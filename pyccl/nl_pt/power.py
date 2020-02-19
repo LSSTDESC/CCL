@@ -15,7 +15,7 @@ except ImportError:
 
 
 class PTCalculator(object):
-    def __init__(self, with_NC=True, with_IA=True,
+    def __init__(self, with_NC=False, with_IA=False, with_dd=True
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75):
@@ -58,6 +58,7 @@ class PTCalculator(object):
                 "You must have the `FASTPT` python package "
                 "installed to use CCL to get PT observables!")
 
+        self.with_dd = with_dd
         self.with_NC = with_NC
         self.with_IA = with_IA
         self.P_window = P_window
@@ -77,6 +78,7 @@ class PTCalculator(object):
                              low_extrap=low_extrap,
                              high_extrap=high_extrap,
                              n_pad=n_pad)
+        self.one_loop_dd = None
         self.dd_bias = None
         self.ia_ta = None
         self.ia_tt = None
@@ -87,15 +89,25 @@ class PTCalculator(object):
             raise ValueError("Input spectrum has wrong shape")
         if self.with_NC:
             self._get_dd_bias(pk)
+        elif self.with_dd:
+            self._get_one_loop_dd(pk)
         if self.with_IA:
             self._get_ia_bias(pk)
 
+    def _get_one_loop_dd(self, pk):
+        # Precompute quantities needed for one-loop dd
+        # power spectra. Only needed if dd_bias is not called.
+        self.one_loop_dd = self.pt.one_loop_dd(pk,
+                                                P_window=self.P_window,
+                                                C_window=self.C_window)    
+    
     def _get_dd_bias(self, pk):
         # Precompute quantities needed for number counts
         # power spectra.
         self.dd_bias = self.pt.one_loop_dd_bias(pk,
                                                 P_window=self.P_window,
                                                 C_window=self.C_window)
+        self.one_loop_dd[0:1]=self.dd_bias[0:1]
 
     def _get_ia_bias(self, pk):
         # Precompute quantities needed for intrinsic alignment
@@ -196,6 +208,27 @@ class PTCalculator(object):
                0.5 * bs[None, :] * Pd1s2)
         return pgm
 
+    def get_pmm(self, Pd1d1_lin, g4):
+        """ Get the one-loop matter power spectrum.
+
+        Args:
+            Pd1d1_lin (array_like): 1-loop linear matter power spectrum at the
+                wavenumber values given by this object's `ks` list.
+            g4 (array_like): fourth power of the growth factor at
+                a number of redshifts.
+
+        Returns:
+            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+                is the size of this object's `ks` attribute, and \
+                `N_z` is the size of the input redshift-dependent \
+                biases and growth factor.
+        """
+        P1loop = g4[None, :] * self.one_loop_dd[0][:, None]
+        
+        pmm = (Pd1d1_lin + P1loop)
+        return pmm
+        
+    
     def get_pim(self, Pd1d1, g4, c1, c2, cd):
         """ Get the intrinsic alignment - matter cross-spectrum at
         the internal set of wavenumbers (given by this object's `ks`
@@ -324,7 +357,7 @@ class PTCalculator(object):
 
 
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
-                sub_lowk=False, use_nonlin=True, nonlin_type = 'hf', a_arr=None,
+                sub_lowk=False, use_nonlin=True, nonlin_type='hf', a_arr=None,
                 extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
@@ -380,7 +413,13 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         raise TypeError("tracer2 must be of type `PTTracer`")
 
     if ptc is None:
-        ptc = PTCalculator()
+        with_NC=False
+        with_IA=False
+        if (tracer1.type == 'NC') or (tracer2.type == 'NC'):
+            with_NC=True
+        if (tracer1.type == 'IA') or (tracer2.type == 'IA'):
+            with_IA=True
+        ptc = PTCalculator(with_NC=with_NC, with_IA=with_IA)
     if not isinstance(ptc, PTCalculator):
         raise TypeError("ptc should be of type `PTCalculator`")
 
@@ -397,7 +436,6 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     z_arr = 1. / a_arr - 1
     # P_lin(k) at z=0
     pk_lin_z0 = linear_matter_power(cosmo, ptc.ks, 1.)
-    ptc.update_pk(pk_lin_z0)
 
     # Linear growth factor
     ga = growth_factor(cosmo, a_arr)
@@ -407,23 +445,32 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     # Now compute the Pk using FASTPT
     # First, get P_d1d1 (the delta delta correlation), which could
     # be linear or nonlinear.
-    add_dd_spt = False
+    if use_nonlin:
+        if nonlin_type == 'spt':
+            ptc.with_dd = True
+            # this step could be automatic, unless we want to allow
+            # IA only runs.
+            
+    # update the PTC to have the require Pk components                       
+    ptc.update_pk(pk_lin_z0)
+
     if use_nonlin:
         if nonlin_type == 'hf':
             Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
                               for a in a_arr]).T
         elif nonlin_type == 'spt':
-            #pass linear for now. The one_loop contribution will be added once it is calculated.
-            d1d1 = np.array([linear_matter_power(cosmo, ptc.ks, a)
+            # Pass linear Pk here.
+			# The one_loop contribution will be added once it is calculated by FAST-PT.
+            Pd1d1_lin = np.array([linear_matter_power(cosmo, ptc.ks, a)
                                       for a in a_arr]).T
-            add_dd_spt = True
+            Pd1d1 = ptc.get_pmm(Pd1d1_lin,ga4)
         else:
             raise NotImplementedError("Nonlinear option %s not implemented yet" %
                                                   (nonlin_type))
     else:
         Pd1d1 = np.array([linear_matter_power(cosmo, ptc.ks, a)
                           for a in a_arr]).T
-
+                          
     if (tracer1.type == 'NC'):
         b11 = tracer1.b1(z_arr)
         b21 = tracer1.b2(z_arr)
@@ -433,9 +480,6 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.bs(z_arr)
 
-            # TODO: we're not using the 1-loop calculation at all
-            #   (i.e. bias_fpt[0]).
-            # Should we allow users to select that as Pd1d1?
             p_pt = ptc.get_pgg(Pd1d1, ga4,
                                b11, b21, bs1, b12, b22, bs2,
                                sub_lowk)
@@ -489,6 +533,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                                c12, c22, cd2)
         elif (tracer2.type == 'M'):
             p_pt = Pd1d1
+                
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
