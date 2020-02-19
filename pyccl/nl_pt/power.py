@@ -96,8 +96,6 @@ class PTCalculator(object):
         self.dd_bias = self.pt.one_loop_dd_bias(pk,
                                                 P_window=self.P_window,
                                                 C_window=self.C_window)
-        print(pk)
-        print(self.dd_bias[0])
 
     def _get_ia_bias(self, pk):
         # Precompute quantities needed for intrinsic alignment
@@ -419,11 +417,11 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     if (tracer1.type == 'NC'):
         b11 = tracer1.b1(z_arr)
         b21 = tracer1.b2(z_arr)
-        bs1 = tracer1.b2(z_arr)
+        bs1 = tracer1.bs(z_arr)
         if (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
-            bs2 = tracer2.b2(z_arr)
+            bs2 = tracer2.bs(z_arr)
 
             # TODO: we're not using the 1-loop calculation at all
             #   (i.e. bias_fpt[0]).
@@ -457,7 +455,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         elif (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
-            bs2 = tracer2.b2(z_arr)
+            bs2 = tracer2.bs(z_arr)
             p_pt = ptc.get_pgi(Pd1d1, ga4,
                                b12, b22, bs2, c11, c21, cd1)
         elif (tracer2.type == 'M'):
@@ -470,7 +468,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         if (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
-            bs2 = tracer2.b2(z_arr)
+            bs2 = tracer2.bs(z_arr)
             p_pt = ptc.get_pgm(Pd1d1, ga4,
                                b12, b22, bs2)
         elif (tracer2.type == 'IA'):

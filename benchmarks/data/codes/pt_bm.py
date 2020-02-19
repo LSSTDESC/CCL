@@ -26,9 +26,7 @@ pt_ob=fpt.FASTPT(ks,to_do=to_do,low_extrap=-5,high_extrap=3,n_pad=n_pad)
 dd_bias = pt_ob.one_loop_dd_bias(pk,
                                  P_window=P_window,
                                  C_window=C_window)
-print(pk)
-print(dd_bias[0])
-exit(1)
+
 ia_ta = pt_ob.IA_ta(pk,
                     P_window=P_window,
                     C_window=C_window)
@@ -69,9 +67,10 @@ pgg = (b1**2 * Pd1d1 +
        b1 * bs * Pd1s2 +
        0.5 * b2 * bs * Pd2s2 +
        0.25 * bs**2 * Ps2s2)
+
 pgm = (b1 * Pd1d1 +
-       b2 * Pd1d2 +
-       bs * Pd1s2)
+       0.5* b2 * Pd1d2 +
+       0.5 * bs * Pd1s2)
 pgi = b1 * (c1 * Pd1d1 +
             cd * (a00e + c00e) +
             c2 * (a0e2 + b0e2))
@@ -96,16 +95,3 @@ np.savetxt("../pt_bm_z1.txt",
            np.transpose([ks, pgg[1], pgm[1], pgi[1],
                          pii[1], pii_bb[1], pim[1]]),
            header='[0]-k  [1]-GG [2]-GM [3]-GI [4]-II [5]-II_BB [6]-IM')
-
-import matplotlib.pyplot as plt
-for i in range(2):
-    plt.figure()
-    plt.plot(ks, pk,'k-')
-    plt.plot(ks, pgg[0],'r-')
-    plt.plot(ks, pgm[0],'g-')
-    plt.plot(ks, pgi[0],'b-')
-    plt.plot(ks, pii[0],'y-')
-    plt.plot(ks, pii_bb[0],'y--')
-    plt.plot(ks, pim[0],'c-')
-    plt.loglog()
-plt.show()
