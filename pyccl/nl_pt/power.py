@@ -107,7 +107,7 @@ class PTCalculator(object):
         self.dd_bias = self.pt.one_loop_dd_bias(pk,
                                                 P_window=self.P_window,
                                                 C_window=self.C_window)
-        self.one_loop_dd[0:1]=self.dd_bias[0:1]
+        self.one_loop_dd = self.dd_bias[0:1]
 
     def _get_ia_bias(self, pk):
         # Precompute quantities needed for intrinsic alignment
