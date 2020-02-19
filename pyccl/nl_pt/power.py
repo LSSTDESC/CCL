@@ -57,7 +57,7 @@ class PTCalculator(object):
         assert HAVE_FASTPT, (
                 "You must have the `FASTPT` python package "
                 "installed to use CCL to get PT observables!")
-                
+
         self.with_NC = with_NC
         self.with_IA = with_IA
         self.P_window = P_window
@@ -71,7 +71,7 @@ class PTCalculator(object):
 
         nk_total = int((log10k_max - log10k_min) * nk_per_decade)
         self.ks = np.logspace(log10k_min, log10k_max, nk_total)
-        n_pad = pad_factor * len(self.ks)
+        n_pad = int(pad_factor * len(self.ks))
 
         self.pt = fpt.FASTPT(self.ks, to_do=to_do,
                              low_extrap=low_extrap,
@@ -96,6 +96,8 @@ class PTCalculator(object):
         self.dd_bias = self.pt.one_loop_dd_bias(pk,
                                                 P_window=self.P_window,
                                                 C_window=self.C_window)
+        print(pk)
+        print(self.dd_bias[0])
 
     def _get_ia_bias(self, pk):
         # Precompute quantities needed for intrinsic alignment
@@ -321,6 +323,7 @@ class PTCalculator(object):
                    ((c11*c22 + c21*c12)*g4)[None, :] * (a0e2 + b0e2)[:, None] +
                    ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
         return pii
+
 
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                 sub_lowk=False, use_nonlin=True, a_arr=None,

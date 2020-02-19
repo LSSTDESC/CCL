@@ -6,10 +6,10 @@ cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.96, sigma8=0.8,
                       transfer_function='bbks')
 lkmin = -4
 lkmax = 2
-nlk = 256
+n_per_decade = 20
 z_s = np.array([0., 1.])
 a_s = 1./(1 + z_s)
-ks = np.logspace(lkmin, lkmax, nlk)
+ks = np.logspace(lkmin, lkmax, (lkmax - lkmin) * n_per_decade)
 pk = ccl.linear_matter_power(cosmo, ks, 1.)
 gf = ccl.growth_factor(cosmo, a_s)
 g4 = gf**4
@@ -26,6 +26,9 @@ pt_ob=fpt.FASTPT(ks,to_do=to_do,low_extrap=-5,high_extrap=3,n_pad=n_pad)
 dd_bias = pt_ob.one_loop_dd_bias(pk,
                                  P_window=P_window,
                                  C_window=C_window)
+print(pk)
+print(dd_bias[0])
+exit(1)
 ia_ta = pt_ob.IA_ta(pk,
                     P_window=P_window,
                     C_window=C_window)
