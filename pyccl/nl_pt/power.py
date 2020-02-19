@@ -57,7 +57,7 @@ class PTCalculator(object):
         assert HAVE_FASTPT, (
                 "You must have the `FASTPT` python package "
                 "installed to use CCL to get PT observables!")
-                
+
         self.with_NC = with_NC
         self.with_IA = with_IA
         self.P_window = P_window
@@ -71,7 +71,7 @@ class PTCalculator(object):
 
         nk_total = int((log10k_max - log10k_min) * nk_per_decade)
         self.ks = np.logspace(log10k_min, log10k_max, nk_total)
-        n_pad = pad_factor * len(self.ks)
+        n_pad = int(pad_factor * len(self.ks))
 
         self.pt = fpt.FASTPT(self.ks, to_do=to_do,
                              low_extrap=low_extrap,
@@ -322,6 +322,7 @@ class PTCalculator(object):
                    ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
         return pii
 
+
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                 sub_lowk=False, use_nonlin=True, nonlin_type = 'hf', a_arr=None,
                 extrap_order_lok=1, extrap_order_hik=2,
@@ -426,11 +427,11 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     if (tracer1.type == 'NC'):
         b11 = tracer1.b1(z_arr)
         b21 = tracer1.b2(z_arr)
-        bs1 = tracer1.b2(z_arr)
+        bs1 = tracer1.bs(z_arr)
         if (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
-            bs2 = tracer2.b2(z_arr)
+            bs2 = tracer2.bs(z_arr)
 
             # TODO: we're not using the 1-loop calculation at all
             #   (i.e. bias_fpt[0]).
@@ -464,7 +465,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         elif (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
-            bs2 = tracer2.b2(z_arr)
+            bs2 = tracer2.bs(z_arr)
             p_pt = ptc.get_pgi(Pd1d1, ga4,
                                b12, b22, bs2, c11, c21, cd1)
         elif (tracer2.type == 'M'):
@@ -477,7 +478,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         if (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
-            bs2 = tracer2.b2(z_arr)
+            bs2 = tracer2.bs(z_arr)
             p_pt = ptc.get_pgm(Pd1d1, ga4,
                                b12, b22, bs2)
         elif (tracer2.type == 'IA'):
