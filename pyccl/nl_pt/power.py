@@ -323,7 +323,7 @@ class PTCalculator(object):
         return pii
 
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
-                sub_lowk=False, use_nonlin=True, a_arr=None,
+                sub_lowk=False, use_nonlin=True, nonlin_type = 'hf', a_arr=None,
                 extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
@@ -406,9 +406,19 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     # Now compute the Pk using FASTPT
     # First, get P_d1d1 (the delta delta correlation), which could
     # be linear or nonlinear.
+    add_dd_spt = False
     if use_nonlin:
-        Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
-                          for a in a_arr]).T
+        if nonlin_type == 'hf':
+            Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
+                              for a in a_arr]).T
+        elif nonlin_type == 'spt':
+            #pass linear for now. The one_loop contribution will be added once it is calculated.
+            d1d1 = np.array([linear_matter_power(cosmo, ptc.ks, a)
+                                      for a in a_arr]).T
+            add_dd_spt = True
+        else:
+            raise NotImplementedError("Nonlinear option %s not implemented yet" %
+                                                  (nonlin_type))
     else:
         Pd1d1 = np.array([linear_matter_power(cosmo, ptc.ks, a)
                           for a in a_arr]).T
