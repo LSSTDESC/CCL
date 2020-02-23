@@ -13,16 +13,18 @@ ks = np.logspace(lkmin, lkmax, (lkmax - lkmin) * n_per_decade)
 pk = ccl.linear_matter_power(cosmo, ks, 1.)
 gf = ccl.growth_factor(cosmo, a_s)
 g4 = gf**4
-Pd1d1 = np.array([ccl.linear_matter_power(cosmo, ks, a)
+pklin = np.array([ccl.linear_matter_power(cosmo, ks, a)
                   for a in a_s])
 
 C_window=.75
 P_window=None
 n_pad=int(0.5*len(ks))
-to_do = ['one_loop_dd']
-to_do.append('dd_bias')
-to_do.append('IA')
+to_do = ['one_loop_dd', 'dd_bias', 'IA']
 pt_ob=fpt.FASTPT(ks,to_do=to_do,low_extrap=-5,high_extrap=3,n_pad=n_pad)
+oloop_dd = pt_ob.one_loop_dd(pk,
+                             P_window=P_window,
+                             C_window=C_window)
+Pd1d1 = pklin + g4[:, None] * oloop_dd[0][None, :]
 dd_bias = pt_ob.one_loop_dd_bias(pk,
                                  P_window=P_window,
                                  C_window=C_window)

@@ -51,7 +51,7 @@ def test_pt_pk(comb):
     a_arr = 1./(1+np.array([0., 0.25, 0.5, 0.75, 1.]))[::-1]
     pk = pt.get_pt_pk2d(COSMO, ptt1, tracer2=ptt2, ptc=ptc,
                         return_ia_bb=return_bb,
-                        nonlin_pk_type='linear',
+                        nonlin_pk_type='spt',
                         a_arr=a_arr)
     for iz, z in enumerate(zs):
         a = 1./(1+z)
