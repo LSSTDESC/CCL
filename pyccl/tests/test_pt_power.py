@@ -71,18 +71,74 @@ def test_pt_workspace_smoke():
     assert len(w.ks) == 40
 
 
-@pytest.mark.parametrize('tracers', [['TG', 'TG', False],
-                                     ['TG', 'TI', False],
-                                     ['TG', 'TM', False],
-                                     ['TI', 'TG', False],
-                                     ['TI', 'TI', False],
-                                     ['TI', 'TI', True],
-                                     ['TI', 'TM', False],
-                                     ['TM', 'TG', False],
-                                     ['TM', 'TI', False],
-                                     ['TM', 'TM', False]])
-def test_pt_get_pk2d_smoke(tracers):
+@pytest.mark.parametrize('options', [['TG', 'TG', False, False, PTC],
+                                     ['TG', 'TG', False, False, None],
+                                     ['TG', 'TG', False, True, PTC],
+                                     ['TG', 'TI', False, False, PTC],
+                                     ['TG', 'TM', False, False, PTC],
+                                     ['TI', 'TG', False, False, PTC],
+                                     ['TI', 'TI', False, False, PTC],
+                                     ['TI', 'TI', True, False, PTC],
+                                     ['TI', 'TM', False, False, PTC],
+                                     ['TM', 'TG', False, False, PTC],
+                                     ['TM', 'TI', False, False, PTC],
+                                     ['TM', 'TM', False, False, PTC]])
+def test_pt_get_pk2d_smoke(options):
+    if options[0] == options[1]:
+        t2 = None
+    else:
+        t2 = TRS[options[1]]
     ccl.nl_pt.get_pt_pk2d(COSMO,
-                          TRS[tracers[0]],
-                          tracer2=TRS[tracers[1]],
-                          ptc=PTC)
+                          TRS[options[0]],
+                          tracer2=t2,
+                          return_ia_bb=options[2],
+                          sub_lowk=options[3],
+                          ptc=options[4])
+
+
+def test_ptc_raises():
+    with pytest.raises(ValueError):
+        PTC.update_pk(np.zeros(4))
+
+
+def test_pt_get_pk2d_raises():
+    # Wrong tracer type 2
+    with pytest.raises(TypeError):
+        ccl.nl_pt.get_pt_pk2d(COSMO,
+                              TRS['TG'],
+                              tracer2=3,
+                              ptc=PTC)
+    # Wrong tracer type 1
+    with pytest.raises(TypeError):
+        ccl.nl_pt.get_pt_pk2d(COSMO,
+                              3,
+                              tracer2=TRS['TG'],
+                              ptc=PTC)
+    # Wrong calculator type
+    with pytest.raises(TypeError):
+        ccl.nl_pt.get_pt_pk2d(COSMO,
+                              TRS['TG'],
+                              ptc=3)
+
+    # Incomplete calculator
+    ptc_empty = ccl.nl_pt.PTCalculator(with_NC=False,
+                                       with_IA=False,
+                                       with_dd=False)
+    for t in TRS:
+        with pytest.raises(TypeError):
+            ccl.nl_pt.get_pt_pk2d(COSMO, t,
+                                  ptc=ptc_empty)
+    with pytest.raises(NotImplementedError):
+        ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TM'],
+                              nonlin_pk_type='halofat')
+
+    # Wrong tracer types
+    tdum = ccl.nl_pt.PTMatterTracer()
+    tdum.type = 'A'
+    for t in ['TG', 'TI', 'TM']:
+        with pytest.raises(NotImplementedError):
+            ccl.nl_pt.get_pt_pk2d(COSMO, TRS[t],
+                                  tracer2=tdum, ptc=PTC)
+    with pytest.raises(NotImplementedError):
+        ccl.nl_pt.get_pt_pk2d(COSMO, tdum,
+                              tracer2=TRS['TM'], ptc=PTC)
