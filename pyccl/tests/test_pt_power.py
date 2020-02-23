@@ -16,7 +16,9 @@ TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
                                                   (ZZ, BZ),
                                                   (ZZ, BZ)),
        'TM': ccl.nl_pt.PTMatterTracer()}
-PTC = ccl.nl_pt.PTCalculator()
+PTC = ccl.nl_pt.PTCalculator(with_NC=True,
+                             with_IA=True,
+                             with_dd=True)
 
 
 def test_pt_tracer_smoke():

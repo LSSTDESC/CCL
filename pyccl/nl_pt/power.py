@@ -15,7 +15,7 @@ except ImportError:
 
 
 class PTCalculator(object):
-    def __init__(self, with_NC=False, with_IA=False, with_dd=True
+    def __init__(self, with_NC=False, with_IA=False, with_dd=True,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75):
@@ -32,6 +32,9 @@ class PTCalculator(object):
             with_IA(bool): set to True if you'll want to use
                 this calculator to compute correlations involving
                 intrinsic alignments.
+            with_dd(bool): set to True if you'll want to use
+                this calculator to compute the one-loop matter power
+                spectrum.
             log10k_min (float): decimal logarithm of the minimum
                 Fourier scale (in Mpc^-1) for which you want to
                 calculate perturbation theory quantities.
@@ -85,6 +88,11 @@ class PTCalculator(object):
         self.ia_mix = None
 
     def update_pk(self, pk):
+        """ Update the internal PT arrays.
+        Args:
+            pk (array_like): linear power spectrum sampled at the
+                internal `k` values used by this calculator.
+        """
         if pk.shape != self.ks.shape:
             raise ValueError("Input spectrum has wrong shape")
         if self.with_NC:
@@ -98,9 +106,9 @@ class PTCalculator(object):
         # Precompute quantities needed for one-loop dd
         # power spectra. Only needed if dd_bias is not called.
         self.one_loop_dd = self.pt.one_loop_dd(pk,
-                                                P_window=self.P_window,
-                                                C_window=self.C_window)    
-    
+                                               P_window=self.P_window,
+                                               C_window=self.C_window)
+
     def _get_dd_bias(self, pk):
         # Precompute quantities needed for number counts
         # power spectra.
@@ -174,96 +182,6 @@ class PTCalculator(object):
                0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4))
         return pgg
 
-    def get_pgm(self, Pd1d1, g4, b1, b2, bs):
-        """ Get the number counts - matter cross-spectrum at the
-        internal set of wavenumbers (given by this object's `ks`
-        attribute) and a number of redshift values.
-
-        Args:
-            Pd1d1 (array_like): 1-loop matter power spectrum at the
-                wavenumber values given by this object's `ks` list.
-            g4 (array_like): fourth power of the growth factor at
-                a number of redshifts.
-            b1 (array_like): 1-st order bias for the number counts
-                tracer being correlated at the same set of input
-                redshifts.
-            b2 (array_like): 2-nd order bias for the number counts
-                tracer being correlated at the same set of input
-                redshifts.
-            bs (array_like): tidal bias for the number counts
-                tracer being correlated at the same set of input
-                redshifts.
-
-        Returns:
-            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
-                is the size of this object's `ks` attribute, and \
-                `N_z` is the size of the input redshift-dependent \
-                biases and growth factor.
-        """
-        Pd1d2 = g4[None, :] * self.dd_bias[2][:, None]
-        Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
-
-        pgm = (b1[None, :] * Pd1d1 +
-               0.5 * b2[None, :] * Pd1d2 +
-               0.5 * bs[None, :] * Pd1s2)
-        return pgm
-
-    def get_pmm(self, Pd1d1_lin, g4):
-        """ Get the one-loop matter power spectrum.
-
-        Args:
-            Pd1d1_lin (array_like): 1-loop linear matter power spectrum at the
-                wavenumber values given by this object's `ks` list.
-            g4 (array_like): fourth power of the growth factor at
-                a number of redshifts.
-
-        Returns:
-            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
-                is the size of this object's `ks` attribute, and \
-                `N_z` is the size of the input redshift-dependent \
-                biases and growth factor.
-        """
-        P1loop = g4[None, :] * self.one_loop_dd[0][:, None]
-        
-        pmm = (Pd1d1_lin + P1loop)
-        return pmm
-        
-    
-    def get_pim(self, Pd1d1, g4, c1, c2, cd):
-        """ Get the intrinsic alignment - matter cross-spectrum at
-        the internal set of wavenumbers (given by this object's `ks`
-        attribute) and a number of redshift values.
-
-        Args:
-            Pd1d1 (array_like): 1-loop matter power spectrum at the
-                wavenumber values given by this object's `ks` list.
-            g4 (array_like): fourth power of the growth factor at
-                a number of redshifts.
-            c1 (array_like): 1-st order bias for the IA
-                tracer being correlated at the same set of input
-                redshifts.
-            c2 (array_like): 2-nd order bias for the IA
-                tracer being correlated at the same set of input
-                redshifts.
-            cd (array_like): overdensity bias for the IA
-                tracer being correlated at the same set of input
-                redshifts.
-
-        Returns:
-            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
-                is the size of this object's `ks` attribute, and \
-                `N_z` is the size of the input redshift-dependent \
-                biases and growth factor.
-        """
-        a00e, c00e, a0e0e, a0b0b = self.ia_ta
-        a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
-
-        pim = (c1[None, :] * Pd1d1 +
-               (g4*cd)[None, :] * (a00e + c00e)[:, None] +
-               (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
-
-        return pim
-
     def get_pgi(self, Pd1d1, g4, b1, b2, bs, c1, c2, cd):
         """ Get the number counts - IA cross-spectrum at the
         internal set of wavenumbers (given by this object's
@@ -302,11 +220,44 @@ class PTCalculator(object):
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
 
-        pim = b1[None, :] * (c1[None, :] * Pd1d1 +
+        pgi = b1[None, :] * (c1[None, :] * Pd1d1 +
                              (g4*cd)[None, :] * (a00e + c00e)[:, None] +
                              (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
+        return pgi
 
-        return pim
+    def get_pgm(self, Pd1d1, g4, b1, b2, bs):
+        """ Get the number counts - matter cross-spectrum at the
+        internal set of wavenumbers (given by this object's `ks`
+        attribute) and a number of redshift values.
+
+        Args:
+            Pd1d1 (array_like): 1-loop matter power spectrum at the
+                wavenumber values given by this object's `ks` list.
+            g4 (array_like): fourth power of the growth factor at
+                a number of redshifts.
+            b1 (array_like): 1-st order bias for the number counts
+                tracer being correlated at the same set of input
+                redshifts.
+            b2 (array_like): 2-nd order bias for the number counts
+                tracer being correlated at the same set of input
+                redshifts.
+            bs (array_like): tidal bias for the number counts
+                tracer being correlated at the same set of input
+                redshifts.
+
+        Returns:
+            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+                is the size of this object's `ks` attribute, and \
+                `N_z` is the size of the input redshift-dependent \
+                biases and growth factor.
+        """
+        Pd1d2 = g4[None, :] * self.dd_bias[2][:, None]
+        Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
+
+        pgm = (b1[None, :] * Pd1d1 +
+               0.5 * b2[None, :] * Pd1d2 +
+               0.5 * bs[None, :] * Pd1s2)
+        return pgm
 
     def get_pii(self, Pd1d1, g4, c11, c21, cd1,
                 c12, c22, cd2, return_bb=False):
@@ -355,10 +306,64 @@ class PTCalculator(object):
                    ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
         return pii
 
+    def get_pim(self, Pd1d1, g4, c1, c2, cd):
+        """ Get the intrinsic alignment - matter cross-spectrum at
+        the internal set of wavenumbers (given by this object's `ks`
+        attribute) and a number of redshift values.
+
+        Args:
+            Pd1d1 (array_like): 1-loop matter power spectrum at the
+                wavenumber values given by this object's `ks` list.
+            g4 (array_like): fourth power of the growth factor at
+                a number of redshifts.
+            c1 (array_like): 1-st order bias for the IA
+                tracer being correlated at the same set of input
+                redshifts.
+            c2 (array_like): 2-nd order bias for the IA
+                tracer being correlated at the same set of input
+                redshifts.
+            cd (array_like): overdensity bias for the IA
+                tracer being correlated at the same set of input
+                redshifts.
+
+        Returns:
+            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+                is the size of this object's `ks` attribute, and \
+                `N_z` is the size of the input redshift-dependent \
+                biases and growth factor.
+        """
+        a00e, c00e, a0e0e, a0b0b = self.ia_ta
+        a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
+
+        pim = (c1[None, :] * Pd1d1 +
+               (g4*cd)[None, :] * (a00e + c00e)[:, None] +
+               (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
+        return pim
+
+    def get_pmm(self, Pd1d1_lin, g4):
+        """ Get the one-loop matter power spectrum.
+
+        Args:
+            Pd1d1_lin (array_like): 1-loop linear matter power spectrum
+                at the wavenumber values given by this object's
+                `ks` list.
+            g4 (array_like): fourth power of the growth factor at
+                a number of redshifts.
+
+        Returns:
+            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+                is the size of this object's `ks` attribute, and \
+                `N_z` is the size of the input redshift-dependent \
+                biases and growth factor.
+        """
+        P1loop = g4[None, :] * self.one_loop_dd[0][:, None]
+        pmm = (Pd1d1_lin + P1loop)
+        return pmm
+
 
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
-                sub_lowk=False, use_nonlin=True, nonlin_type='hf', a_arr=None,
-                extrap_order_lok=1, extrap_order_hik=2,
+                sub_lowk=False, nonlin_pk_type='halofit',
+                a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the PT power spectrum for two quantities defined by
@@ -376,9 +381,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         sub_lowk (bool): if True, the small-scale white noise
             contribution will be subtracted for number counts
             auto-correlations.
-        use_nonlin (bool): if True, use the non-linear matter power
-            spectrum as the 1-loop power spectrum. Otherwise the
-            linear matter power spectrum will be used.
+        nonlin_pk_type (str): type of 1-loop matter power spectrum
+            to use. 'linear' for linear P(k), 'halofit' for halofit
+            non-linear power spectrum, 'spt' for standard perturbation
+            theory power spectrum. Default: 'halofit'.
         a_arr (array): an array holding values of the scale factor
             at which the halo model power spectrum should be
             calculated for interpolation. If `None`, the internal
@@ -398,7 +404,6 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
     """
-
     if a_arr is None:
         status = 0
         na = lib.get_pk_spline_na(cosmo.cosmo)
@@ -413,13 +418,14 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         raise TypeError("tracer2 must be of type `PTTracer`")
 
     if ptc is None:
-        with_NC=False
-        with_IA=False
-        if (tracer1.type == 'NC') or (tracer2.type == 'NC'):
-            with_NC=True
-        if (tracer1.type == 'IA') or (tracer2.type == 'IA'):
-            with_IA=True
-        ptc = PTCalculator(with_NC=with_NC, with_IA=with_IA)
+        with_NC = ((tracer1.type == 'NC') or
+                   (tracer2.type == 'NC'))
+        with_IA = ((tracer1.type == 'IA') or
+                   (tracer2.type == 'IA'))
+        with_dd = nonlin_pk_type == 'spt'
+        ptc = PTCalculator(with_dd=with_dd,
+                           with_NC=with_NC,
+                           with_IA=with_IA)
     if not isinstance(ptc, PTCalculator):
         raise TypeError("ptc should be of type `PTCalculator`")
 
@@ -431,6 +437,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         if not ptc.with_IA:
             raise ValueError("Need intrinsic alignment bias, "
                              "but calculator didn't compute it")
+    if nonlin_pk_type == 'spt':
+        if not ptc.with_dd:
+            raise ValueError("Need 1-loop matter power spectrum, "
+                             "but calculator didn't compute it")
 
     # z
     z_arr = 1. / a_arr - 1
@@ -439,36 +449,25 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
 
     # Linear growth factor
     ga = growth_factor(cosmo, a_arr)
-    ga2 = ga**2
-    ga4 = ga2**2
+    ga4 = ga**4
 
-    # Now compute the Pk using FASTPT
-    # First, get P_d1d1 (the delta delta correlation), which could
-    # be linear or nonlinear.
-    if use_nonlin:
-        if nonlin_type == 'spt':
-            ptc.with_dd = True
-            # this step could be automatic, unless we want to allow
-            # IA only runs.
-            
-    # update the PTC to have the require Pk components                       
+    # update the PTC to have the require Pk components
     ptc.update_pk(pk_lin_z0)
 
-    if use_nonlin:
-        if nonlin_type == 'hf':
-            Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
-                              for a in a_arr]).T
-        elif nonlin_type == 'spt':
-            Pd1d1_lin = np.array([linear_matter_power(cosmo, ptc.ks, a)
-                                      for a in a_arr]).T
-            Pd1d1 = ptc.get_pmm(Pd1d1_lin,ga4)
-        else:
-            raise NotImplementedError("Nonlinear option %s not implemented yet" %
-                                                  (nonlin_type))
-    else:
+    if nonlin_pk_type == 'halofit':
+        Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
+                          for a in a_arr]).T
+    elif nonlin_pk_type == 'linear':
         Pd1d1 = np.array([linear_matter_power(cosmo, ptc.ks, a)
                           for a in a_arr]).T
-                          
+    elif nonlin_pk_type == 'spt':
+        pklin = np.array([linear_matter_power(cosmo, ptc.ks, a)
+                          for a in a_arr]).T
+        Pd1d1 = ptc.get_pmm(pklin, ga4)
+    else:
+        raise NotImplementedError("Nonlinear option %s not implemented yet" %
+                                  (nonlin_pk_type))
+
     if (tracer1.type == 'NC'):
         b11 = tracer1.b1(z_arr)
         b21 = tracer1.b2(z_arr)
@@ -531,7 +530,6 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                                c12, c22, cd2)
         elif (tracer2.type == 'M'):
             p_pt = Pd1d1
-                
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
