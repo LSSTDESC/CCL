@@ -97,7 +97,7 @@ class PTCalculator(object):
             raise ValueError("Input spectrum has wrong shape")
         if self.with_NC:
             self._get_dd_bias(pk)
-        elif self.with_dd:
+        if self.with_dd:
             self._get_one_loop_dd(pk)
         if self.with_IA:
             self._get_ia_bias(pk)
