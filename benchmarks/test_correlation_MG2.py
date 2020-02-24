@@ -14,7 +14,8 @@ def corr_method(request):
 @pytest.fixture(scope='module')
 def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
-    h0 = 0.70001831054687500
+#    h0 = 0.70001831054687500
+    h0 = 0.67192993164062500
     logA = 3.05  # log(10^10 A_s)
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
@@ -55,18 +56,18 @@ def set_up(request):
 
     # Read benchmarks
     bms = {}
-    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_mu_0p1_Sigma_0p1.dat')[0:15]
-    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_mu_0p1_Sigma_0p1.dat')[15:]
-    bms['dl_11'] = np.loadtxt(dirdat+'/gammat_mu_0p1_Sigma_0p1.dat')[0:15]
-    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_mu_0p1_Sigma_0p1.dat')[15:30]
-    bms['dl_21'] = np.loadtxt(dirdat+'/gammat_mu_0p1_Sigma_0p1.dat')[30:45]
-    bms['dl_22'] = np.loadtxt(dirdat+'/gammat_mu_0p1_Sigma_0p1.dat')[45:]
-    bms['ll_11_p'] = np.loadtxt(dirdat+'/xip_mu_0p1_Sigma_0p1.dat')[0:14]
-    bms['ll_12_p'] = np.loadtxt(dirdat+'/xip_mu_0p1_Sigma_0p1.dat')[14:28]
-    bms['ll_22_p'] = np.loadtxt(dirdat+'/xip_mu_0p1_Sigma_0p1.dat')[28:]
-    bms['ll_11_m'] = np.loadtxt(dirdat+'/xim_mu_0p1_Sigma_0p1.dat')[0:15]
-    bms['ll_12_m'] = np.loadtxt(dirdat+'/xim_mu_0p1_Sigma_0p1.dat')[15:30]
-    bms['ll_22_m'] = np.loadtxt(dirdat+'/xim_mu_0p1_Sigma_0p1.dat')[30:]
+    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[0:15]
+    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[16:30]
+    bms['dl_11'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[0:15]
+    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[16:30]
+    bms['dl_21'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[30:45]
+    bms['dl_22'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[45:60]
+    bms['ll_11_p'] = np.loadtxt(dirdat+'/Xip_linear_prediction.dat')[0:15]
+    bms['ll_12_p'] = np.loadtxt(dirdat+'/Xip_linear_prediction.dat')[16:30]
+    bms['ll_22_p'] = np.loadtxt(dirdat+'/Xip_linear_prediction.dat')[31:45]
+    bms['ll_11_m'] = np.loadtxt(dirdat+'/Xim_linear_prediction.dat')[0:15]
+    bms['ll_12_m'] = np.loadtxt(dirdat+'/Xim_linear_prediction.dat')[16:30]
+    bms['ll_22_m'] = np.loadtxt(dirdat+'/Xim_linear_prediction.dat')[31:45]
     theta = np.loadtxt(dirdat+'/theta_corr_MG.dat')
     bms['theta'] = theta
 
