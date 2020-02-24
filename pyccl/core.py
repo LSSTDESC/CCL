@@ -38,7 +38,7 @@ baryons_power_spectrum_types = {
 # parameterisation of modified gravity
 
 # MI pending question
-# ask Mat why and if this is correct?
+# Matt: is this still used? I changed it anyway but don't see it being used
 # valid_muSig_transfers = {'boltzmann_class', 'class'}
 valid_muSig_transfers = {'boltzmann_isitgr', 'isitgr'}
 

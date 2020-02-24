@@ -237,14 +237,14 @@ def get_isitgr_pk_lin(cosmo):
     cp.ombh2 = cosmo['Omega_b'] * h2
     cp.omch2 = cosmo['Omega_c'] * h2
     cp.omk = cosmo['Omega_k']
-    # is this ok? MI
+#    not needed for now
 #    cp.parameterization = 'muSigma'
 #    cp.binning = None
+#    cp.GR = 1 means GR modified 
     cp.GR = 1
     cp.ISiTGR_muSigma = True
     cp.mu0 = cosmo['mu_0']
     cp.Sigma0 = cosmo['sigma_0']
-#    print("flag for isitgr", cp.mu0, cp.Sigma0, cp.ISiTGR_muSigma, cp.GR)
 
     # "constants"
     cp.TCMB = cosmo['T_CMB']
