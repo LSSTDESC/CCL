@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
 def corr_method(request):
-    errfacs = {'fftlog': 0.22, 'bessel': 0.22}
+    errfacs = {'fftlog': 0.15, 'bessel': 0.15}
     return request.param, errfacs[request.param]
 
 
@@ -15,7 +15,7 @@ def corr_method(request):
 def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
 #    h0 = 0.70001831054687500
-    h0 = 0.67192993164062500
+    h0 = 0.67702026367187500
     logA = 3.05  # log(10^10 A_s)
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
@@ -56,18 +56,18 @@ def set_up(request):
 
     # Read benchmarks
     bms = {}
-    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[0:15]
-    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[16:30]
+    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[0:14]
+    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[15:29]
     bms['dl_11'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[0:15]
-    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[16:30]
+    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[15:30]
     bms['dl_21'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[30:45]
     bms['dl_22'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[45:60]
     bms['ll_11_p'] = np.loadtxt(dirdat+'/Xip_linear_prediction.dat')[0:15]
-    bms['ll_12_p'] = np.loadtxt(dirdat+'/Xip_linear_prediction.dat')[16:30]
-    bms['ll_22_p'] = np.loadtxt(dirdat+'/Xip_linear_prediction.dat')[31:45]
+    bms['ll_12_p'] = np.loadtxt(dirdat+'/Xip_linear_prediction.dat')[15:30]
+    bms['ll_22_p'] = np.loadtxt(dirdat+'/Xip_linear_prediction.dat')[30:45]
     bms['ll_11_m'] = np.loadtxt(dirdat+'/Xim_linear_prediction.dat')[0:15]
-    bms['ll_12_m'] = np.loadtxt(dirdat+'/Xim_linear_prediction.dat')[16:30]
-    bms['ll_22_m'] = np.loadtxt(dirdat+'/Xim_linear_prediction.dat')[31:45]
+    bms['ll_12_m'] = np.loadtxt(dirdat+'/Xim_linear_prediction.dat')[15:30]
+    bms['ll_22_m'] = np.loadtxt(dirdat+'/Xim_linear_prediction.dat')[30:45]
     theta = np.loadtxt(dirdat+'/theta_corr_MG.dat')
     bms['theta'] = theta
 
@@ -77,10 +77,10 @@ def set_up(request):
                    unpack=True)
     ers['dd_11'] = interp1d(d[0], d[1],
                             fill_value=d[1][0],
-                            bounds_error=False)(theta)
+                            bounds_error=False)(theta[0:14])
     ers['dd_22'] = interp1d(d[0], d[2],
                             fill_value=d[2][0],
-                            bounds_error=False)(theta)
+                            bounds_error=False)(theta[0:14])
     d = np.loadtxt("benchmarks/data/sigma_ggl_Nbin5",
                    unpack=True)
     ers['dl_12'] = interp1d(d[0], d[1],
@@ -101,13 +101,13 @@ def set_up(request):
     # with the benchmark.
     ers['ll_11_p'] = interp1d(d[0], d[1],
                               fill_value=d[1][0],
-                              bounds_error=False)(theta[0:14])
+                              bounds_error=False)(theta)
     ers['ll_22_p'] = interp1d(d[0], d[2],
                               fill_value=d[2][0],
-                              bounds_error=False)(theta[0:14])
+                              bounds_error=False)(theta)
     ers['ll_12_p'] = interp1d(d[0], d[3],
                               fill_value=d[3][0],
-                              bounds_error=False)(theta[0:14])
+                              bounds_error=False)(theta)
     d = np.loadtxt("benchmarks/data/sigma_xi-_Nbin5",
                    unpack=True)
     ers['ll_11_m'] = interp1d(d[0], d[1],
@@ -150,12 +150,11 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     theta_deg = bms['theta'] / 60.
     # We cut the largest theta value for xi+ because of issues with the
     # benchmarks.
-    if kind == 'l+':
-        xi = ccl.correlation(cosmo, ell, cli, theta_deg[0:14],
-                             corr_type=kind, method=method)
+    if kind == 'gg':
+        xi = ccl.correlation(cosmo, ell, cli, theta_deg[0:14], corr_type=kind, method=method)
     else:
-        xi = ccl.correlation(cosmo, ell, cli, theta_deg,
-                             corr_type=kind, method=method)
+        xi = ccl.correlation(cosmo, ell, cli, theta_deg, corr_type=kind, method=method)
+
     xi *= pref
 
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
