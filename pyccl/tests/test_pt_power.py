@@ -107,6 +107,16 @@ def test_pt_get_pk2d_smoke(options):
                           ptc=options[4])
 
 
+def test_pt_pk2d_bb():
+    pee = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'], ptc=PTC)
+    pbb = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'], ptc=PTC,
+                                return_ia_bb=True)
+    pee2, pbb2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'], ptc=PTC,
+                                       return_ia_ee_and_bb=True)
+    assert pee.eval(0.1, 0.9, COSMO) == pee2.eval(0.1, 0.9, COSMO)
+    assert pbb.eval(0.1, 0.9, COSMO) == pbb2.eval(0.1, 0.9, COSMO)
+
+
 @pytest.mark.parametrize('nl', ['halofit', 'linear', 'spt'])
 def test_pt_get_pk2d_nl(nl):
     ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TG'],

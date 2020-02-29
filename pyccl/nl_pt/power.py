@@ -260,7 +260,8 @@ class PTCalculator(object):
         return pgm
 
     def get_pii(self, Pd1d1, g4, c11, c21, cd1,
-                c12, c22, cd2, return_bb=False):
+                c12, c22, cd2, return_bb=False,
+                return_both=False):
         """ Get the intrinsic alignment auto-spectrum at the internal
         set of wavenumbers (given by this object's `ks` attribute)
         and a number of redshift values.
@@ -282,6 +283,10 @@ class PTCalculator(object):
                 being correlated at the same set of input redshifts.
             cd2 (array_like): overdensity bias for the second tracer
                 being correlated at the same set of input redshifts.
+            return_bb (bool): if `True`, the B-mode power spectrum
+                will be returned.
+            return_both (bool): if `True`, both the E- and B-mode
+                power spectra will be returned. Supersedes `return_bb`.
 
         Returns:
             array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
@@ -293,18 +298,28 @@ class PTCalculator(object):
         ae2e2, ab2b2 = self.ia_tt
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
 
+        if return_both:
+            return_bb = True
+
         if return_bb:
-            pii = ((cd1*cd2*g4)[None, :] * a0b0b[:, None] +
-                   (c21*c22*g4)[None, :] * ab2b2[:, None] +
-                   ((cd1*c22 + c21*cd2)*g4)[None, :] * d0bb2[:, None])
-        else:
+            pii_bb = ((cd1*cd2*g4)[None, :] * a0b0b[:, None] +
+                      (c21*c22*g4)[None, :] * ab2b2[:, None] +
+                      ((cd1*c22 + c21*cd2)*g4)[None, :] * d0bb2[:, None])
+            if not return_both:
+                pii = pii_bb
+
+        if (not return_bb) or return_both:
             pii = ((c11*c12)[None, :] * Pd1d1 +
                    ((c11*cd2 + c12*cd1)*g4)[None, :] * (a00e + c00e)[:, None] +
                    (cd1*cd2*g4)[None, :] * a0e0e[:, None] +
                    (c21*c22*g4)[None, :] * ae2e2[:, None] +
                    ((c11*c22 + c21*c12)*g4)[None, :] * (a0e2 + b0e2)[:, None] +
                    ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
-        return pii
+
+        if return_both:
+            return pii, pii_bb
+        else:
+            return pii
 
     def get_pim(self, Pd1d1, g4, c1, c2, cd):
         """ Get the intrinsic alignment - matter cross-spectrum at
@@ -364,7 +379,7 @@ class PTCalculator(object):
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                 sub_lowk=False, nonlin_pk_type='halofit',
                 a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
-                return_ia_bb=False):
+                return_ia_bb=False, return_ia_ee_and_bb=False):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the PT power spectrum for two quantities defined by
     two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
@@ -400,6 +415,12 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             input tracers are of type
             :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
             If `False` (default) E-mode power spectrum is returned.
+        return_ia_ee_and_bb (bool): if `True`, the E-mode power spectrum
+            for intrinsic alignments will be returned in addition to
+            the B-mode one (if both input tracers are of type
+            :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
+            If `False` (default) E-mode power spectrum is returned.
+            Supersedes `return_ia_bb`.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
@@ -441,6 +462,9 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         if not ptc.with_dd:
             raise ValueError("Need 1-loop matter power spectrum, "
                              "but calculator didn't compute it")
+
+    if return_ia_ee_and_bb:
+        return_ia_bb = True
 
     # z
     z_arr = 1. / a_arr - 1
@@ -502,7 +526,8 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             cd2 = tracer2.cdelta(z_arr)
             p_pt = ptc.get_pii(Pd1d1, ga4,
                                c11, c21, cd1, c12, c22, cd2,
-                               return_bb=return_ia_bb)
+                               return_bb=return_ia_bb,
+                               return_both=return_ia_ee_and_bb)
         elif (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
@@ -539,9 +564,19 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
 
     # Once you have created the 2-dimensional P(k) array,
     # then generate a Pk2D object as described in pk2d.py.
-    pt_pk = Pk2D(a_arr=a_arr,
-                 lk_arr=np.log(ptc.ks),
-                 pk_arr=p_pt.T,
-                 is_logp=False)
-
-    return pt_pk
+    if return_ia_ee_and_bb:
+        pt_pk_ee = Pk2D(a_arr=a_arr,
+                        lk_arr=np.log(ptc.ks),
+                        pk_arr=p_pt[0].T,
+                        is_logp=False)
+        pt_pk_bb = Pk2D(a_arr=a_arr,
+                        lk_arr=np.log(ptc.ks),
+                        pk_arr=p_pt[1].T,
+                        is_logp=False)
+        return pt_pk_ee, pt_pk_bb
+    else:
+        pt_pk = Pk2D(a_arr=a_arr,
+                     lk_arr=np.log(ptc.ks),
+                     pk_arr=p_pt.T,
+                     is_logp=False)
+        return pt_pk
