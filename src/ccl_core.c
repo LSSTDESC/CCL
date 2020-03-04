@@ -266,13 +266,6 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.logsigma = NULL;
   cosmo->data.dlnsigma_dlogm = NULL;
 
-  // hmf parameter for interpolation
-  cosmo->data.alphahmf = NULL;
-  cosmo->data.betahmf = NULL;
-  cosmo->data.gammahmf = NULL;
-  cosmo->data.phihmf = NULL;
-  cosmo->data.etahmf = NULL;
-
   cosmo->data.rsd_splines[0] = NULL;
   cosmo->data.rsd_splines[1] = NULL;
   cosmo->data.rsd_splines[2] = NULL;
@@ -284,7 +277,6 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_linear_power = false;
   cosmo->computed_nonlin_power = false;
   cosmo->computed_sigma = false;
-  cosmo->computed_hmfparams = false;
   cosmo->status = 0;
   ccl_cosmology_set_status_message(cosmo, "");
 
@@ -745,11 +737,6 @@ void ccl_data_free(ccl_data * data) {
   gsl_spline_free(data->dlnsigma_dlogm);
   ccl_f2d_t_free(data->p_lin);
   ccl_f2d_t_free(data->p_nl);
-  gsl_spline_free(data->alphahmf);
-  gsl_spline_free(data->betahmf);
-  gsl_spline_free(data->gammahmf);
-  gsl_spline_free(data->phihmf);
-  gsl_spline_free(data->etahmf);
   ccl_f1d_t_free(data->rsd_splines[0]);
   ccl_f1d_t_free(data->rsd_splines[1]);
   ccl_f1d_t_free(data->rsd_splines[2]);

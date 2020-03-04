@@ -8,6 +8,88 @@
 
 #include "ccl.h"
 
+ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
+{
+  int s2dstatus=0;
+  ccl_f2d_t *f2d = malloc(sizeof(ccl_f2d_t));
+  if (f2d == NULL)
+    *status = CCL_ERROR_MEMORY;
+
+  if(*status==0) {
+    f2d->lkmin = f2d_o->lkmin;
+    f2d->lkmax = f2d_o->lkmax;
+    f2d->amin = f2d_o->amin;
+    f2d->amax = f2d_o->amax;
+    f2d->is_factorizable = f2d_o->is_factorizable;
+    f2d->is_k_constant = f2d_o->is_k_constant;
+    f2d->is_a_constant = f2d_o->is_a_constant;
+    f2d->extrap_linear_growth = f2d_o->extrap_linear_growth;
+    f2d->extrap_order_lok = f2d_o->extrap_order_lok;
+    f2d->extrap_order_hik = f2d_o->extrap_order_hik;
+    f2d->is_log = f2d_o->is_log;
+    f2d->growth = f2d_o->growth;
+    f2d->growth_factor_0 = f2d_o->growth_factor_0;
+    f2d->growth_exponent = f2d_o->growth_exponent;
+
+    if(f2d_o->fk != NULL) {
+      f2d->fk = gsl_spline_alloc(gsl_interp_cspline,
+                                 f2d_o->fk->size);
+      if(f2d->fk == NULL)
+        *status = CCL_ERROR_MEMORY;
+
+      if(*status==0) {
+        s2dstatus|=gsl_spline_init(f2d->fk, f2d_o->fk->x,
+                                   f2d_o->fk->y, f2d_o->fk->size);
+        if(s2dstatus)
+          *status = CCL_ERROR_SPLINE;
+      }
+    }
+    else
+      f2d->fk = NULL;
+  }
+
+  if(*status==0) {
+    if(f2d_o->fa != NULL) {
+      f2d->fa = gsl_spline_alloc(gsl_interp_cspline,
+                                 f2d_o->fa->size);
+      if(f2d->fa == NULL)
+        *status = CCL_ERROR_MEMORY;
+
+      if(*status==0) {
+        s2dstatus|=gsl_spline_init(f2d->fa, f2d_o->fa->x,
+                                   f2d_o->fa->y, f2d_o->fa->size);
+        if(s2dstatus)
+          *status = CCL_ERROR_SPLINE;
+      }
+    }
+    else
+      f2d->fa = NULL;
+  }
+
+  if(*status==0) {
+    if(f2d_o->fka != NULL) {
+      f2d->fka = gsl_spline2d_alloc(gsl_interp2d_bicubic,
+                                    f2d_o->fka->interp_object.xsize,
+                                    f2d_o->fka->interp_object.ysize);
+      if(f2d->fka == NULL)
+        *status = CCL_ERROR_MEMORY;
+
+      if(*status==0) {
+        s2dstatus!=gsl_spline2d_init(f2d->fka, f2d_o->fka->xarr,
+                                     f2d_o->fka->yarr, f2d_o->fka->zarr,
+                                     f2d_o->fka->interp_object.xsize,
+                                     f2d_o->fka->interp_object.ysize);
+        if(s2dstatus)
+          *status = CCL_ERROR_SPLINE;
+      }
+    }
+    else
+      f2d->fka = NULL;
+  }
+
+  return f2d;
+}
+  
 ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
                          int nk,double *lk_arr,
                          double *fka_arr,
