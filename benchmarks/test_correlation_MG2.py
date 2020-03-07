@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
 def corr_method(request):
-    errfacs = {'fftlog': 0.15, 'bessel': 0.15}
+    errfacs = {'fftlog': 0.20, 'bessel': 0.05}
     return request.param, errfacs[request.param]
 
 
@@ -56,8 +56,8 @@ def set_up(request):
 
     # Read benchmarks
     bms = {}
-    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[0:14]
-    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[15:29]
+    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[0:15]
+    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_linear_prediction.dat')[15:30]
     bms['dl_11'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[0:15]
     bms['dl_12'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[15:30]
     bms['dl_21'] = np.loadtxt(dirdat+'/gammat_linear_prediction.dat')[30:45]
@@ -77,10 +77,10 @@ def set_up(request):
                    unpack=True)
     ers['dd_11'] = interp1d(d[0], d[1],
                             fill_value=d[1][0],
-                            bounds_error=False)(theta[0:14])
+                            bounds_error=False)(theta)
     ers['dd_22'] = interp1d(d[0], d[2],
                             fill_value=d[2][0],
-                            bounds_error=False)(theta[0:14])
+                            bounds_error=False)(theta)
     d = np.loadtxt("benchmarks/data/sigma_ggl_Nbin5",
                    unpack=True)
     ers['dl_12'] = interp1d(d[0], d[1],
@@ -150,11 +150,13 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     theta_deg = bms['theta'] / 60.
     # We cut the largest theta value for xi+ because of issues with the
     # benchmarks.
-    if kind == 'gg':
-        xi = ccl.correlation(cosmo, ell, cli, theta_deg[0:14], corr_type=kind, method=method)
-    else:
-        xi = ccl.correlation(cosmo, ell, cli, theta_deg, corr_type=kind, method=method)
+#    if kind == 'gg':
+    xi = ccl.correlation(cosmo, ell, cli, theta_deg, corr_type=kind, method=method)
+#   else:
+#   xi = ccl.correlation(cosmo, ell, cli, theta_deg, corr_type=kind, method=method)
 
     xi *= pref
+
+    print(xi)
 
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
