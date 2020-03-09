@@ -3,28 +3,30 @@ import pytest
 
 import pyccl as ccl
 
-POWER_MG_TOL = 1e-2
+POWER_MG_TOL = 1e-4
 
 
 @pytest.mark.parametrize('model', list(range(5)))
 def test_power_mg(model):
     mu_0 = [0., 0.1, -0.1, 0.1, -0.1]
     sigma_0 = [0., 0.1, -0.1, -0.1, 0.1]
-
+    h0=0.7
     cosmo = ccl.Cosmology(
-        Omega_c=0.25,
-        Omega_b=0.05,
-        h=0.7,
+        Omega_c=0.112/h0**2,
+        Omega_b=0.0226/h0**2,
+        h=h0,
         A_s=2.1e-9,
         n_s=0.96,
         Neff=3.046,
         mu_0=mu_0[model],
         sigma_0=sigma_0[model],
         Omega_k=0,
+        m_nu=0,
+        T_CMB=2.7255,
         matter_power_spectrum='linear',
         transfer_function='boltzmann_isitgr')
 
-    data = np.loadtxt("./benchmarks/data/model%d_pk_MG.dat" % model)
+    data = np.loadtxt("./data/model%d_pk_MG_matterpower.dat" % model)
 
     a = 1
     k = data[:, 0] * cosmo['h']
@@ -32,8 +34,5 @@ def test_power_mg(model):
     pk_ccl = ccl.linear_matter_power(cosmo, k, a)
     err = np.abs(pk_ccl/pk - 1)
 
-    if model == 0:
-        assert np.allclose(err, 0, rtol=0, atol=POWER_MG_TOL)
-    else:
-        msk = data[:, 0] > 5e-3
-        assert np.allclose(err[msk], 0, rtol=0, atol=POWER_MG_TOL)
+    cut = data[:,0] > 1e-04   #cut two points due to cosmic variance
+    assert np.allclose(err[cut], 0, rtol=0, atol=POWER_MG_TOL)
