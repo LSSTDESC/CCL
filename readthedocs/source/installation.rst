@@ -114,7 +114,7 @@ Known Installation Issues
 
    which will install all the required headers into ``/usr/include``.
    
-   On Mac OSX > 10.15, this patch is no longer included.
+   On Mac OSX 10.15 or greater, this patch is no longer included.
    Instead, you can manually add the location of required headers to your CPATH by running the following, or adding to your ``.bash_profile``:
    
    .. code:: bash
