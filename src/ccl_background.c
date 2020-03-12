@@ -622,6 +622,20 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
 }
 
 
+/* ----- ROUTINE: ccl_cosmology_distances_from_input ------
+INPUT: cosmology, comoving distance chi
+TASK: if not already there, make a table of comoving distances from an input array
+*/
+
+void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, double * chi, int *status)
+{
+  //Do nothing if everything is computed already
+  if(cosmo->computed_distances)
+    return;
+
+
+
+
 /* ----- ROUTINE: ccl_cosmology_compute_growth ------
 INPUT: cosmology
 TASK: if not already there, make a table of growth function and growth rate

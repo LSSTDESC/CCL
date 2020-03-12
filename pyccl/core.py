@@ -148,6 +148,8 @@ class Cosmology(object):
             m_nu_type = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emualtor but results in
             internal inconsistencies. Defaults to 'strict'.
+        background_on_input: #TODO
+        chi_z: #TODO
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -161,7 +163,7 @@ class Cosmology(object):
             baryons_power_spectrum='nobaryons',
             mass_function='tinker10',
             halo_concentration='duffy2008',
-            emulator_neutrinos='strict'):
+            emulator_neutrinos='strict', background_on_input=False, chi_z=None):
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -181,6 +183,10 @@ class Cosmology(object):
             emulator_neutrinos=emulator_neutrinos)
 
         self._build_cosmo()
+
+        # TODO: include these in the self._params_init_kwargs?
+        self.background_on_input = background_on_input
+        self.chi_z = chi_z
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -634,9 +640,14 @@ class Cosmology(object):
         """Compute the distance splines."""
         if self.has_distances:
             return
-        status = 0
-        status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self)
+        if not self.background_on_input:
+            status = 0
+            status = lib.cosmology_compute_distances(self.cosmo, status)
+            check(status, self)
+        else:
+            #status = lib.cosmology_distances_from_input(self.cosmo, self.chi_z, status)
+            #check(status, self)
+            pass
 
     def compute_growth(self):
         """Compute the growth function."""
