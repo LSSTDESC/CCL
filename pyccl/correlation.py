@@ -39,7 +39,7 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
         corr_type (string): Type of correlation function. Choices:
                             'GG' (0x0), 'GL' (0x2),
                             'L+' (2x2, xi+),
-                            'L-' (2x2, xi-), where the numbers refer to the
+                            'L-' (2x2, xi-), where numbers refer to the
                             spins of the two quantities being cross-correlated
                             (see Section 2.4.2 of the CCL paper).
         method (string, optional): Method to compute the correlation function.
