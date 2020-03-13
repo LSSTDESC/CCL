@@ -41,7 +41,7 @@ def correlation(cosmo, ell, C_ell, theta, type='nn', corr_type=None,
         type (string): Type of correlation function. Choices:
                        'NN' (0x0), 'NG' (0x2),
                        'GG+' (2x2, xi+),
-                       'GG-' (2x2, xi-), where the numbers refer to the
+                       'GG-' (2x2, xi-), where numbers refer to the
                        spins of the two quantities being cross-correlated
                        (see Section 2.4.2 of the CCL paper).
         method (string, optional): Method to compute the correlation function.
