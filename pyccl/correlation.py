@@ -77,8 +77,8 @@ def correlation(cosmo, ell, C_ell, theta, type='nn', corr_type=None,
         elif corr_type == 'l-':
             type = 'GG-'
         else:
-            raise ValueError("Unknown corr_type" + corr_type)
-        warnings.warn("corr_type is deprecated.  "
+            raise ValueError("Unknown corr_type " + corr_type)
+        warnings.warn("corr_type is deprecated. "
                       "Use type = {}".format(type))
     method = method.lower()
 
