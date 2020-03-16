@@ -1,5 +1,6 @@
 from .. import ccllib as lib
 from ..core import check
+from ..background import omega_x
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
@@ -97,6 +98,20 @@ class HaloBias(object):
         else:
             M_use = M
         return np.log10(M_use)
+
+    def _get_Delta_m(self, cosmo, a):
+        """ For SO-based mass definitions, this returns the corresponding
+        value of Delta for a rho_matter-based definition. This is useful
+        mostly for the Tinker mass functions, which are defined for any
+        SO mass in general, but explicitly only for Delta_matter.
+        """
+        delta = self.mdef.get_Delta(cosmo, a)
+        if self.mdef.rho_type == 'matter':
+            return delta
+        else:
+            om_this = omega_x(cosmo, a, self.mdef.rho_type)
+            om_matt = omega_x(cosmo, a, 'matter')
+            return delta * om_this / om_matt
 
     def get_halo_bias(self, cosmo, M, a, mdef_other=None):
         """ Returns the halo bias for input parameters.
@@ -303,31 +318,35 @@ class HaloBiasTinker10(HaloBias):
     def _default_mdef(self):
         self.mdef = MassDef200m()
 
-    def _setup(self, cosmo):
-        ld = np.log10(self.mdef.Delta)
+    def _AC(self, ld):
         xp = np.exp(-(4./ld)**4.)
-        self.A = 1.0 + 0.24 * ld * xp
-        self.a = 0.44 * ld - 0.88
+        A = 1.0 + 0.24 * ld * xp
+        C = 0.019 + 0.107 * ld + 0.19*xp
+        return A, C
+
+    def _a(self, ld):
+        return 0.44 * ld - 0.88
+
+    def _setup(self, cosmo):
         self.B = 0.183
         self.b = 1.5
-        self.C = 0.019 + 0.107 * ld + 0.19*xp
         self.c = 2.4
         self.dc = 1.68647
 
     def _check_mdef_strict(self, mdef):
-        if isinstance(mdef.Delta, str):
-            return True
-        elif (mdef.Delta < 200.) or (mdef.Delta > 3200.) or \
-             (mdef.rho_type != 'matter'):
+        if mdef.Delta == 'fof':
             return True
         return False
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM
-        nupa = nu**self.a
 
-        return 1. - self.A * nupa / (nupa + self.dc**self.a) + \
-            self.B * nu**self.b + self.C * nu**self.c
+        ld = np.log10(self._get_Delta_m(cosmo, a))
+        A, C = self._AC(ld)
+        aa = self._a(ld)
+        nupa = nu**aa
+        return 1. - A * nupa / (nupa + self.dc**aa) + \
+            self.B * nu**self.b + C * nu**self.c
 
 
 def halo_bias_from_name(name):
