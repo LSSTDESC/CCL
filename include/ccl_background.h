@@ -329,6 +329,18 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status);
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
 
 /**
+ * //TODO: Fill
+ * @param cosmo Cosmological parameters
+ * @param na integer indicating size of arrays a and chi_a
+ * @param a scale factor at locations where the input chi_a has been pre-computed
+ * @param chi_a comoving distance computed at values of a
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[], double chi_a[], int *status);
+
+/**
  * Compute the growth function and a spline to be stored
  * in the cosmology structure.
  * @param cosmo Cosmological parameters

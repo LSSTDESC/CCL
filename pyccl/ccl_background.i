@@ -111,14 +111,12 @@ void scale_factor_of_chi_vec(ccl_cosmology * cosmo, double* chi, int nchi,
 
 %}
 
-
 %feature("pythonprepend") %{
     if numpy.shape(a1) != (nout,):
         raise CCLError("Input shape for `a1` must match `(nout,)`!")
     if numpy.shape(a2) != (nout,):
         raise CCLError("Input shape for `a2` must match `(nout,)`!")
 %}
-
 
 %inline %{
 
@@ -132,3 +130,13 @@ void scale_factor_of_chi_vec(ccl_cosmology * cosmo, double* chi, int nchi,
 
 /* The directive gets carried between files, so we reset it at the end. */
 %feature("pythonprepend") %{ %}
+
+// FIXME: I cannot place this inside the other pythonprepend features.
+%inline %{
+
+void cosmology_distances_from_input(ccl_cosmology * cosmo,
+        double* a, int na, double* chi, int nchi, int *status) {
+    ccl_cosmology_distances_from_input(cosmo, na, a, chi, status);
+}
+
+%}
