@@ -113,7 +113,20 @@ Known Installation Issues
       $ sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
 
    which will install all the required headers into ``/usr/include``.
-
+   
+   On Mac OSX 10.15 or greater, this patch is no longer included.
+   Instead, you can manually add the location of required headers to your CPATH by running the following, or adding to your ``.bash_profile``:
+   
+   .. code:: bash
+        
+      $ export CPATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include"
+      
+#. Newer versions of Xcode do not automatically have the required command line tools installed. This can be done from the command line:
+ 
+    .. code:: bash
+      
+      $ sudo xcode-select --install
+      $ sudo xcodebuild -license
 
 .. _uninstalling:
 
