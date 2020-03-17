@@ -338,7 +338,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[], double chi_a[], int *status);
+void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[], double chi_a[], double E_a[], int *status);
 
 /**
  * Compute the growth function and a spline to be stored

@@ -152,6 +152,8 @@ class Cosmology(object):
             will be read as input from the chi_z array. #TODO Doc
         chi_z (array_like, optional): Comoving distance computed at points indicated
             by the z_array. If background_on_input is `False`, this is ignored. #TODO Doc
+        hoh0 (array_like, optional): Hubble parameter over the value of H0.
+            If background_on_input is `False`, this is ignored. #TODO Doc
         z_array (array_like, optional): Redshift array with values on which \chi(z)
             is computed. If background_on_input is `False`, this is ignored. #TODO Doc
     """
@@ -168,7 +170,7 @@ class Cosmology(object):
             mass_function='tinker10',
             halo_concentration='duffy2008',
             emulator_neutrinos='strict',
-            background_on_input=False, chi_z=None, z_array=None):
+            background_on_input=False, chi_z=None, hoh0=None, z_array=None):
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -192,6 +194,7 @@ class Cosmology(object):
         # TODO: include these in the self._params_init_kwargs?
         self.background_on_input = background_on_input
         self.chi_z = chi_z
+        self.hoh0 = hoh0
         self.z_array = z_array
 
     def _build_cosmo(self):
@@ -657,7 +660,7 @@ class Cosmology(object):
             a = 1./(1+self.z_array)
             chi = self.chi_z
             #na = len(a_array)
-            status = lib.cosmology_distances_from_input(self.cosmo, a, chi, status)
+            status = lib.cosmology_distances_from_input(self.cosmo, a, chi, self.hoh0, status)
             check(status, self)
 
     def compute_growth(self):
