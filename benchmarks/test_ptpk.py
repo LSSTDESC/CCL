@@ -10,9 +10,6 @@ COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05,
                       h=0.7, sigma8=0.8, n_s=0.96,
                       transfer_function='bbks')
 
-# Read data
-dirdat = os.path.join(os.path.dirname(__file__), 'data')
-
 # Redshifts
 zs = np.array([0., 1.])
 

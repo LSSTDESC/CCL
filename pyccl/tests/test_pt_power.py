@@ -99,12 +99,13 @@ def test_pt_get_pk2d_smoke(options):
         t2 = None
     else:
         t2 = TRS[options[1]]
-    ccl.nl_pt.get_pt_pk2d(COSMO,
-                          TRS[options[0]],
-                          tracer2=t2,
-                          return_ia_bb=options[2],
-                          sub_lowk=options[3],
-                          ptc=options[4])
+    pk = ccl.nl_pt.get_pt_pk2d(COSMO,
+                               TRS[options[0]],
+                               tracer2=t2,
+                               return_ia_bb=options[2],
+                               sub_lowk=options[3],
+                               ptc=options[4])
+    assert isinstance(pk, ccl.Pk2D)
 
 
 def test_pt_pk2d_bb():
@@ -117,10 +118,11 @@ def test_pt_pk2d_bb():
     assert pbb.eval(0.1, 0.9, COSMO) == pbb2.eval(0.1, 0.9, COSMO)
 
 
-@pytest.mark.parametrize('nl', ['halofit', 'linear', 'spt'])
+@pytest.mark.parametrize('nl', ['nonlinear', 'linear', 'spt'])
 def test_pt_get_pk2d_nl(nl):
-    ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TG'],
-                          nonlin_pk_type=nl)
+    pk = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TG'],
+                               nonlin_pk_type=nl)
+    assert isinstance(pk, ccl.Pk2D)
 
 
 def test_ptc_raises():

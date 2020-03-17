@@ -1,4 +1,3 @@
-import warnings
 import numpy as np
 from .. import ccllib as lib
 from ..core import check
@@ -188,6 +187,12 @@ class PTCalculator(object):
         internal set of wavenumbers (given by this object's
         `ks` attribute) and a number of redshift values.
 
+        .. note:: The full non-linear model for the cross-correlation
+                  between number counts and intrinsic alignments is
+                  still work in progress in FastPT. As a workaround
+                  CCL assumes a non-linear treatment of IAs, but only
+                  linearly biased number counts.
+
         Args:
             Pd1d1 (array_like): 1-loop matter power spectrum at the
                 wavenumber values given by this object's `ks` list.
@@ -212,12 +217,6 @@ class PTCalculator(object):
                 `N_z` is the size of the input redshift-dependent \
                 biases and growth factor.
         """
-        warnings.warn(
-            "The full non-linear model for the cross-correlation "
-            "between number counts and intrinsic alignments is "
-            "still work in progress in FastPT. As a workaround "
-            "CCL assumes a non-linear treatment of IAs, but only "
-            "linearly biased number counts.")
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
 
@@ -378,12 +377,18 @@ class PTCalculator(object):
 
 
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
-                sub_lowk=False, nonlin_pk_type='halofit',
+                sub_lowk=False, nonlin_pk_type='nonlinear',
                 a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False, return_ia_ee_and_bb=False):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the PT power spectrum for two quantities defined by
     two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
+
+    .. note:: The full non-linear model for the cross-correlation
+              between number counts and intrinsic alignments is
+              still work in progress in FastPT. As a workaround
+              CCL assumes a non-linear treatment of IAs, but only
+              linearly biased number counts.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -398,13 +403,13 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             contribution will be subtracted for number counts
             auto-correlations.
         nonlin_pk_type (str): type of 1-loop matter power spectrum
-            to use. 'linear' for linear P(k), 'halofit' for halofit
+            to use. 'linear' for linear P(k), 'nonlinear' for the internal
             non-linear power spectrum, 'spt' for standard perturbation
-            theory power spectrum. Default: 'halofit'.
+            theory power spectrum. Default: 'nonlinear'.
         a_arr (array): an array holding values of the scale factor
-            at which the halo model power spectrum should be
-            calculated for interpolation. If `None`, the internal
-            values used by `cosmo` will be used.
+            at which the power spectrum should be calculated for
+            interpolation. If `None`, the internal values used by
+            `cosmo` will be used.
         extrap_order_lok (int): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.pk2d.Pk2D`.
@@ -479,7 +484,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     # update the PTC to have the require Pk components
     ptc.update_pk(pk_lin_z0)
 
-    if nonlin_pk_type == 'halofit':
+    if nonlin_pk_type == 'nonlinear':
         Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
                           for a in a_arr]).T
     elif nonlin_pk_type == 'linear':
