@@ -42,3 +42,8 @@ py36)
     cython "camb>=1"
   ;;
 esac;
+
+# we have to activate the cond env before we install this
+source activate test-environment
+pip install https://github.com/JoeMcEwen/FAST-PT/archive/v3.0.2.tar.gz --no-deps
+conda deactivate
