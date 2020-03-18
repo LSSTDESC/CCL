@@ -660,22 +660,18 @@ void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[
     ccl_cosmology_set_status_message(
       cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): ran out of memory\n");
   }
-
-  // FIXME: This is raised and I don't know why.
   /*
   //Check for messed up scale factor conditions
   if (!*status){
-    if ((fabs(a[0]-cosmo->spline_params.A_SPLINE_MINLOG)>1e-5) ||
-        (fabs(a[na-1]-cosmo->spline_params.A_SPLINE_MAX)>1e-5) ||
-        (a[na-1]>1.0)) {
+    if ((a[0] < cosmo->spline_params.A_SPLINE_MINLOG) ||
+        (a[na-1]-1.0 > 1e-8)) {
       *status = CCL_ERROR_LINSPACE;
       ccl_cosmology_set_status_message(
         cosmo,
         "ccl_background.c: ccl_cosmology_compute_distances(): Error "
         "creating first logarithmic and then linear spacing in a\n");
     }
-  }
-  */
+  }*/
 
   // Initialize a E(a) spline
   if (!*status){
@@ -697,9 +693,9 @@ void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[
 
   // Reverse the order of chi(a) so that we can initialize the a(chi) spline, which needs monotonically decreasing x-array.
   double chi_a_reversed[na], a_reversed[na];
-  for (i=0; i<na; i++) {
-    chi_a_reversed[i] = chi_a[na-1-i]
-    a_reversed[i] = a[na-1-i]
+  for (int i=0; i<na; i++) {
+    chi_a_reversed[i] = chi_a[na-1-i];
+    a_reversed[i] = a[na-1-i];
   }
 //  reverseArray(chi_a, 0, na-1);
 
