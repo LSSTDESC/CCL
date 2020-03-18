@@ -111,3 +111,25 @@ def test_background_rho_x(a, kind, is_comoving):
 def test_background_rho_x_raises():
     with pytest.raises(ValueError):
         ccl.rho_x(COSMO, 1, 'blah', False)
+
+
+def test_input_distances_H():
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
+                          A_s=2e-9)
+    # Where the input quantities are calculated.
+    a_arr = np.linspace(0.1, 1, 100)
+    chi_from_ccl = ccl.background.comoving_radial_distance(cosmo, a_arr)
+    hoh0_from_ccl = ccl.background.h_over_h0(cosmo, a_arr)
+
+    cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
+                                A_s=2e-9, background_on_input=True,
+                                chi_a=chi_from_ccl, hoh0=hoh0_from_ccl,
+                                a_array=a_arr)
+
+    # Where to compare chi(a) from CCL and from CCL with input quantities.
+    a_arr = np.linspace(0.102, 0.987, 158)
+    chi_ccl_input = ccl.background.comoving_radial_distance(cosmo_input,
+                                                            a_arr)
+    chi_from_ccl = ccl.background.comoving_radial_distance(cosmo, a_arr)
+    # Relative difference (a-b)/b < 1e-5 = 0.001 %
+    assert np.allclose(chi_ccl_input, chi_from_ccl, atol=0., rtol=1e-5)
