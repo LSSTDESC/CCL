@@ -696,11 +696,16 @@ void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[
   }
 
   // Reverse the order of chi(a) so that we can initialize the a(chi) spline, which needs monotonically decreasing x-array.
-  reverseArray(chi_a, 0, na-1);
+  double chi_a_reversed[na], a_reversed[na];
+  for (i=0; i<na; i++) {
+    chi_a_reversed[i] = chi_a[na-1-i]
+    a_reversed[i] = a[na-1-i]
+  }
+//  reverseArray(chi_a, 0, na-1);
 
   // Initialize a(chi) spline
   if (!*status){
-    if (gsl_spline_init(achi, chi_a, a, na)){
+    if (gsl_spline_init(achi, chi_a_reversed, a_reversed, na)){
       *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(
         cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): Error creating  chi(a) spline\n");
@@ -710,22 +715,11 @@ void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[
   if (*status){ //If there was an error, free the GSL splines and return
     gsl_spline_free(E); // Note: you are allowed to call gsl_free() on NULL
     gsl_spline_free(chi);
-    gsl_spline_free(a);
+    gsl_spline_free(achi);
     E = NULL;
     chi = NULL;
-    a = NULL;
+    achi = NULL;
   }
-
-  /*
-  // FIXME: Is this necessary?
-  free(a);
-  free(E_a);
-  free(chi_a);
-  a = NULL;
-  E_a = NULL;
-  chi_a = NULL;
-  //Note: you are allowed to call free() on NULL
-  */
 
   if (*status == 0) {
     //If there were no errors, attach the splines to the cosmo struct and end the function.

@@ -148,14 +148,16 @@ class Cosmology(object):
             m_nu_type = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emualtor but results in
             internal inconsistencies. Defaults to 'strict'.
-        background_on_input (:obj:`bool`, optional): If True, the comoving distance
-            will be read as input from the chi_z array. #TODO Doc
-        chi_z (array_like, optional): Comoving distance computed at points indicated
-            by the z_array. If background_on_input is `False`, this is ignored. #TODO Doc
+        background_on_input (:obj:`bool`, optional): If True, the comoving
+            distance will be read as input from the chi_z array.#TODO Doc
+        chi_a (array_like, optional): Comoving distance computed at points
+            indicated by the a_array. If background_on_input is `False`,
+            this is ignored. #TODO Doc
         hoh0 (array_like, optional): Hubble parameter over the value of H0.
             If background_on_input is `False`, this is ignored. #TODO Doc
-        z_array (array_like, optional): Redshift array with values on which \chi(z)
-            is computed. If background_on_input is `False`, this is ignored. #TODO Doc
+        a_array (array_like, optional): Scale factor array with values on
+            which chi(a) is computed. If background_on_input is `False`,
+            this is ignored. #TODO Doc
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -170,7 +172,7 @@ class Cosmology(object):
             mass_function='tinker10',
             halo_concentration='duffy2008',
             emulator_neutrinos='strict',
-            background_on_input=False, chi_z=None, hoh0=None, z_array=None):
+            background_on_input=False, chi_a=None, hoh0=None, a_array=None):
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -193,9 +195,9 @@ class Cosmology(object):
 
         # TODO: include these in the self._params_init_kwargs?
         self.background_on_input = background_on_input
-        self.chi_z = chi_z
+        self.chi_a = chi_a
         self.hoh0 = hoh0
-        self.z_array = z_array
+        self.a_array = a_array
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -654,13 +656,14 @@ class Cosmology(object):
             status = lib.cosmology_compute_distances(self.cosmo, status)
             check(status, self)
         else:
-            # TODO: Check that chi_z and z_array are arrays of the same size.
-            # TODO: Check that z_array has the correct order.
+            # TODO: Check that chi_a and a_array are arrays of the same size.
+            # TODO: Check that a_array is a monotonically increasing array.
             status = 0
-            a = 1./(1+self.z_array)
-            chi = self.chi_z
-            #na = len(a_array)
-            status = lib.cosmology_distances_from_input(self.cosmo, a, chi, self.hoh0, status)
+            status = lib.cosmology_distances_from_input(self.cosmo,
+                                                        self.a_array,
+                                                        self.chi_a,
+                                                        self.hoh0,
+                                                        status)
             check(status, self)
 
     def compute_growth(self):
