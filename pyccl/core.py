@@ -37,11 +37,6 @@ baryons_power_spectrum_types = {
 # List which transfer functions can be used with the muSigma_MG
 # parameterisation of modified gravity
 
-# MI pending question
-# Matt: is this still used? I changed it anyway but don't see it being used
-# valid_muSig_transfers = {'boltzmann_class', 'class'}
-valid_muSig_transfers = {'boltzmann_isitgr', 'isitgr'}
-
 mass_function_types = {
     'angulo':      lib.angulo,
     'tinker':      lib.tinker,

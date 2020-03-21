@@ -41,7 +41,7 @@ tests/.ipynb_checkpoints/*
 examples/.ipynb_checkpoints/*
 examples/*.pdf
 *log
-*dat
+#*dat
 *bak
 *dylib
 pyccl/ccllib.py

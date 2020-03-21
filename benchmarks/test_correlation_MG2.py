@@ -14,7 +14,6 @@ def corr_method(request):
 @pytest.fixture(scope='module')
 def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
-#    h0 = 0.70001831054687500
     h0 = 0.67702026367187500
     logA = 3.05  # log(10^10 A_s)
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
@@ -148,13 +147,7 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     # Our benchmarks have theta in arcmin
     # but CCL requires it in degrees:
     theta_deg = bms['theta'] / 60.
-    # We cut the largest theta value for xi+ because of issues with the
-    # benchmarks.
-#    if kind == 'gg':
     xi = ccl.correlation(cosmo, ell, cli, theta_deg, corr_type=kind, method=method)
-#   else:
-#   xi = ccl.correlation(cosmo, ell, cli, theta_deg, corr_type=kind, method=method)
-
     xi *= pref
 
     print(xi)
