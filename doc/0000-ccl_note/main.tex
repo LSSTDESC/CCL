@@ -432,6 +432,13 @@ We also provide a halo model implementation for computing the non-linear matter
 power spectrum. Halo model computations are known to be inaccurate at the $10\%$
 level or more. See Section~\ref{sec:halo_model} for details.
 
+\subsubsection{Nonlinear Perturbation Theory}
+We provide an implementation of nonlinear standard perturbation theory (SPT) for the matter power spectrum
+using the {\tt FAST-PT} package \cite{mcewen16}. SPT provides a reasonable approximation of the matter
+power spectrum in the mildly nonlinear regime but breaks down on smaller scales.
+It is also known to provide a poor correction to the BAO feature.
+This perturbation theory implementation is discussion in more detail in Section~\ref{sec:Nonlinear_Pk}.
+
 \subsubsection{Cosmic emulator}
 
 The cosmic emulator of \citet{Lawrence17} is integrated into \ccl and it is
@@ -667,6 +674,84 @@ $8h^{-1}$Mpc. Note that for linear power spectrum models where {\tt CLASS} is no
 used, only the option to specify $\sigma_8$ is supported. The computation of
 $\sigma_8$ is described in Section \ref{sec:hmf}.
 
+\subsection{Nonlinear Power Spectra}
+\label{sec:Nonlinear_Pk}
+
+Nonlinear perturbation theory (e.g.\ \cite{bernardeau02}) provides a method to calculate power spectra in the mildly nonlinear regime. {\tt CCL} provide sperturbation theory predictions for dark matter clustering, galaxy biasing, and intrinsic alignments using the {\tt FAST-PT} package \cite{mcewen16,fang17}. These power spectra can then be used for the relevant $P_{\alpha\beta}$, as described below in \ref{sec:cl}. Currently, all modeling is done at ``one-loop'' order, i.e.\ $\mathcal{O}(P_{\rm lin}^2)$, in standard perturbation theory (SPT). \ccl implements these models using {\tt PTTracer} objects.
+
+\subsubsection{Matter density}
+
+The matter density field can be expanded:
+\begin{equation}
+  \label{eq:delta_spt}
+  delta_m = \delta^{(1)} + \delta^{(2)} + \delta^{(3)} + \cdots,
+\end{equation}
+where $\delta^{(1)}$ is the linear density field and higher-order terms can be expressed as a function of the linear density field at the specified order. The matter power spectrum is then given by:
+\begin{equation}
+  P_{\rm NL} = P_{11} + P_{22} + 2P_{13},
+\end{equation}
+where $P_{11}$ is $P_{\rm lin}$.
+
+Note that the nonlinear treatments of galaxy bias and intrinsic alignments use the one-loop SPT matter density expression when calculating relevant correlations, even if a different nonlinear prescription is used for $P_{\rm NL}$.
+
+\subsubsection{Galaxy bias}
+See \cite{desjacques18rev} for a detailed discussion on galaxy bias and treatments in perturbation theory. Currently, nonlinear galaxy bias is given by the following expression (e.g.\ \cite{baldauf12}):
+\begin{equation}
+  \delta_{g} = b1*\delta_m +\frac{b_2}{2}*(\delta_m^2 - \langle \delta_m^2 \rangle) +
+  \frac{b_s}{2}*(s^2 - \langle s^2 \rangle) ,
+\end{equation}
+where $s$ is the tidal field, and the mean values of both quadratic quantities are subtracted.
+The standard linear bias is $b_1$, and $(b_2,b_s)$ are the quadratic bias coefficients.
+The relevant galaxy-galaxy (for two galaxy samples, denoted by the second superscript) and galaxy-matter power spectra are then:
+\begin{align}
+  &P_{gg} = b_{1,1} b_{1,2} P_{d1d1} +
+               \frac{1}{2} (b_{1,1} b_{2,2} + b_{1,2} b_{2,1}) P_{d1d2} + \notag\\
+               &~~~~\frac{1}{4} b_{2,1} b_{2,2} P_{d2d2} +
+               \frac{1}{2} (b_{1,1} b_{s,2} + b12 bs1) P_{d1s2} + \notag\\
+               &~~~~\frac{1}{4} (b_{2,1} b_{s,2} + b22 bs1) P_{d2s2} +
+               \frac{1}{4} b_{s,1} b_{s,2} P_{s2s2},\\
+  &P_{gm} = b1 P_{d1d1} + \frac{1}{2}b_2 P_{d1d2} + \frac{1}{2} b_s P_{d1s2},
+\end{align}
+where $P_{d1d1}$ corresponds to the chosen nonlinear matter power spectrum,
+and the other terms are one-loop PT expressions.
+
+\subsubsection{Intrinsic alignments}
+
+Following the ``TATT'' model (tidal alignment and tidal torquing) described in \cite{blazek19}, the galaxy intrinsic alignment field can be expanded:
+\begin{equation}
+    \gamma^{I}_{ij} = C_1 s_{ij} + C_2\left( s_{ik} s_{kj} - \frac{1}{3}\delta_{ij} s^2 \right) + C_{1\delta} (\delta s_{ij}).
+\end{equation}
+Higher-order contributions will be included in future releases. The matter-intrinsic and intrinsic-intrinsic ($E$- and $B$-mode) power spectra are given by:
+\begin{align}
+\label{eq:dEtot}
+P_{\delta E} =& C_1 P_{d1d1} + C_{1\delta} \left[A_{0|0E} + C_{0|0E}\right]
++ C_2 \left[ A_{0|E2} + B_{0|E2}\right]~, \\
+\label{eq:EEtot}
+P_{EE} =&
+C_1^2 P_{d1d1} + 2 C_1 C_{1\delta} \left[A_{0|0E}+ C_{0|0E}\right] + C_{1\delta}^2 A_{0E|0E}\\
+&+ C_2^2 A_{E2|E2}
++ 2 C_1 C_2 \left[ A_{0|E2} + B_{0|E2}\right] + 2 C_{1\delta} C_2 D_{0E|E2}~,\notag\\
+\label{eq:BBtot}
+P_{BB} =& C_{1\delta}^2 A_{0B|0B} + C_2^2 A_{B2|B2} + 2 C_{1\delta} C_2 D_{0B|B2} ~,
+\end{align} 
+where, as above, $P_{d1d1}$ corresponds to the chosen nonlinear matter power spectrum,
+and the other terms are one-loop PT expressions.
+
+The normalization of the IA bias parameters can be flexibly specified. The convntion of \cite{blazek19} is
+\begin{align}
+    C_1(z) = - A_{1}(z) \frac{\bar{C}_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)} \\
+    C_{1 \delta}(z) = - A_{1 \delta}(z) \frac{\bar{C}_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)} \\
+    C_{2}(z) = A_{2}(z) \frac{5\bar{C}_1 \Omega^2_{\rm m} \rho_{\rm crit}}{\Omega_{\rm m,fid} D^2(z)}~.
+\end{align}
+The convention for $C_1(z)$ matches the normalization for $b_{\rm IA}$ used in the standard IA tracer (see Eq.~\ref{eq:bIA_norm}).
+
+\subsubsection{Galaxy-IA cross correlation}
+
+In the present \ccl implementation, correlations with between nonlinear bias parameters and IA contributions are not yet implemented. These terms will be included in future releases. The current galaxy-intrinsic power spectrum assumes linear galaxy bias and nonlinear IA:
+\begin{align}
+    P_{gI} = b_1 P_{\delta E}~.
+\end{align}
+
 \subsection{Angular power spectra}
 \label{sec:cl}
 
@@ -698,7 +783,7 @@ Three important things must be noted about them:
 \end{itemize}
 
 \subsubsection*{Transfer functions}
-In the most general case, {\tt CCL} accepts transfer functions as generic functions of $k$ and $a$. For simplicity and speed it also supports the simpler case where these are factorisable: $T_\alpha(k,a)=K_\alpha(k)\,A_\alpha(a)$.
+In the most general case, \ccl accepts transfer functions as generic functions of $k$ and $a$. For simplicity and speed it also supports the simpler case where these are factorisable: $T_\alpha(k,a)=K_\alpha(k)\,A_\alpha(a)$.
 
 \subsubsection*{$\ell$ prefactors}
 We provide 3 options for these, encoded in a parameter that we will call $d_\theta$ here:
@@ -734,7 +819,7 @@ single one, such that the total $\Delta^X_\ell(k,\chi)$ of that tracer is the
 sum of the corresponding functions for all the tracers in the combination.
 
 \subsubsection*{Standard tracers}
-{\tt CCL} provides specific functionality (besides its generic features) to define the following types of tracers:
+{\tt CCL} provides specific functionality (besides its generic features) to define the following ``standard'' tracers:
 
   \begin{table*}[h]
     \centering
@@ -764,24 +849,31 @@ with massive neutrinos will cause \ccl to raise an error. $C_\ell$ is instead
 computed assuming a linear-theory relation between the matter overdensity and
 peculiar velocity fields. While this should not be problematic for wide photometric
 redshift bins, users should exercise care when interpreting results for narrow
-window functions. For intrinsic alignments, (I.A. in the table), \ccl currently
-supports the so-called ``non-linear alignment model'', according to which the
+window functions.
+
+By default, for all of these tracers, \ccl assumes that the underlying power spectrum
+is given by $P_{\rm NL}$, which is then multiplied by the relevant (linear) biasing.
+The functionality of these tracers can be used with more general power spectra $P_{\alpha\beta}$,
+e.g.\ the nonlinear biasing or IA described in Sec.~\ref{sec:Nonlinear_Pk}. In this case,
+the biasing should be set to 1 when defining these tracers instead specified in the relevant {\tt PTTracer}.
+
+For intrinsic alignments, (I.A. in the table), the default \ccl
+choice is the ``non-linear alignment model'', according to which the
 galaxy inertia tensor is proportional the local tidal tensor
 \cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}. $\chi_s$ is the distance to
 the source plane for CMB lensing. $b_{\rm IA}$ is the corresponding alignment
 bias. Notice that in the \ccl implementation, the normalization of this bias
 is chosen to coincide with the parameter $A_{\rm IA}$ used in current weak
 lensing analyses, i.e., the user is expected to pass $A_{\rm IA}$ to the routine,
-and this is connected to $b_{\rm IA}$ by the following expression\cite[Eq. 6]{Joachimi11}:
-
+and this is connected to $b_{\rm IA}$ by the following expression \cite[Eq. 6]{Joachimi11}:
 \begin{equation}
-b_{\rm IA} = - A_{\rm IA} \frac{C_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}
+    \label{eq:bIA_norm}
+    b_{\rm IA} = - A_{\rm IA} \frac{C_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}
 \end{equation}
 where $\rho_{\rm crit}$ is in the default \ccl units and
 $C_1= 5\times 10^{-14} (Mpc/h)^3 / (M_\odot/h)$ \citep{Brown02,Bridle07}.
 Note that although $\Omega_{\rm m}$ should in principle include non-relativistic
 neutrinos, this is not the case in \ccl at this point.
-
 
 Note that \ccl currently does not compute relativistic corrections to number
 counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be
