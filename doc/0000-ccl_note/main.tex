@@ -688,7 +688,7 @@ The matter density field can be expanded:
 \end{equation}
 where $\delta^{(1)}$ is the linear density field and higher-order terms can be expressed as a function of the linear density field at the specified order. The matter power spectrum is then given by:
 \begin{equation}
-  P_{\rm NL} = P_{11} + P_{22} + 2P_{13},
+  P_{\rm NL} = P_{11} + P_{22} + 2P_{13}~,
 \end{equation}
 where $P_{11}$ is $P_{\rm lin}$.
 
@@ -697,8 +697,8 @@ Note that the nonlinear treatments of galaxy bias and intrinsic alignments use t
 \subsubsection{Galaxy bias}
 See \cite{desjacques18rev} for a detailed discussion on galaxy bias and treatments in perturbation theory. Currently, nonlinear galaxy bias is given by the following expression (e.g.\ \cite{baldauf12}):
 \begin{equation}
-  \delta_{g} = b1*\delta_m +\frac{b_2}{2}*(\delta_m^2 - \langle \delta_m^2 \rangle) +
-  \frac{b_s}{2}*(s^2 - \langle s^2 \rangle) ,
+  \delta_{g} = b_1 \delta_m +\frac{b_2}{2}*(\delta_m^2 - \langle \delta_m^2 \rangle) +
+  \frac{b_s}{2}*(s^2 - \langle s^2 \rangle) ~,
 \end{equation}
 where $s$ is the tidal field, and the mean values of both quadratic quantities are subtracted.
 The standard linear bias is $b_1$, and $(b_2,b_s)$ are the quadratic bias coefficients.
@@ -707,10 +707,10 @@ The relevant galaxy-galaxy (for two galaxy samples, denoted by the second supers
   &P_{gg} = b_{1,1} b_{1,2} P_{d1d1} +
                \frac{1}{2} (b_{1,1} b_{2,2} + b_{1,2} b_{2,1}) P_{d1d2} + \notag\\
                &~~~~\frac{1}{4} b_{2,1} b_{2,2} P_{d2d2} +
-               \frac{1}{2} (b_{1,1} b_{s,2} + b12 bs1) P_{d1s2} + \notag\\
-               &~~~~\frac{1}{4} (b_{2,1} b_{s,2} + b22 bs1) P_{d2s2} +
-               \frac{1}{4} b_{s,1} b_{s,2} P_{s2s2},\\
-  &P_{gm} = b1 P_{d1d1} + \frac{1}{2}b_2 P_{d1d2} + \frac{1}{2} b_s P_{d1s2},
+               \frac{1}{2} (b_{1,1} b_{s,2} + b_{1,2} b_{s,1}) P_{d1s2} + \notag\\
+               &~~~~\frac{1}{4} (b_{2,1} b_{s,2} + b_{2,2} b_{s,1}) P_{d2s2} +
+               \frac{1}{4} b_{s,1} b_{s,2} P_{s2s2}~,\\
+  &P_{gm} = b_1 P_{d1d1} + \frac{1}{2}b_2 P_{d1d2} + \frac{1}{2} b_s P_{d1s2}~,
 \end{align}
 where $P_{d1d1}$ corresponds to the chosen nonlinear matter power spectrum,
 and the other terms are one-loop PT expressions.
@@ -719,7 +719,7 @@ and the other terms are one-loop PT expressions.
 
 Following the ``TATT'' model (tidal alignment and tidal torquing) described in \cite{blazek19}, the galaxy intrinsic alignment field can be expanded:
 \begin{equation}
-    \gamma^{I}_{ij} = C_1 s_{ij} + C_2\left( s_{ik} s_{kj} - \frac{1}{3}\delta_{ij} s^2 \right) + C_{1\delta} (\delta s_{ij}).
+    \gamma^{I}_{ij} = C_1 s_{ij} + C_2\left( s_{ik} s_{kj} - \frac{1}{3}\delta_{ij} s^2 \right) + C_{1\delta} (\delta s_{ij})~.
 \end{equation}
 Higher-order contributions will be included in future releases. The matter-intrinsic and intrinsic-intrinsic ($E$- and $B$-mode) power spectra are given by:
 \begin{align}
@@ -739,8 +739,8 @@ and the other terms are one-loop PT expressions.
 
 The normalization of the IA bias parameters can be flexibly specified. The convntion of \cite{blazek19} is
 \begin{align}
-    C_1(z) = - A_{1}(z) \frac{\bar{C}_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)} \\
-    C_{1 \delta}(z) = - A_{1 \delta}(z) \frac{\bar{C}_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)} \\
+    C_1(z) = - A_{1}(z) \frac{\bar{C}_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}~, \\
+    C_{1 \delta}(z) = - A_{1 \delta}(z) \frac{\bar{C}_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}~, \\
     C_{2}(z) = A_{2}(z) \frac{5\bar{C}_1 \Omega^2_{\rm m} \rho_{\rm crit}}{\Omega_{\rm m,fid} D^2(z)}~.
 \end{align}
 The convention for $C_1(z)$ matches the normalization for $b_{\rm IA}$ used in the standard IA tracer (see Eq.~\ref{eq:bIA_norm}).
