@@ -705,10 +705,10 @@ The standard linear bias is $b_1$, and $(b_2,b_s)$ are the quadratic bias coeffi
 The relevant galaxy-galaxy (for two galaxy samples, denoted by the second superscript) and galaxy-matter power spectra are then:
 \begin{align}
   &P_{gg} = b_{1,1} b_{1,2} P_{d1d1} +
-               \frac{1}{2} (b_{1,1} b_{2,2} + b_{1,2} b_{2,1}) P_{d1d2} + \notag\\
-               &~~~~\frac{1}{4} b_{2,1} b_{2,2} P_{d2d2} +
-               \frac{1}{2} (b_{1,1} b_{s,2} + b_{1,2} b_{s,1}) P_{d1s2} + \notag\\
-               &~~~~\frac{1}{4} (b_{2,1} b_{s,2} + b_{2,2} b_{s,1}) P_{d2s2} +
+               \frac{1}{2} (b_{1,1} b_{2,2} + b_{1,2} b_{2,1}) P_{d1d2} \notag\\
+               &~~~~ + \frac{1}{4} b_{2,1} b_{2,2} P_{d2d2} +
+               \frac{1}{2} (b_{1,1} b_{s,2} + b_{1,2} b_{s,1}) P_{d1s2} \notag\\
+               &~~~~ + \frac{1}{4} (b_{2,1} b_{s,2} + b_{2,2} b_{s,1}) P_{d2s2} +
                \frac{1}{4} b_{s,1} b_{s,2} P_{s2s2}~,\\
   &P_{gm} = b_1 P_{d1d1} + \frac{1}{2}b_2 P_{d1d2} + \frac{1}{2} b_s P_{d1s2}~,
 \end{align}
@@ -728,11 +728,11 @@ P_{\delta E} =& C_1 P_{d1d1} + C_{1\delta} \left[A_{0|0E} + C_{0|0E}\right]
 + C_2 \left[ A_{0|E2} + B_{0|E2}\right]~, \\
 \label{eq:EEtot}
 P_{EE} =&
-C_1^2 P_{d1d1} + 2 C_1 C_{1\delta} \left[A_{0|0E}+ C_{0|0E}\right] + C_{1\delta}^2 A_{0E|0E}\\
-&+ C_2^2 A_{E2|E2}
-+ 2 C_1 C_2 \left[ A_{0|E2} + B_{0|E2}\right] + 2 C_{1\delta} C_2 D_{0E|E2}~,\notag\\
+C_{1,1}C_{1,2} P_{d1d1} + (C_{1,1} C_{1\delta,2}+C_{1,2} C_{1\delta,1}) \left[A_{0|0E}+ C_{0|0E}\right] + C_{1\delta,1} C_{1\delta,2} A_{0E|0E} \notag\\
+&+ C_{2,1} C_{2,2} A_{E2|E2} + (C_{1,1} C_{2,2} + C_{1,2} C_{2,1}) \left[ A_{0|E2} + B_{0|E2}\right] \notag \\
+&+ (C_{1\delta,1} C_{2,2} + C_{1\delta,2} C_{2,1})D_{0E|E2}~,\\
 \label{eq:BBtot}
-P_{BB} =& C_{1\delta}^2 A_{0B|0B} + C_2^2 A_{B2|B2} + 2 C_{1\delta} C_2 D_{0B|B2} ~,
+P_{BB} =& C_{1\delta,1} C_{1\delta,2} A_{0B|0B} + C_{2,1} C_{2,2} A_{B2|B2} + (C_{1\delta,1} C_{2,2} + C_{1\delta,2} C_{2,1}) D_{0B|B2} ~,
 \end{align} 
 where, as above, $P_{d1d1}$ corresponds to the chosen nonlinear matter power spectrum,
 and the other terms are one-loop PT expressions.
