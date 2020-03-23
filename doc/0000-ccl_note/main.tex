@@ -434,7 +434,7 @@ level or more. See Section~\ref{sec:halo_model} for details.
 
 \subsubsection{Nonlinear Perturbation Theory}
 We provide an implementation of nonlinear standard perturbation theory (SPT) for the matter power spectrum
-using the {\tt FAST-PT} package \cite{mcewen16}. SPT provides a reasonable approximation of the matter
+using the {\tt FAST-PT} package \citep{mcewen16}. SPT provides a reasonable approximation of the matter
 power spectrum in the mildly nonlinear regime but breaks down on smaller scales.
 It is also known to provide a poor correction to the BAO feature.
 This perturbation theory implementation is discussion in more detail in Section~\ref{sec:Nonlinear_Pk}.
@@ -677,7 +677,7 @@ $\sigma_8$ is described in Section \ref{sec:hmf}.
 \subsection{Nonlinear Power Spectra}
 \label{sec:Nonlinear_Pk}
 
-Nonlinear perturbation theory (e.g.\ \cite{bernardeau02}) provides a method to calculate power spectra in the mildly nonlinear regime. {\tt CCL} provide sperturbation theory predictions for dark matter clustering, galaxy biasing, and intrinsic alignments using the {\tt FAST-PT} package \cite{mcewen16,fang17}. These power spectra can then be used for the relevant $P_{\alpha\beta}$, as described below in \ref{sec:cl}. Currently, all modeling is done at ``one-loop'' order, i.e.\ $\mathcal{O}(P_{\rm lin}^2)$, in standard perturbation theory (SPT). \ccl implements these models using {\tt PTTracer} objects.
+Nonlinear perturbation theory (e.g.\ \citealp{bernardeau02}) provides a method to calculate power spectra in the mildly nonlinear regime. {\tt CCL} provides perturbation theory predictions for dark matter clustering, galaxy biasing, and intrinsic alignments using the {\tt FAST-PT} package \citep{mcewen16,fang17}. These predictions can be used as the general input for the power spectra between observables $\alpha$ and $\beta$, $P_{\alpha\beta}$, as described below in \ref{sec:cl}. Currently, all modeling is done at ``one-loop'' order, i.e.\ $\mathcal{O}(P_{\rm lin}^2)$, in standard perturbation theory (SPT). \ccl implements these models using {\tt PTTracer} objects.
 
 \subsubsection{Matter density}
 
@@ -695,10 +695,10 @@ where $P_{11}$ is $P_{\rm lin}$.
 Note that the nonlinear treatments of galaxy bias and intrinsic alignments use the one-loop SPT matter density expression when calculating relevant correlations, even if a different nonlinear prescription is used for $P_{\rm NL}$.
 
 \subsubsection{Galaxy bias}
-See \cite{desjacques18rev} for a detailed discussion on galaxy bias and treatments in perturbation theory. Currently, nonlinear galaxy bias is given by the following expression (e.g.\ \cite{baldauf12}):
+See \cite{desjacques18rev} for a detailed discussion on galaxy bias and treatments in perturbation theory. Currently, nonlinear galaxy bias is given by the following expression (e.g.\ \citealp{baldauf12}):
 \begin{equation}
-  \delta_{g} = b_1 \delta_m +\frac{b_2}{2}*(\delta_m^2 - \langle \delta_m^2 \rangle) +
-  \frac{b_s}{2}*(s^2 - \langle s^2 \rangle) ~,
+  \delta_{g} = b_1 \delta_m +\frac{b_2}{2} (\delta_m^2 - \langle \delta_m^2 \rangle) +
+  \frac{b_s}{2} (s^2 - \langle s^2 \rangle) ~,
 \end{equation}
 where $s$ is the tidal field, and the mean values of both quadratic quantities are subtracted.
 The standard linear bias is $b_1$, and $(b_2,b_s)$ are the quadratic bias coefficients.
@@ -737,13 +737,15 @@ P_{BB} =& C_{1\delta,1} C_{1\delta,2} A_{0B|0B} + C_{2,1} C_{2,2} A_{B2|B2} + (C
 where, as above, $P_{d1d1}$ corresponds to the chosen nonlinear matter power spectrum,
 and the other terms are one-loop PT expressions.
 
-The normalization of the IA bias parameters can be flexibly specified. The convntion of \cite{blazek19} is
+The normalization of the IA bias parameters can be flexibly specified. The convention of \cite{blazek19} is
 \begin{align}
     C_1(z) = - A_{1}(z) \frac{\bar{C}_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}~, \\
     C_{1 \delta}(z) = - A_{1 \delta}(z) \frac{\bar{C}_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}~, \\
     C_{2}(z) = A_{2}(z) \frac{5\bar{C}_1 \Omega^2_{\rm m} \rho_{\rm crit}}{\Omega_{\rm m,fid} D^2(z)}~.
 \end{align}
-The convention for $C_1(z)$ matches the normalization for $b_{\rm IA}$ used in the standard IA tracer (see Eq.~\ref{eq:bIA_norm}).
+This convention for $C_1(z)$ matches the fiducial \ccl normalization for $b_{\rm IA}$ used in the standard IA
+tracer when $A_IA$ is specified (see Eq.~\ref{eq:bIA_norm}). When using this nonlinear TATT model,
+the full $z$-dependent $C$-values must be specified.
 
 \subsubsection{Galaxy-IA cross correlation}
 
@@ -860,20 +862,21 @@ the biasing should be set to 1 when defining these tracers instead specified in 
 For intrinsic alignments, (I.A. in the table), the default \ccl
 choice is the ``non-linear alignment model'', according to which the
 galaxy inertia tensor is proportional the local tidal tensor
-\cite{2004PhRvD..70f3526H,2007MNRAS.381.1197H}. $\chi_s$ is the distance to
+\citep{2004PhRvD..70f3526H,2007MNRAS.381.1197H}. $\chi_s$ is the distance to
 the source plane for CMB lensing. $b_{\rm IA}$ is the corresponding alignment
-bias. Notice that in the \ccl implementation, the normalization of this bias
+bias. The default \ccl choice for the normalization of this bias
 is chosen to coincide with the parameter $A_{\rm IA}$ used in current weak
 lensing analyses, i.e., the user is expected to pass $A_{\rm IA}$ to the routine,
 and this is connected to $b_{\rm IA}$ by the following expression \cite[Eq. 6]{Joachimi11}:
 \begin{equation}
     \label{eq:bIA_norm}
-    b_{\rm IA} = - A_{\rm IA} \frac{C_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}
+    b_{\rm IA} = - A_{\rm IA} \frac{\bar{C}_1 \Omega_{\rm m} \rho_{\rm crit}}{D(z)}
 \end{equation}
 where $\rho_{\rm crit}$ is in the default \ccl units and
-$C_1= 5\times 10^{-14} (Mpc/h)^3 / (M_\odot/h)$ \citep{Brown02,Bridle07}.
+$\bar{C}_1= 5\times 10^{-14} (Mpc/h)^3 / (M_\odot/h)$ \citep{Brown02,Bridle07}.
 Note that although $\Omega_{\rm m}$ should in principle include non-relativistic
-neutrinos, this is not the case in \ccl at this point.
+neutrinos, this is not the case in \ccl at this point. The user can also directly
+specify any general $b_{\rm IA}(z)$.
 
 Note that \ccl currently does not compute relativistic corrections to number
 counts \cite{2011PhRvD..84d3516C,2011PhRvD..84f3505B}. Although these should be
