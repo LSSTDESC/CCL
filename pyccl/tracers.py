@@ -484,11 +484,11 @@ class WeakLensingTracer(Tracer):
             (z, A_IA(z)) giving the intrinsic alignment amplitude A_IA(z).
             If `None`, the tracer is assumped to not have intrinsic
             alignments. Defaults to None.
-        ia_renorm (bool): set to True to use the conventional IA normalization.
+        fid_ia_norm (bool): set to True to use the conventional IA normalization.
             set to False to use the raw input amplitude, which will usually be 1
             for use with PT IA modeling. Defaults to True.
     """
-    def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None, ia_renorm=True):
+    def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None, fid_ia_norm=True):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -508,7 +508,7 @@ class WeakLensingTracer(Tracer):
             z_a, tmp_a = _check_array_params(ia_bias)
             # Kernel
             kernel_i = get_density_kernel(cosmo, dndz)
-            if ia_renorm:    
+            if fid_ia_norm:    
                 # Normalize so that A_IA=1
                 D = growth_factor(cosmo, 1./(1+z_a))
                 # Transfer
