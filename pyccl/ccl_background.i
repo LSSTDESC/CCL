@@ -10,6 +10,8 @@
 %apply (double* IN_ARRAY1, int DIM1) {(double* a2, int na2)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* chi, int nchi)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* hoh0, int nhoh0)};
+%apply (double* IN_ARRAY1, int DIM1) {(double* growth, int ngrowth)};
+%apply (double* IN_ARRAY1, int DIM1) {(double* fgrowth, int nfgrowth)};
 %apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
 
 %include "../include/ccl_background.h"
@@ -138,6 +140,12 @@ void scale_factor_of_chi_vec(ccl_cosmology * cosmo, double* chi, int nchi,
 void cosmology_distances_from_input(ccl_cosmology * cosmo,
         double* a, int na, double* chi, int nchi, double* hoh0, int nhoh0, int *status) {
     ccl_cosmology_distances_from_input(cosmo, na, a, chi, hoh0, status);
+}
+
+void cosmology_growth_from_input(ccl_cosmology * cosmo,
+        double* a, int na, double* growth, int ngrowth, double* fgrowth, int nfgrowth,
+        int * status) {
+    ccl_cosmology_growth_from_input(cosmo, na, a, growth, fgrowth, status);
 }
 
 %}

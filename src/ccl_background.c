@@ -621,23 +621,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
 }
 
-/* ----- ROUTINE: reverseArray ------
-INPUT: array, start, end
-TASK: Function to reverse arr[] from start to end.
-*/
-static void reverseArray(double arr[], int start, int end)
-{
-    double temp;
-    while (start < end)
-    {
-        temp = arr[start];
-        arr[start] = arr[end];
-        arr[end] = temp;
-        start++;
-        end--;
-    }
-}
-
 /* ----- ROUTINE: ccl_cosmology_distances_from_input ------
 INPUT: cosmology, scale factor array, comoving distance chi computed at the scale factor array values
 TASK: if not already there, make a table of comoving distances from an input array
@@ -726,6 +709,61 @@ void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[
   }
 
   return;
+}
+
+/* ----- ROUTINE: ccl_cosmology_growth_from_input ------
+INPUT: cosmology, scale factor array, growth array, growth rate array
+TASK: if not already there, create growth splines with the input arrays and store them.
+*/
+void ccl_cosmology_growth_from_input(ccl_cosmology* cosmo, int na, double a[], double growth_arr[], double fgrowth_arr[], int* status)
+{
+  int chistatus;
+  if (cosmo->computed_growth)
+    return;
+
+  gsl_spline * growth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+  gsl_spline * fgrowth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+
+  if (growth == NULL || fgrowth == NULL) {
+    *status = CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_growth_from_input(): ran out of memory\n");
+  }
+
+  if (*status == 0) {
+    chistatus = gsl_spline_init(growth, a, growth_arr, na);
+    if (chistatus) {
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_growth_from_input(): Error creating D(a) spline\n");
+    }
+  }
+
+  if (*status == 0) {
+    chistatus = gsl_spline_init(fgrowth, a, fgrowth_arr, na);
+    if (chistatus) {
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_growth_from_input(): Error creating f(a) spline\n");
+    }
+  }
+
+  double growth0 = growth_arr[na-1];
+
+  if (*status){ //If there was an error, free the GSL splines and return
+    gsl_spline_free(growth);
+    gsl_spline_free(fgrowth);
+    growth = NULL;
+    fgrowth = NULL;
+  }
+
+  if (*status == 0) {
+    // assign all the splines we've just made to the structure.
+    cosmo->data.growth = growth;
+    cosmo->data.fgrowth = fgrowth;
+    cosmo->data.growth0 = growth0;
+    cosmo->computed_growth = true;
+  }
 }
 
 /* ----- ROUTINE: ccl_cosmology_compute_growth ------
