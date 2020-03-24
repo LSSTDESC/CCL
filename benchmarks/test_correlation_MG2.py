@@ -147,7 +147,8 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     # Our benchmarks have theta in arcmin
     # but CCL requires it in degrees:
     theta_deg = bms['theta'] / 60.
-    xi = ccl.correlation(cosmo, ell, cli, theta_deg, corr_type=kind, method=method)
+    xi = ccl.correlation(cosmo, ell, cli, theta_deg, corr_type=kind,
+                         method=method)
     xi *= pref
 
     print(xi)

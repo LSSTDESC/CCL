@@ -10,7 +10,7 @@ POWER_MG_TOL = 1e-4
 def test_power_mg(model):
     mu_0 = [0., 0.1, -0.1, 0.1, -0.1]
     sigma_0 = [0., 0.1, -0.1, -0.1, 0.1]
-    h0=0.7
+    h0 = 0.7
     cosmo = ccl.Cosmology(
         Omega_c=0.112/h0**2,
         Omega_b=0.0226/h0**2,
@@ -34,5 +34,6 @@ def test_power_mg(model):
     pk_ccl = ccl.linear_matter_power(cosmo, k, a)
     err = np.abs(pk_ccl/pk - 1)
 
-    cut = data[:,0] > 1e-04   #cut two points due to cosmic variance
+# cut two points due to cosmic variance
+    cut = data[:, 0] > 1e-04
     assert np.allclose(err[cut], 0, rtol=0, atol=POWER_MG_TOL)
