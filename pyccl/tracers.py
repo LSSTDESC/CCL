@@ -488,7 +488,7 @@ class WeakLensingTracer(Tracer):
             set to False to use the raw input amplitude, which will usually be 1
             for use with PT IA modeling. Defaults to True.
     """
-    def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None, fid_ia_norm=True):
+    def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None, use_a_ia=True):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -508,7 +508,7 @@ class WeakLensingTracer(Tracer):
             z_a, tmp_a = _check_array_params(ia_bias)
             # Kernel
             kernel_i = get_density_kernel(cosmo, dndz)
-            if fid_ia_norm:    
+            if use_a_ia:    
                 # Normalize so that A_IA=1
                 D = growth_factor(cosmo, 1./(1+z_a))
                 # Transfer
