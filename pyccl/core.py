@@ -149,23 +149,22 @@ class Cosmology(object):
             masses to be equal right before calling the emualtor but results in
             internal inconsistencies. Defaults to 'strict'.
         background_on_input (:obj:`bool`, optional): If True, the comoving
-            distance will be read as input from the chi_z array.#TODO Doc
+            distance will be read as input from the chi_z array.
         a_array (array_like, optional): Scale factor array with values on
             which the input arrays are computed. The array must end on the
             value of 1.0. If background_on_input is `False`
-            this is ignored. #TODO Doc
+            this is ignored.
         chi_array (array_like, optional): Comoving radial distance computed at
             points indicated by the a_array. If background_on_input is `False`
-            this is ignored. #TODO Doc
+            this is ignored.
         hoh0_array (array_like, optional): Hubble parameter divided by the
             value of H0. If background_on_input is `False` this is ignored.
-             #TODO Doc
         growth_array (array_like, optional): Growth factor array, defined as
             D(a)=P(k,a)/P(k,a=1), assuming no scale dependence. It is assumed
             that D(a<<1)~a so that D(1.0) will be used for normalization.
-            If background_on_input is `False` this is ignored. #TODO Doc
+            If background_on_input is `False` this is ignored.
         fgrowth_array (array_like, optional): Growth rate array.
-            If background_on_input is `False` this is ignored. #TODO Doc
+            If background_on_input is `False` this is ignored.
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -202,7 +201,6 @@ class Cosmology(object):
 
         self._build_cosmo()
 
-        # TODO: include these in the self._params_init_kwargs?
         # User input arrays:
         self.background_on_input = background_on_input
         self.a_array = a_array
@@ -210,6 +208,12 @@ class Cosmology(object):
         self.hoh0_array = hoh0_array
         self.growth_array = growth_array
         self.fgrowth_array = fgrowth_array
+        # Check if the input arrays are all parsed
+        if (background_on_input and ((a_array is None) or (chi_array is None) or
+                                    (hoh0_array is None) or
+                                    (growth_array is None) or
+                                    (fgrowth_array is None))):
+            raise ValueError("Input arrays not parsed.")
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""

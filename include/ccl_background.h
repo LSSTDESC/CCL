@@ -329,7 +329,7 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status);
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
 
 /**
- * //TODO: Fill
+ * Store user input arrays in splines for the comoving radial distance chi(a), hubble parameter E(a) as well as a(chi).
  * @param cosmo Cosmological parameters
  * @param na integer indicating size of array a
  * @param a scale factor at locations where the input arrays are pre-computed
@@ -342,7 +342,7 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
 void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[], double chi_a[], double E_a[], int *status);
 
 /**
- * //TODO: Fill
+ * Store user input arrays in splines for the growth factor, growth rate and normalization.
  * @param cosmo Cosmological parameters
  * @param na integer indicating size of array a
  * @param a scale factor at locations where the input arrays are pre-computed

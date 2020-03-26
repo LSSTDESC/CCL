@@ -121,18 +121,22 @@ def test_background_rho_x_raises():
         ccl.rho_x(COSMO, 1, 'blah', False)
 
 
-def test_input_distances_H():
+def test_input_arrays():
     cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
                           A_s=2e-9)
     # Where the input quantities are calculated.
     a_arr = np.linspace(0.1, 1, 100)
     chi_from_ccl = ccl.background.comoving_radial_distance(cosmo, a_arr)
     hoh0_from_ccl = ccl.background.h_over_h0(cosmo, a_arr)
+    growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
+    fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
 
     cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
                                 A_s=2e-9, background_on_input=True,
                                 a_array=a_arr, chi_array=chi_from_ccl,
-                                hoh0_array=hoh0_from_ccl)
+                                hoh0_array=hoh0_from_ccl,
+                                growth_array=growth_from_ccl,
+                                fgrowth_array=fgrowth_from_ccl)
 
     # Where to compare chi(a) from CCL and from CCL with input quantities.
     a_arr = np.linspace(0.102, 0.987, 158)
@@ -142,26 +146,8 @@ def test_input_distances_H():
     # Relative difference (a-b)/b < 1e-5 = 0.001 %
     assert np.allclose(chi_ccl_input, chi_from_ccl, atol=0., rtol=1e-5)
 
-
-def test_input_growth():
-    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                          A_s=2e-9)
-    # Where the input quantities are calculated.
-    a_arr = np.linspace(0.1, 1, 100)
-    growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
-    fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
-
-    cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9, background_on_input=True,
-                                a_array=a_arr, growth_array=growth_from_ccl,
-                                fgrowth_array=fgrowth_from_ccl)
-
-    # Where to compare chi(a) from CCL and from CCL with input quantities.
-    a_arr = np.linspace(0.102, 0.987, 158)
     growth_ccl_input = ccl.background.growth_factor(cosmo_input, a_arr)
     growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
-
-    # Relative difference (a-b)/b < 1e-5 = 0.001 %
     assert np.allclose(growth_ccl_input, growth_from_ccl, atol=0., rtol=1e-5)
 
     fgrowth_ccl_input = ccl.background.growth_rate(cosmo_input, a_arr)
@@ -176,16 +162,12 @@ def test_input_arrays_raises():
                                     n_s=0.965, A_s=2e-9,
                                     background_on_input=True,
                                     a_array=input_a, chi_array=input_chi_array,
-                                    hoh0_array=input_hoh0_array)
-        with pytest.raises(ValueError):
-            cosmo_input.compute_distances()
-
-        cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                    n_s=0.965, A_s=2e-9,
-                                    background_on_input=True,
-                                    a_array=input_a,
+                                    hoh0_array=input_hoh0_array,
                                     growth_array=input_growth_array,
                                     fgrowth_array=input_fgrowth_array)
-
         with pytest.raises(ValueError):
+            cosmo_input.compute_distances()
             cosmo_input.compute_growth()
+            cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                        n_s=0.965, A_s=2e-9,
+                                        background_on_input=True)

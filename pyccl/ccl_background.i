@@ -134,7 +134,6 @@ void scale_factor_of_chi_vec(ccl_cosmology * cosmo, double* chi, int nchi,
 /* The directive gets carried between files, so we reset it at the end. */
 %feature("pythonprepend") %{ %}
 
-// FIXME: I cannot place this inside the other pythonprepend features.
 %inline %{
 
 void cosmology_distances_from_input(ccl_cosmology * cosmo,
