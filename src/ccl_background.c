@@ -628,6 +628,9 @@ TASK: if not already there, make a table of comoving distances from an input arr
 void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[], double chi_a[], double E_a[],
    int *status)
 {
+  double *chi_a_reversed = NULL;
+  double *a_reversed = NULL;
+
   //Do nothing if everything is computed already
   if(cosmo->computed_distances)
     return;
@@ -643,18 +646,9 @@ void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[
     ccl_cosmology_set_status_message(
       cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): ran out of memory\n");
   }
-  /*
-  //Check for messed up scale factor conditions
-  if (!*status){
-    if ((a[0] < cosmo->spline_params.A_SPLINE_MINLOG) ||
-        (a[na-1]-1.0 > 1e-8)) {
-      *status = CCL_ERROR_LINSPACE;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_background.c: ccl_cosmology_compute_distances(): Error "
-        "creating first logarithmic and then linear spacing in a\n");
-    }
-  }*/
+
+  // Update the minimum scale factor value used by the user, which is necessary because it is used in ccl_tracers.c
+  cosmo->spline_params.A_SPLINE_MIN = a[0];
 
   // Initialize a E(a) spline
   if (!*status){
@@ -675,12 +669,21 @@ void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[
   }
 
   // Reverse the order of chi(a) so that we can initialize the a(chi) spline, which needs monotonically decreasing x-array.
-  double chi_a_reversed[na], a_reversed[na];
-  for (int i=0; i<na; i++) {
-    chi_a_reversed[i] = chi_a[na-1-i];
-    a_reversed[i] = a[na-1-i];
+  if (!*status) {
+    chi_a_reversed = malloc(na*sizeof(double));
+    a_reversed = malloc(na*sizeof(double));
+    if (chi_a_reversed == NULL || a_reversed == NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): ran out of memory\n");
+    }
+    else {
+      for (int i=0; i<na; i++) {
+        chi_a_reversed[i] = chi_a[na-1-i];
+        a_reversed[i] = a[na-1-i];
+      }
+    }
   }
-//  reverseArray(chi_a, 0, na-1);
 
   // Initialize a(chi) spline
   if (!*status){
@@ -690,6 +693,8 @@ void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[
         cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): Error creating  chi(a) spline\n");
     }
   }
+  free(chi_a_reversed);
+  free(a_reversed);
 
   if (*status){ //If there was an error, free the GSL splines and return
     gsl_spline_free(E); // Note: you are allowed to call gsl_free() on NULL

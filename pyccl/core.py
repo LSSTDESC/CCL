@@ -150,21 +150,22 @@ class Cosmology(object):
             internal inconsistencies. Defaults to 'strict'.
         background_on_input (:obj:`bool`, optional): If True, the comoving
             distance will be read as input from the chi_z array.#TODO Doc
-        chi_a (array_like, optional): Comoving distance computed at points
-            indicated by the a_array. If background_on_input is `False`,
-            this is ignored. #TODO Doc
-        hoh0 (array_like, optional): Hubble parameter over the value of H0.
-            If background_on_input is `False`, this is ignored. #TODO Doc
         a_array (array_like, optional): Scale factor array with values on
             which the input arrays are computed. The array must end on the
-            value of 1.0. If background_on_input is `False`,
+            value of 1.0. If background_on_input is `False`
             this is ignored. #TODO Doc
+        chi_array (array_like, optional): Comoving radial distance computed at
+            points indicated by the a_array. If background_on_input is `False`
+            this is ignored. #TODO Doc
+        hoh0_array (array_like, optional): Hubble parameter divided by the
+            value of H0. If background_on_input is `False` this is ignored.
+             #TODO Doc
         growth_array (array_like, optional): Growth factor array, defined as
             D(a)=P(k,a)/P(k,a=1), assuming no scale dependence. It is assumed
             that D(a<<1)~a so that D(1.0) will be used for normalization.
-            If background_on_input is `False`, this is ignored. #TODO Doc
+            If background_on_input is `False` this is ignored. #TODO Doc
         fgrowth_array (array_like, optional): Growth rate array.
-            If background_on_input is `False`, this is ignored. #TODO Doc
+            If background_on_input is `False` this is ignored. #TODO Doc
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -179,8 +180,8 @@ class Cosmology(object):
             mass_function='tinker10',
             halo_concentration='duffy2008',
             emulator_neutrinos='strict',
-            background_on_input=False, chi_a=None, hoh0=None, a_array=None,
-            growth_array=None, fgrowth_array=None):
+            background_on_input=False, a_array=None, chi_array=None,
+            hoh0_array=None, growth_array=None, fgrowth_array=None):
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -202,10 +203,11 @@ class Cosmology(object):
         self._build_cosmo()
 
         # TODO: include these in the self._params_init_kwargs?
+        # User input arrays:
         self.background_on_input = background_on_input
-        self.chi_a = chi_a
-        self.hoh0 = hoh0
         self.a_array = a_array
+        self.chi_array = chi_array
+        self.hoh0_array = hoh0_array
         self.growth_array = growth_array
         self.fgrowth_array = fgrowth_array
 
@@ -667,21 +669,22 @@ class Cosmology(object):
             check(status, self)
         else:
             # Check that input arrays have the same size.
-            if not (self.a_array.shape == self.chi_a.shape == self.hoh0.shape):
+            if not (self.a_array.shape == self.chi_array.shape
+                    == self.hoh0_array.shape):
                 raise ValueError("Input arrays must have the same size.")
             # Check that a_array is a monotonically increasing array.
             if not np.array_equal(self.a_array, np.sort(self.a_array)):
                 raise ValueError("Input scale factor array is not "
                                  "monotonically increasing.")
             # Check that the last element of a_array is 1:
-            if self.a_array[-1]-1.0 > 1e-5:
+            if np.abs(self.a_array[-1]-1.0) > 1e-5:
                 raise ValueError("The last element of the input scale factor"
                                  "array must be 1.0.")
             status = 0
             status = lib.cosmology_distances_from_input(self.cosmo,
                                                         self.a_array,
-                                                        self.chi_a,
-                                                        self.hoh0,
+                                                        self.chi_array,
+                                                        self.hoh0_array,
                                                         status)
             check(status, self)
 
@@ -724,7 +727,7 @@ class Cosmology(object):
                 raise ValueError("Input scale factor array is not "
                                  "monotonically increasing.")
             # Check that the last element of a_array is 1:
-            if self.a_array[-1]-1.0 > 1e-5:
+            if np.abs(self.a_array[-1]-1.0) > 1e-5:
                 raise ValueError("The last element of the input scale factor"
                                  "array must be 1.0.")
             status = 0
