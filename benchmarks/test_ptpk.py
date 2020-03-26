@@ -3,7 +3,6 @@ import numpy as np
 import pyccl as ccl
 import pyccl.nl_pt as pt
 import pytest
-import matplotlib.pyplot as plt
 
 # Set cosmology
 COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05,
@@ -36,7 +35,6 @@ kmax=1.e0
 
 @pytest.mark.parametrize('comb', enumerate(order))
 def test_pt_pk(comb):
-    print(comb)
     i_d, cc = comb
     t1, t2 = cc
 
@@ -58,15 +56,6 @@ def test_pt_pk(comb):
         kin = data[iz][0]
         ind = np.where((kin<kmax) & (kin>kmin))
         k=kin[ind]
-        print(k)
         dpk = data[iz][i_d+1][ind]
         tpk = pk.eval(k, a, COSMO)
-#        plt.plot(k,tpk/dpk,label='tpk/dpk')
-#        plt.xscale('log')
-#        plt.title(comb)
-#        plt.ylim(.9999,1.0001)
-#        plt.legend()
-#        plt.show()
-        print('max diff=')
-        print(max(np.fabs(tpk / dpk - 1)))
         assert np.all(np.fabs(tpk / dpk - 1) < 1E-5)
