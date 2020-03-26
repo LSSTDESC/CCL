@@ -209,10 +209,10 @@ class Cosmology(object):
         self.growth_array = growth_array
         self.fgrowth_array = fgrowth_array
         # Check if the input arrays are all parsed
-        if (background_on_input and ((a_array is None) or (chi_array is None) or
-                                    (hoh0_array is None) or
-                                    (growth_array is None) or
-                                    (fgrowth_array is None))):
+        if (background_on_input and ((a_array is None) or (chi_array is None)
+                                     or (hoh0_array is None) or
+                                     (growth_array is None) or
+                                     (fgrowth_array is None))):
             raise ValueError("Input arrays not parsed.")
 
     def _build_cosmo(self):
