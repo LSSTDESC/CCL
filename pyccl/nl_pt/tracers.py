@@ -1,7 +1,54 @@
 import numpy as np
 from scipy.interpolate import interp1d
 from ..pyutils import _check_array_params
+from ..background import growth_factor
+from .. import ccllib as lib
 
+
+def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None, Om_m2_for_c2 = False, Om_m_fid=0.3):
+    """
+    Function to convert from a_ia values to c_ia values,
+    using the standard convention of Blazek 2019 or the variant used
+    by the Dark Energy Survey analysis.
+    
+    Args:
+    cosmo (ccl cosmo object)
+    z (float or array_like): z value(s) where amplitude is evaluated
+    a1 (float or array_like): IA a1 at input z values. Defaults to 1.0
+    a1delta (float or array_like): IA a1delta at input z values. Defaults to None
+    a2 (float or array_like): IA a2 at input z values. Defaults to None
+        
+    Returns:
+        c1 (float or array_like): IA c1 at input z values
+        c1delta (float or array_like): IA c1delta at input z values
+        c2 (float or array_like): IA c2 at input z values
+    """
+    gz = growth_factor(cosmo, 1./(1+z))
+    c1=c2=c1delta=None
+    a_arr = [a1,a2,a1delta]
+    rho_crit = lib.cvar.constants.RHO_CRITICAL
+    a_names = ['a1','a2','a1delta']
+    for i,a in enumerate(a_arr):
+        if np.ndim(a)>1:
+            raise ValueError("%s should be a scalar or a 1-dim array" % a_names[i])
+        if np.ndim(a)==1:
+            try:
+                len(a1)==len(z)
+            except:
+                raise ValueError("The array %s must have the same number of elements as z" % a_names[i])
+    if a1 != None:
+        c_1 = -1*a_1*5e-14*rho_crit*cosmo['Omega_m']/gz
+    if a1delta != None:    
+        c_1delta = -1*a_1delta*5e-14*rho_crit*cosmo['Omega_m']/gz
+     if a2 != None:
+        if Om_m2_for_c2:
+            c_2 = a_2*5*5e-14*rho_crit*cosmo['Omega_m']**2/(Om_m_fid*gz**2) #Blazek2019 convention
+        else:
+            c_2 = a_2*5*5e-14*rho_crit*cosmo['Omega_m']/(gz**2) #DES convention
+            
+        
+        
+    return c1,c2,c1delta
 
 class PTTracer(object):
     """PTTracers contain the information necessary to describe the
