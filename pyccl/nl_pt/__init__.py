@@ -2,7 +2,8 @@
 from .tracers import (  # noqa
     PTTracer, PTMatterTracer,
     PTNumberCountsTracer,
-    PTIntrinsicAlignmentTracer)
+    PTIntrinsicAlignmentTracer,
+    IA_norm)
 
 # Power spectra
 from .power import (  # noqa

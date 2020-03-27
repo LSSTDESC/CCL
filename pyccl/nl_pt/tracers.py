@@ -17,6 +17,8 @@ def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None, Om_m2_for_c2 = False, Om_m_
     a1 (float or array_like): IA a1 at input z values. Defaults to 1.0
     a1delta (float or array_like): IA a1delta at input z values. Defaults to None
     a2 (float or array_like): IA a2 at input z values. Defaults to None
+    Om_m2_for_c2 (bool): True to use the Blazek 2019 convention of Om_m^2 scaling. Defaults to False
+    Om_m_fid (float): Value for Blazek 2019 scaling. Defaults to 0.3
         
     Returns:
         c1 (float or array_like): IA c1 at input z values
@@ -24,31 +26,33 @@ def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None, Om_m2_for_c2 = False, Om_m_
         c2 (float or array_like): IA c2 at input z values
     """
     gz = growth_factor(cosmo, 1./(1+z))
-    c1=c2=c1delta=None
-    a_arr = [a1,a2,a1delta]
+    a_arr = [a1,a1delta,a2]
+    c1 = c1delta = c2 = None
     rho_crit = lib.cvar.constants.RHO_CRITICAL
-    a_names = ['a1','a2','a1delta']
+    a_names = ['a1','a1delta','a2']
+    use = [False, False, False]
     for i,a in enumerate(a_arr):
         if np.ndim(a)>1:
             raise ValueError("%s should be a scalar or a 1-dim array" % a_names[i])
         if np.ndim(a)==1:
-            try:
-                len(a1)==len(z)
-            except:
+            if len(a)!=len(z):
                 raise ValueError("The array %s must have the same number of elements as z" % a_names[i])
-    if a1 != None:
-        c_1 = -1*a_1*5e-14*rho_crit*cosmo['Omega_m']/gz
-    if a1delta != None:    
-        c_1delta = -1*a_1delta*5e-14*rho_crit*cosmo['Omega_m']/gz
-     if a2 != None:
+            if a.any() is not None:
+                use[i] = True
+        if np.ndim(a)==0:    
+            if a is not None:
+                use[i] = True
+    if use[0]:
+        c1 = -1*a1*5e-14*rho_crit*cosmo['Omega_m']/gz
+    if use[1]: 
+        c1delta = -1*a1delta*5e-14*rho_crit*cosmo['Omega_m']/gz
+    if use[2]:
         if Om_m2_for_c2:
-            c_2 = a_2*5*5e-14*rho_crit*cosmo['Omega_m']**2/(Om_m_fid*gz**2) #Blazek2019 convention
+            c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']**2/(Om_m_fid*gz**2) #Blazek2019 convention
         else:
-            c_2 = a_2*5*5e-14*rho_crit*cosmo['Omega_m']/(gz**2) #DES convention
-            
+            c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']/(gz**2) #DES convention
         
-        
-    return c1,c2,c1delta
+    return c1, c1delta, c2
 
 class PTTracer(object):
     """PTTracers contain the information necessary to describe the
