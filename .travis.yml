@@ -37,6 +37,9 @@ install:
   - if [[ $TRAVIS_OS_NAME != 'osx' ]]; then "./.travis/install_class_linux.sh"; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then "./.travis/install_class_osx.sh"; fi
 
+  # install ISiTGR into the env
+  - if [[ $TRAVIS_OS_NAME != 'osx' ]]; then "./.travis/install_isitgr_linux.sh"; fi
+
 script:
   - flake8 pyccl
   - flake8 --exclude=data benchmarks
