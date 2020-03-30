@@ -5,21 +5,24 @@ from ..background import growth_factor
 from .. import ccllib as lib
 
 
-def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None, Om_m2_for_c2=False, Om_m_fid=0.3):
+def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
+            Om_m2_for_c2=False, Om_m_fid=0.3):
     """
     Function to convert from a_ia values to c_ia values,
     using the standard convention of Blazek 2019 or the variant used
     by the Dark Energy Survey analysis.
-    
+
     Args:
     cosmo (ccl cosmo object)
     z (float or array_like): z value(s) where amplitude is evaluated
     a1 (float or array_like): IA a1 at input z values. Defaults to 1.0
-    a1delta (float or array_like): IA a1delta at input z values. Defaults to None
+    a1delta (float or array_like): IA a1delta at input z values.
+            Defaults to None
     a2 (float or array_like): IA a2 at input z values. Defaults to None
-    Om_m2_for_c2 (bool): True to use the Blazek 2019 convention of Om_m^2 scaling. Defaults to False
+    Om_m2_for_c2 (bool): True to use the Blazek 2019 convention of
+            Om_m^2 scaling. Defaults to False
     Om_m_fid (float): Value for Blazek 2019 scaling. Defaults to 0.3
-        
+
     Returns:
         c1 (float or array_like): IA c1 at input z values
         c1delta (float or array_like): IA c1delta at input z values
@@ -33,10 +36,12 @@ def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None, Om_m2_for_c2=False, Om_m_fi
     use = [False, False, False]
     for i,a in enumerate(a_arr):
         if np.ndim(a) > 1:
-            raise ValueError("%s should be a scalar or a 1-dim array" % a_names[i])
+            raise ValueError("%s should be a scalar or a \
+                                1-dim array" % a_names[i])
         if np.ndim(a) == 1:
             if len(a) != len(z):
-                raise ValueError("The array %s must have the same number of elements as z" % a_names[i])
+                raise ValueError("The array %s must havethe same number \
+                                    of elements as z" % a_names[i])
             if a.any() is not None:
                 use[i] = True
         if np.ndim(a) == 0:
@@ -48,9 +53,11 @@ def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None, Om_m2_for_c2=False, Om_m_fi
         c1delta = -1*a1delta*5e-14*rho_crit*cosmo['Omega_m']/gz
     if use[2]:
         if Om_m2_for_c2:
-            c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']**2/(Om_m_fid*gz**2) #Blazek2019 convention
+            c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']**2/(Om_m_fid*gz**2)
+            #Blazek2019 convention
         else:
-            c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']/(gz**2) #DES convention
+            c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']/(gz**2)
+            #DES convention
 
     return c1, c1delta, c2
 
