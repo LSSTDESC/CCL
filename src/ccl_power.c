@@ -430,6 +430,11 @@ TASK: compute linear power spectrum
 void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status) {
   if (cosmo->computed_linear_power) return;
 
+  if(cosmo->spline_params.A_SPLINE_MAX != 1.) {
+    *status = CCL_ERROR_COMPUTECHI;
+    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: A_SPLINE_MAX must be 1.0\n");
+  }
+
   if (*status == 0) {
     // get linear P(k)
     switch (cosmo->config.transfer_function_method) {

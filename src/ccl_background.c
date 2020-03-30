@@ -647,6 +647,11 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
   double *y2 = NULL;
 	double df, integ;
 
+  if(cosmo->spline_params.A_SPLINE_MAX != 1.) {
+    *status = CCL_ERROR_COMPUTECHI;
+    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: A_SPLINE_MAX must be 1.0\n");
+  }
+
   if (*status == 0) {
     a = ccl_linlog_spacing(
       cosmo->spline_params.A_SPLINE_MINLOG, cosmo->spline_params.A_SPLINE_MIN,
