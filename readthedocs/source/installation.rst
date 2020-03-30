@@ -70,6 +70,19 @@ An installation with ``pip`` should work as well. See the `CAMB <https://github.
 repo for more details. Note that if you installed CCL with ``conda``, ``camb``
 should already be in your environment.
 
+.. _getting-fast-pt:
+
+Getting FastPT
+==============
+
+To use ``FastPT`` with CCL, you can install it with:
+
+.. code-block:: bash
+
+   $ pip install fast-pt
+
+Note the hyphen in the package name! You can also get it directly from the 
+`FastPT <https://github.com/JoeMcEwen/FAST-PT>`_ repo.
 
 .. _getting-cmake:
 
