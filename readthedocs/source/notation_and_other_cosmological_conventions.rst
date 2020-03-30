@@ -142,7 +142,7 @@ parameters.
   - A_SPLINE_MIN: the transition scale factor between logarithmically spaced
     spline points and linearly spaced spline points.
   - A_SPLINE_MAX: the the maximum value of the scale factor splines used for
-    distances, etc.
+    distances, etc. Must be set to 1.0.
   - LOGM_SPLINE_NM: the number of logarithmically spaced values in mass for
     splines used in the computation of the halo mass function.
   - LOGM_SPLINE_MIN: the base-10 logarithm of the minimum halo mass for

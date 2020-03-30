@@ -447,9 +447,9 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   if(cosmo->computed_distances)
     return;
 
-  if(cosmo->spline_params.A_SPLINE_MAX>1.) {
+  if(cosmo->spline_params.A_SPLINE_MAX != 1.) {
     *status = CCL_ERROR_COMPUTECHI;
-    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
+    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: A_SPLINE_MAX must be 1.0\n");
     return;
   }
 
