@@ -148,23 +148,6 @@ class Cosmology(object):
             m_nu_type = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emualtor but results in
             internal inconsistencies. Defaults to 'strict'.
-        background_on_input (:obj:`bool`, optional): If True, the comoving
-            distance will be read as input from the chi_z array.
-        a_array (array_like, optional): Scale factor array with values on
-            which the input arrays are computed. The array must end on the
-            value of 1.0. If background_on_input is `False`
-            this is ignored.
-        chi_array (array_like, optional): Comoving radial distance computed at
-            points indicated by the a_array. If background_on_input is `False`
-            this is ignored.
-        hoh0_array (array_like, optional): Hubble parameter divided by the
-            value of H0. If background_on_input is `False` this is ignored.
-        growth_array (array_like, optional): Growth factor array, defined as
-            D(a)=P(k,a)/P(k,a=1), assuming no scale dependence. It is assumed
-            that D(a<<1)~a so that D(1.0) will be used for normalization.
-            If background_on_input is `False` this is ignored.
-        fgrowth_array (array_like, optional): Growth rate array.
-            If background_on_input is `False` this is ignored.
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -178,9 +161,7 @@ class Cosmology(object):
             baryons_power_spectrum='nobaryons',
             mass_function='tinker10',
             halo_concentration='duffy2008',
-            emulator_neutrinos='strict',
-            background_on_input=False, a_array=None, chi_array=None,
-            hoh0_array=None, growth_array=None, fgrowth_array=None):
+            emulator_neutrinos='strict'):
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -201,19 +182,9 @@ class Cosmology(object):
 
         self._build_cosmo()
 
-        # User input arrays:
-        self.background_on_input = background_on_input
-        self.a_array = a_array
-        self.chi_array = chi_array
-        self.hoh0_array = hoh0_array
-        self.growth_array = growth_array
-        self.fgrowth_array = fgrowth_array
-        # Check if the input arrays are all parsed
-        if (background_on_input and ((a_array is None) or (chi_array is None)
-                                     or (hoh0_array is None) or
-                                     (growth_array is None) or
-                                     (fgrowth_array is None))):
-            raise ValueError("Input arrays not parsed.")
+        # This will change to True once the "set_background_from_arrays"
+        # is called.
+        self.background_on_input = False
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -942,3 +913,39 @@ class Cosmology(object):
 
         # Return status information
         return "status(%s): %s" % (status, msg)
+
+    def set_background_from_arrays(self, a_array=None, chi_array=None,
+                                   hoh0_array=None, growth_array=None,
+                                   fgrowth_array=None):
+        """
+        Function to store distances and growth splines from input arrays.
+
+        Args:
+            a_array (array_like, optional): Scale factor array with values on
+                which the input arrays are computed. The array must end on the
+                value of 1.0.
+            chi_array (array_like, optional): Comoving radial distance computed
+                at points indicated by the a_array.
+            hoh0_array (array_like, optional): Hubble parameter divided by the
+                value of H0.
+            growth_array (array_like, optional): Growth factor array, defined
+                as D(a)=P(k,a)/P(k,a=1), assuming no scale dependence. It is
+                assumed that D(a<<1)~a so that D(1.0) will be used for
+                normalization.
+            fgrowth_array (array_like, optional): Growth rate array.
+        """
+        if self.has_distances or self.has_growth:
+            raise ValueError("Background cosmology has already been"
+                             " initialized and cannot be reset.")
+        else:
+            self.background_on_input = True
+            self.a_array = a_array
+            self.chi_array = chi_array
+            self.hoh0_array = hoh0_array
+            self.growth_array = growth_array
+            self.fgrowth_array = fgrowth_array
+            # Check if the input arrays are all parsed
+            if ((a_array is None) or (chi_array is None)
+                    or (hoh0_array is None) or (growth_array is None)
+                    or (fgrowth_array is None)):
+                raise ValueError("Input arrays not parsed.")
