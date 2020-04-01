@@ -5,59 +5,65 @@ from ..background import growth_factor
 from .. import ccllib as lib
 
 
-def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
-            Om_m2_for_c2=False, Om_m_fid=0.3):
+def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
+                      Om_m2_for_c2=False, Om_m_fid=0.3):
     """
     Function to convert from a_ia values to c_ia values,
     using the standard convention of Blazek 2019 or the variant used
     by the Dark Energy Survey analysis.
 
     Args:
-    cosmo (ccl cosmo object)
-    z (float or array_like): z value(s) where amplitude is evaluated
-    a1 (float or array_like): IA a1 at input z values. Defaults to 1.0
-    a1delta (float or array_like): IA a1delta at input z values.
-            Defaults to None
-    a2 (float or array_like): IA a2 at input z values. Defaults to None
-    Om_m2_for_c2 (bool): True to use the Blazek 2019 convention of
+        cosmo (:class:`~pyccl.core.Cosmology`): cosmology object.
+        z (float or array_like): z value(s) where amplitude is evaluated
+        a1 (float or array_like): IA a1 at input z values. Defaults to 1.0
+        a1delta (float or array_like): IA a1delta at input z values.
+            Defaults to None.
+        a2 (float or array_like): IA a2 at input z values.
+            Defaults to None.
+        Om_m2_for_c2 (bool): True to use the Blazek 2019 convention of
             Om_m^2 scaling. Defaults to False
-    Om_m_fid (float): Value for Blazek 2019 scaling. Defaults to 0.3
+        Om_m_fid (float): Value for Blazek 2019 scaling. Defaults to 0.3.
 
     Returns:
         c1 (float or array_like): IA c1 at input z values
         c1delta (float or array_like): IA c1delta at input z values
         c2 (float or array_like): IA c2 at input z values
     """
-    gz = growth_factor(cosmo, 1./(1+z))
-    a_arr = [a1, a1delta, a2]
-    c1 = c1delta = c2 = None
-    rho_crit = lib.cvar.constants.RHO_CRITICAL
-    a_names = ['a1', 'a1delta', 'a2']
-    use = [False, False, False]
-    for i, a in enumerate(a_arr):
+
+    def check_input_array(a, name):
+        if a is None:
+            return
+
         if np.ndim(a) > 1:
-            raise ValueError("%s should be a scalar or a \
-                                1-dim array" % a_names[i])
+            raise ValueError(name +
+                             " should be a scalar or 1D")
+        if np.ndim(z) != np.ndim(a):
+            raise ValueError("Both z and " + name +
+                             " should have the same dimension")
         if np.ndim(a) == 1:
             if len(a) != len(z):
-                raise ValueError("The array %s must havethe same number \
-                                    of elements as z" % a_names[i])
-            if a.any() is not None:
-                use[i] = True
-        if np.ndim(a) == 0:
-            if a is not None:
-                use[i] = True
-    if use[0]:
-        c1 = -1*a1*5e-14*rho_crit*cosmo['Omega_m']/gz
-    if use[1]:
-        c1delta = -1*a1delta*5e-14*rho_crit*cosmo['Omega_m']/gz
-    if use[2]:
-        if Om_m2_for_c2:
-            c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']**2/(Om_m_fid*gz**2)
-            # Blazek2019 convention
-        else:
-            c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']/(gz**2)
-            # DES convention
+                raise ValueError("Both z and " + name +
+                                 " should have the same size")
+    check_input_array(a1, 'a1')
+    check_input_array(a2, 'a2')
+    check_input_array(a1delta, 'a1delta')
+
+    Om_m = cosmo['Omega_m']
+    rho_crit = lib.cvar.constants.RHO_CRITICAL
+    c1 = c1delta = c2 = None
+    gz = growth_factor(cosmo, 1./(1+z))
+
+    if a1 is not None:
+        c1 = -1*a1*5e-14*rho_crit*Om_m/gz
+
+    if a1delta is not None:
+        c1delta = -1*a1delta*5e-14*rho_crit*Om_m/gz
+
+    if a2 is not None:
+        if Om_m2_for_c2:  # Blazek2019 convention
+            c2 = a2*5*5e-14*rho_crit*Om_m**2/(Om_m_fid*gz**2)
+        else:  # DES convention
+            c2 = a2*5*5e-14*rho_crit*Om_m/(gz**2)
 
     return c1, c1delta, c2
 
