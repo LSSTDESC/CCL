@@ -37,9 +37,7 @@ def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
         if np.ndim(a) > 1:
             raise ValueError(name +
                              " should be a scalar or 1D")
-        if np.ndim(z) != np.ndim(a):
-            raise ValueError("Both z and " + name +
-                             " should have the same dimension")
+
         if np.ndim(a) == 1:
             if len(a) != len(z):
                 raise ValueError("Both z and " + name +
