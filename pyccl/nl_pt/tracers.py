@@ -29,12 +29,12 @@ def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
         c2 (float or array_like): IA c2 at input z values
     """
     gz = growth_factor(cosmo, 1./(1+z))
-    a_arr = [a1,a1delta,a2]
+    a_arr = [a1, a1delta, a2]
     c1 = c1delta = c2 = None
     rho_crit = lib.cvar.constants.RHO_CRITICAL
-    a_names = ['a1','a1delta','a2']
+    a_names = ['a1', 'a1delta', 'a2']
     use = [False, False, False]
-    for i,a in enumerate(a_arr):
+    for i, a in enumerate(a_arr):
         if np.ndim(a) > 1:
             raise ValueError("%s should be a scalar or a \
                                 1-dim array" % a_names[i])
@@ -54,10 +54,10 @@ def IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
     if use[2]:
         if Om_m2_for_c2:
             c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']**2/(Om_m_fid*gz**2)
-            #Blazek2019 convention
+            # Blazek2019 convention
         else:
             c2 = a2*5*5e-14*rho_crit*cosmo['Omega_m']/(gz**2)
-            #DES convention
+            # DES convention
 
     return c1, c1delta, c2
 

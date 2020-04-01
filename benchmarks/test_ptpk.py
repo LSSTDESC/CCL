@@ -30,8 +30,9 @@ data.append(np.loadtxt(os.path.join(dirdat, 'pt_bm_z0.txt'), unpack=True))
 data.append(np.loadtxt(os.path.join(dirdat, 'pt_bm_z1.txt'), unpack=True))
 order = ['gg', 'gm', 'gi', 'ii', 'ib', 'im']
 
-kmin=1.e-3
-kmax=1.e0
+kmin = 1.e-3
+kmax = 1.e0
+
 
 @pytest.mark.parametrize('comb', enumerate(order))
 def test_pt_pk(comb):
@@ -54,8 +55,8 @@ def test_pt_pk(comb):
     for iz, z in enumerate(zs):
         a = 1./(1+z)
         kin = data[iz][0]
-        ind = np.where((kin<kmax) & (kin>kmin))
-        k=kin[ind]
+        ind = np.where((kin < kmax) & (kin > kmin))
+        k = kin[ind]
         dpk = data[iz][i_d+1][ind]
         tpk = pk.eval(k, a, COSMO)
         assert np.all(np.fabs(tpk / dpk - 1) < 1E-5)
