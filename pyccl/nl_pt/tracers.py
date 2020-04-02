@@ -42,6 +42,17 @@ def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
             if len(a) != len(z):
                 raise ValueError("Both z and " + name +
                                  " should have the same size")
+                                 
+        if np.ndim(a) == 0:
+            if np.ndim(z) > 1:
+                raise ValueError("For scalar z " + name +
+                                 " a should be ")
+                
+                raise ValueError("Both z and " + name +
+                                              " should have the same dimension")
+   
+    if np.ndim(z) > 1:
+        raise ValueError("z should be a scalar or 1D")
     check_input_array(a1, 'a1')
     check_input_array(a2, 'a2')
     check_input_array(a1delta, 'a1delta')
