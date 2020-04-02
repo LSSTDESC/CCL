@@ -4,6 +4,18 @@
 /* put additional #include here */
 %}
 
+// SWIG black magic
+%typemap(memberin) double A_SPLINE_MAX {
+    if($input) {
+        PyErr_SetString(PyExc_RuntimeError, "A_SPLINE_MAX is fixed to 1.0 and is not mutable.");
+        SWIG_fail;
+    }
+}
+
+// Redefine A_SPLINE_MAX as not const so that the setter throws our error message.
+typedef struct ccl_spline_params {
+    double A_SPLINE_MAX;
+} ccl_spline_params;
 %include "../include/ccl_core.h"
 
 // Enable vectorised arguments for arrays
