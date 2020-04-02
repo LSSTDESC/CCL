@@ -6,7 +6,7 @@ CCL can be installed from ``pip``, ``conda``, or directly from source.
 It is configured to install most of its requirements automatically. However, if
 you want to use CCL with Boltzmann codes like ``CLASS`` or ``CAMB``, or do 
 perturbation theory calculations with ``FAST-PT``, you will
-need to make sure the ``Python`` wrappers for these packages are installed
+need to make sure these packages and their ``Python`` wrappers are installed
 as well. See the instructions for :ref:`boltzmann-codes` and 
 :ref:`getting-fast-pt` below.
 
