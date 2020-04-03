@@ -21,8 +21,8 @@ To install CCL using a ``pip`` developer installation, you can execute
 from the top-level directory in the repository. You will need ``CMake`` in
 order to install CCL in this way. See :ref:`getting-cmake` for help installing
 ``CMake`` if you do not already have it. In order to run the tests,
-you will need both ``CAMB`` and ``CLASS`` installed. See the instructions for
-:ref:`boltzmann-codes` for details.
+you will need ``CAMB``, ``CLASS``, and ``FAST-PT`` installed. See the instructions for
+:ref:`boltzmann-codes` and :ref:`getting-fast-pt` for details.
 
 
 C-layer Dependencies and Requirements

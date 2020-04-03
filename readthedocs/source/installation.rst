@@ -4,9 +4,11 @@ Installation
 
 CCL can be installed from ``pip``, ``conda``, or directly from source.
 It is configured to install most of its requirements automatically. However, if
-you want to use CCL with Boltzmann codes like ``CLASS`` or ``CAMB``, you will
-need to make sure the ``Python`` wrappers for these packages are installed
-as well. See the instructions for :ref:`boltzmann-codes` below.
+you want to use CCL with Boltzmann codes like ``CLASS`` or ``CAMB``, or do 
+perturbation theory calculations with ``FAST-PT``, you will
+need to make sure these packages and their ``Python`` wrappers are installed
+as well. See the instructions for :ref:`boltzmann-codes` and 
+:ref:`getting-fast-pt` below.
 
 CCL works on Linux or Mac OS. Windows installation is not supported.
 
@@ -70,6 +72,19 @@ An installation with ``pip`` should work as well. See the `CAMB <https://github.
 repo for more details. Note that if you installed CCL with ``conda``, ``camb``
 should already be in your environment.
 
+.. _getting-fast-pt:
+
+Getting FAST-PT
+===============
+
+To use ``FAST-PT`` with CCL, you can install it with:
+
+.. code-block:: bash
+
+   $ pip install fast-pt
+
+Note the hyphen in the package name! You can also get it directly from the 
+`FAST-PT <https://github.com/JoeMcEwen/FAST-PT>`_ repo.
 
 .. _getting-cmake:
 

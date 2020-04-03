@@ -57,8 +57,9 @@ class PTCalculator(object):
                 documentation for more details.
         """
         assert HAVE_FASTPT, (
-                "You must have the `FASTPT` python package "
-                "installed to use CCL to get PT observables!")
+                "You must have the `FAST-PT` python package "
+                "installed to use CCL to get PT observables! "
+                "You can install it with pip install fast-pt.")
 
         self.with_dd = with_dd
         self.with_NC = with_NC
