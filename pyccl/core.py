@@ -182,7 +182,7 @@ class Cosmology(object):
 
         self._build_cosmo()
 
-        # This will change to True once the "set_background_from_arrays"
+        # This will change to True once the "_set_background_from_arrays"
         # is called.
         self.background_on_input = False
 
@@ -914,9 +914,9 @@ class Cosmology(object):
         # Return status information
         return "status(%s): %s" % (status, msg)
 
-    def set_background_from_arrays(self, a_array=None, chi_array=None,
-                                   hoh0_array=None, growth_array=None,
-                                   fgrowth_array=None):
+    def _set_background_from_arrays(self, a_array=None, chi_array=None,
+                                    hoh0_array=None, growth_array=None,
+                                    fgrowth_array=None):
         """
         Function to store distances and growth splines from input arrays.
 
