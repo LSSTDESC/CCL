@@ -752,13 +752,3 @@ smoothed with a tophat filter of comoving size 8 Mpc/h
 double ccl_sigma8(ccl_cosmology *cosmo, int *status) {
   return ccl_sigmaR(cosmo, 8/cosmo->params.h, 1., status);
 }
-
-void ccl_cosmology_input_linear_power(ccl_cosmology *cosmo, int *status) {
-  if (cosmo->computed_linear_power) return;
-
-  if (*status == 0) {
-    // get linear P(k)
-  }
-  if (*status == 0)
-    cosmo->computed_linear_power = true;
-}

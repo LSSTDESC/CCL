@@ -782,6 +782,10 @@ class Cosmology(object):
                       extrap_order_lok=1,
                       extrap_order_hik=2,
                       cosmo=None)
+
+        # needed to init some models
+        self.compute_growth()
+
         psp = pk_lin.psp
 
         status = 0
