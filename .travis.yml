@@ -2,24 +2,33 @@ language: generic
 
 matrix:
   include:
-  - os: linux
-    sudo: required
-    env: TOXENV=py27
-  - os: linux
-    sudo: required
-    env: TOXENV=py36
-  - os: osx
-    osx_image: xcode9.4
-    env: TOXENV=py27
-  - os: osx
-    osx_image: xcode9.4
-    env: TOXENV=py36
+    - os: linux
+      sudo: required
+      env: TOXENV=py36
+      name: linux (Python3.6)
+    - os: osx
+      osx_image: xcode9.4
+      env: TOXENV=py36
+      name: OSX (Python3.6)
+    - os: linux
+      sudo: required
+      env: TOXENV=py27
+      name: linux (Python2.7)
+    - os: osx
+      osx_image: xcode9.4
+      env: TOXENV=py27
+      name: OSX (Python2.7)
+
+  allow_failures:
+    - name: linux (Python2.7)
+    - name: OSX (Python2.7)
+  fast_finish: true
 
 install:
   - "./.travis/install.sh"
   - export PATH=$HOME/miniconda/bin:$PATH
   - source activate test-environment
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then conda install -y llvm-openmp clang=4.0.1; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then conda install -y llvm-openmp; fi
   # this is a hack for conda osx compilers
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi

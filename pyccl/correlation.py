@@ -10,6 +10,7 @@ from . import ccllib as lib
 from . import constants as const
 from .core import check
 import numpy as np
+import warnings
 
 correlation_methods = {
     'fftlog':   const.CCL_CORR_FFTLOG,
@@ -18,48 +19,71 @@ correlation_methods = {
 }
 
 correlation_types = {
-    'gg': const.CCL_CORR_GG,
-    'gl': const.CCL_CORR_GL,
-    'l+': const.CCL_CORR_LP,
-    'l-': const.CCL_CORR_LM,
+    'NN': const.CCL_CORR_GG,
+    'NG': const.CCL_CORR_GL,
+    'GG+': const.CCL_CORR_LP,
+    'GG-': const.CCL_CORR_LM,
 }
 
 
-def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
+def correlation(cosmo, ell, C_ell, theta, type='nn', corr_type=None,
+                method='fftlog'):
     """Compute the angular correlation function.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         ell (array_like): Multipoles corresponding to the input angular power
                           spectrum.
         C_ell (array_like): Input angular power spectrum.
         theta (float or array_like): Angular separation(s) at which to
                                      calculate the angular correlation
                                      function (in degrees).
-        corr_type (string): Type of correlation function. Choices:
-                            'GG' (galaxy-galaxy), 'GL' (galaxy-shear),
-                            'L+' (shear-shear, xi+),
-                            'L-' (shear-shear, xi-).
+        type (string): Type of correlation function. Choices:
+                       'NN' (0x0), 'NG' (0x2),
+                       'GG+' (2x2, xi+),
+                       'GG-' (2x2, xi-), where numbers refer to the
+                       spins of the two quantities being cross-correlated
+                       (see Section 2.4.2 of the CCL paper).
         method (string, optional): Method to compute the correlation function.
                                    Choices: 'Bessel' (direct integration over
                                    Bessel function), 'FFTLog' (fast
-                                   integration with FFTLog), 'Legendre' (
-                                   brute-force sum over Legendre polynomials).
+                                   integration with FFTLog), 'Legendre'
+                                   (brute-force sum over Legendre polynomials).
+        corr_type (string): (deprecated, please use `type`)
+                            Type of correlation function. Choices:
+                            'gg' (0x0), 'gl' (0x2),
+                            'l+' (2x2, xi+),
+                            'l-' (2x2, xi-), where the numbers refer to the
+                            spins of the two quantities being cross-correlated
+                            (see Section 2.4.2 of the CCL paper).
 
     Returns:
-        float or array_like: Value(s) of the correlation function at the input
-            angular separations.
+        float or array_like: Value(s) of the correlation function at the \
+            input angular separations.
     """
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
     status = 0
 
-    # Convert to lower case
-    corr_type = corr_type.lower()
+    if corr_type is not None:
+        # Convert to lower case
+        corr_type = corr_type.lower()
+        if corr_type == 'gg':
+            type = 'NN'
+        elif corr_type == 'gl':
+            type = 'NG'
+        elif corr_type == 'l+':
+            type = 'GG+'
+        elif corr_type == 'l-':
+            type = 'GG-'
+        else:
+            raise ValueError("Unknown corr_type " + corr_type)
+        warnings.warn("corr_type is deprecated. "
+                      "Use type = {}".format(type))
     method = method.lower()
 
-    if corr_type not in correlation_types.keys():
-        raise ValueError("'%s' is not a valid correlation type." % corr_type)
+    if type not in correlation_types.keys():
+        raise ValueError("'%s' is not a valid correlation type." % type)
 
     if method not in correlation_methods.keys():
         raise ValueError("'%s' is not a valid correlation method." % method)
@@ -72,7 +96,7 @@ def correlation(cosmo, ell, C_ell, theta, corr_type='gg', method='fftlog'):
 
     # Call correlation function
     wth, status = lib.correlation_vec(cosmo, ell, C_ell, theta,
-                                      correlation_types[corr_type],
+                                      correlation_types[type],
                                       correlation_methods[method],
                                       len(theta), status)
     check(status, cosmo_in)
@@ -85,7 +109,7 @@ def correlation_3d(cosmo, a, r):
     """Compute the 3D correlation function.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         r (float or array_like): distance(s) at which to calculate the 3D
                                  correlation function (in Mpc).
@@ -117,7 +141,7 @@ def correlation_multipole(cosmo, a, beta, l, s):
     """Compute the correlation multipoles.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         beta (float): growth rate divided by galaxy bias.
         l (int) : the desired multipole
@@ -154,7 +178,7 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline=True):
     with multipoles.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         s (float or array_like): distance(s) at which to calculate the
                                  3DRsd correlation function (in Mpc).
@@ -193,7 +217,7 @@ def correlation_3dRsd_avgmu(cosmo, a, s, beta):
     Compute the 3DRsd correlation function averaged over mu at constant s.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         s (float or array_like): distance(s) at which to calculate the 3DRsd
                                  correlation function (in Mpc).
@@ -228,7 +252,7 @@ def correlation_pi_sigma(cosmo, a, beta, pi, sig, use_spline=True):
     Compute the 3DRsd correlation in pi-sigma space.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         a (float): scale factor.
         pi (float): distance times cosine of the angle (in Mpc).
         sig (float or array-like): distance(s) times sine of the angle

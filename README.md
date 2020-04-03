@@ -56,7 +56,7 @@ $ pip install pyccl
 
 For the PyPi installation, you will need ``CMake`` installed locally. See
 [Getting CMake](https://ccl.readthedocs.io/en/latest/source/installation.html#getting-cmake)
-for instructions.
+for instructions. Note that the code only supports Linux or Mac OS, but no Windows.
 
 Once you have the code installed, you can take it for a spin!
 

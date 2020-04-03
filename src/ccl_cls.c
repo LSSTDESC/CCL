@@ -137,22 +137,89 @@ static double cl_integrand(double lk, void *params) {
   return k*pk*d1*d2;
 }
 
-void ccl_angular_cls_limber(ccl_cosmology *cosmo,
-                           ccl_cl_tracer_collection_t *trc1,
-                           ccl_cl_tracer_collection_t *trc2,
-                           ccl_f2d_t *psp,
-                           int nl_out, double *l_out, double *cl_out,
-                           int *status) {
-  int local_status;
-  int clastatus, lind;
-  integ_cl_par ipar;
-  gsl_function F;
-  double lkmin, lkmax, l;
-  double result, eresult;
+static void integ_cls_limber_spline(ccl_cosmology *cosmo,
+				    integ_cl_par *ipar,
+				    double lkmin, double lkmax,
+				    double *result, int *status) {
+  int ik;
+  int nk = (int)(fmax((lkmax - lkmin) / cosmo->spline_params.DLOGK_INTEGRATION + 0.5,
+		      1))+1;
+  double *fk_arr = NULL;
+  double *lk_arr = NULL;
+  lk_arr = ccl_linear_spacing(lkmin, lkmax, nk);
+  if(lk_arr == NULL)
+    *status = CCL_ERROR_LOGSPACE;
+
+  if(*status == 0) {
+    fk_arr = malloc(nk * sizeof(double));
+    if(fk_arr == NULL)
+      *status = CCL_ERROR_MEMORY;
+  }
+
+  if(*status == 0) {
+    for(ik=0; ik<nk; ik++) {
+      fk_arr[ik] = cl_integrand(lk_arr[ik], ipar);
+      if(*(ipar->status)) {
+	*status = *(ipar->status);
+	break;
+      }
+    }
+  }
+
+  if(*status == 0) {
+    ccl_integ_spline(1, nk, lk_arr, &fk_arr,
+                     1, -1, result, gsl_interp_akima,
+                     status);
+  }
+  free(fk_arr);
+  free(lk_arr);
+}
+
+static void integ_cls_limber_qag_quad(ccl_cosmology *cosmo,
+				      gsl_function *F,
+				      double lkmin, double lkmax,
+				      gsl_integration_workspace *w,
+				      double *result, double *eresult,
+				      int *status) {
   int gslstatus;
-  gsl_integration_workspace *w;
-  gsl_integration_cquad_workspace *w_cquad;
   size_t nevals;
+  gsl_integration_cquad_workspace *w_cquad = NULL;
+  // Integrate
+  gslstatus = gsl_integration_qag(F, lkmin, lkmax, 0,
+				  cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
+				  cosmo->gsl_params.N_ITERATION,
+				  cosmo->gsl_params.INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
+				  w, result, eresult);
+
+  // Test if a round-off error occured in the evaluation of the integral
+  // If so, try another integration function, more robust but potentially slower
+  if (gslstatus == GSL_EROUND) {
+    ccl_raise_gsl_warning(gslstatus,
+			  "ccl_cls.c: ccl_angular_cl_limber(): "
+			  "Default GSL integration failure, attempting backup method.");
+    w_cquad = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+    if (w_cquad == NULL)
+      *status = CCL_ERROR_MEMORY;
+
+    if (*status == 0) {
+      nevals = 0;
+      gslstatus = gsl_integration_cquad(F, lkmin, lkmax, 0,
+					cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
+					w_cquad, result, eresult, &nevals);
+    }
+  }
+  gsl_integration_cquad_workspace_free(w_cquad);
+  if(*status == 0)
+    *status = gslstatus;
+}
+
+void ccl_angular_cls_limber(ccl_cosmology *cosmo,
+			    ccl_cl_tracer_collection_t *trc1,
+			    ccl_cl_tracer_collection_t *trc2,
+			    ccl_f2d_t *psp,
+			    int nl_out, double *l_out, double *cl_out,
+			    ccl_integration_t integration_method,
+			    int *status) {
 
   // make sure to init core things for safety
   if (!cosmo->computed_distances) {
@@ -178,33 +245,39 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
   else
     psp_use = psp;
 
-  #pragma omp parallel private(lind, clastatus, ipar, lkmin, lkmax, result, \
-                               eresult, gslstatus, w, w_cquad, nevals, l, F, \
-                               local_status) \
-                       shared(cosmo, trc1, trc2, l_out, cl_out, \
-                              nl_out, status, psp_use) \
+  #pragma omp parallel shared(cosmo, trc1, trc2, l_out, cl_out, \
+                              nl_out, status, psp_use, integration_method) \
                        default(none)
   {
-    w_cquad = NULL;
-    w = NULL;
-    local_status = *status;
+    int clastatus, lind;
+    integ_cl_par ipar;
+    gsl_integration_workspace *w = NULL;
+    int local_status = *status;
+    gsl_function F;
+    double lkmin, lkmax, l, result, eresult;
 
     if (local_status == 0) {
-      w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
-      if (w == NULL) {
-        local_status = CCL_ERROR_MEMORY;
-      }
-    }
-
-    if (local_status == 0) {
-      // Set up integrating function
+      // Set up integrating function parameters
       ipar.cosmo = cosmo;
       ipar.trc1 = trc1;
       ipar.trc2 = trc2;
       ipar.psp = psp_use;
       ipar.status = &clastatus;
-      F.function = &cl_integrand;
-      F.params = &ipar;
+    }
+
+    if(integration_method == ccl_integration_qag_quad) {
+      if (local_status == 0) {
+	w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+	if (w == NULL) {
+	  local_status = CCL_ERROR_MEMORY;
+	}
+      }
+
+      if (local_status == 0) {
+	// Set up integrating function
+	F.function = &cl_integrand;
+	F.params = &ipar;
+      }
     }
 
     #pragma omp for schedule(dynamic)
@@ -217,42 +290,23 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
         // Get integration limits
         get_k_interval(cosmo, trc1, trc2, l, &lkmin, &lkmax);
 
-        // Integrate
-        gslstatus = gsl_integration_qag(&F, lkmin, lkmax, 0,
-                                        cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
-                                        cosmo->gsl_params.N_ITERATION,
-                                        cosmo->gsl_params.INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
-                                        w, &result, &eresult);
+	// Integrate
+	if(integration_method == ccl_integration_qag_quad) {
+	  integ_cls_limber_qag_quad(cosmo, &F, lkmin, lkmax, w,
+				    &result, &eresult, &local_status);
+	}
+	else if(integration_method == ccl_integration_spline) {
+	  integ_cls_limber_spline(cosmo, &ipar, lkmin, lkmax,
+				  &result, &local_status);
+	}
+	else
+	  local_status = CCL_ERROR_NOT_IMPLEMENTED;
 
-        // Test if a round-off error occured in the evaluation of the integral
-        // If so, try another integration function, more robust but potentially slower
-        if (gslstatus == GSL_EROUND) {
-          ccl_raise_gsl_warning(
-              gslstatus,
-              "ccl_cls.c: ccl_angular_cl_limber(): "
-              "Default GSL integration failure, attempting backup method.");
-
-          if (w_cquad == NULL) {
-            w_cquad = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
-            if (w_cquad == NULL) {
-              local_status = CCL_ERROR_MEMORY;
-            }
-          }
-
-          if (local_status == 0) {
-            nevals = 0;
-            gslstatus = gsl_integration_cquad(
-              &F, lkmin, lkmax, 0,
-              cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
-              w_cquad, &result, &eresult, &nevals);
-          }
-        }
-
-        if (gslstatus == GSL_SUCCESS && (*ipar.status == 0) && local_status == 0) {
+        if ((*ipar.status == 0) && (local_status == 0)) {
           cl_out[lind] = result / (l+0.5);
         }
         else {
-          ccl_raise_gsl_warning(gslstatus, "ccl_cls.c: ccl_angular_cl_limber():");
+          ccl_raise_gsl_warning(local_status, "ccl_cls.c: ccl_angular_cl_limber():");
           cl_out[lind] = NAN;
           local_status = CCL_ERROR_INTEG;
         }
@@ -260,7 +314,6 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
     }
 
     gsl_integration_workspace_free(w);
-    gsl_integration_cquad_workspace_free(w_cquad);
 
     if (local_status) {
       #pragma omp atomic write

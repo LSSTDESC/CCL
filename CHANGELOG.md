@@ -1,16 +1,42 @@
+# Unreleased
+## Python library
+- Perturbation theory power spectra #734
+- Generalized Tinker mass function to all SO mass definitions (#736)
+- Deprecated old halo model (#736)
+- Halo model power spectra #717
+- Fixed bug in Duffy 2008 concentration-mass relation #717
+- Added a "spline" integration method to carry out Limber integrals.
+- Added a function for the angular diameter distance difference between two scale factors (#645)
+- Extended implementation of halo profiles (#722).
+- Improved FFTLog API (#722).
+- Functionality to resample 1D arrays including extrapolation (#720).
+- Methods to retrieve internal tracer functions (#713).
+- Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
+- Add straightforward single massive neutrino option (#730).
+
+## C library
+- Deprecated old halo model (#736)
+- Added a "spline" integration method to carry out Limber integrals.
+- Added function for the angular diameter distance difference between two scale factors (#645)
+- Removed old C/C++ examples (#725)
+- Extended implementation of halo profiles (#722).
+- Improved FFTLog API (#722).
+- Functionality to resample 1D arrays including extrapolation (#720).
+- Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
+
 # v2.0.1 Changes
 
 ## Bug Fixes
 - Fixed a PyPi installation bug where the proper files for `CMAKE` were not
   included in the source distribution.
 
-# v 2.0 Changes
+# v2.0 API changes
 
 ## Python library
 - Made CAMB the default Boltzmann code (#685).
 - Added check to ensure the number of relativistic neutrinos is positive (#684).
 - Added massive neutrinos to Omega_m (#680).
-- Chamged neutrino API options to be intuitive and consistent (#681).
+- Changed neutrino API options to be intuitive and consistent (#681).
 - Enabled CAMB (#677)
 - Fixed bug when normalizing the linear power spectrum using sigma8 and
   the mu-Sigma modified gravity model (#677).
@@ -43,6 +69,7 @@
 - Added custom Halofit code (#611).
 - Added `has_density` and `has_shear` tags to `Tracer` constructors.
 - Changed TCMB to T_CMB everywhere (#615)
+- Deprecate Angpow (#571)
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
 ## C library
@@ -78,6 +105,7 @@
 - Changed TCMB to T_CMB everywhere (#615)
 - Fixed a small bug in the w_tophat expression and increased precision (#607)
 - Deprecated the use of GSL spline accelerators (#626)
+- Deprecate Angpow (#571)
 - Added support for modified gravity via mu / Sigma (scale-independent) parameterisation (#442)
 
 # v 1.0 API changes :

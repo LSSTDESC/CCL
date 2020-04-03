@@ -108,8 +108,8 @@ class Cosmology(object):
         m_nu (:obj:`float`, optional): Total mass in eV of the massive
             neutrinos present. Defaults to 0.
         m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
-            be one of 'inverted', 'normal', 'equal' or 'list'. The default
-            of None is the same as 'normal'.
+            be one of 'inverted', 'normal', 'equal', 'single', or 'list'.
+            The default of None is the same as 'normal'.
         w0 (:obj:`float`, optional): First order term of dark energy equation
             of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy equation
@@ -450,6 +450,11 @@ class Cosmology(object):
                 mnu_list[0] = m_nu[0]/3.
                 mnu_list[1] = m_nu[0]/3.
                 mnu_list[2] = m_nu[0]/3.
+            elif (m_nu_type == 'single'):
+                mnu_list = [0]*3
+                mnu_list[0] = m_nu[0]
+                mnu_list[1] = 0.
+                mnu_list[2] = 0.
 
         # Check which of the neutrino species are non-relativistic today
         N_nu_mass = 0
@@ -709,6 +714,38 @@ class Cosmology(object):
         status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
         check(status, self)
 
+    def _get_halo_model_nonlin_power(self):
+        from . import halos as hal
+        mdef = hal.MassDef('vir', 'matter')
+        conc = self._config.halo_concentration_method
+        mfm = self._config.mass_function_method
+
+        if conc == lib.bhattacharya2011:
+            c = hal.ConcentrationBhattacharya13(mdef=mdef)
+        elif conc == lib.duffy2008:
+            c = hal.ConcentrationDuffy08(mdef=mdef)
+        elif conc == lib.constant_concentration:
+            c = hal.ConcentrationConstant(c=4., mdef=mdef)
+
+        if mfm == lib.tinker10:
+            hmf = hal.MassFuncTinker10(self, mass_def=mdef,
+                                       mass_def_strict=False)
+            hbf = hal.HaloBiasTinker10(self, mass_def=mdef,
+                                       mass_def_strict=False)
+        elif mfm == lib.shethtormen:
+            hmf = hal.MassFuncSheth99(self, mass_def=mdef,
+                                      mass_def_strict=False,
+                                      use_delta_c_fit=True)
+            hbf = hal.HaloBiasSheth99(self, mass_def=mdef,
+                                      mass_def_strict=False)
+        else:
+            raise ValueError("Halo model spectra not available for your "
+                             "current choice of mass function with the "
+                             "deprecated implementation.")
+        prf = hal.HaloProfileNFW(c)
+        hmc = hal.HMCalculator(self, hmf, hbf, mdef)
+        return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
+
     def compute_nonlin_power(self):
         """Compute the non-linear power spectrum."""
         if self.has_nonlin_power:
@@ -747,11 +784,17 @@ class Cosmology(object):
             self.compute_linear_power()
 
         # for the halo model we need to init the mass function stuff
+        psp = None
         if self._config_init_kwargs['matter_power_spectrum'] == 'halo_model':
-            self.compute_sigma()
+            warnings.warn(
+                "The halo model option for the internal CCL matter power "
+                "spectrum is deprecated. Use the more general functionality "
+                "in the `halos` module.", category=CCLWarning)
+            psp_py = self._get_halo_model_nonlin_power()
+            psp = psp_py.psp
 
         status = 0
-        status = lib.cosmology_compute_nonlin_power(self.cosmo, status)
+        status = lib.cosmology_compute_nonlin_power(self.cosmo, psp, status)
         check(status, self)
 
     def compute_sigma(self):
@@ -779,7 +822,6 @@ class Cosmology(object):
         self.compute_linear_power()
         status = 0
         status = lib.cosmology_compute_sigma(self.cosmo, status)
-        status = lib.cosmology_compute_hmfparams(self.cosmo, status)
         check(status, self)
 
     @property
@@ -804,10 +846,8 @@ class Cosmology(object):
 
     @property
     def has_sigma(self):
-        """Checks if sigma(M) and mass function splines are precomputed."""
-        return (
-            bool(self.cosmo.computed_sigma) and
-            bool(self.cosmo.computed_hmfparams))
+        """Checks if sigma(M) is precomputed."""
+        return bool(self.cosmo.computed_sigma)
 
     def status(self):
         """Get error status of the ccl_cosmology object.

@@ -139,7 +139,9 @@ void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
   // Prepare N(z) spline
   ccl_f1d_t *nz_f = NULL;
 
-  nz_f = ccl_f1d_t_new(nz, z_arr, nz_arr, 0, 0);
+  nz_f = ccl_f1d_t_new(nz, z_arr, nz_arr, 0, 0,
+		       ccl_f1d_extrap_const,
+		       ccl_f1d_extrap_const, status);
   if (nz_f == NULL) {
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(
@@ -272,12 +274,11 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
                                 int *status) {
   ccl_f1d_t *nz_f = NULL;
   ccl_f1d_t *sz_f = NULL;
-  gsl_integration_workspace *w;
-  integ_lensing_pars *ipar;
-  int local_status;
 
   // Prepare N(z) spline
-  nz_f = ccl_f1d_t_new(nz, z_arr, nz_arr, 0, 0);
+  nz_f = ccl_f1d_t_new(nz, z_arr, nz_arr, 0, 0,
+		       ccl_f1d_extrap_const,
+		       ccl_f1d_extrap_const, status);
   if (nz_f == NULL) {
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(
@@ -297,7 +298,9 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
   // Prepare magnification bias spline if needed
   if (*status == 0) {
     if ((nz_s > 0) && (zs_arr != NULL) && (sz_arr != NULL)) {
-      sz_f = ccl_f1d_t_new(nz_s, zs_arr, sz_arr, sz_arr[0], sz_arr[nz_s-1]);
+      sz_f = ccl_f1d_t_new(nz_s, zs_arr, sz_arr, sz_arr[0], sz_arr[nz_s-1],
+			   ccl_f1d_extrap_const,
+			   ccl_f1d_extrap_const, status);
       if (sz_f == NULL) {
         *status = CCL_ERROR_SPLINE;
         ccl_cosmology_set_status_message(
@@ -307,56 +310,65 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
     }
   }
 
-  double lens_prefac = get_lensing_prefactor(cosmo, status);
-  double chi, a, z, mgfac;
-  int ichi;
+  if(*status==0) {
+    #pragma omp parallel default(none) \
+                         shared(cosmo, z_max, i_nz_norm, sz_f, nz_f, \
+                                nchi, chi_arr, wL_arr, status)
+    {
+      double chi, a, z, mgfac, lens_prefac;
+      int ichi, local_status;
+      integ_lensing_pars *ipar = NULL;
+      gsl_integration_workspace *w = NULL;
 
-  w = NULL;
-  ipar = NULL;
-  local_status = *status;
+      local_status = *status;
 
-  if (local_status == 0) {
-    ipar = malloc(sizeof(integ_lensing_pars));
-    w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+      lens_prefac = get_lensing_prefactor(cosmo, &local_status);
+      if (local_status == 0) {
+        ipar = malloc(sizeof(integ_lensing_pars));
+        w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
 
-    if ((ipar == NULL) || (w == NULL)) {
-      local_status = CCL_ERROR_MEMORY;
-    }
-  }
+        if ((ipar == NULL) || (w == NULL)) {
+          local_status = CCL_ERROR_MEMORY;
+        }
+      }
 
-  if (local_status == 0) {
-    ipar->cosmo = cosmo;
-    ipar->z_max = z_max;
-    ipar->i_nz_norm = i_nz_norm;
-    ipar->sz_f = sz_f;
-    ipar->nz_f = nz_f;
-    ipar->status = &local_status;
-  }
+      if (local_status == 0) {
+        ipar->cosmo = cosmo;
+        ipar->z_max = z_max;
+        ipar->i_nz_norm = i_nz_norm;
+        ipar->sz_f = sz_f;
+        ipar->nz_f = nz_f;
+        ipar->status = &local_status;
+      }
 
-  //Populate arrays
-  for (ichi=0; ichi < nchi; ichi++) {
-    if (local_status == 0) {
-      chi = chi_arr[ichi];
-      a = ccl_scale_factor_of_chi(cosmo, chi, &local_status);
-      z = 1./a-1;
-      // Add MG correction if needed
-      mgfac = 1.0;
-      if (fabs(cosmo->params.sigma_0))
-        mgfac += ccl_Sig_MG(cosmo, a, &local_status);
-      ipar->z_end = z;
-      ipar->chi_end = chi;
+      //Populate arrays
+      #pragma omp for
+      for (ichi=0; ichi < nchi; ichi++) {
+        if (local_status == 0) {
+          chi = chi_arr[ichi];
+          a = ccl_scale_factor_of_chi(cosmo, chi, &local_status);
+          z = 1./a-1;
+          // Add MG correction if needed
+          mgfac = 1.0;
+          if (fabs(cosmo->params.sigma_0))
+            mgfac += ccl_Sig_MG(cosmo, a, &local_status);
+          ipar->z_end = z;
+          ipar->chi_end = chi;
 
-      wL_arr[ichi] = lensing_kernel_integrate(cosmo, ipar, w)*(1+z)*lens_prefac*mgfac;
-    } else {
-      wL_arr[ichi] = NAN;
-    }
-  }
+          wL_arr[ichi] = lensing_kernel_integrate(cosmo, ipar, w)*(1+z)*lens_prefac*mgfac;
+        } else {
+          wL_arr[ichi] = NAN;
+        }
+      } //end omp for
 
-  gsl_integration_workspace_free(w);
-  free(ipar);
+      gsl_integration_workspace_free(w);
+      free(ipar);
 
-  if (local_status != 0) {
-    *status = CCL_ERROR_INTEG;
+      if (local_status) {
+        #pragma omp atomic write
+        *status = CCL_ERROR_INTEG;
+      }
+    } //end omp parallel
   }
 
   ccl_f1d_t_free(nz_f);
@@ -430,7 +442,9 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
   if (*status == 0) {
     // Initialize radial kernel
     if ((n_w > 0) && (chi_w != NULL) && (w_w != NULL)) {
-      tr->kernel = ccl_f1d_t_new(n_w,chi_w,w_w,0,0);
+      tr->kernel = ccl_f1d_t_new(n_w,chi_w,w_w,0,0,
+				 ccl_f1d_extrap_const,
+				 ccl_f1d_extrap_const, status);
       if (tr->kernel == NULL)
         *status=CCL_ERROR_MEMORY;
     }

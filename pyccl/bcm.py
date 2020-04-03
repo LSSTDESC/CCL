@@ -12,10 +12,10 @@ def bcm_model_fka(cosmo, k, a):
               for details.
 
     .. note:: The correction factor is applied multiplicatively so that
-              `P_corrected(k, a) = P(k, a) * factor(k, a)`.
+              :math:`P_{\\rm corrected}(k, a) = P(k, a)\\, f_{\\rm bcm}(k, a)`.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
         a (float): Scale factor.
 

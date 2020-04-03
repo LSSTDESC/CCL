@@ -1,12 +1,18 @@
-from . import ccllib as lib
-from .pyutils import _vectorize_fn, _vectorize_fn2, _vectorize_fn4
+from . import halos as hal
+from .pyutils import deprecated
+from .errors import CCLError
+from .power import sigmaM  # noqa
 
 
+@deprecated(hal.MassFunc)
 def massfunc(cosmo, halo_mass, a, overdensity=200):
-    """Tinker et al. (2010) halo mass function, dn/dlog10M.
+    """Halo mass function, dn/dlog10M.
+
+    .. note:: Note that this function is deprecated. Please use the
+              functionality in the :mod:`~pyccl.halos.hmfunc` module.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): scale factor.
         overdensity (float): overdensity parameter (default: 200)
@@ -14,50 +20,33 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
     Returns:
         float or array_like: Halo mass function; dn/dlog10M.
     """
-    cosmo.compute_sigma()
-    return _vectorize_fn4(lib.massfunc,
-                          lib.massfunc_vec, cosmo, halo_mass, a, overdensity)
+    mdef = hal.MassDef(overdensity, 'matter')
+    mf_par = cosmo._config_init_kwargs['mass_function']
+    if mf_par == 'tinker10':
+        mf = hal.MassFuncTinker10(cosmo, mdef)
+    elif mf_par == 'tinker':
+        mf = hal.MassFuncTinker08(cosmo, mdef)
+    elif mf_par == 'watson':
+        mf = hal.MassFuncWatson13(cosmo, mdef)
+    elif mf_par == 'shethtormen':
+        mf = hal.MassFuncSheth99(cosmo)
+    elif mf_par == 'angulo':
+        mf = hal.MassFuncAngulo12(cosmo)
+
+    return mf.get_mass_function(cosmo,
+                                halo_mass,
+                                a)
 
 
-def massfunc_m2r(cosmo, halo_mass):
-    """Converts smoothing halo mass into smoothing halo radius.
-
-    .. note:: This is R=(3M/(4*pi*rho_m))^(1/3), where rho_m is the mean
-              matter density.
-
-    Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
-        halo_mass (float or array_like): Halo masses; Msun.
-
-    Returns:
-        float or array_like: Smoothing halo radius; Mpc.
-    """
-    return _vectorize_fn(lib.massfunc_m2r,
-                         lib.massfunc_m2r_vec, cosmo, halo_mass)
-
-
-def sigmaM(cosmo, halo_mass, a):
-    """Root mean squared variance for the given halo mass of the linear power
-    spectrum; Msun.
-
-    Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
-        halo_mass (float or array_like): Halo masses; Msun.
-        a (float): scale factor.
-
-    Returns:
-        float or array_like: RMS variance of halo mass.
-    """
-    cosmo.compute_sigma()
-    return _vectorize_fn2(lib.sigmaM,
-                          lib.sigmaM_vec, cosmo, halo_mass, a)
-
-
+@deprecated(hal.HaloBias)
 def halo_bias(cosmo, halo_mass, a, overdensity=200):
-    """Tinker et al. (2010) halo bias
+    """Halo bias
+
+    .. note:: Note that this function is deprecated. Please use the
+              functionality in the :mod:`~pyccl.halos.hbias` module.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): Scale factor.
         overdensity (float): Overdensity parameter (default: 200).
@@ -65,6 +54,35 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     Returns:
         float or array_like: Halo bias.
     """
-    cosmo.compute_sigma()
-    return _vectorize_fn4(lib.halo_bias,
-                          lib.halo_bias_vec, cosmo, halo_mass, a, overdensity)
+    mdef = hal.MassDef(overdensity, 'matter')
+    mf_par = cosmo._config_init_kwargs['mass_function']
+    if mf_par == 'tinker10':
+        bf = hal.HaloBiasTinker10(cosmo, mdef)
+    elif mf_par == 'shethtormen':
+        bf = hal.HaloBiasSheth99(cosmo)
+    else:
+        raise CCLError("No b(M) fitting function implemented for "
+                       "mass_function_method: "+mf_par)
+    return bf.get_halo_bias(cosmo,
+                            halo_mass,
+                            a)
+
+
+@deprecated(hal.mass2radius_lagrangian)
+def massfunc_m2r(cosmo, halo_mass):
+    """Converts smoothing halo mass into smoothing halo radius.
+
+    .. note:: This is :math:`R=(3M/(4\\pi\\rho_M))^{1/3}``, where
+              :math:`\\rho_M` is the mean comoving matter density.
+
+    .. note:: Note that this function is deprecated. Please use
+              :meth:`~pyccl.halos.massdef.mass2radius_lagrangian`.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        halo_mass (float or array_like): Halo masses; Msun.
+
+    Returns:
+        float or array_like: Smoothing halo radius; Mpc.
+    """
+    return hal.mass2radius_lagrangian(cosmo, halo_mass)

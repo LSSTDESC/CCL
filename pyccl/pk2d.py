@@ -9,7 +9,7 @@ class Pk2D(object):
     arbitrary function of wavenumber and scale factor.
 
     Args:
-        pkfunc (:obj:function): a function returning a floating point
+        pkfunc (:obj:`function`): a function returning a floating point
              number or numpy array with the signature `f(k,a)`, where k
              is a wavenumber (in units of Mpc^-1) and a is the scale
              factor. The function must able to take numpy arrays as `k`.
@@ -52,8 +52,8 @@ class Pk2D(object):
              logarithm of the power spectrum. Otherwise, the true value
              of the power spectrum is expected. Note that arrays will be
              interpolated in log space if `is_logp` is set to `True`.
-        cosmo (:obj:`Cosmology`): Cosmology object. The cosmology object
-             is needed in order if `pkfunc` is not `None`. The object is
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The cosmology
+             object is needed in order if `pkfunc` is not `None`. The object is
              used to determine the sampling rate in scale factor and
              wavenumber.
     """
@@ -110,14 +110,14 @@ class Pk2D(object):
         Args:
             k (float or array_like): wavenumber value(s) in units of Mpc^-1.
             a (float): value of the scale factor
-            cosmo (:obj:`Cosmology`): Cosmology object. The cosmology object
-                  is needed in order to evaluate the power spectrum outside
-                  the interpolation range in `a`. E.g. if you want to evaluate
-                  the power spectrum at a very small a, not covered by the
-                  arrays you passed when initializing this object, the power
-                  spectrum will be extrapolated from the earliest available
-                  value using the linear growth factor (for which a cosmology
-                  is needed).
+            cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The
+                cosmology object is needed in order to evaluate the power
+                spectrum outside the interpolation range in `a`. E.g. if you
+                want to evaluate the power spectrum at a very small a, not
+                covered by the arrays you passed when initializing this object,
+                the power spectrum will be extrapolated from the earliest
+                available value using the linear growth factor (for which a
+                cosmology is needed).
             a_arr (array): an array holding values of the scale factor.
 
         Returns:

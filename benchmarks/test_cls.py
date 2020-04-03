@@ -194,7 +194,28 @@ def set_up(request):
 def test_cls(set_up, t1, t2, bm,
              a1b1, a1b2, a2b1, a2b2, fl):
     cosmo, trcs, lfc, bmk = set_up
-    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], lfc['ells']) * lfc[fl]
+    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], lfc['ells'],
+                        limber_integration_method='qag_quad') * lfc[fl]
     el = np.sqrt((bmk[a1b1] * bmk[a2b2] + bmk[a1b2] * bmk[a2b1]) /
                  (2 * lfc['ells'] + 1.))
     assert np.all(np.fabs(cl - bmk[bm]) < 0.1 * el)
+
+
+@pytest.mark.parametrize("t1,t2,bm,a1b1,a1b2,a2b1,a2b2,fl",
+                         [('g1', 'g1', 'dd_11',   # NC1-NC1
+                           'dd_11', 'dd_11', 'dd_11', 'dd_11',
+                           'fl_one'),
+                          ('g1', 'g2', 'dd_12',   # NC1-NC2
+                           'dd_11', 'dd_12', 'dd_12', 'dd_22',
+                           'fl_one'),
+                          ('l2', 'l2', 'll_22',   # WL2-WL2
+                           'll_22', 'll_22', 'll_22', 'll_22',
+                           'fl_ll')])
+def test_cls_spline(set_up, t1, t2, bm,
+                    a1b1, a1b2, a2b1, a2b2, fl):
+    cosmo, trcs, lfc, bmk = set_up
+    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], lfc['ells'],
+                        limber_integration_method='spline') * lfc[fl]
+    el = np.sqrt((bmk[a1b1] * bmk[a2b2] + bmk[a1b2] * bmk[a2b1]) /
+                 (2 * lfc['ells'] + 1.))
+    assert np.all(np.fabs(cl - bmk[bm]) < 0.2 * el)
