@@ -1,6 +1,7 @@
 import numpy as np
 import pyccl as ccl
 import pytest
+from .. import ccllib as lib
 
 NZ = 128
 ZZ = np.linspace(0., 1., NZ)
@@ -19,6 +20,22 @@ TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
 PTC = ccl.nl_pt.PTCalculator(with_NC=True,
                              with_IA=True,
                              with_dd=True)
+
+a_1 = a_2 = a_d = 1.0
+gz = ccl.growth_factor(COSMO, 1./(1+ZZ))
+ZZ_1 = 1.0
+gz_1 = ccl.growth_factor(COSMO, 1./(1+ZZ_1))
+a_1_v = a_1*np.ones_like(ZZ)
+Om_m = COSMO['Omega_m']
+rho_crit = lib.cvar.constants.RHO_CRITICAL
+rho_m = lib.cvar.constants.RHO_CRITICAL * COSMO['Omega_m']
+Om_m_fid = 0.3
+
+c_1_t = -1*a_1*5e-14*rho_crit*COSMO['Omega_m']/gz
+c_1_t_1 = -1*a_1*5e-14*rho_crit*COSMO['Omega_m']/gz_1
+c_d_t = -1*a_d*5e-14*rho_crit*COSMO['Omega_m']/gz
+c_2_t = a_2*5*5e-14*rho_crit*COSMO['Omega_m']**2/(Om_m_fid*gz**2)
+c_2_t_des = a_2*5*5e-14*rho_crit*COSMO['Omega_m']/(gz**2)
 
 
 def test_pt_tracer_smoke():
@@ -174,3 +191,45 @@ def test_pt_get_pk2d_raises():
     with pytest.raises(NotImplementedError):
         ccl.nl_pt.get_pt_pk2d(COSMO, tdum,
                               tracer2=TRS['TM'], ptc=PTC)
+
+
+def test_translate_IA_norm():
+    # test that it works with scalar a, vector z
+    c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ, a1=a_1, a1delta=a_d,
+                                                a2=a_2, Om_m2_for_c2=False)
+    assert c_1.all() == c_1_t.all()
+    assert c_d.all() == c_d_t.all()
+    assert c_2.all() == c_2_t_des.all()
+
+    c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ, a1=a_1, a1delta=a_d,
+                                                a2=a_2, Om_m2_for_c2=True)
+    assert c_2.all() == c_2_t.all()
+
+    # test that it works with scalar a, scalar z
+    c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ_1, a1=a_1,
+                                                Om_m2_for_c2=False)
+    assert c_1 == c_1_t_1
+
+    # test that it works with vector a, vector z
+    c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ, a1=a_1_v,
+                                                Om_m2_for_c2=False)
+    assert c_1.all() == c_1_t.all()
+
+
+def test_translate_IA_norm_raises():
+    # Should raise error with 2d input a or z
+    z_wrong = np.ones((2, 3))
+    a_wrong = np.ones((2, 3))
+    with pytest.raises(ValueError):
+        c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ, a1=a_wrong,
+                                                    Om_m2_for_c2=False)
+    with pytest.raises(ValueError):
+        c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, z_wrong, a1=a_1_v,
+                                                    Om_m2_for_c2=False)
+
+    # Should raise error if len(a) != len(z)
+    NZ2 = 129
+    ZZ2 = np.linspace(0., 1., NZ2)
+    with pytest.raises(ValueError):
+        c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ2, a1=a_1_v,
+                                                    Om_m2_for_c2=False)
