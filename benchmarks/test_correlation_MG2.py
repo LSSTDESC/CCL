@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
 def corr_method(request):
-    errfacs = {'fftlog': 0.20, 'bessel': 0.05}
+    errfacs = {'fftlog': 0.21, 'bessel': 0.05}
     return request.param, errfacs[request.param]
 
 

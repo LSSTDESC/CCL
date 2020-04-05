@@ -7,13 +7,6 @@ except ImportError:
     HAVE_CLASS = False
 
 try:
-    import isitgr
-    import isitgr.model
-    HAVE_ISITGR = True
-except ImportError:
-    HAVE_ISITGR = False
-
-try:
     import camb
     import camb.model
     HAVE_CAMB = True
@@ -39,6 +32,8 @@ def get_camb_pk_lin(cosmo):
             object. The linear power spectrum.
     """
 
+    # Comment from Jarvis: TODO clean up this and other assert 
+    # anti-patterns in this file
     assert HAVE_CAMB, (
         "You must have the `camb` python package "
         "installed to run CCL with CAMB!")
@@ -194,9 +189,14 @@ def get_isitgr_pk_lin(cosmo):
             object. The linear power spectrum.
     """
 
-    assert HAVE_ISITGR, (
-        "You must have the `isitgr` python package "
-        "installed to run CCL with ISiTGR-CAMB!")
+    try:
+        import isitgr
+        import isitgr.model
+    except ImportError as e:
+        e.args = (
+            "You must have the `isitgr` python package "
+            "installed to run CCL with ISiTGR-CAMB!",
+        *e.args)
 
     # z sampling from CCL parameters
     na = lib.get_pk_spline_na(cosmo.cosmo)
