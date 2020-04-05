@@ -26,7 +26,8 @@ def test_power_mg(model):
         matter_power_spectrum='linear',
         transfer_function='boltzmann_isitgr')
 
-    data = np.loadtxt("./benchmarks/data/model%d_pk_MG_matterpower.dat" % model)
+    data = np.loadtxt("./benchmarks/data/model%d_pk_MG_matterpower.dat"
+                      % model)
 
     a = 1
     k = data[:, 0] * cosmo['h']
