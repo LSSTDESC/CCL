@@ -32,7 +32,7 @@ def get_camb_pk_lin(cosmo):
             object. The linear power spectrum.
     """
 
-    # Comment from Jarvis: TODO clean up this and other assert 
+    # Comment from Jarvis: TODO clean up this and other assert
     # anti-patterns in this file
     assert HAVE_CAMB, (
         "You must have the `camb` python package "
@@ -196,7 +196,7 @@ def get_isitgr_pk_lin(cosmo):
         e.args = (
             "You must have the `isitgr` python package "
             "installed to run CCL with ISiTGR-CAMB!",
-        *e.args)
+            *e.args)
 
     # z sampling from CCL parameters
     na = lib.get_pk_spline_na(cosmo.cosmo)
