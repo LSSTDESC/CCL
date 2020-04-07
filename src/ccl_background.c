@@ -447,12 +447,6 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   if(cosmo->computed_distances)
     return;
 
-  if(cosmo->spline_params.A_SPLINE_MAX>1.) {
-    *status = CCL_ERROR_COMPUTECHI;
-    ccl_cosmology_set_status_message(cosmo, "ccl_background.c: scale factor cannot be larger than 1.\n");
-    return;
-  }
-
   // Create logarithmically and then linearly-spaced values of the scale factor
   int na = cosmo->spline_params.A_SPLINE_NA+cosmo->spline_params.A_SPLINE_NLOG-1;
   double * a = ccl_linlog_spacing(

@@ -23,9 +23,29 @@ def test_correlation_smoke(method):
 
     for tval in [t_arr, t_lst, t_scl, t_int]:
         corr = ccl.correlation(
-            COSMO, ell, cl, tval, corr_type='gg', method=method)
+            COSMO, ell, cl, tval, type='NN', method=method)
         assert np.all(np.isfinite(corr))
         assert np.shape(corr) == np.shape(tval)
+
+
+@pytest.mark.parametrize('typs', [['gg', 'NN'],
+                                  ['gl', 'NG'],
+                                  ['l+', 'GG+'],
+                                  ['l-', 'GG-']])
+def test_correlation_newtypes(typs):
+    z = np.linspace(0., 1., 200)
+    n = np.ones(z.shape)
+    lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
+
+    ell = np.logspace(1, 3, 5)
+    cl = ccl.angular_cl(COSMO, lens, lens, ell)
+
+    theta = np.logspace(-2., np.log10(5.), 5)
+    corr_old = ccl.correlation(COSMO, ell, cl, theta,
+                               corr_type=typs[0])
+    corr_new = ccl.correlation(COSMO, ell, cl, theta,
+                               type=typs[1])
+    assert np.all(corr_new == corr_old)
 
 
 @pytest.mark.parametrize(

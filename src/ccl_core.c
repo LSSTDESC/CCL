@@ -280,6 +280,10 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->status = 0;
   ccl_cosmology_set_status_message(cosmo, "");
 
+  if(cosmo->spline_params.A_SPLINE_MAX !=1.) {
+    cosmo->status = CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo, "ccl_core.c: A_SPLINE_MAX needs to be 1.\n");
+  }
 
   return cosmo;
 }

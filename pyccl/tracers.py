@@ -1,10 +1,9 @@
 from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate, growth_factor
+from .pyutils import _check_array_params, NoneArr
 import numpy as np
 import collections
-
-NoneArr = np.array([])
 
 
 def get_density_kernel(cosmo, dndz):
@@ -549,26 +548,3 @@ def _check_returned_tracer(return_val):
     else:
         tr, _ = return_val
     return tr
-
-
-def _check_array_params(f_arg, arr3=False):
-    """Check whether an argument `f_arg` passed into the constructor of
-    Tracer() is valid.
-
-    If the argument is set to `None`, it will be replaced with a special array
-    that signals to the CCL wrapper that this argument is NULL.
-    """
-    if f_arg is None:
-        # Return empty array if argument is None
-        f1 = NoneArr
-        f2 = NoneArr
-        f3 = NoneArr
-    else:
-        f1 = np.atleast_1d(np.array(f_arg[0], dtype=float))
-        f2 = np.atleast_1d(np.array(f_arg[1], dtype=float))
-        if arr3:
-            f3 = np.atleast_1d(np.array(f_arg[2], dtype=float))
-    if arr3:
-        return f1, f2, f3
-    else:
-        return f1, f2
