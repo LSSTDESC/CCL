@@ -184,10 +184,10 @@ class Cosmology(object):
 
         # This will change to True once the "set_background_from_arrays"
         # is called.
-        self.background_on_input = False
+        self._background_on_input = False
         # This will change to True once the "set_linear_power_from_arrays"
         # is called.
-        self.linear_power_on_input = False
+        self._linear_power_on_input = False
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -641,7 +641,7 @@ class Cosmology(object):
         """Compute the distance splines."""
         if self.has_distances:
             return
-        if not self.background_on_input:
+        if not self._background_on_input:
             status = 0
             status = lib.cosmology_compute_distances(self.cosmo, status)
             check(status, self)
@@ -691,7 +691,7 @@ class Cosmology(object):
                     "with massive neutrinos in CCL!",
                     category=CCLWarning)
 
-        if not self.background_on_input:
+        if not self._background_on_input:
             status = 0
             status = lib.cosmology_compute_growth(self.cosmo, status)
             check(status, self)
@@ -717,7 +717,7 @@ class Cosmology(object):
     def compute_linear_power(self):
         """Call the appropriate function to compute the linear power
         spectrum, either read from input or calculated internally,"""
-        if self.linear_power_on_input:
+        if self._linear_power_on_input:
             self._compute_linear_power_from_arrays()
         else:
             self._compute_linear_power_internal()
@@ -770,7 +770,7 @@ class Cosmology(object):
         check(status, self)
 
     def _compute_linear_power_from_arrays(self):
-        if not self.linear_power_on_input:
+        if not self._linear_power_on_input:
             raise ValueError("Cannot compute linear power spectrum from"
                              "input without input arrays initialized.")
         from .pk2d import Pk2D  # FIXME: Is it okay to call this here?
@@ -948,9 +948,9 @@ class Cosmology(object):
         # Return status information
         return "status(%s): %s" % (status, msg)
 
-    def set_background_from_arrays(self, a_array=None, chi_array=None,
-                                   hoh0_array=None, growth_array=None,
-                                   fgrowth_array=None):
+    def _set_background_from_arrays(self, a_array=None, chi_array=None,
+                                    hoh0_array=None, growth_array=None,
+                                    fgrowth_array=None):
         """
         Function to store distances and growth splines from input arrays.
 
@@ -972,7 +972,7 @@ class Cosmology(object):
             raise ValueError("Background cosmology has already been"
                              " initialized and cannot be reset.")
         else:
-            self.background_on_input = True
+            self._background_on_input = True
             self.a_array = a_array
             self.chi_array = chi_array
             self.hoh0_array = hoh0_array
@@ -984,8 +984,8 @@ class Cosmology(object):
                     or (fgrowth_array is None)):
                 raise ValueError("Input arrays not parsed.")
 
-    def set_linear_power_from_arrays(self, a_array=None, k_array=None,
-                                     pk_array=None):
+    def _set_linear_power_from_arrays(self, a_array=None, k_array=None,
+                                      pk_array=None):
         """
         # TODO: Docstring.
 
@@ -1009,7 +1009,7 @@ class Cosmology(object):
             raise ValueError("Linear power spectrum has been initialized"
                              "and cannot be reset.")
         else:
-            self.linear_power_on_input = True
+            self._linear_power_on_input = True
             self.a_array = a_array
             self.k_array = k_array
             self.pk_array = pk_array

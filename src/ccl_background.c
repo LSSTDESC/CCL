@@ -1326,9 +1326,7 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
     }
     if (*status != CCL_ERROR_NOT_IMPLEMENTED) {
       double D;
-      //fprintf(stderr, "a=%lf,  ", a);
       int gslstatus = gsl_spline_eval_e(cosmo->data.growth, a, NULL, &D);
-      //fprintf(stderr, "D=%lf\n", D);
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_growth_factor():");
         *status |= gslstatus;
