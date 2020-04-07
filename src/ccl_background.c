@@ -615,6 +615,155 @@ void ccl_cosmology_compute_distances(ccl_cosmology * cosmo, int *status)
   }
 }
 
+/* ----- ROUTINE: ccl_cosmology_distances_from_input ------
+INPUT: cosmology, scale factor array, comoving distance chi computed at the scale factor array values
+TASK: if not already there, make a table of comoving distances from an input array
+*/
+void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[], double chi_a[], double E_a[],
+   int *status)
+{
+  double *chi_a_reversed = NULL;
+  double *a_reversed = NULL;
+
+  //Do nothing if everything is computed already
+  if(cosmo->computed_distances)
+    return;
+
+  // Allocate E(a), chi(a) and a(chi) splines
+  gsl_spline * E = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+  gsl_spline * chi = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+  gsl_spline * achi = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+
+  //Check for too little memory
+  if (a == NULL || E_a == NULL || chi_a == NULL || E == NULL || chi == NULL || achi == NULL) {
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(
+      cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): ran out of memory\n");
+  }
+
+  // Update the minimum scale factor value used by the user, which is necessary because it is used in ccl_tracers.c
+  cosmo->spline_params.A_SPLINE_MIN = a[0];
+
+  // Initialize a E(a) spline
+  if (!*status){
+    if (gsl_spline_init(E, a, E_a, na)){
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): Error creating  E(a) spline\n");
+    }
+  }
+
+  // Initialize chi(a) spline
+  if (!*status){
+    if (gsl_spline_init(chi, a, chi_a, na)){//in Mpc
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): Error creating  chi(a) spline\n");
+    }
+  }
+
+  // Reverse the order of chi(a) so that we can initialize the a(chi) spline, which needs monotonically decreasing x-array.
+  if (!*status) {
+    chi_a_reversed = malloc(na*sizeof(double));
+    a_reversed = malloc(na*sizeof(double));
+    if (chi_a_reversed == NULL || a_reversed == NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): ran out of memory\n");
+    }
+    else {
+      for (int i=0; i<na; i++) {
+        chi_a_reversed[i] = chi_a[na-1-i];
+        a_reversed[i] = a[na-1-i];
+      }
+    }
+  }
+
+  // Initialize a(chi) spline
+  if (!*status){
+    if (gsl_spline_init(achi, chi_a_reversed, a_reversed, na)){
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_distances_from_input(): Error creating  chi(a) spline\n");
+    }
+  }
+  free(chi_a_reversed);
+  free(a_reversed);
+
+  if (*status){ //If there was an error, free the GSL splines and return
+    gsl_spline_free(E); // Note: you are allowed to call gsl_free() on NULL
+    gsl_spline_free(chi);
+    gsl_spline_free(achi);
+    E = NULL;
+    chi = NULL;
+    achi = NULL;
+  }
+
+  if (*status == 0) {
+    //If there were no errors, attach the splines to the cosmo struct and end the function.
+    cosmo->data.E             = E;
+    cosmo->data.chi           = chi;
+    cosmo->data.achi          = achi;
+    cosmo->computed_distances = true;
+  }
+
+  return;
+}
+
+/* ----- ROUTINE: ccl_cosmology_growth_from_input ------
+INPUT: cosmology, scale factor array, growth array, growth rate array
+TASK: if not already there, create growth splines with the input arrays and store them.
+*/
+void ccl_cosmology_growth_from_input(ccl_cosmology* cosmo, int na, double a[], double growth_arr[], double fgrowth_arr[], int* status)
+{
+  int chistatus;
+  if (cosmo->computed_growth)
+    return;
+
+  gsl_spline * growth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+  gsl_spline * fgrowth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+
+  if (growth == NULL || fgrowth == NULL) {
+    *status = CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_growth_from_input(): ran out of memory\n");
+  }
+
+  if (*status == 0) {
+    chistatus = gsl_spline_init(growth, a, growth_arr, na);
+    if (chistatus) {
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_growth_from_input(): Error creating D(a) spline\n");
+    }
+  }
+
+  if (*status == 0) {
+    chistatus = gsl_spline_init(fgrowth, a, fgrowth_arr, na);
+    if (chistatus) {
+      *status = CCL_ERROR_SPLINE;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_background.c: ccl_cosmology_growth_from_input(): Error creating f(a) spline\n");
+    }
+  }
+
+  double growth0 = growth_arr[na-1];
+
+  if (*status){ //If there was an error, free the GSL splines and return
+    gsl_spline_free(growth);
+    gsl_spline_free(fgrowth);
+    growth = NULL;
+    fgrowth = NULL;
+  }
+
+  if (*status == 0) {
+    // assign all the splines we've just made to the structure.
+    cosmo->data.growth = growth;
+    cosmo->data.fgrowth = fgrowth;
+    cosmo->data.growth0 = growth0;
+    cosmo->computed_growth = true;
+  }
+}
 
 /* ----- ROUTINE: ccl_cosmology_compute_growth ------
 INPUT: cosmology
