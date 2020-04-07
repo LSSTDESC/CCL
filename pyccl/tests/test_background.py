@@ -192,3 +192,4 @@ def test_input_arrays_raises():
         cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7,
                                     n_s=0.965, A_s=2e-9)
         cosmo_input._set_background_from_arrays()
+

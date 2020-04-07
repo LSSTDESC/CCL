@@ -712,6 +712,14 @@ class Cosmology(object):
                                                      status)
 
     def compute_linear_power(self):
+        """Call the appropriate function to compute the linear power
+        spectrum, either read from input or calculated internally,"""
+        if self._linear_power_on_input:
+            self._compute_linear_power_from_arrays()
+        else:
+            self._compute_linear_power_internal()
+
+    def _compute_linear_power_internal(self):
         """Compute the linear power spectrum."""
         if self.has_linear_power:
             return
@@ -754,6 +762,29 @@ class Cosmology(object):
                            "transfer function!")
 
         # first do the linear matter power
+        status = 0
+        status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
+        check(status, self)
+
+    def _compute_linear_power_from_arrays(self):
+        if not self._linear_power_on_input:
+            raise ValueError("Cannot compute linear power spectrum from"
+                             "input without input arrays initialized.")
+        from .pk2d import Pk2D  # FIXME: Is it okay to call this here?
+        pk_lin = Pk2D(pkfunc=None,
+                      a_arr=self.a_array,
+                      lk_arr=np.log(self.k_array),
+                      pk_arr=self.pk_array,
+                      is_logp=False,
+                      extrap_order_lok=1,
+                      extrap_order_hik=2,
+                      cosmo=None)
+
+        # needed to init some models
+        self.compute_growth()
+
+        psp = pk_lin.psp
+
         status = 0
         status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
         check(status, self)
@@ -948,4 +979,36 @@ class Cosmology(object):
             if ((a_array is None) or (chi_array is None)
                     or (hoh0_array is None) or (growth_array is None)
                     or (fgrowth_array is None)):
+                raise ValueError("Input arrays not parsed.")
+
+    def _set_linear_power_from_arrays(self, a_array=None, k_array=None,
+                                      pk_array=None):
+        """
+        # TODO: Docstring.
+
+        a_array (array): an array holding values of the scale factor
+        k_array (array): an array holding values of the wavenumber
+            in units of Mpc^-1).
+        pk_array (array): a 2D array containing the values of the power
+            spectrum at the values of the scale factor and the wavenumber
+            held by `a_array` and `k_array`. The shape of this array must be
+            `[na,nk]`, where `na` is the size of `a_array` and `nk` is the
+            size of `k_array`. This array can be provided in a flattened
+            form as long as the total size matches `nk*na`.
+            Note that, if you pass your own Pk array, you
+            are responsible of making sure that it is sufficiently well
+            sampled (i.e. the resolution of `a_array` and `k_array` is high
+            enough to sample the main features in the power spectrum).
+            For reference, CCL will use bicubic interpolation to evaluate
+            the power spectrum at any intermediate point in k and a.
+        """
+        if self.has_linear_power:
+            raise ValueError("Linear power spectrum has been initialized"
+                             "and cannot be reset.")
+        else:
+            self._linear_power_on_input = True
+            self.a_array = a_array
+            self.k_array = k_array
+            self.pk_array = pk_array
+            if ((a_array is None) or (k_array is None) or (pk_array is None)):
                 raise ValueError("Input arrays not parsed.")
