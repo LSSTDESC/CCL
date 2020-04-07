@@ -184,7 +184,7 @@ class Cosmology(object):
 
         # This will change to True once the "_set_background_from_arrays"
         # is called.
-        self.background_on_input = False
+        self._background_on_input = False
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -638,7 +638,7 @@ class Cosmology(object):
         """Compute the distance splines."""
         if self.has_distances:
             return
-        if not self.background_on_input:
+        if not self._background_on_input:
             status = 0
             status = lib.cosmology_compute_distances(self.cosmo, status)
             check(status, self)
@@ -688,7 +688,7 @@ class Cosmology(object):
                     "with massive neutrinos in CCL!",
                     category=CCLWarning)
 
-        if not self.background_on_input:
+        if not self._background_on_input:
             status = 0
             status = lib.cosmology_compute_growth(self.cosmo, status)
             check(status, self)
@@ -938,7 +938,7 @@ class Cosmology(object):
             raise ValueError("Background cosmology has already been"
                              " initialized and cannot be reset.")
         else:
-            self.background_on_input = True
+            self._background_on_input = True
             self.a_array = a_array
             self.chi_array = chi_array
             self.hoh0_array = hoh0_array
