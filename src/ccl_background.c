@@ -1328,7 +1328,6 @@ double ccl_growth_factor(ccl_cosmology * cosmo, double a, int * status)
           cosmo, "ccl_background.c: ccl_growth_factor(): Scale factor outside interpolation range.");
         return NAN;
       }
-
       return D;
     }
     else {
