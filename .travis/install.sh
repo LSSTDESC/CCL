@@ -16,7 +16,7 @@ mkdir -p $HOME/download
 if [ "${TOXENV}" = py27 ]; then
     curl -s https://repo.continuum.io/miniconda/Miniconda2-latest-${CONDA_INST}-x86_64.sh -o $HOME/download/miniconda.sh
 else
-    curl -s https://repo.anaconda.com/miniconda/Miniconda3-latest-${CONDA_INST}-x86_64.sh
+    curl -s https://repo.anaconda.com/miniconda/Miniconda3-latest-${CONDA_INST}-x86_64.sh -o $HOME/download/miniconda.sh
 fi
 bash $HOME/download/miniconda.sh -b -p $HOME/miniconda
 
