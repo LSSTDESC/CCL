@@ -146,7 +146,7 @@ def test_transfer_matter_power_nu_raises(tf, pk, m_nu):
 
 
 @pytest.mark.parametrize('tf', [
-    'boltzmann_class', 'boltzmann_camb','boltzmann_isitgr'])
+    'boltzmann_class', 'boltzmann_camb', 'boltzmann_isitgr'])
 def test_power_sigma8norm_norms_consistent(tf):
     # make a cosmo with A_s
     cosmo = ccl.Cosmology(
