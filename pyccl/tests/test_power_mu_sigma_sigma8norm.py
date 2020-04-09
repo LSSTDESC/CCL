@@ -5,7 +5,7 @@ import pyccl as ccl
 
 
 @pytest.mark.parametrize('tf', [
-    'bbks', 'eisenstein_hu', 'boltzmann_class', 'boltzmann_camb'])
+    'bbks', 'eisenstein_hu', 'boltzmann_class', 'boltzmann_camb','boltzmann_isitgr'])
 def test_power_mu_sigma_sigma8norm(tf):
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -29,7 +29,7 @@ def test_power_mu_sigma_sigma8norm(tf):
 
 
 @pytest.mark.parametrize('tf', [
-    'boltzmann_class', 'boltzmann_camb'])
+    'boltzmann_class', 'boltzmann_camb','boltzmann_isitgr'])
 def test_power_mu_sigma_sigma8norm_norms_consistent(tf):
     # make a cosmo with A_s
     cosmo = ccl.Cosmology(
