@@ -1,10 +1,9 @@
 from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate, growth_factor
+from .pyutils import _check_array_params, NoneArr
 import numpy as np
 import collections
-
-NoneArr = np.array([])
 
 
 def get_density_kernel(cosmo, dndz):
@@ -485,8 +484,13 @@ class WeakLensingTracer(Tracer):
             (z, A_IA(z)) giving the intrinsic alignment amplitude A_IA(z).
             If `None`, the tracer is assumped to not have intrinsic
             alignments. Defaults to None.
+        use_A_ia (bool): set to True to use the conventional IA
+            normalization. Set to False to use the raw input amplitude,
+            which will usually be 1 for use with PT IA modeling.
+            Defaults to True.
     """
-    def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None):
+    def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None,
+                 use_A_ia=True):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -506,13 +510,19 @@ class WeakLensingTracer(Tracer):
             z_a, tmp_a = _check_array_params(ia_bias)
             # Kernel
             kernel_i = get_density_kernel(cosmo, dndz)
-            # Normalize so that A_IA=1
-            D = growth_factor(cosmo, 1./(1+z_a))
-            # Transfer
-            # See Joachimi et al. (2011), arXiv: 1008.3491, Eq. 6.
-            # and note that we use C_1= 5e-14 from arXiv:0705.0166
-            rho_m = lib.cvar.constants.RHO_CRITICAL * cosmo['Omega_m']
-            a = - tmp_a * 5e-14 * rho_m / D
+            if use_A_ia:
+                # Normalize so that A_IA=1
+                D = growth_factor(cosmo, 1./(1+z_a))
+                # Transfer
+                # See Joachimi et al. (2011), arXiv: 1008.3491, Eq. 6.
+                # and note that we use C_1= 5e-14 from arXiv:0705.0166
+                rho_m = lib.cvar.constants.RHO_CRITICAL * cosmo['Omega_m']
+                a = - tmp_a * 5e-14 * rho_m / D
+            else:
+                # use the raw input normalization. Normally, this will be 1
+                # to allow nonlinear PT IA models, where normalization is
+                # already applied to the power spectrum.
+                a = tmp_a
             # Reverse order for increasing a
             t_a = (1./(1+z_a[::-1]), a[::-1])
             self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
@@ -549,26 +559,3 @@ def _check_returned_tracer(return_val):
     else:
         tr, _ = return_val
     return tr
-
-
-def _check_array_params(f_arg, arr3=False):
-    """Check whether an argument `f_arg` passed into the constructor of
-    Tracer() is valid.
-
-    If the argument is set to `None`, it will be replaced with a special array
-    that signals to the CCL wrapper that this argument is NULL.
-    """
-    if f_arg is None:
-        # Return empty array if argument is None
-        f1 = NoneArr
-        f2 = NoneArr
-        f3 = NoneArr
-    else:
-        f1 = np.atleast_1d(np.array(f_arg[0], dtype=float))
-        f2 = np.atleast_1d(np.array(f_arg[1], dtype=float))
-        if arr3:
-            f3 = np.atleast_1d(np.array(f_arg[2], dtype=float))
-    if arr3:
-        return f1, f2, f3
-    else:
-        return f1, f2

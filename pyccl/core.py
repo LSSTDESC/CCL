@@ -182,6 +182,10 @@ class Cosmology(object):
 
         self._build_cosmo()
 
+        # This will change to True once the "_set_background_from_arrays"
+        # is called.
+        self._background_on_input = False
+
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
         # We have to make all of the C stuff that goes into a cosmology
@@ -634,9 +638,30 @@ class Cosmology(object):
         """Compute the distance splines."""
         if self.has_distances:
             return
-        status = 0
-        status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self)
+        if not self._background_on_input:
+            status = 0
+            status = lib.cosmology_compute_distances(self.cosmo, status)
+            check(status, self)
+        else:
+            # Check that input arrays have the same size.
+            if not (self.a_array.shape == self.chi_array.shape
+                    == self.hoh0_array.shape):
+                raise ValueError("Input arrays must have the same size.")
+            # Check that a_array is a monotonically increasing array.
+            if not np.array_equal(self.a_array, np.sort(self.a_array)):
+                raise ValueError("Input scale factor array is not "
+                                 "monotonically increasing.")
+            # Check that the last element of a_array is 1:
+            if np.abs(self.a_array[-1]-1.0) > 1e-5:
+                raise ValueError("The last element of the input scale factor"
+                                 "array must be 1.0.")
+            status = 0
+            status = lib.cosmology_distances_from_input(self.cosmo,
+                                                        self.a_array,
+                                                        self.chi_array,
+                                                        self.hoh0_array,
+                                                        status)
+            check(status, self)
 
     def compute_growth(self):
         """Compute the growth function."""
@@ -663,9 +688,28 @@ class Cosmology(object):
                     "with massive neutrinos in CCL!",
                     category=CCLWarning)
 
-        status = 0
-        status = lib.cosmology_compute_growth(self.cosmo, status)
-        check(status, self)
+        if not self._background_on_input:
+            status = 0
+            status = lib.cosmology_compute_growth(self.cosmo, status)
+            check(status, self)
+        else:
+            # Check that input arrays have the same size.
+            if not (self.a_array.shape == self.growth_array.shape
+                    == self.fgrowth_array.shape):
+                raise ValueError("Input arrays must have the same size.")
+            # Check that a_array is a monotonically increasing array.
+            if not np.array_equal(self.a_array, np.sort(self.a_array)):
+                raise ValueError("Input scale factor array is not "
+                                 "monotonically increasing.")
+            # Check that the last element of a_array is 1:
+            if np.abs(self.a_array[-1]-1.0) > 1e-5:
+                raise ValueError("The last element of the input scale factor"
+                                 "array must be 1.0.")
+            status = 0
+            status = lib.cosmology_growth_from_input(self.cosmo, self.a_array,
+                                                     self.growth_array,
+                                                     self.fgrowth_array,
+                                                     status)
 
     def compute_linear_power(self):
         """Compute the linear power spectrum."""
@@ -873,3 +917,39 @@ class Cosmology(object):
 
         # Return status information
         return "status(%s): %s" % (status, msg)
+
+    def _set_background_from_arrays(self, a_array=None, chi_array=None,
+                                    hoh0_array=None, growth_array=None,
+                                    fgrowth_array=None):
+        """
+        Function to store distances and growth splines from input arrays.
+
+        Args:
+            a_array (array_like, optional): Scale factor array with values on
+                which the input arrays are computed. The array must end on the
+                value of 1.0.
+            chi_array (array_like, optional): Comoving radial distance computed
+                at points indicated by the a_array.
+            hoh0_array (array_like, optional): Hubble parameter divided by the
+                value of H0.
+            growth_array (array_like, optional): Growth factor array, defined
+                as D(a)=P(k,a)/P(k,a=1), assuming no scale dependence. It is
+                assumed that D(a<<1)~a so that D(1.0) will be used for
+                normalization.
+            fgrowth_array (array_like, optional): Growth rate array.
+        """
+        if self.has_distances or self.has_growth:
+            raise ValueError("Background cosmology has already been"
+                             " initialized and cannot be reset.")
+        else:
+            self._background_on_input = True
+            self.a_array = a_array
+            self.chi_array = chi_array
+            self.hoh0_array = hoh0_array
+            self.growth_array = growth_array
+            self.fgrowth_array = fgrowth_array
+            # Check if the input arrays are all parsed
+            if ((a_array is None) or (chi_array is None)
+                    or (hoh0_array is None) or (growth_array is None)
+                    or (fgrowth_array is None)):
+                raise ValueError("Input arrays not parsed.")

@@ -527,11 +527,7 @@ def halomod_Pk2D(cosmo, hmc, prof,
             :class:`~pyccl.pk2d.Pk2D`.
 
     Returns:
-        float or array_like: integral values evaluated at each
-        combination of `k` and `a`. The shape of the output will
-        be `(N_a, N_k)` where `N_k` and `N_a` are the sizes of
-        `k` and `a` respectively. If `k` or `a` are scalars, the
-        corresponding dimension will be squeezed out on output.
+        :class:`~pyccl.pk2d.Pk2D`: halo model power spectrum.
     """
     if lk_arr is None:
         status = 0

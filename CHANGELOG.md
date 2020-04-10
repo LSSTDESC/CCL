@@ -1,5 +1,6 @@
 # Unreleased
 ## Python library
+- Perturbation theory power spectra #734
 - Generalized Tinker mass function to all SO mass definitions (#736)
 - Deprecated old halo model (#736)
 - Halo model power spectra #717
