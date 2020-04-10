@@ -40,6 +40,7 @@ def test_power_mu_sigma_sigma8norm(tf):
             ccl.linear_matter_power(cosmo_musig, 1e-4, a))
         assert np.not_equal(pk_rat, gfac)
 
+
 def test_import_isitgr():
     "Test simple imports"
     import isitgr
