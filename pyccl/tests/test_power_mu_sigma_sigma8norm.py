@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from IPython.utils.importstring import import_item
 
 import pyccl as ccl
 
@@ -29,6 +30,21 @@ def test_power_mu_sigma_sigma8norm(tf):
             ccl.linear_matter_power(cosmo_musig, 1e-4, a))
         assert np.allclose(pk_rat, gfac)
 
+    if tf == 'boltzmann_isitgr':
+        # make sure P(k) ratio is right
+        a = 0.8
+        gfac = (
+            ccl.growth_factor(cosmo, a) / ccl.growth_factor(cosmo_musig, a))**2
+        pk_rat = (
+            ccl.linear_matter_power(cosmo, 1e-4, a) /
+            ccl.linear_matter_power(cosmo_musig, 1e-4, a))
+        assert np.not_equal(pk_rat, gfac)
+
+def test_import_isitgr():
+    "Test simple imports"
+    import isitgr
+    boltzmann = import_item('isitgr')
+    assert isitgr == boltzmann
 
 @pytest.mark.parametrize('tf', [
     'boltzmann_class', 'boltzmann_camb', 'boltzmann_isitgr'])
