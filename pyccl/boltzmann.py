@@ -197,6 +197,7 @@ def get_isitgr_pk_lin(cosmo):
             "You must have the `isitgr` python package "
             "installed to run CCL with ISiTGR-CAMB!",
             *e.args)
+        raise
 
     # z sampling from CCL parameters
     na = lib.get_pk_spline_na(cosmo.cosmo)
