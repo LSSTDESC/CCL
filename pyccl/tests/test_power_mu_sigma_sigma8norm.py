@@ -44,8 +44,8 @@ def test_power_mu_sigma_sigma8norm(tf):
 def test_import_isitgr():
     "Test simple imports"
     import isitgr
-    boltzmann = import_item('isitgr')
-    assert isitgr == boltzmann
+    boltzmann_t = import_item('isitgr')
+    assert isitgr == boltzmann_t
 
 @pytest.mark.parametrize('tf', [
     'boltzmann_class', 'boltzmann_camb', 'boltzmann_isitgr'])
