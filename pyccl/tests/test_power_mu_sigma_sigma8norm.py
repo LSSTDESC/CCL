@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-#from IPython.utils.importstring import import_item
 from traitlets import import_item
 
 import pyccl as ccl
