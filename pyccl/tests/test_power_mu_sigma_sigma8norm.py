@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
-from traitlets import import_item
-
+from unittest import mock
 import pyccl as ccl
 
 
@@ -30,22 +29,10 @@ def test_power_mu_sigma_sigma8norm(tf):
             ccl.linear_matter_power(cosmo_musig, 1e-4, a))
         assert np.allclose(pk_rat, gfac)
 
-    if tf == 'boltzmann_isitgr':
-        # make sure P(k) ratio is right
-        a = 0.8
-        gfac = (
-            ccl.growth_factor(cosmo, a) / ccl.growth_factor(cosmo_musig, a))**2
-        pk_rat = (
-            ccl.linear_matter_power(cosmo, 1e-4, a) /
-            ccl.linear_matter_power(cosmo_musig, 1e-4, a))
-        assert np.not_equal(pk_rat, gfac)
-
-
-def test_import_isitgr():
-    "Test simple imports"
-    import isitgr
-    boltzmann_t = import_item('isitgr')
-    assert isitgr == boltzmann_t
+from unittest import mock
+    with mock.patch.dict(sys.modules, {'isitgr':None}):
+        with assert_raises(ImportError):
+            get_isitgr_pk_lin(cosmo)
 
 @pytest.mark.parametrize('tf', [
     'boltzmann_class', 'boltzmann_camb', 'boltzmann_isitgr'])
