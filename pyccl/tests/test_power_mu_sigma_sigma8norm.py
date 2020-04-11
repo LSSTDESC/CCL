@@ -2,6 +2,9 @@ import numpy as np
 import pytest
 from unittest import mock
 import pyccl as ccl
+import sys
+from numpy.testing import assert_raises
+from .boltzmann import get_isitgr_pk_lin
 
 
 @pytest.mark.parametrize('tf', [
@@ -29,10 +32,10 @@ def test_power_mu_sigma_sigma8norm(tf):
             ccl.linear_matter_power(cosmo_musig, 1e-4, a))
         assert np.allclose(pk_rat, gfac)
 
-from unittest import mock
-    with mock.patch.dict(sys.modules, {'isitgr':None}):
+    with mock.patch.dict(sys.modules, {'isitgr': None}):
         with assert_raises(ImportError):
             get_isitgr_pk_lin(cosmo)
+
 
 @pytest.mark.parametrize('tf', [
     'boltzmann_class', 'boltzmann_camb', 'boltzmann_isitgr'])
