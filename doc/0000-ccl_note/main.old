@@ -421,16 +421,6 @@ initializing the cosmology object, we construct a bi-dimensional spline in $k$
 and the scale-factor which is then evaluated by the relevant routines to obtain
 the matter power spectrum at the desired wavenumber and redshift.
 
-\subsubsection{ISiTGR}
-\ccl can also call the {\tt ISiTGR} software patch \citep{isitgr1,isitgr2} that is 
-built on the top of the {\tt CAMB} package to include modified gravity models. 
-This is invoked by spefifying the transfer function option boltzmann\_isitgr. 
-\ccl then then calculates the GR of modified gravity linear matter power spectrum 
-at a given redshift. Here also, on initializing the cosmology object, we construct a 
-bi-dimensional spline in $k$ and the scale-factor which is then evaluated by the 
-relevant routines to obtain the matter power spectrum at the desired wavenumber 
-and redshift.
-
 \subsubsection{Halofit}
 We provide a Halofit implementation that applies a correction to any input
 linear matter power spectrum to compute an approximation to the non-linear
@@ -540,30 +530,30 @@ spectrum with baryonic feedback included, \ccl will assume the default parameter
 of \citet{Schneider15}.
 
 \subsubsection{Modified gravity ($\mu, \Sigma$)}
-
 \ccl supports the quasistatic parameterization of modified gravity with
 scale-independent deviations from GR which arise at late times (currently with
 functional form given in equation \ref{muSigform}). Under these conditions,
-and the specied cosmology, the matter modified gravity power spectrum in 
-calculated using {\tt ISiTGR}  (described further above) according to the values of the modified 
-gravity parameters. If these are zero or not specified then the GR matter power 
-spectrum is calculated.
+the matter power spectrum in a modified gravity scenario can be computed simply
+by re-scaling the GR matter power spectrum with the modified gravity growth factor.
 
-This implementation replaces the intilal one where the modified gravity power 
-spectrum is computed by re-scaling the GR matter power spectrum by 
-multiplying it by the squared ratio of the MG  growth factor $D_{MG}$ to the GR 
-one, $D_{GR}$. 
+For each power spectrum calculation method above, we first compute the power spectrum
+in GR at a grid in $a$ and $k$ as usual, in preparation for producing splines in
+these variables. If ${\tt mu\_0} \ne 0$, we then take the ratio of the growth factor
+$D$ at the given value of ${\tt mu\_0}$ to the GR (${\tt mu\_0}=0$) growth factor,
+and multiply the GR power spectrum by this ratio squared:
 
-The new implementation solved accuracy issues for spectra and  correlations 
-encoutered in the initial implementation and provides the power  spectrum and 
-the 2D angular spectra and correlations at the same level of accuracy 
-as that of the LCDM standard model.   
+\begin{equation}
+P(k,z) = \left(\frac{D^{\mu}(z)}{D^{\rm GR}(z)}\right)^2 P^{\rm GR}(k,z).
+\label{Pkmu}
+\end{equation}
+We then set up splines for the power spectrum as usual.
 
-The splines for the power spectrum are set as usual but we note that 
-the $\mu, \Sigma$ MG implementation is valid only in the quasistatic limit 
-and is also restricted to the linear regime for now since no-reliable methods 
-are available to model such non-linear small scales nor the very 
-large scales where the quasistatic limit ceased to be valid.   
+Note that the $\mu, \Sigma$ quasistatic parameterization of deviations from GR
+is technically only valid in the linear regime and at sub-horizon scales. We
+allow the user to do this re-scaling for the non-linear power spectrum, but
+issue a warning. Computing the matter power spectrum under this parameterization
+of modified gravity will not produce physically meaningful results on very large
+or small scales.
 
 \subsubsection{Extrapolation for the nonlinear power spectrum}
 \label{sec:NLextrapol}
