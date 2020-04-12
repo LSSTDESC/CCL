@@ -421,11 +421,13 @@ initializing the cosmology object, we construct a bi-dimensional spline in $k$
 and the scale-factor which is then evaluated by the relevant routines to obtain
 the matter power spectrum at the desired wavenumber and redshift.
 
+\newpage
+
 \subsubsection{ISiTGR}
-\ccl can also call the {\tt ISiTGR} software patch \citep{isitgr1,isitgr2} that is 
+\ccl can call the {\tt ISiTGR} software patch \citep{isitgr1,isitgr2} that is 
 built on the top of the {\tt CAMB} package to include modified gravity models. 
-This is invoked by spefifying the transfer function option boltzmann\_isitgr. 
-\ccl then then calculates the GR of modified gravity linear matter power spectrum 
+This is invoked by specifying the transfer function option boltzmann\_isitgr. 
+\ccl then then calculates the GR or modified gravity linear matter power spectrum 
 at a given redshift. Here also, on initializing the cosmology object, we construct a 
 bi-dimensional spline in $k$ and the scale-factor which is then evaluated by the 
 relevant routines to obtain the matter power spectrum at the desired wavenumber 
@@ -544,7 +546,7 @@ of \citet{Schneider15}.
 \ccl supports the quasistatic parameterization of modified gravity with
 scale-independent deviations from GR which arise at late times (currently with
 functional form given in equation \ref{muSigform}). Under these conditions,
-and the specied cosmology, the matter modified gravity power spectrum in 
+and the specified cosmology, the modified gravity matter power spectrum is
 calculated using {\tt ISiTGR}  (described further above) according to the values of the modified 
 gravity parameters. If these are zero or not specified then the GR matter power 
 spectrum is calculated.
@@ -559,11 +561,11 @@ encoutered in the initial implementation and provides the power  spectrum and
 the 2D angular spectra and correlations at the same level of accuracy 
 as that of the LCDM standard model.   
 
-The splines for the power spectrum are set as usual but we note that 
+The splines for the power spectrum are then set as usual, but we note that 
 the $\mu, \Sigma$ MG implementation is valid only in the quasistatic limit 
 and is also restricted to the linear regime for now since no-reliable methods 
 are available to model such non-linear small scales nor the very 
-large scales where the quasistatic limit ceased to be valid.   
+large scales where the quasistatic limit cease to be valid.   
 
 \subsubsection{Extrapolation for the nonlinear power spectrum}
 \label{sec:NLextrapol}
