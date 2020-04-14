@@ -13,6 +13,7 @@
 - Methods to retrieve internal tracer functions (#713).
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
 - Add straightforward single massive neutrino option (#730).
+- Updated MG support via mu / Sigma (scale-independent) with higher accuracy implementation (#737)
 
 ## C library
 - Deprecated old halo model (#736)
@@ -23,6 +24,7 @@
 - Improved FFTLog API (#722).
 - Functionality to resample 1D arrays including extrapolation (#720).
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
+- Updated MG support via mu / Sigma (scale-independent) with higher accuracy implementation (#737)
 
 # v2.0.1 Changes
 

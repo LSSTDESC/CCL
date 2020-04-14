@@ -33,13 +33,13 @@ py27)
   conda create -q -n test-environment python=2.7 pip \
     numpy nose coveralls flake8 pyyaml gsl fftw cmake swig scipy \
     compilers pkg-config setuptools_scm pytest pandas pytest-cov \
-    cython "camb>=1"
+    cython "camb>=1" isitgr traitlets
   ;;
 py36)
   conda create -q -n test-environment python=3.6 pip \
     numpy nose coveralls flake8 pyyaml gsl fftw cmake swig  scipy \
     compilers pkg-config setuptools_scm pytest pandas pytest-cov \
-    cython "camb>=1"
+    cython "camb>=1" isitgr traitlets
   ;;
 esac;
 
