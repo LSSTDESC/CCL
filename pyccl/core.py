@@ -9,7 +9,7 @@ import yaml
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
 from ._types import error_types
-from .boltzmann import get_class_pk_lin, get_camb_pk_lin
+from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 
 # Configuration types
@@ -20,6 +20,7 @@ transfer_function_types = {
     'boltzmann_class':  lib.boltzmann_class,
     'boltzmann_camb':   lib.boltzmann_camb,
     'pklin_from_input': lib.pklin_from_input,
+    'boltzmann_isitgr': lib.boltzmann_isitgr,
 }
 
 matter_power_spectrum_types = {
@@ -36,7 +37,6 @@ baryons_power_spectrum_types = {
 
 # List which transfer functions can be used with the muSigma_MG
 # parameterisation of modified gravity
-valid_muSig_transfers = {'boltzmann_class', 'class'}
 
 mass_function_types = {
     'angulo':      lib.angulo,
@@ -752,6 +752,10 @@ class Cosmology(object):
             pk_lin = get_class_pk_lin(self)
             psp = pk_lin.psp
         elif ((self._config_init_kwargs['transfer_function'] ==
+                'boltzmann_isitgr') and not self.has_linear_power):
+            pk_lin = get_isitgr_pk_lin(self)
+            psp = pk_lin.psp
+        elif ((self._config_init_kwargs['transfer_function'] ==
                 'boltzmann_camb') and not self.has_linear_power):
             pk_lin = get_camb_pk_lin(self)
             psp = pk_lin.psp
@@ -760,7 +764,7 @@ class Cosmology(object):
 
         if (psp is None and not self.has_linear_power and (
                 self._config_init_kwargs['transfer_function'] in
-                ['boltzmann_camb', 'boltzmann_class'])):
+                ['boltzmann_camb', 'boltzmann_class', 'boltzmann_isitgr'])):
             raise CCLError("Either the CAMB or CLASS computation "
                            "failed silently! CCL could not compute the "
                            "transfer function!")

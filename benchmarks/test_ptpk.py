@@ -4,7 +4,6 @@ import pyccl as ccl
 import pyccl.nl_pt as pt
 import pytest
 
-
 # Set cosmology
 COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05,
                       h=0.7, sigma8=0.8, n_s=0.96,
@@ -31,6 +30,9 @@ data.append(np.loadtxt(os.path.join(dirdat, 'pt_bm_z0.txt'), unpack=True))
 data.append(np.loadtxt(os.path.join(dirdat, 'pt_bm_z1.txt'), unpack=True))
 order = ['gg', 'gm', 'gi', 'ii', 'ib', 'im']
 
+kmin = 1.e-3
+kmax = 1.e0
+
 
 @pytest.mark.parametrize('comb', enumerate(order))
 def test_pt_pk(comb):
@@ -52,7 +54,9 @@ def test_pt_pk(comb):
                         a_arr=a_arr)
     for iz, z in enumerate(zs):
         a = 1./(1+z)
-        k = data[iz][0]
-        dpk = data[iz][i_d+1]
+        kin = data[iz][0]
+        ind = np.where((kin < kmax) & (kin > kmin))
+        k = kin[ind]
+        dpk = data[iz][i_d+1][ind]
         tpk = pk.eval(k, a, COSMO)
         assert np.all(np.fabs(tpk / dpk - 1) < 1E-5)
