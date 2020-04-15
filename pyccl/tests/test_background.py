@@ -192,34 +192,3 @@ def test_input_arrays_raises():
         cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7,
                                     n_s=0.965, A_s=2e-9)
         cosmo_input._set_background_from_arrays()
-
-
-def test_input_lin_power_spectrum():
-    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                          A_s=2e-9)
-    a_arr = np.linspace(0.1, 1.0, 50)
-    k_arr = np.logspace(np.log10(2e-4), np.log10(1), 1000)
-    pk_arr = np.empty(shape=(len(a_arr), len(k_arr)))
-    for i, a in enumerate(a_arr):
-        pk_arr[i] = ccl.power.linear_matter_power(cosmo, k_arr, a)
-
-    chi_from_ccl = ccl.background.comoving_radial_distance(cosmo, a_arr)
-    hoh0_from_ccl = ccl.background.h_over_h0(cosmo, a_arr)
-    growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
-    fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
-
-    cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9, transfer_function='pklin_from_input')
-    cosmo_input._set_background_from_arrays(a_array=a_arr,
-                                            chi_array=chi_from_ccl,
-                                            hoh0_array=hoh0_from_ccl,
-                                            growth_array=growth_from_ccl,
-                                            fgrowth_array=fgrowth_from_ccl)
-    cosmo_input._set_linear_power_from_arrays(a_arr, k_arr, pk_arr)
-    cosmo_input.compute_linear_power()
-    pk_CCL_input = ccl.power.linear_matter_power(cosmo_input, k_arr, 0.5)
-    pk_CCL = ccl.power.linear_matter_power(cosmo, k_arr, 0.5)
-
-    # The first k's seem to always be somewhat high (10^-3 relative
-    # difference).
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)

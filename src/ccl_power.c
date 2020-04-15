@@ -459,7 +459,7 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
         break;
 
       case ccl_boltzmann_isitgr:
-	rescaled_mg_flag = 0; 
+	    rescaled_mg_flag = 0;
         ccl_cosmology_spline_linpower_musigma(cosmo, psp, rescaled_mg_flag, status);
         break;
 

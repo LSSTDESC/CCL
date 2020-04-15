@@ -11,6 +11,7 @@ from .errors import CCLError, CCLWarning
 from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
+from .pk2d import Pk2D
 
 # Configuration types
 transfer_function_types = {
@@ -778,7 +779,6 @@ class Cosmology(object):
         if not self._linear_power_on_input:
             raise ValueError("Cannot compute linear power spectrum from"
                              "input without input arrays initialized.")
-        from .pk2d import Pk2D  # FIXME: Is it okay to call this here?
         pk_lin = Pk2D(pkfunc=None,
                       a_arr=self.a_array,
                       lk_arr=np.log(self.k_array),
@@ -992,7 +992,10 @@ class Cosmology(object):
     def _set_linear_power_from_arrays(self, a_array=None, k_array=None,
                                       pk_array=None):
         """
-        # TODO: Docstring.
+        This function initializes the arrays used for parsing
+        a linear power spectrum from input. Call this function
+        to have the power spectrum be read from input and not
+        computed by CCL.
 
         a_array (array): an array holding values of the scale factor
         k_array (array): an array holding values of the wavenumber
