@@ -720,7 +720,13 @@ class Cosmology(object):
         """Call the appropriate function to compute the linear power
         spectrum, either read from input or calculated internally,"""
         if self._linear_power_on_input:
-            self._compute_linear_power_from_arrays()
+            print('YOOOOOO')
+#            self._compute_linear_power_from_arrays()
+        elif (self._config_init_kwargs['transfer_function']
+              == 'pklin_from_input'):
+            raise ValueError("Input arrays were not initialized when "
+                             "trying to compute linear power spectrum with "
+                             "transfer function set to pklin_from_input.")
         else:
             self._compute_linear_power_internal()
 
@@ -778,7 +784,7 @@ class Cosmology(object):
     def _compute_linear_power_from_arrays(self):
         if not self._linear_power_on_input:
             raise ValueError("Cannot compute linear power spectrum from"
-                             "input without input arrays initialized.")
+                             " input without input arrays initialized.")
         pk_lin = Pk2D(pkfunc=None,
                       a_arr=self.a_array,
                       lk_arr=np.log(self.k_array),
@@ -1019,13 +1025,13 @@ class Cosmology(object):
         else:
             if (self._config_init_kwargs['transfer_function']
                     == 'pklin_from_input'):
+                if ((a_array is None) or (k_array is None)
+                        or (pk_array is None)):
+                    raise ValueError("Input arrays not parsed.")
                 self._linear_power_on_input = True
                 self.a_array = a_array
                 self.k_array = k_array
                 self.pk_array = pk_array
-                if ((a_array is None) or (k_array is None)
-                        or (pk_array is None)):
-                    raise ValueError("Input arrays not parsed.")
             else:
                 raise ValueError("Transfer function was not set to "
                                  "'pklin_from_input' while trying to "
