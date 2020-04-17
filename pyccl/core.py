@@ -720,8 +720,7 @@ class Cosmology(object):
         """Call the appropriate function to compute the linear power
         spectrum, either read from input or calculated internally,"""
         if self._linear_power_on_input:
-            print('YOOOOOO')
-#            self._compute_linear_power_from_arrays()
+            self._compute_linear_power_from_arrays()
         elif (self._config_init_kwargs['transfer_function']
               == 'pklin_from_input'):
             raise ValueError("Input arrays were not initialized when "
