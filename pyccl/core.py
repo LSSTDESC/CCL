@@ -11,6 +11,7 @@ from .errors import CCLError, CCLWarning
 from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin
 from .pyutils import check
+from .pk2d import Pk2D
 
 # Configuration types
 transfer_function_types = {
@@ -885,6 +886,11 @@ class Cosmology(object):
         spectrum, either read from input or calculated internally,"""
         if self._nonlinear_power_on_input:
             self._compute_nonlin_power_from_arrays()
+        elif (self._config_init_kwargs['matter_power_spectrum']
+              == 'pknl_from_input'):
+            raise ValueError("Input arrays were not initialized when "
+                             "trying to compute non-linear power spectrum with"
+                             " matter power spectrum set to pknl_from_input.")
         else:
             self._compute_nonlin_power_internal()
 
@@ -892,7 +898,6 @@ class Cosmology(object):
         if not self._nonlinear_power_on_input:
             raise ValueError("Cannot compute non-linear power spectrum from"
                              "input without input arrays initialized.")
-        from .pk2d import Pk2D
         pk_lin = Pk2D(pkfunc=None,
                       a_arr=self.a_array,
                       lk_arr=np.log(self.k_array),
@@ -1059,7 +1064,10 @@ class Cosmology(object):
     def _set_nonlin_power_from_arrays(self, a_array=None, k_array=None,
                                       pk_array=None):
         """
-        # TODO: Docstring.
+        This function initializes the arrays used for parsing
+        a non-linear power spectrum from input. Call this function
+        to have the power spectrum be read from input and not
+        computed by CCL.
 
         a_array (array): an array holding values of the scale factor
         k_array (array): an array holding values of the wavenumber
@@ -1083,13 +1091,13 @@ class Cosmology(object):
         else:
             if (self._config_init_kwargs['matter_power_spectrum']
                     == 'pknl_from_input'):
+                if ((a_array is None) or (k_array is None)
+                        or (pk_array is None)):
+                    raise ValueError("Input arrays not parsed.")
                 self._nonlinear_power_on_input = True
                 self.a_array = a_array
                 self.k_array = k_array
                 self.pk_array = pk_array
-                if ((a_array is None) or (k_array is None)
-                        or (pk_array is None)):
-                    raise ValueError("Input arrays not parsed.")
             else:
                 raise ValueError("Matter power spectrum type was not set to "
                                  "'pknl_from_input' while trying to "
