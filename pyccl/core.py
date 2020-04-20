@@ -9,7 +9,7 @@ import yaml
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
 from ._types import error_types
-from .boltzmann import get_class_pk_lin, get_camb_pk_lin
+from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 
@@ -21,6 +21,7 @@ transfer_function_types = {
     'boltzmann_class':  lib.boltzmann_class,
     'boltzmann_camb':   lib.boltzmann_camb,
     'pklin_from_input': lib.pklin_from_input,
+    'boltzmann_isitgr': lib.boltzmann_isitgr,
 }
 
 matter_power_spectrum_types = {
@@ -38,7 +39,6 @@ baryons_power_spectrum_types = {
 
 # List which transfer functions can be used with the muSigma_MG
 # parameterisation of modified gravity
-valid_muSig_transfers = {'boltzmann_class', 'class'}
 
 mass_function_types = {
     'angulo':      lib.angulo,
@@ -725,6 +725,11 @@ class Cosmology(object):
         spectrum, either read from input or calculated internally,"""
         if self._linear_power_on_input:
             self._compute_linear_power_from_arrays()
+        elif (self._config_init_kwargs['transfer_function']
+              == 'pklin_from_input'):
+            raise ValueError("Input arrays were not initialized when "
+                             "trying to compute linear power spectrum with "
+                             "transfer function set to pklin_from_input.")
         else:
             self._compute_linear_power_internal()
 
@@ -757,6 +762,10 @@ class Cosmology(object):
             pk_lin = get_class_pk_lin(self)
             psp = pk_lin.psp
         elif ((self._config_init_kwargs['transfer_function'] ==
+                'boltzmann_isitgr') and not self.has_linear_power):
+            pk_lin = get_isitgr_pk_lin(self)
+            psp = pk_lin.psp
+        elif ((self._config_init_kwargs['transfer_function'] ==
                 'boltzmann_camb') and not self.has_linear_power):
             pk_lin = get_camb_pk_lin(self)
             psp = pk_lin.psp
@@ -765,7 +774,7 @@ class Cosmology(object):
 
         if (psp is None and not self.has_linear_power and (
                 self._config_init_kwargs['transfer_function'] in
-                ['boltzmann_camb', 'boltzmann_class'])):
+                ['boltzmann_camb', 'boltzmann_class', 'boltzmann_isitgr'])):
             raise CCLError("Either the CAMB or CLASS computation "
                            "failed silently! CCL could not compute the "
                            "transfer function!")
@@ -778,8 +787,7 @@ class Cosmology(object):
     def _compute_linear_power_from_arrays(self):
         if not self._linear_power_on_input:
             raise ValueError("Cannot compute linear power spectrum from"
-                             "input without input arrays initialized.")
-        from .pk2d import Pk2D  # FIXME: Is it okay to call this here?
+                             " input without input arrays initialized.")
         pk_lin = Pk2D(pkfunc=None,
                       a_arr=self.a_array,
                       lk_arr=np.log(self.k_array),
@@ -788,9 +796,6 @@ class Cosmology(object):
                       extrap_order_lok=1,
                       extrap_order_hik=2,
                       cosmo=None)
-
-        # needed to init some models
-        self.compute_growth()
 
         psp = pk_lin.psp
 
@@ -1025,7 +1030,10 @@ class Cosmology(object):
     def _set_linear_power_from_arrays(self, a_array=None, k_array=None,
                                       pk_array=None):
         """
-        # TODO: Docstring.
+        This function initializes the arrays used for parsing
+        a linear power spectrum from input. Call this function
+        to have the power spectrum be read from input and not
+        computed by CCL.
 
         a_array (array): an array holding values of the scale factor
         k_array (array): an array holding values of the wavenumber
@@ -1049,13 +1057,13 @@ class Cosmology(object):
         else:
             if (self._config_init_kwargs['transfer_function']
                     == 'pklin_from_input'):
+                if ((a_array is None) or (k_array is None)
+                        or (pk_array is None)):
+                    raise ValueError("Input arrays not parsed.")
                 self._linear_power_on_input = True
                 self.a_array = a_array
                 self.k_array = k_array
                 self.pk_array = pk_array
-                if ((a_array is None) or (k_array is None)
-                        or (pk_array is None)):
-                    raise ValueError("Input arrays not parsed.")
             else:
                 raise ValueError("Transfer function was not set to "
                                  "'pklin_from_input' while trying to "
