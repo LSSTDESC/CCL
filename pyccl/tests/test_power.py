@@ -194,7 +194,7 @@ def test_input_lin_power_spectrum():
                                             growth_array=growth_from_ccl,
                                             fgrowth_array=fgrowth_from_ccl)
     cosmo_input._set_linear_power_from_arrays(a_arr, k_arr, pk_arr)
-    cosmo_input.compute_linear_power()
+
     pk_CCL_input = ccl.power.linear_matter_power(cosmo_input, k_arr, 0.5)
     pk_CCL = ccl.power.linear_matter_power(cosmo, k_arr, 0.5)
 
@@ -238,7 +238,7 @@ def test_input_nonlin_power_spectrum():
                                             growth_array=growth_from_ccl,
                                             fgrowth_array=fgrowth_from_ccl)
     cosmo_input._set_nonlin_power_from_arrays(a_arr, k_arr, pk_arr)
-    cosmo_input.compute_nonlin_power()
+
     pk_CCL_input = ccl.power.nonlin_matter_power(cosmo_input, k_arr, 0.5)
     pk_CCL = ccl.power.nonlin_matter_power(cosmo, k_arr, 0.5)
 
