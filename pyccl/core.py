@@ -1015,7 +1015,8 @@ class Cosmology(object):
         else:
             if ((a_array is None) or (k_array is None)
                     or (pk_array is None)):
-                raise ValueError("Input arrays not parsed.")
+                raise ValueError("One or more input array for a, k,"
+                                 " or Pk is not parsed.")
             self.cosmo.config.transfer_function_method = lib.pklin_from_input
             self._config_init_kwargs['transfer_function'] = 'pklin_from_input'
             self._linear_power_on_input = True
