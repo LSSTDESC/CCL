@@ -187,7 +187,7 @@ def test_input_lin_power_spectrum():
     fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
 
     cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9, transfer_function='pklin_from_input')
+                                A_s=2e-9)
     cosmo_input._set_background_from_arrays(a_array=a_arr,
                                             chi_array=chi_from_ccl,
                                             hoh0_array=hoh0_from_ccl,
@@ -198,8 +198,6 @@ def test_input_lin_power_spectrum():
     pk_CCL_input = ccl.power.linear_matter_power(cosmo_input, k_arr, 0.5)
     pk_CCL = ccl.power.linear_matter_power(cosmo, k_arr, 0.5)
 
-    # The first k's seem to always be somewhat high (10^-3 relative
-    # difference).
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
 
@@ -212,10 +210,6 @@ def test_input_linpower_raises():
         cosmo_input.compute_linear_power()
         cosmo_input._set_linear_power_from_arrays()
     cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9, transfer_function='pklin_from_input')
+                                A_s=2e-9)
     with pytest.raises(ValueError):
         cosmo_input._compute_linear_power_from_arrays()
-    with pytest.raises(ValueError):
-        cosmo_input._set_linear_power_from_arrays()
-    with pytest.raises(ValueError):
-        cosmo_input.compute_linear_power()

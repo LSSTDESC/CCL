@@ -20,7 +20,6 @@ transfer_function_types = {
     'bbks':             lib.bbks,
     'boltzmann_class':  lib.boltzmann_class,
     'boltzmann_camb':   lib.boltzmann_camb,
-    'pklin_from_input': lib.pklin_from_input,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
 }
 
@@ -1019,16 +1018,12 @@ class Cosmology(object):
             raise ValueError("Linear power spectrum has been initialized"
                              "and cannot be reset.")
         else:
-            if (self._config_init_kwargs['transfer_function']
-                    == 'pklin_from_input'):
-                if ((a_array is None) or (k_array is None)
-                        or (pk_array is None)):
-                    raise ValueError("Input arrays not parsed.")
-                self._linear_power_on_input = True
-                self.a_array = a_array
-                self.k_array = k_array
-                self.pk_array = pk_array
-            else:
-                raise ValueError("Transfer function was not set to "
-                                 "'pklin_from_input' while trying to "
-                                 "input a linear power spectrum.")
+            if ((a_array is None) or (k_array is None)
+                    or (pk_array is None)):
+                raise ValueError("Input arrays not parsed.")
+            self.cosmo.config.transfer_function_method = lib.pklin_from_input
+            self._config_init_kwargs['transfer_function'] = 'pklin_from_input'
+            self._linear_power_on_input = True
+            self.a_array = a_array
+            self.k_array = k_array
+            self.pk_array = pk_array
