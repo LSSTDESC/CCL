@@ -720,11 +720,6 @@ class Cosmology(object):
         spectrum, either read from input or calculated internally,"""
         if self._linear_power_on_input:
             self._compute_linear_power_from_arrays()
-        elif (self._config_init_kwargs['transfer_function']
-              == 'pklin_from_input'):
-            raise ValueError("Input arrays were not initialized when "
-                             "trying to compute linear power spectrum with "
-                             "transfer function set to pklin_from_input.")
         else:
             self._compute_linear_power_internal()
 
