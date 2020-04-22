@@ -66,6 +66,17 @@ void ccl_cosmology_compute_nonlin_power_from_f2d(ccl_cosmology *cosmo,
                                                  ccl_f2d_t *psp, int *status);
 
 /**
+ * Compute the linear power spectrum from an existing 2d spline P(k,z).
+ * @param cosmo Cosmological parameters
+ * @param psp existing 2d spline.
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+void ccl_compute_linear_power_from_f2d(ccl_cosmology *cosmo,
+                                                 ccl_f2d_t *psp, int *status);
+
+/**
  * Variance of the matter density field with (top-hat) smoothing scale R [Mpc].
  * Returns sigma(R) for specified cosmology at a = 1.
  * @param cosmo Cosmology parameters and configurations

@@ -459,8 +459,12 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
         break;
 
       case ccl_boltzmann_isitgr:
-	rescaled_mg_flag = 0; 
+	    rescaled_mg_flag = 0;
         ccl_cosmology_spline_linpower_musigma(cosmo, psp, rescaled_mg_flag, status);
+        break;
+
+      case ccl_pklin_from_input:
+        ccl_compute_linear_power_from_f2d(cosmo, psp, status);
         break;
 
       default: {
@@ -482,6 +486,12 @@ void ccl_cosmology_compute_nonlin_power_from_f2d(ccl_cosmology *cosmo,
                                                  ccl_f2d_t *psp, int *status)
 {
   cosmo->data.p_nl = ccl_f2d_t_copy(psp, status);
+}
+
+void ccl_compute_linear_power_from_f2d(ccl_cosmology *cosmo,
+                                                 ccl_f2d_t *psp, int *status)
+{
+  cosmo->data.p_lin = ccl_f2d_t_copy(psp, status);
 }
 
 /*------ ROUTINE: ccl_cosmology_compute_power -----

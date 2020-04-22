@@ -11,6 +11,7 @@ from .errors import CCLError, CCLWarning
 from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
+from .pk2d import Pk2D
 
 # Configuration types
 transfer_function_types = {
@@ -19,7 +20,7 @@ transfer_function_types = {
     'bbks':             lib.bbks,
     'boltzmann_class':  lib.boltzmann_class,
     'boltzmann_camb':   lib.boltzmann_camb,
-    'boltzmann_isitgr':   lib.boltzmann_isitgr,
+    'boltzmann_isitgr': lib.boltzmann_isitgr,
 }
 
 matter_power_spectrum_types = {
@@ -185,6 +186,9 @@ class Cosmology(object):
         # This will change to True once the "_set_background_from_arrays"
         # is called.
         self._background_on_input = False
+        # This will change to True once the "set_linear_power_from_arrays"
+        # is called.
+        self._linear_power_on_input = False
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -712,6 +716,14 @@ class Cosmology(object):
                                                      status)
 
     def compute_linear_power(self):
+        """Call the appropriate function to compute the linear power
+        spectrum, either read from input or calculated internally,"""
+        if self._linear_power_on_input:
+            self._compute_linear_power_from_arrays()
+        else:
+            self._compute_linear_power_internal()
+
+    def _compute_linear_power_internal(self):
         """Compute the linear power spectrum."""
         if self.has_linear_power:
             return
@@ -758,6 +770,25 @@ class Cosmology(object):
                            "transfer function!")
 
         # first do the linear matter power
+        status = 0
+        status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
+        check(status, self)
+
+    def _compute_linear_power_from_arrays(self):
+        if not self._linear_power_on_input:
+            raise ValueError("Cannot compute linear power spectrum from"
+                             " input without input arrays initialized.")
+        pk_lin = Pk2D(pkfunc=None,
+                      a_arr=self.a_array,
+                      lk_arr=np.log(self.k_array),
+                      pk_arr=self.pk_array,
+                      is_logp=False,
+                      extrap_order_lok=1,
+                      extrap_order_hik=2,
+                      cosmo=None)
+
+        psp = pk_lin.psp
+
         status = 0
         status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
         check(status, self)
@@ -953,3 +984,42 @@ class Cosmology(object):
                     or (hoh0_array is None) or (growth_array is None)
                     or (fgrowth_array is None)):
                 raise ValueError("Input arrays not parsed.")
+
+    def _set_linear_power_from_arrays(self, a_array=None, k_array=None,
+                                      pk_array=None):
+        """
+        This function initializes the arrays used for parsing
+        a linear power spectrum from input. Call this function
+        to have the power spectrum be read from input and not
+        computed by CCL.
+
+        a_array (array): an array holding values of the scale factor
+        k_array (array): an array holding values of the wavenumber
+            in units of Mpc^-1).
+        pk_array (array): a 2D array containing the values of the power
+            spectrum at the values of the scale factor and the wavenumber
+            held by `a_array` and `k_array`. The shape of this array must be
+            `[na,nk]`, where `na` is the size of `a_array` and `nk` is the
+            size of `k_array`. This array can be provided in a flattened
+            form as long as the total size matches `nk*na`.
+            Note that, if you pass your own Pk array, you
+            are responsible of making sure that it is sufficiently well
+            sampled (i.e. the resolution of `a_array` and `k_array` is high
+            enough to sample the main features in the power spectrum).
+            For reference, CCL will use bicubic interpolation to evaluate
+            the power spectrum at any intermediate point in k and a.
+        """
+        if self.has_linear_power:
+            raise ValueError("Linear power spectrum has been initialized"
+                             "and cannot be reset.")
+        else:
+            if ((a_array is None) or (k_array is None)
+                    or (pk_array is None)):
+                raise ValueError("One or more input array for a, k,"
+                                 " or Pk is not parsed.")
+            self.cosmo.config.transfer_function_method = lib.pklin_from_input
+            self._config_init_kwargs['transfer_function'] = 'pklin_from_input'
+            self._linear_power_on_input = True
+            self.a_array = a_array
+            self.k_array = k_array
+            self.pk_array = pk_array
