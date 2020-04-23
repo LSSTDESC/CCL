@@ -108,3 +108,16 @@ def sigma8(cosmo):
     """
     cosmo.compute_linear_power()
     return sigmaR(cosmo, 8.0 / cosmo['h'])
+
+def kNL(cosmo, a):
+    """Scale for the non-linear cut.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+
+    Returns:
+        float: Scale of non-linear cut-off.
+    """
+    cosmo.compute_linear_power()
+    return _vectorize_fn2(lib.kNL, lib.kNL_vec, cosmo, a)

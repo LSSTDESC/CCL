@@ -110,6 +110,17 @@ double ccl_sigmaV(ccl_cosmology *cosmo, double R, double a, int * status);
  */
 double ccl_sigma8(ccl_cosmology *cosmo, int * status);
 
+/**
+ * Scale for the non-linear cut.
+ * Returns k_NL for specified cosmology at specified scale factor.
+ * @param cosmo Cosmology parameters and configurations
+ * @param a scale factor
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return kNL.
+ */
+double ccl_kNL(ccl_cosmology *cosmo, double a, int * status);
+
 CCL_END_DECLS
 
 #endif

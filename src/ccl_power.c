@@ -608,6 +608,12 @@ typedef struct {
   int* status;
 } SigmaV_pars;
 
+// Params for k_NL integrand
+typedef struct {
+  ccl_cosmology *cosmo;
+  int* status;
+} KNL_pars;
+
 /* --------- ROUTINE: w_tophat ---------
 INPUT: kR, ususally a wavenumber multiplied by a smoothing radius
 TASK: Output W(x)=[sin(x)-x*cos(x)]*(3/x)^3
@@ -767,4 +773,61 @@ smoothed with a tophat filter of comoving size 8 Mpc/h
 
 double ccl_sigma8(ccl_cosmology *cosmo, int *status) {
   return ccl_sigmaR(cosmo, 8/cosmo->params.h, 1., status);
+}
+
+// Integrand for kNL integral
+static double kNL_integrand(double k,void *params) {
+  KNL_pars *par=(KNL_pars *)params;
+
+  double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
+
+  return pk*k*k*k;
+}
+
+/* --------- ROUTINE: ccl_kNL ---------
+INPUT: cosmology, scale factor
+TASK: compute kNL, the scale for the non-linear cut
+*/
+double ccl_kNL(ccl_cosmology *cosmo,double a,int *status) {
+  if (!cosmo->computed_linear_power) {
+    *status = CCL_ERROR_LINEAR_POWER_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_sigmaR(): linear power spctrum has not been computed!");
+    return NAN;
+  }
+  if (!cosmo->computed_growth){
+    *status = CCL_ERROR_GROWTH_INIT;
+    ccl_cosmology_set_status_message(
+      cosmo,
+      "ccl_power.c: ccl_sigmaR(): growth factor splines have not been precomputed!");
+    return NAN;
+  }
+
+  KNL_pars par;
+  par.status = status;
+
+  par.cosmo=cosmo;
+  gsl_integration_cquad_workspace *workspace =  NULL;
+  gsl_function F;
+  F.function=&kNL_integrand;
+  F.params=&par;
+  double k_NL;
+
+  workspace = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+  if (workspace == NULL) {
+    *status = CCL_ERROR_MEMORY;
+  }
+  if (*status == 0) {
+    int gslstatus = gsl_integration_cquad(&F, cosmo->spline_params.K_MIN, cosmo->spline_params.K_MAX,
+                                          0.0, cosmo->gsl_params.INTEGRATION_KNL_EPSREL,
+                                          workspace,&k_NL,NULL,NULL);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_kNL():");
+      *status |= gslstatus;
+    }
+  }
+  gsl_integration_cquad_workspace_free(workspace);
+
+  return pow(sqrt(k_NL*M_LN10/(6*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status), -1); //remove M_LN10 -- what is it? //is ccl_growth_factor there to set the power spectrum to the correct redshift?
 }
