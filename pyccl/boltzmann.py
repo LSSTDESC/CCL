@@ -13,6 +13,11 @@ try:
 except ImportError:
     HAVE_CAMB = False
 
+try:
+    import isitgr
+except ImportError:
+    pass  #  If this is required, an error message will be emitted below, but this is necessary to avoid weird nan issues from isitgr functions
+    
 from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D

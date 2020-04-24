@@ -3,11 +3,6 @@ import numpy as np
 import pyccl as ccl
 from scipy.interpolate import interp1d
 import pytest
-try:
-    import isitgr
-except ImportError:
-    pass  #  If this is required, an error message will be emitted below, but this is necessary to avoid weird nan ssues from isitgr functions
-
 
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
 def corr_method(request):
