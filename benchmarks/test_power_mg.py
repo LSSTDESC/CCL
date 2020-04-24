@@ -1,7 +1,10 @@
 import numpy as np
 import pytest
-
 import pyccl as ccl
+try:
+    import isitgr
+except ImportError:
+    pass  #  If this is required, an error message will be emitted below, but this is necessary to avoid weird nan i\ssues from isitgr functions
 
 POWER_MG_TOL = 1e-2
 
