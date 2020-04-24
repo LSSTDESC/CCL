@@ -1,5 +1,5 @@
 from . import ccllib as lib
-from .pyutils import _vectorize_fn2
+from .pyutils import _vectorize_fn2, _vectorize_fn
 import numpy as np
 from .core import check
 
@@ -120,4 +120,4 @@ def kNL(cosmo, a):
         float: Scale of non-linear cut-off.
     """
     cosmo.compute_linear_power()
-    return _vectorize_fn2(lib.kNL, lib.kNL_vec, cosmo, a)
+    return _vectorize_fn(lib.kNL, lib.kNL_vec, cosmo, a)
