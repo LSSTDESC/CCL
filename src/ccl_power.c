@@ -781,7 +781,7 @@ static double kNL_integrand(double k,void *params) {
 
   double pk=ccl_linear_matter_power(par->cosmo,k, 1.,par->status);
 
-  return pk*k*k*k;
+  return pk;
 }
 
 /* --------- ROUTINE: ccl_kNL ---------
@@ -829,5 +829,5 @@ double ccl_kNL(ccl_cosmology *cosmo,double a,int *status) {
   }
   gsl_integration_cquad_workspace_free(workspace);
 
-  return pow(sqrt(k_NL*M_LN10/(6*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status), -1); //remove M_LN10 -- what is it? //is ccl_growth_factor there to set the power spectrum to the correct redshift?
+  return pow(sqrt(k_NL/(6*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status), -1); //remove M_LN10 -- what is it? //is ccl_growth_factor there to set the power spectrum to the correct redshift? Why not do this in the integrand?
 }
