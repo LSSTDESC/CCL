@@ -16,7 +16,7 @@ except ImportError:
 try:
     import isitgr
 except ImportError:
-    pass  #  If this is required, an error message will be emitted below, but this is necessary to avoid weird nan issues from isitgr functions
+    pass  #prevent nans from isitgr
     
 from . import ccllib as lib
 from .pyutils import check
