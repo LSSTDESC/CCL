@@ -4,6 +4,7 @@ import pyccl as ccl
 from scipy.interpolate import interp1d
 import pytest
 
+
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
 def corr_method(request):
     errfacs = {'fftlog': 0.21, 'bessel': 0.05}
