@@ -3,7 +3,10 @@ from .core import check
 from .background import comoving_radial_distance, growth_rate, growth_factor
 from .pyutils import _check_array_params, NoneArr
 import numpy as np
-import collections
+try:
+    from collections.abc import Iterable
+except ImportError:  # for py2.7
+    from collections import Iterable
 
 
 def get_density_kernel(cosmo, dndz):
@@ -23,10 +26,10 @@ def get_density_kernel(cosmo, dndz):
             The units are arbitrary; N(z) will be normalized
             to unity.
     """
-    if ((not isinstance(dndz, collections.Iterable))
+    if ((not isinstance(dndz, Iterable))
         or (len(dndz) != 2)
-        or (not (isinstance(dndz[0], collections.Iterable)
-                 and isinstance(dndz[1], collections.Iterable)))):
+        or (not (isinstance(dndz[0], Iterable)
+                 and isinstance(dndz[1], Iterable)))):
         raise ValueError("dndz needs to be a tuple of two arrays.")
     z_n, n = _check_array_params(dndz)
     # this call inits the distance splines neded by the kernel functions
@@ -59,10 +62,10 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
             giving the magnification bias as a function of redshift. If
             `None`, s=0 will be assumed
     """
-    if ((not isinstance(dndz, collections.Iterable))
+    if ((not isinstance(dndz, Iterable))
         or (len(dndz) != 2)
-        or (not (isinstance(dndz[0], collections.Iterable)
-                 and isinstance(dndz[1], collections.Iterable)))):
+        or (not (isinstance(dndz[0], Iterable)
+                 and isinstance(dndz[1], Iterable)))):
         raise ValueError("dndz needs to be a tuple of two arrays.")
 
     # we need the distance functions at the C layer
