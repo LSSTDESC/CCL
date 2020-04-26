@@ -269,7 +269,7 @@ static int growth_factor_and_growth_rate(double a, double *gf, double *fg, ccl_c
 
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
-        return NAN;
+        return 0;
       }
 
       *gf = y[0];
@@ -299,7 +299,7 @@ static int growth_factor_and_growth_rate(double a, double *gf, double *fg, ccl_c
 
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
-        return NAN;
+        return 0;
       }
 
       *gf = y[0];

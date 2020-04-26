@@ -75,10 +75,10 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
         *status = CCL_ERROR_MEMORY;
 
       if(*status==0) {
-        s2dstatus!=gsl_spline2d_init(f2d->fka, f2d_o->fka->xarr,
-                                     f2d_o->fka->yarr, f2d_o->fka->zarr,
-                                     f2d_o->fka->interp_object.xsize,
-                                     f2d_o->fka->interp_object.ysize);
+        s2dstatus |= gsl_spline2d_init(f2d->fka, f2d_o->fka->xarr,
+                                       f2d_o->fka->yarr, f2d_o->fka->zarr,
+                                       f2d_o->fka->interp_object.xsize,
+                                       f2d_o->fka->interp_object.ysize);
         if(s2dstatus)
           *status = CCL_ERROR_SPLINE;
       }
