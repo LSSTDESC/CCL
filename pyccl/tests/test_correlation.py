@@ -2,6 +2,8 @@ import numpy as np
 import pyccl as ccl
 import pytest
 
+from pyccl.pyutils import assert_warns
+
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
@@ -41,8 +43,8 @@ def test_correlation_newtypes(typs):
     cl = ccl.angular_cl(COSMO, lens, lens, ell)
 
     theta = np.logspace(-2., np.log10(5.), 5)
-    corr_old = ccl.correlation(COSMO, ell, cl, theta,
-                               corr_type=typs[0])
+    corr_old = assert_warns(ccl.CCLWarning,
+            ccl.correlation, COSMO, ell, cl, theta, corr_type=typs[0])
     corr_new = ccl.correlation(COSMO, ell, cl, theta,
                                type=typs[1])
     assert np.all(corr_new == corr_old)
@@ -125,4 +127,4 @@ def test_correlation_raises():
         ccl.correlation(COSMO, [1], [1e-3], [1], method='blah')
 
     with pytest.raises(ValueError):
-        ccl.correlation(COSMO, [1], [1e-3], [1], corr_type='blah')
+        ccl.correlation(COSMO, [1], [1e-3], [1], type='blah')
