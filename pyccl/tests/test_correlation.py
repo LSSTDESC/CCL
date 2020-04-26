@@ -2,8 +2,6 @@ import numpy as np
 import pyccl as ccl
 import pytest
 
-from pyccl.pyutils import assert_warns
-
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
@@ -35,6 +33,7 @@ def test_correlation_smoke(method):
                                   ['l+', 'GG+'],
                                   ['l-', 'GG-']])
 def test_correlation_newtypes(typs):
+    from pyccl.pyutils import assert_warns
     z = np.linspace(0., 1., 200)
     n = np.ones(z.shape)
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
