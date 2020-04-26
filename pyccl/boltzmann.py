@@ -14,9 +14,9 @@ except ImportError:
     HAVE_CAMB = False
 
 try:
-    import isitgr # noqa: F401
+    import isitgr  # noqa: F401
 except ImportError:
-    pass # prevent nans from isitgr
+    pass  # prevent nans from isitgr
 
 from . import ccllib as lib
 from .pyutils import check
@@ -195,7 +195,7 @@ def get_isitgr_pk_lin(cosmo):
     """
 
     try:
-        import isitgr # noqa: F811
+        import isitgr  # noqa: F811
         import isitgr.model
     except ImportError as e:
         e.args = (
