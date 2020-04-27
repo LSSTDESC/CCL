@@ -122,18 +122,18 @@ def set_up(request):
 
 
 @pytest.mark.parametrize("t1,t2,bm,er,kind,pref",
-                         [('g1', 'g1', 'dd_11', 'dd_11', 'gg', 1),
-                          ('g2', 'g2', 'dd_22', 'dd_22', 'gg', 1),
-                          ('g1', 'l1', 'dl_11', 'dl_11', 'gl', 1),
-                          ('g1', 'l2', 'dl_12', 'dl_12', 'gl', 1),
-                          ('g2', 'l1', 'dl_21', 'dl_21', 'gl', 1),
-                          ('g2', 'l2', 'dl_22', 'dl_22', 'gl', 1),
-                          ('l1', 'l1', 'll_11_p', 'll_11_p', 'l+', 1),
-                          ('l1', 'l2', 'll_12_p', 'll_12_p', 'l+', 1),
-                          ('l2', 'l2', 'll_22_p', 'll_22_p', 'l+', 1),
-                          ('l1', 'l1', 'll_11_m', 'll_11_m', 'l-', 1),
-                          ('l1', 'l2', 'll_12_m', 'll_12_m', 'l-', 1),
-                          ('l2', 'l2', 'll_22_m', 'll_22_m', 'l-', 1)])
+                         [('g1', 'g1', 'dd_11', 'dd_11', 'NN', 1),
+                          ('g2', 'g2', 'dd_22', 'dd_22', 'NN', 1),
+                          ('g1', 'l1', 'dl_11', 'dl_11', 'NG', 1),
+                          ('g1', 'l2', 'dl_12', 'dl_12', 'NG', 1),
+                          ('g2', 'l1', 'dl_21', 'dl_21', 'NG', 1),
+                          ('g2', 'l2', 'dl_22', 'dl_22', 'NG', 1),
+                          ('l1', 'l1', 'll_11_p', 'll_11_p', 'GG+', 1),
+                          ('l1', 'l2', 'll_12_p', 'll_12_p', 'GG+', 1),
+                          ('l2', 'l2', 'll_22_p', 'll_22_p', 'GG+', 1),
+                          ('l1', 'l1', 'll_11_m', 'll_11_m', 'GG-', 1),
+                          ('l1', 'l2', 'll_12_m', 'll_12_m', 'GG-', 1),
+                          ('l2', 'l2', 'll_22_m', 'll_22_m', 'GG-', 1)])
 def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     cosmo, trcs, bms, ers, fls = set_up
     method, errfac = corr_method
@@ -147,7 +147,7 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     # Our benchmarks have theta in arcmin
     # but CCL requires it in degrees:
     theta_deg = bms['theta'] / 60.
-    xi = ccl.correlation(cosmo, ell, cli, theta_deg, corr_type=kind,
+    xi = ccl.correlation(cosmo, ell, cli, theta_deg, type=kind,
                          method=method)
     xi *= pref
 
