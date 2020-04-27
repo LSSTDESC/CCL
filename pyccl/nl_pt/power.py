@@ -380,7 +380,8 @@ class PTCalculator(object):
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                 sub_lowk=False, nonlin_pk_type='nonlinear',
                 a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
-                return_ia_bb=False, return_ia_ee_and_bb=False):
+                return_ia_bb=False, return_ia_ee_and_bb=False,
+                return_ptc=False):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the PT power spectrum for two quantities defined by
     two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
@@ -580,10 +581,16 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                         lk_arr=np.log(ptc.ks),
                         pk_arr=p_pt[1].T,
                         is_logp=False)
-        return pt_pk_ee, pt_pk_bb
+        if return_ptc:
+            return pt_pk_ee, pt_pk_bb, ptc
+        else:
+            return pt_pk_ee, pt_pk_bb
     else:
         pt_pk = Pk2D(a_arr=a_arr,
                      lk_arr=np.log(ptc.ks),
                      pk_arr=p_pt.T,
                      is_logp=False)
-        return pt_pk
+        if return_ptc:
+            return pt_pk, ptc
+        else:
+            return pt_pk
