@@ -392,7 +392,10 @@ class Tracer(object):
         self._trc.append(_check_returned_tracer(ret))
 
     def __del__(self):
-        if hasattr(self, '_trc'):
+        # Sometimes lib is freed before some Tracers, in which case, this
+        # doesn't work.
+        # So just check that lib.cl_tracer_t_free is still a real function.
+        if hasattr(self, '_trc') and lib.cl_tracer_t_free is not None:
             for t in self._trc:
                 lib.cl_tracer_t_free(t)
 
