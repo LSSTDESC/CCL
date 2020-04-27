@@ -686,6 +686,14 @@ $8h^{-1}$Mpc. Note that for linear power spectrum models where {\tt CLASS} is no
 used, only the option to specify $\sigma_8$ is supported. The computation of
 $\sigma_8$ is described in Section \ref{sec:hmf}.
 
+\subsubsection{Non-linear scale cut}
+\label{sec:kNL}
+
+The scale at which non-linear structure formation becomes important for the computation of the matter power spectrum at a particular redshift can be estimated using
+\begin{equation}
+k_NL(z) \approx \Sigma(z)^{-1}=\left[ \frac{1}{6\pi^2} \int^{\infty}_0 dk P_{\rm lin}(k,z) \right]^{-1/2}~.
+\end{equation}
+
 \subsection{Nonlinear Power Spectra}
 \label{sec:Nonlinear_Pk}
 
