@@ -109,6 +109,7 @@ def sigma8(cosmo):
     cosmo.compute_linear_power()
     return sigmaR(cosmo, 8.0 / cosmo['h'])
 
+
 def kNL(cosmo, a):
     """Scale for the non-linear cut.
 
