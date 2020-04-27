@@ -109,7 +109,6 @@ def test_haloprofile(model):
 
     mdef = ccl.halos.MassDef(halomassdef, 'matter')
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
-    kwargs = {}
 
     if model == 'nfw':
         p = ccl.halos.HaloProfileNFW(c, truncated=False)
