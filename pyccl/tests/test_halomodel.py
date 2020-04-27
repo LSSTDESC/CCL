@@ -40,7 +40,8 @@ def test_halo_concentration(m):
     from pyccl.pyutils import assert_warns
     a = 0.8
     # Deprecated.
-    c = assert_warns(ccl.CCLWarning,
+    c = assert_warns(
+            ccl.CCLWarning,
             ccl.halo_concentration, COSMO, m, a)
     assert np.all(np.isfinite(c))
     assert np.shape(c) == np.shape(m)
@@ -90,7 +91,8 @@ def test_halomodel_choices_smoke(mf_c):
     k = np.geomspace(1E-2, 1, 10)
     # Deprecated
     # TODO: Convert this and other places to using the non-deprecated syntax
-    # Or, since this wasn't already done, maybe this is a useful convenience function?
+    # Or, since this wasn't already done, maybe this is a useful convenience
+    # function?
     p = assert_warns(ccl.CCLWarning, ccl.twohalo_matter_power, cosmo, k, a)
     pb = get_pk_new(mf, c, cosmo, a, k, False, True)
 
@@ -116,11 +118,14 @@ def test_halomodel_power_consistent():
     a = 0.8
     k = np.logspace(-1, 1, 10)
     # These are all deprecated.
-    tot = assert_warns(ccl.CCLWarning,
+    tot = assert_warns(
+            ccl.CCLWarning,
             ccl.halomodel_matter_power, COSMO, k, a)
-    one = assert_warns(ccl.CCLWarning,
+    one = assert_warns(
+            ccl.CCLWarning,
             ccl.onehalo_matter_power, COSMO, k, a)
-    two = assert_warns(ccl.CCLWarning,
+    two = assert_warns(
+            ccl.CCLWarning,
             ccl.twohalo_matter_power, COSMO, k, a)
 
     assert np.allclose(one + two, tot)

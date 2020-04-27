@@ -28,7 +28,9 @@ def test_halomod_f2d_copy():
     pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf, normprof1=True)
     psp_new = pk2d.psp
     # This just triggers the internal calculation
-    pk_old = assert_warns(ccl.CCLWarning, ccl.nonlin_matter_power, COSMO_HM, 1., 0.8)
+    pk_old = assert_warns(
+            ccl.CCLWarning,
+            ccl.nonlin_matter_power, COSMO_HM, 1., 0.8)
     pk_new = pk2d.eval(1., 0.8, COSMO_HM)
     psp_old = COSMO_HM.cosmo.data.p_nl
     assert psp_new.lkmin == psp_old.lkmin

@@ -42,7 +42,8 @@ def test_correlation_newtypes(typs):
     cl = ccl.angular_cl(COSMO, lens, lens, ell)
 
     theta = np.logspace(-2., np.log10(5.), 5)
-    corr_old = assert_warns(ccl.CCLWarning,
+    corr_old = assert_warns(
+            ccl.CCLWarning,
             ccl.correlation, COSMO, ell, cl, theta, corr_type=typs[0])
     corr_new = ccl.correlation(COSMO, ell, cl, theta,
                                type=typs[1])
