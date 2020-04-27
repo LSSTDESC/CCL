@@ -31,7 +31,6 @@ def test_power_nu(model):
 
     a = 1
 
-
     data_lin = np.loadtxt("./benchmarks/data/model%d_pk_nu.txt" % (model+1))
     k_lin = data_lin[:, 0] * cosmo['h']
     pk_lin = data_lin[:, 1] / (cosmo['h']**3)

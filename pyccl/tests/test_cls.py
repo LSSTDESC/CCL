@@ -52,19 +52,19 @@ def test_cls_smoke(p_of_k_a):
     with assert_raises(ValueError):
         ccl.NumberCountsTracer(COSMO, False, dndz=z, bias=(z, b))
     with assert_raises(ValueError):
-        ccl.NumberCountsTracer(COSMO, False, dndz=(z,n,n), bias=(z, b))
+        ccl.NumberCountsTracer(COSMO, False, dndz=(z, n, n), bias=(z, b))
     with assert_raises(ValueError):
         ccl.NumberCountsTracer(COSMO, False, dndz=(z,), bias=(z, b))
     with assert_raises(ValueError):
-        ccl.NumberCountsTracer(COSMO, False, dndz=(1,2), bias=(z, b))
+        ccl.NumberCountsTracer(COSMO, False, dndz=(1, 2), bias=(z, b))
     with assert_raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=z)
     with assert_raises(ValueError):
-        ccl.WeakLensingTracer(COSMO, dndz=(z,n,n))
+        ccl.WeakLensingTracer(COSMO, dndz=(z, n, n))
     with assert_raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=(z,))
     with assert_raises(ValueError):
-        ccl.WeakLensingTracer(COSMO, dndz=(1,2))
+        ccl.WeakLensingTracer(COSMO, dndz=(1, 2))
 
 
 @pytest.mark.parametrize('ells', [[3, 2, 1], [1, 3, 2], [2, 3, 1]])

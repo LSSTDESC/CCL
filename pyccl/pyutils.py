@@ -487,7 +487,7 @@ def _check_array_params(f_arg, name=None, arr3=False):
         if ((not isinstance(f_arg, Iterable))
             or (len(f_arg) != (3 if arr3 else 2))
             or (not (isinstance(f_arg[0], Iterable)
-                    and isinstance(f_arg[1], Iterable)))):
+                     and isinstance(f_arg[1], Iterable)))):
             raise ValueError("%s needs to be a tuple of two arrays." % name)
 
         f1 = np.atleast_1d(np.array(f_arg[0], dtype=float))
