@@ -117,7 +117,7 @@ def kNL(cosmo, a):
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        float: Scale of non-linear cut-off.
+        float or array-like: Scale of non-linear cut-off; Mpc^-1.
     """
     cosmo.compute_linear_power()
     return _vectorize_fn(lib.kNL, lib.kNL_vec, cosmo, a)
