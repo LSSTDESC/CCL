@@ -38,8 +38,8 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
         *status = CCL_ERROR_MEMORY;
 
       if(*status==0) {
-        s2dstatus|=gsl_spline_init(f2d->fk, f2d_o->fk->x,
-                                   f2d_o->fk->y, f2d_o->fk->size);
+        s2dstatus |= gsl_spline_init(f2d->fk, f2d_o->fk->x,
+                                     f2d_o->fk->y, f2d_o->fk->size);
         if(s2dstatus)
           *status = CCL_ERROR_SPLINE;
       }
@@ -56,8 +56,8 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
         *status = CCL_ERROR_MEMORY;
 
       if(*status==0) {
-        s2dstatus|=gsl_spline_init(f2d->fa, f2d_o->fa->x,
-                                   f2d_o->fa->y, f2d_o->fa->size);
+        s2dstatus |= gsl_spline_init(f2d->fa, f2d_o->fa->x,
+                                     f2d_o->fa->y, f2d_o->fa->size);
         if(s2dstatus)
           *status = CCL_ERROR_SPLINE;
       }
@@ -75,10 +75,10 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
         *status = CCL_ERROR_MEMORY;
 
       if(*status==0) {
-        s2dstatus!=gsl_spline2d_init(f2d->fka, f2d_o->fka->xarr,
-                                     f2d_o->fka->yarr, f2d_o->fka->zarr,
-                                     f2d_o->fka->interp_object.xsize,
-                                     f2d_o->fka->interp_object.ysize);
+        s2dstatus |= gsl_spline2d_init(f2d->fka, f2d_o->fka->xarr,
+                                       f2d_o->fka->yarr, f2d_o->fka->zarr,
+                                       f2d_o->fka->interp_object.xsize,
+                                       f2d_o->fka->interp_object.ysize);
         if(s2dstatus)
           *status = CCL_ERROR_SPLINE;
       }
@@ -192,7 +192,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
       if (f2d->fk != NULL)
         s2dstatus |= gsl_spline_init(f2d->fk, lk_arr, fk_arr, nk);
       if (f2d->fa != NULL)
-        s2dstatus|=gsl_spline_init(f2d->fa, a_arr, fa_arr, na);
+        s2dstatus |= gsl_spline_init(f2d->fa, a_arr, fa_arr, na);
     }
     else {
       if (f2d->fka != NULL)

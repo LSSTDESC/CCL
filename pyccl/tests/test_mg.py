@@ -37,6 +37,7 @@ def test_mu_sigma_transfer_err(tf):
 
 @pytest.mark.parametrize('mp', ['emu', 'halofit'])
 def test_mu_sigma_matter_power_err(mp):
+    from pyccl.pyutils import assert_warns
     with pytest.raises(ccl.CCLError):
         cosmo = ccl.Cosmology(
             Omega_c=0.25,
@@ -49,4 +50,5 @@ def test_mu_sigma_matter_power_err(mp):
             transfer_function=None,
             matter_power_spectrum=mp
         )
-        ccl.nonlin_matter_power(cosmo, 1, 1)
+        # Also raises a warning, so catch that.
+        assert_warns(ccl.CCLWarning, ccl.nonlin_matter_power, cosmo, 1, 1)

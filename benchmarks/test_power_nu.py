@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+import warnings
 
 import pyccl as ccl
 
@@ -33,7 +34,15 @@ def test_power_nu(model):
     data_lin = np.loadtxt("./benchmarks/data/model%d_pk_nu.txt" % (model+1))
     k_lin = data_lin[:, 0] * cosmo['h']
     pk_lin = data_lin[:, 1] / (cosmo['h']**3)
-    pk_lin_ccl = ccl.linear_matter_power(cosmo, k_lin, a)
+
+    with warnings.catch_warnings():
+        # Linear power with massive neutrinos raises a warning.
+        # Ignore it.
+        # XXX: Do you really want to be raising a warning for this?
+        #      This seems spurious to me.  (MJ)
+        warnings.simplefilter("ignore")
+        pk_lin_ccl = ccl.linear_matter_power(cosmo, k_lin, a)
+
     err = np.abs(pk_lin_ccl/pk_lin - 1)
     assert np.allclose(err, 0, rtol=0, atol=POWER_NU_TOL)
 
