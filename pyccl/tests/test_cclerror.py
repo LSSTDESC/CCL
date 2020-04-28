@@ -18,6 +18,7 @@ def test_cclerror_not_equal():
     assert_(e != e2)
     assert_(hash(e) != hash(e2))
 
+
 def test_cclwarning_repr():
     """Check that a CCLWarning can be built from its repr"""
     w = pyccl.CCLWarning("blah")
