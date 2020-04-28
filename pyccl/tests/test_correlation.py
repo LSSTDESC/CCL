@@ -125,6 +125,7 @@ def test_correlation_pi_sigma_smoke(sval):
 def test_correlation_raises():
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, [1], [1e-3], [1], method='blah')
-
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, [1], [1e-3], [1], type='blah')
+    with pytest.raises(ValueError):
+        ccl.correlation(COSMO, [1], [1e-3], [1], corr_type='blah')
