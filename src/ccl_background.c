@@ -66,7 +66,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
   if ((cosmo->params.N_nu_mass) > 0.0001) {
     // Call the massive neutrino density function just once at this redshift.
     OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.m_nu,
-		       cosmo->params.T_CMB, status);
+                           cosmo->params.T_CMB, status);
   }
   else {
     OmNuh2 = 0.;
@@ -79,7 +79,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
       return 1.;
     case ccl_species_m_label :
       return (cosmo->params.Omega_c + cosmo->params.Omega_b) / (a*a*a) / hnorm / hnorm +
-	      OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / hnorm / hnorm;
+          OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / hnorm / hnorm;
     case ccl_species_l_label :
       return
         cosmo->params.Omega_l *
@@ -138,9 +138,9 @@ of modifications to GR in the quasistatic approximation.
 
 double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
 {
-	// This function can be extended to include other
-	// z-dependences for mu in the future.
-	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
+    // This function can be extended to include other
+    // z-dependences for mu in the future.
+    return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
 }
 
 /* --------- ROUTINE: ccl_Sig_MG ---------
@@ -151,9 +151,9 @@ of modifications to GR in the quasistatic approximation.
 
 double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
 {
-	// This function can be extended to include other
-	// z-dependences for Sigma in the future.
-	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
+    // This function can be extended to include other
+    // z-dependences for Sigma in the future.
+    return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
 }
 
 // Structure to hold parameters of chi_integrand
@@ -269,7 +269,7 @@ static int growth_factor_and_growth_rate(double a, double *gf, double *fg, ccl_c
 
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
-        return NAN;
+        return 0;
       }
 
       *gf = y[0];
@@ -299,7 +299,7 @@ static int growth_factor_and_growth_rate(double a, double *gf, double *fg, ccl_c
 
       if(gslstatus != GSL_SUCCESS) {
         ccl_raise_gsl_warning(gslstatus, "ccl_background.c: growth_factor_and_growth_rate():");
-        return NAN;
+        return 0;
       }
 
       *gf = y[0];
@@ -788,7 +788,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
   double growth0, fgrowth0;
   double *y = NULL;
   double *y2 = NULL;
-	double df, integ;
+  double df, integ;
 
   if (*status == 0) {
     a = ccl_linlog_spacing(
@@ -851,9 +851,9 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
           else if(z>cosmo->params.z_mgrowth[cosmo->params.nz_mgrowth-1])
             df_arr[i]=cosmo->params.df_mgrowth[cosmo->params.nz_mgrowth-1];
           else
-  	       chistatus |= gsl_spline_eval_e(df_z_spline,z,NULL,&df_arr[i]);
+              chistatus |= gsl_spline_eval_e(df_z_spline,z,NULL,&df_arr[i]);
         } else {
-  	     df_arr[i]=0;
+            df_arr[i]=0;
         }
       }
       if(chistatus) {
@@ -933,7 +933,7 @@ void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
           gslstatus = gsl_integration_cquad(
             &F, a[i], 1.0, 0.0, cosmo->gsl_params.INTEGRATION_DISTANCE_EPSREL,
             workspace, &integ, NULL, NULL);
-  	      if (gslstatus != GSL_SUCCESS) {
+          if (gslstatus != GSL_SUCCESS) {
             ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_cosmology_compute_growth():");
             status_mg |= gslstatus;
           }
@@ -1109,7 +1109,7 @@ double ccl_sinn(ccl_cosmology *cosmo, double chi, int *status)
   default:
     *status = CCL_ERROR_PARAMETERS;
     ccl_cosmology_set_status_message(cosmo, "ccl_background.c: ccl_sinn: ill-defined cosmo->params.k_sign = %d",
-	    cosmo->params.k_sign);
+                                     cosmo->params.k_sign);
     return NAN;
   }
 }
@@ -1166,26 +1166,26 @@ double ccl_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2
     return NAN;
   } else {
       if (!cosmo->computed_distances) {
-	*status = CCL_ERROR_DISTANCES_INIT;
-	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): distance splines have not been precomputed!");
-	return NAN;
+          *status = CCL_ERROR_DISTANCES_INIT;
+          ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): distance splines have not been precomputed!");
+          return NAN;
       }
       double chi1,chi2;
       int gslstatus = gsl_spline_eval_e(cosmo->data.chi, a1, NULL, &chi1);
       if(gslstatus != GSL_SUCCESS) {
-	ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_angular_diameter_distance():");
-	*status |= gslstatus;
-	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): Scale factor outside interpolation range.\n");
-	return NAN;
+          ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_angular_diameter_distance():");
+          *status |= gslstatus;
+          ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): Scale factor outside interpolation range.\n");
+          return NAN;
       }
       gslstatus = gsl_spline_eval_e(cosmo->data.chi, a2, NULL, &chi2);
       if(gslstatus != GSL_SUCCESS) {
-	ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_angular_diameter_distance():");
-	*status |= gslstatus;
-	ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): Scale factor outside interpolation range.\n");
-	return NAN;
+          ccl_raise_gsl_warning(gslstatus, "ccl_background.c: ccl_angular_diameter_distance():");
+          *status |= gslstatus;
+          ccl_cosmology_set_status_message(cosmo,"ccl_background.c: ccl_angular_diameter_distance(): Scale factor outside interpolation range.\n");
+          return NAN;
       }
-	    return a2*ccl_sinn(cosmo,chi2-chi1,status);
+      return a2*ccl_sinn(cosmo,chi2-chi1,status);
   }
 }
 
@@ -1399,8 +1399,8 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
       }
       return g;
     } else {
-	    return NAN;
-	  }
+        return NAN;
+    }
   }
 }
 

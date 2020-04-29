@@ -107,15 +107,23 @@ def test_haloprofile(model):
         np.log(rmin) +
         np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
 
+    mdef = ccl.halos.MassDef(halomassdef, 'matter')
+    c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
+
     if model == 'nfw':
-        prof_func = ccl.nfw_profile_3d
+        p = ccl.halos.HaloProfileNFW(c, truncated=False)
+        prof = p.real(COSMO, r, halomass, a, mdef)
     elif model == 'projected_nfw':
-        prof_func = ccl.nfw_profile_2d
+        p = ccl.halos.HaloProfileNFW(c, truncated=False,
+                                     projected_analytic=True)
+        prof = p.projected(COSMO, r, halomass, a, mdef)
     elif model == 'einasto':
-        prof_func = ccl.einasto_profile_3d
+        mdef = ccl.halos.MassDef(halomassdef, 'matter', c_m_relation=c)
+        p = ccl.halos.HaloProfileEinasto(c, truncated=False)
+        prof = p.real(COSMO, r, halomass, a, mdef)
     elif model == 'hernquist':
-        prof_func = ccl.hernquist_profile_3d
-    prof = prof_func(COSMO, concentration, halomass, halomassdef, a, r)
+        p = ccl.halos.HaloProfileHernquist(c, truncated=False)
+        prof = p.real(COSMO, r, halomass, a, mdef)
 
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])
