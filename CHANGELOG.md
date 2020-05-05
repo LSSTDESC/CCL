@@ -1,7 +1,7 @@
 # Unreleased
 
 ## Python library
--
+- Added more developer documentation (#776).
 
 ## C library
 -
