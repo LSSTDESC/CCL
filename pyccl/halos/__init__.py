@@ -48,3 +48,9 @@ from .halo_model import (  # noqa
     halomod_bias_1pt,
     halomod_power_spectrum,
     halomod_Pk2D)
+
+# More halo profiles
+from .halos_extra import (  # noqa
+    HaloProfileHOD, HaloProfileArnaud,
+    Profile2ptHOD, Profile2ptR,
+    ConcentrationDuffy08M500c)
