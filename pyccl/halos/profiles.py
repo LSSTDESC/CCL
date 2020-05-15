@@ -47,6 +47,9 @@ class HaloProfile(object):
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
 
+    def update_parameters(self, **kwargs):
+        pass
+
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by
         FFTLog to compute Hankel transforms. The available

@@ -57,6 +57,17 @@ class HaloProfileHOD(HaloProfileNFW):
         super(HaloProfileHOD, self).__init__(c_M_relation)
         self._fourier = self._fourier_analytic_hod
 
+    def update_parameters(self, **kwargs):
+        self.lMmin = kwargs.get('lMmin', self.lMmin)
+        self.lMminp = kwargs.get('lMminp', self.lMminp)
+        self.lM0 = kwargs.get('lM0', self.lM0)
+        self.lM0p = kwargs.get('lM0p', self.lM0p)
+        self.lM1 = kwargs.get('lM1', self.lM1)
+        self.lM1p = kwargs.get('lM1p', self.lM1p)
+        self.a0 = kwargs.get('a_pivot', self.a0)
+        self.sigmaLogM = kwargs.get('sigmaLogM', self.sigmaLogM)
+        self.alpha = kwargs.get('alpha', self.alpha)
+
     def _lMmin(self, a):
         return self.lMmin + self.lMminp * (a - self.a0)
 
@@ -128,8 +139,8 @@ class HaloProfileArnaud(HaloProfile):
         self._fourier_interp = self._integ_interp()
         super(HaloProfileArnaud, self).__init__()
 
-    def _update_bhydro(self, b_hydro):
-        self.b_hydro = b_hydro
+    def update_parameters(self, **kwargs):
+        self.b_hydro = kwargs.get('b_hydro', self.b_hydro)
 
     def _form_factor(self, x):
         f1 = (self.c500*x)**(-self.gamma)
