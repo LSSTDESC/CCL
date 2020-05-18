@@ -72,6 +72,25 @@ An installation with ``pip`` should work as well. See the `CAMB <https://github.
 repo for more details. Note that if you installed CCL with ``conda``, ``camb``
 should already be in your environment.
 
+ISiTGR
+------
+
+In order to use CCL with ``ISiTGR``, you need to install the ``ISiTGR`` ``Python``
+wrapper ``isitgr`` with:
+
+   $ pip install isitgr [--user]
+
+See further instructions `here <https://github.com/mishakb/ISiTGR>`_.
+
+If you are working in a ``conda`` environment, then ``ISiTGR`` is also available via
+
+.. code-block:: bash
+
+   $ conda install -c conda-forge isitgr
+
+Note that if you installed CCL with ``conda``, ``isitgr``
+should already be in your environment.
+
 .. _getting-fast-pt:
 
 Getting FAST-PT
