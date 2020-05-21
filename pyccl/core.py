@@ -1023,3 +1023,32 @@ class Cosmology(object):
             self.a_array = a_array
             self.k_array = k_array
             self.pk_array = pk_array
+
+
+class CosmologyPlanck18LCDM(Cosmology):
+    """A cosmology roughly corresponding to the best-fit parameters from
+    the 2018 Planck release (arXiv:1807.06209).
+
+    Args:
+        **kwargs (dict): a dictionary of parameters passed as arguments
+            to the `Cosmology` constructor. It should not contain any of
+            the LambdaCDM parameters (`"Omega_c"`, `"Omega_b"`, `"n_s"`,
+            `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
+    """
+    def __init__(self, **kwargs):
+        h = 0.6732
+        ob = 0.022383
+        oc = 0.12011
+        ns = 0.96605
+        s8 = 0.8120
+        p = {'h': h,
+             'Omega_c': oc/h**2,
+             'Omega_b': ob/h**2,
+             'n_s': ns,
+             'sigma8': s8,
+             'A_s': None}
+        if any(k in kwargs for k in p.keys()):
+            raise ValueError("You cannot change the LCDM parameters: "
+                             "%s " % list(p.keys()))
+        kwargs.update(p)
+        super(CosmologyPlanck18LCDM, self).__init__(**kwargs)
