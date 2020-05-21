@@ -38,8 +38,8 @@ install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then "./.travis/install_class_osx.sh"; fi
 
 script:
-  - flake8 --ignore=E741 pyccl
-  - flake8 --ignore=E741 --exclude=data benchmarks
+  - flake8 pyccl
+  - flake8 --exclude=data benchmarks
   - "[[ `grep \"$(printf '\t')\" pyccl/*.py` == \"\" ]]"  # no tabs in python
   - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES -DCMAKE_VERBOSE_MAKEFILE=ON .. && make && cd ..
   - CLASS_PARAM_DIR=./build/extern/share/class/ OMP_NUM_THREADS=2 ./build/check_ccl
