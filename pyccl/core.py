@@ -510,17 +510,17 @@ class Cosmology(object):
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
                 self._params, status = lib.parameters_create_nu(
-                   Omega_c, Omega_b, Omega_k, Neff,
-                   w0, wa, h, norm_pk,
-                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, mnu_final_list, status)
+                    Omega_c, Omega_b, Omega_k, Neff,
+                    w0, wa, h, norm_pk,
+                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    mu_0, sigma_0, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
                 self._params, status = lib.parameters_create_nu_vec(
-                   Omega_c, Omega_b, Omega_k, Neff,
-                   w0, wa, h, norm_pk,
-                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, z_mg, df_mg, mnu_final_list, status)
+                    Omega_c, Omega_b, Omega_k, Neff,
+                    w0, wa, h, norm_pk,
+                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    mu_0, sigma_0, z_mg, df_mg, mnu_final_list, status)
             check(status)
         finally:
             lib.cvar.constants.T_CMB = T_CMB_old

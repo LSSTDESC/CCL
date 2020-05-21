@@ -34,8 +34,8 @@ def set_up():
 
 @pytest.mark.parametrize("alpha,beta,gamma,is_factorizable,"
                          "w_transfer,mismatch,der_bessel,der_angles",
-                         [  # non-factorizable
-                          (-2., -1., -1., False, True, False, 0, 0),
+                         # non-factorizable
+                         [(-2., -1., -1., False, True, False, 0, 0),
                           (-2.,  0., -1., False, True, False, 0, 0),
                           (-2., -1.,  0., False, True, False, 0, 0),
                           (-2.,  0.,  0., False, True, False, 0, 0),
@@ -57,8 +57,7 @@ def set_up():
                           # non-zero der_angles
                           (-2., -1., -1., False, True, False, 0, 1),
                           (-2., -1., -1., False, True, False, 0, 2),
-                          (-2., -1., -1., False, True, False, -1, 2),
-                         ])
+                          (-2., -1., -1., False, True, False, -1, 2)])
 def test_tracers_analytic(set_up, alpha, beta, gamma,
                           is_factorizable, w_transfer,
                           mismatch, der_bessel, der_angles):

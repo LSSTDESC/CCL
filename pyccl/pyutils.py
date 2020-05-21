@@ -515,5 +515,5 @@ def assert_warns(wtype, f, *args, **kwargs):
     assert len(w) >= 1, "Expected warning was not raised."
     assert issubclass(w[0].category, wtype), \
         "Warning raised was the wrong type (got %s, expected %s)" % (
-                w[0].category, wtype)
+            w[0].category, wtype)
     return res

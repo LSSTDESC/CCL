@@ -139,7 +139,7 @@ class_models = {
         "wa": 0.1,
         "Neff": Neff_from_N_ur_N_ncdm(N_ur=1.0, N_ncdm=2.0),
         "m_nu": [0.03, 0.02, 0.0]},
-    }
+}
 
 
 def read_chi_benchmark_file():
