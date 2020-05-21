@@ -852,7 +852,7 @@ class HaloProfileHernquist(HaloProfile):
         return prof
 
 
-class HaloProfileArnaud(HaloProfile):
+class HaloProfilePressureArnaud(HaloProfile):
     """ Generalized NFW pressure profile by Arnaud et al.
     (2010A&A...517A..92A).
 
