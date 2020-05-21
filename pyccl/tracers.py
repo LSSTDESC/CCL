@@ -542,6 +542,38 @@ class CMBLensingTracer(Tracer):
         self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
 
 
+class tSZTracer(Tracer):
+    """Specific `Tracer` associated with the thermal Sunyaev Zel'dovich
+    Compton-y parameter. The radial kernel for this tracer is simply given by
+
+    .. math::
+       W(\\chi) = \\frac{\\sigma_T}{m_ec^2}\,\\frac{1}{1+z},
+
+    where :math:`\\sigma_T` is the Thomson scattering cross section and
+    :math:`m_e` is the electron mass.
+
+    Any angular power spectra computed with this tracer, should use
+    a three-dimensional power spectrum involving the electron pressure.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
+        zmax (float): maximum redshift up to which we define the
+            kernel.
+        n_chi (float): number of intervals in the radial comoving
+            distance on which we sample the kernel.
+    """
+    def __init__(self, cosmo, z_max=6., n_chi=1024):
+        self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+        chi_arr = np.linspace(0, self.chi_max, n_chi)
+        a_arr = scale_factor_of_chi(cosmo, chi_arr) 
+        # This is \sigma_T / (m_e * c^2)
+        prefac = 4.01710079e-06
+        w_arr = prefac * a_arr
+
+        self._trc = []
+        self.add_tracer(cosmo, kernel=(chi_arr, w_arr))
+
+
 def _check_returned_tracer(return_val):
     """Wrapper to catch exceptions when tracers are spawned from C.
     """
