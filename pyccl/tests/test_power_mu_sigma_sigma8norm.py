@@ -5,6 +5,10 @@ import pyccl as ccl
 import sys
 from numpy.testing import assert_raises
 from pyccl.boltzmann import get_isitgr_pk_lin
+try:
+    from importlib import reload
+except ImportError:
+    pass  # in 2.7, reload is a global function.
 
 
 @pytest.mark.parametrize('tf', [
@@ -35,6 +39,9 @@ def test_power_mu_sigma_sigma8norm(tf):
     with mock.patch.dict(sys.modules, {'isitgr': None}):
         with assert_raises(ImportError):
             get_isitgr_pk_lin(cosmo)
+    # Importing ccl without isitgr is fine.  No ImportError triggered.
+    with mock.patch.dict(sys.modules, {'isitgr': None}):
+        reload(ccl.boltzmann)
 
 
 @pytest.mark.parametrize('tf', [
