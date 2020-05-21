@@ -1,6 +1,7 @@
 from . import ccllib as lib
 from .core import check
-from .background import comoving_radial_distance, growth_rate, growth_factor
+from .background import comoving_radial_distance, growth_rate, \
+    growth_factor, scale_factor_of_chi
 from .pyutils import _check_array_params, NoneArr
 import numpy as np
 
@@ -547,7 +548,7 @@ class tSZTracer(Tracer):
     Compton-y parameter. The radial kernel for this tracer is simply given by
 
     .. math::
-       W(\\chi) = \\frac{\\sigma_T}{m_ec^2}\,\\frac{1}{1+z},
+       W(\\chi) = \\frac{\\sigma_T}{m_ec^2} \\frac{1}{1+z},
 
     where :math:`\\sigma_T` is the Thomson scattering cross section and
     :math:`m_e` is the electron mass.
@@ -565,7 +566,7 @@ class tSZTracer(Tracer):
     def __init__(self, cosmo, z_max=6., n_chi=1024):
         self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
         chi_arr = np.linspace(0, self.chi_max, n_chi)
-        a_arr = scale_factor_of_chi(cosmo, chi_arr) 
+        a_arr = scale_factor_of_chi(cosmo, chi_arr)
         # This is \sigma_T / (m_e * c^2)
         prefac = 4.01710079e-06
         w_arr = prefac * a_arr
