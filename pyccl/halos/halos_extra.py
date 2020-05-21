@@ -265,8 +265,12 @@ class Profile2ptHOD(Profile2pt):
 
 
 class Profile2ptR(Profile2pt):
-    def __init__(self, r_corr=0.):
+    def __init__(self, r_corr=0., r_corr_name='r_corr'):
         self.r_corr = r_corr
+        self.r_corr_name = r_corr_name
+
+    def update_parameters(self, **kwargs):
+        self.r_corr = kwargs.get(self.r_corr_name, self.r_corr)
 
     def fourier_2pt(self, prof, cosmo, k, M, a, r_corr=0.,
                     prof2=None, mass_def=None):

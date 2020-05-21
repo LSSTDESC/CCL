@@ -12,6 +12,9 @@ class Profile2pt(object):
     def __init__(self):
         pass
 
+    def update_parameters(self, **kwargs):
+        pass
+
     def fourier_2pt(self, prof, cosmo, k, M, a,
                     prof2=None, mass_def=None):
         """ Returns the Fourier-space two-point moment between

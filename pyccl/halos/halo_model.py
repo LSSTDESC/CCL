@@ -342,7 +342,7 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, normprof=False):
 def halomod_power_spectrum(cosmo, hmc, k, a, prof,
                            prof_2pt=None, prof2=None, p_of_k_a=None,
                            normprof1=False, normprof2=False,
-                           get_1h=True, get_2h=True):
+                           get_1h=True, get_2h=True, f_ka=False):
     """ Computes the halo model power spectrum for two
     quantities defined by their respective halo profiles.
     The halo model power spectrum for two profiles
@@ -388,6 +388,11 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             term in the first equation above) won't be computed.
         get_2h (bool): if `False`, the 2-halo term (i.e. the second
             term in the first equation above) won't be computed.
+        f_ka (function): function of two variables (k and a) with
+            the same signature and behavior as the `eval` method of
+            :class:`~pyccl.pk2d.Pk2D`. The total halo model power
+            spectrum will be multiplied by this factor. If `None`
+            the extra factor is just 1.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -460,8 +465,14 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         else:
             pk_1h = 0.
 
+        # Correction factor
+        if f_ka is not None:
+            fcorr = f_ka(k_use, aa, cosmo)
+        else:
+            fcorr = 1
+
         # Total power spectrum
-        out[ia, :] = (pk_1h + pk_2h) * norm
+        out[ia, :] = (pk_1h + pk_2h) * norm * fcorr
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
