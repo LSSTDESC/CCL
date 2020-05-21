@@ -13,8 +13,8 @@ import numpy as np
 import warnings
 
 correlation_methods = {
-    'fftlog':   const.CCL_CORR_FFTLOG,
-    'bessel':   const.CCL_CORR_BESSEL,
+    'fftlog': const.CCL_CORR_FFTLOG,
+    'bessel': const.CCL_CORR_BESSEL,
     'legendre': const.CCL_CORR_LGNDRE,
 }
 

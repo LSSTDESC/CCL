@@ -36,22 +36,22 @@ def set_up():
                          "w_transfer,mismatch,der_bessel,der_angles",
                          # non-factorizable
                          [(-2., -1., -1., False, True, False, 0, 0),
-                          (-2.,  0., -1., False, True, False, 0, 0),
-                          (-2., -1.,  0., False, True, False, 0, 0),
-                          (-2.,  0.,  0., False, True, False, 0, 0),
-                          (0.,  0.,  0., False, True, False, 0, 0),
+                          (-2., 0., -1., False, True, False, 0, 0),
+                          (-2., -1., 0., False, True, False, 0, 0),
+                          (-2., 0., 0., False, True, False, 0, 0),
+                          (0., 0., 0., False, True, False, 0, 0),
                           # factorizable transfer functions
                           (-2., -1., -1., True, True, False, 0, 0),
-                          (-2.,  0., -1., True, True, False, 0, 0),
-                          (-2., -1.,  0., True, True, False, 0, 0),
-                          (-2.,  0.,  0., True, True, False, 0, 0),
-                          (0.,  0.,  0., True, True, False, 0, 0),
+                          (-2., 0., -1., True, True, False, 0, 0),
+                          (-2., -1., 0., True, True, False, 0, 0),
+                          (-2., 0., 0., True, True, False, 0, 0),
+                          (0., 0., 0., True, True, False, 0, 0),
                           # Unit transfer functions
-                          (-2.,  0.,  0., False, False, False, 0, 0),
-                          (0.,  0.,  0., False, False, False, 0, 0),
+                          (-2., 0., 0., False, False, False, 0, 0),
+                          (0., 0., 0., False, False, False, 0, 0),
                           # Mismatch in kernel-transfer coverage
-                          (-2., -1.,  0., True, True, True, 0, 0),
-                          (-2., -1.,  0., False, True, True, 0, 0),
+                          (-2., -1., 0., True, True, True, 0, 0),
+                          (-2., -1., 0., False, True, True, 0, 0),
                           # non-zero der_bessel
                           (-2., -1., -1., False, True, False, -1, 0),
                           # non-zero der_angles

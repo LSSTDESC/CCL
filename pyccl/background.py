@@ -18,13 +18,13 @@ from .pyutils import _vectorize_fn, _vectorize_fn3
 from .pyutils import _vectorize_fn4, _vectorize_fn5
 
 species_types = {
-    'critical':                   lib.species_crit_label,
-    'matter':                     lib.species_m_label,
-    'dark_energy':                lib.species_l_label,
-    'radiation':                  lib.species_g_label,
-    'curvature':                  lib.species_k_label,
-    'neutrinos_rel':              lib.species_ur_label,
-    'neutrinos_massive':          lib.species_nu_label,
+    'critical': lib.species_crit_label,
+    'matter': lib.species_m_label,
+    'dark_energy': lib.species_l_label,
+    'radiation': lib.species_g_label,
+    'curvature': lib.species_k_label,
+    'neutrinos_rel': lib.species_ur_label,
+    'neutrinos_massive': lib.species_nu_label,
 }
 
 

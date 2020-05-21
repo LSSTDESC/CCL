@@ -15,41 +15,41 @@ from .pk2d import Pk2D
 
 # Configuration types
 transfer_function_types = {
-    None:               lib.transfer_none,
-    'eisenstein_hu':    lib.eisenstein_hu,
-    'bbks':             lib.bbks,
-    'boltzmann_class':  lib.boltzmann_class,
-    'boltzmann_camb':   lib.boltzmann_camb,
+    None: lib.transfer_none,
+    'eisenstein_hu': lib.eisenstein_hu,
+    'bbks': lib.bbks,
+    'boltzmann_class': lib.boltzmann_class,
+    'boltzmann_camb': lib.boltzmann_camb,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
 }
 
 matter_power_spectrum_types = {
-    'halo_model':   lib.halo_model,
-    'halofit':      lib.halofit,
-    'linear':       lib.linear,
-    'emu':          lib.emu
+    'halo_model': lib.halo_model,
+    'halofit': lib.halofit,
+    'linear': lib.linear,
+    'emu': lib.emu
 }
 
 baryons_power_spectrum_types = {
-    'nobaryons':   lib.nobaryons,
-    'bcm':         lib.bcm
+    'nobaryons': lib.nobaryons,
+    'bcm': lib.bcm
 }
 
 # List which transfer functions can be used with the muSigma_MG
 # parameterisation of modified gravity
 
 mass_function_types = {
-    'angulo':      lib.angulo,
-    'tinker':      lib.tinker,
-    'tinker10':    lib.tinker10,
-    'watson':      lib.watson,
+    'angulo': lib.angulo,
+    'tinker': lib.tinker,
+    'tinker10': lib.tinker10,
+    'watson': lib.watson,
     'shethtormen': lib.shethtormen
 }
 
 halo_concentration_types = {
-    'bhattacharya2011':          lib.bhattacharya2011,
-    'duffy2008':                 lib.duffy2008,
-    'constant_concentration':    lib.constant_concentration,
+    'bhattacharya2011': lib.bhattacharya2011,
+    'duffy2008': lib.duffy2008,
+    'constant_concentration': lib.constant_concentration,
 }
 
 emulator_neutrinos_types = {
