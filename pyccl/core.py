@@ -1025,9 +1025,10 @@ class Cosmology(object):
             self.pk_array = pk_array
 
 
-class CosmologyPlanck18LCDM(Cosmology):
-    """A cosmology roughly corresponding to the best-fit parameters from
-    the 2018 Planck release (arXiv:1807.06209).
+class CosmologyVanillaLCDM(Cosmology):
+    """A cosmology with typical flat Lambda-CDM parameters (`Omega_c=0.25`,
+    `Omega_b = 0.05`, `Omega_k = 0`, `sigma8 = 0.81`, `n_s = 0.96`, `h = 0.67`,
+    no massive neutrinos).
 
     Args:
         **kwargs (dict): a dictionary of parameters passed as arguments
@@ -1036,19 +1037,14 @@ class CosmologyPlanck18LCDM(Cosmology):
             `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
     """
     def __init__(self, **kwargs):
-        h = 0.6732
-        ob = 0.022383
-        oc = 0.12011
-        ns = 0.96605
-        s8 = 0.8120
-        p = {'h': h,
-             'Omega_c': oc/h**2,
-             'Omega_b': ob/h**2,
-             'n_s': ns,
-             'sigma8': s8,
+        p = {'h': 0.67,
+             'Omega_c': 0.25,
+             'Omega_b': 0.05,
+             'n_s': 0.96,
+             'sigma8': 0.81,
              'A_s': None}
         if any(k in kwargs for k in p.keys()):
             raise ValueError("You cannot change the LCDM parameters: "
                              "%s " % list(p.keys()))
         kwargs.update(p)
-        super(CosmologyPlanck18LCDM, self).__init__(**kwargs)
+        super(CosmologyVanillaLCDM, self).__init__(**kwargs)
