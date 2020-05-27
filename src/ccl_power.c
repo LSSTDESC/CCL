@@ -812,7 +812,7 @@ double ccl_kNL(ccl_cosmology *cosmo,double a,int *status) {
   gsl_function F;
   F.function=&kNL_integrand;
   F.params=&par;
-  double k_NL;
+  double PL_integral;
 
   workspace = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
   if (workspace == NULL) {
@@ -821,7 +821,7 @@ double ccl_kNL(ccl_cosmology *cosmo,double a,int *status) {
   if (*status == 0) {
     int gslstatus = gsl_integration_cquad(&F, cosmo->spline_params.K_MIN, cosmo->spline_params.K_MAX,
                                           0.0, cosmo->gsl_params.INTEGRATION_KNL_EPSREL,
-                                          workspace,&k_NL,NULL,NULL);
+                                          workspace,&PL_integral,NULL,NULL);
     if(gslstatus != GSL_SUCCESS) {
       ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_kNL():");
       *status |= gslstatus;
@@ -829,5 +829,5 @@ double ccl_kNL(ccl_cosmology *cosmo,double a,int *status) {
   }
   gsl_integration_cquad_workspace_free(workspace);
 
-  return pow(sqrt(k_NL/(6*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status), -1); //remove M_LN10 -- what is it? //is ccl_growth_factor there to set the power spectrum to the correct redshift? Why not do this in the integrand?
+  return pow(sqrt(PL_integral/(6*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status), -1);
 }
