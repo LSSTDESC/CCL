@@ -113,6 +113,10 @@ def sigma8(cosmo):
 def kNL(cosmo, a):
     """Scale for the non-linear cut.
 
+    .. note:: k_NL is calculated based on Lagrangian perturbation theory as the
+              inverse of the variance of the displacement field, i.e.
+              k_NL = 1/sigma_eta = [1/(6 pi^2) * int P_L(k) dk]^{-1/2}.
+
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
