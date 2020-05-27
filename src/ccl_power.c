@@ -828,6 +828,6 @@ double ccl_kNL(ccl_cosmology *cosmo,double a,int *status) {
     }
   }
   gsl_integration_cquad_workspace_free(workspace);
-
-  return pow(sqrt(PL_integral/(6*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status), -1);
+  double sigma_eta = sqrt(PL_integral/(6*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
+  return pow(sigma_eta, -1);
 }
