@@ -486,7 +486,7 @@ def halomod_Pk2D(cosmo, hmc, prof,
                  normprof1=False, normprof2=False,
                  get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
-                 extrap_order_lok=1, extrap_order_hik=2):
+                 extrap_order_lok=1, extrap_order_hik=2, f_ka=False):
     """ Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the halo-model power spectrum for two quantities defined by
     their respective halo profiles. See :meth:`~HMCalculator.pk`
@@ -536,6 +536,11 @@ def halomod_Pk2D(cosmo, hmc, prof,
         extrap_order_hik (int): extrapolation order to be used on
             k-values above the maximum of the splines. See
             :class:`~pyccl.pk2d.Pk2D`.
+        f_ka (function): function of two variables (k and a) with
+            the same signature and behavior as the `eval` method of
+            :class:`~pyccl.pk2d.Pk2D`. The total halo model power
+            spectrum will be multiplied by this factor. If `None`
+            the extra factor is just 1.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: halo model power spectrum.
@@ -555,7 +560,7 @@ def halomod_Pk2D(cosmo, hmc, prof,
                                     prof, prof_2pt=prof_2pt,
                                     prof2=prof2, p_of_k_a=p_of_k_a,
                                     normprof1=normprof1, normprof2=normprof2,
-                                    get_1h=get_1h, get_2h=get_2h)
+                                    get_1h=get_1h, get_2h=get_2h, f_ka=f_ka)
 
     pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                 extrap_order_lok=extrap_order_lok,
