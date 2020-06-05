@@ -342,7 +342,7 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, normprof=False):
 def halomod_power_spectrum(cosmo, hmc, k, a, prof,
                            prof_2pt=None, prof2=None, p_of_k_a=None,
                            normprof1=False, normprof2=False,
-                           get_1h=True, get_2h=True, f_ka=False):
+                           get_1h=True, get_2h=True, f_ka=None):
     """ Computes the halo model power spectrum for two
     quantities defined by their respective halo profiles.
     The halo model power spectrum for two profiles
@@ -486,7 +486,7 @@ def halomod_Pk2D(cosmo, hmc, prof,
                  normprof1=False, normprof2=False,
                  get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
-                 extrap_order_lok=1, extrap_order_hik=2, f_ka=False):
+                 extrap_order_lok=1, extrap_order_hik=2, f_ka=None):
     """ Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the halo-model power spectrum for two quantities defined by
     their respective halo profiles. See :meth:`~HMCalculator.pk`
