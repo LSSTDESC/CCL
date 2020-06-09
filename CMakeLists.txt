@@ -20,12 +20,11 @@ set(CCL_SRC
     src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c
     src/ccl_neutrinos.c
     src/ccl_emu17.c src/ccl_correlation.c
-    src/ccl_halomod.c
     src/ccl_halofit.c
     src/ccl_haloprofile.c
     src/ccl_tracers.c
     src/ccl_mass_conversion.c
-    src/fftlog.c)
+    src/ccl_fftlog.c)
 
 # Defines list of CCL C test src files
 # ! Add new tests of the C code to this list
@@ -101,9 +100,6 @@ target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} 
 # Builds the test suite
 add_executable(check_ccl ${TEST_SRC})
 target_link_libraries(check_ccl ccl)
-
-# Builds example folder in place, make this optional
-add_subdirectory(examples "${CMAKE_CURRENT_SOURCE_DIR}/examples" EXCLUDE_FROM_ALL)
 
 # Builds pkgconfig file for CCL
 SET(PROJECT_DESCRIPTION "DESC Core Cosmology Library: cosmology routines with validated numerical accuracy")

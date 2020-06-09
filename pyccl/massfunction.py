@@ -8,8 +8,11 @@ from .power import sigmaM  # noqa
 def massfunc(cosmo, halo_mass, a, overdensity=200):
     """Halo mass function, dn/dlog10M.
 
+    .. note:: Note that this function is deprecated. Please use the
+              functionality in the :mod:`~pyccl.halos.hmfunc` module.
+
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): scale factor.
         overdensity (float): overdensity parameter (default: 200)
@@ -39,8 +42,11 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
 def halo_bias(cosmo, halo_mass, a, overdensity=200):
     """Halo bias
 
+    .. note:: Note that this function is deprecated. Please use the
+              functionality in the :mod:`~pyccl.halos.hbias` module.
+
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
         a (float): Scale factor.
         overdensity (float): Overdensity parameter (default: 200).
@@ -65,11 +71,15 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
 @deprecated(hal.mass2radius_lagrangian)
 def massfunc_m2r(cosmo, halo_mass):
     """Converts smoothing halo mass into smoothing halo radius.
-    .. note:: This is R=(3M/(4*pi*rho_m))^(1/3), where rho_m is the mean
-    matter density.
+
+    .. note:: This is :math:`R=(3M/(4\\pi\\rho_M))^{1/3}``, where
+              :math:`\\rho_M` is the mean comoving matter density.
+
+    .. note:: Note that this function is deprecated. Please use
+              :meth:`~pyccl.halos.massdef.mass2radius_lagrangian`.
 
     Args:
-        cosmo (:obj:`Cosmology`): Cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
 
     Returns:

@@ -10,7 +10,7 @@ def mass2radius_lagrangian(cosmo, M):
     the mass of the halo assuming a homogeneous Universe.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         M (float or array_like): halo mass in units of M_sun.
 
     Returns:
@@ -27,11 +27,17 @@ def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
     """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration `c_new` is
     found by solving the equation:
-    f(c_old) * D_old = f(c_new) * D_new
-    where f(x) = x^3/[ln(1+x) - x/(1+x)].
+
+    .. math::
+        f(c_{\\rm old}) \\Delta_{\\rm old} = f(c_{\\rm new}) \\Delta_{\\rm new}
+
+    where
+
+    .. math::
+        f(x) = \\frac{x^3}{\\log(1+x) - x/(1+x)}.
 
     Args:
-        cosmo (:obj:`Cosmology`): A Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         c_old (float or array_like): concentration to translate from.
         Delta_old (float): Delta parameter associated to the input
             concentration. See description of the MassDef class.
@@ -57,12 +63,15 @@ def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
 
 class MassDef(object):
     """Halo mass definition. Halo masses are defined in terms of an overdensity
-    parameter Delta and an associated density X (either the matter density or
-    the critical density):
-    M = 4 * pi * Delta * rho_X * R^3 / 3
-    where R is the halo radius. This object also holds methods to translate
-    between R and M, and to translate masses between different definitions
-    if a concentration-mass relation is provided.
+    parameter :math:`\\Delta` and an associated density :math:`X` (either the
+    matter density or the critical density):
+
+    .. math::
+        M = \\frac{4 \\pi}{3} \\Delta\\,\\rho_X\\, R^3
+
+    where :math:`R` is the halo radius. This object also holds methods to
+    translate between :math:`R` and :math:`M`, and to translate masses between
+    different definitions if a concentration-mass relation is provided.
 
     Args:
         Delta (float): overdensity parameter. Pass 'vir' if using virial
@@ -118,7 +127,7 @@ class MassDef(object):
         definition.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             a (float): scale factor
 
         Returns:
@@ -136,10 +145,12 @@ class MassDef(object):
 
     def get_mass(self, cosmo, R, a):
         """ Translates a halo radius into a mass
-            M =  (4 * pi / 3) * rho_X * Delta * R^3
+
+        .. math::
+            M = \\frac{4 \\pi}{3} \\Delta\\,\\rho_X\\, R^3
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             R (float or array_like): halo radius in units of Mpc (physical, not
                 comoving).
             a (float): scale factor.
@@ -156,10 +167,9 @@ class MassDef(object):
 
     def get_radius(self, cosmo, M, a):
         """ Translates a halo mass into a radius
-            M =  (4 * pi / 3) * rho_X * Delta * R^3
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
 
@@ -179,7 +189,7 @@ class MassDef(object):
         """ Returns concentration for this mass definition.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
 
@@ -196,7 +206,7 @@ class MassDef(object):
         """ Translate halo mass in this definition into another definition
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
             m_def_other (:obj:`MassDef`): another mass definition.

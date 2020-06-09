@@ -24,23 +24,35 @@ def test_halomod(model):
         m_nu=0,
         Omega_k=0,
         transfer_function='eisenstein_hu',
-        matter_power_spectrum='linear',
-        mass_function='shethtormen',
-        halo_concentration='duffy2008')
+        matter_power_spectrum='linear')
 
     data_z0 = np.loadtxt("./benchmarks/data/pk_hm_c%d_z0.txt" % (model+1))
     data_z1 = np.loadtxt("./benchmarks/data/pk_hm_c%d_z1.txt" % (model+1))
 
+    mass_def = ccl.halos.MassDef('vir', 'matter')
+    hmf = ccl.halos.MassFuncSheth99(cosmo, mass_def=mass_def,
+                                    mass_def_strict=False,
+                                    use_delta_c_fit=True)
+    hbf = ccl.halos.HaloBiasSheth99(cosmo, mass_def=mass_def,
+                                    mass_def_strict=False)
+    cM = ccl.halos.ConcentrationDuffy08(mdef=mass_def)
+    prf = ccl.halos.HaloProfileNFW(cM)
+    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
+
+    z = 0.
     k = data_z0[:, 0] * cosmo['h']
     pk = data_z0[:, -1] / (cosmo['h']**3)
-    pk_ccl = ccl.halomodel_matter_power(cosmo, k, 1)
+    pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z),
+                                              prf, normprof1=True)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)
 
+    z = 1.
     k = data_z1[:, 0] * cosmo['h']
     pk = data_z1[:, -1] / (cosmo['h']**3)
-    pk_ccl = ccl.halomodel_matter_power(cosmo, k, 0.5)
+    pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z),
+                                              prf, normprof1=True)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)

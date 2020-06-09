@@ -9,8 +9,8 @@ class Concentration(object):
     """ This class enables the calculation of halo concentrations.
 
     Args:
-        mass_def (:obj:`MassDef`): a mass definition object that fixes
-            the mass definition used by this c(M)
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass definition
+            object that fixes the mass definition used by this c(M)
             parametrization.
     """
     name = 'default'
@@ -47,7 +47,8 @@ class Concentration(object):
         start of the constructor call.
 
         Args:
-            mdef (:obj:`MassDef`): a mass definition object.
+            mdef (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             bool: True if the mass definition is not compatible with
@@ -61,10 +62,11 @@ class Concentration(object):
         this object.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`MassDef`): a mass definition object.
+            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
 
         Returns:
             float or array_like: mass according to this object's
@@ -80,11 +82,11 @@ class Concentration(object):
         """ Returns the concentration for input parameters.
 
         Args:
-            cosmo (:obj:`Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:obj:`MassDef`): the mass definition object
-                that defines M.
+            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+                the mass definition object that defines M.
 
         Returns:
             float or array_like: concentration.
@@ -105,7 +107,8 @@ class ConcentrationDiemer15(Concentration):
     S.O. masses with Delta = 200-critical.
 
     Args:
-        mdef (:obj:`MassDef`): a mass definition object that fixes
+        mdef (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object that fixes
             the mass definition used by this c(M)
             parametrization.
     """
@@ -169,7 +172,8 @@ class ConcentrationBhattacharya13(Concentration):
     By default it will be initialized for Delta = 200-critical.
 
     Args:
-        mdef (:obj:`MassDef`): a mass definition object that fixes
+        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+            definition object that fixes
             the mass definition used by this c(M)
             parametrization.
     """
@@ -219,7 +223,8 @@ class ConcentrationPrada12(Concentration):
     S.O. masses with Delta = 200-critical.
 
     Args:
-        mdef (:obj:`MassDef`): a mass definition object that fixes
+        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+            definition object that fixes
             the mass definition used by this c(M)
             parametrization.
     """
@@ -277,7 +282,8 @@ class ConcentrationKlypin11(Concentration):
     S.O. masses with Delta = Delta_vir.
 
     Args:
-        mdef (:obj:`MassDef`): a mass definition object that fixes
+        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+            definition object that fixes
             the mass definition used by this c(M)
             parametrization.
     """
@@ -306,7 +312,8 @@ class ConcentrationDuffy08(Concentration):
     By default it will be initialized for Delta = 200-critical.
 
     Args:
-        mdef (:obj:`MassDef`): a mass definition object that fixes
+        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+            definition object that fixes
             the mass definition used by this c(M)
             parametrization.
     """
@@ -330,7 +337,7 @@ class ConcentrationDuffy08(Concentration):
         if self.mdef.Delta == 'vir':
             self.A = 7.85
             self.B = -0.081
-            self.C = -0.47
+            self.C = -0.71
         else:  # Now Delta has to be 200
             if self.mdef.rho_type == 'matter':
                 self.A = 10.14
@@ -344,6 +351,35 @@ class ConcentrationDuffy08(Concentration):
     def _concentration(self, cosmo, M, a):
         M_pivot_inv = cosmo.cosmo.params.h * 5E-13
         return self.A * (M * M_pivot_inv)**self.B * a**(-self.C)
+
+
+class ConcentrationConstant(Concentration):
+    """ Constant contentration-mass relation.
+
+    Args:
+        c (float): constant concentration value.
+        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+            definition object that fixes
+            the mass definition used by this c(M)
+            parametrization. In this case it's arbitrary.
+    """
+    name = 'Constant'
+
+    def __init__(self, c=1, mdef=None):
+        self.c = c
+        super(ConcentrationConstant, self).__init__(mdef)
+
+    def _default_mdef(self):
+        self.mdef = MassDef(200, 'critical')
+
+    def _check_mdef(self, mdef):
+        return False
+
+    def _concentration(self, cosmo, M, a):
+        if np.ndim(M) == 0:
+            return self.c
+        else:
+            return self.c * np.ones(M.size)
 
 
 def concentration_from_name(name):

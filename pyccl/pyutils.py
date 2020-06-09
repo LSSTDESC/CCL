@@ -6,15 +6,32 @@ from .errors import CCLError, CCLWarning
 import functools
 import warnings
 import numpy as np
+try:
+    from collections.abc import Iterable
+except ImportError:  # pragma: no cover  (for py2.7)
+    from collections import Iterable
+
+NoneArr = np.array([])
+
+integ_types = {'qag_quad': lib.integration_qag_quad,
+               'spline': lib.integration_spline}
+
+extrap_types = {'none': lib.f1d_extrap_0,
+                'constant': lib.f1d_extrap_const,
+                'linx_liny': lib.f1d_extrap_linx_liny,
+                'linx_logy': lib.f1d_extrap_linx_logy,
+                'logx_liny': lib.f1d_extrap_logx_liny,
+                'logx_logy': lib.f1d_extrap_logx_logy}
 
 
 def check(status, cosmo=None):
     """Check the status returned by a ccllib function.
 
     Args:
-        status (int or :obj:`core.error_types`): Flag or error describing the
-                                                 success of a function.
-        cosmo (:obj:`Cosmology`, optional): A Cosmology object.
+        status (int or :obj:`~pyccl.core.error_types`):
+            Flag or error describing the success of a function.
+        cosmo (:class:`~pyccl.core.Cosmology`, optional):
+            A Cosmology object.
     """
     # Check for normal status (no action required)
     if status == 0:
@@ -284,6 +301,97 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
     return f
 
 
+def _vectorize_fn5(fn, fn_vec, cosmo, x1, x2, returns_status=True):
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with two vector arguments of the same length,
+    with a cosmology dependence.
+
+    Args:
+        fn (callable): Function with a single argument.
+        fn_vec (callable): Function that has a vectorized implementation in
+                           a .i file.
+        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
+                                            converted to a ccl_cosmology.
+        x1 (float or array_like): Argument to fn.
+        x2 (float or array_like): Argument to fn.
+        returns_stats (bool): Indicates whether fn returns a status.
+
+    """
+    # Access ccl_cosmology object
+    cosmo_in = cosmo
+    cosmo = cosmo.cosmo
+    status = 0
+
+    # If a scalar was passed, convert to an array
+    if isinstance(x1, int):
+        x1 = float(x1)
+        x2 = float(x2)
+    if isinstance(x1, float):
+        # Use single-value function
+        if returns_status:
+            f, status = fn(cosmo, x1, x2, status)
+        else:
+            f = fn(cosmo, x1, x2)
+    elif isinstance(x1, np.ndarray):
+        # Use vectorised function
+        if returns_status:
+            f, status = fn_vec(cosmo, x1, x2, x1.size, status)
+        else:
+            f = fn_vec(cosmo, x1, x2, x1.size)
+    else:
+        # Use vectorised function
+        if returns_status:
+            f, status = fn_vec(cosmo, x1, x2, len(x2), status)
+        else:
+            f = fn_vec(cosmo, x1, x2, len(x2))
+
+    # Check result and return
+    check(status, cosmo_in)
+    return f
+
+
+def resample_array(x_in, y_in, x_out,
+                   extrap_lo='none', extrap_hi='none',
+                   fill_value_lo=0, fill_value_hi=0):
+    """ Interpolates an input y array onto a set of x values.
+
+    Args:
+        x_in (array_like): input x-values.
+        y_in (array_like): input y-values.
+        x_out (array_like): x-values for output array.
+        extrap_lo (string): type of extrapolation for x-values below the
+            range of `x_in`. 'none' (for no interpolation), 'constant',
+            'linx_liny' (linear in x and y), 'linx_logy', 'logx_liny' and
+            'logx_logy'.
+        extrap_hi (string): type of extrapolation for x-values above the
+            range of `x_in`.
+        fill_value_lo (float): constant value if `extrap_lo` is
+            'constant'.
+        fill_value_hi (float): constant value if `extrap_hi` is
+            'constant'.
+    Returns:
+        array_like: output array.
+    """
+
+    if extrap_lo not in extrap_types.keys():
+        raise ValueError("'%s' is not a valid extrapolation type. "
+                         "Available options are: %s"
+                         % (extrap_lo, extrap_types.keys()))
+    if extrap_hi not in extrap_types.keys():
+        raise ValueError("'%s' is not a valid extrapolation type. "
+                         "Available options are: %s"
+                         % (extrap_hi, extrap_types.keys()))
+
+    status = 0
+    y_out, status = lib.array_1d_resample(x_in, y_in, x_out,
+                                          fill_value_lo, fill_value_hi,
+                                          extrap_types[extrap_lo],
+                                          extrap_types[extrap_hi],
+                                          x_out.size, status)
+    check(status)
+    return y_out
+
+
 def deprecated(new_function=None):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
@@ -300,3 +408,112 @@ def deprecated(new_function=None):
             return func(*args, **kwargs)
         return new_func
     return _depr_decorator
+
+
+def _fftlog_transform(rs, frs,
+                      dim, mu, power_law_index):
+    if np.ndim(rs) != 1:
+        raise ValueError("rs should be a 1D array")
+    if np.ndim(frs) < 1 or np.ndim(frs) > 2:
+        raise ValueError("frs should be a 1D or 2D array")
+    if np.ndim(frs) == 1:
+        n_transforms = 1
+        n_r = len(frs)
+    else:
+        n_transforms, n_r = frs.shape
+
+    if len(rs) != n_r:
+        raise ValueError("rs should have %d elements" % n_r)
+
+    status = 0
+    result, status = lib.fftlog_transform(n_transforms,
+                                          rs, frs.flatten(),
+                                          dim, mu, power_law_index,
+                                          (n_transforms + 1) * n_r,
+                                          status)
+    check(status)
+    result = result.reshape([n_transforms + 1, n_r])
+    ks = result[0]
+    fks = result[1:]
+    if np.ndim(frs) == 1:
+        fks = fks.squeeze()
+
+    return ks, fks
+
+
+def _spline_integrate(x, ys, a, b):
+    if np.ndim(x) != 1:
+        raise ValueError("x should be a 1D array")
+    if np.ndim(ys) < 1 or np.ndim(ys) > 2:
+        raise ValueError("ys should be 1D or a 2D array")
+    if np.ndim(ys) == 1:
+        n_integ = 1
+        n_x = len(ys)
+    else:
+        n_integ, n_x = ys.shape
+
+    if len(x) != n_x:
+        raise ValueError("x should have %d elements" % n_x)
+
+    if np.ndim(a) > 0 or np.ndim(b) > 0:
+        raise TypeError("Integration limits should be scalar")
+
+    status = 0
+    result, status = lib.spline_integrate(n_integ,
+                                          x, ys.flatten(),
+                                          a, b, n_integ,
+                                          status)
+    check(status)
+
+    if np.ndim(ys) == 1:
+        result = result[0]
+
+    return result
+
+
+def _check_array_params(f_arg, name=None, arr3=False):
+    """Check whether an argument `f_arg` passed into the constructor of
+    Tracer() is valid.
+
+    If the argument is set to `None`, it will be replaced with a special array
+    that signals to the CCL wrapper that this argument is NULL.
+    """
+    if f_arg is None:
+        # Return empty array if argument is None
+        f1 = NoneArr
+        f2 = NoneArr
+        f3 = NoneArr
+    else:
+        if ((not isinstance(f_arg, Iterable))
+            or (len(f_arg) != (3 if arr3 else 2))
+            or (not (isinstance(f_arg[0], Iterable)
+                     and isinstance(f_arg[1], Iterable)))):
+            raise ValueError("%s needs to be a tuple of two arrays." % name)
+
+        f1 = np.atleast_1d(np.array(f_arg[0], dtype=float))
+        f2 = np.atleast_1d(np.array(f_arg[1], dtype=float))
+        if arr3:
+            f3 = np.atleast_1d(np.array(f_arg[2], dtype=float))
+    if arr3:
+        return f1, f2, f3
+    else:
+        return f1, f2
+
+
+def assert_warns(wtype, f, *args, **kwargs):
+    """Check that a function call f(*args, **kwargs) raises a warning of type
+    wtype.
+
+    Returns the output of f(*args, **kwargs) unless there was no warning, in
+    which case an AssertionError is raised.
+    """
+    import warnings
+    # Check that f() raises a warning, but not an error.
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        res = f(*args, **kwargs)
+    assert len(w) >= 1, "Expected warning was not raised."
+    assert issubclass(w[0].category, wtype), \
+        "Warning raised was the wrong type (got %s, expected %s)" % (
+                w[0].category, wtype)
+    return res

@@ -125,6 +125,7 @@ typedef struct ccl_spline_params {
   double K_MAX_SPLINE;
   double K_MAX;
   double K_MIN;
+  double DLOGK_INTEGRATION;
   int N_K;
   int N_K_3DCOR;
 
@@ -134,13 +135,13 @@ typedef struct ccl_spline_params {
   int N_ELL_CORR;
 
   // interpolation types
-  gsl_interp_type* A_SPLINE_TYPE;
-  gsl_interp_type* K_SPLINE_TYPE;
-  gsl_interp_type* M_SPLINE_TYPE;
-  gsl_interp_type* D_SPLINE_TYPE;
-  gsl_interp2d_type* PNL_SPLINE_TYPE;
-  gsl_interp2d_type* PLIN_SPLINE_TYPE;
-  gsl_interp_type* CORR_SPLINE_TYPE;
+  const gsl_interp_type* A_SPLINE_TYPE;
+  const gsl_interp_type* K_SPLINE_TYPE;
+  const gsl_interp_type* M_SPLINE_TYPE;
+  const gsl_interp_type* D_SPLINE_TYPE;
+  const gsl_interp2d_type* PNL_SPLINE_TYPE;
+  const gsl_interp2d_type* PLIN_SPLINE_TYPE;
+  const gsl_interp_type* CORR_SPLINE_TYPE;
 } ccl_spline_params;
 
 extern const ccl_spline_params default_spline_params;
@@ -269,13 +270,6 @@ typedef struct ccl_data {
   gsl_spline * logsigma;
   gsl_spline * dlnsigma_dlogm;
 
-  // splines for halo mass function
-  gsl_spline * alphahmf;
-  gsl_spline * betahmf;
-  gsl_spline * gammahmf;
-  gsl_spline * phihmf;
-  gsl_spline * etahmf;
-
   // power spectrum splines
   ccl_f2d_t * p_lin;
   ccl_f2d_t * p_nl;
@@ -300,7 +294,6 @@ typedef struct ccl_cosmology {
   bool computed_linear_power;
   bool computed_nonlin_power;
   bool computed_sigma;
-  bool computed_hmfparams;
 
   int status;
   //this is optional - less tedious than tracking all numerical values for status in error handler function

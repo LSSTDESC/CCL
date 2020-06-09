@@ -14,9 +14,9 @@ echo "installing miniconda"
 rm -rf $HOME/miniconda
 mkdir -p $HOME/download
 if [ "${TOXENV}" = py27 ]; then
-    curl -s https://repo.continuum.io/miniconda/Miniconda2-latest-${CONDA_INST}-x86_64.sh -o $HOME/download/miniconda.sh
+    curl -s https://repo.anaconda.com/miniconda/Miniconda2-latest-${CONDA_INST}-x86_64.sh -o $HOME/download/miniconda.sh
 else
-    curl -s https://repo.continuum.io/miniconda/Miniconda3-latest-${CONDA_INST}-x86_64.sh -o $HOME/download/miniconda.sh
+    curl -s https://repo.anaconda.com/miniconda/Miniconda3-latest-${CONDA_INST}-x86_64.sh -o $HOME/download/miniconda.sh
 fi
 bash $HOME/download/miniconda.sh -b -p $HOME/miniconda
 
@@ -33,12 +33,17 @@ py27)
   conda create -q -n test-environment python=2.7 pip \
     numpy nose coveralls flake8 pyyaml gsl fftw cmake swig scipy \
     compilers pkg-config setuptools_scm pytest pandas pytest-cov \
-    cython "camb>=1"
+    cython "camb>=1" isitgr traitlets
   ;;
 py36)
   conda create -q -n test-environment python=3.6 pip \
     numpy nose coveralls flake8 pyyaml gsl fftw cmake swig  scipy \
     compilers pkg-config setuptools_scm pytest pandas pytest-cov \
-    cython "camb>=1"
+    cython "camb>=1" isitgr traitlets
   ;;
 esac;
+
+# we have to activate the cond env before we install this
+source activate test-environment
+pip install https://github.com/JoeMcEwen/FAST-PT/archive/v3.0.2.tar.gz --no-deps
+conda deactivate

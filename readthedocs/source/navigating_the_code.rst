@@ -60,5 +60,5 @@ for various reasons.
   profiles
 - ``ccl_tracers.c``: code to compute various kernels for tracers of large-scale structure
   (e.g., weak lensing kernels, galaxy clustering kernels, etc.)
-- ``fftlog.c``: an implementation of the ``FFTLog`` algorithm for fast transforms
+- ``ccl_fftlog.c``: an implementation of the ``FFTLog`` algorithm for fast transforms
   between Fourier and real space quantities

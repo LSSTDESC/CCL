@@ -10,7 +10,8 @@ CONCS = [ccl.halos.ConcentrationDiemer15,
          ccl.halos.ConcentrationBhattacharya13,
          ccl.halos.ConcentrationPrada12,
          ccl.halos.ConcentrationKlypin11,
-         ccl.halos.ConcentrationDuffy08]
+         ccl.halos.ConcentrationDuffy08,
+         ccl.halos.ConcentrationConstant]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 # None of our concentration-mass relations
 # are defined for FoF halos.
@@ -35,7 +36,7 @@ def test_cM_duffy_smoke():
         assert np.shape(c) == np.shape(m)
 
 
-@pytest.mark.parametrize('cM_class', CONCS)
+@pytest.mark.parametrize('cM_class', CONCS[:-1])
 def test_cM_mdef_raises(cM_class):
     with pytest.raises(ValueError):
         cM_class(MDEF)

@@ -17,7 +17,7 @@
  ^ @param psp The linear power spectrum to spline.
  * @param status, integer indicating the status
  */
-void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status) {
+void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp, int rescaled_mg_flag, int* status) {
   double kmin, kmax, ndecades, amin, amax, ic, sigma8, log_sigma8;
   int nk, na, s;
   double *lk = NULL, *aa = NULL, *lpk_ln = NULL, *lpk_nl = NULL;
@@ -196,7 +196,13 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
             //pk_ij = pk[j*N_k + i]
             //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
             psout_l = ccl_f2d_t_eval(psp, lk[i], aa[j], cosmo, status);
+	    if (rescaled_mg_flag == 0) {
+            lpk_ln[j*nk+i] = log(psout_l) ;
+	    }
+	    else {
             lpk_ln[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
+	    }
+
           }
         }
       }

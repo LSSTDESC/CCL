@@ -27,7 +27,8 @@ typedef enum ccl_neutrino_mass_splits{
   ccl_nu_normal=0,
   ccl_nu_inverted=1,
   ccl_nu_equal=2,
-  ccl_nu_sum=3
+  ccl_nu_sum=3,
+  ccl_nu_single=4
 } ccl_neutrino_mass_splits;
 
 /**

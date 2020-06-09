@@ -179,34 +179,34 @@ def set_up(request):
 # Commented out because we don't have this covariance
 # ('g1', 'g2', 'dd_12', 'dd_12', 'gg', 1),
 @pytest.mark.parametrize("t1,t2,bm,er,kind,pref",
-                         [('g1', 'g1', 'dd_11', 'dd_11', 'gg', 1),
-                          ('g2', 'g2', 'dd_22', 'dd_22', 'gg', 1),
-                          ('g1', 'l1', 'dl_11', 'dl_11', 'gl', 1),
-                          ('g1', 'l2', 'dl_12', 'dl_12', 'gl', 1),
-                          ('g2', 'l1', 'dl_21', 'dl_21', 'gl', 1),
-                          ('g2', 'l2', 'dl_22', 'dl_22', 'gl', 1),
-                          ('g1', 'i1', 'di_11', 'dl_11', 'gl', 1),
-                          ('g1', 'i2', 'di_12', 'dl_12', 'gl', 1),
-                          ('g2', 'i1', 'di_21', 'dl_21', 'gl', 1),
-                          ('g2', 'i2', 'di_22', 'dl_22', 'gl', 1),
-                          ('l1', 'l1', 'll_11_p', 'll_11_p', 'l+', 1),
-                          ('l1', 'l2', 'll_12_p', 'll_12_p', 'l+', 1),
-                          ('l2', 'l2', 'll_22_p', 'll_22_p', 'l+', 1),
-                          ('l1', 'l1', 'll_11_m', 'll_11_m', 'l-', 1),
-                          ('l1', 'l2', 'll_12_m', 'll_12_m', 'l-', 1),
-                          ('l2', 'l2', 'll_22_m', 'll_22_m', 'l-', 1),
-                          ('i1', 'l1', 'li_11_p', 'll_11_p', 'l+', 2),
-                          ('i1', 'l2', 'li_12_p', 'll_11_p', 'l+', 1),
-                          ('i2', 'l2', 'li_22_p', 'll_22_p', 'l+', 2),
-                          ('i1', 'l1', 'li_11_m', 'll_11_m', 'l-', 2),
-                          ('i1', 'l2', 'li_12_m', 'll_11_m', 'l-', 1),
-                          ('i2', 'l2', 'li_22_m', 'll_22_m', 'l-', 2),
-                          ('i1', 'i1', 'ii_11_p', 'll_11_p', 'l+', 1),
-                          ('i1', 'i2', 'ii_12_p', 'll_12_p', 'l+', 1),
-                          ('i2', 'i2', 'ii_22_p', 'll_22_p', 'l+', 1),
-                          ('i1', 'i1', 'ii_11_m', 'll_11_m', 'l-', 1),
-                          ('i1', 'i2', 'ii_12_m', 'll_12_m', 'l-', 1),
-                          ('i2', 'i2', 'ii_22_m', 'll_22_m', 'l-', 1)])
+                         [('g1', 'g1', 'dd_11', 'dd_11', 'NN', 1),
+                          ('g2', 'g2', 'dd_22', 'dd_22', 'NN', 1),
+                          ('g1', 'l1', 'dl_11', 'dl_11', 'NG', 1),
+                          ('g1', 'l2', 'dl_12', 'dl_12', 'NG', 1),
+                          ('g2', 'l1', 'dl_21', 'dl_21', 'NG', 1),
+                          ('g2', 'l2', 'dl_22', 'dl_22', 'NG', 1),
+                          ('g1', 'i1', 'di_11', 'dl_11', 'NG', 1),
+                          ('g1', 'i2', 'di_12', 'dl_12', 'NG', 1),
+                          ('g2', 'i1', 'di_21', 'dl_21', 'NG', 1),
+                          ('g2', 'i2', 'di_22', 'dl_22', 'NG', 1),
+                          ('l1', 'l1', 'll_11_p', 'll_11_p', 'GG+', 1),
+                          ('l1', 'l2', 'll_12_p', 'll_12_p', 'GG+', 1),
+                          ('l2', 'l2', 'll_22_p', 'll_22_p', 'GG+', 1),
+                          ('l1', 'l1', 'll_11_m', 'll_11_m', 'GG-', 1),
+                          ('l1', 'l2', 'll_12_m', 'll_12_m', 'GG-', 1),
+                          ('l2', 'l2', 'll_22_m', 'll_22_m', 'GG-', 1),
+                          ('i1', 'l1', 'li_11_p', 'll_11_p', 'GG+', 2),
+                          ('i1', 'l2', 'li_12_p', 'll_11_p', 'GG+', 1),
+                          ('i2', 'l2', 'li_22_p', 'll_22_p', 'GG+', 2),
+                          ('i1', 'l1', 'li_11_m', 'll_11_m', 'GG-', 2),
+                          ('i1', 'l2', 'li_12_m', 'll_11_m', 'GG-', 1),
+                          ('i2', 'l2', 'li_22_m', 'll_22_m', 'GG-', 2),
+                          ('i1', 'i1', 'ii_11_p', 'll_11_p', 'GG+', 1),
+                          ('i1', 'i2', 'ii_12_p', 'll_12_p', 'GG+', 1),
+                          ('i2', 'i2', 'ii_22_p', 'll_22_p', 'GG+', 1),
+                          ('i1', 'i1', 'ii_11_m', 'll_11_m', 'GG-', 1),
+                          ('i1', 'i2', 'ii_12_m', 'll_12_m', 'GG-', 1),
+                          ('i2', 'i2', 'ii_22_m', 'll_22_m', 'GG-', 1)])
 def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     cosmo, trcs, bms, ers, fls = set_up
     method, errfac = corr_method
@@ -222,7 +222,7 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     global T0
     t0 = time.time()
     xi = ccl.correlation(cosmo, ell, cli, bms['theta'],
-                         corr_type=kind, method=method)
+                         type=kind, method=method)
     T0 += (time.time() - t0)
 
     xi *= pref

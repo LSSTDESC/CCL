@@ -157,7 +157,8 @@ When cutting a new release, the procedure is as follows:
 
       $ python setup.py sdist
 
-   This command will create a ``.tar.gz`` file in the ``dist`` folder.
+   This command will create a ``.tar.gz`` file in the ``dist`` folder. CAREFUL!!! Only build and upload the source distribution,
+   not a binary wheel!
 #. Upload source distribution to PyPi using ``twine`` (can be installed using ``pip`` or ``conda``):
 
    .. code-block:: bash

@@ -9,8 +9,9 @@ import yaml
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
 from ._types import error_types
-from .boltzmann import get_class_pk_lin, get_camb_pk_lin
+from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
+from .pk2d import Pk2D
 
 # Configuration types
 transfer_function_types = {
@@ -19,6 +20,7 @@ transfer_function_types = {
     'bbks':             lib.bbks,
     'boltzmann_class':  lib.boltzmann_class,
     'boltzmann_camb':   lib.boltzmann_camb,
+    'boltzmann_isitgr': lib.boltzmann_isitgr,
 }
 
 matter_power_spectrum_types = {
@@ -35,7 +37,6 @@ baryons_power_spectrum_types = {
 
 # List which transfer functions can be used with the muSigma_MG
 # parameterisation of modified gravity
-valid_muSig_transfers = {'boltzmann_class', 'class'}
 
 mass_function_types = {
     'angulo':      lib.angulo,
@@ -108,8 +109,8 @@ class Cosmology(object):
         m_nu (:obj:`float`, optional): Total mass in eV of the massive
             neutrinos present. Defaults to 0.
         m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
-            be one of 'inverted', 'normal', 'equal' or 'list'. The default
-            of None is the same as 'normal'.
+            be one of 'inverted', 'normal', 'equal', 'single', or 'list'.
+            The default of None is the same as 'normal'.
         w0 (:obj:`float`, optional): First order term of dark energy equation
             of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy equation
@@ -183,6 +184,13 @@ class Cosmology(object):
             emulator_neutrinos=emulator_neutrinos)
 
         self._build_cosmo()
+
+        # This will change to True once the "_set_background_from_arrays"
+        # is called.
+        self._background_on_input = False
+        # This will change to True once the "set_linear_power_from_arrays"
+        # is called.
+        self._linear_power_on_input = False
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -456,6 +464,11 @@ class Cosmology(object):
                 mnu_list[0] = m_nu[0]/3.
                 mnu_list[1] = m_nu[0]/3.
                 mnu_list[2] = m_nu[0]/3.
+            elif (m_nu_type == 'single'):
+                mnu_list = [0]*3
+                mnu_list[0] = m_nu[0]
+                mnu_list[1] = 0.
+                mnu_list[2] = 0.
 
         # Check which of the neutrino species are non-relativistic today
         N_nu_mass = 0
@@ -635,9 +648,30 @@ class Cosmology(object):
         """Compute the distance splines."""
         if self.has_distances:
             return
-        status = 0
-        status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self)
+        if not self._background_on_input:
+            status = 0
+            status = lib.cosmology_compute_distances(self.cosmo, status)
+            check(status, self)
+        else:
+            # Check that input arrays have the same size.
+            if not (self.a_array.shape == self.chi_array.shape
+                    == self.hoh0_array.shape):
+                raise ValueError("Input arrays must have the same size.")
+            # Check that a_array is a monotonically increasing array.
+            if not np.array_equal(self.a_array, np.sort(self.a_array)):
+                raise ValueError("Input scale factor array is not "
+                                 "monotonically increasing.")
+            # Check that the last element of a_array is 1:
+            if np.abs(self.a_array[-1]-1.0) > 1e-5:
+                raise ValueError("The last element of the input scale factor"
+                                 "array must be 1.0.")
+            status = 0
+            status = lib.cosmology_distances_from_input(self.cosmo,
+                                                        self.a_array,
+                                                        self.chi_array,
+                                                        self.hoh0_array,
+                                                        status)
+            check(status, self)
 
     def compute_growth(self):
         """Compute the growth function."""
@@ -664,11 +698,38 @@ class Cosmology(object):
                     "with massive neutrinos in CCL!",
                     category=CCLWarning)
 
-        status = 0
-        status = lib.cosmology_compute_growth(self.cosmo, status)
-        check(status, self)
+        if not self._background_on_input:
+            status = 0
+            status = lib.cosmology_compute_growth(self.cosmo, status)
+            check(status, self)
+        else:
+            # Check that input arrays have the same size.
+            if not (self.a_array.shape == self.growth_array.shape
+                    == self.fgrowth_array.shape):
+                raise ValueError("Input arrays must have the same size.")
+            # Check that a_array is a monotonically increasing array.
+            if not np.array_equal(self.a_array, np.sort(self.a_array)):
+                raise ValueError("Input scale factor array is not "
+                                 "monotonically increasing.")
+            # Check that the last element of a_array is 1:
+            if np.abs(self.a_array[-1]-1.0) > 1e-5:
+                raise ValueError("The last element of the input scale factor"
+                                 "array must be 1.0.")
+            status = 0
+            status = lib.cosmology_growth_from_input(self.cosmo, self.a_array,
+                                                     self.growth_array,
+                                                     self.fgrowth_array,
+                                                     status)
 
     def compute_linear_power(self):
+        """Call the appropriate function to compute the linear power
+        spectrum, either read from input or calculated internally,"""
+        if self._linear_power_on_input:
+            self._compute_linear_power_from_arrays()
+        else:
+            self._compute_linear_power_internal()
+
+    def _compute_linear_power_internal(self):
         """Compute the linear power spectrum."""
         if self.has_linear_power:
             return
@@ -697,6 +758,10 @@ class Cosmology(object):
             pk_lin = get_class_pk_lin(self)
             psp = pk_lin.psp
         elif ((self._config_init_kwargs['transfer_function'] ==
+                'boltzmann_isitgr') and not self.has_linear_power):
+            pk_lin = get_isitgr_pk_lin(self)
+            psp = pk_lin.psp
+        elif ((self._config_init_kwargs['transfer_function'] ==
                 'boltzmann_camb') and not self.has_linear_power):
             pk_lin = get_camb_pk_lin(self)
             psp = pk_lin.psp
@@ -705,7 +770,7 @@ class Cosmology(object):
 
         if (psp is None and not self.has_linear_power and (
                 self._config_init_kwargs['transfer_function'] in
-                ['boltzmann_camb', 'boltzmann_class'])):
+                ['boltzmann_camb', 'boltzmann_class', 'boltzmann_isitgr'])):
             raise CCLError("Either the CAMB or CLASS computation "
                            "failed silently! CCL could not compute the "
                            "transfer function!")
@@ -714,6 +779,57 @@ class Cosmology(object):
         status = 0
         status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
         check(status, self)
+
+    def _compute_linear_power_from_arrays(self):
+        if not self._linear_power_on_input:
+            raise ValueError("Cannot compute linear power spectrum from"
+                             " input without input arrays initialized.")
+        pk_lin = Pk2D(pkfunc=None,
+                      a_arr=self.a_array,
+                      lk_arr=np.log(self.k_array),
+                      pk_arr=self.pk_array,
+                      is_logp=False,
+                      extrap_order_lok=1,
+                      extrap_order_hik=2,
+                      cosmo=None)
+
+        psp = pk_lin.psp
+
+        status = 0
+        status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
+        check(status, self)
+
+    def _get_halo_model_nonlin_power(self):
+        from . import halos as hal
+        mdef = hal.MassDef('vir', 'matter')
+        conc = self._config.halo_concentration_method
+        mfm = self._config.mass_function_method
+
+        if conc == lib.bhattacharya2011:
+            c = hal.ConcentrationBhattacharya13(mdef=mdef)
+        elif conc == lib.duffy2008:
+            c = hal.ConcentrationDuffy08(mdef=mdef)
+        elif conc == lib.constant_concentration:
+            c = hal.ConcentrationConstant(c=4., mdef=mdef)
+
+        if mfm == lib.tinker10:
+            hmf = hal.MassFuncTinker10(self, mass_def=mdef,
+                                       mass_def_strict=False)
+            hbf = hal.HaloBiasTinker10(self, mass_def=mdef,
+                                       mass_def_strict=False)
+        elif mfm == lib.shethtormen:
+            hmf = hal.MassFuncSheth99(self, mass_def=mdef,
+                                      mass_def_strict=False,
+                                      use_delta_c_fit=True)
+            hbf = hal.HaloBiasSheth99(self, mass_def=mdef,
+                                      mass_def_strict=False)
+        else:
+            raise ValueError("Halo model spectra not available for your "
+                             "current choice of mass function with the "
+                             "deprecated implementation.")
+        prf = hal.HaloProfileNFW(c)
+        hmc = hal.HMCalculator(self, hmf, hbf, mdef)
+        return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
     def compute_nonlin_power(self):
         """Compute the non-linear power spectrum."""
@@ -753,11 +869,17 @@ class Cosmology(object):
             self.compute_linear_power()
 
         # for the halo model we need to init the mass function stuff
+        psp = None
         if self._config_init_kwargs['matter_power_spectrum'] == 'halo_model':
-            self.compute_sigma()
+            warnings.warn(
+                "The halo model option for the internal CCL matter power "
+                "spectrum is deprecated. Use the more general functionality "
+                "in the `halos` module.", category=CCLWarning)
+            psp_py = self._get_halo_model_nonlin_power()
+            psp = psp_py.psp
 
         status = 0
-        status = lib.cosmology_compute_nonlin_power(self.cosmo, status)
+        status = lib.cosmology_compute_nonlin_power(self.cosmo, psp, status)
         check(status, self)
 
     def compute_sigma(self):
@@ -785,7 +907,6 @@ class Cosmology(object):
         self.compute_linear_power()
         status = 0
         status = lib.cosmology_compute_sigma(self.cosmo, status)
-        status = lib.cosmology_compute_hmfparams(self.cosmo, status)
         check(status, self)
 
     @property
@@ -810,10 +931,8 @@ class Cosmology(object):
 
     @property
     def has_sigma(self):
-        """Checks if sigma(M) and mass function splines are precomputed."""
-        return (
-            bool(self.cosmo.computed_sigma) and
-            bool(self.cosmo.computed_hmfparams))
+        """Checks if sigma(M) is precomputed."""
+        return bool(self.cosmo.computed_sigma)
 
     def status(self):
         """Get error status of the ccl_cosmology object.
@@ -835,3 +954,78 @@ class Cosmology(object):
 
         # Return status information
         return "status(%s): %s" % (status, msg)
+
+    def _set_background_from_arrays(self, a_array=None, chi_array=None,
+                                    hoh0_array=None, growth_array=None,
+                                    fgrowth_array=None):
+        """
+        Function to store distances and growth splines from input arrays.
+
+        Args:
+            a_array (array_like, optional): Scale factor array with values on
+                which the input arrays are computed. The array must end on the
+                value of 1.0.
+            chi_array (array_like, optional): Comoving radial distance computed
+                at points indicated by the a_array.
+            hoh0_array (array_like, optional): Hubble parameter divided by the
+                value of H0.
+            growth_array (array_like, optional): Growth factor array, defined
+                as D(a)=P(k,a)/P(k,a=1), assuming no scale dependence. It is
+                assumed that D(a<<1)~a so that D(1.0) will be used for
+                normalization.
+            fgrowth_array (array_like, optional): Growth rate array.
+        """
+        if self.has_distances or self.has_growth:
+            raise ValueError("Background cosmology has already been"
+                             " initialized and cannot be reset.")
+        else:
+            self._background_on_input = True
+            self.a_array = a_array
+            self.chi_array = chi_array
+            self.hoh0_array = hoh0_array
+            self.growth_array = growth_array
+            self.fgrowth_array = fgrowth_array
+            # Check if the input arrays are all parsed
+            if ((a_array is None) or (chi_array is None)
+                    or (hoh0_array is None) or (growth_array is None)
+                    or (fgrowth_array is None)):
+                raise ValueError("Input arrays not parsed.")
+
+    def _set_linear_power_from_arrays(self, a_array=None, k_array=None,
+                                      pk_array=None):
+        """
+        This function initializes the arrays used for parsing
+        a linear power spectrum from input. Call this function
+        to have the power spectrum be read from input and not
+        computed by CCL.
+
+        a_array (array): an array holding values of the scale factor
+        k_array (array): an array holding values of the wavenumber
+            in units of Mpc^-1).
+        pk_array (array): a 2D array containing the values of the power
+            spectrum at the values of the scale factor and the wavenumber
+            held by `a_array` and `k_array`. The shape of this array must be
+            `[na,nk]`, where `na` is the size of `a_array` and `nk` is the
+            size of `k_array`. This array can be provided in a flattened
+            form as long as the total size matches `nk*na`.
+            Note that, if you pass your own Pk array, you
+            are responsible of making sure that it is sufficiently well
+            sampled (i.e. the resolution of `a_array` and `k_array` is high
+            enough to sample the main features in the power spectrum).
+            For reference, CCL will use bicubic interpolation to evaluate
+            the power spectrum at any intermediate point in k and a.
+        """
+        if self.has_linear_power:
+            raise ValueError("Linear power spectrum has been initialized"
+                             "and cannot be reset.")
+        else:
+            if ((a_array is None) or (k_array is None)
+                    or (pk_array is None)):
+                raise ValueError("One or more input array for a, k,"
+                                 " or Pk is not parsed.")
+            self.cosmo.config.transfer_function_method = lib.pklin_from_input
+            self._config_init_kwargs['transfer_function'] = 'pklin_from_input'
+            self._linear_power_on_input = True
+            self.a_array = a_array
+            self.k_array = k_array
+            self.pk_array = pk_array

@@ -18,10 +18,11 @@ def test_omnuh2_smoke(a, m):
     assert np.shape(om) == np.shape(a)
 
 
-@pytest.mark.parametrize('split', ['normal', 'inverted', 'equal', 'sum'])
+@pytest.mark.parametrize('split', ['normal', 'inverted', 'equal', 'sum',
+                                   'single'])
 def test_nu_masses_smoke(split):
     m = ccl.nu_masses(0.1, split)
-    if split == 'sum':
+    if split in ['sum', 'single']:
         assert np.ndim(m) == 0
     else:
         assert np.ndim(m) == 1

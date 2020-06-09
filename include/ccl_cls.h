@@ -21,7 +21,9 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
        ccl_cl_tracer_collection_t *trc1,
        ccl_cl_tracer_collection_t *trc2,
        ccl_f2d_t *psp,
-       int nl_out, double *l_out, double *cl_out, int *status);
+       int nl_out, double *l_out, double *cl_out,
+       ccl_integration_t integration_method,
+       int *status);
 /**
  * Computes non-Limber power spectrum for two different tracers at a given ell.
  * @param cosmo Cosmological parameters

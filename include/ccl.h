@@ -22,6 +22,7 @@
 
 #include "ccl_defs.h"
 #include "ccl_utils.h"
+#include "ccl_fftlog.h"
 #include "ccl_f1d.h"
 #include "ccl_f2d.h"
 #include "ccl_config.h"
@@ -38,7 +39,6 @@
 #include "ccl_bbks.h"
 #include "ccl_eh.h"
 #include "ccl_halofit.h"
-#include "ccl_halomod.h"
 #include "ccl_musigma.h"
 #include "ccl_haloprofile.h"
 #include "ccl_mass_conversion.h"

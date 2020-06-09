@@ -177,7 +177,7 @@ parameters.
   - N_ELL_CORR: the number of logarithmically spaced bins in angular
     wavenumber between ELL_MIN_CORR and ELL_MAX_CORR.
 
-The numrical accuracy of GSL computations are controlled by the following
+The numerical accuracy of GSL computations is controlled by the following
 parameters.
 
   - N_ITERATION: the size of the GSL workspace for numerical

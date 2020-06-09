@@ -47,7 +47,17 @@ def test_nM_mdef_raises(nM_pair):
                                       ccl.halos.MassFuncTinker10])
 def test_nM_mdef_bad_delta(nM_class):
     with pytest.raises(ValueError):
-        nM_class(COSMO, M100)
+        nM_class(COSMO, MFOF)
+
+
+@pytest.mark.parametrize('nM_class', [ccl.halos.MassFuncTinker08,
+                                      ccl.halos.MassFuncTinker10])
+def test_nM_SO_allgood(nM_class):
+    nM = nM_class(COSMO, MVIR)
+    for m in MS:
+        n = nM.get_mass_function(COSMO, m, 0.9)
+        assert np.all(np.isfinite(n))
+        assert np.shape(n) == np.shape(m)
 
 
 def test_nM_despali_smoke():
@@ -113,3 +123,19 @@ def test_nM_default():
     lM_out = nM._get_consistent_mass(COSMO,
                                      M_in, 1., nM.mdef)
     assert np.fabs(np.log10(M_in) - lM_out) < 1E-10
+
+
+@pytest.mark.parametrize('mf', [ccl.halos.MassFuncTinker08,
+                                ccl.halos.MassFuncTinker10])
+def test_nM_tinker_crit(mf):
+    a = 0.5
+    om = ccl.omega_x(COSMO, a, 'matter')
+    oc = ccl.omega_x(COSMO, a, 'critical')
+    delta_c = 500.
+    delta_m = delta_c * oc / om
+    mdef_c = ccl.halos.MassDef(delta_c, 'critical')
+    mdef_m = ccl.halos.MassDef(delta_m, 'matter')
+    nM_c = mf(COSMO, mdef_c)
+    nM_m = mf(COSMO, mdef_m)
+    assert np.allclose(nM_c.get_mass_function(COSMO, 1E13, a),
+                       nM_m.get_mass_function(COSMO, 1E13, a))

@@ -57,7 +57,7 @@ def test_parameters_lcdm_defaults():
         1)
 
 
-@pytest.mark.parametrize('m_nu_type', ['normal', 'inverted'])
+@pytest.mark.parametrize('m_nu_type', ['normal', 'inverted', 'single'])
 def test_parameters_nu(m_nu_type):
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
@@ -73,18 +73,24 @@ def test_parameters_nu(m_nu_type):
         m_nu_type=m_nu_type
     )
 
-    assert np.allclose(
-        cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
-        ccl.physical_constants.DELTAM12_sq, atol=1e-4, rtol=0)
-
     if m_nu_type == 'inverted':
+        assert np.allclose(cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
+                           ccl.physical_constants.DELTAM12_sq,
+                           atol=1e-4, rtol=0)
         assert np.allclose(
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_neg, atol=1e-4, rtol=0)
     elif m_nu_type == 'normal':
+        assert np.allclose(cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
+                           ccl.physical_constants.DELTAM12_sq,
+                           atol=1e-4, rtol=0)
         assert np.allclose(
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_pos, atol=1e-4, rtol=0)
+    elif m_nu_type == 'single':
+        assert np.allclose(cosmo['m_nu'][0], 0.15, atol=1e-4, rtol=0)
+        assert np.allclose(cosmo['m_nu'][1], 0., atol=1e-4, rtol=0)
+        assert np.allclose(cosmo['m_nu'][2], 0., atol=1e-4, rtol=0)
 
 
 def test_parameters_nu_Nnurel_neg():

@@ -20,6 +20,8 @@ typedef enum transfer_function_t
   ccl_bbks              = 2,
   ccl_boltzmann_class   = 3,
   ccl_boltzmann_camb    = 4,
+  ccl_boltzmann_isitgr  = 5,
+  ccl_pklin_from_input  = 6,
 } transfer_function_t;
 
 /**

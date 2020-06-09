@@ -7,204 +7,55 @@
 #include <gsl/gsl_sf_expint.h>
 #include "ccl.h"
 
-//maths helper function for NFW profile
-static double helper_fx(double x){
-    double f;
-    f = log(1.+x)-x/(1.+x);
-    return f;
+static double einasto_norm_integrand(double x, void *params)
+{
+  double alpha = *((double *)(params));
+  return x*x*exp(-2*(pow(x,alpha)-1)/alpha);
 }
 
-//cosmo: ccl cosmology object containing cosmological parameters
-//c: halo concentration, needs to be consistent with halo size definition
-//halomass: halo mass
-//massdef_delta: mass definition, overdensity relative to mean matter density
-//a: scale factor
-//r: radii at which to calculate output
-//nr: number of radii for calculation
-//rho_r: stores densities at r
-//returns void
-void ccl_halo_profile_nfw(ccl_cosmology *cosmo, double c, double halomass,
-                          double massdef_delta_m, double a, double *r, int nr,
-                          double *rho_r, int *status) {
-
-    //haloradius: halo radius for mass definition
-    //rs: scale radius
-    double haloradius, rs;
-
-    haloradius = r_delta(cosmo, halomass, a, massdef_delta_m, status);
-    rs = haloradius/c;
-
-    //rhos: NFW density parameter
-    double rhos;
-
-    rhos = halomass/(4.*M_PI*(rs*rs*rs)*helper_fx(c));
-
-    int i;
-    double x;
-    for(i=0; i < nr; i++) {
-        x = r[i]/rs;
-        rho_r[i] = rhos/(x*(1.+x)*(1.+x));
-    }
-    return;
-}
-
-//cosmo: ccl cosmology object containing cosmological parameters
-//c: halo concentration, needs to be consistent with halo size definition
-//halomass: halo mass
-//massdef_delta: mass definition, overdensity relative to mean matter density
-//a: scale factor
-//rp: radius at which to calculate output
-//nr: number of radii for calculation
-//sigma_r: stores surface mass density (integrated along line of sight) at given projected rp
-//returns void
-void ccl_projected_halo_profile_nfw(ccl_cosmology *cosmo, double c,
-                                    double halomass, double massdef_delta_m,
-                                    double a, double *rp, int nr, double *sigma_r,
-                                    int *status) {
-
-    //haloradius: halo radius for mass definition
-    //rs: scale radius
-    double haloradius, rs;
-
-    haloradius = r_delta(cosmo, halomass, a, massdef_delta_m, status);
-    rs = haloradius/c;
-
-    //rhos: NFW density parameter
-    double rhos;
-
-    rhos = halomass/(4.*M_PI*(rs*rs*rs)*helper_fx(c));
-
-    double x;
-
-    int i;
-    for(i=0; i < nr; i++){
-
-        x = rp[i]/rs;
-        if (x==1.){
-            sigma_r[i] = 2.*rs*rhos/3.;
-        }
-        else if (x<1.){
-            sigma_r[i] = 2.*rs*rhos*(1.-2.*atanh(sqrt(fabs((1.-x)/(1.+x))))/sqrt(fabs(1.-x*x)))/(x*x-1.);
-        }
-        else {
-            sigma_r[i] = 2.*rs*rhos*(1.-2.*atan(sqrt(fabs((1.-x)/(1.+x))))/sqrt(fabs(1.-x*x)))/(x*x-1.);
-        }
-    }
-    return;
-
-}
-
-//maths helper function assuming NFW approximation
-static double helper_solve_cvir(double c, void *rhs_pointer){
-    double rhs = *(double*)rhs_pointer;
-    return (log(1.+c)-c/(1.+c))/(c*c*c) - rhs;
-}
-
-//solve for cvir from different mass definition iteratively, assuming NFW profile.
-static double solve_cvir(ccl_cosmology *cosmo, double rhs, double initial_guess, int *status){
-
-    int rootstatus;
-    int iter = 0, max_iter = 100;
-    const gsl_root_fsolver_type *T;
-    gsl_root_fsolver *s;
-    double cvir;
-    double c_lo = 0.1, c_hi = initial_guess*100.;
+void ccl_einasto_norm_integral(int n_m, double *r_s, double *r_delta, double *alpha,
+			       double *norm_out,int *status)
+{
+#pragma omp parallel default(none)			\
+  shared(n_m, r_s, r_delta, alpha, norm_out, status)
+  {
+    int ii;
+    int status_this=0;
     gsl_function F;
-
-    F.function = &helper_solve_cvir;
-    F.params = &rhs;
-
-    T = gsl_root_fsolver_brent;
-    s = gsl_root_fsolver_alloc (T);
-    if (s != NULL) {
-      gsl_root_fsolver_set (s, &F, c_lo, c_hi);
-
-      do
-        {
-          iter++;
-          gsl_root_fsolver_iterate (s);
-          cvir = gsl_root_fsolver_root (s);
-          c_lo = gsl_root_fsolver_x_lower (s);
-          c_hi = gsl_root_fsolver_x_upper (s);
-          rootstatus = gsl_root_test_interval (c_lo, c_hi, 0, 0.0001);
-        }
-      while (rootstatus == GSL_CONTINUE && iter < max_iter);
-
-      gsl_root_fsolver_free(s);
-
-      // Check for errors
-      if (rootstatus != GSL_SUCCESS) {
-          ccl_raise_gsl_warning(rootstatus, "ccl_haloprofile.c: solve_cvir():");
-          *status = CCL_ERROR_PROFILE_ROOT;
-          ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: solve_cvir(): Root finding failure\n");
-          return NAN;
-      } else {
-          return cvir;
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+    
+    if (w == NULL)
+      status_this = CCL_ERROR_MEMORY;
+    
+    if(status_this == 0) {
+#pragma omp for
+      for(ii=0;ii<n_m;ii++) {
+	int qagstatus;
+	double result, eresult;
+	double x_max = r_delta[ii]/r_s[ii];
+	F.function = &einasto_norm_integrand;
+	F.params = &(alpha[ii]);
+	qagstatus = gsl_integration_qag(&F, 0, x_max, 0, 1E-4,
+					1000, GSL_INTEG_GAUSS31,
+					w, &result, &eresult);
+	if(qagstatus != GSL_SUCCESS) {
+	  ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: ccl_einasto_norm_integral():");
+	  status_this = CCL_ERROR_INTEG;
+	  result = NAN;
+	}
+	norm_out[ii] = 4 * M_PI * r_s[ii] * r_s[ii] * r_s[ii] * result;
       }
+    } //end omp for
+  
+    gsl_integration_workspace_free(w);
+    if(status_this) {
+      #pragma omp atomic write
+      *status = status_this;
     }
-    else {
-      *status = CCL_ERROR_MEMORY;
-      return NAN;
-    }
+  } //end omp parallel
 }
 
-// Structure to hold parameters of integrand_einasto
-typedef struct{
-  ccl_cosmology *cosmo;
-  double alpha, rs;
-} Int_Einasto_Par;
-
-static double integrand_einasto(double r, void *params){
-
-    Int_Einasto_Par *p = (Int_Einasto_Par *)params;
-    double alpha = p->alpha;
-    double rs = p->rs;
-
-    return 4.*M_PI*r*r*exp(-2.*(pow(r/rs,alpha)-1)/alpha);
-}
-
-//integrate einasto profile to get normalization of rhos
-static double integrate_einasto(ccl_cosmology *cosmo, double R, double alpha, double rs, int *status){
-    int qagstatus;
-    double result = 0, eresult;
-    Int_Einasto_Par ipar;
-    gsl_function F;
-    gsl_integration_workspace *w = NULL;
-
-    w = gsl_integration_workspace_alloc(1000);
-
-    if (w == NULL) {
-      *status = CCL_ERROR_MEMORY;
-    }
-
-    if (*status == 0) {
-      // Structure required for the gsl integration
-      ipar.cosmo = cosmo;
-      ipar.alpha = alpha;
-      ipar.rs = rs;
-      F.function = &integrand_einasto;
-      F.params = &ipar;
-
-      // Actually does the integration
-      qagstatus = gsl_integration_qag(
-        &F, 0, R, 0, 0.0001, 1000, 3, w,
-        &result, &eresult);
-
-      // Check for errors
-      if (qagstatus != GSL_SUCCESS) {
-        ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: integrate_einasto():");
-        *status = CCL_ERROR_PROFILE_INT;
-        ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: integrate_einasto(): Integration failure\n");
-        result = NAN;
-      }
-    }
-
-  // Clean up
-  gsl_integration_workspace_free(w);
-
-  return result;
-}
-
+<<<<<<< HEAD
 
 //cosmo: ccl cosmology object containing cosmological parameters
 //c: halo concentration, needs to be consistent with halo size definition
@@ -260,96 +111,52 @@ void ccl_halo_profile_einasto(ccl_cosmology *cosmo, double c, double halomass,
 
     return;
 
+=======
+static double hernquist_norm_integrand(double x, void *params)
+{
+  double opx=1+x;
+  return x*x/(x*opx*opx*opx);
+>>>>>>> master
 }
 
-// Structure to hold parameters of integrand_hernquist
-typedef struct{
-  ccl_cosmology *cosmo;
-  double rs;
-} Int_Hernquist_Par;
-
-static double integrand_hernquist(double r, void *params){
-
-    Int_Hernquist_Par *p = (Int_Hernquist_Par *)params;
-    double rs = p->rs;
-
-    return 4.*M_PI*r*r/((r/rs)*(1.+r/rs)*(1.+r/rs)*(1.+r/rs));
-}
-
-//integrate hernquist profile to get normalization of rhos
-static double integrate_hernquist(ccl_cosmology *cosmo, double R, double rs, int *status){
-    int qagstatus;
-    double result = 0, eresult;
-    Int_Hernquist_Par ipar;
+void ccl_hernquist_norm_integral(int n_m, double *r_s, double *r_delta,
+			       double *norm_out,int *status)
+{
+#pragma omp parallel default(none)		\
+  shared(n_m, r_s, r_delta, norm_out, status)
+  {
+    int ii;
+    int status_this=0;
     gsl_function F;
-    gsl_integration_workspace *w = NULL;
-
-    w = gsl_integration_workspace_alloc(1000);
-
-    if (w == NULL) {
-      *status = CCL_ERROR_MEMORY;
-    }
-
-    if (*status == 0) {
-      // Structure required for the gsl integration
-      ipar.cosmo = cosmo;
-      ipar.rs = rs;
-      F.function = &integrand_hernquist;
-      F.params = &ipar;
-
-      // Actually does the integration
-      qagstatus = gsl_integration_qag(
-        &F, 0, R, 0, 0.0001, 1000, 3, w,
-        &result, &eresult);
-
-      // Check for errors
-      if (qagstatus != GSL_SUCCESS) {
-        ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: integrate_hernquist():");
-        *status = CCL_ERROR_PROFILE_INT;
-        ccl_cosmology_set_status_message(cosmo, "ccl_haloprofile.c: integrate_hernquist(): Integration failure\n");
-        result = NAN;
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+    
+    if (w == NULL)
+      status_this = CCL_ERROR_MEMORY;
+    
+    if(status_this == 0) {
+#pragma omp for
+      for(ii=0;ii<n_m;ii++) {
+	int qagstatus;
+	double result, eresult;
+	double x_max = r_delta[ii]/r_s[ii];
+	F.function = &hernquist_norm_integrand;
+	F.params = NULL;
+	qagstatus = gsl_integration_qag(&F, 0, x_max, 0, 1E-4,
+					1000, GSL_INTEG_GAUSS31,
+					w, &result, &eresult);
+	if(qagstatus != GSL_SUCCESS) {
+	  ccl_raise_gsl_warning(qagstatus, "ccl_haloprofile.c: ccl_hernquist_norm_integral():");
+	  status_this = CCL_ERROR_INTEG;
+	  result = NAN;
+	}
+	norm_out[ii] = 4 * M_PI * r_s[ii] * r_s[ii] * r_s[ii] * result;
       }
-    }
-
-    // Clean up
+    } //end omp for
+  
     gsl_integration_workspace_free(w);
-
-    return result;
-}
-
-
-//cosmo: ccl cosmology object containing cosmological parameters
-//c: halo concentration, needs to be consistent with halo size definition
-//halomass: halo mass
-//massdef_delta: mass definition, overdensity relative to mean matter density
-//a: scale factor
-//r: radii at which to calculate output
-//nr: number of radii for calculation
-//rho_r: stores densities at r
-//returns void
-void ccl_halo_profile_hernquist(ccl_cosmology *cosmo, double c, double halomass,
-                                double massdef_delta_m, double a, double *r, int nr,
-                                double *rho_r, int *status) {
-
-    //haloradius: halo radius for mass definition
-    //rs: scale radius
-    double haloradius, rs;
-
-    haloradius = r_delta(cosmo, halomass, a, massdef_delta_m, status);
-    rs = haloradius/c;
-
-    //rhos: scale density
-    double rhos;
-
-    rhos = halomass/integrate_hernquist(cosmo, haloradius, rs, status); //normalize
-
-    int i;
-    double x;
-    for(i=0; i < nr; i++) {
-        x = r[i]/rs;
-        rho_r[i] = rhos/(x*pow((1.+x),3));
+    if(status_this) {
+      #pragma omp atomic write
+      *status = status_this;
     }
-
-    return;
-
+  } //end omp parallel
 }

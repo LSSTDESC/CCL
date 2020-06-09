@@ -1,15 +1,18 @@
-from . import ccllib as lib
-import numpy as np
-from .core import check
+from . import halos as hal
+from .pyutils import deprecated
 
 
+@deprecated(hal.HaloProfileNFW)
 def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D NFW halo profile at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
 
+    .. note:: Note that this function is deprecated. Please use the
+              functionality in the :mod:`~pyccl.halos.profiles` module.
+
     Args:
-        cosmo (:obj:`Cosmology`): cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
         concentration (float): halo concentration.
         halo_mass (float): halo masses; in units of Msun.
         odelta (float): overdensity with respect to mean matter density.
@@ -20,69 +23,14 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
-    status = 0
-    scalar = True if np.ndim(r) == 0 else False
-
-    # Convert to array if it's not already an array
-    if not isinstance(r, np.ndarray):
-        r = np.array([r, ]).flatten()
-
-    nr = len(r)
-
-    cosmo = cosmo.cosmo
-    # Call function
-    rho_r, status = lib.halo_profile_nfw_vec(
-        cosmo, concentration, halo_mass,
-        odelta, a, r, nr, status)
-
-    # Check status and return
-    check(status, cosmo)
-    if scalar:
-        return rho_r[0]
-    return rho_r
+    mdef = hal.MassDef(odelta, 'matter')
+    c = hal.ConcentrationConstant(c=concentration,
+                                  mdef=mdef)
+    p = hal.HaloProfileNFW(c, truncated=False)
+    return p.real(cosmo, r, halo_mass, a, mdef)
 
 
-def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
-    """Calculate the 2D projected NFW halo profile
-    at a given radius or an array of radii,
-    for a halo with a given mass, mass definition, and concentration,
-    at a given scale factor, with a cosmology dependence.
-
-    Args:
-        cosmo (:obj:`Cosmology`): cosmological parameters.
-        concentration (float): halo concentration.
-        halo_mass (float): halo masses; in units of Msun.
-        odelta (float): overdensity with respect to mean matter density.
-        a (float): scale factor.
-        r (float or array_like): radius or radii to calculate profile for,
-         in units of Mpc.
-
-    Returns:
-        float or array_like: 2D projected NFW density at r,
-         in units of Msun/Mpc^2.
-    """
-    status = 0
-    scalar = True if np.ndim(r) == 0 else False
-
-    # Convert to array if it's not already an array
-    if not isinstance(r, np.ndarray):
-        r = np.array([r, ]).flatten()
-
-    nr = len(r)
-
-    cosmo = cosmo.cosmo
-    # Call function
-    sigma_r, status = lib.projected_halo_profile_nfw_vec(
-        cosmo, concentration,
-        halo_mass, odelta, a, r, nr, status)
-
-    # Check status and return
-    check(status, cosmo)
-    if scalar:
-        return sigma_r[0]
-    return sigma_r
-
-
+@deprecated(hal.HaloProfileEinasto)
 def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D Einasto halo profile
     at a given radius or an array of radii,
@@ -91,8 +39,11 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     The alpha parameter is calibrated using the relation with peak height in
     https://arxiv.org/pdf/1401.1216.pdf eqn5, assuming virial mass.
 
+    .. note:: Note that this function is deprecated. Please use the
+              functionality in the :mod:`~pyccl.halos.profiles` module.
+
     Args:
-        cosmo (:obj:`Cosmology`): cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
         concentration (float): halo concentration.
         halo_mass (float): halo masses; in units of Msun.
         odelta (float): overdensity with respect to mean matter density.
@@ -103,39 +54,27 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
-    # needed for part of the parameters
-    cosmo.compute_sigma()
-
-    status = 0
-    scalar = True if np.ndim(r) == 0 else False
-
-    # Convert to array if it's not already an array
-    if not isinstance(r, np.ndarray):
-        r = np.array([r, ]).flatten()
-
-    nr = len(r)
-
-    cosmo = cosmo.cosmo
-    # Call function
-    rho_r, status = lib.halo_profile_einasto_vec(
-        cosmo, concentration, halo_mass,
-        odelta, a, r, nr, status)
-
-    # Check status and return
-    check(status, cosmo)
-    if scalar:
-        return rho_r[0]
-    return rho_r
+    mdef = hal.MassDef(odelta, 'matter')
+    c = hal.ConcentrationConstant(c=concentration,
+                                  mdef=mdef)
+    mdef = hal.MassDef(odelta, 'matter',
+                       c_m_relation=c)
+    p = hal.HaloProfileEinasto(c, truncated=False)
+    return p.real(cosmo, r, halo_mass, a, mdef)
 
 
+@deprecated(hal.HaloProfileHernquist)
 def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D Hernquist halo profile
     at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
 
+    .. note:: Note that this function is deprecated. Please use the
+              functionality in the :mod:`~pyccl.halos.profiles` module.
+
     Args:
-        cosmo (:obj:`Cosmology`): cosmological parameters.
+        cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
         concentration (float): halo concentration.
         halo_mass (float): halo masses; in units of Msun.
         odelta (float): overdensity with respect to mean matter density.
@@ -146,23 +85,39 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
-    status = 0
-    scalar = True if np.ndim(r) == 0 else False
+    mdef = hal.MassDef(odelta, 'matter')
+    c = hal.ConcentrationConstant(c=concentration,
+                                  mdef=mdef)
+    p = hal.HaloProfileHernquist(c, truncated=False)
+    return p.real(cosmo, r, halo_mass, a, mdef)
 
-    # Convert to array if it's not already an array
-    if not isinstance(r, np.ndarray):
-        r = np.array([r, ]).flatten()
 
-    nr = len(r)
+@deprecated(hal.HaloProfileNFW)
+def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
+    """Calculate the 2D projected NFW halo profile
+    at a given radius or an array of radii,
+    for a halo with a given mass, mass definition, and concentration,
+    at a given scale factor, with a cosmology dependence.
 
-    cosmo = cosmo.cosmo
-    # Call function
-    rho_r, status = lib.halo_profile_hernquist_vec(
-        cosmo, concentration, halo_mass,
-        odelta, a, r, nr, status)
+    .. note:: Note that this function is deprecated. Please use the
+              functionality in the :mod:`~pyccl.halos.profiles` module.
 
-    # Check status and return
-    check(status, cosmo)
-    if scalar:
-        return rho_r[0]
-    return rho_r
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
+        concentration (float): halo concentration.
+        halo_mass (float): halo masses; in units of Msun.
+        odelta (float): overdensity with respect to mean matter density.
+        a (float): scale factor.
+        r (float or array_like): radius or radii to calculate profile for,
+         in units of Mpc.
+
+    Returns:
+        float or array_like: 2D projected NFW density at r, \
+         in units of Msun/Mpc^2.
+    """
+    mdef = hal.MassDef(odelta, 'matter')
+    c = hal.ConcentrationConstant(c=concentration,
+                                  mdef=mdef)
+    p = hal.HaloProfileNFW(c, truncated=False,
+                           projected_analytic=True)
+    return p.projected(cosmo, r, halo_mass, a, mdef)

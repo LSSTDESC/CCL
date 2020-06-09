@@ -88,6 +88,7 @@ double ccl_sinn(ccl_cosmology *cosmo,double chi, int *status);
  */
 double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* status);
 
+
 /**
  * Comoving angular distances in Mpc to scale factors as given in array a[0..na-1]
  * NOTE this quantity is otherwise known as the transverse comoving distance, and is NOT angular diameter
@@ -102,6 +103,38 @@ double ccl_comoving_angular_distance(ccl_cosmology * cosmo, double a, int* statu
  * @return void
  */
 void ccl_comoving_angular_distances(ccl_cosmology * cosmo, int na, double a[], double output[], int* status);
+
+
+/**
+ * Angular diameter distance in Mpc from scale factor a1 to scale factor a2
+ * NOTE this is Eq. (19) of astro-ph/9905116, it gives the ratio of the physical
+ * transverse size of an object to its angular size in radians.
+ * @param cosmo Cosmological parameters
+ * @param a1 scale factor, normalized to 1 for today
+ * @param a2 scale factor, normalized to 1 for today
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return comoving_angular_diameter_distance, the angular diameter distance between a1 and a2 in Mpc
+ */
+double ccl_angular_diameter_distance(ccl_cosmology * cosmo, double a1, double a2, int* status);
+
+
+/**
+ * Angular diameter distance in Mpc from scale factor a1[0..na-1] to scale factor a2[0..na-1]
+ * NOTE this is Eq. (19) of astro-ph/9905116, it gives the ratio of the physical
+ * transverse size of an object to its angular size in radians.
+ * @param cosmo Cosmological parameters
+ * @param na Number of scale factors in a
+ * @param a1 array of scale factors, normalized to 1 for today
+ * @param a2 array of scale factors, normalized to 1 for today
+ * @param output array of length na to store the results of the calculation. The entry at index i stores the
+ * distance for a1[i], a2[i].
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+void ccl_angular_diameter_distances(ccl_cosmology * cosmo, int na, double a1[], double a2[], double output[], int* status);
+
 
 /**
  * Comoving luminosity distance in Mpc from today to scale factor a
@@ -294,6 +327,33 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status);
  * @return void
  */
 void ccl_cosmology_compute_distances(ccl_cosmology * cosmo,int *status);
+
+/**
+ * Store user input arrays in splines for the comoving radial distance chi(a), hubble parameter E(a) as well as a(chi).
+ * @param cosmo Cosmological parameters
+ * @param na integer indicating size of array a
+ * @param a scale factor at locations where the input arrays are pre-computed
+ * @param chi_a comoving distance computed at values of a
+ * @param E_a Hubble parameter dividied by H_0 as a function of a
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[], double chi_a[], double E_a[], int *status);
+
+/**
+ * Store user input arrays in splines for the growth factor, growth rate and normalization.
+ * @param cosmo Cosmological parameters
+ * @param na integer indicating size of array a
+ * @param a scale factor at locations where the input arrays are pre-computed
+ * @param growth_arr Growth factor array, defined as D(a)=P(k,a)/P(k,a=1), assuming no scale dependence.
+ * It is assumed that D(a<<1)~a so that D(1.0) will be used for normalization.
+ * @param fgrowth_arr Derivative of the growth array.
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return void
+ */
+void ccl_cosmology_growth_from_input(ccl_cosmology* cosmo, int na, double a[], double growth_arr[], double fgrowth_arr[], int* status);
 
 /**
  * Compute the growth function and a spline to be stored
