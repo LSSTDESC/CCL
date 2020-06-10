@@ -228,28 +228,3 @@ double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, int *status)
   }
   return dlsdlgm;
 }
-
-/*----- ROUTINE: ccl_dlnsigM_dlogM -----
-INPUT: ccl_cosmology *cosmo, double halo mass in units of Msun
-TASK: returns the value of the derivative of ln(sigma^-1) with respect to log10 in halo mass.
-*/
-double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, int *status)
-{
-  // Check if sigma has already been calculated
-  if (!cosmo->computed_sigma) {
-    *status = CCL_ERROR_SIGMA_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_massfunc.c: ccl_sigmaM(): linear power spctrum has not been computed!");
-    return NAN;
-  }
-  
-  double dlsdlgm;
-  int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm,
-				    log_halomass, NULL, &dlsdlgm);
-  if(gslstatus) { 
-    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_dlnsigM_dlogM():");
-    *status |= gslstatus;
-  }
-  return dlsdlgm;
-}

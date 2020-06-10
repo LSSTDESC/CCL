@@ -482,7 +482,7 @@ class WeakLensingTracer(Tracer):
             Defaults to True.
     """
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None,
-                 use_A_ia=True):
+                 use_A_ia=True, lk_range=None):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -519,6 +519,8 @@ class WeakLensingTracer(Tracer):
             t_a = (1./(1+z_a[::-1]), a[::-1])
             self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
                             der_bessel=-1, der_angles=2)
+
+/*        if (cosmo['sigma_0'] != 0):  */
 
 
 class CMBLensingTracer(Tracer):
