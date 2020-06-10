@@ -348,10 +348,12 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
           chi = chi_arr[ichi];
           a = ccl_scale_factor_of_chi(cosmo, chi, &local_status);
           z = 1./a-1;
-          // Add MG correction if needed
           mgfac = 1.0;
+          double k=0; 
+          // Add MG correction if needed
           if (fabs(cosmo->params.sigma_0))
-            mgfac += ccl_Sig_MG(cosmo, a, &local_status);
+          // MI: k=0 for now but will need to be assigned when fully implemented
+	    mgfac += ccl_Sig_MG(cosmo, a, k, status);
           ipar->z_end = z;
           ipar->chi_end = chi;
 
