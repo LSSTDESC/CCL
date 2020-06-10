@@ -19,7 +19,7 @@ def _get_mf_hb(cosmo, mass_def):
                                    mass_def_strict=False)
         hbf = hal.HaloBiasTinker10(cosmo, mass_def=mass_def,
                                    mass_def_strict=False)
-    if cosmo._config.mass_function_method == lib.tinker10:
+    elif cosmo._config.mass_function_method == lib.tinker10:
         hmf = hal.MassFuncTinker10(cosmo, mass_def=mass_def,
                                    mass_def_strict=False)
         hbf = hal.HaloBiasTinker10(cosmo, mass_def=mass_def,
