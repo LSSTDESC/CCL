@@ -961,7 +961,7 @@ class HaloProfilePressureArnaud(HaloProfile):
         R = mass_def.get_radius(cosmo, M_use * mb, a) / a
 
         nn = self._norm(cosmo, M_use, a, mb)
-        prof = self._form_factor(r_use[None, :] * R[:, None])
+        prof = self._form_factor(r_use[None, :] / R[:, None])
         prof *= nn[:, None]
 
         if np.ndim(r) == 0:
