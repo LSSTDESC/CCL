@@ -1089,7 +1089,7 @@ class Cosmology(object):
             self.cosmo.config.matter_power_spectrum_method \
                 = lib.pknl_from_input
             self._config_init_kwargs['matter_power_spectrum']\
-                = 'pklin_from_input'
+                = 'pknl_from_input'
             self._nonlinear_power_on_input = True
             self.a_array = a_array
             self.k_array = k_array
