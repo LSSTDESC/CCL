@@ -22,7 +22,7 @@ def test_haloprofile_smoke(func, r):
     odelta = 200
     # These are all deprecated
     prof = assert_warns(
-            ccl.CCLWarning,
-            getattr(ccl, func), cosmo, c, mass, odelta, a, r)
+        ccl.CCLWarning,
+        getattr(ccl, func), cosmo, c, mass, odelta, a, r)
     assert np.all(np.isfinite(prof))
     assert np.shape(prof) == np.shape(r)

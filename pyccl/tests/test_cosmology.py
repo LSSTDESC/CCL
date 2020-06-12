@@ -105,6 +105,24 @@ def test_cosmology_pickles():
         ccl.comoving_radial_distance(cosmo2, 0.5))
 
 
+def test_cosmology_lcdm():
+    """Check that the default vanilla cosmology behaves
+    as expected"""
+    c1 = ccl.Cosmology(Omega_c=0.25,
+                       Omega_b=0.05,
+                       h=0.67, n_s=0.96,
+                       sigma8=0.81)
+    c2 = ccl.CosmologyVanillaLCDM()
+    assert_(ccl.comoving_radial_distance(c1, 0.5) ==
+            ccl.comoving_radial_distance(c2, 0.5))
+
+
+def test_cosmology_p18lcdm_raises():
+    with pytest.raises(ValueError):
+        kw = {'Omega_c': 0.1}
+        ccl.CosmologyVanillaLCDM(**kw)
+
+
 def test_cosmology_repr():
     """Check that we can make a Cosmology object from its repr."""
     import pyccl  # noqa: F401
