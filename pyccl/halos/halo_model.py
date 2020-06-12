@@ -411,11 +411,14 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
                         "`Profile2pt` or `None`")
     # Power spectrum
     if isinstance(p_of_k_a, Pk2D):
-        def pkf(sf): return p_of_k_a.eval(k_use, sf, cosmo)
-    elif (p_of_k_a is None) or (p_of_k_a == 'linear'):
-        def pkf(sf): return linear_matter_power(cosmo, k_use, sf)
-    elif p_of_k_a == 'nonlinear':
-        def pkf(sf): return nonlin_matter_power(cosmo, k_use, sf)
+        def pkf(sf):
+            return p_of_k_a.eval(k_use, sf, cosmo)
+    elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+        def pkf(sf):
+            return linear_matter_power(cosmo, k_use, sf)
+    elif str(p_of_k_a) == 'nonlinear':
+        def pkf(sf):
+            return nonlin_matter_power(cosmo, k_use, sf)
     else:
         raise TypeError("p_of_k_a must be `None`, \'linear\', "
                         "\'nonlinear\' or a `Pk2D` object")

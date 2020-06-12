@@ -16,7 +16,7 @@ To install CCL using a ``pip`` developer installation, you can execute
 
 .. code-block:: bash
 
-   $ pip install -e .
+   $ pip install --no-deps -e .
 
 from the top-level directory in the repository. You will need ``CMake`` in
 order to install CCL in this way. See :ref:`getting-cmake` for help installing
@@ -49,3 +49,36 @@ To uninstall ``CCL`` in developer mode, simply type
 .. code-block:: bash
 
    $ pip uninstall pyccl
+
+
+Boostrapping a CCL Development Environment with ``conda``
+=========================================================
+
+One of the easier ways to get started with CCL development is to use
+``conda-forge`` to provide the third-party requirements above and the necessary
+compilers. The following commands will get you started with a ``conda-forge``-based
+development environment. Note that before you start, make sure to follow the
+`conda-forge instructions <https://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge>`_
+for use and that your ``PYTHONPATH`` variable is not set.
+
+Then do the following
+
+.. code-block:: bash
+
+   $ conda create -n ccl-dev compilers cmake swig pyccl pytest flake8
+   $ conda activate ccl-dev
+   $ conda uninstall pyccl --force
+   $ git clone https://github.com/LSSTDESC/CCL.git
+   $ cd CCL
+   $ pip install --no-deps -e .
+
+This set of commands leaves a copy of the compiled ``C`` extension in the checked out
+copy of the code, e.g.,
+
+.. code-block:: bash
+
+   $ ls pyccl/*.so
+   pyccl/_ccllib.so
+
+If you make changes to the ``C`` library or checkout a new branch, simply rerun
+``pip install --no-deps -e .`` to rebuild the library.

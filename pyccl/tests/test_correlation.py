@@ -33,6 +33,7 @@ def test_correlation_smoke(method):
                                   ['l+', 'GG+'],
                                   ['l-', 'GG-']])
 def test_correlation_newtypes(typs):
+    from pyccl.pyutils import assert_warns
     z = np.linspace(0., 1., 200)
     n = np.ones(z.shape)
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
@@ -41,8 +42,9 @@ def test_correlation_newtypes(typs):
     cl = ccl.angular_cl(COSMO, lens, lens, ell)
 
     theta = np.logspace(-2., np.log10(5.), 5)
-    corr_old = ccl.correlation(COSMO, ell, cl, theta,
-                               corr_type=typs[0])
+    corr_old = assert_warns(
+        ccl.CCLWarning,
+        ccl.correlation, COSMO, ell, cl, theta, corr_type=typs[0])
     corr_new = ccl.correlation(COSMO, ell, cl, theta,
                                type=typs[1])
     assert np.all(corr_new == corr_old)
@@ -123,6 +125,7 @@ def test_correlation_pi_sigma_smoke(sval):
 def test_correlation_raises():
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, [1], [1e-3], [1], method='blah')
-
+    with pytest.raises(ValueError):
+        ccl.correlation(COSMO, [1], [1e-3], [1], type='blah')
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, [1], [1e-3], [1], corr_type='blah')

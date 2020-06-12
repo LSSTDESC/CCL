@@ -6,6 +6,10 @@ from .errors import CCLError, CCLWarning
 import functools
 import warnings
 import numpy as np
+try:
+    from collections.abc import Iterable
+except ImportError:  # pragma: no cover  (for py2.7)
+    from collections import Iterable
 
 NoneArr = np.array([])
 
@@ -467,7 +471,7 @@ def _spline_integrate(x, ys, a, b):
     return result
 
 
-def _check_array_params(f_arg, arr3=False):
+def _check_array_params(f_arg, name=None, arr3=False):
     """Check whether an argument `f_arg` passed into the constructor of
     Tracer() is valid.
 
@@ -480,6 +484,12 @@ def _check_array_params(f_arg, arr3=False):
         f2 = NoneArr
         f3 = NoneArr
     else:
+        if ((not isinstance(f_arg, Iterable))
+            or (len(f_arg) != (3 if arr3 else 2))
+            or (not (isinstance(f_arg[0], Iterable)
+                     and isinstance(f_arg[1], Iterable)))):
+            raise ValueError("%s needs to be a tuple of two arrays." % name)
+
         f1 = np.atleast_1d(np.array(f_arg[0], dtype=float))
         f2 = np.atleast_1d(np.array(f_arg[1], dtype=float))
         if arr3:
@@ -488,3 +498,22 @@ def _check_array_params(f_arg, arr3=False):
         return f1, f2, f3
     else:
         return f1, f2
+
+
+def assert_warns(wtype, f, *args, **kwargs):
+    """Check that a function call f(*args, **kwargs) raises a warning of type
+    wtype.
+
+    Returns the output of f(*args, **kwargs) unless there was no warning, in
+    which case an AssertionError is raised.
+    """
+    import warnings
+    # Check that f() raises a warning, but not an error.
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        res = f(*args, **kwargs)
+    assert len(w) >= 1, "Expected warning was not raised."
+    assert issubclass(w[0].category, wtype), \
+        "Warning raised was the wrong type (got %s, expected %s)" % (
+            w[0].category, wtype)
+    return res

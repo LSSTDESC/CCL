@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 import pyccl as ccl
 
 POWER_MG_TOL = 1e-4
@@ -11,7 +10,7 @@ def test_power_mg(model):
     mu_0 = [0., 0.1, -0.1, 0.1, -0.1]
     sigma_0 = [0., 0.1, -0.1, -0.1, 0.1]
     h0 = 0.7
-    cosmo = ccl.Cosmology(
+    cosmoMG = ccl.Cosmology(
         Omega_c=0.112/h0**2,
         Omega_b=0.0226/h0**2,
         h=h0,
@@ -30,11 +29,11 @@ def test_power_mg(model):
                       % model)
 
     a = 1
-    k = data[:, 0] * cosmo['h']
-    pk = data[:, 1] / (cosmo['h']**3)
-    pk_ccl = ccl.linear_matter_power(cosmo, k, a)
+    k = data[:, 0] * cosmoMG['h']
+    pk = data[:, 1] / (cosmoMG['h']**3)
+    pk_ccl = ccl.linear_matter_power(cosmoMG, k, a)
     err = np.abs(pk_ccl/pk - 1)
-
+    print(cosmoMG)
 # cut two points due to cosmic variance
     cut = data[:, 0] > 1e-04
     assert np.allclose(err[cut], 0, rtol=0, atol=POWER_MG_TOL)

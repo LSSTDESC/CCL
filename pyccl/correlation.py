@@ -13,8 +13,8 @@ import numpy as np
 import warnings
 
 correlation_methods = {
-    'fftlog':   const.CCL_CORR_FFTLOG,
-    'bessel':   const.CCL_CORR_BESSEL,
+    'fftlog': const.CCL_CORR_FFTLOG,
+    'bessel': const.CCL_CORR_BESSEL,
     'legendre': const.CCL_CORR_LGNDRE,
 }
 
@@ -26,7 +26,7 @@ correlation_types = {
 }
 
 
-def correlation(cosmo, ell, C_ell, theta, type='nn', corr_type=None,
+def correlation(cosmo, ell, C_ell, theta, type='NN', corr_type=None,
                 method='fftlog'):
     """Compute the angular correlation function.
 
@@ -61,6 +61,7 @@ def correlation(cosmo, ell, C_ell, theta, type='nn', corr_type=None,
         float or array_like: Value(s) of the correlation function at the \
             input angular separations.
     """
+    from .errors import CCLWarning
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
     status = 0
@@ -78,8 +79,8 @@ def correlation(cosmo, ell, C_ell, theta, type='nn', corr_type=None,
             type = 'GG-'
         else:
             raise ValueError("Unknown corr_type " + corr_type)
-        warnings.warn("corr_type is deprecated. "
-                      "Use type = {}".format(type))
+        warnings.warn("corr_type is deprecated. Use type = {}".format(type),
+                      CCLWarning)
     method = method.lower()
 
     if type not in correlation_types.keys():

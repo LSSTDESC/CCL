@@ -135,13 +135,13 @@ typedef struct ccl_spline_params {
   int N_ELL_CORR;
 
   // interpolation types
-  gsl_interp_type* A_SPLINE_TYPE;
-  gsl_interp_type* K_SPLINE_TYPE;
-  gsl_interp_type* M_SPLINE_TYPE;
-  gsl_interp_type* D_SPLINE_TYPE;
-  gsl_interp2d_type* PNL_SPLINE_TYPE;
-  gsl_interp2d_type* PLIN_SPLINE_TYPE;
-  gsl_interp_type* CORR_SPLINE_TYPE;
+  const gsl_interp_type* A_SPLINE_TYPE;
+  const gsl_interp_type* K_SPLINE_TYPE;
+  const gsl_interp_type* M_SPLINE_TYPE;
+  const gsl_interp_type* D_SPLINE_TYPE;
+  const gsl_interp2d_type* PNL_SPLINE_TYPE;
+  const gsl_interp2d_type* PLIN_SPLINE_TYPE;
+  const gsl_interp_type* CORR_SPLINE_TYPE;
 } ccl_spline_params;
 
 extern const ccl_spline_params default_spline_params;

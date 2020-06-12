@@ -33,7 +33,8 @@ def smoke_assert_prof_real(profile):
         if sr == 0:
             r = 0.5
         else:
-            r = np.linspace(0., 1., sr)
+            # Don't include 0 to avoid 1/0 at origin.
+            r = np.linspace(0.001, 1., sr)
         if sm == 0:
             m = 1E12
         else:

@@ -3,10 +3,10 @@ from . import ccllib as lib
 from .core import check
 
 neutrino_mass_splits = {
-    'normal':      lib.nu_normal,
+    'normal': lib.nu_normal,
     'inverted': lib.nu_inverted,
-    'equal':   lib.nu_equal,
-    'sum':   lib.nu_sum,
+    'equal': lib.nu_equal,
+    'sum': lib.nu_sum,
     'single': lib.nu_single,
 }
 
