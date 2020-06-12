@@ -57,9 +57,9 @@ class PTCalculator(object):
                 documentation for more details.
         """
         assert HAVE_FASTPT, (
-                "You must have the `FAST-PT` python package "
-                "installed to use CCL to get PT observables! "
-                "You can install it with pip install fast-pt.")
+            "You must have the `FAST-PT` python package "
+            "installed to use CCL to get PT observables! "
+            "You can install it with pip install fast-pt.")
 
         self.with_dd = with_dd
         self.with_NC = with_NC
@@ -446,10 +446,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         raise TypeError("tracer2 must be of type `PTTracer`")
 
     if ptc is None:
-        with_NC = ((tracer1.type == 'NC') or
-                   (tracer2.type == 'NC'))
-        with_IA = ((tracer1.type == 'IA') or
-                   (tracer2.type == 'IA'))
+        with_NC = ((tracer1.type == 'NC')
+                   or (tracer2.type == 'NC'))
+        with_IA = ((tracer1.type == 'IA')
+                   or (tracer2.type == 'IA'))
         with_dd = nonlin_pk_type == 'spt'
         ptc = PTCalculator(with_dd=with_dd,
                            with_NC=with_NC,

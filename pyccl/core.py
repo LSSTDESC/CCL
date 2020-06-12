@@ -15,41 +15,41 @@ from .pk2d import Pk2D
 
 # Configuration types
 transfer_function_types = {
-    None:               lib.transfer_none,
-    'eisenstein_hu':    lib.eisenstein_hu,
-    'bbks':             lib.bbks,
-    'boltzmann_class':  lib.boltzmann_class,
-    'boltzmann_camb':   lib.boltzmann_camb,
+    None: lib.transfer_none,
+    'eisenstein_hu': lib.eisenstein_hu,
+    'bbks': lib.bbks,
+    'boltzmann_class': lib.boltzmann_class,
+    'boltzmann_camb': lib.boltzmann_camb,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
 }
 
 matter_power_spectrum_types = {
-    'halo_model':      lib.halo_model,
-    'halofit':         lib.halofit,
-    'linear':          lib.linear,
-    'emu':             lib.emu,
+    'halo_model': lib.halo_model,
+    'halofit': lib.halofit,
+    'linear': lib.linear,
+    'emu': lib.emu
 }
 
 baryons_power_spectrum_types = {
-    'nobaryons':   lib.nobaryons,
-    'bcm':         lib.bcm
+    'nobaryons': lib.nobaryons,
+    'bcm': lib.bcm
 }
 
 # List which transfer functions can be used with the muSigma_MG
 # parameterisation of modified gravity
 
 mass_function_types = {
-    'angulo':      lib.angulo,
-    'tinker':      lib.tinker,
-    'tinker10':    lib.tinker10,
-    'watson':      lib.watson,
+    'angulo': lib.angulo,
+    'tinker': lib.tinker,
+    'tinker10': lib.tinker10,
+    'watson': lib.watson,
     'shethtormen': lib.shethtormen
 }
 
 halo_concentration_types = {
-    'bhattacharya2011':          lib.bhattacharya2011,
-    'duffy2008':                 lib.duffy2008,
-    'constant_concentration':    lib.constant_concentration,
+    'bhattacharya2011': lib.bhattacharya2011,
+    'duffy2008': lib.duffy2008,
+    'constant_concentration': lib.constant_concentration,
 }
 
 emulator_neutrinos_types = {
@@ -513,17 +513,17 @@ class Cosmology(object):
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
                 self._params, status = lib.parameters_create_nu(
-                   Omega_c, Omega_b, Omega_k, Neff,
-                   w0, wa, h, norm_pk,
-                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, mnu_final_list, status)
+                    Omega_c, Omega_b, Omega_k, Neff,
+                    w0, wa, h, norm_pk,
+                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    mu_0, sigma_0, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
                 self._params, status = lib.parameters_create_nu_vec(
-                   Omega_c, Omega_b, Omega_k, Neff,
-                   w0, wa, h, norm_pk,
-                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, z_mg, df_mg, mnu_final_list, status)
+                    Omega_c, Omega_b, Omega_k, Neff,
+                    w0, wa, h, norm_pk,
+                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    mu_0, sigma_0, z_mg, df_mg, mnu_final_list, status)
             check(status)
         finally:
             lib.cvar.constants.T_CMB = T_CMB_old
@@ -1094,3 +1094,28 @@ class Cosmology(object):
             self.a_array = a_array
             self.k_array = k_array
             self.pk_array = pk_array
+
+
+class CosmologyVanillaLCDM(Cosmology):
+    """A cosmology with typical flat Lambda-CDM parameters (`Omega_c=0.25`,
+    `Omega_b = 0.05`, `Omega_k = 0`, `sigma8 = 0.81`, `n_s = 0.96`, `h = 0.67`,
+    no massive neutrinos).
+
+    Args:
+        **kwargs (dict): a dictionary of parameters passed as arguments
+            to the `Cosmology` constructor. It should not contain any of
+            the LambdaCDM parameters (`"Omega_c"`, `"Omega_b"`, `"n_s"`,
+            `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
+    """
+    def __init__(self, **kwargs):
+        p = {'h': 0.67,
+             'Omega_c': 0.25,
+             'Omega_b': 0.05,
+             'n_s': 0.96,
+             'sigma8': 0.81,
+             'A_s': None}
+        if any(k in kwargs for k in p.keys()):
+            raise ValueError("You cannot change the LCDM parameters: "
+                             "%s " % list(p.keys()))
+        kwargs.update(p)
+        super(CosmologyVanillaLCDM, self).__init__(**kwargs)
