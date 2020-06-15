@@ -248,6 +248,9 @@ def get_isitgr_pk_lin(cosmo):
     cp.ISiTGR_muSigma = True
     cp.mu0 = cosmo['mu_0']
     cp.Sigma0 = cosmo['sigma_0']
+    cp.c1 = cosmo['c1_mg']
+    cp.c2 = cosmo['c2_mg']
+    cp.Lambda = cosmo['lambda_mg']
 
     # "constants"
     cp.TCMB = cosmo['T_CMB']

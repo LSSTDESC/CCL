@@ -144,10 +144,16 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status)
 	// z-dependences for mu in the future.
 	double hnorm = h_over_h0(a, cosmo, status);
 /* MI: check again units and k  */
-	double s2_k = (cosmo->params.lambda_mg*(hnorm*cosmo->params.h/a)/k/(ccl_constants.CLIGHT/1000));
-	double s1_k = (1.0+cosmo->params.c1_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
+        double s1_k, s2_k;
+        if (k==0.0) {
+              s1_k = 1.0;
+        }
+        else {
+	     s2_k = (cosmo->params.lambda_mg*(hnorm*cosmo->params.H0)/k/(ccl_constants.CLIGHT/1000));
+	     s1_k = (1.0+cosmo->params.c1_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
+	}
 	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status)/cosmo->params.Omega_l*s1_k;
-/*MI before   return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l; */
+/*MI before    cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l; */
 }
 
 /* --------- ROUTINE: ccl_Sig_MG ---------
@@ -164,10 +170,16 @@ double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)
 	// z-dependences for Sigma in the future.
 	double hnorm = h_over_h0(a, cosmo, status);
 /* MI: check again units and k  */
-	double s2_k = (cosmo->params.lambda_mg*(hnorm*cosmo->params.h/a)/k/(ccl_constants.CLIGHT/1000));
-	double s1_k = (1.0+cosmo->params.c2_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
-	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l * s1_k;
-/*   return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l; */
+        double s1_k, s2_k;
+        if (k==0.0) {
+              s1_k = 1.0;
+        }
+        else {
+	     s2_k = (cosmo->params.lambda_mg*(hnorm*cosmo->params.H0)/k/(ccl_constants.CLIGHT/1000));
+	     s1_k = (1.0+cosmo->params.c1_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
+	}
+	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status)/cosmo->params.Omega_l*s1_k;
+	/*     cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status)/cosmo->params.Omega_l; */
 }
 
 // Structure to hold parameters of chi_integrand
