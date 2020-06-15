@@ -27,9 +27,9 @@ from .background import growth_factor, growth_factor_unnorm, \
 # Generalized power spectra
 from .pk2d import Pk2D
 
-# Power spectrum calculations and sigma8
+# Power spectrum calculations, sigma8 and kNL
 from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
-    sigmaV, sigma8, sigmaM
+    sigmaV, sigma8, sigmaM, kNL
 
 # BCM stuff
 from .bcm import bcm_model_fka

@@ -129,6 +129,17 @@ def test_sigma8_consistent():
     assert np.allclose(ccl.sigmaR(COSMO, 8 / COSMO['h'], 1), COSMO['sigma8'])
 
 
+@pytest.mark.parametrize('A', [
+    1,
+    1.0,
+    [0.3, 0.5, 1],
+    np.array([0.3, 0.5, 1])])
+def test_kNL(A):
+    knl = ccl.kNL(COSMO, A)
+    assert np.all(np.isfinite(knl))
+    assert np.shape(knl) == np.shape(A)
+
+
 @pytest.mark.parametrize('tf,pk,m_nu', [
     # ('boltzmann_class', 'emu', 0.06), - this case is slow and not needed
     (None, 'emu', 0.06),
