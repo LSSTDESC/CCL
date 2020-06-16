@@ -271,7 +271,8 @@ def rho_x(cosmo, a, species, is_comoving=False):
         species_types[species], int(is_comoving))
 
 
-def Sig_MG(cosmo, a, k):
+#def Sig_MG(cosmo, a, k):
+def Sig_MG(cosmo, a):
     """Redshift-dependent modification to Poisson equation for massless
     particles under modified gravity.
 
@@ -285,10 +286,12 @@ def Sig_MG(cosmo, a, k):
             Sig_MG is assumed to be proportional to Omega_Lambda(z), \
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
     """
-    return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
+    #return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
+    return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a)
 
 
-def mu_MG(cosmo, a, k):
+#def mu_MG(cosmo, a, k):
+def mu_MG(cosmo, a):
     """Redshift-dependent modification to Poisson equation under modified
     gravity.
 
@@ -302,4 +305,5 @@ def mu_MG(cosmo, a, k):
             mu_MG is assumed to be proportional to Omega_Lambda(z), \
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
     """
-    return _vectorize_fn(lib.mu_MG, lib.mu_MG_vec, cosmo, a, k)
+    #return _vectorize_fn(lib.mu_MG, lib.mu_MG_vec, cosmo, a, k)
+    return _vectorize_fn(lib.mu_MG, lib.mu_MG_vec, cosmo, a)

@@ -138,11 +138,14 @@ of modifications to GR in the quasistatic approximation.
 MI: tag to get started 
 */
 
-double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status)
+/* double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status) */
+double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
 {
 	// This function can be extended to include other
 	// z-dependences for mu in the future.
 	double hnorm = h_over_h0(a, cosmo, status);
+/* MI: REMOVE FOR k DEPENDANCE  */
+	double k=0.0; 
 /* MI: check again units and k  */
         double s1_k, s2_k;
         if (k==0.0) {
@@ -164,11 +167,14 @@ of modifications to GR in the quasistatic approximation.
 MI: tag to get started 
 */
 
-double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)
+/* double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)*/
+double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
 {
 	// This function can be extended to include other
 	// z-dependences for Sigma in the future.
 	double hnorm = h_over_h0(a, cosmo, status);
+/* MI: REMOVE FOR k DEPENDANCE  */
+	double k=0.0; 
 /* MI: check again units and k  */
         double s1_k, s2_k;
         if (k==0.0) {
@@ -235,7 +241,8 @@ static int growth_ode_system_muSig(double a,const double y[],double dydt[],void 
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
 
-  double mu = ccl_mu_MG(cosmo, a, k, &status);
+/* MI  double mu = ccl_mu_MG(cosmo, a, k, &status); */
+  double mu = ccl_mu_MG(cosmo, a, &status);
   dydt[1]=1.5*hnorm*a*om*y[0]*(1. + mu);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
