@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from .core import check
-from .background import comoving_radial_distance, growth_rate, growth_factor
+from .background import comoving_radial_distance, growth_rate, growth_factor, Sig_MG
 from .pyutils import _check_array_params, NoneArr
 import numpy as np
 
@@ -482,7 +482,7 @@ class WeakLensingTracer(Tracer):
             Defaults to True.
     """
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None,
-                 use_A_ia=True):
+                 use_A_ia=True, k_array=None):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -520,7 +520,13 @@ class WeakLensingTracer(Tracer):
             self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
                             der_bessel=-1, der_angles=2)
 
-#        if (cosmo['sigma_0'] != 0):
+        if (cosmo['sigma_0'] != 0):
+            k = 0
+            mg_transfer = Sig_MG(cosmo,1./(1+z_n), k)
+            self.add_tracer(cosmo, transfer_ka=mg_transfer,
+                            der_bessel=-1, der_angles=2)
+
+
 
 
 class CMBLensingTracer(Tracer):

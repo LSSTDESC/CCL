@@ -348,16 +348,17 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
           chi = chi_arr[ichi];
           a = ccl_scale_factor_of_chi(cosmo, chi, &local_status);
           z = 1./a-1;
-          mgfac = 1.0;
-          double k=0; 
+          // mgfac = 1.0;
+          // double k=0; 
           // Add MG correction if needed
-          if (fabs(cosmo->params.sigma_0))
+          // if (fabs(cosmo->params.sigma_0))
           // MI: k=0 for now but will need to be assigned when fully implemented
-	    mgfac += ccl_Sig_MG(cosmo, a, k, status);
+	  //  mgfac += ccl_Sig_MG(cosmo, a, k, status);
           ipar->z_end = z;
           ipar->chi_end = chi;
 
-          wL_arr[ichi] = lensing_kernel_integrate(cosmo, ipar, w)*(1+z)*lens_prefac*mgfac;
+          // wL_arr[ichi] = lensing_kernel_integrate(cosmo, ipar, w)*(1+z)*lens_prefac*mgfac;
+          wL_arr[ichi] = lensing_kernel_integrate(cosmo, ipar, w)*(1+z)*lens_prefac;
         } else {
           wL_arr[ichi] = NAN;
         }
@@ -387,13 +388,15 @@ void ccl_get_kappa_kernel(ccl_cosmology *cosmo, double chi_source,
   for (int ichi=0; ichi < nchi; ichi++) {
     double chi = chi_arr[ichi];
     double a = ccl_scale_factor_of_chi(cosmo, chi, status);
-    double mgfac = 1;
-    double k=0; 
+ //   double mgfac = 1;
+ //   double k=0; 
     // Add MG correction if needed
-    if (fabs(cosmo->params.sigma_0))
+    // MI:I will move this out of here and to tracers.py
+//    if (fabs(cosmo->params.sigma_0))
 // MI: k=0 for now but will need to be assigned when fully implemented
-	mgfac += ccl_Sig_MG(cosmo, a, k, status);
-    wchi[ichi] = lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi*mgfac/a;
+//	mgfac += ccl_Sig_MG(cosmo, a, k, status);
+//    wchi[ichi] = lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi*mgfac/a;
+    wchi[ichi] = lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi/a;
   }
 }
 
