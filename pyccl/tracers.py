@@ -523,11 +523,9 @@ class WeakLensingTracer(Tracer):
         if (cosmo['sigma_0'] != 0):
             k = 0
             # mg_transfer = Sig_MG(cosmo,1./(1+z_n), k)
-            mg_transfer = Sig_MG(cosmo,1./(1+z_n))
-            self.add_tracer(cosmo, transfer_ka=mg_transfer,
+            mg_transfer = (1./(1+z_n),Sig_MG(cosmo,1./(1+z_n)))
+            self.add_tracer(cosmo, transfer_a=mg_transfer,
                             der_bessel=-1, der_angles=2)
-
-
 
 
 class CMBLensingTracer(Tracer):
