@@ -523,7 +523,7 @@ class WeakLensingTracer(Tracer):
         if (cosmo['sigma_0'] != 0):
             k = 0
             # mg_transfer = Sig_MG(cosmo,1./(1+z_n), k)
-            mg_transfer = (1./(1+z_n),Sig_MG(cosmo,1./(1+z_n)))
+            mg_transfer = (1./(1+z_n)[::-1],1+Sig_MG(cosmo,1./(1+z_n)[::-1]))
             self.add_tracer(cosmo, transfer_a=mg_transfer,
                             der_bessel=-1, der_angles=2)
 
@@ -547,6 +547,14 @@ class CMBLensingTracer(Tracer):
 
         kernel = get_kappa_kernel(cosmo, z_source, n_samples)
         self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
+
+        if (cosmo['sigma_0'] != 0):
+            k = 0
+            # mg_transfer = Sig_MG(cosmo,1./(1+z_n), k)
+            mg_transfer = (1./(1+z_n),1+Sig_MG(cosmo,1./(1+z_n)))
+            self.add_tracer(cosmo, transfer_a=mg_transfer,
+                            der_bessel=-1, der_angles=2)
+
 
 
 def _check_returned_tracer(return_val):
