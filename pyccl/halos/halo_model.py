@@ -180,7 +180,7 @@ class HMCalculator(object):
         sint = np.zeros_like(a)
         for i, _a in enumerate(a):
             self._get_ingredients(_a, cosmo, False)
-            _selm = sel(self._mass, _a).T
+            _selm = np.atleast_2d(sel(self._mass, _a)).T
             mint[i] = self._integrator(
                 dvda[i] * self.mf[..., :] * _selm[..., :], self._lmass)
             sint[i] = self._integrator(_selm[..., :], self._lmass)
