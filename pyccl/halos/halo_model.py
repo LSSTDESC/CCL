@@ -8,7 +8,10 @@ from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import rho_x
 from ..pyutils import _spline_integrate
+from .. import background
 import numpy as np
+
+physical_constants = lib.cvar.constants
 
 
 class HMCalculator(object):
@@ -136,6 +139,59 @@ class HMCalculator(object):
                            self._mass, a, mass_def=self._mdef).T
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
+
+    def number_counts(self, cosmo, sel, na=128):
+        """ Solves the integral:
+
+        .. math::
+            nc(sel) = \\int dM\\int da\\,\\frac{dV}{dad\\Omega}\\,n(M,a)\\,sel(M,a)
+
+        where :math:`n(M,a)` is the halo mass function, and
+        :math:`sel(M,a)` is the selection function as a function of halo mass
+        and scale factor. Note that the selection function is normalized to
+        integrate to unity.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            sel (callable): function of mass and scale factor that returns the
+                possibly unnormalized selection function
+            na (int): number of samples in scale factor to be used in
+                the integrals. Default: 128.
+
+        Returns:
+            float or array_like: integral values evaluated at each
+            value of `k`.
+        """  # noqa
+
+        # get a values for integral
+        a = np.linspace(cosmo.cosmo.spline_params.A_SPLINE_MIN, 1, na)
+        z = 1.0 / a - 1
+
+        # compute the volume element
+        abs_dzda = 1 / a / a
+        da = background.angular_diameter_distance(cosmo, a)
+        ez = background.h_over_h0(cosmo, a)
+        dh = physical_constants.CLIGHT_HMPC / cosmo['h']
+        dvdz = dh * (1.0 + z)**2 * da**2 / ez
+        dvda = dvdz * abs_dzda
+
+        # no do m intergrals in a loop
+        mint = np.zeros_like(a)
+        sint = np.zeros_like(a)
+        for i, _a in enumerate(a):
+            self._get_ingredients(_a, cosmo, False)
+            _selm = sel(self._mass, _a).T
+            mint[i] = self._integrator(
+                dvda[i] * self.mf[..., :] * _selm[..., :], self._lmass)
+            sint[i] = self._integrator(_selm[..., :], self._lmass)
+        # now do a integrals and normalize
+        mtot = self._integrator(mint, a)
+        stot = self._integrator(sint, a)
+
+        if np.allclose(stot, 0):
+            return 0
+        else:
+            return mtot / stot
 
     def I_0_1(self, cosmo, k, a, prof):
         """ Solves the integral:
