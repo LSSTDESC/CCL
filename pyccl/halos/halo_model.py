@@ -175,7 +175,7 @@ class HMCalculator(object):
         dvdz = dh * (1.0 + z)**2 * da**2 / ez
         dvda = dvdz * abs_dzda
 
-        # no do m intergrals in a loop
+        # now do m intergrals in a loop
         mint = np.zeros_like(a)
         sint = np.zeros_like(a)
         for i, _a in enumerate(a):
@@ -184,7 +184,8 @@ class HMCalculator(object):
             mint[i] = self._integrator(
                 dvda[i] * self.mf[..., :] * _selm[..., :], self._lmass)
             sint[i] = self._integrator(_selm[..., :], self._lmass)
-        # now do a integrals and normalize
+
+        # now do scale factor integrals and normalize
         mtot = self._integrator(mint, a)
         stot = self._integrator(sint, a)
 
