@@ -494,10 +494,25 @@ class WeakLensingTracer(Tracer):
                               fill_value=0)
 
         if has_shear:
-            # Kernel
-            kernel_l = get_lensing_kernel(cosmo, dndz)
-            self.add_tracer(cosmo, kernel=kernel_l,
-                            der_bessel=-1, der_angles=2)
+            if (cosmo['sigma_0'] == 0):
+                # GR case 
+                # Kernel
+                kernel_l = get_lensing_kernel(cosmo, dndz)
+                # GR transfer function is 1 from the None default
+                self.add_tracer(cosmo, kernel=kernel_l,
+                        der_bessel=-1, der_angles=2)
+            else:
+                # MG case
+                # Kernel
+                kernel_l = get_lensing_kernel(cosmo, dndz)
+                # MG transfer function
+                a_n = 1./(1+z_n)[::-1]
+                mgfac = 1+Sig_MG(cosmo,a_n)
+                mg_transfer = (a_n,mgfac)
+                self.add_tracer(cosmo, kernel=kernel_l,
+                        transfer_a=mg_transfer, der_bessel=-1, 
+                        der_angles=2)
+
         if ia_bias is not None:  # Has intrinsic alignments
             z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
             # Kernel
@@ -515,18 +530,22 @@ class WeakLensingTracer(Tracer):
                 # to allow nonlinear PT IA models, where normalization is
                 # already applied to the power spectrum.
                 a = tmp_a
+
             # Reverse order for increasing a
             t_a = (1./(1+z_a[::-1]), a[::-1])
-            self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
-                            der_bessel=-1, der_angles=2)
 
-        if (cosmo['sigma_0'] != 0):
-            k = 0
-            # mg_transfer = Sig_MG(cosmo,1./(1+z_n), k)
-            mg_transfer = (1./(1+z_n)[::-1],1+Sig_MG(cosmo,1./(1+z_n)[::-1]))
-            self.add_tracer(cosmo, transfer_a=mg_transfer,
+            if (cosmo['sigma_0'] == 0):
+                # GR case 
+                # no specifc additional gravity factor beside the default 1            
+                self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
                             der_bessel=-1, der_angles=2)
-
+            else:
+                # MG transfer function
+                mgfac = 1+Sig_MG(cosmo, 1./(1+z_a[::-1]))
+                mg_transfer = (1./(1+z_a[::-1]), mgfac)
+                self.add_tracer(cosmo, kernel=kernel_i, 
+                        transfer_a=t_a*mg_transfer,
+                        der_bessel=-1, der_angles=2)
 
 class CMBLensingTracer(Tracer):
     """A Tracer for CMB lensing.
