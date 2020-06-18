@@ -148,8 +148,11 @@ class HMCalculator(object):
 
         where :math:`n(M,a)` is the halo mass function, and
         :math:`sel(M,a)` is the selection function as a function of halo mass
-        and scale factor. Note that the selection function is normalized to
-        integrate to unity.
+        and scale factor.
+
+        Note that the selection function is normalized to integrate to unity and
+        assumed to represent the selection probaility per unit scale factor and
+        per unit mass.
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -175,6 +178,10 @@ class HMCalculator(object):
         dvdz = dh * (1.0 + z)**2 * da**2 / ez
         dvda = dvdz * abs_dzda
 
+        # this is used to convert quantities per dm to per dlog10m (e.g.
+        # the selection function )
+        dmdlog10m = self._mass * np.log(10)
+
         # now do m intergrals in a loop
         mint = np.zeros_like(a)
         sint = np.zeros_like(a)
@@ -182,8 +189,10 @@ class HMCalculator(object):
             self._get_ingredients(_a, cosmo, False)
             _selm = np.atleast_2d(sel(self._mass, _a)).T
             mint[i] = self._integrator(
-                dvda[i] * self.mf[..., :] * _selm[..., :], self._lmass)
-            sint[i] = self._integrator(_selm[..., :], self._lmass)
+                dvda[i] * self.mf[..., :] * _selm[..., :] * dmdlog10m,
+                self._lmass
+            )
+            sint[i] = self._integrator(_selm[..., :] * dmdlog10m, self._lmass)
 
         # now do scale factor integrals and normalize
         mtot = self._integrator(mint, a)
