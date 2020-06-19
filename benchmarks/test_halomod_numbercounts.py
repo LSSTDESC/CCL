@@ -17,7 +17,7 @@ def test_hmcalculator_number_counts_numcosmo():
     hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
                                      mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef, nlog10M=1024)
+    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
 
     print("")
     print(ccl.sigma8(cosmo))
@@ -46,7 +46,7 @@ def test_hmcalculator_number_counts_numcosmo():
 
     area = 200 * (np.pi / 180)**2
 
-    nc = hmc.number_counts(cosmo, sel, na=1024) * area
+    nc = hmc.number_counts(cosmo, sel) * area
     assert np.isfinite(nc)
     assert not np.allclose(nc, 0)
     print(nc)
