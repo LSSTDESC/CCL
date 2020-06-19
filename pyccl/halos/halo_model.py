@@ -140,7 +140,7 @@ class HMCalculator(object):
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
 
-    def number_counts(self, cosmo, sel, na=128):
+    def number_counts(self, cosmo, sel, na=128, amin=None, amax=1.0):
         """ Solves the integral:
 
         .. math::
@@ -162,13 +162,21 @@ class HMCalculator(object):
                 ``(len(m), len(a))`` according to the numpy broadcasting rules.
             na (int): number of samples in scale factor to be used in
                 the integrals. Default: 128.
+            amin (float): the minimum scale factor at which to start integrals
+                over the selection function.
+                Default: value of ``cosmo.cosmo.spline_params.A_SPLINE_MIN``
+            amax (float): the maximum scale factor at which to end integrals
+                over the selection function.
+                Default: 1.0
 
         Returns:
             float: the total number of clusters
         """  # noqa
 
         # get a values for integral
-        a = np.linspace(cosmo.cosmo.spline_params.A_SPLINE_MIN, 1, na)
+        if amin is None:
+            amin = cosmo.cosmo.spline_params.A_SPLINE_MIN
+        a = np.linspace(amin, amax, na)
 
         # compute the volume element
         abs_dzda = 1 / a / a
@@ -191,30 +199,31 @@ class HMCalculator(object):
         # now do scale factor integrals and normalize
         mtot = self._integrator(mint, a)
 
-        import scipy.integrate
+        if False:
+            import scipy.integrate
 
-        def _func(m, a):
+            def _func(m, a):
 
-            abs_dzda = 1 / a / a
-            dc = background.comoving_angular_distance(cosmo, a)
-            ez = background.h_over_h0(cosmo, a)
-            dh = physical_constants.CLIGHT_HMPC / cosmo['h']
-            dvdz = dh * dc**2 / ez
-            dvda = dvdz * abs_dzda
+                abs_dzda = 1 / a / a
+                dc = background.comoving_angular_distance(cosmo, a)
+                ez = background.h_over_h0(cosmo, a)
+                dh = physical_constants.CLIGHT_HMPC / cosmo['h']
+                dvdz = dh * dc**2 / ez
+                dvda = dvdz * abs_dzda
 
-            val = self._massfunc.get_mass_function(
-                cosmo, 10**m, a, mdef_other=self._mdef
+                val = self._massfunc.get_mass_function(
+                    cosmo, 10**m, a, mdef_other=self._mdef
+                )
+                val *= sel(10**m, a)
+                return val[0, 0] * dvda
+
+            mtot, _ = scipy.integrate.dblquad(
+                _func,
+                amin,
+                amax,
+                lambda x: self._prec['log10M_min'],
+                lambda x: self._prec['log10M_max'],
             )
-            val *= sel(10**m, a)
-            return val[0, 0] * dvda
-
-        mtot, _ = scipy.integrate.dblquad(
-            _func,
-            0.3333,
-            1.0,
-            lambda x: self._prec['log10M_min'],
-            lambda x: self._prec['log10M_max'],
-        )
 
         return mtot
 

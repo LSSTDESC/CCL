@@ -33,7 +33,7 @@ def test_hmcalculator_number_counts_numcosmo():
             cosmo, hmf, hbf, mdef,
             log10M_min=np.log10(bench[1]),
             log10M_max=np.log10(bench[2]),
-            nlog10M=10240)
+            integration_method_M='spline')
 
         a_2 = 1.0 / (1.0 + bench[4])
         a_1 = 1.0 / (1.0 + bench[3])
@@ -53,10 +53,9 @@ def test_hmcalculator_number_counts_numcosmo():
 
         area = 200 * (np.pi / 180)**2
 
-        nc = hmc.number_counts(cosmo, sel, na=1024) * area
+        nc = hmc.number_counts(cosmo, sel, amin=a_2, amax=a_1) * area
         assert np.isfinite(nc)
         assert not np.allclose(nc, 0)
 
-        tol = 0.02  # np.sqrt(bench[0]) / bench[0] / 10
-        print(nc, bench[0], nc/bench[0]-1, tol)
+        tol = max(0.01, np.sqrt(bench[0]) / bench[0] / 10)
         assert np.allclose(nc, bench[0], atol=0, rtol=tol)

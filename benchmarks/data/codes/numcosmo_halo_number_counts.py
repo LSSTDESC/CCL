@@ -72,19 +72,22 @@ mf = Nc.HaloMassFunction.new(dist, psf, mulf)
 
 psf.prepare(cosmo)
 mf.set_area_sd(200.0)
+mf.set_prec(1.0e-9)
 mf.set_eval_limits(cosmo, math.log(1e14), math.log(1e16), 0.0, 2.0)
 mf.prepare(cosmo)
 
 gf = psml.peek_gf()
 gf.prepare(cosmo)
 
-# cosmo.params_log_all()
+cosmo.params_log_all()
 print(cosmo.sigma8(psf))
 print(cosmo.E(1.0/0.9 - 1))
 print(psml.eval(cosmo, 1/0.9-1, 1.0))
 print(gf.eval(cosmo, 1/0.9-1))
-print(mf.dn_dlnM(cosmo, math.log(1e15), 1/0.9-1) * math.log(10))
 
+for m in [1e14, 5e14, 1e15, 5e15]:
+    print(
+        math.log10(m), mf.dn_dlnM(cosmo, math.log(m), 1/0.9-1) * math.log(10))
 
 with open("../numcosmo_cluster_counts.txt", "w") as fp:
     fp.write("# counts  mmin  mmax  zmin  zmax\n")
