@@ -157,51 +157,41 @@ class HMCalculator(object):
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             sel (callable): function of mass and scale factor that returns the
-                possibly unnormalized selection function
+                selection function. This function should take in floats or arrays
+                with a signature ``sel(m, a)`` and return an array with shape
+                ``(len(m), len(a))`` according to the numpy broadcasting rules.
             na (int): number of samples in scale factor to be used in
                 the integrals. Default: 128.
 
         Returns:
-            float or array_like: integral values evaluated at each
-            value of `k`.
+            float: the total number of clusters
         """  # noqa
 
         # get a values for integral
         a = np.linspace(cosmo.cosmo.spline_params.A_SPLINE_MIN, 1, na)
-        z = 1.0 / a - 1
 
         # compute the volume element
         abs_dzda = 1 / a / a
-        da = background.angular_diameter_distance(cosmo, a)
+        dc = background.comoving_angular_distance(cosmo, a)
         ez = background.h_over_h0(cosmo, a)
         dh = physical_constants.CLIGHT_HMPC / cosmo['h']
-        dvdz = dh * (1.0 + z)**2 * da**2 / ez
+        dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda
-
-        # this is used to convert quantities per dm to per dlog10m (e.g.
-        # the selection function )
-        dmdlog10m = self._mass * np.log(10)
 
         # now do m intergrals in a loop
         mint = np.zeros_like(a)
-        sint = np.zeros_like(a)
         for i, _a in enumerate(a):
             self._get_ingredients(_a, cosmo, False)
             _selm = np.atleast_2d(sel(self._mass, _a)).T
             mint[i] = self._integrator(
-                dvda[i] * self.mf[..., :] * _selm[..., :] * dmdlog10m,
+                dvda[i] * self.mf[..., :] * _selm[..., :],
                 self._lmass
             )
-            sint[i] = self._integrator(_selm[..., :] * dmdlog10m, self._lmass)
 
         # now do scale factor integrals and normalize
         mtot = self._integrator(mint, a)
-        stot = self._integrator(sint, a)
 
-        if np.allclose(stot, 0):
-            return 0
-        else:
-            return mtot / stot
+        return mtot
 
     def I_0_1(self, cosmo, k, a, prof):
         """ Solves the integral:

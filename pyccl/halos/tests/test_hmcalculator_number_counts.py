@@ -97,4 +97,4 @@ def test_hmcalculator_number_counts_norm():
     assert np.isfinite(nc4)
     assert not np.allclose(nc4, 0)
 
-    assert np.allclose(nc2, nc4)
+    assert np.allclose(nc2 * 2, nc4)
