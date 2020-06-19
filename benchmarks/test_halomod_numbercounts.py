@@ -17,7 +17,8 @@ def test_hmcalculator_number_counts_numcosmo():
     hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
                                      mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = ccl.halos.HMCalculator(
+        cosmo, hmf, hbf, mdef, log10M_min=14, nlog10M=1024)
 
     print("")
     print(ccl.sigma8(cosmo))
