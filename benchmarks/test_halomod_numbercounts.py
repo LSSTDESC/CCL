@@ -58,4 +58,5 @@ def test_hmcalculator_number_counts_numcosmo():
         assert not np.allclose(nc, 0)
 
         tol = max(0.01, np.sqrt(bench[0]) / bench[0] / 10)
+        print(nc, bench[0], nc/bench[0]-1, tol)
         assert np.allclose(nc, bench[0], atol=0, rtol=tol)

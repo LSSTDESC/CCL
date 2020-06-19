@@ -196,34 +196,8 @@ class HMCalculator(object):
                 self._lmass
             )
 
-        # now do scale factor integrals and normalize
+        # now do scale factor integral
         mtot = self._integrator(mint, a)
-
-        if False:
-            import scipy.integrate
-
-            def _func(m, a):
-
-                abs_dzda = 1 / a / a
-                dc = background.comoving_angular_distance(cosmo, a)
-                ez = background.h_over_h0(cosmo, a)
-                dh = physical_constants.CLIGHT_HMPC / cosmo['h']
-                dvdz = dh * dc**2 / ez
-                dvda = dvdz * abs_dzda
-
-                val = self._massfunc.get_mass_function(
-                    cosmo, 10**m, a, mdef_other=self._mdef
-                )
-                val *= sel(10**m, a)
-                return val[0, 0] * dvda
-
-            mtot, _ = scipy.integrate.dblquad(
-                _func,
-                amin,
-                amax,
-                lambda x: self._prec['log10M_min'],
-                lambda x: self._prec['log10M_max'],
-            )
 
         return mtot
 
