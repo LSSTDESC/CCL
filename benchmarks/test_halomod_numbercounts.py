@@ -30,7 +30,9 @@ def test_hmcalculator_number_counts_numcosmo():
     for i in range(benches.shape[0]):
         bench = benches[i, :]
         hmc = ccl.halos.HMCalculator(
-            cosmo, hmf, hbf, mdef, log10M_min=np.log10(bench[1]),
+            cosmo, hmf, hbf, mdef,
+            log10M_min=np.log10(bench[1]),
+            log10M_max=np.log10(bench[2]),
             nlog10M=10240)
 
         a_2 = 1.0 / (1.0 + bench[4])
@@ -56,4 +58,5 @@ def test_hmcalculator_number_counts_numcosmo():
         assert not np.allclose(nc, 0)
 
         tol = 0.02  # np.sqrt(bench[0]) / bench[0] / 10
+        print(nc, bench[0], nc/bench[0]-1, tol)
         assert np.allclose(nc, bench[0], atol=0, rtol=tol)
