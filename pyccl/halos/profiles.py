@@ -875,7 +875,7 @@ class HaloProfilePressureArnaud(HaloProfile):
 
         # Interpolator for dimensionless Fourier-space profile
         self._fourier_interp = self._integ_interp()
-        super(HaloProfileArnaud, self).__init__()
+        super(HaloProfilePressureArnaud, self).__init__()
 
     def update_parameters(self, **kwargs):
         self.mass_bias = kwargs.get('mass_bias', self.mass_bias)
