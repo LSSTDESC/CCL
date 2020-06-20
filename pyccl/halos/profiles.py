@@ -947,7 +947,7 @@ class HaloProfilePressureArnaud(HaloProfile):
         PM = (M*mb)**(2/3+aP)             # mass dependence
         Pz = h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
 
-        P = K * PM * Pz
+        P = K * PM * Pz / h70
         return P
 
     def _real(self, cosmo, r, M, a, mass_def):
