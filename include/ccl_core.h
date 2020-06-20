@@ -164,6 +164,8 @@ typedef struct ccl_gsl_params {
   double INTEGRATION_DISTANCE_EPSREL;
   // sigma_R integral
   double INTEGRATION_SIGMAR_EPSREL;
+  // k_NL integral
+  double INTEGRATION_KNL_EPSREL;
 
   // Root finding
   double ROOT_EPSREL;
