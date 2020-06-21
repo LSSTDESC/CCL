@@ -864,13 +864,13 @@ class HaloProfilePressureArnaud(HaloProfile):
         nr (int): number of points over which the
             Fourier-space profile template will be sampled.
     """
-    def __init__(self, mass_bias=0.8, rrange=(1e-3, 10), nr=100):
+    def __init__(self, mass_bias=0.8, qrange=(1e-3, 1e3), nq=128):
         self.c500 = 1.81
         self.alpha = 1.33
         self.beta = 4.13
         self.gamma = 0.31
-        self.rrange = rrange
-        self.nr = nr
+        self.qrange = qrange
+        self.nq = nq
         self.mass_bias = mass_bias
 
         # Interpolator for dimensionless Fourier-space profile
@@ -889,49 +889,20 @@ class HaloProfilePressureArnaud(HaloProfile):
     def _integ_interp(self):
         from scipy.interpolate import interp1d
         from scipy.integrate import quad
-        from numpy.linalg import lstsq
 
         def integrand(x):
             return self._form_factor(x)*x
 
-        # # Integration Boundaries # #
-        rmin, rmax = self.rrange
-        lgqmin, lgqmax = np.log10(1/rmax), np.log10(1/rmin)  # log10 bounds
-
-        q_arr = np.logspace(lgqmin, lgqmax, self.nr)
+        q_arr = np.geomspace(self.qrange[0], self.qrange[1], self.nq)
         f_arr = np.array([quad(integrand,
                                a=1e-4, b=np.inf,     # limits of integration
                                weight="sin",  # fourier sine weight
                                wvar=q)[0] / q
                           for q in q_arr])
-
-        F2 = interp1d(np.log10(q_arr), np.array(f_arr), kind="cubic")
-
-        # # Extrapolation # #
-        # Backward Extrapolation
-        def F1(x):
-            if np.ndim(x) == 0:
-                return f_arr[0]
-            else:
-                return f_arr[0] * np.ones_like(x)  # constant value
-
-        # Forward Extrapolation
-        # linear fitting
-        Q = np.log10(q_arr[q_arr > 1e2])
-        F = np.log10(f_arr[q_arr > 1e2])
-        A = np.vstack([Q, np.ones(len(Q))]).T
-        m, c = lstsq(A, F, rcond=None)[0]
-
-        def F3(x):
-            return 10**(m*x+c)  # logarithmic drop
-
-        def F(x):
-            return np.piecewise(x,
-                                [x < lgqmin,        # backward extrapolation
-                                 (lgqmin <= x)*(x <= lgqmax),  # common range
-                                 lgqmax < x],       # forward extrapolation
-                                [F1, F2, F3])
-        return F
+        Fq = interp1d(np.log(q_arr), f_arr,
+                      fill_value="extrapolate",
+                      bounds_error=False)
+        return Fq
 
     def _norm(self, cosmo, M, a, mb):
         """Computes the normalisation factor of the Arnaud profile.
@@ -983,7 +954,7 @@ class HaloProfilePressureArnaud(HaloProfile):
         # R_Delta*(1+z)
         R = mass_def.get_radius(cosmo, M_use * mb, a) / a
 
-        ff = self._fourier_interp(np.log10(k_use[None, :] * R[:, None]))
+        ff = self._fourier_interp(np.log(k_use[None, :] * R[:, None]))
         nn = self._norm(cosmo, M_use, a, mb)
 
         prof = (4*np.pi*R**3 * nn)[:, None] * ff
