@@ -330,39 +330,39 @@ class Tracer(object):
         """
         # case with no astro biases
         if ((bias_transfer_a is None) and (bias_transfer_k is None)):    
-            # Scale-dependent case with full k array 
             if (isinstance(k_MG, (list, np.ndarray))): 		
+                # Scale-dependent case with full k array 
                 self.add_tracer(cosmo, kernel,
                     transfer_ka=mg_transfer, der_bessel=der_bessel,
                     der_angles=der_angles)
-            # Scale-dependent case the single specied k value
             elif (isinstance(k_MG, float) or isinstance(k_MG, int)): 		
+                # Scale-dependent case with  a single specified k value
                 self.add_tracer(cosmo, kernel,
                     transfer_a=mg_transfer, der_bessel=der_bessel,
                     der_angles=der_angles)
-            # Scale-independent case where k=None
             else:		
+                # Scale-independent case where k=None
                 self.add_tracer(cosmo, kernel,
                     transfer_a=mg_transfer, der_bessel=der_bessel, 
                     der_angles=der_angles)
 
         #  case of an astro bias depending on a and  k 
         elif ((bias_transfer_a is not None) and (bias_transfer_k is not None)):   
-            # Scale-dependent case with full k array 
             if (isinstance(k_MG, (list, np.ndarray))):
+                # Scale-dependent case with full k array 
                 mg_transfer_new = (mg_transfer[0], mg_transfer[1],
-                                (bias_transfer_a[1] * (bias_transfer_k[1] * mg_transfer[2]).T).T)
+                                (bias_transfer_a[1] * (bias_transfer_k[1]*mg_transfer[2]).T).T)
                 self.add_tracer(cosmo, kernel,
                     transfer_ka=mg_transfer_new,
                     der_bessel=der_bessel, der_angles=der_angles)	
-            # Scale-dependent case the single specied k value
             elif (isinstance(k_MG, float) or isinstance(k_MG, int)):
+                # Scale-dependent case with  a single specified k value
                 mg_transfer_new = (mg_transfer[0] ,mg_transfer[1] * bias_transfer_a[1])
                 self.add_tracer(cosmo, kernel,
                     transfer_a=mg_transfer_new,
                     der_bessel=der_bessel, der_angles=der_angles, transfer_k=bias_transfer_k )
-            # Scale-independent case where k=None
             else:
+                # Scale-independent case where k=None
                 mg_transfer_new = (mg_transfer[0] ,mg_transfer[1] * bias_transfer_a[1])
                 self.add_tracer(cosmo, kernel,
                     transfer_a=mg_transfer_new,
@@ -370,21 +370,21 @@ class Tracer(object):
 				
         #  case of an astro bias depending on a but not k  
         elif ((bias_transfer_a is not None) and (bias_transfer_k is None)):    
-            # Scale-dependent case with full k array 
-            if (isinstance(k_MG, (list, np.ndarray))): 		# Scale-Independent case
+            if (isinstance(k_MG, (list, np.ndarray))):
+                # Scale-dependent case with full k array 
                 mg_transfer_new = (mg_transfer[0], mg_transfer[1], 
                                 (bias_transfer_a[1] * mg_transfer[2].T).T)
                 self.add_tracer(cosmo, kernel,
                     transfer_ka=mg_transfer_new,
                      der_bessel=der_bessel, der_angles=der_angles)
-            # Scale-dependent case the single specied k value
-            elif (isinstance(k_MG, float) or isinstance(k_MG, int)): 		# Scale-dependent case we look for T(a,k=k0), k0!=0
+            elif (isinstance(k_MG, float) or isinstance(k_MG, int)):
+                # Scale-dependent case with  a single specified k value
                 mg_transfer_new = (mg_transfer[0] ,mg_transfer[1] * bias_transfer_a[1])
                 self.add_tracer(cosmo, kernel,
                     transfer_a=mg_transfer_new,
                      der_bessel=der_bessel, der_angles=der_angles)
-            # Scale-independent case where k=None
-            else:		# Scale-dependent case where we compute T(a,k) for many k values
+            else:
+                # Scale-independent case where k=None
                 mg_transfer_new = (mg_transfer[0] ,mg_transfer[1] * bias_transfer_a[1])
                 self.add_tracer(cosmo, kernel,
                     transfer_a=mg_transfer_new,
@@ -392,20 +392,20 @@ class Tracer(object):
 			
         #  case of an astro bias depending on k but not a  
         elif ((bias_transfer_a is None) and (bias_transfer_k is not None)): 
-            # Scale-dependent case with full k array 
-            if (isinstance(k_MG, (list, np.ndarray))): 		# Scale-Independent case
+            if (isinstance(k_MG, (list, np.ndarray))):
+                # Scale-dependent case with full k array 
                 mg_transfer_new = (mg_transfer[0], mg_transfer[1],
-                                (bias_transfer_k[1] * mg_transfer[2])) # check .T .T
+                                (bias_transfer_k[1] * mg_transfer[2]))
                 self.add_tracer(cosmo, kernel,
                     transfer_ka=mg_transfer_new, 
                     der_bessel=der_bessel, der_angles=der_angles)
-            # Scale-dependent case the single specied k value
-            elif (isinstance(k_MG, float) or isinstance(k_MG, int)): 		# Scale-dependent case we look for T(a,k=k0), k0!=0
+            elif (isinstance(k_MG, float) or isinstance(k_MG, int)):
+                # Scale-dependent case with  a single specified k value
                 self.add_tracer(cosmo, kernel,
                     transfer_a=mg_transfer,
                     der_bessel=der_bessel, der_angles=der_angles, transfer_k=bias_transfer_k)
-            # Scale-independent case where k=None
-            else:		# Scale-dependent case where we compute T(a,k) for many k values
+            else:
+                # Scale-independent case where k=None
                 self.add_tracer(cosmo, kernel,
                     transfer_a=mg_transfer,
                     der_bessel=der_bessel, der_angles=der_angles, transfer_k=bias_transfer_k)
