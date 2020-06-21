@@ -325,8 +325,9 @@ class Tracer(object):
     def MG_add_tracer(self, cosmo, kernel, mg_transfer, 
                     k_MG=None, der_bessel=0, der_angles=0,
                     bias_transfer_a=None, bias_transfer_k=None):
-        """ function to add MG tracers for different cases including 
-            different cases and biases like intrinsic alignements (IA) when present
+        """ function to set mg_transfer in the right format and add MG tracers 
+            for different cases including different cases and biases like intrinsic 
+            alignements (IA) when present
         """
         # case with no astro biases
         if ((bias_transfer_a is None) and (bias_transfer_k is None)):    
