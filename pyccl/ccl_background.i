@@ -6,6 +6,7 @@
 
 // Enable vectorised arguments for arrays
 %apply (double* IN_ARRAY1, int DIM1) {(double* a, int na)};
+%apply (double* IN_ARRAY1, int DIM1) {(double* k, int nk)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* a1, int na1)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* a2, int na2)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* chi, int nchi)};
@@ -78,30 +79,49 @@ void rho_x_vec(ccl_cosmology * cosmo, int label, int is_comoving,
       output[i] = ccl_rho_x(cosmo, a[i], label, is_comoving, status);
     }
 }
-
-void mu_MG_vec(ccl_cosmology * cosmo,
-        double* a,  int na,
-/* MI:         double* a,  double k, int na, */
-        int nout, double* output, int *status) {
-    assert(nout == na);
-    for(int i=0; i < na; i++){
-      output[i] = ccl_mu_MG(cosmo, a[i], status);
-/*      output[i] = ccl_mu_MG(cosmo, a[i], k, status); */
-    }
-}
-
-void Sig_MG_vec(ccl_cosmology * cosmo,
-/*        double* a, double k,  int na, MI:*/
-        double* a,  int na,
-        int nout, double* output, int *status) {
-    assert(nout == na);
-    for(int i=0; i < na; i++){
-      output[i] = ccl_Sig_MG(cosmo, a[i], status);
-/*      output[i] = ccl_Sig_MG(cosmo, a[i], k, status);  */
-    }
-}
-
 %}
+
+/* unit tests and MG functions definitions */
+%feature("pythonprepend") %{
+    if (len(a)*len(k)) != nout:
+        raise CCLError("Input length for `a` times `k` must match `nout`!")
+%}
+
+%inline %{
+void mu_MG_vec(ccl_cosmology * cosmo, double* a, int na, double* k, int nk,
+               int nout, double* output, int *status) {
+    int index;
+    int _status;
+    assert(nout == na*nk);
+    for(int j=0; j < nk; j++){
+            index = j * na; // to get correct indexing. 
+            for(int i=0; i < na; i++){
+                _status = 0;
+                output[i+index] = ccl_mu_MG(cosmo, a[i], k[j], &_status);
+                *status |= _status;
+// printf("index-i=%d, index-j=%d, index=%d, Sigma=%f, a=%f, k=%f \n", i, j, index, output[i+index], a[i], k[j]);
+            }
+    }
+}
+
+void Sig_MG_vec(ccl_cosmology * cosmo, double* a, int na, double* k, int nk,
+                int nout, double* output, int *status) {
+    int index;
+    int _status;
+    assert(nout == na*nk);
+    for(int j=0; j < nk; j++){
+            index = j * na; // to get correct indexing. 
+            for(int i=0; i < na; i++){
+                _status = 0;
+                output[i+index] = ccl_Sig_MG(cosmo, a[i], k[j], &_status);
+                *status |= _status;
+//printf("index-i=%d, index-j=%d, index=%d, Sigma=%f, a=%f, k=%f \n", i, j, index, output[i+index], a[i], k[j]);
+            }
+     }
+}
+%}
+/* End of MG functions and unit tests */
+
 
 /* Now we change the directive for `chi` instead of `a`. */
 %feature("pythonprepend") %{

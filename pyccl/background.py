@@ -16,6 +16,7 @@ import numpy as np
 from . import ccllib as lib
 from .pyutils import _vectorize_fn, _vectorize_fn3
 from .pyutils import _vectorize_fn4, _vectorize_fn5
+from .pyutils import  _vectorize_fn6
 
 species_types = {
     'critical':                   lib.species_crit_label,
@@ -271,33 +272,14 @@ def rho_x(cosmo, a, species, is_comoving=False):
         species_types[species], int(is_comoving))
 
 
-#def Sig_MG(cosmo, a, k):
-def Sig_MG(cosmo, a):
-    """Redshift-dependent modification to Poisson equation for massless
-    particles under modified gravity.
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        a (float or array_like): Scale factor(s), normalized to 1 today.
-
-    Returns:
-        float or array_like: Modification to Poisson equation under \
-            modified gravity at scale factor a. \
-            Sig_MG is assumed to be proportional to Omega_Lambda(z), \
-            see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
-    """
-    #return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
-    return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a)
-
-
-#def mu_MG(cosmo, a, k):
-def mu_MG(cosmo, a):
+def mu_MG(cosmo, a, k=None):
     """Redshift-dependent modification to Poisson equation under modified
     gravity.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
+        k (float or array_like): Wavenumber for scale
 
     Returns:
         float or array_like: Modification to Poisson equation \
@@ -305,5 +287,50 @@ def mu_MG(cosmo, a):
             mu_MG is assumed to be proportional to Omega_Lambda(z), \
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
     """
-    #return _vectorize_fn(lib.mu_MG, lib.mu_MG_vec, cosmo, a, k)
-    return _vectorize_fn(lib.mu_MG, lib.mu_MG_vec, cosmo, a)
+	
+    if (isinstance(k, (list, np.ndarray))):
+        return _vectorize_fn6(lib.mu_MG,
+                              lib.mu_MG_vec,
+                              cosmo, a, k)
+    else:
+        if (isinstance(k, float) or isinstance(k, int)):
+            k=np.array([k])
+            return _vectorize_fn6(lib.mu_MG,
+                                  lib.mu_MG_vec,
+                                  cosmo, a, k)			
+        else:
+            k=np.array([0])
+            return _vectorize_fn6(lib.mu_MG,
+                                  lib.mu_MG_vec,
+                                  cosmo, a, k)
+	
+def Sig_MG(cosmo, a, k=None):
+    """Redshift-dependent modification to Poisson equation for massless
+    particles under modified gravity.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+        k (float or array_like): Wavenumber for scale
+
+    Returns:
+        float or array_like: Modification to Poisson equation under \
+            modified gravity at scale factor a. \
+            Sig_MG is assumed to be proportional to Omega_Lambda(z), \
+            see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
+    """
+    if (isinstance(k, (list, np.ndarray))):
+        return _vectorize_fn6(lib.Sig_MG,
+                              lib.Sig_MG_vec,
+                              cosmo, a, k)
+    else:
+        if (isinstance(k, float) or isinstance(k, int)):
+            k=np.array([k])
+            return _vectorize_fn6(lib.Sig_MG,
+                                  lib.Sig_MG_vec,
+                                  cosmo, a, k)			
+        else:
+            k=np.array([0])
+            return _vectorize_fn6(lib.Sig_MG,
+                                  lib.Sig_MG_vec,
+                                  cosmo, a, k)

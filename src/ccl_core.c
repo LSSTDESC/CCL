@@ -485,8 +485,8 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   mnu = &mnuval;
   double mu_0 = 0.;
   double sigma_0 = 0.;
-  double c1_mg = 0.;
-  double c2_mg = 0.;
+  double c1_mg = 1.;
+  double c2_mg = 1.;
   double lambda_mg = 0.;
 
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,

@@ -131,61 +131,51 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
 }
 
 /* --------- ROUTINE: ccl_mu_MG ---------
-INPUT: cosmology object, scale factor
-TASK: Compute mu(a) where mu is one of the the parameterizating functions
+INPUT: cosmology object, scale factor, wavenumber for scale 
+TASK: Compute mu(a,k) where mu is one of the the parameterizating functions
 of modifications to GR in the quasistatic approximation.
-
-MI: tag to get started 
 */
 
-/* double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status) */
-double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
+double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status)
 {
+    double s1_k, s2_k, hnorm;
 	// This function can be extended to include other
-	// z-dependences for mu in the future.
-	double hnorm = h_over_h0(a, cosmo, status);
-/* MI: REMOVE FOR k DEPENDANCE  */
-	double k=0.0; 
-/* MI: check again units and k  */
-        double s1_k, s2_k;
-        if (k==0.0) {
-              s1_k = 1.0;
-        }
-        else {
-	     s2_k = (cosmo->params.lambda_mg*(hnorm*cosmo->params.H0)/k/(ccl_constants.CLIGHT/1000));
-	     s1_k = (1.0+cosmo->params.c1_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
+	// redshift and scale z-dependences for mu in the future
+	hnorm = h_over_h0(a, cosmo, status);
+    if (k==0.0) {
+        s1_k = cosmo->params.c1_mg;
+    }
+    else {
+	    s2_k = (cosmo->params.lambda_mg*(hnorm*cosmo->params.H0)/k/(ccl_constants.CLIGHT/1000));
+	    s1_k = (1.0+cosmo->params.c1_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
 	}
 	return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status)/cosmo->params.Omega_l*s1_k;
-/*MI before    cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l; */
 }
 
 /* --------- ROUTINE: ccl_Sig_MG ---------
-INPUT: cosmology object, scale factor
-TASK: Compute Sigma(a) where Sigma is one of the the parameterizating functions
+INPUT: cosmology object, scale factor, wavenumber for scale
+TASK: Compute Sigma(a,k) where Sigma is one of the the parameterizating functions
 of modifications to GR in the quasistatic approximation.
-
-MI: tag to get started 
 */
 
-/* double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)*/
-double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
+double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)
 {
+    double s1_k, s2_k, hnorm;
 	// This function can be extended to include other
-	// z-dependences for Sigma in the future.
-	double hnorm = h_over_h0(a, cosmo, status);
-/* MI: REMOVE FOR k DEPENDANCE  */
-	double k=0.0; 
-/* MI: check again units and k  */
-        double s1_k, s2_k;
-        if (k==0.0) {
-              s1_k = 1.0;
-        }
-        else {
-	     s2_k = (cosmo->params.lambda_mg*(hnorm*cosmo->params.H0)/k/(ccl_constants.CLIGHT/1000));
-	     s1_k = (1.0+cosmo->params.c1_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
+	// redshift and scale dependences for Sigma in the future.
+	hnorm = h_over_h0(a, cosmo, status);
+    if (k==0.0) {
+        s1_k = cosmo->params.c2_mg;
+    }
+    else {
+	    s2_k = cosmo->params.lambda_mg*(hnorm*cosmo->params.H0)/k/(ccl_constants.CLIGHT/1000);
+        s1_k = (1.0+cosmo->params.c2_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
+
+//		printf("c1=%f,c2=%f,lambda=%f \n",cosmo->params.c1_mg,cosmo->params.c2_mg,cosmo->params.lambda_mg);
+//		printf("hnorm=%f, s2_k=%f, H0=%f, c=%f \n",hnorm,s2_k,cosmo->params.H0,ccl_constants.CLIGHT);
+//	    printf("sigma_0=%f, k=%f, s1_k=%f \n \n", cosmo->params.sigma_0, k, s1_k);
 	}
 	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status)/cosmo->params.Omega_l*s1_k;
-	/*     cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status)/cosmo->params.Omega_l; */
 }
 
 // Structure to hold parameters of chi_integrand
@@ -228,7 +218,6 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 INPUT: scale factor
 TASK: Define the ODE system to be solved in order to compute the growth (of the density)
 * in the case in which we use the mu / Sigma quasistatic parameterisation of modified gravity
-
 MI: tag to get started 
 */
 static int growth_ode_system_muSig(double a,const double y[],double dydt[],void *params)
@@ -241,8 +230,7 @@ static int growth_ode_system_muSig(double a,const double y[],double dydt[],void 
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
 
-/* MI  double mu = ccl_mu_MG(cosmo, a, k, &status); */
-  double mu = ccl_mu_MG(cosmo, a, &status);
+  double mu = ccl_mu_MG(cosmo, a, k, &status);
   dydt[1]=1.5*hnorm*a*om*y[0]*(1. + mu);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
