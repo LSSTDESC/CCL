@@ -856,11 +856,35 @@ class HaloProfilePressureGNFW(HaloProfile):
     """ Generalized NFW pressure profile by Arnaud et al.
     (2010A&A...517A..92A).
 
+    The parametrization is:
+
+    .. math::
+       P_e(r) = C\\times P_0 h_{70}^E (c_{500} x)^{-\\gamma}
+       [1+(c_{500}x)^\\alpha]^{(\\gamma-\\beta)/\\alpha},
+
+    where
+
+    .. math::
+       C = 1.65\\,h_{70}^2\\left(\\frac{H(z)}{H_0}\\right)^{8/3}
+       \\left[\\frac{h_{70}\\tilde{M}_{500}}
+       {3\\times10^{14}\\,M_\\odot}\\right]^{2/3+0.12},
+
+    :math:`x = r/\\tilde{r}_{500}`, :math:`h_{70}=h/0.7`, and the
+    exponent :math:`E` is -1 for SZ-based profile normalizations
+    and -1.5 for X-ray-based normalizations. The biased mass
+    :math:`\\tilde{M}_{500}` is related to the true overdensity
+    mass :math:`M_{500}` via the mass bias parameter :math:`(1-b)`
+    as :math:`\\tilde{M}_{500}=(1-b)M_{500}`. :math:`\\tilde{r}_{500}`
+    is the overdensity halo radius associated with :math:`\\tilde{M}_{500}`
+    (note the intentional tilde!), and the profile is defined for
+    a halo overdensity :math:`\\Delta=500` with respect to the
+    critical density.
+
     Args:
         mass_bias (float): the mass bias parameter :math:`1-b`.
         profile_params (string or dict): profile parameters to use.
-            Options: `"Arnaud2010"` for the original parameters from
-            Arnaud et al. 2010. `"Planck2013"` for the parameters
+            Options: `"Arnaud10"` for the original parameters from
+            Arnaud et al. 2010. `"Planck13"` for the parameters
             used by Planck 2013 (V). A dictionary with the following
             keys: `"P0"` (profile normalization), `"c500"` (concentration
             parameter), `"alpha"`, `"beta"` and `"gamma"` (profile shape
@@ -912,6 +936,24 @@ class HaloProfilePressureGNFW(HaloProfile):
         super(HaloProfilePressureGNFW, self).__init__()
 
     def update_parameters(self, **kwargs):
+        """ Update any of the parameters associated with
+        this profile.
+
+        Relevant keys are:
+
+        - `mass_bias`: the mass bias parameter :math:`1-b`.
+        - `P0`: profile normalization.
+        - `c500`: concentration parameter.
+        - `alpha`, `beta`, `gamma`: profile shape parameters.
+        - `alpha_P`: additional mass dependence exponent.
+        - `P0_hexp`: power of `h` with which the normalization should \
+           scale (-1 for SZ-based normalizations, -3/2 for \
+           X-ray-based ones).
+
+        Note that a change in `alpha`, `beta` or `gamma` will trigger
+        a recomputation of the Fourier-space template, which can be
+        slow.
+        """
         self.mass_bias = kwargs.get('mass_bias', self.mass_bias)
         # Check if we need to recompute the Fourier profile.
         re_fourier = (self.pp['alpha'] != kwargs.get('alpha',
@@ -925,12 +967,16 @@ class HaloProfilePressureGNFW(HaloProfile):
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):
+        # Scale-dependent factor of the GNFW profile.
         f1 = (self.pp['c500']*x)**(-self.pp['gamma'])
         exponent = -(self.pp['beta']-self.pp['gamma'])/self.pp['alpha']
         f2 = (1+(self.pp['c500']*x)**self.pp['alpha'])**exponent
         return f1*f2
 
     def _integ_interp(self):
+        # Precomputes the Fourier transform of the profile in terms
+        # of the scaled radius x and creates a spline interpolator
+        # for it.
         from scipy.interpolate import interp1d
         from scipy.integrate import quad
 
@@ -938,6 +984,9 @@ class HaloProfilePressureGNFW(HaloProfile):
             return self._form_factor(x)*x
 
         q_arr = np.geomspace(self.qrange[0], self.qrange[1], self.nq)
+        # We use the `weight` feature of quad to quickly estimate
+        # the Fourier transform. We could use the existing FFTLog
+        # framework, but this is a lot less of a kerfuffle.
         f_arr = np.array([quad(integrand,
                                a=1e-4, b=np.inf,  # limits of integration
                                weight="sin",  # fourier sine weight
@@ -949,10 +998,9 @@ class HaloProfilePressureGNFW(HaloProfile):
         return Fq
 
     def _norm(self, cosmo, M, a, mb):
-        """Computes the normalisation factor of the GNFW profile.
-        .. note:: Normalisation factor is given in units of ``eV/cm^3``. \
-        (Bolliet et al. 2017).
-        """
+        # Computes the normalisation factor of the GNFW profile.
+        # Normalisation factor is given in units of eV/cm^3.
+        # (Bolliet et al. 2017).
         h70 = cosmo["h"]/0.7
         C0 = 1.65*h70**2
         CM = (h70*M*mb/3E14)**(2/3+self.pp['alpha_P'])   # M dependence
@@ -961,6 +1009,8 @@ class HaloProfilePressureGNFW(HaloProfile):
         return P0_corr * C0 * CM * Cz
 
     def _real(self, cosmo, r, M, a, mass_def):
+        # Real-space profile.
+        # Output in units of eV/cm^3
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
@@ -981,9 +1031,8 @@ class HaloProfilePressureGNFW(HaloProfile):
         return prof
 
     def _fourier(self, cosmo, k, M, a, mass_def):
-        """Computes the Fourier transform of the Arnaud profile.
-        .. note:: Output units are ``[norm] Mpc^3``
-        """
+        # Fourier-space profile.
+        # Output in units of eV * Mpc^3 / cm^3.
         # Input handling
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)

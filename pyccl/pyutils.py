@@ -501,11 +501,11 @@ def _check_array_params(f_arg, name=None, arr3=False):
 
 
 def assert_warns(wtype, f, *args, **kwargs):
-    """Check that a function call f(*args, **kwargs) raises a warning of type
-    wtype.
+    """Check that a function call `f(*args, **kwargs)` raises a warning of
+    type wtype.
 
-    Returns the output of f(*args, **kwargs) unless there was no warning, in
-    which case an AssertionError is raised.
+    Returns the output of `f(*args, **kwargs)` unless there was no warning,
+    in which case an AssertionError is raised.
     """
     import warnings
     # Check that f() raises a warning, but not an error.
