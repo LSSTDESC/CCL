@@ -900,13 +900,13 @@ class HaloProfilePressureGNFW(HaloProfile):
                  qrange=(1e-3, 1e3), nq=128):
         self.qrange = qrange
         self.nq = nq
-        self.mass_bias = mass_bias,
-        self.P0 = P0,
-        self.c500 = c500,
-        self.alpha = alpha,
-        self.alpha_P = alpha_P,
-        self.beta = beta,
-        self.gamma = gamma,
+        self.mass_bias = mass_bias
+        self.P0 = P0
+        self.c500 = c500
+        self.alpha = alpha
+        self.alpha_P = alpha_P
+        self.beta = beta
+        self.gamma = gamma
         self.P0_hexp = P0_hexp
 
         # Interpolator for dimensionless Fourier-space profile
