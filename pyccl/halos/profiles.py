@@ -852,38 +852,81 @@ class HaloProfileHernquist(HaloProfile):
         return prof
 
 
-class HaloProfilePressureArnaud(HaloProfile):
+class HaloProfilePressureGNFW(HaloProfile):
     """ Generalized NFW pressure profile by Arnaud et al.
     (2010A&A...517A..92A).
 
     Args:
         mass_bias (float): the mass bias parameter :math:`1-b`.
+        profile_params (string or dict): profile parameters to use.
+            Options: `"Arnaud2010"` for the original parameters from
+            Arnaud et al. 2010. `"Planck2013"` for the parameters
+            used by Planck 2013 (V). A dictionary with the following
+            keys: `"P0"` (profile normalization), `"c500"` (concentration
+            parameter), `"alpha"`, `"beta"` and `"gamma"` (profile shape
+            parameters), `"alpha_P"` (additional mass dependence exponent)
+            and `"P0_hexp"` power of `h` with which the normalization should
+            scale (-1 for SZ-based normalizations, -3/2 for X-ray-based ones).
         rrange (tuple): limits of integration to be used when
             precomputing the Fourier-space profile template, as
             fractions of the virial radius.
         nr (int): number of points over which the
             Fourier-space profile template will be sampled.
     """
-    def __init__(self, mass_bias=0.8, qrange=(1e-3, 1e3), nq=128):
-        self.c500 = 1.81
-        self.alpha = 1.33
-        self.beta = 4.13
-        self.gamma = 0.31
+    def __init__(self, mass_bias=0.8,
+                 profile_params='Planck13',
+                 qrange=(1e-3, 1e3), nq=128):
+        if profile_params == 'Planck13':
+            self.pp = {'P0': 6.41,
+                       'c500': 1.81,
+                       'alpha': 1.33,
+                       'alpha_P': 0.12,
+                       'beta': 4.13,
+                       'gamma': 0.31,
+                       'P0_hexp': -1.}
+        elif profile_params == 'Arnaud10':
+            self.pp = {'P0': 8.130,
+                       'c500': 1.156,
+                       'alpha': 1.0620,
+                       'alpha_P': 0.12,
+                       'beta': 5.4807,
+                       'gamma': 0.3292,
+                       'P0_hexp': -1.5}
+        else:
+            if isinstance(profile_params, dict):
+                if profile_params.keys() < {'P0', 'c500', 'alpha', 'alpha_P',
+                                            'beta', 'gamma', 'P0_hexp'}:
+                    raise ValueError("'profile_params' does not contain all "
+                                     "required parameters")
+                self.pp = dict(profile_params)
+            else:
+                raise ValueError("'profile_params' must be 'Planck13', "
+                                 "'Arnaud10' or a dictionary")
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
 
         # Interpolator for dimensionless Fourier-space profile
         self._fourier_interp = self._integ_interp()
-        super(HaloProfilePressureArnaud, self).__init__()
+        super(HaloProfilePressureGNFW, self).__init__()
 
     def update_parameters(self, **kwargs):
         self.mass_bias = kwargs.get('mass_bias', self.mass_bias)
+        self.pp.update(kwargs)
+        # Recompute Fourier profile if needed
+        re_fourier = (self.pp['alpha'] != kwargs.get('alpha',
+                                                     self.pp['alpha'])) or \
+                     (self.pp['beta'] != kwargs.get('beta',
+                                                    self.pp['beta'])) or \
+                     (self.pp['gamma'] != kwargs.get('gamma',
+                                                     self.pp['gamma']))
+        if re_fourier:
+            self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):
-        f1 = (self.c500*x)**(-self.gamma)
-        exponent = -(self.beta-self.gamma)/self.alpha
-        f2 = (1+(self.c500*x)**self.alpha)**exponent
+        f1 = (self.pp['c500']*x)**(-self.pp['gamma'])
+        exponent = -(self.pp['beta']-self.pp['gamma'])/self.pp['alpha']
+        f2 = (1+(self.pp['c500']*x)**self.pp['alpha'])**exponent
         return f1*f2
 
     def _integ_interp(self):
@@ -905,21 +948,16 @@ class HaloProfilePressureArnaud(HaloProfile):
         return Fq
 
     def _norm(self, cosmo, M, a, mb):
-        """Computes the normalisation factor of the Arnaud profile.
+        """Computes the normalisation factor of the GNFW profile.
         .. note:: Normalisation factor is given in units of ``eV/cm^3``. \
-        (Arnaud et al., 2009)
+        (Bolliet et al. 2017).
         """
-        aP = 0.12  # Arnaud et al.
         h70 = cosmo["h"]/0.7
-        P0 = 6.41  # reference pressure
-
-        K = 1.65*h70**2*P0 * (h70/3e14)**(2/3+aP)  # prefactor
-
-        PM = (M*mb)**(2/3+aP)             # mass dependence
-        Pz = h_over_h0(cosmo, a)**(8/3)  # scale factor (z) dependence
-
-        P = K * PM * Pz / h70
-        return P
+        C0 = 1.65*h70**2
+        CM = (h70*M*mb/3E14)**(2/3+self.pp['alpha_P'])   # M dependence
+        Cz = h_over_h0(cosmo, a)**(8/3)  # z dependence
+        P0_corr = self.pp['P0'] * h70**self.pp['P0_hexp']  # h-corrected P_0
+        return P0_corr * C0 * CM * Cz
 
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
