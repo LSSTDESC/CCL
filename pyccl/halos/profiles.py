@@ -880,59 +880,43 @@ class HaloProfilePressureGNFW(HaloProfile):
     a halo overdensity :math:`\\Delta=500` with respect to the
     critical density.
 
+    The default arguments (other than `mass_bias`), correspond to the
+    profile parameters used in the Planck 2013 (V) paper.
+
     Args:
         mass_bias (float): the mass bias parameter :math:`1-b`.
-        profile_params (string or dict): profile parameters to use.
-            Options: `"Arnaud10"` for the original parameters from
-            Arnaud et al. 2010. `"Planck13"` for the parameters
-            used by Planck 2013 (V). A dictionary with the following
-            keys: `"P0"` (profile normalization), `"c500"` (concentration
-            parameter), `"alpha"`, `"beta"` and `"gamma"` (profile shape
-            parameters), `"alpha_P"` (additional mass dependence exponent)
-            and `"P0_hexp"` power of `h` with which the normalization should
-            scale (-1 for SZ-based normalizations, -3/2 for X-ray-based ones).
-            Default: `"Planck13"`.
+        P0 (float): profile normalization.
+        c500 (float): concentration parameter.
+        alpha (float): profile shape parameter.
+        beta (float): profile shape parameter.
+        gamma (float): profile shape parameter.
+        alpha_P (float): additional mass dependence exponent
+        P0_hexp (float): power of `h` with which the normalization
+            parameter should scale (-1 for SZ-based normalizations,
+            -3/2 for X-ray-based ones).
         qrange (tuple): limits of integration to be used when
             precomputing the Fourier-space profile template, as
             fractions of the virial radius.
         nq (int): number of points over which the
             Fourier-space profile template will be sampled.
     """
-    def __init__(self, mass_bias=0.8,
-                 profile_params='Planck13',
+    def __init__(self, mass_bias=0.8, P0=6.41,
+                 c500=1.81, alpha=1.33, alpha_P=0.12,
+                 beta=4.13, gamma=0.31, P0_hexp=-1.,
                  qrange=(1e-3, 1e3), nq=128):
-        if profile_params == 'Planck13':
-            self.pp = {'P0': 6.41,
-                       'c500': 1.81,
-                       'alpha': 1.33,
-                       'alpha_P': 0.12,
-                       'beta': 4.13,
-                       'gamma': 0.31,
-                       'P0_hexp': -1.}
-        elif profile_params == 'Arnaud10':
-            self.pp = {'P0': 8.130,
-                       'c500': 1.156,
-                       'alpha': 1.0620,
-                       'alpha_P': 0.12,
-                       'beta': 5.4807,
-                       'gamma': 0.3292,
-                       'P0_hexp': -1.5}
-        else:
-            if isinstance(profile_params, dict):
-                if profile_params.keys() < {'P0', 'c500', 'alpha', 'alpha_P',
-                                            'beta', 'gamma', 'P0_hexp'}:
-                    raise ValueError("'profile_params' does not contain all "
-                                     "required parameters")
-                self.pp = dict(profile_params)
-            else:
-                raise ValueError("'profile_params' must be 'Planck13', "
-                                 "'Arnaud10' or a dictionary")
         self.qrange = qrange
         self.nq = nq
-        self.mass_bias = mass_bias
+        self.pp = {'mass_bias': mass_bias,
+                   'P0': P0,
+                   'c500': c500,
+                   'alpha': alpha,
+                   'alpha_P': alpha_P,
+                   'beta': beta,
+                   'gamma': gamma,
+                   'P0_hexp': P0_hexp}
 
         # Interpolator for dimensionless Fourier-space profile
-        self._fourier_interp = self._integ_interp()
+        self._fourier_interp = None
         super(HaloProfilePressureGNFW, self).__init__()
 
     def update_parameters(self, **kwargs):
@@ -954,7 +938,6 @@ class HaloProfilePressureGNFW(HaloProfile):
         a recomputation of the Fourier-space template, which can be
         slow.
         """
-        self.mass_bias = kwargs.get('mass_bias', self.mass_bias)
         # Check if we need to recompute the Fourier profile.
         re_fourier = (self.pp['alpha'] != kwargs.get('alpha',
                                                      self.pp['alpha'])) or \
@@ -963,7 +946,7 @@ class HaloProfilePressureGNFW(HaloProfile):
                      (self.pp['gamma'] != kwargs.get('gamma',
                                                      self.pp['gamma']))
         self.pp.update(kwargs)
-        if re_fourier:
+        if re_fourier and (self._fourier_interp is not None):
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):
@@ -1016,7 +999,7 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         # Comoving virial radius
         # (1-b)
-        mb = self.mass_bias
+        mb = self.pp['mass_bias']
         # R_Delta*(1+z)
         R = mass_def.get_radius(cosmo, M_use * mb, a) / a
 
@@ -1033,12 +1016,17 @@ class HaloProfilePressureGNFW(HaloProfile):
     def _fourier(self, cosmo, k, M, a, mass_def):
         # Fourier-space profile.
         # Output in units of eV * Mpc^3 / cm^3.
+
+        # Tabulate if not done yet
+        if self._fourier_interp is None:
+            self._fourier_interp = self._integ_interp()
+
         # Input handling
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
         # hydrostatic bias
-        mb = self.mass_bias
+        mb = self.pp['mass_bias']
         # R_Delta*(1+z)
         R = mass_def.get_radius(cosmo, M_use * mb, a) / a
 

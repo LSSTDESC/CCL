@@ -68,6 +68,16 @@ def test_empirical_smoke(prof_class):
 
     p = prof_class(c)
     smoke_assert_prof_real(p)
+    p.update_parameters(**{'p': 0})
+
+
+def test_gnfw_smoke():
+    p = ccl.halos.HaloProfilePressureGNFW()
+    smoke_assert_prof_real(p)
+    p.update_parameters(**{'mass_bias': 0.7,
+                           'alpha': 1.24})
+    assert p.pp['alpha'] == 1.24
+    assert p.pp['mass_bias'] == 0.7
 
 
 @pytest.mark.parametrize('prof_class',
