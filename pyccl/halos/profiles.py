@@ -48,12 +48,6 @@ class HaloProfile(object):
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
 
-    def update_parameters(self, **kwargs):
-        """ Update any of the parameters associated with
-        this profile (other than the fftlog parameters).
-        """
-        pass
-
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by
         FFTLog to compute Hankel transforms. The available
@@ -906,54 +900,73 @@ class HaloProfilePressureGNFW(HaloProfile):
                  qrange=(1e-3, 1e3), nq=128):
         self.qrange = qrange
         self.nq = nq
-        self.pp = {'mass_bias': mass_bias,
-                   'P0': P0,
-                   'c500': c500,
-                   'alpha': alpha,
-                   'alpha_P': alpha_P,
-                   'beta': beta,
-                   'gamma': gamma,
-                   'P0_hexp': P0_hexp}
+        self.mass_bias = mass_bias,
+        self.P0 = P0,
+        self.c500 = c500,
+        self.alpha = alpha,
+        self.alpha_P = alpha_P,
+        self.beta = beta,
+        self.gamma = gamma,
+        self.P0_hexp = P0_hexp
 
         # Interpolator for dimensionless Fourier-space profile
         self._fourier_interp = None
         super(HaloProfilePressureGNFW, self).__init__()
 
-    def update_parameters(self, **kwargs):
+    def update_parameters(self, mass_bias=None, P0=None,
+                          c500=None, alpha=None, beta=None, gamma=None,
+                          alpha_P=None, P0_hexp=None):
         """ Update any of the parameters associated with
-        this profile.
+        this profile. Any parameter set to `None` won't be updated.
 
-        Relevant keys are:
+        .. note:: A change in `alpha`, `beta` or `gamma` will trigger
+            a recomputation of the Fourier-space template, which can be
+            slow.
 
-        - `mass_bias`: the mass bias parameter :math:`1-b`.
-        - `P0`: profile normalization.
-        - `c500`: concentration parameter.
-        - `alpha`, `beta`, `gamma`: profile shape parameters.
-        - `alpha_P`: additional mass dependence exponent.
-        - `P0_hexp`: power of `h` with which the normalization should \
-           scale (-1 for SZ-based normalizations, -3/2 for \
-           X-ray-based ones).
-
-        Note that a change in `alpha`, `beta` or `gamma` will trigger
-        a recomputation of the Fourier-space template, which can be
-        slow.
+        Args:
+            mass_bias (float): the mass bias parameter :math:`1-b`.
+            P0 (float): profile normalization.
+            c500 (float): concentration parameter.
+            alpha (float): profile shape parameter.
+            beta (float): profile shape parameters.
+            gamma (float): profile shape parameters.
+            alpha_P (float): additional mass dependence exponent.
+            P0_hexp (float): power of `h` with which the normalization should \
+                scale (-1 for SZ-based normalizations, -3/2 for \
+                X-ray-based ones).
         """
+        if mass_bias is not None:
+            self.mass_bias = mass_bias
+        if c500 is not None:
+            self.c500 = c500
+        if alpha_P is not None:
+            self.alpha_P = alpha_P
+        if P0 is not None:
+            self.P0 = P0
+
         # Check if we need to recompute the Fourier profile.
-        re_fourier = (self.pp['alpha'] != kwargs.get('alpha',
-                                                     self.pp['alpha'])) or \
-                     (self.pp['beta'] != kwargs.get('beta',
-                                                    self.pp['beta'])) or \
-                     (self.pp['gamma'] != kwargs.get('gamma',
-                                                     self.pp['gamma']))
-        self.pp.update(kwargs)
+        re_fourier = False
+        if alpha is not None:
+            if alpha != self.alpha:
+                re_fourier = True
+            self.alpha = alpha
+        if beta is not None:
+            if beta != self.beta:
+                re_fourier = True
+            self.beta = beta
+        if gamma is not None:
+            if gamma != self.gamma:
+                re_fourier = True
+            self.gamma = gamma
+
         if re_fourier and (self._fourier_interp is not None):
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):
         # Scale-dependent factor of the GNFW profile.
-        f1 = (self.pp['c500']*x)**(-self.pp['gamma'])
-        exponent = -(self.pp['beta']-self.pp['gamma'])/self.pp['alpha']
-        f2 = (1+(self.pp['c500']*x)**self.pp['alpha'])**exponent
+        f1 = (self.c500*x)**(-self.gamma)
+        exponent = -(self.beta-self.gamma)/self.alpha
+        f2 = (1+(self.c500*x)**self.alpha)**exponent
         return f1*f2
 
     def _integ_interp(self):
@@ -986,9 +999,9 @@ class HaloProfilePressureGNFW(HaloProfile):
         # (Bolliet et al. 2017).
         h70 = cosmo["h"]/0.7
         C0 = 1.65*h70**2
-        CM = (h70*M*mb/3E14)**(2/3+self.pp['alpha_P'])   # M dependence
+        CM = (h70*M*mb/3E14)**(2/3+self.alpha_P)   # M dependence
         Cz = h_over_h0(cosmo, a)**(8/3)  # z dependence
-        P0_corr = self.pp['P0'] * h70**self.pp['P0_hexp']  # h-corrected P_0
+        P0_corr = self.P0 * h70**self.P0_hexp  # h-corrected P_0
         return P0_corr * C0 * CM * Cz
 
     def _real(self, cosmo, r, M, a, mass_def):
@@ -999,7 +1012,7 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         # Comoving virial radius
         # (1-b)
-        mb = self.pp['mass_bias']
+        mb = self.mass_bias
         # R_Delta*(1+z)
         R = mass_def.get_radius(cosmo, M_use * mb, a) / a
 
@@ -1026,7 +1039,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         k_use = np.atleast_1d(k)
 
         # hydrostatic bias
-        mb = self.pp['mass_bias']
+        mb = self.mass_bias
         # R_Delta*(1+z)
         R = mass_def.get_radius(cosmo, M_use * mb, a) / a
 
