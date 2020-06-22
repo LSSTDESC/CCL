@@ -66,6 +66,7 @@ psml.prepare(cosmo)
 # now compute the mass function
 psf = Ncm.PowspecFilter.new(psml, Ncm.PowspecFilterType.TOPHAT)
 psf.set_best_lnr0()
+psf.set_zf(2.5)
 mulf = Nc.MultiplicityFunc.new_from_name("NcMultiplicityFuncTinkerMean")
 mulf.set_Delta(200)
 mf = Nc.HaloMassFunction.new(dist, psf, mulf)
@@ -73,7 +74,7 @@ mf = Nc.HaloMassFunction.new(dist, psf, mulf)
 psf.prepare(cosmo)
 mf.set_area_sd(200.0)
 mf.set_prec(1.0e-9)
-mf.set_eval_limits(cosmo, math.log(1e14), math.log(1e16), 0.0, 1.0)
+mf.set_eval_limits(cosmo, math.log(1e14), math.log(1e16), 0.0, 2.5)
 mf.prepare(cosmo)
 
 gf = psml.peek_gf()
@@ -92,14 +93,14 @@ for m in [1e14, 5e14, 1e15, 5e15]:
 with open("../numcosmo_cluster_counts.txt", "w") as fp:
     fp.write("# counts  mmin  mmax  zmin  zmax\n")
 
-    nc = mf.n(cosmo, math.log(1.0e14), math.log(2.0e14), 0, 1, True)
+    nc = mf.n(cosmo, math.log(1.0e14), math.log(2.0e14), 0, 2, True)
     fp.write(
-        "%20.12g %20.12g %20.12g %20.12g %20.12g\n" % (nc, 1e14, 2e14, 0, 1))
+        "%20.12g %20.12g %20.12g %20.12g %20.12g\n" % (nc, 1e14, 2e14, 0, 2))
 
-    nc = mf.n(cosmo, math.log(2.0e14), math.log(1.0e15), 0, 1, True)
+    nc = mf.n(cosmo, math.log(2.0e14), math.log(1.0e15), 0, 2, True)
     fp.write(
-        "%20.12g %20.12g %20.12g %20.12g %20.12g\n" % (nc, 2e14, 1e15, 0, 1))
+        "%20.12g %20.12g %20.12g %20.12g %20.12g\n" % (nc, 2e14, 1e15, 0, 2))
 
-    nc = mf.n(cosmo, math.log(1.0e15), math.log(1.0e16), 0, 1, True)
+    nc = mf.n(cosmo, math.log(1.0e15), math.log(1.0e16), 0, 2, True)
     fp.write(
-        "%20.12g %20.12g %20.12g %20.12g %20.12g\n" % (nc, 1e15, 1e16, 0, 1))
+        "%20.12g %20.12g %20.12g %20.12g %20.12g\n" % (nc, 1e15, 1e16, 0, 2))
