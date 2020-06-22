@@ -867,10 +867,11 @@ class HaloProfilePressureGNFW(HaloProfile):
             parameters), `"alpha_P"` (additional mass dependence exponent)
             and `"P0_hexp"` power of `h` with which the normalization should
             scale (-1 for SZ-based normalizations, -3/2 for X-ray-based ones).
-        rrange (tuple): limits of integration to be used when
+            Default: `"Planck13"`.
+        qrange (tuple): limits of integration to be used when
             precomputing the Fourier-space profile template, as
             fractions of the virial radius.
-        nr (int): number of points over which the
+        nq (int): number of points over which the
             Fourier-space profile template will be sampled.
     """
     def __init__(self, mass_bias=0.8,
@@ -912,14 +913,14 @@ class HaloProfilePressureGNFW(HaloProfile):
 
     def update_parameters(self, **kwargs):
         self.mass_bias = kwargs.get('mass_bias', self.mass_bias)
-        self.pp.update(kwargs)
-        # Recompute Fourier profile if needed
+        # Check if we need to recompute the Fourier profile.
         re_fourier = (self.pp['alpha'] != kwargs.get('alpha',
                                                      self.pp['alpha'])) or \
                      (self.pp['beta'] != kwargs.get('beta',
                                                     self.pp['beta'])) or \
                      (self.pp['gamma'] != kwargs.get('gamma',
                                                      self.pp['gamma']))
+        self.pp.update(kwargs)
         if re_fourier:
             self._fourier_interp = self._integ_interp()
 
@@ -938,7 +939,7 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         q_arr = np.geomspace(self.qrange[0], self.qrange[1], self.nq)
         f_arr = np.array([quad(integrand,
-                               a=1e-4, b=np.inf,     # limits of integration
+                               a=1e-4, b=np.inf,  # limits of integration
                                weight="sin",  # fourier sine weight
                                wvar=q)[0] / q
                           for q in q_arr])
