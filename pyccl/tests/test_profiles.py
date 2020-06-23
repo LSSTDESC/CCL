@@ -70,6 +70,22 @@ def test_empirical_smoke(prof_class):
     smoke_assert_prof_real(p)
 
 
+def test_gnfw_smoke():
+    p = ccl.halos.HaloProfilePressureGNFW()
+    beta_old = p.beta
+    smoke_assert_prof_real(p)
+    p.update_parameters(mass_bias=0.7,
+                        alpha=1.24)
+    assert p.alpha == 1.24
+    assert p.mass_bias == 0.7
+    assert p.beta == beta_old
+    for n in ['P0', 'P0_hexp', 'alpha',
+              'beta', 'gamma', 'alpha_P',
+              'c500', 'mass_bias']:
+        p.update_parameters(**{n: 1234.})
+        assert getattr(p, n) == 1234.
+
+
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileGaussian,
                           ccl.halos.HaloProfilePowerLaw])

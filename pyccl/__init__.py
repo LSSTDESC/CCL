@@ -39,7 +39,7 @@ from .massfunction import massfunc, halo_bias, massfunc_m2r
 
 # Cl's and tracers
 from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, \
-    get_density_kernel, get_kappa_kernel, get_lensing_kernel
+    tSZTracer, get_density_kernel, get_kappa_kernel, get_lensing_kernel
 from .cls import angular_cl
 
 # Useful constants and unit conversions
