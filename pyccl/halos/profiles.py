@@ -875,7 +875,8 @@ class HaloProfilePressureGNFW(HaloProfile):
     critical density.
 
     The default arguments (other than `mass_bias`), correspond to the
-    profile parameters used in the Planck 2013 (V) paper.
+    profile parameters used in the Planck 2013 (V) paper. The profile
+    is calculated in physical (non-comoving) units of eV/cm^3.
 
     Args:
         mass_bias (float): the mass bias parameter :math:`1-b`.
