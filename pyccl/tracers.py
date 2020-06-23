@@ -544,7 +544,7 @@ class CMBLensingTracer(Tracer):
 
 
 class tSZTracer(Tracer):
-    """Specific `Tracer` associated with the thermal Sunyaev Zel'dovich
+    """Specific :class:`Tracer` associated with the thermal Sunyaev Zel'dovich
     Compton-y parameter. The radial kernel for this tracer is simply given by
 
     .. math::
@@ -554,7 +554,8 @@ class tSZTracer(Tracer):
     :math:`m_e` is the electron mass.
 
     Any angular power spectra computed with this tracer, should use
-    a three-dimensional power spectrum involving the electron pressure.
+    a three-dimensional power spectrum involving the electron pressure
+    in physical (non-comoving) units of :math:`eV\\,{\\rm cm}^{-3}`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.

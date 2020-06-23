@@ -82,7 +82,8 @@ def test_gnfw_smoke():
     for n in ['P0', 'P0_hexp', 'alpha',
               'beta', 'gamma', 'alpha_P',
               'c500', 'mass_bias']:
-        p.update_parameters(**{n: 1.})
+        p.update_parameters(**{n: 1234.})
+        assert getattr(p, n) == 1234.
 
 
 @pytest.mark.parametrize('prof_class',

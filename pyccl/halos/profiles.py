@@ -943,6 +943,8 @@ class HaloProfilePressureGNFW(HaloProfile):
             self.alpha_P = alpha_P
         if P0 is not None:
             self.P0 = P0
+        if P0_hexp is not None:
+            self.P0_hexp = P0_hexp
 
         # Check if we need to recompute the Fourier profile.
         re_fourier = False
