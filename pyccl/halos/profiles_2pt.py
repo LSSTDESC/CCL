@@ -56,3 +56,9 @@ class Profile2pt(object):
             uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
 
         return uk1 * uk2
+
+
+class Profile2ptHOD(Profile2pt):
+    def fourier_2pt(self, prof, cosmo, k, M, a,
+                    prof2=None, mass_def=None):
+        return prof._fourier_variance(cosmo, k, M, a, mass_def)
