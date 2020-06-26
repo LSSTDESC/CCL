@@ -1058,39 +1058,31 @@ class HaloProfilePressureGNFW(HaloProfile):
         return prof
 
 
-class HaloProfileHOD(HaloProfileNFW):
-    def __init__(self, c_M_relation,
-                 lMmin=11.87, lM0=11.87,
-                 lM1=11.97, bg=0.72, bmax=6.4,
-                 sigmaLogM=0.15, alpha=0.855):
-        self.Mmin = 10.**lMmin
-        self.M0 = 10.**lM0
-        self.M1 = 10.**lM1
-        self.sigmaLogM = sigmaLogM
-        self.alpha = alpha
-        self.bg = bg
-        self.bmax = bmax
-        super(HaloProfileHOD, self).__init__(c_M_relation)
-        self._fourier = self._fourier_analytic_hod
+class HaloProfileHOD(HaloProfile):
+    def __init__(self, n_central=None, n_satellite=None, p_satellite=None, params):
+        # TODO check signature
+        self._Nc = n_central
+        # TODO check signature
+        self._Ns = n_satellite
+        # TODO check type
+        # TODO check update_params
+        self._ps = p_satellite
+        self.params = params
 
-    def _fourier_analytic_sat(self, cosmo, k, M, a, mass_def):
+    def update_parameters(self, params):
+        self.params = params
+        self._ps.update_params(**params)
+
+    def _fourier(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
-        # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
-        R_s = R_M / c_M
-        c_M *= self.bmax/self.bg
+        Nc = self._Nc(cosmo, M_use, a, self.params)
+        Ns = self._Ns(cosmo, M_use, a, self.params)
+        # NFW profile
+        uk = self._ps.fourier(cosmo, k_use, M_use, a, mass_def)
 
-        x = k_use[None, :] * R_s[:, None] * self.bg
-        Si1, Ci1 = sici((1 + c_M[:, None]) * x)
-        Si2, Ci2 = sici(x)
-
-        P1 = 1 / (np.log(1+c_M) - c_M/(1+c_M))
-        P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
-        P3 = np.sin(c_M[:, None] * x) / ((1 + c_M[:, None]) * x)
-        prof = P1[:, None] * (P2 - P3)
+        prof = Nc[:, None] * (1 + Ns[:, None] * uk)
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -1098,27 +1090,18 @@ class HaloProfileHOD(HaloProfileNFW):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _Nc(self, M):
-        # Number of centrals
-        return 0.5 * (1 + erf(np.log10(M / self.Mmin) / self.sigmaLogM))
-
-    def _Ns(self, M):
-        # Number of satellites
-        return np.heaviside(M-self.M0, 1) * \
-            (np.fabs(M - self.M0) / self.M1)**self.alpha
-
-    def _fourier_analytic_hod(self, cosmo, k, M, a, mass_def):
+    def _real(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
-        k_use = np.atleast_1d(k)
 
-        Nc = self._Nc(M_use)
-        Ns = self._Ns(M_use)
+        Nc = self._Nc(cosmo, M_use, a, params)
+        Ns = self._Ns(cosmo, M_use, a, params)
         # NFW profile
-        uk = self._fourier_analytic_sat(cosmo, k_use, M_use, a, mass_def)
+        ur = self._ps.real(cosmo, k_use, M_use, a, mass_def)
 
-        prof = Nc[:, None] * (1 + Ns[:, None] * uk)
+        prof = Nc[:, None] * (1 + Ns[:, None] * ur)
 
-        if np.ndim(k) == 0:
+        if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
@@ -1129,13 +1112,88 @@ class HaloProfileHOD(HaloProfileNFW):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
-        Nc = self._Nc(M_use)
-        Ns = self._Ns(M_use)
+        Nc = self._Nc(cosmo, M_use, a, self.params)
+        Ns = self._Ns(cosmo, M_use, a, self.params)
         # NFW profile
-        uk = self._fourier_analytic_sat(cosmo, k_use, M_use, a, mass_def)
+        uk = self._ps.fourier(cosmo, k_use, M_use, a, mass_def)
 
         prof = Ns[:, None] * uk
         prof = Nc[:, None] * (2 * prof + prof**2)
+
+        if np.ndim(k) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+
+def hod_n_central_default(cosmo, M, a, params):
+    lMmin = params['lMmin_0'] + params['lMmin_p'] * (a - params['a_pivot'])
+    siglnM = params['siglnM_0'] + params['siglnM_p'] * (a - params['a_pivot'])
+    return 0.5 * (1 + erf((np.log10(M) - lMmin)/siglnM))
+
+
+def hod_n_satellite_default(cosmo, M, a, params):
+    M0 = 10.**(params['lM0_0'] + params['lM0_p'] * (a - params['a_pivot']))
+    M1 = 10.**(params['lM1_0'] + params['lM1_p'] * (a - params['a_pivot']))
+    alpha = params['alpha_0'] + params['alpha_p'] * (a - params['a_pivot'])
+    return np.heaviside(M-M0,1) * ((M - M0) / M1)**alpha
+
+
+class HaloProfileHODSatNFW(HaloProfile):
+    def __init__(self, c_M_relation, bg_0=1., bg_p=0., bmax_0=1., bmax_p=0., a_pivot=1.):
+        if not isinstance(c_M_relation, Concentration):
+            raise TypeError("c_M_relation must be of type `Concentration`)")
+
+        self.cM = c_M_relation
+        self.bg_0 = bg_0
+        self.bg_p = bg_p
+        self.bmax_0 = bmax_0
+        self.bmax_p = bmax_p
+        self.a_pivot = 1.
+        super(HaloProfileHODSatNFW, self).__init__()
+        self.update_precision_fftlog(padding_hi_fftlog=1E2,
+                                     padding_lo_fftlog=1E-2,
+                                     n_per_decade=1000,
+                                     plaw_fourier=-2.)
+
+    def update_parameters(self, bg_0=None, bmax_0=None,
+                          bg_p=None, bmax_p=None, a_pivot=None):
+        if bg_0 is not None:
+            self.bg_0 = bg_0
+        if bmax_0 is not None:
+            self.bmax_0 = bmax_0
+        if bg_p is not None:
+            self.bg_p = bg_p
+        if bmax_p is not None:
+            self.bmax_p = bmax_p
+        if a_pivot is not None:
+            self.a_pivot = a_pivot
+
+    def _get_cM(self, cosmo, M, a, mdef=None):
+        return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
+
+    #TODO: code real
+    def _fourier(self, cosmo, k, M, a, mass_def):
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        # Comoving virial radius
+        bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
+        bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+        c_M *= bmax / bg
+
+        x = k_use[None, :] * R_s[:, None] * bg
+        Si1, Ci1 = sici((1 + c_M[:, None]) * x)
+        Si2, Ci2 = sici(x)
+
+        P1 = 1 / (np.log(1+c_M) - c_M/(1+c_M))
+        P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
+        P3 = np.sin(c_M[:, None] * x) / ((1 + c_M[:, None]) * x)
+        prof = P1[:, None] * (P2 - P3)
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
