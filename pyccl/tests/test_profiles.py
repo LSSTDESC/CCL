@@ -1,12 +1,14 @@
 import numpy as np
 import pytest
 import pyccl as ccl
+import types
 
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
 M200 = ccl.halos.MassDef200c()
+M500c = ccl.halos.MassDef(500, 'critical')
 
 
 def one_f(cosmo, M, a=None, mdef=None):
@@ -16,7 +18,8 @@ def one_f(cosmo, M, a=None, mdef=None):
         return np.ones(M.size)
 
 
-def smoke_assert_prof_real(profile):
+def smoke_assert_prof_real(profile, use_fourier=False,
+                           use_fourier_variance=False):
     sizes = [(0, 0),
              (2, 0),
              (0, 2),
@@ -39,7 +42,12 @@ def smoke_assert_prof_real(profile):
             m = 1E12
         else:
             m = np.geomspace(1E10, 1E14, sm)
-        p = profile._real(COSMO, r, m, 1., M200)
+        if use_fourier:
+            p = profile._fourier(COSMO, r, m, 1., M200)
+        elif use_fourier_variance:
+            p = profile._fourier_variance(COSMO, r, m, 1., M200)
+        else:
+            p = profile._real(COSMO, r, m, 1., M200)
         assert np.shape(p) == sh
 
 
@@ -70,6 +78,27 @@ def test_empirical_smoke(prof_class):
     smoke_assert_prof_real(p)
 
 
+def test_snfw_params():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p = ccl.halos.HaloProfileScaledNFW(c)
+    for n in ['bg_0', 'bmax_0', 'bg_p', 'bmax_p',
+              'a_pivot', 'scale_with_mass']:
+        p.update_parameters({n: 0.987})
+        assert getattr(p, n) == 0.987
+
+
+@pytest.mark.parametrize('scale_mass', [True, False])
+def test_snfw_smoke(scale_mass):
+    prof_class = ccl.halos.HaloProfileScaledNFW
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    with pytest.raises(TypeError):
+        p = prof_class(None)
+
+    p = prof_class(c, scale_with_mass=scale_mass)
+    smoke_assert_prof_real(p)
+    smoke_assert_prof_real(p, use_fourier=True)
+
+
 def test_gnfw_smoke():
     p = ccl.halos.HaloProfilePressureGNFW()
     beta_old = p.beta
@@ -84,6 +113,95 @@ def test_gnfw_smoke():
               'c500', 'mass_bias']:
         p.update_parameters(**{n: 1234.})
         assert getattr(p, n) == 1234.
+
+
+def test_gnfw_refourier():
+    p = ccl.halos.HaloProfilePressureGNFW()
+    # Create Fourier template
+    p._integ_interp()
+    p_f1 = p.fourier(COSMO, 1., 1E13, 1., M500c)
+    # Check the Fourier profile gets recalculated
+    p.update_parameters(alpha=1.32)
+    p_f2 = p.fourier(COSMO, 1., 1E13, 1., M500c)
+    assert p_f1 != p_f2
+
+
+def test_hod_smoke():
+    prof_class = ccl.halos.HaloProfileHOD
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p = prof_class(c_M_relation=c)
+    smoke_assert_prof_real(p)
+    smoke_assert_prof_real(p, use_fourier=True)
+    smoke_assert_prof_real(p, use_fourier_variance=True)
+
+
+def test_hod_raises():
+    def f_wrong(x):
+        return x
+
+    def f_right(M, a, p):
+        return p['scale'] * M
+
+    def update_right(self, p):
+        self.r_s = p.get('r_s', self.r_s)
+
+    def update_wrong(self, p):
+        self.r_s = p['r_x']
+
+    def r_s(cosmo, M, a, mdef):
+        return mdef.get_radius(cosmo, M, a)
+
+    p_wrong = ccl.halos.ConcentrationDuffy08(M200)
+    p_right = ccl.halos.HaloProfileGaussian(r_s, one_f)
+    p_right.update_parameters = types.MethodType(update_right, p_right)
+    p_wrong_update = ccl.halos.HaloProfileGaussian(r_s, one_f)
+    p_wrong_update.update_parameters = types.MethodType(update_wrong,
+                                                        p_wrong_update)
+    params_right = {'scale': 0.5, 'r_s': r_s}
+    params_wrong = {'scaled': 0.5, 'r_x': r_s}
+
+    prof_class = ccl.halos.HaloProfileHOD
+
+    # Wrong n_central
+    with pytest.raises(ValueError):
+        p = prof_class(n_central=f_wrong, params=params_right)
+    # Wrong n_sat
+    with pytest.raises(ValueError):
+        p = prof_class(n_central=f_right, n_satellite=f_wrong,
+                       params=params_right)
+    # Right n_central, and sat, wrong params
+    with pytest.raises(ValueError):
+        p = prof_class(n_central=f_right, n_satellite=f_right,
+                       params=params_wrong)
+    # No c(M) relation for default profile
+    with pytest.raises(ValueError):
+        p = prof_class(n_central=f_right, n_satellite=f_right,
+                       params=params_right)
+    # Wrong sat profile
+    with pytest.raises(TypeError):
+        p = prof_class(n_central=f_right,
+                       n_satellite=f_right,
+                       p_satellite=p_wrong,
+                       params=params_right)
+    # Profile with wrong update_parameters signature
+    with pytest.raises(ValueError):
+        p = prof_class(n_central=f_right,
+                       n_satellite=f_right,
+                       p_satellite=p_wrong_update,
+                       params=params_right)
+
+    # This should work
+    p = prof_class(n_central=f_right,
+                   n_satellite=f_right,
+                   p_satellite=p_right,
+                   params=params_right)
+    # Check n_central and n_sat works as expected
+    for fac in [0.3, 0.5]:
+        for fun in [p._Nc, p._Ns]:
+            p.update_parameters({'scale': fac})
+            assert fun(1E13, 1., p.params) == fac*1E13
+    # Check profile can be evaluated
+    smoke_assert_prof_real(p)
 
 
 @pytest.mark.parametrize('prof_class',

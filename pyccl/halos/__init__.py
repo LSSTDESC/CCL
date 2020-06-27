@@ -37,7 +37,9 @@ from .profiles import (  # noqa
     HaloProfilePowerLaw, HaloProfileNFW,
     HaloProfileEinasto, HaloProfileHernquist,
     HaloProfilePressureGNFW,
-    HaloProfileHOD)
+    HaloProfileHOD, HaloProfileScaledNFW,
+    hod_n_central_default,
+    hod_n_satellite_default)
 
 # Halo profile 2-point cumulants
 from .profiles_2pt import (  # noqa
