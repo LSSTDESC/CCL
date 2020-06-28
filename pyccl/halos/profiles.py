@@ -1212,7 +1212,7 @@ class HaloProfileHOD(HaloProfile):
         self.params = params
 
     def update_parameters(self, params):
-        self.params = params
+        self.params.update(params)
         if self.update_profile:
             self._ps.update_parameters(params)
 
@@ -1271,13 +1271,13 @@ class HaloProfileHOD(HaloProfile):
 
 
 def hod_n_central_default(M, a, p):
-    lMmin = p['lMmin_0'] + p['lMmin_p'] * (a - p['a_pivot'])
+    Mmin = 10.**(p['lMmin_0'] + p['lMmin_p'] * (a - p['a_pivot']))
     siglM = p['siglM_0'] + p['siglM_p'] * (a - p['a_pivot'])
-    return 0.5 * (1 + erf((np.log10(M) - lMmin)/siglM))
+    return 0.5 * (1 + erf(np.log(M/Mmin)/siglM))
 
 
 def hod_n_satellite_default(M, a, p):
     M0 = 10.**(p['lM0_0'] + p['lM0_p'] * (a - p['a_pivot']))
     M1 = 10.**(p['lM1_0'] + p['lM1_p'] * (a - p['a_pivot']))
     alpha = p['alpha_0'] + p['alpha_p'] * (a - p['a_pivot'])
-    return np.heaviside(M-M0, 1) * ((M-M0) / M1)**alpha
+    return np.heaviside(M-M0, 1) * (np.fabs(M-M0) / M1)**alpha
