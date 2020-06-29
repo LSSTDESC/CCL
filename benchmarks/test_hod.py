@@ -41,7 +41,7 @@ def test_hodcl():
     # Make sure we use the same P(k)
     cosmo._set_linear_power_from_arrays(a_array=1/(1.+zs[::-1]),
                                         k_array=ks,
-                                        pk_array=pks[::-1,:])
+                                        pk_array=pks[::-1, :])
     # Halo model setup
     mass_def = ccl.halos.MassDef(200, 'critical')
     cm = ccl.halos.ConcentrationDuffy08(mass_def)
@@ -69,4 +69,3 @@ def test_hodcl():
     cl_hod = ccl.angular_cl(cosmo, tr, tr, l_bm, p_of_k_a=pk_hod)
 
     assert np.all(np.fabs(cl_hod/cl_bm-1) < 0.005)
-
