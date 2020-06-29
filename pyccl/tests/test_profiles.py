@@ -120,6 +120,24 @@ def test_hod_smoke():
         assert getattr(p, n) == 1234.
 
 
+def test_hod_2pt_raises():
+    pbad = ccl.halos.HaloProfilePressureGNFW()
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    pgood = ccl.halos.HaloProfileHOD(c_M_relation=c)
+    pgood_b = ccl.halos.HaloProfileHOD(c_M_relation=c)
+    p2 = ccl.halos.Profile2ptHOD()
+    with pytest.raises(TypeError):
+        p2.fourier_2pt(pbad, COSMO, 1., 1E13, 1.,
+                       mass_def=M200)
+
+    with pytest.raises(ValueError):
+        p2.fourier_2pt(pgood, COSMO, 1., 1E13, 1.,
+                       prof2=pgood_b, mass_def=M200)
+
+    p2.fourier_2pt(pgood, COSMO, 1., 1E13, 1.,
+                   prof2=pgood, mass_def=M200)
+
+
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileGaussian,
                           ccl.halos.HaloProfilePowerLaw])
