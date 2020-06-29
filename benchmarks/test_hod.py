@@ -3,6 +3,8 @@ import pyccl as ccl
 
 
 def test_hodcl():
+    # With many thanks to Ryu Makiya, Eiichiro Komatsu
+    # and Shin'ichiro Ando for providing this benchmark.
     # HOD params
     lMcut = 11.8
     lM1 = 11.73
