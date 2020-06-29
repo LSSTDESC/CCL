@@ -895,6 +895,8 @@ class HaloProfilePressureGNFW(HaloProfile):
         nq (int): number of points over which the
             Fourier-space profile template will be sampled.
     """
+    name = 'GNFW'
+
     def __init__(self, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
@@ -1058,46 +1060,91 @@ class HaloProfilePressureGNFW(HaloProfile):
         return prof
 
 
-class HaloProfileScaledNFW(HaloProfile):
-    def __init__(self, c_M_relation, bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., scale_with_mass=False):
+class HaloProfileHOD(HaloProfile):
+    name = 'HOD'
+
+    def __init__(self, c_M_relation,
+                 lMmin_0=12., lMmin_p=0., siglM_0=0.4,
+                 siglM_p=0., lM0_0=7., lM0_p=0.,
+                 lM1_0=13.3, lM1_p=0., alpha_0=1.,
+                 alpha_p=0., fc_0=1., fc_p=0.,
+                 bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
+                 a_pivot=1.):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
         self.cM = c_M_relation
+        self.lMmin_0 = lMmin_0
+        self.lMmin_p = lMmin_p
+        self.lM0_0 = lM0_0
+        self.lM0_p = lM0_p
+        self.lM1_0 = lM1_0
+        self.lM1_p = lM1_p
+        self.siglM_0 = siglM_0
+        self.siglM_p = siglM_p
+        self.alpha_0 = alpha_0
+        self.alpha_p = alpha_p
+        self.fc_0 = fc_0
+        self.fc_p = fc_p
         self.bg_0 = bg_0
         self.bg_p = bg_p
         self.bmax_0 = bmax_0
         self.bmax_p = bmax_p
-        self.a_pivot = 1.
-        self.scale_with_mass = scale_with_mass
-        super(HaloProfileScaledNFW, self).__init__()
-        self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
-                                     n_per_decade=1000,
-                                     plaw_fourier=-2.)
-
-    def update_parameters(self, params):
-        self.bg_0 = params.get('bg_0', self.bg_0)
-        self.bmax_0 = params.get('bmax_0', self.bmax_0)
-        self.bg_p = params.get('bg_p', self.bg_p)
-        self.bmax_p = params.get('bmax_p', self.bmax_p)
-        self.a_pivot = params.get('a_pivot', self.a_pivot)
-        self.scale_with_mass = params.get('scale_with_mass',
-                                          self.scale_with_mass)
+        self.a_pivot = a_pivot
+        super(HaloProfileHOD, self).__init__()
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
-    def _norm(self, M, Rs, c):
-        # sNFW normalization from mass, radius and concentration
-        if self.scale_with_mass:
-            scale = M
-        else:
-            scale = 1.
-        return scale / (4 * np.pi * Rs**3 * (np.log(1+c) - c/(1+c)))
+    def update_parameters(self, lMmin_0=None, lMmin_p=None,
+                          siglM_0=None, siglM_p=None,
+                          lM0_0=None, lM0_p=None,
+                          lM1_0=None, lM1_p=None,
+                          alpha_0=None, alpha_p=None,
+                          fc_0=None, fc_p=None,
+                          bg_0=None, bg_p=None,
+                          bmax_0=None, bmax_p=None,
+                          a_pivot=None):
+        if lMmin_0 is not None:
+            self.lMmin_0 = lMmin_0
+        if lMmin_p is not None:
+            self.lMmin_p = lMmin_p
+        if lM0_0 is not None:
+            self.lM0_0 = lM0_0
+        if lM0_p is not None:
+            self.lM0_p = lM0_p
+        if lM1_0 is not None:
+            self.lM1_0 = lM1_0
+        if lM1_p is not None:
+            self.lM1_p = lM1_p
+        if siglM_0 is not None:
+            self.siglM_0 = siglM_0
+        if siglM_p is not None:
+            self.siglM_p = siglM_p
+        if alpha_0 is not None:
+            self.alpha_0 = alpha_0
+        if alpha_p is not None:
+            self.alpha_p = alpha_p
+        if fc_0 is not None:
+            self.fc_0 = fc_0
+        if fc_p is not None:
+            self.fc_p = fc_p
+        if bg_0 is not None:
+            self.bg_0 = bg_0
+        if bg_p is not None:
+            self.bg_p = bg_p
+        if bmax_0 is not None:
+            self.bmax_0 = bmax_0
+        if bmax_p is not None:
+            self.bmax_p = bmax_p
+        if a_pivot is not None:
+            self.a_pivot = a_pivot
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _usat_norm(self, M, Rs, c):
+        # sNFW normalization from mass, radius and concentration
+        return 1. / (4 * np.pi * Rs**3 * (np.log(1+c) - c/(1+c)))
+
+    def _usat_real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
@@ -1114,7 +1161,7 @@ class HaloProfileScaledNFW(HaloProfile):
         # Truncate
         prof[r_use[None, :] > R_M[:, None]*bmax] = 0
 
-        norm = self._norm(M_use, bg*R_s, c_M)
+        norm = self._usat_norm(M_use, bg*R_s, c_M)
         prof = prof[:, :] * norm[:, None]
 
         if np.ndim(r) == 0:
@@ -1123,7 +1170,7 @@ class HaloProfileScaledNFW(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier(self, cosmo, k, M, a, mass_def):
+    def _usat_fourier(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
@@ -1139,11 +1186,7 @@ class HaloProfileScaledNFW(HaloProfile):
         Si1, Ci1 = sici((1 + c_M[:, None]) * x)
         Si2, Ci2 = sici(x)
 
-        if self.scale_with_mass:
-            scale = M_use
-        else:
-            scale = 1.
-        P1 = scale / (np.log(1+c_M) - c_M/(1+c_M))
+        P1 = 1. / (np.log(1+c_M) - c_M/(1+c_M))
         P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
         P3 = np.sin(c_M[:, None] * x) / ((1 + c_M[:, None]) * x)
         prof = P1[:, None] * (P2 - P3)
@@ -1154,76 +1197,14 @@ class HaloProfileScaledNFW(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-
-class HaloProfileHOD(HaloProfile):
-    def __init__(self, n_central=None, n_satellite=None,
-                 p_satellite=None, c_M_relation=None,
-                 params={'lMmin_0': 12., 'lMmin_p': 0., 'siglM_0': 0.4,
-                         'siglM_p': 0., 'lM0_0': 7., 'lM0_p': 0.,
-                         'lM1_0': 13.3, 'lM1_p': 0., 'alpha_0': 1.,
-                         'alpha_p': 0., 'bg_0': 1., 'bg_p': 0.,
-                         'bmax_0': 1., 'bmax_p': 0., 'a_pivot': 1.}):
-        # Get default parametrization if needed
-        if n_central is None:
-            n_central = hod_n_central_default
-        # Check function signature and assign
-        try:
-            n_central(np.array([1E12, 1E13]), 1., params)
-        except Exception:
-            raise ValueError("Can't use input function `n_central`")
-        self._Nc = n_central
-
-        # Get default parametrization if needed
-        if n_satellite is None:
-            n_satellite = hod_n_satellite_default
-        # Check function signature and assign
-        try:
-            n_satellite(np.array([1E12, 1E13]), 1., params)
-        except Exception:
-            raise ValueError("Can't use input function `n_satellite`")
-        self._Ns = n_satellite
-
-        # Use scaled NFW by default
-        if p_satellite is None:
-            # We need a concentration-mass relation
-            if c_M_relation is None:
-                raise ValueError("A c(M) relation is needed for the "
-                                 "default HOD satellite profile")
-            p_satellite = HaloProfileScaledNFW(c_M_relation,
-                                               params['bg_0'],
-                                               params['bg_p'],
-                                               params['bmax_0'],
-                                               params['bmax_p'],
-                                               params['a_pivot'])
-
-        # Check type
-        if not isinstance(p_satellite, HaloProfile):
-            raise TypeError("p_satellite must be of type `HaloProfile`")
-        # Check if it has `update_parameters` method.
-        self.update_profile = hasattr(p_satellite, 'update_parameters')
-        # If so, check it works as expected.
-        if self.update_profile:
-            try:
-                p_satellite.update_parameters(params)
-            except Exception:
-                raise ValueError("`update_parameters` does not work as "
-                                 "expected for `p_satellite`")
-        self._ps = p_satellite
-        self.params = params
-
-    def update_parameters(self, params):
-        self.params.update(params)
-        if self.update_profile:
-            self._ps.update_parameters(params)
-
     def _fourier(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
-        Nc = self._Nc(M_use, a, self.params)
-        Ns = self._Ns(M_use, a, self.params)
+        Nc = self._Nc(M_use, a)
+        Ns = self._Ns(M_use, a)
         # NFW profile
-        uk = self._ps.fourier(cosmo, k_use, M_use, a, mass_def)
+        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
 
         prof = Nc[:, None] * (1 + Ns[:, None] * uk)
 
@@ -1237,10 +1218,10 @@ class HaloProfileHOD(HaloProfile):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
-        Nc = self._Nc(M_use, a, self.params)
-        Ns = self._Ns(M_use, a, self.params)
+        Nc = self._Nc(M_use, a)
+        Ns = self._Ns(M_use, a)
         # NFW profile
-        ur = self._ps.real(cosmo, r_use, M_use, a, mass_def)
+        ur = self._usat_real(cosmo, r_use, M_use, a, mass_def)
 
         prof = Nc[:, None] * (1 + Ns[:, None] * ur)
 
@@ -1255,10 +1236,10 @@ class HaloProfileHOD(HaloProfile):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
-        Nc = self._Nc(M_use, a, self.params)
-        Ns = self._Ns(M_use, a, self.params)
+        Nc = self._Nc(M_use, a)
+        Ns = self._Ns(M_use, a)
         # NFW profile
-        uk = self._ps.fourier(cosmo, k_use, M_use, a, mass_def)
+        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
 
         prof = Ns[:, None] * uk
         prof = Nc[:, None] * (2 * prof + prof**2)
@@ -1269,15 +1250,13 @@ class HaloProfileHOD(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
+    def _Nc(self, M, a):
+        Mmin = 10.**(self.lMmin_0 + self.lMmin_p * (a - self.a_pivot))
+        siglM = self.siglM_0 + self.siglM_p * (a - self.a_pivot)
+        return 0.5 * (1 + erf(np.log(M/Mmin)/siglM))
 
-def hod_n_central_default(M, a, p):
-    Mmin = 10.**(p['lMmin_0'] + p['lMmin_p'] * (a - p['a_pivot']))
-    siglM = p['siglM_0'] + p['siglM_p'] * (a - p['a_pivot'])
-    return 0.5 * (1 + erf(np.log(M/Mmin)/siglM))
-
-
-def hod_n_satellite_default(M, a, p):
-    M0 = 10.**(p['lM0_0'] + p['lM0_p'] * (a - p['a_pivot']))
-    M1 = 10.**(p['lM1_0'] + p['lM1_p'] * (a - p['a_pivot']))
-    alpha = p['alpha_0'] + p['alpha_p'] * (a - p['a_pivot'])
-    return np.heaviside(M-M0, 1) * (np.fabs(M-M0) / M1)**alpha
+    def _Ns(self, M, a):
+        M0 = 10.**(self.lM0_0 + self.lM0_p * (a - self.a_pivot))
+        M1 = 10.**(self.lM1_0 + self.lM1_p * (a - self.a_pivot))
+        alpha = self.alpha_0 + self.alpha_p * (a - self.a_pivot)
+        return np.heaviside(M-M0, 1) * (np.fabs(M-M0) / M1)**alpha

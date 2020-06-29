@@ -48,14 +48,14 @@ def test_hodcl():
     hmf = ccl.halos.MassFuncTinker08(cosmo, mass_def=mass_def)
     hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mass_def)
     hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
-    prf = ccl.halos.HaloProfileHOD(c_M_relation=cm)
-    prf.update_parameters({'lMmin_0': np.log10(10.**lMcut/cosmo['h']),
-                           'siglM_0': sigma_Ncen,
-                           'lM0_0': np.log10(10.**lMcut/cosmo['h']),
-                           'lM1_0': np.log10(10.**lM1/cosmo['h']),
-                           'alpha_0': alp_Nsat,
-                           'bg_0': rgs,
-                           'bmax_0': rmax})
+    prf = ccl.halos.HaloProfileHOD(cm,
+                                   lMmin_0=np.log10(10.**lMcut/cosmo['h']),
+                                   siglM_0=sigma_Ncen,
+                                   lM0_0=np.log10(10.**lMcut/cosmo['h']),
+                                   lM1_0=np.log10(10.**lM1/cosmo['h']),
+                                   alpha_0=alp_Nsat,
+                                   bg_0=rgs,
+                                   bmax_0=rmax)
     prf2pt = ccl.halos.Profile2ptHOD()
     # P(k)
     k_arr = np.geomspace(1E-4, 1E2, 512)
