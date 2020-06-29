@@ -1197,35 +1197,37 @@ class HaloProfileHOD(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier(self, cosmo, k, M, a, mass_def):
-        M_use = np.atleast_1d(M)
-        k_use = np.atleast_1d(k)
-
-        Nc = self._Nc(M_use, a)
-        Ns = self._Ns(M_use, a)
-        # NFW profile
-        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
-
-        prof = Nc[:, None] * (1 + Ns[:, None] * uk)
-
-        if np.ndim(k) == 0:
-            prof = np.squeeze(prof, axis=-1)
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=0)
-        return prof
-
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         Nc = self._Nc(M_use, a)
         Ns = self._Ns(M_use, a)
+        fc = self._fc(a)
         # NFW profile
         ur = self._usat_real(cosmo, r_use, M_use, a, mass_def)
 
-        prof = Nc[:, None] * (1 + Ns[:, None] * ur)
+        prof = Nc[:, None] * (fc + Ns[:, None] * ur)
 
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fourier(self, cosmo, k, M, a, mass_def):
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        Nc = self._Nc(M_use, a)
+        Ns = self._Ns(M_use, a)
+        fc = self._fc(a)
+        # NFW profile
+        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
+
+        prof = Nc[:, None] * (fc + Ns[:, None] * uk)
+
+        if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
@@ -1238,11 +1240,12 @@ class HaloProfileHOD(HaloProfile):
 
         Nc = self._Nc(M_use, a)
         Ns = self._Ns(M_use, a)
+        fc = self._fc(a)
         # NFW profile
         uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
 
         prof = Ns[:, None] * uk
-        prof = Nc[:, None] * (2 * prof + prof**2)
+        prof = Nc[:, None] * (2 * fc * prof + prof**2)
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -1250,12 +1253,18 @@ class HaloProfileHOD(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
+    def _fc(self, a):
+        # Observed fraction of centrals
+        return self.fc_0 + self.fc_p * (a - self.a_pivot)
+
     def _Nc(self, M, a):
+        # Number of centrals
         Mmin = 10.**(self.lMmin_0 + self.lMmin_p * (a - self.a_pivot))
         siglM = self.siglM_0 + self.siglM_p * (a - self.a_pivot)
         return 0.5 * (1 + erf(np.log(M/Mmin)/siglM))
 
     def _Ns(self, M, a):
+        # Number of satellites
         M0 = 10.**(self.lM0_0 + self.lM0_p * (a - self.a_pivot))
         M1 = 10.**(self.lM1_0 + self.lM1_p * (a - self.a_pivot))
         alpha = self.alpha_0 + self.alpha_p * (a - self.a_pivot)
