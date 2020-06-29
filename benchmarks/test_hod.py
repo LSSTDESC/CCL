@@ -1,0 +1,72 @@
+import numpy as np
+import pyccl as ccl
+
+
+def test_hodcl():
+    # HOD params
+    lMcut = 11.8
+    lM1 = 11.73
+    sigma_Ncen = 0.15
+    alp_Nsat = 0.77
+    rmax = 4.39
+    rgs = 1.17
+
+    # Input power spectrum
+    ks = np.loadtxt("benchmarks/data/k_hod.txt")
+    zs = np.loadtxt("benchmarks/data/z_hod.txt")
+    pks = np.loadtxt("benchmarks/data/pk_hod.txt")
+    l_bm, cl_bm = np.loadtxt("benchmarks/data/cl_hod.txt",
+                             unpack=True)
+
+    # Set N(z)
+    def _nz_2mrs(z):
+        # From 1706.05422
+        m = 1.31
+        beta = 1.64
+        x = z / 0.0266
+        return x**m * np.exp(-x**beta)
+    z1 = 1e-5
+    z2 = 0.1
+    z_arr = np.linspace(z1, z2, 1024)
+    dndz = _nz_2mrs(z_arr)
+
+    # CCL prediction
+    cosmo = ccl.Cosmology(Omega_b=0.05,
+                          Omega_c=0.25,
+                          h=0.67,
+                          n_s=0.9645,
+                          A_s=2.0E-9,
+                          m_nu=0.00001,
+                          m_nu_type='equal')
+    # Make sure we use the same P(k)
+    cosmo._set_linear_power_from_arrays(a_array=1/(1.+zs[::-1]),
+                                        k_array=ks,
+                                        pk_array=pks[::-1,:])
+    # Halo model setup
+    mass_def = ccl.halos.MassDef(200, 'critical')
+    cm = ccl.halos.ConcentrationDuffy08(mass_def)
+    hmf = ccl.halos.MassFuncTinker08(cosmo, mass_def=mass_def)
+    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mass_def)
+    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
+    prf = ccl.halos.HaloProfileHOD(c_M_relation=cm)
+    prf.update_parameters({'lMmin_0': np.log10(10.**lMcut/cosmo['h']),
+                           'siglM_0': sigma_Ncen,
+                           'lM0_0': np.log10(10.**lMcut/cosmo['h']),
+                           'lM1_0': np.log10(10.**lM1/cosmo['h']),
+                           'alpha_0': alp_Nsat,
+                           'bg_0': rgs,
+                           'bmax_0': rmax})
+    prf2pt = ccl.halos.Profile2ptHOD()
+    # P(k)
+    k_arr = np.geomspace(1E-4, 1E2, 512)
+    a_arr = np.linspace(0.8, 1, 32)
+    pk_hod = ccl.halos.halomod_Pk2D(cosmo, hmc, prf, prof_2pt=prf2pt,
+                                    normprof1=True, lk_arr=np.log(k_arr),
+                                    a_arr=a_arr)
+    # C_ell
+    tr = ccl.NumberCountsTracer(cosmo, False, (z_arr, dndz),
+                                (z_arr, np.ones(len(dndz))))
+    cl_hod = ccl.angular_cl(cosmo, tr, tr, l_bm, p_of_k_a=pk_hod)
+
+    assert np.all(np.fabs(cl_hod/cl_bm-1) < 0.005)
+
