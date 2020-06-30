@@ -80,7 +80,7 @@ class HaloProfileHOD(HaloProfileNFW):
     def _Nc(self, M, a):
         # Number of centrals
         Mmin = 10.**self._lMmin(a)
-        return 0.5 * (1 + erf(np.log(M / Mmin) / self.sigmaLogM))
+        return 0.5 * (1 + erf(np.log10(M / Mmin) / self.sigmaLogM))
 
     def _Ns(self, M, a):
         # Number of satellites

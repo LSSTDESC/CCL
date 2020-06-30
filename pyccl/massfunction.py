@@ -58,6 +58,8 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     mf_par = cosmo._config_init_kwargs['mass_function']
     if mf_par == 'tinker10':
         bf = hal.HaloBiasTinker10(cosmo, mdef)
+    elif mf_par == 'tinker':
+        bf = hal.HaloBiasTinker10(cosmo, mdef)
     elif mf_par == 'shethtormen':
         bf = hal.HaloBiasSheth99(cosmo)
     else:
