@@ -34,6 +34,8 @@ install:
 script:
 - flake8 pyccl
 - flake8 --exclude=data benchmarks
+- cd doc/0000-ccl_note && make && cd ..
+- cd doc/ccl_paper && make apj && cd ..
 - "[[ `grep \"$(printf '\t')\" pyccl/*.py` == \"\" ]]"
 - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES -DCMAKE_VERBOSE_MAKEFILE=ON
   .. && make && cd ..
