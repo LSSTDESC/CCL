@@ -33,18 +33,17 @@ py27)
   conda create -q -n test-environment python=2.7 pip \
     numpy nose coveralls flake8 pyyaml gsl fftw cmake swig scipy \
     compilers pkg-config setuptools_scm pytest pandas pytest-cov \
-    cython "camb>=1" isitgr traitlets
+    cython "camb>=1" isitgr traitlets mkauthlist
   ;;
 py36)
   conda create -q -n test-environment python=3.6 pip \
     numpy nose coveralls flake8 pyyaml gsl fftw cmake swig  scipy \
     compilers pkg-config setuptools_scm pytest pandas pytest-cov \
-    cython "camb>=1" isitgr traitlets
+    cython "camb>=1" isitgr traitlets mkauthlist
   ;;
 esac;
 
 # we have to activate the cond env before we install this
 source activate test-environment
 pip install https://github.com/JoeMcEwen/FAST-PT/archive/v3.0.2.tar.gz --no-deps
-pip install mkauthlist
 conda deactivate
