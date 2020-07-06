@@ -71,6 +71,16 @@ static void ccl_tracer_corr_fftlog(ccl_cosmology *cosmo,
 				  ccl_f1d_extrap_const,
 				  ccl_f1d_extrap_logx_logy,
 				  status);
+  if (*status) {
+    free(l_arr);
+    free(cl_arr);
+    ccl_cosmology_set_status_message(cosmo,
+                                     "ccl_correlation.c: ccl_f1d_t_new "
+                                     "failed to create spline\n");
+    if (cl_spl) ccl_f1d_t_free(cl_spl);
+    return;
+  }
+
   if(cl_spl==NULL) {
     free(l_arr);
     free(cl_arr);
