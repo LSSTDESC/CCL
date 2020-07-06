@@ -131,6 +131,7 @@ def test_correlation_raises():
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, [1], [1e-3], [1], corr_type='blah')
 
+
 def test_correlation_zero():
     ell = np.arange(2, 100000)
     C_ell = np.zeros(ell.size)
