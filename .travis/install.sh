@@ -46,5 +46,5 @@ esac;
 # we have to activate the cond env before we install this
 source activate test-environment
 pip install https://github.com/JoeMcEwen/FAST-PT/archive/v3.0.2.tar.gz --no-deps
-pip install mkauthlist --no-deps
+pip install mkauthlist  --no-deps
 conda deactivate
