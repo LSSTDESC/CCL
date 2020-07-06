@@ -95,11 +95,15 @@ def correlation(cosmo, ell, C_ell, theta, type='NN', corr_type=None,
         scalar = True
         theta = np.array([theta, ])
 
-    # Call correlation function
-    wth, status = lib.correlation_vec(cosmo, ell, C_ell, theta,
-                                      correlation_types[type],
-                                      correlation_methods[method],
-                                      len(theta), status)
+    if np.all(np.array(C_ell) == 0):
+        # short-cut and also avoid integration errors
+        wth = np.zeros_like(theta)
+    else:
+        # Call correlation function
+        wth, status = lib.correlation_vec(cosmo, ell, C_ell, theta,
+                                          correlation_types[type],
+                                          correlation_methods[method],
+                                          len(theta), status)
     check(status, cosmo_in)
     if scalar:
         return wth[0]

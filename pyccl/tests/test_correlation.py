@@ -1,6 +1,7 @@
 import numpy as np
 import pyccl as ccl
 import pytest
+from timeit import default_timer
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -129,3 +130,15 @@ def test_correlation_raises():
         ccl.correlation(COSMO, [1], [1e-3], [1], type='blah')
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, [1], [1e-3], [1], corr_type='blah')
+
+def test_correlation_zero():
+    ell = np.arange(2, 100000)
+    C_ell = np.zeros(ell.size)
+    theta = np.logspace(0, 2, 10000)
+    t0 = default_timer()
+    corr = ccl.correlation(COSMO, ell, C_ell, theta)
+    t1 = default_timer()
+    # if the short-cut has worked this should take
+    # less than 1 second at the absolute outside
+    assert t1 - t0 < 1.0
+    assert (corr == np.zeros(theta.size)).all()
