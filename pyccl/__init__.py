@@ -16,7 +16,7 @@ from . import ccllib as lib
 from . import core, constants, background, power, halomodel, pk2d, haloprofile, halos, massfunction, nl_pt
 
 # Core data structures
-from .core import Cosmology
+from .core import Cosmology, CosmologyVanillaLCDM
 
 # Background cosmology functions and growth functions
 from .background import growth_factor, growth_factor_unnorm, \
@@ -27,9 +27,9 @@ from .background import growth_factor, growth_factor_unnorm, \
 # Generalized power spectra
 from .pk2d import Pk2D
 
-# Power spectrum calculations and sigma8
+# Power spectrum calculations, sigma8 and kNL
 from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
-    sigmaV, sigma8, sigmaM
+    sigmaV, sigma8, sigmaM, kNL
 
 # BCM stuff
 from .bcm import bcm_model_fka
@@ -39,7 +39,7 @@ from .massfunction import massfunc, halo_bias, massfunc_m2r
 
 # Cl's and tracers
 from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, \
-    get_density_kernel, get_kappa_kernel, get_lensing_kernel
+    tSZTracer, get_density_kernel, get_kappa_kernel, get_lensing_kernel
 from .cls import angular_cl
 
 # Useful constants and unit conversions

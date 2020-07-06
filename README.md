@@ -111,5 +111,6 @@ for more information.
 # Contact
 
 If you have comments, questions, or feedback, please
-[write us an issue](https://github.com/LSSTDESC/CCL/issues). You can also contact the
-[administrators](https://github.com/LSSTDESC/CCL/CCL-administrators).
+[write us an issue](https://github.com/LSSTDESC/CCL/issues). 
+
+The current lead of the LSST DESC CCL Topical Team is Danielle Leonard (c-d-leonard, danielle.leonard at ncl.ac.uk)

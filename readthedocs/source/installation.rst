@@ -54,10 +54,10 @@ CLASS
 
 In order to use CCL with ``CLASS``, you need to install the ``CLASS`` ``Python``
 wrapper ``classy``. See their instructions
-`here <https://github.com/lesgourg/class_public/wiki/Python-wrapper>`_.
+`here <https://github.com/lesgourg/class_public/wiki/Python-wrapper>`__.
 Note that you may need to edit the ``Makefile`` in the ``CLASS`` repo to work
 with your system. Please report any installation issues to the ``CLASS`` developers
-on their `issues tracker <https://github.com/lesgourg/class_public/issues>`_.
+on their `issues tracker <https://github.com/lesgourg/class_public/issues>`__.
 
 CAMB
 ----
@@ -68,8 +68,27 @@ If you are working in a ``conda`` environment, then ``CAMB`` is available via
 
    $ conda install -c conda-forge camb
 
-An installation with ``pip`` should work as well. See the `CAMB <https://github.com/cmbant/CAMB>`_
+An installation with ``pip`` should work as well. See the `CAMB <https://github.com/cmbant/CAMB>`__
 repo for more details. Note that if you installed CCL with ``conda``, ``camb``
+should already be in your environment.
+
+ISiTGR
+------
+
+In order to use CCL with ``ISiTGR``, you need to install the ``ISiTGR`` ``Python``
+wrapper ``isitgr`` with:
+
+   $ pip install isitgr [--user]
+
+See further instructions `here <https://github.com/mishakb/ISiTGR>`__.
+
+If you are working in a ``conda`` environment, then ``ISiTGR`` is also available via
+
+.. code-block:: bash
+
+   $ conda install -c conda-forge isitgr
+
+Note that if you installed CCL with ``conda``, ``isitgr``
 should already be in your environment.
 
 .. _getting-fast-pt:
@@ -84,7 +103,7 @@ To use ``FAST-PT`` with CCL, you can install it with:
    $ pip install fast-pt
 
 Note the hyphen in the package name! You can also get it directly from the 
-`FAST-PT <https://github.com/JoeMcEwen/FAST-PT>`_ repo.
+`FAST-PT <https://github.com/JoeMcEwen/FAST-PT>`__ repo.
 
 .. _getting-cmake:
 
@@ -106,9 +125,9 @@ OS X
 ----
 
 On MacOS X you can either install with a DMG from
-`this page <https://cmake.org/download/>`_ or with a package manager such as
-`homebrew <https://brew.sh/>`_, `MacPorts <https://www.macports.org/>`_, or
-`Fink <(http://www.finkproject.org/>`_.
+`this page <https://cmake.org/download/>`__ or with a package manager such as
+`homebrew <https://brew.sh/>`__, `MacPorts <https://www.macports.org/>`__, or
+`Fink <(http://www.finkproject.org/>`__.
 
 For instance with ``homebrew``, you can run
 

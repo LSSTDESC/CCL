@@ -424,13 +424,13 @@ the matter power spectrum at the desired wavenumber and redshift.
 \newpage
 
 \subsubsection{ISiTGR}
-\ccl can call the {\tt ISiTGR} software patch \citep{isitgr1,isitgr2} that is 
-built on the top of the {\tt CAMB} package to include modified gravity models. 
-This is invoked by specifying the transfer function option boltzmann\_isitgr. 
-\ccl then then calculates the GR or modified gravity linear matter power spectrum 
-at a given redshift. Here also, on initializing the cosmology object, we construct a 
-bi-dimensional spline in $k$ and the scale-factor which is then evaluated by the 
-relevant routines to obtain the matter power spectrum at the desired wavenumber 
+\ccl can call the {\tt ISiTGR} software patch \citep{isitgr1,isitgr2} that is
+built on the top of the {\tt CAMB} package to include modified gravity models.
+This is invoked by specifying the transfer function option boltzmann\_isitgr.
+\ccl then then calculates the GR or modified gravity linear matter power spectrum
+at a given redshift. Here also, on initializing the cosmology object, we construct a
+bi-dimensional spline in $k$ and the scale-factor which is then evaluated by the
+relevant routines to obtain the matter power spectrum at the desired wavenumber
 and redshift.
 
 \subsubsection{Halofit}
@@ -547,25 +547,25 @@ of \citet{Schneider15}.
 scale-independent deviations from GR which arise at late times (currently with
 functional form given in equation \ref{muSigform}). Under these conditions,
 and the specified cosmology, the modified gravity matter power spectrum is
-calculated using {\tt ISiTGR}  (described further above) according to the values of the modified 
-gravity parameters. If these are zero or not specified then the GR matter power 
+calculated using {\tt ISiTGR}  (described further above) according to the values of the modified
+gravity parameters. If these are zero or not specified then the GR matter power
 spectrum is calculated.
 
-This implementation replaces the intilal one where the modified gravity power 
-spectrum is computed by re-scaling the GR matter power spectrum by 
-multiplying it by the squared ratio of the MG  growth factor $D_{MG}$ to the GR 
-one, $D_{GR}$. 
+This implementation replaces the intilal one where the modified gravity power
+spectrum is computed by re-scaling the GR matter power spectrum by
+multiplying it by the squared ratio of the MG  growth factor $D_{MG}$ to the GR
+one, $D_{GR}$.
 
-The new implementation solved accuracy issues for spectra and  correlations 
-encoutered in the initial implementation and provides the power  spectrum and 
-the 2D angular spectra and correlations at the same level of accuracy 
-as that of the LCDM standard model.   
+The new implementation solved accuracy issues for spectra and  correlations
+encoutered in the initial implementation and provides the power  spectrum and
+the 2D angular spectra and correlations at the same level of accuracy
+as that of the LCDM standard model.
 
-The splines for the power spectrum are then set as usual, but we note that 
-the $\mu, \Sigma$ MG implementation is valid only in the quasistatic limit 
-and is also restricted to the linear regime for now since no-reliable methods 
-are available to model such non-linear small scales nor the very 
-large scales where the quasistatic limit cease to be valid.   
+The splines for the power spectrum are then set as usual, but we note that
+the $\mu, \Sigma$ MG implementation is valid only in the quasistatic limit
+and is also restricted to the linear regime for now since no-reliable methods
+are available to model such non-linear small scales nor the very
+large scales where the quasistatic limit cease to be valid.
 
 \subsubsection{Extrapolation for the nonlinear power spectrum}
 \label{sec:NLextrapol}
@@ -686,6 +686,14 @@ $8h^{-1}$Mpc. Note that for linear power spectrum models where {\tt CLASS} is no
 used, only the option to specify $\sigma_8$ is supported. The computation of
 $\sigma_8$ is described in Section \ref{sec:hmf}.
 
+\subsubsection{Non-linear scale cut}
+\label{sec:kNL}
+
+A conservative estimate of the scale at which non-linear structure formation becomes important for the computation of the matter power spectrum at a particular redshift can be obtained from the inverse of the RMS displacement $\sigma_{\eta}^2$ in the Zel'dovich approximation \cite{cosmicvisions2018}. Using the expression for $\sigma_{\eta}^2$ from \cite{white2015} we have
+\begin{equation}
+k_{\rm NL}(z) \approx \sigma_{\eta}(z)^{-1}=\left[ \frac{1}{6\pi^2} \int^{\infty}_0 dk P_{\rm lin}(k,z) \right]^{-1/2}~.
+\end{equation}
+
 \subsection{Nonlinear Power Spectra}
 \label{sec:Nonlinear_Pk}
 
@@ -745,7 +753,7 @@ C_{1,1}C_{1,2} P_{d1d1} + (C_{1,1} C_{1\delta,2}+C_{1,2} C_{1\delta,1}) \left[A_
 &+ (C_{1\delta,1} C_{2,2} + C_{1\delta,2} C_{2,1})D_{0E|E2}~,\\
 \label{eq:BBtot}
 P_{BB} =& C_{1\delta,1} C_{1\delta,2} A_{0B|0B} + C_{2,1} C_{2,2} A_{B2|B2} + (C_{1\delta,1} C_{2,2} + C_{1\delta,2} C_{2,1}) D_{0B|B2} ~,
-\end{align} 
+\end{align}
 where, as above, $P_{d1d1}$ corresponds to the chosen nonlinear matter power spectrum,
 and the other terms are one-loop PT expressions.
 

@@ -14,52 +14,52 @@ except ImportError:
 
 
 class PTCalculator(object):
+    """ This class implements a set of methods that can be
+    used to compute the various components needed to estimate
+    perturbation theory correlations. These calculations are
+    currently based on FAST-PT
+    (https://github.com/JoeMcEwen/FAST-PT).
+
+    Args:
+        with_NC (bool): set to True if you'll want to use
+            this calculator to compute correlations involving
+            number counts.
+        with_IA(bool): set to True if you'll want to use
+            this calculator to compute correlations involving
+            intrinsic alignments.
+        with_dd(bool): set to True if you'll want to use
+            this calculator to compute the one-loop matter power
+            spectrum.
+        log10k_min (float): decimal logarithm of the minimum
+            Fourier scale (in Mpc^-1) for which you want to
+            calculate perturbation theory quantities.
+        log10k_max (float): decimal logarithm of the maximum
+            Fourier scale (in Mpc^-1) for which you want to
+            calculate perturbation theory quantities.
+        pad_factor (float): fraction of the log(k) interval
+            you want to add as padding for FFTLog calculations
+            within FAST-PT.
+        low_extrap (float): decimal logaritm of the minimum
+            Fourier scale (in Mpc^-1) for which FAST-PT will
+            extrapolate.
+        high_extrap (float): decimal logaritm of the maximum
+            Fourier scale (in Mpc^-1) for which FAST-PT will
+            extrapolate.
+        P_window (array_like or None): 2-element array describing
+            the tapering window used by FAST-PT. See FAST-PT
+            documentation for more details.
+        C_window (float): `C_window` parameter used by FAST-PT
+            to smooth the edges and avoid ringing. See FAST-PT
+            documentation for more details.
+    """
     def __init__(self, with_NC=False, with_IA=False, with_dd=True,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75):
-        """ This class implements a set of methods that can be
-        used to compute the various components needed to estimate
-        perturbation theory correlations. These calculations are
-        currently based on FAST-PT
-        (https://github.com/JoeMcEwen/FAST-PT).
-
-        Args:
-            with_NC (bool): set to True if you'll want to use
-                this calculator to compute correlations involving
-                number counts.
-            with_IA(bool): set to True if you'll want to use
-                this calculator to compute correlations involving
-                intrinsic alignments.
-            with_dd(bool): set to True if you'll want to use
-                this calculator to compute the one-loop matter power
-                spectrum.
-            log10k_min (float): decimal logarithm of the minimum
-                Fourier scale (in Mpc^-1) for which you want to
-                calculate perturbation theory quantities.
-            log10k_max (float): decimal logarithm of the maximum
-                Fourier scale (in Mpc^-1) for which you want to
-                calculate perturbation theory quantities.
-            pad_factor (float): fraction of the log(k) interval
-                you want to add as padding for FFTLog calculations
-                within FAST-PT.
-            low_extrap (float): decimal logaritm of the minimum
-                Fourier scale (in Mpc^-1) for which FAST-PT will
-                extrapolate.
-            high_extrap (float): decimal logaritm of the maximum
-                Fourier scale (in Mpc^-1) for which FAST-PT will
-                extrapolate.
-            P_window (array_like or None): 2-element array describing
-                the tapering window used by FAST-PT. See FAST-PT
-                documentation for more details.
-            C_window (float): `C_window` parameter used by FAST-PT
-                to smooth the edges and avoid ringing. See FAST-PT
-                documentation for more details.
-        """
         assert HAVE_FASTPT, (
-                "You must have the `FAST-PT` python package "
-                "installed to use CCL to get PT observables! "
-                "You can install it with pip install fast-pt.")
+            "You must have the `FAST-PT` python package "
+            "installed to use CCL to get PT observables! "
+            "You can install it with pip install fast-pt.")
 
         self.with_dd = with_dd
         self.with_NC = with_NC
@@ -89,6 +89,7 @@ class PTCalculator(object):
 
     def update_pk(self, pk):
         """ Update the internal PT arrays.
+
         Args:
             pk (array_like): linear power spectrum sampled at the
                 internal `k` values used by this calculator.
@@ -446,10 +447,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         raise TypeError("tracer2 must be of type `PTTracer`")
 
     if ptc is None:
-        with_NC = ((tracer1.type == 'NC') or
-                   (tracer2.type == 'NC'))
-        with_IA = ((tracer1.type == 'IA') or
-                   (tracer2.type == 'IA'))
+        with_NC = ((tracer1.type == 'NC')
+                   or (tracer2.type == 'NC'))
+        with_IA = ((tracer1.type == 'IA')
+                   or (tracer2.type == 'IA'))
         with_dd = nonlin_pk_type == 'spt'
         ptc = PTCalculator(with_dd=with_dd,
                            with_NC=with_NC,

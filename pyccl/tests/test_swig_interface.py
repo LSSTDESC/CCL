@@ -198,6 +198,14 @@ def test_swig_power():
             3,
             status)
 
+    assert_raises(
+        CCLError,
+        ccllib.kNL_vec,
+        COSMO,
+        [0.5, 1.0],
+        3,
+        status)
+
 
 def test_swig_haloprofile():
     status = 0
