@@ -143,3 +143,13 @@ def test_correlation_zero():
     # less than 1 second at the absolute outside
     assert t1 - t0 < 1.0
     assert (corr == np.zeros(theta.size)).all()
+
+
+def test_correlation_zero_ends():
+    # This should give an error instead of crashing
+    ell = np.arange(2, 1001)
+    C_ell = np.zeros(ell.size)
+    C_ell[500] = 1.0
+    theta = np.logspace(0, 2, 20)
+    with pytest.raises(ccl.CCLError):
+        ccl.correlation(COSMO, ell, C_ell, theta)
