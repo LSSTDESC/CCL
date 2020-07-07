@@ -35,9 +35,10 @@ class PTNLEffCalculator(object):
         multiply power by W(kR)^2, default: True
     """
 
-    def __init__(self, cosmo, cs2, R, pade_resum=True, smooth_density=True):
+    def __init__(self, cosmo, cs2, R, pade_resum=True, smooth_density=True, z_evol=False):
 
         self.cosmo = cosmo
+        self.z_evol = z_evol
         self.cs2 = cs2
         self.R = R
         self.pade_resum = pade_resum
@@ -292,8 +293,16 @@ def get_pt_eff_pk2d(cosmo, ptc):
     ga4 = ga[:, np.newaxis]**4
     ga2 = ga[:, np.newaxis]**2
 
+    # Redshift-evolution of effective halo model parameters from Oliver Philcox (from fit to Quijote sims)
+    if ptc.z_evol:
+        cs2 = ptc.cs2*ga[:, np.newaxis]**3
+        R = ptc.R*ga2
+    else:
+        cs2 = ptc.cs2
+        R = ptc.R
+
     ptc.prepare_IR_resummation(k, a_arr)
-    counterterm_tmp = -ptc.cs2 * k ** 2.
+    counterterm_tmp = -cs2 * k ** 2.
     if ptc.pade_resum:
         counterterm_tmp /= (1. + (k/ptc.cosmo.cosmo.params.h) ** 2.)
     no_wiggle_lin = ptc.linear_no_wiggle_power
@@ -302,7 +311,7 @@ def get_pt_eff_pk2d(cosmo, ptc):
                 no_wiggle_lin + wiggle_lin * np.exp(-ptc.BAO_damping[:, np.newaxis] * k ** 2.))
 
     if ptc.smooth_density:
-        p_pt *= ptc.compute_smoothing_function(k, ptc.R) ** 2.
+        p_pt *= ptc.compute_smoothing_function(k, R) ** 2.
 
     pt_pk = Pk2D(a_arr=a_arr,
                  lk_arr=np.log(k),
