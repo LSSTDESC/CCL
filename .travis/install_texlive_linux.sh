@@ -34,7 +34,8 @@ tlmgr install   \
   amsmath       \
   latexmk       \
   revtex        \
-  textcase
+  textcase      \
+  epsf
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
