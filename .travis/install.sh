@@ -12,6 +12,9 @@ fi
 
 if [[ $TRAVIS_OS_NAME != 'osx' ]]; then
     echo "installing texlive"
+    sudo apt-get install texlive-latex-recommended
+    sudo apt-get install texlive-latex-base
+    sudo apt-get install texlive-fonts-recommended
     sudo apt-get install texlive
 fi
 
