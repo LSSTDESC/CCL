@@ -49,3 +49,8 @@ from .halo_model import (  # noqa
     halomod_bias_1pt,
     halomod_power_spectrum,
     halomod_Pk2D)
+
+# Halo model power spectrum
+from .power_eff import (  # noqa
+    PTNLEffCalculator,
+    get_pt_eff_pk2d)
