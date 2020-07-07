@@ -11,8 +11,8 @@ else
 fi
 
 if [[ $TRAVIS_OS_NAME != 'osx' ]]; then
-    echo "installing texline"
-    apt-get install texlive
+    echo "installing texlive"
+    sudo apt-get install texlive
 fi
 
 echo "installing miniconda"
