@@ -33,7 +33,8 @@ tlmgr install   \
   stmaryrd      \
   amsmath       \
   latexmk       \
-  revtex
+  revtex        \
+  textcase
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
