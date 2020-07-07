@@ -39,7 +39,7 @@ install:
 script:
 - flake8 pyccl
 - flake8 --exclude=data benchmarks
-- if [[ $TRAVIS_OS_NAME != 'osx' ]]; then pushd doc/ccl_paper && make && popd; fi
+- if [[ $TRAVIS_OS_NAME != 'osx' ]]; then pushd doc/0000-ccl_note/ && make && popd; fi
 - cd $TRAVIS_BUILD_DIR
 - "[[ `grep \"$(printf '\t')\" pyccl/*.py` == \"\" ]]"
 - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES -DCMAKE_VERBOSE_MAKEFILE=ON
