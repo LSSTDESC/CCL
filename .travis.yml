@@ -21,7 +21,12 @@ matrix:
   - name: linux (Python2.7)
   - name: OSX (Python2.7)
   fast_finish: true
+cache:
+  directories:
+    - /tmp/texlive
+    - $HOME/.texlive
 install:
+- if [[ $TRAVIS_OS_NAME != 'osx' ]]; then source ./.travis/install_texlive_linux.sh; fi
 - "./.travis/install.sh"
 - export PATH=$HOME/miniconda/bin:$PATH
 - source activate test-environment
