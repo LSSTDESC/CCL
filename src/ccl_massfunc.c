@@ -188,7 +188,7 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double log_halomass, double a, int *stat
 INPUT: ccl_cosmology *cosmo, double halo mass in units of Msun
 TASK: returns the value of the derivative of ln(sigma^-1) with respect to log10 in halo mass.
 */
-double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, int *status)
+double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, double a, int *status)
 {
   // Check if sigma has already been calculated
   if (!cosmo->computed_sigma) {

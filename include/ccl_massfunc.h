@@ -30,11 +30,12 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double log_halomass, double a, int *stat
  * via interpolation.
  * @param cosmo Cosmological parameters
  * @param log_halomass log10(Mass) to compute at, in units of Msun
+ * @param a, scale factor, normalized to a=1 today
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
  * @return sigmaM, the standard deviation of density at mass scale M
  */
-double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, int *status);
+double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, double a, int *status);
 
 /**
  * Fitting function for the spherical-model critical linear density for collapse
