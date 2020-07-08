@@ -43,7 +43,8 @@ tlmgr install   \
   xifthen       \
   helvetic      \
   ulem          \
-  ifmtarg
+  ifmtarg       \
+  unicode-math
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
