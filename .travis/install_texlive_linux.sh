@@ -41,7 +41,8 @@ tlmgr install   \
   amssymb       \
   xspace        \
   xifthen       \
-  helvetic
+  helvetic      \
+  ulem
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
