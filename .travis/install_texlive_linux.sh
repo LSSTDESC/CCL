@@ -46,7 +46,8 @@ tlmgr install   \
   latex-tools   \
   psnfss        \
   rsfs          \
-  times
+  times         \
+  biblatex
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
