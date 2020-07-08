@@ -48,7 +48,10 @@ tlmgr install   \
   rsfs          \
   times         \
   biblatex      \
-  collection-fontsextra
+  collection-fontsextra \
+  fpl           \
+  palatino      \
+  mathpazo
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
