@@ -44,7 +44,8 @@ tlmgr install   \
   helvetic      \
   ulem          \
   ifmtarg       \
-  unicode-math
+  unicode-math  \
+  mathpple
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
