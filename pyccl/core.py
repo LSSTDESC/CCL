@@ -927,7 +927,6 @@ class Cosmology(object):
                 "when the power spectrum is via the BCM model!",
                 category=CCLWarning)
 
-        self.compute_growth()
         self.compute_linear_power()
         status = 0
         status = lib.cosmology_compute_sigma(self.cosmo, status)

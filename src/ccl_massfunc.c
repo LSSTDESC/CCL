@@ -61,74 +61,79 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
   if(cosmo->computed_sigma)
     return;
 
-  // create linearly-spaced values of the mass.
+  int na = cosmo->spline_params.A_SPLINE_NA_PK+cosmo->spline_params.A_SPLINE_NLOG_PK-1;
+  double amin=cosmo->spline_params.A_SPLINE_MINLOG_PK;
+  double amax=cosmo->spline_params.A_SPLINE_MAX;
   int nm = cosmo->spline_params.LOGM_SPLINE_NM;
   double *m = NULL;
   double *y = NULL;
+  double *aa = NULL;
   double smooth_radius;
-  double na, nb;
 
+  // create linearly-spaced values of the mass.
   m = ccl_linear_spacing(cosmo->spline_params.LOGM_SPLINE_MIN, cosmo->spline_params.LOGM_SPLINE_MAX, nm);
   if (m == NULL ||
       (fabs(m[0]-cosmo->spline_params.LOGM_SPLINE_MIN)>1e-5) ||
       (fabs(m[nm-1]-cosmo->spline_params.LOGM_SPLINE_MAX)>1e-5) ||
       (m[nm-1]>10E17)) {
     *status = CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo,"ccl_cosmology_compute_sigmas(): Error creating linear spacing in m\n");
+    ccl_cosmology_set_status_message(cosmo,"ccl_cosmology_compute_sigmas(): "
+                                     "Error creating linear spacing in m\n");
   }
 
+  // create scale factor array
   if (*status == 0) {
-    // create space for y, to be filled with sigma and dlnsigma_dlogm
-    y = malloc(sizeof(double)*nm);
-    if (y == NULL) {
+    aa = ccl_linlog_spacing(amin, cosmo->spline_params.A_SPLINE_MIN_PK,
+                            amax, cosmo->spline_params.A_SPLINE_NLOG_PK,
+                            cosmo->spline_params.A_SPLINE_NA_PK);
+    if (aa == NULL) {
       *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+        cosmo,
+       "ccl_cosmology_compute_sigmas(): Error creating scale factor array\n");
     }
   }
 
-  // start up of GSL pointers
-  int gslstatus = 0;
-  gsl_spline *logsigma = NULL;
-  gsl_spline *dlnsigma_dlogm = NULL;
+  // create space for y, to be filled with sigma and dlnsigma_dlogm
+  if (*status == 0) {
+    y = malloc(sizeof(double)*nm*na);
+    if (y == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_cosmology_compute_sigmas(): memory allocation\n");
+    }
+  }
 
   // fill in sigma, if no errors have been triggered at this time.
   if (*status == 0) {
-    for (int i=0; i<nm; i++) {
-      smooth_radius = sigmaM_m2r(cosmo, pow(10,m[i]), status);
-      y[i] = log(ccl_sigmaR(cosmo, smooth_radius, 1., status));
-    }
-    logsigma = gsl_spline_alloc(cosmo->spline_params.M_SPLINE_TYPE, nm);
-    if (logsigma == NULL) {
-      *status = CCL_ERROR_MEMORY;
+    for (int j=0; j<na; j++) {
+      double a_sf = aa[j];
+      for (int i=0; i<nm; i++) {
+        smooth_radius = sigmaM_m2r(cosmo, pow(10,m[i]), status);
+        y[j*nm + i] = log(ccl_sigmaR(cosmo, smooth_radius, a_sf, status));
+      }
     }
   }
 
+  // If all went well, create sigma_M spline
   if (*status == 0) {
-    gslstatus = gsl_spline_init(logsigma, m, y, nm);
-    if (gslstatus != GSL_SUCCESS) {
-      *status = CCL_ERROR_SPLINE ;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating sigma(M) spline\n");
-    }
+    cosmo->data.sigma_M = ccl_f2d_t_new(
+      na, aa, nm, m, y, NULL, NULL,
+      0, 1, 2, ccl_f2d_cclgrowth,
+      1, NULL, 0, 1,
+      ccl_f2d_3, status);
   }
 
-  // again, making splines assuming nothing bad has happened to this point
-  if (*status == 0 ) {
-    for (int i=0; i<nm; i++) {
-      if(i==0) {
-        gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&na);
-        gslstatus |= gsl_spline_eval_e(logsigma, m[i]+cosmo->spline_params.LOGM_SPLINE_DELTA/2., NULL,&nb);
-        y[i] = 2.*(na-nb)*y[i] / cosmo->spline_params.LOGM_SPLINE_DELTA;
-      }
-      else if (i==nm-1) {
-        gslstatus |= gsl_spline_eval_e(logsigma, m[i]-cosmo->spline_params.LOGM_SPLINE_DELTA/2., NULL,&na);
-        gslstatus |= gsl_spline_eval_e(logsigma, m[i], NULL,&nb);
-        y[i] = 2.*(na-nb)*y[i] / cosmo->spline_params.LOGM_SPLINE_DELTA;
-      }
-      else {
-        gslstatus |= gsl_spline_eval_e(logsigma, m[i]-cosmo->spline_params.LOGM_SPLINE_DELTA/2., NULL,&na);
-        gslstatus |= gsl_spline_eval_e(logsigma, m[i]+cosmo->spline_params.LOGM_SPLINE_DELTA/2., NULL,&nb);
-        y[i] = (na-nb) / cosmo->spline_params.LOGM_SPLINE_DELTA;
+  // Now we compute dlogsigma/dlogM
+  int gslstatus = 0;
+  if (*status == 0) {
+    for (int j=0; j<na; j++) {
+      double *y_row = &(y[j*nm]);
+      for (int i=0; i<nm; i++) {
+        gslstatus |=  gsl_spline2d_eval_deriv_x_e(cosmo->data.sigma_M->fka,
+                                                  m[i], aa[j], NULL, NULL, y_row + i);
+        y_row[i] = -y_row[i];
       }
     }
 
@@ -143,32 +148,19 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
     }
   }
 
+  // If all went well, create spline
   if (*status == 0) {
-    dlnsigma_dlogm = gsl_spline_alloc(cosmo->spline_params.M_SPLINE_TYPE, nm);
-    if (dlnsigma_dlogm == NULL) {
-      *status = CCL_ERROR_MEMORY;
-    }
+    cosmo->data.dlnsigma_dlogm = ccl_f2d_t_new(
+      na, aa, nm, m, y, NULL, NULL,
+      0, 1, 2, ccl_f2d_constantgrowth,
+      0, NULL, 1., 1,
+      ccl_f2d_3, status);
   }
 
-  if (*status == 0) {
-    gslstatus = gsl_spline_init(dlnsigma_dlogm, m, y, nm);
-    if (gslstatus != GSL_SUCCESS) {
-      *status = CCL_ERROR_SPLINE ;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_massfunc.c: ccl_cosmology_compute_sigma(): Error creating dlnsigma/dlogM spline\n");
-    }
-  }
-
-  if (*status == 0) {
-    cosmo->data.logsigma = logsigma;
-    cosmo->data.dlnsigma_dlogm = dlnsigma_dlogm;
+  if (*status == 0)
     cosmo->computed_sigma = true;
-  } else {
-    gsl_spline_free(logsigma);
-    gsl_spline_free(dlnsigma_dlogm);
-  }
 
+  free(aa);
   free(m);
   free(y);
 }
@@ -180,28 +172,16 @@ necessary.
 */
 double ccl_sigmaM(ccl_cosmology *cosmo, double log_halomass, double a, int *status)
 {
-  double sigmaM;
   // Check if sigma has already been calculated
   if (!cosmo->computed_sigma) {
     *status = CCL_ERROR_SIGMA_INIT;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_massfunc.c: ccl_sigmaM(): linear power spctrum has not been computed!");
+      "ccl_massfunc.c: ccl_sigmaM(): sigma(M) has not been computed!");
     return NAN;
   }
 
-  double lgsigmaM;
-
-  int gslstatus = gsl_spline_eval_e(cosmo->data.logsigma, log_halomass, NULL, &lgsigmaM);
-
-  if(gslstatus != GSL_SUCCESS) {
-    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_sigmaM():");
-    *status |= gslstatus;
-  }
-
-  // Interpolate to get sigma
-  sigmaM = exp(lgsigmaM)*ccl_growth_factor(cosmo, a, status);
-  return sigmaM;
+  return ccl_f2d_t_eval(cosmo->data.sigma_M, log_halomass, a, cosmo, status);
 }
 
 /*----- ROUTINE: ccl_dlnsigM_dlogM -----
@@ -218,13 +198,6 @@ double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, int *status)
       "ccl_massfunc.c: ccl_sigmaM(): linear power spctrum has not been computed!");
     return NAN;
   }
-  
-  double dlsdlgm;
-  int gslstatus = gsl_spline_eval_e(cosmo->data.dlnsigma_dlogm,
-				    log_halomass, NULL, &dlsdlgm);
-  if(gslstatus) { 
-    ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_dlnsigM_dlogM():");
-    *status |= gslstatus;
-  }
-  return dlsdlgm;
+
+  return ccl_f2d_t_eval(cosmo->data.dlnsigma_dlogm, log_halomass, a, cosmo, status);
 }

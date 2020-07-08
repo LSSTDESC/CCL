@@ -266,8 +266,8 @@ typedef struct ccl_data {
   gsl_spline * achi;
 
   // Function of Halo mass M
-  gsl_spline * logsigma;
-  gsl_spline * dlnsigma_dlogm;
+  ccl_f2d_t * sigma_M;
+  ccl_f2d_t * dlnsigma_dlogm;
 
   // power spectrum splines
   ccl_f2d_t * p_lin;
