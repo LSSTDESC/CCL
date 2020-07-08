@@ -38,14 +38,14 @@ tlmgr install   \
   epsf          \
   xcolor        \
   soul          \
-  amssymb       \
-  xspace        \
   xifthen       \
   helvetic      \
   ulem          \
   ifmtarg       \
   unicode-math  \
-  mathpple
+  mathpple      \
+  latex-tools   \
+  psnfss
 
 # Keep no backups (not required, simply makes cache bigger)
 tlmgr option -- autobackup 0
