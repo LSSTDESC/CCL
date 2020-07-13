@@ -1095,9 +1095,11 @@ class HaloProfileHOD(HaloProfile):
     Where :math:`\\Theta(x)` is the Heaviside step function,
     and the proportionality constant in the last equation is
     such that the volume integral of :math:`u_s` is 1. The
-    radii :math:`r_g` and :math:`r_g` are related to the NFW scale
-    radius :math:`r_s` through :math:`r_x=\\beta_x\\,r_s`. The
-    scale radius is related to the comoving overdensity halo
+    radius :math:`r_g` is related to the NFW scale radius :math:`r_s`
+    through :math:`r_g=\\beta_g\\,r_s`, and the radius
+    :math:`r_{\\rm max}` is related to the overdensity radius
+    :math:`r_\\Delta` as :math:`r_{\\rm max}=\\beta_{\\rm max}r_\\Delta`.
+    The scale radius is related to the comoving overdensity halo
     radius via :math:`R_\\Delta(M) = c(M)\\,r_s`.
 
     All the quantities :math:`\\log_{10}M_{\\rm min}`,
@@ -1274,10 +1276,6 @@ class HaloProfileHOD(HaloProfile):
         if a_pivot is not None:
             self.a_pivot = a_pivot
 
-    def _usat_norm(self, M, Rs, c):
-        # sNFW normalization from mass, radius and concentration
-        return 1. / (4 * np.pi * Rs**3 * (np.log(1+c) - c/(1+c)))
-
     def _usat_real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
@@ -1295,7 +1293,7 @@ class HaloProfileHOD(HaloProfile):
         # Truncate
         prof[r_use[None, :] > R_M[:, None]*bmax] = 0
 
-        norm = self._usat_norm(M_use, bg*R_s, c_M)
+        norm = 1. / (4 * np.pi * (bg*R_s)**3 * (np.log(1+c_M) - c_M/(1+c_M)))
         prof = prof[:, :] * norm[:, None]
 
         if np.ndim(r) == 0:
