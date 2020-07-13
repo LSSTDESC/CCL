@@ -358,8 +358,8 @@ def halo_bias_from_name(name):
     Returns:
         HaloBias subclass corresponding to the input name.
     """
-    bias_functions = {c.name: c for c in HaloBias.__subclasses__()}
-    if name in bias_functions:
+    bias_functions = {c.name.lower(): c for c in HaloBias.__subclasses__()}
+    if name.lower() in bias_functions:
         return bias_functions[name]
     else:
         raise ValueError("Halo bias parametrization %s not implemented")
