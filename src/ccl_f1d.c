@@ -103,6 +103,14 @@ ccl_f1d_t *ccl_f1d_t_new(int n,double *x,double *y,double y0,double yf,
   }
   else // No extrapolation
     spl->der_hi = 0;
+
+  // If one of the derivatives could not be calculated
+  // then return NULL.
+  if (*status){
+    ccl_f1d_t_free(spl);
+    spl = NULL;
+  }
+
   return spl;
 }
 

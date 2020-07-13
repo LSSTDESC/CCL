@@ -21,7 +21,12 @@ matrix:
   - name: linux (Python2.7)
   - name: OSX (Python2.7)
   fast_finish: true
+cache:
+  directories:
+    - /tmp/texlive
+    - $HOME/.texlive
 install:
+- if [[ $TRAVIS_OS_NAME != 'osx' ]]; then source ./.travis/install_texlive_linux.sh; fi
 - "./.travis/install.sh"
 - export PATH=$HOME/miniconda/bin:$PATH
 - source activate test-environment
@@ -34,6 +39,8 @@ install:
 script:
 - flake8 pyccl
 - flake8 --exclude=data benchmarks
+- if [[ $TRAVIS_OS_NAME != 'osx' ]]; then pushd doc/0000-ccl_note/ && make && popd; fi
+- cd $TRAVIS_BUILD_DIR
 - "[[ `grep \"$(printf '\t')\" pyccl/*.py` == \"\" ]]"
 - mkdir -p build && cd build && cmake -DFORCE_OPENMP=YES -DCMAKE_VERBOSE_MAKEFILE=ON
   .. && make && cd ..
