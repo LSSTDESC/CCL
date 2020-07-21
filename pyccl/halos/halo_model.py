@@ -241,7 +241,7 @@ class HMCalculator(object):
             \\langle u(k,a|M) v(k,a|M) w(k',a|M) z(k',a|M)\\rangle,
 
         where :math:`n(M,a)` is the halo mass function, and
-        :math: \\langle u(k,a|M) v(k,a|M) w(k',a|M) z(k',a|M)\\rangle
+        :math:`\\langle u(k,a|M) v(k,a|M) w(k',a|M) z(k',a|M)\\rangle`
         is the four-point moment of the two halo profiles.
 
         .. note::
@@ -284,9 +284,9 @@ class HMCalculator(object):
         self._get_ingredients(a, cosmo, False)
         uk1 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                      prof2=prof2,
-                                     mass_def=self._mdef)
+                                     mass_def=self._mdef).squeeze()
         uk2 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
-                                     mass_def=self._mdef)
+                                     mass_def=self._mdef).squeeze()
         i04 = self._integrate_over_mf(np.einsum('ij,ik->jki', uk1, uk2))
         return i04
 
