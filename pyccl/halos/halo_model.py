@@ -210,7 +210,7 @@ class HMCalculator(object):
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object
@@ -231,6 +231,64 @@ class HMCalculator(object):
                                   mass_def=self._mdef).T
         i02 = self._integrate_over_mf(uk)
         return i02
+
+    def I_0_4(self, cosmo, k, a, prof1, prof12_2pt, prof2=None,
+              prof3=None, prof34_2pt=None, prof4=None):
+        """ Solves the integral:
+
+        .. math::
+            I^0_4(k,a|u,v,w,z) = \\int dM\\,n(M,a)\\,
+            \\langle u(k,a|M) v(k,a|M) w(k',a|M) z(k',a|M)\\rangle,
+
+        where :math:`n(M,a)` is the halo mass function, and
+        :math: \\langle u(k,a|M) v(k,a|M) w(k',a|M) z(k',a|M)\\rangle
+        is the four-point moment of the two halo profiles.
+
+        .. note::
+            The integrand is approximated by the sum of the product
+            of the two pairs of profiles.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            k (float or array_like): comoving wavenumber in Mpc^-1.
+            a (float): scale factor.
+            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+                profile.
+            prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+                a profile covariance object
+                returning the the two-point moment of the first pair of
+                profiles being correlated.
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
+                second halo profile. If `None`, `prof1` will be used as
+                `prof2`.
+            prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): a
+                third halo profile. If `None`, `prof1` will be used as
+                `prof3`.
+            prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+                a profile covariance object
+                returning the the two-point moment of the second pair of
+                profiles being correlated.
+            prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): a
+                fourth halo profile. If `None`, `prof1` will be used as
+                `prof4`.
+
+        Returns:
+             float or array_like: integral values evaluated at each
+             value of `k`.
+        """
+        if prof3 is None:
+            prof3 = prof1
+        if prof34_2pt is None:
+            prof34_2pt = prof12_2pt
+
+        self._get_ingredients(a, cosmo, False)
+        uk1 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
+                                     prof2=prof2,
+                                     mass_def=self._mdef)
+        uk2 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
+                                     mass_def=self._mdef)
+        i04 = self._integrate_over_mf(np.einsum('ij,ik->jki', uk1, uk2))
+        return i04
 
 
 def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof,
