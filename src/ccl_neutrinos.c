@@ -170,14 +170,7 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, int* s
 
   Tnu = T_CMB*pow(4./11.,1./3.);
   a4 = a*a*a*a;
-  // Check if mnu=0. We assume that in the massless case mnu is a
-  // pointer to a single element and that element is 0. This should in principle never be called.
-  if (mnu[0] < 0.00017) {  // Limit taken from Lesgourges et al. 2012
-    prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu;
-    return N_nu_mass*prefix_massless*7./8./a4;
-  }
 
-  // And the remaining massive case.
   // Tnu_eff is used in the massive case because CLASS uses an effective
   // temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * T_CMB = 0.71611 * T_CMB
   Tnu_eff = Tnu * ccl_constants.TNCDM / (pow(4./11.,1./3.));
