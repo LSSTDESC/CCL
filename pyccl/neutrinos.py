@@ -21,8 +21,8 @@ def Omeganuh2(a, m_nu, T_CMB=None):
         T_CMB (float, optional): Temperature of the CMB (K). Default: 2.725.
 
     Returns:
-        float or array_like: :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
-    the neutrino masses
+        float or array_like: :math:`\\Omega_\\nu\\,h^2` at a given
+        scale factor given the neutrino masses
     """
     status = 0
     scalar = True if np.ndim(a) == 0 else False
