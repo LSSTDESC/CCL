@@ -342,7 +342,7 @@ class Cosmology(object):
         """Build a ccl_parameters struct"""
 
         # Check to make sure Omega_k is within reasonable bounds.
-        if  Omega_k < -1.0135:
+        if Omega_k is not None and Omega_k < -1.0135:
             raise ValueError("Omega_k must be more than -1.0135.")
 
         # Set nz_mg (no. of redshift bins for modified growth fns.)
