@@ -508,3 +508,9 @@ def test_parameters_read_write():
         IOError,
         params.read_yaml,
         filename=temp_file_name+"/nonexistent_directory/params.yml")
+
+
+def test_omega_k():
+    """ Check that the value of Omega_k is within reasonable bounds. """
+    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05, h=0.7,
+                  A_s=2.1e-9, n_s=0.96, Omega_k=-2)
