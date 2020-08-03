@@ -39,12 +39,16 @@ py36)
   conda create -q -n test-environment python=3.6 pip \
     numpy nose coveralls flake8 pyyaml gsl fftw cmake swig  scipy \
     compilers pkg-config setuptools_scm pytest pandas pytest-cov \
-    cython "camb>=1" isitgr traitlets
+    cython "camb>=1" isitgr traitlets fast-pt
   ;;
 esac;
 
 # we have to activate the cond env before we install this
 source activate test-environment
-pip install https://github.com/JoeMcEwen/FAST-PT/archive/v3.0.2.tar.gz --no-deps
+# pip install https://github.com/JoeMcEwen/FAST-PT/archive/v3.0.2.tar.gz --no-deps
 pip install mkauthlist  --no-deps
+
+if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+    conda install -y -q llvm-openmp
+fi
 conda deactivate
