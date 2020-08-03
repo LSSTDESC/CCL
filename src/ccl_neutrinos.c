@@ -170,7 +170,7 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, int* s
 
   Tnu = T_CMB*pow(4./11.,1./3.);
   a4 = a*a*a*a;
-
+  
   // Tnu_eff is used in the massive case because CLASS uses an effective
   // temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * T_CMB = 0.71611 * T_CMB
   Tnu_eff = Tnu * ccl_constants.TNCDM / (pow(4./11.,1./3.));
@@ -180,13 +180,22 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, int* s
 
   OmNuh2 = 0.; // Initialize to 0 - we add to this for each massive neutrino species.
   for(int i=0; i < N_nu_mass; i++) {
-    // Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K))
-    // This returns the density normalized so that we get nuh2 at a=0
-    mnuOT = mnu[i] / (Tnu_eff/a) * (ccl_constants.EV_IN_J / (ccl_constants.KBOLTZ));
+      
+    // Check whether this species is effectively massless
+    // In this case, invoke the analytic massless limit:
+    if (mnu[i] < 0.00017) {  // Limit taken from Lesgourges et al. 2012
+      prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu;	
+      OmNuh2 = N_nu_mass*prefix_massless*7./8./a4 + OmNuh2;	
+    } else {  
+       // For the true massive case:  
+       // Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K))
+       // This returns the density normalized so that we get nuh2 at a=0
+       mnuOT = mnu[i] / (Tnu_eff/a) * (ccl_constants.EV_IN_J / (ccl_constants.KBOLTZ));
 
-    // Get the value of the phase-space integral
-    intval = nu_phasespace_intg(mnuOT, status);
-    OmNuh2 = intval*prefix_massive/a4 + OmNuh2;
+       // Get the value of the phase-space integral
+       intval = nu_phasespace_intg(mnuOT, status);
+       OmNuh2 = intval*prefix_massive/a4 + OmNuh2;
+    }
   }
 
   return OmNuh2;
