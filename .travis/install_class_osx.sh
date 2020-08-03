@@ -8,7 +8,7 @@ cd class_public
 git checkout v2.7.2
 
 sed -i.bak -e 's/^CC/#CC/g' Makefile
-sed -i.bak -e 's/^OPTFLAG =/OPTFLAG = -I${CONDA_PREFIX}\/include/g' Makefile
+sed -i.bak -e 's/^OPTFLAG =/OPTFLAG = ${CFLAGS} ${LDFLAGS}/g' Makefile
 sed -i.bak -e 's/^#CCFLAG +=/CCFLAG +=/g' Makefile
 sed -i.bak -e 's/^#CCFLAG =/CCFLAG =/g' Makefile
 
