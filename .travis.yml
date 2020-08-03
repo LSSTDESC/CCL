@@ -30,7 +30,6 @@ install:
 - "./.travis/install.sh"
 - export PATH=$HOME/miniconda/bin:$PATH
 - source activate test-environment
-- if [[ $TRAVIS_OS_NAME == 'osx' ]]; then conda install -y llvm-openmp; fi
 - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib;
   fi
 - if [[ $TRAVIS_OS_NAME == 'osx' ]]; then export CONDA_BUILD_SYSROOT=/; fi
