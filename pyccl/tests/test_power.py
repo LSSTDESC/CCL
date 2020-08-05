@@ -204,9 +204,10 @@ def test_input_lin_power_spectrum():
                                 A_s=2e-9)
     cosmo_input._set_background_from_arrays(a_array=a_arr,
                                             chi_array=chi_from_ccl,
-                                            hoh0_array=hoh0_from_ccl,
-                                            growth_array=growth_from_ccl,
-                                            fgrowth_array=fgrowth_from_ccl)
+                                            hoh0_array=hoh0_from_ccl)
+    cosmo_input._set_growth_from_arrays(a_array=a_arr,
+                                        growth_array=growth_from_ccl,
+                                        fgrowth_array=fgrowth_from_ccl)
     cosmo_input._set_linear_power_from_arrays(a_arr, k_arr, pk_arr)
 
     pk_CCL_input = ccl.power.linear_matter_power(cosmo_input, k_arr, 0.5)
@@ -248,9 +249,10 @@ def test_input_nonlin_power_spectrum():
                                 A_s=2e-9,)
     cosmo_input._set_background_from_arrays(a_array=a_arr,
                                             chi_array=chi_from_ccl,
-                                            hoh0_array=hoh0_from_ccl,
-                                            growth_array=growth_from_ccl,
-                                            fgrowth_array=fgrowth_from_ccl)
+                                            hoh0_array=hoh0_from_ccl)
+    cosmo_input._set_growth_from_arrays(a_array=a_arr,
+                                        growth_array=growth_from_ccl,
+                                        fgrowth_array=fgrowth_from_ccl)
     cosmo_input._set_nonlin_power_from_arrays(a_arr, k_arr, pk_arr)
 
     pk_CCL_input = ccl.power.nonlin_matter_power(cosmo_input, k_arr, 0.5)
