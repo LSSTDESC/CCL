@@ -13,18 +13,16 @@ neutrino_mass_splits = {
 
 def Omeganuh2(a, m_nu, T_CMB=None):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
-    the sum of the neutrino masses.
-
-    .. note:: for all practical purposes, :math:`N_{\\rm eff}` is simply
-        `N_nu_mass`.
+    the neutrino masses.
 
     Args:
         a (float or array-like): Scale factor, normalized to 1 today.
-        m_nu (float or array-like): Neutrino mass (in eV)
+        m_nu (float or array-like): Neutrino mass(es) (in eV)
         T_CMB (float, optional): Temperature of the CMB (K). Default: 2.725.
 
     Returns:
-        float or array_like: corresponding to a given neutrino mass.
+        float or array_like: :math:`\\Omega_\\nu\\,h^2` at a given
+        scale factor given the neutrino masses
     """
     status = 0
     scalar = True if np.ndim(a) == 0 else False
