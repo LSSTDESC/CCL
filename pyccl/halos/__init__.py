@@ -49,3 +49,7 @@ from .halo_model import (  # noqa
     halomod_bias_1pt,
     halomod_power_spectrum,
     halomod_Pk2D)
+
+# Weak lensing functions
+from .weak_lensing_profile import (  # noqa
+    WLCalculator)
