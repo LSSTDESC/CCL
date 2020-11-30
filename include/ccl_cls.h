@@ -37,11 +37,12 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
  * For specific cases see documentation for ccl_error.c
  */
 void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,
-         ccl_cl_tracer_collection_t *trc1,
-         ccl_cl_tracer_collection_t *trc2,
-         ccl_f2d_t *psp,
-         int nl_out,int *l_out,double *cl_out,
-         int *status);
+       ccl_cl_tracer_collection_t *trc1,
+       ccl_cl_tracer_collection_t *trc2,
+       ccl_f2d_t *psp,
+       int nl_out, int *l_out, double *cl_out,
+       ccl_integration_t integration_method, double dchi,
+       int *status);
 
 CCL_END_DECLS
 #endif

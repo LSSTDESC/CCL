@@ -13,7 +13,7 @@ NoneArr = np.array([])
 
 
 def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
-               l_limber=-1., limber_integration_method='qag_quad'):
+               l_limber=-1., limber_integration_method='qag_quad', dchi_nonlimber=5.):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
@@ -87,6 +87,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     cl, status = lib.angular_cl_vec(
         cosmo, clt1, clt2, psp, l_limber,
         ell_use, integ_types[limber_integration_method],
+        dchi_nonlimber,
         ell_use.size, status)
     if np.ndim(ell) == 0:
         cl = cl[0]

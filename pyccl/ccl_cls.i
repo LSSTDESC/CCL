@@ -22,7 +22,7 @@ void angular_cl_vec(ccl_cosmology * cosmo,
                     ccl_cl_tracer_collection_t *clt2,
                     ccl_f2d_t *pspec, double l_limber,
                     double* ell, int nell,
-                    int integration_type,
+                    int integration_type, double dchi_nonlimber,
                     int nout, double* output,
                     int *status) {
 
@@ -49,7 +49,8 @@ void angular_cl_vec(ccl_cosmology * cosmo,
 
       // Non-Limber computation
       ccl_angular_cls_nonlimber(cosmo, clt1, clt2, pspec,
-                                index_nonlimber_last+1, ell_int, output, status);
+                                index_nonlimber_last+1, ell_int, output,
+                                integration_type, dchi_nonlimber, status);
       free(ell_int);
     }
   }
