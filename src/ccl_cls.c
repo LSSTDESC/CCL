@@ -177,7 +177,7 @@ static double cl_integrand_nonlimber(double lk, void *params) {
   if (d2 == 0)
     return 0;
 
-  return k*k*d1*d2;
+  return k*k*k*d1*d2;
 }
 
 static void integ_cls_nonlimber_spline(ccl_cosmology *cosmo,
