@@ -429,9 +429,16 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
             If `False` (default) E-mode power spectrum is returned.
             Supersedes `return_ia_bb`.
+        return_ptc (bool): if `True`, the fastpt object used as the PT
+            calculator (ptc) will also be returned. This feature may
+            be useful if an input ptc is not specified and one is
+            initialized when this function is called. If `False` (default)
+            the ptc is not output, whether or not it is initialized as
+            part of the function call.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
+        :class: fastpt object [optional]
     """
     if a_arr is None:
         status = 0
