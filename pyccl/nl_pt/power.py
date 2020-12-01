@@ -438,7 +438,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
-        :class: fastpt object [optional]
+        :class:`~pyccl.nl_pt.power.PTCalculator`: PT Calc [optional]
     """
     if a_arr is None:
         status = 0
