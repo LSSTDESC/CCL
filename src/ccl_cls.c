@@ -573,6 +573,8 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,
 
         // Get integration limits
         get_k_interval(cosmo, trc1, trc2, l, &lkmin, &lkmax);
+        lkmin+=log(0.2);
+        lkmax+=log(5.0);
 
 	// Integrate
 	if(integration_method == ccl_integration_qag_quad) {
