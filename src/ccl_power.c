@@ -485,12 +485,24 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
 void ccl_cosmology_compute_nonlin_power_from_f2d(ccl_cosmology *cosmo,
                                                  ccl_f2d_t *psp, int *status)
 {
+  if(psp == NULL)
+  {
+    *status = CCL_ERROR_NONLIN_POWER_INIT;
+    ccl_raise_warning(CCL_ERROR_NONLIN_POWER_INIT, "Not a valid F2D pointer!");
+    return;
+  }
   cosmo->data.p_nl = ccl_f2d_t_copy(psp, status);
 }
 
 void ccl_compute_linear_power_from_f2d(ccl_cosmology *cosmo,
                                                  ccl_f2d_t *psp, int *status)
 {
+  if(psp == NULL)
+  {
+    *status = CCL_ERROR_LINEAR_POWER_INIT;
+    ccl_raise_warning(CCL_ERROR_LINEAR_POWER_INIT, "Not a valid F2D pointer!");
+    return;
+  }
   cosmo->data.p_lin = ccl_f2d_t_copy(psp, status);
 }
 
