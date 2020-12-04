@@ -24,8 +24,7 @@ jobs:
             python-version: ${{ matrix.py }}
 
         - name: Install GFortran macOS
-          if: contains( matrix.os, 'macos')
-          run: brew install gcc@9 || brew upgrade gcc@9 || true
+          run: gfortran --version
 
         - name: Install dependencies
           run: |
