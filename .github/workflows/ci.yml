@@ -23,10 +23,6 @@ jobs:
           with:
             python-version: ${{ matrix.py }}
 
-        - name: Install CLASS (macos)
-          if: matrix.os == 'macos-latest'
-          run: ./.github/scripts/install_class_macos.sh
-
         - name: Install GFortran macOS
           if: matrix.os == 'macos-latest'
           run: |
@@ -62,6 +58,15 @@ jobs:
           run: |
             git clone https://github.com/lesgourg/class_public.git
             cd class_public
+            git checkout v2.7.2
+            make
+
+        - name: Install CLASS (macos)
+          if: matrix.os == 'macos-latest'
+          run: |
+            git clone https://github.com/lesgourg/class_public.git
+            cd class_public
+            sed -i.bak -e "s/CC       = gcc/CC       = gcc-9/g" Makefile
             git checkout v2.7.2
             make
 
