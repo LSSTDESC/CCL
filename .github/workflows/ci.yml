@@ -27,6 +27,7 @@ jobs:
             pip install -U camb
             pip install -U isitgr
             pip install -U cython
+            pip install -U flake8
             sudo -H apt-get install libgsl-dev libfftw3-dev
 
         - name: Install CLASS
@@ -35,6 +36,11 @@ jobs:
             cd class_public
             git checkout v2.7.2
             make
+
+        - name: Flake
+          run: |
+            flake8 pyccl
+            flake8 --exclude=data benchmarks
 
         - name: Build CCL
           run: |
