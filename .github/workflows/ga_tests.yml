@@ -1,4 +1,4 @@
-name: learn-github-actions
+name: testing-travis-migration
 on: [push]
 jobs:
     check-bats-version:
@@ -8,3 +8,4 @@ jobs:
         - uses: actions/setup-node@v1
         - run: npm install -g bats
         - run: bats -v
+        - run: ./.github/scripts/install.sh
