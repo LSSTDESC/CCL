@@ -52,3 +52,10 @@ jobs:
 
         - name: Benchmarks
           run: OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
+
+        - name: Coveralls
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            pip install -U coveralls
+            coveralls
