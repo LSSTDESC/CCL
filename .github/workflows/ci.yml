@@ -25,7 +25,7 @@ jobs:
 
         - name: Install GFortran macOS
           run: |
-            alias gfortran=gfortran-9; gfortran -dumpversion
+            which gfortran-9
 
         - name: Install dependencies
           run: |
