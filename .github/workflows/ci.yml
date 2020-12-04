@@ -64,11 +64,15 @@ jobs:
         - name: Install CLASS (macos)
           if: matrix.os == 'macos-latest'
           run: |
+            rm -rf class_public
             git clone https://github.com/lesgourg/class_public.git
             cd class_public
             git checkout v2.7.2
+            cp Makefile Makefile_bak
             sed -i.bak -e "s/CC       = gcc/CC       = gcc-9/g" Makefile
             make
+            pwd
+            mv Makefile_bak Makefile
 
         - name: Flake
           run: |
