@@ -24,10 +24,9 @@ jobs:
             python-version: ${{ matrix.py }}
 
         - name: Install GFortran macOS
-          run: alias gfortran='gfortran-9'
-
-        - name: Check gfortran
-          run: gfortran -dumpversion
+          run: |
+            alias gfortran='gfortran-9'
+            gfortran -dumpversion
 
         - name: Install dependencies
           run: |
