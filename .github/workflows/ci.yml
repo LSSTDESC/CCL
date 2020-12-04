@@ -32,7 +32,8 @@ jobs:
         - name: Install GSL, FFTW (macos)
           if: matrix.os == 'macos-latest'
           run: |
-            brew install fftw gsl || true
+            brew install fftw || true
+            brew install gsl || true
 
         - name: Install GSL, FFTW (linux)
           if: matrix.os == 'ubuntu-latest'
