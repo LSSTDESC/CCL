@@ -32,7 +32,7 @@ int main(int argc,char **argv)
   ccl_config.matter_power_spectrum_method=ccl_linear;
   ccl_parameters ccl_params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
 						    &mnu, mnu_type,w_0, w_a, h, A_s,
-						    n_s,-1,-1,-1,-1,NULL,NULL, &status);
+						    n_s,-1,-1,-1,-1,-1,-1,-1,-1,-1,NULL,NULL, &status);
   ccl_params.Omega_g=0.;
   ccl_params.Omega_l=Omega_v;
   

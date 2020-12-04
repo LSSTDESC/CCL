@@ -39,13 +39,16 @@ ccl_parameters parameters_create_nu(
                         double Omega_c, double Omega_b, double Omega_k,
                         double Neff, double w0, double wa, double h,
                         double norm_pk, double n_s, double bcm_log10Mc,
-                        double bcm_etab, double bcm_ks, double mu_0,
-                        double sigma_0, double* m_nu, int n_m, int* status)
+                        double bcm_etab, double bcm_ks, 
+                        double hmcode_A, double hmcode_eta, double hmcode_logT,
+                        double mu_0, double sigma_0,
+                        double* m_nu, int n_m, int* status)
 {
     return ccl_parameters_create(
                         Omega_c, Omega_b, Omega_k, Neff, m_nu, n_m,
                         w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab,
-                        bcm_ks, mu_0, sigma_0, -1, NULL, NULL, status );
+                        bcm_ks, hmcode_A, hmcode_eta, hmcode_logT,
+                        mu_0, sigma_0, -1, NULL, NULL, status);
 }
 
 %}
@@ -60,8 +63,9 @@ ccl_parameters parameters_create_nu_vec(
                         double Omega_c, double Omega_b, double Omega_k,
                         double Neff, double w0, double wa, double h,
                         double norm_pk, double n_s, double bcm_log10Mc,
-                        double bcm_etab, double bcm_ks, double mu_0,
-                        double sigma_0, double* zarr, int nz,
+                        double bcm_etab, double bcm_ks, 
+                        double hmcode_A, double hmcode_eta, double hmcode_logT,
+                        double mu_0, double sigma_0, double* zarr, int nz,
                         double* dfarr, int nf, double* m_nu,
                         int n_m, int* status)
 {
@@ -69,6 +73,7 @@ ccl_parameters parameters_create_nu_vec(
     return ccl_parameters_create(
                         Omega_c, Omega_b, Omega_k, Neff, m_nu, n_m,
                         w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                        hmcode_A, hmcode_eta, hmcode_logT,
                         mu_0, sigma_0, nz, zarr, dfarr, status);
 }
 

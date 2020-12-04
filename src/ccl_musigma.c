@@ -138,9 +138,10 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
           cosmo->params.Neff, mnu_list, cosmo->params.N_nu_mass,
           cosmo->params.w0, cosmo->params.wa, cosmo->params.h,
           norm_pk, cosmo->params.n_s,
-          cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
-          cosmo->params.bcm_ks, 0., 0., cosmo->params.nz_mgrowth,
-          cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
+          cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab, cosmo->params.bcm_ks, 
+          cosmo->params.hmcode_A, cosmo->params.hmcode_eta, cosmo->params.hmcode_logT,
+          0., 0., cosmo->params.nz_mgrowth, cosmo->params.z_mgrowth, cosmo->params.df_mgrowth,
+          status);
 
         if (*status) {
           *status = CCL_ERROR_PARAMETERS;

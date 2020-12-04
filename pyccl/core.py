@@ -27,7 +27,9 @@ matter_power_spectrum_types = {
     'halo_model': lib.halo_model,
     'halofit': lib.halofit,
     'linear': lib.linear,
-    'emu': lib.emu
+    'emu': lib.emu,
+    'hmcode': lib.pknl_from_boltzmann,
+    'hmcode2020': lib.pknl_from_boltzmann,
 }
 
 baryons_power_spectrum_types = {
@@ -124,6 +126,12 @@ class Cosmology(object):
             model. Defaults to 0.5.
         bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
             model. Defaults to 55.0.
+        hmcode_A (:obj:`float`, optional): HMCode-2016 parameter. Defaults
+            to 3.13.
+        hmcode_eta (:obj:`float`, optional): HMCode-2016 parameter. Defaults
+            to 0.603.
+        hmcode_logT (:obj:`float`, optional): HMCode-2020 parameter. Defaults
+            to 7.8.
         mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
@@ -155,8 +163,9 @@ class Cosmology(object):
             sigma8=None, A_s=None,
             Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., m_nu_type=None,
             w0=-1., wa=0., T_CMB=None,
-            bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
-            bcm_ks=55., mu_0=0., sigma_0=0., z_mg=None, df_mg=None,
+            bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5, bcm_ks=55., 
+            hmcode_A=3.13, hmcode_eta=0.603, hmcode_logT=7.8,
+            mu_0=0., sigma_0=0., z_mg=None, df_mg=None,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryons_power_spectrum='nobaryons',
@@ -169,8 +178,9 @@ class Cosmology(object):
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
             m_nu_type=m_nu_type, w0=w0, wa=wa, T_CMB=T_CMB,
-            bcm_log10Mc=bcm_log10Mc,
-            bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
+            bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab, bcm_ks=bcm_ks, 
+            hmcode_A=hmcode_A, hmcode_eta=hmcode_eta, hmcode_logT=hmcode_logT,
+            mu_0=mu_0, sigma_0=sigma_0,
             z_mg=z_mg, df_mg=df_mg)
 
         self._config_init_kwargs = dict(
@@ -250,6 +260,9 @@ class Cosmology(object):
             bcm_log10Mc=params['bcm_log10Mc'],
             bcm_etab=params['bcm_etab'],
             bcm_ks=params['bcm_ks'],
+            hmcode_A=params['hmcode_A'],
+            hmcode_eta=params['hmcode_eta'],
+            hmcode_logT=params['hmcode_logT'],
             mu_0=params['mu_0'],
             sigma_0=params['sigma_0'])
         if 'z_mg' in params:
@@ -341,6 +354,7 @@ class Cosmology(object):
             A_s=None, Omega_k=None, Neff=None, m_nu=None, m_nu_type=None,
             w0=None, wa=None, T_CMB=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
+            hmcode_A=None, hmcode_eta=None, hmcode_logT=None,
             mu_0=None, sigma_0=None, z_mg=None, df_mg=None, Omega_g=None):
         """Build a ccl_parameters struct"""
 
@@ -523,6 +537,7 @@ class Cosmology(object):
                     Omega_c, Omega_b, Omega_k, Neff,
                     w0, wa, h, norm_pk,
                     n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    hmcode_A, hmcode_eta, hmcode_logT,
                     mu_0, sigma_0, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
@@ -530,6 +545,7 @@ class Cosmology(object):
                     Omega_c, Omega_b, Omega_k, Neff,
                     w0, wa, h, norm_pk,
                     n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    hmcode_A, hmcode_eta, hmcode_logT,
                     mu_0, sigma_0, z_mg, df_mg, mnu_final_list, status)
             check(status)
         finally:
@@ -760,6 +776,8 @@ class Cosmology(object):
         # needed to init some models
         self.compute_growth()
 
+        psp_nonlin = None
+
         if ((self._config_init_kwargs['transfer_function'] ==
                 'boltzmann_class') and not self.has_linear_power):
             pk_lin = get_class_pk_lin(self)
@@ -770,7 +788,12 @@ class Cosmology(object):
             psp = pk_lin.psp
         elif ((self._config_init_kwargs['transfer_function'] ==
                 'boltzmann_camb') and not self.has_linear_power):
-            pk_lin = get_camb_pk_lin(self)
+            if (self._config_init_kwargs['matter_power_spectrum'] == 'hmcode'
+                    or self._config_init_kwargs['matter_power_spectrum'] == 'hmcode2020'):
+                pk_lin, pk_nonlin = get_camb_pk_lin(self, nonlin=True)
+                psp_nonlin = pk_nonlin.psp
+            else:
+                pk_lin = get_camb_pk_lin(self)
             psp = pk_lin.psp
         else:
             psp = None
@@ -786,6 +809,13 @@ class Cosmology(object):
         status = 0
         status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
         check(status, self)
+
+        # Use the non linear power spectrum if it has already been computed
+        if psp_nonlin is not None:
+            status = 0
+            status = lib.cosmology_compute_nonlin_power(self.cosmo, psp_nonlin, status)
+            check(status, self)
+
 
     def _compute_linear_power_from_arrays(self):
         if not self._linear_power_on_input:

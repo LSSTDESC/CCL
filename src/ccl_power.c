@@ -550,6 +550,10 @@ void ccl_cosmology_compute_nonlin_power(ccl_cosmology* cosmo, ccl_f2d_t *psp_o,
         ccl_cosmology_compute_power_emu(cosmo, status);}
         break;
 
+      case ccl_pknl_from_boltzmann: {
+        ccl_cosmology_compute_nonlin_power_from_f2d(cosmo, psp_o, status);}
+        break;
+
       case ccl_pknl_from_input: {
         ccl_cosmology_compute_nonlin_power_from_f2d(cosmo, psp_o, status);}
         break;

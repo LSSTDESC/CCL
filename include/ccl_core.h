@@ -234,6 +234,11 @@ typedef struct ccl_parameters {
   double bcm_etab;
   double bcm_ks;
 
+  // HMCode parameters
+  double hmcode_A;
+  double hmcode_eta;
+  double hmcode_logT;
+
   // mu / Sigma quasistatica parameterisation of modified gravity params
   double mu_0;
   double sigma_0;
@@ -324,6 +329,9 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  * @param bcm_log10Mc log10 cluster mass, one of the parameters of the BCM model
  * @param bcm_etab ejection radius parameter, one of the parameters of the BCM model
  * @param bcm_ks wavenumber for the stellar profile, one of the parameters of the BCM model
+ * @param hmcode_A HMCode 2016 halo concentration parameter
+ * @param hmcode_eta HMCode 2016 halo bloating parameter
+ * @param hmcode_logT HMCode 2020 AGN feedback parameter
  * @param nz_mgrowth the number of redshifts where the modified growth is provided
  * @param zarr_mgrowth the array of redshifts where the modified growth is provided
  * @param dfarr_mgrowth the modified growth function vector provided
@@ -335,6 +343,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
+             double hmcode_A, double hmcode_eta, double hmcode_logT,
 				     double mu_0, double sigma_0, int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status);
 

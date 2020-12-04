@@ -383,8 +383,9 @@ ccl_parameters ccl_parameters_create(
                      double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab,
-				     double bcm_ks, double mu_0, double sigma_0,
+				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks, 
+             double hmcode_A, double hmcode_eta, double hmcode_logT,
+             double mu_0, double sigma_0,
 				     int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
@@ -445,6 +446,11 @@ ccl_parameters ccl_parameters_create(
   else
     params.bcm_ks=bcm_ks;
 
+  //HMCode params
+  params.hmcode_A = (hmcode_A > 0) ? hmcode_A : 3.13;
+  params.hmcode_eta = (hmcode_eta > 0) ? hmcode_eta : 0.603;
+  params.hmcode_logT = (hmcode_logT > 0) ? hmcode_logT : 7.8;
+
   // Params of the mu / Sigma parameterisation of MG
   params.mu_0 = mu_0;
   params.sigma_0 = sigma_0;
@@ -490,7 +496,7 @@ ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, d
   double sigma_0 = 0.;
 
   ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, 0, w0, wa, h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1, NULL, NULL, status);
+						mnu, 0, w0, wa, h, norm_pk, n_s, -1, -1, -1, -1, -1, -1, mu_0, sigma_0, -1, NULL, NULL, status);
   return params;
 
 }
@@ -558,6 +564,11 @@ void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, i
   WRITE_DOUBLE(bcm_log10Mc);
   WRITE_DOUBLE(bcm_etab);
   WRITE_DOUBLE(bcm_ks);
+
+  // HMCode parameters
+  WRITE_DOUBLE(hmcode_A);
+  WRITE_DOUBLE(hmcode_eta);
+  WRITE_DOUBLE(hmcode_logT);
 
   // Modified gravity parameters
   WRITE_DOUBLE(mu_0);
@@ -657,6 +668,11 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
   READ_DOUBLE(bcm_etab);
   READ_DOUBLE(bcm_ks);
 
+  // HMCode parameters
+  READ_DOUBLE(hmcode_A);
+  READ_DOUBLE(hmcode_eta);
+  READ_DOUBLE(hmcode_logT);
+
   // Modified gravity parameters
   READ_DOUBLE(mu_0);
   READ_DOUBLE(sigma_0);
@@ -719,7 +735,8 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
     Neff, mnu, N_nu_mass,
     w0, wa, h, norm_pk,
     n_s, bcm_log10Mc, bcm_etab,
-    bcm_ks, mu_0, sigma_0, nz_mgrowth, z_mgrowth,
+    bcm_ks, hmcode_A, hmcode_eta, hmcode_logT,
+    mu_0, sigma_0, nz_mgrowth, z_mgrowth,
     df_mgrowth, status);
 
   if(z_mgrowth) free(z_mgrowth);

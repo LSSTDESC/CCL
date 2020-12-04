@@ -63,7 +63,7 @@ static void test_angpow_precision(struct angpow_data * data)
   ccl_parameters ccl_params = ccl_parameters_create(data->Omega_c, data->Omega_b, data->Omega_k,
 						    data->Neff, data->mnu, data->mnu_type,data->w_0,
 						    data->w_a, data->h, data->A_s, data->n_s,
-						    -1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
+						    -1,-1,-1,-1,-1,-1,data->mu_0, data->sigma_0,-1,NULL,NULL, &status);
   ccl_params.Omega_g=0.;
   ccl_params.Omega_l=data->Omega_v;
 

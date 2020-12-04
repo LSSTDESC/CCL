@@ -24,7 +24,7 @@ from .pk2d import Pk2D
 from .errors import CCLError
 
 
-def get_camb_pk_lin(cosmo):
+def get_camb_pk_lin(cosmo, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 
     Args:
@@ -136,12 +136,24 @@ def get_camb_pk_lin(cosmo):
         w=cosmo['w0'],
         wa=cosmo['wa']
     )
-    # cp.set_cosmology()
+    if nonlin:
+        cp.NonLinearModel = camb.nonlinear.Halofit()
+        if cosmo._config_init_kwargs['matter_power_spectrum'] == "hmcode":
+            cp.NonLinearModel.set_params(halofit_version="mead",
+                HMCode_A_baryon=cosmo["hmcode_A"],
+                HMCode_eta_baryon=cosmo["hmcode_eta"])
+        elif cosmo._config_init_kwargs['matter_power_spectrum'] == "hmcode2020":
+            cp.NonLinearModel.set_params(halofit_version="mead2020",
+                HMCode_logT_AGN=cosmo["hmcode_logT"])
+
+
     cp.set_matter_power(
         redshifts=[_z for _z in zs],
         kmax=10,
-        nonlinear=False)
-    assert cp.NonLinear == camb.model.NonLinear_none
+        nonlinear=nonlin)
+    if not nonlin:
+        assert cp.NonLinear == camb.model.NonLinear_none        
+
 
     cp.set_for_lmax(5000)
     cp.InitPower.set_params(
@@ -177,6 +189,37 @@ def get_camb_pk_lin(cosmo):
         extrap_order_lok=1,
         extrap_order_hik=2,
         cosmo=cosmo)
+
+    if nonlin:
+        k, z, pk = camb_res.get_linear_matter_power_spectrum(
+        hubble_units=True, nonlinear=True)
+
+        # convert to non-h inverse units
+        k *= cosmo['h']
+        pk /= (h2 * cosmo['h'])
+
+        # now build interpolant
+        nk = k.shape[0]
+        lk_arr = np.log(k)
+        a_arr = 1.0 / (1.0 + z)
+        na = a_arr.shape[0]
+        sinds = np.argsort(a_arr)
+        a_arr = a_arr[sinds]
+        ln_p_k_and_z = np.zeros((na, nk), dtype=np.float64)
+        for i, sind in enumerate(sinds):
+            ln_p_k_and_z[i, :] = np.log(pk[sind, :])
+
+        pk_nonlin = Pk2D(
+            pkfunc=None,
+            a_arr=a_arr,
+            lk_arr=lk_arr,
+            pk_arr=ln_p_k_and_z,
+            is_logp=True,
+            extrap_order_lok=1,
+            extrap_order_hik=2,
+            cosmo=cosmo)
+        
+        return pk_lin, pk_nonlin
 
     return pk_lin
 
