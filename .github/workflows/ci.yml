@@ -28,7 +28,7 @@ jobs:
           run: |
             brew cask install gfortran || true
             gfortran -dumpversion
-            brew cask install gcc || true
+            brew install gcc || true
             gcc -dumpversion
 
         - name: Install GSL, FFTW (macos)
