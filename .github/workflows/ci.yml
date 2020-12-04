@@ -35,7 +35,7 @@ jobs:
             brew install fftw gsl || true
 
         - name: Install GSL, FFTW (linux)
-          if: matrix.os == ubuntu-latest'
+          if: matrix.os == 'ubuntu-latest'
           run: |
             sudo -H apt-get install libgsl-dev libfftw3-dev
 
