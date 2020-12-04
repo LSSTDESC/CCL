@@ -1,0 +1,48 @@
+name: testing-travis-migration
+on: [push]
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        py: [ 3.6 ]
+
+    steps:
+        - uses: actions/checkout@v2
+
+        - name: Set up Python ${{ matrix.py }}
+          uses: actions/setup-python@v2
+          with:
+            python-version: ${{ matrix.py }}
+
+        - name: Install dependencies
+          run: |
+            python -m pip install -U pip
+            pip install -U numpy
+            pip install -U scipy
+            pip install -U pytest
+            pip install -U pytest-cov
+            pip install -U fast-pt
+            pip install -U camb
+            pip install -U isitgr
+            pip install -U cython
+            sudo -H apt-get install libgsl-dev libfftw3-dev
+
+        - name: Install CLASS
+          run: |
+            git clone https://github.com/lesgourg/class_public.git
+            cd class_public
+            git checkout v2.7.2
+            make
+
+        - name: Build CCL
+          run: |
+            python setup.py build
+            python setup.py develop
+
+        - name: Unit tests
+          run: OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
+
+        - name: Benchmarks
+          run: OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
