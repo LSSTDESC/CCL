@@ -260,9 +260,9 @@ class Cosmology(object):
             bcm_log10Mc=params['bcm_log10Mc'],
             bcm_etab=params['bcm_etab'],
             bcm_ks=params['bcm_ks'],
-            hmcode_A=params['hmcode_A'],
-            hmcode_eta=params['hmcode_eta'],
-            hmcode_logT=params['hmcode_logT'],
+            hmcode_A=params.get('hmcode_A', default=3.13),
+            hmcode_eta=params.get('hmcode_eta', default=0.603),
+            hmcode_logT=params.get('hmcode_logT', default=7.8),
             mu_0=params['mu_0'],
             sigma_0=params['sigma_0'])
         if 'z_mg' in params:
