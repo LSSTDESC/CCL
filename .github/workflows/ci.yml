@@ -25,7 +25,7 @@ jobs:
 
         - name: Install GFortran macOS
           if: contains( matrix.os, 'macos')
-          run: brew install gcc9 || brew upgrade gcc9 || true
+          run: brew install gcc@9 || brew upgrade gcc@9 || true
 
         - name: Install dependencies
           run: |
