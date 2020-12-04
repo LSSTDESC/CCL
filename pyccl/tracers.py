@@ -3,64 +3,6 @@ from .core import check
 from .background import comoving_radial_distance, growth_rate, growth_factor, Sig_MG
 from .pyutils import _check_array_params, NoneArr
 import numpy as np
-#MI tagged 
-def get_MG_transfer_function(cosmo, z, k=None):
-    """ This function allows to obtain the function Sigma(z,k) (1 or 2 D vector)
-        for an array redshift (i.e. scale factor) coming from the redshift 
-        distributiorn (defined by the user) and a single value or an array of k 
-        specified by the user. We obtain then Sigma(z,k) as a 1D array for those z 
-        and k arrays and then convert it to a 2D array taking into consideration 
-        the given sizes of the arrays for a and k. The MG parameter array goes then
-        as a multiplicative factor within the MG transfer function. 
-        If k is not specified then only a 1D array for Sigma(a,k=0) is used.
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): cosmology object used to
-            transform redshifts into distances.
-        z (float or tuple of arrays): a single z value (for z_CMB for example) 
-            or a tuple of arrays (z, N(z)) giving the redshift distribution of the
-            objects. The units are arbitrary; N(z) will be normalized to unity.
-	k (float or array): a single k value or an array of k for which we 
-            calculate the MG parameter Sigma(a,k). For now, the k range should 
-            be limited to linear scales. 
-    """
-	
-    if isinstance(z, float):
-        a_CMB=1/(1+z)
-        a = np.linspace(a_CMB, 1, 100) 
-    else:
-        a = 1./(1+z)
-    a.sort()
-    # Scale-dependant MG case with an array of k 
-    if (isinstance(k, (list, np.ndarray))): 	
-        k.sort()
-	# computing MG factor array 
-        mgfac_1d = 1
-        mgfac_1d += Sig_MG(cosmo, a, k)	
-	# converting 1D MG factor to a 2D array, so it is compatible 
-        # with the transfer_ka input structure in MG_add.tracer and 
-        # add.tracer
-        mgfac_2d = mgfac_1d.reshape(len(a),-1,order='F')  
-    	# converting to ln(k) array 
-        lk = np.log(k) 
-    	# setting transfer_ka for this case
-        mg_transfer = (a, lk, mgfac_2d)  
-    # Scale-dependant MG case for a signle value of k 
-    elif (isinstance(k, float) or isinstance(k, int)): 		
-        mgfac_1d = 1
-        mgfac_1d += Sig_MG(cosmo, a, k)
-        # setting transfer function with an array of a and a value of k
-        mg_transfer = (a, mgfac_1d)  
-    # Scale-independent MG case (for k=None)
-    else:	
-        k = None
-        # computing MG factor
-        mgfac_1d = 1
-        mgfac_1d += Sig_MG(cosmo, a, k)
-        # setting transfer function with an array of a and k=None
-        mg_transfer = (a, mgfac_1d)  
-		
-    return mg_transfer
 
 def get_density_kernel(cosmo, dndz):
     """This convenience function returns the radial kernel for
@@ -720,3 +662,153 @@ def _check_returned_tracer(return_val):
     else:
         tr, _ = return_val
     return tr
+
+
+
+def get_MG_transfer_function(cosmo, z, k=None):
+    """ This function allows to obtain the function Sigma(z,k) (1 or 2 D vector)
+        for an array redshift (i.e. scale factor) coming from the redshift 
+        distributiorn (defined by the user) and a single value or an array of k 
+        specified by the user. We obtain then Sigma(z,k) as a 1D array for those z 
+        and k arrays and then convert it to a 2D array taking into consideration 
+        the given sizes of the arrays for a and k. The MG parameter array goes then
+        as a multiplicative factor within the MG transfer function. 
+        If k is not specified then only a 1D array for Sigma(a,k=0) is used.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): cosmology object used to
+            transform redshifts into distances.
+        z (float or tuple of arrays): a single z value (for z_CMB for example) 
+            or a tuple of arrays (z, N(z)) giving the redshift distribution of the
+            objects. The units are arbitrary; N(z) will be normalized to unity.
+	k (float or array): a single k value or an array of k for which we 
+            calculate the MG parameter Sigma(a,k). For now, the k range should 
+            be limited to linear scales. 
+    """
+	
+    if isinstance(z, float):
+        a_CMB=1/(1+z)
+        a = np.linspace(a_CMB, 1, 100) 
+    else:
+        a = 1./(1+z)
+    a.sort()
+    # Scale-dependant MG case with an array of k 
+    if (isinstance(k, (list, np.ndarray))): 	
+        k.sort()
+	# computing MG factor array 
+        mgfac_1d = 1
+        mgfac_1d += Sig_MG(cosmo, a, k)	
+	# converting 1D MG factor to a 2D array, so it is compatible 
+        # with the transfer_ka input structure in MG_add.tracer and 
+        # add.tracer
+        mgfac_2d = mgfac_1d.reshape(len(a),-1,order='F')  
+    	# converting to ln(k) array 
+        lk = np.log(k) 
+    	# setting transfer_ka for this case
+        mg_transfer = (a, lk, mgfac_2d)  
+    # Scale-dependant MG case for a signle value of k 
+    elif (isinstance(k, float) or isinstance(k, int)): 		
+        mgfac_1d = 1
+        mgfac_1d += Sig_MG(cosmo, a, k)
+        # setting transfer function with an array of a and a value of k
+        mg_transfer = (a, mgfac_1d)  
+    # Scale-independent MG case (for k=None)
+    else:	
+        k = None
+        # computing MG factor
+        mgfac_1d = 1
+        mgfac_1d += Sig_MG(cosmo, a, k)
+        # setting transfer function with an array of a and k=None
+        mg_transfer = (a, mgfac_1d)  
+		
+    return mg_transfer
+
+
+    def MG_add_tracer(self, cosmo, kernel, mg_transfer, 
+                    k=None, der_bessel=0, der_angles=0,
+                    bias_transfer_a=None, bias_transfer_k=None):
+        """ function to set mg_transfer in the right format and add MG tracers 
+            for different cases including different cases and biases like intrinsic 
+            alignements (IA) when present
+        """
+        # case with no astro biases
+        if ((bias_transfer_a is None) and (bias_transfer_k is None)):    
+            if (isinstance(k, (list, np.ndarray))): 		
+                # Scale-dependent case with full k array 
+                self.add_tracer(cosmo, kernel,
+                    transfer_ka=mg_transfer, der_bessel=der_bessel,
+                    der_angles=der_angles)
+            elif (isinstance(k, float) or isinstance(k, int)): 		
+                # Scale-dependent case with  a single specified k value
+                self.add_tracer(cosmo, kernel,
+                    transfer_a=mg_transfer, der_bessel=der_bessel,
+                    der_angles=der_angles)
+            else:		
+                # Scale-independent case where k=None
+                self.add_tracer(cosmo, kernel,
+                    transfer_a=mg_transfer, der_bessel=der_bessel, 
+                    der_angles=der_angles)
+
+        #  case of an astro bias depending on a and  k 
+        elif ((bias_transfer_a is not None) and (bias_transfer_k is not None)):   
+            if (isinstance(k, (list, np.ndarray))):
+                # Scale-dependent case with full k array 
+                mg_transfer_new = (mg_transfer[0], mg_transfer[1],
+                                (bias_transfer_a[1] * (bias_transfer_k[1]*mg_transfer[2]).T).T)
+                self.add_tracer(cosmo, kernel,
+                    transfer_ka=mg_transfer_new,
+                    der_bessel=der_bessel, der_angles=der_angles)	
+            elif (isinstance(k, float) or isinstance(k, int)):
+                # Scale-dependent case with  a single specified k value
+                mg_transfer_new = (mg_transfer[0] ,mg_transfer[1] * bias_transfer_a[1])
+                self.add_tracer(cosmo, kernel,
+                    transfer_a=mg_transfer_new,
+                    der_bessel=der_bessel, der_angles=der_angles, transfer_k=bias_transfer_k )
+            else:
+                # Scale-independent case where k=None
+                mg_transfer_new = (mg_transfer[0] ,mg_transfer[1] * bias_transfer_a[1])
+                self.add_tracer(cosmo, kernel,
+                    transfer_a=mg_transfer_new,
+                    der_bessel=der_bessel, der_angles=der_angles, transfer_k=bias_transfer_k )
+				
+        #  case of an astro bias depending on a but not k  
+        elif ((bias_transfer_a is not None) and (bias_transfer_k is None)):    
+            if (isinstance(k, (list, np.ndarray))):
+                # Scale-dependent case with full k array 
+                mg_transfer_new = (mg_transfer[0], mg_transfer[1], 
+                                (bias_transfer_a[1] * mg_transfer[2].T).T)
+                self.add_tracer(cosmo, kernel,
+                    transfer_ka=mg_transfer_new,
+                     der_bessel=der_bessel, der_angles=der_angles)
+            elif (isinstance(k, float) or isinstance(k, int)):
+                # Scale-dependent case with  a single specified k value
+                mg_transfer_new = (mg_transfer[0] ,mg_transfer[1] * bias_transfer_a[1])
+                self.add_tracer(cosmo, kernel,
+                    transfer_a=mg_transfer_new,
+                     der_bessel=der_bessel, der_angles=der_angles)
+            else:
+                # Scale-independent case where k=None
+                mg_transfer_new = (mg_transfer[0] ,mg_transfer[1] * bias_transfer_a[1])
+                self.add_tracer(cosmo, kernel,
+                    transfer_a=mg_transfer_new,
+                     der_bessel=der_bessel, der_angles=der_angles)
+			
+        #  case of an astro bias depending on k but not a  
+        elif ((bias_transfer_a is None) and (bias_transfer_k is not None)): 
+            if (isinstance(k, (list, np.ndarray))):
+                # Scale-dependent case with full k array 
+                mg_transfer_new = (mg_transfer[0], mg_transfer[1],
+                                (bias_transfer_k[1] * mg_transfer[2]))
+                self.add_tracer(cosmo, kernel,
+                    transfer_ka=mg_transfer_new, 
+                    der_bessel=der_bessel, der_angles=der_angles)
+            elif (isinstance(k, float) or isinstance(k, int)):
+                # Scale-dependent case with  a single specified k value
+                self.add_tracer(cosmo, kernel,
+                    transfer_a=mg_transfer,
+                    der_bessel=der_bessel, der_angles=der_angles, transfer_k=bias_transfer_k)
+            else:
+                # Scale-independent case where k=None
+                self.add_tracer(cosmo, kernel,
+                    transfer_a=mg_transfer,
+                    der_bessel=der_bessel, der_angles=der_angles, transfer_k=bias_transfer_k)
