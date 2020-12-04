@@ -260,9 +260,6 @@ class Cosmology(object):
             bcm_log10Mc=params['bcm_log10Mc'],
             bcm_etab=params['bcm_etab'],
             bcm_ks=params['bcm_ks'],
-            hmcode_A=params.get('hmcode_A', default=3.13),
-            hmcode_eta=params.get('hmcode_eta', default=0.603),
-            hmcode_logT=params.get('hmcode_logT', default=7.8),
             mu_0=params['mu_0'],
             sigma_0=params['sigma_0'])
         if 'z_mg' in params:
@@ -272,6 +269,11 @@ class Cosmology(object):
         if 'm_nu' in params:
             inits['m_nu'] = params['m_nu']
             inits['m_nu_type'] = 'list'
+
+        # Add HMCode parameters to inits if they are in params
+        inits.update({k : params[k] 
+                        for k in ["hmcode_A", "hmcode_eta", "hmcode_logT"] 
+                        if k in params})
 
         return cls(**inits)
 
