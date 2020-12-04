@@ -1,11 +1,17 @@
 name: testing-travis-migration
 on: [push]
 jobs:
-    check-bats-version:
-      runs-on: ubuntu-latest
-      steps:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        py: [ 3.6 ]
+
+    steps:
         - uses: actions/checkout@v2
-        - uses: actions/setup-node@v1
-        - run: npm install -g bats
-        - run: bats -v
-        - run: ./.github/scripts/install.sh
+
+        - name: Set up Python ${{ matrix.py }}
+          uses: actions/setup-python@v2
+          with:
+            python-version: ${{ matrix.py }}
