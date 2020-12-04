@@ -225,7 +225,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
   if (*status == 0) {
     cosmo->data.p_lin = ccl_f2d_t_new(
       na, aa, nk, lk, lpk_ln, NULL, NULL, 0,
-      1, 2, ccl_f2d_cclgrowth, 1, NULL, 0, 2,
+      1, 2, ccl_f2d_cclgrowth, 1, 0, 2,
       ccl_f2d_3,status);
   }
 
@@ -251,7 +251,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
       ccl_f2d_t_free(cosmo->data.p_lin);
       cosmo->data.p_lin = ccl_f2d_t_new(
         na, aa, nk, lk, lpk_ln, NULL, NULL, 0,
-        1, 2, ccl_f2d_cclgrowth, 1, NULL, 0, 2,
+        1, 2, ccl_f2d_cclgrowth, 1, 0, 2,
         ccl_f2d_3,status);
     }
   }
