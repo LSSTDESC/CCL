@@ -26,6 +26,9 @@ jobs:
         - name: Install GFortran macOS
           run: alias gfortran='gfortran-9'
 
+        - name: Check gfortran
+          run: gfortran -dumpversion
+
         - name: Install dependencies
           run: |
             python -m pip install -U pip
