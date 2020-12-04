@@ -26,10 +26,10 @@ jobs:
         - name: Install GCC, GFortran macOS
           if: matrix.os == 'macos-latest'
           run: |
-            brew cask install gfortran || true
-            gfortran -dumpversion
             brew install gcc || true
             gcc -dumpversion
+            brew cask install gfortran || true
+            gfortran -dumpversion
 
         - name: Install GSL, FFTW (macos)
           if: matrix.os == 'macos-latest'
