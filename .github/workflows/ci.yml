@@ -8,9 +8,9 @@ jobs:
         os: [ ubuntu-latest ]
         py: [ 3.6, 3.7, 3.8, 3.9 ]
 
-        include:
-          - os: macos-latest
-            py: 3.7
+        #include:
+        #  - os: macos-latest
+        #    py: 3.7
 
     steps:
         - uses: actions/checkout@v2
