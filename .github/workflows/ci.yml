@@ -34,6 +34,7 @@ jobs:
           run: |
             brew install fftw || true
             brew install gsl || true
+            brew install swig || true
 
         - name: Install GSL, FFTW (linux)
           if: matrix.os == 'ubuntu-latest'
