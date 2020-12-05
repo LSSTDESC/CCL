@@ -55,22 +55,16 @@ jobs:
         - name: Install CLASS (linux)
           if: matrix.os == 'ubuntu-latest'
           run: |
-            git clone https://github.com/lesgourg/class_public.git
+            git clone -b v2.7.2 --single-branch --depth 1 "https://github.com/lesgourg/class_public.git"
             cd class_public
-            git checkout v2.7.2
             make
 
         - name: Install CLASS (macos)
           if: matrix.os == 'macos-latest'
           run: |
-            rm -rf class_public
-            git clone https://github.com/lesgourg/class_public.git
+            git clone -b v2.7.2 --single-branch --depth 1 "https://github.com/lesgourg/class_public.git"
             cd class_public
-            git checkout v2.7.2
-            cp Makefile Makefile_bak
-            sed -i.bak -e "s/CC       = gcc/CC       = gcc-9/g" Makefile
-            make
-            mv Makefile_bak Makefile
+            make CC=gcc-9
 
         - name: Flake
           run: |
