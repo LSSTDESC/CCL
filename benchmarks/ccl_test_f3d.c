@@ -154,6 +154,7 @@ CTEST2(f3d,baseline) {
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,tkka/tkka_model(khigh,khigh,atest));
 
+  ccl_a_finder_free(finda);
   ccl_f3d_t_free(tsp);
 }
 
@@ -217,5 +218,6 @@ CTEST2(f3d,factorized) {
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,tkka/tkka_model(khigh,khigh,atest));
 
+  ccl_a_finder_free(finda);
   ccl_f3d_t_free(tsp);
 }
