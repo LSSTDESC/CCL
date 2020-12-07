@@ -78,7 +78,9 @@ jobs:
 
         - name: C unit tests
           run: |
-            CLASS_PARAM_DIR=./build/extern/share/class/ OMP_NUM_THREADS=2 ./build/check_ccl
+            cd build
+            make -j4
+            CLASS_PARAM_DIR=./extern/share/class/ OMP_NUM_THREADS=2 ./check_ccl
 
         - name: Python unit tests
           run: OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
