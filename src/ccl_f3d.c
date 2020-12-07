@@ -227,7 +227,7 @@ ccl_f3d_t *ccl_f3d_t_new(int na,double *a_arr,
                                  extrap_order_lok, extrap_order_hik,
                                  extrap_linear_growth,
                                  is_tkka_log,
-                                 growth_factor_0, growth_exponent,
+                                 growth_factor_0, growth_exponent/2,
                                  interp_type, status);
       f3d->fka_2 = ccl_f2d_t_new(na, a_arr,
                                  nk, lk_arr,
@@ -235,7 +235,7 @@ ccl_f3d_t *ccl_f3d_t_new(int na,double *a_arr,
                                  extrap_order_lok, extrap_order_hik,
                                  extrap_linear_growth,
                                  is_tkka_log,
-                                 growth_factor_0, growth_exponent,
+                                 growth_factor_0, growth_exponent/2,
                                  interp_type, status);
     }
     else {
@@ -366,11 +366,11 @@ double ccl_f3d_t_eval(ccl_f3d_t *f3d,double lk1,double lk2,double a,ccl_a_finder
         tkka += dtkka2 * (lk2 - lk2_ev);
       tkka_post = tkka;
     }
-  }
 
-  // Exponentiate if needed
-  if (f3d->is_log)
-    tkka_post = exp(tkka_post);
+    // Exponentiate if needed
+    if (f3d->is_log)
+      tkka_post = exp(tkka_post);
+  }
 
   // Extrapolate in a if needed
   if (is_hiz) {
@@ -418,8 +418,5 @@ void ccl_f3d_t_free(ccl_f3d_t *f3d)
 
 ccl_a_finder *ccl_a_finder_new_from_f3d(ccl_f3d_t *f3d)
 {
-  double a=1;
-  return NULL;
-  //ccl_a_finder *finda = ccl_a_finder(f3d->na, f3d->a_arr);
-  //return finda;
+  return ccl_a_finder_new(f3d->na, f3d->a_arr);
 }
