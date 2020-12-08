@@ -132,7 +132,7 @@ class MassFunc(object):
 
         Returns:
             float or array_like: mass function \
-                :math:`dn/d\\log_{10}M` in units of Mpc^-3.
+                :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
         """
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,

@@ -15,41 +15,41 @@ from .pk2d import Pk2D
 
 # Configuration types
 transfer_function_types = {
-    None:               lib.transfer_none,
-    'eisenstein_hu':    lib.eisenstein_hu,
-    'bbks':             lib.bbks,
-    'boltzmann_class':  lib.boltzmann_class,
-    'boltzmann_camb':   lib.boltzmann_camb,
+    None: lib.transfer_none,
+    'eisenstein_hu': lib.eisenstein_hu,
+    'bbks': lib.bbks,
+    'boltzmann_class': lib.boltzmann_class,
+    'boltzmann_camb': lib.boltzmann_camb,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
 }
 
 matter_power_spectrum_types = {
-    'halo_model':   lib.halo_model,
-    'halofit':      lib.halofit,
-    'linear':       lib.linear,
-    'emu':          lib.emu
+    'halo_model': lib.halo_model,
+    'halofit': lib.halofit,
+    'linear': lib.linear,
+    'emu': lib.emu
 }
 
 baryons_power_spectrum_types = {
-    'nobaryons':   lib.nobaryons,
-    'bcm':         lib.bcm
+    'nobaryons': lib.nobaryons,
+    'bcm': lib.bcm
 }
 
 # List which transfer functions can be used with the muSigma_MG
 # parameterisation of modified gravity
 
 mass_function_types = {
-    'angulo':      lib.angulo,
-    'tinker':      lib.tinker,
-    'tinker10':    lib.tinker10,
-    'watson':      lib.watson,
+    'angulo': lib.angulo,
+    'tinker': lib.tinker,
+    'tinker10': lib.tinker10,
+    'watson': lib.watson,
     'shethtormen': lib.shethtormen
 }
 
 halo_concentration_types = {
-    'bhattacharya2011':          lib.bhattacharya2011,
-    'duffy2008':                 lib.duffy2008,
-    'constant_concentration':    lib.constant_concentration,
+    'bhattacharya2011': lib.bhattacharya2011,
+    'duffy2008': lib.duffy2008,
+    'constant_concentration': lib.constant_concentration,
 }
 
 emulator_neutrinos_types = {
@@ -186,9 +186,15 @@ class Cosmology(object):
         # This will change to True once the "_set_background_from_arrays"
         # is called.
         self._background_on_input = False
-        # This will change to True once the "set_linear_power_from_arrays"
+        # This will change to True once the "_set_growth_from_arrays"
+        # is called.
+        self._growth_on_input = False
+        # This will change to True once the "_set_linear_power_from_arrays"
         # is called.
         self._linear_power_on_input = False
+        # This will change to True once the "_set_nonlin_power_from_arrays"
+        # is called.
+        self._nonlinear_power_on_input = False
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -337,6 +343,10 @@ class Cosmology(object):
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, z_mg=None, df_mg=None, Omega_g=None):
         """Build a ccl_parameters struct"""
+
+        # Check to make sure Omega_k is within reasonable bounds.
+        if Omega_k is not None and Omega_k < -1.0135:
+            raise ValueError("Omega_k must be more than -1.0135.")
 
         # Set nz_mg (no. of redshift bins for modified growth fns.)
         if z_mg is not None and df_mg is not None:
@@ -510,17 +520,17 @@ class Cosmology(object):
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
                 self._params, status = lib.parameters_create_nu(
-                   Omega_c, Omega_b, Omega_k, Neff,
-                   w0, wa, h, norm_pk,
-                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, mnu_final_list, status)
+                    Omega_c, Omega_b, Omega_k, Neff,
+                    w0, wa, h, norm_pk,
+                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    mu_0, sigma_0, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
                 self._params, status = lib.parameters_create_nu_vec(
-                   Omega_c, Omega_b, Omega_k, Neff,
-                   w0, wa, h, norm_pk,
-                   n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                   mu_0, sigma_0, z_mg, df_mg, mnu_final_list, status)
+                    Omega_c, Omega_b, Omega_k, Neff,
+                    w0, wa, h, norm_pk,
+                    n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    mu_0, sigma_0, z_mg, df_mg, mnu_final_list, status)
             check(status)
         finally:
             lib.cvar.constants.T_CMB = T_CMB_old
@@ -648,20 +658,21 @@ class Cosmology(object):
             check(status, self)
         else:
             # Check that input arrays have the same size.
-            if not (self.a_array.shape == self.chi_array.shape
+            if not (self.a_array_back.shape == self.chi_array.shape
                     == self.hoh0_array.shape):
                 raise ValueError("Input arrays must have the same size.")
-            # Check that a_array is a monotonically increasing array.
-            if not np.array_equal(self.a_array, np.sort(self.a_array)):
+            # Check that a_array_back is a monotonically increasing array.
+            if not np.array_equal(self.a_array_back,
+                                  np.sort(self.a_array_back)):
                 raise ValueError("Input scale factor array is not "
                                  "monotonically increasing.")
-            # Check that the last element of a_array is 1:
-            if np.abs(self.a_array[-1]-1.0) > 1e-5:
+            # Check that the last element of a_array_back is 1:
+            if np.abs(self.a_array_back[-1]-1.0) > 1e-5:
                 raise ValueError("The last element of the input scale factor"
                                  "array must be 1.0.")
             status = 0
             status = lib.cosmology_distances_from_input(self.cosmo,
-                                                        self.a_array,
+                                                        self.a_array_back,
                                                         self.chi_array,
                                                         self.hoh0_array,
                                                         status)
@@ -692,25 +703,27 @@ class Cosmology(object):
                     "with massive neutrinos in CCL!",
                     category=CCLWarning)
 
-        if not self._background_on_input:
+        if not self._growth_on_input:
             status = 0
             status = lib.cosmology_compute_growth(self.cosmo, status)
             check(status, self)
         else:
             # Check that input arrays have the same size.
-            if not (self.a_array.shape == self.growth_array.shape
+            if not (self.a_array_grth.shape == self.growth_array.shape
                     == self.fgrowth_array.shape):
                 raise ValueError("Input arrays must have the same size.")
-            # Check that a_array is a monotonically increasing array.
-            if not np.array_equal(self.a_array, np.sort(self.a_array)):
+            # Check that a_array_grth is a monotonically increasing array.
+            if not np.array_equal(self.a_array_grth,
+                                  np.sort(self.a_array_grth)):
                 raise ValueError("Input scale factor array is not "
                                  "monotonically increasing.")
-            # Check that the last element of a_array is 1:
-            if np.abs(self.a_array[-1]-1.0) > 1e-5:
+            # Check that the last element of a_array_grth is 1:
+            if np.abs(self.a_array_grth[-1]-1.0) > 1e-5:
                 raise ValueError("The last element of the input scale factor"
                                  "array must be 1.0.")
             status = 0
-            status = lib.cosmology_growth_from_input(self.cosmo, self.a_array,
+            status = lib.cosmology_growth_from_input(self.cosmo,
+                                                     self.a_array_grth,
                                                      self.growth_array,
                                                      self.fgrowth_array,
                                                      status)
@@ -779,9 +792,9 @@ class Cosmology(object):
             raise ValueError("Cannot compute linear power spectrum from"
                              " input without input arrays initialized.")
         pk_lin = Pk2D(pkfunc=None,
-                      a_arr=self.a_array,
-                      lk_arr=np.log(self.k_array),
-                      pk_arr=self.pk_array,
+                      a_arr=self.a_array_pkln,
+                      lk_arr=np.log(self.k_array_pkln),
+                      pk_arr=self.pk_array_pkln,
                       is_logp=False,
                       extrap_order_lok=1,
                       extrap_order_hik=2,
@@ -825,7 +838,7 @@ class Cosmology(object):
         hmc = hal.HMCalculator(self, hmf, hbf, mdef)
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
-    def compute_nonlin_power(self):
+    def _compute_nonlin_power_internal(self):
         """Compute the non-linear power spectrum."""
         if self.has_nonlin_power:
             return
@@ -871,6 +884,33 @@ class Cosmology(object):
                 "in the `halos` module.", category=CCLWarning)
             psp_py = self._get_halo_model_nonlin_power()
             psp = psp_py.psp
+
+        status = 0
+        status = lib.cosmology_compute_nonlin_power(self.cosmo, psp, status)
+        check(status, self)
+
+    def compute_nonlin_power(self):
+        """Call the appropriate function to compute the linear power
+        spectrum, either read from input or calculated internally,"""
+        if self._nonlinear_power_on_input:
+            self._compute_nonlin_power_from_arrays()
+        else:
+            self._compute_nonlin_power_internal()
+
+    def _compute_nonlin_power_from_arrays(self):
+        if not self._nonlinear_power_on_input:
+            raise ValueError("Cannot compute non-linear power spectrum from"
+                             "input without input arrays initialized.")
+        pk_nln = Pk2D(pkfunc=None,
+                      a_arr=self.a_array_pknl,
+                      lk_arr=np.log(self.k_array_pknl),
+                      pk_arr=self.pk_array_pknl,
+                      is_logp=False,
+                      extrap_order_lok=1,
+                      extrap_order_hik=2,
+                      cosmo=None)
+
+        psp = pk_nln.psp
 
         status = 0
         status = lib.cosmology_compute_nonlin_power(self.cosmo, psp, status)
@@ -950,8 +990,7 @@ class Cosmology(object):
         return "status(%s): %s" % (status, msg)
 
     def _set_background_from_arrays(self, a_array=None, chi_array=None,
-                                    hoh0_array=None, growth_array=None,
-                                    fgrowth_array=None):
+                                    hoh0_array=None):
         """
         Function to store distances and growth splines from input arrays.
 
@@ -963,25 +1002,45 @@ class Cosmology(object):
                 at points indicated by the a_array.
             hoh0_array (array_like, optional): Hubble parameter divided by the
                 value of H0.
+        """
+        if self.has_distances:
+            raise ValueError("Background cosmology has already been"
+                             " initialized and cannot be reset.")
+        else:
+            self._background_on_input = True
+            self.a_array_back = a_array
+            self.chi_array = chi_array
+            self.hoh0_array = hoh0_array
+            # Check if the input arrays are all parsed
+            if ((a_array is None) or (chi_array is None)
+                    or (hoh0_array is None)):
+                raise ValueError("Input arrays not parsed.")
+
+    def _set_growth_from_arrays(self, a_array=None, growth_array=None,
+                                fgrowth_array=None):
+        """
+        Function to store distances and growth splines from input arrays.
+
+        Args:
+            a_array (array_like, optional): Scale factor array with values on
+                which the input arrays are computed. The array must end on the
+                value of 1.0.
             growth_array (array_like, optional): Growth factor array, defined
                 as D(a)=P(k,a)/P(k,a=1), assuming no scale dependence. It is
                 assumed that D(a<<1)~a so that D(1.0) will be used for
                 normalization.
             fgrowth_array (array_like, optional): Growth rate array.
         """
-        if self.has_distances or self.has_growth:
-            raise ValueError("Background cosmology has already been"
+        if self.has_growth:
+            raise ValueError("Linear growth has already been"
                              " initialized and cannot be reset.")
         else:
-            self._background_on_input = True
-            self.a_array = a_array
-            self.chi_array = chi_array
-            self.hoh0_array = hoh0_array
+            self._growth_on_input = True
+            self.a_array_grth = a_array
             self.growth_array = growth_array
             self.fgrowth_array = fgrowth_array
             # Check if the input arrays are all parsed
-            if ((a_array is None) or (chi_array is None)
-                    or (hoh0_array is None) or (growth_array is None)
+            if ((a_array is None) or (growth_array is None)
                     or (fgrowth_array is None)):
                 raise ValueError("Input arrays not parsed.")
 
@@ -1015,11 +1074,77 @@ class Cosmology(object):
         else:
             if ((a_array is None) or (k_array is None)
                     or (pk_array is None)):
-                raise ValueError("One or more input array for a, k,"
-                                 " or Pk is not parsed.")
+                raise ValueError("One or more input arrays for a, k,"
+                                 " or Pk are not parsed.")
             self.cosmo.config.transfer_function_method = lib.pklin_from_input
             self._config_init_kwargs['transfer_function'] = 'pklin_from_input'
             self._linear_power_on_input = True
-            self.a_array = a_array
-            self.k_array = k_array
-            self.pk_array = pk_array
+            self.a_array_pkln = a_array
+            self.k_array_pkln = k_array
+            self.pk_array_pkln = pk_array
+
+    def _set_nonlin_power_from_arrays(self, a_array=None, k_array=None,
+                                      pk_array=None):
+        """
+        This function initializes the arrays used for parsing
+        a non-linear power spectrum from input. Call this function
+        to have the power spectrum be read from input and not
+        computed by CCL.
+
+        a_array (array): an array holding values of the scale factor
+        k_array (array): an array holding values of the wavenumber
+           in units of Mpc^-1).
+        pk_array (array): a 2D array containing the values of the power
+           spectrum at the values of the scale factor and the wavenumber
+           held by `a_array` and `k_array`. The shape of this array must be
+           `[na,nk]`, where `na` is the size of `a_array` and `nk` is the
+           size of `k_array`. This array can be provided in a flattened
+           form as long as the total size matches `nk*na`.
+           Note that, if you pass your own Pk array, you
+           are responsible of making sure that it is sufficiently well
+           sampled (i.e. the resolution of `a_array` and `k_array` is high
+           enough to sample the main features in the power spectrum).
+           For reference, CCL will use bicubic interpolation to evaluate
+           the power spectrum at any intermediate point in k and a.
+        """
+        if self.has_nonlin_power:
+            raise ValueError("Non-linear power spectrum has been initialized"
+                             "and cannot be reset.")
+        else:
+            if ((a_array is None) or (k_array is None)
+                    or (pk_array is None)):
+                raise ValueError("One or more input arrays for a, k,"
+                                 " or Pk are not parsed.")
+            self.cosmo.config.matter_power_spectrum_method \
+                = lib.pknl_from_input
+            self._config_init_kwargs['matter_power_spectrum']\
+                = 'pknl_from_input'
+            self._nonlinear_power_on_input = True
+            self.a_array_pknl = a_array
+            self.k_array_pknl = k_array
+            self.pk_array_pknl = pk_array
+
+
+class CosmologyVanillaLCDM(Cosmology):
+    """A cosmology with typical flat Lambda-CDM parameters (`Omega_c=0.25`,
+    `Omega_b = 0.05`, `Omega_k = 0`, `sigma8 = 0.81`, `n_s = 0.96`, `h = 0.67`,
+    no massive neutrinos).
+
+    Args:
+        **kwargs (dict): a dictionary of parameters passed as arguments
+            to the `Cosmology` constructor. It should not contain any of
+            the LambdaCDM parameters (`"Omega_c"`, `"Omega_b"`, `"n_s"`,
+            `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
+    """
+    def __init__(self, **kwargs):
+        p = {'h': 0.67,
+             'Omega_c': 0.25,
+             'Omega_b': 0.05,
+             'n_s': 0.96,
+             'sigma8': 0.81,
+             'A_s': None}
+        if any(k in kwargs for k in p.keys()):
+            raise ValueError("You cannot change the LCDM parameters: "
+                             "%s " % list(p.keys()))
+        kwargs.update(p)
+        super(CosmologyVanillaLCDM, self).__init__(**kwargs)

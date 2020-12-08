@@ -12,6 +12,7 @@ import pytest
     np.array([1, 2, 3]),
     [1, 2, 3]])
 def test_haloprofile_smoke(func, r):
+    from pyccl.pyutils import assert_warns
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
@@ -19,6 +20,9 @@ def test_haloprofile_smoke(func, r):
     c = 5
     mass = 1e14
     odelta = 200
-    prof = getattr(ccl, func)(cosmo, c, mass, odelta, a, r)
+    # These are all deprecated
+    prof = assert_warns(
+        ccl.CCLWarning,
+        getattr(ccl, func), cosmo, c, mass, odelta, a, r)
     assert np.all(np.isfinite(prof))
     assert np.shape(prof) == np.shape(r)

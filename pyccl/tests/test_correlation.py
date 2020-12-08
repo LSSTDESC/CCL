@@ -1,6 +1,7 @@
 import numpy as np
 import pyccl as ccl
 import pytest
+from timeit import default_timer
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -33,6 +34,7 @@ def test_correlation_smoke(method):
                                   ['l+', 'GG+'],
                                   ['l-', 'GG-']])
 def test_correlation_newtypes(typs):
+    from pyccl.pyutils import assert_warns
     z = np.linspace(0., 1., 200)
     n = np.ones(z.shape)
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
@@ -41,8 +43,9 @@ def test_correlation_newtypes(typs):
     cl = ccl.angular_cl(COSMO, lens, lens, ell)
 
     theta = np.logspace(-2., np.log10(5.), 5)
-    corr_old = ccl.correlation(COSMO, ell, cl, theta,
-                               corr_type=typs[0])
+    corr_old = assert_warns(
+        ccl.CCLWarning,
+        ccl.correlation, COSMO, ell, cl, theta, corr_type=typs[0])
     corr_new = ccl.correlation(COSMO, ell, cl, theta,
                                type=typs[1])
     assert np.all(corr_new == corr_old)
@@ -123,6 +126,30 @@ def test_correlation_pi_sigma_smoke(sval):
 def test_correlation_raises():
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, [1], [1e-3], [1], method='blah')
-
+    with pytest.raises(ValueError):
+        ccl.correlation(COSMO, [1], [1e-3], [1], type='blah')
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, [1], [1e-3], [1], corr_type='blah')
+
+
+def test_correlation_zero():
+    ell = np.arange(2, 100000)
+    C_ell = np.zeros(ell.size)
+    theta = np.logspace(0, 2, 10000)
+    t0 = default_timer()
+    corr = ccl.correlation(COSMO, ell, C_ell, theta)
+    t1 = default_timer()
+    # if the short-cut has worked this should take
+    # less than 1 second at the absolute outside
+    assert t1 - t0 < 1.0
+    assert (corr == np.zeros(theta.size)).all()
+
+
+def test_correlation_zero_ends():
+    # This should give an error instead of crashing
+    ell = np.arange(2, 1001)
+    C_ell = np.zeros(ell.size)
+    C_ell[500] = 1.0
+    theta = np.logspace(0, 2, 20)
+    with pytest.raises(ccl.CCLError):
+        ccl.correlation(COSMO, ell, C_ell, theta)

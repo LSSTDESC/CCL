@@ -1,5 +1,5 @@
 from . import ccllib as lib
-from .pyutils import _vectorize_fn2
+from .pyutils import _vectorize_fn2, _vectorize_fn
 import numpy as np
 from .core import check
 
@@ -108,3 +108,21 @@ def sigma8(cosmo):
     """
     cosmo.compute_linear_power()
     return sigmaR(cosmo, 8.0 / cosmo['h'])
+
+
+def kNL(cosmo, a):
+    """Scale for the non-linear cut.
+
+    .. note:: k_NL is calculated based on Lagrangian perturbation theory as the
+              inverse of the variance of the displacement field, i.e.
+              k_NL = 1/sigma_eta = [1/(6 pi^2) * int P_L(k) dk]^{-1/2}.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+
+    Returns:
+        float or array-like: Scale of non-linear cut-off; Mpc^-1.
+    """
+    cosmo.compute_linear_power()
+    return _vectorize_fn(lib.kNL, lib.kNL_vec, cosmo, a)

@@ -1,9 +1,9 @@
 from . import ccllib as lib
 from .core import check
-from .background import comoving_radial_distance, growth_rate, growth_factor
+from .background import comoving_radial_distance, growth_rate, \
+    growth_factor, scale_factor_of_chi
 from .pyutils import _check_array_params, NoneArr
 import numpy as np
-import collections
 
 
 def get_density_kernel(cosmo, dndz):
@@ -23,12 +23,7 @@ def get_density_kernel(cosmo, dndz):
             The units are arbitrary; N(z) will be normalized
             to unity.
     """
-    if ((not isinstance(dndz, collections.Iterable))
-        or (len(dndz) != 2)
-        or (not (isinstance(dndz[0], collections.Iterable)
-                 and isinstance(dndz[1], collections.Iterable)))):
-        raise ValueError("dndz needs to be a tuple of two arrays.")
-    z_n, n = _check_array_params(dndz)
+    z_n, n = _check_array_params(dndz, 'dndz')
     # this call inits the distance splines neded by the kernel functions
     chi = comoving_radial_distance(cosmo, 1./(1.+z_n))
     status = 0
@@ -59,18 +54,12 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
             giving the magnification bias as a function of redshift. If
             `None`, s=0 will be assumed
     """
-    if ((not isinstance(dndz, collections.Iterable))
-        or (len(dndz) != 2)
-        or (not (isinstance(dndz[0], collections.Iterable)
-                 and isinstance(dndz[1], collections.Iterable)))):
-        raise ValueError("dndz needs to be a tuple of two arrays.")
-
     # we need the distance functions at the C layer
     cosmo.compute_distances()
 
-    z_n, n = _check_array_params(dndz)
+    z_n, n = _check_array_params(dndz, 'dndz')
     has_magbias = mag_bias is not None
-    z_s, s = _check_array_params(mag_bias)
+    z_s, s = _check_array_params(mag_bias, 'mag_bias')
 
     # Calculate number of samples in chi
     nchi = lib.get_nchi_lensing_kernel_wrapper(z_n)
@@ -366,10 +355,10 @@ class Tracer(object):
         is_a_constant = (transfer_ka is None) and (transfer_a is None)
         is_kernel_constant = kernel is None
 
-        chi_s, wchi_s = _check_array_params(kernel)
+        chi_s, wchi_s = _check_array_params(kernel, 'kernel')
         if is_factorizable:
-            a_s, ta_s = _check_array_params(transfer_a)
-            lk_s, tk_s = _check_array_params(transfer_k)
+            a_s, ta_s = _check_array_params(transfer_a, 'transfer_a')
+            lk_s, tk_s = _check_array_params(transfer_k, 'transfer_k')
             tka_s = NoneArr
             if (not is_a_constant) and (a_s.shape != ta_s.shape):
                 raise ValueError("Time-dependent transfer arrays "
@@ -378,7 +367,8 @@ class Tracer(object):
                 raise ValueError("Scale-dependent transfer arrays "
                                  "should have the same shape")
         else:
-            a_s, lk_s, tka_s = _check_array_params(transfer_ka, arr3=True)
+            a_s, lk_s, tka_s = _check_array_params(transfer_ka, 'transer_ka',
+                                                   arr3=True)
             if tka_s.shape != (len(a_s), len(lk_s)):
                 raise ValueError("2D transfer array has inconsistent "
                                  "shape. Should be (na,nk)")
@@ -404,7 +394,10 @@ class Tracer(object):
         self._trc.append(_check_returned_tracer(ret))
 
     def __del__(self):
-        if hasattr(self, '_trc'):
+        # Sometimes lib is freed before some Tracers, in which case, this
+        # doesn't work.
+        # So just check that lib.cl_tracer_t_free is still a real function.
+        if hasattr(self, '_trc') and lib.cl_tracer_t_free is not None:
             for t in self._trc:
                 lib.cl_tracer_t_free(t)
 
@@ -436,7 +429,7 @@ class NumberCountsTracer(Tracer):
         cosmo.compute_distances()
 
         from scipy.interpolate import interp1d
-        z_n, n = _check_array_params(dndz)
+        z_n, n = _check_array_params(dndz, 'dndz')
         self._dndz = interp1d(z_n, n, bounds_error=False,
                               fill_value=0)
 
@@ -446,7 +439,7 @@ class NumberCountsTracer(Tracer):
             if kernel_d is None:
                 kernel_d = get_density_kernel(cosmo, dndz)
             # Transfer
-            z_b, b = _check_array_params(bias)
+            z_b, b = _check_array_params(bias, 'bias')
             # Reverse order for increasing a
             t_a = (1./(1+z_b[::-1]), b[::-1])
             self.add_tracer(cosmo, kernel=kernel_d, transfer_a=t_a)
@@ -455,7 +448,7 @@ class NumberCountsTracer(Tracer):
             if kernel_d is None:
                 kernel_d = get_density_kernel(cosmo, dndz)
             # Transfer (growth rate)
-            z_b, _ = _check_array_params(dndz)
+            z_b, _ = _check_array_params(dndz, 'dndz')
             a_s = 1./(1+z_b[::-1])
             t_a = (a_s, -growth_rate(cosmo, a_s))
             self.add_tracer(cosmo, kernel=kernel_d,
@@ -497,7 +490,7 @@ class WeakLensingTracer(Tracer):
         cosmo.compute_distances()
 
         from scipy.interpolate import interp1d
-        z_n, n = _check_array_params(dndz)
+        z_n, n = _check_array_params(dndz, 'dndz')
         self._dndz = interp1d(z_n, n, bounds_error=False,
                               fill_value=0)
 
@@ -507,7 +500,7 @@ class WeakLensingTracer(Tracer):
             self.add_tracer(cosmo, kernel=kernel_l,
                             der_bessel=-1, der_angles=2)
         if ia_bias is not None:  # Has intrinsic alignments
-            z_a, tmp_a = _check_array_params(ia_bias)
+            z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
             # Kernel
             kernel_i = get_density_kernel(cosmo, dndz)
             if use_A_ia:
@@ -548,6 +541,39 @@ class CMBLensingTracer(Tracer):
 
         kernel = get_kappa_kernel(cosmo, z_source, n_samples)
         self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
+
+
+class tSZTracer(Tracer):
+    """Specific :class:`Tracer` associated with the thermal Sunyaev Zel'dovich
+    Compton-y parameter. The radial kernel for this tracer is simply given by
+
+    .. math::
+       W(\\chi) = \\frac{\\sigma_T}{m_ec^2} \\frac{1}{1+z},
+
+    where :math:`\\sigma_T` is the Thomson scattering cross section and
+    :math:`m_e` is the electron mass.
+
+    Any angular power spectra computed with this tracer, should use
+    a three-dimensional power spectrum involving the electron pressure
+    in physical (non-comoving) units of :math:`eV\\,{\\rm cm}^{-3}`.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
+        zmax (float): maximum redshift up to which we define the
+            kernel.
+        n_chi (float): number of intervals in the radial comoving
+            distance on which we sample the kernel.
+    """
+    def __init__(self, cosmo, z_max=6., n_chi=1024):
+        self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+        chi_arr = np.linspace(0, self.chi_max, n_chi)
+        a_arr = scale_factor_of_chi(cosmo, chi_arr)
+        # This is \sigma_T / (m_e * c^2)
+        prefac = 4.01710079e-06
+        w_arr = prefac * a_arr
+
+        self._trc = []
+        self.add_tracer(cosmo, kernel=(chi_arr, w_arr))
 
 
 def _check_returned_tracer(return_val):

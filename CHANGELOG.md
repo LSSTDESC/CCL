@@ -1,4 +1,14 @@
 # Unreleased
+
+## Python library
+- Added more developer documentation (#776).
+- Added number counts integrals for clusters (#787)
+
+## C library
+-
+
+# v2.1.0 Changes
+
 ## Python library
 - Perturbation theory power spectra #734
 - Generalized Tinker mass function to all SO mass definitions (#736)
@@ -14,6 +24,8 @@
 - Improved implementation of halo model quantities (n(M), b(M), c(M)) (#668, #655, #656, #657, #636).
 - Add straightforward single massive neutrino option (#730).
 - Updated MG support via mu / Sigma (scale-independent) with higher accuracy implementation (#737)
+- Added function to estimate the scale at which non-linear structure formation becomes
+  important for the computation of the matter power spectrum (#760).
 
 ## C library
 - Deprecated old halo model (#736)
