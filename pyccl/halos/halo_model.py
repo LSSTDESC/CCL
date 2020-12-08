@@ -6,7 +6,7 @@ from .profiles import HaloProfile
 from .profiles_2pt import Profile2pt
 from ..core import check
 from ..pk2d import Pk2D
-from ..tk2d import Tk3D
+from ..tk3d import Tk3D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import rho_x
 from ..pyutils import _spline_integrate
