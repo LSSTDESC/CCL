@@ -56,7 +56,7 @@ void tk3d_eval_multi(ccl_f3d_t *tsp,double* lkarr,int nk,
   ccl_a_finder *finda = ccl_a_finder_new_from_f3d(tsp);
   for(int ii=0;ii<nk;ii++) {
     for(int jj=0;jj<nk;jj++) {
-      doutput[jj+nk*ii]=ccl_f3d_t_eval(tsp,lkarr[ii],lkarr[jj],
+      doutput[jj+nk*ii]=ccl_f3d_t_eval(tsp,lkarr[jj],lkarr[ii],
                                        a,finda,NULL,status);
     }
   }

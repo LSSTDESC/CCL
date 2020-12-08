@@ -49,15 +49,19 @@ class Tk3D(object):
     def eval(self, k, a):
         status = 0
 
+        if np.ndim(a) != 0:
+            raise TypeError("a must be a floating point number")
+
         if isinstance(k, int):
             k = float(k)
         if isinstance(k, float):
             f, status = lib.tk3d_eval_single(self.tsp, np.log(k), a, status)
         else:
             k_use = np.atleast_1d(k)
+            nk = k_use.size
             f, status = lib.tk3d_eval_multi(self.tsp, np.log(k_use),
-                                            a, k_use.size*k_use.size,
-                                            status)
+                                            a, nk*nk, status)
+            f = f.reshape([nk, nk])
         check(status)
         return f
 
