@@ -1,3 +1,4 @@
+import warnings
 from .. import ccllib as lib
 from .hmfunc import MassFunc
 from .hbias import HaloBias
@@ -5,10 +6,12 @@ from .profiles import HaloProfile
 from .profiles_2pt import Profile2pt
 from ..core import check
 from ..pk2d import Pk2D
+from ..tk2d import Tk3D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import rho_x
 from ..pyutils import _spline_integrate
 from .. import background
+from ..errors import CCLWarning
 import numpy as np
 
 physical_constants = lib.cvar.constants
@@ -346,7 +349,7 @@ class HMCalculator(object):
                                       prof2=prof2, mass_def=self._mdef).T
         uk34 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
                                       prof2=prof4, mass_def=self._mdef).T
-        i04 = self._integrate_over_mf(uk12[:, None, :] * uk34[None, :, :])
+        i04 = self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
         return i04
 
 
@@ -671,3 +674,109 @@ def halomod_Pk2D(cosmo, hmc, prof,
                 extrap_order_hik=extrap_order_hik,
                 cosmo=cosmo, is_logp=False)
     return pk2d
+
+
+def halomod_trispectrum_1h(cosmo, hmc, k, a,
+                           prof1, prof2=None, prof12_2pt=None,
+                           prof3=None, prof4=None, prof34_2pt=None,
+                           normprof1=False, normprof2=False,
+                           normprof3=False, normprof4=False):
+    a_use = np.atleast_1d(a)
+    k_use = np.atleast_1d(k)
+
+    # Check inputs
+    if not isinstance(prof1, HaloProfile):
+        raise TypeError("prof1 must be of type `HaloProfile`")
+    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
+    if prof12_2pt is None:
+        prof12_2pt = Profile2pt()
+    elif not isinstance(prof12_2pt, Profile2pt):
+        raise TypeError("prof12_2pt must be of type "
+                        "`Profile2pt` or `None`")
+
+    def get_norm(normprof, prof, sf):
+        if normprof:
+            return hmc.profile_norm(cosmo, sf, prof)
+        else:
+            return 1
+
+    na = len(a_use)
+    nk = len(k_use)
+    out = np.zeros([na, nk, nk])
+    for ia, aa in enumerate(a_use):
+        # Compute profile normalizations
+        norm1 = get_norm(normprof1, prof1, aa)
+        # Compute second profile normalization
+        if prof2 is None:
+            norm2 = norm1
+        else:
+            norm2 = get_norm(normprof2, prof2, aa)
+        if prof3 is None:
+            norm3 = norm1
+        else:
+            norm3 = get_norm(normprof3, prof3, aa)
+        if prof4 is None:
+            norm4 = norm3
+        else:
+            norm4 = get_norm(normprof4, prof4, aa)
+
+        norm = norm1 * norm2 * norm3 * norm4
+
+        # Compute trispectrum at this redshift
+        tk_1h = hmc.I_0_4(cosmo, k_use, aa,
+                          prof1, prof12_2pt, prof2=prof2,
+                          prof3=prof3, prof34_2pt=prof34_2pt,
+                          prof4=prof4)
+
+        # Normalize
+        out[ia, :, :] = tk_1h * norm
+
+    if np.ndim(a) == 0:
+        out = np.squeeze(out, axis=0)
+    if np.ndim(k) == 0:
+        out = np.squeeze(out, axis=-1)
+        out = np.squeeze(out, axis=-1)
+    return out
+
+
+def halomod_Tk3D_1h(cosmo, hmc,
+                    prof1, prof2=None, prof12_2pt=None,
+                    prof3=None, prof4=None, prof34_2pt=None,
+                    normprof1=False, normprof2=False,
+                    normprof3=False, normprof4=False,
+                    lk_arr=None, a_arr=None,
+                    extrap_order_lok=1, extrap_order_hik=1,
+                    use_log=False):
+    if lk_arr is None:
+        status = 0
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status)
+    if a_arr is None:
+        status = 0
+        na = lib.get_pk_spline_na(cosmo.cosmo)
+        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        check(status)
+
+    tkk = halomod_trispectrum_1h(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                 prof1, prof2=prof2,
+                                 prof12_2pt=prof12_2pt,
+                                 prof3=prof3, prof4=prof4,
+                                 prof34_2pt=prof34_2pt,
+                                 normprof1=normprof1, normprof2=normprof2,
+                                 normprof3=normprof3, normprof4=normprof4)
+    if use_log:
+        if np.any(tkk <= 0):
+            warnings.warn(
+                "Some values were not positive. "
+                "Will not interpolate in log-space.",
+                category=CCLWarning)
+            use_log = False
+        else:
+            tkk = np.log(tkk)
+
+    tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkk,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik, is_logp=use_log)
+    return tk3d
