@@ -260,6 +260,6 @@ def test_return_ptc():
     assert ptc2_2 is PTC
     # check that the result outputs are the same
     # for the internally initialized ptc.
-    assert np.allclose(pk_2.eval(ks, 1., COSMO), pk(ks, 1., COSMO))
-    assert np.allclose(pee2_2(ks, 1., COSMO), pee2(ks, 1., COSMO))
-    assert np.allclose(pbb2_2(ks, 1., COSMO), pbb2(ks, 1., COSMO))
+    assert np.allclose(pk_2.eval(ks, 1., COSMO), pk.eval(ks, 1., COSMO))
+    assert np.allclose(pee2_2(ks, 1., COSMO), pee2.eval(ks, 1., COSMO))
+    assert np.allclose(pbb2_2(ks, 1., COSMO), pbb2.eval(ks, 1., COSMO))
