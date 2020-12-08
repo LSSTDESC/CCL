@@ -12,7 +12,7 @@ class Tk3D(object):
         nk = len(lk_arr)
 
         if ((extrap_order_hik not in (0, 1)) or
-            (extrap_order_lok not in (0, 1))):
+                (extrap_order_lok not in (0, 1))):
             raise ValueError("Only constant or linear extrapolation in "
                              "log(k) is possible (`extrap_order_hik` or "
                              "`extrap_order_lok` must be 0 or 1).")
@@ -28,21 +28,21 @@ class Tk3D(object):
                 raise ValueError("Input trispectrum factor "
                                  "shapes are wrong")
 
-            self.tsp, status = lib.set_tk3d_new_factorizable(lk_arr, a_arr,
-                                                             pk1_arr.flatten(),
-                                                             pk2_arr.flatten(),
-                                                             int(extrap_order_lok),
-                                                             int(extrap_order_lok),
-                                                             int(is_logt), status)
+            self.tsp, status = lib.tk3d_new_factorizable(lk_arr, a_arr,
+                                                         pk1_arr.flatten(),
+                                                         pk2_arr.flatten(),
+                                                         int(extrap_order_lok),
+                                                         int(extrap_order_lok),
+                                                         int(is_logt), status)
         else:
             if tkk_arr.shape != (na, nk, nk):
                 raise ValueError("Input trispectrum shape is wrong")
 
-            self.tsp, status = lib.set_tk3d_new_from_arrays(lk_arr, a_arr,
-                                                            tkk_arr.flatten(),
-                                                            int(extrap_order_lok),
-                                                            int(extrap_order_lok),
-                                                            int(is_logt), status)
+            self.tsp, status = lib.tk3d_new_from_arrays(lk_arr, a_arr,
+                                                        tkk_arr.flatten(),
+                                                        int(extrap_order_lok),
+                                                        int(extrap_order_lok),
+                                                        int(is_logt), status)
         check(status)
         self.has_tsp = True
 
