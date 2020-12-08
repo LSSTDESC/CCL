@@ -1,5 +1,14 @@
 name: continuous-integration
-on: [push]
+on:
+  push:
+    branches:
+      - main
+      - releases/*
+
+  pull_request:
+    branches:
+      - main
+      - releases/*
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -23,6 +32,9 @@ jobs:
             python-version: ${{ matrix.py }}
 
         - name: Install GFortran macOS
+          # brew returns a failure exit code if
+          # the thing is already installed and
+          # current. Hence the `|| true` statement
           if: matrix.os == 'macos-latest'
           run: |
             brew cask install gfortran || true
@@ -95,6 +107,17 @@ jobs:
             pip install -U coveralls
             coveralls
 
+        - name: Cache pip, brew
+          uses: actions/cache@v2
+          with:
+            path: |
+              ~/.cache/pip
+              $HOME/Library/Caches/Homebrew
+              /usr/local/Cellar
+            key: ${{ runner.os }}-${{ matrix.py }}-cache
+            restore-keys: |
+              ${{ runner.os }}-${{ matrix.py }}-cache
+              ${{ runner.os }}-
 
   build-doc-only-ubuntu:
     runs-on: ubuntu-latest
