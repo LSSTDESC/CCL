@@ -28,12 +28,12 @@ ccl_f3d_t *tk3d_new_from_arrays(double* lkarr,int nk,
   return tsp;
 }
 
-ccl_f3d_t *tk3d_new_from_arrays(double* lkarr,int nk,
-                                double* aarr,int na,
-                                double* pk1arr, int npk1,
-                                double* pk2arr, int npk2,
-                                int order_lok,int order_hik,
-                                int is_logp, int *status)
+ccl_f3d_t *tk3d_new_factorizable(double* lkarr,int nk,
+                                 double* aarr,int na,
+                                 double* pk1arr, int npk1,
+                                 double* pk2arr, int npk2,
+                                 int order_lok,int order_hik,
+                                 int is_logp, int *status)
 {
   ccl_f3d_t *tsp=ccl_f3d_t_new(na,aarr,nk,lkarr,NULL,pk1arr,pk2arr,1,
 			       order_lok,order_hik,ccl_f2d_constantgrowth,
@@ -44,7 +44,7 @@ ccl_f3d_t *tk3d_new_from_arrays(double* lkarr,int nk,
 double tk3d_eval_single(ccl_f3d_t *tsp,double lk,double a,int *status)
 {
   ccl_a_finder *finda = ccl_a_finder_new_from_f3d(tsp);
-  double tkk = ccl_f3d_t_eval(psp,lk,lk,a,finda,NULL,status);
+  double tkk = ccl_f3d_t_eval(tsp,lk,lk,a,finda,NULL,status);
   ccl_a_finder_free(finda);
   return tkk;
 }
@@ -56,7 +56,7 @@ void tk3d_eval_multi(ccl_f3d_t *tsp,double* lkarr,int nk,
   ccl_a_finder *finda = ccl_a_finder_new_from_f3d(tsp);
   for(int ii=0;ii<nk;ii++) {
     for(int jj=0;jj<nk;jj++) {
-      doutput[jj+nk*ii]=ccl_f3d_t_eval(psp,lkarr[ii],lkarr[jj],
+      doutput[jj+nk*ii]=ccl_f3d_t_eval(tsp,lkarr[ii],lkarr[jj],
                                        a,finda,NULL,status);
     }
   }
