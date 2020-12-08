@@ -16,6 +16,7 @@ COSMO = ccl.Cosmology(
     np.array([0.3, 0.5, 10])])
 @pytest.mark.parametrize('kind', ['one', 'two', 'total'])
 def test_halomodel_power(k, kind):
+    from pyccl.pyutils import assert_warns
     a = 0.8
 
     if kind == 'one':
@@ -25,7 +26,7 @@ def test_halomodel_power(k, kind):
     else:
         func = ccl.halomodel_matter_power
 
-    pk = func(COSMO, k, a)
+    pk = assert_warns(ccl.CCLWarning, func, COSMO, k, a)
     assert np.all(np.isfinite(pk))
     assert np.shape(k) == np.shape(pk)
 
@@ -36,8 +37,12 @@ def test_halomodel_power(k, kind):
     [1e14, 1e15],
     np.array([1e14, 1e15])])
 def test_halo_concentration(m):
+    from pyccl.pyutils import assert_warns
     a = 0.8
-    c = ccl.halo_concentration(COSMO, m, a)
+    # Deprecated.
+    c = assert_warns(
+        ccl.CCLWarning,
+        ccl.halo_concentration, COSMO, m, a)
     assert np.all(np.isfinite(c))
     assert np.shape(c) == np.shape(m)
 
@@ -76,6 +81,7 @@ def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
                                   ['shethtormen', 'constant_concentration'],
                                   ['tinker10', 'constant_concentration']])
 def test_halomodel_choices_smoke(mf_c):
+    from pyccl.pyutils import assert_warns
     mf, c = mf_c
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -83,7 +89,11 @@ def test_halomodel_choices_smoke(mf_c):
         mass_function=mf, halo_concentration=c)
     a = 0.8
     k = np.geomspace(1E-2, 1, 10)
-    p = ccl.twohalo_matter_power(cosmo, k, a)
+    # Deprecated
+    # TODO: Convert this and other places to using the non-deprecated syntax
+    # Or, since this wasn't already done, maybe this is a useful convenience
+    # function?
+    p = assert_warns(ccl.CCLWarning, ccl.twohalo_matter_power, cosmo, k, a)
     pb = get_pk_new(mf, c, cosmo, a, k, False, True)
 
     assert np.all(np.isfinite(p))
@@ -91,6 +101,7 @@ def test_halomodel_choices_smoke(mf_c):
 
 
 def test_halomodel_choices_raises():
+    from pyccl.pyutils import assert_warns
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear',
@@ -99,14 +110,22 @@ def test_halomodel_choices_raises():
     k = np.geomspace(1E-2, 1, 10)
 
     with pytest.raises(ValueError):
-        ccl.twohalo_matter_power(cosmo, k, a)
+        assert_warns(ccl.CCLWarning, ccl.twohalo_matter_power, cosmo, k, a)
 
 
 def test_halomodel_power_consistent():
+    from pyccl.pyutils import assert_warns
     a = 0.8
     k = np.logspace(-1, 1, 10)
-    tot = ccl.halomodel_matter_power(COSMO, k, a)
-    one = ccl.onehalo_matter_power(COSMO, k, a)
-    two = ccl.twohalo_matter_power(COSMO, k, a)
+    # These are all deprecated.
+    tot = assert_warns(
+        ccl.CCLWarning,
+        ccl.halomodel_matter_power, COSMO, k, a)
+    one = assert_warns(
+        ccl.CCLWarning,
+        ccl.onehalo_matter_power, COSMO, k, a)
+    two = assert_warns(
+        ccl.CCLWarning,
+        ccl.twohalo_matter_power, COSMO, k, a)
 
     assert np.allclose(one + two, tot)

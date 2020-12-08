@@ -8,7 +8,10 @@ from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import rho_x
 from ..pyutils import _spline_integrate
+from .. import background
 import numpy as np
+
+physical_constants = lib.cvar.constants
 
 
 class HMCalculator(object):
@@ -136,6 +139,67 @@ class HMCalculator(object):
                            self._mass, a, mass_def=self._mdef).T
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
+
+    def number_counts(self, cosmo, sel, na=128, amin=None, amax=1.0):
+        """ Solves the integral:
+
+        .. math::
+            nc(sel) = \\int dM\\int da\\,\\frac{dV}{dad\\Omega}\\,n(M,a)\\,sel(M,a)
+
+        where :math:`n(M,a)` is the halo mass function, and
+        :math:`sel(M,a)` is the selection function as a function of halo mass
+        and scale factor.
+
+        Note that the selection function is normalized to integrate to unity and
+        assumed to represent the selection probaility per unit scale factor and
+        per unit mass.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            sel (callable): function of mass and scale factor that returns the
+                selection function. This function should take in floats or arrays
+                with a signature ``sel(m, a)`` and return an array with shape
+                ``(len(m), len(a))`` according to the numpy broadcasting rules.
+            na (int): number of samples in scale factor to be used in
+                the integrals. Default: 128.
+            amin (float): the minimum scale factor at which to start integrals
+                over the selection function.
+                Default: value of ``cosmo.cosmo.spline_params.A_SPLINE_MIN``
+            amax (float): the maximum scale factor at which to end integrals
+                over the selection function.
+                Default: 1.0
+
+        Returns:
+            float: the total number of clusters
+        """  # noqa
+
+        # get a values for integral
+        if amin is None:
+            amin = cosmo.cosmo.spline_params.A_SPLINE_MIN
+        a = np.linspace(amin, amax, na)
+
+        # compute the volume element
+        abs_dzda = 1 / a / a
+        dc = background.comoving_angular_distance(cosmo, a)
+        ez = background.h_over_h0(cosmo, a)
+        dh = physical_constants.CLIGHT_HMPC / cosmo['h']
+        dvdz = dh * dc**2 / ez
+        dvda = dvdz * abs_dzda
+
+        # now do m intergrals in a loop
+        mint = np.zeros_like(a)
+        for i, _a in enumerate(a):
+            self._get_ingredients(_a, cosmo, False)
+            _selm = np.atleast_2d(sel(self._mass, _a)).T
+            mint[i] = self._integrator(
+                dvda[i] * self.mf[..., :] * _selm[..., :],
+                self._lmass
+            )
+
+        # now do scale factor integral
+        mtot = self._integrator(mint, a)
+
+        return mtot
 
     def I_0_1(self, cosmo, k, a, prof):
         """ Solves the integral:
@@ -411,11 +475,14 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
                         "`Profile2pt` or `None`")
     # Power spectrum
     if isinstance(p_of_k_a, Pk2D):
-        def pkf(sf): return p_of_k_a.eval(k_use, sf, cosmo)
-    elif (p_of_k_a is None) or (p_of_k_a == 'linear'):
-        def pkf(sf): return linear_matter_power(cosmo, k_use, sf)
-    elif p_of_k_a == 'nonlinear':
-        def pkf(sf): return nonlin_matter_power(cosmo, k_use, sf)
+        def pkf(sf):
+            return p_of_k_a.eval(k_use, sf, cosmo)
+    elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+        def pkf(sf):
+            return linear_matter_power(cosmo, k_use, sf)
+    elif str(p_of_k_a) == 'nonlinear':
+        def pkf(sf):
+            return nonlin_matter_power(cosmo, k_use, sf)
     else:
         raise TypeError("p_of_k_a must be `None`, \'linear\', "
                         "\'nonlinear\' or a `Pk2D` object")

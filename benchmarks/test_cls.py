@@ -53,7 +53,7 @@ def set_up(request):
         # Histogram case
         z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)[:, 1:]
         _, tmp_a1 = np.loadtxt(dirdat + "ia_amp_histo_1.txt", unpack=True)
-        z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt",  unpack=True)[:, 1:]
+        z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt", unpack=True)[:, 1:]
         _, tmp_a2 = np.loadtxt(dirdat + "ia_amp_histo_2.txt", unpack=True)
     else:
         raise ValueError("Wrong Nz type " + nztyp)

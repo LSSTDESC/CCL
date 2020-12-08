@@ -135,13 +135,13 @@ typedef struct ccl_spline_params {
   int N_ELL_CORR;
 
   // interpolation types
-  gsl_interp_type* A_SPLINE_TYPE;
-  gsl_interp_type* K_SPLINE_TYPE;
-  gsl_interp_type* M_SPLINE_TYPE;
-  gsl_interp_type* D_SPLINE_TYPE;
-  gsl_interp2d_type* PNL_SPLINE_TYPE;
-  gsl_interp2d_type* PLIN_SPLINE_TYPE;
-  gsl_interp_type* CORR_SPLINE_TYPE;
+  const gsl_interp_type* A_SPLINE_TYPE;
+  const gsl_interp_type* K_SPLINE_TYPE;
+  const gsl_interp_type* M_SPLINE_TYPE;
+  const gsl_interp_type* D_SPLINE_TYPE;
+  const gsl_interp2d_type* PNL_SPLINE_TYPE;
+  const gsl_interp2d_type* PLIN_SPLINE_TYPE;
+  const gsl_interp_type* CORR_SPLINE_TYPE;
 } ccl_spline_params;
 
 extern const ccl_spline_params default_spline_params;
@@ -164,6 +164,8 @@ typedef struct ccl_gsl_params {
   double INTEGRATION_DISTANCE_EPSREL;
   // sigma_R integral
   double INTEGRATION_SIGMAR_EPSREL;
+  // k_NL integral
+  double INTEGRATION_KNL_EPSREL;
 
   // Root finding
   double ROOT_EPSREL;

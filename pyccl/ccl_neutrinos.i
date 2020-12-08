@@ -14,8 +14,8 @@
     if numpy.shape(a) != (nout,):
         raise CCLError("Input shape for `a` must match `(nout,)`!")
 
-    if numpy.shape(mnu) != (3,):
-        raise CCLError("Input shape for `mnu` must match `(3,)`!")
+    if numpy.shape(mnu) != (N_nu_mass,):
+        raise CCLError("Input shape for `mnu` must match `(N_nu_mass,)`!")
 %}
 
 %inline %{

@@ -1,11 +1,12 @@
 from .. import ccllib as lib
 from ..core import check
+from ..background import h_over_h0
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
-from scipy.special import sici
+from scipy.special import sici, erf
 
 
 class HaloProfile(object):
@@ -843,3 +844,560 @@ class HaloProfileHernquist(HaloProfile):
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
+
+
+class HaloProfilePressureGNFW(HaloProfile):
+    """ Generalized NFW pressure profile by Arnaud et al.
+    (2010A&A...517A..92A).
+
+    The parametrization is:
+
+    .. math::
+       P_e(r) = C\\times P_0 h_{70}^E (c_{500} x)^{-\\gamma}
+       [1+(c_{500}x)^\\alpha]^{(\\gamma-\\beta)/\\alpha},
+
+    where
+
+    .. math::
+       C = 1.65\\,h_{70}^2\\left(\\frac{H(z)}{H_0}\\right)^{8/3}
+       \\left[\\frac{h_{70}\\tilde{M}_{500}}
+       {3\\times10^{14}\\,M_\\odot}\\right]^{2/3+0.12},
+
+    :math:`x = r/\\tilde{r}_{500}`, :math:`h_{70}=h/0.7`, and the
+    exponent :math:`E` is -1 for SZ-based profile normalizations
+    and -1.5 for X-ray-based normalizations. The biased mass
+    :math:`\\tilde{M}_{500}` is related to the true overdensity
+    mass :math:`M_{500}` via the mass bias parameter :math:`(1-b)`
+    as :math:`\\tilde{M}_{500}=(1-b)M_{500}`. :math:`\\tilde{r}_{500}`
+    is the overdensity halo radius associated with :math:`\\tilde{M}_{500}`
+    (note the intentional tilde!), and the profile is defined for
+    a halo overdensity :math:`\\Delta=500` with respect to the
+    critical density.
+
+    The default arguments (other than `mass_bias`), correspond to the
+    profile parameters used in the Planck 2013 (V) paper. The profile
+    is calculated in physical (non-comoving) units of eV/cm^3.
+
+    Args:
+        mass_bias (float): the mass bias parameter :math:`1-b`.
+        P0 (float): profile normalization.
+        c500 (float): concentration parameter.
+        alpha (float): profile shape parameter.
+        beta (float): profile shape parameter.
+        gamma (float): profile shape parameter.
+        alpha_P (float): additional mass dependence exponent
+        P0_hexp (float): power of `h` with which the normalization
+            parameter should scale (-1 for SZ-based normalizations,
+            -3/2 for X-ray-based ones).
+        qrange (tuple): limits of integration to be used when
+            precomputing the Fourier-space profile template, as
+            fractions of the virial radius.
+        nq (int): number of points over which the
+            Fourier-space profile template will be sampled.
+    """
+    name = 'GNFW'
+
+    def __init__(self, mass_bias=0.8, P0=6.41,
+                 c500=1.81, alpha=1.33, alpha_P=0.12,
+                 beta=4.13, gamma=0.31, P0_hexp=-1.,
+                 qrange=(1e-3, 1e3), nq=128):
+        self.qrange = qrange
+        self.nq = nq
+        self.mass_bias = mass_bias
+        self.P0 = P0
+        self.c500 = c500
+        self.alpha = alpha
+        self.alpha_P = alpha_P
+        self.beta = beta
+        self.gamma = gamma
+        self.P0_hexp = P0_hexp
+
+        # Interpolator for dimensionless Fourier-space profile
+        self._fourier_interp = None
+        super(HaloProfilePressureGNFW, self).__init__()
+
+    def update_parameters(self, mass_bias=None, P0=None,
+                          c500=None, alpha=None, beta=None, gamma=None,
+                          alpha_P=None, P0_hexp=None):
+        """ Update any of the parameters associated with
+        this profile. Any parameter set to `None` won't be updated.
+
+        .. note:: A change in `alpha`, `beta` or `gamma` will trigger
+            a recomputation of the Fourier-space template, which can be
+            slow.
+
+        Args:
+            mass_bias (float): the mass bias parameter :math:`1-b`.
+            P0 (float): profile normalization.
+            c500 (float): concentration parameter.
+            alpha (float): profile shape parameter.
+            beta (float): profile shape parameters.
+            gamma (float): profile shape parameters.
+            alpha_P (float): additional mass dependence exponent.
+            P0_hexp (float): power of `h` with which the normalization should \
+                scale (-1 for SZ-based normalizations, -3/2 for \
+                X-ray-based ones).
+        """
+        if mass_bias is not None:
+            self.mass_bias = mass_bias
+        if c500 is not None:
+            self.c500 = c500
+        if alpha_P is not None:
+            self.alpha_P = alpha_P
+        if P0 is not None:
+            self.P0 = P0
+        if P0_hexp is not None:
+            self.P0_hexp = P0_hexp
+
+        # Check if we need to recompute the Fourier profile.
+        re_fourier = False
+        if alpha is not None:
+            if alpha != self.alpha:
+                re_fourier = True
+            self.alpha = alpha
+        if beta is not None:
+            if beta != self.beta:
+                re_fourier = True
+            self.beta = beta
+        if gamma is not None:
+            if gamma != self.gamma:
+                re_fourier = True
+            self.gamma = gamma
+
+        if re_fourier and (self._fourier_interp is not None):
+            self._fourier_interp = self._integ_interp()
+
+    def _form_factor(self, x):
+        # Scale-dependent factor of the GNFW profile.
+        f1 = (self.c500*x)**(-self.gamma)
+        exponent = -(self.beta-self.gamma)/self.alpha
+        f2 = (1+(self.c500*x)**self.alpha)**exponent
+        return f1*f2
+
+    def _integ_interp(self):
+        # Precomputes the Fourier transform of the profile in terms
+        # of the scaled radius x and creates a spline interpolator
+        # for it.
+        from scipy.interpolate import interp1d
+        from scipy.integrate import quad
+
+        def integrand(x):
+            return self._form_factor(x)*x
+
+        q_arr = np.geomspace(self.qrange[0], self.qrange[1], self.nq)
+        # We use the `weight` feature of quad to quickly estimate
+        # the Fourier transform. We could use the existing FFTLog
+        # framework, but this is a lot less of a kerfuffle.
+        f_arr = np.array([quad(integrand,
+                               a=1e-4, b=np.inf,  # limits of integration
+                               weight="sin",  # fourier sine weight
+                               wvar=q)[0] / q
+                          for q in q_arr])
+        Fq = interp1d(np.log(q_arr), f_arr,
+                      fill_value="extrapolate",
+                      bounds_error=False)
+        return Fq
+
+    def _norm(self, cosmo, M, a, mb):
+        # Computes the normalisation factor of the GNFW profile.
+        # Normalisation factor is given in units of eV/cm^3.
+        # (Bolliet et al. 2017).
+        h70 = cosmo["h"]/0.7
+        C0 = 1.65*h70**2
+        CM = (h70*M*mb/3E14)**(2/3+self.alpha_P)   # M dependence
+        Cz = h_over_h0(cosmo, a)**(8/3)  # z dependence
+        P0_corr = self.P0 * h70**self.P0_hexp  # h-corrected P_0
+        return P0_corr * C0 * CM * Cz
+
+    def _real(self, cosmo, r, M, a, mass_def):
+        # Real-space profile.
+        # Output in units of eV/cm^3
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        # (1-b)
+        mb = self.mass_bias
+        # R_Delta*(1+z)
+        R = mass_def.get_radius(cosmo, M_use * mb, a) / a
+
+        nn = self._norm(cosmo, M_use, a, mb)
+        prof = self._form_factor(r_use[None, :] / R[:, None])
+        prof *= nn[:, None]
+
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fourier(self, cosmo, k, M, a, mass_def):
+        # Fourier-space profile.
+        # Output in units of eV * Mpc^3 / cm^3.
+
+        # Tabulate if not done yet
+        if self._fourier_interp is None:
+            self._fourier_interp = self._integ_interp()
+
+        # Input handling
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        # hydrostatic bias
+        mb = self.mass_bias
+        # R_Delta*(1+z)
+        R = mass_def.get_radius(cosmo, M_use * mb, a) / a
+
+        ff = self._fourier_interp(np.log(k_use[None, :] * R[:, None]))
+        nn = self._norm(cosmo, M_use, a, mb)
+
+        prof = (4*np.pi*R**3 * nn)[:, None] * ff
+
+        if np.ndim(k) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+
+class HaloProfileHOD(HaloProfile):
+    """ A generic halo occupation distribution (HOD)
+    profile describing the number density of galaxies
+    as a function of halo mass.
+
+    The parametrization for the mean profile is:
+
+    .. math::
+       \\langle n_g(r)|M,a\\rangle = \\bar{N}_c(M,a)
+       \\left[f_c(a)+\\bar{N}_s(M,a) u_{\\rm sat}(r|M,a)\\right]
+
+    where :math:`\\bar{N}_c` and :math:`\\bar{N}_s` are the
+    mean number of central and satellite galaxies respectively,
+    :math:`f_c` is the observed fraction of central galaxies, and
+    :math:`u_{\\rm sat}(r|M,a)` is the distribution of satellites
+    as a function of distance to the halo centre.
+
+    These quantities are parametrized as follows:
+
+    .. math::
+       \\bar{N}_c(M,a)=\\frac{1}{2}\\left[1+{\\rm erf}
+       \\left(\\frac{\\log(M/M_{\\rm min})}{\\sigma_{{\\rm ln}M}}
+       \\right)\\right]
+
+    .. math::
+       \\bar{N}_s(M,a)=\\Theta(M-M_0)\\left(\\frac{M-M_0}{M_1}
+       \\right)^\\alpha
+
+    .. math::
+       u_s(r|M,a)\\propto\\frac{\\Theta(r_{\\rm max}-r)}
+       {(r/r_g)(1+r/r_g)^2}
+
+    Where :math:`\\Theta(x)` is the Heaviside step function,
+    and the proportionality constant in the last equation is
+    such that the volume integral of :math:`u_s` is 1. The
+    radius :math:`r_g` is related to the NFW scale radius :math:`r_s`
+    through :math:`r_g=\\beta_g\\,r_s`, and the radius
+    :math:`r_{\\rm max}` is related to the overdensity radius
+    :math:`r_\\Delta` as :math:`r_{\\rm max}=\\beta_{\\rm max}r_\\Delta`.
+    The scale radius is related to the comoving overdensity halo
+    radius via :math:`R_\\Delta(M) = c(M)\\,r_s`.
+
+    All the quantities :math:`\\log_{10}M_{\\rm min}`,
+    :math:`\\log_{10}M_0`, :math:`\\log_{10}M_1`,
+    :math:`\\sigma_{{\\rm ln}M}`, :math:`f_c`, :math:`\\alpha`,
+    :math:`\\beta_g` and :math:`\\beta_{\\rm max}` are
+    time-dependent via a linear expansion around a pivot scale
+    factor :math:`a_*` with an offset (:math:`X_0`) and a tilt
+    parameter (:math:`X_p`):
+
+    .. math::
+       X(a) = X_0 + X_p\\,(a-a_*).
+
+    This definition of the HOD profile draws from several papers
+    in the literature, including: astro-ph/0408564, arXiv:1706.05422
+    and arXiv:1912.08209. The default values used here are roughly
+    compatible with those found in the latter paper.
+
+    See :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`) for a
+    description of the Fourier-space two-point correlator of the
+    HOD profile.
+
+    Args:
+        c_M_relation (:obj:`Concentration`): concentration-mass
+            relation to use with this profile.
+        lMmin_0 (float): offset parameter for
+            :math:`\\log_{10}M_{\\rm min}`.
+        lMmin_p (float): tilt parameter for
+            :math:`\\log_{10}M_{\\rm min}`.
+        siglM_0 (float): offset parameter for
+            :math:`\\sigma_{{\\rm ln}M}`.
+        siglM_p (float): tilt parameter for
+            :math:`\\sigma_{{\\rm ln}M}`.
+        lM0_0 (float): offset parameter for
+            :math:`\\log_{10}M_0`.
+        lM0_p (float): tilt parameter for
+            :math:`\\log_{10}M_0`.
+        lM1_0 (float): offset parameter for
+            :math:`\\log_{10}M_1`.
+        lM1_p (float): tilt parameter for
+            :math:`\\log_{10}M_1`.
+        alpha_0 (float): offset parameter for
+            :math:`\\alpha`.
+        alpha_p (float): tilt parameter for
+            :math:`\\alpha`.
+        fc_0 (float): offset parameter for
+            :math:`f_c`.
+        fc_p (float): tilt parameter for
+            :math:`f_c`.
+        bg_0 (float): offset parameter for
+            :math:`\\beta_g`.
+        bg_p (float): tilt parameter for
+            :math:`\\beta_g`.
+        bmax_0 (float): offset parameter for
+            :math:`\\beta_{\\rm max}`.
+        bmax_p (float): tilt parameter for
+            :math:`\\beta_{\\rm max}`.
+        a_pivot (float): pivot scale factor :math:`a_*`.
+    """
+    name = 'HOD'
+
+    def __init__(self, c_M_relation,
+                 lMmin_0=12., lMmin_p=0., siglM_0=0.4,
+                 siglM_p=0., lM0_0=7., lM0_p=0.,
+                 lM1_0=13.3, lM1_p=0., alpha_0=1.,
+                 alpha_p=0., fc_0=1., fc_p=0.,
+                 bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
+                 a_pivot=1.):
+        if not isinstance(c_M_relation, Concentration):
+            raise TypeError("c_M_relation must be of type `Concentration`)")
+
+        self.cM = c_M_relation
+        self.lMmin_0 = lMmin_0
+        self.lMmin_p = lMmin_p
+        self.lM0_0 = lM0_0
+        self.lM0_p = lM0_p
+        self.lM1_0 = lM1_0
+        self.lM1_p = lM1_p
+        self.siglM_0 = siglM_0
+        self.siglM_p = siglM_p
+        self.alpha_0 = alpha_0
+        self.alpha_p = alpha_p
+        self.fc_0 = fc_0
+        self.fc_p = fc_p
+        self.bg_0 = bg_0
+        self.bg_p = bg_p
+        self.bmax_0 = bmax_0
+        self.bmax_p = bmax_p
+        self.a_pivot = a_pivot
+        super(HaloProfileHOD, self).__init__()
+
+    def _get_cM(self, cosmo, M, a, mdef=None):
+        return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
+
+    def update_parameters(self, lMmin_0=None, lMmin_p=None,
+                          siglM_0=None, siglM_p=None,
+                          lM0_0=None, lM0_p=None,
+                          lM1_0=None, lM1_p=None,
+                          alpha_0=None, alpha_p=None,
+                          fc_0=None, fc_p=None,
+                          bg_0=None, bg_p=None,
+                          bmax_0=None, bmax_p=None,
+                          a_pivot=None):
+        """ Update any of the parameters associated with
+        this profile. Any parameter set to `None` won't be updated.
+
+        Args:
+            lMmin_0 (float): offset parameter for
+                :math:`\\log_{10}M_{\\rm min}`.
+            lMmin_p (float): tilt parameter for
+                :math:`\\log_{10}M_{\\rm min}`.
+            siglM_0 (float): offset parameter for
+                :math:`\\sigma_{{\\rm ln}M}`.
+            siglM_p (float): tilt parameter for
+                :math:`\\sigma_{{\\rm ln}M}`.
+            lM0_0 (float): offset parameter for
+                :math:`\\log_{10}M_0`.
+            lM0_p (float): tilt parameter for
+                :math:`\\log_{10}M_0`.
+            lM1_0 (float): offset parameter for
+                :math:`\\log_{10}M_1`.
+            lM1_p (float): tilt parameter for
+                :math:`\\log_{10}M_1`.
+            alpha_0 (float): offset parameter for
+                :math:`\\alpha`.
+            alpha_p (float): tilt parameter for
+                :math:`\\alpha`.
+            fc_0 (float): offset parameter for
+                :math:`f_c`.
+            fc_p (float): tilt parameter for
+                :math:`f_c`.
+            bg_0 (float): offset parameter for
+                :math:`\\beta_g`.
+            bg_p (float): tilt parameter for
+                :math:`\\beta_g`.
+            bmax_0 (float): offset parameter for
+                :math:`\\beta_{\\rm max}`.
+            bmax_p (float): tilt parameter for
+                :math:`\\beta_{\\rm max}`.
+            a_pivot (float): pivot scale factor :math:`a_*`.
+        """
+        if lMmin_0 is not None:
+            self.lMmin_0 = lMmin_0
+        if lMmin_p is not None:
+            self.lMmin_p = lMmin_p
+        if lM0_0 is not None:
+            self.lM0_0 = lM0_0
+        if lM0_p is not None:
+            self.lM0_p = lM0_p
+        if lM1_0 is not None:
+            self.lM1_0 = lM1_0
+        if lM1_p is not None:
+            self.lM1_p = lM1_p
+        if siglM_0 is not None:
+            self.siglM_0 = siglM_0
+        if siglM_p is not None:
+            self.siglM_p = siglM_p
+        if alpha_0 is not None:
+            self.alpha_0 = alpha_0
+        if alpha_p is not None:
+            self.alpha_p = alpha_p
+        if fc_0 is not None:
+            self.fc_0 = fc_0
+        if fc_p is not None:
+            self.fc_p = fc_p
+        if bg_0 is not None:
+            self.bg_0 = bg_0
+        if bg_p is not None:
+            self.bg_p = bg_p
+        if bmax_0 is not None:
+            self.bmax_0 = bmax_0
+        if bmax_p is not None:
+            self.bmax_p = bmax_p
+        if a_pivot is not None:
+            self.a_pivot = a_pivot
+
+    def _usat_real(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
+        bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+        c_M *= bmax / bg
+
+        x = r_use[None, :] / (R_s[:, None] * bg)
+        prof = 1./(x * (1 + x)**2)
+        # Truncate
+        prof[r_use[None, :] > R_M[:, None]*bmax] = 0
+
+        norm = 1. / (4 * np.pi * (bg*R_s)**3 * (np.log(1+c_M) - c_M/(1+c_M)))
+        prof = prof[:, :] * norm[:, None]
+
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _usat_fourier(self, cosmo, k, M, a, mass_def):
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        # Comoving virial radius
+        bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
+        bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+        c_M *= bmax / bg
+
+        x = k_use[None, :] * R_s[:, None] * bg
+        Si1, Ci1 = sici((1 + c_M[:, None]) * x)
+        Si2, Ci2 = sici(x)
+
+        P1 = 1. / (np.log(1+c_M) - c_M/(1+c_M))
+        P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
+        P3 = np.sin(c_M[:, None] * x) / ((1 + c_M[:, None]) * x)
+        prof = P1[:, None] * (P2 - P3)
+
+        if np.ndim(k) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _real(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        Nc = self._Nc(M_use, a)
+        Ns = self._Ns(M_use, a)
+        fc = self._fc(a)
+        # NFW profile
+        ur = self._usat_real(cosmo, r_use, M_use, a, mass_def)
+
+        prof = Nc[:, None] * (fc + Ns[:, None] * ur)
+
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fourier(self, cosmo, k, M, a, mass_def):
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        Nc = self._Nc(M_use, a)
+        Ns = self._Ns(M_use, a)
+        fc = self._fc(a)
+        # NFW profile
+        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
+
+        prof = Nc[:, None] * (fc + Ns[:, None] * uk)
+
+        if np.ndim(k) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fourier_variance(self, cosmo, k, M, a, mass_def):
+        # Fourier-space variance of the HOD profile
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        Nc = self._Nc(M_use, a)
+        Ns = self._Ns(M_use, a)
+        fc = self._fc(a)
+        # NFW profile
+        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
+
+        prof = Ns[:, None] * uk
+        prof = Nc[:, None] * (2 * fc * prof + prof**2)
+
+        if np.ndim(k) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fc(self, a):
+        # Observed fraction of centrals
+        return self.fc_0 + self.fc_p * (a - self.a_pivot)
+
+    def _Nc(self, M, a):
+        # Number of centrals
+        Mmin = 10.**(self.lMmin_0 + self.lMmin_p * (a - self.a_pivot))
+        siglM = self.siglM_0 + self.siglM_p * (a - self.a_pivot)
+        return 0.5 * (1 + erf(np.log(M/Mmin)/siglM))
+
+    def _Ns(self, M, a):
+        # Number of satellites
+        M0 = 10.**(self.lM0_0 + self.lM0_p * (a - self.a_pivot))
+        M1 = 10.**(self.lM1_0 + self.lM1_p * (a - self.a_pivot))
+        alpha = self.alpha_0 + self.alpha_p * (a - self.a_pivot)
+        return np.heaviside(M-M0, 1) * (np.fabs(M-M0) / M1)**alpha
