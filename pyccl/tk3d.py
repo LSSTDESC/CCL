@@ -43,7 +43,9 @@ class Tk3D(object):
     covariance of angular power spectra via Limber integration.
 
     Args:
-        a_arr (array): an array holding values of the scale factor.
+        a_arr (array): an array holding values of the scale factor. Note
+            that the trispectrum will be extrapolated as constant on
+            values of the scale factor outside those held by this array.
         lk_arr (array): an array holding values of the natural logarithm
             of the wavenumber (in units of Mpc^-1).
         tkk_arr (array): a 3D array with shape `[na,nk,nk]`, where `na`
