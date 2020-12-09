@@ -28,6 +28,7 @@ Submodules
    pyccl.pk2d
    pyccl.power
    pyccl.pyutils
+   pyccl.tk3d
    pyccl.tracers
 
 Module contents
