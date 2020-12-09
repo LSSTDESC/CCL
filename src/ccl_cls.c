@@ -427,7 +427,8 @@ static double cov_integrand(double chi, void *params)
 static void integ_cov_limber_spline(ccl_cosmology *cosmo,
 				    integ_cov_par *ipar,
 				    double chimin, double chimax,
-				    double *result, int *status) {
+				    double *result, int *status)
+{
   int ichi;
   int nchi = (int)(fmax((chimax - chimin) / cosmo->spline_params.DCHI_INTEGRATION + 0.5,
 		      1))+1;
@@ -438,8 +439,8 @@ static void integ_cov_limber_spline(ccl_cosmology *cosmo,
     *status = CCL_ERROR_LOGSPACE;
 
   if(*status == 0) {
-    chi_arr = malloc(nchi * sizeof(double));
-    if(chi_arr == NULL)
+    fchi_arr = malloc(nchi * sizeof(double));
+    if(fchi_arr == NULL)
       *status = CCL_ERROR_MEMORY;
   }
 
@@ -458,6 +459,7 @@ static void integ_cov_limber_spline(ccl_cosmology *cosmo,
                      1, -1, result, gsl_interp_akima,
                      status);
   }
+
   free(fchi_arr);
   free(chi_arr);
 }

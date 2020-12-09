@@ -11,7 +11,7 @@ COSMO = ccl.CosmologyVanillaLCDM()
 
 
 def tkkaf(k1, k2, a, alpha=1., beta=1.):
-    return 1/(k1**alpha*k2**beta)
+    return 1./(k1**alpha*k2**beta)
 
 
 def get_tk3d(alpha=1, beta=1):
@@ -41,7 +41,7 @@ def get_tracer():
     return t
 
 
-@pytest.mark.parametrize("alpha,beta", [(1., 1.),
+@pytest.mark.parametrize("alpha,beta", [(3., 3.),
                                         (2., 2.),
                                         (1., 2.),
                                         (2., 1.)])
@@ -55,6 +55,11 @@ def test_cov_cNG_sanity(alpha, beta):
 
     cov = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ls, tsp)
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
+
+    # Spline integration (fast but inaccurate)
+    cov = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ls, tsp,
+                                 integration_method='spline')
+    assert np.all(np.fabs(cov/cov_p-1).flatten() < 4E-2)
 
     # Different tracers
     cov = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ls, tsp,
