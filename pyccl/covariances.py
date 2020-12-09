@@ -13,7 +13,26 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
                        cltracer3=None, cltracer4=None, ell2=None,
                        integration_method='qag_quad'):
     """Calculate the connected non-Gaussian covariance for a pair of
-    power spectra between two pairs of tracers.
+    power spectra :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
+    between two pairs of tracers (:math:`(a,b)` and :math:`(c,d)`).
+
+    Specifically, it computes:
+
+    .. math::
+        {\\rm Cov}_{\\rm cNG}(\\ell_1,\\ell_2)=
+        \\int \\frac{d\\chi}{\\chi^6}
+        \\tilde{\\Delta}^a_{\\ell_1}(\\chi)
+        \\tilde{\\Delta}^b_{\\ell_1}(\\chi)
+        \\tilde{\\Delta}^c_{\\ell_2}(\\chi)
+        \\tilde{\\Delta}^d_{\\ell_2}(\\chi)\\,
+        \\bar{T}_{abcd}\\left[\\frac{\\ell_1+1/2}{\\chi},
+                              \\frac{\\ell_2+1/2}{\\chi}, a(\\chi)\\right]
+
+    where :math:`\\Delta^x_\\ell(\\chi)` is the transfer function for tracer
+    :math:`x` (see Eq. 39 in the CCL note), and
+    :math:`\\bar{T}_{abcd}(k_1,k_2,a)` is the isotropized connected
+    trispectrum of the four tracers (see the documentation of the
+    :class:`~pyccl.tk3d.Tk3D` class for details).
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
