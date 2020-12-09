@@ -118,7 +118,6 @@ class Pk2D(object):
                 the power spectrum will be extrapolated from the earliest
                 available value using the linear growth factor (for which a
                 cosmology is needed).
-            a_arr (array): an array holding values of the scale factor.
 
         Returns:
             float or array_like: value(s) of the power spectrum.
