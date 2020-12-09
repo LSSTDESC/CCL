@@ -741,11 +741,17 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
         raise TypeError("prof1 must be of type `HaloProfile`")
     if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
+    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
+        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
+    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
+        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
     if prof12_2pt is None:
         prof12_2pt = Profile2pt()
     elif not isinstance(prof12_2pt, Profile2pt):
         raise TypeError("prof12_2pt must be of type "
                         "`Profile2pt` or `None`")
+    if (prof34_2pt is not None) and (not isinstance(prof34_2pt, Profile2pt)):
+        raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
     def get_norm(normprof, prof, sf):
         if normprof:
@@ -885,5 +891,5 @@ def halomod_Tk3D_1h(cosmo, hmc,
 
     tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkk,
                 extrap_order_lok=extrap_order_lok,
-                extrap_order_hik=extrap_order_hik, is_logp=use_log)
+                extrap_order_hik=extrap_order_hik, is_logt=use_log)
     return tk3d
