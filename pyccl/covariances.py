@@ -1,8 +1,5 @@
-import warnings
-
 import numpy as np
 
-from .errors import CCLWarning
 from . import ccllib as lib
 from .pyutils import check, integ_types
 from .tk3d import Tk3D
@@ -98,7 +95,7 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
     cov = cov.reshape([ell2_use.size, ell1_use.size])
     if np.ndim(ell2) == 0:
         cov = np.squeeze(cov, axis=0)
-    if np.ndim(ell1) == 0:
+    if np.ndim(ell) == 0:
         cov = np.squeeze(cov, axis=-1)
 
     # Free up tracer collections
