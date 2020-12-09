@@ -539,7 +539,7 @@ void ccl_angular_cl_covariance(ccl_cosmology *cosmo,
     // Find integration limits
     chimin = 1E15;
     chimax = -1E15;
-    update_chi_limits(trc1, &chimin, &chimax, 0);
+    update_chi_limits(trc1, &chimin, &chimax, 1);
     update_chi_limits(trc2, &chimin, &chimax, 0);
     update_chi_limits(trc3, &chimin, &chimax, 0);
     update_chi_limits(trc4, &chimin, &chimax, 0);

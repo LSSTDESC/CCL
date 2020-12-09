@@ -90,7 +90,7 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
     cov, status = lib.angular_cov_vec(
         cosmo, clt1, clt2, clt3, clt4, tsp,
         ell1_use, ell2_use, integ_types[integration_method],
-        6, 4*np.pi*fsky, ell1_use.size*ell2_use.size, status)
+        6, 1./(4*np.pi*fsky), ell1_use.size*ell2_use.size, status)
 
     cov = cov.reshape([ell2_use.size, ell1_use.size])
     if np.ndim(ell2) == 0:
