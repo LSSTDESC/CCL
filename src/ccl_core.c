@@ -124,6 +124,7 @@ const ccl_spline_params default_spline_params = {
   1E3,  // K_MAX
   5E-5,  // K_MIN
   0.025,  // DLOGK_INTEGRATION
+  5.,  // DCHI_INTEGRATION
   167,  // N_K
   100000,  // N_K_3DCOR
 
