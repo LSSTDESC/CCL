@@ -37,6 +37,8 @@ c_d_t = -1*a_d*5e-14*rho_crit*COSMO['Omega_m']/gz
 c_2_t = a_2*5*5e-14*rho_crit*COSMO['Omega_m']**2/(Om_m_fid*gz**2)
 c_2_t_des = a_2*5*5e-14*rho_crit*COSMO['Omega_m']/(gz**2)
 
+ks = np.logspace(-3, 2, 512)
+
 
 def test_pt_tracer_smoke():
     ccl.nl_pt.PTTracer()
@@ -233,3 +235,31 @@ def test_translate_IA_norm_raises():
     with pytest.raises(ValueError):
         c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ2, a1=a_1_v,
                                                     Om_m2_for_c2=False)
+
+
+def test_return_ptc():
+    # if no ptc is input, check that returned pk and ptc objects have
+    # the correct properties.
+    pk, ptc1 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TG'], return_ptc=True)
+    assert isinstance(pk, ccl.Pk2D)
+    assert isinstance(ptc1, ccl.nl_pt.power.PTCalculator)
+    # same test with EE/BB output
+    pee2, pbb2, ptc2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'],
+                                             return_ia_ee_and_bb=True,
+                                             return_ptc=True)
+    assert isinstance(pee2, ccl.Pk2D)
+    assert isinstance(pbb2, ccl.Pk2D)
+    assert isinstance(ptc2, ccl.nl_pt.power.PTCalculator)
+    # check that returned ptc matches input ptc.
+    pk_2, ptc1_2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TG'], ptc=PTC,
+                                         return_ptc=True)
+    pee2_2, pbb2_2, ptc2_2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'], ptc=PTC,
+                                                   return_ia_ee_and_bb=True,
+                                                   return_ptc=True)
+    assert ptc1_2 is PTC
+    assert ptc2_2 is PTC
+    # check that the result outputs are the same
+    # for the internally initialized ptc.
+    assert np.allclose(pk_2.eval(ks, 1., COSMO), pk.eval(ks, 1., COSMO))
+    assert np.allclose(pee2_2.eval(ks, 1., COSMO), pee2.eval(ks, 1., COSMO))
+    assert np.allclose(pbb2_2.eval(ks, 1., COSMO), pbb2.eval(ks, 1., COSMO))
