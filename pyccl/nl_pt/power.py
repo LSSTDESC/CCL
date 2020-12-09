@@ -381,7 +381,8 @@ class PTCalculator(object):
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                 sub_lowk=False, nonlin_pk_type='nonlinear',
                 a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
-                return_ia_bb=False, return_ia_ee_and_bb=False):
+                return_ia_bb=False, return_ia_ee_and_bb=False,
+                return_ptc=False):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the PT power spectrum for two quantities defined by
     two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
@@ -429,9 +430,16 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
             If `False` (default) E-mode power spectrum is returned.
             Supersedes `return_ia_bb`.
+        return_ptc (bool): if `True`, the fastpt object used as the PT
+            calculator (ptc) will also be returned. This feature may
+            be useful if an input ptc is not specified and one is
+            initialized when this function is called. If `False` (default)
+            the ptc is not output, whether or not it is initialized as
+            part of the function call.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
+        :class:`~pyccl.nl_pt.power.PTCalculator`: PT Calc [optional]
     """
     if a_arr is None:
         status = 0
@@ -581,10 +589,16 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                         lk_arr=np.log(ptc.ks),
                         pk_arr=p_pt[1].T,
                         is_logp=False)
-        return pt_pk_ee, pt_pk_bb
+        if return_ptc:
+            return pt_pk_ee, pt_pk_bb, ptc
+        else:
+            return pt_pk_ee, pt_pk_bb
     else:
         pt_pk = Pk2D(a_arr=a_arr,
                      lk_arr=np.log(ptc.ks),
                      pk_arr=p_pt.T,
                      is_logp=False)
-        return pt_pk
+        if return_ptc:
+            return pt_pk, ptc
+        else:
+            return pt_pk
