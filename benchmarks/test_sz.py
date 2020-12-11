@@ -45,4 +45,4 @@ def test_szcl():
     tll = ccl.angular_cl_cov_cNG(COSMO, tr, tr, l_bm, tkk, fsky=fsky)
 
     assert np.all(np.fabs(cl/cl_bm-1) < 2E-2)
-    assert np.all(np.fabs(tll/tll_bm-1) < 4E-2)
+    assert np.all(np.fabs(tll/tll_bm-1) < 5E-2)
