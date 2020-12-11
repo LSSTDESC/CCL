@@ -11,25 +11,22 @@ def test_szcl():
         n_s=0.9645,
         A_s=2.02E-9,
         Neff=3.046,
-        m_nu=0.,
-        m_nu_type='normal',
-        Omega_k=0,
         transfer_function='boltzmann_class')
     bm = np.loadtxt("benchmarks/data/sz_cl_P13_szpowerspectrum.txt",
                     unpack=True)
     l_bm = bm[0]
     cl_bm = bm[1]
     tll_bm = np.loadtxt("benchmarks/data/tSZ_trispectrum_ref_for_cobaya.txt")
-
     fac = 2*np.pi/(l_bm*(l_bm+1)*1E12)
+
     cl_bm *= fac
     tll_bm *= fac[:, None]*fac[None, :]/(4*np.pi*fsky)
-
     mass_def = ccl.halos.MassDef(500, 'critical')
     hmf = ccl.halos.MassFuncTinker08(COSMO, mass_def=mass_def)
     hbf = ccl.halos.HaloBiasTinker10(COSMO, mass_def=mass_def)
     hmc = ccl.halos.HMCalculator(COSMO, hmf, hbf, mass_def)
-    prf = ccl.halos.HaloProfilePressureGNFW(mass_bias=1./1.41)
+    prf = ccl.halos.HaloProfilePressureGNFW()
+    prf.update_parameters(mass_bias=1./1.41, x_out=6.)
     tr = ccl.tSZTracer(COSMO, z_max=3.)
 
     # Power spectrum
@@ -44,6 +41,5 @@ def test_szcl():
                                     use_log=True)
     tll = ccl.angular_cl_cov_cNG(COSMO, tr, tr, l_bm, tkk, fsky=fsky)
 
-    print(np.amax(np.fabs(cl/cl_bm-1)))
     assert np.all(np.fabs(cl/cl_bm-1) < 2E-2)
     assert np.all(np.fabs(tll/tll_bm-1) < 5E-2)

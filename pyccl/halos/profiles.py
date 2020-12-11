@@ -892,6 +892,8 @@ class HaloProfilePressureGNFW(HaloProfile):
         qrange (tuple): limits of integration to be used when
             precomputing the Fourier-space profile template, as
             fractions of the virial radius.
+        x_out (float): profile threshold (as a fraction of r500c).
+            if `None`, no threshold will be used.
         nq (int): number of points over which the
             Fourier-space profile template will be sampled.
     """
@@ -900,7 +902,7 @@ class HaloProfilePressureGNFW(HaloProfile):
     def __init__(self, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
-                 qrange=(1e-3, 1e3), nq=128):
+                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
@@ -911,6 +913,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         self.beta = beta
         self.gamma = gamma
         self.P0_hexp = P0_hexp
+        self.x_out = x_out
 
         # Interpolator for dimensionless Fourier-space profile
         self._fourier_interp = None
@@ -918,7 +921,7 @@ class HaloProfilePressureGNFW(HaloProfile):
 
     def update_parameters(self, mass_bias=None, P0=None,
                           c500=None, alpha=None, beta=None, gamma=None,
-                          alpha_P=None, P0_hexp=None):
+                          alpha_P=None, P0_hexp=None, x_out=None):
         """ Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
 
@@ -937,7 +940,11 @@ class HaloProfilePressureGNFW(HaloProfile):
             P0_hexp (float): power of `h` with which the normalization should \
                 scale (-1 for SZ-based normalizations, -3/2 for \
                 X-ray-based ones).
+            x_out (float): profile threshold (as a fraction of r500c). \
+                if `None`, no threshold will be used.
         """
+        if x_out is not None:
+            self.x_out = x_out
         if mass_bias is not None:
             self.mass_bias = mass_bias
         if c500 is not None:
@@ -989,7 +996,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         # the Fourier transform. We could use the existing FFTLog
         # framework, but this is a lot less of a kerfuffle.
         f_arr = np.array([quad(integrand,
-                               a=1e-4, b=np.inf,  # limits of integration
+                               a=1e-4, b=self.x_out,  # limits of integration
                                weight="sin",  # fourier sine weight
                                wvar=q)[0] / q
                           for q in q_arr])
