@@ -48,7 +48,7 @@ from .cls import angular_cl
 # Useful constants and unit conversions
 physical_constants = lib.cvar.constants
 
-from .correlation import (
+from .correlations import (
     correlation, correlation_3d, correlation_multipole, correlation_3dRsd,
     correlation_3dRsd_avgmu, correlation_pi_sigma)
 
