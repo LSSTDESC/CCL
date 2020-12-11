@@ -1,7 +1,7 @@
-pyccl.correlation module
+pyccl.covariances module
 ========================
 
-.. automodule:: pyccl.correlation
+.. automodule:: pyccl.covariances
     :members:
     :undoc-members:
     :show-inheritance:
