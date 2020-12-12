@@ -485,6 +485,8 @@ class MassFuncTinker10(MassFunc):
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         ld = np.log10(self._get_Delta_m(cosmo, a))
         nu = 1.686 / sigM
+        # redshift evolution only up to z=3
+        a = np.clip(a, 0.25, 1)
         pa = self.pa0(ld) * a**(-0.27)
         pb = self.pb0(ld) * a**(-0.20)
         pc = self.pc0(ld) * a**0.01
