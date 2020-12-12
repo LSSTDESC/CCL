@@ -438,7 +438,7 @@ class MassFuncTinker10(MassFunc):
     name = 'Tinker10'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
-                 norm_all_z=True):
+                 norm_all_z=False):
         self.norm_all_z = norm_all_z
         super(MassFuncTinker10, self).__init__(cosmo,
                                                mass_def,

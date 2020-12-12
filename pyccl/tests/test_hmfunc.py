@@ -145,7 +145,8 @@ def test_nM_tinker10_norm():
     from scipy.integrate import quad
 
     md = ccl.halos.MassDef(300, rho_type='matter')
-    mf = ccl.halos.MassFuncTinker10(COSMO, mass_def=md)
+    mf = ccl.halos.MassFuncTinker10(COSMO, mass_def=md,
+                                    norm_all_z=True)
     bf = ccl.halos.HaloBiasTinker10(COSMO, mass_def=md)
 
     def integrand(lnu, z):
