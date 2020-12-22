@@ -16,7 +16,7 @@
  * The functions below implement this procedure.
 */
 
-// I snuck a private function from backgrounc.c into here. :P
+// I snuck a private function from background.c into here. :P
 // The default routines create a full spline but we just need one value.
 // This may seem like over optimizing, but in testing initializing halofit
 // is an order of magnitude or more slower if we don't do this.
@@ -185,6 +185,7 @@ struct hf_int_data {
   double r2;
   double a;
   ccl_cosmology *cosmo;
+  ccl_f2d_t *plin;
   int *status;
   gsl_integration_cquad_workspace *workspace;
 };
@@ -195,7 +196,7 @@ static double gauss_norm_int_func(double lnk, void *p) {
   double k2 = k*k;
 
   return (
-    ccl_linear_matter_power(hfd->cosmo, k, hfd->a, hfd->status) *
+    ccl_f2d_t_eval(hfd->plin, lnk, hfd->a, hfd->cosmo, hfd->status) *
     k*k2/2.0/M_PI/M_PI *
     exp(-k2 * (hfd->r2)));
 }
@@ -206,7 +207,7 @@ static double onederiv_gauss_norm_int_func(double lnk, void *p) {
   double k2 = k*k;
 
   return (
-    ccl_linear_matter_power(hfd->cosmo, k, hfd->a, hfd->status) *
+    ccl_f2d_t_eval(hfd->plin, lnk, hfd->a, hfd->cosmo, hfd->status) *
     k*k2/2.0/M_PI/M_PI *
     exp(-k2 * (hfd->r2)) *
     (-k2 * 2.0 * (hfd->r)));
@@ -218,7 +219,7 @@ static double twoderiv_gauss_norm_int_func(double lnk, void *p) {
   double k2 = k*k;
 
   return (
-    ccl_linear_matter_power(hfd->cosmo, k, hfd->a, hfd->status) *
+    ccl_f2d_t_eval(hfd->plin, lnk, hfd->a, hfd->cosmo, hfd->status) *
     k*k2/2.0/M_PI/M_PI *
     exp(-k2 * (hfd->r2)) *
     (-2.0*k2 + 4.0*k2*k2 * (hfd->r2)));
@@ -231,8 +232,8 @@ static double rsigma_func(double rsigma, void *p) {
   gsl_function F;
   int gsl_status;
 
-  lnkmin = hfd->cosmo->data.p_lin->lkmin;
-  lnkmax = hfd->cosmo->data.p_lin->lkmax;
+  lnkmin = hfd->plin->lkmin;
+  lnkmax = hfd->plin->lkmax;
   hfd->r = rsigma;
   hfd->r2 = rsigma * rsigma;
   F.function = &gauss_norm_int_func;
@@ -315,7 +316,8 @@ static double get_rsigma(double a, struct hf_int_data data) {
  * @param cosmo Cosmological data
  * @param int, status of computations
  */
-halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
+halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
+                                       ccl_f2d_t *plin, int *status) {
   int n_a, i, gsl_status;
   double amin, amax;
   double lnkmin, lnkmax;
@@ -337,11 +339,11 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
   // solving sigma2(R, a) = 1
   // it is this radius that is needed for the subsequent splines of
   // the derivatives.
-  amin = cosmo->data.p_lin->amin;
-  amax = cosmo->data.p_lin->amax;
+  amin = plin->amin;
+  amax = plin->amax;
   n_a = cosmo->spline_params.A_SPLINE_NA_PK + cosmo->spline_params.A_SPLINE_NLOG_PK - 1;
-  lnkmin = cosmo->data.p_lin->lkmin;
-  lnkmax = cosmo->data.p_lin->lkmax;
+  lnkmin = plin->lkmin;
+  lnkmax = plin->lkmax;
 
   ///////////////////////////////////////////////////////
   // memory allocation
@@ -555,6 +557,7 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
     // setup for integrations
     data.status = status;
     data.cosmo = cosmo;
+    data.plin = plin;
     data.workspace = workspace;
 
     for (i=0; i<n_a; ++i) {
@@ -858,13 +861,14 @@ void ccl_halofit_struct_free(halofit_struct *hf) {
 /**
  * Computes the halofit non-linear power spectrum
  * @param cosmo: cosmology object containing parameters
- * @param k: wavenumber in units of Mpc^{-1}
+ * @param lk: natural logarithm of wavenumber in units of Mpc^{-1}
  * @param a: scale factor normalised to a=1 today
  * @param status: Status flag: 0 if there are no errors, non-zero otherwise
  * @param hf: halofit splines for evaluating the power spectrum
  * @return halofit_matter_power: halofit power spectrum, P(k), units of Mpc^{3}
  */
-double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struct *hf, int *status) {
+double ccl_halofit_power(ccl_cosmology *cosmo, ccl_f2d_t *plin,
+                         double lk, double a, halofit_struct *hf, int *status) {
   double rsigma, neff, C;
   double ksigma, weffa, omegaMz, omegaDEwz, kh;
   double PkL, PkNL, f1, f2, f3, an, bn, cn, gamman, alphan, betan, nun, mun, y, fy;
@@ -874,6 +878,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   double neff2, neff3, neff4;
   double kh2, y2;
   double delta2_norm, om_nu;
+  double k=exp(lk);
 
   // all eqns are from Takahashi et al. unless stated otherwise
   // eqns A4 - A5
@@ -937,7 +942,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   betan += (fnu * (1.081 + 0.395*neff2));
 
   // eqns A1 - A3
-  PkL = ccl_linear_matter_power(cosmo, k, a, status);
+  PkL = ccl_f2d_t_eval(plin, lk, a, cosmo, status);
   y = k/ksigma;
   y2 = y * y;
   fy = y/4.0 + y2/8.0;

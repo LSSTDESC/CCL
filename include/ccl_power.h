@@ -39,11 +39,15 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * s
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-void ccl_cosmology_compute_linear_power(ccl_cosmology * cosmo, ccl_f2d_t *psp, int* status);
+void ccl_compute_linear_power(ccl_cosmology * cosmo, ccl_f2d_t *psp, int* status);
 
 ccl_f2d_t *ccl_compute_linpower_bbks(ccl_cosmology *cosmo, int *status);
 
 ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int *status);
+
+ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status);
+
+ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status);
 
 /**
  * Compute the non-linear power spectrum and create a 2d spline P(k,z) to be stored
@@ -54,31 +58,9 @@ ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int *status);
  * For specific cases see documentation for ccl_error.c
  * @return void
  */
-void ccl_cosmology_compute_nonlin_power(ccl_cosmology * cosmo,
-                                        ccl_f2d_t *psp,
-                                        int* status);
-
-/**
- * Compute the non-linear power spectrum from an existing 2d spline P(k,z).
- * @param cosmo Cosmological parameters
- * @param psp existing 2d spline.
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-void ccl_cosmology_compute_nonlin_power_from_f2d(ccl_cosmology *cosmo,
-                                                 ccl_f2d_t *psp, int *status);
-
-/**
- * Compute the linear power spectrum from an existing 2d spline P(k,z).
- * @param cosmo Cosmological parameters
- * @param psp existing 2d spline.
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-void ccl_compute_linear_power_from_f2d(ccl_cosmology *cosmo,
-                                       ccl_f2d_t *psp, int *status);
+void ccl_compute_nonlin_power(ccl_cosmology * cosmo,
+                              ccl_f2d_t *psp,
+                              int* status);
 
 /**
  * Variance of the matter density field with (top-hat) smoothing scale R [Mpc].

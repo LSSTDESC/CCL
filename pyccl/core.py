@@ -185,6 +185,8 @@ class Cosmology(object):
 
         # This will change to True once the "_set_background_from_arrays"
         # is called.
+        self._pk_lin = {}
+        self._pk_nl = {}
         self._background_on_input = False
         # This will change to True once the "_set_growth_from_arrays"
         # is called.
@@ -731,16 +733,23 @@ class Cosmology(object):
     def compute_linear_power(self):
         """Call the appropriate function to compute the linear power
         spectrum, either read from input or calculated internally,"""
-        if self._linear_power_on_input:
-            self._compute_linear_power_from_arrays()
-        else:
-            self._compute_linear_power_internal()
-
-    def _compute_linear_power_internal(self):
-        """Compute the linear power spectrum."""
         if self.has_linear_power:
             return
 
+        if self._linear_power_on_input:
+            pk = self._compute_linear_power_from_arrays()
+        else:
+            pk = self._compute_linear_power_internal()
+
+        self._pk_lin['delta_matter_x_delta_matter'] = pk
+        if pk:
+            status = 0
+            status = lib.compute_linear_power(self.cosmo, pk.psp,
+                                              status)
+            check(status, self)
+
+    def _compute_linear_power_internal(self):
+        """Compute the linear power spectrum."""
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
                 ['bbks', 'eisenstein_hu']):
@@ -761,48 +770,32 @@ class Cosmology(object):
         self.compute_growth()
 
         trf = self._config_init_kwargs['transfer_function']
+        pk = None
         if ((trf == 'boltzmann_class') and not self.has_linear_power):
-            pk_lin = get_class_pk_lin(self)
-            psp = pk_lin.psp
+            pk = get_class_pk_lin(self)
         elif ((trf == 'boltzmann_isitgr') and not self.has_linear_power):
-            pk_lin = get_isitgr_pk_lin(self)
-            psp = pk_lin.psp
+            pk = get_isitgr_pk_lin(self)
         elif ((trf == 'boltzmann_camb') and not self.has_linear_power):
-            pk_lin = get_camb_pk_lin(self)
-            psp = pk_lin.psp
+            pk = get_camb_pk_lin(self)
         elif ((trf in ['bbks', 'eisenstein_hu'])
               and not self.has_linear_power):
-            pk_lin = Pk2D.pk_linear_from_analytic(self, model=trf)
-            psp = pk_lin.psp
-        else:
-            psp = None
-
-        if (psp is None and not self.has_linear_power and (trf is not None)):
-            raise CCLError("CCL could not compute the transfer function!")
-
-        # first do the linear matter power
-        status = 0
-        status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
-        check(status, self)
+            pk = Pk2D.pk_from_model(self,
+                                    model=trf)
+        return pk
 
     def _compute_linear_power_from_arrays(self):
         if not self._linear_power_on_input:
             raise ValueError("Cannot compute linear power spectrum from"
                              " input without input arrays initialized.")
-        pk_lin = Pk2D(pkfunc=None,
-                      a_arr=self.a_array_pkln,
-                      lk_arr=np.log(self.k_array_pkln),
-                      pk_arr=self.pk_array_pkln,
-                      is_logp=False,
-                      extrap_order_lok=1,
-                      extrap_order_hik=2,
-                      cosmo=None)
-
-        psp = pk_lin.psp
-
-        status = 0
-        status = lib.cosmology_compute_linear_power(self.cosmo, psp, status)
-        check(status, self)
+        pk = Pk2D(pkfunc=None,
+                  a_arr=self.a_array_pkln,
+                  lk_arr=np.log(self.k_array_pkln),
+                  pk_arr=self.pk_array_pkln,
+                  is_logp=False,
+                  extrap_order_lok=1,
+                  extrap_order_hik=2,
+                  cosmo=None)
+        return pk
 
     def _get_halo_model_nonlin_power(self):
         from . import halos as hal
@@ -836,11 +829,26 @@ class Cosmology(object):
         hmc = hal.HMCalculator(self, hmf, hbf, mdef)
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
-    def _compute_nonlin_power_internal(self):
-        """Compute the non-linear power spectrum."""
+    def compute_nonlin_power(self):
+        """Call the appropriate function to compute the linear power
+        spectrum, either read from input or calculated internally,"""
         if self.has_nonlin_power:
             return
 
+        if self._nonlinear_power_on_input:
+            pk = self._compute_nonlin_power_from_arrays()
+        else:
+            pk = self._compute_nonlin_power_internal()
+
+        self._pk_nl['delta_matter_x_delta_matter'] = pk
+
+        if pk:
+            status = 0
+            status = lib.compute_nonlin_power(self.cosmo, pk.psp, status)
+            check(status, self)
+
+    def _compute_nonlin_power_internal(self):
+        """Compute the non-linear power spectrum."""
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
                 warnings.warn(
@@ -869,50 +877,43 @@ class Cosmology(object):
 
         self.compute_distances()
 
+        mps = self._config_init_kwargs['matter_power_spectrum']
         # needed for halofit, halomodel and linear options
-        if self._config_init_kwargs['matter_power_spectrum'] != 'emu':
+        if mps != 'emu':
             self.compute_linear_power()
 
-        # for the halo model we need to init the mass function stuff
-        psp = None
-        if self._config_init_kwargs['matter_power_spectrum'] == 'halo_model':
+        pk = None
+        if mps == 'halo_model':
             warnings.warn(
                 "The halo model option for the internal CCL matter power "
                 "spectrum is deprecated. Use the more general functionality "
                 "in the `halos` module.", category=CCLWarning)
-            psp_py = self._get_halo_model_nonlin_power()
-            psp = psp_py.psp
-
-        status = 0
-        status = lib.cosmology_compute_nonlin_power(self.cosmo, psp, status)
-        check(status, self)
-
-    def compute_nonlin_power(self):
-        """Call the appropriate function to compute the linear power
-        spectrum, either read from input or calculated internally,"""
-        if self._nonlinear_power_on_input:
-            self._compute_nonlin_power_from_arrays()
-        else:
-            self._compute_nonlin_power_internal()
+            pk = self._get_halo_model_nonlin_power()
+        elif mps == 'halofit':
+            pkl = self._pk_lin['delta_matter_x_delta_matter']
+            if pkl is None:
+                raise CCLError("The linear power spectrum is a "
+                               "necessary input for halofit")
+            pk = Pk2D.halofit_it(self, pkl)
+        elif mps == 'emu':
+            pk = Pk2D.pk_from_model(self, model='emu')
+        elif mps == 'linear':
+            pk = self._pk_lin['delta_matter_x_delta_matter']
+        return pk
 
     def _compute_nonlin_power_from_arrays(self):
         if not self._nonlinear_power_on_input:
             raise ValueError("Cannot compute non-linear power spectrum from"
                              "input without input arrays initialized.")
-        pk_nln = Pk2D(pkfunc=None,
-                      a_arr=self.a_array_pknl,
-                      lk_arr=np.log(self.k_array_pknl),
-                      pk_arr=self.pk_array_pknl,
-                      is_logp=False,
-                      extrap_order_lok=1,
-                      extrap_order_hik=2,
-                      cosmo=None)
-
-        psp = pk_nln.psp
-
-        status = 0
-        status = lib.cosmology_compute_nonlin_power(self.cosmo, psp, status)
-        check(status, self)
+        pk = Pk2D(pkfunc=None,
+                  a_arr=self.a_array_pknl,
+                  lk_arr=np.log(self.k_array_pknl),
+                  pk_arr=self.pk_array_pknl,
+                  is_logp=False,
+                  extrap_order_lok=1,
+                  extrap_order_hik=2,
+                  cosmo=None)
+        return pk
 
     def compute_sigma(self):
         """Compute the sigma(M) and mass function splines."""

@@ -109,23 +109,38 @@ class Pk2D(object):
         self.has_psp = True
 
     @classmethod
-    def pk_linear_from_analytic(Pk2D, cosmo, model='bbks'):
-        # These need a growth function
-        cosmo.compute_growth()
+    def pk_from_model(Pk2D, cosmo, model):
         pk2d = Pk2D(empty=True)
         status = 0
         if model == 'bbks':
+            cosmo.compute_growth()
             ret = lib.compute_linpower_bbks(cosmo.cosmo, status)
         elif model == 'eisenstein_hu':
+            cosmo.compute_growth()
             ret = lib.compute_linpower_eh(cosmo.cosmo, status)
+        elif model == 'emu':
+            ret = lib.compute_power_emu(cosmo.cosmo, status)
         else:
-            raise ValueError("Unknown analytical model %s " % model)
+            raise ValueError("Unknown model %s " % model)
 
         if np.ndim(ret) == 0:
             status = ret
         else:
             pk2d.psp, status = ret
 
+        check(status, cosmo)
+        pk2d.has_psp = True
+        return pk2d
+
+    @classmethod
+    def halofit_it(Pk2D, cosmo, pk_linear):
+        pk2d = Pk2D(empty=True)
+        status = 0
+        ret = lib.halofit_it(cosmo.cosmo, pk_linear.psp, status)
+        if np.ndim(ret) == 0:
+            status = ret
+        else:
+            pk2d.psp, status = ret
         check(status)
         pk2d.has_psp = True
         return pk2d
