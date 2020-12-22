@@ -17,119 +17,45 @@
  ^ @param psp The linear power spectrum to spline.
  * @param status, integer indicating the status
  */
-void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp, int rescaled_mg_flag, int* status) {
-  double kmin, kmax, ndecades, amin, amax, ic, sigma8, log_sigma8;
-  int nk, na, s;
-  double *lk = NULL, *aa = NULL, *lpk_ln = NULL, *lpk_nl = NULL;
-  double norm_pk;
-  double *mnu_list = NULL;
-  ccl_parameters params_GR;
-  params_GR.m_nu = NULL;
-  params_GR.z_mgrowth = NULL;
-  params_GR.df_mgrowth = NULL;
-  ccl_cosmology * cosmo_GR = NULL;
-  double *D_mu = NULL;
-  double *D_GR = NULL;
+void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
+                                           int mg_rescale, int* status) {
 
   if (*status == 0) {
-    //calculations done - now allocate CCL splines
-    kmin = 2*exp(psp->lkmin);
-    kmax = cosmo->spline_params.K_MAX_SPLINE;
-    //Compute nk from number of decades and N_K = # k per decade
-    ndecades = log10(kmax) - log10(kmin);
-    nk = (int)ceil(ndecades*cosmo->spline_params.N_K);
-    amin = cosmo->spline_params.A_SPLINE_MINLOG_PK;
-    amax = cosmo->spline_params.A_SPLINE_MAX;
-    na = cosmo->spline_params.A_SPLINE_NA_PK+cosmo->spline_params.A_SPLINE_NLOG_PK-1;
-
-    // The lk array is initially k, but will later
-    // be overwritten with log(k)
-    lk = ccl_log_spacing(kmin, kmax, nk);
-    if (lk == NULL) {
-      *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(
-          cosmo,
-          "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
-    }
-  }
-
-  if (*status == 0) {
-    aa = ccl_linlog_spacing(
-        amin, cosmo->spline_params.A_SPLINE_MIN_PK,
-        amax, cosmo->spline_params.A_SPLINE_NLOG_PK,
-        cosmo->spline_params.A_SPLINE_NA_PK);
-    if (aa == NULL) {
-      *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
-    }
-  }
-
-  if (*status == 0) {
-    lpk_ln = malloc(nk * na * sizeof(double));
-    if (lpk_ln == NULL) {
-      *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
-    }
-  }
-
-  if (*status == 0) {
-    lpk_nl = malloc(nk * na * sizeof(double));
-    if(lpk_nl == NULL) {
-      *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
-    }
-  }
-
-  if (*status == 0) {
-    // After this loop lk will contain log(k),
-    // lpk_ln will contain log(P_lin), all in Mpc, not Mpc/h units!
-    double psout_l;
-    s = 0;
-
     // If scale-independent mu / Sigma modified gravity is in use
     // and mu ! = 0 : get the unnormalized growth factor in MG and for
     // corresponding GR case, to rescale CLASS power spectrum
-    if (fabs(cosmo->params.mu_0) > 1e-14) {
+    if ((fabs(cosmo->params.mu_0) > 1e-14) && mg_rescale) {
       // Set up another cosmology which is exactly the same as the
       // current one but with mu_0 and Sigma_0=0, for scaling P(k)
 
       // Get a list of the three neutrino masses already calculated
-      mnu_list = malloc(3*sizeof(double));
-      if (mnu_list == NULL) {
-        *status = CCL_ERROR_MEMORY;
-        ccl_cosmology_set_status_message(
-          cosmo,
-          "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
+      size_t na;
+      double *aa;
+      double norm_pk;
+      double mnu_list[3] = {0, 0, 0};
+      ccl_parameters params_GR;
+      params_GR.m_nu = NULL;
+      params_GR.z_mgrowth = NULL;
+      params_GR.df_mgrowth = NULL;
+      ccl_cosmology * cosmo_GR = NULL;
+      double *D_mu = NULL;
+      double *D_GR = NULL;
+
+      for (int i=0; i< cosmo->params.N_nu_mass; i=i+1)
+        mnu_list[i] = cosmo->params.m_nu[i];
+
+      if (isfinite(cosmo->params.A_s)) {
+        norm_pk = cosmo->params.A_s;
       }
-
-      if (*status == 0) {
-        for (int i=0; i< cosmo->params.N_nu_mass; i=i+1) {
-          mnu_list[i] = cosmo->params.m_nu[i];
-        }
-        if (cosmo->params.N_nu_mass < 3) {
-          for (int j=cosmo->params.N_nu_mass; j<3; j=j+1) {
-            mnu_list[j] = 0.;
-          }
-        }
-
-        if (isfinite(cosmo->params.A_s)) {
-          norm_pk = cosmo->params.A_s;
-        }
-        else if (isfinite(cosmo->params.sigma8)) {
-          norm_pk = cosmo->params.sigma8;
-        }
-        else {
-          *status = CCL_ERROR_PARAMETERS;
-          strcpy(
-            cosmo->status_message,
-            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): neither A_s nor sigma8 defined.\n");
-        }
+      else if (isfinite(cosmo->params.sigma8)) {
+        norm_pk = cosmo->params.sigma8;
+      }
+      else {
+        *status = CCL_ERROR_PARAMETERS;
+        strcpy(
+               cosmo->status_message,
+               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+               "neither A_s nor sigma8 defined.\n");
       }
 
       if (*status == 0) {
@@ -147,6 +73,24 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
           strcpy(
             cosmo->status_message,
             "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): could not make MG params.\n");
+        }
+      }
+
+      // Get array of scale factors
+      if(*status == 0) {
+        if(psp->fa != NULL) {
+          na = psp->fa->size;
+          aa = psp->fa->x;
+        }
+        else if(psp->fka != NULL) {
+          na = psp->fka->interp_object.ysize;
+          aa = psp->fka->yarr;
+        }
+        else {
+          *status = CCL_ERROR_SPLINE;
+          strcpy(cosmo->status_message,
+                 "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                 "input pk2d has no splines.\n");
         }
       }
 
@@ -189,80 +133,190 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
       }
 
       if (*status == 0) {
-        for (int i=0; i<nk; i++) {
-          lk[i] = log(lk[i]);
-          for (int j = 0; j < na; j++) {
-            //The 2D interpolation routines access the function values pk_{k_ia_j} with the following ordering:
-            //pk_ij = pk[j*N_k + i]
-            //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-            psout_l = ccl_f2d_t_eval(psp, lk[i], aa[j], cosmo, status);
-	    if (rescaled_mg_flag == 0) {
-            lpk_ln[j*nk+i] = log(psout_l) ;
-	    }
-	    else {
-            lpk_ln[j*nk+i] = log(psout_l) + 2 * log(D_mu[j]) - 2 * log(D_GR[j]);
-	    }
+        size_t nk=0;
+        if (psp->fka != NULL)
+          nk=psp->fka->interp_object.xsize;
 
+        for (int i=0; i<na; i++) {
+          double rescale_factor=D_mu[i]/D_GR[i];
+          if(psp->is_log)
+            rescale_factor = 2*log(rescale_factor);
+          else
+            rescale_factor = rescale_factor*rescale_factor;
+          if (psp->fa != NULL) {
+            if(psp->is_log)
+              psp->fa->y[i] += rescale_factor;
+            else
+              psp->fa->y[i] *= rescale_factor;
+          }
+          else {
+            for(int j=0; j<nk; j++) {
+              if(psp->is_log)
+                psp->fka->zarr[i*nk+j] += rescale_factor;
+              else
+                psp->fka->zarr[i*nk+j] *= rescale_factor;
+            }
+          }
+        }
+
+        if(psp->fa != NULL) {
+          gsl_spline *fa = gsl_spline_alloc(gsl_interp_cspline,
+                                            psp->fa->size);
+          if(fa == NULL) {
+            *status == CCL_ERROR_MEMORY;
+            ccl_cosmology_set_status_message(
+                                             cosmo,
+            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
+          }
+          if(*status==0) {
+            int spstatus = gsl_spline_init(fa, psp->fa->x,
+                                           psp->fa->y, psp->fa->size);
+            if(spstatus) {
+              *status == CCL_ERROR_MEMORY;
+              ccl_cosmology_set_status_message(
+                                               cosmo,
+                                               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                               "Error initializing spline\n");
+            }
+          }
+          if(*status==0) {
+            gsl_spline_free(psp->fa);
+            psp->fa=fa;
+          }
+        }
+        else {
+          gsl_spline2d *fka = gsl_spline2d_alloc(gsl_interp2d_bicubic,
+                                                 psp->fka->interp_object.xsize,
+                                                 psp->fka->interp_object.ysize); 
+          if(fka == NULL) {
+            *status == CCL_ERROR_MEMORY;
+            ccl_cosmology_set_status_message(
+                                             cosmo,
+                                             "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                             "memory allocation\n");
+          }
+          if(*status==0) {
+            int spstatus = gsl_spline2d_init(fka, psp->fka->xarr,
+                                             psp->fka->yarr, psp->fka->zarr,
+                                             psp->fka->interp_object.xsize,
+                                             psp->fka->interp_object.ysize);
+            if(spstatus) {
+              *status == CCL_ERROR_MEMORY;
+              ccl_cosmology_set_status_message(
+                                               cosmo,
+                                               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                               "Error initializing spline\n");
+            }
+          }
+          if(*status==0) {
+            gsl_spline2d_free(psp->fka);
+            psp->fka=fka;
+          }
+        }
+      }
+      free(D_mu);
+      free(D_GR);
+      ccl_parameters_free(&params_GR);
+      ccl_cosmology_free(cosmo_GR);
+    }
+  }
+
+  // if desried, renomalize to a given sigma8
+  if (*status == 0) {
+    if (isfinite(cosmo->params.sigma8) && (!isfinite(cosmo->params.A_s))) {
+      size_t na, nk;
+      double sigma8, renorm=1;
+
+      cosmo->computed_linear_power = true;
+      sigma8 = ccl_sigma8(cosmo, psp, status);
+      cosmo->computed_linear_power = false;
+
+      if (*status == 0) {
+        renorm = cosmo->params.sigma8/sigma8;
+        if (psp->is_log)
+          renorm = 2*log(renorm);
+        else
+          renorm = renorm*renorm;
+
+        if (psp->fa != NULL) {
+          na = psp->fa->size;
+          for (int i=0; i<na; i++) {
+            if (psp->fa != NULL) {
+              if (psp->is_log)
+                psp->fa->y[i] += renorm;
+              else
+                psp->fa->y[i] *= renorm;
+            }
+          }
+        }
+        else {
+          na = psp->fka->interp_object.ysize;
+          nk = psp->fka->interp_object.xsize;
+          for(int i=0; i<na*nk; i++) {
+            if (psp->is_log)
+              psp->fka->zarr[i] += renorm;
+            else
+              psp->fka->zarr[i] *= renorm;
+          }
+        }
+      }
+
+      if (*status == 0) {
+        if(psp->fa != NULL) {
+          gsl_spline *fa = gsl_spline_alloc(gsl_interp_cspline,
+                                            psp->fa->size);
+          if(fa == NULL) {
+            *status == CCL_ERROR_MEMORY;
+            ccl_cosmology_set_status_message(
+                                             cosmo,
+            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
+          }
+          if(*status==0) {
+            int spstatus = gsl_spline_init(fa, psp->fa->x,
+                                           psp->fa->y, psp->fa->size);
+            if(spstatus) {
+              *status == CCL_ERROR_MEMORY;
+              ccl_cosmology_set_status_message(
+                                               cosmo,
+                                               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                               "Error initializing spline\n");
+            }
+          }
+          if(*status==0) {
+            gsl_spline_free(psp->fa);
+            psp->fa=fa;
+          }
+        }
+        else {
+          gsl_spline2d *fka = gsl_spline2d_alloc(gsl_interp2d_bicubic,
+                                                 psp->fka->interp_object.xsize,
+                                                 psp->fka->interp_object.ysize); 
+          if(fka == NULL) {
+            *status == CCL_ERROR_MEMORY;
+            ccl_cosmology_set_status_message(
+                                             cosmo,
+                                             "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                             "memory allocation\n");
+          }
+          if(*status==0) {
+            int spstatus = gsl_spline2d_init(fka, psp->fka->xarr,
+                                             psp->fka->yarr, psp->fka->zarr,
+                                             psp->fka->interp_object.xsize,
+                                             psp->fka->interp_object.ysize);
+            if(spstatus) {
+              *status == CCL_ERROR_MEMORY;
+              ccl_cosmology_set_status_message(
+                                               cosmo,
+                                               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                               "Error initializing spline\n");
+            }
+          }
+          if(*status==0) {
+            gsl_spline2d_free(psp->fka);
+            psp->fka=fka;
           }
         }
       }
     }
-    else {
-      // This is the normal GR case.
-      for (int i=0; i<nk; i++) {
-        lk[i] = log(lk[i]);
-        for (int j = 0; j<na; j++) {
-          //The 2D interpolation routines access the function values pk_{k_ia_j} with the following ordering:
-          //pk_ij = pk[j*N_k + i]
-          //with i = 0,...,N_k-1 and j = 0,...,N_a-1.
-          psout_l = ccl_f2d_t_eval(psp, lk[i], aa[j], cosmo, status);
-          lpk_ln[j*nk+i] = log(psout_l);
-        }
-      }
-    }
   }
-
-  if (*status == 0) {
-    cosmo->data.p_lin = ccl_f2d_t_new(
-      na, aa, nk, lk, lpk_ln, NULL, NULL, 0,
-      1, 2, ccl_f2d_cclgrowth, 1, NULL, 0, 2,
-      ccl_f2d_3,status);
-  }
-
-  // if desried, renomalize to a given sigma8
-  if (isfinite(cosmo->params.sigma8) && (!isfinite(cosmo->params.A_s))) {
-    if (*status == 0) {
-      cosmo->computed_linear_power = true;
-      sigma8 = ccl_sigma8(cosmo, cosmo->data.p_lin, status);
-      cosmo->computed_linear_power = false;
-    }
-
-    if (*status == 0) {
-      // Calculate normalization factor using computed value of sigma8, then
-      // recompute P(k, a) using this normalization
-      log_sigma8 = 2*(log(cosmo->params.sigma8) - log(sigma8));
-      for(int j = 0; j<na*nk; j++)
-        lpk_ln[j] += log_sigma8;
-    }
-
-    if (*status == 0) {
-      // Free the previous P(k,a) spline, and allocate a new one to store the
-      // properly-normalized P(k,a)
-      ccl_f2d_t_free(cosmo->data.p_lin);
-      cosmo->data.p_lin = ccl_f2d_t_new(
-        na, aa, nk, lk, lpk_ln, NULL, NULL, 0,
-        1, 2, ccl_f2d_cclgrowth, 1, NULL, 0, 2,
-        ccl_f2d_3,status);
-    }
-  }
-
-  free(D_mu);
-  free(D_GR);
-  free(mnu_list);
-  ccl_parameters_free(&params_GR);
-  ccl_cosmology_free(cosmo_GR);
-  free(lk);
-  free(aa);
-  free(lpk_nl);
-  free(lpk_ln);
 }

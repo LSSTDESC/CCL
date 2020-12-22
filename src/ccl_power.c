@@ -452,15 +452,18 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
 
       case ccl_boltzmann_class:
         ccl_cosmology_spline_linpower_musigma(cosmo, psp, rescaled_mg_flag, status);
+        ccl_compute_linear_power_from_f2d(cosmo, psp, status);
         break;
 
       case ccl_boltzmann_camb:
         ccl_cosmology_spline_linpower_musigma(cosmo, psp, rescaled_mg_flag, status);
+        ccl_compute_linear_power_from_f2d(cosmo, psp, status);
         break;
 
       case ccl_boltzmann_isitgr:
-	    rescaled_mg_flag = 0;
+        rescaled_mg_flag = 0;
         ccl_cosmology_spline_linpower_musigma(cosmo, psp, rescaled_mg_flag, status);
+        ccl_compute_linear_power_from_f2d(cosmo, psp, status);
         break;
 
       case ccl_pklin_from_input:
