@@ -56,10 +56,14 @@ class Pk2D(object):
              object is needed in order if `pkfunc` is not `None`. The object is
              used to determine the sampling rate in scale factor and
              wavenumber.
+        empty (bool): if True, just create an empty object, to be filled
+            out later
     """
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
-                 cosmo=None):
+                 cosmo=None, empty=False):
+        if empty:
+            return
 
         status = 0
         if pkfunc is None:  # Initialize power spectrum from 2D array
@@ -103,6 +107,28 @@ class Pk2D(object):
                                                         int(is_logp), status)
         check(status)
         self.has_psp = True
+
+    @classmethod
+    def pk_linear_from_analytic(Pk2D, cosmo, model='bbks'):
+        # These need a growth function
+        cosmo.compute_growth()
+        pk2d = Pk2D(empty=True)
+        status = 0
+        if model == 'bbks':
+            ret = lib.compute_linpower_bbks(cosmo.cosmo, status)
+        elif model == 'eisenstein_hu':
+            ret = lib.compute_linpower_eh(cosmo.cosmo, status)
+        else:
+            raise ValueError("Unknown analytical model %s " % model)
+
+        if np.ndim(ret) == 0:
+            status = ret
+        else:
+            pk2d.psp, status = ret
+
+        check(status)
+        pk2d.has_psp = True
+        return pk2d
 
     def eval(self, k, a, cosmo):
         """Evaluate power spectrum.

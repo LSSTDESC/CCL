@@ -41,6 +41,10 @@ double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * s
  */
 void ccl_cosmology_compute_linear_power(ccl_cosmology * cosmo, ccl_f2d_t *psp, int* status);
 
+ccl_f2d_t *ccl_compute_linpower_bbks(ccl_cosmology *cosmo, int *status);
+
+ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int *status);
+
 /**
  * Compute the non-linear power spectrum and create a 2d spline P(k,z) to be stored
  * in the cosmology structure.

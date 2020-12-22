@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
@@ -63,6 +64,32 @@ def test_pk2d_smoke():
     pkarr = np.zeros([len(aarr), len(lkarr)])
     psp = ccl.Pk2D(a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr)
     assert_(not np.isnan(psp.eval(1E-2, 0.5, cosmo)))
+
+
+@pytest.mark.parametrize('transfer', ['bbks', 'eisenstein_hu'])
+def test_pk2d_analytic(transfer):
+    """Make sure it works once."""
+    cosmo = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+        transfer_function=transfer)
+    pk = ccl.Pk2D.pk_linear_from_analytic(cosmo, model=transfer)
+    ks = np.geomspace(1E-3, 1E1, 128)
+    for z in [0., 0.5, 2.]:
+        a = 1./(1+z)
+        pk1 = pk.eval(ks, a, cosmo)
+        pk2 = ccl.linear_matter_power(cosmo, ks, a)
+        maxdiff = np.amax(np.fabs(pk1/pk2-1))
+        assert maxdiff < 1E-10
+
+
+@pytest.mark.parametrize('transfer', ['bbks', 'eisenstein_hu'])
+def test_pk2d_analytic_fails(transfer):
+    """Make sure it works once."""
+    cosmo = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1E-10, n_s=0.96,
+        transfer_function=transfer)
+    assert_raises(ccl.CCLError, ccl.Pk2D.pk_linear_from_analytic,
+                  cosmo, model=transfer)
 
 
 def test_pk2d_function():
