@@ -233,7 +233,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
   if (isfinite(cosmo->params.sigma8) && (!isfinite(cosmo->params.A_s))) {
     if (*status == 0) {
       cosmo->computed_linear_power = true;
-      sigma8 = ccl_sigma8(cosmo, status);
+      sigma8 = ccl_sigma8(cosmo, cosmo->data.p_lin, status);
       cosmo->computed_linear_power = false;
     }
 

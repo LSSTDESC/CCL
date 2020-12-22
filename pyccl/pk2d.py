@@ -149,3 +149,29 @@ class Pk2D(object):
         if hasattr(self, 'has_psp'):
             if self.has_psp and hasattr(self, 'psp'):
                 lib.f2d_t_free(self.psp)
+
+
+def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
+    """ Return the C-level f2d spline associated with a
+    Pk2D object. If `None` on input, the internal power
+    spectrum is used.
+
+    Args:
+        cosmo (Cosmology object)
+        p_of_k_a (Pk2D object or None).
+    """
+    if p_of_k_a is not None:
+        if isinstance(p_of_k_a, Pk2D):
+            psp = p_of_k_a.psp
+        else:
+            raise ValueError("p_of_k_a must be either a "
+                             "pyccl.Pk2D object or None")
+    else:
+        psp = None
+        # if a power spectrum was not passed, we need the non-linear one
+        # at the C level
+        if is_linear:
+            cosmo.compute_linear_power()
+        else:
+            cosmo.compute_nonlin_power()
+    return psp

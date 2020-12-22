@@ -45,17 +45,19 @@ void nonlin_matter_power_vec(ccl_cosmology * cosmo, double a, double* k, int nk,
 
 %inline %{
 
-void sigmaR_vec(ccl_cosmology * cosmo, double a, double* R, int nR,
+void sigmaR_vec(ccl_cosmology * cosmo, ccl_f2d_t *psp,
+                double a, double* R, int nR,
                 int nout, double* output, int *status) {
     for(int i=0; i < nR; i++){
-      output[i] = ccl_sigmaR(cosmo, R[i], a, status);
+      output[i] = ccl_sigmaR(cosmo, R[i], a, psp, status);
     }
 }
 
-void sigmaV_vec(ccl_cosmology * cosmo, double a, double* R, int nR,
+void sigmaV_vec(ccl_cosmology * cosmo, ccl_f2d_t *psp,
+                double a, double* R, int nR,
                 int nout, double* output, int *status) {
     for(int i=0; i < nR; i++){
-      output[i] = ccl_sigmaV(cosmo, R[i], a, status);
+      output[i] = ccl_sigmaV(cosmo, R[i], a, psp, status);
     }
 }
 
@@ -71,12 +73,12 @@ void sigmaV_vec(ccl_cosmology * cosmo, double a, double* R, int nR,
 
 %inline %{
 
-void kNL_vec(ccl_cosmology * cosmo,
-        double* a,  int na,
-        int nout, double* output, int *status) {
+void kNL_vec(ccl_cosmology * cosmo, ccl_f2d_t *psp,
+             double* a,  int na,
+             int nout, double* output, int *status) {
     assert(nout == na);
     for(int i=0; i < na; i++){
-      output[i] = ccl_kNL(cosmo, a[i], status);
+      output[i] = ccl_kNL(cosmo, a[i], psp, status);
     }
 }
 

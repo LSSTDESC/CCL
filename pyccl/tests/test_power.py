@@ -232,7 +232,6 @@ def test_input_linpower_raises():
 
 def test_input_nonlin_power_spectrum():
     cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-
                           A_s=2e-9)
     a_arr = np.linspace(0.1, 1.0, 50)
     k_arr = np.logspace(np.log10(2e-4), np.log10(1), 1000)
@@ -246,7 +245,7 @@ def test_input_nonlin_power_spectrum():
     fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
 
     cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9,)
+                                A_s=2e-9)
     cosmo_input._set_background_from_arrays(a_array=a_arr,
                                             chi_array=chi_from_ccl,
                                             hoh0_array=hoh0_from_ccl)
