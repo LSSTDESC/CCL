@@ -760,27 +760,25 @@ class Cosmology(object):
         # needed to init some models
         self.compute_growth()
 
-        if ((self._config_init_kwargs['transfer_function'] ==
-                'boltzmann_class') and not self.has_linear_power):
+        trf = self._config_init_kwargs['transfer_function']
+        if ((trf == 'boltzmann_class') and not self.has_linear_power):
             pk_lin = get_class_pk_lin(self)
             psp = pk_lin.psp
-        elif ((self._config_init_kwargs['transfer_function'] ==
-                'boltzmann_isitgr') and not self.has_linear_power):
+        elif ((trf == 'boltzmann_isitgr') and not self.has_linear_power):
             pk_lin = get_isitgr_pk_lin(self)
             psp = pk_lin.psp
-        elif ((self._config_init_kwargs['transfer_function'] ==
-                'boltzmann_camb') and not self.has_linear_power):
+        elif ((trf == 'boltzmann_camb') and not self.has_linear_power):
             pk_lin = get_camb_pk_lin(self)
+            psp = pk_lin.psp
+        elif ((trf in ['bbks', 'eisenstein_hu'])
+              and not self.has_linear_power):
+            pk_lin = Pk2D.pk_linear_from_analytic(self, model=trf)
             psp = pk_lin.psp
         else:
             psp = None
 
-        if (psp is None and not self.has_linear_power and (
-                self._config_init_kwargs['transfer_function'] in
-                ['boltzmann_camb', 'boltzmann_class', 'boltzmann_isitgr'])):
-            raise CCLError("Either the CAMB or CLASS computation "
-                           "failed silently! CCL could not compute the "
-                           "transfer function!")
+        if (psp is None and not self.has_linear_power and (trf is not None)):
+            raise CCLError("CCL could not compute the transfer function!")
 
         # first do the linear matter power
         status = 0

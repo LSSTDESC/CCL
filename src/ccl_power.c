@@ -449,8 +449,7 @@ TASK: compute linear power spectrum
 */
 void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status) {
   if (cosmo->computed_linear_power) return;
-  ccl_f2d_t *pk2d=NULL;
-  int pk2d_new, rescale_mg, rescale_at_all;
+  int rescale_mg, rescale_at_all;
 
   if (*status == 0) {
     // get linear P(k)
@@ -460,45 +459,33 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
         break;
 
       case ccl_bbks: {
-        pk2d_new=1;
         rescale_mg = 0;
-        rescale_at_all = 0;
-        pk2d=ccl_compute_linpower_bbks(cosmo, status);}
+        rescale_at_all = 0;}
         break;
 
       case ccl_eisenstein_hu: {
-        pk2d_new=1;
         rescale_mg = 0;
-        rescale_at_all = 0;
-        pk2d=ccl_compute_linpower_eh(cosmo, status);}
+        rescale_at_all = 0;}
         break;
 
       case ccl_boltzmann_class: {
-        pk2d_new=0;
         rescale_mg = 1;
-        rescale_at_all = 1;
-        pk2d=psp;}
+        rescale_at_all = 1;}
         break;
 
       case ccl_boltzmann_camb: {
-        pk2d_new=0;
         rescale_mg = 1;
-        rescale_at_all = 1;
-        pk2d=psp;}
+        rescale_at_all = 1;}
         break;
 
       case ccl_boltzmann_isitgr: {
-        pk2d_new=0;
         rescale_mg = 0;
-        rescale_at_all = 1;
-        pk2d=psp;}
+        rescale_at_all = 1;}
         break;
 
       case ccl_pklin_from_input: {
-        pk2d_new=0;
         rescale_mg = 0;
-        rescale_at_all = 0;
-        pk2d=psp;}
+        rescale_at_all = 0;}
         break;
 
       default: {
@@ -513,16 +500,13 @@ void ccl_cosmology_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, in
 
   if(*status == 0) {
     if(rescale_at_all) {
-      ccl_cosmology_spline_linpower_musigma(cosmo, pk2d,
+      ccl_cosmology_spline_linpower_musigma(cosmo, psp,
                                             rescale_mg, status);
     }
   }
 
   if(*status == 0)
-    ccl_compute_linear_power_from_f2d(cosmo, pk2d, status);
-
-  if(pk2d_new)
-    ccl_f2d_t_free(pk2d);
+    ccl_compute_linear_power_from_f2d(cosmo, psp, status);
 
   if (*status == 0)
     cosmo->computed_linear_power = true;
