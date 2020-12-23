@@ -8,10 +8,11 @@ CCL_BEGIN_DECLS
  * Computes sigma(R), the power spectrum normalization, over log-spaced values of mass and radii
  * The result is attached to the cosmology object
  * @param cosmo Cosmological parameters
+ * @param psp linear matter power spectrum
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.
  */
-void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status);
+void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *status);
 
 /**
  * Calculate the standard deviation of density at smoothing mass M via interpolation.

@@ -227,9 +227,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
       size_t na, nk;
       double sigma8, renorm=1;
 
-      cosmo->computed_linear_power = true;
       sigma8 = ccl_sigma8(cosmo, psp, status);
-      cosmo->computed_linear_power = false;
 
       if (*status == 0) {
         renorm = cosmo->params.sigma8/sigma8;

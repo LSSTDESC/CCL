@@ -243,7 +243,6 @@ fgrowth: logarithmic derivative of the growth (density) (dlnD/da?)
 E: E(a)=H(a)/H0
 growth0: growth at z=0, defined to be 1
 sigma: ?
-p_lin: linear matter power spectrum at z=0?
 p_lnl: nonlinear matter power spectrum at z=0?
 computed_distances, computed_growth,
 computed_power, computed_sigma: store status of the computations
@@ -277,11 +276,9 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.rsd_splines[1] = NULL;
   cosmo->data.rsd_splines[2] = NULL;
 
-  cosmo->data.p_lin = NULL;
   cosmo->data.p_nl = NULL;
   cosmo->computed_distances = false;
   cosmo->computed_growth = false;
-  cosmo->computed_linear_power = false;
   cosmo->computed_nonlin_power = false;
   cosmo->computed_sigma = false;
   cosmo->status = 0;
@@ -746,7 +743,6 @@ void ccl_data_free(ccl_data * data) {
   gsl_spline_free(data->achi);
   gsl_spline_free(data->logsigma);
   gsl_spline_free(data->dlnsigma_dlogm);
-  ccl_f2d_t_free(data->p_lin);
   ccl_f2d_t_free(data->p_nl);
   ccl_f1d_t_free(data->rsd_splines[0]);
   ccl_f1d_t_free(data->rsd_splines[1]);

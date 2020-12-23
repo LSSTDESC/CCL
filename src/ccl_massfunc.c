@@ -56,7 +56,7 @@ static double sigmaM_m2r(ccl_cosmology *cosmo, double halomass, int *status)
   return smooth_radius;
 }
 
-void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
+void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *status)
 {
   if(cosmo->computed_sigma)
     return;
@@ -94,7 +94,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, int *status)
   if (*status == 0) {
     for (int i=0; i<nm; i++) {
       smooth_radius = sigmaM_m2r(cosmo, pow(10,m[i]), status);
-      y[i] = log(ccl_sigmaR(cosmo, smooth_radius, 1., NULL, status));
+      y[i] = log(ccl_sigmaR(cosmo, smooth_radius, 1., psp, status));
     }
     logsigma = gsl_spline_alloc(cosmo->spline_params.M_SPLINE_TYPE, nm);
     if (logsigma == NULL) {

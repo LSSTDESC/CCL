@@ -127,9 +127,7 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
                           ccl_f2d_3,status);
   }
   if(*status==0) {
-    cosmo->computed_linear_power=true;
     sigma8 = ccl_sigma8(cosmo, psp_out, status);
-    cosmo->computed_linear_power=false;
   }
 
   if(*status==0) {
@@ -442,10 +440,6 @@ ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
   return psp_out;
 }
 
-/*------ ROUTINE: ccl_compute_linear_power -----
-INPUT: ccl_cosmology * cosmo
-TASK: compute linear power spectrum
-*/
 void ccl_rescale_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp,
                               int rescale_mg, int rescale_norm,
                               int *status)
@@ -453,20 +447,6 @@ void ccl_rescale_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp,
   if(rescale_mg || rescale_norm)
     ccl_cosmology_spline_linpower_musigma(cosmo, psp, rescale_mg, status);
 }
-
-void ccl_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status) {
-  if (cosmo->computed_linear_power) return;
-
-  if (cosmo->config.transfer_function_method == ccl_transfer_none)
-    return;
-
-  if(*status == 0)
-    cosmo->data.p_lin = ccl_f2d_t_copy(psp, status);
-
-  if (*status == 0)
-    cosmo->computed_linear_power = true;
-}
-
 
 /*------ ROUTINE: ccl_compute_nonlin_power -----
 INPUT: ccl_cosmology * cosmo
@@ -491,31 +471,6 @@ void ccl_compute_nonlin_power(ccl_cosmology* cosmo, ccl_f2d_t *psp_o,
 
   if (*status == 0)
     cosmo->computed_nonlin_power = true;
-}
-
-/*------ ROUTINE: ccl_linear_matter_power -----
-INPUT: ccl_cosmology * cosmo, k [1/Mpc],a
-TASK: compute the linear power spectrum at a given redshift
-      by rescaling using the growth function
-*/
-double ccl_linear_matter_power(ccl_cosmology* cosmo, double k, double a, int* status) {
-  if (!cosmo->computed_linear_power) {
-    *status = CCL_ERROR_LINEAR_POWER_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_power.c: ccl_linear_matter_power(): linear power spctrum has not been computed!");
-    return NAN;
-  }
-
-  if (cosmo->config.transfer_function_method != ccl_transfer_none)
-    return ccl_f2d_t_eval(cosmo->data.p_lin,log(k),a,cosmo,status);
-  else {
-    *status = CCL_ERROR_INCONSISTENT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_power.c: ccl_linear_matter_power(): linear power spctrum is None!");
-    return NAN;
-  }
 }
 
 /*------ ROUTINE: ccl_nonlin_matter_power -----
@@ -606,28 +561,15 @@ INPUT: cosmology, comoving smoothing radius, scale factor
 TASK: compute sigmaR, the variance in the *linear* density field
 smoothed with a tophat filter of comoving size R
 */
-double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,ccl_f2d_t *psp_in, int *status) {
-  ccl_f2d_t *psp;
-
-  if(psp_in == NULL) {
-    if (!cosmo->computed_linear_power) {
-      *status = CCL_ERROR_LINEAR_POWER_INIT;
-      ccl_cosmology_set_status_message(
-                                       cosmo,
-                                       "ccl_power.c: ccl_sigmaR(): linear power spctrum has not been computed!");
+double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,ccl_f2d_t *psp, int *status) {
+  if (!cosmo->computed_growth){
+    *status = CCL_ERROR_GROWTH_INIT;
+    ccl_cosmology_set_status_message(
+                                     cosmo,
+                                     "ccl_power.c: ccl_sigmaR(): growth factor "
+                                     "splines have not been precomputed!");
       return NAN;
-    }
-    if (!cosmo->computed_growth){
-      *status = CCL_ERROR_GROWTH_INIT;
-      ccl_cosmology_set_status_message(
-                                       cosmo,
-                                       "ccl_power.c: ccl_sigmaR(): growth factor splines have not been precomputed!");
-      return NAN;
-    }
-    psp = cosmo->data.p_lin;
   }
-  else
-    psp = psp_in;
 
   SigmaR_pars par;
   par.status = status;
@@ -668,28 +610,15 @@ TASK: compute sigmaV, the variance in the *linear* displacement field
 smoothed with a tophat filter of comoving size R
 The linear displacement field is the gradient of the linear density field
 */
-double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,ccl_f2d_t *psp_in, int *status) {
-  ccl_f2d_t *psp;
-
-  if(psp_in == NULL) {
-    if (!cosmo->computed_linear_power) {
-      *status = CCL_ERROR_LINEAR_POWER_INIT;
-      ccl_cosmology_set_status_message(
-                                       cosmo,
-                                       "ccl_power.c: ccl_sigmaV(): linear power spctrum has not been computed!");
+double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,ccl_f2d_t *psp, int *status) {
+  if (!cosmo->computed_growth){
+    *status = CCL_ERROR_GROWTH_INIT;
+    ccl_cosmology_set_status_message(
+                                     cosmo,
+                                     "ccl_power.c: ccl_sigmaV(): growth factor "
+                                     "splines have not been precomputed!");
       return NAN;
-    }
-    if (!cosmo->computed_growth){
-      *status = CCL_ERROR_GROWTH_INIT;
-      ccl_cosmology_set_status_message(
-                                       cosmo,
-                                       "ccl_power.c: ccl_sigmaV(): growth factor splines have not been precomputed!");
-      return NAN;
-    }
-    psp = cosmo->data.p_lin;
   }
-  else
-    psp = psp_in;
 
   SigmaV_pars par;
   par.status = status;
@@ -734,8 +663,8 @@ TASK: compute sigma8, the variance in the *linear* density field at a=1
 smoothed with a tophat filter of comoving size 8 Mpc/h
 */
 
-double ccl_sigma8(ccl_cosmology *cosmo, ccl_f2d_t *psp_in, int *status) {
-  return ccl_sigmaR(cosmo, 8/cosmo->params.h, 1., psp_in, status);
+double ccl_sigma8(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *status) {
+  return ccl_sigmaR(cosmo, 8/cosmo->params.h, 1., psp, status);
 }
 
 // Integrand for kNL integral
@@ -751,28 +680,15 @@ static double kNL_integrand(double k,void *params) {
 INPUT: cosmology, scale factor
 TASK: compute kNL, the scale for the non-linear cut
 */
-double ccl_kNL(ccl_cosmology *cosmo,double a,ccl_f2d_t *psp_in, int *status) {
-  ccl_f2d_t *psp;
-
-  if(psp_in == NULL) {
-    if (!cosmo->computed_linear_power) {
-      *status = CCL_ERROR_LINEAR_POWER_INIT;
-      ccl_cosmology_set_status_message(
-                                       cosmo,
-                                       "ccl_power.c: ccl_kNL(): linear power spctrum has not been computed!");
+double ccl_kNL(ccl_cosmology *cosmo,double a,ccl_f2d_t *psp, int *status) {
+  if (!cosmo->computed_growth){
+    *status = CCL_ERROR_GROWTH_INIT;
+    ccl_cosmology_set_status_message(
+                                     cosmo,
+                                     "ccl_power.c: ccl_kNL(): growth factor "
+                                     "splines have not been precomputed!");
       return NAN;
-    }
-    if (!cosmo->computed_growth){
-      *status = CCL_ERROR_GROWTH_INIT;
-      ccl_cosmology_set_status_message(
-                                       cosmo,
-                                       "ccl_power.c: ccl_kNL(): growth factor splines have not been precomputed!");
-      return NAN;
-    }
-    psp = cosmo->data.p_lin;
   }
-  else
-    psp = psp_in;
 
   KNL_pars par;
   par.status = status;

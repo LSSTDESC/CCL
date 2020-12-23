@@ -20,13 +20,6 @@
 %}
 
 %inline %{
-void linear_matter_power_vec(ccl_cosmology * cosmo, double a, double* k, int nk,
-                             int nout, double* output, int* status) {
-    for(int i=0; i < nk; i++){
-      output[i] = ccl_linear_matter_power(cosmo, k[i], a, status);
-    }
-}
-
 void nonlin_matter_power_vec(ccl_cosmology * cosmo, double a, double* k, int nk,
                              int nout, double* output, int* status) {
     for(int i=0; i < nk; i++){

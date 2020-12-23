@@ -176,8 +176,7 @@ def test_swig_neurtinos():
 
 def test_swig_power():
     status = 0
-    for func in [ccllib.linear_matter_power_vec,
-                 ccllib.nonlin_matter_power_vec]:
+    for func in [ccllib.nonlin_matter_power_vec]:
         assert_raises(
             CCLError,
             func,

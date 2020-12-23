@@ -208,11 +208,12 @@ def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
             raise ValueError("p_of_k_a must be either a "
                              "pyccl.Pk2D object or None")
     else:
-        psp = None
         # if a power spectrum was not passed, we need the non-linear one
         # at the C level
         if is_linear:
             cosmo.compute_linear_power()
+            psp = cosmo._pk_lin['delta_matter_x_delta_matter'].psp
         else:
             cosmo.compute_nonlin_power()
+            psp = cosmo._pk_nl['delta_matter_x_delta_matter'].psp
     return psp

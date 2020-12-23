@@ -183,10 +183,12 @@ class Cosmology(object):
 
         self._build_cosmo()
 
-        # This will change to True once the "_set_background_from_arrays"
-        # is called.
+        self._has_pk_lin = False
         self._pk_lin = {}
         self._pk_nl = {}
+
+        # This will change to True once the "_set_background_from_arrays"
+        # is called.
         self._background_on_input = False
         # This will change to True once the "_set_growth_from_arrays"
         # is called.
@@ -743,10 +745,7 @@ class Cosmology(object):
 
         self._pk_lin['delta_matter_x_delta_matter'] = pk
         if pk:
-            status = 0
-            status = lib.compute_linear_power(self.cosmo, pk.psp,
-                                              status)
-            check(status, self)
+            self._has_pk_lin = True
 
     def _compute_linear_power_internal(self):
         """Compute the linear power spectrum."""
@@ -950,8 +949,11 @@ class Cosmology(object):
 
         self.compute_growth()
         self.compute_linear_power()
+        pk = self._pk_lin['delta_matter_x_delta_matter']
+        if pk is None:
+            raise CCLError("Linear power spectrum can't be None")
         status = 0
-        status = lib.cosmology_compute_sigma(self.cosmo, status)
+        status = lib.cosmology_compute_sigma(self.cosmo, pk.psp, status)
         check(status, self)
 
     @property
@@ -967,7 +969,7 @@ class Cosmology(object):
     @property
     def has_linear_power(self):
         """Checks if the linear power spectra have been precomputed."""
-        return bool(self.cosmo.computed_linear_power)
+        return self._has_pk_lin
 
     @property
     def has_nonlin_power(self):
