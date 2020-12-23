@@ -12,6 +12,7 @@ from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
+from .bcm import bcm_correct_pk2d
 
 # Configuration types
 transfer_function_types = {
@@ -910,6 +911,10 @@ class Cosmology(object):
             pk = Pk2D.pk_from_model(self, model='emu')
         elif mps == 'linear':
             pk = self._pk_lin['delta_matter_x_delta_matter']
+
+        # Correct for baryons if required
+        if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
+            bcm_correct_pk2d(self, pk)
         return pk
 
     def _compute_nonlin_power_from_arrays(self):

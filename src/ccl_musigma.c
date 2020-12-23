@@ -173,8 +173,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
                                            psp->fa->y, psp->fa->size);
             if(spstatus) {
               *status == CCL_ERROR_MEMORY;
-              ccl_cosmology_set_status_message(
-                                               cosmo,
+              ccl_cosmology_set_status_message(cosmo,
                                                "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
                                                "Error initializing spline\n");
             }
@@ -190,8 +189,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
                                                  psp->fka->interp_object.ysize); 
           if(fka == NULL) {
             *status == CCL_ERROR_MEMORY;
-            ccl_cosmology_set_status_message(
-                                             cosmo,
+            ccl_cosmology_set_status_message(cosmo,
                                              "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
                                              "memory allocation\n");
           }
@@ -202,8 +200,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
                                              psp->fka->interp_object.ysize);
             if(spstatus) {
               *status == CCL_ERROR_MEMORY;
-              ccl_cosmology_set_status_message(
-                                               cosmo,
+              ccl_cosmology_set_status_message(cosmo,
                                                "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
                                                "Error initializing spline\n");
             }

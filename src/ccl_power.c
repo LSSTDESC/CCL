@@ -12,19 +12,6 @@
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
 
-// helper function for BCM corrections
-static void correct_bcm(ccl_cosmology *cosmo, int na, double *a_arr, int nk,
-                        double *lk_arr,double *pk2d, int *status) {
-  for (int ii=0; ii < na; ii++) {
-    double a = a_arr[ii];
-    for(int jj=0; jj < nk; jj++) {
-      double k = exp(lk_arr[jj]);
-      double fbcm = ccl_bcm_model_fka(cosmo, k, a, status);
-      pk2d[jj+nk*ii] += log(fbcm);
-    }
-  }
-}
-
 // helper functions for BBKS and EH98
 static double bbks_power(ccl_parameters *params, void *p, double k) {
   return ccl_bbks_power(params, k);
@@ -352,11 +339,6 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
     }
   }
 
-  if (*status == 0) {
-    if(cosmo->config.baryons_power_spectrum_method==ccl_bcm)
-      correct_bcm(cosmo,na,aemu,NK_EMU,lk,lpk_nl,status);
-  }
-
   if(*status==0) {
     psp_out=ccl_f2d_t_new(na,aemu,NK_EMU,lk,lpk_nl,NULL,NULL,0,
                           1,2,ccl_f2d_no_extrapol,
@@ -423,11 +405,6 @@ ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
         }
       }
     }
-  }
-
-  if (*status == 0) {
-    if(cosmo->config.baryons_power_spectrum_method == ccl_bcm)
-      correct_bcm(cosmo, na, z, nk, x, y2d, status);
   }
 
   if(*status == 0)

@@ -25,14 +25,14 @@ from .background import growth_factor, growth_factor_unnorm, \
     omega_x, rho_x, mu_MG, Sig_MG
 
 # Generalized power spectra
-from .pk2d import Pk2D
+from .pk2d import Pk2D, parse_pk2d
 
 # Power spectrum calculations, sigma8 and kNL
 from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
     sigmaV, sigma8, sigmaM, kNL
 
 # BCM stuff
-from .bcm import bcm_model_fka
+from .bcm import bcm_model_fka, bcm_correct_pk2d
 
 # Old halo mass function
 from .massfunction import massfunc, halo_bias, massfunc_m2r

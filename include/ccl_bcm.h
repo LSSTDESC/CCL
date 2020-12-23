@@ -17,6 +17,8 @@ CCL_BEGIN_DECLS
  */
 double ccl_bcm_model_fka(ccl_cosmology * cosmo, double k, double a, int *status);
 
+void ccl_bcm_correct(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *status);
+
 CCL_END_DECLS
 
 #endif

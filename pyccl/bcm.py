@@ -1,5 +1,5 @@
 from . import ccllib as lib
-from .pyutils import _vectorize_fn2
+from .pyutils import _vectorize_fn2, check
 
 
 def bcm_model_fka(cosmo, k, a):
@@ -24,3 +24,9 @@ def bcm_model_fka(cosmo, k, a):
     """
     return _vectorize_fn2(lib.bcm_model_fka,
                           lib.bcm_model_fka_vec, cosmo, k, a)
+
+
+def bcm_correct_pk2d(cosmo, pk2d):
+    status = 0
+    status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
+    check(status, cosmo)
