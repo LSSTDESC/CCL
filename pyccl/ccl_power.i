@@ -15,23 +15,6 @@
 /* The python code here will be executed before all of the functions that
    follow this directive. */
 %feature("pythonprepend") %{
-    if numpy.shape(k) != (nout,):
-        raise CCLError("Input shape for `k` must match `(nout,)`!")
-%}
-
-%inline %{
-void nonlin_matter_power_vec(ccl_cosmology * cosmo, double a, double* k, int nk,
-                             int nout, double* output, int* status) {
-    for(int i=0; i < nk; i++){
-      output[i] = ccl_nonlin_matter_power(cosmo, k[i], a, status);
-    }
-}
-
-%}
-
-/* The python code here will be executed before all of the functions that
-   follow this directive. */
-%feature("pythonprepend") %{
     if numpy.shape(R) != (nout,):
         raise CCLError("Input shape for `R` must match `(nout,)`!")
 %}

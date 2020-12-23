@@ -230,23 +230,8 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
     return;
   }
 
-  // Figure out which power spectrum to use
-  ccl_f2d_t *psp_use;
-  if (psp == NULL) {
-    if (!cosmo->computed_nonlin_power) {
-      *status = CCL_ERROR_NONLIN_POWER_INIT;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_cls.c: ccl_angular_cl_limber(): non-linear power spctrum has not been computed!");
-      return;
-    }
-    psp_use = cosmo->data.p_nl;
-  }
-  else
-    psp_use = psp;
-
   #pragma omp parallel shared(cosmo, trc1, trc2, l_out, cl_out, \
-                              nl_out, status, psp_use, integration_method) \
+                              nl_out, status, psp, integration_method) \
                        default(none)
   {
     int clastatus, lind;
@@ -261,7 +246,7 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
       ipar.cosmo = cosmo;
       ipar.trc1 = trc1;
       ipar.trc2 = trc2;
-      ipar.psp = psp_use;
+      ipar.psp = psp;
       ipar.status = &clastatus;
     }
 

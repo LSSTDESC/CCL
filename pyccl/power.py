@@ -36,8 +36,10 @@ def nonlin_matter_power(cosmo, k, a):
         float or array_like: Nonlinear matter power spectrum; Mpc^3.
     """
     cosmo.compute_nonlin_power()
-    return _vectorize_fn2(lib.nonlin_matter_power,
-                          lib.nonlin_matter_power_vec, cosmo, k, a)
+    if cosmo._pk_nl['delta_matter_x_delta_matter'] is None:
+        raise CCLError("Linear power spectrum is None!")
+    return cosmo._pk_nl['delta_matter_x_delta_matter'].eval(k, a,
+                                                            cosmo)
 
 
 def sigmaM(cosmo, M, a):

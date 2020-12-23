@@ -5,19 +5,6 @@
 
 CCL_BEGIN_DECLS
 
-/**
- * Non-linear matter power spectrum.
- * Returns P_NL(k,a) [Mpc^3] for given cosmology, using the method specified in cosmo->config.transfer_function_method and cosmo->config.matter_power_spectrum_method.
- * @param cosmo Cosmology parameters and configurations
- * @param k Fourier mode, in [1/Mpc] units
- * @param a scale factor, normalized to 1 for today
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return P_NL(k,a).
- */
-
-double ccl_nonlin_matter_power(ccl_cosmology * cosmo, double k, double a,int * status);
-
 ccl_f2d_t *ccl_compute_linpower_bbks(ccl_cosmology *cosmo, int *status);
 
 ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int *status);
@@ -26,22 +13,9 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status);
 
 ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status);
 
-void ccl_rescale_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp,
-                              int rescale_mg, int rescale_norm,
-                              int *status);
-
-/**
- * Compute the non-linear power spectrum and create a 2d spline P(k,z) to be stored
- * in the cosmology structure.
- * @param cosmo Cosmological parameters
- * @param psp existing 2d spline.
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return void
- */
-void ccl_compute_nonlin_power(ccl_cosmology * cosmo,
-                              ccl_f2d_t *psp,
-                              int* status);
+void ccl_rescale_linpower(ccl_cosmology* cosmo, ccl_f2d_t *psp,
+                          int rescale_mg, int rescale_norm,
+                          int *status);
 
 /**
  * Variance of the matter density field with (top-hat) smoothing scale R [Mpc].

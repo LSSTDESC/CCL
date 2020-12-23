@@ -269,9 +269,6 @@ typedef struct ccl_data {
   gsl_spline * logsigma;
   gsl_spline * dlnsigma_dlogm;
 
-  // power spectrum splines
-  ccl_f2d_t * p_nl;
-
   // real-space splines for RSD
   ccl_f1d_t* rsd_splines[3];
   double rsd_splines_scalefactor;
@@ -289,7 +286,6 @@ typedef struct ccl_cosmology {
 
   bool computed_distances;
   bool computed_growth;
-  bool computed_nonlin_power;
   bool computed_sigma;
 
   int status;

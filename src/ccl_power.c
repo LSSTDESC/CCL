@@ -390,7 +390,7 @@ ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(
         cosmo,
-        "ccl_power.c: ccl_cosmology_spline_nonlinpower(): memory allocation\n");
+        "ccl_power.c: ccl_halofit_it(): memory allocation\n");
     }
   }
 
@@ -417,53 +417,12 @@ ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
   return psp_out;
 }
 
-void ccl_rescale_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp,
-                              int rescale_mg, int rescale_norm,
-                              int *status)
+void ccl_rescale_linpower(ccl_cosmology* cosmo, ccl_f2d_t *psp,
+                          int rescale_mg, int rescale_norm,
+                          int *status)
 {
   if(rescale_mg || rescale_norm)
     ccl_cosmology_spline_linpower_musigma(cosmo, psp, rescale_mg, status);
-}
-
-/*------ ROUTINE: ccl_compute_nonlin_power -----
-INPUT: ccl_cosmology * cosmo
-TASK: compute linear power spectrum
-*/
-void ccl_compute_nonlin_power(ccl_cosmology* cosmo, ccl_f2d_t *psp_o,
-                              int* status) {
-  if ((fabs(cosmo->params.mu_0)>1e-14 || fabs(cosmo->params.sigma_0)>1e-14) &&
-      cosmo->config.matter_power_spectrum_method != ccl_linear) {
-    *status = CCL_ERROR_NOT_IMPLEMENTED;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_power.c: ccl_compute_nonlin_power(): The power spectrum in the "
-      "mu / Sigma modified gravity parameterisation is only implemented with "
-      "the linear power spectrum.\n");
-    return;
-  }
-
-  if (cosmo->computed_nonlin_power) return;
-
-  cosmo->data.p_nl = ccl_f2d_t_copy(psp_o, status);
-
-  if (*status == 0)
-    cosmo->computed_nonlin_power = true;
-}
-
-/*------ ROUTINE: ccl_nonlin_matter_power -----
-INPUT: ccl_cosmology * cosmo, a, k [1/Mpc]
-TASK: compute the nonlinear power spectrum at a given redshift
-*/
-double ccl_nonlin_matter_power(ccl_cosmology* cosmo, double k, double a, int* status) {
-  if (!cosmo->computed_nonlin_power) {
-    *status = CCL_ERROR_NONLIN_POWER_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_power.c: ccl_nonlin_matter_power(): non-linear power spctrum has not been computed!");
-    return NAN;
-  }
-
-  return ccl_f2d_t_eval(cosmo->data.p_nl,log(k),a,cosmo,status);
 }
 
 // Params for sigma(R) integrand

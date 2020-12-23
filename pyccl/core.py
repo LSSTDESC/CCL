@@ -186,6 +186,7 @@ class Cosmology(object):
 
         self._has_pk_lin = False
         self._pk_lin = {}
+        self._has_pk_nl = False
         self._pk_nl = {}
 
         # This will change to True once the "_set_background_from_arrays"
@@ -788,10 +789,10 @@ class Cosmology(object):
                                     model=trf)
         if pk:
             status = 0
-            status = lib.rescale_linear_power(self.cosmo, pk.psp,
-                                              int(rescale_mg),
-                                              int(rescale_s8),
-                                              status)
+            status = lib.rescale_linpower(self.cosmo, pk.psp,
+                                          int(rescale_mg),
+                                          int(rescale_s8),
+                                          status)
             check(status, self)
         return pk
 
@@ -855,9 +856,7 @@ class Cosmology(object):
         self._pk_nl['delta_matter_x_delta_matter'] = pk
 
         if pk:
-            status = 0
-            status = lib.compute_nonlin_power(self.cosmo, pk.psp, status)
-            check(status, self)
+            self._has_pk_nl = True
 
     def _compute_nonlin_power_internal(self):
         """Compute the non-linear power spectrum."""
@@ -979,7 +978,7 @@ class Cosmology(object):
     @property
     def has_nonlin_power(self):
         """Checks if the non-linear power spectra have been precomputed."""
-        return bool(self.cosmo.computed_nonlin_power)
+        return self._has_pk_nl
 
     @property
     def has_sigma(self):

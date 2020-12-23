@@ -423,20 +423,13 @@ INPUT: cosmology, scale factor a,
 Correlation function result will be in array xi
  */
 
-void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
+void ccl_correlation_3d(ccl_cosmology *cosmo,
+                        ccl_f2d_t *psp, double a,
                         int n_r,double *r,double *xi,
                         int do_taper_pk,double *taper_pk_limits,
                         int *status) {
   int i,N_ARR;
   double *k_arr,*pk_arr,*r_arr,*xi_arr;
-
-  if (!cosmo->computed_nonlin_power) {
-    *status = CCL_ERROR_NONLIN_POWER_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_correlation.c: ccl_correlation_3d(): non-linear power spctrum has not been computed!");
-    return;
-  }
 
   //number of data points for k and pk array
   N_ARR=(int)(cosmo->spline_params.N_K_3DCOR*log10(cosmo->spline_params.K_MAX/cosmo->spline_params.K_MIN));
@@ -457,7 +450,7 @@ void ccl_correlation_3d(ccl_cosmology *cosmo, double a,
   }
 
   for (i=0; i<N_ARR; i++){
-    pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
+    pk_arr[i] = ccl_f2d_t_eval(psp, log(k_arr[i]), a, cosmo, status);
   }
   if (do_taper_pk)
     taper_cl(N_ARR,k_arr,pk_arr,taper_pk_limits);
@@ -519,19 +512,12 @@ INPUT:  cosmology, scale factor a, beta (= growth rate / bias),
 Multipole function result will be in array xi
  */
 
-void ccl_correlation_multipole(ccl_cosmology *cosmo, double a, double beta,
+void ccl_correlation_multipole(ccl_cosmology *cosmo, ccl_f2d_t *psp,
+                               double a, double beta,
                                int l, int n_s, double *s, double *xi,
                                int *status) {
   int i, N_ARR;
   double *k_arr, *pk_arr, *s_arr, *xi_arr, *xi_arr0;
-
-  if (!cosmo->computed_nonlin_power) {
-    *status = CCL_ERROR_NONLIN_POWER_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_correlation.c: ccl_correlation_multipole(): non-linear power spctrum has not been computed!");
-    return;
-  }
 
   N_ARR = (int)(cosmo->spline_params.N_K_3DCOR * log10(cosmo->spline_params.K_MAX / cosmo->spline_params.K_MIN));
 
@@ -553,7 +539,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, double a, double beta,
   }
 
   for (i = 0; i < N_ARR; i++)
-    pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
+    pk_arr[i] = ccl_f2d_t_eval(psp, log(k_arr[i]), a, cosmo, status);
 
   s_arr = malloc(sizeof(double) * N_ARR);
   if (s_arr == NULL) {
@@ -640,18 +626,10 @@ INPUT:  cosmology, scale factor a
 Result is stored in cosmo->data.rsd_splines[]
  */
 
-void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
-                                      int *status) {
+void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
+                                      double a, int *status) {
   int i, N_ARR;
   double *k_arr, *pk_arr, *s_arr, *xi_arr, *xi_arr0, *xi_arr2, *xi_arr4;
-
-  if (!cosmo->computed_nonlin_power) {
-    *status = CCL_ERROR_NONLIN_POWER_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_correlation.c: ccl_correlation_multipole_spline(): non-linear power spctrum has not been computed!");
-    return;
-  }
 
   N_ARR = (int)(cosmo->spline_params.N_K_3DCOR * log10(cosmo->spline_params.K_MAX / cosmo->spline_params.K_MIN));
 
@@ -675,7 +653,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, double a,
   }
 
   for (i = 0; i < N_ARR; i++)
-    pk_arr[i] = ccl_nonlin_matter_power(cosmo, k_arr[i], a, status);
+    pk_arr[i] = ccl_f2d_t_eval(psp, log(k_arr[i]), a, cosmo, status);
 
   s_arr = malloc(sizeof(double) * N_ARR);
   if (s_arr == NULL) {
@@ -838,19 +816,12 @@ INPUT:  cosmology, scale factor a, number of s values, s values,
 Correlation function result will be in array xi
  */
 
-void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
+void ccl_correlation_3dRsd(ccl_cosmology *cosmo, ccl_f2d_t *psp,
+                           double a, int n_s, double *s,
                            double mu, double beta, double *xi, int use_spline,
                            int *status) {
   int i;
   double *xi_arr0, *xi_arr2, *xi_arr4;
-
-  if (!cosmo->computed_nonlin_power) {
-    *status = CCL_ERROR_NONLIN_POWER_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_correlation.c: ccl_correlation_3dRsd(): non-linear power spctrum has not been computed!");
-    return;
-  }
 
   if (use_spline == 0) {
     xi_arr0 = malloc(sizeof(double) * n_s);
@@ -878,9 +849,9 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
       return;
     }
 
-    ccl_correlation_multipole(cosmo, a, beta, 0, n_s, s, xi_arr0, status);
-    ccl_correlation_multipole(cosmo, a, beta, 2, n_s, s, xi_arr2, status);
-    ccl_correlation_multipole(cosmo, a, beta, 4, n_s, s, xi_arr4, status);
+    ccl_correlation_multipole(cosmo, psp, a, beta, 0, n_s, s, xi_arr0, status);
+    ccl_correlation_multipole(cosmo, psp, a, beta, 2, n_s, s, xi_arr2, status);
+    ccl_correlation_multipole(cosmo, psp, a, beta, 4, n_s, s, xi_arr4, status);
     for (i = 0; i < n_s; i++)
       xi[i] = xi_arr0[i] + xi_arr2[i] * gsl_sf_legendre_Pl(2, mu) +
               xi_arr4[i] * gsl_sf_legendre_Pl(4, mu);
@@ -893,7 +864,7 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, double a, int n_s, double *s,
         (cosmo->data.rsd_splines[1] == NULL) ||
         (cosmo->data.rsd_splines[2] == NULL) ||
         (cosmo->data.rsd_splines_scalefactor != a))
-      ccl_correlation_multipole_spline(cosmo, a, status);
+      ccl_correlation_multipole_spline(cosmo, psp, a, status);
 
     for (i = 0; i < n_s; i++)
       xi[i] = (1. + 2. / 3 * beta + 1. / 5 * beta * beta) *
@@ -916,11 +887,12 @@ INPUT:  cosmology, scale factor a, number of s values, s values, beta (= growth 
 The result will be in array xi
 */
 
-void ccl_correlation_3dRsd_avgmu(ccl_cosmology *cosmo, double a, int n_s, double *s,
+void ccl_correlation_3dRsd_avgmu(ccl_cosmology *cosmo, ccl_f2d_t *psp,
+                                 double a, int n_s, double *s,
                                  double beta, double *xi,
                                  int *status) {
 // The average is just the l=0 multipole - the higher multiples inetegrate to zero.
-  ccl_correlation_multipole(cosmo, a, beta, 0, n_s, s, xi, status);
+  ccl_correlation_multipole(cosmo, psp, a, beta, 0, n_s, s, xi, status);
 
   return;
 }
@@ -936,19 +908,12 @@ INPUT:  cosmology, scale factor a, beta (= growth rate / bias),
 Correlation function result will be in array xi
 */
 
-void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, double a, double beta,
+void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp,
+                              double a, double beta,
                               double pi, int n_sig, double *sig, double *xi,
                               int use_spline, int *status) {
   int i;
   double *mu_arr, *s_arr, *xi_arr;
-
-  if (!cosmo->computed_nonlin_power) {
-    *status = CCL_ERROR_NONLIN_POWER_INIT;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_correlation.c: ccl_correlation_pi_sigma(): non-linear power spctrum has not been computed!");
-    return;
-  }
 
   mu_arr = malloc(sizeof(double) * n_sig);
   if (mu_arr == NULL) {
@@ -983,7 +948,7 @@ void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, double a, double beta,
   }
 
   for (i = 0; i < n_sig; i++) {
-    ccl_correlation_3dRsd(cosmo, a, n_sig, s_arr, mu_arr[i], beta, xi_arr,
+    ccl_correlation_3dRsd(cosmo, psp, a, n_sig, s_arr, mu_arr[i], beta, xi_arr,
                           use_spline, status);
     xi[i] = xi_arr[i];
   }
