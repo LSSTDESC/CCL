@@ -278,7 +278,8 @@ def correlation_3dRsd_avgmu(cosmo, a, s, beta, p_of_k_a=None):
     return xis
 
 
-def correlation_pi_sigma(cosmo, a, beta, pi, sig, use_spline=True, p_of_k_a=None):
+def correlation_pi_sigma(cosmo, a, beta, pi, sig,
+                         use_spline=True, p_of_k_a=None):
     """
     Compute the 3DRsd correlation in pi-sigma space.
 

@@ -1,5 +1,4 @@
 from . import ccllib as lib
-from .pyutils import _vectorize_fn2
 import numpy as np
 from .core import check
 from .pk2d import parse_pk2d
