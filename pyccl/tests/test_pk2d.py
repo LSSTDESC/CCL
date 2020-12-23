@@ -107,7 +107,6 @@ def test_pk2d_from_model_emu():
 
 @pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu'])
 def test_pk2d_from_model_fails(model):
-    """Make sure it works once."""
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1E-10, n_s=0.96,
         transfer_function='boltzmann_class')

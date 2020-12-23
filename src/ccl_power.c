@@ -446,63 +446,19 @@ ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
 INPUT: ccl_cosmology * cosmo
 TASK: compute linear power spectrum
 */
+void ccl_rescale_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp,
+                              int rescale_mg, int rescale_norm,
+                              int *status)
+{
+  if(rescale_mg || rescale_norm)
+    ccl_cosmology_spline_linpower_musigma(cosmo, psp, rescale_mg, status);
+}
+
 void ccl_compute_linear_power(ccl_cosmology* cosmo, ccl_f2d_t *psp, int* status) {
   if (cosmo->computed_linear_power) return;
-  int rescale_mg, rescale_at_all;
 
-  if (*status == 0) {
-    // get linear P(k)
-    switch (cosmo->config.transfer_function_method) {
-      case ccl_transfer_none:
-        return;
-        break;
-
-      case ccl_bbks: {
-        rescale_mg = 0;
-        rescale_at_all = 0;}
-        break;
-
-      case ccl_eisenstein_hu: {
-        rescale_mg = 0;
-        rescale_at_all = 0;}
-        break;
-
-      case ccl_boltzmann_class: {
-        rescale_mg = 1;
-        rescale_at_all = 1;}
-        break;
-
-      case ccl_boltzmann_camb: {
-        rescale_mg = 1;
-        rescale_at_all = 1;}
-        break;
-
-      case ccl_boltzmann_isitgr: {
-        rescale_mg = 0;
-        rescale_at_all = 1;}
-        break;
-
-      case ccl_pklin_from_input: {
-        rescale_mg = 0;
-        rescale_at_all = 0;}
-        break;
-
-      default: {
-        *status = CCL_ERROR_INCONSISTENT;
-        ccl_cosmology_set_status_message(
-          cosmo,
-          "ccl_power.c: ccl_compute_linear_power(): "
-          "Unknown or non-implemented transfer function method: %d \n",
-          cosmo->config.transfer_function_method);}
-    }
-  }
-
-  if(*status == 0) {
-    if(rescale_at_all) {
-      ccl_cosmology_spline_linpower_musigma(cosmo, psp,
-                                            rescale_mg, status);
-    }
-  }
+  if (cosmo->config.transfer_function_method == ccl_transfer_none)
+    return;
 
   if(*status == 0)
     cosmo->data.p_lin = ccl_f2d_t_copy(psp, status);

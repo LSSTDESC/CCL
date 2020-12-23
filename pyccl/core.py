@@ -771,16 +771,28 @@ class Cosmology(object):
 
         trf = self._config_init_kwargs['transfer_function']
         pk = None
+        rescale_s8 = True
+        rescale_mg = True
         if ((trf == 'boltzmann_class') and not self.has_linear_power):
             pk = get_class_pk_lin(self)
         elif ((trf == 'boltzmann_isitgr') and not self.has_linear_power):
+            rescale_mg = False
             pk = get_isitgr_pk_lin(self)
         elif ((trf == 'boltzmann_camb') and not self.has_linear_power):
             pk = get_camb_pk_lin(self)
         elif ((trf in ['bbks', 'eisenstein_hu'])
               and not self.has_linear_power):
+            rescale_s8 = False
+            rescale_mg = False
             pk = Pk2D.pk_from_model(self,
                                     model=trf)
+        if pk:
+            status = 0
+            status = lib.rescale_linear_power(self.cosmo, pk.psp,
+                                              int(rescale_mg),
+                                              int(rescale_s8),
+                                              status)
+            check(status, self)
         return pk
 
     def _compute_linear_power_from_arrays(self):
