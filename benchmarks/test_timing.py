@@ -36,4 +36,4 @@ def test_timing():
     end = time.time()
     t_seconds = end - start
     print(end-start)
-    assert t_seconds < 0
+    assert t_seconds < 2.
