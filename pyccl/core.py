@@ -951,7 +951,6 @@ class Cosmology(object):
                 "when the power spectrum is via the BCM model!",
                 category=CCLWarning)
 
-        self.compute_growth()
         self.compute_linear_power()
         pk = self._pk_lin['delta_matter_x_delta_matter']
         if pk is None:

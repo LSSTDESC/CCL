@@ -107,6 +107,7 @@ typedef struct ccl_spline_params {
   double A_SPLINE_MIN;
   double A_SPLINE_MINLOG_PK;
   double A_SPLINE_MIN_PK;
+  double A_SPLINE_MIN_SM;
   double A_SPLINE_MAX;
   double A_SPLINE_MINLOG;
   int A_SPLINE_NLOG;
@@ -118,6 +119,7 @@ typedef struct ccl_spline_params {
   double LOGM_SPLINE_MAX;
 
   //PS a and k spline
+  int A_SPLINE_NA_SM;
   int A_SPLINE_NA_PK;
   int A_SPLINE_NLOG_PK;
 
@@ -266,8 +268,7 @@ typedef struct ccl_data {
   gsl_spline * achi;
 
   // Function of Halo mass M
-  gsl_spline * logsigma;
-  gsl_spline * dlnsigma_dlogm;
+  gsl_spline2d * logsigma;
 
   // real-space splines for RSD
   ccl_f1d_t* rsd_splines[3];

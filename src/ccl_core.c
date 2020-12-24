@@ -105,17 +105,19 @@ const ccl_spline_params default_spline_params = {
   0.1,  // A_SPLINE_MIN
   0.01,  // A_SPLINE_MINLOG_PK
   0.1,  // A_SPLINE_MIN_PK,
+  0.01,  // A_SPLINE_MIN_SM,
   1.0,  // A_SPLINE_MAX,
   0.0001,  // A_SPLINE_MINLOG,
   250,  // A_SPLINE_NLOG,
 
   // mass splines
   0.025,  // LOGM_SPLINE_DELTA
-  440,  // LOGM_SPLINE_NM
+  50,  // LOGM_SPLINE_NM
   6,  // LOGM_SPLINE_MIN
   17,  // LOGM_SPLINE_MAX
 
   // PS a and k spline
+  20,  // A_SPLINE_NA_SM
   40,  // A_SPLINE_NA_PK
   11,  // A_SPLINE_NLOG_PK
 
@@ -270,7 +272,6 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.achi = NULL;
 
   cosmo->data.logsigma = NULL;
-  cosmo->data.dlnsigma_dlogm = NULL;
 
   cosmo->data.rsd_splines[0] = NULL;
   cosmo->data.rsd_splines[1] = NULL;
@@ -739,8 +740,7 @@ void ccl_data_free(ccl_data * data) {
   gsl_spline_free(data->fgrowth);
   gsl_spline_free(data->E);
   gsl_spline_free(data->achi);
-  gsl_spline_free(data->logsigma);
-  gsl_spline_free(data->dlnsigma_dlogm);
+  gsl_spline2d_free(data->logsigma);
   ccl_f1d_t_free(data->rsd_splines[0]);
   ccl_f1d_t_free(data->rsd_splines[1]);
   ccl_f1d_t_free(data->rsd_splines[2]);
