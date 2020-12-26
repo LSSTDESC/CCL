@@ -429,6 +429,7 @@ void ccl_rescale_linpower(ccl_cosmology* cosmo, ccl_f2d_t *psp,
 typedef struct {
   ccl_cosmology *cosmo;
   double R;
+  double a;
   ccl_f2d_t *psp;
   int* status;
 } SigmaR_pars;
@@ -437,6 +438,7 @@ typedef struct {
 typedef struct {
   ccl_cosmology *cosmo;
   double R;
+  double a;
   ccl_f2d_t *psp;
   int* status;
 } SigmaV_pars;
@@ -444,6 +446,7 @@ typedef struct {
 // Params for k_NL integrand
 typedef struct {
   ccl_cosmology *cosmo;
+  double a;
   ccl_f2d_t *psp;
   int* status;
 } KNL_pars;
@@ -473,7 +476,8 @@ static double sigmaR_integrand(double lk,void *params) {
   SigmaR_pars *par=(SigmaR_pars *)params;
 
   double k=pow(10.,lk);
-  double pk=ccl_f2d_t_eval(par->psp, lk * M_LN10, 1., par->cosmo, par->status);
+  double pk=ccl_f2d_t_eval(par->psp, lk * M_LN10, par->a,
+                           par->cosmo, par->status);
   double kR=k*par->R;
   double w = w_tophat(kR);
 
@@ -485,7 +489,8 @@ static double sigmaV_integrand(double lk,void *params) {
   SigmaV_pars *par=(SigmaV_pars *)params;
 
   double k=pow(10.,lk);
-  double pk=ccl_f2d_t_eval(par->psp, lk * M_LN10, 1., par->cosmo, par->status);
+  double pk=ccl_f2d_t_eval(par->psp, lk * M_LN10, par->a,
+                           par->cosmo, par->status);
   double kR=k*par->R;
   double w = w_tophat(kR);
 
@@ -498,20 +503,13 @@ TASK: compute sigmaR, the variance in the *linear* density field
 smoothed with a tophat filter of comoving size R
 */
 double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,ccl_f2d_t *psp, int *status) {
-  if (!cosmo->computed_growth){
-    *status = CCL_ERROR_GROWTH_INIT;
-    ccl_cosmology_set_status_message(
-                                     cosmo,
-                                     "ccl_power.c: ccl_sigmaR(): growth factor "
-                                     "splines have not been precomputed!");
-      return NAN;
-  }
 
   SigmaR_pars par;
   par.status = status;
 
   par.cosmo=cosmo;
   par.R=R;
+  par.a=a;
   par.psp=psp;
 
   gsl_integration_cquad_workspace *workspace =  NULL;
@@ -537,7 +535,7 @@ double ccl_sigmaR(ccl_cosmology *cosmo,double R,double a,ccl_f2d_t *psp, int *st
   }
   gsl_integration_cquad_workspace_free(workspace);
 
-  return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
+  return sqrt(sigma_R*M_LN10/(2*M_PI*M_PI));
 }
 
 /* --------- ROUTINE: ccl_sigmaV ---------
@@ -547,20 +545,13 @@ smoothed with a tophat filter of comoving size R
 The linear displacement field is the gradient of the linear density field
 */
 double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,ccl_f2d_t *psp, int *status) {
-  if (!cosmo->computed_growth){
-    *status = CCL_ERROR_GROWTH_INIT;
-    ccl_cosmology_set_status_message(
-                                     cosmo,
-                                     "ccl_power.c: ccl_sigmaV(): growth factor "
-                                     "splines have not been precomputed!");
-      return NAN;
-  }
 
   SigmaV_pars par;
   par.status = status;
 
   par.cosmo=cosmo;
   par.R=R;
+  par.a=a;
   par.psp=psp;
 
   gsl_integration_cquad_workspace *workspace = NULL;
@@ -590,7 +581,7 @@ double ccl_sigmaV(ccl_cosmology *cosmo,double R,double a,ccl_f2d_t *psp, int *st
 
   gsl_integration_cquad_workspace_free(workspace);
 
-  return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
+  return sqrt(sigma_V*M_LN10/(2*M_PI*M_PI));
 }
 
 /* --------- ROUTINE: ccl_sigma8 ---------
@@ -607,7 +598,8 @@ double ccl_sigma8(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *status) {
 static double kNL_integrand(double k,void *params) {
   KNL_pars *par=(KNL_pars *)params;
 
-  double pk=ccl_f2d_t_eval(par->psp, log(k), 1., par->cosmo, par->status);
+  double pk=ccl_f2d_t_eval(par->psp, log(k), par->a,
+                           par->cosmo, par->status);
 
   return pk;
 }
@@ -617,14 +609,6 @@ INPUT: cosmology, scale factor
 TASK: compute kNL, the scale for the non-linear cut
 */
 double ccl_kNL(ccl_cosmology *cosmo,double a,ccl_f2d_t *psp, int *status) {
-  if (!cosmo->computed_growth){
-    *status = CCL_ERROR_GROWTH_INIT;
-    ccl_cosmology_set_status_message(
-                                     cosmo,
-                                     "ccl_power.c: ccl_kNL(): growth factor "
-                                     "splines have not been precomputed!");
-      return NAN;
-  }
 
   KNL_pars par;
   par.status = status;
@@ -651,6 +635,6 @@ double ccl_kNL(ccl_cosmology *cosmo,double a,ccl_f2d_t *psp, int *status) {
     }
   }
   gsl_integration_cquad_workspace_free(workspace);
-  double sigma_eta = sqrt(PL_integral/(6*M_PI*M_PI))*ccl_growth_factor(cosmo, a, status);
+  double sigma_eta = sqrt(PL_integral/(6*M_PI*M_PI));
   return pow(sigma_eta, -1);
 }
