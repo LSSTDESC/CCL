@@ -253,9 +253,9 @@ class Cosmology(object):
                     ('growth_rate' not in growth)):
                 raise ValueError("`growth` must contain keys "
                                  "'a', 'growth_factor' and 'growth_rate'")
-            a = background['a']
-            dz = background['growth_factor']
-            fz = background['growth_rate']
+            a = growth['a']
+            dz = growth['growth_factor']
+            fz = growth['growth_rate']
             # Check that input arrays have the same size.
             if not (a.shape == dz.shape
                     == fz.shape):
