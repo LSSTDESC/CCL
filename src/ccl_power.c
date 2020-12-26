@@ -612,6 +612,7 @@ double ccl_kNL(ccl_cosmology *cosmo,double a,ccl_f2d_t *psp, int *status) {
 
   KNL_pars par;
   par.status = status;
+  par.a = a;
   par.psp=psp;
 
   par.cosmo=cosmo;
