@@ -205,7 +205,7 @@ class Cosmology(object):
             pk_linear=None, pk_nonlin=None):
 
         # Cosmology
-        cosmo = Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h
+        cosmo = Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h,
                           n_s=n_s, sigma8=sigma8, A_s=A_s,
                           Omega_k=Omega_k, Omega_g=Omega_g,
                           Neff=Neff, m_nu=m_nu, m_nu_type=m_nu_type,
@@ -214,8 +214,8 @@ class Cosmology(object):
         # Parse arrays
         has_bg = background is not None
         has_dz = growth is not None
-        has_pklin = pk_linear is not None
-        has_pknl = pk_nonlin is not None
+        # has_pklin = pk_linear is not None
+        # has_pknl = pk_nonlin is not None
 
         # Background
         if has_bg:
@@ -229,7 +229,7 @@ class Cosmology(object):
             chi = background['chi']
             hoh0 = background['h_over_h0']
             # Check that input arrays have the same size.
-            if not (a.shape == chi.shape == h0h0.shape):
+            if not (a.shape == chi.shape == hoh0.shape):
                 raise ValueError("Input arrays must have the same size.")
             # Check that `a` is a monotonically increasing array.
             if not np.array_equal(a, np.sort(a)):
@@ -241,7 +241,7 @@ class Cosmology(object):
                                  "array must be 1.0.")
             status = 0
             status = lib.cosmology_distances_from_input(cosmo.cosmo,
-                                                        a, chi, h0h0,
+                                                        a, chi, hoh0,
                                                         status)
             check(status, cosmo)
 
