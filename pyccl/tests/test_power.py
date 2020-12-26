@@ -187,47 +187,106 @@ def test_power_sigma8norm_norms_consistent(tf):
 
 
 def test_input_lin_power_spectrum():
+    # Setup
     cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
                           A_s=2e-9)
     a_arr = np.linspace(0.1, 1.0, 50)
+    chi_from_ccl = ccl.background.comoving_radial_distance(cosmo, a_arr)
+    hoh0_from_ccl = ccl.background.h_over_h0(cosmo, a_arr)
+    growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
+    fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
     k_arr = np.logspace(np.log10(2e-4), np.log10(1), 1000)
     pk_arr = np.empty(shape=(len(a_arr), len(k_arr)))
     for i, a in enumerate(a_arr):
         pk_arr[i] = ccl.power.linear_matter_power(cosmo, k_arr, a)
 
-    chi_from_ccl = ccl.background.comoving_radial_distance(cosmo, a_arr)
-    hoh0_from_ccl = ccl.background.h_over_h0(cosmo, a_arr)
-    growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
-    fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
-
-    cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9)
-    cosmo_input._set_background_from_arrays(a_array=a_arr,
-                                            chi_array=chi_from_ccl,
-                                            hoh0_array=hoh0_from_ccl)
-    cosmo_input._set_growth_from_arrays(a_array=a_arr,
-                                        growth_array=growth_from_ccl,
-                                        fgrowth_array=fgrowth_from_ccl)
-    cosmo_input._set_linear_power_from_arrays(a_arr, k_arr, pk_arr)
+    cosmo_input = ccl.Cosmology.calculator(
+        Omega_c=0.27, Omega_b=0.05, h=0.7,
+        n_s=0.965, A_s=2e-9,
+        background={'a': a_arr,
+                    'chi': chi_from_ccl,
+                    'h_over_h0': hoh0_from_ccl},
+        growth={'a': a_arr,
+                'growth_factor': growth_from_ccl,
+                'growth_rate': fgrowth_from_ccl},
+        pk_linear={'a': a_arr, 'k': k_arr,
+                   'delta_matter_x_delta_matter': pk_arr})
 
     pk_CCL_input = ccl.power.linear_matter_power(cosmo_input, k_arr, 0.5)
     pk_CCL = ccl.power.linear_matter_power(cosmo, k_arr, 0.5)
 
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
+    # Test again with negative power spectrum (so it's not logscaled)
+    cosmo_input = ccl.Cosmology.calculator(
+        Omega_c=0.27, Omega_b=0.05, h=0.7,
+        n_s=0.965, A_s=2e-9,
+        background={'a': a_arr,
+                    'chi': chi_from_ccl,
+                    'h_over_h0': hoh0_from_ccl},
+        growth={'a': a_arr,
+                'growth_factor': growth_from_ccl,
+                'growth_rate': fgrowth_from_ccl},
+        pk_linear={'a': a_arr, 'k': k_arr,
+                   'delta_matter_x_delta_matter': -pk_arr})
+
+    pk_CCL_input = -ccl.power.linear_matter_power(cosmo_input, k_arr, 0.5)
+    pk_CCL = ccl.power.linear_matter_power(cosmo, k_arr, 0.5)
+
+    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
+
 
 def test_input_linpower_raises():
-    cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9)
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                          n_s=0.965, sigma8=0.8,
+                          transfer_function='bbks')
+    a_arr = np.linspace(0.1, 1.0, 50)
+    k_arr = np.logspace(np.log10(2e-4), np.log10(1), 1000)
+    pk_arr = np.array([ccl.power.linear_matter_power(cosmo, k_arr, a)
+                       for a in a_arr])
+
+    # Not a dictionary
+    with pytest.raises(TypeError):
+        ccl.Cosmology.calculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_linear=np.pi)
+
+    # Dm x Dm not present
     with pytest.raises(ValueError):
-        cosmo_input._set_linear_power_from_arrays()
+        ccl.Cosmology.calculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_linear={'a': a_arr, 'k': k_arr,
+                       'delta_matter_y_delta_matter': pk_arr})
+
+    # Non-parsable power spectrum
     with pytest.raises(ValueError):
-        cosmo_input.compute_linear_power()
-        cosmo_input._set_linear_power_from_arrays()
-    cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9)
+        ccl.Cosmology.calculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_linear={'a': a_arr, 'k': k_arr,
+                       'delta_matter_x_delta_matter': pk_arr,
+                       'a_y_b': pk_arr})
+
+    # Wrong shape
     with pytest.raises(ValueError):
-        cosmo_input._compute_linear_power_from_arrays()
+        ccl.Cosmology.calculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_linear={'a': a_arr, 'k': k_arr,
+                       'delta_matter_x_delta_matter': pk_arr,
+                       'a_x_b': pk_arr[0]})
+
+    # Check new power spectrum is stored
+    cosmo_input = ccl.Cosmology.calculator(
+        Omega_c=0.27, Omega_b=0.05, h=0.7,
+        n_s=0.965, sigma8=0.8,
+        pk_linear={'a': a_arr, 'k': k_arr,
+                   'delta_matter_x_delta_matter': pk_arr,
+                   'a_x_b': pk_arr})
+    assert 'a_x_b' in cosmo_input._pk_lin
+    assert cosmo_input.has_linear_power
 
 
 def test_input_nonlin_power_spectrum():
@@ -244,14 +303,15 @@ def test_input_nonlin_power_spectrum():
     growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
     fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
 
-    cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9)
-    cosmo_input._set_background_from_arrays(a_array=a_arr,
-                                            chi_array=chi_from_ccl,
-                                            hoh0_array=hoh0_from_ccl)
-    cosmo_input._set_growth_from_arrays(a_array=a_arr,
-                                        growth_array=growth_from_ccl,
-                                        fgrowth_array=fgrowth_from_ccl)
+    cosmo_input = ccl.calculator.Cosmology(
+        Omega_c=0.27, Omega_b=0.05, h=0.7,
+        n_s=0.965, A_s=2e-9,
+        background={'a': a_arr,
+                    'chi': chi_from_ccl,
+                    'h_over_h0': hoh0_from_ccl},
+        growth={'a': a_arr,
+                'growth_factor': growth_from_ccl,
+                'growth_rate': fgrowth_from_ccl})
     cosmo_input._set_nonlin_power_from_arrays(a_arr, k_arr, pk_arr)
 
     pk_CCL_input = ccl.power.nonlin_matter_power(cosmo_input, k_arr, 0.5)

@@ -158,6 +158,10 @@ def test_input_arrays():
     fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
     assert np.allclose(fgrowth_ccl_input, fgrowth_from_ccl, atol=0., rtol=1e-5)
 
+    # Test that the distance/growth flags have been set
+    assert cosmo_input.has_distances
+    assert cosmo_input.has_growth
+
 
 def test_input_arrays_raises():
     """
