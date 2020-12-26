@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include <gsl/gsl_integration.h>
@@ -318,8 +319,8 @@ static double get_rsigma(double a, struct hf_int_data data) {
  */
 halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
                                        ccl_f2d_t *plin, int *status) {
-  int n_a, i, gsl_status;
-  double amin, amax;
+  size_t n_a;
+  int i, gsl_status;
   double lnkmin, lnkmax;
   double *a_vec = NULL;
   double *vals = NULL;
@@ -339,29 +340,42 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
   // solving sigma2(R, a) = 1
   // it is this radius that is needed for the subsequent splines of
   // the derivatives.
-  amin = plin->amin;
-  amax = plin->amax;
-  n_a = cosmo->spline_params.A_SPLINE_NA_PK + cosmo->spline_params.A_SPLINE_NLOG_PK - 1;
   lnkmin = plin->lkmin;
   lnkmax = plin->lkmax;
+  if(plin->fa != NULL) {
+    n_a = plin->fa->size;
+    a_vec = plin->fa->x;
+  }
+  else if(plin->fka != NULL) {
+    n_a = plin->fka->interp_object.ysize;
+    a_vec = plin->fka->yarr;
+  }
+  else {
+    *status = CCL_ERROR_SPLINE;
+    strcpy(cosmo->status_message,
+           "ccl_halofit.c: ccl_halofit_struct_new(): "
+           "input pk2d has no splines.\n");
+  }
 
-  ///////////////////////////////////////////////////////
-  // memory allocation
-  hf = (halofit_struct*)malloc(sizeof(halofit_struct));
-  if (hf == NULL) {
-    *status = CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_halofit.c: ccl_halofit_struct_new(): "
-      "memory could not be allocated for halofit_struct\n");
-  } else {
-    hf->rsigma = NULL;
-    hf->sigma2 = NULL;
-    hf->n_eff = NULL;
-    hf->C = NULL;
-    hf->weff = NULL;
-    hf->omeff = NULL;
-    hf->deeff = NULL;
+  if(*status == 0) {
+    ///////////////////////////////////////////////////////
+    // memory allocation
+    hf = (halofit_struct*)malloc(sizeof(halofit_struct));
+    if (hf == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+                                       cosmo,
+                                       "ccl_halofit.c: ccl_halofit_struct_new(): "
+                                       "memory could not be allocated for halofit_struct\n");
+    } else {
+      hf->rsigma = NULL;
+      hf->sigma2 = NULL;
+      hf->n_eff = NULL;
+      hf->C = NULL;
+      hf->weff = NULL;
+      hf->omeff = NULL;
+      hf->deeff = NULL;
+    }
   }
 
   if (*status == 0) {
@@ -372,20 +386,6 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
         cosmo,
         "ccl_halofit.c: ccl_halofit_struct_new(): "
         "memory could not be allocated for cquad workspace\n");
-    }
-  }
-
-  if (*status == 0) {
-    a_vec = ccl_linlog_spacing(
-      amin, cosmo->spline_params.A_SPLINE_MIN_PK,
-      amax, cosmo->spline_params.A_SPLINE_NLOG_PK,
-      cosmo->spline_params.A_SPLINE_NA_PK);
-    if (a_vec == NULL) {
-      *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_halofit.c: ccl_halofit_struct_new(): "
-        "memory could not be allocated for scale factor vector\n");
     }
   }
 
@@ -815,7 +815,6 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
     hf = NULL;
   }
   gsl_integration_cquad_workspace_free(workspace);
-  free(a_vec);
   free(vals);
   free(vals_om);
   free(vals_de);

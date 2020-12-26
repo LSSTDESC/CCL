@@ -199,7 +199,7 @@ class Cosmology(object):
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
             T_CMB=None, background=None, growth=None,
-            pk_linear=None, pk_nonlin=None):
+            pk_linear=None, pk_nonlin=None, use_halofit=False):
 
         # Cosmology
         cosmo = Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h,
@@ -212,7 +212,7 @@ class Cosmology(object):
         has_bg = background is not None
         has_dz = growth is not None
         has_pklin = pk_linear is not None
-        # has_pknl = pk_nonlin is not None
+        has_pknl = pk_nonlin is not None
 
         # Background
         if has_bg:
@@ -308,6 +308,58 @@ class Cosmology(object):
                 cosmo._pk_lin[n] = pk
             # Set linear power spectrum as initialized
             cosmo._has_pk_lin = True
+
+        # Linear power spectrum
+        if has_pknl:
+            if not isinstance(pk_nonlin, dict):
+                raise TypeError("`pk_nonlin` must be a dictionary")
+            if (('a' not in pk_nonlin) or ('k' not in pk_nonlin)):
+                raise ValueError("`pk_nonlin` must contain keys "
+                                 "'a' and 'k' (at least)")
+            if ((not use_halofit) and
+                    ('delta_matter_x_delta_matter' not in pk_nonlin)):
+                raise ValueError("`pk_nonlin` must contain key "
+                                 "'delta_matter_x_delta_matter' or "
+                                 "use halofit to compute it")
+            na = len(pk_nonlin['a'])
+            nk = len(pk_nonlin['k'])
+            lk = np.log(pk_nonlin['k'])
+            pk_names = [key for key in pk_nonlin if key not in ('a', 'k')]
+            for n in pk_names:
+                qs = n.split('_x_')
+                if len(qs) != 2:
+                    raise ValueError("Power spectrum label %s could " % n +
+                                     "not be parsed. Label must be of the " +
+                                     "form 'q1_x_q2'")
+                pk = pk_nonlin[n]
+                if pk.shape != (na, nk):
+                    raise ValueError("Power spectrum %s has shape " % n +
+                                     str(pk.shape) + " but shape " +
+                                     "(%d, %d) was expected." % (na, nk))
+                # Spline in log-space if the P(k) is positive-definite
+                use_log = np.all(pk > 0)
+                if use_log:
+                    pk = np.log(pk)
+                # Initialize and store
+                pk = Pk2D(pkfunc=None,
+                          a_arr=pk_nonlin['a'], lk_arr=lk, pk_arr=pk,
+                          is_logp=use_log, extrap_order_lok=1,
+                          extrap_order_hik=2, cosmo=None)
+                cosmo._pk_nl[n] = pk
+            # Set linear power spectrum as initialized
+            cosmo._has_pk_nl = True
+
+        # Use halofit if needef for all missing non-linear power spectra
+        if use_halofit:
+            if not has_pklin:
+                raise ValueError("Must specify linear Pk to use halofit")
+            for n, pkl in cosmo._pk_lin.items():
+                if (n in cosmo._pk_nl) or (pkl is None):
+                    continue
+                pk = Pk2D.halofit_it(cosmo, pkl)
+                cosmo._pk_nl[n] = pk
+            # Set linear power spectrum as initialized
+            cosmo._has_pk_nl = True
 
         return cosmo
 
@@ -889,23 +941,10 @@ class Cosmology(object):
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
     def compute_nonlin_power(self):
-        """Call the appropriate function to compute the linear power
-        spectrum, either read from input or calculated internally,"""
+        """Compute the non-linear power spectrum."""
         if self.has_nonlin_power:
             return
 
-        if self._nonlinear_power_on_input:
-            pk = self._compute_nonlin_power_from_arrays()
-        else:
-            pk = self._compute_nonlin_power_internal()
-
-        self._pk_nl['delta_matter_x_delta_matter'] = pk
-
-        if pk:
-            self._has_pk_nl = True
-
-    def _compute_nonlin_power_internal(self):
-        """Compute the non-linear power spectrum."""
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
                 warnings.warn(
@@ -934,6 +973,7 @@ class Cosmology(object):
 
         self.compute_distances()
 
+        # Populate power spectrum splines
         mps = self._config_init_kwargs['matter_power_spectrum']
         # needed for halofit, halomodel and linear options
         if mps != 'emu':
@@ -960,21 +1000,11 @@ class Cosmology(object):
         # Correct for baryons if required
         if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
             bcm_correct_pk2d(self, pk)
-        return pk
 
-    def _compute_nonlin_power_from_arrays(self):
-        if not self._nonlinear_power_on_input:
-            raise ValueError("Cannot compute non-linear power spectrum from"
-                             "input without input arrays initialized.")
-        pk = Pk2D(pkfunc=None,
-                  a_arr=self.a_array_pknl,
-                  lk_arr=np.log(self.k_array_pknl),
-                  pk_arr=self.pk_array_pknl,
-                  is_logp=False,
-                  extrap_order_lok=1,
-                  extrap_order_hik=2,
-                  cosmo=None)
-        return pk
+        # Assign
+        self._pk_nl['delta_matter_x_delta_matter'] = pk
+        if pk:
+            self._has_pk_nl = True
 
     def compute_sigma(self):
         """Compute the sigma(M) and mass function splines."""
