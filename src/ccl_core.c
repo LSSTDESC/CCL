@@ -105,7 +105,8 @@ const ccl_spline_params default_spline_params = {
   0.1,  // A_SPLINE_MIN
   0.01,  // A_SPLINE_MINLOG_PK
   0.1,  // A_SPLINE_MIN_PK,
-  0.01,  // A_SPLINE_MIN_SM,
+  0.01,  // A_SPLINE_MINLOG_SM,
+  0.1,  // A_SPLINE_MIN_SM,
   1.0,  // A_SPLINE_MAX,
   0.0001,  // A_SPLINE_MINLOG,
   250,  // A_SPLINE_NLOG,
@@ -117,7 +118,8 @@ const ccl_spline_params default_spline_params = {
   17,  // LOGM_SPLINE_MAX
 
   // PS a and k spline
-  20,  // A_SPLINE_NA_SM
+  13,  // A_SPLINE_NA_SM
+  6,  // A_SPLINE_NLOG_SM
   40,  // A_SPLINE_NA_PK
   11,  // A_SPLINE_NLOG_PK
 

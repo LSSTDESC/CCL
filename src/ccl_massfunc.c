@@ -60,9 +60,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *stat
   if(cosmo->computed_sigma)
     return;
 
-  int na = cosmo->spline_params.A_SPLINE_NA_SM;
-  double amin=cosmo->spline_params.A_SPLINE_MIN_SM;
-  double amax=cosmo->spline_params.A_SPLINE_MAX;
+  int na = cosmo->spline_params.A_SPLINE_NA_SM + cosmo->spline_params.A_SPLINE_NLOG_SM - 1;
   int nm = cosmo->spline_params.LOGM_SPLINE_NM;
   double *m = NULL;
   double *y = NULL;
@@ -83,7 +81,11 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *stat
 
   // create scale factor array
   if (*status == 0) {
-    aa = ccl_linear_spacing(amin, amax, na);
+    aa = ccl_linlog_spacing(cosmo->spline_params.A_SPLINE_MINLOG_SM,
+                            cosmo->spline_params.A_SPLINE_MIN_SM,
+                            cosmo->spline_params.A_SPLINE_MAX,
+                            cosmo->spline_params.A_SPLINE_NLOG_SM,
+                            cosmo->spline_params.A_SPLINE_NA_SM);
     if (aa == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,
