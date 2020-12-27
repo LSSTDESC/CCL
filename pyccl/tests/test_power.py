@@ -218,7 +218,7 @@ def atest_input_lin_power_spectrum():
     for i, a in enumerate(a_arr):
         pk_arr[i] = ccl.power.linear_matter_power(cosmo, k_arr, a)
 
-    cosmo_input = ccl.Cosmology.calculator(
+    cosmo_input = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.05, h=0.7,
         n_s=0.965, A_s=2e-9,
         background={'a': a_arr,
@@ -236,7 +236,7 @@ def atest_input_lin_power_spectrum():
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
     # Test again with negative power spectrum (so it's not logscaled)
-    cosmo_input = ccl.Cosmology.calculator(
+    cosmo_input = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.05, h=0.7,
         n_s=0.965, A_s=2e-9,
         background={'a': a_arr,
@@ -253,7 +253,7 @@ def atest_input_lin_power_spectrum():
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
     # Via `linear_power`
-    cosmo_input = ccl.Cosmology.calculator(
+    cosmo_input = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.05, h=0.7,
         n_s=0.965, A_s=2e-9,
         background={'a': a_arr,
@@ -281,14 +281,14 @@ def test_input_linpower_raises():
 
     # Not a dictionary
     with pytest.raises(TypeError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_linear=np.pi)
 
     # Dm x Dm not present
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
@@ -296,7 +296,7 @@ def test_input_linpower_raises():
 
     # Non-parsable power spectrum
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
@@ -305,7 +305,7 @@ def test_input_linpower_raises():
 
     # Wrong shape
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
@@ -313,7 +313,7 @@ def test_input_linpower_raises():
                        'a_x_b': pk_arr[0]})
 
     # Check new power spectrum is stored
-    cosmo_input = ccl.Cosmology.calculator(
+    cosmo_input = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.05, h=0.7,
         n_s=0.965, sigma8=0.8,
         pk_linear={'a': a_arr, 'k': k_arr,
@@ -336,7 +336,7 @@ def test_input_nonlin_power_spectrum():
     for i, a in enumerate(a_arr):
         pk_arr[i] = ccl.power.nonlin_matter_power(cosmo, k_arr, a)
 
-    cosmo_input = ccl.Cosmology.calculator(
+    cosmo_input = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.05, h=0.7,
         n_s=0.965, A_s=2e-9,
         background={'a': a_arr,
@@ -354,7 +354,7 @@ def test_input_nonlin_power_spectrum():
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
     # Test again with negative power spectrum (so it's not logscaled)
-    cosmo_input = ccl.Cosmology.calculator(
+    cosmo_input = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.05, h=0.7,
         n_s=0.965, A_s=2e-9,
         background={'a': a_arr,
@@ -374,7 +374,7 @@ def test_input_nonlin_power_spectrum():
     kl_arr = np.logspace(-4, 1, 1000)
     pkl_arr = np.array([ccl.power.linear_matter_power(cosmo, kl_arr, a)
                         for a in a_arr])
-    cosmo_input = ccl.Cosmology.calculator(
+    cosmo_input = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.05, h=0.7,
         n_s=0.965, A_s=2e-9,
         pk_linear={'a': a_arr, 'k': kl_arr,
@@ -389,7 +389,7 @@ def test_input_nonlin_power_spectrum():
     kl_arr = np.logspace(-4, 1, 1000)
     pkl_arr = np.array([ccl.power.linear_matter_power(cosmo, kl_arr, a)
                         for a in a_arr])
-    cosmo_input = ccl.Cosmology.calculator(
+    cosmo_input = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.05, h=0.7,
         n_s=0.965, A_s=2e-9,
         pk_linear={'a': a_arr, 'k': kl_arr,
@@ -422,14 +422,14 @@ def test_input_nonlin_raises():
 
     # Not a dictionary
     with pytest.raises(TypeError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_nonlin=np.pi)
 
     # k not present
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'kk': k_arr,
@@ -437,7 +437,7 @@ def test_input_nonlin_raises():
 
     # delta_matter_x_delta_matter not present
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'k': k_arr,
@@ -445,7 +445,7 @@ def test_input_nonlin_raises():
 
     # Non-parsable power spectrum
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'k': k_arr,
@@ -454,7 +454,7 @@ def test_input_nonlin_raises():
 
     # Wrong shape
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'k': k_arr,
@@ -463,13 +463,13 @@ def test_input_nonlin_raises():
 
     # Linear Pk not set for halofit
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(
+        ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             use_halofit=True)
 
     # Check new power spectrum is stored
-    cosmo_input = ccl.Cosmology.calculator(
+    cosmo_input = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.05, h=0.7,
         n_s=0.965, sigma8=0.8,
         pk_linear={'a': a_arr, 'k': k_arr,

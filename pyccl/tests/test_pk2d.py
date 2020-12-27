@@ -198,7 +198,7 @@ def test_pk2d_parsing():
     psp = ccl.Pk2D(a_arr=a_arr, lk_arr=np.log(k_arr),
                    pk_arr=np.log(pk_arr))
 
-    cosmo = ccl.Cosmology.calculator(
+    cosmo = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         pk_nonlin={'a': a_arr, 'k': k_arr,
                    'delta_matter_x_delta_matter': pk_arr,

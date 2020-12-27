@@ -34,7 +34,7 @@ def test_hodcl():
 
     # CCL prediction
     # Make sure we use the same P(k)
-    cosmo = ccl.Cosmology.calculator(
+    cosmo = ccl.CosmologyCalculator(
         Omega_b=0.05,
         Omega_c=0.25,
         h=0.67,

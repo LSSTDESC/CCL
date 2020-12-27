@@ -16,7 +16,7 @@ from . import ccllib as lib
 from . import core, constants, background, power, halomodel, pk2d, haloprofile, halos, massfunction, nl_pt
 
 # Core data structures
-from .core import Cosmology, CosmologyVanillaLCDM
+from .core import Cosmology, CosmologyVanillaLCDM, CosmologyCalculator
 
 # Background cosmology functions and growth functions
 from .background import growth_factor, growth_factor_unnorm, \

@@ -137,10 +137,10 @@ def test_input_arrays():
     growth = {'a': a_arr,
               'growth_factor': growth_from_ccl,
               'growth_rate': fgrowth_from_ccl}
-    cosmo_input = ccl.Cosmology.calculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                           n_s=0.965, A_s=2e-9,
-                                           background=background,
-                                           growth=growth)
+    cosmo_input = ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                          n_s=0.965, A_s=2e-9,
+                                          background=background,
+                                          growth=growth)
 
     # Where to compare chi(a) from CCL and from CCL with input quantities.
     a_arr = np.linspace(0.102, 0.987, 158)
@@ -173,34 +173,34 @@ def test_input_arrays_raises():
                     input_a_array_not1,
                     input_a_array[:-2]]:
         with pytest.raises(ValueError):
-            ccl.Cosmology.calculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                     n_s=0.965, A_s=2e-9,
-                                     growth={'a': input_a,
-                                             'growth_factor': input_growth,
-                                             'growth_rate': input_fgrowth})
+            ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                    n_s=0.965, A_s=2e-9,
+                                    growth={'a': input_a,
+                                            'growth_factor': input_growth,
+                                            'growth_rate': input_fgrowth})
         with pytest.raises(ValueError):
-            ccl.Cosmology.calculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                     n_s=0.965, A_s=2e-9,
-                                     background={'a': input_a,
-                                                 'chi': input_chi,
-                                                 'h_over_h0': input_hoh0})
+            ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                    n_s=0.965, A_s=2e-9,
+                                    background={'a': input_a,
+                                                'chi': input_chi,
+                                                'h_over_h0': input_hoh0})
     # Not a dictionary
     with pytest.raises(TypeError):
-        ccl.Cosmology.calculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                 n_s=0.965, A_s=2e-9,
-                                 growth=3)
+        ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                n_s=0.965, A_s=2e-9,
+                                growth=3)
     with pytest.raises(TypeError):
-        ccl.Cosmology.calculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                 n_s=0.965, A_s=2e-9,
-                                 background=3)
+        ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                n_s=0.965, A_s=2e-9,
+                                background=3)
     # Incomplete dictionary
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                 n_s=0.965, A_s=2e-9,
-                                 background={'a': input_a_array,
-                                             'h_over_h0': input_hoh0})
+        ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                n_s=0.965, A_s=2e-9,
+                                background={'a': input_a_array,
+                                            'h_over_h0': input_hoh0})
     with pytest.raises(ValueError):
-        ccl.Cosmology.calculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                 n_s=0.965, A_s=2e-9,
-                                 growth={'a': input_a_array,
-                                         'growth_rate': input_fgrowth})
+        ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                n_s=0.965, A_s=2e-9,
+                                growth={'a': input_a_array,
+                                        'growth_rate': input_fgrowth})

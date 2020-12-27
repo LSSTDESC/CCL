@@ -191,281 +191,6 @@ class Cosmology(object):
         self._has_pk_nl = False
         self._pk_nl = {}
 
-    @classmethod
-    def calculator(
-            Cosmology, Omega_c=None, Omega_b=None, h=None, n_s=None,
-            sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
-            Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=None, background=None, growth=None,
-            pk_linear=None, pk_nonlin=None, use_halofit=False):
-        """Constructor for a "calculator-mode" CCL `Cosmology` object.
-        This allows users to build a cosmology from a set of arrays
-        describing the background expansion, linear growth factor and
-        linear and non-linear power spectra, which can then be used
-        to compute more complex observables (e.g. angular power
-        spectra or halo-model quantities). These are stored in
-        `background`, `growth`, `pk_linear` and `pk_nonlin`.
-
-        .. note:: Although in principle these arrays should suffice
-                  to compute most observable quantities some
-                  calculations implemented in CCL (e.g. the halo
-                  mass function) requires knowledge of basic
-                  cosmological parameters such as :math:`\\Omega_M`.
-                  For this reason, users must pass a minimal set
-                  of :math:`\\Lambda` CDM cosmological parameters.
-
-        Args:
-            Omega_c (:obj:`float`): Cold dark matter density fraction.
-            Omega_b (:obj:`float`): Baryonic matter density fraction.
-            h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc;
-                unitless.
-            A_s (:obj:`float`): Power spectrum normalization. Exactly
-                one of A_s and sigma_8 is required.
-            sigma8 (:obj:`float`): Variance of matter density
-                perturbations at an 8 Mpc/h scale. Exactly one of A_s
-                and sigma_8 is required.
-            n_s (:obj:`float`): Primordial scalar perturbation spectral
-                index.
-            Omega_k (:obj:`float`, optional): Curvature density fraction.
-                Defaults to 0.
-            Omega_g (:obj:`float`, optional): Density in relativistic species
-                except massless neutrinos. The default of `None` corresponds
-                to setting this from the CMB temperature. Note that if a
-                non-`None` value is given, this may result in a physically
-                inconsistent model because the CMB temperature will still
-                be non-zero in the parameters.
-            Neff (:obj:`float`, optional): Effective number of massless
-                neutrinos present. Defaults to 3.046.
-            m_nu (:obj:`float`, optional): Total mass in eV of the massive
-                neutrinos present. Defaults to 0.
-            m_nu_type (:obj:`str`, optional): The type of massive neutrinos.
-                Should be one of 'inverted', 'normal', 'equal', 'single', or
-                'list'. The default of None is the same as 'normal'.
-            w0 (:obj:`float`, optional): First order term of dark energy
-                equation of state. Defaults to -1.
-            wa (:obj:`float`, optional): Second order term of dark energy
-                equation of state. Defaults to 0.
-            T_CMB (:obj:`float`): The CMB temperature today. The default of
-                ``None`` uses the global CCL value in
-                ``pyccl.physical_constants.T_CMB``.
-            background (:obj:`dict`): a dictionary describing the background
-                expansion. It must contain three mandatory entries: `'a'`: an
-                array of monotonically ascending scale-factor values. `'chi'`:
-                an array containing the values of the comoving radial distance
-                (in units of Mpc) at the scale factor values stored in `a`.
-                '`h_over_h0`': an array containing the Hubble expansion rate at
-                the scale factor values stored in `a`, divided by its value
-                today (at `a=1`).
-            growth (:obj:`dict`): a dictionary describing the linear growth of
-                matter fluctuations. It must contain three mandatory entries:
-                `'a'`: an array of monotonically ascending scale-factor
-                values. `'growth_factor'`: an array containing the values of
-                the linear growth factor :math:`D(a)` at the scale factor
-                values stored in `a`. '`growth_rate`': an array containing the
-                growth rate :math:`f(a)\\equiv d\\log D/d\\log a` at the scale
-                factor values stored in `a`.
-            pk_linear (:obj:`dict`): a dictionary containing linear power
-                spectra. It must contain the following mandatory entries:
-                `'a'`: an array of scale factor values. `'k'`: an array of
-                comoving wavenumbers in units of inverse Mpc.
-                `'delta_matter_x_delta_matter'`: a 2D array of shape
-                `(n_a, n_k)`, where `n_a` and `n_k` are the lengths of
-                `'a'` and `'k'` respectively, containing the linear matter
-                power spectrum :math:`P(k,a)`. This dictionary may also
-                contain other entries with keys of the form `'q1_x_q2'`,
-                containing other cross-power spectra between quantities
-                `'q1'` and `'q2'`.
-            pk_nonlin (:obj:`dict`): a dictionary containing non-linear
-                power spectra. It must contain the following mandatory
-                entries: `'a'`: an array of scale factor values.
-                `'k'`: an array of comoving wavenumbers in units of
-                inverse Mpc. If `use_halofit == None`, it should also
-                contain `'delta_matter_x_delta_matter'`: a 2D array of
-                shape `(n_a, n_k)`, where `n_a` and `n_k` are the lengths
-                of `'a'` and `'k'` respectively, containing the non-linear
-                matter power spectrum :math:`P(k,a)`. This dictionary may
-                also contain other entries with keys of the form `'q1_x_q2'`,
-                containing other cross-power spectra between quantities
-                `'q1'` and `'q2'`.
-            use_halofit (:obj:`bool`): if `True`, all entries in `pk_linear`
-                which do not appear in `pk_nonlin`, will be populated in the
-                latter by applying the "HALOFIT" transformation of
-                Takahashi et al. 2012 (arXiv:1208.2701) on their linear
-                versions.
-        """
-        if pk_linear:
-            transfer_function = 'calculator'
-        else:
-            transfer_function = 'boltzmann_camb'
-        if pk_nonlin or use_halofit:
-            matter_power_spectrum = 'calculator'
-        else:
-            matter_power_spectrum = 'halofit'
-
-        # Cosmology
-        cosmo = Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h,
-                          n_s=n_s, sigma8=sigma8, A_s=A_s,
-                          Omega_k=Omega_k, Omega_g=Omega_g,
-                          Neff=Neff, m_nu=m_nu, m_nu_type=m_nu_type,
-                          w0=w0, wa=wa, T_CMB=T_CMB,
-                          transfer_function=transfer_function,
-                          matter_power_spectrum=matter_power_spectrum)
-
-        # Parse arrays
-        has_bg = background is not None
-        has_dz = growth is not None
-        has_pklin = pk_linear is not None
-        has_pknl = pk_nonlin is not None
-
-        # Background
-        if has_bg:
-            if not isinstance(background, dict):
-                raise TypeError("`background` must be a dictionary.")
-            if (('a' not in background) or ('chi' not in background) or
-                    ('h_over_h0' not in background)):
-                raise ValueError("`background` must contain keys "
-                                 "'a', 'chi' and 'h_over_h0'")
-            a = background['a']
-            chi = background['chi']
-            hoh0 = background['h_over_h0']
-            # Check that input arrays have the same size.
-            if not (a.shape == chi.shape == hoh0.shape):
-                raise ValueError("Input arrays must have the same size.")
-            # Check that `a` is a monotonically increasing array.
-            if not np.array_equal(a, np.sort(a)):
-                raise ValueError("Input scale factor array is not "
-                                 "monotonically increasing.")
-            # Check that the last element of a_array_back is 1:
-            if np.abs(a[-1]-1.0) > 1e-5:
-                raise ValueError("The last element of the input scale factor"
-                                 "array must be 1.0.")
-            status = 0
-            status = lib.cosmology_distances_from_input(cosmo.cosmo,
-                                                        a, chi, hoh0,
-                                                        status)
-            check(status, cosmo)
-
-        # Growth
-        if has_dz:
-            if not isinstance(growth, dict):
-                raise TypeError("`growth` must be a dictionary.")
-            if (('a' not in growth) or ('growth_factor' not in growth) or
-                    ('growth_rate' not in growth)):
-                raise ValueError("`growth` must contain keys "
-                                 "'a', 'growth_factor' and 'growth_rate'")
-            a = growth['a']
-            dz = growth['growth_factor']
-            fz = growth['growth_rate']
-            # Check that input arrays have the same size.
-            if not (a.shape == dz.shape
-                    == fz.shape):
-                raise ValueError("Input arrays must have the same size.")
-            # Check that a_array_grth is a monotonically increasing array.
-            if not np.array_equal(a,
-                                  np.sort(a)):
-                raise ValueError("Input scale factor array is not "
-                                 "monotonically increasing.")
-            # Check that the last element of a_array_grth is 1:
-            if np.abs(a[-1]-1.0) > 1e-5:
-                raise ValueError("The last element of the input scale factor"
-                                 "array must be 1.0.")
-            status = 0
-            status = lib.cosmology_growth_from_input(cosmo.cosmo,
-                                                     a, dz, fz,
-                                                     status)
-            check(status, cosmo)
-
-        # Linear power spectrum
-        if has_pklin:
-            if not isinstance(pk_linear, dict):
-                raise TypeError("`pk_linear` must be a dictionary")
-            if (('delta_matter_x_delta_matter' not in pk_linear) or
-                    ('a' not in pk_linear) or ('k' not in pk_linear)):
-                raise ValueError("`pk_linear` must contain keys 'a', 'k' "
-                                 "and 'delta_matter_x_delta_matter' "
-                                 "(at least)")
-            na = len(pk_linear['a'])
-            nk = len(pk_linear['k'])
-            lk = np.log(pk_linear['k'])
-            pk_names = [key for key in pk_linear if key not in ('a', 'k')]
-            for n in pk_names:
-                qs = n.split('_x_')
-                if len(qs) != 2:
-                    raise ValueError("Power spectrum label %s could " % n +
-                                     "not be parsed. Label must be of the " +
-                                     "form 'q1_x_q2'")
-                pk = pk_linear[n]
-                if pk.shape != (na, nk):
-                    raise ValueError("Power spectrum %s has shape " % n +
-                                     str(pk.shape) + " but shape " +
-                                     "(%d, %d) was expected." % (na, nk))
-                # Spline in log-space if the P(k) is positive-definite
-                use_log = np.all(pk > 0)
-                if use_log:
-                    pk = np.log(pk)
-                # Initialize and store
-                pk = Pk2D(pkfunc=None,
-                          a_arr=pk_linear['a'], lk_arr=lk, pk_arr=pk,
-                          is_logp=use_log, extrap_order_lok=1,
-                          extrap_order_hik=2, cosmo=None)
-                cosmo._pk_lin[n] = pk
-            # Set linear power spectrum as initialized
-            cosmo._has_pk_lin = True
-
-        # Linear power spectrum
-        if has_pknl:
-            if not isinstance(pk_nonlin, dict):
-                raise TypeError("`pk_nonlin` must be a dictionary")
-            if (('a' not in pk_nonlin) or ('k' not in pk_nonlin)):
-                raise ValueError("`pk_nonlin` must contain keys "
-                                 "'a' and 'k' (at least)")
-            if ((not use_halofit) and
-                    ('delta_matter_x_delta_matter' not in pk_nonlin)):
-                raise ValueError("`pk_nonlin` must contain key "
-                                 "'delta_matter_x_delta_matter' or "
-                                 "use halofit to compute it")
-            na = len(pk_nonlin['a'])
-            nk = len(pk_nonlin['k'])
-            lk = np.log(pk_nonlin['k'])
-            pk_names = [key for key in pk_nonlin if key not in ('a', 'k')]
-            for n in pk_names:
-                qs = n.split('_x_')
-                if len(qs) != 2:
-                    raise ValueError("Power spectrum label %s could " % n +
-                                     "not be parsed. Label must be of the " +
-                                     "form 'q1_x_q2'")
-                pk = pk_nonlin[n]
-                if pk.shape != (na, nk):
-                    raise ValueError("Power spectrum %s has shape " % n +
-                                     str(pk.shape) + " but shape " +
-                                     "(%d, %d) was expected." % (na, nk))
-                # Spline in log-space if the P(k) is positive-definite
-                use_log = np.all(pk > 0)
-                if use_log:
-                    pk = np.log(pk)
-                # Initialize and store
-                pk = Pk2D(pkfunc=None,
-                          a_arr=pk_nonlin['a'], lk_arr=lk, pk_arr=pk,
-                          is_logp=use_log, extrap_order_lok=1,
-                          extrap_order_hik=2, cosmo=None)
-                cosmo._pk_nl[n] = pk
-            # Set linear power spectrum as initialized
-            cosmo._has_pk_nl = True
-
-        # Use halofit if needef for all missing non-linear power spectra
-        if use_halofit:
-            if not has_pklin:
-                raise ValueError("Must specify linear Pk to use halofit")
-            for n, pkl in cosmo._pk_lin.items():
-                if (n in cosmo._pk_nl) or (pkl is None):
-                    continue
-                pk = Pk2D.halofit_it(cosmo, pkl)
-                cosmo._pk_nl[n] = pk
-            # Set linear power spectrum as initialized
-            cosmo._has_pk_nl = True
-
-        return cosmo
-
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
         # We have to make all of the C stuff that goes into a cosmology
@@ -1208,3 +933,278 @@ class CosmologyVanillaLCDM(Cosmology):
                              "%s " % list(p.keys()))
         kwargs.update(p)
         super(CosmologyVanillaLCDM, self).__init__(**kwargs)
+
+
+class CosmologyCalculator(Cosmology):
+    """A "calculator-mode" CCL `Cosmology` object.
+    This allows users to build a cosmology from a set of arrays
+    describing the background expansion, linear growth factor and
+    linear and non-linear power spectra, which can then be used
+    to compute more complex observables (e.g. angular power
+    spectra or halo-model quantities). These are stored in
+    `background`, `growth`, `pk_linear` and `pk_nonlin`.
+
+    .. note:: Although in principle these arrays should suffice
+              to compute most observable quantities some
+              calculations implemented in CCL (e.g. the halo
+              mass function) requires knowledge of basic
+              cosmological parameters such as :math:`\\Omega_M`.
+              For this reason, users must pass a minimal set
+              of :math:`\\Lambda` CDM cosmological parameters.
+
+    Args:
+        Omega_c (:obj:`float`): Cold dark matter density fraction.
+        Omega_b (:obj:`float`): Baryonic matter density fraction.
+        h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc;
+            unitless.
+        A_s (:obj:`float`): Power spectrum normalization. Exactly
+            one of A_s and sigma_8 is required.
+        sigma8 (:obj:`float`): Variance of matter density
+            perturbations at an 8 Mpc/h scale. Exactly one of A_s
+            and sigma_8 is required.
+        n_s (:obj:`float`): Primordial scalar perturbation spectral
+            index.
+        Omega_k (:obj:`float`, optional): Curvature density fraction.
+            Defaults to 0.
+        Omega_g (:obj:`float`, optional): Density in relativistic species
+            except massless neutrinos. The default of `None` corresponds
+            to setting this from the CMB temperature. Note that if a
+            non-`None` value is given, this may result in a physically
+            inconsistent model because the CMB temperature will still
+            be non-zero in the parameters.
+        Neff (:obj:`float`, optional): Effective number of massless
+            neutrinos present. Defaults to 3.046.
+        m_nu (:obj:`float`, optional): Total mass in eV of the massive
+            neutrinos present. Defaults to 0.
+        m_nu_type (:obj:`str`, optional): The type of massive neutrinos.
+            Should be one of 'inverted', 'normal', 'equal', 'single', or
+            'list'. The default of None is the same as 'normal'.
+        w0 (:obj:`float`, optional): First order term of dark energy
+            equation of state. Defaults to -1.
+        wa (:obj:`float`, optional): Second order term of dark energy
+            equation of state. Defaults to 0.
+        T_CMB (:obj:`float`): The CMB temperature today. The default of
+            ``None`` uses the global CCL value in
+            ``pyccl.physical_constants.T_CMB``.
+        background (:obj:`dict`): a dictionary describing the background
+            expansion. It must contain three mandatory entries: `'a'`: an
+            array of monotonically ascending scale-factor values. `'chi'`:
+            an array containing the values of the comoving radial distance
+            (in units of Mpc) at the scale factor values stored in `a`.
+            '`h_over_h0`': an array containing the Hubble expansion rate at
+            the scale factor values stored in `a`, divided by its value
+            today (at `a=1`).
+        growth (:obj:`dict`): a dictionary describing the linear growth of
+            matter fluctuations. It must contain three mandatory entries:
+            `'a'`: an array of monotonically ascending scale-factor
+            values. `'growth_factor'`: an array containing the values of
+            the linear growth factor :math:`D(a)` at the scale factor
+            values stored in `a`. '`growth_rate`': an array containing the
+            growth rate :math:`f(a)\\equiv d\\log D/d\\log a` at the scale
+            factor values stored in `a`.
+        pk_linear (:obj:`dict`): a dictionary containing linear power
+            spectra. It must contain the following mandatory entries:
+            `'a'`: an array of scale factor values. `'k'`: an array of
+            comoving wavenumbers in units of inverse Mpc.
+            `'delta_matter_x_delta_matter'`: a 2D array of shape
+            `(n_a, n_k)`, where `n_a` and `n_k` are the lengths of
+            `'a'` and `'k'` respectively, containing the linear matter
+            power spectrum :math:`P(k,a)`. This dictionary may also
+            contain other entries with keys of the form `'q1_x_q2'`,
+            containing other cross-power spectra between quantities
+            `'q1'` and `'q2'`.
+        pk_nonlin (:obj:`dict`): a dictionary containing non-linear
+            power spectra. It must contain the following mandatory
+            entries: `'a'`: an array of scale factor values.
+            `'k'`: an array of comoving wavenumbers in units of
+            inverse Mpc. If `use_halofit == None`, it should also
+            contain `'delta_matter_x_delta_matter'`: a 2D array of
+            shape `(n_a, n_k)`, where `n_a` and `n_k` are the lengths
+            of `'a'` and `'k'` respectively, containing the non-linear
+            matter power spectrum :math:`P(k,a)`. This dictionary may
+            also contain other entries with keys of the form `'q1_x_q2'`,
+            containing other cross-power spectra between quantities
+            `'q1'` and `'q2'`.
+        use_halofit (:obj:`bool`): if `True`, all entries in `pk_linear`
+            which do not appear in `pk_nonlin`, will be populated in the
+            latter by applying the "HALOFIT" transformation of
+            Takahashi et al. 2012 (arXiv:1208.2701) on their linear
+            versions.
+    """
+    def __init__(
+            self, Omega_c=None, Omega_b=None, h=None, n_s=None,
+            sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
+            Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
+            T_CMB=None, background=None, growth=None,
+            pk_linear=None, pk_nonlin=None, use_halofit=False):
+        if pk_linear:
+            transfer_function = 'calculator'
+        else:
+            transfer_function = 'boltzmann_camb'
+        if pk_nonlin or use_halofit:
+            matter_power_spectrum = 'calculator'
+        else:
+            matter_power_spectrum = 'halofit'
+
+        # Cosmology
+        super(CosmologyCalculator, self).__init__(
+            Omega_c=Omega_c, Omega_b=Omega_b, h=h,
+            n_s=n_s, sigma8=sigma8, A_s=A_s,
+            Omega_k=Omega_k, Omega_g=Omega_g,
+            Neff=Neff, m_nu=m_nu, m_nu_type=m_nu_type,
+            w0=w0, wa=wa, T_CMB=T_CMB,
+            transfer_function=transfer_function,
+            matter_power_spectrum=matter_power_spectrum)
+
+        # Parse arrays
+        has_bg = background is not None
+        has_dz = growth is not None
+        has_pklin = pk_linear is not None
+        has_pknl = pk_nonlin is not None
+
+        # Background
+        if has_bg:
+            if not isinstance(background, dict):
+                raise TypeError("`background` must be a dictionary.")
+            if (('a' not in background) or ('chi' not in background) or
+                    ('h_over_h0' not in background)):
+                raise ValueError("`background` must contain keys "
+                                 "'a', 'chi' and 'h_over_h0'")
+            a = background['a']
+            chi = background['chi']
+            hoh0 = background['h_over_h0']
+            # Check that input arrays have the same size.
+            if not (a.shape == chi.shape == hoh0.shape):
+                raise ValueError("Input arrays must have the same size.")
+            # Check that `a` is a monotonically increasing array.
+            if not np.array_equal(a, np.sort(a)):
+                raise ValueError("Input scale factor array is not "
+                                 "monotonically increasing.")
+            # Check that the last element of a_array_back is 1:
+            if np.abs(a[-1]-1.0) > 1e-5:
+                raise ValueError("The last element of the input scale factor"
+                                 "array must be 1.0.")
+            status = 0
+            status = lib.cosmology_distances_from_input(self.cosmo,
+                                                        a, chi, hoh0,
+                                                        status)
+            check(status, self)
+
+        # Growth
+        if has_dz:
+            if not isinstance(growth, dict):
+                raise TypeError("`growth` must be a dictionary.")
+            if (('a' not in growth) or ('growth_factor' not in growth) or
+                    ('growth_rate' not in growth)):
+                raise ValueError("`growth` must contain keys "
+                                 "'a', 'growth_factor' and 'growth_rate'")
+            a = growth['a']
+            dz = growth['growth_factor']
+            fz = growth['growth_rate']
+            # Check that input arrays have the same size.
+            if not (a.shape == dz.shape
+                    == fz.shape):
+                raise ValueError("Input arrays must have the same size.")
+            # Check that a_array_grth is a monotonically increasing array.
+            if not np.array_equal(a,
+                                  np.sort(a)):
+                raise ValueError("Input scale factor array is not "
+                                 "monotonically increasing.")
+            # Check that the last element of a_array_grth is 1:
+            if np.abs(a[-1]-1.0) > 1e-5:
+                raise ValueError("The last element of the input scale factor"
+                                 "array must be 1.0.")
+            status = 0
+            status = lib.cosmology_growth_from_input(self.cosmo,
+                                                     a, dz, fz,
+                                                     status)
+            check(status, self)
+
+        # Linear power spectrum
+        if has_pklin:
+            if not isinstance(pk_linear, dict):
+                raise TypeError("`pk_linear` must be a dictionary")
+            if (('delta_matter_x_delta_matter' not in pk_linear) or
+                    ('a' not in pk_linear) or ('k' not in pk_linear)):
+                raise ValueError("`pk_linear` must contain keys 'a', 'k' "
+                                 "and 'delta_matter_x_delta_matter' "
+                                 "(at least)")
+            na = len(pk_linear['a'])
+            nk = len(pk_linear['k'])
+            lk = np.log(pk_linear['k'])
+            pk_names = [key for key in pk_linear if key not in ('a', 'k')]
+            for n in pk_names:
+                qs = n.split('_x_')
+                if len(qs) != 2:
+                    raise ValueError("Power spectrum label %s could " % n +
+                                     "not be parsed. Label must be of the " +
+                                     "form 'q1_x_q2'")
+                pk = pk_linear[n]
+                if pk.shape != (na, nk):
+                    raise ValueError("Power spectrum %s has shape " % n +
+                                     str(pk.shape) + " but shape " +
+                                     "(%d, %d) was expected." % (na, nk))
+                # Spline in log-space if the P(k) is positive-definite
+                use_log = np.all(pk > 0)
+                if use_log:
+                    pk = np.log(pk)
+                # Initialize and store
+                pk = Pk2D(pkfunc=None,
+                          a_arr=pk_linear['a'], lk_arr=lk, pk_arr=pk,
+                          is_logp=use_log, extrap_order_lok=1,
+                          extrap_order_hik=2, cosmo=None)
+                self._pk_lin[n] = pk
+            # Set linear power spectrum as initialized
+            self._has_pk_lin = True
+
+        # Linear power spectrum
+        if has_pknl:
+            if not isinstance(pk_nonlin, dict):
+                raise TypeError("`pk_nonlin` must be a dictionary")
+            if (('a' not in pk_nonlin) or ('k' not in pk_nonlin)):
+                raise ValueError("`pk_nonlin` must contain keys "
+                                 "'a' and 'k' (at least)")
+            if ((not use_halofit) and
+                    ('delta_matter_x_delta_matter' not in pk_nonlin)):
+                raise ValueError("`pk_nonlin` must contain key "
+                                 "'delta_matter_x_delta_matter' or "
+                                 "use halofit to compute it")
+            na = len(pk_nonlin['a'])
+            nk = len(pk_nonlin['k'])
+            lk = np.log(pk_nonlin['k'])
+            pk_names = [key for key in pk_nonlin if key not in ('a', 'k')]
+            for n in pk_names:
+                qs = n.split('_x_')
+                if len(qs) != 2:
+                    raise ValueError("Power spectrum label %s could " % n +
+                                     "not be parsed. Label must be of the " +
+                                     "form 'q1_x_q2'")
+                pk = pk_nonlin[n]
+                if pk.shape != (na, nk):
+                    raise ValueError("Power spectrum %s has shape " % n +
+                                     str(pk.shape) + " but shape " +
+                                     "(%d, %d) was expected." % (na, nk))
+                # Spline in log-space if the P(k) is positive-definite
+                use_log = np.all(pk > 0)
+                if use_log:
+                    pk = np.log(pk)
+                # Initialize and store
+                pk = Pk2D(pkfunc=None,
+                          a_arr=pk_nonlin['a'], lk_arr=lk, pk_arr=pk,
+                          is_logp=use_log, extrap_order_lok=1,
+                          extrap_order_hik=2, cosmo=None)
+                self._pk_nl[n] = pk
+            # Set linear power spectrum as initialized
+            self._has_pk_nl = True
+
+        # Use halofit if needef for all missing non-linear power spectra
+        if use_halofit:
+            if not has_pklin:
+                raise ValueError("Must specify linear Pk to use halofit")
+            for n, pkl in self._pk_lin.items():
+                if (n in self._pk_nl) or (pkl is None):
+                    continue
+                pk = Pk2D.halofit_it(self, pkl)
+                self._pk_nl[n] = pk
+            # Set linear power spectrum as initialized
+            self._has_pk_nl = True
