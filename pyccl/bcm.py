@@ -1,5 +1,6 @@
 from . import ccllib as lib
-from .pyutils import _vectorize_fn2, check
+from .pyutils import check
+import numpy as np
 
 
 def bcm_model_fka(cosmo, k, a):
@@ -22,8 +23,15 @@ def bcm_model_fka(cosmo, k, a):
     Returns:
         float or array_like: Correction factor to apply to the power spectrum.
     """
-    return _vectorize_fn2(lib.bcm_model_fka,
-                          lib.bcm_model_fka_vec, cosmo, k, a)
+    k_use = np.atleast_1d(k)
+    status = 0
+    fka, status = lib.bcm_model_fka_vec(cosmo.cosmo, a, k_use,
+                                        len(k_use), status)
+    check(status, cosmo)
+
+    if np.ndim(k) == 0:
+        fka = fka[0]
+    return fka
 
 
 def bcm_correct_pk2d(cosmo, pk2d):
