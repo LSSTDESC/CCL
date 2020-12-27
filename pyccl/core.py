@@ -198,7 +198,101 @@ class Cosmology(object):
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
             T_CMB=None, background=None, growth=None,
             pk_linear=None, pk_nonlin=None, use_halofit=False):
+        """Constructor for a "calculator-mode" CCL `Cosmology` object.
+        This allows users to build a cosmology from a set of arrays
+        describing the background expansion, linear growth factor and
+        linear and non-linear power spectra, which can then be used
+        to compute more complex observables (e.g. angular power
+        spectra or halo-model quantities). These are stored in
+        `background`, `growth`, `pk_linear` and `pk_nonlin`.
 
+        .. note:: Although in principle these arrays should suffice
+                  to compute most observable quantities some
+                  calculations implemented in CCL (e.g. the halo
+                  mass function) requires knowledge of basic
+                  cosmological parameters such as :math:`\\Omega_M`.
+                  For this reason, users must pass a minimal set
+                  of :math:`\\Lambda` CDM cosmological parameters.
+
+        Args:
+            Omega_c (:obj:`float`): Cold dark matter density fraction.
+            Omega_b (:obj:`float`): Baryonic matter density fraction.
+            h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc;
+                unitless.
+            A_s (:obj:`float`): Power spectrum normalization. Exactly
+                one of A_s and sigma_8 is required.
+            sigma8 (:obj:`float`): Variance of matter density
+                perturbations at an 8 Mpc/h scale. Exactly one of A_s
+                and sigma_8 is required.
+            n_s (:obj:`float`): Primordial scalar perturbation spectral
+                index.
+            Omega_k (:obj:`float`, optional): Curvature density fraction.
+                Defaults to 0.
+            Omega_g (:obj:`float`, optional): Density in relativistic species
+                except massless neutrinos. The default of `None` corresponds
+                to setting this from the CMB temperature. Note that if a
+                non-`None` value is given, this may result in a physically
+                inconsistent model because the CMB temperature will still
+                be non-zero in the parameters.
+            Neff (:obj:`float`, optional): Effective number of massless
+                neutrinos present. Defaults to 3.046.
+            m_nu (:obj:`float`, optional): Total mass in eV of the massive
+                neutrinos present. Defaults to 0.
+            m_nu_type (:obj:`str`, optional): The type of massive neutrinos.
+                Should be one of 'inverted', 'normal', 'equal', 'single', or
+                'list'. The default of None is the same as 'normal'.
+            w0 (:obj:`float`, optional): First order term of dark energy
+                equation of state. Defaults to -1.
+            wa (:obj:`float`, optional): Second order term of dark energy
+                equation of state. Defaults to 0.
+            T_CMB (:obj:`float`): The CMB temperature today. The default of
+                ``None`` uses the global CCL value in
+                ``pyccl.physical_constants.T_CMB``.
+            background (:obj:`dict`): a dictionary describing the background
+                expansion. It must contain three mandatory entries: `'a'`: an
+                array of monotonically ascending scale-factor values. `'chi'`:
+                an array containing the values of the comoving radial distance
+                (in units of Mpc) at the scale factor values stored in `a`.
+                '`h_over_h0`': an array containing the Hubble expansion rate at
+                the scale factor values stored in `a`, divided by its value
+                today (at `a=1`).
+            growth (:obj:`dict`): a dictionary describing the linear growth of
+                matter fluctuations. It must contain three mandatory entries:
+                `'a'`: an array of monotonically ascending scale-factor
+                values. `'growth_factor'`: an array containing the values of
+                the linear growth factor :math:`D(a)` at the scale factor
+                values stored in `a`. '`growth_rate`': an array containing the
+                growth rate :math:`f(a)\\equiv d\\log D/d\\log a` at the scale
+                factor values stored in `a`.
+            pk_linear (:obj:`dict`): a dictionary containing linear power
+                spectra. It must contain the following mandatory entries:
+                `'a'`: an array of scale factor values. `'k'`: an array of
+                comoving wavenumbers in units of inverse Mpc.
+                `'delta_matter_x_delta_matter'`: a 2D array of shape
+                `(n_a, n_k)`, where `n_a` and `n_k` are the lengths of
+                `'a'` and `'k'` respectively, containing the linear matter
+                power spectrum :math:`P(k,a)`. This dictionary may also
+                contain other entries with keys of the form `'q1_x_q2'`,
+                containing other cross-power spectra between quantities
+                `'q1'` and `'q2'`.
+            pk_nonlin (:obj:`dict`): a dictionary containing non-linear
+                power spectra. It must contain the following mandatory
+                entries: `'a'`: an array of scale factor values.
+                `'k'`: an array of comoving wavenumbers in units of
+                inverse Mpc. If `use_halofit == None`, it should also
+                contain `'delta_matter_x_delta_matter'`: a 2D array of
+                shape `(n_a, n_k)`, where `n_a` and `n_k` are the lengths
+                of `'a'` and `'k'` respectively, containing the non-linear
+                matter power spectrum :math:`P(k,a)`. This dictionary may
+                also contain other entries with keys of the form `'q1_x_q2'`,
+                containing other cross-power spectra between quantities
+                `'q1'` and `'q2'`.
+            use_halofit (:obj:`bool`): if `True`, all entries in `pk_linear`
+                which do not appear in `pk_nonlin`, will be populated in the
+                latter by applying the "HALOFIT" transformation of
+                Takahashi et al. 2012 (arXiv:1208.2701) on their linear
+                versions.
+        """
         if pk_linear:
             transfer_function = 'calculator'
         else:
@@ -1016,7 +1110,7 @@ class Cosmology(object):
             self._has_pk_nl = True
 
     def compute_sigma(self):
-        """Compute the sigma(M) and mass function splines."""
+        """Compute the sigma(M) spline."""
         if self.has_sigma:
             return
 

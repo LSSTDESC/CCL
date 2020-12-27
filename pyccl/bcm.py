@@ -1,5 +1,6 @@
 from . import ccllib as lib
 from .pyutils import check
+from .pk2d import Pk2D
 import numpy as np
 
 
@@ -35,6 +36,14 @@ def bcm_model_fka(cosmo, k, a):
 
 
 def bcm_correct_pk2d(cosmo, pk2d):
+    """Apply the BCM model correction factor to a given power spectrum.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
+    """
+    if not isinstance(pk2d, Pk2D):
+        raise ValueError("pk2d must be a Pk2D object")
     status = 0
     status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
     check(status, cosmo)

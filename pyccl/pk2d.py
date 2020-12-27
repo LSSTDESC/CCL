@@ -110,6 +110,16 @@ class Pk2D(object):
 
     @classmethod
     def pk_from_model(Pk2D, cosmo, model):
+        """`Pk2D` constructor returning the power spectrum associated with
+        a given numerical model.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            model (:obj:`str`): model to use. Three models allowed:
+                `'bbks'` (Bardeen et al. ApJ 304 (1986) 15).
+                `'eisenstein_hu'` (Eisenstein & Hu astro-ph/9710252).
+                `'emu'` (arXiv:1508.02654).
+        """
         pk2d = Pk2D(empty=True)
         status = 0
         if model == 'bbks':
@@ -134,6 +144,15 @@ class Pk2D(object):
 
     @classmethod
     def halofit_it(Pk2D, cosmo, pk_linear):
+        """Pk2D constructor that applies the "HALOFIT" transformation of
+        Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
+        power spectrum in `pk_linear`.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            pk_linear (:class:`Pk2D`): a :class:`Pk2D` object containing
+                the linear power spectrum to transform.
+        """
         pk2d = Pk2D(empty=True)
         status = 0
         ret = lib.halofit_it(cosmo.cosmo, pk_linear.psp, status)
@@ -193,13 +212,20 @@ class Pk2D(object):
 
 
 def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
-    """ Return the C-level f2d spline associated with a
-    Pk2D object. If `None` on input, the internal power
-    spectrum is used.
+    """ Return the C-level `f2d` spline associated with a
+    :class:`Pk2D` object.
 
     Args:
-        cosmo (Cosmology object)
-        p_of_k_a (Pk2D object or None).
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        p_of_k_a (:class:`Pk2D`, :obj:`str` or `None`): if a
+            :class:`Pk2D` object, its `f2d` spline will be used. If
+            a string, the linear or non-linear power spectrum stored
+            by `cosmo` under this name will be used. If `None`, the
+            matter power spectrum stored by `cosmo` will be used.
+        is_linear (:obj:`bool`): if `True`, and if `p_of_k_a` is a
+            string or `None`, the linear version of the corresponding
+            power spectrum will be used (otherwise it'll be the
+            non-linear version).
     """
     if isinstance(p_of_k_a, Pk2D):
         psp = p_of_k_a.psp

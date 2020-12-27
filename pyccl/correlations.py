@@ -119,9 +119,11 @@ def correlation_3d(cosmo, a, r, p_of_k_a=None):
         a (float): scale factor.
         r (float or array_like): distance(s) at which to calculate the 3D
                                  correlation function (in Mpc).
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or None): 3D Power spectrum to
-            integrate. If `None`, the non-linear matter power spectrum will
-            be used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+            to integrate. If a string, it must correspond to one of the
+            non-linear power spectra stored in `cosmo` (e.g.
+            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            power spectrum stored in `cosmo` will be used.
 
     Returns:
         Value(s) of the correlation function at the input distance(s).
@@ -160,9 +162,11 @@ def correlation_multipole(cosmo, a, beta, l, s, p_of_k_a=None):
         l (int) : the desired multipole
         s (float or array_like): distance(s) at which to calculate the 3DRsd
                                  correlation function (in Mpc).
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or None): 3D Power spectrum to
-            integrate. If `None`, the non-linear matter power spectrum will
-            be used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+            to integrate. If a string, it must correspond to one of the
+            non-linear power spectra stored in `cosmo` (e.g.
+            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            power spectrum stored in `cosmo` will be used.
 
     Returns:
         Value(s) of the correlation function at the input distance(s).
@@ -206,9 +210,11 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline=True, p_of_k_a=None):
         beta (float): growth rate divided by galaxy bias.
         use_spline: switch that determines whether the RSD correlation
                     function is calculated using global splines of multipoles.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or None): 3D Power spectrum to
-            integrate. If `None`, the non-linear matter power spectrum will
-            be used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+            to integrate. If a string, it must correspond to one of the
+            non-linear power spectra stored in `cosmo` (e.g.
+            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            power spectrum stored in `cosmo` will be used.
 
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
@@ -247,9 +253,11 @@ def correlation_3dRsd_avgmu(cosmo, a, s, beta, p_of_k_a=None):
         s (float or array_like): distance(s) at which to calculate the 3DRsd
                                  correlation function (in Mpc).
         beta (float): growth rate divided by galaxy bias.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or None): 3D Power spectrum to
-            integrate. If `None`, the non-linear matter power spectrum will
-            be used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+            to integrate. If a string, it must correspond to one of the
+            non-linear power spectra stored in `cosmo` (e.g.
+            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            power spectrum stored in `cosmo` will be used.
 
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
@@ -290,9 +298,11 @@ def correlation_pi_sigma(cosmo, a, beta, pi, sig,
         sig (float or array-like): distance(s) times sine of the angle
                                    (in Mpc).
         beta (float): growth rate divided by galaxy bias.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or None): 3D Power spectrum to
-            integrate. If `None`, the non-linear matter power spectrum will
-            be used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+            to integrate. If a string, it must correspond to one of the
+            non-linear power spectra stored in `cosmo` (e.g.
+            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            power spectrum stored in `cosmo` will be used.
 
     Returns:
         Value(s) of the correlation function at the input pi and sigma.
