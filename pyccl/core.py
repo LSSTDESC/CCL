@@ -22,13 +22,15 @@ transfer_function_types = {
     'boltzmann_class': lib.boltzmann_class,
     'boltzmann_camb': lib.boltzmann_camb,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
+    'calculator': lib.pklin_from_input
 }
 
 matter_power_spectrum_types = {
     'halo_model': lib.halo_model,
     'halofit': lib.halofit,
     'linear': lib.linear,
-    'emu': lib.emu
+    'emu': lib.emu,
+    'calculator': lib.pklin_from_input
 }
 
 baryons_power_spectrum_types = {
@@ -197,12 +199,23 @@ class Cosmology(object):
             T_CMB=None, background=None, growth=None,
             pk_linear=None, pk_nonlin=None, use_halofit=False):
 
+        if pk_linear:
+            transfer_function = 'calculator'
+        else:
+            transfer_function = 'boltzmann_camb'
+        if pk_nonlin or use_halofit:
+            matter_power_spectrum = 'calculator'
+        else:
+            matter_power_spectrum = 'halofit'
+
         # Cosmology
         cosmo = Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h,
                           n_s=n_s, sigma8=sigma8, A_s=A_s,
                           Omega_k=Omega_k, Omega_g=Omega_g,
                           Neff=Neff, m_nu=m_nu, m_nu_type=m_nu_type,
-                          w0=w0, wa=wa, T_CMB=T_CMB)
+                          w0=w0, wa=wa, T_CMB=T_CMB,
+                          transfer_function=transfer_function,
+                          matter_power_spectrum=matter_power_spectrum)
 
         # Parse arrays
         has_bg = background is not None
