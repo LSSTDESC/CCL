@@ -36,7 +36,7 @@ def nonlin_matter_power(cosmo, k, a):
     """
     cosmo.compute_nonlin_power()
     if cosmo._pk_nl['delta_matter_x_delta_matter'] is None:
-        raise CCLError("Linear power spectrum is None!")
+        raise CCLError("Non-linear power spectrum is None!")
     return cosmo._pk_nl['delta_matter_x_delta_matter'].eval(k, a,
                                                             cosmo)
 

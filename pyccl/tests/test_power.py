@@ -88,6 +88,12 @@ def test_linear_power_smoke(k):
     assert np.shape(pk) == np.shape(k)
 
 
+def test_linear_power_raises():
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=None)
+    with pytest.raises(ccl.CCLError):
+        ccl.linear_matter_power(cosmo, 1., 1.)
+
+
 @pytest.mark.parametrize('k', [
     1,
     1.0,
