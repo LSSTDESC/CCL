@@ -188,3 +188,48 @@ def test_pk2d_cls():
     psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
     cells = ccl.angular_cl(cosmo, lens1, lens1, ells, p_of_k_a=psp)
     assert all_finite(cells)
+
+
+def test_pk2d_parsing():
+    a_arr = np.linspace(0.1, 1, 100)
+    k_arr = np.geomspace(1E-4, 1E3, 1000)
+    pk_arr = a_arr[:, None] * ((k_arr/0.01)/(1+(k_arr/0.01)**3))[None, :]
+
+    psp = ccl.Pk2D(a_arr=a_arr, lk_arr=np.log(k_arr),
+                   pk_arr=np.log(pk_arr))
+
+    cosmo = ccl.Cosmology.calculator(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+        pk_nonlin={'a': a_arr, 'k': k_arr,
+                   'delta_matter_x_delta_matter': pk_arr,
+                   'a_x_b': pk_arr})
+    z = np.linspace(0., 1., 200)
+    n = np.exp(-((z-0.5)/0.1)**2)
+    lens1 = ccl.WeakLensingTracer(cosmo, (z, n))
+    ells = np.linspace(2, 100, 10)
+
+    cls1 = ccl.angular_cl(cosmo, lens1, lens1, ells,
+                          p_of_k_a=None)
+    cls2 = ccl.angular_cl(cosmo, lens1, lens1, ells,
+                          p_of_k_a='delta_matter_x_delta_matter')
+    cls3 = ccl.angular_cl(cosmo, lens1, lens1, ells,
+                          p_of_k_a='a_x_b')
+    cls4 = ccl.angular_cl(cosmo, lens1, lens1, ells,
+                          p_of_k_a=psp)
+    assert all_finite(cls1)
+    assert all_finite(cls2)
+    assert all_finite(cls3)
+    assert all_finite(cls4)
+    assert np.all(np.fabs(cls2/cls1-1) < 1E-10)
+    assert np.all(np.fabs(cls3/cls1-1) < 1E-10)
+    assert np.all(np.fabs(cls4/cls1-1) < 1E-10)
+
+    # Wrong name
+    with pytest.raises(KeyError):
+        ccl.angular_cl(cosmo, lens1, lens1, ells,
+                       p_of_k_a='a_x_c')
+
+    # Wrong type
+    with pytest.raises(ValueError):
+        ccl.angular_cl(cosmo, lens1, lens1, ells,
+                       p_of_k_a=3)
