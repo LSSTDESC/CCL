@@ -189,10 +189,6 @@ class Cosmology(object):
         self._has_pk_nl = False
         self._pk_nl = {}
 
-        # This will change to True once the "_set_nonlin_power_from_arrays"
-        # is called.
-        self._nonlinear_power_on_input = False
-
     @classmethod
     def calculator(
             Cosmology, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -385,7 +381,7 @@ class Cosmology(object):
         # NOTE: we use the C yaml dump here so that the parameters
         # dumped by this object are compatible with the C yaml load function.
         status = 0
-        lib.parameters_write_yaml(self._params, filename, status)
+        status = lib.parameters_write_yaml(self._params, filename, status)
 
         # Check status
         if status != 0:
@@ -1080,47 +1076,6 @@ class Cosmology(object):
 
         # Return status information
         return "status(%s): %s" % (status, msg)
-
-    def _set_nonlin_power_from_arrays(self, a_array=None, k_array=None,
-                                      pk_array=None):
-        """
-        This function initializes the arrays used for parsing
-        a non-linear power spectrum from input. Call this function
-        to have the power spectrum be read from input and not
-        computed by CCL.
-
-        a_array (array): an array holding values of the scale factor
-        k_array (array): an array holding values of the wavenumber
-           in units of Mpc^-1).
-        pk_array (array): a 2D array containing the values of the power
-           spectrum at the values of the scale factor and the wavenumber
-           held by `a_array` and `k_array`. The shape of this array must be
-           `[na,nk]`, where `na` is the size of `a_array` and `nk` is the
-           size of `k_array`. This array can be provided in a flattened
-           form as long as the total size matches `nk*na`.
-           Note that, if you pass your own Pk array, you
-           are responsible of making sure that it is sufficiently well
-           sampled (i.e. the resolution of `a_array` and `k_array` is high
-           enough to sample the main features in the power spectrum).
-           For reference, CCL will use bicubic interpolation to evaluate
-           the power spectrum at any intermediate point in k and a.
-        """
-        if self.has_nonlin_power:
-            raise ValueError("Non-linear power spectrum has been initialized"
-                             "and cannot be reset.")
-        else:
-            if ((a_array is None) or (k_array is None)
-                    or (pk_array is None)):
-                raise ValueError("One or more input arrays for a, k,"
-                                 " or Pk are not parsed.")
-            self.cosmo.config.matter_power_spectrum_method \
-                = lib.pknl_from_input
-            self._config_init_kwargs['matter_power_spectrum']\
-                = 'pknl_from_input'
-            self._nonlinear_power_on_input = True
-            self.a_array_pknl = a_array
-            self.k_array_pknl = k_array
-            self.pk_array_pknl = pk_array
 
 
 class CosmologyVanillaLCDM(Cosmology):
