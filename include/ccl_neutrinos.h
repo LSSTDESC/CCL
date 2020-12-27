@@ -32,15 +32,6 @@ typedef enum ccl_neutrino_mass_splits{
 } ccl_neutrino_mass_splits;
 
 /**
- * Spline for the phasespace integral required for getting the fractional energy density of massive neutrinos.
- * Returns a gsl spline for the phase space integral needed for massive neutrinos.
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * For specific cases see documentation for ccl_error.c
- * @return spl, the gsl spline for the phasespace integral required for massive neutrino calculations.
- */
-gsl_spline* calculate_nu_phasespace_spline(int *status);
-
-/**
  * Returns density of one neutrino species at a scale factor a.
  * Users are encouraged to access this quantity via the function ccl_omega_x.
  * @param a Scale factor
@@ -51,7 +42,6 @@ gsl_spline* calculate_nu_phasespace_spline(int *status);
  * For specific cases see documentation for ccl_error.c
  * @return OmNuh2 Fractional energy density of neutrions with mass mnu, multiplied by h squared.
  */
-
 double ccl_Omeganuh2(double a, int N_nu_mass, double* mnu, double T_CMB, int * status);
 
 /**

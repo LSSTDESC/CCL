@@ -109,7 +109,7 @@ void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_tracers.c: ccl_get_number_counts_kernel: "
+      "ccl_tracers.c: ccl_get_number_counts_kernel(): "
       "error initializing spline\n");
   }
 
@@ -245,7 +245,7 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_tracers.c: get_lensing_mag_kernel: error initializing spline\n");
+      "ccl_tracers.c: get_lensing_mag_kernel(): error initializing spline\n");
   }
 
   // Get N(z) normalization
@@ -267,7 +267,7 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
         *status = CCL_ERROR_SPLINE;
         ccl_cosmology_set_status_message(
           cosmo,
-          "ccl_tracers.c: get_lensing_mag_kernel: error initializing spline\n");
+          "ccl_tracers.c: get_lensing_mag_kernel(): error initializing spline\n");
       }
     }
   }
@@ -376,13 +376,13 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
     *status = CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_tracers.c: ccl_cl_tracer_new: der_angles must be between 0 and 2\n");
+      "ccl_tracers.c: ccl_cl_tracer_new(): der_angles must be between 0 and 2\n");
   }
   if ((der_bessel < -1) || (der_bessel > 2)) {
     *status = CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_tracers.c: ccl_cl_tracer_new: der_bessel must be between -1 and 2\n");
+      "ccl_tracers.c: ccl_cl_tracer_new(): der_bessel must be between -1 and 2\n");
   }
 
   if (*status == 0) {

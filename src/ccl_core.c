@@ -287,7 +287,9 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
 
   if(cosmo->spline_params.A_SPLINE_MAX !=1.) {
     cosmo->status = CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_core.c: A_SPLINE_MAX needs to be 1.\n");
+    ccl_cosmology_set_status_message(cosmo,
+                                     "ccl_core.c: ccl_cosmology_create(): "
+                                     "A_SPLINE_MAX needs to be 1.\n");
   }
 
   return cosmo;
@@ -377,8 +379,7 @@ A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
 
  */
-ccl_parameters ccl_parameters_create(
-                     double Omega_c, double Omega_b, double Omega_k,
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab,
@@ -387,7 +388,7 @@ ccl_parameters ccl_parameters_create(
 				     double *dfarr_mgrowth, int *status)
 {
   #ifndef USE_GSL_ERROR
-    gsl_set_error_handler_off ();
+    gsl_set_error_handler_off();
   #endif
 
   ccl_parameters params;
@@ -577,7 +578,9 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
   if (!f) {
     *status = CCL_ERROR_FILE_READ;
     ccl_parameters bad_params;
-    ccl_raise_warning(CCL_ERROR_FILE_READ, "ccl_core.c: Failed to read parameters from file.");
+    ccl_raise_warning(CCL_ERROR_FILE_READ,
+                      "ccl_core.c: ccl_parameters_read_yaml(): "
+                      "Failed to read parameters from file.");
 
     return bad_params;
   }
@@ -675,7 +678,8 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
   if (*status) {
     ccl_raise_warning(
       *status,
-      "ccl_core.c: Structure of YAML file incorrect: %s",
+      "ccl_core.c: ccl_parameters_read_yaml():"
+      "Structure of YAML file incorrect: %s",
       filename);
   }
 

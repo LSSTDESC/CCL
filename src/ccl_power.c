@@ -46,7 +46,8 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
   // Exit if sigma8 wasn't specified
   if (isnan(cosmo->params.sigma8)) {
     *status = CCL_ERROR_INCONSISTENT;
-    ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_compute_linpower_analytic(): "
+    ccl_cosmology_set_status_message(cosmo,
+             "ccl_power.c: ccl_compute_linpower_analytic(): "
              "sigma8 not set, required for analytic power spectra\n");
     return NULL;
   }
@@ -57,14 +58,16 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
   x=ccl_log_spacing(kmin, kmax, nk);
   if(x==NULL) {
     *status = CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_compute_linpower_analytic(): "
+    ccl_cosmology_set_status_message(cosmo,
+             "ccl_power.c: ccl_compute_linpower_analytic(): "
              "memory allocation\n");
   }
   if(*status==0) {
     y=malloc(sizeof(double)*nk);
     if(y==NULL) {
       *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_compute_linpower_analytic(): "
+      ccl_cosmology_set_status_message(cosmo,
+               "ccl_power.c: ccl_compute_linpower_analytic(): "
                "memory allocation\n");
     }
   }
@@ -74,7 +77,8 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
        cosmo->spline_params.A_SPLINE_NA_PK);
     if(z==NULL) {
       *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_compute_linpower_analytic(): "
+      ccl_cosmology_set_status_message(cosmo,
+               "ccl_power.c: ccl_compute_linpower_analytic(): "
                "memory allocation\n");
     }
   }
@@ -83,7 +87,8 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
     y2d = malloc(nk * na * sizeof(double));
     if(y2d==NULL) {
       *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo,"ccl_power.c: ccl_compute_linpower_analytic(): "
+      ccl_cosmology_set_status_message(cosmo,
+               "ccl_power.c: ccl_compute_linpower_analytic(): "
                "memory allocation\n");
     }
   }
@@ -173,7 +178,8 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
   if(*status==0) {
     if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
       *status=CCL_ERROR_INCONSISTENT;
-      ccl_cosmology_set_status_message(cosmo, "ccl_power.c: ccl_compute_power_emu(): "
+      ccl_cosmology_set_status_message(cosmo,
+               "ccl_power.c: ccl_compute_power_emu(): "
                "h is outside allowed range\n");
     }
   }
@@ -388,8 +394,7 @@ ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
     y2d = malloc(nk * na * sizeof(double));
     if (y2d == NULL) {
       *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(
-        cosmo,
+      ccl_cosmology_set_status_message(cosmo,
         "ccl_power.c: ccl_halofit_it(): memory allocation\n");
     }
   }

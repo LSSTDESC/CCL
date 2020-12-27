@@ -164,7 +164,7 @@ static double get_w0eff(double a, struct hf_model_match_data data) {
 
     if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
       ccl_raise_gsl_warning(
-        gsl_status, "ccl_halofit.c: get_w0eff: error in root finding for the halofit matching cosmology\n");
+        gsl_status, "ccl_halofit.c: get_w0eff(): error in root finding for the halofit matching cosmology\n");
       *(data.status) |= gsl_status;
     }
   }
@@ -304,7 +304,7 @@ static double get_rsigma(double a, struct hf_int_data data) {
 
     if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
       ccl_raise_gsl_warning(
-        gsl_status, "ccl_halofit.c: get_rsigma: error in root finding for the halofit non-linear scale\n");
+        gsl_status, "ccl_halofit.c: get_rsigma(): error in root finding for the halofit non-linear scale\n");
       *(data.status) |= gsl_status;
     }
   }

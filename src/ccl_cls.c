@@ -195,7 +195,7 @@ static void integ_cls_limber_qag_quad(ccl_cosmology *cosmo,
   // If so, try another integration function, more robust but potentially slower
   if (gslstatus == GSL_EROUND) {
     ccl_raise_gsl_warning(gslstatus,
-			  "ccl_cls.c: ccl_angular_cl_limber(): "
+			  "ccl_cls.c: integ_cls_limber_qag_quad(): "
 			  "Default GSL integration failure, attempting backup method.");
     w_cquad = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
     if (w_cquad == NULL)
@@ -226,7 +226,7 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
     *status = CCL_ERROR_DISTANCES_INIT;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_cls.c: ccl_angular_cl_limber(): distance splines have not been precomputed!");
+      "ccl_cls.c: ccl_angular_cls_limber(): distance splines have not been precomputed!");
     return;
   }
 
@@ -291,7 +291,7 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
           cl_out[lind] = result / (l+0.5);
         }
         else {
-          ccl_raise_gsl_warning(local_status, "ccl_cls.c: ccl_angular_cl_limber():");
+          ccl_raise_gsl_warning(local_status, "ccl_cls.c: ccl_angular_cls_limber():");
           cl_out[lind] = NAN;
           local_status = CCL_ERROR_INTEG;
         }

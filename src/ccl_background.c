@@ -786,7 +786,6 @@ INPUT: cosmology
 TASK: if not already there, make a table of growth function and growth rate
       normalize growth to input parameter growth0
 */
-// MUSIG
 void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
 {
   if (cosmo->computed_growth)
@@ -1303,7 +1302,6 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
   }
 }
 
-//
 void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int * status)
 {
   int _status;
@@ -1402,7 +1400,7 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
       *status = CCL_ERROR_GROWTH_INIT;
       ccl_cosmology_set_status_message(
         cosmo,
-        "ccl_background.c: ccl_growth_rate(): growth factor splines have not been precomputed!");
+        "ccl_background.c: ccl_growth_rate(): growth rate splines have not been precomputed!");
     }
     if(*status != CCL_ERROR_NOT_IMPLEMENTED) {
       double g;
