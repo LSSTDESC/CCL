@@ -422,7 +422,7 @@ void ccl_rescale_linpower(ccl_cosmology* cosmo, ccl_f2d_t *psp,
                           int *status)
 {
   if(rescale_mg || rescale_norm)
-    ccl_cosmology_spline_linpower_musigma(cosmo, psp, rescale_mg, status);
+    ccl_rescale_musigma_s8(cosmo, psp, rescale_mg, status);
 }
 
 // Params for sigma(R) integrand

@@ -17,8 +17,8 @@
  ^ @param psp The linear power spectrum to spline.
  * @param status, integer indicating the status
  */
-void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
-                                           int mg_rescale, int* status) {
+void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
+                            int mg_rescale, int* status) {
 
   if (*status == 0) {
     // If scale-independent mu / Sigma modified gravity is in use
@@ -54,7 +54,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         *status = CCL_ERROR_PARAMETERS;
         strcpy(
                cosmo->status_message,
-               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+               "ccl_power.c: ccl_rescale_musigma_s8(): "
                "neither A_s nor sigma8 defined.\n");
       }
 
@@ -72,7 +72,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
           *status = CCL_ERROR_PARAMETERS;
           strcpy(
             cosmo->status_message,
-            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): could not make MG params.\n");
+            "ccl_power.c: ccl_rescale_musigma_s8(): could not make MG params.\n");
         }
       }
 
@@ -89,7 +89,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         else {
           *status = CCL_ERROR_SPLINE;
           strcpy(cosmo->status_message,
-                 "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                 "ccl_power.c: ccl_rescale_musigma_s8(): "
                  "input pk2d has no splines.\n");
         }
       }
@@ -103,7 +103,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
           *status = CCL_ERROR_MEMORY;
           ccl_cosmology_set_status_message(
             cosmo,
-            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
+            "ccl_power.c: ccl_rescale_musigma_s8(): memory allocation\n");
         }
       }
 
@@ -114,7 +114,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
           *status = CCL_ERROR_PARAMETERS;
           strcpy(
             cosmo->status_message,
-            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): could not init GR growth.\n");
+            "ccl_power.c: ccl_rescale_musigma_s8(): could not init GR growth.\n");
         }
       }
 
@@ -128,7 +128,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
           *status = CCL_ERROR_PARAMETERS;
           strcpy(
             cosmo->status_message,
-            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): could not make MG and GR growth.\n");
+            "ccl_power.c: ccl_rescale_musigma_s8(): could not make MG and GR growth.\n");
         }
       }
 
@@ -166,7 +166,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
             *status == CCL_ERROR_MEMORY;
             ccl_cosmology_set_status_message(
                                              cosmo,
-            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
+            "ccl_power.c: ccl_rescale_musigma_s8(): memory allocation\n");
           }
           if(*status==0) {
             int spstatus = gsl_spline_init(fa, psp->fa->x,
@@ -174,7 +174,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
             if(spstatus) {
               *status == CCL_ERROR_MEMORY;
               ccl_cosmology_set_status_message(cosmo,
-                                               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                               "ccl_power.c: ccl_rescale_musigma_s8(): "
                                                "Error initializing spline\n");
             }
           }
@@ -190,7 +190,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
           if(fka == NULL) {
             *status == CCL_ERROR_MEMORY;
             ccl_cosmology_set_status_message(cosmo,
-                                             "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                             "ccl_power.c: ccl_rescale_musigma_s8(): "
                                              "memory allocation\n");
           }
           if(*status==0) {
@@ -201,7 +201,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
             if(spstatus) {
               *status == CCL_ERROR_MEMORY;
               ccl_cosmology_set_status_message(cosmo,
-                                               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                               "ccl_power.c: ccl_rescale_musigma_s8(): "
                                                "Error initializing spline\n");
             }
           }
@@ -264,7 +264,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
             *status == CCL_ERROR_MEMORY;
             ccl_cosmology_set_status_message(
                                              cosmo,
-            "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): memory allocation\n");
+            "ccl_power.c: ccl_rescale_musigma_s8(): memory allocation\n");
           }
           if(*status==0) {
             int spstatus = gsl_spline_init(fa, psp->fa->x,
@@ -273,7 +273,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
               *status == CCL_ERROR_MEMORY;
               ccl_cosmology_set_status_message(
                                                cosmo,
-                                               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                               "ccl_power.c: ccl_rescale_musigma_s8(): "
                                                "Error initializing spline\n");
             }
           }
@@ -290,7 +290,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
             *status == CCL_ERROR_MEMORY;
             ccl_cosmology_set_status_message(
                                              cosmo,
-                                             "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                             "ccl_power.c: ccl_rescale_musigma_s8(): "
                                              "memory allocation\n");
           }
           if(*status==0) {
@@ -302,7 +302,7 @@ void ccl_cosmology_spline_linpower_musigma(ccl_cosmology* cosmo, ccl_f2d_t *psp,
               *status == CCL_ERROR_MEMORY;
               ccl_cosmology_set_status_message(
                                                cosmo,
-                                               "ccl_power.c: ccl_cosmology_spline_linpower_musigma(): "
+                                               "ccl_power.c: ccl_rescale_musigma_s8(): "
                                                "Error initializing spline\n");
             }
           }
