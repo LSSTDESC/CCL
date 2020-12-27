@@ -265,8 +265,7 @@ INPUT: tracer 1, tracer 2, i_bessel, theta array, n_theta, L_max, output Pl_thet
  */
 static void ccl_compute_legendre_polynomial(int corr_type,double theta,int ell_max,double *Pl_theta)
 {
-  int i,j;
-  double k=0;
+  int j;
   double cth=cos(theta*M_PI/180);
 
   //Initialize Pl_theta
