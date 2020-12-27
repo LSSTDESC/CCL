@@ -141,7 +141,7 @@ class Pk2D(object):
             status = ret
         else:
             pk2d.psp, status = ret
-        check(status)
+        check(status, cosmo)
         pk2d.has_psp = True
         return pk2d
 

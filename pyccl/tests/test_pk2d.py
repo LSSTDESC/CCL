@@ -105,6 +105,19 @@ def test_pk2d_from_model_emu():
         assert maxdiff < 1E-10
 
 
+def test_pk2d_halofit_raises():
+    cosmo = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
+    lkarr = -4.+6*np.arange(100)/99.
+    aarr = 0.05+0.95*np.arange(100)/99.
+    pkarr = np.zeros([len(aarr), len(lkarr)])
+    psp = ccl.Pk2D(a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr)
+    # This will make the splines fail
+    psp.psp.amin = psp.psp.amax
+    assert_raises(ccl.CCLError, ccl.Pk2D.halofit_it,
+                  cosmo, psp)
+
+
 @pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu'])
 def test_pk2d_from_model_fails(model):
     cosmo = ccl.Cosmology(
@@ -112,6 +125,12 @@ def test_pk2d_from_model_fails(model):
         transfer_function='boltzmann_class')
     assert_raises(ccl.CCLError, ccl.Pk2D.pk_from_model,
                   cosmo, model=model)
+
+
+def test_pk2d_from_model_raises():
+    cosmo = ccl.CosmologyVanillaLCDM()
+    assert_raises(ValueError, ccl.Pk2D.pk_from_model,
+                  cosmo, model='bbkss')
 
 
 def test_pk2d_function():
