@@ -335,13 +335,6 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 				     double mu_0, double sigma_0, int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status);
 
-/* ------- ROUTINE: ccl_parameters_create_flat_lcdm --------
-INPUT: some cosmological parameters needed to create a flat LCDM model
-TASK: call ccl_parameters_create to produce an LCDM model
-*/
-ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h,
-double norm_pk, double n_s, int *status);
-
 
 /**
  * Free a parameters struct

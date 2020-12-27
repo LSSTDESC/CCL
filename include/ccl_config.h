@@ -104,7 +104,6 @@ typedef struct ccl_configuration {
   mass_function_t          mass_function_method;
   halo_concentration_t     halo_concentration_method;
   emulator_neutrinos_t     emulator_neutrinos_method;
-  // TODO: Halo definition
 } ccl_configuration;
 
 /**

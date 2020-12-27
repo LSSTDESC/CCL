@@ -470,30 +470,6 @@ ccl_parameters ccl_parameters_create(
 }
 
 
-/* ------- ROUTINE: ccl_parameters_create_flat_lcdm --------
-INPUT: some cosmological parameters needed to create a flat LCDM model
-TASK: call ccl_parameters_create to produce an LCDM model
-*/
-ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h,
-                                               double norm_pk, double n_s, int *status)
-{
-  double Omega_k = 0.0;
-  double Neff = 3.046;
-  double w0 = -1.0;
-  double wa = 0.0;
-  double *mnu;
-  double mnuval = 0.;  // a pointer to the variable is not kept past the lifetime of this function
-  mnu = &mnuval;
-  double mu_0 = 0.;
-  double sigma_0 = 0.;
-
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, 0, w0, wa, h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1, NULL, NULL, status);
-  return params;
-
-}
-
-
 /**
  * Write a cosmology parameters object to a file in yaml format.
  * @param cosmo Cosmological parameters
