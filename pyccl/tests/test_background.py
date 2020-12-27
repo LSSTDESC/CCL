@@ -24,7 +24,7 @@ input_a_array_descending = np.linspace(1.0, 0.1, 100)
 input_a_array = np.linspace(0.1, 1, 100)
 input_chi = ccl.background.comoving_radial_distance(COSMO, input_a_array)
 input_hoh0 = ccl.background.h_over_h0(COSMO, input_a_array)
-input_growth = ccl.background.growth_factor(COSMO, input_a_array)
+input_growth = ccl.background.growth_factor_unnorm(COSMO, input_a_array)
 input_fgrowth = ccl.background.growth_rate(COSMO, input_a_array)
 
 
@@ -128,7 +128,7 @@ def test_input_arrays():
     a_arr = np.linspace(0.1, 1, 100)
     chi_from_ccl = ccl.background.comoving_radial_distance(cosmo, a_arr)
     hoh0_from_ccl = ccl.background.h_over_h0(cosmo, a_arr)
-    growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
+    growth_from_ccl = ccl.background.growth_factor_unnorm(cosmo, a_arr)
     fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
 
     background = {'a': a_arr,
