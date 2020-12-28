@@ -119,7 +119,7 @@ static double get_w0eff(double a, struct hf_model_match_data data) {
   if(*(data.status) != 0) {
     ccl_cosmology_set_status_message(
       data.cosmo,
-      "ccl_halofit.c: ccl_halofit_struct_new(): "
+      "ccl_halofit.c: get_w0eff(): "
       "could not compute chi_drag for cosmology\n");
     return NAN;
   }

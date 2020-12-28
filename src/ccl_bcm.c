@@ -110,6 +110,8 @@ void ccl_bcm_correct(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *status)
       psp->is_k_constant = 0;
       psp->is_a_constant = 0;
     }
+    else
+      gsl_spline2d_free(fka);
   }
 
   free(y2d);

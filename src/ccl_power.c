@@ -139,6 +139,10 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
                             ccl_f2d_3,status);
   }
 
+  free(x);
+  free(y);
+  free(z);
+  free(y2d);
   return psp_out;
 }
 
