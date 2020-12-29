@@ -363,7 +363,7 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
 }
 
 
-ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
+ccl_f2d_t *ccl_apply_halofit(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
 {
   ccl_f2d_t *psp_out=NULL;
   size_t nk, na;
@@ -399,7 +399,7 @@ ccl_f2d_t *ccl_halofit_it(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
     if (y2d == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,
-        "ccl_power.c: ccl_halofit_it(): memory allocation\n");
+        "ccl_power.c: ccl_apply_halofit(): memory allocation\n");
     }
   }
 

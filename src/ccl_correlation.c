@@ -537,7 +537,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, ccl_f2d_t *psp,
   k_arr = ccl_log_spacing(cosmo->spline_params.K_MIN, cosmo->spline_params.K_MAX, N_ARR);
   if (k_arr == NULL) {
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole(): ran out of memory\n");
     return;
   }
@@ -546,7 +546,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, ccl_f2d_t *psp,
   if (pk_arr == NULL) {
     free(k_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole(): ran out of memory\n");
     return;
   }
@@ -559,7 +559,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(k_arr);
     free(pk_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole(): ran out of memory\n");
     return;
   }
@@ -569,7 +569,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(pk_arr);
     free(s_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole(): ran out of memory\n");
     return;
   }
@@ -580,7 +580,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(s_arr);
     free(xi_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole(): ran out of memory\n");
     return;
   }
@@ -601,7 +601,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     ccl_fftlog_ComputeXi3D(4, 0, 1, N_ARR, k_arr, &pk_arr, s_arr, &xi_arr0, status);
     for (i = 0; i < N_ARR; i++) xi_arr[i] = 8. / 35 * beta * beta * xi_arr0[i];
   } else {
-    strcpy(cosmo->status_message, "unavailable value of l\n");
+    ccl_cosmology_set_status_message(cosmo, "unavailable value of l\n");
     return;
   }
 
@@ -616,7 +616,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(xi_arr);
     free(xi_arr0);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole(): ran out of memory\n");
   }
   for (i = 0; i < n_s; i++) xi[i] = ccl_f1d_t_eval(xi_spl,s[i]);
@@ -649,7 +649,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
   k_arr = ccl_log_spacing(cosmo->spline_params.K_MIN, cosmo->spline_params.K_MAX, N_ARR);
   if (k_arr == NULL) {
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -659,7 +659,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
   if (pk_arr == NULL) {
     free(k_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -673,7 +673,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(k_arr);
     free(pk_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -684,7 +684,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(pk_arr);
     free(s_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -696,7 +696,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(s_arr);
     free(xi_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -709,7 +709,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(xi_arr);
     free(xi_arr0);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -723,7 +723,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(xi_arr0);
     free(xi_arr2);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -757,7 +757,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(xi_arr2);
     free(xi_arr4);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -777,7 +777,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     ccl_f1d_t_free(cosmo->data.rsd_splines[0]);
     cosmo->data.rsd_splines[0] = NULL;
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -799,7 +799,7 @@ void ccl_correlation_multipole_spline(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     ccl_f1d_t_free(cosmo->data.rsd_splines[1]);
     cosmo->data.rsd_splines[1] = NULL;
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_multipole_spline(): "
            "ran out of memory\n");
     return;
@@ -840,7 +840,7 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     xi_arr0 = malloc(sizeof(double) * n_s);
     if (xi_arr0 == NULL) {
       *status = CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,
+      ccl_cosmology_set_status_message(cosmo,
              "ccl_correlation.c: ccl_correlation_3dRsd(): ran out of memory\n");
       return;
     }
@@ -848,7 +848,7 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     if (xi_arr2 == NULL) {
       free(xi_arr0);
       *status = CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,
+      ccl_cosmology_set_status_message(cosmo,
              "ccl_correlation.c: ccl_correlation_3dRsd(): ran out of memory\n");
       return;
     }
@@ -857,7 +857,7 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, ccl_f2d_t *psp,
       free(xi_arr0);
       free(xi_arr2);
       *status = CCL_ERROR_MEMORY;
-      strcpy(cosmo->status_message,
+      ccl_cosmology_set_status_message(cosmo,
              "ccl_correlation.c: ccl_correlation_3dRsd(): ran out of memory\n");
       return;
     }
@@ -931,7 +931,7 @@ void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp,
   mu_arr = malloc(sizeof(double) * n_sig);
   if (mu_arr == NULL) {
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_pi_sigma(): ran out of memory\n");
     return;
   }
@@ -940,7 +940,7 @@ void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp,
   if (s_arr == NULL) {
     free(mu_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_pi_sigma(): ran out of memory\n");
     return;
   }
@@ -950,7 +950,7 @@ void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     free(mu_arr);
     free(s_arr);
     *status = CCL_ERROR_MEMORY;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_correlation.c: ccl_correlation_pi_sigma(): ran out of memory\n");
     return;
   }

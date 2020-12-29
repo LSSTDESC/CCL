@@ -724,6 +724,7 @@ void ccl_cosmology_growth_from_input(ccl_cosmology* cosmo, int na, double a[],
   double *growth_normed = NULL;
   gsl_spline * growth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
   gsl_spline * fgrowth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+  //The last element corresponds to a=1 (which is checked for in python).
   double growth0 = growth_arr[na-1];
 
   if (growth == NULL || fgrowth == NULL) {

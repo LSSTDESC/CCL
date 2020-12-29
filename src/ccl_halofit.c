@@ -352,7 +352,7 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
   }
   else {
     *status = CCL_ERROR_SPLINE;
-    strcpy(cosmo->status_message,
+    ccl_cosmology_set_status_message(cosmo,
            "ccl_halofit.c: ccl_halofit_struct_new(): "
            "input pk2d has no splines.\n");
   }

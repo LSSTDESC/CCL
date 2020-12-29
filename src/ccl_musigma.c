@@ -52,8 +52,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
       }
       else {
         *status = CCL_ERROR_PARAMETERS;
-        strcpy(
-               cosmo->status_message,
+        ccl_cosmology_set_status_message(cosmo,
                "ccl_musigma.c: ccl_rescale_musigma_s8(): "
                "neither A_s nor sigma8 defined.\n");
       }
@@ -70,8 +69,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
 
         if (*status) {
           *status = CCL_ERROR_PARAMETERS;
-          strcpy(
-            cosmo->status_message,
+          ccl_cosmology_set_status_message(cosmo,
             "ccl_musigma.c: ccl_rescale_musigma_s8(): could not make MG params.\n");
         }
       }
@@ -88,7 +86,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         }
         else {
           *status = CCL_ERROR_SPLINE;
-          strcpy(cosmo->status_message,
+          ccl_cosmology_set_status_message(cosmo,
                  "ccl_musigma.c: ccl_rescale_musigma_s8(): "
                  "input pk2d has no splines.\n");
         }
@@ -112,8 +110,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
 
         if (*status) {
           *status = CCL_ERROR_PARAMETERS;
-          strcpy(
-            cosmo->status_message,
+          ccl_cosmology_set_status_message(cosmo,
             "ccl_musigma.c: ccl_rescale_musigma_s8(): could not init GR growth.\n");
         }
       }
@@ -126,8 +123,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
 
         if (*status) {
           *status = CCL_ERROR_PARAMETERS;
-          strcpy(
-            cosmo->status_message,
+          ccl_cosmology_set_status_message(cosmo,
             "ccl_musigma.c: ccl_rescale_musigma_s8(): could not make MG and GR growth.\n");
         }
       }

@@ -285,7 +285,7 @@ void ccl_integ_spline(int ny, int nx,double *x,double **y,
 
   if((b>x[nx-1]) || (a<x[0])) {
     ccl_raise_warning(CCL_ERROR_SPLINE,
-		      "ccl_utils.c: ccl_integ_spline(): "
+                      "ccl_utils.c: ccl_integ_spline(): "
                       "integration limits beyond interpolated range\n");
     *status = CCL_ERROR_SPLINE;
     return;

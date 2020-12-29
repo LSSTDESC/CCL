@@ -143,7 +143,7 @@ class Pk2D(object):
         return pk2d
 
     @classmethod
-    def halofit_it(Pk2D, cosmo, pk_linear):
+    def apply_halofit(Pk2D, cosmo, pk_linear):
         """Pk2D constructor that applies the "HALOFIT" transformation of
         Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
         power spectrum in `pk_linear`.
@@ -155,7 +155,7 @@ class Pk2D(object):
         """
         pk2d = Pk2D(empty=True)
         status = 0
-        ret = lib.halofit_it(cosmo.cosmo, pk_linear.psp, status)
+        ret = lib.apply_halofit(cosmo.cosmo, pk_linear.psp, status)
         if np.ndim(ret) == 0:
             status = ret
         else:

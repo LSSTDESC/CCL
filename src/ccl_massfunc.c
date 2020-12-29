@@ -75,7 +75,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *stat
       (m[nm-1]>10E17)) {
     *status = CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(cosmo,
-                                     "ccl_massfunc.c: ccl_cosmology_compute_sigmas(): "
+                                     "ccl_massfunc.c: ccl_cosmology_compute_sigma(): "
                                      "Error creating linear spacing in m\n");
   }
 
@@ -89,7 +89,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *stat
     if (aa == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_massfunc.c: ccl_cosmology_compute_sigmas(): "
+                                       "ccl_massfunc.c: ccl_cosmology_compute_sigma(): "
                                        "Error creating scale factor array\n");
     }
   }
@@ -100,7 +100,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *stat
     if (y == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_massfunc.c: ccl_cosmology_compute_sigmas(): "
+                                       "ccl_massfunc.c: ccl_cosmology_compute_sigma(): "
                                        "memory allocation\n");
     }
   }
@@ -136,8 +136,8 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *stat
     if (lsM == NULL) {
       *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_massfunc.c: ccl_cosmology_compute_sigmas(): "
-                                       "memory allocation\n");
+                                       "ccl_massfunc.c: ccl_cosmology_compute_sigma(): "
+                                       "error allocating 2D spline\n");
     }
   }
 
@@ -146,7 +146,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *stat
     if (s2dstatus) {
       *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_massfunc.c: ccl_cosmology_compute_sigmas(): "
+                                       "ccl_massfunc.c: ccl_cosmology_compute_sigma(): "
                                        "error initializing spline\n");
     }
   }

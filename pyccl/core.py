@@ -30,7 +30,7 @@ matter_power_spectrum_types = {
     'halofit': lib.halofit,
     'linear': lib.linear,
     'emu': lib.emu,
-    'calculator': lib.pklin_from_input
+    'calculator': lib.pknl_from_input
 }
 
 baryons_power_spectrum_types = {
@@ -819,7 +819,7 @@ class Cosmology(object):
             if pkl is None:
                 raise CCLError("The linear power spectrum is a "
                                "necessary input for halofit")
-            pk = Pk2D.halofit_it(self, pkl)
+            pk = Pk2D.apply_halofit(self, pkl)
         elif mps == 'emu':
             pk = Pk2D.pk_from_model(self, model='emu')
         elif mps == 'linear':
@@ -1110,7 +1110,7 @@ class CosmologyCalculator(Cosmology):
                                   np.sort(a)):
                 raise ValueError("Input scale factor array is not "
                                  "monotonically increasing.")
-            # Check that the last element of a_array_grth is 1:
+            # Check that the last element of a is 1:
             if np.abs(a[-1]-1.0) > 1e-5:
                 raise ValueError("The last element of the input scale factor"
                                  "array must be 1.0.")
@@ -1157,7 +1157,7 @@ class CosmologyCalculator(Cosmology):
             # Set linear power spectrum as initialized
             self._has_pk_lin = True
 
-        # Linear power spectrum
+        # Non-linear power spectrum
         if has_pknl:
             if not isinstance(pk_nonlin, dict):
                 raise TypeError("`pk_nonlin` must be a dictionary")
@@ -1204,7 +1204,7 @@ class CosmologyCalculator(Cosmology):
             for n, pkl in self._pk_lin.items():
                 if (n in self._pk_nl) or (pkl is None):
                     continue
-                pk = Pk2D.halofit_it(self, pkl)
+                pk = Pk2D.apply_halofit(self, pkl)
                 self._pk_nl[n] = pk
             # Set linear power spectrum as initialized
             self._has_pk_nl = True
