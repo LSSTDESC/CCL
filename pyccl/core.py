@@ -871,7 +871,7 @@ class Cosmology(object):
         status = lib.cosmology_compute_sigma(self.cosmo, pk.psp, status)
         check(status, self)
 
-    def get_linear_power(self, name=None):
+    def get_linear_power(self, name='delta_matter_x_delta_matter'):
         """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
         the linear power spectrum with name `name`.
 
@@ -890,7 +890,7 @@ class Cosmology(object):
             raise KeyError("Unknown power spectrum %s." % name)
         return self._pk_lin[name]
 
-    def get_nonlin_power(self, name=None):
+    def get_nonlin_power(self, name='delta_matter_x_delta_matter'):
         """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
         the non-linear power spectrum with name `name`.
 
