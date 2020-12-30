@@ -32,7 +32,7 @@ def test_halomod_f2d_copy():
         ccl.CCLWarning,
         ccl.nonlin_matter_power, COSMO_HM, 1., 0.8)
     pk_new = pk2d.eval(1., 0.8, COSMO_HM)
-    psp_old = COSMO_HM._pk_nl['delta_matter_x_delta_matter'].psp
+    psp_old = COSMO_HM.get_nonlin_power().psp
     assert psp_new.lkmin == psp_old.lkmin
     assert psp_new.lkmax == psp_old.lkmax
     assert psp_new.amin == psp_old.amin

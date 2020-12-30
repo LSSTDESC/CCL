@@ -68,10 +68,12 @@ def test_pk2d_smoke():
 
 @pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu'])
 def test_pk2d_from_model(model):
+    cosmo_fixed = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function=model)
-    pk = ccl.Pk2D.pk_from_model(cosmo, model=model)
+    pk = ccl.Pk2D.pk_from_model(cosmo_fixed, model=model)
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
@@ -83,6 +85,17 @@ def test_pk2d_from_model(model):
 
 def test_pk2d_from_model_emu():
     pars = [0.3643, 0.071075, 0.55, 0.8333, 0.9167, -0.7667, 0.1944]
+    cosmo_fixed = ccl.Cosmology(Omega_c=pars[0],
+                                Omega_b=pars[1],
+                                h=pars[2],
+                                sigma8=pars[3],
+                                n_s=pars[4],
+                                w0=pars[5],
+                                wa=pars[6],
+                                Neff=3.04,
+                                Omega_g=0,
+                                Omega_k=0,
+                                transfer_function='bbks')
     cosmo = ccl.Cosmology(Omega_c=pars[0],
                           Omega_b=pars[1],
                           h=pars[2],
@@ -95,7 +108,7 @@ def test_pk2d_from_model_emu():
                           Omega_k=0,
                           transfer_function='bbks',
                           matter_power_spectrum='emu')
-    pk = ccl.Pk2D.pk_from_model(cosmo, model='emu')
+    pk = ccl.Pk2D.pk_from_model(cosmo_fixed, model='emu')
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)

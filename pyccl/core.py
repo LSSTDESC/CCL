@@ -871,6 +871,44 @@ class Cosmology(object):
         status = lib.cosmology_compute_sigma(self.cosmo, pk.psp, status)
         check(status, self)
 
+    def get_linear_power(self, name=None):
+        """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
+        the linear power spectrum with name `name`.
+
+        Args:
+            name (:obj:`str` or `None`): name of the power spectrum to
+                return. If `None`, `'delta_matter_x_delta_matter'` will
+                be used.
+
+        Returns:
+            :class:`~pyccl.pk2d.Pk2D` object containing the linear
+            power spectrum with name `name`.
+        """
+        if name is None:
+            name = 'delta_matter_x_delta_matter'
+        if name not in self._pk_lin:
+            raise KeyError("Unknown power spectrum %s." % name)
+        return self._pk_lin[name]
+
+    def get_nonlin_power(self, name=None):
+        """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
+        the non-linear power spectrum with name `name`.
+
+        Args:
+            name (:obj:`str` or `None`): name of the power spectrum to
+                return. If `None`, `'delta_matter_x_delta_matter'` will
+                be used.
+
+        Returns:
+            :class:`~pyccl.pk2d.Pk2D` object containing the non-linear
+            power spectrum with name `name`.
+        """
+        if name is None:
+            name = 'delta_matter_x_delta_matter'
+        if name not in self._pk_nl:
+            raise KeyError("Unknown power spectrum %s." % name)
+        return self._pk_nl[name]
+
     @property
     def has_distances(self):
         """Checks if the distances have been precomputed."""

@@ -230,22 +230,17 @@ def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
     if isinstance(p_of_k_a, Pk2D):
         psp = p_of_k_a.psp
     else:
-        if isinstance(p_of_k_a, str):
+        if (p_of_k_a is None) or isinstance(p_of_k_a, str):
             name = p_of_k_a
-        elif p_of_k_a is None:
-            name = 'delta_matter_x_delta_matter'
         else:
             raise ValueError("p_of_k_a must be a pyccl.Pk2D object, "
                              "a string, or None")
 
         if is_linear:
             cosmo.compute_linear_power()
-            pk = cosmo._pk_lin
+            pk = cosmo.get_linear_power(name)
         else:
             cosmo.compute_nonlin_power()
-            pk = cosmo._pk_nl
-
-        if name not in pk:
-            raise KeyError("Unknown power spectrum %s." % name)
-        psp = pk[name].psp
+            pk = cosmo.get_nonlin_power(name)
+        psp = pk.psp
     return psp
