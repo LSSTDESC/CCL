@@ -27,7 +27,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to project. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.

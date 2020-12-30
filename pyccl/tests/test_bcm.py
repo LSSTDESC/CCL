@@ -25,7 +25,7 @@ def test_bcm_correct_smoke():
     fka = ccl.bcm_model_fka(COSMO, k_arr, 0.5)
     pk_nobar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
     ccl.bcm_correct_pk2d(COSMO,
-                         COSMO._pk_nl['delta_matter_x_delta_matter'])
+                         COSMO._pk_nl['delta_matter:delta_matter'])
     pk_wbar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
     assert np.all(np.fabs(pk_wbar/(pk_nobar*fka)-1) < 1E-5)
 

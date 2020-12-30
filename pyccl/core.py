@@ -736,7 +736,7 @@ class Cosmology(object):
             check(status, self)
 
         # Assign
-        self._pk_lin['delta_matter_x_delta_matter'] = pk
+        self._pk_lin['delta_matter:delta_matter'] = pk
         if pk:
             self._has_pk_lin = True
 
@@ -823,7 +823,7 @@ class Cosmology(object):
                 "in the `halos` module.", category=CCLWarning)
             pk = self._get_halo_model_nonlin_power()
         elif mps == 'halofit':
-            pkl = self._pk_lin['delta_matter_x_delta_matter']
+            pkl = self._pk_lin['delta_matter:delta_matter']
             if pkl is None:
                 raise CCLError("The linear power spectrum is a "
                                "necessary input for halofit")
@@ -831,14 +831,14 @@ class Cosmology(object):
         elif mps == 'emu':
             pk = Pk2D.pk_from_model(self, model='emu')
         elif mps == 'linear':
-            pk = self._pk_lin['delta_matter_x_delta_matter']
+            pk = self._pk_lin['delta_matter:delta_matter']
 
         # Correct for baryons if required
         if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
             bcm_correct_pk2d(self, pk)
 
         # Assign
-        self._pk_nl['delta_matter_x_delta_matter'] = pk
+        self._pk_nl['delta_matter:delta_matter'] = pk
         if pk:
             self._has_pk_nl = True
 
@@ -864,20 +864,20 @@ class Cosmology(object):
                 category=CCLWarning)
 
         self.compute_linear_power()
-        pk = self._pk_lin['delta_matter_x_delta_matter']
+        pk = self._pk_lin['delta_matter:delta_matter']
         if pk is None:
             raise CCLError("Linear power spectrum can't be None")
         status = 0
         status = lib.cosmology_compute_sigma(self.cosmo, pk.psp, status)
         check(status, self)
 
-    def get_linear_power(self, name='delta_matter_x_delta_matter'):
+    def get_linear_power(self, name='delta_matter:delta_matter'):
         """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
         the linear power spectrum with name `name`.
 
         Args:
             name (:obj:`str` or `None`): name of the power spectrum to
-                return. If `None`, `'delta_matter_x_delta_matter'` will
+                return. If `None`, `'delta_matter:delta_matter'` will
                 be used.
 
         Returns:
@@ -885,18 +885,18 @@ class Cosmology(object):
             power spectrum with name `name`.
         """
         if name is None:
-            name = 'delta_matter_x_delta_matter'
+            name = 'delta_matter:delta_matter'
         if name not in self._pk_lin:
             raise KeyError("Unknown power spectrum %s." % name)
         return self._pk_lin[name]
 
-    def get_nonlin_power(self, name='delta_matter_x_delta_matter'):
+    def get_nonlin_power(self, name='delta_matter:delta_matter'):
         """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
         the non-linear power spectrum with name `name`.
 
         Args:
             name (:obj:`str` or `None`): name of the power spectrum to
-                return. If `None`, `'delta_matter_x_delta_matter'` will
+                return. If `None`, `'delta_matter:delta_matter'` will
                 be used.
 
         Returns:
@@ -904,7 +904,7 @@ class Cosmology(object):
             power spectrum with name `name`.
         """
         if name is None:
-            name = 'delta_matter_x_delta_matter'
+            name = 'delta_matter:delta_matter'
         if name not in self._pk_nl:
             raise KeyError("Unknown power spectrum %s." % name)
         return self._pk_nl[name]
@@ -1052,11 +1052,11 @@ class CosmologyCalculator(Cosmology):
             spectra. It must contain the following mandatory entries:
             `'a'`: an array of scale factor values. `'k'`: an array of
             comoving wavenumbers in units of inverse Mpc.
-            `'delta_matter_x_delta_matter'`: a 2D array of shape
+            `'delta_matter:delta_matter'`: a 2D array of shape
             `(n_a, n_k)`, where `n_a` and `n_k` are the lengths of
             `'a'` and `'k'` respectively, containing the linear matter
             power spectrum :math:`P(k,a)`. This dictionary may also
-            contain other entries with keys of the form `'q1_x_q2'`,
+            contain other entries with keys of the form `'q1:q2'`,
             containing other cross-power spectra between quantities
             `'q1'` and `'q2'`.
         pk_nonlin (:obj:`dict`): a dictionary containing non-linear
@@ -1064,20 +1064,20 @@ class CosmologyCalculator(Cosmology):
             entries: `'a'`: an array of scale factor values.
             `'k'`: an array of comoving wavenumbers in units of
             inverse Mpc. If `nonlinear_model` is `None`, it should also
-            contain `'delta_matter_x_delta_matter'`: a 2D array of
+            contain `'delta_matter:delta_matter'`: a 2D array of
             shape `(n_a, n_k)`, where `n_a` and `n_k` are the lengths
             of `'a'` and `'k'` respectively, containing the non-linear
             matter power spectrum :math:`P(k,a)`. This dictionary may
-            also contain other entries with keys of the form `'q1_x_q2'`,
+            also contain other entries with keys of the form `'q1:q2'`,
             containing other cross-power spectra between quantities
             `'q1'` and `'q2'`.
         nonlinear_model (:obj:`str`, :obj:`dict` or `None`): model to
             compute non-linear power spectra. If a string, the associated
             non-linear model will be applied to all entries in `pk_linear`
             which do not appear in `pk_nonlin`. If a dictionary, it should
-            contain entries of the form `'q1_x_q2': model`, where `model`
+            contain entries of the form `'q1:q2': model`, where `model`
             is a string designating the non-linear model to apply to the
-            `'q1_x_q2'` power spectrum, which must also be present in
+            `'q1:q2'` power spectrum, which must also be present in
             `pk_linear`. If `model` is `None`, this non-linear power
             spectrum will not be calculated. If `nonlinear_model` is
             `None`, no additional non-linear power spectra will be
@@ -1189,21 +1189,21 @@ class CosmologyCalculator(Cosmology):
         # Linear power spectrum
         if not isinstance(pk_linear, dict):
             raise TypeError("`pk_linear` must be a dictionary")
-        if (('delta_matter_x_delta_matter' not in pk_linear) or
+        if (('delta_matter:delta_matter' not in pk_linear) or
                 ('a' not in pk_linear) or ('k' not in pk_linear)):
             raise ValueError("`pk_linear` must contain keys 'a', 'k' "
-                             "and 'delta_matter_x_delta_matter' "
+                             "and 'delta_matter:delta_matter' "
                              "(at least)")
         na = len(pk_linear['a'])
         nk = len(pk_linear['k'])
         lk = np.log(pk_linear['k'])
         pk_names = [key for key in pk_linear if key not in ('a', 'k')]
         for n in pk_names:
-            qs = n.split('_x_')
+            qs = n.split(':')
             if len(qs) != 2:
                 raise ValueError("Power spectrum label %s could " % n +
                                  "not be parsed. Label must be of the " +
-                                 "form 'q1_x_q2'")
+                                 "form 'q1:q2'")
             pk = pk_linear[n]
             if pk.shape != (na, nk):
                 raise ValueError("Power spectrum %s has shape " % n +
@@ -1230,20 +1230,20 @@ class CosmologyCalculator(Cosmology):
             raise ValueError("`pk_nonlin` must contain keys "
                              "'a' and 'k' (at least)")
         if ((not has_nonlin_model) and
-                ('delta_matter_x_delta_matter' not in pk_nonlin)):
+                ('delta_matter:delta_matter' not in pk_nonlin)):
             raise ValueError("`pk_nonlin` must contain key "
-                             "'delta_matter_x_delta_matter' or "
+                             "'delta_matter:delta_matter' or "
                              "use halofit to compute it")
         na = len(pk_nonlin['a'])
         nk = len(pk_nonlin['k'])
         lk = np.log(pk_nonlin['k'])
         pk_names = [key for key in pk_nonlin if key not in ('a', 'k')]
         for n in pk_names:
-            qs = n.split('_x_')
+            qs = n.split(':')
             if len(qs) != 2:
                 raise ValueError("Power spectrum label %s could " % n +
                                  "not be parsed. Label must be of the " +
-                                 "form 'q1_x_q2'")
+                                 "form 'q1:q2'")
             pk = pk_nonlin[n]
             if pk.shape != (na, nk):
                 raise ValueError("Power spectrum %s has shape " % n +
@@ -1287,7 +1287,7 @@ class CosmologyCalculator(Cosmology):
                 raise KeyError(name + " is not a "
                                "known linear power spectrum")
 
-            if ((name == 'delta_matter_x_delta_matter') and
+            if ((name == 'delta_matter:delta_matter') and
                     (model is None)):
                 raise ValueError("The non-linear matter power spectrum "
                                  "can't be `None`")

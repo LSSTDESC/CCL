@@ -4,7 +4,7 @@ from .core import check
 from .pk2d import parse_pk2d
 
 
-def linear_power(cosmo, k, a, p_of_k_a='delta_matter_x_delta_matter'):
+def linear_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     """The linear power spectrum.
 
     Args:
@@ -24,7 +24,7 @@ def linear_power(cosmo, k, a, p_of_k_a='delta_matter_x_delta_matter'):
     return cosmo._pk_lin[p_of_k_a].eval(k, a, cosmo)
 
 
-def nonlin_power(cosmo, k, a, p_of_k_a='delta_matter_x_delta_matter'):
+def nonlin_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     """The non-linear power spectrum.
 
     Args:
@@ -56,7 +56,7 @@ def linear_matter_power(cosmo, k, a):
         float or array_like: Linear matter power spectrum; Mpc^3.
     """
     cosmo.compute_linear_power()
-    return cosmo._pk_lin['delta_matter_x_delta_matter'].eval(k, a,
+    return cosmo._pk_lin['delta_matter:delta_matter'].eval(k, a,
                                                              cosmo)
 
 
@@ -72,7 +72,7 @@ def nonlin_matter_power(cosmo, k, a):
         float or array_like: Nonlinear matter power spectrum; Mpc^3.
     """
     cosmo.compute_nonlin_power()
-    return cosmo._pk_nl['delta_matter_x_delta_matter'].eval(k, a,
+    return cosmo._pk_nl['delta_matter:delta_matter'].eval(k, a,
                                                             cosmo)
 
 
@@ -111,7 +111,7 @@ def sigmaR(cosmo, R, a=1., p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
 
     Returns:
@@ -140,7 +140,7 @@ def sigmaV(cosmo, R, a=1., p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
 
     Returns:
@@ -169,7 +169,7 @@ def sigma8(cosmo, p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
 
     Returns:
@@ -191,7 +191,7 @@ def kNL(cosmo, a, p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
 
     Returns:

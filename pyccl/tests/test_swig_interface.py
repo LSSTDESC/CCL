@@ -149,7 +149,7 @@ def test_swig_correlation():
         CCLError,
         ccllib.correlation_3d_vec,
         COSMO,
-        PYCOSMO._pk_nl['delta_matter_x_delta_matter'].psp,
+        PYCOSMO._pk_nl['delta_matter:delta_matter'].psp,
         1.0,
         [1, 2, 3],
         4,

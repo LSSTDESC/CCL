@@ -44,7 +44,7 @@ def test_hodcl():
         m_nu_type='equal',
         pk_linear={'a': 1./(1.+zs[::-1]),
                    'k': ks,
-                   'delta_matter_x_delta_matter': pks[::-1, :]})
+                   'delta_matter:delta_matter': pks[::-1, :]})
     cosmo.compute_growth()
 
     # Halo model setup

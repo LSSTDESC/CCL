@@ -122,7 +122,7 @@ def correlation_3d(cosmo, a, r, p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
 
     Returns:
@@ -165,7 +165,7 @@ def correlation_multipole(cosmo, a, beta, l, s, p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
 
     Returns:
@@ -213,7 +213,7 @@ def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline=True, p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
 
     Returns:
@@ -256,7 +256,7 @@ def correlation_3dRsd_avgmu(cosmo, a, s, beta, p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
 
     Returns:
@@ -301,7 +301,7 @@ def correlation_pi_sigma(cosmo, a, beta, pi, sig,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter_x_delta_matter'`). If `None`, the non-linear matter
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
 
     Returns:
