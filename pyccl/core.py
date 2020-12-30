@@ -1063,7 +1063,7 @@ class CosmologyCalculator(Cosmology):
             power spectra. It must contain the following mandatory
             entries: `'a'`: an array of scale factor values.
             `'k'`: an array of comoving wavenumbers in units of
-            inverse Mpc. If `use_halofit == None`, it should also
+            inverse Mpc. If `nonlinear_model` is `None`, it should also
             contain `'delta_matter_x_delta_matter'`: a 2D array of
             shape `(n_a, n_k)`, where `n_a` and `n_k` are the lengths
             of `'a'` and `'k'` respectively, containing the non-linear
@@ -1071,23 +1071,31 @@ class CosmologyCalculator(Cosmology):
             also contain other entries with keys of the form `'q1_x_q2'`,
             containing other cross-power spectra between quantities
             `'q1'` and `'q2'`.
-        use_halofit (:obj:`bool`): if `True`, all entries in `pk_linear`
-            which do not appear in `pk_nonlin`, will be populated in the
-            latter by applying the "HALOFIT" transformation of
-            Takahashi et al. 2012 (arXiv:1208.2701) on their linear
-            versions.
+        nonlinear_model (:obj:`str`, :obj:`dict` or `None`): model to
+            compute non-linear power spectra. If a string, the associated
+            non-linear model will be applied to all entries in `pk_linear`
+            which do not appear in `pk_nonlin`. If a dictionary, it should
+            contain entries of the form `'q1_x_q2': model`, where `model`
+            is a string designating the non-linear model to apply to the
+            `'q1_x_q2'` power spectrum, which must also be present in
+            `pk_linear`. If `model` is `None`, this non-linear power
+            spectrum will not be calculated. If `nonlinear_model` is
+            `None`, no additional non-linear power spectra will be
+            computed. The only non-linear model supported is `'halofit'`,
+            corresponding to the "HALOFIT" transformation of
+            Takahashi et al. 2012 (arXiv:1208.2701).
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
             T_CMB=None, background=None, growth=None,
-            pk_linear=None, pk_nonlin=None, use_halofit=False):
+            pk_linear=None, pk_nonlin=None, nonlinear_model=None):
         if pk_linear:
             transfer_function = 'calculator'
         else:
             transfer_function = None
-        if pk_nonlin or use_halofit:
+        if pk_nonlin or nonlinear_model:
             matter_power_spectrum = 'calculator'
         else:
             matter_power_spectrum = None
@@ -1107,6 +1115,7 @@ class CosmologyCalculator(Cosmology):
         has_dz = growth is not None
         has_pklin = pk_linear is not None
         has_pknl = pk_nonlin is not None
+        has_nonlin_model = nonlinear_model is not None
 
         if has_bg:
             self._init_bg(background)
@@ -1115,11 +1124,8 @@ class CosmologyCalculator(Cosmology):
         if has_pklin:
             self._init_pklin(pk_linear)
         if has_pknl:
-            self._init_pknl(pk_nonlin, use_halofit)
-        if use_halofit:
-            if not has_pklin:
-                raise ValueError("Must specify linear Pk to use halofit")
-            self._use_halofit()
+            self._init_pknl(pk_nonlin, has_nonlin_model)
+        self._apply_nonlinear_model(nonlinear_model)
 
     def _init_bg(self, background):
         # Background
@@ -1216,14 +1222,14 @@ class CosmologyCalculator(Cosmology):
         # Set linear power spectrum as initialized
         self._has_pk_lin = True
 
-    def _init_pknl(self, pk_nonlin, use_halofit):
+    def _init_pknl(self, pk_nonlin, has_nonlin_model):
         # Non-linear power spectrum
         if not isinstance(pk_nonlin, dict):
             raise TypeError("`pk_nonlin` must be a dictionary")
         if (('a' not in pk_nonlin) or ('k' not in pk_nonlin)):
             raise ValueError("`pk_nonlin` must contain keys "
                              "'a' and 'k' (at least)")
-        if ((not use_halofit) and
+        if ((not has_nonlin_model) and
                 ('delta_matter_x_delta_matter' not in pk_nonlin)):
             raise ValueError("`pk_nonlin` must contain key "
                              "'delta_matter_x_delta_matter' or "
@@ -1256,12 +1262,43 @@ class CosmologyCalculator(Cosmology):
         # Set non-linear power spectrum as initialized
         self._has_pk_nl = True
 
-    def _use_halofit(self):
-        # Use halofit if needed for all missing non-linear power spectra
-        for n, pkl in self._pk_lin.items():
-            if (n in self._pk_nl):
+    def _apply_nonlinear_model(self, nonlin_model):
+        if nonlin_model is None:
+            return
+        elif isinstance(nonlin_model, str):
+            if not self._pk_lin:
+                raise ValueError("You asked to use the non-linear "
+                                 "model " + nonlin_model + " but "
+                                 "provided no linear power spectrum "
+                                 "to apply it to.")
+            nld = {n: nonlin_model
+                   for n in self._pk_lin}
+        elif isinstance(nonlin_model, dict):
+            nld = nonlin_model
+        else:
+            raise TypeError("`nonlinear_model` must be a string, "
+                            "a dictionary or `None`")
+
+        for name, model in nld.items():
+            if name in self._pk_nl:
                 continue
-            pk = Pk2D.apply_halofit(self, pkl)
-            self._pk_nl[n] = pk
+
+            if name not in self._pk_lin:
+                raise KeyError(name + " is not a "
+                               "known linear power spectrum")
+
+            if ((name == 'delta_matter_x_delta_matter') and
+                    (model is None)):
+                raise ValueError("The non-linear matter power spectrum "
+                                 "can't be `None`")
+
+            if model == 'halofit':
+                pkl = self._pk_lin[name]
+                self._pk_nl[name] = Pk2D.apply_halofit(self, pkl)
+            elif model is None:
+                pass
+            else:
+                raise KeyError(model + " is not a valid "
+                               "non-linear model.")
         # Set non-linear power spectrum as initialized
         self._has_pk_nl = True
