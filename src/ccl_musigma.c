@@ -28,6 +28,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
 
   size_t na;
   double *aa;
+  double rescale_extra_musig = 1;
   double *rescale_factor = NULL;
 
   if (*status == 0) {
@@ -144,6 +145,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         double renorm = D_mu/D_GR;
         rescale_factor[i] *= renorm*renorm;
       }
+      rescale_extra_musig = rescale_factor[na-1];
 
       if (*status) {
         *status = CCL_ERROR_PARAMETERS;
@@ -160,9 +162,11 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
   if(do_s8) {
     if (*status == 0) {
       double renorm = cosmo->params.sigma8/ccl_sigma8(cosmo, psp, status);
+      renorm *= renorm;
+      renorm /= rescale_extra_musig;
 
       for (int i=0; i<na; i++)
-        rescale_factor[i] *= renorm*renorm;
+        rescale_factor[i] *= renorm;
     }
   }
 
