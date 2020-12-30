@@ -57,7 +57,7 @@ def linear_matter_power(cosmo, k, a):
     """
     cosmo.compute_linear_power()
     return cosmo._pk_lin['delta_matter:delta_matter'].eval(k, a,
-                                                             cosmo)
+                                                           cosmo)
 
 
 def nonlin_matter_power(cosmo, k, a):
@@ -73,7 +73,7 @@ def nonlin_matter_power(cosmo, k, a):
     """
     cosmo.compute_nonlin_power()
     return cosmo._pk_nl['delta_matter:delta_matter'].eval(k, a,
-                                                            cosmo)
+                                                          cosmo)
 
 
 def sigmaM(cosmo, M, a):

@@ -298,7 +298,7 @@ def test_input_linpower_raises():
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
-                       'delta_matter_y_delta_matter': pk_arr})
+                       'delta_matter;delta_matter': pk_arr})
 
     # Non-parsable power spectrum
     with pytest.raises(ValueError):
@@ -307,7 +307,7 @@ def test_input_linpower_raises():
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
                        'delta_matter:delta_matter': pk_arr,
-                       'a_y_b': pk_arr})
+                       'a;b': pk_arr})
 
     # Wrong shape
     with pytest.raises(ValueError):
@@ -370,8 +370,8 @@ def test_input_nonlinear_model():
         nonlinear_model='halofit')
 
     pk_CCL_input = cosmo_input.get_nonlin_power('a:b').eval(k_arr,
-                                                              0.5,
-                                                              cosmo_input)
+                                                            0.5,
+                                                            cosmo_input)
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
     # Via `nonlin_power`
@@ -525,7 +525,7 @@ def test_input_nonlin_raises():
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'kk': k_arr,
-                       'delta_matter_y_delta_matter': pk_arr})
+                       'delta_matter;delta_matter': pk_arr})
 
     # delta_matter:delta_matter not present
     with pytest.raises(ValueError):
@@ -533,7 +533,7 @@ def test_input_nonlin_raises():
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'k': k_arr,
-                       'delta_matter_y_delta_matter': pk_arr})
+                       'delta_matter;delta_matter': pk_arr})
 
     # Non-parsable power spectrum
     with pytest.raises(ValueError):
@@ -542,7 +542,7 @@ def test_input_nonlin_raises():
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'k': k_arr,
                        'delta_matter:delta_matter': pk_arr,
-                       'a_y_b': pk_arr})
+                       'a;b': pk_arr})
 
     # Wrong shape
     with pytest.raises(ValueError):
