@@ -128,14 +128,14 @@ def test_input_arrays():
     a_arr = np.linspace(0.1, 1, 100)
     chi_from_ccl = ccl.background.comoving_radial_distance(cosmo, a_arr)
     hoh0_from_ccl = ccl.background.h_over_h0(cosmo, a_arr)
-    growth_from_ccl = ccl.background.growth_factor_unnorm(cosmo, a_arr)
+    growthu_from_ccl = ccl.background.growth_factor_unnorm(cosmo, a_arr)
     fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
 
     background = {'a': a_arr,
                   'chi': chi_from_ccl,
                   'h_over_h0': hoh0_from_ccl}
     growth = {'a': a_arr,
-              'growth_factor': growth_from_ccl,
+              'growth_factor': growthu_from_ccl,
               'growth_rate': fgrowth_from_ccl}
     cosmo_input = ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
                                           n_s=0.965, A_s=2e-9,
@@ -153,6 +153,10 @@ def test_input_arrays():
     growth_ccl_input = ccl.background.growth_factor(cosmo_input, a_arr)
     growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
     assert np.allclose(growth_ccl_input, growth_from_ccl, atol=0., rtol=1e-5)
+
+    growthu_ccl_input = ccl.background.growth_factor_unnorm(cosmo_input, a_arr)
+    growthu_from_ccl = ccl.background.growth_factor_unnorm(cosmo, a_arr)
+    assert np.allclose(growthu_ccl_input, growthu_from_ccl, atol=0., rtol=1e-5)
 
     fgrowth_ccl_input = ccl.background.growth_rate(cosmo_input, a_arr)
     fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
