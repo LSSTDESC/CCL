@@ -94,6 +94,12 @@ def test_linear_matter_power_raises():
         ccl.linear_matter_power(cosmo, 1., 1.)
 
 
+def test_nonlin_matter_power_raises():
+    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum=None)
+    with pytest.raises(ccl.CCLError):
+        ccl.nonlin_matter_power(cosmo, 1., 1.)
+
+
 def test_linear_power_raises():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function='bbks')
     with pytest.raises(KeyError):

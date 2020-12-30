@@ -2,7 +2,6 @@ from . import ccllib as lib
 import numpy as np
 from .core import check
 from .pk2d import parse_pk2d
-from .errors import CCLError
 
 
 def linear_power(cosmo, k, a, p_of_k_a='delta_matter_x_delta_matter'):
@@ -57,8 +56,6 @@ def linear_matter_power(cosmo, k, a):
         float or array_like: Linear matter power spectrum; Mpc^3.
     """
     cosmo.compute_linear_power()
-    if cosmo._pk_lin['delta_matter_x_delta_matter'] is None:
-        raise CCLError("Linear power spectrum is None!")
     return cosmo._pk_lin['delta_matter_x_delta_matter'].eval(k, a,
                                                              cosmo)
 

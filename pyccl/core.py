@@ -26,6 +26,7 @@ transfer_function_types = {
 }
 
 matter_power_spectrum_types = {
+    None: lib.pknl_none,
     'halo_model': lib.halo_model,
     'halofit': lib.halofit,
     'linear': lib.linear,
@@ -709,7 +710,10 @@ class Cosmology(object):
         pk = None
         rescale_s8 = True
         rescale_mg = True
-        if trf == 'boltzmann_class':
+        if trf is None:
+            raise CCLError("You want to compute the linear power spectrum, "
+                           "but you selected `transfer_function=None`.")
+        elif trf == 'boltzmann_class':
             pk = get_class_pk_lin(self)
         elif trf == 'boltzmann_isitgr':
             rescale_mg = False
@@ -804,11 +808,15 @@ class Cosmology(object):
         # Populate power spectrum splines
         mps = self._config_init_kwargs['matter_power_spectrum']
         # needed for halofit, halomodel and linear options
-        if mps != 'emu':
+        if (mps != 'emu') and (mps is not None):
             self.compute_linear_power()
 
         pk = None
-        if mps == 'halo_model':
+        if mps is None:
+            raise CCLError("You want to compute the non-linear power "
+                           "spectrum, but you selected "
+                           "`matter_power_spectrum=None`.")
+        elif mps == 'halo_model':
             warnings.warn(
                 "The halo model option for the internal CCL matter power "
                 "spectrum is deprecated. Use the more general functionality "
@@ -1040,11 +1048,11 @@ class CosmologyCalculator(Cosmology):
         if pk_linear:
             transfer_function = 'calculator'
         else:
-            transfer_function = 'boltzmann_camb'
+            transfer_function = None
         if pk_nonlin or use_halofit:
             matter_power_spectrum = 'calculator'
         else:
-            matter_power_spectrum = 'halofit'
+            matter_power_spectrum = None
 
         # Cosmology
         super(CosmologyCalculator, self).__init__(
@@ -1062,149 +1070,160 @@ class CosmologyCalculator(Cosmology):
         has_pklin = pk_linear is not None
         has_pknl = pk_nonlin is not None
 
-        # Background
         if has_bg:
-            if not isinstance(background, dict):
-                raise TypeError("`background` must be a dictionary.")
-            if (('a' not in background) or ('chi' not in background) or
-                    ('h_over_h0' not in background)):
-                raise ValueError("`background` must contain keys "
-                                 "'a', 'chi' and 'h_over_h0'")
-            a = background['a']
-            chi = background['chi']
-            hoh0 = background['h_over_h0']
-            # Check that input arrays have the same size.
-            if not (a.shape == chi.shape == hoh0.shape):
-                raise ValueError("Input arrays must have the same size.")
-            # Check that `a` is a monotonically increasing array.
-            if not np.array_equal(a, np.sort(a)):
-                raise ValueError("Input scale factor array is not "
-                                 "monotonically increasing.")
-            # Check that the last element of a_array_back is 1:
-            if np.abs(a[-1]-1.0) > 1e-5:
-                raise ValueError("The last element of the input scale factor"
-                                 "array must be 1.0.")
-            status = 0
-            status = lib.cosmology_distances_from_input(self.cosmo,
-                                                        a, chi, hoh0,
-                                                        status)
-            check(status, self)
-
-        # Growth
+            self._init_bg(background)
         if has_dz:
-            if not isinstance(growth, dict):
-                raise TypeError("`growth` must be a dictionary.")
-            if (('a' not in growth) or ('growth_factor' not in growth) or
-                    ('growth_rate' not in growth)):
-                raise ValueError("`growth` must contain keys "
-                                 "'a', 'growth_factor' and 'growth_rate'")
-            a = growth['a']
-            dz = growth['growth_factor']
-            fz = growth['growth_rate']
-            # Check that input arrays have the same size.
-            if not (a.shape == dz.shape
-                    == fz.shape):
-                raise ValueError("Input arrays must have the same size.")
-            # Check that a_array_grth is a monotonically increasing array.
-            if not np.array_equal(a,
-                                  np.sort(a)):
-                raise ValueError("Input scale factor array is not "
-                                 "monotonically increasing.")
-            # Check that the last element of a is 1:
-            if np.abs(a[-1]-1.0) > 1e-5:
-                raise ValueError("The last element of the input scale factor"
-                                 "array must be 1.0.")
-            status = 0
-            status = lib.cosmology_growth_from_input(self.cosmo,
-                                                     a, dz, fz,
-                                                     status)
-            check(status, self)
-
-        # Linear power spectrum
+            self._init_growth(growth)
         if has_pklin:
-            if not isinstance(pk_linear, dict):
-                raise TypeError("`pk_linear` must be a dictionary")
-            if (('delta_matter_x_delta_matter' not in pk_linear) or
-                    ('a' not in pk_linear) or ('k' not in pk_linear)):
-                raise ValueError("`pk_linear` must contain keys 'a', 'k' "
-                                 "and 'delta_matter_x_delta_matter' "
-                                 "(at least)")
-            na = len(pk_linear['a'])
-            nk = len(pk_linear['k'])
-            lk = np.log(pk_linear['k'])
-            pk_names = [key for key in pk_linear if key not in ('a', 'k')]
-            for n in pk_names:
-                qs = n.split('_x_')
-                if len(qs) != 2:
-                    raise ValueError("Power spectrum label %s could " % n +
-                                     "not be parsed. Label must be of the " +
-                                     "form 'q1_x_q2'")
-                pk = pk_linear[n]
-                if pk.shape != (na, nk):
-                    raise ValueError("Power spectrum %s has shape " % n +
-                                     str(pk.shape) + " but shape " +
-                                     "(%d, %d) was expected." % (na, nk))
-                # Spline in log-space if the P(k) is positive-definite
-                use_log = np.all(pk > 0)
-                if use_log:
-                    pk = np.log(pk)
-                # Initialize and store
-                pk = Pk2D(pkfunc=None,
-                          a_arr=pk_linear['a'], lk_arr=lk, pk_arr=pk,
-                          is_logp=use_log, extrap_order_lok=1,
-                          extrap_order_hik=2, cosmo=None)
-                self._pk_lin[n] = pk
-            # Set linear power spectrum as initialized
-            self._has_pk_lin = True
-
-        # Non-linear power spectrum
+            self._init_pklin(pk_linear)
         if has_pknl:
-            if not isinstance(pk_nonlin, dict):
-                raise TypeError("`pk_nonlin` must be a dictionary")
-            if (('a' not in pk_nonlin) or ('k' not in pk_nonlin)):
-                raise ValueError("`pk_nonlin` must contain keys "
-                                 "'a' and 'k' (at least)")
-            if ((not use_halofit) and
-                    ('delta_matter_x_delta_matter' not in pk_nonlin)):
-                raise ValueError("`pk_nonlin` must contain key "
-                                 "'delta_matter_x_delta_matter' or "
-                                 "use halofit to compute it")
-            na = len(pk_nonlin['a'])
-            nk = len(pk_nonlin['k'])
-            lk = np.log(pk_nonlin['k'])
-            pk_names = [key for key in pk_nonlin if key not in ('a', 'k')]
-            for n in pk_names:
-                qs = n.split('_x_')
-                if len(qs) != 2:
-                    raise ValueError("Power spectrum label %s could " % n +
-                                     "not be parsed. Label must be of the " +
-                                     "form 'q1_x_q2'")
-                pk = pk_nonlin[n]
-                if pk.shape != (na, nk):
-                    raise ValueError("Power spectrum %s has shape " % n +
-                                     str(pk.shape) + " but shape " +
-                                     "(%d, %d) was expected." % (na, nk))
-                # Spline in log-space if the P(k) is positive-definite
-                use_log = np.all(pk > 0)
-                if use_log:
-                    pk = np.log(pk)
-                # Initialize and store
-                pk = Pk2D(pkfunc=None,
-                          a_arr=pk_nonlin['a'], lk_arr=lk, pk_arr=pk,
-                          is_logp=use_log, extrap_order_lok=1,
-                          extrap_order_hik=2, cosmo=None)
-                self._pk_nl[n] = pk
-            # Set linear power spectrum as initialized
-            self._has_pk_nl = True
-
-        # Use halofit if needef for all missing non-linear power spectra
+            self._init_pknl(pk_nonlin, use_halofit)
         if use_halofit:
             if not has_pklin:
                 raise ValueError("Must specify linear Pk to use halofit")
-            for n, pkl in self._pk_lin.items():
-                if (n in self._pk_nl) or (pkl is None):
-                    continue
-                pk = Pk2D.apply_halofit(self, pkl)
-                self._pk_nl[n] = pk
-            # Set linear power spectrum as initialized
-            self._has_pk_nl = True
+            self._use_halofit()
+
+    def _init_bg(self, background):
+        # Background
+        if not isinstance(background, dict):
+            raise TypeError("`background` must be a dictionary.")
+        if (('a' not in background) or ('chi' not in background) or
+                ('h_over_h0' not in background)):
+            raise ValueError("`background` must contain keys "
+                             "'a', 'chi' and 'h_over_h0'")
+        a = background['a']
+        chi = background['chi']
+        hoh0 = background['h_over_h0']
+        # Check that input arrays have the same size.
+        if not (a.shape == chi.shape == hoh0.shape):
+            raise ValueError("Input arrays must have the same size.")
+        # Check that `a` is a monotonically increasing array.
+        if not np.array_equal(a, np.sort(a)):
+            raise ValueError("Input scale factor array is not "
+                             "monotonically increasing.")
+        # Check that the last element of a_array_back is 1:
+        if np.abs(a[-1]-1.0) > 1e-5:
+            raise ValueError("The last element of the input scale factor"
+                             "array must be 1.0.")
+        status = 0
+        status = lib.cosmology_distances_from_input(self.cosmo,
+                                                    a, chi, hoh0,
+                                                    status)
+        check(status, self)
+
+    def _init_growth(self, growth):
+        # Growth
+        if not isinstance(growth, dict):
+            raise TypeError("`growth` must be a dictionary.")
+        if (('a' not in growth) or ('growth_factor' not in growth) or
+                ('growth_rate' not in growth)):
+            raise ValueError("`growth` must contain keys "
+                             "'a', 'growth_factor' and 'growth_rate'")
+        a = growth['a']
+        dz = growth['growth_factor']
+        fz = growth['growth_rate']
+        # Check that input arrays have the same size.
+        if not (a.shape == dz.shape
+                == fz.shape):
+            raise ValueError("Input arrays must have the same size.")
+        # Check that a_array_grth is a monotonically increasing array.
+        if not np.array_equal(a,
+                              np.sort(a)):
+            raise ValueError("Input scale factor array is not "
+                             "monotonically increasing.")
+        # Check that the last element of a is 1:
+        if np.abs(a[-1]-1.0) > 1e-5:
+            raise ValueError("The last element of the input scale factor"
+                             "array must be 1.0.")
+        status = 0
+        status = lib.cosmology_growth_from_input(self.cosmo,
+                                                 a, dz, fz,
+                                                 status)
+        check(status, self)
+
+    def _init_pklin(self, pk_linear):
+        # Linear power spectrum
+        if not isinstance(pk_linear, dict):
+            raise TypeError("`pk_linear` must be a dictionary")
+        if (('delta_matter_x_delta_matter' not in pk_linear) or
+                ('a' not in pk_linear) or ('k' not in pk_linear)):
+            raise ValueError("`pk_linear` must contain keys 'a', 'k' "
+                             "and 'delta_matter_x_delta_matter' "
+                             "(at least)")
+        na = len(pk_linear['a'])
+        nk = len(pk_linear['k'])
+        lk = np.log(pk_linear['k'])
+        pk_names = [key for key in pk_linear if key not in ('a', 'k')]
+        for n in pk_names:
+            qs = n.split('_x_')
+            if len(qs) != 2:
+                raise ValueError("Power spectrum label %s could " % n +
+                                 "not be parsed. Label must be of the " +
+                                 "form 'q1_x_q2'")
+            pk = pk_linear[n]
+            if pk.shape != (na, nk):
+                raise ValueError("Power spectrum %s has shape " % n +
+                                 str(pk.shape) + " but shape " +
+                                 "(%d, %d) was expected." % (na, nk))
+            # Spline in log-space if the P(k) is positive-definite
+            use_log = np.all(pk > 0)
+            if use_log:
+                pk = np.log(pk)
+            # Initialize and store
+            pk = Pk2D(pkfunc=None,
+                      a_arr=pk_linear['a'], lk_arr=lk, pk_arr=pk,
+                      is_logp=use_log, extrap_order_lok=1,
+                      extrap_order_hik=2, cosmo=None)
+            self._pk_lin[n] = pk
+        # Set linear power spectrum as initialized
+        self._has_pk_lin = True
+
+    def _init_pknl(self, pk_nonlin, use_halofit):
+        # Non-linear power spectrum
+        if not isinstance(pk_nonlin, dict):
+            raise TypeError("`pk_nonlin` must be a dictionary")
+        if (('a' not in pk_nonlin) or ('k' not in pk_nonlin)):
+            raise ValueError("`pk_nonlin` must contain keys "
+                             "'a' and 'k' (at least)")
+        if ((not use_halofit) and
+                ('delta_matter_x_delta_matter' not in pk_nonlin)):
+            raise ValueError("`pk_nonlin` must contain key "
+                             "'delta_matter_x_delta_matter' or "
+                             "use halofit to compute it")
+        na = len(pk_nonlin['a'])
+        nk = len(pk_nonlin['k'])
+        lk = np.log(pk_nonlin['k'])
+        pk_names = [key for key in pk_nonlin if key not in ('a', 'k')]
+        for n in pk_names:
+            qs = n.split('_x_')
+            if len(qs) != 2:
+                raise ValueError("Power spectrum label %s could " % n +
+                                 "not be parsed. Label must be of the " +
+                                 "form 'q1_x_q2'")
+            pk = pk_nonlin[n]
+            if pk.shape != (na, nk):
+                raise ValueError("Power spectrum %s has shape " % n +
+                                 str(pk.shape) + " but shape " +
+                                 "(%d, %d) was expected." % (na, nk))
+            # Spline in log-space if the P(k) is positive-definite
+            use_log = np.all(pk > 0)
+            if use_log:
+                pk = np.log(pk)
+            # Initialize and store
+            pk = Pk2D(pkfunc=None,
+                      a_arr=pk_nonlin['a'], lk_arr=lk, pk_arr=pk,
+                      is_logp=use_log, extrap_order_lok=1,
+                      extrap_order_hik=2, cosmo=None)
+            self._pk_nl[n] = pk
+        # Set non-linear power spectrum as initialized
+        self._has_pk_nl = True
+
+    def _use_halofit(self):
+        # Use halofit if needed for all missing non-linear power spectra
+        for n, pkl in self._pk_lin.items():
+            if (n in self._pk_nl):
+                continue
+            pk = Pk2D.apply_halofit(self, pkl)
+            self._pk_nl[n] = pk
+        # Set non-linear power spectrum as initialized
+        self._has_pk_nl = True
