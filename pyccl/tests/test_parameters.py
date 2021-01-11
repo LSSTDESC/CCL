@@ -489,7 +489,8 @@ def test_parameters_read_write():
     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
         temp_file_name = tmpfile.name
 
-    # Write out and then eead in the parameters from that file
+    # Write out and then read in the parameters from that file
+    assert_raises(IOError, params.write_yaml, "/bogus/file/name")
     params.write_yaml(temp_file_name)
     params2 = ccl.Cosmology.read_yaml(temp_file_name)
 

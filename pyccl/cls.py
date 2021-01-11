@@ -5,7 +5,7 @@ import numpy as np
 from .errors import CCLWarning
 from . import ccllib as lib
 from .pyutils import check, integ_types
-from .pk2d import Pk2D
+from .pk2d import parse_pk2d
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig
 # wrapper
@@ -24,9 +24,11 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the angular power spectrum.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or None): 3D Power spectrum to
-            project. If `None`, the non-linear matter power spectrum will be
-            used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+            to project. If a string, it must correspond to one of the
+            non-linear power spectra stored in `cosmo` (e.g.
+            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
+            power spectrum stored in `cosmo` will be used.
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
         limber_integration_method (string) : integration method to be used
@@ -56,17 +58,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    if p_of_k_a is not None:
-        if isinstance(p_of_k_a, Pk2D):
-            psp = p_of_k_a.psp
-        else:
-            raise ValueError("p_of_k_a must be either a "
-                             "pyccl.Pk2D object or None")
-    else:
-        psp = None
-        # if a power spectrum was not passed, we need the non-linear one
-        # at the C level
-        cosmo_in.compute_nonlin_power()
+    psp = parse_pk2d(cosmo_in, p_of_k_a)
 
     # Create tracer colections
     status = 0

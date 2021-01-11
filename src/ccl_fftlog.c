@@ -44,11 +44,6 @@ static double complex lngamma_fftlog(double complex z)
   return lnr.val + I*phi.val;
 }
 
-static double complex gamma_fftlog(double complex z)
-{
-  return cexp(lngamma_fftlog(z));
-}
-
 static double complex polar (double r, double phi)
 {
   return (r*cos(phi) +I*(r*sin(phi)));
