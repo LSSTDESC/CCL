@@ -221,11 +221,12 @@ class Cosmology(object):
             raise IOError("Unable to write YAML file {}".format(filename))
 
     @classmethod
-    def read_yaml(cls, filename):
+    def read_yaml(cls, filename, **kwargs):
         """Read the parameters from a YAML file.
 
         Args:
             filename (:obj:`str`) Filename to read parameters from.
+            **kwargs (dict) Additional keywords that supersede file contents
         """
         with open(filename, 'r') as fp:
             params = yaml.load(fp, Loader=yaml.Loader)
@@ -255,6 +256,8 @@ class Cosmology(object):
         if 'm_nu' in params:
             inits['m_nu'] = params['m_nu']
             inits['m_nu_type'] = 'list'
+
+        inits.update(kwargs)
 
         return cls(**inits)
 
