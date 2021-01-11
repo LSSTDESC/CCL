@@ -144,7 +144,7 @@ class MassFunc(object):
                                     len(logM), status)
         check(status)
         # dlogsigma(M)/dlog10(M)
-        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, logM,
+        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
                                                    len(logM), status)
         check(status)
 

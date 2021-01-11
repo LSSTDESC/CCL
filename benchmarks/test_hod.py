@@ -33,17 +33,20 @@ def test_hodcl():
     dndz = _nz_2mrs(z_arr)
 
     # CCL prediction
-    cosmo = ccl.Cosmology(Omega_b=0.05,
-                          Omega_c=0.25,
-                          h=0.67,
-                          n_s=0.9645,
-                          A_s=2.0E-9,
-                          m_nu=0.00001,
-                          m_nu_type='equal')
     # Make sure we use the same P(k)
-    cosmo._set_linear_power_from_arrays(a_array=1/(1.+zs[::-1]),
-                                        k_array=ks,
-                                        pk_array=pks[::-1, :])
+    cosmo = ccl.CosmologyCalculator(
+        Omega_b=0.05,
+        Omega_c=0.25,
+        h=0.67,
+        n_s=0.9645,
+        A_s=2.0E-9,
+        m_nu=0.00001,
+        m_nu_type='equal',
+        pk_linear={'a': 1./(1.+zs[::-1]),
+                   'k': ks,
+                   'delta_matter:delta_matter': pks[::-1, :]})
+    cosmo.compute_growth()
+
     # Halo model setup
     mass_def = ccl.halos.MassDef(200, 'critical')
     cm = ccl.halos.ConcentrationDuffy08(mass_def)
