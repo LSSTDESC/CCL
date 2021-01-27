@@ -60,10 +60,22 @@ jobs:
             pip install -U pytest
             pip install -U pytest-cov
             pip install -U fast-pt
-            pip install -U camb
             pip install -U isitgr
             pip install -U cython
             pip install -U flake8
+
+        - name: Install CAMB (linux)
+          if: matrix.os == 'ubuntu-latest'
+          run: |
+            pip install -U camb
+
+        - name: Install CAMB (macos)
+          if: matrix.os == 'macos-latest'
+          run: |
+            mkdir -p gfortran-symlinks
+            ln -s gfortran-8 gfortran-symlinks/gfortran
+            export PATH=$PWD/gfortran-symlinks:$PATH
+            pip install -U camb
 
         - name: Install CLASS (linux)
           if: matrix.os == 'ubuntu-latest'
