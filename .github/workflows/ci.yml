@@ -38,7 +38,7 @@ jobs:
           # current. Hence the `|| true` statement
           if: matrix.os == 'macos-latest'
           run: |
-            brew install --build-from-source gfortran || true
+            brew install --cask gfortran || true
 
         - name: Install GSL, FFTW, SWIG (macos)
           if: matrix.os == 'macos-latest'
