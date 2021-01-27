@@ -73,7 +73,7 @@ jobs:
           if: matrix.os == 'macos-latest'
           run: |
             mkdir -p gfortran-symlinks
-            ln -s gfortran-8 gfortran-symlinks/gfortran
+            ln -s /usr/bin/gfortran-8 gfortran-symlinks/gfortran
             export PATH=$PWD/gfortran-symlinks:$PATH
             pip install -U camb
             pip install -U isitgr
