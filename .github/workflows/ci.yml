@@ -38,7 +38,7 @@ jobs:
           # current. Hence the `|| true` statement
           if: matrix.os == 'macos-latest'
           run: |
-            brew install gcc || true
+            brew install gfortran --cask --build-from-source || true
 
         - name: Install GSL, FFTW, SWIG (macos)
           if: matrix.os == 'macos-latest'
@@ -62,19 +62,6 @@ jobs:
             pip install -U fast-pt
             pip install -U cython
             pip install -U flake8
-
-        - name: Install CAMB (linux)
-          if: matrix.os == 'ubuntu-latest'
-          run: |
-            pip install -U camb
-            pip install -U isitgr
-
-        - name: Install CAMB (macos)
-          if: matrix.os == 'macos-latest'
-          run: |
-            mkdir -p gfortran-symlinks
-            ln -s /usr/bin/gfortran-8 gfortran-symlinks/gfortran
-            export PATH=$PWD/gfortran-symlinks:$PATH
             pip install -U camb
             pip install -U isitgr
 
