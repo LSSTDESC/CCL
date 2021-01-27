@@ -62,6 +62,21 @@ jobs:
             pip install -U fast-pt
             pip install -U cython
             pip install -U flake8
+
+        - name: Install CAMB (limux)
+          if: matrix.os == 'ubuntu-latest'
+          run: |
+            pip install -U camb
+            pip install -U isitgr
+
+        - name: Install CAMB (macos)
+          if: matrix.os == 'macos-latest'
+          env:
+            CC: gcc-10
+            FC: gfortran-10
+            F77: gfortran-10
+            F90: gfortran-10
+          run: |
             pip install -U camb
             pip install -U isitgr
 
