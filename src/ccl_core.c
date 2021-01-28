@@ -48,6 +48,11 @@ const ccl_configuration default_config = {
 #define GSL_EPSREL_SIGMAR 1E-5
 
 /**
+ * Relative precision in k_NL calculations
+ */
+#define GSL_EPSREL_KNL 1E-5
+
+/**
  * Relative precision in distance calculations
  */
 #define GSL_EPSREL_DIST 1E-6
@@ -70,6 +75,7 @@ const ccl_gsl_params default_gsl_params = {
   GSL_EPSREL,                          // INTEGRATION_LIMBER_EPSREL
   GSL_EPSREL_DIST,                     // INTEGRATION_DISTANCE_EPSREL
   GSL_EPSREL_SIGMAR,                   // INTEGRATION_SIGMAR_EPSREL
+  GSL_EPSREL_KNL,                      // INTEGRATION_KNL_EPSREL
   GSL_EPSREL,                          // ROOT_EPSREL
   GSL_N_ITERATION,                     // ROOT_N_ITERATION
   GSL_EPSREL_GROWTH,                   // ODE_GROWTH_EPSREL
@@ -86,6 +92,7 @@ const ccl_gsl_params default_gsl_params = {
 #undef GSL_N_ITERATION
 #undef GSL_INTEGRATION_GAUSS_KRONROD_POINTS
 #undef GSL_EPSREL_SIGMAR
+#undef GSL_EPSREL_KNL
 #undef GSL_EPSREL_DIST
 #undef GSL_EPSREL_GROWTH
 #undef GSL_EPSREL_DNDZ
@@ -408,8 +415,8 @@ ccl_parameters ccl_parameters_create(
     params.N_nu_mass = 0;
   }else{
     params.N_nu_mass = n_mnu;
-   } 
-  
+   }
+
   // Dark Energy
   params.w0 = w0;
   params.wa = wa;

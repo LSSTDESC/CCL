@@ -41,8 +41,8 @@ def test_halo_concentration(m):
     a = 0.8
     # Deprecated.
     c = assert_warns(
-            ccl.CCLWarning,
-            ccl.halo_concentration, COSMO, m, a)
+        ccl.CCLWarning,
+        ccl.halo_concentration, COSMO, m, a)
     assert np.all(np.isfinite(c))
     assert np.shape(c) == np.shape(m)
 
@@ -119,13 +119,13 @@ def test_halomodel_power_consistent():
     k = np.logspace(-1, 1, 10)
     # These are all deprecated.
     tot = assert_warns(
-            ccl.CCLWarning,
-            ccl.halomodel_matter_power, COSMO, k, a)
+        ccl.CCLWarning,
+        ccl.halomodel_matter_power, COSMO, k, a)
     one = assert_warns(
-            ccl.CCLWarning,
-            ccl.onehalo_matter_power, COSMO, k, a)
+        ccl.CCLWarning,
+        ccl.onehalo_matter_power, COSMO, k, a)
     two = assert_warns(
-            ccl.CCLWarning,
-            ccl.twohalo_matter_power, COSMO, k, a)
+        ccl.CCLWarning,
+        ccl.twohalo_matter_power, COSMO, k, a)
 
     assert np.allclose(one + two, tot)
