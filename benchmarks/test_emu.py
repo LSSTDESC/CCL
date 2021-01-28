@@ -36,7 +36,11 @@ def test_emu_nu(model):
 
     a = 1
     k = data[:, 0]
-    pk = ccl.nonlin_matter_power(cosmo, k, a)
+
+    # Catch warning about neutrino linear growth
+    pk = ccl.pyutils.assert_warns(ccl.CCLWarning,
+                                  ccl.nonlin_matter_power,
+                                  cosmo, k, a)
     err = np.abs(pk/data[:, 1]-1)
     assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)
 

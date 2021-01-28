@@ -27,6 +27,12 @@ MDFS = [MVIR, MVIR, MVIR, MVIR,
         MFOF, MFOF, MVIR, MFOF, MFOF]
 
 
+def test_sM_raises():
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=None)
+    with pytest.raises(ccl.CCLError):
+        cosmo.compute_sigma()
+
+
 @pytest.mark.parametrize('nM_class', HMFS)
 def test_nM_subclasses_smoke(nM_class):
     nM = nM_class(COSMO)
