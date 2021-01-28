@@ -2,7 +2,14 @@
 
 ## Python library
 - Added more developer documentation (#776).
+- Vanilla LCDM cosmology (#783)
+- Sunyaev-Zel'dovich GNFW profile and tracer (#784)
 - Added number counts integrals for clusters (#787)
+- Halo Occupation Distribution (#793)
+- kwargs option in `read_yaml` (#829)
+- correlation.py now correlations.py (#834)
+- Calculator mode (#843)
+- z-dependent mass function normalization for Tinker10 (#839)
 
 ## C library
 -
