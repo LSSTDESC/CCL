@@ -33,7 +33,7 @@ jobs:
 
       - name: remove homebrew
         run: |
-          curl -s https://raw.githubusercontent.com/Homebrew/install/master/uninstall -o uninstall_homebrew.sh
+          curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
           chmod u+x ./uninstall_homebrew.sh
           ./uninstall_homebrew.sh -f -q >& /dev/null
           rm -f uninstall_homebrew.sh
@@ -59,7 +59,7 @@ jobs:
           if [[ ${MATRIX_OS} == "macos-latest" ]]; then
             . ci_scripts/install_class_osx.sh
           else
-            . ci_scripts_install_class_linux.sh
+            . ci_scripts/install_class_linux.sh
           fi
         env:
           MATRIX_OS: ${{ matrix.os }}
@@ -72,7 +72,7 @@ jobs:
             exit 1
           fi
 
-      - name: Build CCL
+      - name: build CCL
         run: |
           python setup.py build
           python setup.py develop
@@ -87,7 +87,7 @@ jobs:
         run: |
           OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
 
-      - name: Benchmarks
+      - name: benchmarks
         run: |
           OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
 
