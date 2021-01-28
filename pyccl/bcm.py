@@ -1,5 +1,7 @@
 from . import ccllib as lib
-from .pyutils import _vectorize_fn2
+from .pyutils import check
+from .pk2d import Pk2D
+import numpy as np
 
 
 def bcm_model_fka(cosmo, k, a):
@@ -22,5 +24,26 @@ def bcm_model_fka(cosmo, k, a):
     Returns:
         float or array_like: Correction factor to apply to the power spectrum.
     """
-    return _vectorize_fn2(lib.bcm_model_fka,
-                          lib.bcm_model_fka_vec, cosmo, k, a)
+    k_use = np.atleast_1d(k)
+    status = 0
+    fka, status = lib.bcm_model_fka_vec(cosmo.cosmo, a, k_use,
+                                        len(k_use), status)
+    check(status, cosmo)
+
+    if np.ndim(k) == 0:
+        fka = fka[0]
+    return fka
+
+
+def bcm_correct_pk2d(cosmo, pk2d):
+    """Apply the BCM model correction factor to a given power spectrum.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
+    """
+    if not isinstance(pk2d, Pk2D):
+        raise ValueError("pk2d must be a Pk2D object")
+    status = 0
+    status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
+    check(status, cosmo)

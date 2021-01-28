@@ -19,7 +19,7 @@ Submodules
    pyccl.boltzmann
    pyccl.cls
    pyccl.core
-   pyccl.correlation
+   pyccl.correlations
    pyccl.errors
    pyccl.halomodel
    pyccl.haloprofile
