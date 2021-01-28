@@ -160,7 +160,7 @@ def test_pkhm_pk_smoke(pars):
 def test_pkhm_pk2d():
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
     k_arr = KK
-    a_arr = np.linspace(0.1, 1, 10)
+    a_arr = np.linspace(0.3, 1, 10)
     pk_arr = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr,
                                               P1, normprof1=True,
                                               normprof2=True)
