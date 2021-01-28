@@ -23,6 +23,11 @@ jobs:
           - 3.8
 
     steps:
+      - name: cancel previous runs
+        uses: styfle/cancel-workflow-action@0.6.0
+        with:
+          access_token: ${{ github.token }}
+
       - uses: actions/checkout@v2
 
       - uses: conda-incubator/setup-miniconda@v2
