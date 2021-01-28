@@ -18,7 +18,7 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-        py: 3.8
+        py: '3.8'
 
     steps:
         - uses: actions/checkout@v2
