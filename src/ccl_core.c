@@ -105,17 +105,21 @@ const ccl_spline_params default_spline_params = {
   0.1,  // A_SPLINE_MIN
   0.01,  // A_SPLINE_MINLOG_PK
   0.1,  // A_SPLINE_MIN_PK,
+  0.01,  // A_SPLINE_MINLOG_SM,
+  0.1,  // A_SPLINE_MIN_SM,
   1.0,  // A_SPLINE_MAX,
   0.0001,  // A_SPLINE_MINLOG,
   250,  // A_SPLINE_NLOG,
 
   // mass splines
   0.025,  // LOGM_SPLINE_DELTA
-  440,  // LOGM_SPLINE_NM
+  50,  // LOGM_SPLINE_NM
   6,  // LOGM_SPLINE_MIN
   17,  // LOGM_SPLINE_MAX
 
   // PS a and k spline
+  13,  // A_SPLINE_NA_SM
+  6,  // A_SPLINE_NLOG_SM
   40,  // A_SPLINE_NA_PK
   11,  // A_SPLINE_NLOG_PK
 
@@ -243,7 +247,6 @@ fgrowth: logarithmic derivative of the growth (density) (dlnD/da?)
 E: E(a)=H(a)/H0
 growth0: growth at z=0, defined to be 1
 sigma: ?
-p_lin: linear matter power spectrum at z=0?
 p_lnl: nonlinear matter power spectrum at z=0?
 computed_distances, computed_growth,
 computed_power, computed_sigma: store status of the computations
@@ -271,25 +274,22 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.achi = NULL;
 
   cosmo->data.logsigma = NULL;
-  cosmo->data.dlnsigma_dlogm = NULL;
 
   cosmo->data.rsd_splines[0] = NULL;
   cosmo->data.rsd_splines[1] = NULL;
   cosmo->data.rsd_splines[2] = NULL;
 
-  cosmo->data.p_lin = NULL;
-  cosmo->data.p_nl = NULL;
   cosmo->computed_distances = false;
   cosmo->computed_growth = false;
-  cosmo->computed_linear_power = false;
-  cosmo->computed_nonlin_power = false;
   cosmo->computed_sigma = false;
   cosmo->status = 0;
   ccl_cosmology_set_status_message(cosmo, "");
 
   if(cosmo->spline_params.A_SPLINE_MAX !=1.) {
     cosmo->status = CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_core.c: A_SPLINE_MAX needs to be 1.\n");
+    ccl_cosmology_set_status_message(cosmo,
+                                     "ccl_core.c: ccl_cosmology_create(): "
+                                     "A_SPLINE_MAX needs to be 1.\n");
   }
 
   return cosmo;
@@ -379,8 +379,7 @@ A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
 
  */
-ccl_parameters ccl_parameters_create(
-                     double Omega_c, double Omega_b, double Omega_k,
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab,
@@ -390,7 +389,7 @@ ccl_parameters ccl_parameters_create(
 				     double *dfarr_mgrowth, int *status)
 {
   #ifndef USE_GSL_ERROR
-    gsl_set_error_handler_off ();
+    gsl_set_error_handler_off();
   #endif
 
   ccl_parameters params;
@@ -613,7 +612,9 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
   if (!f) {
     *status = CCL_ERROR_FILE_READ;
     ccl_parameters bad_params;
-    ccl_raise_warning(CCL_ERROR_FILE_READ, "ccl_core.c: Failed to read parameters from file.");
+    ccl_raise_warning(CCL_ERROR_FILE_READ,
+                      "ccl_core.c: ccl_parameters_read_yaml(): "
+                      "Failed to read parameters from file.");
 
     return bad_params;
   }
@@ -714,7 +715,8 @@ ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
   if (*status) {
     ccl_raise_warning(
       *status,
-      "ccl_core.c: Structure of YAML file incorrect: %s",
+      "ccl_core.c: ccl_parameters_read_yaml():"
+      "Structure of YAML file incorrect: %s",
       filename);
   }
 
@@ -757,10 +759,7 @@ void ccl_data_free(ccl_data * data) {
   gsl_spline_free(data->fgrowth);
   gsl_spline_free(data->E);
   gsl_spline_free(data->achi);
-  gsl_spline_free(data->logsigma);
-  gsl_spline_free(data->dlnsigma_dlogm);
-  ccl_f2d_t_free(data->p_lin);
-  ccl_f2d_t_free(data->p_nl);
+  gsl_spline2d_free(data->logsigma);
   ccl_f1d_t_free(data->rsd_splines[0]);
   ccl_f1d_t_free(data->rsd_splines[1]);
   ccl_f1d_t_free(data->rsd_splines[2]);

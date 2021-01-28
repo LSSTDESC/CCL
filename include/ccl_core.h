@@ -107,6 +107,8 @@ typedef struct ccl_spline_params {
   double A_SPLINE_MIN;
   double A_SPLINE_MINLOG_PK;
   double A_SPLINE_MIN_PK;
+  double A_SPLINE_MINLOG_SM;
+  double A_SPLINE_MIN_SM;
   double A_SPLINE_MAX;
   double A_SPLINE_MINLOG;
   int A_SPLINE_NLOG;
@@ -118,6 +120,8 @@ typedef struct ccl_spline_params {
   double LOGM_SPLINE_MAX;
 
   //PS a and k spline
+  int A_SPLINE_NA_SM;
+  int A_SPLINE_NLOG_SM;
   int A_SPLINE_NA_PK;
   int A_SPLINE_NLOG_PK;
 
@@ -269,12 +273,7 @@ typedef struct ccl_data {
   gsl_spline * achi;
 
   // Function of Halo mass M
-  gsl_spline * logsigma;
-  gsl_spline * dlnsigma_dlogm;
-
-  // power spectrum splines
-  ccl_f2d_t * p_lin;
-  ccl_f2d_t * p_nl;
+  gsl_spline2d * logsigma;
 
   // real-space splines for RSD
   ccl_f1d_t* rsd_splines[3];
@@ -293,8 +292,6 @@ typedef struct ccl_cosmology {
 
   bool computed_distances;
   bool computed_growth;
-  bool computed_linear_power;
-  bool computed_nonlin_power;
   bool computed_sigma;
 
   int status;
@@ -341,13 +338,6 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 				     double mu_0, double sigma_0, double c1_mg, double c2_mg, double lambda_mg,
                                      int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status);
-
-/* ------- ROUTINE: ccl_parameters_create_flat_lcdm --------
-INPUT: some cosmological parameters needed to create a flat LCDM model
-TASK: call ccl_parameters_create to produce an LCDM model
-*/
-ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h,
-double norm_pk, double n_s, int *status);
 
 
 /**

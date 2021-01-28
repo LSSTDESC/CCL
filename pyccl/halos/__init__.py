@@ -35,11 +35,12 @@ from .hbias import (  # noqa
 from .profiles import (  # noqa
     HaloProfile, HaloProfileGaussian,
     HaloProfilePowerLaw, HaloProfileNFW,
-    HaloProfileEinasto, HaloProfileHernquist)
+    HaloProfileEinasto, HaloProfileHernquist,
+    HaloProfilePressureGNFW, HaloProfileHOD)
 
 # Halo profile 2-point cumulants
 from .profiles_2pt import (  # noqa
-    Profile2pt)
+    Profile2pt, Profile2ptHOD)
 
 # Halo model power spectrum
 from .halo_model import (  # noqa

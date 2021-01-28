@@ -14,48 +14,48 @@ except ImportError:
 
 
 class PTCalculator(object):
+    """ This class implements a set of methods that can be
+    used to compute the various components needed to estimate
+    perturbation theory correlations. These calculations are
+    currently based on FAST-PT
+    (https://github.com/JoeMcEwen/FAST-PT).
+
+    Args:
+        with_NC (bool): set to True if you'll want to use
+            this calculator to compute correlations involving
+            number counts.
+        with_IA(bool): set to True if you'll want to use
+            this calculator to compute correlations involving
+            intrinsic alignments.
+        with_dd(bool): set to True if you'll want to use
+            this calculator to compute the one-loop matter power
+            spectrum.
+        log10k_min (float): decimal logarithm of the minimum
+            Fourier scale (in Mpc^-1) for which you want to
+            calculate perturbation theory quantities.
+        log10k_max (float): decimal logarithm of the maximum
+            Fourier scale (in Mpc^-1) for which you want to
+            calculate perturbation theory quantities.
+        pad_factor (float): fraction of the log(k) interval
+            you want to add as padding for FFTLog calculations
+            within FAST-PT.
+        low_extrap (float): decimal logaritm of the minimum
+            Fourier scale (in Mpc^-1) for which FAST-PT will
+            extrapolate.
+        high_extrap (float): decimal logaritm of the maximum
+            Fourier scale (in Mpc^-1) for which FAST-PT will
+            extrapolate.
+        P_window (array_like or None): 2-element array describing
+            the tapering window used by FAST-PT. See FAST-PT
+            documentation for more details.
+        C_window (float): `C_window` parameter used by FAST-PT
+            to smooth the edges and avoid ringing. See FAST-PT
+            documentation for more details.
+    """
     def __init__(self, with_NC=False, with_IA=False, with_dd=True,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75):
-        """ This class implements a set of methods that can be
-        used to compute the various components needed to estimate
-        perturbation theory correlations. These calculations are
-        currently based on FAST-PT
-        (https://github.com/JoeMcEwen/FAST-PT).
-
-        Args:
-            with_NC (bool): set to True if you'll want to use
-                this calculator to compute correlations involving
-                number counts.
-            with_IA(bool): set to True if you'll want to use
-                this calculator to compute correlations involving
-                intrinsic alignments.
-            with_dd(bool): set to True if you'll want to use
-                this calculator to compute the one-loop matter power
-                spectrum.
-            log10k_min (float): decimal logarithm of the minimum
-                Fourier scale (in Mpc^-1) for which you want to
-                calculate perturbation theory quantities.
-            log10k_max (float): decimal logarithm of the maximum
-                Fourier scale (in Mpc^-1) for which you want to
-                calculate perturbation theory quantities.
-            pad_factor (float): fraction of the log(k) interval
-                you want to add as padding for FFTLog calculations
-                within FAST-PT.
-            low_extrap (float): decimal logaritm of the minimum
-                Fourier scale (in Mpc^-1) for which FAST-PT will
-                extrapolate.
-            high_extrap (float): decimal logaritm of the maximum
-                Fourier scale (in Mpc^-1) for which FAST-PT will
-                extrapolate.
-            P_window (array_like or None): 2-element array describing
-                the tapering window used by FAST-PT. See FAST-PT
-                documentation for more details.
-            C_window (float): `C_window` parameter used by FAST-PT
-                to smooth the edges and avoid ringing. See FAST-PT
-                documentation for more details.
-        """
         assert HAVE_FASTPT, (
             "You must have the `FAST-PT` python package "
             "installed to use CCL to get PT observables! "
@@ -89,6 +89,7 @@ class PTCalculator(object):
 
     def update_pk(self, pk):
         """ Update the internal PT arrays.
+
         Args:
             pk (array_like): linear power spectrum sampled at the
                 internal `k` values used by this calculator.
@@ -380,7 +381,8 @@ class PTCalculator(object):
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                 sub_lowk=False, nonlin_pk_type='nonlinear',
                 a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
-                return_ia_bb=False, return_ia_ee_and_bb=False):
+                return_ia_bb=False, return_ia_ee_and_bb=False,
+                return_ptc=False):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the PT power spectrum for two quantities defined by
     two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
@@ -428,9 +430,16 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
             If `False` (default) E-mode power spectrum is returned.
             Supersedes `return_ia_bb`.
+        return_ptc (bool): if `True`, the fastpt object used as the PT
+            calculator (ptc) will also be returned. This feature may
+            be useful if an input ptc is not specified and one is
+            initialized when this function is called. If `False` (default)
+            the ptc is not output, whether or not it is initialized as
+            part of the function call.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
+        :class:`~pyccl.nl_pt.power.PTCalculator`: PT Calc [optional]
     """
     if a_arr is None:
         status = 0
@@ -580,10 +589,16 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                         lk_arr=np.log(ptc.ks),
                         pk_arr=p_pt[1].T,
                         is_logp=False)
-        return pt_pk_ee, pt_pk_bb
+        if return_ptc:
+            return pt_pk_ee, pt_pk_bb, ptc
+        else:
+            return pt_pk_ee, pt_pk_bb
     else:
         pt_pk = Pk2D(a_arr=a_arr,
                      lk_arr=np.log(ptc.ks),
                      pk_arr=p_pt.T,
                      is_logp=False)
-        return pt_pk
+        if return_ptc:
+            return pt_pk, ptc
+        else:
+            return pt_pk

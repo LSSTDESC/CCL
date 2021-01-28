@@ -132,7 +132,7 @@ class MassFunc(object):
 
         Returns:
             float or array_like: mass function \
-                :math:`dn/d\\log_{10}M` in units of Mpc^-3.
+                :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
         """
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
@@ -144,7 +144,7 @@ class MassFunc(object):
                                     len(logM), status)
         check(status)
         # dlogsigma(M)/dlog10(M)
-        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, logM,
+        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
                                                    len(logM), status)
         check(status)
 

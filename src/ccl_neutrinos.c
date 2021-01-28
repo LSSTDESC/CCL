@@ -48,7 +48,7 @@ static double nu_integrand(double x, void *r) {
 TASK: Get the spline of the result of the phase-space integral required for massive neutrinos.
 */
 
-gsl_spline* calculate_nu_phasespace_spline(int *status) {
+static gsl_spline* calculate_nu_phasespace_spline(int *status) {
   int N = CCL_NU_MNUT_N;
   double *mnut = NULL;
   double *y = NULL;
@@ -128,7 +128,7 @@ gsl_spline* calculate_nu_phasespace_spline(int *status) {
 INPUTS: mnuOT: the dimensionless mass / temperature of a single massive neutrino
 TASK: Get the value of the phase space integral at mnuOT
 */
-double nu_phasespace_intg(double mnuOT, int* status)
+static double nu_phasespace_intg(double mnuOT, int* status)
 {
   // Check if the global variable for the phasespace spline has been defined yet:
   if (nu_spline == NULL)
@@ -160,24 +160,16 @@ INPUTS: a: scale factor, Nnumass: number of massive neutrino species,
 TASK: Compute Omeganu * h^2 as a function of time.
 !! To all practical purposes, Neff is simply N_nu_mass !!
 */
-double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, int* status) {
-  double Tnu, a4, prefix_massless, mnuone, OmNuh2;
+double ccl_Omeganuh2(double a, int N_nu_mass, double* mnu, double T_CMB, int* status) {
+  double Tnu, a4, prefix_massless, OmNuh2;
   double Tnu_eff, mnuOT, intval, prefix_massive;
-  double total_mass; // To check if this is the massless or massive case.
 
   // First check if N_nu_mass is 0
   if (N_nu_mass == 0) return 0.0;
 
   Tnu = T_CMB*pow(4./11.,1./3.);
   a4 = a*a*a*a;
-  // Check if mnu=0. We assume that in the massless case mnu is a
-  // pointer to a single element and that element is 0. This should in principle never be called.
-  if (mnu[0] < 0.00017) {  // Limit taken from Lesgourges et al. 2012
-    prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu;
-    return N_nu_mass*prefix_massless*7./8./a4;
-  }
-
-  // And the remaining massive case.
+  
   // Tnu_eff is used in the massive case because CLASS uses an effective
   // temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * T_CMB = 0.71611 * T_CMB
   Tnu_eff = Tnu * ccl_constants.TNCDM / (pow(4./11.,1./3.));
@@ -187,13 +179,22 @@ double ccl_Omeganuh2 (double a, int N_nu_mass, double* mnu, double T_CMB, int* s
 
   OmNuh2 = 0.; // Initialize to 0 - we add to this for each massive neutrino species.
   for(int i=0; i < N_nu_mass; i++) {
-    // Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K))
-    // This returns the density normalized so that we get nuh2 at a=0
-    mnuOT = mnu[i] / (Tnu_eff/a) * (ccl_constants.EV_IN_J / (ccl_constants.KBOLTZ));
+      
+    // Check whether this species is effectively massless
+    // In this case, invoke the analytic massless limit:
+    if (mnu[i] < 0.00017) {  // Limit taken from Lesgourges et al. 2012
+      prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu;	
+      OmNuh2 = N_nu_mass*prefix_massless*7./8./a4 + OmNuh2;	
+    } else {  
+       // For the true massive case:  
+       // Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K))
+       // This returns the density normalized so that we get nuh2 at a=0
+       mnuOT = mnu[i] / (Tnu_eff/a) * (ccl_constants.EV_IN_J / (ccl_constants.KBOLTZ));
 
-    // Get the value of the phase-space integral
-    intval = nu_phasespace_intg(mnuOT, status);
-    OmNuh2 = intval*prefix_massive/a4 + OmNuh2;
+       // Get the value of the phase-space integral
+       intval = nu_phasespace_intg(mnuOT, status);
+       OmNuh2 = intval*prefix_massive/a4 + OmNuh2;
+    }
   }
 
   return OmNuh2;
@@ -246,7 +247,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split,
           *status = CCL_ERROR_MNU_UNPHYSICAL;
           ccl_raise_warning(
               *status,
-              "CCL_ERROR_MNU_UNPHYSICAL: Sum of neutrinos masses for this Omeganu "
+              "ccl_neutrinos.c: ccl_nu_masses(): Sum of neutrinos masses for this Omeganu "
               "value is incompatible with the requested mass hierarchy.");
         }
       }
@@ -282,7 +283,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split,
           *status = CCL_ERROR_MNU_UNPHYSICAL;
           ccl_raise_warning(
               *status,
-              "CCL_ERROR_MNU_UNPHYSICAL: Sum of neutrinos masses for this Omeganu "
+              "ccl_neutrinos.c: ccl_nu_masses(): Sum of neutrinos masses for this Omeganu "
               "value is incompatible with the requested mass hierarchy.");
         }
       }
@@ -314,6 +315,7 @@ double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split,
     *status = CCL_ERROR_MNU_UNPHYSICAL;
     ccl_raise_warning(
         *status,
+        "ccl_neutrinos.c: ccl_nu_masses(): "
         "mass option = %d not yet supported!", mass_split);
   }
 

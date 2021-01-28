@@ -113,7 +113,7 @@ static double tkEH_b(eh_struct *eh,double k)
   //////
   // Eisenstein & Hu's Tk_b (Eq 21)
   // see astro-ph/9709112 for the relevant equations
-  double x_bessel,part1,part2,jbes;
+  double x_bessel,part1,part2;
   double x=k*eh->rsound;
 
   //First term of Eq. 21
