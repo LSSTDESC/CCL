@@ -10,7 +10,7 @@ CCL_BEGIN_DECLS
  * @param cosmo Cosmological parameters
  * @param trc1 a ccl_cl_tracer_collection_t containing a bunch of individual contributions.
  * @param trc2 a ccl_cl_tracer_collection_t containing a bunch of individual contributions.
- * @param psp the p2d_t object representing the 3D power spectrum to integrate over. Pass null to use the non-linear matter power spectrum.
+ * @param psp the p2d_t object representing the 3D power spectrum to integrate over.
  * @param nl_out number of multipoles on which the power spectrum will be calculated.
  * @param l_out multipole values on which the power spectrum will be calculated.
  * @param cl_out will hold the calculated power spectrum values.
@@ -29,7 +29,7 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
  * @param cosmo Cosmological parameters
  * @param trc1 a ccl_cl_tracer_collection_t containing a bunch of individual contributions.
  * @param trc2 a ccl_cl_tracer_collection_t containing a bunch of individual contributions.
- * @param psp the p2d_t object representing the 3D power spectrum to integrate over. Pass null to use the non-linear matter power spectrum.
+ * @param psp the p2d_t object representing the 3D power spectrum to integrate over.
  * @param nl_out number of multipoles on which the power spectrum will be calculated.
  * @param l_out multipole values on which the power spectrum will be calculated.
  * @param cl_out will hold the calculated power spectrum values.
