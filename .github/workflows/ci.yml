@@ -55,10 +55,10 @@ jobs:
           if [[ ${MATRIX_OS} == "macos-latest" ]]; then
             conda install llvm-openmp
             echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
-            echo "CONDA_BUILD_SYSROOT=/" >> $GITHUB_ENV
             SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             echo "SDKROOT: ${SDKROOT}"
-            echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
+            # echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
+            echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
           fi
         env:
           MATRIX_OS: ${{ matrix.os }}
@@ -104,7 +104,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          coveralls
+          coveralls --service=github
 
   build-doc-only-ubuntu:
     runs-on: ubuntu-latest
