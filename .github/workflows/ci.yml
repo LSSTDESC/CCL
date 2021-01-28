@@ -38,6 +38,7 @@ jobs:
           show-channel-urls: true
 
       - name: remove homebrew
+        if: matrix.os == 'macos-latest'
         run: |
           curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
           chmod u+x ./uninstall_homebrew.sh
@@ -57,7 +58,7 @@ jobs:
             echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
             SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             echo "SDKROOT: ${SDKROOT}"
-            # echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
+            echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
             echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
           fi
         env:

@@ -12,7 +12,7 @@ sed -i.bak -e 's/^OPTFLAG =/OPTFLAG = ${CFLAGS} ${LDFLAGS}/g' Makefile
 sed -i.bak -e 's/^#CCFLAG +=/CCFLAG +=/g' Makefile
 sed -i.bak -e 's/^#CCFLAG =/CCFLAG =/g' Makefile
 
-make
+make -j4
 
 # at this point the make file leaves you in the python dir
 cd ..
