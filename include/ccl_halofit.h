@@ -22,7 +22,8 @@ typedef struct halofit_struct {
  * @param cosmo Cosmological data
  * @return int, status of computations
  */
-halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status);
+halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
+                                       ccl_f2d_t *plin, int *status);
 
 /*
  * Free a halofit struct
@@ -39,7 +40,8 @@ void ccl_halofit_struct_free(halofit_struct *hf);
  * @param hf: halofit splines for evaluating the power spectrum
  * @return halofit_matter_power: halofit power spectrum, P(k), units of Mpc^{3}
  */
-double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struct *hf, int *status);
+double ccl_halofit_power(ccl_cosmology *cosmo, ccl_f2d_t *plin,
+                         double k, double a, halofit_struct *hf, int *status);
 
 CCL_END_DECLS
 

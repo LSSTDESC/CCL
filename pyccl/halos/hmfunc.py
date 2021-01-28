@@ -144,7 +144,7 @@ class MassFunc(object):
                                     len(logM), status)
         check(status)
         # dlogsigma(M)/dlog10(M)
-        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, logM,
+        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
                                                    len(logM), status)
         check(status)
 
@@ -432,10 +432,14 @@ class MassFuncTinker10(MassFunc):
             If `None`, Delta = 200 (matter) will be used.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
+        norm_all_z (bool): should we normalize the mass function
+            at z=0 or at all z?
     """
     name = 'Tinker10'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+                 norm_all_z=False):
+        self.norm_all_z = norm_all_z
         super(MassFuncTinker10, self).__init__(cosmo,
                                                mass_def,
                                                mass_def_strict)
@@ -446,8 +450,6 @@ class MassFuncTinker10(MassFunc):
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
 
-        delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
-                          1200.0, 1600.0, 2400.0, 3200.0])
         delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
                           1200.0, 1600.0, 2400.0, 3200.0])
         alpha = np.array([0.368, 0.363, 0.385, 0.389, 0.393,
@@ -467,6 +469,13 @@ class MassFuncTinker10(MassFunc):
         self.pb0 = interp1d(ldelta, beta)
         self.pc0 = interp1d(ldelta, gamma)
         self.pd0 = interp1d(ldelta, phi)
+        if self.norm_all_z:
+            p = np.array([-0.158, -0.195, -0.213, -0.254, -0.281,
+                          -0.349, -0.367, -0.435, -0.504])
+            q = np.array([0.0128, 0.0128, 0.0143, 0.0154, 0.0172,
+                          0.0174, 0.0199, 0.0203, 0.0205])
+            self.pp0 = interp1d(ldelta, p)
+            self.pq0 = interp1d(ldelta, q)
 
     def _check_mdef_strict(self, mdef):
         if mdef.Delta == 'fof':
@@ -476,11 +485,19 @@ class MassFuncTinker10(MassFunc):
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         ld = np.log10(self._get_Delta_m(cosmo, a))
         nu = 1.686 / sigM
+        # redshift evolution only up to z=3
+        a = np.clip(a, 0.25, 1)
         pa = self.pa0(ld) * a**(-0.27)
         pb = self.pb0(ld) * a**(-0.20)
         pc = self.pc0(ld) * a**0.01
         pd = self.pd0(ld) * a**0.08
-        return nu * self.pA0(ld) * (1 + (pb * nu)**(-2 * pd)) * \
+        pA0 = self.pA0(ld)
+        if self.norm_all_z:
+            z = 1./a - 1
+            pp = self.pp0(ld)
+            pq = self.pq0(ld)
+            pA0 *= np.exp(z*(pp+pq*z))
+        return nu * pA0 * (1 + (pb * nu)**(-2 * pd)) * \
             nu**(2 * pa) * np.exp(-0.5 * pc * nu**2)
 
 

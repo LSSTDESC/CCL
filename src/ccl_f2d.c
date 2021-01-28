@@ -103,7 +103,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
                          int growth_exponent,
                          ccl_f2d_interp_t interp_type,
                          int *status) {
-  int s2dstatus;
+  int s2dstatus=0;
   ccl_f2d_t *f2d = malloc(sizeof(ccl_f2d_t));
   if (f2d == NULL)
     *status = CCL_ERROR_MEMORY;
@@ -184,7 +184,6 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 
   if (*status == 0) {
     if (f2d->is_factorizable) {
-      s2dstatus = 0;
       if (f2d->fk != NULL)
         s2dstatus |= gsl_spline_init(f2d->fk, lk_arr, fk_arr, nk);
       if (f2d->fa != NULL)
@@ -244,10 +243,9 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status
   }
 
   // Evaluate spline
-  int spstatus;
+  int spstatus=0;
   if (f2d->is_factorizable) {
     double fk, fa;
-    spstatus = 0;
     if (f2d->fk == NULL) {
       if (f2d->is_log)
         fk = 0;
