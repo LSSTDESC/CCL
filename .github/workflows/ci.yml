@@ -5,132 +5,114 @@ on:
       - main
       - master
       - releases/*
-  pull_request:
-    branches:
-      - main
-      - master
-      - releases/*
+  pull_request: null
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
-        py: [ 3.6, 3.7, 3.8, 3.9 ]
-        CC: [ gcc ]
-
-        # Check macos too
-        include:
-          - os: macos-latest
-            py: 3.7
+        os:
+          - macos-latest
+          - ubuntu-latest
+        py: 3.8
 
     steps:
         - uses: actions/checkout@v2
 
-        - name: Set up Python ${{ matrix.py }}
-          uses: actions/setup-python@v2
+        - uses: conda-incubator/setup-miniconda@v2
           with:
             python-version: ${{ matrix.py }}
+            channels: conda-forge,defaults
+            channel-priority: strict
+            show-channel-urls: true
 
-        - name: Install GFortran macOS
-          # brew returns a failure exit code if
-          # the thing is already installed and
-          # current. Hence the `|| true` statement
-          if: matrix.os == 'macos-latest'
+        - name: remove homebrew
           run: |
-            brew cask install gfortran || true
+            curl -s https://raw.githubusercontent.com/Homebrew/install/master/uninstall -o uninstall_homebrew.sh
+            chmod u+x ./uninstall_homebrew.sh
+            ./uninstall_homebrew.sh -f -q >& /dev/null
+            rm -f uninstall_homebrew.sh
 
-        - name: Install GSL, FFTW, SWIG (macos)
-          if: matrix.os == 'macos-latest'
+        - name: install deps
           run: |
-            brew install fftw || true
-            brew install gsl || true
-            brew install swig || true
+            conda install \
+              pip \
+              numpy nose coveralls flake8 pyyaml gsl fftw cmake swig scipy \
+              compilers pkg-config setuptools_scm pytest pandas pytest-cov \
+              cython "camb>=1" isitgr traitlets fast-pt
 
-        - name: Install GSL, FFTW (linux)
-          if: matrix.os == 'ubuntu-latest'
+            if [[ ${MATRIX_OS} == "macos-latest" ]]; then
+              conda install llvm-openmp
+              echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
+              echo "CONDA_BUILD_SYSROOT=/" >> $GITHUB_ENV
+            fi
+          env:
+            MATRIX_OS: ${{ matrix.os }}
+
+        - name: install class
           run: |
-            sudo -H apt-get install libgsl-dev libfftw3-dev
+            if [[ ${MATRIX_OS} == "macos-latest" ]]; then
+              . ci_scripts/install_class_osx.sh
+            else
+              . ci_scripts_install_class_linux.sh
+            fi
+          env:
+            MATRIX_OS: ${{ matrix.os }}
 
-        - name: Install python dependencies
-          run: |
-            python -m pip install -U pip
-            pip install -U numpy
-            pip install -U scipy
-            pip install -U pytest
-            pip install -U pytest-cov
-            pip install -U fast-pt
-            pip install -U camb
-            pip install -U isitgr
-            pip install -U cython
-            pip install -U flake8
-
-        - name: Install CLASS (linux)
-          if: matrix.os == 'ubuntu-latest'
-          run: |
-            git clone -b v2.7.2 --single-branch --depth 1 "https://github.com/lesgourg/class_public.git"
-            cd class_public
-            make
-
-        - name: Install CLASS (macos)
-          if: matrix.os == 'macos-latest'
-          run: |
-            git clone -b v2.7.2 --single-branch --depth 1 "https://github.com/lesgourg/class_public.git"
-            cd class_public
-            make CC=gcc-9
-
-        - name: Flake
+        - name: lint
           run: |
             flake8 pyccl
             flake8 --exclude=data benchmarks
+            if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
+              exit 1
+            fi
 
         - name: Build CCL
           run: |
             python setup.py build
             python setup.py develop
 
-        - name: C unit tests
+        - name: c unit tests
           run: |
             cd build
             make -j4
             CLASS_PARAM_DIR=./extern/share/class/ OMP_NUM_THREADS=2 ./check_ccl
 
-        - name: Python unit tests
-          run: OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
+        - name: python unit tests
+          run: |
+            OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
 
         - name: Benchmarks
-          run: OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
+          run: |
+            OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
 
-        - name: Coveralls
+        - name: coveralls
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
-            pip install -U coveralls
             coveralls
-
-        - name: Cache pip, brew
-          uses: actions/cache@v2
-          with:
-            path: |
-              ~/.cache/pip
-              $HOME/Library/Caches/Homebrew
-              /usr/local/Cellar
-            key: ${{ runner.os }}-${{ matrix.py }}-cache
-            restore-keys: |
-              ${{ runner.os }}-${{ matrix.py }}-cache
-              ${{ runner.os }}-
 
   build-doc-only-ubuntu:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
-      - name: Install prereq using apt
+      - name: install latex
         run: |
 
-          sudo apt install texlive texlive-bibtex-extra texlive-science texlive-publishers latexmk python3-sphinx python3-sphinx-rtd-theme python3-nbconvert python3-jupyter-client jupyter-client jupyter-nbconvert sphinx-common pandoc python3-setuptools -y
+          sudo apt install \
+            texlive texlive-bibtex-extra texlive-science texlive-publishers \
+            latexmk python3-sphinx python3-sphinx-rtd-theme python3-nbconvert \
+            python3-jupyter-client jupyter-client jupyter-nbconvert sphinx-common \
+            pandoc python3-setuptools \
+            -y
           sudo pip3 install mkauthlist
-      - name: Building docs
+
+      - name: build docs
         run: |
           cd doc/0000-ccl_note
           make
