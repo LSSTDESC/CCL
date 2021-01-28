@@ -104,7 +104,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         cosmo->params.w0, cosmo->params.wa, cosmo->params.h,
         norm_pk, cosmo->params.n_s,
         cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
-        cosmo->params.bcm_ks, 0., 0., cosmo->params.nz_mgrowth,
+        cosmo->params.bcm_ks, 0., 0., 1., 1., 0.,cosmo->params.nz_mgrowth,
         cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
 
       if (*status) {
@@ -126,15 +126,9 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
       }
     }
 
-      if (*status == 0) {
-        params_GR = ccl_parameters_create(
-          cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k,
-          cosmo->params.Neff, mnu_list, cosmo->params.N_nu_mass,
-          cosmo->params.w0, cosmo->params.wa, cosmo->params.h,
-          norm_pk, cosmo->params.n_s,
-          cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
-          cosmo->params.bcm_ks, 0., 0., 1., 1., 0.,cosmo->params.nz_mgrowth,
-          cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
+    if (*status == 0) {
+     ccl_cosmology_compute_growth(cosmo_GR, status);
+
 
       if (*status) {
         *status = CCL_ERROR_PARAMETERS;

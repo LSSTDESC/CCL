@@ -48,12 +48,15 @@ def set_up(request):
     bz1 = 1.45*np.ones_like(pz1)
     bz2 = 1.55*np.ones_like(pz2)
 
+    # define k range
+    k_array = np.linspace(1e-4,71.4267030535,500)
+
     # Initialize tracers
     trc = {}
     trc['g1'] = ccl.NumberCountsTracer(cosmo, False, (z1, pz1), (z1, bz1))
     trc['g2'] = ccl.NumberCountsTracer(cosmo, False, (z2, pz2), (z2, bz2))
-    trc['l1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1))
-    trc['l2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2))
+    trc['l1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1), k=k_array)
+    trc['l2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2), k=k_array)
 
     # Read benchmarks
     bms = {}
