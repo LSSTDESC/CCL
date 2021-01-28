@@ -666,12 +666,12 @@ def _check_returned_tracer(return_val):
 
 
 def get_MG_transfer_function(cosmo, z, k=None):
-    """ This function allows to obtain the function Sigma(z,k) (1 or 2 D vector)
-        for an array redshift (i.e. scale factor) coming from the redshift 
-        distributiorn (defined by the user) and a single value or an array of k 
+    """ This function allows to obtain the function Sigma(z,k) (1 or 2D arrays)
+        for an array of redshifts (i.e. scale factors) coming from a redshift 
+        distribution (defined by the user) and a single value or an array of k 
         specified by the user. We obtain then Sigma(z,k) as a 1D array for those z 
         and k arrays and then convert it to a 2D array taking into consideration 
-        the given sizes of the arrays for a and k. The MG parameter array goes then
+        the given sizes of the arrays for z and k. The MG parameter array goes then
         as a multiplicative factor within the MG transfer function. 
         If k is not specified then only a 1D array for Sigma(a,k=0) is used.
 
@@ -687,8 +687,9 @@ def get_MG_transfer_function(cosmo, z, k=None):
     """
 	
     if isinstance(z, float):
-        a_CMB=1/(1+z)
-        a = np.linspace(a_CMB, 1, 100) 
+        a_single=1/(1+z)
+        a = np.linspace(a_single, 1, 100) 
+        # a_single is for example like for the CMB surface
     else:
         a = 1./(1+z)
     a.sort()
@@ -745,6 +746,9 @@ def get_MG_transfer_function(cosmo, z, k=None):
                     der_angles=der_angles)
             else:		
                 # Scale-independent case where k=None
+                # Note the last two cases can be condensed into one 
+                # but left separate in case needed for future 
+                # developement
                 self.add_tracer(cosmo, kernel,
                     transfer_a=mg_transfer, der_bessel=der_bessel, 
                     der_angles=der_angles)

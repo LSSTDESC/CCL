@@ -171,9 +171,6 @@ double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)
 	    s2_k = cosmo->params.lambda_mg*(hnorm*cosmo->params.H0)/k/(ccl_constants.CLIGHT/1000);
         s1_k = (1.0+cosmo->params.c2_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
 
-//		printf("c1=%f,c2=%f,lambda=%f \n",cosmo->params.c1_mg,cosmo->params.c2_mg,cosmo->params.lambda_mg);
-//		printf("hnorm=%f, s2_k=%f, H0=%f, c=%f \n",hnorm,s2_k,cosmo->params.H0,ccl_constants.CLIGHT);
-//	    printf("sigma_0=%f, k=%f, s1_k=%f \n \n", cosmo->params.sigma_0, k, s1_k);
 	}
 	return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status)/cosmo->params.Omega_l*s1_k;
 }
@@ -218,7 +215,6 @@ static int growth_ode_system(double a,const double y[],double dydt[],void *param
 INPUT: scale factor
 TASK: Define the ODE system to be solved in order to compute the growth (of the density)
 * in the case in which we use the mu / Sigma quasistatic parameterisation of modified gravity
-MI: tag to get started 
 */
 static int growth_ode_system_muSig(double a,const double y[],double dydt[],void *params)
 {
