@@ -16,7 +16,7 @@ import numpy as np
 from . import ccllib as lib
 from .pyutils import _vectorize_fn, _vectorize_fn3
 from .pyutils import _vectorize_fn4, _vectorize_fn5
-from .pyutils import  _vectorize_fn6
+from .pyutils import _vectorize_fn6
 
 species_types = {
     'critical': lib.species_crit_label,
@@ -287,23 +287,23 @@ def mu_MG(cosmo, a, k=None):
             mu_MG is assumed to be proportional to Omega_Lambda(z), \
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
     """
-	
     if (isinstance(k, (list, np.ndarray))):
         return _vectorize_fn6(lib.mu_MG,
                               lib.mu_MG_vec,
                               cosmo, a, k)
     else:
         if (isinstance(k, float) or isinstance(k, int)):
-            k=np.array([k])
-            return _vectorize_fn6(lib.mu_MG,
-                                  lib.mu_MG_vec,
-                                  cosmo, a, k)			
-        else:
-            k=np.array([0])
+            k = np.array([k])
             return _vectorize_fn6(lib.mu_MG,
                                   lib.mu_MG_vec,
                                   cosmo, a, k)
-	
+        else:
+            k = np.array([0])
+            return _vectorize_fn6(lib.mu_MG,
+                                  lib.mu_MG_vec,
+                                  cosmo, a, k)
+
+
 def Sig_MG(cosmo, a, k=None):
     """Redshift-dependent modification to Poisson equation for massless
     particles under modified gravity.
@@ -325,12 +325,12 @@ def Sig_MG(cosmo, a, k=None):
                               cosmo, a, k)
     else:
         if (isinstance(k, float) or isinstance(k, int)):
-            k=np.array([k])
+            k = np.array([k])
             return _vectorize_fn6(lib.Sig_MG,
                                   lib.Sig_MG_vec,
-                                  cosmo, a, k)			
+                                  cosmo, a, k)
         else:
-            k=np.array([0])
+            k = np.array([0])
             return _vectorize_fn6(lib.Sig_MG,
                                   lib.Sig_MG_vec,
                                   cosmo, a, k)

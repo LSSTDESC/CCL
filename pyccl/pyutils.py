@@ -301,6 +301,7 @@ def _vectorize_fn5(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     check(status, cosmo_in)
     return f
 
+
 def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     """Generic wrapper to allow vectorized (1D array) access to CCL
     functions with two vector arguments of the any length,
@@ -328,7 +329,6 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
         x2 = float(x2)
     if isinstance(x1, float):
         # Use single-value function
-#        print("using \n")
         if returns_status:
             f, status = fn(cosmo, x1, x2, status)
         else:
@@ -349,6 +349,7 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     # Check result and return
     check(status, cosmo_in)
     return f
+
 
 def resample_array(x_in, y_in, x_out,
                    extrap_lo='none', extrap_hi='none',
