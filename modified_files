@@ -1,0 +1,8 @@
+git add   include/ccl_background.h
+git add   pyccl/background.py
+git add   pyccl/ccl_background.i
+git add   pyccl/core.py
+git add   pyccl/pyutils.py
+git add   pyccl/tracers.py
+git add   src/ccl_background.c
+git add   src/ccl_core.c

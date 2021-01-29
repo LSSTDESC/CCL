@@ -1,7 +1,8 @@
 from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate, \
-    growth_factor, scale_factor_of_chi, Sig_MG
+    growth_factor, scale_factor_of_chi
+from .musigma import Sig_MG
 from .pyutils import _check_array_params, NoneArr
 import numpy as np
 
@@ -635,7 +636,7 @@ class WeakLensingTracer(Tracer):
             Defaults to True.
     """
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None,
-                 use_A_ia=True, k=None):
+                 use_A_ia=True):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -654,6 +655,7 @@ class WeakLensingTracer(Tracer):
                                 der_bessel=-1, der_angles=2)
             else:
                 # MG case
+                k = np.logspace(-5, -0.7)
                 mg_transfer = self._get_MG_transfer_function(cosmo, z_n, k)
                 self._MG_add_tracer(cosmo, kernel_l, mg_transfer,
                                     k, der_bessel=-1, der_angles=2)
@@ -682,6 +684,7 @@ class WeakLensingTracer(Tracer):
                                 der_bessel=-1, der_angles=2)
             else:
                 # MG case
+                k = np.logspace(-5, -0.7)
                 mg_transfer = self._get_MG_transfer_function(cosmo, z_a, k)
                 self._MG_add_tracer(cosmo, kernel_i, mg_transfer,
                                     k, der_bessel=-1, der_angles=2,
@@ -699,7 +702,7 @@ class CMBLensingTracer(Tracer):
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
-    def __init__(self, cosmo, z_source, n_samples=100, k=None):
+    def __init__(self, cosmo, z_source, n_samples=100):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -708,6 +711,7 @@ class CMBLensingTracer(Tracer):
         if (cosmo['sigma_0'] == 0):
             self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
         else:
+            k = np.logspace(-5, -0.7)
             mg_transfer = self._get_MG_transfer_function(cosmo, z_source, k)
             self._MG_add_tracer(cosmo, kernel, mg_transfer,
                                 k, der_bessel=-1, der_angles=1)
