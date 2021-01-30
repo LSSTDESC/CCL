@@ -22,11 +22,11 @@ double ccl_mu_MG(ccl_cosmology * cosmo, double a, double k, int *status)
     double s1_k, s2_k, hnorm;
 	// This function can be extended to include other
 	// redshift and scale z-dependences for mu in the future
-	hnorm = ccl_h_over_h0(cosmo, a, status);
     if (k==0.0) {
         s1_k = cosmo->params.c1_mg;
     }
     else {
+      hnorm = ccl_h_over_h0(cosmo, a, status);
 	    s2_k = (cosmo->params.lambda_mg*(hnorm*cosmo->params.H0)/k/(ccl_constants.CLIGHT/1000));
 	    s1_k = (1.0+cosmo->params.c1_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
 	}
@@ -44,11 +44,11 @@ double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)
     double s1_k, s2_k, hnorm;
 	// This function can be extended to include other
 	// redshift and scale dependences for Sigma in the future.
-	hnorm = ccl_h_over_h0(cosmo, a, status);
     if (k==0.0) {
         s1_k = cosmo->params.c2_mg;
     }
     else {
+      hnorm = ccl_h_over_h0(cosmo, a, status);
 	    s2_k = cosmo->params.lambda_mg*(hnorm*cosmo->params.H0)/k/(ccl_constants.CLIGHT/1000);
         s1_k = (1.0+cosmo->params.c2_mg*s2_k*s2_k)/(1.0+s2_k*s2_k);
 
@@ -190,6 +190,8 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         double D_GR = ccl_growth_factor_unnorm(cosmo_GR, aa[i], status);
         double renorm = D_mu/D_GR;
         rescale_factor[i] *= renorm*renorm;
+        //printf("D_GR=%f\n", D_GR);
+        //printf("D_mu=%f\n", D_mu);
       }
       rescale_extra_musig = rescale_factor[na-1];
 

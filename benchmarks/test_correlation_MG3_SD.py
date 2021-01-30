@@ -13,7 +13,7 @@ def corr_method(request):
 
 @pytest.fixture(scope='module')
 def set_up(request):
-    dirdat = os.path.dirname(__file__) + '/data/'
+    dirdat = os.path.dirname(__file__) + '/data'
     h0 = 0.67702026367187500
     logA = 3.05  # log(10^10 A_s)
     # scale dependent MG cosmology
@@ -41,8 +41,8 @@ def set_up(request):
     fl['ells'] = ells
 
     # Load dNdz's
-    z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)
-    z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt",  unpack=True)
+    z1, pz1 = np.loadtxt(dirdat + "/bin1_histo.txt", unpack=True)
+    z2, pz2 = np.loadtxt(dirdat + "/bin2_histo.txt",  unpack=True)
 
     # Set up the linear galaxy bias as used in generating benchmarks
     bz1 = 1.45*np.ones_like(pz1)

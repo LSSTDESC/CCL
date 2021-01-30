@@ -6,7 +6,6 @@
 
 // Enable vectorised arguments for arrays
 %apply (double* IN_ARRAY1, int DIM1) {(double* a, int na)};
-%apply (double* IN_ARRAY1, int DIM1) {(double* k, int nk)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* a1, int na1)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* a2, int na2)};
 %apply (double* IN_ARRAY1, int DIM1) {(double* chi, int nchi)};

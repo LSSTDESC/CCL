@@ -2,9 +2,40 @@ from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate, \
     growth_factor, scale_factor_of_chi
-from .musigma import Sig_MG
-from .pyutils import _check_array_params, NoneArr
+from .pyutils import _check_array_params, NoneArr, _vectorize_fn6
 import numpy as np
+
+
+def _Sig_MG(cosmo, a, k=None):
+    """Redshift-dependent modification to Poisson equation for massless
+    particles under modified gravity.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+        k (float or array_like): Wavenumber for scale
+
+    Returns:
+        float or array_like: Modification to Poisson equation under \
+            modified gravity at scale factor a. \
+            Sig_MG is assumed to be proportional to Omega_Lambda(z), \
+            see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
+    """
+    if (isinstance(k, (list, np.ndarray))):
+        return _vectorize_fn6(lib.Sig_MG,
+                              lib.Sig_MG_vec,
+                              cosmo, a, k)
+    else:
+        if (isinstance(k, float) or isinstance(k, int)):
+            k = np.array([k])
+            return _vectorize_fn6(lib.Sig_MG,
+                                  lib.Sig_MG_vec,
+                                  cosmo, a, k)
+        else:
+            k = np.array([0])
+            return _vectorize_fn6(lib.Sig_MG,
+                                  lib.Sig_MG_vec,
+                                  cosmo, a, k)
 
 
 def get_density_kernel(cosmo, dndz):
@@ -284,11 +315,6 @@ class Tracer(object):
                 self.add_tracer(cosmo, kernel,
                                 transfer_a=mg_transfer, der_bessel=der_bessel,
                                 der_angles=der_angles)
-            else:
-                # Scale-independent case where k=None
-                self.add_tracer(cosmo, kernel,
-                                transfer_a=mg_transfer, der_bessel=der_bessel,
-                                der_angles=der_angles)
 
         #  case of an astro bias depending on a and  k
         elif ((bias_transfer_a is not None) and (bias_transfer_k is not None)):
@@ -307,13 +333,7 @@ class Tracer(object):
                 self.add_tracer(cosmo, kernel, transfer_a=mg_transfer_new,
                                 der_bessel=der_bessel, der_angles=der_angles,
                                 transfer_k=bias_transfer_k)
-            else:
-                # Scale-independent case where k=None
-                mg_transfer_new = (mg_transfer[0], mg_transfer[1] *
-                                   bias_transfer_a[1])
-                self.add_tracer(cosmo, kernel, transfer_a=mg_transfer_new,
-                                der_bessel=der_bessel, der_angles=der_angles,
-                                transfer_k=bias_transfer_k)
+
         #  case of an astro bias depending on a but not k
         elif ((bias_transfer_a is not None) and (bias_transfer_k is None)):
             if (isinstance(k, (list, np.ndarray))):
@@ -328,12 +348,7 @@ class Tracer(object):
                                    bias_transfer_a[1])
                 self.add_tracer(cosmo, kernel, transfer_a=mg_transfer_new,
                                 der_bessel=der_bessel, der_angles=der_angles)
-            else:
-                # Scale-independent case where k=None
-                mg_transfer_new = (mg_transfer[0], mg_transfer[1] *
-                                   bias_transfer_a[1])
-                self.add_tracer(cosmo, kernel, transfer_a=mg_transfer_new,
-                                der_bessel=der_bessel, der_angles=der_angles)
+
         #  case of an astro bias depending on k but not a
         elif ((bias_transfer_a is None) and (bias_transfer_k is not None)):
             if (isinstance(k, (list, np.ndarray))):
@@ -347,16 +362,11 @@ class Tracer(object):
                 self.add_tracer(cosmo, kernel, transfer_a=mg_transfer,
                                 der_bessel=der_bessel, der_angles=der_angles,
                                 transfer_k=bias_transfer_k)
-            else:
-                # Scale-independent case where k=None
-                self.add_tracer(cosmo, kernel, transfer_a=mg_transfer,
-                                der_bessel=der_bessel, der_angles=der_angles,
-                                transfer_k=bias_transfer_k)
 
     def _get_MG_transfer_function(self, cosmo, z, k=None):
         """ This function allows to obtain the function Sigma(z,k) (1 or 2D
-            arrays) for an array of redshifts (i.e. scale factors) coming from
-            a redshift distribution (defined by the user) and a single value or
+            arrays) for an array of redshifts coming from a redshift 
+            distribution (defined by the user) and a single value or
             an array of k specified by the user. We obtain then Sigma(z,k) as a
             1D array for those z and k arrays and then convert it to a 2D array
             taking into consideration the given sizes of the arrays for z and k
@@ -387,33 +397,19 @@ class Tracer(object):
             a = 1./(1.+z)
         a.sort()
         # Scale-dependant MG case with an array of k
-        if (isinstance(k, (list, np.ndarray))):
-            k.sort()
-            # computing MG factor array
-            mgfac_1d = 1
-            mgfac_1d += Sig_MG(cosmo, a, k)
-            # converting 1D MG factor to a 2D array, so it is compatible
-            # with the transfer_ka input structure in MG_add.tracer and
-            # add.tracer
-            mgfac_2d = mgfac_1d.reshape(len(a), -1, order='F')
-            # converting to ln(k) array
-            lk = np.log(k)
-            # setting transfer_ka for this case
-            mg_transfer = (a, lk, mgfac_2d)
-        # Scale-dependant MG case for a signle value of k
-        elif (isinstance(k, float) or isinstance(k, int)):
-            mgfac_1d = 1
-            mgfac_1d += Sig_MG(cosmo, a, k)
-        # setting transfer function with an array of a and a value of k
-            mg_transfer = (a, mgfac_1d)
-        # Scale-independent MG case (for k=None)
-        else:
-            k = None
-            # computing MG factor
-            mgfac_1d = 1
-            mgfac_1d += Sig_MG(cosmo, a, k)
-        # setting transfer function with an array of a and k=None
-            mg_transfer = (a, mgfac_1d)
+        k.sort()
+        # computing MG factor array
+        mgfac_1d = 1
+        mgfac_1d += _Sig_MG(cosmo, a, k)
+        # converting 1D MG factor to a 2D array, so it is compatible
+        # with the transfer_ka input structure in MG_add.tracer and
+        # add.tracer
+        mgfac_2d = mgfac_1d.reshape(len(a), -1, order='F')
+        # converting to ln(k) array
+        lk = np.log(k)
+        # setting transfer_ka for this case
+        mg_transfer = (a, lk, mgfac_2d)
+
         return mg_transfer
 
     def add_tracer(self, cosmo, kernel=None,
@@ -611,8 +607,17 @@ class NumberCountsTracer(Tracer):
             chi, w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias)
             # Multiply by -2 for magnification
             kernel_m = (chi, -2 * w)
-            self.add_tracer(cosmo, kernel=kernel_m,
-                            der_bessel=-1, der_angles=1)
+            if (cosmo['sigma_0'] == 0):
+                # GR case
+                self.add_tracer(cosmo, kernel=kernel_m,
+                                der_bessel=-1, der_angles=1)
+            else:
+                # MG case
+                k = np.logspace(-5, -0.7)
+                z_b, _ = _check_array_params(dndz, 'dndz')
+                mg_transfer = self._get_MG_transfer_function(cosmo, z_b, k)
+                self._MG_add_tracer(cosmo, kernel_m, mg_transfer,
+                                    k, der_bessel=-1, der_angles=1)
 
 
 class WeakLensingTracer(Tracer):
@@ -678,17 +683,8 @@ class WeakLensingTracer(Tracer):
                 a = tmp_a
             # Reverse order for increasing a
             t_a = (1./(1+z_a[::-1]), a[::-1])
-            if (cosmo['sigma_0'] == 0):
-                # GR case
-                self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
-                                der_bessel=-1, der_angles=2)
-            else:
-                # MG case
-                k = np.logspace(-5, -0.7)
-                mg_transfer = self._get_MG_transfer_function(cosmo, z_a, k)
-                self._MG_add_tracer(cosmo, kernel_i, mg_transfer,
-                                    k, der_bessel=-1, der_angles=2,
-                                    bias_transfer_a=t_a)
+            self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
+                            der_bessel=-1, der_angles=2)
 
 
 class CMBLensingTracer(Tracer):

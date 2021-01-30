@@ -39,7 +39,7 @@ from .massfunction import massfunc, halo_bias, massfunc_m2r
 
 # Cl's and tracers
 from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, \
-    tSZTracer, get_density_kernel, get_kappa_kernel, get_lensing_kernel
+    tSZTracer, get_density_kernel, get_kappa_kernel, get_lensing_kernel, _Sig_MG
 from .cls import angular_cl
 
 # Useful constants and unit conversions
@@ -59,9 +59,6 @@ from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3
 
 # Specific to massive neutrinos
 from .neutrinos import Omeganuh2, nu_masses
-
-# MG functions
-from .musigma import mu_MG, Sig_MG
 
 # Expose function to toggle debug mode
 from .pyutils import debug_mode, resample_array

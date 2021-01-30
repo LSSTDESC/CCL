@@ -132,12 +132,12 @@ class Cosmology(object):
             modified gravity model. Defaults to 0.0
         sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
-        c1_mg (:obj:`float`, optional): One of the parameters of the scale
-            dependent mu-Sigma modified gravity model. Defaults to 1.0
-        c2_mg (:obj:`float`, optional): One of the parameters of the scale
-            dependent mu-Sigma modified gravity model. Defaults to 1.0
-        lambda_mg (:obj:`float`, optional): One of the parameters of the scale
-            dependent mu-Sigma modified gravity model. Defaults to 0.0
+        c1_mg (:obj:`float`, optional): MG parameter that enters in the scale
+            dependence of mu affecting its large scale behavior. Default to 1.
+        c2_mg (:obj:`float`, optional): MG parameter that enters in the scale
+            dependence of Sigma affecting its large scale behavior. Default 1.
+        lambda_mg (:obj:`float`, optional): MG parameter that sets the start 
+            of the dependance on c1 and c2 MG parameters. Defaults to 0.0
         df_mg (array_like, optional): Perturbations to the GR growth rate as
             a function of redshift :math:`\\Delta f`. Used to implement simple
             modified growth scenarios.
@@ -530,41 +530,18 @@ class Cosmology(object):
             status = 0
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
-                self._params, status = lib.parameters_create_nu(Omega_c,
-                                                                Omega_b,
-                                                                Omega_k, Neff,
-                                                                w0, wa, h,
-                                                                norm_pk, n_s,
-                                                                bcm_log10Mc,
-                                                                bcm_etab,
-                                                                bcm_ks,
-                                                                mu_0,
-                                                                sigma_0, c1_mg,
-                                                                c2_mg,
-                                                                lambda_mg,
-                                                                mnu_final_list,
-                                                                status)
+                self._params, status = lib.parameters_create_nu(
+                    Omega_c, Omega_b, Omega_k, Neff,
+                    w0, wa, h, norm_pk, n_s, bcm_log10Mc,
+                    bcm_etab, bcm_ks, mu_0, sigma_0, c1_mg,
+                    c2_mg, lambda_mg, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
-                self._params, status = lib.parameters_create_nu_vec(Omega_c,
-                                                                    Omega_b,
-                                                                    Omega_k,
-                                                                    Neff,
-                                                                    w0, wa, h,
-                                                                    norm_pk,
-                                                                    n_s,
-                                                                    bcm_log10Mc,
-                                                                    bcm_etab,
-                                                                    bcm_ks,
-                                                                    mu_0,
-                                                                    sigma_0,
-                                                                    c1_mg,
-                                                                    c2_mg,
-                                                                    lambda_mg,
-                                                                    z_mg,
-                                                                    df_mg,
-                                                                    mnu_final_list,
-                                                                    status)
+                self._params, status = lib.parameters_create_nu_vec(
+                    Omega_c, Omega_b, Omega_k, Neff, w0, wa, h,
+                    norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, z_mg,
+                    df_mg, mnu_final_list, status)
             check(status)
         finally:
             lib.cvar.constants.T_CMB = T_CMB_old

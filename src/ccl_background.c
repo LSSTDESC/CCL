@@ -175,14 +175,13 @@ static int growth_ode_system_muSig(double a,const double y[],double dydt[],void 
 {
   int status = 0;
 /* for MG mu(a,k) we set k=0 since it is large scales */
-  double k = 0;
   ccl_cosmology * cosmo = params;
 
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
+  double mu = ccl_mu_MG(cosmo, a, 0.0, &status);
 
-  double mu = ccl_mu_MG(cosmo, a, k, &status);
-  dydt[1]=1.5*hnorm*a*om*y[0]*(1.);// + mu);
+  dydt[1]=1.5*hnorm*a*om*y[0]*(1. + mu);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
 
