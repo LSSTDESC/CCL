@@ -21,7 +21,7 @@ def set_up(request):
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
                           m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255,
                           mu_0=0.1, sigma_0=0.1,
-                          c1_mg = 1.1, c2_mg = 1.1, lambda_mg = 1,
+                          c1_mg=1.1, c2_mg=1.1, lambda_mg=1,
                           transfer_function='boltzmann_isitgr',
                           matter_power_spectrum='linear')
     cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
@@ -42,7 +42,7 @@ def set_up(request):
 
     # Load dNdz's
     z1, pz1 = np.loadtxt(dirdat + "/bin1_histo.txt", unpack=True)
-    z2, pz2 = np.loadtxt(dirdat + "/bin2_histo.txt",  unpack=True)
+    z2, pz2 = np.loadtxt(dirdat + "/bin2_histo.txt", unpack=True)
 
     # Set up the linear galaxy bias as used in generating benchmarks
     bz1 = 1.45*np.ones_like(pz1)

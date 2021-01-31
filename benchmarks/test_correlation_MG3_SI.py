@@ -41,7 +41,7 @@ def set_up(request):
 
     # Load dNdz's
     z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)
-    z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt",  unpack=True)
+    z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt", unpack=True)
 
     # Set up the linear galaxy bias as used in generating benchmarks
     bz1 = 1.45*np.ones_like(pz1)
