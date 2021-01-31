@@ -365,7 +365,7 @@ class Tracer(object):
 
     def _get_MG_transfer_function(self, cosmo, z, k=None):
         """ This function allows to obtain the function Sigma(z,k) (1 or 2D
-            arrays) for an array of redshifts coming from a redshift 
+            arrays) for an array of redshifts coming from a redshift
             distribution (defined by the user) and a single value or
             an array of k specified by the user. We obtain then Sigma(z,k) as a
             1D array for those z and k arrays and then convert it to a 2D array
