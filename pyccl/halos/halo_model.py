@@ -684,7 +684,8 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
                            normprof3=False, normprof4=False):
     """ Computes the halo model 1-halo trispectrum for four different
     quantities defined by their respective halo profiles. The 1-halo
-    trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is:
+    trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
+    calculated as:
 
     .. math::
         T_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
@@ -692,6 +693,11 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
 
     where :math:`I^0_{2,2}` is defined in the documentation
     of :meth:`~HMCalculator.I_0_22`.
+
+    .. note:: This approximation assumes that the 4-point
+              profile cumulant is the same as the product of two
+              2-point cumulants. We may relax this assumption in
+              future versions of CCL.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
