@@ -130,6 +130,7 @@ typedef struct ccl_spline_params {
   double K_MAX;
   double K_MIN;
   double DLOGK_INTEGRATION;
+  double DCHI_INTEGRATION;
   int N_K;
   int N_K_3DCOR;
 

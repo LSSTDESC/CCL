@@ -20,6 +20,7 @@ Submodules
    pyccl.cls
    pyccl.core
    pyccl.correlations
+   pyccl.covariances
    pyccl.errors
    pyccl.halomodel
    pyccl.haloprofile

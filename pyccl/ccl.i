@@ -48,6 +48,7 @@ from .errors import CCLError
 %include "ccl_correlation.i"
 %include "ccl_tracers.i"
 %include "ccl_cls.i"
+%include "ccl_covs.i"
 %include "ccl_neutrinos.i"
 %include "ccl_haloprofile.i"
 %include "ccl_mass_conversion.i"
