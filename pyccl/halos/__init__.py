@@ -48,4 +48,6 @@ from .halo_model import (  # noqa
     halomod_mean_profile_1pt,
     halomod_bias_1pt,
     halomod_power_spectrum,
-    halomod_Pk2D)
+    halomod_Pk2D,
+    halomod_trispectrum_1h,
+    halomod_Tk3D_1h)
