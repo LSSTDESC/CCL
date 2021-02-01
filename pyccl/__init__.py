@@ -13,7 +13,7 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from . import ccllib as lib
-from . import core, constants, background, power, halomodel, pk2d, haloprofile, halos, massfunction, nl_pt
+from . import core, constants, background, power, halomodel, pk2d, tk3d, haloprofile, halos, massfunction, nl_pt
 
 # Core data structures
 from .core import Cosmology, CosmologyVanillaLCDM, CosmologyCalculator
@@ -26,6 +26,9 @@ from .background import growth_factor, growth_factor_unnorm, \
 
 # Generalized power spectra
 from .pk2d import Pk2D, parse_pk2d
+
+# Generalized connected trispectra
+from .tk3d import Tk3D
 
 # Power spectrum calculations, sigma8 and kNL
 from .power import linear_power, nonlin_power, linear_matter_power, nonlin_matter_power, \

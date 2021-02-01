@@ -41,6 +41,7 @@ from .errors import CCLError
 
 %include "ccl_core.i"
 %include "ccl_pk2d.i"
+%include "ccl_tk3d.i"
 %include "ccl_background.i"
 %include "ccl_power.i"
 %include "ccl_bcm.i"

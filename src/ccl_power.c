@@ -115,7 +115,7 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
 
   if(*status==0) {
     psp_out=ccl_f2d_t_new(na,z,nk,x,y2d,NULL,NULL,0,
-                          1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
+                          1,2,ccl_f2d_cclgrowth,1,0,2,
                           ccl_f2d_3,status);
   }
   if(*status==0) {
@@ -135,7 +135,7 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
     // properly-normalized P(k,a)
     ccl_f2d_t_free(psp_out);
     psp_out = ccl_f2d_t_new(na,z,nk,x,y2d,NULL,NULL,0,
-                            1,2,ccl_f2d_cclgrowth,1,NULL,0,2,
+                            1,2,ccl_f2d_cclgrowth,1,0,2,
                             ccl_f2d_3,status);
   }
 
@@ -352,7 +352,7 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
   if(*status==0) {
     psp_out=ccl_f2d_t_new(na,aemu,NK_EMU,lk,lpk_nl,NULL,NULL,0,
                           1,2,ccl_f2d_no_extrapol,
-                          1,NULL,0,2,ccl_f2d_3,status);
+                          1,0,2,ccl_f2d_3,status);
   }
 
   free(lpk_1a);
@@ -418,7 +418,7 @@ ccl_f2d_t *ccl_apply_halofit(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
 
   if(*status == 0)
     psp_out = ccl_f2d_t_new(na, z, nk, x, y2d, NULL, NULL, 0,
-                            1, 2, ccl_f2d_cclgrowth, 1, NULL,
+                            1, 2, ccl_f2d_cclgrowth, 1,
                             0, 2, ccl_f2d_3, status);
 
   free(y2d);
