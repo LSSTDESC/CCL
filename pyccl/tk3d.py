@@ -91,6 +91,12 @@ class Tk3D(object):
         na = len(a_arr)
         nk = len(lk_arr)
 
+        if not np.all(a_arr[1:]-a_arr[:-1] > 0):
+            raise ValueError("`a_arr` must be strictly increasing")
+
+        if not np.all(lk_arr[1:]-lk_arr[:-1] > 0):
+            raise ValueError("`lk_arr` must be strictly increasing")
+
         if ((extrap_order_hik not in (0, 1)) or
                 (extrap_order_lok not in (0, 1))):
             raise ValueError("Only constant or linear extrapolation in "

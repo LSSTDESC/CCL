@@ -107,23 +107,23 @@ jobs:
         run: |
           coveralls --service=github
 
-  build-doc-only-ubuntu:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: install latex
-        run: |
-
-          sudo apt install \
-            texlive texlive-bibtex-extra texlive-science texlive-publishers \
-            latexmk python3-sphinx python3-sphinx-rtd-theme python3-nbconvert \
-            python3-jupyter-client jupyter-client jupyter-nbconvert sphinx-common \
-            pandoc python3-setuptools \
-            -y
-          sudo pip3 install mkauthlist
-
-      - name: build docs
-        run: |
-          cd doc/0000-ccl_note
-          make
+#  build-doc-only-ubuntu:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: install latex
+#        run: |
+#
+#          sudo apt install \
+#            texlive texlive-bibtex-extra texlive-science texlive-publishers \
+#            latexmk python3-sphinx python3-sphinx-rtd-theme python3-nbconvert \
+#            python3-jupyter-client jupyter-client jupyter-nbconvert sphinx-common \
+#            pandoc python3-setuptools \
+#            -y
+#          sudo pip3 install mkauthlist
+#
+#      - name: build docs
+#        run: |
+#          cd doc/0000-ccl_note
+#          make
