@@ -296,13 +296,15 @@ class Tracer(object):
 
         return np.array([t.der_bessel for t in self._trc])
 
-    def _MG_add_tracer(self, cosmo, kernel, mg_transfer,
-                       k=None, der_bessel=0, der_angles=0,
+    def _MG_add_tracer(self, cosmo, kernel, z_b, der_bessel=0, der_angles=0,
                        bias_transfer_a=None, bias_transfer_k=None):
         """ function to set mg_transfer in the right format and add MG tracers
             for different cases including different cases and biases like
             intrinsic alignements (IA) when present
         """
+        # Getting MG transfer function and building a k-array
+        mg_transfer, k = self._get_MG_transfer_function(cosmo, z_b)
+
         # case with no astro biases
         if ((bias_transfer_a is None) and (bias_transfer_k is None)):
             if (isinstance(k, (list, np.ndarray))):
@@ -363,7 +365,7 @@ class Tracer(object):
                                 der_bessel=der_bessel, der_angles=der_angles,
                                 transfer_k=bias_transfer_k)
 
-    def _get_MG_transfer_function(self, cosmo, z, k=None):
+    def _get_MG_transfer_function(self, cosmo, z):
         """ This function allows to obtain the function Sigma(z,k) (1 or 2D
             arrays) for an array of redshifts coming from a redshift
             distribution (defined by the user) and a single value or
@@ -398,9 +400,14 @@ class Tracer(object):
                 samplesize = int(z[0]/stepsize)
                 z_0_to_zmin = np.linspace(0.0, z[0] - stepsize, samplesize)
                 z = np.concatenate((z_0_to_zmin, z))
-                a = 1./(1.+z)
+            a = 1./(1.+z)
         a.sort()
         # Scale-dependant MG case with an array of k
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        status = 0
+        k, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status)
+        k = np.exp(k)
         k.sort()
         # computing MG factor array
         mgfac_1d = 1
@@ -414,7 +421,7 @@ class Tracer(object):
         # setting transfer_ka for this case
         mg_transfer = (a, lk, mgfac_2d)
 
-        return mg_transfer
+        return mg_transfer, k
 
     def add_tracer(self, cosmo, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
@@ -617,15 +624,9 @@ class NumberCountsTracer(Tracer):
                                 der_bessel=-1, der_angles=1)
             else:
                 # MG case
-                nk = lib.get_pk_spline_nk(cosmo.cosmo)
-                status = 0
-                k, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-                check(status)
-                k = np.exp(k)
                 z_b, _ = _check_array_params(dndz, 'dndz')
-                mg_transfer = self._get_MG_transfer_function(cosmo, z_b, k)
-                self._MG_add_tracer(cosmo, kernel_m, mg_transfer,
-                                    k, der_bessel=-1, der_angles=1)
+                self._MG_add_tracer(cosmo, kernel_m, z_b,
+                                    der_bessel=-1, der_angles=1)
 
 
 class WeakLensingTracer(Tracer):
@@ -668,15 +669,8 @@ class WeakLensingTracer(Tracer):
                                 der_bessel=-1, der_angles=2)
             else:
                 # MG case
-                nk = lib.get_pk_spline_nk(cosmo.cosmo)
-                status = 0
-                k, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-                check(status)
-                k = np.exp(k)
-                z_b, _ = _check_array_params(dndz, 'dndz')
-                mg_transfer = self._get_MG_transfer_function(cosmo, z_n, k)
-                self._MG_add_tracer(cosmo, kernel_l, mg_transfer,
-                                    k, der_bessel=-1, der_angles=2)
+                self._MG_add_tracer(cosmo, kernel_l, z_n,
+                                    der_bessel=-1, der_angles=2)
         if ia_bias is not None:  # Has intrinsic alignments
             z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
             # Kernel
@@ -720,15 +714,8 @@ class CMBLensingTracer(Tracer):
         if (cosmo['sigma_0'] == 0):
             self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
         else:
-            nk = lib.get_pk_spline_nk(cosmo.cosmo)
-            status = 0
-            k, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-            check(status)
-            k = np.exp(k)
-            z_b, _ = _check_array_params(dndz, 'dndz')
-            mg_transfer = self._get_MG_transfer_function(cosmo, z_source, k)
-            self._MG_add_tracer(cosmo, kernel, mg_transfer,
-                                k, der_bessel=-1, der_angles=1)
+            self._MG_add_tracer(cosmo, kernel, z_source,
+                                der_bessel=-1, der_angles=1)
 
 
 class tSZTracer(Tracer):
