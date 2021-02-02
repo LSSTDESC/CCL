@@ -1,7 +1,6 @@
-import numpy as np
 import pyccl as ccl
-
 import pytest
+
 
 @pytest.mark.parametrize('tf', ['eisenstein_hu', 'bbks'])
 def test_mu_sigma_transfer_err(tf):
