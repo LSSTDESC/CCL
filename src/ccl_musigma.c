@@ -190,8 +190,6 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         double D_GR = ccl_growth_factor_unnorm(cosmo_GR, aa[i], status);
         double renorm = D_mu/D_GR;
         rescale_factor[i] *= renorm*renorm;
-        //printf("D_GR=%f\n", D_GR);
-        //printf("D_mu=%f\n", D_mu);
       }
       rescale_extra_musig = rescale_factor[na-1];
 

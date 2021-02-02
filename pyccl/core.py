@@ -134,10 +134,13 @@ class Cosmology(object):
             modified gravity model. Defaults to 0.0
         c1_mg (:obj:`float`, optional): MG parameter that enters in the scale
             dependence of mu affecting its large scale behavior. Default to 1.
+            See, e.g., Eqs. (46) in Ade et al. 2015, arXiv:1502.01590
         c2_mg (:obj:`float`, optional): MG parameter that enters in the scale
             dependence of Sigma affecting its large scale behavior. Default 1.
+            See, e.g., Eqs. (47) in Ade et al. 2015, arXiv:1502.01590
         lambda_mg (:obj:`float`, optional): MG parameter that sets the start
             of dependance on c1 and c2 MG parameters. Defaults to 0.0
+            See, e.g., Eqs. (46) & (47) in Ade et al. 2015, arXiv:1502.01590
         df_mg (array_like, optional): Perturbations to the GR growth rate as
             a function of redshift :math:`\\Delta f`. Used to implement simple
             modified growth scenarios.

@@ -385,16 +385,20 @@ class Tracer(object):
                 calculate the MG parameter Sigma(a,k). For now, the k range
                 should be limited to linear scales.
         """
+        # Sampling scale factor from a very small (at CMB for example)
+        # all the way to 1 here and today for the transfer function.
+        # For a < a_single it is GR (no early MG)
         if isinstance(z, float):
             a_single = 1/(1+z)
             a = np.linspace(a_single, 1, 100)
             # a_single is for example like for the CMB surface
         else:
-            stepsize = z[1]-z[0]
-            samplesize = int(z[0]/stepsize)
-            z_0_to_zmin = np.linspace(0.0, z[0] - stepsize, samplesize)
-            z = np.concatenate((z_0_to_zmin, z))
-            a = 1./(1.+z)
+            if z[0] != 0.0:
+                stepsize = z[1]-z[0]
+                samplesize = int(z[0]/stepsize)
+                z_0_to_zmin = np.linspace(0.0, z[0] - stepsize, samplesize)
+                z = np.concatenate((z_0_to_zmin, z))
+                a = 1./(1.+z)
         a.sort()
         # Scale-dependant MG case with an array of k
         k.sort()
@@ -613,7 +617,11 @@ class NumberCountsTracer(Tracer):
                                 der_bessel=-1, der_angles=1)
             else:
                 # MG case
-                k = np.logspace(-5, -0.7)
+                nk = lib.get_pk_spline_nk(cosmo.cosmo)
+                status = 0
+                k, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+                check(status)
+                k = np.exp(k)
                 z_b, _ = _check_array_params(dndz, 'dndz')
                 mg_transfer = self._get_MG_transfer_function(cosmo, z_b, k)
                 self._MG_add_tracer(cosmo, kernel_m, mg_transfer,
@@ -660,7 +668,12 @@ class WeakLensingTracer(Tracer):
                                 der_bessel=-1, der_angles=2)
             else:
                 # MG case
-                k = np.logspace(-5, -0.7)
+                nk = lib.get_pk_spline_nk(cosmo.cosmo)
+                status = 0
+                k, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+                check(status)
+                k = np.exp(k)
+                z_b, _ = _check_array_params(dndz, 'dndz')
                 mg_transfer = self._get_MG_transfer_function(cosmo, z_n, k)
                 self._MG_add_tracer(cosmo, kernel_l, mg_transfer,
                                     k, der_bessel=-1, der_angles=2)
@@ -707,7 +720,12 @@ class CMBLensingTracer(Tracer):
         if (cosmo['sigma_0'] == 0):
             self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
         else:
-            k = np.logspace(-5, -0.7)
+            nk = lib.get_pk_spline_nk(cosmo.cosmo)
+            status = 0
+            k, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+            check(status)
+            k = np.exp(k)
+            z_b, _ = _check_array_params(dndz, 'dndz')
             mg_transfer = self._get_MG_transfer_function(cosmo, z_source, k)
             self._MG_add_tracer(cosmo, kernel, mg_transfer,
                                 k, der_bessel=-1, der_angles=1)
