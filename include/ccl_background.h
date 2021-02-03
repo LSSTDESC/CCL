@@ -299,26 +299,6 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
 double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int* status);
 
 /**
- * Sigma(z) in the mu / Sigma parameterisation of modified gravity at a given redshift.
- * @param cosmo Cosmological parameters
- * @param a scale factor, normalized to 1 for today
- * @param status 0 if there are no errors, nonzero otherwise.
- *  For specific cases see documentation for ccl_error.c
- * @return Sigma(z), function of the mu / Sigma parameterisation of modified gravity.
-*/
-double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status);
-
-/**
- * mu(z) in the mu / Sigma parameterisation of modified gravity at a given redshift.
- * @param cosmo Cosmological parameters
- * @param a scale factor, normalized to 1 for today
- * @param status 0 if there are no errors, nonzero otherwise.
- *  For specific cases see documentation for ccl_error.c
- * @return mu(z), function of the mu / Sigma parameterisation of modified gravity.
-*/
-double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status);
-
-/**
  * Compute comoving distances and spline to be stored
  * in the cosmology structure.
  * @param cosmo Cosmological parameters

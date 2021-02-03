@@ -39,9 +39,7 @@ input_fgrowth = ccl.background.growth_rate(COSMO, input_a_array)
     ccl.angular_diameter_distance,
     ccl.luminosity_distance,
     ccl.h_over_h0,
-    ccl.distance_modulus,
-    ccl.mu_MG,
-    ccl.Sig_MG])
+    ccl.distance_modulus])
 def test_background_a_interface(a, func):
     if func is ccl.distance_modulus and np.any(a == 1):
         with pytest.raises(ccl.CCLError):

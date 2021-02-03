@@ -130,32 +130,6 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
   return rhocrit * ccl_omega_x(cosmo, a, label, status);
 }
 
-/* --------- ROUTINE: ccl_mu_MG ---------
-INPUT: cosmology object, scale factor
-TASK: Compute mu(a) where mu is one of the the parameterizating functions
-of modifications to GR in the quasistatic approximation.
-*/
-
-double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
-{
-    // This function can be extended to include other
-    // z-dependences for mu in the future.
-    return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
-}
-
-/* --------- ROUTINE: ccl_Sig_MG ---------
-INPUT: cosmology object, scale factor
-TASK: Compute Sigma(a) where Sigma is one of the the parameterizating functions
-of modifications to GR in the quasistatic approximation.
-*/
-
-double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
-{
-    // This function can be extended to include other
-    // z-dependences for Sigma in the future.
-    return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
-}
-
 // Structure to hold parameters of chi_integrand
 typedef struct {
   ccl_cosmology *cosmo;
@@ -200,12 +174,13 @@ TASK: Define the ODE system to be solved in order to compute the growth (of the 
 static int growth_ode_system_muSig(double a,const double y[],double dydt[],void *params)
 {
   int status = 0;
+/* for MG mu(a,k) we set k=0 since it is large scales */
   ccl_cosmology * cosmo = params;
 
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
+  double mu = ccl_mu_MG(cosmo, a, 0.0, &status);
 
-  double mu = ccl_mu_MG(cosmo, a, &status);
   dydt[1]=1.5*hnorm*a*om*y[0]*(1. + mu);
 
   dydt[0]=y[1]/(a*a*a*hnorm);

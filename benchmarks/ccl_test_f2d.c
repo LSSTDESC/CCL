@@ -280,7 +280,8 @@ CTEST2(f2d,pk) {
   config.matter_power_spectrum_method = ccl_linear;
   ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b, 0.0, 3.046, &mnu,
                                                 0, -1.0, 0.0, data->h, data->A_s,data->n_s,
-                                                -1, -1, -1, 0., 0., -1, NULL, NULL, &status);
+                                                -1, -1, -1, 0., 0., 1.0, 1.0, 0.0, 
+						-1, NULL, NULL, &status);
   params.T_CMB=2.7;
   params.Omega_k=0;
   params.Omega_g=0;
