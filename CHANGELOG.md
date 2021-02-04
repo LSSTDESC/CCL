@@ -7,7 +7,7 @@
 - Vanilla LCDM cosmology (#783)
 - Sunyaev-Zel'dovich GNFW profile and tracer (#784)
 - Added number counts integrals for clusters (#787)
-- Scale-dependent modified gravity (#790)
+- Scale (and redshift) - dependent mu-Sigma modified gravity support (#790)
 - Halo Occupation Distribution (#793)
 - kwargs option in `read_yaml` (#829)
 - correlation.py now correlations.py (#834)
