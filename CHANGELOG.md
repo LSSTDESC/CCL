@@ -1,18 +1,19 @@
 # Unreleased
 
+# v2.2.0 Changes
+
 ## Python library
 - Added more developer documentation (#776).
 - Vanilla LCDM cosmology (#783)
 - Sunyaev-Zel'dovich GNFW profile and tracer (#784)
 - Added number counts integrals for clusters (#787)
+- Scale-dependent modified gravity (#790)
 - Halo Occupation Distribution (#793)
 - kwargs option in `read_yaml` (#829)
 - correlation.py now correlations.py (#834)
 - Calculator mode (#843)
 - z-dependent mass function normalization for Tinker10 (#839)
-
-## C library
--
+- Non-Gaussian covariance matrices (#833, #835, #838)
 
 # v2.1.0 Changes
 
