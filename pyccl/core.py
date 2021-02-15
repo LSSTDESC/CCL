@@ -246,12 +246,11 @@ class Cosmology(object):
         params = self._params_init_kwargs.copy()
         make_yaml_friendly(params)
 
-        if isinstance(filename,str):
+        if isinstance(filename, str):
             with open(filename, "w") as fp:
                 yaml.dump(params, fp, default_flow_style=False)
         else:
             yaml.dump(params, filename, default_flow_style=False)
-
 
     @classmethod
     def read_yaml(cls, filename, **kwargs):
@@ -259,7 +258,7 @@ class Cosmology(object):
 
         Args:
             filename (:obj:`str`) Filename, file pointer, or stream to read
-                parameters from.  
+                parameters from.
             **kwargs (dict) Additional keywords that supersede file contents
         """
         if isinstance(filename, str):
@@ -303,7 +302,7 @@ class Cosmology(object):
             lambda_mg=params['lambda_mg'])
 
         inits.update(kwargs)
-        
+
         return cls(**inits)
 
     def _build_config(
