@@ -229,7 +229,8 @@ class Cosmology(object):
         """Write a YAML representation of the parameters to file.
 
         Args:
-            filename (:obj:`str`) Filename to write parameters to.
+            filename (:obj:`str`) Filename, file pointer, or stream to write "
+                "parameters to."
         """
         def make_yaml_friendly(d):
             for k, v in d.items():
@@ -244,30 +245,39 @@ class Cosmology(object):
 
         params = self._params_init_kwargs.copy()
         make_yaml_friendly(params)
-        with open(filename, "w") as fp:
-            yaml.dump(params, fp, default_flow_style=False)
+
+        if isinstance(filename,str):
+            with open(filename, "w") as fp:
+                yaml.dump(params, fp, default_flow_style=False)
+        else:
+            yaml.dump(params, filename, default_flow_style=False)
+
 
     @classmethod
     def read_yaml(cls, filename, **kwargs):
         """Read the parameters from a YAML file.
 
         Args:
-            filename (:obj:`str`) Filename to read parameters from.
+            filename (:obj:`str`) Filename, file pointer, or stream to read
+                parameters from.  
             **kwargs (dict) Additional keywords that supersede file contents
         """
-        with open(filename, 'r') as fp:
-            params = yaml.load(fp, Loader=yaml.Loader)
+        if isinstance(filename, str):
+            with open(filename, 'r') as fp:
+                params = yaml.load(fp, Loader=yaml.Loader)
+        else:
+            params = yaml.load(filename, Loader=yaml.Loader)
 
         # Check for missing values in yaml files created with the C-level
         # yaml dumper
         if any([p not in params for p in ["m_nu", "m_nu_type"]]):
-            warnings.warn(f"The yaml file ({filename}) is missing information, "
-                          f"likely due to having been created by an old version"
-                          f" of CCL.", category=CCLWarning)
+            warnings.warn("The yaml file is missing information, "
+                          "likely due to having been created by an old version"
+                          " of CCL.", category=CCLWarning)
             for p in ["m_nu", "m_nu_type"]:
                 if p not in params:
                     params[p] = None
-                    
+
         # Now we assemble an init for the object since the CCL YAML has
         # extra info we don't need and different formatting.
         inits = dict(
