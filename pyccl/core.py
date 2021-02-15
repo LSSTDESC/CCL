@@ -89,7 +89,7 @@ class Cosmology(object):
               the generic relative accuracy for integration by executing
               ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
 = 1e-5``.
-              See the module level documetaion of `pyccl.core` for details.
+              See the module level documentation of `pyccl.core` for details.
 
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
@@ -169,7 +169,7 @@ class Cosmology(object):
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
             m_nu_type = 'equal', and 'equalize', which will redistribute
-            masses to be equal right before calling the emualtor but results in
+            masses to be equal right before calling the emulator but results in
             internal inconsistencies. Defaults to 'strict'.
     """
     def __init__(
@@ -267,40 +267,20 @@ class Cosmology(object):
         else:
             params = yaml.load(filename, Loader=yaml.Loader)
 
-        # Check for missing values in yaml files created with the C-level
-        # yaml dumper
-        if any([p not in params for p in ["m_nu", "m_nu_type"]]):
-            warnings.warn("The yaml file is missing information, "
-                          "likely due to having been created by an old version"
-                          " of CCL.", category=CCLWarning)
-            for p in ["m_nu", "m_nu_type"]:
-                if p not in params:
-                    params[p] = None
+        if "sigma8" in params and params["sigma8"] == "nan":
+            del params["sigma8"]
+        if "A_s" in params and params["A_s"] == "nan":
+            del params["A_s"]
 
-        # Now we assemble an init for the object since the CCL YAML has
-        # extra info we don't need and different formatting.
-        inits = dict(
-            Omega_c=params['Omega_c'],
-            Omega_b=params['Omega_b'],
-            h=params['h'],
-            n_s=params['n_s'],
-            sigma8=None if params['sigma8'] == 'nan' else params['sigma8'],
-            A_s=None if params['A_s'] == 'nan' else params['A_s'],
-            Omega_k=params['Omega_k'],
-            Neff=params['Neff'],
-            m_nu=params['m_nu'],
-            m_nu_type=params['m_nu_type'],
-            w0=params['w0'],
-            wa=params['wa'],
-            bcm_log10Mc=params['bcm_log10Mc'],
-            bcm_etab=params['bcm_etab'],
-            bcm_ks=params['bcm_ks'],
-            mu_0=params['mu_0'],
-            sigma_0=params['sigma_0'],
-            c1_mg=params['c1_mg'],
-            c2_mg=params['c2_mg'],
-            lambda_mg=params['lambda_mg'])
-
+        # Read the values we need from the loaded yaml dictionary. Missing
+        # values take their default values from Cosmology.__init__
+        inits = {k: params[k] for k in ["Omega_c", "Omega_b", "h", "n_s",
+                                        "sigma8", "A_s", "Omega_k",
+                                        "Neff", "m_nu", "m_nu_type",
+                                        "w0", "wa",
+                                        "bcm_log10Mc", "bcm_etab", "bcm_ks",
+                                        "mu_0", "sigma_0", "c1_mg", "c2_mg",
+                                        "lambda_mg"] if k in params}
         inits.update(kwargs)
 
         return cls(**inits)
