@@ -13,6 +13,7 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
+from .power import sigma8
 
 # Configuration types
 transfer_function_types = {
@@ -31,7 +32,8 @@ matter_power_spectrum_types = {
     'halofit': lib.halofit,
     'linear': lib.linear,
     'emu': lib.emu,
-    'calculator': lib.pknl_from_input
+    'calculator': lib.pknl_from_input,
+    'camb' : lib.pknl_from_boltzman
 }
 
 baryons_power_spectrum_types = {
@@ -185,7 +187,8 @@ class Cosmology(object):
             baryons_power_spectrum='nobaryons',
             mass_function='tinker10',
             halo_concentration='duffy2008',
-            emulator_neutrinos='strict'):
+            emulator_neutrinos='strict',
+            extra_parameters=None):
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -195,7 +198,8 @@ class Cosmology(object):
             bcm_log10Mc=bcm_log10Mc,
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
-            z_mg=z_mg, df_mg=df_mg)
+            z_mg=z_mg, df_mg=df_mg,
+            extra_parameters=extra_parameters)
 
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
@@ -280,7 +284,8 @@ class Cosmology(object):
                                         "w0", "wa",
                                         "bcm_log10Mc", "bcm_etab", "bcm_ks",
                                         "mu_0", "sigma_0", "c1_mg", "c2_mg",
-                                        "lambda_mg"] if k in params}
+                                        "lambda_mg",
+                                        "extra_parameters"] if k in params}
         inits.update(kwargs)
 
         return cls(**inits)
@@ -365,7 +370,8 @@ class Cosmology(object):
             w0=None, wa=None, T_CMB=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, c1_mg=None, c2_mg=None, lambda_mg=None,
-            z_mg=None, df_mg=None, Omega_g=None):
+            z_mg=None, df_mg=None, Omega_g=None,
+            extra_parameters=None):
         """Build a ccl_parameters struct"""
 
         # Check to make sure Omega_k is within reasonable bounds.
@@ -726,7 +732,7 @@ class Cosmology(object):
         if self._config_init_kwargs['matter_power_spectrum'] == 'emu':
             warnings.warn(
                 "None of the linear power spectrum models in CCL are "
-                "consistent with that implictly used in the emulated "
+                "consistent with that implicitly used in the emulated "
                 "non-linear power spectrum!",
                 category=CCLWarning)
 
@@ -747,7 +753,30 @@ class Cosmology(object):
             rescale_mg = False
             pk = get_isitgr_pk_lin(self)
         elif trf == 'boltzmann_camb':
-            pk = get_camb_pk_lin(self)
+            pk_nl_from_camb = False
+            if self._config_init_kwargs['matter_power_spectrum'] == "camb":
+                pk_nl_from_camb = True
+            pk = get_camb_pk_lin(self, nonlin=pk_nl_from_camb)
+            if pk_nl_from_camb:
+                pk, pk_nl = pk
+                self._pk_nl['delta_matter:delta_matter'] = pk_nl
+                self._has_pk_nl = True
+                rescale_mg = False
+                rescale_s8 = False
+                if abs(self["mu_0"]) > 1e-14:
+                    warnings.warn("You want to compute the non-linear power "
+                                  "spectrum using CAMB. This cannot be "
+                                  "consistently done with mu_0 > 0.",
+                                  category=CCLWarning)
+                if np.isfinite(self["sigma8"]) and not np.isfinite(self["A_s"]):
+                    if abs(self["sigma8"] - sigma8(self, pk)) > 1e-6:
+                        warnings.warn("You want to compute the non-linear power"
+                                      " spectrum using CAMB and specified "
+                                      "sigma8. The value of sigma8 computed "
+                                      "from the linear power spectrum differs "
+                                      "from the specified one and cannot be "
+                                      "consistenty rescaled.",
+                                      category=CCLWarning)
         elif trf in ['bbks', 'eisenstein_hu']:
             rescale_s8 = False
             rescale_mg = False
@@ -838,6 +867,10 @@ class Cosmology(object):
         # needed for halofit, halomodel and linear options
         if (mps != 'emu') and (mps is not None):
             self.compute_linear_power()
+
+        if mps == "camb" and self._has_pk_nl:
+            # Already computed
+            return
 
         pk = None
         if mps is None:
