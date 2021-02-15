@@ -89,7 +89,7 @@ class Cosmology(object):
               the generic relative accuracy for integration by executing
               ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
 = 1e-5``.
-              See the module level documetaion of `pyccl.core` for details.
+              See the module level documentation of `pyccl.core` for details.
 
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
@@ -169,7 +169,7 @@ class Cosmology(object):
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
             m_nu_type = 'equal', and 'equalize', which will redistribute
-            masses to be equal right before calling the emualtor but results in
+            masses to be equal right before calling the emulator but results in
             internal inconsistencies. Defaults to 'strict'.
     """
     def __init__(
@@ -229,57 +229,58 @@ class Cosmology(object):
         """Write a YAML representation of the parameters to file.
 
         Args:
-            filename (:obj:`str`) Filename to write parameters to.
+            filename (:obj:`str`) Filename, file pointer, or stream to write "
+                "parameters to."
         """
-        # NOTE: we use the C yaml dump here so that the parameters
-        # dumped by this object are compatible with the C yaml load function.
-        status = 0
-        status = lib.parameters_write_yaml(self._params, filename, status)
+        def make_yaml_friendly(d):
+            for k, v in d.items():
+                if isinstance(v, np.floating):
+                    d[k] = float(v)
+                elif isinstance(v, np.integer):
+                    d[k] = int(v)
+                elif isinstance(v, np.bool):
+                    d[k] = bool(v)
+                elif isinstance(v, dict):
+                    make_yaml_friendly(v)
 
-        # Check status
-        if status != 0:
-            raise IOError("Unable to write YAML file {}".format(filename))
+        params = self._params_init_kwargs.copy()
+        make_yaml_friendly(params)
+
+        if isinstance(filename, str):
+            with open(filename, "w") as fp:
+                yaml.dump(params, fp, default_flow_style=False)
+        else:
+            yaml.dump(params, filename, default_flow_style=False)
 
     @classmethod
     def read_yaml(cls, filename, **kwargs):
         """Read the parameters from a YAML file.
 
         Args:
-            filename (:obj:`str`) Filename to read parameters from.
+            filename (:obj:`str`) Filename, file pointer, or stream to read
+                parameters from.
             **kwargs (dict) Additional keywords that supersede file contents
         """
-        with open(filename, 'r') as fp:
-            params = yaml.load(fp, Loader=yaml.Loader)
+        if isinstance(filename, str):
+            with open(filename, 'r') as fp:
+                params = yaml.load(fp, Loader=yaml.Loader)
+        else:
+            params = yaml.load(filename, Loader=yaml.Loader)
 
-        # Now we assemble an init for the object since the CCL YAML has
-        # extra info we don't need and different formatting.
-        inits = dict(
-            Omega_c=params['Omega_c'],
-            Omega_b=params['Omega_b'],
-            h=params['h'],
-            n_s=params['n_s'],
-            sigma8=None if params['sigma8'] == 'nan' else params['sigma8'],
-            A_s=None if params['A_s'] == 'nan' else params['A_s'],
-            Omega_k=params['Omega_k'],
-            Neff=params['Neff'],
-            w0=params['w0'],
-            wa=params['wa'],
-            bcm_log10Mc=params['bcm_log10Mc'],
-            bcm_etab=params['bcm_etab'],
-            bcm_ks=params['bcm_ks'],
-            mu_0=params['mu_0'],
-            sigma_0=params['sigma_0'],
-            c1_mg=params['c1_mg'],
-            c2_mg=params['c2_mg'],
-            lambda_mg=params['lambda_mg'])
-        if 'z_mg' in params:
-            inits['z_mg'] = params['z_mg']
-            inits['df_mg'] = params['df_mg']
+        if "sigma8" in params and params["sigma8"] == "nan":
+            del params["sigma8"]
+        if "A_s" in params and params["A_s"] == "nan":
+            del params["A_s"]
 
-        if 'm_nu' in params:
-            inits['m_nu'] = params['m_nu']
-            inits['m_nu_type'] = 'list'
-
+        # Read the values we need from the loaded yaml dictionary. Missing
+        # values take their default values from Cosmology.__init__
+        inits = {k: params[k] for k in ["Omega_c", "Omega_b", "h", "n_s",
+                                        "sigma8", "A_s", "Omega_k",
+                                        "Neff", "m_nu", "m_nu_type",
+                                        "w0", "wa",
+                                        "bcm_log10Mc", "bcm_etab", "bcm_ks",
+                                        "mu_0", "sigma_0", "c1_mg", "c2_mg",
+                                        "lambda_mg"] if k in params}
         inits.update(kwargs)
 
         return cls(**inits)
