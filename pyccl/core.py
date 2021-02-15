@@ -231,14 +231,21 @@ class Cosmology(object):
         Args:
             filename (:obj:`str`) Filename to write parameters to.
         """
-        # NOTE: we use the C yaml dump here so that the parameters
-        # dumped by this object are compatible with the C yaml load function.
-        status = 0
-        status = lib.parameters_write_yaml(self._params, filename, status)
+        def make_yaml_friendly(d):
+            for k, v in d.items():
+                if isinstance(v, np.floating):
+                    d[k] = float(v)
+                elif isinstance(v, np.integer):
+                    d[k] = int(v)
+                elif isinstance(v, np.bool):
+                    d[k] = bool(v)
+                elif isinstance(v, dict):
+                    make_yaml_friendly(v)
 
-        # Check status
-        if status != 0:
-            raise IOError("Unable to write YAML file {}".format(filename))
+        params = self._params_init_kwargs.copy()
+        make_yaml_friendly(params)
+        with open(filename, "w") as fp:
+            yaml.dump(params, fp, default_flow_style=False)
 
     @classmethod
     def read_yaml(cls, filename, **kwargs):
@@ -251,6 +258,16 @@ class Cosmology(object):
         with open(filename, 'r') as fp:
             params = yaml.load(fp, Loader=yaml.Loader)
 
+        # Check for missing values in yaml files created with the C-level
+        # yaml dumper
+        if any([p not in params for p in ["m_nu", "m_nu_type"]]):
+            warnings.warn(f"The yaml file ({filename}) is missing information, "
+                          f"likely due to having been created by an old version"
+                          f" of CCL.", category=CCLWarning)
+            for p in ["m_nu", "m_nu_type"]:
+                if p not in params:
+                    params[p] = None
+                    
         # Now we assemble an init for the object since the CCL YAML has
         # extra info we don't need and different formatting.
         inits = dict(
@@ -262,6 +279,8 @@ class Cosmology(object):
             A_s=None if params['A_s'] == 'nan' else params['A_s'],
             Omega_k=params['Omega_k'],
             Neff=params['Neff'],
+            m_nu=params['m_nu'],
+            m_nu_type=params['m_nu_type'],
             w0=params['w0'],
             wa=params['wa'],
             bcm_log10Mc=params['bcm_log10Mc'],
@@ -272,16 +291,9 @@ class Cosmology(object):
             c1_mg=params['c1_mg'],
             c2_mg=params['c2_mg'],
             lambda_mg=params['lambda_mg'])
-        if 'z_mg' in params:
-            inits['z_mg'] = params['z_mg']
-            inits['df_mg'] = params['df_mg']
-
-        if 'm_nu' in params:
-            inits['m_nu'] = params['m_nu']
-            inits['m_nu_type'] = 'list'
 
         inits.update(kwargs)
-
+        
         return cls(**inits)
 
     def _build_config(
