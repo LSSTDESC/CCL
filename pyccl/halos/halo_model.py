@@ -299,6 +299,44 @@ class HMCalculator(object):
         i02 = self._integrate_over_mf(uk)
         return i02
 
+    def I_1_2(self, cosmo, k, a, prof1, prof_2pt, prof2=None):
+        """ Solves the integral:
+
+        .. math::
+            I^1_2(k,a|u,v) = \\int dM\\,n(M,a)\\,b(M,a)\\,
+            \\langle u(k,a|M) v(k,a|M)\\rangle,
+
+        where :math:`n(M,a)` is the halo mass function,
+        :math:`b(M,a)` is the halo bias, and
+        :math:`\\langle u(k,a|M) v(k,a|M)\\rangle` is the two-point
+        moment of the two halo profiles.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            k (float or array_like): comoving wavenumber in Mpc^-1.
+            a (float): scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+                profile.
+            prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+                a profile covariance object
+                returning the the two-point moment of the two profiles
+                being correlated.
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
+                second halo profile. If `None`, `prof` will be used as
+                `prof2`.
+
+        Returns:
+             float or array_like: integral values evaluated at each
+             value of `k`.
+        """
+        # Compute mass function
+        self._get_ingredients(a, cosmo, False)
+        uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
+                                  prof2=prof2,
+                                  mass_def=self._mdef).T
+        i02 = self._integrate_over_mbf(uk)
+        return i02
+
     def I_0_22(self, cosmo, k, a,
                prof1, prof12_2pt, prof2=None,
                prof3=None, prof34_2pt=None, prof4=None):
