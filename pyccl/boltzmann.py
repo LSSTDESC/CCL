@@ -31,10 +31,13 @@ def get_camb_pk_lin(cosmo, nonlin=False):
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run CAMB.
+        nonlin (:obj:`bool`, optional): Whether to compute and return the
+            non-linear power spectrum as well.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
-            object. The linear power spectrum.
+            object. The linear power spectrum. If `nonlin=True`, returns a
+            tuple (pk_lin, pk_nonlin).
     """
 
     # Comment from Jarvis: TODO clean up this and other assert

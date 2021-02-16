@@ -167,13 +167,15 @@ class Cosmology(object):
             Defaults to 'tinker10' (2010).
         halo_concentration (:obj:`str`, optional): The halo concentration
             relation to use. Defaults to Duffy et al. (2008) 'duffy2008'.
-        emulator_neutrinos: `str`, optional): If using the emulator for
+        emulator_neutrinos (:obj: `str`, optional): If using the emulator for
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
             m_nu_type = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emulator but results in
             internal inconsistencies. Defaults to 'strict'.
+        extra_parameters (:obj:`dict`, optional): Dictionary holding extra
+            parameters. Defaults to None.
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -248,7 +250,7 @@ class Cosmology(object):
                 elif isinstance(v, dict):
                     make_yaml_friendly(v)
 
-        params = {**self._params_init_kwargs.copy(),
+        params = {**self._params_init_kwargs,
                   **self._config_init_kwargs}
         make_yaml_friendly(params)
 
