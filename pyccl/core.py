@@ -5,6 +5,7 @@ can compute a set of theoretical predictions.
 import warnings
 import numpy as np
 import yaml
+import inspect
 
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
@@ -33,7 +34,7 @@ matter_power_spectrum_types = {
     'linear': lib.linear,
     'emu': lib.emu,
     'calculator': lib.pknl_from_input,
-    'camb' : lib.pknl_from_boltzman
+    'camb': lib.pknl_from_boltzman
 }
 
 baryons_power_spectrum_types = {
@@ -247,14 +248,17 @@ class Cosmology(object):
                 elif isinstance(v, dict):
                     make_yaml_friendly(v)
 
-        params = self._params_init_kwargs.copy()
+        params = {**self._params_init_kwargs.copy(),
+                  **self._config_init_kwargs}
         make_yaml_friendly(params)
 
         if isinstance(filename, str):
             with open(filename, "w") as fp:
-                yaml.dump(params, fp, default_flow_style=False)
+                yaml.dump(params, fp,
+                          default_flow_style=False, sort_keys=False)
         else:
-            yaml.dump(params, filename, default_flow_style=False)
+            yaml.dump(params, filename,
+                      default_flow_style=False, sort_keys=False)
 
     @classmethod
     def read_yaml(cls, filename, **kwargs):
@@ -276,16 +280,15 @@ class Cosmology(object):
         if "A_s" in params and params["A_s"] == "nan":
             del params["A_s"]
 
+        # Get the call signature of Cosmology (i.e., the names of
+        # all arguments)
+        init_param_names = inspect.signature(cls).parameters.keys()
+
         # Read the values we need from the loaded yaml dictionary. Missing
         # values take their default values from Cosmology.__init__
-        inits = {k: params[k] for k in ["Omega_c", "Omega_b", "h", "n_s",
-                                        "sigma8", "A_s", "Omega_k",
-                                        "Neff", "m_nu", "m_nu_type",
-                                        "w0", "wa",
-                                        "bcm_log10Mc", "bcm_etab", "bcm_ks",
-                                        "mu_0", "sigma_0", "c1_mg", "c2_mg",
-                                        "lambda_mg",
-                                        "extra_parameters"] if k in params}
+        inits = {k: params[k] for k in init_param_names if k in params}
+
+        # Overwrite with extra values
         inits.update(kwargs)
 
         return cls(**inits)
@@ -768,11 +771,12 @@ class Cosmology(object):
                                   "spectrum using CAMB. This cannot be "
                                   "consistently done with mu_0 > 0.",
                                   category=CCLWarning)
-                if np.isfinite(self["sigma8"]) and not np.isfinite(self["A_s"]):
+                if np.isfinite(self["sigma8"]) \
+                        and not np.isfinite(self["A_s"]):
                     if abs(self["sigma8"] - sigma8(self, pk)) > 1e-6:
-                        warnings.warn("You want to compute the non-linear power"
-                                      " spectrum using CAMB and specified "
-                                      "sigma8. The value of sigma8 computed "
+                        warnings.warn("You want to compute the non-linear "
+                                      "power spectrum using CAMB and specified"
+                                      " sigma8. The value of sigma8 computed "
                                       "from the linear power spectrum differs "
                                       "from the specified one and cannot be "
                                       "consistenty rescaled.",

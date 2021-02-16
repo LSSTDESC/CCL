@@ -227,7 +227,7 @@ def get_camb_pk_lin(cosmo, nonlin=False):
             extrap_order_lok=1,
             extrap_order_hik=2,
             cosmo=cosmo)
-        
+
         return pk_lin, pk_nonlin
 
 
