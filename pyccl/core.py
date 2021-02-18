@@ -572,7 +572,8 @@ class Cosmology(object):
         # Check if the user has defined a dark energy model for camb to use,
         # and if they have not, then default to 'fluid'.
         self._params.DE_model_camb = DE_model_camb
-        DE_model_camb_types = ['fluid','ppf','DarkEnergyFluid','DarkEnergyPPF']
+        DE_model_camb_types = ['fluid', 'ppf',
+                               'DarkEnergyFluid', 'DarkEnergyPPF']
         if DE_model_camb is None:
             DE_model_camb = 'fluid'
         elif DE_model_camb not in DE_model_camb_types:
@@ -652,7 +653,7 @@ class Cosmology(object):
         string += ", ".join(
             "%s=%s" % (k, v)
             for k, v in self._params_init_kwargs.items()
-            if k not in ['m_nu', 'm_nu_type', 'z_mg', 'df_mg', 'DE_model_camb'])
+            if k not in ['m_nu', 'm_nu_type', 'z_mg', 'df_mg'])
 
         if hasattr(self._params_init_kwargs['m_nu'], '__len__'):
             string += ", m_nu=[%s, %s, %s]" % tuple(

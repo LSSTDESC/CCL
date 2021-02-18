@@ -132,11 +132,11 @@ def get_camb_pk_lin(cosmo):
     if (cosmo['DE_model_camb'] == 'ppf' or
             cosmo['DE_model_camb'] == 'DarkEnergyPPF'):
         cp.set_classes(
-        dark_energy_model=camb.dark_energy.DarkEnergyPPF
+            dark_energy_model=camb.dark_energy.DarkEnergyPPF
         )
     else:
         cp.set_classes(
-        dark_energy_model=camb.dark_energy.DarkEnergyFluid
+            dark_energy_model=camb.dark_energy.DarkEnergyFluid
         )
 
     cp.DarkEnergy.set_params(
