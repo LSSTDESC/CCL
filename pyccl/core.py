@@ -164,13 +164,15 @@ class Cosmology(object):
             Defaults to 'tinker10' (2010).
         halo_concentration (:obj:`str`, optional): The halo concentration
             relation to use. Defaults to Duffy et al. (2008) 'duffy2008'.
-        emulator_neutrinos: `str`, optional): If using the emulator for
+        emulator_neutrinos (:obj:`str`, optional): If using the emulator for
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
             m_nu_type = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emulator but results in
             internal inconsistencies. Defaults to 'strict'.
+        DE_model_camb (:`str`, optional): It tells camb which dark energy model
+            to use. Defaults to 'DarkEnergyFluid'.
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -180,6 +182,7 @@ class Cosmology(object):
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0.,
             c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
+            DE_model_camb=None,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryons_power_spectrum='nobaryons',
@@ -195,7 +198,8 @@ class Cosmology(object):
             bcm_log10Mc=bcm_log10Mc,
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
-            z_mg=z_mg, df_mg=df_mg)
+            z_mg=z_mg, df_mg=df_mg,
+            DE_model_camb=DE_model_camb)
 
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
@@ -280,7 +284,8 @@ class Cosmology(object):
                                         "w0", "wa",
                                         "bcm_log10Mc", "bcm_etab", "bcm_ks",
                                         "mu_0", "sigma_0", "c1_mg", "c2_mg",
-                                        "lambda_mg"] if k in params}
+                                        "lambda_mg",
+                                        "DE_model_camb"] if k in params}
         inits.update(kwargs)
 
         return cls(**inits)
@@ -365,7 +370,7 @@ class Cosmology(object):
             w0=None, wa=None, T_CMB=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, c1_mg=None, c2_mg=None, lambda_mg=None,
-            z_mg=None, df_mg=None, Omega_g=None):
+            z_mg=None, df_mg=None, Omega_g=None, DE_model_camb=None):
         """Build a ccl_parameters struct"""
 
         # Check to make sure Omega_k is within reasonable bounds.
@@ -564,6 +569,16 @@ class Cosmology(object):
             self._params.Omega_g = Omega_g
             self._params.Omega_l = total - Omega_g
 
+        # Check if the user has defined a dark energy model for camb to use,
+        # and if they have not, then default to 'fluid'.
+        self._params.DE_model_camb = DE_model_camb
+        DE_model_camb_types = ['fluid','ppf','DarkEnergyFluid','DarkEnergyPPF']
+        if DE_model_camb is None:
+            DE_model_camb = 'fluid'
+        elif DE_model_camb not in DE_model_camb_types:
+            raise ValueError("The only dark energy models CCL supports with"
+                             " camb are fluid and ppf.")
+
     def __getitem__(self, key):
         """Access parameter values by name."""
         try:
@@ -637,7 +652,7 @@ class Cosmology(object):
         string += ", ".join(
             "%s=%s" % (k, v)
             for k, v in self._params_init_kwargs.items()
-            if k not in ['m_nu', 'm_nu_type', 'z_mg', 'df_mg'])
+            if k not in ['m_nu', 'm_nu_type', 'z_mg', 'df_mg', 'DE_model_camb'])
 
         if hasattr(self._params_init_kwargs['m_nu'], '__len__'):
             string += ", m_nu=[%s, %s, %s]" % tuple(
