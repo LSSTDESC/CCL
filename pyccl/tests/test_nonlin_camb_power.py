@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.testing import assert_raises
 
 import pyccl as ccl
 
@@ -19,10 +20,9 @@ def test_nonlin_camb_power():
                             HMCode_logT_AGN=logT_AGN))
     p.set_cosmology(H0=h*100, omch2=Omega_c*h**2, ombh2=Omega_b*h**2, mnu=0.0)
     p.share_delta_neff = False
-    p.InitPower.set_params(
-        As=A_s,
-        ns=n_s)
-    z = [0.0]
+    p.InitPower.set_params(As=A_s, ns=n_s)
+
+    z = [0.0, 0.5, 1.0]
     p.set_matter_power(redshifts=z, kmax=10.0, nonlinear=True)
     p.set_for_lmax(5000)
 
@@ -38,16 +38,30 @@ def test_nonlin_camb_power():
                               extra_parameters={"camb":
                                                 {"halofit_version": "mead2020",
                                                  "HMCode_logT_AGN": logT_AGN}})
-    pk_nonlin_ccl = ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)
 
-    # import matplotlib.pyplot as plt
+    for z_, pk_camb in zip(z, pk_nonlin_camb):
+        pk_nonlin_ccl = ccl.nonlin_matter_power(ccl_cosmo, k, 1/(1+z_))
 
-    # plt.loglog(k, pk_nonlin_camb[0])
-    # plt.loglog(k, pk_nonlin_ccl)
-    # plt.semilogx(k, pk_nonlin_ccl/pk_nonlin_camb[0]-1)
-    # plt.show()
-    assert np.allclose(pk_nonlin_camb, pk_nonlin_ccl, rtol=3e-3)
+        assert np.allclose(pk_camb, pk_nonlin_ccl, rtol=3e-3)
 
 
-# if __name__ == "__main__":
-#     test_nonlin_camb_power()
+def test_nonlin_camb_power_with_sigma8():
+    logT_AGN = 7.93
+    Omega_c = 0.25
+    Omega_b = 0.05
+    n_s = 0.97
+    h = 0.7
+
+    ccl_cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
+                              sigma8=0.8, n_s=n_s,
+                              transfer_function="boltzmann_camb",
+                              matter_power_spectrum="camb",
+                              extra_parameters={"camb":
+                                                {"halofit_version": "mead2020",
+                                                 "HMCode_logT_AGN": logT_AGN}})
+
+    k = np.logspace(-3, 1, 10)
+
+    # Check that non-linear power spectrum isn't being used with sigma8
+    with assert_raises(ccl.errors.CCLError):
+        ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)
