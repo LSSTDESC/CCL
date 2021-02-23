@@ -1222,6 +1222,10 @@ class CosmologyCalculator(Cosmology):
             raise ValueError("`pk_linear` must contain keys 'a', 'k' "
                              "and 'delta_matter:delta_matter' "
                              "(at least)")
+
+        # needed for high-z extrapolation
+        self.compute_growth()
+
         na = len(pk_linear['a'])
         nk = len(pk_linear['k'])
         lk = np.log(pk_linear['k'])
