@@ -579,6 +579,8 @@ class Cosmology(object):
         try:
             if key == 'm_nu':
                 val = lib.parameters_get_nu_masses(self._params, 3)
+            elif key == 'extra_parameters':
+                val = self._params_init_kwargs["extra_parameters"]
             else:
                 val = getattr(self._params, key)
         except AttributeError:

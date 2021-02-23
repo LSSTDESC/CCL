@@ -49,8 +49,7 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
     try:
-        extra_camb_params = \
-            cosmo._params_init_kwargs["extra_parameters"]["camb"]
+        extra_camb_params = cosmo["extra_parameters"]["camb"]
     except (KeyError, TypeError):
         pass
 
