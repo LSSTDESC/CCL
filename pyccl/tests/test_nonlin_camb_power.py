@@ -46,7 +46,6 @@ def test_nonlin_camb_power():
 
 
 def test_nonlin_camb_power_with_sigma8():
-    logT_AGN = 7.93
     Omega_c = 0.25
     Omega_b = 0.05
     n_s = 0.97
@@ -55,10 +54,7 @@ def test_nonlin_camb_power_with_sigma8():
     ccl_cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
                               sigma8=0.8, n_s=n_s,
                               transfer_function="boltzmann_camb",
-                              matter_power_spectrum="camb",
-                              extra_parameters={"camb":
-                                                {"halofit_version": "mead2020",
-                                                 "HMCode_logT_AGN": logT_AGN}})
+                              matter_power_spectrum="camb")
 
     k = np.logspace(-3, 1, 10)
 
