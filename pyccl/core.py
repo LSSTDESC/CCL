@@ -14,7 +14,6 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
-from .power import sigma8
 
 # Configuration types
 transfer_function_types = {
@@ -775,14 +774,10 @@ class Cosmology(object):
                                   category=CCLWarning)
                 if np.isfinite(self["sigma8"]) \
                         and not np.isfinite(self["A_s"]):
-                    if abs(self["sigma8"] - sigma8(self, pk)) > 1e-6:
-                        warnings.warn("You want to compute the non-linear "
-                                      "power spectrum using CAMB and specified"
-                                      " sigma8. The value of sigma8 computed "
-                                      "from the linear power spectrum differs "
-                                      "from the specified one and cannot be "
-                                      "consistenty rescaled.",
-                                      category=CCLWarning)
+                    raise CCLError("You want to compute the non-linear "
+                                   "power spectrum using CAMB and specified"
+                                   " sigma8 but the non-linear power spectrum "
+                                   "cannot be consistenty rescaled.")
         elif trf in ['bbks', 'eisenstein_hu']:
             rescale_s8 = False
             rescale_mg = False
