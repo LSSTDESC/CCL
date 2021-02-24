@@ -1,5 +1,12 @@
 # Unreleased
 
+## Python library
+- Allow access to CAMB nonlinear power spectra (#854)
+- Write and read configuration settings to yaml (#852)
+
+## C library
+- Deprecate C-level yaml reader and writer (#852)
+
 # v2.2.0 Changes
 
 ## Python library
