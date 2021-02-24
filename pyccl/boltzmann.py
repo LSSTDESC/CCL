@@ -35,9 +35,9 @@ def get_camb_pk_lin(cosmo, nonlin=False):
             non-linear power spectrum as well.
 
     Returns:
-        :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
-            object. The linear power spectrum. If `nonlin=True`, returns a
-            tuple (pk_lin, pk_nonlin).
+        :class:`~pyccl.pk2d.Pk2D`: Power spectrum object. The linear power \
+            spectrum. If ``nonlin=True``, returns a tuple \
+            ``(pk_lin, pk_nonlin)``.
     """
 
     # Comment from Jarvis: TODO clean up this and other assert
