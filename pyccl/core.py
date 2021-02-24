@@ -186,7 +186,7 @@ class Cosmology(object):
         * `kmax`
         * `lmax`
 
-    Consult the CAMB documentation for their usage. These parameters are passed 
+    Consult the CAMB documentation for their usage. These parameters are passed
     in a :obj:`dict` to `extra_parameters` as::
 
         extra_parameters = {"camb": {"halofit_version": "mead2020",
