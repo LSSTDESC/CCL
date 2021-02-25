@@ -107,6 +107,8 @@ typedef struct ccl_spline_params {
   double A_SPLINE_MIN;
   double A_SPLINE_MINLOG_PK;
   double A_SPLINE_MIN_PK;
+  double A_SPLINE_MINLOG_SM;
+  double A_SPLINE_MIN_SM;
   double A_SPLINE_MAX;
   double A_SPLINE_MINLOG;
   int A_SPLINE_NLOG;
@@ -118,6 +120,8 @@ typedef struct ccl_spline_params {
   double LOGM_SPLINE_MAX;
 
   //PS a and k spline
+  int A_SPLINE_NA_SM;
+  int A_SPLINE_NLOG_SM;
   int A_SPLINE_NA_PK;
   int A_SPLINE_NLOG_PK;
 
@@ -126,6 +130,7 @@ typedef struct ccl_spline_params {
   double K_MAX;
   double K_MIN;
   double DLOGK_INTEGRATION;
+  double DCHI_INTEGRATION;
   int N_K;
   int N_K_3DCOR;
 
@@ -237,6 +242,9 @@ typedef struct ccl_parameters {
   // mu / Sigma quasistatica parameterisation of modified gravity params
   double mu_0;
   double sigma_0;
+  double c1_mg;
+  double c2_mg;
+  double lambda_mg;
 
   // Derived parameters
   double sigma8;
@@ -266,12 +274,7 @@ typedef struct ccl_data {
   gsl_spline * achi;
 
   // Function of Halo mass M
-  gsl_spline * logsigma;
-  gsl_spline * dlnsigma_dlogm;
-
-  // power spectrum splines
-  ccl_f2d_t * p_lin;
-  ccl_f2d_t * p_nl;
+  gsl_spline2d * logsigma;
 
   // real-space splines for RSD
   ccl_f1d_t* rsd_splines[3];
@@ -290,8 +293,6 @@ typedef struct ccl_cosmology {
 
   bool computed_distances;
   bool computed_growth;
-  bool computed_linear_power;
-  bool computed_nonlin_power;
   bool computed_sigma;
 
   int status;
@@ -332,18 +333,12 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  * @return void
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double Neff, double* mnu, int n_mnu,
-				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
-				     double mu_0, double sigma_0, int nz_mgrowth, double *zarr_mgrowth,
-				     double *dfarr_mgrowth, int *status);
-
-/* ------- ROUTINE: ccl_parameters_create_flat_lcdm --------
-INPUT: some cosmological parameters needed to create a flat LCDM model
-TASK: call ccl_parameters_create to produce an LCDM model
-*/
-ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h,
-double norm_pk, double n_s, int *status);
+                                     double Neff, double* mnu, int n_mnu,
+                                     double w0, double wa, double h, double norm_pk,
+                                     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
+                                     double mu_0, double sigma_0, double c1_mg, double c2_mg, double lambda_mg,
+                                     int nz_mgrowth, double *zarr_mgrowth,
+                                     double *dfarr_mgrowth, int *status);
 
 
 /**
@@ -352,24 +347,6 @@ double norm_pk, double n_s, int *status);
  * @return void
  */
 void ccl_parameters_free(ccl_parameters * params);
-
-
-/**
- * Write a cosmology parameters object to a file in yaml format, .
- * @param params Cosmological parameters
- * @param filename Name of file to create and write
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * @return void
- */
-void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, int * status);
-
-/**
- * Read a cosmology parameters object from a file in yaml format, .
- * @param filename Name of existing file to read from
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- * @return cosmo Cosmological parameters
- */
-ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status);
 
 /**
  * Free a cosmology struct

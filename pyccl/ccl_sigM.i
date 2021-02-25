@@ -27,12 +27,12 @@ void sigM_vec(ccl_cosmology * cosmo, double a,
     output[i] = ccl_sigmaM(cosmo, logM[i], a, status);
 }
 
-void dlnsigM_dlogM_vec(ccl_cosmology * cosmo,
+void dlnsigM_dlogM_vec(ccl_cosmology * cosmo, double a,
 		       double *logM, int nM,
 		       int nout, double* output, int *status)
 {
   for(int i=0; i<nM; i++)
-    output[i] = ccl_dlnsigM_dlogM(cosmo, logM[i], status);
+    output[i] = ccl_dlnsigM_dlogM(cosmo, logM[i], a, status);
 }
 
 %}

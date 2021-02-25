@@ -13,26 +13,29 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
 from . import ccllib as lib
-from . import core, constants, background, power, halomodel, pk2d, haloprofile, halos, massfunction, nl_pt
+from . import core, constants, background, power, halomodel, pk2d, tk3d, haloprofile, halos, massfunction, nl_pt
 
 # Core data structures
-from .core import Cosmology, CosmologyVanillaLCDM
+from .core import Cosmology, CosmologyVanillaLCDM, CosmologyCalculator
 
 # Background cosmology functions and growth functions
 from .background import growth_factor, growth_factor_unnorm, \
     growth_rate, comoving_radial_distance, angular_diameter_distance, comoving_angular_distance, \
     h_over_h0, luminosity_distance, distance_modulus, scale_factor_of_chi, \
-    omega_x, rho_x, mu_MG, Sig_MG
+    omega_x, rho_x
 
 # Generalized power spectra
-from .pk2d import Pk2D
+from .pk2d import Pk2D, parse_pk2d
+
+# Generalized connected trispectra
+from .tk3d import Tk3D
 
 # Power spectrum calculations, sigma8 and kNL
-from .power import linear_matter_power, nonlin_matter_power, sigmaR, \
-    sigmaV, sigma8, sigmaM, kNL
+from .power import linear_power, nonlin_power, linear_matter_power, nonlin_matter_power, \
+    sigmaR, sigmaV, sigma8, sigmaM, kNL
 
 # BCM stuff
-from .bcm import bcm_model_fka
+from .bcm import bcm_model_fka, bcm_correct_pk2d
 
 # Old halo mass function
 from .massfunction import massfunc, halo_bias, massfunc_m2r
@@ -41,11 +44,12 @@ from .massfunction import massfunc, halo_bias, massfunc_m2r
 from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, \
     tSZTracer, get_density_kernel, get_kappa_kernel, get_lensing_kernel
 from .cls import angular_cl
+from .covariances import angular_cl_cov_cNG
 
 # Useful constants and unit conversions
 physical_constants = lib.cvar.constants
 
-from .correlation import (
+from .correlations import (
     correlation, correlation_3d, correlation_multipole, correlation_3dRsd,
     correlation_3dRsd_avgmu, correlation_pi_sigma)
 

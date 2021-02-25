@@ -13,7 +13,6 @@ CCL_BEGIN_DECLS
 typedef enum ccl_f2d_extrap_growth_t
 {
   ccl_f2d_cclgrowth = 401, //Use CCL's linear growth
-  ccl_f2d_customgrowth = 402, //Use a custom growth function
   ccl_f2d_constantgrowth = 403, //Use a constant growth factor
   ccl_f2d_no_extrapol = 404, //Do not extrapolate, just throw an exception
 } ccl_f2d_extrap_growth_t;
@@ -37,7 +36,6 @@ typedef struct {
   int extrap_order_hik; /**< Order of extrapolating polynomial in log(k) for high k (0, 1 or 2)*/
   ccl_f2d_extrap_growth_t extrap_linear_growth;  /**< Extrapolation type at high redshifts*/
   int is_log; /**< Do I hold the values of log(f(k,a))?*/
-  double (*growth)(double); /**< Custom extrapolating growth function*/
   double growth_factor_0; /**< Constant extrapolating growth factor*/
   int growth_exponent; /**< Power to which growth should be exponentiated*/
   gsl_spline *fk; /**< Spline holding the values of the k-dependent factor*/
@@ -57,9 +55,8 @@ typedef struct {
  * @param is_factorizable if not 0, fk_arr and fa_arr will be used as 1-D arrays to construct a factorizable 2D function.
  * @param extrap_order_lok Order of the polynomial that extrapolates on wavenumbers smaller than the minimum of lk_arr. Allowed values: 0 (constant), 1 (linear extrapolation) and 2 (quadratic extrapolation). Extrapolation happens in ln(k).
  * @param extrap_order_hik Order of the polynomial that extrapolates on wavenumbers larger than the maximum of lk_arr. Allowed values: 0 (constant), 1 (linear extrapolation) and 2 (quadratic extrapolation). Extrapolation happens in ln(k).
- * @param extrap_linear_growth: ccl_f2d_extrap_growth_t value defining how the function with scale factors below the interpolation range. Allowed values: ccl_f2d_cclgrowth (scale with the CCL linear growth factor), ccl_f2d_customgrowth (scale with a custom function of redshift passed through `growth`), ccl_f2d_constantgrowth (scale by multiplying the function at the earliest available scale factor by a constant number, defined by `growth_factor_0`), ccl_f2d_no_extrapol (throw an error if the function is ever evaluated outside the interpolation range in a). Note that, above the interpolation range (i.e. for low redshifts), the function will be assumed constant.
+ * @param extrap_linear_growth: ccl_f2d_extrap_growth_t value defining how the function with scale factors below the interpolation range. Allowed values: ccl_f2d_cclgrowth (scale with the CCL linear growth factor), ccl_f2d_constantgrowth (scale by multiplying the function at the earliest available scale factor by a constant number, defined by `growth_factor_0`), ccl_f2d_no_extrapol (throw an error if the function is ever evaluated outside the interpolation range in a). Note that, above the interpolation range (i.e. for low redshifts), the function will be assumed constant.
  * @param is_fka_log: if not zero, `fka_arr` contains ln(f(k,a)) instead of f(k,a). If the function is factorizable, then `fk_arr` holds ln(K(k)) and `fa_arr` holds ln(A(a)), where f(k,a)=K(k)*A(a).
- * @param growth: custom growth function. Irrelevant if extrap_linear_growth!=ccl_f2d_customgrowth.
  * @param growth_factor_0: custom growth function. Irrelevant if extrap_linear_growth!=ccl_f2d_constantgrowth.
  * @param growth_exponent: power to which the extrapolating growth factor should be exponentiated when extrapolating (e.g. usually 2 for linear power spectra).
  * @param interp_type: 2D interpolation method. Currently only ccl_f2d_3 is implemented (bicubic interpolation).
@@ -75,7 +72,6 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 			 int extrap_order_hik,
 			 ccl_f2d_extrap_growth_t extrap_linear_growth,
 			 int is_fka_log,
-			 double (*growth)(double),
 			 double growth_factor_0,
 			 int growth_exponent,
 			 ccl_f2d_interp_t interp_type,

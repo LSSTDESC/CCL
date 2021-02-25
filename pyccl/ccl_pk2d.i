@@ -23,7 +23,7 @@ ccl_f2d_t *set_pk2d_new_from_arrays(double* lkarr,int nk,
 {
   ccl_f2d_t *psp=ccl_f2d_t_new(na,aarr,nk,lkarr,pkarr,NULL,NULL,0,
 			       order_lok,order_hik,ccl_f2d_cclgrowth,
-			       is_logp,NULL,0,2,ccl_f2d_3,status);
+			       is_logp,0,2,ccl_f2d_3,status);
   return psp;
 }
 

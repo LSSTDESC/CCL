@@ -56,10 +56,14 @@ class Pk2D(object):
              object is needed in order if `pkfunc` is not `None`. The object is
              used to determine the sampling rate in scale factor and
              wavenumber.
+        empty (bool): if True, just create an empty object, to be filled
+            out later
     """
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
-                 cosmo=None):
+                 cosmo=None, empty=False):
+        if empty:
+            return
 
         status = 0
         if pkfunc is None:  # Initialize power spectrum from 2D array
@@ -104,6 +108,62 @@ class Pk2D(object):
         check(status)
         self.has_psp = True
 
+    @classmethod
+    def pk_from_model(Pk2D, cosmo, model):
+        """`Pk2D` constructor returning the power spectrum associated with
+        a given numerical model.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            model (:obj:`str`): model to use. Three models allowed:
+                `'bbks'` (Bardeen et al. ApJ 304 (1986) 15).
+                `'eisenstein_hu'` (Eisenstein & Hu astro-ph/9710252).
+                `'emu'` (arXiv:1508.02654).
+        """
+        pk2d = Pk2D(empty=True)
+        status = 0
+        if model == 'bbks':
+            cosmo.compute_growth()
+            ret = lib.compute_linpower_bbks(cosmo.cosmo, status)
+        elif model == 'eisenstein_hu':
+            cosmo.compute_growth()
+            ret = lib.compute_linpower_eh(cosmo.cosmo, status)
+        elif model == 'emu':
+            ret = lib.compute_power_emu(cosmo.cosmo, status)
+        else:
+            raise ValueError("Unknown model %s " % model)
+
+        if np.ndim(ret) == 0:
+            status = ret
+        else:
+            pk2d.psp, status = ret
+
+        check(status, cosmo)
+        pk2d.has_psp = True
+        return pk2d
+
+    @classmethod
+    def apply_halofit(Pk2D, cosmo, pk_linear):
+        """Pk2D constructor that applies the "HALOFIT" transformation of
+        Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
+        power spectrum in `pk_linear`.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            pk_linear (:class:`Pk2D`): a :class:`Pk2D` object containing
+                the linear power spectrum to transform.
+        """
+        pk2d = Pk2D(empty=True)
+        status = 0
+        ret = lib.apply_halofit(cosmo.cosmo, pk_linear.psp, status)
+        if np.ndim(ret) == 0:
+            status = ret
+        else:
+            pk2d.psp, status = ret
+        check(status, cosmo)
+        pk2d.has_psp = True
+        return pk2d
+
     def eval(self, k, a, cosmo):
         """Evaluate power spectrum.
 
@@ -118,7 +178,6 @@ class Pk2D(object):
                 the power spectrum will be extrapolated from the earliest
                 available value using the linear growth factor (for which a
                 cosmology is needed).
-            a_arr (array): an array holding values of the scale factor.
 
         Returns:
             float or array_like: value(s) of the power spectrum.
@@ -149,3 +208,38 @@ class Pk2D(object):
         if hasattr(self, 'has_psp'):
             if self.has_psp and hasattr(self, 'psp'):
                 lib.f2d_t_free(self.psp)
+
+
+def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
+    """ Return the C-level `f2d` spline associated with a
+    :class:`Pk2D` object.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        p_of_k_a (:class:`Pk2D`, :obj:`str` or `None`): if a
+            :class:`Pk2D` object, its `f2d` spline will be used. If
+            a string, the linear or non-linear power spectrum stored
+            by `cosmo` under this name will be used. If `None`, the
+            matter power spectrum stored by `cosmo` will be used.
+        is_linear (:obj:`bool`): if `True`, and if `p_of_k_a` is a
+            string or `None`, the linear version of the corresponding
+            power spectrum will be used (otherwise it'll be the
+            non-linear version).
+    """
+    if isinstance(p_of_k_a, Pk2D):
+        psp = p_of_k_a.psp
+    else:
+        if (p_of_k_a is None) or isinstance(p_of_k_a, str):
+            name = p_of_k_a
+        else:
+            raise ValueError("p_of_k_a must be a pyccl.Pk2D object, "
+                             "a string, or None")
+
+        if is_linear:
+            cosmo.compute_linear_power()
+            pk = cosmo.get_linear_power(name)
+        else:
+            cosmo.compute_nonlin_power()
+            pk = cosmo.get_nonlin_power(name)
+        psp = pk.psp
+    return psp

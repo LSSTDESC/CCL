@@ -2,8 +2,26 @@ from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate, \
     growth_factor, scale_factor_of_chi
-from .pyutils import _check_array_params, NoneArr
+from .pyutils import _check_array_params, NoneArr, _vectorize_fn6
 import numpy as np
+
+
+def _Sig_MG(cosmo, a, k=None):
+    """Redshift-dependent modification to Poisson equation for massless
+    particles under modified gravity.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+        k (float or array_like): Wavenumber for scale
+
+    Returns:
+        float or array_like: Modification to Poisson equation under \
+            modified gravity at scale factor a. \
+            Sig_MG is assumed to be proportional to Omega_Lambda(z), \
+            see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
+    """
+    return _vectorize_fn6(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
 
 
 def get_density_kernel(cosmo, dndz):
@@ -264,6 +282,97 @@ class Tracer(object):
 
         return np.array([t.der_bessel for t in self._trc])
 
+    def _MG_add_tracer(self, cosmo, kernel, z_b, der_bessel=0, der_angles=0,
+                       bias_transfer_a=None, bias_transfer_k=None):
+        """ function to set mg_transfer in the right format and add MG tracers
+            for different cases including different cases and biases like
+            intrinsic alignements (IA) when present
+        """
+        # Getting MG transfer function and building a k-array
+        mg_transfer = self._get_MG_transfer_function(cosmo, z_b)
+
+        # case with no astro biases
+        if ((bias_transfer_a is None) and (bias_transfer_k is None)):
+            self.add_tracer(cosmo, kernel, transfer_ka=mg_transfer,
+                            der_bessel=der_bessel, der_angles=der_angles)
+
+        #  case of an astro bias depending on a and  k
+        elif ((bias_transfer_a is not None) and (bias_transfer_k is not None)):
+            mg_transfer_new = (mg_transfer[0], mg_transfer[1],
+                               (bias_transfer_a[1] * (bias_transfer_k[1] *
+                                mg_transfer[2]).T).T)
+            self.add_tracer(cosmo, kernel, transfer_ka=mg_transfer_new,
+                            der_bessel=der_bessel, der_angles=der_angles)
+
+        #  case of an astro bias depending on a but not k
+        elif ((bias_transfer_a is not None) and (bias_transfer_k is None)):
+            mg_transfer_new = (mg_transfer[0], mg_transfer[1],
+                               (bias_transfer_a[1] * mg_transfer[2].T).T)
+            self.add_tracer(cosmo, kernel, transfer_ka=mg_transfer_new,
+                            der_bessel=der_bessel, der_angles=der_angles)
+
+        #  case of an astro bias depending on k but not a
+        elif ((bias_transfer_a is None) and (bias_transfer_k is not None)):
+            mg_transfer_new = (mg_transfer[0], mg_transfer[1],
+                               (bias_transfer_k[1] * mg_transfer[2]))
+            self.add_tracer(cosmo, kernel, transfer_ka=mg_transfer_new,
+                            der_bessel=der_bessel, der_angles=der_angles)
+
+    def _get_MG_transfer_function(self, cosmo, z):
+        """ This function allows to obtain the function Sigma(z,k) (1 or 2D
+            arrays) for an array of redshifts coming from a redshift
+            distribution (defined by the user) and a single value or
+            an array of k specified by the user. We obtain then Sigma(z,k) as a
+            1D array for those z and k arrays and then convert it to a 2D array
+            taking into consideration the given sizes of the arrays for z and k
+            The MG parameter array goes then as a multiplicative factor within
+            the MG transfer function. If k is not specified then only a 1D
+            array for Sigma(a,k=0) is used.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): cosmology object used to
+                transform redshifts into distances.
+            z (float or tuple of arrays): a single z value (e.g. for CMB)
+                or a tuple of arrays (z, N(z)) giving the redshift distribution
+                of the objects. The units are arbitrary; N(z) will be
+                normalized to unity.
+            k (float or array): a single k value or an array of k for which we
+                calculate the MG parameter Sigma(a,k). For now, the k range
+                should be limited to linear scales.
+        """
+        # Sampling scale factor from a very small (at CMB for example)
+        # all the way to 1 here and today for the transfer function.
+        # For a < a_single it is GR (no early MG)
+        if isinstance(z, float):
+            a_single = 1/(1+z)
+            a = np.linspace(a_single, 1, 100)
+            # a_single is for example like for the CMB surface
+        else:
+            if z[0] != 0.0:
+                stepsize = z[1]-z[0]
+                samplesize = int(z[0]/stepsize)
+                z_0_to_zmin = np.linspace(0.0, z[0] - stepsize, samplesize)
+                z = np.concatenate((z_0_to_zmin, z))
+            a = 1./(1.+z)
+        a.sort()
+        # Scale-dependant MG case with an array of k
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        status = 0
+        lk, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status)
+        k = np.exp(lk)
+        # computing MG factor array
+        mgfac_1d = 1
+        mgfac_1d += _Sig_MG(cosmo, a, k)
+        # converting 1D MG factor to a 2D array, so it is compatible
+        # with the transfer_ka input structure in MG_add.tracer and
+        # add.tracer
+        mgfac_2d = mgfac_1d.reshape(len(a), -1, order='F')
+        # setting transfer_ka for this case
+        mg_transfer = (a, lk, mgfac_2d)
+
+        return mg_transfer
+
     def add_tracer(self, cosmo, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
                    der_bessel=0, der_angles=0,
@@ -443,6 +552,7 @@ class NumberCountsTracer(Tracer):
             # Reverse order for increasing a
             t_a = (1./(1+z_b[::-1]), b[::-1])
             self.add_tracer(cosmo, kernel=kernel_d, transfer_a=t_a)
+
         if has_rsd:  # Has RSDs
             # Kernel
             if kernel_d is None:
@@ -458,8 +568,15 @@ class NumberCountsTracer(Tracer):
             chi, w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias)
             # Multiply by -2 for magnification
             kernel_m = (chi, -2 * w)
-            self.add_tracer(cosmo, kernel=kernel_m,
-                            der_bessel=-1, der_angles=1)
+            if (cosmo['sigma_0'] == 0):
+                # GR case
+                self.add_tracer(cosmo, kernel=kernel_m,
+                                der_bessel=-1, der_angles=1)
+            else:
+                # MG case
+                z_b, _ = _check_array_params(dndz, 'dndz')
+                self._MG_add_tracer(cosmo, kernel_m, z_b,
+                                    der_bessel=-1, der_angles=1)
 
 
 class WeakLensingTracer(Tracer):
@@ -495,10 +612,15 @@ class WeakLensingTracer(Tracer):
                               fill_value=0)
 
         if has_shear:
-            # Kernel
             kernel_l = get_lensing_kernel(cosmo, dndz)
-            self.add_tracer(cosmo, kernel=kernel_l,
-                            der_bessel=-1, der_angles=2)
+            if (cosmo['sigma_0'] == 0):
+                # GR case
+                self.add_tracer(cosmo, kernel=kernel_l,
+                                der_bessel=-1, der_angles=2)
+            else:
+                # MG case
+                self._MG_add_tracer(cosmo, kernel_l, z_n,
+                                    der_bessel=-1, der_angles=2)
         if ia_bias is not None:  # Has intrinsic alignments
             z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
             # Kernel
@@ -538,9 +660,12 @@ class CMBLensingTracer(Tracer):
 
         # we need the distance functions at the C layer
         cosmo.compute_distances()
-
         kernel = get_kappa_kernel(cosmo, z_source, n_samples)
-        self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
+        if (cosmo['sigma_0'] == 0):
+            self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
+        else:
+            self._MG_add_tracer(cosmo, kernel, z_source,
+                                der_bessel=-1, der_angles=1)
 
 
 class tSZTracer(Tracer):

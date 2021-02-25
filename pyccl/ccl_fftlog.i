@@ -35,7 +35,6 @@ void fftlog_transform(int npk,
 {
   int ii;
   double *r_out = &(output[0]);
-  double *fr_out = &(output[n_in_k]);
   double epsilon = 0.5*dim+plaw_index;
 
   double **_fk_in=NULL, **_fr_out=NULL;

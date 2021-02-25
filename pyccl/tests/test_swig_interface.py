@@ -5,8 +5,10 @@ import pyccl
 from pyccl import ccllib
 from pyccl import CCLError
 
-PYCOSMO = pyccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
+PYCOSMO = pyccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.8, n_s=0.96,
+                          transfer_function='bbks')
+PYCOSMO.compute_nonlin_power()
 COSMO = PYCOSMO.cosmo
 
 
@@ -113,7 +115,7 @@ def test_swig_core():
         CCLError,
         ccllib.parameters_create_nu_vec,
         0.25, 0.05, 0.0, 3.0, -1.0, 0.0, 0.7, 2e-9, 0.95, 1, 0.0, 0.0,
-        0.0, 0.0, [1.0, 2.0],
+        0.0, 0.0, 1.0, 1.0, 0.0, [1.0, 2.0],
         [0.0, 0.3, 0.5],
         [0.02, 0.01, 0.2],
         status)
@@ -147,6 +149,7 @@ def test_swig_correlation():
         CCLError,
         ccllib.correlation_3d_vec,
         COSMO,
+        PYCOSMO._pk_nl['delta_matter:delta_matter'].psp,
         1.0,
         [1, 2, 3],
         4,
@@ -176,16 +179,6 @@ def test_swig_neurtinos():
 
 def test_swig_power():
     status = 0
-    for func in [ccllib.linear_matter_power_vec,
-                 ccllib.nonlin_matter_power_vec]:
-        assert_raises(
-            CCLError,
-            func,
-            COSMO,
-            1.0,
-            [1.0, 2.0],
-            3,
-            status)
 
     for func in [ccllib.sigmaR_vec,
                  ccllib.sigmaV_vec]:
@@ -193,6 +186,7 @@ def test_swig_power():
             CCLError,
             func,
             COSMO,
+            None,
             1.0,
             [1.0, 2.0],
             3,
@@ -202,6 +196,7 @@ def test_swig_power():
         CCLError,
         ccllib.kNL_vec,
         COSMO,
+        None,
         [0.5, 1.0],
         3,
         status)

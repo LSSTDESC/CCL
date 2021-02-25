@@ -46,37 +46,6 @@ void ccl_add_cl_tracer_to_collection(ccl_cl_tracer_collection_t *trc,
   trc->n_tracers++;
 }
 
-
-// Takes an array of z-dependent numbers and the corresponding z values
-// and returns an array of a values and the corresponding a-dependent values.
-// The order of the original arrays is assumed to be ascending in z, and
-// the order of the returned arrays is swapped (so it has ascending a).
-static void from_z_to_a(ccl_cosmology *cosmo,
-                        int nz, double *z_arr, double *fz_arr,
-                        double **a_arr, double **fa_arr, int *status) {
-  *a_arr = NULL;
-  *fa_arr = NULL;
-  *a_arr = malloc(nz*sizeof(double));
-  *fa_arr = malloc(nz*sizeof(double));
-
-  if ((a_arr == NULL) || (fa_arr == NULL)) {
-    *status = CCL_ERROR_MEMORY;
-    free(*a_arr);
-    free(*fa_arr);
-    ccl_cosmology_set_status_message(
-      cosmo, "ccl_tracers.c: from_z_to_a(): memory allocation error\n");
-  }
-
-  if (*status == 0) {
-    int ia;
-    // Populate array of scale factors in reverse order
-    for (ia=0; ia < nz; ia++) {
-      (*a_arr)[ia] = 1./(1+z_arr[nz-1-ia]);
-      (*fa_arr)[ia] = fz_arr[nz-1-ia];
-    }
-  }
-}
-
 //Integrand for N(z) integrator
 static double nz_integrand(double z, void *pars) {
   ccl_f1d_t *nz_f = (ccl_f1d_t *)pars;
@@ -125,12 +94,6 @@ static double get_nz_norm(ccl_cosmology *cosmo, ccl_f1d_t *nz_f,
   return nz_norm;
 }
 
-static void from_z_to_chi(ccl_cosmology *cosmo, int nz, double *z_arr,
-                          double *chi_arr, int *status) {
-  for (int ichi=0; ichi < nz; ichi++)
-    chi_arr[ichi] = ccl_comoving_radial_distance(cosmo, 1./(1+z_arr[ichi]), status);
-}
-
 void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
                                   int nz, double *z_arr, double *nz_arr,
                                   int normalize_nz,
@@ -146,7 +109,7 @@ void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_tracers.c: ccl_get_number_counts_kernel: "
+      "ccl_tracers.c: ccl_get_number_counts_kernel(): "
       "error initializing spline\n");
   }
 
@@ -239,8 +202,7 @@ static double lensing_kernel_integrate(ccl_cosmology *cosmo,
 //Returns number of divisions on which
 //the lensing kernel should be calculated
 int ccl_get_nchi_lensing_kernel(int nz, double *z_arr, int *status) {
-  int nchi;
-  double dz = -1, z_max = -1;
+  double dz = -1;
   //Compute redshift step
   dz = (z_arr[nz-1]-z_arr[0])/(nz-1);
 
@@ -283,7 +245,7 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
     *status = CCL_ERROR_SPLINE;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_tracers.c: get_lensing_mag_kernel: error initializing spline\n");
+      "ccl_tracers.c: get_lensing_mag_kernel(): error initializing spline\n");
   }
 
   // Get N(z) normalization
@@ -305,7 +267,7 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
         *status = CCL_ERROR_SPLINE;
         ccl_cosmology_set_status_message(
           cosmo,
-          "ccl_tracers.c: get_lensing_mag_kernel: error initializing spline\n");
+          "ccl_tracers.c: get_lensing_mag_kernel(): error initializing spline\n");
       }
     }
   }
@@ -348,14 +310,9 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
           chi = chi_arr[ichi];
           a = ccl_scale_factor_of_chi(cosmo, chi, &local_status);
           z = 1./a-1;
-          // Add MG correction if needed
-          mgfac = 1.0;
-          if (fabs(cosmo->params.sigma_0))
-            mgfac += ccl_Sig_MG(cosmo, a, &local_status);
           ipar->z_end = z;
           ipar->chi_end = chi;
-
-          wL_arr[ichi] = lensing_kernel_integrate(cosmo, ipar, w)*(1+z)*lens_prefac*mgfac;
+          wL_arr[ichi] = lensing_kernel_integrate(cosmo, ipar, w)*(1+z)*lens_prefac;
         } else {
           wL_arr[ichi] = NAN;
         }
@@ -385,11 +342,7 @@ void ccl_get_kappa_kernel(ccl_cosmology *cosmo, double chi_source,
   for (int ichi=0; ichi < nchi; ichi++) {
     double chi = chi_arr[ichi];
     double a = ccl_scale_factor_of_chi(cosmo, chi, status);
-    double mgfac = 1;
-    // Add MG correction if needed
-    if (fabs(cosmo->params.sigma_0))
-      mgfac += ccl_Sig_MG(cosmo, a, status);
-    wchi[ichi] = lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi*mgfac/a;
+    wchi[ichi] = lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi/a;
   }
 }
 
@@ -414,13 +367,13 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
     *status = CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_tracers.c: ccl_cl_tracer_new: der_angles must be between 0 and 2\n");
+      "ccl_tracers.c: ccl_cl_tracer_new(): der_angles must be between 0 and 2\n");
   }
   if ((der_bessel < -1) || (der_bessel > 2)) {
     *status = CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_tracers.c: ccl_cl_tracer_new: der_bessel must be between -1 and 2\n");
+      "ccl_tracers.c: ccl_cl_tracer_new(): der_bessel must be between -1 and 2\n");
   }
 
   if (*status == 0) {
@@ -505,7 +458,6 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
         extrap_order_hik, // extrap_order_hik
         ccl_f2d_constantgrowth, // extrap_linear_growth
         is_fka_log, // is_fka_log
-        NULL, // growth (function)
         1, // growth_factor_0 -> will assume constant transfer function
         0, // growth_exponent
         ccl_f2d_3, // interp_type

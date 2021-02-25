@@ -27,6 +27,12 @@ MDFS = [MVIR, MVIR, MVIR, MVIR,
         MFOF, MFOF, MVIR, MFOF, MFOF]
 
 
+def test_sM_raises():
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=None)
+    with pytest.raises(ccl.CCLError):
+        cosmo.compute_sigma()
+
+
 @pytest.mark.parametrize('nM_class', HMFS)
 def test_nM_subclasses_smoke(nM_class):
     nM = nM_class(COSMO)
@@ -139,3 +145,26 @@ def test_nM_tinker_crit(mf):
     nM_m = mf(COSMO, mdef_m)
     assert np.allclose(nM_c.get_mass_function(COSMO, 1E13, a),
                        nM_m.get_mass_function(COSMO, 1E13, a))
+
+
+def test_nM_tinker10_norm():
+    from scipy.integrate import quad
+
+    md = ccl.halos.MassDef(300, rho_type='matter')
+    mf = ccl.halos.MassFuncTinker10(COSMO, mass_def=md,
+                                    norm_all_z=True)
+    bf = ccl.halos.HaloBiasTinker10(COSMO, mass_def=md)
+
+    def integrand(lnu, z):
+        nu = np.exp(lnu)
+        a = 1./(1+z)
+        gnu = mf._get_fsigma(COSMO, 1.686/nu, a, 1)
+        bnu = bf._get_bsigma(COSMO, bf.dc/nu, a)
+        return gnu*bnu
+
+    def norm(z):
+        return quad(integrand, -13, 2, args=(z,))[0]
+
+    zs = np.linspace(0, 1, 4)
+    ns = np.array([norm(z) for z in zs])
+    assert np.all(np.fabs(ns-1) < 0.005)

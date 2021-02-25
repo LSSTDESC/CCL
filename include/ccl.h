@@ -25,6 +25,7 @@
 #include "ccl_fftlog.h"
 #include "ccl_f1d.h"
 #include "ccl_f2d.h"
+#include "ccl_f3d.h"
 #include "ccl_config.h"
 #include "ccl_core.h"
 #include "ccl_error.h"
