@@ -5,6 +5,7 @@ can compute a set of theoretical predictions.
 import warnings
 import numpy as np
 import yaml
+import inspect
 
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
@@ -31,7 +32,8 @@ matter_power_spectrum_types = {
     'halofit': lib.halofit,
     'linear': lib.linear,
     'emu': lib.emu,
-    'calculator': lib.pknl_from_input
+    'calculator': lib.pknl_from_input,
+    'camb': lib.pknl_from_boltzman
 }
 
 baryons_power_spectrum_types = {
@@ -171,8 +173,25 @@ class Cosmology(object):
             m_nu_type = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emulator but results in
             internal inconsistencies. Defaults to 'strict'.
-        DE_model_camb (:`str`, optional): It tells camb which dark energy model
-            to use. Defaults to 'DarkEnergyFluid'.
+        extra_parameters (:obj:`dict`, optional): Dictionary holding extra
+            parameters. Currently supports extra parameters for CAMB, with
+            details described below. Defaults to None.
+
+    Currently supported extra parameters for CAMB are:
+
+        * `halofit_version`
+        * `HMCode_A_baryon`
+        * `HMCode_eta_baryon`
+        * `HMCode_logT_AGN`
+        * `kmax`
+        * `lmax`
+
+    Consult the CAMB documentation for their usage. These parameters are passed
+    in a :obj:`dict` to `extra_parameters` as::
+
+        extra_parameters = {"camb": {"halofit_version": "mead2020",
+                                     "HMCode_logT_AGN": 7.8}}
+
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -188,7 +207,8 @@ class Cosmology(object):
             baryons_power_spectrum='nobaryons',
             mass_function='tinker10',
             halo_concentration='duffy2008',
-            emulator_neutrinos='strict'):
+            emulator_neutrinos='strict',
+            extra_parameters=None):
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -199,7 +219,7 @@ class Cosmology(object):
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
             z_mg=z_mg, df_mg=df_mg,
-            DE_model_camb=DE_model_camb)
+            extra_parameters=extra_parameters)
 
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
@@ -247,14 +267,17 @@ class Cosmology(object):
                 elif isinstance(v, dict):
                     make_yaml_friendly(v)
 
-        params = self._params_init_kwargs.copy()
+        params = {**self._params_init_kwargs,
+                  **self._config_init_kwargs}
         make_yaml_friendly(params)
 
         if isinstance(filename, str):
             with open(filename, "w") as fp:
-                yaml.dump(params, fp, default_flow_style=False)
+                yaml.dump(params, fp,
+                          default_flow_style=False, sort_keys=False)
         else:
-            yaml.dump(params, filename, default_flow_style=False)
+            yaml.dump(params, filename,
+                      default_flow_style=False, sort_keys=False)
 
     @classmethod
     def read_yaml(cls, filename, **kwargs):
@@ -276,16 +299,15 @@ class Cosmology(object):
         if "A_s" in params and params["A_s"] == "nan":
             del params["A_s"]
 
+        # Get the call signature of Cosmology (i.e., the names of
+        # all arguments)
+        init_param_names = inspect.signature(cls).parameters.keys()
+
         # Read the values we need from the loaded yaml dictionary. Missing
         # values take their default values from Cosmology.__init__
-        inits = {k: params[k] for k in ["Omega_c", "Omega_b", "h", "n_s",
-                                        "sigma8", "A_s", "Omega_k",
-                                        "Neff", "m_nu", "m_nu_type",
-                                        "w0", "wa",
-                                        "bcm_log10Mc", "bcm_etab", "bcm_ks",
-                                        "mu_0", "sigma_0", "c1_mg", "c2_mg",
-                                        "lambda_mg",
-                                        "DE_model_camb"] if k in params}
+        inits = {k: params[k] for k in init_param_names if k in params}
+
+        # Overwrite with extra values
         inits.update(kwargs)
 
         return cls(**inits)
@@ -370,7 +392,8 @@ class Cosmology(object):
             w0=None, wa=None, T_CMB=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, c1_mg=None, c2_mg=None, lambda_mg=None,
-            z_mg=None, df_mg=None, Omega_g=None, DE_model_camb=None):
+            z_mg=None, df_mg=None, Omega_g=None,
+            extra_parameters=None):
         """Build a ccl_parameters struct"""
 
         # Check to make sure Omega_k is within reasonable bounds.
@@ -585,6 +608,8 @@ class Cosmology(object):
         try:
             if key == 'm_nu':
                 val = lib.parameters_get_nu_masses(self._params, 3)
+            elif key == 'extra_parameters':
+                val = self._params_init_kwargs["extra_parameters"]
             else:
                 val = getattr(self._params, key)
         except AttributeError:
@@ -742,7 +767,7 @@ class Cosmology(object):
         if self._config_init_kwargs['matter_power_spectrum'] == 'emu':
             warnings.warn(
                 "None of the linear power spectrum models in CCL are "
-                "consistent with that implictly used in the emulated "
+                "consistent with that implicitly used in the emulated "
                 "non-linear power spectrum!",
                 category=CCLWarning)
 
@@ -763,7 +788,27 @@ class Cosmology(object):
             rescale_mg = False
             pk = get_isitgr_pk_lin(self)
         elif trf == 'boltzmann_camb':
-            pk = get_camb_pk_lin(self)
+            pk_nl_from_camb = False
+            if self._config_init_kwargs['matter_power_spectrum'] == "camb":
+                pk_nl_from_camb = True
+            pk = get_camb_pk_lin(self, nonlin=pk_nl_from_camb)
+            if pk_nl_from_camb:
+                pk, pk_nl = pk
+                self._pk_nl['delta_matter:delta_matter'] = pk_nl
+                self._has_pk_nl = True
+                rescale_mg = False
+                rescale_s8 = False
+                if abs(self["mu_0"]) > 1e-14:
+                    warnings.warn("You want to compute the non-linear power "
+                                  "spectrum using CAMB. This cannot be "
+                                  "consistently done with mu_0 > 0.",
+                                  category=CCLWarning)
+                if np.isfinite(self["sigma8"]) \
+                        and not np.isfinite(self["A_s"]):
+                    raise CCLError("You want to compute the non-linear "
+                                   "power spectrum using CAMB and specified"
+                                   " sigma8 but the non-linear power spectrum "
+                                   "cannot be consistenty rescaled.")
         elif trf in ['bbks', 'eisenstein_hu']:
             rescale_s8 = False
             rescale_mg = False
@@ -854,6 +899,10 @@ class Cosmology(object):
         # needed for halofit, halomodel and linear options
         if (mps != 'emu') and (mps is not None):
             self.compute_linear_power()
+
+        if mps == "camb" and self._has_pk_nl:
+            # Already computed
+            return
 
         pk = None
         if mps is None:
@@ -1238,6 +1287,10 @@ class CosmologyCalculator(Cosmology):
             raise ValueError("`pk_linear` must contain keys 'a', 'k' "
                              "and 'delta_matter:delta_matter' "
                              "(at least)")
+
+        # needed for high-z extrapolation
+        self.compute_growth()
+
         na = len(pk_linear['a'])
         nk = len(pk_linear['k'])
         lk = np.log(pk_linear['k'])
