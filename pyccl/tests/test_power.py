@@ -573,9 +573,10 @@ def test_input_nonlin_raises():
     assert 'a:b' in cosmo_input._pk_nl
     assert cosmo_input.has_nonlin_power
 
+
 def test_camb_de_model():
-    """ Check that the dark energy model for camb has been properly defined. """
+    """Check that the dark energy model for CAMB has been properly defined."""
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function='boltzmann_camb',
-                extra_parameters={"camb":{"dark_energy_model": "pf"}})
+                    extra_parameters={"camb": {"dark_energy_model": "pf"}})
     with pytest.raises(ValueError):
         ccl.linear_matter_power(cosmo, 1, 1)

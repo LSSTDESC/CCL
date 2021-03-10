@@ -140,12 +140,12 @@ def get_camb_pk_lin(cosmo, nonlin=False):
         delta_neff)
 
     camb_de_models = ['DarkEnergyFluid', 'DarkEnergyPPF', 'fluid', 'ppf']
-    camb_de_model = extra_camb_params.get('dark_energy_model','DarkEnergyFluid')
+    camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
         raise ValueError("The only dark energy models CCL supports with"
                          " camb are fluid and ppf.")
     cp.set_classes(
-            dark_energy_model=camb_de_model
+        dark_energy_model=camb_de_model
     )
 
     cp.DarkEnergy.set_params(
@@ -365,12 +365,12 @@ def get_isitgr_pk_lin(cosmo):
         delta_neff)
 
     camb_de_models = ['DarkEnergyFluid', 'DarkEnergyPPF', 'fluid', 'ppf']
-    camb_de_model = extra_camb_params.get('dark_energy_model','DarkEnergyFluid')
+    camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
         raise ValueError("The only dark energy models CCL supports with"
                          " camb are fluid and ppf.")
     cp.set_classes(
-            dark_energy_model=camb_de_model
+        dark_energy_model=camb_de_model
     )
     cp.DarkEnergy.set_params(
         w=cosmo['w0'],
