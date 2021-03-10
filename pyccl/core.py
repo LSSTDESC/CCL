@@ -185,6 +185,7 @@ class Cosmology(object):
         * `HMCode_logT_AGN`
         * `kmax`
         * `lmax`
+        * `dark_energy_model`
 
     Consult the CAMB documentation for their usage. These parameters are passed
     in a :obj:`dict` to `extra_parameters` as::
@@ -201,7 +202,6 @@ class Cosmology(object):
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0.,
             c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
-            DE_model_camb=None,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryons_power_spectrum='nobaryons',
@@ -591,17 +591,6 @@ class Cosmology(object):
             total = self._params.Omega_g + self._params.Omega_l
             self._params.Omega_g = Omega_g
             self._params.Omega_l = total - Omega_g
-
-        # Check if the user has defined a dark energy model for camb to use,
-        # and if they have not, then default to 'fluid'.
-        self._params.DE_model_camb = DE_model_camb
-        DE_model_camb_types = ['fluid', 'ppf',
-                               'DarkEnergyFluid', 'DarkEnergyPPF']
-        if DE_model_camb is None:
-            DE_model_camb = 'fluid'
-        elif DE_model_camb not in DE_model_camb_types:
-            raise ValueError("The only dark energy models CCL supports with"
-                             " camb are fluid and ppf.")
 
     def __getitem__(self, key):
         """Access parameter values by name."""
