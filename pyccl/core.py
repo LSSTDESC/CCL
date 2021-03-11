@@ -1276,6 +1276,11 @@ class CosmologyCalculator(Cosmology):
                              "and 'delta_matter:delta_matter' "
                              "(at least)")
 
+        # Check that `a` is a monotonically increasing array.
+        if not np.array_equal(pk_linear['a'], np.sort(pk_linear['a'])):
+            raise ValueError("Input scale factor array in `pk_linear` is not "
+                             "monotonically increasing.")
+
         # needed for high-z extrapolation
         self.compute_growth()
 
@@ -1314,6 +1319,11 @@ class CosmologyCalculator(Cosmology):
         if (('a' not in pk_nonlin) or ('k' not in pk_nonlin)):
             raise ValueError("`pk_nonlin` must contain keys "
                              "'a' and 'k' (at least)")
+        # Check that `a` is a monotonically increasing array.
+        if not np.array_equal(pk_nonlin['a'], np.sort(pk_nonlin['a'])):
+            raise ValueError("Input scale factor array in `pk_nonlin` is not "
+                             "monotonically increasing.")
+
         if ((not has_nonlin_model) and
                 ('delta_matter:delta_matter' not in pk_nonlin)):
             raise ValueError("`pk_nonlin` must contain key "
