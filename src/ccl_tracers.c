@@ -428,16 +428,16 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
       tr->chi_max = chi_w[n_w-1];
 
       // Find minimum
-      for (ichi=0; ichi < n_w; ichi++) {
-        if (fabs(w_w[ichi]) >= w_max) {
+      for (ichi=0; ichi < n_w-1; ichi++) {
+        if (fabs(w_w[ichi+1]) >= w_max) {
           tr->chi_min = chi_w[ichi];
           break;
         }
       }
 
       // Find maximum
-      for (ichi=n_w-1; ichi >= 0; ichi--) {
-        if (fabs(w_w[ichi]) >= w_max) {
+      for (ichi=n_w-1; ichi >= 1; ichi--) {
+        if (fabs(w_w[ichi-1]) >= w_max) {
           tr->chi_max = chi_w[ichi];
           break;
         }
