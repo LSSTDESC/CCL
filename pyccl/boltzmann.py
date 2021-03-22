@@ -149,7 +149,8 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     )
 
     if camb_de_model not in camb_de_models[:2] and cosmo['wa'] and \
-        (cosmo['w0'] < -1 - 1e-6 or 1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
+            (cosmo['w0'] < -1 - 1e-6 or
+                1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
         raise ValueError("If you want to use w crossing -1,"
                          " then please set the dark_energy_model to ppf.")
     cp.DarkEnergy.set_params(
@@ -377,7 +378,8 @@ def get_isitgr_pk_lin(cosmo):
         dark_energy_model=camb_de_model
     )
     if camb_de_model not in camb_de_models[:2] and cosmo['wa'] and \
-        (cosmo['w0'] < -1 - 1e-6 or 1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
+            (cosmo['w0'] < -1 - 1e-6 or
+                1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
         raise ValueError("If you want to use w crossing -1,"
                          " then please set the dark_energy_model to ppf.")
     cp.DarkEnergy.set_params(
