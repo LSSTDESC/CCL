@@ -139,7 +139,7 @@ def get_camb_pk_lin(cosmo, nonlin=False):
         cp.ombh2 * (camb.constants.COBE_CMBTemp / cp.TCMB) ** 3,
         delta_neff)
 
-    camb_de_models = ['DarkEnergyFluid', 'DarkEnergyPPF', 'fluid', 'ppf']
+    camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
         raise ValueError("The only dark energy models CCL supports with"
@@ -148,6 +148,10 @@ def get_camb_pk_lin(cosmo, nonlin=False):
         dark_energy_model=camb_de_model
     )
 
+    if camb_de_model not in camb_de_models[:2] and cosmo['wa'] and \
+        (cosmo['w0'] < -1 - 1e-6 or 1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
+        raise ValueError("If you want to use w crossing -1,"
+                         " then please set the dark_energy_model to ppf.")
     cp.DarkEnergy.set_params(
         w=cosmo['w0'],
         wa=cosmo['wa']
@@ -364,7 +368,7 @@ def get_isitgr_pk_lin(cosmo):
         cp.ombh2 * (isitgr.constants.COBE_CMBTemp / cp.TCMB) ** 3,
         delta_neff)
 
-    camb_de_models = ['DarkEnergyFluid', 'DarkEnergyPPF', 'fluid', 'ppf']
+    camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
         raise ValueError("The only dark energy models CCL supports with"
@@ -372,6 +376,10 @@ def get_isitgr_pk_lin(cosmo):
     cp.set_classes(
         dark_energy_model=camb_de_model
     )
+    if camb_de_model not in camb_de_models[:2] and cosmo['wa'] and \
+        (cosmo['w0'] < -1 - 1e-6 or 1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
+        raise ValueError("If you want to use w crossing -1,"
+                         " then please set the dark_energy_model to ppf.")
     cp.DarkEnergy.set_params(
         w=cosmo['w0'],
         wa=cosmo['wa']

@@ -581,3 +581,12 @@ def test_camb_de_model():
         extra_parameters={"camb": {"dark_energy_model": "pf"}})
     with pytest.raises(ValueError):
         ccl.linear_matter_power(cosmo, 1, 1)
+
+
+def test_camb_correct_de_model():
+    """Check that w is not less than -1, if the chosen dark energy model for
+    CAMB is fluid."""
+    cosmo = ccl.CosmologyVanillaLCDM(
+        transfer_function='boltzmann_camb', w0=-1, wa=-1)
+    with pytest.raises(ValueError):
+        ccl.linear_matter_power(cosmo, 1, 1)
