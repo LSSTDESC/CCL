@@ -262,6 +262,37 @@ class HMCalculator(object):
         i11 = self._integrate_over_mbf(uk)
         return i11
 
+    def I_1_2(self, cosmo, k, a, prof1, prof_2pt, prof2=None):
+        """ Solves the integral:
+
+        .. math::
+            I^1_1(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
+            \\langle u(k,a|M)\\rangle,
+
+        where :math:`n(M,a)` is the halo mass function,
+        :math:`b(M,a)` is the halo bias, and
+        :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
+        function of scale, scale factor and halo mass.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            k (float or array_like): comoving wavenumber in Mpc^-1.
+            a (float): scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+                profile.
+
+        Returns:
+            float or array_like: integral values evaluated at each
+            value of `k`.
+        """
+        # Compute mass function and halo bias
+        self._get_ingredients(a, cosmo, True)
+        uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
+                                  prof2=prof2,
+                                  mass_def=self._mdef).T
+        i12 = self._integrate_over_mbf(uk)
+        return i12
+
     def I_0_2(self, cosmo, k, a, prof1, prof_2pt, prof2=None):
         """ Solves the integral:
 
@@ -795,6 +826,176 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
 
         # Normalize
         out[ia, :, :] = tk_1h * norm
+
+    if np.ndim(a) == 0:
+        out = np.squeeze(out, axis=0)
+    if np.ndim(k) == 0:
+        out = np.squeeze(out, axis=-1)
+        out = np.squeeze(out, axis=-1)
+    return out
+
+def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, p12_of_k_a, prof2=None,
+                              prof12_2pt=None, prof3=None, prof4=None,
+                              prof13_2pt=None, prof14_2pt=None,
+                              prof24_2pt=None, prof32_2pt=None,
+                              prof34_2pt=None, normprof1=False,
+                              normprof2=False, normprof3=False,
+                              normprof4=False, p13_of_k_a=None,
+                              p14_of_k_a=None):
+    """ Computes the halo model 1-halo trispectrum for four different
+    quantities defined by their respective halo profiles. The 2-halo
+    trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
+    calculated as:
+
+    .. math::
+        T_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
+        P_lin(k_u) * I^1_2(k_u|u_{1,2}) * I^1_2(k_v|u_{1,2}) + 2 perm
+
+    where :math:`I^1_2` is defined in the documentation
+    of :meth:`~HMCalculator.I_1_2`.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        hmc (:class:`HMCalculator`): a halo model calculator.
+        k (float or array_like): comoving wavenumber in Mpc^-1.
+        a (float or array_like): scale factor.
+        prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_1` above.
+        p12_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum for 12 (corresponding
+            to :math:`u_1`). If `None`, the power spectrum stored within
+            `cosmo` will be used.
+        prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_2` above. If `None`,
+            `prof1` will be used as `prof2`.
+        prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            a profile covariance object returning the the two-point
+            moment of `prof1` and `prof2`. If `None`, the default
+            second moment will be used, corresponding to the
+            products of the means of both profiles.
+        prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_1` above. If `None`,
+            `prof1` will be used as `prof3`.
+        prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_2` above. If `None`,
+            `prof3` will be used as `prof4`.
+        prof13_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof1` and `prof3`.
+        prof14_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof14_2pt` for `prof1` and `prof4`.
+        prof24_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof14_2pt` for `prof2` and `prof4`.
+        prof32_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof14_2pt` for `prof3` and `prof2`.
+        prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof14_2pt` for `prof3` and `prof4`.
+        normprof1 (bool): if `True`, this integral will be
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
+            (see :meth:`~HMCalculator.I_0_1`), where
+            :math:`u` is the profile represented by `prof1`.
+        normprof2 (bool): same as `normprof1` for `prof2`.
+        normprof3 (bool): same as `normprof1` for `prof3`.
+        normprof4 (bool): same as `normprof1` for `prof4`.
+        p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
+        p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
+
+    Returns:
+        float or array_like: integral values evaluated at each
+        combination of `k` and `a`. The shape of the output will
+        be `(N_a, N_k, N_k)` where `N_k` and `N_a` are the sizes of
+        `k` and `a` respectively. The ordering is such that
+        `output[ia, ik2, ik1] = T(k[ik1], k[ik2], a[ia])`
+        If `k` or `a` are scalars, the corresponding dimension will
+        be squeezed out on output.
+    """
+    a_use = np.atleast_1d(a)
+    k_use = np.atleast_1d(k)
+
+    # Check inputs
+    if not isinstance(prof1, HaloProfile):
+        raise TypeError("prof1 must be of type `HaloProfile`")
+    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
+    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
+        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
+    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
+        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
+    if prof12_2pt is None:
+        prof12_2pt = Profile2pt()
+    elif not isinstance(prof12_2pt, Profile2pt):
+        raise TypeError("prof12_2pt must be of type "
+                        "`Profile2pt` or `None`")
+    if (prof13_2pt is not None) and (not isinstance(prof13_2pt, Profile2pt)):
+        raise TypeError("prof13_2pt must be of type `Profile2pt` or `None`")
+    if (prof14_2pt is not None) and (not isinstance(prof14_2pt, Profile2pt)):
+        raise TypeError("prof14_2pt must be of type `Profile2pt` or `None`")
+
+    def get_norm(normprof, prof, sf):
+        if normprof:
+            return hmc.profile_norm(cosmo, sf, prof)
+        else:
+            return 1
+
+    # Power spectrum
+    def get_pk(p_of_k_a):
+        if isinstance(p_of_k_a, Pk2D):
+            def pkf(sf):
+                return p_of_k_a.eval(k_use, sf, cosmo)
+        elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+            def pkf(sf):
+                return linear_matter_power(cosmo, k_use, sf)
+        elif str(p_of_k_a) == 'nonlinear':
+            def pkf(sf):
+                return nonlin_matter_power(cosmo, k_use, sf)
+        else:
+            raise TypeError("p_of_k_a must be `None`, \'linear\', "
+                            "\'nonlinear\' or a `Pk2D` object")
+        return pkf
+
+    na = len(a_use)
+    nk = len(k_use)
+    out = np.zeros([na, nk, nk])
+    for ia, aa in enumerate(a_use):
+        # Compute profile normalizations
+        norm1 = get_norm(normprof1, prof1, aa)
+        # Compute second profile normalization
+        if prof2 is None:
+            norm2 = norm1
+        else:
+            norm2 = get_norm(normprof2, prof2, aa)
+        if prof3 is None:
+            norm3 = norm1
+        else:
+            norm3 = get_norm(normprof3, prof3, aa)
+        if prof4 is None:
+            norm4 = norm3
+        else:
+            norm4 = get_norm(normprof4, prof4, aa)
+
+        norm = norm1 * norm2 * norm3 * norm4
+
+        # Compute trispectrum at this redshift
+        p12 = get_pk(p12_of_k_a)
+        i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2)
+        i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof2=prof4)
+        # Permutation 1
+        if p13_of_k_a is None:
+            p13 = p12
+        else:
+            p13 = get_pk(p13_of_k_a)
+        i13 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof13_2pt, prof2=prof3)
+        i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4)
+        # Permutation 2
+        if p14_of_k_a is None:
+            p14 = p12
+        else:
+            p14 = get_pk(p14_of_k_a)
+        i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4)
+        i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2)
+
+        tk_2h_22 = p12 * i12 * i34 + p13 * i13 * i24 + p14 * i14 * i32
+        # Normalize
+        out[ia, :, :] = tk_2h_22 * norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
