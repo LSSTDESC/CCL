@@ -298,7 +298,7 @@ class HMCalculator(object):
         """ Solves the integral:
 
         .. math::
-            I^1_3(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
+            I^1_3(k,a|u_2, v_1, _v2) = \\int dM\\,n(M,a)\\,b(M,a)\\,
             \\langle u_2(k,a|M) v_1(k',a|M) v_2(k',a|M)\\rangle,
 
         where :math:`n(M,a)` is the halo mass function,
@@ -1068,9 +1068,8 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1, p1_of_k_a,
         prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
         p1_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum for 1 (corresponding
-            to :math:`u_1`). If `None`, the power spectrum stored within
-            `cosmo` will be used.
+            be used as the linear matter power spectrum for :math:`u`. If
+            `None`, the power spectrum stored within `cosmo` will be used.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
             `prof1` will be used as `prof2`.
@@ -1098,9 +1097,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1, p1_of_k_a,
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
         normprof4 (bool): same as `normprof1` for `prof4`.
-        p2_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 2
-        p3_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 3
-        p4_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 4
+        p3_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for :math:`v`
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -1180,33 +1177,32 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1, p1_of_k_a,
         norm = norm1 * norm2 * norm3 * norm4
 
         # Compute trispectrum at this redshift
-        p1 = get_pk(p1_of_k_a)
-        i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)
-        i234 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof234_3pt, prof2=prof3, prof3=prof4)
+        p1 = get_pk(p1_of_k_a)(aa)[:, None]
+        i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
+        i234 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof234_3pt, prof2=prof3,
+                         prof3=prof4)
         # Permutation 1
-        if p2_of_k_a is None:
-            p2 = p1
-        else:
-            p2 = get_pk(p2_of_k_a)
-        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
-        i134 = hmc.I_1_3(cosmo, k_use, aa, prof1, prof134_3pt, prof2=prof3, prof3=prof4)
+        # p2 = p1  # (because k_a = k_b)
+        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
+        i134 = hmc.I_1_3(cosmo, k_use, aa, prof1, prof134_3pt, prof2=prof3,
+                         prof3=prof4)
+        ### Attention to axis order change!
         # Permutation 2
-        if p3_of_k_a is None:
-            p3 = p1
-        else:
-            p3 = get_pk(p3_of_k_a)
-        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)
-        i214 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof214_3pt, prof2=prof1, prof3=prof4)
+        p3 = get_pk(p3_of_k_a)(aa)[None, :]
+        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+        # Note: the integration is over < k k' k' >, so those profiles with
+        # same argument (k) must be in prof2 and prof3. In order to recover
+        # the correct axis ordering, we transpose afterwards.
+        i214 = hmc.I_1_3(cosmo, k_use, aa, prof4, prof214_3pt, prof2=prof1,
+                         prof3=prof2).T
         # Permutation 4
-        if p4_of_k_a is None:
-            p4 = p1
-        else:
-            p4 = get_pk(p4_of_k_a)
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)
-        i231 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof231_3pt, prof2=prof3, prof3=prof1)
+        # p4 = p3  # (because k_c = k_d)
+        i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+        i231 = hmc.I_1_3(cosmo, k_use, aa, prof3, prof231_3pt, prof2=prof2,
+                         prof3=prof1).T
+        ####
 
-        tk_2h_22 = p1 * i1 * i234 + p2 * i2 * i134 + p3 * i3 * i214 + \
-                   p4 * i4 * i231
+        tk_2h_22 = p1 * (i1 * i234 + i2 * i134) + p3 * (i3 * i214 + i4 * i231)
 
         # Normalize
         out[ia, :, :] = tk_2h_22 * norm
