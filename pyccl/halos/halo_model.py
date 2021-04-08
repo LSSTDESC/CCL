@@ -4,6 +4,7 @@ from .hmfunc import MassFunc
 from .hbias import HaloBias
 from .profiles import HaloProfile
 from .profiles_2pt import Profile2pt
+from .profiles_3pt import Profile3pt
 from ..core import check
 from ..pk2d import Pk2D
 from ..tk3d import Tk3D
@@ -292,6 +293,38 @@ class HMCalculator(object):
                                   mass_def=self._mdef).T
         i12 = self._integrate_over_mbf(uk)
         return i12
+
+    def I_1_3(self, cosmo, k, a, prof1, prof_3pt, prof2=None, prof3=None):
+        """ Solves the integral:
+
+        .. math::
+            I^1_1(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
+            \\langle u(k,a|M)\\rangle,
+
+        where :math:`n(M,a)` is the halo mass function,
+        :math:`b(M,a)` is the halo bias, and
+        :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
+        function of scale, scale factor and halo mass.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            k (float or array_like): comoving wavenumber in Mpc^-1.
+            a (float): scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+                profile.
+
+        Returns:
+            float or array_like: integral values evaluated at each
+            value of `k`.
+        """
+        # Compute mass function and halo bias
+        self._get_ingredients(a, cosmo, True)
+        uk = prof_3pt.fourier_3pt(prof1, cosmo, k, self._mass, a,
+                                  prof2=prof2, prof3=prof3,
+                                  mass_def=self._mdef).T
+
+        i13 = self._integrate_over_mbf(uk)
+        return i13
 
     def I_0_2(self, cosmo, k, a, prof1, prof_2pt, prof2=None):
         """ Solves the integral:
@@ -848,7 +881,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, p12_of_k_a, prof2=None,
     calculated as:
 
     .. math::
-        T_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
+        T^{2h}_{22}_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
         P_lin(k_u) * I^1_2(k_u|u_{1,2}) * I^1_2(k_v|u_{1,2}) + 2 perm
 
     where :math:`I^1_2` is defined in the documentation
@@ -1004,6 +1037,336 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, p12_of_k_a, prof2=None,
         out = np.squeeze(out, axis=-1)
     return out
 
+def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1, p1_of_k_a,
+                              prof2=None, prof3=None, prof4=None,
+                              prof234_3pt=None, prof134_3pt=None,
+                              prof214_3pt=None, prof231_3pt=None,
+                              normprof1=False, normprof2=False,
+                              normprof3=False, normprof4=False,
+                              p2_of_k_a=None, p3_of_k_a=None, p4_of_k_a=None):
+    """ Computes the halo model 2-halo trispectrum for four different
+    quantities defined by their respective halo profiles. The 2-halo
+    trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
+    calculated as:
+
+    .. math::
+        T^{2h}_{13}_{u_1,u_2,v_1,v_2}(k_u,k_v,a) =
+        P_lin(k_u) * I^1_1(k_{u_1}|u_1) * I^1_3(k_{u_1, v}|u_1, v_{1,2}) + 3 perm
+
+    where :math:`I^1_1` is defined in the documentation of
+    :meth:`~HMCalculator.I_1_1` and :math:`I^1_3` is defined in the
+    documentation of :meth:`~HMCalculator.I_1_3`.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        hmc (:class:`HMCalculator`): a halo model calculator.
+        k (float or array_like): comoving wavenumber in Mpc^-1.
+        a (float or array_like): scale factor.
+        prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_1` above.
+        p1_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum for 1 (corresponding
+            to :math:`u_1`). If `None`, the power spectrum stored within
+            `cosmo` will be used.
+        prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_2` above. If `None`,
+            `prof1` will be used as `prof2`.
+        prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_1` above. If `None`,
+            `prof1` will be used as `prof3`.
+        prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_2` above. If `None`,
+            `prof3` will be used as `prof4`.
+        prof234_3pt (:class:`~pyccl.halos.profiles_3pt.Profile3pt`):
+            a profile covariance object returning the 3-point
+            moment of `prof2`, `prof3` and `prof4`. If `None`, the default
+            third moment will be used, corresponding to the
+            products of the means of each profile.
+        prof134_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof1`, `prof3` and `prof4`.
+        prof214_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof2`, `prof1` and `prof4`.
+        prof231_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof2`, `prof3` and `prof1`.
+        normprof1 (bool): if `True`, this integral will be
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
+            (see :meth:`~HMCalculator.I_0_1`), where
+            :math:`u` is the profile represented by `prof1`.
+        normprof2 (bool): same as `normprof1` for `prof2`.
+        normprof3 (bool): same as `normprof1` for `prof3`.
+        normprof4 (bool): same as `normprof1` for `prof4`.
+        p2_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 2
+        p3_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 3
+        p4_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 4
+
+    Returns:
+        float or array_like: integral values evaluated at each
+        combination of `k` and `a`. The shape of the output will
+        be `(N_a, N_k, N_k)` where `N_k` and `N_a` are the sizes of
+        `k` and `a` respectively. The ordering is such that
+        `output[ia, ik2, ik1] = T(k[ik1], k[ik2], a[ia])`
+        If `k` or `a` are scalars, the corresponding dimension will
+        be squeezed out on output.
+    """
+    a_use = np.atleast_1d(a)
+    k_use = np.atleast_1d(k)
+
+    # Check inputs
+    if not isinstance(prof1, HaloProfile):
+        raise TypeError("prof1 must be of type `HaloProfile`")
+    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
+    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
+        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
+    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
+        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
+    if prof234_3pt is None:
+        prof234_3pt = Profile3pt()
+    elif not isinstance(prof234_3pt , Profile3pt):
+        raise TypeError("prof234_3pt must be of type "
+                        "`Profile3pt` or `None`")
+    if (prof134_3pt is not None) and (not isinstance(prof134_3pt, Profile3pt)):
+        raise TypeError("prof134_3pt must be of type `Profile3pt` or `None`")
+    if (prof214_3pt is not None) and (not isinstance(prof214_3pt, Profile3pt)):
+        raise TypeError("prof214_3pt must be of type `Profile3pt` or `None`")
+    if (prof231_3pt is not None) and (not isinstance(prof231_3pt, Profile3pt)):
+        raise TypeError("prof231_3pt must be of type `Profile3pt` or `None`")
+
+    def get_norm(normprof, prof, sf):
+        if normprof:
+            return hmc.profile_norm(cosmo, sf, prof)
+        else:
+            return 1
+
+    # Power spectrum
+    def get_pk(p_of_k_a):
+        if isinstance(p_of_k_a, Pk2D):
+            def pkf(sf):
+                return p_of_k_a.eval(k_use, sf, cosmo)
+        elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+            def pkf(sf):
+                return linear_matter_power(cosmo, k_use, sf)
+        elif str(p_of_k_a) == 'nonlinear':
+            def pkf(sf):
+                return nonlin_matter_power(cosmo, k_use, sf)
+        else:
+            raise TypeError("p_of_k_a must be `None`, \'linear\', "
+                            "\'nonlinear\' or a `Pk2D` object")
+        return pkf
+
+    na = len(a_use)
+    nk = len(k_use)
+    out = np.zeros([na, nk, nk])
+    for ia, aa in enumerate(a_use):
+        # Compute profile normalizations
+        norm1 = get_norm(normprof1, prof1, aa)
+        # Compute second profile normalization
+        if prof2 is None:
+            norm2 = norm1
+        else:
+            norm2 = get_norm(normprof2, prof2, aa)
+        if prof3 is None:
+            norm3 = norm1
+        else:
+            norm3 = get_norm(normprof3, prof3, aa)
+        if prof4 is None:
+            norm4 = norm3
+        else:
+            norm4 = get_norm(normprof4, prof4, aa)
+
+        norm = norm1 * norm2 * norm3 * norm4
+
+        # Compute trispectrum at this redshift
+        p1 = get_pk(p1_of_k_a)
+        i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)
+        i234 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof234_3pt, prof2=prof3, prof3=prof4)
+        # Permutation 1
+        if p2_of_k_a is None:
+            p2 = p1
+        else:
+            p2 = get_pk(p2_of_k_a)
+        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
+        i134 = hmc.I_1_3(cosmo, k_use, aa, prof1, prof134_3pt, prof2=prof3, prof3=prof4)
+        # Permutation 2
+        if p3_of_k_a is None:
+            p3 = p1
+        else:
+            p3 = get_pk(p3_of_k_a)
+        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)
+        i214 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof214_3pt, prof2=prof1, prof3=prof4)
+        # Permutation 4
+        if p4_of_k_a is None:
+            p4 = p1
+        else:
+            p4 = get_pk(p4_of_k_a)
+        i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)
+        i231 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof231_3pt, prof2=prof3, prof3=prof1)
+
+        tk_2h_22 = p1 * i1 * i234 + p2 * i2 * i134 + p3 * i3 * i214 + \
+                   p4 * i4 * i231
+
+        # Normalize
+        out[ia, :, :] = tk_2h_22 * norm
+
+    if np.ndim(a) == 0:
+        out = np.squeeze(out, axis=0)
+    if np.ndim(k) == 0:
+        out = np.squeeze(out, axis=-1)
+        out = np.squeeze(out, axis=-1)
+    return out
+
+def halomod_Tk3D_2h(cosmo, hmc,
+                    prof1, p1_of_k_a, p12_of_k_a, prof2=None, prof12_2pt=None,
+                    prof3=None, prof4=None,
+                    prof13_2pt=None, prof14_2pt=None,
+                    prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
+                    prof234_3pt=None, prof134_3pt=None,
+                    prof214_3pt=None, prof231_3pt=None,
+                    p13_of_k_a=None, p14_of_k_a=None,
+                    p2_of_k_a=None, p3_of_k_a=None, p4_of_k_a=None,
+                    normprof1=False, normprof2=False,
+                    normprof3=False, normprof4=False,
+                    lk_arr=None, a_arr=None,
+                    extrap_order_lok=1, extrap_order_hik=1, use_log=False):
+    """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing the 2-halo
+    trispectrum for four quantities defined by their respective halo profiles.
+    See :meth:`halomod_trispectrum_1h` for more details about the actual
+    calculation.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        hmc (:class:`HMCalculator`): a halo model calculator.
+        prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_1` above.
+        p1_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum for 1 (corresponding
+            to :math:`u_1`). If `None`, the power spectrum stored within
+            `cosmo` will be used.
+        p12_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum for 12 (corresponding
+            to :math:`u_1`). If `None`, the power spectrum stored within
+            `cosmo` will be used.
+        prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_2` above. If `None`,
+            `prof1` will be used as `prof2`.
+        prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            a profile covariance object returning the the two-point
+            moment of `prof1` and `prof2`. If `None`, the default
+            second moment will be used, corresponding to the
+            products of the means of both profiles.
+        prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_1` above. If `None`,
+            `prof1` will be used as `prof3`.
+        prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_2` above. If `None`,
+            `prof3` will be used as `prof4`.
+        prof13_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof1` and `prof3`.
+        prof14_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof14_2pt` for `prof1` and `prof4`.
+        prof24_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof14_2pt` for `prof2` and `prof4`.
+        prof32_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof14_2pt` for `prof3` and `prof2`.
+        prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof14_2pt` for `prof3` and `prof4`.
+        prof234_3pt (:class:`~pyccl.halos.profiles_3pt.Profile3pt`):
+            a profile covariance object returning the 3-point
+            moment of `prof2`, `prof3` and `prof4`. If `None`, the default
+            third moment will be used, corresponding to the
+            products of the means of each profile.
+        prof134_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof1`, `prof3` and `prof4`.
+        prof214_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof2`, `prof1` and `prof4`.
+        prof231_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof2`, `prof3` and `prof1`.
+        p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
+        p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
+        p2_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 2
+        p3_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 3
+        p4_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 4
+        normprof1 (bool): if `True`, this integral will be
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
+            (see :meth:`~HMCalculator.I_0_1`), where
+            :math:`u` is the profile represented by `prof1`.
+        normprof2 (bool): same as `normprof1` for `prof2`.
+        normprof3 (bool): same as `normprof1` for `prof3`.
+        normprof4 (bool): same as `normprof1` for `prof4`.
+        a_arr (array): an array holding values of the scale factor
+            at which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of Mpc^-1) at
+            which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        extrap_order_lok (int): extrapolation order to be used on
+            k-values below the minimum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        extrap_order_hik (int): extrapolation order to be used on
+            k-values above the maximum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        use_log (bool): if `True`, the trispectrum will be
+            interpolated in log-space (unless negative or
+            zero values are found).
+
+    Returns:
+        :class:`~pyccl.tk3d.Tk3D`: 2-halo trispectrum.
+    """
+    if lk_arr is None:
+        status = 0
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status)
+    if a_arr is None:
+        status = 0
+        na = lib.get_pk_spline_na(cosmo.cosmo)
+        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        check(status)
+
+    tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr, prof1,
+                                 p12_of_k_a, prof2=prof2,
+                                 prof12_2pt=prof12_2pt, prof3=prof3,
+                                 prof4=prof4, prof13_2pt=prof13_2pt,
+                                 prof14_2pt=prof14_2pt, prof24_2pt=prof24_2pt,
+                                 prof32_2pt=prof32_2pt, prof34_2pt=prof34_2pt,
+                                 normprof1=normprof1, normprof2=normprof2,
+                                 normprof3=normprof3, normprof4=normprof4,
+                                 p13_of_k_a=p13_of_k_a, p14_of_k_a=p14_of_k_a)
+
+    tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                          prof1, p1_of_k_a, prof2=prof2,
+                                          prof3=prof3, prof4=prof4,
+                                          prof234_3pt=prof234_3pt,
+                                          prof134_3pt=prof134_3pt,
+                                          prof214_3pt=prof214_3pt,
+                                          prof231_3pt=prof231_3pt,
+                                          normprof1=normprof1,
+                                          normprof2=normprof2,
+                                          normprof3=normprof3,
+                                          normprof4=normprof4,
+                                          p2_of_k_a=p2_of_k_a,
+                                          p3_of_k_a=p3_of_k_a,
+                                          p4_of_k_a=p4_of_k_a)
+
+    tkk = tkk_2h_22 + tkk_2h_13
+
+    if use_log:
+        if np.any(tkk <= 0):
+            warnings.warn(
+                "Some values were not positive. "
+                "Will not interpolate in log-space.",
+                category=CCLWarning)
+            use_log = False
+        else:
+            tkk = np.log(tkk)
+
+    tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkk,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik, is_logt=use_log)
+    return tk3d
 
 def halomod_Tk3D_1h(cosmo, hmc,
                     prof1, prof2=None, prof12_2pt=None,
