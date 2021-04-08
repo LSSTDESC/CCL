@@ -298,13 +298,14 @@ class HMCalculator(object):
         """ Solves the integral:
 
         .. math::
-            I^1_1(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
-            \\langle u(k,a|M)\\rangle,
+            I^1_3(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
+            \\langle u_2(k,a|M) v_1(k',a|M) v_2(k',a|M)\\rangle,
 
         where :math:`n(M,a)` is the halo mass function,
         :math:`b(M,a)` is the halo bias, and
-        :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
-        function of scale, scale factor and halo mass.
+        :math:`\\langle u_2(k,a|M) v_1(k',a|M) v_2(k',a|M)\\rangle` is the
+        3pt halo profile as a function of scales `k` and `k'`, scale factor
+        and halo mass.
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -315,9 +316,11 @@ class HMCalculator(object):
 
         Returns:
             float or array_like: integral values evaluated at each
-            value of `k`.
+            value of `k`. Its shape will be `(N_k, N_k)`, with `N_k` the
+            size of the `k` array.
         """
         # Compute mass function and halo bias
+        # and transpose to move the M-axis last
         self._get_ingredients(a, cosmo, True)
         uk = prof_3pt.fourier_3pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2, prof3=prof3,

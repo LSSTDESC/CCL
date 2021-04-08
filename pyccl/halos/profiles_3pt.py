@@ -2,7 +2,7 @@ from .profiles import HaloProfile
 
 
 class Profile3pt(object):
-    """ This class implements the 1-halo 3-point correlator between two
+    """ This class implements the 1-halo 3-point correlator between three
     halo profiles. In the simplest case, this is just
     the product of the three profiles in Fourier space.
     More complicated cases should be implemented by subclassing
@@ -18,7 +18,7 @@ class Profile3pt(object):
         two profiles:
 
         .. math::
-           \\langle\\rho_1(k)\\rho_2(k)\\rho_3(k)\\rangle.
+           \\langle\\rho_1(k)\\rho_2(k')\\rho_3(k')\\rangle.
 
         Args:
             prof (:class:`~pyccl.halos.profiles.HaloProfile`):
@@ -39,8 +39,8 @@ class Profile3pt(object):
 
         Returns:
             float or array_like: second-order Fourier-space
-            moment. The shape of the output will be `(N_M, N_k)`
-            where `N_k` and `N_m` are the sizes of `k` and `M`
+            moment. The shape of the output will be `(N_M, N_k, N_k)`
+            where `N_k`, and `N_m` are the sizes of `k`, and `M`
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
@@ -64,4 +64,4 @@ class Profile3pt(object):
 
             uk3 = prof3.fourier(cosmo, k, M, a, mass_def=mass_def)
 
-        return uk1 * uk2 * uk3
+        return uk1[:, :, None] * (uk2 * uk3)[:, None, :]
