@@ -1114,22 +1114,34 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1, p1_of_k_a,
     # Check inputs
     if not isinstance(prof1, HaloProfile):
         raise TypeError("prof1 must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+    if prof2 is None:
+        prof2 = prof1
+    elif not isinstance(prof2, HaloProfile):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
+    if prof3 is None:
+        prof3 = prof1
+    elif not isinstance(prof3, HaloProfile):
         raise TypeError("prof3 must be of type `HaloProfile` or `None`")
-    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
+    if prof4 is None:
+        prof4 = prof1
+    elif not isinstance(prof4, HaloProfile):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
+
     if prof234_3pt is None:
         prof234_3pt = Profile3pt()
     elif not isinstance(prof234_3pt , Profile3pt):
-        raise TypeError("prof234_3pt must be of type "
-                        "`Profile3pt` or `None`")
-    if (prof134_3pt is not None) and (not isinstance(prof134_3pt, Profile3pt)):
+        raise TypeError("prof234_3pt must be of type `Profile3pt` or `None`")
+    if prof134_3pt is None:
+        prof134_3pt = prof234_3pt
+    elif not isinstance(prof134_3pt , Profile3pt):
         raise TypeError("prof134_3pt must be of type `Profile3pt` or `None`")
-    if (prof214_3pt is not None) and (not isinstance(prof214_3pt, Profile3pt)):
+    if prof214_3pt is None:
+        prof214_3pt = prof234_3pt
+    elif not isinstance(prof214_3pt , Profile3pt):
         raise TypeError("prof214_3pt must be of type `Profile3pt` or `None`")
-    if (prof231_3pt is not None) and (not isinstance(prof231_3pt, Profile3pt)):
+    if prof231_3pt is None:
+        prof231_3pt = prof234_3pt
+    elif not isinstance(prof231_3pt , Profile3pt):
         raise TypeError("prof231_3pt must be of type `Profile3pt` or `None`")
 
     def get_norm(normprof, prof, sf):
@@ -1325,15 +1337,15 @@ def halomod_Tk3D_2h(cosmo, hmc,
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
         check(status)
 
-    tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr, prof1,
-                                 p12_of_k_a, prof2=prof2,
-                                 prof12_2pt=prof12_2pt, prof3=prof3,
-                                 prof4=prof4, prof13_2pt=prof13_2pt,
-                                 prof14_2pt=prof14_2pt, prof24_2pt=prof24_2pt,
-                                 prof32_2pt=prof32_2pt, prof34_2pt=prof34_2pt,
-                                 normprof1=normprof1, normprof2=normprof2,
-                                 normprof3=normprof3, normprof4=normprof4,
-                                 p13_of_k_a=p13_of_k_a, p14_of_k_a=p14_of_k_a)
+    # tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr, prof1,
+    #                              p12_of_k_a, prof2=prof2,
+    #                              prof12_2pt=prof12_2pt, prof3=prof3,
+    #                              prof4=prof4, prof13_2pt=prof13_2pt,
+    #                              prof14_2pt=prof14_2pt, prof24_2pt=prof24_2pt,
+    #                              prof32_2pt=prof32_2pt, prof34_2pt=prof34_2pt,
+    #                              normprof1=normprof1, normprof2=normprof2,
+    #                              normprof3=normprof3, normprof4=normprof4,
+    #                              p13_of_k_a=p13_of_k_a, p14_of_k_a=p14_of_k_a)
 
     tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
                                           prof1, p1_of_k_a, prof2=prof2,
@@ -1350,7 +1362,8 @@ def halomod_Tk3D_2h(cosmo, hmc,
                                           p3_of_k_a=p3_of_k_a,
                                           p4_of_k_a=p4_of_k_a)
 
-    tkk = tkk_2h_22 + tkk_2h_13
+    # tkk = tkk_2h_22 + tkk_2h_13
+    tkk = tkk_2h_13
 
     if use_log:
         if np.any(tkk <= 0):

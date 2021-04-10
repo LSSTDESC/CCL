@@ -54,6 +54,7 @@ class Profile3pt(object):
             if not isinstance(prof2, HaloProfile):
                 raise TypeError("prof2 must be of type "
                                 "`HaloProfile` or `None`")
+            uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
 
         if prof3 is None:
             uk3 = uk1

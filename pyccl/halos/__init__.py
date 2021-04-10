@@ -50,4 +50,6 @@ from .halo_model import (  # noqa
     halomod_power_spectrum,
     halomod_Pk2D,
     halomod_trispectrum_1h,
-    halomod_Tk3D_1h)
+    halomod_trispectrum_2h_13,
+    halomod_Tk3D_1h,
+    halomod_Tk3D_2h)
