@@ -870,14 +870,13 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
         out = np.squeeze(out, axis=-1)
     return out
 
-def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, p12_of_k_a, prof2=None,
-                              prof12_2pt=None, prof3=None, prof4=None,
+def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
+                              prof3=None, prof4=None, prof12_2pt=None,
                               prof13_2pt=None, prof14_2pt=None,
                               prof24_2pt=None, prof32_2pt=None,
                               prof34_2pt=None, normprof1=False,
                               normprof2=False, normprof3=False,
-                              normprof4=False, p13_of_k_a=None,
-                              p14_of_k_a=None):
+                              normprof4=False):
     """ Computes the halo model 1-halo trispectrum for four different
     quantities defined by their respective halo profiles. The 2-halo
     trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
@@ -885,7 +884,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, p12_of_k_a, prof2=None,
 
     .. math::
         T^{2h}_{22}_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
-        P_lin(k_u) * I^1_2(k_u|u_{1,2}) * I^1_2(k_v|u_{1,2}) + 2 perm
+        P_lin(|k_{u_1} + k_{u_2}|) * I^1_2(k_{u_1}, k_{u_2}|u}) * I^1_2(k_{v_1}, k_{v_2}|v}) + 2 perm
 
     where :math:`I^1_2` is defined in the documentation
     of :meth:`~HMCalculator.I_1_2`.
@@ -1011,21 +1010,15 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, p12_of_k_a, prof2=None,
         norm = norm1 * norm2 * norm3 * norm4
 
         # Compute trispectrum at this redshift
-        p12 = get_pk(p12_of_k_a)
+        p12 = get_pk(p_of_k_a)(aa)
         i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2)
         i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof2=prof4)
         # Permutation 1
-        if p13_of_k_a is None:
-            p13 = p12
-        else:
-            p13 = get_pk(p13_of_k_a)
+        p13 = p12
         i13 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof13_2pt, prof2=prof3)
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4)
         # Permutation 2
-        if p14_of_k_a is None:
-            p14 = p12
-        else:
-            p14 = get_pk(p14_of_k_a)
+        p14 = p12
         i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4)
         i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2)
 
@@ -1040,13 +1033,12 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, p12_of_k_a, prof2=None,
         out = np.squeeze(out, axis=-1)
     return out
 
-def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1, p1_of_k_a,
+def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
                               prof2=None, prof3=None, prof4=None,
                               prof234_3pt=None, prof134_3pt=None,
                               prof214_3pt=None, prof231_3pt=None,
                               normprof1=False, normprof2=False,
-                              normprof3=False, normprof4=False,
-                              p2_of_k_a=None, p3_of_k_a=None, p4_of_k_a=None):
+                              normprof3=False, normprof4=False):
     """ Computes the halo model 2-halo trispectrum for four different
     quantities defined by their respective halo profiles. The 2-halo
     trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
@@ -1054,7 +1046,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1, p1_of_k_a,
 
     .. math::
         T^{2h}_{13}_{u_1,u_2,v_1,v_2}(k_u,k_v,a) =
-        P_lin(k_u) * I^1_1(k_{u_1}|u_1) * I^1_3(k_{u_1, v}|u_1, v_{1,2}) + 3 perm
+        P_lin(k_u) * I^1_1(k_{u_1}|u_1) * I^1_3(k_{u_1}, k_{v_1}, k_{v_2}|u_1, v}) + 3 perm
 
     where :math:`I^1_1` is defined in the documentation of
     :meth:`~HMCalculator.I_1_1` and :math:`I^1_3` is defined in the
@@ -1189,7 +1181,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1, p1_of_k_a,
         norm = norm1 * norm2 * norm3 * norm4
 
         # Compute trispectrum at this redshift
-        p1 = get_pk(p1_of_k_a)(aa)[:, None]
+        p1 = get_pk(p_of_k_a)(aa)[:, None]
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
         i234 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof234_3pt, prof2=prof3,
                          prof3=prof4)
@@ -1200,7 +1192,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1, p1_of_k_a,
                          prof3=prof4)
         ### Attention to axis order change!
         # Permutation 2
-        p3 = get_pk(p3_of_k_a)(aa)[None, :]
+        p3 = p1.T
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         # Note: the integration is over < k k' k' >, so those profiles with
         # same argument (k) must be in prof2 and prof3. In order to recover
@@ -1337,18 +1329,17 @@ def halomod_Tk3D_2h(cosmo, hmc,
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
         check(status)
 
-    # tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr, prof1,
-    #                              p12_of_k_a, prof2=prof2,
+    # tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
+    #                              p_of_k_a, prof1, prof2=prof2,
     #                              prof12_2pt=prof12_2pt, prof3=prof3,
     #                              prof4=prof4, prof13_2pt=prof13_2pt,
     #                              prof14_2pt=prof14_2pt, prof24_2pt=prof24_2pt,
     #                              prof32_2pt=prof32_2pt, prof34_2pt=prof34_2pt,
     #                              normprof1=normprof1, normprof2=normprof2,
-    #                              normprof3=normprof3, normprof4=normprof4,
-    #                              p13_of_k_a=p13_of_k_a, p14_of_k_a=p14_of_k_a)
+    #                              normprof3=normprof3, normprof4=normprof4)
 
     tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                          prof1, p1_of_k_a, prof2=prof2,
+                                          p1_of_k_a, prof1, prof2=prof2,
                                           prof3=prof3, prof4=prof4,
                                           prof234_3pt=prof234_3pt,
                                           prof134_3pt=prof134_3pt,
@@ -1357,10 +1348,7 @@ def halomod_Tk3D_2h(cosmo, hmc,
                                           normprof1=normprof1,
                                           normprof2=normprof2,
                                           normprof3=normprof3,
-                                          normprof4=normprof4,
-                                          p2_of_k_a=p2_of_k_a,
-                                          p3_of_k_a=p3_of_k_a,
-                                          p4_of_k_a=p4_of_k_a)
+                                          normprof4=normprof4)
 
     # tkk = tkk_2h_22 + tkk_2h_13
     tkk = tkk_2h_13
