@@ -1206,10 +1206,10 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
                          prof3=prof1).T
         ####
 
-        tk_2h_22 = p1 * (i1 * i234 + i2 * i134) + p3 * (i3 * i214 + i4 * i231)
+        tk_2h_13 = p1 * (i1 * i234 + i2 * i134) + p3 * (i3 * i214 + i4 * i231)
 
         # Normalize
-        out[ia, :, :] = tk_2h_22 * norm
+        out[ia, :, :] = tk_2h_13 * norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
