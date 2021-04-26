@@ -576,17 +576,21 @@ def test_input_nonlin_raises():
 
 def test_camb_de_model():
     """Check that the dark energy model for CAMB has been properly defined."""
-    cosmo = ccl.CosmologyVanillaLCDM(
-        transfer_function='boltzmann_camb',
-        extra_parameters={"camb": {"dark_energy_model": "pf"}})
     with pytest.raises(ValueError):
+        cosmo = ccl.CosmologyVanillaLCDM(
+            transfer_function='boltzmann_camb',
+            extra_parameters={"camb": {"dark_energy_model": "pf"}})
         ccl.linear_matter_power(cosmo, 1, 1)
 
-
-def test_camb_correct_de_model():
     """Check that w is not less than -1, if the chosen dark energy model for
     CAMB is fluid."""
-    cosmo = ccl.CosmologyVanillaLCDM(
-        transfer_function='boltzmann_camb', w0=-1, wa=-1)
     with pytest.raises(ValueError):
+        cosmo = ccl.CosmologyVanillaLCDM(
+            transfer_function='boltzmann_camb', w0=-1, wa=-1)
         ccl.linear_matter_power(cosmo, 1, 1)
+
+    """Check that ppf is running smoothly."""
+    cosmo = ccl.CosmologyVanillaLCDM(
+        transfer_function='boltzmann_camb', w0=-1, wa=-1,
+        extra_parameters={"camb": {"dark_energy_model": "ppf"}})
+    assert np.isfinite(ccl.linear_matter_power(cosmo, 1, 1))
