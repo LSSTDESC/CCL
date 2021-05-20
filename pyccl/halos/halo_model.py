@@ -535,9 +535,9 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
     elif not isinstance(prof_2pt, Profile2pt):
         raise TypeError("prof_2pt must be of type "
                         "`Profile2pt` or `None`")
-    if not hasattr(f_ka, "__call__"):
+    if f_ka is not None and not hasattr(f_ka, "__call__"):
         raise TypeError("f_ka must be a function with "
-                        "signature `k`, `a`, `cosmo`")
+                        "signature `k, a, cosmo` or `None`")
     # Power spectrum
     if isinstance(p_of_k_a, Pk2D):
         def pkf(sf):
