@@ -101,6 +101,15 @@ def test_tk3d_eval_errors():
     assert_raises(TypeError, tsp.eval, 1E-2, np.array([0.1]))
 
 
+def test_tk3d_delete():
+    """Check that ccl.Tk3D.__del__ works."""
+    (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
+    tsp = ccl.Tk3D(a_arr, lk_arr, pk1_arr=fka1_arr,
+                   pk2_arr=fka2_arr)
+    # This should not cause an ignored exception
+    del tsp
+
+
 @pytest.mark.parametrize('is_product', [True, False])
 def test_tk3d_eval(is_product):
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()

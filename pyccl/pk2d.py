@@ -72,6 +72,11 @@ class Pk2D(object):
                 raise ValueError("If you do not provide a function, "
                                  "you must provide arrays")
 
+            # Check that `a` is a monotonically increasing array.
+            if not np.array_equal(a_arr, np.sort(a_arr)):
+                raise ValueError("Input scale factor array in `a_arr` is not "
+                                 "monotonically increasing.")
+
             pkflat = pk_arr.flatten()
             # Check dimensions make sense
             if (len(a_arr)*len(lk_arr) != len(pkflat)):

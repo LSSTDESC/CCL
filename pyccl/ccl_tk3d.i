@@ -13,6 +13,7 @@
 %apply (int DIM1, double* ARGOUT_ARRAY1) {(int ndout, double* doutput)};
 
 %include "../include/ccl_f2d.h"
+%include "../include/ccl_f3d.h"
 %include "../include/ccl_core.h"
 
 %inline %{

@@ -292,6 +292,14 @@ def test_input_linpower_raises():
             n_s=0.965, sigma8=0.8,
             pk_linear=np.pi)
 
+    # a not increasing
+    with pytest.raises(ValueError):
+        ccl.CosmologyCalculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_linear={'a': a_arr[::-1], 'k': k_arr,
+                       'delta_matter:delta_matter': pk_arr})
+
     # Dm x Dm not present
     with pytest.raises(ValueError):
         ccl.CosmologyCalculator(
@@ -526,6 +534,14 @@ def test_input_nonlin_raises():
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'kk': k_arr,
                        'delta_matter;delta_matter': pk_arr})
+
+    # a not increasing
+    with pytest.raises(ValueError):
+        ccl.CosmologyCalculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_nonlin={'a': a_arr[::-1], 'k': k_arr,
+                       'delta_matter:delta_matter': pk_arr})
 
     # delta_matter:delta_matter not present
     with pytest.raises(ValueError):

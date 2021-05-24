@@ -258,7 +258,7 @@ def rho_x(cosmo, a, species, is_comoving=False):
 
     Returns:
         rho_x (float or array_like): Physical density of a given species
-        at a scale factor.
+        at a scale factor, in units of Msun / Mpc^3.
     """
 
     if species not in species_types.keys():
