@@ -509,11 +509,11 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             term in the first equation above) won't be computed.
         get_2h (bool): if `False`, the 2-halo term (i.e. the second
             term in the first equation above) won't be computed.
-        f_ka (function): function of two variables (k and a) with
-            the same signature and behavior as the `eval` method of
-            :class:`~pyccl.pk2d.Pk2D`. The total halo model power
-            spectrum will be multiplied by this factor. If `None`
-            the extra factor is just 1.
+        f_ka (function): function of two variables and cosmology
+            (k, a, cosmo) with the same signature and behavior as 
+            the `eval` method of class:`~pyccl.pk2d.Pk2D`. 
+            The total halo model power spectrum will be multiplied 
+            by this factor. If `None` the extra factor is just 1.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -664,11 +664,11 @@ def halomod_Pk2D(cosmo, hmc, prof,
         extrap_order_hik (int): extrapolation order to be used on
             k-values above the maximum of the splines. See
             :class:`~pyccl.pk2d.Pk2D`.
-        f_ka (function): function of two variables (k and a) with
-            the same signature and behavior as the `eval` method of
-            :class:`~pyccl.pk2d.Pk2D`. The total halo model power
-            spectrum will be multiplied by this factor. If `None`
-            the extra factor is just 1.
+        f_ka (function): function of two variables and cosmology
+            (k, a, cosmo) with the same signature and behavior as 
+            the `eval` method of class:`~pyccl.pk2d.Pk2D`. 
+            The total halo model power spectrum will be multiplied 
+            by this factor. If `None` the extra factor is just 1.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: halo model power spectrum.
