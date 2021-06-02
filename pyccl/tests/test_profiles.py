@@ -120,6 +120,33 @@ def test_hod_smoke():
         assert getattr(p, n) == 1234.
 
 
+@pytest.mark.parametrize('real_prof', [True, False])
+def test_hod_ns_independent(real_prof):
+    func = lambda prof: prof._real if real_prof else prof._fourier
+
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    hmd = c.mdef
+    p1 = ccl.halos.HaloProfileHOD(c_M_relation=c,
+                                  lMmin_0=12.,
+                                  ns_independent=False)
+    p2 = ccl.halos.HaloProfileHOD(c_M_relation=c,
+                                  lMmin_0=12.,
+                                  ns_independent=True)
+    # M < Mmin
+    f1 = func(p1)(COSMO, 1., 1e10, 1., hmd)
+    assert np.all(f1 == 0)
+    f2 = func(p2)(COSMO, 1., 1e10, 1., hmd)
+    assert np.all(f2 > 0)
+    # M > Mmin
+    f1 = func(p1)(COSMO, 1., 1e14, 1., hmd)
+    f2 = func(p2)(COSMO, 1., 1e14, 1., hmd)
+    assert np.allclose(f1, f2, rtol=0)
+    # M == Mmin
+    f1 = func(p1)(COSMO, 1., 1e12, 1., hmd)
+    f2 = func(p2)(COSMO, 1., 1e12, 1., hmd)
+    assert np.allclose(2*f1, f2+0.5, rtol=0)
+
+
 def test_hod_2pt_raises():
     pbad = ccl.halos.HaloProfilePressureGNFW()
     c = ccl.halos.ConcentrationDuffy08(M200)
