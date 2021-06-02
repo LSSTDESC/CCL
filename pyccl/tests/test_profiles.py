@@ -138,6 +138,20 @@ def test_hod_2pt_raises():
                    prof2=pgood, mass_def=M200)
 
 
+def test_2pt_rcorr_smoke():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p = ccl.halos.HaloProfileNFW(c_M_relation=c)
+    F0 = ccl.halos.Profile2pt().fourier_2pt(p, COSMO, 1., 1e13, 1.,
+                                            mass_def=M200)
+    F1 = ccl.halos.Profile2ptR(r_corr=0).fourier_2pt(p, COSMO, 1., 1e13, 1.,
+                                                     mass_def=M200)
+    assert np.allclose(F0, F1, atol=0)
+
+    F2 = ccl.halos.Profile2ptR(r_corr=-1).fourier_2pt(p, COSMO, 1., 1e13, 1.,
+                                                      mass_def=M200)
+    assert np.allclose(F2, 0)
+
+
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileGaussian,
                           ccl.halos.HaloProfilePowerLaw])
