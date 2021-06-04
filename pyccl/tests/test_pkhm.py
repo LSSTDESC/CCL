@@ -278,7 +278,7 @@ def test_pkhm_errors():
     # Wrong 1h damping
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         supress_1h=func, get_1h=False)
+                                         supress_1h=True)
 
     with pytest.raises(ValueError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
