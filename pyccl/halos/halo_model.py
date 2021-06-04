@@ -554,7 +554,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         if not get_1h:
             raise ValueError("can't supress the 1-halo term "
                              "when get_1h is False")
-        if not hasattr(supress_1h, "__cal__"):
+        if not hasattr(supress_1h, "__call__"):
             raise TypeError("supress_1h must be "
                             "a function of `a` or None")
 
