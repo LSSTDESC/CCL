@@ -139,13 +139,17 @@ def test_hod_2pt_raises():
 
 
 def test_2pt_f_ka():
+    mu, sig = -0.4, 0.35
+
     def gauss(x, mu, sig):
         return np.exp(-((x - mu) / sig)**2)
-    mu, sig = -0.4, 0.35
+
     def boost(k, a, cosmo):
         return 1 + gauss(np.log10(k), mu, sig)
+
     def noboost(k, a, cosmo):
         return np.ones_like(k)
+
     nM = ccl.halos.mass_function_from_name("Tinker08")(COSMO, mass_def=M200)
     bM = ccl.halos.halo_bias_from_name("Tinker10")(COSMO, mass_def=M200)
     hmc = ccl.halos.HMCalculator(COSMO, nM, bM, M200)
