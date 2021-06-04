@@ -577,9 +577,9 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
     alpha_arr = smooth_transition(a_use)
     if np.any(alpha_arr < 0.4):
         warnings.warn(
-                "Halo model transition smoothing is very aggressive "
-                "(alpha < 0.4). You might be oversmoothing.",
-                category=CCLWarning)
+            "Halo model transition smoothing is very aggressive "
+            "(alpha < 0.4). You might be oversmoothing.",
+            category=CCLWarning)
 
     na = len(a_use)
     nk = len(k_use)
