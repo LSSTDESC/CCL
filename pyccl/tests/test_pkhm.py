@@ -140,6 +140,10 @@ def test_pkhm_bias_smoke(norm):
                           {'cv': None, 'norm': True,
                            'pk': 'linear', 'h1': True,
                            'h2': True, 'itg': 'simpson',
+                           'p2': P2},
+                          {'cv': None, 'norm': False,
+                           'pk': 'linear', 'h1': True,
+                           'h2': True, 'itg': 'simpson',
                            'p2': P2}])
 def test_pkhm_pk_smoke(pars):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
@@ -182,6 +186,29 @@ def test_pkhm_pk2d():
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
                   < 1E-4)
 
+    # halo model correction factor
+    mu, sig = -0.4, 0.35
+
+    def gauss(x, mu, sig):
+        return np.exp(-((x - mu) / sig)**2)
+
+    def boost(k, a, cosmo):
+        return 1 + gauss(np.log10(k), mu, sig)
+
+    def noboost(k, a, cosmo):
+        return np.ones_like(k)
+
+    pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr,
+                                           P1, f_ka=None)
+    pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr,
+                                           P1, f_ka=noboost)
+    assert np.allclose(pk0, pk1, rtol=0)
+
+    B = gauss(np.log10(k_arr), mu, sig)
+    pk2 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr,
+                                           P1, f_ka=boost)
+    assert np.allclose(pk2/pk0-1, B, rtol=0)
+
 
 def test_pkhm_errors():
     # Wrong integration
@@ -221,3 +248,8 @@ def test_pkhm_errors():
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
                                          p_of_k_a=KK)
+
+    # Wrong f_ka
+    with pytest.raises(TypeError):
+        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
+                                         f_ka=np.ones_like(KK))

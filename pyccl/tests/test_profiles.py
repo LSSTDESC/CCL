@@ -138,32 +138,6 @@ def test_hod_2pt_raises():
                    prof2=pgood, mass_def=M200)
 
 
-def test_2pt_f_ka():
-    mu, sig = -0.4, 0.35
-
-    def gauss(x, mu, sig):
-        return np.exp(-((x - mu) / sig)**2)
-
-    def boost(k, a, cosmo):
-        return 1 + gauss(np.log10(k), mu, sig)
-
-    def noboost(k, a, cosmo):
-        return np.ones_like(k)
-
-    nM = ccl.halos.mass_function_from_name("Tinker08")(COSMO, mass_def=M200)
-    bM = ccl.halos.halo_bias_from_name("Tinker10")(COSMO, mass_def=M200)
-    hmc = ccl.halos.HMCalculator(COSMO, nM, bM, M200)
-    c = ccl.halos.ConcentrationDuffy08(M200)
-    p = ccl.halos.HaloProfileNFW(c_M_relation=c)
-    k = np.logspace(1e-3, 2, 128)
-    pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k, 1., p, f_ka=None)
-    pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k, 1., p, f_ka=noboost)
-    assert np.allclose(pk0, pk1, rtol=0)
-    B = gauss(np.log10(k), mu, sig)
-    pk2 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k, 1., p, f_ka=boost)
-    assert np.allclose(pk2/pk0-1, B, rtol=0)
-
-
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileGaussian,
                           ccl.halos.HaloProfilePowerLaw])
