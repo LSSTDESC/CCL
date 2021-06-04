@@ -153,7 +153,7 @@ def test_hod_ns_independent(real_prof):
         assert f2 > f1 == 0
 
     p1.update_parameters(ns_independent=True)
-    assert p1.ns_independent == True
+    assert p1.ns_independent is True
 
 
 def test_hod_2pt_raises():
