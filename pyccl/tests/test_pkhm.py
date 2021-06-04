@@ -186,28 +186,43 @@ def test_pkhm_pk2d():
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
                   < 1E-4)
 
-    # halo model correction factor
-    mu, sig = -0.4, 0.35
+    # 1h/2h transition
+    def alpha0(a):  # no smoothing
+        return 1.
 
-    def gauss(x, mu, sig):
-        return np.exp(-((x - mu) / sig)**2)
+    def alpha1(a):
+        return 0.7
 
-    def boost(k, a, cosmo):
-        return 1 + gauss(np.log10(k), mu, sig)
-
-    def noboost(k, a, cosmo):
-        return np.ones_like(k)
-
-    pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr,
-                                           P1, f_ka=None)
-    pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr,
-                                           P1, f_ka=noboost)
+    pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
+                                           normprof1=True, normprof2=True,
+                                           smooth_transition=None)
+    pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
+                                           normprof1=True, normprof2=True,
+                                           smooth_transition=alpha0)
     assert np.allclose(pk0, pk1, rtol=0)
+    pk2 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
+                                           normprof1=True, normprof2=True,
+                                           smooth_transition=alpha1)
+    assert np.all(pk2/pk0 > 1.)
 
-    B = gauss(np.log10(k_arr), mu, sig)
-    pk2 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr,
-                                           P1, f_ka=boost)
-    assert np.allclose(pk2/pk0-1, B, rtol=0)
+    # 1-halo damping
+    def ks0(a):  # no damping
+        return 1e-16
+
+    def ks1(a):  # fully supressed
+        return 1e16
+
+    pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
+                                           normprof1=True, normprof2=True,
+                                           supress_1h=None, get_2h=False)
+    pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
+                                           normprof1=True, normprof2=True,
+                                           supress_1h=ks0, get_2h=False)
+    assert np.allclose(pk0, pk1, rtol=0)
+    pk2 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
+                                           normprof1=True, normprof2=True,
+                                           supress_1h=ks1, get_2h=False)
+    assert np.allclose(pk2, 0, rtol=0)
 
 
 def test_pkhm_errors():
@@ -249,7 +264,22 @@ def test_pkhm_errors():
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
                                          p_of_k_a=KK)
 
-    # Wrong f_ka
+    def func():
+        pass
+
+    # Wrong 1h/2h smoothing
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         f_ka=np.ones_like(KK))
+                                         smooth_transition=True)
+    with pytest.raises(ValueError):
+        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
+                                         smooth_transition=func, get_1h=False)
+
+    # Wrong 1h damping
+    with pytest.raises(TypeError):
+        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
+                                         supress_1h=func, get_1h=False)
+
+    with pytest.raises(ValueError):
+        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
+                                         supress_1h=func, get_1h=False)
