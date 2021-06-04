@@ -143,13 +143,19 @@ def test_2pt_rcorr_smoke():
     p = ccl.halos.HaloProfileNFW(c_M_relation=c)
     F0 = ccl.halos.Profile2pt().fourier_2pt(p, COSMO, 1., 1e13, 1.,
                                             mass_def=M200)
-    F1 = ccl.halos.Profile2ptR(r_corr=0).fourier_2pt(p, COSMO, 1., 1e13, 1.,
-                                                     mass_def=M200)
-    assert np.allclose(F0, F1, atol=0)
-
-    F2 = ccl.halos.Profile2ptR(r_corr=-1).fourier_2pt(p, COSMO, 1., 1e13, 1.,
-                                                      mass_def=M200)
-    assert np.allclose(F2, 0)
+    p2pt = ccl.halos.Profile2ptR(r_corr=0)
+    F1 = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., mass_def=M200)
+    assert F0 == F1
+    F2 = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., prof2=p, mass_def=M200)
+    assert F1 == F2
+    p2pt.update_parameters(r_corr=-1.)
+    assert p2pt.r_corr == -1.
+    F3 = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., mass_def=M200)
+    assert F3 == 0
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(None, COSMO, 1., 1e13, 1., mass_def=M200)
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., prof2=0, mass_def=M200)
 
 
 @pytest.mark.parametrize('prof_class',
