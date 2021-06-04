@@ -147,6 +147,14 @@ def test_hod_ns_independent(real_prof):
     f2 = func(p2)(COSMO, 0.01, 1e12, 1., hmd)
     assert np.allclose(2*f1, f2+0.5, rtol=0)
 
+    if not real_prof:
+        f1 = p1._fourier_variance(COSMO, 0.01, 1e10, 1., hmd)
+        f2 = p2._fourier_variance(COSMO, 0.01, 1e10, 1., hmd)
+        assert f2 > f1 == 0
+
+    p1.update_parameters(ns_independent=True)
+    assert p1.ns_independent == True
+
 
 def test_hod_2pt_raises():
     pbad = ccl.halos.HaloProfilePressureGNFW()
