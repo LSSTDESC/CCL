@@ -572,6 +572,15 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         raise TypeError("p_of_k_a must be `None`, \'linear\', "
                         "\'nonlinear\' or a `Pk2D` object")
 
+    # out-of-loop optimizations
+    ks_arr = supress_1h(a_use)
+    alpha_arr = smooth_transition(a_use)
+    if np.any(alpha_arr < 0.4):
+        warnings.warn(
+                "Halo model transition smoothing is very aggressive "
+                "(alpha < 0.4). You might be oversmoothing.",
+                category=CCLWarning)
+
     na = len(a_use)
     nk = len(k_use)
     out = np.zeros([na, nk])
@@ -609,7 +618,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         if get_1h:
             pk_1h = hmc.I_0_2(cosmo, k_use, aa, prof, prof_2pt, prof2)
             if supress_1h is not None:
-                ks = supress_1h(aa)
+                ks = ks_arr[ia]
                 pk_1h *= (k_use / ks)**4 / (1 + (k_use / ks)**4)
         else:
             pk_1h = 0.
@@ -618,7 +627,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         if smooth_transition is None:
             out[ia, :] = (pk_1h + pk_2h) * norm
         else:
-            alpha = smooth_transition(aa)
+            alpha = alpha_arr[ia]
             out[ia, :] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) * norm
 
     if np.ndim(a) == 0:
