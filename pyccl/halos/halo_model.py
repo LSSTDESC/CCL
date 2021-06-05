@@ -544,6 +544,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         raise TypeError("prof_2pt must be of type "
                         "`Profile2pt` or `None`")
     if smooth_transition is not None:
+        flag_alpha = False  # check alpha bounds
         if not (get_1h and get_2h):
             raise ValueError("transition region can only be modified "
                              "when both 1-halo and 2-halo terms are queried")
@@ -571,17 +572,6 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
     else:
         raise TypeError("p_of_k_a must be `None`, \'linear\', "
                         "\'nonlinear\' or a `Pk2D` object")
-
-    # out-of-loop optimizations
-    if supress_1h is not None:
-        ks_arr = supress_1h(a_use)
-    if smooth_transition is not None:
-        alpha_arr = smooth_transition(a_use)
-        if np.any(alpha_arr < 0.4):
-            warnings.warn(
-                "Halo model transition smoothing is very aggressive "
-                "(alpha < 0.4). You might be oversmoothing.",
-                category=CCLWarning)
 
     na = len(a_use)
     nk = len(k_use)
@@ -620,7 +610,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         if get_1h:
             pk_1h = hmc.I_0_2(cosmo, k_use, aa, prof, prof_2pt, prof2)
             if supress_1h is not None:
-                ks = ks_arr[ia]
+                ks = supress_1h(aa)
                 pk_1h *= (k_use / ks)**4 / (1 + (k_use / ks)**4)
         else:
             pk_1h = 0.
@@ -629,8 +619,17 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         if smooth_transition is None:
             out[ia, :] = (pk_1h + pk_2h) * norm
         else:
-            alpha = alpha_arr[ia]
+            alpha = smooth_transition(aa)
+            if alpha < 0.4 and not flag_alpha:
+                flag_alpha = True
             out[ia, :] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) * norm
+
+    if flag_alpha:
+        warnings.warn(
+            "1-halo/2-halo transition smoothing is very aggressive "
+            "for some value(s) of `a` (alpha < 0.4). "
+            "You might be oversmoothing.",
+            category=CCLWarning)
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
