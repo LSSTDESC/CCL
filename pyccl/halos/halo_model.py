@@ -543,8 +543,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
     elif not isinstance(prof_2pt, Profile2pt):
         raise TypeError("prof_2pt must be of type "
                         "`Profile2pt` or `None`")
+    flag_alpha = False  # check alpha bounds
     if smooth_transition is not None:
-        flag_alpha = False  # check alpha bounds
         if not (get_1h and get_2h):
             raise ValueError("transition region can only be modified "
                              "when both 1-halo and 2-halo terms are queried")
