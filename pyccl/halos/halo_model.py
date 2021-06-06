@@ -543,7 +543,6 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
     elif not isinstance(prof_2pt, Profile2pt):
         raise TypeError("prof_2pt must be of type "
                         "`Profile2pt` or `None`")
-    flag_alpha = False  # check alpha bounds
     if smooth_transition is not None:
         if not (get_1h and get_2h):
             raise ValueError("transition region can only be modified "
@@ -620,16 +619,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             out[ia, :] = (pk_1h + pk_2h) * norm
         else:
             alpha = smooth_transition(aa)
-            if alpha < 0.4 and not flag_alpha:
-                flag_alpha = True
             out[ia, :] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) * norm
-
-    if flag_alpha:
-        warnings.warn(
-            "1-halo/2-halo transition smoothing is very aggressive "
-            "for some value(s) of `a` (alpha < 0.4). "
-            "You might be oversmoothing.",
-            category=CCLWarning)
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)

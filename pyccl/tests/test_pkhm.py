@@ -283,13 +283,6 @@ def test_pkhm_errors():
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
                                          smooth_transition=func, get_1h=False)
 
-    def alpha(a):
-        return 0.3
-
-    with pytest.warns(RuntimeWarning):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         smooth_transition=alpha)
-
     # Wrong 1h damping
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
