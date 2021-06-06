@@ -513,13 +513,13 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         smooth_transition (function or None):
             Modify the halo model 1-halo/2-halo transition region
             via a time-dependent function :math:`\\alpha(a)`,
-            defined as in HMCODE-2020: :math:`P(k,a)=
+            defined as in HMCODE-2020 (``arXiv:2009.01858``): :math:`P(k,a)=
             (P_{1h}^{\\alpha(a)}(k)+P_{2h}^{\\alpha(a)}(k))^{1/\\alpha}`.
             If `None` the extra factor is just 1.
         supress_1h (function or None):
             Supress the 1-halo large scale contribution by a
             time- and scale-dependent function :math:`k_*(a)`,
-            defined as in HMCODE-2020:
+            defined as in HMCODE-2020 (``arXiv:2009.01858``):
             :math:`\\frac{(k/k_*(a))^4}{1+(k/k_*(a))^4}`.
             If `None` the standard 1-halo term is returned with no damping.
 
@@ -697,13 +697,13 @@ def halomod_Pk2D(cosmo, hmc, prof,
         smooth_transition (function or None):
             Modify the halo model 1-halo/2-halo transition region
             via a time-dependent function :math:`\\alpha(a)`,
-            defined as in HMCODE-2020: :math:`P(k,a)=
+            defined as in HMCODE-2020 (``arXiv:2009.01858``): :math:`P(k,a)=
             (P_{1h}^{\\alpha(a)}(k)+P_{2h}^{\\alpha(a)}(k))^{1/\\alpha}`.
             If `None` the extra factor is just 1.
         supress_1h (function or None):
             Supress the 1-halo large scale contribution by a
             time- and scale-dependent function :math:`k_*(a)`,
-            defined as in HMCODE-2020:
+            defined as in HMCODE-2020 (``arXiv:2009.01858``):
             :math:`\\frac{(k/k_*(a))^4}{1+(k/k_*(a))^4}`.
             If `None` the standard 1-halo term is returned with no damping.
 
