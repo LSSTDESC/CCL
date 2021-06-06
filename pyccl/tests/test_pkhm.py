@@ -212,6 +212,9 @@ def test_pkhm_pk2d():
     def ks1(a):  # fully supressed
         return 1e16
 
+    def ks2(a):  # reasonable
+        return 0.04
+
     pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
                                            normprof1=True, normprof2=True,
                                            supress_1h=None, get_2h=False)
@@ -223,6 +226,11 @@ def test_pkhm_pk2d():
                                            normprof1=True, normprof2=True,
                                            supress_1h=ks1, get_2h=False)
     assert np.allclose(pk2, 0, rtol=0)
+    pk3 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
+                                           normprof1=True, normprof2=True,
+                                           supress_1h=ks2, get_2h=False)
+    fact = (k_arr/0.04)**4 / (1 + (k_arr/0.04)**4)
+    assert np.allclose(pk3, pk0*fact, rtol=0)
 
 
 def test_pkhm_errors():
