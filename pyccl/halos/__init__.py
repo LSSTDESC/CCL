@@ -40,7 +40,7 @@ from .profiles import (  # noqa
 
 # Halo profile 2-point cumulants
 from .profiles_2pt import (  # noqa
-    Profile2pt, Profile2ptHOD, Profile2ptR)
+    Profile2pt, Profile2ptHOD)
 
 # Halo model power spectrum
 from .halo_model import (  # noqa
