@@ -708,7 +708,7 @@ class ISWTracer(Tracer):
     fluctuations is:
 
     .. math::
-        \\Delta T_{\\rm CMB} = 
+        \\Delta T_{\\rm CMB} =
         2T_{\\rm CMB} \\int_0^{\\chi_{LSS}}d\\chi a\\,\\dot{\\phi}
 
     Any angular power spectra computed with this tracer, should use
