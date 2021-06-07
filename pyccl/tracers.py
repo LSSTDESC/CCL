@@ -708,13 +708,14 @@ class ISWTracer(Tracer):
     fluctuations is:
 
     .. math::
-       \\frac{\\Delta T}{T} = 2\\int_0^{\\chi_{LSS}}d\\chi a\\,\\dot{\\phi}
+        \\Delta T_{\\rm CMB} = 
+        2T_{\\rm CMB} \\int_0^{\\chi_{LSS}}d\\chi a\\,\\dot{\\phi}
 
     Any angular power spectra computed with this tracer, should use
     a three-dimensional power spectrum involving the matter power spectrum.
     The current implementation of this tracers assumes a standard Poisson
     equation relating :math:`\\phi` and :math:`\\delta`, and linear structure
-    growth. Although this should be valid  in :math:`\\Lambda`CDM and on
+    growth. Although this should be valid in :math:`\\Lambda` CDM and on
     the large scales the ISW is sensitive to, these approximations must be
     borne in mind.
 
