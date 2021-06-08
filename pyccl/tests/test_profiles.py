@@ -177,7 +177,6 @@ def test_hod_2pt_raises():
 def test_2pt_rcorr_smoke():
     c = ccl.halos.ConcentrationDuffy08(M200)
     p = ccl.halos.HaloProfileNFW(c_M_relation=c)
-    p2 = ccl.halos.HaloProfileNFW(c_M_relation=c)  # different memory location
     F0 = ccl.halos.Profile2pt().fourier_2pt(p, COSMO, 1., 1e13, 1.,
                                             mass_def=M200)
     p2pt = ccl.halos.Profile2pt(r_corr=0)
@@ -188,7 +187,7 @@ def test_2pt_rcorr_smoke():
 
     p2pt.update_parameters(r_corr=-1.)
     assert p2pt.r_corr == -1.
-    F3 = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., prof2=p2, mass_def=M200)
+    F3 = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., mass_def=M200)
     assert F3 == 0
 
     # Errors
@@ -196,10 +195,6 @@ def test_2pt_rcorr_smoke():
         p2pt.fourier_2pt(None, COSMO, 1., 1e13, 1., mass_def=M200)
     with pytest.raises(TypeError):
         p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., prof2=0, mass_def=M200)
-    with pytest.raises(ValueError):
-        p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., mass_def=M200)
-    with pytest.raises(ValueError):
-        p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., prof2=p, mass_def=M200)
 
 
 @pytest.mark.parametrize('prof_class',

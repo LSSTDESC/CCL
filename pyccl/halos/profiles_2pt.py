@@ -69,12 +69,6 @@ class Profile2pt(object):
         """
         if not isinstance(prof, HaloProfile):
             raise TypeError("prof must be of type `HaloProfile`")
-        # If we auto-correlate a profile the covariance term must be zero.
-        # We add the test here because `prof2` might be given but point
-        # to the same memory location as `prof`. In this case, we know
-        # the two profiles are identical.
-        if self.r_corr != 0 and ((prof2 is None) or (prof == prof2)):
-            raise ValueError("prof is the same as prof2 but r_corr != 0")
 
         uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
 
