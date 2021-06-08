@@ -3,7 +3,7 @@ import pyccl as ccl
 from scipy.integrate import simps
 
 
-def test_szcl():
+def test_iswcl():
     # Cosmology
     Ob = 0.05
     Oc = 0.25
