@@ -13,7 +13,7 @@ def test_hmcalculator_number_counts_smoke():
     hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
                                      mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = ccl.halos.HMCalculator(hmf, hbf, mdef)
 
     def sel(m, a):
         m = np.atleast_1d(m)
@@ -42,7 +42,7 @@ def test_hmcalculator_number_counts_zero():
     hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
                                      mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = ccl.halos.HMCalculator(hmf, hbf, mdef)
 
     def sel(m, a):
         m = np.atleast_1d(m)
@@ -65,7 +65,7 @@ def test_hmcalculator_number_counts_norm():
     hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
                                      mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = ccl.halos.HMCalculator(hmf, hbf, mdef)
 
     def sel2(m, a):
         m = np.atleast_1d(m)
@@ -130,7 +130,7 @@ def test_hmcalculator_number_counts_scipy_dblquad():
     mmax = 1e15
 
     hmc = ccl.halos.HMCalculator(
-        cosmo, hmf, hbf, mdef,
+        hmf, hbf, mdef,
         log10M_min=np.log10(mmin),
         log10M_max=np.log10(mmax),
         integration_method_M='spline')

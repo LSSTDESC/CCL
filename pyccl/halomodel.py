@@ -68,7 +68,7 @@ def onehalo_matter_power(cosmo, k, a):
     c = _get_concentration(cosmo, mdef)
     hmf, hbf = _get_mf_hb(cosmo, mdef)
     prf = hal.HaloProfileNFW(c)
-    hmc = hal.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = hal.HMCalculator(hmf, hbf, mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
                                       prf, normprof1=True,
@@ -91,7 +91,7 @@ def twohalo_matter_power(cosmo, k, a):
     c = _get_concentration(cosmo, mdef)
     hmf, hbf = _get_mf_hb(cosmo, mdef)
     prf = hal.HaloProfileNFW(c)
-    hmc = hal.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = hal.HMCalculator(hmf, hbf, mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
                                       prf, normprof1=True,
@@ -114,7 +114,7 @@ def halomodel_matter_power(cosmo, k, a):
     c = _get_concentration(cosmo, mdef)
     hmf, hbf = _get_mf_hb(cosmo, mdef)
     prf = hal.HaloProfileNFW(c)
-    hmc = hal.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = hal.HMCalculator(hmf, hbf, mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
                                       prf, normprof1=True)

@@ -75,7 +75,7 @@ def smoke_assert_tkk1h_real(func):
                            'p3': P3, 'p4': P4, 'cv34': PKC,
                            'norm': True}],)
 def test_tkk1h_smoke(pars):
-    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
+    hmc = ccl.halos.HMCalculator(HMF, HBF, mass_def=M200,
                                  nlog10M=2)
 
     def f(k, a):
@@ -94,7 +94,7 @@ def test_tkk1h_smoke(pars):
 
 
 def test_tkk1h_tk3d():
-    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
+    hmc = ccl.halos.HMCalculator(HMF, HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
     tkk_arr = ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
@@ -144,7 +144,7 @@ def test_tkk1h_tk3d():
 def test_tkk1h_errors():
     from pyccl.pyutils import assert_warns
 
-    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
+    hmc = ccl.halos.HMCalculator(HMF, HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
 
