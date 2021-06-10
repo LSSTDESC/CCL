@@ -634,6 +634,12 @@ class Cosmology(object):
     def __enter__(self):
         return self
 
+    def __eq__(self, cosmo2):
+        """Check if two cosmologies are equivalent."""
+        check_pars = self._params_init_kwargs == cosmo2._params_init_kwargs
+        check_config = self._config_init_kwargs == cosmo2._config_init_kwargs
+        return check_pars and check_config
+
     def __exit__(self, type, value, traceback):
         """Free the C memory this object is managing when the context manager
         exits."""
@@ -847,7 +853,7 @@ class Cosmology(object):
                              "current choice of mass function with the "
                              "deprecated implementation.")
         prf = hal.HaloProfileNFW(c)
-        hmc = hal.HMCalculator(self, hmf, hbf, mdef)
+        hmc = hal.HMCalculator(hmf, hbf, mdef)
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
     def compute_nonlin_power(self):

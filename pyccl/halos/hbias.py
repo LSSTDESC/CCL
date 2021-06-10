@@ -26,8 +26,13 @@ class HaloBias(object):
     """
     name = "default"
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
-        cosmo.compute_sigma()
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
+        # We store `cosmo` if the halo bias' setup parameters
+        # depend on cosmology. If that is the case, we prohibit change
+        # of cosmology when querying the halo bias function.
+        self.cosmo = cosmo
+        if self.cosmo is not None:
+            cosmo.compute_sigma()
         self.mass_def_strict = mass_def_strict
         if mass_def is not None:
             if self._check_mdef(mass_def):
@@ -126,6 +131,9 @@ class HaloBias(object):
         Returns:
             float or array_like: halo bias.
         """
+        if (self.cosmo is not None) and not (self.cosmo.__eq__(cosmo)):
+            raise ValueError("Input cosmology is incompatible with "
+                             "the one used during initialization.")
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
                                          a, mdef_other)
@@ -175,7 +183,7 @@ class HaloBiasSheth99(HaloBias):
     """
     name = "Sheth99"
 
-    def __init__(self, cosmo, mass_def=None,
+    def __init__(self, cosmo=None, mass_def=None,
                  mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
@@ -224,7 +232,7 @@ class HaloBiasSheth01(HaloBias):
     """
     name = "Sheth01"
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
         super(HaloBiasSheth01, self).__init__(cosmo,
                                               mass_def,
                                               mass_def_strict)
@@ -268,7 +276,7 @@ class HaloBiasBhattacharya11(HaloBias):
     """
     name = "Bhattacharya11"
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
         super(HaloBiasBhattacharya11, self).__init__(cosmo,
                                                      mass_def,
                                                      mass_def_strict)
@@ -310,7 +318,7 @@ class HaloBiasTinker10(HaloBias):
     """
     name = "Tinker10"
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
         super(HaloBiasTinker10, self).__init__(cosmo,
                                                mass_def,
                                                mass_def_strict)

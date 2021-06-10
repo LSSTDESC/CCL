@@ -30,9 +30,13 @@ class MassFunc(object):
     """
     name = 'default'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
-        # Initialize sigma(M) splines if needed
-        cosmo.compute_sigma()
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
+        # We store `cosmo` if the mass function's setup parameters
+        # depend on cosmology. If that is the case, we prohibit change
+        # of cosmology when querying the mass function.
+        self.cosmo = cosmo
+        if self.cosmo is not None:
+            cosmo.compute_sigma()
         self.mass_def_strict = mass_def_strict
         # Check if mass function was provided and check that it's
         # sensible.
@@ -134,6 +138,10 @@ class MassFunc(object):
             float or array_like: mass function \
                 :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
         """
+        if (self.cosmo is not None) and not (self.cosmo.__eq__(cosmo)):
+            raise ValueError("Input cosmology is incompatible with "
+                             "the one used during initialization.")
+        cosmo.compute_sigma()
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
                                          a, mdef_other)
@@ -193,7 +201,7 @@ class MassFuncPress74(MassFunc):
     """
     name = 'Press74'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
         super(MassFuncPress74, self).__init__(cosmo,
                                               mass_def,
                                               mass_def_strict)
@@ -234,7 +242,7 @@ class MassFuncSheth99(MassFunc):
     """
     name = 'Sheth99'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
         super(MassFuncSheth99, self).__init__(cosmo,
@@ -281,7 +289,7 @@ class MassFuncJenkins01(MassFunc):
     """
     name = 'Jenkins01'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
         super(MassFuncJenkins01, self).__init__(cosmo,
                                                 mass_def=mass_def,
                                                 mass_def_strict=True)
@@ -318,7 +326,7 @@ class MassFuncTinker08(MassFunc):
     """
     name = 'Tinker08'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
         super(MassFuncTinker08, self).__init__(cosmo,
                                                mass_def,
                                                mass_def_strict)
@@ -375,7 +383,7 @@ class MassFuncDespali16(MassFunc):
     """
     name = 'Despali16'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True,
                  ellipsoidal=False):
         super(MassFuncDespali16, self).__init__(cosmo,
                                                 mass_def,
@@ -437,7 +445,7 @@ class MassFuncTinker10(MassFunc):
     """
     name = 'Tinker10'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True,
                  norm_all_z=False):
         self.norm_all_z = norm_all_z
         super(MassFuncTinker10, self).__init__(cosmo,
@@ -519,7 +527,7 @@ class MassFuncBocquet16(MassFunc):
     """
     name = 'Bocquet16'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True,
                  hydro=True):
         self.hydro = hydro
         super(MassFuncBocquet16, self).__init__(cosmo,
@@ -659,7 +667,7 @@ class MassFuncWatson13(MassFunc):
     """
     name = 'Watson13'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
         super(MassFuncWatson13, self).__init__(cosmo,
                                                mass_def,
                                                mass_def_strict)
@@ -725,7 +733,7 @@ class MassFuncAngulo12(MassFunc):
     """
     name = 'Angulo12'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
         super(MassFuncAngulo12, self).__init__(cosmo,
                                                mass_def,
                                                mass_def_strict)
