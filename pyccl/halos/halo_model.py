@@ -29,7 +29,6 @@ class HMCalculator(object):
     an arbitrary function of mass, scale factor and Fourier scales.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
         massfunc (:class:`~pyccl.halos.hmfunc.MassFunc`): a mass
             function object.
         hbias (:class:`~pyccl.halos.hbias.HaloBias`): a halo bias
@@ -53,11 +52,10 @@ class HMCalculator(object):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
-    def __init__(self, cosmo, massfunc, hbias, mass_def,
+    def __init__(self, massfunc, hbias, mass_def,
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
                  k_min=1E-5):
-        self._rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
         if not isinstance(massfunc, MassFunc):
             raise TypeError("massfunc must be of type `MassFunc`")
         self._massfunc = massfunc
@@ -94,12 +92,13 @@ class HMCalculator(object):
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
     def _get_ingredients(self, a, cosmo, get_bf):
+        rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
         # Compute mass function and bias (if needed) at a new
         # value of the scale factor.
         if a != self._a_current_mf:
             self.mf = self._massfunc.get_mass_function(cosmo, self._mass, a,
                                                        mdef_other=self._mdef)
-            self.mf0 = (self._rho0 -
+            self.mf0 = (rho0 -
                         self._integrator(self.mf * self._mass,
                                          self._lmass)) / self._m0
             self._a_current_mf = a
@@ -108,7 +107,7 @@ class HMCalculator(object):
             if a != self._a_current_bf:
                 self.bf = self._hbias.get_halo_bias(cosmo, self._mass, a,
                                                     mdef_other=self._mdef)
-                self.mbf0 = (self._rho0 -
+                self.mbf0 = (rho0 -
                              self._integrator(self.mf * self.bf * self._mass,
                                               self._lmass)) / self._m0
             self._a_current_bf = a
