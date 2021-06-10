@@ -37,7 +37,7 @@ def test_halomod(model):
                                     mass_def_strict=False)
     cM = ccl.halos.ConcentrationDuffy08(mdef=mass_def)
     prf = ccl.halos.HaloProfileNFW(cM)
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
+    hmc = ccl.halos.HMCalculator(hmf, hbf, mass_def)
 
     z = 0.
     k = data_z0[:, 0] * cosmo['h']
