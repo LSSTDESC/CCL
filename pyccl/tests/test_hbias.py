@@ -6,6 +6,7 @@ import pyccl as ccl
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
+COSMO2 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.73, sigma8=0.8, n_s=0.95)
 HBFS = [ccl.halos.HaloBiasSheth99,
         ccl.halos.HaloBiasSheth01,
         ccl.halos.HaloBiasTinker10,
@@ -23,6 +24,13 @@ def test_bM_subclasses_smoke(bM_class):
         b = bM.get_halo_bias(COSMO, m, 0.9)
         assert np.all(np.isfinite(b))
         assert np.shape(b) == np.shape(m)
+
+
+def test_bM_cosmo_raises():
+    # raises in base class; no loop through all subclasses
+    bM = ccl.halos.HaloBiasTinker10(COSMO)
+    with pytest.raises(ValueError):
+        bM.get_halo_bias(COSMO2, 1e14, 1.)
 
 
 @pytest.mark.parametrize('bM_pair', zip(HBFS, MDFS))
