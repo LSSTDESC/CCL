@@ -46,7 +46,7 @@ def test_nM_subclasses_smoke(nM_class):
 
 def test_nM_cosmo_raises():
     # raises in base class; no loop through all subclasses
-    nM = ccl.halos.HaloBiasTinker10(COSMO)
+    nM = ccl.halos.MassFuncTinker10(COSMO)
     with pytest.raises(ValueError):
         nM.get_mass_function(COSMO2, 1e14, 1.)
 
