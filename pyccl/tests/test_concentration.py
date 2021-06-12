@@ -29,7 +29,7 @@ def test_cM_subclasses_smoke(cM_class):
 
 def test_cM_duffy_smoke():
     md = ccl.halos.MassDef('vir', 'critical')
-    cM = ccl.halos.ConcentrationDuffy08(md)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def=md)
     for m in MS:
         c = cM.get_concentration(COSMO, m, 0.9)
         assert np.all(np.isfinite(c))
@@ -39,7 +39,7 @@ def test_cM_duffy_smoke():
 @pytest.mark.parametrize('cM_class', CONCS[:-1])
 def test_cM_mdef_raises(cM_class):
     with pytest.raises(ValueError):
-        cM_class(MDEF)
+        cM_class(mass_def=MDEF)
 
 
 @pytest.mark.parametrize('name', ['Duffy08', 'Diemer15'])

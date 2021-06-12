@@ -12,15 +12,15 @@ from .pk2d import parse_pk2d
 NoneArr = np.array([])
 
 
-def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
+def angular_cl(cosmo, tracer1, tracer2, *, ell, p_of_k_a=None,
                l_limber=-1., limber_integration_method='qag_quad'):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        cltracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+        tracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
             of any kind.
-        cltracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
+        tracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
             of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the angular power spectrum.
@@ -46,7 +46,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
             category=CCLWarning)
-
+    if ell is None:
+        raise ValueError("must specify `ell`")
     if limber_integration_method not in ['qag_quad', 'spline']:
         raise ValueError("Integration method %s not supported" %
                          limber_integration_method)
@@ -64,9 +65,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     status = 0
     clt1, status = lib.cl_tracer_collection_t_new(status)
     clt2, status = lib.cl_tracer_collection_t_new(status)
-    for t in cltracer1._trc:
+    for t in tracer1._trc:
         status = lib.add_cl_tracer_to_collection(clt1, t, status)
-    for t in cltracer2._trc:
+    for t in tracer2._trc:
         status = lib.add_cl_tracer_to_collection(clt2, t, status)
 
     ell_use = np.atleast_1d(ell)

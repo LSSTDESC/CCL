@@ -26,25 +26,25 @@ class HaloBias(object):
     """
     name = "default"
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         cosmo.compute_sigma()
         self.mass_def_strict = mass_def_strict
         if mass_def is not None:
-            if self._check_mdef(mass_def):
+            if self._check_mass_def(mass_def):
                 raise ValueError("Halo bias " + self.name +
                                  " is not compatible with mass definition" +
                                  " Delta = %s, " % (mass_def.Delta) +
                                  " rho = " + mass_def.rho_type)
-            self.mdef = mass_def
+            self.mass_def = mass_def
         else:
-            self._default_mdef()
+            self._default_mass_def()
         self._setup(cosmo)
 
-    def _default_mdef(self):
+    def _default_mass_def(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mdef = MassDef('fof', 'matter')
+        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         """ Use this function to initialize any internal attributes
@@ -56,17 +56,17 @@ class HaloBias(object):
         """
         pass
 
-    def _check_mdef_strict(self, mdef):
+    def _check_mass_def_strict(self, mass_def):
         return False
 
-    def _check_mdef(self, mdef):
+    def _check_mass_def(self, mass_def):
         """ Return False if the input mass definition agrees with
         the definitions for which this parametrization
         works. True otherwise. This function gets called at the
         start of the constructor call.
 
         Args:
-            mdef (:class:`~pyccl.halos.massdef.MassDef`):
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
         Returns:
@@ -74,10 +74,10 @@ class HaloBias(object):
                 this parametrization. False otherwise.
         """
         if self.mass_def_strict:
-            return self._check_mdef_strict(mdef)
+            return self._check_mass_def_strict(mass_def)
         return False
 
-    def _get_consistent_mass(self, cosmo, M, a, mdef_other):
+    def _get_consistent_mass(self, cosmo, M, a, mass_def_other):
         """ Transform a halo mass with a given mass definition into
         the corresponding mass definition that was used to initialize
         this object.
@@ -86,15 +86,16 @@ class HaloBias(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
         Returns:
             float or array_like: mass according to this object's
             mass definition.
         """
-        if mdef_other is not None:
-            M_use = mdef_other.translate_mass(cosmo, M, a, self.mdef)
+        if mass_def_other is not None:
+            M_use = mass_def_other.translate_mass(cosmo, M, a,
+                                                 mass_def_other=self.mass_def)
         else:
             M_use = M
         return np.log10(M_use)
@@ -105,22 +106,22 @@ class HaloBias(object):
         mostly for the Tinker mass functions, which are defined for any
         SO mass in general, but explicitly only for Delta_matter.
         """
-        delta = self.mdef.get_Delta(cosmo, a)
-        if self.mdef.rho_type == 'matter':
+        delta = self.mass_def.get_Delta(cosmo, a)
+        if self.mass_def.rho_type == 'matter':
             return delta
         else:
-            om_this = omega_x(cosmo, a, self.mdef.rho_type)
+            om_this = omega_x(cosmo, a, self.mass_def.rho_type)
             om_matt = omega_x(cosmo, a, 'matter')
             return delta * om_this / om_matt
 
-    def get_halo_bias(self, cosmo, M, a, mdef_other=None):
+    def get_halo_bias(self, cosmo, M, a, *, mass_def_other=None):
         """ Returns the halo bias for input parameters.
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
                 the mass definition object that defines M.
 
         Returns:
@@ -128,7 +129,7 @@ class HaloBias(object):
         """
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
-                                         a, mdef_other)
+                                         a, mass_def_other)
 
         # sigma(M)
         status = 0
@@ -175,24 +176,24 @@ class HaloBiasSheth99(HaloBias):
     """
     name = "Sheth99"
 
-    def __init__(self, cosmo, mass_def=None,
+    def __init__(self, cosmo, *, mass_def=None,
                  mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
         super(HaloBiasSheth99, self).__init__(cosmo,
-                                              mass_def,
-                                              mass_def_strict)
+                                              mass_def=mass_def,
+                                              mass_def_strict=mass_def_strict)
 
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
+    def _default_mass_def(self):
+        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.p = 0.3
         self.a = 0.707
 
-    def _check_mdef_strict(self, mdef):
+    def _check_mass_def_strict(self, mass_def):
         if self.mass_def_strict:
-            if mdef.Delta != 'fof':
+            if mass_def.Delta != 'fof':
                 return True
         return False
 
@@ -224,13 +225,13 @@ class HaloBiasSheth01(HaloBias):
     """
     name = "Sheth01"
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(HaloBiasSheth01, self).__init__(cosmo,
-                                              mass_def,
-                                              mass_def_strict)
+                                              mass_def=mass_def,
+                                              mass_def_strict=mass_def_strict)
 
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
+    def _default_mass_def(self):
+        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.a = 0.707
@@ -239,8 +240,8 @@ class HaloBiasSheth01(HaloBias):
         self.c = 0.6
         self.dc = 1.68647
 
-    def _check_mdef_strict(self, mdef):
-        if mdef.Delta != 'fof':
+    def _check_mass_def_strict(self, mass_def):
+        if mass_def.Delta != 'fof':
             return True
         return False
 
@@ -268,13 +269,15 @@ class HaloBiasBhattacharya11(HaloBias):
     """
     name = "Bhattacharya11"
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
-        super(HaloBiasBhattacharya11, self).__init__(cosmo,
-                                                     mass_def,
-                                                     mass_def_strict)
+    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
+        super(HaloBiasBhattacharya11, self).__init__(
+            cosmo,
+            mass_def=mass_def,
+            mass_def_strict=mass_def_strict
+            )
 
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
+    def _default_mass_def(self):
+        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.a = 0.788
@@ -283,8 +286,8 @@ class HaloBiasBhattacharya11(HaloBias):
         self.q = 1.795
         self.dc = 1.68647
 
-    def _check_mdef_strict(self, mdef):
-        if mdef.Delta != 'fof':
+    def _check_mass_def_strict(self, mass_def):
+        if mass_def.Delta != 'fof':
             return True
         return False
 
@@ -310,13 +313,15 @@ class HaloBiasTinker10(HaloBias):
     """
     name = "Tinker10"
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
-        super(HaloBiasTinker10, self).__init__(cosmo,
-                                               mass_def,
-                                               mass_def_strict)
+    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
+        super(HaloBiasTinker10, self).__init__(
+            cosmo,
+            mass_def=mass_def,
+            mass_def_strict=mass_def_strict
+            )
 
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
+    def _default_mass_def(self):
+        self.mass_def = MassDef200m()
 
     def _AC(self, ld):
         xp = np.exp(-(4./ld)**4.)
@@ -333,8 +338,8 @@ class HaloBiasTinker10(HaloBias):
         self.c = 2.4
         self.dc = 1.68647
 
-    def _check_mdef_strict(self, mdef):
-        if mdef.Delta == 'fof':
+    def _check_mass_def_strict(self, mass_def):
+        if mass_def.Delta == 'fof':
             return True
         return False
 

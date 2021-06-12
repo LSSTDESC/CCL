@@ -9,8 +9,8 @@ from .tk3d import Tk3D
 NoneArr = np.array([])
 
 
-def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
-                       cltracer3=None, cltracer4=None, ell2=None,
+def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, tracer3=None, tracer4=None,
+                       t_of_kk_a, ell, ell2=None, fsky=1.,
                        integration_method='qag_quad'):
     """Calculate the connected non-Gaussian covariance for a pair of
     power spectra :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
@@ -36,21 +36,22 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        cltracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+        tracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
             of any kind.
-        cltracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
+        tracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
             of any kind.
+        tracer3 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+            of any kind. If `None`, `tracer1` will be used instead.
+        tracer4 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+            of any kind. If `None`, `tracer2` will be used instead.
+        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D` or None): 3D connected
+            trispectrum.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the first dimension of the angular power spectrum covariance.
-        tkka (:class:`~pyccl.tk3d.Tk3D` or None): 3D connected trispectrum.
-        fsky (float) sky fraction.
-        cltracer3 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
-            of any kind. If `None`, `cltracer1` will be used instead.
-        cltracer4 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
-            of any kind. If `None`, `cltracer1` will be used instead.
         ell2 (float or array_like): Angular wavenumber(s) at which to evaluate
             the second dimension of the angular power spectrum covariance. If
             `None`, `ell` will be used instead.
+        fsky (float) sky fraction.
         integration_method (string) : integration method to be used
             for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
             method backed up by `quad` when it fails) and 'spline' (the
@@ -75,30 +76,30 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    if isinstance(tkka, Tk3D):
-        tsp = tkka.tsp
+    if isinstance(t_of_kk_a, Tk3D):
+        tsp = t_of_kk_a.tsp
     else:
         raise ValueError("tkka must be a pyccl.Tk3D")
 
     # Create tracer colections
     status = 0
     clt1, status = lib.cl_tracer_collection_t_new(status)
-    for t in cltracer1._trc:
+    for t in tracer1._trc:
         status = lib.add_cl_tracer_to_collection(clt1, t, status)
     clt2, status = lib.cl_tracer_collection_t_new(status)
-    for t in cltracer2._trc:
+    for t in tracer2._trc:
         status = lib.add_cl_tracer_to_collection(clt2, t, status)
-    if cltracer3 is None:
+    if tracer3 is None:
         clt3 = clt1
     else:
         clt3, status = lib.cl_tracer_collection_t_new(status)
-        for t in cltracer3._trc:
+        for t in tracer3._trc:
             status = lib.add_cl_tracer_to_collection(clt3, t, status)
-    if cltracer4 is None:
+    if tracer4 is None:
         clt4 = clt2
     else:
         clt4, status = lib.cl_tracer_collection_t_new(status)
-        for t in cltracer4._trc:
+        for t in tracer4._trc:
             status = lib.add_cl_tracer_to_collection(clt4, t, status)
 
     ell1_use = np.atleast_1d(ell)
@@ -120,9 +121,9 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
     # Free up tracer collections
     lib.cl_tracer_collection_t_free(clt1)
     lib.cl_tracer_collection_t_free(clt2)
-    if cltracer3 is not None:
+    if tracer3 is not None:
         lib.cl_tracer_collection_t_free(clt3)
-    if cltracer4 is not None:
+    if tracer4 is not None:
         lib.cl_tracer_collection_t_free(clt4)
 
     check(status, cosmo=cosmo_in)

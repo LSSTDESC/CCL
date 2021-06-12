@@ -24,7 +24,7 @@ from .pk2d import Pk2D
 from .errors import CCLError
 
 
-def get_camb_pk_lin(cosmo, nonlin=False):
+def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 
     Args:

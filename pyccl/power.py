@@ -4,7 +4,7 @@ from .core import check
 from .pk2d import parse_pk2d
 
 
-def linear_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
+def linear_power(cosmo, k, a, *, p_of_k_a='delta_matter:delta_matter'):
     """The linear power spectrum.
 
     Args:
@@ -21,7 +21,7 @@ def linear_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     cosmo.compute_linear_power()
     if p_of_k_a not in cosmo._pk_lin:
         raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_lin[p_of_k_a].eval(k, a, cosmo)
+    return cosmo._pk_lin[p_of_k_a].eval(cosmo, k, a)
 
 
 def nonlin_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
@@ -41,7 +41,7 @@ def nonlin_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     cosmo.compute_nonlin_power()
     if p_of_k_a not in cosmo._pk_nl:
         raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_nl[p_of_k_a].eval(k, a, cosmo)
+    return cosmo._pk_nl[p_of_k_a].eval(cosmo, k, a)
 
 
 def linear_matter_power(cosmo, k, a):
@@ -56,8 +56,7 @@ def linear_matter_power(cosmo, k, a):
         float or array_like: Linear matter power spectrum; Mpc^3.
     """
     cosmo.compute_linear_power()
-    return cosmo._pk_lin['delta_matter:delta_matter'].eval(k, a,
-                                                           cosmo)
+    return cosmo._pk_lin['delta_matter:delta_matter'].eval(cosmo, k, a)
 
 
 def nonlin_matter_power(cosmo, k, a):
@@ -72,8 +71,7 @@ def nonlin_matter_power(cosmo, k, a):
         float or array_like: Nonlinear matter power spectrum; Mpc^3.
     """
     cosmo.compute_nonlin_power()
-    return cosmo._pk_nl['delta_matter:delta_matter'].eval(k, a,
-                                                          cosmo)
+    return cosmo._pk_nl['delta_matter:delta_matter'].eval(cosmo, k, a)
 
 
 def sigmaM(cosmo, M, a):
@@ -101,7 +99,7 @@ def sigmaM(cosmo, M, a):
     return sigM
 
 
-def sigmaR(cosmo, R, a=1., p_of_k_a=None):
+def sigmaR(cosmo, R, a=1., *, p_of_k_a=None):
     """RMS variance in a top-hat sphere of radius R in Mpc.
 
     Args:
@@ -158,7 +156,7 @@ def sigmaV(cosmo, R, a=1., p_of_k_a=None):
     return sV
 
 
-def sigma8(cosmo, p_of_k_a=None):
+def sigma8(cosmo, *, p_of_k_a=None):
     """RMS variance in a top-hat sphere of radius 8 Mpc/h.
 
     .. note:: 8 Mpc/h is rescaled based on the chosen value of the Hubble
@@ -178,7 +176,7 @@ def sigma8(cosmo, p_of_k_a=None):
     return sigmaR(cosmo, 8.0 / cosmo['h'], p_of_k_a=p_of_k_a)
 
 
-def kNL(cosmo, a, p_of_k_a=None):
+def kNL(cosmo, a, *, p_of_k_a=None):
     """Scale for the non-linear cut.
 
     .. note:: k_NL is calculated based on Lagrangian perturbation theory as the

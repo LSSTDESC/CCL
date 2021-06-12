@@ -23,17 +23,17 @@ class Profile2pt(object):
             of the fourier profiles.
 
     """
-    def __init__(self, r_corr=0.):
+    def __init__(self, *, r_corr=0.):
         self.r_corr = r_corr
 
-    def update_parameters(self, r_corr=None):
+    def update_parameters(self, *, r_corr=None):
         """ Update any of the parameters associated with this 1-halo
         2-point correlator. Any parameter set to `None` won't be updated.
         """
         if r_corr is not None:
             self.r_corr = r_corr
 
-    def fourier_2pt(self, prof, cosmo, k, M, a,
+    def fourier_2pt(self, cosmo, k, M, a, prof, *,
                     prof2=None, mass_def=None):
         """ Return the Fourier-space two-point moment between
         two profiles.
@@ -42,9 +42,6 @@ class Profile2pt(object):
            (1+\\rho_{u_1,u_2})\\langle u_1(k)\\rangle\\langle u_2(k) \\rangle
 
         Args:
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`):
-                halo profile for which the second-order moment
-                is desired.
             cosmo (:class:`~pyccl.core.Cosmology`):
                 a Cosmology object.
             k (float or array_like):
@@ -53,6 +50,9 @@ class Profile2pt(object):
                 halo mass in units of M_sun.
             a (float):
                 scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`):
+                halo profile for which the second-order moment
+                is desired.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
@@ -96,19 +96,19 @@ class Profile2ptHOD(Profile2pt):
     where all quantities are described in the documentation of
     :class:`~pyccl.halos.profiles.HaloProfileHOD`.
     """
-    def fourier_2pt(self, prof, cosmo, k, M, a,
+    def fourier_2pt(self, cosmo, k, M, a, prof, *,
                     prof2=None, mass_def=None):
         """ Returns the Fourier-space two-point moment for the HOD
         profile.
 
         Args:
-            prof (:class:`~pyccl.halos.profiles.HaloProfileHOD`):
-                halo profile for which the second-order moment
-                is desired.
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfileHOD`):
+                halo profile for which the second-order moment
+                is desired.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want

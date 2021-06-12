@@ -195,7 +195,7 @@ class Cosmology(object):
 
     """
     def __init__(
-            self, Omega_c=None, Omega_b=None, h=None, n_s=None,
+            self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
             Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., m_nu_type=None,
             w0=-1., wa=0., T_CMB=None,
@@ -820,35 +820,36 @@ class Cosmology(object):
 
     def _get_halo_model_nonlin_power(self):
         from . import halos as hal
-        mdef = hal.MassDef('vir', 'matter')
+        mass_def = hal.MassDef('vir', 'matter')
         conc = self._config.halo_concentration_method
         mfm = self._config.mass_function_method
 
         if conc == lib.bhattacharya2011:
-            c = hal.ConcentrationBhattacharya13(mdef=mdef)
+            c = hal.ConcentrationBhattacharya13(mass_def=mass_def)
         elif conc == lib.duffy2008:
-            c = hal.ConcentrationDuffy08(mdef=mdef)
+            c = hal.ConcentrationDuffy08(mass_def=mass_def)
         elif conc == lib.constant_concentration:
-            c = hal.ConcentrationConstant(c=4., mdef=mdef)
+            c = hal.ConcentrationConstant(c=4., mass_def=mass_def)
 
         if mfm == lib.tinker10:
-            hmf = hal.MassFuncTinker10(self, mass_def=mdef,
+            hmf = hal.MassFuncTinker10(self, mass_def=mass_def,
                                        mass_def_strict=False)
-            hbf = hal.HaloBiasTinker10(self, mass_def=mdef,
+            hbf = hal.HaloBiasTinker10(self, mass_def=mass_def,
                                        mass_def_strict=False)
         elif mfm == lib.shethtormen:
-            hmf = hal.MassFuncSheth99(self, mass_def=mdef,
+            hmf = hal.MassFuncSheth99(self, mass_def=mass_def,
                                       mass_def_strict=False,
                                       use_delta_c_fit=True)
-            hbf = hal.HaloBiasSheth99(self, mass_def=mdef,
+            hbf = hal.HaloBiasSheth99(self, mass_def=mass_def,
                                       mass_def_strict=False)
         else:
             raise ValueError("Halo model spectra not available for your "
                              "current choice of mass function with the "
                              "deprecated implementation.")
-        prf = hal.HaloProfileNFW(c)
-        hmc = hal.HMCalculator(self, hmf, hbf, mdef)
-        return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
+        prf = hal.HaloProfileNFW(c_m_relation=c)
+        hmc = hal.HMCalculator(self, mass_function=hmf,
+                               halo_bias=hbf, mass_def=mass_def)
+        return hal.halomod_Pk2D(self, hmc, prf, normprof=True)
 
     def compute_nonlin_power(self):
         """Compute the non-linear power spectrum."""
@@ -909,7 +910,7 @@ class Cosmology(object):
             if pkl is None:
                 raise CCLError("The linear power spectrum is a "
                                "necessary input for halofit")
-            pk = Pk2D.apply_halofit(self, pkl)
+            pk = Pk2D.apply_halofit(self, pk_linear=pkl)
         elif mps == 'emu':
             pk = Pk2D.pk_from_model(self, model='emu')
         elif mps == 'linear':
@@ -1168,7 +1169,7 @@ class CosmologyCalculator(Cosmology):
             Takahashi et al. 2012 (arXiv:1208.2701).
     """
     def __init__(
-            self, Omega_c=None, Omega_b=None, h=None, n_s=None,
+            self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
             T_CMB=None, background=None, growth=None,
@@ -1390,7 +1391,7 @@ class CosmologyCalculator(Cosmology):
 
             if model == 'halofit':
                 pkl = self._pk_lin[name]
-                self._pk_nl[name] = Pk2D.apply_halofit(self, pkl)
+                self._pk_nl[name] = Pk2D.apply_halofit(self, pk_linear=pkl)
             elif model is None:
                 pass
             else:

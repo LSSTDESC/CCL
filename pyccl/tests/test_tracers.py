@@ -18,7 +18,7 @@ def get_tracer(tracer_type):
 
     if tracer_type == 'nc':
         ntr = 3
-        tr = ccl.NumberCountsTracer(COSMO, True,
+        tr = ccl.NumberCountsTracer(COSMO, has_rsd=True,
                                     dndz=(z, n),
                                     bias=(z, b),
                                     mag_bias=(z, b))
@@ -29,7 +29,7 @@ def get_tracer(tracer_type):
                                    ia_bias=(z, b))
     elif tracer_type == 'cl':
         ntr = 1
-        tr = ccl.CMBLensingTracer(COSMO, 1100.)
+        tr = ccl.CMBLensingTracer(COSMO, z_source=1100.)
     else:
         ntr = 0
         tr = ccl.Tracer()
@@ -59,7 +59,7 @@ def test_tracer_kernel_smoke(tracer_type):
     for chi in [np.linspace(0., 3000., 128),
                 [100., 1000.],
                 100.]:
-        w = tr.get_kernel(chi)
+        w = tr.get_kernel(chi=chi)
 
         assert w.shape[0] == ntr
         if ntr > 0:

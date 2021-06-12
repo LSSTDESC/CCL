@@ -5,11 +5,11 @@ from . import halos as hal
 
 def _get_concentration(cosmo, mass_def):
     if cosmo._config.halo_concentration_method == lib.bhattacharya2011:
-        c = hal.ConcentrationBhattacharya13(mdef=mass_def)
+        c = hal.ConcentrationBhattacharya13(mass_def=mass_def)
     elif cosmo._config.halo_concentration_method == lib.duffy2008:
-        c = hal.ConcentrationDuffy08(mdef=mass_def)
+        c = hal.ConcentrationDuffy08(mass_def=mass_def)
     elif cosmo._config.halo_concentration_method == lib.constant_concentration:
-        c = hal.ConcentrationConstant(c=4., mdef=mass_def)
+        c = hal.ConcentrationConstant(c=4., mass_def=mass_def)
     return c
 
 
@@ -67,11 +67,12 @@ def onehalo_matter_power(cosmo, k, a):
     mdef = hal.MassDef('vir', 'matter')
     c = _get_concentration(cosmo, mdef)
     hmf, hbf = _get_mf_hb(cosmo, mdef)
-    prf = hal.HaloProfileNFW(c)
-    hmc = hal.HMCalculator(cosmo, hmf, hbf, mdef)
+    prf = hal.HaloProfileNFW(c_m_relation=c)
+    hmc = hal.HMCalculator(cosmo, mass_function=hmf,
+                           halo_bias=hbf, mass_def=mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
-                                      prf, normprof1=True,
+                                      prf, normprof=True,
                                       get_2h=False)
 
 
@@ -90,11 +91,12 @@ def twohalo_matter_power(cosmo, k, a):
     mdef = hal.MassDef('vir', 'matter')
     c = _get_concentration(cosmo, mdef)
     hmf, hbf = _get_mf_hb(cosmo, mdef)
-    prf = hal.HaloProfileNFW(c)
-    hmc = hal.HMCalculator(cosmo, hmf, hbf, mdef)
+    prf = hal.HaloProfileNFW(c_m_relation=c)
+    hmc = hal.HMCalculator(cosmo, mass_function=hmf,
+                           halo_bias=hbf, mass_def=mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
-                                      prf, normprof1=True,
+                                      prf, normprof=True,
                                       get_1h=False)
 
 
@@ -113,8 +115,9 @@ def halomodel_matter_power(cosmo, k, a):
     mdef = hal.MassDef('vir', 'matter')
     c = _get_concentration(cosmo, mdef)
     hmf, hbf = _get_mf_hb(cosmo, mdef)
-    prf = hal.HaloProfileNFW(c)
-    hmc = hal.HMCalculator(cosmo, hmf, hbf, mdef)
+    prf = hal.HaloProfileNFW(c_m_relation=c)
+    hmc = hal.HMCalculator(cosmo, mass_function=hmf,
+                           halo_bias=hbf, mass_def=mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
-                                      prf, normprof1=True)
+                                      prf, normprof=True)

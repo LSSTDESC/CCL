@@ -23,11 +23,11 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
-    mdef = hal.MassDef(odelta, 'matter')
+    mass_def = hal.MassDef(odelta, 'matter')
     c = hal.ConcentrationConstant(c=concentration,
-                                  mdef=mdef)
-    p = hal.HaloProfileNFW(c, truncated=False)
-    return p.real(cosmo, r, halo_mass, a, mdef)
+                                  mass_def=mass_def)
+    p = hal.HaloProfileNFW(c_m_relation=c, truncated=False)
+    return p.real(cosmo, r, halo_mass, a, mass_def=mass_def)
 
 
 @deprecated(hal.HaloProfileEinasto)
@@ -54,13 +54,13 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
-    mdef = hal.MassDef(odelta, 'matter')
+    mass_def = hal.MassDef(odelta, 'matter')
     c = hal.ConcentrationConstant(c=concentration,
-                                  mdef=mdef)
-    mdef = hal.MassDef(odelta, 'matter',
+                                  mass_def=mass_def)
+    mass_def = hal.MassDef(odelta, 'matter',
                        c_m_relation=c)
-    p = hal.HaloProfileEinasto(c, truncated=False)
-    return p.real(cosmo, r, halo_mass, a, mdef)
+    p = hal.HaloProfileEinasto(c_m_relation=c, truncated=False)
+    return p.real(cosmo, r, halo_mass, a, mass_def=mass_def)
 
 
 @deprecated(hal.HaloProfileHernquist)
@@ -85,11 +85,11 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     Returns:
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
-    mdef = hal.MassDef(odelta, 'matter')
+    mass_def = hal.MassDef(odelta, 'matter')
     c = hal.ConcentrationConstant(c=concentration,
-                                  mdef=mdef)
-    p = hal.HaloProfileHernquist(c, truncated=False)
-    return p.real(cosmo, r, halo_mass, a, mdef)
+                                  mass_def=mass_def)
+    p = hal.HaloProfileHernquist(c_m_relation=c, truncated=False)
+    return p.real(cosmo, r, halo_mass, a, mass_def=mass_def)
 
 
 @deprecated(hal.HaloProfileNFW)
@@ -115,9 +115,9 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
         float or array_like: 2D projected NFW density at r, \
          in units of Msun/Mpc^2.
     """
-    mdef = hal.MassDef(odelta, 'matter')
+    mass_def = hal.MassDef(odelta, 'matter')
     c = hal.ConcentrationConstant(c=concentration,
-                                  mdef=mdef)
-    p = hal.HaloProfileNFW(c, truncated=False,
+                                  mass_def=mass_def)
+    p = hal.HaloProfileNFW(c_m_relation=c, truncated=False,
                            projected_analytic=True)
-    return p.projected(cosmo, r, halo_mass, a, mdef)
+    return p.projected(cosmo, r, halo_mass, a, mass_def=mass_def)

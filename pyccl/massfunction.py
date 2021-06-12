@@ -23,11 +23,11 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
     mdef = hal.MassDef(overdensity, 'matter')
     mf_par = cosmo._config_init_kwargs['mass_function']
     if mf_par == 'tinker10':
-        mf = hal.MassFuncTinker10(cosmo, mdef)
+        mf = hal.MassFuncTinker10(cosmo, mass_def=mdef)
     elif mf_par == 'tinker':
-        mf = hal.MassFuncTinker08(cosmo, mdef)
+        mf = hal.MassFuncTinker08(cosmo, mass_def=mdef)
     elif mf_par == 'watson':
-        mf = hal.MassFuncWatson13(cosmo, mdef)
+        mf = hal.MassFuncWatson13(cosmo, mass_def=mdef)
     elif mf_par == 'shethtormen':
         mf = hal.MassFuncSheth99(cosmo)
     elif mf_par == 'angulo':
@@ -57,7 +57,7 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     mdef = hal.MassDef(overdensity, 'matter')
     mf_par = cosmo._config_init_kwargs['mass_function']
     if mf_par == 'tinker10':
-        bf = hal.HaloBiasTinker10(cosmo, mdef)
+        bf = hal.HaloBiasTinker10(cosmo, mass_def=mdef)
     elif mf_par == 'shethtormen':
         bf = hal.HaloBiasSheth99(cosmo)
     else:

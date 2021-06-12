@@ -9,18 +9,6 @@ class Pk2D(object):
     arbitrary function of wavenumber and scale factor.
 
     Args:
-        pkfunc (:obj:`function`): a function returning a floating point
-             number or numpy array with the signature `f(k,a)`, where k
-             is a wavenumber (in units of Mpc^-1) and a is the scale
-             factor. The function must able to take numpy arrays as `k`.
-             The function must return the value(s) of the power spectrum
-             (or its natural logarithm, depending on the value of
-             `is_logp`. The power spectrum units should be compatible
-             with those used by CCL (e.g. if you're passing a matter power
-             spectrum, its units should be Mpc^3). If this argument is not
-             `None`, this function will be sampled at the values of k and
-             a used internally by CCL to store the linear and non-linear
-             power spectra.
         a_arr (array): an array holding values of the scale factor
         lk_arr (array): an array holding values of the natural logarithm
              of the wavenumber (in units of Mpc^-1).
@@ -40,6 +28,26 @@ class Pk2D(object):
              enough to sample the main features in the power spectrum).
              For reference, CCL will use bicubic interpolation to evaluate
              the power spectrum at any intermediate point in k and a.
+        pkfunc (:obj:`function`): a function returning a floating point
+             number or numpy array with the signature `f(k,a)`, where k
+             is a wavenumber (in units of Mpc^-1) and a is the scale
+             factor. The function must able to take numpy arrays as `k`.
+             The function must return the value(s) of the power spectrum
+             (or its natural logarithm, depending on the value of
+             `is_logp`. The power spectrum units should be compatible
+             with those used by CCL (e.g. if you're passing a matter power
+             spectrum, its units should be Mpc^3). If this argument is not
+             `None`, this function will be sampled at the values of k and
+             a used internally by CCL to store the linear and non-linear
+             power spectra.
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The cosmology
+             object is needed in order if `pkfunc` is not `None`. The object is
+             used to determine the sampling rate in scale factor and
+             wavenumber.
+        is_logp (boolean): if True, pkfunc/pkarr return/hold the natural
+             logarithm of the power spectrum. Otherwise, the true value
+             of the power spectrum is expected. Note that arrays will be
+             interpolated in log space if `is_logp` is set to `True`.
         extrap_order_lok (int): extrapolation order to be used on k-values
              below the minimum of the splines (use 0, 1 or 2). Note that
              the extrapolation will be done in either log(P(k)) or P(k),
@@ -48,20 +56,13 @@ class Pk2D(object):
              above the maximum of the splines (use 0, 1 or 2). Note that
              the extrapolation will be done in either log(P(k)) or P(k),
              depending on the value of `is_logp`.
-        is_logp (boolean): if True, pkfunc/pkarr return/hold the natural
-             logarithm of the power spectrum. Otherwise, the true value
-             of the power spectrum is expected. Note that arrays will be
-             interpolated in log space if `is_logp` is set to `True`.
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The cosmology
-             object is needed in order if `pkfunc` is not `None`. The object is
-             used to determine the sampling rate in scale factor and
-             wavenumber.
         empty (bool): if True, just create an empty object, to be filled
             out later
     """
-    def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
-                 is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
-                 cosmo=None, empty=False):
+    def __init__(self, *, a_arr=None, lk_arr=None, pk_arr=None,
+                 pkfunc=None, cosmo=None, is_logp=True,
+                 extrap_order_lok=1, extrap_order_hik=2,
+                 empty=False):
         if empty:
             return
 
@@ -148,7 +149,7 @@ class Pk2D(object):
         return pk2d
 
     @classmethod
-    def apply_halofit(Pk2D, cosmo, pk_linear):
+    def apply_halofit(Pk2D, cosmo, *, pk_linear):
         """Pk2D constructor that applies the "HALOFIT" transformation of
         Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
         power spectrum in `pk_linear`.
@@ -169,12 +170,10 @@ class Pk2D(object):
         pk2d.has_psp = True
         return pk2d
 
-    def eval(self, k, a, cosmo):
+    def eval(self, cosmo, k, a):
         """Evaluate power spectrum.
 
         Args:
-            k (float or array_like): wavenumber value(s) in units of Mpc^-1.
-            a (float): value of the scale factor
             cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The
                 cosmology object is needed in order to evaluate the power
                 spectrum outside the interpolation range in `a`. E.g. if you
@@ -183,6 +182,8 @@ class Pk2D(object):
                 the power spectrum will be extrapolated from the earliest
                 available value using the linear growth factor (for which a
                 cosmology is needed).
+            k (float or array_like): wavenumber value(s) in units of Mpc^-1.
+            a (float): value of the scale factor
 
         Returns:
             float or array_like: value(s) of the power spectrum.
@@ -215,7 +216,7 @@ class Pk2D(object):
                 lib.f2d_t_free(self.psp)
 
 
-def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
+def parse_pk2d(cosmo, p_of_k_a, *, is_linear=False):
     """ Return the C-level `f2d` spline associated with a
     :class:`Pk2D` object.
 
