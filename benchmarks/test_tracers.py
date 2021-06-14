@@ -122,7 +122,7 @@ def test_tracers_analytic(set_up, alpha, beta, gamma,
     # C_ells
     larr = np.linspace(2, 3000, 100)
     # 1D
-    cl = ccl.angular_cl(cosmo, t, t, larr, p_of_k_a=pk2d)
+    cl = ccl.angular_cl(cosmo, t, t, ell=larr, p_of_k_a=pk2d)
     # Prediction
     clpred = get_prediction(larr, chii, chif,
                             alpha, beta, gamma,

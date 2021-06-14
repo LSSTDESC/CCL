@@ -24,22 +24,25 @@ def test_szcl():
     mass_def = ccl.halos.MassDef(500, 'critical')
     hmf = ccl.halos.MassFuncTinker08(COSMO, mass_def=mass_def)
     hbf = ccl.halos.HaloBiasTinker10(COSMO, mass_def=mass_def)
-    hmc = ccl.halos.HMCalculator(COSMO, hmf, hbf, mass_def)
+    hmc = ccl.halos.HMCalculator(COSMO, mass_function=hmf,
+                                 halo_bias=hbf, mass_def=mass_def)
     prf = ccl.halos.HaloProfilePressureGNFW()
     prf.update_parameters(mass_bias=1./1.41, x_out=6.)
     tr = ccl.tSZTracer(COSMO, z_max=3.)
 
     # Power spectrum
-    pk = ccl.halos.halomod_Pk2D(COSMO, hmc, prf, get_2h=False)
-    cl = ccl.angular_cl(COSMO, tr, tr, l_bm, p_of_k_a=pk)
+    pk = ccl.halos.halomod_Pk2D(COSMO, hmc, prf, normprof=False, get_2h=False)
+    cl = ccl.angular_cl(COSMO, tr, tr, ell=l_bm, p_of_k_a=pk)
 
     # Covariance
     lk_arr = np.log(np.geomspace(1E-4, 1E2, 256))
     a_arr = 1./(1+np.linspace(0, 3., 20))[::-1]
     tkk = ccl.halos.halomod_Tk3D_1h(COSMO, hmc, prf,
+                                    normprof=False,
                                     lk_arr=lk_arr, a_arr=a_arr,
                                     use_log=True)
-    tll = ccl.angular_cl_cov_cNG(COSMO, tr, tr, l_bm, tkk, fsky=fsky)
+    tll = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ell=l_bm,
+                                 t_of_kk_a=tkk, fsky=fsky)
 
     assert np.all(np.fabs(cl/cl_bm-1) < 2E-2)
     assert np.all(np.fabs(tll/tll_bm-1) < 5E-2)

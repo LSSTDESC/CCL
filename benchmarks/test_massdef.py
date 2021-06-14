@@ -74,5 +74,6 @@ def test_mdef_concentration():
 
 
 def test_mdef_translate_mass():
-    Ms_500c_h = hmd_200m.translate_mass(cosmo, Ms, 1., hmd_500c)
+    Ms_500c_h = hmd_200m.translate_mass(cosmo, Ms, 1.,
+                                        mass_def_other=hmd_500c)
     assert np.all(np.fabs(Ms_500c_h/Ms_500c-1) < 1E-6)

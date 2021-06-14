@@ -50,10 +50,12 @@ def set_up(request):
 
     # Initialize tracers
     trc = {}
-    trc['g1'] = ccl.NumberCountsTracer(cosmo, False, (z1, pz1), (z1, bz1))
-    trc['g2'] = ccl.NumberCountsTracer(cosmo, False, (z2, pz2), (z2, bz2))
-    trc['l1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1))
-    trc['l2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2))
+    trc['g1'] = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                       dndz=(z1, pz1), bias=(z1, bz1))
+    trc['g2'] = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                       dndz=(z2, pz2), bias=(z2, bz2))
+    trc['l1'] = ccl.WeakLensingTracer(cosmo, dndz=(z1, pz1))
+    trc['l2'] = ccl.WeakLensingTracer(cosmo, dndz=(z2, pz2))
 
     # Read benchmarks
     bms = {}
@@ -142,15 +144,15 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
 
     # Debugging - define the  same cosmology but in GR
 
-    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], fls['ells'])
+    cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], ell=fls['ells'])
 
     ell = np.arange(fls['lmax'])
     cli = interp1d(fls['ells'], cl, kind='cubic')(ell)
     # Our benchmarks have theta in arcmin
     # but CCL requires it in degrees:
     theta_deg = bms['theta'] / 60.
-    xi = ccl.correlation(cosmo, ell, cli, theta_deg, type=kind,
-                         method=method)
+    xi = ccl.correlation(cosmo, ell=ell, C_ell=cli, theta=theta_deg,
+                         type=kind, method=method)
     xi *= pref
 
     print(xi)

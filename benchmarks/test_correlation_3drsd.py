@@ -43,10 +43,10 @@ def test_correlation_3drsd(model):
     r2 = data2[:, 0]
     a = 1.0
 
-    xi1 = ccl.correlation_3dRsd_avgmu(cosmo, a, r1, beta[model])
+    xi1 = ccl.correlation_3dRsd_avgmu(cosmo, a, dist=r1, beta=beta[model])
     err = np.abs(r1*r1*(xi1-data1[:, 1]))
     assert np.allclose(err, 0, rtol=0, atol=CORR_TOLERANCE1)
 
-    xi2 = ccl.correlation_3dRsd_avgmu(cosmo, a, r2, beta[model])
+    xi2 = ccl.correlation_3dRsd_avgmu(cosmo, a, dist=r2, beta=beta[model])
     err = np.abs(r2*r2*(xi2-data2[:, 1]))
     assert np.allclose(err, 0, rtol=0, atol=CORR_TOLERANCE2)
