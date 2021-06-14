@@ -379,9 +379,9 @@ def test_input_nonlinear_model():
                    'delta_matter:delta_matter': -pk_arr},
         nonlinear_model='halofit')
 
-    pk_CCL_input = cosmo_input.get_nonlin_power('a:b').eval(k_arr,
-                                                            0.5,
-                                                            cosmo_input)
+    pk_CCL_input = cosmo_input.get_nonlin_power('a:b').eval(cosmo_input,
+                                                            k_arr,
+                                                            0.5)
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
     # Via `nonlin_power`
