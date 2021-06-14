@@ -294,7 +294,7 @@ class Tracer(object):
 
         # case with no astro biases
         if ((bias_transfer_a is None) and (bias_transfer_k is None)):
-            self.add_tracer(cosmo, kernel, transfer_ka=mg_transfer,
+            self.add_tracer(cosmo, kernel=kernel, transfer_ka=mg_transfer,
                             der_bessel=der_bessel, der_angles=der_angles)
 
         #  case of an astro bias depending on a and  k
@@ -302,21 +302,21 @@ class Tracer(object):
             mg_transfer_new = (mg_transfer[0], mg_transfer[1],
                                (bias_transfer_a[1] * (bias_transfer_k[1] *
                                 mg_transfer[2]).T).T)
-            self.add_tracer(cosmo, kernel, transfer_ka=mg_transfer_new,
+            self.add_tracer(cosmo, kernel=kernel, transfer_ka=mg_transfer_new,
                             der_bessel=der_bessel, der_angles=der_angles)
 
         #  case of an astro bias depending on a but not k
         elif ((bias_transfer_a is not None) and (bias_transfer_k is None)):
             mg_transfer_new = (mg_transfer[0], mg_transfer[1],
                                (bias_transfer_a[1] * mg_transfer[2].T).T)
-            self.add_tracer(cosmo, kernel, transfer_ka=mg_transfer_new,
+            self.add_tracer(cosmo, kernel=kernel, transfer_ka=mg_transfer_new,
                             der_bessel=der_bessel, der_angles=der_angles)
 
         #  case of an astro bias depending on k but not a
         elif ((bias_transfer_a is None) and (bias_transfer_k is not None)):
             mg_transfer_new = (mg_transfer[0], mg_transfer[1],
                                (bias_transfer_k[1] * mg_transfer[2]))
-            self.add_tracer(cosmo, kernel, transfer_ka=mg_transfer_new,
+            self.add_tracer(cosmo, kernel=kernel, transfer_ka=mg_transfer_new,
                             der_bessel=der_bessel, der_angles=der_angles)
 
     def _get_MG_transfer_function(self, cosmo, z):
