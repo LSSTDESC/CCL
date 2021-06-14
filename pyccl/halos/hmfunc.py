@@ -472,11 +472,12 @@ class MassFuncTinker10(MassFunc):
                         -0.301, -0.301, -0.319, -0.336])
 
         ldelta = np.log10(delta)
-        self.pA0 = interp1d(ldelta, alpha)
-        self.pa0 = interp1d(ldelta, eta)
-        self.pb0 = interp1d(ldelta, beta)
-        self.pc0 = interp1d(ldelta, gamma)
-        self.pd0 = interp1d(ldelta, phi)
+        extrap_kw = {"bounds_error": False, "fill_value": "extrapolate"}
+        self.pA0 = interp1d(ldelta, alpha, **extrap_kw)
+        self.pa0 = interp1d(ldelta, eta, **extrap_kw)
+        self.pb0 = interp1d(ldelta, beta, **extrap_kw)
+        self.pc0 = interp1d(ldelta, gamma, **extrap_kw)
+        self.pd0 = interp1d(ldelta, phi, **extrap_kw)
         if self.norm_all_z:
             p = np.array([-0.158, -0.195, -0.213, -0.254, -0.281,
                           -0.349, -0.367, -0.435, -0.504])
