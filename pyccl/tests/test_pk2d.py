@@ -54,6 +54,10 @@ def test_pk2d_init():
     assert_raises(
         ValueError, ccl.Pk2D, a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr[1:])
 
+    # Scale factor is not monotonically increasing
+    assert_raises(
+        ValueError, ccl.Pk2D, a_arr=aarr[::-1], lk_arr=lkarr, pk_arr=pkarr)
+
 
 def test_pk2d_smoke():
     """Make sure it works once."""

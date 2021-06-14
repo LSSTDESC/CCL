@@ -294,6 +294,14 @@ def test_input_linpower_raises():
             n_s=0.965, sigma8=0.8,
             pk_linear=np.pi)
 
+    # a not increasing
+    with pytest.raises(ValueError):
+        ccl.CosmologyCalculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_linear={'a': a_arr[::-1], 'k': k_arr,
+                       'delta_matter:delta_matter': pk_arr})
+
     # Dm x Dm not present
     with pytest.raises(ValueError):
         ccl.CosmologyCalculator(
@@ -529,6 +537,14 @@ def test_input_nonlin_raises():
             pk_nonlin={'a': a_arr, 'kk': k_arr,
                        'delta_matter;delta_matter': pk_arr})
 
+    # a not increasing
+    with pytest.raises(ValueError):
+        ccl.CosmologyCalculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_nonlin={'a': a_arr[::-1], 'k': k_arr,
+                       'delta_matter:delta_matter': pk_arr})
+
     # delta_matter:delta_matter not present
     with pytest.raises(ValueError):
         ccl.CosmologyCalculator(
@@ -574,3 +590,26 @@ def test_input_nonlin_raises():
         nonlinear_model='halofit')
     assert 'a:b' in cosmo_input._pk_nl
     assert cosmo_input.has_nonlin_power
+
+
+def test_camb_de_model():
+    """Check that the dark energy model for CAMB has been properly defined."""
+    with pytest.raises(ValueError):
+        cosmo = ccl.CosmologyVanillaLCDM(
+            transfer_function='boltzmann_camb',
+            extra_parameters={"camb": {"dark_energy_model": "pf"}})
+        ccl.linear_matter_power(cosmo, 1, 1)
+
+    """Check that w is not less than -1, if the chosen dark energy model for
+    CAMB is fluid."""
+    with pytest.raises(ValueError):
+        cosmo = ccl.CosmologyVanillaLCDM(
+            transfer_function='boltzmann_camb', w0=-1, wa=-1)
+        ccl.linear_matter_power(cosmo, 1, 1)
+
+    """Check that ppf is running smoothly."""
+    cosmo = ccl.CosmologyVanillaLCDM(
+        transfer_function='boltzmann_camb', w0=-1, wa=-1,
+        extra_parameters={"camb": {"dark_energy_model": "ppf"}})
+    assert np.isfinite(ccl.linear_matter_power(cosmo, 1, 1))
+
