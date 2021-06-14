@@ -194,7 +194,7 @@ class MassFuncPress74(MassFunc):
     """
     name = 'Press74'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(MassFuncPress74, self).__init__(
             cosmo,
             mass_def=mass_def,
