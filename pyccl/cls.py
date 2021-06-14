@@ -46,8 +46,6 @@ def angular_cl(cosmo, tracer1, tracer2, *, ell, p_of_k_a=None,
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
             category=CCLWarning)
-    if ell is None:
-        raise ValueError("must specify `ell`")
     if limber_integration_method not in ['qag_quad', 'spline']:
         raise ValueError("Integration method %s not supported" %
                          limber_integration_method)
