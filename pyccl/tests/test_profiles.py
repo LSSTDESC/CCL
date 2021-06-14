@@ -120,6 +120,42 @@ def test_hod_smoke():
         assert getattr(p, n) == 1234.
 
 
+@pytest.mark.parametrize('real_prof', [True, False])
+def test_hod_ns_independent(real_prof):
+    def func(prof):
+        return prof._real if real_prof else prof._fourier
+
+    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    hmd = c.mass_def
+    p1 = ccl.halos.HaloProfileHOD(c_m_relation=c,
+                                  lMmin_0=12.,
+                                  ns_independent=False)
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=c,
+                                  lMmin_0=12.,
+                                  ns_independent=True)
+    # M < Mmin
+    f1 = func(p1)(COSMO, 0.01, 1e10, 1., mass_def=hmd)
+    assert np.all(f1 == 0)
+    f2 = func(p2)(COSMO, 0.01, 1e10, 1., mass_def=hmd)
+    assert np.all(f2 > 0)
+    # M > Mmin
+    f1 = func(p1)(COSMO, 0.01, 1e14, 1., mass_def=hmd)
+    f2 = func(p2)(COSMO, 0.01, 1e14, 1., mass_def=hmd)
+    assert np.allclose(f1, f2, rtol=0)
+    # M == Mmin
+    f1 = func(p1)(COSMO, 0.01, 1e12, 1., mass_def=hmd)
+    f2 = func(p2)(COSMO, 0.01, 1e12, 1., mass_def=hmd)
+    assert np.allclose(2*f1, f2+0.5, rtol=0)
+
+    if not real_prof:
+        f1 = p1._fourier_variance(COSMO, 0.01, 1e10, 1., mass_def=hmd)
+        f2 = p2._fourier_variance(COSMO, 0.01, 1e10, 1., mass_def=hmd)
+        assert f2 > f1 == 0
+
+    p1.update_parameters(ns_independent=True)
+    assert p1.ns_independent is True
+
+
 def test_hod_2pt_raises():
     pbad = ccl.halos.HaloProfilePressureGNFW()
     c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
