@@ -153,24 +153,25 @@ def test_tkk1h_errors():
 
     # Wrong first profile
     with pytest.raises(TypeError):
-        ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr, None)
+        ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr, None,
+                                         normprof=False)
     # Wrong other profiles
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof2=PKC)
+                                         P1, prof2=PKC, normprof=False)
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof3=PKC)
+                                         P1, prof3=PKC, normprof=False)
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof4=PKC)
+                                         P1, prof4=PKC, normprof=False)
     # Wrong 2pts
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof12_2pt=P2)
+                                         P1, prof12_2pt=P2, normprof=False)
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof34_2pt=P2)
+                                         P1, prof34_2pt=P2, normprof=False)
 
     # Negative profile in logspace
     assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,

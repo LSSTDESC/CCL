@@ -203,18 +203,23 @@ def test_cosmology_context():
         cosmo.has_growth
 
 
-@pytest.mark.parametrize('mass_function', ['angulo', 'tinker', 'tinker10',
-                                           'watson', 'shethtormen'],
-                         'halo_concentration', ['bhattacharya2011',
-                                                'duffy2008',
-                                                'constant_concentration'])
-def test_cosmology_hmf_c(hmf, c):
+@pytest.mark.parametrize('c', ['bhattacharya2011', 'duffy2008',
+                               'constant_concentration'])
+def test_cosmology_concentrations(c):
+    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
+                                     halo_concentration=c)
+    with pytest.warns(RuntimeWarning):
+        cosmo.compute_nonlin_power()
+
+
+@pytest.mark.parametrize('hmf', ['angulo', 'tinker', 'tinker10',
+                                 'watson', 'shethtormen'])
+def test_cosmology_mass_functions(hmf):
     """Check halo concentration and halo mass function passed into choice
     `halo_model` of matter power spectrum in Cosmology."""
     valid_hmf = ["tinker10", "shethtormen"]
     cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
-                                     mass_function=hmf,
-                                     halo_concentration=c)
+                                     mass_function=hmf)
     if hmf in valid_hmf:
         with pytest.warns(RuntimeWarning):
             cosmo.compute_nonlin_power()
