@@ -79,7 +79,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, tracer3=None, tracer4=None,
     if isinstance(t_of_kk_a, Tk3D):
         tsp = t_of_kk_a.tsp
     else:
-        raise ValueError("tkka must be a pyccl.Tk3D")
+        raise TypeError("t_of_kk_a must be of type pyccl.Tk3D")
 
     # Create tracer colections
     status = 0
