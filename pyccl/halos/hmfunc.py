@@ -612,9 +612,10 @@ class MassFuncBocquet16(MassFunc):
         # NOTE: The following lines have been commented out because
         # currently rho_type can only be 'matter' or 'critical' and
         # so this case cannot be covered.
-        # elif int(mass_def.Delta) == 200:
-        #     if mass_def.rho_type not in ['matter', 'critical']:
-        #         return True
+        elif int(mass_def.Delta) == 200:
+            return False
+            # if mass_def.rho_type not in ['matter', 'critical']:
+            #     return True
         elif int(mass_def.Delta) == 500:
             if mass_def.rho_type != 'critical':
                 return True
