@@ -62,7 +62,7 @@ from .halomodel import (
 from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3d, nfw_profile_2d
 
 # Specific to massive neutrinos
-from .neutrinos import Omeganuh2, nu_masses
+from .neutrinos import Omega_nu_h2, nu_masses
 
 # Expose function to toggle debug mode
 from .pyutils import debug_mode, resample_array
