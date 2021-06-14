@@ -18,6 +18,11 @@ MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 MDEF = ccl.halos.MassDef('fof', 'matter')
 
 
+def test_cM_default_mass_def():
+    c = ccl.halos.Concentration()
+    assert MDEF.__eq__(c.mass_def)
+
+
 @pytest.mark.parametrize('cM_class', CONCS)
 def test_cM_subclasses_smoke(cM_class):
     cM = cM_class()
@@ -38,8 +43,13 @@ def test_cM_duffy_smoke():
 
 @pytest.mark.parametrize('cM_class', CONCS[:-1])
 def test_cM_mdef_raises(cM_class):
+    # check str (fof, matter)
     with pytest.raises(ValueError):
         cM_class(mass_def=MDEF)
+    # test mass_def with numbers
+    M500m = ccl.halos.MassDef(500, "matter")
+    with pytest.raises(ValueError):
+        cM_class(mass_def=M500m)
 
 
 @pytest.mark.parametrize('name', ['Duffy08', 'Diemer15'])

@@ -356,8 +356,7 @@ class HMCalculator(object):
         return i04
 
 
-def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *,
-                             normprof=False):
+def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof):
     """ Returns the mass-weighted mean halo profile.
 
     .. math::
@@ -408,7 +407,7 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *,
     return out
 
 
-def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
+def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof):
     """ Returns the mass-and-bias-weighted mean halo profile.
 
     .. math::

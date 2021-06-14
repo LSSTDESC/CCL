@@ -97,3 +97,6 @@ def test_cov_cNG_errors():
 
     assert_raises(TypeError, ccl.angular_cl_cov_cNG,
                   COSMO, tr, tr, ell=ls, tracer3=tr)
+
+    assert_raises(TypeError, ccl.angular_cl_cov_cNG,
+                  COSMO, tr, tr, ell=ls, t_of_kk_a=None)

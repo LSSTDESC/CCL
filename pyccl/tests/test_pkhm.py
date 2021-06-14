@@ -254,31 +254,39 @@ def test_pkhm_errors():
         ccl.halos.HMCalculator(COSMO, mass_function=HMF,
                                halo_bias=None, mass_def=M200)
 
+    # Wrong MassDef
+    with pytest.raises(TypeError):
+        ccl.halos.HMCalculator(COSMO, mass_function=HMF,
+                               halo_bias=HBF, mass_def=None)
+
     hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF,
                                  halo_bias=HBF, mass_def=M200)
 
     # Wrong profile
     with pytest.raises(TypeError):
-        ccl.halos.halomod_mean_profile_1pt(COSMO, hmc, KK, AA, None)
+        ccl.halos.halomod_mean_profile_1pt(COSMO, hmc, KK, AA, None,
+                                           normprof=False)
     with pytest.raises(TypeError):
-        ccl.halos.halomod_bias_1pt(COSMO, hmc, KK, AA, None)
+        ccl.halos.halomod_bias_1pt(COSMO, hmc, KK, AA, None,
+                                   normprof=False)
     with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, None)
+        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, None,
+                                         normprof=False)
 
     # Wrong prof2
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         prof2=KK)
+                                         prof2=KK, normprof=False)
 
     # Wrong prof_2pt
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         prof_2pt=KK)
+                                         prof_2pt=KK, normprof=False)
 
     # Wrong pk2d
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         p_of_k_a=KK)
+                                         p_of_k_a=KK, normprof=False)
 
     def func():
         pass
