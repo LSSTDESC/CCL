@@ -101,8 +101,9 @@ class MassFunc(object):
                 mass definition.
         """
         if mass_def_other is not None:
-            M_use = mass_def_other.translate_mass(cosmo, M, a,
-                                                 mass_def_other=self.mass_def)
+            M_use = mass_def_other.translate_mass(
+                cosmo, M, a,
+               mass_def_other=self.mass_def)
         else:
             M_use = M
         return np.log10(M_use)
@@ -198,8 +199,7 @@ class MassFuncPress74(MassFunc):
         super(MassFuncPress74, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef('fof', 'matter')
@@ -288,8 +288,7 @@ class MassFuncJenkins01(MassFunc):
         super(MassFuncJenkins01, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef('fof', 'matter')
@@ -327,8 +326,7 @@ class MassFuncTinker08(MassFunc):
         super(MassFuncTinker08, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef200m()
@@ -388,8 +386,7 @@ class MassFuncDespali16(MassFunc):
         super(MassFuncDespali16, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
         self.ellipsoidal = ellipsoidal
 
     def _default_mass_def(self):
@@ -453,8 +450,7 @@ class MassFuncTinker10(MassFunc):
         super(MassFuncTinker10, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef200m()
@@ -537,8 +533,7 @@ class MassFuncBocquet16(MassFunc):
         super(MassFuncBocquet16, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef200m()
@@ -677,8 +672,7 @@ class MassFuncWatson13(MassFunc):
         super(MassFuncWatson13, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef200m()
@@ -745,8 +739,7 @@ class MassFuncAngulo12(MassFunc):
         super(MassFuncAngulo12, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef('fof', 'matter')

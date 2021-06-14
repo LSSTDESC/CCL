@@ -663,7 +663,7 @@ class CMBLensingTracer(Tracer):
 
         # we need the distance functions at the C layer
         cosmo.compute_distances()
-        kernel = get_kappa_kernel(cosmo, z_source=z_source, 
+        kernel = get_kappa_kernel(cosmo, z_source=z_source,
                                   nsamples=n_samples)
         if (cosmo['sigma_0'] == 0):
             self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)

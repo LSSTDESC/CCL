@@ -55,10 +55,8 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
     mass_def = hal.MassDef(odelta, 'matter')
-    c = hal.ConcentrationConstant(c=concentration,
-                                  mass_def=mass_def)
-    mass_def = hal.MassDef(odelta, 'matter',
-                       c_m_relation=c)
+    c = hal.ConcentrationConstant(c=concentration, mass_def=mass_def)
+    mass_def = hal.MassDef(odelta, 'matter', c_m_relation=c)
     p = hal.HaloProfileEinasto(c_m_relation=c, truncated=False)
     return p.real(cosmo, r, halo_mass, a, mass_def=mass_def)
 

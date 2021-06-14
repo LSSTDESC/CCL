@@ -61,4 +61,3 @@ def test_nonlin_camb_power_with_sigma8():
     # Check that non-linear power spectrum isn't being used with sigma8
     with assert_raises(ccl.errors.CCLError):
         ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)
-

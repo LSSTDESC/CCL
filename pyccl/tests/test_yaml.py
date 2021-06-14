@@ -34,4 +34,3 @@ def test_yaml():
     cosmo2.write_yaml(stream2)
 
     assert stream.getvalue() == stream2.getvalue()
-

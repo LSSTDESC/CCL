@@ -77,7 +77,7 @@ def test_tk3d_errors():
                   pk1_arr=tkka_arr)
 
     # tkka has wrong shape
-    assert_raises(ValueError, ccl.Tk3D, a_arr= a_arr, lk_arr=lk_arr,
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a_arr, lk_arr=lk_arr,
                   tkk_arr=fka1_arr)
 
     # Wrong extrapolation orders

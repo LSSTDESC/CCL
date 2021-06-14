@@ -612,4 +612,3 @@ def test_camb_de_model():
         transfer_function='boltzmann_camb', w0=-1, wa=-1,
         extra_parameters={"camb": {"dark_energy_model": "ppf"}})
     assert np.isfinite(ccl.linear_matter_power(cosmo, 1, 1))
-

@@ -97,11 +97,8 @@ class HMCalculator(object):
         # value of the scale factor.
         if a != self._a_current_mf:
             self.mf = self.mass_function.get_mass_function(
-                                                  cosmo,
-                                                  self._mass,
-                                                  a,
-                                                  mass_def_other=self.mass_def
-                                                  )
+                cosmo, self._mass, a,
+                mass_def_other=self.mass_def)
             self.mf0 = (self._rho0 -
                         self._integrator(self.mf * self._mass,
                                          self._lmass)) / self._m0
@@ -110,10 +107,8 @@ class HMCalculator(object):
         if get_bf:
             if a != self._a_current_bf:
                 self.bf = self.halo_bias.get_halo_bias(
-                                                  cosmo,
-                                                  self._mass, a,
-                                                  mass_def_other=self.mass_def
-                                                  )
+                    cosmo, self._mass, a,
+                    mass_def_other=self.mass_def)
                 self.mbf0 = (self._rho0 -
                              self._integrator(self.mf * self.bf * self._mass,
                                               self._lmass)) / self._m0

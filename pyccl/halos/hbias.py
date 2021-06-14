@@ -94,8 +94,9 @@ class HaloBias(object):
             mass definition.
         """
         if mass_def_other is not None:
-            M_use = mass_def_other.translate_mass(cosmo, M, a,
-                                                 mass_def_other=self.mass_def)
+            M_use = mass_def_other.translate_mass(
+                cosmo, M, a,
+                mass_def_other=self.mass_def)
         else:
             M_use = M
         return np.log10(M_use)
@@ -273,8 +274,7 @@ class HaloBiasBhattacharya11(HaloBias):
         super(HaloBiasBhattacharya11, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef('fof', 'matter')
@@ -317,8 +317,7 @@ class HaloBiasTinker10(HaloBias):
         super(HaloBiasTinker10, self).__init__(
             cosmo,
             mass_def=mass_def,
-            mass_def_strict=mass_def_strict
-            )
+            mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef200m()
