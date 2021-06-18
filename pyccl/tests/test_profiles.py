@@ -55,8 +55,8 @@ def test_defaults():
 
 
 def test_profiles_equal():
-    p1 = ccl.HaloProfilePressureGNFW(mass_bias=0.8)
-    p2 = ccl.HaloProfilePressureGNFW(mass_bias=0.8)
+    p1 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.8)
+    p2 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.8)
     assert p1.__eq__(p2)
     p2.update_parameters(mass_bias=0.5)
     assert not p1.__eq__(p2)
