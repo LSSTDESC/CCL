@@ -147,6 +147,22 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
+    def update_parameters(self):
+        raise NotImplementedError("Parameters can't be updated in this profile.")
+
+    def _get_parameters(self):
+        code = self.update_parameters.__code__
+        count = code.co_argcount + code.co_kwonlyargcount
+        args = code.co_varnames[1: count]
+        pars = dict.fromkeys(args)
+        for par in pars:
+            pars[par] = getattr(self, par)
+        return pars
+
+    def __eq__(self, prof2):
+        """ Return `True` if the this profile is equivalent to another."""
+        return self._get_parameters() == prof2._get_parameters()
+
     def real(self, cosmo, r, M, a, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.

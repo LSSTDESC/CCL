@@ -50,6 +50,16 @@ def test_defaults():
         p.real(None, None, None, None)
     with pytest.raises(NotImplementedError):
         p.fourier(None, None, None, None)
+    with pytest.raises(NotImplementedError):
+        p.update_parameters()
+
+
+def test_profiles_equal():
+    p1 = ccl.HaloProfilePressureGNFW(mass_bias=0.8)
+    p2 = ccl.HaloProfilePressureGNFW(mass_bias=0.8)
+    assert p1.__eq__(p2)
+    p2.update_parameters(mass_bias=0.5)
+    assert not p1.__eq__(p2)
 
 
 @pytest.mark.parametrize('prof_class',

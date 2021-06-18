@@ -582,7 +582,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         else:
             norm1 = 1
         # Compute second profile normalization
-        if prof2 is None:
+        if prof2 is None or (prof2.__eq__(prof)):
             norm2 = norm1
         else:
             if normprof2:
@@ -596,7 +596,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
 
             # Compute second bias factor
-            if prof2 is None:
+            if prof2 is None or (prof2.__eq__(prof)):
                 i11_2 = i11_1
             else:
                 i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
