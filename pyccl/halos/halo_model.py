@@ -1107,13 +1107,12 @@ def halomod_Tk3D_SSC(cosmo, hmc,
                                prof34_2pt_bak, prof4)
         norm12 = norm1 * norm2
         norm34 = norm3 * norm4
-        print(norm1, norm2, norm3, norm4)
 
         pk = pk2d.eval(k_use, aa, cosmo)
         dpk = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo)
-        # (47/21 - dlogPk/dlogk) * I11 * I11 * Pk+I12
-        dpk12[ia, :] = norm12*((2.2380952381-dpk)*i11_1*i11_2*pk+i12_12)
-        dpk34[ia, :] = norm34*((2.2380952381-dpk)*i11_3*i11_4*pk+i12_34)
+        # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk+I12
+        dpk12[ia, :] = norm12*((2.2380952381-dpk/3)*i11_1*i11_2*pk+i12_12)
+        dpk34[ia, :] = norm34*((2.2380952381-dpk/3)*i11_3*i11_4*pk+i12_34)
 
     if use_log:
         if np.any(dpk12 <= 0) or np.any(dpk34 <= 0):
