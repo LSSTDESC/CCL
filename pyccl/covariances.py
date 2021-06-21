@@ -2,7 +2,7 @@ import numpy as np
 
 from . import ccllib as lib
 from .pyutils import check, integ_types, _check_array_params
-from .background import comoving_radial_distance
+from .background import comoving_radial_distance, comoving_angular_distance
 from .tk3d import Tk3D
 from .pk2d import parse_pk2d
 
@@ -131,14 +131,14 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
     return cov
 
 
-def sigma2_B_disc(cosmo, a=None, fsky=1.):
+def sigma2_B_disc(cosmo, a=None, fsky=1., p_of_k_a=None):
     """ Returns the variance of the projected linear density field
     over a circular disc covering a sky fraction `fsky` as a function
     of scale factor. This is given by
 
     .. math::
         \\sigma^2_B(z) = \\int_0^\\infty \frac{k\\,dk}{2\\pi}
-            P_L(k,z)\\,\\left[\\frac{2J_1(k R(z))}{k R(z)},
+            P_L(k,z)\\,\\left[\\frac{2J_1(k R(z))}{k R(z)}\\right]^2,
 
     where :math:`R(z)` is the corresponding radial aperture as a
     function of redshift. This quantity is used to compute the
@@ -150,6 +150,8 @@ def sigma2_B_disc(cosmo, a=None, fsky=1.):
             values at which to evaluate the projected variance. If
             `None`, a default sampling will be used.
         fsky (float): sky fraction.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, str, or `None`): Linear
+            power spectrum to use. Defaults to `None`.
 
     Returns:
         float or array_like: values of the projected variance.
@@ -165,7 +167,7 @@ def sigma2_B_disc(cosmo, a=None, fsky=1.):
 
     chi_arr = comoving_radial_distance(cosmo, a_arr)
     R_arr = chi_arr * np.arccos(1-2*fsky)
-    psp = parse_pk2d(cosmo, None, is_linear=True)
+    psp = parse_pk2d(cosmo, p_of_k_a, is_linear=True)
 
     s2B_arr, status = lib.sigma2b_vec(cosmo.cosmo, a_arr, R_arr, psp,
                                       na, status)
@@ -177,6 +179,63 @@ def sigma2_B_disc(cosmo, a=None, fsky=1.):
             return s2B_arr[0]
         else:
             return s2B_arr
+
+
+def sigma2_B_from_mask(cosmo, a=None, mask_wl=None, p_of_k_a=None):
+    """ Returns the variance of the projected linear density field, given the
+        angular power spectrum of the footprint mask and scale factor.
+        This is given by
+
+    .. math::
+        \\sigma^2_B(z) = \\frac{1}{\\chi^2{z}}\\sum_\\ell
+            P_L(\\frac{\\ell+\\frac{1}{2}}{\\chi(z)},z)\\,
+            (2\\ell+1)\\sum_m W^A_{\\ell m} {W^B}^*_{\\ell m},
+
+    where :math:`W^A_{\\ell m}` and :math:`W^B_{\\ell m}` are the spherical
+    harmonics decomposition of the footprint masks of fields `A` and `B`,
+    normalized by their area.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        a (float, array_like or `None`): an array of scale factor
+            values at which to evaluate the projected variance.
+        mask_wl (array_like): Array with the angular power spectrum of the
+            masks. The power spectrum should be given at integer multipoles,
+            starting at :math:`\\ell=0`. The power spectrum is normalized
+            as :math:`(2\\ell+1)\\sum_m W^A_{\\ell m} {W^B}^*_{\\ell m}`.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, str, or `None`): Linear
+            power spectrum to use. Defaults to `None`.
+
+    Returns:
+        float or array_like: values of the projected variance.
+    """
+    if p_of_k_a is None:
+        cosmo.compute_linear_power()
+        p_of_k_a = cosmo.get_linear_power()
+
+    a_arr = np.atleast_1d(a)
+    chi = comoving_angular_distance(cosmo, a=a_arr)
+
+    ell = np.arange(mask_wl.size)
+
+    sigma2_B = np.zeros(a_arr.size)
+    for i in range(sigma2_B.size):
+        if 1-a_arr[i] < 1e-6:
+            # For a=1, the integral becomes independent of the footprint in
+            # the flat-sky approximation. So we are just using the method
+            # for the disc geometry here
+            sigma2_B[i] = sigma2_B_disc(cosmo=cosmo, a=a_arr[i],
+                                        p_of_k_a=p_of_k_a)
+        else:
+            k = (ell+0.5)/chi[i]
+            pk = p_of_k_a.eval(k, a_arr[i], cosmo)
+            # See eq. E.10 of 2007.01844
+            sigma2_B[i] = np.sum(pk * mask_wl)/chi[i]**2
+
+    if np.ndim(a) == 0:
+        return sigma2_B[0]
+    else:
+        return sigma2_B
 
 
 def angular_cl_cov_SSC(cosmo, cltracer1, cltracer2, ell, tkka,
