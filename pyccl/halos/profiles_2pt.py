@@ -128,7 +128,7 @@ class Profile2ptHOD(Profile2pt):
             raise TypeError("prof must be of type `HaloProfileHOD`")
 
         if prof2 is not None:
-            if prof2 is not prof:
+            if not prof2.__eq__(prof):
                 raise ValueError("prof2 must be the same as prof")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)
