@@ -187,8 +187,8 @@ def test_pkhm_pk2d():
                   < 1E-4)
 
     # Testing profiles which are not equivalent (but very close)
-    G1 = ccl.halos.HaloProfileHOD(c_m_relation=CON, lMmin_0=12.00000)
-    G2 = ccl.halos.HaloProfileHOD(c_m_relation=CON, lMmin_0=11.99999)
+    G1 = ccl.halos.HaloProfileHOD(CON, lMmin_0=12.00000)
+    G2 = ccl.halos.HaloProfileHOD(CON, lMmin_0=11.99999)
     assert not G1.__eq__(G2)
     # I_1_1
     pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, G1,
