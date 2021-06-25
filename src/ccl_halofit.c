@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include <gsl/gsl_integration.h>
@@ -16,7 +17,7 @@
  * The functions below implement this procedure.
 */
 
-// I snuck a private function from backgrounc.c into here. :P
+// I snuck a private function from background.c into here. :P
 // The default routines create a full spline but we just need one value.
 // This may seem like over optimizing, but in testing initializing halofit
 // is an order of magnitude or more slower if we don't do this.
@@ -61,7 +62,9 @@ static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int
     cosmo->params.Neff, mnu, cosmo->params.N_nu_mass,
     w0eff, 0, cosmo->params.h, norm_pk,
     cosmo->params.n_s, cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
-    cosmo->params.bcm_ks, cosmo->params.mu_0, cosmo->params.sigma_0, cosmo->params.nz_mgrowth,
+    cosmo->params.bcm_ks, cosmo->params.mu_0, cosmo->params.sigma_0, 
+    cosmo->params.c1_mg, cosmo->params.c2_mg, cosmo->params.lambda_mg, 
+    cosmo->params.nz_mgrowth,
     cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
 
     if(*status != 0)
@@ -118,7 +121,7 @@ static double get_w0eff(double a, struct hf_model_match_data data) {
   if(*(data.status) != 0) {
     ccl_cosmology_set_status_message(
       data.cosmo,
-      "ccl_halofit.c: ccl_halofit_struct_new(): "
+      "ccl_halofit.c: get_w0eff(): "
       "could not compute chi_drag for cosmology\n");
     return NAN;
   }
@@ -163,7 +166,7 @@ static double get_w0eff(double a, struct hf_model_match_data data) {
 
     if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
       ccl_raise_gsl_warning(
-        gsl_status, "ccl_halofit.c: get_w0eff: error in root finding for the halofit matching cosmology\n");
+        gsl_status, "ccl_halofit.c: get_w0eff(): error in root finding for the halofit matching cosmology\n");
       *(data.status) |= gsl_status;
     }
   }
@@ -185,6 +188,7 @@ struct hf_int_data {
   double r2;
   double a;
   ccl_cosmology *cosmo;
+  ccl_f2d_t *plin;
   int *status;
   gsl_integration_cquad_workspace *workspace;
 };
@@ -195,7 +199,7 @@ static double gauss_norm_int_func(double lnk, void *p) {
   double k2 = k*k;
 
   return (
-    ccl_linear_matter_power(hfd->cosmo, k, hfd->a, hfd->status) *
+    ccl_f2d_t_eval(hfd->plin, lnk, hfd->a, hfd->cosmo, hfd->status) *
     k*k2/2.0/M_PI/M_PI *
     exp(-k2 * (hfd->r2)));
 }
@@ -206,7 +210,7 @@ static double onederiv_gauss_norm_int_func(double lnk, void *p) {
   double k2 = k*k;
 
   return (
-    ccl_linear_matter_power(hfd->cosmo, k, hfd->a, hfd->status) *
+    ccl_f2d_t_eval(hfd->plin, lnk, hfd->a, hfd->cosmo, hfd->status) *
     k*k2/2.0/M_PI/M_PI *
     exp(-k2 * (hfd->r2)) *
     (-k2 * 2.0 * (hfd->r)));
@@ -218,7 +222,7 @@ static double twoderiv_gauss_norm_int_func(double lnk, void *p) {
   double k2 = k*k;
 
   return (
-    ccl_linear_matter_power(hfd->cosmo, k, hfd->a, hfd->status) *
+    ccl_f2d_t_eval(hfd->plin, lnk, hfd->a, hfd->cosmo, hfd->status) *
     k*k2/2.0/M_PI/M_PI *
     exp(-k2 * (hfd->r2)) *
     (-2.0*k2 + 4.0*k2*k2 * (hfd->r2)));
@@ -231,8 +235,8 @@ static double rsigma_func(double rsigma, void *p) {
   gsl_function F;
   int gsl_status;
 
-  lnkmin = hfd->cosmo->data.p_lin->lkmin;
-  lnkmax = hfd->cosmo->data.p_lin->lkmax;
+  lnkmin = hfd->plin->lkmin;
+  lnkmax = hfd->plin->lkmax;
   hfd->r = rsigma;
   hfd->r2 = rsigma * rsigma;
   F.function = &gauss_norm_int_func;
@@ -302,7 +306,7 @@ static double get_rsigma(double a, struct hf_int_data data) {
 
     if (gsl_status != GSL_SUCCESS || itr >= max_itr) {
       ccl_raise_gsl_warning(
-        gsl_status, "ccl_halofit.c: get_rsigma: error in root finding for the halofit non-linear scale\n");
+        gsl_status, "ccl_halofit.c: get_rsigma(): error in root finding for the halofit non-linear scale\n");
       *(data.status) |= gsl_status;
     }
   }
@@ -315,9 +319,10 @@ static double get_rsigma(double a, struct hf_int_data data) {
  * @param cosmo Cosmological data
  * @param int, status of computations
  */
-halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
-  int n_a, i, gsl_status;
-  double amin, amax;
+halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
+                                       ccl_f2d_t *plin, int *status) {
+  size_t n_a;
+  int i, gsl_status;
   double lnkmin, lnkmax;
   double *a_vec = NULL;
   double *vals = NULL;
@@ -337,29 +342,42 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
   // solving sigma2(R, a) = 1
   // it is this radius that is needed for the subsequent splines of
   // the derivatives.
-  amin = cosmo->data.p_lin->amin;
-  amax = cosmo->data.p_lin->amax;
-  n_a = cosmo->spline_params.A_SPLINE_NA_PK + cosmo->spline_params.A_SPLINE_NLOG_PK - 1;
-  lnkmin = cosmo->data.p_lin->lkmin;
-  lnkmax = cosmo->data.p_lin->lkmax;
+  lnkmin = plin->lkmin;
+  lnkmax = plin->lkmax;
+  if(plin->fa != NULL) {
+    n_a = plin->fa->size;
+    a_vec = plin->fa->x;
+  }
+  else if(plin->fka != NULL) {
+    n_a = plin->fka->interp_object.ysize;
+    a_vec = plin->fka->yarr;
+  }
+  else {
+    *status = CCL_ERROR_SPLINE;
+    ccl_cosmology_set_status_message(cosmo,
+           "ccl_halofit.c: ccl_halofit_struct_new(): "
+           "input pk2d has no splines.\n");
+  }
 
-  ///////////////////////////////////////////////////////
-  // memory allocation
-  hf = (halofit_struct*)malloc(sizeof(halofit_struct));
-  if (hf == NULL) {
-    *status = CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(
-      cosmo,
-      "ccl_halofit.c: ccl_halofit_struct_new(): "
-      "memory could not be allocated for halofit_struct\n");
-  } else {
-    hf->rsigma = NULL;
-    hf->sigma2 = NULL;
-    hf->n_eff = NULL;
-    hf->C = NULL;
-    hf->weff = NULL;
-    hf->omeff = NULL;
-    hf->deeff = NULL;
+  if(*status == 0) {
+    ///////////////////////////////////////////////////////
+    // memory allocation
+    hf = (halofit_struct*)malloc(sizeof(halofit_struct));
+    if (hf == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+                                       cosmo,
+                                       "ccl_halofit.c: ccl_halofit_struct_new(): "
+                                       "memory could not be allocated for halofit_struct\n");
+    } else {
+      hf->rsigma = NULL;
+      hf->sigma2 = NULL;
+      hf->n_eff = NULL;
+      hf->C = NULL;
+      hf->weff = NULL;
+      hf->omeff = NULL;
+      hf->deeff = NULL;
+    }
   }
 
   if (*status == 0) {
@@ -370,20 +388,6 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
         cosmo,
         "ccl_halofit.c: ccl_halofit_struct_new(): "
         "memory could not be allocated for cquad workspace\n");
-    }
-  }
-
-  if (*status == 0) {
-    a_vec = ccl_linlog_spacing(
-      amin, cosmo->spline_params.A_SPLINE_MIN_PK,
-      amax, cosmo->spline_params.A_SPLINE_NLOG_PK,
-      cosmo->spline_params.A_SPLINE_NA_PK);
-    if (a_vec == NULL) {
-      *status = CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_halofit.c: ccl_halofit_struct_new(): "
-        "memory could not be allocated for scale factor vector\n");
     }
   }
 
@@ -555,6 +559,7 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
     // setup for integrations
     data.status = status;
     data.cosmo = cosmo;
+    data.plin = plin;
     data.workspace = workspace;
 
     for (i=0; i<n_a; ++i) {
@@ -812,7 +817,6 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo, int *status) {
     hf = NULL;
   }
   gsl_integration_cquad_workspace_free(workspace);
-  free(a_vec);
   free(vals);
   free(vals_om);
   free(vals_de);
@@ -858,13 +862,14 @@ void ccl_halofit_struct_free(halofit_struct *hf) {
 /**
  * Computes the halofit non-linear power spectrum
  * @param cosmo: cosmology object containing parameters
- * @param k: wavenumber in units of Mpc^{-1}
+ * @param lk: natural logarithm of wavenumber in units of Mpc^{-1}
  * @param a: scale factor normalised to a=1 today
  * @param status: Status flag: 0 if there are no errors, non-zero otherwise
  * @param hf: halofit splines for evaluating the power spectrum
  * @return halofit_matter_power: halofit power spectrum, P(k), units of Mpc^{3}
  */
-double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struct *hf, int *status) {
+double ccl_halofit_power(ccl_cosmology *cosmo, ccl_f2d_t *plin,
+                         double lk, double a, halofit_struct *hf, int *status) {
   double rsigma, neff, C;
   double ksigma, weffa, omegaMz, omegaDEwz, kh;
   double PkL, PkNL, f1, f2, f3, an, bn, cn, gamman, alphan, betan, nun, mun, y, fy;
@@ -874,6 +879,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   double neff2, neff3, neff4;
   double kh2, y2;
   double delta2_norm, om_nu;
+  double k=exp(lk);
 
   // all eqns are from Takahashi et al. unless stated otherwise
   // eqns A4 - A5
@@ -937,7 +943,7 @@ double ccl_halofit_power(ccl_cosmology *cosmo, double k, double a, halofit_struc
   betan += (fnu * (1.081 + 0.395*neff2));
 
   // eqns A1 - A3
-  PkL = ccl_linear_matter_power(cosmo, k, a, status);
+  PkL = ccl_f2d_t_eval(plin, lk, a, cosmo, status);
   y = k/ksigma;
   y2 = y * y;
   fy = y/4.0 + y2/8.0;

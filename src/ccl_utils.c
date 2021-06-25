@@ -19,7 +19,8 @@ double * ccl_linear_spacing(double xmin, double xmax, int N)
   if (x==NULL) {
     ccl_raise_warning(
       CCL_ERROR_MEMORY,
-      "ERROR: Could not allocate memory for linear-spaced array (N=%d)\n", N);
+      "ccl_utils.c: ccl_linear_spacing(): "
+      "Could not allocate memory for linear-spaced array (N=%d)\n", N);
     return x;
   }
 
@@ -45,14 +46,16 @@ double * ccl_linlog_spacing(double xminlog, double xmin, double xmax, int Nlog, 
   if (Nlog<2) {
     ccl_raise_warning(
       CCL_ERROR_LINLOGSPACE,
-      "ERROR: Cannot make log-spaced array with %d points - need at least 2\n", Nlog);
+      "ccl_utils.c: ccl_linlog_spacing(): "
+      "Cannot make log-spaced array with %d points - need at least 2\n", Nlog);
     return NULL;
   }
 
   if (!(xminlog>0 && xmin>0)) {
     ccl_raise_warning(
       CCL_ERROR_LINLOGSPACE,
-      "ERROR: Cannot make log-spaced array xminlog or xmin non-positive (had %le, %le)\n", xminlog, xmin);
+      "ccl_utils.c: ccl_linlog_spacing(): "
+      "Cannot make log-spaced array xminlog or xmin non-positive (had %le, %le)\n", xminlog, xmin);
     return NULL;
   }
 
@@ -70,7 +73,8 @@ double * ccl_linlog_spacing(double xminlog, double xmin, double xmax, int Nlog, 
   if (x==NULL) {
     ccl_raise_warning(
       CCL_ERROR_MEMORY,
-      "ERROR: Could not allocate memory for array of size (Nlin+Nlog-1)=%d)\n", (Nlin+Nlog-1));
+      "ccl_utils.c: ccl_linlog_spacing(): "
+      "Could not allocate memory for array of size (Nlin+Nlog-1)=%d)\n", (Nlin+Nlog-1));
     return x;
   }
 
@@ -104,14 +108,16 @@ double * ccl_log_spacing(double xmin, double xmax, int N)
   if (N<2) {
     ccl_raise_warning(
       CCL_ERROR_LOGSPACE,
-      "ERROR: Cannot make log-spaced array with %d points - need at least 2\n", N);
+      "ccl_utils.c: ccl_log_spacing(): "
+      "Cannot make log-spaced array with %d points - need at least 2\n", N);
     return NULL;
   }
 
   if (!(xmin>0 && xmax>0)) {
     ccl_raise_warning(
       CCL_ERROR_LOGSPACE,
-      "ERROR: Cannot make log-spaced array xmax or xmax non-positive (had %le, %le)\n", xmin, xmax);
+      "ccl_utils.c: ccl_log_spacing(): "
+      "Cannot make log-spaced array xmax or xmax non-positive (had %le, %le)\n", xmin, xmax);
     return NULL;
   }
 
@@ -123,7 +129,8 @@ double * ccl_log_spacing(double xmin, double xmax, int N)
   if (x==NULL) {
     ccl_raise_warning(
       CCL_ERROR_MEMORY,
-      "ERROR: Could not allocate memory for log-spaced array (N=%d)\n", N);
+      "ccl_utils.c: ccl_linlog_spacing(): "
+      "Could not allocate memory for log-spaced array (N=%d)\n", N);
     return x;
   }
 
@@ -145,10 +152,6 @@ double ccl_j_bessel(int l,double x)
   double jl;
   double ax=fabs(x);
   double ax2=x*x;
-  if(l<0) {
-    fprintf(stderr,"CosmoMas: l>0 for Bessel function");
-    exit(1);
-  }
 
   if(l<7) {
     if(l==0) {
@@ -282,7 +285,8 @@ void ccl_integ_spline(int ny, int nx,double *x,double **y,
 
   if((b>x[nx-1]) || (a<x[0])) {
     ccl_raise_warning(CCL_ERROR_SPLINE,
-		      "ERROR: integration limits beyond interpolated range\n");
+                      "ccl_utils.c: ccl_integ_spline(): "
+                      "integration limits beyond interpolated range\n");
     *status = CCL_ERROR_SPLINE;
     return;
   }

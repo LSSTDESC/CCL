@@ -1,0 +1,129 @@
+name: continuous-integration
+on:
+  push:
+    branches:
+      - main
+      - master
+      - releases/*
+  pull_request: null
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+        py:
+          - 3.8
+
+    steps:
+      - name: cancel previous runs
+        uses: styfle/cancel-workflow-action@0.6.0
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v2
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.py }}
+          channels: conda-forge,defaults
+          channel-priority: strict
+          show-channel-urls: true
+
+      - name: remove homebrew
+        if: matrix.os == 'macos-latest'
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
+          chmod u+x ./uninstall_homebrew.sh
+          ./uninstall_homebrew.sh -f -q >& /dev/null
+          rm -f uninstall_homebrew.sh
+
+      - name: install deps
+        run: |
+          conda install \
+            pip \
+            numpy nose coveralls flake8 pyyaml gsl fftw cmake swig scipy \
+            compilers pkg-config setuptools_scm pytest pandas pytest-cov \
+            cython "camb>=1" isitgr traitlets fast-pt
+
+          if [[ ${MATRIX_OS} == "macos-latest" ]]; then
+            conda install llvm-openmp
+            echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
+            SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            echo "SDKROOT: ${SDKROOT}"
+            echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
+            echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
+          fi
+        env:
+          MATRIX_OS: ${{ matrix.os }}
+
+      - name: install class
+        run: |
+          if [[ ${MATRIX_OS} == "macos-latest" ]]; then
+            . ci_scripts/install_class_osx.sh
+          else
+            . ci_scripts/install_class_linux.sh
+          fi
+        env:
+          MATRIX_OS: ${{ matrix.os }}
+
+      - name: lint
+        run: |
+          flake8 pyccl
+          flake8 --exclude=data benchmarks
+          if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
+            exit 1
+          fi
+
+      - name: build CCL
+        run: |
+          python setup.py build
+          python setup.py develop
+
+      - name: c unit tests
+        run: |
+          cd build
+          make -j4
+          CLASS_PARAM_DIR=./extern/share/class/ OMP_NUM_THREADS=2 ./check_ccl
+
+      - name: python unit tests
+        run: |
+          OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
+
+      - name: benchmarks
+        run: |
+          OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
+
+      - name: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          coveralls --service=github
+
+#  build-doc-only-ubuntu:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: install latex
+#        run: |
+#
+#          sudo apt install \
+#            texlive texlive-bibtex-extra texlive-science texlive-publishers \
+#            latexmk python3-sphinx python3-sphinx-rtd-theme python3-nbconvert \
+#            python3-jupyter-client jupyter-client jupyter-nbconvert sphinx-common \
+#            pandoc python3-setuptools \
+#            -y
+#          sudo pip3 install mkauthlist
+#
+#      - name: build docs
+#        run: |
+#          cd doc/0000-ccl_note
+#          make

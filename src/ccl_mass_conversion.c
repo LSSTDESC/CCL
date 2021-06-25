@@ -118,12 +118,12 @@ void ccl_convert_concentration(ccl_cosmology *cosmo,
   int ii,st=0;
   double d_factor = delta_old/delta_new;
   for(ii=0;ii<nc;ii++) {
-    double c_new_h;
     st=convert_concentration_single(d_factor, c_old[ii], &(c_new[ii]), c_old[ii]);
     if(st!=GSL_SUCCESS) {
       *status=CCL_ERROR_ROOT;
       ccl_cosmology_set_status_message(cosmo,
-				       "ccl_mass_conversion.c: NR solver failed to find a root\n");
+        "ccl_mass_conversion.c: ccl_convert_concentration(): "
+        "NR solver failed to find a root\n");
       return;
     }
   }

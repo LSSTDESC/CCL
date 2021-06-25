@@ -130,32 +130,6 @@ double ccl_rho_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, int
   return rhocrit * ccl_omega_x(cosmo, a, label, status);
 }
 
-/* --------- ROUTINE: ccl_mu_MG ---------
-INPUT: cosmology object, scale factor
-TASK: Compute mu(a) where mu is one of the the parameterizating functions
-of modifications to GR in the quasistatic approximation.
-*/
-
-double ccl_mu_MG(ccl_cosmology * cosmo, double a, int *status)
-{
-    // This function can be extended to include other
-    // z-dependences for mu in the future.
-    return cosmo->params.mu_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
-}
-
-/* --------- ROUTINE: ccl_Sig_MG ---------
-INPUT: cosmology object, scale factor
-TASK: Compute Sigma(a) where Sigma is one of the the parameterizating functions
-of modifications to GR in the quasistatic approximation.
-*/
-
-double ccl_Sig_MG(ccl_cosmology * cosmo, double a, int *status)
-{
-    // This function can be extended to include other
-    // z-dependences for Sigma in the future.
-    return cosmo->params.sigma_0 * ccl_omega_x(cosmo, a, ccl_species_l_label, status) / cosmo->params.Omega_l;
-}
-
 // Structure to hold parameters of chi_integrand
 typedef struct {
   ccl_cosmology *cosmo;
@@ -200,12 +174,13 @@ TASK: Define the ODE system to be solved in order to compute the growth (of the 
 static int growth_ode_system_muSig(double a,const double y[],double dydt[],void *params)
 {
   int status = 0;
+/* for MG mu(a,k) we set k=0 since it is large scales */
   ccl_cosmology * cosmo = params;
 
   double hnorm=h_over_h0(a,cosmo, &status);
   double om=ccl_omega_x(cosmo, a, ccl_species_m_label, &status);
+  double mu = ccl_mu_MG(cosmo, a, 0.0, &status);
 
-  double mu = ccl_mu_MG(cosmo, a, &status);
   dydt[1]=1.5*hnorm*a*om*y[0]*(1. + mu);
 
   dydt[0]=y[1]/(a*a*a*hnorm);
@@ -714,14 +689,18 @@ void ccl_cosmology_distances_from_input(ccl_cosmology * cosmo, int na, double a[
 INPUT: cosmology, scale factor array, growth array, growth rate array
 TASK: if not already there, create growth splines with the input arrays and store them.
 */
-void ccl_cosmology_growth_from_input(ccl_cosmology* cosmo, int na, double a[], double growth_arr[], double fgrowth_arr[], int* status)
+void ccl_cosmology_growth_from_input(ccl_cosmology* cosmo, int na, double a[],
+                                     double growth_arr[], double fgrowth_arr[], int* status)
 {
   int chistatus;
   if (cosmo->computed_growth)
     return;
 
+  double *growth_normed = NULL;
   gsl_spline * growth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
   gsl_spline * fgrowth = gsl_spline_alloc(cosmo->spline_params.A_SPLINE_TYPE, na);
+  //The last element corresponds to a=1 (which is checked for in python).
+  double growth0 = growth_arr[na-1];
 
   if (growth == NULL || fgrowth == NULL) {
     *status = CCL_ERROR_MEMORY;
@@ -729,8 +708,21 @@ void ccl_cosmology_growth_from_input(ccl_cosmology* cosmo, int na, double a[], d
         cosmo, "ccl_background.c: ccl_cosmology_growth_from_input(): ran out of memory\n");
   }
 
+  // Need to normalize the growth factor
   if (*status == 0) {
-    chistatus = gsl_spline_init(growth, a, growth_arr, na);
+    growth_normed = malloc(na*sizeof(double));
+    if (growth_normed == NULL) {
+      *status = CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(
+           cosmo, "ccl_background.c: ccl_cosmology_growth_from_input(): ran out of memory\n");
+    }
+  }
+
+  if (*status == 0) {
+    for(int ia=0; ia<na; ia++)
+      growth_normed[ia] = growth_arr[ia]/growth0;
+
+    chistatus = gsl_spline_init(growth, a, growth_normed, na);
     if (chistatus) {
       *status = CCL_ERROR_SPLINE;
       ccl_cosmology_set_status_message(
@@ -747,8 +739,6 @@ void ccl_cosmology_growth_from_input(ccl_cosmology* cosmo, int na, double a[], d
     }
   }
 
-  double growth0 = growth_arr[na-1];
-
   if (*status){ //If there was an error, free the GSL splines and return
     gsl_spline_free(growth);
     gsl_spline_free(fgrowth);
@@ -763,6 +753,8 @@ void ccl_cosmology_growth_from_input(ccl_cosmology* cosmo, int na, double a[], d
     cosmo->data.growth0 = growth0;
     cosmo->computed_growth = true;
   }
+
+  free(growth_normed);
 }
 
 /* ----- ROUTINE: ccl_cosmology_compute_growth ------
@@ -770,7 +762,6 @@ INPUT: cosmology
 TASK: if not already there, make a table of growth function and growth rate
       normalize growth to input parameter growth0
 */
-// MUSIG
 void ccl_cosmology_compute_growth(ccl_cosmology* cosmo, int* status)
 {
   if (cosmo->computed_growth)
@@ -1287,7 +1278,6 @@ double ccl_scale_factor_of_chi(ccl_cosmology * cosmo, double chi, int * status)
   }
 }
 
-//
 void ccl_scale_factor_of_chis(ccl_cosmology * cosmo, int nchi, double chi[], double output[], int * status)
 {
   int _status;
@@ -1386,7 +1376,7 @@ double ccl_growth_rate(ccl_cosmology * cosmo, double a, int * status)
       *status = CCL_ERROR_GROWTH_INIT;
       ccl_cosmology_set_status_message(
         cosmo,
-        "ccl_background.c: ccl_growth_rate(): growth factor splines have not been precomputed!");
+        "ccl_background.c: ccl_growth_rate(): growth rate splines have not been precomputed!");
     }
     if(*status != CCL_ERROR_NOT_IMPLEMENTED) {
       double g;

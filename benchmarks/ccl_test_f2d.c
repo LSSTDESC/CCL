@@ -7,7 +7,7 @@
 
 double growth_function(double a)
 {
-  return pow(a,0.375);
+  return 1;
 }
 
 double k_function(double k)
@@ -88,9 +88,8 @@ CTEST2(f2d,constant) {
 		    1,
 		    2,
 		    2,
-		    ccl_f2d_customgrowth,
-		    1,
-		    growth_function,0,2,
+		    ccl_f2d_constantgrowth,
+		    1,0,2,
 		    ccl_f2d_3,
 		    &status);
   ASSERT_TRUE(status==0);
@@ -108,9 +107,8 @@ CTEST2(f2d,constant) {
 		    1,
 		    2,
 		    2,
-		    ccl_f2d_customgrowth,
-		    1,
-		    NULL,0,2,
+		    ccl_f2d_constantgrowth,
+		    1,0,2,
 		    ccl_f2d_3,
 		    &status);
   ASSERT_TRUE(status==0);
@@ -128,9 +126,8 @@ CTEST2(f2d,constant) {
 		    0,
 		    2,
 		    2,
-		    ccl_f2d_customgrowth,
-		    1,
-		    NULL,0,2,
+		    ccl_f2d_constantgrowth,
+		    1,0,2,
 		    ccl_f2d_3,
 		    &status);
   ASSERT_TRUE(status==0);
@@ -157,9 +154,9 @@ CTEST2(f2d,a_overflow) {
 		    NULL, NULL, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
-  		    ccl_f2d_customgrowth, //extrap_growth
+  		    ccl_f2d_constantgrowth, //extrap_growth
   		    1, //is_fka_log
-  		    growth_function,0,2,
+  		    0,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
@@ -187,9 +184,9 @@ CTEST2(f2d,sanity) {
 		    NULL, NULL, 0,
   		    2, //extrap_lok
 		    2, //extrap_hik
-  		    ccl_f2d_customgrowth, //extrap_growth
+  		    ccl_f2d_constantgrowth, //extrap_growth
   		    1, //is_fka_log
-  		    growth_function,0,2,
+  		    1,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
@@ -235,9 +232,9 @@ CTEST2(f2d,factorize) {
 		    data->fk_arr,data->fa_arr,1,
   		    2, //extrap_lok
 		    2, //extrap_hik
-  		    ccl_f2d_customgrowth, //extrap_growth
+  		    ccl_f2d_constantgrowth, //extrap_growth
   		    1, //is_fka_log
-  		    growth_function,0,2,
+  		    1,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
@@ -277,11 +274,14 @@ CTEST2(f2d,pk) {
   //Now verify that things scale with the CCL growth factor as intended
   //First initialize the cosmology object
   double gz;
+  double mnu=0.;
   ccl_configuration config = default_config;
   config.transfer_function_method = ccl_bbks;
   config.matter_power_spectrum_method = ccl_linear;
-  ccl_parameters params = ccl_parameters_create_flat_lcdm(data->Omega_c,data->Omega_b,data->h,
-							  data->A_s,data->n_s, &status);
+  ccl_parameters params = ccl_parameters_create(data->Omega_c,data->Omega_b, 0.0, 3.046, &mnu,
+                                                0, -1.0, 0.0, data->h, data->A_s,data->n_s,
+                                                -1, -1, -1, 0., 0., 1.0, 1.0, 0.0, 
+						-1, NULL, NULL, &status);
   params.T_CMB=2.7;
   params.Omega_k=0;
   params.Omega_g=0;
@@ -306,7 +306,7 @@ CTEST2(f2d,pk) {
 		    2, //extrap_hik
   		    ccl_f2d_cclgrowth, //extrap_growth
   		    1, //is_fka_log
-  		    NULL,0,2,
+  		    0,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);

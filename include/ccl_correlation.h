@@ -44,6 +44,7 @@ void ccl_correlation(ccl_cosmology *cosmo,
 /**
  * Computes the 3dcorrelation function (wrapper)
  * @param cosmo :Cosmological parameters
+ * @param psp: power spectrum
  * @param a : scale factor
  * @param n_r : number of output values of distance r
  * @param r : values of the distance in Mpc
@@ -51,28 +52,32 @@ void ccl_correlation(ccl_cosmology *cosmo,
  * @param do_taper_pk : key for tapering (using cosine tapering by default)
  * @param taper_pk_limits: limits of tapering
  */
-void ccl_correlation_3d(ccl_cosmology *cosmo,double a,
-		     int n_r,double *r,double *xi,
-		     int do_taper_pk,double *taper_pk_limits,
-		     int *status);
+void ccl_correlation_3d(ccl_cosmology *cosmo,ccl_f2d_t *psp,
+                        double a,int n_r,double *r,double *xi,
+                        int do_taper_pk,double *taper_pk_limits,
+                        int *status);
 
-void ccl_correlation_multipole(ccl_cosmology *cosmo,double a,double beta,
-			   int l,int n_s,double *s,double *xi,
-			   int *status);
+void ccl_correlation_multipole(ccl_cosmology *cosmo,ccl_f2d_t *psp,
+                               double a,double beta,
+                               int l,int n_s,double *s,double *xi,
+                               int *status);
 
-void ccl_correlation_multipole_spline(ccl_cosmology *cosmo,double a,int *status);
+void ccl_correlation_multipole_spline(ccl_cosmology *cosmo,ccl_f2d_t *psp,
+                                      double a,int *status);
 
-void ccl_correlation_3dRsd(ccl_cosmology *cosmo,double a,
+void ccl_correlation_3dRsd(ccl_cosmology *cosmo,ccl_f2d_t *psp,double a,
 			   int n_s,double *s,double mu,double beta,double *xi,
 			   int use_spline, int *status);
 
-void ccl_correlation_3dRsd_avgmu(ccl_cosmology *cosmo, double a, int n_s, double *s,
+void ccl_correlation_3dRsd_avgmu(ccl_cosmology *cosmo, ccl_f2d_t *psp,
+                                 double a, int n_s, double *s,
                                  double beta, double *xi,
                                  int *status);
 
-void ccl_correlation_pi_sigma(ccl_cosmology *cosmo,double a,double beta,
-			   double pi,int n_sig,double *sig,double *xi,
-			   int use_spline,int *status);
+void ccl_correlation_pi_sigma(ccl_cosmology *cosmo,ccl_f2d_t *psp,
+                              double a,double beta,double pi,
+                              int n_sig,double *sig,double *xi,
+                              int use_spline,int *status);
 
 CCL_END_DECLS
 

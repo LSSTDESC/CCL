@@ -24,7 +24,7 @@ input_a_array_descending = np.linspace(1.0, 0.1, 100)
 input_a_array = np.linspace(0.1, 1, 100)
 input_chi = ccl.background.comoving_radial_distance(COSMO, input_a_array)
 input_hoh0 = ccl.background.h_over_h0(COSMO, input_a_array)
-input_growth = ccl.background.growth_factor(COSMO, input_a_array)
+input_growth = ccl.background.growth_factor_unnorm(COSMO, input_a_array)
 input_fgrowth = ccl.background.growth_rate(COSMO, input_a_array)
 
 
@@ -39,9 +39,7 @@ input_fgrowth = ccl.background.growth_rate(COSMO, input_a_array)
     ccl.angular_diameter_distance,
     ccl.luminosity_distance,
     ccl.h_over_h0,
-    ccl.distance_modulus,
-    ccl.mu_MG,
-    ccl.Sig_MG])
+    ccl.distance_modulus])
 def test_background_a_interface(a, func):
     if func is ccl.distance_modulus and np.any(a == 1):
         with pytest.raises(ccl.CCLError):
@@ -128,17 +126,19 @@ def test_input_arrays():
     a_arr = np.linspace(0.1, 1, 100)
     chi_from_ccl = ccl.background.comoving_radial_distance(cosmo, a_arr)
     hoh0_from_ccl = ccl.background.h_over_h0(cosmo, a_arr)
-    growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
+    growthu_from_ccl = ccl.background.growth_factor_unnorm(cosmo, a_arr)
     fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
 
-    cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7, n_s=0.965,
-                                A_s=2e-9)
-    cosmo_input._set_background_from_arrays(a_array=a_arr,
-                                            chi_array=chi_from_ccl,
-                                            hoh0_array=hoh0_from_ccl)
-    cosmo_input._set_growth_from_arrays(a_array=a_arr,
-                                        growth_array=growth_from_ccl,
-                                        fgrowth_array=fgrowth_from_ccl)
+    background = {'a': a_arr,
+                  'chi': chi_from_ccl,
+                  'h_over_h0': hoh0_from_ccl}
+    growth = {'a': a_arr,
+              'growth_factor': growthu_from_ccl,
+              'growth_rate': fgrowth_from_ccl}
+    cosmo_input = ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                          n_s=0.965, A_s=2e-9,
+                                          background=background,
+                                          growth=growth)
 
     # Where to compare chi(a) from CCL and from CCL with input quantities.
     a_arr = np.linspace(0.102, 0.987, 158)
@@ -152,9 +152,17 @@ def test_input_arrays():
     growth_from_ccl = ccl.background.growth_factor(cosmo, a_arr)
     assert np.allclose(growth_ccl_input, growth_from_ccl, atol=0., rtol=1e-5)
 
+    growthu_ccl_input = ccl.background.growth_factor_unnorm(cosmo_input, a_arr)
+    growthu_from_ccl = ccl.background.growth_factor_unnorm(cosmo, a_arr)
+    assert np.allclose(growthu_ccl_input, growthu_from_ccl, atol=0., rtol=1e-5)
+
     fgrowth_ccl_input = ccl.background.growth_rate(cosmo_input, a_arr)
     fgrowth_from_ccl = ccl.background.growth_rate(cosmo, a_arr)
     assert np.allclose(fgrowth_ccl_input, fgrowth_from_ccl, atol=0., rtol=1e-5)
+
+    # Test that the distance/growth flags have been set
+    assert cosmo_input.has_distances
+    assert cosmo_input.has_growth
 
 
 def test_input_arrays_raises():
@@ -163,37 +171,38 @@ def test_input_arrays_raises():
     not ending in 1.0, being different size, as well as
     for no input arrays.
     """
-    for input_a in [input_a_array_descending, input_a_array_not1,
+    for input_a in [input_a_array_descending,
+                    input_a_array_not1,
                     input_a_array[:-2]]:
-        cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                    n_s=0.965, A_s=2e-9)
-        cosmo_input._set_background_from_arrays(a_array=input_a,
-                                                chi_array=input_chi,
-                                                hoh0_array=input_hoh0)
-        cosmo_input._set_growth_from_arrays(a_array=input_a,
-                                            growth_array=input_growth,
-                                            fgrowth_array=input_fgrowth)
         with pytest.raises(ValueError):
-            cosmo_input.compute_distances()
-            cosmo_input.compute_growth()
-    # Test trying to set input arrays when cosmology has been initialized
+            ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                    n_s=0.965, A_s=2e-9,
+                                    growth={'a': input_a,
+                                            'growth_factor': input_growth,
+                                            'growth_rate': input_fgrowth})
+        with pytest.raises(ValueError):
+            ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                    n_s=0.965, A_s=2e-9,
+                                    background={'a': input_a,
+                                                'chi': input_chi,
+                                                'h_over_h0': input_hoh0})
+    # Not a dictionary
+    with pytest.raises(TypeError):
+        ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                n_s=0.965, A_s=2e-9,
+                                growth=3)
+    with pytest.raises(TypeError):
+        ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                n_s=0.965, A_s=2e-9,
+                                background=3)
+    # Incomplete dictionary
     with pytest.raises(ValueError):
-        cosmo_input._set_background_from_arrays(a_array=input_a_array,
-                                                chi_array=input_chi,
-                                                hoh0_array=input_hoh0)
-        cosmo_input._set_growth_from_arrays(a_array=input_a_array,
-                                            growth_array=input_growth,
-                                            fgrowth_array=input_fgrowth)
-        cosmo_input.compute_growth()
-        cosmo_input._set_background_from_arrays(a_array=input_a,
-                                                chi_array=input_chi,
-                                                hoh0_array=input_hoh0)
-        cosmo_input._set_growth_from_arrays(a_array=input_a,
-                                            growth_array=input_growth,
-                                            fgrowth_array=input_fgrowth)
-    # Test trying to set background without input arrays
+        ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                n_s=0.965, A_s=2e-9,
+                                background={'a': input_a_array,
+                                            'h_over_h0': input_hoh0})
     with pytest.raises(ValueError):
-        cosmo_input = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7,
-                                    n_s=0.965, A_s=2e-9)
-        cosmo_input._set_background_from_arrays()
-        cosmo_input._set_growth_from_arrays()
+        ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
+                                n_s=0.965, A_s=2e-9,
+                                growth={'a': input_a_array,
+                                        'growth_rate': input_fgrowth})

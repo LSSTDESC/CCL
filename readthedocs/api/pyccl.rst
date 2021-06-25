@@ -19,7 +19,8 @@ Submodules
    pyccl.boltzmann
    pyccl.cls
    pyccl.core
-   pyccl.correlation
+   pyccl.correlations
+   pyccl.covariances
    pyccl.errors
    pyccl.halomodel
    pyccl.haloprofile
@@ -28,6 +29,7 @@ Submodules
    pyccl.pk2d
    pyccl.power
    pyccl.pyutils
+   pyccl.tk3d
    pyccl.tracers
 
 Module contents

@@ -105,17 +105,21 @@ const ccl_spline_params default_spline_params = {
   0.1,  // A_SPLINE_MIN
   0.01,  // A_SPLINE_MINLOG_PK
   0.1,  // A_SPLINE_MIN_PK,
+  0.01,  // A_SPLINE_MINLOG_SM,
+  0.1,  // A_SPLINE_MIN_SM,
   1.0,  // A_SPLINE_MAX,
   0.0001,  // A_SPLINE_MINLOG,
   250,  // A_SPLINE_NLOG,
 
   // mass splines
   0.025,  // LOGM_SPLINE_DELTA
-  440,  // LOGM_SPLINE_NM
+  50,  // LOGM_SPLINE_NM
   6,  // LOGM_SPLINE_MIN
   17,  // LOGM_SPLINE_MAX
 
   // PS a and k spline
+  13,  // A_SPLINE_NA_SM
+  6,  // A_SPLINE_NLOG_SM
   40,  // A_SPLINE_NA_PK
   11,  // A_SPLINE_NLOG_PK
 
@@ -124,6 +128,7 @@ const ccl_spline_params default_spline_params = {
   1E3,  // K_MAX
   5E-5,  // K_MIN
   0.025,  // DLOGK_INTEGRATION
+  5.,  // DCHI_INTEGRATION
   167,  // N_K
   100000,  // N_K_3DCOR
 
@@ -243,7 +248,6 @@ fgrowth: logarithmic derivative of the growth (density) (dlnD/da?)
 E: E(a)=H(a)/H0
 growth0: growth at z=0, defined to be 1
 sigma: ?
-p_lin: linear matter power spectrum at z=0?
 p_lnl: nonlinear matter power spectrum at z=0?
 computed_distances, computed_growth,
 computed_power, computed_sigma: store status of the computations
@@ -271,25 +275,22 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->data.achi = NULL;
 
   cosmo->data.logsigma = NULL;
-  cosmo->data.dlnsigma_dlogm = NULL;
 
   cosmo->data.rsd_splines[0] = NULL;
   cosmo->data.rsd_splines[1] = NULL;
   cosmo->data.rsd_splines[2] = NULL;
 
-  cosmo->data.p_lin = NULL;
-  cosmo->data.p_nl = NULL;
   cosmo->computed_distances = false;
   cosmo->computed_growth = false;
-  cosmo->computed_linear_power = false;
-  cosmo->computed_nonlin_power = false;
   cosmo->computed_sigma = false;
   cosmo->status = 0;
   ccl_cosmology_set_status_message(cosmo, "");
 
   if(cosmo->spline_params.A_SPLINE_MAX !=1.) {
     cosmo->status = CCL_ERROR_SPLINE;
-    ccl_cosmology_set_status_message(cosmo, "ccl_core.c: A_SPLINE_MAX needs to be 1.\n");
+    ccl_cosmology_set_status_message(cosmo,
+                                     "ccl_core.c: ccl_cosmology_create(): "
+                                     "A_SPLINE_MAX needs to be 1.\n");
   }
 
   return cosmo;
@@ -379,17 +380,17 @@ A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
 
  */
-ccl_parameters ccl_parameters_create(
-                     double Omega_c, double Omega_b, double Omega_k,
+ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab,
 				     double bcm_ks, double mu_0, double sigma_0,
+				     double c1_mg, double c2_mg, double lambda_mg,
 				     int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
   #ifndef USE_GSL_ERROR
-    gsl_set_error_handler_off ();
+    gsl_set_error_handler_off();
   #endif
 
   ccl_parameters params;
@@ -448,6 +449,9 @@ ccl_parameters ccl_parameters_create(
   // Params of the mu / Sigma parameterisation of MG
   params.mu_0 = mu_0;
   params.sigma_0 = sigma_0;
+  params.c1_mg = c1_mg;
+  params.c2_mg = c2_mg;
+  params.lambda_mg = lambda_mg;
 
   // Set remaining standard and easily derived parameters
   ccl_parameters_fill_initial(&params, status);
@@ -472,264 +476,6 @@ ccl_parameters ccl_parameters_create(
 }
 
 
-/* ------- ROUTINE: ccl_parameters_create_flat_lcdm --------
-INPUT: some cosmological parameters needed to create a flat LCDM model
-TASK: call ccl_parameters_create to produce an LCDM model
-*/
-ccl_parameters ccl_parameters_create_flat_lcdm(double Omega_c, double Omega_b, double h,
-                                               double norm_pk, double n_s, int *status)
-{
-  double Omega_k = 0.0;
-  double Neff = 3.046;
-  double w0 = -1.0;
-  double wa = 0.0;
-  double *mnu;
-  double mnuval = 0.;  // a pointer to the variable is not kept past the lifetime of this function
-  mnu = &mnuval;
-  double mu_0 = 0.;
-  double sigma_0 = 0.;
-
-  ccl_parameters params = ccl_parameters_create(Omega_c, Omega_b, Omega_k, Neff,
-						mnu, 0, w0, wa, h, norm_pk, n_s, -1, -1, -1, mu_0, sigma_0, -1, NULL, NULL, status);
-  return params;
-
-}
-
-
-/**
- * Write a cosmology parameters object to a file in yaml format.
- * @param cosmo Cosmological parameters
- * @param f FILE* pointer opened for reading
- * @return void
- */
-void ccl_parameters_write_yaml(ccl_parameters * params, const char * filename, int *status)
-{
-  FILE * f = fopen(filename, "w");
-
-  if (!f){
-    *status = CCL_ERROR_FILE_WRITE;
-    return;
-  }
-
-#define WRITE_DOUBLE(name) fprintf(f, #name ": %le\n",params->name)
-#define WRITE_INT(name) fprintf(f, #name ": %d\n",params->name)
-
-  // Densities: CDM, baryons, total matter, curvature
-  WRITE_DOUBLE(Omega_c);
-  WRITE_DOUBLE(Omega_b);
-  WRITE_DOUBLE(Omega_m);
-  WRITE_DOUBLE(Omega_k);
-  WRITE_INT(k_sign);
-
-  // Dark Energy
-  WRITE_DOUBLE(w0);
-  WRITE_DOUBLE(wa);
-
-  // Hubble parameters
-  WRITE_DOUBLE(H0);
-  WRITE_DOUBLE(h);
-
-  // Neutrino properties
-  WRITE_DOUBLE(Neff);
-  WRITE_INT(N_nu_mass);
-  WRITE_DOUBLE(N_nu_rel);
-
-  if (params->N_nu_mass>0){
-    fprintf(f, "m_nu: [");
-    for (int i=0; i<params->N_nu_mass; i++){
-      fprintf(f, "%le, ", params->m_nu[i]);
-    }
-    fprintf(f, "]\n");
-  }
-
-  WRITE_DOUBLE(sum_nu_masses);
-  WRITE_DOUBLE(Omega_nu_mass);
-  WRITE_DOUBLE(Omega_nu_rel);
-
-  // Primordial power spectra
-  WRITE_DOUBLE(A_s);
-  WRITE_DOUBLE(n_s);
-
-  // Radiation parameters
-  WRITE_DOUBLE(Omega_g);
-  WRITE_DOUBLE(T_CMB);
-
-  // BCM baryonic model parameters
-  WRITE_DOUBLE(bcm_log10Mc);
-  WRITE_DOUBLE(bcm_etab);
-  WRITE_DOUBLE(bcm_ks);
-
-  // Modified gravity parameters
-  WRITE_DOUBLE(mu_0);
-  WRITE_DOUBLE(sigma_0);
-
-  // Derived parameters
-  WRITE_DOUBLE(sigma8);
-  WRITE_DOUBLE(Omega_l);
-  WRITE_DOUBLE(z_star);
-
-  WRITE_INT(has_mgrowth);
-  WRITE_INT(nz_mgrowth);
-
-  if (params->has_mgrowth){
-    fprintf(f, "z_mgrowth: [");
-    for (int i=0; i<params->nz_mgrowth; i++){
-      fprintf(f, "%le, ", params->z_mgrowth[i]);
-    }
-    fprintf(f, "]\n");
-
-    fprintf(f, "df_mgrowth: [");
-    for (int i=0; i<params->nz_mgrowth; i++){
-      fprintf(f, "%le, ", params->df_mgrowth[i]);
-    }
-    fprintf(f, "]\n");
-  }
-
-#undef WRITE_DOUBLE
-#undef WRITE_INT
-
-  fclose(f);
-}
-
-/**
- * Write a cosmology parameters object to a file in yaml format.
- * @param cosmo Cosmological parameters
- * @param f FILE* pointer opened for reading
- * @return void
- */
-ccl_parameters ccl_parameters_read_yaml(const char * filename, int *status) {
-  FILE * f = fopen(filename, "r");
-
-  if (!f) {
-    *status = CCL_ERROR_FILE_READ;
-    ccl_parameters bad_params;
-    ccl_raise_warning(CCL_ERROR_FILE_READ, "ccl_core.c: Failed to read parameters from file.");
-
-    return bad_params;
-  }
-
-#define READ_DOUBLE(name) double name; *status |= (0==fscanf(f, #name ": %le\n",&name));
-#define READ_INT(name) int name; *status |= (0==fscanf(f, #name ": %d\n",&name))
-
-  // Densities: CDM, baryons, total matter, curvature
-  READ_DOUBLE(Omega_c);
-  READ_DOUBLE(Omega_b);
-  READ_DOUBLE(Omega_m);
-  READ_DOUBLE(Omega_k);
-  READ_INT(k_sign);
-
-  // Dark Energy
-  READ_DOUBLE(w0);
-  READ_DOUBLE(wa);
-
-  // Hubble parameters
-  READ_DOUBLE(H0);
-  READ_DOUBLE(h);
-
-  // Neutrino properties
-  READ_DOUBLE(Neff);
-  READ_INT(N_nu_mass);
-  READ_DOUBLE(N_nu_rel);
-
-  double mnu[3] = {0.0, 0.0, 0.0};
-  if (N_nu_mass>0){
-    *status |= (0==fscanf(f, "m_nu: ["));
-    for (int i=0; i<N_nu_mass; i++){
-      *status |= (0==fscanf(f, "%le, ", mnu+i));
-    }
-    *status |= (0==fscanf(f, "]\n"));
-  }
-
-  READ_DOUBLE(sum_nu_masses);
-  READ_DOUBLE(Omega_nu_mass);
-  READ_DOUBLE(Omega_nu_rel);
-
-  // Primordial power spectra
-  READ_DOUBLE(A_s);
-  READ_DOUBLE(n_s);
-
-  // Radiation parameters
-  READ_DOUBLE(Omega_g);
-  READ_DOUBLE(T_CMB);
-
-  // BCM baryonic model parameters
-  READ_DOUBLE(bcm_log10Mc);
-  READ_DOUBLE(bcm_etab);
-  READ_DOUBLE(bcm_ks);
-
-  // Modified gravity parameters
-  READ_DOUBLE(mu_0);
-  READ_DOUBLE(sigma_0);
-
-  // Derived parameters
-  READ_DOUBLE(sigma8);
-  READ_DOUBLE(Omega_l);
-  READ_DOUBLE(z_star);
-
-  READ_INT(has_mgrowth);
-  READ_INT(nz_mgrowth);
-
-  double *z_mgrowth;
-  double *df_mgrowth;
-
-
-  if (has_mgrowth){
-    z_mgrowth = malloc(nz_mgrowth*sizeof(double));
-    df_mgrowth = malloc(nz_mgrowth*sizeof(double));
-    *status |= (0==fscanf(f, "z_mgrowth: ["));
-    for (int i=0; i<nz_mgrowth; i++){
-      *status |= (0==fscanf(f, "%le, ", z_mgrowth+i));
-    }
-    *status |= (0==fscanf(f, "]\n"));
-
-    *status |= (0==fscanf(f, "df_mgrowth: ["));
-    for (int i=0; i<nz_mgrowth; i++){
-      *status |= (0==fscanf(f, "%le, ", df_mgrowth+i));
-    }
-    *status |= (0==fscanf(f, "]\n"));
-  }
-  else{
-    z_mgrowth = NULL;
-    df_mgrowth = NULL;
-  }
-
-#undef READ_DOUBLE
-#undef READ_INT
-
-  fclose(f);
-
-  if (*status) {
-    ccl_raise_warning(
-      *status,
-      "ccl_core.c: Structure of YAML file incorrect: %s",
-      filename);
-  }
-
-  double norm_pk;
-
-  if (isnan(A_s)){
-    norm_pk = sigma8;
-  }
-  else{
-   norm_pk = A_s;
-  }
-
-  ccl_parameters params = ccl_parameters_create(
-    Omega_c, Omega_b, Omega_k,
-    Neff, mnu, N_nu_mass,
-    w0, wa, h, norm_pk,
-    n_s, bcm_log10Mc, bcm_etab,
-    bcm_ks, mu_0, sigma_0, nz_mgrowth, z_mgrowth,
-    df_mgrowth, status);
-
-  if(z_mgrowth) free(z_mgrowth);
-  if (df_mgrowth) free(df_mgrowth);
-
-  return params;
-}
-
-
-
 /* ------- ROUTINE: ccl_data_free --------
 INPUT: ccl_data
 TASK: free the input data
@@ -744,10 +490,7 @@ void ccl_data_free(ccl_data * data) {
   gsl_spline_free(data->fgrowth);
   gsl_spline_free(data->E);
   gsl_spline_free(data->achi);
-  gsl_spline_free(data->logsigma);
-  gsl_spline_free(data->dlnsigma_dlogm);
-  ccl_f2d_t_free(data->p_lin);
-  ccl_f2d_t_free(data->p_nl);
+  gsl_spline2d_free(data->logsigma);
   ccl_f1d_t_free(data->rsd_splines[0]);
   ccl_f1d_t_free(data->rsd_splines[1]);
   ccl_f1d_t_free(data->rsd_splines[2]);

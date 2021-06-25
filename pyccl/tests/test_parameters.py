@@ -489,7 +489,8 @@ def test_parameters_read_write():
     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
         temp_file_name = tmpfile.name
 
-    # Write out and then eead in the parameters from that file
+    # Write out and then read in the parameters from that file
+    assert_raises(IOError, params.write_yaml, "/bogus/file/name")
     params.write_yaml(temp_file_name)
     params2 = ccl.Cosmology.read_yaml(temp_file_name)
 
@@ -497,6 +498,18 @@ def test_parameters_read_write():
     assert_almost_equal(params['Omega_c'], params2['Omega_c'])
     assert_almost_equal(params['Neff'], params2['Neff'])
     assert_almost_equal(params['sum_nu_masses'], params2['sum_nu_masses'])
+
+    # check overriding parameters with kwargs
+    params3 = ccl.Cosmology.read_yaml(temp_file_name,
+                                      matter_power_spectrum='emu',
+                                      n_s=1.1)
+    # check unmodified parameters are the same
+    assert_almost_equal(params['Omega_c'], params3['Omega_c'])
+    assert_almost_equal(params['Neff'], params3['Neff'])
+    # check new parameters and config correctly updated
+    assert_almost_equal(1.1, params3['n_s'])
+    assert_almost_equal(params['sum_nu_masses'], params3['sum_nu_masses'])
+    assert params3._config_init_kwargs['matter_power_spectrum'] == 'emu'
 
     # Now make a file that will be deleted so it does not exist
     # and check the right error is raise

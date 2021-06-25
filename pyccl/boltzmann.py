@@ -24,17 +24,20 @@ from .pk2d import Pk2D
 from .errors import CCLError
 
 
-def get_camb_pk_lin(cosmo):
+def get_camb_pk_lin(cosmo, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run CAMB.
+        nonlin (:obj:`bool`, optional): Whether to compute and return the
+            non-linear power spectrum as well.
 
     Returns:
-        :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
-            object. The linear power spectrum.
+        :class:`~pyccl.pk2d.Pk2D`: Power spectrum object. The linear power \
+            spectrum. If ``nonlin=True``, returns a tuple \
+            ``(pk_lin, pk_nonlin)``.
     """
 
     # Comment from Jarvis: TODO clean up this and other assert
@@ -42,6 +45,13 @@ def get_camb_pk_lin(cosmo):
     assert HAVE_CAMB, (
         "You must have the `camb` python package "
         "installed to run CCL with CAMB!")
+
+    # Get extra CAMB parameters that were specified
+    extra_camb_params = {}
+    try:
+        extra_camb_params = cosmo["extra_parameters"]["camb"]
+    except (KeyError, TypeError):
+        pass
 
     # z sampling from CCL parameters
     na = lib.get_pk_spline_na(cosmo.cosmo)
@@ -136,14 +146,25 @@ def get_camb_pk_lin(cosmo):
         w=cosmo['w0'],
         wa=cosmo['wa']
     )
-    # cp.set_cosmology()
+
+    if nonlin:
+        cp.NonLinearModel = camb.nonlinear.Halofit()
+        halofit_version = extra_camb_params.get("halofit_version", "mead")
+        options = {k: extra_camb_params[k] for k in
+                   ["HMCode_A_baryon",
+                    "HMCode_eta_baryon",
+                    "HMCode_logT_AGN"] if k in extra_camb_params}
+        cp.NonLinearModel.set_params(halofit_version=halofit_version,
+                                     **options)
+
     cp.set_matter_power(
         redshifts=[_z for _z in zs],
-        kmax=10,
-        nonlinear=False)
-    assert cp.NonLinear == camb.model.NonLinear_none
+        kmax=extra_camb_params.get("kmax", 10.0),
+        nonlinear=nonlin)
+    if not nonlin:
+        assert cp.NonLinear == camb.model.NonLinear_none
 
-    cp.set_for_lmax(5000)
+    cp.set_for_lmax(extra_camb_params.get("lmax", 5000))
     cp.InitPower.set_params(
         As=A_s_fid,
         ns=cosmo['n_s'])
@@ -178,7 +199,38 @@ def get_camb_pk_lin(cosmo):
         extrap_order_hik=2,
         cosmo=cosmo)
 
-    return pk_lin
+    if not nonlin:
+        return pk_lin
+    else:
+        k, z, pk = camb_res.get_linear_matter_power_spectrum(
+            hubble_units=True, nonlinear=True)
+
+        # convert to non-h inverse units
+        k *= cosmo['h']
+        pk /= (h2 * cosmo['h'])
+
+        # now build interpolant
+        nk = k.shape[0]
+        lk_arr = np.log(k)
+        a_arr = 1.0 / (1.0 + z)
+        na = a_arr.shape[0]
+        sinds = np.argsort(a_arr)
+        a_arr = a_arr[sinds]
+        ln_p_k_and_z = np.zeros((na, nk), dtype=np.float64)
+        for i, sind in enumerate(sinds):
+            ln_p_k_and_z[i, :] = np.log(pk[sind, :])
+
+        pk_nonlin = Pk2D(
+            pkfunc=None,
+            a_arr=a_arr,
+            lk_arr=lk_arr,
+            pk_arr=ln_p_k_and_z,
+            is_logp=True,
+            extrap_order_lok=1,
+            extrap_order_hik=2,
+            cosmo=cosmo)
+
+        return pk_lin, pk_nonlin
 
 
 def get_isitgr_pk_lin(cosmo):
@@ -248,6 +300,9 @@ def get_isitgr_pk_lin(cosmo):
     cp.ISiTGR_muSigma = True
     cp.mu0 = cosmo['mu_0']
     cp.Sigma0 = cosmo['sigma_0']
+    cp.c1 = cosmo['c1_mg']
+    cp.c2 = cosmo['c2_mg']
+    cp.Lambda = cosmo['lambda_mg']
 
     # "constants"
     cp.TCMB = cosmo['T_CMB']

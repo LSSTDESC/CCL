@@ -27,7 +27,6 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
     f2d->extrap_order_lok = f2d_o->extrap_order_lok;
     f2d->extrap_order_hik = f2d_o->extrap_order_hik;
     f2d->is_log = f2d_o->is_log;
-    f2d->growth = f2d_o->growth;
     f2d->growth_factor_0 = f2d_o->growth_factor_0;
     f2d->growth_exponent = f2d_o->growth_exponent;
 
@@ -100,12 +99,11 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
                          int extrap_order_hik,
                          ccl_f2d_extrap_growth_t extrap_linear_growth,
                          int is_fka_log,
-                         double (*growth)(double),
                          double growth_factor_0,
                          int growth_exponent,
                          ccl_f2d_interp_t interp_type,
                          int *status) {
-  int s2dstatus;
+  int s2dstatus=0;
   ccl_f2d_t *f2d = malloc(sizeof(ccl_f2d_t));
   if (f2d == NULL)
     *status = CCL_ERROR_MEMORY;
@@ -119,7 +117,6 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     f2d->extrap_order_hik = extrap_order_hik;
     f2d->extrap_linear_growth = extrap_linear_growth;
     f2d->is_log = is_fka_log;
-    f2d->growth = growth;
     f2d->growth_factor_0 = growth_factor_0;
     f2d->growth_exponent = growth_exponent;
     f2d->fka = NULL;
@@ -140,7 +137,6 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     *status = CCL_ERROR_INCONSISTENT;
 
   if ((extrap_linear_growth != ccl_f2d_cclgrowth) &&
-      (extrap_linear_growth != ccl_f2d_customgrowth) &&
       (extrap_linear_growth != ccl_f2d_constantgrowth) &&
       (extrap_linear_growth != ccl_f2d_no_extrapol))
     *status = CCL_ERROR_INCONSISTENT;
@@ -188,7 +184,6 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 
   if (*status == 0) {
     if (f2d->is_factorizable) {
-      s2dstatus = 0;
       if (f2d->fk != NULL)
         s2dstatus |= gsl_spline_init(f2d->fk, lk_arr, fk_arr, nk);
       if (f2d->fa != NULL)
@@ -248,10 +243,9 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status
   }
 
   // Evaluate spline
-  int spstatus;
+  int spstatus=0;
   if (f2d->is_factorizable) {
     double fk, fa;
-    spstatus = 0;
     if (f2d->fk == NULL) {
       if (f2d->is_log)
         fk = 0;
@@ -369,8 +363,6 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status
         ccl_growth_factor(csm, a, status) /
         ccl_growth_factor(csm, a_ev, status));
     }
-    else if (f2d->extrap_linear_growth == ccl_f2d_customgrowth) // Use internal growth function
-      gz = f2d->growth(a) / f2d->growth(a_ev);
     else // Use constant growth factor
       gz = f2d->growth_factor_0;
 

@@ -150,8 +150,9 @@ double ccl_f1d_t_eval(ccl_f1d_t *spl,double x)
       return spl->y_ini * pow(x/spl->x_ini, spl->der_lo);
     }
     else {
-      ccl_raise_gsl_warning(CCL_ERROR_SPLINE_EV, "ccl_utils.c: ccl_splin_eval(): "
-			    "x-value below range.");
+      ccl_raise_gsl_warning(CCL_ERROR_SPLINE_EV,
+                            "ccl_f1d.c: ccl_f1d_t_eval(): "
+                            "x-value below range.");
       return NAN;
     }
   }
@@ -171,8 +172,9 @@ double ccl_f1d_t_eval(ccl_f1d_t *spl,double x)
       return spl->y_end * pow(x/spl->x_end, spl->der_hi);
     }
     else {
-      ccl_raise_gsl_warning(CCL_ERROR_SPLINE_EV, "ccl_utils.c: ccl_splin_eval(): "
-			    "x-value above range.");
+      ccl_raise_gsl_warning(CCL_ERROR_SPLINE_EV,
+                            "ccl_f1d.c: ccl_f1d_t_eval(): "
+                            "x-value above range.");
       return NAN;
     }
   }
@@ -180,8 +182,8 @@ double ccl_f1d_t_eval(ccl_f1d_t *spl,double x)
     double y;
     int stat=gsl_spline_eval_e(spl->spline,x,NULL,&y);
     if (stat!=GSL_SUCCESS) {
-      ccl_raise_gsl_warning(stat, "ccl_utils.c: ccl_splin_eval(): "
-			    "x-value outside range.");
+      ccl_raise_gsl_warning(stat, "ccl_f1d.c: ccl_f1d_t_eval(): "
+                            "x-value outside range.");
       return NAN;
     }
     return y;

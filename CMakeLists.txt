@@ -15,7 +15,8 @@ option(FORCE_OPENMP "Forcibly use OpenMP " NO)
 # Defines list of CCL src files
 set(CCL_SRC
     src/ccl_background.c src/ccl_core.c src/ccl_error.c
-    src/ccl_bbks.c src/ccl_f1d.c src/ccl_f2d.c src/ccl_power.c src/ccl_bcm.c
+    src/ccl_bbks.c src/ccl_f1d.c src/ccl_f2d.c src/ccl_f3d.c
+    src/ccl_power.c src/ccl_bcm.c
     src/ccl_eh.c src/ccl_musigma.c
     src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c
     src/ccl_neutrinos.c
@@ -33,6 +34,7 @@ set(TEST_SRC
     benchmarks/ccl_test.c
     benchmarks/ccl_test_utils.c
     benchmarks/ccl_test_f2d.c
+    benchmarks/ccl_test_f3d.c
 
     # Move to python when we bring ANGPOW back
     #benchmarks/ccl_test_angpow.c
