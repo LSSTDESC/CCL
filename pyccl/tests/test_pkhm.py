@@ -186,9 +186,32 @@ def test_pkhm_pk2d():
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
                   < 1E-4)
 
+    ## Testing profiles which are not equivalent (but very close)
+    G1 = ccl.halos.HaloProfileHOD(c_m_relation=CON, lMmin_0=12.00000)
+    G2 = ccl.halos.HaloProfileHOD(c_m_relation=CON, lMmin_0=11.99999)
+    assert not G1.__eq__(G2)
+    # I_1_1
+    pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, G1,
+                                           prof2=G1, normprof1=False,
+                                           normprof2=False)
+    pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, G1,
+                                           prof2=G2, normprof1=False,
+                                           normprof2=False)
+    assert np.allclose(pk1, pk0, rtol=1e-4)
+
+    # Profile normalization
+    pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, G1,
+                                           prof2=G1, normprof1=True,
+                                           normprof2=True)
+    pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, G1,
+                                           prof2=G2, normprof1=True,
+                                           normprof2=True)
+    assert np.allclose(pk1, pk0, rtol=1e-4)
+
     # 1h/2h transition
     def alpha0(a):  # no smoothing
         return 1.
+
 
     def alpha1(a):
         return 0.7
