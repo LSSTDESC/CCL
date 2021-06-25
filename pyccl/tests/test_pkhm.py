@@ -9,8 +9,8 @@ COSMO = ccl.Cosmology(
 M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
-                              fourier_analytic=True)
+CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+P1 = ccl.halos.HaloProfileNFW(c_m_relation=CON, fourier_analytic=True)
 P2 = P1
 PKC = ccl.halos.Profile2pt()
 KK = np.geomspace(1E-3, 10, 32)
@@ -186,7 +186,7 @@ def test_pkhm_pk2d():
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
                   < 1E-4)
 
-    ## Testing profiles which are not equivalent (but very close)
+    # Testing profiles which are not equivalent (but very close)
     G1 = ccl.halos.HaloProfileHOD(c_m_relation=CON, lMmin_0=12.00000)
     G2 = ccl.halos.HaloProfileHOD(c_m_relation=CON, lMmin_0=11.99999)
     assert not G1.__eq__(G2)
@@ -211,7 +211,6 @@ def test_pkhm_pk2d():
     # 1h/2h transition
     def alpha0(a):  # no smoothing
         return 1.
-
 
     def alpha1(a):
         return 0.7
