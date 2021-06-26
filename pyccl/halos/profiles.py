@@ -281,33 +281,33 @@ class HaloProfile(object):
         """ Returns the critical surface mass density.
 
         .. math::
-         \\Sigma_{\\mathrm{crit}} = \\frac{c^2}{4\\pi G} 
-          \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}}, 
-           where :math:`c` is the speed of light, :math:`G` is the gravitational 
-           constant, and :math:`D_i` is the angular diameter distance. The labels 
-           :math:`i =` s, l and ls denotes the distances to the source, lens, and 
-           between source and lens, respectively.
+         \\Sigma_{\\mathrm{crit}} = \\frac{c^2}{4\\pi G}
+          \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}},
+           where :math:`c` is the speed of light, :math:`G` is the 
+           gravitational constant, and :math:`D_i` is the angular diameter
+           distance. The labels :math:`i =` s, l and ls denotes the distances
+           to the source, lens, and between source and lens, respectively.
             Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             a_lens (float): lens' scale factor.
             a_src (float or array_like): source's scale factor.
 
         Returns:
-            float or array_like: :math:`\\Sigma_{\\mathrm{crit}}` in units 
-            of :math:`\\M_{\\odot}/Mpc^2`    
+            float or array_like: :math:`\\Sigma_{\\mathrm{crit}}` in units
+            of :math:`\\M_{\\odot}/Mpc^2`
         """
-        Ds = angular_diameter_distance(cosmo, a_src, a2=None) 
+        Ds = angular_diameter_distance(cosmo, a_src, a2=None)
         Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
         Dls = angular_diameter_distance(cosmo, a_lens, a_src)
-        A = physical_constants.CLIGHT**2 * physical_constants.MPC_TO_METER 
-        / (4.0 * np.pi * physical_constants.GNEWT * physical_constants.SOLAR_MASS)
+        A = physical_constants.CLIGHT**2 * physical_constants.MPC_TO_METER/
+        (4.0 * np.pi * physical_constants.GNEWT * physical_constants.SOLAR_MASS)
 
         Sigma_crit = A * Ds / (Dl * Dls)
         return Sigma_crit
 
     def convergence(self, cosmo, r, M, a_lens, a_src, mass_def=None):
-        """ Returns the convergence as a function of cosmology, 
-        radius, halo mass and the scale factors of the source 
+        """ Returns the convergence as a function of cosmology,
+        radius, halo mass and the scale factors of the source
         and the lens.
 
         .. math::
