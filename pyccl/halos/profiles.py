@@ -12,7 +12,7 @@ physical_constants = lib.cvar.constants
 
 
 class HaloProfile(object):
-    """ This class implements functionality associated to
+    """This class implements functionality associated to
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL
     for specific halo profiles, or write your own subclass.
@@ -37,21 +37,24 @@ class HaloProfile(object):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
-    name = 'default'
+
+    name = "default"
 
     def __init__(self):
-        self.precision_fftlog = {'padding_lo_fftlog': 0.1,
-                                 'padding_lo_extra': 0.1,
-                                 'padding_hi_fftlog': 10.,
-                                 'padding_hi_extra': 10.,
-                                 'large_padding_2D': False,
-                                 'n_per_decade': 100,
-                                 'extrapol': 'linx_liny',
-                                 'plaw_fourier': -1.5,
-                                 'plaw_projected': -1.}
+        self.precision_fftlog = {
+            "padding_lo_fftlog": 0.1,
+            "padding_lo_extra": 0.1,
+            "padding_hi_fftlog": 10.0,
+            "padding_hi_extra": 10.0,
+            "large_padding_2D": False,
+            "n_per_decade": 100,
+            "extrapol": "linx_liny",
+            "plaw_fourier": -1.5,
+            "plaw_projected": -1.0,
+        }
 
     def update_precision_fftlog(self, **kwargs):
-        """ Update any of the precision parameters used by
+        """Update any of the precision parameters used by
         FFTLog to compute Hankel transforms. The available
         parameters are:
 
@@ -124,7 +127,7 @@ class HaloProfile(object):
         self.precision_fftlog.update(kwargs)
 
     def _get_plaw_fourier(self, cosmo, a):
-        """ This controls the value of `plaw_fourier` to be used
+        """This controls the value of `plaw_fourier` to be used
         as a function of cosmology and scale factor.
 
         Args:
@@ -134,10 +137,10 @@ class HaloProfile(object):
         Returns:
             float: power law index to be used with FFTLog.
         """
-        return self.precision_fftlog['plaw_fourier']
+        return self.precision_fftlog["plaw_fourier"]
 
     def _get_plaw_projected(self, cosmo, a):
-        """ This controls the value of `plaw_projected` to be
+        """This controls the value of `plaw_projected` to be
         used as a function of cosmology and scale factor.
 
         Args:
@@ -147,10 +150,10 @@ class HaloProfile(object):
         Returns:
             float: power law index to be used with FFTLog.
         """
-        return self.precision_fftlog['plaw_projected']
+        return self.precision_fftlog["plaw_projected"]
 
     def real(self, cosmo, r, M, a, mass_def=None):
-        """ Returns the 3D  real-space value of the profile as a
+        """Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
 
         Args:
@@ -168,19 +171,20 @@ class HaloProfile(object):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_real', None):
+        if getattr(self, "_real", None):
             f_r = self._real(cosmo, r, M, a, mass_def)
-        elif getattr(self, '_fourier', None):
-            f_r = self._fftlog_wrap(cosmo, r, M, a, mass_def,
-                                    fourier_out=False)
+        elif getattr(self, "_fourier", None):
+            f_r = self._fftlog_wrap(cosmo, r, M, a, mass_def, fourier_out=False)
         else:
-            raise NotImplementedError("Profiles must have at least "
-                                      " either a _real or a "
-                                      " _fourier method.")
+            raise NotImplementedError(
+                "Profiles must have at least "
+                " either a _real or a "
+                " _fourier method."
+            )
         return f_r
 
     def fourier(self, cosmo, k, M, a, mass_def=None):
-        """ Returns the Fourier-space value of the profile as a
+        """Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
         scale factor.
 
@@ -203,19 +207,20 @@ class HaloProfile(object):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_fourier', None):
+        if getattr(self, "_fourier", None):
             f_k = self._fourier(cosmo, k, M, a, mass_def)
-        elif getattr(self, '_real', None):
-            f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def,
-                                    fourier_out=True)
+        elif getattr(self, "_real", None):
+            f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
         else:
-            raise NotImplementedError("Profiles must have at least "
-                                      " either a _real or a "
-                                      " _fourier method.")
+            raise NotImplementedError(
+                "Profiles must have at least "
+                " either a _real or a "
+                " _fourier method."
+            )
         return f_k
 
     def projected(self, cosmo, r_t, M, a, mass_def=None):
-        """ Returns the 2D projected profile as a function of
+        """Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
 
         .. math::
@@ -237,16 +242,16 @@ class HaloProfile(object):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_projected', None):
+        if getattr(self, "_projected", None):
             s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
         else:
-            s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
-                                                a, mass_def,
-                                                is_cumul2d=False)
+            s_r_t = self._projected_fftlog_wrap(
+                cosmo, r_t, M, a, mass_def, is_cumul2d=False
+            )
         return s_r_t
 
     def cumul2d(self, cosmo, r_t, M, a, mass_def=None):
-        """ Returns the 2D cumulative surface density as a
+        """Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
         factor.
 
@@ -269,21 +274,21 @@ class HaloProfile(object):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_cumul2d', None):
+        if getattr(self, "_cumul2d", None):
             s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
         else:
-            s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
-                                                a, mass_def,
-                                                is_cumul2d=True)
+            s_r_t = self._projected_fftlog_wrap(
+                cosmo, r_t, M, a, mass_def, is_cumul2d=True
+            )
         return s_r_t
 
     def sigma_critical(self, cosmo, a_lens, a_src):
-        """ Returns the critical surface mass density.
+        """Returns the critical surface mass density.
 
         .. math::
          \\Sigma_{\\mathrm{crit}} = \\frac{c^2}{4\\pi G}
           \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}},
-           where :math:`c` is the speed of light, :math:`G` is the 
+           where :math:`c` is the speed of light, :math:`G` is the
            gravitational constant, and :math:`D_i` is the angular diameter
            distance. The labels :math:`i =` s, l and ls denotes the distances
            to the source, lens, and between source and lens, respectively.
@@ -299,8 +304,11 @@ class HaloProfile(object):
         Ds = angular_diameter_distance(cosmo, a_src, a2=None)
         Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
         Dls = angular_diameter_distance(cosmo, a_lens, a_src)
-        A = physical_constants.CLIGHT**2 * physical_constants.MPC_TO_METER/
-        (4.0 * np.pi * physical_constants.GNEWT * physical_constants.SOLAR_MASS)
+        A = (
+            physical_constants.CLIGHT ** 2
+            * physical_constants.MPC_TO_METER
+            / (4.0 * np.pi * physical_constants.GNEWT * physical_constants.SOLAR_MASS)
+        )
 
         Sigma_crit = A * Ds / (Dl * Dls)
         return Sigma_crit
@@ -330,8 +338,8 @@ class HaloProfile(object):
         """
 
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
-        Sigma_crit = self.sigma_critical(cosmo, a_lens, a_src) 
-        return Sigma/Sigma_crit
+        Sigma_crit = self.sigma_critical(cosmo, a_lens, a_src)
+        return Sigma / Sigma_crit
 
     def shear(self, cosmo, r, M, a_lens, a_src, mass_def=None):
         """ Returns the shear (tangential) as a function of cosmology, 
@@ -359,8 +367,8 @@ class HaloProfile(object):
 
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
         Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
-        Sigma_crit = self.sigma_critical(cosmo, a_lens, a_src) 
-        return (Sigma_bar - Sigma)/Sigma_crit
+        Sigma_crit = self.sigma_critical(cosmo, a_lens, a_src)
+        return (Sigma_bar - Sigma) / Sigma_crit
 
     def reduced_shear(self, cosmo, r, M, a_lens, a_src, mass_def=None):
         """ Returns the reduced shear as a function of cosmology, 
@@ -386,8 +394,8 @@ class HaloProfile(object):
                 :math:`g_t`
         """
 
-        convergence = self.convergence (cosmo, r, M, a_lens, a_src, mass_def)
-        shear       = self.shear (cosmo, r, M, a_lens, s_src, mass_def)
+        convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
+        shear = self.shear(cosmo, r, M, a_lens, s_src, mass_def)
         return shear / (1.0 - convergence)
 
     def reduced_shear_physical(self, cosmo, r, M, a_lens, a_src, mass_def=None):
@@ -414,7 +422,7 @@ class HaloProfile(object):
 
         convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
         shear = self.shear(cosmo, r, M, a_lens, a_src, mass_def)
-        return shear/(a_lens**2 - convergence)
+        return shear / (a_lens ** 2 - convergence)
 
     def magnification(self, cosmo, r, M, a_lens, a_src, mass_def=None):
         """ Returns the magnification for input parameters.
@@ -441,7 +449,7 @@ class HaloProfile(object):
         convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
         shear = self.shear(cosmo, r, M, a_lens, a_src, mass_def)
 
-        return 1.0/((1.0 - convergence)**2 - np.abs (shear)**2)    
+        return 1.0 / ((1.0 - convergence) ** 2 - np.abs(shear) ** 2)
 
     def magnification_physical(self, cosmo, r, M, a_lens, a_src, mass_def=None):
         """ Returns the magnification for input parameters in physical units.
@@ -460,14 +468,14 @@ class HaloProfile(object):
                 :math:`\\mu`    
         """
 
-        al2 = a_lens**2
+        al2 = a_lens ** 2
         conv_phy = self.convergence(cosmo, r, M, a_lens, a_src, mass_def) / al2
         shear_phy = self.shear(cosmo, r, M, a_lens, a_src, mass_def) / al2
-        return 1.0/((1.0 - conv_phy)**2 - np.abs (shear_phy)**2)    
+        return 1.0 / ((1.0 - conv_phy) ** 2 - np.abs(shear_phy) ** 2)
 
-    def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
-                     fourier_out=False,
-                     large_padding=True):
+    def _fftlog_wrap(
+        self, cosmo, k, M, a, mass_def, fourier_out=False, large_padding=True
+    ):
         # This computes the 3D Hankel transform
         #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_0(k r)
         # if fourier_out == False, and
@@ -486,13 +494,12 @@ class HaloProfile(object):
 
         # k/r ranges to be used with FFTLog and its sampling.
         if large_padding:
-            k_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(k_use)
-            k_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(k_use)
+            k_min = self.precision_fftlog["padding_lo_fftlog"] * np.amin(k_use)
+            k_max = self.precision_fftlog["padding_hi_fftlog"] * np.amax(k_use)
         else:
-            k_min = self.precision_fftlog['padding_lo_extra'] * np.amin(k_use)
-            k_max = self.precision_fftlog['padding_hi_extra'] * np.amax(k_use)
-        n_k = (int(np.log10(k_max / k_min)) *
-               self.precision_fftlog['n_per_decade'])
+            k_min = self.precision_fftlog["padding_lo_extra"] * np.amin(k_use)
+            k_max = self.precision_fftlog["padding_hi_extra"] * np.amax(k_use)
+        n_k = int(np.log10(k_max / k_min)) * self.precision_fftlog["n_per_decade"]
         r_arr = np.geomspace(k_min, k_max, n_k)
 
         p_k_out = np.zeros([nM, k_use.size])
@@ -502,19 +509,23 @@ class HaloProfile(object):
         plaw_index = self._get_plaw_fourier(cosmo, a)
 
         # Compute Fourier profile through fftlog
-        k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
-                                               3, 0, plaw_index)
+        k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M, 3, 0, plaw_index)
         lk_arr = np.log(k_arr)
 
         for im, p_k_arr in enumerate(p_fourier_M):
             # Resample into input k values
-            p_fourier = resample_array(lk_arr, p_k_arr, lk_use,
-                                       self.precision_fftlog['extrapol'],
-                                       self.precision_fftlog['extrapol'],
-                                       0, 0)
+            p_fourier = resample_array(
+                lk_arr,
+                p_k_arr,
+                lk_use,
+                self.precision_fftlog["extrapol"],
+                self.precision_fftlog["extrapol"],
+                0,
+                0,
+            )
             p_k_out[im, :] = p_fourier
         if fourier_out:
-            p_k_out *= (2 * np.pi)**3
+            p_k_out *= (2 * np.pi) ** 3
 
         if np.ndim(k) == 0:
             p_k_out = np.squeeze(p_k_out, axis=-1)
@@ -522,8 +533,7 @@ class HaloProfile(object):
             p_k_out = np.squeeze(p_k_out, axis=0)
         return p_k_out
 
-    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def,
-                               is_cumul2d=False):
+    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def, is_cumul2d=False):
         # This computes Sigma(R) from the Fourier-space profile as:
         # Sigma(R) = \frac{1}{2\pi} \int dk k J_0(k R) \rho(k)
         r_t_use = np.atleast_1d(r_t)
@@ -532,27 +542,22 @@ class HaloProfile(object):
         nM = len(M_use)
 
         # k/r range to be used with FFTLog and its sampling.
-        r_t_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(r_t_use)
-        r_t_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(r_t_use)
-        n_r_t = (int(np.log10(r_t_max / r_t_min)) *
-                 self.precision_fftlog['n_per_decade'])
+        r_t_min = self.precision_fftlog["padding_lo_fftlog"] * np.amin(r_t_use)
+        r_t_max = self.precision_fftlog["padding_hi_fftlog"] * np.amax(r_t_use)
+        n_r_t = int(np.log10(r_t_max / r_t_min)) * self.precision_fftlog["n_per_decade"]
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
 
         sig_r_t_out = np.zeros([nM, r_t_use.size])
         # Compute Fourier-space profile
-        if getattr(self, '_fourier', None):
+        if getattr(self, "_fourier", None):
             # Compute from `_fourier` if available.
-            p_fourier = self._fourier(cosmo, k_arr, M_use,
-                                      a, mass_def)
+            p_fourier = self._fourier(cosmo, k_arr, M_use, a, mass_def)
         else:
             # Compute with FFTLog otherwise.
-            lpad = self.precision_fftlog['large_padding_2D']
-            p_fourier = self._fftlog_wrap(cosmo,
-                                          k_arr,
-                                          M_use, a,
-                                          mass_def,
-                                          fourier_out=True,
-                                          large_padding=lpad)
+            lpad = self.precision_fftlog["large_padding_2D"]
+            p_fourier = self._fftlog_wrap(
+                cosmo, k_arr, M_use, a, mass_def, fourier_out=True, large_padding=lpad
+            )
         if is_cumul2d:
             # The cumulative profile involves a factor 1/(k R) in
             # the integrand.
@@ -567,20 +572,24 @@ class HaloProfile(object):
             plaw_index = self._get_plaw_projected(cosmo, a)
 
         # Compute projected profile through fftlog
-        r_t_arr, sig_r_t_M = _fftlog_transform(k_arr, p_fourier,
-                                               2, i_bessel,
-                                               plaw_index)
+        r_t_arr, sig_r_t_M = _fftlog_transform(
+            k_arr, p_fourier, 2, i_bessel, plaw_index
+        )
         lr_t_arr = np.log(r_t_arr)
 
         if is_cumul2d:
             sig_r_t_M /= r_t_arr[None, :]
         for im, sig_r_t_arr in enumerate(sig_r_t_M):
             # Resample into input r_t values
-            sig_r_t = resample_array(lr_t_arr, sig_r_t_arr,
-                                     lr_t_use,
-                                     self.precision_fftlog['extrapol'],
-                                     self.precision_fftlog['extrapol'],
-                                     0, 0)
+            sig_r_t = resample_array(
+                lr_t_arr,
+                sig_r_t_arr,
+                lr_t_use,
+                self.precision_fftlog["extrapol"],
+                self.precision_fftlog["extrapol"],
+                0,
+                0,
+            )
             sig_r_t_out[im, :] = sig_r_t
 
         if np.ndim(r_t) == 0:
@@ -591,7 +600,7 @@ class HaloProfile(object):
 
 
 class HaloProfileGaussian(HaloProfile):
-    """ Gaussian profile
+    """Gaussian profile
 
     .. math::
         \\rho(r) = \\rho_0\\, e^{-(r/r_s)^2}
@@ -606,15 +615,16 @@ class HaloProfileGaussian(HaloProfile):
         rho0 (:obj:`function`): the amplitude of the profile.
             It should have the same signature as `r_scale`.
     """
-    name = 'Gaussian'
+
+    name = "Gaussian"
 
     def __init__(self, r_scale, rho0):
         self.rho_0 = rho0
         self.r_s = r_scale
         super(HaloProfileGaussian, self).__init__()
-        self.update_precision_fftlog(padding_lo_fftlog=0.01,
-                                     padding_hi_fftlog=100.,
-                                     n_per_decade=10000)
+        self.update_precision_fftlog(
+            padding_lo_fftlog=0.01, padding_hi_fftlog=100.0, n_per_decade=10000
+        )
 
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -625,7 +635,7 @@ class HaloProfileGaussian(HaloProfile):
         # Compute normalization
         rho0 = self.rho_0(cosmo, M_use, a, mass_def)
         # Form factor
-        prof = np.exp(-(r_use[None, :] / rs[:, None])**2)
+        prof = np.exp(-((r_use[None, :] / rs[:, None]) ** 2))
         prof = prof * rho0[:, None]
 
         if np.ndim(r) == 0:
@@ -636,7 +646,7 @@ class HaloProfileGaussian(HaloProfile):
 
 
 class HaloProfilePowerLaw(HaloProfile):
-    """ Power-law profile
+    """Power-law profile
 
     .. math::
         \\rho(r) = (r/r_s)^\\alpha
@@ -652,7 +662,8 @@ class HaloProfilePowerLaw(HaloProfile):
             profile. The signature of this function should
             be `f(cosmo, a)`.
     """
-    name = 'PowerLaw'
+
+    name = "PowerLaw"
 
     def __init__(self, r_scale, tilt):
         self.r_s = r_scale
@@ -677,7 +688,7 @@ class HaloProfilePowerLaw(HaloProfile):
         rs = self.r_s(cosmo, M_use, a, mass_def)
         tilt = self.tilt(cosmo, a)
         # Form factor
-        prof = (r_use[None, :] / rs[:, None])**tilt
+        prof = (r_use[None, :] / rs[:, None]) ** tilt
 
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -687,7 +698,7 @@ class HaloProfilePowerLaw(HaloProfile):
 
 
 class HaloProfileNFW(HaloProfile):
-    """ Navarro-Frenk-White (astro-ph:astro-ph/9508025) profile.
+    """Navarro-Frenk-White (astro-ph:astro-ph/9508025) profile.
 
     .. math::
        \\rho(r) = \\frac{\\rho_0}
@@ -723,13 +734,17 @@ class HaloProfileNFW(HaloProfile):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
-    name = 'NFW'
 
-    def __init__(self, c_M_relation,
-                 fourier_analytic=True,
-                 projected_analytic=False,
-                 cumul2d_analytic=False,
-                 truncated=True):
+    name = "NFW"
+
+    def __init__(
+        self,
+        c_M_relation,
+        fourier_analytic=True,
+        projected_analytic=False,
+        cumul2d_analytic=False,
+        truncated=True,
+    ):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
@@ -739,28 +754,34 @@ class HaloProfileNFW(HaloProfile):
             self._fourier = self._fourier_analytic
         if projected_analytic:
             if truncated:
-                raise ValueError("Analytic projected profile not supported "
-                                 "for truncated NFW. Set `truncated` or "
-                                 "`projected_analytic` to `False`.")
+                raise ValueError(
+                    "Analytic projected profile not supported "
+                    "for truncated NFW. Set `truncated` or "
+                    "`projected_analytic` to `False`."
+                )
             self._projected = self._projected_analytic
         if cumul2d_analytic:
             if truncated:
-                raise ValueError("Analytic cumuative 2d profile not supported "
-                                 "for truncated NFW. Set `truncated` or "
-                                 "`cumul2d_analytic` to `False`.")
+                raise ValueError(
+                    "Analytic cumuative 2d profile not supported "
+                    "for truncated NFW. Set `truncated` or "
+                    "`cumul2d_analytic` to `False`."
+                )
             self._cumul2d = self._cumul2d_analytic
         super(HaloProfileNFW, self).__init__()
-        self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
-                                     n_per_decade=1000,
-                                     plaw_fourier=-2.)
+        self.update_precision_fftlog(
+            padding_hi_fftlog=1e2,
+            padding_lo_fftlog=1e-2,
+            n_per_decade=1000,
+            plaw_fourier=-2.0,
+        )
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
     def _norm(self, M, Rs, c):
         # NFW normalization from mass, radius and concentration
-        return M / (4 * np.pi * Rs**3 * (np.log(1+c) - c/(1+c)))
+        return M / (4 * np.pi * Rs ** 3 * (np.log(1 + c) - c / (1 + c)))
 
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -772,7 +793,7 @@ class HaloProfileNFW(HaloProfile):
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
-        prof = 1./(x * (1 + x)**2)
+        prof = 1.0 / (x * (1 + x) ** 2)
         if self.truncated:
             prof[r_use[None, :] > R_M[:, None]] = 0
 
@@ -786,19 +807,16 @@ class HaloProfileNFW(HaloProfile):
         return prof
 
     def _fx_projected(self, x):
-
         def f1(xx):
             x2m1 = xx * xx - 1
-            return 1 / x2m1 + np.arccosh(1 / xx) / np.fabs(x2m1)**1.5
+            return 1 / x2m1 + np.arccosh(1 / xx) / np.fabs(x2m1) ** 1.5
 
         def f2(xx):
             x2m1 = xx * xx - 1
-            return 1 / x2m1 - np.arccos(1 / xx) / np.fabs(x2m1)**1.5
+            return 1 / x2m1 - np.arccos(1 / xx) / np.fabs(x2m1) ** 1.5
 
         xf = x.flatten()
-        return np.piecewise(xf,
-                            [xf < 1, xf > 1],
-                            [f1, f2, 1./3.]).reshape(x.shape)
+        return np.piecewise(xf, [xf < 1, xf > 1], [f1, f2, 1.0 / 3.0]).reshape(x.shape)
 
     def _projected_analytic(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -821,7 +839,6 @@ class HaloProfileNFW(HaloProfile):
         return prof
 
     def _fx_cumul2d(self, x):
-
         def f1(xx):
             sqx2m1 = np.sqrt(np.fabs(xx * xx - 1))
             return np.log(0.5 * xx) + np.arccosh(1 / xx) / sqx2m1
@@ -832,10 +849,8 @@ class HaloProfileNFW(HaloProfile):
 
         xf = x.flatten()
         omln2 = 0.3068528194400547  # 1-Log[2]
-        f = np.piecewise(xf,
-                         [xf < 1, xf > 1],
-                         [f1, f2, omln2]).reshape(x.shape)
-        return 2 * f / x**2
+        f = np.piecewise(xf, [xf < 1, xf > 1], [f1, f2, omln2]).reshape(x.shape)
+        return 2 * f / x ** 2
 
     def _cumul2d_analytic(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -886,7 +901,7 @@ class HaloProfileNFW(HaloProfile):
 
 
 class HaloProfileEinasto(HaloProfile):
-    """ Einasto profile (1965TrAlm...5...87E).
+    """Einasto profile (1965TrAlm...5...87E).
 
     .. math::
        \\rho(r) = \\rho_0\\,\\exp(-2 ((r/r_s)^\\alpha-1) / \\alpha)
@@ -913,7 +928,8 @@ class HaloProfileEinasto(HaloProfile):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
-    name = 'Einasto'
+
+    name = "Einasto"
 
     def __init__(self, c_M_relation, truncated=True):
         if not isinstance(c_M_relation, Concentration):
@@ -922,16 +938,18 @@ class HaloProfileEinasto(HaloProfile):
         self.cM = c_M_relation
         self.truncated = truncated
         super(HaloProfileEinasto, self).__init__()
-        self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
-                                     n_per_decade=1000,
-                                     plaw_fourier=-2.)
+        self.update_precision_fftlog(
+            padding_hi_fftlog=1e2,
+            padding_lo_fftlog=1e-2,
+            n_per_decade=1000,
+            plaw_fourier=-2.0,
+        )
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
     def _get_alpha(self, cosmo, M, a, mdef):
-        mdef_vir = MassDef('vir', 'matter')
+        mdef_vir = MassDef("vir", "matter")
         Mvir = mdef.translate_mass(cosmo, M, a, mdef_vir)
         sM = sigmaM(cosmo, Mvir, a)
         nu = 1.686 / sM
@@ -955,8 +973,7 @@ class HaloProfileEinasto(HaloProfile):
         norm = M_use / norm
 
         x = r_use[None, :] / R_s[:, None]
-        prof = norm[:, None] * np.exp(-2. * (x**alpha[:, None] - 1) /
-                                      alpha[:, None])
+        prof = norm[:, None] * np.exp(-2.0 * (x ** alpha[:, None] - 1) / alpha[:, None])
         if self.truncated:
             prof[r_use[None, :] > R_M[:, None]] = 0
 
@@ -968,7 +985,7 @@ class HaloProfileEinasto(HaloProfile):
 
 
 class HaloProfileHernquist(HaloProfile):
-    """ Hernquist (1990ApJ...356..359H).
+    """Hernquist (1990ApJ...356..359H).
 
     .. math::
        \\rho(r) = \\frac{\\rho_0}
@@ -993,7 +1010,8 @@ class HaloProfileHernquist(HaloProfile):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
-    name = 'Hernquist'
+
+    name = "Hernquist"
 
     def __init__(self, c_M_relation, truncated=True):
         if not isinstance(c_M_relation, Concentration):
@@ -1002,10 +1020,12 @@ class HaloProfileHernquist(HaloProfile):
         self.cM = c_M_relation
         self.truncated = truncated
         super(HaloProfileHernquist, self).__init__()
-        self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
-                                     n_per_decade=1000,
-                                     plaw_fourier=-2.)
+        self.update_precision_fftlog(
+            padding_hi_fftlog=1e2,
+            padding_lo_fftlog=1e-2,
+            n_per_decade=1000,
+            plaw_fourier=-2.0,
+        )
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
@@ -1025,7 +1045,7 @@ class HaloProfileHernquist(HaloProfile):
         norm = M_use / norm
 
         x = r_use[None, :] / R_s[:, None]
-        prof = norm[:, None] / (x * (1 + x)**3)
+        prof = norm[:, None] / (x * (1 + x) ** 3)
         if self.truncated:
             prof[r_use[None, :] > R_M[:, None]] = 0
 
@@ -1037,7 +1057,7 @@ class HaloProfileHernquist(HaloProfile):
 
 
 class HaloProfilePressureGNFW(HaloProfile):
-    """ Generalized NFW pressure profile by Arnaud et al.
+    """Generalized NFW pressure profile by Arnaud et al.
     (2010A&A...517A..92A).
 
     The parametrization is:
@@ -1087,12 +1107,23 @@ class HaloProfilePressureGNFW(HaloProfile):
         nq (int): number of points over which the
             Fourier-space profile template will be sampled.
     """
-    name = 'GNFW'
 
-    def __init__(self, mass_bias=0.8, P0=6.41,
-                 c500=1.81, alpha=1.33, alpha_P=0.12,
-                 beta=4.13, gamma=0.31, P0_hexp=-1.,
-                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf):
+    name = "GNFW"
+
+    def __init__(
+        self,
+        mass_bias=0.8,
+        P0=6.41,
+        c500=1.81,
+        alpha=1.33,
+        alpha_P=0.12,
+        beta=4.13,
+        gamma=0.31,
+        P0_hexp=-1.0,
+        qrange=(1e-3, 1e3),
+        nq=128,
+        x_out=np.inf,
+    ):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
@@ -1109,9 +1140,18 @@ class HaloProfilePressureGNFW(HaloProfile):
         self._fourier_interp = None
         super(HaloProfilePressureGNFW, self).__init__()
 
-    def update_parameters(self, mass_bias=None, P0=None,
-                          c500=None, alpha=None, beta=None, gamma=None,
-                          alpha_P=None, P0_hexp=None, x_out=None):
+    def update_parameters(
+        self,
+        mass_bias=None,
+        P0=None,
+        c500=None,
+        alpha=None,
+        beta=None,
+        gamma=None,
+        alpha_P=None,
+        P0_hexp=None,
+        x_out=None,
+    ):
         """ Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
 
@@ -1166,10 +1206,10 @@ class HaloProfilePressureGNFW(HaloProfile):
 
     def _form_factor(self, x):
         # Scale-dependent factor of the GNFW profile.
-        f1 = (self.c500*x)**(-self.gamma)
-        exponent = -(self.beta-self.gamma)/self.alpha
-        f2 = (1+(self.c500*x)**self.alpha)**exponent
-        return f1*f2
+        f1 = (self.c500 * x) ** (-self.gamma)
+        exponent = -(self.beta - self.gamma) / self.alpha
+        f2 = (1 + (self.c500 * x) ** self.alpha) ** exponent
+        return f1 * f2
 
     def _integ_interp(self):
         # Precomputes the Fourier transform of the profile in terms
@@ -1179,31 +1219,39 @@ class HaloProfilePressureGNFW(HaloProfile):
         from scipy.integrate import quad
 
         def integrand(x):
-            return self._form_factor(x)*x
+            return self._form_factor(x) * x
 
         q_arr = np.geomspace(self.qrange[0], self.qrange[1], self.nq)
         # We use the `weight` feature of quad to quickly estimate
         # the Fourier transform. We could use the existing FFTLog
         # framework, but this is a lot less of a kerfuffle.
-        f_arr = np.array([quad(integrand,
-                               a=1e-4, b=self.x_out,  # limits of integration
-                               weight="sin",  # fourier sine weight
-                               wvar=q)[0] / q
-                          for q in q_arr])
-        Fq = interp1d(np.log(q_arr), f_arr,
-                      fill_value="extrapolate",
-                      bounds_error=False)
+        f_arr = np.array(
+            [
+                quad(
+                    integrand,
+                    a=1e-4,
+                    b=self.x_out,  # limits of integration
+                    weight="sin",  # fourier sine weight
+                    wvar=q,
+                )[0]
+                / q
+                for q in q_arr
+            ]
+        )
+        Fq = interp1d(
+            np.log(q_arr), f_arr, fill_value="extrapolate", bounds_error=False
+        )
         return Fq
 
     def _norm(self, cosmo, M, a, mb):
         # Computes the normalisation factor of the GNFW profile.
         # Normalisation factor is given in units of eV/cm^3.
         # (Bolliet et al. 2017).
-        h70 = cosmo["h"]/0.7
-        C0 = 1.65*h70**2
-        CM = (h70*M*mb/3E14)**(2/3+self.alpha_P)   # M dependence
-        Cz = h_over_h0(cosmo, a)**(8/3)  # z dependence
-        P0_corr = self.P0 * h70**self.P0_hexp  # h-corrected P_0
+        h70 = cosmo["h"] / 0.7
+        C0 = 1.65 * h70 ** 2
+        CM = (h70 * M * mb / 3e14) ** (2 / 3 + self.alpha_P)  # M dependence
+        Cz = h_over_h0(cosmo, a) ** (8 / 3)  # z dependence
+        P0_corr = self.P0 * h70 ** self.P0_hexp  # h-corrected P_0
         return P0_corr * C0 * CM * Cz
 
     def _real(self, cosmo, r, M, a, mass_def):
@@ -1248,7 +1296,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         ff = self._fourier_interp(np.log(k_use[None, :] * R[:, None]))
         nn = self._norm(cosmo, M_use, a, mb)
 
-        prof = (4*np.pi*R**3 * nn)[:, None] * ff
+        prof = (4 * np.pi * R ** 3 * nn)[:, None] * ff
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -1258,7 +1306,7 @@ class HaloProfilePressureGNFW(HaloProfile):
 
 
 class HaloProfileHOD(HaloProfile):
-    """ A generic halo occupation distribution (HOD)
+    """A generic halo occupation distribution (HOD)
     profile describing the number density of galaxies
     as a function of halo mass.
 
@@ -1356,15 +1404,30 @@ class HaloProfileHOD(HaloProfile):
             :math:`\\beta_{\\rm max}`.
         a_pivot (float): pivot scale factor :math:`a_*`.
     """
-    name = 'HOD'
 
-    def __init__(self, c_M_relation,
-                 lMmin_0=12., lMmin_p=0., siglM_0=0.4,
-                 siglM_p=0., lM0_0=7., lM0_p=0.,
-                 lM1_0=13.3, lM1_p=0., alpha_0=1.,
-                 alpha_p=0., fc_0=1., fc_p=0.,
-                 bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1.):
+    name = "HOD"
+
+    def __init__(
+        self,
+        c_M_relation,
+        lMmin_0=12.0,
+        lMmin_p=0.0,
+        siglM_0=0.4,
+        siglM_p=0.0,
+        lM0_0=7.0,
+        lM0_p=0.0,
+        lM1_0=13.3,
+        lM1_p=0.0,
+        alpha_0=1.0,
+        alpha_p=0.0,
+        fc_0=1.0,
+        fc_p=0.0,
+        bg_0=1.0,
+        bg_p=0.0,
+        bmax_0=1.0,
+        bmax_p=0.0,
+        a_pivot=1.0,
+    ):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
@@ -1391,16 +1454,27 @@ class HaloProfileHOD(HaloProfile):
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
-    def update_parameters(self, lMmin_0=None, lMmin_p=None,
-                          siglM_0=None, siglM_p=None,
-                          lM0_0=None, lM0_p=None,
-                          lM1_0=None, lM1_p=None,
-                          alpha_0=None, alpha_p=None,
-                          fc_0=None, fc_p=None,
-                          bg_0=None, bg_p=None,
-                          bmax_0=None, bmax_p=None,
-                          a_pivot=None):
-        """ Update any of the parameters associated with
+    def update_parameters(
+        self,
+        lMmin_0=None,
+        lMmin_p=None,
+        siglM_0=None,
+        siglM_p=None,
+        lM0_0=None,
+        lM0_p=None,
+        lM1_0=None,
+        lM1_p=None,
+        alpha_0=None,
+        alpha_p=None,
+        fc_0=None,
+        fc_p=None,
+        bg_0=None,
+        bg_p=None,
+        bmax_0=None,
+        bmax_p=None,
+        a_pivot=None,
+    ):
+        """Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
 
         Args:
@@ -1486,11 +1560,11 @@ class HaloProfileHOD(HaloProfile):
         c_M *= bmax / bg
 
         x = r_use[None, :] / (R_s[:, None] * bg)
-        prof = 1./(x * (1 + x)**2)
+        prof = 1.0 / (x * (1 + x) ** 2)
         # Truncate
-        prof[r_use[None, :] > R_M[:, None]*bmax] = 0
+        prof[r_use[None, :] > R_M[:, None] * bmax] = 0
 
-        norm = 1. / (4 * np.pi * (bg*R_s)**3 * (np.log(1+c_M) - c_M/(1+c_M)))
+        norm = 1.0 / (4 * np.pi * (bg * R_s) ** 3 * (np.log(1 + c_M) - c_M / (1 + c_M)))
         prof = prof[:, :] * norm[:, None]
 
         if np.ndim(r) == 0:
@@ -1515,7 +1589,7 @@ class HaloProfileHOD(HaloProfile):
         Si1, Ci1 = sici((1 + c_M[:, None]) * x)
         Si2, Ci2 = sici(x)
 
-        P1 = 1. / (np.log(1+c_M) - c_M/(1+c_M))
+        P1 = 1.0 / (np.log(1 + c_M) - c_M / (1 + c_M))
         P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
         P3 = np.sin(c_M[:, None] * x) / ((1 + c_M[:, None]) * x)
         prof = P1[:, None] * (P2 - P3)
@@ -1574,7 +1648,7 @@ class HaloProfileHOD(HaloProfile):
         uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
 
         prof = Ns[:, None] * uk
-        prof = Nc[:, None] * (2 * fc * prof + prof**2)
+        prof = Nc[:, None] * (2 * fc * prof + prof ** 2)
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -1588,13 +1662,13 @@ class HaloProfileHOD(HaloProfile):
 
     def _Nc(self, M, a):
         # Number of centrals
-        Mmin = 10.**(self.lMmin_0 + self.lMmin_p * (a - self.a_pivot))
+        Mmin = 10.0 ** (self.lMmin_0 + self.lMmin_p * (a - self.a_pivot))
         siglM = self.siglM_0 + self.siglM_p * (a - self.a_pivot)
-        return 0.5 * (1 + erf(np.log(M/Mmin)/siglM))
+        return 0.5 * (1 + erf(np.log(M / Mmin) / siglM))
 
     def _Ns(self, M, a):
         # Number of satellites
-        M0 = 10.**(self.lM0_0 + self.lM0_p * (a - self.a_pivot))
-        M1 = 10.**(self.lM1_0 + self.lM1_p * (a - self.a_pivot))
+        M0 = 10.0 ** (self.lM0_0 + self.lM0_p * (a - self.a_pivot))
+        M1 = 10.0 ** (self.lM1_0 + self.lM1_p * (a - self.a_pivot))
         alpha = self.alpha_0 + self.alpha_p * (a - self.a_pivot)
-        return np.heaviside(M-M0, 1) * (np.fabs(M-M0) / M1)**alpha
+        return np.heaviside(M - M0, 1) * (np.fabs(M - M0) / M1) ** alpha
