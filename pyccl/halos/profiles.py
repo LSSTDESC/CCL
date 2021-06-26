@@ -281,26 +281,26 @@ class HaloProfile(object):
         """ Returns the critical surface mass density.
 
         .. math::
-           \\Sigma_{\\mathrm{crit}} = \\frac{c^2}{4\\pi G} 
-           \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}}, 
-
-        where :math:`c` is the speed of light, :math:`G` is the gravitational 
-        constant, and :math:`D_i` is the angular diameter distance. The labels 
-        :math:`i =` s, l and ls denotes the distances to the source, lens, and 
-        between source and lens, respectively.
-
-        Args:
+         \\Sigma_{\\mathrm{crit}} = \\frac{c^2}{4\\pi G} 
+          \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}}, 
+           where :math:`c` is the speed of light, :math:`G` is the gravitational 
+           constant, and :math:`D_i` is the angular diameter distance. The labels 
+           :math:`i =` s, l and ls denotes the distances to the source, lens, and 
+           between source and lens, respectively.
+            Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             a_lens (float): lens' scale factor.
             a_src (float or array_like): source's scale factor.
 
         Returns:
-            float or array_like: :math:`\\Sigma_{\\mathrm{crit}}` in units of :math:`\\M_{\\odot}/Mpc^2`    
+            float or array_like: :math:`\\Sigma_{\\mathrm{crit}}` in units 
+            of :math:`\\M_{\\odot}/Mpc^2`    
         """
-        Ds  = angular_diameter_distance (cosmo, a_src, a2=None) 
-        Dl  = angular_diameter_distance (cosmo, a_lens, a2=None)
-        Dls = angular_diameter_distance (cosmo, a_lens, a_src)
-        A   = physical_constants.CLIGHT**2 * physical_constants.MPC_TO_METER / (4.0 * np.pi * physical_constants.GNEWT * physical_constants.SOLAR_MASS)
+        Ds = angular_diameter_distance(cosmo, a_src, a2=None) 
+        Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
+        Dls = angular_diameter_distance(cosmo, a_lens, a_src)
+        A = physical_constants.CLIGHT**2 * physical_constants.MPC_TO_METER 
+        / (4.0 * np.pi * physical_constants.GNEWT * physical_constants.SOLAR_MASS)
 
         Sigma_crit = A * Ds / (Dl * Dls)
         return Sigma_crit
@@ -329,9 +329,9 @@ class HaloProfile(object):
                 :math:`\\kappa`
         """
 
-        Sigma      = self.projected (cosmo, r, M, a_lens, mass_def)
-        Sigma_crit = self.sigma_critical (cosmo, a_lens, a_src) 
-        return Sigma / Sigma_crit
+        Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
+        Sigma_crit = self.sigma_critical(cosmo, a_lens, a_src) 
+        return Sigma/Sigma_crit
 
     def shear(self, cosmo, r, M, a_lens, a_src, mass_def=None):
         """ Returns the shear (tangential) as a function of cosmology, 
@@ -357,10 +357,10 @@ class HaloProfile(object):
                 :math:`\\gamma`
         """
 
-        Sigma      = self.projected (cosmo, r, M, a_lens, mass_def)
-        Sigma_bar  = self.cumul2d (cosmo, r, M, a_lens, mass_def)
-        Sigma_crit = self.sigma_critical (cosmo, a_lens, a_src) 
-        return (Sigma_bar - Sigma) / Sigma_crit
+        Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
+        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
+        Sigma_crit = self.sigma_critical(cosmo, a_lens, a_src) 
+        return (Sigma_bar - Sigma)/Sigma_crit
 
     def reduced_shear(self, cosmo, r, M, a_lens, a_src, mass_def=None):
         """ Returns the reduced shear as a function of cosmology, 
@@ -412,9 +412,9 @@ class HaloProfile(object):
                 :math:`g_t`
         """
 
-        convergence = self.convergence (cosmo, r, M, a_lens, a_src, mass_def)
-        shear       = self.shear (cosmo, r, M, a_lens, a_src, mass_def)
-        return shear / (a_lens**2 - convergence)
+        convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
+        shear = self.shear(cosmo, r, M, a_lens, a_src, mass_def)
+        return shear/(a_lens**2 - convergence)
 
     def magnification(self, cosmo, r, M, a_lens, a_src, mass_def=None):
         """ Returns the magnification for input parameters.
@@ -438,10 +438,10 @@ class HaloProfile(object):
                 :math:`\\mu`    
         """
 
-        convergence = self.convergence (cosmo, r, M, a_lens, a_src, mass_def)
-        shear       = self.shear (cosmo, r, M, a_lens, a_src, mass_def)
+        convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
+        shear = self.shear(cosmo, r, M, a_lens, a_src, mass_def)
 
-        return 1.0 / ((1.0 - convergence)**2 - np.abs (shear)**2)    
+        return 1.0/((1.0 - convergence)**2 - np.abs (shear)**2)    
 
     def magnification_physical(self, cosmo, r, M, a_lens, a_src, mass_def=None):
         """ Returns the magnification for input parameters in physical units.
@@ -460,11 +460,10 @@ class HaloProfile(object):
                 :math:`\\mu`    
         """
 
-        al2       = a_lens**2
-        conv_phy  = self.convergence (cosmo, r, M, a_lens, a_src, mass_def) / al2
-        shear_phy = self.shear (cosmo, r, M, a_lens, a_src, mass_def) / al2
-
-        return 1.0 / ((1.0 - conv_phy)**2 - np.abs (shear_phy)**2)    
+        al2 = a_lens**2
+        conv_phy = self.convergence(cosmo, r, M, a_lens, a_src, mass_def) / al2
+        shear_phy = self.shear(cosmo, r, M, a_lens, a_src, mass_def) / al2
+        return 1.0/((1.0 - conv_phy)**2 - np.abs (shear_phy)**2)    
 
     def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
                      fourier_out=False,
