@@ -347,9 +347,11 @@ class HaloProfile(object):
         source and the lens.
 
         .. math::
-           \\gamma(R) = \\frac{\\Delta\\Sigma(R)}{\\Sigma_{\\mathrm{crit}}} = \\frac{\\overline{\\Sigma}(< R) - \\Sigma(R)}{\\Sigma_{\\mathrm{crit}}},\\
+           \\gamma(R) = \\frac{\\Delta\\Sigma(R)}{\\Sigma_{\\mathrm{crit}}} =
+           \\frac{\\overline{\\Sigma}(< R) - \\Sigma(R)}{\\Sigma_{\\mathrm{crit}}},\\
 
-        where :math:`\\overline{\\Sigma}(< R)` is the average surface density within R.  
+        where :math:`\\overline{\\Sigma}(< R)` is the average surface density
+        within R.  
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
@@ -378,7 +380,8 @@ class HaloProfile(object):
         .. math::
            g_t (R) = \\frac{\\gamma(R)}{(1 - \\kappa(R))},\\
 
-        where :math: `\\gamma(R)` is the shear and `\\kappa(R)` is the convergence.
+        where :math: `\\gamma(R)` is the shear and `\\kappa(R)` is the 
+                convergence.
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
@@ -430,7 +433,8 @@ class HaloProfile(object):
         .. math::    
            \\mu (R) = \\frac{1}{\\left[(1 - \\kappa(R))^2 - \\vert \\gamma(R) \\vert^2 \\right]]},\\
 
-        where :math: `\\gamma(R)` is the shear and `\\kappa(R)` is the convergence.   
+        where :math: `\\gamma(R)` is the shear and `\\kappa(R)` is the 
+        convergence.   
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
@@ -1405,16 +1409,32 @@ class HaloProfileHOD(HaloProfile):
         a_pivot (float): pivot scale factor :math:`a_*`.
         ns_independent (bool): drop requirement to only form
             satellites when centrals are present.
-        """
-    name = 'HOD'
+    """
 
-    def __init__(self, c_M_relation,
-                 lMmin_0=12., lMmin_p=0., siglM_0=0.4,
-                 siglM_p=0., lM0_0=7., lM0_p=0.,
-                 lM1_0=13.3, lM1_p=0., alpha_0=1.,
-                 alpha_p=0., fc_0=1., fc_p=0.,
-                 bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False):
+    name = "HOD"
+
+    def __init__(
+        self,
+        c_M_relation,
+        lMmin_0=12.0,
+        lMmin_p=0.0,
+        siglM_0=0.4,
+        siglM_p=0.0,
+        lM0_0=7.0,
+        lM0_p=0.0,
+        lM1_0=13.3,
+        lM1_p=0.0,
+        alpha_0=1.0,
+        alpha_p=0.0,
+        fc_0=1.0,
+        fc_p=0.0,
+        bg_0=1.0,
+        bg_p=0.0,
+        bmax_0=1.0,
+        bmax_p=0.0,
+        a_pivot=1.0,
+        ns_independent=False,
+    ):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
@@ -1442,17 +1462,28 @@ class HaloProfileHOD(HaloProfile):
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
-    def update_parameters(self, lMmin_0=None, lMmin_p=None,
-                          siglM_0=None, siglM_p=None,
-                          lM0_0=None, lM0_p=None,
-                          lM1_0=None, lM1_p=None,
-                          alpha_0=None, alpha_p=None,
-                          fc_0=None, fc_p=None,
-                          bg_0=None, bg_p=None,
-                          bmax_0=None, bmax_p=None,
-                          a_pivot=None,
-                          ns_independent=None):
-        """ Update any of the parameters associated with
+    def update_parameters(
+        self,
+        lMmin_0=None,
+        lMmin_p=None,
+        siglM_0=None,
+        siglM_p=None,
+        lM0_0=None,
+        lM0_p=None,
+        lM1_0=None,
+        lM1_p=None,
+        alpha_0=None,
+        alpha_p=None,
+        fc_0=None,
+        fc_p=None,
+        bg_0=None,
+        bg_p=None,
+        bmax_0=None,
+        bmax_p=None,
+        a_pivot=None,
+        ns_independent=None,
+    ):
+        """Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
 
         Args:
@@ -1637,9 +1668,9 @@ class HaloProfileHOD(HaloProfile):
 
         prof = Ns[:, None] * uk
         if self.ns_independent:
-            prof = 2 * Nc[:, None] * fc * prof + prof**2
+            prof = 2 * Nc[:, None] * fc * prof + prof ** 2
         else:
-            prof = Nc[:, None] * (2 * fc * prof + prof**2)
+            prof = Nc[:, None] * (2 * fc * prof + prof ** 2)
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
