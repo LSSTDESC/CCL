@@ -1403,31 +1403,18 @@ class HaloProfileHOD(HaloProfile):
         bmax_p (float): tilt parameter for
             :math:`\\beta_{\\rm max}`.
         a_pivot (float): pivot scale factor :math:`a_*`.
-    """
+        ns_independent (bool): drop requirement to only form
+            satellites when centrals are present.
+        """
+    name = 'HOD'
 
-    name = "HOD"
-
-    def __init__(
-        self,
-        c_M_relation,
-        lMmin_0=12.0,
-        lMmin_p=0.0,
-        siglM_0=0.4,
-        siglM_p=0.0,
-        lM0_0=7.0,
-        lM0_p=0.0,
-        lM1_0=13.3,
-        lM1_p=0.0,
-        alpha_0=1.0,
-        alpha_p=0.0,
-        fc_0=1.0,
-        fc_p=0.0,
-        bg_0=1.0,
-        bg_p=0.0,
-        bmax_0=1.0,
-        bmax_p=0.0,
-        a_pivot=1.0,
-    ):
+    def __init__(self, c_M_relation,
+                 lMmin_0=12., lMmin_p=0., siglM_0=0.4,
+                 siglM_p=0., lM0_0=7., lM0_p=0.,
+                 lM1_0=13.3, lM1_p=0., alpha_0=1.,
+                 alpha_p=0., fc_0=1., fc_p=0.,
+                 bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
+                 a_pivot=1., ns_independent=False):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
@@ -1449,32 +1436,23 @@ class HaloProfileHOD(HaloProfile):
         self.bmax_0 = bmax_0
         self.bmax_p = bmax_p
         self.a_pivot = a_pivot
+        self.ns_independent = ns_independent
         super(HaloProfileHOD, self).__init__()
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
-    def update_parameters(
-        self,
-        lMmin_0=None,
-        lMmin_p=None,
-        siglM_0=None,
-        siglM_p=None,
-        lM0_0=None,
-        lM0_p=None,
-        lM1_0=None,
-        lM1_p=None,
-        alpha_0=None,
-        alpha_p=None,
-        fc_0=None,
-        fc_p=None,
-        bg_0=None,
-        bg_p=None,
-        bmax_0=None,
-        bmax_p=None,
-        a_pivot=None,
-    ):
-        """Update any of the parameters associated with
+    def update_parameters(self, lMmin_0=None, lMmin_p=None,
+                          siglM_0=None, siglM_p=None,
+                          lM0_0=None, lM0_p=None,
+                          lM1_0=None, lM1_p=None,
+                          alpha_0=None, alpha_p=None,
+                          fc_0=None, fc_p=None,
+                          bg_0=None, bg_p=None,
+                          bmax_0=None, bmax_p=None,
+                          a_pivot=None,
+                          ns_independent=None):
+        """ Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
 
         Args:
@@ -1511,6 +1489,8 @@ class HaloProfileHOD(HaloProfile):
             bmax_p (float): tilt parameter for
                 :math:`\\beta_{\\rm max}`.
             a_pivot (float): pivot scale factor :math:`a_*`.
+            ns_independent (bool): drop requirement to only form
+                satellites when centrals are present
         """
         if lMmin_0 is not None:
             self.lMmin_0 = lMmin_0
@@ -1546,6 +1526,8 @@ class HaloProfileHOD(HaloProfile):
             self.bmax_p = bmax_p
         if a_pivot is not None:
             self.a_pivot = a_pivot
+        if ns_independent is not None:
+            self.ns_independent = ns_independent
 
     def _usat_real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -1610,7 +1592,10 @@ class HaloProfileHOD(HaloProfile):
         # NFW profile
         ur = self._usat_real(cosmo, r_use, M_use, a, mass_def)
 
-        prof = Nc[:, None] * (fc + Ns[:, None] * ur)
+        if self.ns_independent:
+            prof = Nc[:, None] * fc + Ns[:, None] * ur
+        else:
+            prof = Nc[:, None] * (fc + Ns[:, None] * ur)
 
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -1628,7 +1613,10 @@ class HaloProfileHOD(HaloProfile):
         # NFW profile
         uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
 
-        prof = Nc[:, None] * (fc + Ns[:, None] * uk)
+        if self.ns_independent:
+            prof = Nc[:, None] * fc + Ns[:, None] * uk
+        else:
+            prof = Nc[:, None] * (fc + Ns[:, None] * uk)
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -1648,7 +1636,10 @@ class HaloProfileHOD(HaloProfile):
         uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
 
         prof = Ns[:, None] * uk
-        prof = Nc[:, None] * (2 * fc * prof + prof ** 2)
+        if self.ns_independent:
+            prof = 2 * Nc[:, None] * fc * prof + prof**2
+        else:
+            prof = Nc[:, None] * (2 * fc * prof + prof**2)
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)

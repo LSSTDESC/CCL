@@ -185,6 +185,7 @@ class Cosmology(object):
         * `HMCode_logT_AGN`
         * `kmax`
         * `lmax`
+        * `dark_energy_model`
 
     Consult the CAMB documentation for their usage. These parameters are passed
     in a :obj:`dict` to `extra_parameters` as::
