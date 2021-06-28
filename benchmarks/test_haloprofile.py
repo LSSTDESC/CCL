@@ -95,7 +95,8 @@ def test_profile_NFW():
     assert np.all(err <= tol)
 
 
-@pytest.mark.parametrize("model", ["nfw", "projected_nfw", "einasto", "hernquist"])
+@pytest.mark.parametrize("model", ["nfw", "projected_nfw",
+                                   "einasto", "hernquist"])
 def test_haloprofile(model):
 
     data = np.loadtxt("./benchmarks/data/haloprofile_%s_colossus.txt" % model)
@@ -117,7 +118,8 @@ def test_haloprofile(model):
         p = ccl.halos.HaloProfileNFW(c, truncated=False)
         prof = p.real(COSMO, r, halomass, a, mdef)
     elif model == "projected_nfw":
-        p = ccl.halos.HaloProfileNFW(c, truncated=False, projected_analytic=True)
+        p = ccl.halos.HaloProfileNFW(c, truncated=False,
+                                     projected_analytic=True)
         prof = p.projected(COSMO, r, halomass, a, mdef)
     elif model == "einasto":
         mdef = ccl.halos.MassDef(halomassdef, "matter", c_m_relation=c)
@@ -165,7 +167,8 @@ def test_weak_lensing_functions():
     assert np.all(err_kappa <= tol)
 
     gamma = (
-        p.shear(COSMO, r_al, halomass, a_lens, a_source, mass_def=mdef) / a_lens ** 2
+        p.shear(COSMO, r_al, halomass, a_lens, a_source,
+                mass_def=mdef) / a_lens ** 2
     )
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 2]), 1e-12, np.inf)
     err_gamma = np.abs(gamma - data[:, 2])
