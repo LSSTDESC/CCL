@@ -513,8 +513,8 @@ class HaloProfile(object):
             k_min = self.precision_fftlog["padding_lo_extra"] * np.amin(k_use)
             k_max = self.precision_fftlog["padding_hi_extra"] * np.amax(k_use)
 
-        n_k = int(np.log10(k_max / k_min))
-        * self.precision_fftlog["n_per_decade"]
+        n_k = int(np.log10(k_max /
+                           k_min)) * self.precision_fftlog["n_per_decade"]
 
         r_arr = np.geomspace(k_min, k_max, n_k)
 
@@ -563,8 +563,8 @@ class HaloProfile(object):
         r_t_min = self.precision_fftlog["padding_lo_fftlog"] * np.amin(r_t_use)
         r_t_max = self.precision_fftlog["padding_hi_fftlog"] * np.amax(r_t_use)
 
-        n_r_t = int(np.log10(r_t_max / r_t_min))
-        * self.precision_fftlog["n_per_decade"]
+        n_r_t = int(np.log10(r_t_max /
+                             r_t_min)) * self.precision_fftlog["n_per_decade"]
 
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
 
