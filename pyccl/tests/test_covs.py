@@ -154,3 +154,14 @@ def test_Sigma2B():
     assert np.all(np.fabs(s2b_b/s2b_a[idx]-1) < 1E-10)
     assert np.all(np.fabs(s2b_c/s2b_a[idx]-1) < 1E-10)
     assert np.all(np.fabs(s2b_d/s2b_a[idx]-1) < 1E-3)
+
+    # Check calculation based on mask Cls against the disc calculation
+    ell = np.arange(1000)
+    theta = np.arccos(1-2*fsky)
+    kR = (ell+0.5)*theta
+    mask_wl = (ell+0.5)/(2*np.pi) * (2*jv(1, kR)/(kR))**2
+
+    a_use = np.array([0.2, 0.5, 1.0])
+    s2b_e = ccl.sigma2_B_from_mask(COSMO, a=a_use, mask_wl=mask_wl)
+    s2b_f = ccl.sigma2_B_disc(COSMO, a=a_use, fsky=fsky)
+    assert np.all(np.fabs(s2b_e/s2b_f-1) < 1E-3)
