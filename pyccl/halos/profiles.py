@@ -163,7 +163,9 @@ class HaloProfile(object):
 
     def __eq__(self, prof2):
         """ Return `True` if this profile is equivalent to another."""
-        return self._get_parameters() == prof2._get_parameters()
+        parameters = self._get_parameters() == prof2._get_parameters()
+        precision = self.precision_fftlog == prof2.precision_fftlog
+        return parameters and precision
 
     def real(self, cosmo, r, M, a, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
