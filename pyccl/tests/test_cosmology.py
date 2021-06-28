@@ -10,6 +10,26 @@ from numpy.testing import assert_raises, assert_, assert_no_warnings
 import pyccl as ccl
 
 
+def test_cosmo_methods():
+    """ Check that all pyccl functions that take cosmo
+    as their first argument are methods of the Cosmology object.
+    """
+    from inspect import getmembers, isfunction, signature
+    from .. import background, bcm, \
+        cls, correlations, covariances, \
+        pk2d, power, tracers, halos, nl_pt
+    from ..core import CosmologyVanillaLCDM
+    cosmo = CosmologyVanillaLCDM()
+    subs = [background, bcm, cls, correlations, covariances,
+            pk2d, power, tracers, halos, nl_pt]
+    funcs = [getmembers(sub, isfunction) for sub in subs]
+    funcs = [func for sub in funcs for func in sub]
+    for name, func in funcs:
+        pars = signature(func).parameters
+        if list(pars)[0] == "cosmo":
+            _ = getattr(cosmo, name)
+
+
 def test_cosmology_critical_init():
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
