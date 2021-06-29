@@ -51,7 +51,7 @@ class MassFunc(object):
             self.mdef = mass_def
         else:
             self._default_mdef()
-        self._setup(cosmo)
+        self._setup(self.cosmo)
 
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
