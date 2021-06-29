@@ -128,4 +128,3 @@ def test_massdef_from_string_raises():
     from pyccl.halos import mass_def_from_name
     with pytest.raises(ValueError):
         mass_def_from_name("none")
-
