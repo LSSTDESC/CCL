@@ -295,4 +295,10 @@ def mass_def_from_name(name):
     elif rho_type == "c":
         rho_type = "critical"
 
-    return MassDef(Delta, rho_type, c_m_relation=c_m_relation)
+    class MassDefDummy(MassDef):
+        def __init__(self, c_m=c_m_relation):
+            super(MassDefDummy, self).__init__(Delta,
+                                               rho_type,
+                                               c_m_relation=c_m)
+
+    return MassDefDummy
