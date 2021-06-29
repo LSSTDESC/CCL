@@ -158,32 +158,25 @@ def test_weak_lensing_functions():
         c, truncated=False, projected_analytic=True, cumul2d_analytic=True
     )
 
-    kappa = (
-        p.convergence(COSMO, r_al, halomass, a_lens, a_source, mass_def=mdef)
-        / a_lens ** 2
-    )
+    kappa = p.convergence(COSMO, r_al, halomass,
+                          a_lens, a_source, mass_def=mdef)
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err_kappa = np.abs(kappa - data[:, 1])
     assert np.all(err_kappa <= tol)
 
-    gamma = (
-        p.shear(COSMO, r_al, halomass, a_lens, a_source,
-                mass_def=mdef) / a_lens ** 2
-    )
+    gamma = p.shear(COSMO, r_al, halomass, a_lens, a_source, mass_def=mdef)
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 2]), 1e-12, np.inf)
     err_gamma = np.abs(gamma - data[:, 2])
     assert np.all(err_gamma <= tol)
 
-    gt = p.reduced_shear_physical(
-        COSMO, r_al, halomass, a_lens, a_source, mass_def=mdef
-    )
+    gt = p.reduced_shear(COSMO, r_al,
+                         halomass, a_lens, a_source, mass_def=mdef)
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 3]), 1e-12, np.inf)
     err_gt = np.abs(gt - data[:, 3])
     assert np.all(err_gt <= tol)
 
-    mu = p.magnification_physical(
-        COSMO, r_al, halomass, a_lens, a_source, mass_def=mdef
-    )
+    mu = p.magnification(COSMO, r_al,
+                         halomass, a_lens, a_source, mass_def=mdef)
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 4]), 1e-12, np.inf)
     err_mu = np.abs(mu - data[:, 4])
     assert np.all(err_mu <= tol)
