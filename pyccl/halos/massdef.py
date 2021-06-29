@@ -288,6 +288,7 @@ def mass_def_from_name(name):
     c_m_relation = "Duffy08"
     try:
         _, Delta, rho_type = re.split(r"(\d+)", name)
+        Delta = int(Delta)
     except ValueError:
         raise ValueError("MassDef name string "
                          "could not be parsed")
