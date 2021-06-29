@@ -2,6 +2,7 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import species_types, rho_x, omega_x
 import numpy as np
+import re
 
 
 def mass2radius_lagrangian(cosmo, M):
@@ -286,13 +287,13 @@ def mass_def_from_name(name):
 
     c_m_relation = "Duffy08"
     try:
-        Delta, rho_type = int(name[:-1]), name[-1]
+        _, Delta, rho_type = re.split("(\d+)", name)
     except ValueError:
         raise ValueError("MassDef name string "
                          "could not be parsed")
-    if rho_type == "m":
+    if rho_type in ["m", "matter"]:
         rho_type = "matter"
-    elif rho_type == "c":
+    elif rho_type in ["c", "critical"]:
         rho_type = "critical"
 
     class MassDefDummy(MassDef):
