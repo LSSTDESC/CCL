@@ -30,11 +30,11 @@ class HMCalculator(object):
     an arbitrary function of mass, scale factor and Fourier scales.
 
     Args:
-        massfunc (str):
+        massfunc (str or :class:`~pyccl.halos.hmfunc.MassFunc`):
             the mass function to use
-        hbias (str):
+        hbias (str or :class:`~pyccl.halos.hbias.HaloBias`):
             the halo bias function to use
-        mass_def (str):
+        mass_def (str or :class:`~pyccl.halos.massdef.MassDef`):
             the halo mass definition to use
         log10M_min (float): logarithmic mass (in units of solar mass)
             corresponding to the lower bound of the integrals in
