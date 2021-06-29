@@ -114,3 +114,18 @@ def test_translate_mass_raises():
 def test_subclasses_smoke(scls):
     hmd = scls()
     assert np.isfinite(hmd.get_Delta(COSMO, 1.))
+
+
+def test_massdef_from_string():
+    from pyccl.halos import MassDefVir, MassDef200m, MassDef200c, \
+        mass_def_from_name
+    assert mass_def_from_name("vir") == MassDefVir
+    assert mass_def_from_name("200m") == MassDef200m
+    assert mass_def_from_name("200c") == MassDef200c
+
+
+def test_massdef_from_string_raises():
+    from pyccl.halos import mass_def_from_name
+    with pytest.raises(ValueError):
+        mass_def_from_name("none")
+

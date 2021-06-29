@@ -19,6 +19,24 @@ AA = 1.0
 PK2D = ccl.Pk2D(cosmo=COSMO, pkfunc=lambda k, a: a / k)
 
 
+def test_hmc_from_string_smoke():
+    ccl.halos.HMCalculator(massfunc="Tinker08",
+                           hbias="Tinker10",
+                           mass_def="200m")
+    ccl.halos.HMCalculator(massfunc=HMF,
+                           hbias="Tinker10",
+                           mass_def="vir")
+
+
+def test_hmc_raises():
+    with pytest.raises(ValueError):
+        ccl.halos.HMCalculator(massfunc=None, hbias=HBF, mass_def=M200)
+    with pytest.raises(ValueError):
+        ccl.halos.HMCalculator(massfunc=HMF, hbias=None, mass_def=M200)
+    with pytest.raises(ValueError):
+        ccl.halos.HMCalculator(massfunc=HMF, hbias=HBF, mass_def=None)
+
+
 def test_prof2pt_smoke():
     uk_NFW = P1.fourier(COSMO, KK, MM, AA,
                         mass_def=M200)
