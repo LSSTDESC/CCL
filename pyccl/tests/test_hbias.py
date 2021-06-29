@@ -27,13 +27,6 @@ def test_bM_subclasses_smoke(bM_class):
         assert np.shape(b) == np.shape(m)
 
 
-def test_bM_cosmo_raises():
-    # raises in base class; no loop through all subclasses
-    bM = ccl.halos.HaloBiasTinker10(COSMO)
-    with pytest.raises(ValueError):
-        bM.get_halo_bias(COSMO2, 1e14, 1.)
-
-
 @pytest.mark.parametrize('bM_pair', zip(HBFS, MDFS))
 def test_bM_mdef_raises(bM_pair):
     bM_class, mdef = bM_pair

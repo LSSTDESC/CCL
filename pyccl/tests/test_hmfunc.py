@@ -44,13 +44,6 @@ def test_nM_subclasses_smoke(nM_class):
         assert np.shape(n) == np.shape(m)
 
 
-def test_nM_cosmo_raises():
-    # raises in base class; no loop through all subclasses
-    nM = ccl.halos.MassFuncTinker10(COSMO)
-    with pytest.raises(ValueError):
-        nM.get_mass_function(COSMO2, 1e14, 1.)
-
-
 @pytest.mark.parametrize('nM_pair', zip(HMFS, MDFS))
 def test_nM_mdef_raises(nM_pair):
     nM_class, mdef = nM_pair
