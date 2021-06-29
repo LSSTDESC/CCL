@@ -119,9 +119,9 @@ def test_subclasses_smoke(scls):
 def test_massdef_from_string():
     from pyccl.halos import MassDefVir, MassDef200m, MassDef200c, \
         mass_def_from_name
-    assert mass_def_from_name("vir") == MassDefVir
-    assert mass_def_from_name("200m") == MassDef200m
-    assert mass_def_from_name("200c") == MassDef200c
+    assert mass_def_from_name("vir")().__eq__(MassDefVir())
+    assert mass_def_from_name("200m")().__eq__(MassDef200m())
+    assert mass_def_from_name("200c")().__eq__(MassDef200c())
 
 
 def test_massdef_from_string_raises():

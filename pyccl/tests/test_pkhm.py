@@ -29,11 +29,11 @@ def test_hmc_from_string_smoke():
 
 
 def test_hmc_raises():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ccl.halos.HMCalculator(massfunc=None, hbias=HBF, mass_def=M200)
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ccl.halos.HMCalculator(massfunc=HMF, hbias=None, mass_def=M200)
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ccl.halos.HMCalculator(massfunc=HMF, hbias=HBF, mass_def=None)
 
 
