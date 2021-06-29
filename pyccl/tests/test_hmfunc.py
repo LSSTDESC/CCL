@@ -68,6 +68,43 @@ def test_nM_SO_allgood(nM_class):
         assert np.shape(n) == np.shape(m)
 
 
+def test_nM_cosmo():
+    nMclass = ccl.halos.MassFuncTinker10
+
+    # check that the last-used Cosmology is stored
+    nM = nMclass()
+    nM.get_mass_function(COSMO2, 1e14, 1)
+    assert nM.cosmo == COSMO2
+
+    # now, force the mass function be cosmology-dependent
+    def func(nMclass):
+        return True
+    nMclass._check_cosmo_dependent = func
+
+    # check that it needs Cosmology as an argument
+    with pytest.raises(ValueError):
+        nMclass(cosmo=None)
+
+    # define an almost-equivalent cosmology
+    eps = 1e-5
+    cosmo_new = ccl.Cosmology(Omega_c=COSMO2["Omega_c"]*(1+eps),
+                              Omega_b=COSMO2["Omega_b"],
+                              h=COSMO2["h"],
+                              sigma8=COSMO2["sigma8"],
+                              n_s=COSMO2["n_s"])
+    assert not COSMO2.__eq__(cosmo_new)
+
+    # check that the mass functions yield almost-equivalent results
+    nM = nMclass(COSMO2)
+    mf0 = nM.get_mass_function(COSMO2, 1e14, 1)
+    mf1 = nM.get_mass_function(cosmo_new, 1e14, 1)
+    assert np.allclose(mf0, mf1, rtol=2*eps)
+
+    # revert the change and check
+    nMclass._check_cosmo_dependent = ccl.halos.MassFunc._check_cosmo_dependent
+    assert not nMclass._check_cosmo_dependent(nMclass)
+
+
 def test_nM_despali_smoke():
     nM = ccl.halos.MassFuncDespali16(COSMO,
                                      ellipsoidal=True)
