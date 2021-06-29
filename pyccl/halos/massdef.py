@@ -269,3 +269,30 @@ class MassDefVir(MassDef):
         super(MassDefVir, self).__init__('vir',
                                          'critical',
                                          c_m_relation=c_m)
+
+
+def mass_def_from_name(name):
+    """ Return mass definition subclass from name string.
+
+    Args:
+        name (string): a mass function name
+
+    Returns:
+        MassDef subclass corresponding to the input name.
+    """
+    if name == "vir":
+        c_m_relation = "Klypin11"
+        return MassDefVir
+
+    c_m_relation = "Duffy08"
+    try:
+        Delta, rho_type = int(name[:-1]), name[-1]
+    except ValueError:
+        raise ValueError("MassDef name string "
+                         "could not be parsed")
+    if rho_type == "m":
+        rho_type = "matter"
+    elif rho_type == "c":
+        rho_type = "critical"
+
+    return MassDef(Delta, rho_type, c_m_relation=c_m_relation)

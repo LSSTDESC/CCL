@@ -1,7 +1,8 @@
 import warnings
 from .. import ccllib as lib
-from .hmfunc import MassFunc
-from .hbias import HaloBias
+from .hmfunc import MassFunc, mass_function_from_name
+from .hbias import HaloBias, halo_bias_from_name
+from .massdef import mass_def_from_name
 from .profiles import HaloProfile
 from .profiles_2pt import Profile2pt
 from ..core import check
@@ -29,12 +30,12 @@ class HMCalculator(object):
     an arbitrary function of mass, scale factor and Fourier scales.
 
     Args:
-        massfunc (:class:`~pyccl.halos.hmfunc.MassFunc`): a mass
-            function object.
-        hbias (:class:`~pyccl.halos.hbias.HaloBias`): a halo bias
-            object.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object.
+        massfunc (str):
+            the mass function to use
+        hbias (str):
+            the halo bias function to use
+        mass_def (str):
+            the halo mass definition to use
         log10M_min (float): logarithmic mass (in units of solar mass)
             corresponding to the lower bound of the integrals in
             mass. Default: 8.
@@ -56,13 +57,11 @@ class HMCalculator(object):
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
                  k_min=1E-5):
-        if not isinstance(massfunc, MassFunc):
-            raise TypeError("massfunc must be of type `MassFunc`")
-        self._massfunc = massfunc
-        if not isinstance(hbias, HaloBias):
-            raise TypeError("hbias must be of type `HaloBias`")
-        self._hbias = hbias
-        self._mdef = mass_def
+        self._mdef = mass_def_from_name(mass_def)
+        nMclass = mass_function_from_name(massfunc)
+        self._massfunc = nMclass(mass_def=self._mdef)
+        bMclass = halo_bias_from_name(hbias)
+        self._hbias = bMclass(mass_def=self._mdef)
         self._prec = {'log10M_min': log10M_min,
                       'log10M_max': log10M_max,
                       'nlog10M': nlog10M,
