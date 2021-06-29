@@ -27,12 +27,14 @@ class HaloBias(object):
     name = "default"
 
     def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
-        # We store `cosmo` if the halo bias' setup parameters
-        # depend on cosmology. If that is the case, we prohibit change
-        # of cosmology when querying the halo bias function.
         self.cosmo = cosmo
-        if self.cosmo is not None:
-            cosmo.compute_sigma()
+        if self.cosmo is None:
+            if self._check_cosmo_dependent():
+                raise ValueError("Must provide Cosmology for "
+                                 "halo bias %s" % self.name)
+        else:
+            self.cosmo.compute_sigma()
+
         self.mass_def_strict = mass_def_strict
         if mass_def is not None:
             if self._check_mdef(mass_def):
@@ -43,7 +45,7 @@ class HaloBias(object):
             self.mdef = mass_def
         else:
             self._default_mdef()
-        self._setup(cosmo)
+        self._setup(self.cosmo)
 
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
@@ -60,6 +62,12 @@ class HaloBias(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         """
         pass
+
+    def _check_cosmo_dependent(self):
+        """ Is this halo bias' setup method
+        cosmology-dependent?
+        """
+        return False
 
     def _check_mdef_strict(self, mdef):
         return False
@@ -131,9 +139,27 @@ class HaloBias(object):
         Returns:
             float or array_like: halo bias.
         """
-        if (self.cosmo is not None) and not (self.cosmo.__eq__(cosmo)):
-            raise ValueError("Input cosmology is incompatible with "
-                             "the one used during initialization.")
+        # set up Cosmology
+        if self.cosmo is not None:
+            if not self.cosmo.__eq__(cosmo):
+                # if this Cosmology is not equal to the stored one
+                # then recompute sigma and store it
+                cosmo.compute_sigma()
+                self.cosmo = cosmo
+                if self._check_cosmo_dependent():
+                    # also, re-run setup if this halo bias
+                    # depends on Cosmology
+                    self._setup(cosmo)
+            else:
+                # otherwise, use stored Cosmology
+                # to avoid recomputing sigma
+                cosmo = self.cosmo
+        else:
+            # this will only run the first time
+            # the halo bias is queried
+            cosmo.compute_sigma()
+            self.cosmo = cosmo
+
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
                                          a, mdef_other)

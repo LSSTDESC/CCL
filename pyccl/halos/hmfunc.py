@@ -31,12 +31,14 @@ class MassFunc(object):
     name = 'default'
 
     def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
-        # We store `cosmo` if the mass function's setup parameters
-        # depend on cosmology. If that is the case, we prohibit change
-        # of cosmology when querying the mass function.
         self.cosmo = cosmo
-        if self.cosmo is not None:
-            cosmo.compute_sigma()
+        if self.cosmo is None:
+            if self._check_cosmo_dependent():
+                raise ValueError("Must provide Cosmology for "
+                                 "mass function %s" % self.name)
+        else:
+            self.cosmo.compute_sigma()
+
         self.mass_def_strict = mass_def_strict
         # Check if mass function was provided and check that it's
         # sensible.
@@ -66,6 +68,12 @@ class MassFunc(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         """
         pass
+
+    def _check_cosmo_dependent(self):
+        """ Is this mass function's setup method
+        cosmology-dependent?
+        """
+        return False
 
     def _check_mdef_strict(self, mdef):
         return False
@@ -138,10 +146,27 @@ class MassFunc(object):
             float or array_like: mass function \
                 :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
         """
-        if (self.cosmo is not None) and not (self.cosmo.__eq__(cosmo)):
-            raise ValueError("Input cosmology is incompatible with "
-                             "the one used during initialization.")
-        cosmo.compute_sigma()
+        # set up Cosmology
+        if self.cosmo is not None:
+            if not self.cosmo.__eq__(cosmo):
+                # if this Cosmology is not equal to the stored one
+                # then recompute sigma and store it
+                cosmo.compute_sigma()
+                self.cosmo = cosmo
+                if self._check_cosmo_dependent():
+                    # also, re-run setup if this mass function
+                    # depends on Cosmology
+                    self._setup(cosmo)
+            else:
+                # otherwise, use stored Cosmology
+                # to avoid recomputing sigma
+                cosmo = self.cosmo
+        else:
+            # this will only run the first time
+            # the mass function is queried
+            cosmo.compute_sigma()
+            self.cosmo = cosmo
+
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
                                          a, mdef_other)
