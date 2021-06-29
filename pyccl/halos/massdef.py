@@ -84,6 +84,8 @@ class MassDef(object):
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
+    name = 'default'
+
     def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense
         if (Delta != 'fof') and (Delta != 'vir'):
@@ -240,6 +242,8 @@ class MassDef200m(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+    name = '200m'
+
     def __init__(self, c_m='Duffy08'):
         super(MassDef200m, self).__init__(200,
                                           'matter',
@@ -253,6 +257,8 @@ class MassDef200c(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+    name = '200c'
+
     def __init__(self, c_m='Duffy08'):
         super(MassDef200c, self).__init__(200,
                                           'critical',
@@ -266,6 +272,8 @@ class MassDefVir(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+    name = 'vir'
+
     def __init__(self, c_m='Klypin11'):
         super(MassDefVir, self).__init__('vir',
                                          'critical',
@@ -302,5 +310,5 @@ def mass_def_from_name(name):
             super(MassDefDummy, self).__init__(Delta,
                                                rho_type,
                                                c_m_relation=c_m)
-
+    MassDefDummy.name = name
     return MassDefDummy
