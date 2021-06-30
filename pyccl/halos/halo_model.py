@@ -68,7 +68,7 @@ class HMCalculator(object):
                       'log10M_max': lM_max,
                       'nlog10M': nlM,
                       'integration_method_M': integration_method_M,
-                      'k_min': k_norm}
+                      'k_norm': k_norm}
         self._lmass = np.linspace(self._prec['log10M_min'],
                                   self._prec['log10M_max'],
                                   self._prec['nlog10M'])
@@ -139,7 +139,7 @@ class HMCalculator(object):
         """
         # Compute mass function
         self._get_ingredients(cosmo, a, False)
-        uk0 = prof.fourier(cosmo, self._prec['k_min'],
+        uk0 = prof.fourier(cosmo, self._prec['k_norm'],
                            self._mass, a, mass_def=self.mass_def).T
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
