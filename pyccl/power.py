@@ -127,7 +127,7 @@ def sigmaR(cosmo, R, a=1., *, p_of_k_a=None):
     return sR
 
 
-def sigmaV(cosmo, R, a=1., p_of_k_a=None):
+def sigmaV(cosmo, R, a=1., *, p_of_k_a=None):
     """RMS variance in the displacement field in a top-hat sphere of radius R.
     The linear displacement field is the gradient of the linear density field.
 
