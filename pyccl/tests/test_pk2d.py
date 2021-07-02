@@ -191,7 +191,7 @@ def test_pk2d_function():
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
 
-def ftest_pk2d_cls():
+def test_pk2d_cls():
     """
     Test interplay between Pk2D and the Limber integrator
     """
