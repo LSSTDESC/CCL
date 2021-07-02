@@ -151,7 +151,8 @@ def sigma2_B_disc(cosmo, a=None, fsky=1., p_of_k_a=None):
             `None`, a default sampling will be used.
         fsky (float): sky fraction.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, str, or `None`): Linear
-            power spectrum to use. Defaults to `None`.
+            power spectrum to use. Defaults to `None`, in which case the
+            internal linear power spectrum from `cosmo` is used.
 
     Returns:
         float or array_like: values of the projected variance.
@@ -202,9 +203,12 @@ def sigma2_B_from_mask(cosmo, a=None, mask_wl=None, p_of_k_a=None):
         mask_wl (array_like): Array with the angular power spectrum of the
             masks. The power spectrum should be given at integer multipoles,
             starting at :math:`\\ell=0`. The power spectrum is normalized
-            as :math:`(2\\ell+1)\\sum_m W^A_{\\ell m} {W^B}^*_{\\ell m}`.
+            as :math:`(2\\ell+1)\\sum_m W^A_{\\ell m} {W^B}^*_{\\ell m}`. It is
+            the responsibility of the user to the provide the mask power out to
+            sufficiently high ell for their required precision.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, str, or `None`): Linear
-            power spectrum to use. Defaults to `None`.
+            power spectrum to use. Defaults to `None`, in which case the
+            internal linear power spectrum from `cosmo` is used.
 
     Returns:
         float or array_like: values of the projected variance.
