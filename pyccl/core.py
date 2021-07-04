@@ -197,10 +197,10 @@ class Cosmology(object):
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
     # an attribute of this class.
-    from . import background, bcm, \
+    from . import background, boltzmann, bcm, \
         cls, correlations, covariances, \
         pk2d, power, tracers, halos, nl_pt
-    subs = [background, bcm, cls, correlations, covariances,
+    subs = [background, boltzmann, bcm, cls, correlations, covariances,
             pk2d, power, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
@@ -208,7 +208,7 @@ class Cosmology(object):
         pars = signature(func).parameters
         if list(pars)[0] == "cosmo":
             vars()[name] = func
-    del background, bcm, cls, correlations, covariances, \
+    del background, boltzmann, bcm, cls, correlations, covariances, \
         pk2d, power, tracers, halos, nl_pt
 
     def __init__(
