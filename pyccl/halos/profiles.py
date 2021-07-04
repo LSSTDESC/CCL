@@ -160,7 +160,7 @@ class HaloProfile(object):
             return True
 
         for key, val in params.items():
-            if key == "c_M_relation":
+            if key == "c_M":
                 cm2 = params2.get(key)
                 if val.name != cm2.name:
                     return False
