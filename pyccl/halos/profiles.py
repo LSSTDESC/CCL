@@ -149,26 +149,23 @@ class HaloProfile(object):
 
     def __eq__(self, prof2):
         """ Return `True` if this profile is equivalent to another."""
+        if type(self) != type(prof2):
+            # catch different profile types
+            return False
+
         params, params2 = self.__dict__, prof2.__dict__
 
         if params == params2:
             # same profiles
             return True
 
-        if type(self) != type(prof2):
-            # catch different profile types
-            return False
-
         for key, val in params.items():
             if key == "c_m_relation":
                 cm2 = params2.get(key)
-                if cm2 is None:
+                if val.name != cm2.name:
                     return False
-                else:
-                    if val.name != cm2.name:
-                        return False
-                    if not val.mass_def.__eq__(cm2.mass_def):
-                        return False
+                if not val.mass_def.__eq__(cm2.mass_def):
+                    return False
             elif key == "precision_fftlog":
                 if val != params2[key]:
                     return False
