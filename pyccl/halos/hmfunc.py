@@ -1,6 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
+from ..pyutils import warn_api, deprecate_attr
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
@@ -30,12 +31,12 @@ class MassFunc(object):
     """
     name = 'default'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         # Initialize sigma(M) splines if needed
         cosmo.compute_sigma()
         self.mass_def_strict = mass_def_strict
-        # Check if mass function was provided and check that it's
-        # sensible.
+        # Check if mass definition was provided and check that it's sensible.
         if mass_def is not None:
             if self._check_mass_def(mass_def):
                 raise ValueError("Mass function " + self.name +
@@ -46,6 +47,10 @@ class MassFunc(object):
         else:
             self._default_mass_def()
         self._setup(cosmo)
+
+    @deprecate_attr(pairs=[("mass_def", "mdef")])
+    def __getattr__(self, name):
+        return getattr(self, name)
 
     def _default_mass_def(self):
         """ Assigns a default mass definition for this object if
@@ -122,6 +127,7 @@ class MassFunc(object):
             om_matt = omega_x(cosmo, a, 'matter')
             return delta * om_this / om_matt
 
+    @warn_api(pairs=[("mass_def_other", "mdef_other")])
     def get_mass_function(self, cosmo, M, a, *, mass_def_other=None):
         """ Returns the mass function for input parameters.
 
@@ -195,6 +201,7 @@ class MassFuncPress74(MassFunc):
     """
     name = 'Press74'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(MassFuncPress74, self).__init__(
             cosmo,
@@ -284,6 +291,7 @@ class MassFuncJenkins01(MassFunc):
     """
     name = 'Jenkins01'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(MassFuncJenkins01, self).__init__(
             cosmo,
@@ -348,10 +356,11 @@ class MassFuncTinker08(MassFunc):
         phi = np.array([1.19, 1.27, 1.34, 1.45, 1.58,
                         1.80, 1.97, 2.24, 2.44])
         ldelta = np.log10(delta)
-        self.pA0 = interp1d(ldelta, alpha)
-        self.pa0 = interp1d(ldelta, beta)
-        self.pb0 = interp1d(ldelta, gamma)
-        self.pc = interp1d(ldelta, phi)
+        extrap_kw = {"bounds_error": False, "fill_value": "extrapolate"}
+        self.pA0 = interp1d(ldelta, alpha, **extrap_kw)
+        self.pa0 = interp1d(ldelta, beta, **extrap_kw)
+        self.pb0 = interp1d(ldelta, gamma, **extrap_kw)
+        self.pc = interp1d(ldelta, phi, **extrap_kw)
 
     def _check_mass_def_strict(self, mass_def):
         if mass_def.Delta == 'fof':
@@ -381,6 +390,7 @@ class MassFuncDespali16(MassFunc):
     """
     name = 'Despali16'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
                  ellipsoidal=False):
         super(MassFuncDespali16, self).__init__(
@@ -444,6 +454,7 @@ class MassFuncTinker10(MassFunc):
     """
     name = 'Tinker10'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
                  norm_all_z=False):
         self.norm_all_z = norm_all_z
@@ -483,8 +494,8 @@ class MassFuncTinker10(MassFunc):
                           -0.349, -0.367, -0.435, -0.504])
             q = np.array([0.0128, 0.0128, 0.0143, 0.0154, 0.0172,
                           0.0174, 0.0199, 0.0203, 0.0205])
-            self.pp0 = interp1d(ldelta, p)
-            self.pq0 = interp1d(ldelta, q)
+            self.pp0 = interp1d(ldelta, p, **extrap_kw)
+            self.pq0 = interp1d(ldelta, q, **extrap_kw)
 
     def _check_mass_def_strict(self, mass_def):
         if mass_def.Delta == 'fof':
@@ -528,6 +539,7 @@ class MassFuncBocquet16(MassFunc):
     """
     name = 'Bocquet16'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
                  hydro=True):
         self.hydro = hydro
@@ -672,6 +684,7 @@ class MassFuncWatson13(MassFunc):
     """
     name = 'Watson13'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(MassFuncWatson13, self).__init__(
             cosmo,
@@ -739,6 +752,7 @@ class MassFuncAngulo12(MassFunc):
     """
     name = 'Angulo12'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(MassFuncAngulo12, self).__init__(
             cosmo,
