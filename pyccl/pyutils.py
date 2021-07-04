@@ -560,7 +560,7 @@ def warn_api(pairs=None, order=None):
       2. ``Matplotlib``: https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/_api/deprecation.py#L454
       3. ``legacy-api-wrap``: https://github.com/flying-sheep/legacy-api-wrap/blob/master/legacy_api_wrap.py#L27
 
-    """  # noqa
+    """
 
     def wrapper(func):
         """ This wrapper assumes that
@@ -570,18 +570,12 @@ def warn_api(pairs=None, order=None):
         POK = Parameter.POSITIONAL_OR_KEYWORD
         KWO = Parameter.KEYWORD_ONLY
 
-        # is this function a class method?
-        name_parts = func.__qualname__.split(".")
-
         # extract new parameters
         params = signature(func).parameters
         pos_names = [n for n, p in params.items() if p.kind == POK]
         kwo_names = [n for n, p in params.items() if p.kind == KWO]
         names = pos_names + kwo_names
-        # second term: If the function name has more than 2 parts
-        # the function is a class method. Convert boolean to integer
-        # and subtract from real number of positional arguments.
-        npos = len(pos_names) - 1 * (len(name_parts) > 1)
+        npos = len(pos_names)
 
         @functools.wraps(func)
         def new_func(*args, **kwargs):
@@ -627,7 +621,7 @@ def warn_api(pairs=None, order=None):
                     indices = [extra_names.index(n) for n in swap]
                     idx1, idx2 = min(indices), max(indices)
                     extra_names_api = extra_names[:idx1] + swap + \
-                                      extra_names[idx2+1:]  # noqa
+                                      extra_names[idx2+1:]
                 else:
                     extra_names_api = extra_names
 
@@ -635,7 +629,7 @@ def warn_api(pairs=None, order=None):
                     kwargs[name] = value
 
             # warn about API change
-            no_kw = names[npos : npos + len(args)]  # noqa
+            no_kw = names[npos : npos + len(args)]
             s = "" if len(no_kw) == 1 else "s"
             no_kw = f"`{no_kw[0]}`" if len(no_kw) == 1 else no_kw
             warnings.warn(
