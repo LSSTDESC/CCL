@@ -1,4 +1,6 @@
 from .profiles import HaloProfile, HaloProfileHOD
+from ..pyutils import warn_api
+import warnings
 
 
 class Profile2pt(object):
@@ -23,9 +25,11 @@ class Profile2pt(object):
             of the fourier profiles.
 
     """
+    @warn_api()
     def __init__(self, *, r_corr=0.):
         self.r_corr = r_corr
 
+    @warn_api()
     def update_parameters(self, *, r_corr=None):
         """ Update any of the parameters associated with this 1-halo
         2-point correlator. Any parameter set to `None` won't be updated.
@@ -67,6 +71,16 @@ class Profile2pt(object):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
+        # patch to check if new or old API is used
+        from ..core import Cosmology
+        if not isinstance(cosmo, Cosmology):
+            warnings.warn("Official API for Profile2pt.fourier_2pt "
+                          "has changed. Argument order "
+                          "(prof, cosmo, k, M, a) has been replaced by "
+                          "(cosmo, k, M, a, prof).", FutureWarning)
+            prof, cosmo, k, M, a = cosmo, k, M, a, prof  # old to new API
+            assert isinstance(prof, HaloProfile)
+
         if not isinstance(prof, HaloProfile):
             raise TypeError("prof must be of type `HaloProfile`")
 
@@ -124,6 +138,16 @@ class Profile2ptHOD(Profile2pt):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
+        # patch to check if new or old API is used
+        from ..core import Cosmology
+        if not isinstance(cosmo, Cosmology):
+            warnings.warn("Official API for Profile2pt.fourier_2pt "
+                          "has changed. Argument order "
+                          "(prof, cosmo, k, M, a) has been replaced by "
+                          "(cosmo, k, M, a, prof).", FutureWarning)
+            prof, cosmo, k, M, a = cosmo, k, M, a, prof  # old to new API
+            assert isinstance(prof, HaloProfile)
+
         if not isinstance(prof, HaloProfileHOD):
             raise TypeError("prof must be of type `HaloProfileHOD`")
 

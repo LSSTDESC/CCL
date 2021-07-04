@@ -1,6 +1,7 @@
 from . import ccllib as lib
 
-from .pyutils import check
+from .pyutils import check, warn_api
+import warnings
 import numpy as np
 
 
@@ -59,6 +60,8 @@ class Pk2D(object):
         empty (bool): if True, just create an empty object, to be filled
             out later
     """
+    @warn_api(order=["pkfunc", "a_arr", "lk_arr", "pk_arr", "is_logp",
+                     "extrap_order_lok", "extrap_order_hik", "cosmo"])
     def __init__(self, *, a_arr=None, lk_arr=None, pk_arr=None,
                  pkfunc=None, cosmo=None, is_logp=True,
                  extrap_order_lok=1, extrap_order_hik=2,
@@ -149,6 +152,7 @@ class Pk2D(object):
         return pk2d
 
     @classmethod
+    @warn_api()
     def apply_halofit(Pk2D, cosmo, *, pk_linear):
         """Pk2D constructor that applies the "HALOFIT" transformation of
         Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
@@ -188,6 +192,14 @@ class Pk2D(object):
         Returns:
             float or array_like: value(s) of the power spectrum.
         """
+        # patch to check if new or old API is used
+        from .core import Cosmology
+        if not isinstance(cosmo, Cosmology):
+            warnings.warn("Official API for Pk2D.eval has changed. "
+                          "Argument order (k, a, cosmo) has been replaced "
+                          "by (cosmo, k, a).", FutureWarning)
+            cosmo, k, a = k, a, cosmo
+
         # make sure we have growth factors for extrapolation
         cosmo.compute_growth()
 
@@ -216,6 +228,7 @@ class Pk2D(object):
                 lib.f2d_t_free(self.psp)
 
 
+@warn_api()
 def parse_pk2d(cosmo, p_of_k_a, *, is_linear=False):
     """ Return the C-level `f2d` spline associated with a
     :class:`Pk2D` object.
