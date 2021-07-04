@@ -52,8 +52,9 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None):
 
 
 @deprecated(Omega_nu_h2)
-def Omeganuh2(a, m_nu, T_CMB=None):
-    return Omega_nu_h2(a, m_nu, T_CMB)
+@warn_api()
+def Omeganuh2(a, *, m_nu, T_CMB=None):
+    return Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
 
 
 @warn_api(pairs=[("Om_nu_h2", "OmNuh2")])
