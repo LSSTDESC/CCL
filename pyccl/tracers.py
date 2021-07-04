@@ -2,7 +2,7 @@ from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate, \
     growth_factor, scale_factor_of_chi
-from .pyutils import _check_array_params, NoneArr, _vectorize_fn6
+from .pyutils import _check_array_params, NoneArr, _vectorize_fn6, warn_api
 import numpy as np
 
 
@@ -25,6 +25,7 @@ def _Sig_MG(cosmo, a, k):
     return _vectorize_fn6(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
 
 
+@warn_api()
 def get_density_kernel(cosmo, *, dndz):
     """This convenience function returns the radial kernel for
     galaxy-clustering-like tracers. Given an unnormalized
@@ -54,6 +55,7 @@ def get_density_kernel(cosmo, *, dndz):
     return chi, wchi
 
 
+@warn_api()
 def get_lensing_kernel(cosmo, *, dndz, mag_bias=None):
     """This convenience function returns the radial kernel for
     weak-lensing-like. Given an unnormalized redshift distribution
@@ -95,6 +97,7 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None):
     return chi, wchi
 
 
+@warn_api()
 def get_kappa_kernel(cosmo, *, z_source=1100, nsamples=100):
     """This convenience function returns the radial kernel for
     CMB-lensing-like tracers.
@@ -166,6 +169,7 @@ class Tracer(object):
         """
         return self._dndz(z)
 
+    @warn_api()
     def get_kernel(self, *, chi):
         """Get the radial kernels for all tracers contained
         in this `Tracer`.
@@ -231,15 +235,14 @@ class Tracer(object):
                 f_ells = np.squeeze(f_ells, axis=-1)
         return f_ells
 
-    def get_transfer(self, k, a):
+    def get_transfer(self, lk, a):
         """Get the transfer functions for all tracers contained
         in this `Tracer`.
-
         Args:
-            k (float or array_like): values of the wave number
-                (in units of inverse Mpc) in increasing order.
+            lk (float or array_like): values of the natural logarithm of
+                the wave number (in units of inverse Mpc) in increasing
+                order.
             a (float or array_like): values of the scale factor.
-
         Returns:
             array_like: list of transfer functions for each tracer. \
                 The shape will be `(n_tracer, lk.size, a.size)`, where \
@@ -249,7 +252,6 @@ class Tracer(object):
         if not hasattr(self, '_trc'):
             return []
 
-        lk = np.log(k)
         lk_use = np.atleast_1d(lk)
         a_use = np.atleast_1d(a)
         transfers = []
@@ -374,6 +376,7 @@ class Tracer(object):
 
         return mg_transfer
 
+    @warn_api(order=["der_bessel", "der_angles", "is_logt"])
     def add_tracer(self, cosmo, *, kernel=None,
                    transfer_ka=None,
                    transfer_k=None, transfer_a=None,
@@ -534,6 +537,7 @@ class NumberCountsTracer(Tracer):
         has_rsd (bool): Flag for whether the tracer has a
             redshift-space distortion term.
     """
+    @warn_api(order=["has_rsd", "dndz", "bias", "mag_bias"])
     def __init__(self, cosmo, *, dndz, bias, mag_bias=None, has_rsd):
         self._trc = []
 
@@ -602,8 +606,9 @@ class WeakLensingTracer(Tracer):
             which will usually be 1 for use with PT IA modeling.
             Defaults to True.
     """
-    def __init__(self, cosmo, *, dndz, has_shear=True, ia_bias=None,
-                 use_A_ia=True):
+    @warn_api()
+    def __init__(self, cosmo, *, dndz, has_shear=True,
+                 ia_bias=None, use_A_ia=True):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -658,6 +663,7 @@ class CMBLensingTracer(Tracer):
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
+    @warn_api()
     def __init__(self, cosmo, *, z_source=1100, n_samples=100):
         self._trc = []
 
@@ -693,6 +699,7 @@ class tSZTracer(Tracer):
         n_chi (float): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
+    @warn_api()
     def __init__(self, cosmo, *, z_max=6., n_chi=1024):
         self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
         chi_arr = np.linspace(0, self.chi_max, n_chi)
