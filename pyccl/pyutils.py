@@ -589,9 +589,10 @@ def warn_api(pairs=None, order=None):
                 do_rename = not all([n in names for n in these_kwargs])
                 if do_rename:
                     for new, old in rename:
-                        kwargs[new] = kwargs.pop(old)
-                        if (swap is not None) and (new in swap):
-                            swap.remove(new)
+                        if old in kwargs:
+                            kwargs[new] = kwargs.pop(old)
+                            if (swap is not None) and (new in swap):
+                                swap.remove(new)
 
                     # warn about API change
                     s = "" if len(rename) == 1 else "s"
@@ -617,11 +618,11 @@ def warn_api(pairs=None, order=None):
             # deal with the remaining arguments
             extra_names = [n for n in names if n not in kwargs]
             if len(extra_names) > 0:
-                if swap is not None:
+                if (swap is not None) and len(swap) > 0:
                     indices = [extra_names.index(n) for n in swap]
                     idx1, idx2 = min(indices), max(indices)
                     extra_names_api = extra_names[:idx1] + swap + \
-                                      extra_names[idx2+1:]  # noqa
+                                      extra_names[idx2+1:]
                 else:
                     extra_names_api = extra_names
 
@@ -629,7 +630,7 @@ def warn_api(pairs=None, order=None):
                     kwargs[name] = value
 
             # warn about API change
-            no_kw = names[npos : npos + len(args)]  # noqa
+            no_kw = names[npos : npos + len(args)]
             s = "" if len(no_kw) == 1 else "s"
             no_kw = f"`{no_kw[0]}`" if len(no_kw) == 1 else no_kw
             warnings.warn(
