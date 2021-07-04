@@ -238,7 +238,7 @@ def test_projected_plaw_accuracy(alpha):
         return alpha
 
     p = ccl.halos.HaloProfilePowerLaw(r_scale=one_f, tilt=alpha_f)
-    p.update_precision_fftlog(plaw_index=alpha)
+    p.update_precision_fftlog(plaw_fourier=alpha)
 
     rt_arr = np.logspace(-3, 2, 1024)
     srt_arr = p.projected(COSMO, rt_arr, 1., 1.)
@@ -262,7 +262,7 @@ def test_plaw_accuracy(alpha):
         return alpha
 
     p = ccl.halos.HaloProfilePowerLaw(r_scale=one_f, tilt=alpha_f)
-    p.update_precision_fftlog(plaw_index=alpha)
+    p.update_precision_fftlog(plaw_fourier=alpha)
 
     k_arr = np.logspace(-3, 2, 1024)
     fk_arr = p.fourier(COSMO, k_arr, 1., 1.)
