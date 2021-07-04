@@ -10,7 +10,7 @@ from ..pk2d import Pk2D
 from ..tk3d import Tk3D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import rho_x
-from ..pyutils import _spline_integrate
+from ..pyutils import _spline_integrate, warn_api, deprecate_attr
 from .. import background
 from ..errors import CCLWarning
 import numpy as np
@@ -51,6 +51,9 @@ class HMCalculator(object):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
+    @warn_api(pairs=[("mass_function", "massfunc"), ("halo_bias", "hbias"),
+                     ("lM_min", "log10M_min"), ("lM_max", "log10M_max"),
+                     ("nlM", "nlog10M"), ("k_norm", "k_min")])
     def __init__(self, cosmo, *, mass_function, halo_bias, mass_def,
                  lM_min=8., lM_max=16., nlM=128,
                  integration_method_M='simpson', k_norm=1E-5):
@@ -88,11 +91,17 @@ class HMCalculator(object):
         self._a_current_mf = -1
         self._a_current_bf = -1
 
+    @deprecate_attr(pairs=[("mass_function", "_massfunc"),
+                           ("halo_bias", "_hbias"),
+                           ("mass_def", "_mdef")])
+    def __getattr__(self, name):
+        return getattr(self, name)
+
     def _integ_spline(self, fM, lM):
         # Spline integrator
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
-    def _get_ingredients(self, cosmo, a, get_bf):
+    def _get_ingredients(self, a, cosmo, get_bf):
         # Compute mass function and bias (if needed) at a new
         # value of the scale factor.
         if a != self._a_current_mf:
@@ -138,12 +147,16 @@ class HMCalculator(object):
             float or array_like: integral value.
         """
         # Compute mass function
-        self._get_ingredients(cosmo, a, False)
+        self._get_ingredients(a, cosmo, False)
         uk0 = prof.fourier(cosmo, self._prec['k_norm'],
                            self._mass, a, mass_def=self.mass_def).T
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
 
+    @warn_api(pairs=[("selection", "sel"),
+                     ("a_min", "amin"),
+                     ("a_max", "amax")],
+              order=["na", "a_min", "a_max"])
     def number_counts(self, cosmo, *, selection,
                       a_min=None, a_max=1.0, na=128):
         """ Solves the integral:
@@ -195,7 +208,7 @@ class HMCalculator(object):
         # now do m intergrals in a loop
         mint = np.zeros_like(a)
         for i, _a in enumerate(a):
-            self._get_ingredients(cosmo, _a, False)
+            self._get_ingredients(_a, cosmo, False)
             _selm = np.atleast_2d(selection(self._mass, _a)).T
             mint[i] = self._integrator(
                 dvda[i] * self.mf[..., :] * _selm[..., :],
@@ -259,12 +272,13 @@ class HMCalculator(object):
             value of `k`.
         """
         # Compute mass function and halo bias
-        self._get_ingredients(cosmo, a, True)
+        self._get_ingredients(a, cosmo, True)
         uk = prof.fourier(cosmo, k, self._mass, a,
                           mass_def=self.mass_def).T
         i11 = self._integrate_over_mbf(uk)
         return i11
 
+    @warn_api(pairs=[("prof", "prof1")], order=["prof_2pt", "prof2"])
     def I_0_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
         """ Solves the integral:
 
@@ -294,13 +308,15 @@ class HMCalculator(object):
              value of `k`.
         """
         # Compute mass function
-        self._get_ingredients(cosmo, a, False)
+        self._get_ingredients(a, cosmo, False)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
                                   prof2=prof2,
                                   mass_def=self.mass_def).T
         i02 = self._integrate_over_mf(uk)
         return i02
 
+    @warn_api(pairs=[("prof", "prof1")],
+              order=["prof12_2pt", "prof2", "prof3", "prof34_2pt", "prof4"])
     def I_0_22(self, cosmo, k, a, prof, *,
                prof2=None, prof3=None, prof4=None,
                prof12_2pt, prof34_2pt=None):
@@ -347,7 +363,7 @@ class HMCalculator(object):
         if prof34_2pt is None:
             prof34_2pt = prof12_2pt
 
-        self._get_ingredients(cosmo, a, False)
+        self._get_ingredients(a, cosmo, False)
         uk12 = prof12_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
                                       prof2=prof2, mass_def=self.mass_def).T
         uk34 = prof34_2pt.fourier_2pt(cosmo, k, self._mass, a, prof3,
@@ -356,6 +372,7 @@ class HMCalculator(object):
         return i04
 
 
+@warn_api()
 def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof):
     """ Returns the mass-weighted mean halo profile.
 
@@ -407,6 +424,7 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof):
     return out
 
 
+@warn_api()
 def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof):
     """ Returns the mass-and-bias-weighted mean halo profile.
 
@@ -461,6 +479,8 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof):
     return out
 
 
+@warn_api(pairs=[("normprof", "normprof1")],
+          order=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
 def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof_2pt=None,
                            normprof, normprof2=False,
@@ -631,6 +651,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     return out
 
 
+@warn_api(pairs=[("normprof", "normprof1")],
+          order=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
 def halomod_Pk2D(cosmo, hmc, prof, *,
                  prof2=None, prof_2pt=None,
                  normprof, normprof2=False,
@@ -730,6 +752,8 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
     return pk2d
 
 
+@warn_api(pairs=[("prof", "prof1"), ("normprof", "normprof1")],
+          order=["prof12_2pt", "prof3", "prof4"])
 def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof3=None, prof4=None,
                            prof12_2pt=None, prof34_2pt=None,
@@ -858,6 +882,8 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
     return out
 
 
+@warn_api(pairs=[("prof", "prof1"), ("normprof", "normprof1")],
+          order=["prof12_2pt", "prof3", "prof4"])
 def halomod_Tk3D_1h(cosmo, hmc, prof, *,
                     prof2=None, prof3=None, prof4=None,
                     prof12_2pt=None, prof34_2pt=None,

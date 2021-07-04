@@ -1,6 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
+from ..pyutils import warn_api, deprecate_attr
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
@@ -26,6 +27,7 @@ class HaloBias(object):
     """
     name = "default"
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         cosmo.compute_sigma()
         self.mass_def_strict = mass_def_strict
@@ -39,6 +41,10 @@ class HaloBias(object):
         else:
             self._default_mass_def()
         self._setup(cosmo)
+
+    @deprecate_attr(pairs=[("mass_def", "mdef")])
+    def __getattr__(self, name):
+        return getattr(self, name)
 
     def _default_mass_def(self):
         """ Assigns a default mass definition for this object if
@@ -115,6 +121,7 @@ class HaloBias(object):
             om_matt = omega_x(cosmo, a, 'matter')
             return delta * om_this / om_matt
 
+    @warn_api(pairs=[("mass_def_other", "mdef_other")])
     def get_halo_bias(self, cosmo, M, a, *, mass_def_other=None):
         """ Returns the halo bias for input parameters.
 
@@ -177,6 +184,7 @@ class HaloBiasSheth99(HaloBias):
     """
     name = "Sheth99"
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None,
                  mass_def_strict=True,
                  use_delta_c_fit=False):
@@ -226,6 +234,7 @@ class HaloBiasSheth01(HaloBias):
     """
     name = "Sheth01"
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(HaloBiasSheth01, self).__init__(cosmo,
                                               mass_def=mass_def,
@@ -270,6 +279,7 @@ class HaloBiasBhattacharya11(HaloBias):
     """
     name = "Bhattacharya11"
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(HaloBiasBhattacharya11, self).__init__(
             cosmo,
@@ -313,6 +323,7 @@ class HaloBiasTinker10(HaloBias):
     """
     name = "Tinker10"
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(HaloBiasTinker10, self).__init__(
             cosmo,
