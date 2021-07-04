@@ -15,7 +15,7 @@ These strings define the `species` inputs to the functions below.
 import numpy as np
 from . import ccllib as lib
 from .pyutils import _vectorize_fn, _vectorize_fn3
-from .pyutils import _vectorize_fn4, _vectorize_fn5
+from .pyutils import _vectorize_fn4, _vectorize_fn5, warn_api
 
 species_types = {
     'critical': lib.species_crit_label,
@@ -239,6 +239,7 @@ def omega_x(cosmo, a, species):
                           lib.omega_x_vec, cosmo, a, species_types[species])
 
 
+@warn_api()
 def rho_x(cosmo, a, species, *, is_comoving=False):
     """Physical or comoving density as a function of scale factor.
 

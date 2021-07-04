@@ -10,6 +10,7 @@ from . import ccllib as lib
 from . import constants as const
 from .core import check
 from .pk2d import parse_pk2d
+from .pyutils import warn_api
 import numpy as np
 import warnings
 
@@ -27,6 +28,7 @@ correlation_types = {
 }
 
 
+@warn_api()
 def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
                 method='fftlog'):
     """Compute the angular correlation function.
@@ -111,6 +113,7 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
     return wth
 
 
+@warn_api(pairs=[("dist", "r")])
 def correlation_3d(cosmo, a, *, dist, p_of_k_a=None):
     """Compute the 3D correlation function.
 
@@ -152,6 +155,7 @@ def correlation_3d(cosmo, a, *, dist, p_of_k_a=None):
     return xi
 
 
+@warn_api(pairs=[("dist", "s"), ("ell", "l")], order=["beta", "ell", "dist"])
 def correlation_multipole(cosmo, a, *, ell, dist, beta, p_of_k_a=None):
     """Compute the correlation multipoles.
 
@@ -195,6 +199,7 @@ def correlation_multipole(cosmo, a, *, ell, dist, beta, p_of_k_a=None):
     return xis
 
 
+@warn_api(pairs=[("dist", "s")])
 def correlation_3dRsd(cosmo, a, *, dist, mu, beta,
                       use_spline=True, p_of_k_a=None):
     """
@@ -245,6 +250,7 @@ def correlation_3dRsd(cosmo, a, *, dist, mu, beta,
     return xis
 
 
+@warn_api(pairs=[("dist", "s")])
 def correlation_3dRsd_avgmu(cosmo, a, *, dist, beta, p_of_k_a=None):
     """
     Compute the 3DRsd correlation function averaged over mu at constant s.
@@ -288,6 +294,8 @@ def correlation_3dRsd_avgmu(cosmo, a, *, dist, beta, p_of_k_a=None):
     return xis
 
 
+@warn_api(pairs=[("sigma", "sig")],
+          order=["beta", "pi", "sigma", "use_spline", "p_of_k_a"])
 def correlation_pi_sigma(cosmo, a, *, pi, sigma, beta,
                          p_of_k_a=None, use_spline=True):
     """

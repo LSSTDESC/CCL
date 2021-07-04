@@ -11,7 +11,7 @@ from . import ccllib as lib
 from .errors import CCLError, CCLWarning
 from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
-from .pyutils import check
+from .pyutils import check, warn_api
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 
@@ -194,6 +194,7 @@ class Cosmology(object):
                                      "HMCode_logT_AGN": 7.8}}
 
     """
+    @warn_api()
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
@@ -1168,6 +1169,7 @@ class CosmologyCalculator(Cosmology):
             corresponding to the "HALOFIT" transformation of
             Takahashi et al. 2012 (arXiv:1208.2701).
     """
+    @warn_api()
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,

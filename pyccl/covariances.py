@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import ccllib as lib
-from .pyutils import check, integ_types
+from .pyutils import check, integ_types, warn_api
 from .tk3d import Tk3D
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig
@@ -9,6 +9,10 @@ from .tk3d import Tk3D
 NoneArr = np.array([])
 
 
+@warn_api(pairs=[("tracer1", "cltracer1"), ("tracer2", "cltracer2"),
+                 ("tracer3", "cltracer3"), ("tracer4", "cltracer4"),
+                 ("t_of_kk_a", "tkka")],
+          order=["ell", "t_of_kk_a", "fsky", "tracer3", "tracer4", "ell2"])
 def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, tracer3=None, tracer4=None,
                        t_of_kk_a, ell, ell2=None, fsky=1.,
                        integration_method='qag_quad'):

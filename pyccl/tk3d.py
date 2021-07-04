@@ -1,6 +1,6 @@
 from . import ccllib as lib
 
-from .pyutils import check
+from .pyutils import check, warn_api
 import numpy as np
 
 
@@ -85,6 +85,7 @@ class Tk3D(object):
         extrap_order_hik (int): same as `extrap_order_lok` for
             k-values above the maximum of the splines.
     """
+    @warn_api(order=["extrap_order_lok", "extrap_order_hik", "is_logt"])
     def __init__(self, *, a_arr, lk_arr, tkk_arr=None,
                  pk1_arr=None, pk2_arr=None, is_logt=True,
                  extrap_order_lok=1, extrap_order_hik=1):

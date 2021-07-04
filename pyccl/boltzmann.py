@@ -19,11 +19,12 @@ except ImportError:
     pass  # prevent nans from isitgr
 
 from . import ccllib as lib
-from .pyutils import check
+from .pyutils import check, warn_api
 from .pk2d import Pk2D
 from .errors import CCLError
 
 
+@warn_api()
 def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 

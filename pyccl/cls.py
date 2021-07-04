@@ -4,7 +4,7 @@ import numpy as np
 
 from .errors import CCLWarning
 from . import ccllib as lib
-from .pyutils import check, integ_types
+from .pyutils import check, integ_types, warn_api
 from .pk2d import parse_pk2d
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig
@@ -12,6 +12,7 @@ from .pk2d import parse_pk2d
 NoneArr = np.array([])
 
 
+@warn_api(pairs=[("tracer1", "cltracer1"), ("tracer2", "cltracer2")])
 def angular_cl(cosmo, tracer1, tracer2, *, ell, p_of_k_a=None,
                l_limber=-1., limber_integration_method='qag_quad'):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
