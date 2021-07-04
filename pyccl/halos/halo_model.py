@@ -242,7 +242,7 @@ class HMCalculator(object):
             value of `k`.
         """
         # Compute mass function
-        self._get_ingredients(cosmo, a, False)
+        self._get_ingredients(a, cosmo, False)
         uk = prof.fourier(cosmo, k, self._mass, a,
                           mass_def=self.mass_def).T
         i01 = self._integrate_over_mf(uk)
