@@ -590,7 +590,7 @@ def warn_api(pairs=None, order=None):
                 if do_rename:
                     for new, old in rename:
                         kwargs[new] = kwargs.pop(old)
-                        if new in swap:
+                        if (swap is not None) and (new in swap):
                             swap.remove(new)
 
                     # warn about API change
