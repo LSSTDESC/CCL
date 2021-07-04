@@ -1,6 +1,7 @@
 import numpy as np
 from . import ccllib as lib
 from .core import check
+from .pyutils import deprecated, warn_api
 
 neutrino_mass_splits = {
     'normal': lib.nu_normal,
@@ -11,6 +12,7 @@ neutrino_mass_splits = {
 }
 
 
+@warn_api()
 def Omega_nu_h2(a, *, m_nu, T_CMB=None):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
@@ -49,6 +51,12 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None):
     return OmNuh2
 
 
+@deprecated(Omega_nu_h2)
+def Omeganuh2(a, m_nu, T_CMB=None):
+    return Omega_nu_h2(a, m_nu, T_CMB)
+
+
+@warn_api(pairs=[("Om_nu_h2", "OmNuh2")])
 def nu_masses(*, Om_nu_h2, mass_split, T_CMB=None):
     """Returns the neutrinos mass(es) for a given OmNuh2, according to the
     splitting convention specified by the user.
