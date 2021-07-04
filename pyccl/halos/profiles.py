@@ -160,11 +160,11 @@ class HaloProfile(object):
             return True
 
         for key, val in params.items():
-            if key == "c_m_relation":
+            if key == "c_M_relation":
                 cm2 = params2.get(key)
                 if val.name != cm2.name:
                     return False
-                if not val.mass_def.__eq__(cm2.mass_def):
+                if not val.mdef.__eq__(cm2.mdef):
                     return False
             elif key == "precision_fftlog":
                 if val != params2[key]:
