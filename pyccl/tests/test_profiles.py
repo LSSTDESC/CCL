@@ -50,8 +50,6 @@ def test_defaults():
         p.real(None, None, None, None)
     with pytest.raises(NotImplementedError):
         p.fourier(None, None, None, None)
-    with pytest.raises(NotImplementedError):
-        p.update_parameters()
 
 
 def test_profiles_equal():
