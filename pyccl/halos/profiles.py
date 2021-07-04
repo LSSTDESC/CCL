@@ -147,25 +147,36 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
-    def update_parameters(self):
-        raise NotImplementedError("Parameters can't be updated "
-                                  "in this profile.")
-
-    def _get_parameters(self):
-        """ Return a dictionary of the profile parameters and their values."""
-        code = self.update_parameters.__code__
-        count = code.co_argcount + code.co_kwonlyargcount
-        args = code.co_varnames[1: count]
-        pars = dict.fromkeys(args)
-        for par in pars:
-            pars[par] = getattr(self, par)
-        return pars
-
     def __eq__(self, prof2):
         """ Return `True` if this profile is equivalent to another."""
-        parameters = self._get_parameters() == prof2._get_parameters()
-        precision = self.precision_fftlog == prof2.precision_fftlog
-        return parameters and precision
+        params, params2 = self.__dict__, prof2.__dict__
+
+        if params == params2:
+            # same profiles
+            return True
+
+        if type(self) != type(prof2):
+            # catch different profile types
+            return False
+
+        for key, val in params.items():
+            if key == "c_m_relation":
+                cm2 = params2.get(key)
+                if cm2 is None:
+                    return False
+                else:
+                    if val.name != cm2.name:
+                        return False
+                    if not val.mass_def.__eq__(cm2.mass_def):
+                        return False
+            elif key == "precision_fftlog":
+                if val != params2[key]:
+                    return False
+            else:
+                if val != params2.get(key):
+                    return False
+
+        return True
 
     def real(self, cosmo, r, M, a, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
