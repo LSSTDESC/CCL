@@ -2,7 +2,8 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import h_over_h0
 from ..power import sigmaM
-from ..pyutils import resample_array, _fftlog_transform
+from ..pyutils import resample_array, _fftlog_transform, \
+    warn_api, deprecate_attr
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
@@ -119,6 +120,9 @@ class HaloProfile(object):
                 parameter is recommended when implementing a new profile.
                 Default value: -1.
         """
+        for par in kwargs:
+            if par not in self.precision_fftlog:
+                raise KeyError(f"Parameter {par} not recognized")
         self.precision_fftlog.update(kwargs)
 
     def _get_plaw_fourier(self, cosmo, a):
@@ -147,6 +151,7 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
+    @warn_api(pairs=[("r", "rt")])
     def real(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
@@ -212,6 +217,7 @@ class HaloProfile(object):
                                       " _fourier method.")
         return f_k
 
+    @warn_api(pairs=[("r", "rt")])
     def projected(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
@@ -243,6 +249,7 @@ class HaloProfile(object):
                                                 is_cumul2d=False)
         return s_r_t
 
+    @warn_api(pairs=[("r", "rt")])
     def cumul2d(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
@@ -418,6 +425,7 @@ class HaloProfileGaussian(HaloProfile):
     """
     name = 'Gaussian'
 
+    @warn_api(pairs=[("r_scale", "r_s")])
     def __init__(self, *, r_scale, rho0):
         self.rho_0 = rho0
         self.r_scale = r_scale
@@ -464,6 +472,7 @@ class HaloProfilePowerLaw(HaloProfile):
     """
     name = 'PowerLaw'
 
+    @warn_api(pairs=[("r_scale", "r_s")])
     def __init__(self, *, r_scale, tilt):
         self.r_s = r_scale
         self.tilt = tilt
@@ -535,6 +544,7 @@ class HaloProfileNFW(HaloProfile):
     """
     name = 'NFW'
 
+    @warn_api(pairs=[("c_m_relation", "c_M_relation")])
     def __init__(self, *, c_m_relation,
                  fourier_analytic=True,
                  projected_analytic=False,
@@ -565,7 +575,11 @@ class HaloProfileNFW(HaloProfile):
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
-    def _get_cM(self, cosmo, M, a, mass_def=None):
+    @deprecate_attr(pairs=[("c_m_relation", "cM")])
+    def __getattr__(self, name):
+        return getattr(self, name)
+
+    def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
         return self.c_m_relation.get_concentration(cosmo, M, a,
                                                    mass_def_other=mass_def)
 
@@ -579,7 +593,7 @@ class HaloProfileNFW(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -617,7 +631,7 @@ class HaloProfileNFW(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -654,7 +668,7 @@ class HaloProfileNFW(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -674,7 +688,7 @@ class HaloProfileNFW(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         x = k_use[None, :] * R_s[:, None]
@@ -726,6 +740,7 @@ class HaloProfileEinasto(HaloProfile):
     """
     name = 'Einasto'
 
+    @warn_api(pairs=[("c_m_relation", "c_M_relation")])
     def __init__(self, *, c_m_relation, truncated=True):
         if not isinstance(c_m_relation, Concentration):
             raise TypeError("c_m_relation must be of type `Concentration`)")
@@ -738,7 +753,11 @@ class HaloProfileEinasto(HaloProfile):
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
-    def _get_cM(self, cosmo, M, a, mass_def=None):
+    @deprecate_attr(pairs=[("c_m_relation", "cM")])
+    def __getattr__(self, name):
+        return getattr(self, name)
+
+    def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
         return self.c_m_relation.get_concentration(cosmo, M, a,
                                                    mass_def_other=mass_def)
 
@@ -757,7 +776,7 @@ class HaloProfileEinasto(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         alpha = self._get_alpha(cosmo, M_use, a, mass_def)
@@ -808,6 +827,7 @@ class HaloProfileHernquist(HaloProfile):
     """
     name = 'Hernquist'
 
+    @warn_api(pairs=[("c_m_relation", "c_M_relation")])
     def __init__(self, *, c_m_relation, truncated=True):
         if not isinstance(c_m_relation, Concentration):
             raise TypeError("c_m_relation must be of type `Concentration`)")
@@ -820,7 +840,11 @@ class HaloProfileHernquist(HaloProfile):
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
-    def _get_cM(self, cosmo, M, a, mass_def=None):
+    @deprecate_attr(pairs=[("c_m_relation", "cM")])
+    def __getattr__(self, name):
+        return getattr(self, name)
+
+    def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
         return self.c_m_relation.get_concentration(cosmo, M, a,
                                                    mass_def_other=mass_def)
 
@@ -830,7 +854,7 @@ class HaloProfileHernquist(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         status = 0
@@ -903,6 +927,7 @@ class HaloProfilePressureGNFW(HaloProfile):
     """
     name = 'GNFW'
 
+    @warn_api()
     def __init__(self, *, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
@@ -923,6 +948,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         self._fourier_interp = None
         super(HaloProfilePressureGNFW, self).__init__()
 
+    @warn_api()
     def update_parameters(self, *, mass_bias=None, P0=None,
                           c500=None, alpha=None, beta=None, gamma=None,
                           alpha_P=None, P0_hexp=None, x_out=None):
@@ -1174,6 +1200,7 @@ class HaloProfileHOD(HaloProfile):
         """
     name = 'HOD'
 
+    @warn_api(pairs=[("c_m_relation", "c_M_relation")])
     def __init__(self, *, c_m_relation,
                  lMmin_0=12., lMmin_p=0., siglM_0=0.4,
                  siglM_p=0., lM0_0=7., lM0_p=0.,
@@ -1205,10 +1232,15 @@ class HaloProfileHOD(HaloProfile):
         self.ns_independent = ns_independent
         super(HaloProfileHOD, self).__init__()
 
-    def _get_cM(self, cosmo, M, a, mass_def=None):
+    @deprecate_attr(pairs=[("c_m_relation", "cM")])
+    def __getattr__(self, name):
+        return getattr(self, name)
+
+    def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
         return self.c_m_relation.get_concentration(cosmo, M, a,
                                                    mass_def_other=mass_def)
 
+    @warn_api()
     def update_parameters(self, *, lMmin_0=None, lMmin_p=None,
                           siglM_0=None, siglM_p=None,
                           lM0_0=None, lM0_p=None,
@@ -1304,7 +1336,7 @@ class HaloProfileHOD(HaloProfile):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
@@ -1330,7 +1362,7 @@ class HaloProfileHOD(HaloProfile):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
