@@ -675,7 +675,7 @@ def deprecate_attr(pairs=None):
         @functools.wraps(getter)
         def new_getter(cls, this_name):
 
-            # an attribute may note exist because
+            # an attribute may not exist because
             # it has been renamed...
             if this_name in old_names:
                 idx = old_names.index(this_name)
