@@ -53,10 +53,40 @@ def test_defaults():
 
 
 def test_profiles_equal():
-    p1 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.8)
-    p2 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.8)
+    M200m = ccl.halos.MassDef200m()
+    cm = ccl.halos.ConcentrationDuffy08(mass_def=M200m)
+    p1 = ccl.halos.HaloProfileHOD(c_m_relation=cm, lMmin_0=12.)
+
+    # different profile types
+    p2 = ccl.halos.HaloProfile()
+    assert not p1.__eq__(p2)
+
+    # equal profiles
+    p2 = p1
     assert p1.__eq__(p2)
-    p2.update_parameters(mass_bias=0.5)
+
+    # equivalent profiles
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm, lMmin_0=12.)
+    assert p1.__eq__(p2)
+
+    # different parameters
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm, lMmin_0=11.)
+    assert not p1.__eq__(p2)
+
+    # different mass-concentration
+    cm2 = ccl.halos.ConcentrationConstant()
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm2, lMmin_0=12.)
+    assert not p1.__eq__(p2)
+
+    # different mass-concentration mass definition
+    M200c = ccl.halos.MassDef200c()
+    cm2 = ccl.halos.ConcentrationDuffy08(mass_def=M200c)
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm2, lMmin_0=12.)
+    assert not p1.__eq__(p2)
+
+    # different FFTLog
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm, lMmin_0=12.)
+    p2.update_precision_fftlog(**{"plaw_fourier": -2.0})
     assert not p1.__eq__(p2)
 
 
