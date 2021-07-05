@@ -278,16 +278,20 @@ def test_pkhm_errors():
     # Wrong 1h/2h smoothing
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
+                                         normprof1=True,
                                          smooth_transition=True)
     with pytest.raises(ValueError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
+                                         normprof1=True,
                                          smooth_transition=func, get_1h=False)
 
     # Wrong 1h damping
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
+                                         normprof1=True,
                                          supress_1h=True)
 
     with pytest.raises(ValueError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
+                                         normprof1=True,
                                          supress_1h=func, get_1h=False)

@@ -171,6 +171,6 @@ def test_tkk1h_errors():
 
     # Negative profile in logspace
     assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,
-                 COSMO, hmc, P3, prof2=Pneg,
+                 COSMO, hmc, P3, prof2=Pneg, normprof1=True,
                  lk_arr=np.log(k_arr), a_arr=a_arr,
                  use_log=True)
