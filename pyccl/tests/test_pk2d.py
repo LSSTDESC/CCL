@@ -260,3 +260,53 @@ def test_pk2d_parsing():
     with pytest.raises(ValueError):
         ccl.angular_cl(cosmo, lens1, lens1, ells,
                        p_of_k_a=3)
+
+
+def test_pk2d_add():
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    zarr_b = np.outer(-1*x, 4*np.exp(log_y))
+
+    pk2d_a = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a),
+                      is_logp=True)
+    pk2d_b = ccl.Pk2D(a_arr=2*x, lk_arr=log_y, pk_arr=zarr_b,
+                      is_logp=False)
+
+    # This raises an error because the a ranges don't match
+    with pytest.raises(ValueError):
+        pk2d_a + pk2d_b
+
+    pk2d_c = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=zarr_b,
+                      is_logp=False)
+
+    # This raises an error because addition is only defined for Pk2D + Pk2D
+    with pytest.raises(ValueError):
+        pk2d_a + 1
+        1 + pk2d_a
+
+    pk2d_d = pk2d_a + pk2d_c
+    xarr_d, yarr_d, zarr_d = ccl.pyutils._get_spline2d_arrays(pk2d_d.psp.fka)
+
+    if pk2d_d.psp.is_log:
+        zarr_d = np.exp(zarr_d)
+
+    assert np.allclose(x, xarr_d)
+    assert np.allclose(log_y, yarr_d)
+    assert np.allclose(zarr_a + zarr_b, zarr_d)
+
+    pk2d_e = ccl.Pk2D(a_arr=x[1:-1], lk_arr=log_y[1:-1],
+                      pk_arr=zarr_b[1:-1, 1:-1],
+                      is_logp=False)
+
+    pk2d_f = pk2d_e + pk2d_a
+    xarr_f, yarr_f, zarr_f = ccl.pyutils._get_spline2d_arrays(pk2d_f.psp.fka)
+
+    if pk2d_f.psp.is_log:
+        zarr_f = np.exp(zarr_f)
+
+    assert np.allclose((zarr_a + zarr_b)[1:-1, 1:-1], zarr_f)
+    
+
+
+    

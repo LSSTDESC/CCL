@@ -1,7 +1,8 @@
+import numpy as np
+
 from . import ccllib as lib
 
-from .pyutils import check
-import numpy as np
+from .pyutils import check, _get_spline2d_arrays
 
 
 class Pk2D(object):
@@ -105,6 +106,9 @@ class Pk2D(object):
             for ia, a in enumerate(a_arr):
                 pkflat[ia, :] = pkfunc(k=np.exp(lk_arr), a=a)
             pkflat = pkflat.flatten()
+
+        self.extrap_order_lok = extrap_order_lok
+        self.extrap_order_hik = extrap_order_hik
 
         self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
                                                         int(extrap_order_lok),
@@ -248,12 +252,91 @@ class Pk2D(object):
 
         return f
 
+    def get_spline_arrays(self):
+        """Get the spline data arrays.
+
+        Returns:
+            a_arr: array_like
+                Array of scale factors.
+            lk_arr: array_like
+                Array of logarithm of wavenumber k.
+            pk_arr: array_like
+                Array of the power spectrum P(k, z). The shape
+                is (a_arr.size, lk_arr.size).
+        """
+        if not self.has_psp:
+            raise ValueError("Pk2D object does not have data.")
+
+        a_arr, lk_arr, pk_arr = _get_spline2d_arrays(self.psp.fka)
+        if self.psp.is_log:
+            pk_arr = np.exp(pk_arr)
+
+        return a_arr, lk_arr, pk_arr
+
     def __del__(self):
         """Free memory associated with this Pk2D structure
         """
         if hasattr(self, 'has_psp'):
             if self.has_psp and hasattr(self, 'psp'):
                 lib.f2d_t_free(self.psp)
+
+    def __add__(self, other):
+        """Adds two Pk2D instances.
+
+        The a and k ranges of the 2nd operand need to be the same or smaller
+        than the 1st operand.
+        The returned Pk2D object uses the same a and k arrays as the first
+        operand.
+        """
+        if not isinstance(other, Pk2D):
+            raise ValueError("Addition of Pk2D objects is only defined "
+                             "for other Pk2D objects.")
+
+        if not self.has_psp or not other.has_psp:
+            raise ValueError("Pk2D object does not have data.")
+
+        if (self.psp.lkmin < other.psp.lkmin
+                or self.psp.lkmax > other.psp.lkmax):
+            raise ValueError("The 2nd operand has its data defined over a "
+                             "smaller k range than the 1st operand.")
+        if (self.psp.amin < other.psp.amin
+                or self.psp.amax > other.psp.amax):
+            raise ValueError("The 2nd operand has its data defined over a "
+                             "smaller a range than the 1st operand.")
+
+        a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
+
+        a_arr_b, lk_arr_b, pk_arr_b = other.get_spline_arrays()
+        if not (a_arr_a.size == a_arr_b.size and lk_arr_a.size == lk_arr_b.size
+                and np.allclose(a_arr_a, a_arr_b)
+                and np.allclose(lk_arr_a, lk_arr_b)):
+            # Since the power spectrum is evalulated on a smaller support than
+            # where it was defined, no extrapolation is necessary and the
+            # dependence on the cosmology in moot.
+            # CosmologyVanillaLCDM is being imported here instea of the top of
+            # the module due to circular import issues there.
+            from .core import CosmologyVanillaLCDM
+            dummy_cosmo = CosmologyVanillaLCDM()
+            pk_arr_b = np.array([other.eval(k=np.exp(lk_arr_a),
+                                            a=a_,
+                                            cosmo=dummy_cosmo)
+                                 for a_ in a_arr_a])
+
+        pk_arr_new = pk_arr_a + pk_arr_b
+
+        logp = np.all(pk_arr_new > 0)
+        if logp:
+            pk_arr_new = np.log(pk_arr_new)
+
+        new = Pk2D(a_arr=a_arr_a, lk_arr=lk_arr_a, pk_arr=pk_arr_new,
+                   is_logp=logp,
+                   extrap_order_lok=self.extrap_order_lok,
+                   extrap_order_hik=self.extrap_order_hik)
+
+        return new
+
+    def __radd__(self, other):
+        self.__add__(other)
 
 
 def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
