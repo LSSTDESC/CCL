@@ -95,5 +95,5 @@ def test_cov_cNG_errors():
                   COSMO, tr, tr, ls, tsp,
                   integration_method='cag_cuad')
 
-    assert_raises(ValueError, ccl.angular_cl_cov_cNG,
+    assert_raises(TypeError, ccl.angular_cl_cov_cNG,
                   COSMO, tr, tr, ls, tr)
