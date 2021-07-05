@@ -51,52 +51,55 @@ def test_tk3d_errors():
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
 
     # Decreasing a
-    assert_raises(ValueError, ccl.Tk3D, a_arr[::-1], lk_arr,
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a_arr[::-1], lk_arr=lk_arr,
                   tkk_arr=tkka_arr)
     # Decreasing lk
-    assert_raises(ValueError, ccl.Tk3D, a_arr, lk_arr[::-1],
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a_arr, lk_arr=lk_arr[::-1],
                   tkk_arr=tkka_arr)
     # Non monotonic
     a2 = a_arr.copy()
     a2[1] = a2[0]
-    assert_raises(ValueError, ccl.Tk3D, a2, lk_arr,
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a2, lk_arr=lk_arr,
                   tkk_arr=tkka_arr)
 
     # If no input
     assert_raises(TypeError, ccl.Tk3D)
 
     # No input tkk or fkas
-    assert_raises(ValueError, ccl.Tk3D, a_arr, lk_arr)
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a_arr, lk_arr=lk_arr)
 
     # Missing one fka factor
-    assert_raises(ValueError, ccl.Tk3D, a_arr, lk_arr, pk2_arr=fka2_arr)
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a_arr, lk_arr=lk_arr,
+                  pk2_arr=fka2_arr)
 
     # fka has wrong shape
-    assert_raises(ValueError, ccl.Tk3D, a_arr, lk_arr, pk1_arr=tkka_arr)
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a_arr, lk_arr=lk_arr,
+                  pk1_arr=tkka_arr)
 
     # tkka has wrong shape
-    assert_raises(ValueError, ccl.Tk3D, a_arr, lk_arr, tkk_arr=fka1_arr)
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a_arr, lk_arr=lk_arr,
+                  tkk_arr=fka1_arr)
 
     # Wrong extrapolation orders
-    assert_raises(ValueError, ccl.Tk3D, a_arr, lk_arr,
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a_arr, lk_arr=lk_arr,
                   tkk_arr=tkka_arr, extrap_order_hik=-1)
-    assert_raises(ValueError, ccl.Tk3D, a_arr, lk_arr,
+    assert_raises(ValueError, ccl.Tk3D, a_arr=a_arr, lk_arr=lk_arr,
                   tkk_arr=tkka_arr, extrap_order_lok=2)
 
 
 def test_tk3d_smoke():
     """Make sure it works once."""
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
-    tsp1 = ccl.Tk3D(a_arr, lk_arr, pk1_arr=fka1_arr,
+    tsp1 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=fka1_arr,
                     pk2_arr=fka2_arr)
-    tsp2 = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
+    tsp2 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkka_arr)
     assert_(not np.isnan(tsp1.eval(1E-2, 0.5)))
     assert_(not np.isnan(tsp2.eval(1E-2, 0.5)))
 
 
 def test_tk3d_eval_errors():
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
-    tsp = ccl.Tk3D(a_arr, lk_arr, pk1_arr=fka1_arr,
+    tsp = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=fka1_arr,
                    pk2_arr=fka2_arr)
     assert_raises(TypeError, tsp.eval, 1E-2, np.array([0.1]))
 
@@ -104,7 +107,7 @@ def test_tk3d_eval_errors():
 def test_tk3d_delete():
     """Check that ccl.Tk3D.__del__ works."""
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
-    tsp = ccl.Tk3D(a_arr, lk_arr, pk1_arr=fka1_arr,
+    tsp = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=fka1_arr,
                    pk2_arr=fka2_arr)
     # This should not cause an ignored exception
     del tsp
@@ -114,10 +117,10 @@ def test_tk3d_delete():
 def test_tk3d_eval(is_product):
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
     if is_product:
-        tsp = ccl.Tk3D(a_arr, lk_arr, pk1_arr=fka1_arr,
+        tsp = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=fka1_arr,
                        pk2_arr=fka2_arr)
     else:
-        tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
+        tsp = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkka_arr)
 
     # Test at single point
     ktest = 0.7

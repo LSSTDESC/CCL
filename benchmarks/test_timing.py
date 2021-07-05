@@ -22,17 +22,17 @@ def test_timing():
     cosmo.compute_nonlin_power()
 
     start = time.time()
-    t_g = [ccl.NumberCountsTracer(cosmo, True,
-                                  (z_g, ng),
+    t_g = [ccl.NumberCountsTracer(cosmo, has_rsd=True,
+                                  dndz=(z_g, ng),
                                   bias=(z_g, np.full(len(z_g), b)))
            for ng, b in zip(dNdz_g, b_g)]
-    t_s = [ccl.WeakLensingTracer(cosmo, (z_s, ns)) for ns in dNdz_s]
+    t_s = [ccl.WeakLensingTracer(cosmo, dndz=(z_s, ns)) for ns in dNdz_s]
     t_all = t_g + t_s
 
     cls = np.zeros([nx, nl])
     ind1, ind2 = np.triu_indices(nt)
     for ix, (i1, i2) in enumerate(zip(ind1, ind2)):
-        cls[ix, :] = ccl.angular_cl(cosmo, t_all[i1], t_all[i2], ls)
+        cls[ix, :] = ccl.angular_cl(cosmo, t_all[i1], t_all[i2], ell=ls)
     end = time.time()
     t_seconds = end - start
     print(end-start)

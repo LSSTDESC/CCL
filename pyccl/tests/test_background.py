@@ -109,14 +109,14 @@ def test_background_omega_x_raises():
     'neutrinos_massive'])
 @pytest.mark.parametrize('is_comoving', [True, False])
 def test_background_rho_x(a, kind, is_comoving):
-    val = ccl.rho_x(COSMO_NU, a, kind, is_comoving)
+    val = ccl.rho_x(COSMO_NU, a, kind, is_comoving=is_comoving)
     assert np.all(np.isfinite(val))
     assert np.shape(val) == np.shape(a)
 
 
 def test_background_rho_x_raises():
     with pytest.raises(ValueError):
-        ccl.rho_x(COSMO, 1, 'blah', False)
+        ccl.rho_x(COSMO, 1, 'blah', is_comoving=False)
 
 
 def test_input_arrays():

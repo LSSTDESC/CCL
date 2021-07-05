@@ -46,20 +46,20 @@ def test_nM_subclasses_smoke(nM_class):
 def test_nM_mdef_raises(nM_pair):
     nM_class, mdef = nM_pair
     with pytest.raises(ValueError):
-        nM_class(COSMO, mdef)
+        nM_class(COSMO, mass_def=mdef)
 
 
 @pytest.mark.parametrize('nM_class', [ccl.halos.MassFuncTinker08,
                                       ccl.halos.MassFuncTinker10])
 def test_nM_mdef_bad_delta(nM_class):
     with pytest.raises(ValueError):
-        nM_class(COSMO, MFOF)
+        nM_class(COSMO, mass_def=MFOF)
 
 
 @pytest.mark.parametrize('nM_class', [ccl.halos.MassFuncTinker08,
                                       ccl.halos.MassFuncTinker10])
 def test_nM_SO_allgood(nM_class):
-    nM = nM_class(COSMO, MVIR)
+    nM = nM_class(COSMO, mass_def=MVIR)
     for m in MS:
         n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -77,8 +77,7 @@ def test_nM_despali_smoke():
 
 @pytest.mark.parametrize('mdef', [MFOF, M200m])
 def test_nM_watson_smoke(mdef):
-    nM = ccl.halos.MassFuncWatson13(COSMO,
-                                    mdef)
+    nM = ccl.halos.MassFuncWatson13(COSMO, mass_def=mdef)
     for m in MS:
         n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -92,16 +91,20 @@ def test_nM_watson_smoke(mdef):
 @pytest.mark.parametrize('with_hydro', [True, False])
 def test_nM_bocquet_smoke(with_hydro):
     with pytest.raises(ValueError):
-        ccl.halos.MassFuncBocquet16(COSMO, M500m,
+        ccl.halos.MassFuncBocquet16(COSMO, mass_def=M500m,
                                     hydro=with_hydro)
 
     for md in [M500c, M200c, M200m]:
-        nM = ccl.halos.MassFuncBocquet16(COSMO, md,
+        nM = ccl.halos.MassFuncBocquet16(COSMO, mass_def=md,
                                          hydro=with_hydro)
         for m in MS:
             n = nM.get_mass_function(COSMO, m, 0.9)
             assert np.all(np.isfinite(n))
             assert np.shape(n) == np.shape(m)
+
+    md = ccl.halos.MassDef(1000, "matter")
+    hmf = ccl.halos.MassFuncBocquet16(COSMO, mass_def_strict=True)
+    assert hmf._check_mass_def_strict(md) is True
 
 
 @pytest.mark.parametrize('name', ['Press74', 'Tinker08',
@@ -127,7 +130,7 @@ def test_nM_default():
 
     M_in = 1E12
     lM_out = nM._get_consistent_mass(COSMO,
-                                     M_in, 1., nM.mdef)
+                                     M_in, 1., nM.mass_def)
     assert np.fabs(np.log10(M_in) - lM_out) < 1E-10
 
 
@@ -141,8 +144,8 @@ def test_nM_tinker_crit(mf):
     delta_m = delta_c * oc / om
     mdef_c = ccl.halos.MassDef(delta_c, 'critical')
     mdef_m = ccl.halos.MassDef(delta_m, 'matter')
-    nM_c = mf(COSMO, mdef_c)
-    nM_m = mf(COSMO, mdef_m)
+    nM_c = mf(COSMO, mass_def=mdef_c)
+    nM_m = mf(COSMO, mass_def=mdef_m)
     assert np.allclose(nM_c.get_mass_function(COSMO, 1E13, a),
                        nM_m.get_mass_function(COSMO, 1E13, a))
 

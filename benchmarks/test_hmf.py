@@ -16,7 +16,7 @@ zs = np.array([0., 0.5, 1.])
 
 def test_hmf_despali16():
     hmd = ccl.halos.MassDef('vir', 'critical')
-    mf = ccl.halos.MassFuncDespali16(cosmo, hmd)
+    mf = ccl.halos.MassFuncDespali16(cosmo, mass_def=hmd)
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_despali16.txt'),
                        unpack=True)
     m = d_hmf[0]
@@ -28,7 +28,7 @@ def test_hmf_despali16():
 
 def test_hmf_bocquet16():
     hmd = ccl.halos.MassDef200c()
-    mf = ccl.halos.MassFuncBocquet16(cosmo, hmd)
+    mf = ccl.halos.MassFuncBocquet16(cosmo, mass_def=hmd)
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_bocquet16.txt'),
                        unpack=True)
     m = d_hmf[0]

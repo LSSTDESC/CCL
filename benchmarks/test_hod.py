@@ -49,11 +49,12 @@ def test_hodcl():
 
     # Halo model setup
     mass_def = ccl.halos.MassDef(200, 'critical')
-    cm = ccl.halos.ConcentrationDuffy08(mass_def)
+    cm = ccl.halos.ConcentrationDuffy08(mass_def=mass_def)
     hmf = ccl.halos.MassFuncTinker08(cosmo, mass_def=mass_def)
     hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mass_def)
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
-    prf = ccl.halos.HaloProfileHOD(cm,
+    hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf,
+                                 halo_bias=hbf, mass_def=mass_def)
+    prf = ccl.halos.HaloProfileHOD(c_m_relation=cm,
                                    lMmin_0=np.log10(10.**lMcut/cosmo['h']),
                                    siglM_0=sigma_Ncen,
                                    lM0_0=np.log10(10.**lMcut/cosmo['h']),
@@ -66,11 +67,11 @@ def test_hodcl():
     k_arr = np.geomspace(1E-4, 1E2, 512)
     a_arr = np.linspace(0.8, 1, 32)
     pk_hod = ccl.halos.halomod_Pk2D(cosmo, hmc, prf, prof_2pt=prf2pt,
-                                    normprof1=True, lk_arr=np.log(k_arr),
+                                    normprof=True, lk_arr=np.log(k_arr),
                                     a_arr=a_arr)
     # C_ell
-    tr = ccl.NumberCountsTracer(cosmo, False, (z_arr, dndz),
-                                (z_arr, np.ones(len(dndz))))
-    cl_hod = ccl.angular_cl(cosmo, tr, tr, l_bm, p_of_k_a=pk_hod)
+    tr = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z_arr, dndz),
+                                bias=(z_arr, np.ones(len(dndz))))
+    cl_hod = ccl.angular_cl(cosmo, tr, tr, ell=l_bm, p_of_k_a=pk_hod)
 
     assert np.all(np.fabs(cl_hod/cl_bm-1) < 0.005)

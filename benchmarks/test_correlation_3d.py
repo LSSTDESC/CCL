@@ -45,10 +45,10 @@ def test_correlation_3d(model):
         zind = int(z)
         a = 1.0 / (1 + z)
 
-        xi1 = ccl.correlation_3d(cosmo, a, r1)
+        xi1 = ccl.correlation_3d(cosmo, a, dist=r1)
         err = np.abs(r1*r1*(xi1-data1[:, zind+1]))
         assert np.allclose(err, 0, rtol=0, atol=CORR_TOLERANCE1[zind])
 
-        xi2 = ccl.correlation_3d(cosmo, a, data2[:, 0])
+        xi2 = ccl.correlation_3d(cosmo, a, dist=data2[:, 0])
         err = np.abs(r2*r2*(xi2-data2[:, zind+1]))
         assert np.allclose(err, 0, rtol=0, atol=CORR_TOLERANCE1[zind])

@@ -21,7 +21,7 @@ def get_tk3d(alpha=1, beta=1):
                                k_arr[:, None], a,
                                alpha, beta)
                          for a in a_arr])
-    return ccl.Tk3D(a_arr, np.log(k_arr),
+    return ccl.Tk3D(a_arr=a_arr, lk_arr=np.log(k_arr),
                     tkk_arr=np.log(tkka_arr),
                     is_logt=True)
 
@@ -53,34 +53,34 @@ def test_cov_cNG_sanity(alpha, beta):
 
     cov_p = pred_covar(ls[None, :], ls[:, None], alpha, beta)
 
-    cov = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ls, tsp)
+    cov = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ell=ls, t_of_kk_a=tsp)
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
 
     # Spline integration (fast but inaccurate)
-    cov = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ls, tsp,
+    cov = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
                                  integration_method='spline')
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 4E-2)
 
     # Different tracers
-    cov = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ls, tsp,
-                                 cltracer3=tr, cltracer4=tr)
+    cov = ccl.angular_cl_cov_cNG(COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
+                                 tracer3=tr, tracer4=tr)
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
 
     # Different ells
-    cov = np.array([ccl.angular_cl_cov_cNG(COSMO, tr, tr, ls, tsp,
-                                           ell2=l)
+    cov = np.array([ccl.angular_cl_cov_cNG(COSMO, tr, tr, ell=ls,
+                                           t_of_kk_a=tsp, ell2=l)
                     for l in ls])
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
 
     # Different ells (transpose)
-    cov = np.array([ccl.angular_cl_cov_cNG(COSMO, tr, tr, l, tsp,
-                                           ell2=ls)
+    cov = np.array([ccl.angular_cl_cov_cNG(COSMO, tr, tr, ell=l,
+                                           t_of_kk_a=tsp, ell2=ls)
                     for l in ls]).T
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
 
     # All scalars
-    cov = np.array([[ccl.angular_cl_cov_cNG(COSMO, tr, tr, l1, tsp,
-                                            ell2=l2)
+    cov = np.array([[ccl.angular_cl_cov_cNG(COSMO, tr, tr, ell=l1,
+                                            t_of_kk_a=tsp, ell2=l2)
                      for l1 in ls]
                     for l2 in ls])
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
@@ -92,8 +92,11 @@ def test_cov_cNG_errors():
     ls = np.array([2., 20., 200.])
 
     assert_raises(ValueError, ccl.angular_cl_cov_cNG,
-                  COSMO, tr, tr, ls, tsp,
+                  COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
                   integration_method='cag_cuad')
 
     assert_raises(TypeError, ccl.angular_cl_cov_cNG,
-                  COSMO, tr, tr, ls, tr)
+                  COSMO, tr, tr, ell=ls, tracer3=tr)
+
+    assert_raises(TypeError, ccl.angular_cl_cov_cNG,
+                  COSMO, tr, tr, ell=ls, t_of_kk_a=None)

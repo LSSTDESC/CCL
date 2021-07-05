@@ -29,11 +29,11 @@ def test_bM_subclasses_smoke(bM_class):
 def test_bM_mdef_raises(bM_pair):
     bM_class, mdef = bM_pair
     with pytest.raises(ValueError):
-        bM_class(COSMO, mdef)
+        bM_class(COSMO, mass_def=mdef)
 
 
 def test_bM_SO_allgood():
-    bM = ccl.halos.HaloBiasTinker10(COSMO, MVIR)
+    bM = ccl.halos.HaloBiasTinker10(COSMO, mass_def=MVIR)
     for m in MS:
         b = bM.get_halo_bias(COSMO, m, 0.9)
         assert np.all(np.isfinite(b))
@@ -62,5 +62,5 @@ def test_bM_default():
 
     M_in = 1E12
     lM_out = bM._get_consistent_mass(COSMO,
-                                     M_in, 1., bM.mdef)
+                                     M_in, 1., bM.mass_def)
     assert np.fabs(np.log10(M_in) - lM_out) < 1E-10
