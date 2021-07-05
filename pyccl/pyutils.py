@@ -605,9 +605,25 @@ def warn_api(pairs=None, order=None):
                         f"argument{s} {news}, respectively.",
                         CCLWarning)
 
+            # raise normprof warning? (1 of 2)
+            if ("normprof" in names) and ("normprof" not in kwargs):
+                warn_normprof = True
+            else:
+                warn_normprof = False
+
+            # return if we have everything we need
             if len(args) <= npos:
                 # 1. wrapper assumes positional arguments are not swapped
                 # 2. not checking for new function
+                if warn_normprof and ("normprof" not in kwargs):
+                    # backwards-compatibility
+                    kwargs["normprof"] = False
+                    warnings.warn(
+                        "Halo profile normalization `normprof` "
+                        "has to be explicitly specified to prevent "
+                        "unwanted behavior. Not specifying it "
+                        "will trigger an exception in the future",
+                        CCLWarning)
                 return func(*args, **kwargs)
 
             # remove what was already added from todo list
@@ -643,6 +659,17 @@ def warn_api(pairs=None, order=None):
                 f"Use of argument{s} {no_kw} as positional is deprecated "
                 f"in {func.__name__}. Pass the name{s} of the "
                 f"keyword-only argument{s} explicitly.", CCLWarning)
+
+            # raise normprof warning? (2 of 2)
+            if warn_normprof and ("normprof" not in kwargs):
+                # backwards-compatibility
+                kwargs["normprof"] = False
+                warnings.warn(
+                    "Halo profile normalization `normprof` "
+                    "has to be explicitly specified to prevent "
+                    "unwanted behavior. Not specifying it "
+                    "will trigger an exception in the future",
+                    CCLWarning)
 
             return func(**kwargs)
 
