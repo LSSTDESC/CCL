@@ -78,7 +78,7 @@ def test_API_preserve_warnings():
         PK2D.eval(1., 1., COSMO)
 
 
-@pytest.parametrize('prof_class',
+@pytest.mark.parametrize('prof_class',
                     [ccl.halos.HaloProfileNFW,
                      ccl.halos.HaloProfileEinasto,
                      ccl.halos.HaloProfileHernquist,
