@@ -331,6 +331,7 @@ class MassFuncTinker08(MassFunc):
     """
     name = 'Tinker08'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
         super(MassFuncTinker08, self).__init__(
             cosmo,
