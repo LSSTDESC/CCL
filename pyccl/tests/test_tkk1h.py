@@ -9,9 +9,9 @@ COSMO = ccl.Cosmology(
 M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
-CONC = ccl.halos.ConcentrationDuffy08(mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(c_m_relation=CONC, fourier_analytic=True)
-P2 = ccl.halos.HaloProfileHOD(c_m_relation=CONC)
+P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
+                              fourier_analytic=True)
+P2 = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
 Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
@@ -75,19 +75,18 @@ def smoke_assert_tkk1h_real(func):
                            'p3': P3, 'p4': P4, 'cv34': PKC,
                            'norm': True}],)
 def test_tkk1h_smoke(pars):
-    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF,
-                                 halo_bias=HBF, mass_def=M200,
-                                 nlM=2)
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
+                                 nlog10M=2)
 
     def f(k, a):
         return ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k, a,
-                                                prof=pars['p1'],
+                                                prof1=pars['p1'],
                                                 prof2=pars['p2'],
                                                 prof12_2pt=pars['cv12'],
                                                 prof3=pars['p3'],
                                                 prof4=pars['p4'],
                                                 prof34_2pt=pars['cv34'],
-                                                normprof=pars['norm'],
+                                                normprof1=pars['norm'],
                                                 normprof2=pars['norm'],
                                                 normprof3=pars['norm'],
                                                 normprof4=pars['norm'])
@@ -95,8 +94,7 @@ def test_tkk1h_smoke(pars):
 
 
 def test_tkk1h_tk3d():
-    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF,
-                                 halo_bias=HBF, mass_def=M200)
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
     tkk_arr = ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
@@ -104,7 +102,7 @@ def test_tkk1h_tk3d():
                                                prof12_2pt=PKC,
                                                prof3=P3, prof4=P4,
                                                prof34_2pt=PKC,
-                                               normprof=True,
+                                               normprof1=True,
                                                normprof2=True,
                                                normprof3=True,
                                                normprof4=True)
@@ -115,7 +113,7 @@ def test_tkk1h_tk3d():
                                      prof12_2pt=PKC,
                                      prof3=P3, prof4=P4,
                                      prof34_2pt=PKC,
-                                     normprof=True,
+                                     normprof1=True,
                                      normprof2=True,
                                      normprof3=True,
                                      normprof4=True,
@@ -132,7 +130,7 @@ def test_tkk1h_tk3d():
                                      prof12_2pt=PKC,
                                      prof3=P3, prof4=P4,
                                      prof34_2pt=PKC,
-                                     normprof=True,
+                                     normprof1=True,
                                      normprof2=True,
                                      normprof3=True,
                                      normprof4=True,
@@ -146,35 +144,33 @@ def test_tkk1h_tk3d():
 def test_tkk1h_errors():
     from pyccl.pyutils import assert_warns
 
-    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF,
-                                 halo_bias=HBF, mass_def=M200)
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
 
     # Wrong first profile
     with pytest.raises(TypeError):
-        ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr, None,
-                                         normprof=False)
+        ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr, None)
     # Wrong other profiles
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof2=PKC, normprof=False)
+                                         P1, prof2=PKC)
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof3=PKC, normprof=False)
+                                         P1, prof3=PKC)
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof4=PKC, normprof=False)
+                                         P1, prof4=PKC)
     # Wrong 2pts
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof12_2pt=P2, normprof=False)
+                                         P1, prof12_2pt=P2)
     with pytest.raises(TypeError):
         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-                                         P1, prof34_2pt=P2, normprof=False)
+                                         P1, prof34_2pt=P2)
 
     # Negative profile in logspace
     assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,
-                 COSMO, hmc, P3, prof2=Pneg, normprof=False,
+                 COSMO, hmc, P3, prof2=Pneg,
                  lk_arr=np.log(k_arr), a_arr=a_arr,
                  use_log=True)

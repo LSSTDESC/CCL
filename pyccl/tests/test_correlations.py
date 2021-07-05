@@ -15,7 +15,7 @@ def test_correlation_smoke(method):
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
 
     ell = np.logspace(1, 3, 5)
-    cl = ccl.angular_cl(COSMO, lens, lens, ell=ell)
+    cl = ccl.angular_cl(COSMO, lens, lens, ell)
 
     t_arr = np.logspace(-2., np.log10(5.), 5)
     t_lst = [t for t in t_arr]
@@ -24,7 +24,7 @@ def test_correlation_smoke(method):
 
     for tval in [t_arr, t_lst, t_scl, t_int]:
         corr = ccl.correlation(
-            COSMO, ell=ell, C_ell=cl, theta=tval, type='NN', method=method)
+            COSMO, ell, cl, tval, type='NN', method=method)
         assert np.all(np.isfinite(corr))
         assert np.shape(corr) == np.shape(tval)
 
@@ -40,15 +40,13 @@ def test_correlation_newtypes(typs):
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
 
     ell = np.logspace(1, 3, 5)
-    cl = ccl.angular_cl(COSMO, lens, lens, ell=ell)
+    cl = ccl.angular_cl(COSMO, lens, lens, ell)
 
     theta = np.logspace(-2., np.log10(5.), 5)
     corr_old = assert_warns(
         ccl.CCLWarning,
-        ccl.correlation, COSMO,
-        ell=ell, C_ell=cl,
-        theta=theta, corr_type=typs[0])
-    corr_new = ccl.correlation(COSMO, ell=ell, C_ell=cl, theta=theta,
+        ccl.correlation, COSMO, ell, cl, theta, corr_type=typs[0])
+    corr_new = ccl.correlation(COSMO, ell, cl, theta,
                                type=typs[1])
     assert np.all(corr_new == corr_old)
 
@@ -61,7 +59,7 @@ def test_correlation_newtypes(typs):
      [r for r in np.logspace(1, 2, 5)]])
 def test_correlation_3d_smoke(rval):
     a = 0.8
-    corr = ccl.correlation_3d(COSMO, a, dist=rval)
+    corr = ccl.correlation_3d(COSMO, a, rval)
     assert np.all(np.isfinite(corr))
     assert np.shape(corr) == np.shape(rval)
 
@@ -76,7 +74,7 @@ def test_correlation_3dRSD_smoke(sval):
     a = 0.8
     mu = 0.7
     beta = 0.5
-    corr = ccl.correlation_3dRsd(COSMO, a, dist=sval, mu=mu, beta=beta)
+    corr = ccl.correlation_3dRsd(COSMO, a, sval, mu, beta)
     assert np.all(np.isfinite(corr))
     assert np.shape(corr) == np.shape(sval)
 
@@ -90,7 +88,7 @@ def test_correlation_3dRSD_smoke(sval):
 def test_correlation_3dRSD_avgmu_smoke(sval):
     a = 0.8
     beta = 0.5
-    corr = ccl.correlation_3dRsd_avgmu(COSMO, a, dist=sval, beta=beta)
+    corr = ccl.correlation_3dRsd_avgmu(COSMO, a, sval, beta)
     assert np.all(np.isfinite(corr))
     assert np.shape(corr) == np.shape(sval)
 
@@ -105,7 +103,7 @@ def test_correlation_3dRSD_avgmu_smoke(sval):
 def test_correlation_3dRSD_multipole_smoke(sval, l):
     a = 0.8
     beta = 0.5
-    corr = ccl.correlation_multipole(COSMO, a, beta=beta, ell=l, dist=sval)
+    corr = ccl.correlation_multipole(COSMO, a, beta, l, sval)
     assert np.all(np.isfinite(corr))
     assert np.shape(corr) == np.shape(sval)
 
@@ -120,20 +118,18 @@ def test_correlation_pi_sigma_smoke(sval):
     a = 0.8
     beta = 0.5
     pie = 1
-    corr = ccl.correlation_pi_sigma(COSMO, a, beta=beta, pi=pie, sigma=sval)
+    corr = ccl.correlation_pi_sigma(COSMO, a, beta, pie, sval)
     assert np.all(np.isfinite(corr))
     assert np.shape(corr) == np.shape(sval)
 
 
 def test_correlation_raises():
     with pytest.raises(ValueError):
-        ccl.correlation(COSMO, ell=[1], C_ell=[1e-3], theta=[1],
-                        method='blah')
+        ccl.correlation(COSMO, [1], [1e-3], [1], method='blah')
     with pytest.raises(ValueError):
-        ccl.correlation(COSMO, ell=[1], C_ell=[1e-3], theta=[1], type='blah')
+        ccl.correlation(COSMO, [1], [1e-3], [1], type='blah')
     with pytest.raises(ValueError):
-        ccl.correlation(COSMO, ell=[1], C_ell=[1e-3], theta=[1],
-                        corr_type='blah')
+        ccl.correlation(COSMO, [1], [1e-3], [1], corr_type='blah')
 
 
 def test_correlation_zero():
@@ -141,7 +137,7 @@ def test_correlation_zero():
     C_ell = np.zeros(ell.size)
     theta = np.logspace(0, 2, 10000)
     t0 = default_timer()
-    corr = ccl.correlation(COSMO, ell=ell, C_ell=C_ell, theta=theta)
+    corr = ccl.correlation(COSMO, ell, C_ell, theta)
     t1 = default_timer()
     # if the short-cut has worked this should take
     # less than 1 second at the absolute outside
@@ -156,4 +152,4 @@ def test_correlation_zero_ends():
     C_ell[500] = 1.0
     theta = np.logspace(0, 2, 20)
     with pytest.raises(ccl.CCLError):
-        ccl.correlation(COSMO, ell=ell, C_ell=C_ell, theta=theta)
+        ccl.correlation(COSMO, ell, C_ell, theta)

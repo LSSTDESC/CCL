@@ -50,28 +50,27 @@ def test_halo_concentration(m):
 def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
     mdef = ccl.halos.MassDef('vir', 'matter')
     if mf == 'shethtormen':
-        hmf = ccl.halos.MassFuncSheth99(cosmo, mass_def=mdef,
+        hmf = ccl.halos.MassFuncSheth99(cosmo, mdef,
                                         mass_def_strict=False,
                                         use_delta_c_fit=True)
         hbf = ccl.halos.HaloBiasSheth99(cosmo, mass_def=mdef,
                                         mass_def_strict=False)
     elif mf == 'tinker10':
-        hmf = ccl.halos.MassFuncTinker10(cosmo, mass_def=mdef,
+        hmf = ccl.halos.MassFuncTinker10(cosmo, mdef,
                                          mass_def_strict=False)
         hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
                                          mass_def_strict=False)
 
     if c == 'constant_concentration':
-        cc = ccl.halos.ConcentrationConstant(4., mass_def=mdef)
+        cc = ccl.halos.ConcentrationConstant(4., mdef)
     elif c == 'duffy2008':
-        cc = ccl.halos.ConcentrationDuffy08(mass_def=mdef)
+        cc = ccl.halos.ConcentrationDuffy08(mdef)
     elif c == 'bhattacharya2011':
-        cc = ccl.halos.ConcentrationBhattacharya13(mass_def=mdef)
-    prf = ccl.halos.HaloProfileNFW(c_m_relation=cc)
-    hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf,
-                                 halo_bias=hbf, mass_def=mdef)
+        cc = ccl.halos.ConcentrationBhattacharya13(mdef)
+    prf = ccl.halos.HaloProfileNFW(cc)
+    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
     p = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, a,
-                                         prf, normprof=True,
+                                         prf, normprof1=True,
                                          get_1h=get_1h,
                                          get_2h=get_2h)
     return p

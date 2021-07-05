@@ -8,7 +8,6 @@ import numpy as np
 from numpy.testing import assert_raises, assert_, assert_no_warnings
 
 import pyccl as ccl
-import warnings
 
 
 def test_cosmology_critical_init():
@@ -201,32 +200,3 @@ def test_cosmology_context():
 
     with pytest.raises(AttributeError):
         cosmo.has_growth
-
-
-@pytest.mark.parametrize('c', ['bhattacharya2011', 'duffy2008',
-                               'constant_concentration'])
-def test_cosmology_concentrations(c):
-    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
-                                     halo_concentration=c)
-    with pytest.warns(RuntimeWarning):
-        cosmo.compute_nonlin_power()
-
-
-@pytest.mark.parametrize('hmf', ['angulo', 'tinker', 'tinker10',
-                                 'watson', 'shethtormen'])
-def test_cosmology_mass_functions(hmf):
-    """Check halo concentration and halo mass function passed into choice
-    `halo_model` of matter power spectrum in Cosmology."""
-    valid_hmf = ["tinker10", "shethtormen"]
-    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
-                                     mass_function=hmf)
-    if hmf in valid_hmf:
-        with pytest.warns(RuntimeWarning):
-            cosmo.compute_nonlin_power()
-    else:
-        # ignore the warning this time because we are interested
-        # in the error that is raised
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            with pytest.raises(ValueError):
-                cosmo.compute_nonlin_power()

@@ -133,8 +133,8 @@ def test_pt_pk2d_bb():
                                 return_ia_bb=True)
     pee2, pbb2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'], ptc=PTC,
                                        return_ia_ee_and_bb=True)
-    assert pee.eval(COSMO, 0.1, 0.9) == pee2.eval(COSMO, 0.1, 0.9)
-    assert pbb.eval(COSMO, 0.1, 0.9) == pbb2.eval(COSMO, 0.1, 0.9)
+    assert pee.eval(0.1, 0.9, COSMO) == pee2.eval(0.1, 0.9, COSMO)
+    assert pbb.eval(0.1, 0.9, COSMO) == pbb2.eval(0.1, 0.9, COSMO)
 
 
 @pytest.mark.parametrize('nl', ['nonlinear', 'linear', 'spt'])
@@ -260,6 +260,6 @@ def test_return_ptc():
     assert ptc2_2 is PTC
     # check that the result outputs are the same
     # for the internally initialized ptc.
-    assert np.allclose(pk_2.eval(COSMO, ks, 1.), pk.eval(COSMO, ks, 1.))
-    assert np.allclose(pee2_2.eval(COSMO, ks, 1.), pee2.eval(COSMO, ks, 1.))
-    assert np.allclose(pbb2_2.eval(COSMO, ks, 1.), pbb2.eval(COSMO, ks, 1.))
+    assert np.allclose(pk_2.eval(ks, 1., COSMO), pk.eval(ks, 1., COSMO))
+    assert np.allclose(pee2_2.eval(ks, 1., COSMO), pee2.eval(ks, 1., COSMO))
+    assert np.allclose(pbb2_2.eval(ks, 1., COSMO), pbb2.eval(ks, 1., COSMO))
