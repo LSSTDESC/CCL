@@ -603,12 +603,18 @@ def warn_api(pairs=None, order=None):
                         f"Use of argument{s} {olds} is deprecated "
                         f"in {func.__name__}. Pass the new name{s} of the "
                         f"argument{s} {news}, respectively.",
-                        FutureWarning)
+                        CCLWarning)
 
             if len(args) <= npos:
                 # 1. wrapper assumes positional arguments are not swapped
                 # 2. not checking for new function
                 return func(*args, **kwargs)
+
+            # remove what was already added from todo list
+            if swap is not None:
+                for key in kwargs:
+                    if key in swap:
+                        swap.remove(key)
 
             # include new positionals to kwarg dict
             for name, value in zip(pos_names, args):
@@ -636,7 +642,7 @@ def warn_api(pairs=None, order=None):
             warnings.warn(
                 f"Use of argument{s} {no_kw} as positional is deprecated "
                 f"in {func.__name__}. Pass the name{s} of the "
-                f"keyword-only argument{s} explicitly.", FutureWarning)
+                f"keyword-only argument{s} explicitly.", CCLWarning)
 
             return func(**kwargs)
 
@@ -685,7 +691,7 @@ def deprecate_attr(pairs=None):
 
                 warnings.warn(
                     f"Attribute {this_name} is deprecated in {class_name}. "
-                    f"Pass the new name {new_name}.", FutureWarning)
+                    f"Pass the new name {new_name}.", CCLWarning)
 
                 this_name = new_name
 
