@@ -182,6 +182,7 @@ class HaloProfile(object):
                                       " _fourier method.")
         return f_r
 
+    @warn_api()
     def fourier(self, cosmo, k, M, a, *, mass_def=None):
         """ Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
