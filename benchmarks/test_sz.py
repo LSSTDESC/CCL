@@ -30,13 +30,14 @@ def test_szcl():
     tr = ccl.tSZTracer(COSMO, z_max=3.)
 
     # Power spectrum
-    pk = ccl.halos.halomod_Pk2D(COSMO, hmc, prf, get_2h=False)
+    pk = ccl.halos.halomod_Pk2D(COSMO, hmc, prf,
+                                normprof1=False, get_2h=False)
     cl = ccl.angular_cl(COSMO, tr, tr, l_bm, p_of_k_a=pk)
 
     # Covariance
     lk_arr = np.log(np.geomspace(1E-4, 1E2, 256))
     a_arr = 1./(1+np.linspace(0, 3., 20))[::-1]
-    tkk = ccl.halos.halomod_Tk3D_1h(COSMO, hmc, prf,
+    tkk = ccl.halos.halomod_Tk3D_1h(COSMO, hmc, prf, normprof1=False,
                                     lk_arr=lk_arr, a_arr=a_arr,
                                     use_log=True)
     tll = ccl.angular_cl_cov_cNG(COSMO, tr, tr, l_bm, tkk, fsky=fsky)
