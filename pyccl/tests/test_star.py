@@ -79,10 +79,10 @@ def test_API_preserve_warnings():
 
 
 @pytest.mark.parametrize('prof_class',
-                    [ccl.halos.HaloProfileNFW,
-                     ccl.halos.HaloProfileEinasto,
-                     ccl.halos.HaloProfileHernquist,
-                     ccl.halos.HaloProfileHOD])
+                         [ccl.halos.HaloProfileNFW,
+                          ccl.halos.HaloProfileEinasto,
+                          ccl.halos.HaloProfileHernquist,
+                          ccl.halos.HaloProfileHOD])
 def test_renamed_attribute(prof_class):
     prof = prof_class(c_m_relation=CON)
 
