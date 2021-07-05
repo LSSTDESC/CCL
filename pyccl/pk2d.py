@@ -1,6 +1,7 @@
 from . import ccllib as lib
 
 from .pyutils import check, warn_api
+from .errors import CCLWarning
 import warnings
 import numpy as np
 
@@ -197,8 +198,9 @@ class Pk2D(object):
         if not isinstance(cosmo, Cosmology):
             warnings.warn("Official API for Pk2D.eval has changed. "
                           "Argument order (k, a, cosmo) has been replaced "
-                          "by (cosmo, k, a).", FutureWarning)
+                          "by (cosmo, k, a).", CCLWarning)
             k, a, cosmo = cosmo, k, a  # old to new API
+            assert isinstance(cosmo, Cosmology)
 
         # make sure we have growth factors for extrapolation
         cosmo.compute_growth()

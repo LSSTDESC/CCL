@@ -1,5 +1,6 @@
 from .profiles import HaloProfile, HaloProfileHOD
 from ..pyutils import warn_api
+from ..errors import CCLWarning
 import warnings
 
 
@@ -77,9 +78,9 @@ class Profile2pt(object):
             warnings.warn("Official API for Profile2pt.fourier_2pt "
                           "has changed. Argument order "
                           "(prof, cosmo, k, M, a) has been replaced by "
-                          "(cosmo, k, M, a, prof).", FutureWarning)
+                          "(cosmo, k, M, a, prof).", CCLWarning)
             prof, cosmo, k, M, a = cosmo, k, M, a, prof  # old to new API
-            assert isinstance(prof, HaloProfile)
+            assert isinstance(cosmo, Cosmology)
 
         if not isinstance(prof, HaloProfile):
             raise TypeError("prof must be of type `HaloProfile`")
@@ -144,9 +145,9 @@ class Profile2ptHOD(Profile2pt):
             warnings.warn("Official API for Profile2pt.fourier_2pt "
                           "has changed. Argument order "
                           "(prof, cosmo, k, M, a) has been replaced by "
-                          "(cosmo, k, M, a, prof).", FutureWarning)
+                          "(cosmo, k, M, a, prof).", CCLWarning)
             prof, cosmo, k, M, a = cosmo, k, M, a, prof  # old to new API
-            assert isinstance(prof, HaloProfile)
+            assert isinstance(cosmo, Cosmology)
 
         if not isinstance(prof, HaloProfileHOD):
             raise TypeError("prof must be of type `HaloProfileHOD`")
