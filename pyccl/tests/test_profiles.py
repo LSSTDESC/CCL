@@ -90,7 +90,7 @@ def test_profiles_equal():
     assert not p1.__eq__(p2)
 
     # something else
-    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm, lMmin_0=12.)
+    p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
     assert p1.__eq__(p2)
     p2.hello_here = 0.
     assert not p1.__eq__(p2)
