@@ -362,3 +362,10 @@ def test_nfw_cumul2d_accuracy(fourier_analytic):
 
     res2 = np.fabs(srt2/srt1-1)
     assert np.all(res2 < 5E-3)
+
+
+def test_upd_fftlog_raises():
+    prof = ccl.halos.HaloProfilePressureGNFW()
+    new_params = {"hello_there": 0.}
+    with pytest.raises(KeyError):
+        prof.update_precision_fftlog(**new_params)
