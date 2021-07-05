@@ -244,6 +244,7 @@ class MassFuncSheth99(MassFunc):
     """
     name = 'Sheth99'
 
+    @warn_api()
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
