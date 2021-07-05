@@ -89,6 +89,12 @@ def test_profiles_equal():
     p2.update_precision_fftlog(**{"plaw_fourier": -2.0})
     assert not p1.__eq__(p2)
 
+    # something else
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm, lMmin_0=12.)
+    assert p1.__eq__(p2)
+    p2.hello_here = 0.
+    assert not p1.__eq__(p2)
+
 
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileNFW,
