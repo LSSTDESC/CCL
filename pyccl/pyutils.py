@@ -622,7 +622,7 @@ def warn_api(pairs=None, order=None):
                     indices = [extra_names.index(n) for n in swap]
                     idx1, idx2 = min(indices), max(indices)
                     extra_names_api = extra_names[:idx1] + swap + \
-                                      extra_names[idx2+1:]
+                                      extra_names[idx2+1:]  # noqa
                 else:
                     extra_names_api = extra_names
 
@@ -630,7 +630,7 @@ def warn_api(pairs=None, order=None):
                     kwargs[name] = value
 
             # warn about API change
-            no_kw = names[npos : npos + len(args)]
+            no_kw = names[npos : npos + len(args)]  # noqa
             s = "" if len(no_kw) == 1 else "s"
             no_kw = f"`{no_kw[0]}`" if len(no_kw) == 1 else no_kw
             warnings.warn(

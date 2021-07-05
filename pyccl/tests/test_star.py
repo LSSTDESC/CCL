@@ -17,6 +17,7 @@ COV = ccl.halos.Profile2pt()
 COVh = ccl.halos.Profile2ptHOD()
 PK2D = ccl.boltzmann.get_camb_pk_lin(COSMO)
 
+
 def test_API_preserve_warnings():
     # 0. no warnings for the following examplary functions
     with pytest.warns(None) as w_rec:
@@ -75,6 +76,7 @@ def test_API_preserve_warnings():
     with pytest.warns(FutureWarning):
         # used to be (k, a, cosmo); now it's (cosmo, k, a)
         PK2D.eval(1., 1., COSMO)
+
 
 @pytest.parametrize('prof_class',
                     [ccl.halos.HaloProfileNFW,
