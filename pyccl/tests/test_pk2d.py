@@ -306,7 +306,3 @@ def test_pk2d_add():
         zarr_f = np.exp(zarr_f)
 
     assert np.allclose((zarr_a + zarr_b)[1:-1, 1:-1], zarr_f)
-    
-
-
-    
