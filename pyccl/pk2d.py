@@ -198,7 +198,7 @@ class Pk2D(object):
             warnings.warn("Official API for Pk2D.eval has changed. "
                           "Argument order (k, a, cosmo) has been replaced "
                           "by (cosmo, k, a).", FutureWarning)
-            cosmo, k, a = k, a, cosmo
+            k, a, cosmo = cosmo, k, a  # old to new API
 
         # make sure we have growth factors for extrapolation
         cosmo.compute_growth()
