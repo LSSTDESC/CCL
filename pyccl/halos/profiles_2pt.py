@@ -38,7 +38,7 @@ class Profile2pt(object):
             self.r_corr = r_corr
 
     def fourier_2pt(self, cosmo, k, M, a, prof, *,
-                    prof2=None, mass_def=None):
+                    prof2=None, mass_def):
         """ Return the Fourier-space two-point moment between
         two profiles.
 
@@ -111,7 +111,7 @@ class Profile2ptHOD(Profile2pt):
     :class:`~pyccl.halos.profiles.HaloProfileHOD`.
     """
     def fourier_2pt(self, cosmo, k, M, a, prof, *,
-                    prof2=None, mass_def=None):
+                    prof2=None, mass_def):
         """ Returns the Fourier-space two-point moment for the HOD
         profile.
 
