@@ -518,3 +518,29 @@ def assert_warns(wtype, f, *args, **kwargs):
         "Warning raised was the wrong type (got %s, expected %s)" % (
             w[0].category, wtype)
     return res
+
+
+def _get_spline1d_arrays(gsl_spline):
+    status = 0
+    size, status = lib.get_spline1d_array_size(gsl_spline, status)
+    check(status)
+
+    xarr, yarr, status = lib.get_spline1d_arrays(gsl_spline, size, size,
+                                                 status)
+    check(status)
+
+    return xarr, yarr
+
+
+def _get_spline2d_arrays(gsl_spline):
+    status = 0
+    x_size, y_size, status = lib.get_spline2d_array_sizes(gsl_spline, status)
+    check(status)
+
+    z_size = x_size*y_size
+    xarr, yarr, zarr, status = lib.get_spline2d_arrays(gsl_spline,
+                                                       x_size, y_size, z_size,
+                                                       status)
+    check(status)
+
+    return yarr, xarr, zarr.reshape(y_size, x_size)
