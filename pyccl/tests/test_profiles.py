@@ -66,7 +66,8 @@ def test_profiles_equal():
     assert p1.__eq__(p2)
 
     # equivalent profiles
-    p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
+    cm2 = ccl.halos.ConcentrationDuffy08(mdef=M200m)
+    p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
     assert p1.__eq__(p2)
 
     # different parameters

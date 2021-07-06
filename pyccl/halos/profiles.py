@@ -160,11 +160,11 @@ class HaloProfile(object):
             return True
 
         for key, val in params.items():
-            if key == "cM":
+            if key == "c_m_relation":
                 cm2 = params2.get(key)
                 if val.name != cm2.name:
                     return False
-                if not val.mdef.__eq__(cm2.mdef):
+                if not val.mass_def.__eq__(cm2.mass_def):
                     return False
             elif key == "precision_fftlog":
                 if val != params2[key]:
@@ -173,9 +173,11 @@ class HaloProfile(object):
                 if val != params2.get(key):
                     return False
 
-        # if it's not one of the cases above, then something
-        # peculiar is happening so return False to be consistent
-        return False
+        if len(params) != len(params2):
+            return False
+
+        # if this point is reached, the profiles must be equivalent
+        return True
 
     def real(self, cosmo, r, M, a, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
