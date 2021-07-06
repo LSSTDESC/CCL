@@ -15,10 +15,10 @@ def test_cosmo_methods():
     as their first argument are methods of the Cosmology object.
     """
     from inspect import getmembers, isfunction, signature
-    from .. import background, bcm, \
+    from pyccl import background, bcm, \
         cls, correlations, covariances, \
         pk2d, power, tracers, halos, nl_pt
-    from ..core import CosmologyVanillaLCDM
+    from pyccl.core import CosmologyVanillaLCDM
     cosmo = CosmologyVanillaLCDM()
     subs = [background, bcm, cls, correlations, covariances,
             pk2d, power, tracers, halos, nl_pt]
@@ -28,6 +28,20 @@ def test_cosmo_methods():
         pars = signature(func).parameters
         if list(pars)[0] == "cosmo":
             _ = getattr(cosmo, name)
+
+    # quantitative
+    assert ccl.sigma8(cosmo) == cosmo.sigma8()
+    assert ccl.rho_x(cosmo, 1., "matter", is_comoving=False) == \
+        cosmo.rho_x(1., "matter", is_comoving=False)
+    assert ccl.get_camb_pk_lin(cosmo).eval(1., 1., cosmo) == \
+        cosmo.get_camb_pk_lin().eval(1., 1., cosmo)
+    prof = ccl.halos.HaloProfilePressureGNFW()
+    hmd = ccl.halos.MassDef200m()
+    hmf = ccl.halos.MassFuncTinker08(cosmo)
+    hbf = ccl.halos.HaloBiasTinker10(cosmo)
+    hmc = ccl.halos.HMCalculator(massfunc=hmf, hbias=hbf, mass_def=hmd)
+    assert ccl.halos.halomod_power_spectrum(cosmo, hmc, 1., 1., prof) == \
+        cosmo.halomod_power_spectrum(hmc, 1., 1., prof)
 
 
 def test_cosmology_critical_init():
