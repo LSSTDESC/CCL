@@ -95,12 +95,8 @@ void get_spline1d_arrays(gsl_spline *spline,
     *status = CCL_ERROR_INCONSISTENT;
     return;
   }
-  for(int i=0; i<x_size; i++) {
-    xarr[i] = spline->x[i];
-  }
-  for(int i=0; i<y_size; i++) {
-    yarr[i] = spline->y[i];
-  }
+  memcpy(xarr, spline->x, sizeof(double)*x_size);
+  memcpy(yarr, spline->y, sizeof(double)*y_size);
 }
 
 void get_spline2d_arrays(gsl_spline2d *spline2d,
@@ -121,15 +117,9 @@ void get_spline2d_arrays(gsl_spline2d *spline2d,
     *status = CCL_ERROR_INCONSISTENT;
     return;
   }
-  for(int i=0; i<x_size; i++) {
-    xarr[i] = spline2d->xarr[i];
-  }
-  for(int i=0; i<y_size; i++) {
-    yarr[i] = spline2d->yarr[i];
-  }
-  for(int i=0; i<x_size*y_size; i++) {
-    zarr[i] = spline2d->zarr[i];
-  }
+  memcpy(xarr, spline2d->xarr, sizeof(double)*x_size);
+  memcpy(yarr, spline2d->yarr, sizeof(double)*y_size);
+  memcpy(zarr, spline2d->zarr, sizeof(double)*x_size*y_size);
 }
 
 %}
