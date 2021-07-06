@@ -151,7 +151,7 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
-    @warn_api(pairs=[("r", "rt")])
+    @warn_api()
     def real(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
@@ -426,7 +426,7 @@ class HaloProfileGaussian(HaloProfile):
     """
     name = 'Gaussian'
 
-    @warn_api(pairs=[("r_scale", "r_s")])
+    @warn_api()
     def __init__(self, *, r_scale, rho0):
         self.rho_0 = rho0
         self.r_scale = r_scale
@@ -473,7 +473,7 @@ class HaloProfilePowerLaw(HaloProfile):
     """
     name = 'PowerLaw'
 
-    @warn_api(pairs=[("r_scale", "r_s")])
+    @warn_api()
     def __init__(self, *, r_scale, tilt):
         self.r_s = r_scale
         self.tilt = tilt

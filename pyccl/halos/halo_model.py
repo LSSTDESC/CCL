@@ -400,8 +400,8 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
         `k` and `a` respectively. If `k` or `a` are scalars, the
         corresponding dimension will be squeezed out on output.
     """
-    a_use = np.atleast_1d(a)
-    k_use = np.atleast_1d(k)
+    a_use = np.atleast_1d(a).astype(float)
+    k_use = np.atleast_1d(k).astype(float)
 
     # Check inputs
     if not isinstance(prof, HaloProfile):

@@ -20,7 +20,7 @@ PK2D = ccl.boltzmann.get_camb_pk_lin(COSMO)
 
 
 def test_API_preserve_warnings():
-    # 0. no warnings for the following examplary functions
+    # 0. no warnings for the following exemplary functions
     with pytest.warns(None) as w_rec:
         R1 = ccl.Omega_nu_h2(1., m_nu=[1, 1, 1], T_CMB=2.7)
         R2 = ccl.nu_masses(Om_nu_h2=0.05, mass_split="normal")
