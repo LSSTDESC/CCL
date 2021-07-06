@@ -732,3 +732,56 @@ def deprecate_attr(pairs=None):
             return getter(cls, this_name)
         return new_getter
     return wrapper
+
+
+def _get_spline1d_arrays(gsl_spline):
+    """Get array data from a 1D GSL spline.
+
+    Args:
+        gsl_spline: `SWIGObject` of gsl_spline
+            The SWIG object of the GSL spline.
+
+    Returns:
+        xarr: array_like
+            The x array of the spline.
+        yarr: array_like
+            The y array of the spline.
+    """
+    status = 0
+    size, status = lib.get_spline1d_array_size(gsl_spline, status)
+    check(status)
+
+    xarr, yarr, status = lib.get_spline1d_arrays(gsl_spline, size, size,
+                                                 status)
+    check(status)
+
+    return xarr, yarr
+
+
+def _get_spline2d_arrays(gsl_spline):
+    """Get array data from a 2D GSL spline.
+
+    Args:
+        gsl_spline: `SWIGObject` of gsl_spline2d
+            The SWIG object of the 2D GSL spline.
+
+    Returns:
+        yarr: array_like
+            The y array of the spline.
+        xarr: array_like
+            The x array of the spline.
+        zarr: array_like
+            The z array of the spline. The shape is (yarr.size, xarr.size).
+    """
+    status = 0
+    x_size, y_size, status = lib.get_spline2d_array_sizes(gsl_spline, status)
+    check(status)
+
+    z_size = x_size*y_size
+    xarr, yarr, zarr, status = lib.get_spline2d_arrays(gsl_spline,
+                                                       x_size, y_size, z_size,
+                                                       status)
+    check(status)
+
+    return yarr, xarr, zarr.reshape(y_size, x_size)
+  

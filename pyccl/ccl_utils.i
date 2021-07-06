@@ -11,6 +11,13 @@
   (double *ys_in, int n_in_y)};
 %apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
 
+%apply (int DIM1, double* ARGOUT_ARRAY1) {(int x_size, double* xarr)};
+%apply (int DIM1, double* ARGOUT_ARRAY1) {(int y_size, double* yarr)};
+%apply (int DIM1, double* ARGOUT_ARRAY1) {(int z_size, double* zarr)};
+
+%apply (int* OUTPUT) {(int *size)};
+%apply int *OUTPUT { int *x_size, int *y_size };
+
 
 %feature("pythonprepend") spline_integrate %{
     if n_integ * x_in.size != ys_in.size:
@@ -47,6 +54,72 @@ void spline_integrate(int n_integ,
   }
 
   free(_ys_in);
+}
+
+void get_spline1d_array_size(gsl_spline *spline, int* size, int* status) {
+  if(spline == NULL) {
+    *status = CCL_ERROR_MEMORY;
+    return;
+  }
+  if(spline->interp == NULL) {
+    *status = CCL_ERROR_MEMORY;
+    return;
+  }
+  *size = spline->interp->size;
+}
+
+void get_spline2d_array_sizes(gsl_spline2d *spline2d, int* x_size, int* y_size,
+                              int* status) {
+  if(spline2d == NULL) {
+    *status = CCL_ERROR_MEMORY;
+    return;
+  }
+  *x_size = spline2d->interp_object.xsize;
+  *y_size = spline2d->interp_object.ysize;
+}
+
+void get_spline1d_arrays(gsl_spline *spline,
+                         int x_size, double* xarr,
+                         int y_size, double* yarr,
+                         int *status)
+{
+  if(spline == NULL) {
+    *status = CCL_ERROR_MEMORY;
+    return;
+  }
+  if(x_size != spline->interp->size) {
+    *status = CCL_ERROR_INCONSISTENT;
+    return;
+  }
+  if(y_size != spline->interp->size) {
+    *status = CCL_ERROR_INCONSISTENT;
+    return;
+  }
+  memcpy(xarr, spline->x, sizeof(double)*x_size);
+  memcpy(yarr, spline->y, sizeof(double)*y_size);
+}
+
+void get_spline2d_arrays(gsl_spline2d *spline2d,
+                         int x_size, double* xarr,
+                         int y_size, double* yarr,
+                         int z_size, double* zarr,
+                         int *status)
+{
+  if(spline2d == NULL) {
+    *status = CCL_ERROR_MEMORY;
+    return;
+  }
+  if(x_size != spline2d->interp_object.xsize) {
+    *status = CCL_ERROR_INCONSISTENT;
+    return;
+  }
+  if(y_size != spline2d->interp_object.ysize) {
+    *status = CCL_ERROR_INCONSISTENT;
+    return;
+  }
+  memcpy(xarr, spline2d->xarr, sizeof(double)*x_size);
+  memcpy(yarr, spline2d->yarr, sizeof(double)*y_size);
+  memcpy(zarr, spline2d->zarr, sizeof(double)*x_size*y_size);
 }
 
 %}
