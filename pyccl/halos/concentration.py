@@ -403,6 +403,8 @@ class ConcentrationIshiyama21(Concentration):
     name = 'Ishiyama21'
 
     def __init__(self, mdef=None, relaxed=False, Vmax=False):
+        self.relaxed = relaxed
+        self.Vmax = Vmax
         super(ConcentrationIshiyama21, self).__init__(mass_def=mdef)
 
     def _default_mdef(self):
