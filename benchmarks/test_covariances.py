@@ -70,3 +70,4 @@ def test_ssc_WL():
 
     assert np.all(np.fabs(var_ssc_ccl/var_bj - 1) < 3e-2)
     assert np.all(np.fabs(off_diag_1_ccl/off_diag_1_bj - 1) < 3e-2)
+    assert np.all(np.fabs(cov_ssc/cov_ssc_bj_corrected - 1) < 3e-2)
