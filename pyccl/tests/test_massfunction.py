@@ -23,7 +23,7 @@ def test_massfunc_models_smoke(mf_type):
         transfer_function='bbks', matter_power_spectrum='linear',
         mass_function=mf_type)
     hmf_cls = ccl.halos.mass_function_from_name(MF_EQUIV[mf_type])
-    hmf = hmf_cls(cosmo)
+    hmf = hmf_cls()
     for m in MS:
         # Deprecated
         nm_old = assert_warns(ccl.CCLWarning, ccl.massfunc, cosmo, m, 1.)
@@ -42,7 +42,7 @@ def test_halo_bias_models_smoke(mf_type):
         transfer_function='bbks', matter_power_spectrum='linear',
         mass_function=mf_type)
     hbf_cls = ccl.halos.halo_bias_from_name(MF_EQUIV[mf_type])
-    hbf = hbf_cls(cosmo)
+    hbf = hbf_cls()
     for m in MS:
         # Deprecated
         bm_old = assert_warns(ccl.CCLWarning, ccl.halo_bias, cosmo, m, 1.)

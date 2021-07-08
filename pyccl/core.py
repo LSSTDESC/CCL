@@ -838,15 +838,15 @@ class Cosmology(object):
             c = hal.ConcentrationConstant(c=4., mdef=mdef)
 
         if mfm == lib.tinker10:
-            hmf = hal.MassFuncTinker10(self, mass_def=mdef,
+            hmf = hal.MassFuncTinker10(mass_def=mdef,
                                        mass_def_strict=False)
-            hbf = hal.HaloBiasTinker10(self, mass_def=mdef,
+            hbf = hal.HaloBiasTinker10(mass_def=mdef,
                                        mass_def_strict=False)
         elif mfm == lib.shethtormen:
-            hmf = hal.MassFuncSheth99(self, mass_def=mdef,
+            hmf = hal.MassFuncSheth99(mass_def=mdef,
                                       mass_def_strict=False,
                                       use_delta_c_fit=True)
-            hbf = hal.HaloBiasSheth99(self, mass_def=mdef,
+            hbf = hal.HaloBiasSheth99(mass_def=mdef,
                                       mass_def_strict=False)
         else:
             raise ValueError("Halo model spectra not available for your "
