@@ -1,7 +1,7 @@
 # Halo mass definitions
 from .massdef import (  # noqa
     mass2radius_lagrangian, MassDef,
-    MassDef200m, MassDef200c,
+    MassDef200m, MassDef200c, MassDef500c,
     MassDefVir)
 
 # Halo concentration
