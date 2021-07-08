@@ -27,9 +27,11 @@ def test_hmc_from_string_smoke():
     hmc1 = ccl.halos.HMCalculator(massfunc="Tinker10",
                                   hbias="Tinker10",
                                   mass_def="200m")
-    assert type(hmc1._massfunc) == type(hmc0._massfunc)
-    assert type(hmc1._hbias) == type(hmc0._hbias)
-    assert type(hmc1._mdef) == type(hmc0._mdef)
+    # no quality assurance of the following lines, because we
+    # require an explicit type check, not an instance check (E721)
+    assert type(hmc1._massfunc) == type(hmc0._massfunc)  # noqa
+    assert type(hmc1._hbias) == type(hmc0._hbias)        # noqa
+    assert type(hmc1._mdef) == type(hmc0._mdef)          # noqa
 
     # some strings
     hmc2 = ccl.halos.HMCalculator(massfunc=HMF,
