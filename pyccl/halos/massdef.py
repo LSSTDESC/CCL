@@ -284,31 +284,15 @@ def mass_def_from_name(name):
     """ Return mass definition subclass from name string.
 
     Args:
-        name (string): a mass function name
+        name (string):
+            a mass definition name (e.g. '200m' for Delta=200 matter)
 
     Returns:
         MassDef subclass corresponding to the input name.
     """
-    if name == "vir":
-        c_m_relation = "Klypin11"
-        return MassDefVir
+    mass_defs = {m.name: m for m in MassDef.__subclasses__()}
 
-    c_m_relation = "Duffy08"
-    try:
-        _, Delta, rho_type = re.split(r"(\d+)", name)
-        Delta = int(Delta)
-    except ValueError:
-        raise ValueError("MassDef name string "
-                         "could not be parsed")
-    if rho_type in ["m", "matter"]:
-        rho_type = "matter"
-    elif rho_type in ["c", "critical"]:
-        rho_type = "critical"
-
-    class MassDefDummy(MassDef):
-        def __init__(self, c_m=c_m_relation):
-            super(MassDefDummy, self).__init__(Delta,
-                                               rho_type,
-                                               c_m_relation=c_m)
-    MassDefDummy.name = name
-    return MassDefDummy
+    if name in mass_defs:
+        return mass_defs[name]
+    else:
+        raise ValueError("Mass definition %s not implemented")

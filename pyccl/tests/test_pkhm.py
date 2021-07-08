@@ -20,12 +20,22 @@ PK2D = ccl.Pk2D(cosmo=COSMO, pkfunc=lambda k, a: a / k)
 
 
 def test_hmc_from_string_smoke():
-    ccl.halos.HMCalculator(massfunc="Tinker08",
-                           hbias="Tinker10",
-                           mass_def="200m")
-    ccl.halos.HMCalculator(massfunc=HMF,
-                           hbias="Tinker10",
-                           mass_def="vir")
+    hmc0 = ccl.halos.HMCalculator(massfunc=HMF,
+                                  hbias=HBF,
+                                  mass_def=M200)
+    # all strings
+    hmc1 = ccl.halos.HMCalculator(massfunc="Tinker10",
+                                  hbias="Tinker10",
+                                  mass_def="200m")
+    assert type(hmc1._massfunc) == type(hmc0._massfunc)
+    assert type(hmc1._hbias) == type(hmc0._hbias)
+    assert type(hmc1._mdef) == type(hmc0._mdef)
+
+    # some strings
+    hmc2 = ccl.halos.HMCalculator(massfunc=HMF,
+                                  hbias="Tinker10",
+                                  mass_def="vir")
+    assert isinstance(hmc2._mdef, ccl.halos.MassDefVir)
 
 
 def test_hmc_raises():
