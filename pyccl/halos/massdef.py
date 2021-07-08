@@ -2,7 +2,6 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import species_types, rho_x, omega_x
 import numpy as np
-import re
 
 
 def mass2radius_lagrangian(cosmo, M):
