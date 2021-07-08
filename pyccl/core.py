@@ -197,11 +197,11 @@ class Cosmology(object):
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
     # an attribute of this class.
-    from . import background, boltzmann, bcm, \
-        cls, correlations, covariances, \
-        pk2d, power, tracers, halos, nl_pt
+    from . import background, bcm, boltzmann, \
+        cls, correlations, covariances, neutrinos, \
+        pk2d, power, tk3d, tracers, halos, nl_pt
     subs = [background, boltzmann, bcm, cls, correlations, covariances,
-            pk2d, power, tracers, halos, nl_pt]
+            neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
     for name, func in funcs:
