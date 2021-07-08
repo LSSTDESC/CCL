@@ -110,6 +110,15 @@ def test_cosmology_output():
     assert_(cosmo.has_sigma is True)
 
 
+def test_cosmology_equal():
+    """Check the Cosmology equivalence method."""
+    cosmo1 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                           sigma8=0.81, n_s=0.96)
+    cosmo2 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                           sigma8=0.81, n_s=0.96)
+    assert cosmo1.__eq__(cosmo2)
+
+
 def test_cosmology_pickles():
     """Check that a Cosmology object pickles."""
     cosmo = ccl.Cosmology(

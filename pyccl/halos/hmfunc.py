@@ -57,12 +57,6 @@ class MassFunc(object):
         """
         pass
 
-    def _check_cosmo_dependent(self):
-        """ Is this mass function's setup method
-        cosmology-dependent?
-        """
-        return False
-
     def _check_mdef_strict(self, mdef):
         return False
 
