@@ -50,8 +50,8 @@ def test_hodcl():
     # Halo model setup
     mass_def = ccl.halos.MassDef(200, 'critical')
     cm = ccl.halos.ConcentrationDuffy08(mass_def)
-    hmf = ccl.halos.MassFuncTinker08(cosmo, mass_def=mass_def)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mass_def)
+    hmf = ccl.halos.MassFuncTinker08(mass_def=mass_def)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def)
     hmc = ccl.halos.HMCalculator(hmf, hbf, mass_def)
     prf = ccl.halos.HaloProfileHOD(cm,
                                    lMmin_0=np.log10(10.**lMcut/cosmo['h']),

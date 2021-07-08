@@ -17,10 +17,10 @@ COSMO_HM = ccl.Cosmology(
 def test_halomod_f2d_copy():
     from pyccl.pyutils import assert_warns
     mdef = ccl.halos.MassDef('vir', 'matter')
-    hmf = ccl.halos.MassFuncSheth99(COSMO_HM, mdef,
+    hmf = ccl.halos.MassFuncSheth99(mdef,
                                     mass_def_strict=False,
                                     use_delta_c_fit=True)
-    hbf = ccl.halos.HaloBiasSheth99(COSMO_HM, mass_def=mdef,
+    hbf = ccl.halos.HaloBiasSheth99(mass_def=mdef,
                                     mass_def_strict=False)
     cc = ccl.halos.ConcentrationDuffy08(mdef)
     prf = ccl.halos.HaloProfileNFW(cc)
@@ -60,10 +60,10 @@ def test_nonlin_matter_power_halomod(k):
 
     # New implementation
     mdef = ccl.halos.MassDef('vir', 'matter')
-    hmf = ccl.halos.MassFuncSheth99(COSMO_HM, mdef,
+    hmf = ccl.halos.MassFuncSheth99(mdef,
                                     mass_def_strict=False,
                                     use_delta_c_fit=True)
-    hbf = ccl.halos.HaloBiasSheth99(COSMO_HM, mass_def=mdef,
+    hbf = ccl.halos.HaloBiasSheth99(mass_def=mdef,
                                     mass_def_strict=False)
     cc = ccl.halos.ConcentrationDuffy08(mdef)
     prf = ccl.halos.HaloProfileNFW(cc)

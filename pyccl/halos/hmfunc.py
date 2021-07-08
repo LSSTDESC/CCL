@@ -20,7 +20,6 @@ class MassFunc(object):
     `_get_fsigma` method.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object that fixes
             the mass definition used by this mass function
@@ -30,15 +29,7 @@ class MassFunc(object):
     """
     name = 'default'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
-        self.cosmo = cosmo
-        if self.cosmo is None:
-            if self._check_cosmo_dependent():
-                raise ValueError("Must provide Cosmology for "
-                                 "mass function %s" % self.name)
-        else:
-            self.cosmo.compute_sigma()
-
+    def __init__(self, mass_def=None, mass_def_strict=True):
         self.mass_def_strict = mass_def_strict
         # Check if mass function was provided and check that it's
         # sensible.
@@ -51,7 +42,7 @@ class MassFunc(object):
             self.mdef = mass_def
         else:
             self._default_mdef()
-        self._setup(self.cosmo)
+        self._setup()
 
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
@@ -59,13 +50,10 @@ class MassFunc(object):
         """
         self.mdef = MassDef('fof', 'matter')
 
-    def _setup(self, cosmo):
+    def _setup(self):
         """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
         constructor call.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         """
         pass
 
@@ -146,26 +134,7 @@ class MassFunc(object):
             float or array_like: mass function \
                 :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
         """
-        # set up Cosmology
-        if self.cosmo is not None:
-            if not self.cosmo.__eq__(cosmo):
-                # if this Cosmology is not equal to the stored one
-                # then recompute sigma and store it
-                cosmo.compute_sigma()
-                self.cosmo = cosmo
-                if self._check_cosmo_dependent():
-                    # also, re-run setup if this mass function
-                    # depends on Cosmology
-                    self._setup(cosmo)
-            else:
-                # otherwise, use stored Cosmology
-                # to avoid recomputing sigma
-                cosmo = self.cosmo
-        else:
-            # this will only run the first time
-            # the mass function is queried
-            cosmo.compute_sigma()
-            self.cosmo = cosmo
+        cosmo.compute_sigma()  # compute sigma if needed
 
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
@@ -216,7 +185,6 @@ class MassFuncPress74(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
@@ -226,15 +194,14 @@ class MassFuncPress74(MassFunc):
     """
     name = 'Press74'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
-        super(MassFuncPress74, self).__init__(cosmo,
-                                              mass_def,
+    def __init__(self, mass_def=None, mass_def_strict=True):
+        super(MassFuncPress74, self).__init__(mass_def,
                                               mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef('fof', 'matter')
 
-    def _setup(self, cosmo):
+    def _setup(self):
         self.norm = np.sqrt(2/np.pi)
 
     def _check_mdef_strict(self, mdef):
@@ -254,7 +221,6 @@ class MassFuncSheth99(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
@@ -267,17 +233,16 @@ class MassFuncSheth99(MassFunc):
     """
     name = 'Sheth99'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True,
+    def __init__(self, mass_def=None, mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
-        super(MassFuncSheth99, self).__init__(cosmo,
-                                              mass_def,
+        super(MassFuncSheth99, self).__init__(mass_def,
                                               mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef('fof', 'matter')
 
-    def _setup(self, cosmo):
+    def _setup(self):
         self.A = 0.21615998645
         self.p = 0.3
         self.a = 0.707
@@ -304,7 +269,6 @@ class MassFuncJenkins01(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
@@ -314,15 +278,14 @@ class MassFuncJenkins01(MassFunc):
     """
     name = 'Jenkins01'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
-        super(MassFuncJenkins01, self).__init__(cosmo,
-                                                mass_def=mass_def,
+    def __init__(self, mass_def=None, mass_def_strict=True):
+        super(MassFuncJenkins01, self).__init__(mass_def=mass_def,
                                                 mass_def_strict=True)
 
     def _default_mdef(self):
         self.mdef = MassDef('fof', 'matter')
 
-    def _setup(self, cosmo):
+    def _setup(self):
         self.A = 0.315
         self.b = 0.61
         self.q = 3.8
@@ -340,7 +303,6 @@ class MassFuncTinker08(MassFunc):
     """ Implements mass function described in arXiv:0803.2706.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts SO masses with
@@ -351,9 +313,8 @@ class MassFuncTinker08(MassFunc):
     """
     name = 'Tinker08'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
-        super(MassFuncTinker08, self).__init__(cosmo,
-                                               mass_def,
+    def __init__(self, mass_def=None, mass_def_strict=True):
+        super(MassFuncTinker08, self).__init__(mass_def,
                                                mass_def_strict)
 
     def _default_mdef(self):
@@ -362,7 +323,7 @@ class MassFuncTinker08(MassFunc):
     def _pd(self, ld):
         return 10.**(-(0.75/(ld - 1.8750612633))**1.2)
 
-    def _setup(self, cosmo):
+    def _setup(self):
         from scipy.interpolate import interp1d
 
         delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
@@ -398,7 +359,6 @@ class MassFuncDespali16(MassFunc):
     """ Implements mass function described in arXiv:1507.05627.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts any SO masses.
@@ -408,17 +368,16 @@ class MassFuncDespali16(MassFunc):
     """
     name = 'Despali16'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True,
+    def __init__(self, mass_def=None, mass_def_strict=True,
                  ellipsoidal=False):
-        super(MassFuncDespali16, self).__init__(cosmo,
-                                                mass_def,
+        super(MassFuncDespali16, self).__init__(mass_def,
                                                 mass_def_strict)
         self.ellipsoidal = ellipsoidal
 
     def _default_mdef(self):
         self.mdef = MassDef200m()
 
-    def _setup(self, cosmo):
+    def _setup(self):
         pass
 
     def _check_mdef_strict(self, mdef):
@@ -457,7 +416,6 @@ class MassFuncTinker10(MassFunc):
     """ Implements mass function described in arXiv:1001.3162.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts SO masses with
@@ -470,17 +428,16 @@ class MassFuncTinker10(MassFunc):
     """
     name = 'Tinker10'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True,
+    def __init__(self, mass_def=None, mass_def_strict=True,
                  norm_all_z=False):
         self.norm_all_z = norm_all_z
-        super(MassFuncTinker10, self).__init__(cosmo,
-                                               mass_def,
+        super(MassFuncTinker10, self).__init__(mass_def,
                                                mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef200m()
 
-    def _setup(self, cosmo):
+    def _setup(self):
         from scipy.interpolate import interp1d
 
         delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
@@ -538,7 +495,6 @@ class MassFuncBocquet16(MassFunc):
     """ Implements mass function described in arXiv:1502.07357.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts SO masses with
@@ -552,17 +508,16 @@ class MassFuncBocquet16(MassFunc):
     """
     name = 'Bocquet16'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True,
+    def __init__(self, mass_def=None, mass_def_strict=True,
                  hydro=True):
         self.hydro = hydro
-        super(MassFuncBocquet16, self).__init__(cosmo,
-                                                mass_def,
+        super(MassFuncBocquet16, self).__init__(mass_def,
                                                 mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef200m()
 
-    def _setup(self, cosmo):
+    def _setup(self):
         if int(self.mdef.Delta) == 200:
             if self.mdef.rho_type == 'matter':
                 self.mdef_type = '200m'
@@ -682,7 +637,6 @@ class MassFuncWatson13(MassFunc):
     """ Implements mass function described in arXiv:1212.0095.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts fof and any SO masses.
@@ -692,15 +646,14 @@ class MassFuncWatson13(MassFunc):
     """
     name = 'Watson13'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
-        super(MassFuncWatson13, self).__init__(cosmo,
-                                               mass_def,
+    def __init__(self, mass_def=None, mass_def_strict=True):
+        super(MassFuncWatson13, self).__init__(mass_def,
                                                mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef200m()
 
-    def _setup(self, cosmo):
+    def _setup(self):
         self.is_fof = self.mdef.Delta == 'fof'
 
     def _check_mdef_strict(self, mdef):
@@ -748,7 +701,6 @@ class MassFuncAngulo12(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
@@ -758,15 +710,14 @@ class MassFuncAngulo12(MassFunc):
     """
     name = 'Angulo12'
 
-    def __init__(self, cosmo=None, mass_def=None, mass_def_strict=True):
-        super(MassFuncAngulo12, self).__init__(cosmo,
-                                               mass_def,
+    def __init__(self, mass_def=None, mass_def_strict=True):
+        super(MassFuncAngulo12, self).__init__(mass_def,
                                                mass_def_strict)
 
     def _default_mdef(self):
         self.mdef = MassDef('fof', 'matter')
 
-    def _setup(self, cosmo):
+    def _setup(self):
         self.A = 0.201
         self.a = 2.08
         self.b = 1.7

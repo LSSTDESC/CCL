@@ -50,15 +50,15 @@ def test_halo_concentration(m):
 def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
     mdef = ccl.halos.MassDef('vir', 'matter')
     if mf == 'shethtormen':
-        hmf = ccl.halos.MassFuncSheth99(cosmo, mdef,
+        hmf = ccl.halos.MassFuncSheth99(mdef,
                                         mass_def_strict=False,
                                         use_delta_c_fit=True)
-        hbf = ccl.halos.HaloBiasSheth99(cosmo, mass_def=mdef,
+        hbf = ccl.halos.HaloBiasSheth99(mass_def=mdef,
                                         mass_def_strict=False)
     elif mf == 'tinker10':
-        hmf = ccl.halos.MassFuncTinker10(cosmo, mdef,
+        hmf = ccl.halos.MassFuncTinker10(mdef,
                                          mass_def_strict=False)
-        hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
+        hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef,
                                          mass_def_strict=False)
 
     if c == 'constant_concentration':

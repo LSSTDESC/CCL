@@ -15,15 +15,15 @@ def _get_concentration(cosmo, mass_def):
 
 def _get_mf_hb(cosmo, mass_def):
     if cosmo._config.mass_function_method == lib.tinker10:
-        hmf = hal.MassFuncTinker10(cosmo, mass_def=mass_def,
+        hmf = hal.MassFuncTinker10(mass_def=mass_def,
                                    mass_def_strict=False)
-        hbf = hal.HaloBiasTinker10(cosmo, mass_def=mass_def,
+        hbf = hal.HaloBiasTinker10(mass_def=mass_def,
                                    mass_def_strict=False)
     elif cosmo._config.mass_function_method == lib.shethtormen:
-        hmf = hal.MassFuncSheth99(cosmo, mass_def=mass_def,
+        hmf = hal.MassFuncSheth99(mass_def=mass_def,
                                   mass_def_strict=False,
                                   use_delta_c_fit=True)
-        hbf = hal.HaloBiasSheth99(cosmo, mass_def=mass_def,
+        hbf = hal.HaloBiasSheth99(mass_def=mass_def,
                                   mass_def_strict=False)
     else:
         raise ValueError("Halo model spectra not available for your "

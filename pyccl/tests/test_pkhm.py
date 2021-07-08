@@ -7,8 +7,8 @@ COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
 M200 = ccl.halos.MassDef200m()
-HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
-HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
+HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
+HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
                               fourier_analytic=True)
 P2 = P1

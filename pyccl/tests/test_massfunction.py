@@ -60,7 +60,7 @@ def test_halo_bias_models_smoke(mf_type):
     np.array([1e14, 1e15])])
 def test_massfunc_smoke(m):
     a = 0.8
-    mf = ccl.halos.MassFuncTinker10(COSMO).get_mass_function(COSMO, m, a)
+    mf = ccl.halos.MassFuncTinker10().get_mass_function(COSMO, m, a)
     assert np.all(np.isfinite(mf))
     assert np.shape(mf) == np.shape(m)
 
