@@ -518,7 +518,7 @@ class ConcentrationIshiyama21(Concentration):
         from scipy.optimize import root_scalar
         roots = []
         for arg, neff in zip(Arg, n_eff):
-            func = lambda x: self._G(x, neff) - arg
+            func = lambda x: self._G(x, neff) - arg  # noqa: _G_inv Traceback
             rt = root_scalar(func, x0=1, x1=2).root.item()
             roots.append(rt)
         return np.asarray(roots)

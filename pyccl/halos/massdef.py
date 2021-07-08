@@ -258,6 +258,19 @@ class MassDef200c(MassDef):
                                           c_m_relation=c_m)
 
 
+class MassDef500c(MassDef):
+    """`MassDef` class for the mass definition
+    with Delta=200 times the critical density.
+
+    Args:
+        c_m (string): concentration-mass relation.
+    """
+    def __init__(self, c_m='Ishiyama21'):
+        super(MassDef500c, self).__init__(500,
+                                          'critical',
+                                          c_m_relation=c_m)
+
+
 class MassDefVir(MassDef):
     """`MassDef` class for the mass definition with Delta=Delta_vir times the
     critical density.
