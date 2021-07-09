@@ -164,7 +164,8 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
         float or array_like: values of the projected variance.
     """
     status = 0
-    full_output = not bool(a_arr)
+    full_output = a_arr is None  # return sampling?
+
     if a_arr is None:
         na = lib.get_pk_spline_na(cosmo.cosmo)
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
