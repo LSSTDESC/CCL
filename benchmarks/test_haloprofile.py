@@ -3,7 +3,7 @@ import pytest
 
 import pyccl as ccl
 
-HALOPROFILE_TOLERANCE = 1e-3
+HALOPROFILE_TOLERANCE = 1E-3
 
 COSMO = ccl.Cosmology(
     Omega_b=0.0486,
@@ -14,12 +14,11 @@ COSMO = ccl.Cosmology(
     w0=-1,
     wa=0,
     m_nu=0,
-    m_nu_type="normal",
+    m_nu_type='normal',
     Neff=3.046,
     Omega_k=0,
-    transfer_function="eisenstein_hu",
-    mass_function="shethtormen",
-)
+    transfer_function='eisenstein_hu',
+    mass_function='shethtormen')
 
 
 def test_profile_Hernquist():
@@ -31,11 +30,10 @@ def test_profile_Hernquist():
     rmin = 0.01
     rmax = 100
     r = np.exp(
-        np.log(rmin)
-        + np.log(rmax / rmin) * np.arange(data.shape[0]) / (data.shape[0] - 1)
-    )
+        np.log(rmin) +
+        np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
 
-    mdef = ccl.halos.MassDef(mDelta, "matter")
+    mdef = ccl.halos.MassDef(mDelta, 'matter')
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
     p = ccl.halos.HaloProfileHernquist(c, truncated=False)
 
@@ -55,13 +53,13 @@ def test_profile_Einasto():
     rmin = 0.01
     rmax = 100
     r = np.exp(
-        np.log(rmin)
-        + np.log(rmax / rmin) * np.arange(data.shape[0]) / (data.shape[0] - 1)
-    )
+        np.log(rmin) +
+        np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
 
-    mdef = ccl.halos.MassDef(mDelta, "matter")
+    mdef = ccl.halos.MassDef(mDelta, 'matter')
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
-    mdef = ccl.halos.MassDef(mDelta, "matter", c_m_relation=c)
+    mdef = ccl.halos.MassDef(mDelta, 'matter',
+                             c_m_relation=c)
     p = ccl.halos.HaloProfileEinasto(c, truncated=False)
 
     prof = p.real(COSMO, r, halomass, a, mdef)
@@ -80,11 +78,10 @@ def test_profile_NFW():
     rmin = 0.01
     rmax = 100
     r = np.exp(
-        np.log(rmin)
-        + np.log(rmax / rmin) * np.arange(data.shape[0]) / (data.shape[0] - 1)
-    )
+        np.log(rmin) +
+        np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
 
-    mdef = ccl.halos.MassDef(mDelta, "matter")
+    mdef = ccl.halos.MassDef(mDelta, 'matter')
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
     p = ccl.halos.HaloProfileNFW(c, truncated=False)
 
@@ -95,8 +92,8 @@ def test_profile_NFW():
     assert np.all(err <= tol)
 
 
-@pytest.mark.parametrize("model", ["nfw", "projected_nfw",
-                                   "einasto", "hernquist"])
+@pytest.mark.parametrize(
+    'model', ['nfw', 'projected_nfw', 'einasto', 'hernquist'])
 def test_haloprofile(model):
 
     data = np.loadtxt("./benchmarks/data/haloprofile_%s_colossus.txt" % model)
@@ -107,25 +104,24 @@ def test_haloprofile(model):
     rmin = 0.01
     rmax = 100
     r = np.exp(
-        np.log(rmin)
-        + np.log(rmax / rmin) * np.arange(data.shape[0]) / (data.shape[0] - 1)
-    )
+        np.log(rmin) +
+        np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
 
-    mdef = ccl.halos.MassDef(halomassdef, "matter")
+    mdef = ccl.halos.MassDef(halomassdef, 'matter')
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
 
-    if model == "nfw":
+    if model == 'nfw':
         p = ccl.halos.HaloProfileNFW(c, truncated=False)
         prof = p.real(COSMO, r, halomass, a, mdef)
-    elif model == "projected_nfw":
+    elif model == 'projected_nfw':
         p = ccl.halos.HaloProfileNFW(c, truncated=False,
                                      projected_analytic=True)
         prof = p.projected(COSMO, r, halomass, a, mdef)
-    elif model == "einasto":
-        mdef = ccl.halos.MassDef(halomassdef, "matter", c_m_relation=c)
+    elif model == 'einasto':
+        mdef = ccl.halos.MassDef(halomassdef, 'matter', c_m_relation=c)
         p = ccl.halos.HaloProfileEinasto(c, truncated=False)
         prof = p.real(COSMO, r, halomass, a, mdef)
-    elif model == "hernquist":
+    elif model == 'hernquist':
         p = ccl.halos.HaloProfileHernquist(c, truncated=False)
         prof = p.real(COSMO, r, halomass, a, mdef)
 
@@ -146,13 +142,12 @@ def test_weak_lensing_functions():
     rmin = 0.01
     rmax = 100
     r = np.exp(
-        np.log(rmin)
-        + np.log(rmax / rmin) * np.arange(data.shape[0]) / (data.shape[0] - 1)
-    )
+        np.log(rmin) +
+        np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
 
     r_al = r / a_lens
 
-    mdef = ccl.halos.MassDef(mDelta, "matter")
+    mdef = ccl.halos.MassDef(mDelta, 'matter')
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
     p = ccl.halos.HaloProfileNFW(
         c, truncated=False, projected_analytic=True, cumul2d_analytic=True
