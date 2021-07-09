@@ -64,7 +64,7 @@ def test_tkkssc_smoke(pars):
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 
     tkk = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc,
-                                     prof1=pars['p1'],
+                                     prof=pars['p1'],
                                      prof2=pars['p2'],
                                      prof3=pars['p3'],
                                      prof4=pars['p4'],

@@ -334,13 +334,13 @@ class HMCalculator(object):
             a (float): scale factor.
             prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
+                second halo profile. If `None`, `prof` will be used as
+                `prof2`.
             prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object
                 returning the the two-point moment of the two profiles
                 being correlated.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof` will be used as
-                `prof2`.
 
         Returns:
              float or array_like: integral values evaluated at each
@@ -350,7 +350,7 @@ class HMCalculator(object):
         self._get_ingredients(a, cosmo, False)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
                                   prof2=prof2,
-                                  mass_def=self._mdef).T
+                                  mass_def=self.mass_def).T
         i02 = self._integrate_over_mbf(uk)
         return i02
 
@@ -1182,12 +1182,12 @@ def halomod_Tk3D_SSC(cosmo, hmc, prof, *,
             i11_4 = hmc.I_1_1(cosmo, k_use, aa, prof4)
 
         i12_12 = hmc.I_1_2(cosmo, k_use, aa, prof,
-                           prof2, prof12_2pt)
+                           prof2=prof2, prof_2pt=prof12_2pt)
         if (prof3 is None) and (prof4 is None) and (prof34_2pt is None):
             i12_34 = i12_12
         else:
             i12_34 = hmc.I_1_2(cosmo, k_use, aa, prof3_bak,
-                               prof4, prof34_2pt_bak)
+                               prof2=prof4, prof_2pt=prof34_2pt_bak)
         norm12 = norm1 * norm2
         norm34 = norm3 * norm4
 
