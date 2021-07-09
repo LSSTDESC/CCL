@@ -15,8 +15,15 @@ CONCS = [ccl.halos.ConcentrationDiemer15,
          ccl.halos.ConcentrationConstant]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 # None of our concentration-mass relations
-# are defined for FoF halos.
+# are defined for FoF halos, or 400 matter.
 MDEF = ccl.halos.MassDef('fof', 'matter')
+M400 = ccl.halos.MassDef(400, 'matter')
+
+
+def test_cM_default_mass_def():
+    cM = ccl.halos.Concentration()
+    assert cM.mdef.__eq__(MDEF)
+    assert not cM._check_mdef()
 
 
 @pytest.mark.parametrize('cM_class', CONCS)
@@ -39,8 +46,12 @@ def test_cM_duffy_smoke():
 
 @pytest.mark.parametrize('cM_class', CONCS[:-1])
 def test_cM_mdef_raises(cM_class):
+    # testing strings
     with pytest.raises(ValueError):
         cM_class(MDEF)
+    # testing numbers
+    with pytest.raises(ValueError):
+        cM_class(M400)
 
 
 @pytest.mark.parametrize('name', ['Duffy08', 'Diemer15'])
