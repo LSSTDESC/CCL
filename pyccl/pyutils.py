@@ -631,9 +631,22 @@ def warn_api(pairs=None, order=None):
 
         @functools.wraps(func)
         def new_func(*args, **kwargs):
+            # check for normprof - we'll need that later (1 of 3)
+            def normprof_warning():
+                # all the variables we need will already be in locals
+                if ("normprof" in names) and ("normprof" not in kwargs):
+                    # backwards-compatibility
+                    kwargs["normprof"] = False
+                    warnings.warn(
+                        "Halo profile normalization `normprof` "
+                        "has to be explicitly specified to prevent "
+                        "unwanted behavior. Not specifying it "
+                        "will trigger an exception in the future",
+                        CCLWarning)
+
             # transform decorator input
-            swap = order.copy() if order is not None else None
             rename = np.atleast_2d(pairs) if pairs is not None else None
+            swap = order.copy() if order is not None else None
 
             # rename any keyword-arguments?
             if rename is not None:
@@ -661,25 +674,12 @@ def warn_api(pairs=None, order=None):
                         f"argument{s} {news}, respectively.",
                         CCLWarning)
 
-            # raise normprof warning? (1 of 2)
-            if ("normprof" in names) and ("normprof" not in kwargs):
-                warn_normprof = True
-            else:
-                warn_normprof = False
-
             # return if we have everything we need
             if len(args) <= npos:
                 # 1. wrapper assumes positional arguments are not swapped
                 # 2. not checking for new function
-                if warn_normprof and ("normprof" not in kwargs):
-                    # backwards-compatibility
-                    kwargs["normprof"] = False
-                    warnings.warn(
-                        "Halo profile normalization `normprof` "
-                        "has to be explicitly specified to prevent "
-                        "unwanted behavior. Not specifying it "
-                        "will trigger an exception in the future",
-                        CCLWarning)
+                # 3. raise normprof warning? (2 of 3)
+                normprof_warning()
                 return func(*args, **kwargs)
 
             # remove what was already added from todo list
@@ -716,16 +716,8 @@ def warn_api(pairs=None, order=None):
                 f"in {func.__name__}. Pass the name{s} of the "
                 f"keyword-only argument{s} explicitly.", CCLWarning)
 
-            # raise normprof warning? (2 of 2)
-            if warn_normprof and ("normprof" not in kwargs):
-                # backwards-compatibility
-                kwargs["normprof"] = False
-                warnings.warn(
-                    "Halo profile normalization `normprof` "
-                    "has to be explicitly specified to prevent "
-                    "unwanted behavior. Not specifying it "
-                    "will trigger an exception in the future",
-                    CCLWarning)
+            # raise normprof warning? (3 of 3)
+            normprof_warning()
 
             return func(**kwargs)
 
