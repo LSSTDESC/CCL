@@ -164,6 +164,7 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
         float or array_like: values of the projected variance.
     """
     status = 0
+    full_output = not bool(a_arr)
     if a_arr is None:
         na = lib.get_pk_spline_na(cosmo.cosmo)
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
@@ -179,7 +180,8 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
     s2B_arr, status = lib.sigma2b_vec(cosmo.cosmo, a_arr, R_arr, psp,
                                       na, status)
     check(status, cosmo=cosmo)
-    if a_arr is None:
+
+    if full_output:
         return a_arr, s2B_arr
     else:
         if np.ndim(a_arr) == 0:
@@ -189,7 +191,7 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
 
 
 @warn_api(pairs=[("a_arr", "a")])
-def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
+def sigma2_B_from_mask(cosmo, a_arr, *, mask_wl=None, p_of_k_a=None):
     """ Returns the variance of the projected linear density field, given the
         angular power spectrum of the footprint mask and scale factor.
         This is given by
@@ -205,7 +207,7 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        a_arr (float, array_like or `None`): an array of scale factor
+        a_arr (float, array_like): an array of scale factor
             values at which to evaluate the projected variance.
         mask_wl (array_like): Array with the angular power spectrum of the
             masks. The power spectrum should be given at integer multipoles,
