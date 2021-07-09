@@ -38,7 +38,9 @@ def test_concentration_Ishiyama21(pars):
     cosmo.compute_sigma()
     h = cosmo["h"]
     hmd = ccl.halos.MassDef(Delta, "critical")
-    cm = ccl.halos.ConcentrationIshiyama21(mdef=hmd)
+    cm = ccl.halos.ConcentrationIshiyama21(mdef=hmd,
+                                           relaxed=pars["relaxed"],
+                                           Vmax=pars["Vmax"])
 
     for i, zz in enumerate(z):
         dat = data[:, i+1]                                # noqa
