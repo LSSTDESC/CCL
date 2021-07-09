@@ -132,8 +132,8 @@ class ConcentrationDiemer15(Concentration):
     def _check_mdef(self, mdef):
         if isinstance(mdef.Delta, str):
             return True
-        elif (int(mdef.Delta) != 200) and \
-             (mdef.rho_type != 'critical'):
+        elif not ((int(mdef.Delta) == 200) and \
+                  (mdef.rho_type == 'critical')):
             return True
         return False
 
@@ -239,8 +239,8 @@ class ConcentrationPrada12(Concentration):
     def _check_mdef(self, mdef):
         if isinstance(mdef.Delta, str):
             return True
-        elif (int(mdef.Delta) != 200) and \
-             (mdef.rho_type != 'critical'):
+        elif not ((int(mdef.Delta) == 200) and \
+                  (mdef.rho_type == 'critical')):
             return True
         return False
 
@@ -351,35 +351,6 @@ class ConcentrationDuffy08(Concentration):
     def _concentration(self, cosmo, M, a):
         M_pivot_inv = cosmo.cosmo.params.h * 5E-13
         return self.A * (M * M_pivot_inv)**self.B * a**(-self.C)
-
-
-class ConcentrationConstant(Concentration):
-    """ Constant contentration-mass relation.
-
-    Args:
-        c (float): constant concentration value.
-        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object that fixes
-            the mass definition used by this c(M)
-            parametrization. In this case it's arbitrary.
-    """
-    name = 'Constant'
-
-    def __init__(self, c=1, mdef=None):
-        self.c = c
-        super(ConcentrationConstant, self).__init__(mdef)
-
-    def _default_mdef(self):
-        self.mdef = MassDef(200, 'critical')
-
-    def _check_mdef(self, mdef):
-        return False
-
-    def _concentration(self, cosmo, M, a):
-        if np.ndim(M) == 0:
-            return self.c
-        else:
-            return self.c * np.ones(M.size)
 
 
 class ConcentrationIshiyama21(Concentration):
@@ -545,6 +516,35 @@ class ConcentrationIshiyama21(Concentration):
         if np.ndim(M) == 0:
             c = c[0]
         return c
+
+
+class ConcentrationConstant(Concentration):
+    """ Constant contentration-mass relation.
+
+    Args:
+        c (float): constant concentration value.
+        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+            definition object that fixes
+            the mass definition used by this c(M)
+            parametrization. In this case it's arbitrary.
+    """
+    name = 'Constant'
+
+    def __init__(self, c=1, mdef=None):
+        self.c = c
+        super(ConcentrationConstant, self).__init__(mdef)
+
+    def _default_mdef(self):
+        self.mdef = MassDef(200, 'critical')
+
+    def _check_mdef(self, mdef):
+        return False
+
+    def _concentration(self, cosmo, M, a):
+        if np.ndim(M) == 0:
+            return self.c
+        else:
+            return self.c * np.ones(M.size)
 
 
 def concentration_from_name(name):
