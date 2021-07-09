@@ -165,6 +165,7 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
     """
     status = 0
     full_output = a_arr is None  # return sampling?
+    ndim = np.ndim(a_arr)
 
     if a_arr is None:
         na = lib.get_pk_spline_na(cosmo.cosmo)
@@ -185,7 +186,7 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
     if full_output:
         return a_arr, s2B_arr
     else:
-        if np.ndim(a_arr) == 0:
+        if ndim == 0:
             return s2B_arr[0]
         else:
             return s2B_arr
@@ -246,10 +247,7 @@ def sigma2_B_from_mask(cosmo, a_arr, *, mask_wl=None, p_of_k_a=None):
             # See eq. E.10 of 2007.01844
             sigma2_B[i] = np.sum(pk * mask_wl)/chi[i]**2
 
-    if np.ndim(a_arr) == 0:
-        return sigma2_B[0]
-    else:
-        return sigma2_B
+    return sigma2_B
 
 
 @warn_api(pairs=[("tracer1", "cltracer1"), ("tracer2", "cltracer2"),
