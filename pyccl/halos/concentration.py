@@ -495,16 +495,16 @@ class ConcentrationIshiyama21(Concentration):
                         self.b1 = 1.21
                         self.c_alpha = 0.22
                     else:  # now it's 500c
-                        self.kappa = 1.10
-                        self.a0 = 2.30
-                        self.a1 = 1.64
-                        self.b0 = 1.72
-                        self.b1 = 3.60
-                        self.c_alpha = 0.32
+                        self.kappa = 1.83
+                        self.a0 = 1.95
+                        self.a1 = 1.17
+                        self.b0 = 3.57
+                        self.b1 = 0.91
+                        self.c_alpha = 0.26
 
-    def _dlsigmaR(self, cosmo, R, a, *, eps=1e-6, num=2):
+    def _dlsigmaR(self, cosmo, R, a, *, eps=1e-6):
         # central finite difference
-        R_use = np.geomspace(R * (1-eps/2), R * (1+eps/2), num, axis=-1)
+        R_use = np.geomspace(R * (1-eps/2), R * (1+eps/2), 2, axis=-1)
         shape = R_use.shape
 
         sigR = sigmaR(cosmo, R_use.flatten(), a).reshape(shape)
