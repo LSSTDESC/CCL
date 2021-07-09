@@ -670,8 +670,8 @@ def warn_api(pairs=None, order=None):
                         olds = olds[0]
                     warnings.warn(
                         f"Use of argument{s} {olds} is deprecated "
-                        f"in {func.__name__}. Pass the new name{s} of the "
-                        f"argument{s} {news}, respectively.",
+                        f"in {func.__qualname__}. Pass the new name{s} "
+                        f"of the argument{s} {news}, respectively.",
                         CCLWarning)
 
             # return if we have everything we need
@@ -713,7 +713,7 @@ def warn_api(pairs=None, order=None):
             no_kw = f"`{no_kw[0]}`" if len(no_kw) == 1 else no_kw
             warnings.warn(
                 f"Use of argument{s} {no_kw} as positional is deprecated "
-                f"in {func.__name__}. Pass the name{s} of the "
+                f"in {func.__qualname__}. Pass the name{s} of the "
                 f"keyword-only argument{s} explicitly.", CCLWarning)
 
             # raise normprof warning? (3 of 3)
