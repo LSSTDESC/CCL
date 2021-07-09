@@ -294,7 +294,7 @@ def sigma_critical(cosmo, a_lens, a_src):
     Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
     Dls = angular_diameter_distance(cosmo, a_lens, a_src)
     A = (
-        physical_constants.CLIGHT ** 2
+        physical_constants.CLIGHT**2
         * physical_constants.MPC_TO_METER
         / (4.0 * np.pi * physical_constants.GNEWT
            * physical_constants.SOLAR_MASS)

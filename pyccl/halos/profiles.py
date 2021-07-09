@@ -391,7 +391,7 @@ class HaloProfile(object):
         convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
         shear = self.shear(cosmo, r, M, a_lens, a_src, mass_def)
 
-        return 1.0 / ((1.0 - convergence) ** 2 - np.abs(shear) ** 2)
+        return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 
     def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
                      fourier_out=False,
