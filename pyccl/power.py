@@ -23,7 +23,7 @@ def linear_power(cosmo, k, a, *, p_of_k_a='delta_matter:delta_matter'):
     cosmo.compute_linear_power()
     if p_of_k_a not in cosmo._pk_lin:
         raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_lin[p_of_k_a].eval(cosmo, k, a)
+    return cosmo._pk_lin[p_of_k_a].eval(k, a, cosmo)
 
 
 @warn_api()
@@ -44,7 +44,7 @@ def nonlin_power(cosmo, k, a, *, p_of_k_a='delta_matter:delta_matter'):
     cosmo.compute_nonlin_power()
     if p_of_k_a not in cosmo._pk_nl:
         raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_nl[p_of_k_a].eval(cosmo, k, a)
+    return cosmo._pk_nl[p_of_k_a].eval(k, a, cosmo)
 
 
 def linear_matter_power(cosmo, k, a):
@@ -59,7 +59,7 @@ def linear_matter_power(cosmo, k, a):
         float or array_like: Linear matter power spectrum; Mpc^3.
     """
     cosmo.compute_linear_power()
-    return cosmo._pk_lin['delta_matter:delta_matter'].eval(cosmo, k, a)
+    return cosmo._pk_lin['delta_matter:delta_matter'].eval(k, a, cosmo)
 
 
 def nonlin_matter_power(cosmo, k, a):
@@ -74,7 +74,7 @@ def nonlin_matter_power(cosmo, k, a):
         float or array_like: Nonlinear matter power spectrum; Mpc^3.
     """
     cosmo.compute_nonlin_power()
-    return cosmo._pk_nl['delta_matter:delta_matter'].eval(cosmo, k, a)
+    return cosmo._pk_nl['delta_matter:delta_matter'].eval(k, a, cosmo)
 
 
 def sigmaM(cosmo, M, a):

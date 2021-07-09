@@ -622,7 +622,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     # Power spectrum
     if isinstance(p_of_k_a, Pk2D):
         def pkf(sf):
-            return p_of_k_a.eval(cosmo, k_use, sf)
+            return p_of_k_a.eval(k_use, sf, cosmo)
     elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
         def pkf(sf):
             return linear_matter_power(cosmo, k_use, sf)
