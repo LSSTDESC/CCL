@@ -150,6 +150,7 @@ class HMCalculator(object):
         self._get_ingredients(a, cosmo, False)
         uk0 = prof.fourier(cosmo, self._prec['k_norm'],
                            self._mass, a, mass_def=self.mass_def).T
+        uk0 = np.clip(uk0, a_min=1e-16, a_max=None)
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
 
@@ -1005,7 +1006,10 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
                                  normprof=normprof, normprof2=normprof2,
                                  normprof3=normprof3, normprof4=normprof4)
     if use_log:
-        if np.any(tkk <= 0):
+        # avoid zeros (this is system-dependent)
+        tiny = np.nextafter(0, 1)
+        tkk[tkk == 0] = tiny
+        if np.any(tkk < 0):
             warnings.warn(
                 "Some values were not positive. "
                 "Will not interpolate in log-space.",
