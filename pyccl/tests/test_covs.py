@@ -82,7 +82,7 @@ def test_cov_NG_sanity(alpha, beta, typ):
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 4E-2)
 
     # Different tracers
-    cov = cov_f(ls, cltracer3=tr, cltracer4=tr)
+    cov = cov_f(ls, tracer3=tr, tracer4=tr)
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
 
     # Different ells
@@ -132,14 +132,14 @@ def test_Sigma2B():
 
     fsky = 0.1
     # Default sampling
-    a, s2b_a = ccl.sigma2_B_disc(COSMO, fsky=fsky)
-    idx = (a > 0.5) & (a < 1)
+    a_arr, s2b_a = ccl.sigma2_B_disc(COSMO, fsky=fsky)
+    idx = (a_arr > 0.5) & (a_arr < 1)
 
-    a_use = a[idx]
+    a_use = a_arr[idx]
     # Input sampling
-    s2b_b = ccl.sigma2_B_disc(COSMO, a=a_use, fsky=fsky)
+    s2b_b = ccl.sigma2_B_disc(COSMO, a_arr=a_use, fsky=fsky)
     # Scalar input sampling
-    s2b_c = np.array([ccl.sigma2_B_disc(COSMO, a=a, fsky=fsky)
+    s2b_c = np.array([ccl.sigma2_B_disc(COSMO, a_arr=a, fsky=fsky)
                       for a in a_use])
 
     # Alternative calculation
@@ -168,6 +168,6 @@ def test_Sigma2B():
     mask_wl = (ell+0.5)/(2*np.pi) * (2*jv(1, kR)/(kR))**2
 
     a_use = np.array([0.2, 0.5, 1.0])
-    s2b_e = ccl.sigma2_B_from_mask(COSMO, a=a_use, mask_wl=mask_wl)
-    s2b_f = ccl.sigma2_B_disc(COSMO, a=a_use, fsky=fsky)
+    s2b_e = ccl.sigma2_B_from_mask(COSMO, a_arr=a_use, mask_wl=mask_wl)
+    s2b_f = ccl.sigma2_B_disc(COSMO, a_arr=a_use, fsky=fsky)
     assert np.all(np.fabs(s2b_e/s2b_f-1) < 1E-3)

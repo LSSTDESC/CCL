@@ -40,7 +40,8 @@ def test_cosmo_methods():
     hmd = ccl.halos.MassDef200m()
     hmf = ccl.halos.MassFuncTinker08(cosmo)
     hbf = ccl.halos.HaloBiasTinker10(cosmo)
-    hmc = ccl.halos.HMCalculator(cosmo, massfunc=hmf, hbias=hbf, mass_def=hmd)
+    hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf, halo_bias=hbf,
+                                 mass_def=hmd)
     assert ccl.halos.halomod_power_spectrum(cosmo, hmc, 1., 1., prof) == \
         cosmo.halomod_power_spectrum(hmc, 1., 1., prof)
 

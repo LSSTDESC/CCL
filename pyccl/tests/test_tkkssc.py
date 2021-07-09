@@ -91,22 +91,22 @@ def test_tkkssc_errors():
 
     # Wrong first profile
     with pytest.raises(TypeError):
-        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, None)
+        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, None, normprof=False)
     # Wrong other profiles
     for i in range(2, 4):
         kw = {'prof%d' % i: PKC}
         with pytest.raises(TypeError):
-            ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, **kw)
+            ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, normprof=False, **kw)
     # Wrong 2pts
     with pytest.raises(TypeError):
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1,
-                                   prof12_2pt=P2)
+                                   prof12_2pt=P2, normprof=False)
     with pytest.raises(TypeError):
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1,
-                                   prof34_2pt=P2)
+                                   prof34_2pt=P2, normprof=False)
 
     # Negative profile in logspace
     assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,
-                 COSMO, hmc, P3, prof2=Pneg,
+                 COSMO, hmc, P3, prof2=Pneg, normprof=False,
                  lk_arr=np.log(k_arr), a_arr=a_arr,
                  use_log=True)
