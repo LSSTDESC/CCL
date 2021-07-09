@@ -1,8 +1,6 @@
 from . import ccllib as lib
 
-from .pyutils import check, warn_api
-from .errors import CCLWarning
-import warnings
+from .pyutils import check, warn_api, deprecated
 import numpy as np
 
 
@@ -175,10 +173,12 @@ class Pk2D(object):
         pk2d.has_psp = True
         return pk2d
 
-    def eval(self, cosmo, k, a):
+    def eval(self, k, a, cosmo):
         """Evaluate power spectrum.
 
         Args:
+            k (float or array_like): wavenumber value(s) in units of Mpc^-1.
+            a (float): value of the scale factor
             cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The
                 cosmology object is needed in order to evaluate the power
                 spectrum outside the interpolation range in `a`. E.g. if you
@@ -187,21 +187,10 @@ class Pk2D(object):
                 the power spectrum will be extrapolated from the earliest
                 available value using the linear growth factor (for which a
                 cosmology is needed).
-            k (float or array_like): wavenumber value(s) in units of Mpc^-1.
-            a (float): value of the scale factor
 
         Returns:
             float or array_like: value(s) of the power spectrum.
         """
-        # patch to check if new or old API is used
-        from .core import Cosmology
-        if not isinstance(cosmo, Cosmology):
-            warnings.warn("Official API for Pk2D.eval has changed. "
-                          "Argument order (k, a, cosmo) has been replaced "
-                          "by (cosmo, k, a).", CCLWarning)
-            k, a, cosmo = cosmo, k, a  # old to new API
-            assert isinstance(cosmo, Cosmology)
-
         # make sure we have growth factors for extrapolation
         cosmo.compute_growth()
 
@@ -222,7 +211,7 @@ class Pk2D(object):
 
         return f
 
-    def eval_dlogpk_dlogk(self, k, a, cosmo):
+    def eval_dlPk_dlk(self, k, a, cosmo):
         """Evaluate logarithmic derivative
 
         .. math::
@@ -262,6 +251,10 @@ class Pk2D(object):
         check(status, cosmo)
 
         return f
+
+    @deprecated(eval_dlPk_dlk)
+    def eval_dlogpk_dlogk(self, k, a, cosmo):
+        return self.eval_dlPk_dlk(k, a, cosmo)
 
     def __del__(self):
         """Free memory associated with this Pk2D structure

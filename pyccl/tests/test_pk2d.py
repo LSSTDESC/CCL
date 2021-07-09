@@ -67,7 +67,7 @@ def test_pk2d_smoke():
     aarr = 0.05+0.95*np.arange(100)/99.
     pkarr = np.zeros([len(aarr), len(lkarr)])
     psp = ccl.Pk2D(a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr)
-    assert_(not np.isnan(psp.eval(cosmo, 1E-2, 0.5)))
+    assert_(not np.isnan(psp.eval(1E-2, 0.5, cosmo)))
 
 
 @pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu'])
@@ -81,7 +81,7 @@ def test_pk2d_from_model(model):
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
-        pk1 = pk.eval(cosmo, ks, a)
+        pk1 = pk.eval(ks, a, cosmo)
         pk2 = ccl.linear_matter_power(cosmo, ks, a)
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1E-10
@@ -116,7 +116,7 @@ def test_pk2d_from_model_emu():
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
-        pk1 = pk.eval(cosmo, ks, a)
+        pk1 = pk.eval(ks, a, cosmo)
         pk2 = ccl.nonlin_matter_power(cosmo, ks, a)
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1E-10
@@ -151,32 +151,32 @@ def test_pk2d_function():
     ktest = 1E-2
     atest = 0.5
     ptrue = pk2d(ktest, atest)
-    phere = psp.eval(cosmo, ktest, atest)
+    phere = psp.eval(ktest, atest, cosmo)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp.eval_dlPk_dlk(ktest, atest, cosmo)
     assert_almost_equal(dphere, -1., 6)
 
     ktest = 1
     atest = 0.5
     ptrue = pk2d(ktest, atest)
-    phere = psp.eval(cosmo, ktest, atest)
+    phere = psp.eval(ktest, atest, cosmo)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp.eval_dlPk_dlk(ktest, atest, cosmo)
     assert_almost_equal(dphere, -1., 6)
 
     # Test at array of points
     ktest = np.logspace(-3, 1, 10)
     ptrue = pk2d(ktest, atest)
-    phere = psp.eval(cosmo, ktest, atest)
+    phere = psp.eval(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp.eval_dlPk_dlk(ktest, atest, cosmo)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is not logarithmic
     psp = ccl.Pk2D(pkfunc=pk2d, is_logp=False, cosmo=cosmo)
-    phere = psp.eval(cosmo, ktest, atest)
+    phere = psp.eval(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp.eval_dlPk_dlk(ktest, atest, cosmo)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is arrays
@@ -185,9 +185,9 @@ def test_pk2d_function():
     parr = np.array([pk2d(karr, a) for a in aarr])
     psp = ccl.Pk2D(
         a_arr=aarr, lk_arr=np.log(karr), pk_arr=parr, is_logp=False)
-    phere = psp.eval(cosmo, ktest, atest)
+    phere = psp.eval(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp.eval_dlPk_dlk(ktest, atest, cosmo)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
 

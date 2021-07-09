@@ -33,11 +33,10 @@ def test_API_preserve_warnings():
 
         R8 = COV.fourier_2pt(COSMO, 1., 1e14, 1., PROF, mass_def=M200)
         R9 = COVh.fourier_2pt(COSMO, 1., 1e14, 1., PROF, mass_def=M200)
-        S1 = PK2D.eval(COSMO, 1., 1.)
 
-        S2 = ccl.halos.halomod_bias_1pt(COSMO, HMC, 1., 1., PROF,
+        S1 = ccl.halos.halomod_bias_1pt(COSMO, HMC, 1., 1., PROF,
                                         normprof=False)
-        S3 = ccl.halos.halomod_power_spectrum(COSMO, HMC, 1., 1., PROF,
+        S2 = ccl.halos.halomod_power_spectrum(COSMO, HMC, 1., 1., PROF,
                                               prof2=PROF, prof_2pt=None,
                                               normprof=False)
     assert len(w_rec) == 0
@@ -94,21 +93,16 @@ def test_API_preserve_warnings():
         r9 = COVh.fourier_2pt(PROF, COSMO, 1., 1e14, 1., mass_def=M200)
     assert r9 == R9
 
-    with pytest.warns(CCLWarning):
-        # used to be (k, a, cosmo); now it's (cosmo, k, a)
-        s1 = PK2D.eval(1., 1., COSMO)
-    assert s1 == S1
-
     # 8. halo profile normalization
     with pytest.warns(CCLWarning):
-        s2 = ccl.halos.halomod_bias_1pt(COSMO, HMC, 1., 1., PROF)
-    assert s2 == S2
+        s1 = ccl.halos.halomod_bias_1pt(COSMO, HMC, 1., 1., PROF)
+    assert s1 == S1
 
     with pytest.warns(None) as w_rec:
-        s3 = ccl.halos.halomod_power_spectrum(COSMO, HMC, 1., 1.,
+        s2 = ccl.halos.halomod_power_spectrum(COSMO, HMC, 1., 1.,
                                               PROF, None, PROF)
     assert len(w_rec) == 2
-    assert s3 == S3
+    assert s2 == S2
 
 
 @pytest.mark.parametrize('prof_class',
