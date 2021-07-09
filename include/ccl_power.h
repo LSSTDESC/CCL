@@ -33,6 +33,14 @@ double ccl_sigma2B(ccl_cosmology *cosmo,double R,double a,
 
 /**
  * As `ccl_sigma2B`, calculated for an array of scale factors and smoothing scales.
+ * @param cosmo Cosmology parameters and configurations
+ * @param na number of scale factor values
+ * @param a scale factor values
+ * @param R Smoothing scale values, in [Mpc] units
+ * @param psp input power spectrum.
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ * For specific cases see documentation for ccl_error.c
+ * @return sigma(R,a).
  */
 void ccl_sigma2Bs(ccl_cosmology *cosmo,int na, double *a, double *R,
                   double *sigma2B_out, ccl_f2d_t *psp, int *status);
@@ -43,10 +51,10 @@ void ccl_sigma2Bs(ccl_cosmology *cosmo,int na, double *a, double *R,
  * @param cosmo Cosmology parameters and configurations
  * @param R Smoothing scale, in [Mpc] units
  * @param a scale factor
+ * @param sigma2B_out output values of the variance calculated for the input a and R.
  * @param psp input power spectrum.
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
- * @return sigma(R).
  */
 double ccl_sigmaR(ccl_cosmology *cosmo, double R, double a,
                   ccl_f2d_t *psp, int * status);
