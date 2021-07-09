@@ -12,6 +12,7 @@ import numpy as np
 
 dirdat = os.path.join(os.path.dirname(__file__), "data")
 
+
 @pytest.mark.parametrize("pars",
                          [{"Delta": 200, "relaxed": False, "Vmax": False},
                           {"Delta": 200, "relaxed": False, "Vmax": True},
@@ -33,7 +34,8 @@ def test_concentration_Ishiyama21(pars):
     M = data[:, 0]
     z = np.array([0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 7.0])
 
-    if Delta == "vir": Delta += "ial"  # virial
+    if Delta == "vir":
+        Delta += "ial"  # virial
     cosmo = ccl.CosmologyVanillaLCDM()
     cosmo.compute_sigma()
     h = cosmo["h"]
