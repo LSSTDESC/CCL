@@ -42,8 +42,10 @@ def test_cosmo_methods():
     hbf = ccl.halos.HaloBiasTinker10(cosmo)
     hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf, halo_bias=hbf,
                                  mass_def=hmd)
-    assert ccl.halos.halomod_power_spectrum(cosmo, hmc, 1., 1., prof) == \
-        cosmo.halomod_power_spectrum(hmc, 1., 1., prof)
+    P1 = ccl.halos.halomod_power_spectrum(cosmo, hmc, 1., 1., prof,
+                                          normprof=False)
+    P2 = cosmo.halomod_power_spectrum(hmc, 1., 1., prof, normprof=False)
+    assert  P1 == P2
 
 
 def test_cosmology_critical_init():
