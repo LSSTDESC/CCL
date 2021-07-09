@@ -2,7 +2,7 @@
 from .massdef import (  # noqa
     mass2radius_lagrangian, MassDef,
     MassDef200m, MassDef200c, MassDef500c,
-    MassDefVir)
+    MassDefVir, convert_concentration)
 
 # Halo concentration
 from .concentration import (  # noqa
@@ -51,4 +51,5 @@ from .halo_model import (  # noqa
     halomod_power_spectrum,
     halomod_Pk2D,
     halomod_trispectrum_1h,
-    halomod_Tk3D_1h)
+    halomod_Tk3D_1h,
+    halomod_Tk3D_SSC)
