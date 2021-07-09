@@ -246,8 +246,9 @@ def angular_cl_cov_SSC(cosmo, cltracer1, cltracer2, ell, tkka,
                        sigma2_B=None, fsky=1.,
                        cltracer3=None, cltracer4=None, ell2=None,
                        integration_method='qag_quad'):
-    """Calculate the connected non-Gaussian covariance for a pair of
-    power spectra :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
+    """Calculate the super-sample contribution to the connected
+    non-Gaussian covariance for a pair of power spectra
+    :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
     between two pairs of tracers (:math:`(a,b)` and :math:`(c,d)`).
 
     Specifically, it computes:
