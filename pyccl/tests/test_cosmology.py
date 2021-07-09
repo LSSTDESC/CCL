@@ -45,7 +45,7 @@ def test_cosmo_methods():
     P1 = ccl.halos.halomod_power_spectrum(cosmo, hmc, 1., 1., prof,
                                           normprof=False)
     P2 = cosmo.halomod_power_spectrum(hmc, 1., 1., prof, normprof=False)
-    assert  P1 == P2
+    assert P1 == P2
 
 
 def test_cosmology_critical_init():
