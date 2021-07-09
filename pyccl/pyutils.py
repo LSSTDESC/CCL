@@ -640,17 +640,21 @@ def warn_api(pairs=None, order=None):
                 these_kwargs = list(kwargs.keys())
                 do_rename = not all([n in names for n in these_kwargs])
                 if do_rename:
+                    olds = []
+                    news = []
                     for new, old in rename:
                         if old in kwargs:
+                            olds.append(old)
+                            news.append(new)
                             kwargs[new] = kwargs.pop(old)
                             if (swap is not None) and (new in swap):
                                 swap.remove(new)
 
                     # warn about API change
-                    s = "" if len(rename) == 1 else "s"
-                    news, olds = np.asarray(rename).T.tolist()
-                    news = news[0] if len(rename) == 1 else news
-                    olds = olds[0] if len(rename) == 1 else olds
+                    s = "" if len(olds) == 1 else "s"
+                    if len(olds) == 1:
+                        news = news[0]
+                        olds = olds[0]
                     warnings.warn(
                         f"Use of argument{s} {olds} is deprecated "
                         f"in {func.__name__}. Pass the new name{s} of the "
