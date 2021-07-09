@@ -239,7 +239,7 @@ def sigma2_B_from_mask(cosmo, a_arr, *, mask_wl=None, p_of_k_a=None):
             # For a=1, the integral becomes independent of the footprint in
             # the flat-sky approximation. So we are just using the method
             # for the disc geometry here
-            sigma2_B[i] = sigma2_B_disc(cosmo=cosmo, a=a_arr[i],
+            sigma2_B[i] = sigma2_B_disc(cosmo=cosmo, a_arr=a_arr[i],
                                         p_of_k_a=p_of_k_a)
         else:
             k = (ell+0.5)/chi[i]
