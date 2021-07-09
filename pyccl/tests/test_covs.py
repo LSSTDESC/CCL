@@ -158,7 +158,7 @@ def test_Sigma2B():
                       for a, R in zip(a_use, Rs)])
 
     assert np.all(np.fabs(s2b_b/s2b_a[idx]-1) < 1E-10)
-    assert np.all(np.fabs(s2b_c/s2b_a[idx]-1) < 1E-10)
+    assert np.all(np.fabs(s2b_c/s2b_a[idx]-1) < 1E-8)
     assert np.all(np.fabs(s2b_d/s2b_a[idx]-1) < 1E-3)
 
     # Check calculation based on mask Cls against the disc calculation
