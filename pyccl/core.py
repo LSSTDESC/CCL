@@ -5,7 +5,7 @@ can compute a set of theoretical predictions.
 import warnings
 import numpy as np
 import yaml
-import inspect
+from inspect import getmembers, isfunction, signature
 
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
@@ -194,6 +194,23 @@ class Cosmology(object):
                                      "HMCode_logT_AGN": 7.8}}
 
     """
+    # Go through all functions in the main package and the subpackages
+    # and make every function that takes `cosmo` as its first argument
+    # an attribute of this class.
+    from . import background, bcm, boltzmann, \
+        cls, correlations, covariances, neutrinos, \
+        pk2d, power, tk3d, tracers, halos, nl_pt
+    subs = [background, boltzmann, bcm, cls, correlations, covariances,
+            neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
+    funcs = [getmembers(sub, isfunction) for sub in subs]
+    funcs = [func for sub in funcs for func in sub]
+    for name, func in funcs:
+        pars = signature(func).parameters
+        if list(pars)[0] == "cosmo":
+            vars()[name] = func
+    del background, boltzmann, bcm, cls, correlations, covariances, \
+        neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt
+
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
@@ -301,7 +318,7 @@ class Cosmology(object):
 
         # Get the call signature of Cosmology (i.e., the names of
         # all arguments)
-        init_param_names = inspect.signature(cls).parameters.keys()
+        init_param_names = signature(cls).parameters.keys()
 
         # Read the values we need from the loaded yaml dictionary. Missing
         # values take their default values from Cosmology.__init__

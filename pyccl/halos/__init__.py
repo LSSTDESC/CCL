@@ -2,7 +2,8 @@
 from .massdef import (  # noqa
     mass2radius_lagrangian, MassDef,
     MassDef200m, MassDef200c,
-    MassDefVir, mass_def_from_name)
+    MassDefVir, convert_concentration,
+    mass_def_from_name)
 
 # Halo concentration
 from .concentration import (  # noqa
