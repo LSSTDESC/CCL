@@ -952,7 +952,7 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
             `prof3` will be used as `prof4`.
         prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object returning the the two-point
-            moment of `prof1` and `prof2`. If `None`, the default
+            moment of `prof` and `prof2`. If `None`, the default
             second moment will be used, corresponding to the
             products of the means of both profiles.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
@@ -1051,16 +1051,16 @@ def halomod_Tk3D_SSC(cosmo, hmc, prof, *,
             profile (corresponding to :math:`u_1` above.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
-            `prof1` will be used as `prof2`.
+            `prof` will be used as `prof2`.
         prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_1` above. If `None`,
-            `prof1` will be used as `prof3`.
+            `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
             `prof3` will be used as `prof4`.
         prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object returning the the two-point
-            moment of `prof1` and `prof2`. If `None`, the default
+            moment of `prof` and `prof2`. If `None`, the default
             second moment will be used, corresponding to the
             products of the means of both profiles.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
@@ -1068,10 +1068,10 @@ def halomod_Tk3D_SSC(cosmo, hmc, prof, *,
         normprof (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by `prof1`.
-        normprof2 (bool): same as `normprof1` for `prof2`.
-        normprof3 (bool): same as `normprof1` for `prof3`.
-        normprof4 (bool): same as `normprof1` for `prof4`.
+            :math:`u` is the profile represented by `prof`.
+        normprof2 (bool): same as `normprof` for `prof2`.
+        normprof3 (bool): same as `normprof` for `prof3`.
+        normprof4 (bool): same as `normprof` for `prof4`.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`,
             the power spectrum stored within `cosmo` will be used.
