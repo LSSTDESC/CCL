@@ -132,7 +132,7 @@ class ConcentrationDiemer15(Concentration):
     def _check_mdef(self, mdef):
         if isinstance(mdef.Delta, str):
             return True
-        elif not ((int(mdef.Delta) == 200) and \
+        elif not ((int(mdef.Delta) == 200) and
                   (mdef.rho_type == 'critical')):
             return True
         return False
@@ -239,7 +239,7 @@ class ConcentrationPrada12(Concentration):
     def _check_mdef(self, mdef):
         if isinstance(mdef.Delta, str):
             return True
-        elif not ((int(mdef.Delta) == 200) and \
+        elif not ((int(mdef.Delta) == 200) and
                   (mdef.rho_type == 'critical')):
             return True
         return False
