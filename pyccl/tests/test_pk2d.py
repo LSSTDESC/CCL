@@ -7,7 +7,7 @@ import pyccl as ccl
 
 
 def pk1d(k):
-    return ((k+0.001)/0.1)**(-1)
+    return (k/0.1)**(-1)
 
 
 def grw(a):
@@ -153,23 +153,31 @@ def test_pk2d_function():
     ptrue = pk2d(ktest, atest)
     phere = psp.eval(cosmo, ktest, atest)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_almost_equal(dphere, -1., 6)
 
     ktest = 1
     atest = 0.5
     ptrue = pk2d(ktest, atest)
     phere = psp.eval(cosmo, ktest, atest)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_almost_equal(dphere, -1., 6)
 
     # Test at array of points
     ktest = np.logspace(-3, 1, 10)
     ptrue = pk2d(ktest, atest)
     phere = psp.eval(cosmo, ktest, atest)
     assert_allclose(phere, ptrue, rtol=1E-6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is not logarithmic
     psp = ccl.Pk2D(pkfunc=pk2d, is_logp=False, cosmo=cosmo)
     phere = psp.eval(cosmo, ktest, atest)
     assert_allclose(phere, ptrue, rtol=1E-6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is arrays
     karr = np.logspace(-4, 2, 1000)
@@ -179,6 +187,8 @@ def test_pk2d_function():
         a_arr=aarr, lk_arr=np.log(karr), pk_arr=parr, is_logp=False)
     phere = psp.eval(cosmo, ktest, atest)
     assert_allclose(phere, ptrue, rtol=1E-6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
 
 def test_pk2d_cls():

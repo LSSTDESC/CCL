@@ -372,6 +372,165 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status
   return fka_post;
 }
 
+double ccl_f2d_t_dlogf_dlk_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status)
+{
+
+  if (f2d->is_k_constant)
+    return 0;
+ 
+  double inv_pk0 = 1.;
+  // Get Pk if needed
+  if (!f2d->is_log) {
+    inv_pk0 = ccl_f2d_t_eval(f2d, lk, a, cosmo, status);
+    if(inv_pk0==0)
+      return 0;
+    inv_pk0 = 1./inv_pk0;
+  }
+
+  int is_hiz, is_loz;
+  double a_ev = a;
+  if (f2d->is_a_constant) {
+    is_hiz = 0;
+    is_loz = 0;
+  }
+  else {
+    is_hiz = a < f2d->amin;
+    is_loz = a > f2d->amax;
+    if (is_loz) { // Are we above the interpolation range in a?
+      if (f2d->extrap_linear_growth == ccl_f2d_no_extrapol) {
+        *status=CCL_ERROR_SPLINE_EV;
+        return NAN;
+      }
+      a_ev = f2d->amax;
+    }
+    else if (is_hiz) { // Are we below the interpolation range in a?
+      if (f2d->extrap_linear_growth == ccl_f2d_no_extrapol) {
+        *status=CCL_ERROR_SPLINE_EV;
+        return NAN;
+      }
+      a_ev = f2d->amin;
+    }
+  }
+
+  int is_hik, is_lok;
+  double fka_pre, fka_post;
+  double lk_ev = lk;
+  is_hik = lk > f2d->lkmax;
+  is_lok = lk < f2d->lkmin;
+  if (is_hik) // Are we above the interpolation range in k?
+    lk_ev = f2d->lkmax;
+  else if (is_lok) // Are we below the interpolation range in k?
+    lk_ev = f2d->lkmin;
+
+  // Evaluate spline
+  int spstatus=0;
+  if (f2d->is_factorizable) {
+    double fk, fa;
+    if (f2d->fk == NULL) {
+      if (f2d->is_log)
+        fk = 0;
+      else
+        fk = 1;
+    }
+    else
+      spstatus |= gsl_spline_eval_deriv_e(f2d->fk, lk_ev, NULL, &fk);
+
+    if (f2d->fa == NULL) {
+      if (f2d->is_log)
+        fa = 0;
+      else
+        fa = 1;
+    }
+    else
+      spstatus |= gsl_spline_eval_e(f2d->fa, a_ev, NULL, &fa);
+      if (f2d->is_log)
+        fka_pre = fk+fa;
+      else
+        fka_pre = fk*fa;
+  }
+  else {
+    if (f2d->fka == NULL) {
+      if (f2d->is_log)
+        fka_pre = 0;
+      else
+        fka_pre = 1;
+    }
+    else
+      spstatus = gsl_spline2d_eval_deriv_x_e(f2d->fka, lk_ev, a_ev, NULL, NULL, &fka_pre);
+  }
+
+  if (spstatus) {
+    *status = CCL_ERROR_SPLINE_EV;
+    return NAN;
+  }
+
+  // Now extrapolate in k if needed
+  if (is_hik) {
+    fka_post = fka_pre;
+    if (f2d->extrap_order_hik > 1) {
+      double pd;
+      double dlk = lk-lk_ev;
+      if (f2d->is_factorizable)
+        spstatus = gsl_spline_eval_deriv2_e(f2d->fk, lk_ev, NULL, &pd);
+      else
+        spstatus = gsl_spline2d_eval_deriv_xx_e(f2d->fka, lk_ev, a_ev, NULL, NULL, &pd);
+      if (spstatus) {
+        *status = CCL_ERROR_SPLINE_EV;
+        return NAN;
+      }
+      fka_post += pd*dlk;
+    }
+  }
+  else if (is_lok) {
+    fka_post = fka_pre;
+    if (f2d->extrap_order_lok > 1) {
+      double pd;
+      double dlk = lk-lk_ev;
+      if (f2d->is_factorizable)
+        spstatus = gsl_spline_eval_deriv2_e(f2d->fk, lk_ev, NULL, &pd);
+      else
+        spstatus = gsl_spline2d_eval_deriv_xx_e(f2d->fka, lk_ev, a_ev, NULL, NULL, &pd);
+      if (spstatus) {
+        *status = CCL_ERROR_SPLINE_EV;
+        return NAN;
+      }
+      fka_post += pd*dlk;
+    }
+  }
+  else
+    fka_post = fka_pre;
+
+  // Exponentiate if needed
+  if (!f2d->is_log) {
+    fka_post *= inv_pk0;
+
+    // Extrapolation in a in log-space not needed
+    // (does not contribute to logarithmic k derivative)
+    if (is_hiz) {
+      double gz;  // Use CCL's growth function
+      if (f2d->extrap_linear_growth == ccl_f2d_cclgrowth) {
+        ccl_cosmology *csm = (ccl_cosmology *)cosmo;
+        if (!csm->computed_growth) {
+          *status = CCL_ERROR_GROWTH_INIT;
+          ccl_cosmology_set_status_message(
+            csm,
+            "ccl_f2d.c: ccl_f2d_t_eval(): growth factor splines have not been precomputed!");
+          return NAN;
+        }
+        gz = (
+              ccl_growth_factor(csm, a, status) /
+              ccl_growth_factor(csm, a_ev, status));
+      }
+      else // Use constant growth factor
+        gz = f2d->growth_factor_0;
+
+      fka_post *= pow(gz, f2d->growth_exponent);
+    }
+  }
+
+  return fka_post;
+}
+
 void ccl_f2d_t_free(ccl_f2d_t *f2d)
 {
   if(f2d != NULL) {

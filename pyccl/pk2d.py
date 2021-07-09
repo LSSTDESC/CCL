@@ -222,6 +222,47 @@ class Pk2D(object):
 
         return f
 
+    def eval_dlogpk_dlogk(self, k, a, cosmo):
+        """Evaluate logarithmic derivative
+
+        .. math::
+           \\frac{d\\log P(k,a)}{d\\log k}
+
+        Args:
+            k (float or array_like): wavenumber value(s) in units of Mpc^-1.
+            a (float): value of the scale factor
+            cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The
+                cosmology object is needed in order to evaluate the power
+                spectrum outside the interpolation range in `a`. E.g. if you
+                want to evaluate the power spectrum at a very small a, not
+                covered by the arrays you passed when initializing this object,
+                the power spectrum will be extrapolated from the earliest
+                available value using the linear growth factor (for which a
+                cosmology is needed).
+
+        Returns:
+            float or array_like: value(s) of the power spectrum.
+        """
+        # make sure we have growth factors for extrapolation
+        cosmo.compute_growth()
+
+        status = 0
+        cospass = cosmo.cosmo
+
+        if isinstance(k, int):
+            k = float(k)
+        if isinstance(k, float):
+            f, status = lib.pk2d_der_eval_single(self.psp, np.log(k), a,
+                                                 cospass, status)
+        else:
+            k_use = np.atleast_1d(k)
+            f, status = lib.pk2d_der_eval_multi(self.psp, np.log(k_use),
+                                                a, cospass,
+                                                k_use.size, status)
+        check(status, cosmo)
+
+        return f
+
     def __del__(self):
         """Free memory associated with this Pk2D structure
         """
