@@ -288,9 +288,9 @@ class HaloProfile(object):
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in umits of M_sun.
-            a_lens (float or array_like): lens' scale factor.
-            a_src (float or array_like): source's scale factor.
+            M (float or array_like): halo mass in units of M_sun.
+            a_lens (float or array_like): scale factor of lens.
+            a_src (float or array_like): scale factor of source.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -298,7 +298,6 @@ class HaloProfile(object):
             float or array_like: convergence \
                 :math:`\\kappa`
         """
-
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def) / a_lens**2
         Sigma_crit = sigma_critical(cosmo, a_lens, a_src)
         return Sigma / Sigma_crit
@@ -319,7 +318,7 @@ class HaloProfile(object):
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in umits of M_sun.
+            M (float or array_like): halo mass in units of M_sun.
             a_lens (float or array_like): lens' scale factor.
             a_src (float or array_like): source's scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
@@ -329,7 +328,6 @@ class HaloProfile(object):
             float or array_like: shear \
                 :math:`\\gamma`
         """
-
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
         Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
         Sigma_crit = sigma_critical(cosmo, a_lens, a_src)
@@ -349,7 +347,7 @@ class HaloProfile(object):
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in umits of M_sun.
+            M (float or array_like): halo mass in units of M_sun.
             a_lens (float or array_like): lens' scale factor.
             a_src (float or array_like): source's scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
@@ -359,7 +357,6 @@ class HaloProfile(object):
             float or array_like: reduced shear \
                 :math:`g_t`
         """
-
         convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
         shear = self.shear(cosmo, r, M, a_lens, a_src, mass_def)
         return shear / (1.0 - convergence)
@@ -377,7 +374,7 @@ class HaloProfile(object):
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in umits of M_sun.
+            M (float or array_like): halo mass in units of M_sun.
             a_lens (float or array_like): lens' scale factor.
             a_src (float or array_like): source's scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
@@ -387,7 +384,6 @@ class HaloProfile(object):
             float or array_like: magnification\
                 :math:`\\mu`
         """
-
         convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
         shear = self.shear(cosmo, r, M, a_lens, a_src, mass_def)
 
