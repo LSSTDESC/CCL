@@ -69,8 +69,10 @@ def test_cov_NG_sanity(alpha, beta, typ):
                            prefac=1., chi_power=4)
 
         def cov_f(ll, **kwargs):
-            return ccl.angular_cl_cov_SSC(COSMO, tr, tr, ll, tsp,
-                                          sigma2_B=(a_s, s2b), **kwargs)
+            return ccl.angular_cl_cov_SSC(COSMO, tr, tr, ell=ll,
+                                          t_of_kk_a=tsp,
+                                          sigma2_B=(a_s, s2b),
+                                          **kwargs)
 
     cov = cov_f(ls)
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
