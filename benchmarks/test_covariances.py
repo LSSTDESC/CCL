@@ -15,13 +15,11 @@ def test_ssc_WL():
                           sigma8=0.8, m_nu=0.0)
 
     mass_def = ccl.halos.MassDef200m()
-    hmf = ccl.halos.MassFuncTinker10(cosmo,
-                                     mass_def=mass_def)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo,
-                                     mass_def=mass_def)
-    nfw = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(mass_def),
-                                   fourier_analytic=True)
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
+    hmf = ccl.halos.MassFuncTinker10(mass_def=mass_def)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def)
+    con = ccl.halos.ConcentrationDuffy08(mass_def)
+    nfw = ccl.halos.HaloProfileNFW(con, fourier_analytic=True)
+    hmc = ccl.halos.HMCalculator(hmf, hbf, mass_def)
 
     n_z = 100
 

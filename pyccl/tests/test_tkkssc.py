@@ -8,11 +8,11 @@ COSMO = ccl.Cosmology(
     transfer_function='bbks', matter_power_spectrum='linear')
 COSMO.compute_nonlin_power()
 M200 = ccl.halos.MassDef200m()
-HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
-HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
-                              fourier_analytic=True)
-P2 = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
+HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
+HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
+CON = ccl.halos.ConcentrationDuffy08(M200)
+P1 = ccl.halos.HaloProfileNFW(CON, fourier_analytic=True)
+P2 = ccl.halos.HaloProfileHOD(CON)
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
 Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
@@ -58,7 +58,7 @@ AA = 1.0
                            'p3': None, 'p4': None, 'cv34': None,
                            'norm': False, 'pk': COSMO.get_nonlin_power()}],)
 def test_tkkssc_smoke(pars):
-    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
+    hmc = ccl.halos.HMCalculator(HMF, HBF, mass_def=M200,
                                  nlog10M=2)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
@@ -83,7 +83,7 @@ def test_tkkssc_smoke(pars):
 def test_tkkssc_errors():
     from pyccl.pyutils import assert_warns
 
-    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
+    hmc = ccl.halos.HMCalculator(HMF, HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 
