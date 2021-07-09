@@ -315,7 +315,8 @@ class HMCalculator(object):
         i02 = self._integrate_over_mf(uk)
         return i02
 
-    def I_1_2(self, cosmo, k, a, prof1, prof_2pt, prof2=None):
+    @warn_api(pairs=[("prof", "prof1")], order=["prof_2pt", "prof2"])
+    def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
         """ Solves the integral:
 
         .. math::
@@ -347,7 +348,7 @@ class HMCalculator(object):
         """
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
-        uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
+        uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
                                   prof2=prof2,
                                   mass_def=self._mdef).T
         i02 = self._integrate_over_mbf(uk)
@@ -377,17 +378,17 @@ class HMCalculator(object):
             prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof1` will be used as
+                second halo profile. If `None`, `prof` will be used as
                 `prof2`.
             prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof1` will be used as
+                second halo profile. If `None`, `prof` will be used as
                 `prof3`.
             prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): a
                 second halo profile. If `None`, `prof3` will be used as
                 `prof4`.
             prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object returning the the
-                two-point moment of `prof1` and `prof2`.
+                two-point moment of `prof` and `prof2`.
             prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object returning the the
                 two-point moment of `prof3` and `prof4`.
@@ -819,31 +820,31 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
         hmc (:class:`HMCalculator`): a halo model calculator.
         k (float or array_like): comoving wavenumber in Mpc^-1.
         a (float or array_like): scale factor.
-        prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+        prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
-            `prof1` will be used as `prof2`.
+            `prof` will be used as `prof2`.
         prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object returning the the two-point
-            moment of `prof1` and `prof2`. If `None`, the default
+            moment of `prof` and `prof2`. If `None`, the default
             second moment will be used, corresponding to the
             products of the means of both profiles.
         prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_1` above. If `None`,
-            `prof1` will be used as `prof3`.
+            `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
             `prof3` will be used as `prof4`.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof12_2pt` for `prof3` and `prof4`.
-        normprof1 (bool): if `True`, this integral will be
+        normprof (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by `prof1`.
-        normprof2 (bool): same as `normprof1` for `prof2`.
-        normprof3 (bool): same as `normprof1` for `prof3`.
-        normprof4 (bool): same as `normprof1` for `prof4`.
+            :math:`u` is the profile represented by `prof`.
+        normprof2 (bool): same as `normprof` for `prof2`.
+        normprof3 (bool): same as `normprof` for `prof3`.
+        normprof4 (bool): same as `normprof` for `prof4`.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -859,7 +860,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
 
     # Check inputs
     if not isinstance(prof, HaloProfile):
-        raise TypeError("prof1 must be of type `HaloProfile`")
+        raise TypeError("prof must be of type `HaloProfile`")
     if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
     if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
@@ -1019,10 +1020,12 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
     return tk3d
 
 
-def halomod_Tk3D_SSC(cosmo, hmc,
-                     prof1, prof2=None, prof12_2pt=None,
-                     prof3=None, prof4=None, prof34_2pt=None,
-                     normprof1=False, normprof2=False,
+@warn_api(pairs=[("prof", "prof1"), ("normprof", "normprof1")],
+          order=["prof12_2pt", "prof3", "prof4"])
+def halomod_Tk3D_SSC(cosmo, hmc, prof, *,
+                     prof2=None, prof3=None, prof4=None,
+                     prof12_2pt=None, prof34_2pt=None,
+                     normprof=None, normprof2=False,
                      normprof3=False, normprof4=False,
                      p_of_k_a=None, lk_arr=None, a_arr=None,
                      extrap_order_lok=1, extrap_order_hik=1,
@@ -1044,25 +1047,25 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
         hmc (:class:`HMCalculator`): a halo model calculator.
-        prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+        prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
             `prof1` will be used as `prof2`.
-        prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            a profile covariance object returning the the two-point
-            moment of `prof1` and `prof2`. If `None`, the default
-            second moment will be used, corresponding to the
-            products of the means of both profiles.
         prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_1` above. If `None`,
             `prof1` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
             `prof3` will be used as `prof4`.
+        prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            a profile covariance object returning the the two-point
+            moment of `prof1` and `prof2`. If `None`, the default
+            second moment will be used, corresponding to the
+            products of the means of both profiles.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof12_2pt` for `prof3` and `prof4`.
-        normprof1 (bool): if `True`, this integral will be
+        normprof (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof1`.
@@ -1108,8 +1111,8 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     k_use = np.exp(lk_arr)
 
     # Check inputs
-    if not isinstance(prof1, HaloProfile):
-        raise TypeError("prof1 must be of type `HaloProfile`")
+    if not isinstance(prof, HaloProfile):
+        raise TypeError("prof must be of type `HaloProfile`")
     if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
     if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
@@ -1125,7 +1128,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
     if prof3 is None:
-        prof3_bak = prof1
+        prof3_bak = prof
     else:
         prof3_bak = prof3
     if prof34_2pt is None:
@@ -1156,8 +1159,8 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     dpk34 = np.zeros([na, nk])
     for ia, aa in enumerate(a_arr):
         # Compute profile normalizations
-        norm1 = get_norm(normprof1, prof1, aa)
-        i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof1)
+        norm1 = get_norm(normprof, prof, aa)
+        i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
         # Compute second profile normalization
         if prof2 is None:
             norm2 = norm1
@@ -1178,18 +1181,18 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             norm4 = get_norm(normprof4, prof4, aa)
             i11_4 = hmc.I_1_1(cosmo, k_use, aa, prof4)
 
-        i12_12 = hmc.I_1_2(cosmo, k_use, aa, prof1,
-                           prof12_2pt, prof2)
+        i12_12 = hmc.I_1_2(cosmo, k_use, aa, prof,
+                           prof2, prof12_2pt)
         if (prof3 is None) and (prof4 is None) and (prof34_2pt is None):
             i12_34 = i12_12
         else:
             i12_34 = hmc.I_1_2(cosmo, k_use, aa, prof3_bak,
-                               prof34_2pt_bak, prof4)
+                               prof4, prof34_2pt_bak)
         norm12 = norm1 * norm2
         norm34 = norm3 * norm4
 
         pk = pk2d.eval(k_use, aa, cosmo)
-        dpk = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo)
+        dpk = pk2d.eval_dlPk_dlk(k_use, aa, cosmo)
         # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk+I12
         dpk12[ia, :] = norm12*((2.2380952381-dpk/3)*i11_1*i11_2*pk+i12_12)
         dpk34[ia, :] = norm34*((2.2380952381-dpk/3)*i11_3*i11_4*pk+i12_34)

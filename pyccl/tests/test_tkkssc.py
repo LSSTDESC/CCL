@@ -10,9 +10,9 @@ COSMO.compute_nonlin_power()
 M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
-                              fourier_analytic=True)
-P2 = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
+CON = ccl.halos.ConcentrationDuffy08(M200)
+P1 = ccl.halos.HaloProfileNFW(c_m_relation=CON, fourier_analytic=True)
+P2 = ccl.halos.HaloProfileHOD(c_m_relation=CON)
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
 Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
@@ -58,24 +58,25 @@ AA = 1.0
                            'p3': None, 'p4': None, 'cv34': None,
                            'norm': False, 'pk': COSMO.get_nonlin_power()}],)
 def test_tkkssc_smoke(pars):
-    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
-                                 nlog10M=2)
+    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF, halo_bias=HBF,
+                                 mass_def=M200, nlog10M=2)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 
     tkk = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc,
                                      prof1=pars['p1'],
                                      prof2=pars['p2'],
-                                     prof12_2pt=pars['cv12'],
                                      prof3=pars['p3'],
                                      prof4=pars['p4'],
+                                     prof12_2pt=pars['cv12'],
                                      prof34_2pt=pars['cv34'],
-                                     normprof1=pars['norm'],
+                                     normprof=pars['norm'],
                                      normprof2=pars['norm'],
                                      normprof3=pars['norm'],
                                      normprof4=pars['norm'],
                                      p_of_k_a=pars['pk'],
-                                     lk_arr=np.log(k_arr), a_arr=a_arr)
+                                     lk_arr=np.log(k_arr),
+                                     a_arr=a_arr)
     tk = tkk.eval(0.1, 0.5)
     assert np.all(np.isfinite(tk))
 
@@ -83,7 +84,8 @@ def test_tkkssc_smoke(pars):
 def test_tkkssc_errors():
     from pyccl.pyutils import assert_warns
 
-    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
+    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF, halo_bias=HBF,
+                                 mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 
