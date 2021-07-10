@@ -15,9 +15,9 @@ CONCS = [ccl.halos.ConcentrationDiemer15,
          ccl.halos.ConcentrationConstant]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 # None of our concentration-mass relations
-# are defined for FoF halos, or 400 matter.
+# are defined for FoF halos, or 400 critical.
 MDEF = ccl.halos.MassDef('fof', 'matter')
-M400 = ccl.halos.MassDef(400, 'matter')
+M400 = ccl.halos.MassDef(400, 'critical')
 
 
 def test_cM_default_mass_def():
@@ -52,6 +52,11 @@ def test_cM_mdef_raises(cM_class):
     # testing numbers
     with pytest.raises(ValueError):
         cM_class(M400)
+
+    if cM_class.name == "Ishiyama21":
+        with pytest.raises(ValueError):
+            M500 = ccl.halos.MassDef500c()
+            cM_class(M500, Vmax=True)
 
 
 @pytest.mark.parametrize('name', ['Duffy08', 'Diemer15'])
