@@ -58,6 +58,10 @@ def test_cM_mdef_raises(cM_class):
             M500 = ccl.halos.MassDef500c()
             cM_class(M500, Vmax=True)
 
+        with pytest.raises(ValueError):
+            M200 = ccl.halos.MassDef200m()
+            cM_class(M200)
+
 
 @pytest.mark.parametrize('name', ['Duffy08', 'Diemer15'])
 def test_cM_from_string(name):
