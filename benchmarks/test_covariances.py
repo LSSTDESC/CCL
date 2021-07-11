@@ -19,9 +19,10 @@ def test_ssc_WL():
                                      mass_def=mass_def)
     hbf = ccl.halos.HaloBiasTinker10(cosmo,
                                      mass_def=mass_def)
-    nfw = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(mass_def),
-                                   fourier_analytic=True)
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
+    con = ccl.halos.ConcentrationDuffy08(mass_def=mass_def)
+    nfw = ccl.halos.HaloProfileNFW(c_m_relation=con, fourier_analytic=True)
+    hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mass_def)
 
     n_z = 100
 
@@ -33,16 +34,16 @@ def test_ssc_WL():
     k = np.geomspace(k_min, k_max, n_k)
 
     tk3D = ccl.halos.halomod_Tk3D_SSC(cosmo=cosmo, hmc=hmc,
-                                      prof1=nfw,
+                                      prof=nfw,
                                       prof2=nfw,
                                       prof12_2pt=None,
-                                      normprof1=True, normprof2=True,
+                                      normprof=True, normprof2=True,
                                       lk_arr=np.log(k), a_arr=a,
                                       use_log=True)
 
     z, nofz = np.loadtxt(os.path.join(data_dir, "ssc_WL_nofz.txt"),
                          unpack=True)
-    WL_tracer = ccl.WeakLensingTracer(cosmo, (z, nofz))
+    WL_tracer = ccl.WeakLensingTracer(cosmo, dndz=(z, nofz))
 
     ell = np.loadtxt(os.path.join(data_dir, "ssc_WL_ell.txt"))
 
@@ -50,9 +51,9 @@ def test_ssc_WL():
 
     sigma2_B = ccl.sigma2_B_disc(cosmo, a_arr=a, fsky=fsky)
     cov_ssc = ccl.covariances.angular_cl_cov_SSC(cosmo,
-                                                 cltracer1=WL_tracer,
-                                                 cltracer2=WL_tracer,
-                                                 ell=ell, tkka=tk3D,
+                                                 tracer1=WL_tracer,
+                                                 tracer2=WL_tracer,
+                                                 ell=ell, t_of_kk_a=tk3D,
                                                  sigma2_B=(a, sigma2_B),
                                                  fsky=None)
     var_ssc_ccl = np.diag(cov_ssc)

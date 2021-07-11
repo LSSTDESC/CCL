@@ -58,7 +58,7 @@ def test_pt_pk(comb):
         ind = np.where((kin < kmax) & (kin > kmin))
         k = kin[ind]
         dpk = data[iz][i_d+1][ind]
-        tpk = pk.eval(COSMO, k, a)
+        tpk = pk.eval(k, a, COSMO)
         print('If this fails, try updating or re-installing fast-pt:')
         print('pip install -U fast-pt')
         assert np.all(np.fabs(tpk / dpk - 1) < 1E-5)
