@@ -821,15 +821,18 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
         # Compute profile normalizations
         norm1 = get_norm(normprof1, prof1, aa)
         # Compute second profile normalization
-        if prof2 is None:
+        if prof2 is None or (prof2.__eq__(prof1)):
             norm2 = norm1
         else:
             norm2 = get_norm(normprof2, prof2, aa)
-        if prof3 is None:
+
+        if prof3 is None or (prof3.__eq__(prof1)):
             norm3 = norm1
         else:
             norm3 = get_norm(normprof3, prof3, aa)
-        if prof4 is None:
+
+        prof_comp = prof3 if prof3 is not None else prof1
+        if prof4 is None or (prof4.__eq__(prof_comp)):
             norm4 = norm3
         else:
             norm4 = get_norm(normprof4, prof4, aa)
