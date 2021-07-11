@@ -147,7 +147,7 @@ class PTNumberCountsTracer(PTTracer):
             tidal bias.
     """
     @warn_api()
-    def __init__(self, b1, b2=None, bs=None):
+    def __init__(self, *, b1, b2=None, bs=None):
         self.biases = {}
         self.type = 'NC'
 

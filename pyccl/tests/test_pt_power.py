@@ -10,12 +10,12 @@ BZ = BZ_C * np.ones(NZ)
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
-TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
-                                            (ZZ, BZ),
-                                            (ZZ, BZ)),
-       'TI': ccl.nl_pt.PTIntrinsicAlignmentTracer((ZZ, BZ),
-                                                  (ZZ, BZ),
-                                                  (ZZ, BZ)),
+TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer(b1=(ZZ, BZ),
+                                            b2=(ZZ, BZ),
+                                            bs=(ZZ, BZ)),
+       'TI': ccl.nl_pt.PTIntrinsicAlignmentTracer(c1=(ZZ, BZ),
+                                                  c2=(ZZ, BZ),
+                                                  cdelta=(ZZ, BZ)),
        'TM': ccl.nl_pt.PTMatterTracer()}
 PTC = ccl.nl_pt.PTCalculator(with_NC=True,
                              with_IA=True,
@@ -50,7 +50,7 @@ def test_pt_tracer_m_smoke():
 
 @pytest.mark.parametrize('b2', [(ZZ, BZ), BZ_C, None])
 def test_pt_tracer_nc_smoke(b2):
-    pt_tr = ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
+    pt_tr = ccl.nl_pt.PTNumberCountsTracer(b1=(ZZ, BZ),
                                            b2=b2,
                                            bs=(ZZ, BZ))
 
@@ -67,7 +67,7 @@ def test_pt_tracer_nc_smoke(b2):
 
 @pytest.mark.parametrize('c2', [(ZZ, BZ), BZ_C, None])
 def test_pt_tracer_ia_smoke(c2):
-    pt_tr = ccl.nl_pt.PTIntrinsicAlignmentTracer((ZZ, BZ),
+    pt_tr = ccl.nl_pt.PTIntrinsicAlignmentTracer(c1=(ZZ, BZ),
                                                  c2=c2,
                                                  cdelta=(ZZ, BZ))
 
@@ -83,14 +83,14 @@ def test_pt_tracer_ia_smoke(c2):
 
 
 def test_pt_tracer_get_bias():
-    pt_tr = ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
+    pt_tr = ccl.nl_pt.PTNumberCountsTracer(b1=(ZZ, BZ),
                                            b2=(ZZ, BZ),
                                            bs=(ZZ, BZ))
-    b = pt_tr.get_bias('b1', 0.1)
+    b = pt_tr.get_bias('b1', z=0.1)
     assert b == BZ_C
 
     with pytest.raises(KeyError):
-        pt_tr.get_bias('b_one', 0.1)
+        pt_tr.get_bias('b_one', z=0.1)
 
 
 def test_pt_workspace_smoke():
@@ -133,8 +133,8 @@ def test_pt_pk2d_bb():
                                 return_ia_bb=True)
     pee2, pbb2 = ccl.nl_pt.get_pt_pk2d(COSMO, tracer1=TRS['TI'], ptc=PTC,
                                        return_ia_ee_and_bb=True)
-    assert pee.eval(COSMO, 0.1, 0.9) == pee2.eval(COSMO, 0.1, 0.9)
-    assert pbb.eval(COSMO, 0.1, 0.9) == pbb2.eval(COSMO, 0.1, 0.9)
+    assert pee.eval(0.1, 0.9, COSMO) == pee2.eval(0.1, 0.9, COSMO)
+    assert pbb.eval(0.1, 0.9, COSMO) == pbb2.eval(0.1, 0.9, COSMO)
 
 
 @pytest.mark.parametrize('nl', ['nonlinear', 'linear', 'spt'])
@@ -265,6 +265,6 @@ def test_return_ptc():
     assert ptc2_2 is PTC
     # check that the result outputs are the same
     # for the internally initialized ptc.
-    assert np.allclose(pk_2.eval(COSMO, ks, 1.), pk.eval(COSMO, ks, 1.))
-    assert np.allclose(pee2_2.eval(COSMO, ks, 1.), pee2.eval(COSMO, ks, 1.))
-    assert np.allclose(pbb2_2.eval(COSMO, ks, 1.), pbb2.eval(COSMO, ks, 1.))
+    assert np.allclose(pk_2.eval(ks, 1., COSMO), pk.eval(ks, 1., COSMO))
+    assert np.allclose(pee2_2.eval(ks, 1., COSMO), pee2.eval(ks, 1., COSMO))
+    assert np.allclose(pbb2_2.eval(ks, 1., COSMO), pbb2.eval(ks, 1., COSMO))
