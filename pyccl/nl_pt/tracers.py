@@ -1,11 +1,12 @@
 import numpy as np
 from scipy.interpolate import interp1d
-from ..pyutils import _check_array_params
+from ..pyutils import _check_array_params, warn_api
 from ..background import growth_factor
 from .. import ccllib as lib
 
 
-def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
+@warn_api()
+def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
                       Om_m2_for_c2=False, Om_m_fid=0.3):
     """
     Function to convert from a_ia values to c_ia values,
@@ -84,7 +85,8 @@ class PTTracer(object):
         self.type = None
         pass
 
-    def get_bias(self, bias_name, z):
+    @warn_api()
+    def get_bias(self, bias_name, *, z):
         """Get the value of one of the bias functions at a given
         redshift.
 
@@ -144,6 +146,7 @@ class PTNumberCountsTracer(PTTracer):
         bs (float or tuple of arrays): as above for the
             tidal bias.
     """
+    @warn_api()
     def __init__(self, b1, b2=None, bs=None):
         self.biases = {}
         self.type = 'NC'
@@ -191,7 +194,8 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         cdelta (float or tuple of arrays): as above for the
             overdensity bias.
     """
-    def __init__(self, c1, c2=None, cdelta=None):
+    @warn_api()
+    def __init__(self, *, c1, c2=None, cdelta=None):
 
         self.biases = {}
         self.type = 'IA'

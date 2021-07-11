@@ -48,7 +48,7 @@ def test_pt_pk(comb):
     ptt2 = ptt[t2]
 
     a_arr = 1./(1+np.array([0., 0.25, 0.5, 0.75, 1.]))[::-1]
-    pk = pt.get_pt_pk2d(COSMO, ptt1, tracer2=ptt2, ptc=ptc,
+    pk = pt.get_pt_pk2d(COSMO, tracer1=ptt1, tracer2=ptt2, ptc=ptc,
                         return_ia_bb=return_bb,
                         nonlin_pk_type='spt',
                         a_arr=a_arr)
@@ -58,7 +58,7 @@ def test_pt_pk(comb):
         ind = np.where((kin < kmax) & (kin > kmin))
         k = kin[ind]
         dpk = data[iz][i_d+1][ind]
-        tpk = pk.eval(k, a, COSMO)
+        tpk = pk.eval(COSMO, k, a)
         print('If this fails, try updating or re-installing fast-pt:')
         print('pip install -U fast-pt')
         assert np.all(np.fabs(tpk / dpk - 1) < 1E-5)

@@ -4,6 +4,7 @@ from ..core import check
 from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import growth_factor
+from ..pyutils import warn_api
 from .tracers import PTTracer
 
 try:
@@ -52,7 +53,8 @@ class PTCalculator(object):
             to smooth the edges and avoid ringing. See FAST-PT
             documentation for more details.
     """
-    def __init__(self, with_NC=False, with_IA=False, with_dd=True,
+    @warn_api()
+    def __init__(self, *, with_NC=False, with_IA=False, with_dd=True,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75):
@@ -132,7 +134,8 @@ class PTCalculator(object):
                                      P_window=self.P_window,
                                      C_window=self.C_window)
 
-    def get_pgg(self, Pd1d1, g4,
+    @warn_api()
+    def get_pgg(self, *, Pd1d1, g4,
                 b11, b21, bs1, b12, b22, bs2,
                 sub_lowk):
         """ Get the number counts auto-spectrum at the internal
@@ -184,7 +187,8 @@ class PTCalculator(object):
                0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4))
         return pgg
 
-    def get_pgi(self, Pd1d1, g4, b1, b2, bs, c1, c2, cd):
+    @warn_api()
+    def get_pgi(self, *, Pd1d1, g4, b1, b2, bs, c1, c2, cd):
         """ Get the number counts - IA cross-spectrum at the
         internal set of wavenumbers (given by this object's
         `ks` attribute) and a number of redshift values.
@@ -227,7 +231,8 @@ class PTCalculator(object):
                              (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
         return pgi
 
-    def get_pgm(self, Pd1d1, g4, b1, b2, bs):
+    @warn_api()
+    def get_pgm(self, *, Pd1d1, g4, b1, b2, bs):
         """ Get the number counts - matter cross-spectrum at the
         internal set of wavenumbers (given by this object's `ks`
         attribute) and a number of redshift values.
@@ -261,7 +266,8 @@ class PTCalculator(object):
                0.5 * bs[None, :] * Pd1s2)
         return pgm
 
-    def get_pii(self, Pd1d1, g4, c11, c21, cd1,
+    @warn_api()
+    def get_pii(self, *, Pd1d1, g4, c11, c21, cd1,
                 c12, c22, cd2, return_bb=False,
                 return_both=False):
         """ Get the intrinsic alignment auto-spectrum at the internal
@@ -323,7 +329,8 @@ class PTCalculator(object):
         else:
             return pii
 
-    def get_pim(self, Pd1d1, g4, c1, c2, cd):
+    @warn_api()
+    def get_pim(self, *, Pd1d1, g4, c1, c2, cd):
         """ Get the intrinsic alignment - matter cross-spectrum at
         the internal set of wavenumbers (given by this object's `ks`
         attribute) and a number of redshift values.
@@ -357,7 +364,8 @@ class PTCalculator(object):
                (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
         return pim
 
-    def get_pmm(self, Pd1d1_lin, g4):
+    @warn_api()
+    def get_pmm(self, *, Pd1d1_lin, g4):
         """ Get the one-loop matter power spectrum.
 
         Args:
@@ -378,7 +386,8 @@ class PTCalculator(object):
         return pmm
 
 
-def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
+@warn_api(order=["tracer1", "tracer2", "ptc"])
+def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
                 sub_lowk=False, nonlin_pk_type='nonlinear',
                 a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False, return_ia_ee_and_bb=False,
@@ -395,10 +404,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
-            tracer being correlated.
         ptc (:class:`PTCalculator`): a perturbation theory
             calculator.
+        tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
+            tracer being correlated.
         tracer2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the second
             tracer being correlated. If `None`, the auto-correlation
             of the first tracer will be returned.
@@ -447,6 +456,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
         check(status)
 
+    if tracer1 is None:
+        # recover TypeError functionality from positional argument
+        raise TypeError("get_pt_pk2d missing one required "
+                        "argument tracer1 (pos2)")
     if tracer2 is None:
         tracer2 = tracer1
     if not isinstance(tracer1, PTTracer):
@@ -503,7 +516,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     elif nonlin_pk_type == 'spt':
         pklin = np.array([linear_matter_power(cosmo, ptc.ks, a)
                           for a in a_arr]).T
-        Pd1d1 = ptc.get_pmm(pklin, ga4)
+        Pd1d1 = ptc.get_pmm(Pd1d1_lin=pklin, g4=ga4)
     else:
         raise NotImplementedError("Nonlinear option %s not implemented yet" %
                                   (nonlin_pk_type))
@@ -517,18 +530,20 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.bs(z_arr)
 
-            p_pt = ptc.get_pgg(Pd1d1, ga4,
-                               b11, b21, bs1, b12, b22, bs2,
-                               sub_lowk)
+            p_pt = ptc.get_pgg(Pd1d1=Pd1d1, g4=ga4,
+                               b11=b11, b21=b21, bs1=bs1,
+                               b12=b12, b22=b22, bs2=bs2,
+                               sub_lowk=sub_lowk)
         elif (tracer2.type == 'IA'):
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
             cd2 = tracer2.cdelta(z_arr)
-            p_pt = ptc.get_pgi(Pd1d1, ga4,
-                               b11, b21, bs1, c12, c22, cd2)
+            p_pt = ptc.get_pgi(Pd1d1=Pd1d1, g4=ga4,
+                               b1=b11, b2=b21, bs=bs1,
+                               c1=c12, c2=c22, cd=cd2)
         elif (tracer2.type == 'M'):
-            p_pt = ptc.get_pgm(Pd1d1, ga4,
-                               b11, b21, bs1)
+            p_pt = ptc.get_pgm(Pd1d1=Pd1d1, g4=ga4,
+                               b1=b11, b2=b21, bs=bs1)
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
@@ -540,19 +555,21 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
             cd2 = tracer2.cdelta(z_arr)
-            p_pt = ptc.get_pii(Pd1d1, ga4,
-                               c11, c21, cd1, c12, c22, cd2,
+            p_pt = ptc.get_pii(Pd1d1=Pd1d1, g4=ga4,
+                               c11=c11, c21=c21, cd1=cd1,
+                               c12=c12, c22=c22, cd2=cd2,
                                return_bb=return_ia_bb,
                                return_both=return_ia_ee_and_bb)
         elif (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.bs(z_arr)
-            p_pt = ptc.get_pgi(Pd1d1, ga4,
-                               b12, b22, bs2, c11, c21, cd1)
+            p_pt = ptc.get_pgi(Pd1d1=Pd1d1, g4=ga4,
+                               b1=b12, b2=b22, bs=bs2,
+                               c1=c11, c2=c21, cd=cd1)
         elif (tracer2.type == 'M'):
-            p_pt = ptc.get_pim(Pd1d1, ga4,
-                               c11, c21, cd1)
+            p_pt = ptc.get_pim(Pd1d1=Pd1d1, g4=ga4,
+                               c1=c11, c2=c21, cd=cd1)
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
@@ -561,14 +578,14 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.bs(z_arr)
-            p_pt = ptc.get_pgm(Pd1d1, ga4,
-                               b12, b22, bs2)
+            p_pt = ptc.get_pgm(Pd1d1=Pd1d1, g4=ga4,
+                               b1=b12, b2=b22, bs=bs2)
         elif (tracer2.type == 'IA'):
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
             cd2 = tracer2.cdelta(z_arr)
-            p_pt = ptc.get_pim(Pd1d1, ga4,
-                               c12, c22, cd2)
+            p_pt = ptc.get_pim(Pd1d1=Pd1d1, g4=ga4,
+                               c1=c12, c2=c22, cd=cd2)
         elif (tracer2.type == 'M'):
             p_pt = Pd1d1
         else:
