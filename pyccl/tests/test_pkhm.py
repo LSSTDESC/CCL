@@ -303,7 +303,7 @@ def test_pkhm_errors():
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, None)
     with pytest.raises(TypeError):
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1,
-                                   prof2=P1, prof3=P1, prof4=None,
+                                   prof2=P1, prof3=P1, prof4="hello",
                                    normprof1=True)
 
     # Wrong prof2
