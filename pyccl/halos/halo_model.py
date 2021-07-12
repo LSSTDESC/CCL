@@ -318,7 +318,7 @@ class HMCalculator(object):
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object
@@ -332,6 +332,9 @@ class HMCalculator(object):
              float or array_like: integral values evaluated at each
              value of `k`.
         """
+        if prof2 is None:
+            prof2 = prof1
+
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
