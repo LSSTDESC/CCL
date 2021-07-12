@@ -413,7 +413,7 @@ class HMCalculator(object):
 
 
 @warn_api()
-def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
+def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
     """ Returns the mass-weighted mean halo profile.
 
     .. math::
@@ -465,7 +465,7 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
 
 
 @warn_api()
-def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
+def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
     """ Returns the mass-and-bias-weighted mean halo profile.
 
     .. math::
@@ -523,7 +523,7 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
           order=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
 def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof_2pt=None,
-                           normprof=None, normprof2=False,
+                           normprof=False, normprof2=False,
                            p_of_k_a=None,
                            get_1h=True, get_2h=True,
                            smooth_transition=None, supress_1h=None):
@@ -695,7 +695,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
           order=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
 def halomod_Pk2D(cosmo, hmc, prof, *,
                  prof2=None, prof_2pt=None,
-                 normprof=None, normprof2=False,
+                 normprof=False, normprof2=False,
                  p_of_k_a=None,
                  get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
@@ -797,7 +797,7 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
 def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof3=None, prof4=None,
                            prof12_2pt=None, prof34_2pt=None,
-                           normprof=None, normprof2=False,
+                           normprof=False, normprof2=False,
                            normprof3=False, normprof4=False):
     """ Computes the halo model 1-halo trispectrum for four different
     quantities defined by their respective halo profiles. The 1-halo
@@ -927,7 +927,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
 def halomod_Tk3D_1h(cosmo, hmc, prof, *,
                     prof2=None, prof3=None, prof4=None,
                     prof12_2pt=None, prof34_2pt=None,
-                    normprof=None, normprof2=False,
+                    normprof=False, normprof2=False,
                     normprof3=False, normprof4=False,
                     lk_arr=None, a_arr=None,
                     extrap_order_lok=1, extrap_order_hik=1,
@@ -1029,7 +1029,7 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
 def halomod_Tk3D_SSC(cosmo, hmc, prof, *,
                      prof2=None, prof3=None, prof4=None,
                      prof12_2pt=None, prof34_2pt=None,
-                     normprof=None, normprof2=False,
+                     normprof=False, normprof2=False,
                      normprof3=False, normprof4=False,
                      p_of_k_a=None, lk_arr=None, a_arr=None,
                      extrap_order_lok=1, extrap_order_hik=1,
