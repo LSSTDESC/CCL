@@ -208,11 +208,13 @@ def test_pkhm_pk2d():
                                            normprof2=True)
     assert np.allclose(pk1, pk0, rtol=1e-4)
 
-    # I_0_2
+    # I_0_2 & I_1_2
     assert np.allclose(hmc.I_0_2(COSMO, KK, AA, P1, prof_2pt=PKC),
                        hmc.I_0_2(COSMO, KK, AA, P1, prof2=P1, prof_2pt=PKC),
                        rtol=0)
-
+    assert np.allclose(hmc.I_1_2(COSMO, KK, AA, P1, prof_2pt=PKC),
+                       hmc.I_1_2(COSMO, KK, AA, P1, prof2=P1, prof_2pt=PKC),
+                       rtol=0)
     # I_0_22
     I0 = hmc.I_0_22(COSMO, KK, AA, P1, prof2=P1, prof3=P1, prof4=P1,
                     prof12_2pt=PKC, prof34_2pt=PKC)
@@ -299,6 +301,10 @@ def test_pkhm_errors():
         ccl.halos.halomod_bias_1pt(COSMO, hmc, KK, AA, None)
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, None)
+    with pytest.raises(TypeError):
+        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1,
+                                   prof2=P1, prof3=P1, prof4=None,
+                                   normprof1=True)
 
     # Wrong prof2
     with pytest.raises(TypeError):
