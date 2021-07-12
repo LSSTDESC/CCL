@@ -201,14 +201,26 @@ def test_hod_ns_independent(real_prof):
     assert p1.ns_independent is True
 
 
-def test_hod_2pt_raises():
+def test_hod_2pt():
     pbad = ccl.halos.HaloProfilePressureGNFW()
     c = ccl.halos.ConcentrationDuffy08(M200)
     pgood = ccl.halos.HaloProfileHOD(c_M_relation=c, lM0_0=11.)
     pgood_b = ccl.halos.HaloProfileHOD(c_M_relation=c, lM0_0=11.)
     p2 = ccl.halos.Profile2ptHOD()
+    F0 = p2.fourier_2pt(pgood, COSMO, 1., 1e13, 1.,
+                        prof2=pgood,
+                        mass_def=M200)
+    assert np.allclose(p2.fourier_2pt(pgood, COSMO, 1., 1e13, 1.,
+                                      prof2=None, mass_def=M200),
+                       F0, rtol=0)
+
     with pytest.raises(TypeError):
         p2.fourier_2pt(pbad, COSMO, 1., 1E13, 1.,
+                       mass_def=M200)
+
+    with pytest.raises(TypeError):
+        p2.fourier_2pt(pgood, COSMO, 1., 1e13, 1.,
+                       prof2=pbad,
                        mass_def=M200)
 
     # doesn't raise because profiles are equivalent

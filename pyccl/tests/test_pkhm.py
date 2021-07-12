@@ -208,6 +208,27 @@ def test_pkhm_pk2d():
                                            normprof2=True)
     assert np.allclose(pk1, pk0, rtol=1e-4)
 
+    # I_0_2
+    assert np.allclose(hmc.I_0_2(COSMO, KK, AA, P1, prof_2pt=PKC),
+                       hmc.I_0_2(COSMO, KK, AA, P1, prof2=P1, prof_2pt=PKC),
+                       rtol=0)
+
+    # I_0_22
+    I0 = hmc.I_0_22(COSMO, KK, AA, P1, prof2=P1, prof3=P1, prof4=P1,
+                    prof12_2pt=PKC, prof34_2pt=PKC)
+    assert np.allclose(hmc.I_0_22(COSMO, KK, AA,
+                                  P1, prof2=P1, prof3=P1, prof4=P1,
+                                  prof12_2pt=PKC, prof34_2pt=None),
+                       I0, rtol=0)
+    assert np.allclose(hmc.I_0_22(COSMO, KK, AA,
+                                  P1, prof2=P1, prof3=None, prof4=None,
+                                  prof12_2pt=PKC, prof34_2pt=PKC),
+                       I0, rtol=0)
+    with pytest.raises(ValueError):
+        hmc.I_0_22(COSMO, KK, AA,
+                   P1, prof2=P1, prof3=None, prof4=P1,
+                   prof12_2pt=PKC, prof34_2pt=PKC)
+
     # 1h/2h transition
     def alpha0(a):  # no smoothing
         return 1.
