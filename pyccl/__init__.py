@@ -24,6 +24,9 @@ from .background import growth_factor, growth_factor_unnorm, \
     h_over_h0, luminosity_distance, distance_modulus, scale_factor_of_chi, \
     omega_x, rho_x
 
+# Boltzmann solvers
+from .boltzmann import get_camb_pk_lin, get_isitgr_pk_lin, get_class_pk_lin
+
 # Generalized power spectra
 from .pk2d import Pk2D, parse_pk2d
 
@@ -44,7 +47,7 @@ from .massfunction import massfunc, halo_bias, massfunc_m2r
 from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, \
     tSZTracer, get_density_kernel, get_kappa_kernel, get_lensing_kernel
 from .cls import angular_cl
-from .covariances import angular_cl_cov_cNG
+from .covariances import angular_cl_cov_cNG, angular_cl_cov_SSC, sigma2_B_disc, sigma2_B_from_mask
 
 # Useful constants and unit conversions
 physical_constants = lib.cvar.constants
