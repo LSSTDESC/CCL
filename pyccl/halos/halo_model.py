@@ -1105,28 +1105,29 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     # Check inputs
     if not isinstance(prof1, HaloProfile):
         raise TypeError("prof1 must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+    if prof2 is None:
+        prof2 = prof1
+    elif not isinstance(prof2, HaloProfile):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
+    if prof3 is None:
+        prof3 = prof1
+    elif not isinstance(prof3, HaloProfile):
         raise TypeError("prof3 must be of type `HaloProfile` or `None`")
-    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
+    if prof4 is None:
+        prof4 = prof3
+    elif not isinstance(prof4, HaloProfile):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
     if prof12_2pt is None:
         prof12_2pt = Profile2pt()
     elif not isinstance(prof12_2pt, Profile2pt):
-        raise TypeError("prof12_2pt must be of type "
-                        "`Profile2pt` or `None`")
-    if (prof34_2pt is not None) and (not isinstance(prof34_2pt, Profile2pt)):
-        raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
-
-    if prof3 is None:
-        prof3_bak = prof1
-    else:
-        prof3_bak = prof3
+        raise TypeError("prof12_2pt must be of type `Profile2pt` or `None`")
     if prof34_2pt is None:
-        prof34_2pt_bak = prof12_2pt
+        prof34_2pt = prof12_2pt
+        flag_2pt = 0
+    elif not isinstance(prof34_2pt, Profile2pt):
+        raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
     else:
-        prof34_2pt_bak = prof34_2pt
+        flag_2pt = 1
 
     # Power spectrum
     if isinstance(p_of_k_a, Pk2D):
@@ -1154,19 +1155,19 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         norm1 = get_norm(normprof1, prof1, aa)
         i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof1)
         # Compute second profile normalization
-        if prof2 is None:
+        if prof2.__eq__(prof1):
             norm2 = norm1
             i11_2 = i11_1
         else:
             norm2 = get_norm(normprof2, prof2, aa)
             i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
-        if prof3 is None:
+        if prof3.__eq__(prof1):
             norm3 = norm1
             i11_3 = i11_1
         else:
             norm3 = get_norm(normprof3, prof3, aa)
             i11_3 = hmc.I_1_1(cosmo, k_use, aa, prof3)
-        if prof4 is None:
+        if prof4.__eq__(prof3):
             norm4 = norm3
             i11_4 = i11_3
         else:
@@ -1175,11 +1176,11 @@ def halomod_Tk3D_SSC(cosmo, hmc,
 
         i12_12 = hmc.I_1_2(cosmo, k_use, aa, prof1,
                            prof12_2pt, prof2)
-        if (prof3 is None) and (prof4 is None) and (prof34_2pt is None):
+        if prof3.__eq__(prof1) and prof4.__eq__(prof2) and not flag_2pt:
             i12_34 = i12_12
         else:
-            i12_34 = hmc.I_1_2(cosmo, k_use, aa, prof3_bak,
-                               prof34_2pt_bak, prof4)
+            i12_34 = hmc.I_1_2(cosmo, k_use, aa, prof3,
+                               prof34_2pt, prof4)
         norm12 = norm1 * norm2
         norm34 = norm3 * norm4
 
