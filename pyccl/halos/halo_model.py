@@ -283,14 +283,17 @@ class HMCalculator(object):
                 a profile covariance object
                 returning the the two-point moment of the two profiles
                 being correlated.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof` will be used as
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile` or None):
+                a second halo profile. If `None`, `prof1` will be used as
                 `prof2`.
 
         Returns:
              float or array_like: integral values evaluated at each
              value of `k`.
         """
+        if prof2 is None:
+            prof2 = prof1
+
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
@@ -342,14 +345,23 @@ class HMCalculator(object):
         """
         if prof3 is None:
             prof3 = prof1
+            if prof4 is not None:
+                raise ValueError("prof3 is None but prof4 is not None")
+        # cases with `prof4 == None` are handled internally by Profile2pt
         if prof34_2pt is None:
             prof34_2pt = prof12_2pt
 
         self._get_ingredients(a, cosmo, False)
         uk12 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                       prof2=prof2, mass_def=self._mdef).T
-        uk34 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
-                                      prof2=prof4, mass_def=self._mdef).T
+
+        if prof3.__eq__(prof1) and prof2.__eq__(prof1):
+            # 4pt approximation of the same profile
+            uk34 = uk12
+        else:
+            uk34 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
+                                          prof2=prof4, mass_def=self._mdef).T
+
         i04 = self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
         return i04
 
@@ -536,7 +548,9 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
     # Check inputs
     if not isinstance(prof, HaloProfile):
         raise TypeError("prof must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+    if prof2 is None:
+        prof2 = prof
+    elif not isinstance(prof2, HaloProfile):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
     if prof_2pt is None:
         prof_2pt = Profile2pt()
@@ -582,7 +596,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         else:
             norm1 = 1
         # Compute second profile normalization
-        if prof2 is None or (prof2.__eq__(prof)):
+        if prof2.__eq__(prof):
             norm2 = norm1
         else:
             if normprof2:
@@ -596,7 +610,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
 
             # Compute second bias factor
-            if prof2 is None or (prof2.__eq__(prof)):
+            if prof2.__eq__(prof):
                 i11_2 = i11_1
             else:
                 i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
@@ -794,18 +808,25 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
     # Check inputs
     if not isinstance(prof1, HaloProfile):
         raise TypeError("prof1 must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+    if prof2 is None:
+        prof2 = prof1
+    elif not isinstance(prof2, HaloProfile):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
+    if prof3 is None:
+        prof3 = prof1
+    elif not isinstance(prof3, HaloProfile):
         raise TypeError("prof3 must be of type `HaloProfile` or `None`")
-    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
+    if prof4 is None:
+        prof4 = prof3
+    elif not isinstance(prof4, HaloProfile):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
     if prof12_2pt is None:
         prof12_2pt = Profile2pt()
     elif not isinstance(prof12_2pt, Profile2pt):
-        raise TypeError("prof12_2pt must be of type "
-                        "`Profile2pt` or `None`")
-    if (prof34_2pt is not None) and (not isinstance(prof34_2pt, Profile2pt)):
+        raise TypeError("prof12_2pt must be of type `Profile2pt` or `None`")
+    if prof34_2pt is None:
+        prof34_2pt = prof12_2pt
+    elif not isinstance(prof34_2pt, Profile2pt):
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
     def get_norm(normprof, prof, sf):
@@ -821,18 +842,17 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
         # Compute profile normalizations
         norm1 = get_norm(normprof1, prof1, aa)
         # Compute second profile normalization
-        if prof2 is None or (prof2.__eq__(prof1)):
+        if prof2.__eq__(prof1):
             norm2 = norm1
         else:
             norm2 = get_norm(normprof2, prof2, aa)
 
-        if prof3 is None or (prof3.__eq__(prof1)):
+        if prof3.__eq__(prof1):
             norm3 = norm1
         else:
             norm3 = get_norm(normprof3, prof3, aa)
 
-        prof_comp = prof3 if prof3 is not None else prof1
-        if prof4 is None or (prof4.__eq__(prof_comp)):
+        if prof4.__eq__(prof3):
             norm4 = norm3
         else:
             norm4 = get_norm(normprof4, prof4, aa)

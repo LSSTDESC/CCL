@@ -69,16 +69,16 @@ class Profile2pt(object):
         """
         if not isinstance(prof, HaloProfile):
             raise TypeError("prof must be of type `HaloProfile`")
+        if prof2 is None:
+            prof2 = prof
+        elif not isinstance(prof2, HaloProfile):
+            raise TypeError("prof2 must be of type `HaloProfile` or None")
 
         uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
 
-        if prof2 is None:
+        if prof2.__eq__(prof):
             uk2 = uk1
         else:
-            if not isinstance(prof2, HaloProfile):
-                raise TypeError("prof2 must be of type "
-                                "`HaloProfile` or `None`")
-
             uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
 
         return uk1 * uk2 * (1 + self.r_corr)
@@ -109,7 +109,7 @@ class Profile2ptHOD(Profile2pt):
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`):
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile` or None):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
                 an auto-correlation. Note that only auto-correlations
@@ -126,9 +126,14 @@ class Profile2ptHOD(Profile2pt):
         """
         if not isinstance(prof, HaloProfileHOD):
             raise TypeError("prof must be of type `HaloProfileHOD`")
-
         if prof2 is not None:
-            if not prof2.__eq__(prof):
-                raise ValueError("prof2 must be the same as prof")
+            if not isinstance(prof2, HaloProfileHOD):
+                raise TypeError("prof2 must be of type "
+                                "`HaloProfileHOD` or None")
+        else:
+            prof2 = prof
+
+        if not prof2.__eq__(prof):
+            raise ValueError("prof2 must be equivalent to prof")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)
