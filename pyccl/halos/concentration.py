@@ -504,7 +504,7 @@ class ConcentrationIshiyama21(Concentration):
         kRL = self.kappa * (3 / (4 * np.pi) * M_use / rho_m0)**(1 / 3)
 
         n_eff = -2 * self._dlsigmaR(cosmo, kRL, a) - 3
-        alpha_eff = -growth_rate(cosmo, a)
+        alpha_eff = growth_rate(cosmo, a)
 
         A = self.a0 * (1 + self.a1 * (n_eff + 3))
         B = self.b0 * (1 + self.b1 * (n_eff + 3))

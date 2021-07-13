@@ -12,6 +12,17 @@ import numpy as np
 
 dirdat = os.path.join(os.path.dirname(__file__), "data")
 
+# Planck18 used in Uchuu simulations
+COSMO = ccl.Cosmology(Omega_c=0.2589, Omega_b=0.0486, h=0.6774,
+                      sigma8=0.8159, n_s=0.9667)
+COSMO.compute_sigma()
+H100 = COSMO["h"]
+
+Z = np.array([0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 7.0])
+
+# mass bounds in CCL's HM Calculator
+M_min, M_max = 1e8/H100, 1e16/H100
+
 
 @pytest.mark.parametrize("pars",
                          [{"Delta": 200, "relaxed": False, "Vmax": False},
@@ -32,18 +43,17 @@ def test_concentration_Ishiyama21(pars):
     fname = os.path.join(dirdat, key0)
     data = np.loadtxt(fname)
     M = data[:, 0]
-    z = np.array([0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 7.0])
 
-    cosmo = ccl.CosmologyVanillaLCDM()
-    cosmo.compute_sigma()
-    h = cosmo["h"]
+    # mass cutoff at CCL integration boundaries
+    data = data[(M > M_min) & (M < M_max)]
+    M_use = M[(M > M_min) & (M < M_max)]
+
     hmd = ccl.halos.MassDef(Delta, "critical")
-    cm = ccl.halos.ConcentrationIshiyama21(mdef=hmd,
+    cm = ccl.halos.ConcentrationIshiyama21(mass_def=hmd,
                                            relaxed=pars["relaxed"],
                                            Vmax=pars["Vmax"])
 
-    for i, zz in enumerate(z):
-        dat = data[:, i+1]                                # noqa
-        mod = cm.get_concentration(cosmo, M/h, 1/(1+zz))  # noqa
-        assert True  # FIXME
-        # assert np.allclose(dat, mod, rtol=0.01)
+    for i, zz in enumerate(Z):
+        dat = data[:, i+1]
+        mod = cm.get_concentration(COSMO, M_use/H100, 1/(1+zz))
+        assert np.allclose(mod, dat, rtol=0.04)
