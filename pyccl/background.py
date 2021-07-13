@@ -271,7 +271,7 @@ def rho_x(cosmo, a, species, is_comoving=False):
         species_types[species], int(is_comoving))
 
 
-def sigma_critical(cosmo, a_lens, a_src):
+def sigma_critical(cosmo, a_lens, a_source):
     """Returns the critical surface mass density.
 
     .. math::
@@ -284,16 +284,16 @@ def sigma_critical(cosmo, a_lens, a_src):
             Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             a_lens (float): lens' scale factor.
-            a_src (float or array_like): source's scale factor.
+            a_source (float or array_like): source's scale factor.
 
     Returns:
         float or array_like: :math:`\\Sigma_{\\mathrm{crit}}` in units
         of :math:`\\M_{\\odot}/Mpc^2`
     """
     physical_constants = lib.cvar.constants
-    Ds = angular_diameter_distance(cosmo, a_src, a2=None)
+    Ds = angular_diameter_distance(cosmo, a_source, a2=None)
     Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
-    Dls = angular_diameter_distance(cosmo, a_lens, a_src)
+    Dls = angular_diameter_distance(cosmo, a_lens, a_source)
     A = (
         physical_constants.CLIGHT**2
         * physical_constants.MPC_TO_METER

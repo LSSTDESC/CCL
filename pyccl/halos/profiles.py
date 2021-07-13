@@ -275,7 +275,7 @@ class HaloProfile(object):
                                                 is_cumul2d=True)
         return s_r_t
 
-    def convergence(self, cosmo, r, M, a_lens, a_src, mass_def=None):
+    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def=None):
         """ Returns the convergence as a function of cosmology,
         radius, halo mass and the scale factors of the source
         and the lens.
@@ -290,7 +290,7 @@ class HaloProfile(object):
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a_lens (float or array_like): scale factor of lens.
-            a_src (float or array_like): scale factor of source.
+            a_source (float or array_like): scale factor of source.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -299,10 +299,10 @@ class HaloProfile(object):
                 :math:`\\kappa`
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def) / a_lens**2
-        Sigma_crit = sigma_critical(cosmo, a_lens, a_src)
+        Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return Sigma / Sigma_crit
 
-    def shear(self, cosmo, r, M, a_lens, a_src, mass_def=None):
+    def shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
         """ Returns the shear (tangential) as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -320,7 +320,7 @@ class HaloProfile(object):
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a_lens (float or array_like): lens' scale factor.
-            a_src (float or array_like): source's scale factor.
+            a_source (float or array_like): source's scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -330,10 +330,10 @@ class HaloProfile(object):
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
         Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
-        Sigma_crit = sigma_critical(cosmo, a_lens, a_src)
+        Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
-    def reduced_shear(self, cosmo, r, M, a_lens, a_src, mass_def=None):
+    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
         """ Returns the reduced shear as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -349,7 +349,7 @@ class HaloProfile(object):
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a_lens (float or array_like): lens' scale factor.
-            a_src (float or array_like): source's scale factor.
+            a_source (float or array_like): source's scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -357,11 +357,11 @@ class HaloProfile(object):
             float or array_like: reduced shear \
                 :math:`g_t`
         """
-        convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
-        shear = self.shear(cosmo, r, M, a_lens, a_src, mass_def)
+        convergence = self.convergence(cosmo, r, M, a_lens, a_source, mass_def)
+        shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
         return shear / (1.0 - convergence)
 
-    def magnification(self, cosmo, r, M, a_lens, a_src, mass_def=None):
+    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def=None):
         """ Returns the magnification for input parameters.
 
         .. math::
@@ -376,7 +376,7 @@ class HaloProfile(object):
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a_lens (float or array_like): lens' scale factor.
-            a_src (float or array_like): source's scale factor.
+            a_source (float or array_like): source's scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -384,8 +384,8 @@ class HaloProfile(object):
             float or array_like: magnification\
                 :math:`\\mu`
         """
-        convergence = self.convergence(cosmo, r, M, a_lens, a_src, mass_def)
-        shear = self.shear(cosmo, r, M, a_lens, a_src, mass_def)
+        convergence = self.convergence(cosmo, r, M, a_lens, a_source, mass_def)
+        shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
 
         return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 
