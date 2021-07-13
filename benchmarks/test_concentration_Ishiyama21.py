@@ -19,9 +19,11 @@ COSMO.compute_sigma()
 H100 = COSMO["h"]
 
 Z = np.array([0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 7.0])
+UCHUU_DATA_SCATTER = 0.1
 
 # mass bounds in CCL's HM Calculator
-M_min, M_max = 1e8/H100, 1e16/H100
+M_min = COSMO.cosmo.gsl_params.HM_MMIN/H100
+M_max = COSMO.cosmo.gsl_params.HM_MMAX/H100
 
 
 @pytest.mark.parametrize("pars",
@@ -56,4 +58,4 @@ def test_concentration_Ishiyama21(pars):
     for i, zz in enumerate(Z):
         dat = data[:, i+1]
         mod = cm.get_concentration(COSMO, M_use/H100, 1/(1+zz))
-        assert np.allclose(mod, dat, rtol=0.04)
+        assert np.allclose(mod, dat, rtol=UCHUU_DATA_SCATTER)
