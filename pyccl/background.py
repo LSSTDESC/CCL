@@ -281,10 +281,11 @@ def sigma_critical(cosmo, a_lens, a_source):
            gravitational constant, and :math:`D_i` is the angular diameter
            distance. The labels :math:`i =` s, l and ls denotes the distances
            to the source, lens, and between source and lens, respectively.
-            Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            a_lens (float): lens' scale factor.
-            a_source (float or array_like): source's scale factor.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        a_lens (float): lens' scale factor.
+        a_source (float or array_like): source's scale factor.
 
     Returns:
         float or array_like: :math:`\\Sigma_{\\mathrm{crit}}` in units
