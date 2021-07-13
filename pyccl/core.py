@@ -209,7 +209,8 @@ class Cosmology(object):
         if list(pars)[0] == "cosmo":
             vars()[name] = func
     del background, boltzmann, bcm, cls, correlations, covariances, \
-        neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt
+        neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt, \
+        subs, funcs, func, name, pars  # clear unnecessary locals
 
     @warn_api()
     def __init__(
