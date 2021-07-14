@@ -128,3 +128,50 @@ def test_haloprofile(model):
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])
     assert np.all(err <= tol)
+
+
+def test_weak_lensing_functions():
+    data = np.loadtxt("./benchmarks/data/haloprofile_nfw_wl_numcosmo.txt")
+    z_lens = 1.0
+    z_source = 2.0
+    a_lens = 1.0 / (1.0 + z_lens)
+    a_source = 1.0 / (1.0 + z_source)
+    halomass = 1.0e15
+    concentration = 5
+    mDelta = "vir"  # 200
+    rmin = 0.01
+    rmax = 100
+    r = np.exp(
+        np.log(rmin) +
+        np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
+
+    r_al = r / a_lens
+
+    mdef = ccl.halos.MassDef(mDelta, 'matter')
+    c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
+    p = ccl.halos.HaloProfileNFW(
+        c, truncated=False, projected_analytic=True, cumul2d_analytic=True
+    )
+
+    kappa = p.convergence(COSMO, r_al, halomass,
+                          a_lens, a_source, mass_def=mdef)
+    tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
+    err_kappa = np.abs(kappa - data[:, 1])
+    assert np.all(err_kappa <= tol)
+
+    gamma = p.shear(COSMO, r_al, halomass, a_lens, a_source, mass_def=mdef)
+    tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 2]), 1e-12, np.inf)
+    err_gamma = np.abs(gamma - data[:, 2])
+    assert np.all(err_gamma <= tol)
+
+    gt = p.reduced_shear(COSMO, r_al,
+                         halomass, a_lens, a_source, mass_def=mdef)
+    tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 3]), 1e-12, np.inf)
+    err_gt = np.abs(gt - data[:, 3])
+    assert np.all(err_gt <= tol)
+
+    mu = p.magnification(COSMO, r_al,
+                         halomass, a_lens, a_source, mass_def=mdef)
+    tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 4]), 1e-12, np.inf)
+    err_mu = np.abs(mu - data[:, 4])
+    assert np.all(err_mu <= tol)
