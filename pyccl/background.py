@@ -272,7 +272,7 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
         species_types[species], int(is_comoving))
 
 
-def sigma_critical(cosmo, a_lens, a_source):
+def sigma_critical(cosmo, *, a_lens, a_source):
     """Returns the critical surface mass density.
 
     .. math::

@@ -283,7 +283,8 @@ class HaloProfile(object):
                                                 is_cumul2d=True)
         return s_r_t
 
-    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    @warn_api()
+    def convergence(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the convergence as a function of cosmology,
         radius, halo mass and the scale factors of the source
         and the lens.
@@ -307,10 +308,11 @@ class HaloProfile(object):
                 :math:`\\kappa`
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def) / a_lens**2
-        Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
+        Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
         return Sigma / Sigma_crit
 
-    def shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    @warn_api()
+    def shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the shear (tangential) as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -338,10 +340,11 @@ class HaloProfile(object):
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
         Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
-        Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
+        Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
-    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    @warn_api()
+    def reduced_shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the reduced shear as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -369,7 +372,8 @@ class HaloProfile(object):
         shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
         return shear / (1.0 - convergence)
 
-    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    @warn_api()
+    def magnification(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the magnification for input parameters.
 
         .. math::
