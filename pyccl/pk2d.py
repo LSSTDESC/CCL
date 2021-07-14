@@ -122,8 +122,8 @@ class Pk2D(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             model (:obj:`str`): model to use. Three models allowed:
                 `'bbks'` (Bardeen et al. ApJ 304 (1986) 15).
-                `'eisenstein_hu'` (Eisenstein & Hu astro-ph/9710252).
-                `'eisenstein_hu_nowiggles'` (Eisenstein & Hu astro-ph/9710252).
+                `'eisenstein_hu'` (Eisenstein & Hu astro-ph/9709112).
+                `'eisenstein_hu_nowiggles'` (Eisenstein & Hu astro-ph/9709112).
                 `'emu'` (arXiv:1508.02654).
         """
         pk2d = Pk2D(empty=True)
