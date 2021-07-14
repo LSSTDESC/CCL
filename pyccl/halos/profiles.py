@@ -1,6 +1,6 @@
 from .. import ccllib as lib
 from ..core import check
-from ..background import h_over_h0
+from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform, \
     warn_api, deprecate_attr
@@ -282,6 +282,120 @@ class HaloProfile(object):
                                                 a, mass_def,
                                                 is_cumul2d=True)
         return s_r_t
+
+    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+        """ Returns the convergence as a function of cosmology,
+        radius, halo mass and the scale factors of the source
+        and the lens.
+
+        .. math::
+           \\kappa(R) = \\frac{\\Sigma(R)}{\\Sigma_{\\mathrm{crit}}},\\
+
+        where :math:`\\Sigma(R)` is the 2D projected surface mass density.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            r (float or array_like): comoving radius in Mpc.
+            M (float or array_like): halo mass in units of M_sun.
+            a_lens (float or array_like): scale factor of lens.
+            a_source (float or array_like): scale factor of source.
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
+
+        Returns:
+            float or array_like: convergence \
+                :math:`\\kappa`
+        """
+        Sigma = self.projected(cosmo, r, M, a_lens, mass_def) / a_lens**2
+        Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
+        return Sigma / Sigma_crit
+
+    def shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+        """ Returns the shear (tangential) as a function of cosmology,
+        radius, halo mass and the scale factors of the
+        source and the lens.
+
+        .. math::
+           \\gamma(R) = \\frac{\\Delta\\Sigma(R)}{\\Sigma_{\\mathrm{crit}}} =
+           \\frac{\\overline{\\Sigma}(< R) -
+           \\Sigma(R)}{\\Sigma_{\\mathrm{crit}}},\\
+
+        where :math:`\\overline{\\Sigma}(< R)` is the average surface density
+        within R.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            r (float or array_like): comoving radius in Mpc.
+            M (float or array_like): halo mass in units of M_sun.
+            a_lens (float or array_like): lens' scale factor.
+            a_source (float or array_like): source's scale factor.
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
+
+        Returns:
+            float or array_like: shear \
+                :math:`\\gamma`
+        """
+        Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
+        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
+        Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
+        return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
+
+    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+        """ Returns the reduced shear as a function of cosmology,
+        radius, halo mass and the scale factors of the
+        source and the lens.
+
+        .. math::
+           g_t (R) = \\frac{\\gamma(R)}{(1 - \\kappa(R))},\\
+
+        where :math: `\\gamma(R)` is the shear and `\\kappa(R)` is the
+                convergence.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            r (float or array_like): comoving radius in Mpc.
+            M (float or array_like): halo mass in units of M_sun.
+            a_lens (float or array_like): lens' scale factor.
+            a_source (float or array_like): source's scale factor.
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
+
+        Returns:
+            float or array_like: reduced shear \
+                :math:`g_t`
+        """
+        convergence = self.convergence(cosmo, r, M, a_lens, a_source, mass_def)
+        shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
+        return shear / (1.0 - convergence)
+
+    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+        """ Returns the magnification for input parameters.
+
+        .. math::
+           \\mu (R) = \\frac{1}{\\left[(1 - \\kappa(R))^2 -
+           \\vert \\gamma(R) \\vert^2 \\right]]},\\
+
+        where :math: `\\gamma(R)` is the shear and `\\kappa(R)` is the
+        convergence.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            r (float or array_like): comoving radius in Mpc.
+            M (float or array_like): halo mass in units of M_sun.
+            a_lens (float or array_like): lens' scale factor.
+            a_source (float or array_like): source's scale factor.
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+                a mass definition object.
+
+        Returns:
+            float or array_like: magnification\
+                :math:`\\mu`
+        """
+        convergence = self.convergence(cosmo, r, M, a_lens, a_source, mass_def)
+        shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
+
+        return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 
     def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
                      fourier_out=False,
