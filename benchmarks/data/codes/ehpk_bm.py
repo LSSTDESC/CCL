@@ -8,10 +8,14 @@ WRITE_STUFF=1
 FS=16
 LKMAX=7
 
-def do_all(z_arr,k_arr,cpar,prefix) :
+def do_all(z_arr,k_arr,cpar,prefix,wig):
     pcs=csm.PcsPar()
     pcs.background_set(cpar['om'],cpar['ol'],cpar['ob'],cpar['w0'],cpar['wa'],cpar['hh'],TCMB)
-    pcs.set_linear_pk('EH',-3,LKMAX,0.01,cpar['ns'],cpar['s8'])
+    if wig:
+        typ = 'EH'
+    else:
+        typ = 'EH_smooth'
+    pcs.set_linear_pk(typ,-3,LKMAX,0.01,cpar['ns'],cpar['s8'])
 
     gf0=pcs.growth_factor(1)
     a_arr=1./(z_arr+1)
@@ -40,4 +44,5 @@ k_arr=10**lk_arr
 
 cpar_model1={'om': 0.3,'ol': 0.7,'ob':0.05,'hh': 0.7,'s8': 0.8,'ns': 0.96,'w0': -1.0, 'wa': 0.0}
 
-do_all(z_arr,k_arr,cpar_model1,"model1")
+do_all(z_arr,k_arr,cpar_model1,"model1",True)
+do_all(z_arr,k_arr,cpar_model1,"model1_nowig",False)

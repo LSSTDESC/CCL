@@ -123,6 +123,7 @@ class Pk2D(object):
             model (:obj:`str`): model to use. Three models allowed:
                 `'bbks'` (Bardeen et al. ApJ 304 (1986) 15).
                 `'eisenstein_hu'` (Eisenstein & Hu astro-ph/9710252).
+                `'eisenstein_hu_nowiggles'` (Eisenstein & Hu astro-ph/9710252).
                 `'emu'` (arXiv:1508.02654).
         """
         pk2d = Pk2D(empty=True)
@@ -132,7 +133,10 @@ class Pk2D(object):
             ret = lib.compute_linpower_bbks(cosmo.cosmo, status)
         elif model == 'eisenstein_hu':
             cosmo.compute_growth()
-            ret = lib.compute_linpower_eh(cosmo.cosmo, status)
+            ret = lib.compute_linpower_eh(cosmo.cosmo, 1, status)
+        elif model == 'eisenstein_hu_nowiggles':
+            cosmo.compute_growth()
+            ret = lib.compute_linpower_eh(cosmo.cosmo, 0, status)
         elif model == 'emu':
             ret = lib.compute_power_emu(cosmo.cosmo, status)
         else:
