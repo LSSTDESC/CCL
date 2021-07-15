@@ -748,7 +748,7 @@ class Cosmology(object):
         kw_defaults = {key: val.default for key, val in pars.items()}
         kw = {key: val
               for key, val in kw.items()
-              if (key in kw_defaults) and (val != kw_defaults[key])}
+              if not np.all(val == kw_defaults.get(key))}
 
         string = self._build_string(kw, padding=3, eq_sign="=")
         string = "pyccl.Cosmology(" + string
