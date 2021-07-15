@@ -219,6 +219,35 @@ def test_cosmology_repr():
         ccl.comoving_radial_distance(cosmo, 0.5) ==
         ccl.comoving_radial_distance(cosmo3, 0.5))
 
+    # adding extra parameters
+    cosmo = ccl.Cosmology(
+        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+        extra_parameters={"camb": {"halofit_version": "mead2020",
+                                   "HMCode_logT_AGN": 7.8}})
+
+    cosmo2 = eval(str(cosmo))
+    assert_(
+        ccl.comoving_radial_distance(cosmo, 0.5) ==
+        ccl.comoving_radial_distance(cosmo2, 0.5))
+
+    cosmo3 = eval(repr(cosmo))
+    assert_(
+        ccl.comoving_radial_distance(cosmo, 0.5) ==
+        ccl.comoving_radial_distance(cosmo3, 0.5))
+
+    # testing with vanilla cosmology
+    cosmo = ccl.CosmologyVanillaLCDM()
+
+    cosmo2 = eval(str(cosmo))
+    assert_(
+        ccl.comoving_radial_distance(cosmo, 0.5) ==
+        ccl.comoving_radial_distance(cosmo2, 0.5))
+
+    cosmo3 = eval(repr(cosmo))
+    assert_(
+        ccl.comoving_radial_distance(cosmo, 0.5) ==
+        ccl.comoving_radial_distance(cosmo3, 0.5))
+
 
 def test_cosmology_context():
     """Check that using a Cosmology object in a context manager
