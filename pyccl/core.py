@@ -708,11 +708,8 @@ class Cosmology(object):
                 val = f"'{val}'"
             elif isinstance(val, dict):
                 # go 1 level deeper for dicts
-                string += f"{prefix}{key:<{l_just}}{eq_sign}"
-                # break
-                string += self._build_string(val, padding+3, ":",
-                                             is_dict=has_dict)
-                continue
+                val = self._build_string(val, padding+3, ":",
+                                         is_dict=has_dict)
             elif hasattr(val, "__len__"):
                 # add commas in iterables
                 val = str(list(val))
@@ -721,7 +718,7 @@ class Cosmology(object):
 
         # remove final comma and close bracket
         if is_dict:
-            return string[:-2] + "} ,"
+            return string[:-2] + " }"
         else:
             return string[:-2] + " )"
 
