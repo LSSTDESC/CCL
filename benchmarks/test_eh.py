@@ -1,11 +1,16 @@
 import numpy as np
 import pyccl as ccl
+import pytest
 
 EH_TOLERANCE = 1.0e-5
 
 
-def test_eh():
-    model = 1
+@pytest.mark.parametrize('transfer,fname',
+                         [('eisenstein_hu',
+                           'model1_pk_eh.txt'),
+                          ('eisenstein_hu_nowiggles',
+                           'model1_nowig_pk_eh.txt')])
+def test_eh(transfer, fname):
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -19,10 +24,10 @@ def test_eh():
         m_nu_type='normal',
         Omega_g=0,
         Omega_k=0,
-        transfer_function='eisenstein_hu',
+        transfer_function=transfer,
         matter_power_spectrum='linear')
 
-    data = np.loadtxt('./benchmarks/data/model%d_pk_eh.txt' % model)
+    data = np.loadtxt('./benchmarks/data/' + fname)
 
     k = data[:, 0] * cosmo['h']
     for i in range(1):
