@@ -19,6 +19,7 @@ from .bcm import bcm_correct_pk2d
 transfer_function_types = {
     None: lib.transfer_none,
     'eisenstein_hu': lib.eisenstein_hu,
+    'eisenstein_hu_nowiggles': lib.eisenstein_hu_nowiggles,
     'bbks': lib.bbks,
     'boltzmann_class': lib.boltzmann_class,
     'boltzmann_camb': lib.boltzmann_camb,
@@ -769,7 +770,7 @@ class Cosmology(object):
 
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
-                ['bbks', 'eisenstein_hu']):
+                ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']):
             warnings.warn(
                 "The '%s' linear power spectrum model does not properly "
                 "account for massive neutrinos!" %
@@ -821,7 +822,7 @@ class Cosmology(object):
                                    "power spectrum using CAMB and specified"
                                    " sigma8 but the non-linear power spectrum "
                                    "cannot be consistenty rescaled.")
-        elif trf in ['bbks', 'eisenstein_hu']:
+        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
             rescale_s8 = False
             rescale_mg = False
             pk = Pk2D.pk_from_model(self,
