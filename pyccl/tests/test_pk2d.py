@@ -70,7 +70,8 @@ def test_pk2d_smoke():
     assert_(not np.isnan(psp.eval(1E-2, 0.5, cosmo)))
 
 
-@pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu'])
+@pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu',
+                                   'eisenstein_hu_nowiggles'])
 def test_pk2d_from_model(model):
     cosmo_fixed = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)

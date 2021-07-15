@@ -153,11 +153,11 @@ ccl_f2d_t *ccl_compute_linpower_bbks(ccl_cosmology *cosmo, int *status)
   return psp;
 }
 
-ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int *status)
+ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int wiggled, int *status)
 {
   ccl_f2d_t *psp = NULL;
   eh_struct *eh = NULL;
-  eh = ccl_eh_struct_new(&(cosmo->params),1);
+  eh = ccl_eh_struct_new(&(cosmo->params),wiggled);
   if (eh != NULL) {
     psp=ccl_compute_linpower_analytic(cosmo, eh,
                                       eh_power,
