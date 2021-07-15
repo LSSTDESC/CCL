@@ -672,6 +672,59 @@ class Cosmology(object):
         # and rebuild the C data
         self._build_cosmo()
 
+    def _build_string(self, kw, padding=3, eq_sign="=", is_dict=False):
+        """Build a justified string containing the parameters
+        specified in the input dictionary.
+        """
+        pad = padding * " "
+        has_dict = False
+        prefix0 = f"\n{pad}"
+        # deduce justification padding
+        l_just, r_just = 0, 0
+        for key, val in kw.items():
+            if isinstance(val, dict):
+                has_dict = True
+                continue  # dicts are too long
+            l_just = max(len(str(key)), l_just)
+            r_just = max(len(str(val)), r_just)
+        l_just += 2
+        r_just += 2
+
+        # construct output string
+        string = ""
+        for num, (key, val) in enumerate(kw.items()):
+            prefix = prefix0
+            if is_dict:
+                # dictionary keys should be strings
+                key = f"'{key}'"
+                if num == 0:
+                    prefix = f"\n{pad[:-1]}" + "{"
+
+            if val is None:
+                # assign value to None
+                val = "None"
+            elif isinstance(val, str):
+                # show strings as strings
+                val = f"'{val}'"
+            elif isinstance(val, dict):
+                # go 1 level deeper for dicts
+                string += f"{prefix}{key:<{l_just}}{eq_sign}"
+                # break
+                string += self._build_string(val, padding+3, ":",
+                                             is_dict=has_dict)
+                continue
+            elif hasattr(val, "__len__"):
+                # add commas in iterables
+                val = str(list(val))
+
+            string += f"{prefix}{key:<{l_just}}{eq_sign}{val:>{r_just}} ,"
+
+        # remove final comma and close bracket
+        if is_dict:
+            return string[:-2] + "} ,"
+        else:
+            return string[:-2] + " )"
+
     def __repr__(self):
         """Make an eval-able string.
 
@@ -681,44 +734,29 @@ class Cosmology(object):
         >>> cosmo = pyccl.Cosmology(...)
         >>> cosmo2 = eval(repr(cosmo))
         """
-        string = "pyccl.Cosmology("
-        string += ", ".join(
-            "%s=%s" % (k, v)
-            for k, v in self._params_init_kwargs.items()
-            if k not in ['m_nu', 'm_nu_type', 'z_mg', 'df_mg'])
-
-        if hasattr(self._params_init_kwargs['m_nu'], '__len__'):
-            string += ", m_nu=[%s, %s, %s]" % tuple(
-                self._params_init_kwargs['m_nu'])
-        else:
-            string += ', m_nu=%s' % self._params_init_kwargs['m_nu']
-
-        if self._params_init_kwargs['m_nu_type'] is not None:
-            string += (
-                ", m_nu_type='%s'" % self._params_init_kwargs['m_nu_type'])
-        else:
-            string += ', m_nu_type=None'
-
-        if self._params_init_kwargs['z_mg'] is not None:
-            vals = ", ".join(
-                ["%s" % v for v in self._params_init_kwargs['z_mg']])
-            string += ", z_mg=[%s]" % vals
-        else:
-            string += ", z_mg=%s" % self._params_init_kwargs['z_mg']
-
-        if self._params_init_kwargs['df_mg'] is not None:
-            vals = ", ".join(
-                ["%s" % v for v in self._params_init_kwargs['df_mg']])
-            string += ", df_mg=[%s]" % vals
-        else:
-            string += ", df_mg=%s" % self._params_init_kwargs['df_mg']
-
-        string += ", "
-        string += ", ".join(
-            "%s='%s'" % (k, v) for k, v in self._config_init_kwargs.items())
-        string += ")"
-
+        kw = {**self._params_init_kwargs, **self._config_init_kwargs}
+        string = self._build_string(kw, padding=3, eq_sign="=")
+        string = "pyccl.Cosmology(" + string
         return string
+
+    def __str__(self):
+        """Like __repr__ but don't include any values
+        that equal the default values.
+        """
+        kw = {**self._params_init_kwargs, **self._config_init_kwargs}
+        pars = signature(self.__init__).parameters
+        kw_defaults = {key: val.default for key, val in pars.items()}
+        kw = {key: val
+              for key, val in kw.items()
+              if (key in kw_defaults) and (val != kw_defaults[key])}
+
+        string = self._build_string(kw, padding=3, eq_sign="=")
+        string = "pyccl.Cosmology(" + string
+        return string
+
+    def _repr_pretty_(self, p, cycle):
+        """Alias for iPython consoles."""
+        return p.text(self.__str__())
 
     def compute_distances(self):
         """Compute the distance splines."""
@@ -1079,7 +1117,14 @@ class CosmologyVanillaLCDM(Cosmology):
             raise ValueError("You cannot change the LCDM parameters: "
                              "%s " % list(p.keys()))
         kwargs.update(p)
+        self._params_init_user = kwargs
         super(CosmologyVanillaLCDM, self).__init__(**kwargs)
+
+    def __str__(self):
+        kw = self._params_init_user
+        string = self._build_string(kw, padding=3, eq_sign="=")
+        string = "pyccl.Cosmology(" + string
+        return string
 
 
 class CosmologyCalculator(Cosmology):
