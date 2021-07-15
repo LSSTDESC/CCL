@@ -439,8 +439,7 @@ class Cosmology(object):
             nz_mg = -1
 
         # Check to make sure specified amplitude parameter is consistent
-        if ((A_s is None and sigma8 is None) or
-                (A_s is not None and sigma8 is not None)):
+        if not (A_s is None) ^ (sigma8 is None):
             raise ValueError("Must set either A_s or sigma8 and not both.")
 
         # Set norm_pk to either A_s or sigma8
