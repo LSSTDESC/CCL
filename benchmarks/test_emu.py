@@ -94,7 +94,7 @@ def test_emu_lin(model):
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,
-        transfer_function='boltzmann_camb',
+        transfer_function='boltzmann_class',
         matter_power_spectrum='emu',
     )
 
@@ -103,11 +103,17 @@ def test_emu_lin(model):
     k = np.logspace(-3,-2,50)
 
     # Catch warning about neutrino linear growth
-    pk = ccl.pyutils.assert_warns(ccl.CCLWarning,
+    if (np.sum(mnu)>0):
+        pk = ccl.pyutils.assert_warns(ccl.CCLWarning,
                                   ccl.nonlin_matter_power,
                                   cosmo, k, a)
+    else:
+        pk = ccl.nonlin_matter_power(cosmo,k,a)
 
-    pk_lin = ccl.linear_matter_power(cosmo, k, a)
+    # Catch warning about linear matter power
+    pk_lin = ccl.pyutils.assert_warns(ccl.CCLWarning,
+                                  ccl.linear_matter_power,
+                                  cosmo, k, a)
 
 
     err = np.abs(pk/pk_lin-1)
