@@ -74,6 +74,7 @@ def test_emu(model):
     err = np.abs(pk/data[:, 1]-1)
     assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)
 
+
 @pytest.mark.parametrize('model', list(range(3)))
 def test_emu_lin(model):
     cosmos = np.loadtxt("./benchmarks/data/emu_input_cosmologies.txt")
@@ -98,24 +99,21 @@ def test_emu_lin(model):
         matter_power_spectrum='emu',
     )
 
-
     a = 1
-    k = np.logspace(-3,-2,50)
+    k = np.logspace(-3, -2, 50)
 
     # Catch warning about neutrino linear growth
-    if (np.sum(mnu)>0):
+    if (np.sum(mnu) > 0):
         pk = ccl.pyutils.assert_warns(ccl.CCLWarning,
-                                  ccl.nonlin_matter_power,
-                                  cosmo, k, a)
+                                      ccl.nonlin_matter_power,
+                                      cosmo, k, a)
     else:
-        pk = ccl.nonlin_matter_power(cosmo,k,a)
+        pk = ccl.nonlin_matter_power(cosmo, k, a)
 
     # Catch warning about linear matter power
     pk_lin = ccl.pyutils.assert_warns(ccl.CCLWarning,
-                                  ccl.linear_matter_power,
-                                  cosmo, k, a)
-
+                                      ccl.linear_matter_power,
+                                      cosmo, k, a)
 
     err = np.abs(pk/pk_lin-1)
     assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)
-
