@@ -30,7 +30,7 @@ def test_emu_nu(model):
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,
-        transfer_function='boltzmann_class',
+        transfer_function='boltzmann_camb',
         matter_power_spectrum='emu',
     )
 
@@ -95,7 +95,7 @@ def test_emu_lin(model):
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,
-        transfer_function='boltzmann_class',
+        transfer_function='boltzmann_camb',
         matter_power_spectrum='emu',
     )
 
