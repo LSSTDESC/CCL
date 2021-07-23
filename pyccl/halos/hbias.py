@@ -377,4 +377,4 @@ def halo_bias_from_name(name):
     if name in bias_functions:
         return bias_functions[name]
     else:
-        raise ValueError("Halo bias parametrization %s not implemented")
+        raise ValueError(f"Halo bias parametrization {name} not implemented.")
