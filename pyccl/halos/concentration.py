@@ -411,4 +411,4 @@ def concentration_from_name(name):
     if name in concentrations:
         return concentrations[name]
     else:
-        raise ValueError(f"Concentration {name} not implemented")
+        raise ValueError(f"Concentration {name} not implemented.")

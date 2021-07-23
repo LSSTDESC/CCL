@@ -793,4 +793,4 @@ def mass_function_from_name(name):
     if name in mass_functions:
         return mass_functions[name]
     else:
-        raise ValueError(f"Mass function {name} not implemented")
+        raise ValueError(f"Mass function {name} not implemented.")
