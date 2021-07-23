@@ -742,7 +742,12 @@ class Cosmology(object):
         that equal the default values.
         """
         kw = {**self._params_init_kwargs, **self._config_init_kwargs}
-        pars = signature(self.__init__).parameters
+        if self.__class__.__qualname__ == "Cosmology":
+            # access __init__ signature from this class
+            pars = signature(self.__init__).parameters
+        else:
+            # access __init__ signature from base class
+            pars = signature(self.__class__.__base__.__init__).parameters
         kw_defaults = {key: val.default for key, val in pars.items()}
         kw = {key: val
               for key, val in kw.items()
@@ -1105,24 +1110,17 @@ class CosmologyVanillaLCDM(Cosmology):
             `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
     """
     def __init__(self, **kwargs):
-        p = {'h': 0.67,
-             'Omega_c': 0.25,
+        p = {'Omega_c': 0.25,
              'Omega_b': 0.05,
+             'h': 0.67,
              'n_s': 0.96,
              'sigma8': 0.81,
              'A_s': None}
         if any(k in kwargs for k in p.keys()):
             raise ValueError("You cannot change the LCDM parameters: "
                              "%s " % list(p.keys()))
-        kwargs.update(p)
-        self._params_init_user = kwargs
-        super(CosmologyVanillaLCDM, self).__init__(**kwargs)
-
-    def __str__(self):
-        kw = self._params_init_user
-        string = self._build_string(kw, padding=3, eq_sign="=")
-        string = "pyccl.Cosmology(" + string
-        return string
+        p.update(kwargs)
+        super(CosmologyVanillaLCDM, self).__init__(**p)
 
 
 class CosmologyCalculator(Cosmology):
