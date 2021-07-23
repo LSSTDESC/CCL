@@ -6,6 +6,7 @@
 
 ## C library
 - Deprecate C-level yaml reader and writer (#852)
+- Fixed bug in emulator implementation (#899)
 
 # v2.2.0 Changes
 
