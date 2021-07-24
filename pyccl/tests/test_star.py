@@ -24,7 +24,7 @@ def test_API_preserve_warnings():
     with pytest.warns(None) as w_rec:
         R1 = ccl.Omega_nu_h2(1., m_nu=[1, 1, 1], T_CMB=2.7)
         R2 = ccl.nu_masses(Om_nu_h2=0.05, mass_split="normal")
-        R3 = ccl.correlation_multipole(COSMO, 1., ell=100, dist=1., beta=1.5)
+        R3 = ccl.correlation_multipole(COSMO, 1., ell=2, dist=1., beta=1.5)
 
         R4 = CON.mass_def
         R5 = HMF.mass_def
@@ -58,12 +58,12 @@ def test_API_preserve_warnings():
 
     # 4. swapped order
     with pytest.warns(CCLWarning):
-        r31 = ccl.correlation_multipole(COSMO, 1., 1.5, 100, 1.)
+        r31 = ccl.correlation_multipole(COSMO, 1., 1.5, 2, 1.)
     assert r31 == R3
 
     # 5. renamed argument + swapped order
     with pytest.warns(CCLWarning) as w_rec:
-        r32 = ccl.correlation_multipole(COSMO, 1., 1.5, 100, s=1.)
+        r32 = ccl.correlation_multipole(COSMO, 1., 1.5, 2, s=1.)
     assert len(w_rec) == 2
     assert r32 == R3
 
