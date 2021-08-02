@@ -114,9 +114,9 @@ class PTCalculator(object):
     def _get_dd_bias(self, pk):
         # Precompute quantities needed for number counts
         # power spectra.
-        self.dd_bias = self.pt.one_loop_dd_bias(pk,
-                                                P_window=self.P_window,
-                                                C_window=self.C_window)
+        self.dd_bias = self.pt.one_loop_dd_bias_b3nl(pk,
+                                                     P_window=self.P_window,
+                                                     C_window=self.C_window)
         self.one_loop_dd = self.dd_bias[0:1]
 
     def _get_ia_bias(self, pk):
@@ -134,7 +134,7 @@ class PTCalculator(object):
 
     def get_pgg(self, Pd1d1, g4,
                 b11, b21, bs1, b12, b22, bs2,
-                sub_lowk):
+                sub_lowk, b3nl1=None, b3nl2=None):
         """ Get the number counts auto-spectrum at the internal
         set of wavenumbers (given by this object's `ks` attribute)
         and a number of redshift values.
@@ -158,6 +158,10 @@ class PTCalculator(object):
                 being correlated at the same set of input redshifts.
             sub_lowk (bool): if True, the small-scale white noise
                 contribution will be subtracted.
+            b3nl1 (array_like): 3-rd order bias for the first tracer.
+                If `None`, this contribution won't be included.
+            b3nl2 (array_like): 3-rd order bias for the second tracer.
+                If `None`, this contribution won't be included.
 
         Returns:
             array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
@@ -170,6 +174,11 @@ class PTCalculator(object):
         Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
         Pd2s2 = g4[None, :] * self.dd_bias[5][:, None]
         Ps2s2 = g4[None, :] * self.dd_bias[6][:, None]
+        Pd1d3 = g4[None, :] * self.dd_bias[8][:, None]
+        if b3nl1 is None:
+            b3nl1 = np.zeros_like(g4)
+        if b3nl2 is None:
+            b3nl2 = np.zeros_like(g4)
 
         s4 = 0.
         if sub_lowk:
@@ -181,7 +190,9 @@ class PTCalculator(object):
                0.25*(b21*b22)[None, :] * (Pd2d2 - 2.*s4) +
                0.5*(b11*bs2 + b12*bs1)[None, :] * Pd1s2 +
                0.25*(b21*bs2 + b22*bs1)[None, :] * (Pd2s2 - (4./3.)*s4) +
-               0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4))
+               0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4)+
+               0.5*(b12*b3nl1+b11*b3nl2)[None, :] * Pd1d3)
+
         return pgg
 
     def get_pgi(self, Pd1d1, g4, b1, b2, bs, c1, c2, cd):
@@ -227,7 +238,7 @@ class PTCalculator(object):
                              (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
         return pgi
 
-    def get_pgm(self, Pd1d1, g4, b1, b2, bs):
+    def get_pgm(self, Pd1d1, g4, b1, b2, bs, b3nl=None):
         """ Get the number counts - matter cross-spectrum at the
         internal set of wavenumbers (given by this object's `ks`
         attribute) and a number of redshift values.
@@ -246,6 +257,10 @@ class PTCalculator(object):
             bs (array_like): tidal bias for the number counts
                 tracer being correlated at the same set of input
                 redshifts.
+            b3nl (array_like): 3-rd order bias for the number counts
+                tracer being correlated at the same set of input
+                redshifts. If `None`, this contribution won't be
+                included.
 
         Returns:
             array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
@@ -255,10 +270,15 @@ class PTCalculator(object):
         """
         Pd1d2 = g4[None, :] * self.dd_bias[2][:, None]
         Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
+        Pd1d3 = g4[None, :] * self.dd_bias[8][:, None]
+        if b3nl is None:
+            b3nl = np.zeros_like(g4)
 
         pgm = (b1[None, :] * Pd1d1 +
                0.5 * b2[None, :] * Pd1d2 +
-               0.5 * bs[None, :] * Pd1s2)
+               0.5 * bs[None, :] * Pd1s2 +
+               0.5 * b3nl[None, :] * Pd1d3)
+
         return pgm
 
     def get_pii(self, Pd1d1, g4, c11, c21, cd1,
@@ -512,14 +532,16 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         b11 = tracer1.b1(z_arr)
         b21 = tracer1.b2(z_arr)
         bs1 = tracer1.bs(z_arr)
+        b31 = tracer1.b3nl(z_arr)
         if (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.bs(z_arr)
+            b32 = tracer2.b3nl(z_arr)
 
             p_pt = ptc.get_pgg(Pd1d1, ga4,
                                b11, b21, bs1, b12, b22, bs2,
-                               sub_lowk)
+                               sub_lowk, b3nl1=b31, b3nl2=b32)
         elif (tracer2.type == 'IA'):
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
@@ -528,7 +550,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                                b11, b21, bs1, c12, c22, cd2)
         elif (tracer2.type == 'M'):
             p_pt = ptc.get_pgm(Pd1d1, ga4,
-                               b11, b21, bs1)
+                               b11, b21, bs1, b3nl=b31)
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
@@ -561,8 +583,9 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.bs(z_arr)
+            b32 = tracer2.b3nl(z_arr)
             p_pt = ptc.get_pgm(Pd1d1, ga4,
-                               b12, b22, bs2)
+                               b12, b22, bs2, b3nl=b32)
         elif (tracer2.type == 'IA'):
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
