@@ -190,7 +190,7 @@ class PTCalculator(object):
                0.25*(b21*b22)[None, :] * (Pd2d2 - 2.*s4) +
                0.5*(b11*bs2 + b12*bs1)[None, :] * Pd1s2 +
                0.25*(b21*bs2 + b22*bs1)[None, :] * (Pd2s2 - (4./3.)*s4) +
-               0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4)+
+               0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4) +
                0.5*(b12*b3nl1+b11*b3nl2)[None, :] * Pd1d3)
 
         return pgg

@@ -159,7 +159,6 @@ class PTNumberCountsTracer(PTTracer):
         # Initialize b3nl
         self.biases['b3nl'] = self._get_bias_function(b3nl)
 
-
     @property
     def b1(self):
         """Internal first-order bias function.
