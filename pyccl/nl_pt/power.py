@@ -134,7 +134,8 @@ class PTCalculator(object):
 
     def get_pgg(self, Pd1d1, g4,
                 b11, b21, bs1, b12, b22, bs2,
-                sub_lowk, b3nl1=None, b3nl2=None):
+                sub_lowk, b3nl1=None, b3nl2=None,
+                bk21=None, bk22=None, Pgrad=None):
         """ Get the number counts auto-spectrum at the internal
         set of wavenumbers (given by this object's `ks` attribute)
         and a number of redshift values.
@@ -162,6 +163,15 @@ class PTCalculator(object):
                 If `None`, this contribution won't be included.
             b3nl2 (array_like): 3-rd order bias for the second tracer.
                 If `None`, this contribution won't be included.
+            bk21 (array_like): non-local bias for the first tracer.
+                If `None`, this contribution won't be included.
+            bk22 (array_like): non-local bias for the second tracer.
+                If `None`, this contribution won't be included.
+            Pgrad (array_like): cross-correlation spectrum between
+                the matter overdensity :math:`\\delta` and its
+                Laplacian (divided by :math:`-k^2`). Evaluated at
+                the wavenumber values given by this object's `ks`
+                list. If `None`, `Pd1d1` will be used.
 
         Returns:
             array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
@@ -175,10 +185,18 @@ class PTCalculator(object):
         Pd2s2 = g4[None, :] * self.dd_bias[5][:, None]
         Ps2s2 = g4[None, :] * self.dd_bias[6][:, None]
         Pd1d3 = g4[None, :] * self.dd_bias[8][:, None]
+        if Pgrad is None:
+            Pgrad = Pd1d1
+        Pd1k2 = Pgrad * (self.ks**2)[:, None]
+
         if b3nl1 is None:
             b3nl1 = np.zeros_like(g4)
         if b3nl2 is None:
             b3nl2 = np.zeros_like(g4)
+        if bk21 is None:
+            bk21 = np.zeros_like(g4)
+        if bk22 is None:
+            bk22 = np.zeros_like(g4)
 
         s4 = 0.
         if sub_lowk:
@@ -191,7 +209,8 @@ class PTCalculator(object):
                0.5*(b11*bs2 + b12*bs1)[None, :] * Pd1s2 +
                0.25*(b21*bs2 + b22*bs1)[None, :] * (Pd2s2 - (4./3.)*s4) +
                0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4) +
-               0.5*(b12*b3nl1+b11*b3nl2)[None, :] * Pd1d3)
+               0.5*(b12*b3nl1+b11*b3nl2)[None, :] * Pd1d3 +
+               0.5*(b12*bk21+b11*bk22)[None, :] * Pd1k2)
 
         return pgg
 
@@ -238,7 +257,8 @@ class PTCalculator(object):
                              (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
         return pgi
 
-    def get_pgm(self, Pd1d1, g4, b1, b2, bs, b3nl=None):
+    def get_pgm(self, Pd1d1, g4, b1, b2, bs, b3nl=None,
+                bk2=None, Pgrad=None):
         """ Get the number counts - matter cross-spectrum at the
         internal set of wavenumbers (given by this object's `ks`
         attribute) and a number of redshift values.
@@ -261,6 +281,15 @@ class PTCalculator(object):
                 tracer being correlated at the same set of input
                 redshifts. If `None`, this contribution won't be
                 included.
+            bk2 (array_like): non-local bias for the number counts
+                tracer being correlated at the same set of input
+                redshifts. If `None`, this contribution won't be
+                included.
+            Pgrad (array_like): cross-correlation spectrum between
+                the matter overdensity :math:`\\delta` and its
+                Laplacian (divided by :math:`-k^2`). Evaluated at
+                the wavenumber values given by this object's `ks`
+                list. If `None`, `Pd1d1` will be used.
 
         Returns:
             array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
@@ -271,13 +300,19 @@ class PTCalculator(object):
         Pd1d2 = g4[None, :] * self.dd_bias[2][:, None]
         Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
         Pd1d3 = g4[None, :] * self.dd_bias[8][:, None]
+        if Pgrad is None:
+            Pgrad = Pd1d1
+        Pd1k2 = Pgrad*(self.ks**2)[:, None]
         if b3nl is None:
             b3nl = np.zeros_like(g4)
+        if bk2 is None:
+            bk2 = np.zeros_like(g4)
 
         pgm = (b1[None, :] * Pd1d1 +
                0.5 * b2[None, :] * Pd1d2 +
                0.5 * bs[None, :] * Pd1s2 +
-               0.5 * b3nl[None, :] * Pd1d3)
+               0.5 * b3nl[None, :] * Pd1d3 +
+               0.5 * bk2[None, :] * Pd1k2)
 
         return pgm
 
@@ -400,6 +435,7 @@ class PTCalculator(object):
 
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                 sub_lowk=False, nonlin_pk_type='nonlinear',
+                nonloc_pk_type='nonlinear',
                 a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False, return_ia_ee_and_bb=False,
                 return_ptc=False):
@@ -429,6 +465,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             to use. 'linear' for linear P(k), 'nonlinear' for the internal
             non-linear power spectrum, 'spt' for standard perturbation
             theory power spectrum. Default: 'nonlinear'.
+        nonloc_pk_type (str): type of "non-local" matter power spectrum
+            to use (i.e. the cross-spectrum between the overdensity and
+            its Laplacian divided by :math:`k^2`). Same options as
+            `nonlin_pk_type`. Default: 'nonlinear'.
         a_arr (array): an array holding values of the scale factor
             at which the power spectrum should be calculated for
             interpolation. If `None`, the internal values used by
@@ -528,20 +568,43 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         raise NotImplementedError("Nonlinear option %s not implemented yet" %
                                   (nonlin_pk_type))
 
+    # Compute non-local power spectrum only if needed
+    Pgrad = None
+    if ((tracer1.type == 'NC') and (tracer2.type == 'NC') and
+            (nonloc_pk_type != nonlin_pk_type)):
+        if nonloc_pk_type == 'nonlinear':
+            Pgrad = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
+                              for a in a_arr]).T
+        elif nonloc_pk_type == 'linear':
+            Pgrad = np.array([linear_matter_power(cosmo, ptc.ks, a)
+                              for a in a_arr]).T
+        elif nonloc_pk_type == 'spt':
+            pklin = np.array([linear_matter_power(cosmo, ptc.ks, a)
+                              for a in a_arr]).T
+            Pgrad = ptc.get_pmm(pklin, ga4)
+        else:
+            raise NotImplementedError("Non-local option %s "
+                                      "not implemented yet" %
+                                      (nonloc_pk_type))
+
     if (tracer1.type == 'NC'):
         b11 = tracer1.b1(z_arr)
         b21 = tracer1.b2(z_arr)
         bs1 = tracer1.bs(z_arr)
         b31 = tracer1.b3nl(z_arr)
+        bk21 = tracer1.bk2(z_arr)
         if (tracer2.type == 'NC'):
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.bs(z_arr)
             b32 = tracer2.b3nl(z_arr)
+            bk22 = tracer2.bk2(z_arr)
 
             p_pt = ptc.get_pgg(Pd1d1, ga4,
                                b11, b21, bs1, b12, b22, bs2,
-                               sub_lowk, b3nl1=b31, b3nl2=b32)
+                               sub_lowk, b3nl1=b31, b3nl2=b32,
+                               bk21=bk21, bk22=bk22,
+                               Pgrad=Pgrad)
         elif (tracer2.type == 'IA'):
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
@@ -550,7 +613,8 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                                b11, b21, bs1, c12, c22, cd2)
         elif (tracer2.type == 'M'):
             p_pt = ptc.get_pgm(Pd1d1, ga4,
-                               b11, b21, bs1, b3nl=b31)
+                               b11, b21, bs1, b3nl=b31, bk2=bk21,
+                               Pgrad=Pgrad)
         else:
             raise NotImplementedError("Combination %s-%s not implemented yet" %
                                       (tracer1.type, tracer2.type))
@@ -584,8 +648,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.bs(z_arr)
             b32 = tracer2.b3nl(z_arr)
+            bk22 = tracer2.bk2(z_arr)
             p_pt = ptc.get_pgm(Pd1d1, ga4,
-                               b12, b22, bs2, b3nl=b32)
+                               b12, b22, bs2, b3nl=b32, bk2=bk22,
+                               Pgrad=Pgrad)
         elif (tracer2.type == 'IA'):
             c12 = tracer2.c1(z_arr)
             c22 = tracer2.c2(z_arr)
