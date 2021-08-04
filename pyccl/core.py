@@ -13,7 +13,7 @@ from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check, warn_api
 from .pk2d import Pk2D
-from .bcm import bcm_correct_pk2d
+from .baryons import bcm_correct_pk2d
 
 # Configuration types
 transfer_function_types = {
@@ -198,10 +198,10 @@ class Cosmology(object):
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
     # an attribute of this class.
-    from . import background, bcm, boltzmann, \
-        cls, correlations, covariances, neutrinos, \
+    from . import background, baryons, boltzmann, \
+        cells, correlations, covariances, neutrinos, \
         pk2d, power, tk3d, tracers, halos, nl_pt
-    subs = [background, boltzmann, bcm, cls, correlations, covariances,
+    subs = [background, boltzmann, baryons, cells, correlations, covariances,
             neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
@@ -209,7 +209,7 @@ class Cosmology(object):
         pars = signature(func).parameters
         if list(pars)[0] == "cosmo":
             vars()[name] = func
-    del background, boltzmann, bcm, cls, correlations, covariances, \
+    del background, boltzmann, baryons, cells, correlations, covariances, \
         neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt, \
         subs, funcs, func, name, pars  # clear unnecessary locals
 
