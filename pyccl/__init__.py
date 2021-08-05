@@ -17,10 +17,10 @@ from . import core, constants, background, power, halomodel, pk2d, tk3d, halopro
 
 # Deprecated modules
 from . import baryons, cells
-import warnings
 def __getattr__(name):
     rename = {"bcm": "baryons", "cls": "cells"}
     if name in rename:
+        import warnings
         warnings.warn(f"Module {name} has been renamed to {rename[name]}.")
         name = rename[name]
         return eval(name)
