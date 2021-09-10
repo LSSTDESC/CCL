@@ -6,6 +6,6 @@ from .tracers import (  # noqa
     translate_IA_norm)
 
 # Power spectra
-from .power import (  # noqa
+from .pt_power import (  # noqa
     PTCalculator,
     get_pt_pk2d)

@@ -36,6 +36,8 @@ class PTCalculator(object):
         log10k_max (float): decimal logarithm of the maximum
             Fourier scale (in Mpc^-1) for which you want to
             calculate perturbation theory quantities.
+        nk_per_decade (int): number of wavenumbers per decade
+            to sample.
         pad_factor (float): fraction of the log(k) interval
             you want to add as padding for FFTLog calculations
             within FAST-PT.
@@ -397,11 +399,11 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
         tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
             tracer being correlated.
-        ptc (:class:`PTCalculator`): a perturbation theory
-            calculator.
         tracer2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the second
             tracer being correlated. If `None`, the auto-correlation
             of the first tracer will be returned.
+        ptc (:class:`PTCalculator`): a perturbation theory
+            calculator.
         sub_lowk (bool): if True, the small-scale white noise
             contribution will be subtracted for number counts
             auto-correlations.
@@ -431,10 +433,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             If `False` (default) E-mode power spectrum is returned.
             Supersedes `return_ia_bb`.
         return_ptc (bool): if `True`, the fastpt object used as the PT
-            calculator (ptc) will also be returned. This feature may
-            be useful if an input ptc is not specified and one is
+            calculator (`ptc`) will also be returned. This feature may
+            be useful if an input `ptc` is not specified and one is
             initialized when this function is called. If `False` (default)
-            the ptc is not output, whether or not it is initialized as
+            the `ptc` is not output, whether or not it is initialized as
             part of the function call.
 
     Returns:
