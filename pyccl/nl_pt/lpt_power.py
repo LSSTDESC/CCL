@@ -254,9 +254,9 @@ def get_lpt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
 
     if tracer2 is None:
         tracer2 = tracer1
-    if not isinstance(tracer1, ccl.nl_pt.PTTracer):
+    if not isinstance(tracer1, PTTracer):
         raise TypeError("tracer1 must be of type `ccl.nl_pt.PTTracer`")
-    if not isinstance(tracer2, ccl.nl_pt.PTTracer):
+    if not isinstance(tracer2, PTTracer):
         raise TypeError("tracer2 must be of type `ccl.nl_pt.PTTracer`")
 
     if not isinstance(ptc, LPTCalculator):
@@ -268,10 +268,10 @@ def get_lpt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         raise TypeError("ptc should be of type `LPTCalculator`")
 
     if nonlin_pk_type == 'nonlinear':
-        Pnl = np.array([ccl.nonlin_matter_power(cosmo, ptc.ks, a)
+        Pnl = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
                         for a in ptc.a_s])
     elif nonlin_pk_type == 'linear':
-        Pnl = np.array([ccl.linear_matter_power(cosmo, ptc.ks, a)
+        Pnl = np.array([linear_matter_power(cosmo, ptc.ks, a)
                         for a in ptc.a_s])
     elif nonlin_pk_type == 'lpt':
         Pnl = None
@@ -312,11 +312,11 @@ def get_lpt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
 
     # Once you have created the 2-dimensional P(k) array,
     # then generate a Pk2D object as described in pk2d.py.
-    pt_pk = ccl.Pk2D(a_arr=ptc.a_s,
-                     lk_arr=np.log(ptc.ks),
-                     pk_arr=p_pt,
-                     is_logp=False)
+    pt_pk = Pk2D(a_arr=ptc.a_s,
+                 lk_arr=np.log(ptc.ks),
+                 pk_arr=p_pt,
+                 is_logp=False)
     if return_ptc:
-        return pt_pk, ptcx
+        return pt_pk, ptc
     else:
         return pt_pk
