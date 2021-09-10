@@ -9,3 +9,7 @@ from .tracers import (  # noqa
 from .pt_power import (  # noqa
     PTCalculator,
     get_pt_pk2d)
+# LPT
+from .lpt_power import (  # noqa
+    LPTCalculator,
+    get_lpt_pk2d)
