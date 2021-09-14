@@ -280,21 +280,12 @@ class Pk2D(object):
             if self.has_psp and hasattr(self, 'psp'):
                 lib.f2d_t_free(self.psp)
 
-    def __add__(self, other):
-        """Adds two Pk2D instances.
-
-        The a and k ranges of the 2nd operand need to be the same or smaller
-        than the 1st operand.
-        The returned Pk2D object uses the same a and k arrays as the first
-        operand.
-        """
+    def _check_Pk2D_compatability(self, other):
         if not isinstance(other, Pk2D):
-            raise ValueError("Addition of Pk2D objects is only defined "
+            raise ValueError("Binary operator of Pk2D objects is only defined "
                              "for other Pk2D objects.")
-
         if not self.has_psp or not other.has_psp:
             raise ValueError("Pk2D object does not have data.")
-
         if (self.psp.lkmin < other.psp.lkmin
                 or self.psp.lkmax > other.psp.lkmax):
             raise ValueError("The 2nd operand has its data defined over a "
@@ -305,7 +296,6 @@ class Pk2D(object):
                              "smaller a range than the 1st operand.")
 
         a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
-
         a_arr_b, lk_arr_b, pk_arr_b = other.get_spline_arrays()
         if not (a_arr_a.size == a_arr_b.size and lk_arr_a.size == lk_arr_b.size
                 and np.allclose(a_arr_a, a_arr_b)
@@ -321,7 +311,18 @@ class Pk2D(object):
                                             a=a_,
                                             cosmo=dummy_cosmo)
                                  for a_ in a_arr_a])
+        return a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b
 
+    def __add__(self, other):
+        """Adds two Pk2D instances.
+
+        The a and k ranges of the 2nd operand need to be the same or smaller
+        than the 1st operand.
+        The returned Pk2D object uses the same a and k arrays as the first
+        operand.
+        """
+        a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b = \
+            self._check_Pk2D_compatability(other)
         pk_arr_new = pk_arr_a + pk_arr_b
 
         logp = np.all(pk_arr_new > 0)
@@ -336,7 +337,59 @@ class Pk2D(object):
         return new
 
     def __radd__(self, other):
-        self.__add__(other)
+        return self.__add__(other)
+
+    def __mul__(self, other):
+        """Multiply two Pk2D instances.
+
+        The a and k ranges of the 2nd operand need to be the same or smaller
+        than the 1st operand.
+        The returned Pk2D object uses the same a and k arrays as the first
+        operand.
+        """
+        if isinstance(other, (float, int)):
+            a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
+            pk_arr_new = other * pk_arr_a
+        elif isinstance(other, Pk2D):
+            a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b = \
+                self._check_Pk2D_compatability(other)
+            pk_arr_new = pk_arr_a * pk_arr_b
+        else:
+            raise ValueError("Multiplication of Pk2D is only defined for "
+                             "floats, ints, and Pk2D objects.")
+
+        logp = np.all(pk_arr_new > 0)
+        if logp:
+            pk_arr_new = np.log(pk_arr_new)
+
+        new = Pk2D(a_arr=a_arr_a, lk_arr=lk_arr_a, pk_arr=pk_arr_new,
+                   is_logp=logp,
+                   extrap_order_lok=self.extrap_order_lok,
+                   extrap_order_hik=self.extrap_order_hik)
+        return new
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __pow__(self, exponent):
+        """Take a Pk2D instance to a power.
+        """
+        if not isinstance(exponent, (float, int)):
+            raise ValueError("Exponentiation of Pk2D is only defined for "
+                             "floats and ints.")
+        a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
+        pk_arr_new = pk_arr_a**exponent
+
+        logp = np.all(pk_arr_new > 0)
+        if logp:
+            pk_arr_new = np.log(pk_arr_new)
+
+        new = Pk2D(a_arr=a_arr_a, lk_arr=lk_arr_a, pk_arr=pk_arr_new,
+                   is_logp=logp,
+                   extrap_order_lok=self.extrap_order_lok,
+                   extrap_order_hik=self.extrap_order_hik)
+
+        return new
 
 
 def parse_pk2d(cosmo, p_of_k_a, is_linear=False):

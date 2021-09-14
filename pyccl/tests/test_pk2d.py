@@ -286,10 +286,7 @@ def test_pk2d_add():
         1 + pk2d_a
 
     pk2d_d = pk2d_a + pk2d_c
-    xarr_d, yarr_d, zarr_d = ccl.pyutils._get_spline2d_arrays(pk2d_d.psp.fka)
-
-    if pk2d_d.psp.is_log:
-        zarr_d = np.exp(zarr_d)
+    xarr_d, yarr_d, zarr_d = pk2d_d.get_spline_arrays()
 
     assert np.allclose(x, xarr_d)
     assert np.allclose(log_y, yarr_d)
@@ -300,9 +297,30 @@ def test_pk2d_add():
                       is_logp=False)
 
     pk2d_f = pk2d_e + pk2d_a
-    xarr_f, yarr_f, zarr_f = ccl.pyutils._get_spline2d_arrays(pk2d_f.psp.fka)
-
-    if pk2d_f.psp.is_log:
-        zarr_f = np.exp(zarr_f)
+    xarr_f, yarr_f, zarr_f = pk2d_f.get_spline_arrays()
 
     assert np.allclose((zarr_a + zarr_b)[1:-1, 1:-1], zarr_f)
+
+
+def test_pk2d_mul_pow():
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    zarr_b = np.outer(-1*x, 4*np.exp(log_y))
+
+    pk2d_a = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a),
+                      is_logp=True)
+    pk2d_b = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=zarr_b,
+                      is_logp=False)
+
+    pk2d_g = pk2d_a * pk2d_b
+    pk2d_h = 2*pk2d_a
+    pk2d_i = pk2d_a**1.8
+
+    _, _, zarr_g = pk2d_g.get_spline_arrays()
+    _, _, zarr_h = pk2d_h.get_spline_arrays()
+    _, _, zarr_i = pk2d_i.get_spline_arrays()
+
+    assert np.allclose(zarr_a * zarr_b, zarr_g)
+    assert np.allclose(2 * zarr_a, zarr_h)
+    assert np.allclose(zarr_a**1.8, zarr_i)
