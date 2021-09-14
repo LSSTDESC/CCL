@@ -324,3 +324,7 @@ def test_pk2d_mul_pow():
     assert np.allclose(zarr_a * zarr_b, zarr_g)
     assert np.allclose(2 * zarr_a, zarr_h)
     assert np.allclose(zarr_a**1.8, zarr_i)
+
+    pk2d_j = (pk2d_a + 0.5*pk2d_i)**1.5
+    _, _, zarr_j = pk2d_j.get_spline_arrays()
+    assert np.allclose((zarr_a + 0.5*zarr_i)**1.5, zarr_j)
