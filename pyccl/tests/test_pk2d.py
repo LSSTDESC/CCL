@@ -261,6 +261,7 @@ def test_pk2d_parsing():
         ccl.angular_cl(cosmo, lens1, lens1, ells,
                        p_of_k_a=3)
 
+
 def test_pk2d_get_spline_arrays():
     empty_pk2d = ccl.Pk2D(empty=True)
 
@@ -282,7 +283,7 @@ def test_pk2d_add():
                       is_logp=False)
     pk2d_b2 = ccl.Pk2D(a_arr=x, lk_arr=log_y+0.5, pk_arr=zarr_b,
                        is_logp=False)
- 
+
     # This raises an error because the a ranges don't match
     with pytest.raises(ValueError):
         pk2d_a + pk2d_b
