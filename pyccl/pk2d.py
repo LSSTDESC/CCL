@@ -64,6 +64,7 @@ class Pk2D(object):
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
                  cosmo=None, empty=False):
         if empty:
+            self.has_psp = False
             return
 
         status = 0
