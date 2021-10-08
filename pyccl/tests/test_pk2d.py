@@ -4,6 +4,7 @@ from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
 import pyccl as ccl
+from pyccl import CCLWarning
 
 
 def pk1d(k):
@@ -337,6 +338,11 @@ def test_pk2d_mul_pow():
     # float and int
     with pytest.raises(TypeError):
         pk2d_a**pk2d_b
+
+    # This raises a warning because the power spectrum is non-negative and the
+    # power is non-integer
+    with pytest.warns(CCLWarning):
+        pk2d_b**0.5
 
     pk2d_g = pk2d_a * pk2d_b
     pk2d_h = 2*pk2d_a
