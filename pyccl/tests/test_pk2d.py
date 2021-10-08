@@ -297,18 +297,15 @@ def test_pk2d_add():
     pk2d_c = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=zarr_b,
                       is_logp=False)
 
-    # This raises an error because addition is only defined for Pk2D + Pk2D
-    with pytest.raises(ValueError):
-        pk2d_a + 1
-    with pytest.raises(ValueError):
-        1 + pk2d_a
-
     pk2d_d = pk2d_a + pk2d_c
+    pk2d_d2 = pk2d_a + 1.0
     xarr_d, yarr_d, zarr_d = pk2d_d.get_spline_arrays()
+    _, _, zarr_d2 = pk2d_d2.get_spline_arrays()
 
     assert np.allclose(x, xarr_d)
     assert np.allclose(log_y, yarr_d)
     assert np.allclose(zarr_a + zarr_b, zarr_d)
+    assert np.allclose(zarr_a + 1.0, zarr_d2)
 
     pk2d_e = ccl.Pk2D(a_arr=x[1:-1], lk_arr=log_y[1:-1],
                       pk_arr=zarr_b[1:-1, 1:-1],
@@ -333,12 +330,12 @@ def test_pk2d_mul_pow():
 
     # This raises an error because multiplication is only defined for
     # float, int, and Pk2D
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         pk2d_a*np.array([0.1, 0.2])
 
     # This raises an error because exponention is only defined for
     # float and int
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         pk2d_a**pk2d_b
 
     pk2d_g = pk2d_a * pk2d_b

@@ -1,7 +1,10 @@
+import warnings
+
 import numpy as np
 
 from . import ccllib as lib
 
+from .errors import CCLWarning
 from .pyutils import check, _get_spline2d_arrays
 
 
@@ -281,11 +284,11 @@ class Pk2D(object):
             if self.has_psp and hasattr(self, 'psp'):
                 lib.f2d_t_free(self.psp)
 
-    def _check_Pk2D_compatability(self, other):
+    def _get_binary_operator_arrays(self, other):
         if not isinstance(other, Pk2D):
-            raise ValueError("Binary operator of Pk2D objects is only defined "
-                             "for other Pk2D objects.")
-        if not self.has_psp or not other.has_psp:
+            raise TypeError("Binary operator of Pk2D objects is only defined "
+                            "for other Pk2D objects.")
+        if not (self.has_psp and other.has_psp):
             raise ValueError("Pk2D object does not have data.")
         if (self.psp.lkmin < other.psp.lkmin
                 or self.psp.lkmax > other.psp.lkmax):
@@ -304,7 +307,7 @@ class Pk2D(object):
             # Since the power spectrum is evalulated on a smaller support than
             # where it was defined, no extrapolation is necessary and the
             # dependence on the cosmology in moot.
-            # CosmologyVanillaLCDM is being imported here instea of the top of
+            # CosmologyVanillaLCDM is being imported here instead of the top of
             # the module due to circular import issues there.
             from .core import CosmologyVanillaLCDM
             dummy_cosmo = CosmologyVanillaLCDM()
@@ -322,9 +325,16 @@ class Pk2D(object):
         The returned Pk2D object uses the same a and k arrays as the first
         operand.
         """
-        a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b = \
-            self._check_Pk2D_compatability(other)
-        pk_arr_new = pk_arr_a + pk_arr_b
+        if isinstance(other, (float, int)):
+            a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
+            pk_arr_new = pk_arr_a + other
+        elif isinstance(other, Pk2D):
+            a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b = \
+                self._get_binary_operator_arrays(other)
+            pk_arr_new = pk_arr_a + pk_arr_b
+        else:
+            raise TypeError("Addition of Pk2D is only defined for "
+                            "floats, ints, and Pk2D objects.")
 
         logp = np.all(pk_arr_new > 0)
         if logp:
@@ -353,11 +363,11 @@ class Pk2D(object):
             pk_arr_new = other * pk_arr_a
         elif isinstance(other, Pk2D):
             a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b = \
-                self._check_Pk2D_compatability(other)
+                self._get_binary_operator_arrays(other)
             pk_arr_new = pk_arr_a * pk_arr_b
         else:
-            raise ValueError("Multiplication of Pk2D is only defined for "
-                             "floats, ints, and Pk2D objects.")
+            raise TypeError("Multiplication of Pk2D is only defined for "
+                            "floats, ints, and Pk2D objects.")
 
         logp = np.all(pk_arr_new > 0)
         if logp:
@@ -376,9 +386,14 @@ class Pk2D(object):
         """Take a Pk2D instance to a power.
         """
         if not isinstance(exponent, (float, int)):
-            raise ValueError("Exponentiation of Pk2D is only defined for "
-                             "floats and ints.")
+            raise TypeError("Exponentiation of Pk2D is only defined for "
+                            "floats and ints.")
         a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
+        if np.any(pk_arr_a < 0) and exponent % 1 != 0:
+            warnings.warn("Taking a non-positive Pk2D object to a non-integer "
+                          "power may lead to unexpected results",
+                          category=CCLWarning)
+
         pk_arr_new = pk_arr_a**exponent
 
         logp = np.all(pk_arr_new > 0)
