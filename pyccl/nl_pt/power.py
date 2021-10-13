@@ -51,11 +51,22 @@ class PTCalculator(object):
         C_window (float): `C_window` parameter used by FAST-PT
             to smooth the edges and avoid ringing. See FAST-PT
             documentation for more details.
+        k_cutoff (float): exponential cutoff scale. All power
+            spectra will be multiplied by a cutoff factor of the
+            form :math:`\\exp(-(k/k_*)^n)`, where :math:`k_*` is
+            the cutoff scale. This may be useful when using the
+            resulting power spectra to compute correlation
+            functions if some of the PT contributions do not
+            fall sufficiently fast on small scales. If `None`
+            (default), no cutoff factor will be applied.
+        n_exp_cutoff (float): exponent of the cutoff factor (see
+            `k_cutoff`).
     """
     def __init__(self, with_NC=False, with_IA=False, with_dd=True,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
-                 P_window=None, C_window=.75):
+                 P_window=None, C_window=.75,
+                 k_cutoff=None, n_exp_cutoff=4):
         assert HAVE_FASTPT, (
             "You must have the `FAST-PT` python package "
             "installed to use CCL to get PT observables! "
@@ -76,6 +87,11 @@ class PTCalculator(object):
         nk_total = int((log10k_max - log10k_min) * nk_per_decade)
         self.ks = np.logspace(log10k_min, log10k_max, nk_total)
         n_pad = int(pad_factor * len(self.ks))
+        if k_cutoff is not None:
+            self.exp_cutoff = np.exp(-(self.ks/k_cutoff)**n_exp_cutoff)
+            self.exp_cutoff = self.exp_cutoff[:, None]
+        else:
+            self.exp_cutoff = 1
 
         self.pt = fpt.FASTPT(self.ks, to_do=to_do,
                              low_extrap=low_extrap,
@@ -212,7 +228,7 @@ class PTCalculator(object):
                0.5*(b12*b3nl1+b11*b3nl2)[None, :] * Pd1d3 +
                0.5*(b12*bk21+b11*bk22)[None, :] * Pd1k2)
 
-        return pgg
+        return pgg*self.exp_cutoff
 
     def get_pgi(self, Pd1d1, g4, b1, b2, bs, c1, c2, cd):
         """ Get the number counts - IA cross-spectrum at the
@@ -255,7 +271,7 @@ class PTCalculator(object):
         pgi = b1[None, :] * (c1[None, :] * Pd1d1 +
                              (g4*cd)[None, :] * (a00e + c00e)[:, None] +
                              (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
-        return pgi
+        return pgi*self.exp_cutoff
 
     def get_pgm(self, Pd1d1, g4, b1, b2, bs, b3nl=None,
                 bk2=None, Pgrad=None):
@@ -314,7 +330,7 @@ class PTCalculator(object):
                0.5 * b3nl[None, :] * Pd1d3 +
                0.5 * bk2[None, :] * Pd1k2)
 
-        return pgm
+        return pgm*self.exp_cutoff
 
     def get_pii(self, Pd1d1, g4, c11, c21, cd1,
                 c12, c22, cd2, return_bb=False,
@@ -374,9 +390,9 @@ class PTCalculator(object):
                    ((cd1*c22 + cd2*c21)*g4)[None, :] * d0ee2[:, None])
 
         if return_both:
-            return pii, pii_bb
+            return pii*self.exp_cutoff, pii_bb*self.exp_cutoff
         else:
-            return pii
+            return pii*self.exp_cutoff
 
     def get_pim(self, Pd1d1, g4, c1, c2, cd):
         """ Get the intrinsic alignment - matter cross-spectrum at
@@ -410,7 +426,7 @@ class PTCalculator(object):
         pim = (c1[None, :] * Pd1d1 +
                (g4*cd)[None, :] * (a00e + c00e)[:, None] +
                (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
-        return pim
+        return pim*self.exp_cutoff
 
     def get_pmm(self, Pd1d1_lin, g4):
         """ Get the one-loop matter power spectrum.
@@ -430,7 +446,7 @@ class PTCalculator(object):
         """
         P1loop = g4[None, :] * self.one_loop_dd[0][:, None]
         pmm = (Pd1d1_lin + P1loop)
-        return pmm
+        return pmm*self.exp_cutoff
 
 
 def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,

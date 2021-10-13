@@ -196,6 +196,30 @@ def test_k2pk():
     assert np.all(np.fabs(pkk/(pmm*(1+ks**2))-1) < 1E-10)
 
 
+def test_pk_cutoff():
+    # Tests the exponential cutoff
+    ptc1 = ccl.nl_pt.PTCalculator(with_NC=True)
+    ptc2 = ccl.nl_pt.PTCalculator(with_NC=True,
+                                  k_cutoff=10.,
+                                  n_exp_cutoff=2.)
+    zs = np.array([0., 1.])
+    gs4 = ccl.growth_factor(COSMO, 1./(1+zs))**4
+    pk_lin_z0 = ccl.linear_matter_power(COSMO, ptc1.ks, 1.)
+    ptc1.update_pk(pk_lin_z0)
+    ptc2.update_pk(pk_lin_z0)
+
+    Pd1d1 = np.array([ccl.linear_matter_power(COSMO, ptc1.ks, a)
+                      for a in 1./(1+zs)]).T
+    one = np.ones_like(zs)
+    zero = np.zeros_like(zs)
+    p1 = ptc1.get_pgg(Pd1d1, gs4, one, zero, zero,
+                     one, zero, zero, True).T
+    p2 = ptc2.get_pgg(Pd1d1, gs4, one, zero, zero,
+                      one, zero, zero, True).T
+    expcut = np.exp(-(ptc1.ks/10.)**2)
+    assert np.all(np.fabs(p1*expcut/p2-1) < 1E-10)
+
+
 def test_pt_get_pk2d_raises():
     # Wrong tracer type 2
     with pytest.raises(TypeError):
