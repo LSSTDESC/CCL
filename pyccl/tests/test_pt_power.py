@@ -213,7 +213,7 @@ def test_pk_cutoff():
     one = np.ones_like(zs)
     zero = np.zeros_like(zs)
     p1 = ptc1.get_pgg(Pd1d1, gs4, one, zero, zero,
-                     one, zero, zero, True).T
+                      one, zero, zero, True).T
     p2 = ptc2.get_pgg(Pd1d1, gs4, one, zero, zero,
                       one, zero, zero, True).T
     expcut = np.exp(-(ptc1.ks/10.)**2)
