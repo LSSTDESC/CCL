@@ -586,7 +586,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
 
     # Compute non-local power spectrum only if needed
     Pgrad = None
-    if ((tracer1.type == 'NC') and (tracer2.type == 'NC') and
+    if ((tracer1.type == 'NC') or (tracer2.type == 'NC') and
             (nonloc_pk_type != nonlin_pk_type)):
         if nonloc_pk_type == 'nonlinear':
             Pgrad = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
