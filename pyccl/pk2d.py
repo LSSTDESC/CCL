@@ -293,11 +293,17 @@ class Pk2D(object):
         if (self.psp.lkmin < other.psp.lkmin
                 or self.psp.lkmax > other.psp.lkmax):
             raise ValueError("The 2nd operand has its data defined over a "
-                             "smaller k range than the 1st operand.")
+                             "smaller k range than the 1st operand. To avoid "
+                             "extrapolation, this operation is forbidden. If "
+                             "you want to operate on the smaller support, "
+                             "try swapping the operands.")
         if (self.psp.amin < other.psp.amin
                 or self.psp.amax > other.psp.amax):
             raise ValueError("The 2nd operand has its data defined over a "
-                             "smaller a range than the 1st operand.")
+                             "smaller a range than the 1st operand. To avoid "
+                             "extrapolation, this operation is forbidden. If "
+                             "you want to operate on the smaller support, "
+                             "try swapping the operands.")
 
         a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
         a_arr_b, lk_arr_b, pk_arr_b = other.get_spline_arrays()
