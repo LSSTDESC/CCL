@@ -200,7 +200,7 @@ class PTCalculator(object):
         Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
         Pd2s2 = g4[None, :] * self.dd_bias[5][:, None]
         Ps2s2 = g4[None, :] * self.dd_bias[6][:, None]
-        Pd1d3 = g4[None, :] * self.dd_bias[8][:, None]
+        Pd1p3 = g4[None, :] * self.dd_bias[8][:, None]
         if Pgrad is None:
             Pgrad = Pd1d1
         Pd1k2 = Pgrad * (self.ks**2)[:, None]
@@ -225,7 +225,7 @@ class PTCalculator(object):
                0.5*(b11*bs2 + b12*bs1)[None, :] * Pd1s2 +
                0.25*(b21*bs2 + b22*bs1)[None, :] * (Pd2s2 - (4./3.)*s4) +
                0.25*(bs1*bs2)[None, :] * (Ps2s2 - (8./9.)*s4) +
-               0.5*(b12*b3nl1+b11*b3nl2)[None, :] * Pd1d3 +
+               0.5*(b12*b3nl1+b11*b3nl2)[None, :] * Pd1p3 +
                0.5*(b12*bk21+b11*bk22)[None, :] * Pd1k2)
 
         return pgg*self.exp_cutoff
@@ -315,7 +315,7 @@ class PTCalculator(object):
         """
         Pd1d2 = g4[None, :] * self.dd_bias[2][:, None]
         Pd1s2 = g4[None, :] * self.dd_bias[4][:, None]
-        Pd1d3 = g4[None, :] * self.dd_bias[8][:, None]
+        Pd1p3 = g4[None, :] * self.dd_bias[8][:, None]
         if Pgrad is None:
             Pgrad = Pd1d1
         Pd1k2 = Pgrad*(self.ks**2)[:, None]
@@ -327,7 +327,7 @@ class PTCalculator(object):
         pgm = (b1[None, :] * Pd1d1 +
                0.5 * b2[None, :] * Pd1d2 +
                0.5 * bs[None, :] * Pd1s2 +
-               0.5 * b3nl[None, :] * Pd1d3 +
+               0.5 * b3nl[None, :] * Pd1p3 +
                0.5 * bk2[None, :] * Pd1k2)
 
         return pgm*self.exp_cutoff
