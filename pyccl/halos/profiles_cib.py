@@ -157,9 +157,9 @@ class HaloProfileCIBShang12(HaloProfile):
 
         spec_nu1 = self.spectrum(self.nu/a)
         if nu_other is None:
-            spec_nu2 = self.spectrum(nu_other/a)
-        else:
             spec_nu2 = spec_nu1
+        else:
+            spec_nu2 = self.spectrum(nu_other/a)
 
         fc = self._fcen(M_use, a)
         fs = self._fsat(M_use, a)

@@ -701,6 +701,16 @@ class tSZTracer(Tracer):
         self.add_tracer(cosmo, kernel=(chi_arr, w_arr))
 
 
+class CIBTracer(Tracer):
+    def __init__(self, cosmo, z_max=6., n_chi=1024):
+        self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+        chi_arr = np.linspace(0, self.chi_max, n_chi)
+        a_arr = scale_factor_of_chi(cosmo, chi_arr)
+
+        self._trc = []
+        self.add_tracer(cosmo, kernel=(chi_arr, a_arr))
+
+
 def _check_returned_tracer(return_val):
     """Wrapper to catch exceptions when tracers are spawned from C.
     """
