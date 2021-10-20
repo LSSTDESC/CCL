@@ -310,6 +310,11 @@ class Pk2D(object):
         if not (a_arr_a.size == a_arr_b.size and lk_arr_a.size == lk_arr_b.size
                 and np.allclose(a_arr_a, a_arr_b)
                 and np.allclose(lk_arr_a, lk_arr_b)):
+            warnings.warn("The arrays of the two Pk2D objects are defined at "
+                          "different points in k and/or a. The second operand "
+                          "will be interpolated for the operation.",
+                          category=CCLWarning)
+
             # Since the power spectrum is evalulated on a smaller support than
             # where it was defined, no extrapolation is necessary and the
             # dependence on the cosmology in moot.
