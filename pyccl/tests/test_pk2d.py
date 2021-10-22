@@ -312,7 +312,11 @@ def test_pk2d_add():
                       pk_arr=zarr_b[1:-1, 1:-1],
                       is_logp=False)
 
-    pk2d_f = pk2d_e + pk2d_a
+    # This raises a warning because the power spectra are not defined on the
+    # same support
+    with pytest.warns(CCLWarning):
+        pk2d_f = pk2d_e + pk2d_a
+
     xarr_f, yarr_f, zarr_f = pk2d_f.get_spline_arrays()
 
     assert np.allclose((zarr_a + zarr_b)[1:-1, 1:-1], zarr_f)

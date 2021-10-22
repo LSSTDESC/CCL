@@ -312,7 +312,10 @@ class Pk2D(object):
                 and np.allclose(lk_arr_a, lk_arr_b)):
             warnings.warn("The arrays of the two Pk2D objects are defined at "
                           "different points in k and/or a. The second operand "
-                          "will be interpolated for the operation.",
+                          "will be interpolated for the operation.\n"
+                          "The resulting Pk2D object will be defined for "
+                          f"{self.psp.lkmin} <= log k <= {self.psp.lkmax} and "
+                          f"{self.psp.amin} <= a <= {self.psp.amax}.",
                           category=CCLWarning)
 
             # Since the power spectrum is evalulated on a smaller support than
