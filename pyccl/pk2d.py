@@ -1,5 +1,7 @@
 import warnings
 
+from .emulator import PowerSpectrumEmulator
+
 import numpy as np
 
 from . import ccllib as lib
@@ -157,6 +159,19 @@ class Pk2D(object):
 
         check(status, cosmo)
         pk2d.has_psp = True
+        return pk2d
+
+    @classmethod
+    def pk_from_emulator(Pk2D, cosmo, model):
+        """`Pk2D` constructor returning the power spectrum associated with
+        a given emulator.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            model (:obj:`str`): model to use. These models allowed:
+                `'arico21'` (Arico, Angulo & Zennaro, 2021. arXiv:2104.14568)
+        """
+        pk2d = PowerSpectrumEmulator.get_pk_linear(cosmo, model)
         return pk2d
 
     @classmethod
