@@ -196,6 +196,24 @@ class Pk2D(object):
         pk2d.has_psp = True
         return pk2d
 
+    @classmethod
+    def apply_model(Pk2D, cosmo, model, *, pk_linear):
+        """Pk2D constructor that applies a non-linear model
+        to a linear power spectrum.
+
+        Arguments:
+            cosmo (:class:`~pyccl.core.Cosmology`):
+                A Cosmology object.
+            model (str):
+                Model to use.
+            pk_linear (:class:`Pk2D`):
+                A :class:`Pk2D` object containing the linear
+                power spectrum to transform.
+        """
+        from .boltzmann import PowerSpectrumEmulator
+        pk2d = PowerSpectrumEmulator.apply_model(cosmo, model, pk_linear)
+        return pk2d
+
     def eval(self, k, a, cosmo):
         """Evaluate power spectrum.
 
