@@ -13,7 +13,7 @@ from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
-from .bcm import bcm_correct_pk2d
+from .bcm import bcm_correct_pk2d, baryon_correct
 
 # Configuration types
 transfer_function_types = {
@@ -24,7 +24,8 @@ transfer_function_types = {
     'boltzmann_class': lib.boltzmann_class,
     'boltzmann_camb': lib.boltzmann_camb,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
-    'calculator': lib.pklin_from_input
+    'calculator': lib.pklin_from_input,
+    'arico21': lib.pklin_from_input,
 }
 
 matter_power_spectrum_types = {
@@ -34,12 +35,14 @@ matter_power_spectrum_types = {
     'linear': lib.linear,
     'emu': lib.emu,
     'calculator': lib.pknl_from_input,
-    'camb': lib.pknl_from_boltzman
+    'camb': lib.pknl_from_boltzman,
+    'arico21': lib.pknl_from_input,
 }
 
 baryons_power_spectrum_types = {
     'nobaryons': lib.nobaryons,
-    'bcm': lib.bcm
+    'bcm': lib.bcm,
+    'arico21': lib.nobaryons,
 }
 
 # List which transfer functions can be used with the muSigma_MG
@@ -819,8 +822,9 @@ class Cosmology(object):
         elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
             rescale_s8 = False
             rescale_mg = False
-            pk = Pk2D.pk_from_model(self,
-                                    model=trf)
+            pk = Pk2D.pk_from_model(self, model=trf)
+        elif trf in ['arico21', ]:
+            pk = Pk2D.pk_from_emulator(self, model=trf)
 
         # Rescale by sigma8/mu-sigma if needed
         if pk:
@@ -932,10 +936,15 @@ class Cosmology(object):
             pk = Pk2D.pk_from_model(self, model='emu')
         elif mps == 'linear':
             pk = self._pk_lin['delta_matter:delta_matter']
+        elif mps in ['arico21', ]:  # other emulators go in here
+            pkl = self._pk_lin['delta_matter:delta_matter']
+            pk = Pk2D.apply_model(self, model=mps, pk_linear=pkl)
 
         # Correct for baryons if required
         if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
             bcm_correct_pk2d(self, pk)
+        elif bps in ['arico21', ]:  # other emulators go in here
+            pk = baryon_correct(self, model=bps, pk2d=pk)
 
         # Assign
         self._pk_nl['delta_matter:delta_matter'] = pk
