@@ -67,6 +67,9 @@ from .haloprofile import nfw_profile_3d, einasto_profile_3d, hernquist_profile_3
 # Specific to massive neutrinos
 from .neutrinos import Omeganuh2, nu_masses
 
+# Emulator stuff
+from .emulator import Emulator, PowerSpectrumEmulator
+
 # Expose function to toggle debug mode
 from .pyutils import debug_mode, resample_array
 
