@@ -22,6 +22,7 @@ from .hmfunc import (  # noqa
     MassFuncTinker08, MassFuncTinker10,
     MassFuncWatson13, MassFuncAngulo12,
     MassFuncDespali16, MassFuncBocquet16,
+    MassFuncBocquet20,
     mass_function_from_name)
 
 # Halo bias
