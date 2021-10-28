@@ -1,6 +1,7 @@
 from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D
+from .emulator import PowerSpectrumEmulator
 import numpy as np
 
 
@@ -47,3 +48,22 @@ def bcm_correct_pk2d(cosmo, pk2d):
     status = 0
     status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
     check(status, cosmo)
+
+
+def baryon_correct(cosmo, model, pk2d):
+    """Correct the power spectrum for baryons, given a model name string.
+
+    Arguments:
+        cosmo (:class:`~pyccl.core.Cosmology`):
+            Cosmological parameters.
+        model (str):
+            Model to use.
+        pk2d (:class:`~pyccl.pk2d.Pk2D`):
+            Power spectrum.
+    """
+    if model == "bcm":
+        bcm_correct_pk2d(cosmo, pk2d)
+        return
+    elif model in ["arico21", ]:  # other emulator names go in here
+        pk2d = PowerSpectrumEmulator.include_baryons(cosmo, model, pk2d)
+        return pk2d
