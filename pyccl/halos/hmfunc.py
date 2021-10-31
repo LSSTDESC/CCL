@@ -2,7 +2,7 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
 from ..emulator import Emulator, Bounds
-from .massdef import MassDef, MassDef200m
+from .massdef import MassDef, MassDef200m, MassDef200c
 import numpy as np
 
 
@@ -835,6 +835,10 @@ class MassFuncBocquet20(MassFunc, Emulator):
             self._param_emu_kwargs.pop("M_min")
 
     def _extrapolate_hmf(self, hmf, M, eps=1e-12):
+        # As indicated in :arXiv:2003.12116, the emulator can be
+        # safely extrapolated to lower and higher masses.
+        from scipy.interpolate import interp1d
+
         M_use = np.atleast_1d(M)
         # indices where the emulator outputs reasonable values
         idx = np.where(hmf >= eps)[0]

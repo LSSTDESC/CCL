@@ -941,7 +941,8 @@ class Cosmology(object):
             pk = Pk2D.apply_model(self, model=mps, pk_linear=pkl)
 
         # Correct for baryons if required
-        if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
+        bps = self._config_init_kwargs['baryons_power_spectrum']
+        if bps == 'bcm':
             bcm_correct_pk2d(self, pk)
         elif bps in ['arico21', ]:  # other emulators go in here
             pk = baryon_correct(self, model=bps, pk2d=pk)
