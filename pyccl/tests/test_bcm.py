@@ -8,6 +8,7 @@ COSMO = ccl.CosmologyVanillaLCDM(
     matter_power_spectrum='halofit')
 COSMO.compute_nonlin_power()
 
+
 @pytest.mark.parametrize('k', [
     1,
     1.0,
@@ -30,18 +31,17 @@ def test_bcm_correct_smoke():
     assert np.all(np.fabs(pk_wbar/(pk_nobar*fka)-1) < 1E-5)
 
 
-@pytest.mark.parametrize('model', ['arico21'])
+@pytest.mark.parametrize('model', ['arico21', ])
 def test_baryon_correct_smoke(model):
     # we compare each model with BCM
     if model == "arico21":
-        extras = {"arico21":
-                  {'M_c'           :  14,
-                   'eta'           : -0.3,
-                   'beta'          : -0.22,
-                   'M1_z0_cen'     : 10.5,
-                   'theta_out'     : 0.25,
-                   'theta_inn'     : -0.86,
-                   'M_inn'         : 13.4}
+        extras = {"arico21": {'M_c': 14,
+                              'eta': -0.3,
+                              'beta': -0.22,
+                              'M1_z0_cen': 10.5,
+                              'theta_out': 0.25,
+                              'theta_inn': -0.86,
+                              'M_inn': 13.4}
                   }
         cosmo = ccl.CosmologyVanillaLCDM(
             transfer_function="bbks",

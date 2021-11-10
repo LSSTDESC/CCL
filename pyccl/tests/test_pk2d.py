@@ -88,7 +88,8 @@ def test_pk2d_from_model(model):
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1E-10
 
-@pytest.mark.parametrize('emulator', ['arico21',])
+
+@pytest.mark.parametrize('emulator', ['arico21', ])
 def test_pk2d_from_emulator(emulator):
     cosmo_fixed = ccl.CosmologyVanillaLCDM()
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function=emulator)
@@ -101,7 +102,8 @@ def test_pk2d_from_emulator(emulator):
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1e-3
 
-@pytest.mark.parametrize('emulator', ['arico21',])
+
+@pytest.mark.parametrize('emulator', ['arico21', ])
 def test_pk2d_apply_model(emulator):
     cosmo_fixed = ccl.CosmologyVanillaLCDM()
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function=emulator)
@@ -117,6 +119,7 @@ def test_pk2d_apply_model(emulator):
         pk2 = pk_mod.eval(ks, a, cosmo_fixed)
         maxdiff = np.amax(np.fabs(1-pk1/pk2))
         assert maxdiff < 0.5  # be lenient for different models!
+
 
 def test_pk2d_from_model_emu():
     pars = [0.3643, 0.071075, 0.55, 0.8333, 0.9167, -0.7667, 0.1944]
