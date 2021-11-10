@@ -2,7 +2,7 @@
 This script provides the tools needed for a uniform
 framework for CCL to work with emulators.
 """  # noqa
-from .pyutils import CCLWarning, _get_spline2d_arrays
+from .pyutils import CCLWarning
 
 # We need to load all subclasses of PowerSpectrumEmulator
 # or the `from_name` method will not work!
@@ -10,30 +10,6 @@ from .boltzmann import *  # noqa
 
 import warnings
 import numpy as np
-from scipy.interpolate import RectBivariateSpline
-
-
-def _mul_in_range(a, b):
-    """Multiply within the range of one another.
-
-    Given two tuples ``(x, y, Z)`` where ``Z.shape == (x.size, y.size)``,
-    interpolate the second tuple and multiply them together, extrapolating
-    in the ranges they do not have in common.
-
-    .. note:: The y-values are logged for convenience, as this function
-              is used to interpolate power spectra.
-
-    Arguments:
-        a, b (tuple):
-            Tuples of ``(x, y, Z(x, y))``. The second tuple is assumed
-            to have the narrowest range.
-    """
-    x1, y1, Z1 = a
-    x2, y2, Z2 = b
-    F = RectBivariateSpline(x2, np.log(y2), Z2, kx=1, ky=2)
-    f = F(x1, np.log(y1))
-    Z1 *= f
-    return Z1
 
 
 class Bounds(object):
@@ -269,71 +245,72 @@ class PowerSpectrumEmulator(Emulator):
         return pk2d
 
     @classmethod
-    def get_pk_nonlin(cls, cosmo, name, *, baryons=False):
+    def get_pk_nonlin(cls, cosmo, name):
         """Non-linear matter power spectrum, given a model name."""
         from .pk2d import Pk2D
 
         emu = cls.from_name(name)()
         if hasattr(emu, "_get_pk_nonlin"):
-            k, a, pk = emu._get_pk_nonlin(cosmo, baryons=baryons)
+            k, a, pk = emu._get_pk_nonlin(cosmo)
+            pk2d = Pk2D(lk_arr=np.log(k), a_arr=a, pk_arr=np.log(pk))
         elif hasattr(emu, "_get_nonlin_boost"):
+            # query the emulator
             k, a, pk = emu._get_pk_linear(cosmo)
-            knl, anl, fknl = emu._get_nonlin_boost(cosmo, baryons=baryons)
-            pk = _mul_in_range((a, k, pk), (anl, knl, fknl))
+            knl, anl, fknl = emu._get_nonlin_boost(cosmo)
+            # construct Pk2D objects
+            pk2d_lin = Pk2D(lk_arr=np.log(k), a_arr=a, pk_arr=np.log(pk))
+            pk2d_nonlin_boost = Pk2D(lk_arr=np.log(knl), a_arr=anl,
+                                     pk_arr=np.log(fknl))
+            # multiply
+            pk2d = pk2d_nonlin_boost * pk2d_lin
         else:
             raise NotImplementedError(
                 f"Emulator {name} does not have any of the methods "
                 "`_get_pk_nonlin` or `_get_nonlin_boost` to compute "
                 "the non-linear matter power spectrum.")
 
-        pk2d = Pk2D(lk_arr=np.log(k), a_arr=a, pk_arr=np.log(pk))
         return pk2d
 
     @classmethod
     def apply_model(cls, cosmo, name, pk_linear):
         from .pk2d import Pk2D
 
-        # deconstruct Pk2D object
-        a, lk, lpk = _get_spline2d_arrays(pk_linear.psp.fka)
-        k, pk = np.exp(lk), np.exp(lpk)
-
         emu = cls.from_name(name)()
         if hasattr(emu, "_get_nonlin_boost"):
-            knl, anl, pknl = emu._get_nonlin_boost(cosmo)
-            pk = _mul_in_range((a, k, pk), (anl, knl, pknl))
+            knl, anl, fknl = emu._get_nonlin_boost(cosmo)
+            pk2d_nonlin_boost = Pk2D(lk_arr=np.log(knl), a_arr=anl,
+                                     pk_arr=np.log(fknl))
+            pk2d = pk2d_nonlin_boost * pk_linear
         elif (hasattr(emu, "_get_pk_linear") and
               hasattr(emu, "_get_pk_nonlin")):
             # In this case we calculate the non-linear boost using
             # the ratio of nonlin/linear.
+            # query the emulator
             kl, al, pkl = emu._get_pk_linear(cosmo)
             knl, anl, pknl = emu._get_pk_nonlin(cosmo)
-            idx_k = np.where((kl >= knl[0]) & (kl <= knl[-1]))[0]
-            idx_a = np.where((al >= anl[0]) & (al <= anl[-1]))[0]
-            pkl_use = pkl[np.ix_(idx_a, idx_k)]
-            F = RectBivariateSpline(anl, np.log(knl), pknl/pkl_use)
-            fk = F(a, np.log(k))
-            pk *= fk
+            # construct Pk2D objects and take their ratio
+            pk2d_lin = Pk2D(lk_arr=np.log(kl), a_arr=al, pk_arr=np.log(pkl))
+            pk2d_nl = Pk2D(lk_arr=np.log(knl), a_arr=anl, pk_arr=np.log(pknl))
+            pk2d_nonlin_boost = pk2d_nl**(-1) * pk2d_lin
+            # multiply
+            pk2d = pk2d_nonlin_boost * pk_linear
         else:
             raise NotImplementedError(
                 f"Emulator {name} does not have any of the methods "
                 "`_get_pk_linear`, `_get_pk_nonlin`, or `get_nonlin_boost` "
                 "to apply the matter power spectrum correction.")
 
-        pk2d = Pk2D(lk_arr=lk, a_arr=a, pk_arr=np.log(pk))
         return pk2d
 
     @classmethod
     def include_baryons(cls, cosmo, name, pk_in):
         from .pk2d import Pk2D
 
-        # deconstruct Pk2D object
-        a, lk, lpk = _get_spline2d_arrays(pk_in.psp.fka)
-        k, pk = np.exp(lk), np.exp(lpk)
-
         emu = cls.from_name(name)()
         if hasattr(emu, "_get_baryon_boost"):
-            kb, ab, pkb = emu._get_baryon_boost(cosmo)
-            pk = _mul_in_range((a, k, pk), (ab, kb, pkb))
+            k, a, pk = emu._get_baryon_boost(cosmo)
+            pk2d_baryon = Pk2D(lk_arr=np.log(k), a_arr=a, pk_arr=np.log(pk))
+            pk2d = pk2d_baryon * pk_in
         else:
             # Here, we can't safely infer the baryon correction from
             # a ratio of power spectra because the baryon correction
@@ -342,5 +319,4 @@ class PowerSpectrumEmulator(Emulator):
                 f"Emulator {name} does not have a method "
                 "`_get_baryon_boost` to compute the baryon correction.")
 
-        pk2d = Pk2D(lk_arr=lk, a_arr=a, pk_arr=np.log(pk))
         return pk2d
