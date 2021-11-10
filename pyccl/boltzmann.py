@@ -588,13 +588,7 @@ class PowerSpectrumArico21(PowerSpectrumEmulator):
 
     def _build_emu_parameters(self, cosmo, baryon=False):
         # Note: `omega_matter` in this emulator does not contain neutrinos.
-        # First, remove any previous extra parameters from the dictionary.
-        emu = self._get_model()
-        baryon_params = emu.baryon_keys.tolist()
-        dic = self._param_emu_kwargs
-        [dic.pop(par) for par in dic if par in baryon_params]
-
-        # Secondly, assign the usual cosmological parameters.
+        # Assign the usual cosmological parameters.
         self._param_emu_kwargs = {
             "omega_matter": cosmo["Omega_c"] + cosmo["Omega_b"],
             "omega_baryon": cosmo["Omega_b"],
