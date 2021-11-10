@@ -66,8 +66,8 @@ jobs:
 
       - name: install emulators
         run: |
-           alias conda_pip="${CONDA_PREFIX}/bin/pip"
-           conda_pip install baccoemu MiraTitanHMFemulator
+          ${CONDA_PREFIX}/bin/pip install \
+          baccoemu MiraTitanHMFemulator
         env:
           MATRIX_OS: ${{ matrix.os }}
 
