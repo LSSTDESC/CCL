@@ -67,7 +67,10 @@ jobs:
       - name: install emulators
         run: |
           ${CONDA_PREFIX}/bin/pip install \
-          baccoemu MiraTitanHMFemulator
+            MiraTitanHMFemulator
+          
+          git clone https://bitbucket.org/rangulo/baccoemu/src/master/baccoemu/ ~/baccoemu/        
+          ${CONDA_PREFIX}/bin/python ~/baccoemu/setup.py install --user
         env:
           MATRIX_OS: ${{ matrix.os }}
 
