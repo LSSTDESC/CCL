@@ -88,6 +88,35 @@ def test_pk2d_from_model(model):
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1E-10
 
+@pytest.mark.parametrize('emulator', ['arico21',])
+def test_pk2d_from_emulator(emulator):
+    cosmo_fixed = ccl.CosmologyVanillaLCDM()
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=emulator)
+    pk = ccl.Pk2D.pk_from_emulator(cosmo_fixed, model=emulator)
+    ks = np.geomspace(1e-3, 1e1, 128)
+    for z in [0., 0.5, 2.]:
+        a = 1./(1+z)
+        pk1 = pk.eval(ks, a, cosmo)
+        pk2 = ccl.linear_matter_power(cosmo, ks, a)
+        maxdiff = np.amax(np.fabs(pk1/pk2-1))
+        assert maxdiff < 1e-3
+
+@pytest.mark.parametrize('emulator', ['arico21',])
+def test_pk2d_apply_model(emulator):
+    cosmo_fixed = ccl.CosmologyVanillaLCDM()
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=emulator)
+    ks = np.geomspace(1e-2, 5, 128)
+    for z in [0., 0.5, 2.]:
+        a = 1./(1+z)
+        pkl = cosmo_fixed.get_camb_pk_lin()
+        # non-linear models
+        pk_hf = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
+        pk_mod = ccl.Pk2D.apply_model(cosmo, model=emulator, pk_linear=pkl)
+        # query
+        pk1 = pk_hf.eval(ks, a, cosmo_fixed)
+        pk2 = pk_mod.eval(ks, a, cosmo_fixed)
+        maxdiff = np.amax(np.fabs(1-pk1/pk2))
+        assert maxdiff < 0.5  # be lenient for different models!
 
 def test_pk2d_from_model_emu():
     pars = [0.3643, 0.071075, 0.55, 0.8333, 0.9167, -0.7667, 0.1944]
