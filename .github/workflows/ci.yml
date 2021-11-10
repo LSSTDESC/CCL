@@ -64,6 +64,13 @@ jobs:
         env:
           MATRIX_OS: ${{ matrix.os }}
 
+      - name: install emulators
+        run: |
+           alias conda_pip="${CONDA_PREFIX}/bin/pip
+           conda_pip install baccoemu MiraTitanHMFemulator
+        env:
+          MATRIX_OS: ${{ matrix.os }}
+
       - name: install class
         run: |
           if [[ ${MATRIX_OS} == "macos-latest" ]]; then
