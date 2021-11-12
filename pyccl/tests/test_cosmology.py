@@ -146,11 +146,42 @@ def test_cosmology_output():
 
 def test_cosmology_equal():
     """Check the Cosmology equivalence method."""
+    # equivalent cosmologies
     cosmo1 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
                            sigma8=0.81, n_s=0.96)
     cosmo2 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
                            sigma8=0.81, n_s=0.96)
     assert cosmo1.__eq__(cosmo2)
+
+    # different cosmological parameters
+    cosmo2 = ccl.Cosmology(Omega_c=0.24, Omega_b=0.04, h=0.75,
+                           sigma8=0.8, n_s=0.95)
+    assert not cosmo1.__eq__(cosmo2)
+
+    ## different power spectra
+    a = np.linspace(0.5, 1., 16)
+    k = np.logspace(-2, 1, 128)
+    pk = np.ones((a.size, k.size))
+    pk_dict = {"a": a, "k": k, "delta_matter:delta_matter": pk}
+    # linear
+    cosmo1.compute_linear_power()
+    cosmo2 = ccl.CosmologyCalculator(Omega_c=cosmo1["Omega_c"],
+                                     Omega_b=cosmo1["Omega_b"],
+                                     h=cosmo1["h"],
+                                     sigma8=cosmo1["sigma8"],
+                                     n_s=cosmo1["n_s"],
+                                     pk_linear=pk_dict)
+    assert not cosmo1.__eq__(cosmo2)
+
+    # non-linear
+    cosmo1.compute_nonlin_power()
+    cosmo2 = ccl.CosmologyCalculator(Omega_c=cosmo1["Omega_c"],
+                                     Omega_b=cosmo1["Omega_b"],
+                                     h=cosmo1["h"],
+                                     sigma8=cosmo1["sigma8"],
+                                     n_s=cosmo1["n_s"],
+                                     pk_nonlin=pk_dict)
+    assert not cosmo1.__eq__(cosmo2)
 
 
 def test_cosmology_pickles():
