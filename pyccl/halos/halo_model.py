@@ -122,9 +122,9 @@ class HMCalculator(object):
         # value of the scale factor and/or with a new Cosmology
         if (a != self._a_current_mf or
                 not cosmo.__eq__(self._cosmo_current_mf)):
-            self.mf = self.mass_function.get_mass_function(
+            self.mf = self._massfunc.get_mass_function(
                 cosmo, self._mass, a,
-                mass_def_other=self.mass_def)
+                mdef_other=self._mdef)
             self.mf0 = (rho0 -
                         self._integrator(self.mf * self._mass,
                                          self._lmass)) / self._m0
@@ -134,9 +134,9 @@ class HMCalculator(object):
         if get_bf:
             if (a != self._a_current_bf or
                     not cosmo.__eq__(self._cosmo_current_bf)):
-                self.bf = self.halo_bias.get_halo_bias(
+                self.bf = self._hbias.get_halo_bias(
                     cosmo, self._mass, a,
-                    mass_def_other=self.mass_def)
+                    mdef_other=self._mdef)
                 self.mbf0 = (rho0 -
                              self._integrator(self.mf * self.bf * self._mass,
                                               self._lmass)) / self._m0
