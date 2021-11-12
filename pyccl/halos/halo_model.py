@@ -105,8 +105,12 @@ class HMCalculator(object):
         else:
             self._integrator = self._integ_spline
 
+        # dummy placeholder values
         self._a_current_mf = -1
         self._a_current_bf = -1
+        from ..core import CosmologyVanillaLCDM  # circular import
+        self._cosmo_current_mf = CosmologyVanillaLCDM()
+        self._cosmo_current_bf = CosmologyVanillaLCDM()
 
     def _integ_spline(self, fM, lM):
         # Spline integrator
@@ -115,23 +119,29 @@ class HMCalculator(object):
     def _get_ingredients(self, a, cosmo, get_bf):
         rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
         # Compute mass function and bias (if needed) at a new
-        # value of the scale factor.
-        if a != self._a_current_mf:
-            self.mf = self._massfunc.get_mass_function(cosmo, self._mass, a,
-                                                       mdef_other=self._mdef)
+        # value of the scale factor and/or with a new Cosmology
+        if (a != self._a_current_mf or
+                not cosmo.__eq__(self._cosmo_current_mf)):
+            self.mf = self.mass_function.get_mass_function(
+                cosmo, self._mass, a,
+                mass_def_other=self.mass_def)
             self.mf0 = (rho0 -
                         self._integrator(self.mf * self._mass,
                                          self._lmass)) / self._m0
             self._a_current_mf = a
+            self._cosmo_current_mf = cosmo
 
         if get_bf:
-            if a != self._a_current_bf:
-                self.bf = self._hbias.get_halo_bias(cosmo, self._mass, a,
-                                                    mdef_other=self._mdef)
+            if (a != self._a_current_bf or
+                    not cosmo.__eq__(self._cosmo_current_bf)):
+                self.bf = self.halo_bias.get_halo_bias(
+                    cosmo, self._mass, a,
+                    mass_def_other=self.mass_def)
                 self.mbf0 = (rho0 -
                              self._integrator(self.mf * self.bf * self._mass,
                                               self._lmass)) / self._m0
             self._a_current_bf = a
+            self._cosmo_current_bf = cosmo
 
     def _integrate_over_mf(self, array_2):
         i1 = self._integrator(self.mf[..., :] * array_2,
