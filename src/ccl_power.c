@@ -320,7 +320,12 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
     //For each redshift:
     for (int j = 0; j < na; j++){
       //Turn cosmology into emu_par:
-      emu_par[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b)*cosmo->params.h*cosmo->params.h;
+      if ((cosmo->params.N_nu_mass>0) &&
+          (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize)){
+          emu_par[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b)*cosmo->params.h*cosmo->params.h + Omeganuh2_eq;
+      }else{
+          emu_par[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b+cosmo->params.Omega_nu_mass)*cosmo->params.h*cosmo->params.h;
+      }
       emu_par[1] = cosmo->params.Omega_b*cosmo->params.h*cosmo->params.h;
       emu_par[2] = cosmo->params.sigma8;
       emu_par[3] = cosmo->params.h;

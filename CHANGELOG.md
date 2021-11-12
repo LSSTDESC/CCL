@@ -1,11 +1,21 @@
 # Unreleased
 
+# v2.3.0 Changes
+
 ## Python library
-- Allow access to CAMB nonlinear power spectra (#854)
+- Fixed bug in calculation of Omega_M in cosmic emulator (#897).
+- Eisenstein and Hu no-wiggle power spectrum (#898)
+- Many functions now methods of the `Cosmology` class (#887)
+- Correction to HM transition regime and small-scale 1-halo suppression (#877, #883)
+- Generalized treatment of satellites in HOD profile (#875)
+- SSC Non-Gaussian Angular power spectrum covariance (#855)
+- Allow access to CAMB nonlinear power spectra (#854) and dark-energy models (#857)
 - Write and read configuration settings to yaml (#852)
+- Weak lensing profiles (#824)
 
 ## C library
 - Deprecate C-level yaml reader and writer (#852)
+- Fixed bug in emulator implementation (#899)
 
 # v2.2.0 Changes
 
