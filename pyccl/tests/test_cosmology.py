@@ -162,25 +162,24 @@ def test_cosmology_equal():
     a = np.linspace(0.5, 1., 16)
     k = np.logspace(-2, 1, 128)
     pk = np.ones((a.size, k.size))
-    pk_dict = {"a": a, "k": k, "delta_matter:delta_matter": pk}
+    pk_dict_1 = {"a": a, "k": k, "delta_matter:delta_matter": pk}
+    pk_dict_2 = {"a": a, "k": k, "delta_matter:delta_matter": 2*pk}
     # linear
-    cosmo1.compute_linear_power()
-    cosmo2 = ccl.CosmologyCalculator(Omega_c=cosmo1["Omega_c"],
-                                     Omega_b=cosmo1["Omega_b"],
-                                     h=cosmo1["h"],
-                                     sigma8=cosmo1["sigma8"],
-                                     n_s=cosmo1["n_s"],
-                                     pk_linear=pk_dict)
+    cosmo1 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
+        pk_linear=pk_dict_1)
+    cosmo2 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
+        pk_linear=pk_dict_2)
     assert not cosmo1.__eq__(cosmo2)
 
     # non-linear
-    cosmo1.compute_nonlin_power()
-    cosmo2 = ccl.CosmologyCalculator(Omega_c=cosmo1["Omega_c"],
-                                     Omega_b=cosmo1["Omega_b"],
-                                     h=cosmo1["h"],
-                                     sigma8=cosmo1["sigma8"],
-                                     n_s=cosmo1["n_s"],
-                                     pk_nonlin=pk_dict)
+    cosmo1 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
+        pk_nonlin=pk_dict_1)
+    cosmo2 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
+        pk_nonlin=pk_dict_2)
     assert not cosmo1.__eq__(cosmo2)
 
 
