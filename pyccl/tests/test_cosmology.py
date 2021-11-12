@@ -158,7 +158,7 @@ def test_cosmology_equal():
                            sigma8=0.8, n_s=0.95)
     assert not cosmo1.__eq__(cosmo2)
 
-    ## different power spectra
+    # different power spectra
     a = np.linspace(0.5, 1., 16)
     k = np.logspace(-2, 1, 128)
     pk = np.ones((a.size, k.size))
