@@ -656,7 +656,28 @@ class Cosmology(object):
         """Check if two cosmologies are equivalent."""
         check_pars = self._params_init_kwargs == cosmo2._params_init_kwargs
         check_config = self._config_init_kwargs == cosmo2._config_init_kwargs
-        return check_pars and check_config
+        if not (check_pars and check_config):
+            return False
+
+        # check linear power spectra
+        if self._has_pk_lin and cosmo2._has_pk_lin:
+            pk_this, pk_other = self._pk_lin, cosmo2._pk_lin
+            for pspec, pk in pk_this.items():
+                pk2 = pk_other.get(pspec)
+                if pk2 is not None:
+                    if not pk.__eq__(pk2):
+                        return False
+
+        # check nonlinear power spectra
+        if self._has_pk_nl and cosmo2._has_pk_nl:
+            pk_this, pk_other = self._pk_nl, cosmo2._pk_nl
+            for pspec, pk in pk_this.items():
+                pk2 = pk_other.get(pspec)
+                if pk2 is not None:
+                    if not pk.__eq__(pk2):
+                        return False
+
+        return True
 
     def __exit__(self, type, value, traceback):
         """Free the C memory this object is managing when the context manager
