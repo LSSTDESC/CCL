@@ -335,6 +335,18 @@ class Pk2D(object):
                                  for a_ in a_arr_a])
         return a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b
 
+    def __eq__(self, other):
+        """Check if two Pk2D objects are equivalent, i.e. they contain the
+        same data over the same range.
+        """
+        a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
+        a_arr_b, lk_arr_b, pk_arr_b = other.get_spline_arrays()
+
+        same_a = np.allclose(a_arr_a, a_arr_b)
+        same_lk = np.allclose(lk_arr_a, lk_arr_b)
+        same_pk = np.allclose(pk_arr_a, pk_arr_b)
+        return same_a and same_lk and same_pk
+
     def __add__(self, other):
         """Adds two Pk2D instances.
 
