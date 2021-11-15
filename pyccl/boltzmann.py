@@ -566,8 +566,7 @@ class PowerSpectrumArico21(PowerSpectrumEmulator):
 
     def __init__(self, config=None):
         if config is None:
-            config = {"emu_type": "nn",
-                      "linear": True,
+            config = {"linear": True,
                       "nonlinear_boost": True,
                       "baryonic_boost": True}
         self._config_emu_kwargs = config
