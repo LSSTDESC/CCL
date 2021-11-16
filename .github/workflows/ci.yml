@@ -45,11 +45,20 @@ jobs:
           ./uninstall_homebrew.sh -f -q >& /dev/null
           rm -f uninstall_homebrew.sh
 
+      - name: lint
+        run: |
+          conda install flake8
+          flake8 pyccl
+          flake8 --exclude=data benchmarks
+          if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
+            exit 1
+          fi
+
       - name: install deps
         run: |
           conda install \
             pip \
-            numpy nose coveralls flake8 pyyaml gsl fftw cmake swig scipy \
+            numpy nose coveralls pyyaml gsl fftw cmake swig scipy \
             compilers pkg-config setuptools_scm pytest pandas pytest-cov \
             cython "camb>=1.3" isitgr traitlets fast-pt
 
@@ -80,14 +89,6 @@ jobs:
           fi
         env:
           MATRIX_OS: ${{ matrix.os }}
-
-      - name: lint
-        run: |
-          flake8 pyccl
-          flake8 --exclude=data benchmarks
-          if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
-            exit 1
-          fi
 
       - name: build CCL
         run: |
