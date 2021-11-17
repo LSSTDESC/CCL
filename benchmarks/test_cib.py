@@ -20,6 +20,17 @@ def test_cibcl():
     bM = ccl.halos.HaloBiasTinker10(cosmo, mdef)
     hmc = ccl.halos.HMCalculator(cosmo, nM, bM, mdef)
     pr = ccl.halos.HaloProfileCIBShang12(cM, 217, Mmin=1E10)
+    pr.update_parameters(nu_GHz=217,
+                         alpha=0.36,
+                         T0=24.4,
+                         beta=1.75,
+                         gamma=1.7,
+                         s_z=3.6,
+                         log10meff=12.6,
+                         sigLM=np.sqrt(0.5),
+                         Mmin=1E10,
+                         L0=6.4E-8)
+
     pr2pt = ccl.halos.Profile2ptCIB()
 
     # CIB tracer

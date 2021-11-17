@@ -111,7 +111,7 @@ class HaloProfileCIBShang12(HaloProfile):
         return 0.30*(Msub/Mparent)**(-0.7)*np.exp(-9.9*(Msub/Mparent)**2.5)
 
     def update_parameters(self, nu_GHz=None,
-                          alpha=None, beta=None, T0=None, gamma=None,
+                          alpha=None, T0=None, beta=None, gamma=None,
                           s_z=None, log10meff=None, sigLM=None,
                           Mmin=None, L0=None):
         """ Update any of the parameters associated with
@@ -212,7 +212,8 @@ class HaloProfileCIBShang12(HaloProfile):
         spec_nu = self._spectrum(self.nu/a, a)
 
         Ls = self._Lumsat(M_use, a)
-        ur = self.pNFW._real(cosmo, r_use, M_use, a, mass_def)
+        ur = self.pNFW._real(cosmo, r_use, M_use,
+                             a, mass_def)/M_use[:, None]
 
         prof = Ls[:, None]*ur*spec_nu*self.one_over_4pi
 
