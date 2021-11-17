@@ -45,7 +45,7 @@ from .massfunction import massfunc, halo_bias, massfunc_m2r
 
 # Cl's and tracers
 from .tracers import Tracer, NumberCountsTracer, WeakLensingTracer, CMBLensingTracer, \
-    tSZTracer, CIBTracer, get_density_kernel, get_kappa_kernel, get_lensing_kernel
+    tSZTracer, CIBTracer, ISWTracer, get_density_kernel, get_kappa_kernel, get_lensing_kernel
 from .cls import angular_cl
 from .covariances import angular_cl_cov_cNG, angular_cl_cov_SSC, sigma2_B_disc, sigma2_B_from_mask
 
