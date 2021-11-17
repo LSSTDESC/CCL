@@ -309,7 +309,7 @@ class Profile2ptCIB(Profile2pt):
 
         nu2 = None
         if prof2 is not None:
-            if not isinstance(prof, HaloProfileCIBShang12):
+            if not isinstance(prof2, HaloProfileCIBShang12):
                 raise TypeError("prof must be of type `HaloProfileCIB`")
             nu2 = prof2.nu
         return prof._fourier_variance(cosmo, k, M, a, mass_def,

@@ -88,6 +88,19 @@ def test_cib_smoke():
         assert getattr(p, n) == 1234.
 
 
+def test_cib_2pt_raises():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p_cib = ccl.halos.HaloProfileCIBShang12(c, 217)
+    p_tSZ = ccl.halos.HaloProfilePressureGNFW()
+    p2pt = ccl.halos.Profile2ptCIB()
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(p_tSZ, COSMO, 0.1, 1E13, 1.,
+                         mass_def=M200)
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(p_cib, COSMO, 0.1, 1E13, 1.,
+                         prof2=p_tSZ, mass_def=M200)
+
+
 def test_gnfw_smoke():
     p = ccl.halos.HaloProfilePressureGNFW()
     beta_old = p.beta
