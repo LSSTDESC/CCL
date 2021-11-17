@@ -3,49 +3,48 @@ from .profiles_2pt import Profile2pt
 from .concentration import Concentration
 import numpy as np
 from scipy.integrate import simps
-from scipy.optimize import brentq
+from scipy.special import lambertw
 
 
 class HaloProfileCIBShang12(HaloProfile):
     one_over_4pi = 0.07957747154
 
-    def __init__(self, c_M_relation, nu_GHz, beta=1.5, Td=34., gamma=2.,
-                 s_z=3.0, log10meff=12.5, sigLM=0.5, Mmin=3E11, L0=4E-20):
+    def __init__(self, c_M_relation, nu_GHz, alpha=0.36, T0=24.4, beta=1.75,
+                 gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707, Mmin=1E10,
+                 L0=6.4E-8):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
         self.nu = nu_GHz
+        self.alpha = alpha
+        self.T0 = T0
         self.beta = beta
-        self.Td = Td
         self.gamma = gamma
         self.s_z = s_z
         self.l10meff = log10meff
         self.sigLM = sigLM
         self.Mmin = Mmin
         self.L0 = L0
-        self._set_nu0()
         self.pNFW = HaloProfileNFW(c_M_relation)
         super(HaloProfileCIBShang12, self).__init__()
 
     def dNsub_dlnM_TinkerWetzel10(self, Msub, Mparent):
-        return 0.13*(Msub/Mparent)**(-0.7)*np.exp(-9.9*(Msub/Mparent)**2.5)
+        return 0.30*(Msub/Mparent)**(-0.7)*np.exp(-9.9*(Msub/Mparent)**2.5)
 
     def update_parameters(self, nu_GHz=None,
-                          beta=None, Td=None, gamma=None,
+                          alpha=None, beta=None, T0=None, gamma=None,
                           s_z=None, log10meff=None, sigLM=None,
                           Mmin=None, L0=None):
-        newspec = False
         if nu_GHz is not None:
             self.nu = nu_GHz
+        if alpha is not None:
+            self.alpha = alpha
+        if T0 is not None:
+            self.T0 = T0
         if beta is not None:
             self.beta = beta
-            newspec = True
-        if Td is not None:
-            self.Td = Td
-            newspec = True
         if gamma is not None:
             self.gamma = gamma
-            newspec = True
         if s_z is not None:
             self.s_z = s_z
         if log10meff is not None:
@@ -57,31 +56,27 @@ class HaloProfileCIBShang12(HaloProfile):
         if L0 is not None:
             self.L0 = L0
 
-        if newspec:
-            self._set_nu0()
-
-    def _mBB(self, nu):
+    def spectrum(self, nu, a):
         # h*nu_GHZ / k_B / Td_K
-        x = 0.0479924466*nu/self.Td
-        ex = np.exp(x)
-        return x**(3+self.beta)/(ex-1)
+        h_GHz_o_kB_K = 0.0479924466
+        Td = self.T0/a**self.alpha
+        x = h_GHz_o_kB_K * nu / Td
 
-    def _plaw(self, nu):
-        return self.mBB0*(nu/self.nu0)**(-self.gamma)
+        # Find nu_0
+        q = self.beta+3+self.gamma
+        x0 = q+np.real(lambertw(-q*np.exp(-q), k=0))
 
-    def spectrum(self, nu):
-        return np.piecewise(nu, [nu <= self.nu0],
-                            [self._mBB, self._plaw])/self.mBB0
-
-    def _set_nu0(self):
-        x0 = self.beta+3+self.gamma
-
-        def f_0(x):
+        def mBB(x):
             ex = np.exp(x)
-            return x0 - x*ex/(ex-1)
-        x_0 = brentq(f_0, x0/2, 2*x0)
-        self.nu0 = x_0*self.Td/0.0479924466
-        self.mBB0 = self._mBB(self.nu0)
+            return x**(3+self.beta)/(ex-1)
+
+        mBB0 = mBB(x0)
+
+        def plaw(x):
+            return mBB0*(x0/x)**self.gamma
+
+        return np.piecewise(x, [x <= x0],
+                            [mBB, plaw])/mBB0
 
     def _Lum(self, l10M, a):
         # Redshift evolution
@@ -92,39 +87,39 @@ class HaloProfileCIBShang12(HaloProfile):
         sigma_m = sig_pref * np.exp(-0.5*((l10M - self.l10meff)/self.sigLM)**2)
         return self.L0*phi_z*sigma_m
 
-    def _fcen(self, M, a):
+    def _Lumcen(self, M, a):
         Lum = self._Lum(np.log10(M), a)
-        fcen = np.heaviside(M-self.Mmin, 1)*Lum*self.one_over_4pi
-        return fcen
+        Lumcen = np.heaviside(M-self.Mmin, 1)*Lum
+        return Lumcen
 
-    def _fsat(self, M, a):
-        fsat = np.zeros_like(M)
+    def _Lumsat(self, M, a):
+        Lumsat = np.zeros_like(M)
         # Loop over Mparent
         # TODO: if this is too slow we could move it to C
         # and parallelize
         for iM, Mparent in enumerate(M):
             if Mparent > self.Mmin:
                 # Array of Msubs (log-spaced with 10 samples per dex)
-                nm = max(2, int(np.log10(Mparent/self.Mmin)*10))
-                msub = np.geomspace(self.Mmin, Mparent, nm+1)
+                nm = max(2, int(np.log10(Mparent/1E10)*10))
+                msub = np.geomspace(1E10, Mparent, nm+1)
                 # Sample integrand
                 dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(msub, Mparent)
                 Lum = self._Lum(np.log10(msub), a)
                 integ = dnsubdlnm*Lum
-                fsat[iM] = simps(integ, x=np.log(msub))*self.one_over_4pi
-        return fsat
+                Lumsat[iM] = simps(integ, x=np.log(msub))
+        return Lumsat
 
     def _real(self, cosmo, r, M, a, mass_def):
         M_use = np.atleast_1d(M)
         r_use = np.atleast_1d(r)
 
         # (redshifted) Frequency dependence
-        spec_nu = self.spectrum(self.nu/a)
+        spec_nu = self.spectrum(self.nu/a, a)
 
-        fs = self._fsat(M_use, a)
+        Ls = self._Lumsat(M_use, a)
         ur = self.pNFW._real(cosmo, r_use, M_use, a, mass_def)
 
-        prof = fs[:, None]*ur*spec_nu
+        prof = Ls[:, None]*ur*spec_nu*self.one_over_4pi
 
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -137,13 +132,14 @@ class HaloProfileCIBShang12(HaloProfile):
         k_use = np.atleast_1d(k)
 
         # (redshifted) Frequency dependence
-        spec_nu = self.spectrum(self.nu/a)
+        spec_nu = self.spectrum(self.nu/a, a)
 
-        fc = self._fcen(M_use, a)
-        fs = self._fsat(M_use, a)
-        uk = self.pNFW._fourier(cosmo, k_use, M_use, a, mass_def)
+        Lc = self._Lumcen(M_use, a)
+        Ls = self._Lumsat(M_use, a)
+        uk = self.pNFW._fourier(cosmo, k_use, M_use,
+                                a, mass_def)/M_use[:, None]
 
-        prof = fc[:, None]+fs[:, None]*uk*spec_nu
+        prof = (Lc[:, None]+Ls[:, None]*uk)*spec_nu*self.one_over_4pi
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -155,19 +151,20 @@ class HaloProfileCIBShang12(HaloProfile):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
-        spec_nu1 = self.spectrum(self.nu/a)
+        spec_nu1 = self.spectrum(self.nu/a, a)
         if nu_other is None:
             spec_nu2 = spec_nu1
         else:
-            spec_nu2 = self.spectrum(nu_other/a)
+            spec_nu2 = self.spectrum(nu_other/a, a)
 
-        fc = self._fcen(M_use, a)
-        fs = self._fsat(M_use, a)
-        uk = self.pNFW._fourier(cosmo, k_use, M_use, a, mass_def)
+        Lc = self._Lumcen(M_use, a)
+        Ls = self._Lumsat(M_use, a)
+        uk = self.pNFW._fourier(cosmo, k_use, M_use,
+                                a, mass_def)/M_use[:, None]
 
-        prof = fs[:, None]*uk
-        prof = 2*fc[:, None]*prof + prof**2
-        prof *= spec_nu1*spec_nu2
+        prof = Ls[:, None]*uk
+        prof = 2*Lc[:, None]*prof + prof**2
+        prof *= spec_nu1*spec_nu2*self.one_over_4pi**2
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)

@@ -702,9 +702,10 @@ class tSZTracer(Tracer):
 
 
 class CIBTracer(Tracer):
-    def __init__(self, cosmo, z_max=6., n_chi=1024):
+    def __init__(self, cosmo, z_min=0., z_max=6., n_chi=1024):
         self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-        chi_arr = np.linspace(0, self.chi_max, n_chi)
+        self.chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
+        chi_arr = np.linspace(self.chi_min, self.chi_max, n_chi)
         a_arr = scale_factor_of_chi(cosmo, chi_arr)
 
         self._trc = []
