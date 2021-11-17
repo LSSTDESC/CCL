@@ -613,32 +613,13 @@ class PowerSpectrumArico21(PowerSpectrumEmulator):
     def _validate_bounds(self, which_bounds):
         emu = self._get_model()
 
-        if which_bounds == "linear":
-            if self._has_bounds("linear"):
-                B = self._get_bounds("linear")
-            else:
-                bounds = emu.cosmo_extended_bounds.copy()
-                B = Bounds(bounds)
-                self._set_bounds(B, "linear")
-            B.check_bounds(self._param_emu_kwargs)
-
-        if which_bounds == "nonlin":
-            if self._has_bounds("nonlin"):
-                B = self._get_bounds("nonlin")
-            else:
-                bounds = emu.cosmo_bounds.copy()
-                B = Bounds(bounds)
-                self._set_bounds(B, "nonlin")
-            B.check_bounds(self._param_emu_kwargs)
-
-        if which_bounds == "baryon":
-            if self._has_bounds("baryon"):
-                B = self._get_bounds("baryon")
-            else:
-                bounds = emu.baryon_bounds.copy()
-                B = Bounds(bounds)
-                self._set_bounds(B, "baryon")
-            B.check_bounds(self._param_emu_kwargs)
+        if self._has_bounds(which_bounds):
+            B = self._get_bounds(which_bounds)
+        else:
+            bounds = emu[which_bounds]
+            B = Bounds(bounds)
+            self._set_bounds(B, which_bounds)
+        B.check_bounds(self._param_emu_kwargs)
 
     def _get_pk_linear(self, cosmo):
         # build params and check consistency
