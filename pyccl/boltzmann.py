@@ -713,7 +713,7 @@ class PowerSpectrumArico21(PowerSpectrumEmulator):
         emu = self._get_model()
         h = self._param_emu_kwargs["hubble"]
 
-        a_min, a_max = self._get_bounds("nonlin").bounds["expfactor"]
+        a_min, a_max = self._get_bounds("baryon").bounds["expfactor"]
         na = lib.default_spline_params.A_SPLINE_NA_PK
         a_arr = np.linspace(a_min, a_max, na)
         nk = len(emu.baryon_emulator["k"])
