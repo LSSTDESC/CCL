@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 import pyccl as ccl
+import warnings
 
 
 COSMO = ccl.CosmologyVanillaLCDM(
@@ -31,33 +32,31 @@ def test_bcm_correct_smoke():
     assert np.all(np.fabs(pk_wbar/(pk_nobar*fka)-1) < 1E-5)
 
 
-@pytest.mark.parametrize('model', ['arico21', ])
+@pytest.mark.parametrize('model', ['bcm', 'arico21', ])
 def test_baryon_correct_smoke(model):
     # we compare each model with BCM
-    if model == "arico21":
-        extras = {"arico21": {'M_c': 14,
-                              'eta': -0.3,
-                              'beta': -0.22,
-                              'M1_z0_cen': 10.5,
-                              'theta_out': 0.25,
-                              'theta_inn': -0.86,
-                              'M_inn': 13.4}
-                  }
-        cosmo = ccl.CosmologyVanillaLCDM(
-            transfer_function="bbks",
-            matter_power_spectrum="halofit",
-            extra_parameters=extras)
+    extras = {"arico21": {'M_c': 14, 'eta': -0.3, 'beta': -0.22,
+                          'M1_z0_cen': 10.5, 'theta_out': 0.25,
+                          'theta_inn': -0.86, 'M_inn': 13.4},
+              }  # other models go in here
 
-    k_arr = np.geomspace(1e-2, 1, 16)
-    pknl = COSMO.get_nonlin_power()
-    COSMO.baryon_correct("bcm", pknl)
+    cosmo = ccl.CosmologyVanillaLCDM(
+        matter_power_spectrum="halofit",
+        extra_parameters=extras)
+    cosmo.compute_nonlin_power()
+    pknl = cosmo.get_nonlin_power()
+
+    k_arr = np.geomspace(1e-1, 1, 16)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
-        pk_bar = cosmo.baryon_correct(model, pknl)
-        pk1 = pknl.eval(k_arr, a, COSMO)
-        pk2 = pk_bar.eval(k_arr, a, COSMO)
-        maxdiff = np.amax(np.fabs(1-pk1/pk2))
-        assert maxdiff < 0.5  # be lenient for different baryon models!
+        with warnings.catch_warnings():
+            # filter all warnings related to the emulator packages
+            warnings.simplefilter("ignore")
+            pkb = cosmo.baryon_correct(model, pknl)
+
+        pk0 = pknl.eval(k_arr, a, cosmo)
+        pk1 = pkb.eval(k_arr, a, cosmo)
+        assert not np.array_equal(pk1, pk0)
 
 
 def test_bcm_correct_raises():
