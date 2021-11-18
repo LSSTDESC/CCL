@@ -123,6 +123,20 @@ class Pk2D(object):
         check(status)
         self.has_psp = True
 
+    def copy(self):
+        """Return a copy of this Pk2D object."""
+        if not self.has_psp:
+            pk2d = Pk2D(empty=True)
+            return pk2d
+
+        a_arr, lk_arr, pk_arr = self.get_spline_arrays()
+        pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
+                    is_logp=False,
+                    extrap_order_lok=self.psp.extrap_order_lok,
+                    extrap_order_hik=self.psp.extrap_order_hik)
+
+        return pk2d
+
     @classmethod
     def pk_from_model(Pk2D, cosmo, model):
         """`Pk2D` constructor returning the power spectrum associated with
