@@ -5,6 +5,7 @@ from numpy.testing import (
     assert_raises, assert_almost_equal, assert_allclose)
 import pyccl as ccl
 from pyccl import CCLWarning
+import warnings
 
 
 def pk1d(k):
@@ -103,22 +104,23 @@ def test_pk2d_from_emulator(emulator):
         assert maxdiff < 1e-3
 
 
-@pytest.mark.parametrize('emulator', ['arico21', ])
-def test_pk2d_apply_model(emulator):
-    cosmo_fixed = ccl.CosmologyVanillaLCDM()
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=emulator)
-    ks = np.geomspace(1e-2, 5, 128)
+@pytest.mark.parametrize('model', ['halofit', 'arico21', ])
+def test_pk2d_apply_model_smoke(model):
+    cosmo = ccl.CosmologyVanillaLCDM()
+    cosmo.compute_linear_power()
+    pkl = cosmo.get_linear_power()
+
+    k_arr = np.logspace(-1, 1, 16)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
-        pkl = cosmo_fixed.get_camb_pk_lin()
-        # non-linear models
-        pk_hf = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
-        pk_mod = ccl.Pk2D.apply_model(cosmo, model=emulator, pk_linear=pkl)
-        # query
-        pk1 = pk_hf.eval(ks, a, cosmo_fixed)
-        pk2 = pk_mod.eval(ks, a, cosmo_fixed)
-        maxdiff = np.amax(np.fabs(1-pk1/pk2))
-        assert maxdiff < 0.5  # be lenient for different models!
+        with warnings.catch_warnings():
+            # filter all warnings related to the emulator packages
+            warnings.simplefilter("ignore")
+            pknl = ccl.Pk2D.apply_model(cosmo, model=model, pk_linear=pkl)
+
+        pk0 = pkl.eval(k_arr, a, cosmo)
+        pk1 = pknl.eval(k_arr, a, cosmo)
+        assert not np.array_equal(pk1, pk0)
 
 
 def test_pk2d_from_model_emu():
