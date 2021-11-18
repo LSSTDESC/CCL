@@ -38,6 +38,7 @@ def bcm_model_fka(cosmo, k, a):
 
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
+    This function operates directly onto the input Pk2D object.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
@@ -52,6 +53,7 @@ def bcm_correct_pk2d(cosmo, pk2d):
 
 def baryon_correct(cosmo, model, pk2d):
     """Correct the power spectrum for baryons, given a model name string.
+    This function operates on a copy of the input Pk2D object.
 
     Arguments:
         cosmo (:class:`~pyccl.core.Cosmology`):
@@ -60,10 +62,14 @@ def baryon_correct(cosmo, model, pk2d):
             Model to use.
         pk2d (:class:`~pyccl.pk2d.Pk2D`):
             Power spectrum.
+
+    Returns:
+        :class:`~pyccl.pk2d.Pk2D: a copy of the input `Pk2D` object with the
+        baryon correction applied to it
     """
     if model == "bcm":
-        bcm_correct_pk2d(cosmo, pk2d)
-        return
+        pk2d_new = pk2d.copy()
+        bcm_correct_pk2d(cosmo, pk2d_new)
     elif model in ["arico21", ]:  # other emulator names go in here
-        pk2d = PowerSpectrumEmulator.include_baryons(cosmo, model, pk2d)
-        return pk2d
+        pk2d_new = PowerSpectrumEmulator.include_baryons(cosmo, model, pk2d)
+    return pk2d_new
