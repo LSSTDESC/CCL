@@ -77,7 +77,8 @@ class HaloProfileCIBShang12(HaloProfile):
         L0 (float): luminosity scale (in
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
     """
-    one_over_4pi = 0.07957747154
+    name = 'CIBShang12'
+    _one_over_4pi = 0.07957747154
 
     def __init__(self, c_M_relation, nu_GHz, alpha=0.36, T0=24.4, beta=1.75,
                  gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707, Mmin=1E10,
@@ -215,7 +216,7 @@ class HaloProfileCIBShang12(HaloProfile):
         ur = self.pNFW._real(cosmo, r_use, M_use,
                              a, mass_def)/M_use[:, None]
 
-        prof = Ls[:, None]*ur*spec_nu*self.one_over_4pi
+        prof = Ls[:, None]*ur*spec_nu*self._one_over_4pi
 
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -235,7 +236,7 @@ class HaloProfileCIBShang12(HaloProfile):
         uk = self.pNFW._fourier(cosmo, k_use, M_use,
                                 a, mass_def)/M_use[:, None]
 
-        prof = (Lc[:, None]+Ls[:, None]*uk)*spec_nu*self.one_over_4pi
+        prof = (Lc[:, None]+Ls[:, None]*uk)*spec_nu*self._one_over_4pi
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -260,7 +261,7 @@ class HaloProfileCIBShang12(HaloProfile):
 
         prof = Ls[:, None]*uk
         prof = 2*Lc[:, None]*prof + prof**2
-        prof *= spec_nu1*spec_nu2*self.one_over_4pi**2
+        prof *= spec_nu1*spec_nu2*self._one_over_4pi**2
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
