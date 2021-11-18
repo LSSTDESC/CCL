@@ -224,9 +224,12 @@ class Pk2D(object):
                 A :class:`Pk2D` object containing the linear
                 power spectrum to transform.
         """
-        from .boltzmann import PowerSpectrumEmulator
-        pk2d = PowerSpectrumEmulator.apply_model(cosmo, model, pk_linear)
-        return pk2d
+        if model == "halofit":
+            pk2d_new = Pk2D.apply_halofit(cosmo, pk_linear)
+        elif model in ["arico21", ]:  # other emulator names go in here
+            from .boltzmann import PowerSpectrumEmulator as PSE
+            pk2d_new = PSE.apply_model(cosmo, model, pk_linear)
+        return pk2d_new
 
     def eval(self, k, a, cosmo):
         """Evaluate power spectrum.
