@@ -398,3 +398,13 @@ def test_pk2d_mul_pow():
     pk2d_j = (pk2d_a + 0.5*pk2d_i)**1.5
     _, _, zarr_j = pk2d_j.get_spline_arrays()
     assert np.allclose((zarr_a + 0.5*zarr_i)**1.5, zarr_j)
+
+
+def test_pk2d_copy():
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    cosmo.compute_linear_power()
+    pk0 = cosmo.get_linear_power()
+    pk1 = pk0.copy()
+    assert np.isclose(pk0.eval(1, 1, cosmo), pk1.eval(1, 1, cosmo))
+    assert id(pk0) != id(pk1)
+    assert id(pk0.psp) != id(pk1.psp)
