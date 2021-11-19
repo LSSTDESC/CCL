@@ -42,6 +42,7 @@ class Bounds(object):
             if par not in self.bounds:
                 warnings.warn(
                     f"Unknown bounds for parameter {par}.", CCLWarning)
+                continue
             vmin, vmax = self.bounds[par]
             if not (vmin <= val <= vmax):
                 raise ValueError(f"Parameter {par} out of bounds "
@@ -74,6 +75,9 @@ class Emulator(object):
     emulators = {}
 
     def __init__(self):
+        self._param_emu_kwargs = {}
+        self._config_emu_kwargs = {}
+
         if not self._has_entry:
             self._set_entry()
 
@@ -82,8 +86,6 @@ class Emulator(object):
 
         if self._reload or not self._has_config:
             self._set_config()
-
-        self._param_emu_kwargs = {}
 
     def _load(self):
         # Load and return the emulator (override this)
