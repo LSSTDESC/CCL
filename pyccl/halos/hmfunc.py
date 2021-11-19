@@ -757,6 +757,7 @@ class MassFuncBocquet20(MassFunc, Emulator):
     cosmological N-body simulations.
 
     Parameters:
+        cosmo (deprecated)
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             A mass definition object.
             This parametrization accepts SO masses with
@@ -773,11 +774,12 @@ class MassFuncBocquet20(MassFunc, Emulator):
     """
     name = 'Bocquet20'
 
-    def __init__(self, *, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
                  extrapolate=True):
         self.extrapolate = extrapolate
         Emulator.__init__(self)  # inherit all the Emulator methods first
-        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
+        super().__init__(cosmo, mass_def=mass_def,
+                         mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef200c()
