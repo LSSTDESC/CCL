@@ -14,7 +14,8 @@ HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncTinker10,
         ccl.halos.MassFuncWatson13,
         ccl.halos.MassFuncDespali16,
-        ccl.halos.MassFuncBocquet16]
+        ccl.halos.MassFuncBocquet16,
+        ccl.halos.MassFuncBocquet20]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 MFOF = ccl.halos.MassDef('fof', 'matter')
 MVIR = ccl.halos.MassDef('vir', 'critical')
