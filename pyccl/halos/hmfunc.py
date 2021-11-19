@@ -790,7 +790,7 @@ class MassFuncBocquet20(MassFunc, Emulator):
         return emu
 
     def _build_emu_parameters(self, cosmo=None, M=None, a=None):
-        from pyccl.neutrinos import Omega_nu_h2
+        from pyccl.neutrinos import Omeganuh2
         # check input
         if (cosmo is not None) and (a is None):
             raise ValueError("Need value for scale factor")
@@ -802,7 +802,7 @@ class MassFuncBocquet20(MassFunc, Emulator):
             T_CMB = cosmo["T_CMB"]
             Omega_c = cosmo["Omega_c"]
             Omega_b = cosmo["Omega_b"]
-            Omega_nu_h2 = Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
+            Omega_nu_h2 = Omeganuh2(a, m_nu=m_nu, T_CMB=T_CMB)
 
             self._param_emu_kwargs["Ommh2"] = (
                 Omega_c + Omega_b)*h**2 + Omega_nu_h2

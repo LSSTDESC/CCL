@@ -1,9 +1,8 @@
-import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl.emulator import Bounds
 from pyccl.pyutils import CCLWarning
-from pyccl.boltzmann import PowerSpectrumArico21
+
 
 def test_bounds_raises_warns():
     bounds = {"a": [0, 1], "b": [1, 0]}
