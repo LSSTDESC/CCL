@@ -126,8 +126,7 @@ class Pk2D(object):
     def copy(self):
         """Return a copy of this Pk2D object."""
         if not self.has_psp:
-            pk2d = Pk2D(empty=True)
-            return pk2d
+            return Pk2D(empty=True)
 
         a_arr, lk_arr, pk_arr = self.get_spline_arrays()
         pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,

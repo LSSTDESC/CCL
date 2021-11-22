@@ -329,6 +329,9 @@ def test_pk2d_add():
     # This raises an error because addition with an empty Pk2D should not work
     with pytest.raises(ValueError):
         pk2d_a + empty_pk2d
+    # This raises an error because addition of this type is undefined.
+    with pytest.raises(TypeError):
+        pk2d_a + np.ones((16, 128))
 
     pk2d_c = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=zarr_b,
                       is_logp=False)
@@ -408,3 +411,7 @@ def test_pk2d_copy():
     assert np.isclose(pk0.eval(1, 1, cosmo), pk1.eval(1, 1, cosmo))
     assert id(pk0) != id(pk1)
     assert id(pk0.psp) != id(pk1.psp)
+
+    pk0 = ccl.Pk2D(empty=True)
+    pk1 = pk0.copy()
+    assert not (pk0.has_psp or pk1.has_psp)
