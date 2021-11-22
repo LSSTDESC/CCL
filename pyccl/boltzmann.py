@@ -662,12 +662,10 @@ class PowerSpectrumArico21(PowerSpectrumEmulator):
 
         return k_arr*h, a_arr, pka/h**3
 
-    def _get_pk_nonlin(self, cosmo, baryon=False):
+    def _get_pk_nonlin(self, cosmo):
         # build params and check consistency
-        self._build_emu_parameters(cosmo, baryon=baryon)
+        self._build_emu_parameters(cosmo)
         self._validate_bounds("nonlin")
-        if baryon:
-            self._validate_bounds("baryon")
 
         emu = self._get_model()
         h = self._param_emu_kwargs["hubble"]
@@ -681,7 +679,7 @@ class PowerSpectrumArico21(PowerSpectrumEmulator):
         for row, a in enumerate(a_arr):
             self._param_emu_kwargs["expfactor"] = a
             k_arr, pk = emu.get_nonlinear_pk(self._param_emu_kwargs,
-                                             baryonic_boost=baryon)
+                                             baryonic_boost=False)
             pka[row] = pk
         return k_arr*h, a_arr, pka/h**3
 
