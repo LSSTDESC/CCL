@@ -178,8 +178,9 @@ class Cosmology(object):
             masses to be equal right before calling the emulator but results in
             internal inconsistencies. Defaults to 'strict'.
         extra_parameters (:obj:`dict`, optional): Dictionary holding extra
-            parameters. Currently supports extra parameters for CAMB, with
-            details described below. Defaults to None.
+            parameters. Currently supports extra parameters for CAMB, and
+            implemented power spectrum emulator models, with details
+            described below.
 
     Currently supported extra parameters for CAMB are:
 

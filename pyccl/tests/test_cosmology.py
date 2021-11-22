@@ -3,6 +3,7 @@ import pickle
 import tempfile
 
 import pytest
+import warnings
 
 import numpy as np
 from numpy.testing import assert_raises, assert_, assert_no_warnings
@@ -234,3 +235,43 @@ def test_cosmology_context():
 
     with pytest.raises(AttributeError):
         cosmo.has_growth
+
+
+@pytest.mark.parametrize('model', ['halofit', 'arico21', ])
+def test_cosmo_mps_smoke(model):
+    knl = np.geomspace(0.1, 5, 16)
+    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum=model)
+    with warnings.catch_warnings():
+        # filter warnings related to (k, a) bounds of applied NL model
+        warnings.simplefilter("ignore")
+        cosmo.compute_nonlin_power()
+    pkl = cosmo.get_linear_power().eval(knl, 1, cosmo)
+    pknl = cosmo.get_nonlin_power().eval(knl, 1, cosmo)
+    assert np.all(pknl > pkl)
+
+
+
+@pytest.mark.parametrize('model', ['bcm', 'arico21', ])
+def test_cosmo_bps_smoke(model):
+    extras = {}
+    if model == "arico21":
+        extras = {"arico21": {'M_c'           :  14,
+                              'eta'           : -0.3,
+                              'beta'          : -0.22,
+                              'M1_z0_cen'     : 10.5,
+                              'theta_out'     : 0.25,
+                              'theta_inn'     : -0.86,
+                              'M_inn'         : 13.4}}
+    knl = np.geomspace(0.1, 5, 16)
+    cosmo = ccl.CosmologyVanillaLCDM(baryons_power_spectrum="nobaryons")
+    cosmo.compute_nonlin_power()
+    pk = cosmo.get_nonlin_power().eval(knl, 1, cosmo)
+
+    cosmo_bar = ccl.CosmologyVanillaLCDM(baryons_power_spectrum=model,
+                                         extra_parameters=extras)
+    with warnings.catch_warnings():
+        # filter warnings related to (k, a) bounds of applied baryon model
+        warnings.simplefilter("ignore")
+        cosmo_bar.compute_nonlin_power()
+    pk_bar = cosmo_bar.get_nonlin_power().eval(knl, 1, cosmo_bar)
+    assert np.all(pk_bar < pk)
