@@ -2,6 +2,7 @@ import pytest
 import pyccl as ccl
 from pyccl.emulator import Bounds
 from pyccl.pyutils import CCLWarning
+import warnings
 
 
 def test_bounds_raises_warns():
@@ -28,3 +29,13 @@ def test_emulator_load_raises():
 def test_emulator_from_name_raises():
     with pytest.raises(ValueError):
         ccl.PowerSpectrumEmulator.from_name("hello_world")
+
+
+def test_arico21_raises():
+    cosmo = ccl.CosmologyVanillaLCDM(baryons_power_spectrum="arico21",
+                                     extra_parameters=None)
+    with pytest.raises(ValueError):
+        with warnings.catch_warnings():
+            # ignore Tensorflow-related warnings
+            warnings.simplefilter("ignore")
+            cosmo.compute_nonlin_power()

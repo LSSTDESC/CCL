@@ -168,3 +168,12 @@ def test_nM_tinker10_norm():
     zs = np.linspace(0, 1, 4)
     ns = np.array([norm(z) for z in zs])
     assert np.all(np.fabs(ns-1) < 0.005)
+
+
+def test_nM_bocquet20_extrap():
+    hmf0 = ccl.halos.MassFuncBocquet20(COSMO, extrapolate=True)
+    hmf1 = ccl.halos.MassFuncBocquet20(COSMO, extrapolate=False)
+    M_arr = np.logspace(14, 16, 32)  # inside the emulator range
+    n0 = hmf0.get_mass_function(COSMO, M_arr, 1)
+    n1 = hmf1.get_mass_function(COSMO, M_arr, 1)
+    assert np.allclose(n0, n1, rtol=0)

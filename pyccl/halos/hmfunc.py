@@ -781,8 +781,8 @@ class MassFuncBocquet20(MassFunc, Emulator):
         super().__init__(cosmo, mass_def=mass_def,
                          mass_def_strict=mass_def_strict)
 
-    def _default_mass_def(self):
-        self.mass_def = MassDef200c()
+    def _default_mdef(self):
+        self.mdef = MassDef200c()
 
     def _load(self):
         from MiraTitanHMFemulator import Emulator as HMFemu
@@ -791,9 +791,6 @@ class MassFuncBocquet20(MassFunc, Emulator):
 
     def _build_emu_parameters(self, cosmo=None, M=None, a=None):
         from pyccl.neutrinos import Omeganuh2
-        # check input
-        if (cosmo is not None) and (a is None):
-            raise ValueError("Need value for scale factor")
 
         self._param_emu_kwargs = {}
         if cosmo is not None:
