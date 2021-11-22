@@ -59,6 +59,12 @@ def test_baryon_correct_smoke(model):
         assert not np.array_equal(pk1, pk0)
 
 
+def test_baryon_correct_raises():
+    pk = COSMO.get_nonlin_power()
+    with pytest.raises(NotImplementedError):
+        ccl.Pk2D.include_baryons(COSMO, "hello_world", pk_nonlin=pk)
+
+
 def test_bcm_correct_raises():
     with pytest.raises(ValueError):
         ccl.bcm_correct_pk2d(COSMO, None)
