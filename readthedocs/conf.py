@@ -79,7 +79,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
-    'm2r']
+    'm2r2']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

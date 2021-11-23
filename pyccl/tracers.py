@@ -701,6 +701,38 @@ class tSZTracer(Tracer):
         self.add_tracer(cosmo, kernel=(chi_arr, w_arr))
 
 
+class CIBTracer(Tracer):
+    """Specific :class:`Tracer` associated with the cosmic infrared
+    background (CIB). The radial kernel for this tracer is simply
+
+    .. math::
+       W(\\chi) = \\frac{1}{1+z}.
+
+    Any angular power spectra computed with this tracer, should use
+    a three-dimensional power spectrum involving the CIB emissivity
+    density in units of
+    :math:`{\\rm Jy}\\,{\\rm Mpc}^{-1}\\,{\\rm srad}^{-1}` (or
+    multiples thereof).
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
+        zmin (float): minimum redshift down to which we define the
+            kernel.
+        zmax (float): maximum redshift up to which we define the
+            kernel.
+        n_chi (float): number of intervals in the radial comoving
+            distance on which we sample the kernel.
+    """
+    def __init__(self, cosmo, z_min=0., z_max=6., n_chi=1024):
+        self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+        self.chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
+        chi_arr = np.linspace(self.chi_min, self.chi_max, n_chi)
+        a_arr = scale_factor_of_chi(cosmo, chi_arr)
+
+        self._trc = []
+        self.add_tracer(cosmo, kernel=(chi_arr, a_arr))
+
+
 class ISWTracer(Tracer):
     """Specific :class:`Tracer` associated with the integrated Sachs-Wolfe
     effect (ISW). Useful when cross-correlating any low-redshift probe with
