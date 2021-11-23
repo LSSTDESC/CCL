@@ -136,33 +136,25 @@ class Emulator(object):
 
     def _get_model(self):
         # Return the stored emulator model
-        # or `None` if it doesn't exist
-        if self._has_model:
-            entry = self._get_entry()
-            return entry["model"]
-        else:
-            return None
+        entry = self._get_entry()
+        return entry["model"]
 
     def _get_config(self):
         # Return the stored emulator configuration
-        # or `None` if it doesn't exist
         if self._has_config:
             entry = self._get_entry()
             return entry["config"]
         else:
+            # first go used in `_reload`
             return None
 
     def _get_bounds(self, key=None):
-        # Return the stored emulator abounds
-        # or `None` if they don't exist
+        # Return the stored emulator bounds
         entry = self._get_entry()
-        if self._has_bounds(key):
-            if key is None:
-                return entry["bounds"]
-            else:
-                return entry["bounds"][key]
+        if key is None:
+            return entry["bounds"]
         else:
-            return None
+            return entry["bounds"][key]
 
     def _set_entry(self):
         # Create an entry for this emulator. The entry is
@@ -293,7 +285,7 @@ class PowerSpectrumEmulator(Emulator):
             # construct Pk2D objects and take their ratio
             pk2d_lin = Pk2D(lk_arr=np.log(kl), a_arr=al, pk_arr=np.log(pkl))
             pk2d_nl = Pk2D(lk_arr=np.log(knl), a_arr=anl, pk_arr=np.log(pknl))
-            pk2d_nonlin_boost = pk2d_nl**(-1) * pk2d_lin
+            pk2d_nonlin_boost = pk2d_nl * pk2d_lin**(-1)
             # multiply
             pk2d = pk2d_nonlin_boost * pk_linear
         else:
