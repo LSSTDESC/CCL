@@ -817,15 +817,17 @@ class MassFuncBocquet20(MassFunc, Emulator):
 
     def _validate_bounds(self):
         emu = self._get_model()
-        bounds = emu.param_limits.copy()
 
-        # validate scale factor
-        bounds["z"] = [0., 2.02]
-        if not self.extrapolate:
-            bounds["M_min"] = [1e13, np.inf]
-
-        B = Bounds(bounds)
-        self._set_bounds(B)
+        if self._has_bounds():
+            B = self._get_bounds()
+        else:
+            bounds = emu.param_limits.copy()
+            # validate scale factor
+            bounds["z"] = [0., 2.02]
+            if not self.extrapolate:
+                bounds["M_min"] = [1e13, np.inf]
+                B = Bounds(bounds)
+                self._set_bounds(B)
         B.check_bounds(self._param_emu_kwargs)
 
         # remove scale factor and mass
