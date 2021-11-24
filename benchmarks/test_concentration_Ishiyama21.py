@@ -19,6 +19,9 @@ COSMO.compute_sigma()
 H100 = COSMO["h"]
 
 Z = np.array([0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 7.0])
+# All parametrizations are accurate at to 5% except (500, Vmax, relaxed)
+# for which the model is accurate to 10%, so we choose this value
+# for max data scatter.
 UCHUU_DATA_SCATTER = 0.1
 
 # mass bounds in CCL's HM Calculator
