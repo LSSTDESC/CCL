@@ -1,7 +1,8 @@
 from .. import ccllib as lib
+from ..pyutils import check
 from ..background import growth_factor, growth_rate, rho_x
 from .massdef import MassDef, mass2radius_lagrangian
-from ..power import linear_matter_power, sigmaM, sigmaR
+from ..power import linear_matter_power, sigmaM
 import numpy as np
 
 
@@ -473,14 +474,16 @@ class ConcentrationIshiyama21(Concentration):
                         self.b1 = 0.91
                         self.c_alpha = 0.26
 
-    def _dlsigmaR(self, cosmo, R, a, *, eps=1e-6):
-        # central finite difference
-        R_use = np.geomspace(R * (1-eps/2), R * (1+eps/2), 2, axis=-1)
-        shape = R_use.shape
+    def _dlsigmaR(self, cosmo, R, a):
+        R_use = np.atleast_1d(R)
+        jac = self._jacobian(cosmo)
+        logM = np.log10(jac*R_use**3)
 
-        sigR = sigmaR(cosmo, R_use.flatten(), a).reshape(shape)
-        deriv = np.diff(np.log(sigR)) / np.diff(np.log(R_use))
-        return deriv.squeeze(axis=-1)
+        status = 0
+        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
+                                                    len(logM), status)
+        check(status)
+        return -3/np.log(10) * dlns_dlogM
 
     def _G(self, x, n_eff):
         fx = np.log(1 + x) - x / (1 + x)
@@ -496,13 +499,16 @@ class ConcentrationIshiyama21(Concentration):
             roots.append(rt)
         return np.asarray(roots)
 
+    def _jacobian(self, cosmo):
+        rho_m0 = cosmo.rho_x(1., "matter")
+        return 4/3 * np.pi * rho_m0
+
     def _concentration(self, cosmo, M, a):
         M_use = np.atleast_1d(M)
 
-        rho_m0 = rho_x(cosmo, 1., species="matter")
         nu = 1.686 / sigmaM(cosmo, M_use, a)
-        kRL = self.kappa * (3 / (4 * np.pi) * M_use / rho_m0)**(1 / 3)
-
+        jac = self._jacobian(cosmo)
+        kRL = self.kappa * (M_use/jac)**(1 / 3)
         n_eff = -2 * self._dlsigmaR(cosmo, kRL, a) - 3
         alpha_eff = growth_rate(cosmo, a)
 
