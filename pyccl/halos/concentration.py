@@ -1,6 +1,6 @@
 from .. import ccllib as lib
 from ..pyutils import check
-from ..background import growth_factor, growth_rate, rho_x
+from ..background import growth_factor, growth_rate
 from .massdef import MassDef, mass2radius_lagrangian
 from ..power import linear_matter_power, sigmaM
 import numpy as np
@@ -481,7 +481,7 @@ class ConcentrationIshiyama21(Concentration):
 
         status = 0
         dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
-                                                    len(logM), status)
+                                                   len(logM), status)
         check(status)
         return -3/np.log(10) * dlns_dlogM
 
