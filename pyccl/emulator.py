@@ -76,7 +76,8 @@ class Emulator(object):
 
     def __init__(self):
         self._param_emu_kwargs = {}
-        self._config_emu_kwargs = {}
+        if not hasattr(self, "_config_emu_kwargs"):
+            self._config_emu_kwargs = {}
 
         if not self._has_entry:
             self._set_entry()

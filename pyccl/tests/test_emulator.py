@@ -32,6 +32,18 @@ def test_emulator_from_name_raises():
         ccl.PowerSpectrumEmulator.from_name("hello_world")
 
 
+def test_bacco_smoke():
+    cosmo1 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                           sigma8=0.81, n_s=0.96,
+                           transfer_function="bacco")
+    cosmo2 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                           A_s=2.2315e-9, n_s=0.96,
+                           transfer_function="bacco")
+    assert np.allclose(cosmo1.sigma8(), cosmo2.sigma8(), rtol=1e-4)
+    assert np.allclose(cosmo1.linear_matter_power(1, 1),
+                       cosmo2.linear_matter_power(1, 1), rtol=1e-4)
+
+
 def test_bacco_baryon_smoke():
     cosmo = ccl.CosmologyVanillaLCDM(baryons_power_spectrum="bacco",
                                      extra_parameters=None)

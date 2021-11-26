@@ -640,19 +640,19 @@ class PowerSpectrumBACCO(PowerSpectrumEmulator):
             name = which_bounds
 
         if self._has_bounds(name):
-            B = self._get_bounds(name)
+            B = self._get_bounds(which_bounds)
         else:
             entry = emu.emulator[name]
             bounds = dict(zip(entry["keys"], entry["bounds"].tolist()))
             B = Bounds(bounds)
             self._set_bounds(B, which_bounds)
 
-        # sigma8 and n_s are scaling operations on the emulated linear
+        # sigma8, A_s, n_s are scaling operations on the emulated linear
         # power spectrum, so they can take any value.
         if which_bounds == "linear":
             check_dic = {}
             for key, val in self._param_emu_kwargs.items():
-                if key not in ["sigma8_cold", "ns"]:
+                if key not in ["sigma8_cold", "A_s", "ns"]:
                     check_dic[key] = val
         else:
             check_dic = self._param_emu_kwargs
