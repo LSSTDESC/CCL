@@ -32,35 +32,34 @@ def test_emulator_from_name_raises():
         ccl.PowerSpectrumEmulator.from_name("hello_world")
 
 
-def test_arico21_raises():
-    cosmo = ccl.CosmologyVanillaLCDM(baryons_power_spectrum="arico21",
+def test_bacco_baryon_smoke():
+    cosmo = ccl.CosmologyVanillaLCDM(baryons_power_spectrum="bacco",
                                      extra_parameters=None)
-    with pytest.raises(ValueError):
-        with warnings.catch_warnings():
-            # ignore Tensorflow-related warnings
-            warnings.simplefilter("ignore")
-            cosmo.compute_nonlin_power()
+    with warnings.catch_warnings():
+        # ignore Tensorflow-related warnings
+        warnings.simplefilter("ignore")
+        cosmo.compute_nonlin_power()
 
 
-def test_arico21_linear_nonlin_equiv():
+def test_bacco_linear_nonlin_equiv():
     knl = np.geomspace(0.1, 5, 64)
-    extras = {"arico21": {'M_c': 14, 'eta': -0.3, 'beta': -0.22,
-                          'M1_z0_cen': 10.5, 'theta_out': 0.25,
-                          'theta_inn': -0.86, 'M_inn': 13.4}
+    extras = {"bacco": {'M_c': 14, 'eta': -0.3, 'beta': -0.22,
+                        'M1_z0_cen': 10.5, 'theta_out': 0.25,
+                        'theta_inn': -0.86, 'M_inn': 13.4}
               }
-    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="arico21",
-                                     baryons_power_spectrum="arico21",
+    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="bacco",
+                                     baryons_power_spectrum="bacco",
                                      extra_parameters=extras)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         cosmo.compute_nonlin_power()
     pk0 = cosmo.get_nonlin_power().eval(knl, 1, cosmo)
 
-    pk1 = ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "arico21")
+    pk1 = ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "bacco")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         # NL + bar
-        pk1 = cosmo.baryon_correct("arico21", pk1).eval(knl, 1, cosmo)
+        pk1 = cosmo.baryon_correct("bacco", pk1).eval(knl, 1, cosmo)
 
     assert np.allclose(pk0, pk1, rtol=5e-3)
 
@@ -82,52 +81,52 @@ def test_power_spectum_emulator_raises():
 
 
 def test_power_spectrum_emulator_raises():
-    from pyccl.boltzmann import PowerSpectrumArico21
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="arico21")
-    func = PowerSpectrumArico21._get_pk_linear
-    delattr(PowerSpectrumArico21, "_get_pk_linear")
+    from pyccl.boltzmann import PowerSpectrumBACCO
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bacco")
+    func = PowerSpectrumBACCO._get_pk_linear
+    delattr(PowerSpectrumBACCO, "_get_pk_linear")
     with pytest.raises(NotImplementedError):
         cosmo.compute_linear_power()
-    setattr(PowerSpectrumArico21, "_get_pk_linear", func)
+    setattr(PowerSpectrumBACCO, "_get_pk_linear", func)
 
 
 def test_power_spectrum_emulator_get_pk_equiv():
     cosmo = ccl.CosmologyVanillaLCDM()
     knl = np.geomspace(0.1, 5, 64)
 
-    from pyccl.boltzmann import PowerSpectrumArico21
-    pk0 = ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "arico21")
-    func1 = PowerSpectrumArico21._get_pk_nonlin
-    delattr(PowerSpectrumArico21, "_get_pk_nonlin")
+    from pyccl.boltzmann import PowerSpectrumBACCO
+    pk0 = ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "bacco")
+    func1 = PowerSpectrumBACCO._get_pk_nonlin
+    delattr(PowerSpectrumBACCO, "_get_pk_nonlin")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        pk1 = ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "arico21")
+        pk1 = ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "bacco")
     assert np.allclose(pk0.eval(knl, 1, cosmo),
                        pk1.eval(knl, 1, cosmo),
                        rtol=5e-3)
 
-    func2 = PowerSpectrumArico21._get_nonlin_boost
-    delattr(PowerSpectrumArico21, "_get_nonlin_boost")
+    func2 = PowerSpectrumBACCO._get_nonlin_boost
+    delattr(PowerSpectrumBACCO, "_get_nonlin_boost")
     with pytest.raises(NotImplementedError):
-        ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "arico21")
+        ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "bacco")
 
     # reset the emulator methods
-    setattr(PowerSpectrumArico21, "_get_pk_nonlin", func1)
-    setattr(PowerSpectrumArico21, "_get_nonlin_boost", func2)
+    setattr(PowerSpectrumBACCO, "_get_pk_nonlin", func1)
+    setattr(PowerSpectrumBACCO, "_get_nonlin_boost", func2)
 
 
 def test_power_spectrum_emulator_baryon_raises():
     cosmo = ccl.CosmologyVanillaLCDM()
 
-    from pyccl.boltzmann import PowerSpectrumArico21
-    pk = ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "arico21")
-    func = PowerSpectrumArico21._get_baryon_boost
-    delattr(PowerSpectrumArico21, "_get_baryon_boost")
+    from pyccl.boltzmann import PowerSpectrumBACCO
+    pk = ccl.PowerSpectrumEmulator.get_pk_nonlin(cosmo, "bacco")
+    func = PowerSpectrumBACCO._get_baryon_boost
+    delattr(PowerSpectrumBACCO, "_get_baryon_boost")
     with pytest.raises(NotImplementedError):
-        ccl.PowerSpectrumEmulator.include_baryons(cosmo, "arico21", pk)
+        ccl.PowerSpectrumEmulator.include_baryons(cosmo, "bacco", pk)
 
     # reset the emulator methods
-    setattr(PowerSpectrumArico21, "_get_baryon_boost", func)
+    setattr(PowerSpectrumBACCO, "_get_baryon_boost", func)
 
 
 def test_power_spectrum_emulator_apply_model_equiv():
@@ -136,25 +135,25 @@ def test_power_spectrum_emulator_apply_model_equiv():
     pkl = cosmo.get_linear_power()
     knl = np.geomspace(0.1, 5, 64)
 
-    from pyccl.boltzmann import PowerSpectrumArico21
+    from pyccl.boltzmann import PowerSpectrumBACCO
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        pk0 = ccl.Pk2D.apply_model(cosmo, "arico21", pk_linear=pkl)
-    func1 = PowerSpectrumArico21._get_nonlin_boost
-    delattr(PowerSpectrumArico21, "_get_nonlin_boost")
+        pk0 = ccl.Pk2D.apply_model(cosmo, "bacco", pk_linear=pkl)
+    func1 = PowerSpectrumBACCO._get_nonlin_boost
+    delattr(PowerSpectrumBACCO, "_get_nonlin_boost")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        pk1 = ccl.Pk2D.apply_model(cosmo, "arico21", pk_linear=pkl)
+        pk1 = ccl.Pk2D.apply_model(cosmo, "bacco", pk_linear=pkl)
 
     assert np.allclose(pk0.eval(knl, 1, cosmo),
                        pk1.eval(knl, 1, cosmo),
                        rtol=5e-3)
 
-    func2 = PowerSpectrumArico21._get_pk_nonlin
-    delattr(PowerSpectrumArico21, "_get_pk_nonlin")
+    func2 = PowerSpectrumBACCO._get_pk_nonlin
+    delattr(PowerSpectrumBACCO, "_get_pk_nonlin")
     with pytest.raises(NotImplementedError):
-        ccl.Pk2D.apply_model(cosmo, "arico21", pk_linear=pkl)
+        ccl.Pk2D.apply_model(cosmo, "bacco", pk_linear=pkl)
 
     # reset the emulator methods
-    setattr(PowerSpectrumArico21, "_get_nonlin_boost", func1)
-    setattr(PowerSpectrumArico21, "_get_pk_nonlin", func2)
+    setattr(PowerSpectrumBACCO, "_get_nonlin_boost", func1)
+    setattr(PowerSpectrumBACCO, "_get_pk_nonlin", func2)

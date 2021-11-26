@@ -237,7 +237,7 @@ def test_cosmology_context():
         cosmo.has_growth
 
 
-@pytest.mark.parametrize('model', ['halofit', 'arico21', ])
+@pytest.mark.parametrize('model', ['halofit', 'bacco', ])
 def test_cosmo_mps_smoke(model):
     knl = np.geomspace(0.1, 5, 16)
     cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum=model)
@@ -250,11 +250,11 @@ def test_cosmo_mps_smoke(model):
     assert np.all(pknl > pkl)
 
 
-@pytest.mark.parametrize('model', ['bcm', 'arico21', ])
+@pytest.mark.parametrize('model', ['bcm', 'bacco', ])
 def test_cosmo_bps_smoke(model):
     extras = {}
-    if model == "arico21":
-        extras = {"arico21":
+    if model == "bacco":
+        extras = {"bacco":
                   {'M_c': 14, 'eta': -0.3, 'beta': -0.22, 'M1_z0_cen': 10.5,
                    'theta_out': 0.25, 'theta_inn': -0.86, 'M_inn': 13.4}
                   }

@@ -70,7 +70,7 @@ def baryon_correct(cosmo, model, pk2d):
     if model == "bcm":
         pk2d_new = pk2d.copy()
         bcm_correct_pk2d(cosmo, pk2d_new)
-    elif model in ["arico21", ]:  # other emulator names go in here
+    elif model in ["bacco", ]:  # other emulator names go in here
         pk2d_new = PowerSpectrumEmulator.include_baryons(cosmo, model, pk2d)
     else:
         raise NotImplementedError(f"Baryon correction model {model} "

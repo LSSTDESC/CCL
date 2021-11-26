@@ -182,7 +182,7 @@ class Pk2D(object):
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             model (:obj:`str`): model to use. These models allowed:
-                `'arico21'` (Arico, Angulo & Zennaro, 2021. arXiv:2104.14568)
+                `bacco` (Arico, Angulo & Zennaro, 2021. arXiv:2104.14568)
         """
         pk2d = PowerSpectrumEmulator.get_pk_linear(cosmo, model)
         return pk2d
@@ -229,7 +229,7 @@ class Pk2D(object):
         """
         if model == "halofit":
             pk2d_new = Pk2D.apply_halofit(cosmo, pk_linear)
-        elif model in ["arico21", ]:  # other emulator names go in here
+        elif model in ["bacco", ]:  # other emulator names go in here
             from .boltzmann import PowerSpectrumEmulator as PSE
             pk2d_new = PSE.apply_model(cosmo, model, pk_linear)
         return pk2d_new

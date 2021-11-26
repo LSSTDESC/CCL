@@ -90,7 +90,7 @@ def test_pk2d_from_model(model):
         assert maxdiff < 1E-10
 
 
-@pytest.mark.parametrize('emulator', ['arico21', ])
+@pytest.mark.parametrize('emulator', ['bacco', ])
 def test_pk2d_from_emulator(emulator):
     cosmo_fixed = ccl.CosmologyVanillaLCDM()
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function=emulator)
@@ -104,7 +104,7 @@ def test_pk2d_from_emulator(emulator):
         assert maxdiff < 1e-3
 
 
-@pytest.mark.parametrize('model', ['halofit', 'arico21', ])
+@pytest.mark.parametrize('model', ['halofit', 'bacco', ])
 def test_pk2d_apply_model_smoke(model):
     cosmo = ccl.CosmologyVanillaLCDM()
     cosmo.compute_linear_power()
