@@ -77,7 +77,7 @@ jobs:
         run: |
           ${CONDA_PREFIX}/bin/pip install \
             MiraTitanHMFemulator \
-            git+https://bitbucket.org/rangulo/baccoemu/@dadd125e964692d437b14e18f9beeaec3fb35694
+            git+https://bitbucket.org/rangulo/baccoemu/
         env:
           MATRIX_OS: ${{ matrix.os }}
 
