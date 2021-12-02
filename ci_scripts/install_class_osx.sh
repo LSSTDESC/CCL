@@ -5,6 +5,7 @@ export CONDA_BUILD_SYSROOT=/
 rm -rf class_public
 git clone --depth=1000 https://github.com/lesgourg/class_public.git
 cd class_public
+git checkout v2.7.2
 
 sed -i.bak -e 's/^CC/#CC/g' Makefile
 sed -i.bak -e 's/^OPTFLAG =/OPTFLAG = ${CFLAGS} ${LDFLAGS}/g' Makefile
