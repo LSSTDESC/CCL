@@ -25,9 +25,9 @@ oloop_dd = pt_ob.one_loop_dd(pk,
                              P_window=P_window,
                              C_window=C_window)
 Pd1d1 = pklin + g4[:, None] * oloop_dd[0][None, :]
-dd_bias = pt_ob.one_loop_dd_bias(pk,
-                                 P_window=P_window,
-                                 C_window=C_window)
+dd_bias = pt_ob.one_loop_dd_bias_b3nl(pk,
+                                      P_window=P_window,
+                                      C_window=C_window)
 
 ia_ta = pt_ob.IA_ta(pk,
                     P_window=P_window,
@@ -45,6 +45,8 @@ Pd2d2 = g4 * dd_bias[3][None, :]
 Pd1s2 = g4 * dd_bias[4][None, :]
 Pd2s2 = g4 * dd_bias[5][None, :]
 Ps2s2 = g4 * dd_bias[6][None, :]
+Pd1d3 = g4 * dd_bias[8][None, :]
+Pd1k2 = Pd1d1 * (ks**2)[None, :]
 a00e = g4 * ia_ta[0][None, :]
 c00e = g4 * ia_ta[1][None, :]
 a0e0e = g4 * ia_ta[2][None, :]
@@ -59,6 +61,8 @@ d0bb2 = g4 * ia_mix[3][None, :]
 b1 = 1.3
 b2 = 1.5
 bs = 1.7
+b3 = 1.9
+bk2 = 0.1
 c1 = 1.9
 c2 = 2.1
 cd = 2.3
@@ -68,11 +72,15 @@ pgg = (b1**2 * Pd1d1 +
        0.25 * b2**2 * Pd2d2 +
        b1 * bs * Pd1s2 +
        0.5 * b2 * bs * Pd2s2 +
-       0.25 * bs**2 * Ps2s2)
+       0.25 * bs**2 * Ps2s2 +
+       b1 * b3 * Pd1d3 +
+       b1 * bk2 * Pd1k2)
 
 pgm = (b1 * Pd1d1 +
        0.5* b2 * Pd1d2 +
-       0.5 * bs * Pd1s2)
+       0.5 * bs * Pd1s2 +
+       0.5 * b3 * Pd1d3 +
+       0.5 * bk2 * Pd1k2)
 pgi = b1 * (c1 * Pd1d1 +
             cd * (a00e + c00e) +
             c2 * (a0e2 + b0e2))

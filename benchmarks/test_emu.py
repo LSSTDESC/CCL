@@ -32,7 +32,7 @@ def test_emu_nu(model):
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,
-        transfer_function='boltzmann_class',
+        transfer_function='boltzmann_camb',
         matter_power_spectrum='emu',
     )
 
@@ -74,4 +74,48 @@ def test_emu(model):
     k = data[:, 0]
     pk = ccl.nonlin_matter_power(cosmo, k, a)
     err = np.abs(pk/data[:, 1]-1)
+    assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)
+
+
+@pytest.mark.parametrize('model', list(range(3)))
+def test_emu_lin(model):
+    cosmos = np.loadtxt("./benchmarks/data/emu_input_cosmologies.txt")
+
+    mnu = ccl.nu_masses(
+        cosmos[model, 7] * cosmos[model, 2]**2, 'equal', T_CMB=2.725)
+
+    cosmo = ccl.Cosmology(
+        Omega_c=cosmos[model, 0],
+        Omega_b=cosmos[model, 1],
+        h=cosmos[model, 2],
+        sigma8=cosmos[model, 3],
+        n_s=cosmos[model, 4],
+        w0=cosmos[model, 5],
+        wa=cosmos[model, 6],
+        m_nu=mnu,
+        m_nu_type='list',
+        Neff=3.04,
+        Omega_g=0,
+        Omega_k=0,
+        transfer_function='boltzmann_camb',
+        matter_power_spectrum='emu',
+    )
+
+    a = 1
+    k = np.logspace(-3, -2, 50)
+
+    # Catch warning about neutrino linear growth
+    if (np.sum(mnu) > 0):
+        pk = ccl.pyutils.assert_warns(ccl.CCLWarning,
+                                      ccl.nonlin_matter_power,
+                                      cosmo, k, a)
+    else:
+        pk = ccl.nonlin_matter_power(cosmo, k, a)
+
+    # Catch warning about linear matter power
+    pk_lin = ccl.pyutils.assert_warns(ccl.CCLWarning,
+                                      ccl.linear_matter_power,
+                                      cosmo, k, a)
+
+    err = np.abs(pk/pk_lin-1)
     assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)

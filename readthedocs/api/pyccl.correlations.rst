@@ -2,6 +2,6 @@ pyccl.correlations module
 =========================
 
 .. automodule:: pyccl.correlations
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:

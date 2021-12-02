@@ -138,12 +138,12 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, tracer3=None, tracer4=None,
 
 @warn_api(pairs=[("a_arr", "a")])
 def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
-    """ Returns the variance of the projected linear density field
+    """Returns the variance of the projected linear density field
     over a circular disc covering a sky fraction `fsky` as a function
     of scale factor. This is given by
 
     .. math::
-        \\sigma^2_B(z) = \\int_0^\\infty \frac{k\\,dk}{2\\pi}
+        \\sigma^2_B(z) = \\int_0^\\infty \\frac{k\\,dk}{2\\pi}
             P_L(k,z)\\,\\left[\\frac{2J_1(k R(z))}{k R(z)}\\right]^2,
 
     where :math:`R(z)` is the corresponding radial aperture as a

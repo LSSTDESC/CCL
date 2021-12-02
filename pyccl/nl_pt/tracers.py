@@ -145,9 +145,13 @@ class PTNumberCountsTracer(PTTracer):
             second-order bias.
         bs (float or tuple of arrays): as above for the
             tidal bias.
+        b3nl (float or tuple of arrays): as above for the
+            third-order bias.
+        bk2 (float or tuple of arrays): as above for the
+            non-local bias.
     """
     @warn_api()
-    def __init__(self, *, b1, b2=None, bs=None):
+    def __init__(self, *, b1, b2=None, bs=None, b3nl=None, bk2=None):
         self.biases = {}
         self.type = 'NC'
 
@@ -157,6 +161,10 @@ class PTNumberCountsTracer(PTTracer):
         self.biases['b2'] = self._get_bias_function(b2)
         # Initialize bs
         self.biases['bs'] = self._get_bias_function(bs)
+        # Initialize b3nl
+        self.biases['b3nl'] = self._get_bias_function(b3nl)
+        # Initialize bk2
+        self.biases['bk2'] = self._get_bias_function(bk2)
 
     @property
     def b1(self):
@@ -175,6 +183,18 @@ class PTNumberCountsTracer(PTTracer):
         """Internal tidal bias function.
         """
         return self.biases['bs']
+
+    @property
+    def b3nl(self):
+        """Internal third-order bias function.
+        """
+        return self.biases['b3nl']
+
+    @property
+    def bk2(self):
+        """Internal non-local bias function.
+        """
+        return self.biases['bk2']
 
 
 class PTIntrinsicAlignmentTracer(PTTracer):

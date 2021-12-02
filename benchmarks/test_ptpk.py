@@ -14,7 +14,7 @@ zs = np.array([0., 1.])
 
 # Tracers
 ptt = {}
-ptt['g'] = pt.PTNumberCountsTracer(b1=1.3, b2=1.5, bs=1.7)
+ptt['g'] = pt.PTNumberCountsTracer(b1=1.3, b2=1.5, bs=1.7, b3nl=1.9, bk2=0.1)
 ptt['i'] = pt.PTIntrinsicAlignmentTracer(c1=1.9, c2=2.1, cdelta=2.3)
 ptt['m'] = pt.PTMatterTracer()
 
@@ -51,6 +51,7 @@ def test_pt_pk(comb):
     pk = pt.get_pt_pk2d(COSMO, tracer1=ptt1, tracer2=ptt2, ptc=ptc,
                         return_ia_bb=return_bb,
                         nonlin_pk_type='spt',
+                        nonloc_pk_type='spt',
                         a_arr=a_arr)
     for iz, z in enumerate(zs):
         a = 1./(1+z)
