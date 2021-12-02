@@ -16,9 +16,9 @@ def test_cibcl():
                           Neff=3.046)
     mdef = ccl.halos.MassDef200m()
     cM = ccl.halos.ConcentrationDuffy08(mdef)
-    nM = ccl.halos.MassFuncTinker10(cosmo, mdef, norm_all_z=True)
-    bM = ccl.halos.HaloBiasTinker10(cosmo, mdef)
-    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, mdef)
+    nM = ccl.halos.MassFuncTinker10(mdef, norm_all_z=True)
+    bM = ccl.halos.HaloBiasTinker10(mdef)
+    hmc = ccl.halos.HMCalculator(nM, bM, mdef)
     pr = ccl.halos.HaloProfileCIBShang12(cM, 217, Mmin=1E10)
     pr.update_parameters(nu_GHz=217,
                          alpha=0.36,
