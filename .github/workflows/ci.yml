@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
+          - macos-10.15
           - ubuntu-latest
         py:
           - 3.8
@@ -36,9 +36,11 @@ jobs:
           channels: conda-forge,defaults
           channel-priority: strict
           show-channel-urls: true
+          miniforge-version: latest
+          miniforge-variant: Mambaforge          
 
       - name: remove homebrew
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-10.15'
         run: |
           curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
           chmod u+x ./uninstall_homebrew.sh
@@ -47,7 +49,7 @@ jobs:
 
       - name: lint
         run: |
-          conda install flake8
+          mamba install flake8
           flake8 pyccl
           flake8 --exclude=data benchmarks
           if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
@@ -56,14 +58,14 @@ jobs:
 
       - name: install deps
         run: |
-          conda install \
+          mamba install \
             pip \
             numpy nose coveralls pyyaml gsl fftw cmake swig scipy \
             compilers pkg-config setuptools_scm pytest pandas pytest-cov \
             cython "camb>=1.3" isitgr traitlets fast-pt
 
-          if [[ ${MATRIX_OS} == "macos-latest" ]]; then
-            conda install llvm-openmp
+          if [[ ${MATRIX_OS} == "macos-10.15" ]]; then
+            mamba install llvm-openmp
             echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
             SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             echo "SDKROOT: ${SDKROOT}"
@@ -83,7 +85,7 @@ jobs:
 
       - name: install class
         run: |
-          if [[ ${MATRIX_OS} == "macos-latest" ]]; then
+          if [[ ${MATRIX_OS} == "macos-10.15" ]]; then
             . ci_scripts/install_class_osx.sh
           else
             . ci_scripts/install_class_linux.sh
