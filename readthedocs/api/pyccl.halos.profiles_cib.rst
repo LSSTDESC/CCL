@@ -1,7 +1,7 @@
-pyccl.halos.profiles\_2pt module
+pyccl.halos.profiles\_cib module
 ================================
 
-.. automodule:: pyccl.halos.profiles_2pt
+.. automodule:: pyccl.halos.profiles_cib
    :members:
    :undoc-members:
    :show-inheritance:

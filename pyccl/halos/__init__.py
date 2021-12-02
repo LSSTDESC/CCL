@@ -52,3 +52,8 @@ from .halo_model import (  # noqa
     halomod_trispectrum_1h,
     halomod_Tk3D_1h,
     halomod_Tk3D_SSC)
+
+# CIB profiles
+from .profiles_cib import (  # noqa
+    HaloProfileCIBShang12,
+    Profile2ptCIB)
