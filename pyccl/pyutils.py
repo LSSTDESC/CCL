@@ -600,10 +600,10 @@ def warn_api(pairs=None, order=None):
             # do the same thing
             return a, bee, see, d
 
-    Then, adding this decorator to our function would preserve API
+    Then, adding this decorator to our new function would preserve API
 
     >>> @warn_api(pairs=[('bee', 'b'), ('see', 'c')],
-                  order=['see', 'bee'])
+                  order=['bee', 'see'])
 
     Notes
     -----
