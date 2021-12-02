@@ -1,6 +1,10 @@
 from .profiles import HaloProfile, HaloProfileNFW
 from .profiles_2pt import Profile2pt
 from .concentration import Concentration
+from ..pyutils import warn_api, CCLWarning
+
+import warnings
+
 import numpy as np
 from scipy.integrate import simps
 from scipy.special import lambertw
@@ -63,7 +67,7 @@ class HaloProfileCIBShang12(HaloProfile):
     dependence of the form :math:`T_d=T_0(1+z)^\\alpha`.
 
     Args:
-        c_M_relation (:obj:`Concentration`): concentration-mass
+        c_m_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
         nu_GHz (float): frequency in GHz.
         alpha (float): dust temperature evolution parameter.
@@ -80,11 +84,12 @@ class HaloProfileCIBShang12(HaloProfile):
     name = 'CIBShang12'
     _one_over_4pi = 0.07957747154
 
-    def __init__(self, c_M_relation, nu_GHz, alpha=0.36, T0=24.4, beta=1.75,
+    @warn_api(pairs=[("c_m_relation", "c_M_relation")])
+    def __init__(self, *, c_M_relation, nu_GHz, alpha=0.36, T0=24.4, beta=1.75,
                  gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707, Mmin=1E10,
                  L0=6.4E-8):
         if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`)")
+            raise TypeError("c_m_relation must be of type `Concentration`)")
 
         self.nu = nu_GHz
         self.alpha = alpha
@@ -277,19 +282,19 @@ class Profile2ptCIB(Profile2pt):
     (see :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`
     and Eq. 15 of McCarthy & Madhavacheril (2021PhRvD.103j3515M)).
     """
-    def fourier_2pt(self, prof, cosmo, k, M, a,
+    def fourier_2pt(self, cosmo, k, M, a, prof, *,
                     prof2=None, mass_def=None):
         """ Returns the Fourier-space two-point moment for the CIB
         profile.
 
         Args:
-            prof (:class:`HaloProfileCIBShang12`):
-                halo profile for which the second-order moment
-                is desired.
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
+            prof (:class:`HaloProfileCIBShang12`):
+                halo profile for which the second-order moment
+                is desired.
             prof2 (:class:`HaloProfileCIBShang12`):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
@@ -305,6 +310,16 @@ class Profile2ptCIB(Profile2pt):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
+        # patch to check if new or old API is used
+        from ..core import Cosmology
+        if not isinstance(cosmo, Cosmology):
+            warnings.warn("Official API for Profile2ptCIB.fourier_2pt "
+                          "has changed. Argument order "
+                          "(prof, cosmo, k, M, a) has been replaced by "
+                          "(cosmo, k, M, a, prof).", CCLWarning)
+            prof, cosmo, k, M, a = cosmo, k, M, a, prof  # old to new API
+            assert isinstance(cosmo, Cosmology)
+
         if not isinstance(prof, HaloProfileCIBShang12):
             raise TypeError("prof must be of type `HaloProfileCIB`")
 
