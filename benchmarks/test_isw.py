@@ -24,7 +24,7 @@ def test_iswcl():
     tr_n = ccl.NumberCountsTracer(COSMO, has_rsd=False,
                                   dndz=(zs, nz), bias=(zs, bz))
     tr_i = ccl.ISWTracer(COSMO)
-    cl = ccl.angular_cl(COSMO, tr_n, tr_i, ls)
+    cl = ccl.angular_cl(COSMO, tr_n, tr_i, ell=ls)
 
     # Benchmark from Eq. 6 in 1710.03238
     pz = nz / simps(nz, x=zs)

@@ -1,10 +1,11 @@
+import warnings
 import numpy as np
 from .. import ccllib as lib
 from ..core import check
 from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import growth_factor
-from ..pyutils import warn_api
+from ..pyutils import warn_api, CCLWarning
 from .tracers import PTTracer
 
 try:
@@ -457,7 +458,6 @@ class PTCalculator(object):
         return pmm*self.exp_cutoff
 
 
-@warn_api(order=["tracer1", "tracer2", "ptc"])
 def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
                 sub_lowk=False, nonlin_pk_type='nonlinear',
                 nonloc_pk_type='nonlinear',
@@ -532,10 +532,6 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
         check(status)
 
-    if tracer1 is None:
-        # recover TypeError functionality from positional argument
-        raise TypeError("get_pt_pk2d missing one required "
-                        "argument tracer1 (pos2)")
     if tracer2 is None:
         tracer2 = tracer1
     if not isinstance(tracer1, PTTracer):
@@ -610,7 +606,7 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
         elif nonloc_pk_type == 'spt':
             pklin = np.array([linear_matter_power(cosmo, ptc.ks, a)
                               for a in a_arr]).T
-            Pgrad = ptc.get_pmm(pklin, ga4)
+            Pgrad = ptc.get_pmm(Pd1d1_lin=pklin, g4=ga4)
         else:
             raise NotImplementedError("Non-local option %s "
                                       "not implemented yet" %
@@ -682,6 +678,8 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
             b12 = tracer2.b1(z_arr)
             b22 = tracer2.b2(z_arr)
             bs2 = tracer2.bs(z_arr)
+            b32 = tracer2.b3nl(z_arr)
+            bk22 = tracer2.bk2(z_arr)
             p_pt = ptc.get_pgm(Pd1d1=Pd1d1, g4=ga4,
                                b1=b12, b2=b22, bs=bs2,
                                b3nl=b32, bk2=bk22,

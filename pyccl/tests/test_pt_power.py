@@ -153,13 +153,13 @@ def test_ptc_raises():
                                                ('nonlinear', 'linear'),
                                                ('nonlinear', 'spt')])
 def test_k2pk_types(typ_nlin, typ_nloc):
-    tg = ccl.nl_pt.PTNumberCountsTracer(1., 0., 0., bk2=1.)
-    tm = ccl.nl_pt.PTNumberCountsTracer(1., 0., 0.)
-    pkmm = ccl.nl_pt.get_pt_pk2d(COSMO, tm, tracer2=tm, ptc=PTC,
+    tg = ccl.nl_pt.PTNumberCountsTracer(b1=1., b2=0., bs=0., bk2=1.)
+    tm = ccl.nl_pt.PTNumberCountsTracer(b1=1., b2=0., bs=0.)
+    pkmm = ccl.nl_pt.get_pt_pk2d(COSMO, ptc=PTC, tracer1=tm, tracer2=tm,
                                  nonlin_pk_type=typ_nlin)
-    pkmm_t = ccl.nl_pt.get_pt_pk2d(COSMO, tm, tracer2=tm, ptc=PTC,
+    pkmm_t = ccl.nl_pt.get_pt_pk2d(COSMO, PTC, tracer1=tm, tracer2=tm,
                                    nonlin_pk_type=typ_nloc)
-    pkgg = ccl.nl_pt.get_pt_pk2d(COSMO, tg, tracer2=tg, ptc=PTC,
+    pkgg = ccl.nl_pt.get_pt_pk2d(COSMO, ptc=PTC, tracer1=tg, tracer2=tg,
                                  nonloc_pk_type=typ_nloc)
     ks = np.geomspace(1E-3, 1E1, 128)
     p1 = pkgg.eval(ks, 1., COSMO)
@@ -180,13 +180,15 @@ def test_k2pk():
                       for a in 1./(1+zs)]).T
     one = np.ones_like(zs)
     zero = np.zeros_like(zs)
-    pmm = ptc.get_pgg(Pd1d1, gs4, one, zero, zero,
-                      one, zero, zero, True)
-    pmm_b = ptc.get_pgm(Pd1d1, gs4, one, zero, zero)
-    pmk = ptc.get_pgg(Pd1d1, gs4, one, zero, zero,
-                      one, zero, zero, True, bk21=one)
-    pmk_b = ptc.get_pgm(Pd1d1, gs4, one, zero, zero, bk2=one)
-    pkk = ptc.get_pgg(Pd1d1, gs4, one, zero, zero, one, zero, zero, True,
+    pmm = ptc.get_pgg(Pd1d1=Pd1d1, g4=gs4, b11=one, b21=zero, bs1=zero,
+                      b12=one, b22=zero, bs2=zero, sub_lowk=True)
+    pmm_b = ptc.get_pgm(Pd1d1=Pd1d1, g4=gs4, b1=one, b2=zero, bs=zero)
+    pmk = ptc.get_pgg(Pd1d1=Pd1d1, g4=gs4, b11=one, b21=zero, bs1=zero,
+                      b12=one, b22=zero, bs2=zero, sub_lowk=True, bk21=one)
+    pmk_b = ptc.get_pgm(Pd1d1=Pd1d1, g4=gs4, b1=one, b2=zero, bs=zero,
+                        bk2=one)
+    pkk = ptc.get_pgg(Pd1d1=Pd1d1, g4=gs4, b11=one, b21=zero, bs1=zero,
+                      b12=one, b22=zero, bs2=zero, sub_lowk=True,
                       bk21=one, bk22=one)
     ks = ptc.ks[:, None]
     assert np.all(np.fabs(pmm/Pd1d1-1) < 1E-10)
@@ -212,10 +214,10 @@ def test_pk_cutoff():
                       for a in 1./(1+zs)]).T
     one = np.ones_like(zs)
     zero = np.zeros_like(zs)
-    p1 = ptc1.get_pgg(Pd1d1, gs4, one, zero, zero,
-                      one, zero, zero, True).T
-    p2 = ptc2.get_pgg(Pd1d1, gs4, one, zero, zero,
-                      one, zero, zero, True).T
+    p1 = ptc1.get_pgg(Pd1d1=Pd1d1, g4=gs4, b11=one, b21=zero, bs1=zero,
+                      b12=one, b22=zero, bs2=zero, sub_lowk=True).T
+    p2 = ptc2.get_pgg(Pd1d1=Pd1d1, g4=gs4, b11=one, b21=zero, bs1=zero,
+                      b12=one, b22=zero, bs2=zero, sub_lowk=True).T
     expcut = np.exp(-(ptc1.ks/10.)**2)
     assert np.all(np.fabs(p1*expcut/p2-1) < 1E-10)
 

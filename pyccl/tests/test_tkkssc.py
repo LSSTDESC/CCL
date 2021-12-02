@@ -59,7 +59,7 @@ AA = 1.0
                            'norm': False, 'pk': COSMO.get_nonlin_power()}],)
 def test_tkkssc_smoke(pars):
     hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF, halo_bias=HBF,
-                                 mass_def=M200, nlog10M=2)
+                                 mass_def=M200, nlM=2)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 

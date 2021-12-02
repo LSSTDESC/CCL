@@ -15,11 +15,13 @@ def test_cibcl():
                           A_s=2.02E-9,
                           Neff=3.046)
     mdef = ccl.halos.MassDef200m()
-    cM = ccl.halos.ConcentrationDuffy08(mdef)
-    nM = ccl.halos.MassFuncTinker10(cosmo, mdef, norm_all_z=True)
-    bM = ccl.halos.HaloBiasTinker10(cosmo, mdef)
-    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, mdef)
-    pr = ccl.halos.HaloProfileCIBShang12(cM, 217, Mmin=1E10)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def=mdef)
+    nM = ccl.halos.MassFuncTinker10(cosmo, mass_def=mdef, norm_all_z=True)
+    bM = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef)
+    hmc = ccl.halos.HMCalculator(cosmo, mass_function=nM, halo_bias=bM,
+                                 mass_def=mdef)
+    pr = ccl.halos.HaloProfileCIBShang12(c_m_relation=cM, nu_GHz=217,
+                                         Mmin=1E10)
     pr.update_parameters(nu_GHz=217,
                          alpha=0.36,
                          T0=24.4,
@@ -37,11 +39,12 @@ def test_cibcl():
     tr = ccl.CIBTracer(cosmo, z_min=0.07)
 
     # 3D power spectrum
-    pk = ccl.halos.halomod_Pk2D(cosmo, hmc, pr, prof_2pt=pr2pt)
+    pk = ccl.halos.halomod_Pk2D(cosmo, hmc, pr, prof_2pt=pr2pt,
+                                normprof=False)
 
     # Angular power spectrum
     ls = bm[0]
-    cl = ccl.angular_cl(cosmo, tr, tr, ls, p_of_k_a=pk)
+    cl = ccl.angular_cl(cosmo, tr, tr, ell=ls, p_of_k_a=pk)
     dl = cl*ls*(ls+1)/(2*np.pi)
 
     # Compare

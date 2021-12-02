@@ -307,7 +307,8 @@ class HaloProfile(object):
             float or array_like: convergence \
                 :math:`\\kappa`
         """
-        Sigma = self.projected(cosmo, r, M, a_lens, mass_def) / a_lens**2
+        Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
+        Sigma /= a_lens**2
         Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
         return Sigma / Sigma_crit
 
@@ -338,8 +339,9 @@ class HaloProfile(object):
             float or array_like: shear \
                 :math:`\\gamma`
         """
-        Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
-        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
+        Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
+        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens,
+                                 mass_def=mass_def)
         Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
@@ -368,8 +370,10 @@ class HaloProfile(object):
             float or array_like: reduced shear \
                 :math:`g_t`
         """
-        convergence = self.convergence(cosmo, r, M, a_lens, a_source, mass_def)
-        shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
+        convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
+                                       a_source=a_source, mass_def=mass_def)
+        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source,
+                           mass_def=mass_def)
         return shear / (1.0 - convergence)
 
     @warn_api()
@@ -396,8 +400,10 @@ class HaloProfile(object):
             float or array_like: magnification\
                 :math:`\\mu`
         """
-        convergence = self.convergence(cosmo, r, M, a_lens, a_source, mass_def)
-        shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
+        convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
+                                       a_source=a_source, mass_def=mass_def)
+        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source,
+                           mass_def=mass_def)
 
         return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 

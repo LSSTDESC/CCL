@@ -72,8 +72,8 @@ def test_empirical_smoke(prof_class):
 
 
 def test_cib_smoke():
-    c = ccl.halos.ConcentrationDuffy08(M200)
-    p = ccl.halos.HaloProfileCIBShang12(c, 217)
+    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    p = ccl.halos.HaloProfileCIBShang12(c_m_relation=c, nu_GHz=217)
     beta_old = p.beta
     smoke_assert_prof_real(p, method='_real')
     smoke_assert_prof_real(p, method='_fourier')
@@ -89,15 +89,15 @@ def test_cib_smoke():
 
 
 def test_cib_2pt_raises():
-    c = ccl.halos.ConcentrationDuffy08(M200)
-    p_cib = ccl.halos.HaloProfileCIBShang12(c, 217)
+    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    p_cib = ccl.halos.HaloProfileCIBShang12(c_m_relation=c, nu_GHz=217)
     p_tSZ = ccl.halos.HaloProfilePressureGNFW()
     p2pt = ccl.halos.Profile2ptCIB()
     with pytest.raises(TypeError):
-        p2pt.fourier_2pt(p_tSZ, COSMO, 0.1, 1E13, 1.,
+        p2pt.fourier_2pt(COSMO, 0.1, 1E13, 1., p_tSZ,
                          mass_def=M200)
     with pytest.raises(TypeError):
-        p2pt.fourier_2pt(p_cib, COSMO, 0.1, 1E13, 1.,
+        p2pt.fourier_2pt(COSMO, 0.1, 1E13, 1., p_cib,
                          prof2=p_tSZ, mass_def=M200)
 
 
