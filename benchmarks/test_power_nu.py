@@ -47,7 +47,6 @@ def test_power_nu(model):
         warnings.simplefilter("ignore")
         pk_lin_ccl = ccl.linear_matter_power(cosmo, k_lin, a)
 
-
     assert np.allclose(pk_lin_ccl[k_lin < KMAX],
                        pk_lin[k_lin < KMAX],
                        rtol=POWER_NU_TOL)
