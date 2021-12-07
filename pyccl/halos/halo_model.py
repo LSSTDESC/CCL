@@ -519,7 +519,7 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
     return out
 
 
-@warn_api(pairs=[("normprof", "normprof1")],
+@warn_api(pairs=[("normprof", "normprof1"), ("suppress_1h", "supress_1h")],
           order=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
 def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof_2pt=None,
