@@ -209,7 +209,7 @@ def test_pkhm_pk2d():
     def ks0(a):  # no damping
         return 1e-16
 
-    def ks1(a):  # fully supressed
+    def ks1(a):  # fully suppressed
         return 1e16
 
     def ks2(a):  # reasonable
@@ -217,18 +217,18 @@ def test_pkhm_pk2d():
 
     pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
                                            normprof1=True, normprof2=True,
-                                           supress_1h=None, get_2h=False)
+                                           suppress_1h=None, get_2h=False)
     pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
                                            normprof1=True, normprof2=True,
-                                           supress_1h=ks0, get_2h=False)
+                                           suppress_1h=ks0, get_2h=False)
     assert np.allclose(pk0, pk1, rtol=0)
     pk2 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
                                            normprof1=True, normprof2=True,
-                                           supress_1h=ks1, get_2h=False)
+                                           suppress_1h=ks1, get_2h=False)
     assert np.allclose(pk2, 0, rtol=0)
     pk3 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, P1,
                                            normprof1=True, normprof2=True,
-                                           supress_1h=ks2, get_2h=False)
+                                           suppress_1h=ks2, get_2h=False)
     fact = (k_arr/0.04)**4 / (1 + (k_arr/0.04)**4)
     assert np.allclose(pk3, pk0*fact, rtol=0)
 
@@ -286,8 +286,8 @@ def test_pkhm_errors():
     # Wrong 1h damping
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         supress_1h=True)
+                                         suppress_1h=True)
 
     with pytest.raises(ValueError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         supress_1h=func, get_1h=False)
+                                         suppress_1h=func, get_1h=False)

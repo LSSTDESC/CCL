@@ -502,7 +502,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
                            prof_2pt=None, prof2=None, p_of_k_a=None,
                            normprof1=False, normprof2=False,
                            get_1h=True, get_2h=True,
-                           smooth_transition=None, supress_1h=None):
+                           smooth_transition=None, suppress_1h=None):
     """ Computes the halo model power spectrum for two
     quantities defined by their respective halo profiles.
     The halo model power spectrum for two profiles
@@ -554,8 +554,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             defined as in HMCODE-2020 (``arXiv:2009.01858``): :math:`P(k,a)=
             (P_{1h}^{\\alpha(a)}(k)+P_{2h}^{\\alpha(a)}(k))^{1/\\alpha}`.
             If `None` the extra factor is just 1.
-        supress_1h (function or None):
-            Supress the 1-halo large scale contribution by a
+        suppress_1h (function or None):
+            Suppress the 1-halo large scale contribution by a
             time- and scale-dependent function :math:`k_*(a)`,
             defined as in HMCODE-2020 (``arXiv:2009.01858``):
             :math:`\\frac{(k/k_*(a))^4}{1+(k/k_*(a))^4}`.
@@ -588,12 +588,12 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         if not hasattr(smooth_transition, "__call__"):
             raise TypeError("smooth_transition must be "
                             "a function of `a` or None")
-    if supress_1h is not None:
+    if suppress_1h is not None:
         if not get_1h:
-            raise ValueError("can't supress the 1-halo term "
+            raise ValueError("can't suppress the 1-halo term "
                              "when get_1h is False")
-        if not hasattr(supress_1h, "__call__"):
-            raise TypeError("supress_1h must be "
+        if not hasattr(suppress_1h, "__call__"):
+            raise TypeError("suppress_1h must be "
                             "a function of `a` or None")
 
     # Power spectrum
@@ -646,8 +646,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
 
         if get_1h:
             pk_1h = hmc.I_0_2(cosmo, k_use, aa, prof, prof_2pt, prof2)
-            if supress_1h is not None:
-                ks = supress_1h(aa)
+            if suppress_1h is not None:
+                ks = suppress_1h(aa)
                 pk_1h *= (k_use / ks)**4 / (1 + (k_use / ks)**4)
         else:
             pk_1h = 0.
@@ -672,7 +672,7 @@ def halomod_Pk2D(cosmo, hmc, prof,
                  get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
                  extrap_order_lok=1, extrap_order_hik=2,
-                 smooth_transition=None, supress_1h=None):
+                 smooth_transition=None, suppress_1h=None):
     """ Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the halo-model power spectrum for two quantities defined by
     their respective halo profiles. See :meth:`halomod_power_spectrum`
@@ -728,8 +728,8 @@ def halomod_Pk2D(cosmo, hmc, prof,
             defined as in HMCODE-2020 (``arXiv:2009.01858``): :math:`P(k,a)=
             (P_{1h}^{\\alpha(a)}(k)+P_{2h}^{\\alpha(a)}(k))^{1/\\alpha}`.
             If `None` the extra factor is just 1.
-        supress_1h (function or None):
-            Supress the 1-halo large scale contribution by a
+        suppress_1h (function or None):
+            Suppress the 1-halo large scale contribution by a
             time- and scale-dependent function :math:`k_*(a)`,
             defined as in HMCODE-2020 (``arXiv:2009.01858``):
             :math:`\\frac{(k/k_*(a))^4}{1+(k/k_*(a))^4}`.
@@ -755,7 +755,7 @@ def halomod_Pk2D(cosmo, hmc, prof,
                                     normprof1=normprof1, normprof2=normprof2,
                                     get_1h=get_1h, get_2h=get_2h,
                                     smooth_transition=smooth_transition,
-                                    supress_1h=supress_1h)
+                                    suppress_1h=suppress_1h)
 
     pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                 extrap_order_lok=extrap_order_lok,
