@@ -2,7 +2,7 @@
 from .massdef import (  # noqa
     mass2radius_lagrangian, MassDef,
     MassDef200m, MassDef200c,
-    MassDefVir)
+    MassDefVir, convert_concentration)
 
 # Halo concentration
 from .concentration import (  # noqa
@@ -52,4 +52,10 @@ from .halo_model import (  # noqa
     halomod_trispectrum_1h,
     halomod_trispectrum_2h_13,
     halomod_Tk3D_1h,
-    halomod_Tk3D_2h)
+    halomod_Tk3D_2h,
+    halomod_Tk3D_SSC)
+
+# CIB profiles
+from .profiles_cib import (  # noqa
+    HaloProfileCIBShang12,
+    Profile2ptCIB)

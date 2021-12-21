@@ -71,6 +71,36 @@ def test_empirical_smoke(prof_class):
     smoke_assert_prof_real(p)
 
 
+def test_cib_smoke():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p = ccl.halos.HaloProfileCIBShang12(c, 217)
+    beta_old = p.beta
+    smoke_assert_prof_real(p, method='_real')
+    smoke_assert_prof_real(p, method='_fourier')
+    smoke_assert_prof_real(p, method='_fourier_variance')
+    p.update_parameters(alpha=1.24, T0=20.0)
+    assert p.alpha == 1.24
+    assert p.T0 == 20.0
+    assert p.beta == beta_old
+    for n in ['alpha', 'T0', 'beta', 'gamma',
+              's_z', 'Mmin', 'L0', 'sigLM']:
+        p.update_parameters(**{n: 1234.})
+        assert getattr(p, n) == 1234.
+
+
+def test_cib_2pt_raises():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p_cib = ccl.halos.HaloProfileCIBShang12(c, 217)
+    p_tSZ = ccl.halos.HaloProfilePressureGNFW()
+    p2pt = ccl.halos.Profile2ptCIB()
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(p_tSZ, COSMO, 0.1, 1E13, 1.,
+                         mass_def=M200)
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(p_cib, COSMO, 0.1, 1E13, 1.,
+                         prof2=p_tSZ, mass_def=M200)
+
+
 def test_gnfw_smoke():
     p = ccl.halos.HaloProfilePressureGNFW()
     beta_old = p.beta
@@ -120,6 +150,42 @@ def test_hod_smoke():
         assert getattr(p, n) == 1234.
 
 
+@pytest.mark.parametrize('real_prof', [True, False])
+def test_hod_ns_independent(real_prof):
+    def func(prof):
+        return prof._real if real_prof else prof._fourier
+
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    hmd = c.mdef
+    p1 = ccl.halos.HaloProfileHOD(c_M_relation=c,
+                                  lMmin_0=12.,
+                                  ns_independent=False)
+    p2 = ccl.halos.HaloProfileHOD(c_M_relation=c,
+                                  lMmin_0=12.,
+                                  ns_independent=True)
+    # M < Mmin
+    f1 = func(p1)(COSMO, 0.01, 1e10, 1., hmd)
+    assert np.all(f1 == 0)
+    f2 = func(p2)(COSMO, 0.01, 1e10, 1., hmd)
+    assert np.all(f2 > 0)
+    # M > Mmin
+    f1 = func(p1)(COSMO, 0.01, 1e14, 1., hmd)
+    f2 = func(p2)(COSMO, 0.01, 1e14, 1., hmd)
+    assert np.allclose(f1, f2, rtol=0)
+    # M == Mmin
+    f1 = func(p1)(COSMO, 0.01, 1e12, 1., hmd)
+    f2 = func(p2)(COSMO, 0.01, 1e12, 1., hmd)
+    assert np.allclose(2*f1, f2+0.5, rtol=0)
+
+    if not real_prof:
+        f1 = p1._fourier_variance(COSMO, 0.01, 1e10, 1., hmd)
+        f2 = p2._fourier_variance(COSMO, 0.01, 1e10, 1., hmd)
+        assert f2 > f1 == 0
+
+    p1.update_parameters(ns_independent=True)
+    assert p1.ns_independent is True
+
+
 def test_hod_2pt_raises():
     pbad = ccl.halos.HaloProfilePressureGNFW()
     c = ccl.halos.ConcentrationDuffy08(M200)
@@ -136,6 +202,29 @@ def test_hod_2pt_raises():
 
     p2.fourier_2pt(pgood, COSMO, 1., 1E13, 1.,
                    prof2=pgood, mass_def=M200)
+
+
+def test_2pt_rcorr_smoke():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p = ccl.halos.HaloProfileNFW(c_M_relation=c)
+    F0 = ccl.halos.Profile2pt().fourier_2pt(p, COSMO, 1., 1e13, 1.,
+                                            mass_def=M200)
+    p2pt = ccl.halos.Profile2pt(r_corr=0)
+    F1 = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., mass_def=M200)
+    assert F0 == F1
+    F2 = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., prof2=p, mass_def=M200)
+    assert F1 == F2
+
+    p2pt.update_parameters(r_corr=-1.)
+    assert p2pt.r_corr == -1.
+    F3 = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., mass_def=M200)
+    assert F3 == 0
+
+    # Errors
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(None, COSMO, 1., 1e13, 1., mass_def=M200)
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., prof2=0, mass_def=M200)
 
 
 @pytest.mark.parametrize('prof_class',

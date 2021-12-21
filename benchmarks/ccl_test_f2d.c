@@ -171,7 +171,7 @@ CTEST2(f2d,a_overflow) {
 CTEST2(f2d,sanity) {
   int status=0;
   ccl_f2d_t *psp;
-  double fka;
+  double fka,dfka;
   double lktest=-2.,atest=0.5;
   double alo=0.02;
 
@@ -195,23 +195,32 @@ CTEST2(f2d,sanity) {
   fka=ccl_f2d_t_eval(psp,lktest,atest,NULL,&status);
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lktest),atest));
+  dfka=ccl_f2d_t_dlogf_dlk_eval(psp, lktest, atest,NULL,&status);
+  ASSERT_TRUE(status==0);
+  ASSERT_DBL_NEAR(-1.,dfka);
 
   //Evaluate at very high z and see if it checks out
   fka=ccl_f2d_t_eval(psp,lktest,alo,NULL,&status);
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lktest),alo));
+  dfka = ccl_f2d_t_dlogf_dlk_eval(psp, lktest, alo,NULL,&status);
+  ASSERT_DBL_NEAR(-1.,dfka);
 
   //Evaluate at very high k and see if it checks out
   double lkhi=data->lk_arr[data->n_k-1]*1.1;
   fka=ccl_f2d_t_eval(psp,lkhi,atest,NULL,&status);
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lkhi),atest));
+  dfka = ccl_f2d_t_dlogf_dlk_eval(psp, lkhi, atest,NULL,&status);
+  ASSERT_DBL_NEAR(-1.,dfka);
 
   //Evaluate at very low k and see if it checks out
   double lklo=data->lk_arr[0]/1.1;
   fka=ccl_f2d_t_eval(psp,lklo,atest,NULL,&status);
   ASSERT_TRUE(status==0);
   ASSERT_DBL_NEAR(1,fka/fka_model_analytical(exp(lklo),atest));
+  dfka = ccl_f2d_t_dlogf_dlk_eval(psp, lklo, atest,NULL,&status);
+  ASSERT_DBL_NEAR(-1.,dfka);
 
   ccl_f2d_t_free(psp);
 }

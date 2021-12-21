@@ -149,6 +149,77 @@ def test_ptc_raises():
         PTC.update_pk(np.zeros(4))
 
 
+@pytest.mark.parametrize('typ_nlin,typ_nloc', [('linear', 'nonlinear'),
+                                               ('nonlinear', 'linear'),
+                                               ('nonlinear', 'spt')])
+def test_k2pk_types(typ_nlin, typ_nloc):
+    tg = ccl.nl_pt.PTNumberCountsTracer(1., 0., 0., bk2=1.)
+    tm = ccl.nl_pt.PTNumberCountsTracer(1., 0., 0.)
+    pkmm = ccl.nl_pt.get_pt_pk2d(COSMO, tm, tracer2=tm, ptc=PTC,
+                                 nonlin_pk_type=typ_nlin)
+    pkmm_t = ccl.nl_pt.get_pt_pk2d(COSMO, tm, tracer2=tm, ptc=PTC,
+                                   nonlin_pk_type=typ_nloc)
+    pkgg = ccl.nl_pt.get_pt_pk2d(COSMO, tg, tracer2=tg, ptc=PTC,
+                                 nonloc_pk_type=typ_nloc)
+    ks = np.geomspace(1E-3, 1E1, 128)
+    p1 = pkgg.eval(ks, 1., COSMO)
+    p2 = pkmm.eval(ks, 1., COSMO)+ks**2*pkmm_t.eval(ks, 1., COSMO)
+    assert np.all(np.fabs(p1/p2-1) < 1E-4)
+
+
+def test_k2pk():
+    # Tests the k2 term scaling
+    ptc = ccl.nl_pt.PTCalculator(with_NC=True)
+
+    zs = np.array([0., 1.])
+    gs4 = ccl.growth_factor(COSMO, 1./(1+zs))**4
+    pk_lin_z0 = ccl.linear_matter_power(COSMO, ptc.ks, 1.)
+    ptc.update_pk(pk_lin_z0)
+
+    Pd1d1 = np.array([ccl.linear_matter_power(COSMO, ptc.ks, a)
+                      for a in 1./(1+zs)]).T
+    one = np.ones_like(zs)
+    zero = np.zeros_like(zs)
+    pmm = ptc.get_pgg(Pd1d1, gs4, one, zero, zero,
+                      one, zero, zero, True)
+    pmm_b = ptc.get_pgm(Pd1d1, gs4, one, zero, zero)
+    pmk = ptc.get_pgg(Pd1d1, gs4, one, zero, zero,
+                      one, zero, zero, True, bk21=one)
+    pmk_b = ptc.get_pgm(Pd1d1, gs4, one, zero, zero, bk2=one)
+    pkk = ptc.get_pgg(Pd1d1, gs4, one, zero, zero, one, zero, zero, True,
+                      bk21=one, bk22=one)
+    ks = ptc.ks[:, None]
+    assert np.all(np.fabs(pmm/Pd1d1-1) < 1E-10)
+    assert np.all(np.fabs(pmm_b/Pd1d1-1) < 1E-10)
+    assert np.all(np.fabs(pmk/(pmm*(1+0.5*ks**2))-1) < 1E-10)
+    assert np.all(np.fabs(pmk_b/(pmm*(1+0.5*ks**2))-1) < 1E-10)
+    assert np.all(np.fabs(pkk/(pmm*(1+ks**2))-1) < 1E-10)
+
+
+def test_pk_cutoff():
+    # Tests the exponential cutoff
+    ptc1 = ccl.nl_pt.PTCalculator(with_NC=True)
+    ptc2 = ccl.nl_pt.PTCalculator(with_NC=True,
+                                  k_cutoff=10.,
+                                  n_exp_cutoff=2.)
+    zs = np.array([0., 1.])
+    gs4 = ccl.growth_factor(COSMO, 1./(1+zs))**4
+    pk_lin_z0 = ccl.linear_matter_power(COSMO, ptc1.ks, 1.)
+    ptc1.update_pk(pk_lin_z0)
+    ptc2.update_pk(pk_lin_z0)
+
+    Pd1d1 = np.array([ccl.linear_matter_power(COSMO, ptc1.ks, a)
+                      for a in 1./(1+zs)]).T
+    one = np.ones_like(zs)
+    zero = np.zeros_like(zs)
+    p1 = ptc1.get_pgg(Pd1d1, gs4, one, zero, zero,
+                      one, zero, zero, True).T
+    p2 = ptc2.get_pgg(Pd1d1, gs4, one, zero, zero,
+                      one, zero, zero, True).T
+    expcut = np.exp(-(ptc1.ks/10.)**2)
+    assert np.all(np.fabs(p1*expcut/p2-1) < 1E-10)
+
+
 def test_pt_get_pk2d_raises():
     # Wrong tracer type 2
     with pytest.raises(TypeError):

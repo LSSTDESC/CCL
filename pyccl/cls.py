@@ -34,7 +34,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
         limber_integration_method (string) : integration method to be used
             for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
             method backed up by `quad` when it fails) and 'spline' (the
-            integrand is splined and then integrated analytically).
+            integrand is splined and then integrated numerically).
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values, \

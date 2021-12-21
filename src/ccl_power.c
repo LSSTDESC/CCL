@@ -6,6 +6,7 @@
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_sf_bessel.h>
 
 #include "ccl.h"
 #include "ccl_f2d.h"
@@ -152,11 +153,11 @@ ccl_f2d_t *ccl_compute_linpower_bbks(ccl_cosmology *cosmo, int *status)
   return psp;
 }
 
-ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int *status)
+ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int wiggled, int *status)
 {
   ccl_f2d_t *psp = NULL;
   eh_struct *eh = NULL;
-  eh = ccl_eh_struct_new(&(cosmo->params),1);
+  eh = ccl_eh_struct_new(&(cosmo->params),wiggled);
   if (eh != NULL) {
     psp=ccl_compute_linpower_analytic(cosmo, eh,
                                       eh_power,
@@ -319,7 +320,12 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
     //For each redshift:
     for (int j = 0; j < na; j++){
       //Turn cosmology into emu_par:
-      emu_par[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b)*cosmo->params.h*cosmo->params.h;
+      if ((cosmo->params.N_nu_mass>0) &&
+          (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize)){
+          emu_par[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b)*cosmo->params.h*cosmo->params.h + Omeganuh2_eq;
+      }else{
+          emu_par[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b+cosmo->params.Omega_nu_mass)*cosmo->params.h*cosmo->params.h;
+      }
       emu_par[1] = cosmo->params.Omega_b*cosmo->params.h*cosmo->params.h;
       emu_par[2] = cosmo->params.sigma8;
       emu_par[3] = cosmo->params.h;
@@ -459,6 +465,107 @@ typedef struct {
   ccl_f2d_t *psp;
   int* status;
 } KNL_pars;
+
+
+/* --------- ROUTINE: w_tophat ---------
+INPUT: kR, ususally a wavenumber multiplied by a smoothing radius
+TASK: Output W(x)=[sin(x)-x*cos(x)]*(3/x)^3
+*/
+static double w_tophat_2d(double kR) {
+  double w;
+  double kR2 = kR*kR;
+
+  // This is the Maclaurin expansion of W(x)=2 J1(x)/x to O(x^10), with x=kR.
+  // Necessary numerically because at low x W(x) relies on the fine cancellation of two terms
+  if(kR<0.1) {
+    w= 1. + kR2*(-1.0/8.0 + kR2*(1.0/192.0 +
+      kR2*(-1.0/9216.0 + kR2*(1.0/737280.0 +
+      kR2* (-1.0/88473600.0)))));
+  }
+  else
+    w = 2 * gsl_sf_bessel_J1(kR) / kR;
+  return w;
+}
+
+// Integrand for sigmaB integral (used for the SSC covariance calculation)
+static double sigma2B_integrand(double lk,void *params) {
+  SigmaR_pars *par=(SigmaR_pars *)params;
+
+  double k=pow(10.,lk);
+  double pk=ccl_f2d_t_eval(par->psp, lk * M_LN10, par->a,
+                           par->cosmo, par->status);
+  double kR=k*par->R;
+  double w = w_tophat_2d(kR);
+
+  return pk*k*k*w*w;
+}
+
+/* --------- ROUTINE: ccl_sigmaB ---------
+INPUT: cosmology, comoving smoothing radius, scale factor
+TASK: compute sigmaB, the variance in the projected *linear* density field
+smoothed with a 2D tophat filter of comoving size R
+*/
+double ccl_sigma2B(ccl_cosmology *cosmo,double R,double a,ccl_f2d_t *psp, int *status)
+{
+  SigmaR_pars par;
+  par.status = status;
+
+  par.cosmo=cosmo;
+  par.R=R;
+  par.a=a;
+  par.psp=psp;
+
+  gsl_integration_cquad_workspace *workspace =  NULL;
+  gsl_function F;
+  F.function=&sigma2B_integrand;
+  F.params=&par;
+  double sigma_B;
+
+  workspace = gsl_integration_cquad_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+  if (workspace == NULL) {
+    *status = CCL_ERROR_MEMORY;
+  }
+  if (*status == 0) {
+    int gslstatus = gsl_integration_cquad(&F,
+                                          log10(cosmo->spline_params.K_MIN),
+                                          log10(cosmo->spline_params.K_MAX),
+                                          0.0, cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
+                                          workspace,&sigma_B,NULL,NULL);
+    if(gslstatus != GSL_SUCCESS) {
+      ccl_raise_gsl_warning(gslstatus, "ccl_power.c: ccl_sigma2B():");
+      *status |= gslstatus;
+    }
+  }
+  gsl_integration_cquad_workspace_free(workspace);
+
+  return sigma_B*M_LN10/(2*M_PI);
+}
+
+void ccl_sigma2Bs(ccl_cosmology *cosmo,int na, double *a, double *R,
+                  double *sigma2B_out, ccl_f2d_t *psp, int *status) {
+#pragma omp parallel default(none)                      \
+  shared(cosmo, na, a, R, psp, sigma2B_out, status)
+  {
+    int ia;
+    int local_status=*status;
+
+    #pragma omp for
+    for(ia=0; ia<na; ia++) {
+      if(local_status==0)
+        sigma2B_out[ia]=ccl_sigma2B(cosmo,R[ia],a[ia],psp,&local_status);
+    } //end omp for
+    if(local_status) {
+      #pragma omp atomic write
+      *status=local_status;
+    }
+  } //end omp parallel
+
+  if(*status) {
+    ccl_cosmology_set_status_message(cosmo,
+             "ccl_power.c: ccl_sigma2Bs(): "
+             "integration error\n");
+  }
+}
 
 /* --------- ROUTINE: w_tophat ---------
 INPUT: kR, ususally a wavenumber multiplied by a smoothing radius

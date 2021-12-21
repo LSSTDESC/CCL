@@ -89,6 +89,17 @@ double ccl_f2d_t_eval(ccl_f2d_t *fka,double lk,double a,void *cosmo,
 		      int *status);
 
 /**
+ * Evaluate logarithmic derivative of 2D function of k and a defined by ccl_f2d_t structure wrt k.
+ * @param fka ccl_f2d_t structure defining f(k,a).
+ * @param lk Natural logarithm of the wavenumber.
+ * @param a Scale factor.
+ * @param cosmo ccl_cosmology structure, only needed if evaluating f(k,a) at small scale factors outside the interpolation range, and if fka was initialized with extrap_linear_growth = ccl_f2d_cclgrowth.
+ * @param status Status flag. 0 if there are no errors, nonzero otherwise.
+ */
+double ccl_f2d_t_dlogf_dlk_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status);
+
+
+/**
  * F2D structure destructor.
  * Frees up all memory associated with a f2d structure.
  * @param fka Structure to be freed.

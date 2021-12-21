@@ -4,10 +4,11 @@ from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
 import pyccl as ccl
+from pyccl import CCLWarning
 
 
 def pk1d(k):
-    return ((k+0.001)/0.1)**(-1)
+    return (k/0.1)**(-1)
 
 
 def grw(a):
@@ -70,7 +71,8 @@ def test_pk2d_smoke():
     assert_(not np.isnan(psp.eval(1E-2, 0.5, cosmo)))
 
 
-@pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu'])
+@pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu',
+                                   'eisenstein_hu_nowiggles'])
 def test_pk2d_from_model(model):
     cosmo_fixed = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
@@ -153,23 +155,31 @@ def test_pk2d_function():
     ptrue = pk2d(ktest, atest)
     phere = psp.eval(ktest, atest, cosmo)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_almost_equal(dphere, -1., 6)
 
     ktest = 1
     atest = 0.5
     ptrue = pk2d(ktest, atest)
     phere = psp.eval(ktest, atest, cosmo)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_almost_equal(dphere, -1., 6)
 
     # Test at array of points
     ktest = np.logspace(-3, 1, 10)
     ptrue = pk2d(ktest, atest)
     phere = psp.eval(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is not logarithmic
     psp = ccl.Pk2D(pkfunc=pk2d, is_logp=False, cosmo=cosmo)
     phere = psp.eval(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is arrays
     karr = np.logspace(-4, 2, 1000)
@@ -179,6 +189,8 @@ def test_pk2d_function():
         a_arr=aarr, lk_arr=np.log(karr), pk_arr=parr, is_logp=False)
     phere = psp.eval(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
+    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
 
 def test_pk2d_cls():
@@ -250,3 +262,105 @@ def test_pk2d_parsing():
     with pytest.raises(ValueError):
         ccl.angular_cl(cosmo, lens1, lens1, ells,
                        p_of_k_a=3)
+
+
+def test_pk2d_get_spline_arrays():
+    empty_pk2d = ccl.Pk2D(empty=True)
+
+    # Pk2D needs splines defined to get splines out
+    with pytest.raises(ValueError):
+        empty_pk2d.get_spline_arrays()
+
+
+def test_pk2d_add():
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    zarr_b = np.outer(-1*x, 4*np.exp(log_y))
+
+    empty_pk2d = ccl.Pk2D(empty=True)
+    pk2d_a = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a),
+                      is_logp=True)
+    pk2d_b = ccl.Pk2D(a_arr=2*x, lk_arr=log_y, pk_arr=zarr_b,
+                      is_logp=False)
+    pk2d_b2 = ccl.Pk2D(a_arr=x, lk_arr=log_y+0.5, pk_arr=zarr_b,
+                       is_logp=False)
+
+    # This raises an error because the a ranges don't match
+    with pytest.raises(ValueError):
+        pk2d_a + pk2d_b
+    # This raises an error because the k ranges don't match
+    with pytest.raises(ValueError):
+        pk2d_a + pk2d_b2
+    # This raises an error because addition with an empty Pk2D should not work
+    with pytest.raises(ValueError):
+        pk2d_a + empty_pk2d
+
+    pk2d_c = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=zarr_b,
+                      is_logp=False)
+
+    pk2d_d = pk2d_a + pk2d_c
+    pk2d_d2 = pk2d_a + 1.0
+    xarr_d, yarr_d, zarr_d = pk2d_d.get_spline_arrays()
+    _, _, zarr_d2 = pk2d_d2.get_spline_arrays()
+
+    assert np.allclose(x, xarr_d)
+    assert np.allclose(log_y, yarr_d)
+    assert np.allclose(zarr_a + zarr_b, zarr_d)
+    assert np.allclose(zarr_a + 1.0, zarr_d2)
+
+    pk2d_e = ccl.Pk2D(a_arr=x[1:-1], lk_arr=log_y[1:-1],
+                      pk_arr=zarr_b[1:-1, 1:-1],
+                      is_logp=False)
+
+    # This raises a warning because the power spectra are not defined on the
+    # same support
+    with pytest.warns(CCLWarning):
+        pk2d_f = pk2d_e + pk2d_a
+
+    xarr_f, yarr_f, zarr_f = pk2d_f.get_spline_arrays()
+
+    assert np.allclose((zarr_a + zarr_b)[1:-1, 1:-1], zarr_f)
+
+
+def test_pk2d_mul_pow():
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    zarr_b = np.outer(-1*x, 4*np.exp(log_y))
+
+    pk2d_a = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a),
+                      is_logp=True)
+    pk2d_b = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=zarr_b,
+                      is_logp=False)
+
+    # This raises an error because multiplication is only defined for
+    # float, int, and Pk2D
+    with pytest.raises(TypeError):
+        pk2d_a*np.array([0.1, 0.2])
+
+    # This raises an error because exponention is only defined for
+    # float and int
+    with pytest.raises(TypeError):
+        pk2d_a**pk2d_b
+
+    # This raises a warning because the power spectrum is non-negative and the
+    # power is non-integer
+    with pytest.warns(CCLWarning):
+        pk2d_b**0.5
+
+    pk2d_g = pk2d_a * pk2d_b
+    pk2d_h = 2*pk2d_a
+    pk2d_i = pk2d_a**1.8
+
+    _, _, zarr_g = pk2d_g.get_spline_arrays()
+    _, _, zarr_h = pk2d_h.get_spline_arrays()
+    _, _, zarr_i = pk2d_i.get_spline_arrays()
+
+    assert np.allclose(zarr_a * zarr_b, zarr_g)
+    assert np.allclose(2 * zarr_a, zarr_h)
+    assert np.allclose(zarr_a**1.8, zarr_i)
+
+    pk2d_j = (pk2d_a + 0.5*pk2d_i)**1.5
+    _, _, zarr_j = pk2d_j.get_spline_arrays()
+    assert np.allclose((zarr_a + 0.5*zarr_i)**1.5, zarr_j)

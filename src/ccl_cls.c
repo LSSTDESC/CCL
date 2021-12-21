@@ -404,7 +404,7 @@ static double cov_integrand(double chi, void *params)
   tkk = ccl_f3d_t_eval(p->tsp, lk1, lk2, a,
                        p->finda, p->cosmo, p->status);
   if(p->ker_extra!=NULL)
-    ker = ccl_f1d_t_eval(p->ker_extra, chi);
+    ker = ccl_f1d_t_eval(p->ker_extra, a);
 
   return d1*d2*d3*d4*tkk*ker/pow(chi, p->chipow);
 }

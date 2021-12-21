@@ -5,7 +5,7 @@ can compute a set of theoretical predictions.
 import warnings
 import numpy as np
 import yaml
-import inspect
+from inspect import getmembers, isfunction, signature
 
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
@@ -19,6 +19,7 @@ from .bcm import bcm_correct_pk2d
 transfer_function_types = {
     None: lib.transfer_none,
     'eisenstein_hu': lib.eisenstein_hu,
+    'eisenstein_hu_nowiggles': lib.eisenstein_hu_nowiggles,
     'bbks': lib.bbks,
     'boltzmann_class': lib.boltzmann_class,
     'boltzmann_camb': lib.boltzmann_camb,
@@ -185,6 +186,7 @@ class Cosmology(object):
         * `HMCode_logT_AGN`
         * `kmax`
         * `lmax`
+        * `dark_energy_model`
 
     Consult the CAMB documentation for their usage. These parameters are passed
     in a :obj:`dict` to `extra_parameters` as::
@@ -193,6 +195,23 @@ class Cosmology(object):
                                      "HMCode_logT_AGN": 7.8}}
 
     """
+    # Go through all functions in the main package and the subpackages
+    # and make every function that takes `cosmo` as its first argument
+    # an attribute of this class.
+    from . import background, bcm, boltzmann, \
+        cls, correlations, covariances, neutrinos, \
+        pk2d, power, tk3d, tracers, halos, nl_pt
+    subs = [background, boltzmann, bcm, cls, correlations, covariances,
+            neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
+    funcs = [getmembers(sub, isfunction) for sub in subs]
+    funcs = [func for sub in funcs for func in sub]
+    for name, func in funcs:
+        pars = signature(func).parameters
+        if list(pars)[0] == "cosmo":
+            vars()[name] = func
+    del background, boltzmann, bcm, cls, correlations, covariances, \
+        neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt
+
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
@@ -300,7 +319,7 @@ class Cosmology(object):
 
         # Get the call signature of Cosmology (i.e., the names of
         # all arguments)
-        init_param_names = inspect.signature(cls).parameters.keys()
+        init_param_names = signature(cls).parameters.keys()
 
         # Read the values we need from the loaded yaml dictionary. Missing
         # values take their default values from Cosmology.__init__
@@ -745,7 +764,7 @@ class Cosmology(object):
 
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
-                ['bbks', 'eisenstein_hu']):
+                ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']):
             warnings.warn(
                 "The '%s' linear power spectrum model does not properly "
                 "account for massive neutrinos!" %
@@ -797,7 +816,7 @@ class Cosmology(object):
                                    "power spectrum using CAMB and specified"
                                    " sigma8 but the non-linear power spectrum "
                                    "cannot be consistenty rescaled.")
-        elif trf in ['bbks', 'eisenstein_hu']:
+        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
             rescale_s8 = False
             rescale_mg = False
             pk = Pk2D.pk_from_model(self,
