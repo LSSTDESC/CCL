@@ -263,37 +263,6 @@ class HMCalculator(object):
         i11 = self._integrate_over_mbf(uk)
         return i11
 
-    def I_1_2(self, cosmo, k, a, prof1, prof_2pt, prof2=None):
-        """ Solves the integral:
-
-        .. math::
-            I^1_1(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
-            \\langle u(k,a|M)\\rangle,
-
-        where :math:`n(M,a)` is the halo mass function,
-        :math:`b(M,a)` is the halo bias, and
-        :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
-        function of scale, scale factor and halo mass.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
-                profile.
-
-        Returns:
-            float or array_like: integral values evaluated at each
-            value of `k`.
-        """
-        # Compute mass function and halo bias
-        self._get_ingredients(a, cosmo, True)
-        uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
-                                  prof2=prof2,
-                                  mass_def=self._mdef).T
-        i12 = self._integrate_over_mbf(uk)
-        return i12
-
     def I_1_3(self, cosmo, k, a, prof1, prof_3pt, prof2=None, prof3=None):
         """ Solves the integral:
 
@@ -401,8 +370,8 @@ class HMCalculator(object):
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
                                   mass_def=self._mdef).T
-        i02 = self._integrate_over_mbf(uk)
-        return i02
+        i12 = self._integrate_over_mbf(uk)
+        return i12
 
     def I_0_22(self, cosmo, k, a,
                prof1, prof12_2pt, prof2=None,
@@ -957,6 +926,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
         out = np.squeeze(out, axis=-1)
     return out
 
+
 def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
                               prof3=None, prof4=None, prof12_2pt=None,
                               prof13_2pt=None, prof14_2pt=None,
@@ -971,7 +941,8 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
 
     .. math::
         T^{2h}_{22}_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
-        P_lin(|k_{u_1} + k_{u_2}|) * I^1_2(k_{u_1}, k_{u_2}|u}) * I^1_2(k_{v_1}, k_{v_2}|v}) + 2 perm
+        P_lin(|k_{u_1} + k_{u_2}|)\\,  I^1_2(k_{u_1}, k_{u_2}|u})\\,
+        I^1_2(k_{v_1}, k_{v_2}|v}) + 2 perm
 
     where :math:`I^1_2` is defined in the documentation
     of :meth:`~HMCalculator.I_1_2`.
@@ -1120,6 +1091,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         out = np.squeeze(out, axis=-1)
     return out
 
+
 def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
                               prof2=None, prof3=None, prof4=None,
                               prof234_3pt=None, prof134_3pt=None,
@@ -1133,7 +1105,8 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
 
     .. math::
         T^{2h}_{13}_{u_1,u_2,v_1,v_2}(k_u,k_v,a) =
-        P_lin(k_u) * I^1_1(k_{u_1}|u_1) * I^1_3(k_{u_1}, k_{v_1}, k_{v_2}|u_1, v}) + 3 perm
+        P_lin(k_u)\\, I^1_1(k_{u_1}|u_1)\\,
+        I^1_3(k_{u_1}, k_{v_1}, k_{v_2}|u_1, v}) + 3 perm
 
     where :math:`I^1_1` is defined in the documentation of
     :meth:`~HMCalculator.I_1_1` and :math:`I^1_3` is defined in the
@@ -1208,19 +1181,19 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
 
     if prof234_3pt is None:
         prof234_3pt = Profile3pt()
-    elif not isinstance(prof234_3pt , Profile3pt):
+    elif not isinstance(prof234_3pt, Profile3pt):
         raise TypeError("prof234_3pt must be of type `Profile3pt` or `None`")
     if prof134_3pt is None:
         prof134_3pt = prof234_3pt
-    elif not isinstance(prof134_3pt , Profile3pt):
+    elif not isinstance(prof134_3pt, Profile3pt):
         raise TypeError("prof134_3pt must be of type `Profile3pt` or `None`")
     if prof214_3pt is None:
         prof214_3pt = prof234_3pt
-    elif not isinstance(prof214_3pt , Profile3pt):
+    elif not isinstance(prof214_3pt, Profile3pt):
         raise TypeError("prof214_3pt must be of type `Profile3pt` or `None`")
     if prof231_3pt is None:
         prof231_3pt = prof234_3pt
-    elif not isinstance(prof231_3pt , Profile3pt):
+    elif not isinstance(prof231_3pt, Profile3pt):
         raise TypeError("prof231_3pt must be of type `Profile3pt` or `None`")
 
     def get_norm(normprof, prof, sf):
@@ -1277,7 +1250,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i134 = hmc.I_1_3(cosmo, k_use, aa, prof1, prof134_3pt, prof2=prof3,
                          prof3=prof4)
-        ### Attention to axis order change!
+        # Attention to axis order change!
         # Permutation 2
         p3 = p1.T
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
@@ -1304,6 +1277,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
         out = np.squeeze(out, axis=-1)
         out = np.squeeze(out, axis=-1)
     return out
+
 
 def halomod_Tk3D_2h(cosmo, hmc,
                     prof1, p1_of_k_a, p12_of_k_a, prof2=None, prof12_2pt=None,
@@ -1420,8 +1394,10 @@ def halomod_Tk3D_2h(cosmo, hmc,
     #                              p_of_k_a, prof1, prof2=prof2,
     #                              prof12_2pt=prof12_2pt, prof3=prof3,
     #                              prof4=prof4, prof13_2pt=prof13_2pt,
-    #                              prof14_2pt=prof14_2pt, prof24_2pt=prof24_2pt,
-    #                              prof32_2pt=prof32_2pt, prof34_2pt=prof34_2pt,
+    #                              prof14_2pt=prof14_2pt,
+    #                              prof24_2pt=prof24_2pt,
+    #                              prof32_2pt=prof32_2pt,
+    #                              prof34_2pt=prof34_2pt,
     #                              normprof1=normprof1, normprof2=normprof2,
     #                              normprof3=normprof3, normprof4=normprof4)
 
@@ -1454,6 +1430,7 @@ def halomod_Tk3D_2h(cosmo, hmc,
                 extrap_order_lok=extrap_order_lok,
                 extrap_order_hik=extrap_order_hik, is_logt=use_log)
     return tk3d
+
 
 def halomod_Tk3D_1h(cosmo, hmc,
                     prof1, prof2=None, prof12_2pt=None,
