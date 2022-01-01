@@ -14,6 +14,7 @@ from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
 import numpy as np
+import scipy
 
 physical_constants = lib.cvar.constants
 
@@ -934,10 +935,8 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
                               prof34_2pt=None, normprof1=False,
                               normprof2=False, normprof3=False,
                               normprof4=False):
-    """ Computes the halo model 1-halo trispectrum for four different
-    quantities defined by their respective halo profiles. The 2-halo
-    trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
-    calculated as:
+    """ Computes the halo model 2-halo trispectrum for four profiles
+    :math:`u_{1,2}`, :math:`v_{1,2}` is calculated as:
 
     .. math::
         T^{2h}_{22}_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
@@ -945,7 +944,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         I^1_2(k_{v_1}, k_{v_2}|v}) + 2 perm
 
     where :math:`I^1_2` is defined in the documentation
-    of :meth:`~HMCalculator.I_1_2`.
+    of :math:`~HMCalculator.I_1_2`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -1003,6 +1002,15 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     """
     a_use = np.atleast_1d(a)
     k_use = np.atleast_1d(k)
+    # We only need to compute the independent k * k * cos(theta). Since Pk only
+    # depends on the module of ki + kj, we just need to integrate from 0 to
+    # pi/2 and multiply by 4.
+    theta = np.linspace(0, np.pi/2, 100)
+    dtheta = theta[1] - theta[0]
+    cth = np.cos(theta)
+
+    kkth = k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
+    kkth = kkth.flatten()
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
@@ -1029,24 +1037,26 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         else:
             return 1
 
+    na = len(a_use)
+    nk = len(k_use)
+
     # Power spectrum
-    def get_pk(p_of_k_a):
+    def get_isotropized_pk(p_of_k_a, kkth, aa):
         if isinstance(p_of_k_a, Pk2D):
-            def pkf(sf):
-                return p_of_k_a.eval(k_use, sf, cosmo)
+            pk = p_of_k_a.eval(kkth, aa, cosmo)
         elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
-            def pkf(sf):
-                return linear_matter_power(cosmo, k_use, sf)
+            pk = linear_matter_power(cosmo, kkth, aa)
         elif str(p_of_k_a) == 'nonlinear':
-            def pkf(sf):
-                return nonlin_matter_power(cosmo, k_use, sf)
+            pk = nonlin_matter_power(cosmo, kkth, aa)
         else:
             raise TypeError("p_of_k_a must be `None`, \'linear\', "
                             "\'nonlinear\' or a `Pk2D` object")
-        return pkf
 
-    na = len(a_use)
-    nk = len(k_use)
+        pk = pk.reshape((nk, nk, theta.size))
+        int_pk = scipy.integrate.romb(pk, dtheta, axis=-1)
+        # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
+        return -2 * np.pi * 4 * int_pk
+
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
         # Compute profile normalizations
@@ -1068,17 +1078,24 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         norm = norm1 * norm2 * norm3 * norm4
 
         # Compute trispectrum at this redshift
-        p12 = get_pk(p_of_k_a)(aa)
-        i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2)
-        i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof2=prof4)
+        p12 = get_isotropized_pk(p_of_k_a, 0 * kkth, aa)
+        i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt,
+                        prof2=prof2)[:, None]
+        i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt,
+                        prof2=prof4)[None, :]
         # Permutation 1
-        p13 = p12
-        i13 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof13_2pt, prof2=prof3)
-        i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4)
+        p13 = get_isotropized_pk(p_of_k_a, kkth, aa)
+        i13 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof13_2pt, prof2=prof3,
+                        diag=False)
+        i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4,
+                        diag=False)
         # Permutation 2
-        p14 = p12
-        i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4)
-        i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2)
+        # The minus sign comes from the fact taht k_4 = -k_3
+        p14 = -p13
+        i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4,
+                        diag=False)
+        i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2,
+                        diag=False)
 
         tk_2h_22 = p12 * i12 * i34 + p13 * i13 * i24 + p14 * i14 * i32
         # Normalize

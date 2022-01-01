@@ -34,7 +34,7 @@ class Profile2pt(object):
             self.r_corr = r_corr
 
     def fourier_2pt(self, prof, cosmo, k, M, a,
-                    prof2=None, mass_def=None):
+                    prof2=None, mass_def=None, diag=True):
         """ Return the Fourier-space two-point moment between
         two profiles.
 
@@ -81,7 +81,10 @@ class Profile2pt(object):
 
             uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
 
-        return uk1 * uk2 * (1 + self.r_corr)
+        if diag:
+            return uk1 * uk2 * (1 + self.r_corr)
+        else:
+            return uk1[:, None] * uk2[None, :] * (1 + self.r_corr)
 
 
 class Profile2ptHOD(Profile2pt):
