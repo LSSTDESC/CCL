@@ -935,8 +935,15 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
                               prof34_2pt=None, normprof1=False,
                               normprof2=False, normprof3=False,
                               normprof4=False):
-    """ Computes the halo model 2-halo trispectrum for four profiles
-    :math:`u_{1,2}`, :math:`v_{1,2}` is calculated as:
+    """ Computes the isotropized halo model 2-halo trispectrum for four profiles
+    :math:`u_{1,2}`, :math:`v_{1,2}` as
+
+    .. math::
+        \\bar{T}^{2h}_{22}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
+        \\int \\frac{d\\varphi_2}{2\\pi}
+        T^{2h}_{22}({\\bf k_1},-{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
+
+    with
 
     .. math::
         T^{2h}_{22}_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
@@ -1010,7 +1017,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     cth = np.cos(theta)
 
     kkth = k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
-    kkth = kkth.flatten()
+    kkth = np.sqrt(kkth.flatten())
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
@@ -1042,6 +1049,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
 
     # Power spectrum
     def get_isotropized_pk(p_of_k_a, kkth, aa):
+        # This returns int dphi / 2pi int dphi' / 2pi P(kkth)
         if isinstance(p_of_k_a, Pk2D):
             pk = p_of_k_a.eval(kkth, aa, cosmo)
         elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
@@ -1055,7 +1063,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         pk = pk.reshape((nk, nk, theta.size))
         int_pk = scipy.integrate.romb(pk, dtheta, axis=-1)
         # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
-        return -2 * np.pi * 4 * int_pk
+        return - 4 * int_pk / 2 * np.pi
 
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
@@ -1078,11 +1086,12 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         norm = norm1 * norm2 * norm3 * norm4
 
         # Compute trispectrum at this redshift
-        p12 = get_isotropized_pk(p_of_k_a, 0 * kkth, aa)
-        i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt,
-                        prof2=prof2)[:, None]
-        i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt,
-                        prof2=prof4)[None, :]
+        # P(k1 - k1 = 0) = 0
+        # p12 = get_isotropized_pk(p_of_k_a, 0 * kkth, aa)
+        # i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt,
+        #                 prof2=prof2)[:, None]
+        # i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt,
+        #                 prof2=prof4)[None, :]
         # Permutation 1
         p13 = get_isotropized_pk(p_of_k_a, kkth, aa)
         i13 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof13_2pt, prof2=prof3,
@@ -1090,14 +1099,15 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4,
                         diag=False)
         # Permutation 2
-        # The minus sign comes from the fact taht k_4 = -k_3
+        # The minus sign comes from the fact that k_4 = -k_3
         p14 = -p13
         i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4,
                         diag=False)
         i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2,
                         diag=False)
 
-        tk_2h_22 = p12 * i12 * i34 + p13 * i13 * i24 + p14 * i14 * i32
+        # tk_2h_22 = p12 * i12 * i34 + p13 * i13 * i24 + p14 * i14 * i32
+        tk_2h_22 = p13 * i13 * i24 + p14 * i14 * i32
         # Normalize
         out[ia, :, :] = tk_2h_22 * norm
 
@@ -1115,7 +1125,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
                               prof214_3pt=None, prof231_3pt=None,
                               normprof1=False, normprof2=False,
                               normprof3=False, normprof4=False):
-    """ Computes the halo model 2-halo trispectrum for four different
+    """ Computes the isotropized halo model 2-halo trispectrum for four different
     quantities defined by their respective halo profiles. The 2-halo
     trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
     calculated as:
@@ -1127,7 +1137,13 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
 
     where :math:`I^1_1` is defined in the documentation of
     :meth:`~HMCalculator.I_1_1` and :math:`I^1_3` is defined in the
-    documentation of :meth:`~HMCalculator.I_1_3`.
+    documentation of :meth:`~HMCalculator.I_1_3`. Then, this function returns
+
+    .. math::
+        \\bar{T}^{2h}_{13}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
+        \\int \\frac{d\\varphi_2}{2\\pi}
+        T^{1h}_{13}({\\bf k_1},-{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
+
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -1136,7 +1152,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
         a (float or array_like): scale factor.
         prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
-        p1_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum for :math:`u`. If
             `None`, the power spectrum stored within `cosmo` will be used.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
@@ -1166,7 +1182,6 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
         normprof4 (bool): same as `normprof1` for `prof4`.
-        p3_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for :math:`v`
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -1297,14 +1312,12 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
 
 
 def halomod_Tk3D_2h(cosmo, hmc,
-                    prof1, p1_of_k_a, p12_of_k_a, prof2=None, prof12_2pt=None,
+                    prof1, p_of_k_a, prof2=None, prof12_2pt=None,
                     prof3=None, prof4=None,
                     prof13_2pt=None, prof14_2pt=None,
                     prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
                     prof234_3pt=None, prof134_3pt=None,
                     prof214_3pt=None, prof231_3pt=None,
-                    p13_of_k_a=None, p14_of_k_a=None,
-                    p2_of_k_a=None, p3_of_k_a=None, p4_of_k_a=None,
                     normprof1=False, normprof2=False,
                     normprof3=False, normprof4=False,
                     lk_arr=None, a_arr=None,
@@ -1319,14 +1332,9 @@ def halomod_Tk3D_2h(cosmo, hmc,
         hmc (:class:`HMCalculator`): a halo model calculator.
         prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
-        p1_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum for 1 (corresponding
-            to :math:`u_1`). If `None`, the power spectrum stored within
-            `cosmo` will be used.
-        p12_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum for 12 (corresponding
-            to :math:`u_1`). If `None`, the power spectrum stored within
-            `cosmo` will be used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`, the power
+            spectrum stored within `cosmo` will be used.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
             `prof1` will be used as `prof2`.
@@ -1364,9 +1372,6 @@ def halomod_Tk3D_2h(cosmo, hmc,
             same as `prof12_2pt` for `prof2`, `prof3` and `prof1`.
         p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
         p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
-        p2_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 2
-        p3_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 3
-        p4_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p1_of_k_a for 4
         normprof1 (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.I_0_1`), where
@@ -1407,19 +1412,19 @@ def halomod_Tk3D_2h(cosmo, hmc,
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
         check(status)
 
-    # tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
-    #                              p_of_k_a, prof1, prof2=prof2,
-    #                              prof12_2pt=prof12_2pt, prof3=prof3,
-    #                              prof4=prof4, prof13_2pt=prof13_2pt,
-    #                              prof14_2pt=prof14_2pt,
-    #                              prof24_2pt=prof24_2pt,
-    #                              prof32_2pt=prof32_2pt,
-    #                              prof34_2pt=prof34_2pt,
-    #                              normprof1=normprof1, normprof2=normprof2,
-    #                              normprof3=normprof3, normprof4=normprof4)
+    tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                 p_of_k_a, prof1, prof2=prof2,
+                                 prof12_2pt=prof12_2pt, prof3=prof3,
+                                 prof4=prof4, prof13_2pt=prof13_2pt,
+                                 prof14_2pt=prof14_2pt,
+                                 prof24_2pt=prof24_2pt,
+                                 prof32_2pt=prof32_2pt,
+                                 prof34_2pt=prof34_2pt,
+                                 normprof1=normprof1, normprof2=normprof2,
+                                 normprof3=normprof3, normprof4=normprof4)
 
     tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                          p1_of_k_a, prof1, prof2=prof2,
+                                          p_of_k_a, prof1, prof2=prof2,
                                           prof3=prof3, prof4=prof4,
                                           prof234_3pt=prof234_3pt,
                                           prof134_3pt=prof134_3pt,
@@ -1430,8 +1435,7 @@ def halomod_Tk3D_2h(cosmo, hmc,
                                           normprof3=normprof3,
                                           normprof4=normprof4)
 
-    # tkk = tkk_2h_22 + tkk_2h_13
-    tkk = tkk_2h_13
+    tkk = tkk_2h_22 + tkk_2h_13
 
     if use_log:
         if np.any(tkk <= 0):
