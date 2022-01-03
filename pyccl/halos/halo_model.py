@@ -1016,8 +1016,13 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
-    kkth = k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
-    kkth = np.sqrt(kkth.flatten())
+    k13 = k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 + \
+           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
+    k13 = np.sqrt(k13.flatten())
+
+    k14 = k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 - \
+           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
+    k14 = np.sqrt(k14.flatten())
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
@@ -1048,14 +1053,14 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     nk = len(k_use)
 
     # Power spectrum
-    def get_isotropized_pk(p_of_k_a, kkth, aa):
-        # This returns int dphi / 2pi int dphi' / 2pi P(kkth)
+    def get_isotropized_pk(p_of_k_a, kk, aa):
+        # This returns int dphi / 2pi int dphi' / 2pi P(kk)
         if isinstance(p_of_k_a, Pk2D):
-            pk = p_of_k_a.eval(kkth, aa, cosmo)
+            pk = p_of_k_a.eval(kk, aa, cosmo)
         elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
-            pk = linear_matter_power(cosmo, kkth, aa)
+            pk = linear_matter_power(cosmo, kk, aa)
         elif str(p_of_k_a) == 'nonlinear':
-            pk = nonlin_matter_power(cosmo, kkth, aa)
+            pk = nonlin_matter_power(cosmo, kk, aa)
         else:
             raise TypeError("p_of_k_a must be `None`, \'linear\', "
                             "\'nonlinear\' or a `Pk2D` object")
@@ -1063,7 +1068,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         pk = pk.reshape((nk, nk, theta.size))
         int_pk = scipy.integrate.romb(pk, dtheta, axis=-1)
         # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
-        return - 4 * int_pk / 2 * np.pi
+        return - 4 * int_pk / (2 * np.pi)
 
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
@@ -1093,14 +1098,13 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         # i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt,
         #                 prof2=prof4)[None, :]
         # Permutation 1
-        p13 = get_isotropized_pk(p_of_k_a, kkth, aa)
+        p13 = get_isotropized_pk(p_of_k_a, k13, aa)
         i13 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof13_2pt, prof2=prof3,
                         diag=False)
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4,
                         diag=False)
         # Permutation 2
-        # The minus sign comes from the fact that k_4 = -k_3
-        p14 = -p13
+        p14 = get_isotropized_pk(p_of_k_a, k14, aa)
         i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4,
                         diag=False)
         i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2,
@@ -1394,6 +1398,20 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     """
     a_use = np.atleast_1d(a)
     k_use = np.atleast_1d(k)
+    # We only need to compute the independent k * k * cos(theta). Since Pk only
+    # depends on the module of ki + kj, we just need to integrate from 0 to
+    # pi/2 and multiply by 4.
+    theta = np.linspace(0, np.pi/2, 100)
+    dtheta = theta[1] - theta[0]
+    cth = np.cos(theta)
+
+    k13 = k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 + \
+           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
+    k13 = k24 = np.sqrt(k13.flatten())
+
+    k14 = k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 - \
+           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
+    k14 = k23 = np.sqrt(k14.flatten())
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
@@ -1424,23 +1442,41 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     nk = len(k_use)
 
     # Power spectrum
-    def get_Bpt(p_of_k_a, kkth, aa):
+    def get_pk(k, a):
         # This returns int dphi / 2pi int dphi' / 2pi P(kkth)
         if isinstance(p_of_k_a, Pk2D):
-            pk = p_of_k_a.eval(kkth, aa, cosmo)
+            pk = p_of_k_a.eval(k, a, cosmo)
         elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
-            pk = linear_matter_power(cosmo, kkth, aa)
+            pk = linear_matter_power(cosmo, k, a)
         elif str(p_of_k_a) == 'nonlinear':
-            pk = nonlin_matter_power(cosmo, kkth, aa)
+            pk = nonlin_matter_power(cosmo, k, a)
         else:
             raise TypeError("p_of_k_a must be `None`, \'linear\', "
                             "\'nonlinear\' or a `Pk2D` object")
 
-        pk = pk.reshape((nk, nk, theta.size))
-        int_pk = scipy.integrate.romb(pk, dtheta, axis=-1)
+        return pk
+
+    def get_F2(k1, k2, theta12=180):
+        if theta12 == 180:
+            F2 = 5 / 7. - 0.5 * (k1 * k2) / (k1**2 + k2**2) + 2 / 7.
+            F2 = F2[:, None, None]
+        else:
+            k1 = k1[:, :, None]
+            k2 = k2[:, :, None]
+            F2 = 5 / 7. + \
+                 0.5 * (k1 * k2 * cth[None, None, :]) / (k1**2 + k2**2) + \
+                 2 / 7. * cth[None, None, :]**2
+
+        return F2
+
+    def isotropize_this(arr):
+        # This returns int dphi / 2pi int dphi' / 2pi Bpt
+        int_pk = scipy.integrate.romb(arr, dtheta, axis=-1)
         # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
         return - 4 * int_pk / 2 * np.pi
 
+    k1 = k2 = k_use[:, None]
+    k3 = k4 = k1.T
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
         # Compute profile normalizations
@@ -1462,47 +1498,64 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         norm = norm1 * norm2 * norm3 * norm4
 
         # Compute trispectrum at this redshift
+        p1 = p2 = get_pk(k_use, a)[:, None]
+        p3 = p4 = p1.T
+        p13 = p24 = get_pk(k13, a).reshape((nk, nk, theta.size))
+        p14 = p23 = get_pk(k14, a).reshape((nk, nk, theta.size))
+
         # Permutation 0
-        Bpt_1_2_34 = None
+        Bpt_1_2_34 = 2 * isotropize_this(get_F2(k_use, k_use, 180) * p1 ** 2)
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof2=prof4,
-                        diag=True)
+                        diag=True)[None, :]
 
         # Permutation 1: 2 <-> 3
-        Bpt_1_3_24 = None
+        Bpt_1_3_24 = 2 * isotropize_this(get_F2(k1, k3, None) * p1 * p3 +
+                                         get_F2(k1, k24, None) * p1 * p24 +
+                                         get_F2(k2, k24, None) * p2 * p24
+                                     )
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
-        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[:, None]
+        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4,
-                        diag=True)
+                        diag=False)
 
         # Permutation 2: 2 <-> 4
-        Bpt_1_4_32 = None
+        Bpt_1_4_32 = 2 * isotropize_this(get_F2(k1, k3, None) * p1 * p3 +
+                                         get_F2(k1, k23, None) * p1 * p23 +
+                                         get_F2(k3, k23, None) * p3 * p23
+                                     )
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[:, None]
+        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
         i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2,
-                        diag=True)
+                        diag=False)
 
         # Permutation 3: 1 <-> 3
-        Bpt_3_2_14 = None
-        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[:, None]
+        Bpt_3_2_14 = 2 * isotropize_this(get_F2(k1, k3, None) * p1 * p3 +
+                                         get_F2(k3, k14, None) * p3 * p14 +
+                                         get_F2(k1, k14, None) * p1 * p14
+                                     )
+        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4,
-                        diag=True)
+                        diag=False)
 
         # Permutation 4: 1 <-> 4
-        Bpt_4_2_31 = None
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[:, None]
+        Bpt_4_2_31 = 2 * isotropize_this(get_F2(k1, k3, None) * p1 * p3 +
+                                         get_F2(k3, k13, None) * p3 * p13 +
+                                         get_F2(k1, k13, None) * p1 * p13
+                                     )
+        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i31 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof13_2pt, prof2=prof1,
-                        diag=True)
+                        diag=False)
 
         # Permutation 5: 12 <-> 34
-        Bpt_3_4_12 = None
-        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[:, None]
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[:, None]
+        Bpt_3_4_12 = 2 * isotropize_this(get_F2(k_use, k_use, None) * p3 ** 2)
+        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
         i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2,
-                        diag=True)
+                        diag=True)[:, None]
 
         tk_3h = None
         # Normalize
