@@ -1561,6 +1561,222 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         out = np.squeeze(out, axis=-1)
     return out
 
+def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
+                           prof3=None, prof4=None, normprof1=False,
+                           normprof2=False, normprof3=False, normprof4=False):
+    """ Computes the isotropized halo model 4-halo trispectrum for four profiles
+    :math:`u_{1,2}`, :math:`v_{1,2}` as
+
+    .. math::
+        \\bar{T}^{4h}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
+        \\int \\frac{d\\varphi_2}{2\\pi}
+        T^{4h}({\\bf k_1},-{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
+
+    with
+
+    .. math::
+        T^{3h}{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
+        T^{PT}({\bf k_{u_1}}, {\bf k_{u_2}}, {\bf k_{v_1}}, {\bf k_{v_2}}) \\,
+        I^1_1(k_{u_1} | u) I^1_1(k_{u_2} | u) I^1_1(k_{v_1} | v) I^1_1(k_{v_2} | v) \\,
+
+    where :math:`I^1_1` is defined in the documentation
+    of :math:`~HMCalculator.I_1_1` and :math:`P^{PT}` can be found in Eq. 30
+    of arXiv:1302.6994.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        hmc (:class:`HMCalculator`): a halo model calculator.
+        k (float or array_like): comoving wavenumber in Mpc^-1.
+        a (float or array_like): scale factor.
+        prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_1` above.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`, the power
+            spectrum stored within `cosmo` will be used.
+        prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_2` above. If `None`,
+            `prof1` will be used as `prof2`.
+        prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_1` above. If `None`,
+            `prof1` will be used as `prof3`.
+        prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_2` above. If `None`,
+            `prof3` will be used as `prof4`.
+        normprof1 (bool): if `True`, this integral will be
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
+            (see :meth:`~HMCalculator.I_0_1`), where
+            :math:`u` is the profile represented by `prof1`.
+        normprof2 (bool): same as `normprof1` for `prof2`.
+        normprof3 (bool): same as `normprof1` for `prof3`.
+        normprof4 (bool): same as `normprof1` for `prof4`.
+
+    Returns:
+        float or array_like: integral values evaluated at each
+        combination of `k` and `a`. The shape of the output will
+        be `(N_a, N_k, N_k)` where `N_k` and `N_a` are the sizes of
+        `k` and `a` respectively. The ordering is such that
+        `output[ia, ik2, ik1] = T(k[ik1], k[ik2], a[ia])`
+        If `k` or `a` are scalars, the corresponding dimension will
+        be squeezed out on output.
+    """
+    k_orig = k.copy()
+    a_use = np.atleast_1d(a)
+    k_use = np.atleast_1d(k)
+
+    # Check inputs
+    if not isinstance(prof1, HaloProfile):
+        raise TypeError("prof1 must be of type `HaloProfile`")
+    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
+    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
+        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
+    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
+        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
+
+    def get_norm(normprof, prof, sf):
+        if normprof:
+            return hmc.profile_norm(cosmo, sf, prof)
+        else:
+            return 1
+
+    na = len(a_use)
+    nk = len(k_use)
+
+    # Power spectrum
+    def get_pk(k, a):
+        # This returns int dphi / 2pi int dphi' / 2pi P(kkth)
+        if isinstance(p_of_k_a, Pk2D):
+            pk = p_of_k_a.eval(k, a, cosmo)
+        elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+            pk = linear_matter_power(cosmo, k, a)
+        elif str(p_of_k_a) == 'nonlinear':
+            pk = nonlin_matter_power(cosmo, k, a)
+        else:
+            raise TypeError("p_of_k_a must be `None`, \'linear\', "
+                            "\'nonlinear\' or a `Pk2D` object")
+
+        return pk
+
+
+    # We only need to compute the independent k * k * cos(theta). Since Pk only
+    # depends on the module of ki + kj, we just need to integrate from 0 to
+    # pi/2 and multiply by 4.
+    theta = np.linspace(0, np.pi/2, 100)
+    dtheta = theta[1] - theta[0]
+    cth = np.cos(theta)[None, None, :]
+
+    k = k_use[:, None, None]
+    kp = k_use[None, :, None]
+    ks2_p = k ** 2 + kp ** 2 + 2 * k * kp * cth
+    ks2_m = k ** 2 + kp ** 2 - 2 * k * kp * cth
+
+    # We only need 4 F2's
+    # F2(k + k', -k).
+    F2_ppm = (5./7 - 0.5 * (1 / k**2 + 1 / ks2_p) * (k * kp * cth + k ** 2) + \
+          2/7. * (k + kp * cth) ** 2 / ks2_p)
+
+    # F2(k - k', -k)
+    F2_pmm = (5./7 + 0.5 * (1 / k**2 + 1 / ks2_p) * (k * kp * cth - k ** 2) + \
+          2/7. * (-k + kp * cth) ** 2 / ks2_m)
+
+    # F2(-k + k', -k)
+    F2_mpm = (5./7 + 0.5 * (1 / k**2 + 1 / ks2_p) * (-k * kp * cth + k ** 2) + \
+          2/7. * (k - kp * cth) ** 2 / ks2_m)
+
+    # F2(k + k', k)
+    F2_ppp = (5./7 + 0.5 * (1 / k**2 + 1 / ks2_p) * (k * kp * cth + k ** 2) + \
+          2/7. * (k + kp * cth) ** 2 / ks2_p)
+
+    def isotropize(arr):
+        int_arr = scipy.integrate.romb(arr, dtheta, axis=-1)
+        # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
+        return - 4 * int_arr / (2 * np.pi)
+
+    out = np.zeros([na, nk, nk])
+    for ia, aa in enumerate(a_use):
+        # Compute profile normalizations
+        norm1 = get_norm(normprof1, prof1, aa)
+        # Compute second profile normalization
+        if prof2 is None:
+            norm2 = norm1
+        else:
+            norm2 = get_norm(normprof2, prof2, aa)
+        if prof3 is None:
+            norm3 = norm1
+        else:
+            norm3 = get_norm(normprof3, prof3, aa)
+        if prof4 is None:
+            norm4 = norm3
+        else:
+            norm4 = get_norm(normprof4, prof4, aa)
+
+        norm = norm1 * norm2 * norm3 * norm4
+
+        Pk = get_pk(k_use, aa)[:, None, None]
+        Pkp = np.transpose(Pk, (1, 0))
+        Pks_p = get_pk(np.sqrt(ks2_p).flatten, aa).reshape((nk, nk, -1))
+        Pks_m = get_pk(np.sqrt(ks2_m).flatten, aa).reshape((nk, nk, -1))
+
+        # First summand of the trispectrum
+        # Permutation 0: 13 12
+        S1_13_12 = isotropize(F2_ppm ** 2 * Pks_p * Pk ** 2)
+
+        # Permutation 1: 23 21 (= 13 12 with k -> -k or cth -> -cth)
+        S1_23_21 = isotropize(F2_pmm ** 2 * Pks_m * Pk ** 2)
+
+        # Permutation 2: 31 32 (= F2(k+k', -k) * F2(k+k', -k)^t (k<->k')
+        S1_31_32 = isotropize(F2_ppm * np.transpose(F2_ppm, (1, 0)) * Pks_m *
+                              Pkp * Pk)
+
+        # Permutation 3: 43 42 (= 0)
+
+        # Permutation 4: 12 13 (= 0)
+
+        # Permutation 5: 13 14 (= 31 32)
+        S1_13_14 = S1_31_32
+
+        # Permutation 6: 14 12 (= 23 21)
+        S1_14_12 = S1_23_21
+
+        # Permutation 7: 14 12 (= 23 21)
+        S1_14_12 = S1_23_21
+
+        # Permutation 8: 21 23 (= 0)
+
+        # Permutation 9: 32 31 (= 31 32 with k -> -k or cth -> -cth)
+        S1_32_31 = isotropize(np.transpose(F2_pmm, (1, 0)) * F2_pmm * Pks_m *
+                              Pkp * Pk)
+
+        # Permutation 10: 42 43 (= 13 12 with k <-> k')
+        S1_42_43 = S1_13_12.T
+
+        # Permutation 11: 14 13 (= 31 31 with k <-> k')
+        S1_42_43 = S1_32_31.T
+
+        S1 = S1_13_12 + S1_23_21 + S1_31_32 + S1_13_14 + S1_14_12 + S1_14_12 +\
+             S1_32_31 + S1_42_43 + S1_42_43
+
+        # Second summand of the trispectrum
+        S2 = 0
+
+        # Now the halo model integrals
+        i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
+        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
+        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
+
+        tk_4h = (S1 + S2) * i1 * i2 * i3 * i4
+
+
+        # Normalize
+        out[ia, :, :] = tk_4h * norm
+
+    if np.ndim(a) == 0:
+        out = np.squeeze(out, axis=0)
+    if np.ndim(k) == 0:
+        out = np.squeeze(out, axis=-1)
+        out = np.squeeze(out, axis=-1)
+    return out
 
 def halomod_Tk3D_2h(cosmo, hmc,
                     prof1, p_of_k_a, prof2=None, prof12_2pt=None,
