@@ -1398,20 +1398,6 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     """
     a_use = np.atleast_1d(a)
     k_use = np.atleast_1d(k)
-    # We only need to compute the independent k * k * cos(theta). Since Pk only
-    # depends on the module of ki + kj, we just need to integrate from 0 to
-    # pi/2 and multiply by 4.
-    theta = np.linspace(0, np.pi/2, 100)
-    dtheta = theta[1] - theta[0]
-    cth = np.cos(theta)
-
-    k13 = k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 + \
-           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
-    k13 = k24 = np.sqrt(k13.flatten())
-
-    k14 = k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 - \
-           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
-    k14 = k23 = np.sqrt(k14.flatten())
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
@@ -1456,24 +1442,44 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
 
         return pk
 
-    def get_F2(k1, k2, theta12=180):
-        if theta12 == 180:
-            F2 = 5 / 7. - 0.5 * (k1 * k2) / (k1**2 + k2**2) + 2 / 7.
-            F2 = F2[:, None, None]
-        else:
-            k1 = k1[:, :, None]
-            k2 = k2[:, :, None]
-            F2 = 5 / 7. + \
-                 0.5 * (k1 * k2 * cth[None, None, :]) / (k1**2 + k2**2) + \
-                 2 / 7. * cth[None, None, :]**2
+    def get_Bpt_1_3_24(a, int_minus_theta=False):
+        # We only need to compute the independent k * k * cos(theta). Since Pk only
+        # depends on the module of ki + kj, we just need to integrate from 0 to
+        # pi/2 and multiply by 4.
+        theta = np.linspace(0, np.pi/2, 100)
+        dtheta = theta[1] - theta[0]
+        cth = np.cos(theta)[None, None, :]
 
-        return F2
+        k = k_use[:, None, None]
+        kp = k_use[None, :, None]
+        ks2 = k ** 2 + kp ** 2 + 2 * k * kp * cth
 
-    def isotropize_this(arr):
-        # This returns int dphi / 2pi int dphi' / 2pi Bpt
-        int_pk = scipy.integrate.romb(arr, dtheta, axis=-1)
+        # F2_1 is already analytically integrated
+        F2_1 = (5 + 2 * np.pi) / (7 * 4 * np.pi ** 2) * np.ones((nk, nk))
+        # F2
+        S1 = -0.5 * (1 / k**2 + 1 / ks2) * (k * kp * cth + k ** 2)
+        S2 = + 2/7. * (k + kp * cth) ** 2 / ks2
+        F2_2 = (5./7 + S1 + S2)
+        # F3 = F2 with k <-> k'
+        F2_3 = np.transpose(F2_2, (1, 0))
+
+        P_1 = get_pk(k_use, a)[:, None]
+        P_3 = P_1.T
+        P_24 = get_pk(np.sqrt(ks2).flatten(), a).reshape((nk, nk, -1))
+        Bpt =  F2_2 * P_1 * P_24 + F2_3 * P_3 * P_24
+
         # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
-        return - 4 * int_pk / 2 * np.pi
+        Bpt = - 4 * scipy.integrate.romb(Bpt, dtheta, axis=-1) / (2 * np.pi)
+
+        if int_minus_theta:
+            # To compute Bpt_1_4_32
+            Bpt *= -1
+
+        Bpt += F2_1 * P_1 * P_3
+
+        # Multiply by the factor 2 that we have been omitting until now
+        return 2 * Bpt
+
 
     k1 = k2 = k_use[:, None]
     k3 = k4 = k1.T
@@ -1497,67 +1503,54 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
 
         norm = norm1 * norm2 * norm3 * norm4
 
-        # Compute trispectrum at this redshift
-        p1 = p2 = get_pk(k_use, a)[:, None]
-        p3 = p4 = p1.T
-        p13 = p24 = get_pk(k13, a).reshape((nk, nk, theta.size))
-        p14 = p23 = get_pk(k14, a).reshape((nk, nk, theta.size))
-
         # Permutation 0
-        Bpt_1_2_34 = 2 * isotropize_this(get_F2(k_use, k_use, 180) * p1 ** 2)
-        i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
-        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
-        i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof2=prof4,
-                        diag=True)[None, :]
+        # Bpt_1_2_34 = 0
+        # i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
+        # i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
+        # i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof2=prof4,
+        #                 diag=True)[None, :]
 
         # Permutation 1: 2 <-> 3
-        Bpt_1_3_24 = 2 * isotropize_this(get_F2(k1, k3, None) * p1 * p3 +
-                                         get_F2(k1, k24, None) * p1 * p24 +
-                                         get_F2(k2, k24, None) * p2 * p24
-                                     )
+        Bpt_1_3_24 = get_Bpt_1_3_24(a)
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4,
                         diag=False)
 
         # Permutation 2: 2 <-> 4
-        Bpt_1_4_32 = 2 * isotropize_this(get_F2(k1, k3, None) * p1 * p3 +
-                                         get_F2(k1, k23, None) * p1 * p23 +
-                                         get_F2(k3, k23, None) * p3 * p23
-                                     )
+        # Bpt = Permutation 1 with dtheta -> -dtheta)
+        Bpt_1_4_32 = get_Bpt_1_3_24(a, int_minus_theta=True)
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
         i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2,
                         diag=False)
 
         # Permutation 3: 1 <-> 3
-        Bpt_3_2_14 = 2 * isotropize_this(get_F2(k1, k3, None) * p1 * p3 +
-                                         get_F2(k3, k14, None) * p3 * p14 +
-                                         get_F2(k1, k14, None) * p1 * p14
-                                     )
+        # Bpt = Permutation 2 with k <-> k'
+        Bpt_3_2_14 = Bpt_1_4_32.T
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4,
                         diag=False)
 
         # Permutation 4: 1 <-> 4
-        Bpt_4_2_31 = 2 * isotropize_this(get_F2(k1, k3, None) * p1 * p3 +
-                                         get_F2(k3, k13, None) * p3 * p13 +
-                                         get_F2(k1, k13, None) * p1 * p13
-                                     )
+        # Bpt = Permutation 1
+        Bpt_4_2_31 = Bpt_1_3_24
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i31 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof13_2pt, prof2=prof1,
                         diag=False)
 
         # Permutation 5: 12 <-> 34
-        Bpt_3_4_12 = 2 * isotropize_this(get_F2(k_use, k_use, None) * p3 ** 2)
-        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
-        i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2,
-                        diag=True)[:, None]
+        # Bpt_3_4_12 = 0
+        # i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+        # i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
+        # i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2,
+        #                 diag=True)[:, None]
 
-        tk_3h = None
+        tk_3h = Bpt_1_3_24 * i1 * i3 * i24 + Bpt_1_4_32 * i1 * i4 * i32 + \
+                Bpt_3_2_14 * i3 * i2 * i14 + Bpt_4_2_31 * i4 * i2 * i31
+
         # Normalize
         out[ia, :, :] = tk_3h * norm
 
