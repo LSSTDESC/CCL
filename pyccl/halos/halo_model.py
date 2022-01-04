@@ -1449,6 +1449,9 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         theta = np.linspace(0, np.pi/2, 100)
         dtheta = theta[1] - theta[0]
         cth = np.cos(theta)[None, None, :]
+        if int_minus_theta:
+            # To compute Bpt_1_4_32
+            cth *= -1
 
         k = k_use[:, None, None]
         kp = k_use[None, :, None]
@@ -1470,10 +1473,6 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
 
         # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
         Bpt = - 4 * scipy.integrate.romb(Bpt, dtheta, axis=-1) / (2 * np.pi)
-
-        if int_minus_theta:
-            # To compute Bpt_1_4_32
-            Bpt *= -1
 
         Bpt += F2_1 * P_1 * P_3
 
