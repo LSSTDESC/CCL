@@ -4,6 +4,7 @@ from ..background import growth_factor, growth_rate
 from .massdef import MassDef, mass2radius_lagrangian
 from ..power import linear_matter_power, sigmaM
 import numpy as np
+from scipy.optimize import root_scalar
 
 
 class Concentration(object):
@@ -489,10 +490,9 @@ class ConcentrationIshiyama21(Concentration):
         G = x / fx**((5 + n_eff) / 6)
         return G
 
-    def _G_inv(self, Arg, n_eff):
-        from scipy.optimize import root_scalar
+    def _G_inv(self, arg, n_eff):
         roots = []
-        for arg, neff in zip(Arg, n_eff):
+        for arg, neff in zip(arg, n_eff):
             func = lambda x: self._G(x, neff) - arg  # noqa: _G_inv Traceback
             rt = root_scalar(func, x0=1, x1=2).root.item()
             roots.append(rt)
@@ -508,8 +508,8 @@ class ConcentrationIshiyama21(Concentration):
         A = self.a0 * (1 + self.a1 * (n_eff + 3))
         B = self.b0 * (1 + self.b1 * (n_eff + 3))
         C = 1 - self.c_alpha * (1 - alpha_eff)
-        Arg = A / nu * (1 + nu**2 / B)
-        G = self._G_inv(Arg, n_eff)
+        arg = A / nu * (1 + nu**2 / B)
+        G = self._G_inv(arg, n_eff)
         c = C * G
 
         if np.ndim(M) == 0:
