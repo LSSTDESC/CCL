@@ -260,7 +260,7 @@ class MassDef200c(MassDef):
 
 class MassDef500c(MassDef):
     """`MassDef` class for the mass definition
-    with Delta=200 times the critical density.
+    with Delta=500 times the critical density.
 
     Args:
         c_m (string): concentration-mass relation.
