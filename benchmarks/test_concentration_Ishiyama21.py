@@ -20,13 +20,10 @@ H100 = COSMO["h"]
 
 Z = np.array([0.0, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 7.0])
 # All parametrizations are accurate at to 5% except (500, Vmax, relaxed)
-# for which the model is accurate to 10%, so we choose this value
-# for max data scatter.
-UCHUU_DATA_SCATTER = 0.1
-
-# mass bounds in CCL's HM Calculator
-M_min = COSMO.cosmo.gsl_params.HM_MMIN/H100
-M_max = COSMO.cosmo.gsl_params.HM_MMAX/H100
+# for which the model is accurate to 10%. This may be due to low mass
+# precision error. We thus clip the masses at 8 < log10(M) < 16.
+UCHUU_DATA_SCATTER = 0.035
+M_min, M_max = 1e8, 1e16
 
 
 @pytest.mark.parametrize("pars",
@@ -50,8 +47,8 @@ def test_concentration_Ishiyama21(pars):
     M = data[:, 0]
 
     # mass cutoff at CCL integration boundaries
-    data = data[(M > M_min) & (M < M_max)]
-    M_use = M[(M > M_min) & (M < M_max)]
+    data = data[(M > M_min/H100) & (M < M_max/H100)]
+    M_use = M[(M > M_min/H100) & (M < M_max/H100)]
 
     hmd = ccl.halos.MassDef(Delta, "critical")
     cm = ccl.halos.ConcentrationIshiyama21(mdef=hmd,
