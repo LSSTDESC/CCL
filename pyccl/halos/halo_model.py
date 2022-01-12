@@ -277,7 +277,7 @@ class HMCalculator(object):
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object
@@ -325,7 +325,7 @@ class HMCalculator(object):
                 returning the the two-point moment of the two profiles
                 being correlated.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof` will be used as
+                second halo profile. If `None`, `prof1` will be used as
                 `prof2`.
 
         Returns:
