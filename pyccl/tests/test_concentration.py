@@ -22,7 +22,7 @@ M400 = ccl.halos.MassDef(400, 'critical')
 
 def test_cM_default_mass_def():
     cM = ccl.halos.Concentration()
-    assert cM.mdef.__eq__(MDEF)
+    assert cM.mdef == MDEF
     assert not cM._check_mdef(MDEF)
 
 

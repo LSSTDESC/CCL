@@ -76,7 +76,7 @@ class Profile2pt(object):
 
         uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
 
-        if prof2.__eq__(prof):
+        if prof == prof2:
             uk2 = uk1
         else:
             uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
@@ -133,7 +133,7 @@ class Profile2ptHOD(Profile2pt):
         else:
             prof2 = prof
 
-        if not prof2.__eq__(prof):
-            raise ValueError("prof2 must be equivalent to prof")
+        if not prof == prof2:
+            raise ValueError("prof and prof2 must be equivalent")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)
