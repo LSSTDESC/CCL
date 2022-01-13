@@ -112,6 +112,7 @@ def test_translate_mass_raises():
 
 @pytest.mark.parametrize('scls', [ccl.halos.MassDef200m,
                                   ccl.halos.MassDef200c,
+                                  ccl.halos.MassDef500c,
                                   ccl.halos.MassDefVir])
 def test_subclasses_smoke(scls):
     hmd = scls()
