@@ -104,5 +104,5 @@ def test_tkkssc_errors():
     # Negative profile in logspace
     with pytest.warns((ccl.CCLWarning, np.ComplexWarning)):
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P3, prof2=Pneg,
-                                  lk_arr=np.log(k_arr), a_arr=a_arr,
-                                  use_log=True)
+                                   lk_arr=np.log(k_arr), a_arr=a_arr,
+                                   use_log=True)
