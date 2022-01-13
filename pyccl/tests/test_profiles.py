@@ -88,6 +88,11 @@ def test_cib_smoke():
         assert getattr(p, n) == 1234.
 
 
+def test_cib_raises():
+    with pytest.raises(TypeError):
+        ccl.halos.HaloProfileCIBShang12(c_m_relation="my_conc", nu_GHz=217)
+
+
 def test_cib_2pt_raises():
     c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
     p_cib = ccl.halos.HaloProfileCIBShang12(c_m_relation=c, nu_GHz=217)

@@ -14,18 +14,11 @@ HBF = ccl.halos.HaloBiasTinker10(COSMO)
 HMC = ccl.halos.HMCalculator(COSMO, mass_function=HMF,
                              halo_bias=HBF, mass_def=M200)
 PROF = ccl.halos.HaloProfileHOD(c_m_relation=CON)
+PROFcib = ccl.halos.HaloProfileCIBShang12(c_m_relation=CON, nu_GHz=217)
 COV = ccl.halos.Profile2pt()
 COVh = ccl.halos.Profile2ptHOD()
+COVcib = ccl.halos.Profile2ptCIB()
 PK2D = ccl.boltzmann.get_camb_pk_lin(COSMO)
-
-
-def test_renamed_module_warnings():
-    with pytest.warns(CCLWarning):
-        from pyccl import bcm
-        del bcm
-    with pytest.warns(CCLWarning):
-        from pyccl import cls
-        del cls
 
 
 def test_API_preserve_warnings():
@@ -42,12 +35,15 @@ def test_API_preserve_warnings():
 
         R8 = COV.fourier_2pt(COSMO, 1., 1e14, 1., PROF, mass_def=M200)
         R9 = COVh.fourier_2pt(COSMO, 1., 1e14, 1., PROF, mass_def=M200)
+        R10 = COVcib.fourier_2pt(COSMO, 1., 1e14, 1., PROFcib, mass_def=M200)
 
         S1 = ccl.halos.halomod_bias_1pt(COSMO, HMC, 1., 1., PROF,
                                         normprof=False)
         S2 = ccl.halos.halomod_power_spectrum(COSMO, HMC, 1., 1., PROF,
                                               prof2=PROF, prof_2pt=None,
                                               normprof=False)
+        from pyccl import baryons as M1
+        from pyccl import cells as M2
     assert len(w_rec) == 0
 
     # 1. renamed function
@@ -102,6 +98,10 @@ def test_API_preserve_warnings():
         r9 = COVh.fourier_2pt(PROF, COSMO, 1., 1e14, 1., mass_def=M200)
     assert r9 == R9
 
+    with pytest.warns(CCLWarning):
+        r10 = COVcib.fourier_2pt(PROFcib, COSMO, 1., 1e14, 1., mass_def=M200)
+    assert r10 == R10
+
     # 8. halo profile normalization
     with pytest.warns(CCLWarning):
         s1 = ccl.halos.halomod_bias_1pt(COSMO, HMC, 1., 1., PROF)
@@ -112,6 +112,15 @@ def test_API_preserve_warnings():
                                               PROF, None, PROF)
     assert len(w_rec) == 2
     assert s2 == S2
+
+    # 9. renamed modules
+    with pytest.warns(CCLWarning):
+        from pyccl import bcm as m1
+    assert m1 == M1
+
+    with pytest.warns(CCLWarning):
+        from pyccl import cls as m2
+    assert m2 == M2
 
 
 @pytest.mark.parametrize('prof_class',
@@ -128,3 +137,14 @@ def test_renamed_attribute(prof_class):
 
     with pytest.warns(CCLWarning):
         prof.cM
+
+
+def test_pk2d_warns():
+    pkl = COSMO.get_camb_pk_lin()
+    with pytest.warns(None) as w_rec:
+        Q1 = pkl.eval_dlPk_dlk(1., 1., COSMO)
+    assert len(w_rec) == 0
+
+    with pytest.warns(CCLWarning):
+        q1 = pkl.eval_dlogpk_dlogk(1., 1., COSMO)
+    assert q1 == Q1
