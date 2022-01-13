@@ -19,6 +19,15 @@ COVh = ccl.halos.Profile2ptHOD()
 PK2D = ccl.boltzmann.get_camb_pk_lin(COSMO)
 
 
+def test_renamed_module_warnings():
+    with pytest.warns(CCLWarning):
+        from pyccl import bcm
+        del bcm
+    with pytest.warns(CCLWarning):
+        from pyccl import cls
+        del cls
+
+
 def test_API_preserve_warnings():
     # 0. no warnings for the following exemplary functions
     with pytest.warns(None) as w_rec:
