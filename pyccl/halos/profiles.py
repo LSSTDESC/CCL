@@ -163,10 +163,10 @@ class HaloProfile(object):
         """Return `True` if this profile is equivalent to another."""
         if id(self) == id(prof2):
             return True
-        elif self.__dict__ == prof2.__dict__:
-            return True
         elif type(self) != type(prof2):
             return False
+        elif self.__dict__ == prof2.__dict__:
+            return True
         elif self.__dict__.keys() != prof2.__dict__.keys():
             return False
         else:
