@@ -93,7 +93,7 @@ def test_profiles_equal():
     # something else
     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
     assert p1.__eq__(p2)
-    p2.hello_here = 0.
+    p2.hello_there = 0.
     assert not p1.__eq__(p2)
 
 
@@ -114,6 +114,11 @@ def test_empirical_smoke(prof_class):
 
     p = prof_class(c)
     smoke_assert_prof_real(p)
+
+
+def test_empirical_smoke_CIB():
+    with pytest.raises(TypeError):
+        ccl.halos.HaloProfileCIBShang12(None, nu_GHz=417)
 
 
 def test_cib_smoke():
