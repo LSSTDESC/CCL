@@ -29,6 +29,19 @@ class Concentration(object):
             self._default_mdef()
         self._setup()
 
+    def __eq__(self, other):
+        if id(self) == id(other):
+            return True
+        elif type(self) != type(other):
+            return False
+        else:
+            params, params2 = self.__dict__, other.__dict__
+            for key, val in params.items():
+                if val != params2.get(key):
+                    return False
+        # if this point is reached, the concentration relations are equivalent
+        return True
+
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
