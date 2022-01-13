@@ -170,7 +170,7 @@ class HaloProfile(object):
         elif self.__dict__.keys() != prof2.__dict__.keys():
             return False
         else:
-            return self._prof_equiv(self, prof2)
+            return self._prof_equiv(prof2)
 
     def real(self, cosmo, r, M, a, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
