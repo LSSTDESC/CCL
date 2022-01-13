@@ -390,7 +390,7 @@ class ConcentrationIshiyama21(Concentration):
     name = 'Ishiyama21'
 
     @warn_api(pairs=[("mass_def", "mdef")])
-    def __init__(self, mass_def=None, relaxed=False, Vmax=False):
+    def __init__(self, *, mass_def=None, relaxed=False, Vmax=False):
         self.relaxed = relaxed
         self.Vmax = Vmax
         super(ConcentrationIshiyama21, self).__init__(mass_def=mass_def)
