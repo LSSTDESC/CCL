@@ -147,37 +147,30 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
-    def __eq__(self, prof2):
-        """ Return `True` if this profile is equivalent to another."""
-        if type(self) != type(prof2):
-            # catch different profile types
-            return False
-
+    def _prof_equiv(self, prof2):
+        """Check profile equivalence. If equivalence between two profiles
+        is not trivial, and simply checking equality of their attributes
+        does not suffice, this method has to be reloaded.
+        """
         params, params2 = self.__dict__, prof2.__dict__
-
-        if params == params2:
-            # same profiles
-            return True
-
         for key, val in params.items():
-            if key == "cM":
-                cm2 = params2.get(key)
-                if val.name != cm2.name:
-                    return False
-                if not val.mdef.__eq__(cm2.mdef):
-                    return False
-            elif key == "precision_fftlog":
-                if val != params2[key]:
-                    return False
-            else:
-                if val != params2.get(key):
-                    return False
-
-        if len(params) != len(params2):
-            return False
-
+            if val != params2.get(key):
+                return False
         # if this point is reached, the profiles must be equivalent
         return True
+
+    def __eq__(self, prof2):
+        """Return `True` if this profile is equivalent to another."""
+        if id(self) == id(prof2):
+            return True
+        elif self.__dict__ == prof2.__dict__:
+            return True
+        elif type(self) != type(prof2):
+            return False
+        elif self.__dict__.keys() != prof2.__dict__.keys():
+            return False
+        else:
+            return self._prof_equiv(self, prof2)
 
     def real(self, cosmo, r, M, a, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
