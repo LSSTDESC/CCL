@@ -44,7 +44,7 @@ def test_correlation_newtypes(typs):
 
     theta = np.logspace(-2., np.log10(5.), 5)
     corr_old = assert_warns(
-        ccl.CCLWarning,
+        ccl.CCLDeprecationWarning,
         ccl.correlation, COSMO,
         ell=ell, C_ell=cl,
         theta=theta, corr_type=typs[0])

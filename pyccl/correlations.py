@@ -1,4 +1,4 @@
-"""Correlation functon computations.
+"""Correlation function computations.
 
 Choices of algorithms used to compute correlation functions:
     'Bessel' is a direct integration using Bessel functions.
@@ -11,6 +11,7 @@ from . import constants as const
 from .core import check
 from .pk2d import parse_pk2d
 from .pyutils import warn_api
+from .errors import CCLDeprecationWarning
 import numpy as np
 import warnings
 
@@ -64,7 +65,6 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
         float or array_like: Value(s) of the correlation function at the \
             input angular separations.
     """
-    from .errors import CCLWarning
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
     status = 0
@@ -83,7 +83,7 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
         else:
             raise ValueError("Unknown corr_type " + corr_type)
         warnings.warn("corr_type is deprecated. Use type = {}".format(type),
-                      CCLWarning)
+                      CCLDeprecationWarning)
     method = method.lower()
 
     if type not in correlation_types.keys():

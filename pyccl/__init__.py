@@ -83,4 +83,4 @@ from .neutrinos import Omega_nu_h2, Omeganuh2, nu_masses
 # Expose function to toggle debug mode
 from .pyutils import debug_mode, resample_array
 
-from .errors import CCLError, CCLWarning
+from .errors import CCLError, CCLWarning, CCLDeprecationWarning

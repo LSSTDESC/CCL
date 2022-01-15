@@ -3,7 +3,7 @@ This is a catch-all unit test for the `pyccl.pyutils` module
 which contains the `warn_api` and `deprecate_attr` decorators.
 """
 import pyccl as ccl
-from pyccl.errors import CCLWarning
+from pyccl.errors import CCLDeprecationWarning
 import pytest
 
 COSMO = ccl.CosmologyVanillaLCDM()
@@ -47,63 +47,63 @@ def test_API_preserve_warnings():
     assert len(w_rec) == 0
 
     # 1. renamed function
-    with pytest.warns(ccl.CCLWarning):
+    with pytest.warns(ccl.CCLDeprecationWarning):
         r11 = ccl.Omeganuh2(1., m_nu=[1, 1, 1], T_CMB=2.7)
     assert r11 == R1
 
     # 2. star operator introduced
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r12 = ccl.Omega_nu_h2(1., [1, 1, 1], T_CMB=2.7)
     assert r12 == R1
 
     # 3. renamed argument
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r2 = ccl.nu_masses(OmNuh2=0.05, mass_split="normal")
     assert all(r2 == R2)
 
     # 4. swapped order
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r31 = ccl.correlation_multipole(COSMO, 1., 1.5, 2, 1.)
     assert r31 == R3
 
     # 5. renamed argument + swapped order
-    with pytest.warns(CCLWarning) as w_rec:
+    with pytest.warns(CCLDeprecationWarning) as w_rec:
         r32 = ccl.correlation_multipole(COSMO, 1., 1.5, 2, s=1.)
     assert len(w_rec) == 2
     assert r32 == R3
 
     # 6. renamed class attribute
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r4 = CON.mdef
     assert r4 == R4
 
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r5 = HMF.mdef
     assert r5 == R5
 
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r6 = HBF.mdef
     assert r6 == R6
 
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r7 = HMC._massfunc
     assert r7 == R7
 
     # 7. old API patch for positional arguments
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r8 = COV.fourier_2pt(PROF, COSMO, 1., 1e14, 1., mass_def=M200)
     assert r8 == R8
 
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r9 = COVh.fourier_2pt(PROF, COSMO, 1., 1e14, 1., mass_def=M200)
     assert r9 == R9
 
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         r10 = COVcib.fourier_2pt(PROFcib, COSMO, 1., 1e14, 1., mass_def=M200)
     assert r10 == R10
 
     # 8. halo profile normalization
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         s1 = ccl.halos.halomod_bias_1pt(COSMO, HMC, 1., 1., PROF)
     assert s1 == S1
 
@@ -114,11 +114,11 @@ def test_API_preserve_warnings():
     assert s2 == S2
 
     # 9. renamed modules
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         from pyccl import bcm as m1
     assert m1 == M1
 
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         from pyccl import cls as m2
     assert m2 == M2
 
@@ -135,7 +135,7 @@ def test_renamed_attribute(prof_class):
         prof.c_m_relation
     assert len(w_rec) == 0
 
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         prof.cM
 
 
@@ -145,6 +145,6 @@ def test_pk2d_warns():
         Q1 = pkl.eval_dlPk_dlk(1., 1., COSMO)
     assert len(w_rec) == 0
 
-    with pytest.warns(CCLWarning):
+    with pytest.warns(CCLDeprecationWarning):
         q1 = pkl.eval_dlogpk_dlogk(1., 1., COSMO)
     assert q1 == Q1

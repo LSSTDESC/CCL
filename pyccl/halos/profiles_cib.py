@@ -1,7 +1,7 @@
 from .profiles import HaloProfile, HaloProfileNFW
 from .profiles_2pt import Profile2pt
 from .concentration import Concentration
-from ..pyutils import warn_api, CCLWarning
+from ..pyutils import warn_api, CCLDeprecationWarning
 
 import warnings
 
@@ -316,7 +316,7 @@ class Profile2ptCIB(Profile2pt):
             warnings.warn("Official API for Profile2ptCIB.fourier_2pt "
                           "has changed. Argument order "
                           "(prof, cosmo, k, M, a) has been replaced by "
-                          "(cosmo, k, M, a, prof).", CCLWarning)
+                          "(cosmo, k, M, a, prof).", CCLDeprecationWarning)
             prof, cosmo, k, M, a = cosmo, k, M, a, prof  # old to new API
             assert isinstance(cosmo, Cosmology)
 

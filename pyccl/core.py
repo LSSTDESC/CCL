@@ -8,7 +8,7 @@ import yaml
 from inspect import getmembers, isfunction, signature
 
 from . import ccllib as lib
-from .errors import CCLError, CCLWarning
+from .errors import CCLError, CCLWarning, CCLDeprecationWarning
 from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check, warn_api
@@ -426,7 +426,7 @@ class Cosmology(object):
         if z_mg is not None and df_mg is not None:
             warnings.warn(
                 "Arguments `z_mg` and `df_mg` are deprecated and will be "
-                "removed in a future release.", CCLWarning)
+                "removed in a future release.", CCLDeprecationWarning)
             # Get growth array size and do sanity check
             z_mg = np.atleast_1d(z_mg)
             df_mg = np.atleast_1d(df_mg)
@@ -597,7 +597,7 @@ class Cosmology(object):
                 "and will be removed in a future release. Specify them in "
                 "`extra_parameters` instead, using the model key 'bcm', "
                 "and omitting the 'bcm_' prefix from the parameter name.",
-                CCLWarning)
+                CCLDeprecationWarning)
             bcm = {"log10Mc": bcm_log10Mc, "etab": bcm_etab, "ks": bcm_ks}
 
         bcm_defaults = {"log10Mc": np.log10(1.2e14), "etab": 0.5, "ks": 55}
@@ -986,7 +986,7 @@ class Cosmology(object):
             warnings.warn(
                 "The halo model option for the internal CCL matter power "
                 "spectrum is deprecated. Use the more general functionality "
-                "in the `halos` module.", category=CCLWarning)
+                "in the `halos` module.", category=CCLDeprecationWarning)
             pk = self._get_halo_model_nonlin_power()
         elif mps == 'halofit':
             pkl = self._pk_lin['delta_matter:delta_matter']

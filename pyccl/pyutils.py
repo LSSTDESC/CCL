@@ -2,7 +2,7 @@
 well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
 from ._types import error_types
-from .errors import CCLError, CCLWarning
+from .errors import CCLError, CCLWarning, CCLDeprecationWarning  # noqa
 import functools
 import warnings
 import numpy as np
@@ -406,7 +406,7 @@ def deprecated(new_function=None):
             s = "The function {} is deprecated.".format(func.__name__)
             if new_function:
                 s += " Use {} instead.".format(new_function.__name__)
-            warnings.warn(s, CCLWarning)
+            warnings.warn(s, CCLDeprecationWarning)
             return func(*args, **kwargs)
         return new_func
     return _depr_decorator
@@ -642,7 +642,7 @@ def warn_api(pairs=None, order=None):
                         "has to be explicitly specified to prevent "
                         "unwanted behavior. Not specifying it "
                         "will trigger an exception in the future",
-                        CCLWarning)
+                        CCLDeprecationWarning)
 
             # transform decorator input
             rename = np.atleast_2d(pairs) if pairs is not None else None
@@ -672,7 +672,7 @@ def warn_api(pairs=None, order=None):
                         f"Use of argument{s} {olds} is deprecated "
                         f"in {func.__qualname__}. Pass the new name{s} "
                         f"of the argument{s} {news}, respectively.",
-                        CCLWarning)
+                        CCLDeprecationWarning)
 
             # return if we have everything we need
             if len(args) <= npos:
@@ -714,7 +714,8 @@ def warn_api(pairs=None, order=None):
             warnings.warn(
                 f"Use of argument{s} {no_kw} as positional is deprecated "
                 f"in {func.__qualname__}. Pass the name{s} of the "
-                f"keyword-only argument{s} explicitly.", CCLWarning)
+                f"keyword-only argument{s} explicitly.",
+                CCLDeprecationWarning)
 
             # raise normprof warning? (3 of 3)
             normprof_warning()
@@ -766,7 +767,7 @@ def deprecate_attr(pairs=None):
 
                 warnings.warn(
                     f"Attribute {this_name} is deprecated in {class_name}. "
-                    f"Pass the new name {new_name}.", CCLWarning)
+                    f"Pass the new name {new_name}.", CCLDeprecationWarning)
 
                 this_name = new_name
 

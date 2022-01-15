@@ -6,7 +6,7 @@ import warnings
 import numpy as np
 from . import ccllib as lib
 # from .emulator import PowerSpectrumEmulator
-from .pyutils import check, CCLWarning, deprecated
+from .pyutils import check, CCLDeprecationWarning, deprecated
 
 
 class _Pk2D_descriptor(object):
@@ -19,7 +19,8 @@ class _Pk2D_descriptor(object):
         if instance is None:
             warnings.warn("Use of the power spectrum as an argument "
                           f"is deprecated in {self.func.__name__}. "
-                          "Use the instance method instead.", CCLWarning)
+                          "Use the instance method instead.",
+                          CCLDeprecationWarning)
             this = base
         else:
             this = instance
@@ -50,8 +51,8 @@ def from_model(cls, cosmo, model):
         :class:`~pyccl.pk2d.Pk2D`
             The power spectrum of the input model.
     """
-    if model in ['bacco', ]:  # other emulators go in here
-        return PowerSpectrumEmulator.get_pk_linear(cosmo, model)
+    # if model in ['bacco', ]:  # other emulators go in here
+    #     return PowerSpectrumEmulator.get_pk_linear(cosmo, model)
 
     pk2d = cls(empty=True)
     status = 0
