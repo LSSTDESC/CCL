@@ -1,7 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
-from ..pyutils import warn_api, deprecate_attr
+from ..pyutils import warn_api, deprecate_attr, deprecated
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
@@ -184,6 +184,22 @@ class MassFunc(object):
         """
         raise NotImplementedError("Use one of the non-default "
                                   "MassFunction classes")
+
+    @classmethod
+    def from_name(cls, name):
+        """ Returns mass function subclass from name string
+
+        Args:
+            name (string): a mass function name
+
+        Returns:
+            MassFunc subclass corresponding to the input name.
+        """
+        mass_functions = {c.name: c for c in cls.__subclasses__()}
+        if name in mass_functions:
+            return mass_functions[name]
+        else:
+            raise ValueError(f"Mass function {name} not implemented.")
 
 
 class MassFuncPress74(MassFunc):
@@ -780,6 +796,7 @@ class MassFuncAngulo12(MassFunc):
             np.exp(-self.c / sigM**2)
 
 
+@deprecated(new_function=MassFunc.from_name)
 def mass_function_from_name(name):
     """ Returns mass function subclass from name string
 

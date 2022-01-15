@@ -1,7 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
-from ..pyutils import warn_api, deprecate_attr
+from ..pyutils import warn_api, deprecate_attr, deprecated
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
@@ -164,6 +164,23 @@ class HaloBias(object):
         """
         raise NotImplementedError("Use one of the non-default "
                                   "HaloBias classes")
+
+    @classmethod
+    def from_name(cls, name):
+        """ Returns halo bias subclass from name string
+
+        Args:
+            name (string): a halo bias name
+
+        Returns:
+            HaloBias subclass corresponding to the input name.
+        """
+        bias_functions = {c.name: c for c in cls.__subclasses__()}
+        if name in bias_functions:
+            return bias_functions[name]
+        else:
+            raise ValueError(
+                f"Halo bias parametrization {name} not implemented.")
 
 
 class HaloBiasSheth99(HaloBias):
@@ -364,6 +381,7 @@ class HaloBiasTinker10(HaloBias):
             self.B * nu**self.b + C * nu**self.c
 
 
+@deprecated(new_function=HaloBias.from_name)
 def halo_bias_from_name(name):
     """ Returns halo bias subclass from name string
 
