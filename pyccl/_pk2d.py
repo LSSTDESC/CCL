@@ -5,7 +5,7 @@ This script contains methods for ~pyccl.pk2d.Pk2D.
 import warnings
 import numpy as np
 from . import ccllib as lib
-from .emulator import PowerSpectrumEmulator
+# from .emulator import PowerSpectrumEmulator
 from .pyutils import check, CCLWarning, deprecated
 
 

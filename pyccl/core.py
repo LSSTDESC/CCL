@@ -124,11 +124,14 @@ class Cosmology(object):
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
-        bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
+        bcm_log10Mc (:obj:`float`, optional): Deprecated; pass into
+            `extra parameters`. One of the parameters of the
             BCM model. Defaults to `np.log10(1.2e14)`.
-        bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
+        bcm_etab (:obj:`float`, optional): Deprecated; pass into
+            `extra parameters`. One of the parameters of the BCM
             model. Defaults to 0.5.
-        bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
+        bcm_ks (:obj:`float`, optional): Deprecated; pass into
+            `extra parameters`. One of the parameters of the BCM
             model. Defaults to 55.0.
         mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
@@ -218,8 +221,8 @@ class Cosmology(object):
             sigma8=None, A_s=None,
             Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., m_nu_type=None,
             w0=-1., wa=0., T_CMB=None,
-            bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
-            bcm_ks=55., mu_0=0., sigma_0=0.,
+            bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
+            mu_0=0., sigma_0=0.,
             c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
@@ -234,8 +237,8 @@ class Cosmology(object):
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
             m_nu_type=m_nu_type, w0=w0, wa=wa, T_CMB=T_CMB,
-            bcm_log10Mc=bcm_log10Mc,
-            bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
+            bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab, bcm_ks=bcm_ks,
+            mu_0=mu_0, sigma_0=sigma_0,
             c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
             z_mg=z_mg, df_mg=df_mg,
             extra_parameters=extra_parameters)
@@ -421,6 +424,9 @@ class Cosmology(object):
 
         # Set nz_mg (no. of redshift bins for modified growth fns.)
         if z_mg is not None and df_mg is not None:
+            warnings.warn(
+                "Arguments `z_mg` and `df_mg` are deprecated and will be "
+                "removed in a future release.", CCLWarning)
             # Get growth array size and do sanity check
             z_mg = np.atleast_1d(z_mg)
             df_mg = np.atleast_1d(df_mg)
@@ -579,6 +585,26 @@ class Cosmology(object):
                 raise ValueError("Necessary parameter '%s' was not set "
                                  "(or set to None)." % nm)
 
+        # BCM parameters: deprecate old usage and sub-in defaults if needed
+        if (extra_parameters is not None) and ("bcm" in extra_parameters):
+            bcm = extra_parameters["bcm"]
+        else:
+            bcm = {"log10Mc": None, "etab": None, "ks": None}
+
+        if not all(par is None for par in [bcm_log10Mc, bcm_etab, bcm_ks]):
+            warnings.warn(
+                "BCM parameters as arguments of Cosmology are deprecated "
+                "and will be removed in a future release. Specify them in "
+                "`extra_parameters` instead, using the model key 'bcm', "
+                "and omitting the 'bcm_' prefix from the parameter name.",
+                CCLWarning)
+            bcm = {"log10Mc": bcm_log10Mc, "etab": bcm_etab, "ks": bcm_ks}
+
+        bcm_defaults = {"log10Mc": np.log10(1.2e14), "etab": 0.5, "ks": 55}
+        for par, val in bcm.items():
+            if val is None:
+                bcm[par] = bcm_defaults[par]
+
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
@@ -586,21 +612,21 @@ class Cosmology(object):
         try:
             if T_CMB is not None:
                 lib.cvar.constants.T_CMB = T_CMB
+            log10Mc, etab, ks = bcm["log10Mc"], bcm["etab"], bcm["ks"]
             status = 0
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
                 self._params, status = lib.parameters_create_nu(
-                    Omega_c, Omega_b, Omega_k, Neff,
-                    w0, wa, h, norm_pk, n_s, bcm_log10Mc,
-                    bcm_etab, bcm_ks, mu_0, sigma_0, c1_mg,
-                    c2_mg, lambda_mg, mnu_final_list, status)
+                    Omega_c, Omega_b, Omega_k, Neff, w0, wa, h,
+                    norm_pk, n_s, log10Mc, etab, ks, mu_0, sigma_0,
+                    c1_mg, c2_mg, lambda_mg, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
                 self._params, status = lib.parameters_create_nu_vec(
                     Omega_c, Omega_b, Omega_k, Neff, w0, wa, h,
-                    norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                    mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, z_mg,
-                    df_mg, mnu_final_list, status)
+                    norm_pk, n_s, log10Mc, etab, ks, mu_0, sigma_0,
+                    c1_mg, c2_mg, lambda_mg,
+                    z_mg, df_mg, mnu_final_list, status)
             check(status)
         finally:
             lib.cvar.constants.T_CMB = T_CMB_old
