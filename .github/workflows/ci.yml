@@ -49,6 +49,7 @@ jobs:
 
       - name: lint
         run: |
+          export MAMBA_NO_BANNER=1
           mamba install flake8
           flake8 pyccl
           flake8 --exclude=data benchmarks
