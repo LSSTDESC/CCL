@@ -51,7 +51,7 @@ from .power import linear_power, nonlin_power, linear_matter_power, nonlin_matte
     sigmaR, sigmaV, sigma8, sigmaM, kNL
 
 # BCM stuff
-from .baryons import bcm_model_fka, bcm_correct_pk2d
+from .baryons import bcm_model_fka, bcm_correct_pk2d, _bcm_correct_pk2d, baryon_correct
 
 # Old halo mass function
 from .massfunction import massfunc, halo_bias, massfunc_m2r

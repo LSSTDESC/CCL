@@ -1,6 +1,7 @@
 from . import ccllib as lib
-from .pyutils import check
+from .pyutils import check, deprecated
 from .pk2d import Pk2D
+# from .emulator import PowerSpectrumEmulator
 import numpy as np
 
 
@@ -35,8 +36,9 @@ def bcm_model_fka(cosmo, k, a):
     return fka
 
 
-def bcm_correct_pk2d(cosmo, pk2d):
+def _bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
+    This function operates directly onto the input Pk2D object.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
@@ -47,3 +49,42 @@ def bcm_correct_pk2d(cosmo, pk2d):
     status = 0
     status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
     check(status, cosmo)
+
+
+@deprecated(new_function=_bcm_correct_pk2d)
+def bcm_correct_pk2d(cosmo, pk2d):
+    """Apply the BCM model correction factor to a given power spectrum.
+    This function operates directly onto the input Pk2D object.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
+    """
+    _bcm_correct_pk2d
+
+
+def baryon_correct(cosmo, model, pk2d):
+    """Correct the power spectrum for baryons, given a model name string.
+    This function operates on a copy of the input Pk2D object.
+
+    Arguments:
+        cosmo (:class:`~pyccl.core.Cosmology`):
+            Cosmological parameters.
+        model (str):
+            Model to use.
+        pk2d (:class:`~pyccl.pk2d.Pk2D`):
+            Power spectrum.
+
+    Returns:
+        :class:`~pyccl.pk2d.Pk2D: a copy of the input `Pk2D` object with the
+        baryon correction applied to it
+    """
+    if model == "bcm":
+        pk2d_new = pk2d.copy()
+        bcm_correct_pk2d(cosmo, pk2d_new)
+    # elif model in ["bacco", ]:  # other emulator names go in here
+    #     pk2d_new = PowerSpectrumEmulator.include_baryons(cosmo, model, pk2d)
+    else:
+        raise NotImplementedError(f"Baryon correction model {model} "
+                                  "not recogized")
+    return pk2d_new
