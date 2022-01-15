@@ -13,7 +13,6 @@ from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check, warn_api
 from .pk2d import Pk2D
-from .baryons import bcm_correct_pk2d
 
 # Configuration types
 transfer_function_types = {
