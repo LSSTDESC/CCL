@@ -969,15 +969,19 @@ class Cosmology(object):
             if pkl is None:
                 raise CCLError("The linear power spectrum is a "
                                "necessary input for halofit")
-            pk = Pk2D.apply_halofit(self, pk_linear=pkl)
+            pk = pkl.apply_halofit(self)
         elif mps == 'emu':
-            pk = Pk2D.pk_from_model(self, model='emu')
+            pk = Pk2D.from_model(self, model='emu')
         elif mps == 'linear':
             pk = self._pk_lin['delta_matter:delta_matter']
+        # elif mps in ['bacco', ]:  # other emulators go in here
+        #     pkl = self._pk_lin['delta_matter:delta_matter']
+        #     pk = pkl.apply_nonlin_model(self, model=mps)
 
         # Correct for baryons if required
-        if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
-            bcm_correct_pk2d(self, pk)
+        bps = self._config_init_kwargs['baryons_power_spectrum']
+        if bps in ['bcm', 'bacco', ]:
+            pk = pk.include_baryons(self, model=bps)
 
         # Assign
         self._pk_nl['delta_matter:delta_matter'] = pk
