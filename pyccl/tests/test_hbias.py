@@ -42,7 +42,7 @@ def test_bM_SO_allgood():
 
 @pytest.mark.parametrize('name', ['Tinker10', 'Sheth99'])
 def test_bM_from_string(name):
-    bM_class = ccl.halos.halo_bias_from_name(name)
+    bM_class = ccl.halos.HaloBias.from_name(name)
     bM = bM_class(COSMO)
     for m in MS:
         b = bM.get_halo_bias(COSMO, m, 0.9)
@@ -52,7 +52,7 @@ def test_bM_from_string(name):
 
 def test_bM_from_string_raises():
     with pytest.raises(ValueError):
-        ccl.halos.halo_bias_from_name('Tinker11')
+        ccl.halos.HaloBias.from_name('Tinker11')
 
 
 def test_bM_default():

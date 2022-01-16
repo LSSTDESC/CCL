@@ -66,7 +66,7 @@ def test_cM_mdef_raises(cM_class):
 
 @pytest.mark.parametrize('name', ['Duffy08', 'Diemer15'])
 def test_cM_from_string(name):
-    cM_class = ccl.halos.concentration_from_name(name)
+    cM_class = ccl.halos.Concentration.from_name(name)
     cM = cM_class()
     for m in MS:
         c = cM.get_concentration(COSMO, m, 0.9)
@@ -76,4 +76,4 @@ def test_cM_from_string(name):
 
 def test_cM_from_string_raises():
     with pytest.raises(ValueError):
-        ccl.halos.concentration_from_name('Duffy09')
+        ccl.halos.Concentration.from_name('Duffy09')

@@ -79,7 +79,7 @@ def test_pk2d_from_model(model):
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function=model)
-    pk = ccl.Pk2D.pk_from_model(cosmo_fixed, model=model)
+    pk = ccl.Pk2D.from_model(cosmo_fixed, model=model)
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
@@ -114,7 +114,7 @@ def test_pk2d_from_model_emu():
                           Omega_k=0,
                           transfer_function='bbks',
                           matter_power_spectrum='emu')
-    pk = ccl.Pk2D.pk_from_model(cosmo_fixed, model='emu')
+    pk = ccl.Pk2D.from_model(cosmo_fixed, model='emu')
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
@@ -129,13 +129,13 @@ def test_pk2d_from_model_fails(model):
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1E-10, n_s=0.96,
         transfer_function='boltzmann_class')
-    assert_raises(ccl.CCLError, ccl.Pk2D.pk_from_model,
+    assert_raises(ccl.CCLError, ccl.Pk2D.from_model,
                   cosmo, model=model)
 
 
 def test_pk2d_from_model_raises():
     cosmo = ccl.CosmologyVanillaLCDM()
-    assert_raises(ValueError, ccl.Pk2D.pk_from_model,
+    assert_raises(ValueError, ccl.Pk2D.from_model,
                   cosmo, model='bbkss')
 
 

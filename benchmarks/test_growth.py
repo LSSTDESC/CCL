@@ -140,10 +140,11 @@ def test_growth_mg():
     cosmo1 = ccl.Cosmology(
         Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,
         w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96)
-    cosmo2 = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,
-        w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=z_mg, df_mg=df_mg)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo2 = ccl.Cosmology(
+            Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,
+            w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96,
+            z_mg=z_mg, df_mg=df_mg)
 
     # We have included a growth modification \delta f = K*a, with K==0.1
     # (arbitrarily). This case has an analytic solution, given by

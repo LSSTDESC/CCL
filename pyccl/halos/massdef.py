@@ -113,12 +113,12 @@ class MassDef(object):
             (self.rho_type == other.rho_type)
 
     def _concentration_init(self, c_m_relation):
-        from .concentration import Concentration, concentration_from_name
+        from .concentration import Concentration
         if isinstance(c_m_relation, Concentration):
             self.concentration = c_m_relation
         elif isinstance(c_m_relation, str):
             # Grab class
-            conc_class = concentration_from_name(c_m_relation)
+            conc_class = Concentration.from_name(c_m_relation)
             # instantiate with this mass definition
             self.concentration = conc_class(mass_def=self)
         else:

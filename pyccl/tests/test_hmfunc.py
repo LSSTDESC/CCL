@@ -110,7 +110,7 @@ def test_nM_bocquet_smoke(with_hydro):
 @pytest.mark.parametrize('name', ['Press74', 'Tinker08',
                                   'Despali16', 'Angulo12'])
 def test_nM_from_string(name):
-    nM_class = ccl.halos.mass_function_from_name(name)
+    nM_class = ccl.halos.MassFunc.from_name(name)
     nM = nM_class(COSMO)
     for m in MS:
         n = nM.get_mass_function(COSMO, m, 0.9)
@@ -120,7 +120,7 @@ def test_nM_from_string(name):
 
 def test_nM_from_string_raises():
     with pytest.raises(ValueError):
-        ccl.halos.mass_function_from_name('Tinker09')
+        ccl.halos.MassFunc.from_name('Tinker09')
 
 
 def test_nM_default():

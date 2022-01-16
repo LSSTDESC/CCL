@@ -1479,7 +1479,7 @@ class CosmologyCalculator(Cosmology):
 
             if model == 'halofit':
                 pkl = self._pk_lin[name]
-                self._pk_nl[name] = Pk2D.apply_halofit(self, pk_linear=pkl)
+                self._pk_nl[name] = pkl.apply_halofit(self)
             elif model is None:
                 pass
             else:

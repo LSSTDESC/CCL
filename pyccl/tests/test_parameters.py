@@ -385,18 +385,14 @@ def test_parameters_missing():
         Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.8)
 
     # Make sure that optional parameters are optional
-    assert_no_warnings(
-        ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=None, df_mg=None)
-    assert_no_warnings(
-        ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=None)
-    assert_no_warnings(
-        ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        df_mg=None)
+    with pytest.warns(None) as w_rec:
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
+                      A_s=2.1e-9, n_s=0.96, z_mg=None, df_mg=None)
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
+                      A_s=2.1e-9, n_s=0.96, z_mg=None)
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
+                      A_s=2.1e-9, n_s=0.96, df_mg=None)
+    assert len(w_rec) == 0
 
 
 def test_parameters_set():
@@ -485,10 +481,11 @@ def test_parameters_mgrowth():
 
 def test_parameters_read_write():
     """Check that Cosmology objects can be read and written"""
-    params = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=[0.02, 0.1, 0.05], m_nu_type='list',
-        z_mg=[0.0, 1.0], df_mg=[0.01, 0.0])
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        params = ccl.Cosmology(
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            m_nu=[0.02, 0.1, 0.05], m_nu_type='list',
+            z_mg=[0.0, 1.0], df_mg=[0.01, 0.0])
 
     # Make a temporary file name
     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
@@ -497,7 +494,8 @@ def test_parameters_read_write():
     # Write out and then read in the parameters from that file
     assert_raises(IOError, params.write_yaml, "/bogus/file/name")
     params.write_yaml(temp_file_name)
-    params2 = ccl.Cosmology.read_yaml(temp_file_name)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        params2 = ccl.Cosmology.read_yaml(temp_file_name)
 
     # Check the read-in params are equal to the written out ones
     assert_almost_equal(params['Omega_c'], params2['Omega_c'])
@@ -505,9 +503,10 @@ def test_parameters_read_write():
     assert_almost_equal(params['sum_nu_masses'], params2['sum_nu_masses'])
 
     # check overriding parameters with kwargs
-    params3 = ccl.Cosmology.read_yaml(temp_file_name,
-                                      matter_power_spectrum='emu',
-                                      n_s=1.1)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        params3 = ccl.Cosmology.read_yaml(temp_file_name,
+                                          matter_power_spectrum='emu',
+                                          n_s=1.1)
     # check unmodified parameters are the same
     assert_almost_equal(params['Omega_c'], params3['Omega_c'])
     assert_almost_equal(params['Neff'], params3['Neff'])
@@ -530,5 +529,5 @@ def test_parameters_read_write():
 
 def test_omega_k():
     """ Check that the value of Omega_k is within reasonable bounds. """
-    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05, h=0.7,
-                  A_s=2.1e-9, n_s=0.96, Omega_k=-2)
+    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05,
+                  h=0.7, A_s=2.1e-9, n_s=0.96, Omega_k=-2)
