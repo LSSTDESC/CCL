@@ -281,9 +281,9 @@ class Pk2D(object):
                         empty=True)
             return pk2d
 
-        a_arr, lk_arr, pk_arr = self.get_spline_arrays()
+        a_arr, lk_arr, pk_arr = _get_spline2d_arrays(self.psp.fka)
         pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
-                    is_logp=False,  # get_spline_arrays returns un-logged
+                    is_logp=self.psp.is_log,
                     extrap_order_lok=self.psp.extrap_order_lok,
                     extrap_order_hik=self.psp.extrap_order_hik)
 
