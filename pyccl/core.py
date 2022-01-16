@@ -591,7 +591,7 @@ class Cosmology(object):
         else:
             bcm = {"log10Mc": None, "etab": None, "ks": None}
 
-        if not all(par is None for par in [bcm_log10Mc, bcm_etab, bcm_ks]):
+        if any([par is not None for par in [bcm_log10Mc, bcm_etab, bcm_ks]]):
             warnings.warn(
                 "BCM parameters as arguments of Cosmology are deprecated "
                 "and will be removed in a future release. Specify them in "
