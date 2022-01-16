@@ -20,10 +20,10 @@ from . import baryons, cells
 def __getattr__(name):
     rename = {"bcm": "baryons", "cls": "cells"}
     if name in rename:
-        from .errors import CCLWarning
+        from .errors import CCLDeprecationWarning
         import warnings
         warnings.warn(f"Module {name} has been renamed to {rename[name]}.",
-                      CCLWarning)
+                      CCLDeprecationWarning)
         name = rename[name]
         return eval(name)
     raise AttributeError(f"No module named {name}.")

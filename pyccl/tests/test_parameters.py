@@ -430,52 +430,57 @@ def test_parameters_mgrowth():
 
     # Valid constructions
     for omega_g in [None, 0.0, 0.1]:
-        assert_no_warnings(
-            ccl.Cosmology,
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            z_mg=zarr, df_mg=dfarr, Omega_g=omega_g)
-        assert_no_warnings(
-            ccl.Cosmology,
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            z_mg=[0., 0.1, 0.2],
-            df_mg=[0.1, 0.1, 0.1], Omega_g=omega_g)
+        with pytest.warns(None) as w_rec:
+            with pytest.warns(ccl.CCLDeprecationWarning):
+                ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
+                              A_s=2.1e-9, n_s=0.96, z_mg=zarr,
+                              df_mg=dfarr, Omega_g=omega_g)
+        assert len(w_rec) == 0
+
+        with pytest.warns(None) as w_rec:
+            with pytest.warns(ccl.CCLDeprecationWarning):
+                ccl.Cosmology( Omega_c=0.25, Omega_b=0.05, h=0.7,
+                              A_s=2.1e-9, n_s=0.96, z_mg=[0., 0.1, 0.2],
+                              df_mg=[0.1, 0.1, 0.1], Omega_g=omega_g)
+        assert len(w_rec) == 0
 
         # Invalid constructions
-        assert_raises(
-            ValueError, ccl.Cosmology,
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            z_mg=zarr, Omega_g=omega_g)
-        assert_raises(
-            ValueError, ccl.Cosmology,
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            df_mg=dfarr, Omega_g=omega_g)
-        assert_raises(
-            ValueError, ccl.Cosmology,
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            z_mg=None,
-            df_mg=dfarr, Omega_g=omega_g)
-        assert_raises(
-            ValueError, ccl.Cosmology,
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            z_mg=zarr,
-            df_mg=0.1, Omega_g=omega_g)
-        assert_raises(
-            ValueError, ccl.Cosmology,
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            z_mg=zarr,
-            df_mg=f_func, Omega_g=omega_g)
+        with pytest.warns(ccl.CCLDeprecationWarning):
+            assert_raises(
+                ValueError, ccl.Cosmology,
+                Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                z_mg=zarr, Omega_g=omega_g)
+            assert_raises(
+                ValueError, ccl.Cosmology,
+                Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                df_mg=dfarr, Omega_g=omega_g)
+            assert_raises(
+                ValueError, ccl.Cosmology,
+                Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                z_mg=None,
+                df_mg=dfarr, Omega_g=omega_g)
+            assert_raises(
+                ValueError, ccl.Cosmology,
+                Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                z_mg=zarr,
+                df_mg=0.1, Omega_g=omega_g)
+            assert_raises(
+                ValueError, ccl.Cosmology,
+                Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                z_mg=zarr,
+                df_mg=f_func, Omega_g=omega_g)
 
-        # Mis-matched array sizes and dimensionality
-        assert_raises(
-            ValueError, ccl.Cosmology,
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            z_mg=zarr,
-            df_mg=dfarr[1:], Omega_g=omega_g)
-        assert_raises(
-            ValueError, ccl.Cosmology,
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            z_mg=zarr,
-            df_mg=np.column_stack((dfarr, dfarr)), Omega_g=omega_g)
+            # Mis-matched array sizes and dimensionality
+            assert_raises(
+                ValueError, ccl.Cosmology,
+                Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                z_mg=zarr,
+                df_mg=dfarr[1:], Omega_g=omega_g)
+            assert_raises(
+                ValueError, ccl.Cosmology,
+                Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                z_mg=zarr,
+                df_mg=np.column_stack((dfarr, dfarr)), Omega_g=omega_g)
 
 
 def test_parameters_read_write():

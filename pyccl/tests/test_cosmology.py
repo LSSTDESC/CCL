@@ -274,7 +274,7 @@ def test_cosmology_context():
 def test_cosmology_concentrations(c):
     cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
                                      halo_concentration=c)
-    with pytest.warns(RuntimeWarning):
+    with pytest.warns(DeprecationWarning):
         cosmo.compute_nonlin_power()
 
 
@@ -287,7 +287,7 @@ def test_cosmology_mass_functions(hmf):
     cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
                                      mass_function=hmf)
     if hmf in valid_hmf:
-        with pytest.warns(RuntimeWarning):
+        with pytest.warns(DeprecationWarning):
             cosmo.compute_nonlin_power()
     else:
         # ignore the warning this time because we are interested
