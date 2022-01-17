@@ -1,23 +1,5 @@
 import numpy as np
 
-try:
-    import classy
-    HAVE_CLASS = True
-except ImportError:
-    HAVE_CLASS = False
-
-try:
-    import camb
-    import camb.model
-    HAVE_CAMB = True
-except ImportError:
-    HAVE_CAMB = False
-
-try:
-    import isitgr  # noqa: F401
-except ImportError:
-    pass  # prevent nans from isitgr
-
 from . import ccllib as lib
 from .pyutils import check, warn_api
 from .pk2d import Pk2D
@@ -40,12 +22,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
             spectrum. If ``nonlin=True``, returns a tuple \
             ``(pk_lin, pk_nonlin)``.
     """
-
-    # Comment from Jarvis: TODO clean up this and other assert
-    # anti-patterns in this file
-    assert HAVE_CAMB, (
-        "You must have the `camb` python package "
-        "installed to run CCL with CAMB!")
+    import camb, camb.model
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
@@ -257,16 +234,7 @@ def get_isitgr_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
             object. The linear power spectrum.
     """
-
-    try:
-        import isitgr  # noqa: F811
-        import isitgr.model
-    except ImportError as e:
-        e.args = (
-            "You must have the `isitgr` python package "
-            "installed to run CCL with ISiTGR-CAMB!",
-            *e.args)
-        raise
+    import isitgr, isitgr.model
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
@@ -314,8 +282,7 @@ def get_isitgr_pk_lin(cosmo):
     cp.ombh2 = cosmo['Omega_b'] * h2
     cp.omch2 = cosmo['Omega_c'] * h2
     cp.omk = cosmo['Omega_k']
-#   cp.GR = 1 means GR modified!
-    cp.GR = 1
+    cp.GR = 1  # means GR modified!
     cp.ISiTGR_muSigma = True
     cp.mu0 = cosmo['mu_0']
     cp.Sigma0 = cosmo['sigma_0']
@@ -443,10 +410,7 @@ def get_class_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum object.\
             The linear power spectrum.
     """
-
-    assert HAVE_CLASS, (
-        "You must have the python wrapper for CLASS "
-        "installed to run CCL with CLASS!")
+    import classy
 
     params = {
         "output": "mPk",

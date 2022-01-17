@@ -7,11 +7,7 @@ from ..background import growth_factor
 from ..pyutils import warn_api
 from .tracers import PTTracer
 
-try:
-    import fastpt as fpt
-    HAVE_FASTPT = True
-except ImportError:
-    HAVE_FASTPT = False
+import fastpt as fpt
 
 
 class PTCalculator(object):
@@ -69,11 +65,6 @@ class PTCalculator(object):
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75,
                  k_cutoff=None, n_exp_cutoff=4):
-        assert HAVE_FASTPT, (
-            "You must have the `FAST-PT` python package "
-            "installed to use CCL to get PT observables! "
-            "You can install it with pip install fast-pt.")
-
         self.with_dd = with_dd
         self.with_NC = with_NC
         self.with_IA = with_IA
