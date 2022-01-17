@@ -22,7 +22,8 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
             spectrum. If ``nonlin=True``, returns a tuple \
             ``(pk_lin, pk_nonlin)``.
     """
-    import camb, camb.model
+    import camb
+    import camb.model
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
@@ -234,7 +235,8 @@ def get_isitgr_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
             object. The linear power spectrum.
     """
-    import isitgr, isitgr.model
+    import isitgr
+    import isitgr.model
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}

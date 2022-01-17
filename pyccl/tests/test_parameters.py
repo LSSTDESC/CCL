@@ -326,7 +326,7 @@ def test_parameters_valid_input():
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       Neff=3.046, m_nu=0.06)
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-                     w0=-0.9)
+                      w0=-0.9)
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       w0=-0.9, wa=0.1)
         # Check that kwarg order doesn't matter
@@ -334,6 +334,7 @@ def test_parameters_valid_input():
         # Try a set of parameters with non-zero mu0 / Sig0
         ccl.Cosmology(h=0.7, Omega_c=0.25, Omega_b=0.05, A_s=2.1e-9, n_s=0.96,
                       mu_0=0.1, sigma_0=0.1)
+    assert len(w_rec) == 0
 
 
 def test_parameters_missing():
@@ -469,7 +470,8 @@ def test_parameters_mgrowth():
                 ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
                               A_s=2.1e-9, n_s=0.96,
                               z_mg=zarr,
-                              df_mg=np.column_stack((dfarr, dfarr)), Omega_g=omega_g)
+                              df_mg=np.column_stack((dfarr, dfarr)),
+                              Omega_g=omega_g)
 
 
 def test_parameters_read_write():
