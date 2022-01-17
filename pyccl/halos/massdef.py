@@ -330,9 +330,4 @@ def mass_def_from_name(name):
     Returns:
         MassDef subclass corresponding to the input name.
     """
-    mass_defs = {m.name: m for m in MassDef.__subclasses__()}
-
-    if name in mass_defs:
-        return mass_defs[name]
-    else:
-        raise ValueError(f"Mass definition {name} not implemented.")
+    return MassDef.from_name(name)

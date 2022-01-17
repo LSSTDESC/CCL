@@ -806,8 +806,4 @@ def mass_function_from_name(name):
     Returns:
         MassFunc subclass corresponding to the input name.
     """
-    mass_functions = {c.name: c for c in MassFunc.__subclasses__()}
-    if name in mass_functions:
-        return mass_functions[name]
-    else:
-        raise ValueError(f"Mass function {name} not implemented.")
+    return MassFunc.from_name(name)

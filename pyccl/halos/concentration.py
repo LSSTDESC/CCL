@@ -588,9 +588,4 @@ def concentration_from_name(name):
     Returns:
         Concentration subclass corresponding to the input name.
     """
-    concentrations = {c.name: c
-                      for c in Concentration.__subclasses__()}
-    if name in concentrations:
-        return concentrations[name]
-    else:
-        raise ValueError(f"Concentration {name} not implemented.")
+    return Concentration.from_name(name)

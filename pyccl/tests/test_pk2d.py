@@ -231,6 +231,13 @@ def test_pk2d_copy():
             (pk2.extrap_order_lok, pk2.extrap_order_hik))
     assert pk1 == pk2
 
+    # empty Pk2D
+    pk1 = ccl.Pk2D(extrap_order_lok=10, extrap_order_hik=11, empty=True)
+    assert pk1 != pk2
+
+    pk2 = pk1.copy()
+    assert pk1 == pk2
+
 
 def test_pk2d_cls():
     """

@@ -722,6 +722,8 @@ def warn_api(pairs=None, order=None):
 
             return func(**kwargs)
 
+        new_func.__name__ = func.__name__
+        new_func.__doc__ = func.__doc__
         return new_func
 
     return wrapper
