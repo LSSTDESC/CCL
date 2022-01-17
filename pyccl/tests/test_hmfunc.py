@@ -107,6 +107,13 @@ def test_nM_bocquet_smoke(with_hydro):
     assert hmf._check_mass_def_strict(md) is True
 
 
+def test_bocquet_mass_def():
+    hmd = ccl.halos.MassDef(200, "critical")
+    hmd.rho_type = "something_else"  # bogus rho_type
+    with pytest.raises(ValueError):
+        ccl.halos.MassFuncBocquet16(COSMO, mass_def=hmd)
+
+
 @pytest.mark.parametrize('name', ['Press74', 'Tinker08',
                                   'Despali16', 'Angulo12'])
 def test_nM_from_string(name):
