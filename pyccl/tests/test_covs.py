@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_raises
 import pyccl as ccl
 
 
@@ -113,15 +112,15 @@ def test_cov_NG_errors(typ):
     tr = get_tracer()
     ls = np.array([2., 20., 200.])
 
-    assert_raises(ValueError, cov_f,
-                  COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
-                  integration_method='cag_cuad')
+    with pytest.raises(ValueError):
+        cov_f(COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
+              integration_method='cag_cuad')
 
-    assert_raises(TypeError, cov_f,
-                  COSMO, tr, tr, ell=ls, tracer3=tr)
+    with pytest.raises(TypeError):
+        cov_f(COSMO, tr, tr, ell=ls, tracer3=tr)
 
-    assert_raises(TypeError, cov_f,
-                  COSMO, tr, tr, ell=ls, t_of_kk_a=None)
+    with pytest.raises(TypeError):
+        cov_f(COSMO, tr, tr, ell=ls, t_of_kk_a=None)
 
 
 def test_Sigma2B():

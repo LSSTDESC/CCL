@@ -1,7 +1,6 @@
 import numpy as np
-from numpy.testing import assert_raises
-
 import pyccl as ccl
+import pytest
 
 
 def test_nonlin_camb_power():
@@ -59,5 +58,5 @@ def test_nonlin_camb_power_with_sigma8():
     k = np.logspace(-3, 1, 10)
 
     # Check that non-linear power spectrum isn't being used with sigma8
-    with assert_raises(ccl.errors.CCLError):
+    with pytest.raises(ccl.errors.CCLError):
         ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)

@@ -1,9 +1,7 @@
 import numpy as np
 import pytest
-
 import pyccl as ccl
 
-from numpy.testing import assert_raises
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -51,22 +49,22 @@ def test_cls_smoke(p_of_k_a):
                 assert np.allclose(corr, corr_rev)
 
     # Check invalid dndz
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=z, bias=(z, b))
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.NumberCountsTracer(COSMO, dndz=(z, n, n), bias=(z, b),
                                has_rsd=False)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.NumberCountsTracer(COSMO, dndz=(z,), bias=(z, b), has_rsd=False)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.NumberCountsTracer(COSMO, dndz=(1, 2), bias=(z, b), has_rsd=False)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=z)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=(z, n, n))
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=(z,))
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=(1, 2))
 
 

@@ -17,7 +17,6 @@ MF_TYPES = sorted(list(MF_EQUIV.keys()))
 
 @pytest.mark.parametrize('mf_type', MF_TYPES)
 def test_massfunc_models_smoke(mf_type):
-    from pyccl.pyutils import assert_warns
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear',
@@ -26,8 +25,8 @@ def test_massfunc_models_smoke(mf_type):
     hmf = hmf_cls(cosmo)
     for m in MS:
         # Deprecated
-        nm_old = assert_warns(ccl.CCLDeprecationWarning,
-                              ccl.massfunc, cosmo, m, 1.)
+        with pytest.warns(ccl.CCLDeprecationWarning):
+            nm_old = ccl.massfunc(cosmo, m, 1.)
         nm_new = hmf.get_mass_function(cosmo, m, 1.)
         assert np.all(np.isfinite(nm_old))
         assert np.shape(nm_old) == np.shape(m)
@@ -37,7 +36,6 @@ def test_massfunc_models_smoke(mf_type):
 
 @pytest.mark.parametrize('mf_type', ['tinker10', 'shethtormen'])
 def test_halo_bias_models_smoke(mf_type):
-    from pyccl.pyutils import assert_warns
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear',
@@ -46,8 +44,8 @@ def test_halo_bias_models_smoke(mf_type):
     hbf = hbf_cls(cosmo)
     for m in MS:
         # Deprecated
-        bm_old = assert_warns(ccl.CCLDeprecationWarning,
-                              ccl.halo_bias, cosmo, m, 1.)
+        with pytest.warns(ccl.CCLDeprecationWarning):
+            bm_old = ccl.halo_bias(cosmo, m, 1.)
         bm_new = hbf.get_halo_bias(cosmo, m, 1.)
         assert np.all(np.isfinite(bm_old))
         assert np.shape(bm_old) == np.shape(m)
@@ -73,10 +71,10 @@ def test_massfunc_smoke(m):
     [1e14, 1e15],
     np.array([1e14, 1e15])])
 def test_massfunc_m2r_smoke(m):
-    from pyccl.pyutils import assert_warns
     # Deprecated
     # TODO: switch to mass2radius_lagrangian
-    r = assert_warns(ccl.CCLDeprecationWarning, ccl.massfunc_m2r, COSMO, m)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        r = ccl.massfunc_m2r(COSMO, m)
     assert np.all(np.isfinite(r))
     assert np.shape(r) == np.shape(m)
 
@@ -99,10 +97,10 @@ def test_sigmaM_smoke(m):
     [1e14, 1e15],
     np.array([1e14, 1e15])])
 def test_halo_bias_smoke(m):
-    from pyccl.pyutils import assert_warns
     a = 0.8
     # Deprecated
     # TODO: switch to HaloBias
-    b = assert_warns(ccl.CCLDeprecationWarning, ccl.halo_bias, COSMO, m, a)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        b = ccl.halo_bias(COSMO, m, a)
     assert np.all(np.isfinite(b))
     assert np.shape(b) == np.shape(m)

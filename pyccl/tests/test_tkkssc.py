@@ -82,8 +82,6 @@ def test_tkkssc_smoke(pars):
 
 
 def test_tkkssc_errors():
-    from pyccl.pyutils import assert_warns
-
     hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF, halo_bias=HBF,
                                  mass_def=M200)
     k_arr = KK
@@ -106,7 +104,7 @@ def test_tkkssc_errors():
                                    prof34_2pt=P2, normprof=False)
 
     # Negative profile in logspace
-    assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,
-                 COSMO, hmc, P3, prof2=Pneg, normprof=False,
-                 lk_arr=np.log(k_arr), a_arr=a_arr,
-                 use_log=True)
+    with pytest.warns(ccl.CCLWarning):
+        ccl.halos.halomod_Tk3D_1h(COSMO, hmc, P3, prof2=Pneg, normprof=False,
+                                  lk_arr=np.log(k_arr), a_arr=a_arr,
+                                  use_log=True)

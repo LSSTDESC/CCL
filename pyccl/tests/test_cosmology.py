@@ -1,12 +1,7 @@
-from __future__ import print_function
 import pickle
 import tempfile
-
 import pytest
-
 import numpy as np
-from numpy.testing import assert_raises, assert_, assert_no_warnings
-
 import pyccl as ccl
 import warnings
 
@@ -70,43 +65,33 @@ def test_cosmology_init():
     Check that Cosmology objects can only be constructed in a valid way.
     """
     # Make sure error raised if invalid transfer/power spectrum etc. passed
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        matter_power_spectrum='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        transfer_function='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        baryons_power_spectrum='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        mass_function='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        halo_concentration='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        emulator_neutrinos='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=np.array([0.1, 0.1, 0.1, 0.1]))
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=ccl)
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=np.array([0.1, 0.1, 0.1]),
-        m_nu_type='normal')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                      n_s=0.96, matter_power_spectrum='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                      n_s=0.96, transfer_function='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                      n_s=0.96,baryons_power_spectrum='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                      n_s=0.96, mass_function='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                      n_s=0.96, halo_concentration='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                      n_s=0.96, emulator_neutrinos='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                      n_s=0.96, m_nu=np.array([0.1, 0.1, 0.1, 0.1]))
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                      n_s=0.96, m_nu=ccl)
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      m_nu=np.array([0.1, 0.1, 0.1]), m_nu_type='normal')
 
 
 def test_cosmology_setitem():
@@ -125,27 +110,32 @@ def test_cosmology_output():
                           n_s=0.96)
 
     # Return and print status messages
-    assert_no_warnings(cosmo.status)
-    assert_no_warnings(print, cosmo)
+    with pytest.warns(None) as w_rec:
+        cosmo.status()
+        print(cosmo)
+    assert len(w_rec) == 0
 
     # Test status methods for different precomputable quantities
-    assert_(cosmo.has_distances is False)
-    assert_(cosmo.has_growth is False)
-    assert_(cosmo.has_linear_power is False)
-    assert_(cosmo.has_nonlin_power is False)
-    assert_(cosmo.has_sigma is False)
+    assert cosmo.has_distances is False
+    assert cosmo.has_growth is False
+    assert cosmo.has_linear_power is False
+    assert cosmo.has_nonlin_power is False
+    assert cosmo.has_sigma is False
 
     # Check that quantities can be precomputed
-    assert_no_warnings(cosmo.compute_distances)
-    assert_no_warnings(cosmo.compute_growth)
-    assert_no_warnings(cosmo.compute_linear_power)
-    assert_no_warnings(cosmo.compute_nonlin_power)
-    assert_no_warnings(cosmo.compute_sigma)
-    assert_(cosmo.has_distances is True)
-    assert_(cosmo.has_growth is True)
-    assert_(cosmo.has_linear_power is True)
-    assert_(cosmo.has_nonlin_power is True)
-    assert_(cosmo.has_sigma is True)
+    with pytest.warns(None) as w_rec:
+        cosmo.compute_distances()
+        cosmo.compute_growth()
+        cosmo.compute_linear_power()
+        cosmo.compute_nonlin_power()
+        cosmo.compute_sigma()
+    assert len(w_rec) == 0
+
+    assert cosmo.has_distances is True
+    assert cosmo.has_growth is True
+    assert cosmo.has_linear_power is True
+    assert cosmo.has_nonlin_power is True
+    assert cosmo.has_sigma is True
 
 
 def test_cosmology_pickles():
@@ -162,9 +152,8 @@ def test_cosmology_pickles():
             fp.seek(0)
             cosmo2 = pickle.load(fp)
 
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo2, 0.5))
+    assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
+            ccl.comoving_radial_distance(cosmo2, 0.5))
 
 
 def test_cosmology_lcdm():
@@ -175,7 +164,7 @@ def test_cosmology_lcdm():
                        h=0.67, n_s=0.96,
                        sigma8=0.81)
     c2 = ccl.CosmologyVanillaLCDM()
-    assert_(ccl.comoving_radial_distance(c1, 0.5) ==
+    assert (ccl.comoving_radial_distance(c1, 0.5) ==
             ccl.comoving_radial_distance(c2, 0.5))
 
 
@@ -196,14 +185,12 @@ def test_cosmology_repr():
             z_mg=[0.0, 1.0], df_mg=[0.01, 0.0])
 
         cosmo2 = eval(str(cosmo))
-        assert_(
-            ccl.comoving_radial_distance(cosmo, 0.5) ==
-            ccl.comoving_radial_distance(cosmo2, 0.5))
+        assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
+                ccl.comoving_radial_distance(cosmo2, 0.5))
 
         cosmo3 = eval(repr(cosmo))
-        assert_(
-            ccl.comoving_radial_distance(cosmo, 0.5) ==
-            ccl.comoving_radial_distance(cosmo3, 0.5))
+        assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
+                ccl.comoving_radial_distance(cosmo3, 0.5))
 
     # same test with arrays to be sure
     with pytest.warns(ccl.CCLDeprecationWarning):
@@ -213,14 +200,12 @@ def test_cosmology_repr():
             z_mg=np.array([0.0, 1.0]), df_mg=np.array([0.01, 0.0]))
 
         cosmo2 = eval(str(cosmo))
-        assert_(
-            ccl.comoving_radial_distance(cosmo, 0.5) ==
-            ccl.comoving_radial_distance(cosmo2, 0.5))
+        assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
+                ccl.comoving_radial_distance(cosmo2, 0.5))
 
         cosmo3 = eval(repr(cosmo))
-        assert_(
-            ccl.comoving_radial_distance(cosmo, 0.5) ==
-            ccl.comoving_radial_distance(cosmo3, 0.5))
+        assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
+                ccl.comoving_radial_distance(cosmo3, 0.5))
 
     # adding extra parameters
     cosmo = ccl.Cosmology(
@@ -229,27 +214,23 @@ def test_cosmology_repr():
                                    "HMCode_logT_AGN": 7.8}})
 
     cosmo2 = eval(str(cosmo))
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo2, 0.5))
+    assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
+            ccl.comoving_radial_distance(cosmo2, 0.5))
 
     cosmo3 = eval(repr(cosmo))
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo3, 0.5))
+    assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
+            ccl.comoving_radial_distance(cosmo3, 0.5))
 
     # testing with vanilla cosmology
     cosmo = ccl.CosmologyVanillaLCDM()
 
     cosmo2 = eval(str(cosmo))
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo2, 0.5))
+    assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
+            ccl.comoving_radial_distance(cosmo2, 0.5))
 
     cosmo3 = eval(repr(cosmo))
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo3, 0.5))
+    assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
+            ccl.comoving_radial_distance(cosmo3, 0.5))
 
 
 def test_cosmology_context():
@@ -268,8 +249,8 @@ def test_cosmology_context():
             assert cosmo.has_distances
 
     # make sure it does not!
-    assert_(not hasattr(cosmo, "cosmo"))
-    assert_(not hasattr(cosmo, "_params"))
+    assert not hasattr(cosmo, "cosmo")
+    assert not hasattr(cosmo, "_params")
 
     with pytest.raises(AttributeError):
         cosmo.has_growth
@@ -280,7 +261,7 @@ def test_cosmology_context():
 def test_cosmology_concentrations(c):
     cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
                                      halo_concentration=c)
-    with pytest.warns(DeprecationWarning):
+    with pytest.warns(ccl.CCLDeprecationWarning):
         cosmo.compute_nonlin_power()
 
 
@@ -293,7 +274,7 @@ def test_cosmology_mass_functions(hmf):
     cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
                                      mass_function=hmf)
     if hmf in valid_hmf:
-        with pytest.warns(DeprecationWarning):
+        with pytest.warns(ccl.CCLDeprecationWarning):
             cosmo.compute_nonlin_power()
     else:
         # ignore the warning this time because we are interested
