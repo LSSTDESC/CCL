@@ -64,3 +64,10 @@ def test_bM_default():
     lM_out = bM._get_consistent_mass(COSMO,
                                      M_in, 1., bM.mass_def)
     assert np.fabs(np.log10(M_in) - lM_out) < 1E-10
+
+
+def test_func_deprecated():
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        hb1 = ccl.halos.halo_bias_from_name("Tinker10")
+    hb2 = ccl.halos.HaloBias.from_name("Tinker10")
+    assert hb1 == hb2

@@ -139,6 +139,14 @@ def test_pk2d_from_model_raises():
                   cosmo, model='bbkss')
 
 
+def test_nonlin_models_smoke():
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    pkl = cosmo.get_camb_pk_lin()
+    pk1 = pkl.apply_halofit(cosmo)
+    pk2 = pkl.apply_nonlin_model(cosmo, "halofit")
+    assert pk1 == pk2
+
+
 def test_pk2d_function():
     """
     Test evaluation of Pk2D objects
@@ -191,6 +199,37 @@ def test_pk2d_function():
     assert_allclose(phere, ptrue, rtol=1E-6)
     dphere = psp.eval_dlPk_dlk(ktest, atest, cosmo)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
+
+
+def test_pk2d_eval_cosmo():
+    """Test optional cosmo in Pk2D.eval"""
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    k_arr = np.logspace(-1, 1, 32)
+    a_arr = np.linspace(0.5, 1., 4)
+    pk = np.array([cosmo.linear_matter_power(k_arr, a) for a in a_arr])
+    pk2d = ccl.Pk2D(a_arr=a_arr, lk_arr=np.log(k_arr),
+                    pk_arr=pk, is_logp=False)
+
+    assert pk2d.eval(1., 1., cosmo) == pk2d.eval(1., 1.)
+    assert np.isfinite(pk2d.eval(1., 0.4, cosmo))
+    with pytest.raises(TypeError):
+        pk2d.eval(1., 0.4)
+
+
+def test_pk2d_copy():
+    """Test that copying a Pk2D object works."""
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    cosmo.compute_linear_power()
+    pk1 = cosmo.get_linear_power()
+    pk2 = pk1.copy()
+
+    k_arr = np.logspace(-3, 2, 128)
+    a_arr = np.linspace(0.05, 1., 32)
+    assert np.allclose(np.array([pk1.eval(k_arr, a) for a in a_arr]),
+                       np.array([pk2.eval(k_arr, a) for a in a_arr]), rtol=0)
+    assert ((pk1.extrap_order_lok, pk1.extrap_order_hik) ==
+            (pk2.extrap_order_lok, pk2.extrap_order_hik))
+    assert pk1 == pk2
 
 
 def test_pk2d_cls():

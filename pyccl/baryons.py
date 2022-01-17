@@ -60,7 +60,7 @@ def bcm_correct_pk2d(cosmo, pk2d):
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
     """
-    _bcm_correct_pk2d
+    _bcm_correct_pk2d(cosmo, pk2d)
 
 
 def baryon_correct(cosmo, model, pk2d):

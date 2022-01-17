@@ -263,6 +263,8 @@ class MassDef200m(MassDef):
     Args:
         c_m_relation (string): concentration-mass relation.
     """
+    name = '200m'
+
     @warn_api(pairs=[("c_m_relation", "c_m")])
     def __init__(self, *, c_m_relation='Duffy08'):
         super(MassDef200m, self).__init__(200,
@@ -277,6 +279,8 @@ class MassDef200c(MassDef):
     Args:
         c_m_relation (string): concentration-mass relation.
     """
+    name = '200c'
+
     @warn_api(pairs=[("c_m_relation", "c_m")])
     def __init__(self, *, c_m_relation='Duffy08'):
         super(MassDef200c, self).__init__(200,
@@ -291,6 +295,8 @@ class MassDef500c(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+    name = '500c'
+
     def __init__(self, c_m='Ishiyama21'):
         super(MassDef500c, self).__init__(500,
                                           'critical',
@@ -304,6 +310,8 @@ class MassDefVir(MassDef):
     Args:
         c_m_relation (string): concentration-mass relation.
     """
+    name = 'vir'
+
     @warn_api(pairs=[("c_m_relation", "c_m")])
     def __init__(self, *, c_m_relation='Klypin11'):
         super(MassDefVir, self).__init__('vir',

@@ -171,3 +171,10 @@ def test_nM_tinker10_norm():
     zs = np.linspace(0, 1, 4)
     ns = np.array([norm(z) for z in zs])
     assert np.all(np.fabs(ns-1) < 0.005)
+
+
+def test_func_deprecated():
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        mf1 = ccl.halos.mass_function_from_name("Tinker08")
+    mf2 = ccl.halos.MassFunc.from_name("Tinker08")
+    assert mf1 == mf2

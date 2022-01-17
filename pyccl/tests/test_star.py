@@ -139,12 +139,26 @@ def test_renamed_attribute(prof_class):
         prof.cM
 
 
-def test_pk2d_warns():
+def test_pk2d_renamed_methods_warns():
     pkl = COSMO.get_camb_pk_lin()
     with pytest.warns(None) as w_rec:
         Q1 = pkl.eval_dlPk_dlk(1., 1., COSMO)
+        Q2 = ccl.Pk2D.from_model(COSMO, "bbks")
     assert len(w_rec) == 0
 
     with pytest.warns(CCLDeprecationWarning):
         q1 = pkl.eval_dlogpk_dlogk(1., 1., COSMO)
     assert q1 == Q1
+
+    with pytest.warns(CCLDeprecationWarning):
+        q2 = ccl.Pk2D.pk_from_model(COSMO, "bbks")
+    assert q2 == Q2
+
+
+def test_pk2d_instance_methods():
+    pkl = COSMO.get_camb_pk_lin()
+    with pytest.warns(CCLDeprecationWarning):
+        pknl = ccl.Pk2D.apply_halofit(COSMO, pk_linear=pkl)
+
+    with pytest.warns(CCLDeprecationWarning):
+        ccl.Pk2D.include_baryons(COSMO, model="bcm", pk_nonlin=pknl)

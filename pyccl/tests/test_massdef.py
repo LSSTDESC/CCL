@@ -117,3 +117,17 @@ def test_translate_mass_raises():
 def test_subclasses_smoke(scls):
     hmd = scls()
     assert np.isfinite(hmd.get_Delta(COSMO, 1.))
+
+
+@pytest.mark.parametrize('name', ['200m', '200c', '500c', 'vir'])
+def test_massdef_from_string_smoke(name):
+    hmd_class = ccl.halos.MassDef.from_name(name)
+    hmd = hmd_class()
+    assert np.isfinite(hmd.get_radius(COSMO, 1e14, 1))
+
+
+def test_func_deprecated():
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        hmd1 = ccl.halos.mass_def_from_name("500c")
+    hmd2 = ccl.halos.MassDef.from_name("500c")
+    assert hmd1 == hmd2

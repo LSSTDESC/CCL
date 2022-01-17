@@ -77,3 +77,10 @@ def test_cM_from_string(name):
 def test_cM_from_string_raises():
     with pytest.raises(ValueError):
         ccl.halos.Concentration.from_name('Duffy09')
+
+
+def test_func_deprecated():
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        c1 = ccl.halos.concentration_from_name("Duffy08")
+    c2 = ccl.halos.Concentration.from_name("Duffy08")
+    assert c1 == c2
