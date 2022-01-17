@@ -502,23 +502,23 @@ def _check_array_params(f_arg, name=None, arr3=False):
         return f1, f2
 
 
-def assert_warns(wtype, f, *args, **kwargs):
-    """Check that a function call `f(*args, **kwargs)` raises a warning of
-    type wtype.
+# def assert_warns(wtype, f, *args, **kwargs):
+#     """Check that a function call `f(*args, **kwargs)` raises a warning of
+#     type wtype.
 
-    Returns the output of `f(*args, **kwargs)` unless there was no warning,
-    in which case an AssertionError is raised.
-    """
-    import warnings
-    # Check that f() raises a warning, but not an error.
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        res = f(*args, **kwargs)
-    assert len(w) >= 1, "Expected warning was not raised."
-    assert issubclass(w[0].category, wtype), \
-        "Warning raised was the wrong type (got %s, expected %s)" % (
-            w[0].category, wtype)
-    return res
+#     Returns the output of `f(*args, **kwargs)` unless there was no warning,
+#     in which case an AssertionError is raised.
+#     """
+#     import warnings
+#     # Check that f() raises a warning, but not an error.
+#     with warnings.catch_warnings(record=True) as w:
+#         warnings.simplefilter("always")
+#         res = f(*args, **kwargs)
+#     assert len(w) >= 1, "Expected warning was not raised."
+#     assert issubclass(w[0].category, wtype), \
+#         "Warning raised was the wrong type (got %s, expected %s)" % (
+#             w[0].category, wtype)
+#     return res
 
 
 def _get_spline1d_arrays(gsl_spline):
