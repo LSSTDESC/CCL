@@ -639,7 +639,7 @@ class PowerSpectrumBACCO(PowerSpectrumEmulator):
         else:
             name = which_bounds
 
-        if self._has_bounds(name):
+        if self._has_bounds(which_bounds):
             B = self._get_bounds(which_bounds)
         else:
             entry = emu.emulator[name]
