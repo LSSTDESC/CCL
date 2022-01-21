@@ -10,6 +10,7 @@ from inspect import getmembers, isfunction, signature
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning, CCLDeprecationWarning
 from ._types import error_types
+from ._core import _docstring_extra_parameters
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check, warn_api
 from .pk2d import Pk2D
@@ -77,12 +78,6 @@ class Cosmology(object):
               temperature of the CMB will still be non-zero. Note however
               that this approximation is common for late-time LSS computations.
 
-    .. note:: BCM stands for the "baryonic correction model" of Schneider &
-              Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
-              `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
-/0000-ccl_note/main.pdf>`_
-              for details.
-
     .. note:: After instantiation, you can set parameters related to the
               internal splines and numerical integration accuracy by setting
               the values of the attributes of
@@ -94,109 +89,117 @@ class Cosmology(object):
               See the module level documentation of `pyccl.core` for details.
 
     Args:
-        Omega_c (:obj:`float`): Cold dark matter density fraction.
-        Omega_b (:obj:`float`): Baryonic matter density fraction.
-        h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc; unitless.
-        A_s (:obj:`float`): Power spectrum normalization. Exactly one of A_s
-            and sigma_8 is required.
-        sigma8 (:obj:`float`): Variance of matter density perturbations at
-            an 8 Mpc/h scale. Exactly one of A_s and sigma_8 is required.
-        n_s (:obj:`float`): Primordial scalar perturbation spectral index.
-        Omega_k (:obj:`float`, optional): Curvature density fraction.
-            Defaults to 0.
-        Omega_g (:obj:`float`, optional): Density in relativistic species
-            except massless neutrinos. The default of `None` corresponds
-            to setting this from the CMB temperature. Note that if a non-`None`
-            value is given, this may result in a physically inconsistent model
-            because the CMB temperature will still be non-zero in the
-            parameters.
-        Neff (:obj:`float`, optional): Effective number of massless
-            neutrinos present. Defaults to 3.046.
-        m_nu (:obj:`float`, optional): Total mass in eV of the massive
-            neutrinos present. Defaults to 0.
-        m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
-            be one of 'inverted', 'normal', 'equal', 'single', or 'list'.
+        Omega_c (:obj:`float`):
+            Cold dark matter density fraction.
+        Omega_b (:obj:`float`):
+            Baryonic matter density fraction.
+        h (:obj:`float`):
+            Hubble constant divided by 100 km/s/Mpc; unitless.
+        A_s (:obj:`float`):
+            Power spectrum normalization.
+            Exactly one of A_s and sigma_8 is required.
+        sigma8 (:obj:`float`):
+            Variance of matter density perturbations at an 8 Mpc/h scale.
+            Exactly one of A_s and sigma_8 is required.
+        n_s (:obj:`float`):
+            Primordial scalar perturbation spectral index.
+        Omega_k (:obj:`float`, optional):
+            Curvature density fraction. Defaults to 0.
+        Omega_g (:obj:`float`, optional):
+            Density in relativistic species except massless neutrinos.
+            The default of `None` corresponds to setting this from the CMB
+            temperature. Note that if a non-`None` value is given, it may
+            result in a physically inconsistent model because the CMB
+            temperature will still be non-zero in the parameters.
+        Neff (:obj:`float`, optional):
+            Effective number of massless neutrinos present.
+            Defaults to 3.046.
+        m_nu (:obj:`float`, optional):
+            Total mass in eV of the massive neutrinos present. Defaults to 0.
+        m_nu_type (:obj:`str`, optional):
+            The type of massive neutrinos. Accepted types are ``'inverted'``,
+            ``'normal'``, ``'equal'``, ``'single'``, and ``'list'``.
             The default of None is the same as 'normal'.
-        w0 (:obj:`float`, optional): First order term of dark energy equation
-            of state. Defaults to -1.
-        wa (:obj:`float`, optional): Second order term of dark energy equation
-            of state. Defaults to 0.
-        T_CMB (:obj:`float`): The CMB temperature today. The default of
-            ``None`` uses the global CCL value in
+        w0 (:obj:`float`, optional):
+            First order term of dark energy equation of state. Defaults to -1.
+        wa (:obj:`float`, optional):
+            Second order term of dark energy equation of state. Defaults to 0.
+        T_CMB (:obj:`float`):
+            The CMB temperature today.
+            The default of ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
-        bcm_log10Mc (:obj:`float`, optional): Deprecated; pass into
-            `extra parameters`. One of the parameters of the
-            BCM model. Defaults to `np.log10(1.2e14)`.
-        bcm_etab (:obj:`float`, optional): Deprecated; pass into
-            `extra parameters`. One of the parameters of the BCM
-            model. Defaults to 0.5.
-        bcm_ks (:obj:`float`, optional): Deprecated; pass into
-            `extra parameters`. One of the parameters of the BCM
-            model. Defaults to 55.0.
-        mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        c1_mg (:obj:`float`, optional): MG parameter that enters in the scale
-            dependence of mu affecting its large scale behavior. Default to 1.
+        bcm_log10Mc (:obj:`float`, optional):
+            Deprecated; pass into ``extra parameters``.
+            One of the parameters of the BCM model.
+            Defaults to ``log10(1.2e14)``.
+        bcm_etab (:obj:`float`, optional):
+            Deprecated; pass into ``extra parameters``.
+            One of the parameters of the BCM model. Defaults to 0.5.
+        bcm_ks (:obj:`float`, optional):
+            Deprecated; pass into ``extra parameters``.
+            One of the parameters of the BCM model. Defaults to 55.0.
+        mu_0 (:obj:`float`, optional):
+            One of the parameters of the mu-Sigma modified gravity model.
+            Defaults to 0.0
+        sigma_0 (:obj:`float`, optional):
+            One of the parameters of the mu-Sigma modified gravity model.
+            Defaults to 0.0
+        c1_mg (:obj:`float`, optional):
+            MG parameter that enters in the scale dependence of mu affecting
+            its large scale behavior. Defaults to 1.
             See, e.g., Eqs. (46) in Ade et al. 2015, arXiv:1502.01590
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        c2_mg (:obj:`float`, optional): MG parameter that enters in the scale
-            dependence of Sigma affecting its large scale behavior. Default 1.
+        c2_mg (:obj:`float`, optional):
+            MG parameter that enters in the scale dependence of Sigma
+            affecting its large scale behavior. Defaults to 1.
             See, e.g., Eqs. (47) in Ade et al. 2015, arXiv:1502.01590
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        lambda_mg (:obj:`float`, optional): MG parameter that sets the start
-            of dependance on c1 and c2 MG parameters. Defaults to 0.0
+        lambda_mg (:obj:`float`, optional):
+            MG parameter that sets the start of dependance on c1 and c2 MG
+            parameters. Defaults to 0.0.
             See, e.g., Eqs. (46) & (47) in Ade et al. 2015, arXiv:1502.01590
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        df_mg (array_like, optional): Perturbations to the GR growth rate as
-            a function of redshift :math:`\\Delta f`. Used to implement simple
-            modified growth scenarios.
-        z_mg (array_like, optional): Array of redshifts corresponding to df_mg.
-        transfer_function (:obj:`str`, optional): The transfer function to
-            use. Defaults to 'boltzmann_camb'.
-        matter_power_spectrum (:obj:`str`, optional): The matter power
-            spectrum to use. Defaults to 'halofit'.
-        baryons_power_spectrum (:obj:`str`, optional): The correction from
-            baryonic effects to be implemented. Defaults to 'nobaryons'.
-        mass_function (:obj:`str`, optional): The mass function to use.
-            Defaults to 'tinker10' (2010).
-        halo_concentration (:obj:`str`, optional): The halo concentration
-            relation to use. Defaults to Duffy et al. (2008) 'duffy2008'.
-        emulator_neutrinos (:obj:`str`, optional): If using the emulator for
-            the power spectrum, specified treatment of unequal neutrinos.
-            Options are 'strict', which will raise an error and quit if the
-            user fails to pass either a set of three equal masses or a sum with
-            m_nu_type = 'equal', and 'equalize', which will redistribute
-            masses to be equal right before calling the emulator but results in
-            internal inconsistencies. Defaults to 'strict'.
-        extra_parameters (:obj:`dict`, optional): Dictionary holding extra
-            parameters. Currently supports extra parameters for CAMB, with
-            details described below. Defaults to None.
-
-    Currently supported extra parameters for CAMB are:
-
-        * `halofit_version`
-        * `HMCode_A_baryon`
-        * `HMCode_eta_baryon`
-        * `HMCode_logT_AGN`
-        * `kmax`
-        * `lmax`
-        * `dark_energy_model`
-
-    Consult the CAMB documentation for their usage. These parameters are passed
-    in a :obj:`dict` to `extra_parameters` as::
-
-        extra_parameters = {"camb": {"halofit_version": "mead2020",
-                                     "HMCode_logT_AGN": 7.8}}
+        df_mg (array_like, optional):
+            Perturbations to the GR growth rate as a function of redshift
+            :math:`\\Delta f`. Used to implement simple modified growth
+            scenarios.
+        z_mg (array_like, optional):
+            Redshifts corresponding to df_mg.
+        transfer_function (:obj:`str`, optional):
+            The transfer function to use. Defaults to ``'boltzmann_camb'``.
+        matter_power_spectrum (:obj:`str`, optional):
+            The matter power spectrum to use. Defaults to ``'halofit'``.
+        baryons_power_spectrum (:obj:`str`, optional):
+            The correction from baryonic effects to be implemented.
+            Defaults to ``'nobaryons'``.
+        mass_function (:obj:`str`, optional):
+            Deprecated; use the ``halos`` sub-package.
+            The mass function to use. Defaults to ``'tinker10'``.
+        halo_concentration (:obj:`str`, optional):
+            Deprecated; use the ``halos`` sub-package.
+            The halo concentration relation to use.
+            Defaults to ``'duffy2008'``.
+        emulator_neutrinos (:obj:`str`, optional):
+            If using CosmicEmu for the power spectrum, specified treatment
+            of unequal neutrinos.
+            Options are ``'strict'``, which will raise an error and quit if
+            the user fails to pass either a set of three equal masses or a sum
+            with ``m_nu_type = 'equal'``, and ``'equalize'``, which will
+            redistribute masses to be equal right before calling the emulator,
+            but results in internal inconsistencies. Defaults to ``'strict'``.
+        extra_parameters (:obj:`dict`, optional):
+            Dictionary holding extra parameters.
+            Accepted keys are detailed below.
 
     """
+    __doc__ += _docstring_extra_parameters
+
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
     # an attribute of this class.
@@ -227,8 +230,8 @@ class Cosmology(object):
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryons_power_spectrum='nobaryons',
-            mass_function='tinker10',
-            halo_concentration='duffy2008',
+            mass_function=None,
+            halo_concentration=None,
             emulator_neutrinos='strict',
             extra_parameters=None):
 
@@ -371,12 +374,26 @@ class Cosmology(object):
                 "type. Available options are: %s"
                 % (baryons_power_spectrum,
                    baryons_power_spectrum_types.keys()))
+        if mass_function is not None:
+            warnings.warn(
+                "Argument `mass_function` is deprecated in `pyccl.Cosmology` "
+                "and will be removed in a future release. Use the `halos` "
+                "sub-package for detailed Halo Model prescriptions.",
+                CCLDeprecationWarning)
+            mass_function = "tinker10"
         if mass_function not in mass_function_types.keys():
             raise ValueError(
                 "'%s' is not a valid mass_function type. "
                 "Available options are: %s"
                 % (mass_function,
                    mass_function_types.keys()))
+        if halo_concentration is not None:
+            warnings.warn(
+                "Argument `halo_concentration` is deprecated in "
+                "`pyccl.Cosmology` and will be removed in a future release. "
+                "Use the `halos` sub-package for detailed Halo Model "
+                "prescriptions.", CCLDeprecationWarning)
+            halo_concentration = "duffy2008"
         if halo_concentration not in halo_concentration_types.keys():
             raise ValueError(
                 "'%s' is not a valid halo_concentration type. "
