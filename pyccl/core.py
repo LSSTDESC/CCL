@@ -129,14 +129,14 @@ class Cosmology(object):
             The default of ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
         bcm_log10Mc (:obj:`float`, optional):
-            Deprecated; pass into ``extra parameters``.
+            Deprecated; pass via ``extra parameters``.
             One of the parameters of the BCM model.
             Defaults to ``log10(1.2e14)``.
         bcm_etab (:obj:`float`, optional):
-            Deprecated; pass into ``extra parameters``.
+            Deprecated; pass via ``extra parameters``.
             One of the parameters of the BCM model. Defaults to 0.5.
         bcm_ks (:obj:`float`, optional):
-            Deprecated; pass into ``extra parameters``.
+            Deprecated; pass via ``extra parameters``.
             One of the parameters of the BCM model. Defaults to 55.0.
         mu_0 (:obj:`float`, optional):
             One of the parameters of the mu-Sigma modified gravity model.
@@ -145,6 +145,7 @@ class Cosmology(object):
             One of the parameters of the mu-Sigma modified gravity model.
             Defaults to 0.0
         c1_mg (:obj:`float`, optional):
+            Deprecated; pass via ``extra_parameters``.
             MG parameter that enters in the scale dependence of mu affecting
             its large scale behavior. Defaults to 1.
             See, e.g., Eqs. (46) in Ade et al. 2015, arXiv:1502.01590
@@ -152,6 +153,7 @@ class Cosmology(object):
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
         c2_mg (:obj:`float`, optional):
+            Deprecated; pass via ``extra_parameters``.
             MG parameter that enters in the scale dependence of Sigma
             affecting its large scale behavior. Defaults to 1.
             See, e.g., Eqs. (47) in Ade et al. 2015, arXiv:1502.01590
@@ -159,6 +161,7 @@ class Cosmology(object):
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
         lambda_mg (:obj:`float`, optional):
+            Deprecated; pass via ``extra_parameters``.
             MG parameter that sets the start of dependance on c1 and c2 MG
             parameters. Defaults to 0.0.
             See, e.g., Eqs. (46) & (47) in Ade et al. 2015, arXiv:1502.01590
@@ -166,10 +169,12 @@ class Cosmology(object):
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
         df_mg (array_like, optional):
+            Deprecated; will be removed in a future release.
             Perturbations to the GR growth rate as a function of redshift
             :math:`\\Delta f`. Used to implement simple modified growth
             scenarios.
         z_mg (array_like, optional):
+            Deprecated; will be removed in a future release.
             Redshifts corresponding to df_mg.
         transfer_function (:obj:`str`, optional):
             The transfer function to use. Defaults to ``'boltzmann_camb'``.
@@ -226,12 +231,11 @@ class Cosmology(object):
             w0=-1., wa=0., T_CMB=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=0., sigma_0=0.,
-            c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
+            c1_mg=None, c2_mg=None, lambda_mg=None, z_mg=None, df_mg=None,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryons_power_spectrum='nobaryons',
-            mass_function=None,
-            halo_concentration=None,
+            mass_function=None, halo_concentration=None,
             emulator_neutrinos='strict',
             extra_parameters=None):
 
@@ -374,26 +378,28 @@ class Cosmology(object):
                 "type. Available options are: %s"
                 % (baryons_power_spectrum,
                    baryons_power_spectrum_types.keys()))
-        if mass_function is not None:
+        if mass_function is None:
+            mass_function = "tinker10"
+        else:
             warnings.warn(
                 "Argument `mass_function` is deprecated in `pyccl.Cosmology` "
                 "and will be removed in a future release. Use the `halos` "
                 "sub-package for detailed Halo Model prescriptions.",
                 CCLDeprecationWarning)
-            mass_function = "tinker10"
         if mass_function not in mass_function_types.keys():
             raise ValueError(
                 "'%s' is not a valid mass_function type. "
                 "Available options are: %s"
                 % (mass_function,
                    mass_function_types.keys()))
-        if halo_concentration is not None:
+        if halo_concentration is None:
+            halo_concentration = "duffy2008"
+        else:
             warnings.warn(
                 "Argument `halo_concentration` is deprecated in "
                 "`pyccl.Cosmology` and will be removed in a future release. "
                 "Use the `halos` sub-package for detailed Halo Model "
                 "prescriptions.", CCLDeprecationWarning)
-            halo_concentration = "duffy2008"
         if halo_concentration not in halo_concentration_types.keys():
             raise ValueError(
                 "'%s' is not a valid halo_concentration type. "
@@ -621,6 +627,29 @@ class Cosmology(object):
         for par, val in bcm.items():
             if val is None:
                 bcm[par] = bcm_defaults[par]
+        log10Mc, etab, ks = bcm["log10Mc"], bcm["etab"], bcm["ks"]
+
+        # Planck MG params: deprecate old usage and sub-in defaults if needed
+        if (extra_parameters is not None) and \
+                ("PlanckMG" in extra_parameters):
+            planckMG = extra_parameters["PlanckMG"]
+        else:
+            planckMG = {"c1": 1.0, "c2": 1.0, "lambda": 0.0}
+
+        if any([par is not None for par in [c1_mg, c2_mg, lambda_mg]]):
+            warnings.warn(
+                "MG parameters [c1, c2, lambda] as arguments of Cosmology "
+                "are deprecated and will be removed in a future release. "
+                "Specify them in `extra_parameters` instead, using the model "
+                "key 'PlanckMG', and omitting the '_mg' suffix from the "
+                "parameter name.", CCLDeprecationWarning)
+            planckMG = {"c1": c1_mg, "c2": c2_mg, "lambda": lambda_mg}
+
+        planckMG_defaults = {"c1": 1.0, "c2": 1.0, "lambda": 0.0}
+        for par, val in planckMG.items():
+            if val is None:
+                planckMG[par] = planckMG_defaults[par]
+        c1, c2, lambda_ = planckMG["c1"], planckMG["c2"], planckMG["lambda"]
 
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
@@ -629,20 +658,19 @@ class Cosmology(object):
         try:
             if T_CMB is not None:
                 lib.cvar.constants.T_CMB = T_CMB
-            log10Mc, etab, ks = bcm["log10Mc"], bcm["etab"], bcm["ks"]
             status = 0
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
                 self._params, status = lib.parameters_create_nu(
                     Omega_c, Omega_b, Omega_k, Neff, w0, wa, h,
                     norm_pk, n_s, log10Mc, etab, ks, mu_0, sigma_0,
-                    c1_mg, c2_mg, lambda_mg, mnu_final_list, status)
+                    c1, c2, lambda_, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
                 self._params, status = lib.parameters_create_nu_vec(
                     Omega_c, Omega_b, Omega_k, Neff, w0, wa, h,
                     norm_pk, n_s, log10Mc, etab, ks, mu_0, sigma_0,
-                    c1_mg, c2_mg, lambda_mg,
+                    c1, c2, lambda_,
                     z_mg, df_mg, mnu_final_list, status)
             check(status)
         finally:

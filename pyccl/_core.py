@@ -12,8 +12,7 @@ _docstring_extra_parameters = \
                  'HMCode_logT_AGN': None,
                  'kmax': 10.0,
                  'lmax': 5000,
-                 'dark_energy_model': 'fluid'
-                 }
+                 'dark_energy_model': 'fluid'}
 
     .. note:: Consult the CAMB documentation for their usage.
 
@@ -43,4 +42,17 @@ _docstring_extra_parameters = \
               in Arico et al. (2021b), :arXiv:`2104.14568`. Extra parameters
               are passed into the baryon model described in Arico et al.
               (2021a), :arXiv:`2011.15018`.
+
+    * ``'PlanckMG'`` ::
+
+        'PlanckMG': {'c1': 1.0,
+                     'c2': 1.0,
+                     'lambda': 0.0}
+
+    .. note:: 'PlanckMG' refers to the choice of functional modified gravity
+              parametrization in Eqs. 46 & 47 if Ade et al. (2015),
+              :arXiv:`1502.01590`, where functions f1 and f2 are set equal
+              to the commonly used ratio of dark energy density parameter at
+              some scale factor over the dark energy density parameter today.
+
     """
