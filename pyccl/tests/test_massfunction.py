@@ -17,10 +17,11 @@ MF_TYPES = sorted(list(MF_EQUIV.keys()))
 
 @pytest.mark.parametrize('mf_type', MF_TYPES)
 def test_massfunc_models_smoke(mf_type):
-    cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function='bbks', matter_power_spectrum='linear',
-        mass_function=mf_type)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo = ccl.Cosmology(
+            Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+            transfer_function='bbks', matter_power_spectrum='linear',
+            mass_function=mf_type)
     hmf_cls = ccl.halos.MassFunc.from_name(MF_EQUIV[mf_type])
     hmf = hmf_cls(cosmo)
     for m in MS:
@@ -36,10 +37,11 @@ def test_massfunc_models_smoke(mf_type):
 
 @pytest.mark.parametrize('mf_type', ['tinker10', 'shethtormen'])
 def test_halo_bias_models_smoke(mf_type):
-    cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function='bbks', matter_power_spectrum='linear',
-        mass_function=mf_type)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo = ccl.Cosmology(
+            Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+            transfer_function='bbks', matter_power_spectrum='linear',
+            mass_function=mf_type)
     hbf_cls = ccl.halos.HaloBias.from_name(MF_EQUIV[mf_type])
     hbf = hbf_cls(cosmo)
     for m in MS:

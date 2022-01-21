@@ -5,20 +5,21 @@ import pyccl as ccl
 
 HALOPROFILE_TOLERANCE = 1E-3
 
-COSMO = ccl.Cosmology(
-    Omega_b=0.0486,
-    Omega_c=0.2603,
-    h=0.6774,
-    n_s=0.9667,
-    sigma8=0.8159,
-    w0=-1,
-    wa=0,
-    m_nu=0,
-    m_nu_type='normal',
-    Neff=3.046,
-    Omega_k=0,
-    transfer_function='eisenstein_hu',
-    mass_function='shethtormen')
+with pytest.warns(ccl.CCLDeprecationWarning):
+    COSMO = ccl.Cosmology(
+        Omega_b=0.0486,
+        Omega_c=0.2603,
+        h=0.6774,
+        n_s=0.9667,
+        sigma8=0.8159,
+        w0=-1,
+        wa=0,
+        m_nu=0,
+        m_nu_type='normal',
+        Neff=3.046,
+        Omega_k=0,
+        transfer_function='eisenstein_hu',
+        mass_function='shethtormen')
 
 
 def test_profile_Hernquist():

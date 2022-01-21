@@ -3,10 +3,11 @@ import pytest
 
 import pyccl as ccl
 
-COSMO = ccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-    transfer_function='bbks', matter_power_spectrum='linear',
-    mass_function='shethtormen')
+with pytest.warns(ccl.CCLDeprecationWarning):
+    COSMO = ccl.Cosmology(
+        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+        transfer_function='bbks', matter_power_spectrum='linear',
+        mass_function='shethtormen')
 
 
 @pytest.mark.parametrize('k', [
@@ -81,10 +82,11 @@ def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
                                   ['tinker10', 'constant_concentration']])
 def test_halomodel_choices_smoke(mf_c):
     mf, c = mf_c
-    cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function='bbks', matter_power_spectrum='linear',
-        mass_function=mf, halo_concentration=c)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo = ccl.Cosmology(
+            Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+            transfer_function='bbks', matter_power_spectrum='linear',
+            mass_function=mf, halo_concentration=c)
     a = 0.8
     k = np.geomspace(1E-2, 1, 10)
     # Deprecated
@@ -100,10 +102,11 @@ def test_halomodel_choices_smoke(mf_c):
 
 
 def test_halomodel_choices_raises():
-    cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function='bbks', matter_power_spectrum='linear',
-        mass_function='tinker')
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo = ccl.Cosmology(
+            Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+            transfer_function='bbks', matter_power_spectrum='linear',
+            mass_function='tinker')
     a = 0.8
     k = np.geomspace(1E-2, 1, 10)
 

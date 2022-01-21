@@ -74,12 +74,14 @@ def test_cosmology_init():
     with pytest.raises(ValueError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
                       n_s=0.96, baryons_power_spectrum='x')
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                      n_s=0.96, mass_function='x')
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                      n_s=0.96, halo_concentration='x')
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        with pytest.raises(ValueError):
+            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                          n_s=0.96, mass_function='x')
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        with pytest.raises(ValueError):
+            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                          n_s=0.96, halo_concentration='x')
     with pytest.raises(ValueError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
                       n_s=0.96, emulator_neutrinos='x')
@@ -259,8 +261,9 @@ def test_cosmology_context():
 @pytest.mark.parametrize('c', ['bhattacharya2011', 'duffy2008',
                                'constant_concentration'])
 def test_cosmology_concentrations(c):
-    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
-                                     halo_concentration=c)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
+                                         halo_concentration=c)
     with pytest.warns(ccl.CCLDeprecationWarning):
         cosmo.compute_nonlin_power()
 
@@ -271,8 +274,9 @@ def test_cosmology_mass_functions(hmf):
     """Check halo concentration and halo mass function passed into choice
     `halo_model` of matter power spectrum in Cosmology."""
     valid_hmf = ["tinker10", "shethtormen"]
-    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
-                                     mass_function=hmf)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
+                                         mass_function=hmf)
     if hmf in valid_hmf:
         with pytest.warns(ccl.CCLDeprecationWarning):
             cosmo.compute_nonlin_power()
