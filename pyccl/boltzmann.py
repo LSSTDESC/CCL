@@ -139,7 +139,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
 
     if nonlin:
         cp.NonLinearModel = camb.nonlinear.Halofit()
-        halofit_version = extra_camb_params.get("halofit_version", "mead")
+        halofit_version = extra_camb_params.get("halofit_version", "mead2020")
         options = {k: extra_camb_params[k] for k in
                    ["HMCode_A_baryon",
                     "HMCode_eta_baryon",
