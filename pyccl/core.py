@@ -634,7 +634,7 @@ class Cosmology(object):
                 ("PlanckMG" in extra_parameters):
             planckMG = extra_parameters["PlanckMG"]
         else:
-            planckMG = {"c1": 1.0, "c2": 1.0, "lambda": 0.0}
+            planckMG = {"c1": None, "c2": None, "lambda": None}
 
         if any([par is not None for par in [c1_mg, c2_mg, lambda_mg]]):
             warnings.warn(

@@ -36,3 +36,18 @@ def test_mu_sigma_matter_power_err(mp):
         # Also raises a warning, so catch that.
         with pytest.warns(ccl.CCLWarning):
             ccl.nonlin_matter_power(cosmo, 1, 1)
+
+
+def test_planckmg_deprecated_consistent():
+    planckMG = {"c1": 1.1, "c2": 1.2, "lambda": 0.05}
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo1 = ccl.CosmologyVanillaLCDM(c1_mg=planckMG["c1"],
+                                          c2_mg=planckMG["c2"],
+                                          lambda_mg=planckMG["lambda"])
+    cosmo1.compute_linear_power()
+    pk1 = cosmo1.get_linear_power()
+
+    cosmo2 = ccl.CosmologyVanillaLCDM(extra_parameters={"planckMG": planckMG})
+    cosmo2.compute_linear_power()
+    pk2 = cosmo2.get_linear_power()
+    assert pk1 == pk2

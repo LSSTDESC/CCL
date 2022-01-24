@@ -51,8 +51,8 @@ _docstring_extra_parameters = \
 
     .. note:: 'PlanckMG' refers to the choice of functional modified gravity
               parametrization in Eqs. 46 & 47 if Ade et al. (2015),
-              :arXiv:`1502.01590`, where functions f1 and f2 are set equal
-              to the commonly used ratio of dark energy density parameter at
+              :arXiv:`1502.01590`, where functions f1 and f2 are set equal to
+              the commonly used ratio of the dark energy density parameter at
               some scale factor over the dark energy density parameter today.
 
     """

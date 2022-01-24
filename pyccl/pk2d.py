@@ -301,7 +301,7 @@ class Pk2D(object):
         same data over the same range.
         """
         same_extrap = ((self.extrap_order_lok, self.extrap_order_hik) ==
-                       other.extrap_order_lok, other.extrap_order_hik)
+                       (other.extrap_order_lok, other.extrap_order_hik))
         if self.has_psp != other.has_psp:
             return False
         if not (self.has_psp and other.has_psp):
