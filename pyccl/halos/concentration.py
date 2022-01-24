@@ -33,7 +33,7 @@ class Concentration(object):
 
     @deprecate_attr(pairs=[("mass_def", "mdef")])
     def __getattr__(self, name):
-        return getattr(self, name)
+        return
 
     def _default_mass_def(self):
         """ Assigns a default mass definition for this object if

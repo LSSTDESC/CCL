@@ -803,6 +803,7 @@ class Cosmology(object):
         >>> cosmo2 = eval(repr(cosmo))
         """
         kw = {**self._params_init_kwargs, **self._config_init_kwargs}
+        kw["extra_parameters"] = kw.pop("extra_parameters")
         string = self._build_string(kw, padding=3, eq_sign="=")
         string = "pyccl.Cosmology(" + string
         return string
@@ -812,6 +813,7 @@ class Cosmology(object):
         that equal the default values.
         """
         kw = {**self._params_init_kwargs, **self._config_init_kwargs}
+        kw["extra_parameters"] = kw.pop("extra_parameters")
         if self.__class__.__qualname__ == "Cosmology":
             # access __init__ signature from this class
             pars = signature(self.__init__).parameters

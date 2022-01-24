@@ -95,7 +95,7 @@ class HMCalculator(object):
                            ("halo_bias", "_hbias"),
                            ("mass_def", "_mdef")])
     def __getattr__(self, name):
-        return getattr(self, name)
+        return
 
     def _integ_spline(self, fM, lM):
         # Spline integrator

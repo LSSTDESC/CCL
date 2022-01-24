@@ -746,7 +746,7 @@ def deprecate_attr(pairs=None):
 
     >>> @deprecate_attr([('mass_def', 'mdef')])
         def __getattr__(self, name):
-            return getattr(self, name)
+            return
 
     Now, every time the attribute is called via its old name, the user will
     be warned about the renaming, and the attribute value will be returned.
@@ -777,9 +777,8 @@ def deprecate_attr(pairs=None):
             try:
                 attr = cls.__getattribute__(this_name)
                 return attr
-            except AttributeError:
-                return None
+            except AttributeError as err:
+                raise err
 
-            return getter(cls, this_name)
         return new_getter
     return wrapper
