@@ -5,6 +5,11 @@ from .pyutils import check, warn_api
 from .pk2d import Pk2D
 from .errors import CCLError
 
+try:
+    import isitgr  # noqa: F401
+except ImportError:
+    pass  # prevent nans from isitgr
+
 
 @warn_api()
 def get_camb_pk_lin(cosmo, *, nonlin=False):
@@ -235,7 +240,7 @@ def get_isitgr_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
             object. The linear power spectrum.
     """
-    import isitgr
+    import isitgr  # noqa: F811
     import isitgr.model
 
     # Get extra CAMB parameters that were specified
