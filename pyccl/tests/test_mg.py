@@ -47,7 +47,7 @@ def test_planckmg_deprecated_consistent():
     cosmo1.compute_linear_power()
     pk1 = cosmo1.get_linear_power()
 
-    cosmo2 = ccl.CosmologyVanillaLCDM(extra_parameters={"planckMG": planckMG})
+    cosmo2 = ccl.CosmologyVanillaLCDM(extra_parameters={"PlanckMG": planckMG})
     cosmo2.compute_linear_power()
     pk2 = cosmo2.get_linear_power()
     assert pk1 == pk2
