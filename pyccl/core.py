@@ -383,29 +383,18 @@ class Cosmology(object):
         else:
             warnings.warn(
                 "Argument `mass_function` is deprecated in `pyccl.Cosmology` "
-                "and will be removed in a future release. Use the `halos` "
-                "sub-package for detailed Halo Model prescriptions.",
-                CCLDeprecationWarning)
-        if mass_function not in mass_function_types.keys():
-            raise ValueError(
-                "'%s' is not a valid mass_function type. "
-                "Available options are: %s"
-                % (mass_function,
-                   mass_function_types.keys()))
+                "and will be removed in a future release. To compute the "
+                "Halo Model power spectrum refer to the 'halo_model' key in "
+                "`extra_parameters`.", CCLDeprecationWarning)
         if halo_concentration is None:
             halo_concentration = "duffy2008"
         else:
             warnings.warn(
                 "Argument `halo_concentration` is deprecated in "
                 "`pyccl.Cosmology` and will be removed in a future release. "
-                "Use the `halos` sub-package for detailed Halo Model "
-                "prescriptions.", CCLDeprecationWarning)
-        if halo_concentration not in halo_concentration_types.keys():
-            raise ValueError(
-                "'%s' is not a valid halo_concentration type. "
-                "Available options are: %s"
-                % (halo_concentration,
-                   halo_concentration_types.keys()))
+                "To compute the Halo Model power spectrum refer to the "
+                "'halo_model' key in `extra_parameters`.",
+                CCLDeprecationWarning)
         if emulator_neutrinos not in emulator_neutrinos_types.keys():
             raise ValueError("'%s' is not a valid emulator neutrinos "
                              "method. Available options are: %s"
@@ -421,10 +410,6 @@ class Cosmology(object):
             matter_power_spectrum_types[matter_power_spectrum]
         config.baryons_power_spectrum_method = \
             baryons_power_spectrum_types[baryons_power_spectrum]
-        config.mass_function_method = \
-            mass_function_types[mass_function]
-        config.halo_concentration_method = \
-            halo_concentration_types[halo_concentration]
         config.emulator_neutrinos_method = \
             emulator_neutrinos_types[emulator_neutrinos]
 
@@ -950,36 +935,29 @@ class Cosmology(object):
 
     def _get_halo_model_nonlin_power(self):
         from . import halos as hal
-        mass_def = hal.MassDef('vir', 'matter')
-        conc = self._config.halo_concentration_method
-        mfm = self._config.mass_function_method
+        try:
+            HM = self._params_init_kwargs["extra_parameters"]["halo_model"]
+        except (KeyError, TypeError):
+            warnings.warn(
+                "You want to compute the Halo Model power spectrum but the "
+                "`halo_model` parameters are not specified in "
+                "`extra_parameters`. Refer to the documentation for the "
+                "default values.", CCLWarning)
+            HM = {"mass_def": "200m",
+                  "mass_function": "Tinker10",
+                  "halo_bias": "Tinker10",
+                  "concentration": "Duffy08"}
 
-        if conc == lib.bhattacharya2011:
-            c = hal.ConcentrationBhattacharya13(mass_def=mass_def)
-        elif conc == lib.duffy2008:
-            c = hal.ConcentrationDuffy08(mass_def=mass_def)
-        elif conc == lib.constant_concentration:
-            c = hal.ConcentrationConstant(c=4., mass_def=mass_def)
-
-        if mfm == lib.tinker10:
-            hmf = hal.MassFuncTinker10(self, mass_def=mass_def,
-                                       mass_def_strict=False)
-            hbf = hal.HaloBiasTinker10(self, mass_def=mass_def,
-                                       mass_def_strict=False)
-        elif mfm == lib.shethtormen:
-            hmf = hal.MassFuncSheth99(self, mass_def=mass_def,
-                                      mass_def_strict=False,
-                                      use_delta_c_fit=True)
-            hbf = hal.HaloBiasSheth99(self, mass_def=mass_def,
-                                      mass_def_strict=False)
-        else:
-            raise ValueError("Halo model spectra not available for your "
-                             "current choice of mass function with the "
-                             "deprecated implementation.")
-        prf = hal.HaloProfileNFW(c_m_relation=c)
+        # TODO: simplify using new HMCalculator syntax
+        hmd = hal.MassDef.from_name(HM["mass_def"])()
+        hmf = hal.MassFunc.from_name(HM["mass_function"])(self, mass_def=hmd)
+        hbf = hal.HaloBias.from_name(HM["halo_bias"])(self, mass_def=hmd)
         hmc = hal.HMCalculator(self, mass_function=hmf,
-                               halo_bias=hbf, mass_def=mass_def)
-        return hal.halomod_Pk2D(self, hmc, prf, normprof=True)
+                               halo_bias=hbf,
+                               mass_def=hmd)
+        cM = hal.Concentration.from_name(HM["concentration"])(mass_def=hmd)
+        prof = hal.HaloProfileNFW(c_m_relation=cM)
+        return hal.halomod_Pk2D(self, hmc, prof, normprof=True)
 
     def compute_nonlin_power(self):
         """Compute the non-linear power spectrum."""
@@ -1030,10 +1008,6 @@ class Cosmology(object):
                            "spectrum, but you selected "
                            "`matter_power_spectrum=None`.")
         elif mps == 'halo_model':
-            warnings.warn(
-                "The halo model option for the internal CCL matter power "
-                "spectrum is deprecated. Use the more general functionality "
-                "in the `halos` module.", category=CCLDeprecationWarning)
             pk = self._get_halo_model_nonlin_power()
         elif mps == 'halofit':
             pkl = self._pk_lin['delta_matter:delta_matter']

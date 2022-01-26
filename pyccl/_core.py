@@ -28,6 +28,13 @@ _docstring_extra_parameters = \
 /0000-ccl_note/main.pdf>`_
               for details.
 
+    * ``'halo_model'`` ::
+
+        'halo_model': {'mass_def': '200m',
+                       'mass_function': 'Tinker10',
+                       'halo_bias': 'Tinker10',
+                       'concentration': 'Duffy08'}
+
     * ``'bacco'`` ::
 
         'bacco': {'M_c': 14,
