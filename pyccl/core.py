@@ -184,10 +184,12 @@ class Cosmology(object):
             The correction from baryonic effects to be implemented.
             Defaults to ``'nobaryons'``.
         mass_function (:obj:`str`, optional):
-            Deprecated; use the ``halos`` sub-package.
+            Deprecated; pass via `extra_parameters` or use the `halos`
+            sub-package.
             The mass function to use. Defaults to ``'tinker10'``.
         halo_concentration (:obj:`str`, optional):
-            Deprecated; use the ``halos`` sub-package.
+            Deprecated; pass via `extra_parameters` or use the `halos`
+            sub-package.
             The halo concentration relation to use.
             Defaults to ``'duffy2008'``.
         emulator_neutrinos (:obj:`str`, optional):
@@ -378,30 +380,38 @@ class Cosmology(object):
                 "type. Available options are: %s"
                 % (baryons_power_spectrum,
                    baryons_power_spectrum_types.keys()))
-        if mass_function is None:
-            mass_function = "tinker10"
-        else:
+        if (mass_function, halo_concentration) != (None, None):
             warnings.warn(
-                "Argument `mass_function` is deprecated in `pyccl.Cosmology` "
-                "and will be removed in a future release. To compute the "
-                "Halo Model power spectrum refer to the 'halo_model' key in "
-                "`extra_parameters`.", CCLDeprecationWarning)
-        if halo_concentration is None:
-            halo_concentration = "duffy2008"
-        else:
-            warnings.warn(
-                "Argument `halo_concentration` is deprecated in "
-                "`pyccl.Cosmology` and will be removed in a future release. "
-                "To compute the Halo Model power spectrum refer to the "
-                "'halo_model' key in `extra_parameters`.",
+                "Arguments `mass_function` and `halo_concentration` are "
+                "deprecated in `pyccl.Cosmology` and will be removed in a "
+                "future release. To compute the Halo Model power spectrum "
+                "refer to the 'halo_model' key in `extra_parameters`.",
                 CCLDeprecationWarning)
+            if ((mass_function not in mass_function_types.keys()) and
+                    (mass_function is not None)):
+                raise ValueError(
+                    "'%s' is not a valid mass_function type. "
+                    "Available options are: %s or None."
+                    % (mass_function, mass_function_types.keys()))
+            if ((halo_concentration not in halo_concentration_types.keys()) and
+                    (halo_concentration is not None)):
+                raise ValueError(
+                    "'%s' is not a valid halo_concentration type. "
+                    "Available options are: %s or None."
+                    % (halo_concentration, halo_concentration_types.keys()))
         if emulator_neutrinos not in emulator_neutrinos_types.keys():
-            raise ValueError("'%s' is not a valid emulator neutrinos "
-                             "method. Available options are: %s"
-                             % (emulator_neutrinos,
-                                emulator_neutrinos_types.keys()))
+            raise ValueError(
+                "'%s' is not a valid emulator neutrinos "
+                "method. Available options are: %s"
+                % (emulator_neutrinos, emulator_neutrinos_types.keys()))
 
         # Assign values to new ccl_configuration object
+        # TODO: remove mass function and concentration from config
+        if mass_function is None:
+            mass_function = "tinker10"
+        if halo_concentration is None:
+            halo_concentration = "duffy2008"
+
         config = lib.configuration()
 
         config.transfer_function_method = \
@@ -410,6 +420,10 @@ class Cosmology(object):
             matter_power_spectrum_types[matter_power_spectrum]
         config.baryons_power_spectrum_method = \
             baryons_power_spectrum_types[baryons_power_spectrum]
+        config.mass_function_method = \
+            mass_function_types[mass_function]
+        config.halo_concentration_method = \
+            halo_concentration_types[halo_concentration]
         config.emulator_neutrinos_method = \
             emulator_neutrinos_types[emulator_neutrinos]
 
@@ -935,27 +949,56 @@ class Cosmology(object):
 
     def _get_halo_model_nonlin_power(self):
         from . import halos as hal
+        HM = {"mass_def": None, "mass_def_strict": None,
+              "mass_function": None, "halo_bias": None,
+              "concentration": None}
         try:
-            HM = self._params_init_kwargs["extra_parameters"]["halo_model"]
+            extras = self._params_init_kwargs["extra_parameters"]
+            HM.update(extras["halo_model"])
         except (KeyError, TypeError):
             warnings.warn(
                 "You want to compute the Halo Model power spectrum but the "
                 "`halo_model` parameters are not specified in "
                 "`extra_parameters`. Refer to the documentation for the "
                 "default values.", CCLWarning)
-            HM = {"mass_def": "200m",
-                  "mass_function": "Tinker10",
-                  "halo_bias": "Tinker10",
-                  "concentration": "Duffy08"}
 
-        # TODO: simplify using new HMCalculator syntax
+        # override with deprecated Cosmology arguments
+        mass_function = self._config_init_kwargs["mass_function"]
+        halo_concentration = self._config_init_kwargs["halo_concentration"]
+        if mass_function is not None:
+            mfs = {"angulo": "Angulo12", "tinker": "Tinker08",
+                   "tinker10": "Tinker10", "watson": "Watson13",
+                   "shethtormen": "Sheth99"}
+            HM["mass_function"] = mfs[mass_function]
+            if mass_function in ["tinker10", "shethtormen"]:
+                HM["halo_bias"] = mfs[mass_function]
+        if halo_concentration is not None:
+            cms = {"bhattacharya2011": "Bhattacharya13",
+                   "duffy2008": "Duffy08",
+                   "constant_concentration": "Constant"}
+            HM["concentration"] = cms[halo_concentration]
+
+        HM_defaults = {"mass_def": "vir", "mass_def_strict": False,
+                       "mass_function": "Tinker10", "halo_bias": "Tinker10",
+                       "concentration": "Duffy08"}
+        for par, val in HM.items():
+            if val is None:
+                HM[par] = HM_defaults[par]
+
         hmd = hal.MassDef.from_name(HM["mass_def"])()
-        hmf = hal.MassFunc.from_name(HM["mass_function"])(self, mass_def=hmd)
-        hbf = hal.HaloBias.from_name(HM["halo_bias"])(self, mass_def=hmd)
+        mf_pars = {"mass_def": hmd, "mass_def_strict": HM["mass_def_strict"]}
+        hb_pars = mf_pars.copy()
+        if HM["mass_function"] == "Sheth99":
+            mf_pars["use_delta_c_fit"] = True
+        hmf = hal.MassFunc.from_name(HM["mass_function"])(self, **mf_pars)
+        hbf = hal.HaloBias.from_name(HM["halo_bias"])(self, **hb_pars)
         hmc = hal.HMCalculator(self, mass_function=hmf,
                                halo_bias=hbf,
                                mass_def=hmd)
-        cM = hal.Concentration.from_name(HM["concentration"])(mass_def=hmd)
+        cM_pars = {"mass_def": hmd}
+        if HM["concentration"] == "Constant":
+            cM_pars["c"] = 4.
+        cM = hal.Concentration.from_name(HM["concentration"])(**cM_pars)
         prof = hal.HaloProfileNFW(c_m_relation=cM)
         return hal.halomod_Pk2D(self, hmc, prof, normprof=True)
 

@@ -87,7 +87,7 @@ class MassDef(object):
     """
 
     @warn_api()
-    def __init__(self, Delta, rho_type, *, c_m_relation=None):
+    def __init__(self, Delta, rho_type=None, *, c_m_relation=None):
         # Check it makes sense
         if (Delta != 'fof') and (Delta != 'vir'):
             if isinstance(Delta, str):
@@ -315,7 +315,7 @@ class MassDefVir(MassDef):
     @warn_api(pairs=[("c_m_relation", "c_m")])
     def __init__(self, *, c_m_relation='Klypin11'):
         super(MassDefVir, self).__init__('vir',
-                                         'critical',
+                                         'matter',
                                          c_m_relation=c_m_relation)
 
 

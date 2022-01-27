@@ -30,10 +30,15 @@ _docstring_extra_parameters = \
 
     * ``'halo_model'`` ::
 
-        'halo_model': {'mass_def': '200m',
+        'halo_model': {'mass_def': 'vir',
                        'mass_function': 'Tinker10',
                        'halo_bias': 'Tinker10',
                        'concentration': 'Duffy08'}
+
+    .. note:: Using the halo model to compute the non-linear power spectrum
+              is not recommended, due to the assumptions that go into it.
+              For generic halo model functionality refer to the `halos`
+              sub-package.
 
     * ``'bacco'`` ::
 

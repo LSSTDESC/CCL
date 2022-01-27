@@ -3,7 +3,6 @@ import tempfile
 import pytest
 import numpy as np
 import pyccl as ccl
-import warnings
 
 
 def test_cosmo_methods():
@@ -264,7 +263,7 @@ def test_cosmology_concentrations(c):
     with pytest.warns(ccl.CCLDeprecationWarning):
         cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
                                          halo_concentration=c)
-    with pytest.warns(ccl.CCLDeprecationWarning):
+    with pytest.warns(ccl.CCLWarning):
         cosmo.compute_nonlin_power()
 
 
@@ -278,12 +277,5 @@ def test_cosmology_mass_functions(hmf):
         cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum="halo_model",
                                          mass_function=hmf)
     if hmf in valid_hmf:
-        with pytest.warns(ccl.CCLDeprecationWarning):
+        with pytest.warns(ccl.CCLWarning):
             cosmo.compute_nonlin_power()
-    else:
-        # ignore the warning this time because we are interested
-        # in the error that is raised
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            with pytest.raises(ValueError):
-                cosmo.compute_nonlin_power()

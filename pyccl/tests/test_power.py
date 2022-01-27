@@ -29,7 +29,7 @@ def test_halomod_f2d_copy():
     pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf, normprof=True)
     psp_new = pk2d.psp
     # This just triggers the internal calculation
-    with pytest.warns(ccl.CCLDeprecationWarning):
+    with pytest.warns(CCLWarning):
         pk_old = ccl.nonlin_matter_power(COSMO_HM, 1., 0.8)
     pk_new = pk2d.eval(1., 0.8, COSMO_HM)
     psp_old = COSMO_HM.get_nonlin_power().psp
