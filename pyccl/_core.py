@@ -38,7 +38,9 @@ _docstring_extra_parameters = \
     .. note:: Using the halo model to compute the non-linear power spectrum
               is not recommended, due to the assumptions that go into it.
               For generic halo model functionality refer to the `halos`
-              sub-package.
+              sub-package. If 'halo_bias' is not specified and 'mass_function'
+              is one of ['Tinker10', 'Sheth99'], the 'halo_bias' will be
+              coupled to the 'mass_function'.
 
     * ``'bacco'`` ::
 

@@ -279,3 +279,98 @@ def test_cosmology_mass_functions(hmf):
     if hmf in valid_hmf:
         with pytest.warns(ccl.CCLWarning):
             cosmo.compute_nonlin_power()
+
+
+def test_cosmology_halomodel_power():
+    """This test checks default behavior for the halo model parameters in
+    Cosmology.
+    """
+    k_arr = np.logspace(-1, 2, 64)
+    a = 0.8
+
+    def Cosmo(**pars):
+        return ccl.CosmologyVanillaLCDM(
+            transfer_function="bbks",
+            matter_power_spectrum="halo_model",
+            **pars)
+
+    # halo model in extra parameters
+    cosmo1 = Cosmo(extra_parameters={
+        "halo_model": {"mass_def": "vir",
+                       "mass_def_strict": False,
+                       "mass_function": "Tinker10",
+                       "halo_bias": "Tinker10",
+                       "concentration": "Duffy08"}})
+    cosmo1.compute_nonlin_power()
+
+    # only some parameters defined
+    cosmo2 = Cosmo(extra_parameters={
+        "halo_model": {"mass_function": "Tinker10",
+                       "concentration": "Duffy08"}})
+    cosmo2.compute_nonlin_power()
+
+    # no parameters
+    cosmo3 = Cosmo()
+    with pytest.warns(ccl.CCLWarning):
+        cosmo3.compute_nonlin_power()
+
+    # deprecated parameters
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo4 = Cosmo(mass_function="tinker10",
+                       halo_concentration="duffy2008")
+    with pytest.warns(ccl.CCLWarning):
+        cosmo4.compute_nonlin_power()
+
+    # some deprecated parameters
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo5 = Cosmo(mass_function="tinker10")
+    with pytest.warns(ccl.CCLWarning):
+        cosmo5.compute_nonlin_power()
+
+    def F(cosmo):
+        return cosmo.nonlin_matter_power(k_arr, a)
+
+    assert all([np.allclose(F(cosmo1), F(x), rtol=0)
+                for x in [cosmo2, cosmo3, cosmo4, cosmo5]])
+
+
+def test_cosmology_halomodel_deprecated():
+    """This test tries a different mass function and checks that the
+    corresponding halo bias is used, if available.
+    """
+    k_arr = np.logspace(-1, 2, 64)
+    a = 0.8
+
+    def Cosmo(**pars):
+        return ccl.CosmologyVanillaLCDM(
+            transfer_function="bbks",
+            matter_power_spectrum="halo_model",
+            **pars)
+
+    # old behavior
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo1 = Cosmo(mass_function="shethtormen",
+                       halo_concentration="constant_concentration")
+    with pytest.warns(ccl.CCLWarning):
+        cosmo1.compute_nonlin_power()
+
+    # new behavior
+    cosmo2 = Cosmo(extra_parameters={
+        "halo_model": {"mass_function": "Sheth99",
+                       "concentration": "Constant"}})
+    cosmo2.compute_nonlin_power()
+
+    # fully specified new behavior
+    cosmo3 = Cosmo(extra_parameters={
+        "halo_model": {"mass_def": "vir",
+                       "mass_def_strict": False,
+                       "mass_function": "Sheth99",
+                       "halo_bias": "Sheth99",
+                       "concentration": "Constant"}})
+    cosmo3.compute_nonlin_power()
+
+    def F(cosmo):
+        return cosmo.nonlin_matter_power(k_arr, a)
+
+    assert all([np.allclose(F(cosmo1), F(x), rtol=0)
+                for x in [cosmo2, cosmo3]])

@@ -960,7 +960,10 @@ class Cosmology(object):
                 "You want to compute the Halo Model power spectrum but the "
                 "`halo_model` parameters are not specified in "
                 "`extra_parameters`. Refer to the documentation for the "
-                "default values.", CCLWarning)
+                "default values. "
+                "Defaults will be overriden by the deprecated "
+                "`mass_function` and `halo_concentration`, if specified.",
+                CCLWarning)
 
         # override with deprecated Cosmology arguments
         mass_function = self._config_init_kwargs["mass_function"]
@@ -970,13 +973,15 @@ class Cosmology(object):
                    "tinker10": "Tinker10", "watson": "Watson13",
                    "shethtormen": "Sheth99"}
             HM["mass_function"] = mfs[mass_function]
-            if mass_function in ["tinker10", "shethtormen"]:
-                HM["halo_bias"] = mfs[mass_function]
         if halo_concentration is not None:
             cms = {"bhattacharya2011": "Bhattacharya13",
                    "duffy2008": "Duffy08",
                    "constant_concentration": "Constant"}
             HM["concentration"] = cms[halo_concentration]
+
+        if (HM["halo_bias"] is None and
+                HM["mass_function"] in ["Tinker10", "Sheth99"]):
+            HM["halo_bias"] = HM["mass_function"]
 
         HM_defaults = {"mass_def": "vir", "mass_def_strict": False,
                        "mass_function": "Tinker10", "halo_bias": "Tinker10",
