@@ -271,6 +271,8 @@ class MassDef500c(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+    name = '500c'
+
     def __init__(self, c_m='Ishiyama21'):
         super(MassDef500c, self).__init__(500,
                                           'critical',
