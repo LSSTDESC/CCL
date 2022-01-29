@@ -189,18 +189,19 @@ class HaloProfileCIBShang12(HaloProfile):
         return Lumcen
 
     def _Lumsat(self, M, a):
-        logM = np.log10(M[None, :])
-        # log-spaced integration points (10 per dex)
+        res = np.zeros_like(M)
+        M_use = M[M >= self.Mmin, None]
+        logM = np.log10(M_use)
         LOGM_MIN = 10
         nm = max(2, 10*int(np.max(logM) - LOGM_MIN))
-        msub = np.linspace(LOGM_MIN, np.max(logM), nm+1)[:, None]
+        msub = np.linspace(LOGM_MIN, np.max(logM), nm+1)[None, :]
 
-        dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(10**msub, M)
         Lum = self._Lum(msub, a)
+        dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(10**msub, M_use)
         integ = dnsubdlnm * Lum
-        Lumsat = simps(integ, x=np.log(10)*msub, axis=0)
-        Lumsat[M < self.Mmin] = 0.
-        return Lumsat
+        Lumsat = simps(integ, x=np.log(10)*msub)
+        res[-len(Lumsat): ] = Lumsat
+        return res
 
     def _real(self, cosmo, r, M, a, mass_def):
         M_use = np.atleast_1d(M)
