@@ -200,7 +200,7 @@ class HaloProfileCIBShang12(HaloProfile):
         dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(10**msub, M_use)
         integ = dnsubdlnm * Lum
         Lumsat = simps(integ, x=np.log(10)*msub)
-        res[-len(Lumsat): ] = Lumsat
+        res[-len(Lumsat):] = Lumsat
         return res
 
     def _real(self, cosmo, r, M, a, mass_def):
