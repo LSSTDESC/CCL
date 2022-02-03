@@ -832,6 +832,9 @@ class Cosmology(object):
         """Alias for iPython consoles."""
         return p.text(self.__str__())
 
+    def __hash__(self):
+        return hash(repr(self))
+
     def compute_distances(self):
         """Compute the distance splines."""
         if self.has_distances:
