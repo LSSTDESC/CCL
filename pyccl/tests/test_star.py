@@ -9,10 +9,9 @@ import pytest
 COSMO = ccl.CosmologyVanillaLCDM()
 M200 = ccl.halos.MassDef200c()
 CON = ccl.halos.ConcentrationDuffy08()
-HMF = ccl.halos.MassFuncTinker10(COSMO)
-HBF = ccl.halos.HaloBiasTinker10(COSMO)
-HMC = ccl.halos.HMCalculator(COSMO, mass_function=HMF,
-                             halo_bias=HBF, mass_def=M200)
+HMF = ccl.halos.MassFuncTinker10()
+HBF = ccl.halos.HaloBiasTinker10()
+HMC = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF, mass_def=M200)
 PROF = ccl.halos.HaloProfileHOD(c_m_relation=CON)
 PROFcib = ccl.halos.HaloProfileCIBShang12(c_m_relation=CON, nu_GHz=217)
 COV = ccl.halos.Profile2pt()

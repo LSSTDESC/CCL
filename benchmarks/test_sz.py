@@ -22,9 +22,9 @@ def test_szcl():
     cl_bm *= fac
     tll_bm *= fac[:, None]*fac[None, :]/(4*np.pi*fsky)
     mass_def = ccl.halos.MassDef(500, 'critical')
-    hmf = ccl.halos.MassFuncTinker08(COSMO, mass_def=mass_def)
-    hbf = ccl.halos.HaloBiasTinker10(COSMO, mass_def=mass_def)
-    hmc = ccl.halos.HMCalculator(COSMO, mass_function=hmf,
+    hmf = ccl.halos.MassFuncTinker08(mass_def=mass_def)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf,
                                  halo_bias=hbf, mass_def=mass_def)
     prf = ccl.halos.HaloProfilePressureGNFW()
     prf.update_parameters(mass_bias=1./1.41, x_out=6.)

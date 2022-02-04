@@ -30,7 +30,7 @@ _docstring_extra_parameters = \
 
     * ``'halo_model'`` ::
 
-        'halo_model': {'mass_def': 'vir',
+        'halo_model': {'mass_def': '200m',
                        'mass_def_strict': False,
                        'mass_function': 'Tinker10',
                        'halo_bias': 'Tinker10',

@@ -85,6 +85,7 @@ class MassDef(object):
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
+    name = 'default'
 
     @warn_api()
     def __init__(self, Delta, rho_type=None, *, c_m_relation=None):

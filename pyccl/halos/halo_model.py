@@ -30,13 +30,13 @@ class HMCalculator(object):
     an arbitrary function of mass, scale factor and Fourier scales.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        mass_function (:class:`~pyccl.halos.hmfunc.MassFunc`): a mass
-            function object.
-        halo_bias (:class:`~pyccl.halos.hbias.HaloBias`): a halo bias
-            object.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object.
+
+        massfunc (str or :class:`~pyccl.halos.hmfunc.MassFunc`):
+            the mass function to use
+        hbias (str or :class:`~pyccl.halos.hbias.HaloBias`):
+            the halo bias function to use
+        mass_def (str or :class:`~pyccl.halos.massdef.MassDef`):
+            the halo mass definition to use
         lM_min, lM_max (float): lower and upper integration bounds
             of logarithmic (base-10) mass (in units of solar mass).
             Default range: 8, 16.
@@ -54,19 +54,36 @@ class HMCalculator(object):
     @warn_api(pairs=[("mass_function", "massfunc"), ("halo_bias", "hbias"),
                      ("lM_min", "log10M_min"), ("lM_max", "log10M_max"),
                      ("nlM", "nlog10M"), ("k_norm", "k_min")])
-    def __init__(self, cosmo, *, mass_function, halo_bias, mass_def,
+    def __init__(self, *, mass_function, halo_bias, mass_def,
                  lM_min=8., lM_max=16., nlM=128,
                  integration_method_M='simpson', k_norm=1E-5):
-        self._rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
-        if not isinstance(mass_function, MassFunc):
-            raise TypeError("mass_function must be of type `MassFunc`")
-        self.mass_function = mass_function
-        if not isinstance(halo_bias, HaloBias):
-            raise TypeError("halo_bias must be of type `HaloBias`")
-        self.halo_bias = halo_bias
-        if not isinstance(mass_def, MassDef):
-            raise TypeError("mass_def must be of type `MassDef`")
-        self.mass_def = mass_def
+        # halo mass definition
+        if isinstance(mass_def, MassDef):
+            self.mass_def = mass_def
+        elif isinstance(mass_def, str):
+            self.mass_def = MassDef.from_name(mass_def)()
+        else:
+            raise TypeError("mass_def must be of type `MassDef` "
+                            "or a mass definition name string")
+        # halo mass function
+        if isinstance(mass_function, MassFunc):
+            self.mass_function = mass_function
+        elif isinstance(mass_function, str):
+            nMclass = MassFunc.from_name(mass_function)
+            self.mass_function = nMclass(mass_def=self.mass_def)
+        else:
+            raise TypeError("massfunc must be of type `MassFunc` "
+                            "or a mass function name string")
+        # halo bias function
+        if isinstance(halo_bias, HaloBias):
+            self.halo_bias = halo_bias
+        elif isinstance(halo_bias, str):
+            bMclass = HaloBias.from_name(halo_bias)
+            self.halo_bias = bMclass(mass_def=self.mass_def)
+        else:
+            raise TypeError("hbias must be of type `HaloBias` "
+                            "or a halo bias name string")
+
         self._prec = {'log10M_min': lM_min,
                       'log10M_max': lM_max,
                       'nlog10M': nlM,
@@ -88,8 +105,12 @@ class HMCalculator(object):
         else:
             self._integrator = self._integ_spline
 
+        # we store the last-called cosmology, and scale factor
         self._a_current_mf = -1
         self._a_current_bf = -1
+        from ..core import CosmologyVanillaLCDM  # circular import
+        self._cosmo_current_mf = CosmologyVanillaLCDM()
+        self._cosmo_current_bf = CosmologyVanillaLCDM()
 
     @deprecate_attr(pairs=[("mass_function", "_massfunc"),
                            ("halo_bias", "_hbias"),
@@ -102,26 +123,28 @@ class HMCalculator(object):
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
     def _get_ingredients(self, a, cosmo, get_bf):
+        rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
         # Compute mass function and bias (if needed) at a new
-        # value of the scale factor.
-        if a != self._a_current_mf:
+        # value of the scale factor and/or with a new Cosmology
+        if (a != self._a_current_mf) or (cosmo != self._cosmo_current_mf):
             self.mf = self.mass_function.get_mass_function(
-                cosmo, self._mass, a,
-                mass_def_other=self.mass_def)
-            self.mf0 = (self._rho0 -
-                        self._integrator(self.mf * self._mass,
-                                         self._lmass)) / self._m0
+                cosmo, self._mass, a, mass_def_other=self.mass_def)
+            self.mf0 = (rho0 -
+                        self._integrator(self.mf * self._mass, self._lmass)
+                        ) / self._m0
             self._a_current_mf = a
+            self._cosmo_current_mf = cosmo
 
         if get_bf:
-            if a != self._a_current_bf:
+            if (a != self._a_current_bf) or (cosmo != self._cosmo_current_bf):
                 self.bf = self.halo_bias.get_halo_bias(
-                    cosmo, self._mass, a,
-                    mass_def_other=self.mass_def)
-                self.mbf0 = (self._rho0 -
+                    cosmo, self._mass, a, mass_def_other=self.mass_def)
+                self.mbf0 = (rho0 -
                              self._integrator(self.mf * self.bf * self._mass,
-                                              self._lmass)) / self._m0
+                                              self._lmass)
+                             ) / self._m0
             self._a_current_bf = a
+            self._cosmo_current_bf = cosmo
 
     def _integrate_over_mf(self, array_2):
         i1 = self._integrator(self.mf[..., :] * array_2,

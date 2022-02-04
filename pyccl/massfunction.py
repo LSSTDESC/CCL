@@ -23,15 +23,15 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
     mdef = hal.MassDef(overdensity, 'matter')
     mf_par = cosmo._config_init_kwargs['mass_function']
     if mf_par == 'tinker10':
-        mf = hal.MassFuncTinker10(cosmo, mass_def=mdef)
+        mf = hal.MassFuncTinker10(mass_def=mdef)
     elif mf_par == 'tinker':
-        mf = hal.MassFuncTinker08(cosmo, mass_def=mdef)
+        mf = hal.MassFuncTinker08(mass_def=mdef)
     elif mf_par == 'watson':
-        mf = hal.MassFuncWatson13(cosmo, mass_def=mdef)
+        mf = hal.MassFuncWatson13(mass_def=mdef)
     elif mf_par == 'shethtormen':
-        mf = hal.MassFuncSheth99(cosmo)
+        mf = hal.MassFuncSheth99()
     elif mf_par == 'angulo':
-        mf = hal.MassFuncAngulo12(cosmo)
+        mf = hal.MassFuncAngulo12()
 
     return mf.get_mass_function(cosmo, halo_mass, a)
 
@@ -57,9 +57,9 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     if mf_par is None:
         mf_par = 'tinker10'  # patch for None default
     if mf_par == 'tinker10':
-        bf = hal.HaloBiasTinker10(cosmo, mass_def=mdef)
+        bf = hal.HaloBiasTinker10(mass_def=mdef)
     elif mf_par == 'shethtormen':
-        bf = hal.HaloBiasSheth99(cosmo)
+        bf = hal.HaloBiasSheth99()
     else:
         raise CCLError("No b(M) fitting function implemented for "
                        "mass_function_method: "+mf_par)

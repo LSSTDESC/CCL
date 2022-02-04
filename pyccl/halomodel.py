@@ -15,16 +15,13 @@ def _get_concentration(cosmo, mass_def):
 
 def _get_mf_hb(cosmo, mass_def):
     if cosmo._config.mass_function_method == lib.tinker10:
-        hmf = hal.MassFuncTinker10(cosmo, mass_def=mass_def,
-                                   mass_def_strict=False)
-        hbf = hal.HaloBiasTinker10(cosmo, mass_def=mass_def,
-                                   mass_def_strict=False)
+        hmf = hal.MassFuncTinker10(mass_def=mass_def, mass_def_strict=False)
+        hbf = hal.HaloBiasTinker10(mass_def=mass_def, mass_def_strict=False)
     elif cosmo._config.mass_function_method == lib.shethtormen:
-        hmf = hal.MassFuncSheth99(cosmo, mass_def=mass_def,
+        hmf = hal.MassFuncSheth99(mass_def=mass_def,
                                   mass_def_strict=False,
                                   use_delta_c_fit=True)
-        hbf = hal.HaloBiasSheth99(cosmo, mass_def=mass_def,
-                                  mass_def_strict=False)
+        hbf = hal.HaloBiasSheth99(mass_def=mass_def, mass_def_strict=False)
     else:
         raise ValueError("Halo model spectra not available for your "
                          "current choice of mass function with the "
@@ -68,8 +65,7 @@ def onehalo_matter_power(cosmo, k, a):
     c = _get_concentration(cosmo, mdef)
     hmf, hbf = _get_mf_hb(cosmo, mdef)
     prf = hal.HaloProfileNFW(c_m_relation=c)
-    hmc = hal.HMCalculator(cosmo, mass_function=hmf,
-                           halo_bias=hbf, mass_def=mdef)
+    hmc = hal.HMCalculator(mass_function=hmf, halo_bias=hbf, mass_def=mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
                                       prf, normprof=True,
@@ -92,8 +88,7 @@ def twohalo_matter_power(cosmo, k, a):
     c = _get_concentration(cosmo, mdef)
     hmf, hbf = _get_mf_hb(cosmo, mdef)
     prf = hal.HaloProfileNFW(c_m_relation=c)
-    hmc = hal.HMCalculator(cosmo, mass_function=hmf,
-                           halo_bias=hbf, mass_def=mdef)
+    hmc = hal.HMCalculator(mass_function=hmf, halo_bias=hbf, mass_def=mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
                                       prf, normprof=True,
@@ -116,8 +111,7 @@ def halomodel_matter_power(cosmo, k, a):
     c = _get_concentration(cosmo, mdef)
     hmf, hbf = _get_mf_hb(cosmo, mdef)
     prf = hal.HaloProfileNFW(c_m_relation=c)
-    hmc = hal.HMCalculator(cosmo, mass_function=hmf,
-                           halo_bias=hbf, mass_def=mdef)
+    hmc = hal.HMCalculator(mass_function=hmf, halo_bias=hbf, mass_def=mdef)
 
     return hal.halomod_power_spectrum(cosmo, hmc, k, a,
                                       prf, normprof=True)

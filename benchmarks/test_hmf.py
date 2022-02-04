@@ -16,7 +16,7 @@ zs = np.array([0., 0.5, 1.])
 
 def test_hmf_despali16():
     hmd = ccl.halos.MassDef('vir', 'critical')
-    mf = ccl.halos.MassFuncDespali16(cosmo, mass_def=hmd)
+    mf = ccl.halos.MassFuncDespali16(mass_def=hmd)
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_despali16.txt'),
                        unpack=True)
     m = d_hmf[0]
@@ -28,7 +28,7 @@ def test_hmf_despali16():
 
 def test_hmf_bocquet16():
     hmd = ccl.halos.MassDef200c()
-    mf = ccl.halos.MassFuncBocquet16(cosmo, mass_def=hmd)
+    mf = ccl.halos.MassFuncBocquet16(mass_def=hmd)
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_bocquet16.txt'),
                        unpack=True)
     m = d_hmf[0]
@@ -39,7 +39,7 @@ def test_hmf_bocquet16():
 
 
 def test_hmf_watson13():
-    mf = ccl.halos.MassFuncWatson13(cosmo)
+    mf = ccl.halos.MassFuncWatson13()
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_watson13.txt'),
                        unpack=True)
     m = d_hmf[0]
@@ -50,7 +50,7 @@ def test_hmf_watson13():
 
 
 def test_hmf_tinker08():
-    mf = ccl.halos.MassFuncTinker08(cosmo)
+    mf = ccl.halos.MassFuncTinker08()
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_tinker08.txt'),
                        unpack=True)
     m = d_hmf[0]
@@ -61,7 +61,7 @@ def test_hmf_tinker08():
 
 
 def test_hmf_press74():
-    mf = ccl.halos.MassFuncPress74(cosmo)
+    mf = ccl.halos.MassFuncPress74()
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_press74.txt'),
                        unpack=True)
     m = d_hmf[0]
@@ -72,7 +72,7 @@ def test_hmf_press74():
 
 
 def test_hmf_angulo12():
-    mf = ccl.halos.MassFuncAngulo12(cosmo)
+    mf = ccl.halos.MassFuncAngulo12()
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_angulo12.txt'),
                        unpack=True)
     m = d_hmf[0]
@@ -83,7 +83,7 @@ def test_hmf_angulo12():
 
 
 def test_hmf_sheth99():
-    mf = ccl.halos.MassFuncSheth99(cosmo)
+    mf = ccl.halos.MassFuncSheth99()
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_sheth99.txt'),
                        unpack=True)
     m = d_hmf[0]
@@ -94,7 +94,7 @@ def test_hmf_sheth99():
 
 
 def test_hmf_jenkins01():
-    mf = ccl.halos.MassFuncJenkins01(cosmo)
+    mf = ccl.halos.MassFuncJenkins01()
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_jenkins01.txt'),
                        unpack=True)
     m = d_hmf[0]

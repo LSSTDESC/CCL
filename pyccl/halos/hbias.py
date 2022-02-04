@@ -17,7 +17,6 @@ class HaloBias(object):
     `_get_bsigma method`.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
             definition object that fixes
             the mass definition used by this halo bias
@@ -28,8 +27,7 @@ class HaloBias(object):
     name = "default"
 
     @warn_api()
-    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
-        cosmo.compute_sigma()
+    def __init__(self, *, mass_def=None, mass_def_strict=True):
         self.mass_def_strict = mass_def_strict
         if mass_def is not None:
             if self._check_mass_def(mass_def):
@@ -40,7 +38,7 @@ class HaloBias(object):
             self.mass_def = mass_def
         else:
             self._default_mass_def()
-        self._setup(cosmo)
+        self._setup()
 
     @deprecate_attr(pairs=[("mass_def", "mdef")])
     def __getattr__(self, name):
@@ -52,13 +50,10 @@ class HaloBias(object):
         """
         self.mass_def = MassDef('fof', 'matter')
 
-    def _setup(self, cosmo):
+    def _setup(self):
         """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
         constructor call.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         """
         pass
 
@@ -135,6 +130,8 @@ class HaloBias(object):
         Returns:
             float or array_like: halo bias.
         """
+        cosmo.compute_sigma()  # compute sigma if needed
+
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
                                          a, mass_def_other)
@@ -188,7 +185,6 @@ class HaloBiasSheth99(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
@@ -202,18 +198,16 @@ class HaloBiasSheth99(HaloBias):
     name = "Sheth99"
 
     @warn_api()
-    def __init__(self, cosmo, *, mass_def=None,
+    def __init__(self, *, mass_def=None,
                  mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
-        super(HaloBiasSheth99, self).__init__(cosmo,
-                                              mass_def=mass_def,
-                                              mass_def_strict=mass_def_strict)
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef('fof', 'matter')
 
-    def _setup(self, cosmo):
+    def _setup(self):
         self.p = 0.3
         self.a = 0.707
 
@@ -241,7 +235,6 @@ class HaloBiasSheth01(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
@@ -252,15 +245,13 @@ class HaloBiasSheth01(HaloBias):
     name = "Sheth01"
 
     @warn_api()
-    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
-        super(HaloBiasSheth01, self).__init__(cosmo,
-                                              mass_def=mass_def,
-                                              mass_def_strict=mass_def_strict)
+    def __init__(self, *, mass_def=None, mass_def_strict=True):
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef('fof', 'matter')
 
-    def _setup(self, cosmo):
+    def _setup(self):
         self.a = 0.707
         self.sqrta = 0.84083292038
         self.b = 0.5
@@ -286,7 +277,6 @@ class HaloBiasBhattacharya11(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
@@ -297,16 +287,13 @@ class HaloBiasBhattacharya11(HaloBias):
     name = "Bhattacharya11"
 
     @warn_api()
-    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
-        super(HaloBiasBhattacharya11, self).__init__(
-            cosmo,
-            mass_def=mass_def,
-            mass_def_strict=mass_def_strict)
+    def __init__(self, *, mass_def=None, mass_def_strict=True):
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef('fof', 'matter')
 
-    def _setup(self, cosmo):
+    def _setup(self):
         self.a = 0.788
         self.az = 0.01
         self.p = 0.807
@@ -329,7 +316,6 @@ class HaloBiasTinker10(HaloBias):
     """ Implements halo bias described in arXiv:1001.3162.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts SO masses with
@@ -341,11 +327,8 @@ class HaloBiasTinker10(HaloBias):
     name = "Tinker10"
 
     @warn_api()
-    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True):
-        super(HaloBiasTinker10, self).__init__(
-            cosmo,
-            mass_def=mass_def,
-            mass_def_strict=mass_def_strict)
+    def __init__(self, *, mass_def=None, mass_def_strict=True):
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef200m()
@@ -359,7 +342,7 @@ class HaloBiasTinker10(HaloBias):
     def _a(self, ld):
         return 0.44 * ld - 0.88
 
-    def _setup(self, cosmo):
+    def _setup(self):
         self.B = 0.183
         self.b = 1.5
         self.c = 2.4

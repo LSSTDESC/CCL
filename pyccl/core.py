@@ -722,6 +722,31 @@ class Cosmology(object):
     def __enter__(self):
         return self
 
+    def __eq__(self, cosmo2):
+        """Check if two cosmologies are equivalent."""
+        check_pars = self._params_init_kwargs == cosmo2._params_init_kwargs
+        check_config = self._config_init_kwargs == cosmo2._config_init_kwargs
+        if not (check_pars and check_config):
+            return False
+
+        # check linear power spectra
+        if self._has_pk_lin and cosmo2._has_pk_lin:
+            pk_this, pk_other = self._pk_lin, cosmo2._pk_lin
+            for pspec, pk in pk_this.items():
+                pk2 = pk_other.get(pspec)
+                if pk2 is not None:
+                    return pk == pk2
+
+        # check nonlinear power spectra
+        if self._has_pk_nl and cosmo2._has_pk_nl:
+            pk_this, pk_other = self._pk_nl, cosmo2._pk_nl
+            for pspec, pk in pk_this.items():
+                pk2 = pk_other.get(pspec)
+                if pk2 is not None:
+                    return pk == pk2
+
+        return True
+
     def __exit__(self, type, value, traceback):
         """Free the C memory this object is managing when the context manager
         exits."""
@@ -792,6 +817,9 @@ class Cosmology(object):
         else:
             return string[:-2] + " )"
 
+    def __hash__(self):
+        return hash(repr(self))
+
     def __repr__(self):
         """Make an eval-able string.
 
@@ -831,9 +859,6 @@ class Cosmology(object):
     def _repr_pretty_(self, p, cycle):
         """Alias for iPython consoles."""
         return p.text(self.__str__())
-
-    def __hash__(self):
-        return hash(repr(self))
 
     def compute_distances(self):
         """Compute the distance splines."""
@@ -998,11 +1023,9 @@ class Cosmology(object):
         hb_pars = mf_pars.copy()
         if HM["mass_function"] == "Sheth99":
             mf_pars["use_delta_c_fit"] = True
-        hmf = hal.MassFunc.from_name(HM["mass_function"])(self, **mf_pars)
-        hbf = hal.HaloBias.from_name(HM["halo_bias"])(self, **hb_pars)
-        hmc = hal.HMCalculator(self, mass_function=hmf,
-                               halo_bias=hbf,
-                               mass_def=hmd)
+        hmf = hal.MassFunc.from_name(HM["mass_function"])(**mf_pars)
+        hbf = hal.HaloBias.from_name(HM["halo_bias"])(**hb_pars)
+        hmc = hal.HMCalculator(mass_function=hmf, halo_bias=hbf, mass_def=hmd)
         cM_pars = {"mass_def": hmd}
         if HM["concentration"] == "Constant":
             cM_pars["c"] = 4.

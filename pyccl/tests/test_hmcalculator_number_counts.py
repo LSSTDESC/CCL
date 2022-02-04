@@ -8,13 +8,11 @@ def test_hmcalculator_number_counts_smoke():
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
     mass_def = ccl.halos.MassDef(200, 'matter')
-    hmf = ccl.halos.MassFuncTinker10(cosmo, mass_def=mass_def,
-                                     mass_def_strict=False)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mass_def,
-                                     mass_def_strict=False)
+    hmf = ccl.halos.MassFuncTinker10(mass_def=mass_def, mass_def_strict=False)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def, mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf,
-                                 halo_bias=hbf, mass_def=mass_def)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mass_def)
 
     def sel(m, a):
         m = np.atleast_1d(m)
@@ -38,13 +36,11 @@ def test_hmcalculator_number_counts_zero():
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
     mass_def = ccl.halos.MassDef(200, 'matter')
-    hmf = ccl.halos.MassFuncTinker10(cosmo, mass_def=mass_def,
-                                     mass_def_strict=False)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mass_def,
-                                     mass_def_strict=False)
+    hmf = ccl.halos.MassFuncTinker10(mass_def=mass_def, mass_def_strict=False)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def, mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf,
-                                 halo_bias=hbf, mass_def=mass_def)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mass_def)
 
     def sel(m, a):
         m = np.atleast_1d(m)
@@ -62,13 +58,11 @@ def test_hmcalculator_number_counts_norm():
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
     mdef = ccl.halos.MassDef(200, 'matter')
-    hmf = ccl.halos.MassFuncTinker10(cosmo, mass_def=mdef,
-                                     mass_def_strict=False)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
-                                     mass_def_strict=False)
+    hmf = ccl.halos.MassFuncTinker10(mass_def=mdef, mass_def_strict=False)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf,
-                                 halo_bias=hbf, mass_def=mdef)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mdef)
 
     def sel2(m, a):
         m = np.atleast_1d(m)
@@ -122,10 +116,8 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         matter_power_spectrum='linear'
     )
     mdef = ccl.halos.MassDef(200, 'matter')
-    hmf = ccl.halos.MassFuncTinker08(cosmo, mass_def=mdef,
-                                     mass_def_strict=False)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
-                                     mass_def_strict=False)
+    hmf = ccl.halos.MassFuncTinker08(mass_def=mdef, mass_def_strict=False)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
     amin = 0.75
     amax = 1.0
@@ -133,7 +125,7 @@ def test_hmcalculator_number_counts_scipy_dblquad():
     mmax = 1e15
 
     hmc = ccl.halos.HMCalculator(
-        cosmo, mass_function=hmf, halo_bias=hbf, mass_def=mdef,
+        mass_function=hmf, halo_bias=hbf, mass_def=mdef,
         lM_min=np.log10(mmin),
         lM_max=np.log10(mmax),
         integration_method_M='spline')

@@ -8,8 +8,8 @@ COSMO = ccl.Cosmology(
     transfer_function='bbks', matter_power_spectrum='linear')
 COSMO.compute_nonlin_power()
 M200 = ccl.halos.MassDef200m()
-HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
-HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
+HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
+HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 P1 = ccl.halos.HaloProfileNFW(c_m_relation=CON, fourier_analytic=True)
 P2 = ccl.halos.HaloProfileHOD(c_m_relation=CON)
@@ -58,7 +58,7 @@ AA = 1.0
                            'p3': None, 'p4': None, 'cv34': None,
                            'norm': False, 'pk': COSMO.get_nonlin_power()}],)
 def test_tkkssc_smoke(pars):
-    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF, halo_bias=HBF,
+    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
                                  mass_def=M200, nlM=2)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
@@ -82,7 +82,7 @@ def test_tkkssc_smoke(pars):
 
 
 def test_tkkssc_errors():
-    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF, halo_bias=HBF,
+    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
                                  mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])

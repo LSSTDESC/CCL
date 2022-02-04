@@ -30,14 +30,14 @@ def test_halomod(model):
     data_z1 = np.loadtxt("./benchmarks/data/pk_hm_c%d_z1.txt" % (model+1))
 
     mass_def = ccl.halos.MassDef('vir', 'matter')
-    hmf = ccl.halos.MassFuncSheth99(cosmo, mass_def=mass_def,
+    hmf = ccl.halos.MassFuncSheth99(mass_def=mass_def,
                                     mass_def_strict=False,
                                     use_delta_c_fit=True)
-    hbf = ccl.halos.HaloBiasSheth99(cosmo, mass_def=mass_def,
+    hbf = ccl.halos.HaloBiasSheth99(mass_def=mass_def,
                                     mass_def_strict=False)
     cM = ccl.halos.ConcentrationDuffy08(mass_def=mass_def)
     prf = ccl.halos.HaloProfileNFW(c_m_relation=cM)
-    hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf, halo_bias=hbf,
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mass_def)
 
     z = 0.

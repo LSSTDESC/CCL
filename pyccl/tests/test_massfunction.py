@@ -23,7 +23,7 @@ def test_massfunc_models_smoke(mf_type):
             transfer_function='bbks', matter_power_spectrum='linear',
             mass_function=mf_type)
     hmf_cls = ccl.halos.MassFunc.from_name(MF_EQUIV[mf_type])
-    hmf = hmf_cls(cosmo)
+    hmf = hmf_cls()
     for m in MS:
         # Deprecated
         with pytest.warns(ccl.CCLDeprecationWarning):
@@ -43,7 +43,7 @@ def test_halo_bias_models_smoke(mf_type):
             transfer_function='bbks', matter_power_spectrum='linear',
             mass_function=mf_type)
     hbf_cls = ccl.halos.HaloBias.from_name(MF_EQUIV[mf_type])
-    hbf = hbf_cls(cosmo)
+    hbf = hbf_cls()
     for m in MS:
         # Deprecated
         with pytest.warns(ccl.CCLDeprecationWarning):
@@ -62,7 +62,7 @@ def test_halo_bias_models_smoke(mf_type):
     np.array([1e14, 1e15])])
 def test_massfunc_smoke(m):
     a = 0.8
-    mf = ccl.halos.MassFuncTinker10(COSMO).get_mass_function(COSMO, m, a)
+    mf = ccl.halos.MassFuncTinker10().get_mass_function(COSMO, m, a)
     assert np.all(np.isfinite(mf))
     assert np.shape(mf) == np.shape(m)
 

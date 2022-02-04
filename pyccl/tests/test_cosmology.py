@@ -32,9 +32,9 @@ def test_cosmo_methods():
         cosmo.get_camb_pk_lin().eval(1., 1., cosmo)
     prof = ccl.halos.HaloProfilePressureGNFW()
     hmd = ccl.halos.MassDef200m()
-    hmf = ccl.halos.MassFuncTinker08(cosmo)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo)
-    hmc = ccl.halos.HMCalculator(cosmo, mass_function=hmf, halo_bias=hbf,
+    hmf = ccl.halos.MassFuncTinker08()
+    hbf = ccl.halos.HaloBiasTinker10()
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=hmd)
     P1 = ccl.halos.halomod_power_spectrum(cosmo, hmc, 1., 1., prof,
                                           normprof=False)
@@ -137,6 +137,51 @@ def test_cosmology_output():
     assert cosmo.has_linear_power is True
     assert cosmo.has_nonlin_power is True
     assert cosmo.has_sigma is True
+
+
+def test_cosmology_equal_hash():
+    """Check the Cosmology equivalence method."""
+    # equivalent cosmologies
+    cosmo1 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                           sigma8=0.81, n_s=0.96)
+    cosmo2 = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                           sigma8=0.81, n_s=0.96)
+    assert cosmo1 == cosmo2
+    assert hash(cosmo1) == hash(cosmo2)
+
+    # different cosmological parameters
+    cosmo2 = ccl.Cosmology(Omega_c=0.24, Omega_b=0.04, h=0.75,
+                           sigma8=0.8, n_s=0.95)
+    assert cosmo1 != cosmo2
+    assert hash(cosmo1) != hash(cosmo2)
+
+    # different power spectra...
+    a = np.linspace(0.5, 1., 16)
+    k = np.logspace(-2, 1, 128)
+    pk = np.ones((a.size, k.size))
+    pk_dict_1 = {"a": a, "k": k, "delta_matter:delta_matter": pk}
+    pk_dict_2 = {"a": a, "k": k, "delta_matter:delta_matter": 2*pk}
+    # linear
+    cosmo1 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
+        pk_linear=pk_dict_1)
+    cosmo2 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
+        pk_linear=pk_dict_2)
+    assert cosmo1 != cosmo2
+    # ...but same hashes (because only cosmo params are checked)
+    assert hash(cosmo1) == hash(cosmo2)
+
+    # different non-linear power spectra...
+    cosmo1 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
+        pk_nonlin=pk_dict_1)
+    cosmo2 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
+        pk_nonlin=pk_dict_2)
+    assert cosmo1 != cosmo2
+    # ...but same hashes (because only cosmo params are checked)
+    assert hash(cosmo1) == hash(cosmo2)
 
 
 def test_cosmology_pickles():

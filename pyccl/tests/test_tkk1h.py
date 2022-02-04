@@ -7,8 +7,8 @@ COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
 M200 = ccl.halos.MassDef200m()
-HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
-HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
+HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
+HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 CONC = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 P1 = ccl.halos.HaloProfileNFW(c_m_relation=CONC, fourier_analytic=True)
 P2 = ccl.halos.HaloProfileHOD(c_m_relation=CONC)
@@ -75,9 +75,8 @@ def smoke_assert_tkk1h_real(func):
                            'p3': P3, 'p4': P4, 'cv34': PKC,
                            'norm': True}],)
 def test_tkk1h_smoke(pars):
-    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF,
-                                 halo_bias=HBF, mass_def=M200,
-                                 nlM=2)
+    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
+                                 mass_def=M200, nlM=2)
 
     def f(k, a):
         return ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k, a,
@@ -95,8 +94,8 @@ def test_tkk1h_smoke(pars):
 
 
 def test_tkk1h_tk3d():
-    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF,
-                                 halo_bias=HBF, mass_def=M200)
+    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
+                                 mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
     tkk_arr = ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
@@ -142,8 +141,8 @@ def test_tkk1h_tk3d():
 
 
 def test_tkk1h_errors():
-    hmc = ccl.halos.HMCalculator(COSMO, mass_function=HMF,
-                                 halo_bias=HBF, mass_def=M200)
+    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
+                                 mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
 

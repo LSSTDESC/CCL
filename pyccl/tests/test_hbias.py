@@ -18,7 +18,7 @@ MDFS = [MVIR, MVIR, MFOF, MVIR]
 
 @pytest.mark.parametrize('bM_class', HBFS)
 def test_bM_subclasses_smoke(bM_class):
-    bM = bM_class(COSMO)
+    bM = bM_class()
     for m in MS:
         b = bM.get_halo_bias(COSMO, m, 0.9)
         assert np.all(np.isfinite(b))
@@ -29,11 +29,11 @@ def test_bM_subclasses_smoke(bM_class):
 def test_bM_mdef_raises(bM_pair):
     bM_class, mdef = bM_pair
     with pytest.raises(ValueError):
-        bM_class(COSMO, mass_def=mdef)
+        bM_class(mass_def=mdef)
 
 
 def test_bM_SO_allgood():
-    bM = ccl.halos.HaloBiasTinker10(COSMO, mass_def=MVIR)
+    bM = ccl.halos.HaloBiasTinker10(mass_def=MVIR)
     for m in MS:
         b = bM.get_halo_bias(COSMO, m, 0.9)
         assert np.all(np.isfinite(b))
@@ -43,7 +43,7 @@ def test_bM_SO_allgood():
 @pytest.mark.parametrize('name', ['Tinker10', 'Sheth99'])
 def test_bM_from_string(name):
     bM_class = ccl.halos.HaloBias.from_name(name)
-    bM = bM_class(COSMO)
+    bM = bM_class()
     for m in MS:
         b = bM.get_halo_bias(COSMO, m, 0.9)
         assert np.all(np.isfinite(b))
@@ -56,7 +56,7 @@ def test_bM_from_string_raises():
 
 
 def test_bM_default():
-    bM = ccl.halos.HaloBias(COSMO)
+    bM = ccl.halos.HaloBias()
     with pytest.raises(NotImplementedError):
         bM._get_bsigma(COSMO, 1., 1.)
 
