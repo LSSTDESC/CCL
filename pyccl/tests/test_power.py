@@ -16,7 +16,7 @@ with pytest.warns(CCLDeprecationWarning):
 
 
 def test_halomod_f2d_copy():
-    mdef = ccl.halos.MassDef('vir', 'matter')
+    mdef = ccl.halos.MassDef(200, 'matter')
     hmf = ccl.halos.MassFuncSheth99(mass_def=mdef,
                                     mass_def_strict=False,
                                     use_delta_c_fit=True)
@@ -58,7 +58,7 @@ def test_nonlin_matter_power_halomod(k):
     pk = ccl.nonlin_matter_power(COSMO_HM, k, a)
 
     # New implementation
-    mdef = ccl.halos.MassDef('vir', 'matter')
+    mdef = ccl.halos.MassDef(200, 'matter')
     hmf = ccl.halos.MassFuncSheth99(mass_def=mdef,
                                     mass_def_strict=False,
                                     use_delta_c_fit=True)

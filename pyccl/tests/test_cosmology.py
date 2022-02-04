@@ -341,7 +341,7 @@ def test_cosmology_halomodel_power():
 
     # halo model in extra parameters
     cosmo1 = Cosmo(extra_parameters={
-        "halo_model": {"mass_def": "vir",
+        "halo_model": {"mass_def": "200m",
                        "mass_def_strict": False,
                        "mass_function": "Tinker10",
                        "halo_bias": "Tinker10",
@@ -407,7 +407,7 @@ def test_cosmology_halomodel_deprecated():
 
     # fully specified new behavior
     cosmo3 = Cosmo(extra_parameters={
-        "halo_model": {"mass_def": "vir",
+        "halo_model": {"mass_def": "200m",
                        "mass_def_strict": False,
                        "mass_function": "Sheth99",
                        "halo_bias": "Sheth99",

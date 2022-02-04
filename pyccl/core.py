@@ -1011,7 +1011,7 @@ class Cosmology(object):
                 HM["mass_function"] in ["Tinker10", "Sheth99"]):
             HM["halo_bias"] = HM["mass_function"]
 
-        HM_defaults = {"mass_def": "vir", "mass_def_strict": False,
+        HM_defaults = {"mass_def": "200m", "mass_def_strict": False,
                        "mass_function": "Tinker10", "halo_bias": "Tinker10",
                        "concentration": "Duffy08"}
         for par, val in HM.items():
