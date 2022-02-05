@@ -724,44 +724,25 @@ class Cosmology(object):
         return self
 
     def __eq__(self, cosmo2):
-        """Check if two cosmologies are equivalent."""
-        # There are two ways in which the Cosmology objects can be equivalent.
-        # Either all of their parameters are the same, or the stored linear
-        # and non-linear power spectra are the same.
-        check_pars = self._params_init_kwargs == cosmo2._params_init_kwargs
-        check_config = self._config_init_kwargs == cosmo2._config_init_kwargs
-        cosmo_calc = (isinstance(self, CosmologyCalculator) or
-                      isinstance(cosmo2, CosmologyCalculator))
+        """Check if two cosmologies are equivalent.
 
-        if not cosmo_calc:
-            # if none is initialized with the calculator, require a 1:1 match
-            return check_pars and check_config
-        else:
-            # If the calculator has been used, we compare the power spectra.
+        .. note :: This method will always recognize when two cosmologies
+                   are **not** equivalent (i.e. they return different
+                   theoretical predictions). However, it will not always
+                   recognize two equivalent cosmologies.
 
-            # check linear power spectra
-            if self._has_pk_lin and cosmo2._has_pk_lin:
-                pk_this, pk_other = self._pk_lin, cosmo2._pk_lin
-                for pspec, pk in pk_this.items():
-                    pk2 = pk_other.get(pspec)
-                    if pk2 is not None:  # in case there's more than one
-                        if pk != pk2:
-                            return False
-
-            # check nonlinear power spectra
-            if self._has_pk_nl and cosmo2._has_pk_nl:
-                pk_this, pk_other = self._pk_nl, cosmo2._pk_nl
-                for pspec, pk in pk_this.items():
-                    pk2 = pk_other.get(pspec)
-                    if pk2 is not None:
-                        if pk != pk2:
-                            return False
-
-        # If we reach this point the two cosmologies are equivalent
-        # TODO: Add a more comprehensive method. For example, equivalent
-        # cosmologies can have different parameters if one is defined with
-        # sigma8 and the other with A_s.
-        return True
+                   Limiting behavior where ``'=='`` will return ``False``
+                   even though the two cosmologies are equivalent:
+                    - Exactly one Cosmology is an instance of
+                      ``CosmologyCalculator``.
+                    - Cosmologies defined with different parameter sets,
+                      where one can be computed from the other
+                      (e.g. ``sigma8`` vs ``A_s``).
+                    - Instances of ``CosmologyCalculator`` which do not
+                      contain exactly the same linear & non-linear power
+                      spectrum entries.
+        """
+        return hash(self) == hash(cosmo2)
 
     def __exit__(self, type, value, traceback):
         """Free the C memory this object is managing when the context manager
@@ -835,7 +816,19 @@ class Cosmology(object):
 
     def __hash__(self):
         """Return a hash for this ``Cosmology`` object."""
-        s = str(self._params_init_kwargs) + str(self._config_init_kwargs)
+        s = ""
+        if not isinstance(self, CosmologyCalculator):
+            # we care about the init pararameters
+            s += str(self._params_init_kwargs)
+            s += str(self._config_init_kwargs)
+        else:
+            # we care about the stored pks
+            if self._has_pk_lin:
+                for pspec, pk in self._pk_lin.items():
+                    s += pspec + str(hash(pk))
+            if self._has_pk_nl:
+                for pspec, pk in self._pk_nl.items():
+                    s += pspec + str(hash(pk))
         return hash(s) + sys.maxsize + 1
 
     def __repr__(self):
