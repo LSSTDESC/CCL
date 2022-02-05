@@ -2,6 +2,7 @@
 the cosmology and parameters objects used to instantiate a model from which one
 can compute a set of theoretical predictions.
 """
+import sys
 import warnings
 import numpy as np
 import yaml
@@ -724,27 +725,42 @@ class Cosmology(object):
 
     def __eq__(self, cosmo2):
         """Check if two cosmologies are equivalent."""
+        # There are two ways in which the Cosmology objects can be equivalent.
+        # Either all of their parameters are the same, or the stored linear
+        # and non-linear power spectra are the same.
         check_pars = self._params_init_kwargs == cosmo2._params_init_kwargs
         check_config = self._config_init_kwargs == cosmo2._config_init_kwargs
-        if not (check_pars and check_config):
-            return False
+        cosmo_calc = (isinstance(self, CosmologyCalculator) or
+                      isinstance(cosmo2, CosmologyCalculator))
 
-        # check linear power spectra
-        if self._has_pk_lin and cosmo2._has_pk_lin:
-            pk_this, pk_other = self._pk_lin, cosmo2._pk_lin
-            for pspec, pk in pk_this.items():
-                pk2 = pk_other.get(pspec)
-                if pk2 is not None:
-                    return pk == pk2
+        if not cosmo_calc:
+            # if none is initialized with the calculator, require a 1:1 match
+            return check_pars and check_config
+        else:
+            # If the calculator has been used, we compare the power spectra.
 
-        # check nonlinear power spectra
-        if self._has_pk_nl and cosmo2._has_pk_nl:
-            pk_this, pk_other = self._pk_nl, cosmo2._pk_nl
-            for pspec, pk in pk_this.items():
-                pk2 = pk_other.get(pspec)
-                if pk2 is not None:
-                    return pk == pk2
+            # check linear power spectra
+            if self._has_pk_lin and cosmo2._has_pk_lin:
+                pk_this, pk_other = self._pk_lin, cosmo2._pk_lin
+                for pspec, pk in pk_this.items():
+                    pk2 = pk_other.get(pspec)
+                    if pk2 is not None:  # in case there's more than one
+                        if pk != pk2:
+                            return False
 
+            # check nonlinear power spectra
+            if self._has_pk_nl and cosmo2._has_pk_nl:
+                pk_this, pk_other = self._pk_nl, cosmo2._pk_nl
+                for pspec, pk in pk_this.items():
+                    pk2 = pk_other.get(pspec)
+                    if pk2 is not None:
+                        if pk != pk2:
+                            return False
+
+        # If we reach this point the two cosmologies are equivalent
+        # TODO: Add a more comprehensive method. For example, equivalent
+        # cosmologies can have different parameters if one is defined with
+        # sigma8 and the other with A_s.
         return True
 
     def __exit__(self, type, value, traceback):
@@ -818,7 +834,9 @@ class Cosmology(object):
             return string[:-2] + " )"
 
     def __hash__(self):
-        return hash(repr(self))
+        """Return a hash for this ``Cosmology`` object."""
+        s = str(self._params_init_kwargs) + str(self._config_init_kwargs)
+        return hash(s) + sys.maxsize + 1
 
     def __repr__(self):
         """Make an eval-able string.

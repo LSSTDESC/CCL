@@ -30,7 +30,6 @@ class HMCalculator(object):
     an arbitrary function of mass, scale factor and Fourier scales.
 
     Args:
-
         massfunc (str or :class:`~pyccl.halos.hmfunc.MassFunc`):
             the mass function to use
         hbias (str or :class:`~pyccl.halos.hbias.HaloBias`):

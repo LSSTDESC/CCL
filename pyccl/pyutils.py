@@ -634,6 +634,8 @@ def warn_api(pairs=None, order=None):
             # check for normprof - we'll need that later (1 of 3)
             def normprof_warning():
                 # all the variables we need will already be in locals
+
+                # Special case: `normprof`
                 if ("normprof" in names) and ("normprof" not in kwargs):
                     # backwards-compatibility
                     kwargs["normprof"] = False

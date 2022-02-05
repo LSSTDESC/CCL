@@ -1,3 +1,4 @@
+import sys
 import warnings
 import numpy as np
 
@@ -300,20 +301,35 @@ class Pk2D(object):
         """Check if two Pk2D objects are equivalent, i.e. they contain the
         same data over the same range.
         """
-        same_extrap = ((self.extrap_order_lok, self.extrap_order_hik) ==
-                       (other.extrap_order_lok, other.extrap_order_hik))
-        if self.has_psp != other.has_psp:
-            return False
-        if not (self.has_psp and other.has_psp):
-            return same_extrap
+        return hash(self) == hash(other)
 
-        a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
-        a_arr_b, lk_arr_b, pk_arr_b = other.get_spline_arrays()
+    def __hash__(self):
+        """Compute the hash of this ``Pk2D`` object."""
+        return hash(repr(self)) + sys.maxsize + 1
 
-        same_a = np.array_equiv(a_arr_a, a_arr_b)
-        same_lk = np.array_equiv(lk_arr_a, lk_arr_b)
-        same_pk = np.array_equiv(pk_arr_a, pk_arr_b)
-        return same_a and same_lk and same_pk and same_extrap
+    def __repr__(self):
+        """Construct a string for this ``Pk2D`` object.
+        If this object has data, the data arrays are replaced by their hash.
+        """
+        s = "pyccl.Pk2D\n"
+        s += f"  extrap_lok  =  {self.extrap_order_lok}\n"
+        s += f"  extrap_hik  =  {self.extrap_order_hik}\n"
+        if self.has_psp:
+            # print the first and last elements of the arrays
+            # also print the hashes of the arrays
+            a_arr, lk_arr, pk_arr = self.get_spline_arrays()
+            H = [hash(arr.tobytes()) + sys.maxsize + 1
+                 for arr in [a_arr, lk_arr, pk_arr]]
+            s += f"  a_arr   =  {a_arr.min():6.1f} .. {a_arr.max():6.1f}"
+            s += f"    #{H[0]:20d}\n"
+            s += f"  lk_arr  =  {lk_arr.min():6.3f} .. {lk_arr.max():6.3f}"
+            s += f"    #{H[1]:20d}\n"
+            s += f"  pk_arr  =  {pk_arr[0, 0]:6.3f} .. {pk_arr[-1, -1]:6.3f}"
+            s += f"    #{H[2]:20d}\n"
+            s += f"  is_log  =  {bool(self.psp.is_log)}"
+        else:
+            s += "empty  =  True"
+        return s
 
     def _get_binary_operator_arrays(self, other):
         if not isinstance(other, Pk2D):
