@@ -41,6 +41,7 @@ def test_API_preserve_warnings():
         S2 = ccl.halos.halomod_power_spectrum(COSMO, HMC, 1., 1., PROF,
                                               prof2=PROF, prof_2pt=None,
                                               normprof=False)
+        S3 = ccl.halos.MassFuncTinker10(mass_def=M200, mass_def_strict=False)
         from pyccl import baryons as M1
         from pyccl import cells as M2
     assert len(w_rec) == 0
@@ -120,6 +121,18 @@ def test_API_preserve_warnings():
     with pytest.warns(CCLDeprecationWarning):
         from pyccl import cls as m2
     assert m2 == M2
+
+    # 10. removed `cosmo` dependence
+    with pytest.warns(CCLDeprecationWarning):
+        s31 = ccl.halos.MassFuncTinker10(
+            COSMO, mass_def=M200, mass_def_strict=False)
+
+    with pytest.warns(CCLDeprecationWarning):
+        s32 = ccl.halos.MassFuncTinker10(
+            cosmo=COSMO, mass_def=M200, mass_def_strict=False)
+    assert s31.mass_def == s32.mass_def == S3.mass_def
+    assert s31.mass_def_strict == s32.mass_def_strict == S3.mass_def_strict
+    assert not (hasattr(s31, "cosmo") or hasattr(s32, "cosmo"))
 
 
 @pytest.mark.parametrize('prof_class',

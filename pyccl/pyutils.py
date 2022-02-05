@@ -645,6 +645,7 @@ def warn_api(pairs=None, order=None):
                         CCLDeprecationWarning)
 
             def cosmo_warning(args):
+                warn_cosmo = False
                 from .core import Cosmology
                 from .halos import HMCalculator, MassFunc, HaloBias
                 depr_cosmo_funcs = [HMCalculator, MassFunc, HaloBias]
@@ -655,17 +656,22 @@ def warn_api(pairs=None, order=None):
                 this_name = func.__qualname__
                 if this_name.endswith(".__init__"):
                     # TODO: py39 introduced `str.removesuffix` method
-                    this_name = this_name[:len(".__init__")]
+                    this_name = this_name[:-len(".__init__")]
                 if this_name in depr_cosmo_funcs:
                     # first arg is `self`, then it would be `cosmo`
-                    if (len(args) > 1) and (isinstance(args[1], Cosmology)):
+                    if len(args) > 1 and isinstance(args[1], Cosmology):
                         new_args = list(args)  # we do this because
                         del new_args[1]        # `args` is a tuple and
                         args = new_args        # tuples are immutable
-                        warnings.warn(
-                            "`cosmo` has been deprecated as the first "
-                            f"argument in {this_name}. This will return an "
-                            "exception in the future.", CCLDeprecationWarning)
+                        warn_cosmo = True
+                    elif "cosmo" in kwargs:
+                        kwargs.pop("cosmo")
+                        warn_cosmo = True
+                if warn_cosmo:
+                    warnings.warn(
+                        "`cosmo` has been deprecated as the first "
+                        f"argument in {this_name}. This will return an "
+                        "exception in the future.", CCLDeprecationWarning)
                 return args
 
             args = cosmo_warning(args)
