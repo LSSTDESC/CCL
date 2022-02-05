@@ -634,8 +634,6 @@ def warn_api(pairs=None, order=None):
             # check for normprof - we'll need that later (1 of 3)
             def normprof_warning():
                 # all the variables we need will already be in locals
-
-                # Special case: `normprof`
                 if ("normprof" in names) and ("normprof" not in kwargs):
                     # backwards-compatibility
                     kwargs["normprof"] = False
@@ -645,6 +643,32 @@ def warn_api(pairs=None, order=None):
                         "unwanted behavior. Not specifying it "
                         "will trigger an exception in the future",
                         CCLDeprecationWarning)
+
+            def cosmo_warning(args):
+                from .core import Cosmology
+                from .halos import HMCalculator, MassFunc, HaloBias
+                depr_cosmo_funcs = [HMCalculator, MassFunc, HaloBias]
+                depr_cosmo_funcs += [Class.__qualname__
+                                     for Class in MassFunc.__subclasses__()]
+                depr_cosmo_funcs += [Class.__qualname__
+                                     for Class in HaloBias.__subclasses__()]
+                this_name = func.__qualname__
+                if this_name.endswith(".__init__"):
+                    # TODO: py39 introduced `str.removesuffix` method
+                    this_name = this_name[:len(".__init__")]
+                if this_name in depr_cosmo_funcs:
+                    # first arg is `self`, then it would be `cosmo`
+                    if (len(args) > 1) and (isinstance(args[1], Cosmology)):
+                        new_args = list(args)  # we do this because
+                        del new_args[1]        # `args` is a tuple and
+                        args = new_args        # tuples are immutable
+                        warnings.warn(
+                            "`cosmo` has been deprecated as the first "
+                            f"argument in {this_name}. This will return an "
+                            "exception in the future.", CCLDeprecationWarning)
+                return args
+
+            args = cosmo_warning(args)
 
             # transform decorator input
             rename = np.atleast_2d(pairs) if pairs is not None else None
