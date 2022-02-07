@@ -1,4 +1,3 @@
-import pytest
 import pyccl as ccl
 import numpy as np
 from time import time
