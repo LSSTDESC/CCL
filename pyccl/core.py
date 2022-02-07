@@ -817,6 +817,11 @@ class Cosmology(object):
     def __hash__(self):
         """Return a hash for this ``Cosmology`` object."""
         s = ""
+        # TODO: uncomment the following lines once globals are implemented
+        # global CCL parameters
+        # from . import gsl_params, spline_params
+        # s += gsl_params.items()
+        # s += spline_params.items()
         if not isinstance(self, CosmologyCalculator):
             # we care about the init pararameters
             s += str(self._params_init_kwargs)

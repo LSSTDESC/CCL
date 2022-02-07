@@ -155,12 +155,13 @@ def test_cosmology_equal_hash():
     assert cosmo1 != cosmo2
     assert hash(cosmo1) != hash(cosmo2)
 
-    # different power spectra...
+    # different power spectra
     a = np.linspace(0.5, 1., 16)
     k = np.logspace(-2, 1, 128)
     pk = np.ones((a.size, k.size))
     pk_dict_1 = {"a": a, "k": k, "delta_matter:delta_matter": pk}
     pk_dict_2 = {"a": a, "k": k, "delta_matter:delta_matter": 2*pk}
+
     # linear
     cosmo1 = ccl.CosmologyCalculator(
         Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
@@ -171,7 +172,7 @@ def test_cosmology_equal_hash():
     assert cosmo1 != cosmo2
     assert hash(cosmo1) != hash(cosmo2)
 
-    # different non-linear power spectra...
+    # non-linear
     cosmo1 = ccl.CosmologyCalculator(
         Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
         pk_nonlin=pk_dict_1)
@@ -180,6 +181,14 @@ def test_cosmology_equal_hash():
         pk_nonlin=pk_dict_2)
     assert cosmo1 != cosmo2
     assert hash(cosmo1) != hash(cosmo2)
+
+    # TODO: uncomment once this is implemented
+    # different CCL global parameters
+    # cosmo1 = ccl.CosmologyVanillaLCDM()
+    # ccl.gsl_params.HM_MMIN = 1e6
+    # cosmo2 = ccl.CosmologyVanillaLCDM()
+    # assert cosmo1 != cosmo2
+    # assert hash(cosmo1) != hash(cosmo2)
 
 
 def test_cosmology_pickles():
