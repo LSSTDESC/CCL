@@ -8,7 +8,26 @@ from .ccllib import (
     CCL_CORR_GG, CCL_CORR_GL, CCL_CORR_LP, CCL_CORR_LM)
 
 
-class Caching(object):
+class EnhancedClass(type):
+    """Metaclass that implements ``property`` to ``classmethod``."""
+
+    def __init__(cls, *args, **kwargs):
+        cls._maxsize = 64
+
+    @property
+    def maxsize(cls):
+        return cls._maxsize
+
+    @maxsize.setter
+    def maxsize(cls, value):
+        cls._maxsize = value
+        while len(cls._caches) > cls.maxsize:
+            # iteratively reduce size to current maxsize
+            first_item = cls.first(cls._caches)
+            cls._caches.pop(first_item)
+
+
+class Caching(metaclass=EnhancedClass):
     """Infrastructure to hold cached objects.
 
     Caching is used for pre-computed objects that are expensive to compute.
@@ -25,10 +44,6 @@ class Caching(object):
     """
     _caches = OrderedDict()
     _enabled = True
-    maxsize = 64
-
-    def __init__(self):
-        pass
 
     @classmethod
     def first(cls, dic):
