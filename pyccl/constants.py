@@ -28,10 +28,10 @@ class ParamStruct(object):
 
     def __init__(self, dic):
         self._dic_init = dic  # store defaults from the C layer
-        self._names = list(self._dic_init.keys())
         self._setup()
 
     def _setup(self):
+        self._locked = False
         for param, value in self._dic_init.items():
             setattr(self, param, value)
         self._locked = True
@@ -43,8 +43,9 @@ class ParamStruct(object):
         if self._locked and not hasattr(self, param):
             raise KeyError(
                 f"CCL global parameter {param} does not exist.")
-        if "SPLINE_TYPE" in param:
-            return
+        if ("SPLINE_TYPE" in param) and (value is not None):
+            raise RuntimeError(
+                "CCL spline types are immutable.")
         if (param == "A_SPLINE_MAX") and (value != 1.0):
             # repeat the message from ccl_core.i
             raise RuntimeError(
@@ -59,12 +60,22 @@ class ParamStruct(object):
 
     def __repr__(self):
         params = self._dic_init.keys()
-        s = ""
+        s = "<pyccl.constants.ParamStruct>\n"
         for i, param in enumerate(params):
-            s += "{" if i == 0 else " "
+            s += " {" if i == 0 else "  "
             s += f"'{param}': {getattr(self, param)}"
             s += "}" if i == len(params)-1 else ",\n"
         return s
+
+    def keys(self):
+        return list(self._dic_init.keys())
+
+    def values(self):
+        return [getattr(self, param) for param in self.keys()]
+
+    def items(self):
+        return [[param, value]
+                for param, value in zip(self.keys(), self.values())]
 
 
 class DefaultParameters(object):
@@ -111,13 +122,11 @@ class DefaultParameters(object):
                 The ``ccl_cosmology`` struct via ``SWIG``.
         """
         from . import gsl_params, spline_params
-        for param in gsl_params._names:
-            value = getattr(gsl_params, param)
+        for param, value in gsl_params.items():
             setattr(cosmo.gsl_params, param, value)
-        for param in spline_params._names:
+        for param, value in spline_params.items():
             if "SPLINE_TYPE" in param:
                 continue
             if param == "A_SPLINE_MAX":
                 continue
-            value = getattr(spline_params, param)
             setattr(cosmo.spline_params, param, value)

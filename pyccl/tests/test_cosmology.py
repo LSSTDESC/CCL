@@ -262,18 +262,23 @@ def test_pyccl_default_params():
 
     with pytest.raises(AssertionError):
         # the one we changed will raise an error
-        for name in ccl.gsl_params._names:
-            assert ccl.gsl_params[name] == gsl_params_bak[name]
+        for param, value in ccl.gsl_params.items():
+            assert value == gsl_params_bak[param]
 
     # but now we reload it, so it should be the same as the bak
     ccl.gsl_params.reload()
-    for name in ccl.gsl_params._names:
-        assert ccl.gsl_params[name] == gsl_params_bak[name]
+    for param, value in ccl.gsl_params.items():
+        assert value == gsl_params_bak[param]
 
     # complains when we try to set A_SPLINE_MAX != 1.0
     ccl.spline_params.A_SPLINE_MAX = 1.
     with pytest.raises(RuntimeError):
         ccl.spline_params.A_SPLINE_MAX = 0.9
+
+    # complains when we try to change the spline type
+    ccl.spline_params.A_SPLINE_TYPE = None
+    with pytest.raises(RuntimeError):
+        ccl.spline_params.A_SPLINE_TYPE = "something_else"
 
 
 def test_cosmology_default_params():
