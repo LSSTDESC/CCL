@@ -15,6 +15,7 @@ from ._core import _docstring_extra_parameters
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check, warn_api
 from .pk2d import Pk2D
+from .constants import Caching
 
 # Configuration types
 transfer_function_types = {
@@ -913,11 +914,9 @@ class Cosmology(object):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
-    def compute_linear_power(self):
+    @Caching.cache
+    def _compute_linear_power(self):
         """Compute the linear power spectrum."""
-        if self.has_linear_power:
-            return
-
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
                 ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']):
@@ -986,6 +985,13 @@ class Cosmology(object):
                                           status)
             check(status, self)
 
+        return pk
+
+    def compute_linear_power(self):
+        """Compute the linear power spectrum."""
+        if self.has_linear_power:
+            return
+        pk = self._compute_linear_power()
         # Assign
         self._pk_lin['delta_matter:delta_matter'] = pk
         if pk:
