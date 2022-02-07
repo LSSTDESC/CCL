@@ -234,3 +234,60 @@ def test_cosmology_context():
 
     with pytest.raises(AttributeError):
         cosmo.has_growth
+
+
+def test_pyccl_default_params():
+    """Check that Python-layer for setting the gsl and spline parameters
+    works on par with the C-layer."""
+    gsl_params_bak = ccl.gsl_params._dic_init.copy()
+
+    # we will test with this parameter
+    assert gsl_params_bak["HM_MMIN"] == 1e7
+
+    # can be accessed as an attribute and as a dictionary item
+    assert ccl.gsl_params.HM_MMIN == ccl.gsl_params["HM_MMIN"]
+
+    # can be assigned as an attribute
+    ccl.gsl_params.HM_MMIN = 1e5
+    assert ccl.gsl_params["HM_MMIN"] == 1e5  # cross-check
+
+    ccl.gsl_params["HM_MMIN"] = 1e6
+    assert ccl.gsl_params.HM_MMIN == 1e6
+
+    # does not accept extra assignment
+    with pytest.raises(KeyError):
+        ccl.gsl_params.test = "hello_world"
+    with pytest.raises(KeyError):
+        ccl.gsl_params["test"] = "hallo_world"
+
+    with pytest.raises(AssertionError):
+        # the one we changed will raise an error
+        for name in ccl.gsl_params._names:
+            assert ccl.gsl_params[name] == gsl_params_bak[name]
+
+    # but now we reload it, so it should be the same as the bak
+    ccl.gsl_params.reload()
+    for name in ccl.gsl_params._names:
+        assert ccl.gsl_params[name] == gsl_params_bak[name]
+
+    # complains when we try to set A_SPLINE_MAX != 1.0
+    ccl.spline_params.A_SPLINE_MAX = 1.
+    with pytest.raises(RuntimeError):
+        ccl.spline_params.A_SPLINE_MAX = 0.9
+
+
+def test_cosmology_default_params():
+    """Check that the default params within Cosmology work as intended."""
+    cosmo1 = ccl.CosmologyVanillaLCDM()
+    v1 = cosmo1.cosmo.gsl_params.HM_MMIN
+
+    ccl.gsl_params.HM_MMIN = 1e6
+    cosmo2 = ccl.CosmologyVanillaLCDM()
+    v2 = cosmo2.cosmo.gsl_params.HM_MMIN
+    assert v2 == 1e6
+    assert v2 != v1
+
+    ccl.gsl_params.reload()
+    cosmo3 = ccl.CosmologyVanillaLCDM()
+    v3 = cosmo3.cosmo.gsl_params.HM_MMIN
+    assert v3 == v1

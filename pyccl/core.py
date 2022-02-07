@@ -14,6 +14,7 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
+from .constants import DefaultParameters
 
 # Configuration types
 transfer_function_types = {
@@ -261,6 +262,7 @@ class Cosmology(object):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
+        DefaultParameters.populate(self.cosmo)
 
         if self.cosmo.status != 0:
             raise CCLError(
