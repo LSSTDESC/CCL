@@ -63,7 +63,7 @@ class ParamStruct(object):
     def __setitem__(self, param, value):
         setattr(self, param, value)
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         params = self._dic_init.keys()
         s = "<pyccl.constants.ParamStruct>\n"
         for i, param in enumerate(params):
@@ -89,9 +89,6 @@ class DefaultParameters(object):
     Parameters:
         None (only class method functionality implemented)
     """
-
-    def __init__(self):
-        pass
 
     @classmethod
     def from_struct(cls, name):
