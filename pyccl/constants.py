@@ -71,20 +71,20 @@ class ParamStruct(object):
             s += "}" if i == len(params)-1 else ",\n"
         return s
 
-    def public(self):
+    def _public(self):
         """Access all public attributes of an instance of this class."""
         return {param: value
                 for param, value in vars(self).items()
                 if not param.startswith("_")}
 
     def keys(self):
-        return self.public().keys()
+        return self._public().keys()
 
     def values(self):
-        return self.public().values()
+        return self._public().values()
 
     def items(self):
-        return self.public().items()
+        return self._public().items()
 
 
 class CCLParameters(object):
