@@ -1547,7 +1547,7 @@ class SatelliteShearHOD(HaloProfileHOD):
         self._gammatype = _gammatype
         if not self._gammatype in ['constant', 'radial']:
             raise ValueError("Functional form for intrinsic shear not "
-                             "supported ('constant' or 'exponential'")
+                             "supported (please use 'constant' or 'exponential'")
         if self._gammatype == 'constant':
             self._angular_fl = np.array([2.77582637, -0.19276603, 0.04743899, -0.01779024, 0.00832446, -0.00447308]).reshape(
                 (6, 1))
@@ -1557,6 +1557,8 @@ class SatelliteShearHOD(HaloProfileHOD):
         self._gammabar = _gammabar
         self._a1h = _a1h
         self._b = _b
+        # If _lmax is odd, make it an even number (odd l contributions are zero).
+        if not (_lmax % 2 == 0): _lmax = _lmax // 2
         self._lmax = _lmax
         super().__init__(c_M_relation, fc_0=0.0, ns_independent=True)
 
@@ -1566,7 +1568,6 @@ class SatelliteShearHOD(HaloProfileHOD):
                 raise ValueError("Constant shear parameter not provided.")
             return self._gammabar
         elif self._gammatype == 'radial':
-            # TODO: add the luminosity scaling
             if (self._a1h is None) or (self._b is None):
                 raise ValueError("Radial dependent shear parameters not provided.")
             r_use = np.copy(np.atleast_1d(r))
@@ -1581,14 +1582,9 @@ class SatelliteShearHOD(HaloProfileHOD):
         # the Fourier transform of the density weighted intrinsic shear for satellites |\hat{gamma}^I_s(k|M)|
         # Need to rethink normalization: in matter case, P(k->0)->M_mean, and the integral -> rho_mean.
         # For shear, the normalization is computed separately.
-        # Give M, compute ul, fl and given gamma(r)_b obtain gamma(k)
 
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
-
-        # Below: Fixed r-sampling
-        #R_d = mass_def.get_radius(cosmo, M_use[-1], a) / a
-        #r_integral_interval = np.linspace(0.001, R_d, 512)
 
         # Integration limits on radius
         # Todo: These limits should be specified by the user.
@@ -1601,33 +1597,34 @@ class SatelliteShearHOD(HaloProfileHOD):
         # The r-array shape must be (N_M, N_r)
         rho = NFW.real(cosmo, r_integral_interval, M, a, mass_def)
         l_arr = np.arange(2, self._lmax+1, 2)
+        # Dense sampling of the spherical bessel functions to be used later
+        x_jn = np.geomspace(k_use.min() * r_integral_interval.min(), k_use.max() * r_integral_interval.max(), 10000)
+        jn = np.empty(shape=(len(l_arr), len(x_jn)))
+        for i in range(len(l_arr)):
+            jn[i] = spherical_jn(l_arr[i], x_jn)
 
         if len(M_use)==1:
             u = rho / M
             # Multiply all elements of array a subscript i with
             # all of array b subscript j.
             # np.einsum('...i,j...', a, b)
-            k_dot_r = np.einsum('...i,j...', k_use, r_integral_interval[0,:])#[0])
+            k_dot_r = np.einsum('...i,j...', k_use, r_integral_interval[0,:])
             prof = np.zeros(shape=k_use.shape)
             for i, l in enumerate(l_arr):
-                ul = simps(r_integral_interval[0, :]**2. * self._gamma(r_integral_interval[0, :], R_d[i]) * u[0, :] * spherical_jn(l, k_dot_r),
+                ul = simps(r_integral_interval[0, :]**2. * self._gamma(r_integral_interval[0, :], R_d[0]) * u[0, :] * spherical_jn(l, k_dot_r),
                            r_integral_interval[0, :])
-                # Below for fixed sampling
-                # ul = simps(r_integral_interval**2. * u * spherical_jn(l, k_dot_r), r_integral_interval)
                 prof += (1j**l).real * (2*l+1) * self._angular_fl[i] * ul
         else:
             # TODO: Do not re-compute if already computed (for given a, M_use, k_use, r_use)
             u = rho / M.reshape(len(M), 1)
             # The fourier profile has to be of the shape below:
             prof = np.empty(shape=(len(M_use), len(k_use)))
-            # If fixed sampling
-            # k_dot_r = np.einsum('...i,j...', k_use, r_integral_interval)
-            # jn2 = spherical_jn(2, k_dot_r)
             for i, M_i in enumerate(M_use):
                 k_dot_r = np.einsum('...i,j...', k_use, r_integral_interval[i, :])
                 prof_i = np.zeros(shape=k_use.shape)
                 for j, l in enumerate(l_arr):
-                    ul = simps(r_integral_interval[i, :]**2. * self._gamma(r_integral_interval[i, :], R_d[i]) * u[:, i, :] * spherical_jn(l, k_dot_r),
+                    jn_interp = np.interp(k_dot_r, x_jn, jn[j])
+                    ul = simps(r_integral_interval[i, :]**2. * self._gamma(r_integral_interval[i, :], R_d[i]) * u[:, i, :] * jn_interp,
                                r_integral_interval[i, :])
                     prof_i += (1j**l).real * (2*l+1) * self._angular_fl[j] * ul
                 prof[i, :] = prof_i
