@@ -51,8 +51,8 @@ from .covariances import angular_cl_cov_cNG, angular_cl_cov_SSC, sigma2_B_disc, 
 
 # Useful constants and unit conversions
 physical_constants = lib.cvar.constants
-gsl_params = constants.DefaultParameters.from_struct("default_gsl_params")
-spline_params = constants.DefaultParameters.from_struct("default_spline_params")
+gsl_params = constants.CCLParameters.from_struct("default_gsl_params")
+spline_params = constants.CCLParameters.from_struct("default_spline_params")
 
 from .correlations import (
     correlation, correlation_3d, correlation_multipole, correlation_3dRsd,

@@ -239,10 +239,10 @@ def test_cosmology_context():
 def test_pyccl_default_params():
     """Check that Python-layer for setting the gsl and spline parameters
     works on par with the C-layer."""
-    gsl_params_bak = ccl.gsl_params._dic_init.copy()
+    HM_MMIN = ccl.gsl_params["HM_MMIN"]
 
     # we will test with this parameter
-    assert gsl_params_bak["HM_MMIN"] == 1e7
+    assert HM_MMIN == 1e7
 
     # can be accessed as an attribute and as a dictionary item
     assert ccl.gsl_params.HM_MMIN == ccl.gsl_params["HM_MMIN"]
@@ -260,15 +260,12 @@ def test_pyccl_default_params():
     with pytest.raises(KeyError):
         ccl.gsl_params["test"] = "hallo_world"
 
-    with pytest.raises(AssertionError):
-        # the one we changed will raise an error
-        for param, value in ccl.gsl_params.items():
-            assert value == gsl_params_bak[param]
+    # verify that this has changed
+    assert ccl.gsl_params.HM_MMIN != HM_MMIN
 
-    # but now we reload it, so it should be the same as the bak
+    # but now we reload it, so it should be the default again
     ccl.gsl_params.reload()
-    for param, value in ccl.gsl_params.items():
-        assert value == gsl_params_bak[param]
+    assert ccl.gsl_params.HM_MMIN == HM_MMIN
 
     # complains when we try to set A_SPLINE_MAX != 1.0
     ccl.spline_params.A_SPLINE_MAX = 1.

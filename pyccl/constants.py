@@ -24,25 +24,24 @@ class ParamStruct(object):
     Attributes:
         _locked (``bool``):
             Switch to make the keys immutable.
-        _dic_init (``dict``):
-            Store the original dictionary; used by the ``reload`` method.
-        _names (``list`` of ``str``):
-            Names of the parameters.
+        _name (``str``):
+            Name of the SWIG-generated function in ``ccllib`` which
+            returns the default parameters.
     """
     _locked = False
 
     def __init__(self, dic):
-        self._dic_init = dic  # store defaults from the C layer
-        self._setup()
+        self._setup(dic)
 
-    def _setup(self):
+    def _setup(self, dic):
         self._locked = False
-        for param, value in self._dic_init.items():
+        for param, value in dic.items():
             setattr(self, param, value)
         self._locked = True
 
     def reload(self):
-        self._setup()
+        dic = CCLParameters.from_struct(self._name)
+        self._setup(dic)
 
     def __setattr__(self, param, value):
         if self._locked and not hasattr(self, param):
@@ -64,7 +63,7 @@ class ParamStruct(object):
         setattr(self, param, value)
 
     def __repr__(self):  # pragma: no cover
-        params = self._dic_init.keys()
+        params = self.keys()
         s = "<pyccl.constants.ParamStruct>\n"
         for i, param in enumerate(params):
             s += " {" if i == 0 else "  "
@@ -72,18 +71,23 @@ class ParamStruct(object):
             s += "}" if i == len(params)-1 else ",\n"
         return s
 
+    def public(self):
+        """Access all public attributes of an instance of this class."""
+        return {param: value
+                for param, value in vars(self).items()
+                if not param.startswith("_")}
+
     def keys(self):
-        return list(self._dic_init.keys())
+        return self.public().keys()
 
     def values(self):
-        return [getattr(self, param) for param in self.keys()]
+        return self.public().values()
 
     def items(self):
-        return [[param, value]
-                for param, value in zip(self.keys(), self.values())]
+        return self.public().items()
 
 
-class DefaultParameters(object):
+class CCLParameters(object):
     """Container class with methods to manipulate ``ParamStruct`` dicts.
 
     Parameters:
@@ -104,9 +108,9 @@ class DefaultParameters(object):
             ``ParamStruct``:
                 Frozen dictionary of default parameters.
         """
+        params = {"_name": name}  # store the ccllib function name
         struct = getattr(lib, name)
         dir_ = dir(struct)
-        params = dict()
         for param in dir_:
             if param.isupper():
                 params[param] = getattr(struct, param)
