@@ -277,6 +277,10 @@ def test_pyccl_default_params():
     with pytest.raises(RuntimeError):
         ccl.spline_params.A_SPLINE_TYPE = "something_else"
 
+    # check that dict properties work fine
+    dic = dict(zip(ccl.gsl_params.keys(), ccl.gsl_params.values()))
+    assert dic.items() == ccl.gsl_params.items()
+
 
 def test_cosmology_default_params():
     """Check that the default params within Cosmology work as intended."""
