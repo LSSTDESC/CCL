@@ -1,4 +1,3 @@
-"""This file exposes constants present in CCL."""
 from . import ccllib as lib
 from .ccllib import (
     CCL_ERROR_CLASS, CCL_ERROR_INCONSISTENT, CCL_ERROR_INTEG,
@@ -15,43 +14,77 @@ __all__ = ('CCL_ERROR_CLASS', 'CCL_ERROR_INCONSISTENT', 'CCL_ERROR_INTEG',
 
 
 class ParamStruct(object):
-    """Dict-like structure with frozen keys and mutable values.
+    """Dict-like structure with option to freeze keys and/or values.
 
     Parameters:
         dic (``dict``):
             Dictionary of parameters and values
+        lock_params (``bool``):
+            Switch to disable new parameter creation.
+        lock_values (``bool``):
+            Switch to make the parameter values immutable.
 
     Attributes:
-        _locked (``bool``):
-            Switch to make the keys immutable.
-        _name (``str``):
-            Name of the SWIG-generated function in ``ccllib`` which
-            returns the default parameters.
-    """
-    _locked = False
+        locked (``(bool, bool)``):
+            Lock state of the object.
+        """
+    _locked_params = False
+    _locked_values = False
 
-    def __init__(self, dic):
+    def __init__(self, dic, lock_params=False, lock_values=False):
+        self._locked_state_bak = (lock_params, lock_values)  # save lock state
+        self.locked = (self._locked_state_bak)
         self._setup(dic)
 
     def _setup(self, dic):
-        self._locked = False
+        self._unlock()
         for param, value in dic.items():
             setattr(self, param, value)
-        self._locked = True
+        self._lock()
+
+    @property
+    def locked(self):
+        return self._locked_params, self._locked_values
+
+    @locked.setter
+    def locked(self, state):
+        try:
+            params, values = state
+        except ValueError:
+            raise ValueError(
+                "ParamStruct setter state must contain both lock states.")
+        else:
+            self._locked_params = params
+            self._locked_values = values
+
+    def _lock(self):
+        """Unlock the object."""
+        self.locked = self._locked_state_bak
+
+    def _unlock(self):
+        """Return object to the saved lock state."""
+        self.locked = (False, False)
 
     def reload(self):
+        """Reload the object."""
         dic = CCLParameters.from_struct(self._name)
         self._setup(dic)
 
     def __setattr__(self, param, value):
-        if self._locked and not hasattr(self, param):
+        if self._locked_values and param in self._public():
+            # do not allow change of value (immutable values)
+            raise NotImplementedError(
+                f"Values of {self._name} are immutable.")
+        if self._locked_params and not hasattr(self, param):
+            # do not allow insertion of parameter
             raise KeyError(
                 f"CCL global parameter {param} does not exist.")
         if ("SPLINE_TYPE" in param) and (value is not None):
+            # do not allow change of spline type
             raise RuntimeError(
                 "CCL spline types are immutable.")
         if (param == "A_SPLINE_MAX") and (value != 1.0):
-            # repeat the message from ccl_core.i
+            # do not allow change of max scale factor
             raise RuntimeError(
                 "A_SPLINE_MAX is fixed to 1.0 and is not mutable.")
         object.__setattr__(self, param, value)
@@ -95,7 +128,17 @@ class CCLParameters(object):
     """
 
     @classmethod
-    def from_struct(cls, name):
+    def get_struct(cls, name):
+        """Helper to lookup C-level struct via SWIG multiple levels deep."""
+        lookup = lib  # start in lib
+        names = name.split(".")
+        while len(names) > 0:
+            # go one level deeper as long as multiple levels exist
+            lookup = getattr(lookup, names.pop(0))
+        return lookup
+
+    @classmethod
+    def from_struct(cls, name, constants=False):
         """Construct a ``ParamStruct`` dict containing CCL parameters
         sourced from the C-layer.
 
@@ -103,18 +146,20 @@ class CCLParameters(object):
             name (``str``):
                 Name of the SWIG-generated function which passes the
                 parameters defined at the C-layer struct.
+            constants (``bool``):
+                Switch to make the parameter values immutable.
 
         Returns:
             ``ParamStruct``:
                 Frozen dictionary of default parameters.
         """
         params = {"_name": name}  # store the ccllib function name
-        struct = getattr(lib, name)
+        struct = cls.get_struct(name)
         dir_ = dir(struct)
         for param in dir_:
             if param.isupper():
                 params[param] = getattr(struct, param)
-        return ParamStruct(params)
+        return ParamStruct(params, lock_params=True, lock_values=constants)
 
     @classmethod
     def populate(cls, cosmo):

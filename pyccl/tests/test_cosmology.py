@@ -297,3 +297,11 @@ def test_cosmology_default_params():
     cosmo3 = ccl.CosmologyVanillaLCDM()
     v3 = cosmo3.cosmo.gsl_params.HM_MMIN
     assert v3 == v1
+
+
+def test_ccl_physical_constants_smoke():
+    assert ccl.physical_constants.CLIGHT == ccl.ccllib.cvar.constants.CLIGHT
+
+    # constants are immutable
+    with pytest.raises(NotImplementedError):
+        ccl.physical_constants.CLIGHT = 3e8

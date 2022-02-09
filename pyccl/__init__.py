@@ -50,7 +50,7 @@ from .cls import angular_cl
 from .covariances import angular_cl_cov_cNG, angular_cl_cov_SSC, sigma2_B_disc, sigma2_B_from_mask
 
 # Useful constants and unit conversions
-physical_constants = lib.cvar.constants
+physical_constants = constants.CCLParameters.from_struct("cvar.constants", constants=True)
 gsl_params = constants.CCLParameters.from_struct("default_gsl_params")
 spline_params = constants.CCLParameters.from_struct("default_spline_params")
 
