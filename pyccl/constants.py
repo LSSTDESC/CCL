@@ -50,7 +50,7 @@ class ParamStruct(object):
     def locked(self, state):
         try:
             params, values = state
-        except ValueError:
+        except TypeError:
             raise ValueError(
                 "ParamStruct setter state must contain both lock states.")
         else:

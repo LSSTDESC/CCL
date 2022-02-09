@@ -305,3 +305,8 @@ def test_ccl_physical_constants_smoke():
     # constants are immutable
     with pytest.raises(NotImplementedError):
         ccl.physical_constants.CLIGHT = 3e8
+
+
+def test_CCLParams_raises():
+    with pytest.raises(ValueError):
+        ccl.physical_constants.locked = False
