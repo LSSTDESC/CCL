@@ -157,7 +157,7 @@ class CCLParameters(object):
         struct = cls.get_struct(name)
         dir_ = dir(struct)
         for param in dir_:
-            if param.isupper():
+            if not param.startswith("_") and param not in ["this", "thisown"] :
                 params[param] = getattr(struct, param)
         return ParamStruct(params, lock_params=True, lock_values=constants)
 
