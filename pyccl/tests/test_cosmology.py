@@ -281,6 +281,12 @@ def test_pyccl_default_params():
     dic = dict(zip(ccl.gsl_params.keys(), ccl.gsl_params.values()))
     assert dic.items() == ccl.gsl_params.items()
 
+    # check that copying works fine
+    ccl.gsl_params.reload()
+    dic = ccl.gsl_params.copy()
+    dic.HM_MMIN = 1e6
+    assert dic.HM_MMIN != ccl.gsl_params.HM_MMIN
+
 
 def test_cosmology_default_params():
     """Check that the default params within Cosmology work as intended."""

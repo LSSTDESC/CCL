@@ -39,7 +39,8 @@ class ParamStruct(object):
     def _setup(self, dic):
         self._unlock()
         for param, value in dic.items():
-            setattr(self, param, value)
+            # use setattr from `object` to bypass restrictions from this class
+            object.__setattr__(self, param, value)
         self._lock()
 
     @property
@@ -58,17 +59,21 @@ class ParamStruct(object):
             self._locked_values = values
 
     def _lock(self):
-        """Unlock the object."""
+        """Return object to the saved lock state."""
         self.locked = self._locked_state_bak
 
     def _unlock(self):
-        """Return object to the saved lock state."""
+        """Unlock the object."""
         self.locked = (False, False)
 
     def reload(self):
         """Reload the object."""
         dic = CCLParameters.from_struct(self._name)
         self._setup(dic)
+
+    def copy(self):
+        """Return a copy of this object."""
+        return ParamStruct(self.__dict__, *self.locked)
 
     def __setattr__(self, param, value):
         if self._locked_values and param in self._public():
@@ -155,8 +160,7 @@ class CCLParameters(object):
         """
         params = {"_name": name}  # store the ccllib function name
         struct = cls.get_struct(name)
-        dir_ = dir(struct)
-        for param in dir_:
+        for param in dir(struct):
             if not param.startswith("_") and param not in ["this", "thisown"]:
                 params[param] = getattr(struct, param)
         return ParamStruct(params, lock_params=True, lock_values=constants)
