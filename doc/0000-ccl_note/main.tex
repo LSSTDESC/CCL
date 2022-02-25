@@ -765,20 +765,22 @@ The normalization of the IA bias parameters can be flexibly specified. The conve
 \end{align}
 This convention for $C_1(z)$ matches the default \ccl normalization for $b_{\rm IA}$ used in the standard WL tracer, in which the user is assumed to be specifying $A_{1}$ (see Eq.~\ref{eq:bIA_norm}). When using this nonlinear TATT model, the full $z$-dependent $C$-values must be specified, and the IA amplitude in the standard WL tracer must be set to one.
 
-\subsubsection{Intrinsic alignments: Halo model}
-
-Small scale modelling of the intrinsic alignments signal can also be done using a halo model, as described in \cite{SchneiderBridle2010} and \cite{Fortuna2021}. In the context of halo occupation distribution (HOD) models, the power spectra for satellite galaxies can be found using halo model integrals implemented in CCL. In this case, the 1-halo contributions to the E-mode GI and II power spectra are \cite[Eq. 17, 18]{Fortuna2021}:
- \begin{align}
-	P_{\delta \mathrm{I}, 1 \mathrm{~h}}^{s}(\mathbf{k}, z)&=\int \mathrm{d} M n(M) \frac{M}{\bar{\rho}_{m}} f_{s}(z) \frac{\left\langle N_{s} | M\right\rangle}{\bar{n}_{s}(z)}\left|\hat{\gamma}_{s}^{I}(\mathbf{k} | M)\right| u(k, M)\\
-	P_{\mathrm{II}, \mathrm{h}}^{s s}(\mathbf{k}, z)&=\int \mathrm{d} M n(M) f_{s}^{2}(z) \frac{\left\langle N_{s}\left(N_{s}-1\right) | M\right\rangle}{\bar{n}_{s}^{2}(z)}\left|\hat{\gamma}_{s}^{I}(\mathbf{k} | M)\right|^{2},
-\end{align}
-where $n(M)$ is the halo mass function, $f_s(z)$ is the fraction of satellites as a function of redshift, $\langle N_s|M\rangle$ is the HOD of the satellites, $\hat{\gamma}_s^I(\mathbf{k}|M)$ is the Fourier transform of the intrinsic shear field, and $\bar{n}_s$ is the average number density of satellites.
 \subsubsection{Galaxy-IA cross correlation}
 
 In the present \ccl implementation, correlations with between nonlinear bias parameters and IA contributions are not yet implemented. These terms will be included in future releases. The current galaxy-intrinsic power spectrum assumes linear galaxy bias and nonlinear IA:
 \begin{align}
     P_{gI} = b_1 P_{\delta E}~.
 \end{align}
+
+\subsubsection{Intrinsic alignments: Halo model}
+
+Small scale modelling of the intrinsic alignments signal can also be done using a halo model, as described in \cite{SchneiderBridle2010} and \cite{Fortuna2021}. In the context of halo occupation distribution (HOD) models, the power spectra for satellite galaxies can be found using halo model integrals implemented in CCL. In this case, the 1-halo contributions to the E-mode GI and II power spectra are \cite[Eq. 17, 18]{Fortuna2021}:
+ \begin{align}
+	P_{\delta \mathrm{I}, 1 \mathrm{~h}}^{s}(\mathbf{k}, z)&=\int \mathrm{d} M n(M) \frac{M}{\bar{\rho}_{m}} f_{s}(z) \frac{\left\langle N_{s} | M\right\rangle}{\bar{n}_{s}(z)}\left|\hat{\gamma}_{s}^{I}(\mathbf{k} | M)\right| u(k, M)\\
+	P_{\mathrm{II}, \mathrm{h}}^{s s}(\mathbf{k}, z)&=\int \mathrm{d} M n(M) f_{s}^{2}(z) \frac{\left\langle N_{s}\left(N_{s}-1\right) | M\right\rangle}{\bar{n}_{s}^{2}(z)}\left|\hat{\gamma}_{s}^{I}(\mathbf{k} | M)\right|^{2},
+  \label{eq:IAHaloModelPowerSpectra}
+\end{align}
+where $n(M)$ is the halo mass function, $f_s(z)$ is the fraction of satellites as a function of redshift, $\langle N_s|M\rangle$ is the HOD of the satellites, $\hat{\gamma}_s^I(\mathbf{k}|M)$ is the Fourier transform of the intrinsic shear field, and $\bar{n}_s$ is the average number density of satellites.
 
 \subsection{Angular power spectra}
 \label{sec:cl}
@@ -1448,16 +1450,16 @@ The following profile models are currently implemented in \ccl:
   \begin{align}
   	\tilde{\gamma}_{1-\text{halo}}^{I}(\mathbf{r}, M) &=  \gamma^I(\mathbf{r})N_gu(r|M),
   \end{align}
-  where $\gamma^I(\mathbf{r})=\left|\gamma^{I}(r, \theta)\right| \mathrm{e}^{2 \mathrm{i} \phi}$ is the complex projected intrinsic shear, $u(r|M) = \rho_{\text{NFW}}(\mathbf{r}|M)/M$ is the normalized NFW profile, $N_g$ is the number of galaxies within the halo, and the profile's concentration parameter $c$ needs to be specified by a mass-concentration relation, typically assumed to be deterministic. This profile can be used for halo model calculations of II and GI power spectra, where the intrinsic shear $\left|\gamma^{I}(r, \theta)\right|=\bar{\gamma}(r)\sin\theta$, and $\bar{\gamma}(r)$ can be either constant or radially dependent. Since intrinsic shear involves an angular part, the Fourier transform of the profile is not given by equation~\ref{eq:prof.fourier}, but needs to be computed using a multipole expansion:
+  where $\gamma^I(\mathbf{r})=\left|\gamma^{I}(r, \theta)\right| \mathrm{e}^{2 \mathrm{i} \phi}$ is the complex projected intrinsic shear, $u(r|M) = \rho_{\text{NFW}}(\mathbf{r}|M)/M$ is the normalized NFW profile, $N_g$ is the number of galaxies within the halo, and the profile's concentration parameter $c$ needs to be specified by a mass-concentration relation, typically assumed to be deterministic. This profile can be used for halo model calculations of II and GI power spectra, where the intrinsic shear $\left|\gamma^{I}(r, \theta)\right|=\bar{\gamma}(r)\sin\theta$, and $\bar{\gamma}(r)$ can be either constant or radially dependent. We support an exponential profile for $\bar{\gamma}(r)$, with amplitude and index as free parameters. Since intrinsic shear involves an angular part, the Fourier transform of the profile is not given by equation~\ref{eq:prof.fourier}, but needs to be computed using a multipole expansion:
   \begin{equation}
   	\gamma^{I}(\mathbf{k}| M)= \sum_{\ell=0}^{\infty}(2 \ell+1) i^{\ell} \gamma_{\ell}\left(k | M\right) f_{\ell}\left(\theta_{k}, \phi_{k}\right),
   	\label{eq:gamma_fourier}
   \end{equation}
-  where $f_{\ell}\left(\theta_{k}, \phi_{k}\right)$ is an angular part (\cite[Eq. C8]{Fortuna2021}) and the multipoles are:
+  where $f_{\ell}\left(\theta_{k}, \phi_{k}\right)$ is an angular part \cite[Eq. C8]{Fortuna2021} and the multipoles are:
   $$
   \gamma_{\ell}\left(k | m\right) \equiv \int_{0}^{\infty} r^{2} \mathrm{~d} r\, \bar{\gamma}(r)  u(r | m) j_{\ell}(k r)
   $$
-  with $j_\ell$ a spherical Bessel function. The sum in equation \ref{eq:gamma_fourier} is calculated up to a maximum $l_\mathrm{max}$. The projected 2D profile and cumulative surface density are not relevant in the context of intrinsic alignments, and for this reason, only the Fourier transform computation is provided in the context of this field density profile.\\
+  with $j_\ell$ a spherical Bessel function. The sum in equation \ref{eq:gamma_fourier} is calculated up to a maximum $l_\mathrm{max}$ and the resulting ellipticity field is plugged into equation \ref{eq:IAHaloModelPowerSpectra}. The projected 2D profile and cumulative surface density are not relevant in the context of intrinsic alignments, and for this reason, only the Fourier transform computation is provided in the context of this field density profile.\\
 \end{itemize}
 
 We also provide two additional profiles to be used as toy models:

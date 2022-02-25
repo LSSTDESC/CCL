@@ -1544,6 +1544,7 @@ class HaloProfileHOD(HaloProfile):
 class SatelliteShearHOD(HaloProfileHOD):
     def __init__(self, c_M_relation, _gammatype='radial',
                  _gammabar=0.2, _a1h=0.0014, _b=-2, _lmax = 2):
+        # TODO: Maybe have the constant profile "activated" if _b==0.
         self._gammatype = _gammatype
         if not self._gammatype in ['constant', 'radial']:
             raise ValueError("Functional form for intrinsic shear not "
@@ -1554,6 +1555,8 @@ class SatelliteShearHOD(HaloProfileHOD):
         elif self._gammatype == 'radial':
             self._angular_fl = np.array([4.71238898, -2.61799389, 2.06167032, -1.76714666, 1.57488973, -1.43581368]).reshape(
                 (6, 1))
+        if _lmax>13:
+            raise ValueError('Maximum l provided too high (lmax<=12).')
         self._gammabar = _gammabar
         self._a1h = _a1h
         self._b = _b
@@ -1572,6 +1575,8 @@ class SatelliteShearHOD(HaloProfileHOD):
                 raise ValueError("Radial dependent shear parameters not provided.")
             r_use = np.copy(np.atleast_1d(r))
             r_use[r_use<0.06] = 0.06
+            if np.ndim(r_vir==1):
+                r_vir = r_vir.reshape(len(r_vir), 1) # FIXME: Check this better
             return self._a1h * (r_use / r_vir) ** self._b
 
     def _usat_fourier(self, cosmo, k, M, a, mass_def):
