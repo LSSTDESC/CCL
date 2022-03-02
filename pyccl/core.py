@@ -191,7 +191,7 @@ class Cosmology(object):
     Consult the CAMB documentation for their usage. These parameters are passed
     in a :obj:`dict` to `extra_parameters` as::
 
-        extra_parameters = {"camb": {"halofit_version": "mead2020",
+        extra_parameters = {"camb": {"halofit_version": "mead2020_feedback",
                                      "HMCode_logT_AGN": 7.8}}
 
     """
