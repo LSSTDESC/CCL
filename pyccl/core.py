@@ -170,6 +170,7 @@ class Cosmology(object):
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
+<<<<<<< HEAD
         df_mg (array_like, optional):
             Deprecated; will be removed in a future release.
             Perturbations to the GR growth rate as a function of redshift

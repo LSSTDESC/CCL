@@ -6,7 +6,7 @@ _docstring_extra_parameters = \
 
     * ``'camb'`` ::
 
-        'camb': {'halofit_version': 'mead2020',
+        'camb': {'halofit_version': 'mead2020_feedback',
                  'HMCode_A_baryon': None,
                  'HMCode_eta_baryon': None,
                  'HMCode_logT_AGN': None,
