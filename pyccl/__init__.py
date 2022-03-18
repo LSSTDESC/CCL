@@ -71,3 +71,5 @@ from .neutrinos import Omeganuh2, nu_masses
 from .pyutils import debug_mode, resample_array
 
 from .errors import CCLError, CCLWarning
+
+from .base import Hashing, hash_
