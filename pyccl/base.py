@@ -1,4 +1,5 @@
 import sys
+import functools
 from collections import OrderedDict
 import hashlib
 import numpy as np
@@ -61,3 +62,189 @@ class Hashing:
 
 
 hash_ = Hashing.hash_
+
+
+class CachedObject:
+    """A cached object container."""
+    counter: int = 0
+
+    def __init__(self, obj):
+        self.item = obj
+
+    def __repr__(self):
+        s = f"CachedObject(counter={self.counter})"
+        return s
+
+    def increment(self):
+        self.counter += 1
+
+    def reset(self):
+        self.counter = 0
+
+
+class _ClassPropertyMeta(type):
+    """Implement `property` to a `classmethod`."""
+    # TODO: in py39+ decorators `classmethod` and `property` can be combined
+    @property
+    def maxsize(cls):
+        return cls._maxsize
+
+    @maxsize.setter
+    def maxsize(cls, value):
+        cls._maxsize = value
+        for func in cls._caches.keys():
+            func._cache["maxsize"] = value
+
+    @property
+    def policy(cls):
+        return cls._policy
+
+    @policy.setter
+    def policy(cls, value):
+        if value not in cls._policies:
+            raise ValueError("Cache retention policy not recognized.")
+        if (cls._policy == "lfu") and (not value == "lfu"):
+            # reset counter if current policy is lfu
+            # otherwise new objects are prone to being discarded
+            for dic in cls._caches.values():
+                for item in dic.values():
+                    item.reset()
+        cls._policy = value
+        for func in cls._caches.keys():
+            func._cache["policy"] = value
+
+
+class Caching(metaclass=_ClassPropertyMeta):
+    """Infrastructure to hold cached objects.
+
+    Caching is used for pre-computed objects that are expensive to compute.
+
+    Attributes:
+        maxsize (``int``):
+            Maximum number of caches. If the dictionary is full, new caches
+            are assigned according to the set cache retention policy.
+        policy (``'fifo'``, ``'lru'``, ``'lfu'``):
+            Cache retention policy.
+    """
+    _caches = {}
+    _enabled = True
+    _policies = ['fifo', 'lru', 'lfu']
+    _maxsize = 64
+    _policy = 'lru'
+
+    @classmethod
+    def _get_hash(cls, *args, **kwargs):
+        """Calculate the hex hash from the combination the passed arguments
+        and keyword arguments.
+        """
+        total_hash = sum([hash_(obj) for obj in [args, kwargs]])
+        return hex(hash_(total_hash))
+
+    @classmethod
+    def _get(cls, dic, key, policy):
+        """Get the cached object container
+        under the implemented caching policy.
+        """
+        obj = dic[key]
+        if policy == "lru":
+            dic.move_to_end(key)
+        elif policy == "lfu":
+            obj.increment()
+        return obj
+
+    @classmethod
+    def _pop(cls, dic, policy):
+        """Remove one cached item as per the implemented caching policy."""
+        if policy == "lfu":
+            keys = list(dic)
+            idx = np.argmin([item.counter for item in dic.values()])
+            dic.move_to_end(keys[idx], last=False)
+        dic.pop(next(iter(dic)))
+
+    @classmethod
+    def _decorator(cls, func, maxsize, policy):
+        settings = {'maxsize': maxsize, 'policy': policy}
+        func._cache = settings
+        cls._caches[func] = OrderedDict()
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if not cls._enabled:
+                return func(*args, **kwargs)
+
+            # initialize entry
+            key = cls._get_hash(*args, **kwargs)
+            caches = cls._caches[func]
+            maxsize = func._cache['maxsize']
+            policy = func._cache['policy']
+
+            if key in caches:
+                # output has been cached
+                out = cls._get(caches, key, policy)
+                return out.item
+
+            while len(caches) >= maxsize:
+                # output not cached and no space available, so remove
+                # items as per the caching policy until there is space
+                cls._pop(caches, policy)
+
+            # cache new entry
+            out = CachedObject(func(*args, **kwargs))
+            caches[key] = out
+            return out.item
+
+        return wrapper
+
+    @classmethod
+    def cache(cls, func=None, /, *, maxsize=None, policy=None):
+        """Cache the output of the decorated function.
+
+        Arguments:
+            func (``function``):
+                Function to be decorated.
+            maxsize (``int`` or ``None``):
+                Maximum cache size for the decorated function.
+                If None, defaults to ``pyccl.Caching.maxsize``.
+            policy (``'fifo'``, ``'lru'``, ``'lfu'``):
+                Cache retention policy. When the storage reaches maxsize
+                decide which cached object will be deleted. Default is 'lru'.\n
+                'fifo': first-in-first-out,\n
+                'lru': least-recently-used,\n
+                'lfu': least-frequently-used.
+        """
+        if maxsize is None:
+            maxsize = cls.maxsize
+        if policy is None:
+            policy = cls.policy
+        elif policy not in cls._policies:
+            raise ValueError("Cache retention policy not recognized.")
+
+        def decorator(func):
+            return cls._decorator(func, maxsize, policy)
+
+        # Check if usage is with @cache or @cache()
+        if func is None:
+            # @cache() with parentheses
+            return decorator
+        # @cache without parentheses
+        return decorator(func)
+
+    @classmethod
+    def enable(cls):
+        cls._enabled = True
+
+    @classmethod
+    def disable(cls):
+        cls._enabled = False
+
+    @classmethod
+    def toggle(cls):
+        cls._enabled = not cls._enabled
+
+    @classmethod
+    def reset(cls):
+        cls.maxsize = 64
+        cls.policy = 'lru'
+
+
+cache = Caching.cache
