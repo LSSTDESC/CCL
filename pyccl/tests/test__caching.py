@@ -1,5 +1,6 @@
+# We use double underscore to make it the first test alphabetically.
 import pytest
-import pyccl as ccl
+from . import pyccl as ccl
 import numpy as np
 from time import time
 
@@ -60,19 +61,14 @@ def test_times():
     assert np.all(t1/t2 > SPEEDUP)
 
 
-def get_entry():
-    dic = ccl.Caching._caches
-    func = ccl.Cosmology._compute_linear_power.__wrapped__
-    return dic[func]
-
-
 def test_caching_fifo():
     """Test First-In-First-Out retention policy."""
     # To save time, we test caching by limiting the maximum cache size
     # from 64 (default) to 3. We cache Comologies with different sigma8.
-    # By now, the caching repo will be overfull.
+    # By now, the caching repo will be full.
     ccl.Caching.maxsize = NUM
-    assert len(get_entry()) == ccl.Caching.maxsize
+    func = ccl.Cosmology._compute_linear_power
+    assert len(func.cache_info._caches) >= ccl.Caching.maxsize
 
     ccl.Caching.policy = "fifo"
 
@@ -113,15 +109,30 @@ def test_caching_lfu():
     assert t2/t1 > SPEEDUP
 
 
+def test_caching_reset():
+    """Test the reset switches."""
+    ccl.Caching.reset()
+    assert ccl.Caching.maxsize == 64
+    assert ccl.Caching.policy == "lru"
+    ccl.Caching.clear_cache()
+    func = ccl.Cosmology._compute_linear_power
+    assert len(func.cache_info._caches) == 0
+
+
 def test_caching_policy_raises():
     """Test that if the set policy is not correct, it raises an exception."""
     with pytest.raises(ValueError):
-        @ccl.Caching.cache(policy="my_policy")
-        def func():
+        @ccl.Caching.cache(maxsize=-1)
+        def func1():
             return
 
     with pytest.raises(ValueError):
+        @ccl.Caching.cache(policy="my_policy")
+        def func2():
+            return
+
+    with pytest.raises(ValueError):
+        ccl.Caching.maxsize = -1
+
+    with pytest.raises(ValueError):
         ccl.Caching.policy = "my_policy"
-
-
-ccl.Caching.reset()

@@ -3,7 +3,36 @@ import functools
 from collections import OrderedDict
 import hashlib
 import numpy as np
-from inspect import isclass
+from inspect import Signature, signature, isclass
+
+
+def auto_assign(__init__):
+    """Decorator to automatically assign all parameters as instance attributes.
+    This ought to be applied on ``__init__`` methods.
+    """
+
+    sign = signature(__init__).parameters
+    _, *params = [n for n in sign]
+    _, *defaults = [p.default for p in sign.values()]
+
+    @functools.wraps(__init__)
+    def wrapper(self, *args, **kwargs):
+        # collect all input in one dictionary
+        dic = {**dict(zip(params, args)), **kwargs}
+
+        # assign the declared parameters
+        for param, value in dic.items():
+            setattr(self, param, value)
+
+        # assign the undeclared parameters with default values
+        for param, default in zip(reversed(params), reversed(defaults)):
+            if not hasattr(self, param):
+                setattr(self, param, default)
+
+        # __init__ may now override the attributes we just set
+        __init__(self, *args, **kwargs)
+
+    return wrapper
 
 
 class Hashing:
@@ -64,24 +93,6 @@ class Hashing:
 hash_ = Hashing.hash_
 
 
-class CachedObject:
-    """A cached object container."""
-    counter: int = 0
-
-    def __init__(self, obj):
-        self.item = obj
-
-    def __repr__(self):
-        s = f"CachedObject(counter={self.counter})"
-        return s
-
-    def increment(self):
-        self.counter += 1
-
-    def reset(self):
-        self.counter = 0
-
-
 class _ClassPropertyMeta(type):
     """Implement `property` to a `classmethod`."""
     # TODO: in py39+ decorators `classmethod` and `property` can be combined
@@ -91,9 +102,13 @@ class _ClassPropertyMeta(type):
 
     @maxsize.setter
     def maxsize(cls, value):
+        if value < 0:
+            raise ValueError(
+                "`maxsize` should be larger than zero. "
+                "To disable caching, use `Caching.disable()`.")
         cls._maxsize = value
-        for func in cls._caches.keys():
-            func._cache["maxsize"] = value
+        for func in cls._cached_functions:
+            func.cache_info.maxsize = value
 
     @property
     def policy(cls):
@@ -103,15 +118,17 @@ class _ClassPropertyMeta(type):
     def policy(cls, value):
         if value not in cls._policies:
             raise ValueError("Cache retention policy not recognized.")
-        if (cls._policy == "lfu") and (not value == "lfu"):
-            # reset counter if current policy is lfu
-            # otherwise new objects are prone to being discarded
-            for dic in cls._caches.values():
-                for item in dic.values():
+        if value == "lfu" != cls._policy:
+            # Reset counter if we change policy to lfu
+            # otherwise new objects are prone to being discarded immediately.
+            # Now, the counter is not just used for stats,
+            # it is part of the retention policy.
+            for func in cls._cached_functions:
+                for item in func.cache_info._caches.values():
                     item.reset()
         cls._policy = value
-        for func in cls._caches.keys():
-            func._cache["policy"] = value
+        for func in cls._cached_functions:
+            func.cache_info.policy = value
 
 
 class Caching(metaclass=_ClassPropertyMeta):
@@ -126,18 +143,28 @@ class Caching(metaclass=_ClassPropertyMeta):
         policy (``'fifo'``, ``'lru'``, ``'lfu'``):
             Cache retention policy.
     """
-    _caches = {}
-    _enabled = True
-    _policies = ['fifo', 'lru', 'lfu']
-    _maxsize = 64
-    _policy = 'lru'
+    _enabled: bool = True
+    _policies: list = ['fifo', 'lru', 'lfu']
+    _maxsize: int = 64
+    _policy: str = 'lru'
+    _cached_functions: list = []
 
     @classmethod
-    def _get_hash(cls, *args, **kwargs):
+    def _get_key(cls, func, *args, **kwargs):
         """Calculate the hex hash from the combination the passed arguments
         and keyword arguments.
         """
-        total_hash = sum([hash_(obj) for obj in [args, kwargs]])
+        # get a dictionary of default parameters
+        params = func.cache_info._signature.parameters
+        defaults = {param: value.default for param, value in params.items()}
+        # get a dictionary of the passed parameters
+        passed = {**dict(zip(params, args)), **kwargs}
+        # to save time hashing, discard the values equal to the default
+        to_remove = [param for param, value in passed.items()
+                     if value == defaults[param]]
+        [passed.pop(param) for param in to_remove]
+        # sum of the hash of the items (param, value)
+        total_hash = sum([hash_(obj) for obj in passed.items()])
         return hex(hash_(total_hash))
 
     @classmethod
@@ -148,8 +175,8 @@ class Caching(metaclass=_ClassPropertyMeta):
         obj = dic[key]
         if policy == "lru":
             dic.move_to_end(key)
-        elif policy == "lfu":
-            obj.increment()
+        # update stats
+        obj.increment()
         return obj
 
     @classmethod
@@ -163,9 +190,11 @@ class Caching(metaclass=_ClassPropertyMeta):
 
     @classmethod
     def _decorator(cls, func, maxsize, policy):
-        settings = {'maxsize': maxsize, 'policy': policy}
-        func._cache = settings
-        cls._caches[func] = OrderedDict()
+        # assign caching attributes to decorated function
+        cls._cached_functions.append(func)
+        func.cache_info = CacheInfo(_signature=signature(func),
+                                    maxsize=maxsize, policy=policy)
+        func.clear_cache = func.cache_info._clear_cache
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -173,14 +202,16 @@ class Caching(metaclass=_ClassPropertyMeta):
                 return func(*args, **kwargs)
 
             # initialize entry
-            key = cls._get_hash(*args, **kwargs)
-            caches = cls._caches[func]
-            maxsize = func._cache['maxsize']
-            policy = func._cache['policy']
+            key = cls._get_key(func, *args, **kwargs)
+            # shorthand access
+            caches = func.cache_info._caches
+            maxsize = func.cache_info.maxsize
+            policy = func.cache_info.policy
 
             if key in caches:
-                # output has been cached
+                # output has been cached; update stats and return it
                 out = cls._get(caches, key, policy)
+                func.cache_info.misses += 1
                 return out.item
 
             while len(caches) >= maxsize:
@@ -188,9 +219,11 @@ class Caching(metaclass=_ClassPropertyMeta):
                 # items as per the caching policy until there is space
                 cls._pop(caches, policy)
 
-            # cache new entry
+            # cache new entry and update stats
             out = CachedObject(func(*args, **kwargs))
             caches[key] = out
+            func.cache_info.hits += 1
+            func.cache_info.current_size = len(caches)
             return out.item
 
         return wrapper
@@ -214,6 +247,11 @@ class Caching(metaclass=_ClassPropertyMeta):
         """
         if maxsize is None:
             maxsize = cls.maxsize
+        elif maxsize < 0:
+            raise ValueError(
+                "`maxsize` should be larger than zero. "
+                "To disable caching, use `Caching.disable()`.")
+
         if policy is None:
             policy = cls.policy
         elif policy not in cls._policies:
@@ -246,5 +284,55 @@ class Caching(metaclass=_ClassPropertyMeta):
         cls.maxsize = 64
         cls.policy = 'lru'
 
+    @classmethod
+    def clear_cache(cls):
+        [func.clear_cache() for func in cls._cached_functions]
+
 
 cache = Caching.cache
+
+
+class CacheInfo:
+    """Cache info container.
+    Assigned to cached function as ``function.cache_info``.
+    """
+
+    @auto_assign
+    def __init__(self,
+                 _signature: Signature,
+                 _caches: OrderedDict = OrderedDict(),
+                 maxsize: int = Caching.maxsize,
+                 policy: str = Caching.policy,
+                 hits: int = 0,
+                 misses: int = 0,
+                 current_size: int = 0):
+        return
+
+    def __repr__(self):
+        s = f"<{self.__class__.__name__}>"
+        for par, val in self.__dict__.items():
+            if not par.startswith("_"):
+                s += f"\n\t {par} = {repr(val)}"
+        return s
+
+    def _clear_cache(self):
+        self._caches = OrderedDict()
+        self.hits = self.misses = self.current_size = 0
+
+
+class CachedObject:
+    """A cached object container."""
+    counter: int = 0
+
+    def __init__(self, obj):
+        self.item = obj
+
+    def __repr__(self):
+        s = f"CachedObject(counter={self.counter})"
+        return s
+
+    def increment(self):
+        self.counter += 1
+
+    def reset(self):
+        self.counter = 0

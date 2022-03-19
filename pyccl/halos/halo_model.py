@@ -12,7 +12,7 @@ from ..background import rho_x
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
-from ..base import cache
+from ..base import cache, auto_assign
 import numpy as np
 
 physical_constants = lib.cvar.constants
@@ -54,6 +54,8 @@ class HMCalculator(object):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
+
+    @auto_assign
     def __init__(self, cosmo, massfunc, hbias, mass_def,
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
@@ -97,16 +99,16 @@ class HMCalculator(object):
 
     @cache
     def _get_mass_function(self, cosmo, a):
-        mf = self.mass_function.get_mass_function(
-            cosmo, self._mass, a, mass_def_other=self.mass_def)
+        mf = self.massfunc.get_mass_function(
+            cosmo, self._mass, a, mdef_other=self.mass_def)
         mf0 = (self._rho0 - self._integrator(
             mf*self._mass, self._lmass)) / self._m0
         return mf, mf0
 
     @cache
     def _get_halo_bias(self, cosmo, a):
-        bf = self.halo_bias.get_halo_bias(
-            cosmo, self._mass, a, mass_def_other=self.mass_def)
+        bf = self.hbias.get_halo_bias(
+            cosmo, self._mass, a, mdef_other=self.mass_def)
         bf0 = (self._rho0 - self._integrator(
             self._mf*bf*self._mass, self._lmass)) / self._m0
         return bf, bf0
