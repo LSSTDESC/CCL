@@ -1,9 +1,14 @@
+# NOTE: Classes `Hashing` and `Caching` only contain class methods.
+# It is usually suggested that such code should have its own namespace
+# in the form of distinct functions in a separate module.
+# However, these namespaces are deliberately chosen to be like that
+# so that pyccl isn't cluttered with many non-cosmological modules.
 import sys
 import functools
 from collections import OrderedDict
 import hashlib
 import numpy as np
-from inspect import Signature, signature, isclass
+from inspect import signature, isclass
 
 
 def auto_assign(__init__):
@@ -191,17 +196,15 @@ class Caching(metaclass=_ClassPropertyMeta):
     @classmethod
     def _decorator(cls, func, maxsize, policy):
         # assign caching attributes to decorated function
-        cls._cached_functions.append(func)
-        func.cache_info = CacheInfo(_signature=signature(func),
-                                    maxsize=maxsize, policy=policy)
+        func.cache_info = CacheInfo(func, maxsize=maxsize, policy=policy)
         func.clear_cache = func.cache_info._clear_cache
+        cls._cached_functions.append(func)
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             if not cls._enabled:
                 return func(*args, **kwargs)
 
-            # initialize entry
             key = cls._get_key(func, *args, **kwargs)
             # shorthand access
             caches = func.cache_info._caches
@@ -297,16 +300,12 @@ class CacheInfo:
     Assigned to cached function as ``function.cache_info``.
     """
 
-    @auto_assign
-    def __init__(self,
-                 _signature: Signature,
-                 _caches: OrderedDict = OrderedDict(),
-                 maxsize: int = Caching.maxsize,
-                 policy: str = Caching.policy,
-                 hits: int = 0,
-                 misses: int = 0,
-                 current_size: int = 0):
-        return
+    def __init__(self, func, maxsize=Caching.maxsize, policy=Caching.policy):
+        self._signature = signature(func)
+        self._caches = OrderedDict()
+        self.maxsize = maxsize
+        self.policy = policy
+        self.hits = self.misses = self.current_size = 0
 
     def __repr__(self):
         s = f"<{self.__class__.__name__}>"

@@ -915,7 +915,7 @@ class Cosmology(object):
 
         if mps == "camb" and self._has_pk_nl:
             # Already computed
-            return
+            return self._pk_nl['delta_matter:delta_matter']
 
         pk = None
         if mps is None:
