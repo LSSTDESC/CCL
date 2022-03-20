@@ -12,6 +12,13 @@ class Hashing:
         consistent (``bool``):
             If False, hashes of different processes are randomly salted.
             Defaults to True for consistent hash values across processes.
+
+    .. note::
+
+        Consistent (unsalted) hashing between different processes comes at
+        the expense of extra computation time (~200x slower).
+        Buitin ``hash`` computes in O(100 ns) while using hashlib with md5
+        computes in O(20 μs).
     """
     consistent: bool = True
 
