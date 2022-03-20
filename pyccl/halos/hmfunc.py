@@ -1,6 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
+from ..parameters import physical_constants
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
@@ -148,7 +149,7 @@ class MassFunc(object):
                                                    len(logM), status)
         check(status)
 
-        rho = (lib.cvar.constants.RHO_CRITICAL *
+        rho = (physical_constants.RHO_CRITICAL *
                cosmo['Omega_m'] * cosmo['h']**2)
         f = self._get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
         mf = f * rho * dlns_dlogM / M_use

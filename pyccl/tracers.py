@@ -3,6 +3,7 @@ from .core import check
 from .background import comoving_radial_distance, growth_rate, \
     growth_factor, scale_factor_of_chi, h_over_h0
 from .pyutils import _check_array_params, NoneArr, _vectorize_fn6
+from .parameters import physical_constants
 import numpy as np
 
 
@@ -631,7 +632,7 @@ class WeakLensingTracer(Tracer):
                 # Transfer
                 # See Joachimi et al. (2011), arXiv: 1008.3491, Eq. 6.
                 # and note that we use C_1= 5e-14 from arXiv:0705.0166
-                rho_m = lib.cvar.constants.RHO_CRITICAL * cosmo['Omega_m']
+                rho_m = physical_constants.RHO_CRITICAL * cosmo['Omega_m']
                 a = - tmp_a * 5e-14 * rho_m / D
             else:
                 # use the raw input normalization. Normally, this will be 1
@@ -762,7 +763,7 @@ class ISWTracer(Tracer):
         self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
         chi = np.linspace(0, self.chi_max, n_chi)
         a_arr = scale_factor_of_chi(cosmo, chi)
-        H0 = cosmo['h'] / lib.cvar.constants.CLIGHT_HMPC
+        H0 = cosmo['h'] / physical_constants.CLIGHT_HMPC
         OM = cosmo['Omega_c']+cosmo['Omega_b']
         Ez = h_over_h0(cosmo, a_arr)
         fz = growth_rate(cosmo, a_arr)
