@@ -47,6 +47,13 @@ class Hashing:
         consistent (``bool``):
             If False, hashes of different processes are randomly salted.
             Defaults to True for consistent hash values across processes.
+
+    .. note::
+
+        Consistent (unsalted) hashing between different processes comes at
+        the expense of extra computation time (~200x slower).
+        Buitin ``hash`` computes in O(100 ns) while using hashlib with md5
+        computes in O(20 μs).
     """
     consistent: bool = True
 
@@ -143,8 +150,8 @@ class Caching(metaclass=_ClassPropertyMeta):
 
     Attributes:
         maxsize (``int``):
-            Maximum number of caches. If the dictionary is full, new caches
-            are assigned according to the set cache retention policy.
+            Maximum number of caches to store. If the dictionary is full, new
+            caches are assigned according to the set cache retention policy.
         policy (``'fifo'``, ``'lru'``, ``'lfu'``):
             Cache retention policy.
     """
@@ -156,8 +163,8 @@ class Caching(metaclass=_ClassPropertyMeta):
 
     @classmethod
     def _get_key(cls, func, *args, **kwargs):
-        """Calculate the hex hash from the combination the passed arguments
-        and keyword arguments.
+        """Calculate the hex hash from the sum of the hashes
+        of the passed arguments and keyword arguments.
         """
         # get a dictionary of default parameters
         params = func.cache_info._signature.parameters
@@ -298,9 +305,28 @@ cache = Caching.cache
 class CacheInfo:
     """Cache info container.
     Assigned to cached function as ``function.cache_info``.
+
+    Parameters:
+        func (``function``):
+            Function in which an instance of this class will be assigned.
+        maxsize (``Caching.maxsize``):
+            Maximum number of caches to store.
+        policy (``Caching.policy``):
+            Cache retention policy.
+
+    .. note ::
+
+        To assist in deciding an optimal ``maxsize`` and ``policy``, instances
+        of this class contain the following attributes which are updated
+        on every function call:
+            - ``hits``: number of times the function has computed something
+            - ``misses``: number of times the function has been bypassed
+            - ``current_size``: current size of the cache dictionary
     """
 
     def __init__(self, func, maxsize=Caching.maxsize, policy=Caching.policy):
+        # we store the signature of the function on module import
+        # as it is the most expensive operation (~30x slower)
         self._signature = signature(func)
         self._caches = OrderedDict()
         self.maxsize = maxsize
@@ -320,7 +346,12 @@ class CacheInfo:
 
 
 class CachedObject:
-    """A cached object container."""
+    """A cached object container.
+
+    Attributes:
+        counter (``int``):
+            Number of times the cached item has been retrieved.
+    """
     counter: int = 0
 
     def __init__(self, obj):
