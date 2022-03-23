@@ -1545,7 +1545,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     with
 
     .. math::
-        T^{3h}{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
+        T^{4h}{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
         T^{PT}({\bf k_{u_1}}, {\bf k_{u_2}}, {\bf k_{v_1}}, {\bf k_{v_2}}) \\,
         I^1_1(k_{u_1} | u) I^1_1(k_{u_2} | u) I^1_1(k_{v_1} | v) I^1_1(k_{v_2} | v) \\,
 
@@ -1628,39 +1628,26 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         return pk
 
 
-    # We only need to compute the independent k * k * cos(theta). Since Pk only
-    # depends on the module of ki + kj, we just need to integrate from 0 to
-    # pi/2 and multiply by 4.
-    theta = np.linspace(0, np.pi/2, 100)
+    theta = np.linspace(0, 2 * np.pi, 100)
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)[None, None, :]
 
     k = k_use[:, None, None]
     kp = k_use[None, :, None]
-    ks2_p = k ** 2 + kp ** 2 + 2 * k * kp * cth
-    ks2_m = k ** 2 + kp ** 2 - 2 * k * kp * cth
+    kr2 = k ** 2 + kp ** 2 + 2 * k * kp * cth
+    kr = np.sqrt(kr2)
 
-    # We only need 4 F2's
-    # F2(k + k', -k).
-    F2_ppm = (5./7 - 0.5 * (1 / k**2 + 1 / ks2_p) * (k * kp * cth + k ** 2) + \
-          2/7. * (k + kp * cth) ** 2 / ks2_p)
+    f2 = 5./7. - 0.5 * (1 + k **2 / kr2) * (1 + kp / k * cth) + \
+        2/7. * k ** 2 / kr2 * (1 + kp / k * cth)**2
 
-    # F2(k - k', -k)
-    F2_pmm = (5./7 + 0.5 * (1 / k**2 + 1 / ks2_p) * (k * kp * cth - k ** 2) + \
-          2/7. * (-k + kp * cth) ** 2 / ks2_m)
-
-    # F2(-k + k', -k)
-    F2_mpm = (5./7 + 0.5 * (1 / k**2 + 1 / ks2_p) * (-k * kp * cth + k ** 2) + \
-          2/7. * (k - kp * cth) ** 2 / ks2_m)
-
-    # F2(k + k', k)
-    F2_ppp = (5./7 + 0.5 * (1 / k**2 + 1 / ks2_p) * (k * kp * cth + k ** 2) + \
-          2/7. * (k + kp * cth) ** 2 / ks2_p)
+    r = kp / k
+    intd = (5 * r  + (7 - 2*r**2)*cth) / (1 + r**2 + 2*r*cth) * \
+           (3/7. * r + 0.5 * (1 + r**2) * cth + 4/7. * r * cth**2)
+    X = -7./4. * (1 + r.reshape(nk, nk)**2) + isotropize(intd)
 
     def isotropize(arr):
         int_arr = scipy.integrate.romb(arr, dtheta, axis=-1)
-        # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
-        return - 4 * int_arr / (2 * np.pi)
+        return int_arr / (2 * np.pi)
 
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
@@ -1682,52 +1669,17 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
 
         norm = norm1 * norm2 * norm3 * norm4
 
-        Pk = get_pk(k_use, aa)[:, None, None]
-        Pkp = np.transpose(Pk, (1, 0))
-        Pks_p = get_pk(np.sqrt(ks2_p).flatten, aa).reshape((nk, nk, -1))
-        Pks_m = get_pk(np.sqrt(ks2_m).flatten, aa).reshape((nk, nk, -1))
+        pk = get_pk(k_use, aa)[:, None, None]
+        pkr = get_pk(kr.flatten(), aa).reshape((nk, nk, theta.size))
 
-        # First summand of the trispectrum
-        # Permutation 0: 13 12
-        S1_13_12 = isotropize(F2_ppm ** 2 * Pks_p * Pk ** 2)
+        P4A = isotropize(f2 ** 2 * pkr)
+        P4X = isotropize(f2 * f2.T  * pkr)
 
-        # Permutation 1: 23 21 (= 13 12 with k -> -k or cth -> -cth)
-        S1_23_21 = isotropize(F2_pmm ** 2 * Pks_m * Pk ** 2)
+        t1113 = 4/9. * pk**2 * pk.T * X
+        t1113 += t1113.T
 
-        # Permutation 2: 31 32 (= F2(k+k', -k) * F2(k+k', -k)^t (k<->k')
-        S1_31_32 = isotropize(F2_ppm * np.transpose(F2_ppm, (1, 0)) * Pks_m *
-                              Pkp * Pk)
-
-        # Permutation 3: 43 42 (= 0)
-
-        # Permutation 4: 12 13 (= 0)
-
-        # Permutation 5: 13 14 (= 31 32)
-        S1_13_14 = S1_31_32
-
-        # Permutation 6: 14 12 (= 23 21)
-        S1_14_12 = S1_23_21
-
-        # Permutation 7: 14 12 (= 23 21)
-        S1_14_12 = S1_23_21
-
-        # Permutation 8: 21 23 (= 0)
-
-        # Permutation 9: 32 31 (= 31 32 with k -> -k or cth -> -cth)
-        S1_32_31 = isotropize(np.transpose(F2_pmm, (1, 0)) * F2_pmm * Pks_m *
-                              Pkp * Pk)
-
-        # Permutation 10: 42 43 (= 13 12 with k <-> k')
-        S1_42_43 = S1_13_12.T
-
-        # Permutation 11: 14 13 (= 31 31 with k <-> k')
-        S1_42_43 = S1_32_31.T
-
-        S1 = S1_13_12 + S1_23_21 + S1_31_32 + S1_13_14 + S1_14_12 + S1_14_12 +\
-             S1_32_31 + S1_42_43 + S1_42_43
-
-        # Second summand of the trispectrum
-        S2 = 0
+        t1122 = 8 * (pk**2 P4A + pk * pk.T * P4X)
+        t1122 += t1122.T
 
         # Now the halo model integrals
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
@@ -1735,7 +1687,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
 
-        tk_4h = (4 * S1 + 6 * S2) * i1 * i2 * i3 * i4
+        tk_4h =  i1 * i2 * i3 * i4 * (t1113 + t1122)
 
 
         # Normalize
