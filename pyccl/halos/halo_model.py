@@ -1046,7 +1046,8 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     nk = len(k_use)
 
     # Power spectrum
-    def get_isotropized_pk(p_of_k_a, kk, aa):
+    def get_isotropized_pkr(p_of_k_a, aa):
+        kk = kr.flatten()
         # This returns int dphi / 2pi int dphi' / 2pi P(kk)
         if isinstance(p_of_k_a, Pk2D):
             pk = p_of_k_a.eval(kk, aa, cosmo)
@@ -1081,7 +1082,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
             norm4 = get_norm(normprof4, prof4, aa)
 
         norm = norm1 * norm2 * norm3 * norm4
-        p = get_isotropized_pk(p_of_k_a, kr, aa)
+        p = get_isotropized_pkr(p_of_k_a, aa)
 
         # Compute trispectrum at this redshift
         # P(k1 - k1 = 0) = 0
