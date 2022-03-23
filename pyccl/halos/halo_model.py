@@ -1009,20 +1009,13 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     """
     a_use = np.atleast_1d(a)
     k_use = np.atleast_1d(k)
-    # We only need to compute the independent k * k * cos(theta). Since Pk only
-    # depends on the module of ki + kj, we just need to integrate from 0 to
-    # pi/2 and multiply by 4.
-    theta = np.linspace(0, np.pi/2, 100)
+
+    theta = np.linspace(0, 2*np.pi, 100)
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
-    k13 = k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 + \
-           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
-    k13 = np.sqrt(k13.flatten())
-
-    k14 = k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 - \
-           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :]
-    k14 = np.sqrt(k14.flatten())
+    kr = np.sqrt(k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 + \
+           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :])
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
@@ -1067,8 +1060,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
 
         pk = pk.reshape((nk, nk, theta.size))
         int_pk = scipy.integrate.romb(pk, dtheta, axis=-1)
-        # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
-        return - 4 * int_pk / (2 * np.pi)
+        return int_pk / (2 * np.pi)
 
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
@@ -1089,6 +1081,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
             norm4 = get_norm(normprof4, prof4, aa)
 
         norm = norm1 * norm2 * norm3 * norm4
+        p = get_isotropized_pk(p_of_k_a, kr, aa)
 
         # Compute trispectrum at this redshift
         # P(k1 - k1 = 0) = 0
@@ -1098,22 +1091,19 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         # i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt,
         #                 prof2=prof4)[None, :]
         # Permutation 1
-        p13 = get_isotropized_pk(p_of_k_a, k13, aa)
         i13 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof13_2pt, prof2=prof3,
                         diag=False)
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4,
                         diag=False)
         # Permutation 2
-        p14 = get_isotropized_pk(p_of_k_a, k14, aa)
         i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4,
                         diag=False)
         i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2,
                         diag=False)
 
-        # tk_2h_22 = p12 * i12 * i34 + p13 * i13 * i24 + p14 * i14 * i32
-        tk_2h_22 = p13 * i13 * i24 + p14 * i14 * i32
+        tk_2h_22 = p * (i13 * i24 + i14 * i32)
         # Normalize
-        out[ia, :, :] = tk_2h_22 * norm
+        out[ia, :, :] = tk_2h_22[:, None] * norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -1764,7 +1754,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
 
-        tk_4h = (S1 + S2) * i1 * i2 * i3 * i4
+        tk_4h = (4 * S1 + 6 * S2) * i1 * i2 * i3 * i4
 
 
         # Normalize
