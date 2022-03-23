@@ -1432,42 +1432,29 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
 
         return pk
 
-    def get_Bpt_1_3_24(a, int_minus_theta=False):
+    def get_Bpt(a):
         # We only need to compute the independent k * k * cos(theta). Since Pk only
         # depends on the module of ki + kj, we just need to integrate from 0 to
         # pi/2 and multiply by 4.
-        theta = np.linspace(0, np.pi/2, 100)
+        theta = np.linspace(0, 2 * np.pi, 100)
         dtheta = theta[1] - theta[0]
         cth = np.cos(theta)[None, None, :]
-        if int_minus_theta:
-            # To compute Bpt_1_4_32
-            cth *= -1
 
         k = k_use[:, None, None]
         kp = k_use[None, :, None]
-        ks2 = k ** 2 + kp ** 2 + 2 * k * kp * cth
+        kr2 = k ** 2 + kp ** 2 + 2 * k * kp * cth
+        kr = np.sqrt(kr2)
 
-        # F2_1 is already analytically integrated
-        F2_1 = (5 + 2 * np.pi) / (7 * 4 * np.pi ** 2) * np.ones((nk, nk))
-        # F2
-        S1 = -0.5 * (1 / k**2 + 1 / ks2) * (k * kp * cth + k ** 2)
-        S2 = + 2/7. * (k + kp * cth) ** 2 / ks2
-        F2_2 = (5./7 + S1 + S2)
-        # F3 = F2 with k <-> k'
-        F2_3 = np.transpose(F2_2, (1, 0))
+        f2 = 5./7. - 0.5 * (1 + k **2 / kr2) * (1 + kp / k * cth) + \
+            2/7. * k ** 2 / kr2 * (1 + kp / k * cth)**2
+        P3 = scipy.integrate.romb(get_pk(kr, a)[:, None, None]* f2, dtheta,
+                                  axis=-1)
+        pk = get_pk(k_use, a)[:, None]
 
-        P_1 = get_pk(k_use, a)[:, None]
-        P_3 = P_1.T
-        P_24 = get_pk(np.sqrt(ks2).flatten(), a).reshape((nk, nk, -1))
-        Bpt =  F2_2 * P_1 * P_24 + F2_3 * P_3 * P_24
+        Bpt = 6. / 7. * pk * pk.T + 2 * pk * P3
+        Bpt += Bpt.T
 
-        # d theta, d theta' -> dtheta, - d(\phi \equiv theta - theta')
-        Bpt = - 4 * scipy.integrate.romb(Bpt, dtheta, axis=-1) / (2 * np.pi)
-
-        Bpt += F2_1 * P_1 * P_3
-
-        # Multiply by the factor 2 that we have been omitting until now
-        return 2 * Bpt
+        return Bpt
 
 
     k1 = k2 = k_use[:, None]
@@ -1500,31 +1487,24 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         #                 diag=True)[None, :]
 
         # Permutation 1: 2 <-> 3
-        Bpt_1_3_24 = get_Bpt_1_3_24(a)
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4,
                         diag=False)
 
         # Permutation 2: 2 <-> 4
-        # Bpt = Permutation 1 with dtheta -> -dtheta)
-        Bpt_1_4_32 = get_Bpt_1_3_24(a, int_minus_theta=True)
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
         i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2,
                         diag=False)
 
         # Permutation 3: 1 <-> 3
-        # Bpt = Permutation 2 with k <-> k'
-        Bpt_3_2_14 = Bpt_1_4_32.T
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4,
                         diag=False)
 
         # Permutation 4: 1 <-> 4
-        # Bpt = Permutation 1
-        Bpt_4_2_31 = Bpt_1_3_24
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i31 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof13_2pt, prof2=prof1,
@@ -1537,8 +1517,9 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         # i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2,
         #                 diag=True)[:, None]
 
-        tk_3h = Bpt_1_3_24 * i1 * i3 * i24 + Bpt_1_4_32 * i1 * i4 * i32 + \
-                Bpt_3_2_14 * i3 * i2 * i14 + Bpt_4_2_31 * i4 * i2 * i31
+        Bpt = get_Bpt(a)
+        tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i32 + \
+                       i3 * i2 * i14 + i4 * i2 * i31)
 
         # Normalize
         out[ia, :, :] = tk_3h * norm
