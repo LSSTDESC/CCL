@@ -12,7 +12,7 @@ from ..background import rho_x
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
-from ..base import cache, auto_assign
+from ..base import cache
 import numpy as np
 
 physical_constants = lib.cvar.constants
@@ -55,7 +55,6 @@ class HMCalculator(object):
             Default: 1E-5.
     """
 
-    @auto_assign
     def __init__(self, cosmo, massfunc, hbias, mass_def,
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',

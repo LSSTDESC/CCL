@@ -8,7 +8,9 @@ from time import time
 NUM = 3  # number of different Cosmologies we will check
 # some unusual numbers that have not occurred before
 s8_arr = np.linspace(0.753141592, 0.953141592, NUM)
-SPEEDUP = 100  # speed increase
+# a modest speed increase - we are modest in the test to accommodate for slow
+# runs; normally this is is expected to be another order of magnitude faster
+SPEEDUP = 50
 
 
 def get_cosmo(sigma8):
@@ -53,7 +55,7 @@ def test_times():
     ccl.Caching.disable()
     t1 = np.array([timeit_(s8) for s8 in s8_arr[:1]])
     t2 = np.array([timeit_(s8) for s8 in s8_arr[:1]])
-    assert np.abs(np.log10(t2/t1)) < 0.5
+    assert np.abs(np.log10(t2/t1)) < 1.0
     # But if caching is enabled, the second call will be much faster.
     ccl.Caching.enable()
     t1 = np.array([timeit_(s8) for s8 in s8_arr])
@@ -90,7 +92,7 @@ def test_caching_lru():
     # create new and discard the least recently used
     cosmo_create_and_compute_linpow(0.43)
     t2 = timeit_(sigma8=s8_arr[2])  # retrieved
-    assert np.abs(np.log10(t2/t1)) < 0.5
+    assert np.abs(np.log10(t2/t1)) < 1.0
 
 
 def test_caching_lfu():

@@ -11,35 +11,6 @@ import numpy as np
 from inspect import signature, isclass
 
 
-def auto_assign(__init__):
-    """Decorator to automatically assign all parameters as instance attributes.
-    This ought to be applied on ``__init__`` methods.
-    """
-
-    sign = signature(__init__).parameters
-    _, *params = [n for n in sign]
-    _, *defaults = [p.default for p in sign.values()]
-
-    @functools.wraps(__init__)
-    def wrapper(self, *args, **kwargs):
-        # collect all input in one dictionary
-        dic = {**dict(zip(params, args)), **kwargs}
-
-        # assign the declared parameters
-        for param, value in dic.items():
-            setattr(self, param, value)
-
-        # assign the undeclared parameters with default values
-        for param, default in zip(reversed(params), reversed(defaults)):
-            if not hasattr(self, param):
-                setattr(self, param, default)
-
-        # __init__ may now override the attributes we just set
-        __init__(self, *args, **kwargs)
-
-    return wrapper
-
-
 class Hashing:
     """Container class which implements hashing consistently.
 
@@ -325,7 +296,7 @@ class CacheInfo:
     """
 
     def __init__(self, func, maxsize=Caching.maxsize, policy=Caching.policy):
-        # we store the signature of the function on module import
+        # we store the signature of the function on import
         # as it is the most expensive operation (~30x slower)
         self._signature = signature(func)
         self._caches = OrderedDict()
