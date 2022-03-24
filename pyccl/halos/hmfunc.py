@@ -2,11 +2,12 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
 from ..parameters import physical_constants
+from ..base import CCLHalosObject
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
 
-class MassFunc(object):
+class MassFunc(CCLHalosObject):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
 

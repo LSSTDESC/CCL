@@ -337,3 +337,238 @@ class CachedObject:
 
     def reset(self):
         self.counter = 0
+
+
+def auto_assign(func, sig=None):
+    """Decorator to automatically assign all parameters as instance attributes.
+    This ought to be applied on constructor methods.
+
+    Arguments:
+        func (``function``):
+            Function which takes the instance as its first argument.
+            All function arguments will be assigned as attributes of the
+            instance.
+        sig (``inspect.Signature``, optional):
+            A signature may be provided externally for speed.
+    """
+    sig = signature(func).parameters if sig is None else sig.parameters
+    _, *params = [n for n in sig]
+    _, *defaults = [p.default for p in sig.values()]
+
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        # collect all input in one dictionary
+        dic = {**dict(zip(params, args)), **kwargs}
+
+        # assign the declared parameters
+        for param, value in dic.items():
+            setattr(self, param, value)
+
+        # assign the undeclared parameters with default values
+        for param, default in zip(reversed(params), reversed(defaults)):
+            if not hasattr(self, param):
+                setattr(self, param, default)
+
+        # func may now override the attributes we just set
+        func(self, *args, **kwargs)
+
+    return wrapper
+
+
+class UnlockInstance:
+    """Context manager that temporarily unlocks an immutable instance
+    of ``CCLObject``.
+
+    Parameters:
+        instance (``CCLObject``):
+            Instance of ``CCLObject`` to unlock within the scope
+            of the context manager.
+        mutate (``bool``):
+            If the enclosed function mutates the object, the stored
+            representation is automatically deleted.
+        init (``bool``):
+            Special use for constructors: no need to unlock, but lock on exit.
+    """
+
+    def __init__(self, instance, mutate=True):
+        self.instance = instance
+        self.mutate = mutate
+        # Define these attributes for easy access.
+        self.setattr = object.__setattr__
+        self.id = id(self)
+
+    def check_instance(self):
+        # We want to catch and exit if the instance is not a CCLObject.
+        # Hopefully this will be caught downstream.
+        return isinstance(self.instance, CCLObject)
+
+    def __enter__(self):
+        if not self.check_instance():
+            return
+
+        # Prevent simultaneous enclosing of a single instance.
+        if self.instance._lock_id is not None:
+            # Context manager already active.
+            return
+
+        # Unlock and store the fingerprint of this context manager so that only
+        # this context manager is allowed to run on the instance, until exit.
+        self.setattr(self.instance, "_immutable", False)
+        self.setattr(self.instance, "_lock_id", self.id)
+
+    def __exit__(self, type, value, traceback):
+        if not self.check_instance():
+            return
+
+        # If another context manager is running,
+        # do nothing; otherwise reset.
+        if self.id != self.instance._lock_id:
+            return
+        self.setattr(self.instance, "_lock_id", None)
+
+        # Reset `repr` if the object has been mutated.
+        if self.mutate:
+            self.setattr(self.instance, "_repr", "")
+
+        # Lock the instance on exit.
+        self.setattr(self.instance, "_immutable", True)
+
+
+def unlock_instance(func=None, /, *, argv=0, mutate=True):
+    """Decorator that temporarily unlocks an instance of CCLObject.
+
+    Arguments:
+        func (``function``):
+            Function which changes one of its ``CCLObject`` arguments.
+        argv (``int``):
+            Which argument should be unlocked. Defaults to the first argument.
+        mutate (``bool``):
+            If after the function ``instance_old != instance_new``, the
+            instance is mutated. If ``True``, the representation of the
+            object will be reset.
+    """
+    if func is None:
+        # called with parentheses
+        return functools.partial(unlock_instance, argv=argv, mutate=mutate)
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        with UnlockInstance(args[argv], mutate=mutate):
+            out = func(*args, **kwargs)
+        return out
+    return wrapper
+
+
+def _auto_store_repr(__repr__):
+    """Automatically store the representation of the instance on the first
+    call of ``repr``.
+
+    .. note:: This decorator is defined outside of ``class CCLObject``
+              to allow different CCLObjects to have their own ``__repr__``
+              method, which is then decorated with this function.
+    """
+    @functools.wraps(__repr__)
+    def wrapper(self):
+        if not self._repr:
+            object.__setattr__(self, "_repr", __repr__(self))
+        return self._repr
+    return wrapper
+
+
+class CCLObject:
+    """Base for CCL objects.
+
+    All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.
+    We aim to homogenize equivalence checking, and to consistently use hash.
+    """
+    # Have all the arguments in the constructor been assigned as instance
+    # attributes? (see `auto_assign`)
+    _init_attrs_state: bool = False
+    # Immutability lock. Disables `setattr`. (see `unlock_instance`)
+    _immutable: bool = False
+    # Address of the unlocking context manager. (see `UnlockInstance`)
+    _lock_id: int = None
+    # Calculation of `repr` is expensive, so unless the object is mutated
+    # we store it here. (see `_auto_store_repr`)
+    _repr: str = ""
+
+    def __init_subclass__(cls, init_attrs=None, **kwargs):
+        """Subclass initialization routine.
+
+        Parameters:
+            init_attrs (``bool``):
+                If ``True``, assign all arguments of the constructor
+                as instance attributes. (see ``~pyccl.base.auto_assign``)
+        """
+        # Store the signature of the constructor on import.
+        cls._init_signature = signature(cls.__init__)
+
+        if init_attrs is None:
+            # If not specified, get from current state
+            # because a parent class might have toggled it.
+            init_attrs = cls._init_attrs_state
+
+        if init_attrs and hasattr(cls, "__init__"):
+            # Decorate the __init__ method with the auto-assigner.
+            cls.__init__ = auto_assign(cls.__init__, sig=cls._init_signature)
+            # Make sure this is inherited.
+            cls._init_attrs_state = True
+
+        # Allow instance dict to change or mutate if these methods are called.
+        cls.__init__ = unlock_instance(cls.__init__)
+        if hasattr(cls, "update_parameters"):
+            cls.update_parameters = \
+                unlock_instance(mutate=True)(cls.update_parameters)
+
+        # In the implemented system (repr --> hash --> eq), `repr` often needs
+        # to compute the hash of instance attributes which are also CCLObjects
+        # (e.g. HMCalculator contains [MassFunc, HaloBias, MassDef]).
+        # To avoid having to recompute the full repr of the object every time,
+        # we store it and only re-compute it after instance mutation.
+        cls.__repr__ = _auto_store_repr(cls.__repr__)
+
+        super().__init_subclass__(**kwargs)
+
+    def __setattr__(self, name, value):
+        if self._immutable and name != "_immutable":
+            raise AttributeError("CCL objects can only be updated via "
+                                 "`update_parameters`.")
+        object.__setattr__(self, name, value)
+
+    def update_parameters(self, **kwargs):
+        name = self.__class__.__qualname__
+        raise NotImplementedError(f"{name} objects are immutable.")
+
+    def __eq__(self, other):
+        # Two objects will be equal if their hashes are the same.
+        return hash(self) == hash(other)
+
+    def __hash__(self):
+        # Function ``hash_`` makes use of the ``repr`` of the object,
+        # so we have to make sure that the ``repr`` is unique.
+        return hash_(self)
+
+    def __repr__(self):
+        # If the class does not have a constructor method,
+        # assume all of its instances are equivalent
+        # and build a simple string using just the class name.
+        init = self.__class__.__init__.__wrapped__
+        if init == object.__init__:
+            from ._repr import _build_string_simple
+            return _build_string_simple(self)
+        # If a constructor has been defined, using the simple repr is unsafe
+        # so we revert back to object's repr method, which specifies the id.
+        return object.__repr__(self)
+
+
+class CCLHalosObject(CCLObject, init_attrs=True):
+    """Base for halo objects. Automatically assign all ``__init__``
+    parameters as attributes.
+    """
+
+    def __repr__(self):
+        # If all the passed parameters have been assigned as instance
+        # attributes during construction, we can use these parameters
+        # to build a unique string for each instance.
+        from ._repr import _build_string_from_init_attrs
+        return _build_string_from_init_attrs(self)

@@ -14,7 +14,8 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
-from .base import cache
+from .base import CCLObject, cache, unlock_instance
+from ._repr import _build_string_Cosmology
 from .parameters import CCLParameters
 
 # Configuration types
@@ -67,7 +68,7 @@ emulator_neutrinos_types = {
 }
 
 
-class Cosmology(object):
+class Cosmology(CCLObject):
     """A cosmology including parameters and associated data.
 
     .. note:: Although some arguments default to `None`, they will raise a
@@ -197,6 +198,8 @@ class Cosmology(object):
                                      "HMCode_logT_AGN": 7.8}}
 
     """
+    __repr__ = _build_string_Cosmology
+
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
     # an attribute of this class.
@@ -269,6 +272,22 @@ class Cosmology(object):
             raise CCLError(
                 "(%d): %s"
                 % (self.cosmo.status, self.cosmo.status_message))
+
+    def update_parameters(self, **kwargs):
+        """Update any of the ``gsl_params`` or ``spline_params`` associated
+        with this Cosmology object.
+        """
+        from pyccl import gsl_params, spline_params
+        keys = list(gsl_params.keys()) + list(spline_params.keys())
+        set_diff = list(set(kwargs.keys()) - set(keys))
+        if set_diff:
+            raise ValueError(f"Parameter(s) {set_diff} not recognized.")
+        for param, value in kwargs.items():
+            if param in gsl_params.keys():
+                attr = getattr(self.cosmo, "gsl_params")
+            else:
+                attr = getattr(self.cosmo, "spline_params")
+            setattr(attr, param, value)
 
     def write_yaml(self, filename):
         """Write a YAML representation of the parameters to file.
@@ -660,6 +679,7 @@ class Cosmology(object):
         exits."""
         self.__del__()
 
+    @unlock_instance
     def __getstate__(self):
         # we are removing any C data before pickling so that the
         # is pure python when pickled.
@@ -669,59 +689,12 @@ class Cosmology(object):
         state.pop('_config', None)
         return state
 
+    @unlock_instance
     def __setstate__(self, state):
         self.__dict__ = state
         # we removed the C data when it was pickled, so now we unpickle
         # and rebuild the C data
         self._build_cosmo()
-
-    def __repr__(self):
-        """Make an eval-able string.
-
-        This feature can be used like this:
-
-        >>> import pyccl
-        >>> cosmo = pyccl.Cosmology(...)
-        >>> cosmo2 = eval(repr(cosmo))
-        """
-        string = "pyccl.Cosmology("
-        string += ", ".join(
-            "%s=%s" % (k, v)
-            for k, v in self._params_init_kwargs.items()
-            if k not in ['m_nu', 'm_nu_type', 'z_mg', 'df_mg'])
-
-        if hasattr(self._params_init_kwargs['m_nu'], '__len__'):
-            string += ", m_nu=[%s, %s, %s]" % tuple(
-                self._params_init_kwargs['m_nu'])
-        else:
-            string += ', m_nu=%s' % self._params_init_kwargs['m_nu']
-
-        if self._params_init_kwargs['m_nu_type'] is not None:
-            string += (
-                ", m_nu_type='%s'" % self._params_init_kwargs['m_nu_type'])
-        else:
-            string += ', m_nu_type=None'
-
-        if self._params_init_kwargs['z_mg'] is not None:
-            vals = ", ".join(
-                ["%s" % v for v in self._params_init_kwargs['z_mg']])
-            string += ", z_mg=[%s]" % vals
-        else:
-            string += ", z_mg=%s" % self._params_init_kwargs['z_mg']
-
-        if self._params_init_kwargs['df_mg'] is not None:
-            vals = ", ".join(
-                ["%s" % v for v in self._params_init_kwargs['df_mg']])
-            string += ", df_mg=[%s]" % vals
-        else:
-            string += ", df_mg=%s" % self._params_init_kwargs['df_mg']
-
-        string += ", "
-        string += ", ".join(
-            "%s='%s'" % (k, v) for k, v in self._config_init_kwargs.items())
-        string += ")"
-
-        return string
 
     def compute_distances(self):
         """Compute the distance splines."""
@@ -833,6 +806,7 @@ class Cosmology(object):
 
         return pk
 
+    @unlock_instance(mutate=False)
     def compute_linear_power(self):
         """Compute the linear power spectrum."""
         if self.has_linear_power:
@@ -947,6 +921,7 @@ class Cosmology(object):
 
         return pk
 
+    @unlock_instance(mutate=False)
     def compute_nonlin_power(self):
         """Compute the non-linear power spectrum."""
         if self.has_nonlin_power:

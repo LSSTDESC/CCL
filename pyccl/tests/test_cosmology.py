@@ -180,42 +180,6 @@ def test_cosmology_p18lcdm_raises():
         ccl.CosmologyVanillaLCDM(**kw)
 
 
-def test_cosmology_repr():
-    """Check that we can make a Cosmology object from its repr."""
-    import pyccl  # noqa: F401
-
-    cosmo = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=[0.02, 0.1, 0.05], m_nu_type='list',
-        z_mg=[0.0, 1.0], df_mg=[0.01, 0.0])
-
-    cosmo2 = eval(str(cosmo))
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo2, 0.5))
-
-    cosmo3 = eval(repr(cosmo))
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo3, 0.5))
-
-    # same test with arrays to be sure
-    cosmo = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=np.array([0.02, 0.1, 0.05]), m_nu_type='list',
-        z_mg=np.array([0.0, 1.0]), df_mg=np.array([0.01, 0.0]))
-
-    cosmo2 = eval(str(cosmo))
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo2, 0.5))
-
-    cosmo3 = eval(repr(cosmo))
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo3, 0.5))
-
-
 def test_cosmology_context():
     """Check that using a Cosmology object in a context manager
     frees C resources properly."""

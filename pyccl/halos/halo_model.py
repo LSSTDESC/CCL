@@ -12,12 +12,12 @@ from ..background import rho_x
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
-from ..base import cache
+from ..base import CCLHalosObject, cache, unlock_instance
 from ..parameters import physical_constants
 import numpy as np
 
 
-class HMCalculator(object):
+class HMCalculator(CCLHalosObject):
     """ This class implements a set of methods that can be used to
     compute various halo model quantities. A lot of these quantities
     will involve integrals of the sort:
@@ -61,11 +61,8 @@ class HMCalculator(object):
         self._rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
         if not isinstance(massfunc, MassFunc):
             raise TypeError("massfunc must be of type `MassFunc`")
-        self._massfunc = massfunc
         if not isinstance(hbias, HaloBias):
             raise TypeError("hbias must be of type `HaloBias`")
-        self._hbias = hbias
-        self._mdef = mass_def
         self._prec = {'log10M_min': log10M_min,
                       'log10M_max': log10M_max,
                       'nlog10M': nlog10M,
@@ -97,20 +94,21 @@ class HMCalculator(object):
 
     @cache
     def _get_mass_function(self, cosmo, a):
-        mf = self._massfunc.get_mass_function(
-            cosmo, self._mass, a, mdef_other=self._mdef)
+        mf = self.massfunc.get_mass_function(
+            cosmo, self._mass, a, mdef_other=self.mass_def)
         mf0 = (self._rho0 - self._integrator(
             mf*self._mass, self._lmass)) / self._m0
         return mf, mf0
 
     @cache
     def _get_halo_bias(self, cosmo, a):
-        bf = self._hbias.get_halo_bias(
-            cosmo, self._mass, a, mdef_other=self._mdef)
+        bf = self.hbias.get_halo_bias(
+            cosmo, self._mass, a, mdef_other=self.mass_def)
         bf0 = (self._rho0 - self._integrator(
             self._mf*bf*self._mass, self._lmass)) / self._m0
         return bf, bf0
 
+    @unlock_instance(mutate=False)
     def _get_ingredients(self, a, cosmo, get_bf):
         self._rho0 = self._get_rho(cosmo, 1.)
         # Compute mass function and bias (if needed) at a new
@@ -144,7 +142,7 @@ class HMCalculator(object):
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
         uk0 = prof.fourier(cosmo, self._prec['k_min'],
-                           self._mass, a, mass_def=self._mdef).T
+                           self._mass, a, mass_def=self.mass_def).T
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
 
@@ -233,7 +231,7 @@ class HMCalculator(object):
         # Compute mass function
         self._get_ingredients(a, cosmo, False)
         uk = prof.fourier(cosmo, k, self._mass, a,
-                          mass_def=self._mdef).T
+                          mass_def=self.mass_def).T
         i01 = self._integrate_over_mf(uk)
         return i01
 
@@ -263,7 +261,7 @@ class HMCalculator(object):
         # Compute mass function and halo bias
         self._get_ingredients(a, cosmo, True)
         uk = prof.fourier(cosmo, k, self._mass, a,
-                          mass_def=self._mdef).T
+                          mass_def=self.mass_def).T
         i11 = self._integrate_over_mbf(uk)
         return i11
 
@@ -300,7 +298,7 @@ class HMCalculator(object):
         self._get_ingredients(a, cosmo, False)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
-                                  mass_def=self._mdef).T
+                                  mass_def=self.mass_def).T
         i02 = self._integrate_over_mf(uk)
         return i02
 
@@ -338,7 +336,7 @@ class HMCalculator(object):
         self._get_ingredients(a, cosmo, False)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
-                                  mass_def=self._mdef).T
+                                  mass_def=self.mass_def).T
         i02 = self._integrate_over_mbf(uk)
         return i02
 
@@ -390,9 +388,9 @@ class HMCalculator(object):
 
         self._get_ingredients(a, cosmo, False)
         uk12 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
-                                      prof2=prof2, mass_def=self._mdef).T
+                                      prof2=prof2, mass_def=self.mass_def).T
         uk34 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
-                                      prof2=prof4, mass_def=self._mdef).T
+                                      prof2=prof4, mass_def=self.mass_def).T
         i04 = self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
         return i04
 

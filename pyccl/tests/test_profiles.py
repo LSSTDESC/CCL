@@ -334,7 +334,8 @@ def test_f2r():
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
     p2 = ccl.halos.HaloProfileNFW(cM, fourier_analytic=True)
-    p2._real = None
+    with ccl.UnlockInstance(p2):
+        p2._real = None
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14

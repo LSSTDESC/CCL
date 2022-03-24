@@ -1,7 +1,8 @@
 from . import ccllib as lib
+from .base import CCLObject, unlock_instance
 
 
-class ParamStruct:
+class ParamStruct(CCLObject):
     """Dict-like structure with option to freeze keys and/or values.
 
     Parameters:
@@ -46,14 +47,17 @@ class ParamStruct:
             self._locked_params = params
             self._locked_values = values
 
+    @unlock_instance(mutate=False)
     def _lock(self):
         """Return object to the saved lock state."""
         self.locked = self._locked_state_bak
 
+    @unlock_instance(mutate=False)
     def _unlock(self):
         """Unlock the object."""
         self.locked = (False, False)
 
+    @unlock_instance(mutate=True)
     def reload(self):
         """Reload the object."""
         dic = CCLParameters.from_struct(self._name)
@@ -63,6 +67,7 @@ class ParamStruct:
         """Return a copy of this object."""
         return ParamStruct(self.__dict__, *self.locked)
 
+    @unlock_instance(mutate=True)
     def __setattr__(self, param, value):
         if self._locked_values and param in self._public():
             # do not allow change of value (immutable values)

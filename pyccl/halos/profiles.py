@@ -3,13 +3,15 @@ from ..core import check
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
+from ..base import CCLHalosObject
+from .._repr import _build_string_HaloProfile
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
 from scipy.special import sici, erf
 
 
-class HaloProfile(object):
+class HaloProfile(CCLHalosObject):
     """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL
@@ -35,6 +37,7 @@ class HaloProfile(object):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
+    __repr__ = _build_string_HaloProfile
     name = 'default'
 
     def __init__(self):
