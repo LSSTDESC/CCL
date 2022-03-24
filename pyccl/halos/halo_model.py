@@ -98,16 +98,16 @@ class HMCalculator(object):
 
     @cache
     def _get_mass_function(self, cosmo, a):
-        mf = self.massfunc.get_mass_function(
-            cosmo, self._mass, a, mdef_other=self.mass_def)
+        mf = self._massfunc.get_mass_function(
+            cosmo, self._mass, a, mdef_other=self._mdef)
         mf0 = (self._rho0 - self._integrator(
             mf*self._mass, self._lmass)) / self._m0
         return mf, mf0
 
     @cache
     def _get_halo_bias(self, cosmo, a):
-        bf = self.hbias.get_halo_bias(
-            cosmo, self._mass, a, mdef_other=self.mass_def)
+        bf = self._hbias.get_halo_bias(
+            cosmo, self._mass, a, mdef_other=self._mdef)
         bf0 = (self._rho0 - self._integrator(
             self._mf*bf*self._mass, self._lmass)) / self._m0
         return bf, bf0
