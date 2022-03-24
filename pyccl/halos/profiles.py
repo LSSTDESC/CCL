@@ -1030,7 +1030,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         self.x_out = x_out
 
         # Interpolator for dimensionless Fourier-space profile
-        self._fourier_interp = None
+        self._fourier_interp = self._integ_interp()
         super(HaloProfilePressureGNFW, self).__init__()
 
     def update_parameters(self, mass_bias=None, P0=None,
@@ -1057,8 +1057,6 @@ class HaloProfilePressureGNFW(HaloProfile):
             x_out (float): profile threshold (as a fraction of r500c). \
                 if `None`, no threshold will be used.
         """
-        if x_out is not None:
-            self.x_out = x_out
         if mass_bias is not None:
             self.mass_bias = mass_bias
         if c500 is not None:
@@ -1084,8 +1082,12 @@ class HaloProfilePressureGNFW(HaloProfile):
             if gamma != self.gamma:
                 re_fourier = True
             self.gamma = gamma
+        if x_out is not None:
+            if x_out != self.x_out:
+                re_fourier = True
+            self.x_out = x_out
 
-        if re_fourier and (self._fourier_interp is not None):
+        if re_fourier:
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):
@@ -1155,10 +1157,6 @@ class HaloProfilePressureGNFW(HaloProfile):
     def _fourier(self, cosmo, k, M, a, mass_def):
         # Fourier-space profile.
         # Output in units of eV * Mpc^3 / cm^3.
-
-        # Tabulate if not done yet
-        if self._fourier_interp is None:
-            self._fourier_interp = self._integ_interp()
 
         # Input handling
         M_use = np.atleast_1d(M)

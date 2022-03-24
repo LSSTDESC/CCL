@@ -113,8 +113,8 @@ def test_gnfw_smoke():
     for n in ['P0', 'P0_hexp', 'alpha',
               'beta', 'gamma', 'alpha_P',
               'c500', 'mass_bias', 'x_out']:
-        p.update_parameters(**{n: 1234.})
-        assert getattr(p, n) == 1234.
+        p.update_parameters(**{n: 1.314159})
+        assert getattr(p, n) == 1.314159
 
 
 def test_gnfw_refourier():
