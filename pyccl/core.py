@@ -764,7 +764,7 @@ class Cosmology(object):
 
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
-                ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']):
+                ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles', ]):
             warnings.warn(
                 "The '%s' linear power spectrum model does not properly "
                 "account for massive neutrinos!" %
@@ -813,14 +813,13 @@ class Cosmology(object):
                 if np.isfinite(self["sigma8"]) \
                         and not np.isfinite(self["A_s"]):
                     raise CCLError("You want to compute the non-linear "
-                                   "power spectrum using CAMB and specified"
-                                   " sigma8 but the non-linear power spectrum "
+                                   "power spectrum using CAMB and specified "
+                                   "sigma8 but the non-linear power spectrum "
                                    "cannot be consistenty rescaled.")
         elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
             rescale_s8 = False
             rescale_mg = False
-            pk = Pk2D.pk_from_model(self,
-                                    model=trf)
+            pk = Pk2D.pk_from_model(self, model=trf)
 
         # Rescale by sigma8/mu-sigma if needed
         if pk:
