@@ -13,9 +13,8 @@ from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
 from ..base import cache
+from ..parameters import physical_constants
 import numpy as np
-
-physical_constants = lib.cvar.constants
 
 
 class HMCalculator(object):

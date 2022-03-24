@@ -126,7 +126,12 @@ from .base import (
 )
 
 # Parameters
-physical_constants = lib.cvar.constants
+from .parameters import (
+    CCLParameters,
+    gsl_params,
+    spline_params,
+    physical_constants,
+)
 
 # Miscellaneous
 from .pyutils import debug_mode, resample_array
@@ -155,7 +160,7 @@ from .haloprofile import (
 
 __all__ = (
     'lib', 'cache', 'hash_',
-    'physical_constants',
+    'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
     'CCLError', 'CCLWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
     'growth_factor', 'growth_factor_unnorm', 'growth_rate',

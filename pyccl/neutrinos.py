@@ -1,6 +1,7 @@
 import numpy as np
 from . import ccllib as lib
 from .core import check
+from .parameters import physical_constants
 
 neutrino_mass_splits = {
     'normal': lib.nu_normal,
@@ -28,7 +29,7 @@ def Omeganuh2(a, m_nu, T_CMB=None):
     scalar = True if np.ndim(a) == 0 else False
 
     if T_CMB is None:
-        T_CMB = lib.cvar.constants.T_CMB
+        T_CMB = physical_constants.T_CMB
 
     # Convert to array if it's not already an array
     if not isinstance(a, np.ndarray):
@@ -65,7 +66,7 @@ def nu_masses(OmNuh2, mass_split, T_CMB=None):
     status = 0
 
     if T_CMB is None:
-        T_CMB = lib.cvar.constants.T_CMB
+        T_CMB = physical_constants.T_CMB
 
     if mass_split not in neutrino_mass_splits.keys():
         raise ValueError(
