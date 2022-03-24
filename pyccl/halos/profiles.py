@@ -1087,7 +1087,6 @@ class HaloProfilePressureGNFW(HaloProfile):
                 re_fourier = True
             self.x_out = x_out
 
-
         if re_fourier:
             self._fourier_interp = self._integ_interp()
 

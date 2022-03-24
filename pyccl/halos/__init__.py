@@ -17,7 +17,6 @@ from .concentration import (
     ConcentrationPrada12,
     ConcentrationKlypin11,
     ConcentrationDuffy08,
-    ConcentrationDuffy08M500c,
     ConcentrationIshiyama21,
     ConcentrationConstant,
     concentration_from_name,
@@ -35,7 +34,6 @@ from .hmfunc import (
     MassFuncAngulo12,
     MassFuncDespali16,
     MassFuncBocquet16,
-    MassFuncBocquet20,
     mass_function_from_name,
 )
 
