@@ -50,7 +50,7 @@ from .cls import angular_cl
 from .covariances import angular_cl_cov_cNG, angular_cl_cov_SSC, sigma2_B_disc, sigma2_B_from_mask
 
 # Useful constants and unit conversions
-from .parameters import gsl_params, spline_params, physical_constants
+from .parameters import CCLParameters, gsl_params, spline_params, physical_constants
 
 from .correlations import (
     correlation, correlation_3d, correlation_multipole, correlation_3dRsd,

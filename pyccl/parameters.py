@@ -28,7 +28,7 @@ class ParamStruct:
         self._unlock()
         for param, value in dic.items():
             # use setattr from `object` to bypass restrictions from this class
-            super.__setattr__(self, param, value)
+            object.__setattr__(self, param, value)
         self._lock()
 
     @property
