@@ -11,7 +11,7 @@ class Hashing:
     Attributes:
         consistent (``bool``):
             If False, hashes of different processes are randomly salted.
-            Defaults to True for consistent hash values across processes.
+            Defaults to False for speed, but hashes differ across processes.
 
     .. note::
 
@@ -20,7 +20,7 @@ class Hashing:
         Buitin ``hash`` computes in O(100 ns) while using hashlib with md5
         computes in O(20 μs).
     """
-    consistent: bool = True
+    consistent: bool = False
 
     @classmethod
     def _finalize(cls, obj, /):
