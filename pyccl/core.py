@@ -877,7 +877,7 @@ class Cosmology(object):
     def _compute_nonlin_power(self):
         """Return the non-linear power spectrum."""
         if self.has_nonlin_power:
-            return
+            return self._pk_nl['delta_matter:delta_matter']
 
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
