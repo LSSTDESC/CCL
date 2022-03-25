@@ -73,7 +73,8 @@ def test_pk2d_smoke():
 
 
 @pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu',
-                                   'eisenstein_hu_nowiggles'])
+                                   'eisenstein_hu_nowiggles',
+                                   'bacco'])
 def test_pk2d_from_model(model):
     cosmo_fixed = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
@@ -88,20 +89,6 @@ def test_pk2d_from_model(model):
         pk2 = ccl.linear_matter_power(cosmo, ks, a)
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1E-10
-
-
-@pytest.mark.parametrize('emulator', ['bacco', ])
-def test_pk2d_from_emulator(emulator):
-    cosmo_fixed = ccl.CosmologyVanillaLCDM()
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=emulator)
-    pk = ccl.Pk2D.pk_from_emulator(cosmo_fixed, model=emulator)
-    ks = np.geomspace(1e-3, 1e1, 128)
-    for z in [0., 0.5, 2.]:
-        a = 1./(1+z)
-        pk1 = pk.eval(ks, a, cosmo)
-        pk2 = ccl.linear_matter_power(cosmo, ks, a)
-        maxdiff = np.amax(np.fabs(pk1/pk2-1))
-        assert maxdiff < 1e-3
 
 
 @pytest.mark.parametrize('model', ['halofit', 'bacco', ])

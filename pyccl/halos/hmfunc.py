@@ -753,13 +753,14 @@ class MassFuncAngulo12(MassFunc):
             np.exp(-self.c / sigM**2)
 
 
-class MassFuncBocquet20(Emulator, MassFunc):
+class MassFuncBocquet20(MassFunc, Emulator):
     """ Emulated mass function described in arXiv:2003.12116.
 
     This emulator is based on a Mira-Titan Universe suite of
     cosmological N-body simulations.
 
     Parameters:
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             A mass definition object.
             This parametrization accepts SO masses with
@@ -776,11 +777,11 @@ class MassFuncBocquet20(Emulator, MassFunc):
     """
     name = 'Bocquet20'
 
-    def __init__(self, *, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
                  extrapolate=True):
         self.extrapolate = extrapolate
-        Emulator.__init__(self)  # inherit all the Emulator methods first
-        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
+        super().__init__(
+            cosmo=cosmo, mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef200c()
@@ -795,7 +796,7 @@ class MassFuncBocquet20(Emulator, MassFunc):
         return EmulatorObject(model, bounds)
 
     def _build_parameters(self, cosmo=None, M=None, a=None):
-        from pyccl.neutrinos import Omega_nu_h2
+        from ..neutrinos import Omeganuh2
         # check input
         if (cosmo is not None) and (a is None):
             raise ValueError("Need value for scale factor")
@@ -807,7 +808,7 @@ class MassFuncBocquet20(Emulator, MassFunc):
             T_CMB = cosmo["T_CMB"]
             Omega_c = cosmo["Omega_c"]
             Omega_b = cosmo["Omega_b"]
-            Omega_nu_h2 = Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
+            Omega_nu_h2 = Omeganuh2(a, m_nu=m_nu, T_CMB=T_CMB)
 
             self._parameters["Ommh2"] = (Omega_c + Omega_b)*h**2 + Omega_nu_h2
             self._parameters["Ombh2"] = Omega_b * h**2

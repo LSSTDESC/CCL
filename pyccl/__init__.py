@@ -138,7 +138,11 @@ from .parameters import (
 )
 
 # Emulators
-from .emulator import Emulator, PowerSpectrumEmulator
+from .emulator import (
+    EmulatorObject,
+    Emulator,
+    PowerSpectrumEmulator
+)
 
 # Miscellaneous
 from .pyutils import debug_mode, resample_array
@@ -191,7 +195,7 @@ __all__ = (
     'angular_cl_cov_cNG', 'angular_cl_cov_SSC',
     'sigma2_B_disc', 'sigma2_B_from_mask',
     'Hashing', 'Caching',
-    'Emulator', 'PowerSpectrumEmulator',
+    'EmulatorObject', 'Emulator', 'PowerSpectrumEmulator',
     'debug_mode', 'resample_array',
     'halomodel_matter_power', 'halo_concentration',
     'onehalo_matter_power', 'twohalo_matter_power',

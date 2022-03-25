@@ -13,7 +13,6 @@ from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
-from .bcm import bcm_correct_pk2d, baryon_correct
 from .base import CCLObject, cache, unlock_instance
 from ._repr import _build_string_Cosmology
 from .parameters import CCLParameters
@@ -927,8 +926,8 @@ class Cosmology(CCLObject):
 
         # Correct for baryons if required
         bps = self._config_init_kwargs['baryons_power_spectrum']
-        if bps == ['bcm', 'bacco', ]:
-            pk = pk.include_baryons(self, model=bps)
+        if bps in ['bcm', 'bacco', ]:
+            pk = Pk2D.include_baryons(self, model=bps, pk_nonlin=pk)
 
         return pk
 

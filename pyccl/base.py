@@ -386,8 +386,6 @@ class UnlockInstance:
         mutate (``bool``):
             If the enclosed function mutates the object, the stored
             representation is automatically deleted.
-        init (``bool``):
-            Special use for constructors: no need to unlock, but lock on exit.
     """
 
     def __init__(self, instance, mutate=True):
@@ -519,6 +517,9 @@ class CCLObject:
         if hasattr(cls, "update_parameters"):
             cls.update_parameters = \
                 unlock_instance(mutate=True)(cls.update_parameters)
+        if hasattr(cls, "_build_parameters"):
+            cls._build_parameters = \
+                unlock_instance(mutate=False)(cls._build_parameters)
 
         # In the implemented system (repr --> hash --> eq), `repr` often needs
         # to compute the hash of instance attributes which are also CCLObjects
@@ -526,6 +527,11 @@ class CCLObject:
         # To avoid having to recompute the full repr of the object every time,
         # we store it and only re-compute it after instance mutation.
         cls.__repr__ = _auto_store_repr(cls.__repr__)
+
+        # Subclasses with `_load_emu` methods are emulator implementations.
+        # Automatically cache the result, and convert it to class method.
+        if hasattr(cls, "_load_emu"):
+            cls._load_emu = classmethod(cache(maxsize=8)(cls._load_emu))
 
         super().__init_subclass__(**kwargs)
 

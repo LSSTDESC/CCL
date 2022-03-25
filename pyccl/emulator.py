@@ -90,7 +90,9 @@ class Emulator(CCLObject):
         specifications. Different configurations will be cached separately.
 
       * You may need a method that translates any CCL parameters to a set
-        of parameters the emulator can understand.
+        of parameters the emulator can understand. To that end, if the method
+        is named `_build_parameters`, CCL will automatically allow `setattr`
+        to be called in that method.
     """
     pass
 
