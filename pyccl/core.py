@@ -91,10 +91,13 @@ class Cosmology(CCLObject):
               internal splines and numerical integration accuracy by setting
               the values of the attributes of
               :obj:`Cosmology.cosmo.spline_params` and
-              :obj:`Cosmology.cosmo.gsl_params`. For example, you can set
+              :obj:`Cosmology.cosmo.gsl_params`. via the `update_parameters`
+              method of `Cosmology`. For example, you can set
               the generic relative accuracy for integration by executing
-              ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
+              ``c = Cosmology(...); cosmo.update_parameters(INTEGRATION_EPSREL\
 = 1e-5``.
+              If you bypass `update_parameters` and set it directly with
+              ``setattr``, hashing the Cosmology object will be inconsistent.
               See the module level documentation of `pyccl.core` for details.
 
     Args:

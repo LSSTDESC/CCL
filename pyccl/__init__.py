@@ -119,10 +119,14 @@ from .covariances import (
 
 # Hashing, Caching
 from .base import (
+    CCLObject,
+    CCLHalosObject,
     Hashing,
     Caching,
     hash_,
-    cache
+    cache,
+    UnlockInstance,
+    unlock_instance,
 )
 
 # Parameters
@@ -159,7 +163,8 @@ from .haloprofile import (
 
 
 __all__ = (
-    'lib', 'cache', 'hash_',
+    'lib', 'cache', 'hash_', 'CCLObject', 'CCLHalosObject',
+    'UnlockInstance', 'unlock_instance',
     'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
     'CCLError', 'CCLWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
