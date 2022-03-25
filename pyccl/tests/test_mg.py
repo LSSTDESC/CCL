@@ -1,4 +1,4 @@
-import pyccl as ccl
+from . import pyccl as ccl
 import pytest
 
 
@@ -21,7 +21,7 @@ def test_mu_sigma_transfer_err(tf):
 
 @pytest.mark.parametrize('mp', ['emu', 'halofit'])
 def test_mu_sigma_matter_power_err(mp):
-    from pyccl.pyutils import assert_warns
+    from . import assert_warns
     with pytest.raises(ccl.CCLError):
         cosmo = ccl.Cosmology(
             Omega_c=0.25,

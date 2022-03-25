@@ -7,7 +7,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_raises, assert_, assert_no_warnings
 
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 def test_cosmo_methods():
@@ -18,7 +18,7 @@ def test_cosmo_methods():
     from pyccl import background, bcm, boltzmann, \
         cls, correlations, covariances, neutrinos, \
         pk2d, power, tk3d, tracers, halos, nl_pt
-    from pyccl.core import CosmologyVanillaLCDM
+    from . import CosmologyVanillaLCDM
     cosmo = CosmologyVanillaLCDM()
     subs = [background, boltzmann, bcm, cls, correlations, covariances,
             neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]

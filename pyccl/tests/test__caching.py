@@ -1,6 +1,6 @@
 # We use double underscore to make it the first test alphabetically.
 import pytest
-import pyccl as ccl
+from . import pyccl as ccl
 import numpy as np
 from time import time
 

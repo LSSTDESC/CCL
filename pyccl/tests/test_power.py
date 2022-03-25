@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-import pyccl as ccl
-from pyccl import CCLError, CCLWarning
+from . import pyccl as ccl
+from . import CCLError, CCLWarning
 
 
 COSMO = ccl.Cosmology(

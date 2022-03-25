@@ -1,6 +1,6 @@
 """Test the hashing function of CCL."""
 import pytest
-import pyccl as ccl
+from . import pyccl as ccl
 import numpy as np
 
 OBJECTS = [ccl.Cosmology,  # class

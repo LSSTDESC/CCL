@@ -2,7 +2,7 @@ import tempfile
 import filecmp
 import io
 
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 def test_yaml():
