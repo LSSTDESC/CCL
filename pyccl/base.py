@@ -478,6 +478,42 @@ class CCLObject:
 
     All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.
     We aim to homogenize equivalence checking, and to consistently use hash.
+
+    Overview
+    --------
+    ``CCLObjects`` inherit ``__hash__``, which consistently hashes the
+    representation string. They also inherit ``__eq__`` which checks for
+    hash equivalence, but does not do type checking, since subclasses might
+    simply be particular implementations of parent classes, but otherwise
+    equivalent.
+
+    In the implemented scheme, each ``CCLObject`` may have its own, specialized
+    ``__repr__`` method overloaded. Object representations have to be unique
+    for equivalent objects. If no ``__repr__`` is provided, the default from
+    ``object`` is used.
+
+    Mutation
+    --------
+    ``CCLObjects`` are by default immutable. This aims to provide a failsafe
+    mechanism, where, changing attributes has to trigger a re-computation
+    of something else inside of the instance, rather than simply doing a value
+    change.
+
+    This immutability mechanism can be safely bypassed if a subclass defines an
+    ``update_parameters`` method. ``CCLObjects`` temporarily unlock whenever
+    this method is called.
+
+    Internal State vs. Mutation
+    ---------------------------
+    Other methods that use ``setattr`` can only do that if they are decorated
+    with ``@unlock_instance`` or if the particular code block that makes the
+    change is enclosed within the ``UnlockInstance`` context manager.
+    If neither is provided, an exception is raised.
+
+    If such methods only change the instance's internal state, the decorator
+    may be called with ``@unlock_instance(mutate=False)`` (or equivalently
+    for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
+    the instance is assumed to have mutated.
     """
     # Have all the arguments in the constructor been assigned as instance
     # attributes? (see `auto_assign`)
