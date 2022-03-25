@@ -105,7 +105,7 @@ def test_pk2d_from_emulator(emulator):
 
 
 @pytest.mark.parametrize('model', ['halofit', 'bacco', ])
-def test_pk2d_apply_model_smoke(model):
+def test_pk2d_apply_nonlin_model_smoke(model):
     cosmo = ccl.CosmologyVanillaLCDM()
     cosmo.compute_linear_power()
     pkl = cosmo.get_linear_power()
@@ -116,7 +116,8 @@ def test_pk2d_apply_model_smoke(model):
         with warnings.catch_warnings():
             # filter all warnings related to the emulator packages
             warnings.simplefilter("ignore")
-            pknl = ccl.Pk2D.apply_model(cosmo, model=model, pk_linear=pkl)
+            pknl = ccl.Pk2D.apply_nonlin_model(
+                cosmo, model=model, pk_linear=pkl)
 
         pk0 = pkl.eval(k_arr, a, cosmo)
         pk1 = pknl.eval(k_arr, a, cosmo)

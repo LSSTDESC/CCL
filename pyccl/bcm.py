@@ -1,7 +1,6 @@
 from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D
-from .emulator import PowerSpectrumEmulator
 import numpy as np
 
 
@@ -71,7 +70,9 @@ def baryon_correct(cosmo, model, pk2d):
         pk2d_new = pk2d.copy()
         bcm_correct_pk2d(cosmo, pk2d_new)
     elif model in ["bacco", ]:  # other emulator names go in here
-        pk2d_new = PowerSpectrumEmulator.include_baryons(cosmo, model, pk2d)
+        from .emulator import PowerSpectrumEmulator
+        emu = PowerSpectrumEmulator.from_name(model)()
+        pk2d_new = emu.include_baryons(cosmo, pk2d)
     else:
         raise NotImplementedError(f"Baryon correction model {model} "
                                   "not recogized")

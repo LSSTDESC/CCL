@@ -574,10 +574,9 @@ class Cosmology(object):
             mnu_final_list = [0.]
 
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
-                  n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa',
-                 'h', 'norm_pk', 'n_s']
+        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk, n_s]
+        names = ['Omega_c', 'Omega_b', 'Omega_k',
+                 'w0', 'wa', 'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
@@ -820,12 +819,11 @@ class Cosmology(object):
                                    "power spectrum using CAMB and specified"
                                    " sigma8 but the non-linear power spectrum "
                                    "cannot be consistenty rescaled.")
-        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
+        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles',
+                     'bacco']:
             rescale_s8 = False
             rescale_mg = False
             pk = Pk2D.pk_from_model(self, model=trf)
-        elif trf in ['bacco', ]:
-            pk = Pk2D.pk_from_emulator(self, model=trf)
 
         # Rescale by sigma8/mu-sigma if needed
         if pk:
@@ -939,14 +937,12 @@ class Cosmology(object):
             pk = self._pk_lin['delta_matter:delta_matter']
         elif mps in ['bacco', ]:  # other emulators go in here
             pkl = self._pk_lin['delta_matter:delta_matter']
-            pk = Pk2D.apply_model(self, model=mps, pk_linear=pkl)
+            pk = Pk2D.apply_nonlin_model(self, model=mps, pk_linear=pkl)
 
         # Correct for baryons if required
         bps = self._config_init_kwargs['baryons_power_spectrum']
-        if bps == 'bcm':
-            bcm_correct_pk2d(self, pk)
-        elif bps in ['bacco', ]:  # other emulators go in here
-            pk = baryon_correct(self, model=bps, pk2d=pk)
+        if bps == ['bcm', 'bacco', ]:
+            pk = pk.include_baryons(self, model=bps)
 
         # Assign
         self._pk_nl['delta_matter:delta_matter'] = pk

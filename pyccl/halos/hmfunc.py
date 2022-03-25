@@ -1,9 +1,10 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
-from ..emulator import Emulator, Bounds
+from ..emulator import Emulator, EmulatorObject
 from .massdef import MassDef, MassDef200m, MassDef200c
 import numpy as np
+from scipy.interpolate import interp1d
 
 
 class MassFunc(object):
@@ -750,14 +751,13 @@ class MassFuncAngulo12(MassFunc):
             np.exp(-self.c / sigM**2)
 
 
-class MassFuncBocquet20(MassFunc, Emulator):
+class MassFuncBocquet20(Emulator, MassFunc):
     """ Emulated mass function described in arXiv:2003.12116.
 
     This emulator is based on a Mira-Titan Universe suite of
     cosmological N-body simulations.
 
     Parameters:
-        cosmo (deprecated)
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             A mass definition object.
             This parametrization accepts SO masses with
@@ -774,71 +774,61 @@ class MassFuncBocquet20(MassFunc, Emulator):
     """
     name = 'Bocquet20'
 
-    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
+    def __init__(self, *, mass_def=None, mass_def_strict=True,
                  extrapolate=True):
         self.extrapolate = extrapolate
         Emulator.__init__(self)  # inherit all the Emulator methods first
-        super().__init__(cosmo, mass_def=mass_def,
-                         mass_def_strict=mass_def_strict)
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
-    def _default_mdef(self):
-        self.mdef = MassDef200c()
+    def _default_mass_def(self):
+        self.mass_def = MassDef200c()
 
-    def _load(self):
+    def _load_emu(self):
         from MiraTitanHMFemulator import Emulator as HMFemu
-        emu = HMFemu()
-        return emu
+        model = HMFemu()
+        # build the emulator bounds
+        bounds = model.param_limits.copy()
+        bounds["z"] = [0., 2.02]
+        bounds["M_min"] = [1e13, np.inf]
+        return EmulatorObject(model, bounds)
 
-    def _build_emu_parameters(self, cosmo=None, M=None, a=None):
-        from pyccl.neutrinos import Omeganuh2
+    def _build_parameters(self, cosmo=None, M=None, a=None):
+        from pyccl.neutrinos import Omega_nu_h2
+        # check input
+        if (cosmo is not None) and (a is None):
+            raise ValueError("Need value for scale factor")
 
-        self._param_emu_kwargs = {}
+        self._parameters = {}
         if cosmo is not None:
             h = cosmo["h"]
             m_nu = np.sum(cosmo["m_nu"])
             T_CMB = cosmo["T_CMB"]
             Omega_c = cosmo["Omega_c"]
             Omega_b = cosmo["Omega_b"]
-            Omega_nu_h2 = Omeganuh2(a, m_nu=m_nu, T_CMB=T_CMB)
+            Omega_nu_h2 = Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
 
-            self._param_emu_kwargs["Ommh2"] = (
-                Omega_c + Omega_b)*h**2 + Omega_nu_h2
-            self._param_emu_kwargs["Ombh2"] = Omega_b * h**2
-            self._param_emu_kwargs["Omnuh2"] = Omega_nu_h2
-            self._param_emu_kwargs["n_s"] = cosmo["n_s"]
-            self._param_emu_kwargs["h"] = cosmo["h"]
-            self._param_emu_kwargs["sigma_8"] = cosmo["sigma8"]
-            self._param_emu_kwargs["w_0"] = cosmo["w0"]
-            self._param_emu_kwargs["w_b"] = (-cosmo["wa"] - cosmo["w0"])**0.25
+            self._parameters["Ommh2"] = (Omega_c + Omega_b)*h**2 + Omega_nu_h2
+            self._parameters["Ombh2"] = Omega_b * h**2
+            self._parameters["Omnuh2"] = Omega_nu_h2
+            self._parameters["n_s"] = cosmo["n_s"]
+            self._parameters["h"] = cosmo["h"]
+            self._parameters["sigma_8"] = cosmo["sigma8"]
+            self._parameters["w_0"] = cosmo["w0"]
+            self._parameters["w_b"] = (-cosmo["wa"] - cosmo["w0"])**0.25
 
-            self._param_emu_kwargs["z"] = 1/a - 1
+            self._parameters["z"] = 1/a - 1
             if not self.extrapolate:
-                self._param_emu_kwargs["M_min"] = np.min(M*h)
+                self._parameters["M_min"] = np.min(M*h)
 
-    def _validate_bounds(self):
-        emu = self._get_model()
-
-        if self._has_bounds():
-            B = self._get_bounds()
-        else:
-            bounds = emu.param_limits.copy()
-            # validate scale factor
-            bounds["z"] = [0., 2.02]
-            bounds["M_min"] = [1e13, np.inf]   # only checked when not extrap
-            B = Bounds(bounds)
-            self._set_bounds(B)
-        B.check_bounds(self._param_emu_kwargs)
-
-        # remove scale factor and mass
-        self._param_emu_kwargs.pop("z")
+    def _finalize_parameters(self, wa):
+        # Translate parameters to final emulator input
+        self._parameters["w_a"] = wa
+        self._parameters.pop("w_b")
+        self._parameters.pop("z")
         if not self.extrapolate:
-            self._param_emu_kwargs.pop("M_min")
+            self._parameters.pop("M_min")
 
     def _extrapolate_hmf(self, hmf, M, eps=1e-12):
-        # As indicated in :arXiv:2003.12116, the emulator can be
-        # safely extrapolated to lower and higher masses.
-        from scipy.interpolate import interp1d
-
         M_use = np.atleast_1d(M)
         # indices where the emulator outputs reasonable values
         idx = np.where(hmf >= eps)[0]
@@ -857,14 +847,11 @@ class MassFuncBocquet20(MassFunc, Emulator):
         return hmf
 
     def get_mass_function(self, cosmo, M, a):
-        self._build_emu_parameters(cosmo, M, a)
-        self._validate_bounds()
-        emu = self._get_model()
-
-        # replace w_b with w_a
-        params = self._param_emu_kwargs.copy()
-        params.pop("w_b")
-        params["w_a"] = cosmo["wa"]
+        # load and build parameters
+        emu = self._load_emu()
+        self._build_parameters(cosmo, M, a)
+        emu.check_bounds(self._parameters)
+        self._finalize_parameters(cosmo["wa"])
 
         def hmf_dummy(cosmo, M, a):
             # Populate the queried masses with some emulator-friendly
@@ -883,8 +870,9 @@ class MassFuncBocquet20(MassFunc, Emulator):
         if len(idx) > 0:
             # Under normal use, this block runs.
             M_emu = M_use[idx]
-            hmf[idx] = emu.predict(params, 1/a-1, M_emu,
-                                   get_errors=False)[0]
+            hmf[idx] = emu.model.predict(
+                self._parameters, 1/a-1, M_emu,
+                get_errors=False)[0]
             hmf *= cosmo["h"]**3
         else:
             # No masses inside the emulator range.

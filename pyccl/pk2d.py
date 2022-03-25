@@ -1,7 +1,5 @@
 import warnings
 
-from .emulator import PowerSpectrumEmulator
-
 import numpy as np
 
 from . import ccllib as lib
@@ -149,6 +147,10 @@ class Pk2D(object):
                 `'eisenstein_hu_nowiggles'` (Eisenstein & Hu astro-ph/9709112).
                 `'emu'` (arXiv:1508.02654).
         """
+        if model in ['bacco', ]:  # other emulators go in here
+            from .emulator import PowerSpectrumEmulator as PSE
+            return PSE.from_name(model)().get_pk_linear(cosmo)
+
         pk2d = Pk2D(empty=True)
         status = 0
         if model == 'bbks':
@@ -175,19 +177,6 @@ class Pk2D(object):
         return pk2d
 
     @classmethod
-    def pk_from_emulator(Pk2D, cosmo, model):
-        """`Pk2D` constructor returning the power spectrum associated with
-        a given emulator.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            model (:obj:`str`): model to use. These models allowed:
-                `bacco` (Arico, Angulo & Zennaro, 2021. arXiv:2104.14568)
-        """
-        pk2d = PowerSpectrumEmulator.get_pk_linear(cosmo, model)
-        return pk2d
-
-    @classmethod
     def apply_halofit(Pk2D, cosmo, pk_linear):
         """Pk2D constructor that applies the "HALOFIT" transformation of
         Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
@@ -210,7 +199,7 @@ class Pk2D(object):
         return pk2d
 
     @classmethod
-    def apply_model(Pk2D, cosmo, model, *, pk_linear):
+    def apply_nonlin_model(Pk2D, cosmo, model, *, pk_linear):
         """Pk2D constructor that applies a non-linear model
         to a linear power spectrum.
 
@@ -230,8 +219,9 @@ class Pk2D(object):
         if model == "halofit":
             pk2d_new = Pk2D.apply_halofit(cosmo, pk_linear)
         elif model in ["bacco", ]:  # other emulator names go in here
-            from .boltzmann import PowerSpectrumEmulator as PSE
-            pk2d_new = PSE.apply_model(cosmo, model, pk_linear)
+            from .emulator import PowerSpectrumEmulator as PSE
+            emu = PSE.from_name(model)()
+            pk2d_new = emu.apply_nonlin_model(cosmo, pk_linear)
         return pk2d_new
 
     @classmethod

@@ -22,7 +22,7 @@ except ImportError:
 from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D
-from .emulator import PowerSpectrumEmulator, Bounds
+from .emulator import PowerSpectrumEmulator, EmulatorObject
 from .errors import CCLError, CCLWarning
 
 
@@ -570,17 +570,18 @@ class PowerSpectrumBACCO(PowerSpectrumEmulator):
     """
     name = "bacco"
 
-    def __init__(self, config=None):
-        if config is None:
-            config = {"linear": True,
-                      "nonlinear_boost": True,
-                      "baryonic_boost": True,
-                      "smeared_bao": False,
-                      "compute_sigma8": True}
-        self._config_emu_kwargs = config
-        super().__init__()
+    def _load_emu(self, which_emu):
+        # create the baccoemu input according to which emu we need
+        config = {"linear": False, "nonlinear_boost": False,
+                  "baryonic_boost": False, "smeared_bao": False,
+                  "compute_sigma8": True,   # load to translate from A_s
+                  "verbose": False}
+        config[which_emu] = True
 
-    def _load(self):
+        # patch for internal baccoemu usage
+        if which_emu == "nonlinear_boost":
+            config["linear"] = True
+
         import os
         # supress TensorFlow GPU warnings
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -588,15 +589,21 @@ class PowerSpectrumBACCO(PowerSpectrumEmulator):
         with warnings.catch_warnings():
             # supress pickling warnings
             warnings.simplefilter("ignore")
-            emu = baccoemu.Matter_powerspectrum(**self._config_emu_kwargs,
-                                                verbose=False)
-        return emu
+            model = baccoemu.Matter_powerspectrum(**config)  # this is the emu
 
-    def _build_emu_parameters(self, cosmo, baryon=False):
+        # build the emulator bounds
+        keymap = {"linear": "linear", "nonlinear_boost": "nonlinear",
+                  "baryonic_boost": "baryon", "smeared_bao": "smeared_bao"}
+        keys = model.emulator[keymap[which_emu]]["keys"]
+        vals = model.emulator[keymap[which_emu]]["bounds"].tolist()
+        bounds = dict(zip(keys, vals))
+        return EmulatorObject(model, bounds)
+
+    def _build_parameters(self, cosmo, baryon=False):
         # Note `omega_cold` and `sigma8_cold` in this emulator
         # do not contain neutrinos.
         # Assign the usual cosmological parameters
-        self._param_emu_kwargs = {
+        self._parameters = {
             "omega_cold": cosmo["Omega_c"] + cosmo["Omega_b"],
             "omega_baryon": cosmo["Omega_b"],
             "hubble": cosmo["h"],
@@ -608,9 +615,9 @@ class PowerSpectrumBACCO(PowerSpectrumEmulator):
 
         # Either A_s or sigma8.
         if not np.isnan(cosmo["A_s"]):
-            self._param_emu_kwargs["A_s"] = cosmo["A_s"]
+            self._parameters["A_s"] = cosmo["A_s"]
         else:
-            self._param_emu_kwargs["sigma8_cold"] = cosmo["sigma8"]
+            self._parameters["sigma8_cold"] = cosmo["sigma8"]
 
         # Finally, populate with baryonic parameters if needed.
         if baryon:
@@ -627,114 +634,58 @@ class PowerSpectrumBACCO(PowerSpectrumEmulator):
                     "M_c": 14, "eta": -0.3, "beta": -0.22,
                     "M1_z0_cen": 10.5, "theta_out": 0.25,
                     "theta_inn": -0.86, "M_inn": 13.4}
-            self._param_emu_kwargs.update(extra_params)
-
-    def _validate_bounds(self, which_bounds):
-        emu = self._get_model()
-
-        # `which_bounds` is the CCL name;
-        # `name` is the internal emulator name
-        if which_bounds == "nonlin":
-            name = "nonlinear"
-        else:
-            name = which_bounds
-
-        if self._has_bounds(which_bounds):
-            B = self._get_bounds(which_bounds)
-        else:
-            entry = emu.emulator[name]
-            bounds = dict(zip(entry["keys"], entry["bounds"].tolist()))
-            B = Bounds(bounds)
-            self._set_bounds(B, which_bounds)
-
-        # sigma8, A_s, n_s are scaling operations on the emulated linear
-        # power spectrum, so they can take any value.
-        if which_bounds == "linear":
-            check_dic = {}
-            for key, val in self._param_emu_kwargs.items():
-                if key not in ["sigma8_cold", "A_s", "ns"]:
-                    check_dic[key] = val
-        else:
-            check_dic = self._param_emu_kwargs
-
-        B.check_bounds(check_dic)
+            self._parameters.update(extra_params)
 
     def _get_pk_linear(self, cosmo):
-        # build params and check consistency
-        self._build_emu_parameters(cosmo)
-        self._validate_bounds("linear")
+        # load and build parameters
+        emu = self._load_emu("linear")
+        self._build_parameters(cosmo)
+        emu.check_bounds(self._parameters)
 
-        emu = self._get_model()
-        h = self._param_emu_kwargs["hubble"]
-
-        a_min, a_max = self._get_bounds("linear").bounds["expfactor"]
-        na = lib.default_spline_params.A_SPLINE_NA_PK
+        h = self._parameters["hubble"]
+        a_min, a_max = emu.bounds.bounds["expfactor"]
+        na = cosmo.cosmo.spline_params.A_SPLINE_NA_PK
         a_arr = np.linspace(a_min, a_max, na)
-
-        self._param_emu_kwargs["expfactor"] = a_arr
+        self._parameters["expfactor"] = a_arr
         with warnings.catch_warnings():
             # ignore irrelevant numpy warning internal to baccoemu
             warnings.simplefilter("ignore")
-            k_arr, pka = emu.get_linear_pk(**self._param_emu_kwargs)
-
-        return k_arr*h, a_arr, pka/h**3
-
-    def _get_pk_nonlin(self, cosmo):
-        # build params and check consistency
-        self._build_emu_parameters(cosmo)
-        self._validate_bounds("nonlin")
-
-        emu = self._get_model()
-        h = self._param_emu_kwargs["hubble"]
-
-        a_min, a_max = self._get_bounds("nonlin").bounds["expfactor"]
-        na = lib.default_spline_params.A_SPLINE_NA_PK
-        a_arr = np.linspace(a_min, a_max, na)
-
-        self._param_emu_kwargs["expfactor"] = a_arr
-        with warnings.catch_warnings():
-            # ignore irrelevant numpy warning internal to baccoemu
-            warnings.simplefilter("ignore")
-            k_arr, pka = emu.get_nonlinear_pk(**self._param_emu_kwargs)
+            k_arr, pka = emu.model.get_linear_pk(**self._parameters)
 
         return k_arr*h, a_arr, pka/h**3
 
     def _get_nonlin_boost(self, cosmo):
-        # build params and check consistency
-        self._build_emu_parameters(cosmo)
-        self._validate_bounds("nonlin")
+        # load and build parameters
+        emu = self._load_emu("nonlinear_boost")
+        self._build_parameters(cosmo)
+        emu.check_bounds(self._parameters)
 
-        emu = self._get_model()
-        h = self._param_emu_kwargs["hubble"]
-
-        a_min, a_max = self._get_bounds("nonlin").bounds["expfactor"]
-        na = lib.default_spline_params.A_SPLINE_NA_PK
+        h = self._parameters["hubble"]
+        a_min, a_max = emu.bounds.bounds["expfactor"]
+        na = cosmo.cosmo.spline_params.A_SPLINE_NA_PK
         a_arr = np.linspace(a_min, a_max, na)
-
-        self._param_emu_kwargs["expfactor"] = a_arr
+        self._parameters["expfactor"] = a_arr
         with warnings.catch_warnings():
             # ignore irrelevant numpy warning internal to baccoemu
             warnings.simplefilter("ignore")
-            k_arr, fka = emu.get_nonlinear_boost(**self._param_emu_kwargs)
+            k_arr, fka = emu.model.get_nonlinear_boost(**self._parameters)
 
         return k_arr*h, a_arr, fka
 
     def _get_baryon_boost(self, cosmo):
-        # build params and check consistency
-        self._build_emu_parameters(cosmo, baryon=True)
-        self._validate_bounds("baryon")
+        # load and build parameters
+        emu = self._load_emu("baryonic_boost")
+        self._build_parameters(cosmo, baryon=True)
+        emu.check_bounds(self._parameters)
 
-        emu = self._get_model()
-        h = self._param_emu_kwargs["hubble"]
-
-        a_min, a_max = self._get_bounds("baryon").bounds["expfactor"]
-        na = lib.default_spline_params.A_SPLINE_NA_PK
+        h = self._parameters["hubble"]
+        a_min, a_max = emu.bounds.bounds["expfactor"]
+        na = cosmo.cosmo.spline_params.A_SPLINE_NA_PK
         a_arr = np.linspace(a_min, a_max, na)
-
-        self._param_emu_kwargs["expfactor"] = a_arr
+        self._parameters["expfactor"] = a_arr
         with warnings.catch_warnings():
             # ignore irrelevant numpy warning internal to baccoemu
             warnings.simplefilter("ignore")
-            k_arr, fka = emu.get_baryonic_boost(**self._param_emu_kwargs)
+            k_arr, fka = emu.model.get_baryonic_boost(**self._parameters)
 
         return k_arr*h, a_arr, fka
