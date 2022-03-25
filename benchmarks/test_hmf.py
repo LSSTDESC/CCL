@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import pyccl as ccl
+from . import pyccl as ccl
 
 # Set cosmology
 cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
