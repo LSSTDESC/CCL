@@ -3,7 +3,7 @@ from ..core import check
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
-from ..base import CCLHalosObject
+from ..base import CCLHalosObject, unlock_instance
 from .._repr import _build_string_HaloProfile
 from .concentration import Concentration
 from .massdef import MassDef
@@ -51,6 +51,7 @@ class HaloProfile(CCLHalosObject):
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
 
+    @unlock_instance(mutate=True)
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by
         FFTLog to compute Hankel transforms. The available
