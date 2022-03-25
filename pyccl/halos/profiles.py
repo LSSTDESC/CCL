@@ -150,31 +150,6 @@ class HaloProfile(CCLHalosObject):
         """
         return self.precision_fftlog['plaw_projected']
 
-    def _prof_equiv(self, prof2):
-        """Check profile equivalence. If equivalence between two profiles
-        is not trivial, and simply checking equality of their attributes
-        does not suffice, this method has to be reloaded.
-        """
-        params, params2 = self.__dict__, prof2.__dict__
-        for key, val in params.items():
-            if val != params2.get(key):
-                return False
-        # if this point is reached, the profiles must be equivalent
-        return True
-
-    def __eq__(self, prof2):
-        """Return `True` if this profile is equivalent to another."""
-        if id(self) == id(prof2):
-            return True
-        elif type(self) != type(prof2):
-            return False
-        elif self.__dict__ == prof2.__dict__:
-            return True
-        elif self.__dict__.keys() != prof2.__dict__.keys():
-            return False
-        else:
-            return self._prof_equiv(prof2)
-
     def real(self, cosmo, r, M, a, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.

@@ -396,15 +396,17 @@ class HMCalculator(CCLHalosObject):
             prof34_2pt = prof12_2pt
 
         self._get_ingredients(a, cosmo, False)
-        uk12 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
-                                      prof2=prof2, mass_def=self._mdef).T
+        uk12 = prof12_2pt.fourier_2pt(
+            prof1, cosmo, k, self._mass, a,
+            prof2=prof2, mass_def=self.mass_def).T
 
         if (prof1, prof2) == (prof3, prof4):
             # 4pt approximation of the same profile
             uk34 = uk12
         else:
-            uk34 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
-                                          prof2=prof4, mass_def=self._mdef).T
+            uk34 = prof34_2pt.fourier_2pt(
+                prof3, cosmo, k, self._mass, a,
+                prof2=prof4, mass_def=self.mass_def).T
 
         i04 = self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
         return i04
