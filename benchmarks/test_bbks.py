@@ -1,5 +1,5 @@
 import numpy as np
-import pyccl as ccl
+from . import pyccl as ccl
 import pytest
 
 BBKS_TOLERANCE = 1.0e-5

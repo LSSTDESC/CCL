@@ -1,6 +1,7 @@
 from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D
+from .base import unlock_instance
 import numpy as np
 
 
@@ -35,6 +36,7 @@ def bcm_model_fka(cosmo, k, a):
     return fka
 
 
+@unlock_instance(mutate=True, argv=1)
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
     This function operates directly onto the input Pk2D object.
@@ -44,7 +46,7 @@ def bcm_correct_pk2d(cosmo, pk2d):
         pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
     """
     if not isinstance(pk2d, Pk2D):
-        raise ValueError("pk2d must be a Pk2D object")
+        raise TypeError("pk2d must be a Pk2D object")
     status = 0
     status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
     check(status, cosmo)

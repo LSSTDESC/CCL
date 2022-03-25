@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from numpy.testing import assert_raises
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 NCHI = 100

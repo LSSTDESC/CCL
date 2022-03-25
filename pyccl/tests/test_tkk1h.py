@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 COSMO = ccl.Cosmology(
@@ -142,7 +142,7 @@ def test_tkk1h_tk3d():
 
 
 def test_tkk1h_errors():
-    from pyccl.pyutils import assert_warns
+    from . import assert_warns
 
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
     k_arr = KK

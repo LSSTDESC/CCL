@@ -1,5 +1,5 @@
 import numpy as np
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 def test_hmcalculator_number_counts_numcosmo():

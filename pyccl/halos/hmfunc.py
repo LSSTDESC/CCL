@@ -2,12 +2,14 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
 from ..emulator import Emulator, EmulatorObject
+from ..parameters import physical_constants
+from ..base import CCLHalosObject
 from .massdef import MassDef, MassDef200m, MassDef200c
 import numpy as np
 from scipy.interpolate import interp1d
 
 
-class MassFunc(object):
+class MassFunc(CCLHalosObject):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
 
@@ -150,7 +152,7 @@ class MassFunc(object):
                                                    len(logM), status)
         check(status)
 
-        rho = (lib.cvar.constants.RHO_CRITICAL *
+        rho = (physical_constants.RHO_CRITICAL *
                cosmo['Omega_m'] * cosmo['h']**2)
         f = self._get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
         mf = f * rho * dlns_dlogM / M_use

@@ -1,4 +1,4 @@
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 def test_debug_mode_toggle():

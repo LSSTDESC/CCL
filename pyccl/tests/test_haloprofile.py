@@ -1,5 +1,5 @@
 import numpy as np
-import pyccl as ccl
+from . import pyccl as ccl
 import pytest
 
 
@@ -12,7 +12,7 @@ import pytest
     np.array([1, 2, 3]),
     [1, 2, 3]])
 def test_haloprofile_smoke(func, r):
-    from pyccl.pyutils import assert_warns
+    from . import assert_warns
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')

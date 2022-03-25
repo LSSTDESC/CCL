@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 COSMO = ccl.Cosmology(
@@ -113,8 +113,8 @@ def test_gnfw_smoke():
     for n in ['P0', 'P0_hexp', 'alpha',
               'beta', 'gamma', 'alpha_P',
               'c500', 'mass_bias', 'x_out']:
-        p.update_parameters(**{n: 1234.})
-        assert getattr(p, n) == 1234.
+        p.update_parameters(**{n: 1.314159})
+        assert getattr(p, n) == 1.314159
 
 
 def test_gnfw_refourier():
@@ -334,7 +334,8 @@ def test_f2r():
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
     p2 = ccl.halos.HaloProfileNFW(cM, fourier_analytic=True)
-    p2._real = None
+    with ccl.UnlockInstance(p2):
+        p2._real = None
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14

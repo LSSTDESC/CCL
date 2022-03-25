@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
-import pyccl as ccl
-from pyccl.emulator import Bounds
-from pyccl.pyutils import CCLWarning
+from . import pyccl as ccl
+from . import Bounds
+from . import CCLWarning
 import warnings
 
 

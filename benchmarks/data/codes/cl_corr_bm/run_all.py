@@ -9,7 +9,7 @@ def run_task(window_type,bins_type,b1,b2) :
     elif bins_type=="log" :
         do_logbin=1
     else :
-        print "Wrong binning scheme "+bins_type
+        print("Wrong binning scheme "+bins_type)
 
     strout="#Cosmological parameters\n"
     strout+="omega_m= 0.3\n"
@@ -66,4 +66,3 @@ run_task("analytic","log",2,2)
 run_task("histo","log",1,1)
 run_task("histo","log",1,2)
 run_task("histo","log",2,2)
-
