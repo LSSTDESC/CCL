@@ -25,7 +25,7 @@ def _Sig_MG(cosmo, a, k):
     return _vectorize_fn6(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
 
 
-@warn_api()
+@warn_api
 def get_density_kernel(cosmo, *, dndz):
     """This convenience function returns the radial kernel for
     galaxy-clustering-like tracers. Given an unnormalized
@@ -55,7 +55,7 @@ def get_density_kernel(cosmo, *, dndz):
     return chi, wchi
 
 
-@warn_api()
+@warn_api
 def get_lensing_kernel(cosmo, *, dndz, mag_bias=None):
     """This convenience function returns the radial kernel for
     weak-lensing-like. Given an unnormalized redshift distribution
@@ -97,7 +97,7 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None):
     return chi, wchi
 
 
-@warn_api()
+@warn_api
 def get_kappa_kernel(cosmo, *, z_source=1100, nsamples=100):
     """This convenience function returns the radial kernel for
     CMB-lensing-like tracers.
@@ -169,7 +169,7 @@ class Tracer(object):
         """
         return self._dndz(z)
 
-    @warn_api()
+    @warn_api
     def get_kernel(self, *, chi):
         """Get the radial kernels for all tracers contained
         in this `Tracer`.
@@ -606,7 +606,7 @@ class WeakLensingTracer(Tracer):
             which will usually be 1 for use with PT IA modeling.
             Defaults to True.
     """
-    @warn_api()
+    @warn_api
     def __init__(self, cosmo, *, dndz, has_shear=True,
                  ia_bias=None, use_A_ia=True):
         self._trc = []
@@ -663,7 +663,7 @@ class CMBLensingTracer(Tracer):
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
-    @warn_api()
+    @warn_api
     def __init__(self, cosmo, *, z_source=1100, n_samples=100):
         self._trc = []
 
@@ -699,7 +699,7 @@ class tSZTracer(Tracer):
         n_chi (float): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
-    @warn_api()
+    @warn_api
     def __init__(self, cosmo, *, z_max=6., n_chi=1024):
         self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
         chi_arr = np.linspace(0, self.chi_max, n_chi)
@@ -734,7 +734,7 @@ class CIBTracer(Tracer):
         n_chi (float): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
-    @warn_api()
+    @warn_api
     def __init__(self, cosmo, *, z_min=0., z_max=6., n_chi=1024):
         self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
         self.chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
@@ -770,7 +770,7 @@ class ISWTracer(Tracer):
         n_chi (float): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
-    @warn_api()
+    @warn_api
     def __init__(self, cosmo, *, z_max=6., n_chi=1024):
         self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
         chi = np.linspace(0, self.chi_max, n_chi)

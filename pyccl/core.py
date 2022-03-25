@@ -170,7 +170,6 @@ class Cosmology(object):
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-<<<<<<< HEAD
         df_mg (array_like, optional):
             Deprecated; will be removed in a future release.
             Perturbations to the GR growth rate as a function of redshift
@@ -228,7 +227,7 @@ class Cosmology(object):
         neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt, \
         subs, funcs, func, name, pars  # clear unnecessary locals
 
-    @warn_api()
+    @warn_api
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
@@ -1373,7 +1372,7 @@ class CosmologyCalculator(Cosmology):
             corresponding to the "HALOFIT" transformation of
             Takahashi et al. 2012 (arXiv:1208.2701).
     """
-    @warn_api()
+    @warn_api
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,

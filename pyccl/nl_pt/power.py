@@ -59,7 +59,7 @@ class PTCalculator(object):
         n_exp_cutoff (float): exponent of the cutoff factor (see
             `k_cutoff`).
     """
-    @warn_api()
+    @warn_api
     def __init__(self, *, with_NC=False, with_IA=False, with_dd=True,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
@@ -141,7 +141,7 @@ class PTCalculator(object):
                                      P_window=self.P_window,
                                      C_window=self.C_window)
 
-    @warn_api()
+    @warn_api
     def get_pgg(self, *, Pd1d1, g4,
                 b11, b21, bs1, b12, b22, bs2,
                 sub_lowk, b3nl1=None, b3nl2=None,
@@ -224,7 +224,7 @@ class PTCalculator(object):
 
         return pgg*self.exp_cutoff
 
-    @warn_api()
+    @warn_api
     def get_pgi(self, *, Pd1d1, g4, b1, b2, bs, c1, c2, cd):
         """ Get the number counts - IA cross-spectrum at the
         internal set of wavenumbers (given by this object's
@@ -268,7 +268,7 @@ class PTCalculator(object):
                              (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
         return pgi*self.exp_cutoff
 
-    @warn_api()
+    @warn_api
     def get_pgm(self, *, Pd1d1, g4, b1, b2, bs, b3nl=None,
                 bk2=None, Pgrad=None):
         """ Get the number counts - matter cross-spectrum at the
@@ -328,7 +328,7 @@ class PTCalculator(object):
 
         return pgm*self.exp_cutoff
 
-    @warn_api()
+    @warn_api
     def get_pii(self, *, Pd1d1, g4, c11, c21, cd1,
                 c12, c22, cd2, return_bb=False,
                 return_both=False):
@@ -391,7 +391,7 @@ class PTCalculator(object):
         else:
             return pii*self.exp_cutoff
 
-    @warn_api()
+    @warn_api
     def get_pim(self, *, Pd1d1, g4, c1, c2, cd):
         """ Get the intrinsic alignment - matter cross-spectrum at
         the internal set of wavenumbers (given by this object's `ks`
@@ -426,7 +426,7 @@ class PTCalculator(object):
                (g4*c2)[None, :] * (a0e2 + b0e2)[:, None])
         return pim*self.exp_cutoff
 
-    @warn_api()
+    @warn_api
     def get_pmm(self, *, Pd1d1_lin, g4):
         """ Get the one-loop matter power spectrum.
 

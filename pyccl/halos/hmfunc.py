@@ -30,7 +30,7 @@ class MassFunc(object):
     """
     name = 'default'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         self.mass_def_strict = mass_def_strict
         # Check if mass definition was provided and check that it's sensible.
@@ -213,7 +213,7 @@ class MassFuncPress74(MassFunc):
     """
     name = 'Press74'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
@@ -252,7 +252,7 @@ class MassFuncSheth99(MassFunc):
     """
     name = 'Sheth99'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
@@ -297,7 +297,7 @@ class MassFuncJenkins01(MassFunc):
     """
     name = 'Jenkins01'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
@@ -332,7 +332,7 @@ class MassFuncTinker08(MassFunc):
     """
     name = 'Tinker08'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
@@ -388,7 +388,7 @@ class MassFuncDespali16(MassFunc):
     """
     name = 'Despali16'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True,
                  ellipsoidal=False):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
@@ -448,7 +448,7 @@ class MassFuncTinker10(MassFunc):
     """
     name = 'Tinker10'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True,
                  norm_all_z=False):
         self.norm_all_z = norm_all_z
@@ -528,7 +528,7 @@ class MassFuncBocquet16(MassFunc):
     """
     name = 'Bocquet16'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True,
                  hydro=True):
         self.hydro = hydro
@@ -665,7 +665,7 @@ class MassFuncWatson13(MassFunc):
     """
     name = 'Watson13'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
@@ -729,7 +729,7 @@ class MassFuncAngulo12(MassFunc):
     """
     name = 'Angulo12'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

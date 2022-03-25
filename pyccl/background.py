@@ -239,7 +239,7 @@ def omega_x(cosmo, a, species):
                           lib.omega_x_vec, cosmo, a, species_types[species])
 
 
-@warn_api()
+@warn_api
 def rho_x(cosmo, a, species, *, is_comoving=False):
     """Physical or comoving density as a function of scale factor.
 

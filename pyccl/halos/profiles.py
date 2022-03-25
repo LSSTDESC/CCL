@@ -151,7 +151,7 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
-    @warn_api()
+    @warn_api
     def real(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
@@ -182,7 +182,7 @@ class HaloProfile(object):
                                       " _fourier method.")
         return f_r
 
-    @warn_api()
+    @warn_api
     def fourier(self, cosmo, k, M, a, *, mass_def=None):
         """ Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
@@ -283,7 +283,7 @@ class HaloProfile(object):
                                                 is_cumul2d=True)
         return s_r_t
 
-    @warn_api()
+    @warn_api
     def convergence(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the convergence as a function of cosmology,
         radius, halo mass and the scale factors of the source
@@ -312,7 +312,7 @@ class HaloProfile(object):
         Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
         return Sigma / Sigma_crit
 
-    @warn_api()
+    @warn_api
     def shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the shear (tangential) as a function of cosmology,
         radius, halo mass and the scale factors of the
@@ -345,7 +345,7 @@ class HaloProfile(object):
         Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
-    @warn_api()
+    @warn_api
     def reduced_shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the reduced shear as a function of cosmology,
         radius, halo mass and the scale factors of the
@@ -376,7 +376,7 @@ class HaloProfile(object):
                            mass_def=mass_def)
         return shear / (1.0 - convergence)
 
-    @warn_api()
+    @warn_api
     def magnification(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the magnification for input parameters.
 
@@ -550,7 +550,7 @@ class HaloProfileGaussian(HaloProfile):
     """
     name = 'Gaussian'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, r_scale, rho0):
         self.rho_0 = rho0
         self.r_scale = r_scale
@@ -597,7 +597,7 @@ class HaloProfilePowerLaw(HaloProfile):
     """
     name = 'PowerLaw'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, r_scale, tilt):
         self.r_s = r_scale
         self.tilt = tilt
@@ -1052,7 +1052,7 @@ class HaloProfilePressureGNFW(HaloProfile):
     """
     name = 'GNFW'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
@@ -1073,7 +1073,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         self._fourier_interp = None
         super(HaloProfilePressureGNFW, self).__init__()
 
-    @warn_api()
+    @warn_api
     def update_parameters(self, *, mass_bias=None, P0=None,
                           c500=None, alpha=None, beta=None, gamma=None,
                           alpha_P=None, P0_hexp=None, x_out=None):
@@ -1365,7 +1365,7 @@ class HaloProfileHOD(HaloProfile):
         return self.c_m_relation.get_concentration(cosmo, M, a,
                                                    mass_def_other=mass_def)
 
-    @warn_api()
+    @warn_api
     def update_parameters(self, *, lMmin_0=None, lMmin_p=None,
                           siglM_0=None, siglM_p=None,
                           lM0_0=None, lM0_p=None,

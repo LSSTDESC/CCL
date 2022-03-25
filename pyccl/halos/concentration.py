@@ -18,7 +18,7 @@ class Concentration(object):
     """
     name = 'default'
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None):
         if mass_def is not None:
             if self._check_mass_def(mass_def):

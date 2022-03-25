@@ -51,18 +51,6 @@ def _bcm_correct_pk2d(cosmo, pk2d):
     check(status, cosmo)
 
 
-@deprecated(new_function=_bcm_correct_pk2d)
-def bcm_correct_pk2d(cosmo, pk2d):
-    """Apply the BCM model correction factor to a given power spectrum.
-    This function operates directly onto the input Pk2D object.
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
-    """
-    _bcm_correct_pk2d(cosmo, pk2d)
-
-
 def baryon_correct(cosmo, model, pk2d):
     """Correct the power spectrum for baryons, given a model name string.
     This function operates on a copy of the input Pk2D object.
@@ -88,3 +76,15 @@ def baryon_correct(cosmo, model, pk2d):
         raise NotImplementedError(f"Baryon correction model {model} "
                                   "not recogized")
     return pk2d_new
+
+
+@deprecated(new_function=baryon_correct)
+def bcm_correct_pk2d(cosmo, pk2d):
+    """Apply the BCM model correction factor to a given power spectrum.
+    This function operates directly onto the input Pk2D object.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
+    """
+    _bcm_correct_pk2d(cosmo, pk2d)

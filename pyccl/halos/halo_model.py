@@ -434,7 +434,7 @@ class HMCalculator(object):
         return i04
 
 
-@warn_api()
+@warn_api
 def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
     """ Returns the mass-weighted mean halo profile.
 
@@ -486,7 +486,7 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
     return out
 
 
-@warn_api()
+@warn_api
 def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
     """ Returns the mass-and-bias-weighted mean halo profile.
 
@@ -901,8 +901,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
     def get_norm(normprof, prof, sf):
         if normprof:
             return hmc.profile_norm(cosmo, sf, prof)
-        else:
-            return 1
+        return 1
 
     na = len(a_use)
     nk = len(k_use)

@@ -11,7 +11,7 @@ except ImportError:
     pass  # prevent nans from isitgr
 
 
-@warn_api()
+@warn_api
 def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 

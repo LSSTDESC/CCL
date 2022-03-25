@@ -5,7 +5,7 @@ from ..background import growth_factor
 from .. import ccllib as lib
 
 
-@warn_api()
+@warn_api
 def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
                       Om_m2_for_c2=False, Om_m_fid=0.3):
     """
@@ -85,7 +85,7 @@ class PTTracer(object):
         self.type = None
         pass
 
-    @warn_api()
+    @warn_api
     def get_bias(self, bias_name, *, z):
         """Get the value of one of the bias functions at a given
         redshift.
@@ -150,7 +150,7 @@ class PTNumberCountsTracer(PTTracer):
         bk2 (float or tuple of arrays): as above for the
             non-local bias.
     """
-    @warn_api()
+    @warn_api
     def __init__(self, *, b1, b2=None, bs=None, b3nl=None, bk2=None):
         self.biases = {}
         self.type = 'NC'
@@ -214,7 +214,7 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         cdelta (float or tuple of arrays): as above for the
             overdensity bias.
     """
-    @warn_api()
+    @warn_api
     def __init__(self, *, c1, c2=None, cdelta=None):
 
         self.biases = {}

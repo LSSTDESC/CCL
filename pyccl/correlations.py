@@ -29,7 +29,7 @@ correlation_types = {
 }
 
 
-@warn_api()
+@warn_api
 def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
                 method='fftlog'):
     """Compute the angular correlation function.

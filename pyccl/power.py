@@ -5,7 +5,7 @@ from .pk2d import parse_pk2d
 from .pyutils import warn_api
 
 
-@warn_api()
+@warn_api
 def linear_power(cosmo, k, a, *, p_of_k_a='delta_matter:delta_matter'):
     """The linear power spectrum.
 
@@ -26,7 +26,7 @@ def linear_power(cosmo, k, a, *, p_of_k_a='delta_matter:delta_matter'):
     return cosmo._pk_lin[p_of_k_a].eval(k, a, cosmo)
 
 
-@warn_api()
+@warn_api
 def nonlin_power(cosmo, k, a, *, p_of_k_a='delta_matter:delta_matter'):
     """The non-linear power spectrum.
 
@@ -102,7 +102,7 @@ def sigmaM(cosmo, M, a):
     return sigM
 
 
-@warn_api()
+@warn_api
 def sigmaR(cosmo, R, a=1., *, p_of_k_a=None):
     """RMS variance in a top-hat sphere of radius R in Mpc.
 
@@ -131,7 +131,7 @@ def sigmaR(cosmo, R, a=1., *, p_of_k_a=None):
     return sR
 
 
-@warn_api()
+@warn_api
 def sigmaV(cosmo, R, a=1., *, p_of_k_a=None):
     """RMS variance in the displacement field in a top-hat sphere of radius R.
     The linear displacement field is the gradient of the linear density field.
@@ -161,7 +161,7 @@ def sigmaV(cosmo, R, a=1., *, p_of_k_a=None):
     return sV
 
 
-@warn_api()
+@warn_api
 def sigma8(cosmo, *, p_of_k_a=None):
     """RMS variance in a top-hat sphere of radius 8 Mpc/h.
 
@@ -182,7 +182,7 @@ def sigma8(cosmo, *, p_of_k_a=None):
     return sigmaR(cosmo, 8.0 / cosmo['h'], p_of_k_a=p_of_k_a)
 
 
-@warn_api()
+@warn_api
 def kNL(cosmo, a, *, p_of_k_a=None):
     """Scale for the non-linear cut.
 

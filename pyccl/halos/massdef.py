@@ -24,7 +24,7 @@ def mass2radius_lagrangian(cosmo, M):
     return R
 
 
-@warn_api()
+@warn_api
 def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration `c_new` is
@@ -87,7 +87,7 @@ class MassDef(object):
     """
     name = 'default'
 
-    @warn_api()
+    @warn_api
     def __init__(self, Delta, rho_type=None, *, c_m_relation=None):
         # Check it makes sense
         if (Delta != 'fof') and (Delta != 'vir'):

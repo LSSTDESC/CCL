@@ -26,7 +26,7 @@ class HaloBias(object):
     """
     name = "default"
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         self.mass_def_strict = mass_def_strict
         if mass_def is not None:
@@ -197,7 +197,7 @@ class HaloBiasSheth99(HaloBias):
     """
     name = "Sheth99"
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None,
                  mass_def_strict=True,
                  use_delta_c_fit=False):
@@ -244,7 +244,7 @@ class HaloBiasSheth01(HaloBias):
     """
     name = "Sheth01"
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
@@ -286,7 +286,7 @@ class HaloBiasBhattacharya11(HaloBias):
     """
     name = "Bhattacharya11"
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
@@ -326,7 +326,7 @@ class HaloBiasTinker10(HaloBias):
     """
     name = "Tinker10"
 
-    @warn_api()
+    @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

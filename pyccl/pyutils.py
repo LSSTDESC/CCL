@@ -573,7 +573,7 @@ def _get_spline2d_arrays(gsl_spline):
     return yarr, xarr, zarr.reshape(y_size, x_size)
 
 
-def warn_api(pairs=None, order=None):
+def warn_api(func=None, /, *, pairs=None, order=None):
     """ This decorator translates old API to new API for:
       - functions/methods with changed argument order;
       - functions/methods whose arguments have been renamed.
@@ -585,6 +585,12 @@ def warn_api(pairs=None, order=None):
     order : list, optional
         List of the **old** order of the arguments whose order
         has been changed, under their **new** name. The default is None.
+
+    .. note::
+
+        This wrapper assumes that
+            1. there are no positional-only arguments;
+            2. the order of the positional-or-keyword arguments is unchanged.
 
     Example
     -------
@@ -614,11 +620,7 @@ def warn_api(pairs=None, order=None):
 
     """  # noqa
 
-    def wrapper(func):
-        """ This wrapper assumes that
-        1. there are no positional-only arguments;
-        2. the order of the positional-or-keyword arguments is unchanged.
-        """
+    def _decorator(func, pairs, order):
         POK = Parameter.POSITIONAL_OR_KEYWORD
         KWO = Parameter.KEYWORD_ONLY
 
@@ -630,7 +632,7 @@ def warn_api(pairs=None, order=None):
         npos = len(pos_names)
 
         @functools.wraps(func)
-        def new_func(*args, **kwargs):
+        def wrapper(*args, **kwargs):
             # check for normprof - we'll need that later (1 of 3)
             def normprof_warning():
                 # all the variables we need will already be in locals
@@ -753,12 +755,17 @@ def warn_api(pairs=None, order=None):
             normprof_warning()
 
             return func(**kwargs)
+        return wrapper
 
-        new_func.__name__ = func.__name__
-        new_func.__doc__ = func.__doc__
-        return new_func
+    def decorator(func):
+        return _decorator(func, pairs=pairs, order=order)
 
-    return wrapper
+    # Check if usage is with @warn_api or @warn_api()
+    if func is None:
+        # warn_api() with patentheses
+        return decorator
+    # warn_api without parentheses
+    return decorator(func)
 
 
 def deprecate_attr(pairs=None):

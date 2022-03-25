@@ -12,7 +12,7 @@ neutrino_mass_splits = {
 }
 
 
-@warn_api()
+@warn_api
 def Omega_nu_h2(a, *, m_nu, T_CMB=None):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
@@ -52,7 +52,7 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None):
 
 
 @deprecated(Omega_nu_h2)
-@warn_api()
+@warn_api
 def Omeganuh2(a, *, m_nu, T_CMB=None):
     return Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
 

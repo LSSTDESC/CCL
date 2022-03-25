@@ -289,9 +289,9 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, tracer3=None, tracer4=None,
         tracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
             of any kind.
         tracer3 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
-            of any kind. If `None`, `cltracer1` will be used instead.
+            of any kind. If `None`, `tracer1` will be used instead.
         tracer4 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
-            of any kind. If `None`, `cltracer1` will be used instead.
+            of any kind. If `None`, `tracer1` will be used instead.
         t_of_kk_a (:class:`~pyccl.tk3d.Tk3D`): 3D connected
             trispectrum.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
