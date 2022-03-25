@@ -128,7 +128,7 @@ class Caching(metaclass=_ClassPropertyMeta):
     """
     _enabled: bool = True
     _policies: list = ['fifo', 'lru', 'lfu']
-    _maxsize: int = 64
+    _maxsize: int = 128
     _policy: str = 'lru'
     _cached_functions: list = []
 
@@ -262,7 +262,7 @@ class Caching(metaclass=_ClassPropertyMeta):
 
     @classmethod
     def reset(cls):
-        cls.maxsize = 64
+        cls.maxsize = 128
         cls.policy = 'lru'
 
     @classmethod
@@ -386,8 +386,6 @@ class UnlockInstance:
         mutate (``bool``):
             If the enclosed function mutates the object, the stored
             representation is automatically deleted.
-        init (``bool``):
-            Special use for constructors: no need to unlock, but lock on exit.
     """
 
     def __init__(self, instance, mutate=True):
