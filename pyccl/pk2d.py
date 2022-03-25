@@ -24,10 +24,9 @@ class _Pk2D_descriptor:
         else:
             this = instance
 
+        @functools.wraps(self.func)
         def new_func(*args, **kwargs):
             return self.func(this, *args, **kwargs)
-        new_func.__name__ = self.func.__name__
-        new_func.__doc__ = self.func.__doc__
 
         return new_func
 

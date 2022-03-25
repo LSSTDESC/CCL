@@ -12,9 +12,6 @@ from os import environ, path
 if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 
-# Caching
-from .constants import Caching
-
 from . import ccllib as lib
 from . import core, constants, background, power, halomodel, pk2d, tk3d, haloprofile, halos, massfunction, nl_pt
 
