@@ -15,7 +15,7 @@ COSMO_HM = ccl.Cosmology(
 
 
 def test_halomod_f2d_copy():
-    from pyccl.pyutils import assert_warns
+    from . import assert_warns
     mdef = ccl.halos.MassDef('vir', 'matter')
     hmf = ccl.halos.MassFuncSheth99(COSMO_HM, mdef,
                                     mass_def_strict=False,

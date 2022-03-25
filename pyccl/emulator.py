@@ -91,8 +91,8 @@ class Emulator(CCLObject):
 
       * You may need a method that translates any CCL parameters to a set
         of parameters the emulator can understand. To that end, if the method
-        is named `_build_parameters`, CCL will automatically allow `setattr`
-        to be called in that method.
+        is named ``_build_parameters``, CCL will automatically allow changing
+        of the instance via ``setattr`` inside of that method.
     """
     pass
 
