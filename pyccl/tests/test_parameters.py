@@ -4,7 +4,7 @@ from numpy.testing import (
     assert_raises, assert_no_warnings, assert_almost_equal)
 import pytest
 
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 def test_parameters_lcdm_defaults():

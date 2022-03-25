@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 import pytest
 
-import pyccl as ccl
+from . import pyccl as ccl
 
 GROWTH_HIZ_TOLERANCE = 6.0e-6
 GROWTH_TOLERANCE = 1e-4

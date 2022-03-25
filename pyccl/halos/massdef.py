@@ -1,6 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import species_types, rho_x, omega_x
+from ..base import CCLHalosObject
 import numpy as np
 
 
@@ -61,7 +62,7 @@ def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
     return c_new
 
 
-class MassDef(object):
+class MassDef(CCLHalosObject):
     """Halo mass definition. Halo masses are defined in terms of an overdensity
     parameter :math:`\\Delta` and an associated density :math:`X` (either the
     matter density or the critical density):
@@ -103,11 +104,9 @@ class MassDef(object):
         else:
             self._concentration_init(c_m_relation)
 
-    def __eq__(self, other):
-        """ Allows you to compare two mass definitions
-        """
-        return (self.Delta == other.Delta) and \
-            (self.rho_type == other.rho_type)
+    def __repr__(self):
+        return f"pyccl.halos.MassDef(Delta={self.Delta}, " \
+            f"rho_type={self.rho_type})"
 
     def _concentration_init(self, c_m_relation):
         from .concentration import Concentration, concentration_from_name

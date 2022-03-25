@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 def test_ssc_WL():

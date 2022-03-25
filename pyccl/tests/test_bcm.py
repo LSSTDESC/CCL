@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 COSMO = ccl.Cosmology(
@@ -31,5 +31,5 @@ def test_bcm_correct_smoke():
 
 
 def test_bcm_correct_raises():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ccl.bcm_correct_pk2d(COSMO, None)

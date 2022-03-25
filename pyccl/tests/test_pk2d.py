@@ -3,8 +3,8 @@ import pytest
 from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
-import pyccl as ccl
-from pyccl import CCLWarning
+from . import pyccl as ccl
+from . import CCLWarning
 
 
 def pk1d(k):

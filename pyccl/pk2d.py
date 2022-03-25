@@ -6,9 +6,11 @@ from . import ccllib as lib
 
 from .errors import CCLWarning
 from .pyutils import check, _get_spline2d_arrays
+from .base import CCLObject, UnlockInstance, unlock_instance
+from ._repr import _build_string_Pk2D
 
 
-class Pk2D(object):
+class Pk2D(CCLObject):
     """A power spectrum class holding the information needed to reconstruct an
     arbitrary function of wavenumber and scale factor.
 
@@ -63,6 +65,8 @@ class Pk2D(object):
         empty (bool): if True, just create an empty object, to be filled
             out later
     """
+    __repr__ = _build_string_Pk2D
+
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
                  cosmo=None, empty=False):
@@ -153,10 +157,12 @@ class Pk2D(object):
         if np.ndim(ret) == 0:
             status = ret
         else:
-            pk2d.psp, status = ret
+            with UnlockInstance(pk2d):
+                pk2d.psp, status = ret
 
         check(status, cosmo)
-        pk2d.has_psp = True
+        with UnlockInstance(pk2d):
+            pk2d.has_psp = True
         return pk2d
 
     @classmethod
@@ -176,9 +182,11 @@ class Pk2D(object):
         if np.ndim(ret) == 0:
             status = ret
         else:
-            pk2d.psp, status = ret
+            with UnlockInstance(pk2d):
+                pk2d.psp, status = ret
         check(status, cosmo)
-        pk2d.has_psp = True
+        with UnlockInstance(pk2d):
+            pk2d.has_psp = True
         return pk2d
 
     def eval(self, k, a, cosmo):
@@ -368,6 +376,11 @@ class Pk2D(object):
     def __radd__(self, other):
         return self.__add__(other)
 
+    @unlock_instance(mutate=True)
+    def __iadd__(self, other):
+        self = self.__add__(other)
+        return self
+
     def __mul__(self, other):
         """Multiply two Pk2D instances.
 
@@ -399,6 +412,11 @@ class Pk2D(object):
 
     def __rmul__(self, other):
         return self.__mul__(other)
+
+    @unlock_instance(mutate=True)
+    def __imul__(self, other):
+        self = self.__mul__(other)
+        return self
 
     def __pow__(self, exponent):
         """Take a Pk2D instance to a power.

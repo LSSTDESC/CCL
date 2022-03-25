@@ -1,5 +1,5 @@
 from numpy.testing import assert_
-import pyccl
+from . import pyccl
 
 
 def test_cclerror_repr():

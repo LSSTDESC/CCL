@@ -3,6 +3,9 @@ from .core import check
 from .background import comoving_radial_distance, growth_rate, \
     growth_factor, scale_factor_of_chi, h_over_h0
 from .pyutils import _check_array_params, NoneArr, _vectorize_fn6
+from .parameters import physical_constants
+from .base import CCLObject, unlock_instance
+from ._repr import _build_string_Tracer
 import numpy as np
 
 
@@ -117,7 +120,7 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
     return chi, wchi
 
 
-class Tracer(object):
+class Tracer(CCLObject, init_attrs=True):
     """Tracers contain the information necessary to describe the
     contribution of a given sky observable to its cross-power spectrum
     with any other tracer. Tracers are composed of 4 main ingredients:
@@ -140,6 +143,8 @@ class Tracer(object):
     tracers that get combined linearly when computing power spectra.
     Further details can be found in Section 4.9 of the CCL note.
     """
+    __repr__ = _build_string_Tracer
+
     def __init__(self):
         """By default this `Tracer` object will contain no actual
         tracers
@@ -282,6 +287,7 @@ class Tracer(object):
 
         return np.array([t.der_bessel for t in self._trc])
 
+    @unlock_instance
     def _MG_add_tracer(self, cosmo, kernel, z_b, der_bessel=0, der_angles=0,
                        bias_transfer_a=None, bias_transfer_k=None):
         """ function to set mg_transfer in the right format and add MG tracers
@@ -373,6 +379,7 @@ class Tracer(object):
 
         return mg_transfer
 
+    @unlock_instance
     def add_tracer(self, cosmo, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
                    der_bessel=0, der_angles=0,
@@ -631,7 +638,7 @@ class WeakLensingTracer(Tracer):
                 # Transfer
                 # See Joachimi et al. (2011), arXiv: 1008.3491, Eq. 6.
                 # and note that we use C_1= 5e-14 from arXiv:0705.0166
-                rho_m = lib.cvar.constants.RHO_CRITICAL * cosmo['Omega_m']
+                rho_m = physical_constants.RHO_CRITICAL * cosmo['Omega_m']
                 a = - tmp_a * 5e-14 * rho_m / D
             else:
                 # use the raw input normalization. Normally, this will be 1
@@ -762,7 +769,7 @@ class ISWTracer(Tracer):
         self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
         chi = np.linspace(0, self.chi_max, n_chi)
         a_arr = scale_factor_of_chi(cosmo, chi)
-        H0 = cosmo['h'] / lib.cvar.constants.CLIGHT_HMPC
+        H0 = cosmo['h'] / physical_constants.CLIGHT_HMPC
         OM = cosmo['Omega_c']+cosmo['Omega_b']
         Ez = h_over_h0(cosmo, a_arr)
         fz = growth_rate(cosmo, a_arr)
