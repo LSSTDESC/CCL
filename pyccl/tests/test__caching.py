@@ -33,9 +33,9 @@ def timeit_(sigma8):
 def test_caching_switches():
     """Test that the Caching switches work as intended."""
     assert ccl.Caching._enabled
-    assert ccl.Caching._maxsize == 64
-    ccl.Caching.maxsize = 128
     assert ccl.Caching._maxsize == 128
+    ccl.Caching.maxsize = 32
+    assert ccl.Caching._maxsize == 32
     ccl.Caching.disable()
     assert not ccl.Caching._enabled
     ccl.Caching.enable()
@@ -114,7 +114,7 @@ def test_caching_lfu():
 def test_caching_reset():
     """Test the reset switches."""
     ccl.Caching.reset()
-    assert ccl.Caching.maxsize == 64
+    assert ccl.Caching.maxsize == 128
     assert ccl.Caching.policy == "lru"
     ccl.Caching.clear_cache()
     func = ccl.Cosmology._compute_linear_power
