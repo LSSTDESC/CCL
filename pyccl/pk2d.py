@@ -131,8 +131,14 @@ class Pk2D(CCLObject):
             return Pk2D(empty=True)
 
         a_arr, lk_arr, pk_arr = self.get_spline_arrays()
+
+        is_logp = bool(self.psp.is_log)
+        if is_logp:
+            # log in-place
+            np.log(pk_arr, out=pk_arr)
+
         pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
-                    is_logp=False,
+                    is_logp=is_logp,
                     extrap_order_lok=self.psp.extrap_order_lok,
                     extrap_order_hik=self.psp.extrap_order_hik)
 
