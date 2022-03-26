@@ -1,6 +1,6 @@
 import numpy as np
-import pyccl as ccl
 import pytest
+from . import pyccl as ccl
 
 BCM_TOLERANCE = 1e-4
 

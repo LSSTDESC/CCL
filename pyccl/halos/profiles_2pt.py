@@ -1,10 +1,11 @@
+from ..base import CCLHalosObject
 from .profiles import HaloProfile, HaloProfileHOD
 from ..pyutils import warn_api
 from ..errors import CCLDeprecationWarning
 import warnings
 
 
-class Profile2pt(object):
+class Profile2pt(CCLHalosObject):
     """ This class implements the 1-halo 2-point correlator between
     two halo profiles.
 

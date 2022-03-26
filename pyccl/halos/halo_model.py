@@ -9,16 +9,15 @@ from ..core import check
 from ..pk2d import Pk2D
 from ..tk3d import Tk3D
 from ..power import linear_matter_power, nonlin_matter_power
-from ..background import rho_x
 from ..pyutils import _spline_integrate, warn_api, deprecate_attr
 from .. import background
 from ..errors import CCLWarning
+from ..base import CCLHalosObject, cache, unlock_instance
+from ..parameters import physical_constants
 import numpy as np
 
-physical_constants = lib.cvar.constants
 
-
-class HMCalculator(object):
+class HMCalculator(CCLHalosObject):
     """ This class implements a set of methods that can be used to
     compute various halo model quantities. A lot of these quantities
     will involve integrals of the sort:
@@ -30,9 +29,9 @@ class HMCalculator(object):
     an arbitrary function of mass, scale factor and Fourier scales.
 
     Args:
-        massfunc (str or :class:`~pyccl.halos.hmfunc.MassFunc`):
+        mass_function (str or :class:`~pyccl.halos.hmfunc.MassFunc`):
             the mass function to use
-        hbias (str or :class:`~pyccl.halos.hbias.HaloBias`):
+        halo_bias (str or :class:`~pyccl.halos.hbias.HaloBias`):
             the halo bias function to use
         mass_def (str or :class:`~pyccl.halos.massdef.MassDef`):
             the halo mass definition to use
@@ -50,6 +49,7 @@ class HMCalculator(object):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
+
     @warn_api(pairs=[("mass_function", "massfunc"), ("halo_bias", "hbias"),
                      ("lM_min", "log10M_min"), ("lM_max", "log10M_max"),
                      ("nlM", "nlog10M"), ("k_norm", "k_min")])
@@ -71,7 +71,7 @@ class HMCalculator(object):
             nMclass = MassFunc.from_name(mass_function)
             self.mass_function = nMclass(mass_def=self.mass_def)
         else:
-            raise TypeError("massfunc must be of type `MassFunc` "
+            raise TypeError("mass_function must be of type `MassFunc` "
                             "or a mass function name string")
         # halo bias function
         if isinstance(halo_bias, HaloBias):
@@ -80,7 +80,7 @@ class HMCalculator(object):
             bMclass = HaloBias.from_name(halo_bias)
             self.halo_bias = bMclass(mass_def=self.mass_def)
         else:
-            raise TypeError("hbias must be of type `HaloBias` "
+            raise TypeError("halo_bias must be of type `HaloBias` "
                             "or a halo bias name string")
 
         self._prec = {'log10M_min': lM_min,
@@ -104,13 +104,6 @@ class HMCalculator(object):
         else:
             self._integrator = self._integ_spline
 
-        # we store the last-called cosmology, and scale factor
-        self._a_current_mf = -1
-        self._a_current_bf = -1
-        from ..core import CosmologyVanillaLCDM  # circular import
-        self._cosmo_current_mf = CosmologyVanillaLCDM()
-        self._cosmo_current_bf = CosmologyVanillaLCDM()
-
     @deprecate_attr(pairs=[("mass_function", "_massfunc"),
                            ("halo_bias", "_hbias"),
                            ("mass_def", "_mdef")])
@@ -121,39 +114,43 @@ class HMCalculator(object):
         # Spline integrator
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
+    @cache
+    def _get_rho(self, cosmo, a):
+        return cosmo.rho_x(a, "matter", is_comoving=True)
+
+    @cache
+    def _get_mass_function(self, cosmo, a):
+        mf = self.mass_function.get_mass_function(
+            cosmo, self._mass, a, mass_def_other=self.mass_def)
+        mf0 = (self._rho0 - self._integrator(
+            mf*self._mass, self._lmass)) / self._m0
+        return mf, mf0
+
+    @cache
+    def _get_halo_bias(self, cosmo, a):
+        bf = self.halo_bias.get_halo_bias(
+            cosmo, self._mass, a, mass_def_other=self.mass_def)
+        bf0 = (self._rho0 - self._integrator(
+            self._mf*bf*self._mass, self._lmass)) / self._m0
+        return bf, bf0
+
+    @unlock_instance(mutate=False)
     def _get_ingredients(self, a, cosmo, get_bf):
-        rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
+        self._rho0 = self._get_rho(cosmo, 1.)
         # Compute mass function and bias (if needed) at a new
         # value of the scale factor and/or with a new Cosmology
-        if (a != self._a_current_mf) or (cosmo != self._cosmo_current_mf):
-            self.mf = self.mass_function.get_mass_function(
-                cosmo, self._mass, a, mass_def_other=self.mass_def)
-            self.mf0 = (rho0 -
-                        self._integrator(self.mf * self._mass, self._lmass)
-                        ) / self._m0
-            self._a_current_mf = a
-            self._cosmo_current_mf = cosmo
-
-        if get_bf:
-            if (a != self._a_current_bf) or (cosmo != self._cosmo_current_bf):
-                self.bf = self.halo_bias.get_halo_bias(
-                    cosmo, self._mass, a, mass_def_other=self.mass_def)
-                self.mbf0 = (rho0 -
-                             self._integrator(self.mf * self.bf * self._mass,
-                                              self._lmass)
-                             ) / self._m0
-            self._a_current_bf = a
-            self._cosmo_current_bf = cosmo
+        self._mf, self._mf0 = self._get_mass_function(cosmo, a)
+        self._bf, self._bf0 = self._get_halo_bias(cosmo, a)
 
     def _integrate_over_mf(self, array_2):
-        i1 = self._integrator(self.mf[..., :] * array_2,
+        i1 = self._integrator(self._mf[..., :] * array_2,
                               self._lmass)
-        return i1 + self.mf0 * array_2[..., 0]
+        return i1 + self._mf0 * array_2[..., 0]
 
     def _integrate_over_mbf(self, array_2):
-        i1 = self._integrator((self.mf * self.bf)[..., :] * array_2,
+        i1 = self._integrator((self._mf * self._bf)[..., :] * array_2,
                               self._lmass)
-        return i1 + self.mbf0 * array_2[..., 0]
+        return i1 + self._bf0 * array_2[..., 0]
 
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
@@ -234,7 +231,7 @@ class HMCalculator(object):
             self._get_ingredients(_a, cosmo, False)
             _selm = np.atleast_2d(selection(self._mass, _a)).T
             mint[i] = self._integrator(
-                dvda[i] * self.mf[..., :] * _selm[..., :],
+                dvda[i] * self._mf[..., :] * _selm[..., :],
                 self._lmass
             )
 

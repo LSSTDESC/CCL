@@ -3,7 +3,8 @@ import functools
 import numpy as np
 
 from . import ccllib as lib
-
+from .base import CCLObject, UnlockInstance, unlock_instance
+from ._repr import _build_string_Pk2D
 from .errors import CCLWarning, CCLError
 from .pyutils import (check, _get_spline2d_arrays,
                       warn_api, deprecated, CCLDeprecationWarning)
@@ -31,7 +32,7 @@ class _Pk2D_descriptor:
         return new_func
 
 
-class Pk2D(object):
+class Pk2D(CCLObject):
     """A power spectrum class holding the information needed to reconstruct an
     arbitrary function of wavenumber and scale factor.
 
@@ -86,6 +87,7 @@ class Pk2D(object):
         empty (bool): if True, just create an empty object, to be filled
             out later
     """
+    __repr__ = _build_string_Pk2D
 
     @warn_api(order=["pkfunc", "a_arr", "lk_arr", "pk_arr", "is_logp",
                      "extrap_order_lok", "extrap_order_hik", "cosmo"])
@@ -93,6 +95,11 @@ class Pk2D(object):
                  pkfunc=None, cosmo=None, is_logp=True,
                  extrap_order_lok=1, extrap_order_hik=2,
                  empty=False):
+        # set extrapolation order before everything else
+        # in case an empty Pk2D is created
+        self.extrap_order_lok = extrap_order_lok
+        self.extrap_order_hik = extrap_order_hik
+
         if empty:
             self.has_psp = False
             return
@@ -138,9 +145,6 @@ class Pk2D(object):
                 pkflat[ia, :] = pkfunc(k=np.exp(lk_arr), a=a)
             pkflat = pkflat.flatten()
 
-        self.extrap_order_lok = extrap_order_lok
-        self.extrap_order_hik = extrap_order_hik
-
         self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
                                                         int(extrap_order_lok),
                                                         int(extrap_order_hik),
@@ -181,7 +185,8 @@ class Pk2D(object):
         if cosmo is None:
             from .core import CosmologyVanillaLCDM
             cosmo_use = CosmologyVanillaLCDM()  # this is not used anywhere
-            self.psp.extrap_linear_growth = 404  # flag no extrapolation
+            with UnlockInstance(self, mutate=False):
+                self.psp.extrap_linear_growth = 404  # flag no extrapolation
         else:
             cosmo_use = cosmo
             # make sure we have growth factors for extrapolation
@@ -201,7 +206,8 @@ class Pk2D(object):
 
         # handle scale factor extrapolation
         if cosmo is None:
-            self.psp.extrap_linear_growth = 401  # revert flag linear growth
+            with UnlockInstance(self, mutate=False):
+                self.psp.extrap_linear_growth = 401  # revert flag 404
 
         try:
             check(status, cosmo_use)
@@ -221,10 +227,35 @@ class Pk2D(object):
         f = self.eval(k, a, cosmo=cosmo, derivative=True)
         return f
 
-    @deprecated(eval_dlPk_dlk)
     @functools.wraps(eval_dlPk_dlk)
+    @deprecated(eval_dlPk_dlk)
     def eval_dlogpk_dlogk(self, k, a, cosmo):
         return self.eval_dlPk_dlk(k, a, cosmo)
+
+    def __call__(self, k, a, cosmo=None, *, derivative=False):
+        """Callable vectorized instance."""
+        out = np.array([self.eval(k, aa, cosmo, derivative=derivative)
+                        for aa in np.atleast_1d(a).astype(float)])
+        return out.squeeze()[()]
+
+    def copy(self):
+        """Return a copy of this Pk2D object."""
+        if not self.has_psp:
+            return Pk2D(empty=True)
+
+        a_arr, lk_arr, pk_arr = self.get_spline_arrays()
+
+        is_logp = bool(self.psp.is_log)
+        if is_logp:
+            # log in-place
+            np.log(pk_arr, out=pk_arr)
+
+        pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
+                    is_logp=is_logp,
+                    extrap_order_lok=self.psp.extrap_order_lok,
+                    extrap_order_hik=self.psp.extrap_order_hik)
+
+        return pk2d
 
     @classmethod
     def from_model(cls, cosmo, model):
@@ -244,9 +275,10 @@ class Pk2D(object):
         Returns:
             :class:`~pyccl.pk2d.Pk2D`
                 The power spectrum of the input model.
-        """
-        # if model in ['bacco', ]:  # other emulators go in here
-        #     return PowerSpectrumEmulator.get_pk_linear(cosmo, model)
+        """  # noqa
+        if model in ['bacco', ]:  # other emulators go in here
+            from .emulator import PowerSpectrumEmulator as PSE
+            return PSE.from_name(model)().get_pk_linear(cosmo)
 
         pk2d = cls(empty=True)
         status = 0
@@ -267,41 +299,44 @@ class Pk2D(object):
         if np.ndim(ret) == 0:
             status = ret
         else:
-            pk2d.psp, status = ret
+            with UnlockInstance(pk2d):
+                pk2d.psp, status = ret
 
         check(status, cosmo)
-        pk2d.has_psp = True
+        with UnlockInstance(pk2d):
+            pk2d.has_psp = True
         return pk2d
 
     @classmethod
-    @deprecated(new_function=from_model)
     @functools.wraps(from_model)
+    @deprecated(new_function=from_model.__func__)
     def pk_from_model(cls, cosmo, model):
         return cls.from_model(cosmo, model)
 
     @_Pk2D_descriptor
-    def apply_halofit(self, cosmo, pk_linear=None):
+    def apply_halofit(self, cosmo, *, pk_linear=None):
         """Pk2D constructor that applies the "HALOFIT" transformation of
-        Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
-        power spectrum in `pk_linear`. See ``Pk2D.apply_nonlin_model`` for details.
+        Takahashi et al. 2012 (arXiv:1208.2701) on an input linear power
+        spectrum in `pk_linear`. See ``Pk2D.apply_nonlin_model`` for details.
         """
         if pk_linear is not None:
             self = pk_linear
 
-        from .pk2d import Pk2D
-        pk2d = Pk2D(empty=True)
+        pk2d = self.__class__(empty=True)
         status = 0
         ret = lib.apply_halofit(cosmo.cosmo, self.psp, status)
         if np.ndim(ret) == 0:
             status = ret
         else:
-            pk2d.psp, status = ret
+            with UnlockInstance(pk2d):
+                pk2d.psp, status = ret
         check(status, cosmo)
-        pk2d.has_psp = True
+        with UnlockInstance(pk2d):
+            pk2d.has_psp = True
         return pk2d
 
     @_Pk2D_descriptor
-    def apply_nonlin_model(self, cosmo, model, pk_linear=None):
+    def apply_nonlin_model(self, cosmo, model, *, pk_linear=None):
         """Pk2D constructor that applies a non-linear model
         to a linear power spectrum.
 
@@ -316,44 +351,42 @@ class Pk2D(object):
                 in a future release. Use the instance method instead.
 
         Returns:
-            :class:`Pk2D`
-                A copy of the input power spectrum where the nonlinear model
-                has been applied.
+            :class:`Pk2D`:
+                The transormed power spectrum.
         """
         if pk_linear is not None:
             self = pk_linear
 
         if model == "halofit":
             pk2d_new = self.apply_halofit(cosmo)
-        # elif model in ["bacco", ]:  # other emulator names go in here
-        #     from .boltzmann import PowerSpectrumEmulator as PSE
-        #     pk2d_new = PSE.apply_nonlin_model(cosmo, model, self)
+        elif model in ["bacco", ]:  # other emulator names go in here
+            from .emulator import PowerSpectrumEmulator as PSE
+            emu = PSE.from_name(model)()
+            pk2d_new = emu.apply_nonlin_model(cosmo, self)
         return pk2d_new
 
     @_Pk2D_descriptor
-    def include_baryons(self, cosmo, model, pk_nonlin=None):
+    def include_baryons(self, cosmo, model, *, pk_nonlin=None):
         """Pk2D constructor that applies a correction for baryons to
         a non-linear power spectrum.
 
         Arguments:
-            cosmo (:class:`~pyccl.core.Cosmology`)
+            cosmo (:class:`~pyccl.core.Cosmology`):
                 A Cosmology object.
-            model (str)
+            model (str):
                 Model to use.
-            pk_nonlin (:class:`Pk2D`)
-                A :class:`Pk2D` object containing the non-linear power spectrum
-                to transform. This argument is deprecated and will be removed
-                in a future release. Use the instance method instead.
+            pk_nonlin (:class:`Pk2D`):
+                A :class:`Pk2D` object containing the non-linear power
+                spectrum to transform. This argument is deprecated and will be
+                removed in a future release. Use the instance method instead.
 
         Returns:
             :class:`Pk2D`
-                A copy of the input power spectrum where the baryon correction
+                A copy of the input power spectrum where the nonlinear model
                 has been applied.
         """
-        # As in `apply_nonlin_model`, use of `pk_nonlin` should be deprecated.
         if pk_nonlin is not None:
             self = pk_nonlin
-
         return cosmo.baryon_correct(model, self)
 
     def get_spline_arrays(self):
@@ -376,22 +409,6 @@ class Pk2D(object):
             pk_arr = np.exp(pk_arr)
 
         return a_arr, lk_arr, pk_arr
-
-    def copy(self):
-        """Return a copy of this Pk2D object."""
-        if not self.has_psp:
-            pk2d = Pk2D(extrap_order_lok=self.extrap_order_lok,
-                        extrap_order_hik=self.extrap_order_hik,
-                        empty=True)
-            return pk2d
-
-        a_arr, lk_arr, pk_arr = _get_spline2d_arrays(self.psp.fka)
-        pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
-                    is_logp=self.psp.is_log,
-                    extrap_order_lok=self.psp.extrap_order_lok,
-                    extrap_order_hik=self.psp.extrap_order_hik)
-
-        return pk2d
 
     def __del__(self):
         """Free memory associated with this Pk2D structure."""
@@ -467,8 +484,12 @@ class Pk2D(object):
 
         return new
 
-    def __radd__(self, other):
-        return self.__add__(other)
+    __radd__ = __add__
+
+    @unlock_instance(mutate=True)
+    def __iadd__(self, other):
+        self = self.__add__(other)
+        return self
 
     def __mul__(self, other):
         """Multiply two Pk2D instances.
@@ -499,8 +520,12 @@ class Pk2D(object):
                    extrap_order_hik=self.extrap_order_hik)
         return new
 
-    def __rmul__(self, other):
-        return self.__mul__(other)
+    __rmul__ = __mul__
+
+    @unlock_instance(mutate=True)
+    def __imul__(self, other):
+        self = self.__mul__(other)
+        return self
 
     def __pow__(self, exponent):
         """Take a Pk2D instance to a power.

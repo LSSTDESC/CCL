@@ -2,7 +2,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from ..pyutils import _check_array_params, warn_api
 from ..background import growth_factor
-from .. import ccllib as lib
+from ..parameters import physical_constants
 
 
 @warn_api
@@ -51,7 +51,7 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
     check_input_array(a1delta, 'a1delta')
 
     Om_m = cosmo['Omega_m']
-    rho_crit = lib.cvar.constants.RHO_CRITICAL
+    rho_crit = physical_constants.RHO_CRITICAL
     c1 = c1delta = c2 = None
     gz = growth_factor(cosmo, 1./(1+z))
 

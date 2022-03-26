@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.testing
-import pyccl as ccl
+from . import pyccl as ccl
 import pytest
 
 # Set tolerances

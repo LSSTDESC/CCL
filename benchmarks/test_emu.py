@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-import pyccl as ccl
+from . import pyccl as ccl
 
 EMU_TOLERANCE = 3.0E-2
 

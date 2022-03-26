@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-import pyccl as ccl
+from . import pyccl as ccl
 
 GROWTH_HIZ_TOLERANCE = 6.0e-6
 GROWTH_TOLERANCE = 1e-4

@@ -2,7 +2,7 @@ import tempfile
 import numpy as np
 import pytest
 
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 def test_parameters_lcdm_defaults():

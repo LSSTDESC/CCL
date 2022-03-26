@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import pyccl as ccl
+from . import pyccl as ccl
 
 cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
                       h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,

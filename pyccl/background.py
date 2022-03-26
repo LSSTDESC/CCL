@@ -14,8 +14,9 @@ These strings define the `species` inputs to the functions below.
 """
 import numpy as np
 from . import ccllib as lib
-from .pyutils import _vectorize_fn, _vectorize_fn3
-from .pyutils import _vectorize_fn4, _vectorize_fn5, warn_api
+from .pyutils import (_vectorize_fn, _vectorize_fn3,
+                      _vectorize_fn4, _vectorize_fn5, warn_api)
+from .parameters import physical_constants
 
 species_types = {
     'critical': lib.species_crit_label,
@@ -292,7 +293,6 @@ def sigma_critical(cosmo, *, a_lens, a_source):
         float or array_like: :math:`\\Sigma_{\\mathrm{crit}}` in units
         of :math:`\\M_{\\odot}/Mpc^2`
     """
-    physical_constants = lib.cvar.constants
     Ds = angular_diameter_distance(cosmo, a_source, a2=None)
     Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
     Dls = angular_diameter_distance(cosmo, a_lens, a_source)

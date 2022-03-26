@@ -207,8 +207,8 @@ def generate_ccl_pspec(sample_points, root, class_data_root, zvals,
             except KeyboardInterrupt:
                 raise
             except:
-                print "--- Error running CLASS"
-                print "--- Parameters:", params
+                print("--- Error running CLASS")
+                print("--- Parameters:", params)
                 errored.append(i)
                 continue
 
@@ -221,9 +221,9 @@ def generate_ccl_pspec(sample_points, root, class_data_root, zvals,
                 np.savetxt(fname_lin, np.column_stack((k_class, pk_lin)))
 
     # Print runs that errored
-    if len(errored) > 0: print "ERRORED:"
+    if len(errored) > 0: print("ERRORED:")
     for err in errored:
-        print err
+        print(err)
 
 
 def generate_class_ini(sample_points, root, nonlinear=False, mnu=False,
@@ -448,7 +448,7 @@ def load_summary_stats(sample_points, ccl_data_root, class_data_root,
 
     # Loop over sample points in parameter space and calculate summary stats
     for i in range(N_samp):
-        print "  Loading power spectra for parameter set %05d" % i
+        print("  Loading power spectra for parameter set %05d" % i)
 
         # Get Hubble parameter, h, for rescaling CLASS P(k) to Mpc units
         h = sample_points['h'][i]
@@ -476,7 +476,7 @@ def load_summary_stats(sample_points, ccl_data_root, class_data_root,
             class_pk = pk_class_dat[:,1] / h**3.
 
             # Sanity checks
-            print ccl_pk.size, class_pk.size
+            print(ccl_pk.size, class_pk.size)
             assert ccl_pk.size == class_pk.size
 
             # Calculate fractional deviation
@@ -533,7 +533,7 @@ def ccl_summary_stats(params,
     if cache_name is not None:
         try:
             stats = np.load("%s.npy" % cache_name)
-            print "  Loaded '%s' from cache." % cache_name
+            print("  Loaded '%s' from cache." % cache_name)
             assert stats.shape == (N_samp, N_thres, N_z, N_kbins)
             return stats, params
         except:
@@ -546,7 +546,7 @@ def ccl_summary_stats(params,
     # Loop over sample points in parameter space and calculate summary stats
     for i in range(N_samp):
         trial = params['id'][i]
-        print "  Loading CCL power spectra for parameter set %05d" % i
+        print("  Loading CCL power spectra for parameter set %05d" % i)
 
         # Loop over redshift values
         for j in range(N_z):

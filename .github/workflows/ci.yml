@@ -76,6 +76,14 @@ jobs:
         env:
           MATRIX_OS: ${{ matrix.os }}
 
+      - name: install emulators
+        run: |
+          ${CONDA_PREFIX}/bin/pip install \
+            MiraTitanHMFemulator \
+            git+https://bitbucket.org/rangulo/baccoemu/
+        env:
+          MATRIX_OS: ${{ matrix.os }}
+
       - name: install class
         run: |
           if [[ ${MATRIX_OS} == "macos-10.15" ]]; then

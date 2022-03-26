@@ -1,7 +1,9 @@
 import numpy as np
+import functools
 from . import ccllib as lib
 from .core import check
 from .pyutils import deprecated, warn_api
+from .parameters import physical_constants
 
 neutrino_mass_splits = {
     'normal': lib.nu_normal,
@@ -30,7 +32,7 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None):
     scalar = True if np.ndim(a) == 0 else False
 
     if T_CMB is None:
-        T_CMB = lib.cvar.constants.T_CMB
+        T_CMB = physical_constants.T_CMB
 
     # Convert to array if it's not already an array
     if not isinstance(a, np.ndarray):
@@ -51,8 +53,9 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None):
     return OmNuh2
 
 
-@deprecated(Omega_nu_h2)
 @warn_api
+@functools.wraps(Omega_nu_h2)
+@deprecated(Omega_nu_h2)
 def Omeganuh2(a, *, m_nu, T_CMB=None):
     return Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
 
@@ -74,7 +77,7 @@ def nu_masses(*, Om_nu_h2, mass_split, T_CMB=None):
     status = 0
 
     if T_CMB is None:
-        T_CMB = lib.cvar.constants.T_CMB
+        T_CMB = physical_constants.T_CMB
 
     if mass_split not in neutrino_mass_splits.keys():
         raise ValueError(

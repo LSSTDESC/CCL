@@ -132,7 +132,6 @@ def test_API_preserve_warnings():
             cosmo=COSMO, mass_def=M200, mass_def_strict=False)
     assert s31.mass_def == s32.mass_def == S3.mass_def
     assert s31.mass_def_strict == s32.mass_def_strict == S3.mass_def_strict
-    assert not (hasattr(s31, "cosmo") or hasattr(s32, "cosmo"))
 
 
 @pytest.mark.parametrize('prof_class',

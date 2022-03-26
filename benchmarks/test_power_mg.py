@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-import pyccl as ccl
+from . import pyccl as ccl
 
 POWER_MG_TOL = 1e-2
 

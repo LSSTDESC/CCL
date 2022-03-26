@@ -2,11 +2,12 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
 from ..pyutils import warn_api, deprecate_attr, deprecated
+from ..base import CCLHalosObject
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
 
-class HaloBias(object):
+class HaloBias(CCLHalosObject):
     """ This class enables the calculation of halo bias functions.
     We currently assume that all halo bias functions can be written
     as functions that depend on M only through sigma_M (where

@@ -14,6 +14,9 @@ from ._core import _docstring_extra_parameters
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check, warn_api
 from .pk2d import Pk2D
+from .base import CCLObject, cache, unlock_instance
+from ._repr import _build_string_Cosmology
+from .parameters import CCLParameters
 
 # Configuration types
 transfer_function_types = {
@@ -24,7 +27,8 @@ transfer_function_types = {
     'boltzmann_class': lib.boltzmann_class,
     'boltzmann_camb': lib.boltzmann_camb,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
-    'calculator': lib.pklin_from_input
+    'calculator': lib.pklin_from_input,
+    'bacco': lib.pklin_from_input,
 }
 
 matter_power_spectrum_types = {
@@ -34,12 +38,14 @@ matter_power_spectrum_types = {
     'linear': lib.linear,
     'emu': lib.emu,
     'calculator': lib.pknl_from_input,
-    'camb': lib.pknl_from_boltzman
+    'camb': lib.pknl_from_boltzman,
+    'bacco': lib.pknl_from_input,
 }
 
 baryons_power_spectrum_types = {
     'nobaryons': lib.nobaryons,
-    'bcm': lib.bcm
+    'bcm': lib.bcm,
+    'bacco': lib.nobaryons,
 }
 
 # List which transfer functions can be used with the muSigma_MG
@@ -65,7 +71,7 @@ emulator_neutrinos_types = {
 }
 
 
-class Cosmology(object):
+class Cosmology(CCLObject):
     """A cosmology including parameters and associated data.
 
     .. note:: Although some arguments default to `None`, they will raise a
@@ -82,10 +88,13 @@ class Cosmology(object):
               internal splines and numerical integration accuracy by setting
               the values of the attributes of
               :obj:`Cosmology.cosmo.spline_params` and
-              :obj:`Cosmology.cosmo.gsl_params`. For example, you can set
+              :obj:`Cosmology.cosmo.gsl_params`. via the `update_parameters`
+              method of `Cosmology`. For example, you can set
               the generic relative accuracy for integration by executing
-              ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
+              ``c = Cosmology(...); cosmo.update_parameters(INTEGRATION_EPSREL\
 = 1e-5``.
+              If you bypass `update_parameters` and set it directly with
+              ``setattr``, hashing the Cosmology object will be inconsistent.
               See the module level documentation of `pyccl.core` for details.
 
     Args:
@@ -206,6 +215,7 @@ class Cosmology(object):
 
     """
     __doc__ += _docstring_extra_parameters
+    __repr__ = _build_string_Cosmology
 
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
@@ -274,11 +284,28 @@ class Cosmology(object):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
+        CCLParameters.populate(self.cosmo)
 
         if self.cosmo.status != 0:
             raise CCLError(
                 "(%d): %s"
                 % (self.cosmo.status, self.cosmo.status_message))
+
+    def update_parameters(self, **kwargs):
+        """Update any of the ``gsl_params`` or ``spline_params`` associated
+        with this Cosmology object.
+        """
+        from pyccl import gsl_params, spline_params
+        keys = list(gsl_params.keys()) + list(spline_params.keys())
+        set_diff = list(set(kwargs.keys()) - set(keys))
+        if set_diff:
+            raise ValueError(f"Parameter(s) {set_diff} not recognized.")
+        for param, value in kwargs.items():
+            if param in gsl_params.keys():
+                attr = getattr(self.cosmo, "gsl_params")
+            else:
+                attr = getattr(self.cosmo, "spline_params")
+            setattr(attr, param, value)
 
     def write_yaml(self, filename):
         """Write a YAML representation of the parameters to file.
@@ -598,10 +625,9 @@ class Cosmology(object):
             mnu_final_list = [0.]
 
         # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
-                  n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa',
-                 'h', 'norm_pk', 'n_s']
+        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk, n_s]
+        names = ['Omega_c', 'Omega_b', 'Omega_k',
+                 'w0', 'wa', 'h', 'norm_pk', 'n_s']
         for nm, item in zip(names, compul):
             if item is None:
                 raise ValueError("Necessary parameter '%s' was not set "
@@ -727,6 +753,7 @@ class Cosmology(object):
         exits."""
         self.__del__()
 
+    @unlock_instance
     def __getstate__(self):
         # we are removing any C data before pickling so that the
         # is pure python when pickled.
@@ -736,6 +763,7 @@ class Cosmology(object):
         state.pop('_config', None)
         return state
 
+    @unlock_instance
     def __setstate__(self, state):
         self.__dict__ = state
         # we removed the C data when it was pickled, so now we unpickle
@@ -779,11 +807,12 @@ class Cosmology(object):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
+    @cache
     def _compute_linear_power(self):
-        """Compute the linear power spectrum."""
+        """Return the linear power spectrum."""
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
-                ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']):
+                ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles', ]):
             warnings.warn(
                 "The '%s' linear power spectrum model does not properly "
                 "account for massive neutrinos!" %
@@ -835,7 +864,8 @@ class Cosmology(object):
                                    "power spectrum using CAMB and specified "
                                    "sigma8 but the non-linear power spectrum "
                                    "cannot be consistenty rescaled.")
-        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
+        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles',
+                     'bacco']:
             rescale_s8 = False
             rescale_mg = False
             pk = Pk2D.from_model(self, model=trf)
@@ -851,6 +881,7 @@ class Cosmology(object):
 
         return pk
 
+    @unlock_instance(mutate=False)
     def compute_linear_power(self):
         """Compute the linear power spectrum."""
         if self.has_linear_power:
@@ -919,10 +950,11 @@ class Cosmology(object):
         prof = hal.HaloProfileNFW(c_m_relation=cM)
         return hal.halomod_Pk2D(self, hmc, prof, normprof=True)
 
-    def compute_nonlin_power(self):
-        """Compute the non-linear power spectrum."""
+    @cache
+    def _compute_nonlin_power(self):
+        """Return the non-linear power spectrum."""
         if self.has_nonlin_power:
-            return
+            return self._pk_nl['delta_matter:delta_matter']
 
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
@@ -960,7 +992,7 @@ class Cosmology(object):
 
         if mps == "camb" and self._has_pk_nl:
             # Already computed
-            return
+            return self._pk_nl['delta_matter:delta_matter']
 
         pk = None
         if mps is None:
@@ -988,6 +1020,14 @@ class Cosmology(object):
         if bps in ['bcm', 'bacco', ]:
             pk = pk.include_baryons(self, model=bps)
 
+        return pk
+
+    @unlock_instance(mutate=False)
+    def compute_nonlin_power(self):
+        """Compute the non-linear power spectrum."""
+        if self.has_nonlin_power:
+            return
+        pk = self._compute_nonlin_power()
         # Assign
         self._pk_nl['delta_matter:delta_matter'] = pk
         if pk:

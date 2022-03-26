@@ -1,5 +1,5 @@
 import numpy as np
-import pyccl as ccl
+from . import pyccl as ccl
 
 KNL_TOLERANCE = 1.0e-5
 

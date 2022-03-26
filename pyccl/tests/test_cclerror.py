@@ -1,4 +1,4 @@
-import pyccl
+from . import pyccl
 
 
 def test_cclerror_repr():

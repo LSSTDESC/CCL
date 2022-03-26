@@ -1,8 +1,9 @@
 import pickle
 import tempfile
 import pytest
+import warnings
 import numpy as np
-import pyccl as ccl
+from . import pyccl as ccl
 
 
 def test_cosmo_methods():
@@ -13,7 +14,7 @@ def test_cosmo_methods():
     from pyccl import background, baryons, boltzmann, \
         cells, correlations, covariances, neutrinos, \
         pk2d, power, tk3d, tracers, halos, nl_pt
-    from pyccl.core import CosmologyVanillaLCDM
+    from . import CosmologyVanillaLCDM
     cosmo = CosmologyVanillaLCDM()
     subs = [background, boltzmann, baryons, cells, correlations, covariances,
             neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
@@ -227,65 +228,6 @@ def test_cosmology_p18lcdm_raises():
         ccl.CosmologyVanillaLCDM(**kw)
 
 
-def test_cosmology_repr():
-    """Check that we can make a Cosmology object from its repr."""
-    import pyccl  # noqa: F401
-
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        cosmo = ccl.Cosmology(
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            m_nu=[0.02, 0.1, 0.05], m_nu_type='list',
-            z_mg=[0.0, 1.0], df_mg=[0.01, 0.0])
-
-        cosmo2 = eval(str(cosmo))
-        assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
-                ccl.comoving_radial_distance(cosmo2, 0.5))
-
-        cosmo3 = eval(repr(cosmo))
-        assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
-                ccl.comoving_radial_distance(cosmo3, 0.5))
-
-    # same test with arrays to be sure
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        cosmo = ccl.Cosmology(
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            m_nu=np.array([0.02, 0.1, 0.05]), m_nu_type='list',
-            z_mg=np.array([0.0, 1.0]), df_mg=np.array([0.01, 0.0]))
-
-        cosmo2 = eval(str(cosmo))
-        assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
-                ccl.comoving_radial_distance(cosmo2, 0.5))
-
-        cosmo3 = eval(repr(cosmo))
-        assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
-                ccl.comoving_radial_distance(cosmo3, 0.5))
-
-    # adding extra parameters
-    cosmo = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        extra_parameters={"camb": {"halofit_version": "mead2020",
-                                   "HMCode_logT_AGN": 7.8}})
-
-    cosmo2 = eval(str(cosmo))
-    assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
-            ccl.comoving_radial_distance(cosmo2, 0.5))
-
-    cosmo3 = eval(repr(cosmo))
-    assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
-            ccl.comoving_radial_distance(cosmo3, 0.5))
-
-    # testing with vanilla cosmology
-    cosmo = ccl.CosmologyVanillaLCDM()
-
-    cosmo2 = eval(str(cosmo))
-    assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
-            ccl.comoving_radial_distance(cosmo2, 0.5))
-
-    cosmo3 = eval(repr(cosmo))
-    assert (ccl.comoving_radial_distance(cosmo, 0.5) ==
-            ccl.comoving_radial_distance(cosmo3, 0.5))
-
-
 def test_cosmology_context():
     """Check that using a Cosmology object in a context manager
     frees C resources properly."""
@@ -426,3 +368,121 @@ def test_cosmology_halomodel_deprecated():
 
     assert all([np.allclose(F(cosmo1), F(x), rtol=0)
                 for x in [cosmo2, cosmo3]])
+
+
+@pytest.mark.parametrize('model', ['halofit', 'bacco', ])
+def test_cosmo_mps_smoke(model):
+    knl = np.geomspace(0.1, 5, 16)
+    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum=model)
+    with warnings.catch_warnings():
+        # filter warnings related to (k, a) bounds of applied NL model
+        warnings.simplefilter("ignore")
+        cosmo.compute_nonlin_power()
+    pkl = cosmo.get_linear_power().eval(knl, 1, cosmo)
+    pknl = cosmo.get_nonlin_power().eval(knl, 1, cosmo)
+    assert np.all(pknl > pkl)
+
+
+@pytest.mark.parametrize('model', ['bcm', 'bacco', ])
+def test_cosmo_bps_smoke(model):
+    extras = {}
+    if model == "bacco":
+        extras = {"bacco":
+                  {'M_c': 14, 'eta': -0.3, 'beta': -0.22, 'M1_z0_cen': 10.5,
+                   'theta_out': 0.25, 'theta_inn': -0.86, 'M_inn': 13.4}
+                  }
+    knl = np.geomspace(0.1, 5, 16)
+    cosmo = ccl.CosmologyVanillaLCDM(baryons_power_spectrum="nobaryons")
+    cosmo.compute_nonlin_power()
+    pk = cosmo.get_nonlin_power().eval(knl, 1, cosmo)
+
+    cosmo_bar = ccl.CosmologyVanillaLCDM(baryons_power_spectrum=model,
+                                         extra_parameters=extras)
+    with warnings.catch_warnings():
+        # filter warnings related to (k, a) bounds of applied baryon model
+        warnings.simplefilter("ignore")
+        cosmo_bar.compute_nonlin_power()
+    pk_bar = cosmo_bar.get_nonlin_power().eval(knl, 1, cosmo_bar)
+    assert np.all(pk_bar < pk)
+
+
+def test_pyccl_default_params():
+    """Check that Python-layer for setting the gsl and spline parameters
+    works on par with the C-layer."""
+    HM_MMIN = ccl.gsl_params["HM_MMIN"]
+
+    # we will test with this parameter
+    assert HM_MMIN == 1e7
+
+    # can be accessed as an attribute and as a dictionary item
+    assert ccl.gsl_params.HM_MMIN == ccl.gsl_params["HM_MMIN"]
+
+    # can be assigned as an attribute
+    ccl.gsl_params.HM_MMIN = 1e5
+    assert ccl.gsl_params["HM_MMIN"] == 1e5  # cross-check
+
+    ccl.gsl_params["HM_MMIN"] = 1e6
+    assert ccl.gsl_params.HM_MMIN == 1e6
+
+    # does not accept extra assignment
+    with pytest.raises(KeyError):
+        ccl.gsl_params.test = "hello_world"
+    with pytest.raises(KeyError):
+        ccl.gsl_params["test"] = "hallo_world"
+
+    # verify that this has changed
+    assert ccl.gsl_params.HM_MMIN != HM_MMIN
+
+    # but now we reload it, so it should be the default again
+    ccl.gsl_params.reload()
+    assert ccl.gsl_params.HM_MMIN == HM_MMIN
+
+    # complains when we try to set A_SPLINE_MAX != 1.0
+    ccl.spline_params.A_SPLINE_MAX = 1.
+    with pytest.raises(RuntimeError):
+        ccl.spline_params.A_SPLINE_MAX = 0.9
+
+    # complains when we try to change the spline type
+    ccl.spline_params.A_SPLINE_TYPE = None
+    with pytest.raises(RuntimeError):
+        ccl.spline_params.A_SPLINE_TYPE = "something_else"
+
+    # check that dict properties work fine
+    dic = dict(zip(ccl.gsl_params.keys(), ccl.gsl_params.values()))
+    assert dic.items() == ccl.gsl_params.items()
+
+    # check that copying works fine
+    ccl.gsl_params.reload()
+    dic = ccl.gsl_params.copy()
+    dic.HM_MMIN = 1e6
+    assert dic.HM_MMIN != ccl.gsl_params.HM_MMIN
+
+
+def test_cosmology_default_params():
+    """Check that the default params within Cosmology work as intended."""
+    cosmo1 = ccl.CosmologyVanillaLCDM()
+    v1 = cosmo1.cosmo.gsl_params.HM_MMIN
+
+    ccl.gsl_params.HM_MMIN = 1e6
+    cosmo2 = ccl.CosmologyVanillaLCDM()
+    v2 = cosmo2.cosmo.gsl_params.HM_MMIN
+    assert v2 == 1e6
+    assert v2 != v1
+
+    ccl.gsl_params.reload()
+    cosmo3 = ccl.CosmologyVanillaLCDM()
+    v3 = cosmo3.cosmo.gsl_params.HM_MMIN
+    assert v3 == v1
+
+
+def test_ccl_physical_constants_smoke():
+    assert ccl.physical_constants.CLIGHT == ccl.ccllib.cvar.constants.CLIGHT
+
+    # constants are immutable
+    with pytest.raises(NotImplementedError):
+        ccl.physical_constants.CLIGHT = 3e8
+
+
+def test_CCLParams_raises():
+    with pytest.raises(ValueError):
+        ccl.physical_constants.locked = False

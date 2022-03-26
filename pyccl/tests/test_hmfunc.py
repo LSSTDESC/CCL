@@ -1,11 +1,10 @@
 import numpy as np
 import pytest
-import pyccl as ccl
+from . import pyccl as ccl
 
 
-COSMO = ccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-    transfer_function='bbks', matter_power_spectrum='linear')
+COSMO = ccl.CosmologyVanillaLCDM(transfer_function='bbks',
+                                 matter_power_spectrum='linear')
 HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncSheth99,
         ccl.halos.MassFuncJenkins01,
@@ -14,7 +13,8 @@ HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncTinker10,
         ccl.halos.MassFuncWatson13,
         ccl.halos.MassFuncDespali16,
-        ccl.halos.MassFuncBocquet16]
+        ccl.halos.MassFuncBocquet16,
+        ccl.halos.MassFuncBocquet20]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 MFOF = ccl.halos.MassDef('fof', 'matter')
 MVIR = ccl.halos.MassDef('vir', 'critical')
@@ -104,13 +104,6 @@ def test_nM_bocquet_smoke(with_hydro):
     assert hmf._check_mass_def_strict(md) is True
 
 
-def test_bocquet_mass_def():
-    hmd = ccl.halos.MassDef(200, "critical")
-    hmd.rho_type = "something_else"  # bogus rho_type
-    with pytest.raises(ValueError):
-        ccl.halos.MassFuncBocquet16(mass_def=hmd)
-
-
 @pytest.mark.parametrize('name', ['Press74', 'Tinker08',
                                   'Despali16', 'Angulo12'])
 def test_nM_from_string(name):
@@ -181,3 +174,12 @@ def test_func_deprecated():
         mf1 = ccl.halos.mass_function_from_name("Tinker08")
     mf2 = ccl.halos.MassFunc.from_name("Tinker08")
     assert mf1 == mf2
+
+
+def test_nM_bocquet20_extrap():
+    hmf0 = ccl.halos.MassFuncBocquet20(extrapolate=True)
+    hmf1 = ccl.halos.MassFuncBocquet20(extrapolate=False)
+    M_arr = np.logspace(14, 16, 32)  # inside the emulator range
+    n0 = hmf0.get_mass_function(COSMO, M_arr, 1)
+    n1 = hmf1.get_mass_function(COSMO, M_arr, 1)
+    assert np.allclose(n0, n1, rtol=0)

@@ -1,7 +1,7 @@
 import os
 import numpy as np
-import pyccl as ccl
-import pyccl.nl_pt as pt
+from . import pyccl as ccl
+from . import pt
 import pytest
 
 # Set cosmology

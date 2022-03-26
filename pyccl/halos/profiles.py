@@ -2,15 +2,17 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
-from ..pyutils import resample_array, _fftlog_transform, \
-    warn_api, deprecate_attr
+from ..pyutils import (resample_array, _fftlog_transform,
+                       warn_api, deprecate_attr)
+from ..base import CCLHalosObject, unlock_instance
+from .._repr import _build_string_HaloProfile
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
 from scipy.special import sici, erf
 
 
-class HaloProfile(object):
+class HaloProfile(CCLHalosObject):
     """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL
@@ -36,6 +38,7 @@ class HaloProfile(object):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
+    __repr__ = _build_string_HaloProfile
     name = 'default'
 
     def __init__(self):
@@ -49,6 +52,7 @@ class HaloProfile(object):
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
 
+    @unlock_instance(mutate=True)
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by
         FFTLog to compute Hankel transforms. The available
@@ -1070,7 +1074,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         self.x_out = x_out
 
         # Interpolator for dimensionless Fourier-space profile
-        self._fourier_interp = None
+        self._fourier_interp = self._integ_interp()
         super(HaloProfilePressureGNFW, self).__init__()
 
     @warn_api
@@ -1098,8 +1102,6 @@ class HaloProfilePressureGNFW(HaloProfile):
             x_out (float): profile threshold (as a fraction of r500c). \
                 if `None`, no threshold will be used.
         """
-        if x_out is not None:
-            self.x_out = x_out
         if mass_bias is not None:
             self.mass_bias = mass_bias
         if c500 is not None:
@@ -1125,8 +1127,12 @@ class HaloProfilePressureGNFW(HaloProfile):
             if gamma != self.gamma:
                 re_fourier = True
             self.gamma = gamma
+        if x_out is not None:
+            if x_out != self.x_out:
+                re_fourier = True
+            self.x_out = x_out
 
-        if re_fourier and (self._fourier_interp is not None):
+        if re_fourier:
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):
@@ -1196,10 +1202,6 @@ class HaloProfilePressureGNFW(HaloProfile):
     def _fourier(self, cosmo, k, M, a, mass_def):
         # Fourier-space profile.
         # Output in units of eV * Mpc^3 / cm^3.
-
-        # Tabulate if not done yet
-        if self._fourier_interp is None:
-            self._fourier_interp = self._integ_interp()
 
         # Input handling
         M_use = np.atleast_1d(M)
