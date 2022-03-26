@@ -628,14 +628,14 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
         if not (get_1h and get_2h):
             raise ValueError("transition region can only be modified "
                              "when both 1-halo and 2-halo terms are queried")
-        if not hasattr(smooth_transition, "__call__"):
+        if not callable(smooth_transition):
             raise TypeError("smooth_transition must be "
                             "a function of `a` or None")
     if suppress_1h is not None:
         if not get_1h:
             raise ValueError("can't suppress the 1-halo term "
                              "when get_1h is False")
-        if not hasattr(suppress_1h, "__call__"):
+        if not callable(suppress_1h):
             raise TypeError("suppress_1h must be "
                             "a function of `a` or None")
 
