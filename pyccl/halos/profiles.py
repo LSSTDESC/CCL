@@ -1084,9 +1084,8 @@ class HaloProfilePressureGNFW(HaloProfile):
         """ Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
 
-        .. note:: A change in `alpha`, `beta` or `gamma` will trigger
-            a recomputation of the Fourier-space template, which can be
-            slow.
+        .. note:: A change in `alpha`, `beta`, `x_out`, or `gamma` will trigger
+            a recomputation of the Fourier-space template, which can be slow.
 
         Args:
             mass_bias (float): the mass bias parameter :math:`1-b`.
