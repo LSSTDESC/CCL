@@ -134,7 +134,7 @@ def test_hmf_bocquet20():
         "sigma8": fid["sigma_8"],
         "w0": fid["w_0"],
         "wa": fid["w_a"],
-        "m_nu": ccl.nu_masses(fid["Omnuh2"], mass_split="equal")}
+        "m_nu": ccl.nu_masses(Om_nu_h2=fid["Omnuh2"], mass_split="equal")}
 
     with warnings.catch_warnings():
         # filter CCL neutrino-cosmologies warnings
