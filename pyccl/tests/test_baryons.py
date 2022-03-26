@@ -26,14 +26,15 @@ def test_bcm_correct_smoke():
     k_arr = np.geomspace(1E-2, 1, 10)
     fka = ccl.bcm_model_fka(COSMO, k_arr, 0.5)
     pk_nobar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
-    ccl.bcm_correct_pk2d(COSMO, COSMO._pk_nl['delta_matter:delta_matter'])
-    pk_wbar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
+    pk2d_nobar = COSMO.get_nonlin_power()
+    pk2d_wbar = COSMO.baryon_correct("bcm", pk2d_nobar)
+    pk_wbar = pk2d_wbar.eval(k_arr, 0.5, COSMO)
     assert np.all(np.fabs(pk_wbar/(pk_nobar*fka)-1) < 1E-5)
 
 
 def test_bcm_correct_raises():
     with pytest.raises(TypeError):
-        ccl.bcm_correct_pk2d(COSMO, None)
+        COSMO.baryon_correct("bcm", None)
 
 
 def test_baryon_correct_raises():
@@ -48,6 +49,7 @@ def test_func_deprecated():
 
     with pytest.warns(ccl.CCLDeprecationWarning):
         ccl.baryons.bcm_correct_pk2d(COSMO, pknl1)
+    # new function is private and raises no warnings
     ccl.baryons._bcm_correct_pk2d(COSMO, pknl2)
 
     k_arr, a = np.logspace(-1, 1, 32), 1.

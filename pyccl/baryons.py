@@ -68,6 +68,9 @@ def baryon_correct(cosmo, model, pk2d):
         :class:`~pyccl.pk2d.Pk2D: a copy of the input `Pk2D` object with the
         baryon correction applied to it
     """
+    if not isinstance(pk2d, Pk2D):
+        raise TypeError("pk2d must be a Pk2D object")
+
     if model == "bcm":
         pk2d_new = pk2d.copy()
         _bcm_correct_pk2d(cosmo, pk2d_new)
