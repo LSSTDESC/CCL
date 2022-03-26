@@ -65,10 +65,10 @@ def test_bacco_linear_nonlin_equiv():
     pk0 = cosmo.get_nonlin_power().eval(knl, 1, cosmo)
 
     emu = ccl.PowerSpectrumEmulator.from_name("bacco")()
-    pk1 = emu.get_pk_nonlin(cosmo)
     with warnings.catch_warnings():
         # filter Pk2D narrower range warning
         warnings.simplefilter("ignore")
+        pk1 = emu.get_pk_nonlin(cosmo)
         # NL + bar
         pk1 = cosmo.baryon_correct("bacco", pk1).eval(knl, 1, cosmo)
 
@@ -98,7 +98,10 @@ def test_power_spectrum_emulator_baryon_raises():
 
     from . import PowerSpectrumBACCO
     emu = ccl.PowerSpectrumEmulator.from_name("bacco")()
-    pk = emu.get_pk_nonlin(cosmo)
+    with warnings.catch_warnings():
+        # filter Pk2D narrower range warning
+        warnings.simplefilter("ignore")
+        pk = emu.get_pk_nonlin(cosmo)
     func = PowerSpectrumBACCO._get_baryon_boost
     delattr(PowerSpectrumBACCO, "_get_baryon_boost")
     with pytest.raises(NotImplementedError):
