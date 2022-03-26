@@ -787,7 +787,7 @@ class MassFuncBocquet20(MassFunc, Emulator):
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
                  extrapolate=True):
         self.extrapolate = extrapolate
-        if mass_def_strict == False:
+        if mass_def_strict is False:
             # this will trigger an exception
             mass_def_strict = True
         super().__init__(
@@ -797,7 +797,7 @@ class MassFuncBocquet20(MassFunc, Emulator):
         self.mass_def = MassDef200c()
 
     def _check_mdef_strict(self, mdef):
-        if not (mdef.Delta, mdef.rho_type) == (200, "critical"):
+        if (mdef.Delta, mdef.rho_type) != (200, "critical"):
             return True
         return False
 
