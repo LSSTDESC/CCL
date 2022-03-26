@@ -50,7 +50,7 @@ class EmulatorObject:
             self.check_bounds = NotImplemented
         elif isinstance(bounds, dict):
             self.bounds = Bounds(bounds)
-        elif hasattr(bounds, "__call__"):
+        elif callable(bounds):
             self.check_bounds = bounds
             self.bounds = NotImplemented
         else:
