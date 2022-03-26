@@ -403,9 +403,9 @@ def deprecated(new_function=None):
     def _depr_decorator(func):
         @functools.wraps(func)
         def new_func(*args, **kwargs):
-            s = "The function {} is deprecated.".format(func.__name__)
+            s = "The function {} is deprecated.".format(func.__qualname__)
             if new_function:
-                s += " Use {} instead.".format(new_function.__name__)
+                s += " Use {} instead.".format(new_function.__qualname__)
             warnings.warn(s, CCLDeprecationWarning)
             return func(*args, **kwargs)
         return new_func

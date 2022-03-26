@@ -344,8 +344,7 @@ class HaloProfile(CCLHalosObject):
                 :math:`\\gamma`
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
-        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens,
-                                 mass_def=mass_def)
+        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def=mass_def)
         Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 

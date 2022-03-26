@@ -185,8 +185,7 @@ class Pk2D(CCLObject):
         if cosmo is None:
             from .core import CosmologyVanillaLCDM
             cosmo_use = CosmologyVanillaLCDM()  # this is not used anywhere
-            with UnlockInstance(self, mutate=False):
-                self.psp.extrap_linear_growth = 404  # flag no extrapolation
+            self.psp.extrap_linear_growth = 404  # flag no extrapolation
         else:
             cosmo_use = cosmo
             # make sure we have growth factors for extrapolation
@@ -206,8 +205,7 @@ class Pk2D(CCLObject):
 
         # handle scale factor extrapolation
         if cosmo is None:
-            with UnlockInstance(self, mutate=False):
-                self.psp.extrap_linear_growth = 401  # revert flag 404
+            self.psp.extrap_linear_growth = 401  # revert flag 404
 
         try:
             check(status, cosmo_use)

@@ -56,7 +56,7 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     mf_par = cosmo._config_init_kwargs['mass_function']
     if mf_par is None:
         mf_par = 'tinker10'  # patch for None default
-    if mf_par == 'tinker10':
+    if mf_par in ['tinker', 'tinker10']:
         bf = hal.HaloBiasTinker10(mass_def=mdef)
     elif mf_par == 'shethtormen':
         bf = hal.HaloBiasSheth99()

@@ -56,7 +56,7 @@ mass_function_types = {
     'tinker': lib.tinker,
     'tinker10': lib.tinker10,
     'watson': lib.watson,
-    'shethtormen': lib.shethtormen
+    'shethtormen': lib.shethtormen,
 }
 
 halo_concentration_types = {
@@ -67,7 +67,7 @@ halo_concentration_types = {
 
 emulator_neutrinos_types = {
     'strict': lib.emu_strict,
-    'equalize': lib.emu_equalize
+    'equalize': lib.emu_equalize,
 }
 
 
