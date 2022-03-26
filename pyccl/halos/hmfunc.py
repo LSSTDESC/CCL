@@ -19,9 +19,16 @@ class MassFunc(CCLHalosObject):
 
     where :math:`\\sigma_M^2` is the overdensity variance on spheres with a
     radius given by the Lagrangian radius for mass M.
-    All sub-classes implementing specific mass function parametrizations
-    can therefore be simply created by replacing this class'
-    `_get_fsigma` method.
+
+    * Subclasses implementing analytical mass function parametrizations
+      can be created by overriding the ``_get_fsigma`` method.
+
+    * Subclasses implementing emulators can be created by overriding
+      the ``get_mass_function`` method, via multiple inheritance with
+      ``pyccl.emulator.Emulator``.
+
+    * Subclasses may have particular implementations of ``_check_mdef_strict``
+      to ensure consistency of the halo mass definition.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
@@ -766,8 +773,8 @@ class MassFuncBocquet20(MassFunc, Emulator):
             This parametrization accepts SO masses with
             Delta = 200 critical.
         mass_def_strict (bool):
-            If False, consistency of the mass definition
-            will be ignored. The default is True.
+            This emulator only accepts SO masses with Delta = 20 critical.
+            If False, an exception will be raised.
         extrapolate (bool):
             If True, the queried mass range outside of the emulator's
             training mass range will be extrapolated in log-space,
@@ -780,11 +787,19 @@ class MassFuncBocquet20(MassFunc, Emulator):
     def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
                  extrapolate=True):
         self.extrapolate = extrapolate
+        if mass_def_strict == False:
+            # this will trigger an exception
+            mass_def_strict = True
         super().__init__(
             cosmo=cosmo, mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _default_mass_def(self):
         self.mass_def = MassDef200c()
+
+    def _check_mdef_strict(self, mdef):
+        if not (mdef.Delta, mdef.rho_type) == (200, "critical"):
+            return True
+        return False
 
     def _load_emu(self):
         from MiraTitanHMFemulator import Emulator as HMFemu
@@ -808,9 +823,11 @@ class MassFuncBocquet20(MassFunc, Emulator):
             T_CMB = cosmo["T_CMB"]
             Omega_c = cosmo["Omega_c"]
             Omega_b = cosmo["Omega_b"]
-            Omega_nu_h2 = Omeganuh2(a, m_nu=m_nu, T_CMB=T_CMB)
+            # Neutrinos are treated as a background quantity
+            # and are rescaled internally.
+            Omega_nu_h2 = Omeganuh2(1., m_nu=m_nu, T_CMB=T_CMB)
 
-            self._parameters["Ommh2"] = (Omega_c + Omega_b)*h**2 + Omega_nu_h2
+            self._parameters["Ommh2"] = (Omega_c + Omega_b)*h**2
             self._parameters["Ombh2"] = Omega_b * h**2
             self._parameters["Omnuh2"] = Omega_nu_h2
             self._parameters["n_s"] = cosmo["n_s"]
