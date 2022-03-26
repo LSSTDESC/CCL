@@ -109,7 +109,8 @@ def test_hmf_bocquet20():
     EMU_ACCURACY_AND_DATA_SCATTER = 0.2
     z_arr = np.array([0., 0.29, 0.58, 0.87, 1.15, 1.44, 1.73, 2.02])
     d_hmf = np.genfromtxt(
-        "data/hmf_bocquet20_digitized_from_webplotdigitizer.csv",
+        os.path.join(dirdat,
+                     "hmf_bocquet20_digitized_from_webplotdigitizer.csv"),
         delimiter=",", skip_header=2)
 
     # cosmology used in the example
