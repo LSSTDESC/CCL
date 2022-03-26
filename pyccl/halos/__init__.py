@@ -90,7 +90,6 @@ __all__ = (
     'Concentration', 'ConcentrationDiemer15', 'ConcentrationBhattacharya13',
     'ConcentrationPrada12', 'ConcentrationKlypin11', 'ConcentrationDuffy08',
     'ConcentrationIshiyama21', 'ConcentrationConstant',
-    'ConcentrationDuffy08M500c',
     'concentration_from_name',
     'MassFunc', 'MassFuncPress74', 'MassFuncSheth99', 'MassFuncJenkins01',
     'MassFuncTinker08', 'MassFuncTinker10', 'MassFuncWatson13',
