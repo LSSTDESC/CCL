@@ -117,7 +117,7 @@ from .covariances import (
     sigma2_B_from_mask,
 )
 
-# Hashing, Caching
+# Hashing, Caching, CCL base, Mutation locks
 from .base import (
     CCLObject,
     CCLHalosObject,

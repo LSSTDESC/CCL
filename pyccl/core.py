@@ -93,7 +93,7 @@ class Cosmology(CCLObject):
               internal splines and numerical integration accuracy by setting
               the values of the attributes of
               :obj:`Cosmology.cosmo.spline_params` and
-              :obj:`Cosmology.cosmo.gsl_params`. via the `update_parameters`
+              :obj:`Cosmology.cosmo.gsl_params` via the `update_parameters`
               method of `Cosmology`. For example, you can set
               the generic relative accuracy for integration by executing
               ``c = Cosmology(...); cosmo.update_parameters(INTEGRATION_EPSREL\
