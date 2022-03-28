@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 import pyccl as ccl
-from pyccl.pyutils import assert_warns
 
 
 COSMO = ccl.Cosmology(
@@ -53,31 +52,31 @@ def smoke_assert_tkk2h_real(func):
 
 @pytest.mark.parametrize('pars',
                          [{'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'norm': False},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'norm': True},
-                           {'p1': P1, 'p2': P2, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                          {'p1': P1, 'p2': P2, 'p3': None, 'p4': None,
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'norm': True},
-                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'norm': True},
-                           {'p1': P1, 'p2': None, 'p3': None, 'p4': P4,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': P4,
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'norm': True},
-                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': None,  'cv14': None, 'cv24': PKCH, 'cv32':
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': None, 'cv14': None, 'cv24': PKCH, 'cv32':
                            None, 'norm': True},
-                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': PKC,  'cv14': None, 'cv24': PKCH, 'cv32':
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC, 'cv14': None, 'cv24': PKCH, 'cv32':
                            None, 'norm': True},
-                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': PKC,  'cv14': None, 'cv24': PKC, 'cv32':
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC, 'cv14': None, 'cv24': PKC, 'cv32':
                            None, 'norm': True},
-                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': PKC,  'cv14': PKC, 'cv24': PKC, 'cv32':
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKC, 'cv32':
                            PKCH, 'norm': True},
                           ])
 def test_tkk2h_22_smoke(pars):
@@ -86,19 +85,19 @@ def test_tkk2h_22_smoke(pars):
 
     def f(k, a):
         return ccl.halos.halomod_trispectrum_2h_22(COSMO, hmc, k, a,
-                                                prof1=pars['p1'],
-                                                prof2=pars['p2'],
-                                                prof3=pars['p3'],
-                                                prof4=pars['p4'],
-                                                prof13_2pt=pars['cv13'],
-                                                prof14_2pt=pars['cv14'],
-                                                prof24_2pt=pars['cv24'],
-                                                prof32_2pt=pars['cv32'],
-                                                normprof1=pars['norm'],
-                                                normprof2=pars['norm'],
-                                                normprof3=pars['norm'],
-                                                normprof4=pars['norm'],
-                                                p_of_k_a=None)
+                                                   prof1=pars['p1'],
+                                                   prof2=pars['p2'],
+                                                   prof3=pars['p3'],
+                                                   prof4=pars['p4'],
+                                                   prof13_2pt=pars['cv13'],
+                                                   prof14_2pt=pars['cv14'],
+                                                   prof24_2pt=pars['cv24'],
+                                                   prof32_2pt=pars['cv32'],
+                                                   normprof1=pars['norm'],
+                                                   normprof2=pars['norm'],
+                                                   normprof3=pars['norm'],
+                                                   normprof4=pars['norm'],
+                                                   p_of_k_a=None)
     smoke_assert_tkk2h_real(f)
 
 
@@ -108,39 +107,39 @@ def test_tkk2h_22_smoke(pars):
                            'cv32': None, 'cv234': None, 'cv134': None,
                            'cv124': None, 'cv123': None, 'norm': False},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None,
+                           'cv13': None, 'cv14': None, 'cv24': None,
                            'cv32': None, 'cv234': None, 'cv134': None,
                            'cv124': None, 'cv123': None, 'norm': True},
                           {'p1': P1, 'p2': P2, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None,
+                           'cv13': None, 'cv14': None, 'cv24': None,
                            'cv32': None, 'cv234': None, 'cv134': None,
                            'cv124': None, 'cv123': None, 'norm': True},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': None,  'cv14': None, 'cv24': None,
+                           'cv13': None, 'cv14': None, 'cv24': None,
                            'cv32': None, 'cv234': None, 'cv134': None,
                            'cv124': None, 'cv123': None, 'norm': True},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': P4,
-                           'cv13': None,  'cv14': None, 'cv24': None,
+                           'cv13': None, 'cv14': None, 'cv24': None,
                            'cv32': None, 'cv234': None, 'cv134': None,
                            'cv124': None, 'cv123': None, 'norm': True},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': None,  'cv14': None, 'cv24': PKCH,
+                           'cv13': None, 'cv14': None, 'cv24': PKCH,
                            'cv32': None, 'cv234': None, 'cv134': None,
                            'cv124': None, 'cv123': None, 'norm': True},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': PKC,  'cv14': PKC, 'cv24': PKCH,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
                            'cv32': PKC, 'cv234': None, 'cv134': None,
                            'cv124': None, 'cv123': None, 'norm': True},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': PKC,  'cv14': PKC, 'cv24': PKCH,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
                            'cv32': PKC, 'cv234': Prof3pt, 'cv134': None,
                            'cv124': None, 'cv123': None, 'norm': True},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': PKC,  'cv14': PKC, 'cv24': PKCH,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
                            'cv32': PKC, 'cv234': None, 'cv134': None,
                            'cv124': None, 'cv123': Prof3pt, 'norm': True},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': PKC,  'cv14': PKC, 'cv24': PKCH,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
                            'cv32': PKC, 'cv234': Prof3pt, 'cv134': Prof3pt,
                            'cv124': Prof3pt, 'cv123': Prof3pt, 'norm': True},
                           ])
@@ -150,19 +149,19 @@ def test_tkk2h_13_smoke(pars):
 
     def f(k, a):
         return ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k, a,
-                                                prof1=pars['p1'],
-                                                prof2=pars['p2'],
-                                                prof3=pars['p3'],
-                                                prof4=pars['p4'],
-                                                prof234_3pt=pars['cv234'],
-                                                prof134_3pt=pars['cv134'],
-                                                prof124_3pt=pars['cv124'],
-                                                prof123_3pt=pars['cv123'],
-                                                normprof1=pars['norm'],
-                                                normprof2=pars['norm'],
-                                                normprof3=pars['norm'],
-                                                normprof4=pars['norm'],
-                                                p_of_k_a=None)
+                                                   prof1=pars['p1'],
+                                                   prof2=pars['p2'],
+                                                   prof3=pars['p3'],
+                                                   prof4=pars['p4'],
+                                                   prof234_3pt=pars['cv234'],
+                                                   prof134_3pt=pars['cv134'],
+                                                   prof124_3pt=pars['cv124'],
+                                                   prof123_3pt=pars['cv123'],
+                                                   normprof1=pars['norm'],
+                                                   normprof2=pars['norm'],
+                                                   normprof3=pars['norm'],
+                                                   normprof4=pars['norm'],
+                                                   p_of_k_a=None)
     smoke_assert_tkk2h_real(f)
 
 
@@ -195,7 +194,6 @@ def test_Tk3D_2h():
                                                    normprof3=True,
                                                    normprof4=True,
                                                    p_of_k_a=None)
-
 
     # Input sampling
     tk3d = ccl.halos.halomod_Tk3D_2h(COSMO, hmc,
@@ -248,7 +246,7 @@ def test_Tk3D_2h():
     # We cannot use assert_warns because other warnings are raised before the
     # one we are testing
     with pytest.warns(ccl.CCLWarning):
-        ccl.halos.halomod_Tk3D_2h( COSMO, hmc, P3, prof2=Pneg,
+        ccl.halos.halomod_Tk3D_2h(COSMO, hmc, P3, prof2=Pneg,
                                   lk_arr=np.log(k_arr), a_arr=a_arr,
                                   use_log=True)
 
@@ -256,34 +254,34 @@ def test_Tk3D_2h():
 @pytest.mark.parametrize('pars',
                          # Wrong first profile
                          [{'p1': None, 'p2': None, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': None},
                           # Wrong other profiles
                           {'p1': P1, 'p2': PKC, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': PKC, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': PKC,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'cv13': P2,  'cv14': None, 'cv24': None, 'cv32':
+                           'cv13': P2, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': None},
                           # Wrong 2pts
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': P2, 'cv24': None, 'cv32':
+                           'cv13': None, 'cv14': P2, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': P2, 'cv32':
+                           'cv13': None, 'cv14': None, 'cv24': P2, 'cv32':
                            None, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            P2, 'p_of_k_a': None},
                           # Wron p_of_k_a
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': P2},
                           ])
 def test_tkk2h_22_errors(pars):
@@ -301,4 +299,3 @@ def test_tkk2h_22_errors(pars):
                                             prof24_2pt=pars['cv24'],
                                             prof32_2pt=pars['cv32'],
                                             p_of_k_a=pars['p_of_k_a'])
-

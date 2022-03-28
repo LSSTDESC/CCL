@@ -1009,8 +1009,9 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, prof2=None,
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
-    kr = np.sqrt(k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 + \
-           2 *k_use[:, None, None] * k_use[None, :, None] * cth[None, None, :])
+    kr = np.sqrt(k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 +
+                 2 * k_use[:, None, None] * k_use[None, :, None]
+                   * cth[None, None, :])
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
@@ -1309,12 +1310,12 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1,
 
 
 def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
-                              prof3=None, prof4=None, prof12_2pt=None,
-                              prof13_2pt=None, prof14_2pt=None,
-                              prof24_2pt=None, prof32_2pt=None,
-                              prof34_2pt=None, normprof1=False,
-                              normprof2=False, normprof3=False,
-                              normprof4=False, p_of_k_a=None):
+                           prof3=None, prof4=None, prof12_2pt=None,
+                           prof13_2pt=None, prof14_2pt=None,
+                           prof24_2pt=None, prof32_2pt=None,
+                           prof34_2pt=None, normprof1=False,
+                           normprof2=False, normprof3=False,
+                           normprof4=False, p_of_k_a=None):
     """ Computes the isotropized halo model 3-halo trispectrum for four profiles
     :math:`u_{1,2}`, :math:`v_{1,2}` as
 
@@ -1433,10 +1434,11 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         return pk
 
     def get_Bpt(a):
-        # We only need to compute the independent k * k * cos(theta). Since Pk only
-        # depends on the module of ki + kj, we just need to integrate from 0 to
-        # pi/2 and multiply by 4.
-        theta = np.linspace(0, 2 * np.pi, 100)
+        # We only need to compute the independent k * k * cos(theta) since Pk
+        # only depends on the module of ki + kj
+
+        # Romberg needs 1 + 2^n points
+        theta = np.linspace(0, 2*np.pi, 129)
         dtheta = theta[1] - theta[0]
         cth = np.cos(theta)[None, None, :]
 
@@ -1445,9 +1447,9 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         kr2 = k ** 2 + kp ** 2 + 2 * k * kp * cth
         kr = np.sqrt(kr2)
 
-        f2 = 5./7. - 0.5 * (1 + k **2 / kr2) * (1 + kp / k * cth) + \
+        f2 = 5./7. - 0.5 * (1 + k ** 2 / kr2) * (1 + kp / k * cth) + \
             2/7. * k ** 2 / kr2 * (1 + kp / k * cth)**2
-        P3 = scipy.integrate.romb(get_pk(kr, a)[:, None, None]* f2, dtheta,
+        P3 = scipy.integrate.romb(get_pk(kr, a)[:, None, None] * f2, dtheta,
                                   axis=-1)
         pk = get_pk(k_use, a)[:, None]
 
@@ -1456,9 +1458,6 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
 
         return Bpt
 
-
-    k1 = k2 = k_use[:, None]
-    k3 = k4 = k1.T
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
         # Compute profile normalizations
@@ -1518,7 +1517,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         #                 diag=True)[:, None]
 
         Bpt = get_Bpt(a)
-        tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i32 + \
+        tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i32 +
                        i3 * i2 * i14 + i4 * i2 * i31)
 
         # Normalize
@@ -1531,12 +1530,13 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         out = np.squeeze(out, axis=-1)
     return out
 
+
 def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
                            prof3=None, prof4=None, normprof1=False,
                            normprof2=False, normprof3=False, normprof4=False,
                            p_of_k_a=None):
-    """ Computes the isotropized halo model 4-halo trispectrum for four profiles
-    :math:`u_{1,2}`, :math:`v_{1,2}` as
+    """ Computes the isotropized halo model 4-halo trispectrum for four
+    profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
     .. math::
         \\bar{T}^{4h}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
@@ -1548,7 +1548,8 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
     .. math::
         T^{4h}{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
         T^{PT}({\bf k_{u_1}}, {\bf k_{u_2}}, {\bf k_{v_1}}, {\bf k_{v_2}}) \\,
-        I^1_1(k_{u_1} | u) I^1_1(k_{u_2} | u) I^1_1(k_{v_1} | v) I^1_1(k_{v_2} | v) \\,
+        I^1_1(k_{u_1} | u) I^1_1(k_{u_2} | u) I^1_1(k_{v_1} | v) \\,
+        I^1_1(k_{v_2} | v) \\,
 
     where :math:`I^1_1` is defined in the documentation
     of :math:`~HMCalculator.I_1_1` and :math:`P^{PT}` can be found in Eq. 30
@@ -1590,7 +1591,6 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
         If `k` or `a` are scalars, the corresponding dimension will
         be squeezed out on output.
     """
-    k_orig = k.copy()
     a_use = np.atleast_1d(a)
     k_use = np.atleast_1d(k)
 
@@ -1613,6 +1613,11 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
     na = len(a_use)
     nk = len(k_use)
 
+    # Romberg needs 1 + 2^n points
+    theta = np.linspace(0, 2*np.pi, 129)
+    dtheta = theta[1] - theta[0]
+    cth = np.cos(theta)[None, None, :]
+
     # Power spectrum
     def get_pk(k, a):
         # This returns int dphi / 2pi int dphi' / 2pi P(kkth)
@@ -1628,27 +1633,22 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
 
         return pk
 
-
-    theta = np.linspace(0, 2 * np.pi, 100)
-    dtheta = theta[1] - theta[0]
-    cth = np.cos(theta)[None, None, :]
+    def isotropize(arr):
+        int_arr = scipy.integrate.romb(arr, dtheta, axis=-1)
+        return int_arr / (2 * np.pi)
 
     k = k_use[:, None, None]
     kp = k_use[None, :, None]
     kr2 = k ** 2 + kp ** 2 + 2 * k * kp * cth
     kr = np.sqrt(kr2)
 
-    f2 = 5./7. - 0.5 * (1 + k **2 / kr2) * (1 + kp / k * cth) + \
+    f2 = 5./7. - 0.5 * (1 + k ** 2 / kr2) * (1 + kp / k * cth) + \
         2/7. * k ** 2 / kr2 * (1 + kp / k * cth)**2
 
     r = kp / k
-    intd = (5 * r  + (7 - 2*r**2)*cth) / (1 + r**2 + 2*r*cth) * \
+    intd = (5 * r + (7 - 2*r**2)*cth) / (1 + r**2 + 2*r*cth) * \
            (3/7. * r + 0.5 * (1 + r**2) * cth + 4/7. * r * cth**2)
     X = -7./4. * (1 + r.reshape(nk, nk)**2) + isotropize(intd)
-
-    def isotropize(arr):
-        int_arr = scipy.integrate.romb(arr, dtheta, axis=-1)
-        return int_arr / (2 * np.pi)
 
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
@@ -1674,7 +1674,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
         pkr = get_pk(kr.flatten(), aa).reshape((nk, nk, theta.size))
 
         P4A = isotropize(f2 ** 2 * pkr)
-        P4X = isotropize(f2 * f2.T  * pkr)
+        P4X = isotropize(f2 * f2.T * pkr)
 
         t1113 = 4/9. * pk**2 * pk.T * X
         t1113 += t1113.T
@@ -1688,8 +1688,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
 
-        tk_4h =  i1 * i2 * i3 * i4 * (t1113 + t1122)
-
+        tk_4h = i1 * i2 * i3 * i4 * (t1113 + t1122)
 
         # Normalize
         out[ia, :, :] = tk_4h * norm
@@ -1700,6 +1699,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
         out = np.squeeze(out, axis=-1)
         out = np.squeeze(out, axis=-1)
     return out
+
 
 def halomod_Tk3D_2h(cosmo, hmc,
                     prof1, prof2=None, prof12_2pt=None,
