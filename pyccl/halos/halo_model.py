@@ -928,12 +928,12 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
     return out
 
 
-def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
+def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, prof2=None,
                               prof3=None, prof4=None,
                               prof13_2pt=None, prof14_2pt=None,
                               prof24_2pt=None, prof32_2pt=None,
                               normprof1=False, normprof2=False,
-                              normprof3=False, normprof4=False):
+                              normprof3=False, normprof4=False, p_of_k_a=None):
     """ Computes the isotropized halo model 2-halo trispectrum for four profiles
     :math:`u_{1,2}`, :math:`v_{1,2}` as
 
@@ -959,10 +959,6 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         a (float or array_like): scale factor.
         prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
-        p12_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum for 12 (corresponding
-            to :math:`u_1`). If `None`, the power spectrum stored within
-            `cosmo` will be used.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
             `prof1` will be used as `prof2`.
@@ -992,8 +988,9 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
         normprof4 (bool): same as `normprof1` for `prof4`.
-        p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
-        p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`, the power
+            spectrum stored within `cosmo` will be used.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -1123,12 +1120,12 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     return out
 
 
-def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
+def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1,
                               prof2=None, prof3=None, prof4=None,
                               prof234_3pt=None, prof134_3pt=None,
                               prof124_3pt=None, prof123_3pt=None,
                               normprof1=False, normprof2=False,
-                              normprof3=False, normprof4=False):
+                              normprof3=False, normprof4=False, p_of_k_a=None):
     """ Computes the isotropized halo model 2-halo trispectrum for four different
     quantities defined by their respective halo profiles. The 2-halo
     trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
@@ -1156,9 +1153,6 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
         a (float or array_like): scale factor.
         prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum for :math:`u`. If
-            `None`, the power spectrum stored within `cosmo` will be used.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
             `prof1` will be used as `prof2`.
@@ -1186,6 +1180,9 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
         normprof4 (bool): same as `normprof1` for `prof4`.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`, the power
+            spectrum stored within `cosmo` will be used.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -1312,13 +1309,13 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
     return out
 
 
-def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
+def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
                               prof3=None, prof4=None, prof12_2pt=None,
                               prof13_2pt=None, prof14_2pt=None,
                               prof24_2pt=None, prof32_2pt=None,
                               prof34_2pt=None, normprof1=False,
                               normprof2=False, normprof3=False,
-                              normprof4=False):
+                              normprof4=False, p_of_k_a=None):
     """ Computes the isotropized halo model 3-halo trispectrum for four profiles
     :math:`u_{1,2}`, :math:`v_{1,2}` as
 
@@ -1346,10 +1343,6 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         a (float or array_like): scale factor.
         prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
-        p12_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum for 12 (corresponding
-            to :math:`u_1`). If `None`, the power spectrum stored within
-            `cosmo` will be used.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
             `prof1` will be used as `prof2`.
@@ -1381,8 +1374,9 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
         normprof4 (bool): same as `normprof1` for `prof4`.
-        p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
-        p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`, the power
+            spectrum stored within `cosmo` will be used.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -1538,9 +1532,10 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         out = np.squeeze(out, axis=-1)
     return out
 
-def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
+def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
                            prof3=None, prof4=None, normprof1=False,
-                           normprof2=False, normprof3=False, normprof4=False):
+                           normprof2=False, normprof3=False, normprof4=False,
+                           p_of_k_a=None):
     """ Computes the isotropized halo model 4-halo trispectrum for four profiles
     :math:`u_{1,2}`, :math:`v_{1,2}` as
 
@@ -1567,9 +1562,6 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         a (float or array_like): scale factor.
         prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum. If `None`, the power
-            spectrum stored within `cosmo` will be used.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
             `prof1` will be used as `prof2`.
@@ -1586,6 +1578,9 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
         normprof4 (bool): same as `normprof1` for `prof4`.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`, the power
+            spectrum stored within `cosmo` will be used.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -1708,14 +1703,14 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     return out
 
 def halomod_Tk3D_2h(cosmo, hmc,
-                    prof1, p_of_k_a, prof2=None, prof12_2pt=None,
+                    prof1, prof2=None, prof12_2pt=None,
                     prof3=None, prof4=None,
                     prof13_2pt=None, prof14_2pt=None,
-                    prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
+                    prof24_2pt=None, prof32_2pt=None,
                     prof234_3pt=None, prof134_3pt=None,
-                    prof214_3pt=None, prof231_3pt=None,
+                    prof124_3pt=None, prof123_3pt=None,
                     normprof1=False, normprof2=False,
-                    normprof3=False, normprof4=False,
+                    normprof3=False, normprof4=False, p_of_k_a=None,
                     lk_arr=None, a_arr=None,
                     extrap_order_lok=1, extrap_order_hik=1, use_log=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing the 2-halo
@@ -1728,9 +1723,6 @@ def halomod_Tk3D_2h(cosmo, hmc,
         hmc (:class:`HMCalculator`): a halo model calculator.
         prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum. If `None`, the power
-            spectrum stored within `cosmo` will be used.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
             `prof1` will be used as `prof2`.
@@ -1753,19 +1745,17 @@ def halomod_Tk3D_2h(cosmo, hmc,
             same as `prof14_2pt` for `prof2` and `prof4`.
         prof32_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof14_2pt` for `prof3` and `prof2`.
-        prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof14_2pt` for `prof3` and `prof4`.
         prof234_3pt (:class:`~pyccl.halos.profiles_3pt.Profile3pt`):
             a profile covariance object returning the 3-point
             moment of `prof2`, `prof3` and `prof4`. If `None`, the default
             third moment will be used, corresponding to the
             products of the means of each profile.
         prof134_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof12_2pt` for `prof1`, `prof3` and `prof4`.
-        prof214_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof12_2pt` for `prof2`, `prof1` and `prof4`.
-        prof231_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof12_2pt` for `prof2`, `prof3` and `prof1`.
+            same as `prof234_3pt` for `prof1`, `prof3` and `prof4`.
+        prof124_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof234_3pt` for `prof1`, `prof2` and `prof4`.
+        prof123_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof234_3pt` for `prof1`, `prof2` and `prof3`.
         p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
         p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
         normprof1 (bool): if `True`, this integral will be
@@ -1775,6 +1765,9 @@ def halomod_Tk3D_2h(cosmo, hmc,
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
         normprof4 (bool): same as `normprof1` for `prof4`.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`, the power
+            spectrum stored within `cosmo` will be used.
         a_arr (array): an array holding values of the scale factor
             at which the trispectrum should be calculated for
             interpolation. If `None`, the internal values used
@@ -1809,27 +1802,30 @@ def halomod_Tk3D_2h(cosmo, hmc,
         check(status)
 
     tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                 p_of_k_a, prof1, prof2=prof2,
-                                 prof12_2pt=prof12_2pt, prof3=prof3,
-                                 prof4=prof4, prof13_2pt=prof13_2pt,
-                                 prof14_2pt=prof14_2pt,
-                                 prof24_2pt=prof24_2pt,
-                                 prof32_2pt=prof32_2pt,
-                                 prof34_2pt=prof34_2pt,
-                                 normprof1=normprof1, normprof2=normprof2,
-                                 normprof3=normprof3, normprof4=normprof4)
-
-    tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                          p_of_k_a, prof1, prof2=prof2,
+                                          prof1, prof2=prof2,
                                           prof3=prof3, prof4=prof4,
-                                          prof234_3pt=prof234_3pt,
-                                          prof134_3pt=prof134_3pt,
-                                          prof214_3pt=prof214_3pt,
-                                          prof231_3pt=prof231_3pt,
+                                          prof13_2pt=prof13_2pt,
+                                          prof14_2pt=prof14_2pt,
+                                          prof24_2pt=prof24_2pt,
+                                          prof32_2pt=prof32_2pt,
                                           normprof1=normprof1,
                                           normprof2=normprof2,
                                           normprof3=normprof3,
-                                          normprof4=normprof4)
+                                          normprof4=normprof4,
+                                          p_of_k_a=p_of_k_a)
+
+    tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                          prof1, prof2=prof2,
+                                          prof3=prof3, prof4=prof4,
+                                          prof234_3pt=prof234_3pt,
+                                          prof134_3pt=prof134_3pt,
+                                          prof124_3pt=prof124_3pt,
+                                          prof123_3pt=prof123_3pt,
+                                          normprof1=normprof1,
+                                          normprof2=normprof2,
+                                          normprof3=normprof3,
+                                          normprof4=normprof4,
+                                          p_of_k_a=p_of_k_a)
 
     tkk = tkk_2h_22 + tkk_2h_13
 

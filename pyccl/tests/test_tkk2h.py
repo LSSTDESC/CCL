@@ -84,7 +84,7 @@ def test_tkk2h_22_smoke(pars):
                                  nlog10M=2)
 
     def f(k, a):
-        return ccl.halos.halomod_trispectrum_2h_22(COSMO, hmc, k, a, None,
+        return ccl.halos.halomod_trispectrum_2h_22(COSMO, hmc, k, a,
                                                 prof1=pars['p1'],
                                                 prof2=pars['p2'],
                                                 prof3=pars['p3'],
@@ -96,7 +96,8 @@ def test_tkk2h_22_smoke(pars):
                                                 normprof1=pars['norm'],
                                                 normprof2=pars['norm'],
                                                 normprof3=pars['norm'],
-                                                normprof4=pars['norm'])
+                                                normprof4=pars['norm'],
+                                                p_of_k_a=None)
     smoke_assert_tkk2h_real(f)
 
 
@@ -147,7 +148,7 @@ def test_tkk2h_13_smoke(pars):
                                  nlog10M=2)
 
     def f(k, a):
-        return ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k, a, None,
+        return ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k, a,
                                                 prof1=pars['p1'],
                                                 prof2=pars['p2'],
                                                 prof3=pars['p3'],
@@ -159,58 +160,90 @@ def test_tkk2h_13_smoke(pars):
                                                 normprof1=pars['norm'],
                                                 normprof2=pars['norm'],
                                                 normprof3=pars['norm'],
-                                                normprof4=pars['norm'])
+                                                normprof4=pars['norm'],
+                                                p_of_k_a=None)
     smoke_assert_tkk2h_real(f)
 
 
-# def test_tkk2h_tk3d():
-#     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
-#     k_arr = KK
-#     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
-#     tkk_arr = ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-#                                                P1, prof2=P2,
-#                                                prof12_2pt=PKC,
-#                                                prof3=P3, prof4=P4,
-#                                                prof34_2pt=PKC,
-#                                                normprof1=True,
-#                                                normprof2=True,
-#                                                normprof3=True,
-#                                                normprof4=True)
-#
-#     # Input sampling
-#     tk3d = ccl.halos.halomod_Tk3D_1h(COSMO, hmc,
-#                                      P1, prof2=P2,
-#                                      prof12_2pt=PKC,
-#                                      prof3=P3, prof4=P4,
-#                                      prof34_2pt=PKC,
-#                                      normprof1=True,
-#                                      normprof2=True,
-#                                      normprof3=True,
-#                                      normprof4=True,
-#                                      lk_arr=np.log(k_arr),
-#                                      a_arr=a_arr,
-#                                      use_log=True)
-#     tkk_arr_2 = np.array([tk3d.eval(k_arr, a) for a in a_arr])
-#     assert np.all(np.fabs((tkk_arr / tkk_arr_2 - 1)).flatten()
-#                   < 1E-4)
-#
-#     # Standard sampling
-#     tk3d = ccl.halos.halomod_Tk3D_1h(COSMO, hmc,
-#                                      P1, prof2=P2,
-#                                      prof12_2pt=PKC,
-#                                      prof3=P3, prof4=P4,
-#                                      prof34_2pt=PKC,
-#                                      normprof1=True,
-#                                      normprof2=True,
-#                                      normprof3=True,
-#                                      normprof4=True,
-#                                      lk_arr=np.log(k_arr),
-#                                      use_log=True)
-#     tkk_arr_2 = np.array([tk3d.eval(k_arr, a) for a in a_arr])
-#     assert np.all(np.fabs((tkk_arr / tkk_arr_2 - 1)).flatten()
-#                   < 1E-4)
-#
-#
+def test_Tk3D_2h():
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
+    k_arr = KK
+    a_arr = np.array([0.1, 0.4, 0.7, 1.0])
+    tkk_arr = ccl.halos.halomod_trispectrum_2h_22(COSMO, hmc, k_arr, a_arr,
+                                                  P1, prof2=P2,
+                                                  prof3=P3, prof4=P4,
+                                                  prof13_2pt=PKC,
+                                                  prof14_2pt=PKC,
+                                                  prof24_2pt=PKC,
+                                                  prof32_2pt=PKC,
+                                                  normprof1=True,
+                                                  normprof2=True,
+                                                  normprof3=True,
+                                                  normprof4=True,
+                                                  p_of_k_a=None)
+
+    tkk_arr += ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k_arr, a_arr,
+                                                   prof1=P1, prof2=P2,
+                                                   prof3=P3, prof4=P4,
+                                                   prof234_3pt=None,
+                                                   prof134_3pt=None,
+                                                   prof124_3pt=None,
+                                                   prof123_3pt=None,
+                                                   normprof1=True,
+                                                   normprof2=True,
+                                                   normprof3=True,
+                                                   normprof4=True,
+                                                   p_of_k_a=None)
+
+
+    # Input sampling
+    tk3d = ccl.halos.halomod_Tk3D_2h(COSMO, hmc,
+                                     P1, prof2=P2,
+                                     prof3=P3, prof4=P4,
+                                     prof13_2pt=PKC,
+                                     prof14_2pt=PKC,
+                                     prof24_2pt=PKC,
+                                     prof32_2pt=PKC,
+                                     prof234_3pt=None,
+                                     prof134_3pt=None,
+                                     prof124_3pt=None,
+                                     prof123_3pt=None,
+                                     normprof1=True,
+                                     normprof2=True,
+                                     normprof3=True,
+                                     normprof4=True,
+                                     p_of_k_a=None,
+                                     lk_arr=np.log(k_arr),
+                                     a_arr=a_arr,
+                                     use_log=True)
+    tkk_arr_2 = np.array([tk3d.eval(k_arr, a) for a in a_arr])
+    assert np.all(np.fabs((tkk_arr / tkk_arr_2 - 1)).flatten()
+                  < 1E-4)
+
+    # Standard sampling
+    tk3d = ccl.halos.halomod_Tk3D_2h(COSMO, hmc,
+                                     P1, prof2=P2,
+                                     prof3=P3, prof4=P4,
+                                     prof13_2pt=PKC,
+                                     prof14_2pt=PKC,
+                                     prof24_2pt=PKC,
+                                     prof32_2pt=PKC,
+                                     prof234_3pt=None,
+                                     prof134_3pt=None,
+                                     prof124_3pt=None,
+                                     prof123_3pt=None,
+                                     normprof1=True,
+                                     normprof2=True,
+                                     normprof3=True,
+                                     normprof4=True,
+                                     p_of_k_a=None,
+                                     lk_arr=np.log(k_arr),
+                                     use_log=True)
+    tkk_arr_2 = np.array([tk3d.eval(k_arr, a) for a in a_arr])
+    assert np.all(np.fabs((tkk_arr / tkk_arr_2 - 1)).flatten()
+                  < 1E-4)
+
+
 # def test_tkk2h_errors():
 #     from pyccl.pyutils import assert_warns
 #
