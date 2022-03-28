@@ -367,7 +367,7 @@ class HMCalculator(object):
              value of `k`.
         """
         # Compute mass function
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(a, cosmo, True)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
                                   mass_def=self._mdef).T
@@ -929,12 +929,11 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
 
 
 def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
-                              prof3=None, prof4=None, prof12_2pt=None,
+                              prof3=None, prof4=None,
                               prof13_2pt=None, prof14_2pt=None,
                               prof24_2pt=None, prof32_2pt=None,
-                              prof34_2pt=None, normprof1=False,
-                              normprof2=False, normprof3=False,
-                              normprof4=False):
+                              normprof1=False, normprof2=False,
+                              normprof3=False, normprof4=False):
     """ Computes the isotropized halo model 2-halo trispectrum for four profiles
     :math:`u_{1,2}`, :math:`v_{1,2}` as
 
@@ -986,8 +985,6 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
             same as `prof14_2pt` for `prof2` and `prof4`.
         prof32_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof14_2pt` for `prof3` and `prof2`.
-        prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof14_2pt` for `prof3` and `prof4`.
         normprof1 (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.I_0_1`), where
@@ -1010,7 +1007,8 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
     a_use = np.atleast_1d(a)
     k_use = np.atleast_1d(k)
 
-    theta = np.linspace(0, 2*np.pi, 100)
+    # Romberg needs 1 + 2^n points
+    theta = np.linspace(0, 2*np.pi, 129)
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
@@ -1022,19 +1020,34 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         raise TypeError("prof1 must be of type `HaloProfile`")
     if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
+    else:
+        prof2 = prof1
     if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
         raise TypeError("prof3 must be of type `HaloProfile` or `None`")
+    else:
+        prof3 = prof1
     if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
-    if prof12_2pt is None:
-        prof12_2pt = Profile2pt()
-    elif not isinstance(prof12_2pt, Profile2pt):
-        raise TypeError("prof12_2pt must be of type "
+    else:
+        prof4 = prof3
+
+    if prof13_2pt is None:
+        prof13_2pt = Profile2pt()
+    elif not isinstance(prof13_2pt, Profile2pt):
+        raise TypeError("prof13_2pt must be of type "
                         "`Profile2pt` or `None`")
-    if (prof13_2pt is not None) and (not isinstance(prof13_2pt, Profile2pt)):
+    if (prof24_2pt is not None) and (not isinstance(prof24_2pt, Profile2pt)):
         raise TypeError("prof13_2pt must be of type `Profile2pt` or `None`")
+    else:
+        prof24_2pt = prof13_2pt
     if (prof14_2pt is not None) and (not isinstance(prof14_2pt, Profile2pt)):
         raise TypeError("prof14_2pt must be of type `Profile2pt` or `None`")
+    else:
+        prof14_2pt = prof13_2pt
+    if (prof32_2pt is not None) and (not isinstance(prof32_2pt, Profile2pt)):
+        raise TypeError("prof32_2pt must be of type `Profile2pt` or `None`")
+    else:
+        prof32_2pt = prof13_2pt
 
     def get_norm(normprof, prof, sf):
         if normprof:
@@ -1092,19 +1105,15 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         # i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt,
         #                 prof2=prof4)[None, :]
         # Permutation 1
-        i13 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof13_2pt, prof2=prof3,
-                        diag=False)
-        i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4,
-                        diag=False)
+        i13 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof13_2pt, prof2=prof3)
+        i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4)
         # Permutation 2
-        i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4,
-                        diag=False)
-        i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2,
-                        diag=False)
+        i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4)
+        i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2)
 
         tk_2h_22 = p * (i13 * i24 + i14 * i32)
         # Normalize
-        out[ia, :, :] = tk_2h_22[:, None] * norm
+        out[ia, :, :] = tk_2h_22 * norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -1117,7 +1126,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
 def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
                               prof2=None, prof3=None, prof4=None,
                               prof234_3pt=None, prof134_3pt=None,
-                              prof214_3pt=None, prof231_3pt=None,
+                              prof124_3pt=None, prof123_3pt=None,
                               normprof1=False, normprof2=False,
                               normprof3=False, normprof4=False):
     """ Computes the isotropized halo model 2-halo trispectrum for four different
@@ -1165,11 +1174,11 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
             third moment will be used, corresponding to the
             products of the means of each profile.
         prof134_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof12_2pt` for `prof1`, `prof3` and `prof4`.
-        prof214_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof12_2pt` for `prof2`, `prof1` and `prof4`.
-        prof231_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof12_2pt` for `prof2`, `prof3` and `prof1`.
+            same as `prof234_3pt` for `prof1`, `prof3` and `prof4`.
+        prof124_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof234_3pt` for `prof1`, `prof2` and `prof4`.
+        prof123_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof234_3pt` for `prof1`, `prof2` and `prof3`.
         normprof1 (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.I_0_1`), where
@@ -1679,7 +1688,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, p_of_k_a, prof1, prof2=None,
         t1113 = 4/9. * pk**2 * pk.T * X
         t1113 += t1113.T
 
-        t1122 = 8 * (pk**2 P4A + pk * pk.T * P4X)
+        t1122 = 8 * (pk**2 * P4A + pk * pk.T * P4X)
         t1122 += t1122.T
 
         # Now the halo model integrals
