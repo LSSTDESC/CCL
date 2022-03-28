@@ -1223,13 +1223,13 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
         prof134_3pt = prof234_3pt
     elif not isinstance(prof134_3pt, Profile3pt):
         raise TypeError("prof134_3pt must be of type `Profile3pt` or `None`")
-    if prof214_3pt is None:
-        prof214_3pt = prof234_3pt
-    elif not isinstance(prof214_3pt, Profile3pt):
+    if prof124_3pt is None:
+        prof124_3pt = prof234_3pt
+    elif not isinstance(prof124_3pt, Profile3pt):
         raise TypeError("prof214_3pt must be of type `Profile3pt` or `None`")
-    if prof231_3pt is None:
-        prof231_3pt = prof234_3pt
-    elif not isinstance(prof231_3pt, Profile3pt):
+    if prof123_3pt is None:
+        prof123_3pt = prof234_3pt
+    elif not isinstance(prof123_3pt, Profile3pt):
         raise TypeError("prof231_3pt must be of type `Profile3pt` or `None`")
 
     def get_norm(normprof, prof, sf):
@@ -1290,15 +1290,12 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, p_of_k_a, prof1,
         # Permutation 2
         p3 = p1.T
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        # Note: the integration is over < k k' k' >, so those profiles with
-        # same argument (k) must be in prof2 and prof3. In order to recover
-        # the correct axis ordering, we transpose afterwards.
-        i214 = hmc.I_1_3(cosmo, k_use, aa, prof4, prof214_3pt, prof2=prof1,
+        i214 = hmc.I_1_3(cosmo, k_use, aa, prof4, prof124_3pt, prof2=prof1,
                          prof3=prof2).T
         # Permutation 4
         # p4 = p3  # (because k_c = k_d)
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        i231 = hmc.I_1_3(cosmo, k_use, aa, prof3, prof231_3pt, prof2=prof2,
+        i231 = hmc.I_1_3(cosmo, k_use, aa, prof3, prof123_3pt, prof2=prof2,
                          prof3=prof1).T
         ####
 

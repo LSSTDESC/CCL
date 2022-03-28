@@ -16,6 +16,7 @@ P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
 Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
 PKC = ccl.halos.Profile2pt()
+Prof3pt = ccl.halos.Profile3pt()
 PKCH = ccl.halos.Profile2ptHOD()
 KK = np.geomspace(1E-3, 10, 32)
 MM = np.geomspace(1E11, 1E15, 16)
@@ -100,9 +101,47 @@ def test_tkk2h_22_smoke(pars):
 
 
 @pytest.mark.parametrize('pars',
-                         [{'p1': P1, 'p2': None, 'cv12': None,
-                           'p3': None, 'p4': None, 'cv34': None,
-                           'norm': False}]) # ,
+                         [{'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv13': None, 'cv14': None, 'cv24': None,
+                           'cv32': None, 'cv234': None, 'cv134': None,
+                           'cv124': None, 'cv123': None, 'norm': False},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv13': None,  'cv14': None, 'cv24': None,
+                           'cv32': None, 'cv234': None, 'cv134': None,
+                           'cv124': None, 'cv123': None, 'norm': True},
+                          {'p1': P1, 'p2': P2, 'p3': None, 'p4': None,
+                           'cv13': None,  'cv14': None, 'cv24': None,
+                           'cv32': None, 'cv234': None, 'cv134': None,
+                           'cv124': None, 'cv123': None, 'norm': True},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': None,  'cv14': None, 'cv24': None,
+                           'cv32': None, 'cv234': None, 'cv134': None,
+                           'cv124': None, 'cv123': None, 'norm': True},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': P4,
+                           'cv13': None,  'cv14': None, 'cv24': None,
+                           'cv32': None, 'cv234': None, 'cv134': None,
+                           'cv124': None, 'cv123': None, 'norm': True},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': None,  'cv14': None, 'cv24': PKCH,
+                           'cv32': None, 'cv234': None, 'cv134': None,
+                           'cv124': None, 'cv123': None, 'norm': True},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC,  'cv14': PKC, 'cv24': PKCH,
+                           'cv32': PKC, 'cv234': None, 'cv134': None,
+                           'cv124': None, 'cv123': None, 'norm': True},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC,  'cv14': PKC, 'cv24': PKCH,
+                           'cv32': PKC, 'cv234': Prof3pt, 'cv134': None,
+                           'cv124': None, 'cv123': None, 'norm': True},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC,  'cv14': PKC, 'cv24': PKCH,
+                           'cv32': PKC, 'cv234': None, 'cv134': None,
+                           'cv124': None, 'cv123': Prof3pt, 'norm': True},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC,  'cv14': PKC, 'cv24': PKCH,
+                           'cv32': PKC, 'cv234': Prof3pt, 'cv134': Prof3pt,
+                           'cv124': Prof3pt, 'cv123': Prof3pt, 'norm': True},
+                          ])
 def test_tkk2h_13_smoke(pars):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
                                  nlog10M=2)
@@ -113,6 +152,10 @@ def test_tkk2h_13_smoke(pars):
                                                 prof2=pars['p2'],
                                                 prof3=pars['p3'],
                                                 prof4=pars['p4'],
+                                                prof234_3pt=pars['cv234'],
+                                                prof134_3pt=pars['cv134'],
+                                                prof124_3pt=pars['cv124'],
+                                                prof123_3pt=pars['cv123'],
                                                 normprof1=pars['norm'],
                                                 normprof2=pars['norm'],
                                                 normprof3=pars['norm'],
