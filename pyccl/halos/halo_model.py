@@ -1031,8 +1031,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, prof2=None,
     if prof13_2pt is None:
         prof13_2pt = Profile2pt()
     elif not isinstance(prof13_2pt, Profile2pt):
-        raise TypeError("prof13_2pt must be of type "
-                        "`Profile2pt` or `None`")
+        raise TypeError("prof13_2pt must be of type `Profile2pt` or `None`")
     if (prof24_2pt is not None) and (not isinstance(prof24_2pt, Profile2pt)):
         raise TypeError("prof13_2pt must be of type `Profile2pt` or `None`")
     else:

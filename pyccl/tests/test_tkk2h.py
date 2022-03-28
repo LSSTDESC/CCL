@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import pyccl as ccl
+from pyccl.pyutils import assert_warns
 
 
 COSMO = ccl.Cosmology(
@@ -243,37 +244,61 @@ def test_Tk3D_2h():
     assert np.all(np.fabs((tkk_arr / tkk_arr_2 - 1)).flatten()
                   < 1E-4)
 
+    # Negative profile in logspace
+    # We cannot use assert_warns because other warnings are raised before the
+    # one we are testing
+    with pytest.warns(ccl.CCLWarning):
+        ccl.halos.halomod_Tk3D_2h( COSMO, hmc, P3, prof2=Pneg,
+                                  lk_arr=np.log(k_arr), a_arr=a_arr,
+                                  use_log=True)
 
-# def test_tkk2h_errors():
-#     from pyccl.pyutils import assert_warns
-#
-#     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
-#     k_arr = KK
-#     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
-#
-#     # Wrong first profile
-#     with pytest.raises(TypeError):
-#         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr, None)
-#     # Wrong other profiles
-#     with pytest.raises(TypeError):
-#         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-#                                          P1, prof2=PKC)
-#     with pytest.raises(TypeError):
-#         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-#                                          P1, prof3=PKC)
-#     with pytest.raises(TypeError):
-#         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-#                                          P1, prof4=PKC)
-#     # Wrong 2pts
-#     with pytest.raises(TypeError):
-#         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-#                                          P1, prof12_2pt=P2)
-#     with pytest.raises(TypeError):
-#         ccl.halos.halomod_trispectrum_1h(COSMO, hmc, k_arr, a_arr,
-#                                          P1, prof34_2pt=P2)
-#
-#     # Negative profile in logspace
-#     assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,
-#                  COSMO, hmc, P3, prof2=Pneg,
-#                  lk_arr=np.log(k_arr), a_arr=a_arr,
-#                  use_log=True)
+
+@pytest.mark.parametrize('pars',
+                         # Wrong first profile
+                         [{'p1': None, 'p2': None, 'p3': None, 'p4': None,
+                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           None, 'p_of_k_a': None},
+                          # Wrong other profiles
+                          {'p1': P1, 'p2': PKC, 'p3': None, 'p4': None,
+                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': PKC, 'p4': None,
+                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': PKC,
+                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv13': P2,  'cv14': None, 'cv24': None, 'cv32':
+                           None, 'p_of_k_a': None},
+                          # Wrong 2pts
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv13': None,  'cv14': P2, 'cv24': None, 'cv32':
+                           None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv13': None,  'cv14': None, 'cv24': P2, 'cv32':
+                           None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           P2, 'p_of_k_a': None},
+                          # Wron p_of_k_a
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv13': None,  'cv14': None, 'cv24': None, 'cv32':
+                           None, 'p_of_k_a': P2},
+                          ])
+def test_tkk2h_22_errors(pars):
+
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
+    k_arr = KK
+    a_arr = np.array([0.1, 0.4, 0.7, 1.0])
+
+    with pytest.raises(TypeError):
+        ccl.halos.halomod_trispectrum_2h_22(COSMO, hmc, k_arr, a_arr,
+                                            prof1=pars['p1'], prof2=pars['p2'],
+                                            prof3=pars['p3'], prof4=pars['p4'],
+                                            prof13_2pt=pars['cv13'],
+                                            prof14_2pt=pars['cv14'],
+                                            prof24_2pt=pars['cv24'],
+                                            prof32_2pt=pars['cv32'],
+                                            p_of_k_a=pars['p_of_k_a'])
+
