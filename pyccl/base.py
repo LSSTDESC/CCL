@@ -473,6 +473,14 @@ def _auto_store_repr(__repr__):
     return wrapper
 
 
+def _unwrap(func):
+    """Convenience function that unwraps and returns the innermost function.
+    """
+    while hasattr(func, "__wrapped__"):
+        func = func.__wrapped__
+    return func
+
+
 class CCLObject:
     """Base for CCL objects.
 
@@ -552,7 +560,7 @@ class CCLObject:
         cls.__init__ = unlock_instance(cls.__init__)
         if hasattr(cls, "update_parameters"):
             cls.update_parameters = \
-                unlock_instance(mutate=True)(cls.update_parameters)
+                unlock_instance(mutate=True)(_unwrap(cls.update_parameters))
         if hasattr(cls, "_build_parameters"):
             cls._build_parameters = \
                 unlock_instance(mutate=False)(cls._build_parameters)
@@ -594,7 +602,7 @@ class CCLObject:
         # If the class does not have a constructor method,
         # assume all of its instances are equivalent
         # and build a simple string using just the class name.
-        init = self.__class__.__init__.__wrapped__
+        init = _unwrap(self.__class__.__init__)
         if init == object.__init__:
             from ._repr import _build_string_simple
             return _build_string_simple(self)
