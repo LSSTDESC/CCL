@@ -181,7 +181,9 @@ class Caching(metaclass=_ClassPropertyMeta):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             if not cls._enabled:
-                return func(*args, **kwargs)
+                # Cache emulators even when caching is disabled.
+                if not func.__name__ == "_load_emu":
+                    return func(*args, **kwargs)
 
             key = cls._get_key(func, *args, **kwargs)
             # shorthand access
