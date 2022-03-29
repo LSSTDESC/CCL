@@ -1237,6 +1237,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1,
 
     # Power spectrum
     def get_pk(p_of_k_a):
+        print(type(p_of_k_a))
         if isinstance(p_of_k_a, Pk2D):
             def pkf(sf):
                 return p_of_k_a.eval(k_use, sf, cosmo)

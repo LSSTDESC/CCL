@@ -271,6 +271,9 @@ def test_Tk3D_2h():
                            None, 'p_of_k_a': None},
                           # Wrong 2pts
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv13': P2, 'cv14': P2, 'cv24': None, 'cv32':
+                           None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': P2, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
@@ -279,7 +282,7 @@ def test_Tk3D_2h():
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            P2, 'p_of_k_a': None},
-                          # Wron p_of_k_a
+                          # Wrong p_of_k_a
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': P2},
@@ -298,4 +301,55 @@ def test_tkk2h_22_errors(pars):
                                             prof14_2pt=pars['cv14'],
                                             prof24_2pt=pars['cv24'],
                                             prof32_2pt=pars['cv32'],
+                                            p_of_k_a=pars['p_of_k_a'])
+
+@pytest.mark.parametrize('pars',
+                         # Wrong first profile
+                         [{'p1': None, 'p2': None, 'p3': None, 'p4': None,
+                           'cv234': None, 'cv134': None, 'cv124': None,
+                           'cv123': None, 'p_of_k_a': None},
+                          # Wrong other profiles
+                          {'p1': P1, 'p2': PKC, 'p3': None, 'p4': None,
+                           'cv234': None, 'cv134': None, 'cv124': None,
+                           'cv123': None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': PKC, 'p4': None,
+                           'cv234': None, 'cv134': None, 'cv124': None,
+                           'cv123': None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': PKC,
+                           'cv234': None, 'cv134': None, 'cv124': None,
+                           'cv123': None, 'p_of_k_a': None},
+                          # Wrong 2pts
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv234': P2, 'cv134': None, 'cv124': None,
+                           'cv123': None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv234': None, 'cv134': P2, 'cv124': None,
+                           'cv123': None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv234': None, 'cv134': None, 'cv124': P2,
+                           'cv123': None, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv234': None, 'cv134': None, 'cv124': None,
+                           'cv123': P2, 'p_of_k_a': None},
+                          # Wrong p_of_k_a
+                          {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
+                           'cv234': None, 'cv134': None, 'cv124': None,
+                           'cv123': None, 'p_of_k_a': P2},
+                          ])
+def test_tkk2h_13_errors(pars):
+
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
+    k_arr = KK
+    a_arr = np.array([0.1, 0.4, 0.7, 1.0])
+
+    with pytest.raises(TypeError):
+        ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k_arr, a_arr,
+                                            prof1=pars['p1'],
+                                            prof2=pars['p2'],
+                                            prof3=pars['p3'],
+                                            prof4=pars['p4'],
+                                            prof234_3pt=pars['cv234'],
+                                            prof134_3pt=pars['cv134'],
+                                            prof124_3pt=pars['cv124'],
+                                            prof123_3pt=pars['cv123'],
                                             p_of_k_a=pars['p_of_k_a'])
