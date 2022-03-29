@@ -61,6 +61,7 @@ from .halo_model import (  # noqa
     halomod_Tk3D_1h,
     halomod_Tk3D_2h,
     halomod_Tk3D_3h,
+    halomod_Tk3D_4h,
     halomod_Tk3D_SSC)
 
 # CIB profiles
