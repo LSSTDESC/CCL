@@ -195,7 +195,7 @@ def test_Tk3D_3h():
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            P2, 'p_of_k_a': None},
-                          # Wron p_of_k_a
+                          # Wrong p_of_k_a
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
                            None, 'p_of_k_a': P2},
