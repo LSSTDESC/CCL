@@ -2040,7 +2040,7 @@ def halomod_Tk3D_3h(cosmo, hmc,
             zero values are found).
 
     Returns:
-        :class:`~pyccl.tk3d.Tk3D`: 1-halo trispectrum.
+        :class:`~pyccl.tk3d.Tk3D`: 3-halo trispectrum.
     """
     if lk_arr is None:
         status = 0
@@ -2093,7 +2093,7 @@ def halomod_Tk3D_4h(cosmo, hmc,
                     use_log=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the 3-halo trispectrum for four quantities defined by
-    their respective halo profiles. See :meth:`halomod_trispectrum_3h`
+    their respective halo profiles. See :meth:`halomod_trispectrum_4h`
     for more details about the actual calculation.
 
     Args:
@@ -2140,7 +2140,7 @@ def halomod_Tk3D_4h(cosmo, hmc,
             zero values are found).
 
     Returns:
-        :class:`~pyccl.tk3d.Tk3D`: 1-halo trispectrum.
+        :class:`~pyccl.tk3d.Tk3D`: 4-halo trispectrum.
     """
     if lk_arr is None:
         status = 0
@@ -2163,8 +2163,6 @@ def halomod_Tk3D_4h(cosmo, hmc,
                                  normprof3=normprof3,
                                  normprof4=normprof4,
                                  p_of_k_a=None)
-
-    print('np.any(tkk <= 0)', np.any(tkk <= 0))
 
     if use_log:
         if np.any(tkk <= 0):
@@ -2370,6 +2368,182 @@ def halomod_Tk3D_SSC(cosmo, hmc,
 
     tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                 pk1_arr=dpk12, pk2_arr=dpk34,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik, is_logt=use_log)
+    return tk3d
+
+
+def halomod_Tk3D_cNG(cosmo, hmc,
+                    prof1, prof2=None,
+                    prof3=None, prof4=None, prof12_2pt=None,
+                    prof13_2pt=None, prof14_2pt=None,
+                    prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
+                    prof234_3pt=None, prof134_3pt=None,
+                    prof124_3pt=None, prof123_3pt=None,
+                    normprof1=False, normprof2=False,
+                    normprof3=False, normprof4=False, p_of_k_a=None,
+                    lk_arr=None, a_arr=None,
+                    extrap_order_lok=1, extrap_order_hik=1, use_log=False):
+    """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing the non-Gaussian
+    covariance trispectrum for four quantities defined by their respective halo
+    profiles. This is the sum of the trispectrum terms 1h + 2h + 3h + 4h.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        hmc (:class:`HMCalculator`): a halo model calculator.
+        prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_1` above.
+        prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`u_2` above. If `None`,
+            `prof1` will be used as `prof2`.
+        prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_1` above. If `None`,
+            `prof1` will be used as `prof3`.
+        prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            profile (corresponding to :math:`v_2` above. If `None`,
+            `prof3` will be used as `prof4`.
+        prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            a profile covariance object returning the the two-point
+            moment of `prof1` and `prof2`. If `None`, the default
+            second moment will be used, corresponding to the
+            products of the means of both profiles.
+        prof13_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof1` and `prof3`.
+        prof14_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof1` and `prof4`.
+        prof24_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof2` and `prof4`.
+        prof32_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof3` and `prof2`.
+        prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof12_2pt` for `prof3` and `prof4`.
+        prof234_3pt (:class:`~pyccl.halos.profiles_3pt.Profile3pt`):
+            a profile covariance object returning the 3-point
+            moment of `prof2`, `prof3` and `prof4`. If `None`, the default
+            third moment will be used, corresponding to the
+            products of the means of each profile.
+        prof134_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof234_3pt` for `prof1`, `prof3` and `prof4`.
+        prof124_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof234_3pt` for `prof1`, `prof2` and `prof4`.
+        prof123_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof234_3pt` for `prof1`, `prof2` and `prof3`.
+        p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
+        p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
+        normprof1 (bool): if `True`, this integral will be
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
+            (see :meth:`~HMCalculator.I_0_1`), where
+            :math:`u` is the profile represented by `prof1`.
+        normprof2 (bool): same as `normprof1` for `prof2`.
+        normprof3 (bool): same as `normprof1` for `prof3`.
+        normprof4 (bool): same as `normprof1` for `prof4`.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`, the power
+            spectrum stored within `cosmo` will be used.
+        a_arr (array): an array holding values of the scale factor
+            at which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of Mpc^-1) at
+            which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        extrap_order_lok (int): extrapolation order to be used on
+            k-values below the minimum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        extrap_order_hik (int): extrapolation order to be used on
+            k-values above the maximum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        use_log (bool): if `True`, the trispectrum will be
+            interpolated in log-space (unless negative or
+            zero values are found).
+
+    Returns:
+        :class:`~pyccl.tk3d.Tk3D`: 2-halo trispectrum.
+    """
+    if lk_arr is None:
+        status = 0
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status)
+    if a_arr is None:
+        status = 0
+        na = lib.get_pk_spline_na(cosmo.cosmo)
+        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        check(status)
+
+    tkk = halomod_trispectrum_1h(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                 prof1, prof2=prof2,
+                                 prof12_2pt=prof12_2pt,
+                                 prof3=prof3, prof4=prof4,
+                                 prof34_2pt=prof34_2pt,
+                                 normprof1=normprof1, normprof2=normprof2,
+                                 normprof3=normprof3, normprof4=normprof4)
+
+    tkk += halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                     prof1, prof2=prof2,
+                                     prof3=prof3, prof4=prof4,
+                                     prof13_2pt=prof13_2pt,
+                                     prof14_2pt=prof14_2pt,
+                                     prof24_2pt=prof24_2pt,
+                                     prof32_2pt=prof32_2pt,
+                                     normprof1=normprof1,
+                                     normprof2=normprof2,
+                                     normprof3=normprof3,
+                                     normprof4=normprof4,
+                                     p_of_k_a=p_of_k_a)
+
+    tkk += halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                     prof1, prof2=prof2,
+                                     prof3=prof3, prof4=prof4,
+                                     prof234_3pt=prof234_3pt,
+                                     prof134_3pt=prof134_3pt,
+                                     prof124_3pt=prof124_3pt,
+                                     prof123_3pt=prof123_3pt,
+                                     normprof1=normprof1,
+                                     normprof2=normprof2,
+                                     normprof3=normprof3,
+                                     normprof4=normprof4,
+                                     p_of_k_a=p_of_k_a)
+
+    tkk += halomod_trispectrum_3h(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                  prof1=prof1,
+                                  prof2=prof2,
+                                  prof3=prof3,
+                                  prof4=prof4,
+                                  prof13_2pt=prof13_2pt,
+                                  prof14_2pt=prof14_2pt,
+                                  prof24_2pt=prof24_2pt,
+                                  prof32_2pt=prof32_2pt,
+                                  normprof1=normprof1,
+                                  normprof2=normprof2,
+                                  normprof3=normprof3,
+                                  normprof4=normprof4,
+                                  p_of_k_a=None)
+
+    tkk += halomod_trispectrum_4h(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                  prof1=prof1,
+                                  prof2=prof2,
+                                  prof3=prof3,
+                                  prof4=prof4,
+                                  normprof1=normprof1,
+                                  normprof2=normprof2,
+                                  normprof3=normprof3,
+                                  normprof4=normprof4,
+                                  p_of_k_a=None)
+
+    if use_log:
+        if np.any(tkk <= 0):
+            warnings.warn(
+                "Some values were not positive. "
+                "Will not interpolate in log-space.",
+                category=CCLWarning)
+            use_log = False
+        else:
+            tkk = np.log(tkk)
+
+    tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkk,
                 extrap_order_lok=extrap_order_lok,
                 extrap_order_hik=extrap_order_hik, is_logt=use_log)
     return tk3d
