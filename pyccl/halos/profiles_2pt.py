@@ -83,10 +83,14 @@ class Profile2pt(object):
 
             uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
 
-        if diag:
-            return uk1 * uk2 * (1 + self.r_corr)
+        if (diag is True) or (isinstance(k, float)):
+            output = uk1 * uk2 * (1 + self.r_corr)
+        elif isinstance(M, float):
+            output = uk1[:, None] * uk2[None, :] * (1 + self.r_corr)
         else:
-            return uk1[:, :, None] * uk2[:, None, :] * (1 + self.r_corr)
+            output = uk1[:, :, None] * uk2[:, None, :] * (1 + self.r_corr)
+
+        return output
 
 
 class Profile2ptHOD(Profile2pt):
@@ -139,8 +143,13 @@ class Profile2ptHOD(Profile2pt):
             if prof2 is not prof:
                 raise ValueError("prof2 must be the same as prof")
 
-        if diag is True:
-            return prof._fourier_variance(cosmo, k, M, a, mass_def)
+        if (diag is True) or (isinstance(k, float)):
+            output = prof._fourier_variance(cosmo, k, M, a, mass_def)
+        elif isinstance(M, float):
+            uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
+            output = uk1[:, None] * uk1[None, :] * (1 + self.r_corr)
         else:
             uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
-            return uk1[:, :, None] * uk1[:, None, :] * (1 + self.r_corr)
+            output = uk1[:, :, None] * uk1[:, None, :] * (1 + self.r_corr)
+
+        return output

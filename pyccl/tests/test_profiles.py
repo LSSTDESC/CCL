@@ -203,6 +203,23 @@ def test_hod_2pt_raises():
     p2.fourier_2pt(pgood, COSMO, 1., 1E13, 1.,
                    prof2=pgood, mass_def=M200)
 
+    # Test diag = False
+    # I comment this out because the HOD_2pt returns np.array(number) which is
+    # not a float. Is this intended? This is not the case for
+    # Profile2pt.fourier_2pt
+    # F = p2.fourier_2pt(pgood, COSMO, 1., 1E13, 1., prof2=pgood, mass_def=M200,
+    #                    diag=False)
+    # assert isinstance(F, float)
+    F = p2.fourier_2pt(pgood, COSMO, [1., 2], 1E13, 1., prof2=pgood,
+                       mass_def=M200, diag=False)
+    assert F.shape == (2, 2)
+    F = p2.fourier_2pt(pgood, COSMO, [1., 2], [1e12, 5e12, 1e13], 1.,
+                       prof2=pgood, mass_def=M200, diag=False)
+    assert F.shape == (3, 2, 2)
+    F2 = ccl.halos.Profile2pt().fourier_2pt(pgood, COSMO, [1., 2],
+                                            [1e12, 5e12, 1e13], 1.,
+                                            mass_def=M200, diag=False)
+    assert np.all(F == F2)
 
 def test_2pt_rcorr_smoke():
     c = ccl.halos.ConcentrationDuffy08(M200)
@@ -219,6 +236,16 @@ def test_2pt_rcorr_smoke():
     assert p2pt.r_corr == -1.
     F3 = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., mass_def=M200)
     assert F3 == 0
+
+    # Test diag = False
+    F = p2pt.fourier_2pt(p, COSMO, 1., 1e13, 1., mass_def=M200, diag=False)
+    assert isinstance(F, float)
+    F = p2pt.fourier_2pt(p, COSMO, [1., 2.], 1e13, 1., mass_def=M200,
+                         diag=False)
+    assert F.shape == (2, 2)
+    F = p2pt.fourier_2pt(p, COSMO, [1., 2.], [1e12, 5e12, 1e13], 1.,
+                         mass_def=M200, diag=False)
+    assert F.shape == (3, 2, 2)
 
     # Errors
     with pytest.raises(TypeError):
