@@ -1528,7 +1528,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         # i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
         # i12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2)
 
-        Bpt = get_Bpt(a)
+        Bpt = get_Bpt(aa)
         tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i32 +
                        i3 * i2 * i14 + i4 * i2 * i31)
 
