@@ -31,7 +31,7 @@ def test_Tk3D_2h():
 
     # Power spectrum
     pk = ccl.halos.halomod_Pk2D(COSMO, hmc, prf, get_2h=False)
-    cl = ccl.angular_cl(COSMO, tr, tr, l_bm, p_of_k_a=pk)
+    # cl = ccl.angular_cl(COSMO, tr, tr, l_bm, p_of_k_a=pk)
 
     # Covariance
     lk_arr = np.log(np.geomspace(1E-4, 1E2, 256))
