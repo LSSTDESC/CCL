@@ -1005,7 +1005,11 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, prof2=None,
     k_use = np.atleast_1d(k)
 
     # Romberg needs 1 + 2^n points
-    theta = np.linspace(0, 2*np.pi, 129)
+    # Since the functions we average depend only on cos(theta) we can rewrite
+    # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
+    # \int_0^pi dtheta f(cos theta) / pi
+    # Exclude theta = pi to avoid k + k' = 0
+    theta = np.linspace(0, np.pi, 129, endpoint=False)
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
@@ -1071,7 +1075,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, prof2=None,
 
         pk = pk.reshape((nk, nk, theta.size))
         int_pk = scipy.integrate.romb(pk, dtheta, axis=-1)
-        return int_pk / (2 * np.pi)
+        return int_pk / np.pi
 
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
@@ -1386,9 +1390,13 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
     k_use = np.atleast_1d(k)
 
     # Romberg needs 1 + 2^n points
-    theta = np.linspace(0, 2*np.pi, 129)
+    # Since the functions we average depend only on cos(theta) we can rewrite
+    # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
+    # \int_0^pi dtheta f(cos theta) / pi
+    # Exclude theta = pi to avoid k + k' = 0
+    theta = np.linspace(0, np.pi, 129, endpoint=False)
     dtheta = theta[1] - theta[0]
-    cth = np.cos(theta)[None, None, :]
+    cth = np.cos(theta)
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
@@ -1637,11 +1645,6 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
     na = len(a_use)
     nk = len(k_use)
 
-    # Romberg needs 1 + 2^n points
-    theta = np.linspace(0, 2*np.pi, 129)
-    dtheta = theta[1] - theta[0]
-    cth = np.cos(theta)[None, None, :]
-
     # Power spectrum
     def get_pk(k, a):
         # This returns int dphi / 2pi int dphi' / 2pi P(kkth)
@@ -1656,6 +1659,16 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
                             "\'nonlinear\' or a `Pk2D` object")
 
         return pk
+
+
+    # Romberg needs 1 + 2^n points
+    # Since the functions we average depend only on cos(theta) we can rewrite
+    # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
+    # \int_0^pi dtheta f(cos theta) / pi
+    # Exclude theta = pi to avoid k + k' = 0
+    theta = np.linspace(0, np.pi, 129, endpoint=False)
+    dtheta = theta[1] - theta[0]
+    cth = np.cos(theta)
 
     def isotropize(arr):
         int_arr = scipy.integrate.romb(arr, dtheta, axis=-1)
