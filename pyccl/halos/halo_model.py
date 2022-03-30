@@ -378,9 +378,9 @@ class HMCalculator(object):
                                   prof2=prof2,
                                   mass_def=self._mdef, diag=diag)
         if diag is True:
-            uk = np.transpose(uk, axes=[1, 2, 0])
-        else:
             uk = uk.T
+        else:
+            uk = np.transpose(uk, axes=[1, 2, 0])
         i12 = self._integrate_over_mbf(uk)
         return i12
 
