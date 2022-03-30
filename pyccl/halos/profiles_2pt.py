@@ -139,7 +139,6 @@ class Profile2ptHOD(Profile2pt):
             if prof2 is not prof:
                 raise ValueError("prof2 must be the same as prof")
 
-
         if diag is True:
             return prof._fourier_variance(cosmo, k, M, a, mass_def)
         else:
