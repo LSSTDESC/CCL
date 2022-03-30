@@ -264,12 +264,16 @@ class HMCalculator(object):
         i11 = self._integrate_over_mbf(uk)
         return i11
 
-    def I_1_3(self, cosmo, k, a, prof1, prof_3pt, prof2=None, prof3=None):
+    def I_1_3(self, cosmo, k, a, prof1, prof_2pt, prof2=None, prof3=None):
         """ Solves the integral:
 
         .. math::
             I^1_3(k,a|u_2, v_1, _v2) = \\int dM\\,n(M,a)\\,b(M,a)\\,
             \\langle u_2(k,a|M) v_1(k',a|M) v_2(k',a|M)\\rangle,
+
+        approximated to
+        .. math::
+            I^1_3(k,a|u_2, v_1, _v2) = I^1_1(k,a|u_2) I^1_2(k',a|v_1, v_2)
 
         where :math:`n(M,a)` is the halo mass function,
         :math:`b(M,a)` is the halo bias, and
@@ -292,10 +296,10 @@ class HMCalculator(object):
         # Compute mass function and halo bias
         # and transpose to move the M-axis last
         self._get_ingredients(a, cosmo, True)
-        uk = prof_3pt.fourier_3pt(prof1, cosmo, k, self._mass, a,
-                                  prof2=prof2, prof3=prof3,
-                                  mass_def=self._mdef).T
-
+        uk1 = prof1.fourier(cosmo, k, self._mass, a, mass_def=self._mdef).T
+        uk23 = prof_2pt.fourier_2pt(prof2, cosmo, k, self._mass, a,
+                                    prof2=prof3, mass_def=self._mdef).T
+        uk = uk1[:, :, None] * uk23[:, None, :]
         i13 = self._integrate_over_mbf(uk)
         return i13
 
@@ -1136,8 +1140,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, prof2=None,
 
 def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1,
                               prof2=None, prof3=None, prof4=None,
-                              prof234_3pt=None, prof134_3pt=None,
-                              prof124_3pt=None, prof123_3pt=None,
+                              prof12_2pt=None, prof34_2pt=None,
                               normprof1=False, normprof2=False,
                               normprof3=False, normprof4=False, p_of_k_a=None):
     """ Computes the isotropized halo model 2-halo trispectrum for four different
@@ -1176,17 +1179,13 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1,
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
             `prof3` will be used as `prof4`.
-        prof234_3pt (:class:`~pyccl.halos.profiles_3pt.Profile3pt`):
-            a profile covariance object returning the 3-point
-            moment of `prof2`, `prof3` and `prof4`. If `None`, the default
-            third moment will be used, corresponding to the
-            products of the means of each profile.
-        prof134_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof234_3pt` for `prof1`, `prof3` and `prof4`.
-        prof124_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof234_3pt` for `prof1`, `prof2` and `prof4`.
-        prof123_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof234_3pt` for `prof1`, `prof2` and `prof3`.
+        prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            a profile covariance object returning the 2-point
+            moment of `prof1`, `prof2`. If `None`, the default second moment
+            will be used, corresponding to the products of the means of each
+            profile.
+        prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof34_2pt` for `prof3` and `prof4`.
         normprof1 (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.I_0_1`), where
@@ -1226,22 +1225,14 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1,
     elif not isinstance(prof4, HaloProfile):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
 
-    if prof234_3pt is None:
-        prof234_3pt = Profile3pt()
-    elif not isinstance(prof234_3pt, Profile3pt):
-        raise TypeError("prof234_3pt must be of type `Profile3pt` or `None`")
-    if prof134_3pt is None:
-        prof134_3pt = prof234_3pt
-    elif not isinstance(prof134_3pt, Profile3pt):
-        raise TypeError("prof134_3pt must be of type `Profile3pt` or `None`")
-    if prof124_3pt is None:
-        prof124_3pt = prof234_3pt
-    elif not isinstance(prof124_3pt, Profile3pt):
-        raise TypeError("prof214_3pt must be of type `Profile3pt` or `None`")
-    if prof123_3pt is None:
-        prof123_3pt = prof234_3pt
-    elif not isinstance(prof123_3pt, Profile3pt):
-        raise TypeError("prof231_3pt must be of type `Profile3pt` or `None`")
+    if prof12_2pt is None:
+        prof12_2pt = Profile2pt()
+    elif not isinstance(prof12_2pt, Profile2pt):
+        raise TypeError("prof12_2pt must be of type `Profile2pt` or `None`")
+    if prof34_2pt is None:
+        prof34_2pt = prof12_2pt
+    elif not isinstance(prof12_2pt, Profile2pt):
+        raise TypeError("prof12_2pt must be of type `Profile2pt` or `None`")
 
     def get_norm(normprof, prof, sf):
         if normprof:
@@ -1290,27 +1281,27 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1,
         # Compute trispectrum at this redshift
         p1 = get_pk(p_of_k_a)(aa)[:, None]
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
-        i234 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof234_3pt, prof2=prof3,
+        i234 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof34_2pt, prof2=prof3,
                          prof3=prof4)
         # Permutation 1
         # p2 = p1  # (because k_a = k_b)
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
-        i134 = hmc.I_1_3(cosmo, k_use, aa, prof1, prof134_3pt, prof2=prof3,
+        i134 = hmc.I_1_3(cosmo, k_use, aa, prof1, prof34_2pt, prof2=prof3,
                          prof3=prof4)
         # Attention to axis order change!
         # Permutation 2
         p3 = p1.T
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        i214 = hmc.I_1_3(cosmo, k_use, aa, prof4, prof124_3pt, prof2=prof1,
+        i124 = hmc.I_1_3(cosmo, k_use, aa, prof4, prof12_2pt, prof2=prof1,
                          prof3=prof2).T
         # Permutation 4
         # p4 = p3  # (because k_c = k_d)
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        i231 = hmc.I_1_3(cosmo, k_use, aa, prof3, prof123_3pt, prof2=prof2,
-                         prof3=prof1).T
+        i123 = hmc.I_1_3(cosmo, k_use, aa, prof3, prof12_2pt, prof2=prof1,
+                         prof3=prof2).T
         ####
 
-        tk_2h_13 = p1 * (i1 * i234 + i2 * i134) + p3 * (i3 * i214 + i4 * i231)
+        tk_2h_13 = p1 * (i1 * i234 + i2 * i134) + p3 * (i3 * i124 + i4 * i123)
 
         # Normalize
         out[ia, :, :] = tk_2h_13 * norm
