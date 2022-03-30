@@ -4,7 +4,6 @@ from .hmfunc import MassFunc
 from .hbias import HaloBias
 from .profiles import HaloProfile
 from .profiles_2pt import Profile2pt
-from .profiles_3pt import Profile3pt
 from ..core import check
 from ..pk2d import Pk2D
 from ..tk3d import Tk3D
@@ -296,11 +295,12 @@ class HMCalculator(object):
         # Compute mass function and halo bias
         # and transpose to move the M-axis last
         self._get_ingredients(a, cosmo, True)
-        uk1 = prof1.fourier(cosmo, k, self._mass, a, mass_def=self._mdef).T
+        uk1 = prof1.fourier(cosmo, k, self._mass, a, mass_def=self._mdef)
         uk23 = prof_2pt.fourier_2pt(prof2, cosmo, k, self._mass, a,
-                                    prof2=prof3, mass_def=self._mdef).T
+                                    prof2=prof3, mass_def=self._mdef)
+
         uk = uk1[:, :, None] * uk23[:, None, :]
-        i13 = self._integrate_over_mbf(uk)
+        i13 = self._integrate_over_mbf(uk.T)
         return i13
 
     def I_0_2(self, cosmo, k, a, prof1, prof_2pt, prof2=None):
@@ -1301,6 +1301,10 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1,
                          prof3=prof2).T
         ####
 
+        # print(i1.shape)
+        # print(i234.shape)
+        # print(i4.shape)
+        # print(i123.shape)
         tk_2h_13 = p1 * (i1 * i234 + i2 * i134) + p3 * (i3 * i124 + i4 * i123)
 
         # Normalize
@@ -1840,12 +1844,10 @@ def halomod_Tk3D_1h(cosmo, hmc,
 
 
 def halomod_Tk3D_2h(cosmo, hmc,
-                    prof1, prof2=None, prof12_2pt=None,
+                    prof1, prof2=None,
                     prof3=None, prof4=None,
-                    prof13_2pt=None, prof14_2pt=None,
-                    prof24_2pt=None, prof32_2pt=None,
-                    prof234_3pt=None, prof134_3pt=None,
-                    prof124_3pt=None, prof123_3pt=None,
+                    prof12_2pt=None, prof13_2pt=None, prof14_2pt=None,
+                    prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
                     normprof1=False, normprof2=False,
                     normprof3=False, normprof4=False, p_of_k_a=None,
                     lk_arr=None, a_arr=None,
@@ -1863,17 +1865,17 @@ def halomod_Tk3D_2h(cosmo, hmc,
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
             `prof1` will be used as `prof2`.
-        prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            a profile covariance object returning the the two-point
-            moment of `prof1` and `prof2`. If `None`, the default
-            second moment will be used, corresponding to the
-            products of the means of both profiles.
         prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_1` above. If `None`,
             `prof1` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
             `prof3` will be used as `prof4`.
+        prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            a profile covariance object returning the the two-point
+            moment of `prof1` and `prof2`. If `None`, the default
+            second moment will be used, corresponding to the
+            products of the means of both profiles.
         prof13_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof12_2pt` for `prof1` and `prof3`.
         prof14_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
@@ -1882,17 +1884,8 @@ def halomod_Tk3D_2h(cosmo, hmc,
             same as `prof14_2pt` for `prof2` and `prof4`.
         prof32_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof14_2pt` for `prof3` and `prof2`.
-        prof234_3pt (:class:`~pyccl.halos.profiles_3pt.Profile3pt`):
-            a profile covariance object returning the 3-point
-            moment of `prof2`, `prof3` and `prof4`. If `None`, the default
-            third moment will be used, corresponding to the
-            products of the means of each profile.
-        prof134_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof234_3pt` for `prof1`, `prof3` and `prof4`.
-        prof124_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof234_3pt` for `prof1`, `prof2` and `prof4`.
-        prof123_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof234_3pt` for `prof1`, `prof2` and `prof3`.
+        prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+            same as `prof34_2pt` for `prof3` and `prof4`.
         p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
         p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
         normprof1 (bool): if `True`, this integral will be
@@ -1954,10 +1947,8 @@ def halomod_Tk3D_2h(cosmo, hmc,
     tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
                                           prof1, prof2=prof2,
                                           prof3=prof3, prof4=prof4,
-                                          prof234_3pt=prof234_3pt,
-                                          prof134_3pt=prof134_3pt,
-                                          prof124_3pt=prof124_3pt,
-                                          prof123_3pt=prof123_3pt,
+                                          prof12_2pt=prof12_2pt,
+                                          prof34_2pt=prof34_2pt,
                                           normprof1=normprof1,
                                           normprof2=normprof2,
                                           normprof3=normprof3,

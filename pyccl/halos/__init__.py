@@ -42,10 +42,6 @@ from .profiles import (  # noqa
 from .profiles_2pt import (  # noqa
     Profile2pt, Profile2ptHOD)
 
-# Halo profile 3-point cumulants
-from .profiles_3pt import (  # noqa
-    Profile3pt)
-
 # Halo model power spectrum
 from .halo_model import (  # noqa
     HMCalculator,
