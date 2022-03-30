@@ -1009,7 +1009,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, prof2=None,
     # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
     # \int_0^pi dtheta f(cos theta) / pi
     # Exclude theta = pi to avoid k + k' = 0
-    theta = np.linspace(0, np.pi, 129, endpoint=False)
+    theta = np.linspace(0, np.pi - 1e-5, 129)
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
@@ -1394,7 +1394,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
     # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
     # \int_0^pi dtheta f(cos theta) / pi
     # Exclude theta = pi to avoid k + k' = 0
-    theta = np.linspace(0, np.pi, 129, endpoint=False)
+    theta = np.linspace(0, np.pi - 1e-5, 129)
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
@@ -1654,7 +1654,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
     # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
     # \int_0^pi dtheta f(cos theta) / pi
     # Exclude theta = pi to avoid k + k' = 0
-    theta = np.linspace(0, np.pi, 129, endpoint=False)
+    theta = np.linspace(0, np.pi - 1e-5, 129)
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
