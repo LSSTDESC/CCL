@@ -1462,7 +1462,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         f2 = 5./7. - 0.5 * (1 + kk ** 2 / kr2) * (1 + kp / kk * cth) + \
             2/7. * kk ** 2 / kr2 * (1 + kp / kk * cth)**2
         # When kr = 0:
-        # k^2 / kr^2 (1 + k / kr cos)-> k^2 / (2 k^2 + 2k^2 cos) * ( 1 + cos) = 1/2
+        # k^2 / kr^2 (1 + k / kr cos) -> k^2/(2k^2 + 2k^2 cos)*(1 + cos) = 1/2
         # k^2 / kr^2 (1 + k / kr cos)^2 -> (1 + cos)/2 = 0
         f2[np.where(kr == 0)] = 13. / 28
 
@@ -1648,7 +1648,6 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
                             "\'nonlinear\' or a `Pk2D` object")
 
         return pk
-
 
     # Romberg needs 1 + 2^n points
     # Since the functions we average depend only on cos(theta) we can rewrite
@@ -2380,17 +2379,14 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     return tk3d
 
 
-def halomod_Tk3D_cNG(cosmo, hmc,
-                    prof1, prof2=None,
-                    prof3=None, prof4=None, prof12_2pt=None,
-                    prof13_2pt=None, prof14_2pt=None,
-                    prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
-                    prof234_3pt=None, prof134_3pt=None,
-                    prof124_3pt=None, prof123_3pt=None,
-                    normprof1=False, normprof2=False,
-                    normprof3=False, normprof4=False, p_of_k_a=None,
-                    lk_arr=None, a_arr=None,
-                    extrap_order_lok=1, extrap_order_hik=1, use_log=False):
+def halomod_Tk3D_cNG(cosmo, hmc, prof1, prof2=None, prof3=None, prof4=None,
+                     prof12_2pt=None, prof13_2pt=None, prof14_2pt=None,
+                     prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
+                     prof234_3pt=None, prof134_3pt=None, prof124_3pt=None,
+                     prof123_3pt=None, normprof1=False, normprof2=False,
+                     normprof3=False, normprof4=False, p_of_k_a=None,
+                     lk_arr=None, a_arr=None, extrap_order_lok=1,
+                     extrap_order_hik=1, use_log=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing the non-Gaussian
     covariance trispectrum for four quantities defined by their respective halo
     profiles. This is the sum of the trispectrum terms 1h + 2h + 3h + 4h.

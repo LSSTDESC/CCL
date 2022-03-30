@@ -87,8 +87,8 @@ def smoke_assert_tkk2h_real(func):
                            'cv13': PKC, 'cv14': PKC, 'cv24': PKC, 'cv32':
                            PKCH, 'norm': True, 'p_of_k_a': 'nonlinear'},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'cv13': PKC, 'cv14': PKC, 'cv24': PKC, 'cv32':
-                            PKCH, 'norm': True, 'p_of_k_a': PSP},
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKC, 'cv32': PKCH,
+                           'norm': True, 'p_of_k_a': PSP},
                           ])
 def test_tkk2h_22_smoke(pars):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
@@ -336,6 +336,7 @@ def test_tkk2h_22_errors(pars):
                                             prof24_2pt=pars['cv24'],
                                             prof32_2pt=pars['cv32'],
                                             p_of_k_a=pars['p_of_k_a'])
+
 
 @pytest.mark.parametrize('pars',
                          # Wrong first profile
