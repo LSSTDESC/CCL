@@ -1503,23 +1503,18 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         # i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         # i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof2=prof4)
 
-        # Permutation 1: 2 <-> 3
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
+        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
+
+        # Permutation 1: 2 <-> 3
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof24_2pt, prof2=prof4)
         # Permutation 2: 2 <-> 4
-        i1 = hmc.I_1_1(cosmo, k_use, aa, prof1)[:, None]
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
         i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof32_2pt, prof2=prof2)
-
         # Permutation 3: 1 <-> 3
-        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i14 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof14_2pt, prof2=prof4)
-
         # Permutation 4: 1 <-> 4
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
-        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i31 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof13_2pt, prof2=prof1)
 
         # Permutation 5: 12 <-> 34
