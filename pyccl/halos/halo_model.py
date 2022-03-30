@@ -2378,8 +2378,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
 def halomod_Tk3D_cNG(cosmo, hmc, prof1, prof2=None, prof3=None, prof4=None,
                      prof12_2pt=None, prof13_2pt=None, prof14_2pt=None,
                      prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
-                     prof234_3pt=None, prof134_3pt=None, prof124_3pt=None,
-                     prof123_3pt=None, normprof1=False, normprof2=False,
+                     normprof1=False, normprof2=False,
                      normprof3=False, normprof4=False, p_of_k_a=None,
                      lk_arr=None, a_arr=None, extrap_order_lok=1,
                      extrap_order_hik=1, use_log=False):
@@ -2416,17 +2415,6 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof1, prof2=None, prof3=None, prof4=None,
             same as `prof12_2pt` for `prof3` and `prof2`.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof12_2pt` for `prof3` and `prof4`.
-        prof234_3pt (:class:`~pyccl.halos.profiles_3pt.Profile3pt`):
-            a profile covariance object returning the 3-point
-            moment of `prof2`, `prof3` and `prof4`. If `None`, the default
-            third moment will be used, corresponding to the
-            products of the means of each profile.
-        prof134_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof234_3pt` for `prof1`, `prof3` and `prof4`.
-        prof124_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof234_3pt` for `prof1`, `prof2` and `prof4`.
-        prof123_3pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-            same as `prof234_3pt` for `prof1`, `prof2` and `prof3`.
         p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
         p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
         normprof1 (bool): if `True`, this integral will be
@@ -2496,10 +2484,8 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof1, prof2=None, prof3=None, prof4=None,
     tkk += halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
                                      prof1, prof2=prof2,
                                      prof3=prof3, prof4=prof4,
-                                     prof234_3pt=prof234_3pt,
-                                     prof134_3pt=prof134_3pt,
-                                     prof124_3pt=prof124_3pt,
-                                     prof123_3pt=prof123_3pt,
+                                     prof12_2pt=prof12_2pt,
+                                     prof34_2pt=prof34_2pt,
                                      normprof1=normprof1,
                                      normprof2=normprof2,
                                      normprof3=normprof3,

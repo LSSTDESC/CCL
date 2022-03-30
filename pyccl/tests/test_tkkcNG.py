@@ -16,7 +16,6 @@ P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
 Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
 PKC = ccl.halos.Profile2pt()
-Prof3pt = ccl.halos.Profile3pt()
 PKCH = ccl.halos.Profile2ptHOD()
 KK = np.geomspace(1E-3, 10, 32)
 MM = np.geomspace(1E11, 1E15, 16)
@@ -54,10 +53,8 @@ def test_Tk3D_cNG():
     tkk_arr += ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k_arr, a_arr,
                                                    prof1=P1, prof2=P2,
                                                    prof3=P3, prof4=P4,
-                                                   prof234_3pt=None,
-                                                   prof134_3pt=None,
-                                                   prof124_3pt=None,
-                                                   prof123_3pt=None,
+                                                   prof12_2pt=PKC,
+                                                   prof34_2pt=PKC,
                                                    normprof1=True,
                                                    normprof2=True,
                                                    normprof3=True,
@@ -98,10 +95,6 @@ def test_Tk3D_cNG():
                                       prof24_2pt=PKC,
                                       prof32_2pt=PKC,
                                       prof34_2pt=PKC,
-                                      prof234_3pt=None,
-                                      prof134_3pt=None,
-                                      prof124_3pt=None,
-                                      prof123_3pt=None,
                                       normprof1=True,
                                       normprof2=True,
                                       normprof3=True,

@@ -17,7 +17,6 @@ P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
 Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
 PKC = ccl.halos.Profile2pt()
-Prof3pt = ccl.halos.Profile3pt()
 PKCH = ccl.halos.Profile2ptHOD()
 KK = np.geomspace(1E-3, 10, 32)
 MM = np.geomspace(1E11, 1E15, 16)
