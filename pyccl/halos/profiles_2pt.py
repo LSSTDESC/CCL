@@ -84,7 +84,7 @@ class Profile2pt(object):
         if diag:
             return uk1 * uk2 * (1 + self.r_corr)
         else:
-            return uk1[:, None] * uk2[None, :] * (1 + self.r_corr)
+            return uk1[:, :, None] * uk2[:, None, :] * (1 + self.r_corr)
 
 
 class Profile2ptHOD(Profile2pt):
