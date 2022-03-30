@@ -1016,18 +1016,18 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, prof2=None,
     # Check inputs
     if not isinstance(prof1, HaloProfile):
         raise TypeError("prof1 must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
-        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    else:
+    if prof2 is None:
         prof2 = prof1
-    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
-        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
-    else:
+    elif not isinstance(prof2, HaloProfile):
+        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
+    if prof3 is None:
         prof3 = prof1
-    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
-        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
-    else:
+    elif not isinstance(prof3, HaloProfile):
+        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
+    if prof4 is None:
         prof4 = prof3
+    elif not isinstance(prof4, HaloProfile):
+        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
 
     if prof13_2pt is None:
         prof13_2pt = Profile2pt()
@@ -1208,7 +1208,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof1,
     elif not isinstance(prof3, HaloProfile):
         raise TypeError("prof3 must be of type `HaloProfile` or `None`")
     if prof4 is None:
-        prof4 = prof1
+        prof4 = prof3
     elif not isinstance(prof4, HaloProfile):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
 
@@ -1393,18 +1393,18 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
     # Check inputs
     if not isinstance(prof1, HaloProfile):
         raise TypeError("prof1 must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
-        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    else:
+    if prof2 is None:
         prof2 = prof1
-    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
-        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
-    else:
+    elif not isinstance(prof2, HaloProfile):
+        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
+    if prof3 is None:
         prof3 = prof1
-    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
-        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
-    else:
+    elif not isinstance(prof3, HaloProfile):
+        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
+    if prof4 is None:
         prof4 = prof3
+    elif not isinstance(prof4, HaloProfile):
+        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
 
     if prof13_2pt is None:
         prof13_2pt = Profile2pt()
@@ -1531,9 +1531,20 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         Bpt = get_Bpt(aa)
         tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i32 +
                        i3 * i2 * i14 + i4 * i2 * i31)
+        print(np.any(Bpt < 0))
+        print(np.any(i1 < 0))
+        print(np.any(i2 < 0))
+        print(np.any(i3 < 0))
+        print(np.any(i4 < 0))
+        print(np.any(i24 < 0))
+        print(np.any(i32 < 0))
+        print(np.any(i14 < 0))
+        print(np.any(i31 < 0))
 
         # Normalize
         out[ia, :, :] = tk_3h * norm
+
+        print(norm < 0)
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -1609,18 +1620,18 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
     # Check inputs
     if not isinstance(prof1, HaloProfile):
         raise TypeError("prof1 must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
-        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    else:
+    if prof2 is None:
         prof2 = prof1
-    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
-        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
-    else:
+    elif not isinstance(prof2, HaloProfile):
+        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
+    if prof3 is None:
         prof3 = prof1
-    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
-        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
-    else:
+    elif not isinstance(prof3, HaloProfile):
+        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
+    if prof4 is None:
         prof4 = prof3
+    elif not isinstance(prof4, HaloProfile):
+        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
 
     def get_norm(normprof, prof, sf):
         if normprof:
@@ -2053,19 +2064,19 @@ def halomod_Tk3D_3h(cosmo, hmc,
         check(status)
 
     tkk = halomod_trispectrum_3h(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                   prof1=prof1,
-                                   prof2=prof2,
-                                   prof3=prof3,
-                                   prof4=prof4,
-                                   prof13_2pt=prof13_2pt,
-                                   prof14_2pt=prof14_2pt,
-                                   prof24_2pt=prof24_2pt,
-                                   prof32_2pt=prof32_2pt,
-                                   normprof1=normprof1,
-                                   normprof2=normprof2,
-                                   normprof3=normprof3,
-                                   normprof4=normprof4,
-                                   p_of_k_a=None)
+                                 prof1=prof1,
+                                 prof2=prof2,
+                                 prof3=prof3,
+                                 prof4=prof4,
+                                 prof13_2pt=prof13_2pt,
+                                 prof14_2pt=prof14_2pt,
+                                 prof24_2pt=prof24_2pt,
+                                 prof32_2pt=prof32_2pt,
+                                 normprof1=normprof1,
+                                 normprof2=normprof2,
+                                 normprof3=normprof3,
+                                 normprof4=normprof4,
+                                 p_of_k_a=p_of_k_a)
 
     if use_log:
         if np.any(tkk <= 0):
