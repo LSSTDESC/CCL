@@ -21,6 +21,7 @@ PKCH = ccl.halos.Profile2ptHOD()
 KK = np.geomspace(1E-3, 10, 32)
 MM = np.geomspace(1E11, 1E15, 16)
 AA = 1.0
+PSP = ccl.Pk2D.pk_from_model(COSMO, 'bbks')
 
 
 def smoke_assert_tkk2h_real(func):
@@ -53,31 +54,40 @@ def smoke_assert_tkk2h_real(func):
 @pytest.mark.parametrize('pars',
                          [{'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
-                           None, 'norm': False},
+                           None, 'norm': False, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
-                           None, 'norm': True},
+                           None, 'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
-                           None, 'norm': True},
+                           None, 'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
-                           None, 'norm': True},
+                           None, 'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': P4,
                            'cv13': None, 'cv14': None, 'cv24': None, 'cv32':
-                           None, 'norm': True},
+                           None, 'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': None, 'cv14': None, 'cv24': PKCH, 'cv32':
-                           None, 'norm': True},
+                           None, 'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': PKC, 'cv14': None, 'cv24': PKCH, 'cv32':
-                           None, 'norm': True},
+                           None, 'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': PKC, 'cv14': None, 'cv24': PKC, 'cv32':
-                           None, 'norm': True},
+                           None, 'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': PKC, 'cv14': PKC, 'cv24': PKC, 'cv32':
-                           PKCH, 'norm': True},
+                           PKCH, 'norm': True, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKC, 'cv32':
+                           PKCH, 'norm': True, 'p_of_k_a': 'linear'},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKC, 'cv32':
+                           PKCH, 'norm': True, 'p_of_k_a': 'nonlinear'},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKC, 'cv32':
+                            PKCH, 'norm': True, 'p_of_k_a': PSP},
                           ])
 def test_tkk2h_22_smoke(pars):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
@@ -97,7 +107,7 @@ def test_tkk2h_22_smoke(pars):
                                                    normprof2=pars['norm'],
                                                    normprof3=pars['norm'],
                                                    normprof4=pars['norm'],
-                                                   p_of_k_a=None)
+                                                   p_of_k_a=pars['p_of_k_a'])
     smoke_assert_tkk2h_real(f)
 
 
@@ -105,43 +115,68 @@ def test_tkk2h_22_smoke(pars):
                          [{'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None,
                            'cv32': None, 'cv234': None, 'cv134': None,
-                           'cv124': None, 'cv123': None, 'norm': False},
+                           'cv124': None, 'cv123': None, 'norm': False,
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None,
                            'cv32': None, 'cv234': None, 'cv134': None,
-                           'cv124': None, 'cv123': None, 'norm': True},
+                           'cv124': None, 'cv123': None, 'norm': True,
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': None, 'p4': None,
                            'cv13': None, 'cv14': None, 'cv24': None,
                            'cv32': None, 'cv234': None, 'cv134': None,
-                           'cv124': None, 'cv123': None, 'norm': True},
+                           'cv124': None, 'cv123': None, 'norm': True,
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': None, 'cv14': None, 'cv24': None,
                            'cv32': None, 'cv234': None, 'cv134': None,
-                           'cv124': None, 'cv123': None, 'norm': True},
+                           'cv124': None, 'cv123': None, 'norm': True,
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': P4,
                            'cv13': None, 'cv14': None, 'cv24': None,
                            'cv32': None, 'cv234': None, 'cv134': None,
-                           'cv124': None, 'cv123': None, 'norm': True},
+                           'cv124': None, 'cv123': None, 'norm': True,
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': None, 'cv14': None, 'cv24': PKCH,
                            'cv32': None, 'cv234': None, 'cv134': None,
-                           'cv124': None, 'cv123': None, 'norm': True},
+                           'cv124': None, 'cv123': None, 'norm': True,
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
                            'cv32': PKC, 'cv234': None, 'cv134': None,
-                           'cv124': None, 'cv123': None, 'norm': True},
+                           'cv124': None, 'cv123': None, 'norm': True,
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
                            'cv32': PKC, 'cv234': Prof3pt, 'cv134': None,
-                           'cv124': None, 'cv123': None, 'norm': True},
+                           'cv124': None, 'cv123': None, 'norm': True,
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
                            'cv32': PKC, 'cv234': None, 'cv134': None,
-                           'cv124': None, 'cv123': Prof3pt, 'norm': True},
+                           'cv124': None, 'cv123': Prof3pt, 'norm': True,
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
                            'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
                            'cv32': PKC, 'cv234': Prof3pt, 'cv134': Prof3pt,
-                           'cv124': Prof3pt, 'cv123': Prof3pt, 'norm': True},
+                           'cv124': Prof3pt, 'cv123': Prof3pt, 'norm': True,
+                           'p_of_k_a': None},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
+                           'cv32': PKC, 'cv234': Prof3pt, 'cv134': Prof3pt,
+                           'cv124': Prof3pt, 'cv123': Prof3pt, 'norm': True,
+                           'p_of_k_a': 'linear'},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
+                           'cv32': PKC, 'cv234': Prof3pt, 'cv134': Prof3pt,
+                           'cv124': Prof3pt, 'cv123': Prof3pt, 'norm': True,
+                           'p_of_k_a': 'nonlinear'},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'cv13': PKC, 'cv14': PKC, 'cv24': PKCH,
+                           'cv32': PKC, 'cv234': Prof3pt, 'cv134': Prof3pt,
+                           'cv124': Prof3pt, 'cv123': Prof3pt, 'norm': True,
+                           'p_of_k_a': PSP},
                           ])
 def test_tkk2h_13_smoke(pars):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
@@ -161,7 +196,7 @@ def test_tkk2h_13_smoke(pars):
                                                    normprof2=pars['norm'],
                                                    normprof3=pars['norm'],
                                                    normprof4=pars['norm'],
-                                                   p_of_k_a=None)
+                                                   p_of_k_a=pars['p_of_k_a'])
     smoke_assert_tkk2h_real(f)
 
 

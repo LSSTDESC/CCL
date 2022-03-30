@@ -21,6 +21,7 @@ PKCH = ccl.halos.Profile2ptHOD()
 KK = np.geomspace(1E-3, 10, 32)
 MM = np.geomspace(1E11, 1E15, 16)
 AA = 1.0
+PSP = ccl.Pk2D.pk_from_model(COSMO, 'bbks')
 
 
 def smoke_assert_tkk4h_real(func):
@@ -52,17 +53,23 @@ def smoke_assert_tkk4h_real(func):
 
 @pytest.mark.parametrize('pars',
                          [{'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'norm': False},
+                           'norm': False, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
-                           'norm': True},
+                           'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': None, 'p4': None,
-                           'norm': True},
+                           'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'norm': True},
+                           'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': P4,
-                           'norm': True},
+                           'norm': True, 'p_of_k_a': None},
                           {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
-                           'norm': True},
+                           'norm': True, 'p_of_k_a': None},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'norm': True, 'p_of_k_a': 'linear'},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'norm': True, 'p_of_k_a': 'nonlinear'},
+                          {'p1': P1, 'p2': P2, 'p3': P3, 'p4': P4,
+                           'norm': True, 'p_of_k_a': PSP},
                           ])
 def test_tkk4h_smoke(pars):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
@@ -78,7 +85,7 @@ def test_tkk4h_smoke(pars):
                                                 normprof2=pars['norm'],
                                                 normprof3=pars['norm'],
                                                 normprof4=pars['norm'],
-                                                p_of_k_a=None)
+                                                p_of_k_a=pars['p_of_k_a'])
     smoke_assert_tkk4h_real(f)
 
 
