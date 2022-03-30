@@ -1534,20 +1534,9 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         Bpt = get_Bpt(aa)
         tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i32 +
                        i3 * i2 * i14 + i4 * i2 * i31)
-        print(np.any(Bpt < 0))
-        print(np.any(i1 < 0))
-        print(np.any(i2 < 0))
-        print(np.any(i3 < 0))
-        print(np.any(i4 < 0))
-        print(np.any(i24 < 0))
-        print(np.any(i32 < 0))
-        print(np.any(i14 < 0))
-        print(np.any(i31 < 0))
 
         # Normalize
         out[ia, :, :] = tk_3h * norm
-
-        print(norm < 0)
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)

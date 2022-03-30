@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import pyccl as ccl
+from pyccl.pyutils import assert_warns
 
 
 COSMO = ccl.Cosmology(
@@ -135,12 +136,10 @@ def test_Tk3D_4h():
                   < 1E-4)
 
     # Negative profile in logspace
-    # We cannot use assert_warns because other warnings are raised before the
-    # one we are testing
-    with pytest.warns(ccl.CCLWarning):
-        ccl.halos.halomod_Tk3D_4h(COSMO, hmc, P3, prof2=Pneg,
-                                  lk_arr=np.log(k_arr), a_arr=a_arr,
-                                  use_log=True)
+    assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_2h,
+                 COSMO, hmc, P3, prof2=Pneg,
+                 lk_arr=np.log(k_arr), a_arr=a_arr,
+                 use_log=True)
 
 
 @pytest.mark.parametrize('pars',
