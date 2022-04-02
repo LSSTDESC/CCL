@@ -685,7 +685,7 @@ def warn_api(func=None, /, *, pairs=[], reorder=[]):
             kwargs["normprof"] = False
             warnings.warn(
                 "Halo profile normalization `normprof` has become a required "
-                "argument in {name}. Not specifying it will trigger an "
+                f"argument in {name}. Not specifying it will trigger an "
                 "exception in the future", CCLDeprecationWarning)
 
         # Collect what's remaining and sort to preserve signature order.
