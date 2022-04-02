@@ -12,7 +12,7 @@ from .pk2d import parse_pk2d
 NoneArr = np.array([])
 
 
-@warn_api(pairs=[("tracer1", "cltracer1"), ("tracer2", "cltracer2")])
+@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
 def angular_cl(cosmo, tracer1, tracer2, *, ell, p_of_k_a=None,
                l_limber=-1., limber_integration_method='qag_quad'):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.

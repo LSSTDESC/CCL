@@ -222,7 +222,7 @@ class HaloProfile(CCLHalosObject):
                                       " _fourier method.")
         return f_k
 
-    @warn_api(pairs=[("r", "rt")])
+    @warn_api(pairs=[("rt", "r")])
     def projected(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
@@ -254,7 +254,7 @@ class HaloProfile(CCLHalosObject):
                                                 is_cumul2d=False)
         return s_r_t
 
-    @warn_api(pairs=[("r", "rt")])
+    @warn_api(pairs=[("rt", "r")])
     def cumul2d(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
@@ -672,7 +672,7 @@ class HaloProfileNFW(HaloProfile):
     """
     name = 'NFW'
 
-    @warn_api(pairs=[("c_m_relation", "c_M_relation")])
+    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation,
                  fourier_analytic=True,
                  projected_analytic=False,
@@ -868,7 +868,7 @@ class HaloProfileEinasto(HaloProfile):
     """
     name = 'Einasto'
 
-    @warn_api(pairs=[("c_m_relation", "c_M_relation")])
+    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation, truncated=True):
         if not isinstance(c_m_relation, Concentration):
             raise TypeError("c_m_relation must be of type `Concentration`)")
@@ -955,7 +955,7 @@ class HaloProfileHernquist(HaloProfile):
     """
     name = 'Hernquist'
 
-    @warn_api(pairs=[("c_m_relation", "c_M_relation")])
+    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation, truncated=True):
         if not isinstance(c_m_relation, Concentration):
             raise TypeError("c_m_relation must be of type `Concentration`)")
@@ -1325,7 +1325,7 @@ class HaloProfileHOD(HaloProfile):
         """
     name = 'HOD'
 
-    @warn_api(pairs=[("c_m_relation", "c_M_relation")])
+    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation,
                  lMmin_0=12., lMmin_p=0., siglM_0=0.4,
                  siglM_p=0., lM0_0=7., lM0_p=0.,

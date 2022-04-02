@@ -89,8 +89,8 @@ class Pk2D(CCLObject):
     """
     __repr__ = _build_string_Pk2D
 
-    @warn_api(order=["pkfunc", "a_arr", "lk_arr", "pk_arr", "is_logp",
-                     "extrap_order_lok", "extrap_order_hik", "cosmo"])
+    @warn_api(reorder=["pkfunc", "a_arr", "lk_arr", "pk_arr", "is_logp",
+                       "extrap_order_lok", "extrap_order_hik", "cosmo"])
     def __init__(self, *, a_arr=None, lk_arr=None, pk_arr=None,
                  pkfunc=None, cosmo=None, is_logp=True,
                  extrap_order_lok=1, extrap_order_hik=2,

@@ -11,10 +11,10 @@ from .pk2d import parse_pk2d
 NoneArr = np.array([])
 
 
-@warn_api(pairs=[("tracer1", "cltracer1"), ("tracer2", "cltracer2"),
-                 ("tracer3", "cltracer3"), ("tracer4", "cltracer4"),
-                 ("t_of_kk_a", "tkka")],
-          order=["ell", "t_of_kk_a", "fsky", "tracer3", "tracer4", "ell2"])
+@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
+                 ("cltracer3", "tracer3"), ("cltracer4", "tracer4"),
+                 ("tkka", "t_of_kk_a")],
+          reorder=["ell", "t_of_kk_a", "fsky", "tracer3", "tracer4", "ell2"])
 def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, tracer3=None, tracer4=None,
                        t_of_kk_a, ell, ell2=None, fsky=1.,
                        integration_method='qag_quad'):
@@ -136,7 +136,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, tracer3=None, tracer4=None,
     return cov
 
 
-@warn_api(pairs=[("a_arr", "a")])
+@warn_api(pairs=[("a", "a_arr")])
 def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
     """Returns the variance of the projected linear density field
     over a circular disc covering a sky fraction `fsky` as a function
@@ -192,7 +192,7 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
             return s2B_arr
 
 
-@warn_api(pairs=[("a_arr", "a")])
+@warn_api(pairs=[("a", "a_arr")])
 def sigma2_B_from_mask(cosmo, a_arr, *, mask_wl=None, p_of_k_a=None):
     """ Returns the variance of the projected linear density field, given the
         angular power spectrum of the footprint mask and scale factor.
@@ -250,11 +250,11 @@ def sigma2_B_from_mask(cosmo, a_arr, *, mask_wl=None, p_of_k_a=None):
     return sigma2_B
 
 
-@warn_api(pairs=[("tracer1", "cltracer1"), ("tracer2", "cltracer2"),
-                 ("tracer3", "cltracer3"), ("tracer4", "cltracer4"),
-                 ("t_of_kk_a", "tkka")],
-          order=["ell", "t_of_kk_a", "sigma2_B", "fsky",
-                 "tracer3", "tracer4", "ell2"])
+@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
+                 ("cltracer3", "tracer3"), ("cltracer4", "tracer4"),
+                 ("tkka", "t_of_kk_a")],
+          reorder=["ell", "t_of_kk_a", "sigma2_B", "fsky",
+                   "tracer3", "tracer4", "ell2"])
 def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, tracer3=None, tracer4=None,
                        t_of_kk_a, ell, ell2=None,
                        fsky=1., sigma2_B=None,

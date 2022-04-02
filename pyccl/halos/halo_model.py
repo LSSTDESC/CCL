@@ -50,9 +50,9 @@ class HMCalculator(CCLHalosObject):
             Default: 1E-5.
     """
 
-    @warn_api(pairs=[("mass_function", "massfunc"), ("halo_bias", "hbias"),
-                     ("lM_min", "log10M_min"), ("lM_max", "log10M_max"),
-                     ("nlM", "nlog10M"), ("k_norm", "k_min")])
+    @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
+                     ("log10M_min", "lM_min"), ("log10M_max", "lM_max"),
+                     ("nlog10M", "nlM"), ("k_min", "k_norm")])
     def __init__(self, *, mass_function, halo_bias, mass_def,
                  lM_min=8., lM_max=16., nlM=128,
                  integration_method_M='simpson', k_norm=1E-5):
@@ -173,10 +173,10 @@ class HMCalculator(CCLHalosObject):
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
 
-    @warn_api(pairs=[("selection", "sel"),
-                     ("a_min", "amin"),
-                     ("a_max", "amax")],
-              order=["na", "a_min", "a_max"])
+    @warn_api(pairs=[("sel", "selection"),
+                     ("amin", "a_min"),
+                     ("amax", "a_max")],
+              reorder=["na", "a_min", "a_max"])
     def number_counts(self, cosmo, *, selection,
                       a_min=None, a_max=1.0, na=128):
         """ Solves the integral:
@@ -298,7 +298,7 @@ class HMCalculator(CCLHalosObject):
         i11 = self._integrate_over_mbf(uk)
         return i11
 
-    @warn_api(pairs=[("prof", "prof1")], order=["prof_2pt", "prof2"])
+    @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
     def I_0_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
         """ Solves the integral:
 
@@ -335,7 +335,7 @@ class HMCalculator(CCLHalosObject):
         i02 = self._integrate_over_mf(uk)
         return i02
 
-    @warn_api(pairs=[("prof", "prof1")], order=["prof_2pt", "prof2"])
+    @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
     def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
         """ Solves the integral:
 
@@ -374,8 +374,8 @@ class HMCalculator(CCLHalosObject):
         i02 = self._integrate_over_mbf(uk)
         return i02
 
-    @warn_api(pairs=[("prof", "prof1")],
-              order=["prof12_2pt", "prof2", "prof3", "prof34_2pt", "prof4"])
+    @warn_api(pairs=[("prof1", "prof")],
+              reorder=["prof12_2pt", "prof2", "prof3", "prof34_2pt", "prof4"])
     def I_0_22(self, cosmo, k, a, prof, *,
                prof2=None, prof3=None, prof4=None,
                prof12_2pt, prof34_2pt=None):
@@ -538,8 +538,8 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
     return out
 
 
-@warn_api(pairs=[("normprof", "normprof1"), ("suppress_1h", "supress_1h")],
-          order=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
+@warn_api(pairs=[("normprof1", "normprof"), ("supress_1h", "suppress_1h")],
+          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
 def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof_2pt=None,
                            normprof=False, normprof2=False,
@@ -710,8 +710,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     return out
 
 
-@warn_api(pairs=[("normprof", "normprof1"), ("suppress_1h", "supress_1h")],
-          order=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
+@warn_api(pairs=[("normprof1", "normprof"), ("supress_1h", "suppress_1h")],
+          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
 def halomod_Pk2D(cosmo, hmc, prof, *,
                  prof2=None, prof_2pt=None,
                  normprof=False, normprof2=False,
@@ -811,8 +811,8 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
     return pk2d
 
 
-@warn_api(pairs=[("prof", "prof1"), ("normprof", "normprof1")],
-          order=["prof12_2pt", "prof3", "prof4"])
+@warn_api(pairs=[("prof1", "prof"), ("normprof1", "normprof")],
+          reorder=["prof12_2pt", "prof3", "prof4"])
 def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof3=None, prof4=None,
                            prof12_2pt=None, prof34_2pt=None,
@@ -940,8 +940,8 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
     return out
 
 
-@warn_api(pairs=[("prof", "prof1"), ("normprof", "normprof1")],
-          order=["prof12_2pt", "prof3", "prof4"])
+@warn_api(pairs=[("prof1", "prof"), ("normprof1", "normprof")],
+          reorder=["prof12_2pt", "prof3", "prof4"])
 def halomod_Tk3D_1h(cosmo, hmc, prof, *,
                     prof2=None, prof3=None, prof4=None,
                     prof12_2pt=None, prof34_2pt=None,
@@ -1042,8 +1042,8 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
     return tk3d
 
 
-@warn_api(pairs=[("prof", "prof1"), ("normprof", "normprof1")],
-          order=["prof12_2pt", "prof3", "prof4"])
+@warn_api(pairs=[("prof1", "prof"), ("normprof1", "normprof")],
+          reorder=["prof12_2pt", "prof3", "prof4"])
 def halomod_Tk3D_SSC(cosmo, hmc, prof, *,
                      prof2=None, prof3=None, prof4=None,
                      prof12_2pt=None, prof34_2pt=None,

@@ -206,7 +206,7 @@ class MassDef(CCLHalosObject):
         else:
             return self.concentration.get_concentration(cosmo, M, a)
 
-    @warn_api(pairs=[("mass_def_other", "mdef_other")])
+    @warn_api(pairs=[("mdef_other", "mass_def_other")])
     def translate_mass(self, cosmo, M, a, *, mass_def_other):
         """ Translate halo mass in this definition into another definition
 
@@ -266,7 +266,7 @@ class MassDef200m(MassDef):
     """
     name = '200m'
 
-    @warn_api(pairs=[("c_m_relation", "c_m")])
+    @warn_api(pairs=[("c_m", "c_m_relation")])
     def __init__(self, *, c_m_relation='Duffy08'):
         super(MassDef200m, self).__init__(200,
                                           'matter',
@@ -282,7 +282,7 @@ class MassDef200c(MassDef):
     """
     name = '200c'
 
-    @warn_api(pairs=[("c_m_relation", "c_m")])
+    @warn_api(pairs=[("c_m", "c_m_relation")])
     def __init__(self, *, c_m_relation='Duffy08'):
         super(MassDef200c, self).__init__(200,
                                           'critical',
@@ -313,7 +313,7 @@ class MassDefVir(MassDef):
     """
     name = 'vir'
 
-    @warn_api(pairs=[("c_m_relation", "c_m")])
+    @warn_api(pairs=[("c_m", "c_m_relation")])
     def __init__(self, *, c_m_relation='Klypin11'):
         super(MassDefVir, self).__init__('vir',
                                          'matter',

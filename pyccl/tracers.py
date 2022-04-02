@@ -382,7 +382,7 @@ class Tracer(CCLObject, init_attrs=True):
 
         return mg_transfer
 
-    @warn_api(order=["der_bessel", "der_angles", "is_logt"])
+    @warn_api(reorder=["der_bessel", "der_angles", "is_logt"])
     @unlock_instance
     def add_tracer(self, cosmo, *, kernel=None,
                    transfer_ka=None,
@@ -544,7 +544,7 @@ class NumberCountsTracer(Tracer):
         has_rsd (bool): Flag for whether the tracer has a
             redshift-space distortion term.
     """
-    @warn_api(order=["has_rsd", "dndz", "bias", "mag_bias"])
+    @warn_api(reorder=["has_rsd", "dndz", "bias", "mag_bias"])
     def __init__(self, cosmo, *, dndz, bias, mag_bias=None, has_rsd):
         self._trc = []
 

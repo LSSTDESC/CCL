@@ -89,7 +89,7 @@ class Tk3D(CCLObject):
     """
     __repr__ = _build_string_Tk3D
 
-    @warn_api(order=["extrap_order_lok", "extrap_order_hik", "is_logt"])
+    @warn_api(reorder=["extrap_order_lok", "extrap_order_hik", "is_logt"])
     def __init__(self, *, a_arr, lk_arr, tkk_arr=None,
                  pk1_arr=None, pk2_arr=None, is_logt=True,
                  extrap_order_lok=1, extrap_order_hik=1):

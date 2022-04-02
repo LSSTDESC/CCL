@@ -584,199 +584,116 @@ def _get_spline3d_arrays(gsl_spline, length):
     return xarr, yarr, zarr.reshape((length, x_size, y_size))
 
 
-def warn_api(func=None, /, *, pairs=None, order=None):
+def warn_api(func=None, /, *, pairs=[], reorder=[]):
     """ This decorator translates old API to new API for:
-      - functions/methods with changed argument order;
-      - functions/methods whose arguments have been renamed.
+      - functions/methods whose arguments have been ranamed,
+      - functions/methods with changed argument order,
+      - constructors in the ``halos`` sub-package where ``cosmo`` is removed,
+      - functions/methods where ``normprof`` is now a required argument.
 
-    Parameters
-    ----------
-    pairs : list of pairs, optional
-        List of renaming pairs ``('new', 'old')``. The default is None.
-    order : list, optional
-        List of the **old** order of the arguments whose order
-        has been changed, under their **new** name. The default is None.
+    Parameters:
+        pairs : list of pairs, optional
+            List of renaming pairs ``('old', 'new')``.
+        reorder : list, optional
+            List of the **previous** order of the arguments whose order
+            has been changed, under their **new** name.
 
-    .. note::
+    Example:
+        We have the legacy constructor:
 
-        This wrapper assumes that
-            1. there are no positional-only arguments;
-            2. the order of the positional-or-keyword arguments is unchanged.
+        >>> def __init__(self, cosmo, a, b, c=0, d=1, normprof=False):
+                # do something
+                return a, b, c, d, normprof
 
-    Example
-    -------
-    We have the legacy function
+        and we want to change the API to
 
-    >>> def func(a, b, c, d):
-            # do something
-            return a, b, c, d
+        >>> def __init__(self, a, *, see=0, bee, d=1, normprof=None):
+                # do the same thing
+                return a, bee, see, d, normprof
 
-    and we want to change the API to
+        Then, adding this decorator to our new function would preserve API
 
-    >>> def func(a, *, see, bee, d):
-            # do the same thing
-            return a, bee, see, d
+        >>> @warn_api(pairs=[('b', 'bee'), ('c', 'see')],
+                      reorder=['bee', 'see'])
 
-    Then, adding this decorator to our new function would preserve API
-
-    >>> @warn_api(pairs=[('bee', 'b'), ('see', 'c')],
-                  order=['bee', 'see'])
-
-    Notes
-    -----
-    Similar implementations for more specific usecases:
-      1. ``TreeCorr``: https://github.com/rmjarvis/TreeCorr/blob/main/treecorr/util.py#L932
-      2. ``Matplotlib``: https://github.com/matplotlib/matplotlib/blob/master/lib/matplotlib/_api/deprecation.py#L454
-      3. ``legacy-api-wrap``: https://github.com/flying-sheep/legacy-api-wrap/blob/master/legacy_api_wrap.py#L27
-
-    """  # noqa
-
-    def _decorator(func, pairs, order):
-        POK = Parameter.POSITIONAL_OR_KEYWORD
-        KWO = Parameter.KEYWORD_ONLY
-
-        # extract new parameters
-        params = signature(func).parameters
-        pos_names = [n for n, p in params.items() if p.kind == POK]
-        kwo_names = [n for n, p in params.items() if p.kind == KWO]
-        names = pos_names + kwo_names
-        npos = len(pos_names)
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # check for normprof - we'll need that later (1 of 3)
-            def normprof_warning():
-                # all the variables we need will already be in locals
-                if ("normprof" in names) and ("normprof" not in kwargs):
-                    # backwards-compatibility
-                    kwargs["normprof"] = False
-                    warnings.warn(
-                        "Halo profile normalization `normprof` "
-                        "has to be explicitly specified to prevent "
-                        "unwanted behavior. Not specifying it "
-                        "will trigger an exception in the future",
-                        CCLDeprecationWarning)
-
-            def cosmo_warning(args):
-                warn_cosmo = False
-                from .core import Cosmology
-                from .halos import HMCalculator, MassFunc, HaloBias
-                depr_cosmo_funcs = [HMCalculator, MassFunc, HaloBias]
-                depr_cosmo_funcs += [Class.__qualname__
-                                     for Class in MassFunc.__subclasses__()]
-                depr_cosmo_funcs += [Class.__qualname__
-                                     for Class in HaloBias.__subclasses__()]
-                this_name = func.__qualname__
-                if this_name.endswith(".__init__"):
-                    # TODO: py39 introduced `str.removesuffix` method
-                    this_name = this_name[:-len(".__init__")]
-                if this_name in depr_cosmo_funcs:
-                    # first arg is `self`, then it would be `cosmo`
-                    if len(args) > 1 and isinstance(args[1], Cosmology):
-                        new_args = list(args)  # we do this because
-                        del new_args[1]        # `args` is a tuple and
-                        args = new_args        # tuples are immutable
-                        warn_cosmo = True
-                    elif "cosmo" in kwargs:
-                        kwargs.pop("cosmo")
-                        warn_cosmo = True
-                if warn_cosmo:
-                    warnings.warn(
-                        "`cosmo` has been deprecated as the first "
-                        f"argument in {this_name}. This will return an "
-                        "exception in the future.", CCLDeprecationWarning)
-                return args
-
-            args = cosmo_warning(args)
-
-            # transform decorator input
-            rename = np.atleast_2d(pairs) if pairs is not None else None
-            swap = order.copy() if order is not None else None
-
-            # rename any keyword-arguments?
-            if rename is not None:
-                these_kwargs = list(kwargs.keys())
-                do_rename = not all([n in names for n in these_kwargs])
-                if do_rename:
-                    olds = []
-                    news = []
-                    for new, old in rename:
-                        if old in kwargs:
-                            olds.append(old)
-                            news.append(new)
-                            kwargs[new] = kwargs.pop(old)
-                            if (swap is not None) and (new in swap):
-                                swap.remove(new)
-
-                    # warn about API change
-                    s = "" if len(olds) == 1 else "s"
-                    if len(olds) == 1:
-                        news = news[0]
-                        olds = olds[0]
-                    warnings.warn(
-                        f"Use of argument{s} {olds} is deprecated "
-                        f"in {func.__qualname__}. Pass the new name{s} "
-                        f"of the argument{s} {news}, respectively.",
-                        CCLDeprecationWarning)
-
-            # return if we have everything we need
-            if len(args) <= npos:
-                # 1. wrapper assumes positional arguments are not swapped
-                # 2. not checking for new function
-                # 3. raise normprof warning? (2 of 3)
-                normprof_warning()
-                return func(*args, **kwargs)
-
-            # remove what was already added from todo list
-            if swap is not None:
-                for key in kwargs:
-                    if key in swap:
-                        swap.remove(key)
-
-            # include new positionals to kwarg dict
-            for name, value in zip(pos_names, args):
-                kwargs[name] = value
-            args = args[npos:]
-
-            # deal with the remaining arguments
-            extra_names = [n for n in names if n not in kwargs]
-            if len(extra_names) > 0:
-                if (swap is not None) and len(swap) > 0:
-                    indices = [extra_names.index(n) for n in swap]
-                    idx1, idx2 = min(indices), max(indices)
-                    extra_names_api = extra_names[:idx1] + swap + \
-                                      extra_names[idx2+1:]  # noqa
-                else:
-                    extra_names_api = extra_names
-
-                for name, value in zip(extra_names_api, args):
-                    kwargs[name] = value
-
-            # warn about API change
-            no_kw = names[npos : npos + len(args)]  # noqa
-            s = "" if len(no_kw) == 1 else "s"
-            no_kw = f"`{no_kw[0]}`" if len(no_kw) == 1 else no_kw
-            warnings.warn(
-                f"Use of argument{s} {no_kw} as positional is deprecated "
-                f"in {func.__qualname__}. Pass the name{s} of the "
-                f"keyword-only argument{s} explicitly.",
-                CCLDeprecationWarning)
-
-            # raise normprof warning? (3 of 3)
-            normprof_warning()
-
-            return func(**kwargs)
-        return wrapper
-
-    def decorator(func):
-        return _decorator(func, pairs=pairs, order=order)
-
-    # Check if usage is with @warn_api or @warn_api()
+        - ``cosmo`` is automatically detected for all constructors in ``halos``
+        - ``normprof`` is automatically detected for all decorated functions.
+    """
     if func is None:
-        # warn_api() with patentheses
-        return decorator
-    # warn_api without parentheses
-    return decorator(func)
+        # called without parentheses
+        return functools.partial(warn_api, pairs=pairs, reorder=reorder)
+
+    name = func.__qualname__
+    plural = lambda expr: "" if not len(expr)-1 else "s"  # noqa: final 's'
+    params = signature(func).parameters
+    POK = Parameter.POSITIONAL_OR_KEYWORD
+    KWO = Parameter.KEYWORD_ONLY
+    pos_names = [k for k, v in params.items() if v.kind == POK]
+    kwo_names = [k for k, v in params.items() if v.kind == KWO]
+    npos = len(pos_names)
+    rename = dict(pairs)
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # API compatibility with `cosmo` as a first argument in `halos`.
+        from .core import Cosmology
+        catch_cosmo = args[1] if len(args) > 1 else kwargs.get("cosmo")
+        if ("pyccl.halos" in func.__module__
+                and func.__name__ == "__init__"
+                and isinstance(catch_cosmo, Cosmology)):
+            warnings.warn(
+                f"Use of argument `cosmo` has been deprecated in {name}. "
+                "This will trigger an exception in the future.",
+                CCLDeprecationWarning)
+            # `cosmo` may be in `args` or in `kwargs`, so we check both.
+            args = tuple(
+                item for item in args if not isinstance(item, Cosmology))
+            kwargs.pop("cosmo", None)
+
+        # API compatibility for renamed arguments.
+        warn_names = set(kwargs) - set(params)
+        if warn_names:
+            s = plural(warn_names)
+            warnings.warn(
+                f"Use of argument{s} {list(warn_names)} is deprecated "
+                f"in {name}. Pass the new name{s} of the argument{s} "
+                f"{[rename[k] for k in warn_names]}, respectively.",
+                CCLDeprecationWarning)
+            for param in warn_names:
+                kwargs[rename[param]] = kwargs.pop(param)
+
+        # API compatibility for star operator.
+        if len(args) > npos:
+            # API compatibility for shuffled order.
+            if reorder:
+                # Pick up the positions of the common elements.
+                mask = [param in reorder for param in kwo_names]
+                start = mask.index(True)
+                stop = start + len(reorder)
+                # Sort the reordered part of `kwo_names` by `reorder` indexing.
+                kwo_names[start: stop] = sorted(kwo_names[start: stop],
+                                                key=reorder.index)
+            extras = dict(zip(kwo_names, args[npos:]))
+            kwargs.update(extras)
+            s = plural(extras)
+            warnings.warn(
+                f"Use of argument{s} {list(extras)} as positional is "
+                f"deprecated in {func.__qualname__}.", CCLDeprecationWarning)
+
+        # API compatibility for `normprof` as a required argument.
+        if "normprof" in set(params) - set(kwargs):
+            kwargs["normprof"] = False
+            warnings.warn(
+                "Halo profile normalization `normprof` has become a required "
+                "argument in {name}. Not specifying it will trigger an "
+                "exception in the future", CCLDeprecationWarning)
+
+        # Collect what's remaining.
+        pos = dict(zip(pos_names, args))
+        kwargs.update(pos)
+
+        return func(**kwargs)
+    return wrapper
 
 
 def deprecate_attr(pairs=None):

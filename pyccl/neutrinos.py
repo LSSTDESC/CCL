@@ -60,7 +60,7 @@ def Omeganuh2(a, *, m_nu, T_CMB=None):
     return Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
 
 
-@warn_api(pairs=[("Om_nu_h2", "OmNuh2")])
+@warn_api(pairs=[("OmNuh2", "Om_nu_h2")])
 def nu_masses(*, Om_nu_h2, mass_split, T_CMB=None):
     """Returns the neutrinos mass(es) for a given OmNuh2, according to the
     splitting convention specified by the user.

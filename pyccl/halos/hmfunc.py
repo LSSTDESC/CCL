@@ -133,7 +133,7 @@ class MassFunc(CCLHalosObject):
             om_matt = omega_x(cosmo, a, 'matter')
             return delta * om_this / om_matt
 
-    @warn_api(pairs=[("mass_def_other", "mdef_other")])
+    @warn_api(pairs=[("mdef_other", "mass_def_other")])
     def get_mass_function(self, cosmo, M, a, *, mass_def_other=None):
         """ Returns the mass function for input parameters.
 
