@@ -688,9 +688,11 @@ def warn_api(func=None, /, *, pairs=[], reorder=[]):
                 "argument in {name}. Not specifying it will trigger an "
                 "exception in the future", CCLDeprecationWarning)
 
-        # Collect what's remaining.
+        # Collect what's remaining and sort to preserve signature order.
         pos = dict(zip(pos_names, args))
         kwargs.update(pos)
+        kwargs = {param: kwargs[param]
+                  for param in sorted(kwargs, key=list(params).index)}
 
         return func(**kwargs)
     return wrapper
