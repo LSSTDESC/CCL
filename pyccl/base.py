@@ -451,7 +451,10 @@ def unlock_instance(func=None, /, *, argv=0, mutate=True):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        with UnlockInstance(args[argv], mutate=mutate):
+        # Pick argument from list of `args` or `kwargs` as needed.
+        size = len(args)
+        arg = args[argv] if size > argv else list(kwargs.values())[argv-size]
+        with UnlockInstance(arg, mutate=mutate):
             out = func(*args, **kwargs)
         return out
     return wrapper
