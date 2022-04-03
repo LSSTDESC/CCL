@@ -1,7 +1,6 @@
 from . import ccllib as lib
-from .pyutils import (check, _get_spline2d_arrays, _get_spline3d_arrays,
-                      warn_api)
-from .base import CCLObject
+from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
+from .base import CCLObject, warn_api
 from ._repr import _build_string_Tk3D
 import numpy as np
 

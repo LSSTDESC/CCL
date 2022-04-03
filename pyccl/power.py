@@ -2,7 +2,7 @@ from . import ccllib as lib
 import numpy as np
 from .core import check
 from .pk2d import parse_pk2d
-from .pyutils import warn_api
+from .base import warn_api
 
 
 @warn_api

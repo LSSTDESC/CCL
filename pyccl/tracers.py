@@ -2,9 +2,9 @@ from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate, \
     growth_factor, scale_factor_of_chi, h_over_h0
-from .pyutils import _check_array_params, NoneArr, _vectorize_fn6, warn_api
+from .pyutils import _check_array_params, NoneArr, _vectorize_fn6
 from .parameters import physical_constants
-from .base import CCLObject, unlock_instance
+from .base import CCLObject, unlock_instance, warn_api
 from ._repr import _build_string_Tracer
 import numpy as np
 

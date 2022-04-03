@@ -3,11 +3,11 @@ import functools
 import numpy as np
 
 from . import ccllib as lib
-from .base import CCLObject, UnlockInstance, unlock_instance
+from .base import (CCLObject, UnlockInstance, unlock_instance,
+                   warn_api, deprecated)
 from ._repr import _build_string_Pk2D
-from .errors import CCLWarning, CCLError
-from .pyutils import (check, _get_spline2d_arrays,
-                      warn_api, deprecated, CCLDeprecationWarning)
+from .errors import CCLWarning, CCLError, CCLDeprecationWarning
+from .pyutils import check, _get_spline2d_arrays
 
 
 class _Pk2D_descriptor:

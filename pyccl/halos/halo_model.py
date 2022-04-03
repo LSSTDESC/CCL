@@ -9,10 +9,10 @@ from ..core import check
 from ..pk2d import Pk2D
 from ..tk3d import Tk3D
 from ..power import linear_matter_power, nonlin_matter_power
-from ..pyutils import _spline_integrate, warn_api, deprecate_attr
+from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
-from ..base import CCLHalosObject, cache, unlock_instance
+from ..base import CCLHalosObject, cache, unlock_instance, warn_api
 from ..parameters import physical_constants
 import numpy as np
 
@@ -103,12 +103,6 @@ class HMCalculator(CCLHalosObject):
             self._integrator = simps
         else:
             self._integrator = self._integ_spline
-
-    @deprecate_attr(pairs=[("mass_function", "_massfunc"),
-                           ("halo_bias", "_hbias"),
-                           ("mass_def", "_mdef")])
-    def __getattr__(self, name):
-        return
 
     def _integ_spline(self, fM, lM):
         # Spline integrator

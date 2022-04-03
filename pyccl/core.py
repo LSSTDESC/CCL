@@ -12,9 +12,9 @@ from .errors import CCLError, CCLWarning, CCLDeprecationWarning
 from ._types import error_types
 from ._core import _docstring_extra_parameters
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
-from .pyutils import check, warn_api
+from .pyutils import check
 from .pk2d import Pk2D
-from .base import CCLObject, cache, unlock_instance
+from .base import CCLObject, cache, unlock_instance, warn_api
 from ._repr import _build_string_Cosmology
 from .parameters import CCLParameters
 

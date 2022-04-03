@@ -4,7 +4,8 @@ import numpy as np
 
 from .errors import CCLWarning
 from . import ccllib as lib
-from .pyutils import check, integ_types, warn_api
+from .pyutils import check, integ_types
+from .base import warn_api
 from .pk2d import parse_pk2d
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig

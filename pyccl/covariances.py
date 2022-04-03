@@ -1,7 +1,8 @@
 import numpy as np
 
 from . import ccllib as lib
-from .pyutils import check, integ_types, _check_array_params, warn_api
+from .pyutils import check, integ_types, _check_array_params
+from .base import warn_api
 from .background import comoving_radial_distance, comoving_angular_distance
 from .tk3d import Tk3D
 from .pk2d import parse_pk2d

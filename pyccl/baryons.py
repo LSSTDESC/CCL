@@ -1,7 +1,7 @@
 from . import ccllib as lib
-from .pyutils import check, deprecated
+from .pyutils import check
 from .pk2d import Pk2D
-from .base import unlock_instance
+from .base import unlock_instance, deprecated
 import numpy as np
 import functools
 

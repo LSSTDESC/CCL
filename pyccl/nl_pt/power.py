@@ -4,7 +4,7 @@ from ..core import check
 from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import growth_factor
-from ..pyutils import warn_api
+from ..base import warn_api
 from .tracers import PTTracer
 
 import fastpt as fpt

@@ -1,8 +1,9 @@
 import numpy as np
 from scipy.interpolate import interp1d
-from ..pyutils import _check_array_params, warn_api
+from ..pyutils import _check_array_params
 from ..background import growth_factor
 from ..parameters import physical_constants
+from ..base import warn_api
 
 
 @warn_api

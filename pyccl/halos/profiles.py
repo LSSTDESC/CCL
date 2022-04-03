@@ -2,9 +2,8 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
-from ..pyutils import (resample_array, _fftlog_transform,
-                       warn_api, deprecate_attr)
-from ..base import CCLHalosObject, unlock_instance
+from ..pyutils import resample_array, _fftlog_transform
+from ..base import CCLHalosObject, unlock_instance, warn_api
 from .._repr import _build_string_HaloProfile
 from .concentration import Concentration
 from .massdef import MassDef
@@ -703,10 +702,6 @@ class HaloProfileNFW(HaloProfile):
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
-    @deprecate_attr(pairs=[("c_m_relation", "cM")])
-    def __getattr__(self, name):
-        return
-
     def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
         return self.c_m_relation.get_concentration(cosmo, M, a,
                                                    mass_def_other=mass_def)
@@ -881,10 +876,6 @@ class HaloProfileEinasto(HaloProfile):
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
-    @deprecate_attr(pairs=[("c_m_relation", "cM")])
-    def __getattr__(self, name):
-        return
-
     def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
         return self.c_m_relation.get_concentration(cosmo, M, a,
                                                    mass_def_other=mass_def)
@@ -967,10 +958,6 @@ class HaloProfileHernquist(HaloProfile):
                                      padding_lo_fftlog=1E-2,
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
-
-    @deprecate_attr(pairs=[("c_m_relation", "cM")])
-    def __getattr__(self, name):
-        return
 
     def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
         return self.c_m_relation.get_concentration(cosmo, M, a,
@@ -1356,10 +1343,6 @@ class HaloProfileHOD(HaloProfile):
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
         super(HaloProfileHOD, self).__init__()
-
-    @deprecate_attr(pairs=[("c_m_relation", "cM")])
-    def __getattr__(self, name):
-        return
 
     def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
         return self.c_m_relation.get_concentration(cosmo, M, a,

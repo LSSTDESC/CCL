@@ -1,11 +1,10 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
-from ..pyutils import warn_api, deprecate_attr, deprecated
 from .massdef import MassDef, MassDef200m, MassDef200c
 from ..emulator import Emulator, EmulatorObject
 from ..parameters import physical_constants
-from ..base import CCLHalosObject
+from ..base import CCLHalosObject, deprecated, warn_api
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -56,10 +55,6 @@ class MassFunc(CCLHalosObject):
         else:
             self._default_mass_def()
         self._setup()
-
-    @deprecate_attr(pairs=[("mass_def", "mdef")])
-    def __getattr__(self, name):
-        return
 
     def _default_mass_def(self):
         """ Assigns a default mass definition for this object if

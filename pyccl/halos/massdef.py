@@ -1,8 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import species_types, rho_x, omega_x
-from ..pyutils import warn_api, deprecated
-from ..base import CCLHalosObject
+from ..base import CCLHalosObject, deprecated, warn_api
 import numpy as np
 
 

@@ -2,8 +2,8 @@ import numpy as np
 import functools
 from . import ccllib as lib
 from .core import check
-from .pyutils import deprecated, warn_api
 from .parameters import physical_constants
+from .base import deprecated, warn_api
 
 neutrino_mass_splits = {
     'normal': lib.nu_normal,

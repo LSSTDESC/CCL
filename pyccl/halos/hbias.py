@@ -1,8 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
-from ..pyutils import warn_api, deprecate_attr, deprecated
-from ..base import CCLHalosObject
+from ..base import CCLHalosObject, deprecated, warn_api
 from .massdef import MassDef, MassDef200m
 import numpy as np
 
@@ -40,10 +39,6 @@ class HaloBias(CCLHalosObject):
         else:
             self._default_mass_def()
         self._setup()
-
-    @deprecate_attr(pairs=[("mass_def", "mdef")])
-    def __getattr__(self, name):
-        return
 
     def _default_mass_def(self):
         """ Assigns a default mass definition for this object if

@@ -1,7 +1,8 @@
 from .profiles import HaloProfile, HaloProfileNFW
 from .profiles_2pt import Profile2pt
 from .concentration import Concentration
-from ..pyutils import warn_api, CCLDeprecationWarning
+from ..base import warn_api
+from ..errors import CCLDeprecationWarning
 
 import warnings
 

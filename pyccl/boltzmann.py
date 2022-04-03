@@ -2,7 +2,8 @@ import numpy as np
 import warnings
 
 from . import ccllib as lib
-from .pyutils import check, warn_api
+from .pyutils import check
+from .base import warn_api
 from .pk2d import Pk2D
 from .emulator import PowerSpectrumEmulator, EmulatorObject
 from .errors import CCLError, CCLWarning
