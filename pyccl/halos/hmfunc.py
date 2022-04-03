@@ -773,7 +773,7 @@ class MassFuncBocquet20(MassFunc, Emulator):
             This parametrization accepts SO masses with
             Delta = 200 critical.
         mass_def_strict (bool):
-            This emulator only accepts SO masses with Delta = 20 critical.
+            This emulator only accepts SO masses with Delta = 200 critical.
             If False, an exception will be raised.
         extrapolate (bool):
             If True, the queried mass range outside of the emulator's
