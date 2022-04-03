@@ -128,8 +128,10 @@ class Caching(metaclass=_ClassPropertyMeta):
     """
     _enabled: bool = True
     _policies: list = ['fifo', 'lru', 'lfu']
-    _maxsize: int = 64
-    _policy: str = 'lru'
+    _default_maxsize: int = 64    # class default maxsize
+    _default_policy: str = 'lru'  # class default policy
+    _maxsize = _default_maxsize   # user-defined maxsize
+    _policy = _default_policy     # user-defined policy
     _cached_functions: list = []
 
     @classmethod
@@ -210,7 +212,7 @@ class Caching(metaclass=_ClassPropertyMeta):
         return wrapper
 
     @classmethod
-    def cache(cls, func=None, /, *, maxsize=None, policy=None):
+    def cache(cls, func=None, /, *, maxsize=_maxsize, policy=_policy):
         """Cache the output of the decorated function.
 
         Arguments:
@@ -226,27 +228,19 @@ class Caching(metaclass=_ClassPropertyMeta):
                 'lru': least-recently-used,\n
                 'lfu': least-frequently-used.
         """
-        if maxsize is None:
-            maxsize = cls.maxsize
-        elif maxsize < 0:
+        if maxsize < 0:
             raise ValueError(
                 "`maxsize` should be larger than zero. "
                 "To disable caching, use `Caching.disable()`.")
-
-        if policy is None:
-            policy = cls.policy
-        elif policy not in cls._policies:
+        if policy not in cls._policies:
             raise ValueError("Cache retention policy not recognized.")
 
-        def decorator(func):
-            return cls._decorator(func, maxsize, policy)
-
-        # Check if usage is with @cache or @cache()
         if func is None:
-            # @cache() with parentheses
-            return decorator
-        # @cache without parentheses
-        return decorator(func)
+            # `@cache` without parentheses
+            return functools.partial(
+                cls._decorator, maxsize=maxsize, policy=policy)
+        # `@cache()` with parentheses
+        return cls._decorator(func, maxsize=maxsize, policy=policy)
 
     @classmethod
     def enable(cls):
@@ -262,8 +256,8 @@ class Caching(metaclass=_ClassPropertyMeta):
 
     @classmethod
     def reset(cls):
-        cls.maxsize = 64
-        cls.policy = 'lru'
+        cls.maxsize = cls._default_maxsize
+        cls.policy = cls._default_policy
 
     @classmethod
     def clear_cache(cls):
