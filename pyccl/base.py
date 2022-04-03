@@ -128,7 +128,7 @@ class Caching(metaclass=_ClassPropertyMeta):
     """
     _enabled: bool = True
     _policies: list = ['fifo', 'lru', 'lfu']
-    _default_maxsize: int = 64    # class default maxsize
+    _default_maxsize: int = 128   # class default maxsize
     _default_policy: str = 'lru'  # class default policy
     _maxsize = _default_maxsize   # user-defined maxsize
     _policy = _default_policy     # user-defined policy
