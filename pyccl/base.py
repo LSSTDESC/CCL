@@ -236,10 +236,10 @@ class Caching(metaclass=_ClassPropertyMeta):
             raise ValueError("Cache retention policy not recognized.")
 
         if func is None:
-            # `@cache` without parentheses
+            # `@cache` with parentheses
             return functools.partial(
                 cls._decorator, maxsize=maxsize, policy=policy)
-        # `@cache()` with parentheses
+        # `@cache()` without parentheses
         return cls._decorator(func, maxsize=maxsize, policy=policy)
 
     @classmethod
