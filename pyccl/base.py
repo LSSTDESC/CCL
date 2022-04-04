@@ -220,9 +220,8 @@ class Caching(metaclass=_ClassPropertyMeta):
         Arguments:
             func (``function``):
                 Function to be decorated.
-            maxsize (``int`` or ``None``):
+            maxsize (``int``):
                 Maximum cache size for the decorated function.
-                If None, defaults to ``pyccl.Caching.maxsize``.
             policy (``'fifo'``, ``'lru'``, ``'lfu'``):
                 Cache retention policy. When the storage reaches maxsize
                 decide which cached object will be deleted. Default is 'lru'.\n
