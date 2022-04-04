@@ -480,9 +480,9 @@ def _unwrap(func):
     return func
 
 
-###############################################################################
-###  The following decorators are used to notify users about deprecations.  ###
-###############################################################################
+# +==========================================================================+
+# |  The following decorators are used to notify users about deprecations.   |
+# +==========================================================================+
 def deprecated(new_function=None):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
@@ -491,6 +491,7 @@ def deprecated(new_function=None):
     """
     def decorator(func):
         from .errors import CCLDeprecationWarning
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             s = f"The function {func.__qualname__} is deprecated."
@@ -654,7 +655,7 @@ def deprecate_attr(getter=None, /, *, pairs=[]):
     rename = dict(pairs)
 
     @functools.wraps(getter)
-    def new_getter(cls, name):
+    def wrapper(cls, name):
         from .errors import CCLDeprecationWarning
 
         if name in rename:
@@ -665,12 +666,8 @@ def deprecate_attr(getter=None, /, *, pairs=[]):
                 f"Pass the new name {new_name}.", CCLDeprecationWarning)
             name = new_name
 
-        try:
-            return cls.__getattribute__(name)
-        except AttributeError as err:
-            raise err
-
-    return new_getter
+        return cls.__getattribute__(name)
+    return wrapper
 
 
 class CCLObject:
@@ -818,11 +815,10 @@ class CCLHalosObject(CCLObject, init_attrs=True):
     # Decorate the default `__getattribute__` to preserve API following
     # the name changes of the specified instance attrbiutes.
     # TODO: remove for CCLv3.
-    __getattr__ = \
-        deprecate_attr(
-            pairs=[('mdef', 'mass_def'),
-                   ('_mdef', 'mass_def'),
-                   ('cM', 'c_m_relation'),
-                   ('_massfunc', 'mass_function'),
-                   ('_hbias', 'halo_bias')]
-        )(super.__getattribute__)
+    __getattr__ = deprecate_attr(
+        pairs=[('mdef', 'mass_def'),
+               ('_mdef', 'mass_def'),
+               ('cM', 'c_m_relation'),
+               ('_massfunc', 'mass_function'),
+               ('_hbias', 'halo_bias')]
+    )(super.__getattribute__)
