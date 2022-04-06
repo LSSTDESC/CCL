@@ -382,10 +382,10 @@ class Pk2D(CCLObject):
                 lib.f2d_t_free(self.psp)
 
     def __contains__(self, other):
-        if not (self.psp.lkmin < other.psp.lkmin
-                and self.psp.lkmax > other.psp.lkmax
-                and self.psp.amin < other.psp.amin
-                and self.psp.amax > other.psp.amax):
+        if not (self.psp.lkmin <= other.psp.lkmin
+                and self.psp.lkmax >= other.psp.lkmax
+                and self.psp.amin <= other.psp.amin
+                and self.psp.amax >= other.psp.amax):
             return False
         return True
 
