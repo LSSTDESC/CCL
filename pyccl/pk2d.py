@@ -414,39 +414,35 @@ class Pk2D(CCLObject):
             if self.has_psp and hasattr(self, 'psp'):
                 lib.f2d_t_free(self.psp)
 
+    def __contains__(self, other):
+        if not (self.psp.lkmin >= other.psp.lkmin
+                and self.psp.lkmax <= other.psp.lkmax
+                and self.psp.amin >= other.psp.amin
+                and self.psp.amax <= other.psp.amax):
+            return False
+        return True
+
     def _get_binary_operator_arrays(self, other):
-        if not isinstance(other, Pk2D):
-            raise TypeError("Binary operator of Pk2D objects is only defined "
-                            "for other Pk2D objects.")
         if not (self.has_psp and other.has_psp):
             raise ValueError("Pk2D object does not have data.")
-        if (self.psp.lkmin < other.psp.lkmin
-                or self.psp.lkmax > other.psp.lkmax):
-            raise ValueError("The 2nd operand has its data defined over a "
-                             "smaller k range than the 1st operand. To avoid "
-                             "extrapolation, this operation is forbidden. If "
-                             "you want to operate on the smaller support, "
-                             "try swapping the operands.")
-        if (self.psp.amin < other.psp.amin
-                or self.psp.amax > other.psp.amax):
-            raise ValueError("The 2nd operand has its data defined over a "
-                             "smaller a range than the 1st operand. To avoid "
-                             "extrapolation, this operation is forbidden. If "
-                             "you want to operate on the smaller support, "
-                             "try swapping the operands.")
+        if self not in other:
+            raise ValueError(
+                "The 2nd operand has its data defined over a smaller range "
+                "than the 1st operand. To avoid extrapolation, this operation "
+                "is forbidden. If you want to operate on the smaller support, "
+                "try swapping the operands.")
 
         a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
         a_arr_b, lk_arr_b, pk_arr_b = other.get_spline_arrays()
-        if not (a_arr_a.size == a_arr_b.size and lk_arr_a.size == lk_arr_b.size
+        if not (a_arr_a.size == a_arr_b.size
+                and lk_arr_a.size == lk_arr_b.size
                 and np.allclose(a_arr_a, a_arr_b)
                 and np.allclose(lk_arr_a, lk_arr_b)):
-            warnings.warn("The arrays of the two Pk2D objects are defined at "
-                          "different points in k and/or a. The second operand "
-                          "will be interpolated for the operation.\n"
-                          "The resulting Pk2D object will be defined for "
-                          f"{self.psp.lkmin} <= log k <= {self.psp.lkmax} and "
-                          f"{self.psp.amin} <= a <= {self.psp.amax}.",
-                          category=CCLWarning)
+            warnings.warn(
+                "Operands defined over different ranges. "
+                "The result will be interpolated and clipped to "
+                f"{self.psp.lkmin} <= log k <= {self.psp.lkmax} and "
+                f"{self.psp.amin} <= a <= {self.psp.amax}.", CCLWarning)
 
             pk_arr_b = np.array([other.eval(k=np.exp(lk_arr_a), a=a_,)
                                  for a_ in a_arr_a])
@@ -489,6 +485,16 @@ class Pk2D(CCLObject):
         self = self.__add__(other)
         return self
 
+    def __sub__(self, other):
+        return self + (-1)*other
+
+    __rsub__ = __sub__
+
+    @unlock_instance(mutate=True)
+    def __isub__(self, other):
+        self = self.__sub__(other)
+        return self
+
     def __mul__(self, other):
         """Multiply two Pk2D instances.
 
@@ -525,17 +531,27 @@ class Pk2D(CCLObject):
         self = self.__mul__(other)
         return self
 
+    def __truediv__(self, other):
+        return self * other**(-1)
+
+    __rtruediv__ = __truediv__
+
+    @unlock_instance(mutate=True)
+    def __itruediv__(self, other):
+        self = self.__div__(other)
+        return self
+
     def __pow__(self, exponent):
         """Take a Pk2D instance to a power.
         """
         if not isinstance(exponent, (float, int)):
-            raise TypeError("Exponentiation of Pk2D is only defined for "
-                            "floats and ints.")
+            raise TypeError(
+                "Exponentiation of Pk2D is only defined for floats and ints.")
         a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
         if np.any(pk_arr_a < 0) and exponent % 1 != 0:
-            warnings.warn("Taking a non-positive Pk2D object to a non-integer "
-                          "power may lead to unexpected results",
-                          category=CCLWarning)
+            warnings.warn(
+                "Taking a non-positive Pk2D object to a non-integer "
+                "power may lead to unexpected results", CCLWarning)
 
         pk_arr_new = pk_arr_a**exponent
 
@@ -549,6 +565,13 @@ class Pk2D(CCLObject):
                    extrap_order_hik=self.extrap_order_hik)
 
         return new
+
+    __rpow__ = __pow__
+
+    @unlock_instance(mutate=True)
+    def __ipow__(self, other):
+        self = self.__pow__(other)
+        return self
 
 
 @warn_api
