@@ -166,6 +166,12 @@ class Tk3D(CCLObject):
         check(status)
         return f
 
+    def __call__(self, k, a):
+        """Callable vectorized instance."""
+        out = np.array([self.eval(k, aa)
+                        for aa in np.atleast_1d(a).astype(float)])
+        return out.squeeze()[()]
+
     def __del__(self):
         if hasattr(self, 'has_tsp'):
             if self.has_tsp and hasattr(self, 'tsp'):
