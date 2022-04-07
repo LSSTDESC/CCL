@@ -370,7 +370,7 @@ class Pk2D(CCLObject):
 
     def copy(self):
         """Return a copy of this Pk2D object."""
-        if not self.has_psp:
+        if not self:
             return Pk2D(empty=True)
 
         a_arr, lk_arr, pk_arr = self.get_spline_arrays()
@@ -399,7 +399,7 @@ class Pk2D(CCLObject):
                 Array of the power spectrum P(k, z). The shape
                 is (a_arr.size, lk_arr.size).
         """
-        if not self.has_psp:
+        if not self:
             raise ValueError("Pk2D object does not have data.")
 
         a_arr, lk_arr, pk_arr = _get_spline2d_arrays(self.psp.fka)
@@ -426,7 +426,7 @@ class Pk2D(CCLObject):
         return True
 
     def _get_binary_operator_arrays(self, other):
-        if not (self.has_psp and other.has_psp):
+        if not (self and other):
             raise ValueError("Pk2D object does not have data.")
         if self not in other:
             raise ValueError(
@@ -480,23 +480,6 @@ class Pk2D(CCLObject):
 
         return new
 
-    __radd__ = __add__
-
-    @unlock_instance(mutate=True)
-    def __iadd__(self, other):
-        self = self.__add__(other)
-        return self
-
-    def __sub__(self, other):
-        return self + (-1)*other
-
-    __rsub__ = __sub__
-
-    @unlock_instance(mutate=True)
-    def __isub__(self, other):
-        self = self.__sub__(other)
-        return self
-
     def __mul__(self, other):
         """Multiply two Pk2D instances.
 
@@ -526,23 +509,6 @@ class Pk2D(CCLObject):
                    extrap_order_hik=self.extrap_order_hik)
         return new
 
-    __rmul__ = __mul__
-
-    @unlock_instance(mutate=True)
-    def __imul__(self, other):
-        self = self.__mul__(other)
-        return self
-
-    def __truediv__(self, other):
-        return self * other**(-1)
-
-    __rtruediv__ = __truediv__
-
-    @unlock_instance(mutate=True)
-    def __itruediv__(self, other):
-        self = self.__div__(other)
-        return self
-
     def __pow__(self, exponent):
         """Take a Pk2D instance to a power.
         """
@@ -568,11 +534,45 @@ class Pk2D(CCLObject):
 
         return new
 
-    __rpow__ = __pow__
+    def __sub__(self, other):
+        return self + (-1)*other
+
+    def __truediv__(self, other):
+        return self * other**(-1)
+
+    __radd__ = __add__
+
+    __rmul__ = __mul__
+
+    def __rsub__(self, other):
+        return other + (-1)*self
+
+    def __rtruediv__(self, other):
+        return other * self**(-1)
+
+    @unlock_instance(mutate=True)
+    def __iadd__(self, other):
+        self = self + other
+        return self
+
+    @unlock_instance(mutate=True)
+    def __imul__(self, other):
+        self = self * other
+        return self
+
+    @unlock_instance(mutate=True)
+    def __isub__(self, other):
+        self = self - other
+        return self
+
+    @unlock_instance(mutate=True)
+    def __itruediv__(self, other):
+        self = self / other
+        return self
 
     @unlock_instance(mutate=True)
     def __ipow__(self, other):
-        self = self.__pow__(other)
+        self = self**other
         return self
 
 
