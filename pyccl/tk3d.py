@@ -173,3 +173,6 @@ class Tk3D(object):
         if hasattr(self, 'has_tsp'):
             if self.has_tsp and hasattr(self, 'tsp'):
                 lib.f3d_t_free(self.tsp)
+
+    def __bool__(self):
+        return self.has_tsp

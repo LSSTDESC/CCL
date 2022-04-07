@@ -76,6 +76,7 @@ class Pk2D(object):
         empty (bool): if True, just create an empty object, to be filled
             out later
     """
+
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
                  cosmo=None, empty=False):
@@ -322,6 +323,9 @@ class Pk2D(object):
         if hasattr(self, 'has_psp'):
             if self.has_psp and hasattr(self, 'psp'):
                 lib.f2d_t_free(self.psp)
+
+    def __bool__(self):
+        return self.has_psp
 
     def __contains__(self, other):
         if not (self.psp.lkmin <= other.psp.lkmin
