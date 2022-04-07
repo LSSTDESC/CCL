@@ -315,16 +315,14 @@ class Pk2D(CCLObject):
 
         # handle scale factor extrapolation
         if cosmo is None:
-            from .core import CosmologyVanillaLCDM
-            cosmo_use = CosmologyVanillaLCDM()  # this is not used anywhere
+            cospass = lib.cosmology()
             self.psp.extrap_linear_growth = 404  # flag no extrapolation
         else:
-            cosmo_use = cosmo
-            # make sure we have growth factors for extrapolation
-            cosmo.compute_growth()
+            cospass = cosmo.cosmo
+            cosmo.compute_growth()  # growth factors for extrapolation
+            self.psp.extrap_linear_growth = 401  # flag extrapolation
 
         status = 0
-        cospass = cosmo_use.cosmo
 
         if isinstance(k, int):
             k = float(k)
@@ -335,18 +333,13 @@ class Pk2D(CCLObject):
             f, status = eval_funcs[1](self.psp, np.log(k_use), a, cospass,
                                       k_use.size, status)
 
-        # handle scale factor extrapolation
-        if cosmo is None:
-            self.psp.extrap_linear_growth = 401  # revert flag 404
-
         try:
-            check(status, cosmo_use)
+            check(status, cospass)
         except CCLError as err:
             if (cosmo is None) and ("CCL_ERROR_SPLINE_EV" in str(err)):
                 raise TypeError(
                     "Pk2D evaluation scale factor is outside of the "
-                    "interpolation range. To extrapolate, pass a "
-                    "Cosmology.", err)
+                    "interpolation range. To extrapolate, pass a Cosmology.")
             else:
                 raise err
 
