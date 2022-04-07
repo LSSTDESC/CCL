@@ -178,6 +178,9 @@ class Tk3D(CCLObject):
             if self.has_tsp and hasattr(self, 'tsp'):
                 lib.f3d_t_free(self.tsp)
 
+    def __bool__(self):
+        return self.has_tsp
+
     def get_spline_arrays(self):
         """Get the spline data arrays.
 

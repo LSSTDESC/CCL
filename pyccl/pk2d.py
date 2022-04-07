@@ -414,6 +414,9 @@ class Pk2D(CCLObject):
             if self.has_psp and hasattr(self, 'psp'):
                 lib.f2d_t_free(self.psp)
 
+    def __bool__(self):
+        return self.has_psp
+
     def __contains__(self, other):
         if not (self.psp.lkmin <= other.psp.lkmin
                 and self.psp.lkmax >= other.psp.lkmax
