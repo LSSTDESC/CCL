@@ -95,13 +95,7 @@ class Pk2D(CCLObject):
                  pkfunc=None, cosmo=None, is_logp=True,
                  extrap_order_lok=1, extrap_order_hik=2,
                  empty=False):
-        # set extrapolation order before everything else
-        # in case an empty Pk2D is created
-        self.extrap_order_lok = extrap_order_lok
-        self.extrap_order_hik = extrap_order_hik
-
         if empty:
-            self.has_psp = False
             return
 
         status = 0
@@ -150,7 +144,26 @@ class Pk2D(CCLObject):
                                                         int(extrap_order_hik),
                                                         int(is_logp), status)
         check(status)
-        self.has_psp = True
+
+    @property
+    def has_psp(self):
+        return 'psp' in vars(self)
+
+    @property
+    def extrap_order_lok(self):
+        return self.psp.extrap_order_lok
+
+    @extrap_order_lok.setter
+    def extrap_order_lok(self, value):
+        self.psp.extrap_order_lok = value
+
+    @property
+    def extrap_order_hik(self):
+        return self.psp.extrap_order_hik
+
+    @extrap_order_hik.setter
+    def extrap_order_hik(self, value):
+        self.psp.extrap_order_hik = value
 
     @classmethod
     def from_model(cls, cosmo, model):
@@ -198,8 +211,6 @@ class Pk2D(CCLObject):
                 pk2d.psp, status = ret
 
         check(status, cosmo)
-        with UnlockInstance(pk2d):
-            pk2d.has_psp = True
         return pk2d
 
     @classmethod
@@ -217,7 +228,7 @@ class Pk2D(CCLObject):
         if pk_linear is not None:
             self = pk_linear
 
-        pk2d = self.__class__(empty=True)
+        pk2d = Pk2D(empty=True)
         status = 0
         ret = lib.apply_halofit(cosmo.cosmo, self.psp, status)
         if np.ndim(ret) == 0:
@@ -226,8 +237,6 @@ class Pk2D(CCLObject):
             with UnlockInstance(pk2d):
                 pk2d.psp, status = ret
         check(status, cosmo)
-        with UnlockInstance(pk2d):
-            pk2d.has_psp = True
         return pk2d
 
     @_Pk2D_descriptor
@@ -375,8 +384,8 @@ class Pk2D(CCLObject):
 
         pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                     is_logp=is_logp,
-                    extrap_order_lok=self.psp.extrap_order_lok,
-                    extrap_order_hik=self.psp.extrap_order_hik)
+                    extrap_order_lok=self.extrap_order_lok,
+                    extrap_order_hik=self.extrap_order_hik)
 
         return pk2d
 
@@ -403,9 +412,8 @@ class Pk2D(CCLObject):
 
     def __del__(self):
         """Free memory associated with this Pk2D structure."""
-        if hasattr(self, 'has_psp'):
-            if self.has_psp and hasattr(self, 'psp'):
-                lib.f2d_t_free(self.psp)
+        if self:
+            lib.f2d_t_free(self.psp)
 
     def __bool__(self):
         return self.has_psp
