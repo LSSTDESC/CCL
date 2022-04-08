@@ -80,13 +80,7 @@ class Pk2D(object):
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
                  cosmo=None, empty=False):
-        # set extrapolation order before everything else
-        # in case an empty Pk2D is created
-        self.extrap_order_lok = extrap_order_lok
-        self.extrap_order_hik = extrap_order_hik
-
         if empty:
-            self.has_psp = False
             return
 
         status = 0
@@ -135,7 +129,26 @@ class Pk2D(object):
                                                         int(extrap_order_hik),
                                                         int(is_logp), status)
         check(status)
-        self.has_psp = True
+
+    @property
+    def has_psp(self):
+        return 'psp' in vars(self)
+
+    @property
+    def extrap_order_lok(self):
+        return self.psp.extrap_order_lok
+
+    @extrap_order_lok.setter
+    def extrap_order_lok(self, value):
+        self.psp.extrap_order_lok = value
+
+    @property
+    def extrap_order_hik(self):
+        return self.psp.extrap_order_hik
+
+    @extrap_order_hik.setter
+    def extrap_order_hik(self, value):
+        self.psp.extrap_order_hik = value
 
     @classmethod
     def pk_from_model(Pk2D, cosmo, model):
@@ -172,11 +185,10 @@ class Pk2D(object):
             pk2d.psp, status = ret
 
         check(status, cosmo)
-        pk2d.has_psp = True
         return pk2d
 
     @_Pk2D_descriptor
-    def apply_halofit(Pk2D, cosmo, pk_linear=None):
+    def apply_halofit(self, cosmo, pk_linear=None):
         """Pk2D constructor that applies the "HALOFIT" transformation of
         Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
         power spectrum in `pk_linear`.
@@ -188,6 +200,9 @@ class Pk2D(object):
                 A :class:`Pk2D` object containing the linear power spectrum
                 to transform.
         """
+        if pk_linear is None:
+            pk_linear = self
+
         pk2d = Pk2D(empty=True)
         status = 0
         ret = lib.apply_halofit(cosmo.cosmo, pk_linear.psp, status)
@@ -196,7 +211,6 @@ class Pk2D(object):
         else:
             pk2d.psp, status = ret
         check(status, cosmo)
-        pk2d.has_psp = True
         return pk2d
 
     def eval(self, k, a, cosmo=None, *, derivative=False):
@@ -284,8 +298,8 @@ class Pk2D(object):
 
         pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                     is_logp=is_logp,
-                    extrap_order_lok=self.psp.extrap_order_lok,
-                    extrap_order_hik=self.psp.extrap_order_hik)
+                    extrap_order_lok=self.extrap_order_lok,
+                    extrap_order_hik=self.extrap_order_hik)
 
         return pk2d
 
@@ -311,11 +325,9 @@ class Pk2D(object):
         return a_arr, lk_arr, pk_arr
 
     def __del__(self):
-        """Free memory associated with this Pk2D structure
-        """
-        if hasattr(self, 'has_psp'):
-            if self.has_psp and hasattr(self, 'psp'):
-                lib.f2d_t_free(self.psp)
+        """Free memory associated with this Pk2D structure."""
+        if self:
+            lib.f2d_t_free(self.psp)
 
     def __bool__(self):
         return self.has_psp
