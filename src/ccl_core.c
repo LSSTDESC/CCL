@@ -67,7 +67,7 @@ const ccl_configuration default_config = {
  */
 #define GSL_EPSREL_DNDZ 1E-6
 
-const ccl_gsl_params default_gsl_params = {
+ccl_gsl_params ccl_user_gsl_params = {
   GSL_N_ITERATION,                     // N_ITERATION
   GSL_INTEGRATION_GAUSS_KRONROD_POINTS,// INTEGRATION_GAUSS_KRONROD_POINTS
   GSL_EPSREL,                          // INTEGRATION_EPSREL
@@ -98,7 +98,7 @@ const ccl_gsl_params default_gsl_params = {
 #undef GSL_EPSREL_DNDZ
 
 
-const ccl_spline_params default_spline_params = {
+ccl_spline_params ccl_user_spline_params = {
 
   // scale factor spline params
   250,  // A_SPLINE_NA
@@ -257,8 +257,8 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   ccl_cosmology * cosmo = malloc(sizeof(ccl_cosmology));
   cosmo->params = params;
   cosmo->config = config;
-  cosmo->gsl_params = default_gsl_params;
-  cosmo->spline_params = default_spline_params;
+  cosmo->gsl_params = ccl_user_gsl_params;
+  cosmo->spline_params = ccl_user_spline_params;
   cosmo->spline_params.A_SPLINE_TYPE = gsl_interp_akima;
   cosmo->spline_params.K_SPLINE_TYPE = gsl_interp_akima;
   cosmo->spline_params.M_SPLINE_TYPE = gsl_interp_akima;

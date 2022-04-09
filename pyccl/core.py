@@ -284,7 +284,7 @@ class Cosmology(CCLObject):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
-        CCLParameters.populate(self.cosmo)
+        self._accuracy_params = CCLParameters.from_cosmo(self.cosmo)
 
         if self.cosmo.status != 0:
             raise CCLError(
