@@ -1,4 +1,4 @@
-from pyccl import ccllib as lib
+from . import ccllib as lib
 
 
 class Singleton(type):
