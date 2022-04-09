@@ -1,6 +1,5 @@
 import numpy as np
 from .base import Hashing, hash_
-from .parameters import CCLParameters
 from .pyutils import _get_spline1d_arrays
 
 
@@ -166,8 +165,7 @@ def _build_string_Cosmology(self):
 
     def metadata():
         # Print hashes for the accuracy parameters and the stored Pk2D's.
-        H = hex(sum([hash_(CCLParameters.from_cosmo(self.cosmo, name))
-                     for name in ["gsl_params", "spline_params"]]))
+        H = hex(hash_(self._accuracy_params))
         s = f"{newline}HASH_ACCURACY_PARAMS = {H}"
         if self.__class__.__qualname__ == "CosmologyCalculator":
             # only need the pk's if we compare CosmologyCalculator objects
