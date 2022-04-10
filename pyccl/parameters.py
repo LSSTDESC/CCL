@@ -85,9 +85,11 @@ class CCLParameters:
         """
         out = {}
         for param in spline_params.__dict__:
-            out[param] = getattr(cosmo.spline_params, param)
+            value = getattr(cosmo.spline_params, param)
+            out[param] = value if isinstance(value, (int, float)) else None
         for param in gsl_params.__dict__:
-            out[param] = getattr(cosmo.gsl_params, param)
+            value = getattr(cosmo.gsl_params, param)
+            out[param] = value if isinstance(value, (int, float)) else None
         return out
 
 
