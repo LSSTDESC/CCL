@@ -398,10 +398,10 @@ def test_pk2d_extrap_orders():
     zarr_a = np.outer(x, np.exp(log_y))
     pk = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a), is_logp=True)
 
-    pk.extrap_order_hik = 10
+    pk.update_parameters(extrap_order_hik=10)
     assert pk.extrap_order_hik == pk.psp.extrap_order_hik
 
-    pk.extrap_order_lok = 10
+    pk.update_parameters(extrap_order_lok=10)
     assert pk.extrap_order_lok == pk.psp.extrap_order_lok
 
 

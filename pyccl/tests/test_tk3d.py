@@ -159,6 +159,14 @@ def test_tk3d_spline_arrays(is_product):
         assert np.allclose(np.log(out[0]), tkka_arr, rtol=1e-15)
 
 
+def test_tk3d_spline_arrays_raises():
+    (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
+    tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
+    delattr(tsp, "tsp")
+    with pytest.raises(ValueError):
+        tsp.get_spline_arrays()
+
+
 def test_tk3d_call():
     # Test `__call__` and `__bool__`
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
@@ -166,18 +174,3 @@ def test_tk3d_call():
     assert bool(tsp) is tsp.has_tsp
     assert np.allclose(np.array([tsp.eval(np.exp(lk_arr), a) for a in a_arr]),
                        tsp(np.exp(lk_arr), a_arr), rtol=1e-15)
-
-
-def test_tk3d_spline_arrays_raises():
-    (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
-    tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
-
-    if hasattr(tsp.__class__, "has_tsp"):
-        # `has_tsp` is a property
-        delattr(tsp, "tsp")
-    else:
-        # fool `Tk3D` into believing it doesn't have a `tsp`
-        tsp.has_tsp = False
-
-    with pytest.raises(ValueError):
-        tsp.get_spline_arrays()
