@@ -283,17 +283,17 @@ class Cosmology(CCLObject):
         """Update any of the ``gsl_params`` or ``spline_params`` associated
         with this Cosmology object.
         """
-        from pyccl import gsl_params, spline_params
-        keys = list(gsl_params.keys()) + list(spline_params.keys())
-        set_diff = list(set(kwargs.keys()) - set(keys))
+        from .parameters import spline_params, gsl_params
+        set_diff = list(set(kwargs.keys()) - set(self._accuracy_params.keys()))
         if set_diff:
             raise ValueError(f"Parameter(s) {set_diff} not recognized.")
         for param, value in kwargs.items():
-            if param in gsl_params.keys():
-                attr = getattr(self.cosmo, "gsl_params")
-            else:
+            if hasattr(spline_params, param):
                 attr = getattr(self.cosmo, "spline_params")
+            elif hasattr(gsl_params, param):
+                attr = getattr(self.cosmo, "gsl_params")
             setattr(attr, param, value)
+        self._accuracy_params = CCLParameters.from_cosmo(self.cosmo)
 
     def write_yaml(self, filename):
         """Write a YAML representation of the parameters to file.
