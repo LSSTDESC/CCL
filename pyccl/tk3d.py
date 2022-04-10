@@ -133,7 +133,10 @@ class Tk3D(CCLObject):
                                                         int(extrap_order_lok),
                                                         int(is_logt), status)
         check(status)
-        self.has_tsp = True
+
+    @property
+    def has_tsp(self):
+        return 'tsp' in vars(self)
 
     def eval(self, k, a):
         """Evaluate trispectrum. If `k` is a 1D array with size `nk`, the
@@ -176,6 +179,9 @@ class Tk3D(CCLObject):
         if hasattr(self, 'has_tsp'):
             if self.has_tsp and hasattr(self, 'tsp'):
                 lib.f3d_t_free(self.tsp)
+
+    def __bool__(self):
+        return self.has_tsp
 
     def get_spline_arrays(self):
         """Get the spline data arrays.

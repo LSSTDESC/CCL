@@ -17,6 +17,7 @@ class _Pk2D_descriptor:
 
     def __get__(self, instance, base):
         this = instance if instance else base
+
         @functools.wraps(self.func)
         def new_func(*args, **kwargs):
             return self.func(this, *args, **kwargs)
@@ -83,13 +84,7 @@ class Pk2D(CCLObject):
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
                  cosmo=None, empty=False):
-        # set extrapolation order before everything else
-        # in case an empty Pk2D is created
-        self.extrap_order_lok = extrap_order_lok
-        self.extrap_order_hik = extrap_order_hik
-
         if empty:
-            self.has_psp = False
             return
 
         status = 0
@@ -138,7 +133,26 @@ class Pk2D(CCLObject):
                                                         int(extrap_order_hik),
                                                         int(is_logp), status)
         check(status)
-        self.has_psp = True
+
+    @property
+    def has_psp(self):
+        return 'psp' in vars(self)
+
+    @property
+    def extrap_order_lok(self):
+        return self.psp.extrap_order_lok
+
+    @extrap_order_lok.setter
+    def extrap_order_lok(self, value):
+        self.psp.extrap_order_lok = value
+
+    @property
+    def extrap_order_hik(self):
+        return self.psp.extrap_order_hik
+
+    @extrap_order_hik.setter
+    def extrap_order_hik(self, value):
+        self.psp.extrap_order_hik = value
 
     @classmethod
     def pk_from_model(Pk2D, cosmo, model):
@@ -180,12 +194,10 @@ class Pk2D(CCLObject):
                 pk2d.psp, status = ret
 
         check(status, cosmo)
-        with UnlockInstance(pk2d):
-            pk2d.has_psp = True
         return pk2d
 
     @_Pk2D_descriptor
-    def apply_halofit(Pk2D, cosmo, pk_linear=None):
+    def apply_halofit(self, cosmo, pk_linear=None):
         """Pk2D constructor that applies the "HALOFIT" transformation of
         Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
         power spectrum in `pk_linear`.
@@ -197,6 +209,9 @@ class Pk2D(CCLObject):
                 A :class:`Pk2D` object containing the linear power spectrum
                 to transform.
         """
+        if pk_linear is None:
+            pk_linear = self
+
         pk2d = Pk2D(empty=True)
         status = 0
         ret = lib.apply_halofit(cosmo.cosmo, pk_linear.psp, status)
@@ -206,8 +221,6 @@ class Pk2D(CCLObject):
             with UnlockInstance(pk2d):
                 pk2d.psp, status = ret
         check(status, cosmo)
-        with UnlockInstance(pk2d):
-            pk2d.has_psp = True
         return pk2d
 
     @classmethod
@@ -287,16 +300,14 @@ class Pk2D(CCLObject):
 
         # handle scale factor extrapolation
         if cosmo is None:
-            from .core import CosmologyVanillaLCDM
-            cosmo_use = CosmologyVanillaLCDM()  # this is not used anywhere
+            cospass = lib.cosmology()
             self.psp.extrap_linear_growth = 404  # flag no extrapolation
         else:
-            cosmo_use = cosmo
-            # make sure we have growth factors for extrapolation
-            cosmo.compute_growth()
+            cospass = cosmo.cosmo
+            cosmo.compute_growth()  # growth factors for extrapolation
+            self.psp.extrap_linear_growth = 401  # flag extrapolation
 
         status = 0
-        cospass = cosmo_use.cosmo
 
         if isinstance(k, int):
             k = float(k)
@@ -307,18 +318,13 @@ class Pk2D(CCLObject):
             f, status = eval_funcs[1](self.psp, np.log(k_use), a, cospass,
                                       k_use.size, status)
 
-        # handle scale factor extrapolation
-        if cosmo is None:
-            self.psp.extrap_linear_growth = 401  # revert flag 404
-
         try:
-            check(status, cosmo_use)
+            check(status, cospass)
         except CCLError as err:
             if (cosmo is None) and ("CCL_ERROR_SPLINE_EV" in str(err)):
                 raise TypeError(
                     "Pk2D evaluation scale factor is outside of the "
-                    "interpolation range. To extrapolate, pass a "
-                    "Cosmology.", err)
+                    "interpolation range. To extrapolate, pass a Cosmology.")
             else:
                 raise err
 
@@ -336,7 +342,7 @@ class Pk2D(CCLObject):
 
     def copy(self):
         """Return a copy of this Pk2D object."""
-        if not self.has_psp:
+        if not self:
             return Pk2D(empty=True)
 
         a_arr, lk_arr, pk_arr = self.get_spline_arrays()
@@ -348,8 +354,8 @@ class Pk2D(CCLObject):
 
         pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                     is_logp=is_logp,
-                    extrap_order_lok=self.psp.extrap_order_lok,
-                    extrap_order_hik=self.psp.extrap_order_hik)
+                    extrap_order_lok=self.extrap_order_lok,
+                    extrap_order_hik=self.extrap_order_hik)
 
         return pk2d
 
@@ -365,7 +371,7 @@ class Pk2D(CCLObject):
                 Array of the power spectrum P(k, z). The shape
                 is (a_arr.size, lk_arr.size).
         """
-        if not self.has_psp:
+        if not self:
             raise ValueError("Pk2D object does not have data.")
 
         a_arr, lk_arr, pk_arr = _get_spline2d_arrays(self.psp.fka)
@@ -375,11 +381,12 @@ class Pk2D(CCLObject):
         return a_arr, lk_arr, pk_arr
 
     def __del__(self):
-        """Free memory associated with this Pk2D structure
-        """
-        if hasattr(self, 'has_psp'):
-            if self.has_psp and hasattr(self, 'psp'):
-                lib.f2d_t_free(self.psp)
+        """Free memory associated with this Pk2D structure."""
+        if self:
+            lib.f2d_t_free(self.psp)
+
+    def __bool__(self):
+        return self.has_psp
 
     def __contains__(self, other):
         if not (self.psp.lkmin <= other.psp.lkmin
@@ -390,7 +397,7 @@ class Pk2D(CCLObject):
         return True
 
     def _get_binary_operator_arrays(self, other):
-        if not (self.has_psp and other.has_psp):
+        if not (self and other):
             raise ValueError("Pk2D object does not have data.")
         if self not in other:
             raise ValueError(
@@ -444,23 +451,6 @@ class Pk2D(CCLObject):
 
         return new
 
-    __radd__ = __add__
-
-    @unlock_instance(mutate=True)
-    def __iadd__(self, other):
-        self = self.__add__(other)
-        return self
-
-    def __sub__(self, other):
-        return self + (-1)*other
-
-    __rsub__ = __sub__
-
-    @unlock_instance(mutate=True)
-    def __isub__(self, other):
-        self = self.__sub__(other)
-        return self
-
     def __mul__(self, other):
         """Multiply two Pk2D instances.
 
@@ -490,34 +480,17 @@ class Pk2D(CCLObject):
                    extrap_order_hik=self.extrap_order_hik)
         return new
 
-    __rmul__ = __mul__
-
-    @unlock_instance(mutate=True)
-    def __imul__(self, other):
-        self = self.__mul__(other)
-        return self
-
-    def __truediv__(self, other):
-        return self * other**(-1)
-
-    __rtruediv__ = __truediv__
-
-    @unlock_instance(mutate=True)
-    def __itruediv__(self, other):
-        self = self.__div__(other)
-        return self
-
     def __pow__(self, exponent):
         """Take a Pk2D instance to a power.
         """
         if not isinstance(exponent, (float, int)):
-            raise TypeError("Exponentiation of Pk2D is only defined for "
-                            "floats and ints.")
+            raise TypeError(
+                "Exponentiation of Pk2D is only defined for floats and ints.")
         a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
         if np.any(pk_arr_a < 0) and exponent % 1 != 0:
-            warnings.warn("Taking a non-positive Pk2D object to a non-integer "
-                          "power may lead to unexpected results",
-                          category=CCLWarning)
+            warnings.warn(
+                "Taking a non-positive Pk2D object to a non-integer "
+                "power may lead to unexpected results", CCLWarning)
 
         pk_arr_new = pk_arr_a**exponent
 
@@ -532,11 +505,45 @@ class Pk2D(CCLObject):
 
         return new
 
-    __rpow__ = __pow__
+    def __sub__(self, other):
+        return self + (-1)*other
+
+    def __truediv__(self, other):
+        return self * other**(-1)
+
+    __radd__ = __add__
+
+    __rmul__ = __mul__
+
+    def __rsub__(self, other):
+        return other + (-1)*self
+
+    def __rtruediv__(self, other):
+        return other * self**(-1)
+
+    @unlock_instance(mutate=True)
+    def __iadd__(self, other):
+        self = self + other
+        return self
+
+    @unlock_instance(mutate=True)
+    def __imul__(self, other):
+        self = self * other
+        return self
+
+    @unlock_instance(mutate=True)
+    def __isub__(self, other):
+        self = self - other
+        return self
+
+    @unlock_instance(mutate=True)
+    def __itruediv__(self, other):
+        self = self / other
+        return self
 
     @unlock_instance(mutate=True)
     def __ipow__(self, other):
-        self = self.__pow__(other)
+        self = self**other
         return self
 
 

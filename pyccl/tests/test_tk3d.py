@@ -157,3 +157,12 @@ def test_tk3d_spline_arrays(is_product):
         assert np.all(np.log(out[1]) == fka2_arr)
     else:
         assert np.all(np.log(out[0]) == tkka_arr)
+
+
+def test_tk3d_call():
+    # Test `__call__` and `__bool__`
+    (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
+    tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
+    assert bool(tsp) is tsp.has_tsp
+    assert np.allclose(np.array([tsp.eval(np.exp(lk_arr), a) for a in a_arr]),
+                       tsp(np.exp(lk_arr), a_arr), rtol=1e-15)
