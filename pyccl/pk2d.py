@@ -125,6 +125,12 @@ class Pk2D(CCLObject):
         check(status)
         self.has_psp = True
 
+    def update_parameters(self, extrap_order_lok=None, extrap_order_hik=None):
+        if extrap_order_lok is not None:
+            self.extrap_order_lok = extrap_order_lok
+        if extrap_order_hik is not None:
+            self.extrap_order_hik = extrap_order_hik
+
     @classmethod
     def pk_from_model(Pk2D, cosmo, model):
         """`Pk2D` constructor returning the power spectrum associated with
