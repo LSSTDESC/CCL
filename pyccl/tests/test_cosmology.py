@@ -233,6 +233,17 @@ def test_pyccl_default_params():
     with pytest.raises(TypeError):
         ccl.spline_params.A_SPLINE_TYPE = "something_else"
 
+    # complains when we try to change the physical constants
+    with pytest.raises(AttributeError):
+        ccl.physical_constants.CLIGHT = 1
+
+    # verify that this has changed
+    assert ccl.gsl_params.HM_MMIN != HM_MMIN
+
+    # but now we reload it, so it should be the default again
+    ccl.gsl_params.reload()
+    assert ccl.gsl_params.HM_MMIN == HM_MMIN
+
 
 def test_cosmology_default_params():
     """Check that the default params within Cosmology work as intended."""
@@ -244,6 +255,11 @@ def test_cosmology_default_params():
     v2 = cosmo2.cosmo.gsl_params.HM_MMIN
     assert v2 == v1*10
     assert v2 != v1
+
+    ccl.gsl_params.reload()
+    cosmo3 = ccl.CosmologyVanillaLCDM()
+    v3 = cosmo3.cosmo.gsl_params.HM_MMIN
+    assert v3 == v1
 
 
 def test_ccl_physical_constants_smoke():
