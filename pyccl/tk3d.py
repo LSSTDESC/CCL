@@ -134,7 +134,10 @@ class Tk3D(CCLObject):
                                                         int(extrap_order_lok),
                                                         int(is_logt), status)
         check(status)
-        self.has_tsp = True
+
+    @property
+    def has_tsp(self):
+        return 'tsp' in vars(self)
 
     def eval(self, k, a):
         """Evaluate trispectrum. If `k` is a 1D array with size `nk`, the

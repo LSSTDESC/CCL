@@ -223,44 +223,6 @@ def test_pk2d_function():
     assert np.allclose(dphere, -1., rtol=1e-6)
 
 
-def test_pk2d_eval_cosmo():
-    """Test optional cosmo in Pk2D.eval"""
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    k_arr = np.logspace(-1, 1, 32)
-    a_arr = np.linspace(0.5, 1., 4)
-    pk = np.array([cosmo.linear_matter_power(k_arr, a) for a in a_arr])
-    pk2d = ccl.Pk2D(a_arr=a_arr, lk_arr=np.log(k_arr),
-                    pk_arr=pk, is_logp=False)
-
-    assert pk2d.eval(1., 1., cosmo) == pk2d.eval(1., 1.)
-    assert np.isfinite(pk2d.eval(1., 0.4, cosmo))
-    with pytest.raises(TypeError):
-        pk2d.eval(1., 0.4)
-
-
-def test_pk2d_copy():
-    """Test that copying a Pk2D object works."""
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    cosmo.compute_linear_power()
-    pk1 = cosmo.get_linear_power()
-    pk2 = pk1.copy()
-
-    k_arr = np.logspace(-3, 2, 128)
-    a_arr = np.linspace(0.05, 1., 32)
-    assert np.allclose(np.array([pk1.eval(k_arr, a) for a in a_arr]),
-                       np.array([pk2.eval(k_arr, a) for a in a_arr]), rtol=0)
-    assert ((pk1.extrap_order_lok, pk1.extrap_order_hik) ==
-            (pk2.extrap_order_lok, pk2.extrap_order_hik))
-    assert pk1 == pk2
-
-    pk2 = pk1.copy()
-    assert pk1 == pk2
-
-    pk0 = ccl.Pk2D(empty=True)
-    pk1 = pk0.copy()
-    assert not (pk0.has_psp or pk1.has_psp)
-
-
 def test_pk2d_cls():
     """
     Test interplay between Pk2D and the Limber integrator
@@ -435,3 +397,96 @@ def test_pk2d_mul_pow():
     pk2d_j = (pk2d_a + 0.5*pk2d_i)**1.5
     _, _, zarr_j = pk2d_j.get_spline_arrays()
     assert np.allclose((zarr_a + 0.5*zarr_i)**1.5, zarr_j)
+
+
+def test_pk2d_extrap_orders():
+    # Check that setting extrap orders propagates down to the `psp`.
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    pk = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a), is_logp=True)
+
+    pk.update_parameters(extrap_order_hik=10)
+    assert pk.extrap_order_hik == pk.psp.extrap_order_hik
+
+    pk.update_parameters(extrap_order_lok=10)
+    assert pk.extrap_order_lok == pk.psp.extrap_order_lok
+
+
+def test_pk2d_descriptor():
+    # Check that `apply_halofit` can be called as a class method or
+    # as an instance method.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    cosmo.compute_linear_power()
+    pkl = cosmo.get_linear_power()
+    pk1 = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
+    pk2 = pkl.apply_halofit(cosmo)
+    assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])
+
+
+def test_pk2d_eval_cosmo():
+    # Check that `eval` can be called without `cosmo` and that an error
+    # is raised when scale factor is out of interpolation range.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    cosmo.compute_linear_power()
+    pk = cosmo.get_linear_power()
+    assert pk.eval(1., 1., cosmo) == pk.eval(1., 1., cosmo)
+
+    amin = pk.psp.amin
+    pk.eval(1., amin*0.99, cosmo)  # doesn't fail because cosmo is provided
+    with pytest.raises(TypeError):
+        pk.eval(1., amin*0.99)
+
+
+def test_pk2d_copy():
+    # Check that copying works as intended (also check `bool`).
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    pk = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a), is_logp=True)
+
+    pkc = pk.copy()
+    assert np.allclose(pk.get_spline_arrays()[-1],
+                       pkc.get_spline_arrays()[-1],
+                       rtol=1e-15)
+    assert bool(pk) is bool(pkc) is True  # they both have `psp`
+
+    pk = ccl.Pk2D(empty=True)
+    pkc = pk.copy()
+    assert bool(pk) is bool(pkc) is False
+
+
+def test_pk2d_operations():
+    # Everything is based on the already tested `add`, `mul`, and `pow`,
+    # so we don't need to test every accepted type separately.
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    pk0 = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a), is_logp=True)
+    pk1, pk2 = pk0.copy(), pk0.copy()
+
+    # sub, truediv
+    assert np.allclose((pk1 - pk2).get_spline_arrays()[-1], 0, rtol=1e-15)
+    assert np.allclose((pk1 / pk2).get_spline_arrays()[-1], 1, rtol=1e-15)
+
+    # rsub, rtruediv
+    assert np.allclose((1 - pk1).get_spline_arrays()[-1],
+                       1 - pk1.get_spline_arrays()[-1])
+    assert np.allclose((1 / pk1).get_spline_arrays()[-1],
+                       1 / pk1.get_spline_arrays()[-1])
+
+    # iadd, isub, imul, itruediv, ipow
+    pk1 += pk1
+    assert np.allclose((pk1 / pk2).get_spline_arrays()[-1], 2, rtol=1e-15)
+    pk1 -= pk2
+    assert np.allclose((pk1 / pk2).get_spline_arrays()[-1], 1, rtol=1e-15)
+    pk1 *= pk1
+    assert np.allclose(pk1.get_spline_arrays()[-1],
+                       pk2.get_spline_arrays()[-1]**2,
+                       rtol=1e-15)
+    pk1 /= pk2
+    assert np.allclose((pk1 / pk2).get_spline_arrays()[-1], 1, rtol=1e-15)
+    pk1 **= 2
+    assert np.allclose(pk1.get_spline_arrays()[-1],
+                       pk2.get_spline_arrays()[-1]**2,
+                       rtol=1e-15)
