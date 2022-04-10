@@ -413,7 +413,9 @@ def test_pk2d_copy():
     pk = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a), is_logp=True)
 
     pkc = pk.copy()
-    assert np.all(pk.get_spline_arrays()[-1] == pkc.get_spline_arrays()[-1])
+    assert np.allclose(pk.get_spline_arrays()[-1],
+                       pkc.get_spline_arrays()[-1],
+                       rtol=1e-15)
     assert bool(pk) is bool(pkc) is True  # they both have `psp`
 
     pk = ccl.Pk2D(empty=True)
@@ -431,7 +433,7 @@ def test_pk2d_operations():
     pk1, pk2 = pk0.copy(), pk0.copy()
 
     # sub, truediv
-    assert np.all((pk1 - pk2).get_spline_arrays()[-1] == 0)
+    assert np.allclose((pk1 - pk2).get_spline_arrays()[-1], 0, rtol=1e-15)
     assert np.allclose((pk1 / pk2).get_spline_arrays()[-1], 1, rtol=1e-15)
 
     # rsub, rtruediv
