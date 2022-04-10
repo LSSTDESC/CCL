@@ -470,3 +470,7 @@ def test_cosmology_default_params():
 
 def test_ccl_physical_constants_smoke():
     assert ccl.physical_constants.CLIGHT == ccl.ccllib.cvar.constants.CLIGHT
+
+
+def test_ccl_global_parameters_repr():
+    assert repr(ccl.gsl_params) == repr(ccl.gsl_params.__dict__)
