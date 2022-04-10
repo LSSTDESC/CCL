@@ -15,6 +15,7 @@ class _Pk2D_descriptor:
 
     def __get__(self, instance, base):
         this = instance if instance else base
+
         @functools.wraps(self.func)
         def new_func(*args, **kwargs):
             return self.func(this, *args, **kwargs)
