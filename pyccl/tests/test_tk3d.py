@@ -4,6 +4,7 @@ from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
 from . import pyccl as ccl
+from . import UnlockInstance
 
 
 def kf(k):
@@ -167,8 +168,9 @@ def test_tk3d_spline_arrays_raises():
         # `has_tsp` is a property
         delattr(tsp, "tsp")
     else:
-        # fool `Tk3D` into believing it doesn't have a `tsp`
-        tsp.has_tsp = False
+        with UnlockInstance(tsp):
+            # fool `Tk3D` into believing it doesn't have a `tsp`
+            tsp.has_tsp = False
 
     with pytest.raises(ValueError):
         tsp.get_spline_arrays()
