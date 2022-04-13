@@ -278,6 +278,7 @@ class MassDefVir(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+
     def __init__(self, c_m='Klypin11'):
         super(MassDefVir, self).__init__('vir',
                                          'critical',
