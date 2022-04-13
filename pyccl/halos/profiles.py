@@ -1542,95 +1542,295 @@ class HaloProfileHOD(HaloProfile):
 
 
 class SatelliteShearHOD(HaloProfileHOD):
-    def __init__(self, c_M_relation, _gammatype='radial',
-                 _gammabar=0.2, _a1h=0.0014, _b=-2, _lmax = 2):
-        # TODO: Maybe have the constant profile "activated" if _b==0.
-        self._gammatype = _gammatype
-        if not self._gammatype in ['constant', 'radial']:
-            raise ValueError("Functional form for intrinsic shear not "
-                             "supported (please use 'constant' or 'exponential'")
-        if self._gammatype == 'constant':
-            self._angular_fl = np.array([2.77582637, -0.19276603, 0.04743899, -0.01779024, 0.00832446, -0.00447308]).reshape(
-                (6, 1))
-        elif self._gammatype == 'radial':
-            self._angular_fl = np.array([4.71238898, -2.61799389, 2.06167032, -1.76714666, 1.57488973, -1.43581368]).reshape(
-                (6, 1))
-        if _lmax>13:
-            raise ValueError('Maximum l provided too high (lmax<=12).')
-        self._gammabar = _gammabar
-        self._a1h = _a1h
-        self._b = _b
-        # If _lmax is odd, make it an even number (odd l contributions are zero).
-        if not (_lmax % 2 == 0): _lmax = _lmax // 2
-        self._lmax = _lmax
-        super().__init__(c_M_relation, fc_0=0.0, ns_independent=True)
+    def __init__(self, c_M_relation, a1h=0.001, b=-2,
+                 lmax=2, integration_method='FFTLog'):
+        '''
+        Halo HOD class that calculates the satellite galaxy intrinsic shear
+        field in real and fourier space, according to Fortuna et al. 2021.
+        Can be used to compute halo model-based intrinsic alignment
+        (angular) power spectra.
 
-    def _gamma(self, r, r_vir):
-        if self._gammatype == 'constant':
-            if self._gammabar is None:
-                raise ValueError("Constant shear parameter not provided.")
-            return self._gammabar
-        elif self._gammatype == 'radial':
-            if (self._a1h is None) or (self._b is None):
-                raise ValueError("Radial dependent shear parameters not provided.")
-            r_use = np.copy(np.atleast_1d(r))
-            r_use[r_use<0.06] = 0.06
-            if np.ndim(r_vir==1):
-                r_vir = r_vir.reshape(len(r_vir), 1) # FIXME: Check this better
-            return self._a1h * (r_use / r_vir) ** self._b
+        The satellite intrinsic shear profile in real space is assumed to be
+        .. math::
+            \\gamma^I(r)=a_{1\\mathrm{h}}\\left(\\frac{r}{r_\\mathrm{vir}}
+            \\right)^b \\sin^b\\theta.
 
-    def _usat_fourier(self, cosmo, k, M, a, mass_def):
-        from scipy.special import spherical_jn
+        Args:
+            c_M_relation: concentration-mass relation for the halo model.
+            a1h: Amplitude of the satellite intrinsic shear profile.
+            b: Power-law index of the satellite intrinsic shear profile.
+            If zero, the profile is assumed to be constant inside the halo.
+            lmax: Maximum multipole to be summed in the plane-wave expansion
+            (Eq. (C1) in Fortuna et al. 2021, default=6).
+            integration_method: Method used to obtain the fourier transform
+            of the profile. Can be 'FFTLog', 'simps' or 'spline'. The FFTLog
+            parameters can be updated using the self.update_precision_fftlog
+            function, to attempt reducing ringing and aliasing.
+
+        Parameters that define the numerical integration in the case of
+        'simps' or 'spline' integration can also be changed using the
+        self.update_r_integral_params function.
+        '''
+        if lmax > 13:
+            lmax = 12
+            raise Warning('Maximum l provided too high. Using lmax=12.')
+        self.a1h = a1h
+        self.b = b
+        self.integration_method = integration_method
+        # If lmax is odd, make it even number (odd l contributions are zero).
+        if not (lmax % 2 == 0):
+            lmax = lmax // 2
+        self.lmax = lmax
+        # Hard-code for most common cases (b=0, b=-2) to gain speed (~1.3sec).
+        if self.b == 0:
+            self._angular_fl = np.array([2.77582637, -0.19276603,
+                                         0.04743899, -0.01779024,
+                                         0.00832446, -0.00447308])\
+                .reshape((6, 1))
+        elif self.b == -2:
+            self._angular_fl = np.array([4.71238898, -2.61799389,
+                                         2.06167032, -1.76714666,
+                                         1.57488973, -1.43581368])\
+                .reshape((6, 1))
+        else:
+            self._angular_fl = np.array([self._fl(l, b=self.b)
+                                         for l in range(2, 13, 2)])\
+                .reshape(6, 1)
+        self.cM = c_M_relation
+        super(SatelliteShearHOD, self).__init__(c_M_relation,
+                                                fc_0=0.0,
+                                                ns_independent=True)
+        self.update_precision_fftlog(padding_lo_fftlog=1E-2,
+                                     padding_hi_fftlog=1E3,
+                                     n_per_decade=512*1,
+                                     plaw_fourier=-3.7)
+        self.update_r_integral_params()
+
+    def update_r_integral_params(self, rmin=0.001, N_r=512, N_jn=10000):
+        '''
+        Update the parameters used in the case of Simpson or
+        spline integration.
+
+        Args:
+            rmin: Minimum value of physical radius used to carry out the
+            radial integral (in Mpc). Default=0.001.
+            N_r: Number of points to be used when sampling the radial integral
+            (in logarithmic space). Default=512.
+            N_jn: Number of points to be used when sampling the spherical
+            bessel functions, that are later used to interpolate.
+            Interpolating the bessel functions increases the speed of the
+            computations compared to explicitly evaluating them, without
+            significant loss of accuracy. Default=10000.
+        '''
+        self._rmin = rmin
+        self._N_r = N_r
+        self._N_jn = N_jn
+
+    def _I_integral(self, a, b, e=1E-10):
+        '''
+        Computes the integral
+        .. math::
+            I(a,b) = \\int_{-1}^1 \\mathrm{d}x (1-x^2)^{a/2}x^b.
+        '''
         from scipy.integrate import simps
-        # Fourier transform of u(r|M,c) for satellites. This is used by the Halo model when it computes
-        # matter power spectra. Because we want the shear power spectrum, this is then developed to be
-        # the Fourier transform of the density weighted intrinsic shear for satellites |\hat{gamma}^I_s(k|M)|
-        # Need to rethink normalization: in matter case, P(k->0)->M_mean, and the integral -> rho_mean.
-        # For shear, the normalization is computed separately.
+        x_range = np.linspace(-1 + e, 1 - e, 1024)
+        return simps((1 - x_range ** 2) ** (a / 2.) * x_range ** b, x_range)
 
+    def _fl(self, l, thk=np.pi / 2, phik=None, b=-2):
+        '''
+        Computes the angular part of the satellite intrinsic shear field,
+        Eq. (C8) in Fortuna et al. 2021.
+        '''
+        from scipy.special import binom
+        gj = np.array([0, 0, np.pi / 2, 0, np.pi / 2, 0, 15 * np.pi / 32,
+                       0, 7 * np.pi / 16, 0, 105 * np.pi / 256, 0,
+                       99 * np.pi / 256])
+        l_sum = 0.
+        if b == 0:
+            var1_add = 1
+        else:
+            var1_add = b
+        for m in range(0, l + 1):
+            m_sum = 0.
+            for j in range(0, m + 1):
+                m_sum += (binom(m, j) * gj[j] *
+                          self._I_integral(j + var1_add, m - j) *
+                          np.sin(thk) ** j * np.cos(thk) ** (m - j))
+            l_sum += binom(l, m) * binom((l + m - 1) / 2, l) * m_sum
+        if phik is not None:
+            l_sum *= np.exp(1j * 2 * phik)
+        return 2 ** l * l_sum
+
+    def gamma(self, r, r_vir):
+        '''
+        Returns the intrinsic satellite shear,
+        .. math::
+            \\gamma^I(r)=a_{1\\mathrm{h}}
+            \\left(\\frac{r}{r_\\mathrm{vir}}\\right)^b.
+        If :math:`b` is 0, then only the value of the amplitude
+        :math:`a_\\mathrm{1h}` is returned. In addition, according to
+        Fortuna et al. 2021, we use a constant value of 0.06 Mpc for
+        :math:`r<0.06` Mpc and set a maximum of 0.3 for :math:`\\gamma^I(r)`.
+        '''
+        if self.b == 0:
+            return self.a1h
+        else:
+            r_use = np.copy(np.atleast_1d(r))
+            r_use[r_use < 0.06] = 0.06
+            if np.ndim(r_vir == 1):
+                r_vir = r_vir.reshape(len(r_vir), 1)
+            # Do not output value higher than 0.3
+            gamma_out = self.a1h * (r_use/r_vir) ** self.b
+            gamma_out[gamma_out > 0.3] = 0.3
+            return gamma_out
+
+    def _rvir(self, cosmo, M, a, mdef):
+        """
+        This translates a halo mass into a comoving radius,
+        returns the comoving virial radius (in Mpc).
+        """
+        return mdef.get_radius(cosmo, M, a) / a
+
+    def _real(self, cosmo, r, M, a, mass_def):
+        '''
+        Returns the real part of the satellite intrinsic shear field,
+        .. math::
+            \\gamma^I(r) u(r|M),
+        with :math:`u` being the halo density profile divided by its mass.
+        For now, it assumes a NFW profile.
+        '''
         M_use = np.atleast_1d(M)
-        k_use = np.atleast_1d(k)
+        r_use = np.atleast_1d(r)
 
-        # Integration limits on radius
-        # Todo: These limits should be specified by the user.
-        # Comoving virial radius
-        R_d = mass_def.get_radius(cosmo, M_use, a) / a # comoving cutoff (truncation/virial) radius
-        r_integral_interval = np.linspace(0.001, R_d, 512).T
+        rvir = self._rvir(cosmo, M_use, a, mass_def)
         # TODO: make it possible to specify the halo density profile?
         NFW = HaloProfileNFW(self.cM, truncated=True, fourier_analytic=True)
+        rho = NFW.real(cosmo, r_use, M_use, a, mass_def)
+        u = rho / M_use.reshape(len(M_use), 1)
+        prof = self.gamma(r_use, rvir) * u
 
-        # The r-array shape must be (N_M, N_r)
-        rho = NFW.real(cosmo, r_integral_interval, M, a, mass_def)
-        l_arr = np.arange(2, self._lmax+1, 2)
-        # Dense sampling of the spherical bessel functions to be used later
-        x_jn = np.geomspace(k_use.min() * r_integral_interval.min(), k_use.max() * r_integral_interval.max(), 10000)
-        jn = np.empty(shape=(len(l_arr), len(x_jn)))
-        for i in range(len(l_arr)):
-            jn[i] = spherical_jn(l_arr[i], x_jn)
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
 
-        if len(M_use)==1:
-            u = rho / M
-            # Multiply all elements of array a subscript i with
-            # all of array b subscript j.
-            # np.einsum('...i,j...', a, b)
-            k_dot_r = np.einsum('...i,j...', k_use, r_integral_interval[0,:])
-            prof = np.zeros(shape=k_use.shape)
-            for i, l in enumerate(l_arr):
-                ul = simps(r_integral_interval[0, :]**2. * self._gamma(r_integral_interval[0, :], R_d[0]) * u[0, :] * spherical_jn(l, k_dot_r),
-                           r_integral_interval[0, :])
-                prof += (1j**l).real * (2*l+1) * self._angular_fl[i] * ul
+        return prof
+
+    def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
+                     l=0,
+                     fourier_out=True,
+                     large_padding=True):
+        '''
+        Adapted from pyccl.halos.profiles.HaloProfile._fftlog_wrap, but
+        modified to allow computation of the Hankel transform with variable
+        spherical bessel function index.
+        '''
+
+        # Select which profile should be the input
+        if fourier_out:
+            p_func = self._real
         else:
-            # TODO: Do not re-compute if already computed (for given a, M_use, k_use, r_use)
-            u = rho / M.reshape(len(M), 1)
-            # The fourier profile has to be of the shape below:
-            prof = np.empty(shape=(len(M_use), len(k_use)))
-            for i, M_i in enumerate(M_use):
-                k_dot_r = np.einsum('...i,j...', k_use, r_integral_interval[i, :])
-                prof_i = np.zeros(shape=k_use.shape)
-                for j, l in enumerate(l_arr):
-                    jn_interp = np.interp(k_dot_r, x_jn, jn[j])
-                    ul = simps(r_integral_interval[i, :]**2. * self._gamma(r_integral_interval[i, :], R_d[i]) * u[:, i, :] * jn_interp,
-                               r_integral_interval[i, :])
-                    prof_i += (1j**l).real * (2*l+1) * self._angular_fl[j] * ul
-                prof[i, :] = prof_i
+            p_func = self._fourier
+        k_use = np.atleast_1d(k)
+        M_use = np.atleast_1d(M)
+        lk_use = np.log(k_use)
+        nM = len(M_use)
+
+        # k/r ranges to be used with FFTLog and its sampling.
+        if large_padding:
+            k_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(k_use)
+            k_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(k_use)
+        else:
+            k_min = self.precision_fftlog['padding_lo_extra'] * np.amin(k_use)
+            k_max = self.precision_fftlog['padding_hi_extra'] * np.amax(k_use)
+        n_k = (int(np.log10(k_max / k_min)) *
+               self.precision_fftlog['n_per_decade'])
+        r_arr = np.geomspace(k_min, k_max, n_k)
+
+        p_k_out = np.zeros([nM, k_use.size])
+        # Compute real profile values
+        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def)
+        # Power-law index to pass to FFTLog.
+        plaw_index = self._get_plaw_fourier(cosmo, a)
+
+        # Compute Fourier profile through fftlog
+        k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
+                                               3, l, plaw_index)
+        lk_arr = np.log(k_arr)
+
+        for im, p_k_arr in enumerate(p_fourier_M):
+            # Resample into input k values
+            p_fourier = resample_array(lk_arr, p_k_arr, lk_use,
+                                       self.precision_fftlog['extrapol'],
+                                       self.precision_fftlog['extrapol'],
+                                       0, 0)
+            p_k_out[im, :] = p_fourier
+        if fourier_out:
+            p_k_out *= (2 * np.pi)**3
+
+        if np.ndim(k) == 0:
+            p_k_out = np.squeeze(p_k_out, axis=-1)
+        if np.ndim(M) == 0:
+            p_k_out = np.squeeze(p_k_out, axis=0)
+        return p_k_out
+
+    def _usat_fourier(self, cosmo, k, M, a, mass_def):
+        '''
+        Returns the fourier transform of the satellite intrinsic shear field.
+        The density profile of the halo is assumed to be a truncated NFW
+        profile and the radial integral (in the case of 'simps' or 'spline'
+        method) is evaluated up to the virial radius.
+        '''
+        # TODO: Do not re-compute if already computed.
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+        l_arr = np.arange(2, self.lmax+1, 2, dtype='int32')
+        if not self.integration_method == 'FFTLog':
+            # Define the r-integral sampling and the sph. bessel
+            # function sampling. The bessel function will be sampled
+            # and interpolated to gain speed.
+            r_use = np.linspace(self._rmin,
+                                self._rvir(cosmo, M_use, a, mass_def),
+                                self._N_r).T
+            x_jn = np.geomspace(k_use.min() * r_use.min(),
+                                k_use.max() * r_use.max(),
+                                self._N_jn)
+            jn = np.empty(shape=(len(l_arr), len(x_jn)))
+        prof = np.zeros(shape=(len(M_use), len(k_use)))
+        # Loop over all multipoles:
+        for j, l in enumerate(l_arr):
+            if self.integration_method == 'FFTLog':
+                prof += (self._fftlog_wrap(cosmo, k_use,
+                                           M_use, a, mass_def, l=int(l))
+                         * (1j**l).real * (2*l+1) * self._angular_fl[j]
+                         / (4*np.pi))
+            else:
+                from scipy.special import spherical_jn
+                jn[j] = spherical_jn(l_arr[j], x_jn)
+                k_dot_r = np.multiply.outer(k_use, r_use)
+                jn_interp = np.interp(k_dot_r, x_jn, jn[j])
+                integrand = r_use ** 2 * self._real(cosmo, r_use, M_use,
+                                                    a, mass_def) * jn_interp
+                if self.integration_method == 'simps':
+                    from scipy.integrate import simps
+                    for i, M_i in enumerate(M_use):
+                        prof[i, :] += (simps(integrand[:, i, :],
+                                             r_use[i, :]).T
+                                       * (1j**l).real * (2*l+1)
+                                       * self._angular_fl[j])
+                elif self.integration_method == 'spline':
+                    from pyccl.pyutils import _spline_integrate
+                    for i, M_i in enumerate(M_use):
+                        prof[i, :] += (_spline_integrate(r_use[i, :],
+                                                         integrand[:, i, :],
+                                                         r_use[i, 0],
+                                                         r_use[i, -1]).T
+                                       * (1j**l).real*(2*l+1)
+                                       * self._angular_fl[j])
+
+        if np.ndim(k) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+
         return prof
