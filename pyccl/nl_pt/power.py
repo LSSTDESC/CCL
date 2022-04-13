@@ -56,7 +56,6 @@ class PTCalculator(object):
         n_exp_cutoff (float): exponent of the cutoff factor (see
             `k_cutoff`).
     """
-    _fastpt = None
 
     def __init__(self, with_NC=False, with_IA=False, with_dd=True,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
@@ -84,7 +83,7 @@ class PTCalculator(object):
         else:
             self.exp_cutoff = 1
 
-        fpt = self._import_fastpt()
+        import fastpt as fpt
         self.pt = fpt.FASTPT(self.ks, to_do=to_do,
                              low_extrap=low_extrap,
                              high_extrap=high_extrap,
@@ -94,13 +93,6 @@ class PTCalculator(object):
         self.ia_ta = None
         self.ia_tt = None
         self.ia_mix = None
-
-    def _import_fastpt(self):
-        # Load only one ad-hoc instance of `fastpt`.
-        if self.__class__._fastpt is None:
-            import fastpt
-            self.__class__._fastpt = fastpt
-        return self.__class__._fastpt
 
     def update_pk(self, pk):
         """ Update the internal PT arrays.
