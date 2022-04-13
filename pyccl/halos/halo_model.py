@@ -8,7 +8,6 @@ from ..core import check
 from ..pk2d import Pk2D
 from ..tk3d import Tk3D
 from ..power import linear_matter_power, nonlin_matter_power
-from ..background import rho_x
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
@@ -57,7 +56,6 @@ class HMCalculator(object):
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
                  k_min=1E-5):
-        self._rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
         if not isinstance(massfunc, MassFunc):
             raise TypeError("massfunc must be of type `MassFunc`")
         self._massfunc = massfunc
@@ -96,10 +94,11 @@ class HMCalculator(object):
     def _get_ingredients(self, a, cosmo, get_bf):
         # Compute mass function and bias (if needed) at a new
         # value of the scale factor.
+        _rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
         if a != self._a_current_mf:
             self.mf = self._massfunc.get_mass_function(cosmo, self._mass, a,
                                                        mdef_other=self._mdef)
-            self.mf0 = (self._rho0 -
+            self.mf0 = (_rho0 -
                         self._integrator(self.mf * self._mass,
                                          self._lmass)) / self._m0
             self._a_current_mf = a
@@ -108,7 +107,7 @@ class HMCalculator(object):
             if a != self._a_current_bf:
                 self.bf = self._hbias.get_halo_bias(cosmo, self._mass, a,
                                                     mdef_other=self._mdef)
-                self.mbf0 = (self._rho0 -
+                self.mbf0 = (_rho0 -
                              self._integrator(self.mf * self.bf * self._mass,
                                               self._lmass)) / self._m0
             self._a_current_bf = a
