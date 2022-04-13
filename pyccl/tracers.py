@@ -287,7 +287,6 @@ class Tracer(CCLObject, init_attrs=True):
 
         return np.array([t.der_bessel for t in self._trc])
 
-    @unlock_instance
     def _MG_add_tracer(self, cosmo, kernel, z_b, der_bessel=0, der_angles=0,
                        bias_transfer_a=None, bias_transfer_k=None):
         """ function to set mg_transfer in the right format and add MG tracers
