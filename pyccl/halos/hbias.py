@@ -158,7 +158,7 @@ class HaloBias(object):
                                   "HaloBias classes")
 
     @classmethod
-    def from_name(name):
+    def from_name(cls, name):
         """Returns halo bias subclass from name string
 
         Args:

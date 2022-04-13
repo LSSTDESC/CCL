@@ -768,4 +768,4 @@ class MassFuncAngulo12(MassFunc):
 
 @functools.wraps(MassFunc.from_name)
 def mass_function_from_name(name):
-    return MassFunc.from_name
+    return MassFunc.from_name(name)

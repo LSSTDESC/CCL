@@ -71,7 +71,7 @@ class HMCalculator(object):
             self._massfunc = massfunc
         elif isinstance(massfunc, str):
             nMclass = MassFunc.from_name(massfunc)
-            self._massfunc = nMclass(mass_def=self.mass_def)
+            self._massfunc = nMclass(cosmo, mass_def=self._mdef)
         else:
             raise TypeError("mass_function must be of type `MassFunc` "
                             "or a mass function name string")
@@ -81,7 +81,7 @@ class HMCalculator(object):
             self._hbias = hbias
         elif isinstance(hbias, str):
             bMclass = HaloBias.from_name(hbias)
-            self._hbias = bMclass(mass_def=self.mass_def)
+            self._hbias = bMclass(cosmo, mass_def=self._mdef)
         else:
             raise TypeError("halo_bias must be of type `HaloBias` "
                             "or a halo bias name string")

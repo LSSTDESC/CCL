@@ -209,7 +209,7 @@ class Cosmology(object):
         pars = list(signature(func).parameters)
         if pars and pars[0] == "cosmo":
             vars()[name] = func
-  # clear unnecessary locals
+    # clear unnecessary locals
     del (background, boltzmann, bcm, cls, correlations, covariances,
          neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt,
          subs, funcs, func, name, pars)
