@@ -1,5 +1,6 @@
 import warnings
 from .. import ccllib as lib
+from .massdef import MassDef
 from .hmfunc import MassFunc
 from .hbias import HaloBias
 from .profiles import HaloProfile
@@ -56,13 +57,35 @@ class HMCalculator(object):
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
                  k_min=1E-5):
-        if not isinstance(massfunc, MassFunc):
-            raise TypeError("massfunc must be of type `MassFunc`")
-        self._massfunc = massfunc
-        if not isinstance(hbias, HaloBias):
-            raise TypeError("hbias must be of type `HaloBias`")
-        self._hbias = hbias
-        self._mdef = mass_def
+        # halo mass definition
+        if isinstance(mass_def, MassDef):
+            self._mdef = mass_def
+        elif isinstance(mass_def, str):
+            self._mdef = MassDef.from_name(mass_def)()
+        else:
+            raise TypeError("mass_def must be of type `MassDef` "
+                            "or a mass definition name string")
+
+        # halo mass function
+        if isinstance(massfunc, MassFunc):
+            self._massfunc = massfunc
+        elif isinstance(massfunc, str):
+            nMclass = MassFunc.from_name(massfunc)
+            self._massfunc = nMclass(mass_def=self.mass_def)
+        else:
+            raise TypeError("mass_function must be of type `MassFunc` "
+                            "or a mass function name string")
+
+        # halo bias function
+        if isinstance(hbias, HaloBias):
+            self._hbias = hbias
+        elif isinstance(hbias, str):
+            bMclass = HaloBias.from_name(hbias)
+            self._hbias = bMclass(mass_def=self.mass_def)
+        else:
+            raise TypeError("halo_bias must be of type `HaloBias` "
+                            "or a halo bias name string")
+
         self._prec = {'log10M_min': log10M_min,
                       'log10M_max': log10M_max,
                       'nlog10M': nlog10M,
