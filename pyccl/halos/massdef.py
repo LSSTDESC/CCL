@@ -84,6 +84,8 @@ class MassDef(CCLHalosObject):
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
+    name = 'default'
+
     def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense
         if (Delta != 'fof') and (Delta != 'vir'):
@@ -230,6 +232,24 @@ class MassDef(CCLHalosObject):
                 R_new = c_new * R_this / c_this
                 return m_def_other.get_mass(cosmo, R_new, a)
 
+    @classmethod
+    def from_name(cls, name):
+        """ Return mass definition subclass from name string.
+
+        Args:
+            name (string):
+                a mass definition name (e.g. '200m' for Delta=200 matter)
+
+        Returns:
+            MassDef subclass corresponding to the input name.
+        """
+        mass_defs = {m.name: m for m in cls.__subclasses__()}
+
+        if name in mass_defs:
+            return mass_defs[name]
+        else:
+            raise ValueError(f"Mass definition {name} not implemented.")
+
 
 class MassDef200m(MassDef):
     """`MassDef` class for the mass definition with Delta=200 times the matter
@@ -238,6 +258,8 @@ class MassDef200m(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+    name = '200m'
+
     def __init__(self, c_m='Duffy08'):
         super(MassDef200m, self).__init__(200,
                                           'matter',
@@ -251,6 +273,8 @@ class MassDef200c(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+    name = '200c'
+
     def __init__(self, c_m='Duffy08'):
         super(MassDef200c, self).__init__(200,
                                           'critical',
@@ -264,6 +288,8 @@ class MassDef500c(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+    name = '500c'
+
     def __init__(self, c_m='Ishiyama21'):
         super(MassDef500c, self).__init__(500,
                                           'critical',
@@ -277,6 +303,8 @@ class MassDefVir(MassDef):
     Args:
         c_m (string): concentration-mass relation.
     """
+    name = 'vir'
+
     def __init__(self, c_m='Klypin11'):
         super(MassDefVir, self).__init__('vir',
                                          'critical',

@@ -37,7 +37,7 @@ jobs:
           channel-priority: strict
           show-channel-urls: true
           miniforge-version: latest
-          miniforge-variant: Mambaforge          
+          miniforge-variant: Mambaforge
 
       - name: remove homebrew
         if: matrix.os == 'macos-10.15'
@@ -49,6 +49,7 @@ jobs:
 
       - name: lint
         run: |
+          export MAMBA_NO_BANNER=1
           mamba install flake8
           flake8 pyccl
           flake8 --exclude=data benchmarks

@@ -1,5 +1,6 @@
 import warnings
 from .. import ccllib as lib
+from .massdef import MassDef
 from .hmfunc import MassFunc
 from .hbias import HaloBias
 from .profiles import HaloProfile
@@ -8,7 +9,6 @@ from ..core import check
 from ..pk2d import Pk2D
 from ..tk3d import Tk3D
 from ..power import linear_matter_power, nonlin_matter_power
-from ..background import rho_x
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
@@ -58,11 +58,35 @@ class HMCalculator(CCLHalosObject):
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
                  k_min=1E-5):
-        self._rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
-        if not isinstance(massfunc, MassFunc):
-            raise TypeError("massfunc must be of type `MassFunc`")
-        if not isinstance(hbias, HaloBias):
-            raise TypeError("hbias must be of type `HaloBias`")
+        # halo mass definition
+        if isinstance(mass_def, MassDef):
+            self._mdef = mass_def
+        elif isinstance(mass_def, str):
+            self._mdef = MassDef.from_name(mass_def)()
+        else:
+            raise TypeError("mass_def must be of type `MassDef` "
+                            "or a mass definition name string")
+
+        # halo mass function
+        if isinstance(massfunc, MassFunc):
+            self._massfunc = massfunc
+        elif isinstance(massfunc, str):
+            nMclass = MassFunc.from_name(massfunc)
+            self._massfunc = nMclass(cosmo, mass_def=self._mdef)
+        else:
+            raise TypeError("mass_function must be of type `MassFunc` "
+                            "or a mass function name string")
+
+        # halo bias function
+        if isinstance(hbias, HaloBias):
+            self._hbias = hbias
+        elif isinstance(hbias, str):
+            bMclass = HaloBias.from_name(hbias)
+            self._hbias = bMclass(cosmo, mass_def=self._mdef)
+        else:
+            raise TypeError("halo_bias must be of type `HaloBias` "
+                            "or a halo bias name string")
+
         self._prec = {'log10M_min': log10M_min,
                       'log10M_max': log10M_max,
                       'nlog10M': nlog10M,
