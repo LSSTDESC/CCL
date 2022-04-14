@@ -526,19 +526,12 @@ def get_class_pk_lin(cosmo):
 
 class PowerSpectrumBACCO(PowerSpectrumEmulator):
     """ Suite of power spectrum emulators described in Arico et al. 2021
-    (arXiv:2104.14568).
+    (arXiv:2104.14568). This emulator is part of the BACCO project.
 
     These emulators are available:
       - linear: :arXiv:2104.14568
       - non-linear: :arXiv:2004.06245
       - baryon model: :arXiv:2011.15018
-
-    This emulator is part of the BACCO project.
-
-    Parameters:
-        config (dict):
-            Dictionary with the initial configuration of the emulator.
-            Defaults should work in all cases with minimal overhead.
     """
     name = "bacco"
 
