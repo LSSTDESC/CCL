@@ -4,8 +4,13 @@
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_interp.h>
 
 #include "ccl.h"
+
+#define NZ_NORM_SPLINE_INTEGRAL
+
 
 ccl_cl_tracer_collection_t *ccl_cl_tracer_collection_t_new(int *status) {
   ccl_cl_tracer_collection_t *trc = NULL;
@@ -58,6 +63,27 @@ static double get_nz_norm(ccl_cosmology *cosmo, ccl_f1d_t *nz_f,
                           double z0, double zf, int *status) {
   double nz_norm = -1, nz_enorm;
 
+#ifdef NZ_NORM_SPLINE_INTEGRAL
+  gsl_interp_accel *accel = NULL;
+  accel = gsl_interp_accel_alloc();
+  if(accel == NULL) {
+    *status = CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(
+      cosmo, "ccl_tracers.c: get_nz_norm(): out of memory");
+  }
+  if(*status == 0) {
+    *status = gsl_spline_eval_integ_e(nz_f->spline, z0, zf, accel, &nz_norm);
+	  if(*status) {
+      *status = CCL_ERROR_SPLINE_EV;
+      nz_norm = NAN;
+      ccl_cosmology_set_status_message(
+        cosmo, "ccl_tracers.c: get_nz_norm(): Spline integration failed.");
+	  }
+  }
+  gsl_interp_accel_free(accel);
+  return nz_norm;
+
+#else
   // Get N(z) norm
   gsl_function F;
   gsl_integration_workspace *w = NULL;
@@ -92,6 +118,7 @@ static double get_nz_norm(ccl_cosmology *cosmo, ccl_f1d_t *nz_f,
   gsl_integration_workspace_free(w);
 
   return nz_norm;
+#endif
 }
 
 void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
@@ -193,6 +220,7 @@ static double lensing_kernel_integrate(ccl_cosmology *cosmo,
 
   if ((gslstatus != GSL_SUCCESS) || (*(pars->status))) {
     ccl_raise_gsl_warning(gslstatus, "ccl_tracers.c: lensing_kernel_integrate():");
+    *(pars->status) = CCL_ERROR_INTEG;
     return -1;
   }
 
@@ -313,6 +341,7 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
           ipar->z_end = z;
           ipar->chi_end = chi;
           wL_arr[ichi] = lensing_kernel_integrate(cosmo, ipar, w)*(1+z)*lens_prefac;
+          local_status = *(ipar->status);
         } else {
           wL_arr[ichi] = NAN;
         }
@@ -326,6 +355,11 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
         *status = CCL_ERROR_INTEG;
       }
     } //end omp parallel
+    if(*status) {
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_tracers.c: get_lensing_mag_kernel(): error in computing lensing kernel.\n");
+    }
   }
 
   ccl_f1d_t_free(nz_f);
