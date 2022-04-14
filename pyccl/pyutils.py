@@ -378,7 +378,12 @@ def get_pk_spline_na(cosmo=None):
 
 
 def get_pk_spline_lk(cosmo=None):
-    """
+    """Get a log(k)-array with sampling rate defined by ``ccl.spline_params``
+    or by the spline parameters of the input ``cosmo``.
+
+    Arguments:
+        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
+            Input cosmology.
     """
     nk = get_pk_spline_nk(cosmo=cosmo)
     if cosmo is not None:
@@ -392,7 +397,12 @@ def get_pk_spline_lk(cosmo=None):
 
 
 def get_pk_spline_a(cosmo=None):
-    """
+    """Get an a-array with sampling rate defined by ``ccl.spline_params``
+    or by the spline parameters of the input ``cosmo``.
+
+    Arguments:
+        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
+            Input cosmology.
     """
     na = get_pk_spline_na(cosmo=cosmo)
     if cosmo is not None:
