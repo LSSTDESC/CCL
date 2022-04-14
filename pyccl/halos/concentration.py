@@ -500,7 +500,7 @@ class ConcentrationIshiyama21(Concentration):
         status = 0
         dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
                                                    len(logM), status)
-        check(status)
+        check(status, cosmo=cosmo)
         return -3/np.log(10) * dlns_dlogM
 
     def _G(self, x, n_eff):

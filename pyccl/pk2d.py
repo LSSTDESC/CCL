@@ -121,7 +121,7 @@ class Pk2D(CCLObject):
                                                         int(extrap_order_lok),
                                                         int(extrap_order_hik),
                                                         int(is_logp), status)
-        check(status)
+        check(status, cosmo=cosmo)
 
     @property
     def has_psp(self):
