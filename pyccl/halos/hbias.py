@@ -135,7 +135,7 @@ class HaloBias(object):
         status = 0
         sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
                                     len(logM), status)
-        check(status)
+        check(status, cosmo=cosmo)
 
         b = self._get_bsigma(cosmo, sigM, a)
         if np.ndim(M) == 0:
@@ -218,7 +218,7 @@ class HaloBiasSheth99(HaloBias):
         if self.use_delta_c_fit:
             status = 0
             delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-            check(status)
+            check(status, cosmo=cosmo)
         else:
             delta_c = 1.68647
 
