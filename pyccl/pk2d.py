@@ -107,7 +107,7 @@ class Pk2D(object):
                                                         int(extrap_order_lok),
                                                         int(extrap_order_hik),
                                                         int(is_logp), status)
-        check(status)
+        check(status, cosmo=cosmo)
         self.has_psp = True
 
     @classmethod
