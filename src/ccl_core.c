@@ -570,6 +570,24 @@ void ccl_get_pk_spline_a_array(ccl_cosmology *cosmo,int ndout,double* doutput,in
   free(d);
 }
 
+void ccl_get_pk_spline_a_array_from_params(ccl_spline_params *spline_params,
+                                           int ndout, double *doutput, int *status) {
+  double *d = NULL;
+  if (*status == 0) {
+    d = ccl_linlog_spacing(spline_params->A_SPLINE_MINLOG_PK,
+      spline_params->A_SPLINE_MIN_PK,
+      spline_params->A_SPLINE_MAX,
+      spline_params->A_SPLINE_NLOG_PK,
+      spline_params->A_SPLINE_NA_PK);
+    if (d == NULL)
+      *status = CCL_ERROR_MEMORY;
+  }
+  if(*status==0)
+    memcpy(doutput, d, ndout*sizeof(double));
+
+  free(d);
+}
+
 int ccl_get_pk_spline_nk(ccl_cosmology *cosmo) {
   double ndecades = log10(cosmo->spline_params.K_MAX) - log10(cosmo->spline_params.K_MIN);
   return (int)ceil(ndecades*cosmo->spline_params.N_K);
@@ -581,6 +599,21 @@ void ccl_get_pk_spline_lk_array(ccl_cosmology *cosmo,int ndout,double* doutput,i
     *status = CCL_ERROR_INCONSISTENT;
   if (*status == 0) {
     d = ccl_log_spacing(cosmo->spline_params.K_MIN, cosmo->spline_params.K_MAX, ndout);
+    if (d == NULL)
+      *status = CCL_ERROR_MEMORY;
+  }
+  if (*status == 0) {
+    for(int ii=0; ii < ndout; ii++)
+      doutput[ii] = log(d[ii]);
+  }
+  free(d);
+}
+
+void ccl_get_pk_spline_lk_array_from_params(ccl_spline_params *spline_params,
+                                            int ndout, double *doutput, int *status) {
+  double *d = NULL;
+  if (*status == 0) {
+    d = ccl_log_spacing(spline_params->K_MIN, spline_params->K_MAX, ndout);
     if (d == NULL)
       *status = CCL_ERROR_MEMORY;
   }
