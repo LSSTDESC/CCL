@@ -129,10 +129,3 @@ def test_massdef_from_string_smoke(name):
 def test_massdef_from_string_raises():
     with pytest.raises(ValueError):
         ccl.halos.MassDef.from_name("my_mass_def")
-
-
-def test_func_deprecated():
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        hmd1 = ccl.halos.mass_def_from_name("500c")
-    hmd2 = ccl.halos.MassDef.from_name("500c")
-    assert hmd1 == hmd2

@@ -7,7 +7,6 @@ from .massdef import (
     MassDef500c,
     MassDefVir,
     convert_concentration,
-    mass_def_from_name,
 )
 
 # Halo mass-concentration relations
