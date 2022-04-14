@@ -111,7 +111,7 @@ class Pk2D(CCLObject):
                                                         int(extrap_order_lok),
                                                         int(extrap_order_hik),
                                                         int(is_logp), status)
-        check(status)
+        check(status, cosmo=cosmo)
         self.has_psp = True
 
     def update_parameters(self, extrap_order_lok=None, extrap_order_hik=None):

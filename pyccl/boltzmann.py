@@ -40,7 +40,7 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     na = lib.get_pk_spline_na(cosmo.cosmo)
     status = 0
     a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-    check(status)
+    check(status, cosmo=cosmo)
     a_arr = np.sort(a_arr)
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
@@ -253,7 +253,7 @@ def get_isitgr_pk_lin(cosmo):
     na = lib.get_pk_spline_na(cosmo.cosmo)
     status = 0
     a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-    check(status)
+    check(status, cosmo=cosmo)
     a_arr = np.sort(a_arr)
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
@@ -480,7 +480,7 @@ def get_class_pk_lin(cosmo):
         na = lib.get_pk_spline_na(cosmo.cosmo)
         status = 0
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status)
+        check(status, cosmo=cosmo)
 
         # FIXME - getting the lowest CLASS k value from the python interface
         # appears to be broken - setting to 1e-5 which is close to the

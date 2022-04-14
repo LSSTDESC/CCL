@@ -58,7 +58,7 @@ def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
     if np.isscalar(c_old):
         c_new = c_new[0]
 
-    check(status)
+    check(status, cosmo=cosmo)
     return c_new
 
 
