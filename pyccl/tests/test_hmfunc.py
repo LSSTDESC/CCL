@@ -109,7 +109,6 @@ def test_nM_bocquet_smoke(with_hydro):
 def test_nM_from_string(name):
     nM_class = ccl.halos.MassFunc.from_name(name)
     nM = nM_class()
-    assert nM_class == ccl.halos.mass_function_from_name(name)
     for m in MS:
         n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))

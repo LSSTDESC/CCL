@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import warnings
 from . import pyccl as ccl
-from . import CCLWarning
+from . import CCLWarning, CCLDeprecationWarning
 
 
 def pk1d(k):
@@ -419,7 +419,8 @@ def test_pk2d_descriptor():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     cosmo.compute_linear_power()
     pkl = cosmo.get_linear_power()
-    pk1 = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
+    with pytest.warns(CCLDeprecationWarning):
+        pk1 = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
     pk2 = pkl.apply_halofit(cosmo)
     assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])
 

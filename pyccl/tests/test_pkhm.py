@@ -19,25 +19,6 @@ AA = 1.0
 PK2D = ccl.Pk2D(cosmo=COSMO, pkfunc=lambda k, a: a / k)
 
 
-def test_hmc_from_string_smoke():
-    hmc0 = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
-                                  mass_def=M200)
-    # all strings
-    hmc1 = ccl.halos.HMCalculator(mass_function="Tinker10",
-                                  halo_bias="Tinker10",
-                                  mass_def="200m")
-    # no quality assurance of the following lines, because we
-    # require an explicit type check, not an instance check (E721)
-    assert type(hmc1.mass_function) == type(hmc0.mass_function)  # noqa
-    assert type(hmc1.halo_bias) == type(hmc0.halo_bias)          # noqa
-    assert type(hmc1.mass_def) == type(hmc0.mass_def)            # noqa
-
-    # some strings
-    hmc2 = ccl.halos.HMCalculator(mass_function=HMF, halo_bias="Tinker10",
-                                  mass_def="vir")
-    assert isinstance(hmc2.mass_def, ccl.halos.MassDefVir)
-
-
 def test_hmc_raises():
     with pytest.raises(TypeError):
         ccl.halos.HMCalculator(mass_function=None, halo_bias=HBF,
@@ -343,8 +324,8 @@ def test_pkhm_errors():
 
 def test_calculator_from_string_smoke():
     hmc1 = ccl.halos.HMCalculator(
-        COSMO, massfunc=HMF, hbias=HBF, mass_def=M200)
+        mass_function=HMF, halo_bias=HBF, mass_def=M200)
     hmc2 = ccl.halos.HMCalculator(
-        COSMO, massfunc="Tinker10", hbias="Tinker10", mass_def="200m")
-    for attr in ["_massfunc", "_hbias", "_mdef"]:
+        mass_function="Tinker10", halo_bias="Tinker10", mass_def="200m")
+    for attr in ["mass_function", "halo_bias", "mass_def"]:
         assert getattr(hmc1, attr).name == getattr(hmc2, attr).name
