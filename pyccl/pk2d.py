@@ -5,9 +5,10 @@ import numpy as np
 from . import ccllib as lib
 from .base import (CCLObject, UnlockInstance, unlock_instance,
                    warn_api, deprecated)
+from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
+                      _get_spline2d_arrays)
 from ._repr import _build_string_Pk2D
 from .errors import CCLWarning, CCLError, CCLDeprecationWarning
-from .pyutils import check, _get_spline2d_arrays
 
 
 class _Pk2D_descriptor:
@@ -68,10 +69,8 @@ class Pk2D(CCLObject):
              `None`, this function will be sampled at the values of k and
              a used internally by CCL to store the linear and non-linear
              power spectra.
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The cosmology
-             object is needed in order if `pkfunc` is not `None`. The object is
-             used to determine the sampling rate in scale factor and
-             wavenumber.
+        cosmo (:class:`~pyccl.core.Cosmology`, optional): Cosmology object.
+             Used to determine sampling rates in scale factor and wavenumber.
         is_logp (boolean): if True, pkfunc/pkarr return/hold the natural
              logarithm of the power spectrum. Otherwise, the true value
              of the power spectrum is expected. Note that arrays will be
@@ -98,7 +97,6 @@ class Pk2D(CCLObject):
         if empty:
             return
 
-        status = 0
         if pkfunc is None:  # Initialize power spectrum from 2D array
             # Make sure input makes sense
             if (a_arr is None) or (lk_arr is None) or (pk_arr is None):
@@ -106,7 +104,7 @@ class Pk2D(CCLObject):
                                  "you must provide arrays")
 
             # Check that `a` is a monotonically increasing array.
-            if not np.array_equal(a_arr, np.sort(a_arr)):
+            if not np.all((a_arr[1:] - a_arr[:-1]) > 0):
                 raise ValueError("Input scale factor array in `a_arr` is not "
                                  "monotonically increasing.")
 
@@ -121,24 +119,15 @@ class Pk2D(CCLObject):
             except Exception:
                 raise ValueError("Can't use input function")
 
-            if cosmo is None:
-                raise ValueError("A cosmology is needed if initializing "
-                                 "power spectrum from a function")
-
             # Set k and a sampling from CCL parameters
-            nk = lib.get_pk_spline_nk(cosmo.cosmo)
-            na = lib.get_pk_spline_na(cosmo.cosmo)
-            a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-            check(status)
-            lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-            check(status)
+            a_arr = get_pk_spline_a()
+            lk_arr = get_pk_spline_lk()
 
             # Compute power spectrum on 2D grid
-            pkflat = np.zeros([na, nk])
-            for ia, a in enumerate(a_arr):
-                pkflat[ia, :] = pkfunc(k=np.exp(lk_arr), a=a)
+            pkflat = np.array([pkfunc(k=np.exp(lk_arr), a=a) for a in a_arr])
             pkflat = pkflat.flatten()
 
+        status = 0
         self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
                                                         int(extrap_order_lok),
                                                         int(extrap_order_hik),
