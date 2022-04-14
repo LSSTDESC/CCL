@@ -359,6 +359,8 @@ int ccl_get_pk_spline_na(ccl_cosmology *cosmo);
 int ccl_get_pk_spline_nk(ccl_cosmology *cosmo);
 void ccl_get_pk_spline_a_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status);
 void ccl_get_pk_spline_lk_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status);
+void ccl_get_pk_spline_a_array_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status);
+void ccl_get_pk_spline_lk_array_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status);
 
 CCL_END_DECLS
 
