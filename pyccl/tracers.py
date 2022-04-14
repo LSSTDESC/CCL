@@ -25,7 +25,7 @@ def _Sig_MG(cosmo, a, k=None):
     return _vectorize_fn6(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
 
 
-def _check_background_spline_compatability(cosmo, z):
+def _check_background_spline_compatibility(cosmo, z):
     """Check that a redshift array lies within the support of the
     CCL background splines.
     """
@@ -34,7 +34,7 @@ def _check_background_spline_compatability(cosmo, z):
 
     if a.min() < a_bg.min() or a.max() > a_bg.max():
         raise ValueError(f"Tracer defined over wider redshift range than "
-                         f"interal CCL splines. Tracer: "
+                         f"internal CCL splines. Tracer: "
                          f"z=[{1/a.max()-1}, {1/a.min()-1}]. Background "
                          f"splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
 
@@ -57,7 +57,7 @@ def get_density_kernel(cosmo, dndz):
             to unity.
     """
     z_n, n = _check_array_params(dndz, 'dndz')
-    _check_background_spline_compatability(cosmo, dndz[0])
+    _check_background_spline_compatibility(cosmo, dndz[0])
     # this call inits the distance splines neded by the kernel functions
     chi = comoving_radial_distance(cosmo, 1./(1.+z_n))
     status = 0
@@ -65,7 +65,7 @@ def get_density_kernel(cosmo, dndz):
                                                         z_n, n,
                                                         len(z_n),
                                                         status)
-    check(status)
+    check(status, cosmo=cosmo)
     return chi, wchi
 
 
@@ -94,7 +94,7 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
     z_n, n = _check_array_params(dndz, 'dndz')
     has_magbias = mag_bias is not None
     z_s, s = _check_array_params(mag_bias, 'mag_bias')
-    _check_background_spline_compatability(cosmo, dndz[0])
+    _check_background_spline_compatibility(cosmo, dndz[0])
 
     # Calculate number of samples in chi
     nchi = lib.get_nchi_lensing_kernel_wrapper(z_n)
@@ -107,7 +107,7 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
                                                   z_n, n, z_n[-1],
                                                   int(has_magbias), z_s, s,
                                                   chi, nchi, status)
-    check(status)
+    check(status, cosmo=cosmo)
     return chi, wchi
 
 
@@ -123,7 +123,7 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
-    _check_background_spline_compatability(cosmo, np.array([z_source]))
+    _check_background_spline_compatibility(cosmo, np.array([z_source]))
     # this call inits the distance splines neded by the kernel functions
     chi_source = comoving_radial_distance(cosmo, 1./(1.+z_source))
     chi = np.linspace(0, chi_source, nsamples)
@@ -131,7 +131,7 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
     status = 0
     wchi, status = lib.get_kappa_kernel_wrapper(cosmo.cosmo, chi_source,
                                                 chi, nsamples, status)
-    check(status)
+    check(status, cosmo=cosmo)
     return chi, wchi
 
 
@@ -377,7 +377,7 @@ class Tracer(object):
         nk = lib.get_pk_spline_nk(cosmo.cosmo)
         status = 0
         lk, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status)
+        check(status, cosmo=cosmo)
         k = np.exp(lk)
         # computing MG factor array
         mgfac_1d = 1
