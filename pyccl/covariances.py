@@ -171,7 +171,7 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
     if a_arr is None:
         na = lib.get_pk_spline_na(cosmo.cosmo)
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status)
+        check(status, cosmo=cosmo)
     else:
         a_arr = np.atleast_1d(a_arr)
         na = len(a_arr)

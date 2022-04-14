@@ -519,7 +519,7 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
         status = 0
         na = lib.get_pk_spline_na(cosmo.cosmo)
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status)
+        check(status, cosmo=cosmo)
 
     if tracer2 is None:
         tracer2 = tracer1

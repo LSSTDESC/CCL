@@ -155,11 +155,11 @@ class MassFunc(CCLHalosObject):
         status = 0
         sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
                                     len(logM), status)
-        check(status)
+        check(status, cosmo=cosmo)
         # dlogsigma(M)/dlog10(M)
         dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
                                                    len(logM), status)
-        check(status)
+        check(status, cosmo=cosmo)
 
         rho = (physical_constants.RHO_CRITICAL *
                cosmo['Omega_m'] * cosmo['h']**2)
@@ -282,7 +282,7 @@ class MassFuncSheth99(MassFunc):
         if self.use_delta_c_fit:
             status = 0
             delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-            check(status)
+            check(status, cosmo=cosmo)
         else:
             delta_c = 1.68647
 
@@ -416,10 +416,10 @@ class MassFuncDespali16(MassFunc):
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         status = 0
         delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status)
+        check(status, cosmo=cosmo)
 
         Dv, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
-        check(status)
+        check(status, cosmo=cosmo)
 
         x = np.log10(self.mass_def.get_Delta(cosmo, a) *
                      omega_x(cosmo, a, self.mass_def.rho_type) / Dv)

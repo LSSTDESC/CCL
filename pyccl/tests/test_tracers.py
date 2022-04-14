@@ -124,3 +124,30 @@ def test_tracer_transfer_smoke(tracer_type):
             else:
                 shap = (0, )
             assert tf.shape == shap
+
+
+def test_tracer_nz_support():
+    z_max = 1.0
+    a = np.linspace(1/(1+z_max), 1.0, 100)
+
+    background_def = {"a": a,
+                      "chi": ccl.comoving_radial_distance(COSMO, a),
+                      "h_over_h0": ccl.h_over_h0(COSMO, a)}
+
+    calculator_cosmo = ccl.CosmologyCalculator(
+        Omega_c=0.27, Omega_b=0.045, h=0.67,
+        sigma8=0.8, n_s=0.96,
+        background=background_def)
+
+    z = np.linspace(0., 2., 2000)
+    n = dndz(z)
+
+    with pytest.raises(ValueError):
+        _ = ccl.WeakLensingTracer(calculator_cosmo, (z, n))
+
+    with pytest.raises(ValueError):
+        _ = ccl.NumberCountsTracer(calculator_cosmo, has_rsd=False,
+                                   dndz=(z, n), bias=(z, np.ones_like(z)))
+
+    with pytest.raises(ValueError):
+        _ = ccl.CMBLensingTracer(calculator_cosmo, z_source=2.0)

@@ -902,7 +902,7 @@ class HaloProfileEinasto(HaloProfile):
 
         status = 0
         norm, status = lib.einasto_norm(R_s, R_M, alpha, M_use.size, status)
-        check(status)
+        check(status, cosmo=cosmo)
         norm = M_use / norm
 
         x = r_use[None, :] / R_s[:, None]
@@ -974,7 +974,7 @@ class HaloProfileHernquist(HaloProfile):
 
         status = 0
         norm, status = lib.hernquist_norm(R_s, R_M, M_use.size, status)
-        check(status)
+        check(status, cosmo=cosmo)
         norm = M_use / norm
 
         x = r_use[None, :] / R_s[:, None]

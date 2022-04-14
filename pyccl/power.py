@@ -96,7 +96,7 @@ def sigmaM(cosmo, M, a):
     status = 0
     sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
                                 len(logM), status)
-    check(status)
+    check(status, cosmo=cosmo)
     if np.ndim(M) == 0:
         sigM = sigM[0]
     return sigM
