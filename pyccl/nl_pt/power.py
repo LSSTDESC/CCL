@@ -6,12 +6,6 @@ from ..power import linear_matter_power, nonlin_matter_power
 from ..background import growth_factor
 from .tracers import PTTracer
 
-try:
-    import fastpt as fpt
-    HAVE_FASTPT = True
-except ImportError:
-    HAVE_FASTPT = False
-
 
 class PTCalculator(object):
     """ This class implements a set of methods that can be
@@ -62,16 +56,12 @@ class PTCalculator(object):
         n_exp_cutoff (float): exponent of the cutoff factor (see
             `k_cutoff`).
     """
+
     def __init__(self, with_NC=False, with_IA=False, with_dd=True,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75,
                  k_cutoff=None, n_exp_cutoff=4):
-        assert HAVE_FASTPT, (
-            "You must have the `FAST-PT` python package "
-            "installed to use CCL to get PT observables! "
-            "You can install it with pip install fast-pt.")
-
         self.with_dd = with_dd
         self.with_NC = with_NC
         self.with_IA = with_IA
@@ -93,6 +83,7 @@ class PTCalculator(object):
         else:
             self.exp_cutoff = 1
 
+        import fastpt as fpt
         self.pt = fpt.FASTPT(self.ks, to_do=to_do,
                              low_extrap=low_extrap,
                              high_extrap=high_extrap,

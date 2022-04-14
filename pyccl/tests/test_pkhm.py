@@ -291,3 +291,12 @@ def test_pkhm_errors():
     with pytest.raises(ValueError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
                                          supress_1h=func, get_1h=False)
+
+
+def test_calculator_from_string_smoke():
+    hmc1 = ccl.halos.HMCalculator(
+        COSMO, massfunc=HMF, hbias=HBF, mass_def=M200)
+    hmc2 = ccl.halos.HMCalculator(
+        COSMO, massfunc="Tinker10", hbias="Tinker10", mass_def="200m")
+    for attr in ["_massfunc", "_hbias", "_mdef"]:
+        assert getattr(hmc1, attr).name == getattr(hmc2, attr).name
