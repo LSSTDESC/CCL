@@ -115,9 +115,9 @@ class Pk2D(object):
             nk = lib.get_pk_spline_nk(cosmo.cosmo)
             na = lib.get_pk_spline_na(cosmo.cosmo)
             a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-            check(status)
+            check(status, cosmo=cosmo)
             lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-            check(status)
+            check(status, cosmo=cosmo)
 
             # Compute power spectrum on 2D grid
             pkflat = np.zeros([na, nk])
@@ -129,7 +129,7 @@ class Pk2D(object):
                                                         int(extrap_order_lok),
                                                         int(extrap_order_hik),
                                                         int(is_logp), status)
-        check(status)
+        check(status, cosmo=cosmo)
 
     @property
     def has_psp(self):

@@ -742,12 +742,12 @@ def halomod_Pk2D(cosmo, hmc, prof,
         status = 0
         nk = lib.get_pk_spline_nk(cosmo.cosmo)
         lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status)
+        check(status, cosmo=cosmo)
     if a_arr is None:
         status = 0
         na = lib.get_pk_spline_na(cosmo.cosmo)
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status)
+        check(status, cosmo=cosmo)
 
     pk_arr = halomod_power_spectrum(cosmo, hmc, np.exp(lk_arr), a_arr,
                                     prof, prof_2pt=prof_2pt,
@@ -958,12 +958,12 @@ def halomod_Tk3D_1h(cosmo, hmc,
         status = 0
         nk = lib.get_pk_spline_nk(cosmo.cosmo)
         lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status)
+        check(status, cosmo=cosmo)
     if a_arr is None:
         status = 0
         na = lib.get_pk_spline_na(cosmo.cosmo)
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status)
+        check(status, cosmo=cosmo)
 
     tkk = halomod_trispectrum_1h(cosmo, hmc, np.exp(lk_arr), a_arr,
                                  prof1, prof2=prof2,
@@ -1067,12 +1067,12 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         status = 0
         nk = lib.get_pk_spline_nk(cosmo.cosmo)
         lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status)
+        check(status, cosmo=cosmo)
     if a_arr is None:
         status = 0
         na = lib.get_pk_spline_na(cosmo.cosmo)
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status)
+        check(status, cosmo=cosmo)
 
     k_use = np.exp(lk_arr)
 
