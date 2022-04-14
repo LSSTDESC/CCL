@@ -120,8 +120,8 @@ class Pk2D(CCLObject):
                 raise ValueError("Can't use input function")
 
             # Set k and a sampling from CCL parameters
-            a_arr = get_pk_spline_a()
-            lk_arr = get_pk_spline_lk()
+            a_arr = get_pk_spline_a(cosmo=cosmo)
+            lk_arr = get_pk_spline_lk(cosmo=cosmo)
 
             # Compute power spectrum on 2D grid
             pkflat = np.array([pkfunc(k=np.exp(lk_arr), a=a) for a in a_arr])

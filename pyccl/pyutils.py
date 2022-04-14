@@ -365,7 +365,7 @@ def get_pk_spline_nk(cosmo=None):
             Input cosmology.
     """
     if cosmo is not None:
-        return lib.get_pk_spline_nk(cosmo)
+        return lib.get_pk_spline_nk(cosmo.cosmo)
     ndecades = np.log10(spline_params.K_MAX / spline_params.K_MIN)
     return int(np.ceil(ndecades*spline_params.N_K))
 
@@ -378,7 +378,7 @@ def get_pk_spline_na(cosmo=None):
             Input cosmology.
     """
     if cosmo is not None:
-        return lib.get_pk_spline_na(cosmo)
+        return lib.get_pk_spline_na(cosmo.cosmo)
     return spline_params.A_SPLINE_NA_PK + spline_params.A_SPLINE_NLOG_PK - 1
 
 
@@ -392,7 +392,7 @@ def get_pk_spline_lk(cosmo=None):
     """
     nk = get_pk_spline_nk(cosmo=cosmo)
     if cosmo is not None:
-        lk_arr, status = lib.get_pk_spline_lk(cosmo, nk, 0)
+        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, 0)
         check(status, cosmo)
         return lk_arr
     lk_arr, status = lib.get_pk_spline_lk_from_params(
@@ -411,7 +411,7 @@ def get_pk_spline_a(cosmo=None):
     """
     na = get_pk_spline_na(cosmo=cosmo)
     if cosmo is not None:
-        a_arr, status = lib.get_pk_spline_a(cosmo, na, 0)
+        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, 0)
         check(status, cosmo)
         return a_arr
     a_arr, status = lib.get_pk_spline_a_from_params(
