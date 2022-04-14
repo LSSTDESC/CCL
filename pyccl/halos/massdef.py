@@ -1,7 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import species_types, rho_x, omega_x
-from ..base import CCLHalosObject, deprecated, warn_api
+from ..base import CCLHalosObject, warn_api
 import numpy as np
 
 
@@ -317,17 +317,3 @@ class MassDefVir(MassDef):
         super(MassDefVir, self).__init__('vir',
                                          'matter',
                                          c_m_relation=c_m_relation)
-
-
-@deprecated(new_function=MassDef.from_name)
-def mass_def_from_name(name):
-    """ Return mass definition subclass from name string.
-
-    Args:
-        name (string):
-            a mass definition name (e.g. '200m' for Delta=200 matter)
-
-    Returns:
-        MassDef subclass corresponding to the input name.
-    """
-    return MassDef.from_name(name)

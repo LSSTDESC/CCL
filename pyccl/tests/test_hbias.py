@@ -44,6 +44,7 @@ def test_bM_SO_allgood():
 def test_bM_from_string(name):
     bM_class = ccl.halos.HaloBias.from_name(name)
     bM = bM_class()
+    assert bM_class == ccl.halos.halo_bias_from_name(name)
     for m in MS:
         b = bM.get_halo_bias(COSMO, m, 0.9)
         assert np.all(np.isfinite(b))

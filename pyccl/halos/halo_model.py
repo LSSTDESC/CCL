@@ -1,8 +1,8 @@
 import warnings
 from .. import ccllib as lib
+from .massdef import MassDef
 from .hmfunc import MassFunc
 from .hbias import HaloBias
-from .massdef import MassDef
 from .profiles import HaloProfile
 from .profiles_2pt import Profile2pt
 from ..core import check

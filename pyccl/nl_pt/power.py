@@ -7,8 +7,6 @@ from ..background import growth_factor
 from ..base import warn_api
 from .tracers import PTTracer
 
-import fastpt as fpt
-
 
 class PTCalculator(object):
     """ This class implements a set of methods that can be
@@ -86,6 +84,7 @@ class PTCalculator(object):
         else:
             self.exp_cutoff = 1
 
+        import fastpt as fpt
         self.pt = fpt.FASTPT(self.ks, to_do=to_do,
                              low_extrap=low_extrap,
                              high_extrap=high_extrap,

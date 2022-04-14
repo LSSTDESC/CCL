@@ -7,6 +7,7 @@ from ..parameters import physical_constants
 from ..base import CCLHalosObject, deprecated, warn_api
 import numpy as np
 from scipy.interpolate import interp1d
+import functools
 
 
 class MassFunc(CCLHalosObject):
@@ -919,14 +920,7 @@ class MassFuncBocquet20(MassFunc, Emulator):
         return hmf
 
 
+@functools.wraps(MassFunc.from_name)
 @deprecated(new_function=MassFunc.from_name)
 def mass_function_from_name(name):
-    """ Returns mass function subclass from name string
-
-    Args:
-        name (string): a mass function name
-
-    Returns:
-        MassFunc subclass corresponding to the input name.
-    """
     return MassFunc.from_name(name)

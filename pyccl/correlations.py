@@ -94,7 +94,7 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
 
     # Convert scalar input into an array
     scalar = False
-    if isinstance(theta, float) or isinstance(theta, int):
+    if isinstance(theta, (int, float)):
         scalar = True
         theta = np.array([theta, ])
 
@@ -142,7 +142,7 @@ def correlation_3d(cosmo, a, *, dist, p_of_k_a=None):
 
     # Convert scalar input into an array
     scalar = False
-    if isinstance(dist, float) or isinstance(dist, int):
+    if isinstance(dist, (int, float)):
         scalar = True
         dist = np.array([dist, ])
 
@@ -186,7 +186,7 @@ def correlation_multipole(cosmo, a, *, ell, dist, beta, p_of_k_a=None):
 
     # Convert scalar input into an array
     scalar = False
-    if isinstance(dist, float) or isinstance(dist, int):
+    if isinstance(dist, (int, float)):
         scalar = True
         dist = np.array([dist, ])
 
@@ -236,7 +236,7 @@ def correlation_3dRsd(cosmo, a, *, dist, mu, beta,
 
     # Convert scalar input into an array
     scalar = False
-    if isinstance(dist, float) or isinstance(dist, int):
+    if isinstance(dist, (int, float)):
         scalar = True
         dist = np.array([dist, ])
 
@@ -281,7 +281,7 @@ def correlation_3dRsd_avgmu(cosmo, a, *, dist, beta, p_of_k_a=None):
 
     # Convert scalar input into an array
     scalar = False
-    if isinstance(dist, float) or isinstance(dist, int):
+    if isinstance(dist, (int, float)):
         scalar = True
         dist = np.array([dist, ])
 
@@ -329,7 +329,7 @@ def correlation_pi_sigma(cosmo, a, *, pi, sigma, beta,
 
     # Convert scalar input into an array
     scalar = False
-    if isinstance(sigma, float) or isinstance(sigma, int):
+    if isinstance(sigma, (int, float)):
         scalar = True
         sigma = np.array([sigma, ])
 

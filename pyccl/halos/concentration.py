@@ -6,6 +6,7 @@ from ..power import linear_matter_power, sigmaM
 from ..base import CCLHalosObject, deprecated, warn_api
 import numpy as np
 from scipy.optimize import root_scalar
+import functools
 
 
 class Concentration(CCLHalosObject):
@@ -574,14 +575,7 @@ class ConcentrationConstant(Concentration):
             return self.c * np.ones(M.size)
 
 
+@functools.wraps(Concentration.from_name)
 @deprecated(new_function=Concentration.from_name)
 def concentration_from_name(name):
-    """ Returns halo concentration subclass from name string
-
-    Args:
-        name (string): a concentration name
-
-    Returns:
-        Concentration subclass corresponding to the input name.
-    """
     return Concentration.from_name(name)

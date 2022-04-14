@@ -4,6 +4,7 @@ from ..background import omega_x
 from ..base import CCLHalosObject, deprecated, warn_api
 from .massdef import MassDef, MassDef200m
 import numpy as np
+import functools
 
 
 class HaloBias(CCLHalosObject):
@@ -160,7 +161,7 @@ class HaloBias(CCLHalosObject):
 
     @classmethod
     def from_name(cls, name):
-        """ Returns halo bias subclass from name string
+        """Returns halo bias subclass from name string
 
         Args:
             name (string): a halo bias name
@@ -360,14 +361,7 @@ class HaloBiasTinker10(HaloBias):
             self.B * nu**self.b + C * nu**self.c
 
 
+@functools.wraps(HaloBias.from_name)
 @deprecated(new_function=HaloBias.from_name)
 def halo_bias_from_name(name):
-    """ Returns halo bias subclass from name string
-
-    Args:
-        name (string): a halo bias name
-
-    Returns:
-        HaloBias subclass corresponding to the input name.
-    """
     return HaloBias.from_name(name)

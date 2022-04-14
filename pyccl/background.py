@@ -139,7 +139,7 @@ def angular_diameter_distance(cosmo, a1, a2=None):
                               lib.angular_diameter_distance_vec,
                               cosmo, a1, a2)
     else:
-        if(isinstance(a1, float) or isinstance(a1, int)):
+        if isinstance(a1, (int, float)):
             return _vectorize_fn5(lib.angular_diameter_distance,
                                   lib.angular_diameter_distance_vec,
                                   cosmo, 1., a1)
