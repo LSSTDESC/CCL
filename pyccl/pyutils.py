@@ -26,14 +26,11 @@ extrap_types = {'none': lib.f1d_extrap_0,
 
 def check(status, cosmo=None):
     """Check the status returned by a ccllib function.
-
     Args:
         status (int or :obj:`~pyccl.core.error_types`):
             Flag or error describing the success of a function.
-        cosmo (:class:`~pyccl.core.Cosmology`, or
-               ``~pyccl.ccllib.cosmology``, optional):
-            A Cosmology object, or the C-level cosmology struct.
-            This is recognized internally.
+        cosmo (:class:`~pyccl.core.Cosmology`, optional):
+            A Cosmology object.
     """
     # Check for normal status (no action required)
     if status == 0:
@@ -41,10 +38,7 @@ def check(status, cosmo=None):
 
     # Get status message from Cosmology object, if there is one
     if cosmo is not None:
-        if isinstance(cosmo, lib.cosmology):
-            msg = cosmo.status_message
-        else:
-            msg = cosmo.cosmo.status_message
+        msg = cosmo.cosmo.status_message
     else:
         msg = ""
 

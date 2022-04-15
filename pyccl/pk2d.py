@@ -3,7 +3,7 @@ import functools
 import numpy as np
 
 from . import ccllib as lib
-from .errors import CCLWarning, CCLError
+from .errors import CCLWarning
 from .pyutils import check, _get_spline2d_arrays
 
 
@@ -245,35 +245,35 @@ class Pk2D(object):
 
         # handle scale factor extrapolation
         if cosmo is None:
-            cospass = lib.cosmology()
+            cosmo = self.eval._cosmo
             self.psp.extrap_linear_growth = 404  # flag no extrapolation
         else:
-            cospass = cosmo.cosmo
             cosmo.compute_growth()  # growth factors for extrapolation
             self.psp.extrap_linear_growth = 401  # flag extrapolation
 
         status = 0
-
         if isinstance(k, int):
             k = float(k)
         if isinstance(k, float):
-            f, status = eval_funcs[0](self.psp, np.log(k), a, cospass, status)
+            f, status = eval_funcs[0](self.psp, np.log(k), a,
+                                      cosmo.cosmo, status)
         else:
             k_use = np.atleast_1d(k)
-            f, status = eval_funcs[1](self.psp, np.log(k_use), a, cospass,
-                                      k_use.size, status)
+            f, status = eval_funcs[1](self.psp, np.log(k_use), a,
+                                      cosmo.cosmo, k_use.size, status)
 
-        try:
-            check(status, cospass)
-        except CCLError as err:
-            if (cosmo is None) and ("CCL_ERROR_SPLINE_EV" in str(err)):
-                raise TypeError(
-                    "Pk2D evaluation scale factor is outside of the "
-                    "interpolation range. To extrapolate, pass a Cosmology.")
-            else:
-                raise err
-
+        # Catch scale factor extrapolation bounds error.
+        if status == lib.CCL_ERROR_SPLINE_EV:
+            raise TypeError(
+                "Pk2D evaluation scale factor is outside of the "
+                "interpolation range. To extrapolate, pass a Cosmology.")
+        check(status, cosmo)
         return f
+
+    # Save a dummy cosmology as an attribute of the `eval` method so we don't
+    # have to initialize one every time no `cosmo` is passed. This is gentle
+    # with memory too, as `free` does not work for an empty cosmology.
+    eval._cosmo = type("Dummy", (object,), {"cosmo": lib.cosmology()})()
 
     def eval_dlogpk_dlogk(self, k, a, cosmo):
         """Evaluate logarithmic derivative. See ``Pk2D.eval`` for details."""
