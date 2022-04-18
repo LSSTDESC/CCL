@@ -21,10 +21,9 @@ class Concentration(object):
     def __init__(self, mass_def=None):
         if mass_def is not None:
             if self._check_mdef(mass_def):
-                raise ValueError("c(M) relation " + self.name +
-                                 " is not compatible with mass definition" +
-                                 " Delta = %s, " % (mass_def.Delta) +
-                                 " rho = " + mass_def.rho_type)
+                raise ValueError(
+                    f"Mass definition {mass_def.Delta}-{mass_def.rho_type} "
+                    f"is not compatible with c(M) {self.name} configuration.")
             self.mdef = mass_def
         else:
             self._default_mdef()
