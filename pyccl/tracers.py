@@ -69,7 +69,7 @@ def get_density_kernel(cosmo, dndz):
     return chi, wchi
 
 
-def get_lensing_kernel(cosmo, dndz, mag_bias=None):
+def get_lensing_kernel(cosmo, dndz, mag_bias=None, n_chi=None):
     """This convenience function returns the radial kernel for
     weak-lensing-like. Given an unnormalized redshift distribution
     and an optional magnification bias function, it returns
@@ -96,17 +96,19 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
     z_s, s = _check_array_params(mag_bias, 'mag_bias')
     _check_background_spline_compatibility(cosmo, dndz[0])
 
-    # Calculate number of samples in chi
-    nchi = lib.get_nchi_lensing_kernel_wrapper(z_n)
+    if n_chi is None:
+        # Calculate number of samples in chi
+        n_chi = lib.get_nchi_lensing_kernel_wrapper(z_n)
+
     # Compute array of chis
     status = 0
     chi, status = lib.get_chis_lensing_kernel_wrapper(cosmo.cosmo, z_n[-1],
-                                                      nchi, status)
+                                                      n_chi, status)
     # Compute kernel
     wchi, status = lib.get_lensing_kernel_wrapper(cosmo.cosmo,
                                                   z_n, n, z_n[-1],
                                                   int(has_magbias), z_s, s,
-                                                  chi, nchi, status)
+                                                  chi, n_chi, status)
     check(status, cosmo=cosmo)
     return chi, wchi
 
@@ -549,7 +551,7 @@ class NumberCountsTracer(Tracer):
             `None`, the tracer is assumed to not have magnification bias
             terms. Defaults to None.
     """
-    def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None):
+    def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None, n_chi=512):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -583,7 +585,8 @@ class NumberCountsTracer(Tracer):
                             transfer_a=t_a, der_bessel=2)
         if mag_bias is not None:  # Has magnification bias
             # Kernel
-            chi, w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias)
+            chi, w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias,
+                                        n_chi=n_chi)
             # Multiply by -2 for magnification
             kernel_m = (chi, -2 * w)
             if (cosmo['sigma_0'] == 0):
@@ -618,7 +621,7 @@ class WeakLensingTracer(Tracer):
             Defaults to True.
     """
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None,
-                 use_A_ia=True):
+                 use_A_ia=True, n_chi=256):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -630,7 +633,7 @@ class WeakLensingTracer(Tracer):
                               fill_value=0)
 
         if has_shear:
-            kernel_l = get_lensing_kernel(cosmo, dndz)
+            kernel_l = get_lensing_kernel(cosmo, dndz, n_chi=n_chi)
             if (cosmo['sigma_0'] == 0):
                 # GR case
                 self.add_tracer(cosmo, kernel=kernel_l,
@@ -642,7 +645,7 @@ class WeakLensingTracer(Tracer):
         if ia_bias is not None:  # Has intrinsic alignments
             z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
             # Kernel
-            kernel_i = get_density_kernel(cosmo, dndz)
+            kernel_i = get_density_kernel(cosmo, dndz, n_chi=n_chi)
             if use_A_ia:
                 # Normalize so that A_IA=1
                 D = growth_factor(cosmo, 1./(1+z_a))
