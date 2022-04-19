@@ -7,6 +7,7 @@ from setuptools import setup, find_packages
 from subprocess import call
 from io import open
 import os
+import shutil
 import sys
 
 
@@ -70,6 +71,8 @@ class Clean(_clean):
             os.remove("pyccl/_ccllib.so")
             print("Removed pyccl/_ccllib.so")
         _clean.run(self)
+        shutil.rmtree("build")
+        print("Removed build.")
 
 
 # read the contents of the README file
@@ -103,5 +106,5 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Topic :: Scientific/Engineering :: Physics'
-      ]
-    )
+    ]
+)
