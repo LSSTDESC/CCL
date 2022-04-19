@@ -52,14 +52,11 @@ def test_concentration_Ishiyama21(pars):
 
     hmd = ccl.halos.MassDef(Delta, "critical")
 
-    # test both numerical and emulated solutions
-    for emu in [False, True]:
-        cm = ccl.halos.ConcentrationIshiyama21(mdef=hmd,
-                                               relaxed=pars["relaxed"],
-                                               Vmax=pars["Vmax"],
-                                               emu=emu)
+    cm = ccl.halos.ConcentrationIshiyama21(mdef=hmd,
+                                           relaxed=pars["relaxed"],
+                                           Vmax=pars["Vmax"])
 
-        for i, zz in enumerate(Z):
-            dat = data[:, i+1]
-            mod = cm.get_concentration(COSMO, M_use/H100, 1/(1+zz))
-            assert np.allclose(mod, dat, rtol=UCHUU_DATA_SCATTER)
+    for i, zz in enumerate(Z):
+        dat = data[:, i+1]
+        mod = cm.get_concentration(COSMO, M_use/H100, 1/(1+zz))
+        assert np.allclose(mod, dat, rtol=UCHUU_DATA_SCATTER)

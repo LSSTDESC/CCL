@@ -14,4 +14,3 @@ prune doc
 prune readthedocs
 prune .travis
 exclude .*
-include pyccl/data/*
