@@ -4,8 +4,7 @@ from ..background import growth_factor, growth_rate
 from .massdef import MassDef, mass2radius_lagrangian
 from ..power import linear_matter_power, sigmaM
 import numpy as np
-from scipy.interpolate import RBFInterpolator
-from scipy.optimize import root_scalar
+from scipy.optimize import brentq, root_scalar
 
 
 class Concentration(object):
@@ -372,29 +371,12 @@ class ConcentrationIshiyama21(Concentration):
             If True, use the concentration found with the Vmax numerical
             method. Otherwise, use the concentration found with profile
             fitting. The default is False.
-        emu (bool):
-            If True, uses an emulator to compute the concentration.
-            Defaults to True.
     """
     name = 'Ishiyama21'
-    _emulator: RBFInterpolator = None
 
-    def __new__(cls, *args, **kwargs):
-        # Load emulator the first time an instance is constructed.
-        if cls._emulator is None:
-            import os
-            import pickle
-            dirname = os.path.dirname(__file__)
-            fname = os.path.join(dirname, "..", "data", "Ishiyama21_Ginv")
-            with open(os.path.abspath(fname), "rb") as f:
-                emulator = pickle.load(f)
-            cls._emulator = emulator
-        return super().__new__(cls)
-
-    def __init__(self, mdef=None, relaxed=False, Vmax=False, emu=True):
+    def __init__(self, mdef=None, relaxed=False, Vmax=False):
         self.relaxed = relaxed
         self.Vmax = Vmax
-        self.emu = emu
         super().__init__(mass_def=mdef)
 
     def _default_mdef(self):
@@ -507,31 +489,18 @@ class ConcentrationIshiyama21(Concentration):
         G = x / fx**((5 + n_eff) / 6)
         return G
 
-    def _G_inv_num(self, arg, n_eff):
+    def _G_inv(self, arg, n_eff):
         # Numerical calculation of the inverse of `_G`.
         roots = []
         for val, neff in zip(arg, n_eff):
             func = lambda x: self._G(x, neff) - val  # noqa: _G_inv Traceback
-            rt = root_scalar(func, x0=1, x1=2).root.item()
+            try:
+                rt = brentq(func, a=0.05, b=200)
+            except ValueError:
+                # No root in [0.05, 200] (rare, but it may happen).
+                rt = root_scalar(func, x0=1, x1=2).root.item()
             roots.append(rt)
         return np.asarray(roots)
-
-    def _G_inv_emu(self, arg, n_eff):
-        # Emulated calculation of the inverse of `_G`.
-        points = np.atleast_2d(np.c_[arg, n_eff])
-        return self._emulator(points)
-
-    def _G_inv(self, arg, n_eff):
-        argmin, neffmin = self._emulator._tree.mins
-        argmax, neffmax = self._emulator._tree.maxes
-        # check that the queried values are within the emulator boundaries
-        if (self.emu and
-            (np.all(argmin <= arg)
-             and np.all(arg <= argmax)
-             and np.all(neffmin <= n_eff)
-             and np.all(n_eff <= neffmax))):
-            return self._G_inv_emu(arg, n_eff)
-        return self._G_inv_num(arg, n_eff)
 
     def _concentration(self, cosmo, M, a):
         M_use = np.atleast_1d(M)
