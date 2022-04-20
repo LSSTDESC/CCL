@@ -62,10 +62,12 @@ find_package(OpenMP)
 set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
 set(CMAKE_C_FLAGS_DEBUG   "-Og -g -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
 
-if (("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") AND OpenMP_C_FOUND) 
-    # OpenMP flags for macOS clang
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Xpreprocessor -fopenmp")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Xpreprocessor -fopenmp")
+if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") 
+    if(FORCE_OPENMP OR OpenMP_C_FOUND)
+        # OpenMP flags for macOS clang
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Xpreprocessor -fopenmp")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Xpreprocessor -fopenmp")
+    endif()
 else()
     # OpenMP flags for all other compilers clang
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
@@ -106,7 +108,7 @@ endif()
 # The reason for building ccl as a shared library is that we can link it to
 # class directly, and it's not a dependency anymore
 add_library(ccl SHARED $<TARGET_OBJECTS:objlib>)
-target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m $<$<BOOL:OpenMP_C_FOUND>:OpenMP::OpenMP_C>)
+target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m $<$<BOOL:${OpenMP_C_FOUND}>:OpenMP::OpenMP_C>)
 
 # Builds the test suite
 add_executable(check_ccl ${TEST_SRC})
