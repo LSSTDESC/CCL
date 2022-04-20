@@ -245,7 +245,7 @@ static void integrate_lensing_kernel_gsl(ccl_cosmology *cosmo, double z_max, dou
                                   int nchi, double* chi_arr, double* wL_arr,
                                   int* status) {
   #pragma omp parallel default(none) \
-                        shared(cosmo, z_max, i_nz_norm, sz_f, nz_f, \
+                        shared(cosmo, z_max, nz_norm, sz_f, nz_f, \
                                nchi, chi_arr, wL_arr, status)
   {
     double chi, a, z, mgfac, lens_prefac;
@@ -340,7 +340,7 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
     #pragma omp parallel default(none) \
                         shared(cosmo, nz, z_arr, nz_arr, nz_norm, sz_f, \
                                chi_of_z_array, sz_array, \
-                               nchi, chi_arr, wL_arr, status)
+                               nchi, chi_arr, wL_arr, status, gsl_interp_akima)
     {
       int local_status = *status;
       double lens_prefac = get_lensing_prefactor(cosmo, &local_status);
