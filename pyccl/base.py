@@ -284,8 +284,7 @@ class CacheInfo:
     .. note ::
 
         To assist in deciding an optimal ``maxsize`` and ``policy``, instances
-        of this class contain the following attributes which are updated
-        on every function call:
+        of this class contain the following attributes:
             - ``hits``: number of times the function has computed something
             - ``misses``: number of times the function has been bypassed
             - ``current_size``: current size of the cache dictionary
@@ -298,18 +297,23 @@ class CacheInfo:
         self._caches = OrderedDict()
         self.maxsize = maxsize
         self.policy = policy
-        self.hits = self.misses = self.current_size = 0
+        self.hits = self.misses = 0
+
+    @property
+    def current_size(self):
+        return len(self._caches)
 
     def __repr__(self):
         s = f"<{self.__class__.__name__}>"
         for par, val in self.__dict__.items():
             if not par.startswith("_"):
                 s += f"\n\t {par} = {repr(val)}"
+        s += f"\n\t current_size = {repr(self.current_size)}"
         return s
 
     def _clear_cache(self):
         self._caches = OrderedDict()
-        self.hits = self.misses = self.current_size = 0
+        self.hits = self.misses = 0
 
 
 class CachedObject:
