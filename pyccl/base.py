@@ -209,7 +209,6 @@ class Caching(metaclass=_ClassPropertyMeta):
             out = CachedObject(func(*args, **kwargs))
             caches[key] = out
             func.cache_info.hits += 1
-            func.cache_info.current_size = len(caches)
             return out.item
 
         return wrapper
