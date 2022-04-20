@@ -758,7 +758,7 @@ class Cosmology(object):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
-    @cache
+    @cache(maxsize=3)
     def _compute_linear_power(self):
         """Return the linear power spectrum."""
         if (self['N_nu_mass'] > 0 and
@@ -873,7 +873,7 @@ class Cosmology(object):
         hmc = hal.HMCalculator(self, hmf, hbf, mdef)
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
-    @cache
+    @cache(maxsize=3)
     def _compute_nonlin_power(self):
         """Return the non-linear power spectrum."""
         if self.has_nonlin_power:
