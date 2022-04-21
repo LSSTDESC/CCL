@@ -243,7 +243,7 @@ static double rsigma_func(double rsigma, void *p) {
   F.params = (void *)hfd;
   gsl_status = gsl_integration_cquad(
     &F, lnkmin, lnkmax,
-    0.0, hfd->cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
+    0.0, hfd->cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL/10,
     hfd->workspace, &result, NULL, NULL);
 
   if (gsl_status != GSL_SUCCESS) {
@@ -257,8 +257,12 @@ static double rsigma_func(double rsigma, void *p) {
   return result - 1.0;
 }
 
+static double lnrsigma_func(double lnrsigma, void *p) {
+  return rsigma_func(exp(lnrsigma), p);
+}
+
 static double get_rsigma(double a, struct hf_int_data data) {
-  double rsigma, rlow = 1e-12, rhigh = 1e5;
+  double rsigma, rlow = log(1e-12), rhigh = log(1e5);
   double flow, fhigh;
   int itr, max_itr = 1000, gsl_status;
   const gsl_root_fsolver_type *T;
@@ -266,13 +270,13 @@ static double get_rsigma(double a, struct hf_int_data data) {
   gsl_function F;
 
   data.a = a;
-  F.function = &rsigma_func;
+  F.function = &lnrsigma_func;
   F.params = &data;
 
   // we have to bound the root, otherwise return -1
   // we will fiil in any -1's in the calling routine
-  flow = rsigma_func(rlow, &data);
-  fhigh = rsigma_func(rhigh, &data);
+  flow = lnrsigma_func(rlow, &data);
+  fhigh = lnrsigma_func(rhigh, &data);
   if (flow * fhigh > 0) {
     printf("a: %f, fl|fh: %f|%f\n", data.a, flow, fhigh);
     return -1;
@@ -311,7 +315,7 @@ static double get_rsigma(double a, struct hf_int_data data) {
       *(data.status) |= gsl_status;
     }
   }
-
+  rsigma = exp(rsigma);
   printf("a: %f, r: %f\n", data.a, rsigma);
 
   return rsigma;
