@@ -235,15 +235,15 @@ static double rsigma_func(double rsigma, void *p) {
   gsl_function F;
   int gsl_status;
 
-  lnkmin = hfd->plin->lkmin-10;
-  lnkmax = hfd->plin->lkmax+10;
+  lnkmin = hfd->plin->lkmin;
+  lnkmax = max(hfd->plin->lkmax, log(30/rsigma));
   hfd->r = rsigma;
   hfd->r2 = rsigma * rsigma;
   F.function = &gauss_norm_int_func;
   F.params = (void *)hfd;
   gsl_status = gsl_integration_cquad(
     &F, lnkmin, lnkmax,
-    0.0, hfd->cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL/10,
+    0.0, hfd->cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
     hfd->workspace, &result, NULL, NULL);
 
   if (gsl_status != GSL_SUCCESS) {
@@ -316,7 +316,7 @@ static double get_rsigma(double a, struct hf_int_data data) {
     }
   }
   rsigma = exp(rsigma);
-  printf("a: %f, r: %f\n", data.a, rsigma);
+  printf("a: %f, r: %e\n", data.a, rsigma);
 
   return rsigma;
 }
