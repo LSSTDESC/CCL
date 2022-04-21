@@ -7,18 +7,18 @@ COSMO = ccl.Cosmology(
 
 
 def test_halofit_highz():
-    a0 = 1
-    a95 = 1.0/(1 + 95)
+    a0 = 1.0/(1 + 25)
+    a1 = 1.0/(1 + 50)
 
     k = 10
     pkrat0 = (
         ccl.nonlin_matter_power(COSMO, k, a0)
         / ccl.linear_matter_power(COSMO, k, a0)
     )
-    pkrat95 = (
-        ccl.nonlin_matter_power(COSMO, k, a95)
-        / ccl.linear_matter_power(COSMO, k, a95)
+    pkrat1 = (
+        ccl.nonlin_matter_power(COSMO, k, a1)
+        / ccl.linear_matter_power(COSMO, k, a1)
     )
 
-    print(pkrat0, pkrat95, flush=True)
-    # assert pkrat0 > pkrat95
+    print(pkrat0, pkrat1, flush=True)
+    assert pkrat0 > pkrat1
