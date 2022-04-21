@@ -274,6 +274,7 @@ static double get_rsigma(double a, struct hf_int_data data) {
   flow = rsigma_func(rlow, &data);
   fhigh = rsigma_func(rhigh, &data);
   if (flow * fhigh > 0) {
+    printf("a: %f, fl|fh: %f|%f\n", data.a, flow, fhigh);
     return -1;
   }
 
@@ -310,6 +311,8 @@ static double get_rsigma(double a, struct hf_int_data data) {
       *(data.status) |= gsl_status;
     }
   }
+
+  printf("a: %f, r: %f\n", data.a, rsigma);
 
   return rsigma;
 }
