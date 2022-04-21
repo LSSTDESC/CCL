@@ -1,3 +1,4 @@
+import numpy as np
 import pyccl as ccl
 import pytest
 
@@ -14,7 +15,7 @@ def test_halofit_highz(zl, zh):
     al = 1.0/(1 + zl)
     ah = 1.0/(1 + zh)
 
-    k = 10
+    k = np.logspace(-2, 2, 100)
     pkratl = (
         ccl.nonlin_matter_power(COSMO, k, al)
         / ccl.linear_matter_power(COSMO, k, al)
@@ -24,5 +25,4 @@ def test_halofit_highz(zl, zh):
         / ccl.linear_matter_power(COSMO, k, ah)
     )
 
-    print(pkratl, pkrath, flush=True)
-    assert pkratl > pkrath
+    assert np.all(pkratl >= pkrath), (pkratl, pkrath)

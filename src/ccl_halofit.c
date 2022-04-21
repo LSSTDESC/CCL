@@ -258,7 +258,7 @@ static double rsigma_func(double rsigma, void *p) {
 }
 
 static double get_rsigma(double a, struct hf_int_data data) {
-  double rsigma, rlow = 1e-2, rhigh = 1e2;
+  double rsigma, rlow = 1e-5, rhigh = 1e2;
   double flow, fhigh;
   int itr, max_itr = 1000, gsl_status;
   const gsl_root_fsolver_type *T;
@@ -274,7 +274,6 @@ static double get_rsigma(double a, struct hf_int_data data) {
   flow = rsigma_func(rlow, &data);
   fhigh = rsigma_func(rhigh, &data);
   if (flow * fhigh > 0) {
-    printf("a: %f, low: %f, high: %f\n", data.a, flow, fhigh);
     return -1;
   }
 
@@ -565,58 +564,13 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
 
     for (i=0; i<n_a; ++i) {
       vals[i] = get_rsigma(a_vec[i], data);
-      if (*status != 0) {
+      if ((*status != 0) || (vals[i] <= 0)) {
         *status = CCL_ERROR_ROOT;
         ccl_cosmology_set_status_message(
           cosmo,
           "ccl_halofit.c: ccl_halofit_struct_new(): "
           "could not solve for non-linear scale for halofit at scale factor %f\n", a_vec[i]);
         break;
-      }
-    }
-
-    // now go backwards and fill any -1's
-    // one must work, so set an error if not
-    if (vals[n_a-1] == -1) {
-      *status = CCL_ERROR_ROOT;
-      ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_halofit.c: ccl_halofit_struct_new(): "
-        "could not solve for non-linear scale for halofit at least once\n");
-    }
-    if (*status == 0) {
-      // linearly set rsigma to a very small number at high-z
-      double min_a = -1, max_a = -1;
-      double max_val = -1;
-      double w;
-
-      // first non -1 value and scale factor of last -1 value
-      for (i=1; i<n_a; ++i) {
-        if (vals[i] != -1) {
-          max_a = a_vec[i];
-          max_val = vals[i];
-          break;
-        }
-      }
-      // scale factor of first -1 value
-      for (i=0; i<n_a; ++i) {
-        if (vals[i] == -1) {
-          min_a = a_vec[i];
-          break;
-        }
-      }
-
-      if (min_a != -1) {
-        // at least one value is -1 so set the zeroth value
-        vals[0] = 1e-6;
-
-        // interp any values that remain -1
-        for(i=1; i<n_a-1; ++i) {
-          if (vals[i] == -1) {
-            w = (a_vec[i] - min_a) / (max_a - min_a);
-            vals[i] = w * max_val + (1.0 - w) * vals[0];
-          }
-        }
       }
     }
   }
