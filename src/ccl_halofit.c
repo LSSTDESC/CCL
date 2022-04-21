@@ -262,7 +262,7 @@ static double lnrsigma_func(double lnrsigma, void *p) {
 }
 
 static double get_rsigma(double a, struct hf_int_data data) {
-  double rsigma, rlow = log(1e-12), rhigh = log(1e5);
+  double rsigma, rlow = log(1e-16), rhigh = log(1e5);
   double flow, fhigh;
   int itr, max_itr = 1000, gsl_status;
   const gsl_root_fsolver_type *T;
