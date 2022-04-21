@@ -15,7 +15,7 @@ def test_halofit_highz(zl, zh):
     al = 1.0/(1 + zl)
     ah = 1.0/(1 + zh)
 
-    k = np.logspace(-2, 2, 100)
+    k = np.logspace(0, 2, 10)
     pkratl = (
         ccl.nonlin_matter_power(COSMO, k, al)
         / ccl.linear_matter_power(COSMO, k, al)

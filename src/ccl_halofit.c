@@ -278,7 +278,6 @@ static double get_rsigma(double a, struct hf_int_data data) {
   flow = lnrsigma_func(rlow, &data);
   fhigh = lnrsigma_func(rhigh, &data);
   if (flow * fhigh > 0) {
-    printf("a: %f, fl|fh: %f|%f\n", data.a, flow, fhigh);
     return -1;
   }
 
@@ -316,7 +315,6 @@ static double get_rsigma(double a, struct hf_int_data data) {
     }
   }
   rsigma = exp(rsigma);
-  printf("a: %f, r: %e\n", data.a, rsigma);
 
   return rsigma;
 }
@@ -571,7 +569,7 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
 
     for (i=0; i<n_a; ++i) {
       vals[i] = get_rsigma(a_vec[i], data);
-      if ((*status != 0)) {  // || (vals[i] <= 0)
+      if ((*status != 0) || (vals[i] <= 0) ) {
         *status = CCL_ERROR_ROOT;
         ccl_cosmology_set_status_message(
           cosmo,
