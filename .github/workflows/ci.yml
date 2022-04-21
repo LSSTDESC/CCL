@@ -75,40 +75,40 @@ jobs:
         env:
           MATRIX_OS: ${{ matrix.os }}
 
-      # - name: install class
-      #   run: |
-      #     if [[ ${MATRIX_OS} == "macos-10.15" ]]; then
-      #       . ci_scripts/install_class_osx.sh
-      #     else
-      #       . ci_scripts/install_class_linux.sh
-      #     fi
-      #   env:
-      #     MATRIX_OS: ${{ matrix.os }}
+      - name: install class
+        run: |
+          if [[ ${MATRIX_OS} == "macos-10.15" ]]; then
+            . ci_scripts/install_class_osx.sh
+          else
+            . ci_scripts/install_class_linux.sh
+          fi
+        env:
+          MATRIX_OS: ${{ matrix.os }}
 
       - name: build CCL
         run: |
           python setup.py build
           python setup.py develop
 
-      # - name: c unit tests
-      #   run: |
-      #     cd build
-      #     make -j4
-      #     CLASS_PARAM_DIR=./extern/share/class/ OMP_NUM_THREADS=2 ./check_ccl
+      - name: c unit tests
+        run: |
+          cd build
+          make -j4
+          CLASS_PARAM_DIR=./extern/share/class/ OMP_NUM_THREADS=2 ./check_ccl
 
       - name: python unit tests
         run: |
-          OMP_NUM_THREADS=2 pytest -vvs pyccl --cov=pyccl -k test_halofit_highz
+          OMP_NUM_THREADS=2 pytest -vvs pyccl --cov=pyccl
 
-      # - name: benchmarks
-      #   run: |
-      #     OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
+      - name: benchmarks
+        run: |
+          OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
 
-      # - name: coveralls
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     coveralls --service=github
+      - name: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          coveralls --service=github
 
 #  build-doc-only-ubuntu:
 #    runs-on: ubuntu-latest
