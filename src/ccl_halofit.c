@@ -258,7 +258,7 @@ static double rsigma_func(double rsigma, void *p) {
 }
 
 static double get_rsigma(double a, struct hf_int_data data) {
-  double rsigma, rlow = 1e-5, rhigh = 1e2;
+  double rsigma, rlow = 1e-5, rhigh = 1e5;
   double flow, fhigh;
   int itr, max_itr = 1000, gsl_status;
   const gsl_root_fsolver_type *T;
