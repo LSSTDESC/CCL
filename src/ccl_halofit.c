@@ -659,7 +659,8 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
 
       gsl_status = gsl_integration_cquad(
         &F,
-        lnkmin, lnkmax,
+        lnkmin,
+        fmax(lnkmax, log(30/rsigma)),
         0.0, cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
         workspace, &result, NULL, NULL);
 
@@ -723,7 +724,8 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
 
       gsl_status = gsl_integration_cquad(
         &F,
-        lnkmin, lnkmax,
+        lnkmin,
+        fmax(lnkmax, log(30/rsigma)),
         0.0, cosmo->gsl_params.INTEGRATION_SIGMAR_EPSREL,
         workspace, &result, NULL, NULL);
 
