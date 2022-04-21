@@ -235,8 +235,8 @@ static double rsigma_func(double rsigma, void *p) {
   gsl_function F;
   int gsl_status;
 
-  lnkmin = hfd->plin->lkmin;
-  lnkmax = hfd->plin->lkmax;
+  lnkmin = hfd->plin->lkmin-5;
+  lnkmax = hfd->plin->lkmax+5;
   hfd->r = rsigma;
   hfd->r2 = rsigma * rsigma;
   F.function = &gauss_norm_int_func;
@@ -258,7 +258,7 @@ static double rsigma_func(double rsigma, void *p) {
 }
 
 static double get_rsigma(double a, struct hf_int_data data) {
-  double rsigma, rlow = 1e-5, rhigh = 1e5;
+  double rsigma, rlow = 1e-6, rhigh = 1e5;
   double flow, fhigh;
   int itr, max_itr = 1000, gsl_status;
   const gsl_root_fsolver_type *T;
