@@ -228,14 +228,6 @@ static double twoderiv_gauss_norm_int_func(double lnk, void *p) {
     (-2.0*k2 + 4.0*k2*k2 * (hfd->r2)));
 }
 
-static double fmax(double a, double b) {
-  if (a > b) {
-    return a;
-  } else {
-    return b;
-  }
-}
-
 // function whose root is \sigma^2{rsigma, a} = 1
 static double rsigma_func(double rsigma, void *p) {
   struct hf_int_data *hfd = (struct hf_int_data*)p;
