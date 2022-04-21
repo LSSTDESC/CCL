@@ -98,7 +98,7 @@ jobs:
 
       - name: python unit tests
         run: |
-          OMP_NUM_THREADS=2 pytest -vvs pyccl --cov=pyccl
+          OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
 
       - name: benchmarks
         run: |
