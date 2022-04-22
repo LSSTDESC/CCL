@@ -262,7 +262,7 @@ static double lnrsigma_func(double lnrsigma, void *p) {
 }
 
 static double get_rsigma(double a, struct hf_int_data data) {
-  double rsigma, rlow = log(1e-16), rhigh = log(1e5);
+  double rsigma, rlow = log(1e-64), rhigh = log(1e16);
   double flow, fhigh;
   int itr, max_itr = 1000, gsl_status;
   const gsl_root_fsolver_type *T;
@@ -569,7 +569,7 @@ halofit_struct* ccl_halofit_struct_new(ccl_cosmology *cosmo,
 
     for (i=0; i<n_a; ++i) {
       vals[i] = get_rsigma(a_vec[i], data);
-      if ((*status != 0) || (vals[i] <= 0) ) {
+      if ((*status != 0) || (vals[i] <= 0)) {
         *status = CCL_ERROR_ROOT;
         ccl_cosmology_set_status_message(
           cosmo,
