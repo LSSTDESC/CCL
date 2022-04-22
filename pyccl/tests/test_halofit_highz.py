@@ -7,7 +7,7 @@ COSMO = ccl.Cosmology(
 
 
 def test_halofit_highz():
-    vals = [(25, 75)] + list(zip(range(0, 90), range(1, 99)))
+    vals = [(25, 75)] + list(zip(range(0, 98), range(1, 99)))
     for zl, zh in vals:
         al = 1.0/(1 + zl)
         ah = 1.0/(1 + zh)
