@@ -63,62 +63,62 @@ static double get_nz_norm(ccl_cosmology *cosmo, ccl_f1d_t *nz_f,
                           double z0, double zf, int *status) {
   double nz_norm = -1, nz_enorm;
 
-#ifdef NZ_NORM_SPLINE_INTEGRAL
-  gsl_interp_accel *accel = NULL;
-  accel = gsl_interp_accel_alloc();
-  if(accel == NULL) {
-    *status = CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(
-      cosmo, "ccl_tracers.c: get_nz_norm(): out of memory");
-  }
-  if(*status == 0) {
-    *status = gsl_spline_eval_integ_e(nz_f->spline, z0, zf, accel, &nz_norm);
-	  if(*status) {
-      *status = CCL_ERROR_SPLINE_EV;
-      nz_norm = NAN;
+  if(cosmo->gsl_params.NZ_NORM_SPLINE_INTEGRATION) {
+    gsl_interp_accel *accel = NULL;
+    accel = gsl_interp_accel_alloc();
+    if(accel == NULL) {
+      *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(
-        cosmo, "ccl_tracers.c: get_nz_norm(): Spline integration failed.");
-	  }
-  }
-  gsl_interp_accel_free(accel);
-  return nz_norm;
-
-#else
-  // Get N(z) norm
-  gsl_function F;
-  gsl_integration_workspace *w = NULL;
-  F.function = &nz_integrand;
-  F.params = nz_f;
-
-  w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
-
-  if (w == NULL) {
-    *status = CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(
-      cosmo, "ccl_tracers.c: get_nz_norm(): out of memory");
+        cosmo, "ccl_tracers.c: get_nz_norm(): out of memory");
+    }
+    if(*status == 0) {
+      *status = gsl_spline_eval_integ_e(nz_f->spline, z0, zf, accel, &nz_norm);
+      if(*status) {
+        *status = CCL_ERROR_SPLINE_EV;
+        nz_norm = NAN;
+        ccl_cosmology_set_status_message(
+          cosmo, "ccl_tracers.c: get_nz_norm(): Spline integration failed.");
+      }
+    }
+    gsl_interp_accel_free(accel);
+    return nz_norm;
   }
   else {
-    int gslstatus = gsl_integration_qag(
-      &F, z0, zf, 0,
-      cosmo->gsl_params.INTEGRATION_EPSREL,
-      cosmo->gsl_params.N_ITERATION,
-      cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
-      w, &nz_norm, &nz_enorm);
+    // Use GSL integration routine
+    gsl_function F;
+    gsl_integration_workspace *w = NULL;
+    F.function = &nz_integrand;
+    F.params = nz_f;
 
-    if (gslstatus != GSL_SUCCESS) {
-      ccl_raise_gsl_warning(gslstatus, "ccl_tracers.c: get_nz_norm():");
-      *status = CCL_ERROR_INTEG;
+    w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+
+    if (w == NULL) {
+      *status = CCL_ERROR_MEMORY;
       ccl_cosmology_set_status_message(
-        cosmo,
-        "ccl_tracers.c: get_nz_norm(): "
-        "integration error when normalizing N(z)\n");
+        cosmo, "ccl_tracers.c: get_nz_norm(): out of memory");
     }
+    else {
+      int gslstatus = gsl_integration_qag(
+        &F, z0, zf, 0,
+        cosmo->gsl_params.INTEGRATION_EPSREL,
+        cosmo->gsl_params.N_ITERATION,
+        cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
+        w, &nz_norm, &nz_enorm);
+
+      if (gslstatus != GSL_SUCCESS) {
+        ccl_raise_gsl_warning(gslstatus, "ccl_tracers.c: get_nz_norm():");
+        *status = CCL_ERROR_INTEG;
+        ccl_cosmology_set_status_message(
+          cosmo,
+          "ccl_tracers.c: get_nz_norm(): "
+          "integration error when normalizing N(z)\n");
+      }
+    }
+
+    gsl_integration_workspace_free(w);
+
+    return nz_norm;
   }
-
-  gsl_integration_workspace_free(w);
-
-  return nz_norm;
-#endif
 }
 
 void ccl_get_number_counts_kernel(ccl_cosmology *cosmo,
@@ -214,9 +214,9 @@ static double lensing_kernel_integrand_gsl(double z, void *pars) {
 // Integral[ p(z) * (1-5s(z)/2) * chi_end * (chi(z)-chi_end)/chi(z) , {z',z_end,z_max} ]
 static double lensing_kernel_integrate_qag_wrapper(ccl_cosmology *cosmo,
                                        integ_lensing_pars *pars,
-                                       gsl_integration_workspace *w) {
+                                       gsl_integration_workspace *w, double *error) {
   int gslstatus = 0;
-  double result, eresult;
+  double result;
   gsl_function F;
   F.function = &lensing_kernel_integrand_gsl;
   F.params = pars;
@@ -225,9 +225,11 @@ static double lensing_kernel_integrate_qag_wrapper(ccl_cosmology *cosmo,
     cosmo->gsl_params.INTEGRATION_EPSREL,
     cosmo->gsl_params.N_ITERATION,
     cosmo->gsl_params.INTEGRATION_GAUSS_KRONROD_POINTS,
-    w, &result, &eresult);
-
-  if ((gslstatus != GSL_SUCCESS) || (*(pars->status))) {
+    w, &result, error);
+  
+  if ((gslstatus != GSL_SUCCESS
+       && gslstatus != GSL_EROUND && gslstatus != GSL_EMAXITER)
+      || (*(pars->status))) {
     ccl_raise_gsl_warning(gslstatus, "ccl_tracers.c: lensing_kernel_integrate(): gsl_integration_qag failed.");
     *(pars->status) = CCL_ERROR_INTEG;
     return -1;
@@ -244,65 +246,101 @@ static void integrate_lensing_kernel_gsl(ccl_cosmology *cosmo, double z_max, dou
                                   ccl_f1d_t *nz_f, ccl_f1d_t *sz_f,
                                   int nchi, double* chi_arr, double* wL_arr,
                                   int* status) {
-  #pragma omp parallel default(none) \
-                        shared(cosmo, z_max, nz_norm, sz_f, nz_f, \
-                               nchi, chi_arr, wL_arr, status)
-  {
-    double chi, a, z, mgfac, lens_prefac;
-    int ichi, local_status;
-    integ_lensing_pars *ipar = NULL;
-    gsl_integration_workspace *w = NULL;
-
-    local_status = *status;
-
-    lens_prefac = get_lensing_prefactor(cosmo, &local_status);
-    if (local_status == 0) {
-      ipar = malloc(sizeof(integ_lensing_pars));
-      w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
-
-      if ((ipar == NULL) || (w == NULL)) {
-        local_status = CCL_ERROR_MEMORY;
-      }
-    }
-
-    if (local_status == 0) {
-      ipar->cosmo = cosmo;
-      ipar->z_max = z_max;
-      ipar->i_nz_norm = nz_norm;
-      ipar->sz_f = sz_f;
-      ipar->nz_f = nz_f;
-      ipar->status = &local_status;
-    }
-
-    //Populate arrays
-    #pragma omp for
-    for (ichi=0; ichi < nchi; ichi++) {
-      if (local_status == 0) {
-        chi = chi_arr[ichi];
-        a = ccl_scale_factor_of_chi(cosmo, chi, &local_status);
-        z = 1./a-1;
-        ipar->z_end = z;
-        ipar->chi_end = chi;
-        wL_arr[ichi] = lensing_kernel_integrate_qag_wrapper(cosmo, ipar, w)*(1+z)*lens_prefac;
-        local_status = *(ipar->status);
-      } else {
-        wL_arr[ichi] = NAN;
-      }
-    } //end omp for
-
-    gsl_integration_workspace_free(w);
-    free(ipar);
-
-    if (local_status) {
-      #pragma omp atomic write
-      *status = CCL_ERROR_INTEG;
-    }
-  } //end omp parallel
-  if(*status) {
+  double* wL_err_arr = malloc(nchi*sizeof(double));
+  if(wL_err_arr == NULL) {
+    *status = CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(
       cosmo,
-      "ccl_tracers.c: integrate_lensing_kernel_gsl(): error in computing lensing kernel.\n");
+      "ccl_tracers.c: integrate_lensing_kernel_gsl(): error allocating memory\n");
   }
+  if(*status == 0) {
+    #pragma omp parallel default(none) \
+                          shared(cosmo, z_max, nz_norm, sz_f, nz_f, \
+                                nchi, chi_arr, wL_arr, wL_err_arr, status)
+    {
+      double chi, a, z, mgfac, lens_prefac, wL_err;
+      int ichi, local_status;
+      integ_lensing_pars *ipar = NULL;
+      gsl_integration_workspace *w = NULL;
+
+      local_status = *status;
+
+      lens_prefac = get_lensing_prefactor(cosmo, &local_status);
+      if (local_status == 0) {
+        ipar = malloc(sizeof(integ_lensing_pars));
+        w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
+
+        if ((ipar == NULL) || (w == NULL)) {
+          local_status = CCL_ERROR_MEMORY;
+        }
+      }
+
+      if (local_status == 0) {
+        ipar->cosmo = cosmo;
+        ipar->z_max = z_max;
+        ipar->i_nz_norm = nz_norm;
+        ipar->sz_f = sz_f;
+        ipar->nz_f = nz_f;
+        ipar->status = &local_status;
+      }
+
+      //Populate arrays
+      #pragma omp for
+      for (ichi=0; ichi < nchi; ichi++) {
+        if (local_status == 0) {
+          chi = chi_arr[ichi];
+          a = ccl_scale_factor_of_chi(cosmo, chi, &local_status);
+          z = 1./a-1;
+          ipar->z_end = z;
+          ipar->chi_end = chi;
+          wL_arr[ichi] = lensing_kernel_integrate_qag_wrapper(cosmo, ipar, w, &wL_err)*(1+z)*lens_prefac;
+          wL_err_arr[ichi] = wL_err*(1+z)*lens_prefac;
+          local_status = *(ipar->status);
+        } else {
+          wL_arr[ichi] = NAN;
+        }
+      } //end omp for
+
+      gsl_integration_workspace_free(w);
+      free(ipar);
+
+      if (local_status) {
+        #pragma omp atomic write
+        *status = CCL_ERROR_INTEG;
+      }
+    } //end omp parallel
+
+    if(*status) {
+      ccl_cosmology_set_status_message(
+        cosmo,
+        "ccl_tracers.c: integrate_lensing_kernel_gsl(): error in computing lensing kernel.\n");
+    } else {
+      // Check if error estimates are sufficiently small compared to the peak of the lensing kernel.
+      // First find the maxium value of the lensing kernel wL_max
+      double wL_max = 0.0;
+      for(int i=0; i < nchi; i++) {
+        if(fabs(wL_arr[i]) > wL_max) {
+          wL_max = fabs(wL_arr[i]);
+        }
+      }
+      // Now check that the integration errors are smaller than wL_max*rel_tol
+      if(wL_max > 0.0) {
+        double rel_tol = cosmo->gsl_params.INTEGRATION_EPSREL;
+        for(int i=0; i < nchi; i++) {
+          if(wL_err_arr[i] > wL_max*rel_tol) {
+            *status = CCL_ERROR_INTEG;
+            ccl_cosmology_set_status_message(
+              cosmo,
+              "ccl_tracers.c: integrate_lensing_kernel_gsl(): error in computing lensing kernel. "
+              "Integration error at chi %g larger than tolerance of %g: %g\n",
+              chi_arr[i],  wL_max*rel_tol, wL_err_arr[i]);
+            break;
+          }
+        }
+      }
+    }
+  }
+  free(wL_err_arr);
 }
 
 // Computes the lensing kernel integral using spline integration:
@@ -475,20 +513,21 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
   }
 
   if(*status == 0) {
-    integrate_lensing_kernel_gsl(cosmo, z_max, i_nz_norm,
-                                 nz_f, sz_f,
-                                 nchi, chi_arr, wL_arr,
-                                 status);
-
+    if(cosmo->gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION) {
+      integrate_lensing_kernel_spline(cosmo,
+                                      nz, z_arr, nz_arr, i_nz_norm,
+                                      sz_f, nchi, chi_arr, wL_arr, status);
+    } else {
+      integrate_lensing_kernel_gsl(cosmo, z_max, i_nz_norm,
+                                  nz_f, sz_f,
+                                  nchi, chi_arr, wL_arr,
+                                  status);
+    }
     if(*status) {
       ccl_raise_warning(
         CCL_ERROR_INTEG,
         "ccl_tracers.c: ccl_get_lensing_mag_kernel(): failed to compute lensing kernel with quadrature. "
         "Trying spline integration. This indicates that the n(z) is pathological.\n");
-      *status = 0;
-      integrate_lensing_kernel_spline(cosmo,
-                                      nz, z_arr, nz_arr, i_nz_norm,
-                                      sz_f, nchi, chi_arr, wL_arr, status);
     }
   }
 
