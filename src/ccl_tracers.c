@@ -480,7 +480,7 @@ void ccl_get_lensing_mag_kernel(ccl_cosmology *cosmo,
                                  nchi, chi_arr, wL_arr,
                                  status);
 
-    if(status) {
+    if(*status) {
       ccl_raise_warning(
         CCL_ERROR_INTEG,
         "ccl_tracers.c: ccl_get_lensing_mag_kernel(): failed to compute lensing kernel with quadrature. "
