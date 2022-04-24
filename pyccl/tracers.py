@@ -190,33 +190,46 @@ class Tracer(object):
         in this `Tracer`.
 
         Args:
-            chi (float or array_like): values of the comoving
-                radial distance in increasing order and in Mpc.
+            chi (float or array_like, optional): values of the comoving
+                radial distance in increasing order and in Mpc. If None,
+                returns the kernel at the internal spline knots.
 
         Returns:
-            array_like: list of radial kernels for each tracer. \
-                The shape will be `(n_tracer, chi.size)`, where \
-                `n_tracer` is the number of tracers. The last \
-                dimension will be squeezed if the input is a \
+            array_like: list of radial kernels for each tracer.
+                The shape will be `(n_tracer, chi.size)`, where
+                `n_tracer` is the number of tracers. The last
+                dimension will be squeezed if the input is a
                 scalar.
+                If no chi was provided, returns two arrays, the radial kernels
+                and the comoving radial distances.
         """
         if not hasattr(self, '_trc'):
             return []
 
-        chi_use = np.atleast_1d(chi)
+        if chi is None:
+            chis = []
+        else:
+            chi_use = np.atleast_1d(chi)
         kernels = []
         for t in self._trc:
-            status = 0
-            w, status = lib.cl_tracer_get_kernel(t, chi_use,
-                                                 chi_use.size,
-                                                 status)
-            check(status)
+            if chi is None:
+                chi_use, w = _get_spline1d_arrays(t.kernel.spline)
+                chis.append(chi_use)
+            else:
+                status = 0
+                w, status = lib.cl_tracer_get_kernel(t, chi_use,
+                                                     chi_use.size,
+                                                     status)
+                check(status)
             kernels.append(w)
-        kernels = np.array(kernels)
-        if np.ndim(chi) == 0:
-            if kernels.shape != (0,):
-                kernels = np.squeeze(kernels, axis=-1)
-        return kernels
+        if chi is None:
+            return kernels, chis
+        else:
+            kernels = np.array(kernels)
+            if np.ndim(chi) == 0:
+                if kernels.shape != (0,):
+                    kernels = np.squeeze(kernels, axis=-1)
+            return kernels
 
     def get_f_ell(self, ell):
         """Get the ell-dependent prefactors for all tracers
