@@ -57,7 +57,7 @@ def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
     if np.isscalar(c_old):
         c_new = c_new[0]
 
-    check(status)
+    check(status, cosmo=cosmo)
     return c_new
 
 
@@ -254,6 +254,19 @@ class MassDef200c(MassDef):
     """
     def __init__(self, c_m='Duffy08'):
         super(MassDef200c, self).__init__(200,
+                                          'critical',
+                                          c_m_relation=c_m)
+
+
+class MassDef500c(MassDef):
+    """`MassDef` class for the mass definition
+    with Delta=500 times the critical density.
+
+    Args:
+        c_m (string): concentration-mass relation.
+    """
+    def __init__(self, c_m='Ishiyama21'):
+        super(MassDef500c, self).__init__(500,
                                           'critical',
                                           c_m_relation=c_m)
 
