@@ -569,7 +569,7 @@ class NumberCountsTracer(Tracer):
             samples is enough.
     """
     def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None,
-                 n_sample=256):
+                 n_samples=256):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -604,7 +604,7 @@ class NumberCountsTracer(Tracer):
         if mag_bias is not None:  # Has magnification bias
             # Kernel
             chi, w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias,
-                                        n_chi=n_sample)
+                                        n_chi=n_samples)
             # Multiply by -2 for magnification
             kernel_m = (chi, -2 * w)
             if (cosmo['sigma_0'] == 0):
@@ -643,7 +643,7 @@ class WeakLensingTracer(Tracer):
             is enough.
     """
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None,
-                 use_A_ia=True, n_sample=256):
+                 use_A_ia=True, n_samples=256):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -655,7 +655,7 @@ class WeakLensingTracer(Tracer):
                               fill_value=0)
 
         if has_shear:
-            kernel_l = get_lensing_kernel(cosmo, dndz, n_chi=n_sample)
+            kernel_l = get_lensing_kernel(cosmo, dndz, n_chi=n_samples)
             if (cosmo['sigma_0'] == 0):
                 # GR case
                 self.add_tracer(cosmo, kernel=kernel_l,

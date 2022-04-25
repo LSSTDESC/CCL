@@ -11,7 +11,7 @@ def dndz(z):
     return np.exp(-((z-0.5)/0.1)**2)
 
 
-def get_tracer(tracer_type, cosmo=None):
+def get_tracer(tracer_type, cosmo=None, **tracer_kwargs):
     if cosmo is None:
         cosmo = COSMO
     z = np.linspace(0., 1., 2000)
@@ -23,18 +23,20 @@ def get_tracer(tracer_type, cosmo=None):
         tr = ccl.NumberCountsTracer(cosmo, True,
                                     dndz=(z, n),
                                     bias=(z, b),
-                                    mag_bias=(z, b))
+                                    mag_bias=(z, b),
+                                    **tracer_kwargs)
     elif tracer_type == 'wl':
         ntr = 2
         tr = ccl.WeakLensingTracer(cosmo,
                                    dndz=(z, n),
-                                   ia_bias=(z, b))
+                                   ia_bias=(z, b),
+                                   **tracer_kwargs)
     elif tracer_type == 'cl':
         ntr = 1
-        tr = ccl.CMBLensingTracer(cosmo, 1100.)
+        tr = ccl.CMBLensingTracer(cosmo, 1100., **tracer_kwargs)
     else:
         ntr = 0
-        tr = ccl.Tracer()
+        tr = ccl.Tracer(**tracer_kwargs)
     return tr, ntr
 
 
@@ -220,3 +222,20 @@ def test_tracer_delta_function_nz():
     w = tr_wl.get_kernel(chi=chi_kappa)
 
     assert np.allclose(w, w_kappa)
+
+
+@pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl'])
+def test_tracer_n_sample_smoke(tracer_type):
+    tr, ntr = get_tracer(tracer_type, n_samples=50)
+
+
+def test_tracer_n_sample_wl():
+    z = np.linspace(0., 1., 2000)
+    n = dndz(z)
+
+    n_samples = 50
+    tr_wl = ccl.WeakLensingTracer(COSMO, dndz=(z, n), n_samples=n_samples)
+    w, chi = tr_wl.get_kernel(chi=None)
+
+    assert w[0].shape[-1] == n_samples
+    assert chi[0].shape[-1] == n_samples
