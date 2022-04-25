@@ -227,6 +227,9 @@ def test_tracer_delta_function_nz():
 @pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl'])
 def test_tracer_n_sample_smoke(tracer_type):
     tr, ntr = get_tracer(tracer_type, n_samples=50)
+    if tracer_type != "cl":
+        # n_samples=None should fall back to using the samples from the n(z).
+        tr, ntr = get_tracer(tracer_type, n_samples=None)
 
 
 def test_tracer_n_sample_wl():
