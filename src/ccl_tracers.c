@@ -9,8 +9,6 @@
 
 #include "ccl.h"
 
-#define NZ_NORM_SPLINE_INTEGRAL
-
 
 ccl_cl_tracer_collection_t *ccl_cl_tracer_collection_t_new(int *status) {
   ccl_cl_tracer_collection_t *trc = NULL;
