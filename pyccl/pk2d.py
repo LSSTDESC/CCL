@@ -188,7 +188,9 @@ class Pk2D(object):
         check(status, cosmo)
         return pk2d
 
-    pk_from_model = classmethod(functools.wraps(from_model)(from_model))
+    @classmethod
+    def pk_from_model(cls, cosmo, model):
+        return cls.from_model(cosmo, model)
 
     @_Pk2D_descriptor
     def apply_halofit(self, cosmo, pk_linear=None):
