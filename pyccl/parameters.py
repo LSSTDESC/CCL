@@ -4,7 +4,7 @@ from . import ccllib as lib
 class CCLParameters:
     """Base for singletons holding global CCL parameters and their values.
 
-    Subclasses contain a pointer to the C-struct with the collection
+    Subclasses contain a reference to the C-struct with the collection
     of parameters and their values (via SWIG), as well as a Python-level
     copy of every parameter and value. These are managed simultaneously
     for the life of the singleton's instance.
