@@ -189,6 +189,7 @@ class Pk2D(object):
         return pk2d
 
     @classmethod
+    @functools.wraps(from_model)
     def pk_from_model(cls, cosmo, model):
         return cls.from_model(cosmo, model)
 
