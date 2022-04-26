@@ -179,9 +179,9 @@ def test_tracer_nz_norm_spline_vs_gsl_intergation():
     w_nc_gsl, _ = tr_nc.get_kernel(chi=None)
 
     for w_spline, w_gsl in zip(w_wl_spline, w_wl_gsl):
-        assert np.allclose(w_spline, w_gsl)
+        assert np.allclose(w_spline, w_gsl, atol=0, rtol=1e-8)
     for w_spline, w_gsl in zip(w_nc_spline, w_nc_gsl):
-        assert np.allclose(w_spline, w_gsl)
+        assert np.allclose(w_spline, w_gsl, atol=0, rtol=1e-8)
 
 
 def test_tracer_lensing_kernel_spline_vs_gsl_intergation():
@@ -200,9 +200,10 @@ def test_tracer_lensing_kernel_spline_vs_gsl_intergation():
 
     cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
     tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
-    w_wl_gsl, _ = tr_wl.get_kernel(chi=None)
+    w_wl_gsl, chi = tr_wl.get_kernel(chi=None)
 
-    assert np.allclose(w_wl_spline[0], w_wl_gsl[0])
+    # Peak of kernel is ~1e-5
+    assert np.allclose(w_wl_spline[0], w_wl_gsl[0], atol=1e-10, rtol=1e-8)
 
 
 def test_tracer_delta_function_nz():
@@ -221,7 +222,10 @@ def test_tracer_delta_function_nz():
     # Use the same comoving distances
     w = tr_wl.get_kernel(chi=chi_kappa)
 
-    assert np.allclose(w, w_kappa)
+    assert np.allclose(w[0], w_kappa, atol=1e-8, rtol=1e-6)
+    # at z=z_source, interpolation becomes apparent, so for this test we
+    # ignore these data points.
+    assert np.allclose(w[0][:-2], w_kappa[:-2], atol=1e-11, rtol=1e-11)
 
 
 @pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl'])
