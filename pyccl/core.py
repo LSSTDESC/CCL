@@ -1051,29 +1051,27 @@ class Cosmology(CCLObject):
         return "status(%s): %s" % (status, msg)
 
 
-class CosmologyVanillaLCDM(Cosmology):
+def CosmologyVanillaLCDM(**kwargs):
     """A cosmology with typical flat Lambda-CDM parameters (`Omega_c=0.25`,
     `Omega_b = 0.05`, `Omega_k = 0`, `sigma8 = 0.81`, `n_s = 0.96`, `h = 0.67`,
     no massive neutrinos).
 
-    Args:
+    Arguments:
         **kwargs (dict): a dictionary of parameters passed as arguments
             to the `Cosmology` constructor. It should not contain any of
             the LambdaCDM parameters (`"Omega_c"`, `"Omega_b"`, `"n_s"`,
             `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
     """
-    def __init__(self, **kwargs):
-        p = {'h': 0.67,
-             'Omega_c': 0.25,
-             'Omega_b': 0.05,
-             'n_s': 0.96,
-             'sigma8': 0.81,
-             'A_s': None}
-        if any(k in kwargs for k in p.keys()):
-            raise ValueError("You cannot change the LCDM parameters: "
-                             "%s " % list(p.keys()))
-        kwargs.update(p)
-        super(CosmologyVanillaLCDM, self).__init__(**kwargs)
+    p = {'Omega_c': 0.25,
+         'Omega_b': 0.05,
+         'h': 0.67,
+         'n_s': 0.96,
+         'sigma8': 0.81,
+         'A_s': None}
+    if set(p).intersection(set(kwargs)):
+        raise ValueError(
+            f"You cannot change the LCDM parameters: {list(p.keys())}.")
+    return Cosmology(**(p | kwargs))
 
 
 class CosmologyCalculator(Cosmology):
