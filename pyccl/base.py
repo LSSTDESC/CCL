@@ -1,14 +1,9 @@
-# NOTE: Classes `Hashing` and `Caching` only contain class methods.
-# It is usually suggested that such code should have its own namespace
-# in the form of distinct functions in a separate module.
-# However, these namespaces are deliberately chosen to be like that
-# so that pyccl isn't cluttered with many non-cosmological modules.
 import sys
 import functools
 from collections import OrderedDict
 import hashlib
 import numpy as np
-from inspect import signature, isclass
+from inspect import signature
 
 
 class Hashing:
@@ -29,45 +24,55 @@ class Hashing:
     consistent: bool = False
 
     @classmethod
-    def _finalize(cls, obj, /):
-        """Alphabetically sort all dictionaries except ordered dictionaries.
-        """
-        if isinstance(obj, OrderedDict):
-            return tuple(obj)
-        return tuple(sorted(obj))
-
-    @classmethod
-    def to_hashable(cls, obj, /):
+    def _to_hashable(cls, obj):
         """Make unhashable objects hashable in a consistent manner."""
-        if isclass(obj):
-            return obj.__qualname__
-        elif isinstance(obj, (tuple, list, set)):
-            return tuple([cls.to_hashable(item) for item in obj])
-        elif isinstance(obj, np.ndarray):
-            return obj.tobytes()
-        elif isinstance(obj, dict):
-            dic = dict.fromkeys(obj.keys())
-            for key, value in obj.items():
-                dic[key] = cls.to_hashable(value)
-            return cls._finalize(dic.items())
-        # nothing left to do; just return the object
-        return obj
+
+        if hasattr(obj, "__iter__"):
+            # Encapsulate all the iterables to quickly discard
+            # and go to numbers hashing in the second clause.
+
+            if isinstance(obj, np.ndarray):
+                # Numpy arrays: Convert the data buffer to a byte string.
+                return obj.tobytes()
+
+            elif isinstance(obj, dict):
+                # Dictionaries: Build a tuple from key-value pairs,
+                # where all values are converted to hashables.
+                out = dict.fromkeys(obj)
+                for key, value in obj.items():
+                    out[key] = cls._to_hashable(value)
+                # Sort unordered dictionaries for hash consistency.
+                if isinstance(obj, OrderedDict):
+                    return tuple(obj)
+                return tuple(sorted(obj))
+
+            else:
+                # Iterables: Build a tuple from values converted to hashables.
+                out = [cls._to_hashable(item) for item in obj]
+                return tuple(out)
+
+        elif hasattr(obj, "__hash__"):
+            # Hashables: Just return the object.
+            return obj
+
+        # NotImplemented: Can't hash safely, so raise TypeError.
+        raise TypeError(f"Hashing for {type(obj)} not implemented.")
 
     @classmethod
-    def _hash_consistent(cls, obj, /):
+    def _hash_consistent(cls, obj):
         """Calculate consistent hash value for an input object."""
         hasher = hashlib.md5()
-        hasher.update(repr(cls.to_hashable(obj)).encode())
+        hasher.update(repr(cls.t_o_hashable(obj)).encode())
         return int(hasher.digest().hex(), 16)
 
     @classmethod
-    def _hash_generic(cls, obj, /):
+    def _hash_generic(cls, obj):
         """Generic hash method, which changes between processes."""
-        digest = hash(repr(cls.to_hashable(obj))) + sys.maxsize + 1
+        digest = hash(repr(cls._to_hashable(obj))) + sys.maxsize + 1
         return digest
 
     @classmethod
-    def hash_(cls, obj, /):
+    def hash_(cls, obj):
         if not cls.consistent:
             return cls._hash_generic(obj)
         return cls._hash_consistent(obj)
