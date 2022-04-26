@@ -397,7 +397,7 @@ def test_pk2d_eval_cosmo():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     cosmo.compute_linear_power()
     pk = cosmo.get_linear_power()
-    assert pk.eval(1., 1., cosmo) == pk.eval(1., 1., cosmo)
+    assert pk.eval(1., 1.) == pk.eval(1., 1., cosmo)
 
     amin = pk.psp.amin
     pk.eval(1., amin*0.99, cosmo)  # doesn't fail because cosmo is provided
