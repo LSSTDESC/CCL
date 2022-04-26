@@ -1,14 +1,9 @@
-# NOTE: Classes `Hashing` and `Caching` only contain class methods.
-# It is usually suggested that such code should have its own namespace
-# in the form of distinct functions in a separate module.
-# However, these namespaces are deliberately chosen to be like that
-# so that pyccl isn't cluttered with many non-cosmological modules.
 import sys
 import functools
 from collections import OrderedDict
 import hashlib
 import numpy as np
-from inspect import signature, isclass
+from inspect import signature
 
 
 class Hashing:
@@ -29,45 +24,55 @@ class Hashing:
     consistent: bool = False
 
     @classmethod
-    def _finalize(cls, obj, /):
-        """Alphabetically sort all dictionaries except ordered dictionaries.
-        """
-        if isinstance(obj, OrderedDict):
-            return tuple(obj)
-        return tuple(sorted(obj))
-
-    @classmethod
-    def to_hashable(cls, obj, /):
+    def _to_hashable(cls, obj):
         """Make unhashable objects hashable in a consistent manner."""
-        if isclass(obj):
-            return obj.__qualname__
-        elif isinstance(obj, (tuple, list, set)):
-            return tuple([cls.to_hashable(item) for item in obj])
-        elif isinstance(obj, np.ndarray):
-            return obj.tobytes()
-        elif isinstance(obj, dict):
-            dic = dict.fromkeys(obj.keys())
-            for key, value in obj.items():
-                dic[key] = cls.to_hashable(value)
-            return cls._finalize(dic.items())
-        # nothing left to do; just return the object
-        return obj
+
+        if hasattr(obj, "__iter__"):
+            # Encapsulate all the iterables to quickly discard
+            # and go to numbers hashing in the second clause.
+
+            if isinstance(obj, np.ndarray):
+                # Numpy arrays: Convert the data buffer to a byte string.
+                return obj.tobytes()
+
+            elif isinstance(obj, dict):
+                # Dictionaries: Build a tuple from key-value pairs,
+                # where all values are converted to hashables.
+                out = dict.fromkeys(obj)
+                for key, value in obj.items():
+                    out[key] = cls._to_hashable(value)
+                # Sort unordered dictionaries for hash consistency.
+                if isinstance(obj, OrderedDict):
+                    return tuple(obj)
+                return tuple(sorted(obj))
+
+            else:
+                # Iterables: Build a tuple from values converted to hashables.
+                out = [cls._to_hashable(item) for item in obj]
+                return tuple(out)
+
+        elif hasattr(obj, "__hash__"):
+            # Hashables: Just return the object.
+            return obj
+
+        # NotImplemented: Can't hash safely, so raise TypeError.
+        raise TypeError(f"Hashing for {type(obj)} not implemented.")
 
     @classmethod
-    def _hash_consistent(cls, obj, /):
+    def _hash_consistent(cls, obj):
         """Calculate consistent hash value for an input object."""
         hasher = hashlib.md5()
-        hasher.update(repr(cls.to_hashable(obj)).encode())
+        hasher.update(repr(cls.t_o_hashable(obj)).encode())
         return int(hasher.digest().hex(), 16)
 
     @classmethod
-    def _hash_generic(cls, obj, /):
+    def _hash_generic(cls, obj):
         """Generic hash method, which changes between processes."""
-        digest = hash(repr(cls.to_hashable(obj))) + sys.maxsize + 1
+        digest = hash(repr(cls._to_hashable(obj))) + sys.maxsize + 1
         return digest
 
     @classmethod
-    def hash_(cls, obj, /):
+    def hash_(cls, obj):
         if not cls.consistent:
             return cls._hash_generic(obj)
         return cls._hash_consistent(obj)
@@ -136,21 +141,17 @@ class Caching(metaclass=_ClassPropertyMeta):
 
     @classmethod
     def _get_key(cls, func, *args, **kwargs):
-        """Calculate the hex hash from the sum of the hashes
-        of the passed arguments and keyword arguments.
-        """
+        """Calculate the hex hash from arguments and keyword arguments."""
         # get a dictionary of default parameters
         params = func.cache_info._signature.parameters
-        defaults = {param: value.default for param, value in params.items()}
         # get a dictionary of the passed parameters
         passed = {**dict(zip(params, args)), **kwargs}
-        # to save time hashing, discard the values equal to the default
+        # discard the values equal to the default
+        defaults = {param: value.default for param, value in params.items()}
         to_remove = [param for param, value in passed.items()
                      if value == defaults[param]]
         [passed.pop(param) for param in to_remove]
-        # sum of the hash of the items (param, value)
-        total_hash = sum([hash_(obj) for obj in passed.items()])
-        return hex(hash_(total_hash))
+        return hex(hash_(passed))
 
     @classmethod
     def _get(cls, dic, key, policy):
@@ -171,7 +172,7 @@ class Caching(metaclass=_ClassPropertyMeta):
             keys = list(dic)
             idx = np.argmin([item.counter for item in dic.values()])
             dic.move_to_end(keys[idx], last=False)
-        dic.pop(next(iter(dic)))
+        dic.popitem(last=False)
 
     @classmethod
     def _decorator(cls, func, maxsize, policy):
@@ -247,10 +248,6 @@ class Caching(metaclass=_ClassPropertyMeta):
     @classmethod
     def disable(cls):
         cls._enabled = False
-
-    @classmethod
-    def toggle(cls):
-        cls._enabled = not cls._enabled
 
     @classmethod
     def reset(cls):
