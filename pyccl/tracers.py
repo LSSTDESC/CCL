@@ -201,7 +201,8 @@ class Tracer(object):
                 dimension will be squeezed if the input is a
                 scalar.
                 If no chi was provided, returns two arrays, the radial kernels
-                and the comoving radial distances.
+                and the comoving radial distances corresponding to the internal
+                values used for interpolation.
         """
         if not hasattr(self, '_trc'):
             return []
@@ -637,8 +638,8 @@ class WeakLensingTracer(Tracer):
             normalization. Set to False to use the raw input amplitude,
             which will usually be 1 for use with PT IA modeling.
             Defaults to True.
-        n_samples (int, optional): number of samples over which the kernel
-            is desired. These will be equi-spaced in radial distance.
+        n_samples (int, optional): number of samples over which the lensing
+            kernel is desired. These will be equi-spaced in radial distance.
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
