@@ -141,21 +141,17 @@ class Caching(metaclass=_ClassPropertyMeta):
 
     @classmethod
     def _get_key(cls, func, *args, **kwargs):
-        """Calculate the hex hash from the sum of the hashes
-        of the passed arguments and keyword arguments.
-        """
+        """Calculate the hex hash from arguments and keyword arguments."""
         # get a dictionary of default parameters
         params = func.cache_info._signature.parameters
-        defaults = {param: value.default for param, value in params.items()}
         # get a dictionary of the passed parameters
         passed = {**dict(zip(params, args)), **kwargs}
-        # to save time hashing, discard the values equal to the default
+        # discard the values equal to the default
+        defaults = {param: value.default for param, value in params.items()}
         to_remove = [param for param, value in passed.items()
                      if value == defaults[param]]
         [passed.pop(param) for param in to_remove]
-        # sum of the hash of the items (param, value)
-        total_hash = sum([hash_(obj) for obj in passed.items()])
-        return hex(hash_(total_hash))
+        return hex(hash_(passed))
 
     @classmethod
     def _get(cls, dic, key, policy):
@@ -176,7 +172,7 @@ class Caching(metaclass=_ClassPropertyMeta):
             keys = list(dic)
             idx = np.argmin([item.counter for item in dic.values()])
             dic.move_to_end(keys[idx], last=False)
-        dic.pop(next(iter(dic)))
+        dic.popitem(last=False)
 
     @classmethod
     def _decorator(cls, func, maxsize, policy):
@@ -252,10 +248,6 @@ class Caching(metaclass=_ClassPropertyMeta):
     @classmethod
     def disable(cls):
         cls._enabled = False
-
-    @classmethod
-    def toggle(cls):
-        cls._enabled = not cls._enabled
 
     @classmethod
     def reset(cls):
