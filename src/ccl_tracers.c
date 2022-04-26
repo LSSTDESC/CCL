@@ -104,7 +104,6 @@ static double get_nz_norm(ccl_cosmology *cosmo, ccl_f1d_t *nz_f,
         w, &nz_norm, &nz_enorm);
 
       if (gslstatus != GSL_SUCCESS) {
-        ccl_raise_gsl_warning(gslstatus, "ccl_tracers.c: get_nz_norm():");
         *status = CCL_ERROR_INTEG;
         ccl_cosmology_set_status_message(
           cosmo,
