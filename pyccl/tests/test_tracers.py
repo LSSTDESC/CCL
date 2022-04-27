@@ -200,6 +200,10 @@ def test_tracer_lensing_kernel_spline_vs_gsl_intergation(z_min, z_max,
     z = np.linspace(z_min, z_max, n_z_samples)
     n = dndz(z)
 
+    # Make sure case where z[0] > 0 and n[0] > 0 is tested for
+    if z_min > 0:
+        assert n[0] > 0
+
     cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
     tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
     w_wl_spline, _ = tr_wl.get_kernel(chi=None)
