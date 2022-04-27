@@ -195,7 +195,7 @@ class Caching(metaclass=_ClassPropertyMeta):
             if key in caches:
                 # output has been cached; update stats and return it
                 out = cls._get(caches, key, policy)
-                func.cache_info.misses += 1
+                func.cache_info.hits += 1
                 return out.item
 
             while len(caches) >= maxsize:
@@ -206,14 +206,15 @@ class Caching(metaclass=_ClassPropertyMeta):
             # cache new entry and update stats
             out = CachedObject(func(*args, **kwargs))
             caches[key] = out
-            func.cache_info.hits += 1
+            func.cache_info.misses += 1
             return out.item
 
         return wrapper
 
     @classmethod
     def cache(cls, func=None, /, *, maxsize=_maxsize, policy=_policy):
-        """Cache the output of the decorated function.
+        """Cache the output of the decorated function, using the input
+        arguments as a proxy to build a hash key.
 
         Arguments:
             func (``function``):
@@ -278,8 +279,8 @@ class CacheInfo:
 
         To assist in deciding an optimal ``maxsize`` and ``policy``, instances
         of this class contain the following attributes:
-            - ``hits``: number of times the function has computed something
-            - ``misses``: number of times the function has been bypassed
+            - ``hits``: number of times the function has been bypassed
+            - ``misses``: number of times the function has computed something
             - ``current_size``: current size of the cache dictionary
     """
 
