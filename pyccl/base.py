@@ -579,7 +579,9 @@ class CCLObject:
         raise NotImplementedError(f"{name} objects are immutable.")
 
     def __eq__(self, other):
-        # Two objects will be equal if their hashes are the same.
+        # Two same-type objects will be equal if their hashes are the same.
+        if self.__class__ is not other.__class__:
+            return False
         return hash(self) == hash(other)
 
     def __hash__(self):
