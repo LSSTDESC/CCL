@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import pyccl as ccl
+from pyccl.errors import CCLWarning
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -259,3 +260,11 @@ def test_tracer_n_sample_wl():
 
     assert w[0].shape[-1] == n_samples
     assert chi[0].shape[-1] == n_samples
+
+
+def test_tracer_n_sample_warn():
+    z = np.linspace(0., 1., 50)
+    n = dndz(z)
+
+    with pytest.warns(CCLWarning):
+        _ = ccl.WeakLensingTracer(COSMO, dndz=(z, n))

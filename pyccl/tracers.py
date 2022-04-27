@@ -1,10 +1,14 @@
+import warnings
+
+import numpy as np
+
 from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate, \
     growth_factor, scale_factor_of_chi, h_over_h0
+from .errors import CCLWarning
 from .pyutils import _check_array_params, NoneArr, _vectorize_fn6, \
     _get_spline1d_arrays
-import numpy as np
 
 
 def _Sig_MG(cosmo, a, k=None):
@@ -99,6 +103,15 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None, n_chi=None):
     if n_chi is None:
         # Calculate number of samples in chi
         n_chi = lib.get_nchi_lensing_kernel_wrapper(z_n)
+
+    if n_chi > len(z_n):
+        warnings.warn(
+            f"The number of samples in the n(z) ({len(z_n)}) is smaller than "
+            f"the number of samples in the lensing kernel ({n_chi}). Consider "
+            f"disabling spline integration for the lensing kernel by setting "
+            f"cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION "
+            f"= False",
+            category=CCLWarning)
 
     # Compute array of chis
     status = 0
