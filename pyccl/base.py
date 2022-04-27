@@ -1,6 +1,7 @@
 import sys
 import functools
 from collections import OrderedDict
+from numbers import Number
 import hashlib
 import numpy as np
 from inspect import signature
@@ -27,7 +28,11 @@ class Hashing:
     def _to_hashable(cls, obj):
         """Make unhashable objects hashable in a consistent manner."""
 
-        if hasattr(obj, "__iter__"):
+        if isinstance(obj, (Number, str)):
+            # Strings and Numbers are hashed directly.
+            return obj
+
+        elif hasattr(obj, "__iter__"):
             # Encapsulate all the iterables to quickly discard
             # and go to numbers hashing in the second clause.
 
