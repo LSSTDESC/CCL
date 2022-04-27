@@ -417,8 +417,12 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
           // Trapezoidal rule: \int_a^b f(x) dx \approx (b-a)(f(a) + f(b))/2
           // Here a=z_end, b=zarr[i_chi_end], and f(x) = lensing_kernel_integrand
           // Since lensing_kernel_integrand(cosmo, chi_end, chi_end, ...) = 0, we have f(a) = 0
-          double trapz = 0.5 * (z_arr[i_chi_end] - z_end) * integrand_array[i_chi_end];
-          result += trapz;
+          // Only do this if z_end is greater than the support of the provided n(z), to avoid
+          // inaccurate results due to using the trapezoidal rule for large intervals of z_arr[0] - z_end.
+          if(z_end > z_arr[0]) {
+            double trapz = 0.5 * (z_arr[i_chi_end] - z_end) * integrand_array[i_chi_end];
+            result += trapz;
+          }
 
           if(local_status == 0) {
             wL_arr[ichi] = result * lens_prefac * nz_norm * chi_end / a;
