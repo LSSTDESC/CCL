@@ -397,9 +397,11 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
           z_end = 1./a-1;
 
           // We don't need to start at 0 but finding the index corresponding to chi_end would make things more complicated
+          int i_chi_end = 0;
           for(int i=0; i<nz; i++) {
             if(chi_of_z_array[i] < chi_end) {
               integrand_array[i] = 0.0;
+              i_chi_end = i+1;
             } else {
               integrand_array[i] = lensing_kernel_integrand(cosmo, chi_of_z_array[i], chi_end, nz_arr[i], sz_array[i], &local_status);
             }
@@ -407,9 +409,16 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
           if(local_status) {
             ccl_raise_warning(CCL_ERROR_INTEG, "ccl_tracers.c: integrate_lensing_kernel_spline(): error in lensing_kernel_integrand.\n");
           } else {
-            // Integrate over the whole array. Where z < z_end, the integrand is 0, so that's fine.
-            ccl_integ_spline(1, nz, z_arr, &integrand_array, 1.0, 0.0, &result, gsl_interp_akima, &local_status);
+            ccl_integ_spline(1, nz, z_arr, &integrand_array, z_arr[i_chi_end], z_arr[nz-1], &result, gsl_interp_akima, &local_status);
           }
+
+          // Correct for the missing interval (chi_end, chi_of_z_array[i_chi_end]) in the integral,
+          // where i_chi_end is the smallest index such that chi_end < chi_of_z_array[i_chi_end].
+          // Trapezoidal rule: \int_a^b f(x) dx \approx (b-a)(f(a) + f(b))/2
+          // Here a=z_end, b=zarr[i_chi_end], and f(x) = lensing_kernel_integrand
+          // Since lensing_kernel_integrand(cosmo, chi_end, chi_end, ...) = 0, we have f(a) = 0
+          double trapz = 0.5 * (z_arr[i_chi_end] - z_end) * integrand_array[i_chi_end];
+          result += trapz;
 
           if(local_status == 0) {
             wL_arr[ichi] = result * lens_prefac * nz_norm * chi_end / a;

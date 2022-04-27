@@ -184,14 +184,15 @@ def test_tracer_nz_norm_spline_vs_gsl_intergation():
         assert np.allclose(w_spline, w_gsl, atol=0, rtol=1e-8)
 
 
-def test_tracer_lensing_kernel_spline_vs_gsl_intergation():
+@pytest.mark.parametrize('n_z_samples', [2000, 1000, 500, 100])
+def test_tracer_lensing_kernel_spline_vs_gsl_intergation(n_z_samples):
     # Create a new Cosmology object so that we're not messing with the other
     # tests
     cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
                           sigma8=0.8, n_s=0.96,
                           transfer_function='bbks',
                           matter_power_spectrum='linear')
-    z = np.linspace(0., 1., 2000)
+    z = np.linspace(0., 1., n_z_samples)
     n = dndz(z)
 
     cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
@@ -203,7 +204,10 @@ def test_tracer_lensing_kernel_spline_vs_gsl_intergation():
     w_wl_gsl, chi = tr_wl.get_kernel(chi=None)
 
     # Peak of kernel is ~1e-5
-    assert np.allclose(w_wl_spline[0], w_wl_gsl[0], atol=1e-10, rtol=1e-8)
+    if n_z_samples >= 1000:
+        assert np.allclose(w_wl_spline[0], w_wl_gsl[0], atol=1e-10, rtol=1e-9)
+    else:
+        assert np.allclose(w_wl_spline[0], w_wl_gsl[0], atol=5e-9, rtol=1e-5)
 
 
 def test_tracer_delta_function_nz():
