@@ -41,8 +41,8 @@ class Hashing:
                     out[key] = cls._to_hashable(value)
                 # Sort unordered dictionaries for hash consistency.
                 if isinstance(obj, OrderedDict):
-                    return tuple(obj)
-                return tuple(sorted(obj))
+                    return tuple(obj.items())
+                return tuple(sorted(obj.items()))
 
             else:
                 # Iterables: Build a tuple from values converted to hashables.
