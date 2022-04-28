@@ -60,18 +60,22 @@ find_package(OpenMP)
 
 # Compilation flags
 set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
-set(CMAKE_C_FLAGS_DEBUG   "-Og -g -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
+set(CMAKE_C_FLAGS_DEBUG   "-O0 -g -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
 
 if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") 
-    if(FORCE_OPENMP OR OpenMP_C_FOUND)
+    if(OpenMP_C_FOUND)
         # OpenMP flags for macOS clang
         set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Xpreprocessor -fopenmp")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Xpreprocessor -fopenmp")
+        if(FORCE_OPENMP)
+            set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Xpreprocessor -fopenmp")
+        endif()
     endif()
 else()
     # OpenMP flags for all other compilers clang
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
+    if(FORCE_OPENMP)
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
+    endif()
 endif()
 
 if(DEFINED ENV{CONDA_PREFIX})
