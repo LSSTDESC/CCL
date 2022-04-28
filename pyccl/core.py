@@ -1071,7 +1071,8 @@ def CosmologyVanillaLCDM(**kwargs):
     if set(p).intersection(set(kwargs)):
         raise ValueError(
             f"You cannot change the LCDM parameters: {list(p.keys())}.")
-    return Cosmology(**(p | kwargs))
+    # TODO py39+: dictionary union operator `(p | kwargs)`.
+    return Cosmology(**{**p, **kwargs})
 
 
 class CosmologyCalculator(Cosmology):
