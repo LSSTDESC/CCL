@@ -40,10 +40,6 @@ def test_caching_switches():
     assert not ccl.Caching._enabled
     ccl.Caching.enable()
     assert ccl.Caching._enabled
-    ccl.Caching.toggle()
-    assert not ccl.Caching._enabled
-    ccl.Caching.enable()
-    assert ccl.Caching._enabled
 
 
 def test_times():
