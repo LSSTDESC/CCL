@@ -1,6 +1,4 @@
-import pytest
 import pyccl as ccl
-
 import numpy as np
 
 
