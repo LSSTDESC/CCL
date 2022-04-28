@@ -1,6 +1,6 @@
 from . import ccllib as lib
 
-from .pyutils import check
+from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 import numpy as np
 
 
@@ -179,3 +179,37 @@ class Tk3D(object):
 
     def __bool__(self):
         return self.has_tsp
+
+    def get_spline_arrays(self):
+        """Get the spline data arrays.
+
+        Returns:
+            a_arr (1D ``numpy.ndarray``):
+                Array of scale factors.
+            lk_arr1, lk_arr2 (1D ``numpy.ndarray``):
+                Arrays of :math:``ln(k)``.
+            out (list of ``numpy.ndarray``):
+                The trispectrum T(k1, k2, z) or its factors f(k1, z), f(k2, z).
+        """
+        if not self.has_tsp:
+            raise ValueError("Tk3D object does not have data.")
+
+        out = []
+        if self.tsp.is_product:
+            a_arr, lk_arr1, pk_arr1 = _get_spline2d_arrays(self.tsp.fka_1.fka)
+            _, lk_arr2, pk_arr2 = _get_spline2d_arrays(self.tsp.fka_2.fka)
+            out.append(pk_arr1)
+            out.append(pk_arr2)
+        else:
+            status = 0
+            a_arr, status = lib.get_array(self.tsp.a_arr, self.tsp.na, status)
+            check(status)
+            lk_arr1, lk_arr2, tkka_arr = _get_spline3d_arrays(self.tsp.tkka,
+                                                              self.tsp.na)
+            out.append(tkka_arr)
+
+        if self.tsp.is_log:
+            # exponentiate in-place
+            [np.exp(tk, out=tk) for tk in out]
+
+        return a_arr, lk_arr1, lk_arr2, out
