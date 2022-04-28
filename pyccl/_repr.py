@@ -146,7 +146,7 @@ def _build_string_Cosmology(self):
         if not dic:
             return ""
         length = max(len(key) for key, val in dic.items())
-        tup = Hashing.to_hashable(dic)
+        tup = Hashing._to_hashable(dic)
         s = ""
         for param, value in tup:
             s += f"{newline}{param:{length}} = {value}"
@@ -156,7 +156,7 @@ def _build_string_Cosmology(self):
         # Print any extra parameters.
         if dic["extra_parameters"] is None:
             return ""
-        tup = Hashing.to_hashable(dic["extra_parameters"])
+        tup = Hashing._to_hashable(dic["extra_parameters"])
 
         s = f"{newline}extra_parameters ="
         for key, value in tup:

@@ -1,7 +1,6 @@
 from . import ccllib as lib
 from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 from .base import CCLObject
-from ._repr import _build_string_Tk3D
 import numpy as np
 
 
@@ -86,7 +85,7 @@ class Tk3D(CCLObject):
             expected. Note that arrays will be interpolated in log space
             if `is_logt` is set to `True`.
     """
-    __repr__ = _build_string_Tk3D
+    from ._repr import _build_string_Tk3D as __repr__
 
     def __init__(self, a_arr, lk_arr, tkk_arr=None,
                  pk1_arr=None, pk2_arr=None, extrap_order_lok=1,

@@ -4,7 +4,6 @@ from .background import comoving_radial_distance, growth_rate, \
     growth_factor, scale_factor_of_chi, h_over_h0
 from .parameters import physical_constants
 from .base import CCLObject, unlock_instance
-from ._repr import _build_string_Tracer
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays)
 import numpy as np
@@ -161,7 +160,7 @@ class Tracer(CCLObject, init_attrs=True):
     tracers that get combined linearly when computing power spectra.
     Further details can be found in Section 4.9 of the CCL note.
     """
-    __repr__ = _build_string_Tracer
+    from ._repr import _build_string_Tracer as __repr__
 
     def __init__(self):
         """By default this `Tracer` object will contain no actual
