@@ -582,7 +582,7 @@ class CCLObject:
 
     @functools.cached_property
     def _hash(self):
-        # Function ``hash_`` makes use of the ``repr`` of the object,
+        # ``__hash__`` makes use of the ``repr`` of the object,
         # so we have to make sure that the ``repr`` is unique.
         return hash(repr(self))
 
