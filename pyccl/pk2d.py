@@ -8,7 +8,6 @@ from .errors import CCLWarning
 from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline2d_arrays)
 from .base import CCLObject, UnlockInstance, unlock_instance
-from ._repr import _build_string_Pk2D
 
 
 class Pk2D(CCLObject):
@@ -64,7 +63,7 @@ class Pk2D(CCLObject):
         empty (bool): if True, just create an empty object, to be filled
             out later
     """
-    __repr__ = _build_string_Pk2D
+    from ._repr import _build_string_Pk2D as __repr__
 
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,

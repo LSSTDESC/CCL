@@ -15,7 +15,6 @@ from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
-from ._repr import _build_string_Cosmology
 from .parameters import CCLParameters
 
 # Configuration types
@@ -201,7 +200,7 @@ class Cosmology(CCLObject):
                                      "HMCode_logT_AGN": 7.8}}
 
     """
-    __repr__ = _build_string_Cosmology
+    from ._repr import _build_string_Cosmology as __repr__
 
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
