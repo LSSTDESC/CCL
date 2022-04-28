@@ -110,7 +110,7 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None, n_chi=None):
             f"The number of samples in the n(z) ({len(z_n)}) is smaller than "
             f"the number of samples in the lensing kernel ({n_chi}). Consider "
             f"disabling spline integration for the lensing kernel by setting "
-            f"cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION "
+            f"pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION "
             f"= False",
             category=CCLWarning)
 
