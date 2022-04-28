@@ -174,3 +174,36 @@ def test_tk3d_call():
     assert bool(tsp) is tsp.has_tsp
     assert np.allclose(np.array([tsp.eval(np.exp(lk_arr), a) for a in a_arr]),
                        tsp(np.exp(lk_arr), a_arr), rtol=1e-15)
+
+
+@pytest.mark.parametrize('is_product', [True, False])
+def test_tk3d_spline_arrays(is_product):
+    (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
+    if is_product:
+        tsp = ccl.Tk3D(a_arr, lk_arr, pk1_arr=fka1_arr, pk2_arr=fka2_arr)
+    else:
+        tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
+
+    a_get, lk_get1, lk_get2, out = tsp.get_spline_arrays()
+    assert np.allclose(a_get, a_arr, rtol=1e-15)
+    assert np.allclose(lk_get1, lk_arr, rtol=1e-15)
+    assert np.allclose(lk_get2, lk_arr, rtol=1e-15)
+
+    if is_product:
+        assert np.allclose(np.log(out[0]), fka1_arr, rtol=1e-15)
+        assert np.allclose(np.log(out[1]), fka2_arr, rtol=1e-15)
+    else:
+        assert np.allclose(np.log(out[0]), tkka_arr, rtol=1e-15)
+
+
+def test_tk3d_spline_arrays_raises():
+    (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
+    tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
+
+    # PR923 aims to change this bit of code; the assertion is there to remind
+    # us to uncomment what is commented out.
+    ccl.lib.f3d_t_free(tsp.tsp)
+    delattr(tsp, "tsp")
+
+    with pytest.raises(ValueError):
+        tsp.get_spline_arrays()

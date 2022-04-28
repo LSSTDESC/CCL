@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from . import pyccl as ccl
+from . import CCLWarning
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -11,28 +12,32 @@ def dndz(z):
     return np.exp(-((z-0.5)/0.1)**2)
 
 
-def get_tracer(tracer_type):
+def get_tracer(tracer_type, cosmo=None, **tracer_kwargs):
+    if cosmo is None:
+        cosmo = COSMO
     z = np.linspace(0., 1., 2000)
     n = dndz(z)
     b = np.sqrt(1. + z)
 
     if tracer_type == 'nc':
         ntr = 3
-        tr = ccl.NumberCountsTracer(COSMO, True,
+        tr = ccl.NumberCountsTracer(cosmo, True,
                                     dndz=(z, n),
                                     bias=(z, b),
-                                    mag_bias=(z, b))
+                                    mag_bias=(z, b),
+                                    **tracer_kwargs)
     elif tracer_type == 'wl':
         ntr = 2
-        tr = ccl.WeakLensingTracer(COSMO,
+        tr = ccl.WeakLensingTracer(cosmo,
                                    dndz=(z, n),
-                                   ia_bias=(z, b))
+                                   ia_bias=(z, b),
+                                   **tracer_kwargs)
     elif tracer_type == 'cl':
         ntr = 1
-        tr = ccl.CMBLensingTracer(COSMO, 1100.)
+        tr = ccl.CMBLensingTracer(cosmo, 1100., **tracer_kwargs)
     else:
         ntr = 0
-        tr = ccl.Tracer()
+        tr = ccl.Tracer(**tracer_kwargs)
     return tr, ntr
 
 
@@ -151,3 +156,115 @@ def test_tracer_nz_support():
 
     with pytest.raises(ValueError):
         _ = ccl.CMBLensingTracer(calculator_cosmo, z_source=2.0)
+
+
+def test_tracer_nz_norm_spline_vs_gsl_intergation():
+    # Create a new Cosmology object so that we're not messing with the other
+    # tests
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.8, n_s=0.96,
+                          transfer_function='bbks',
+                          matter_power_spectrum='linear')
+    cosmo.cosmo.gsl_params.NZ_NORM_SPLINE_INTEGRATION = True
+    tr_wl, _ = get_tracer("wl", cosmo)
+    tr_nc, _ = get_tracer("nc", cosmo)
+
+    w_wl_spline, _ = tr_wl.get_kernel(chi=None)
+    w_nc_spline, _ = tr_nc.get_kernel(chi=None)
+
+    cosmo.cosmo.gsl_params.NZ_NORM_SPLINE_INTEGRATION = False
+    tr_wl, _ = get_tracer("wl", cosmo)
+    tr_nc, _ = get_tracer("nc", cosmo)
+
+    w_wl_gsl, _ = tr_wl.get_kernel(chi=None)
+    w_nc_gsl, _ = tr_nc.get_kernel(chi=None)
+
+    for w_spline, w_gsl in zip(w_wl_spline, w_wl_gsl):
+        assert np.allclose(w_spline, w_gsl, atol=0, rtol=1e-8)
+    for w_spline, w_gsl in zip(w_nc_spline, w_nc_gsl):
+        assert np.allclose(w_spline, w_gsl, atol=0, rtol=1e-8)
+
+
+@pytest.mark.parametrize('z_min, z_max, n_z_samples', [(0.0, 1.0, 2000),
+                                                       (0.0, 1.0, 1000),
+                                                       (0.0, 1.0, 500),
+                                                       (0.0, 1.0, 100),
+                                                       (0.3, 1.0, 1000)])
+def test_tracer_lensing_kernel_spline_vs_gsl_intergation(z_min, z_max,
+                                                         n_z_samples):
+    # Create a new Cosmology object so that we're not messing with the other
+    # tests
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.8, n_s=0.96,
+                          transfer_function='bbks',
+                          matter_power_spectrum='linear')
+    z = np.linspace(z_min, z_max, n_z_samples)
+    n = dndz(z)
+
+    # Make sure case where z[0] > 0 and n[0] > 0 is tested for
+    if z_min > 0:
+        assert n[0] > 0
+
+    cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
+    tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
+    w_wl_spline, _ = tr_wl.get_kernel(chi=None)
+
+    cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
+    tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
+    w_wl_gsl, chi = tr_wl.get_kernel(chi=None)
+
+    # Peak of kernel is ~1e-5
+    if n_z_samples >= 1000:
+        assert np.allclose(w_wl_spline[0], w_wl_gsl[0], atol=1e-10, rtol=1e-9)
+    else:
+        assert np.allclose(w_wl_spline[0], w_wl_gsl[0], atol=5e-9, rtol=1e-5)
+
+
+def test_tracer_delta_function_nz():
+    z = np.linspace(0., 1., 2000)
+    z_s_idx = int(z.size*0.8)
+    z_s = z[z_s_idx]
+    n = np.zeros_like(z)
+    n[z_s_idx] = 2.0
+
+    tr_wl = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
+
+    # Single source plane tracer to compare against
+    chi_kappa, w_kappa = ccl.tracers.get_kappa_kernel(COSMO, z_source=z_s,
+                                                      nsamples=100)
+
+    # Use the same comoving distances
+    w = tr_wl.get_kernel(chi=chi_kappa)
+
+    assert np.allclose(w[0], w_kappa, atol=1e-8, rtol=1e-6)
+    # at z=z_source, interpolation becomes apparent, so for this test we
+    # ignore these data points.
+    assert np.allclose(w[0][:-2], w_kappa[:-2], atol=1e-11, rtol=1e-11)
+
+
+@pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl'])
+def test_tracer_n_sample_smoke(tracer_type):
+    tr, ntr = get_tracer(tracer_type, n_samples=50)
+    if tracer_type != "cl":
+        # n_samples=None should fall back to using the samples from the n(z).
+        tr, ntr = get_tracer(tracer_type, n_samples=None)
+
+
+def test_tracer_n_sample_wl():
+    z = np.linspace(0., 1., 2000)
+    n = dndz(z)
+
+    n_samples = 50
+    tr_wl = ccl.WeakLensingTracer(COSMO, dndz=(z, n), n_samples=n_samples)
+    w, chi = tr_wl.get_kernel(chi=None)
+
+    assert w[0].shape[-1] == n_samples
+    assert chi[0].shape[-1] == n_samples
+
+
+def test_tracer_n_sample_warn():
+    z = np.linspace(0., 1., 50)
+    n = dndz(z)
+
+    with pytest.warns(CCLWarning):
+        _ = ccl.WeakLensingTracer(COSMO, dndz=(z, n))

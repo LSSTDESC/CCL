@@ -149,7 +149,7 @@ class Pk2D(CCLObject):
             self.extrap_order_hik = extrap_order_hik
 
     @classmethod
-    def pk_from_model(Pk2D, cosmo, model):
+    def from_model(cls, cosmo, model):
         """`Pk2D` constructor returning the power spectrum associated with
         a given numerical model.
 
@@ -189,6 +189,11 @@ class Pk2D(CCLObject):
 
         check(status, cosmo)
         return pk2d
+
+    @classmethod
+    @functools.wraps(from_model)
+    def pk_from_model(cls, cosmo, model):
+        return cls.from_model(cosmo, model)
 
     @_Pk2D_descriptor
     def apply_halofit(self, cosmo, pk_linear=None):

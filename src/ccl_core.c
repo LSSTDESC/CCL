@@ -85,7 +85,9 @@ ccl_gsl_params ccl_user_gsl_params = {
   0.0,                                 // HM_EPSABS
   1E-4,                                // HM_EPSREL
   1000,                                // HM_LIMIT
-  GSL_INTEG_GAUSS41                    // HM_INT_METHOD
+  GSL_INTEG_GAUSS41,                   // HM_INT_METHOD
+  true,                                // NZ_NORM_SPLINE_INTEGRATION
+  true                                 // LENSING_KERNEL_SPLINE_INTEGRATION
   };
 
 #undef GSL_EPSREL
@@ -508,6 +510,10 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * messag
 
   #pragma omp critical
   {
+    if(strlen(cosmo->status_message) != 0) {
+      ccl_raise_warning(CCL_ERROR_OVERWRITE, "Status message being overwritten.");
+      ccl_raise_warning(cosmo->status, cosmo->status_message);
+    }
     vsnprintf(cosmo->status_message, trunc, message, va);
 
     /* if truncation happens, message[trunc - 1] is not NULL, ... will show up. */

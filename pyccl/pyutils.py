@@ -636,7 +636,7 @@ def _get_spline2d_arrays(gsl_spline):
 
 
 def _get_spline3d_arrays(gsl_spline, length):
-    """Get array data from a 3D GSL spline.
+    """Get array data from an array of 2D GSL splines.
 
     Args:
         gsl_spline (`SWIGObject` of gsl_spline2d **):
