@@ -24,6 +24,25 @@ order to install CCL in this way. See :ref:`getting-cmake` for help installing
 you will need ``CAMB``, ``CLASS``, and ``FAST-PT`` installed. See the instructions for
 :ref:`boltzmann-codes` and :ref:`getting-fast-pt` for details.
 
+To compile the ``C`` code with debugging symbols, add the ``--debug`` option
+when calling ``setup.py``:
+
+.. code-block:: bash
+
+   $ python setup.py --debug develop
+
+Or with ``pip``:
+
+.. code-block:: bash
+
+   $ pip install --no-deps -e . --global-option=--debug
+
+To remove old build products that might conflict when re-compiling CCL, run
+
+.. code-block:: bash
+
+   $ python setup.py clean
+
 
 C-layer Dependencies and Requirements
 =====================================

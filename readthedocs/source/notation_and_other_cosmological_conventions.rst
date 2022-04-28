@@ -211,6 +211,10 @@ parameters.
   - HM_LIMIT: the size of the GSL workspace for halo moodel integrations.
   - HM_INT_METHOD: the Gauss-Kronrod quadrature rule used for adaptive
     integrations for the halo model comptutations.
+  - NZ_NORM_SPLINE_INTEGRATION: Use spline integration for the normalization of
+    the n(z).
+  - LENSING_KERNEL_SPLINE_INTEGRATION: Use spline integration for the lensing
+    kernel integral.
 
 
 Specifying Physical Constants

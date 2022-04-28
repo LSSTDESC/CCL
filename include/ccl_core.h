@@ -190,6 +190,9 @@ typedef struct ccl_gsl_params {
   size_t HM_LIMIT;
   int HM_INT_METHOD;
 
+  // Flags for using spline integration
+  bool NZ_NORM_SPLINE_INTEGRATION;
+  bool LENSING_KERNEL_SPLINE_INTEGRATION;
 } ccl_gsl_params;
 
 extern ccl_gsl_params ccl_user_gsl_params;
