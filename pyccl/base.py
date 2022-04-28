@@ -67,7 +67,7 @@ class Hashing:
     def _hash_consistent(cls, obj):
         """Calculate consistent hash value for an input object."""
         hasher = hashlib.md5()
-        hasher.update(repr(cls.t_o_hashable(obj)).encode())
+        hasher.update(repr(cls._to_hashable(obj)).encode())
         return int(hasher.digest().hex(), 16)
 
     @classmethod
