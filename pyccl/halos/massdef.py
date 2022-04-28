@@ -107,13 +107,13 @@ class MassDef(CCLHalosObject):
 
     @property
     def name(self):
-        if self.Delta == "vir":
-            return "vir"
+        if self.Delta in ["fof", "vir"]:
+            return self.Delta
         return f"{self.Delta}{self.rho_type[0]}"
 
     def __repr__(self):
-        return f"pyccl.halos.MassDef(Delta={self.Delta}, " \
-            f"rho_type={self.rho_type})"
+        return (f"pyccl.halos.MassDef(Delta={self.Delta}, "
+                f"rho_type={self.rho_type})")
 
     def _concentration_init(self, c_m_relation):
         from .concentration import Concentration, concentration_from_name
