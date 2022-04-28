@@ -15,7 +15,6 @@ from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
-from ._repr import _build_string_Cosmology
 from .parameters import CCLParameters
 
 # Configuration types
@@ -201,7 +200,7 @@ class Cosmology(CCLObject):
                                      "HMCode_logT_AGN": 7.8}}
 
     """
-    __repr__ = _build_string_Cosmology
+    from ._repr import _build_string_Cosmology as __repr__
 
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
@@ -1051,29 +1050,28 @@ class Cosmology(CCLObject):
         return "status(%s): %s" % (status, msg)
 
 
-class CosmologyVanillaLCDM(Cosmology):
+def CosmologyVanillaLCDM(**kwargs):
     """A cosmology with typical flat Lambda-CDM parameters (`Omega_c=0.25`,
     `Omega_b = 0.05`, `Omega_k = 0`, `sigma8 = 0.81`, `n_s = 0.96`, `h = 0.67`,
     no massive neutrinos).
 
-    Args:
+    Arguments:
         **kwargs (dict): a dictionary of parameters passed as arguments
             to the `Cosmology` constructor. It should not contain any of
             the LambdaCDM parameters (`"Omega_c"`, `"Omega_b"`, `"n_s"`,
             `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
     """
-    def __init__(self, **kwargs):
-        p = {'h': 0.67,
-             'Omega_c': 0.25,
-             'Omega_b': 0.05,
-             'n_s': 0.96,
-             'sigma8': 0.81,
-             'A_s': None}
-        if any(k in kwargs for k in p.keys()):
-            raise ValueError("You cannot change the LCDM parameters: "
-                             "%s " % list(p.keys()))
-        kwargs.update(p)
-        super(CosmologyVanillaLCDM, self).__init__(**kwargs)
+    p = {'Omega_c': 0.25,
+         'Omega_b': 0.05,
+         'h': 0.67,
+         'n_s': 0.96,
+         'sigma8': 0.81,
+         'A_s': None}
+    if set(p).intersection(set(kwargs)):
+        raise ValueError(
+            f"You cannot change the LCDM parameters: {list(p.keys())}.")
+    # TODO py39+: dictionary union operator `(p | kwargs)`.
+    return Cosmology(**{**p, **kwargs})
 
 
 class CosmologyCalculator(Cosmology):

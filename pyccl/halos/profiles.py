@@ -4,7 +4,6 @@ from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
 from ..base import CCLHalosObject, unlock_instance
-from .._repr import _build_string_HaloProfile
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
@@ -37,7 +36,7 @@ class HaloProfile(CCLHalosObject):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
-    __repr__ = _build_string_HaloProfile
+    from .._repr import _build_string_HaloProfile as __repr__
     name = 'default'
 
     def __init__(self):

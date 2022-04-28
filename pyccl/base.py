@@ -1,14 +1,11 @@
-# NOTE: Classes `Hashing` and `Caching` only contain class methods.
-# It is usually suggested that such code should have its own namespace
-# in the form of distinct functions in a separate module.
-# However, these namespaces are deliberately chosen to be like that
-# so that pyccl isn't cluttered with many non-cosmological modules.
 import sys
 import functools
 from collections import OrderedDict
+from numbers import Number
 import hashlib
 import numpy as np
-from inspect import signature, isclass
+from inspect import signature
+from _thread import RLock
 
 
 class Hashing:
@@ -29,45 +26,59 @@ class Hashing:
     consistent: bool = False
 
     @classmethod
-    def _finalize(cls, obj, /):
-        """Alphabetically sort all dictionaries except ordered dictionaries.
-        """
-        if isinstance(obj, OrderedDict):
-            return tuple(obj)
-        return tuple(sorted(obj))
-
-    @classmethod
-    def to_hashable(cls, obj, /):
+    def _to_hashable(cls, obj):
         """Make unhashable objects hashable in a consistent manner."""
-        if isclass(obj):
-            return obj.__qualname__
-        elif isinstance(obj, (tuple, list, set)):
-            return tuple([cls.to_hashable(item) for item in obj])
-        elif isinstance(obj, np.ndarray):
-            return obj.tobytes()
-        elif isinstance(obj, dict):
-            dic = dict.fromkeys(obj.keys())
-            for key, value in obj.items():
-                dic[key] = cls.to_hashable(value)
-            return cls._finalize(dic.items())
-        # nothing left to do; just return the object
-        return obj
+
+        if isinstance(obj, (Number, str)):
+            # Strings and Numbers are hashed directly.
+            return obj
+
+        elif hasattr(obj, "__iter__"):
+            # Encapsulate all the iterables to quickly discard
+            # and go to numbers hashing in the second clause.
+
+            if isinstance(obj, np.ndarray):
+                # Numpy arrays: Convert the data buffer to a byte string.
+                return obj.tobytes()
+
+            elif isinstance(obj, dict):
+                # Dictionaries: Build a tuple from key-value pairs,
+                # where all values are converted to hashables.
+                out = dict.fromkeys(obj)
+                for key, value in obj.items():
+                    out[key] = cls._to_hashable(value)
+                # Sort unordered dictionaries for hash consistency.
+                if isinstance(obj, OrderedDict):
+                    return tuple(obj.items())
+                return tuple(sorted(obj.items()))
+
+            else:
+                # Iterables: Build a tuple from values converted to hashables.
+                out = [cls._to_hashable(item) for item in obj]
+                return tuple(out)
+
+        elif hasattr(obj, "__hash__"):
+            # Hashables: Just return the object.
+            return obj
+
+        # NotImplemented: Can't hash safely, so raise TypeError.
+        raise TypeError(f"Hashing for {type(obj)} not implemented.")
 
     @classmethod
-    def _hash_consistent(cls, obj, /):
+    def _hash_consistent(cls, obj):
         """Calculate consistent hash value for an input object."""
         hasher = hashlib.md5()
-        hasher.update(repr(cls.to_hashable(obj)).encode())
+        hasher.update(repr(cls._to_hashable(obj)).encode())
         return int(hasher.digest().hex(), 16)
 
     @classmethod
-    def _hash_generic(cls, obj, /):
+    def _hash_generic(cls, obj):
         """Generic hash method, which changes between processes."""
-        digest = hash(repr(cls.to_hashable(obj))) + sys.maxsize + 1
+        digest = hash(repr(cls._to_hashable(obj))) + sys.maxsize + 1
         return digest
 
     @classmethod
-    def hash_(cls, obj, /):
+    def hash_(cls, obj):
         if not cls.consistent:
             return cls._hash_generic(obj)
         return cls._hash_consistent(obj)
@@ -133,24 +144,21 @@ class Caching(metaclass=_ClassPropertyMeta):
     _maxsize = _default_maxsize   # user-defined maxsize
     _policy = _default_policy     # user-defined policy
     _cached_functions: list = []
+    _lock = RLock()  # thread locking while dictionary read/write takes place
 
     @classmethod
     def _get_key(cls, func, *args, **kwargs):
-        """Calculate the hex hash from the sum of the hashes
-        of the passed arguments and keyword arguments.
-        """
+        """Calculate the hex hash from arguments and keyword arguments."""
         # get a dictionary of default parameters
         params = func.cache_info._signature.parameters
-        defaults = {param: value.default for param, value in params.items()}
         # get a dictionary of the passed parameters
         passed = {**dict(zip(params, args)), **kwargs}
-        # to save time hashing, discard the values equal to the default
+        # discard the values equal to the default
+        defaults = {param: value.default for param, value in params.items()}
         to_remove = [param for param, value in passed.items()
                      if value == defaults[param]]
         [passed.pop(param) for param in to_remove]
-        # sum of the hash of the items (param, value)
-        total_hash = sum([hash_(obj) for obj in passed.items()])
-        return hex(hash_(total_hash))
+        return hex(hash_(passed))
 
     @classmethod
     def _get(cls, dic, key, policy):
@@ -171,7 +179,7 @@ class Caching(metaclass=_ClassPropertyMeta):
             keys = list(dic)
             idx = np.argmin([item.counter for item in dic.values()])
             dic.move_to_end(keys[idx], last=False)
-        dic.pop(next(iter(dic)))
+        dic.popitem(last=False)
 
     @classmethod
     def _decorator(cls, func, maxsize, policy):
@@ -191,28 +199,31 @@ class Caching(metaclass=_ClassPropertyMeta):
             maxsize = func.cache_info.maxsize
             policy = func.cache_info.policy
 
-            if key in caches:
-                # output has been cached; update stats and return it
-                out = cls._get(caches, key, policy)
-                func.cache_info.misses += 1
-                return out.item
+            with cls._lock:
+                if key in caches:
+                    # output has been cached; update stats and return it
+                    out = cls._get(caches, key, policy)
+                    func.cache_info.hits += 1
+                    return out.item
 
-            while len(caches) >= maxsize:
-                # output not cached and no space available, so remove
-                # items as per the caching policy until there is space
-                cls._pop(caches, policy)
+            with cls._lock:
+                while len(caches) >= maxsize:
+                    # output not cached and no space available, so remove
+                    # items as per the caching policy until there is space
+                    cls._pop(caches, policy)
 
             # cache new entry and update stats
             out = CachedObject(func(*args, **kwargs))
             caches[key] = out
-            func.cache_info.hits += 1
+            func.cache_info.misses += 1
             return out.item
 
         return wrapper
 
     @classmethod
-    def cache(cls, func=None, /, *, maxsize=_maxsize, policy=_policy):
-        """Cache the output of the decorated function.
+    def cache(cls, func=None, *, maxsize=_maxsize, policy=_policy):
+        """Cache the output of the decorated function, using the input
+        arguments as a proxy to build a hash key.
 
         Arguments:
             func (``function``):
@@ -249,10 +260,6 @@ class Caching(metaclass=_ClassPropertyMeta):
         cls._enabled = False
 
     @classmethod
-    def toggle(cls):
-        cls._enabled = not cls._enabled
-
-    @classmethod
     def reset(cls):
         cls.maxsize = cls._default_maxsize
         cls.policy = cls._default_policy
@@ -281,8 +288,8 @@ class CacheInfo:
 
         To assist in deciding an optimal ``maxsize`` and ``policy``, instances
         of this class contain the following attributes:
-            - ``hits``: number of times the function has computed something
-            - ``misses``: number of times the function has been bypassed
+            - ``hits``: number of times the function has been bypassed
+            - ``misses``: number of times the function has computed something
             - ``current_size``: current size of the cache dictionary
     """
 
@@ -333,6 +340,14 @@ class CachedObject:
 
     def reset(self):
         self.counter = 0
+
+
+def unwrap(func):
+    """Convenience function that unwraps and returns the innermost function.
+    """
+    while hasattr(func, "__wrapped__"):
+        func = func.__wrapped__
+    return func
 
 
 def auto_assign(func, sig=None):
@@ -388,7 +403,6 @@ class UnlockInstance:
         self.instance = instance
         self.mutate = mutate
         # Define these attributes for easy access.
-        self.setattr = object.__setattr__
         self.id = id(self)
 
     def check_instance(self):
@@ -407,8 +421,8 @@ class UnlockInstance:
 
         # Unlock and store the fingerprint of this context manager so that only
         # this context manager is allowed to run on the instance, until exit.
-        self.setattr(self.instance, "_immutable", False)
-        self.setattr(self.instance, "_lock_id", self.id)
+        object.__setattr__(self.instance, "_locked", False)
+        self.instance._lock_id = self.id
 
     def __exit__(self, type, value, traceback):
         if not self.check_instance():
@@ -418,17 +432,22 @@ class UnlockInstance:
         # do nothing; otherwise reset.
         if self.id != self.instance._lock_id:
             return
-        self.setattr(self.instance, "_lock_id", None)
+        self.instance._lock_id = None
 
         # Reset `repr` if the object has been mutated.
         if self.mutate:
-            self.setattr(self.instance, "_repr", "")
+            try:
+                delattr(self.instance, "_repr")
+                delattr(self.instance, "_hash")
+            except AttributeError:
+                # Object mutated but none of these exist.
+                pass
 
         # Lock the instance on exit.
-        self.setattr(self.instance, "_immutable", True)
+        self.instance._locked = True
 
 
-def unlock_instance(func=None, /, *, argv=0, mutate=True):
+def unlock_instance(func=None, *, argv=0, mutate=True):
     """Decorator that temporarily unlocks an instance of CCLObject.
 
     Arguments:
@@ -454,30 +473,6 @@ def unlock_instance(func=None, /, *, argv=0, mutate=True):
             out = func(*args, **kwargs)
         return out
     return wrapper
-
-
-def _auto_store_repr(__repr__):
-    """Automatically store the representation of the instance on the first
-    call of ``repr``.
-
-    .. note:: This decorator is defined outside of ``class CCLObject``
-              to allow different CCLObjects to have their own ``__repr__``
-              method, which is then decorated with this function.
-    """
-    @functools.wraps(__repr__)
-    def wrapper(self):
-        if not self._repr:
-            object.__setattr__(self, "_repr", __repr__(self))
-        return self._repr
-    return wrapper
-
-
-def _unwrap(func):
-    """Convenience function that unwraps and returns the innermost function.
-    """
-    while hasattr(func, "__wrapped__"):
-        func = func.__wrapped__
-    return func
 
 
 class CCLObject:
@@ -522,16 +517,14 @@ class CCLObject:
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
+    # *** Information regarding the state of the CCLObject ***
+    # Immutability lock. Disables `setattr`. (see `unlock_instance`)
+    _locked: bool = False
+    # Memory address of the unlocking context manager. (see `UnlockInstance`)
+    _lock_id: int = None
     # Have all the arguments in the constructor been assigned as instance
     # attributes? (see `auto_assign`)
     _init_attrs_state: bool = False
-    # Immutability lock. Disables `setattr`. (see `unlock_instance`)
-    _immutable: bool = False
-    # Address of the unlocking context manager. (see `UnlockInstance`)
-    _lock_id: int = None
-    # Calculation of `repr` is expensive, so unless the object is mutated
-    # we store it here. (see `_auto_store_repr`)
-    _repr: str = ""
 
     def __init_subclass__(cls, init_attrs=None, **kwargs):
         """Subclass initialization routine.
@@ -555,25 +548,26 @@ class CCLObject:
             # Make sure this is inherited.
             cls._init_attrs_state = True
 
+        # If a new `__repr__` is defined, replace it with its cachable version.
+        # (`cached_property` requires that `__set_name__` is called on it.)
+        if "__repr__" in vars(cls):
+            bmethod = functools.cached_property(cls.__repr__)
+            cls._repr = bmethod
+            bmethod.__set_name__(cls, "_repr")
+            cls.__repr__ = cls.__ccl_repr__
+
         # Allow instance dict to change or mutate if these methods are called.
         cls.__init__ = unlock_instance(cls.__init__)
         if hasattr(cls, "update_parameters"):
             cls.update_parameters = \
-                unlock_instance(mutate=True)(_unwrap(cls.update_parameters))
-
-        # In the implemented system (repr --> hash --> eq), `repr` often needs
-        # to compute the hash of instance attributes which are also CCLObjects
-        # (e.g. HMCalculator contains [MassFunc, HaloBias, MassDef]).
-        # To avoid having to recompute the full repr of the object every time,
-        # we store it and only re-compute it after instance mutation.
-        cls.__repr__ = _auto_store_repr(cls.__repr__)
+                unlock_instance(mutate=True)(unwrap(cls.update_parameters))
 
         super().__init_subclass__(**kwargs)
 
     def __setattr__(self, name, value):
-        if self._immutable and name != "_immutable":
+        if self._locked:
             raise AttributeError("CCL objects can only be updated via "
-                                 "`update_parameters`.")
+                                 "`update_parameters`, if implemented.")
         object.__setattr__(self, name, value)
 
     def update_parameters(self, **kwargs):
@@ -581,25 +575,39 @@ class CCLObject:
         raise NotImplementedError(f"{name} objects are immutable.")
 
     def __eq__(self, other):
-        # Two objects will be equal if their hashes are the same.
+        # Two same-type objects will be equal if their hashes are the same.
+        if self.__class__ is not other.__class__:
+            return False
         return hash(self) == hash(other)
 
-    def __hash__(self):
-        # Function ``hash_`` makes use of the ``repr`` of the object,
+    @functools.cached_property
+    def _hash(self):
+        # ``__hash__`` makes use of the ``repr`` of the object,
         # so we have to make sure that the ``repr`` is unique.
-        return hash_(self)
+        return hash(repr(self))
 
-    def __repr__(self):
-        # If the class does not have a constructor method,
-        # assume all of its instances are equivalent
-        # and build a simple string using just the class name.
-        init = _unwrap(self.__class__.__init__)
+    @functools.cached_property
+    def _repr(self):
+        init = unwrap(self.__class__.__init__)
         if init == object.__init__:
+            # If the class inherits the constructor from `object`,
+            # assume all of its instances are equivalent
+            # and build a simple string using just the class name.
             from ._repr import _build_string_simple
             return _build_string_simple(self)
         # If a constructor has been defined, using the simple repr is unsafe
         # so we revert back to object's repr method, which specifies the id.
         return object.__repr__(self)
+
+    def __hash__(self):
+        return self._hash
+
+    def __ccl_repr__(self):
+        # The actual `__repr__` method is converted to a
+        # cached property and is replaced by this method.
+        return self._repr
+
+    __repr__ = __ccl_repr__
 
 
 class CCLHalosObject(CCLObject, init_attrs=True):
