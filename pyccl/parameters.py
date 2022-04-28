@@ -20,7 +20,7 @@ class CCLParameters:
 
         Parameters:
             ctype (``type``):
-                Pointer to the definition of the C-struct. In SWIG,
+                Reference to the definition of the C-struct. In SWIG,
                 this is the class whose instance is a parameter collection.
             cinstance (``instance``):
                 The instance where the default parameters are implemented.
