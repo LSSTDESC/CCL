@@ -396,6 +396,7 @@ class UnlockInstance:
         self.mutate = mutate
         # Define these attributes for easy access.
         self.id = id(self)
+        self.lock = RLock()
 
     def check_instance(self):
         # We want to catch and exit if the instance is not a CCLObject.
@@ -406,15 +407,16 @@ class UnlockInstance:
         if not self.check_instance():
             return
 
-        # Prevent simultaneous enclosing of a single instance.
-        if self.instance._lock_id is not None:
-            # Context manager already active.
-            return
+        with self.lock:
+            # Prevent simultaneous enclosing of a single instance.
+            if self.instance._lock_id is not None:
+                # Context manager already active.
+                return
 
-        # Unlock and store the fingerprint of this context manager so that only
-        # this context manager is allowed to run on the instance, until exit.
-        object.__setattr__(self.instance, "_locked", False)
-        self.instance._lock_id = self.id
+            # Unlock and store the fingerprint of this context manager so that
+            # only this context manager is allowed to run on the instance.
+            object.__setattr__(self.instance, "_locked", False)
+            self.instance._lock_id = self.id
 
     def __exit__(self, type, value, traceback):
         if not self.check_instance():
@@ -424,19 +426,20 @@ class UnlockInstance:
         # do nothing; otherwise reset.
         if self.id != self.instance._lock_id:
             return
-        self.instance._lock_id = None
 
-        # Reset `repr` if the object has been mutated.
-        if self.mutate:
-            try:
-                delattr(self.instance, "_repr")
-                delattr(self.instance, "_hash")
-            except AttributeError:
-                # Object mutated but none of these exist.
-                pass
+        with self.lock:
+            # Reset `repr` if the object has been mutated.
+            if self.mutate:
+                try:
+                    delattr(self.instance, "_repr")
+                    delattr(self.instance, "_hash")
+                except AttributeError:
+                    # Object mutated but none of these exist.
+                    pass
 
-        # Lock the instance on exit.
-        self.instance._locked = True
+            # Lock the instance on exit.
+            self.instance._lock_id = None
+            self.instance._locked = True
 
 
 def unlock_instance(func=None, *, argv=0, mutate=True):
