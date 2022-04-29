@@ -1,7 +1,6 @@
 from . import ccllib as lib
 from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 from .base import CCLObject, warn_api
-from ._repr import _build_string_Tk3D
 import numpy as np
 
 
@@ -86,7 +85,7 @@ class Tk3D(CCLObject):
         extrap_order_hik (int): same as `extrap_order_lok` for
             k-values above the maximum of the splines.
     """
-    __repr__ = _build_string_Tk3D
+    from ._repr import _build_string_Tk3D as __repr__
 
     @warn_api(reorder=["extrap_order_lok", "extrap_order_hik", "is_logt"])
     def __init__(self, *, a_arr, lk_arr, tkk_arr=None,

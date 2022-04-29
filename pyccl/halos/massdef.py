@@ -85,7 +85,6 @@ class MassDef(CCLHalosObject):
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
-    name = 'default'
 
     @warn_api
     def __init__(self, Delta, rho_type=None, *, c_m_relation=None):
@@ -108,9 +107,15 @@ class MassDef(CCLHalosObject):
         else:
             self._concentration_init(c_m_relation)
 
+    @property
+    def name(self):
+        if self.Delta in ["fof", "vir"]:
+            return self.Delta
+        return f"{self.Delta}{self.rho_type[0]}"
+
     def __repr__(self):
-        return f"pyccl.halos.MassDef(Delta={self.Delta}, " \
-            f"rho_type={self.rho_type})"
+        return (f"pyccl.halos.MassDef(Delta={self.Delta}, "
+                f"rho_type={self.rho_type})")
 
     def _concentration_init(self, c_m_relation):
         from .concentration import Concentration
@@ -248,72 +253,47 @@ class MassDef(CCLHalosObject):
         Returns:
             MassDef subclass corresponding to the input name.
         """
-        mass_defs = {m.name: m for m in cls.__subclasses__()}
-
-        if name in mass_defs:
-            return mass_defs[name]
-        else:
+        try:
+            return eval(f"MassDef{name.capitalize()}")
+        except NameError:
             raise ValueError(f"Mass definition {name} not implemented.")
 
 
-class MassDef200m(MassDef):
+def MassDef200m(c_m='Duffy08'):
     """`MassDef` class for the mass definition with Delta=200 times the matter
     density.
 
     Args:
         c_m_relation (string): concentration-mass relation.
     """
-    name = '200m'
-
-    @warn_api(pairs=[("c_m", "c_m_relation")])
-    def __init__(self, *, c_m_relation='Duffy08'):
-        super(MassDef200m, self).__init__(200,
-                                          'matter',
-                                          c_m_relation=c_m_relation)
+    return MassDef(200, 'matter', c_m_relation=c_m)
 
 
-class MassDef200c(MassDef):
+def MassDef200c(c_m='Duffy08'):
     """`MassDef` class for the mass definition with Delta=200 times the critical
     density.
 
     Args:
         c_m_relation (string): concentration-mass relation.
     """
-    name = '200c'
-
-    @warn_api(pairs=[("c_m", "c_m_relation")])
-    def __init__(self, *, c_m_relation='Duffy08'):
-        super(MassDef200c, self).__init__(200,
-                                          'critical',
-                                          c_m_relation=c_m_relation)
+    return MassDef(200, 'critical', c_m_relation=c_m)
 
 
-class MassDef500c(MassDef):
+def MassDef500c(c_m='Ishiyama21'):
     """`MassDef` class for the mass definition
     with Delta=500 times the critical density.
 
     Args:
         c_m (string): concentration-mass relation.
     """
-    name = '500c'
-
-    def __init__(self, c_m='Ishiyama21'):
-        super(MassDef500c, self).__init__(500,
-                                          'critical',
-                                          c_m_relation=c_m)
+    return MassDef(500, 'critical', c_m_relation=c_m)
 
 
-class MassDefVir(MassDef):
+def MassDefVir(c_m='Klypin11'):
     """`MassDef` class for the mass definition with Delta=Delta_vir times the
     critical density.
 
     Args:
         c_m_relation (string): concentration-mass relation.
     """
-    name = 'vir'
-
-    @warn_api(pairs=[("c_m", "c_m_relation")])
-    def __init__(self, *, c_m_relation='Klypin11'):
-        super(MassDefVir, self).__init__('vir',
-                                         'matter',
-                                         c_m_relation=c_m_relation)
+    return MassDef('vir', 'critical', c_m_relation=c_m)
