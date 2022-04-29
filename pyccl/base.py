@@ -345,14 +345,6 @@ class CachedObject:
         self.counter = 0
 
 
-def unwrap(func):
-    """Convenience function that unwraps and returns the innermost function.
-    """
-    while hasattr(func, "__wrapped__"):
-        func = func.__wrapped__
-    return func
-
-
 def auto_assign(func, sig=None):
     """Decorator to automatically assign all parameters as instance attributes.
     This ought to be applied on constructor methods.
@@ -407,6 +399,7 @@ class UnlockInstance:
         self.mutate = mutate
         # Define these attributes for easy access.
         self.id = id(self)
+        self.lock = RLock()
 
     def check_instance(self):
         # We want to catch and exit if the instance is not a CCLObject.
@@ -417,15 +410,16 @@ class UnlockInstance:
         if not self.check_instance():
             return
 
-        # Prevent simultaneous enclosing of a single instance.
-        if self.instance._lock_id is not None:
-            # Context manager already active.
-            return
+        with self.lock:
+            # Prevent simultaneous enclosing of a single instance.
+            if self.instance._lock_id is not None:
+                # Context manager already active.
+                return
 
-        # Unlock and store the fingerprint of this context manager so that only
-        # this context manager is allowed to run on the instance, until exit.
-        object.__setattr__(self.instance, "_locked", False)
-        self.instance._lock_id = self.id
+            # Unlock and store the fingerprint of this context manager so that
+            # only this context manager is allowed to run on the instance.
+            object.__setattr__(self.instance, "_locked", False)
+            self.instance._lock_id = self.id
 
     def __exit__(self, type, value, traceback):
         if not self.check_instance():
@@ -435,19 +429,20 @@ class UnlockInstance:
         # do nothing; otherwise reset.
         if self.id != self.instance._lock_id:
             return
-        self.instance._lock_id = None
 
-        # Reset `repr` if the object has been mutated.
-        if self.mutate:
-            try:
-                delattr(self.instance, "_repr")
-                delattr(self.instance, "_hash")
-            except AttributeError:
-                # Object mutated but none of these exist.
-                pass
+        with self.lock:
+            # Reset `repr` if the object has been mutated.
+            if self.mutate:
+                try:
+                    delattr(self.instance, "_repr")
+                    delattr(self.instance, "_hash")
+                except AttributeError:
+                    # Object mutated but none of these exist.
+                    pass
 
-        # Lock the instance on exit.
-        self.instance._locked = True
+            # Lock the instance on exit.
+            self.instance._lock_id = None
+            self.instance._locked = True
 
 
 def unlock_instance(func=None, *, argv=0, mutate=True):
@@ -765,19 +760,20 @@ class CCLObject:
             # Make sure this is inherited.
             cls._init_attrs_state = True
 
-        # If a new `__repr__` is defined, replace it with its cachable version.
-        # (`cached_property` requires that `__set_name__` is called on it.)
         if "__repr__" in vars(cls):
+            # If the class defines a custom `__repr__`, this will be the new
+            # `_repr` (which is cached). Decorator `cached_property` requires
+            # that `__set_name__` is called on it.
             bmethod = functools.cached_property(cls.__repr__)
             cls._repr = bmethod
             bmethod.__set_name__(cls, "_repr")
+            # Fall back to using `__ccl_repr__` from `CCLObject`.
             cls.__repr__ = cls.__ccl_repr__
 
         # Allow instance dict to change or mutate if these methods are called.
         cls.__init__ = unlock_instance(cls.__init__)
         if hasattr(cls, "update_parameters"):
-            cls.update_parameters = unlock_instance(
-                unwrap(cls.update_parameters))
+            cls.update_parameters = unlock_instance(cls.update_parameters)
 
         # Subclasses with `_load_emu` methods are emulator implementations.
         # Automatically cache the result, and convert it to class method.
@@ -796,40 +792,32 @@ class CCLObject:
         name = self.__class__.__qualname__
         raise NotImplementedError(f"{name} objects are immutable.")
 
+    @functools.cached_property
+    def _repr(self):
+        # By default we use `__repr__` from `object`.
+        return object.__repr__(self)
+
+    @functools.cached_property
+    def _hash(self):
+        # `__hash__` makes use of the `repr` of the object,
+        # so we have to make sure that the `repr` is unique.
+        return hash(repr(self))
+
+    def __ccl_repr__(self):
+        # The custom `__repr__` is converted to a
+        # cached property and is replaced by this method.
+        return self._repr
+
+    __repr__ = __ccl_repr__
+
+    def __hash__(self):
+        return self._hash
+
     def __eq__(self, other):
         # Two same-type objects will be equal if their hashes are the same.
         if self.__class__ is not other.__class__:
             return False
         return hash(self) == hash(other)
-
-    @functools.cached_property
-    def _hash(self):
-        # ``__hash__`` makes use of the ``repr`` of the object,
-        # so we have to make sure that the ``repr`` is unique.
-        return hash(repr(self))
-
-    @functools.cached_property
-    def _repr(self):
-        init = unwrap(self.__class__.__init__)
-        if init == object.__init__:
-            # If the class inherits the constructor from `object`,
-            # assume all of its instances are equivalent
-            # and build a simple string using just the class name.
-            from ._repr import _build_string_simple
-            return _build_string_simple(self)
-        # If a constructor has been defined, using the simple repr is unsafe
-        # so we revert back to object's repr method, which specifies the id.
-        return object.__repr__(self)
-
-    def __hash__(self):
-        return self._hash
-
-    def __ccl_repr__(self):
-        # The actual `__repr__` method is converted to a
-        # cached property and is replaced by this method.
-        return self._repr
-
-    __repr__ = __ccl_repr__
 
 
 class CCLHalosObject(CCLObject, init_attrs=True):
