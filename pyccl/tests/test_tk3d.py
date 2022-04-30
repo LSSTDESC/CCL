@@ -4,6 +4,8 @@ from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
 from . import pyccl as ccl
+from . import UnlockInstance
+
 
 
 def kf(k):
@@ -163,8 +165,15 @@ def test_tk3d_spline_arrays_raises():
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
     tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
 
-    ccl.lib.f3d_t_free(tsp.tsp)
-    delattr(tsp, "tsp")
+    # PR923 aims to change this bit of code; the assertion is there to remind
+    # us to uncomment what is commented out.
+    assert not hasattr(tsp.__class__, "has_tsp")
+    # ccl.lib.f3d_t_free(tsp.tsp)
+    # delattr(tsp, "tsp")
+
+    # fool `Tk3D` into believing it doesn't have a `tsp`
+    with UnlockInstance(tsp):
+        tsp.has_tsp = False
 
     with pytest.raises(ValueError):
         tsp.get_spline_arrays()
