@@ -107,6 +107,16 @@ def test_caching_lfu():
     assert t2/t1 > SPEEDUP
 
 
+def test_cache_info():
+    """Test that the CacheInfo repr gives us the expected information."""
+    info = ccl.Cosmology._compute_linear_power.cache_info
+    for text in ["maxsize", "policy", "hits", "misses", "current_size"]:
+        assert text in repr(info)
+
+    obj = list(info._caches.values())[0]
+    assert "counter" in repr(obj)
+
+
 def test_caching_reset():
     """Test the reset switches."""
     ccl.Caching.reset()

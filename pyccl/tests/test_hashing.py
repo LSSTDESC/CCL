@@ -2,14 +2,16 @@
 import pytest
 import pyccl as ccl
 import numpy as np
+from collections import OrderedDict
 
 OBJECTS = [ccl.Cosmology,  # class
            (0, 1, 2),      # tuple
            [0, 1, 2],      # list
            set([0, 1, 2]),   # set
            np.arange(3),   # array
-           {0: None, 1: None, 2: None},                   # dict
+           {0: None, 1: None, 2: None},                    # dict
            {0: None, 1: None, 2: {2.1: None, 2.2: None}},  # nested dict
+           OrderedDict({0: None, 1: None, 2: None}),       # OrderedDict
            ccl.CosmologyVanillaLCDM(),  # something else
            None,                        # something else
            ]

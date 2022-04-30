@@ -274,8 +274,8 @@ class CacheInfo:
         s = f"<{self.__class__.__name__}>"
         for par, val in self.__dict__.items():
             if not par.startswith("_"):
-                s += f"\n\t {par} = {repr(val)}"
-        s += f"\n\t current_size = {repr(self.current_size)}"
+                s += f"\n\t {par} = {val!r}"
+        s += f"\n\t current_size = {self.current_size!r}"
         return s
 
     def _clear_cache(self):
