@@ -473,30 +473,6 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
     return wrapper
 
 
-def _auto_store_repr(__repr__):
-    """Automatically store the representation of the instance on the first
-    call of ``repr``.
-
-    .. note:: This decorator is defined outside of ``class CCLObject``
-              to allow different CCLObjects to have their own ``__repr__``
-              method, which is then decorated with this function.
-    """
-    @functools.wraps(__repr__)
-    def wrapper(self):
-        if not self._repr:
-            object.__setattr__(self, "_repr", __repr__(self))
-        return self._repr
-    return wrapper
-
-
-def _unwrap(func):
-    """Convenience function that unwraps and returns the innermost function.
-    """
-    while hasattr(func, "__wrapped__"):
-        func = func.__wrapped__
-    return func
-
-
 # +==========================================================================+
 # |  The following decorators are used to notify users about deprecations.   |
 # +==========================================================================+
