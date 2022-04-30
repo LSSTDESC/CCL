@@ -144,18 +144,17 @@ void get_spline3d_arrays(gsl_spline2d **spline2d,
                          int *status)
 {
   // check for inconsistencies //
-  if(spline2d == NULL) {
+  if (spline2d == NULL) {
     *status = CCL_ERROR_MEMORY;
     return;
   }
-  // check only the first array element; the others must be consistent //
-  if(x_size != spline2d[0]->interp_object.xsize) {
-    *status = CCL_ERROR_INCONSISTENT;
-    return;
-  }
-  if(y_size != spline2d[0]->interp_object.ysize) {
-    *status = CCL_ERROR_INCONSISTENT;
-    return;
+
+  for (int ia = 0; ia < na; ia++) {
+    if (x_size != spline2d[ia]->interp_object.xsize
+        || y_size != spline2d[ia]->interp_object.ysize) {
+      *status = CCL_ERROR_INCONSISTENT;
+      return;
+    }
   }
 
   for (int ia = 0; ia < na; ia++) {
@@ -163,6 +162,7 @@ void get_spline3d_arrays(gsl_spline2d **spline2d,
       tarr[ia*x_size*y_size + ik] = spline2d[ia]->zarr[ik];
     }
   }
+
   // no need to do this for every scale factor //
   memcpy(xarr, spline2d[0]->xarr, sizeof(double)*x_size);
   memcpy(yarr, spline2d[0]->yarr, sizeof(double)*y_size);

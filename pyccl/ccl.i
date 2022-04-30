@@ -21,7 +21,7 @@ from .errors import CCLError
 %init %{
     import_array();
     // Tell CCL to not print to stdout/stderr for debugging.
-    ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
+    ccl_set_debug_policy(CCL_DEBUG_MODE_ON);
 %}
 
 // Automatically document arguments and output types of all functions
