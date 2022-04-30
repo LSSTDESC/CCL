@@ -5,7 +5,7 @@ from numbers import Number
 import hashlib
 import numpy as np
 from inspect import signature
-# from _thread import RLock
+from _thread import RLock
 
 
 class Hashing:
@@ -144,7 +144,7 @@ class Caching(metaclass=_ClassPropertyMeta):
     _maxsize = _default_maxsize   # user-defined maxsize
     _policy = _default_policy     # user-defined policy
     _cached_functions: list = []
-    # _lock = RLock()  # thread locking while dictionary read/write takes place
+    _lock = RLock()  # thread locking while dictionary read/write takes place
 
     @classmethod
     def _get_key(cls, func, *args, **kwargs):
@@ -199,18 +199,18 @@ class Caching(metaclass=_ClassPropertyMeta):
             maxsize = func.cache_info.maxsize
             policy = func.cache_info.policy
 
-            # with cls._lock:
-            if key in caches:
-                # output has been cached; update stats and return it
-                out = cls._get(caches, key, policy)
-                func.cache_info.hits += 1
-                return out.item
+            with cls._lock:
+                if key in caches:
+                    # output has been cached; update stats and return it
+                    out = cls._get(caches, key, policy)
+                    func.cache_info.hits += 1
+                    return out.item
 
-            # with cls._lock:
-            while len(caches) >= maxsize:
-                # output not cached and no space available, so remove
-                # items as per the caching policy until there is space
-                cls._pop(caches, policy)
+            with cls._lock:
+                while len(caches) >= maxsize:
+                    # output not cached and no space available, so remove
+                    # items as per the caching policy until there is space
+                    cls._pop(caches, policy)
 
             # cache new entry and update stats
             out = CachedObject(func(*args, **kwargs))
