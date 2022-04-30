@@ -12,7 +12,6 @@ from ..background import rho_x
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
-from ..base import cache
 import numpy as np
 
 physical_constants = lib.cvar.constants
@@ -88,36 +87,31 @@ class HMCalculator(object):
         else:
             self._integrator = self._integ_spline
 
+        self._a_current_mf = -1
+        self._a_current_bf = -1
+
     def _integ_spline(self, fM, lM):
         # Spline integrator
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
-    @cache
-    def _get_rho(self, cosmo, a):
-        return cosmo.rho_x(a, "matter", is_comoving=True)
-
-    @cache
-    def _get_mass_function(self, cosmo, a):
-        mf = self._massfunc.get_mass_function(
-            cosmo, self._mass, a, mdef_other=self._mdef)
-        mf0 = (self._rho0 - self._integrator(
-            mf*self._mass, self._lmass)) / self._m0
-        return mf, mf0
-
-    @cache
-    def _get_halo_bias(self, cosmo, a):
-        bf = self._hbias.get_halo_bias(
-            cosmo, self._mass, a, mdef_other=self._mdef)
-        bf0 = (self._rho0 - self._integrator(
-            self._mf*bf*self._mass, self._lmass)) / self._m0
-        return bf, bf0
-
     def _get_ingredients(self, a, cosmo, get_bf):
-        self._rho0 = self._get_rho(cosmo, 1.)
         # Compute mass function and bias (if needed) at a new
         # value of the scale factor and/or with a new Cosmology
-        self._mf, self._mf0 = self._get_mass_function(cosmo, a)
-        self._bf, self._bf0 = self._get_halo_bias(cosmo, a)
+        rho0 = cosmo.rho_x(a, "matter", is_comoving=True)
+
+        if a != self._a_current_mf:
+            self._mf = self._massfunc.get_mass_function(
+                cosmo, self._mass, a, mdef_other=self._mdef)
+            self._mf0 = (rho0 - self._integrator(
+                self._mf*self._mass, self._lmass)) / self._m0
+            self._a_current_mf = a
+
+        if get_bf and a != self._a_current_bf:
+            self._bf = self._hbias.get_halo_bias(
+                cosmo, self._mass, a, mdef_other=self._mdef)
+            self._bf0 = (rho0 - self._integrator(
+                self._mf*self._bf*self._mass, self._lmass)) / self._m0
+            self._a_current_bf = a
 
     def _integrate_over_mf(self, array_2):
         i1 = self._integrator(self._mf[..., :] * array_2,
