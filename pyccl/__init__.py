@@ -72,4 +72,4 @@ from .pyutils import debug_mode, resample_array
 
 from .errors import CCLError, CCLWarning
 
-from .base import Hashing, Caching, hash_, cache
+from .base import Caching, cache, hash_

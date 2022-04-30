@@ -2,89 +2,54 @@ import sys
 import functools
 from collections import OrderedDict
 from numbers import Number
-import hashlib
 import numpy as np
 from inspect import signature
 from _thread import RLock
 
 
-class Hashing:
-    """Container class which implements hashing consistently.
+def _to_hashable(obj):
+    """Make unhashable objects hashable in a consistent manner."""
 
-    Attributes:
-        consistent (``bool``):
-            If False, hashes of different processes are randomly salted.
-            Defaults to False for speed, but hashes differ across processes.
+    if isinstance(obj, (Number, str)):
+        # Strings and Numbers are hashed directly.
+        return obj
 
-    .. note::
+    elif hasattr(obj, "__iter__"):
+        # Encapsulate all the iterables to quickly discard
+        # and go to numbers hashing in the second clause.
 
-        Consistent (unsalted) hashing between different processes comes at
-        the expense of extra computation time (~200x slower).
-        Buitin ``hash`` computes in O(100 ns) while using hashlib with md5
-        computes in O(20 μs).
-    """
-    consistent: bool = False
+        if isinstance(obj, np.ndarray):
+            # Numpy arrays: Convert the data buffer to a byte string.
+            return obj.tobytes()
 
-    @classmethod
-    def _to_hashable(cls, obj):
-        """Make unhashable objects hashable in a consistent manner."""
+        elif isinstance(obj, dict):
+            # Dictionaries: Build a tuple from key-value pairs,
+            # where all values are converted to hashables.
+            out = dict.fromkeys(obj)
+            for key, value in obj.items():
+                out[key] = _to_hashable(value)
+            # Sort unordered dictionaries for hash consistency.
+            if isinstance(obj, OrderedDict):
+                return tuple(obj.items())
+            return tuple(sorted(obj.items()))
 
-        if isinstance(obj, (Number, str)):
-            # Strings and Numbers are hashed directly.
-            return obj
+        else:
+            # Iterables: Build a tuple from values converted to hashables.
+            out = [_to_hashable(item) for item in obj]
+            return tuple(out)
 
-        elif hasattr(obj, "__iter__"):
-            # Encapsulate all the iterables to quickly discard
-            # and go to numbers hashing in the second clause.
+    elif hasattr(obj, "__hash__"):
+        # Hashables: Just return the object.
+        return obj
 
-            if isinstance(obj, np.ndarray):
-                # Numpy arrays: Convert the data buffer to a byte string.
-                return obj.tobytes()
-
-            elif isinstance(obj, dict):
-                # Dictionaries: Build a tuple from key-value pairs,
-                # where all values are converted to hashables.
-                out = dict.fromkeys(obj)
-                for key, value in obj.items():
-                    out[key] = cls._to_hashable(value)
-                # Sort unordered dictionaries for hash consistency.
-                if isinstance(obj, OrderedDict):
-                    return tuple(obj.items())
-                return tuple(sorted(obj.items()))
-
-            else:
-                # Iterables: Build a tuple from values converted to hashables.
-                out = [cls._to_hashable(item) for item in obj]
-                return tuple(out)
-
-        elif hasattr(obj, "__hash__"):
-            # Hashables: Just return the object.
-            return obj
-
-        # NotImplemented: Can't hash safely, so raise TypeError.
-        raise TypeError(f"Hashing for {type(obj)} not implemented.")
-
-    @classmethod
-    def _hash_consistent(cls, obj):
-        """Calculate consistent hash value for an input object."""
-        hasher = hashlib.md5()
-        hasher.update(repr(cls._to_hashable(obj)).encode())
-        return int(hasher.digest().hex(), 16)
-
-    @classmethod
-    def _hash_generic(cls, obj):
-        """Generic hash method, which changes between processes."""
-        digest = hash(repr(cls._to_hashable(obj))) + sys.maxsize + 1
-        return digest
-
-    @classmethod
-    def hash_(cls, obj):
-        if not cls.consistent:
-            return cls._hash_generic(obj)
-        return cls._hash_consistent(obj)
+    # NotImplemented: Can't hash safely, so raise TypeError.
+    raise TypeError(f"Hashing for {type(obj)} not implemented.")
 
 
-hash_ = Hashing.hash_
+def hash_(obj):
+    """Generic hash method, which changes between processes."""
+    digest = hash(repr(_to_hashable(obj))) + sys.maxsize + 1
+    return digest
 
 
 class _ClassPropertyMeta(type):
@@ -144,7 +109,6 @@ class Caching(metaclass=_ClassPropertyMeta):
     _maxsize = _default_maxsize   # user-defined maxsize
     _policy = _default_policy     # user-defined policy
     _cached_functions: list = []
-    _lock = RLock()  # thread locking while dictionary read/write takes place
 
     @classmethod
     def _get_key(cls, func, *args, **kwargs):
@@ -199,14 +163,14 @@ class Caching(metaclass=_ClassPropertyMeta):
             maxsize = func.cache_info.maxsize
             policy = func.cache_info.policy
 
-            with cls._lock:
+            with RLock():
                 if key in caches:
                     # output has been cached; update stats and return it
                     out = cls._get(caches, key, policy)
                     func.cache_info.hits += 1
                     return out.item
 
-            with cls._lock:
+            with RLock():
                 while len(caches) >= maxsize:
                     # output not cached and no space available, so remove
                     # items as per the caching policy until there is space

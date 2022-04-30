@@ -16,9 +16,7 @@ OBJECTS = [ccl.Cosmology,  # class
 
 
 @pytest.mark.parametrize("obj", OBJECTS)
-@pytest.mark.parametrize("consistent", [True, False])
-def test_hashing_smoke(obj, consistent):
-    ccl.Hashing.consistent = consistent
+def test_hashing_smoke(obj):
     assert isinstance(ccl.hash_(obj), int)
 
 
