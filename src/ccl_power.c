@@ -242,7 +242,7 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
   if(*status==0) {
     double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;
     if(w0wacomb<8.1e-3){ //0.3^4
-      *status=CCL_ERROR_INCONSISTENT;
+      *status=CCL_ERROR_EMULATOR_BOUND;
       ccl_cosmology_set_status_message(cosmo,
                                        "ccl_power.c: ccl_compute_power_emu(): "
                                        "w0 and wa do not satisfy the emulator bound\n");
@@ -251,7 +251,7 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
 
   if(*status==0) {
     if(cosmo->params.Omega_nu_mass*cosmo->params.h*cosmo->params.h>0.01){
-      *status=CCL_ERROR_INCONSISTENT;
+      *status=CCL_ERROR_EMULATOR_BOUND;
       ccl_cosmology_set_status_message(cosmo,
                                        "ccl_power.c: ccl_compute_power_emu(): "
                                        "Omega_nu does not satisfy the emulator bound\n");
@@ -347,7 +347,8 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
         *status=CCL_ERROR_MEMORY;
         ccl_cosmology_set_status_message(cosmo,
                                          "ccl_power.c: ccl_compute_power_emu(): "
-                                         "memory allocation error\n");
+                                         "call to emulator failed; "
+                                         "(possibly out-of-bounds?)\n");
         break;
       }
       for (int i=0; i<NK_EMU; i++)

@@ -7,7 +7,7 @@ from . import ccllib as lib
 from .errors import CCLWarning
 from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline2d_arrays)
-from .base import CCLObject, UnlockInstance, unlock_instance
+from .base import CCLObject, UnlockInstance
 
 
 class Pk2D(CCLObject):
@@ -112,12 +112,6 @@ class Pk2D(CCLObject):
                                                         int(is_logp), status)
         check(status, cosmo=cosmo)
         self.has_psp = True
-
-    def update_parameters(self, extrap_order_lok=None, extrap_order_hik=None):
-        if extrap_order_lok is not None:
-            self.extrap_order_lok = extrap_order_lok
-        if extrap_order_hik is not None:
-            self.extrap_order_hik = extrap_order_hik
 
     @classmethod
     def pk_from_model(Pk2D, cosmo, model):
@@ -370,11 +364,6 @@ class Pk2D(CCLObject):
     def __radd__(self, other):
         return self.__add__(other)
 
-    @unlock_instance(mutate=True)
-    def __iadd__(self, other):
-        self = self.__add__(other)
-        return self
-
     def __mul__(self, other):
         """Multiply two Pk2D instances.
 
@@ -406,11 +395,6 @@ class Pk2D(CCLObject):
 
     def __rmul__(self, other):
         return self.__mul__(other)
-
-    @unlock_instance(mutate=True)
-    def __imul__(self, other):
-        self = self.__mul__(other)
-        return self
 
     def __pow__(self, exponent):
         """Take a Pk2D instance to a power.

@@ -86,19 +86,6 @@ class Cosmology(CCLObject):
 /0000-ccl_note/main.pdf>`_
               for details.
 
-    .. note:: After instantiation, you can set parameters related to the
-              internal splines and numerical integration accuracy by setting
-              the values of the attributes of
-              :obj:`Cosmology.cosmo.spline_params` and
-              :obj:`Cosmology.cosmo.gsl_params` via the `update_parameters`
-              method of `Cosmology`. For example, you can set
-              the generic relative accuracy for integration by executing
-              ``c = Cosmology(...); cosmo.update_parameters(INTEGRATION_EPSREL\
-= 1e-5``.
-              If you bypass `update_parameters` and set it directly with
-              ``setattr``, hashing the Cosmology object will be inconsistent.
-              See the module level documentation of `pyccl.core` for details.
-
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
         Omega_b (:obj:`float`): Baryonic matter density fraction.
@@ -276,22 +263,6 @@ class Cosmology(CCLObject):
             raise CCLError(
                 "(%d): %s"
                 % (self.cosmo.status, self.cosmo.status_message))
-
-    def update_parameters(self, **kwargs):
-        """Update any of the ``gsl_params`` or ``spline_params`` associated
-        with this Cosmology object.
-        """
-        from .parameters import spline_params, gsl_params
-        set_diff = list(set(kwargs.keys()) - set(self._accuracy_params.keys()))
-        if set_diff:
-            raise ValueError(f"Parameter(s) {set_diff} not recognized.")
-        for param, value in kwargs.items():
-            if hasattr(spline_params, param):
-                attr = getattr(self.cosmo, "spline_params")
-            elif hasattr(gsl_params, param):
-                attr = getattr(self.cosmo, "gsl_params")
-            setattr(attr, param, value)
-        self._accuracy_params = CCLParameters.from_cosmo(self.cosmo)
 
     def write_yaml(self, filename):
         """Write a YAML representation of the parameters to file.
@@ -856,9 +827,6 @@ class Cosmology(CCLObject):
     @cache(maxsize=3)
     def _compute_nonlin_power(self):
         """Return the non-linear power spectrum."""
-        if self.has_nonlin_power:
-            return self._pk_nl['delta_matter:delta_matter']
-
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
                 warnings.warn(

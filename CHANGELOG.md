@@ -1,5 +1,8 @@
 # Unreleased
 
+## Python library
+- Fixed high-z halofit behavior (#932)
+
 # v2.3.0 Changes
 
 ## Python library

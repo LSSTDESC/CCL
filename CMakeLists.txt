@@ -55,17 +55,32 @@ include(BuildGSL)
 # option to use a pre-installed version of angpow
 #include(BuildAngpow)
 
+# Check if OpemMP is installed (only matters for macOS clang)
+find_package(OpenMP)
+
 # Compilation flags
 set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
-set(CMAKE_C_FLAGS_DEBUG   "-Og -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
-if ((NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") OR FORCE_OPENMP)
-    # When not using Clang and in Release mode, enabling OpenMP support
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
-    if(DEFINED ENV{CONDA_PREFIX})
-        include_directories("$ENV{CONDA_PREFIX}/include")
-        add_link_options("LINKER:-rpath,$ENV{CONDA_PREFIX}/lib")
+set(CMAKE_C_FLAGS_DEBUG   "-O0 -g -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
+
+if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") 
+    if(OpenMP_C_FOUND)
+        # OpenMP flags for macOS clang
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Xpreprocessor -fopenmp")
+        if(FORCE_OPENMP)
+            set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Xpreprocessor -fopenmp")
+        endif()
     endif()
+else()
+    # OpenMP flags for all other compilers clang
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fopenmp")
+    if(FORCE_OPENMP)
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fopenmp")
+    endif()
+endif()
+
+if(DEFINED ENV{CONDA_PREFIX})
+    include_directories("$ENV{CONDA_PREFIX}/include")
+    add_link_options("LINKER:-rpath,$ENV{CONDA_PREFIX}/lib")
 endif()
 
 # Define include and library directories for external dependencies
@@ -97,7 +112,7 @@ endif()
 # The reason for building ccl as a shared library is that we can link it to
 # class directly, and it's not a dependency anymore
 add_library(ccl SHARED $<TARGET_OBJECTS:objlib>)
-target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m)
+target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m $<$<BOOL:${OpenMP_C_FOUND}>:OpenMP::OpenMP_C>)
 
 # Builds the test suite
 add_executable(check_ccl ${TEST_SRC})
