@@ -247,6 +247,10 @@ def test_pkhm_errors():
     with pytest.raises(TypeError):
         ccl.halos.HMCalculator(COSMO, HMF, None, mass_def=M200)
 
+    # Wrong mass_def
+    with pytest.raises(TypeError):
+        ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=None)
+
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
 
     # Wrong profile
