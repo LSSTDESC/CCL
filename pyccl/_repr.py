@@ -131,7 +131,7 @@ def _build_string_Cosmology(self):
     def test_eq(key, val, default):
         # Neutrino masses can be a list, so use `np.all` for comparison.
         # `np.all` is expensive, so only use that with `m_nu`.
-        if key != "m_nu":
+        if key not in ["m_nu", "z_mg", "df_mg"]:
             return val == default
         return np.all(val == default)
 

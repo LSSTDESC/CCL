@@ -7,7 +7,7 @@ from . import ccllib as lib
 from .errors import CCLWarning
 from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline2d_arrays)
-from .base import CCLObject, UnlockInstance, unlock_instance
+from .base import CCLObject, UnlockInstance
 
 
 class Pk2D(CCLObject):
