@@ -1,5 +1,5 @@
 import numpy as np
-from .base import Hashing, hash_
+from .base import _to_hashable, hash_
 from .pyutils import _get_spline1d_arrays
 
 
@@ -122,7 +122,7 @@ def _build_string_Cosmology(self):
             sigma8  = 0.81
             extra_parameters =
                 test = {'param': 18.4}
-            H_ACCURACY_PARAMS = 0x1959cbc9
+            HASH_ACCURACY_PARAMS = 0x1959cbc9
             HASH_PK = 0xbca03ab0
     """
     newline = "\n\t"
@@ -131,7 +131,7 @@ def _build_string_Cosmology(self):
     def test_eq(key, val, default):
         # Neutrino masses can be a list, so use `np.all` for comparison.
         # `np.all` is expensive, so only use that with `m_nu`.
-        if key != "m_nu":
+        if key not in ["m_nu", "z_mg", "df_mg"]:
             return val == default
         return np.all(val == default)
 
@@ -146,7 +146,7 @@ def _build_string_Cosmology(self):
         if not dic:
             return ""
         length = max(len(key) for key, val in dic.items())
-        tup = Hashing._to_hashable(dic)
+        tup = _to_hashable(dic)
         s = ""
         for param, value in tup:
             s += f"{newline}{param:{length}} = {value}"
@@ -156,7 +156,7 @@ def _build_string_Cosmology(self):
         # Print any extra parameters.
         if dic["extra_parameters"] is None:
             return ""
-        tup = Hashing._to_hashable(dic["extra_parameters"])
+        tup = _to_hashable(dic["extra_parameters"])
 
         s = f"{newline}extra_parameters ="
         for key, value in tup:

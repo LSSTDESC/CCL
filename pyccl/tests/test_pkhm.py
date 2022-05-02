@@ -247,6 +247,10 @@ def test_pkhm_errors():
     with pytest.raises(TypeError):
         ccl.halos.HMCalculator(COSMO, HMF, None, mass_def=M200)
 
+    # Wrong mass_def
+    with pytest.raises(TypeError):
+        ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=None)
+
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
 
     # Wrong profile
@@ -298,5 +302,5 @@ def test_calculator_from_string_smoke():
         COSMO, massfunc=HMF, hbias=HBF, mass_def=M200)
     hmc2 = ccl.halos.HMCalculator(
         COSMO, massfunc="Tinker10", hbias="Tinker10", mass_def="200m")
-    for attr in ["_massfunc", "_hbias", "_mdef"]:
+    for attr in ["_massfunc", "_hbias"]:
         assert getattr(hmc1, attr).name == getattr(hmc2, attr).name

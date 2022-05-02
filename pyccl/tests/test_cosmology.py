@@ -238,8 +238,9 @@ def test_cosmo_bps_smoke(model):
 
 
 def test_pyccl_default_params():
-    """Check that Python-layer for setting the gsl and spline parameters
-    works on par with the C-layer."""
+    """Check that the Python-layer for setting the gsl and spline parameters
+    works on par with the C-layer.
+    """
     HM_MMIN = ccl.gsl_params["HM_MMIN"]
 
     # we will test with this parameter

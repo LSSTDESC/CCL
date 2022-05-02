@@ -121,10 +121,9 @@ from .covariances import (
 from .base import (
     CCLObject,
     CCLHalosObject,
-    Hashing,
     Caching,
-    hash_,
     cache,
+    hash_,
     UnlockInstance,
     unlock_instance,
 )
@@ -170,7 +169,7 @@ from .haloprofile import (
 
 
 __all__ = (
-    'lib', 'cache', 'hash_', 'CCLObject', 'CCLHalosObject',
+    'lib', 'Caching', 'cache', 'hash_', 'CCLObject', 'CCLHalosObject',
     'UnlockInstance', 'unlock_instance',
     'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
     'CCLError', 'CCLWarning',
@@ -194,7 +193,6 @@ __all__ = (
     'correlation_3dRsd', 'correlation_3dRsd_avgmu', 'correlation_pi_sigma',
     'angular_cl_cov_cNG', 'angular_cl_cov_SSC',
     'sigma2_B_disc', 'sigma2_B_from_mask',
-    'Hashing', 'Caching',
     'EmulatorObject', 'Emulator', 'PowerSpectrumEmulator',
     'debug_mode', 'resample_array',
     'halomodel_matter_power', 'halo_concentration',
