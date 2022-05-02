@@ -364,11 +364,6 @@ class Pk2D(CCLObject):
     def __radd__(self, other):
         return self.__add__(other)
 
-    @unlock_instance(mutate=True)
-    def __iadd__(self, other):
-        self = self.__add__(other)
-        return self
-
     def __mul__(self, other):
         """Multiply two Pk2D instances.
 
@@ -400,11 +395,6 @@ class Pk2D(CCLObject):
 
     def __rmul__(self, other):
         return self.__mul__(other)
-
-    @unlock_instance(mutate=True)
-    def __imul__(self, other):
-        self = self.__mul__(other)
-        return self
 
     def __pow__(self, exponent):
         """Take a Pk2D instance to a power.
