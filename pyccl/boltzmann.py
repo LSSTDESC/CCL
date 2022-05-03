@@ -22,6 +22,7 @@ from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D
 from .errors import CCLError
+from .parameters import physical_constants
 
 
 def get_camb_pk_lin(cosmo, nonlin=False):
@@ -118,7 +119,7 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
     # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
     g = np.power(
-        lib.cvar.constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        physical_constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
@@ -348,7 +349,7 @@ def get_isitgr_pk_lin(cosmo):
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
     # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
     g = np.power(
-        lib.cvar.constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        physical_constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
