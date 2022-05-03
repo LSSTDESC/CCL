@@ -14,47 +14,46 @@ class CCLParameters:
     """
     _instances = {}
 
-    def __init_subclass__(cls, ctype=None, cinstance=None,
-                          freeze=False, **kwargs):
+    def __init_subclass__(cls, type=None, instance=None, freeze=False):
         """Routine for subclass initialization.
 
         Parameters:
-            ctype (``type``):
+            type (``type``):
                 Reference to the definition of the C-struct. In SWIG,
                 this is the class whose instance is a parameter collection.
-            cinstance (``instance``):
+            instance (``instance``):
                 The instance where the default parameters are implemented.
-                ``cinstance`` should be an instance of ``ctype``.
+                ``instance`` should be an instance of ``type``.
             freeze (``bool``):
                 Disallow mutation of the parameters.
         """
-        cls._ctype = ctype
-        cls._cinstance = cinstance
+        super().__init_subclass__()
+        cls._type = type
+        cls._instance = instance
         cls._frozen = freeze
-        super().__init_subclass__(**kwargs)
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls):
         # Convert all subclasses to singletons.
         if cls not in CCLParameters._instances:
-            instance = super().__new__(cls, *args, **kwargs)
+            instance = super().__new__(cls)
             CCLParameters._instances[cls] = instance
         return CCLParameters._instances[cls]
 
     def __init__(self):
-        for attribute in dir(self._ctype):
+        for attribute in dir(self._type):
             if (not attribute.startswith("_")
                     and attribute not in ["this", "thisown"]):
-                value = getattr(self._cinstance, attribute)
+                value = getattr(self._instance, attribute)
                 super.__setattr__(self, attribute, value)
         self.__class__._params_bak = self.__dict__.copy()
 
     def __setattr__(self, key, value):
-        if self._frozen:
+        if self._frozen and key != "T_CMB":
             name = self.__class__.__name__
             raise AttributeError(f"Instances of {name} are frozen.")
-        if not hasattr(self._ctype, key):
+        if not hasattr(self._type, key):
             raise KeyError(f"Parameter {key} does not exist.")
-        setattr(self._cinstance, key, value)
+        setattr(self._instance, key, value)
         super.__setattr__(self, key, value)
 
     def __getitem__(self, key):
@@ -68,7 +67,7 @@ class CCLParameters:
     def reload(self):
         """Reload the C-level default CCL parameters."""
         for param, value in self.__class__._params_bak.items():
-            setattr(self._cinstance, param, value)
+            setattr(self._instance, param, value)
             super.__setattr__(self, param, value)
 
     @classmethod
@@ -88,22 +87,22 @@ class CCLParameters:
 
 
 class SplineParams(CCLParameters,
-                   ctype=lib.spline_params,
-                   cinstance=lib.cvar.user_spline_params):
+                   type=lib.spline_params,
+                   instance=lib.cvar.user_spline_params):
     """The singleton instance of this class holds the spline parameters."""
     pass
 
 
 class GSLParams(CCLParameters,
-                ctype=lib.gsl_params,
-                cinstance=lib.cvar.user_gsl_params):
+                type=lib.gsl_params,
+                instance=lib.cvar.user_gsl_params):
     """The singleton instance of this class holds the gsl parameters."""
     pass
 
 
 class PhysicalConstants(CCLParameters,
-                        ctype=lib.physical_constants,
-                        cinstance=lib.cvar.constants,
+                        type=lib.physical_constants,
+                        instance=lib.cvar.constants,
                         freeze=True):
     """The singleton instance of this class holds the physical constants."""
     pass
