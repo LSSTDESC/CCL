@@ -15,7 +15,7 @@ from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
-from .parameters import CCLParameters
+from .parameters import CCLParameters, physical_constants
 
 # Configuration types
 transfer_function_types = {
@@ -257,7 +257,9 @@ class Cosmology(CCLObject):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
-        self._accuracy_params = CCLParameters.from_cosmo(self.cosmo)
+        self._spline_params = CCLParameters.get_params_dict("spline_params")
+        self._gsl_params = CCLParameters.get_params_dict("gsl_params")
+        self._accuracy_params = {**self._spline_params, **self._gsl_params}
 
         if self.cosmo.status != 0:
             raise CCLError(
@@ -579,10 +581,10 @@ class Cosmology(CCLObject):
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
-        T_CMB_old = lib.cvar.constants.T_CMB
+        T_CMB_old = physical_constants.T_CMB
         try:
             if T_CMB is not None:
-                lib.cvar.constants.T_CMB = T_CMB
+                physical_constants.T_CMB = T_CMB
             status = 0
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
@@ -600,7 +602,7 @@ class Cosmology(CCLObject):
                     df_mg, mnu_final_list, status)
             check(status)
         finally:
-            lib.cvar.constants.T_CMB = T_CMB_old
+            physical_constants.T_CMB = T_CMB_old
 
         if Omega_g is not None:
             total = self._params.Omega_g + self._params.Omega_l
