@@ -19,6 +19,7 @@ from . import ccllib as lib
 from .errors import (
     CCLError,
     CCLWarning,
+    CCLDeprecationWarning,
 )
 
 # Core data structures
@@ -165,7 +166,7 @@ __all__ = (
     'lib', 'Caching', 'cache', 'hash_', 'CCLObject', 'CCLHalosObject',
     'UnlockInstance', 'unlock_instance',
     'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
-    'CCLError', 'CCLWarning',
+    'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
     'growth_factor', 'growth_factor_unnorm', 'growth_rate',
     'comoving_radial_distance', 'angular_diameter_distance',
