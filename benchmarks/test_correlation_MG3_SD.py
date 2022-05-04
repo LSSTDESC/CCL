@@ -17,6 +17,8 @@ def set_up(request):
     h0 = 0.67702026367187500
     logA = 3.05  # log(10^10 A_s)
     # scale dependent MG cosmology
+    ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
+    ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
     with pytest.warns(ccl.CCLDeprecationWarning):
         cosmo = ccl.Cosmology(
             Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
@@ -26,8 +28,6 @@ def set_up(request):
             c1_mg=1.1, c2_mg=1.1, lambda_mg=1,
             transfer_function='boltzmann_isitgr',
             matter_power_spectrum='linear')
-    cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
-    cosmo.cosmo.gsl_params.INTEGRATION_EPSREL = 2.5E-5
 
     # Ell-dependent correction factors
     # Set up array of ells
@@ -160,3 +160,6 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     print(xi)
 
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
+
+
+ccl.gsl_params.reload()

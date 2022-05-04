@@ -7,16 +7,15 @@ def test_CCLObject():
     # Test eq --> hash --> repr for all kinds of CCL objects.
 
     # 1.1. Using a complicated Cosmology object.
-    extras = {"camb": {"halofit_version": "mead2020", "HMCode_logT_AGN": 7.8}}
+    extras = {"camb": {"halofit_version": "mead2020", "HMCode_logT_AGN": 7.8},
+              "arrays": {"array1": np.ones(10), "array2": np.ones(10)}}
     kwargs = {"transfer_function": "bbks",
               "matter_power_spectrum": "emu",
-              "z_mg": np.ones(10),
-              "df_mg": np.ones(10),
               "extra_parameters": extras}
     COSMO1 = ccl.CosmologyVanillaLCDM(**kwargs)
     COSMO2 = ccl.CosmologyVanillaLCDM(**kwargs)
     assert COSMO1 == COSMO2
-    kwargs["df_mg"] *= 2
+    kwargs["extra_parameters"]["arrays"]["array1"] *= 2
     COSMO2 = ccl.CosmologyVanillaLCDM(**kwargs)
     assert COSMO1 != COSMO2
 
@@ -24,7 +23,7 @@ def test_CCLObject():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     cosmo.compute_linear_power()
     PK1 = cosmo.get_linear_power()
-    PK2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
+    PK2 = ccl.Pk2D.from_model(cosmo, "bbks")
     assert PK1 == PK2
     assert ccl.Pk2D(empty=True) == ccl.Pk2D(empty=True)
 
@@ -58,31 +57,31 @@ def test_CCLHalosObject():
     # Test eq --> hash --> repr for all kinds of CCL halo objects.
 
     # 1. Build a halo model calculator using the default parametrizations.
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    HMC = ccl.halos.HMCalculator(
-        cosmo, massfunc="Tinker08", hbias="Tinker10", mass_def="200m")
+    HMC = ccl.halos.HMCalculator(mass_function="Tinker08",
+                                 halo_bias="Tinker10",
+                                 mass_def="200m")
 
     # 2. Define separate default halo model ingredients.
     MDEF = ccl.halos.MassDef200m()
-    HMF = ccl.halos.MassFuncTinker08(cosmo, mass_def=MDEF)
-    HBF = ccl.halos.HaloBiasTinker10(cosmo, mass_def=MDEF)
+    HMF = ccl.halos.MassFuncTinker08(mass_def=MDEF)
+    HBF = ccl.halos.HaloBiasTinker10(mass_def=MDEF)
 
     # 3. Test equivalence.
-    assert MDEF == HMC._mdef
-    assert HMF == HMC._massfunc
-    assert HBF == HMC._hbias
-    # TODO: Uncomment once CCLv3 is released (uniform keyword naming).
-    # HMC2 = ccl.halos.HMCalculator(
-    #     cosmo, massfunc=HMF, hbias=HBF, mass_def=MDEF)
-    # assert HMC == HMC2
+    assert MDEF == HMC.mass_def
+    assert HMF == HMC.mass_function
+    assert HBF == HMC.halo_bias
+    HMC2 = ccl.halos.HMCalculator(mass_function=HMF,
+                                  halo_bias=HBF,
+                                  mass_def=MDEF)
+    assert HMC == HMC2
 
     # 4. Test halo profiles.
     CM1 = ccl.halos.Concentration.from_name("Duffy08")()
     CM2 = ccl.halos.ConcentrationDuffy08()
     assert CM1 == CM2
 
-    P1 = ccl.halos.HaloProfileHOD(c_M_relation=CM1)
-    P2 = ccl.halos.HaloProfileHOD(c_M_relation=CM2)
+    P1 = ccl.halos.HaloProfileHOD(c_m_relation=CM1)
+    P2 = ccl.halos.HaloProfileHOD(c_m_relation=CM2)
     assert P1 == P2
 
     PCOV1 = ccl.halos.Profile2pt(r_corr=1.5)

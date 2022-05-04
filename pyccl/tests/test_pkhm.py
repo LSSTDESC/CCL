@@ -332,4 +332,4 @@ def test_calculator_from_string_smoke():
     hmc2 = ccl.halos.HMCalculator(
         mass_function="Tinker10", halo_bias="Tinker10", mass_def="200m")
     for attr in ["mass_function", "halo_bias", "mass_def"]:
-        assert getattr(hmc1, attr).name == getattr(hmc2, attr).name
+        assert getattr(hmc1, attr) == getattr(hmc2, attr)

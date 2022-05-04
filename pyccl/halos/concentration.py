@@ -22,7 +22,7 @@ class Concentration(CCLHalosObject):
     @warn_api
     def __init__(self, *, mass_def=None):
         if mass_def is not None:
-            if self._check_mdef(mass_def):
+            if self._check_mass_def(mass_def):
                 raise ValueError(
                     f"Mass definition {mass_def.Delta}-{mass_def.rho_type} "
                     f"is not compatible with c(M) {self.name} configuration.")

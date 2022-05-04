@@ -402,10 +402,7 @@ def test_pk2d_extrap_orders():
     zarr_a = np.outer(x, np.exp(log_y))
     pk = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a), is_logp=True)
 
-    pk.update_parameters(extrap_order_hik=10)
     assert pk.extrap_order_hik == pk.psp.extrap_order_hik
-
-    pk.update_parameters(extrap_order_lok=10)
     assert pk.extrap_order_lok == pk.psp.extrap_order_lok
 
 
@@ -500,5 +497,6 @@ def test_pk2d_from_model_smoke():
     # Verify that both `from_model` methods are equivalent.
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     pk1 = ccl.Pk2D.from_model(cosmo, "bbks")
-    pk2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
+    with pytest.warns(CCLDeprecationWarning):
+        pk2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
     assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])

@@ -148,7 +148,7 @@ def test_tracer_nz_support():
     n = dndz(z)
 
     with pytest.raises(ValueError):
-        _ = ccl.WeakLensingTracer(calculator_cosmo, (z, n))
+        _ = ccl.WeakLensingTracer(calculator_cosmo, dndz=(z, n))
 
     with pytest.raises(ValueError):
         _ = ccl.NumberCountsTracer(calculator_cosmo, has_rsd=False,

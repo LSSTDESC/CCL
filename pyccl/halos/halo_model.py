@@ -118,15 +118,15 @@ class HMCalculator(CCLHalosObject):
         rho0 = cosmo.rho_x(a, "matter", is_comoving=True)
 
         if a != self._a_current_mf:
-            self._mf = self._massfunc.get_mass_function(
-                cosmo, self._mass, a, mdef_other=self._mdef)
+            self._mf = self.mass_function.get_mass_function(
+                cosmo, self._mass, a, mass_def_other=self.mass_def)
             self._mf0 = (rho0 - self._integrator(
                 self._mf*self._mass, self._lmass)) / self._m0
             self._a_current_mf = a
 
         if get_bf and a != self._a_current_bf:
-            self._bf = self._hbias.get_halo_bias(
-                cosmo, self._mass, a, mdef_other=self._mdef)
+            self._bf = self.halo_bias.get_halo_bias(
+                cosmo, self._mass, a, mass_def_other=self.mass_def)
             self._bf0 = (rho0 - self._integrator(
                 self._mf*self._bf*self._mass, self._lmass)) / self._m0
             self._a_current_bf = a

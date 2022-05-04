@@ -459,7 +459,7 @@ def deprecated(new_function=None):
     return decorator
 
 
-def warn_api(func=None, /, *, pairs=[], reorder=[]):
+def warn_api(func=None, *, pairs=[], reorder=[]):
     """ This decorator translates old API to new API for:
       - functions/methods whose arguments have been ranamed,
       - functions/methods with changed argument order,
@@ -575,7 +575,7 @@ def warn_api(func=None, /, *, pairs=[], reorder=[]):
     return wrapper
 
 
-def deprecate_attr(getter=None, /, *, pairs=[]):
+def deprecate_attr(getter=None, *, pairs=[]):
     """This decorator can be used to deprecate attributes,
     warning users about it and pointing them to the new attribute.
 
@@ -710,9 +710,15 @@ class CCLObject:
             cls.__repr__ = cls.__ccl_repr__
 
         # Allow instance dict to change or mutate if these methods are called.
-        cls.__init__ = unlock_instance(cls.__init__)
-        if hasattr(cls, "update_parameters"):
-            cls.update_parameters = unlock_instance(cls.update_parameters)
+        def Funlock(cl, name, mutate=True):
+            func = vars(cl).get(name)
+            if func is not None:
+                newfunc = unlock_instance(mutate=mutate)(func)
+                setattr(cl, name, newfunc)
+
+        Funlock(cls, "__init__", False)
+        Funlock(cls, "update_parameters")
+        Funlock(cls, "_build_parameters", False)
 
         # Subclasses with `_load_emu` methods are emulator implementations.
         # Automatically cache the result, and convert it to class method.

@@ -20,6 +20,8 @@ def set_up(request):
     t0 = time.time()
     nztyp = request.param
     dirdat = os.path.dirname(__file__) + '/data/'
+    ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
+    ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
     with pytest.warns(ccl.CCLDeprecationWarning):
         cosmo = ccl.Cosmology(
             Omega_c=0.30, Omega_b=0.00, Omega_g=0, Omega_k=0,
@@ -27,8 +29,6 @@ def set_up(request):
             w0=-1, wa=0, T_CMB=2.7, transfer_function='bbks',
             mass_function='tinker',
             matter_power_spectrum='linear')
-    cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
-    cosmo.cosmo.gsl_params.INTEGRATION_EPSREL = 2.5E-5
 
     # Ell-dependent correction factors
     # Set up array of ells
@@ -232,3 +232,6 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
 
     print("time:", T0)
     print("time cls:", T0_CLS)
+
+
+ccl.gsl_params.reload()

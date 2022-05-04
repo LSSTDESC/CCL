@@ -16,14 +16,14 @@ def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
     h0 = 0.70001831054687500
     logA = 3.05  # log(10^10 A_s)
+    ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
+    ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
                           m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255,
                           mu_0=0.1, sigma_0=0.1,
                           transfer_function='boltzmann_class',
                           matter_power_spectrum='linear')
-    cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
-    cosmo.cosmo.gsl_params.INTEGRATION_EPSREL = 2.5E-5
 
     # Ell-dependent correction factors
     # Set up array of ells
@@ -160,3 +160,6 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     xi *= pref
 
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
+
+
+ccl.gsl_params.reload()

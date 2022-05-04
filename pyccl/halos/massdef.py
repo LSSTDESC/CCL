@@ -253,41 +253,45 @@ class MassDef(CCLHalosObject):
             raise ValueError(f"Mass definition {name} not implemented.")
 
 
-def MassDef200m(c_m='Duffy08'):
+@warn_api(pairs=[('c_m', 'c_m_relation')])
+def MassDef200m(c_m_relation='Duffy08'):
     """`MassDef` class for the mass definition with Delta=200 times the matter
     density.
 
     Args:
         c_m_relation (string): concentration-mass relation.
     """
-    return MassDef(200, 'matter', c_m_relation=c_m)
+    return MassDef(200, 'matter', c_m_relation=c_m_relation)
 
 
-def MassDef200c(c_m='Duffy08'):
+@warn_api(pairs=[('c_m', 'c_m_relation')])
+def MassDef200c(c_m_relation='Duffy08'):
     """`MassDef` class for the mass definition with Delta=200 times the critical
     density.
 
     Args:
         c_m_relation (string): concentration-mass relation.
     """
-    return MassDef(200, 'critical', c_m_relation=c_m)
+    return MassDef(200, 'critical', c_m_relation=c_m_relation)
 
 
-def MassDef500c(c_m='Ishiyama21'):
+@warn_api(pairs=[('c_m', 'c_m_relation')])
+def MassDef500c(c_m_relation='Ishiyama21'):
     """`MassDef` class for the mass definition
     with Delta=500 times the critical density.
 
     Args:
         c_m (string): concentration-mass relation.
     """
-    return MassDef(500, 'critical', c_m_relation=c_m)
+    return MassDef(500, 'critical', c_m_relation=c_m_relation)
 
 
-def MassDefVir(c_m='Klypin11'):
+@warn_api(pairs=[('c_m', 'c_m_relation')])
+def MassDefVir(c_m_relation='Klypin11'):
     """`MassDef` class for the mass definition with Delta=Delta_vir times the
     critical density.
 
     Args:
         c_m_relation (string): concentration-mass relation.
     """
-    return MassDef('vir', 'critical', c_m_relation=c_m)
+    return MassDef('vir', 'critical', c_m_relation=c_m_relation)
