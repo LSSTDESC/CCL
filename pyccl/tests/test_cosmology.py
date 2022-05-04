@@ -261,7 +261,8 @@ def test_pyccl_default_params():
     with pytest.raises(KeyError):
         ccl.gsl_params["test"] = "hallo_world"
 
-    # complains when we try to set A_SPLINE_MAX
+    # complains when we try to set A_SPLINE_MAX != 1.0
+    ccl.spline_params.A_SPLINE_MAX = 1.0
     with pytest.raises(RuntimeError):
         ccl.spline_params.A_SPLINE_MAX = 0.9
 
