@@ -23,7 +23,6 @@ class CCLParameters:
                 Disable parameter mutation.
         """
         super().__init_subclass__()
-        cls._type = instance.__class__
         cls._instance = instance
         cls._frozen = freeze
 
@@ -41,7 +40,7 @@ class CCLParameters:
                           CCLDeprecationWarning)
             object.__setattr__(self, key, value)
 
-        cls._type.__setattr__ = _new_setattr
+        cls._instance.__class__.__setattr__ = _new_setattr
 
     def __init__(self):
         # Keep a copy of the default parameters.
@@ -59,7 +58,7 @@ class CCLParameters:
             # `T_CMB` mutates in Cosmology.
             name = self.__class__.__name__
             raise AttributeError(f"Instances of {name} are frozen.")
-        if not hasattr(self._type, key):
+        if not hasattr(self._instance, key):
             raise KeyError(f"Parameter {key} does not exist.")
         if (key, value) == ("A_SPLINE_MAX", 1.0):
             # Setting `A_SPLINE_MAX` to its default value; do nothing.
