@@ -119,10 +119,7 @@ class Caching(metaclass=_ClassPropertyMeta):
         passed = {**dict(zip(params, args)), **kwargs}
         # discard the values equal to the default
         defaults = {param: value.default for param, value in params.items()}
-        to_remove = [param for param, value in passed.items()
-                     if value == defaults[param]]
-        [passed.pop(param) for param in to_remove]
-        return hex(hash_(passed))
+        return hex(hash_({**defaults, **passed}))
 
     @classmethod
     def _get(cls, dic, key, policy):
