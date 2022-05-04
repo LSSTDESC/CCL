@@ -122,13 +122,20 @@ quantities (e.g., the transfer function). The various options are as follows.
 Controlling Splines and Numerical Accuracy
 ------------------------------------------
 
-The internal splines and integration accuracy are controlled by the
-attributes of :obj:`Cosmology.cosmo.spline_params` and
-:obj:`Cosmology.cosmo.gsl_params`. These should be set after instantiation,
-but before the object is used. For example, you can set the generic relative
+The internal splines and integration accuracy are controlled by the global
+instances :obj:`pyccl.spline_params` and :obj:`pyccl.gsl_params`.
+Upon instantiation, the :obj:`pyccl.Cosmology` object assumes the accuracy
+parameters from these instances. For example, you can set the generic relative
 accuracy for integration by executing
-``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL = 1e-5``. The
-default values for these parameters are located in ``src/ccl_core.c``.
+``pyccl.gsl_params.INTEGRATION_EPSREL = 1e-5`` or
+``pyccl.gsl_params["INTEGRATION_EPSREL"] = 1e-5``. To reset the accuracy
+parameters to their default valus listed in ``src/ccl_core.c``, you may run
+``pyccl.gsl_params.reload()`` or ``pyccl.spline_params.reload()``.
+
+.. note::
+   Previously, the indicated way of setting the accuracy parameters was
+   after instantiation of a :obj:`Cosmology` object. For mutation consinstency,
+   this functionality is now deprecated and will raise an error in the future.
 
 The internal splines are controlled by the following
 parameters.
@@ -211,6 +218,10 @@ parameters.
   - HM_LIMIT: the size of the GSL workspace for halo moodel integrations.
   - HM_INT_METHOD: the Gauss-Kronrod quadrature rule used for adaptive
     integrations for the halo model comptutations.
+  - NZ_NORM_SPLINE_INTEGRATION: Use spline integration for the normalization of
+    the n(z).
+  - LENSING_KERNEL_SPLINE_INTEGRATION: Use spline integration for the lensing
+    kernel integral.
 
 
 Specifying Physical Constants

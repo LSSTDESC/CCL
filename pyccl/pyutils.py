@@ -389,8 +389,7 @@ def get_pk_spline_lk(cosmo=None):
         lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, 0)
         check(status, cosmo)
         return lk_arr
-    lk_arr, status = lib.get_pk_spline_lk_from_params(
-        lib.cvar.user_spline_params, nk, 0)
+    lk_arr, status = lib.get_pk_spline_lk_from_params(spline_params, nk, 0)
     check(status)
     return lk_arr
 
@@ -408,8 +407,7 @@ def get_pk_spline_a(cosmo=None):
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, 0)
         check(status, cosmo)
         return a_arr
-    a_arr, status = lib.get_pk_spline_a_from_params(
-        lib.cvar.user_spline_params, na, 0)
+    a_arr, status = lib.get_pk_spline_a_from_params(spline_params, na, 0)
     check(status)
     return a_arr
 
@@ -599,7 +597,7 @@ def _get_spline2d_arrays(gsl_spline):
 
 
 def _get_spline3d_arrays(gsl_spline, length):
-    """Get array data from a 3D GSL spline.
+    """Get array data from an array of 2D GSL splines.
 
     Args:
         gsl_spline (`SWIGObject` of gsl_spline2d **):

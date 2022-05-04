@@ -1,7 +1,6 @@
 import numpy as np
 from . import pyccl as ccl
 import pytest
-from . import ccllib as lib
 
 NZ = 128
 ZZ = np.linspace(0., 1., NZ)
@@ -27,8 +26,8 @@ ZZ_1 = 1.0
 gz_1 = ccl.growth_factor(COSMO, 1./(1+ZZ_1))
 a_1_v = a_1*np.ones_like(ZZ)
 Om_m = COSMO['Omega_m']
-rho_crit = lib.cvar.constants.RHO_CRITICAL
-rho_m = lib.cvar.constants.RHO_CRITICAL * COSMO['Omega_m']
+rho_crit = ccl.physical_constants.RHO_CRITICAL
+rho_m = ccl.physical_constants.RHO_CRITICAL * COSMO['Omega_m']
 Om_m_fid = 0.3
 
 c_1_t = -1*a_1*5e-14*rho_crit*COSMO['Omega_m']/gz

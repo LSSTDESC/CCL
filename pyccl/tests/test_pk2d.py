@@ -427,7 +427,7 @@ def test_pk2d_eval_cosmo():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     cosmo.compute_linear_power()
     pk = cosmo.get_linear_power()
-    assert pk.eval(1., 1., cosmo) == pk.eval(1., 1., cosmo)
+    assert pk.eval(1., 1.) == pk.eval(1., 1., cosmo)
 
     amin = pk.psp.amin
     pk.eval(1., amin*0.99, cosmo)  # doesn't fail because cosmo is provided
@@ -488,8 +488,17 @@ def test_pk2d_operations():
                        pk2.get_spline_arrays()[-1]**2,
                        rtol=1e-15)
 
+
 def test_pk2d_pkfunc_init_without_cosmo():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
     arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
     assert np.allclose(arr1, arr2, rtol=0)
+
+
+def test_pk2d_from_model_smoke():
+    # Verify that both `from_model` methods are equivalent.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    pk1 = ccl.Pk2D.from_model(cosmo, "bbks")
+    pk2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
+    assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])

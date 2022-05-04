@@ -30,6 +30,11 @@ def test_cclwarning_repr():
     assert str(v2) == str(v)
     assert v2 == v
 
+    v = pyccl.CCLDeprecationWarning("blah")
+    v2 = eval(repr(v))
+    assert str(v2) == str(v)
+    assert v2 == v
+
 
 def test_cclwarning_not_equal():
     """Check that a CCLWarning can be built from its repr"""

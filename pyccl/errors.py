@@ -1,3 +1,6 @@
+import warnings
+
+
 class CCLError(RuntimeError):
     """A CCL-specific RuntimeError"""
     def __repr__(self):
@@ -29,10 +32,8 @@ class CCLDeprecationWarning(FutureWarning):
 
     @classmethod
     def enable(cls):
-        import warnings
         warnings.simplefilter("always")
 
     @classmethod
     def disable(cls):
-        import warnings
         warnings.filterwarnings(action="ignore", category=cls)

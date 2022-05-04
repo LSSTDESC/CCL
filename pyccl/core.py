@@ -15,7 +15,7 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .base import CCLObject, cache, unlock_instance, warn_api
-from .parameters import CCLParameters
+from .parameters import CCLParameters, physical_constants
 
 # Configuration types
 transfer_function_types = {
@@ -82,19 +82,6 @@ class Cosmology(CCLObject):
               give you a model that is physically inconsistent since the
               temperature of the CMB will still be non-zero. Note however
               that this approximation is common for late-time LSS computations.
-
-    .. note:: After instantiation, you can set parameters related to the
-              internal splines and numerical integration accuracy by setting
-              the values of the attributes of
-              :obj:`Cosmology.cosmo.spline_params` and
-              :obj:`Cosmology.cosmo.gsl_params` via the `update_parameters`
-              method of `Cosmology`. For example, you can set
-              the generic relative accuracy for integration by executing
-              ``c = Cosmology(...); cosmo.update_parameters(INTEGRATION_EPSREL\
-= 1e-5``.
-              If you bypass `update_parameters` and set it directly with
-              ``setattr``, hashing the Cosmology object will be inconsistent.
-              See the module level documentation of `pyccl.core` for details.
 
     Args:
         Omega_c (:obj:`float`):
@@ -284,28 +271,14 @@ class Cosmology(CCLObject):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
-        self._accuracy_params = CCLParameters.from_cosmo(self.cosmo)
+        self._spline_params = CCLParameters.get_params_dict("spline_params")
+        self._gsl_params = CCLParameters.get_params_dict("gsl_params")
+        self._accuracy_params = {**self._spline_params, **self._gsl_params}
 
         if self.cosmo.status != 0:
             raise CCLError(
                 "(%d): %s"
                 % (self.cosmo.status, self.cosmo.status_message))
-
-    def update_parameters(self, **kwargs):
-        """Update any of the ``gsl_params`` or ``spline_params`` associated
-        with this Cosmology object.
-        """
-        from .parameters import spline_params, gsl_params
-        set_diff = list(set(kwargs.keys()) - set(self._accuracy_params.keys()))
-        if set_diff:
-            raise ValueError(f"Parameter(s) {set_diff} not recognized.")
-        for param, value in kwargs.items():
-            if hasattr(spline_params, param):
-                attr = getattr(self.cosmo, "spline_params")
-            elif hasattr(gsl_params, param):
-                attr = getattr(self.cosmo, "gsl_params")
-            setattr(attr, param, value)
-        self._accuracy_params = CCLParameters.from_cosmo(self.cosmo)
 
     def write_yaml(self, filename):
         """Write a YAML representation of the parameters to file.
@@ -679,10 +652,10 @@ class Cosmology(CCLObject):
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
-        T_CMB_old = lib.cvar.constants.T_CMB
+        T_CMB_old = physical_constants.T_CMB
         try:
             if T_CMB is not None:
-                lib.cvar.constants.T_CMB = T_CMB
+                physical_constants.T_CMB = T_CMB
             status = 0
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
@@ -699,7 +672,7 @@ class Cosmology(CCLObject):
                     z_mg, df_mg, mnu_final_list, status)
             check(status)
         finally:
-            lib.cvar.constants.T_CMB = T_CMB_old
+            physical_constants.T_CMB = T_CMB_old
 
         if Omega_g is not None:
             total = self._params.Omega_g + self._params.Omega_l
@@ -953,9 +926,6 @@ class Cosmology(CCLObject):
     @cache(maxsize=3)
     def _compute_nonlin_power(self):
         """Return the non-linear power spectrum."""
-        if self.has_nonlin_power:
-            return self._pk_nl['delta_matter:delta_matter']
-
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
                 warnings.warn(

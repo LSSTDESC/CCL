@@ -268,6 +268,10 @@ def test_pkhm_errors():
         ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
                                mass_def=None)
 
+    # Wrong mass_def
+    with pytest.raises(TypeError):
+        ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF, mass_def=None)
+
     hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
                                  mass_def=M200)
 
