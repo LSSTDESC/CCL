@@ -123,9 +123,9 @@ Controlling Splines and Numerical Accuracy
 ------------------------------------------
 
 The internal splines and integration accuracy are controlled by the global
-singleton instances :obj:`pyccl.spline_params` and :obj:`pyccl.gsl_params`.
-Upon instantiation, the :obj:`pyccl.Cosmology` object assumes the accuracy 
-parameters from these singletons. For example, you can set the generic relative
+instances :obj:`pyccl.spline_params` and :obj:`pyccl.gsl_params`.
+Upon instantiation, the :obj:`pyccl.Cosmology` object assumes the accuracy
+parameters from these instances. For example, you can set the generic relative
 accuracy for integration by executing
 ``pyccl.gsl_params.INTEGRATION_EPSREL = 1e-5`` or
 ``pyccl.gsl_params["INTEGRATION_EPSREL"] = 1e-5``. To reset the accuracy
@@ -134,8 +134,8 @@ parameters to their default valus listed in ``src/ccl_core.c``, you may run
 
 .. note::
    Previously, the indicated way of setting the accuracy parameters was
-   after instantiation of a :obj:`Cosmology` object. For consinstency, we now
-   advice against manually mutating :obj:`Cosmology` objects.
+   after instantiation of a :obj:`Cosmology` object. For mutation consinstency,
+   this functionality is now deprecated and will raise an error in the future.
 
 The internal splines are controlled by the following
 parameters.
