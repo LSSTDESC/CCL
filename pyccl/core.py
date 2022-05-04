@@ -14,7 +14,7 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
-from .parameters import CCLParameters, physical_constants
+from .parameters import physical_constants
 
 # Configuration types
 transfer_function_types = {
