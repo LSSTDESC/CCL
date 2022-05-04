@@ -304,4 +304,4 @@ def test_ccl_physical_constants_smoke():
 
 
 def test_ccl_global_parameters_repr():
-    assert repr(ccl.gsl_params) == repr(ccl.gsl_params.__dict__)
+    assert eval(repr(ccl.spline_params)) == ccl.spline_params._bak
