@@ -47,7 +47,6 @@ def test_cclwarning_not_equal():
     assert hash(v) != hash(v2)
 
 
-
 def test_ccl_deprecationwarning_switch():
     import warnings
 
