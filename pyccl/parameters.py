@@ -66,8 +66,7 @@ class CCLParameters:
             return
         object.__setattr__(self._instance, key, value)
 
-    def __getitem__(self, key):
-        return getattr(self, key)
+    __getitem__ = __getattribute__
 
     __setitem__ = __setattr__
 
