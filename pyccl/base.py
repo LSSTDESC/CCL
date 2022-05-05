@@ -1,7 +1,6 @@
 import sys
 import functools
 from collections import OrderedDict
-from numbers import Number
 import numpy as np
 import warnings
 from inspect import signature, Parameter
@@ -11,7 +10,7 @@ from _thread import RLock
 def _to_hashable(obj):
     """Make unhashable objects hashable in a consistent manner."""
 
-    if isinstance(obj, (Number, str)):
+    if isinstance(obj, (int, float, str)):
         # Strings and Numbers are hashed directly.
         return obj
 
@@ -627,15 +626,14 @@ class CCLObject:
     """Base for CCL objects.
 
     All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.
-    We aim to homogenize equivalence checking, and to consistently use hash.
+    Both methods rely on ``__repr__`` uniqueness. This aims to homogenize
+    equivalence checking, and to standardize the use of hash.
 
     Overview
     --------
     ``CCLObjects`` inherit ``__hash__``, which consistently hashes the
     representation string. They also inherit ``__eq__`` which checks for
-    hash equivalence, but does not do type checking, since subclasses might
-    simply be particular implementations of parent classes, but otherwise
-    equivalent.
+    representation equivalence.
 
     In the implemented scheme, each ``CCLObject`` may have its own, specialized
     ``__repr__`` method overloaded. Object representations have to be unique
@@ -756,10 +754,10 @@ class CCLObject:
         return self._hash
 
     def __eq__(self, other):
-        # Two same-type objects will be equal if their hashes are the same.
+        # Two same-type objects are equal if their representations are equal.
         if self.__class__ is not other.__class__:
             return False
-        return hash(self) == hash(other)
+        return repr(self) == repr(other)
 
 
 class CCLHalosObject(CCLObject, init_attrs=True):
