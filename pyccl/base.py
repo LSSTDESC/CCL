@@ -14,8 +14,7 @@ def _to_hashable(obj):
         return obj
 
     elif hasattr(obj, "__iter__"):
-        # Encapsulate all the iterables to quickly discard
-        # and go to numbers hashing in the second clause.
+        # Encapsulate all the iterables to quickly discard as needed.
 
         if isinstance(obj, np.ndarray):
             # Numpy arrays: Convert the data buffer to a byte string.
@@ -181,7 +180,7 @@ class Caching(metaclass=_ClassPropertyMeta):
         return wrapper
 
     @classmethod
-    def cache(cls, func=None, /, *, maxsize=_maxsize, policy=_policy):
+    def cache(cls, func=None, *, maxsize=_maxsize, policy=_policy):
         """Cache the output of the decorated function, using the input
         arguments as a proxy to build a hash key.
 
