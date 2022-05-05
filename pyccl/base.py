@@ -1,7 +1,6 @@
 import sys
 import functools
 from collections import OrderedDict
-from numbers import Number
 import numpy as np
 from inspect import signature
 from _thread import RLock
@@ -10,7 +9,7 @@ from _thread import RLock
 def _to_hashable(obj):
     """Make unhashable objects hashable in a consistent manner."""
 
-    if isinstance(obj, (Number, str)):
+    if isinstance(obj, (int, float, str)):
         # Strings and Numbers are hashed directly.
         return obj
 
