@@ -2,9 +2,6 @@ from .profiles import HaloProfile, HaloProfileNFW
 from .profiles_2pt import Profile2pt
 from .concentration import Concentration
 from ..base import warn_api
-from ..errors import CCLDeprecationWarning
-
-import warnings
 
 import numpy as np
 from scipy.integrate import simps
@@ -283,6 +280,8 @@ class Profile2ptCIB(Profile2pt):
     (see :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`
     and Eq. 15 of McCarthy & Madhavacheril (2021PhRvD.103j3515M)).
     """
+
+    @warn_api
     def fourier_2pt(self, cosmo, k, M, a, prof, *,
                     prof2=None, mass_def=None):
         """ Returns the Fourier-space two-point moment for the CIB
@@ -311,16 +310,6 @@ class Profile2ptCIB(Profile2pt):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
-        # patch to check if new or old API is used
-        from ..core import Cosmology
-        if not isinstance(cosmo, Cosmology):
-            warnings.warn("Official API for Profile2ptCIB.fourier_2pt "
-                          "has changed. Argument order "
-                          "(prof, cosmo, k, M, a) has been replaced by "
-                          "(cosmo, k, M, a, prof).", CCLDeprecationWarning)
-            prof, cosmo, k, M, a = cosmo, k, M, a, prof  # old to new API
-            assert isinstance(cosmo, Cosmology)
-
         if not isinstance(prof, HaloProfileCIBShang12):
             raise TypeError("prof must be of type `HaloProfileCIB`")
 

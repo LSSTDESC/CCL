@@ -1,8 +1,6 @@
 from ..base import CCLHalosObject
 from .profiles import HaloProfile, HaloProfileHOD
 from ..base import warn_api
-from ..errors import CCLDeprecationWarning
-import warnings
 
 
 class Profile2pt(CCLHalosObject):
@@ -39,8 +37,8 @@ class Profile2pt(CCLHalosObject):
         if r_corr is not None:
             self.r_corr = r_corr
 
-    def fourier_2pt(self, cosmo, k, M, a, prof, *,
-                    prof2=None, mass_def):
+    @warn_api
+    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None, mass_def):
         """ Return the Fourier-space two-point moment between
         two profiles.
 
@@ -73,16 +71,6 @@ class Profile2pt(CCLHalosObject):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
-        # patch to check if new or old API is used
-        from ..core import Cosmology
-        if not isinstance(cosmo, Cosmology):
-            warnings.warn("Official API for Profile2pt.fourier_2pt "
-                          "has changed. Argument order "
-                          "(prof, cosmo, k, M, a) has been replaced by "
-                          "(cosmo, k, M, a, prof).", CCLDeprecationWarning)
-            prof, cosmo, k, M, a = cosmo, k, M, a, prof  # old to new API
-            assert isinstance(cosmo, Cosmology)
-
         if not isinstance(prof, HaloProfile):
             raise TypeError("prof must be of type `HaloProfile`")
 
@@ -112,8 +100,9 @@ class Profile2ptHOD(Profile2pt):
     where all quantities are described in the documentation of
     :class:`~pyccl.halos.profiles.HaloProfileHOD`.
     """
-    def fourier_2pt(self, cosmo, k, M, a, prof, *,
-                    prof2=None, mass_def):
+
+    @warn_api
+    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None, mass_def):
         """ Returns the Fourier-space two-point moment for the HOD
         profile.
 
@@ -140,16 +129,6 @@ class Profile2ptHOD(Profile2pt):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
-        # patch to check if new or old API is used
-        from ..core import Cosmology
-        if not isinstance(cosmo, Cosmology):
-            warnings.warn("Official API for Profile2pt.fourier_2pt "
-                          "has changed. Argument order "
-                          "(prof, cosmo, k, M, a) has been replaced by "
-                          "(cosmo, k, M, a, prof).", CCLDeprecationWarning)
-            prof, cosmo, k, M, a = cosmo, k, M, a, prof  # old to new API
-            assert isinstance(cosmo, Cosmology)
-
         if not isinstance(prof, HaloProfileHOD):
             raise TypeError("prof must be of type `HaloProfileHOD`")
 

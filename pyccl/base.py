@@ -523,6 +523,20 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
                 item for item in args if not isinstance(item, Cosmology))
             kwargs.pop("cosmo", None)
 
+        # API compatibility for reordered positionals in `fourier_2pt`.
+        from .halos.profiles import HaloProfile
+        first_arg = args[1] if len(args) > 1 else None
+        if (func.__name__ == "fourier_2pt"
+                and isinstance(first_arg, HaloProfile)):
+            api = dict(zip(["prof", "cosmo", "k", "M", "a"], args[1: 6]))
+            print(api)
+            args = (args[0],) + args[6:]  # discard args [1-5]
+            kwargs.update(api)            # they are now kwargs
+            warnings.warn(
+                "API for Profile2pt.fourier_2pt has changed. "
+                "Argument order (prof, cosmo, k, M, a) has been replaced by "
+                "(cosmo, k, M, a, prof).", CCLDeprecationWarning)
+
         # API compatibility for renamed arguments.
         warn_names = set(kwargs) - set(params)
         if warn_names:
