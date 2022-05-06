@@ -514,21 +514,15 @@ class CCLObject(ABC):
             # Fall back to using `__ccl_repr__` from `CCLObject`.
             cls.__repr__ = cls.__ccl_repr__
 
-        # Allow instance dict to change or mutate if these methods are called.
-        def Funlock(cl, name, mutate=True):
+        def Funlock(cl, name, mutate):
+            # Allow instance to change or mutate if method `name` is called.
             func = vars(cl).get(name)
             if func is not None:
                 newfunc = unlock_instance(mutate=mutate)(func)
                 setattr(cl, name, newfunc)
 
         Funlock(cls, "__init__", False)
-        Funlock(cls, "update_parameters")
-        Funlock(cls, "_build_parameters", False)
-
-        # Subclasses with `_load_emu` methods are emulator implementations.
-        # Automatically cache the result, and convert it to class method.
-        if hasattr(cls, "_load_emu"):
-            cls._load_emu = classmethod(cache(maxsize=8)(cls._load_emu))
+        Funlock(cls, "update_parameters", True)
 
         super().__init_subclass__(**kwargs)
 
