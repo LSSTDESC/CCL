@@ -74,8 +74,12 @@ class CCLParameters:
 
     def reload(self):
         """Reload the C-level default CCL parameters."""
+        frozen = self._frozen
+        if frozen:
+            object.__setattr__(self, "_frozen", False)
         for param, value in self._bak.items():
             setattr(self, param, value)
+        object.__setattr__(self, "_frozen", frozen)
 
     @classmethod
     def get_params_dict(cls, name):

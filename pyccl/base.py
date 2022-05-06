@@ -4,6 +4,7 @@ from collections import OrderedDict
 import numpy as np
 from inspect import signature
 from _thread import RLock
+from abc import ABC
 
 
 def _to_hashable(obj):
@@ -431,7 +432,7 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
     return wrapper
 
 
-class CCLObject:
+class CCLObject(ABC):
     """Base for CCL objects.
 
     All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.
@@ -580,3 +581,67 @@ class CCLHalosObject(CCLObject, init_attrs=True):
         # to build a unique string for each instance.
         from ._repr import _build_string_from_init_attrs
         return _build_string_from_init_attrs(self)
+
+
+def link_abstractmethods(cls=None, *, methods: list[str]):
+    """Abstract class decorator, (used together with ``@abstractmethod``)
+    that links multiple abstract methods. Subclasses that define either of
+    the linked methods will satisfy the abstraction requirement. Propagated
+    via inheritance using the ``__linked_abstractmethods__`` hook.
+
+    Example:
+        Subclasses of the following class can be instantiated if either
+        ``method1`` or ``method2`` are defined. Otherwise, it falls back
+        to normal ``abc.ABCMeta`` behavior:
+
+        >>> @link_abstractmethods(methods=['method1', 'method2'])
+            class MyClass(metaclass=ABCMeta):
+                @abstractmethod
+                def method1(self):
+                    ...
+                @abstractmethod
+                def method2(self):
+                    ...
+                @abstractmethod
+                def another_method(self):
+                    ...
+
+        This subclass can be instantiated:
+
+        >>> class MySubclass(MyClass):
+                def method1(self):
+                    ...
+                def another_method(self):
+                    ...
+
+        This subclass can't be instantiated:
+
+        >>> class MySubclass(MyClass):
+                def another_method(self):
+                    ...
+    """
+    if cls is None:
+        # Avoid doubly-nested decorator factory.
+        return functools.partial(link_abstractmethods, methods=methods)
+
+    if not hasattr(cls, "__linked_abstractmethods__"):
+        # Save the linked abstract methods as a hook.
+        cls.__linked_abstractmethods__ = frozenset(methods)
+
+    def is_abstract(cls, method):
+        # Return True if a method is an abstract method.
+        return getattr(getattr(cls, method), "__isabstractmethod__", False)
+
+    def __new__(cl, *args, **kwargs):
+        # Tap into instance creation and remove all linked abstract methods
+        # from the `__abstractmethods__` hook.
+        linked = cl.__linked_abstractmethods__
+        if not all([is_abstract(cl, method) for method in linked]):
+            # If not all are abstract, it means that at least one is defined.
+            abstracts = (set(cl.__abstractmethods__) - set(linked))
+            cl.__abstractmethods__ = frozenset(abstracts)
+
+        return super(cls, cl).__new__(cl)
+
+    cls.__new__ = __new__
+    return cls

@@ -5,6 +5,7 @@ from ..base import CCLHalosObject
 from .massdef import MassDef, MassDef200m
 import numpy as np
 import functools
+from abc import abstractmethod
 
 
 class HaloBias(CCLHalosObject):
@@ -129,13 +130,11 @@ class HaloBias(CCLHalosObject):
             float or array_like: halo bias.
         """
         M_use = np.atleast_1d(M)
-        logM = self._get_consistent_mass(cosmo, M_use,
-                                         a, mdef_other)
+        logM = self._get_consistent_mass(cosmo, M_use, a, mdef_other)
 
         # sigma(M)
         status = 0
-        sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
-                                    len(logM), status)
+        sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM, len(logM), status)
         check(status, cosmo=cosmo)
 
         b = self._get_bsigma(cosmo, sigM, a)
@@ -143,6 +142,7 @@ class HaloBias(CCLHalosObject):
             b = b[0]
         return b
 
+    @abstractmethod
     def _get_bsigma(self, cosmo, sigM, a):
         """ Get the halo bias as a function of sigmaM.
 
@@ -155,8 +155,6 @@ class HaloBias(CCLHalosObject):
         Returns:
             float or array_like: f(sigma_M) function.
         """
-        raise NotImplementedError("Use one of the non-default "
-                                  "HaloBias classes")
 
     @classmethod
     def from_name(cls, name):
