@@ -4,6 +4,7 @@ from collections import OrderedDict
 import numpy as np
 from inspect import signature
 from _thread import RLock
+from abc import ABC
 
 
 def _to_hashable(obj):
@@ -429,7 +430,7 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
     return wrapper
 
 
-class CCLObject:
+class CCLObject(ABC):
     """Base for CCL objects.
 
     All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.

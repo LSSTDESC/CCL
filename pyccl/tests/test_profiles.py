@@ -44,14 +44,6 @@ def smoke_assert_prof_real(profile, method='_real'):
         assert np.shape(p) == sh
 
 
-def test_defaults():
-    p = ccl.halos.HaloProfile()
-    with pytest.raises(NotImplementedError):
-        p.real(None, None, None, None)
-    with pytest.raises(NotImplementedError):
-        p.fourier(None, None, None, None)
-
-
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileNFW,
                           ccl.halos.HaloProfileHernquist,
@@ -333,9 +325,9 @@ def test_f2r():
     p1 = ccl.halos.HaloProfileNFW(cM)
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
-    p2 = ccl.halos.HaloProfileNFW(cM, fourier_analytic=True)
-    with ccl.UnlockInstance(p2):
-        p2._real = None
+    class NFW(ccl.halos.HaloProfileNFW):
+        _fourier = ccl.halos.HaloProfileNFW._fourier
+    p2 = NFW(cM, fourier_analytic=True)
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14

@@ -6,6 +6,7 @@ from ..base import CCLHalosObject
 from .massdef import MassDef, MassDef200m
 import numpy as np
 import functools
+from abc import abstractmethod
 
 
 class MassFunc(CCLHalosObject):
@@ -160,6 +161,7 @@ class MassFunc(CCLHalosObject):
             mf = mf[0]
         return mf
 
+    @abstractmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         """ Get the :math:`f(\\sigma_M)` function for this mass function
         object (see description of this class for details).
@@ -177,8 +179,6 @@ class MassFunc(CCLHalosObject):
         Returns:
             float or array_like: :math:`f(\\sigma_M)` function.
         """
-        raise NotImplementedError("Use one of the non-default "
-                                  "MassFunction classes")
 
     @classmethod
     def from_name(cls, name):

@@ -39,6 +39,14 @@ class HaloProfile(CCLHalosObject):
     from .._repr import _build_string_HaloProfile as __repr__
     name = 'default'
 
+    def __init_subclass__(cls, **kwargs):
+        # Prevent subclass creation when `_real` or `_fourier` are not defined.
+        abc = HaloProfile
+        if (cls._real, cls._fourier) == (abc._real, abc._fourier):
+            raise TypeError(
+                f"{cls.__name__} must define `_real` or `_fourier`.")
+        super().__init_subclass__(**kwargs)
+
     def __init__(self):
         self.precision_fftlog = {'padding_lo_fftlog': 0.1,
                                  'padding_lo_extra': 0.1,
@@ -150,8 +158,24 @@ class HaloProfile(CCLHalosObject):
         """
         return self.precision_fftlog['plaw_projected']
 
+    def _real(self, cosmo, r, M, a, mass_def):
+        """Implementation of the 3D real-space profile.
+        Either `_real` or `_fourier` have to be defined.
+        """
+
+    def _fourier(self, cosmo, k, M, a, mass_def):
+        """Implementation of the 3D fourier-space profile.
+        Either `_real` or `_fourier` have to be defined.
+        """
+
+    def _projected(self, cosmo, r_t, M, a, mass_def):
+        """Implementation of the 2D real-space projected profile."""
+
+    def _cumul2d(self, cosmo, r_t, M, a, mass_def):
+        """Implementation of the 2D cumulative surface density."""
+
     def real(self, cosmo, r, M, a, mass_def=None):
-        """ Returns the 3D  real-space value of the profile as a
+        """ Returns the 3D real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
 
         Args:
@@ -169,15 +193,12 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_real', None):
+        prof = self.__class__
+        if "_real" in vars(prof):
             f_r = self._real(cosmo, r, M, a, mass_def)
-        elif getattr(self, '_fourier', None):
+        elif "_fourier" in vars(prof):
             f_r = self._fftlog_wrap(cosmo, r, M, a, mass_def,
                                     fourier_out=False)
-        else:
-            raise NotImplementedError("Profiles must have at least "
-                                      " either a _real or a "
-                                      " _fourier method.")
         return f_r
 
     def fourier(self, cosmo, k, M, a, mass_def=None):
@@ -204,15 +225,11 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_fourier', None):
+        prof = self.__class__
+        if "_fourier" in vars(prof):
             f_k = self._fourier(cosmo, k, M, a, mass_def)
-        elif getattr(self, '_real', None):
-            f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def,
-                                    fourier_out=True)
-        else:
-            raise NotImplementedError("Profiles must have at least "
-                                      " either a _real or a "
-                                      " _fourier method.")
+        elif "_real" in vars(prof):
+            f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
         return f_k
 
     def projected(self, cosmo, r_t, M, a, mass_def=None):
@@ -238,7 +255,8 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_projected', None):
+        prof = self.__class__
+        if "_projected" in vars(prof):
             s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
         else:
             s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
@@ -270,7 +288,8 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_cumul2d', None):
+        prof = self.__class__
+        if "_cumul2d" in vars(prof):
             s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
         else:
             s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
@@ -467,7 +486,8 @@ class HaloProfile(CCLHalosObject):
 
         sig_r_t_out = np.zeros([nM, r_t_use.size])
         # Compute Fourier-space profile
-        if getattr(self, '_fourier', None):
+        prof = self.__class__
+        if "_fourier" in vars(prof):
             # Compute from `_fourier` if available.
             p_fourier = self._fourier(cosmo, k_arr, M_use,
                                       a, mass_def)
