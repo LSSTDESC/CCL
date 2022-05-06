@@ -3,13 +3,16 @@ from ..core import check
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
-from ..base import CCLHalosObject, unlock_instance
+from ..base import CCLHalosObject, unlock_instance, link_abstractmethods
 from .concentration import Concentration
 from .massdef import MassDef
+from ..errors import warnings, CCLDeprecationWarning
 import numpy as np
 from scipy.special import sici, erf
+from abc import abstractmethod
 
 
+@link_abstractmethods(methods=["_real", "_fourier"])
 class HaloProfile(CCLHalosObject):
     """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
@@ -40,12 +43,11 @@ class HaloProfile(CCLHalosObject):
     name = 'default'
 
     def __init_subclass__(cls, **kwargs):
-        # Prevent subclass creation when `_real` or `_fourier` are not defined.
-        abc = HaloProfile
-        if (cls._real, cls._fourier) == (abc._real, abc._fourier):
-            raise TypeError(
-                f"{cls.__name__} must define `_real` or `_fourier`.")
         super().__init_subclass__(**kwargs)
+
+
+
+
 
     def __init__(self):
         self.precision_fftlog = {'padding_lo_fftlog': 0.1,
@@ -158,21 +160,17 @@ class HaloProfile(CCLHalosObject):
         """
         return self.precision_fftlog['plaw_projected']
 
+    @abstractmethod
     def _real(self, cosmo, r, M, a, mass_def):
         """Implementation of the 3D real-space profile.
         Either `_real` or `_fourier` have to be defined.
         """
 
+    @abstractmethod
     def _fourier(self, cosmo, k, M, a, mass_def):
         """Implementation of the 3D fourier-space profile.
         Either `_real` or `_fourier` have to be defined.
         """
-
-    def _projected(self, cosmo, r_t, M, a, mass_def):
-        """Implementation of the 2D real-space projected profile."""
-
-    def _cumul2d(self, cosmo, r_t, M, a, mass_def):
-        """Implementation of the 2D cumulative surface density."""
 
     def real(self, cosmo, r, M, a, mass_def=None):
         """ Returns the 3D real-space value of the profile as a
@@ -193,7 +191,7 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        prof = self.__class__
+        prof = self.__class__  # see if defined at the class level
         if "_real" in vars(prof):
             f_r = self._real(cosmo, r, M, a, mass_def)
         elif "_fourier" in vars(prof):
@@ -225,7 +223,7 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        prof = self.__class__
+        prof = self.__class__  # see if defined at the class level
         if "_fourier" in vars(prof):
             f_k = self._fourier(cosmo, k, M, a, mass_def)
         elif "_real" in vars(prof):
@@ -255,8 +253,7 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        prof = self.__class__
-        if "_projected" in vars(prof):
+        if hasattr(self, "_projected"):
             s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
         else:
             s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
@@ -288,8 +285,7 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        prof = self.__class__
-        if "_cumul2d" in vars(prof):
+        if hasattr(self, "_cumul2d"):
             s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
         else:
             s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
@@ -657,9 +653,9 @@ class HaloProfileNFW(HaloProfile):
     Args:
         c_M_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
-        fourier_analytic (bool): set to `True` if you want to compute
-            the Fourier profile analytically (and not through FFTLog).
-            Default: `False`.
+        fourier_analytic (bool): (Deprecated - do not use)
+            set to `True` if you want to compute the Fourier profile
+            analytically (and not through FFTLog).
         projected_analytic (bool): set to `True` if you want to
             compute the 2D projected profile analytically (and not
             through FFTLog). Default: `False`.
@@ -673,7 +669,7 @@ class HaloProfileNFW(HaloProfile):
     name = 'NFW'
 
     def __init__(self, c_M_relation,
-                 fourier_analytic=True,
+                 fourier_analytic=None,
                  projected_analytic=False,
                  cumul2d_analytic=False,
                  truncated=True):
@@ -682,8 +678,9 @@ class HaloProfileNFW(HaloProfile):
 
         self.cM = c_M_relation
         self.truncated = truncated
-        if fourier_analytic:
-            self._fourier = self._fourier_analytic
+        if fourier_analytic is not None:
+            warnings.warn("Argument `fourier_analytic` is deprecated in "
+                          "HaloProfileNFW.", CCLDeprecationWarning)
         if projected_analytic:
             if truncated:
                 raise ValueError("Analytic projected profile not supported "
@@ -804,7 +801,7 @@ class HaloProfileNFW(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier_analytic(self, cosmo, k, M, a, mass_def):
+    def _fourier(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 

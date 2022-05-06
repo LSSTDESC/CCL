@@ -152,7 +152,7 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
     return chi, wchi
 
 
-class Tracer(CCLObject, init_attrs=True):
+class Tracer(CCLObject):
     """Tracers contain the information necessary to describe the
     contribution of a given sky observable to its cross-power spectrum
     with any other tracer. Tracers are composed of 4 main ingredients:
