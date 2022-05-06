@@ -286,7 +286,8 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_growth = false;
   cosmo->computed_sigma = false;
   cosmo->status = 0;
-  ccl_cosmology_set_status_message(cosmo, "");
+  // Initialise as 0-length string
+  cosmo->status_message[0] = "\0";
 
   if(cosmo->spline_params.A_SPLINE_MAX !=1.) {
     cosmo->status = CCL_ERROR_SPLINE;
@@ -511,8 +512,8 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * messag
   #pragma omp critical
   {
     if(strlen(cosmo->status_message) != 0) {
-      ccl_raise_warning(CCL_ERROR_OVERWRITE, "Status message being overwritten.");
-      ccl_raise_warning(cosmo->status, cosmo->status_message);
+      ccl_raise_warning(CCL_ERROR_OVERWRITE, "Status message being overwritten:");
+      fprintf(stderr, "STATUS: %d. %s\n", cosmo->status, cosmo->status_message);
     }
     vsnprintf(cosmo->status_message, trunc, message, va);
 
