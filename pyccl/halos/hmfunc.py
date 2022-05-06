@@ -3,7 +3,7 @@ from ..core import check
 from ..background import omega_x
 from ..emulator import Emulator, EmulatorObject
 from ..parameters import physical_constants
-from ..base import CCLHalosObject
+from ..base import CCLHalosObject, link_abstractmethods
 from .massdef import MassDef, MassDef200m, MassDef200c
 import numpy as np
 from scipy.interpolate import interp1d
@@ -11,6 +11,7 @@ import functools
 from abc import abstractmethod
 
 
+@link_abstractmethods(methods=["_get_fsigma", "get_mass_function"])
 class MassFunc(CCLHalosObject):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
@@ -133,6 +134,7 @@ class MassFunc(CCLHalosObject):
             om_matt = omega_x(cosmo, a, 'matter')
             return delta * om_this / om_matt
 
+    @abstractmethod
     def get_mass_function(self, cosmo, M, a, mdef_other=None):
         """ Returns the mass function for input parameters.
 
