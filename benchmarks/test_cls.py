@@ -11,13 +11,13 @@ def set_up(request):
 
     nztyp = request.param
     dirdat = os.path.dirname(__file__) + '/data/'
+    ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 1E-4
+    ccl.gsl_params.INTEGRATION_EPSREL = 1E-4
     cosmo = ccl.Cosmology(Omega_c=0.30, Omega_b=0.00, Omega_g=0, Omega_k=0,
                           h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,
                           w0=-1, wa=0, T_CMB=2.7, transfer_function='bbks',
                           mass_function='tinker',
                           matter_power_spectrum='linear')
-    cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 1E-4
-    cosmo.cosmo.gsl_params.INTEGRATION_EPSREL = 1E-4
 
     # ell-arrays
     nls = 541
@@ -117,6 +117,8 @@ def set_up(request):
     bms['ii_22'] = read_bm(pre + 'b2b2' + post + 'ii.txt')
     bms['cc'] = read_bm(pre + 'log_cl_cc.txt')
     print('init and i/o time:', time.time() - t0)
+
+    ccl.gsl_params.reload()
 
     return cosmo, trc, lfacs, bms
 

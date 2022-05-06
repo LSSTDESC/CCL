@@ -10,7 +10,7 @@ M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
 CON = ccl.halos.ConcentrationDuffy08(M200)
-P1 = ccl.halos.HaloProfileNFW(CON, fourier_analytic=True)
+P1 = ccl.halos.HaloProfileNFW(CON)
 P2 = P1
 PKC = ccl.halos.Profile2pt()
 KK = np.geomspace(1E-3, 10, 32)

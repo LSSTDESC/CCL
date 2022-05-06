@@ -7,6 +7,7 @@ from ..base import CCLHalosObject
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 import functools
+from abc import abstractmethod
 
 
 class Concentration(CCLHalosObject):
@@ -30,11 +31,11 @@ class Concentration(CCLHalosObject):
             self._default_mdef()
         self._setup()
 
+    @abstractmethod
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self):
         """ Use this function to initialize any internal attributes
@@ -80,6 +81,10 @@ class Concentration(CCLHalosObject):
         else:
             M_use = M
         return M_use
+
+    @abstractmethod
+    def _concentration(self, cosmo, M, a):
+        """Implementation of the c(M) relation."""
 
     def get_concentration(self, cosmo, M, a, mdef_other=None):
         """ Returns the concentration for input parameters.
