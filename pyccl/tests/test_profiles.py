@@ -50,7 +50,7 @@ def test_profiles_equal():
     p1 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
 
     # different profile types
-    p2 = ccl.halos.HaloProfile()
+    p2 = ccl.halos.HaloProfilePressureGNFW()
     assert p1 != p2
 
     # equal profiles
