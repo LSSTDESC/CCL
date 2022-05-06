@@ -55,17 +55,6 @@ def test_bM_from_string_raises():
         ccl.halos.HaloBias.from_name('Tinker11')
 
 
-def test_bM_default():
-    bM = ccl.halos.HaloBias()
-    with pytest.raises(NotImplementedError):
-        bM._get_bsigma(COSMO, 1., 1.)
-
-    M_in = 1E12
-    lM_out = bM._get_consistent_mass(COSMO,
-                                     M_in, 1., bM.mass_def)
-    assert np.fabs(np.log10(M_in) - lM_out) < 1E-10
-
-
 def test_func_deprecated():
     with pytest.warns(ccl.CCLDeprecationWarning):
         hb1 = ccl.halos.halo_bias_from_name("Tinker10")

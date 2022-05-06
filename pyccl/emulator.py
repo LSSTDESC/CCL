@@ -1,6 +1,7 @@
-from .base import CCLObject
+from .base import CCLObject, cache, unlock_instance
 from .pk2d import Pk2D
 import numpy as np
+from abc import abstractmethod
 
 
 class Bounds(CCLObject):
@@ -94,7 +95,38 @@ class Emulator(CCLObject):
         is named ``_build_parameters``, CCL will automatically allow changing
         of the instance via ``setattr`` inside of that method.
     """
-    pass
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        def Funlock(cl, name, mutate):
+            # Allow instance to change or mutate if method `name` is called.
+            func = vars(cl).get(name)
+            if func is not None:
+                newfunc = unlock_instance(mutate=mutate)(func)
+                setattr(cl, name, newfunc)
+
+        Funlock(cls, "_build_parameters", False)
+
+        # Subclasses with `_load_emu` methods are emulator implementations.
+        # Automatically cache the result, and convert it to class method.
+        if hasattr(cls, "_load_emu"):
+            if getattr(cls._load_emu, "__isabstractmethod__", False):
+                cls._load_emu = classmethod(cache(maxsize=8)(cls._load_emu))
+
+    @abstractmethod
+    def _load_emu(cls, **kwargs) -> EmulatorObject:
+        """Implicit class method that loads the emulator (and its bounds)
+        and returns an instance of ``EmulatorObject``. The configuration
+        parameters in ``kwargs`` are used to cache the emulator.
+        """
+
+    def _build_parameters(self, **kwargs) -> None:
+        """Emulator implementations that use this method have the instance
+        ``self`` automatically unlocked so that ``setattr`` works as needed.
+        Alternatively, because ``CCLObjects`` are immutable, the context
+        manager ``UnlockInstance`` or the decorator ``unlock_instance``
+        may be used.
+        """
 
 
 class PowerSpectrumEmulator(Emulator):

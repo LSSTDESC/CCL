@@ -44,14 +44,6 @@ def smoke_assert_prof_real(profile, method='_real'):
         assert np.shape(p) == sh
 
 
-def test_defaults():
-    p = ccl.halos.HaloProfile()
-    with pytest.raises(NotImplementedError):
-        p.real(None, None, None, None)
-    with pytest.raises(NotImplementedError):
-        p.fourier(None, None, None, None)
-
-
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileNFW,
                           ccl.halos.HaloProfileHernquist,
@@ -306,14 +298,23 @@ def test_plaw_accuracy(alpha):
     assert np.all(res < 5E-3)
 
 
+def get_nfw(real=False, fourier=False):
+    # Return a subclass of the NFW profile with or without fourier analytic.
+    NFW = type("NFW", (ccl.halos.HaloProfileNFW,), {})
+    if real:
+        NFW._real = ccl.halos.HaloProfileNFW._real
+    if fourier:
+        NFW._fourier = ccl.halos.HaloProfileNFW._fourier
+    return NFW
+
+
 @pytest.mark.parametrize("use_analytic", [True, False])
 def test_nfw_accuracy(use_analytic):
     from scipy.special import sici
 
     tol = 1E-10 if use_analytic else 5E-3
     cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
-    p = ccl.halos.HaloProfileNFW(c_m_relation=cM,
-                                 fourier_analytic=use_analytic)
+    p = get_nfw(real=True, fourier=use_analytic)(c_m_relation=cM)
     M = 1E14
     a = 0.5
     c = cM.get_concentration(COSMO, M, a)
@@ -342,9 +343,7 @@ def test_f2r():
     p1 = ccl.halos.HaloProfileNFW(c_m_relation=cM)
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
-    p2 = ccl.halos.HaloProfileNFW(c_m_relation=cM, fourier_analytic=True)
-    with ccl.UnlockInstance(p2):
-        p2._real = None
+    p2 = get_nfw(fourier=True)(c_m_relation=cM)
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14
@@ -367,8 +366,7 @@ def test_nfw_projected_accuracy(fourier_analytic):
     p1 = ccl.halos.HaloProfileNFW(c_m_relation=cM, truncated=False,
                                   projected_analytic=True)
     # FFTLog
-    p2 = ccl.halos.HaloProfileNFW(c_m_relation=cM, truncated=False,
-                                  fourier_analytic=fourier_analytic)
+    p2 = get_nfw(fourier=fourier_analytic)(c_m_relation=cM, truncated=False)
 
     M = 1E14
     a = 0.5
@@ -387,8 +385,7 @@ def test_nfw_cumul2d_accuracy(fourier_analytic):
     p1 = ccl.halos.HaloProfileNFW(c_m_relation=cM, truncated=False,
                                   cumul2d_analytic=True)
     # FFTLog
-    p2 = ccl.halos.HaloProfileNFW(c_m_relation=cM, truncated=False,
-                                  fourier_analytic=fourier_analytic)
+    p2 = get_nfw(fourier=fourier_analytic)(c_m_relation=cM, truncated=False)
 
     M = 1E14
     a = 1.0

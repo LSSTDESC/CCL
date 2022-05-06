@@ -120,17 +120,6 @@ def test_nM_from_string_raises():
         ccl.halos.MassFunc.from_name('Tinker09')
 
 
-def test_nM_default():
-    nM = ccl.halos.MassFunc()
-    with pytest.raises(NotImplementedError):
-        nM._get_fsigma(COSMO, 1., 1., 8)
-
-    M_in = 1E12
-    lM_out = nM._get_consistent_mass(COSMO,
-                                     M_in, 1., nM.mass_def)
-    assert np.fabs(np.log10(M_in) - lM_out) < 1E-10
-
-
 @pytest.mark.parametrize('mf', [ccl.halos.MassFuncTinker08,
                                 ccl.halos.MassFuncTinker10])
 def test_nM_tinker_crit(mf):

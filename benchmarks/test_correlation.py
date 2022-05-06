@@ -175,6 +175,8 @@ def set_up(request):
                               fill_value=d[3][0],
                               bounds_error=False)(theta)
     print('setup time:', time.time() - t0)
+
+    ccl.gsl_params.reload()
     return cosmo, trc, bms, ers, fl
 
 

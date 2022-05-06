@@ -11,7 +11,7 @@ M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(c_m_relation=CON, fourier_analytic=True)
+P1 = ccl.halos.HaloProfileNFW(c_m_relation=CON)
 P2 = ccl.halos.HaloProfileHOD(c_m_relation=CON)
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1

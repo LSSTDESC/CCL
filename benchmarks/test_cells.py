@@ -120,6 +120,8 @@ def set_up(request):
     bms['cc'] = read_bm(pre + 'log_cl_cc.txt')
     print('init and i/o time:', time.time() - t0)
 
+    ccl.gsl_params.reload()
+
     return cosmo, trc, lfacs, bms
 
 

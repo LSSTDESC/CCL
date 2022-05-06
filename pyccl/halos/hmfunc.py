@@ -4,12 +4,14 @@ from ..background import omega_x
 from .massdef import MassDef, MassDef200m, MassDef200c
 from ..emulator import Emulator, EmulatorObject
 from ..parameters import physical_constants
-from ..base import CCLHalosObject, deprecated, warn_api
+from ..base import CCLHalosObject, link_abstractmethods, deprecated, warn_api
 import numpy as np
 from scipy.interpolate import interp1d
 import functools
+from abc import abstractmethod
 
 
+@link_abstractmethods(methods=["_get_fsigma", "get_mass_function"])
 class MassFunc(CCLHalosObject):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
@@ -130,6 +132,7 @@ class MassFunc(CCLHalosObject):
             return delta * om_this / om_matt
 
     @warn_api(pairs=[("mdef_other", "mass_def_other")])
+    @abstractmethod
     def get_mass_function(self, cosmo, M, a, *, mass_def_other=None):
         """ Returns the mass function for input parameters.
 
@@ -170,6 +173,7 @@ class MassFunc(CCLHalosObject):
             mf = mf[0]
         return mf
 
+    @abstractmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         """ Get the :math:`f(\\sigma_M)` function for this mass function
         object (see description of this class for details).
@@ -187,8 +191,6 @@ class MassFunc(CCLHalosObject):
         Returns:
             float or array_like: :math:`f(\\sigma_M)` function.
         """
-        raise NotImplementedError("Use one of the non-default "
-                                  "MassFunction classes")
 
     @classmethod
     def from_name(cls, name):

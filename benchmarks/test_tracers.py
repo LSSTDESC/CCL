@@ -20,6 +20,7 @@ def get_prediction(ells, chi_i, chi_f, alpha, beta, gamma,
 
 @pytest.fixture(scope='module')
 def set_up():
+    ccl.physical_constants.T_CMB = 2.7
     ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 1E-4
     ccl.gsl_params.INTEGRATION_EPSREL = 1E-4
     with pytest.warns(ccl.CCLDeprecationWarning):
@@ -29,8 +30,9 @@ def set_up():
             w0=-1, wa=0, transfer_function='bbks',
             mass_function='tinker',
             matter_power_spectrum='linear')
-    cosmo.cosmo.params.T_CMB = 2.7
 
+    ccl.physical_constants.reload()
+    ccl.gsl_params.reload()
     return cosmo
 
 

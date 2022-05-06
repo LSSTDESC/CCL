@@ -124,6 +124,8 @@ def set_up(request):
     ers['ll_12_m'] = interp1d(d[0], d[3],
                               fill_value=d[3][0],
                               bounds_error=False)(theta)
+
+    ccl.gsl_params.reload()
     return cosmo, trc, bms, ers, fl
 
 

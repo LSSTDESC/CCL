@@ -20,13 +20,6 @@ MDEF = ccl.halos.MassDef('fof', 'matter')
 M400 = ccl.halos.MassDef(400, 'critical')
 
 
-def test_cM_default_mass_def():
-    cM = ccl.halos.Concentration()
-    assert cM.mass_def.__eq__(MDEF)
-    assert not cM._check_mass_def(MDEF)
-    assert MDEF.__eq__(cM.mass_def)
-
-
 @pytest.mark.parametrize('cM_class', CONCS)
 def test_cM_subclasses_smoke(cM_class):
     cM = cM_class()
