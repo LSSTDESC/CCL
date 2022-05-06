@@ -42,13 +42,6 @@ class HaloProfile(CCLHalosObject):
     from .._repr import _build_string_HaloProfile as __repr__
     name = 'default'
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-
-
-
-
-
     def __init__(self):
         self.precision_fftlog = {'padding_lo_fftlog': 0.1,
                                  'padding_lo_extra': 0.1,
