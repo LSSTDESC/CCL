@@ -70,7 +70,10 @@ class CCLParameters:
     __setitem__ = __setattr__
 
     def __repr__(self):
-        return repr(self._bak)
+        out = self._bak.copy()
+        for par in out:
+            out[par] = getattr(self, par)
+        return repr(out)
 
     def reload(self):
         """Reload the C-level default CCL parameters."""
