@@ -363,7 +363,7 @@ def _build_string_Tk3D(self, na=2, nk=4, decimals=2):
     # we will print 2 tables
     if not self.tsp.is_product:
         # get the start and the end of the trispectrum, diagonally in `k`
-        tks = [tks[:, 0, :], tks[:, :, -1]]
+        tks = [tks[0][:, 0, :], tks[0][:, :, -1]]
 
     T = Table(n_y=na, n_x=nk, decimals=decimals, newline=newline,
               data_y=a, legend="a \\ log10(k1)", meta=[])
