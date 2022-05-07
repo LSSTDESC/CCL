@@ -42,11 +42,11 @@ class HaloBias(CCLHalosObject):
             self._default_mass_def()
         self._setup()
 
+    @abstractmethod
     def _default_mass_def(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self):
         """ Use this function to initialize any internal attributes

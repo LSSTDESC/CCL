@@ -27,12 +27,23 @@ def test_CCLObject():
     assert PK1 == PK2
     assert ccl.Pk2D(empty=True) == ccl.Pk2D(empty=True)
 
-    # 3. Using a Tk3D object.
+    # 3.1. Using a factorizable Tk3D object.
     a_arr, lk_arr, pk_arr = PK1.get_spline_arrays()
     TK1 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                    pk1_arr=pk_arr, pk2_arr=pk_arr, is_logt=False)
     TK2 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                    pk1_arr=pk_arr, pk2_arr=pk_arr, is_logt=False)
+    assert TK1 == TK2
+
+    # 3.2. Using a non-factorizable Tk3D object.
+    a_arr_2 = np.arange(0.5, 0.9, 0.1)
+    lk_arr_2 = np.linspace(-2, 1, 8)
+    TK1 = ccl.Tk3D(
+        a_arr=a_arr_2, lk_arr=lk_arr_2,
+        tkk_arr=np.ones((a_arr_2.size, lk_arr_2.size, lk_arr_2.size)))
+    TK2 = ccl.Tk3D(
+        a_arr=a_arr_2, lk_arr=lk_arr_2,
+        tkk_arr=np.ones((a_arr_2.size, lk_arr_2.size, lk_arr_2.size)))
     assert TK1 == TK2
 
     # 4. Using a CosmologyCalculator.
@@ -41,10 +52,10 @@ def test_CCLObject():
                  "delta_matter:delta_matter": pk_arr}
     COSMO1 = ccl.CosmologyCalculator(
         Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
-        pk_linear=pk_linear)
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
     COSMO2 = ccl.CosmologyCalculator(
         Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
-        pk_linear=pk_linear)
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
     assert COSMO1 == COSMO2
 
     # 5. Using a Tracer object.
@@ -54,7 +65,7 @@ def test_CCLObject():
 
 
 def test_CCLHalosObject():
-    # Test eq --> hash --> repr for all kinds of CCL halo objects.
+    # Test eq --> repr <-- hash for all kinds of CCL halo objects.
 
     # 1. Build a halo model calculator using the default parametrizations.
     HMC = ccl.halos.HMCalculator(mass_function="Tinker08",
@@ -113,3 +124,11 @@ def test_CCLObject_immutable():
     assert prof1 == prof2                   # repr is cached
     prof2.update_parameters(mass_bias=0.7)  # cached repr is deleted
     assert prof1 != prof2                   # repr is cached again
+
+
+def test_CCLObject_default_behavior():
+    # Test that if `__repr__` is not defined the fall back is safe.
+    MyType = type("MyType", (ccl.CCLObject,), {"test": 0})
+    instances = [MyType() for _ in range(2)]
+    assert instances[0] != instances[1]
+    assert hash(instances[0]) != hash(instances[1])

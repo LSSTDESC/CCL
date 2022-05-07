@@ -59,11 +59,11 @@ class MassFunc(CCLHalosObject):
             self._default_mass_def()
         self._setup()
 
+    @abstractmethod
     def _default_mass_def(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self):
         """ Use this function to initialize any internal attributes
@@ -812,9 +812,6 @@ class MassFuncBocquet20(MassFunc, Emulator):
 
     def _build_parameters(self, cosmo=None, M=None, a=None):
         from ..neutrinos import Omega_nu_h2
-        # check input
-        if (cosmo is not None) and (a is None):
-            raise ValueError("Need value for scale factor")
 
         self._parameters = {}
         if cosmo is not None:

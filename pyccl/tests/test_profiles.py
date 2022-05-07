@@ -455,3 +455,9 @@ def test_upd_fftlog_raises():
     new_params = {"hello_there": 0.}
     with pytest.raises(KeyError):
         prof.update_precision_fftlog(**new_params)
+
+
+def test_nfw_deprecated():
+    cM = ccl.halos.ConcentrationDuffy08(M200)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        ccl.halos.HaloProfileNFW(c_m_relation=cM, fourier_analytic=True)

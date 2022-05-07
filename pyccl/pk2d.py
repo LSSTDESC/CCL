@@ -141,17 +141,9 @@ class Pk2D(CCLObject):
     def extrap_order_lok(self):
         return self.psp.extrap_order_lok
 
-    @extrap_order_lok.setter
-    def extrap_order_lok(self, value):
-        self.psp.extrap_order_lok = value
-
     @property
     def extrap_order_hik(self):
         return self.psp.extrap_order_hik
-
-    @extrap_order_hik.setter
-    def extrap_order_hik(self, value):
-        self.psp.extrap_order_hik = value
 
     @classmethod
     def from_model(cls, cosmo, model):

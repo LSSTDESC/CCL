@@ -172,3 +172,8 @@ def test_nM_bocquet20_extrap():
     n0 = hmf0.get_mass_function(COSMO, M_arr, 1)
     n1 = hmf1.get_mass_function(COSMO, M_arr, 1)
     assert np.allclose(n0, n1, rtol=0)
+
+
+def test_nM_bocquet20_raises():
+    with pytest.raises(ValueError):
+        ccl.halos.MassFuncBocquet20(mass_def=MVIR, mass_def_strict=False)

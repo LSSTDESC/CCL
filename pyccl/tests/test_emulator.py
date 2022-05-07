@@ -19,6 +19,32 @@ def test_bounds_raises_warns():
         emu.check_bounds(proposal)
 
 
+def test_bounds_repr():
+    bounds = {"a": [0, 1], "b": [0, 1]}
+    emu = EmulatorObject(model=None, bounds=bounds)
+    assert eval(repr(emu.bounds)) == emu.bounds.bounds
+
+
+def test_bounds_types():
+    # Test all the bounds types EmulatorObject can accept.
+    # 0. We have already checked the dictionary in the previous tests.
+
+    # 1. No bounds (handled internally by the emulator).
+    emu = EmulatorObject(model=None, bounds=None)
+    assert emu.bounds is emu.check_bounds is NotImplemented
+
+    # 2. Callable.
+    def check(bounds):
+        pass
+    emu = EmulatorObject(model=None, bounds=check)
+    assert emu.bounds is NotImplemented
+    assert emu.check_bounds is check
+
+    # 3. Wrong type.
+    with pytest.raises(ValueError):
+        EmulatorObject(model=None, bounds="something_else")
+
+
 def test_emulator_from_name_raises():
     # emulator does not exist
     with pytest.raises(ValueError):
