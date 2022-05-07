@@ -37,12 +37,14 @@ def test_CCLObject():
     assert TK1 == TK2
 
     # 3.2. Using a non-factorizable Tk3D object.
-    a_arr = np.arange(0.5, 0.9, 0.1)
-    lk_arr = np.linspace(-2, 1, 8)
-    TK1 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
-                   tkk_arr=np.ones((a_arr.size, lk_arr.size, lk_arr.size)))
-    TK2 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
-                   tkk_arr=np.ones((a_arr.size, lk_arr.size, lk_arr.size)))
+    a_arr_2 = np.arange(0.5, 0.9, 0.1)
+    lk_arr_2 = np.linspace(-2, 1, 8)
+    TK1 = ccl.Tk3D(
+        a_arr=a_arr_2, lk_arr=lk_arr_2,
+        tkk_arr=np.ones((a_arr_2.size, lk_arr_2.size, lk_arr_2.size)))
+    TK2 = ccl.Tk3D(
+        a_arr=a_arr_2, lk_arr=lk_arr_2,
+        tkk_arr=np.ones((a_arr_2.size, lk_arr_2.size, lk_arr_2.size)))
     assert TK1 == TK2
 
     # 4. Using a CosmologyCalculator.
