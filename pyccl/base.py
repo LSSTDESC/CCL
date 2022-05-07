@@ -530,7 +530,6 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
         if (func.__name__ == "fourier_2pt"
                 and isinstance(first_arg, HaloProfile)):
             api = dict(zip(["prof", "cosmo", "k", "M", "a"], args[1: 6]))
-            print(api)
             args = (args[0],) + args[6:]  # discard args [1-5]
             kwargs.update(api)            # they are now kwargs
             warnings.warn(
