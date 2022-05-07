@@ -448,3 +448,9 @@ def test_nfw_cumul2d_accuracy(fourier_analytic):
 
     res2 = np.fabs(srt2/srt1-1)
     assert np.all(res2 < 5E-3)
+
+
+def test_nfw_deprecated():
+    cM = ccl.halos.ConcentrationDuffy08(M200)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        ccl.halos.HaloProfileNFW(cM, fourier_analytic=True)

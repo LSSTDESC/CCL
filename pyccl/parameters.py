@@ -36,8 +36,10 @@ class CCLParameters:
             name = self.__class__.__name__
             # TODO: Deprecation cycle for fully immutable Cosmology objects.
             # raise AttributeError(f"Direct assignment in {name} not supported.")  # noqa
-            warnings.warn(f"Direct assignment in {name} is deprecated.",
-                          CCLDeprecationWarning)
+            warnings.warn(
+                f"Direct assignment of {name} is deprecated. "
+                f"Set via `pyccl.{name}.{key}` before instantiation.",
+                CCLDeprecationWarning)
             object.__setattr__(self, key, value)
 
         cls._instance.__class__.__setattr__ = _new_setattr
