@@ -470,7 +470,7 @@ def test_cosmology_default_params():
     assert v3 == v1
 
     # warns when we try to mutate instantiated `cvar` objects
-    with pytest.warns(ccl.CCLDeprecationWarning):
+    with pytest.raises(AttributeError):
         cosmo1.cosmo.spline_params.A_SPLINE_MIN = 0.5
 
 

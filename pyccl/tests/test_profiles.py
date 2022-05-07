@@ -458,6 +458,6 @@ def test_upd_fftlog_raises():
 
 
 def test_nfw_deprecated():
-    cM = ccl.halos.ConcentrationDuffy08(M200)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
     with pytest.warns(ccl.CCLDeprecationWarning):
         ccl.halos.HaloProfileNFW(c_m_relation=cM, fourier_analytic=True)
