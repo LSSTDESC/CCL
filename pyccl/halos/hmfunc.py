@@ -809,11 +809,11 @@ class MassFuncBocquet20(MassFunc, Emulator):
         if mass_def_strict is False:
             # this will trigger an exception
             mass_def_strict = True
-        super().__init__(
-            cosmo=cosmo, mass_def=mass_def, mass_def_strict=mass_def_strict)
+        super().__init__(cosmo=cosmo, mass_def=mass_def,
+                         mass_def_strict=mass_def_strict)
 
-    def _default_mass_def(self):
-        self.mass_def = MassDef200c()
+    def _default_mdef(self):
+        self.mdef = MassDef200c()
 
     def _check_mdef_strict(self, mdef):
         if (mdef.Delta, mdef.rho_type) != (200, "critical"):
@@ -831,9 +831,6 @@ class MassFuncBocquet20(MassFunc, Emulator):
 
     def _build_parameters(self, cosmo=None, M=None, a=None):
         from ..neutrinos import Omeganuh2
-        # check input
-        if (cosmo is not None) and (a is None):
-            raise ValueError("Need value for scale factor")
 
         self._parameters = {}
         if cosmo is not None:
