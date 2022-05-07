@@ -570,7 +570,7 @@ class CCLHalosObject(CCLObject, init_attrs=True):
         return _build_string_from_init_attrs(self)
 
 
-def link_abstractmethods(cls=None, *, methods: list[str]):
+def link_abstractmethods(cls=None, *, methods: list):
     """Abstract class decorator, (used together with ``@abstractmethod``)
     that links multiple abstract methods. Subclasses that define either of
     the linked methods will satisfy the abstraction requirement. Propagated
