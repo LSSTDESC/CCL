@@ -300,6 +300,10 @@ def test_cosmology_default_params():
     v3 = cosmo3.cosmo.gsl_params.HM_MMIN
     assert v3 == v1
 
+    # warns when we try to mutate instantiated `cvar` objects
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo1.cosmo.spline_params.A_SPLINE_MIN = 0.5
+
 
 def test_ccl_physical_constants_smoke():
     assert ccl.physical_constants.CLIGHT == ccl.ccllib.cvar.constants.CLIGHT
