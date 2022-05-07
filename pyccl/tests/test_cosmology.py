@@ -306,4 +306,5 @@ def test_ccl_physical_constants_smoke():
 
 
 def test_ccl_global_parameters_repr():
+    ccl.spline_params.reload()
     assert eval(repr(ccl.spline_params)) == ccl.spline_params._bak
