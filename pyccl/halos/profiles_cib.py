@@ -87,7 +87,7 @@ class HaloProfileCIBShang12(HaloProfile):
                  gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707, Mmin=1E10,
                  L0=6.4E-8):
         if not isinstance(c_m_relation, Concentration):
-            raise TypeError("c_m_relation must be of type `Concentration`)")
+            raise TypeError("c_m_relation must be of type `Concentration`")
 
         self.nu = nu_GHz
         self.alpha = alpha

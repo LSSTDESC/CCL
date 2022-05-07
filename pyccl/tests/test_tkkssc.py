@@ -15,7 +15,7 @@ P1 = ccl.halos.HaloProfileNFW(c_m_relation=CON)
 P2 = ccl.halos.HaloProfileHOD(c_m_relation=CON)
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
-Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
+Pneg = ccl.halos.HaloProfilePressureGNFW(P0=1j)  # (1j*1j = -1)
 PKC = ccl.halos.Profile2pt()
 PKCH = ccl.halos.Profile2ptHOD()
 KK = np.geomspace(1E-3, 10, 32)
@@ -104,7 +104,7 @@ def test_tkkssc_errors():
                                    prof34_2pt=P2, normprof=False)
 
     # Negative profile in logspace
-    with pytest.warns(ccl.CCLWarning):
+    with pytest.warns((ccl.CCLWarning, np.ComplexWarning)):
         ccl.halos.halomod_Tk3D_1h(COSMO, hmc, P3, prof2=Pneg, normprof=False,
                                   lk_arr=np.log(k_arr), a_arr=a_arr,
                                   use_log=True)

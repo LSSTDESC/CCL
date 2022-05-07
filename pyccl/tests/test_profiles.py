@@ -44,6 +44,45 @@ def smoke_assert_prof_real(profile, method='_real'):
         assert np.shape(p) == sh
 
 
+def test_profiles_equal():
+    M200m = ccl.halos.MassDef200m()
+    cm = ccl.halos.ConcentrationDuffy08(mass_def=M200m)
+    p1 = ccl.halos.HaloProfileHOD(c_m_relation=cm, lMmin_0=12.)
+
+    # different profile types
+    p2 = ccl.halos.HaloProfilePressureGNFW()
+    assert p1 != p2
+
+    # equal profiles
+    p2 = p1
+    assert p1 == p2
+
+    # equivalent profiles
+    cm2 = ccl.halos.ConcentrationDuffy08(mass_def=M200m)
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm2, lMmin_0=12.)
+    assert p1 == p2
+
+    # different parameters
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm, lMmin_0=11.)
+    assert p1 != p2
+
+    # different mass-concentration
+    cm2 = ccl.halos.ConcentrationConstant()
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm2, lMmin_0=12.)
+    assert p1 != p2
+
+    # different mass-concentration mass definition
+    M200c = ccl.halos.MassDef200c()
+    cm2 = ccl.halos.ConcentrationDuffy08(mass_def=M200c)
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm2, lMmin_0=12.)
+    assert p1 != p2
+
+    # different FFTLog
+    p2 = ccl.halos.HaloProfileHOD(c_m_relation=cm, lMmin_0=12.)
+    p2.update_precision_fftlog(**{"plaw_fourier": -2.0})
+    assert p1 != p2
+
+
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileNFW,
                           ccl.halos.HaloProfileHernquist,
@@ -61,6 +100,11 @@ def test_empirical_smoke(prof_class):
 
     p = prof_class(c_m_relation=c)
     smoke_assert_prof_real(p)
+
+
+def test_empirical_smoke_CIB():
+    with pytest.raises(TypeError):
+        ccl.halos.HaloProfileCIBShang12(c_m_relation=None, nu_GHz=417)
 
 
 def test_cib_smoke():
@@ -183,22 +227,31 @@ def test_hod_ns_independent(real_prof):
     assert p1.ns_independent is True
 
 
-def test_hod_2pt_raises():
+def test_hod_2pt():
     pbad = ccl.halos.HaloProfilePressureGNFW()
     c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
     pgood = ccl.halos.HaloProfileHOD(c_m_relation=c)
     pgood_b = ccl.halos.HaloProfileHOD(c_m_relation=c)
     p2 = ccl.halos.Profile2ptHOD()
+    F0 = p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood,
+                        prof2=pgood,
+                        mass_def=M200)
+    assert np.allclose(p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood,
+                                      prof2=None, mass_def=M200),
+                       F0, rtol=0)
+
     with pytest.raises(TypeError):
         p2.fourier_2pt(COSMO, 1., 1E13, 1., pbad,
                        mass_def=M200)
 
-    with pytest.raises(ValueError):
-        p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood,
-                       prof2=pgood_b, mass_def=M200)
-
+    # doesn't raise because profiles are equivalent
     p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood,
                    prof2=pgood, mass_def=M200)
+
+    with pytest.raises(ValueError):
+        pgood_b.update_parameters(lM0_0=10.)
+        p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood,
+                       prof2=pgood_b, mass_def=M200)
 
 
 def test_2pt_rcorr_smoke():

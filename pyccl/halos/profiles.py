@@ -687,7 +687,7 @@ class HaloProfileNFW(HaloProfile):
                  cumul2d_analytic=False,
                  truncated=True):
         if not isinstance(c_m_relation, Concentration):
-            raise TypeError("c_m_relation must be of type `Concentration`)")
+            raise TypeError("c_m_relation must be of type `Concentration`")
 
         self.c_m_relation = c_m_relation
         self.truncated = truncated
@@ -876,7 +876,7 @@ class HaloProfileEinasto(HaloProfile):
     @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation, truncated=True):
         if not isinstance(c_m_relation, Concentration):
-            raise TypeError("c_m_relation must be of type `Concentration`)")
+            raise TypeError("c_m_relation must be of type `Concentration`")
 
         self.c_m_relation = c_m_relation
         self.truncated = truncated
@@ -959,7 +959,7 @@ class HaloProfileHernquist(HaloProfile):
     @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation, truncated=True):
         if not isinstance(c_m_relation, Concentration):
-            raise TypeError("c_m_relation must be of type `Concentration`)")
+            raise TypeError("c_m_relation must be of type `Concentration`")
 
         self.c_m_relation = c_m_relation
         self.truncated = truncated
