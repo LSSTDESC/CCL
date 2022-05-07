@@ -236,7 +236,7 @@ def test_tracer_delta_function_nz():
 
     # Single source plane tracer to compare against
     chi_kappa, w_kappa = ccl.tracers.get_kappa_kernel(COSMO, z_source=z_s,
-                                                      nsamples=100)
+                                                      n_samples=100)
 
     # Use the same comoving distances
     w = tr_wl.get_kernel(chi=chi_kappa)

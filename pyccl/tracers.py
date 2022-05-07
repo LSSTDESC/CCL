@@ -131,15 +131,15 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
     return chi, wchi
 
 
-@warn_api
-def get_kappa_kernel(cosmo, *, z_source=1100, nsamples=100):
+@warn_api(pairs=[("nsamples", "n_samples")])
+def get_kappa_kernel(cosmo, *, z_source=1100, n_samples=100):
     """This convenience function returns the radial kernel for
     CMB-lensing-like tracers.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
         z_source (float): Redshift of source plane for CMB lensing.
-        nsamples (int): number of samples over which the kernel
+        n_samples (int): number of samples over which the kernel
             is desired. These will be equi-spaced in radial distance.
             The kernel is quite smooth, so usually O(100) samples
             is enough.
@@ -147,11 +147,11 @@ def get_kappa_kernel(cosmo, *, z_source=1100, nsamples=100):
     _check_background_spline_compatibility(cosmo, np.array([z_source]))
     # this call inits the distance splines neded by the kernel functions
     chi_source = comoving_radial_distance(cosmo, 1./(1.+z_source))
-    chi = np.linspace(0, chi_source, nsamples)
+    chi = np.linspace(0, chi_source, n_samples)
 
     status = 0
     wchi, status = lib.get_kappa_kernel_wrapper(cosmo.cosmo, chi_source,
-                                                chi, nsamples, status)
+                                                chi, n_samples, status)
     check(status, cosmo=cosmo)
     return chi, wchi
 
@@ -609,7 +609,7 @@ def NumberCountsTracer(cosmo, *, has_rsd, dndz, bias,
     if bias is not None:  # Has density term
         # Kernel
         if kernel_d is None:
-            kernel_d = get_density_kernel(cosmo, dndz)
+            kernel_d = get_density_kernel(cosmo, dndz=dndz)
         # Transfer
         z_b, b = _check_array_params(bias, 'bias')
         # Reverse order for increasing a
@@ -619,7 +619,7 @@ def NumberCountsTracer(cosmo, *, has_rsd, dndz, bias,
     if has_rsd:  # Has RSDs
         # Kernel
         if kernel_d is None:
-            kernel_d = get_density_kernel(cosmo, dndz)
+            kernel_d = get_density_kernel(cosmo, dndz=dndz)
         # Transfer (growth rate)
         z_b, _ = _check_array_params(dndz, 'dndz')
         a_s = 1./(1+z_b[::-1])
@@ -693,7 +693,7 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
     if ia_bias is not None:  # Has intrinsic alignments
         z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
         # Kernel
-        kernel_i = get_density_kernel(cosmo, dndz)
+        kernel_i = get_density_kernel(cosmo, dndz=dndz)
         if use_A_ia:
             # Normalize so that A_IA=1
             D = growth_factor(cosmo, 1./(1+z_a))
