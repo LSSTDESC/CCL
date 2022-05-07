@@ -51,11 +51,11 @@ class MassFunc(CCLHalosObject):
             self._default_mdef()
         self._setup(cosmo)
 
+    @abstractmethod
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         """ Use this function to initialize any internal attributes
