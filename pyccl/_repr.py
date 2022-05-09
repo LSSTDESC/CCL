@@ -1,6 +1,6 @@
 import numpy as np
 from .base import _to_hashable, hash_
-from .pyutils import _get_spline1d_arrays
+from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 
 
 class Table:
@@ -301,23 +301,55 @@ def _build_string_HaloProfile(self):
 def _build_string_Tracer(self):
     """Buld a representation for a Tracer.
 
+    .. note:: Tracer insertion order is important.
+
     Example output ::
 
-        <pyccl.tracers.CMBLensingTracer>
-            cosmo = CosmologyVanillaLCDM,  HASH = 0xda3e0d42
-            z_source = 1101
-            n_samples = 128
-            NUM_TRACERS = 1
-            HASH_SPLINES = 0xf4bd2054
+        <pyccl.tracers.Tracer>
+            num       kernel             transfer       prefac  bessel
+             0  0x82ad882c232406bb  0xa0657c0f1c98fd77    0       2
+             1  0x7ab385bb323530da         None           0       0
     """
+    def get_tracer_info(tr):
+        # Return a string with info for the C-level tracer.
+
+        kernel = []
+        if tr.kernel is not None:
+            kernel.append(_get_spline1d_arrays(tr.kernel.spline))
+        kernel = hex(hash_(kernel)) if kernel else 'None'
+
+        transfer = []
+        if tr.transfer is not None:
+            attrs = ["fa", "fk"]
+            for attr in attrs:
+                spline = getattr(tr.transfer, attr, None)
+                if spline is not None:
+                    transfer.append(_get_spline1d_arrays(spline))
+            spline = getattr(tr.transfer, "fka", None)
+            if spline is not None:
+                transfer.append(_get_spline2d_arrays(spline))
+            transfer.append(tr.transfer.is_log)
+            transfer.append((tr.transfer.extrap_order_lok,
+                             tr.transfer.extrap_order_hik))
+        transfer = hex(hash_(transfer)) if transfer else 'None'
+
+        prefac = tr.der_angles
+        bessel = tr.der_bessel
+        return kernel, transfer, prefac, bessel
+
+    def print_row(newline, num, kernel, transfer, prefac, bessel):
+        s = f"{num:^3}{kernel:^20}{transfer:^20}{prefac:^8}{bessel:^8}"
+        return f"{newline}{s}"
+
     tracers = self._trc
-    H = hex(sum([hash_(_get_spline1d_arrays(tr.kernel.spline))
-                 for tr in tracers]))
+    if tracers == 0:
+        return "pyccl.Tracer(empty=True)"
+
     newline = "\n\t"
-    s = _build_string_from_init_attrs(self)
-    s += f"{newline}NUM_TRACERS = {len(tracers)}"
-    if len(tracers) > 0:
-        s += f"{newline}HASH_SPLINES = {H}"
+    s = _build_string_simple(self)
+    s += print_row(newline, "num", "kernel", "transfer", "prefac", "bessel")
+    for num, tracer in enumerate(self._trc):
+        s += print_row(newline, num, *get_tracer_info(tracer))
     return s
 
 
