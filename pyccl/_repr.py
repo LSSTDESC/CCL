@@ -348,7 +348,7 @@ def _build_string_Tracer(self):
     newline = "\n\t"
     s = _build_string_simple(self)
     s += print_row(newline, "num", "kernel", "transfer", "prefac", "bessel")
-    for num, tracer in enumerate(self._trc):
+    for num, tracer in enumerate(tracers):
         s += print_row(newline, num, *get_tracer_info(tracer))
     return s
 
