@@ -10,7 +10,7 @@ COSMO = ccl.Cosmology(
 
 @pytest.mark.parametrize('method', ['bessel', 'legendre', 'fftlog'])
 def test_correlation_smoke(method):
-    z = np.linspace(0., 1., 200)
+    z = np.linspace(0., 1., 256)
     n = np.ones(z.shape)
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
 
@@ -34,7 +34,7 @@ def test_correlation_smoke(method):
                                   ['l+', 'GG+'],
                                   ['l-', 'GG-']])
 def test_correlation_newtypes(typs):
-    z = np.linspace(0., 1., 200)
+    z = np.linspace(0., 1., 256)
     n = np.ones(z.shape)
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
 

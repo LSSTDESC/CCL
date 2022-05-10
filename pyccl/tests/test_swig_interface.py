@@ -5,6 +5,7 @@ from . import pyccl
 from . import ccllib
 from . import CCLError
 
+pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
 PYCOSMO = pyccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
                           sigma8=0.8, n_s=0.96,
                           transfer_function='bbks')
@@ -123,3 +124,6 @@ def test_swig_haloprofile():
         ccllib.einasto_norm([0.1, 1.0], [0.1, 1.0], [0.1, 1.0], 4, status)
     with pytest.raises(CCLError):
         ccllib.hernquist_norm([0.1, 1.0], [0.1, 1.0], 4, status)
+
+
+pyccl.gsl_params.reload()

@@ -208,7 +208,11 @@ def test_tracer_lensing_kernel_spline_vs_gsl_intergation(z_min, z_max,
 
     ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
     cosmo = new_simple_cosmo()
-    tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
+    if n_z_samples >= 256:
+        tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
+    else:
+        with pytest.warns(CCLWarning):
+            tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
     w_wl_spline, _ = tr_wl.get_kernel(chi=None)
 
     ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False

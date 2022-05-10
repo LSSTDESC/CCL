@@ -15,7 +15,7 @@ LENS = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, NN))
 @pytest.mark.parametrize('p_of_k_a', [None, PKA])
 def test_cls_smoke(p_of_k_a):
     # make a set of tracers to test with
-    z = np.linspace(0., 1., 200)
+    z = np.linspace(0., 1., 256)
     n = np.exp(-((z-0.5)/0.1)**2)
     b = np.sqrt(1. + z)
     lens1 = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
