@@ -208,7 +208,7 @@ class Pk2D(CCLObject):
         check(status, cosmo)
         return pk2d
 
-    @classmethod
+    @_Pk2D_descriptor
     def apply_nonlin_model(Pk2D, cosmo, model, *, pk_linear):
         """Pk2D constructor that applies a non-linear model
         to a linear power spectrum.
@@ -234,7 +234,7 @@ class Pk2D(CCLObject):
             pk2d_new = emu.apply_nonlin_model(cosmo, pk_linear)
         return pk2d_new
 
-    @classmethod
+    @_Pk2D_descriptor
     def include_baryons(Pk2D, cosmo, model, *, pk_nonlin):
         """Pk2D constructor that applies a correction for baryons to
         a non-linear power spectrum.
