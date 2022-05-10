@@ -531,27 +531,27 @@ class Pk2D(CCLObject):
     def __rtruediv__(self, other):
         return other * self**(-1)
 
-    @unlock_instance(mutate=True)
+    @unlock_instance
     def __iadd__(self, other):
         self = self + other
         return self
 
-    @unlock_instance(mutate=True)
+    @unlock_instance
     def __imul__(self, other):
         self = self * other
         return self
 
-    @unlock_instance(mutate=True)
+    @unlock_instance
     def __isub__(self, other):
         self = self - other
         return self
 
-    @unlock_instance(mutate=True)
+    @unlock_instance
     def __itruediv__(self, other):
         self = self / other
         return self
 
-    @unlock_instance(mutate=True)
+    @unlock_instance
     def __ipow__(self, other):
         self = self**other
         return self

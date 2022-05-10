@@ -395,6 +395,13 @@ def test_pk2d_mul_pow():
     assert np.allclose((zarr_a + 0.5*zarr_i)**1.5, zarr_j)
 
 
+def test_pk2d_pkfunc_init_without_cosmo():
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
+    arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
+    assert np.allclose(arr1, arr2, rtol=0)
+
+
 def test_pk2d_extrap_orders():
     # Check that setting extrap orders propagates down to the `psp`.
     x = np.linspace(0.1, 1, 10)
@@ -484,13 +491,6 @@ def test_pk2d_operations():
     assert np.allclose(pk1.get_spline_arrays()[-1],
                        pk2.get_spline_arrays()[-1]**2,
                        rtol=1e-15)
-
-
-def test_pk2d_pkfunc_init_without_cosmo():
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
-    arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
-    assert np.allclose(arr1, arr2, rtol=0)
 
 
 def test_pk2d_from_model_smoke():
