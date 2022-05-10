@@ -184,6 +184,9 @@ class Tracer(CCLObject):
         # Do nothing, just initialize list of tracers
         self._trc = []
 
+    def __bool__(self):
+        return bool(self._trc)
+
     @property
     def chi_min(self):
         """Return ``chi_min`` for this ``Tracer``. If it contains more than

@@ -76,7 +76,7 @@ def test_pk2d_from_model(model):
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function=model)
-    pk = ccl.Pk2D.pk_from_model(cosmo_fixed, model=model)
+    pk = ccl.Pk2D.from_model(cosmo_fixed, model=model)
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
@@ -111,7 +111,7 @@ def test_pk2d_from_model_emu():
                           Omega_k=0,
                           transfer_function='bbks',
                           matter_power_spectrum='emu')
-    pk = ccl.Pk2D.pk_from_model(cosmo_fixed, model='emu')
+    pk = ccl.Pk2D.from_model(cosmo_fixed, model='emu')
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
@@ -126,13 +126,13 @@ def test_pk2d_from_model_fails(model):
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1E-10, n_s=0.96,
         transfer_function='boltzmann_class')
-    assert_raises(ccl.CCLError, ccl.Pk2D.pk_from_model,
+    assert_raises(ccl.CCLError, ccl.Pk2D.from_model,
                   cosmo, model=model)
 
 
 def test_pk2d_from_model_raises():
     cosmo = ccl.CosmologyVanillaLCDM()
-    assert_raises(ValueError, ccl.Pk2D.pk_from_model,
+    assert_raises(ValueError, ccl.Pk2D.from_model,
                   cosmo, model='bbkss')
 
 
@@ -368,3 +368,101 @@ def test_pk2d_pkfunc_init_without_cosmo():
     arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
     arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
     assert np.allclose(arr1, arr2, rtol=0)
+
+
+def test_pk2d_extrap_orders():
+    # Check that setting extrap orders propagates down to the `psp`.
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    pk = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a), is_logp=True)
+
+    assert pk.extrap_order_hik == pk.psp.extrap_order_hik
+    assert pk.extrap_order_lok == pk.psp.extrap_order_lok
+
+
+def test_pk2d_descriptor():
+    # Check that `apply_halofit` can be called as a class method or
+    # as an instance method.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    cosmo.compute_linear_power()
+    pkl = cosmo.get_linear_power()
+    pk1 = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
+    pk2 = pkl.apply_halofit(cosmo)
+    assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])
+
+
+def test_pk2d_eval_cosmo():
+    # Check that `eval` can be called without `cosmo` and that an error
+    # is raised when scale factor is out of interpolation range.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    cosmo.compute_linear_power()
+    pk = cosmo.get_linear_power()
+    assert pk.eval(1., 1.) == pk.eval(1., 1., cosmo)
+
+    amin = pk.psp.amin
+    pk.eval(1., amin*0.99, cosmo)  # doesn't fail because cosmo is provided
+    with pytest.raises(TypeError):
+        pk.eval(1., amin*0.99)
+
+
+def test_pk2d_copy():
+    # Check that copying works as intended (also check `bool`).
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    pk = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a), is_logp=True)
+
+    pkc = pk.copy()
+    assert np.allclose(pk.get_spline_arrays()[-1],
+                       pkc.get_spline_arrays()[-1],
+                       rtol=1e-15)
+    assert bool(pk) is bool(pkc) is True  # they both have `psp`
+
+    pk = ccl.Pk2D(empty=True)
+    pkc = pk.copy()
+    assert bool(pk) is bool(pkc) is False
+
+
+def test_pk2d_operations():
+    # Everything is based on the already tested `add`, `mul`, and `pow`,
+    # so we don't need to test every accepted type separately.
+    x = np.linspace(0.1, 1, 10)
+    log_y = np.linspace(-3, 1, 20)
+    zarr_a = np.outer(x, np.exp(log_y))
+    pk0 = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a), is_logp=True)
+    pk1, pk2 = pk0.copy(), pk0.copy()
+
+    # sub, truediv
+    assert np.allclose((pk1 - pk2).get_spline_arrays()[-1], 0, rtol=1e-15)
+    assert np.allclose((pk1 / pk2).get_spline_arrays()[-1], 1, rtol=1e-15)
+
+    # rsub, rtruediv
+    assert np.allclose((1 - pk1).get_spline_arrays()[-1],
+                       1 - pk1.get_spline_arrays()[-1])
+    assert np.allclose((1 / pk1).get_spline_arrays()[-1],
+                       1 / pk1.get_spline_arrays()[-1])
+
+    # iadd, isub, imul, itruediv, ipow
+    pk1 += pk1
+    assert np.allclose((pk1 / pk2).get_spline_arrays()[-1], 2, rtol=1e-15)
+    pk1 -= pk2
+    assert np.allclose((pk1 / pk2).get_spline_arrays()[-1], 1, rtol=1e-15)
+    pk1 *= pk1
+    assert np.allclose(pk1.get_spline_arrays()[-1],
+                       pk2.get_spline_arrays()[-1]**2,
+                       rtol=1e-15)
+    pk1 /= pk2
+    assert np.allclose((pk1 / pk2).get_spline_arrays()[-1], 1, rtol=1e-15)
+    pk1 **= 2
+    assert np.allclose(pk1.get_spline_arrays()[-1],
+                       pk2.get_spline_arrays()[-1]**2,
+                       rtol=1e-15)
+
+
+def test_pk2d_from_model_smoke():
+    # Verify that both `from_model` methods are equivalent.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    pk1 = ccl.Pk2D.from_model(cosmo, "bbks")
+    pk2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
+    assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])

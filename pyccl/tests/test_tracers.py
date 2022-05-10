@@ -275,6 +275,11 @@ def test_tracer_n_sample_warn():
         _ = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
 
 
+def test_tracer_bool():
+    assert bool(ccl.Tracer()) is False
+    assert bool(ccl.CMBLensingTracer(COSMO, z_source=1100)) is True
+
+
 def test_tracer_chi_min_max():
     # Test that it can access the C-level chi_min and chi_max.
     tr = ccl.CMBLensingTracer(COSMO, z_source=1100)
