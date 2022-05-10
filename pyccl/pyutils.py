@@ -27,7 +27,6 @@ extrap_types = {'none': lib.f1d_extrap_0,
 
 def check(status, cosmo=None):
     """Check the status returned by a ccllib function.
-
     Args:
         status (int or :obj:`~pyccl.core.error_types`):
             Flag or error describing the success of a function.

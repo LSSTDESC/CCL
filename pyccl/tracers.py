@@ -4,8 +4,8 @@ import numpy as np
 
 from . import ccllib as lib
 from .core import check
-from .background import comoving_radial_distance, growth_rate, \
-    growth_factor, scale_factor_of_chi, h_over_h0
+from .background import (comoving_radial_distance, growth_rate,
+                         growth_factor, scale_factor_of_chi, h_over_h0)
 from .errors import CCLWarning
 from .parameters import physical_constants
 from .base import CCLObject, UnlockInstance, unlock_instance
@@ -23,9 +23,9 @@ def _Sig_MG(cosmo, a, k=None):
         k (float or array_like): Wavenumber for scale
 
     Returns:
-        float or array_like: Modification to Poisson equation under \
-            modified gravity at scale factor a. \
-            Sig_MG is assumed to be proportional to Omega_Lambda(z), \
+        float or array_like: Modification to Poisson equation under
+            modified gravity at scale factor a.
+            Sig_MG is assumed to be proportional to Omega_Lambda(z),
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
     """
     return _vectorize_fn6(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
@@ -184,6 +184,31 @@ class Tracer(CCLObject):
         # Do nothing, just initialize list of tracers
         self._trc = []
 
+    def __bool__(self):
+        return bool(self._trc)
+
+    @property
+    def chi_min(self):
+        """Return ``chi_min`` for this ``Tracer``. If it contains more than
+        one tracers and their ``chi_mins`` are different it will raise an
+        ``AttributeError``.
+        """
+        chis = [tr.chi_min for tr in self._trc]
+        if chis.count(chis[0]) != len(chis):
+            raise AttributeError("Tracers have different chi_min.")
+        return chis[0]
+
+    @property
+    def chi_max(self):
+        """Return ``chi_max`` for this ``Tracer``. If it contains more than
+        one tracers and their ``chi_maxs`` are different it will raise an
+        ``AttributeError``.
+        """
+        chis = [tr.chi_max for tr in self._trc]
+        if chis.count(chis[0]) != len(chis):
+            raise AttributeError("Tracers have different chi_max.")
+        return chis[0]
+
     def _dndz(self, z):
         raise NotImplementedError("`get_dndz` not implemented for "
                                   "this `Tracer` type.")
@@ -197,12 +222,12 @@ class Tracer(CCLObject):
             z (float or array_like): redshift values.
 
         Returns:
-            array_like: redshift distribution evaluated at the \
+            array_like: redshift distribution evaluated at the
                 input values of `z`.
         """
         return self._dndz(z)
 
-    def get_kernel(self, chi):
+    def get_kernel(self, chi=None):
         """Get the radial kernels for all tracers contained
         in this `Tracer`.
 
@@ -221,9 +246,6 @@ class Tracer(CCLObject):
                 and the comoving radial distances corresponding to the internal
                 values used for interpolation.
         """
-        if not hasattr(self, '_trc'):
-            return []
-
         if chi is None:
             chis = []
         else:
@@ -257,15 +279,12 @@ class Tracer(CCLObject):
             ell (float or array_like): angular multipole values.
 
         Returns:
-            array_like: list of prefactors for each tracer. \
-                The shape will be `(n_tracer, ell.size)`, where \
-                `n_tracer` is the number of tracers. The last \
-                dimension will be squeezed if the input is a \
+            array_like: list of prefactors for each tracer.
+                The shape will be `(n_tracer, ell.size)`, where
+                `n_tracer` is the number of tracers. The last
+                dimension will be squeezed if the input is a
                 scalar.
         """
-        if not hasattr(self, '_trc'):
-            return []
-
         ell_use = np.atleast_1d(ell)
         f_ells = []
         for t in self._trc:
@@ -292,9 +311,9 @@ class Tracer(CCLObject):
             a (float or array_like): values of the scale factor.
 
         Returns:
-            array_like: list of transfer functions for each tracer. \
-                The shape will be `(n_tracer, lk.size, a.size)`, where \
-                `n_tracer` is the number of tracers. The other \
+            array_like: list of transfer functions for each tracer.
+                The shape will be `(n_tracer, lk.size, a.size)`, where
+                `n_tracer` is the number of tracers. The other
                 dimensions will be squeezed if the inputs are scalars.
         """
         if not hasattr(self, '_trc'):
@@ -563,7 +582,7 @@ class Tracer(CCLObject):
                 lib.cl_tracer_t_free(t)
 
 
-def NumberCountsTracer(cosmo, has_rsd, dndz, bias,
+def NumberCountsTracer(cosmo, has_rsd, dndz, bias=None,
                        mag_bias=None, n_samples=256):
     """Specific `Tracer` associated to galaxy clustering with linear
     scale-independent bias, including redshift-space distortions and
@@ -753,9 +772,8 @@ def tSZTracer(cosmo, z_max=6., n_chi=1024):
     """
     tracer = Tracer()
 
-    with UnlockInstance(tracer, mutate=False):
-        tracer.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-    chi_arr = np.linspace(0, tracer.chi_max, n_chi)
+    chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+    chi_arr = np.linspace(0, chi_max, n_chi)
     a_arr = scale_factor_of_chi(cosmo, chi_arr)
     # This is \sigma_T / (m_e * c^2)
     prefac = 4.01710079e-06
@@ -789,10 +807,9 @@ def CIBTracer(cosmo, z_min=0., z_max=6., n_chi=1024):
     """
     tracer = Tracer()
 
-    with UnlockInstance(tracer, mutate=False):
-        tracer.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-        tracer.chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
-    chi_arr = np.linspace(tracer.chi_min, tracer.chi_max, n_chi)
+    chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+    chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
+    chi_arr = np.linspace(chi_min, chi_max, n_chi)
     a_arr = scale_factor_of_chi(cosmo, chi_arr)
 
     tracer.add_tracer(cosmo, kernel=(chi_arr, a_arr))
@@ -826,9 +843,8 @@ def ISWTracer(cosmo, z_max=6., n_chi=1024):
     """
     tracer = Tracer()
 
-    with UnlockInstance(tracer, mutate=False):
-        tracer.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-    chi = np.linspace(0, tracer.chi_max, n_chi)
+    chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+    chi = np.linspace(0, chi_max, n_chi)
     a_arr = scale_factor_of_chi(cosmo, chi)
     H0 = cosmo['h'] / physical_constants.CLIGHT_HMPC
     OM = cosmo['Omega_c']+cosmo['Omega_b']
@@ -841,8 +857,7 @@ def ISWTracer(cosmo, z_max=6., n_chi=1024):
 
 
 def _check_returned_tracer(return_val):
-    """Wrapper to catch exceptions when tracers are spawned from C.
-    """
+    """Wrapper to catch exceptions when tracers are spawned from C."""
     if (isinstance(return_val, int)):
         check(return_val)
         tr = None
