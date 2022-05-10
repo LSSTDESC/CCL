@@ -109,13 +109,13 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
         # Calculate number of samples in chi
         n_chi = lib.get_nchi_lensing_kernel_wrapper(z_n)
 
-    if n_chi > len(z_n):
+    if (n_chi > len(z_n)
+            and cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION):
         warnings.warn(
             f"The number of samples in the n(z) ({len(z_n)}) is smaller than "
             f"the number of samples in the lensing kernel ({n_chi}). Consider "
             f"disabling spline integration for the lensing kernel by setting "
-            f"pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION "
-            f"= False",
+            f"pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False",
             category=CCLWarning)
 
     # Compute array of chis
