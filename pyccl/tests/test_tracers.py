@@ -328,3 +328,6 @@ def test_tracer_repr():
     tr7.add_tracer(COSMO, transfer_ka=(a, lk, t_ka))
     assert tr6 == tr7
     # different extrap orders
+    tr6.add_tracer(COSMO, transfer_ka=(a, lk, t_ka), extrap_order_lok=0)
+    tr7.add_tracer(COSMO, transfer_ka=(a, lk, t_ka), extrap_order_lok=1)
+    assert tr6 != tr7
