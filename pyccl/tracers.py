@@ -180,6 +180,9 @@ class Tracer(object):
         # Do nothing, just initialize list of tracers
         self._trc = []
 
+    def __bool__(self):
+        return bool(self._trc)
+
     def _dndz(self, z):
         raise NotImplementedError("`get_dndz` not implemented for "
                                   "this `Tracer` type.")

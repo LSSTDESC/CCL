@@ -268,3 +268,8 @@ def test_tracer_n_sample_warn():
 
     with pytest.warns(CCLWarning):
         _ = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
+
+
+def test_tracer_bool():
+    assert bool(ccl.Tracer()) is False
+    assert bool(ccl.CMBLensingTracer(COSMO, z_source=1100)) is True
