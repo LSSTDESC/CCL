@@ -6,7 +6,7 @@ from . import ccllib as lib
 from .errors import CCLWarning
 from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline2d_arrays)
-from .base import CCLObject, UnlockInstance
+from .base import CCLObject, UnlockInstance, unlock_instance
 
 
 class _Pk2D_descriptor:
@@ -456,22 +456,27 @@ class Pk2D(CCLObject):
     def __rtruediv__(self, other):
         return other * self**(-1)
 
+    @unlock_instance
     def __iadd__(self, other):
         self = self + other
         return self
 
+    @unlock_instance
     def __imul__(self, other):
         self = self * other
         return self
 
+    @unlock_instance
     def __isub__(self, other):
         self = self - other
         return self
 
+    @unlock_instance
     def __itruediv__(self, other):
         self = self / other
         return self
 
+    @unlock_instance
     def __ipow__(self, other):
         self = self**other
         return self
