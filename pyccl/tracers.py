@@ -183,6 +183,28 @@ class Tracer(object):
     def __bool__(self):
         return bool(self._trc)
 
+    @property
+    def chi_min(self):
+        """Return ``chi_min`` for this ``Tracer``. If it contains more than
+        one tracers and their ``chi_mins`` are different it will raise an
+        ``AttributeError``.
+        """
+        chis = [tr.chi_min for tr in self._trc]
+        if chis.count(chis[0]) != len(chis):
+            raise AttributeError("Tracers have different chi_min.")
+        return chis[0]
+
+    @property
+    def chi_max(self):
+        """Return ``chi_max`` for this ``Tracer``. If it contains more than
+        one tracers and their ``chi_maxs`` are different it will raise an
+        ``AttributeError``.
+        """
+        chis = [tr.chi_max for tr in self._trc]
+        if chis.count(chis[0]) != len(chis):
+            raise AttributeError("Tracers have different chi_max.")
+        return chis[0]
+
     def _dndz(self, z):
         raise NotImplementedError("`get_dndz` not implemented for "
                                   "this `Tracer` type.")
