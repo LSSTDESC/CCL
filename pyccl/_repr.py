@@ -342,7 +342,7 @@ def _build_string_Tracer(self):
         return f"{newline}{s}"
 
     tracers = self._trc
-    if tracers == 0:
+    if not tracers:
         return "pyccl.Tracer(empty=True)"
 
     newline = "\n\t"

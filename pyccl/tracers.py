@@ -854,8 +854,7 @@ def ISWTracer(cosmo, z_max=6., n_chi=1024):
 
 
 def _check_returned_tracer(return_val):
-    """Wrapper to catch exceptions when tracers are spawned from C.
-    """
+    """Wrapper to catch exceptions when tracers are spawned from C."""
     if (isinstance(return_val, int)):
         check(return_val)
         tr = None
