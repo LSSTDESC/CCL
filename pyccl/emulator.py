@@ -136,10 +136,10 @@ class PowerSpectrumEmulator(Emulator):
     to build `Pk2D` object containing the power spectrum.
 
     Specific implementations should have at least one of the following methods:
-        * ``_get_pk_linear(cosmo) -> k, a, pka``
-        * ``_get_pk_nonlin(cosmo) -> k, a, pka``
-        * ``_get_nonlin_boost(cosmo) -> k, a, pka``
-        * ``_get_baryon_boost(cosmo) -> k, a, pka``
+        * ``_get_pk_linear(cosmo) -> a, k pka``
+        * ``_get_pk_nonlin(cosmo) -> a, k, pka``
+        * ``_get_nonlin_boost(cosmo) -> a, k, pka``
+        * ``_get_baryon_boost(cosmo) -> a, k, pka``
 
     Further information for general use of the emulators can be found
     in the docs of ``pyccl.emulators.Emulator``.
@@ -161,19 +161,19 @@ class PowerSpectrumEmulator(Emulator):
                 "`_get_pk_linear` to compute the linear "
                 "matter power spectrum.")
 
-        k, a, pk = self._get_pk_linear(cosmo)
+        a, k, pk = self._get_pk_linear(cosmo)
         pk2d = Pk2D(lk_arr=np.log(k), a_arr=a, pk_arr=np.log(pk))
         return pk2d
 
     def get_pk_nonlin(self, cosmo):
         """Non-linear matter power spectrum, given a model name."""
         if hasattr(self, "_get_pk_nonlin"):
-            k, a, pk = self._get_pk_nonlin(cosmo)
+            a, k, pk = self._get_pk_nonlin(cosmo)
             pk2d = Pk2D(lk_arr=np.log(k), a_arr=a, pk_arr=np.log(pk))
         elif hasattr(self, "_get_nonlin_boost"):
             # query the emulator
-            k, a, pk = self._get_pk_linear(cosmo)
-            knl, anl, fknl = self._get_nonlin_boost(cosmo)
+            a, k, pk = self._get_pk_linear(cosmo)
+            anl, knl, fknl = self._get_nonlin_boost(cosmo)
             # construct Pk2D objects
             pk2d_lin = Pk2D(lk_arr=np.log(k), a_arr=a, pk_arr=np.log(pk))
             pk2d_nonlin_boost = Pk2D(lk_arr=np.log(knl), a_arr=anl,
@@ -190,7 +190,7 @@ class PowerSpectrumEmulator(Emulator):
 
     def apply_nonlin_model(self, cosmo, pk_linear):
         if hasattr(self, "_get_nonlin_boost"):
-            knl, anl, fknl = self._get_nonlin_boost(cosmo)
+            anl, knl, fknl = self._get_nonlin_boost(cosmo)
             pk2d_nonlin_boost = Pk2D(lk_arr=np.log(knl), a_arr=anl,
                                      pk_arr=np.log(fknl))
             pk2d = pk2d_nonlin_boost * pk_linear
@@ -199,8 +199,8 @@ class PowerSpectrumEmulator(Emulator):
             # In this case we calculate the non-linear boost using
             # the ratio of nonlin/linear.
             # query the emulator
-            kl, al, pkl = self._get_pk_linear(cosmo)
-            knl, anl, pknl = self._get_pk_nonlin(cosmo)
+            al, kl, pkl = self._get_pk_linear(cosmo)
+            anl, knl, pknl = self._get_pk_nonlin(cosmo)
             # construct Pk2D objects and take their ratio
             pk2d_lin = Pk2D(lk_arr=np.log(kl), a_arr=al, pk_arr=np.log(pkl))
             pk2d_nl = Pk2D(lk_arr=np.log(knl), a_arr=anl, pk_arr=np.log(pknl))
@@ -217,7 +217,7 @@ class PowerSpectrumEmulator(Emulator):
 
     def include_baryons(self, cosmo, pk_in):
         if hasattr(self, "_get_baryon_boost"):
-            k, a, pk = self._get_baryon_boost(cosmo)
+            a, k, pk = self._get_baryon_boost(cosmo)
             pk2d_baryon = Pk2D(lk_arr=np.log(k), a_arr=a, pk_arr=np.log(pk))
             pk2d = pk2d_baryon * pk_in
         else:

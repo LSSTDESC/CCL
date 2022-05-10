@@ -619,7 +619,7 @@ class PowerSpectrumBACCO(PowerSpectrumEmulator):
             warnings.simplefilter("ignore")
             k_arr, pka = emu.model.get_linear_pk(**self._parameters)
 
-        return k_arr*h, a_arr, pka/h**3
+        return a_arr, k_arr*h, pka/h**3
 
     def _get_nonlin_boost(self, cosmo):
         # load and build parameters
@@ -637,7 +637,7 @@ class PowerSpectrumBACCO(PowerSpectrumEmulator):
             warnings.simplefilter("ignore")
             k_arr, fka = emu.model.get_nonlinear_boost(**self._parameters)
 
-        return k_arr*h, a_arr, fka
+        return a_arr, k_arr*h, fka
 
     def _get_baryon_boost(self, cosmo):
         # load and build parameters
@@ -655,4 +655,4 @@ class PowerSpectrumBACCO(PowerSpectrumEmulator):
             warnings.simplefilter("ignore")
             k_arr, fka = emu.model.get_baryonic_boost(**self._parameters)
 
-        return k_arr*h, a_arr, fka
+        return a_arr, k_arr*h, fka

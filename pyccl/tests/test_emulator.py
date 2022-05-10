@@ -101,9 +101,11 @@ def test_bacco_linear_nonlin_equiv():
     assert np.allclose(pk0, pk1, rtol=5e-3)
 
 
-def test_power_spectum_emulator_raises():
-    # does not have a `get_pk_linear` method
-    cosmo = ccl.CosmologyVanillaLCDM()
+def test_power_spectum_emulator_funcs():
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks",
+                                     matter_power_spectrum="halofit")
+    cosmo.compute_linear_power()
+    cosmo.compute_nonlin_power()
 
     class DummyEmu(ccl.PowerSpectrumEmulator):
         name = "dummy"
@@ -114,9 +116,53 @@ def test_power_spectum_emulator_raises():
         def _load_emu(self):
             pass
 
+    # 1. Test for `get_pk_linear`.
+    # does not have a `get_pk_linear` method
     with pytest.raises(NotImplementedError):
         emu = ccl.PowerSpectrumEmulator.from_name("dummy")()
         emu.get_pk_linear(cosmo)
+
+    # 2. Tests for `get_pk_nonlin`.
+    # does not have `_get_pk_nonlin` or `_get_nonlin_boost`
+    with pytest.raises(NotImplementedError):
+        emu = ccl.PowerSpectrumEmulator.from_name("dummy")()
+        emu.get_pk_nonlin(cosmo)
+
+    # we define a custom `_get_pk_nonlin`
+    def _get_pk_nonlin(self, cosmo):
+        pk = cosmo.get_nonlin_power()
+        a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
+        return a_arr, np.exp(lk_arr), pk_arr
+
+    DummyEmu._get_pk_nonlin = _get_pk_nonlin
+    # doesn't raise an error now
+    emu = ccl.PowerSpectrumEmulator.from_name("dummy")()
+    emu.get_pk_nonlin(cosmo)
+
+    # 2. Tests for `apply_nonlin_model`.
+    pkl = cosmo.get_linear_power()
+    pknl = cosmo.get_nonlin_power()  # test against this
+
+    # we define a custom `_get_pk_linear`
+    def _get_pk_linear(self, cosmo):
+        pk = cosmo.get_linear_power()
+        a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
+        return a_arr, np.exp(lk_arr), pk_arr
+
+    DummyEmu._get_pk_linear = _get_pk_linear
+
+    emu = ccl.PowerSpectrumEmulator.from_name("dummy")()
+    pknl_emu = emu.apply_nonlin_model(cosmo, pk_linear=pkl)
+
+    pk1 = pknl.get_spline_arrays()[-1]
+    pk2 = pknl_emu.get_spline_arrays()[-1]
+    assert np.allclose(pk1, pk2, 1e-16)
+
+    # does not have any method -> raises error
+    del DummyEmu._get_pk_linear, DummyEmu._get_pk_nonlin
+    with pytest.raises(NotImplementedError):
+        emu = ccl.PowerSpectrumEmulator.from_name("dummy")()
+        emu.apply_nonlin_model(cosmo, pk_linear=pkl)
 
 
 def test_power_spectrum_emulator_baryon_raises():
