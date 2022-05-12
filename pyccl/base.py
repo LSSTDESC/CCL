@@ -338,6 +338,36 @@ def auto_assign(func, sig=None):
     return wrapper
 
 
+class ObjectLock:
+    """Control the lock state (immutability) of a ``CCLObject``."""
+    _locked: bool = False
+    _lock_id: int = None
+
+    def __repr__(self):
+        return f"LockInfo(locked={self.locked})"
+
+    @property
+    def locked(self):
+        """Check if the object is locked."""
+        return self._locked
+
+    @property
+    def active(self):
+        """Check if an unlocking context manager is active."""
+        return self._lock_id is not None
+
+    def lock(self):
+        """Lock the object."""
+        self._locked = True
+        self._lock_id = None
+
+    def unlock(self, manager_id=None):
+        """Unlock the object."""
+        self._locked = False
+        if manager_id is not None:
+            self._lock_id = manager_id
+
+
 class UnlockInstance:
     """Context manager that temporarily unlocks an immutable instance
     of ``CCLObject``.
@@ -356,38 +386,37 @@ class UnlockInstance:
         self.mutate = mutate
         # Define these attributes for easy access.
         self.id = id(self)
-        self.lock = RLock()
-
-    def check_instance(self):
+        self.thread_lock = RLock()
         # We want to catch and exit if the instance is not a CCLObject.
         # Hopefully this will be caught downstream.
-        return isinstance(self.instance, CCLObject)
+        self.check_instance = isinstance(instance, CCLObject)
+        if self.check_instance:
+            self.object_lock = instance._object_lock
 
     def __enter__(self):
-        if not self.check_instance():
+        if not self.check_instance:
             return
 
-        with self.lock:
+        with self.thread_lock:
             # Prevent simultaneous enclosing of a single instance.
-            if self.instance._lock_id is not None:
+            if self.object_lock.active:
                 # Context manager already active.
                 return
 
             # Unlock and store the fingerprint of this context manager so that
             # only this context manager is allowed to run on the instance.
-            object.__setattr__(self.instance, "_locked", False)
-            self.instance._lock_id = self.id
+            self.object_lock.unlock(manager_id=self.id)
 
     def __exit__(self, type, value, traceback):
-        if not self.check_instance():
+        if not self.check_instance:
             return
 
         # If another context manager is running,
         # do nothing; otherwise reset.
-        if self.id != self.instance._lock_id:
+        if self.id != self.object_lock._lock_id:
             return
 
-        with self.lock:
+        with self.thread_lock:
             # Reset `repr` if the object has been mutated.
             if self.mutate:
                 try:
@@ -398,8 +427,7 @@ class UnlockInstance:
                     pass
 
             # Lock the instance on exit.
-            self.instance._lock_id = None
-            self.instance._locked = True
+            self.object_lock.lock()
 
 
 def unlock_instance(func=None, *, argv=0, mutate=True):
@@ -479,6 +507,7 @@ class CCLObjectMeta(ABCMeta):
             linked = clsobj.__linked_abstractmethods__
 
             def is_abstract(clsobj, method):
+                # Check if the `method` of class `clsobj` is abstract.
                 meth = getattr(clsobj, method)
                 return getattr(meth, "__isabstractmethod__", False)
 
@@ -530,11 +559,6 @@ class CCLObject(metaclass=CCLObjectMeta):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
-    # *** Information regarding the immutability state of the CCLObject ***
-    # Immutability lock. Disables `setattr`. (see `unlock_instance`)
-    _locked: bool = False
-    # Memory address of the unlocking context manager. (see `UnlockInstance`)
-    _lock_id: int = None
 
     def __init_subclass__(cls, **kwargs):
         """Subclass initialization routine."""
@@ -563,8 +587,14 @@ class CCLObject(metaclass=CCLObjectMeta):
         Funlock(cls, "__init__", False)
         Funlock(cls, "update_parameters", True)
 
+    def __new__(cls, *args, **kwargs):
+        # Populate every instance with an `ObjectLock` as attribute.
+        instance = super().__new__(cls)
+        object.__setattr__(instance, "_object_lock", ObjectLock())
+        return instance
+
     def __setattr__(self, name, value):
-        if self._locked:
+        if self._object_lock.locked:
             raise AttributeError("CCL objects can only be updated via "
                                  "`update_parameters`, if implemented.")
         object.__setattr__(self, name, value)
