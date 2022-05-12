@@ -471,36 +471,18 @@ class CCLObject(ABC):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
-    # *** Information regarding the state of the CCLObject ***
+    # *** Information regarding the immutability state of the CCLObject ***
     # Immutability lock. Disables `setattr`. (see `unlock_instance`)
     _locked: bool = False
     # Memory address of the unlocking context manager. (see `UnlockInstance`)
     _lock_id: int = None
-    # Have all the arguments in the constructor been assigned as instance
-    # attributes? (see `auto_assign`)
-    _init_attrs_state: bool = False
 
-    def __init_subclass__(cls, init_attrs=None, **kwargs):
-        """Subclass initialization routine.
+    def __init_subclass__(cls, **kwargs):
+        """Subclass initialization routine."""
+        super().__init_subclass__(**kwargs)
 
-        Parameters:
-            init_attrs (``bool``):
-                If ``True``, assign all arguments of the constructor
-                as instance attributes. (see ``~pyccl.base.auto_assign``)
-        """
         # Store the signature of the constructor on import.
-        cls._init_signature = signature(cls.__init__)
-
-        if init_attrs is None:
-            # If not specified, get from current state
-            # because a parent class might have toggled it.
-            init_attrs = cls._init_attrs_state
-
-        if init_attrs and hasattr(cls, "__init__"):
-            # Decorate the __init__ method with the auto-assigner.
-            cls.__init__ = auto_assign(cls.__init__, sig=cls._init_signature)
-            # Make sure this is inherited.
-            cls._init_attrs_state = True
+        cls.__signature__ = signature(cls.__init__)
 
         if "__repr__" in vars(cls):
             # If the class defines a custom `__repr__`, this will be the new
@@ -512,12 +494,15 @@ class CCLObject(ABC):
             # Fall back to using `__ccl_repr__` from `CCLObject`.
             cls.__repr__ = cls.__ccl_repr__
 
-        # Allow instance dict to change or mutate if these methods are called.
-        cls.__init__ = unlock_instance(cls.__init__)
-        if hasattr(cls, "update_parameters"):
-            cls.update_parameters = unlock_instance(cls.update_parameters)
+        def Funlock(cl, name, mutate):
+            # Allow instance to change or mutate if method `name` is called.
+            func = vars(cl).get(name)
+            if func is not None:
+                newfunc = unlock_instance(mutate=mutate)(func)
+                setattr(cl, name, newfunc)
 
-        super().__init_subclass__(**kwargs)
+        Funlock(cls, "__init__", False)
+        Funlock(cls, "update_parameters", True)
 
     def __setattr__(self, name, value):
         if self._locked:
@@ -557,10 +542,18 @@ class CCLObject(ABC):
         return repr(self) == repr(other)
 
 
-class CCLHalosObject(CCLObject, init_attrs=True):
+class CCLHalosObject(CCLObject):
     """Base for halo objects. Automatically assign all ``__init__``
     parameters as attributes.
     """
+
+    def __init_subclass__(cls, **kwargs):
+        """Subclass initialization routine."""
+        super().__init_subclass__(**kwargs)
+
+        if "__init__" in vars(cls):
+            # Decorate the __init__ method with the auto-assigner.
+            cls.__init__ = auto_assign(cls.__init__, sig=cls.__signature__)
 
     def __repr__(self):
         # If all the passed parameters have been assigned as instance

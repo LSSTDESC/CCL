@@ -138,7 +138,7 @@ def _build_string_Cosmology(self):
     def printdict(dic):
         # Print the non-default parameters listed in a parameter dictionary.
         base = cls.__base__ if cls.__qualname__ != "Cosmology" else cls
-        params = base._init_signature.parameters
+        params = base.__signature__.parameters
         defaults = {param: value.default for param, value in params.items()}
         dic = {key: val for key, val in dic.items()
                if not test_eq(key, val, defaults.get(key))}
@@ -251,7 +251,7 @@ def _build_string_from_init_attrs(self):
     """
 
     # collect the dictionary of input values different to defaults
-    params = self._init_signature.parameters
+    params = self.__class__.__signature__.parameters
     defaults = {param: value.default
                 for param, value in params.items()
                 if param != "self"}
