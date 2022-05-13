@@ -4,7 +4,7 @@ from collections import OrderedDict
 import numpy as np
 from inspect import signature
 from _thread import RLock
-from abc import ABC
+from abc import ABCMeta
 
 
 def _to_hashable(obj):
@@ -304,7 +304,7 @@ class CachedObject:
         self.counter = 0
 
 
-def auto_assign(func, sig=None):
+def auto_assign(func, sig):
     """Decorator to automatically assign all parameters as instance attributes.
     This ought to be applied on constructor methods.
 
@@ -313,31 +313,50 @@ def auto_assign(func, sig=None):
             Function which takes the instance as its first argument.
             All function arguments will be assigned as attributes of the
             instance.
-        sig (``inspect.Signature``, optional):
-            A signature may be provided externally for speed.
+        sig (``inspect.Signature``):
+            The signature of the constructor this decorator is applied to.
+            This is needed to distinguish between parent class methods.
     """
-    sig = signature(func).parameters if sig is None else sig.parameters
-    _, *params = [n for n in sig]
-    _, *defaults = [p.default for p in sig.values()]
-
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
-        # collect all input in one dictionary
-        dic = {**dict(zip(params, args)), **kwargs}
-
-        # assign the declared parameters
-        for param, value in dic.items():
-            setattr(self, param, value)
-
-        # assign the undeclared parameters with default values
-        for param, default in zip(reversed(params), reversed(defaults)):
-            if not hasattr(self, param):
-                setattr(self, param, default)
-
+        bound = sig.bind_partial(self, *args, **kwargs)
+        bound.apply_defaults()
+        bound.arguments.pop("self")
+        for name, value in bound.arguments.items():
+            setattr(self, name, value)
         # func may now override the attributes we just set
         func(self, *args, **kwargs)
-
     return wrapper
+
+
+class ObjectLock:
+    """Control the lock state (immutability) of a ``CCLObject``."""
+    _locked: bool = False
+    _lock_id: int = None
+
+    def __repr__(self):
+        return f"LockInfo(locked={self.locked})"
+
+    @property
+    def locked(self):
+        """Check if the object is locked."""
+        return self._locked
+
+    @property
+    def active(self):
+        """Check if an unlocking context manager is active."""
+        return self._lock_id is not None
+
+    def lock(self):
+        """Lock the object."""
+        self._locked = True
+        self._lock_id = None
+
+    def unlock(self, manager_id=None):
+        """Unlock the object."""
+        self._locked = False
+        if manager_id is not None:
+            self._lock_id = manager_id
 
 
 class UnlockInstance:
@@ -358,38 +377,37 @@ class UnlockInstance:
         self.mutate = mutate
         # Define these attributes for easy access.
         self.id = id(self)
-        self.lock = RLock()
-
-    def check_instance(self):
+        self.thread_lock = RLock()
         # We want to catch and exit if the instance is not a CCLObject.
         # Hopefully this will be caught downstream.
-        return isinstance(self.instance, CCLObject)
+        self.check_instance = isinstance(instance, CCLObject)
+        if self.check_instance:
+            self.object_lock = instance._object_lock
 
     def __enter__(self):
-        if not self.check_instance():
+        if not self.check_instance:
             return
 
-        with self.lock:
+        with self.thread_lock:
             # Prevent simultaneous enclosing of a single instance.
-            if self.instance._lock_id is not None:
+            if self.object_lock.active:
                 # Context manager already active.
                 return
 
             # Unlock and store the fingerprint of this context manager so that
             # only this context manager is allowed to run on the instance.
-            object.__setattr__(self.instance, "_locked", False)
-            self.instance._lock_id = self.id
+            self.object_lock.unlock(manager_id=self.id)
 
     def __exit__(self, type, value, traceback):
-        if not self.check_instance():
+        if not self.check_instance:
             return
 
         # If another context manager is running,
         # do nothing; otherwise reset.
-        if self.id != self.instance._lock_id:
+        if self.id != self.object_lock._lock_id:
             return
 
-        with self.lock:
+        with self.thread_lock:
             # Reset `repr` if the object has been mutated.
             if self.mutate:
                 try:
@@ -400,8 +418,7 @@ class UnlockInstance:
                     pass
 
             # Lock the instance on exit.
-            self.instance._lock_id = None
-            self.instance._locked = True
+            self.object_lock.lock()
 
 
 def unlock_instance(func=None, *, argv=0, mutate=True):
@@ -432,7 +449,57 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
     return wrapper
 
 
-class CCLObject(ABC):
+class CCLObjectMeta(ABCMeta):
+    """Metaclass for ``CCLObject``.
+
+    Enables linking of abstract methods, if ``__linked_abstractmethods__``
+    is provided for the base class. Subclasses that define either of
+    the linked methods will satisfy the abstraction requirement.
+
+    Example:
+        Subclasses of the following class can be instantiated if either
+        ``method1`` or ``method2`` (and ``another_method``) are defined.
+        Otherwise, it falls back to normal ``abc.ABCMeta`` behavior:
+
+        >>> class MyBaseClass(metaclass=ABCMeta):
+                __linked_abstractmethods__ = 'method1', 'method2'
+                @abstractmethod
+                def method1(self):
+                    ...
+                @abstractmethod
+                def method2(self):
+                    ...
+                @abstractmethod
+                def another_method(self):
+                    ...
+    """
+
+    def __new__(mcls, name, bases, clsdict):
+        """Class factory for ``CCLObject``.
+
+        .. note:: Naming convention: ``mcls`` -- metaclass, ``cls`` -- class
+        """
+        cls = super().__new__(mcls, name, bases, clsdict)
+
+        # Check if abstraction criteria are satisfied.
+        if hasattr(cls, "__linked_abstractmethods__"):
+            # Tap into class creation and remove all linked abstract methods
+            # from the `__abstractmethods__` hook.
+            linked = cls.__linked_abstractmethods__
+
+            def is_abstract(cls, method):
+                # Check if the `method` of class `cls` is abstract.
+                meth = getattr(cls, method)
+                return getattr(meth, "__isabstractmethod__", False)
+
+            if not all([is_abstract(cls, method) for method in linked]):
+                abstracts = set(cls.__abstractmethods__) - set(linked)
+                cls.__abstractmethods__ = frozenset(abstracts)
+
+        return cls
+
+
+class CCLObject(metaclass=CCLObjectMeta):
     """Base for CCL objects.
 
     All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.
@@ -473,37 +540,20 @@ class CCLObject(ABC):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
-    # *** Information regarding the state of the CCLObject ***
-    # Immutability lock. Disables `setattr`. (see `unlock_instance`)
-    _locked: bool = False
-    # Memory address of the unlocking context manager. (see `UnlockInstance`)
-    _lock_id: int = None
-    # Have all the arguments in the constructor been assigned as instance
-    # attributes? (see `auto_assign`)
-    _init_attrs_state: bool = False
 
-    def __init_subclass__(cls, init_attrs=None, **kwargs):
-        """Subclass initialization routine.
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
 
-        Parameters:
-            init_attrs (``bool``):
-                If ``True``, assign all arguments of the constructor
-                as instance attributes. (see ``~pyccl.base.auto_assign``)
-        """
-        # Store the signature of the constructor on import.
-        cls._init_signature = signature(cls.__init__)
+        # 1. Store the signature of the constructor on import.
+        cls.__signature__ = signature(cls.__init__)
 
-        if init_attrs is None:
-            # If not specified, get from current state
-            # because a parent class might have toggled it.
-            init_attrs = cls._init_attrs_state
+        # 2. Assign the arguments of the constructor if needed.
+        if (hasattr(cls, "__init_attrs__")
+                and cls.__init_attrs__
+                and "__init__" in vars(cls)):
+            cls.__init__ = auto_assign(cls.__init__, sig=cls.__signature__)
 
-        if init_attrs and hasattr(cls, "__init__"):
-            # Decorate the __init__ method with the auto-assigner.
-            cls.__init__ = auto_assign(cls.__init__, sig=cls._init_signature)
-            # Make sure this is inherited.
-            cls._init_attrs_state = True
-
+        # 3. Replace repr (if implemented) with its cached version.
         if "__repr__" in vars(cls):
             # If the class defines a custom `__repr__`, this will be the new
             # `_repr` (which is cached). Decorator `cached_property` requires
@@ -514,20 +564,25 @@ class CCLObject(ABC):
             # Fall back to using `__ccl_repr__` from `CCLObject`.
             cls.__repr__ = cls.__ccl_repr__
 
-        def Funlock(cl, name, mutate):
+        # 4. Unlock instance on specific methods.
+        def Funlock(cls, name, mutate):
             # Allow instance to change or mutate if method `name` is called.
-            func = vars(cl).get(name)
+            func = vars(cls).get(name)
             if func is not None:
                 newfunc = unlock_instance(mutate=mutate)(func)
-                setattr(cl, name, newfunc)
+                setattr(cls, name, newfunc)
 
         Funlock(cls, "__init__", False)
         Funlock(cls, "update_parameters", True)
 
-        super().__init_subclass__(**kwargs)
+    def __new__(cls, *args, **kwargs):
+        # Populate every instance with an `ObjectLock` as attribute.
+        instance = super().__new__(cls)
+        object.__setattr__(instance, "_object_lock", ObjectLock())
+        return instance
 
     def __setattr__(self, name, value):
-        if self._locked:
+        if self._object_lock.locked:
             raise AttributeError("CCL objects can only be updated via "
                                  "`update_parameters`, if implemented.")
         object.__setattr__(self, name, value)
@@ -564,10 +619,11 @@ class CCLObject(ABC):
         return repr(self) == repr(other)
 
 
-class CCLHalosObject(CCLObject, init_attrs=True):
+class CCLHalosObject(CCLObject):
     """Base for halo objects. Automatically assign all ``__init__``
     parameters as attributes.
     """
+    __init_attrs__ = True
 
     def __repr__(self):
         # If all the passed parameters have been assigned as instance
@@ -575,67 +631,3 @@ class CCLHalosObject(CCLObject, init_attrs=True):
         # to build a unique string for each instance.
         from ._repr import _build_string_from_init_attrs
         return _build_string_from_init_attrs(self)
-
-
-def link_abstractmethods(cls=None, *, methods: list):
-    """Abstract class decorator, (used together with ``@abstractmethod``)
-    that links multiple abstract methods. Subclasses that define either of
-    the linked methods will satisfy the abstraction requirement. Propagated
-    via inheritance using the ``__linked_abstractmethods__`` hook.
-
-    Example:
-        Subclasses of the following class can be instantiated if either
-        ``method1`` or ``method2`` are defined. Otherwise, it falls back
-        to normal ``abc.ABCMeta`` behavior:
-
-        >>> @link_abstractmethods(methods=['method1', 'method2'])
-            class MyClass(metaclass=ABCMeta):
-                @abstractmethod
-                def method1(self):
-                    ...
-                @abstractmethod
-                def method2(self):
-                    ...
-                @abstractmethod
-                def another_method(self):
-                    ...
-
-        This subclass can be instantiated:
-
-        >>> class MySubclass(MyClass):
-                def method1(self):
-                    ...
-                def another_method(self):
-                    ...
-
-        This subclass can't be instantiated:
-
-        >>> class MySubclass(MyClass):
-                def another_method(self):
-                    ...
-    """
-    if cls is None:
-        # Avoid doubly-nested decorator factory.
-        return functools.partial(link_abstractmethods, methods=methods)
-
-    if not hasattr(cls, "__linked_abstractmethods__"):
-        # Save the linked abstract methods as a hook.
-        cls.__linked_abstractmethods__ = frozenset(methods)
-
-    def is_abstract(cls, method):
-        # Return True if a method is an abstract method.
-        return getattr(getattr(cls, method), "__isabstractmethod__", False)
-
-    def __new__(cl, *args, **kwargs):
-        # Tap into instance creation and remove all linked abstract methods
-        # from the `__abstractmethods__` hook.
-        linked = cl.__linked_abstractmethods__
-        if not all([is_abstract(cl, method) for method in linked]):
-            # If not all are abstract, it means that at least one is defined.
-            abstracts = (set(cl.__abstractmethods__) - set(linked))
-            cl.__abstractmethods__ = frozenset(abstracts)
-
-        return super(cls, cl).__new__(cl)
-
-    cls.__new__ = __new__
-    return cls
