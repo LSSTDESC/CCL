@@ -3,7 +3,7 @@ from ..core import check
 from ..background import omega_x
 from ..emulator import Emulator, EmulatorObject
 from ..parameters import physical_constants
-from ..base import CCLHalosObject, link_abstractmethods
+from ..base import CCLHalosObject
 from .massdef import MassDef, MassDef200m, MassDef200c
 import numpy as np
 from scipy.interpolate import interp1d
@@ -11,7 +11,6 @@ import functools
 from abc import abstractmethod
 
 
-@link_abstractmethods(methods=["_get_fsigma", "get_mass_function"])
 class MassFunc(CCLHalosObject):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
@@ -42,7 +41,7 @@ class MassFunc(CCLHalosObject):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    name = 'default'
+    __linked_abstractmethods__ = "_get_fsigma", "get_mass_function"
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         # Initialize sigma(M) splines if needed
