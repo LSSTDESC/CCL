@@ -302,7 +302,7 @@ class CachedObject:
         self.counter = 0
 
 
-def auto_assign(func, sig=None):
+def auto_assign(func, sig):
     """Decorator to automatically assign all parameters as instance attributes.
     This ought to be applied on constructor methods.
 
@@ -311,30 +311,19 @@ def auto_assign(func, sig=None):
             Function which takes the instance as its first argument.
             All function arguments will be assigned as attributes of the
             instance.
-        sig (``inspect.Signature``, optional):
-            A signature may be provided externally for speed.
+        sig (``inspect.Signature``):
+            The signature of the constructor this decorator is applied to.
+            This is needed to distinguish between parent class methods.
     """
-    sig = signature(func).parameters if sig is None else sig.parameters
-    _, *params = [n for n in sig]
-    _, *defaults = [p.default for p in sig.values()]
-
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
-        # collect all input in one dictionary
-        dic = {**dict(zip(params, args)), **kwargs}
-
-        # assign the declared parameters
-        for param, value in dic.items():
-            setattr(self, param, value)
-
-        # assign the undeclared parameters with default values
-        for param, default in zip(reversed(params), reversed(defaults)):
-            if not hasattr(self, param):
-                setattr(self, param, default)
-
+        bound = sig.bind_partial(self, *args, **kwargs)
+        bound.apply_defaults()
+        bound.arguments.pop("self")
+        for name, value in bound.arguments.items():
+            setattr(self, name, value)
         # func may now override the attributes we just set
         func(self, *args, **kwargs)
-
     return wrapper
 
 
@@ -463,13 +452,12 @@ class CCLObjectMeta(ABCMeta):
 
     Enables linking of abstract methods, if ``__linked_abstractmethods__``
     is provided for the base class. Subclasses that define either of
-    the linked methods will satisfy the abstraction requirement. Propagated
-    via inheritance using the ``__linked_abstractmethods__`` hook.
+    the linked methods will satisfy the abstraction requirement.
 
     Example:
         Subclasses of the following class can be instantiated if either
-        ``method1`` or ``method2`` are defined. Otherwise, it falls back
-        to normal ``abc.ABCMeta`` behavior:
+        ``method1`` or ``method2`` (and ``another_method``) are defined.
+        Otherwise, it falls back to normal ``abc.ABCMeta`` behavior:
 
         >>> class MyBaseClass(metaclass=ABCMeta):
                 __linked_abstractmethods__ = 'method1', 'method2'
@@ -482,40 +470,31 @@ class CCLObjectMeta(ABCMeta):
                 @abstractmethod
                 def another_method(self):
                     ...
-
-        This subclass can be instantiated:
-
-        >>> class MySubclass(MyBaseClass):
-                def method1(self):
-                    ...
-                def another_method(self):
-                    ...
-
-        This subclass can't be instantiated:
-
-        >>> class MySubclass(MyClass):
-                def another_method(self):
-                    ...
     """
 
-    def __new__(cls, name, bases, clsdict):
-        clsobj = super().__new__(cls, name, bases, clsdict)
+    def __new__(mcls, name, bases, clsdict):
+        """Class factory for ``CCLObject``.
 
-        if hasattr(clsobj, "__linked_abstractmethods__"):
+        .. note:: Naming convention: ``mcls`` -- metaclass, ``cls`` -- class
+        """
+        cls = super().__new__(mcls, name, bases, clsdict)
+
+        # Check if abstraction criteria are satisfied.
+        if hasattr(cls, "__linked_abstractmethods__"):
             # Tap into class creation and remove all linked abstract methods
             # from the `__abstractmethods__` hook.
-            linked = clsobj.__linked_abstractmethods__
+            linked = cls.__linked_abstractmethods__
 
-            def is_abstract(clsobj, method):
-                # Check if the `method` of class `clsobj` is abstract.
-                meth = getattr(clsobj, method)
+            def is_abstract(cls, method):
+                # Check if the `method` of class `cls` is abstract.
+                meth = getattr(cls, method)
                 return getattr(meth, "__isabstractmethod__", False)
 
-            if not all([is_abstract(clsobj, method) for method in linked]):
-                abstracts = set(clsobj.__abstractmethods__) - set(linked)
-                clsobj.__abstractmethods__ = frozenset(abstracts)
+            if not all([is_abstract(cls, method) for method in linked]):
+                abstracts = set(cls.__abstractmethods__) - set(linked)
+                cls.__abstractmethods__ = frozenset(abstracts)
 
-        return clsobj
+        return cls
 
 
 class CCLObject(metaclass=CCLObjectMeta):
@@ -561,12 +540,18 @@ class CCLObject(metaclass=CCLObjectMeta):
     """
 
     def __init_subclass__(cls, **kwargs):
-        """Subclass initialization routine."""
         super().__init_subclass__(**kwargs)
 
-        # Store the signature of the constructor on import.
+        # 1. Store the signature of the constructor on import.
         cls.__signature__ = signature(cls.__init__)
 
+        # 2. Assign the arguments of the constructor if needed.
+        if (hasattr(cls, "__init_attrs__")
+                and cls.__init_attrs__
+                and "__init__" in vars(cls)):
+            cls.__init__ = auto_assign(cls.__init__, sig=cls.__signature__)
+
+        # 3. Replace repr (if implemented) with its cached version.
         if "__repr__" in vars(cls):
             # If the class defines a custom `__repr__`, this will be the new
             # `_repr` (which is cached). Decorator `cached_property` requires
@@ -577,12 +562,13 @@ class CCLObject(metaclass=CCLObjectMeta):
             # Fall back to using `__ccl_repr__` from `CCLObject`.
             cls.__repr__ = cls.__ccl_repr__
 
-        def Funlock(cl, name, mutate):
+        # 4. Unlock instance on specific methods.
+        def Funlock(cls, name, mutate):
             # Allow instance to change or mutate if method `name` is called.
-            func = vars(cl).get(name)
+            func = vars(cls).get(name)
             if func is not None:
                 newfunc = unlock_instance(mutate=mutate)(func)
-                setattr(cl, name, newfunc)
+                setattr(cls, name, newfunc)
 
         Funlock(cls, "__init__", False)
         Funlock(cls, "update_parameters", True)
@@ -635,14 +621,7 @@ class CCLHalosObject(CCLObject):
     """Base for halo objects. Automatically assign all ``__init__``
     parameters as attributes.
     """
-
-    def __init_subclass__(cls, **kwargs):
-        """Subclass initialization routine."""
-        super().__init_subclass__(**kwargs)
-
-        if "__init__" in vars(cls):
-            # Decorate the __init__ method with the auto-assigner.
-            cls.__init__ = auto_assign(cls.__init__, sig=cls.__signature__)
+    __init_attrs__ = True
 
     def __repr__(self):
         # If all the passed parameters have been assigned as instance
