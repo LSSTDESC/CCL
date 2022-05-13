@@ -335,7 +335,7 @@ class ObjectLock:
     _lock_id: int = None
 
     def __repr__(self):
-        return f"LockInfo(locked={self.locked})"
+        return f"{self.__class__.__name__}(locked={self.locked})"
 
     @property
     def locked(self):
