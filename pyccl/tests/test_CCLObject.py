@@ -4,7 +4,7 @@ from . import pyccl as ccl
 
 
 def test_CCLObject():
-    # Test eq --> hash --> repr for all kinds of CCL objects.
+    # Test eq --> repr <-- hash for all kinds of CCL objects.
 
     # 1.1. Using a complicated Cosmology object.
     extras = {"camb": {"halofit_version": "mead2020", "HMCode_logT_AGN": 7.8},
@@ -103,6 +103,13 @@ def test_CCLHalosObject():
 
 
 def test_CCLObject_immutable():
+    # test `CCLObject` lock
+    obj = ccl.CCLObject()
+    obj._object_lock.unlock()
+    assert "locked=False" in repr(obj._object_lock)
+    obj._object_lock.lock()
+    assert "locked=True" in repr(obj._object_lock)
+
     # `update_parameters` not implemented.
     cosmo = ccl.CosmologyVanillaLCDM()
     with pytest.raises(AttributeError):
