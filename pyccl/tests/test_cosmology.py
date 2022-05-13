@@ -61,6 +61,15 @@ def test_cosmology_critical_init():
     assert np.allclose(cosmo.cosmo.data.growth0, 1)
 
 
+def test_cosmology_As_sigma8_populates():
+    # Check that cosmo.sigma8() pupulates sigma8 if it is missing.
+    cosmo = ccl.Cosmology(Omega_c=0.265, Omega_b=0.045, h=0.675,
+                          n_s=0.965, A_s=2e-9)
+    assert np.isnan(cosmo["sigma8"])
+    cosmo.sigma8()
+    assert cosmo["sigma8"] == cosmo.sigma8()
+
+
 def test_cosmology_init():
     """
     Check that Cosmology objects can only be constructed in a valid way.

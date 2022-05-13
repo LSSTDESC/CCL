@@ -263,6 +263,9 @@ class Cosmology(object):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
+        # Attribute `_params` is not used anywhere, so we get rid of it.
+        lib.parameters_free(self._params)
+        delattr(self, "_params")
 
         if self.cosmo.status != 0:
             raise CCLError(
@@ -616,11 +619,11 @@ class Cosmology(object):
         """Access parameter values by name."""
         try:
             if key == 'm_nu':
-                val = lib.parameters_get_nu_masses(self._params, 3)
+                val = lib.parameters_get_nu_masses(self.cosmo.params, 3)
             elif key == 'extra_parameters':
                 val = self._params_init_kwargs["extra_parameters"]
             else:
-                val = getattr(self._params, key)
+                val = getattr(self.cosmo.params, key)
         except AttributeError:
             raise KeyError("Parameter '%s' not recognized." % key)
         return val
@@ -638,18 +641,11 @@ class Cosmology(object):
                     hasattr(lib, 'cosmology_free') and
                     lib.cosmology_free is not None):
                 lib.cosmology_free(self.cosmo)
-        if hasattr(self, "_params"):
-            if (self._params is not None and
-                    hasattr(lib, 'parameters_free') and
-                    lib.parameters_free is not None):
-                lib.parameters_free(self._params)
 
         # finally delete some attributes we don't want to be around for safety
         # when the context manager exits or if __del__ is called twice
         if hasattr(self, "cosmo"):
             delattr(self, "cosmo")
-        if hasattr(self, "_params"):
-            delattr(self, "_params")
 
     def __enter__(self):
         return self
@@ -664,7 +660,6 @@ class Cosmology(object):
         # is pure python when pickled.
         state = self.__dict__.copy()
         state.pop('cosmo', None)
-        state.pop('_params', None)
         state.pop('_config', None)
         return state
 
