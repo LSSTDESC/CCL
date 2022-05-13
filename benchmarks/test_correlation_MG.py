@@ -18,6 +18,7 @@ def set_up(request):
     logA = 3.05  # log(10^10 A_s)
     ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
     ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
                           m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255,

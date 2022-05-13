@@ -22,6 +22,7 @@ def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
     ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
     ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
     with pytest.warns(ccl.CCLDeprecationWarning):
         cosmo = ccl.Cosmology(
             Omega_c=0.30, Omega_b=0.00, Omega_g=0, Omega_k=0,

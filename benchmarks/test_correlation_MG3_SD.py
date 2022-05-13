@@ -19,6 +19,7 @@ def set_up(request):
     # scale dependent MG cosmology
     ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
     ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
     with pytest.warns(ccl.CCLDeprecationWarning):
         cosmo = ccl.Cosmology(
             Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
