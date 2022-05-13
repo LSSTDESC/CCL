@@ -318,15 +318,38 @@ def auto_assign(func, sig):
             The signature of the constructor this decorator is applied to.
             This is needed to distinguish between parent class methods.
     """
+# TODO: Replace body of `auto_assign` with this (faster) code for CCLv3.
+#     @functools.wraps(func)
+#     def wrapper(self, *args, **kwargs):
+#         bound = sig.bind_partial(self, *args, **kwargs)
+#         bound.apply_defaults()
+#         bound.arguments.pop("self")
+#         for name, value in bound.arguments.items():
+#             setattr(self, name, value)
+#         # func may now override the attributes we just set
+#         func(self, *args, **kwargs)
+#     return wrapper
+
+    _, *params = [n for n in sig.parameters]
+    _, *defaults = [p.default for p in sig.parameters.values()]
+
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
-        bound = sig.bind_partial(self, *args, **kwargs)
-        bound.apply_defaults()
-        bound.arguments.pop("self")
-        for name, value in bound.arguments.items():
-            setattr(self, name, value)
+        # collect all input in a dictionary
+        dic = {**dict(zip(params, args)), **kwargs}
+
+        # assign the declared parameters
+        for param, value in dic.items():
+            setattr(self, param, value)
+
+        # assign the undelcared parameters with default values
+        for param, default in zip(reversed(params), reversed(defaults)):
+            if not hasattr(self, param):
+                setattr(self, param, default)
+
         # func may now override the attributes we just set
         func(self, *args, **kwargs)
+
     return wrapper
 
 
@@ -653,8 +676,6 @@ def deprecate_attr(getter=None, *, pairs=[]):
     return wrapper
 
 
-class CCLObject(ABC):
-=======
 class CCLObjectMeta(ABCMeta):
     """Metaclass for ``CCLObject``.
 
@@ -706,7 +727,6 @@ class CCLObjectMeta(ABCMeta):
 
 
 class CCLObject(metaclass=CCLObjectMeta):
->>>>>>> emulator
     """Base for CCL objects.
 
     All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.
