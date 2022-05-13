@@ -100,18 +100,15 @@ class CCLParameters:
 
 class SplineParams(CCLParameters, instance=lib.cvar.user_spline_params):
     """Instances of this class hold the spline parameters."""
-    pass
 
 
 class GSLParams(CCLParameters, instance=lib.cvar.user_gsl_params):
     """Instances of this class hold the gsl parameters."""
-    pass
 
 
 class PhysicalConstants(CCLParameters, instance=lib.cvar.constants,
                         freeze=True):
     """Instances of this class hold the physical constants."""
-    pass
 
 
 spline_params = SplineParams()

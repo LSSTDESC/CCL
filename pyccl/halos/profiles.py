@@ -3,8 +3,7 @@ from ..core import check
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
-from ..base import (CCLHalosObject, unlock_instance, link_abstractmethods,
-                    warn_api)
+from ..base import CCLHalosObject, unlock_instance, warn_api
 from .concentration import Concentration
 from .massdef import MassDef
 from ..errors import warnings, CCLDeprecationWarning
@@ -13,7 +12,6 @@ from scipy.special import sici, erf
 from abc import abstractmethod
 
 
-@link_abstractmethods(methods=["_real", "_fourier"])
 class HaloProfile(CCLHalosObject):
     """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
@@ -41,7 +39,7 @@ class HaloProfile(CCLHalosObject):
     calculation.
     """
     from .._repr import _build_string_HaloProfile as __repr__
-    name = 'default'
+    __linked_abstractmethods__ = '_real', '_fourier'
 
     def __init__(self):
         self.precision_fftlog = {'padding_lo_fftlog': 0.1,
