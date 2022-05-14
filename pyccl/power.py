@@ -179,6 +179,8 @@ def sigma8(cosmo, p_of_k_a=None):
     status = 0
     s8, status = lib.sigma8(cosmo.cosmo, psp, status)
     check(status, cosmo)
+    if np.isnan(cosmo._params.sigma8):
+        cosmo._params.sigma8 = s8
     return s8
 
 
