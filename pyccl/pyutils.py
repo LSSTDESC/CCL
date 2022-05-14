@@ -548,7 +548,7 @@ def _get_spline2d_arrays(gsl_spline):
     """Get array data from a 2D GSL spline.
 
     Args:
-        gsl_spline: `SWIGObject` of gsl_spline2d
+        gsl_spline: `SWIGObject` of gsl_spline2d *
             The SWIG object of the 2D GSL spline.
 
     Returns:
@@ -570,3 +570,33 @@ def _get_spline2d_arrays(gsl_spline):
     check(status)
 
     return yarr, xarr, zarr.reshape(y_size, x_size)
+
+
+def _get_spline3d_arrays(gsl_spline, length):
+    """Get array data from an array of 2D GSL splines.
+
+    Args:
+        gsl_spline (`SWIGObject` of gsl_spline2d **):
+            The SWIG object of the 2D GSL spline.
+        length (int):
+            The length of the 3rd dimension.
+
+    Returns:
+        xarr: array_like
+            The x array of the spline.
+        yarr: array_like
+            The y array of the spline.
+        zarr: array_like
+            The z array of the spline. The shape is (yarr.size, xarr.size).
+    """
+    status = 0
+    x_size, y_size, status = lib.get_spline3d_array_sizes(gsl_spline, status)
+    check(status)
+
+    z_size = x_size*y_size*length
+    xarr, yarr, zarr, status = lib.get_spline3d_arrays(gsl_spline,
+                                                       x_size, y_size, z_size,
+                                                       length, status)
+    check(status)
+
+    return xarr, yarr, zarr.reshape((length, x_size, y_size))
