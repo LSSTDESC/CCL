@@ -1543,7 +1543,7 @@ class HaloProfileHOD(HaloProfile):
 
 class SatelliteShearHOD(HaloProfileHOD):
     def __init__(self, c_M_relation, a1h=0.001, b=-2,
-                 lmax=2, integration_method='FFTLog'):
+                 lmax=6, integration_method='FFTLog'):
         '''
         Halo HOD class that calculates the satellite galaxy intrinsic shear
         field in real and fourier space, according to Fortuna et al. 2021.
