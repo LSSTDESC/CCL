@@ -1,9 +1,14 @@
+import warnings
+
+import numpy as np
+
 from . import ccllib as lib
 from .core import check
 from .background import comoving_radial_distance, growth_rate, \
     growth_factor, scale_factor_of_chi, h_over_h0
-from .pyutils import _check_array_params, NoneArr, _vectorize_fn6
-import numpy as np
+from .errors import CCLWarning
+from .pyutils import _check_array_params, NoneArr, _vectorize_fn6, \
+    _get_spline1d_arrays
 
 
 def _Sig_MG(cosmo, a, k=None):
@@ -24,6 +29,20 @@ def _Sig_MG(cosmo, a, k=None):
     return _vectorize_fn6(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
 
 
+def _check_background_spline_compatibility(cosmo, z):
+    """Check that a redshift array lies within the support of the
+    CCL background splines.
+    """
+    a_bg, _ = _get_spline1d_arrays(cosmo.cosmo.data.chi)
+    a = 1/(1+z)
+
+    if a.min() < a_bg.min() or a.max() > a_bg.max():
+        raise ValueError(f"Tracer defined over wider redshift range than "
+                         f"internal CCL splines. Tracer: "
+                         f"z=[{1/a.max()-1}, {1/a.min()-1}]. Background "
+                         f"splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
+
+
 def get_density_kernel(cosmo, dndz):
     """This convenience function returns the radial kernel for
     galaxy-clustering-like tracers. Given an unnormalized
@@ -42,6 +61,7 @@ def get_density_kernel(cosmo, dndz):
             to unity.
     """
     z_n, n = _check_array_params(dndz, 'dndz')
+    _check_background_spline_compatibility(cosmo, dndz[0])
     # this call inits the distance splines neded by the kernel functions
     chi = comoving_radial_distance(cosmo, 1./(1.+z_n))
     status = 0
@@ -49,11 +69,11 @@ def get_density_kernel(cosmo, dndz):
                                                         z_n, n,
                                                         len(z_n),
                                                         status)
-    check(status)
+    check(status, cosmo=cosmo)
     return chi, wchi
 
 
-def get_lensing_kernel(cosmo, dndz, mag_bias=None):
+def get_lensing_kernel(cosmo, dndz, mag_bias=None, n_chi=None):
     """This convenience function returns the radial kernel for
     weak-lensing-like. Given an unnormalized redshift distribution
     and an optional magnification bias function, it returns
@@ -78,19 +98,31 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None):
     z_n, n = _check_array_params(dndz, 'dndz')
     has_magbias = mag_bias is not None
     z_s, s = _check_array_params(mag_bias, 'mag_bias')
+    _check_background_spline_compatibility(cosmo, dndz[0])
 
-    # Calculate number of samples in chi
-    nchi = lib.get_nchi_lensing_kernel_wrapper(z_n)
+    if n_chi is None:
+        # Calculate number of samples in chi
+        n_chi = lib.get_nchi_lensing_kernel_wrapper(z_n)
+
+    if n_chi > len(z_n):
+        warnings.warn(
+            f"The number of samples in the n(z) ({len(z_n)}) is smaller than "
+            f"the number of samples in the lensing kernel ({n_chi}). Consider "
+            f"disabling spline integration for the lensing kernel by setting "
+            f"cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION "
+            f"= False",
+            category=CCLWarning)
+
     # Compute array of chis
     status = 0
     chi, status = lib.get_chis_lensing_kernel_wrapper(cosmo.cosmo, z_n[-1],
-                                                      nchi, status)
+                                                      n_chi, status)
     # Compute kernel
     wchi, status = lib.get_lensing_kernel_wrapper(cosmo.cosmo,
                                                   z_n, n, z_n[-1],
                                                   int(has_magbias), z_s, s,
-                                                  chi, nchi, status)
-    check(status)
+                                                  chi, n_chi, status)
+    check(status, cosmo=cosmo)
     return chi, wchi
 
 
@@ -106,6 +138,7 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
+    _check_background_spline_compatibility(cosmo, np.array([z_source]))
     # this call inits the distance splines neded by the kernel functions
     chi_source = comoving_radial_distance(cosmo, 1./(1.+z_source))
     chi = np.linspace(0, chi_source, nsamples)
@@ -113,7 +146,7 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
     status = 0
     wchi, status = lib.get_kappa_kernel_wrapper(cosmo.cosmo, chi_source,
                                                 chi, nsamples, status)
-    check(status)
+    check(status, cosmo=cosmo)
     return chi, wchi
 
 
@@ -170,33 +203,47 @@ class Tracer(object):
         in this `Tracer`.
 
         Args:
-            chi (float or array_like): values of the comoving
-                radial distance in increasing order and in Mpc.
+            chi (float or array_like, optional): values of the comoving
+                radial distance in increasing order and in Mpc. If None,
+                returns the kernel at the internal spline knots.
 
         Returns:
-            array_like: list of radial kernels for each tracer. \
-                The shape will be `(n_tracer, chi.size)`, where \
-                `n_tracer` is the number of tracers. The last \
-                dimension will be squeezed if the input is a \
+            array_like: list of radial kernels for each tracer.
+                The shape will be `(n_tracer, chi.size)`, where
+                `n_tracer` is the number of tracers. The last
+                dimension will be squeezed if the input is a
                 scalar.
+                If no chi was provided, returns two arrays, the radial kernels
+                and the comoving radial distances corresponding to the internal
+                values used for interpolation.
         """
         if not hasattr(self, '_trc'):
             return []
 
-        chi_use = np.atleast_1d(chi)
+        if chi is None:
+            chis = []
+        else:
+            chi_use = np.atleast_1d(chi)
         kernels = []
         for t in self._trc:
-            status = 0
-            w, status = lib.cl_tracer_get_kernel(t, chi_use,
-                                                 chi_use.size,
-                                                 status)
-            check(status)
+            if chi is None:
+                chi_use, w = _get_spline1d_arrays(t.kernel.spline)
+                chis.append(chi_use)
+            else:
+                status = 0
+                w, status = lib.cl_tracer_get_kernel(t, chi_use,
+                                                     chi_use.size,
+                                                     status)
+                check(status)
             kernels.append(w)
-        kernels = np.array(kernels)
-        if np.ndim(chi) == 0:
-            if kernels.shape != (0,):
-                kernels = np.squeeze(kernels, axis=-1)
-        return kernels
+        if chi is None:
+            return kernels, chis
+        else:
+            kernels = np.array(kernels)
+            if np.ndim(chi) == 0:
+                if kernels.shape != (0,):
+                    kernels = np.squeeze(kernels, axis=-1)
+            return kernels
 
     def get_f_ell(self, ell):
         """Get the ell-dependent prefactors for all tracers
@@ -359,7 +406,7 @@ class Tracer(object):
         nk = lib.get_pk_spline_nk(cosmo.cosmo)
         status = 0
         lk, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status)
+        check(status, cosmo=cosmo)
         k = np.exp(lk)
         # computing MG factor array
         mgfac_1d = 1
@@ -530,8 +577,13 @@ class NumberCountsTracer(Tracer):
             giving the magnification bias as a function of redshift. If
             `None`, the tracer is assumed to not have magnification bias
             terms. Defaults to None.
+        n_samples (int, optional): number of samples over which the
+            magnification lensing kernel is desired. These will be equi-spaced
+            in radial distance. The kernel is quite smooth, so usually O(100)
+            samples is enough.
     """
-    def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None):
+    def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None,
+                 n_samples=256):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -565,7 +617,8 @@ class NumberCountsTracer(Tracer):
                             transfer_a=t_a, der_bessel=2)
         if mag_bias is not None:  # Has magnification bias
             # Kernel
-            chi, w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias)
+            chi, w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias,
+                                        n_chi=n_samples)
             # Multiply by -2 for magnification
             kernel_m = (chi, -2 * w)
             if (cosmo['sigma_0'] == 0):
@@ -598,9 +651,13 @@ class WeakLensingTracer(Tracer):
             normalization. Set to False to use the raw input amplitude,
             which will usually be 1 for use with PT IA modeling.
             Defaults to True.
+        n_samples (int, optional): number of samples over which the lensing
+            kernel is desired. These will be equi-spaced in radial distance.
+            The kernel is quite smooth, so usually O(100) samples
+            is enough.
     """
     def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None,
-                 use_A_ia=True):
+                 use_A_ia=True, n_samples=256):
         self._trc = []
 
         # we need the distance functions at the C layer
@@ -612,7 +669,7 @@ class WeakLensingTracer(Tracer):
                               fill_value=0)
 
         if has_shear:
-            kernel_l = get_lensing_kernel(cosmo, dndz)
+            kernel_l = get_lensing_kernel(cosmo, dndz, n_chi=n_samples)
             if (cosmo['sigma_0'] == 0):
                 # GR case
                 self.add_tracer(cosmo, kernel=kernel_l,
@@ -650,7 +707,7 @@ class CMBLensingTracer(Tracer):
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
         z_source (float): Redshift of source plane for CMB lensing.
-        nsamples (int, optional): number of samples over which the kernel
+        n_samples (int, optional): number of samples over which the kernel
             is desired. These will be equi-spaced in radial distance.
             The kernel is quite smooth, so usually O(100) samples
             is enough.

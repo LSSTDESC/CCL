@@ -4,7 +4,7 @@ from ..background import growth_factor, growth_rate
 from .massdef import MassDef, mass2radius_lagrangian
 from ..power import linear_matter_power, sigmaM
 import numpy as np
-from scipy.optimize import root_scalar
+from scipy.optimize import brentq, root_scalar
 
 
 class Concentration(object):
@@ -20,10 +20,9 @@ class Concentration(object):
     def __init__(self, mass_def=None):
         if mass_def is not None:
             if self._check_mdef(mass_def):
-                raise ValueError("c(M) relation " + self.name +
-                                 " is not compatible with mass definition" +
-                                 " Delta = %s, " % (mass_def.Delta) +
-                                 " rho = " + mass_def.rho_type)
+                raise ValueError(
+                    f"Mass definition {mass_def.Delta}-{mass_def.rho_type} "
+                    f"is not compatible with c(M) {self.name} configuration.")
             self.mdef = mass_def
         else:
             self._default_mdef()
@@ -378,7 +377,7 @@ class ConcentrationIshiyama21(Concentration):
     def __init__(self, mdef=None, relaxed=False, Vmax=False):
         self.relaxed = relaxed
         self.Vmax = Vmax
-        super(ConcentrationIshiyama21, self).__init__(mass_def=mdef)
+        super().__init__(mass_def=mdef)
 
     def _default_mdef(self):
         self.mdef = MassDef(500, 'critical')
@@ -482,7 +481,7 @@ class ConcentrationIshiyama21(Concentration):
         status = 0
         dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
                                                    len(logM), status)
-        check(status)
+        check(status, cosmo=cosmo)
         return -3/np.log(10) * dlns_dlogM
 
     def _G(self, x, n_eff):
@@ -491,10 +490,15 @@ class ConcentrationIshiyama21(Concentration):
         return G
 
     def _G_inv(self, arg, n_eff):
+        # Numerical calculation of the inverse of `_G`.
         roots = []
-        for arg, neff in zip(arg, n_eff):
-            func = lambda x: self._G(x, neff) - arg  # noqa: _G_inv Traceback
-            rt = root_scalar(func, x0=1, x1=2).root.item()
+        for val, neff in zip(arg, n_eff):
+            func = lambda x: self._G(x, neff) - val  # noqa: _G_inv Traceback
+            try:
+                rt = brentq(func, a=0.05, b=200)
+            except ValueError:
+                # No root in [0.05, 200] (rare, but it may happen).
+                rt = root_scalar(func, x0=1, x1=2).root.item()
             roots.append(rt)
         return np.asarray(roots)
 
