@@ -1704,8 +1704,8 @@ class SatelliteShearHOD(HaloProfileHOD):
 
         rvir = self._rvir(cosmo, M_use, a, mass_def)
         # TODO: make it possible to specify the halo density profile?
-        NFW = HaloProfileNFW(self.cM, truncated=True, fourier_analytic=True)
-        rho = NFW.real(cosmo, r_use, M_use, a, mass_def)
+        density_prof = HaloProfileNFW(self.cM, truncated=True, fourier_analytic=True)
+        rho = density_prof.real(cosmo, r_use, M_use, a, mass_def)
         u = rho / M_use.reshape(len(M_use), 1)
         prof = self.gamma(r_use, rvir) * u
 
@@ -1781,7 +1781,8 @@ class SatelliteShearHOD(HaloProfileHOD):
         profile and the radial integral (in the case of 'simps' or 'spline'
         method) is evaluated up to the virial radius.
         '''
-        # TODO: Do not re-compute if already computed.
+        # TODO: Do not re-compute if already computed (to be
+        #  updated with the caching CCL update).
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
         l_arr = np.arange(2, self.lmax+1, 2, dtype='int32')
