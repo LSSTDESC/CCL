@@ -1704,7 +1704,8 @@ class SatelliteShearHOD(HaloProfileHOD):
 
         rvir = self._rvir(cosmo, M_use, a, mass_def)
         # TODO: make it possible to specify the halo density profile?
-        density_prof = HaloProfileNFW(self.cM, truncated=True, fourier_analytic=True)
+        density_prof = HaloProfileNFW(self.cM, truncated=True,
+                                      fourier_analytic=True)
         rho = density_prof.real(cosmo, r_use, M_use, a, mass_def)
         u = rho / M_use.reshape(len(M_use), 1)
         prof = self.gamma(r_use, rvir) * u
