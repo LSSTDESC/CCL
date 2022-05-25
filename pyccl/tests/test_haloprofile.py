@@ -26,3 +26,24 @@ def test_haloprofile_smoke(func, r):
         getattr(ccl, func), cosmo, c, mass, odelta, a, r)
     assert np.all(np.isfinite(prof))
     assert np.shape(prof) == np.shape(r)
+
+
+def test_IA_halo_model():
+    from pyccl.pyutils import assert_warns
+    hmd_200m = ccl.halos.MassDef200m()
+    cM = ccl.halos.ConcentrationDuffy08(hmd_200m)
+
+    # lmax too low
+    assert_warns(ccl.CCLWarning,
+                 ccl.halos.SatelliteShearHOD,
+                 cM, lmax=1)
+
+    # lmax too high
+    assert_warns(ccl.CCLWarning,
+                 ccl.halos.SatelliteShearHOD,
+                 cM, lmax=14)
+
+    # Wrong integration method
+    with pytest.raises(ValueError):
+        ccl.halos.SatelliteShearHOD(cM,
+                                    integration_method="something_else")

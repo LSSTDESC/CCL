@@ -1,3 +1,5 @@
+import warnings
+import pyccl
 from .. import ccllib as lib
 from ..core import check
 from ..background import h_over_h0, sigma_critical
@@ -1573,10 +1575,24 @@ class SatelliteShearHOD(HaloProfileHOD):
         '''
         if lmax > 13:
             lmax = 12
-            raise Warning('Maximum l provided too high. Using lmax=12.')
+            warnings.warn(
+                'Maximum l provided too high. Using lmax=12.',
+                category=pyccl.CCLWarning)
+        elif lmax < 2:
+            lmax = 2
+            warnings.warn(
+                'Maximum l provided too low. Using lmax=2.',
+                category=pyccl.CCLWarning)
         self.a1h = a1h
         self.b = b
         self.integration_method = integration_method
+        if integration_method not in ['FFTLog',
+                                      'simps',
+                                      'spline']:
+            raise ValueError(
+                'Integration method provided not supported. Use '
+                '"FFTLog", "simps", or "spline".'
+            )
         # If lmax is odd, make it even number (odd l contributions are zero).
         if not (lmax % 2 == 0):
             lmax = lmax // 2
