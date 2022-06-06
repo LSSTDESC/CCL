@@ -995,7 +995,9 @@ def halomod_Tk3D_SSC(cosmo, hmc,
                      normprof3=False, normprof4=False,
                      p_of_k_a=None, lk_arr=None, a_arr=None,
                      extrap_order_lok=1, extrap_order_hik=1,
-                     use_log=False):
+                     use_log=False, is_clustering1=False,
+                     is_clustering2=False, is_clustering3=False,
+                     is_clustering4=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
@@ -1162,6 +1164,45 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk+I12
         dpk12[ia, :] = norm12*((2.2380952381-dpk/3)*i11_1*i11_2*pk+i12_12)
         dpk34[ia, :] = norm34*((2.2380952381-dpk/3)*i11_3*i11_4*pk+i12_34)
+
+        # Counter terms for clustering (i.e. - (bA + bB) * PAB
+        # Default the biases to 0 and change this if the quantities are for
+        # galaxy clustering
+        b1 = b2 = b3 = b4 = 0
+        if is_clustering1 or is_clustering2:
+            i02_12 = hmc.I_0_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2)
+            P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
+
+            if is_clustering1:
+                b1 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof1) * norm1
+            if is_clustering2:
+                if prof2 is None:
+                    b2 = b1
+                else:
+                    b2 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof2) * norm2
+
+            dpk12[ia, :] += (b1 + b2) * P_12
+
+        if is_clustering4 or is_clustering4:
+            if (prof3 is None) and (prof4 is None) and (prof34_2pt is None):
+                i02_34 = i02_12
+            else:
+                i02_34 = hmc.I_0_2(cosmo, k_use, aa, prof3, prof34_2pt, prof4)
+            P_34 = norm34 * (pk * i11_3 * i11_4 + i02_34)
+
+            if is_clustering3:
+                if prof3 is None:
+                    b3 = b1
+                else:
+                    b3 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof3) * norm3
+
+            if is_clustering4:
+                if prof4 is None:
+                    b4 = b3
+                else:
+                    b4 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof4) * norm4
+
+            dpk34[ia, :] += (b3 + b4) * P_34
 
     if use_log:
         if np.any(dpk12 <= 0) or np.any(dpk34 <= 0):
