@@ -1181,7 +1181,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
                 else:
                     b2 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof2) * norm2
 
-            dpk12[ia, :] += (b1 + b2) * P_12
+            dpk12[ia, :] -= (b1 + b2) * P_12
 
         if is_clustering4 or is_clustering4:
             if (prof3 is None) and (prof4 is None) and (prof34_2pt is None):
@@ -1202,7 +1202,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
                 else:
                     b4 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof4) * norm4
 
-            dpk34[ia, :] += (b3 + b4) * P_34
+            dpk34[ia, :] -= (b3 + b4) * P_34
 
     if use_log:
         if np.any(dpk12 <= 0) or np.any(dpk34 <= 0):
