@@ -1174,33 +1174,38 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
             if is_clustering1:
-                b1 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof1) * norm1
+                b1 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof1,
+                                      normprof=True)
             if is_clustering2:
                 if prof2 is None:
                     b2 = b1
                 else:
-                    b2 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof2) * norm2
+                    b2 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof2,
+                                          normprof=True)
 
             dpk12[ia, :] -= (b1 + b2) * P_12
 
-        if is_clustering4 or is_clustering4:
+        if is_clustering3 or is_clustering4:
             if (prof3 is None) and (prof4 is None) and (prof34_2pt is None):
                 i02_34 = i02_12
             else:
-                i02_34 = hmc.I_0_2(cosmo, k_use, aa, prof3, prof34_2pt, prof4)
+                i02_34 = hmc.I_0_2(cosmo, k_use, aa, prof3_bak, prof34_2pt_bak,
+                                   prof4)
             P_34 = norm34 * (pk * i11_3 * i11_4 + i02_34)
 
             if is_clustering3:
                 if prof3 is None:
                     b3 = b1
                 else:
-                    b3 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof3) * norm3
+                    b3 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof3,
+                                          normprof=True)
 
             if is_clustering4:
                 if prof4 is None:
                     b4 = b3
                 else:
-                    b4 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof4) * norm4
+                    b4 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof4,
+                                          normprof=True)
 
             dpk34[ia, :] -= (b3 + b4) * P_34
 
