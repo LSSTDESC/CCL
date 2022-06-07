@@ -36,6 +36,7 @@ class HaloProfile(object):
     calculation.
     """
     name = 'default'
+    is_number_counts = False
 
     def __init__(self):
         self.precision_fftlog = {'padding_lo_fftlog': 0.1,
@@ -47,8 +48,6 @@ class HaloProfile(object):
                                  'extrapol': 'linx_liny',
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
-
-        self.is_number_counts = False
 
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by
@@ -1285,6 +1284,7 @@ class HaloProfileHOD(HaloProfile):
             satellites when centrals are present.
         """
     name = 'HOD'
+    is_number_counts = True
 
     def __init__(self, c_M_relation,
                  lMmin_0=12., lMmin_p=0., siglM_0=0.4,
@@ -1316,8 +1316,6 @@ class HaloProfileHOD(HaloProfile):
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
         super(HaloProfileHOD, self).__init__()
-
-        self.is_number_counts = True
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
