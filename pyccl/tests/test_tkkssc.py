@@ -15,6 +15,8 @@ P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
                               fourier_analytic=True)
 # P2 will have is_number_counts = True
 P2 = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
+P2_nogc = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
+P2_nogc.is_number_counts = False
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
 Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
@@ -33,8 +35,10 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
         norm1 = hmc.profile_norm(COSMO, a, prof1)
         norm2 = hmc.profile_norm(COSMO, a, prof2)
         norm12 = 1
-        if normalize:
-            norm12 = norm1 * norm2
+        if prof1.is_number_counts:
+            norm12 *= norm1
+        if prof2.is_number_counts:
+            norm12 *= norm2
 
         i11_1 = hmc.I_1_1(COSMO, k, a, prof1)
         i11_2 = hmc.I_1_1(COSMO, k, a, prof2)
@@ -60,7 +64,7 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
                            'norm': True, 'pk': None},
                           {'p1': P1, 'p2': P2, 'cv12': None,
                            'p3': None, 'p4': None, 'cv34': None,
-                           'norm': False, 'pk': None},
+                           'norm': True, 'pk': None},
                           {'p1': P1, 'p2': None, 'cv12': None,
                            'p3': P3, 'p4': None, 'cv34': None,
                            'norm': False, 'pk': None},
@@ -69,10 +73,10 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
                            'norm': False, 'pk': None},
                           {'p1': P1, 'p2': P2, 'cv12': None,
                            'p3': P3, 'p4': P4, 'cv34': None,
-                           'norm': False, 'pk': None},
+                           'norm': True, 'pk': None},
                           {'p1': P2, 'p2': P2, 'cv12': PKCH,
                            'p3': P2, 'p4': P2, 'cv34': None,
-                           'norm': False, 'pk': None},
+                           'norm': True, 'pk': None},
                           {'p1': P1, 'p2': P2, 'cv12': PKC,
                            'p3': P3, 'p4': P4, 'cv34': PKC,
                            'norm': True, 'pk': None},
@@ -133,6 +137,14 @@ def test_tkkssc_errors():
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1,
                                    prof34_2pt=P2)
 
+    # No normalization for number counts profile
+    with pytest.raises(ValueError):
+        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P2, normprof1=False)
+        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof2=P2, normprof2=False)
+        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof3=P2, normprof3=False)
+        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof4=P2, normprof4=False)
+
+
     # Negative profile in logspace
     assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,
                  COSMO, hmc, P3, prof2=Pneg,
@@ -192,12 +204,15 @@ def test_tkkssc_counterterms_gc(kwargs):
 
     # Tk's without clustering terms. Set is_number_counts=False for HOD
     # profiles
+    # Ensure HOD profiles are normalized
     kwargs_nogc = kwargs.copy()
-    for k, v in kwargs_nogc.items():
-        if v is None:
-            continue
-        v.is_number_counts = False
-        kwargs_nogc[k] = v
+    keys = list(kwargs.keys())
+    for k in keys:
+        v = kwargs[k]
+        if isinstance(v, ccl.halos.HaloProfileHOD):
+            kwargs_nogc[k] = P2_nogc
+            kwargs_nogc['norm' + k] = True
+            kwargs['norm' + k] = True
     tkk_nogc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof12_2pt=PKC,
                                           prof34_2pt=PKC,
                                           lk_arr=np.log(k_arr), a_arr=a_arr,

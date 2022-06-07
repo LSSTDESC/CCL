@@ -1093,6 +1093,23 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     if (prof34_2pt is not None) and (not isinstance(prof34_2pt, Profile2pt)):
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
+    # number counts profiles must be normalized
+    if (prof1.is_number_counts) and (normprof1 is False):
+        raise ValueError('normprof1 must be True if prof1 is of number ' +
+                         'counts type')
+    if (prof2 is not None) and (prof2.is_number_counts) and \
+            (normprof2 is False):
+        raise ValueError('normprof2 must be True if prof2 is of number ' +
+                         'counts type')
+    if (prof3 is not None) and (prof3.is_number_counts) and \
+            (normprof3 is False):
+        raise ValueError('normprof3 must be True if prof3 is of number ' +
+                         'counts type')
+    if (prof4 is not None) and (prof4.is_number_counts) and \
+            (normprof4 is False):
+        raise ValueError('normprof4 must be True if prof3 is of number ' +
+                         'counts type')
+
     if prof3 is None:
         prof3_bak = prof1
     else:
@@ -1170,18 +1187,12 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
             if prof1.is_number_counts:
-                if normprof1:
-                    b1 = i11_1 * norm1
-                else:
-                    b1 = i11_1 * hmc.profile_norm(cosmo, aa, prof1)
+                b1 = i11_1 * norm1
 
             if prof2 is None:
                 b2 = b1
             elif prof2.is_number_counts:
-                if normprof2:
-                    b2 = i11_2 * norm2
-                else:
-                    b2 = i11_2 * hmc.profile_norm(cosmo, aa, prof2)
+                b2 = i11_2 * norm2
 
             dpk12[ia, :] -= (b1 + b2) * P_12
 
@@ -1198,18 +1209,12 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             if prof3 is None:
                 b3 = b1
             elif prof3.is_number_counts:
-                if normprof3:
-                    b3 = i11_3 * norm3
-                else:
-                    b3 = i11_3 * hmc.profile_norm(cosmo, aa, prof3)
+                b3 = i11_3 * norm3
 
             if prof4 is None:
                 b4 = b3
             elif prof4.is_number_counts:
-                if normprof4:
-                    b4 = i11_4 * norm4
-                else:
-                    b4 = i11_4 * hmc.profile_norm(cosmo, aa, prof4)
+                b4 = i11_4 * norm4
 
             dpk34[ia, :] -= (b3 + b4) * P_34
 
