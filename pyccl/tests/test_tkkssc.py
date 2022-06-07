@@ -144,7 +144,6 @@ def test_tkkssc_errors():
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof3=P2, normprof3=False)
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof4=P2, normprof4=False)
 
-
     # Negative profile in logspace
     assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,
                  COSMO, hmc, P3, prof2=Pneg,
