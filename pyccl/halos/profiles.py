@@ -48,6 +48,8 @@ class HaloProfile(object):
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
 
+        self.is_number_counts = False
+
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by
         FFTLog to compute Hankel transforms. The available
@@ -1314,6 +1316,8 @@ class HaloProfileHOD(HaloProfile):
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
         super(HaloProfileHOD, self).__init__()
+
+        self.is_number_counts = True
 
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)

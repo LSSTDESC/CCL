@@ -13,6 +13,7 @@ HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
 P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
                               fourier_analytic=True)
+# P2 will have is_number_counts = True
 P2 = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
@@ -24,11 +25,11 @@ MM = np.geomspace(1E11, 1E15, 16)
 AA = 1.0
 
 
-def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt, is_clustering1,
-                           is_clustering2, normalize=False):
+def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
+                           normalize=False):
 
     P_12 = b1 = b2 = np.zeros_like(k)
-    if is_clustering1 or is_clustering2:
+    if prof1.is_number_counts or prof2.is_number_counts:
         norm1 = hmc.profile_norm(COSMO, a, prof1)
         norm2 = hmc.profile_norm(COSMO, a, prof2)
         norm12 = 1
@@ -42,12 +43,11 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt, is_clustering1,
         pk = ccl.linear_matter_power(COSMO, k, a)
         P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
-        if is_clustering1:
+        if prof1.is_number_counts:
             b1 = halomod_bias_1pt(COSMO, hmc, k, a, prof1) * norm1
-        if is_clustering2:
+        if prof2.is_number_counts:
             b2 = halomod_bias_1pt(COSMO, hmc, k, a, prof2) * norm2
 
-    # print('test', b1, b2)
     return (b1 + b2) * P_12
 
 
@@ -85,27 +85,6 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt, is_clustering1,
                           {'p1': P1, 'p2': None, 'cv12': None,
                            'p3': None, 'p4': None, 'cv34': None,
                            'norm': False, 'pk': COSMO.get_nonlin_power()},
-                          # Test clustering counter terms
-                          {'p1': P1, 'p2': None, 'cv12': None,
-                           'p3': None, 'p4': None, 'cv34': None,
-                           'norm': False, 'pk': None,
-                           'is_clustering1': True, 'is_clustering2': False,
-                           'is_clustering3': False, 'is_clustering4': False},
-                          {'p1': P1, 'p2': None, 'cv12': None,
-                           'p3': None, 'p4': None, 'cv34': None,
-                           'norm': False, 'pk': None,
-                           'is_clustering1': True, 'is_clustering2': True,
-                           'is_clustering3': False, 'is_clustering4': False},
-                          {'p1': P1, 'p2': None, 'cv12': None,
-                           'p3': None, 'p4': None, 'cv34': None,
-                           'norm': False, 'pk': None,
-                           'is_clustering1': True, 'is_clustering2': False,
-                           'is_clustering3': True, 'is_clustering4': False},
-                          {'p1': P1, 'p2': None, 'cv12': None,
-                           'p3': None, 'p4': None, 'cv34': None,
-                           'norm': False, 'pk': None,
-                           'is_clustering1': True, 'is_clustering2': True,
-                           'is_clustering3': True, 'is_clustering4': True},
                           ],)
 def test_tkkssc_smoke(pars):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
@@ -126,14 +105,6 @@ def test_tkkssc_smoke(pars):
                                      normprof4=pars['norm'],
                                      p_of_k_a=pars['pk'],
                                      lk_arr=np.log(k_arr), a_arr=a_arr,
-                                     is_clustering1=pars.get('is_clustering1',
-                                                             False),
-                                     is_clustering2=pars.get('is_clustering2',
-                                                             False),
-                                     is_clustering3=pars.get('is_clustering3',
-                                                             False),
-                                     is_clustering4=pars.get('is_clustering4',
-                                                             False)
                                      )
     tk = tkk.eval(0.1, 0.5)
     assert np.all(np.isfinite(tk))
@@ -170,26 +141,40 @@ def test_tkkssc_errors():
 
 
 @pytest.mark.parametrize('kwargs', [
-                         {'is_clustering1': False, 'is_clustering2': False,
-                          'is_clustering3': False, 'is_clustering4': False},
+                         # All is_number_counts = False
+                         {'prof1': P1, 'prof2': P1,
+                          'prof3': P1, 'prof4': P1},
+                         #
+                         {'prof1': P2, 'prof2': P1,
+                          'prof3': P1, 'prof4': P1},
+                         #
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': P1, 'prof4': P1},
+                         #
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': P2, 'prof4': P1},
+                         #
+                         {'prof1': P1, 'prof2': P1,
+                          'prof3': P2, 'prof4': P2},
+                         #
+                         {'prof1': P2, 'prof2': P1,
+                          'prof3': P2, 'prof4': P2},
+                         #
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': P1, 'prof4': P2},
+                         #
+                         {'prof1': P2, 'prof2': None,
+                          'prof3': P1, 'prof4': None},
+                         #
+                         {'prof1': P2, 'prof2': None,
+                          'prof3': None, 'prof4': None},
+                         #
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': None, 'prof4': None},
+                         # All is_number_counts = True
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': P2, 'prof4': P2},
 
-                         {'is_clustering1': False, 'is_clustering2': True,
-                          'is_clustering3': False, 'is_clustering4': False},
-
-                         {'is_clustering1': False, 'is_clustering2': False,
-                          'is_clustering3': True, 'is_clustering4': False},
-
-                         {'is_clustering1': False, 'is_clustering2': False,
-                          'is_clustering3': False, 'is_clustering4': True},
-
-                         {'is_clustering1': True, 'is_clustering2': True,
-                          'is_clustering3': False, 'is_clustering4': False},
-
-                         {'is_clustering1': True, 'is_clustering2': False,
-                          'is_clustering3': True, 'is_clustering4': False},
-
-                         {'is_clustering1': True, 'is_clustering2': True,
-                          'is_clustering3': True, 'is_clustering4': True},
                          ]
                          )
 def test_tkkssc_counterterms_gc(kwargs):
@@ -198,17 +183,30 @@ def test_tkkssc_counterterms_gc(kwargs):
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 
-    # Tk's without clustering terms
-    tkk_nogc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof1=P1, prof2=P2,
-                                          prof3=P1, prof4=P2, prof12_2pt=PKC,
+    if kwargs['prof2'] is None:
+        kwargs['prof2'] = kwargs['prof1']
+    if kwargs['prof3'] is None:
+        kwargs['prof3'] = kwargs['prof1']
+    if kwargs['prof4'] is None:
+        kwargs['prof4'] = kwargs['prof3']
+
+    # Tk's without clustering terms. Set is_number_counts=False for HOD
+    # profiles
+    kwargs_nogc = kwargs.copy()
+    for k, v in kwargs_nogc.items():
+        if v is None:
+            continue
+        v.is_number_counts = False
+        kwargs_nogc[k] = v
+    tkk_nogc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof12_2pt=PKC,
                                           prof34_2pt=PKC,
-                                          lk_arr=np.log(k_arr), a_arr=a_arr)
+                                          lk_arr=np.log(k_arr), a_arr=a_arr,
+                                          **kwargs_nogc)
     _, _, _, tkk_nogc_arrs = tkk_nogc.get_spline_arrays()
     tk_nogc_12, tk_nogc_34 = tkk_nogc_arrs
 
     # Tk's with clustering terms
-    tkk_gc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof1=P1, prof2=P2,
-                                        prof3=P1, prof4=P2, prof12_2pt=PKC,
+    tkk_gc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof12_2pt=PKC,
                                         prof34_2pt=PKC,
                                         lk_arr=np.log(k_arr), a_arr=a_arr,
                                         **kwargs)
@@ -218,13 +216,11 @@ def test_tkkssc_counterterms_gc(kwargs):
     # Tk's of the clustering terms
     tkc12 = []
     tkc34 = []
-    for i, aa in enumerate(a_arr):
-        tkc12.append(get_ssc_counterterm_gc(k_arr, aa, hmc, P1, P2, PKC,
-                                            kwargs['is_clustering1'],
-                                            kwargs['is_clustering2']))
-        tkc34.append(get_ssc_counterterm_gc(k_arr, aa, hmc, P1, P2, PKC,
-                                            kwargs['is_clustering3'],
-                                            kwargs['is_clustering4']))
+    for aa in a_arr:
+        tkc12.append(get_ssc_counterterm_gc(k_arr, aa, hmc, kwargs['prof1'],
+                                            kwargs['prof2'], PKC))
+        tkc34.append(get_ssc_counterterm_gc(k_arr, aa, hmc, kwargs['prof3'],
+                                            kwargs['prof4'], PKC))
     tkc12 = np.array(tkc12)
     tkc34 = np.array(tkc34)
 
