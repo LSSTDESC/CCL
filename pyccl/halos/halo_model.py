@@ -1170,13 +1170,18 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
             if prof1.is_number_counts:
-                b1 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof1,
-                                      normprof=True)
+                if normprof1:
+                    b1 = i11_1 * norm1
+                else:
+                    b1 = i11_1 * hmc.profile_norm(cosmo, aa, prof1)
+
             if prof2 is None:
                 b2 = b1
             elif prof2.is_number_counts:
-                b2 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof2,
-                                      normprof=True)
+                if normprof2:
+                    b2 = i11_2 * norm2
+                else:
+                    b2 = i11_2 * hmc.profile_norm(cosmo, aa, prof2)
 
             dpk12[ia, :] -= (b1 + b2) * P_12
 
@@ -1193,14 +1198,18 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             if prof3 is None:
                 b3 = b1
             elif prof3.is_number_counts:
-                b3 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof3,
-                                      normprof=True)
+                if normprof3:
+                    b3 = i11_3 * norm3
+                else:
+                    b3 = i11_3 * hmc.profile_norm(cosmo, aa, prof3)
 
             if prof4 is None:
                 b4 = b3
             elif prof4.is_number_counts:
-                b4 = halomod_bias_1pt(cosmo, hmc, k_use, aa, prof4,
-                                      normprof=True)
+                if normprof4:
+                    b4 = i11_4 * norm4
+                else:
+                    b4 = i11_4 * hmc.profile_norm(cosmo, aa, prof4)
 
             dpk34[ia, :] -= (b3 + b4) * P_34
 
