@@ -190,16 +190,13 @@ def test_tkkssc_errors():
 
                          {'is_clustering1': True, 'is_clustering2': True,
                           'is_clustering3': True, 'is_clustering4': True},
-                          ]
+                         ]
                          )
 def test_tkkssc_counterterms_gc(kwargs):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
                                  nlog10M=2)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
-
-    k = 0.1
-    a = 0.5
 
     # Tk's without clustering terms
     tkk_nogc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof1=P1, prof2=P2,
