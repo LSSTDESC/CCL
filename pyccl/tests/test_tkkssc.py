@@ -140,8 +140,11 @@ def test_tkkssc_errors():
     # No normalization for number counts profile
     with pytest.raises(ValueError):
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P2, normprof1=False)
+    with pytest.raises(ValueError):
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof2=P2, normprof2=False)
+    with pytest.raises(ValueError):
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof3=P2, normprof3=False)
+    with pytest.raises(ValueError):
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof4=P2, normprof4=False)
 
     # Negative profile in logspace
