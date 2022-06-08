@@ -1180,6 +1180,8 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         dpk12[ia, :] = norm12*((2.2380952381-dpk/3)*i11_1*i11_2*pk+i12_12)
         dpk34[ia, :] = norm34*((2.2380952381-dpk/3)*i11_3*i11_4*pk+i12_34)
 
+        # Defining i02_12 here to avoid problems in L1205 in some plataforms
+        i02_12 = None
         # Counter terms for clustering (i.e. - (bA + bB) * PAB
         if prof1.is_number_counts or (prof2 is None or prof2.is_number_counts):
             b1 = b2 = np.zeros_like(k_use)
