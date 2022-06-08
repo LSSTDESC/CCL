@@ -182,6 +182,13 @@ def test_tkkssc_errors():
                          #
                          {'prof1': P2, 'prof2': P2,
                           'prof3': None, 'prof4': None},
+                         # As in benchmarks/test_covariances.py
+                         {'prof1': P1, 'prof2': P1,
+                          'prof3': None, 'prof4': None},
+                         # Setting prof34_2pt
+                         {'prof1': P1, 'prof2': P1,
+                          'prof3': None, 'prof4': None,
+                          'prof34_2pt': PKC},
                          # All is_number_counts = True
                          {'prof1': P2, 'prof2': P2,
                           'prof3': P2, 'prof4': P2},
@@ -194,13 +201,6 @@ def test_tkkssc_counterterms_gc(kwargs):
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 
-    if kwargs['prof2'] is None:
-        kwargs['prof2'] = kwargs['prof1']
-    if kwargs['prof3'] is None:
-        kwargs['prof3'] = kwargs['prof1']
-    if kwargs['prof4'] is None:
-        kwargs['prof4'] = kwargs['prof3']
-
     # Tk's without clustering terms. Set is_number_counts=False for HOD
     # profiles
     # Ensure HOD profiles are normalized
@@ -212,20 +212,26 @@ def test_tkkssc_counterterms_gc(kwargs):
             kwargs_nogc[k] = P2_nogc
             kwargs_nogc['norm' + k] = True
             kwargs['norm' + k] = True
-    tkk_nogc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof12_2pt=PKC,
-                                          prof34_2pt=PKC,
+    tkk_nogc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc,
                                           lk_arr=np.log(k_arr), a_arr=a_arr,
                                           **kwargs_nogc)
     _, _, _, tkk_nogc_arrs = tkk_nogc.get_spline_arrays()
     tk_nogc_12, tk_nogc_34 = tkk_nogc_arrs
 
     # Tk's with clustering terms
-    tkk_gc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof12_2pt=PKC,
-                                        prof34_2pt=PKC,
+    tkk_gc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc,
                                         lk_arr=np.log(k_arr), a_arr=a_arr,
                                         **kwargs)
     _, _, _, tkk_gc_arrs = tkk_gc.get_spline_arrays()
     tk_gc_12, tk_gc_34 = tkk_gc_arrs
+
+    # Update the None's to their corresponding values
+    if kwargs['prof2'] is None:
+        kwargs['prof2'] = kwargs['prof1']
+    if kwargs['prof3'] is None:
+        kwargs['prof3'] = kwargs['prof1']
+    if kwargs['prof4'] is None:
+        kwargs['prof4'] = kwargs['prof3']
 
     # Tk's of the clustering terms
     tkc12 = []
