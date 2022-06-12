@@ -198,11 +198,10 @@ class HaloProfileCIBShang12(HaloProfile):
     def _Lumsat(self, M, a):
         Lumsat = np.zeros_like(M)
         goodM = M > self.Mmin
-        ngood = np.sum(goodM)
 
         dlogM = np.log10(np.amax(M)/self.Mmin)
         nm = max(2, int(dlogM*self.nMsub_per_dex))
-        # This will have shape [ngood, nm]
+        # This will have shape [sum(goodM), nm]
         msub = np.geomspace(self.Mmin, M[goodM], nm).T
         dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(msub,
                                                    M[goodM][:, None])
