@@ -290,7 +290,7 @@ class HaloProfile(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
-            a_lens (float or array_like): scale factor of lens.
+            a_lens (float): scale factor of lens.
             a_source (float or array_like): scale factor of source.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
@@ -323,7 +323,7 @@ class HaloProfile(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
-            a_lens (float or array_like): lens' scale factor.
+            a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
@@ -355,7 +355,7 @@ class HaloProfile(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
-            a_lens (float or array_like): lens' scale factor.
+            a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
@@ -382,7 +382,7 @@ class HaloProfile(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
-            a_lens (float or array_like): lens' scale factor.
+            a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
