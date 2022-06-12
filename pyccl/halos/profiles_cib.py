@@ -76,13 +76,15 @@ class HaloProfileCIBShang12(HaloProfile):
         Mmin (float): minimum subhalo mass.
         L0 (float): luminosity scale (in
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
+        nMsub_per_dex (int): number of subhalo mass samples per
+            decade used in integral over satellites.
     """
     name = 'CIBShang12'
     _one_over_4pi = 0.07957747154
 
     def __init__(self, c_M_relation, nu_GHz, alpha=0.36, T0=24.4, beta=1.75,
                  gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707, Mmin=1E10,
-                 L0=6.4E-8):
+                 L0=6.4E-8, nMsub_per_dex=3):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
@@ -97,6 +99,7 @@ class HaloProfileCIBShang12(HaloProfile):
         self.Mmin = Mmin
         self.L0 = L0
         self.pNFW = HaloProfileNFW(c_M_relation)
+        self.nMsub_per_dex = nMsub_per_dex
         super(HaloProfileCIBShang12, self).__init__()
 
     def dNsub_dlnM_TinkerWetzel10(self, Msub, Mparent):
@@ -114,7 +117,7 @@ class HaloProfileCIBShang12(HaloProfile):
     def update_parameters(self, nu_GHz=None,
                           alpha=None, T0=None, beta=None, gamma=None,
                           s_z=None, log10meff=None, sigLM=None,
-                          Mmin=None, L0=None):
+                          Mmin=None, L0=None, nMsub_per_dex=None):
         """ Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
 
@@ -130,6 +133,8 @@ class HaloProfileCIBShang12(HaloProfile):
             Mmin (float): minimum subhalo mass.
             L0 (float): luminosity scale (in
                 :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
+            nMsub_per_dex (int): number of subhalo mass samples per
+                decade used in integral over satellites.
         """
         if nu_GHz is not None:
             self.nu = nu_GHz
@@ -151,6 +156,8 @@ class HaloProfileCIBShang12(HaloProfile):
             self.Mmin = Mmin
         if L0 is not None:
             self.L0 = L0
+        if nMsub_per_dex is not None:
+            self.nMsub_per_dex = nMsub_per_dex
 
     def _spectrum(self, nu, a):
         # h*nu_GHZ / k_B / Td_K
@@ -190,19 +197,17 @@ class HaloProfileCIBShang12(HaloProfile):
 
     def _Lumsat(self, M, a):
         Lumsat = np.zeros_like(M)
-        # Loop over Mparent
-        # TODO: if this is too slow we could move it to C
-        # and parallelize
-        for iM, Mparent in enumerate(M):
-            if Mparent > self.Mmin:
-                # Array of Msubs (log-spaced with 10 samples per dex)
-                nm = max(2, int(np.log10(Mparent/1E10)*10))
-                msub = np.geomspace(1E10, Mparent, nm+1)
-                # Sample integrand
-                dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(msub, Mparent)
-                Lum = self._Lum(np.log10(msub), a)
-                integ = dnsubdlnm*Lum
-                Lumsat[iM] = simps(integ, x=np.log(msub))
+        goodM = M > self.Mmin
+        ngood = np.sum(goodM)
+
+        dlogM = np.log10(np.amax(M)/self.Mmin)
+        nm = max(2, int(dlogM*self.nMsub_per_dex))
+        # This will have shape [ngood, nm]
+        msub = np.geomspace(self.Mmin, M[goodM], nm).T
+        dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(msub,
+                                                   M[goodM][:, None])
+        Lum = self._Lum(np.log10(msub), a)
+        Lumsat[goodM] = simps(dnsubdlnm*Lum, x=np.log(msub), axis=-1)
         return Lumsat
 
     def _real(self, cosmo, r, M, a, mass_def):
