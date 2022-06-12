@@ -29,7 +29,8 @@ def test_cibcl():
                          log10meff=12.6,
                          sigLM=np.sqrt(0.5),
                          Mmin=1E10,
-                         L0=6.4E-8)
+                         L0=6.4E-8,
+                         nMsub_per_dex=2)
 
     pr2pt = ccl.halos.Profile2ptCIB()
 
