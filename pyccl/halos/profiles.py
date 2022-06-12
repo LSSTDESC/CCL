@@ -36,6 +36,7 @@ class HaloProfile(object):
     calculation.
     """
     name = 'default'
+    is_number_counts = False
 
     def __init__(self):
         self.precision_fftlog = {'padding_lo_fftlog': 0.1,
@@ -1283,6 +1284,7 @@ class HaloProfileHOD(HaloProfile):
             satellites when centrals are present.
         """
     name = 'HOD'
+    is_number_counts = True
 
     def __init__(self, c_M_relation,
                  lMmin_0=12., lMmin_p=0., siglM_0=0.4,
