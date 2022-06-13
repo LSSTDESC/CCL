@@ -287,7 +287,7 @@ ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration co
   cosmo->computed_sigma = false;
   cosmo->status = 0;
   // Initialise as 0-length string
-  cosmo->status_message[0] = "\0";
+  cosmo->status_message[0] = '\0';
 
   if(cosmo->spline_params.A_SPLINE_MAX !=1.) {
     cosmo->status = CCL_ERROR_SPLINE;
