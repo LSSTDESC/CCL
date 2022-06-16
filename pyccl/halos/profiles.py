@@ -292,7 +292,7 @@ class HaloProfile(object):
             M (float or array_like): halo mass in units of M_sun.
             a_lens (float): scale factor of lens.
             a_source (float or array_like): scale factor of source.
-                If array_like, it must have the same shape as r.
+                If array_like, it must have the same shape as `r`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -326,7 +326,7 @@ class HaloProfile(object):
             M (float or array_like): halo mass in units of M_sun.
             a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
-                If array_like, it must have the same shape as r.
+                If array_like, it must have the same shape as `r`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -359,7 +359,7 @@ class HaloProfile(object):
             M (float or array_like): halo mass in units of M_sun.
             a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
-                If array_like, it must have the same shape as r.
+                If array_like, it must have the same shape as `r`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -387,7 +387,7 @@ class HaloProfile(object):
             M (float or array_like): halo mass in units of M_sun.
             a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
-                If array_like, it must have the same shape as r.
+                If array_like, it must have the same shape as `r`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
