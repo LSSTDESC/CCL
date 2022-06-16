@@ -335,6 +335,7 @@ class HaloProfile(object):
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
         Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
         if hasattr(a_source, "__iter__"):
+            a_source = np.array(a_source)
             a_lens = np.full_like(a_source, a_lens)
         Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
