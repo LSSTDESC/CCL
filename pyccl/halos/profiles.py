@@ -38,6 +38,7 @@ class HaloProfile(object):
     calculation.
     """
     name = 'default'
+    is_number_counts = False
 
     def __init__(self):
         self.precision_fftlog = {'padding_lo_fftlog': 0.1,
@@ -291,8 +292,9 @@ class HaloProfile(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
-            a_lens (float or array_like): scale factor of lens.
+            a_lens (float): scale factor of lens.
             a_source (float or array_like): scale factor of source.
+                If array_like, it must have the same shape as `r`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -301,6 +303,9 @@ class HaloProfile(object):
                 :math:`\\kappa`
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def) / a_lens**2
+        if hasattr(a_source, "__iter__"):
+            a_source = np.array(a_source)
+            a_lens = np.full_like(a_source, a_lens)
         Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return Sigma / Sigma_crit
 
@@ -321,8 +326,9 @@ class HaloProfile(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
-            a_lens (float or array_like): lens' scale factor.
+            a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
+                If array_like, it must have the same shape as `r`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -332,6 +338,9 @@ class HaloProfile(object):
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
         Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
+        if hasattr(a_source, "__iter__"):
+            a_source = np.array(a_source)
+            a_lens = np.full_like(a_source, a_lens)
         Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
@@ -350,8 +359,9 @@ class HaloProfile(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
-            a_lens (float or array_like): lens' scale factor.
+            a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
+                If array_like, it must have the same shape as `r`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -377,8 +387,9 @@ class HaloProfile(object):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
-            a_lens (float or array_like): lens' scale factor.
+            a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
+                If array_like, it must have the same shape as `r`.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
@@ -1285,6 +1296,7 @@ class HaloProfileHOD(HaloProfile):
             satellites when centrals are present.
         """
     name = 'HOD'
+    is_number_counts = True
 
     def __init__(self, c_M_relation,
                  lMmin_0=12., lMmin_p=0., siglM_0=0.4,

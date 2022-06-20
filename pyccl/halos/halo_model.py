@@ -1093,6 +1093,23 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     if (prof34_2pt is not None) and (not isinstance(prof34_2pt, Profile2pt)):
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
+    # number counts profiles must be normalized
+    if (prof1.is_number_counts) and (normprof1 is False):
+        raise ValueError('normprof1 must be True if prof1 is of number ' +
+                         'counts type')
+    if (prof2 is not None) and (prof2.is_number_counts) and \
+            (normprof2 is False):
+        raise ValueError('normprof2 must be True if prof2 is of number ' +
+                         'counts type')
+    if (prof3 is not None) and (prof3.is_number_counts) and \
+            (normprof3 is False):
+        raise ValueError('normprof3 must be True if prof3 is of number ' +
+                         'counts type')
+    if (prof4 is not None) and (prof4.is_number_counts) and \
+            (normprof4 is False):
+        raise ValueError('normprof4 must be True if prof3 is of number ' +
+                         'counts type')
+
     if prof3 is None:
         prof3_bak = prof1
     else:
@@ -1162,6 +1179,45 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk+I12
         dpk12[ia, :] = norm12*((2.2380952381-dpk/3)*i11_1*i11_2*pk+i12_12)
         dpk34[ia, :] = norm34*((2.2380952381-dpk/3)*i11_3*i11_4*pk+i12_34)
+
+        # Counter terms for clustering (i.e. - (bA + bB) * PAB
+        if prof1.is_number_counts or (prof2 is None or prof2.is_number_counts):
+            b1 = b2 = np.zeros_like(k_use)
+            i02_12 = hmc.I_0_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2)
+            P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
+
+            if prof1.is_number_counts:
+                b1 = i11_1 * norm1
+
+            if prof2 is None:
+                b2 = b1
+            elif prof2.is_number_counts:
+                b2 = i11_2 * norm2
+
+            dpk12[ia, :] -= (b1 + b2) * P_12
+
+        if prof3_bak.is_number_counts or \
+                ((prof3_bak.is_number_counts and prof4 is None) or
+                 (prof4 is not None) and prof4.is_number_counts):
+            b3 = b4 = np.zeros_like(k_use)
+            if (prof3 is None) and (prof4 is None) and (prof34_2pt is None):
+                i02_34 = i02_12
+            else:
+                i02_34 = hmc.I_0_2(cosmo, k_use, aa, prof3_bak, prof34_2pt_bak,
+                                   prof4)
+            P_34 = norm34 * (pk * i11_3 * i11_4 + i02_34)
+
+            if prof3 is None:
+                b3 = b1
+            elif prof3.is_number_counts:
+                b3 = i11_3 * norm3
+
+            if prof4 is None:
+                b4 = b3
+            elif prof4.is_number_counts:
+                b4 = i11_4 * norm4
+
+            dpk34[ia, :] -= (b3 + b4) * P_34
 
     if use_log:
         if np.any(dpk12 <= 0) or np.any(dpk34 <= 0):
