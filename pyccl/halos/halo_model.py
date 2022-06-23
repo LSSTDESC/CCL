@@ -995,7 +995,8 @@ def halomod_Tk3D_SSC(cosmo, hmc,
                      normprof3=False, normprof4=False,
                      p_of_k_a=None, lk_arr=None, a_arr=None,
                      extrap_order_lok=1, extrap_order_hik=1,
-                     use_log=False):
+                     use_log=False, bias1=None, bias2=None,
+                     bias3=None, bias4=None):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
@@ -1059,6 +1060,12 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
+        bias1 (float or array): bias for the halo profile 1. It can be a float
+        or an array of length lk_arr. If given, use this bias instead the one
+        computed from the halo model.
+        bias2 (float or array): as bias1 but for prof2
+        bias3 (float or array): as bias1 but for prof3
+        bias4 (float or array): as bias1 but for prof4
 
     Returns:
         :class:`~pyccl.tk3d.Tk3D`: SSC effective trispectrum.
@@ -1187,12 +1194,12 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
             if prof1.is_number_counts:
-                b1 = i11_1 * norm1
+                b1 = i11_1 * norm1 if bias1 is None else bias1
 
             if prof2 is None:
-                b2 = b1
+                b2 = b1 if bias2 is None else bias2
             elif prof2.is_number_counts:
-                b2 = i11_2 * norm2
+                b2 = i11_2 * norm2 if bias2 is None else bias2
 
             dpk12[ia, :] -= (b1 + b2) * P_12
 
@@ -1208,14 +1215,14 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             P_34 = norm34 * (pk * i11_3 * i11_4 + i02_34)
 
             if prof3 is None:
-                b3 = b1
+                b3 = b1 if bias3 is None else bias3
             elif prof3.is_number_counts:
-                b3 = i11_3 * norm3
+                b3 = i11_3 * norm3 if bias3 is None else bias3
 
             if prof4 is None:
-                b4 = b3
+                b4 = b3 if bias4 is None else bias4
             elif prof4.is_number_counts:
-                b4 = i11_4 * norm4
+                b4 = i11_4 * norm4 if bias4 is None else bias4
 
             dpk34[ia, :] -= (b3 + b4) * P_34
 

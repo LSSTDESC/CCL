@@ -28,7 +28,7 @@ AA = 1.0
 
 
 def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
-                           normalize=False):
+                           normalize=False, bias1=None, bias2=None):
 
     P_12 = b1 = b2 = np.zeros_like(k)
     if prof1.is_number_counts or prof2.is_number_counts:
@@ -48,9 +48,15 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
         P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
         if prof1.is_number_counts:
-            b1 = halomod_bias_1pt(COSMO, hmc, k, a, prof1) * norm1
+            if bias1 is None:
+                b1 = halomod_bias_1pt(COSMO, hmc, k, a, prof1) * norm1
+            else:
+                b1 = bias1
         if prof2.is_number_counts:
-            b2 = halomod_bias_1pt(COSMO, hmc, k, a, prof2) * norm2
+            if bias2 is None:
+                b2 = halomod_bias_1pt(COSMO, hmc, k, a, prof2) * norm2
+            else:
+                b2 = bias2
 
     return (b1 + b2) * P_12
 
@@ -195,7 +201,26 @@ def test_tkkssc_errors():
                          # All is_number_counts = True
                          {'prof1': P2, 'prof2': P2,
                           'prof3': P2, 'prof4': P2},
-
+                         # Input biases
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': P2, 'prof4': P2,
+                          'bias1': 1, 'bias2': 2},
+                         # Input biases
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': P2, 'prof4': P2,
+                          'bias3': 3, 'bias4': 2},
+                         # Input biases
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': P2, 'prof4': P2,
+                          'bias1': 1, 'bias2': 2, 'bias3': 3},
+                         # Input biases
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': P2, 'prof4': P2,
+                          'bias1': 1, 'bias2': 2, 'bias3': 3, 'bias4':4},
+                         # Input biases as arr
+                         {'prof1': P2, 'prof2': P2,
+                          'prof3': P2, 'prof4': P2,
+                          'bias1': np.ones_like(KK)}
                          ]
                          )
 def test_tkkssc_counterterms_gc(kwargs):
@@ -241,9 +266,13 @@ def test_tkkssc_counterterms_gc(kwargs):
     tkc34 = []
     for aa in a_arr:
         tkc12.append(get_ssc_counterterm_gc(k_arr, aa, hmc, kwargs['prof1'],
-                                            kwargs['prof2'], PKC))
+                                            kwargs['prof2'], PKC,
+                                            bias1=kwargs.get('bias1', None),
+                                            bias2=kwargs.get('bias2', None)))
         tkc34.append(get_ssc_counterterm_gc(k_arr, aa, hmc, kwargs['prof3'],
-                                            kwargs['prof4'], PKC))
+                                            kwargs['prof4'], PKC,
+                                            bias1=kwargs.get('bias3', None),
+                                            bias2=kwargs.get('bias4', None)))
     tkc12 = np.array(tkc12)
     tkc34 = np.array(tkc34)
 
