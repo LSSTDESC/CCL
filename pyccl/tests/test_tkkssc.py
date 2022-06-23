@@ -216,7 +216,7 @@ def test_tkkssc_errors():
                          # Input biases
                          {'prof1': P2, 'prof2': P2,
                           'prof3': P2, 'prof4': P2,
-                          'bias1': 1, 'bias2': 2, 'bias3': 3, 'bias4':4},
+                          'bias1': 1, 'bias2': 2, 'bias3': 3, 'bias4': 4},
                          # Input biases as arr
                          {'prof1': P2, 'prof2': P2,
                           'prof3': P2, 'prof4': P2,
