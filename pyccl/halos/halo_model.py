@@ -1006,10 +1006,13 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     .. math::
         \\frac{\\partial P_{u,v}(k)}{\\partial\\delta_L} =
         \\left(\\frac{68}{21}-\\frac{d\\log k^3P_L(k)}{d\\log k}\\right)
-        P_L(k)I^1_1(k,|u)I^1_1(k,|v)+I^1_2(k|u,v)
+        P_L(k)I^1_1(k,|u)I^1_1(k,|v)+I^1_2(k|u,v) - (b_{uu} + b_{vv})
+        P_{u,v}(k)
 
     where the :math:`I^a_b` are defined in the documentation
-    of :meth:`~HMCalculator.I_1_1` and  :meth:`~HMCalculator.I_1_2`.
+    of :meth:`~HMCalculator.I_1_1` and  :meth:`~HMCalculator.I_1_2` and
+    :math:`b_{uu}` and :math:`b_{vv}` are the linear halo biases for quantities
+    :math:`u` and :math:`v`, respectively (zero if they are not clustering).
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
