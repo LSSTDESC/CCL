@@ -30,7 +30,8 @@ def test_haloprofile_smoke(func, r):
 
 def test_IA_halo_model():
     from pyccl.pyutils import assert_warns
-    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.83, n_s=0.96)
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.83, n_s=0.96)
     k_arr = np.geomspace(1E-3, 1e3, 256)  # For evaluating
     hmd_200m = ccl.halos.MassDef200m()
     cM = ccl.halos.ConcentrationDuffy08(hmd_200m)
@@ -47,7 +48,7 @@ def test_IA_halo_model():
 
     # Run with b!={0,2}
     assert (ccl.halos.SatelliteShearHOD(cM, b=-1.9)
-            ._angular_fl).shape == (6,1)
+            ._angular_fl).shape == (6, 1)
 
     # Preliminary test on FFTLog accuracy vs simps method.
     s_g_HOD1 = ccl.halos.SatelliteShearHOD(cM)
