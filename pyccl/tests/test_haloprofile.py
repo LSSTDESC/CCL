@@ -30,6 +30,8 @@ def test_haloprofile_smoke(func, r):
 
 def test_IA_halo_model():
     from pyccl.pyutils import assert_warns
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.83, n_s=0.96)
+    k_arr = np.geomspace(1E-3, 1e3, 256)  # For evaluating
     hmd_200m = ccl.halos.MassDef200m()
     cM = ccl.halos.ConcentrationDuffy08(hmd_200m)
 
@@ -42,6 +44,17 @@ def test_IA_halo_model():
     assert_warns(ccl.CCLWarning,
                  ccl.halos.SatelliteShearHOD,
                  cM, lmax=14)
+
+    # Run with b!={0,2}
+    assert (ccl.halos.SatelliteShearHOD(cM, b=-1.9)
+            ._angular_fl).shape == (6,1)
+
+    # Preliminary test on FFTLog accuracy vs simps method.
+    s_g_HOD1 = ccl.halos.SatelliteShearHOD(cM)
+    s_g_HOD2 = ccl.halos.SatelliteShearHOD(cM, integration_method='simps')
+    s_g1 = s_g_HOD1._usat_fourier(cosmo, k_arr, 1e13, 1., hmd_200m)
+    s_g2 = s_g_HOD2._usat_fourier(cosmo, k_arr, 1e13, 1., hmd_200m)
+    assert np.all(np.abs((s_g1-s_g2)/s_g2)) > 0.05
 
     # Wrong integration method
     with pytest.raises(ValueError):
