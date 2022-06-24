@@ -10,6 +10,7 @@ from . import ccllib as lib
 from . import constants as const
 from .core import check
 from .pk2d import parse_pk2d
+from .pyutils import resample_array, _fftlog_transform
 import numpy as np
 import warnings
 
@@ -330,3 +331,156 @@ def correlation_pi_sigma(cosmo, a, beta, pi, sig,
     if scalar:
         return xis[0]
     return xis
+
+
+def correlation_ab(cosmo, r_p: np.ndarray, z: np.ndarray,
+                   dndz: np.ndarray, dndz2=None,
+                   p_of_k_a=None,
+                   type='gg',
+                   precision_fftlog: dict = None):
+    """Computes :math:`w_{ab}`.
+    .. math::
+        \\w_{ab}(r_p)=\\int dz\\,(W)(z)
+        \\int\\frac{dk k}{2\\pi^2}\\,P(k,a)\\,J_n(k r_p)
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            r_p (float or array-like): Projected radial separation where the
+                correlation function will be evaluated.
+            z (array-like): Redshift values where the redshift distribution
+                has been evaluated.
+            dndz (array-like): Redshift distribution to be used when computing
+                the window function (see e.g. Eq. (3.11) in (1811.09598)).
+            dndz2 (array-like or None): Redshift distribution corresponding to
+                sample `b` of tracers to be correlated. If tracers `a` and `b`
+                are the same, this should be left as None.
+                Default value: None.
+            p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): 3D Power spectrum to
+                integrate.
+            type (string): Type of `ab` correlation. This changes the Bessel
+                function in the integral above. Choices: 'gg' (`J_0`),
+                'g+' (`J_2`), '++' (`J_0+J_4`).
+            precision_fftlog (dict): Dictionary containing the precision
+                parameters used by FFTLog to compute Hankel transforms. The
+                dictionary should contain the keys: `padding_lo_fftlog`,
+                `padding_lo_fftlog`, `padding_lo_extra`, `padding_hi_fftlog`,
+                `padding_hi_extra`, `n_per_decade`, `extrapol`,
+                `plaw_fourier`. Default values are 0.01, 0.1, 10., 10.,
+                100, 'linx_liny' and -1.5. For more information look at
+                `pyccl.halos.profiles.HaloProfile.update_precision_fftlog`.
+
+        Returns:
+            array-like: Value(s) of the correlation function at the input
+            projected radial separation(s).
+    """
+    if dndz2 is None:
+        dndz2 = dndz
+    a = 1/(1+z)
+    wz = dndz*dndz2*(1+z)**2/(
+        cosmo.comoving_radial_distance(a)**2. *
+        _compute_dchi_da_num(a, cosmo))
+    wz /= np.trapz(wz, z)
+    if type == 'gg':
+        xi = np.array([_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=0)
+                      for a_ in a])
+    elif type == 'g+':
+        xi = np.array([_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=2)
+                      for a_ in a])
+    elif type == '++':
+        xi = np.array([(_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=0) +
+                       _fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=4))
+                      for a_ in a])
+    else:
+        raise ValueError
+    if np.ndim(xi) == 2:
+        wz = wz.reshape((len(z), 1))
+    w = np.trapz(wz*xi, z, axis=0)
+    return w
+
+
+def _fftlog_wrap(r_p: np.ndarray, a: float, cosmo, p_of_k_a=None,
+                 precision_fftlog: dict = None,
+                 n=0, large_padding=True):
+    '''Computes the integral
+       .. math::
+          \\xi(r_p,a)=\\int\\frac{dk k}{2\\pi^2}\\,P(k,a)\\,J_n(k r_p)
+       Adapted from pyccl.halos.profiles.HaloProfile._fftlog_wrap.
+    '''
+    # Note: The _fftlog_transform solves for
+    # f(r) = \int 4 pi k^2 f(k) j_l(kr) dk
+    # To compute the integral shown above we use _fftlog_transform
+    # and set fk = rp^1/2 P(k,a:float)/(2^5/2 pi^5/2 k^1/2).
+    if precision_fftlog is None:
+        precision_fftlog = {'padding_lo_fftlog': 0.01,
+                            'padding_lo_extra': 0.1,
+                            'padding_hi_fftlog': 10.,
+                            'padding_hi_extra': 10.,
+                            'n_per_decade': 100,
+                            'extrapol': 'linx_liny',
+                            'plaw_fourier': -1.5}
+    else:
+        for key in ['padding_lo_fftlog', 'padding_lo_extra',
+                    'padding_hi_fftlog', 'padding_hi_extra', 'n_per_decade',
+                    'extrapol', 'plaw_fourier']:
+            if key not in precision_fftlog.keys():
+                raise ValueError('Error.')
+    l = n - 1 / 2
+
+    r_use = np.atleast_1d(r_p)
+    lr_use = np.log(r_use)
+
+    # k-range to be used with FFTLog and its sampling.
+    if large_padding:
+        k_min = precision_fftlog['padding_lo_fftlog'] * np.amin(r_use)
+        k_max = precision_fftlog['padding_hi_fftlog'] * np.amax(r_use)
+    else:
+        k_min = precision_fftlog['padding_lo_extra'] * np.amin(r_use)
+        k_max = precision_fftlog['padding_hi_extra'] * np.amax(r_use)
+    n_k = (int(np.log10(k_max / k_min)) *
+           precision_fftlog['n_per_decade'])
+    k_arr = np.geomspace(k_min, k_max, n_k)  # Array to be used by FFTLog.
+
+    # What needs to go in _fftlog_transform to get out \xi_gg.
+    fk = p_of_k_a.eval(k_arr, a, cosmo)/((2*np.pi)**(5./2)*k_arr**(1/2))
+    r_arr, xi_fourier = _fftlog_transform(k_arr, fk, 3, l,
+                                          precision_fftlog['plaw_fourier'])
+    lr_arr = np.log(r_arr)
+
+    # Resample into input k values.
+    xi_out = resample_array(lr_arr, xi_fourier, lr_use,
+                            precision_fftlog['extrapol'],
+                            precision_fftlog['extrapol'],
+                            0, 0)
+    # Multiply to get the correct output.
+    xi_out *= (2*np.pi)**3*np.sqrt(r_use)
+
+    if np.ndim(r_p) == 0:
+        xi_out = np.squeeze(xi_out, axis=-1)
+    return xi_out
+
+
+def _compute_dchi_da_num(a, cosmo, a_step=0.01):
+    a_use = np.atleast_1d(a)
+    # If the a-array has values higher than 1, throw an error.
+    if len(a_use[a_use > 1]) > 0:
+        raise ValueError('Cannot accept scale factor larger than 1.')
+    # If the a-array has values that go beyond 1 when the step size is added
+    # reduce the step size until that doesn't happen anymore and
+    # throw a warning.
+    if len(a_use[(a_use + a_step > 1) & (a_use < 1)] > 0):
+        while len(a_use[(a_use + a_step > 1) & (a_use < 1)] > 0):
+            a_step /= 2.
+        warnings.warn('Step size causes scale factor > 1. Using step=%f'
+                      % a_step)
+    dxda = np.empty(a_use.shape)
+    # Compute for all values of a that do not go above 1.
+    dxda[a_use < 1] = np.array([
+        (cosmo.comoving_radial_distance(a + a_step) -
+         cosmo.comoving_radial_distance(a - a_step)) / (2 * a_step)
+        for a in a_use[a_use < 1]])
+    # For the values that go above 1,
+    # use a constant value that is very close to 1.
+    dxda[a_use == 1] = (cosmo.comoving_radial_distance(0.9999 + 0.00001) -
+                        cosmo.comoving_radial_distance(
+        0.9999 - 0.00001)) / (2 * 0.00001)
+    return dxda
