@@ -379,6 +379,7 @@ def correlation_ab(cosmo, r_p: np.ndarray, z: np.ndarray,
     wz = dndz*dndz2*(1+z)**2/(
         cosmo.comoving_radial_distance(a)**2. *
         _compute_dchi_da_num(a, cosmo))
+    wz[np.isnan(wz)] = 0
     wz /= np.trapz(wz, z)
     if type == 'gg':
         xi = np.array([_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=0)
