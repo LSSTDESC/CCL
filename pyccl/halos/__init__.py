@@ -52,7 +52,8 @@ from .halo_model import (  # noqa
     halomod_Pk2D,
     halomod_trispectrum_1h,
     halomod_Tk3D_1h,
-    halomod_Tk3D_SSC)
+    halomod_Tk3D_SSC,
+    halomod_Tk3D_SSC_linear_bias)
 
 # CIB profiles
 from .profiles_cib import (  # noqa

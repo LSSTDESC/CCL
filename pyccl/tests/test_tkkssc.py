@@ -35,9 +35,9 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
         norm1 = hmc.profile_norm(COSMO, a, prof1)
         norm2 = hmc.profile_norm(COSMO, a, prof2)
         norm12 = 1
-        if prof1.is_number_counts:
+        if prof1.is_number_counts or normalize:
             norm12 *= norm1
-        if prof2.is_number_counts:
+        if prof2.is_number_counts or normalize:
             norm12 *= norm2
 
         i11_1 = hmc.I_1_1(COSMO, k, a, prof1)
@@ -249,3 +249,87 @@ def test_tkkssc_counterterms_gc(kwargs):
 
     assert np.abs((tk_nogc_12 - tkc12) / tk_gc_12 - 1).max() < 1e-5
     assert np.abs((tk_nogc_34 - tkc34) / tk_gc_34 - 1).max() < 1e-5
+
+
+def test_tkkssc_linear_bias():
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
+                                 nlog10M=2)
+    k_arr = KK
+    a_arr = np.array([0.3, 0.5, 0.7, 1.0])
+
+    # Tk's exact version
+    prof = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
+                                    fourier_analytic=True)
+    # Error when prof is not NFW
+    with pytest.raises(TypeError):
+        tkk_lin = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=P2)
+
+    bias1 = 1
+    bias2 = 2
+    bias3 = 3
+    bias4 = 4
+    is_nc = False
+
+    # Tk's from tkkssc_linear
+    tkk_lin = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+                                                     bias1=bias1,
+                                                     bias2=bias2,
+                                                     bias3=bias3,
+                                                     bias4=bias4,
+                                                     is_number_counts1=is_nc,
+                                                     is_number_counts2=is_nc,
+                                                     is_number_counts3=is_nc,
+                                                     is_number_counts4=is_nc,
+                                                     lk_arr=np.log(k_arr),
+                                                     a_arr=a_arr)
+    _, _, _, tkk_lin_arrs = tkk_lin.get_spline_arrays()
+    tk_lin_12, tk_lin_34 = tkk_lin_arrs
+    # Remove the biases
+    tk_lin_12 /= (bias1 * bias2)
+    tk_lin_34 /= (bias3 * bias4)
+    assert np.abs(tk_lin_12 / tk_lin_34 - 1).max() < 1e-5
+
+    # True Tk's (biases for NFW ~ 1)
+    tkk = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof1=prof,
+                                     lk_arr=np.log(k_arr), a_arr=a_arr,
+                                     normprof1=True, normprof2=True,
+                                     normprof3=True, normprof4=True)
+    _, _, _, tkk_arrs = tkk.get_spline_arrays()
+    tk_12, tk_34 = tkk_arrs
+
+    assert np.abs(tk_lin_12 / tk_12 - 1).max() < 1e-2
+    assert np.abs(tk_lin_34 / tk_34 - 1).max() < 1e-2
+
+    # Now with clustering
+    is_nc = True
+    tkk_lin_nc = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+                                                        bias1=bias1,
+                                                        bias2=bias2,
+                                                        bias3=bias3,
+                                                        bias4=bias4,
+                                                        is_number_counts1=is_nc,
+                                                        is_number_counts2=is_nc,
+                                                        is_number_counts3=is_nc,
+                                                        is_number_counts4=is_nc,
+                                                        lk_arr=np.log(k_arr),
+                                                        a_arr=a_arr)
+    _, _, _, tkk_lin_nc_arrs = tkk_lin_nc.get_spline_arrays()
+    tk_lin_nc_12, tk_lin_nc_34 = tkk_lin_nc_arrs
+    tk_lin_nc_12 /= (bias1 * bias2)
+    tk_lin_nc_34 /= (bias3 * bias4)
+
+    tk_lin_ct_12 = (tk_lin_12 - tk_lin_nc_12) / (bias1 + bias2) # = pk+i02
+    tk_lin_ct_34 = (tk_lin_34 - tk_lin_nc_34) / (bias3 + bias4) # = pk+i02
+
+    assert np.abs(tk_lin_ct_12 / tk_lin_ct_34 - 1).max() < 1e-5
+
+    # True counter terms
+    tkc12 = []
+    prof.is_number_counts = True  # Trick the function below
+    for aa in a_arr:
+        # Divide by 2 to account for ~(1 + 1)
+        tkc12.append(get_ssc_counterterm_gc(k_arr, aa, hmc, prof, prof, PKC,
+                                            normalize=True) / 2)
+    tkc12 = np.array(tkc12)
+
+    assert np.abs(tk_lin_ct_12 / tkc12 - 1).max() < 1e-2
