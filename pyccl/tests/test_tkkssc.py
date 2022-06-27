@@ -251,7 +251,40 @@ def test_tkkssc_counterterms_gc(kwargs):
     assert np.abs((tk_nogc_34 - tkc34) / tk_gc_34 - 1).max() < 1e-5
 
 
-def test_tkkssc_linear_bias():
+@pytest.mark.parametrize('kwargs', [{'is_number_counts1': True,
+                                     'is_number_counts2': True,
+                                     'is_number_counts3': True,
+                                     'is_number_counts4': True},
+                                    {'is_number_counts1': True,
+                                     'is_number_counts2': True,
+                                     'is_number_counts3': True,
+                                     'is_number_counts4': False},
+                                    {'is_number_counts1': True,
+                                     'is_number_counts2': True,
+                                     'is_number_counts3': False,
+                                     'is_number_counts4': False},
+                                    {'is_number_counts1': True,
+                                     'is_number_counts2': True,
+                                     'is_number_counts3': False,
+                                     'is_number_counts4': True},
+                                    {'is_number_counts1': True,
+                                     'is_number_counts2': False,
+                                     'is_number_counts3': False,
+                                     'is_number_counts4': True},
+                                    {'is_number_counts1': True,
+                                     'is_number_counts2': False,
+                                     'is_number_counts3': False,
+                                     'is_number_counts4': False},
+                                    {'is_number_counts1': True,
+                                     'is_number_counts2': False,
+                                     'is_number_counts3': True,
+                                     'is_number_counts4': False},
+                                    {'is_number_counts1': False,
+                                     'is_number_counts2': False,
+                                     'is_number_counts3': True,
+                                     'is_number_counts4': False},
+                                    ])
+def test_tkkssc_linear_bias(kwargs):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
                                  nlog10M=2)
     k_arr = KK
@@ -300,17 +333,15 @@ def test_tkkssc_linear_bias():
     assert np.abs(tk_lin_12 / tk_12 - 1).max() < 1e-2
     assert np.abs(tk_lin_34 / tk_34 - 1).max() < 1e-2
 
+    print()
+    print('CASE', kwargs)
     # Now with clustering
-    is_nc = True
     tkk_lin_nc = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
                                                         bias1=bias1,
                                                         bias2=bias2,
                                                         bias3=bias3,
                                                         bias4=bias4,
-                                                        is_number_counts1=is_nc,
-                                                        is_number_counts2=is_nc,
-                                                        is_number_counts3=is_nc,
-                                                        is_number_counts4=is_nc,
+                                                        **kwargs,
                                                         lk_arr=np.log(k_arr),
                                                         a_arr=a_arr)
     _, _, _, tkk_lin_nc_arrs = tkk_lin_nc.get_spline_arrays()
@@ -318,18 +349,46 @@ def test_tkkssc_linear_bias():
     tk_lin_nc_12 /= (bias1 * bias2)
     tk_lin_nc_34 /= (bias3 * bias4)
 
-    tk_lin_ct_12 = (tk_lin_12 - tk_lin_nc_12) / (bias1 + bias2) # = pk+i02
-    tk_lin_ct_34 = (tk_lin_34 - tk_lin_nc_34) / (bias3 + bias4) # = pk+i02
+    factor12 = 0
+    factor12 += bias1 if kwargs['is_number_counts1'] else 0
+    factor12 += bias2 if kwargs['is_number_counts2'] else 0
 
-    assert np.abs(tk_lin_ct_12 / tk_lin_ct_34 - 1).max() < 1e-5
+    factor34 = 0
+    factor34 += bias3 if kwargs['is_number_counts3'] else 0
+    factor34 += bias4 if kwargs['is_number_counts4'] else 0
+
+    tk_lin_ct_12 = np.zeros_like(tk_lin_nc_12)
+    if factor12 != 0:
+        tk_lin_ct_12 = (tk_lin_12 - tk_lin_nc_12) / factor12  # = pk+i02
+
+    tk_lin_ct_34 = np.zeros_like(tk_lin_nc_34)
+    if factor34 != 0:
+        tk_lin_ct_34 = (tk_lin_34 - tk_lin_nc_34) / factor34  # = pk+i02
+
+    if (factor12 != 0) and (factor34 != 0):
+        assert np.abs(tk_lin_ct_12 / tk_lin_ct_34 - 1).max() < 1e-5
 
     # True counter terms
     tkc12 = []
+    tkc34 = []
     prof.is_number_counts = True  # Trick the function below
     for aa in a_arr:
         # Divide by 2 to account for ~(1 + 1)
-        tkc12.append(get_ssc_counterterm_gc(k_arr, aa, hmc, prof, prof, PKC,
-                                            normalize=True) / 2)
-    tkc12 = np.array(tkc12)
+        tkc_ia = get_ssc_counterterm_gc(k_arr, aa, hmc, prof, prof, PKC,
+                                        normalize=True) / 2
+        if factor12 == 0:
+            tkc12.append(np.zeros_like(tkc_ia))
+        else:
+            tkc12.append(tkc_ia)
 
-    assert np.abs(tk_lin_ct_12 / tkc12 - 1).max() < 1e-2
+        if factor34 == 0:
+            tkc34.append(np.zeros_like(tkc_ia))
+        else:
+            tkc34.append(tkc_ia)
+
+    tkc12 = np.array(tkc12)
+    tkc34 = np.array(tkc34)
+
+    # Add 1e-100 for the cases when the counter terms are 0
+    assert np.abs((tk_lin_ct_12 + 1e-100) / (tkc12 + 1e-100) - 1).max() < 1e-2
+    assert np.abs((tk_lin_ct_34 + 1e-100) / (tkc34 + 1e-100) - 1).max() < 1e-2
