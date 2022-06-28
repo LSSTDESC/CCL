@@ -370,26 +370,22 @@ def test_tkkssc_linear_bias_smoke_and_errors():
     prof = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
                                     fourier_analytic=True)
 
-    tkk_lin = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
-                                                     p_of_k_a='linear')
+    ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+                                           p_of_k_a='linear')
 
-    tkk_lin = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
-                                                     p_of_k_a='nonlinear')
-
-    tkk_lin = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
-                                                     p_of_k_a='nonlinear')
+    ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+                                           p_of_k_a='nonlinear')
 
     pk = COSMO.get_nonlin_power()
-    tkk_lin = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
-                                                     p_of_k_a=pk)
+    ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof, p_of_k_a=pk)
 
     # Error when prof is not NFW
     with pytest.raises(TypeError):
-        tkk_lin = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=P2)
+        ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=P2)
 
     # Error when p_of_k_a is wrong
     with pytest.raises(TypeError):
-        tkk_lin = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+        ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
                                                          p_of_k_a=P1)
 
     # Negative profile in logspace
