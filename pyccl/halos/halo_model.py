@@ -1006,8 +1006,8 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, prof, bias1=1, bias2=1, bias3=1,
     .. math::
         \\frac{\\partial P_{u,v}(k)}{\\partial\\delta_L} =
         \\left(\\frac{68}{21}-\\frac{d\\log k^3P_L(k)}{d\\log k}\\right)
-        b_u b_v P_L(k)+I^1_2(k|u,v) - (b_{u} + b_{v})
-        P_{u,v}(k)
+        b_u b_v \\left(P_L(k)+I^1_2(k|u,v) - (b_{u} + b_{v})
+        P_{u,v}(k) \\right)
 
     where the :math:`I^1_2` is defined in the documentation
     :meth:`~HMCalculator.I_1_2` and :math:`b_{}` and :math:`b_{vv}` are the
@@ -1020,7 +1020,7 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, prof, bias1=1, bias2=1, bias3=1,
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo NFW
             profile.
         bias1 (float or array): linear galaxy bias for quantity 1. If an array,
-        it has to have the shape (a_arr, lk_arr).
+        it has to have the shape of `a_arr`.
         bias2 (float or array): linear galaxy bias for quantity 2.
         bias3 (float or array): linear galaxy bias for quantity 3.
         bias4 (float or array): linear galaxy bias for quantity 4.
@@ -1066,7 +1066,7 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, prof, bias1=1, bias2=1, bias3=1,
         check(status, cosmo=cosmo)
 
     # Make sure biases are of the form number of a x number of k
-    ones = np.ones((a_arr.size, lk_arr.size))
+    ones = np.ones_like(a_arr)
     bias1 *= ones
     bias2 *= ones
     bias3 *= ones
@@ -1101,13 +1101,14 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, prof, bias1=1, bias2=1, bias3=1,
 
         pk = pk2d.eval(k_use, aa, cosmo)
         dpk = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo)
-        # ~ [(47/21 - 1/3 dlogPk/dlogk) * Pk+I12 ] * bias1 * bias2
-        dpk12[ia, :] = dpk34[ia, :] = ((2.2380952381-dpk/3)*pk + i12)
+        # ~ [(47/21 - 1/3 dlogPk/dlogk) * Pk+I12]
+        dpk12[ia] = ((2.2380952381-dpk/3)*pk + i12)
+        dpk34[ia] = dpk12[ia].copy()  # Avoid surprises
 
         # Counter terms for clustering (i.e. - (bA + bB) * PAB
         if is_number_counts1 or is_number_counts2 or is_number_counts3 or \
            is_number_counts4:
-            b1 = b2 = b3 = b4 = np.zeros_like(k_use)
+            b1 = b2 = b3 = b4 = 0
 
             i02 = hmc.I_0_2(cosmo, k_use, aa, prof, prof_2pt, prof) * norm
             P_12 = P_34 = pk + i02
@@ -1124,8 +1125,8 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, prof, bias1=1, bias2=1, bias3=1,
             dpk12[ia, :] -= (b1 + b2) * P_12
             dpk34[ia, :] -= (b3 + b4) * P_34
 
-    dpk12 *= bias1 * bias2
-    dpk34 *= bias3 * bias4
+        dpk12[ia] *= bias1[ia] * bias2[ia]
+        dpk34[ia] *= bias3[ia] * bias4[ia]
 
     if use_log:
         if np.any(dpk12 <= 0) or np.any(dpk34 <= 0):
@@ -1167,7 +1168,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
 
     where the :math:`I^a_b` are defined in the documentation
     of :meth:`~HMCalculator.I_1_1` and  :meth:`~HMCalculator.I_1_2` and
-    :math:`b_{uu}` and :math:`b_{vv}` are the linear halo biases for quantities
+    :math:`b_{u}` and :math:`b_{v}` are the linear halo biases for quantities
     :math:`u` and :math:`v`, respectively (zero if they are not clustering).
 
     Args:

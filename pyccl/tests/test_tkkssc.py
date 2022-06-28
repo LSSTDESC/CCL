@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl.halos.halo_model import halomod_bias_1pt
+import itertools
 
 
 COSMO = ccl.Cosmology(
@@ -251,39 +252,9 @@ def test_tkkssc_counterterms_gc(kwargs):
     assert np.abs((tk_nogc_34 - tkc34) / tk_gc_34 - 1).max() < 1e-5
 
 
-@pytest.mark.parametrize('kwargs', [{'is_number_counts1': True,
-                                     'is_number_counts2': True,
-                                     'is_number_counts3': True,
-                                     'is_number_counts4': True},
-                                    {'is_number_counts1': True,
-                                     'is_number_counts2': True,
-                                     'is_number_counts3': True,
-                                     'is_number_counts4': False},
-                                    {'is_number_counts1': True,
-                                     'is_number_counts2': True,
-                                     'is_number_counts3': False,
-                                     'is_number_counts4': False},
-                                    {'is_number_counts1': True,
-                                     'is_number_counts2': True,
-                                     'is_number_counts3': False,
-                                     'is_number_counts4': True},
-                                    {'is_number_counts1': True,
-                                     'is_number_counts2': False,
-                                     'is_number_counts3': False,
-                                     'is_number_counts4': True},
-                                    {'is_number_counts1': True,
-                                     'is_number_counts2': False,
-                                     'is_number_counts3': False,
-                                     'is_number_counts4': False},
-                                    {'is_number_counts1': True,
-                                     'is_number_counts2': False,
-                                     'is_number_counts3': True,
-                                     'is_number_counts4': False},
-                                    {'is_number_counts1': False,
-                                     'is_number_counts2': False,
-                                     'is_number_counts3': True,
-                                     'is_number_counts4': False},
-                                    ])
+@pytest.mark.parametrize('kwargs', [{f'is_number_counts{i+1}': nc[i] for i in
+                                     range(4)} for nc in
+                                    itertools.product([True,False], repeat=4)])
 def test_tkkssc_linear_bias(kwargs):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
                                  nlog10M=2)
@@ -333,8 +304,6 @@ def test_tkkssc_linear_bias(kwargs):
     assert np.abs(tk_lin_12 / tk_12 - 1).max() < 1e-2
     assert np.abs(tk_lin_34 / tk_34 - 1).max() < 1e-2
 
-    print()
-    print('CASE', kwargs)
     # Now with clustering
     tkk_lin_nc = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
                                                         bias1=bias1,
