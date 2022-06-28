@@ -254,7 +254,8 @@ def test_tkkssc_counterterms_gc(kwargs):
 
 @pytest.mark.parametrize('kwargs', [{f'is_number_counts{i+1}': nc[i] for i in
                                      range(4)} for nc in
-                                    itertools.product([True,False], repeat=4)])
+                                    itertools.product([True, False],
+                                                      repeat=4)])
 def test_tkkssc_linear_bias(kwargs):
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
                                  nlog10M=2)
