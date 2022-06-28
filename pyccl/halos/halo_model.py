@@ -1004,10 +1004,9 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, prof, bias1=1, bias2=1, bias3=1,
     calculated as:
 
     .. math::
-        \\frac{\\partial P_{u,v}(k)}{\\partial\\delta_L} =
+        \\frac{\\partial P_{u,v}(k)}{\\partial\\delta_L} = b_u b_v \\left(
         \\left(\\frac{68}{21}-\\frac{d\\log k^3P_L(k)}{d\\log k}\\right)
-        b_u b_v \\left(P_L(k)+I^1_2(k|u,v) - (b_{u} + b_{v})
-        P_{u,v}(k) \\right)
+        P_L(k)+I^1_2(k|u,v) - (b_{u} + b_{v}) P_{u,v}(k) \\right)
 
     where the :math:`I^1_2` is defined in the documentation
     :meth:`~HMCalculator.I_1_2` and :math:`b_{}` and :math:`b_{vv}` are the

@@ -265,10 +265,10 @@ def test_tkkssc_linear_bias(kwargs):
     # Tk's exact version
     prof = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
                                     fourier_analytic=True)
-    bias1 = 1
-    bias2 = 2
-    bias3 = 3
-    bias4 = 4
+    bias1 = 2
+    bias2 = 3
+    bias3 = 4
+    bias4 = 5
     is_nc = False
 
     # Tk's from tkkssc_linear
