@@ -386,7 +386,7 @@ def test_tkkssc_linear_bias_smoke_and_errors():
     # Error when p_of_k_a is wrong
     with pytest.raises(TypeError):
         ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
-                                                         p_of_k_a=P1)
+                                               p_of_k_a=P1)
 
     # Negative profile in logspace
     assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_SSC_linear_bias,
