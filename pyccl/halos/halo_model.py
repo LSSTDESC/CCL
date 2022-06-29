@@ -1275,22 +1275,18 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     if (prof34_2pt is not None) and (not isinstance(prof34_2pt, Profile2pt)):
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
+
     # number counts profiles must be normalized
-    if (prof1.is_number_counts) and (normprof1 is False):
-        raise ValueError('normprof1 must be True if prof1 is of number ' +
-                         'counts type')
-    if (prof2 is not None) and (prof2.is_number_counts) and \
-            (normprof2 is False):
-        raise ValueError('normprof2 must be True if prof2 is of number ' +
-                         'counts type')
-    if (prof3 is not None) and (prof3.is_number_counts) and \
-            (normprof3 is False):
-        raise ValueError('normprof3 must be True if prof3 is of number ' +
-                         'counts type')
-    if (prof4 is not None) and (prof4.is_number_counts) and \
-            (normprof4 is False):
-        raise ValueError('normprof4 must be True if prof3 is of number ' +
-                         'counts type')
+    profs = {prof1: normprof1, prof2: normprof2,
+             prof3: normprof3, prof4: normprof4}
+
+    for i, profile, normalization in enumerate(profs.items()):
+        if (profile is not None
+                and profile.is_number_counts
+                and not normalization
+            ):
+            raise ValueError(
+                f"normprof{i+1} must be True if prof{i+1} is number counts")
 
     if prof3 is None:
         prof3_bak = prof1
