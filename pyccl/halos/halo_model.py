@@ -1280,7 +1280,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     profs = {prof1: normprof1, prof2: normprof2,
              prof3: normprof3, prof4: normprof4}
 
-    for i, profile, normalization in enumerate(profs.items()):
+    for i, (profile, normalization) in enumerate(profs.items()):
         if (profile is not None
                 and profile.is_number_counts
                 and not normalization
