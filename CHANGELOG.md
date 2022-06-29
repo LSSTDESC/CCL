@@ -1,7 +1,17 @@
 # Unreleased
 
+# v2.4.0 Changes
+
 ## Python library
 - Fixed high-z halofit behavior (#932)
+- Sped up calculation of Ishiyama21 concentration (#930)
+- Improved N(z) treatment in tracers and corresponding error messages (#926, #928)
+- Enabled accessing Tk3D internal arrays (#924)
+- Added CIB profile using Shang et al. 2012 model (#905)
+- Added third-order and non-local biases to Fast-PT wrapper (#901)
+
+## C library
+- Enabled compilation with debugging symbols (#931)
 
 # v2.3.0 Changes
 
