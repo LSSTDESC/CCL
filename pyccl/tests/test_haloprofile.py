@@ -46,16 +46,23 @@ def test_IA_halo_model():
                  ccl.halos.SatelliteShearHOD,
                  cM, lmax=14)
 
+    # lmax odd
+    assert (ccl.halos.SatelliteShearHOD(cM, lmax=7)
+            .lmax) % 2 == 0
+
     # Run with b!={0,2}
-    assert (ccl.halos.SatelliteShearHOD(cM, b=-1.9)
+    assert (ccl.halos.SatelliteShearHOD(cM, b=-1.9, lmax=12)
             ._angular_fl).shape == (6, 1)
 
     # Preliminary test on FFTLog accuracy vs simps method.
     s_g_HOD1 = ccl.halos.SatelliteShearHOD(cM)
     s_g_HOD2 = ccl.halos.SatelliteShearHOD(cM, integration_method='simps')
+    s_g_HOD3 = ccl.halos.SatelliteShearHOD(cM, integration_method='spline')
     s_g1 = s_g_HOD1._usat_fourier(cosmo, k_arr, 1e13, 1., hmd_200m)
     s_g2 = s_g_HOD2._usat_fourier(cosmo, k_arr, 1e13, 1., hmd_200m)
-    assert np.all(np.abs((s_g1-s_g2)/s_g2)) > 0.05
+    s_g3 = s_g_HOD3._usat_fourier(cosmo, k_arr, 1e13, 1., hmd_200m)
+    assert np.all(np.abs((s_g1 - s_g2) / s_g2)) > 0.05
+    assert np.all(np.abs((s_g3 - s_g2) / s_g3)) > 0.05
 
     # Wrong integration method
     with pytest.raises(ValueError):

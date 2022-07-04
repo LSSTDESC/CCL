@@ -403,12 +403,13 @@ class HaloProfile(object):
         return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 
     def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
+                     l=0,
                      fourier_out=False,
                      large_padding=True):
         # This computes the 3D Hankel transform
-        #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_0(k r)
+        #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_l(k r)
         # if fourier_out == False, and
-        #  \rho(r) = \frac{1}{2\pi^2} \int dk k^2 \rho(k) j_0(k r)
+        #  \rho(r) = \frac{1}{2\pi^2} \int dk k^2 \rho(k) j_l(k r)
         # otherwise.
 
         # Select which profile should be the input
@@ -440,7 +441,7 @@ class HaloProfile(object):
 
         # Compute Fourier profile through fftlog
         k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
-                                               3, 0, plaw_index)
+                                               3, l, plaw_index)
         lk_arr = np.log(k_arr)
 
         for im, p_k_arr in enumerate(p_fourier_M):
@@ -1557,7 +1558,8 @@ class HaloProfileHOD(HaloProfile):
 
 class SatelliteShearHOD(HaloProfileHOD):
     def __init__(self, c_M_relation, a1h=0.001, b=-2,
-                 lmax=6, integration_method='FFTLog'):
+                 lmax=6, integration_method='FFTLog',
+                 **kwargs):
         '''
         Halo HOD class that calculates the satellite galaxy intrinsic shear
         field in real and fourier space, according to Fortuna et al. 2021.
@@ -1568,6 +1570,10 @@ class SatelliteShearHOD(HaloProfileHOD):
         .. math::
             \\gamma^I(r)=a_{1\\mathrm{h}}\\left(\\frac{r}{r_\\mathrm{vir}}
             \\right)^b \\sin^b\\theta.
+        With :math:`a_{1\\mathrm{h}}` the amplitude of intrinsic alignments on
+        the 1-halo scale, :math:`b` the index defining the radial dependence
+        and :math:`\\theta` the angle defining the projection of the
+        semi-major axis of the galaxy along the line of sight.
 
         Args:
             c_M_relation: concentration-mass relation for the halo model.
@@ -1607,7 +1613,7 @@ class SatelliteShearHOD(HaloProfileHOD):
             )
         # If lmax is odd, make it even number (odd l contributions are zero).
         if not (lmax % 2 == 0):
-            lmax = lmax // 2
+            lmax = lmax-1
         self.lmax = lmax
         # Hard-code for most common cases (b=0, b=-2) to gain speed (~1.3sec).
         if self.b == 0:
@@ -1622,12 +1628,13 @@ class SatelliteShearHOD(HaloProfileHOD):
                 .reshape((6, 1))
         else:
             self._angular_fl = np.array([self._fl(l, b=self.b)
-                                         for l in range(2, 13, 2)])\
-                .reshape(6, 1)
+                                         for l in range(2, self.lmax+1, 2)])\
+                .reshape(self.lmax//2, 1)
         self.cM = c_M_relation
         super(SatelliteShearHOD, self).__init__(c_M_relation,
                                                 fc_0=0.0,
-                                                ns_independent=True)
+                                                ns_independent=True,
+                                                **kwargs)
         self.update_precision_fftlog(padding_lo_fftlog=1E-2,
                                      padding_hi_fftlog=1E3,
                                      n_per_decade=512*1,
@@ -1654,15 +1661,17 @@ class SatelliteShearHOD(HaloProfileHOD):
         self._N_r = N_r
         self._N_jn = N_jn
 
-    def _I_integral(self, a, b, e=1E-10):
+    def _I_integral(self, a, b):
         '''
         Computes the integral
         .. math::
-            I(a,b) = \\int_{-1}^1 \\mathrm{d}x (1-x^2)^{a/2}x^b.
+            I(a,b) = \\int_{-1}^1 \\mathrm{d}x (1-x^2)^{a/2}x^b =
+            \\frac{((-1)^b+1)\\Gamma(a+1)\\Gamma\\left
+            \\frac{b+1}{2}\\right}
+            {2\\Gamma\\left(a+\\frac{b}{2}+\\frac{3}{2}\\right}.
         '''
-        from scipy.integrate import simps
-        x_range = np.linspace(-1 + e, 1 - e, 1024)
-        return simps((1 - x_range ** 2) ** (a / 2.) * x_range ** b, x_range)
+        from scipy.special import gamma
+        return (1+(-1)**b)*gamma(a/2+1)*gamma((b+1)/2)/(2*gamma(a/2+b/2+3/2))
 
     def _fl(self, l, thk=np.pi / 2, phik=None, b=-2):
         '''
@@ -1689,7 +1698,7 @@ class SatelliteShearHOD(HaloProfileHOD):
             l_sum *= np.exp(1j * 2 * phik)
         return 2 ** l * l_sum
 
-    def gamma(self, r, r_vir):
+    def gamma_I(self, r, r_vir):
         '''
         Returns the intrinsic satellite shear,
         .. math::
@@ -1731,12 +1740,9 @@ class SatelliteShearHOD(HaloProfileHOD):
         r_use = np.atleast_1d(r)
 
         rvir = self._rvir(cosmo, M_use, a, mass_def)
-        # TODO: make it possible to specify the halo density profile?
-        density_prof = HaloProfileNFW(self.cM, truncated=True,
-                                      fourier_analytic=True)
-        rho = density_prof.real(cosmo, r_use, M_use, a, mass_def)
-        u = rho / M_use.reshape(len(M_use), 1)
-        prof = self.gamma(r_use, rvir) * u
+        # Density profile from HOD class - truncated NFW
+        u = self._usat_real(cosmo, r_use, M_use, a, mass_def)
+        prof = self.gamma_I(r_use, rvir) * u
 
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -1744,64 +1750,6 @@ class SatelliteShearHOD(HaloProfileHOD):
             prof = np.squeeze(prof, axis=0)
 
         return prof
-
-    def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
-                     l=0,
-                     fourier_out=True,
-                     large_padding=True):
-        '''
-        Adapted from pyccl.halos.profiles.HaloProfile._fftlog_wrap, but
-        modified to allow computation of the Hankel transform with variable
-        spherical bessel function index.
-        '''
-
-        # Select which profile should be the input
-        if fourier_out:
-            p_func = self._real
-        else:
-            p_func = self._fourier
-        k_use = np.atleast_1d(k)
-        M_use = np.atleast_1d(M)
-        lk_use = np.log(k_use)
-        nM = len(M_use)
-
-        # k/r ranges to be used with FFTLog and its sampling.
-        if large_padding:
-            k_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(k_use)
-            k_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(k_use)
-        else:
-            k_min = self.precision_fftlog['padding_lo_extra'] * np.amin(k_use)
-            k_max = self.precision_fftlog['padding_hi_extra'] * np.amax(k_use)
-        n_k = (int(np.log10(k_max / k_min)) *
-               self.precision_fftlog['n_per_decade'])
-        r_arr = np.geomspace(k_min, k_max, n_k)
-
-        p_k_out = np.zeros([nM, k_use.size])
-        # Compute real profile values
-        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def)
-        # Power-law index to pass to FFTLog.
-        plaw_index = self._get_plaw_fourier(cosmo, a)
-
-        # Compute Fourier profile through fftlog
-        k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
-                                               3, l, plaw_index)
-        lk_arr = np.log(k_arr)
-
-        for im, p_k_arr in enumerate(p_fourier_M):
-            # Resample into input k values
-            p_fourier = resample_array(lk_arr, p_k_arr, lk_use,
-                                       self.precision_fftlog['extrapol'],
-                                       self.precision_fftlog['extrapol'],
-                                       0, 0)
-            p_k_out[im, :] = p_fourier
-        if fourier_out:
-            p_k_out *= (2 * np.pi)**3
-
-        if np.ndim(k) == 0:
-            p_k_out = np.squeeze(p_k_out, axis=-1)
-        if np.ndim(M) == 0:
-            p_k_out = np.squeeze(p_k_out, axis=0)
-        return p_k_out
 
     def _usat_fourier(self, cosmo, k, M, a, mass_def):
         '''
@@ -1831,7 +1779,8 @@ class SatelliteShearHOD(HaloProfileHOD):
         for j, l in enumerate(l_arr):
             if self.integration_method == 'FFTLog':
                 prof += (self._fftlog_wrap(cosmo, k_use,
-                                           M_use, a, mass_def, l=int(l))
+                                           M_use, a, mass_def,
+                                           l=int(l), fourier_out=True)
                          * (1j**l).real * (2*l+1) * self._angular_fl[j]
                          / (4*np.pi))
             else:

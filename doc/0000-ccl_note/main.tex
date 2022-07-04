@@ -780,7 +780,12 @@ Small scale modelling of the intrinsic alignments signal can also be done using 
 	P_{\mathrm{II}, \mathrm{h}}^{s s}(\mathbf{k}, z)&=\int \mathrm{d} M n(M) f_{s}^{2}(z) \frac{\left\langle N_{s}\left(N_{s}-1\right) | M\right\rangle}{\bar{n}_{s}^{2}(z)}\left|\hat{\gamma}_{s}^{I}(\mathbf{k} | M)\right|^{2},
   \label{eq:IAHaloModelPowerSpectra}
 \end{align}
-where $n(M)$ is the halo mass function, $f_s(z)$ is the fraction of satellites as a function of redshift, $\langle N_s|M\rangle$ is the HOD of the satellites, $\hat{\gamma}_s^I(\mathbf{k}|M)$ is the Fourier transform of the intrinsic shear field, and $\bar{n}_s$ is the average number density of satellites.
+where $n(M)$ is the halo mass function, $f_s(z)$ is the fraction of satellites as a function of redshift, $\langle N_s|M\rangle$ is the HOD of the satellites, $\hat{\gamma}_s^I(\mathbf{k}|M)$ is the Fourier transform of the intrinsic shear field, and $\bar{n}_s$ is the average number density of satellites. We implement a radially dependent profile for the real part of $\hat{\gamma}_s^I(\mathbf{k}|M)$, following \cite{Fortuna2021},
+ \begin{align}
+	\gamma^I(r,\theta)=a_{1\mathrm{h}}\left(\frac{r\sin\theta}{r_\mathrm{vir}}\right)^b=\bar{\gamma}(r)\sin\theta,
+\end{align}
+where $a_{1\mathrm{h}}$ is the amplitude of intrinsic alignments on the 1-halo scale, $b$ the index defining the radial dependence and $\theta$ the angle defining the projection of the semi-major axis of the galaxy along the line of sight. To avoid unphysical behaviour on small sacles, we set $\bar{\gamma}(r<0.06\text{ Mpc}/h)=\bar{\gamma}(0.06\text{ Mpc}/h)$ and also $\bar{\gamma}(r)<0.3$, which corresponds to perfect alignment. By setting $b=0$ one can also define a radially constant profile with amplitude $a_{1\mathrm{h}}$.
+
 
 \subsection{Angular power spectra}
 \label{sec:cl}
