@@ -1,7 +1,9 @@
+import itertools
 import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl.halos.halo_model import halomod_bias_1pt
+from pyccl.pyutils import assert_warns
 
 
 COSMO = ccl.Cosmology(
@@ -35,9 +37,9 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
         norm1 = hmc.profile_norm(COSMO, a, prof1)
         norm2 = hmc.profile_norm(COSMO, a, prof2)
         norm12 = 1
-        if prof1.is_number_counts:
+        if prof1.is_number_counts or normalize:
             norm12 *= norm1
-        if prof2.is_number_counts:
+        if prof2.is_number_counts or normalize:
             norm12 *= norm2
 
         i11_1 = hmc.I_1_1(COSMO, k, a, prof1)
@@ -115,7 +117,6 @@ def test_tkkssc_smoke(pars):
 
 
 def test_tkkssc_errors():
-    from pyccl.pyutils import assert_warns
 
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
     k_arr = KK
@@ -249,3 +250,146 @@ def test_tkkssc_counterterms_gc(kwargs):
 
     assert np.abs((tk_nogc_12 - tkc12) / tk_gc_12 - 1).max() < 1e-5
     assert np.abs((tk_nogc_34 - tkc34) / tk_gc_34 - 1).max() < 1e-5
+
+
+@pytest.mark.parametrize('kwargs', [{f'is_number_counts{i+1}': nc[i] for i in
+                                     range(4)} for nc in
+                                    itertools.product([True, False],
+                                                      repeat=4)])
+def test_tkkssc_linear_bias(kwargs):
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
+                                 nlog10M=2)
+    k_arr = KK
+    a_arr = np.array([0.3, 0.5, 0.7, 1.0])
+
+    # Tk's exact version
+    prof = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
+                                    fourier_analytic=True)
+    bias1 = 2
+    bias2 = 3
+    bias3 = 4
+    bias4 = 5
+    is_nc = False
+
+    # Tk's from tkkssc_linear
+    tkk_lin = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+                                                     bias1=bias1,
+                                                     bias2=bias2,
+                                                     bias3=bias3,
+                                                     bias4=bias4,
+                                                     is_number_counts1=is_nc,
+                                                     is_number_counts2=is_nc,
+                                                     is_number_counts3=is_nc,
+                                                     is_number_counts4=is_nc,
+                                                     lk_arr=np.log(k_arr),
+                                                     a_arr=a_arr)
+    _, _, _, tkk_lin_arrs = tkk_lin.get_spline_arrays()
+    tk_lin_12, tk_lin_34 = tkk_lin_arrs
+    # Remove the biases
+    tk_lin_12 /= (bias1 * bias2)
+    tk_lin_34 /= (bias3 * bias4)
+    assert np.abs(tk_lin_12 / tk_lin_34 - 1).max() < 1e-5
+
+    # True Tk's (biases for NFW ~ 1)
+    tkk = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, prof1=prof,
+                                     lk_arr=np.log(k_arr), a_arr=a_arr,
+                                     normprof1=True, normprof2=True,
+                                     normprof3=True, normprof4=True)
+    _, _, _, tkk_arrs = tkk.get_spline_arrays()
+    tk_12, tk_34 = tkk_arrs
+
+    assert np.abs(tk_lin_12 / tk_12 - 1).max() < 1e-2
+    assert np.abs(tk_lin_34 / tk_34 - 1).max() < 1e-2
+
+    # Now with clustering
+    tkk_lin_nc = ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+                                                        bias1=bias1,
+                                                        bias2=bias2,
+                                                        bias3=bias3,
+                                                        bias4=bias4,
+                                                        **kwargs,
+                                                        lk_arr=np.log(k_arr),
+                                                        a_arr=a_arr)
+    _, _, _, tkk_lin_nc_arrs = tkk_lin_nc.get_spline_arrays()
+    tk_lin_nc_12, tk_lin_nc_34 = tkk_lin_nc_arrs
+    tk_lin_nc_12 /= (bias1 * bias2)
+    tk_lin_nc_34 /= (bias3 * bias4)
+
+    factor12 = 0
+    factor12 += bias1 if kwargs['is_number_counts1'] else 0
+    factor12 += bias2 if kwargs['is_number_counts2'] else 0
+
+    factor34 = 0
+    factor34 += bias3 if kwargs['is_number_counts3'] else 0
+    factor34 += bias4 if kwargs['is_number_counts4'] else 0
+
+    tk_lin_ct_12 = np.zeros_like(tk_lin_nc_12)
+    if factor12 != 0:
+        tk_lin_ct_12 = (tk_lin_12 - tk_lin_nc_12) / factor12  # = pk+i02
+
+    tk_lin_ct_34 = np.zeros_like(tk_lin_nc_34)
+    if factor34 != 0:
+        tk_lin_ct_34 = (tk_lin_34 - tk_lin_nc_34) / factor34  # = pk+i02
+
+    if (factor12 != 0) and (factor34 != 0):
+        assert np.abs(tk_lin_ct_12 / tk_lin_ct_34 - 1).max() < 1e-5
+
+    # True counter terms
+    tkc12 = []
+    tkc34 = []
+    prof.is_number_counts = True  # Trick the function below
+    for aa in a_arr:
+        # Divide by 2 to account for ~(1 + 1)
+        tkc_ia = get_ssc_counterterm_gc(k_arr, aa, hmc, prof, prof, PKC,
+                                        normalize=True) / 2
+        if factor12 == 0:
+            tkc12.append(np.zeros_like(tkc_ia))
+        else:
+            tkc12.append(tkc_ia)
+
+        if factor34 == 0:
+            tkc34.append(np.zeros_like(tkc_ia))
+        else:
+            tkc34.append(tkc_ia)
+
+    tkc12 = np.array(tkc12)
+    tkc34 = np.array(tkc34)
+
+    # Add 1e-100 for the cases when the counter terms are 0
+    assert np.abs((tk_lin_ct_12 + 1e-100) / (tkc12 + 1e-100) - 1).max() < 1e-2
+    assert np.abs((tk_lin_ct_34 + 1e-100) / (tkc34 + 1e-100) - 1).max() < 1e-2
+
+
+def test_tkkssc_linear_bias_smoke_and_errors():
+    hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200,
+                                 nlog10M=2)
+    k_arr = KK
+    a_arr = np.array([0.3, 0.5, 0.7, 1.0])
+
+    # Tk's exact version
+    prof = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
+                                    fourier_analytic=True)
+
+    ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+                                           p_of_k_a='linear')
+
+    ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+                                           p_of_k_a='nonlinear')
+
+    pk = COSMO.get_nonlin_power()
+    ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof, p_of_k_a=pk)
+
+    # Error when prof is not NFW
+    with pytest.raises(TypeError):
+        ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=P2)
+
+    # Error when p_of_k_a is wrong
+    with pytest.raises(TypeError):
+        ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
+                                               p_of_k_a=P1)
+
+    # Negative profile in logspace
+    assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_SSC_linear_bias,
+                 COSMO, hmc, prof, bias1=-1,
+                 lk_arr=np.log(k_arr), a_arr=a_arr,
+                 use_log=True)
