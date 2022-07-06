@@ -18,12 +18,13 @@ ccl_f2d_t *set_pk2d_new_from_arrays(double* lkarr,int nk,
 				    double* aarr,int na,
 				    double* pkarr,int npk,
 				    int order_lok,int order_hik,
-				    int is_logp,
+				    int is_logp, int extrap_in_log,
 				    int *status)
 {
   ccl_f2d_t *psp=ccl_f2d_t_new(na,aarr,nk,lkarr,pkarr,NULL,NULL,0,
 			       order_lok,order_hik,ccl_f2d_cclgrowth,
-			       is_logp,0,0,2,ccl_f2d_3,status);
+			       is_logp,extrap_in_log,0,2,
+			       ccl_f2d_3,status);
   return psp;
 }
 

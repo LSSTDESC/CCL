@@ -47,11 +47,11 @@ class Pk2D(object):
         extrap_order_lok (int): extrapolation order to be used on k-values
              below the minimum of the splines (use 0, 1 or 2). Note that
              the extrapolation will be done in either log(P(k)) or P(k),
-             depending on the value of `is_logp`.
+             depending on the value of `is_logp` and `extrap_in_log`.
         extrap_order_hik (int): extrapolation order to be used on k-values
              above the maximum of the splines (use 0, 1 or 2). Note that
              the extrapolation will be done in either log(P(k)) or P(k),
-             depending on the value of `is_logp`.
+             depending on the value of `is_logp` and `extrap_in_log`.
         is_logp (boolean): if True, pkfunc/pkarr return/hold the natural
              logarithm of the power spectrum. Otherwise, the true value
              of the power spectrum is expected. Note that arrays will be
@@ -62,10 +62,12 @@ class Pk2D(object):
              wavenumber.
         empty (bool): if True, just create an empty object, to be filled
             out later
+        extrap_in_log (bool): if True, extrapolation will be done in
+            log(k)-log(p) space, regardless of the value of `is_logp`.
     """
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
-                 cosmo=None, empty=False):
+                 cosmo=None, empty=False, extrap_in_log=False):
         if empty:
             self.has_psp = False
             return
@@ -117,7 +119,9 @@ class Pk2D(object):
         self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
                                                         int(extrap_order_lok),
                                                         int(extrap_order_hik),
-                                                        int(is_logp), status)
+                                                        int(is_logp),
+                                                        int(extrap_in_log),
+                                                        status)
         check(status, cosmo=cosmo)
         self.has_psp = True
 
