@@ -1637,7 +1637,7 @@ class SatelliteShearHOD(HaloProfileHOD):
                                                 **kwargs)
         self.update_precision_fftlog(padding_lo_fftlog=1E-2,
                                      padding_hi_fftlog=1E3,
-                                     n_per_decade=512*1,
+                                     n_per_decade=100,
                                      plaw_fourier=-3.7)
         self.update_r_integral_params()
 
