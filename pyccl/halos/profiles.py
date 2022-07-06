@@ -1557,40 +1557,40 @@ class HaloProfileHOD(HaloProfile):
 
 
 class SatelliteShearHOD(HaloProfileHOD):
-    def __init__(self, c_M_relation, a1h=0.001, b=-2,
-                 lmax=6, integration_method='FFTLog',
-                 **kwargs):
-        '''
-        Halo HOD class that calculates the satellite galaxy intrinsic shear
-        field in real and fourier space, according to Fortuna et al. 2021.
-        Can be used to compute halo model-based intrinsic alignment
-        (angular) power spectra.
+    """ Halo HOD class that calculates the satellite galaxy intrinsic shear
+    field in real and fourier space, according to Fortuna et al. 2021.
+    Can be used to compute halo model-based intrinsic alignment
+    (angular) power spectra.
 
-        The satellite intrinsic shear profile in real space is assumed to be
-        .. math::
-            \\gamma^I(r)=a_{1\\mathrm{h}}\\left(\\frac{r}{r_\\mathrm{vir}}
-            \\right)^b \\sin^b\\theta.
-        With :math:`a_{1\\mathrm{h}}` the amplitude of intrinsic alignments on
-        the 1-halo scale, :math:`b` the index defining the radial dependence
-        and :math:`\\theta` the angle defining the projection of the
-        semi-major axis of the galaxy along the line of sight.
+    The satellite intrinsic shear profile in real space is assumed to be
+    .. math::
+        \\gamma^I(r)=a_{1\\mathrm{h}}\\left(\\frac{r}{r_\\mathrm{vir}}
+        \\right)^b \\sin^b\\theta,
 
-        Args:
-            c_M_relation: concentration-mass relation for the halo model.
-            a1h: Amplitude of the satellite intrinsic shear profile.
-            b: Power-law index of the satellite intrinsic shear profile.
+    where :math:`a_{1\\mathrm{h}}` is the amplitude of intrinsic alignments on
+    the 1-halo scale, :math:`b` the index defining the radial dependence
+    and :math:`\\theta` the angle defining the projection of the
+    semi-major axis of the galaxy along the line of sight.
+
+    Args:
+        c_M_relation: concentration-mass relation for the halo model.
+        a1h: Amplitude of the satellite intrinsic shear profile.
+        b: Power-law index of the satellite intrinsic shear profile.
             If zero, the profile is assumed to be constant inside the halo.
-            lmax: Maximum multipole to be summed in the plane-wave expansion
+        lmax: Maximum multipole to be summed in the plane-wave expansion
             (Eq. (C1) in Fortuna et al. 2021, default=6).
             integration_method: Method used to obtain the fourier transform
             of the profile. Can be 'FFTLog', 'simps' or 'spline'. The FFTLog
             parameters can be updated using the self.update_precision_fftlog
             function, to attempt reducing ringing and aliasing.
 
-        Parameters that define the numerical integration in the case of
-        'simps' or 'spline' integration can also be changed using the
-        self.update_r_integral_params function.
-        '''
+    Parameters that define the numerical integration in the case of
+    'simps' or 'spline' integration can also be changed using the
+    self.update_r_integral_params function.
+    """
+    def __init__(self, c_M_relation, a1h=0.001, b=-2,
+                 lmax=6, integration_method='FFTLog',
+                 **kwargs):
         if lmax > 13:
             lmax = 12
             warnings.warn(
@@ -1648,14 +1648,14 @@ class SatelliteShearHOD(HaloProfileHOD):
 
         Args:
             rmin: Minimum value of physical radius used to carry out the
-            radial integral (in Mpc). Default=0.001.
+                radial integral (in Mpc). Default=0.001.
             N_r: Number of points to be used when sampling the radial integral
-            (in logarithmic space). Default=512.
+                (in logarithmic space). Default=512.
             N_jn: Number of points to be used when sampling the spherical
-            bessel functions, that are later used to interpolate.
-            Interpolating the bessel functions increases the speed of the
-            computations compared to explicitly evaluating them, without
-            significant loss of accuracy. Default=10000.
+                bessel functions, that are later used to interpolate.
+                Interpolating the bessel functions increases the speed of the
+                computations compared to explicitly evaluating them, without
+                significant loss of accuracy. Default=10000.
         '''
         self._rmin = rmin
         self._N_r = N_r
