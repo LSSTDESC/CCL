@@ -671,6 +671,7 @@ ccl_cl_tracer_t *ccl_cl_tracer_t_new(ccl_cosmology *cosmo,
         extrap_order_hik, // extrap_order_hik
         ccl_f2d_constantgrowth, // extrap_linear_growth
         is_fka_log, // is_fka_log
+	0, //extrap_in_log
         1, // growth_factor_0 -> will assume constant transfer function
         0, // growth_exponent
         ccl_f2d_3, // interp_type

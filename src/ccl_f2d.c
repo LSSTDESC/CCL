@@ -26,6 +26,7 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
     f2d->extrap_linear_growth = f2d_o->extrap_linear_growth;
     f2d->extrap_order_lok = f2d_o->extrap_order_lok;
     f2d->extrap_order_hik = f2d_o->extrap_order_hik;
+    f2d->extrap_in_log = f2d_o->extrap_in_log;
     f2d->is_log = f2d_o->is_log;
     f2d->growth_factor_0 = f2d_o->growth_factor_0;
     f2d->growth_exponent = f2d_o->growth_exponent;
@@ -99,6 +100,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
                          int extrap_order_hik,
                          ccl_f2d_extrap_growth_t extrap_linear_growth,
                          int is_fka_log,
+			 int extrap_in_log,
                          double growth_factor_0,
                          int growth_exponent,
                          ccl_f2d_interp_t interp_type,
@@ -115,6 +117,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     f2d->is_a_constant = ((a_arr == NULL) || ((fka_arr == NULL) && (fa_arr == NULL)));
     f2d->extrap_order_lok = extrap_order_lok;
     f2d->extrap_order_hik = extrap_order_hik;
+    f2d->extrap_in_log = extrap_in_log;
     f2d->extrap_linear_growth = extrap_linear_growth;
     f2d->is_log = is_fka_log;
     f2d->growth_factor_0 = growth_factor_0;

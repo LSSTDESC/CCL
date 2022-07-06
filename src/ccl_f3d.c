@@ -226,7 +226,7 @@ ccl_f3d_t *ccl_f3d_t_new(int na,double *a_arr,
                                  fka1_arr, NULL, NULL, 0,
                                  extrap_order_lok, extrap_order_hik,
                                  extrap_linear_growth,
-                                 is_tkka_log,
+                                 is_tkka_log, 0,
                                  growth_factor_0, growth_exponent/2,
                                  interp_type, status);
       f3d->fka_2 = ccl_f2d_t_new(na, a_arr,
@@ -234,7 +234,7 @@ ccl_f3d_t *ccl_f3d_t_new(int na,double *a_arr,
                                  fka2_arr, NULL, NULL, 0,
                                  extrap_order_lok, extrap_order_hik,
                                  extrap_linear_growth,
-                                 is_tkka_log,
+                                 is_tkka_log, 0,
                                  growth_factor_0, growth_exponent/2,
                                  interp_type, status);
     }
