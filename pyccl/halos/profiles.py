@@ -342,7 +342,7 @@ class HaloProfile(object):
         Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
-    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the reduced shear as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -371,7 +371,7 @@ class HaloProfile(object):
         shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
         return shear / (1.0 - convergence)
 
-    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the magnification for input parameters.
 
         .. math::
