@@ -89,7 +89,7 @@ CTEST2(f2d,constant) {
 		    2,
 		    2,
 		    ccl_f2d_constantgrowth,
-		    1,0,2,
+		    1,0,0,2,
 		    ccl_f2d_3,
 		    &status);
   ASSERT_TRUE(status==0);
@@ -108,7 +108,7 @@ CTEST2(f2d,constant) {
 		    2,
 		    2,
 		    ccl_f2d_constantgrowth,
-		    1,0,2,
+		    1,0,0,2,
 		    ccl_f2d_3,
 		    &status);
   ASSERT_TRUE(status==0);
@@ -127,7 +127,7 @@ CTEST2(f2d,constant) {
 		    2,
 		    2,
 		    ccl_f2d_constantgrowth,
-		    1,0,2,
+		    1,0,0,2,
 		    ccl_f2d_3,
 		    &status);
   ASSERT_TRUE(status==0);
@@ -156,7 +156,7 @@ CTEST2(f2d,a_overflow) {
 		    2, //extrap_hik
   		    ccl_f2d_constantgrowth, //extrap_growth
   		    1, //is_fka_log
-  		    0,2,
+  		    0,0,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
@@ -186,7 +186,7 @@ CTEST2(f2d,sanity) {
 		    2, //extrap_hik
   		    ccl_f2d_constantgrowth, //extrap_growth
   		    1, //is_fka_log
-  		    1,2,
+  		    0,1,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
@@ -243,7 +243,7 @@ CTEST2(f2d,factorize) {
 		    2, //extrap_hik
   		    ccl_f2d_constantgrowth, //extrap_growth
   		    1, //is_fka_log
-  		    1,2,
+  		    0,1,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
@@ -315,7 +315,7 @@ CTEST2(f2d,pk) {
 		    2, //extrap_hik
   		    ccl_f2d_cclgrowth, //extrap_growth
   		    1, //is_fka_log
-  		    0,2,
+  		    0,0,2,
   		    ccl_f2d_3,
   		    &status);
   ASSERT_TRUE(status==0);
