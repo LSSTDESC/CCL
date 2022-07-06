@@ -148,7 +148,7 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
-    def real(self, cosmo, r, M, a, mass_def=None):
+    def real(self, cosmo, r, M, a, mass_def):
         """ Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
 
@@ -178,7 +178,7 @@ class HaloProfile(object):
                                       " _fourier method.")
         return f_r
 
-    def fourier(self, cosmo, k, M, a, mass_def=None):
+    def fourier(self, cosmo, k, M, a, mass_def):
         """ Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
         scale factor.
@@ -213,7 +213,7 @@ class HaloProfile(object):
                                       " _fourier method.")
         return f_k
 
-    def projected(self, cosmo, r_t, M, a, mass_def=None):
+    def projected(self, cosmo, r_t, M, a, mass_def):
         """ Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
 
@@ -244,7 +244,7 @@ class HaloProfile(object):
                                                 is_cumul2d=False)
         return s_r_t
 
-    def cumul2d(self, cosmo, r_t, M, a, mass_def=None):
+    def cumul2d(self, cosmo, r_t, M, a, mass_def):
         """ Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
         factor.
@@ -276,7 +276,7 @@ class HaloProfile(object):
                                                 is_cumul2d=True)
         return s_r_t
 
-    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the convergence as a function of cosmology,
         radius, halo mass and the scale factors of the source
         and the lens.
@@ -307,7 +307,7 @@ class HaloProfile(object):
         Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return Sigma / Sigma_crit
 
-    def shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def shear(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the shear (tangential) as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
