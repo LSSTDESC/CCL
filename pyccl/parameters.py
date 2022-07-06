@@ -37,7 +37,8 @@ class CCLParameters:
             # TODO: Deprecation cycle for fully immutable Cosmology objects.
             # raise AttributeError(f"Direct assignment in {name} not supported.")  # noqa
             warnings.warn(
-                f"Direct assignment of {name} is deprecated. "
+                f"Direct assignment of {name} is deprecated "
+                "and an error will be raised in the next CCL release."
                 f"Set via `pyccl.{name}.{key}` before instantiation.",
                 CCLDeprecationWarning)
             object.__setattr__(self, key, value)
