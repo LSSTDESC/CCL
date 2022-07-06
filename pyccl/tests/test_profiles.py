@@ -10,7 +10,7 @@ M200 = ccl.halos.MassDef200c()
 M500c = ccl.halos.MassDef(500, 'critical')
 
 
-def one_f(cosmo, M, a=None, mdef=None):
+def one_f(cosmo, M, a=1, mdef=M200):
     if np.ndim(M) == 0:
         return 1
     else:
@@ -47,9 +47,9 @@ def smoke_assert_prof_real(profile, method='_real'):
 def test_defaults():
     p = ccl.halos.HaloProfile()
     with pytest.raises(NotImplementedError):
-        p.real(None, None, None, None)
+        p.real(None, None, None, None, None)
     with pytest.raises(NotImplementedError):
-        p.fourier(None, None, None, None)
+        p.fourier(None, None, None, None, None)
 
 
 @pytest.mark.parametrize('prof_class',
@@ -245,7 +245,7 @@ def test_gaussian_accuracy():
     p = ccl.halos.HaloProfileGaussian(one_f, one_f)
 
     k_arr = np.logspace(-3, 2, 1024)
-    fk_arr = p.fourier(COSMO, k_arr, 1., 1.)
+    fk_arr = p.fourier(COSMO, k_arr, 1., 1., M200)
     fk_arr_pred = fk(k_arr)
     res = np.fabs(fk_arr - fk_arr_pred)
     assert np.all(res < 5E-3)
@@ -268,7 +268,7 @@ def test_projected_plaw_accuracy(alpha):
     p.update_precision_fftlog(plaw_index=alpha)
 
     rt_arr = np.logspace(-3, 2, 1024)
-    srt_arr = p.projected(COSMO, rt_arr, 1., 1.)
+    srt_arr = p.projected(COSMO, rt_arr, 1., 1., M200)
     srt_arr_pred = s_r_t(rt_arr)
     res = np.fabs(srt_arr / srt_arr_pred - 1)
     assert np.all(res < 5E-3)
@@ -292,7 +292,7 @@ def test_plaw_accuracy(alpha):
     p.update_precision_fftlog(plaw_index=alpha)
 
     k_arr = np.logspace(-3, 2, 1024)
-    fk_arr = p.fourier(COSMO, k_arr, 1., 1.)
+    fk_arr = p.fourier(COSMO, k_arr, 1., 1., M200)
     fk_arr_pred = fk(k_arr)
     res = np.fabs(fk_arr / fk_arr_pred - 1)
     assert np.all(res < 5E-3)
