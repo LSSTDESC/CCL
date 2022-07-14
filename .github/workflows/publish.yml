@@ -19,13 +19,13 @@ jobs:
       run: |
         python setup.py sdist
 
-    - name: Publish to Test PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.TEST_PYPI_PYCCL_UPLOAD }}
-        repository_url: https://test.pypi.org/legacy/
-
-    # - name: Publish to PyPI
+    # - name: Publish to Test PyPI
     #   uses: pypa/gh-action-pypi-publish@release/v1
     #   with:
-    #     password: ${{ secrets.PYPI_PYCCL_UPLOAD }}
+    #     password: ${{ secrets.TEST_PYPI_PYCCL_UPLOAD }}
+    #     repository_url: https://test.pypi.org/legacy/
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_PYCCL_UPLOAD }}
