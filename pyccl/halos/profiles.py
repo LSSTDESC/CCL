@@ -873,6 +873,12 @@ class HaloProfileEinasto(HaloProfile):
         alpha = 0.155 + 0.0095 * nu * nu
         return alpha
 
+    def _norm(self, M, Rs, c, alpha):
+        # Einasto normalization from mass, radius and concentration
+        return M / (np.pi * Rs**3 * 2**(2-3/alpha) * alpha**(-1+3/alpha)
+                    * np.exp(2/alpha)
+                    * gamma(3/alpha) * gammainc(3/alpha, 2/alpha*c**alpha))
+
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
@@ -887,10 +893,8 @@ class HaloProfileEinasto(HaloProfile):
         # status = 0
         # norm, status = lib.einasto_norm(R_s, R_M, alpha, M_use.size, status)
         # check(status, cosmo=cosmo)
-        norm = np.pi * R_s**3 * 2**(2-3/alpha) * alpha**(-1+3/alpha) * \
-            np.exp(2/alpha) * \
-            gamma(3/alpha) * gammainc(3/alpha, 2/alpha*c_M**alpha)
-        norm = M_use / norm
+        # norm = M_use / norm
+        norm = self._norm(M_use, R_s, c_M, alpha)
 
         x = r_use[None, :] / R_s[:, None]
         prof = norm[:, None] * np.exp(-2. * (x**alpha[:, None] - 1) /
@@ -948,6 +952,10 @@ class HaloProfileHernquist(HaloProfile):
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
+    def _norm(self, M, Rs, c):
+        # Hernquist normalization from mass, radius and concentration
+        return M / (4 * np.pi * Rs**3 * (c / (1 + c))**2 / 2)
+
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
@@ -957,10 +965,11 @@ class HaloProfileHernquist(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        status = 0
-        norm, status = lib.hernquist_norm(R_s, R_M, M_use.size, status)
-        check(status, cosmo=cosmo)
-        norm = M_use / norm
+        # status = 0
+        # norm, status = lib.hernquist_norm(R_s, R_M, M_use.size, status)
+        # check(status, cosmo=cosmo)
+        # norm = M_use / norm
+        norm = self._norm(M_use, R_s, c_M)
 
         x = r_use[None, :] / R_s[:, None]
         prof = norm[:, None] / (x * (1 + x)**3)
