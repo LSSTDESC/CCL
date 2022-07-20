@@ -888,10 +888,6 @@ class HaloProfileEinasto(HaloProfile):
 
         alpha = self._get_alpha(cosmo, M_use, a, mass_def)
 
-        # status = 0
-        # norm, status = lib.einasto_norm(R_s, R_M, alpha, M_use.size, status)
-        # check(status, cosmo=cosmo)
-        # norm = M_use / norm
         norm = self._norm(M_use, R_s, c_M, alpha)
 
         x = r_use[None, :] / R_s[:, None]
@@ -963,10 +959,6 @@ class HaloProfileHernquist(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        # status = 0
-        # norm, status = lib.hernquist_norm(R_s, R_M, M_use.size, status)
-        # check(status, cosmo=cosmo)
-        # norm = M_use / norm
         norm = self._norm(M_use, R_s, c_M)
 
         x = r_use[None, :] / R_s[:, None]
