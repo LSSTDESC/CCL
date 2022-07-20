@@ -1,5 +1,3 @@
-# from .. import ccllib as lib
-# from ..core import check
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
