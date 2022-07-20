@@ -6,7 +6,7 @@ from ..pyutils import resample_array, _fftlog_transform
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
-from scipy.special import sici, erf
+from scipy.special import sici, erf, gamma, gammainc
 
 
 class HaloProfile(object):
@@ -884,10 +884,12 @@ class HaloProfileEinasto(HaloProfile):
 
         alpha = self._get_alpha(cosmo, M_use, a, mass_def)
 
-        status = 0
-        norm, status = lib.einasto_norm(R_s, R_M, alpha, M_use.size, status)
-        check(status, cosmo=cosmo)
+        #status = 0
+        #norm, status = lib.einasto_norm(R_s, R_M, alpha, M_use.size, status)
+        #check(status, cosmo=cosmo)
+        norm = np.pi*R_s**3*2**(2-3/alpha)*alpha**(-1+3/alpha)*np.exp(2/alpha)*gamma(3/alpha)*gammainc(3/alpha, 2/alpha*c_M**alpha)
         norm = M_use / norm
+
 
         x = r_use[None, :] / R_s[:, None]
         prof = norm[:, None] * np.exp(-2. * (x**alpha[:, None] - 1) /
