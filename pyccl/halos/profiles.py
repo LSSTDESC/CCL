@@ -803,7 +803,7 @@ class HaloProfileNFW(HaloProfile):
 
         x = k_use[None, :] * R_s[:, None]
         Si2, Ci2 = sici(x)
-        P1 = M / (np.log(1 + c_M) - c_M / (1 + c_M))
+        P1 = M_use / (np.log(1 + c_M) - c_M / (1 + c_M))
         if self.truncated:
             Si1, Ci1 = sici((1 + c_M[:, None]) * x)
             P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
