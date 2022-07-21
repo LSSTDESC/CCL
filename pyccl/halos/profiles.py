@@ -872,7 +872,7 @@ class HaloProfileEinasto(HaloProfile):
         return alpha
 
     def _norm(self, M, Rs, c, alpha):
-        # Einasto normalization from mass, radius and concentration
+        # Einasto normalization from mass, radius, concentration and alpha
         return M / (np.pi * Rs**3 * 2**(2-3/alpha) * alpha**(-1+3/alpha)
                     * np.exp(2/alpha)
                     * gamma(3/alpha) * gammainc(3/alpha, 2/alpha*c**alpha))
@@ -948,7 +948,7 @@ class HaloProfileHernquist(HaloProfile):
 
     def _norm(self, M, Rs, c):
         # Hernquist normalization from mass, radius and concentration
-        return M / (4 * np.pi * Rs**3 * (c / (1 + c))**2 / 2)
+        return M / (2 * np.pi * Rs**3 * (c / (1 + c))**2)
 
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
