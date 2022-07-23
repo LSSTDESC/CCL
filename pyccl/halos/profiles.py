@@ -949,13 +949,13 @@ class HaloProfileHernquist(HaloProfile):
         if projected_analytic:
             if truncated:
                 raise ValueError("Analytic projected profile not supported "
-                                 "for truncated NFW. Set `truncated` or "
+                                 "for truncated Hernquist. Set `truncated` or "
                                  "`projected_analytic` to `False`.")
             self._projected = self._projected_analytic
         if cumul2d_analytic:
             if truncated:
                 raise ValueError("Analytic cumuative 2d profile not supported "
-                                 "for truncated NFW. Set `truncated` or "
+                                 "for truncated Hernquist. Set `truncated` or "
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
         super(HaloProfileHernquist, self).__init__()
