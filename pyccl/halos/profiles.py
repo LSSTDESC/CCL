@@ -1011,7 +1011,7 @@ class HaloProfileHernquist(HaloProfile):
         xf = x.flatten()
         return np.piecewise(xf,
                             [xf < 1, xf > 1],
-                            [f1, f2, 4./30.]).reshape(x.shape)
+                            [f1, f2, 2./15.]).reshape(x.shape)
 
     def _projected_analytic(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
@@ -1083,14 +1083,14 @@ class HaloProfileHernquist(HaloProfile):
 
         x = k_use[None, :] * R_s[:, None]
         Si2, Ci2 = sici(x)
-        P1 = M / ((c_M / (1 + c_M))**2 / 2)
+        c_Mp1 = c_M + 1
+        P1 = M / ((c_M / c_Mp1)**2 / 2)
 
         if self.truncated:
-            Si1, Ci1 = sici((1 + c_M[:, None]) * x)
+            Si1, Ci1 = sici(c_Mp1 * x)
             P2 = x * np.sin(x) * (Ci1 - Ci2) - x * np.cos(x) * (Si1 - Si2)
-            P3 = (-1 + np.sin(c_M[:, None] * x) / ((1 + c_M[:, None])**2 * x)
-                  + (1 + c_M[:, None]) * np.cos(c_M[:, None] * x)
-                  / ((1 + c_M[:, None])**2))
+            P3 = (-1 + np.sin(c_M[:, None] * x) / (c_Mp1**2 * x)
+                  + c_Mp1 * np.cos(c_M[:, None] * x) / (c_Mp1**2))
             prof = P1[:, None] * (P2 - P3) / 2
         else:
             P2 = (-x * (2 * np.sin(x) * Ci2 + np.pi * np.cos(x))
