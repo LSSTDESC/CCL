@@ -938,6 +938,7 @@ class HaloProfileHernquist(HaloProfile):
     name = 'Hernquist'
 
     def __init__(self, c_M_relation,
+                 fourier_analytic=False,
                  projected_analytic=False,
                  cumul2d_analytic=False,
                  truncated=True):
@@ -946,6 +947,8 @@ class HaloProfileHernquist(HaloProfile):
 
         self.cM = c_M_relation
         self.truncated = truncated
+        if fourier_analytic:
+            self._fourier = self._fourier_analytic
         if projected_analytic:
             if truncated:
                 raise ValueError("Analytic projected profile not supported "
@@ -1064,6 +1067,37 @@ class HaloProfileHernquist(HaloProfile):
         prof = prof[:, :] * norm[:, None]
 
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fourier_analytic(self, cosmo, k, M, a, mass_def):
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = k_use[None, :] * R_s[:, None]
+        Si2, Ci2 = sici(x)
+        P1 = M / ((c_M / (1 + c_M))**2 / 2)
+
+        if self.truncated:
+            Si1, Ci1 = sici((1 + c_M[:, None]) * x)
+            P2 = x * np.sin(x) * (Ci1 - Ci2) + x * np.cos(x) * (Si2 - Si1)
+            P3 = (-1 + np.sin(c_M[:, None] * x) / ((1 + c_M[:, None])**2 * x)
+                  + (c_M[:, None] * np.cos(c_M[:, None] * x)
+                     / ((1 + c_M[:, None])**2 * x))
+                  + np.cos(c_M[:, None] * x) / ((1 + c_M[:, None])**2 * x))
+            prof = P1[:, None] * (P2 - P3)/2
+        else:
+            P2 = (-x*(2*np.sin(x)*Ci2+np.pi*np.cos(x))+2*x*np.cos(x)*Si2+2)/4
+            prof = P1[:, None] * P2
+
+        if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
