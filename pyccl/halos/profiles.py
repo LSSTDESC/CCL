@@ -1087,14 +1087,14 @@ class HaloProfileHernquist(HaloProfile):
 
         if self.truncated:
             Si1, Ci1 = sici((1 + c_M[:, None]) * x)
-            P2 = x * np.sin(x) * (Ci1 - Ci2) + x * np.cos(x) * (Si2 - Si1)
+            P2 = x * np.sin(x) * (Ci1 - Ci2) - x * np.cos(x) * (Si1 - Si2)
             P3 = (-1 + np.sin(c_M[:, None] * x) / ((1 + c_M[:, None])**2 * x)
-                  + (c_M[:, None] * np.cos(c_M[:, None] * x)
-                     / ((1 + c_M[:, None])**2 * x))
-                  + np.cos(c_M[:, None] * x) / ((1 + c_M[:, None])**2 * x))
-            prof = P1[:, None] * (P2 - P3)/2
+                  + (1 + c_M[:, None]) * np.cos(c_M[:, None] * x)
+                  / ((1 + c_M[:, None])**2))
+            prof = P1[:, None] * (P2 - P3) / 2
         else:
-            P2 = (-x*(2*np.sin(x)*Ci2+np.pi*np.cos(x))+2*x*np.cos(x)*Si2+2)/4
+            P2 = (-x * (2 * np.sin(x) * Ci2 + np.pi * np.cos(x))
+                  + 2 * x * np.cos(x) * Si2 + 2) / 4
             prof = P1[:, None] * P2
 
         if np.ndim(k) == 0:
