@@ -925,6 +925,9 @@ class HaloProfileHernquist(HaloProfile):
     Args:
         c_M_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
+        fourier_analytic (bool): set to `True` if you want to compute
+            the Fourier profile analytically (and not through FFTLog).
+            Default: `False`.
         projected_analytic (bool): set to `True` if you want to
             compute the 2D projected profile analytically (and not
             through FFTLog). Default: `False`.
