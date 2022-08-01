@@ -252,6 +252,52 @@ def test_tracer_lensing_kernel_spline_vs_gsl_intergation(z_min, z_max,
         assert np.allclose(w_wl_spline[0], w_wl_gsl[0], atol=5e-9, rtol=1e-5)
 
 
+@pytest.mark.parametrize('z_min, z_max, n_z_samples', [(0.0, 1.0, 2000),
+                                                       (0.0, 1.0, 1000),
+                                                       (0.0, 1.0, 500),
+                                                       (0.0, 1.0, 100),
+                                                       (0.3, 1.0, 1000)])
+def test_tracer_magnification_kernel_spline_vs_gsl_intergation(z_min, z_max,
+                                                               n_z_samples):
+    # Create a new Cosmology object so that we're not messing with the other
+    # tests
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.8, n_s=0.96,
+                          transfer_function='bbks',
+                          matter_power_spectrum='linear')
+    z = np.linspace(z_min, z_max, n_z_samples)
+    n = dndz(z)
+    b = np.zeros_like(z)
+
+    # Make sure case where z[0] > 0 and n[0] > 0 is tested for
+    if z_min > 0:
+        assert n[0] > 0
+
+    cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
+    tr_mg = ccl.NumberCountsTracer(cosmo, False, dndz=(z, n),
+                                   bias=(z, b), mag_bias=(z, b))
+    w_mg_spline, _ = tr_mg.get_kernel(chi=None)
+
+    cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
+    tr_mg = ccl.NumberCountsTracer(cosmo, False, dndz=(z, n),
+                                   bias=(z, b), mag_bias=(z, b))
+    w_mg_gsl, chi = tr_mg.get_kernel(chi=None)
+    tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
+    w_wl_gsl, _ = tr_wl.get_kernel(chi=None)
+
+    # Peak of kernel is ~1e-5
+    if n_z_samples >= 1000:
+        assert np.allclose(w_mg_spline[1], w_mg_gsl[1],
+                           atol=2e-10, rtol=1e-9)
+        assert np.allclose(w_mg_spline[1], -2*w_wl_gsl[0],
+                           atol=2e-10, rtol=1e-9)
+    else:
+        assert np.allclose(w_mg_spline[1], w_mg_gsl[1],
+                           atol=1e-8, rtol=1e-5)
+        assert np.allclose(w_mg_spline[1], -2*w_wl_gsl[0],
+                           atol=1e-8, rtol=1e-5)
+
+
 def test_tracer_delta_function_nz():
     z = np.linspace(0., 1., 2000)
     z_s_idx = int(z.size*0.8)
