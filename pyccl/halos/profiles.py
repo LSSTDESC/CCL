@@ -645,7 +645,7 @@ class HaloProfileNFW(HaloProfile):
             relation to use with this profile.
         fourier_analytic (bool): set to `True` if you want to compute
             the Fourier profile analytically (and not through FFTLog).
-            Default: `False`.
+            Default: `True`.
         projected_analytic (bool): set to `True` if you want to
             compute the 2D projected profile analytically (and not
             through FFTLog). Default: `False`.
