@@ -117,20 +117,23 @@ class HMCalculator(object):
     def _get_ingredients(self, a, cosmo, get_bf):
         # Compute mass function and bias (if needed) at a new
         # value of the scale factor.
-        _rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
+        rho0 = None
         if a != self._a_current_mf:
+            rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
             self.mf = self._massfunc.get_mass_function(cosmo, self._mass, a,
                                                        mdef_other=self._mdef)
-            self.mf0 = (_rho0 -
+            self.mf0 = (rho0 -
                         self._integrator(self.mf * self._mass,
                                          self._lmass)) / self._m0
             self._a_current_mf = a
 
         if get_bf:
             if a != self._a_current_bf:
+                if rho0 is None:
+                    rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
                 self.bf = self._hbias.get_halo_bias(cosmo, self._mass, a,
                                                     mdef_other=self._mdef)
-                self.mbf0 = (_rho0 -
+                self.mbf0 = (rho0 -
                              self._integrator(self.mf * self.bf * self._mass,
                                               self._lmass)) / self._m0
             self._a_current_bf = a
