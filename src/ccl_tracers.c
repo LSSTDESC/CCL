@@ -373,7 +373,7 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
 
   if(*status == 0) {
     #pragma omp parallel default(none) \
-                        shared(cosmo, nz, z_arr, nz_arr, nz_norm, sz_f, \
+                        shared(cosmo, nz, z_arr, nz_arr, nz_norm, \
                                chi_of_z_array, sz_array, \
                                nchi, chi_arr, wL_arr, status, gsl_interp_akima)
     {
@@ -403,7 +403,11 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
               integrand_array[i] = 0.0;
               i_chi_end = i+1;
             } else {
-              integrand_array[i] = lensing_kernel_integrand(cosmo, chi_of_z_array[i], chi_end, nz_arr[i], sz_array[i], &local_status);
+	      integrand_array[i] = lensing_kernel_integrand(cosmo,
+							    chi_of_z_array[i],
+							    chi_end, nz_arr[i],
+							    (1-2.5*sz_array[i]),
+							    &local_status);
             }
           }
           if(local_status) {
