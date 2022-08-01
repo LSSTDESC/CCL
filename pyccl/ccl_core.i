@@ -4,7 +4,7 @@
 /* put additional #include here */
 %}
 
-// SWIG black magic. Change the behaviour of setting A_SPLINE_MAX to thowing an
+// SWIG black magic. Change the behaviour of setting A_SPLINE_MAX to throwing an
 // error.
 %typemap(memberin) double A_SPLINE_MAX {
     if($input) {
@@ -46,7 +46,7 @@ ccl_parameters parameters_create_nu(
     return ccl_parameters_create(
                         Omega_c, Omega_b, Omega_k, Neff, m_nu, n_m,
                         w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab,
-                        bcm_ks, mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, 
+                        bcm_ks, mu_0, sigma_0, c1_mg, c2_mg, lambda_mg,
                         -1, NULL, NULL, status );
 }
 
@@ -72,7 +72,7 @@ ccl_parameters parameters_create_nu_vec(
     return ccl_parameters_create(
                         Omega_c, Omega_b, Omega_k, Neff, m_nu, n_m,
                         w0, wa, h, norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                        mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, 
+                        mu_0, sigma_0, c1_mg, c2_mg, lambda_mg,
                         nz, zarr, dfarr, status);
 }
 

@@ -5,6 +5,7 @@ from .massdef import MassDef, mass2radius_lagrangian
 from ..power import linear_matter_power, sigmaM
 import numpy as np
 from scipy.optimize import brentq, root_scalar
+import functools
 
 
 class Concentration(object):
@@ -100,6 +101,22 @@ class Concentration(object):
         if np.ndim(M) == 0:
             c = c[0]
         return c
+
+    @classmethod
+    def from_name(cls, name):
+        """ Returns halo concentration subclass from name string
+
+        Args:
+            name (string): a concentration name
+
+        Returns:
+            Concentration subclass corresponding to the input name.
+        """
+        concentrations = {c.name: c for c in cls.__subclasses__()}
+        if name in concentrations:
+            return concentrations[name]
+        else:
+            raise ValueError(f"Concentration {name} not implemented.")
 
 
 class ConcentrationDiemer15(Concentration):
@@ -550,18 +567,6 @@ class ConcentrationConstant(Concentration):
             return self.c * np.ones(M.size)
 
 
+@functools.wraps(Concentration.from_name)
 def concentration_from_name(name):
-    """ Returns halo concentration subclass from name string
-
-    Args:
-        name (string): a concentration name
-
-    Returns:
-        Concentration subclass corresponding to the input name.
-    """
-    concentrations = {c.name: c
-                      for c in Concentration.__subclasses__()}
-    if name in concentrations:
-        return concentrations[name]
-    else:
-        raise ValueError("Concentration %s not implemented")
+    return Concentration.from_name(name)
