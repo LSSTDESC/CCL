@@ -41,6 +41,38 @@ def get_tracer(tracer_type, cosmo=None, **tracer_kwargs):
     return tr, ntr
 
 
+def test_tracer_mag_0p4():
+    z = np.linspace(0., 1., 2000)
+    n = dndz(z)
+    # Small bias so the magnification contribution
+    # is significant (if there at all)
+    b = np.ones_like(z)*0.1
+    s_no = np.ones_like(z)*0.4
+    s_yes = np.zeros_like(z)
+    # Tracer with no magnification by construction
+    t1 = ccl.NumberCountsTracer(COSMO, True,
+                                dndz=(z, n),
+                                bias=(z, b))
+    # Tracer with s=0.4
+    t2 = ccl.NumberCountsTracer(COSMO, True,
+                                dndz=(z, n),
+                                bias=(z, b),
+                                mag_bias=(z, s_no))
+    # Tracer with magnification
+    t3 = ccl.NumberCountsTracer(COSMO, True,
+                                dndz=(z, n),
+                                bias=(z, b),
+                                mag_bias=(z, s_yes))
+    ls = np.array([2, 200, 2000])
+    cl1 = ccl.angular_cl(COSMO, t1, t1, ls)
+    cl2 = ccl.angular_cl(COSMO, t2, t2, ls)
+    cl3 = ccl.angular_cl(COSMO, t3, t3, ls)
+    # Check cl1 == cl2
+    assert np.all(np.fabs(cl2/cl1-1) < 1E-5)
+    # Check cl1 != cl3
+    assert np.all(np.fabs(cl3/cl1-1) > 1E-2)
+
+
 @pytest.mark.parametrize('tracer_type', ['nc', 'wl'])
 def test_tracer_dndz_smoke(tracer_type):
     tr, _ = get_tracer(tracer_type)
