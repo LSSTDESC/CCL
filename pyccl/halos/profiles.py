@@ -167,10 +167,6 @@ class HaloProfile(object):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        # mass_def is irrelevant in these profiles
-        if self.name in ['Gaussian', 'PowerLaw']:
-            mass_def = None
-
         if getattr(self, '_real', None):
             f_r = self._real(cosmo, r, M, a, mass_def)
         elif getattr(self, '_fourier', None):
@@ -206,10 +202,6 @@ class HaloProfile(object):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        # mass_def is irrelevant in these profiles
-        if self.name in ['Gaussian', 'PowerLaw']:
-            mass_def = None
-
         if getattr(self, '_fourier', None):
             f_k = self._fourier(cosmo, k, M, a, mass_def)
         elif getattr(self, '_real', None):
@@ -244,10 +236,6 @@ class HaloProfile(object):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        # mass_def is irrelevant in these profiles
-        if self.name in ['Gaussian', 'PowerLaw']:
-            mass_def = None
-
         if getattr(self, '_projected', None):
             s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
         else:
@@ -280,10 +268,6 @@ class HaloProfile(object):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        # mass_def is irrelevant in these profiles
-        if self.name in ['Gaussian', 'PowerLaw']:
-            mass_def = None
-
         if getattr(self, '_cumul2d', None):
             s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
         else:
