@@ -34,6 +34,7 @@ def _check_background_spline_compatibility(cosmo, z):
     """Check that a redshift array lies within the support of the
     CCL background splines.
     """
+    cosmo.compute_distances()
     a_bg, _ = _get_spline1d_arrays(cosmo.cosmo.data.chi)
     a = 1/(1+z)
 

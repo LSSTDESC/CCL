@@ -1,12 +1,10 @@
-from .. import ccllib as lib
-from ..core import check
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
-from scipy.special import sici, erf
+from scipy.special import sici, erf, gamma, gammainc
 
 
 class HaloProfile(object):
@@ -148,7 +146,7 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
-    def real(self, cosmo, r, M, a, mass_def=None):
+    def real(self, cosmo, r, M, a, mass_def):
         """ Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
 
@@ -178,7 +176,7 @@ class HaloProfile(object):
                                       " _fourier method.")
         return f_r
 
-    def fourier(self, cosmo, k, M, a, mass_def=None):
+    def fourier(self, cosmo, k, M, a, mass_def):
         """ Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
         scale factor.
@@ -213,7 +211,7 @@ class HaloProfile(object):
                                       " _fourier method.")
         return f_k
 
-    def projected(self, cosmo, r_t, M, a, mass_def=None):
+    def projected(self, cosmo, r_t, M, a, mass_def):
         """ Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
 
@@ -244,7 +242,7 @@ class HaloProfile(object):
                                                 is_cumul2d=False)
         return s_r_t
 
-    def cumul2d(self, cosmo, r_t, M, a, mass_def=None):
+    def cumul2d(self, cosmo, r_t, M, a, mass_def):
         """ Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
         factor.
@@ -276,7 +274,7 @@ class HaloProfile(object):
                                                 is_cumul2d=True)
         return s_r_t
 
-    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the convergence as a function of cosmology,
         radius, halo mass and the scale factors of the source
         and the lens.
@@ -301,13 +299,10 @@ class HaloProfile(object):
                 :math:`\\kappa`
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def) / a_lens**2
-        if hasattr(a_source, "__iter__"):
-            a_source = np.array(a_source)
-            a_lens = np.full_like(a_source, a_lens)
         Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return Sigma / Sigma_crit
 
-    def shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def shear(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the shear (tangential) as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -336,13 +331,10 @@ class HaloProfile(object):
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
         Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
-        if hasattr(a_source, "__iter__"):
-            a_source = np.array(a_source)
-            a_lens = np.full_like(a_source, a_lens)
         Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
-    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the reduced shear as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -371,7 +363,7 @@ class HaloProfile(object):
         shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
         return shear / (1.0 - convergence)
 
-    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the magnification for input parameters.
 
         .. math::
@@ -803,7 +795,7 @@ class HaloProfileNFW(HaloProfile):
 
         x = k_use[None, :] * R_s[:, None]
         Si2, Ci2 = sici(x)
-        P1 = M / (np.log(1 + c_M) - c_M / (1 + c_M))
+        P1 = M_use / (np.log(1 + c_M) - c_M / (1 + c_M))
         if self.truncated:
             Si1, Ci1 = sici((1 + c_M[:, None]) * x)
             P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
@@ -873,6 +865,12 @@ class HaloProfileEinasto(HaloProfile):
         alpha = 0.155 + 0.0095 * nu * nu
         return alpha
 
+    def _norm(self, M, Rs, c, alpha):
+        # Einasto normalization from mass, radius, concentration and alpha
+        return M / (np.pi * Rs**3 * 2**(2-3/alpha) * alpha**(-1+3/alpha)
+                    * np.exp(2/alpha)
+                    * gamma(3/alpha) * gammainc(3/alpha, 2/alpha*c**alpha))
+
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
@@ -884,10 +882,7 @@ class HaloProfileEinasto(HaloProfile):
 
         alpha = self._get_alpha(cosmo, M_use, a, mass_def)
 
-        status = 0
-        norm, status = lib.einasto_norm(R_s, R_M, alpha, M_use.size, status)
-        check(status, cosmo=cosmo)
-        norm = M_use / norm
+        norm = self._norm(M_use, R_s, c_M, alpha)
 
         x = r_use[None, :] / R_s[:, None]
         prof = norm[:, None] * np.exp(-2. * (x**alpha[:, None] - 1) /
@@ -945,6 +940,10 @@ class HaloProfileHernquist(HaloProfile):
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
+    def _norm(self, M, Rs, c):
+        # Hernquist normalization from mass, radius and concentration
+        return M / (2 * np.pi * Rs**3 * (c / (1 + c))**2)
+
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
@@ -954,10 +953,7 @@ class HaloProfileHernquist(HaloProfile):
         c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
         R_s = R_M / c_M
 
-        status = 0
-        norm, status = lib.hernquist_norm(R_s, R_M, M_use.size, status)
-        check(status, cosmo=cosmo)
-        norm = M_use / norm
+        norm = self._norm(M_use, R_s, c_M)
 
         x = r_use[None, :] / R_s[:, None]
         prof = norm[:, None] / (x * (1 + x)**3)
@@ -1050,9 +1046,8 @@ class HaloProfilePressureGNFW(HaloProfile):
         """ Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
 
-        .. note:: A change in `alpha`, `beta` or `gamma` will trigger
-            a recomputation of the Fourier-space template, which can be
-            slow.
+        .. note:: A change in `alpha`, `beta`, `x_out`, or `gamma` will trigger
+            a recomputation of the Fourier-space template, which can be slow.
 
         Args:
             mass_bias (float): the mass bias parameter :math:`1-b`.
@@ -1068,8 +1063,6 @@ class HaloProfilePressureGNFW(HaloProfile):
             x_out (float): profile threshold (as a fraction of r500c). \
                 if `None`, no threshold will be used.
         """
-        if x_out is not None:
-            self.x_out = x_out
         if mass_bias is not None:
             self.mass_bias = mass_bias
         if c500 is not None:
@@ -1095,6 +1088,10 @@ class HaloProfilePressureGNFW(HaloProfile):
             if gamma != self.gamma:
                 re_fourier = True
             self.gamma = gamma
+        if x_out is not None:
+            if x_out != self.x_out:
+                re_fourier = True
+            self.x_out = x_out
 
         if re_fourier and (self._fourier_interp is not None):
             self._fourier_interp = self._integ_interp()

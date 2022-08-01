@@ -4,6 +4,7 @@ from ..background import omega_x
 from ..parameters import physical_constants
 from .massdef import MassDef, MassDef200m
 import numpy as np
+import functools
 
 
 class MassFunc(object):
@@ -177,6 +178,22 @@ class MassFunc(object):
         """
         raise NotImplementedError("Use one of the non-default "
                                   "MassFunction classes")
+
+    @classmethod
+    def from_name(cls, name):
+        """ Returns mass function subclass from name string
+
+        Args:
+            name (string): a mass function name
+
+        Returns:
+            MassFunc subclass corresponding to the input name.
+        """
+        mass_functions = {c.name: c for c in cls.__subclasses__()}
+        if name in mass_functions:
+            return mass_functions[name]
+        else:
+            raise ValueError(f"Mass function {name} not implemented.")
 
 
 class MassFuncPress74(MassFunc):
@@ -750,17 +767,6 @@ class MassFuncAngulo12(MassFunc):
             np.exp(-self.c / sigM**2)
 
 
+@functools.wraps(MassFunc.from_name)
 def mass_function_from_name(name):
-    """ Returns mass function subclass from name string
-
-    Args:
-        name (string): a mass function name
-
-    Returns:
-        MassFunc subclass corresponding to the input name.
-    """
-    mass_functions = {c.name: c for c in MassFunc.__subclasses__()}
-    if name in mass_functions:
-        return mass_functions[name]
-    else:
-        raise ValueError("Mass function %s not implemented")
+    return MassFunc.from_name(name)
