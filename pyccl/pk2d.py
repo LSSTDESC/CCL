@@ -174,6 +174,7 @@ class Pk2D(object):
             # HALOFIT translates (w0, wa) to a w0_eff. This requires computing
             # the comoving distance to the CMB, which requires the background
             # splines being sampled to sufficiently high redshifts.
+            cosmo.compute_distances()
             _, a = _get_spline1d_arrays(cosmo.cosmo.data.achi)
             if min(a) > 1/(1 + 3000):
                 raise CCLError("Comoving distance spline does not cover "

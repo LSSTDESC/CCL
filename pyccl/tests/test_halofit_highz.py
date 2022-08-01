@@ -45,7 +45,6 @@ def test_halofit_background_check():
     cosmo.cosmo.spline_params.A_SPLINE_MINLOG = 0.3
     cosmo.cosmo.spline_params.A_SPLINE_MIN_PK = 0.4
     cosmo.cosmo.spline_params.A_SPLINE_MINLOG_PK = 0.3
-    cosmo.compute_distances()
 
     k = np.geomspace(1e-3, 1, 10)
 
