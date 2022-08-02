@@ -4,8 +4,8 @@ import numpy as np
 
 from . import ccllib as lib
 
-from .errors import CCLWarning
-from .pyutils import check, _get_spline2d_arrays
+from .errors import CCLError, CCLWarning
+from .pyutils import check, _get_spline1d_arrays, _get_spline2d_arrays
 
 
 class Pk2D(object):
@@ -170,6 +170,21 @@ class Pk2D(object):
             pk_linear (:class:`Pk2D`): a :class:`Pk2D` object containing
                 the linear power spectrum to transform.
         """
+        if cosmo["wa"] != 0:
+            # HALOFIT translates (w0, wa) to a w0_eff. This requires computing
+            # the comoving distance to the CMB, which requires the background
+            # splines being sampled to sufficiently high redshifts.
+            cosmo.compute_distances()
+            _, a = _get_spline1d_arrays(cosmo.cosmo.data.achi)
+            if min(a) > 1/(1 + 3000):
+                raise CCLError("Comoving distance spline does not cover "
+                               "sufficiently high redshifts for HALOFIT. "
+                               "HALOFIT translates (w0, wa) to a w0_eff. This "
+                               "requires computing the comoving distance to "
+                               "the CMB, which requires the background "
+                               "splines being sampled to sufficiently high "
+                               "redshifts. If using the calculator mode, "
+                               "check the support of the background data.")
         pk2d = Pk2D(empty=True)
         status = 0
         ret = lib.apply_halofit(cosmo.cosmo, pk_linear.psp, status)

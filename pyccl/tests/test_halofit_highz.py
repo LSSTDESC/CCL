@@ -2,6 +2,8 @@ import numpy as np
 import pyccl as ccl
 import pytest
 
+from pyccl.errors import CCLError
+
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='halofit')
@@ -29,3 +31,22 @@ def test_halofit_highz(cosmo):
         )
 
         assert np.all(pkratl >= pkrath), (zl, zh, pkratl, pkrath)
+
+
+def test_halofit_background_check():
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
+                          n_s=0.97,
+                          sigma8=0.8,
+                          w0=-1.04, wa=-0.1,
+                          matter_power_spectrum="halofit",
+                          transfer_function="eisenstein_hu")
+
+    cosmo.cosmo.spline_params.A_SPLINE_MIN = 0.4
+    cosmo.cosmo.spline_params.A_SPLINE_MINLOG = 0.3
+    cosmo.cosmo.spline_params.A_SPLINE_MIN_PK = 0.4
+    cosmo.cosmo.spline_params.A_SPLINE_MINLOG_PK = 0.3
+
+    k = np.geomspace(1e-3, 1, 10)
+
+    with pytest.raises(CCLError):
+        ccl.nonlin_matter_power(cosmo, k, a=0.5)
