@@ -935,10 +935,10 @@ class HaloProfileHernquist(HaloProfile):
     name = 'Hernquist'
 
     def __init__(self, c_M_relation,
+                 truncated=True,
                  fourier_analytic=False,
                  projected_analytic=False,
-                 cumul2d_analytic=False,
-                 truncated=True):
+                 cumul2d_analytic=False):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
