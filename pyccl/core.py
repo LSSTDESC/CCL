@@ -14,6 +14,7 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
+from .parameters import CCLParameters, physical_constants
 
 # Configuration types
 transfer_function_types = {
@@ -200,9 +201,9 @@ class Cosmology(object):
     # an attribute of this class.
     from . import (background, bcm, boltzmann, cls,
                    correlations, covariances, neutrinos,
-                   pk2d, power, tk3d, tracers, halos, nl_pt)
+                   pk2d, power, pyutils, tk3d, tracers, halos, nl_pt)
     subs = [background, boltzmann, bcm, cls, correlations, covariances,
-            neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
+            neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
     for name, func in funcs:
@@ -211,7 +212,7 @@ class Cosmology(object):
             vars()[name] = func
     # clear unnecessary locals
     del (background, boltzmann, bcm, cls, correlations, covariances,
-         neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt,
+         neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt,
          subs, funcs, func, name, pars)
 
     def __init__(
@@ -263,6 +264,9 @@ class Cosmology(object):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
+        self._spline_params = CCLParameters.get_params_dict("spline_params")
+        self._gsl_params = CCLParameters.get_params_dict("gsl_params")
+        self._accuracy_params = {**self._spline_params, **self._gsl_params}
 
         if self.cosmo.status != 0:
             raise CCLError(
@@ -584,10 +588,10 @@ class Cosmology(object):
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
-        T_CMB_old = lib.cvar.constants.T_CMB
+        T_CMB_old = physical_constants.T_CMB
         try:
             if T_CMB is not None:
-                lib.cvar.constants.T_CMB = T_CMB
+                physical_constants.T_CMB = T_CMB
             status = 0
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
@@ -605,7 +609,7 @@ class Cosmology(object):
                     df_mg, mnu_final_list, status)
             check(status)
         finally:
-            lib.cvar.constants.T_CMB = T_CMB_old
+            physical_constants.T_CMB = T_CMB_old
 
         if Omega_g is not None:
             total = self._params.Omega_g + self._params.Omega_l

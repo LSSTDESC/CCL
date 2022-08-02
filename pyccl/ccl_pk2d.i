@@ -32,9 +32,19 @@ void get_pk_spline_a(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
   ccl_get_pk_spline_a_array(cosmo,ndout,doutput,status);
 }
 
+void get_pk_spline_a_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status)
+{
+  ccl_get_pk_spline_a_array_from_params(spline_params, ndout, doutput, status);
+}
+
 void get_pk_spline_lk(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
 {
   ccl_get_pk_spline_lk_array(cosmo,ndout,doutput,status);
+}
+
+void get_pk_spline_lk_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status)
+{
+  ccl_get_pk_spline_lk_array_from_params(spline_params, ndout, doutput, status);
 }
 
 double pk2d_eval_single(ccl_f2d_t *psp,double lk,double a,ccl_cosmology *cosmo,int *status)

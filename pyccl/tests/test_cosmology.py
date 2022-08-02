@@ -243,3 +243,80 @@ def test_cosmology_context():
 
     with pytest.raises(AttributeError):
         cosmo.has_growth
+
+
+def test_pyccl_default_params():
+    """Check that the Python-layer for setting the gsl and spline parameters
+    works on par with the C-layer.
+    """
+    HM_MMIN = ccl.gsl_params["HM_MMIN"]
+
+    # we will test with this parameter
+    assert HM_MMIN == 1e7
+
+    # can be accessed as an attribute and as a dictionary item
+    assert ccl.gsl_params.HM_MMIN == ccl.gsl_params["HM_MMIN"]
+
+    # can be assigned as an attribute
+    ccl.gsl_params.HM_MMIN = 1e5
+    assert ccl.gsl_params["HM_MMIN"] == 1e5  # cross-check
+
+    ccl.gsl_params["HM_MMIN"] = 1e6
+    assert ccl.gsl_params.HM_MMIN == 1e6
+
+    # does not accept extra assignment
+    with pytest.raises(KeyError):
+        ccl.gsl_params.test = "hello_world"
+    with pytest.raises(KeyError):
+        ccl.gsl_params["test"] = "hallo_world"
+
+    # complains when we try to set A_SPLINE_MAX != 1.0
+    ccl.spline_params.A_SPLINE_MAX = 1.0
+    with pytest.raises(RuntimeError):
+        ccl.spline_params.A_SPLINE_MAX = 0.9
+
+    # complains when we try to change the spline type
+    ccl.spline_params.A_SPLINE_TYPE = None
+    with pytest.raises(TypeError):
+        ccl.spline_params.A_SPLINE_TYPE = "something_else"
+
+    # complains when we try to change the physical constants
+    with pytest.raises(AttributeError):
+        ccl.physical_constants.CLIGHT = 1
+
+    # verify that this has changed
+    assert ccl.gsl_params.HM_MMIN != HM_MMIN
+
+    # but now we reload it, so it should be the default again
+    ccl.gsl_params.reload()
+    assert ccl.gsl_params.HM_MMIN == HM_MMIN
+
+
+def test_cosmology_default_params():
+    """Check that the default params within Cosmology work as intended."""
+    cosmo1 = ccl.CosmologyVanillaLCDM()
+    v1 = cosmo1.cosmo.gsl_params.HM_MMIN
+
+    ccl.gsl_params.HM_MMIN = v1*10
+    cosmo2 = ccl.CosmologyVanillaLCDM()
+    v2 = cosmo2.cosmo.gsl_params.HM_MMIN
+    assert v2 == v1*10
+    assert v2 != v1
+
+    ccl.gsl_params.reload()
+    cosmo3 = ccl.CosmologyVanillaLCDM()
+    v3 = cosmo3.cosmo.gsl_params.HM_MMIN
+    assert v3 == v1
+
+    # warns when we try to mutate instantiated `cvar` objects
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        cosmo1.cosmo.spline_params.A_SPLINE_MIN = 0.5
+
+
+def test_ccl_physical_constants_smoke():
+    assert ccl.physical_constants.CLIGHT == ccl.ccllib.cvar.constants.CLIGHT
+
+
+def test_ccl_global_parameters_repr():
+    ccl.spline_params.reload()
+    assert eval(repr(ccl.spline_params)) == ccl.spline_params._bak

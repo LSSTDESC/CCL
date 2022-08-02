@@ -20,6 +20,15 @@ from . import ccllib as lib
 from .errors import (
     CCLError,
     CCLWarning,
+    CCLDeprecationWarning,
+)
+
+# Constants and accuracy parameters
+from .parameters import (
+    CCLParameters,
+    gsl_params,
+    spline_params,
+    physical_constants,
 )
 
 # Core data structures
@@ -118,11 +127,10 @@ from .covariances import (
     sigma2_B_from_mask,
 )
 
-# Parameters
-physical_constants = lib.cvar.constants
 
 # Miscellaneous
 from .pyutils import debug_mode, resample_array
+
 
 # Deprecated & Renamed modules
 from .halomodel import (
@@ -148,8 +156,8 @@ from .haloprofile import (
 
 __all__ = (
     'lib',
-    'physical_constants',
-    'CCLError', 'CCLWarning',
+    'CCLParameters', 'spline_params', 'gsl_params', 'physical_constants',
+    'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
     'growth_factor', 'growth_factor_unnorm', 'growth_rate',
     'comoving_radial_distance', 'angular_diameter_distance',
