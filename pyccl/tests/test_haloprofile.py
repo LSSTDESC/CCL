@@ -54,6 +54,11 @@ def test_IA_halo_model():
     assert (ccl.halos.SatelliteShearHOD(cM, b=-1.9, lmax=12)
             ._angular_fl).shape == (6, 1)
 
+    # non-zero central fraction HOD parameters
+    assert_warns(ccl.CCLWarning,
+                 ccl.halos.SatelliteShearHOD,
+                 cM, fc_0=0.5)
+
     # Preliminary test on FFTLog accuracy vs simps method.
     s_g_HOD1 = ccl.halos.SatelliteShearHOD(cM)
     s_g_HOD2 = ccl.halos.SatelliteShearHOD(cM, integration_method='simps')
