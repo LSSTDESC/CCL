@@ -45,9 +45,6 @@ def test_pk2d_init():
     assert_raises(ValueError, ccl.Pk2D, pkfunc=pk1d)
     ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
 
-    # Input function but no cosmo
-    assert_raises(ValueError, ccl.Pk2D, pkfunc=lpk2d)
-
     # Input arrays have incorrect sizes
     lkarr = -4.+6*np.arange(100)/99.
     aarr = 0.05+0.95*np.arange(100)/99.
@@ -364,3 +361,10 @@ def test_pk2d_mul_pow():
     pk2d_j = (pk2d_a + 0.5*pk2d_i)**1.5
     _, _, zarr_j = pk2d_j.get_spline_arrays()
     assert np.allclose((zarr_a + 0.5*zarr_i)**1.5, zarr_j)
+
+
+def test_pk2d_pkfunc_init_without_cosmo():
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
+    arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
+    assert np.allclose(arr1, arr2, rtol=0)

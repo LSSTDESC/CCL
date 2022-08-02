@@ -17,6 +17,8 @@ def set_up(request):
     h0 = 0.67702026367187500
     logA = 3.05  # log(10^10 A_s)
     # scale dependent MG cosmology
+    ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
+    ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
                           m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255,
@@ -24,8 +26,6 @@ def set_up(request):
                           c1_mg=1.1, c2_mg=1.1, lambda_mg=1,
                           transfer_function='boltzmann_isitgr',
                           matter_power_spectrum='linear')
-    cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
-    cosmo.cosmo.gsl_params.INTEGRATION_EPSREL = 2.5E-5
 
     # Ell-dependent correction factors
     # Set up array of ells
@@ -120,6 +120,8 @@ def set_up(request):
     ers['ll_12_m'] = interp1d(d[0], d[3],
                               fill_value=d[3][0],
                               bounds_error=False)(theta)
+
+    ccl.gsl_params.reload()
     return cosmo, trc, bms, ers, fl
 
 
