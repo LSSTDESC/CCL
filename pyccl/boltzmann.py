@@ -1,27 +1,15 @@
 import numpy as np
 
 try:
-    import classy
-    HAVE_CLASS = True
-except ImportError:
-    HAVE_CLASS = False
-
-try:
-    import camb
-    import camb.model
-    HAVE_CAMB = True
-except ImportError:
-    HAVE_CAMB = False
-
-try:
     import isitgr  # noqa: F401
-except ImportError:
+except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
 from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D
 from .errors import CCLError
+from .parameters import physical_constants
 
 
 def get_camb_pk_lin(cosmo, nonlin=False):
@@ -39,12 +27,8 @@ def get_camb_pk_lin(cosmo, nonlin=False):
             spectrum. If ``nonlin=True``, returns a tuple \
             ``(pk_lin, pk_nonlin)``.
     """
-
-    # Comment from Jarvis: TODO clean up this and other assert
-    # anti-patterns in this file
-    assert HAVE_CAMB, (
-        "You must have the `camb` python package "
-        "installed to run CCL with CAMB!")
+    import camb
+    import camb.model
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
@@ -118,7 +102,7 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
     # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
     g = np.power(
-        lib.cvar.constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        physical_constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
@@ -256,16 +240,8 @@ def get_isitgr_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
             object. The linear power spectrum.
     """
-
-    try:
-        import isitgr  # noqa: F811
-        import isitgr.model
-    except ImportError as e:
-        e.args = (
-            "You must have the `isitgr` python package "
-            "installed to run CCL with ISiTGR-CAMB!",
-            *e.args)
-        raise
+    import isitgr  # noqa: F811
+    import isitgr.model
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
@@ -348,7 +324,7 @@ def get_isitgr_pk_lin(cosmo):
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
     # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
     g = np.power(
-        lib.cvar.constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        physical_constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
@@ -442,10 +418,7 @@ def get_class_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum object.\
             The linear power spectrum.
     """
-
-    assert HAVE_CLASS, (
-        "You must have the python wrapper for CLASS "
-        "installed to run CCL with CLASS!")
+    import classy
 
     params = {
         "output": "mPk",

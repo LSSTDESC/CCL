@@ -43,7 +43,7 @@ def bcm_correct_pk2d(cosmo, pk2d):
         pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
     """
     if not isinstance(pk2d, Pk2D):
-        raise ValueError("pk2d must be a Pk2D object")
+        raise TypeError("pk2d must be a Pk2D object")
     status = 0
     status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
     check(status, cosmo)

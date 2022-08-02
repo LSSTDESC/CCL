@@ -149,7 +149,7 @@ typedef struct ccl_spline_params {
   const gsl_interp_type* CORR_SPLINE_TYPE;
 } ccl_spline_params;
 
-extern const ccl_spline_params default_spline_params;
+extern ccl_spline_params ccl_user_spline_params;
 
 /**
  * Struct that contains parameters that control the accuracy of various GSL
@@ -195,7 +195,7 @@ typedef struct ccl_gsl_params {
   bool LENSING_KERNEL_SPLINE_INTEGRATION;
 } ccl_gsl_params;
 
-extern const ccl_gsl_params default_gsl_params;
+extern ccl_gsl_params ccl_user_gsl_params;
 
 /**
  * Struct containing the parameters defining a cosmology
@@ -362,6 +362,8 @@ int ccl_get_pk_spline_na(ccl_cosmology *cosmo);
 int ccl_get_pk_spline_nk(ccl_cosmology *cosmo);
 void ccl_get_pk_spline_a_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status);
 void ccl_get_pk_spline_lk_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status);
+void ccl_get_pk_spline_a_array_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status);
+void ccl_get_pk_spline_lk_array_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status);
 
 CCL_END_DECLS
 

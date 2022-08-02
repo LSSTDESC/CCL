@@ -1,5 +1,6 @@
 import warnings
 from .. import ccllib as lib
+from .massdef import MassDef
 from .hmfunc import MassFunc
 from .hbias import HaloBias
 from .profiles import HaloProfile, HaloProfileNFW
@@ -8,13 +9,11 @@ from ..core import check
 from ..pk2d import Pk2D
 from ..tk3d import Tk3D
 from ..power import linear_matter_power, nonlin_matter_power
-from ..background import rho_x
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
+from ..parameters import physical_constants
 import numpy as np
-
-physical_constants = lib.cvar.constants
 
 
 class HMCalculator(object):
@@ -57,14 +56,35 @@ class HMCalculator(object):
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
                  k_min=1E-5):
-        self._rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
-        if not isinstance(massfunc, MassFunc):
-            raise TypeError("massfunc must be of type `MassFunc`")
-        self._massfunc = massfunc
-        if not isinstance(hbias, HaloBias):
-            raise TypeError("hbias must be of type `HaloBias`")
-        self._hbias = hbias
-        self._mdef = mass_def
+        # halo mass definition
+        if isinstance(mass_def, MassDef):
+            self._mdef = mass_def
+        elif isinstance(mass_def, str):
+            self._mdef = MassDef.from_name(mass_def)()
+        else:
+            raise TypeError("mass_def must be of type `MassDef` "
+                            "or a mass definition name string")
+
+        # halo mass function
+        if isinstance(massfunc, MassFunc):
+            self._massfunc = massfunc
+        elif isinstance(massfunc, str):
+            nMclass = MassFunc.from_name(massfunc)
+            self._massfunc = nMclass(cosmo, mass_def=self._mdef)
+        else:
+            raise TypeError("mass_function must be of type `MassFunc` "
+                            "or a mass function name string")
+
+        # halo bias function
+        if isinstance(hbias, HaloBias):
+            self._hbias = hbias
+        elif isinstance(hbias, str):
+            bMclass = HaloBias.from_name(hbias)
+            self._hbias = bMclass(cosmo, mass_def=self._mdef)
+        else:
+            raise TypeError("halo_bias must be of type `HaloBias` "
+                            "or a halo bias name string")
+
         self._prec = {'log10M_min': log10M_min,
                       'log10M_max': log10M_max,
                       'nlog10M': nlog10M,
@@ -96,19 +116,23 @@ class HMCalculator(object):
     def _get_ingredients(self, a, cosmo, get_bf):
         # Compute mass function and bias (if needed) at a new
         # value of the scale factor.
+        rho0 = None
         if a != self._a_current_mf:
+            rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
             self.mf = self._massfunc.get_mass_function(cosmo, self._mass, a,
                                                        mdef_other=self._mdef)
-            self.mf0 = (self._rho0 -
+            self.mf0 = (rho0 -
                         self._integrator(self.mf * self._mass,
                                          self._lmass)) / self._m0
             self._a_current_mf = a
 
         if get_bf:
             if a != self._a_current_bf:
+                if rho0 is None:
+                    rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
                 self.bf = self._hbias.get_halo_bias(cosmo, self._mass, a,
                                                     mdef_other=self._mdef)
-                self.mbf0 = (self._rho0 -
+                self.mbf0 = (rho0 -
                              self._integrator(self.mf * self.bf * self._mass,
                                               self._lmass)) / self._m0
             self._a_current_bf = a
@@ -1254,21 +1278,15 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
     # number counts profiles must be normalized
-    if (prof1.is_number_counts) and (normprof1 is False):
-        raise ValueError('normprof1 must be True if prof1 is of number ' +
-                         'counts type')
-    if (prof2 is not None) and (prof2.is_number_counts) and \
-            (normprof2 is False):
-        raise ValueError('normprof2 must be True if prof2 is of number ' +
-                         'counts type')
-    if (prof3 is not None) and (prof3.is_number_counts) and \
-            (normprof3 is False):
-        raise ValueError('normprof3 must be True if prof3 is of number ' +
-                         'counts type')
-    if (prof4 is not None) and (prof4.is_number_counts) and \
-            (normprof4 is False):
-        raise ValueError('normprof4 must be True if prof3 is of number ' +
-                         'counts type')
+    profs = {prof1: normprof1, prof2: normprof2,
+             prof3: normprof3, prof4: normprof4}
+
+    for i, (profile, normalization) in enumerate(profs.items()):
+        if (profile is not None
+                and profile.is_number_counts
+                and not normalization):
+            raise ValueError(
+                f"normprof{i+1} must be True if prof{i+1} is number counts")
 
     if prof3 is None:
         prof3_bak = prof1

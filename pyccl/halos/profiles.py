@@ -148,7 +148,7 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
-    def real(self, cosmo, r, M, a, mass_def=None):
+    def real(self, cosmo, r, M, a, mass_def):
         """ Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
 
@@ -178,7 +178,7 @@ class HaloProfile(object):
                                       " _fourier method.")
         return f_r
 
-    def fourier(self, cosmo, k, M, a, mass_def=None):
+    def fourier(self, cosmo, k, M, a, mass_def):
         """ Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
         scale factor.
@@ -213,7 +213,7 @@ class HaloProfile(object):
                                       " _fourier method.")
         return f_k
 
-    def projected(self, cosmo, r_t, M, a, mass_def=None):
+    def projected(self, cosmo, r_t, M, a, mass_def):
         """ Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
 
@@ -244,7 +244,7 @@ class HaloProfile(object):
                                                 is_cumul2d=False)
         return s_r_t
 
-    def cumul2d(self, cosmo, r_t, M, a, mass_def=None):
+    def cumul2d(self, cosmo, r_t, M, a, mass_def):
         """ Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
         factor.
@@ -276,7 +276,7 @@ class HaloProfile(object):
                                                 is_cumul2d=True)
         return s_r_t
 
-    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the convergence as a function of cosmology,
         radius, halo mass and the scale factors of the source
         and the lens.
@@ -301,13 +301,10 @@ class HaloProfile(object):
                 :math:`\\kappa`
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def) / a_lens**2
-        if hasattr(a_source, "__iter__"):
-            a_source = np.array(a_source)
-            a_lens = np.full_like(a_source, a_lens)
         Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return Sigma / Sigma_crit
 
-    def shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def shear(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the shear (tangential) as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -336,13 +333,10 @@ class HaloProfile(object):
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
         Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
-        if hasattr(a_source, "__iter__"):
-            a_source = np.array(a_source)
-            a_lens = np.full_like(a_source, a_lens)
         Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
-    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the reduced shear as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -371,7 +365,7 @@ class HaloProfile(object):
         shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
         return shear / (1.0 - convergence)
 
-    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def=None):
+    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def):
         """ Returns the magnification for input parameters.
 
         .. math::
@@ -648,7 +642,7 @@ class HaloProfileNFW(HaloProfile):
             relation to use with this profile.
         fourier_analytic (bool): set to `True` if you want to compute
             the Fourier profile analytically (and not through FFTLog).
-            Default: `False`.
+            Default: `True`.
         projected_analytic (bool): set to `True` if you want to
             compute the 2D projected profile analytically (and not
             through FFTLog). Default: `False`.
@@ -804,7 +798,7 @@ class HaloProfileNFW(HaloProfile):
 
         x = k_use[None, :] * R_s[:, None]
         Si2, Ci2 = sici(x)
-        P1 = M / (np.log(1 + c_M) - c_M / (1 + c_M))
+        P1 = M_use / (np.log(1 + c_M) - c_M / (1 + c_M))
         if self.truncated:
             Si1, Ci1 = sici((1 + c_M[:, None]) * x)
             P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
@@ -928,21 +922,48 @@ class HaloProfileHernquist(HaloProfile):
     Args:
         c_M_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
+        fourier_analytic (bool): set to `True` if you want to compute
+            the Fourier profile analytically (and not through FFTLog).
+            Default: `False`.
+        projected_analytic (bool): set to `True` if you want to
+            compute the 2D projected profile analytically (and not
+            through FFTLog). Default: `False`.
+        cumul2d_analytic (bool): set to `True` if you want to
+            compute the 2D cumulative surface density analytically
+            (and not through FFTLog). Default: `False`.
         truncated (bool): set to `True` if the profile should be
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
     name = 'Hernquist'
 
-    def __init__(self, c_M_relation, truncated=True):
+    def __init__(self, c_M_relation,
+                 truncated=True,
+                 fourier_analytic=False,
+                 projected_analytic=False,
+                 cumul2d_analytic=False):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
         self.cM = c_M_relation
         self.truncated = truncated
+        if fourier_analytic:
+            self._fourier = self._fourier_analytic
+        if projected_analytic:
+            if truncated:
+                raise ValueError("Analytic projected profile not supported "
+                                 "for truncated Hernquist. Set `truncated` or "
+                                 "`projected_analytic` to `False`.")
+            self._projected = self._projected_analytic
+        if cumul2d_analytic:
+            if truncated:
+                raise ValueError("Analytic cumuative 2d profile not supported "
+                                 "for truncated Hernquist. Set `truncated` or "
+                                 "`cumul2d_analytic` to `False`.")
+            self._cumul2d = self._cumul2d_analytic
         super(HaloProfileHernquist, self).__init__()
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
+                                     padding_lo_fftlog=1E-4,
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
@@ -970,6 +991,112 @@ class HaloProfileHernquist(HaloProfile):
             prof[r_use[None, :] > R_M[:, None]] = 0
 
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fx_projected(self, x):
+
+        def f1(xx):
+            x2m1 = xx * xx - 1
+            return (-3 / 2 / x2m1**2
+                    + (x2m1+3) * np.arccosh(1 / xx) / 2 / np.fabs(x2m1)**2.5)
+
+        def f2(xx):
+            x2m1 = xx * xx - 1
+            return (-3 / 2 / x2m1**2
+                    + (x2m1+3) * np.arccos(1 / xx) / 2 / np.fabs(x2m1)**2.5)
+
+        xf = x.flatten()
+        return np.piecewise(xf,
+                            [xf < 1, xf > 1],
+                            [f1, f2, 2./15.]).reshape(x.shape)
+
+    def _projected_analytic(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = r_use[None, :] / R_s[:, None]
+        prof = self._fx_projected(x)
+        norm = 2 * R_s * self._norm(M_use, R_s, c_M)
+        prof = prof[:, :] * norm[:, None]
+
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fx_cumul2d(self, x):
+
+        def f1(xx):
+            x2m1 = xx * xx - 1
+            return (1 + 1 / x2m1
+                    + (x2m1 + 1) * np.arccosh(1 / xx) / np.fabs(x2m1)**1.5)
+
+        def f2(xx):
+            x2m1 = xx * xx - 1
+            return (1 + 1 / x2m1
+                    - (x2m1 + 1) * np.arccos(1 / xx) / np.fabs(x2m1)**1.5)
+
+        xf = x.flatten()
+        f = np.piecewise(xf,
+                         [xf < 1, xf > 1],
+                         [f1, f2, 1./3.]).reshape(x.shape)
+
+        return f / x**2
+
+    def _cumul2d_analytic(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = r_use[None, :] / R_s[:, None]
+        prof = self._fx_cumul2d(x)
+        norm = 2 * R_s * self._norm(M_use, R_s, c_M)
+        prof = prof[:, :] * norm[:, None]
+
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fourier_analytic(self, cosmo, k, M, a, mass_def):
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = k_use[None, :] * R_s[:, None]
+        Si2, Ci2 = sici(x)
+        c_Mp1 = c_M + 1
+        P1 = M / ((c_M / c_Mp1)**2 / 2)
+        if self.truncated:
+            Si1, Ci1 = sici(c_Mp1 * x)
+            P2 = x * np.sin(x) * (Ci1 - Ci2) - x * np.cos(x) * (Si1 - Si2)
+            P3 = (-1 + np.sin(c_M[:, None] * x) / (c_Mp1**2 * x)
+                  + c_Mp1 * np.cos(c_M[:, None] * x) / (c_Mp1**2))
+            prof = P1[:, None] * (P2 - P3) / 2
+        else:
+            P2 = (-x * (2 * np.sin(x) * Ci2 + np.pi * np.cos(x))
+                  + 2 * x * np.cos(x) * Si2 + 2) / 4
+            prof = P1[:, None] * P2
+
+        if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
@@ -1055,9 +1182,8 @@ class HaloProfilePressureGNFW(HaloProfile):
         """ Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
 
-        .. note:: A change in `alpha`, `beta` or `gamma` will trigger
-            a recomputation of the Fourier-space template, which can be
-            slow.
+        .. note:: A change in `alpha`, `beta`, `x_out`, or `gamma` will trigger
+            a recomputation of the Fourier-space template, which can be slow.
 
         Args:
             mass_bias (float): the mass bias parameter :math:`1-b`.
@@ -1073,8 +1199,6 @@ class HaloProfilePressureGNFW(HaloProfile):
             x_out (float): profile threshold (as a fraction of r500c). \
                 if `None`, no threshold will be used.
         """
-        if x_out is not None:
-            self.x_out = x_out
         if mass_bias is not None:
             self.mass_bias = mass_bias
         if c500 is not None:
@@ -1100,6 +1224,10 @@ class HaloProfilePressureGNFW(HaloProfile):
             if gamma != self.gamma:
                 re_fourier = True
             self.gamma = gamma
+        if x_out is not None:
+            if x_out != self.x_out:
+                re_fourier = True
+            self.x_out = x_out
 
         if re_fourier and (self._fourier_interp is not None):
             self._fourier_interp = self._integ_interp()

@@ -350,8 +350,8 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
                                               int nchi, double* chi_arr, double* wL_arr,
                                               int* status) {
   double* chi_of_z_array = malloc(nz*sizeof(double));
-  double* sz_array = malloc(nz*sizeof(double));
-  if(chi_of_z_array == NULL || sz_array == NULL) {
+  double* qz_array = malloc(nz*sizeof(double));
+  if(chi_of_z_array == NULL || qz_array == NULL) {
     *status = CCL_ERROR_MEMORY;
     ccl_cosmology_set_status_message(
       cosmo,
@@ -359,22 +359,22 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
   }
 
   if(*status == 0) {
-    // Fill chi and sz arrays
+    // Fill chi and qz arrays
     for(int i=0; i<nz; i++) {
       double a = 1./(1+z_arr[i]);
       chi_of_z_array[i] = ccl_comoving_radial_distance(cosmo, a, status);
       if(sz_f != NULL) {
-        sz_array[i] = ccl_f1d_t_eval(sz_f, z_arr[i]);
+        qz_array[i] = 1-2.5*ccl_f1d_t_eval(sz_f, z_arr[i]);
       } else {
-        sz_array[i] = 1.0;
+        qz_array[i] = 1.0;
       }
     }
   }
 
   if(*status == 0) {
     #pragma omp parallel default(none) \
-                        shared(cosmo, nz, z_arr, nz_arr, nz_norm, sz_f, \
-                               chi_of_z_array, sz_array, \
+                        shared(cosmo, nz, z_arr, nz_arr, nz_norm, \
+                               chi_of_z_array, qz_array, \
                                nchi, chi_arr, wL_arr, status, gsl_interp_akima)
     {
       int local_status = *status;
@@ -403,7 +403,11 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
               integrand_array[i] = 0.0;
               i_chi_end = i+1;
             } else {
-              integrand_array[i] = lensing_kernel_integrand(cosmo, chi_of_z_array[i], chi_end, nz_arr[i], sz_array[i], &local_status);
+	      integrand_array[i] = lensing_kernel_integrand(cosmo,
+							    chi_of_z_array[i],
+							    chi_end, nz_arr[i],
+							    qz_array[i],
+							    &local_status);
             }
           }
           if(local_status) {
@@ -446,7 +450,7 @@ static void integrate_lensing_kernel_spline(ccl_cosmology *cosmo,
   }
 
   free(chi_of_z_array);
-  free(sz_array);
+  free(qz_array);
 }
 
 //Returns number of divisions on which
