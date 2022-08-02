@@ -61,10 +61,15 @@ def test_empirical_smoke(prof_class):
     with pytest.raises(TypeError):
         p = prof_class(None)
 
-    if prof_class == ccl.halos.HaloProfileNFW:
+    if prof_class in [ccl.halos.HaloProfileNFW,
+                      ccl.halos.HaloProfileHernquist]:
         with pytest.raises(ValueError):
             p = prof_class(c,
                            projected_analytic=True,
+                           truncated=True)
+        with pytest.raises(ValueError):
+            p = prof_class(c,
+                           cumul2d_analytic=True,
                            truncated=True)
 
     p = prof_class(c)
