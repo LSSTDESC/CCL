@@ -101,7 +101,7 @@ __all__ = (
     'HaloBiasBhattacharya11', 'halo_bias_from_name',
     'HaloProfile', 'HaloProfileGaussian', 'HaloProfilePowerLaw',
     'HaloProfileNFW', 'HaloProfileEinasto', 'HaloProfileHernquist',
-    'HaloProfilePressureGNFW', 'HaloProfileHOD',
+    'HaloProfilePressureGNFW', 'HaloProfileHOD', 'SatelliteShearHOD',
     'Profile2pt', 'Profile2ptHOD',
     'HMCalculator', 'halomod_mean_profile_1pt', 'halomod_bias_1pt',
     'halomod_power_spectrum', 'halomod_Pk2D', 'halomod_trispectrum_1h',
