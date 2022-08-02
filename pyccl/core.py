@@ -201,9 +201,9 @@ class Cosmology(object):
     # an attribute of this class.
     from . import (background, bcm, boltzmann, cls,
                    correlations, covariances, neutrinos,
-                   pk2d, power, tk3d, tracers, halos, nl_pt)
+                   pk2d, power, pyutils, tk3d, tracers, halos, nl_pt)
     subs = [background, boltzmann, bcm, cls, correlations, covariances,
-            neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
+            neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
     for name, func in funcs:
@@ -212,7 +212,7 @@ class Cosmology(object):
             vars()[name] = func
     # clear unnecessary locals
     del (background, boltzmann, bcm, cls, correlations, covariances,
-         neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt,
+         neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt,
          subs, funcs, func, name, pars)
 
     def __init__(
