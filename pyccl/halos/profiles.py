@@ -639,7 +639,7 @@ class HaloProfileNFW(HaloProfile):
             relation to use with this profile.
         fourier_analytic (bool): set to `True` if you want to compute
             the Fourier profile analytically (and not through FFTLog).
-            Default: `False`.
+            Default: `True`.
         projected_analytic (bool): set to `True` if you want to
             compute the 2D projected profile analytically (and not
             through FFTLog). Default: `False`.
@@ -919,21 +919,48 @@ class HaloProfileHernquist(HaloProfile):
     Args:
         c_M_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
+        fourier_analytic (bool): set to `True` if you want to compute
+            the Fourier profile analytically (and not through FFTLog).
+            Default: `False`.
+        projected_analytic (bool): set to `True` if you want to
+            compute the 2D projected profile analytically (and not
+            through FFTLog). Default: `False`.
+        cumul2d_analytic (bool): set to `True` if you want to
+            compute the 2D cumulative surface density analytically
+            (and not through FFTLog). Default: `False`.
         truncated (bool): set to `True` if the profile should be
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
     name = 'Hernquist'
 
-    def __init__(self, c_M_relation, truncated=True):
+    def __init__(self, c_M_relation,
+                 truncated=True,
+                 fourier_analytic=False,
+                 projected_analytic=False,
+                 cumul2d_analytic=False):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
         self.cM = c_M_relation
         self.truncated = truncated
+        if fourier_analytic:
+            self._fourier = self._fourier_analytic
+        if projected_analytic:
+            if truncated:
+                raise ValueError("Analytic projected profile not supported "
+                                 "for truncated Hernquist. Set `truncated` or "
+                                 "`projected_analytic` to `False`.")
+            self._projected = self._projected_analytic
+        if cumul2d_analytic:
+            if truncated:
+                raise ValueError("Analytic cumuative 2d profile not supported "
+                                 "for truncated Hernquist. Set `truncated` or "
+                                 "`cumul2d_analytic` to `False`.")
+            self._cumul2d = self._cumul2d_analytic
         super(HaloProfileHernquist, self).__init__()
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
+                                     padding_lo_fftlog=1E-4,
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
@@ -961,6 +988,112 @@ class HaloProfileHernquist(HaloProfile):
             prof[r_use[None, :] > R_M[:, None]] = 0
 
         if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fx_projected(self, x):
+
+        def f1(xx):
+            x2m1 = xx * xx - 1
+            return (-3 / 2 / x2m1**2
+                    + (x2m1+3) * np.arccosh(1 / xx) / 2 / np.fabs(x2m1)**2.5)
+
+        def f2(xx):
+            x2m1 = xx * xx - 1
+            return (-3 / 2 / x2m1**2
+                    + (x2m1+3) * np.arccos(1 / xx) / 2 / np.fabs(x2m1)**2.5)
+
+        xf = x.flatten()
+        return np.piecewise(xf,
+                            [xf < 1, xf > 1],
+                            [f1, f2, 2./15.]).reshape(x.shape)
+
+    def _projected_analytic(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = r_use[None, :] / R_s[:, None]
+        prof = self._fx_projected(x)
+        norm = 2 * R_s * self._norm(M_use, R_s, c_M)
+        prof = prof[:, :] * norm[:, None]
+
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fx_cumul2d(self, x):
+
+        def f1(xx):
+            x2m1 = xx * xx - 1
+            return (1 + 1 / x2m1
+                    + (x2m1 + 1) * np.arccosh(1 / xx) / np.fabs(x2m1)**1.5)
+
+        def f2(xx):
+            x2m1 = xx * xx - 1
+            return (1 + 1 / x2m1
+                    - (x2m1 + 1) * np.arccos(1 / xx) / np.fabs(x2m1)**1.5)
+
+        xf = x.flatten()
+        f = np.piecewise(xf,
+                         [xf < 1, xf > 1],
+                         [f1, f2, 1./3.]).reshape(x.shape)
+
+        return f / x**2
+
+    def _cumul2d_analytic(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = r_use[None, :] / R_s[:, None]
+        prof = self._fx_cumul2d(x)
+        norm = 2 * R_s * self._norm(M_use, R_s, c_M)
+        prof = prof[:, :] * norm[:, None]
+
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _fourier_analytic(self, cosmo, k, M, a, mass_def):
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        x = k_use[None, :] * R_s[:, None]
+        Si2, Ci2 = sici(x)
+        c_Mp1 = c_M + 1
+        P1 = M / ((c_M / c_Mp1)**2 / 2)
+        if self.truncated:
+            Si1, Ci1 = sici(c_Mp1 * x)
+            P2 = x * np.sin(x) * (Ci1 - Ci2) - x * np.cos(x) * (Si1 - Si2)
+            P3 = (-1 + np.sin(c_M[:, None] * x) / (c_Mp1**2 * x)
+                  + c_Mp1 * np.cos(c_M[:, None] * x) / (c_Mp1**2))
+            prof = P1[:, None] * (P2 - P3) / 2
+        else:
+            P2 = (-x * (2 * np.sin(x) * Ci2 + np.pi * np.cos(x))
+                  + 2 * x * np.cos(x) * Si2 + 2) / 4
+            prof = P1[:, None] * P2
+
+        if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
