@@ -960,7 +960,7 @@ class HaloProfileHernquist(HaloProfile):
             self._cumul2d = self._cumul2d_analytic
         super(HaloProfileHernquist, self).__init__()
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
+                                     padding_lo_fftlog=1E-4,
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
@@ -1082,7 +1082,6 @@ class HaloProfileHernquist(HaloProfile):
         Si2, Ci2 = sici(x)
         c_Mp1 = c_M + 1
         P1 = M / ((c_M / c_Mp1)**2 / 2)
-
         if self.truncated:
             Si1, Ci1 = sici(c_Mp1 * x)
             P2 = x * np.sin(x) * (Ci1 - Ci2) - x * np.cos(x) * (Si1 - Si2)
