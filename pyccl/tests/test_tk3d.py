@@ -172,8 +172,6 @@ def test_tk3d_spline_arrays_raises():
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
     tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
 
-    # PR923 aims to change this bit of code; the assertion is there to remind
-    # us to uncomment what is commented out.
     ccl.lib.f3d_t_free(tsp.tsp)
     delattr(tsp, "tsp")
 
