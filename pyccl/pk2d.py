@@ -40,6 +40,7 @@ class Pk2D(object):
 
         The power spectrum can be evaluated by directly calling the instance
         ``pk(k, a)``, or by calling the ``eval`` method, ``pk.eval(k, a)``.
+        Calling the instance is vectorized in both ``k`` and ``a``.
 
     Parameters
     ----------
@@ -291,7 +292,9 @@ class Pk2D(object):
 
     def __call__(self, k, a, cosmo=None, *, derivative=False):
         """Callable vectorized instance."""
-        return self.eval(k, a, cosmo=cosmo, derivative=derivative)
+        out = np.array([self.eval(k, aa, cosmo=cosmo, derivative=derivative)
+                        for aa in np.atleast_1d(a)])
+        return out.squeeze()[()]
 
     def copy(self):
         """Return a copy of this Pk2D object."""
