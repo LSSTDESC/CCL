@@ -76,7 +76,6 @@ def test_empirical_smoke(prof_class):
         smoke_assert_prof_real(p, method='_projected_analytic')
         smoke_assert_prof_real(p, method='_cumul2d_analytic')
 
-
     p = prof_class(c)
     smoke_assert_prof_real(p, method='_real')
 
