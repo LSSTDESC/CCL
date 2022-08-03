@@ -73,7 +73,7 @@ def test_background_a_interface(a, func):
         val = func(COSMO, a)
         assert np.all(np.isfinite(val))
         assert np.shape(val) == np.shape(a)
-        if(func is ccl.angular_diameter_distance):
+        if (func is ccl.angular_diameter_distance):
             val = func(COSMO, a, a)
             assert np.all(np.isfinite(val))
             assert np.shape(val) == np.shape(a)
