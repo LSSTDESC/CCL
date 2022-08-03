@@ -116,8 +116,8 @@ def debug_mode(debug):
 
 
 def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument, with a cosmology dependence.
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with one vector argument, with a cosmology dependence.
 
     Args:
         fn (callable): Function with a single argument.
@@ -163,8 +163,9 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
 
 
 def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument and one integer argument, with a cosmology dependence.
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with one vector argument and one integer argument,
+    with a cosmology dependence.
 
     Args:
         fn (callable): Function with a single argument.
@@ -209,8 +210,9 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
 
 
 def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument and two float arguments, with a cosmology dependence.
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with one vector argument and two float arguments, with
+    a cosmology dependence.
 
     Args:
         fn (callable): Function with a single argument.
