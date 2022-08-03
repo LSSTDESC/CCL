@@ -3,8 +3,9 @@ import functools
 import numpy as np
 
 from . import ccllib as lib
-from .errors import CCLWarning
-from .pyutils import check, _get_spline2d_arrays
+from .errors import CCLWarning, CCLError
+from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
+                      _get_spline1d_arrays, _get_spline2d_arrays)
 
 
 class _Pk2D_descriptor:
@@ -70,10 +71,8 @@ class Pk2D(object):
              logarithm of the power spectrum. Otherwise, the true value
              of the power spectrum is expected. Note that arrays will be
              interpolated in log space if `is_logp` is set to `True`.
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The cosmology
-             object is needed in order if `pkfunc` is not `None`. The object is
-             used to determine the sampling rate in scale factor and
-             wavenumber.
+        cosmo (:class:`~pyccl.core.Cosmology`, optional): Cosmology object.
+             Used to determine sampling rates in scale factor and wavenumber.
         empty (bool): if True, just create an empty object, to be filled
             out later
     """
@@ -92,7 +91,7 @@ class Pk2D(object):
                                  "you must provide arrays")
 
             # Check that `a` is a monotonically increasing array.
-            if not np.array_equal(a_arr, np.sort(a_arr)):
+            if not np.all((a_arr[1:] - a_arr[:-1]) > 0):
                 raise ValueError("Input scale factor array in `a_arr` is not "
                                  "monotonically increasing.")
 
@@ -107,22 +106,12 @@ class Pk2D(object):
             except Exception:
                 raise ValueError("Can't use input function")
 
-            if cosmo is None:
-                raise ValueError("A cosmology is needed if initializing "
-                                 "power spectrum from a function")
-
             # Set k and a sampling from CCL parameters
-            nk = lib.get_pk_spline_nk(cosmo.cosmo)
-            na = lib.get_pk_spline_na(cosmo.cosmo)
-            a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-            check(status, cosmo=cosmo)
-            lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-            check(status, cosmo=cosmo)
+            a_arr = get_pk_spline_a(cosmo=cosmo)
+            lk_arr = get_pk_spline_lk(cosmo=cosmo)
 
             # Compute power spectrum on 2D grid
-            pkflat = np.zeros([na, nk])
-            for ia, a in enumerate(a_arr):
-                pkflat[ia, :] = pkfunc(k=np.exp(lk_arr), a=a)
+            pkflat = np.array([pkfunc(k=np.exp(lk_arr), a=a) for a in a_arr])
             pkflat = pkflat.flatten()
 
         self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
@@ -200,6 +189,22 @@ class Pk2D(object):
         """
         if pk_linear is None:
             pk_linear = self
+
+        if cosmo["wa"] != 0:
+            # HALOFIT translates (w0, wa) to a w0_eff. This requires computing
+            # the comoving distance to the CMB, which requires the background
+            # splines being sampled to sufficiently high redshifts.
+            cosmo.compute_distances()
+            _, a = _get_spline1d_arrays(cosmo.cosmo.data.achi)
+            if min(a) > 1/(1 + 3000):
+                raise CCLError("Comoving distance spline does not cover "
+                               "sufficiently high redshifts for HALOFIT. "
+                               "HALOFIT translates (w0, wa) to a w0_eff. This "
+                               "requires computing the comoving distance to "
+                               "the CMB, which requires the background "
+                               "splines being sampled to sufficiently high "
+                               "redshifts. If using the calculator mode, "
+                               "check the support of the background data.")
 
         pk2d = Pk2D(empty=True)
         status = 0

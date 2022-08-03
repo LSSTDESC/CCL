@@ -115,3 +115,15 @@ def test_translate_mass_raises():
 def test_subclasses_smoke(scls):
     hmd = scls()
     assert np.isfinite(hmd.get_Delta(COSMO, 1.))
+
+
+@pytest.mark.parametrize('name', ['200m', '200c', '500c', 'vir'])
+def test_massdef_from_string_smoke(name):
+    hmd_class = ccl.halos.MassDef.from_name(name)
+    hmd = hmd_class()
+    assert np.isfinite(hmd.get_radius(COSMO, 1e14, 1))
+
+
+def test_massdef_from_string_raises():
+    with pytest.raises(ValueError):
+        ccl.halos.MassDef.from_name("my_mass_def")

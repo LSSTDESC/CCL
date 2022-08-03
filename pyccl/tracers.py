@@ -4,11 +4,12 @@ import numpy as np
 
 from . import ccllib as lib
 from .core import check
-from .background import comoving_radial_distance, growth_rate, \
-    growth_factor, scale_factor_of_chi, h_over_h0
+from .background import (comoving_radial_distance, growth_rate,
+                         growth_factor, scale_factor_of_chi, h_over_h0)
 from .errors import CCLWarning
-from .pyutils import _check_array_params, NoneArr, _vectorize_fn6, \
-    _get_spline1d_arrays
+from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
+                      _get_spline1d_arrays)
+from .parameters import physical_constants
 
 
 def _Sig_MG(cosmo, a, k=None):
@@ -33,6 +34,7 @@ def _check_background_spline_compatibility(cosmo, z):
     """Check that a redshift array lies within the support of the
     CCL background splines.
     """
+    cosmo.compute_distances()
     a_bg, _ = _get_spline1d_arrays(cosmo.cosmo.data.chi)
     a = 1/(1+z)
 
@@ -109,7 +111,7 @@ def get_lensing_kernel(cosmo, dndz, mag_bias=None, n_chi=None):
             f"The number of samples in the n(z) ({len(z_n)}) is smaller than "
             f"the number of samples in the lensing kernel ({n_chi}). Consider "
             f"disabling spline integration for the lensing kernel by setting "
-            f"cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION "
+            f"pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION "
             f"= False",
             category=CCLWarning)
 
@@ -713,7 +715,7 @@ class WeakLensingTracer(Tracer):
                 # Transfer
                 # See Joachimi et al. (2011), arXiv: 1008.3491, Eq. 6.
                 # and note that we use C_1= 5e-14 from arXiv:0705.0166
-                rho_m = lib.cvar.constants.RHO_CRITICAL * cosmo['Omega_m']
+                rho_m = physical_constants.RHO_CRITICAL * cosmo['Omega_m']
                 a = - tmp_a * 5e-14 * rho_m / D
             else:
                 # use the raw input normalization. Normally, this will be 1
@@ -844,7 +846,7 @@ class ISWTracer(Tracer):
         chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
         chi = np.linspace(0, chi_max, n_chi)
         a_arr = scale_factor_of_chi(cosmo, chi)
-        H0 = cosmo['h'] / lib.cvar.constants.CLIGHT_HMPC
+        H0 = cosmo['h'] / physical_constants.CLIGHT_HMPC
         OM = cosmo['Omega_c']+cosmo['Omega_b']
         Ez = h_over_h0(cosmo, a_arr)
         fz = growth_rate(cosmo, a_arr)

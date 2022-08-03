@@ -31,5 +31,5 @@ def test_bcm_correct_smoke():
 
 
 def test_bcm_correct_raises():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ccl.bcm_correct_pk2d(COSMO, None)

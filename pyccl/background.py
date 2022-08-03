@@ -16,6 +16,7 @@ import numpy as np
 from . import ccllib as lib
 from .pyutils import _vectorize_fn, _vectorize_fn3
 from .pyutils import _vectorize_fn4, _vectorize_fn5
+from .parameters import physical_constants
 
 species_types = {
     'critical': lib.species_crit_label,
@@ -117,10 +118,15 @@ def comoving_angular_distance(cosmo, a):
 def angular_diameter_distance(cosmo, a1, a2=None):
     """Angular diameter distance.
 
-    .. note:: The angular diameter distance in Mpc from scale factor
-              a1 to scale factor a2. If a2 is not provided, it is assumed that
-              the distance will be calculated between 1 and a1. Note that a2
-              has to be smaller than a1.
+    The angular diameter distance in Mpc from scale factor
+    `a1` to scale factor `a2`. If `a2` is not provided, it is
+    assumed that the distance will be calculated between 1 and
+    `a1`.
+
+    .. note:: `a2` has to be smaller than `a1` (i.e. a source at
+              `a2` is behind one at `a1`). You can compute the
+              distance between a single lens at `a1` and multiple
+              sources at `a2` by passing a scalar `a1`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
@@ -133,11 +139,14 @@ def angular_diameter_distance(cosmo, a1, a2=None):
     """
     cosmo.compute_distances()
     if(a2 is not None):
+        # One lens, multiple sources
+        if (np.ndim(a1) == 0) and (np.ndim(a2) != 0):
+            a1 = np.full(len(a2), a1)
         return _vectorize_fn5(lib.angular_diameter_distance,
                               lib.angular_diameter_distance_vec,
                               cosmo, a1, a2)
     else:
-        if(isinstance(a1, float) or isinstance(a1, int)):
+        if isinstance(a1, (int, float)):
             return _vectorize_fn5(lib.angular_diameter_distance,
                                   lib.angular_diameter_distance_vec,
                                   cosmo, 1., a1)
@@ -291,7 +300,6 @@ def sigma_critical(cosmo, a_lens, a_source):
         float or array_like: :math:`\\Sigma_{\\mathrm{crit}}` in units
         of :math:`\\M_{\\odot}/Mpc^2`
     """
-    physical_constants = lib.cvar.constants
     Ds = angular_diameter_distance(cosmo, a_source, a2=None)
     Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
     Dls = angular_diameter_distance(cosmo, a_lens, a_source)
