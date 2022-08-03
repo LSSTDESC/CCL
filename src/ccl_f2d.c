@@ -26,6 +26,7 @@ ccl_f2d_t *ccl_f2d_t_copy(ccl_f2d_t *f2d_o, int *status)
     f2d->extrap_linear_growth = f2d_o->extrap_linear_growth;
     f2d->extrap_order_lok = f2d_o->extrap_order_lok;
     f2d->extrap_order_hik = f2d_o->extrap_order_hik;
+    f2d->extrap_in_log = f2d_o->extrap_in_log;
     f2d->is_log = f2d_o->is_log;
     f2d->growth_factor_0 = f2d_o->growth_factor_0;
     f2d->growth_exponent = f2d_o->growth_exponent;
@@ -99,6 +100,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
                          int extrap_order_hik,
                          ccl_f2d_extrap_growth_t extrap_linear_growth,
                          int is_fka_log,
+			 int extrap_in_log,
                          double growth_factor_0,
                          int growth_exponent,
                          ccl_f2d_interp_t interp_type,
@@ -115,6 +117,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
     f2d->is_a_constant = ((a_arr == NULL) || ((fka_arr == NULL) && (fa_arr == NULL)));
     f2d->extrap_order_lok = extrap_order_lok;
     f2d->extrap_order_hik = extrap_order_hik;
+    f2d->extrap_in_log = extrap_in_log;
     f2d->extrap_linear_growth = extrap_linear_growth;
     f2d->is_log = is_fka_log;
     f2d->growth_factor_0 = growth_factor_0;
@@ -285,11 +288,17 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status
   }
 
   // Now extrapolate in k if needed
+  // Stored in lin-scale but extrapolated in log
+  int extrap_linlog = ((!(f2d->is_log)) && (f2d->extrap_in_log));
   if (is_hik) {
     fka_post = fka_pre;
     if (f2d->extrap_order_hik > 0) {
-      double pd;
+      double pd, pdd;
       double dlk = lk-lk_ev;
+      if ((extrap_linlog) && (fka_pre==0)) {// Avoid division by zero
+	*status = CCL_ERROR_SPLINE_EV;
+	return NAN;
+      }
       if (f2d->is_factorizable)
         spstatus = gsl_spline_eval_deriv_e(f2d->fk, lk_ev, NULL, &pd);
       else
@@ -298,25 +307,43 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status
         *status = CCL_ERROR_SPLINE_EV;
         return NAN;
       }
-      fka_post += pd*dlk;
+      if (extrap_linlog) {
+	// dlogP/dlogk = P'/P
+	pd = pd/fka_pre;
+	// P(k) = P(k_0) * e^{delta_log_k * dlogP/dlogk}
+	fka_post *= exp(pd*dlk);
+      }
+      else
+	fka_post += pd*dlk;
       if (f2d->extrap_order_hik > 1) {
         if (f2d->is_factorizable)
-          spstatus = gsl_spline_eval_deriv2_e(f2d->fk, lk_ev, NULL, &pd);
+          spstatus = gsl_spline_eval_deriv2_e(f2d->fk, lk_ev, NULL, &pdd);
         else
-          spstatus = gsl_spline2d_eval_deriv_xx_e(f2d->fka, lk_ev, a_ev, NULL, NULL, &pd);
+          spstatus = gsl_spline2d_eval_deriv_xx_e(f2d->fka, lk_ev, a_ev, NULL, NULL, &pdd);
         if (spstatus) {
           *status=CCL_ERROR_SPLINE_EV;
           return NAN;
         }
-        fka_post += pd*dlk*dlk*0.5;
+	if (extrap_linlog) {
+	  // d^2logP/dlogk^2 = P''/P - (P'/P)^2
+	  pdd = pdd/fka_pre-pd*pd;
+	  // Second order correction
+	  fka_post *= exp(0.5*pdd*dlk*dlk);
+	}
+	else
+	  fka_post += pdd*dlk*dlk*0.5;
       }
     }
   }
   else if (is_lok) {
     fka_post = fka_pre;
     if (f2d->extrap_order_lok > 0) {
-      double pd;
+      double pd,pdd;
       double dlk = lk-lk_ev;
+      if ((extrap_linlog) && (fka_pre==0)) {// Avoid division by zero
+	*status = CCL_ERROR_SPLINE_EV;
+	return NAN;
+      }
       if (f2d->is_factorizable)
         spstatus = gsl_spline_eval_deriv_e(f2d->fk, lk_ev, NULL, &pd);
       else
@@ -325,18 +352,32 @@ double ccl_f2d_t_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, int *status
         *status = CCL_ERROR_SPLINE_EV;
         return NAN;
       }
-      fka_post += pd*dlk;
+      if (extrap_linlog) {
+	// dlogP/dlogk = P'/P
+	pd = pd/fka_pre;
+	// P(k) = P(k_0) * e^{delta_log_k * dlogP/dlogk}
+	fka_post *= exp(pd*dlk);
+      }
+      else
+	fka_post += pd*dlk;
 
       if (f2d->extrap_order_lok > 1) {
         if (f2d->is_factorizable)
-          spstatus = gsl_spline_eval_deriv2_e(f2d->fk, lk_ev, NULL, &pd);
+          spstatus = gsl_spline_eval_deriv2_e(f2d->fk, lk_ev, NULL, &pdd);
         else
-          spstatus = gsl_spline2d_eval_deriv_xx_e(f2d->fka, lk_ev, a_ev, NULL, NULL, &pd);
+          spstatus = gsl_spline2d_eval_deriv_xx_e(f2d->fka, lk_ev, a_ev, NULL, NULL, &pdd);
         if (spstatus) {
           *status = CCL_ERROR_SPLINE_EV;
           return NAN;
         }
-        fka_post += pd*dlk*dlk*0.5;
+	if (extrap_linlog) {
+	  // d^2logP/dlogk^2 = P''/P - (P'/P)^2
+	  pdd = pdd/fka_pre-pd*pd;
+	  // Second order correction
+	  fka_post *= exp(0.5*pdd*dlk*dlk);
+	}
+	else
+	  fka_post += pdd*dlk*dlk*0.5;
       }
     }
   }
@@ -465,6 +506,17 @@ double ccl_f2d_t_dlogf_dlk_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, i
   }
 
   // Now extrapolate in k if needed
+  //Stored in lin-scale but extrapolated in log
+  int extrap_linlog = ((!(f2d->is_log)) && (f2d->extrap_in_log));
+  double fka_0;
+  if ((is_hik || is_lok) && extrap_linlog) {
+    // Need to evaluate this to calculate the numerical derivative
+    fka_0 = ccl_f2d_t_eval(f2d, lk_ev, a_ev, cosmo, status);
+    if (status || (fka_0==0)) {
+      *status = CCL_ERROR_SPLINE_EV;
+      return NAN;
+    }
+  }
   if (is_hik) {
     fka_post = fka_pre;
     if (f2d->extrap_order_hik > 1) {
@@ -478,7 +530,15 @@ double ccl_f2d_t_dlogf_dlk_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, i
         *status = CCL_ERROR_SPLINE_EV;
         return NAN;
       }
-      fka_post += pd*dlk;
+      if (extrap_linlog) {
+	// fka_0 = P_0
+	// fka_pre = P'_0
+	// pd = P''_0
+	// d^2logP/dlogk^2 = P''/P-(P'/P)^2
+	fka_post = (fka_pre+(pd/fka_0-fka_pre*fka_pre/(fka_0*fka_0))*dlk)/inv_pk0;
+      }
+      else
+	fka_post += pd*dlk;
     }
   }
   else if (is_lok) {
@@ -494,7 +554,15 @@ double ccl_f2d_t_dlogf_dlk_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, i
         *status = CCL_ERROR_SPLINE_EV;
         return NAN;
       }
-      fka_post += pd*dlk;
+      if (extrap_linlog) {
+	// fka_0 = P_0
+	// fka_pre = P'_0
+	// pd = P''_0
+	// d^2logP/dlogk^2 = P''/P-(P'/P)^2
+	fka_post = (fka_pre+(pd/fka_0-fka_pre*fka_pre/(fka_0*fka_0))*dlk)/inv_pk0;
+      }
+      else
+	fka_post += pd*dlk;
     }
   }
   else
@@ -506,26 +574,6 @@ double ccl_f2d_t_dlogf_dlk_eval(ccl_f2d_t *f2d,double lk,double a,void *cosmo, i
 
     // Extrapolation in a in log-space not needed
     // (does not contribute to logarithmic k derivative)
-    if (is_hiz) {
-      double gz;  // Use CCL's growth function
-      if (f2d->extrap_linear_growth == ccl_f2d_cclgrowth) {
-        ccl_cosmology *csm = (ccl_cosmology *)cosmo;
-        if (!csm->computed_growth) {
-          *status = CCL_ERROR_GROWTH_INIT;
-          ccl_cosmology_set_status_message(
-            csm,
-            "ccl_f2d.c: ccl_f2d_t_eval(): growth factor splines have not been precomputed!");
-          return NAN;
-        }
-        gz = (
-              ccl_growth_factor(csm, a, status) /
-              ccl_growth_factor(csm, a_ev, status));
-      }
-      else // Use constant growth factor
-        gz = f2d->growth_factor_0;
-
-      fka_post *= pow(gz, f2d->growth_exponent);
-    }
   }
 
   return fka_post;

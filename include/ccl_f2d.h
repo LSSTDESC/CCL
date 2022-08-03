@@ -36,6 +36,7 @@ typedef struct {
   int extrap_order_hik; /**< Order of extrapolating polynomial in log(k) for high k (0, 1 or 2)*/
   ccl_f2d_extrap_growth_t extrap_linear_growth;  /**< Extrapolation type at high redshifts*/
   int is_log; /**< Do I hold the values of log(f(k,a))?*/
+  int extrap_in_log; /**< Do I hold the values of log(f(k,a))?*/
   double growth_factor_0; /**< Constant extrapolating growth factor*/
   int growth_exponent; /**< Power to which growth should be exponentiated*/
   gsl_spline *fk; /**< Spline holding the values of the k-dependent factor*/
@@ -56,6 +57,7 @@ typedef struct {
  * @param extrap_order_lok Order of the polynomial that extrapolates on wavenumbers smaller than the minimum of lk_arr. Allowed values: 0 (constant), 1 (linear extrapolation) and 2 (quadratic extrapolation). Extrapolation happens in ln(k).
  * @param extrap_order_hik Order of the polynomial that extrapolates on wavenumbers larger than the maximum of lk_arr. Allowed values: 0 (constant), 1 (linear extrapolation) and 2 (quadratic extrapolation). Extrapolation happens in ln(k).
  * @param extrap_linear_growth: ccl_f2d_extrap_growth_t value defining how the function with scale factors below the interpolation range. Allowed values: ccl_f2d_cclgrowth (scale with the CCL linear growth factor), ccl_f2d_constantgrowth (scale by multiplying the function at the earliest available scale factor by a constant number, defined by `growth_factor_0`), ccl_f2d_no_extrapol (throw an error if the function is ever evaluated outside the interpolation range in a). Note that, above the interpolation range (i.e. for low redshifts), the function will be assumed constant.
+ * @param extrap_in_log: if not zero, extrapolation will take place in log-log scale.
  * @param is_fka_log: if not zero, `fka_arr` contains ln(f(k,a)) instead of f(k,a). If the function is factorizable, then `fk_arr` holds ln(K(k)) and `fa_arr` holds ln(A(a)), where f(k,a)=K(k)*A(a).
  * @param growth_factor_0: custom growth function. Irrelevant if extrap_linear_growth!=ccl_f2d_constantgrowth.
  * @param growth_exponent: power to which the extrapolating growth factor should be exponentiated when extrapolating (e.g. usually 2 for linear power spectra).
@@ -72,6 +74,7 @@ ccl_f2d_t *ccl_f2d_t_new(int na,double *a_arr,
 			 int extrap_order_hik,
 			 ccl_f2d_extrap_growth_t extrap_linear_growth,
 			 int is_fka_log,
+			 int extrap_in_log,
 			 double growth_factor_0,
 			 int growth_exponent,
 			 ccl_f2d_interp_t interp_type,
