@@ -1080,8 +1080,8 @@ class HaloProfileHernquist(HaloProfile):
 
         x = k_use[None, :] * R_s[:, None]
         Si2, Ci2 = sici(x)
-        c_Mp1 = c_M + 1
-        P1 = M / ((c_M / c_Mp1)**2 / 2)
+        P1 = M / ((c_M / (c_M + 1))**2 / 2)
+        c_Mp1 = c_M[:, None] + 1
         if self.truncated:
             Si1, Ci1 = sici(c_Mp1 * x)
             P2 = x * np.sin(x) * (Ci1 - Ci2) - x * np.cos(x) * (Si1 - Si2)
