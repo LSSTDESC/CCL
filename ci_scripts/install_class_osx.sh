@@ -3,7 +3,7 @@ export CONDA_BUILD_SYSROOT=/
 rm -rf class_public
 git clone --depth=1000 https://github.com/lesgourg/class_public.git
 cd class_public
-#git checkout v2.7.2
+git checkout v2.7.2
 
 echo "----------------------------------"
 env
