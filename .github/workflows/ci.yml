@@ -87,6 +87,8 @@ jobs:
         env:
           MATRIX_OS: ${{ matrix.os }}
         continue-on-error: true
+	# We need this because installing CLASS on macos actually throws
+	# an error, even though the code does get compiled and installed.
 
       - name: build CCL
         run: |
