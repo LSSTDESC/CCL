@@ -71,9 +71,14 @@ def test_empirical_smoke(prof_class):
             p = prof_class(c,
                            cumul2d_analytic=True,
                            truncated=True)
+        p = prof_class(c)
+        smoke_assert_prof_real(p, method='_fourier_analytic')
+        smoke_assert_prof_real(p, method='_projected_analytic')
+        smoke_assert_prof_real(p, method='_cumul2d_analytic')
+
 
     p = prof_class(c)
-    smoke_assert_prof_real(p)
+    smoke_assert_prof_real(p, method='_real')
 
 
 def test_cib_smoke():
