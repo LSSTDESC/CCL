@@ -77,7 +77,8 @@ jobs:
           MATRIX_OS: ${{ matrix.os }}
 
       - name: install class
-        run: |
+        continue-on-error: true
+	run: |
           export LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
           if [[ ${MATRIX_OS} == "macos-11" ]]; then
             . ci_scripts/install_class_osx.sh
