@@ -14,7 +14,6 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
-from .base import cache
 from .parameters import CCLParameters, physical_constants
 
 # Configuration types
@@ -764,7 +763,6 @@ class Cosmology(object):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
-    @cache(maxsize=3)
     def _compute_linear_power(self):
         """Return the linear power spectrum."""
         if (self['N_nu_mass'] > 0 and
@@ -879,7 +877,6 @@ class Cosmology(object):
         hmc = hal.HMCalculator(self, hmf, hbf, mdef)
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
-    @cache(maxsize=3)
     def _compute_nonlin_power(self):
         """Return the non-linear power spectrum."""
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
