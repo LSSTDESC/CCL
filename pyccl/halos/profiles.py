@@ -1181,7 +1181,7 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         .. note::
 
-            A change in ``alpha``, ``beta``, ``gamma``, ``c500`` or ``x_out``,
+            A change in ``alpha``, ``beta``, ``gamma``, or ``x_out``,
             recomputes the Fourier-space template, which may be slow.
 
         Arguments
@@ -1204,6 +1204,8 @@ class HaloProfilePressureGNFW(HaloProfile):
         """
         if mass_bias is not None:
             self.mass_bias = mass_bias
+        if c500 is not None:
+            self.c500 = c500
         if alpha_P is not None:
             self.alpha_P = alpha_P
         if P0 is not None:
@@ -1225,10 +1227,6 @@ class HaloProfilePressureGNFW(HaloProfile):
             if gamma != self.gamma:
                 re_fourier = True
             self.gamma = gamma
-        if c500 is not None:
-            if c500 != self.c500:
-                re_fourier = True
-            self.c500 = c500
         if x_out is not None:
             if x_out != self.x_out:
                 re_fourier = True
@@ -1239,9 +1237,10 @@ class HaloProfilePressureGNFW(HaloProfile):
 
     def _form_factor(self, x):
         # Scale-dependent factor of the GNFW profile.
-        f1 = (self.c500*x)**(-self.gamma)
+        # `x` has units of R/c500.
+        f1 = x**(-self.gamma)
         exponent = -(self.beta-self.gamma)/self.alpha
-        f2 = (1+(self.c500*x)**self.alpha)**exponent
+        f2 = (1 + x**self.alpha)**exponent
         return f1*f2
 
     def _integ_interp(self):
@@ -1252,7 +1251,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         from scipy.integrate import quad
 
         def integrand(x):
-            return self._form_factor(x)*x
+            return self._form_factor(self.c500*x)*x
 
         q_arr = np.geomspace(self.qrange[0], self.qrange[1], self.nq)
         # We use the `weight` feature of quad to quickly estimate
@@ -1292,7 +1291,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         R = mass_def.get_radius(cosmo, M_use * mb, a) / a
 
         nn = self._norm(cosmo, M_use, a, mb)
-        prof = self._form_factor(r_use[None, :] / R[:, None])
+        prof = self._form_factor(self.c500 * r_use[None, :] / R[:, None])
         prof *= nn[:, None]
 
         if np.ndim(r) == 0:
