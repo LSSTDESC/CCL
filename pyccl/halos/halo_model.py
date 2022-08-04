@@ -127,13 +127,13 @@ class HMCalculator(object):
                 self._mf*self._mass, self._lmass)) / self._m0
 
         if get_bf:
-            self._a_current_mf = a
             if a != self._a_current_bf:
+                self._a_current_mf = a
                 if rho0 is None:
                     rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
                 self._bf = self._hbias.get_halo_bias(
                     cosmo, self._mass, a, mdef_other=self._mdef)
-                self._bf0 = (rho0 - self._integrator(
+                self._mbf0 = (rho0 - self._integrator(
                     self._mf*self._bf*self._mass, self._lmass)) / self._m0
 
     def _integrate_over_mf(self, array_2):
@@ -144,7 +144,7 @@ class HMCalculator(object):
     def _integrate_over_mbf(self, array_2):
         i1 = self._integrator((self._mf * self._bf)[..., :] * array_2,
                               self._lmass)
-        return i1 + self._bf0 * array_2[..., 0]
+        return i1 + self._mbf0 * array_2[..., 0]
 
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`

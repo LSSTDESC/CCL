@@ -763,8 +763,11 @@ class Cosmology(object):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
-    def _compute_linear_power(self):
-        """Return the linear power spectrum."""
+    def compute_linear_power(self):
+        """Compute the linear power spectrum."""
+        if self.has_linear_power:
+            return
+
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
                 ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles', ]):
@@ -833,13 +836,6 @@ class Cosmology(object):
                                           status)
             check(status, self)
 
-        return pk
-
-    def compute_linear_power(self):
-        """Compute the linear power spectrum."""
-        if self.has_linear_power:
-            return
-        pk = self._compute_linear_power()
         # Assign
         self._pk_lin['delta_matter:delta_matter'] = pk
         if pk:
@@ -877,8 +873,11 @@ class Cosmology(object):
         hmc = hal.HMCalculator(self, hmf, hbf, mdef)
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
-    def _compute_nonlin_power(self):
-        """Return the non-linear power spectrum."""
+    def compute_nonlin_power(self):
+        """Compute the non-linear power spectrum."""
+        if self.has_nonlin_power:
+            return
+
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
                 warnings.warn(
@@ -943,13 +942,6 @@ class Cosmology(object):
         if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
             bcm_correct_pk2d(self, pk)
 
-        return pk
-
-    def compute_nonlin_power(self):
-        """Compute the non-linear power spectrum."""
-        if self.has_nonlin_power:
-            return
-        pk = self._compute_nonlin_power()
         # Assign
         self._pk_nl['delta_matter:delta_matter'] = pk
         if pk:
