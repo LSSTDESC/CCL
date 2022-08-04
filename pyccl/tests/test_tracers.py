@@ -364,11 +364,9 @@ def test_tracer_chi_min_max():
     assert tr.chi_min == tr._trc[0].chi_min
     assert tr.chi_max == tr._trc[0].chi_max
 
-    # Raises an error if chi_min or chi_max is not the same.
+    # Returns the lowest/highest if chi_min or chi_max are not the same.
     chi = np.linspace(tr.chi_min+0.05, tr.chi_max+0.05, 128)
     wchi = np.ones_like(chi)
     tr.add_tracer(COSMO, kernel=(chi, wchi))
-    with pytest.raises(AttributeError):
-        tr.chi_min
-    with pytest.raises(AttributeError):
-        tr.chi_max
+    assert tr.chi_min == tr._trc[0].chi_min
+    assert tr.chi_max == tr._trc[1].chi_max

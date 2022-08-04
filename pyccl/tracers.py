@@ -187,25 +187,21 @@ class Tracer(object):
 
     @property
     def chi_min(self):
-        """Return ``chi_min`` for this ``Tracer``. If it contains more than
-        one tracers and their ``chi_mins`` are different it will raise an
-        ``AttributeError``.
+        """Return ``chi_min`` for this ``Tracer``, if it exists. For more than
+        one tracers containing a ``chi_min`` in the tracer collection, the
+        lowest value is returned.
         """
         chis = [tr.chi_min for tr in self._trc]
-        if chis.count(chis[0]) != len(chis):
-            raise AttributeError("Tracers have different chi_min.")
-        return chis[0]
+        return min(chis) if chis else None
 
     @property
     def chi_max(self):
-        """Return ``chi_max`` for this ``Tracer``. If it contains more than
-        one tracers and their ``chi_maxs`` are different it will raise an
-        ``AttributeError``.
+        """Return ``chi_max`` for this ``Tracer``, if it exists. For more than
+        one tracers containing a ``chi_max`` in the tracer collection, the
+        highest value is returned.
         """
         chis = [tr.chi_max for tr in self._trc]
-        if chis.count(chis[0]) != len(chis):
-            raise AttributeError("Tracers have different chi_max.")
-        return chis[0]
+        return max(chis) if chis else None
 
     def _dndz(self, z):
         raise NotImplementedError("`get_dndz` not implemented for "
