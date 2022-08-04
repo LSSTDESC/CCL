@@ -1176,30 +1176,34 @@ class HaloProfilePressureGNFW(HaloProfile):
     def update_parameters(self, mass_bias=None, P0=None,
                           c500=None, alpha=None, beta=None, gamma=None,
                           alpha_P=None, P0_hexp=None, x_out=None):
-        """ Update any of the parameters associated with
-        this profile. Any parameter set to `None` won't be updated.
+        """Update any of the parameters associated with this profile.
+        Any parameter set to ``None`` won't be updated.
 
-        .. note:: A change in `alpha`, `beta`, `x_out`, or `gamma` will trigger
-            a recomputation of the Fourier-space template, which can be slow.
+        .. note::
 
-        Args:
-            mass_bias (float): the mass bias parameter :math:`1-b`.
-            P0 (float): profile normalization.
-            c500 (float): concentration parameter.
-            alpha (float): profile shape parameter.
-            beta (float): profile shape parameters.
-            gamma (float): profile shape parameters.
-            alpha_P (float): additional mass dependence exponent.
-            P0_hexp (float): power of `h` with which the normalization should \
-                scale (-1 for SZ-based normalizations, -3/2 for \
-                X-ray-based ones).
-            x_out (float): profile threshold (as a fraction of r500c). \
-                if `None`, no threshold will be used.
+            A change in ``alpha``, ``beta``, ``gamma``, ``c500`` or ``x_out``,
+            recomputes the Fourier-space template, which may be slow.
+
+        Arguments
+        ---------
+        mass_bias : float
+            The mass bias parameter :math:`1-b`.
+        P0 : float
+            Profile normalization.
+        c500 : float
+            Concentration parameter.
+        alpha, beta, gamma : float
+            Profile shape parameter.
+        alpha_P : float
+            Additional mass-dependence exponent.
+        P0_hexp : float
+            Power of ``h`` with which the normalization scales.
+            SZ-based normalizations: -1. X-ray-based normalizations: -3/2.
+        x_out : float
+            Profile threshold (as a fraction of r500c).
         """
         if mass_bias is not None:
             self.mass_bias = mass_bias
-        if c500 is not None:
-            self.c500 = c500
         if alpha_P is not None:
             self.alpha_P = alpha_P
         if P0 is not None:
@@ -1221,6 +1225,10 @@ class HaloProfilePressureGNFW(HaloProfile):
             if gamma != self.gamma:
                 re_fourier = True
             self.gamma = gamma
+        if c500 is not None:
+            if c500 != self.c500:
+                re_fourier = True
+            self.c500 = c500
         if x_out is not None:
             if x_out != self.x_out:
                 re_fourier = True
