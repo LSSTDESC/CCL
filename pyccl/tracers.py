@@ -555,10 +555,9 @@ class Tracer(object):
             ta_s = NoneArr
             tk_s = NoneArr
 
-        if a_s is not None:
-            if not np.all(np.diff(a_s) > 0):
-                raise ValueError("Scale factor must be monotonically "
-                                 "increasing")
+        if not (np.diff(a_s) > 0).all():
+            raise ValueError("Scale factor must be monotonically "
+                             "increasing")
 
         status = 0
         ret = lib.cl_tracer_t_new_wrapper(cosmo.cosmo,
