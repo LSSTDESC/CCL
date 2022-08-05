@@ -31,6 +31,21 @@ def correlation(cosmo, ell, C_ell, theta, type='NN', corr_type=None,
                 method='fftlog'):
     """Compute the angular correlation function.
 
+    .. note::
+
+        The accuracy of the Hankel transform depends on the range of
+        multipoles over which the power spectra are integrated. If you
+        are interested on very small scales (e.g. below 0.1 degrees),
+        you should make sure you have sampled the input power spectra
+        up to sufficiently high ell. You should also probably modify
+        the spline variables controlling how power spectra are sampled
+        internally when using `FFTlog` (or at least check that the
+        result does not depend on their current value). These are:
+        `ccl.spline_params.ELL_MIN_CORR`,
+        `ccl.spline_params.ELL_MAX_CORR`,
+        `ccl.spline_params.N_ELL_CORR`.
+
+
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         ell (array_like): Multipoles corresponding to the input angular power

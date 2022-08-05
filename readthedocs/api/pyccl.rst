@@ -28,6 +28,7 @@ Submodules
    pyccl.haloprofile
    pyccl.massfunction
    pyccl.neutrinos
+   pyccl.parameters
    pyccl.pk2d
    pyccl.power
    pyccl.pyutils
