@@ -92,7 +92,7 @@ setup(
     include_package_data=True,
     use_scm_version=True,
     distclass=Distribution,
-    python_requires='>3.7.0',
+    python_requires='>=3.7.0',
     setup_requires=['setuptools_scm'],
     install_requires=['numpy', 'pyyaml'],
     cmdclass={'build_py': Build, 'develop': Develop, 'clean': Clean},
