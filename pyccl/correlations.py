@@ -33,9 +33,9 @@ def correlation(cosmo, ell, C_ell, theta, type='NN', corr_type=None,
 
     .. note::
 
-        For scales smaller than :math:`\\sim 0.1^{\\circ}`, the input power 
-        spectrum should be sampled to sufficienly high :math:`\\ell` to ensure 
-        the Hankel transform is well-behaved. The following spline parameters, 
+        For scales smaller than :math:`\\sim 0.1^{\\circ}`, the input power
+        spectrum should be sampled to sufficienly high :math:`\\ell` to ensure
+        the Hankel transform is well-behaved. The following spline parameters,
         related to ``FFTLog``-sampling may also be modified for accuracy:
             - ``ccl.spline_params.ELL_MIN_CORR``
             - ``ccl.spline_params.ELL_MAX_CORR``
