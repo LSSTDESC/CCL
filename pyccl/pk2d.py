@@ -293,7 +293,7 @@ class Pk2D(object):
     def __call__(self, k, a, cosmo=None, *, derivative=False):
         """Callable vectorized instance."""
         out = np.array([self.eval(k, aa, cosmo=cosmo, derivative=derivative)
-                        for aa in np.atleast_1d(a)])
+                        for aa in np.atleast_1d(a).astype(float)])
         return out.squeeze()[()]
 
     def copy(self):
