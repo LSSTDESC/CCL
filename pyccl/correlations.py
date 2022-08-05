@@ -33,18 +33,13 @@ def correlation(cosmo, ell, C_ell, theta, type='NN', corr_type=None,
 
     .. note::
 
-        The accuracy of the Hankel transform depends on the range of
-        multipoles over which the power spectra are integrated. If you
-        are interested on very small scales (e.g. below 0.1 degrees),
-        you should make sure you have sampled the input power spectra
-        up to sufficiently high ell. You should also probably modify
-        the spline variables controlling how power spectra are sampled
-        internally when using `FFTlog` (or at least check that the
-        result does not depend on their current value). These are:
-        `ccl.spline_params.ELL_MIN_CORR`,
-        `ccl.spline_params.ELL_MAX_CORR`,
-        `ccl.spline_params.N_ELL_CORR`.
-
+        For scales smaller than :math:`\\sim 0.1^{\\circ}`, the input power 
+        spectrum should be sampled to sufficienly high :math:`\\ell` to ensure 
+        the Hankel transform is well-behaved. The following spline parameters, 
+        related to ``FFTLog``-sampling may also be modified for accuracy:
+            - ``ccl.spline_params.ELL_MIN_CORR``
+            - ``ccl.spline_params.ELL_MAX_CORR``
+            - ``ccl.spline_params.N_ELL_CORR``.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
