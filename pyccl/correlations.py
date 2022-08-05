@@ -30,6 +30,11 @@ correlation_types = {
 def correlation(cosmo, ell, C_ell, theta, type='NN', corr_type=None,
                 method='fftlog'):
     """Compute the angular correlation function.
+    
+    .. math::
+        \\xi^{ab}_\\pm = \\sum_\\ell\frac{2\\ell+1}{4\\pi}\,(\\pm1)^{s_b}\\,
+                         C^{ab\\pm}_\\ell\\,d^\\ell_{s_a,\\pm s_b}(\\theta)
+    
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
