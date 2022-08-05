@@ -31,10 +31,29 @@ def correlation(cosmo, ell, C_ell, theta, type='NN', corr_type=None,
                 method='fftlog'):
     """Compute the angular correlation function.
     
+    
+
     .. math::
-        \\xi^{ab}_\\pm = \\sum_\\ell\frac{2\\ell+1}{4\\pi}\,(\\pm1)^{s_b}\\,
+        \\xi^{ab}_\\pm(\\theta) = \\sum_\\ell\\frac{2\\ell+1}{4\\pi}\,(\\pm1)^{s_b}\\,
                          C^{ab\\pm}_\\ell\\,d^\\ell_{s_a,\\pm s_b}(\\theta)
     
+    where :math:`\\theta` is the angle between the two fields :math:`a` and :math:`b` with spins
+    :math:`s_a` and :math:`s_b` after alignement of their tangential coordinate.  :math:`d^\\ell_{mm'}`
+    are the Wigner-d matrices and we have defined the power spectra
+
+    .. math::
+       C^{ab\\pm}_\\ell\\equiv\\left(C^{a_Eb_E}_\\ell\\pm C^{a_Bb_B}_\\ell\\right)
+                  +i\\left(C^{a_Bb_E}_\\ell\\mp C^{a_Eb_B}_\\ell\\right)
+
+    which reduces to the :math:`EE` power spectrum when all :math:`B`-modes are 0.
+
+    The different spin combinaisons  are:
+
+      o  :math:`s_a=s_b=0` e.g. galaxy-galaxy, galaxy-:math:`\\kappa` and :math:`\\kappa`-:math:`\\kappa`
+    
+      o :math:`s_a=2`, `s_b=0` e.g. galaxy-shear,  and :math:`\\kappa`-shear
+    
+      o :math:`s_a=s_b=2` e.g. shear-shear.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
