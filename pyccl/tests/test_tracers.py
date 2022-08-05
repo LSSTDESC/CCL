@@ -351,3 +351,22 @@ def test_tracer_n_sample_warn():
 
     with pytest.warns(CCLWarning):
         _ = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
+
+
+def test_tracer_bool():
+    assert bool(ccl.Tracer()) is False
+    assert bool(ccl.CMBLensingTracer(COSMO, z_source=1100)) is True
+
+
+def test_tracer_chi_min_max():
+    # Test that it can access the C-level chi_min and chi_max.
+    tr = ccl.CMBLensingTracer(COSMO, z_source=1100)
+    assert tr.chi_min == tr._trc[0].chi_min
+    assert tr.chi_max == tr._trc[0].chi_max
+
+    # Returns the lowest/highest if chi_min or chi_max are not the same.
+    chi = np.linspace(tr.chi_min+0.05, tr.chi_max+0.05, 128)
+    wchi = np.ones_like(chi)
+    tr.add_tracer(COSMO, kernel=(chi, wchi))
+    assert tr.chi_min == tr._trc[0].chi_min
+    assert tr.chi_max == tr._trc[1].chi_max

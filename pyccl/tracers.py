@@ -182,6 +182,27 @@ class Tracer(object):
         # Do nothing, just initialize list of tracers
         self._trc = []
 
+    def __bool__(self):
+        return bool(self._trc)
+
+    @property
+    def chi_min(self):
+        """Return ``chi_min`` for this ``Tracer``, if it exists. For more than
+        one tracers containing a ``chi_min`` in the tracer collection, the
+        lowest value is returned.
+        """
+        chis = [tr.chi_min for tr in self._trc]
+        return min(chis) if chis else None
+
+    @property
+    def chi_max(self):
+        """Return ``chi_max`` for this ``Tracer``, if it exists. For more than
+        one tracers containing a ``chi_max`` in the tracer collection, the
+        highest value is returned.
+        """
+        chis = [tr.chi_max for tr in self._trc]
+        return max(chis) if chis else None
+
     def _dndz(self, z):
         raise NotImplementedError("`get_dndz` not implemented for "
                                   "this `Tracer` type.")
@@ -749,8 +770,8 @@ class tSZTracer(Tracer):
             distance on which we sample the kernel.
     """
     def __init__(self, cosmo, z_max=6., n_chi=1024):
-        self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-        chi_arr = np.linspace(0, self.chi_max, n_chi)
+        chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+        chi_arr = np.linspace(0, chi_max, n_chi)
         a_arr = scale_factor_of_chi(cosmo, chi_arr)
         # This is \sigma_T / (m_e * c^2)
         prefac = 4.01710079e-06
@@ -783,9 +804,9 @@ class CIBTracer(Tracer):
             distance on which we sample the kernel.
     """
     def __init__(self, cosmo, z_min=0., z_max=6., n_chi=1024):
-        self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-        self.chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
-        chi_arr = np.linspace(self.chi_min, self.chi_max, n_chi)
+        chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+        chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
+        chi_arr = np.linspace(chi_min, chi_max, n_chi)
         a_arr = scale_factor_of_chi(cosmo, chi_arr)
 
         self._trc = []
@@ -818,8 +839,8 @@ class ISWTracer(Tracer):
             distance on which we sample the kernel.
     """
     def __init__(self, cosmo, z_max=6., n_chi=1024):
-        self.chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-        chi = np.linspace(0, self.chi_max, n_chi)
+        chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+        chi = np.linspace(0, chi_max, n_chi)
         a_arr = scale_factor_of_chi(cosmo, chi)
         H0 = cosmo['h'] / physical_constants.CLIGHT_HMPC
         OM = cosmo['Omega_c']+cosmo['Omega_b']
