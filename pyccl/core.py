@@ -813,7 +813,7 @@ class Cosmology(object):
             if abs(self["mu_0"]) > 1e-14:
                 warnings.warn("CAMB doesn't compute non-linear power spectra "
                               "consistently with mu_0 > 0.", CCLWarning)
-            if self["A_s"] is None:
+            if np.isnan(self["A_s"]):
                 raise CCLError("CAMB doesn't rescale non-linear power spectra "
                                "consistently without A_s.")
 
