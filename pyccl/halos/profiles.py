@@ -1107,15 +1107,17 @@ class HaloProfilePressureGNFW(HaloProfile):
     The parametrization is:
 
     .. math::
+
        P_e(r) = C\\times P_0 h_{70}^E (c_{500} x)^{-\\gamma}
        [1+(c_{500}x)^\\alpha]^{(\\gamma-\\beta)/\\alpha},
 
     where
 
     .. math::
+
        C = 1.65\\,h_{70}^2\\left(\\frac{H(z)}{H_0}\\right)^{8/3}
        \\left[\\frac{h_{70}\\tilde{M}_{500}}
-       {3\\times10^{14}\\,M_\\odot}\\right]^{2/3+0.12},
+       {3\\times10^{14}\\,M_\\odot}\\right]^{2/3+\\alpha_{\\mathrm{P}}},
 
     :math:`x = r/\\tilde{r}_{500}`, :math:`h_{70}=h/0.7`, and the
     exponent :math:`E` is -1 for SZ-based profile normalizations
@@ -1128,28 +1130,34 @@ class HaloProfilePressureGNFW(HaloProfile):
     a halo overdensity :math:`\\Delta=500` with respect to the
     critical density.
 
-    The default arguments (other than `mass_bias`), correspond to the
-    profile parameters used in the Planck 2013 (V) paper. The profile
-    is calculated in physical (non-comoving) units of eV/cm^3.
+    The default arguments (other than ``mass_bias``), correspond to the
+    profile parameters used in the Planck 2013 (V) paper. The profile is
+    calculated in physical (non-comoving) units of :math:`\\mathrm{eV/cm^3}`.
 
-    Args:
-        mass_bias (float): the mass bias parameter :math:`1-b`.
-        P0 (float): profile normalization.
-        c500 (float): concentration parameter.
-        alpha (float): profile shape parameter.
-        beta (float): profile shape parameter.
-        gamma (float): profile shape parameter.
-        alpha_P (float): additional mass dependence exponent
-        P0_hexp (float): power of `h` with which the normalization
-            parameter should scale (-1 for SZ-based normalizations,
-            -3/2 for X-ray-based ones).
-        qrange (tuple): limits of integration to be used when
-            precomputing the Fourier-space profile template, as
-            fractions of the virial radius.
-        x_out (float): profile threshold (as a fraction of r500c).
-            if `None`, no threshold will be used.
-        nq (int): number of points over which the
-            Fourier-space profile template will be sampled.
+    Parameters
+    ----------
+    mass_bias : float
+        The mass bias parameter :math:`1-b`.
+    P0 : float
+        Profile normalization.
+    c500 : float
+        Concentration parameter.
+    alpha, beta, gamma : float
+        Profile shape parameters.
+    alpha_P : float
+        Additional mass dependence exponent
+    P0_hexp : float
+        Power of :math:`h` with which the normalization parameter scales.
+        Equal to :math:`-1` for SZ-based normalizations,
+        and :math:`-3/2` for X-ray-based normalizations.
+    qrange : 2-sequence
+        Limits of integration used when computing the Fourier-space
+        profile template, in units of :math:`R_{\\mathrm{vir}}`.
+    nq : int
+        Number of sampling points of the Fourier-space profile template.
+    x_out : float
+        Profile threshold, in units of :math:`R_{\\mathrm{500c}}`.
+        Defaults to :math:`+\\infty`.
     """
     name = 'GNFW'
 
@@ -1176,30 +1184,34 @@ class HaloProfilePressureGNFW(HaloProfile):
     def update_parameters(self, mass_bias=None, P0=None,
                           c500=None, alpha=None, beta=None, gamma=None,
                           alpha_P=None, P0_hexp=None, x_out=None):
-        """ Update any of the parameters associated with
-        this profile. Any parameter set to `None` won't be updated.
+        """Update any of the parameters associated with this profile.
+        Any parameter set to ``None`` won't be updated.
 
-        .. note:: A change in `alpha`, `beta`, `x_out`, or `gamma` will trigger
-            a recomputation of the Fourier-space template, which can be slow.
+        .. note::
 
-        Args:
-            mass_bias (float): the mass bias parameter :math:`1-b`.
-            P0 (float): profile normalization.
-            c500 (float): concentration parameter.
-            alpha (float): profile shape parameter.
-            beta (float): profile shape parameters.
-            gamma (float): profile shape parameters.
-            alpha_P (float): additional mass dependence exponent.
-            P0_hexp (float): power of `h` with which the normalization should \
-                scale (-1 for SZ-based normalizations, -3/2 for \
-                X-ray-based ones).
-            x_out (float): profile threshold (as a fraction of r500c). \
-                if `None`, no threshold will be used.
+            A change in ``alpha``, ``beta``, ``gamma``, ``c500``, or ``x_out``
+            recomputes the Fourier-space template, which may be slow.
+
+        Arguments
+        ---------
+        mass_bias : float
+            The mass bias parameter :math:`1-b`.
+        P0 : float
+            Profile normalization.
+        c500 : float
+            Concentration parameter.
+        alpha, beta, gamma : float
+            Profile shape parameter.
+        alpha_P : float
+            Additional mass-dependence exponent.
+        P0_hexp : float
+            Power of ``h`` with which the normalization scales.
+            SZ-based normalizations: -1. X-ray-based normalizations: -3/2.
+        x_out : float
+            Profile threshold (as a fraction of r500c).
         """
         if mass_bias is not None:
             self.mass_bias = mass_bias
-        if c500 is not None:
-            self.c500 = c500
         if alpha_P is not None:
             self.alpha_P = alpha_P
         if P0 is not None:
@@ -1209,21 +1221,20 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         # Check if we need to recompute the Fourier profile.
         re_fourier = False
-        if alpha is not None:
-            if alpha != self.alpha:
-                re_fourier = True
+        if alpha is not None and alpha != self.alpha:
+            re_fourier = True
             self.alpha = alpha
-        if beta is not None:
-            if beta != self.beta:
-                re_fourier = True
+        if beta is not None and beta != self.beta:
+            re_fourier = True
             self.beta = beta
-        if gamma is not None:
-            if gamma != self.gamma:
-                re_fourier = True
+        if gamma is not None and gamma != self.gamma:
+            re_fourier = True
             self.gamma = gamma
-        if x_out is not None:
-            if x_out != self.x_out:
-                re_fourier = True
+        if c500 is not None and c500 != self.c500:
+            re_fourier = True
+            self.c500 = c500
+        if x_out is not None and x_out != self.x_out:
+            re_fourier = True
             self.x_out = x_out
 
         if re_fourier and (self._fourier_interp is not None):
