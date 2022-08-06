@@ -1215,19 +1215,19 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         # Check if we need to recompute the Fourier profile.
         re_fourier = False
-        if alpha != self.alpha:
+        if alpha is not None and alpha != self.alpha:
             re_fourier = True
             self.alpha = alpha
-        if beta != self.beta:
+        if beta is not None and beta != self.beta:
             re_fourier = True
             self.beta = beta
-        if gamma != self.gamma:
+        if gamma is not None and gamma != self.gamma:
             re_fourier = True
             self.gamma = gamma
-        if c500 != self.c500:
+        if c500 is not None and c500 != self.c500:
             re_fourier = True
             self.c500 = c500
-        if x_out != self.x_out:
+        if x_out is not None and x_out != self.x_out:
             re_fourier = True
             self.x_out = x_out
 
