@@ -1212,8 +1212,6 @@ class HaloProfilePressureGNFW(HaloProfile):
         """
         if mass_bias is not None:
             self.mass_bias = mass_bias
-        if c500 is not None:
-            self.c500 = c500
         if alpha_P is not None:
             self.alpha_P = alpha_P
         if P0 is not None:
