@@ -1181,7 +1181,7 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         .. note::
 
-            A change in ``alpha``, ``beta``, ``gamma``, or ``x_out``,
+            A change in ``alpha``, ``beta``, ``gamma``, ``c500``, or ``x_out``
             recomputes the Fourier-space template, which may be slow.
 
         Arguments
@@ -1215,21 +1215,20 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         # Check if we need to recompute the Fourier profile.
         re_fourier = False
-        if alpha is not None:
-            if alpha != self.alpha:
-                re_fourier = True
+        if alpha != self.alpha:
+            re_fourier = True
             self.alpha = alpha
-        if beta is not None:
-            if beta != self.beta:
-                re_fourier = True
+        if beta != self.beta:
+            re_fourier = True
             self.beta = beta
-        if gamma is not None:
-            if gamma != self.gamma:
-                re_fourier = True
+        if gamma != self.gamma:
+            re_fourier = True
             self.gamma = gamma
-        if x_out is not None:
-            if x_out != self.x_out:
-                re_fourier = True
+        if c500 != self.c500:
+            re_fourier = True
+            self.c500 = c500
+        if x_out != self.x_out:
+            re_fourier = True
             self.x_out = x_out
 
         if re_fourier and (self._fourier_interp is not None):
@@ -1237,10 +1236,9 @@ class HaloProfilePressureGNFW(HaloProfile):
 
     def _form_factor(self, x):
         # Scale-dependent factor of the GNFW profile.
-        # `x` has units of R/c500.
-        f1 = x**(-self.gamma)
+        f1 = (self.c500*x)**(-self.gamma)
         exponent = -(self.beta-self.gamma)/self.alpha
-        f2 = (1 + x**self.alpha)**exponent
+        f2 = (1+(self.c500*x)**self.alpha)**exponent
         return f1*f2
 
     def _integ_interp(self):
@@ -1251,7 +1249,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         from scipy.integrate import quad
 
         def integrand(x):
-            return self._form_factor(self.c500*x)*x
+            return self._form_factor(x)*x
 
         q_arr = np.geomspace(self.qrange[0], self.qrange[1], self.nq)
         # We use the `weight` feature of quad to quickly estimate
@@ -1291,7 +1289,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         R = mass_def.get_radius(cosmo, M_use * mb, a) / a
 
         nn = self._norm(cosmo, M_use, a, mb)
-        prof = self._form_factor(self.c500 * r_use[None, :] / R[:, None])
+        prof = self._form_factor(r_use[None, :] / R[:, None])
         prof *= nn[:, None]
 
         if np.ndim(r) == 0:
