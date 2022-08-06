@@ -909,7 +909,7 @@ class Cosmology(object):
             self.compute_linear_power()
 
         if mps == "camb":
-                return
+            return
 
         if mps is None:
             raise CCLError("You want to compute the non-linear power "
