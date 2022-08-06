@@ -1107,15 +1107,17 @@ class HaloProfilePressureGNFW(HaloProfile):
     The parametrization is:
 
     .. math::
+
        P_e(r) = C\\times P_0 h_{70}^E (c_{500} x)^{-\\gamma}
        [1+(c_{500}x)^\\alpha]^{(\\gamma-\\beta)/\\alpha},
 
     where
 
     .. math::
+
        C = 1.65\\,h_{70}^2\\left(\\frac{H(z)}{H_0}\\right)^{8/3}
        \\left[\\frac{h_{70}\\tilde{M}_{500}}
-       {3\\times10^{14}\\,M_\\odot}\\right]^{2/3+0.12},
+       {3\\times10^{14}\\,M_\\odot}\\right]^{2/3+\\alpha_{\\mathrm{P}}},
 
     :math:`x = r/\\tilde{r}_{500}`, :math:`h_{70}=h/0.7`, and the
     exponent :math:`E` is -1 for SZ-based profile normalizations
@@ -1128,28 +1130,34 @@ class HaloProfilePressureGNFW(HaloProfile):
     a halo overdensity :math:`\\Delta=500` with respect to the
     critical density.
 
-    The default arguments (other than `mass_bias`), correspond to the
-    profile parameters used in the Planck 2013 (V) paper. The profile
-    is calculated in physical (non-comoving) units of eV/cm^3.
+    The default arguments (other than ``mass_bias``), correspond to the
+    profile parameters used in the Planck 2013 (V) paper. The profile is
+    calculated in physical (non-comoving) units of :math:`\\mathrm{eV/cm^3}`.
 
-    Args:
-        mass_bias (float): the mass bias parameter :math:`1-b`.
-        P0 (float): profile normalization.
-        c500 (float): concentration parameter.
-        alpha (float): profile shape parameter.
-        beta (float): profile shape parameter.
-        gamma (float): profile shape parameter.
-        alpha_P (float): additional mass dependence exponent
-        P0_hexp (float): power of `h` with which the normalization
-            parameter should scale (-1 for SZ-based normalizations,
-            -3/2 for X-ray-based ones).
-        qrange (tuple): limits of integration to be used when
-            precomputing the Fourier-space profile template, as
-            fractions of the virial radius.
-        x_out (float): profile threshold (as a fraction of r500c).
-            if `None`, no threshold will be used.
-        nq (int): number of points over which the
-            Fourier-space profile template will be sampled.
+    Parameters
+    ----------
+    mass_bias : float
+        The mass bias parameter :math:`1-b`.
+    P0 : float
+        Profile normalization.
+    c500 : float
+        Concentration parameter.
+    alpha, beta, gamma : float
+        Profile shape parameters.
+    alpha_P : float
+        Additional mass dependence exponent
+    P0_hexp : float
+        Power of :math:`h` with which the normalization parameter scales.
+        Equal to :math:`-1` for SZ-based normalizations,
+        and :math:`-3/2` for X-ray-based normalizations.
+    qrange : 2-sequence
+        Limits of integration used when computing the Fourier-space
+        profile template, in units of :math:`R_{\\mathrm{vir}}`.
+    nq : int
+        Number of sampling points of the Fourier-space profile template.
+    x_out : float
+        Profile threshold, in units of :math:`R_{\\mathrm{500c}}`.
+        Defaults to :math:`+\\infty`.
     """
     name = 'GNFW'
 

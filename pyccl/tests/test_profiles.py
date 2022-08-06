@@ -134,7 +134,7 @@ def test_gnfw_refourier():
     p._integ_interp()
     p_f1 = p.fourier(COSMO, 1., 1E13, 1., M500c)
     # Check the Fourier profile gets recalculated
-    p.update_parameters(alpha=1.32)
+    p.update_parameters(alpha=1.32, c500=p.c500+0.1)
     p_f2 = p.fourier(COSMO, 1., 1E13, 1., M500c)
     assert p_f1 != p_f2
 
