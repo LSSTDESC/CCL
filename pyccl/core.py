@@ -390,8 +390,9 @@ class Cosmology(object):
                                 emulator_neutrinos_types.keys()))
         if (matter_power_spectrum == "camb"
                 and transfer_function != "boltzmann_camb"):
-            raise CCLError("To compute the matter power spectrum with CAMB "
-                           "the transfer function should be 'boltzmann_camb'.")
+            raise CCLError(
+                "To compute the non-linear matter power spectrum with CAMB "
+                "the transfer function should be 'boltzmann_camb'.")
 
         # Assign values to new ccl_configuration object
         config = lib.configuration()
