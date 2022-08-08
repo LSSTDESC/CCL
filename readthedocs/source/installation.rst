@@ -134,6 +134,18 @@ For instance with ``homebrew``, you can run
 .. code-block:: bash
 
    $ brew install cmake
+   
+Google Colab
+-------------
+
+To install ``pyccl`` on https://colab.research.google.com then one way is the following
+
+.. code-block:: python
+
+   !pip install -q condacolab
+   import condacolab
+   condacolab.install()
+   !mamba install pyccl
 
 
 Known Installation Issues
