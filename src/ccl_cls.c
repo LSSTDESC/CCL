@@ -27,11 +27,17 @@ static void get_chi_interval(ccl_cosmology *cosmo, double l,
   // Loop through all tracers and find distance bounds
   double chi_min1 = 1E15;
   double chi_max1 = -1E15;
-  for (itr=0; itr < trc->n_tracers; itr++) {
-    if (trc->ts[itr]->chi_min < chi_min1)
-      chi_min1 = trc->ts[itr]->chi_min;
-    if (trc->ts[itr]->chi_max > chi_max1)
-      chi_max1 = trc->ts[itr]->chi_max;
+  if(l<10000) {
+    chi_min1 = 26.;
+    chi_max1 = 6955.;
+  }
+  else {
+    for (itr=0; itr < trc->n_tracers; itr++) {
+      if (trc->ts[itr]->chi_min < chi_min1)
+	chi_min1 = trc->ts[itr]->chi_min;
+      if (trc->ts[itr]->chi_max > chi_max1)
+	chi_max1 = trc->ts[itr]->chi_max;
+    }
   }
   if (chi_min1 <= 0)
     chi_min1 = 0.5*(l+0.5)/cosmo->spline_params.K_MAX;
@@ -50,20 +56,32 @@ static void get_k_interval(ccl_cosmology *cosmo,
   // Loop through all tracers and find distance bounds
   double chi_min1 = 1E15;
   double chi_max1 = -1E15;
-  for (itr=0; itr < trc1->n_tracers; itr++) {
-    if (trc1->ts[itr]->chi_min < chi_min1)
-      chi_min1 = trc1->ts[itr]->chi_min;
-    if (trc1->ts[itr]->chi_max > chi_max1)
-      chi_max1 = trc1->ts[itr]->chi_max;
+  if(l<10000) {
+    chi_min1 = 26.;
+    chi_max1 = 6955.;
+  }
+  else {
+    for (itr=0; itr < trc1->n_tracers; itr++) {
+      if (trc1->ts[itr]->chi_min < chi_min1)
+	chi_min1 = trc1->ts[itr]->chi_min;
+      if (trc1->ts[itr]->chi_max > chi_max1)
+	chi_max1 = trc1->ts[itr]->chi_max;
+    }
   }
 
   double chi_min2 = 1E15;
   double chi_max2 = -1E15;
-  for (itr=0; itr < trc2->n_tracers; itr++) {
-    if (trc2->ts[itr]->chi_min < chi_min2)
-      chi_min2 = trc2->ts[itr]->chi_min;
-    if (trc2->ts[itr]->chi_max > chi_max2)
-      chi_max2 = trc2->ts[itr]->chi_max;
+  if(l<10000) {
+    chi_min2 = 26.;
+    chi_max2 = 6955.;
+  }
+  else {
+    for (itr=0; itr < trc2->n_tracers; itr++) {
+      if (trc2->ts[itr]->chi_min < chi_min2)
+	chi_min2 = trc2->ts[itr]->chi_min;
+      if (trc2->ts[itr]->chi_max > chi_max2)
+	chi_max2 = trc2->ts[itr]->chi_max;
+    }
   }
 
   // Find maximum of minima and minimum of maxima
@@ -116,9 +134,14 @@ static double transfer_nonlimber_integrand_wrap(int l, double lk, double k, doub
                                                 int *status)
 {
   int itr;
+  double pk_half, pk;
   double tri = 0;
   double a = ccl_scale_factor_of_chi(cosmo, chi, status);
-  double pk_half = sqrt(ccl_f2d_t_eval(psp, lk, a, cosmo, status));
+  pk = ccl_f2d_t_eval(psp, lk, a, cosmo, status);
+  if (pk<=0)
+    pk_half=0;
+  else
+    pk_half = sqrt(pk);
 
   for (itr=0; itr < trc->n_tracers; itr++) {
     tri += transfer_nonlimber_integrand_single(trc->ts[itr], l, lk, k,
@@ -138,6 +161,10 @@ static double transfer_nonlimber_wrap(int l,double lk, double k, double d_chi,
   double chi_min, chi_max, result;
   double *chi_arr, *integ_arr;
   double dchi=d_chi, ell=(double)l;
+
+  // Non-zero distance interval
+  if(dchi<=0)
+    dchi=fmin(fmax(0.05*M_PI/k,0.01),5);
 
   // Chi and integrand values
   get_chi_interval(cosmo, ell, trc, &chi_min, &chi_max);
@@ -178,6 +205,47 @@ static double cl_integrand_nonlimber(double lk, void *params) {
     return 0;
 
   return k*k*k*d1*d2;
+}
+
+static void integ_cls_nonlimber_spline_linear(ccl_cosmology *cosmo,
+					      integ_cl_par *ipar,
+					      double lkmin, double lkmax,
+					      double *result, int *status) {
+  int ik;
+  double kmin = exp(lkmin);
+  double kmax = exp(lkmax);
+  int nk = 512;
+
+  double *fk_arr = NULL;
+  double *k_arr = NULL;
+  k_arr = ccl_linear_spacing(kmin, kmax, nk);
+  if(k_arr == NULL)
+    *status = CCL_ERROR_LOGSPACE;
+
+  if(*status == 0) {
+    fk_arr = malloc(nk * sizeof(double));
+    if(fk_arr == NULL)
+      *status = CCL_ERROR_MEMORY;
+  }
+
+  if(*status == 0) {
+    for(ik=0; ik<nk; ik++) {
+      double lk = log(k_arr[ik]);
+      fk_arr[ik] = cl_integrand_nonlimber(lk, ipar)/k_arr[ik];
+      if(*(ipar->status)) {
+	*status = *(ipar->status);
+	break;
+      }
+    }
+  }
+
+  if(*status == 0) {
+    ccl_integ_spline(1, nk, k_arr, &fk_arr,
+                     1, -1, result, gsl_interp_akima,
+                     status);
+  }
+  free(fk_arr);
+  free(k_arr);
 }
 
 static void integ_cls_nonlimber_spline(ccl_cosmology *cosmo,
@@ -497,12 +565,8 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,
                                ccl_f2d_t *psp,
                                int nl_out, int *l_out, double *cl_out,
                                ccl_integration_t integration_method, double dchi,
-                               int *status) {
-
-  // Non-zero distance interval
-  if(dchi<=0)
-    dchi=5;
-
+                               int *status)
+{
   // make sure to init core things for safety
   if (!cosmo->computed_distances) {
     *status = CCL_ERROR_DISTANCES_INIT;
@@ -583,7 +647,7 @@ void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,
 	}
 	else if(integration_method == ccl_integration_spline) {
 	  integ_cls_nonlimber_spline(cosmo, &ipar, lkmin, lkmax,
-                                     &result, &local_status);
+				     &result, &local_status);
 	}
 	else
 	  local_status = CCL_ERROR_NOT_IMPLEMENTED;
