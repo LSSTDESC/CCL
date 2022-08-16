@@ -123,13 +123,13 @@ class HMCalculator(object):
             self.mf0 = (rho0 - integ) / self._m0
             self._cosmo_mf, self._a_mf = cosmo, a  # cache
 
-    def _get_halo_bias(self, cosmo, a, ρ0):
+    def _get_halo_bias(self, cosmo, a, rho0):
         # Compute the halo bias at this cosmo and a.
         if cosmo != self._cosmo_bf or a != self._a_bf:
             hbias = self.halo_bias.get_halo_bias
             self.bf = hbias(cosmo, self._mass, a)
             integ = self._integrator(self.mf*self.bf*self._mass, self._lmass)
-            self.mbf0 = (ρ0 - integ) / self._m0
+            self.mbf0 = (rho0 - integ) / self._m0
             self._cosmo_bf, self._a_bf = cosmo, a  # cache
 
     def _get_ingredients(self, a, cosmo, get_bf):
