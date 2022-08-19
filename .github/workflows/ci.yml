@@ -5,6 +5,7 @@ on:
       - main
       - master
       - releases/*
+      - 'github_actions'
   pull_request: null
 
 jobs:
