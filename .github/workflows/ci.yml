@@ -85,8 +85,6 @@ jobs:
           else
             . ci_scripts/install_class_linux.sh
           fi
-        env:
-          MATRIX_OS: ${{ matrix.os }}
 
       - name: build CCL
         run: |
