@@ -56,8 +56,6 @@ jobs:
           if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
             exit 1
           fi
-        env:
-          MATRIX_OS: ${{ matrix.os }}
 
       - name: install deps
         run: |
@@ -75,6 +73,8 @@ jobs:
             echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
             echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
           fi
+        env:
+          MATRIX_OS: ${{ matrix.os }}
 
       - name: install class
         run: |
