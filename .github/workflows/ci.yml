@@ -47,7 +47,7 @@ jobs:
           chmod u+x ./uninstall_homebrew.sh
           ./uninstall_homebrew.sh -f -q >& /dev/null
           rm -f uninstall_homebrew.sh
-          find /Users/runner/miniconda3/envs/test -name 'libomp.*'
+          find /Users/runner -name 'libomp.*'
 
       - name: lint
         run: |
