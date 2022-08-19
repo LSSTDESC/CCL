@@ -5,7 +5,6 @@ on:
       - main
       - master
       - releases/*
-      - 'github_actions' #
   pull_request: null
 
 jobs:
@@ -19,7 +18,7 @@ jobs:
       matrix:
         os:
           - macos-11
-          #- ubuntu-latest
+          - ubuntu-latest
         py:
           - 3.8
 
@@ -88,9 +87,6 @@ jobs:
           fi
         env:
           MATRIX_OS: ${{ matrix.os }}
-        continue-on-error: true
-        # We need this because installing CLASS on macos actually throws
-        # an error, even though the code does get compiled and installed.
 
       - name: build CCL
         run: |
