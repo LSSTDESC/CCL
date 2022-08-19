@@ -18,7 +18,7 @@ jobs:
       matrix:
         os:
           - macos-11
-          - ubuntu-latest
+          #- ubuntu-latest
         py:
           - 3.8
 
@@ -46,6 +46,7 @@ jobs:
           chmod u+x ./uninstall_homebrew.sh
           ./uninstall_homebrew.sh -f -q >& /dev/null
           rm -f uninstall_homebrew.sh
+          find /Users/runner/miniconda3/envs/test -name 'libomp.*'
 
       - name: lint
         run: |
