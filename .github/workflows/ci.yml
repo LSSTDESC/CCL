@@ -79,8 +79,8 @@ jobs:
       - name: install class
         run: |
           if [[ ${MATRIX_OS} == "macos-11" ]]; then
-            export LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
-            LDFLAGS+=" -L/Users/runner/miniconda3/envs/test/lib"
+            export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+            export LDFLAGS="$LDFLAGS -L/Users/runner/miniconda3/envs/test/lib"
             . ci_scripts/install_class_osx.sh
           else
             . ci_scripts/install_class_linux.sh
