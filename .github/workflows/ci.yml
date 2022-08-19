@@ -47,7 +47,6 @@ jobs:
           chmod u+x ./uninstall_homebrew.sh
           ./uninstall_homebrew.sh -f -q >& /dev/null
           rm -f uninstall_homebrew.sh
-          find /Users/runner -name 'libomp.*'
 
       - name: lint
         run: |
@@ -81,6 +80,7 @@ jobs:
       - name: install class
         run: |
           export LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+          export LDFLAGS="-Wl,-rpath,/Users/runner/miniconda3/envs/test/lib"
           export LDFLAGS=-L/Users/runner/miniconda3/envs/test/lib
           if [[ ${MATRIX_OS} == "macos-11" ]]; then
             . ci_scripts/install_class_osx.sh
