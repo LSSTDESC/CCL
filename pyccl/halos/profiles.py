@@ -863,8 +863,9 @@ class HaloProfileEinasto(HaloProfile):
 
         Arguments
         ---------
-        alpha : float
-            Profile shape parameter.
+        alpha : float, 'cosmo'
+            Profile shape parameter. Set to
+            'cosmo' to calculate the value from cosmology
         """
         if alpha is not None and alpha != self.alpha:
             self.alpha = alpha
