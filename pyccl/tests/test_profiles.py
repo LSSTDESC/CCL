@@ -112,6 +112,13 @@ def test_cib_2pt_raises():
                          prof2=p_tSZ, mass_def=M200)
 
 
+def test_einasto_smoke():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p = ccl.halos.HaloProfileEinasto(c)
+    p.update_parameters(alpha=1.)
+    assert p._get_alpha(COSMO, 1E14, 1., M200) == 1.
+
+
 def test_gnfw_smoke():
     p = ccl.halos.HaloProfilePressureGNFW()
     beta_old = p.beta
