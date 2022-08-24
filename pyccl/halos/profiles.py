@@ -855,6 +855,18 @@ class HaloProfileEinasto(HaloProfile):
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
+    def update_parameters(self, alpha=None):
+        """Update any of the parameters associated with this profile.
+        Any parameter set to ``None`` won't be updated.
+
+        Arguments
+        ---------
+        alpha : float
+            Profile shape parameter.
+        """
+        if alpha is not None and alpha != self.alpha:
+            self.alpha = alpha
+
     def _get_cM(self, cosmo, M, a, mdef=None):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
