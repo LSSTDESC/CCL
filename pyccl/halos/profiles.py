@@ -878,7 +878,7 @@ class HaloProfileEinasto(HaloProfile):
             nu = 1.686 / sM
             alpha = 0.155 + 0.0095 * nu * nu
         else:
-            alpha = self.alpha
+            alpha = np.array([self.alpha])
         return alpha
 
     def _norm(self, M, Rs, c, alpha):
