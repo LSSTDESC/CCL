@@ -842,12 +842,13 @@ class HaloProfileEinasto(HaloProfile):
     """
     name = 'Einasto'
 
-    def __init__(self, c_M_relation, truncated=True):
+    def __init__(self, c_M_relation, truncated=True, alpha=None):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
         self.cM = c_M_relation
         self.truncated = truncated
+        self.alpha = alpha
         super(HaloProfileEinasto, self).__init__()
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-2,
@@ -858,11 +859,15 @@ class HaloProfileEinasto(HaloProfile):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
     def _get_alpha(self, cosmo, M, a, mdef):
-        mdef_vir = MassDef('vir', 'matter')
-        Mvir = mdef.translate_mass(cosmo, M, a, mdef_vir)
-        sM = sigmaM(cosmo, Mvir, a)
-        nu = 1.686 / sM
-        alpha = 0.155 + 0.0095 * nu * nu
+        if self.alpha is None:
+            mdef_vir = MassDef('vir', 'matter')
+            Mvir = mdef.translate_mass(cosmo, M, a, mdef_vir)
+            print(cosmo, M, a, mdef_vir)
+            sM = sigmaM(cosmo, Mvir, a)
+            nu = 1.686 / sM
+            alpha = 0.155 + 0.0095 * nu * nu
+        else:
+            alpha = self.alpha
         return alpha
 
     def _norm(self, M, Rs, c, alpha):
