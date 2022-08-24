@@ -874,7 +874,6 @@ class HaloProfileEinasto(HaloProfile):
         if self.alpha is None:
             mdef_vir = MassDef('vir', 'matter')
             Mvir = mdef.translate_mass(cosmo, M, a, mdef_vir)
-            print(cosmo, M, a, mdef_vir)
             sM = sigmaM(cosmo, Mvir, a)
             nu = 1.686 / sM
             alpha = 0.155 + 0.0095 * nu * nu
