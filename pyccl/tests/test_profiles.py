@@ -116,7 +116,7 @@ def test_einasto_smoke():
     c = ccl.halos.ConcentrationDuffy08(M200)
     p = ccl.halos.HaloProfileEinasto(c)
     p.update_parameters(alpha=1.)
-    assert getattr(p, 'alpha') == 1.
+    p._get_alpha(COSMO, 1E14, 1., M200) == 1.
 
 
 def test_gnfw_smoke():
