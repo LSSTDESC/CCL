@@ -78,17 +78,15 @@ jobs:
 
       - name: install class
         run: |
-          export LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
           if [[ ${MATRIX_OS} == "macos-11" ]]; then
+            export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+            export LDFLAGS="$LDFLAGS -L/Users/runner/miniconda3/envs/test/lib"
             . ci_scripts/install_class_osx.sh
           else
             . ci_scripts/install_class_linux.sh
           fi
         env:
           MATRIX_OS: ${{ matrix.os }}
-        continue-on-error: true
-        # We need this because installing CLASS on macos actually throws
-        # an error, even though the code does get compiled and installed.
 
       - name: build CCL
         run: |
