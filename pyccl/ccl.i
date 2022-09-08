@@ -51,7 +51,6 @@ from .errors import CCLError
 %include "ccl_covs.i"
 %include "ccl_neutrinos.i"
 %include "ccl_musigma.i"
-%include "ccl_haloprofile.i"
 %include "ccl_mass_conversion.i"
 %include "ccl_sigM.i"
 %include "ccl_f1d.i"

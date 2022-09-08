@@ -14,6 +14,7 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
+from .parameters import CCLParameters, physical_constants
 
 # Configuration types
 transfer_function_types = {
@@ -198,19 +199,21 @@ class Cosmology(object):
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
     # an attribute of this class.
-    from . import background, bcm, boltzmann, \
-        cls, correlations, covariances, neutrinos, \
-        pk2d, power, tk3d, tracers, halos, nl_pt
+    from . import (background, bcm, boltzmann, cls,
+                   correlations, covariances, neutrinos,
+                   pk2d, power, pyutils, tk3d, tracers, halos, nl_pt)
     subs = [background, boltzmann, bcm, cls, correlations, covariances,
-            neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
+            neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
     for name, func in funcs:
-        pars = signature(func).parameters
-        if list(pars)[0] == "cosmo":
+        pars = list(signature(func).parameters)
+        if pars and pars[0] == "cosmo":
             vars()[name] = func
-    del background, boltzmann, bcm, cls, correlations, covariances, \
-        neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt
+    # clear unnecessary locals
+    del (background, boltzmann, bcm, cls, correlations, covariances,
+         neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt,
+         subs, funcs, func, name, pars)
 
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -261,6 +264,9 @@ class Cosmology(object):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
+        self._spline_params = CCLParameters.get_params_dict("spline_params")
+        self._gsl_params = CCLParameters.get_params_dict("gsl_params")
+        self._accuracy_params = {**self._spline_params, **self._gsl_params}
 
         if self.cosmo.status != 0:
             raise CCLError(
@@ -582,10 +588,10 @@ class Cosmology(object):
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
-        T_CMB_old = lib.cvar.constants.T_CMB
+        T_CMB_old = physical_constants.T_CMB
         try:
             if T_CMB is not None:
-                lib.cvar.constants.T_CMB = T_CMB
+                physical_constants.T_CMB = T_CMB
             status = 0
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
@@ -603,7 +609,7 @@ class Cosmology(object):
                     df_mg, mnu_final_list, status)
             check(status)
         finally:
-            lib.cvar.constants.T_CMB = T_CMB_old
+            physical_constants.T_CMB = T_CMB_old
 
         if Omega_g is not None:
             total = self._params.Omega_g + self._params.Omega_l
@@ -764,7 +770,7 @@ class Cosmology(object):
 
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
-                ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']):
+                ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles', ]):
             warnings.warn(
                 "The '%s' linear power spectrum model does not properly "
                 "account for massive neutrinos!" %
@@ -813,14 +819,13 @@ class Cosmology(object):
                 if np.isfinite(self["sigma8"]) \
                         and not np.isfinite(self["A_s"]):
                     raise CCLError("You want to compute the non-linear "
-                                   "power spectrum using CAMB and specified"
-                                   " sigma8 but the non-linear power spectrum "
+                                   "power spectrum using CAMB and specified "
+                                   "sigma8 but the non-linear power spectrum "
                                    "cannot be consistenty rescaled.")
         elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
             rescale_s8 = False
             rescale_mg = False
-            pk = Pk2D.pk_from_model(self,
-                                    model=trf)
+            pk = Pk2D.pk_from_model(self, model=trf)
 
         # Rescale by sigma8/mu-sigma if needed
         if pk:

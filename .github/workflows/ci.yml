@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-10.15
+          - macos-11
           - ubuntu-latest
         py:
           - 3.8
@@ -40,7 +40,7 @@ jobs:
           miniforge-variant: Mambaforge
 
       - name: remove homebrew
-        if: matrix.os == 'macos-10.15'
+        if: matrix.os == 'macos-11'
         run: |
           curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
           chmod u+x ./uninstall_homebrew.sh
@@ -49,6 +49,7 @@ jobs:
 
       - name: lint
         run: |
+          export MAMBA_NO_BANNER=1
           mamba install flake8
           flake8 pyccl
           flake8 --exclude=data benchmarks
@@ -64,7 +65,7 @@ jobs:
             compilers pkg-config setuptools_scm pytest pandas pytest-cov \
             cython "camb>=1.3" isitgr traitlets fast-pt
 
-          if [[ ${MATRIX_OS} == "macos-10.15" ]]; then
+          if [[ ${MATRIX_OS} == "macos-11" ]]; then
             mamba install llvm-openmp
             echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
             SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
@@ -77,13 +78,17 @@ jobs:
 
       - name: install class
         run: |
-          if [[ ${MATRIX_OS} == "macos-10.15" ]]; then
+          export LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+          if [[ ${MATRIX_OS} == "macos-11" ]]; then
             . ci_scripts/install_class_osx.sh
           else
             . ci_scripts/install_class_linux.sh
           fi
         env:
           MATRIX_OS: ${{ matrix.os }}
+        continue-on-error: true
+        # We need this because installing CLASS on macos actually throws
+        # an error, even though the code does get compiled and installed.
 
       - name: build CCL
         run: |

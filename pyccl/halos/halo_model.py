@@ -1,20 +1,19 @@
 import warnings
 from .. import ccllib as lib
+from .massdef import MassDef
 from .hmfunc import MassFunc
 from .hbias import HaloBias
-from .profiles import HaloProfile
+from .profiles import HaloProfile, HaloProfileNFW
 from .profiles_2pt import Profile2pt
 from ..core import check
 from ..pk2d import Pk2D
 from ..tk3d import Tk3D
 from ..power import linear_matter_power, nonlin_matter_power
-from ..background import rho_x
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
+from ..parameters import physical_constants
 import numpy as np
-
-physical_constants = lib.cvar.constants
 
 
 class HMCalculator(object):
@@ -57,14 +56,35 @@ class HMCalculator(object):
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
                  k_min=1E-5):
-        self._rho0 = rho_x(cosmo, 1., 'matter', is_comoving=True)
-        if not isinstance(massfunc, MassFunc):
-            raise TypeError("massfunc must be of type `MassFunc`")
-        self._massfunc = massfunc
-        if not isinstance(hbias, HaloBias):
-            raise TypeError("hbias must be of type `HaloBias`")
-        self._hbias = hbias
-        self._mdef = mass_def
+        # halo mass definition
+        if isinstance(mass_def, MassDef):
+            self._mdef = mass_def
+        elif isinstance(mass_def, str):
+            self._mdef = MassDef.from_name(mass_def)()
+        else:
+            raise TypeError("mass_def must be of type `MassDef` "
+                            "or a mass definition name string")
+
+        # halo mass function
+        if isinstance(massfunc, MassFunc):
+            self._massfunc = massfunc
+        elif isinstance(massfunc, str):
+            nMclass = MassFunc.from_name(massfunc)
+            self._massfunc = nMclass(cosmo, mass_def=self._mdef)
+        else:
+            raise TypeError("mass_function must be of type `MassFunc` "
+                            "or a mass function name string")
+
+        # halo bias function
+        if isinstance(hbias, HaloBias):
+            self._hbias = hbias
+        elif isinstance(hbias, str):
+            bMclass = HaloBias.from_name(hbias)
+            self._hbias = bMclass(cosmo, mass_def=self._mdef)
+        else:
+            raise TypeError("halo_bias must be of type `HaloBias` "
+                            "or a halo bias name string")
+
         self._prec = {'log10M_min': log10M_min,
                       'log10M_max': log10M_max,
                       'nlog10M': nlog10M,
@@ -96,19 +116,23 @@ class HMCalculator(object):
     def _get_ingredients(self, a, cosmo, get_bf):
         # Compute mass function and bias (if needed) at a new
         # value of the scale factor.
+        rho0 = None
         if a != self._a_current_mf:
+            rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
             self.mf = self._massfunc.get_mass_function(cosmo, self._mass, a,
                                                        mdef_other=self._mdef)
-            self.mf0 = (self._rho0 -
+            self.mf0 = (rho0 -
                         self._integrator(self.mf * self._mass,
                                          self._lmass)) / self._m0
             self._a_current_mf = a
 
         if get_bf:
             if a != self._a_current_bf:
+                if rho0 is None:
+                    rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
                 self.bf = self._hbias.get_halo_bias(cosmo, self._mass, a,
                                                     mdef_other=self._mdef)
-                self.mbf0 = (self._rho0 -
+                self.mbf0 = (rho0 -
                              self._integrator(self.mf * self.bf * self._mass,
                                               self._lmass)) / self._m0
             self._a_current_bf = a
@@ -330,7 +354,7 @@ class HMCalculator(object):
              value of `k`.
         """
         # Compute mass function
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(a, cosmo, True)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
                                   mass_def=self._mdef).T
@@ -988,6 +1012,163 @@ def halomod_Tk3D_1h(cosmo, hmc,
     return tk3d
 
 
+def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, prof, bias1=1, bias2=1, bias3=1,
+                                 bias4=1,
+                                 is_number_counts1=False,
+                                 is_number_counts2=False,
+                                 is_number_counts3=False,
+                                 is_number_counts4=False,
+                                 p_of_k_a=None, lk_arr=None,
+                                 a_arr=None, extrap_order_lok=1,
+                                 extrap_order_hik=1, use_log=False):
+    """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
+    the super-sample covariance trispectrum, given by the tensor
+    product of the power spectrum responses associated with the
+    two pairs of quantities being correlated. Each response is
+    calculated as:
+
+    .. math::
+        \\frac{\\partial P_{u,v}(k)}{\\partial\\delta_L} = b_u b_v \\left(
+        \\left(\\frac{68}{21}-\\frac{d\\log k^3P_L(k)}{d\\log k}\\right)
+        P_L(k)+I^1_2(k|u,v) - (b_{u} + b_{v}) P_{u,v}(k) \\right)
+
+    where the :math:`I^1_2` is defined in the documentation
+    :meth:`~HMCalculator.I_1_2` and :math:`b_{}` and :math:`b_{vv}` are the
+    linear halo biases for quantities :math:`u` and :math:`v`, respectively
+    (zero if they are not clustering).
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        hmc (:class:`HMCalculator`): a halo model calculator.
+        prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo NFW
+            profile.
+        bias1 (float or array): linear galaxy bias for quantity 1. If an array,
+        it has to have the shape of `a_arr`.
+        bias2 (float or array): linear galaxy bias for quantity 2.
+        bias3 (float or array): linear galaxy bias for quantity 3.
+        bias4 (float or array): linear galaxy bias for quantity 4.
+        is_number_counts1 (bool): If True, quantity 1 will be considered
+        number counts and the clustering counter terms computed. Default False.
+        is_number_counts2 (bool): as is_number_counts1 but for quantity 2.
+        is_number_counts3 (bool): as is_number_counts1 but for quantity 3.
+        is_number_counts4 (bool): as is_number_counts1 but for quantity 4.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`,
+            the power spectrum stored within `cosmo` will be used.
+        a_arr (array): an array holding values of the scale factor
+            at which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of Mpc^-1) at
+            which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        extrap_order_lok (int): extrapolation order to be used on
+            k-values below the minimum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        extrap_order_hik (int): extrapolation order to be used on
+            k-values above the maximum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        use_log (bool): if `True`, the trispectrum will be
+            interpolated in log-space (unless negative or
+            zero values are found).
+
+    Returns:
+        :class:`~pyccl.tk3d.Tk3D`: SSC effective trispectrum.
+    """
+    if lk_arr is None:
+        status = 0
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status, cosmo=cosmo)
+    if a_arr is None:
+        status = 0
+        na = lib.get_pk_spline_na(cosmo.cosmo)
+        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        check(status, cosmo=cosmo)
+
+    # Make sure biases are of the form number of a x number of k
+    ones = np.ones_like(a_arr)
+    bias1 *= ones
+    bias2 *= ones
+    bias3 *= ones
+    bias4 *= ones
+
+    k_use = np.exp(lk_arr)
+
+    # Check inputs
+    if not isinstance(prof, HaloProfileNFW):
+        raise TypeError("prof must be of type `HaloProfileNFW`")
+    prof_2pt = Profile2pt()
+
+    # Power spectrum
+    if isinstance(p_of_k_a, Pk2D):
+        pk2d = p_of_k_a
+    elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+        pk2d = cosmo.get_linear_power('delta_matter:delta_matter')
+    elif str(p_of_k_a) == 'nonlinear':
+        pk2d = cosmo.get_nonlin_power('delta_matter:delta_matter')
+    else:
+        raise TypeError("p_of_k_a must be `None`, \'linear\', "
+                        "\'nonlinear\' or a `Pk2D` object")
+
+    na = len(a_arr)
+    nk = len(k_use)
+    dpk12 = np.zeros([na, nk])
+    dpk34 = np.zeros([na, nk])
+    for ia, aa in enumerate(a_arr):
+        # Compute profile normalizations
+        norm = hmc.profile_norm(cosmo, aa, prof) ** 2
+        i12 = hmc.I_1_2(cosmo, k_use, aa, prof, prof_2pt, prof) * norm
+
+        pk = pk2d.eval(k_use, aa, cosmo)
+        dpk = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo)
+        # ~ [(47/21 - 1/3 dlogPk/dlogk) * Pk+I12]
+        dpk12[ia] = ((2.2380952381-dpk/3)*pk + i12)
+        dpk34[ia] = dpk12[ia].copy()  # Avoid surprises
+
+        # Counter terms for clustering (i.e. - (bA + bB) * PAB
+        if is_number_counts1 or is_number_counts2 or is_number_counts3 or \
+           is_number_counts4:
+            b1 = b2 = b3 = b4 = 0
+
+            i02 = hmc.I_0_2(cosmo, k_use, aa, prof, prof_2pt, prof) * norm
+            P_12 = P_34 = pk + i02
+
+            if is_number_counts1:
+                b1 = bias1[ia]
+            if is_number_counts2:
+                b2 = bias2[ia]
+            if is_number_counts3:
+                b3 = bias3[ia]
+            if is_number_counts4:
+                b4 = bias4[ia]
+
+            dpk12[ia, :] -= (b1 + b2) * P_12
+            dpk34[ia, :] -= (b3 + b4) * P_34
+
+        dpk12[ia] *= bias1[ia] * bias2[ia]
+        dpk34[ia] *= bias3[ia] * bias4[ia]
+
+    if use_log:
+        if np.any(dpk12 <= 0) or np.any(dpk34 <= 0):
+            warnings.warn(
+                "Some values were not positive. "
+                "Will not interpolate in log-space.",
+                category=CCLWarning)
+            use_log = False
+        else:
+            dpk12 = np.log(dpk12)
+            dpk34 = np.log(dpk34)
+
+    tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr,
+                pk1_arr=dpk12, pk2_arr=dpk34,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik, is_logt=use_log)
+    return tk3d
+
+
 def halomod_Tk3D_SSC(cosmo, hmc,
                      prof1, prof2=None, prof12_2pt=None,
                      prof3=None, prof4=None, prof34_2pt=None,
@@ -1005,10 +1186,13 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     .. math::
         \\frac{\\partial P_{u,v}(k)}{\\partial\\delta_L} =
         \\left(\\frac{68}{21}-\\frac{d\\log k^3P_L(k)}{d\\log k}\\right)
-        P_L(k)I^1_1(k,|u)I^1_1(k,|v)+I^1_2(k|u,v)
+        P_L(k)I^1_1(k,|u)I^1_1(k,|v)+I^1_2(k|u,v) - (b_{u} + b_{v})
+        P_{u,v}(k)
 
     where the :math:`I^a_b` are defined in the documentation
-    of :meth:`~HMCalculator.I_1_1` and  :meth:`~HMCalculator.I_1_2`.
+    of :meth:`~HMCalculator.I_1_1` and  :meth:`~HMCalculator.I_1_2` and
+    :math:`b_{u}` and :math:`b_{v}` are the linear halo biases for quantities
+    :math:`u` and :math:`v`, respectively (zero if they are not clustering).
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -1094,21 +1278,15 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
     # number counts profiles must be normalized
-    if (prof1.is_number_counts) and (normprof1 is False):
-        raise ValueError('normprof1 must be True if prof1 is of number ' +
-                         'counts type')
-    if (prof2 is not None) and (prof2.is_number_counts) and \
-            (normprof2 is False):
-        raise ValueError('normprof2 must be True if prof2 is of number ' +
-                         'counts type')
-    if (prof3 is not None) and (prof3.is_number_counts) and \
-            (normprof3 is False):
-        raise ValueError('normprof3 must be True if prof3 is of number ' +
-                         'counts type')
-    if (prof4 is not None) and (prof4.is_number_counts) and \
-            (normprof4 is False):
-        raise ValueError('normprof4 must be True if prof3 is of number ' +
-                         'counts type')
+    profs = {prof1: normprof1, prof2: normprof2,
+             prof3: normprof3, prof4: normprof4}
+
+    for i, (profile, normalization) in enumerate(profs.items()):
+        if (profile is not None
+                and profile.is_number_counts
+                and not normalization):
+            raise ValueError(
+                f"normprof{i+1} must be True if prof{i+1} is number counts")
 
     if prof3 is None:
         prof3_bak = prof1
