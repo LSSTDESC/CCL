@@ -334,9 +334,9 @@ def correlation_pi_sigma(cosmo, a, beta, pi, sig,
 
 
 def correlation_ab(cosmo, r_p: np.ndarray, z: np.ndarray,
-                   dndz: np.ndarray, dndz2=None,
+                   dndz: np.ndarray = None, dndz2: np.ndarray = None,
                    p_of_k_a=None,
-                   type='gg',
+                   type: str = 'gg',
                    precision_fftlog: dict = None):
     """Computes :math:`w_{ab}`.
     .. math::
@@ -348,13 +348,13 @@ def correlation_ab(cosmo, r_p: np.ndarray, z: np.ndarray,
             r_p (float or array-like): Projected radial separation where the
                 correlation function will be evaluated.
             z (array-like): Redshift values where the redshift distribution
-                has been evaluated.
+                has been evaluated. If float, the window function is set to
+                a delta function.
             dndz (array-like): Redshift distribution to be used when computing
                 the window function (see e.g. Eq. (3.11) in (1811.09598)).
             dndz2 (array-like or None): Redshift distribution corresponding to
-                sample `b` of tracers to be correlated. If tracers `a` and `b`
-                are the same, this should be left as None.
-                Default value: None.
+                sample `b` of tracers to be correlated. If None, tracers `a`
+                and `b` are the same. Default value: None.
             p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): 3D Power spectrum to
                 integrate.
             type (string): Type of `ab` correlation. This changes the Bessel
@@ -373,29 +373,43 @@ def correlation_ab(cosmo, r_p: np.ndarray, z: np.ndarray,
             array-like: Value(s) of the correlation function at the input
             projected radial separation(s).
     """
+    # TODO: add functionality for p_of_k_a=None.
+    # TODO: add some unit tests for Value Errors.
     if dndz2 is None:
         dndz2 = dndz
+    if dndz is None and np.iterable(z):
+        raise ValueError('Cannot have iterable redshift array while '
+                         'dndz is None.')
     a = 1/(1+z)
-    wz = dndz*dndz2*(1+z)**2/(
-        cosmo.comoving_radial_distance(a)**2. *
-        _compute_dchi_da_num(a, cosmo))
-    wz[np.isnan(wz)] = 0
-    wz /= np.trapz(wz, z)
+    a = np.atleast_1d(a)
     if type == 'gg':
-        xi = np.array([_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=0)
+        xi = np.array([_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=0,
+                                    precision_fftlog=precision_fftlog)
                       for a_ in a])
     elif type == 'g+':
-        xi = np.array([_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=2)
+        xi = np.array([_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=2,
+                                    precision_fftlog=precision_fftlog)
                       for a_ in a])
     elif type == '++':
-        xi = np.array([(_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=0) +
-                       _fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=4))
+        xi = np.array([(_fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=0,
+                                     precision_fftlog=precision_fftlog) +
+                       _fftlog_wrap(r_p, a_, cosmo, p_of_k_a, n=4,
+                                    precision_fftlog=precision_fftlog))
                       for a_ in a])
     else:
-        raise ValueError
-    if np.ndim(xi) == 2:
-        wz = wz.reshape((len(z), 1))
-    w = np.trapz(wz*xi, z, axis=0)
+        raise ValueError('Correlation type not recognised. Accepted'
+                         'values: "gg", "g+", "++".')
+    if np.iterable(z):
+        wz = dndz*dndz2*(1+z)**2/(
+            cosmo.comoving_radial_distance(a)**2. *
+            _compute_dchi_da_num(a, cosmo))
+        wz[np.isnan(wz)] = 0  # For values at z=0
+        wz /= np.trapz(wz, z)
+        if np.ndim(xi) == 2:
+            wz = wz.reshape((len(z), 1))
+        w = np.trapz(wz*xi, z, axis=0)
+    else:
+        w = xi[0]
     return w
 
 
