@@ -3,11 +3,8 @@ from . import ccllib as lib
 from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 import numpy as np
 
-## Terasawa
-from . import core #Terasawa
-from . import background # Terasawa
-##
-
+from . import core
+from . import background 
 
 class Tk3D(object):
     """A container for \"isotropized\" connected trispectra relevant for
@@ -367,5 +364,5 @@ def Tk3D_SSC_Terasawa22(cosmo,deltah=0.02,
                 pk1_arr=dpk12, pk2_arr=dpk12,
                 extrap_order_lok=extrap_order_lok,
                 extrap_order_hik=extrap_order_hik, is_logt=use_log)
-    return tk3d, pk, T_h, dpk, dpk12 #pk, T_h, dpk, dpk12 are outputs for debug 
+    return tk3d 
     
