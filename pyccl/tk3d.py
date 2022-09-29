@@ -326,7 +326,7 @@ def Tk3D_SSC_Terasawa22(cosmo,deltah=0.02,
     dpk12 = np.zeros([na,nk])
     dpk = np.zeros(nk)
     T_h = np.zeros(nk)
-   
+    
     kmin = 1e-2
     for ia, aa in enumerate(a_arr):
         
@@ -337,7 +337,7 @@ def Tk3D_SSC_Terasawa22(cosmo,deltah=0.02,
         pk_hm = pk2d_hm.eval(k_use, aa, cosmo_hm)
         
         dpknl = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo) 
-        dpklin = pk2dlin.eval_dlogpk_dlogk(k_use, aa, cosmo) 
+        dpklin = pk2dlin.eval_dlogpk_dlogk(k_use, aa, cosmo)
         
         # use linear theory below kmin
         T_h[k_use<=kmin] = 1
@@ -348,8 +348,7 @@ def Tk3D_SSC_Terasawa22(cosmo,deltah=0.02,
         dpk[k_use>kmin] = dpknl[k_use>kmin]
         
         dpk12[ia, :] = pk * (1. + (26./21.)*T_h -dpk/3.)
-    #dpk34 = dpk12
-    
+        
     if use_log:
         if np.any(dpk12 <= 0):
             warnings.warn(
@@ -359,10 +358,9 @@ def Tk3D_SSC_Terasawa22(cosmo,deltah=0.02,
             use_log = False
         else:
             dpk12 = np.log(dpk12)
-    
+            
     tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                 pk1_arr=dpk12, pk2_arr=dpk12,
                 extrap_order_lok=extrap_order_lok,
                 extrap_order_hik=extrap_order_hik, is_logt=use_log)
     return tk3d 
-    
