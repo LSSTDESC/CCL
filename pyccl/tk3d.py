@@ -3,8 +3,8 @@ from . import ccllib as lib
 from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 import numpy as np
 
-from . import core 
-from . import background 
+from . import core
+from . import background
 
 
 
@@ -218,8 +218,9 @@ class Tk3D(object):
 
         return a_arr, lk_arr1, lk_arr2, out
 
-def Tk3D_SSC_Terasawa22(cosmo,deltah=0.02,
-                       lk_arr=None, a_arr=None,
+    
+def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02, 
+                     lk_arr=None, a_arr=None,
                      extrap_order_lok=1, extrap_order_hik=1,
                      use_log=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
@@ -296,13 +297,13 @@ def Tk3D_SSC_Terasawa22(cosmo,deltah=0.02,
     Omega_c_m = np.power((h/hm),2) * Omega_c #\Omega_c h^2 is fixed
     Omega_b_m = np.power((h/hm),2) * Omega_b #\Omega_b h^2 is fixed
 
-    cosmo_hp = core.Cosmology(Omega_c=Omega_c_p,Omega_b=Omega_b_p,
+    cosmo_hp = core.Cosmology(Omega_c=Omega_c_p, Omega_b=Omega_b_p,
                             h=hp, n_s=n_s, A_s=A_s,
                             transfer_function="boltzmann_camb",
                             matter_power_spectrum="camb",
                             extra_parameters=extra_parameters)
     
-    cosmo_hm = core.Cosmology(Omega_c=Omega_c_m,Omega_b=Omega_b_m,
+    cosmo_hm = core.Cosmology(Omega_c=Omega_c_m, Omega_b=Omega_b_m,
                             h=hm, n_s=n_s, A_s=A_s,
                             transfer_function="boltzmann_camb",
                             matter_power_spectrum="camb",
