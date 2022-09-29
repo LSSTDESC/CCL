@@ -7,7 +7,6 @@ from . import core
 from . import background
 
 
-
 class Tk3D(object):
     """A container for \"isotropized\" connected trispectra relevant for
     covariance matrix calculations. I.e. functions of 3 variables of the
