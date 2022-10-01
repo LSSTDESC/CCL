@@ -4,7 +4,6 @@ from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 import numpy as np
 
 from . import core
-from . import background
 
 
 class Tk3D(object):
@@ -309,8 +308,8 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
                             extra_parameters=extra_parameters)
     
     # Growth factor
-    Dp = background.growth_factor_unnorm(cosmo_hp,a_arr)
-    Dm = background.growth_factor_unnorm(cosmo_hm,a_arr)
+    Dp = cosmo_hp.growth_factor_unnorm(a_arr)
+    Dm = cosmo_hm.growth_factor_unnorm(a_arr)
     
     # Power spectrum
     cosmo.compute_linear_power()
