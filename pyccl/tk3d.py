@@ -333,7 +333,7 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
     kmin = 1e-2
     for ia, aa in enumerate(a_arr):
 
-        pk = pk2d.eval(k_use, aa, cosmo)  
+        pk = pk2d.eval(k_use, aa, cosmo)
         pk_hp = pk2d_hp.eval(k_use, aa, cosmo_hp)
         pk_hm = pk2d_hm.eval(k_use, aa, cosmo_hm)
 
@@ -343,13 +343,13 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
         # use linear theory below kmin
         T_h[k_use <= kmin] = 1
 
-        T_h[k_use > kmin] = (np.log(pk_hp[k_use > kmin])-np.log(pk_hm[k_use > kmin]))\\
+        T_h[k_use > kmin] = (np.log(pk_hp[k_use > kmin])-np.log(pk_hm[k_use > kmin]))
         /(2*(np.log(Dp[ia])-np.log(Dm[ia])))  # (hp-hm) term is cancelled out
 
         dpk[k_use <= kmin] = dpklin[k_use <= kmin]
         dpk[k_use > kmin] = dpknl[k_use > kmin]
 
-        dpk12[ia, :] = pk * (1. + (26./21.) * T_h -dpk/3.)
+        dpk12[ia, :] = pk * (1. + (26. / 21.) * T_h -dpk / 3.)
 
     if use_log:
         if np.any(dpk12 <= 0):
