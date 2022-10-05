@@ -215,7 +215,6 @@ class Tk3D(object):
             [np.exp(tk, out=tk) for tk in out]
 
         return a_arr, lk_arr1, lk_arr2, out
-
     
 def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02, 
                      lk_arr=None, a_arr=None,
@@ -224,18 +223,19 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
-    two pairs of quantities being correlated. Currently this 
-    function only applicable to matter power spectrum in flat 
-    cosmology. Each response is calculated using the method 
+    two pairs of quantities being correlated. Currently this
+    function only applicable to matter power spectrum in flat
+    cosmology. Each response is calculated using the method
     developed in Terasawa et al. 2022 (arXiv:2205.10339v2) as:
 
     .. math::
         \\frac{\\partial P_{mm}(k)}{\\partial\\delta_L} =
-        \\left(1 + \\frac{26}{21}T_{h}(k)  -\\frac{1}{3}\\frac{d\\log P_{mm}(k)}{d\\log k}\\right)
+        \\left(1 + \\frac{26}{21}T_{h}(k)  
+        -\\frac{1}{3}\\frac{d\\log P_{mm}(k)}{d\\log k}\\right)
         P_{mm}(k),
 
     where the :math:`T_{h}(k)` is the normalized growth response to
-    the Hubble parameter defined as 
+    the Hubble parameter defined as
     :math:`T_{h}(k) = \\frac{d\\log P_{mm}(k)}{dh}/(2\\frac{d\\log D}{dh})`.
     
     Args:
