@@ -216,10 +216,11 @@ class Tk3D(object):
 
         return a_arr, lk_arr1, lk_arr2, out
     
+    
 def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02, 
-                     lk_arr=None, a_arr=None,
-                     extrap_order_lok=1, extrap_order_hik=1,
-                     use_log=False):
+                        lk_arr=None, a_arr=None,
+                        extrap_order_lok=1, extrap_order_hik=1,
+                        use_log=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
@@ -230,7 +231,7 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
 
     .. math::
         \\frac{\\partial P_{mm}(k)}{\\partial\\delta_L} =
-        \\left(1 + \\frac{26}{21}T_{h}(k)  
+        \\left(1 + \\frac{26}{21}T_{h}(k)
         -\\frac{1}{3}\\frac{d\\log P_{mm}(k)}{d\\log k}\\right)
         P_{mm}(k),
 
