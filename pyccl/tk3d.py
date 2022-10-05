@@ -343,7 +343,7 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
         # use linear theory below kmin
         T_h[k_use <= kmin] = 1
 
-        T_h[k_use > kmin] = (np.log(pk_hp[k_use > kmin])-np.log(pk_hm[k_use > kmin]))
+        T_h[k_use > kmin] = (np.log(pk_hp[k_use > kmin])-np.log(pk_hm[k_use > kmin]))\\
         /(2*(np.log(Dp[ia])-np.log(Dm[ia])))  # (hp-hm) term is cancelled out
 
         dpk[k_use <= kmin] = dpklin[k_use <= kmin]
