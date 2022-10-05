@@ -215,9 +215,9 @@ class Tk3D(object):
             [np.exp(tk, out=tk) for tk in out]
 
         return a_arr, lk_arr1, lk_arr2, out
-    
-    
-def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02, 
+
+
+def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
                         lk_arr=None, a_arr=None,
                         extrap_order_lok=1, extrap_order_hik=1,
                         use_log=False):
@@ -238,7 +238,7 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
     where the :math:`T_{h}(k)` is the normalized growth response to
     the Hubble parameter defined as
     :math:`T_{h}(k) = \\frac{d\\log P_{mm}(k)}{dh}/(2\\frac{d\\log D}{dh})`.
-    
+
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
         deltah (float): the variation of h to compute T_{h}(k) by
@@ -284,73 +284,71 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
     h = cosmo["h"]
     n_s = cosmo["n_s"]
     A_s = cosmo["A_s"]
-    
-    extra_parameters = {"camb": {"halofit_version": "original",
- }}
-    #set h-modified cosmology to take finite differencing
-    hp = h + deltah 
-    Omega_c_p = np.power((h/hp),2) * Omega_c #\Omega_c h^2 is fixed
-    Omega_b_p = np.power((h/hp),2) * Omega_b #\Omega_b h^2 is fixed
 
-    hm = h - deltah 
-    Omega_c_m = np.power((h/hm),2) * Omega_c #\Omega_c h^2 is fixed
-    Omega_b_m = np.power((h/hm),2) * Omega_b #\Omega_b h^2 is fixed
+    extra_parameters = {"camb": {"halofit_version": "original", }}
+
+# set h-modified cosmology to take finite differencing
+    hp = h + deltah
+    Omega_c_p = np.power((h/hp), 2) * Omega_c  # \Omega_c h^2 is fixed
+    Omega_b_p = np.power((h/hp), 2) * Omega_b  # \Omega_b h^2 is fixed
+
+    hm = h - deltah
+    Omega_c_m = np.power((h/hm), 2) * Omega_c  # \Omega_c h^2 is fixed
+    Omega_b_m = np.power((h/hm), 2) * Omega_b  # \Omega_b h^2 is fixed
 
     cosmo_hp = core.Cosmology(Omega_c=Omega_c_p, Omega_b=Omega_b_p,
-                            h=hp, n_s=n_s, A_s=A_s,
-                            transfer_function="boltzmann_camb",
-                            matter_power_spectrum="camb",
-                            extra_parameters=extra_parameters)
-    
+                              h=hp, n_s=n_s, A_s=A_s,
+                              transfer_function="boltzmann_camb",
+                              matter_power_spectrum="camb",
+                              extra_parameters=extra_parameters)
+
     cosmo_hm = core.Cosmology(Omega_c=Omega_c_m, Omega_b=Omega_b_m,
-                            h=hm, n_s=n_s, A_s=A_s,
-                            transfer_function="boltzmann_camb",
-                            matter_power_spectrum="camb",
-                            extra_parameters=extra_parameters)
-    
+                              h=hm, n_s=n_s, A_s=A_s,
+                              transfer_function="boltzmann_camb",
+                              matter_power_spectrum="camb",
+                              extra_parameters=extra_parameters)
+
     # Growth factor
     Dp = cosmo_hp.growth_factor_unnorm(a_arr)
     Dm = cosmo_hm.growth_factor_unnorm(a_arr)
-    
+
     # Power spectrum
     cosmo.compute_linear_power()
     cosmo_hp.compute_linear_power()
     cosmo_hm.compute_linear_power()
-    
+
     pk2dlin = cosmo.get_linear_power('delta_matter:delta_matter')
 
     pk2d = cosmo.get_nonlin_power('delta_matter:delta_matter')
     pk2d_hp = cosmo_hp.get_nonlin_power('delta_matter:delta_matter')
     pk2d_hm = cosmo_hm.get_nonlin_power('delta_matter:delta_matter')
-    
+
     na = len(a_arr)
     nk = len(k_use)
-    dpk12 = np.zeros([na,nk])
+    dpk12 = np.zeros([na, nk])
     dpk = np.zeros(nk)
     T_h = np.zeros(nk)
-   
+
     kmin = 1e-2
     for ia, aa in enumerate(a_arr):
-        
-        pk = pk2d.eval(k_use, aa, cosmo)
-        pk_hp_kh = pk2d_hp.eval(k_use, aa, cosmo_hp)
-        pk_hm_kh = pk2d_hm.eval(k_use, aa, cosmo_hm)
+    
+        pk = pk2d.eval(k_use, aa, cosmo)      
         pk_hp = pk2d_hp.eval(k_use, aa, cosmo_hp)
         pk_hm = pk2d_hm.eval(k_use, aa, cosmo_hm)
-        
+
         dpknl = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo) 
         dpklin = pk2dlin.eval_dlogpk_dlogk(k_use, aa, cosmo) 
-        
+
         # use linear theory below kmin
-        T_h[k_use<=kmin] = 1
-        
-        T_h[k_use>kmin] = (np.log(pk_hp[k_use>kmin])-np.log(pk_hm[k_use>kmin]))/(2*(np.log(Dp[ia])-np.log(Dm[ia]))) # (hp-hm) term is cancelled out
-        
-        dpk[k_use<=kmin] = dpklin[k_use<=kmin]
-        dpk[k_use>kmin] = dpknl[k_use>kmin]
-        
+        T_h[k_use <= kmin] = 1
+
+        T_h[k_use > kmin] = (np.log(pk_hp[k_use > kmin])-np.log(pk_hm[k_use > kmin]))/(2*(np.log(Dp[ia])-np.log(Dm[ia])))  # (hp-hm) term is cancelled out
+
+        dpk[k_use <= kmin] = dpklin[k_use <= kmin]
+        dpk[k_use > kmin] = dpknl[k_use > kmin]
+
         dpk12[ia, :] = pk * (1. + (26./21.)*T_h -dpk/3.)
-    
+
     if use_log:
         if np.any(dpk12 <= 0):
             warnings.warn(
@@ -360,7 +358,7 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
             use_log = False
         else:
             dpk12 = np.log(dpk12)
-    
+
     tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                 pk1_arr=dpk12, pk2_arr=dpk12,
                 extrap_order_lok=extrap_order_lok,
