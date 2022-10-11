@@ -665,6 +665,7 @@ def _get_spline3d_arrays(gsl_spline, length):
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))
 
+
 def check_openmp():
     N = lib.check_openmp()
     if N > 0:
