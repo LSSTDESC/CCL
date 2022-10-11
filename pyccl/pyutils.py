@@ -664,3 +664,10 @@ def _get_spline3d_arrays(gsl_spline, length):
     check(status)
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))
+
+def check_openmp():
+    N = lib.check_openmp()
+    if N > 0:
+        print(f'OpenMP is working with {N} threads enabled')
+    else:
+        print('OpenMP not supported')

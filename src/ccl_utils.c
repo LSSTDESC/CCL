@@ -340,3 +340,15 @@ void ccl_integ_spline(int ny, int nx,double *x,double **y,
     } //end omp parallel
   }
 }
+
+int ccl_check_openmp()
+{
+  int total = 0;
+  #ifdef _OPENMP
+  #pragma omp parallel
+  {
+    total = omp_get_num_threads();
+  }
+  #endif
+    return total;
+}
