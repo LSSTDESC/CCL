@@ -3,6 +3,9 @@
 #include <math.h>
 
 #include <gsl/gsl_errno.h>
+#ifdef _OPENMP
+#include "omp.h"
+#endif
 
 #include "ccl.h"
 
