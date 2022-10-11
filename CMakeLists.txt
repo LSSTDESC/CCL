@@ -61,7 +61,7 @@ find_package(OpenMP)
 set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
 set(CMAKE_C_FLAGS_DEBUG   "-O0 -g -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
 
-if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)?Clang$") 
+if ("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)+Clang$")
     if(OpenMP_C_FOUND)
         # OpenMP flags for macOS clang
         set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Xpreprocessor -fopenmp")
