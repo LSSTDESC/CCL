@@ -344,7 +344,16 @@ void ccl_integ_spline(int ny, int nx,double *x,double **y,
   }
 }
 
-int ccl_check_openmp()
+int ccl_openmp_version()
+{
+  #ifdef _OPENMP
+    return _OPENMP;
+  #else
+    return 0;
+  #endif
+}
+
+int ccl_openmp_threads()
 {
   #ifdef _OPENMP
     return omp_get_max_threads();
