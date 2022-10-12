@@ -356,7 +356,7 @@ int ccl_openmp_version()
 int ccl_openmp_threads()
 {
   #ifdef _OPENMP
-    return omp_get_max_threads();
+    return omp_get_num_procs();
   #else
     return 0;
   #endif

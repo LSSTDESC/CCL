@@ -669,7 +669,7 @@ def _get_spline3d_arrays(gsl_spline, length):
 def check_openmp_threads():
     openmp_threads = lib.openmp_threads()
     if openmp_threads > 0:
-        print(f'OpenMP is working with {openmp_threads} threads enabled')
+        print(f'OpenMP is working with {openmp_threads} threads max')
     else:
         print('OpenMP is not supported')
 
