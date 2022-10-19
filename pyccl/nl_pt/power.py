@@ -445,7 +445,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                 nonloc_pk_type='nonlinear',
                 a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False, return_ia_ee_and_bb=False,
-                return_ptc=False):
+                return_ptc=False, update_ptc=True):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the PT power spectrum for two quantities defined by
     two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
@@ -503,6 +503,8 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             initialized when this function is called. If `False` (default)
             the ptc is not output, whether or not it is initialized as
             part of the function call.
+        update_ptc (bool): if `False`, do not recompute the tracer-independent
+            perturbative quantitities in the fastpt object.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
@@ -530,6 +532,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         ptc = PTCalculator(with_dd=with_dd,
                            with_NC=with_NC,
                            with_IA=with_IA)
+        update_ptc = True
     if not isinstance(ptc, PTCalculator):
         raise TypeError("ptc should be of type `PTCalculator`")
 
@@ -558,8 +561,9 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     ga = growth_factor(cosmo, a_arr)
     ga4 = ga**4
 
-    # update the PTC to have the require Pk components
-    ptc.update_pk(pk_lin_z0)
+    if update_ptc:
+        # update the PTC to have the require Pk components
+        ptc.update_pk(pk_lin_z0)
 
     if nonlin_pk_type == 'nonlinear':
         Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
