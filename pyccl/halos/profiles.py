@@ -839,10 +839,12 @@ class HaloProfileEinasto(HaloProfile):
         truncated (bool): set to `True` if the profile should be
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
+        alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
+            'cosmo' to calculate the value from cosmology. Default: 'cosmo'
     """
     name = 'Einasto'
 
-    def __init__(self, c_M_relation, truncated=True, alpha=None):
+    def __init__(self, c_M_relation, truncated=True, alpha='cosmo'):
         if not isinstance(c_M_relation, Concentration):
             raise TypeError("c_M_relation must be of type `Concentration`)")
 
@@ -861,8 +863,9 @@ class HaloProfileEinasto(HaloProfile):
 
         Arguments
         ---------
-        alpha : float
-            Profile shape parameter.
+        alpha : float, 'cosmo'
+            Profile shape parameter. Set to
+            'cosmo' to calculate the value from cosmology
         """
         if alpha is not None and alpha != self.alpha:
             self.alpha = alpha
@@ -871,15 +874,14 @@ class HaloProfileEinasto(HaloProfile):
         return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
     def _get_alpha(self, cosmo, M, a, mdef):
-        if self.alpha is None:
+        if self.alpha == 'cosmo':
             mdef_vir = MassDef('vir', 'matter')
             Mvir = mdef.translate_mass(cosmo, M, a, mdef_vir)
-            print(cosmo, M, a, mdef_vir)
             sM = sigmaM(cosmo, Mvir, a)
             nu = 1.686 / sM
             alpha = 0.155 + 0.0095 * nu * nu
         else:
-            alpha = self.alpha
+            alpha = np.full_like(M, self.alpha)
         return alpha
 
     def _norm(self, M, Rs, c, alpha):
