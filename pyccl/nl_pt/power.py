@@ -684,11 +684,15 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         pt_pk_ee = Pk2D(a_arr=a_arr,
                         lk_arr=np.log(ptc.ks),
                         pk_arr=p_pt[0].T,
-                        is_logp=False)
+                        is_logp=False,
+                        extrap_order_lok=extrap_order_lok,
+                        extrap_order_hik=extrap_order_hik)
         pt_pk_bb = Pk2D(a_arr=a_arr,
                         lk_arr=np.log(ptc.ks),
                         pk_arr=p_pt[1].T,
-                        is_logp=False)
+                        is_logp=False,
+                        extrap_order_lok=extrap_order_lok,
+                        extrap_order_hik=extrap_order_hik)
         if return_ptc:
             return pt_pk_ee, pt_pk_bb, ptc
         else:
@@ -697,7 +701,9 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         pt_pk = Pk2D(a_arr=a_arr,
                      lk_arr=np.log(ptc.ks),
                      pk_arr=p_pt.T,
-                     is_logp=False)
+                     is_logp=False,
+                     extrap_order_lok=extrap_order_lok,
+                     extrap_order_hik=extrap_order_hik)
         if return_ptc:
             return pt_pk, ptc
         else:
