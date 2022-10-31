@@ -177,3 +177,18 @@ def test_weak_lensing_functions():
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 4]), 1e-12, np.inf)
     err_mu = np.abs(mu - data[:, 4])
     assert np.all(err_mu <= tol)
+
+def test_satellite_shear_profile():
+    k_arr, gamma_k_CosmoSIS = np.loadtxt('./benchmarks/data/satellite_shear_profile_cosmoSIS_dev.txt', unpack=True)
+    cosmo = ccl.Cosmology(Omega_c=0.278 - 0.0391, Omega_b=0.0391, h=0.7, A_s=1.70150098142e-09, n_s=0.978)
+
+    z_eval = 0.2
+    mass_eval = 1e15  # Msun
+
+    hmd_200m = ccl.halos.MassDef200m()
+    cM = ccl.halos.ConcentrationDuffy08(hmd_200m)
+
+    sat_gamma_HOD_simps = ccl.halos.SatelliteShearHOD(cM, lmax=6, a1h=0.000989)
+    gamma_k_CCL = sat_gamma_HOD_simps._usat_fourier(cosmo, k_arr, mass_eval, 1 / (1 + z_eval), hmd_200m)
+
+    assert np.all(np.fabs(-gamma_k_CCL / gamma_k_CosmoSIS - 1) < 0.8)

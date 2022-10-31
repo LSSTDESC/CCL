@@ -148,6 +148,22 @@ class HaloProfile(object):
         """
         return self.precision_fftlog['plaw_projected']
 
+    def _get_prefactor(self, cosmo, a, hmc):
+        """
+        Add a pre-factor for the total power spectra that depends
+        only on the scale factor.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            a (float): scale factor.
+            hmc (:class:`~pyccl.halos.HMCalculator`): halo
+                model calculator object.
+
+        Returns:
+            float or array_like: pre-factor value.
+        """
+        return 1.
+
     def real(self, cosmo, r, M, a, mass_def):
         """ Returns the 3D  real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
@@ -400,7 +416,7 @@ class HaloProfile(object):
                      large_padding=True):
         # This computes the 3D Hankel transform
         #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_l(k r)
-        # if fourier_out == False, and
+        # if fourier_out == True, and
         #  \rho(r) = \frac{1}{2\pi^2} \int dk k^2 \rho(k) j_l(k r)
         # otherwise.
 
@@ -1796,6 +1812,19 @@ class SatelliteShearHOD(HaloProfileHOD):
         self._rmin = rmin
         self._N_r = N_r
         self._N_jn = N_jn
+
+    def _get_prefactor(self, cosmo, a, hmc):
+        '''
+        Compute the prefactor due to the satellite intrinsic shear
+        halo model, which is the satellite galaxy fraction f_s=ns/(ng+ns)
+        divided by the satellite galaxy number density ns.
+        '''
+        from scipy.integrate import simps
+        M_use = hmc._mass
+        ngal = simps(self._Nc(M_use, a) * (1+self._Ns(M_use, a)) *
+                     hmc._massfunc.get_mass_function(cosmo, a=a, M=M_use) /
+                     M_use, M_use)
+        return 1/ngal
 
     def _I_integral(self, a, b):
         '''

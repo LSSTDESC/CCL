@@ -643,15 +643,18 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             norm1 = hmc.profile_norm(cosmo, aa, prof)
         else:
             norm1 = 1
+        prefac1 = prof._get_prefactor(cosmo, aa, hmc)
         # Compute second profile normalization
         if prof2 is None:
             norm2 = norm1
+            prefac2 = prefac1
         else:
             if normprof2:
                 norm2 = hmc.profile_norm(cosmo, aa, prof2)
             else:
                 norm2 = 1
-        norm = norm1 * norm2
+            prefac2 = prof2._get_prefactor(cosmo, aa, hmc)
+        norm = norm1 * norm2 * prefac1 * prefac2
 
         if get_2h:
             # Compute first bias factor
