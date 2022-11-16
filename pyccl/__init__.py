@@ -153,6 +153,11 @@ from .haloprofile import (
     nfw_profile_2d,
 )
 
+from .darkemulator import (
+    darkemu_Tk3D_SSC,
+    b2H17,
+    b2L16,
+)
 
 __all__ = (
     'lib',

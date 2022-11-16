@@ -12,6 +12,8 @@ from .massdef import (
 # Halo mass-concentration relations
 from .concentration import (
     Concentration,
+    ConcentrationDiemer15_colossus,
+    ConcentrationDiemer15_ius,
     ConcentrationDiemer15,
     ConcentrationBhattacharya13,
     ConcentrationPrada12,
@@ -34,6 +36,7 @@ from .hmfunc import (
     MassFuncAngulo12,
     MassFuncDespali16,
     MassFuncBocquet16,
+    MassFuncDarkEmulator,
     mass_function_from_name,
 )
 
@@ -95,7 +98,7 @@ __all__ = (
     'MassFunc', 'MassFuncPress74', 'MassFuncSheth99', 'MassFuncJenkins01',
     'MassFuncTinker08', 'MassFuncTinker10', 'MassFuncWatson13',
     'MassFuncAngulo12', 'MassFuncDespali16', 'MassFuncBocquet16',
-    'MassFuncBocquet20', 'mass_function_from_name',
+    'MassFuncBocquet20', 'MassFuncDarkEmulator', 'mass_function_from_name',
     'HaloBias', 'HaloBiasSheth99', 'HaloBiasSheth01', 'HaloBiasTinker10',
     'HaloBiasBhattacharya11', 'halo_bias_from_name',
     'HaloProfile', 'HaloProfileGaussian', 'HaloProfilePowerLaw',

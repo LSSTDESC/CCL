@@ -3,9 +3,18 @@ from . import ccllib as lib
 from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 import numpy as np
 
-from . import core
+from . import core 
 import warnings
 from .errors import CCLWarning
+
+#for P_gm
+import sys
+import os
+darkemu_path = os.path.realpath(os.path.join(os.getcwd(),'/Users/terasawaryo_other/OneDrive - The University of Tokyo/Master/code/dark_emulator_public'))
+sys.path.insert(0,darkemu_path)
+from dark_emulator import darkemu
+from dark_emulator import model_hod
+
 
 
 class Tk3D(object):
@@ -218,29 +227,28 @@ class Tk3D(object):
 
         return a_arr, lk_arr1, lk_arr2, out
 
-
-def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
-                        lk_arr=None, a_arr=None,
-                        extrap_order_lok=1, extrap_order_hik=1,
-                        use_log=False):
+def Tk3D_SSC_Terasawa22(cosmo,deltah=0.02,
+                        extra_parameters={"camb": {"halofit_version": "original",}},
+                       lk_arr=None, a_arr=None,
+                     extrap_order_lok=1, extrap_order_hik=1,
+                     use_log=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
-    two pairs of quantities being correlated. Currently this
-    function only applicable to matter power spectrum in flat
-    cosmology. Each response is calculated using the method
+    two pairs of quantities being correlated. Currently this 
+    function only applicable to matter power spectrum in flat 
+    cosmology. Each response is calculated using the method 
     developed in Terasawa et al. 2022 (arXiv:2205.10339v2) as:
 
     .. math::
         \\frac{\\partial P_{mm}(k)}{\\partial\\delta_L} =
-        \\left(1 + \\frac{26}{21}T_{h}(k)
-        -\\frac{1}{3}\\frac{d\\log P_{mm}(k)}{d\\log k}\\right)
+        \\left(1 + \\frac{26}{21}T_{h}(k)  -\\frac{1}{3}\\frac{d\\log P_{mm}(k)}{d\\log k}\\right)
         P_{mm}(k),
 
     where the :math:`T_{h}(k)` is the normalized growth response to
-    the Hubble parameter defined as
+    the Hubble parameter defined as 
     :math:`T_{h}(k) = \\frac{d\\log P_{mm}(k)}{dh}/(2\\frac{d\\log D}{dh})`.
-
+    
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
         deltah (float): the variation of h to compute T_{h}(k) by
@@ -286,74 +294,73 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
     h = cosmo["h"]
     n_s = cosmo["n_s"]
     A_s = cosmo["A_s"]
+    
+    #extra_parameters = {"camb": {"halofit_version": "original",}}
 
-    extra_parameters = {"camb": {"halofit_version": "original", }}
+    #set h-modified cosmology to take finite differencing
+    hp = h + deltah 
+    Omega_c_p = np.power((h/hp),2) * Omega_c #\Omega_c h^2 is fixed
+    Omega_b_p = np.power((h/hp),2) * Omega_b #\Omega_b h^2 is fixed
 
-# set h-modified cosmology to take finite differencing
-    hp = h + deltah
-    Omega_c_p = np.power((h/hp), 2) * Omega_c  # \Omega_c h^2 is fixed
-    Omega_b_p = np.power((h/hp), 2) * Omega_b  # \Omega_b h^2 is fixed
+    hm = h - deltah 
+    Omega_c_m = np.power((h/hm),2) * Omega_c #\Omega_c h^2 is fixed
+    Omega_b_m = np.power((h/hm),2) * Omega_b #\Omega_b h^2 is fixed
 
-    hm = h - deltah
-    Omega_c_m = np.power((h/hm), 2) * Omega_c  # \Omega_c h^2 is fixed
-    Omega_b_m = np.power((h/hm), 2) * Omega_b  # \Omega_b h^2 is fixed
-
-    cosmo_hp = core.Cosmology(Omega_c=Omega_c_p, Omega_b=Omega_b_p,
-                              h=hp, n_s=n_s, A_s=A_s,
-                              transfer_function="boltzmann_camb",
-                              matter_power_spectrum="camb",
-                              extra_parameters=extra_parameters)
-
-    cosmo_hm = core.Cosmology(Omega_c=Omega_c_m, Omega_b=Omega_b_m,
-                              h=hm, n_s=n_s, A_s=A_s,
-                              transfer_function="boltzmann_camb",
-                              matter_power_spectrum="camb",
-                              extra_parameters=extra_parameters)
-
+    cosmo_hp = core.Cosmology(Omega_c=Omega_c_p,Omega_b=Omega_b_p,
+                            h=hp, n_s=n_s, A_s=A_s,
+                            transfer_function="boltzmann_camb",
+                            matter_power_spectrum="camb",
+                            extra_parameters=extra_parameters)
+    
+    cosmo_hm = core.Cosmology(Omega_c=Omega_c_m,Omega_b=Omega_b_m,
+                            h=hm, n_s=n_s, A_s=A_s,
+                            transfer_function="boltzmann_camb",
+                            matter_power_spectrum="camb",
+                            extra_parameters=extra_parameters)
+    
     # Growth factor
     Dp = cosmo_hp.growth_factor_unnorm(a_arr)
     Dm = cosmo_hm.growth_factor_unnorm(a_arr)
-
+    
     # Power spectrum
     cosmo.compute_linear_power()
     cosmo_hp.compute_linear_power()
     cosmo_hm.compute_linear_power()
-
+    
     pk2dlin = cosmo.get_linear_power('delta_matter:delta_matter')
 
     pk2d = cosmo.get_nonlin_power('delta_matter:delta_matter')
     pk2d_hp = cosmo_hp.get_nonlin_power('delta_matter:delta_matter')
     pk2d_hm = cosmo_hm.get_nonlin_power('delta_matter:delta_matter')
-
+    
     na = len(a_arr)
     nk = len(k_use)
-    dpk12 = np.zeros([na, nk])
+    dpk12 = np.zeros([na,nk])
     dpk = np.zeros(nk)
     T_h = np.zeros(nk)
-
+   
     kmin = 1e-2
     for ia, aa in enumerate(a_arr):
-
+        
         pk = pk2d.eval(k_use, aa, cosmo)
+        pk_hp_kh = pk2d_hp.eval(k_use, aa, cosmo_hp)
+        pk_hm_kh = pk2d_hm.eval(k_use, aa, cosmo_hm)
         pk_hp = pk2d_hp.eval(k_use, aa, cosmo_hp)
         pk_hm = pk2d_hm.eval(k_use, aa, cosmo_hm)
-
-        dpknl = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo)
-        dpklin = pk2dlin.eval_dlogpk_dlogk(k_use, aa, cosmo)
-
+        
+        dpknl = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo) 
+        dpklin = pk2dlin.eval_dlogpk_dlogk(k_use, aa, cosmo) 
+        
         # use linear theory below kmin
-        T_h[k_use <= kmin] = 1
-
-        T_h[k_use > kmin] = (np.log(pk_hp[k_use > kmin]) -
-                             np.log(pk_hm[k_use > kmin])) / \
-                            (2 * (np.log(Dp[ia]) - np.log(Dm[ia])))
-        # (hp-hm) term is cancelled out
-
-        dpk[k_use <= kmin] = dpklin[k_use <= kmin]
-        dpk[k_use > kmin] = dpknl[k_use > kmin]
-
-        dpk12[ia, :] = pk * (1. + (26. / 21.) * T_h - dpk / 3.)
-
+        T_h[k_use<=kmin] = 1
+        
+        T_h[k_use>kmin] = (np.log(pk_hp[k_use>kmin])-np.log(pk_hm[k_use>kmin]))/(2*(np.log(Dp[ia])-np.log(Dm[ia]))) # (hp-hm) term is cancelled out
+        
+        dpk[k_use<=kmin] = dpklin[k_use<=kmin]
+        dpk[k_use>kmin] = dpknl[k_use>kmin]
+        
+        dpk12[ia, :] = pk * (1. + (26./21.)*T_h -dpk/3.)
+    
     if use_log:
         if np.any(dpk12 <= 0):
             warnings.warn(
@@ -363,9 +370,316 @@ def Tk3D_SSC_Terasawa22(cosmo, deltah=0.02,
             use_log = False
         else:
             dpk12 = np.log(dpk12)
-
+    
     tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                 pk1_arr=dpk12, pk2_arr=dpk12,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik, is_logt=use_log)
+    return tk3d
+
+
+def pkarr_SSC_Terasawa22(cosmo,deltah=0.02,
+                        extra_parameters={"camb": {"halofit_version": "original",}},
+                       lk_arr=None, a_arr=None,
+                     extrap_order_lok=1, extrap_order_hik=1,
+                     use_log=False):
+    """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
+    the super-sample covariance trispectrum, given by the tensor
+    product of the power spectrum responses associated with the
+    two pairs of quantities being correlated. Currently this 
+    function only applicable to matter power spectrum in flat 
+    cosmology. Each response is calculated using the method 
+    developed in Terasawa et al. 2022 (arXiv:2205.10339v2) as:
+
+    .. math::
+        \\frac{\\partial P_{mm}(k)}{\\partial\\delta_L} =
+        \\left(1 + \\frac{26}{21}T_{h}(k)  -\\frac{1}{3}\\frac{d\\log P_{mm}(k)}{d\\log k}\\right)
+        P_{mm}(k),
+
+    where the :math:`T_{h}(k)` is the normalized growth response to
+    the Hubble parameter defined as 
+    :math:`T_{h}(k) = \\frac{d\\log P_{mm}(k)}{dh}/(2\\frac{d\\log D}{dh})`.
+    
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        deltah (float): the variation of h to compute T_{h}(k) by
+            the two-sided numerical derivative method.
+        a_arr (array): an array holding values of the scale factor
+            at which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of Mpc^-1) at
+            which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        extrap_order_lok (int): extrapolation order to be used on
+            k-values below the minimum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        extrap_order_hik (int): extrapolation order to be used on
+            k-values above the maximum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        use_log (bool): if `True`, the trispectrum will be
+            interpolated in log-space (unless negative or
+            zero values are found).
+
+    Returns:
+        :class:`~pyccl.tk3d.Tk3D`: SSC effective trispectrum.
+    """
+
+    if lk_arr is None:
+        status = 0
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status, cosmo=cosmo)
+    if a_arr is None:
+        status = 0
+        na = lib.get_pk_spline_na(cosmo.cosmo)
+        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        check(status, cosmo=cosmo)
+
+    k_use = np.exp(lk_arr)
+
+    Omega_c = cosmo["Omega_c"]
+    Omega_b = cosmo["Omega_b"]
+    h = cosmo["h"]
+    n_s = cosmo["n_s"]
+    A_s = cosmo["A_s"]
+    
+    #extra_parameters = {"camb": {"halofit_version": "original",}}
+
+    #set h-modified cosmology to take finite differencing
+    hp = h + deltah 
+    Omega_c_p = np.power((h/hp),2) * Omega_c #\Omega_c h^2 is fixed
+    Omega_b_p = np.power((h/hp),2) * Omega_b #\Omega_b h^2 is fixed
+
+    hm = h - deltah 
+    Omega_c_m = np.power((h/hm),2) * Omega_c #\Omega_c h^2 is fixed
+    Omega_b_m = np.power((h/hm),2) * Omega_b #\Omega_b h^2 is fixed
+
+    cosmo_hp = core.Cosmology(Omega_c=Omega_c_p,Omega_b=Omega_b_p,
+                            h=hp, n_s=n_s, A_s=A_s,
+                            transfer_function="boltzmann_camb",
+                            matter_power_spectrum="camb",
+                            extra_parameters=extra_parameters)
+    
+    cosmo_hm = core.Cosmology(Omega_c=Omega_c_m,Omega_b=Omega_b_m,
+                            h=hm, n_s=n_s, A_s=A_s,
+                            transfer_function="boltzmann_camb",
+                            matter_power_spectrum="camb",
+                            extra_parameters=extra_parameters)
+    
+    # Growth factor
+    Dp = cosmo_hp.growth_factor_unnorm(a_arr)
+    Dm = cosmo_hm.growth_factor_unnorm(a_arr)
+    
+    # Power spectrum
+    cosmo.compute_linear_power()
+    cosmo_hp.compute_linear_power()
+    cosmo_hm.compute_linear_power()
+    
+    pk2dlin = cosmo.get_linear_power('delta_matter:delta_matter')
+
+    pk2d = cosmo.get_nonlin_power('delta_matter:delta_matter')
+    pk2d_hp = cosmo_hp.get_nonlin_power('delta_matter:delta_matter')
+    pk2d_hm = cosmo_hm.get_nonlin_power('delta_matter:delta_matter')
+    
+    na = len(a_arr)
+    nk = len(k_use)
+    dpk12 = np.zeros([na,nk])
+    dpk = np.zeros(nk)
+    T_h = np.zeros(nk)
+   
+    kmin = 1e-2
+    for ia, aa in enumerate(a_arr):
+        
+        pk = pk2d.eval(k_use, aa, cosmo)
+        pk_hp_kh = pk2d_hp.eval(k_use, aa, cosmo_hp)
+        pk_hm_kh = pk2d_hm.eval(k_use, aa, cosmo_hm)
+        pk_hp = pk2d_hp.eval(k_use, aa, cosmo_hp)
+        pk_hm = pk2d_hm.eval(k_use, aa, cosmo_hm)
+        
+        dpknl = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo) 
+        dpklin = pk2dlin.eval_dlogpk_dlogk(k_use, aa, cosmo) 
+        
+        # use linear theory below kmin
+        T_h[k_use<=kmin] = 1
+        
+        T_h[k_use>kmin] = (np.log(pk_hp[k_use>kmin])-np.log(pk_hm[k_use>kmin]))/(2*(np.log(Dp[ia])-np.log(Dm[ia]))) # (hp-hm) term is cancelled out
+        
+        dpk[k_use<=kmin] = dpklin[k_use<=kmin]
+        dpk[k_use>kmin] = dpknl[k_use>kmin]
+        
+        dpk12[ia, :] = pk * (1. + (26./21.)*T_h -dpk/3.)
+    
+    if use_log:
+        if np.any(dpk12 <= 0):
+            warnings.warn(
+                "Some values were not positive. "
+                "Will not interpolate in log-space.",
+                category=CCLWarning)
+            use_log = False
+        else:
+            dpk12 = np.log(dpk12)
+    
+    return dpk12
+
+
+def Terasawa_Tk3D_SSC_linear_bias(cosmo, bias1=1, bias2=1, bias3=1,
+                                 bias4=1,
+                                 is_number_counts1=False,
+                                 is_number_counts2=False,
+                                 is_number_counts3=False,
+                                 is_number_counts4=False,
+                                 p_of_k_a=None, lk_arr=None,
+                                 a_arr=None, extrap_order_lok=1,
+                                 extrap_order_hik=1, use_log=False):
+    """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
+    the super-sample covariance trispectrum, given by the tensor
+    product of the power spectrum responses associated with the
+    two pairs of quantities being correlated. Each response is
+    calculated as:
+
+    .. math::
+        \\frac{\\partial P_{u,v}(k)}{\\partial\\delta_L} = b_u b_v \\left(
+        \\left(\\frac{68}{21}-\\frac{d\\log k^3P_L(k)}{d\\log k}\\right)
+        P_L(k)+I^1_2(k|u,v) - (b_{u} + b_{v}) P_{u,v}(k) \\right)
+
+    where the :math:`I^1_2` is defined in the documentation
+    :meth:`~HMCalculator.I_1_2` and :math:`b_{}` and :math:`b_{vv}` are the
+    linear halo biases for quantities :math:`u` and :math:`v`, respectively
+    (zero if they are not clustering).
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        hmc (:class:`HMCalculator`): a halo model calculator.
+        prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo NFW
+            profile.
+        bias1 (float or array): linear galaxy bias for quantity 1. If an array,
+        it has to have the shape of `a_arr`.
+        bias2 (float or array): linear galaxy bias for quantity 2.
+        bias3 (float or array): linear galaxy bias for quantity 3.
+        bias4 (float or array): linear galaxy bias for quantity 4.
+        is_number_counts1 (bool): If True, quantity 1 will be considered
+        number counts and the clustering counter terms computed. Default False.
+        is_number_counts2 (bool): as is_number_counts1 but for quantity 2.
+        is_number_counts3 (bool): as is_number_counts1 but for quantity 3.
+        is_number_counts4 (bool): as is_number_counts1 but for quantity 4.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If `None`,
+            the power spectrum stored within `cosmo` will be used.
+        a_arr (array): an array holding values of the scale factor
+            at which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of Mpc^-1) at
+            which the trispectrum should be calculated for
+            interpolation. If `None`, the internal values used
+            by `cosmo` will be used.
+        extrap_order_lok (int): extrapolation order to be used on
+            k-values below the minimum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        extrap_order_hik (int): extrapolation order to be used on
+            k-values above the maximum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        use_log (bool): if `True`, the trispectrum will be
+            interpolated in log-space (unless negative or
+            zero values are found).
+
+    Returns:
+        :class:`~pyccl.tk3d.Tk3D`: SSC effective trispectrum.
+    """
+    if lk_arr is None:
+        status = 0
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status, cosmo=cosmo)
+    if a_arr is None:
+        status = 0
+        na = lib.get_pk_spline_na(cosmo.cosmo)
+        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        check(status, cosmo=cosmo)
+
+    # Make sure biases are of the form number of a x number of k
+    ones = np.ones_like(a_arr)
+    bias1 *= ones
+    bias2 *= ones
+    bias3 *= ones
+    bias4 *= ones
+
+    k_use = np.exp(lk_arr)
+
+    # Power spectrum
+    #if isinstance(p_of_k_a, Pk2D):
+    #    pk2d = p_of_k_a
+#     elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+#         pk2d = cosmo.get_linear_power('delta_matter:delta_matter')
+#     elif str(p_of_k_a) == 'nonlinear':
+#         pk2d = cosmo.get_nonlin_power('delta_matter:delta_matter')
+    #else:
+    cosmo.compute_linear_power()
+    
+    pk2d = cosmo.get_nonlin_power('delta_matter:delta_matter')
+    
+        #raise TypeError("p_of_k_a must be `None`, \'linear\', "
+        #                "\'nonlinear\' or a `Pk2D` object")
+
+    na = len(a_arr)
+    nk = len(k_use)
+    dpk12 = np.zeros([na, nk])
+    dpk34 = np.zeros([na, nk])
+    
+    dpk = pkarr_SSC_Terasawa22(cosmo,deltah=0.02,
+                        extra_parameters={"camb": {"halofit_version": "original",}},
+                       lk_arr=lk_arr, a_arr=a_arr,
+                     extrap_order_lok=extrap_order_lok, extrap_order_hik=extrap_order_hik,
+                     use_log=False)
+    
+    for ia, aa in enumerate(a_arr):
+        
+        pk = pk2d.eval(k_use, aa, cosmo)
+        
+        # ~ [(47/21 - 1/3 dlogPk/dlogk) * Pk+I12]
+        #dpk12[ia] = ((2.2380952381-dpk/3)*pk + i12)
+        dpk12[ia] = dpk[ia]
+        dpk34[ia] = dpk12[ia].copy()  # Avoid surprises
+
+        # Counter terms for clustering (i.e. - (bA + bB) * PAB
+        if is_number_counts1 or is_number_counts2 or is_number_counts3 or \
+           is_number_counts4:
+            b1 = b2 = b3 = b4 = 0
+
+            P_12 = P_34 = pk #+ i02
+
+            if is_number_counts1:
+                b1 = bias1[ia]
+            if is_number_counts2:
+                b2 = bias2[ia]
+            if is_number_counts3:
+                b3 = bias3[ia]
+            if is_number_counts4:
+                b4 = bias4[ia]
+
+            dpk12[ia, :] -= (b1 + b2) * P_12
+            dpk34[ia, :] -= (b3 + b4) * P_34
+
+        dpk12[ia] *= bias1[ia] * bias2[ia]
+        dpk34[ia] *= bias3[ia] * bias4[ia]
+
+    if use_log:
+        if np.any(dpk12 <= 0) or np.any(dpk34 <= 0):
+            warnings.warn(
+                "Some values were not positive. "
+                "Will not interpolate in log-space.",
+                category=CCLWarning)
+            use_log = False
+        else:
+            dpk12 = np.log(dpk12)
+            dpk34 = np.log(dpk34)
+
+    tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr,
+                pk1_arr=dpk12, pk2_arr=dpk34,
                 extrap_order_lok=extrap_order_lok,
                 extrap_order_hik=extrap_order_hik, is_logt=use_log)
     return tk3d

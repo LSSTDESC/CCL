@@ -2,10 +2,19 @@ from .. import ccllib as lib
 from ..pyutils import check
 from ..background import growth_factor, growth_rate
 from .massdef import MassDef, mass2radius_lagrangian
-from ..power import linear_matter_power, sigmaM
+from ..power import linear_matter_power, sigmaM, sigma8
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 import functools
+
+# Terasawa
+from scipy import optimize
+from colossus.cosmology import cosmology as colcosmology
+from colossus.halo import concentration as colconcentration
+from scipy.interpolate import InterpolatedUnivariateSpline as ius
+
+
+#
 
 
 class Concentration(object):
@@ -18,13 +27,15 @@ class Concentration(object):
     """
     name = 'default'
 
-    def __init__(self, mass_def=None):
+    def __init__(self, mass_def=None, mdef_other=None):
         if mass_def is not None:
             if self._check_mdef(mass_def):
-                raise ValueError(
-                    f"Mass definition {mass_def.Delta}-{mass_def.rho_type} "
-                    f"is not compatible with c(M) {self.name} configuration.")
+                if mdef_other is None:
+                    raise ValueError(
+                        f"Mass definition {mass_def.Delta}-{mass_def.rho_type} "
+                        f"is not compatible with c(M) {self.name} configuration.")
             self.mdef = mass_def
+            self.mdef_other = mdef_other
         else:
             self._default_mdef()
         self._setup()
@@ -74,10 +85,11 @@ class Concentration(object):
             float or array_like: mass according to this object's
             mass definition.
         """
-        if mdef_other is not None:
-            M_use = mdef_other.translate_mass(cosmo, M, a, self.mdef)
-        else:
-            M_use = M
+#         if mdef_other is not None:
+#             M_use = mdef_other.translate_mass(cosmo, M, a, self.mdef)
+#         else:
+#             M_use = M
+        M_use = M
         return M_use
 
     def get_concentration(self, cosmo, M, a, mdef_other=None):
@@ -119,7 +131,7 @@ class Concentration(object):
             raise ValueError(f"Concentration {name} not implemented.")
 
 
-class ConcentrationDiemer15(Concentration):
+class ConcentrationDiemer15_colossus(Concentration):
     """ Concentration-mass relation by Diemer & Kravtsov 2015
     (arXiv:1407.4730). This parametrization is only valid for
     S.O. masses with Delta = 200-critical.
@@ -133,7 +145,137 @@ class ConcentrationDiemer15(Concentration):
     name = 'Diemer15'
 
     def __init__(self, mdef=None):
-        super(ConcentrationDiemer15, self).__init__(mdef)
+        super(ConcentrationDiemer15_colossus, self).__init__(mdef)
+
+    def _default_mdef(self):
+        self.mdef = MassDef(200, 'matter')
+
+    def _setup(self):
+        self.kappa = 1.0
+        self.phi_0 = 6.58
+        self.phi_1 = 1.27
+        self.eta_0 = 7.28
+        self.eta_1 = 1.56
+        self.alpha = 1.08
+        self.beta = 1.77
+
+    def _check_mdef(self, mdef):
+        if isinstance(mdef.Delta, str):
+            return True
+        elif not ((int(mdef.Delta) == 200) and
+                  (mdef.rho_type == 'matter')):
+            return True
+        return False
+    
+    def _concentration(self, cosmo, M, a):#='diemer15'
+        Oc0 = cosmo["Omega_c"]
+        Ob0 = cosmo["Omega_b"]
+        h = cosmo["h"]
+        n_s = cosmo["n_s"]
+        if cosmo["sigma8"] is None:
+            self.sigma8 = sigma8(cosmo)
+        else:
+            self.sigma8 = cosmo["sigma8"]
+        H0 = 100 * h
+        Om0 = Oc0 + Ob0
+        Mh = M * h  # Msol/h
+        Mh_int = np.logspace(12,17)
+        params = {'flat': True, 'H0': H0, 'Om0': Om0,
+                  'Ob0': Ob0, 'sigma8': self.sigma8, 'ns': n_s, 'persistence': ''}
+        colcosmo = colcosmology.setCosmology('myCosmo', params)
+        c = np.zeros(len(Mh_int))
+        for i in range(len(Mh_int)):
+            c[i] = colconcentration.concentration(Mh_int[i], '200m', z=1./a -1, model="diemer15")
+        
+        c_func = ius(Mh_int,c)
+        c_out = c_func(Mh)
+        return c_out
+    
+
+class ConcentrationDiemer15_ius(Concentration):
+    """ Concentration-mass relation by Diemer & Kravtsov 2015
+    (arXiv:1407.4730). This parametrization is only valid for
+    S.O. masses with Delta = 200-critical.
+
+    Args:
+        mdef (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object that fixes
+            the mass definition used by this c(M)
+            parametrization.
+    """
+    name = 'Diemer15'
+
+    def __init__(self, mdef=None, mdef_other=None):
+        super(ConcentrationDiemer15_ius, self).__init__(mdef,mdef_other)
+
+    def _default_mdef(self):
+        self.mdef = MassDef(200, 'critical')
+
+    def _setup(self):
+        self.kappa = 1.0
+        self.phi_0 = 6.58
+        self.phi_1 = 1.27
+        self.eta_0 = 7.28
+        self.eta_1 = 1.56
+        self.alpha = 1.08
+        self.beta = 1.77
+
+    def _check_mdef(self, mdef):
+        if isinstance(mdef.Delta, str):
+            return True
+        elif not ((int(mdef.Delta) == 200) and
+                  (mdef.rho_type == 'critical')):
+            return True
+        return False
+
+    def _concentration(self, cosmo, M, a):
+        M_int = np.logspace(7,17)   #np.atleast_1d(M)
+
+        # Compute power spectrum slope
+        R = mass2radius_lagrangian(cosmo, M_int)
+        lk_R = np.log(2.0 * np.pi / R * self.kappa)
+        # Using central finite differences
+        lk_hi = lk_R + 0.005
+        lk_lo = lk_R - 0.005
+        dlpk = np.log(linear_matter_power(cosmo, np.exp(lk_hi), a) /
+                      linear_matter_power(cosmo, np.exp(lk_lo), a))
+        dlk = lk_hi - lk_lo
+        n = dlpk / dlk
+
+        sig = sigmaM(cosmo, M_int, a)
+        delta_c = 1.68647
+        nu = delta_c / sig
+
+        floor = self.phi_0 + n * self.phi_1
+        nu0 = self.eta_0 + n * self.eta_1
+        c = 0.5 * floor * ((nu0 / nu)**self.alpha +
+                           (nu / nu0)**self.beta)
+        #if np.ndim(M) == 0:
+        #    c = c[0]
+        
+        if self.mdef_other is not None:
+            M_other = self.mdef.translate_mass(cosmo, M_int, a, self.mdef_other)  # mdef into m_def_other (:obj:`MassDef`): another mass definition.
+        
+        c_func = ius(M_other,c)
+        c_out = c_func(M)
+        
+        return c_out
+
+class ConcentrationDiemer15(Concentration):
+    """ Concentration-mass relation by Diemer & Kravtsov 2015
+    (arXiv:1407.4730). This parametrization is only valid for
+    S.O. masses with Delta = 200-critical.
+
+    Args:
+        mdef (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object that fixes
+            the mass definition used by this c(M)
+            parametrization.
+    """
+    name = 'Diemer15'
+
+    def __init__(self, mdef=None, mdef_other=None):
+        super(ConcentrationDiemer15, self).__init__(mdef,mdef_other)
 
     def _default_mdef(self):
         self.mdef = MassDef(200, 'critical')
@@ -181,7 +323,6 @@ class ConcentrationDiemer15(Concentration):
             c = c[0]
 
         return c
-
 
 class ConcentrationBhattacharya13(Concentration):
     """ Concentration-mass relation by Bhattacharya et al. 2013

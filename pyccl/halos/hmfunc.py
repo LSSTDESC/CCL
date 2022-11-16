@@ -6,6 +6,7 @@ from .massdef import MassDef, MassDef200m
 import numpy as np
 import functools
 
+from dark_emulator import darkemu
 
 class MassFunc(object):
     """ This class enables the calculation of halo mass functions.
@@ -766,7 +767,69 @@ class MassFuncAngulo12(MassFunc):
         return self.A * ((self.a / sigM)**self.b + 1.) * \
             np.exp(-self.c / sigM**2)
 
+class MassFuncDarkEmulator(MassFunc):
+    """ Implements mass function described in 2019ApJ...884..29P.
+    This parametrization is only valid for '200m' masses.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object.
+            this parametrization accepts FoF masses only.
+            If `None`, FoF masses will be used.
+        mass_def_strict (bool): if False, consistency of the mass
+            definition will be ignored.
+    """
+    name = 'DarkEmulator'
+
+    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+        super(MassFuncDarkEmulator, self).__init__(cosmo,
+                                              mass_def,
+                                              mass_def_strict)
+    def _default_mdef(self):
+        self.mdef = MassDef200m()
+
+    def _setup(self, cosmo):
+        Omega_c = cosmo["Omega_c"]
+        Omega_b = cosmo["Omega_b"]
+        h = cosmo["h"]
+        n_s = cosmo["n_s"]
+        A_s = cosmo["A_s"]
+
+        omega_c = Omega_c * h ** 2
+        omega_b = Omega_b * h ** 2
+        omega_nu = 0.00064
+        Omega_L = 1 - ((omega_c + omega_b + omega_nu) / h **2)
+
+        emu = darkemu.de_interface.base_class()
+
+        #Parameters cparam (numpy array) : Cosmological parameters (𝜔𝑏, 𝜔𝑐, Ω𝑑𝑒, ln(10^10 𝐴𝑠), 𝑛𝑠, 𝑤)  
+        cparam = np.array([omega_b,omega_c,Omega_L,np.log(10 ** 10 * A_s),n_s,-1.])
+        emu.set_cosmology(cparam)
+        self.emu = emu
+    
+    def _check_mdef_strict(self, mdef):
+        if isinstance(mdef.Delta, str):
+            return True
+        elif int(mdef.Delta) == 200:
+            if (mdef.rho_type != 'matter'):
+                return True
+        return False
+
+    def _get_fsigma(self, cosmo, sigM, a, lnM):
+        
+        alpha = 10**(-(0.75/(np.log10(200/75.)))**1.2)
+        
+        self.A = self.emu.get_A_HMF(1/a - 1)
+        self.a = self.emu.get_a_HMF(1/a - 1)
+        self.b = 2.57 * a ** alpha
+        self.c = 1.19
+
+        return self.A * ((self.b / sigM)**self.a + 1.) * \
+            np.exp(-self.c / sigM**2)
+
 
 @functools.wraps(MassFunc.from_name)
 def mass_function_from_name(name):
     return MassFunc.from_name(name)
+
