@@ -113,4 +113,4 @@ def test_cls_mg():
     cl0 = ccl.angular_cl(cosmo_MG, tr_MG, tr_MG, ell)
     cosmo_calc.compute_growth()
     cl1 = ccl.angular_cl(cosmo_calc, tr_calc, tr_calc, ell)
-    assert not (1 - cl1 / cl0).any()  # all equal to zero
+    assert np.all(np.fabs(1 - cl1 / cl0) < 1E-10)
