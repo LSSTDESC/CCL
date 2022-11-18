@@ -1846,14 +1846,15 @@ class SatelliteShearHOD(HaloProfileHOD):
     def _get_prefactor(self, cosmo, a, hmc):
         '''
         Compute the prefactor due to the satellite intrinsic shear
-        halo model, which is the satellite galaxy fraction f_s=ns/(ng+ns)
-        divided by the satellite galaxy number density ns.
+        halo model, which is the satellite galaxy fraction f_s=ns/(nc+ns)
+        divided by the satellite galaxy number density ns, making it
+        just 1/ngal.
         '''
         from scipy.integrate import simps
         M_use = hmc._mass
         ngal = simps(self._Nc(M_use, a) * (1+self._Ns(M_use, a)) *
-                     hmc._massfunc.get_mass_function(cosmo, a=a, M=M_use) /
-                     M_use, M_use)
+                     hmc._massfunc.get_mass_function(cosmo, a=a, M=M_use),
+                     np.log10(M_use))
         return 1/ngal
 
     def _I_integral(self, a, b):
