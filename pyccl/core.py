@@ -1140,6 +1140,10 @@ class CosmologyCalculator(Cosmology):
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
+        mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
+        sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
         background (:obj:`dict`): a dictionary describing the background
             expansion. It must contain three mandatory entries: `'a'`: an
             array of monotonically ascending scale-factor values. `'chi'`:
@@ -1197,7 +1201,7 @@ class CosmologyCalculator(Cosmology):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=None, background=None, growth=None,
+            T_CMB=None, mu_0=0., sigma_0=0., background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None):
         if pk_linear:
             transfer_function = 'calculator'
@@ -1214,7 +1218,7 @@ class CosmologyCalculator(Cosmology):
             n_s=n_s, sigma8=sigma8, A_s=A_s,
             Omega_k=Omega_k, Omega_g=Omega_g,
             Neff=Neff, m_nu=m_nu, m_nu_type=m_nu_type,
-            w0=w0, wa=wa, T_CMB=T_CMB,
+            w0=w0, wa=wa, T_CMB=T_CMB, mu_0=mu_0, sigma_0=sigma_0,
             transfer_function=transfer_function,
             matter_power_spectrum=matter_power_spectrum)
 
