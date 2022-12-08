@@ -667,7 +667,8 @@ def _get_spline3d_arrays(gsl_spline, length):
 
 
 def check_openmp_version():
-    """Return the OpenMP specification release date. Return 0 if OpenMP is not working.
+    """Return the OpenMP specification release date.
+    Return 0 if OpenMP is not working.
     """
 
     return lib.openmp_version()
