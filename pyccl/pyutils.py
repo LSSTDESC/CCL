@@ -664,3 +664,19 @@ def _get_spline3d_arrays(gsl_spline, length):
     check(status)
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))
+
+
+def check_openmp_version():
+    """Return the OpenMP specification release date.
+    Return 0 if OpenMP is not working.
+    """
+
+    return lib.openmp_version()
+
+
+def check_openmp_threads():
+    """Returns the number of processors available to the device.
+    Return 0 if OpenMP is not working.
+    """
+
+    return lib.openmp_threads()
