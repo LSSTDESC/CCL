@@ -280,11 +280,11 @@ class Cosmology(object):
         """
         def make_yaml_friendly(d):
             for k, v in d.items():
-                if isinstance(v, np.floating):
+                if isinstance(v, float):
                     d[k] = float(v)
-                elif isinstance(v, np.integer):
+                elif isinstance(v, int):
                     d[k] = int(v)
-                elif isinstance(v, np.bool):
+                elif isinstance(v, bool):
                     d[k] = bool(v)
                 elif isinstance(v, dict):
                     make_yaml_friendly(v)
