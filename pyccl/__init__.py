@@ -19,7 +19,7 @@ from . import ccllib as lib
 # monkey patch for isitgr and fast-pt if Numpy>=1.24
 from packaging.version import parse
 import numpy as np
-if (parse(np.__version__) >= parse('1.24')):
+if parse(np.__version__) >= parse('1.24'):
     np.int = int
 del parse
 del np
