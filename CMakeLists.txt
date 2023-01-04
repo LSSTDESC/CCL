@@ -65,13 +65,11 @@ set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99
 set(CMAKE_C_FLAGS_DEBUG   "-O0 -g -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
 
 if(OpenMP_C_FOUND)
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OpenMP_C_FLAGS}")
-    include_directories(${OpenMP_C_INCLUDE_DIR})
-    if(FORCE_OPENMP)
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${OpenMP_C_FLAGS}")
+    if ((("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)+Clang$") AND (CMAKE_C_COMPILER_VERSION LESS 13)) AND (NOT FORCE_OPENMP))
+    else()
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OpenMP_C_FLAGS}")
+        include_directories(${OpenMP_C_INCLUDE_DIR})
     endif()
-else()
-    set(openmp_lib "")
 endif()
 
 if(DEFINED ENV{CONDA_PREFIX})
