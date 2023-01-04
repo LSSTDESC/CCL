@@ -13,7 +13,7 @@ project(ccl VERSION 2.0.0)
 # Uncomment to get detailed build outputs
 # set( CMAKE_VERBOSE_MAKEFILE on )
 
-option(FORCE_OPENMP "Forcibly use OpenMP " NO)
+option(FORCE_OPENMP "Forcibly use OpenMP" NO)
 
 # Defines list of CCL src files
 set(CCL_SRC
@@ -67,9 +67,9 @@ set(CMAKE_C_FLAGS_DEBUG   "-O0 -g -fomit-frame-pointer -fno-common -fPIC -std=gn
 if(OpenMP_C_FOUND)
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OpenMP_C_FLAGS}")
     if(FORCE_OPENMP)
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${OpenMP_C_FLAGS}")
         include_directories(${OpenMP_C_INCLUDE_DIR})
         link_libraries(${OpenMP_libomp_LIBRARY})
+        set(openmp_lib "")
     endif()
 else()
     set(openmp_lib "")
