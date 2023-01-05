@@ -57,8 +57,13 @@ include(BuildGSL)
 # option to use a pre-installed version of angpow
 #include(BuildAngpow)
 
-# Check if OpemMP is installed (only matters for macOS clang)
-find_package(OpenMP)
+if(("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)+Clang$") AND (CMAKE_C_COMPILER_VERSION LESS 13) AND NOT FORCE_OPENMP)
+    # Apple Clang 12 (and maybe below) have issues with OpenMP and cmake, so we don't try to find it
+    # Anything else supports OpenMP
+    # This can be overwritten by setting FORCE_OPENMP=TRUE
+else()
+    find_package(OpenMP)
+endif()
 
 # Compilation flags
 set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
@@ -70,8 +75,6 @@ if(OpenMP_C_FOUND)
     if(FORCE_OPENMP)
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${OpenMP_C_FLAGS}")
     endif()
-else()
-    set(openmp_lib "")
 endif()
 
 if(DEFINED ENV{CONDA_PREFIX})
