@@ -61,7 +61,7 @@ if(("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)+Clang$") AND (CMAKE_C_COMPILER_VE
     # Apple Clang 12 (and maybe below) have issues with OpenMP and cmake, so we don't try to find it
     # Anything else supports OpenMP
     # This can be overwritten by setting FORCE_OPENMP=TRUE and adding "-L/usr/local/lib -lomp" to LDFLAGS
-    # by issuing 'export LDFLAGS="$LDFLAGS -L/usr/local/lib -lomp"'
+    # by issuing 'export LDFLAGS="$LDFLAGS -L/usr/local/lib -lomp"' in the command line
 else()
     find_package(OpenMP)
 endif()
