@@ -114,6 +114,7 @@ endif()
 # The reason for building ccl as a shared library is that we can link it to
 # class directly, and it's not a dependency anymore
 add_library(ccl SHARED $<TARGET_OBJECTS:objlib>)
+# The generator expression $<$<BOOL:${OpenMP_C_FOUND}>:OpenMP::OpenMP_C> adds the OpenMP library if OpenMP is available
 target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m $<$<BOOL:${OpenMP_C_FOUND}>:OpenMP::OpenMP_C>)
 
 # Builds the test suite
