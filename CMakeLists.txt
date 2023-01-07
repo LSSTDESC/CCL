@@ -57,8 +57,14 @@ include(BuildGSL)
 # option to use a pre-installed version of angpow
 #include(BuildAngpow)
 
-# Check if OpemMP is installed (only matters for macOS clang)
-find_package(OpenMP)
+if(("${CMAKE_C_COMPILER_ID}" MATCHES "^(Apple)+Clang$") AND (CMAKE_C_COMPILER_VERSION LESS 13) AND NOT FORCE_OPENMP)
+    # Apple Clang 12 (and maybe below) have issues with OpenMP and cmake, so we don't try to find it
+    # Anything else supports OpenMP
+    # This can be overwritten by setting FORCE_OPENMP=TRUE and adding "-L/usr/local/lib -lomp" to LDFLAGS
+    # by issuing 'export LDFLAGS="$LDFLAGS -L/usr/local/lib -lomp"' in the command line
+else()
+    find_package(OpenMP)
+endif()
 
 # Compilation flags
 set(CMAKE_C_FLAGS_RELEASE "-O3 -fomit-frame-pointer -fno-common -fPIC -std=gnu99 -DHAVE_ANGPOW")
@@ -67,12 +73,9 @@ set(CMAKE_C_FLAGS_DEBUG   "-O0 -g -fomit-frame-pointer -fno-common -fPIC -std=gn
 if(OpenMP_C_FOUND)
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OpenMP_C_FLAGS}")
     include_directories(${OpenMP_C_INCLUDE_DIR})
-    link_libraries(${OpenMP_libomp_LIBRARY})
     if(FORCE_OPENMP)
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${OpenMP_C_FLAGS}")
     endif()
-else()
-    set(openmp_lib "")
 endif()
 
 if(DEFINED ENV{CONDA_PREFIX})
@@ -111,7 +114,8 @@ endif()
 # The reason for building ccl as a shared library is that we can link it to
 # class directly, and it's not a dependency anymore
 add_library(ccl SHARED $<TARGET_OBJECTS:objlib>)
-target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m)
+# The generator expression $<$<BOOL:${OpenMP_C_FOUND}>:OpenMP::OpenMP_C> adds the OpenMP library if OpenMP is available
+target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} ${ANGPOW_LIBRARIES} m $<$<BOOL:${OpenMP_C_FOUND}>:OpenMP::OpenMP_C>)
 
 # Builds the test suite
 add_executable(check_ccl ${TEST_SRC})
