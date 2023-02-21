@@ -23,3 +23,4 @@ def test_tk3d_ssc_terasawa22():
     
     # Check result
     assert np.all(np.isfinite(trisp))    
+    
