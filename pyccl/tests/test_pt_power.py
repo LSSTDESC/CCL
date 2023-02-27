@@ -333,3 +333,21 @@ def test_return_ptc():
     assert np.allclose(pk_2.eval(ks, 1., COSMO), pk.eval(ks, 1., COSMO))
     assert np.allclose(pee2_2.eval(ks, 1., COSMO), pee2.eval(ks, 1., COSMO))
     assert np.allclose(pbb2_2.eval(ks, 1., COSMO), pbb2.eval(ks, 1., COSMO))
+
+
+def test_pt_no_ptc_update():
+    pee1 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'], ptc=PTC)
+    pee1_no_update = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'], ptc=PTC,
+                                           update_ptc=False)
+
+    COSMO2 = ccl.Cosmology(
+        Omega_c=COSMO["Omega_c"], Omega_b=COSMO["Omega_b"], h=COSMO["h"],
+        sigma8=COSMO["sigma8"]+0.05, n_s=COSMO["n_s"],
+        transfer_function='bbks', matter_power_spectrum='linear')
+
+    pee2_no_update = ccl.nl_pt.get_pt_pk2d(COSMO2, TRS['TI'], ptc=PTC,
+                                           update_ptc=False)
+    pee2 = ccl.nl_pt.get_pt_pk2d(COSMO2, TRS['TI'], ptc=PTC)
+
+    assert pee1.eval(0.1, 0.9, COSMO) == pee1_no_update.eval(0.1, 0.9, COSMO)
+    assert pee2.eval(0.1, 0.9, COSMO) != pee2_no_update.eval(0.1, 0.9, COSMO2)
