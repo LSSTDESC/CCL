@@ -115,8 +115,17 @@ def test_cib_2pt_raises():
 def test_einasto_smoke():
     c = ccl.halos.ConcentrationDuffy08(M200)
     p = ccl.halos.HaloProfileEinasto(c)
-    p.update_parameters(alpha=1.)
-    assert p._get_alpha(COSMO, 1E14, 1., M200) == 1.
+    for M in [1E14, [1E14, 1E15]]:
+        alpha_from_cosmo = p._get_alpha(COSMO, M, 1., M200)
+
+        p.update_parameters(alpha=1.)
+        alpha = p._get_alpha(COSMO, M, 1., M200)
+        assert np.ndim(M) == np.ndim(alpha)
+        assert np.all(p._get_alpha(COSMO, M, 1., M200) == np.full_like(M, 1.))
+
+        p.update_parameters(alpha='cosmo')
+        assert np.ndim(M) == np.ndim(alpha_from_cosmo)
+        assert np.all(p._get_alpha(COSMO, M, 1., M200) == alpha_from_cosmo)
 
 
 def test_gnfw_smoke():
