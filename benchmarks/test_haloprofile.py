@@ -200,5 +200,53 @@ def test_satellite_shear_profile():
                                                     mass_eval,
                                                     1 / (1 + z_eval),
                                                     hmd_200m)
-
+    # This benchmark is not accurate enough and only serves as a
+    # qualitative test, which is why the accuracy criterion is so low.
     assert np.all(np.fabs(-gamma_k_CCL / gamma_k_CosmoSIS - 1) < 0.8)
+    # An in-house benchmark test has been developed, testing the accuracy
+    # of the FFTLog method against a highly accurate integration method as
+    # described in benchmarks/data/codes/halomod_IA_FFTLog_accuracy.ipynb.
+    l_arr, cl_GI_benchmark, cl_II_benchmark = np.loadtxt(
+        './benchmarks/data/IA_halomodel_Cell_test.txt',
+        delimiter=',', unpack=True)
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045,
+                          h=0.67, sigma8=0.83, n_s=0.96)
+    k_arr = np.geomspace(1E-3, 1e2, 128)  # For evaluating
+    a_arr = np.linspace(0.1, 1, 16)
+
+    hmd_200m = ccl.halos.MassDef200m()
+    cM = ccl.halos.ConcentrationDuffy08(hmd_200m)
+    nM = ccl.halos.MassFuncTinker08(cosmo, mass_def=hmd_200m)
+    bM = ccl.halos.HaloBiasTinker10(cosmo, mass_def=hmd_200m)
+    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd_200m, nlog10M=64)
+
+    sat_gamma_HOD = ccl.halos.SatelliteShearHOD(cM)
+    NFW = ccl.halos.HaloProfileNFW(cM, truncated=True, fourier_analytic=True)
+
+    pk_GI_1h = ccl.halos.halomod_Pk2D(cosmo, hmc, NFW,
+                                      normprof1=True,
+                                      prof2=sat_gamma_HOD,
+                                      get_2h=False,
+                                      lk_arr=np.log(k_arr),
+                                      a_arr=a_arr)
+    pk_II_1h = ccl.halos.halomod_Pk2D(cosmo, hmc, sat_gamma_HOD,
+                                      get_2h=False,
+                                      lk_arr=np.log(k_arr),
+                                      a_arr=a_arr)
+
+    z_arr = np.linspace(0., 3., 256)
+    z0 = 0.1
+    pz = 1. / (2. * z0) * (z_arr / z0) ** 2. * np.exp(-z_arr / z0)
+
+    b_IA = np.ones(len(z_arr))  # A_IA = 1 in the NLA model
+    ia_tracer = ccl.WeakLensingTracer(cosmo, dndz=(z_arr, pz), has_shear=False,
+                                      ia_bias=(z_arr, b_IA), use_A_ia=False)
+    wl_tracer = ccl.WeakLensingTracer(cosmo, dndz=(z_arr, pz))
+
+    cl_GI_1h = ccl.angular_cl(cosmo, wl_tracer, ia_tracer, l_arr,
+                              p_of_k_a=pk_GI_1h)
+    cl_II_1h = ccl.angular_cl(cosmo, ia_tracer, ia_tracer, l_arr,
+                              p_of_k_a=pk_II_1h)
+
+    assert np.all(np.fabs(cl_GI_1h / cl_GI_benchmark - 1) < 0.01)
+    assert np.all(np.fabs(cl_II_1h / cl_II_benchmark - 1) < 0.01)

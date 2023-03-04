@@ -59,7 +59,7 @@ def test_IA_halo_model():
                  ccl.halos.SatelliteShearHOD,
                  cM, fc_0=0.5)
 
-    # Preliminary test on FFTLog accuracy vs simps method.
+    # Testing FFTLog accuracy vs simps and spline method.
     s_g_HOD1 = ccl.halos.SatelliteShearHOD(cM)
     s_g_HOD2 = ccl.halos.SatelliteShearHOD(cM, integration_method='simps')
     s_g_HOD3 = ccl.halos.SatelliteShearHOD(cM, integration_method='spline')
@@ -73,3 +73,22 @@ def test_IA_halo_model():
     with pytest.raises(ValueError):
         ccl.halos.SatelliteShearHOD(cM,
                                     integration_method="something_else")
+
+
+def test_prefactor():
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.83, n_s=0.96)
+
+    hmd_200m = ccl.halos.MassDef200m()
+    cM = ccl.halos.ConcentrationDuffy08(hmd_200m)
+    nM = ccl.halos.MassFuncTinker08(cosmo, mass_def=hmd_200m)
+    bM = ccl.halos.HaloBiasTinker10(cosmo, mass_def=hmd_200m)
+    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd_200m)
+
+    profile = ccl.halos.HaloProfile()
+    assert np.all(np.abs(profile._get_prefactor(
+        cosmo, 1., hmc)-1.0 < 1e-10))
+
+    sat_gamma_HOD = ccl.halos.SatelliteShearHOD(cM)
+    assert sat_gamma_HOD._get_prefactor(
+        cosmo, 1., hmc) > 0

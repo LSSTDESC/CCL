@@ -1809,8 +1809,8 @@ class SatelliteShearHOD(HaloProfileHOD):
         self.cM = c_M_relation
         if 'fc_0' in kwargs.keys() or 'fc_p' in kwargs.keys():
             warnings.warn(
-                'Provided fractions for central galaxies are not zero.'
-                'Setting them to zero (fc_0=fc_p=0).',
+                'Fractions for central galaxies were provided but'
+                'are not tweakable and will be set to zero (fc_0=fc_p=0).',
                 category=pyccl.CCLWarning)
         kwargs['fc_0'] = 0.0
         kwargs['fc_p'] = 0.0
@@ -1819,13 +1819,13 @@ class SatelliteShearHOD(HaloProfileHOD):
                                                 **kwargs)
         self.update_precision_fftlog(padding_lo_fftlog=1E-2,
                                      padding_hi_fftlog=1E3,
-                                     n_per_decade=100,
+                                     n_per_decade=350,
                                      plaw_fourier=-3.7)
         self.update_r_integral_params()
 
     def update_r_integral_params(self, rmin=0.001, N_r=512, N_jn=10000):
         '''
-        Update the parameters used in the case of Simpson or
+        Update the parameters used in the case of Simpson's or
         spline integration.
 
         Args:
@@ -1854,7 +1854,7 @@ class SatelliteShearHOD(HaloProfileHOD):
         M_use = hmc._mass
         ngal = simps(self._Nc(M_use, a) * (1+self._Ns(M_use, a)) *
                      hmc._massfunc.get_mass_function(cosmo, a=a, M=M_use),
-                     np.log10(M_use))
+                     hmc._lmass)
         return 1/ngal
 
     def _I_integral(self, a, b):
