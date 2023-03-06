@@ -13,16 +13,20 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 del environ, path
 
+# Patch for deprecated alias in Numpy >= 1.20.0 (used in ISiTGR & FAST-PT).
+# Deprecation cycle starts in Numpy 1.20 and ends in Numpy 1.24.
+from packaging.version import parse
+import numpy
+numpy.int = int if parse(numpy.__version__) >= parse("1.20.0") else numpy.int
+del parse, numpy
+
 # SWIG-generated
 from . import ccllib as lib
 
-# monkey patch for isitgr and fast-pt if Numpy>=1.24
-from packaging.version import parse
-import numpy as np
-if parse(np.__version__) >= parse('1.24'):
-    np.int = int
-del parse
-del np
+# CCL base
+from .base import (
+    hash_,
+)
 
 # Errors
 from .errors import (
@@ -135,10 +139,8 @@ from .covariances import (
     sigma2_B_from_mask,
 )
 
-
 # Miscellaneous
 from .pyutils import debug_mode, resample_array
-
 
 # Deprecated & Renamed modules
 from .halomodel import (
@@ -164,6 +166,7 @@ from .haloprofile import (
 
 __all__ = (
     'lib',
+    'hash_',
     'CCLParameters', 'spline_params', 'gsl_params', 'physical_constants',
     'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
