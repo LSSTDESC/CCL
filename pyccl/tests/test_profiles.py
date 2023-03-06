@@ -71,9 +71,15 @@ def test_empirical_smoke(prof_class):
             p = prof_class(c,
                            cumul2d_analytic=True,
                            truncated=True)
+        p = prof_class(c)
+        smoke_assert_prof_real(p, method='_fourier_analytic')
+        smoke_assert_prof_real(p, method='_projected_analytic')
+        smoke_assert_prof_real(p, method='_cumul2d_analytic')
 
     p = prof_class(c)
-    smoke_assert_prof_real(p)
+    smoke_assert_prof_real(p, method='real')
+    smoke_assert_prof_real(p, method='projected')
+    smoke_assert_prof_real(p, method='fourier')
 
 
 def test_cib_smoke():
@@ -106,6 +112,22 @@ def test_cib_2pt_raises():
                          prof2=p_tSZ, mass_def=M200)
 
 
+def test_einasto_smoke():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p = ccl.halos.HaloProfileEinasto(c)
+    for M in [1E14, [1E14, 1E15]]:
+        alpha_from_cosmo = p._get_alpha(COSMO, M, 1., M200)
+
+        p.update_parameters(alpha=1.)
+        alpha = p._get_alpha(COSMO, M, 1., M200)
+        assert np.ndim(M) == np.ndim(alpha)
+        assert np.all(p._get_alpha(COSMO, M, 1., M200) == np.full_like(M, 1.))
+
+        p.update_parameters(alpha='cosmo')
+        assert np.ndim(M) == np.ndim(alpha_from_cosmo)
+        assert np.all(p._get_alpha(COSMO, M, 1., M200) == alpha_from_cosmo)
+
+
 def test_gnfw_smoke():
     p = ccl.halos.HaloProfilePressureGNFW()
     beta_old = p.beta
@@ -128,7 +150,7 @@ def test_gnfw_refourier():
     p._integ_interp()
     p_f1 = p.fourier(COSMO, 1., 1E13, 1., M500c)
     # Check the Fourier profile gets recalculated
-    p.update_parameters(alpha=1.32)
+    p.update_parameters(alpha=1.32, c500=p.c500+0.1)
     p_f2 = p.fourier(COSMO, 1., 1E13, 1., M500c)
     assert p_f1 != p_f2
 

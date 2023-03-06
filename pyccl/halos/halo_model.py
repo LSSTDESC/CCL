@@ -12,7 +12,7 @@ from ..power import linear_matter_power, nonlin_matter_power
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
-from ..parameters import physical_constants
+from ..parameters import physical_constants as const
 import numpy as np
 
 
@@ -107,34 +107,38 @@ class HMCalculator(object):
         else:
             self._integrator = self._integ_spline
 
-        self._a_current_mf = -1
-        self._a_current_bf = -1
+        # Cache last results for mass function and halo bias.
+        self._cosmo_mf = self._cosmo_bf = None
+        self._a_mf = self._a_bf = -1
 
     def _integ_spline(self, fM, lM):
         # Spline integrator
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
-    def _get_ingredients(self, a, cosmo, get_bf):
-        # Compute mass function and bias (if needed) at a new
-        # value of the scale factor and/or with a new Cosmology
-        rho0 = None
-        if a != self._a_current_mf:
-            self._a_current_mf = a
-            rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
-            self._mf = self._massfunc.get_mass_function(
-                cosmo, self._mass, a, mdef_other=self._mdef)
-            self._mf0 = (rho0 - self._integrator(
-                self._mf*self._mass, self._lmass)) / self._m0
+    def _get_mass_function(self, cosmo, a, rho0):
+        # Compute the mass function at this cosmo and a.
+        if a != self._a_mf or cosmo != self._cosmo_mf:
+            massfunc = self._massfunc.get_mass_function
+            self._mf = massfunc(cosmo, self._mass, a)
+            integ = self._integrator(self._mf*self._mass, self._lmass)
+            self._mf0 = (rho0 - integ) / self._m0
+            self._cosmo_mf, self._a_mf = cosmo, a  # cache
 
+    def _get_halo_bias(self, cosmo, a, rho0):
+        # Compute the halo bias at this cosmo and a.
+        if cosmo != self._cosmo_bf or a != self._a_bf:
+            hbias = self._hbias.get_halo_bias
+            self._bf = hbias(cosmo, self._mass, a)
+            integ = self._integrator(self._mf*self._bf*self._mass, self._lmass)
+            self._mbf0 = (rho0 - integ) / self._m0
+            self._cosmo_bf, self._a_bf = cosmo, a  # cache
+
+    def _get_ingredients(self, cosmo, a, get_bf):
+        """Compute mass function and halo bias at some scale factor."""
+        rho0 = const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"]**2
+        self._get_mass_function(cosmo, a, rho0)
         if get_bf:
-            self._a_current_mf = a
-            if a != self._a_current_bf:
-                if rho0 is None:
-                    rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
-                self._bf = self._hbias.get_halo_bias(
-                    cosmo, self._mass, a, mdef_other=self._mdef)
-                self._bf0 = (rho0 - self._integrator(
-                    self._mf*self._bf*self._mass, self._lmass)) / self._m0
+            self._get_halo_bias(cosmo, a, rho0)
 
     def _integrate_over_mf(self, array_2):
         i1 = self._integrator(self._mf[..., :] * array_2,
@@ -144,7 +148,7 @@ class HMCalculator(object):
     def _integrate_over_mbf(self, array_2):
         i1 = self._integrator((self._mf * self._bf)[..., :] * array_2,
                               self._lmass)
-        return i1 + self._bf0 * array_2[..., 0]
+        return i1 + self._mbf0 * array_2[..., 0]
 
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
@@ -160,7 +164,7 @@ class HMCalculator(object):
             float or array_like: integral value.
         """
         # Compute mass function
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(cosmo, a, False)
         uk0 = prof.fourier(cosmo, self._prec['k_min'],
                            self._mass, a, mass_def=self._mdef).T
         norm = 1. / self._integrate_over_mf(uk0)
@@ -208,14 +212,14 @@ class HMCalculator(object):
         abs_dzda = 1 / a / a
         dc = background.comoving_angular_distance(cosmo, a)
         ez = background.h_over_h0(cosmo, a)
-        dh = physical_constants.CLIGHT_HMPC / cosmo['h']
+        dh = const.CLIGHT_HMPC / cosmo['h']
         dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda
 
         # now do m intergrals in a loop
         mint = np.zeros_like(a)
         for i, _a in enumerate(a):
-            self._get_ingredients(_a, cosmo, False)
+            self._get_ingredients(cosmo, _a, False)
             _selm = np.atleast_2d(sel(self._mass, _a)).T
             mint[i] = self._integrator(
                 dvda[i] * self._mf[..., :] * _selm[..., :],
@@ -249,7 +253,7 @@ class HMCalculator(object):
             value of `k`.
         """
         # Compute mass function
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(cosmo, a, False)
         uk = prof.fourier(cosmo, k, self._mass, a,
                           mass_def=self._mdef).T
         i01 = self._integrate_over_mf(uk)
@@ -279,7 +283,7 @@ class HMCalculator(object):
             value of `k`.
         """
         # Compute mass function and halo bias
-        self._get_ingredients(a, cosmo, True)
+        self._get_ingredients(cosmo, a, True)
         uk = prof.fourier(cosmo, k, self._mass, a,
                           mass_def=self._mdef).T
         i11 = self._integrate_over_mbf(uk)
@@ -315,7 +319,7 @@ class HMCalculator(object):
              value of `k`.
         """
         # Compute mass function
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(cosmo, a, False)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
                                   mass_def=self._mdef).T
@@ -353,7 +357,7 @@ class HMCalculator(object):
              value of `k`.
         """
         # Compute mass function
-        self._get_ingredients(a, cosmo, True)
+        self._get_ingredients(cosmo, a, True)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
                                   mass_def=self._mdef).T
@@ -406,7 +410,7 @@ class HMCalculator(object):
         if prof34_2pt is None:
             prof34_2pt = prof12_2pt
 
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(cosmo, a, False)
         uk12 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                       prof2=prof2, mass_def=self._mdef).T
         uk34 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
