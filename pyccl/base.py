@@ -50,7 +50,8 @@ def hash_(obj):
 
 class _ClassPropertyMeta(type):
     """Implement `property` to a `classmethod`."""
-    # TODO: in py39+ decorators `classmethod` and `property` can be combined
+    # NOTE: Only in 3.8 < py < 3.11 can `classmethod` wrap `property`.
+    # https://docs.python.org/3.11/library/functions.html#classmethod
     @property
     def maxsize(cls):
         return cls._maxsize
