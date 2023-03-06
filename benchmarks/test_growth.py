@@ -31,7 +31,7 @@ def read_growth_lowz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt("benchmarks/data/growth_model1-5.txt").T
-    assert(dat.shape == (6, 6))
+    assert (dat.shape == (6, 6))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]
@@ -45,7 +45,7 @@ def read_growth_highz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt("benchmarks/data/growth_hiz_model1-3.txt").T
-    assert(dat.shape == (4, 7))
+    assert (dat.shape == (4, 7))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]
@@ -60,7 +60,7 @@ def read_growth_allz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt("benchmarks/data/growth_cosmomad_allz.txt").T
-    assert(dat.shape == (6, 10))
+    assert (dat.shape == (6, 10))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]

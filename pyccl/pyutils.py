@@ -115,8 +115,8 @@ def debug_mode(debug):
 
 
 def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument, with a cosmology dependence.
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with one vector argument, with a cosmology dependence.
 
     Args:
         fn (callable): Function with a single argument.
@@ -162,8 +162,9 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
 
 
 def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument and one integer argument, with a cosmology dependence.
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with one vector argument and one integer argument,
+    with a cosmology dependence.
 
     Args:
         fn (callable): Function with a single argument.
@@ -208,8 +209,9 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
 
 
 def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument and two float arguments, with a cosmology dependence.
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with one vector argument and two float arguments, with
+    a cosmology dependence.
 
     Args:
         fn (callable): Function with a single argument.
@@ -661,3 +663,19 @@ def _get_spline3d_arrays(gsl_spline, length):
     check(status)
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))
+
+
+def check_openmp_version():
+    """Return the OpenMP specification release date.
+    Return 0 if OpenMP is not working.
+    """
+
+    return lib.openmp_version()
+
+
+def check_openmp_threads():
+    """Returns the number of processors available to the device.
+    Return 0 if OpenMP is not working.
+    """
+
+    return lib.openmp_threads()

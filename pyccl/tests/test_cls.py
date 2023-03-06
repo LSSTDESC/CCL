@@ -84,3 +84,33 @@ def test_cls_raise_weird_pk():
     ells = [10, 11]
     with pytest.raises(ValueError):
         ccl.angular_cl(COSMO, LENS, LENS, ells, p_of_k_a=lambda k, a: 10)
+
+
+def test_cls_mg():
+    # Check that if we feed the non-linear matter power spectrum from a MG
+    # cosmology into a Calculator and get Cells using MG tracers, we get the
+    # same results.
+
+    # set up a MG cosmology
+    cosmo_MG = ccl.CosmologyVanillaLCDM(mu_0=0.5, sigma_0=0.5,
+                                        transfer_function="bbks",
+                                        matter_power_spectrum="linear")
+    cosmo_MG.compute_nonlin_power()
+    pk2d = cosmo_MG.get_nonlin_power()
+
+    # copy it into a calculator
+    a, lk, pk = pk2d.get_spline_arrays()
+    pk_nonlin = {"a": a, "k": np.exp(lk), "delta_matter:delta_matter": pk}
+    cosmo_calc = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        mu_0=0.5, sigma_0=0.5, pk_nonlin=pk_nonlin)
+
+    # get the Cells
+    ell = np.geomspace(2, 2000, 128)
+    tr_MG = ccl.CMBLensingTracer(cosmo_MG, 1100.)
+    tr_calc = ccl.CMBLensingTracer(cosmo_calc, 1100.)
+
+    cl0 = ccl.angular_cl(cosmo_MG, tr_MG, tr_MG, ell)
+    cosmo_calc.compute_growth()
+    cl1 = ccl.angular_cl(cosmo_calc, tr_calc, tr_calc, ell)
+    assert np.all(np.fabs(1 - cl1 / cl0) < 1E-10)

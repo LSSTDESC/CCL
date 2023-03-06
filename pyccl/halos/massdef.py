@@ -84,6 +84,7 @@ class MassDef(CCLHalosObject):
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
+    name = 'default'
 
     def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense
@@ -105,9 +106,13 @@ class MassDef(CCLHalosObject):
         else:
             self._concentration_init(c_m_relation)
 
-    def __repr__(self):
-        return (f"pyccl.halos.MassDef(Delta={self.Delta}, "
-                f"rho_type={self.rho_type})")
+    def __eq__(self, other):
+        """ Allows you to compare two mass definitions
+        """
+        if not isinstance(other, MassDef):
+            return False
+        return (self.Delta == other.Delta) and \
+            (self.rho_type == other.rho_type)
 
     def _concentration_init(self, c_m_relation):
         from .concentration import Concentration, concentration_from_name

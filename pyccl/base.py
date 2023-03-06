@@ -24,13 +24,11 @@ def _to_hashable(obj):
         elif isinstance(obj, dict):
             # Dictionaries: Build a tuple from key-value pairs,
             # where all values are converted to hashables.
-            out = dict.fromkeys(obj)
-            for key, value in obj.items():
-                out[key] = _to_hashable(value)
+            out = {key: _to_hashable(value) for key, value in obj.items()}
             # Sort unordered dictionaries for hash consistency.
             if isinstance(obj, OrderedDict):
-                return tuple(obj.items())
-            return tuple(sorted(obj.items()))
+                return tuple(out.items())
+            return tuple(sorted(out.items()))
 
         else:
             # Iterables: Build a tuple from values converted to hashables.
@@ -53,7 +51,8 @@ def hash_(obj):
 
 class _ClassPropertyMeta(type):
     """Implement `property` to a `classmethod`."""
-    # TODO: in py39+ decorators `classmethod` and `property` can be combined
+    # NOTE: Only in 3.8 < py < 3.11 can `classmethod` wrap `property`.
+    # https://docs.python.org/3.11/library/functions.html#classmethod
     @property
     def maxsize(cls):
         return cls._maxsize
@@ -101,7 +100,7 @@ class Caching(metaclass=_ClassPropertyMeta):
         policy (``'fifo'``, ``'lru'``, ``'lfu'``):
             Cache retention policy.
     """
-    _enabled: bool = True
+    _enabled: bool = False
     _policies: list = ['fifo', 'lru', 'lfu']
     _default_maxsize: int = 128   # class default maxsize
     _default_policy: str = 'lru'  # class default policy

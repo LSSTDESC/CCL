@@ -54,3 +54,14 @@ def test_bM_from_string(name):
 def test_bM_from_string_raises():
     with pytest.raises(ValueError):
         ccl.halos.HaloBias.from_name('Tinker11')
+
+
+def test_bM_default():
+    bM = ccl.halos.HaloBias(COSMO)
+    with pytest.raises(NotImplementedError):
+        bM._get_bsigma(COSMO, 1., 1.)
+
+    M_in = 1E12
+    lM_out = bM._get_consistent_mass(COSMO,
+                                     M_in, 1., bM.mdef)
+    assert np.fabs(np.log10(M_in) - lM_out) < 1E-10

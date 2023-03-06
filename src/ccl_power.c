@@ -708,7 +708,11 @@ smoothed with a tophat filter of comoving size 8 Mpc/h
 */
 
 double ccl_sigma8(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *status) {
-  return ccl_sigmaR(cosmo, 8/cosmo->params.h, 1., psp, status);
+  double res = ccl_sigmaR(cosmo, 8/cosmo->params.h, 1., psp, status);
+  if (isnan(cosmo->params.sigma8)) {
+    cosmo->params.sigma8 = res;
+  }
+  return res;
 }
 
 // Integrand for kNL integral

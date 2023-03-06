@@ -2,7 +2,7 @@ import numpy as np
 
 try:
     import isitgr  # noqa: F401
-except ImportError:
+except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
 from . import ccllib as lib

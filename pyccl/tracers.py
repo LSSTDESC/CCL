@@ -35,6 +35,7 @@ def _check_background_spline_compatibility(cosmo, z):
     """Check that a redshift array lies within the support of the
     CCL background splines.
     """
+    cosmo.compute_distances()
     a_bg, _ = _get_spline1d_arrays(cosmo.cosmo.data.chi)
     a = 1/(1+z)
 
@@ -189,25 +190,21 @@ class Tracer(CCLObject):
 
     @property
     def chi_min(self):
-        """Return ``chi_min`` for this ``Tracer``. If it contains more than
-        one tracers and their ``chi_mins`` are different it will raise an
-        ``AttributeError``.
+        """Return ``chi_min`` for this ``Tracer``, if it exists. For more than
+        one tracers containing a ``chi_min`` in the tracer collection, the
+        lowest value is returned.
         """
         chis = [tr.chi_min for tr in self._trc]
-        if chis.count(chis[0]) != len(chis):
-            raise AttributeError("Tracers have different chi_min.")
-        return chis[0]
+        return min(chis) if chis else None
 
     @property
     def chi_max(self):
-        """Return ``chi_max`` for this ``Tracer``. If it contains more than
-        one tracers and their ``chi_maxs`` are different it will raise an
-        ``AttributeError``.
+        """Return ``chi_max`` for this ``Tracer``, if it exists. For more than
+        one tracers containing a ``chi_max`` in the tracer collection, the
+        highest value is returned.
         """
         chis = [tr.chi_max for tr in self._trc]
-        if chis.count(chis[0]) != len(chis):
-            raise AttributeError("Tracers have different chi_max.")
-        return chis[0]
+        return max(chis) if chis else None
 
     def _dndz(self, z):
         raise NotImplementedError("`get_dndz` not implemented for "
@@ -413,7 +410,7 @@ class Tracer(CCLObject):
         # Sampling scale factor from a very small (at CMB for example)
         # all the way to 1 here and today for the transfer function.
         # For a < a_single it is GR (no early MG)
-        if isinstance(z, float):
+        if isinstance(z, (int, float)):
             a_single = 1/(1+z)
             a = np.linspace(a_single, 1, 100)
             # a_single is for example like for the CMB surface
@@ -555,6 +552,10 @@ class Tracer(CCLObject):
             tka_s = tka_s.flatten()
             ta_s = NoneArr
             tk_s = NoneArr
+
+        if not (np.diff(a_s) > 0).all():
+            raise ValueError("Scale factor must be monotonically "
+                             "increasing")
 
         status = 0
         ret = lib.cl_tracer_t_new_wrapper(cosmo.cosmo,

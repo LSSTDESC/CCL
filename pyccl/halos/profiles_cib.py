@@ -189,21 +189,22 @@ class HaloProfileCIBShang12(HaloProfile):
         return Lumcen
 
     def _Lumsat(self, M, a):
-        Lumsat = np.zeros_like(M)
-        # Loop over Mparent
-        # TODO: if this is too slow we could move it to C
-        # and parallelize
-        for iM, Mparent in enumerate(M):
-            if Mparent > self.Mmin:
-                # Array of Msubs (log-spaced with 10 samples per dex)
-                nm = max(2, int(np.log10(Mparent/1E10)*10))
-                msub = np.geomspace(1E10, Mparent, nm+1)
-                # Sample integrand
-                dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(msub, Mparent)
-                Lum = self._Lum(np.log10(msub), a)
-                integ = dnsubdlnm*Lum
-                Lumsat[iM] = simps(integ, x=np.log(msub))
-        return Lumsat
+        if not np.max(M) > self.Mmin:
+            return np.zeros_like(M)
+
+        res = np.zeros_like(M)
+        M_use = M[M >= self.Mmin, None]
+        logM = np.log10(M_use)
+        LOGM_MIN = np.log10(self.Mmin)
+        nm = max(2, 10*int(np.max(logM) - LOGM_MIN))
+        msub = np.linspace(LOGM_MIN, np.max(logM), nm+1)[None, :]
+
+        Lum = self._Lum(msub, a)
+        dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(10**msub, M_use)
+        integ = dnsubdlnm * Lum
+        Lumsat = simps(integ, x=np.log(10)*msub)
+        res[-len(Lumsat):] = Lumsat
+        return res
 
     def _real(self, cosmo, r, M, a, mass_def):
         M_use = np.atleast_1d(M)

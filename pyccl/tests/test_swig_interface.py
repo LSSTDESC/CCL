@@ -200,18 +200,3 @@ def test_swig_power():
         [0.5, 1.0],
         3,
         status)
-
-
-def test_swig_haloprofile():
-    status = 0
-    assert_raises(CCLError,
-                  ccllib.einasto_norm,
-                  [0.1, 1.0],
-                  [0.1, 1.0],
-                  [0.1, 1.0],
-                  4, status)
-    assert_raises(CCLError,
-                  ccllib.hernquist_norm,
-                  [0.1, 1.0],
-                  [0.1, 1.0],
-                  4, status)

@@ -146,6 +146,8 @@ def test_weak_lensing_functions():
         np.log(rmax/rmin) * np.arange(data.shape[0]) / (data.shape[0]-1))
 
     r_al = r / a_lens
+    len_r = len(r)
+    a_source = [a_source]*len_r
 
     mdef = ccl.halos.MassDef(mDelta, 'matter')
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
