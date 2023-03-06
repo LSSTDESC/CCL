@@ -20,7 +20,6 @@ def _to_hashable(obj):
         elif isinstance(obj, dict):
             # Dictionaries: Build a tuple from key-value pairs,
             # where all values are converted to hashables.
-            out = dict.fromkeys(obj)
             out = {key: _to_hashable(value) for key, value in obj.items()}
             # Sort unordered dictionaries for hash consistency.
             if isinstance(obj, OrderedDict):

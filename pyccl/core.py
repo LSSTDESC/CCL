@@ -913,7 +913,7 @@ class Cosmology(object):
         if (mps != 'emu') and (mps is not None):
             self.compute_linear_power()
 
-        if mps == "camb" and self._has_pk_nl:
+        if mps == "camb" and self.has_nonlin_power:
             # Already computed
             return
 
