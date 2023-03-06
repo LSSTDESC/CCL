@@ -12,6 +12,11 @@ s8_arr = np.linspace(0.753141592, 0.953141592, NUM)
 # runs; normally this is is expected to be another order of magnitude faster
 SPEEDUP = 50
 
+# enable caching if not already enabled
+DEFAULT_CACHING_STATUS = ccl.Caching._enabled
+if not ccl.Caching._enabled:
+    ccl.Caching.enable()
+
 
 def get_cosmo(sigma8):
     return ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96,
@@ -144,3 +149,6 @@ def test_caching_policy_raises():
 
     with pytest.raises(ValueError):
         ccl.Caching.policy = "my_policy"
+
+
+ccl.Caching._enabled = DEFAULT_CACHING_STATUS

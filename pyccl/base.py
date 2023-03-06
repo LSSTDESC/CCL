@@ -98,7 +98,7 @@ class Caching(metaclass=_ClassPropertyMeta):
         policy (``'fifo'``, ``'lru'``, ``'lfu'``):
             Cache retention policy.
     """
-    _enabled: bool = True
+    _enabled: bool = False
     _policies: list = ['fifo', 'lru', 'lfu']
     _default_maxsize: int = 128   # class default maxsize
     _default_policy: str = 'lru'  # class default policy
