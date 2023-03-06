@@ -254,8 +254,7 @@ class MassDef(CCLHalosObject):
 
 
 def MassDef200m(c_m='Duffy08'):
-    """`MassDef` class for the mass definition with Delta=200 times the matter
-    density.
+    r""":math:`\Delta = 200m` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
@@ -264,8 +263,7 @@ def MassDef200m(c_m='Duffy08'):
 
 
 def MassDef200c(c_m='Duffy08'):
-    """`MassDef` class for the mass definition with Delta=200 times the critical
-    density.
+    r""":math:`\Delta = 200c` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
@@ -274,8 +272,7 @@ def MassDef200c(c_m='Duffy08'):
 
 
 def MassDef500c(c_m='Ishiyama21'):
-    """`MassDef` class for the mass definition
-    with Delta=500 times the critical density.
+    r""":math:`\Delta = 500m` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
@@ -284,8 +281,7 @@ def MassDef500c(c_m='Ishiyama21'):
 
 
 def MassDefVir(c_m='Klypin11'):
-    """`MassDef` class for the mass definition with Delta=Delta_vir times the
-    critical density.
+    r""":math:`\Delta = \rm vir` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
