@@ -21,12 +21,11 @@ def _to_hashable(obj):
             # Dictionaries: Build a tuple from key-value pairs,
             # where all values are converted to hashables.
             out = dict.fromkeys(obj)
-            for key, value in obj.items():
-                out[key] = _to_hashable(value)
+            out = {key: _to_hashable(value) for key, value in obj.items()}
             # Sort unordered dictionaries for hash consistency.
             if isinstance(obj, OrderedDict):
-                return tuple(obj.items())
-            return tuple(sorted(obj.items()))
+                return tuple(out.items())
+            return tuple(sorted(out.items()))
 
         else:
             # Iterables: Build a tuple from values converted to hashables.
