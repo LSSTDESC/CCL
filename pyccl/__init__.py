@@ -25,6 +25,8 @@ from . import ccllib as lib
 
 # CCL base
 from .base import (
+    Caching,
+    cache,
     hash_,
 )
 
@@ -166,7 +168,7 @@ from .haloprofile import (
 
 __all__ = (
     'lib',
-    'hash_',
+    'Caching', 'cache', 'hash_',
     'CCLParameters', 'spline_params', 'gsl_params', 'physical_constants',
     'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',

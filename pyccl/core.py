@@ -14,6 +14,7 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
+from .base import cache
 from .parameters import CCLParameters, physical_constants
 
 # Configuration types
@@ -766,11 +767,9 @@ class Cosmology(object):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
-    def compute_linear_power(self):
-        """Compute the linear power spectrum."""
-        if self.has_linear_power:
-            return
-
+    @cache(maxsize=3)
+    def _compute_linear_power(self):
+        """Return the linear power spectrum."""
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
                 ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles', ]):
@@ -839,6 +838,13 @@ class Cosmology(object):
                                           status)
             check(status, self)
 
+        return pk
+
+    def compute_linear_power(self):
+        """Compute the linear power spectrum."""
+        if self.has_linear_power:
+            return
+        pk = self._compute_linear_power()
         # Assign
         self._pk_lin['delta_matter:delta_matter'] = pk
 
@@ -874,11 +880,9 @@ class Cosmology(object):
         hmc = hal.HMCalculator(self, hmf, hbf, mdef)
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
-    def compute_nonlin_power(self):
-        """Compute the non-linear power spectrum."""
-        if self.has_nonlin_power:
-            return
-
+    @cache(maxsize=3)
+    def _compute_nonlin_power(self):
+        """Return the non-linear power spectrum."""
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
                 warnings.warn(
@@ -915,7 +919,7 @@ class Cosmology(object):
 
         if mps == "camb" and self.has_nonlin_power:
             # Already computed
-            return
+            return self._pk_nl['delta_matter:delta_matter']
 
         if mps is None:
             raise CCLError("You want to compute the non-linear power "
@@ -942,6 +946,13 @@ class Cosmology(object):
         if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
             bcm_correct_pk2d(self, pk)
 
+        return pk
+
+    def compute_nonlin_power(self):
+        """Compute the non-linear power spectrum."""
+        if self.has_nonlin_power:
+            return
+        pk = self._compute_nonlin_power()
         # Assign
         self._pk_nl['delta_matter:delta_matter'] = pk
 
