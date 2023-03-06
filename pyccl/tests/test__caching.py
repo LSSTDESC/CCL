@@ -37,7 +37,7 @@ def timeit_(sigma8):
 
 def test_caching_switches():
     """Test that the Caching switches work as intended."""
-    assert ccl.Caching._enabled
+    assert ccl.Caching._enabled == DEFAULT_CACHING_STATUS
     assert ccl.Caching._maxsize == ccl.Caching._default_maxsize
     ccl.Caching.maxsize = 128
     assert ccl.Caching._maxsize == 128
