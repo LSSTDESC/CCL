@@ -278,17 +278,19 @@ def test_tracer_magnification_kernel_spline_vs_gsl_intergation(z_min, z_max,
     if z_min > 0:
         assert n[0] > 0
 
-    cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
     tr_mg = ccl.NumberCountsTracer(cosmo, False, dndz=(z, n),
                                    bias=(z, b), mag_bias=(z, b))
     w_mg_spline, _ = tr_mg.get_kernel(chi=None)
+    ccl.gsl_params.reload()
 
-    cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
     tr_mg = ccl.NumberCountsTracer(cosmo, False, dndz=(z, n),
                                    bias=(z, b), mag_bias=(z, b))
     w_mg_gsl, chi = tr_mg.get_kernel(chi=None)
     tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
     w_wl_gsl, _ = tr_wl.get_kernel(chi=None)
+    ccl.gsl_params.reload()
 
     # Peak of kernel is ~1e-5
     if n_z_samples >= 1000:
@@ -351,3 +353,36 @@ def test_tracer_n_sample_warn():
 
     with pytest.warns(CCLWarning):
         _ = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
+
+
+def test_tracer_bool():
+    assert bool(ccl.Tracer()) is False
+    assert bool(ccl.CMBLensingTracer(COSMO, z_source=1100)) is True
+
+
+def test_tracer_chi_min_max():
+    # Test that it can access the C-level chi_min and chi_max.
+    tr = ccl.CMBLensingTracer(COSMO, z_source=1100)
+    assert tr.chi_min == tr._trc[0].chi_min
+    assert tr.chi_max == tr._trc[0].chi_max
+
+    # Returns the lowest/highest if chi_min or chi_max are not the same.
+    chi = np.linspace(tr.chi_min+0.05, tr.chi_max+0.05, 128)
+    wchi = np.ones_like(chi)
+    tr.add_tracer(COSMO, kernel=(chi, wchi))
+    assert tr.chi_min == tr._trc[0].chi_min
+    assert tr.chi_max == tr._trc[1].chi_max
+
+
+def test_tracer_increase_sf():
+    z = np.linspace(0, 3., 32)
+    one = np.ones(len(z))
+    chi = ccl.comoving_radial_distance(COSMO, 1./(1+z))
+    sf = 1./(1+z)
+    tr = ccl.Tracer()
+    with pytest.raises(ValueError):
+        tr.add_tracer(COSMO, kernel=(chi, one),
+                      transfer_a=(sf, one))
+    # Check it works in the right order
+    tr.add_tracer(COSMO, kernel=(chi, one),
+                  transfer_a=(sf[::-1], one))

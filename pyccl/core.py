@@ -252,9 +252,7 @@ class Cosmology(object):
 
         self._build_cosmo()
 
-        self._has_pk_lin = False
         self._pk_lin = {}
-        self._has_pk_nl = False
         self._pk_nl = {}
 
     def _build_cosmo(self):
@@ -282,11 +280,11 @@ class Cosmology(object):
         """
         def make_yaml_friendly(d):
             for k, v in d.items():
-                if isinstance(v, np.floating):
+                if isinstance(v, float):
                     d[k] = float(v)
-                elif isinstance(v, np.integer):
+                elif isinstance(v, int):
                     d[k] = int(v)
-                elif isinstance(v, np.bool):
+                elif isinstance(v, bool):
                     d[k] = bool(v)
                 elif isinstance(v, dict):
                     make_yaml_friendly(v)
@@ -390,6 +388,11 @@ class Cosmology(object):
                              "method. Available options are: %s"
                              % (emulator_neutrinos,
                                 emulator_neutrinos_types.keys()))
+        if (matter_power_spectrum == "camb"
+                and transfer_function != "boltzmann_camb"):
+            raise CCLError(
+                "To compute the non-linear matter power spectrum with CAMB "
+                "the transfer function should be 'boltzmann_camb'.")
 
         # Assign values to new ccl_configuration object
         config = lib.configuration()
@@ -800,32 +803,32 @@ class Cosmology(object):
         elif trf == 'boltzmann_isitgr':
             rescale_mg = False
             pk = get_isitgr_pk_lin(self)
-        elif trf == 'boltzmann_camb':
-            pk_nl_from_camb = False
-            if self._config_init_kwargs['matter_power_spectrum'] == "camb":
-                pk_nl_from_camb = True
-            pk = get_camb_pk_lin(self, nonlin=pk_nl_from_camb)
-            if pk_nl_from_camb:
-                pk, pk_nl = pk
-                self._pk_nl['delta_matter:delta_matter'] = pk_nl
-                self._has_pk_nl = True
-                rescale_mg = False
-                rescale_s8 = False
-                if abs(self["mu_0"]) > 1e-14:
-                    warnings.warn("You want to compute the non-linear power "
-                                  "spectrum using CAMB. This cannot be "
-                                  "consistently done with mu_0 > 0.",
-                                  category=CCLWarning)
-                if np.isfinite(self["sigma8"]) \
-                        and not np.isfinite(self["A_s"]):
-                    raise CCLError("You want to compute the non-linear "
-                                   "power spectrum using CAMB and specified "
-                                   "sigma8 but the non-linear power spectrum "
-                                   "cannot be consistenty rescaled.")
         elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
             rescale_s8 = False
             rescale_mg = False
-            pk = Pk2D.pk_from_model(self, model=trf)
+            pk = Pk2D.from_model(self, model=trf)
+
+        # Compute the CAMB nonlin power spectrum if needed,
+        # to avoid repeating the code in `compute_nonlin_power`.
+        # Because CAMB power spectra come in pairs with pkl always computed,
+        # we set the nonlin power spectrum first, but keep the linear via a
+        # status variable to use it later if the transfer function is CAMB too.
+        pkl = None
+        if self._config_init_kwargs["matter_power_spectrum"] == "camb":
+            if abs(self["mu_0"]) > 1e-14:
+                warnings.warn("CAMB doesn't compute non-linear power spectra "
+                              "consistently with mu_0 > 0.", CCLWarning)
+            if not np.isfinite(self["A_s"]):
+                raise CCLError("CAMB doesn't rescale non-linear power spectra "
+                               "consistently without A_s.")
+
+            # no rescaling because A_s is necessarily provided
+            rescale_mg = rescale_s8 = False
+            name = "delta_matter:delta_matter"
+            pkl, self._pk_nl[name] = get_camb_pk_lin(self, nonlin=True)
+
+        if trf == "boltzmann_camb":
+            pk = pkl if pkl is not None else get_camb_pk_lin(self)
 
         # Rescale by sigma8/mu-sigma if needed
         if pk:
@@ -838,8 +841,6 @@ class Cosmology(object):
 
         # Assign
         self._pk_lin['delta_matter:delta_matter'] = pk
-        if pk:
-            self._has_pk_lin = True
 
     def _get_halo_model_nonlin_power(self):
         from . import halos as hal
@@ -914,9 +915,8 @@ class Cosmology(object):
 
         if mps == "camb" and self._has_pk_nl:
             # Already computed
-            return self._pk_nl['delta_matter:delta_matter']
+            return
 
-        pk = None
         if mps is None:
             raise CCLError("You want to compute the non-linear power "
                            "spectrum, but you selected "
@@ -934,7 +934,7 @@ class Cosmology(object):
                                "necessary input for halofit")
             pk = Pk2D.apply_halofit(self, pkl)
         elif mps == 'emu':
-            pk = Pk2D.pk_from_model(self, model='emu')
+            pk = Pk2D.from_model(self, model='emu')
         elif mps == 'linear':
             pk = self._pk_lin['delta_matter:delta_matter']
 
@@ -944,8 +944,6 @@ class Cosmology(object):
 
         # Assign
         self._pk_nl['delta_matter:delta_matter'] = pk
-        if pk:
-            self._has_pk_nl = True
 
     def compute_sigma(self):
         """Compute the sigma(M) spline."""
@@ -1027,12 +1025,18 @@ class Cosmology(object):
     @property
     def has_linear_power(self):
         """Checks if the linear power spectra have been precomputed."""
-        return self._has_pk_lin
+        try:
+            return isinstance(self._pk_lin["delta_matter:delta_matter"], Pk2D)
+        except KeyError:
+            return False
 
     @property
     def has_nonlin_power(self):
         """Checks if the non-linear power spectra have been precomputed."""
-        return self._has_pk_nl
+        try:
+            return isinstance(self._pk_nl["delta_matter:delta_matter"], Pk2D)
+        except KeyError:
+            return False
 
     @property
     def has_sigma(self):
@@ -1137,6 +1141,10 @@ class CosmologyCalculator(Cosmology):
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
+        mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
+        sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+            modified gravity model. Defaults to 0.0
         background (:obj:`dict`): a dictionary describing the background
             expansion. It must contain three mandatory entries: `'a'`: an
             array of monotonically ascending scale-factor values. `'chi'`:
@@ -1194,7 +1202,7 @@ class CosmologyCalculator(Cosmology):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=None, background=None, growth=None,
+            T_CMB=None, mu_0=0., sigma_0=0., background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None):
         if pk_linear:
             transfer_function = 'calculator'
@@ -1211,7 +1219,7 @@ class CosmologyCalculator(Cosmology):
             n_s=n_s, sigma8=sigma8, A_s=A_s,
             Omega_k=Omega_k, Omega_g=Omega_g,
             Neff=Neff, m_nu=m_nu, m_nu_type=m_nu_type,
-            w0=w0, wa=wa, T_CMB=T_CMB,
+            w0=w0, wa=wa, T_CMB=T_CMB, mu_0=mu_0, sigma_0=sigma_0,
             transfer_function=transfer_function,
             matter_power_spectrum=matter_power_spectrum)
 
@@ -1333,8 +1341,6 @@ class CosmologyCalculator(Cosmology):
                       is_logp=use_log, extrap_order_lok=1,
                       extrap_order_hik=2, cosmo=None)
             self._pk_lin[n] = pk
-        # Set linear power spectrum as initialized
-        self._has_pk_lin = True
 
     def _init_pknl(self, pk_nonlin, has_nonlin_model):
         # Non-linear power spectrum
@@ -1378,8 +1384,6 @@ class CosmologyCalculator(Cosmology):
                       is_logp=use_log, extrap_order_lok=1,
                       extrap_order_hik=2, cosmo=None)
             self._pk_nl[n] = pk
-        # Set non-linear power spectrum as initialized
-        self._has_pk_nl = True
 
     def _apply_nonlinear_model(self, nonlin_model):
         if nonlin_model is None:
@@ -1419,5 +1423,3 @@ class CosmologyCalculator(Cosmology):
             else:
                 raise KeyError(model + " is not a valid "
                                "non-linear model.")
-        # Set non-linear power spectrum as initialized
-        self._has_pk_nl = True

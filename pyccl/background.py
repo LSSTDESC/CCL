@@ -138,7 +138,7 @@ def angular_diameter_distance(cosmo, a1, a2=None):
         float or array_like: angular diameter distance; Mpc.
     """
     cosmo.compute_distances()
-    if(a2 is not None):
+    if (a2 is not None):
         # One lens, multiple sources
         if (np.ndim(a1) == 0) and (np.ndim(a2) != 0):
             a1 = np.full(len(a2), a1)

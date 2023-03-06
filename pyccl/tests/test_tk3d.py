@@ -139,6 +139,15 @@ def test_tk3d_eval(is_product):
     assert_allclose(phere.flatten(), ptrue.flatten(), rtol=1E-6)
 
 
+def test_tk3d_call():
+    # Test `__call__` and `__bool__`
+    (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
+    tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
+    assert bool(tsp) is tsp.has_tsp
+    assert np.allclose(np.array([tsp.eval(np.exp(lk_arr), a) for a in a_arr]),
+                       tsp(np.exp(lk_arr), a_arr), rtol=1e-15)
+
+
 @pytest.mark.parametrize('is_product', [True, False])
 def test_tk3d_spline_arrays(is_product):
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
@@ -163,14 +172,8 @@ def test_tk3d_spline_arrays_raises():
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
     tsp = ccl.Tk3D(a_arr, lk_arr, tkk_arr=tkka_arr)
 
-    # PR923 aims to change this bit of code; the assertion is there to remind
-    # us to uncomment what is commented out.
-    assert not hasattr(tsp.__class__, "has_tsp")
-    # ccl.lib.f3d_t_free(tsp.tsp)
-    # delattr(tsp, "tsp")
-
-    # fool `Tk3D` into believing it doesn't have a `tsp`
-    tsp.has_tsp = False
+    ccl.lib.f3d_t_free(tsp.tsp)
+    delattr(tsp, "tsp")
 
     with pytest.raises(ValueError):
         tsp.get_spline_arrays()
