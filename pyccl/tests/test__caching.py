@@ -4,6 +4,8 @@ import pyccl as ccl
 import numpy as np
 from time import time
 
+# Enable caching for this test.
+DEFAULT_CACHING_STATUS = ccl.Caching._enabled
 
 NUM = 3  # number of different Cosmologies we will check
 # some unusual numbers that have not occurred before
@@ -32,7 +34,6 @@ def timeit_(sigma8):
 
 def test_caching_switches():
     """Test that the Caching switches work as intended."""
-    assert ccl.Caching._enabled
     assert ccl.Caching._maxsize == ccl.Caching._default_maxsize
     ccl.Caching.maxsize = 128
     assert ccl.Caching._maxsize == 128
@@ -144,3 +145,7 @@ def test_caching_policy_raises():
 
     with pytest.raises(ValueError):
         ccl.Caching.policy = "my_policy"
+
+
+# Revert to defaults.
+ccl.Caching._enabled = DEFAULT_CACHING_STATUS
