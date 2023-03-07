@@ -46,7 +46,8 @@ def smoke_assert_prof_real(profile, method='_real'):
 
 
 @pytest.mark.parametrize('prof_class',
-                         [ccl.halos.HaloProfileHernquist,
+                         [ccl.halos.HaloProfileNFW,
+                          ccl.halos.HaloProfileHernquist,
                           ccl.halos.HaloProfileEinasto])
 def test_empirical_smoke(prof_class):
     c = ccl.halos.ConcentrationDuffy08(M200)
