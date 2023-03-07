@@ -23,7 +23,6 @@ del parse, numpy
 # SWIG-generated
 from . import ccllib as lib
 
-# CCL base
 # Hashing, Caching, CCL base, Mutation locks
 from .base import (
     CCLObject,
