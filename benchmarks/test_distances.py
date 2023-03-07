@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_allclose
 import numpy.testing
-from . import pyccl as ccl
+import pyccl as ccl
 import pytest
 
 # Set tolerances

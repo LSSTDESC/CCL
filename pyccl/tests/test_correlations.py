@@ -1,5 +1,5 @@
 import numpy as np
-from . import pyccl as ccl
+import pyccl as ccl
 import pytest
 from timeit import default_timer
 
@@ -34,7 +34,7 @@ def test_correlation_smoke(method):
                                   ['l+', 'GG+'],
                                   ['l-', 'GG-']])
 def test_correlation_newtypes(typs):
-    from . import assert_warns
+    from pyccl.pyutils import assert_warns
     z = np.linspace(0., 1., 200)
     n = np.ones(z.shape)
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))

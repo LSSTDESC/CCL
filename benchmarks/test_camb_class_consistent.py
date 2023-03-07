@@ -1,8 +1,7 @@
 import pytest
 import numpy as np
 import warnings
-
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 def test_camb_class_consistent_smoke(kwargs=None, pkerr=1e-3):

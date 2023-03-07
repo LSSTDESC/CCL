@@ -1,9 +1,8 @@
 import copy
 import numpy as np
 from numpy.testing import assert_raises
-from . import pyccl
-from . import ccllib
-from . import CCLError
+import pyccl
+from pyccl import ccllib, CCLError
 
 PYCOSMO = pyccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
                           sigma8=0.8, n_s=0.96,

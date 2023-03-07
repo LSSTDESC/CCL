@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
-
-from . import pyccl as ccl
+import pyccl as ccl
 
 from numpy.testing import assert_raises
 

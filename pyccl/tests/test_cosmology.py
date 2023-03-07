@@ -1,13 +1,9 @@
-from __future__ import print_function
 import pickle
 import tempfile
-
 import pytest
-
 import numpy as np
 from numpy.testing import assert_raises, assert_, assert_no_warnings
-
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 def test_cosmo_methods():
@@ -18,8 +14,7 @@ def test_cosmo_methods():
     from pyccl import background, bcm, boltzmann, \
         cls, correlations, covariances, neutrinos, \
         pk2d, power, tk3d, tracers, halos, nl_pt
-    from . import CosmologyVanillaLCDM
-    cosmo = CosmologyVanillaLCDM()
+    cosmo = ccl.CosmologyVanillaLCDM()
     subs = [background, boltzmann, bcm, cls, correlations, covariances,
             neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]

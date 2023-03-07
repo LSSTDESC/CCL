@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from . import _fftlog_transform
+from pyccl.pyutils import _fftlog_transform
 
 
 def fk(k, alpha, mu, dim):

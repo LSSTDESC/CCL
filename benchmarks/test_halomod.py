@@ -1,6 +1,5 @@
 import numpy as np
-from . import pyccl as ccl
-
+import pyccl as ccl
 import pytest
 
 HALOMOD_TOLERANCE = 1E-3

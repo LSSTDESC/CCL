@@ -1,6 +1,6 @@
 # We use double underscore to make it the first test alphabetically.
 import pytest
-from . import pyccl as ccl
+import pyccl as ccl
 import numpy as np
 from time import time
 
@@ -11,11 +11,6 @@ s8_arr = np.linspace(0.753141592, 0.953141592, NUM)
 # a modest speed increase - we are modest in the test to accommodate for slow
 # runs; normally this is is expected to be another order of magnitude faster
 SPEEDUP = 50
-
-# enable caching if not already enabled
-DEFAULT_CACHING_STATUS = ccl.Caching._enabled
-if not ccl.Caching._enabled:
-    ccl.Caching.enable()
 
 
 def get_cosmo(sigma8):
@@ -37,7 +32,7 @@ def timeit_(sigma8):
 
 def test_caching_switches():
     """Test that the Caching switches work as intended."""
-    assert ccl.Caching._enabled == DEFAULT_CACHING_STATUS
+    assert ccl.Caching._enabled
     assert ccl.Caching._maxsize == ccl.Caching._default_maxsize
     ccl.Caching.maxsize = 128
     assert ccl.Caching._maxsize == 128
@@ -149,6 +144,3 @@ def test_caching_policy_raises():
 
     with pytest.raises(ValueError):
         ccl.Caching.policy = "my_policy"
-
-
-ccl.Caching._enabled = DEFAULT_CACHING_STATUS

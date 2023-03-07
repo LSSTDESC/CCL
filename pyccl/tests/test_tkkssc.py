@@ -1,8 +1,9 @@
 import itertools
 import numpy as np
 import pytest
-from . import pyccl as ccl
-from . import assert_warns, UnlockInstance
+import pyccl as ccl
+from pyccl import UnlockInstance
+from pyccl.pyutils import assert_warns
 
 
 COSMO = ccl.Cosmology(

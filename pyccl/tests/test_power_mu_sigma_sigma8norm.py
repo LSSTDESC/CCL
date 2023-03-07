@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 from unittest import mock
-from . import pyccl as ccl
+import pyccl as ccl
 import sys
 from numpy.testing import assert_raises
-from . import get_isitgr_pk_lin
+from pyccl import get_isitgr_pk_lin
 try:
     from importlib import reload
 except ImportError:

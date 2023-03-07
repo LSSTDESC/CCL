@@ -1,4 +1,4 @@
-import pyccl
-pt = pyccl.nl_pt
+import pyccl as ccl
 
-__all__ = ('pyccl', 'pt',)
+# Enable caching for testing.
+ccl.Caching.enable()
