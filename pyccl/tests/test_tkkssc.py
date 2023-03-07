@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 import pytest
 from . import pyccl as ccl
-from . import assert_warns
+from . import assert_warns, UnlockInstance
 
 
 COSMO = ccl.Cosmology(
@@ -16,7 +16,8 @@ P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200))
 # P2 will have is_number_counts = True
 P2 = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
 P2_nogc = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
-P2_nogc.is_number_counts = False
+with UnlockInstance(P2_nogc):
+    P2_nogc.is_number_counts = False
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
 Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
@@ -333,7 +334,8 @@ def test_tkkssc_linear_bias(kwargs):
     # True counter terms
     tkc12 = []
     tkc34 = []
-    prof.is_number_counts = True  # Trick the function below
+    with UnlockInstance(prof):
+        prof.is_number_counts = True  # Trick the function below
     for aa in a_arr:
         # Divide by 2 to account for ~(1 + 1)
         tkc_ia = get_ssc_counterterm_gc(k_arr, aa, hmc, prof, prof, PKC,

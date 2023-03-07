@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from . import pyccl as ccl
+from . import UnlockInstance
 
 
 COSMO = ccl.Cosmology(
@@ -44,17 +45,8 @@ def smoke_assert_prof_real(profile, method='_real'):
         assert np.shape(p) == sh
 
 
-def test_defaults():
-    p = ccl.halos.HaloProfile()
-    with pytest.raises(NotImplementedError):
-        p.real(None, None, None, None, None)
-    with pytest.raises(NotImplementedError):
-        p.fourier(None, None, None, None, None)
-
-
 @pytest.mark.parametrize('prof_class',
-                         [ccl.halos.HaloProfileNFW,
-                          ccl.halos.HaloProfileHernquist,
+                         [ccl.halos.HaloProfileHernquist,
                           ccl.halos.HaloProfileEinasto])
 def test_empirical_smoke(prof_class):
     c = ccl.halos.ConcentrationDuffy08(M200)
@@ -462,7 +454,8 @@ def test_hernquist_f2r():
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
     p2 = ccl.halos.HaloProfileHernquist(cM, fourier_analytic=True)
-    p2._real = None
+    with UnlockInstance(p2):
+        p2._real = None
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14

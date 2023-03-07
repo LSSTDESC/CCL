@@ -170,9 +170,9 @@ def _build_string_Cosmology(self):
         if self.__class__.__qualname__ == "CosmologyCalculator":
             # only need the pk's if we compare CosmologyCalculator objects
             H = 0
-            if self._has_pk_lin:
+            if self.has_linear_power:
                 H += sum([hash_(pk) for pk in self._pk_lin.values()])
-            if self._has_pk_nl:
+            if self.has_nonlin_power:
                 H += sum([hash_(pk) for pk in self._pk_nl.values()])
             H = hex(H)
             s += f"{newline}HASH_PK = {H}"
