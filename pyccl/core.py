@@ -86,6 +86,16 @@ class Cosmology(CCLObject):
 /0000-ccl_note/main.pdf>`_
               for details.
 
+    .. note:: After instantiation, you can set parameters related to the
+              internal splines and numerical integration accuracy by setting
+              the values of the attributes of
+              :obj:`Cosmology.cosmo.spline_params` and
+              :obj:`Cosmology.cosmo.gsl_params`. For example, you can set
+              the generic relative accuracy for integration by executing
+              ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
+= 1e-5``.
+              See the module level documentation of `pyccl.core` for details.
+
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
         Omega_b (:obj:`float`): Baryonic matter density fraction.
