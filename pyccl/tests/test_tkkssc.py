@@ -13,7 +13,8 @@ COSMO.compute_nonlin_power()
 M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200))
+P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
+                              fourier_analytic=True)
 # P2 will have is_number_counts = True
 P2 = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
 P2_nogc = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
@@ -262,7 +263,8 @@ def test_tkkssc_linear_bias(kwargs):
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 
     # Tk's exact version
-    prof = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200))
+    prof = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
+                                    fourier_analytic=True)
     bias1 = 2
     bias2 = 3
     bias3 = 4
@@ -366,7 +368,8 @@ def test_tkkssc_linear_bias_smoke_and_errors():
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 
     # Tk's exact version
-    prof = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200))
+    prof = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
+                                    fourier_analytic=True)
 
     ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, hmc, prof=prof,
                                            p_of_k_a='linear')

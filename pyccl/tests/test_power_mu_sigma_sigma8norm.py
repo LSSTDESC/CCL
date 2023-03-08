@@ -4,7 +4,7 @@ from unittest import mock
 import pyccl as ccl
 import sys
 from numpy.testing import assert_raises
-from pyccl import get_isitgr_pk_lin
+from pyccl.boltzmann import get_isitgr_pk_lin
 try:
     from importlib import reload
 except ImportError:

@@ -19,7 +19,8 @@ def test_ssc_WL():
                                      mass_def=mass_def)
     hbf = ccl.halos.HaloBiasTinker10(cosmo,
                                      mass_def=mass_def)
-    nfw = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(mass_def))
+    nfw = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(mass_def),
+                                   fourier_analytic=True)
     hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
 
     n_z = 100

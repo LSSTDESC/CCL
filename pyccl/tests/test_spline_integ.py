@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from pyccl.pyutils import _spline_integrate
-from pyccl import CCLError
+from pyccl.errors import CCLError
 
 
 def yf(x, pw):
