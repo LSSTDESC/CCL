@@ -2,6 +2,7 @@
 `$ pytest tests/ --use-cache`
 """
 
+
 def pytest_addoption(parser):
     parser.addoption("--use-cache", action="store_true", help="Enable cache.")
 
