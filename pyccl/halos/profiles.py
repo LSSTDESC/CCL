@@ -4,7 +4,6 @@ from ..pyutils import resample_array, _fftlog_transform
 from ..base import CCLHalosObject, unlock_instance
 from .concentration import Concentration
 from .massdef import MassDef
-from ..errors import warnings, CCLDeprecationWarning
 import numpy as np
 from scipy.special import sici, erf, gamma, gammainc
 from abc import abstractmethod
@@ -649,9 +648,9 @@ class HaloProfileNFW(HaloProfile):
     Args:
         c_M_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
-        fourier_analytic (bool): (Deprecated - do not use)
-            set to `True` if you want to compute the Fourier profile
-            analytically (and not through FFTLog).
+        fourier_analytic (bool): set to `True` if you want to compute
+            the Fourier profile analytically (and not through FFTLog).
+            Default: `True`.
         projected_analytic (bool): set to `True` if you want to
             compute the 2D projected profile analytically (and not
             through FFTLog). Default: `False`.
@@ -665,7 +664,7 @@ class HaloProfileNFW(HaloProfile):
     name = 'NFW'
 
     def __init__(self, c_M_relation,
-                 fourier_analytic=None,
+                 fourier_analytic=True,
                  projected_analytic=False,
                  cumul2d_analytic=False,
                  truncated=True):
@@ -674,9 +673,8 @@ class HaloProfileNFW(HaloProfile):
 
         self.cM = c_M_relation
         self.truncated = truncated
-        if fourier_analytic is not None:
-            warnings.warn("Argument `fourier_analytic` is deprecated in "
-                          "HaloProfileNFW.", CCLDeprecationWarning)
+        if fourier_analytic:
+            self._fourier = self._fourier_analytic
         if projected_analytic:
             if truncated:
                 raise ValueError("Analytic projected profile not supported "
@@ -797,7 +795,7 @@ class HaloProfileNFW(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier(self, cosmo, k, M, a, mass_def):
+    def _fourier_analytic(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
