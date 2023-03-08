@@ -313,9 +313,6 @@ class Tracer(CCLObject):
                 `n_tracer` is the number of tracers. The other
                 dimensions will be squeezed if the inputs are scalars.
         """
-        if not hasattr(self, '_trc'):
-            return []
-
         lk_use = np.atleast_1d(lk)
         a_use = np.atleast_1d(a)
         transfers = []
@@ -344,9 +341,6 @@ class Tracer(CCLObject):
         Returns:
             array_like: list of Bessel derivative orders for each tracer.
         """
-        if not hasattr(self, '_trc'):
-            return []
-
         return np.array([t.der_bessel for t in self._trc])
 
     def _MG_add_tracer(self, cosmo, kernel, z_b, der_bessel=0, der_angles=0,
