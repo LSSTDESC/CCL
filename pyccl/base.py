@@ -369,7 +369,7 @@ class UnlockInstance:
             representation is automatically deleted.
     """
 
-    def __init__(self, instance, mutate=True):
+    def __init__(self, instance, *, mutate=True):
         self.instance = instance
         self.mutate = mutate
         # Define these attributes for easy access.
@@ -426,6 +426,7 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
             Function which changes one of its ``CCLObject`` arguments.
         argv (``int``):
             Which argument should be unlocked. Defaults to the first argument.
+            This should be a ``CCLObject``, or the decorator will do nothing.
         mutate (``bool``):
             If after the function ``instance_old != instance_new``, the
             instance is mutated. If ``True``, the representation of the
