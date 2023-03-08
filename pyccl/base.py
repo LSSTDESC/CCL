@@ -426,7 +426,7 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
             Function which changes one of its ``CCLObject`` arguments.
         argv (``int``):
             Which argument should be unlocked. Defaults to the first argument.
-            This should be a ``CCLObject``, or the decorator will do nothing
+            This should be a ``CCLObject``, or the decorator will do nothing.
         mutate (``bool``):
             If after the function ``instance_old != instance_new``, the
             instance is mutated. If ``True``, the representation of the
