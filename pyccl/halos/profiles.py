@@ -35,7 +35,6 @@ class HaloProfile(CCLHalosObject):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
-    from .._repr import _build_string_HaloProfile as __repr__
     __linked_abstractmethods__ = '_real', '_fourier'
     is_number_counts = False
 

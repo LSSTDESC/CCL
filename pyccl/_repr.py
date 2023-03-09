@@ -271,25 +271,6 @@ def _build_string_from_attrs(self):
     return s
 
 
-def _build_string_HaloProfile(self):
-    """Build a representation for a HaloProfile.
-
-    Example output ::
-
-        <pyccl.halos.profiles.HaloProfileHOD>
-            c_m_relation = ConcentrationDuffy08,  HASH = 0xc8d6ef04
-            lMmin_0 = 11.5
-            lM1_0 = 12.0
-            ns_independent = True
-            HASH_FFTLOG = 0x5546e5dc
-    """
-    H = hex(hash_(self.precision_fftlog))
-    newline = "\n\t"
-    s = _build_string_from_attrs(self)
-    s += f"{newline}HASH_FFTLOG = {H}"
-    return s
-
-
 def _build_string_Tracer(self):
     """Buld a representation for a Tracer.
 
