@@ -77,6 +77,8 @@ class HaloProfileCIBShang12(HaloProfile):
         L0 (float): luminosity scale (in
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
     """
+    __repr_attrs__ = ("cM", "nu", "alpha", "T0", "beta", "gamma", "s_z",
+                      "l10meff", "sigLM", "Mmin", "L0", "precision_fftlog",)
     name = 'CIBShang12'
     _one_over_4pi = 0.07957747154
 
@@ -96,6 +98,7 @@ class HaloProfileCIBShang12(HaloProfile):
         self.sigLM = sigLM
         self.Mmin = Mmin
         self.L0 = L0
+        self.cM = c_M_relation
         self.pNFW = HaloProfileNFW(c_M_relation)
         super(HaloProfileCIBShang12, self).__init__()
 

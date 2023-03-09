@@ -32,7 +32,7 @@ class MassFunc(CCLHalosObject):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    name = 'default'
+    __repr_attrs__ = ("mdef", "mass_def_strict",)
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         # Initialize sigma(M) splines if needed
@@ -251,6 +251,7 @@ class MassFuncSheth99(MassFunc):
             the fit of Nakamura & Suto 1997. Otherwise use
             delta_crit = 1.68647.
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "use_delta_c_fit",)
     name = 'Sheth99'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
@@ -392,6 +393,7 @@ class MassFuncDespali16(MassFunc):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "ellipsoidal",)
     name = 'Despali16'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
@@ -454,6 +456,7 @@ class MassFuncTinker10(MassFunc):
         norm_all_z (bool): should we normalize the mass function
             at z=0 or at all z?
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
@@ -536,6 +539,7 @@ class MassFuncBocquet16(MassFunc):
             using dark-matter-only simulations. Otherwise, include
             baryonic effects (default).
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "hydro",)
     name = 'Bocquet16'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,

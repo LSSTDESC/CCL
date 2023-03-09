@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 import pyccl as ccl
+import functools
 
 
 def test_CCLObject():
@@ -140,3 +141,38 @@ def test_CCLObject_default_behavior():
     instances = [MyType() for _ in range(2)]
     assert instances[0] != instances[1]
     assert hash(instances[0]) != hash(instances[1])
+
+
+def init_decorator(func):
+    """Check that all attributes listed in ``__repr_attrs__`` are defined in
+    the constructor of all subclasses of ``CCLHalosObject``.
+    NOTE: Used in ``conftest.py``.
+    """
+
+    def in_mro(self):
+        """Determine if `__repr_attrs__` is defined somewhere in the MRO."""
+        # NOTE: This helper function makes sure that an AttributeError is not
+        # raised when `super().__init__` is called inside another `__init__`.
+        mro = self.__class__.__mro__[1:]  # MRO excluding this class
+        for cls in mro:
+            if hasattr(cls, "__repr_attrs__"):
+                return True
+        return False
+
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        func(self, *args, **kwargs)
+        flag = [attr for attr in self.__repr_attrs__
+                if not (hasattr(self, attr) or in_mro(self))]
+        if flag:
+            # NOTE: Set the attributes before calling `super`.
+            raise AttributeError(f"{self.__class__.__name__}: attribute(s) "
+                                 f"{flag} not set in __init__.")
+
+    return wrapper
+
+
+def all_subclasses(cls):
+    """Get all subclasses of ``cls``. NOTE: Used in ``conftest.py``."""
+    return set(cls.__subclasses__()).union([s for c in cls.__subclasses__()
+                                            for s in all_subclasses(c)])

@@ -545,13 +545,7 @@ class CCLObject(metaclass=CCLObjectMeta):
         # 1. Store the signature of the constructor on import.
         cls.__signature__ = signature(cls.__init__)
 
-        # 2. Assign the arguments of the constructor if needed.
-        if (hasattr(cls, "__init_attrs__")
-                and cls.__init_attrs__
-                and "__init__" in vars(cls)):
-            cls.__init__ = auto_assign(cls.__init__, sig=cls.__signature__)
-
-        # 3. Replace repr (if implemented) with its cached version.
+        # 2. Replace repr (if implemented) with its cached version.
         if "__repr__" in vars(cls):
             # If the class defines a custom `__repr__`, this will be the new
             # `_repr` (which is cached). Decorator `cached_property` requires
@@ -562,7 +556,7 @@ class CCLObject(metaclass=CCLObjectMeta):
             # Fall back to using `__ccl_repr__` from `CCLObject`.
             cls.__repr__ = cls.__ccl_repr__
 
-        # 4. Unlock instance on specific methods.
+        # 3. Unlock instance on specific methods.
         def Funlock(cls, name, mutate):
             # Allow instance to change or mutate if method `name` is called.
             func = vars(cls).get(name)
@@ -618,14 +612,39 @@ class CCLObject(metaclass=CCLObjectMeta):
 
 
 class CCLHalosObject(CCLObject):
-    """Base for halo objects. Automatically assign all ``__init__``
-    parameters as attributes.
+    """Base for halo objects. Representations for instances are built from a
+    list of attribute names specified as a class variable in ``__repr_attrs__``
+    (acting as a hook).
+
+    Example:
+        The representation (also hash) of instances of the following class
+        is built based only on the attributes specified in ``__repr_attrs__``:
+
+        >>> class MyClass(CCLHalosObject):
+            __repr_attrs__ = ("a", "b", "other")
+            def __init__(self, a=1, b=2, c=3, d=4, e=5):
+                self.a = a
+                self.b = b
+                self.c = c
+                self.other = d + e
+
+        >>> repr(MyClass(6, 7, 8, 9, 10))
+            <__main__.MyClass>
+                a = 6
+                b = 7
+                other = 19
     """
-    __init_attrs__ = True
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if not ("__repr__" in vars(cls) or hasattr(cls, "__repr_attrs__")):
+            # pyccl will exit with this error on import should there exist
+            # any subclasses which have not been configured correctly.
+            raise ValueError(
+                f"{cls.__name__} which is an instance of CCLHalosObject "
+                "does not have a `__repr__` method or a `__repr_attrs__` "
+                "class attribute.")
 
     def __repr__(self):
-        # If all the passed parameters have been assigned as instance
-        # attributes during construction, we can use these parameters
-        # to build a unique string for each instance.
-        from ._repr import _build_string_from_init_attrs
-        return _build_string_from_init_attrs(self)
+        from ._repr import _build_string_from_attrs
+        return _build_string_from_attrs(self)

@@ -53,6 +53,7 @@ class HMCalculator(CCLHalosObject):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
+    __repr_attrs__ = ("_massfunc", "_hbias", "_mdef", "_prec",)
 
     def __init__(self, cosmo, massfunc, hbias, mass_def,
                  log10M_min=8., log10M_max=16.,
@@ -169,7 +170,7 @@ class HMCalculator(CCLHalosObject):
         # Compute mass function
         self._get_ingredients(cosmo, a, False)
         uk0 = prof.fourier(cosmo, self._prec['k_min'],
-                           self._mass, a, mass_def=self.mass_def).T
+                           self._mass, a, mass_def=self._mdef).T
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
 
@@ -258,7 +259,7 @@ class HMCalculator(CCLHalosObject):
         # Compute mass function
         self._get_ingredients(cosmo, a, False)
         uk = prof.fourier(cosmo, k, self._mass, a,
-                          mass_def=self.mass_def).T
+                          mass_def=self._mdef).T
         i01 = self._integrate_over_mf(uk)
         return i01
 
@@ -288,7 +289,7 @@ class HMCalculator(CCLHalosObject):
         # Compute mass function and halo bias
         self._get_ingredients(cosmo, a, True)
         uk = prof.fourier(cosmo, k, self._mass, a,
-                          mass_def=self.mass_def).T
+                          mass_def=self._mdef).T
         i11 = self._integrate_over_mbf(uk)
         return i11
 
@@ -325,7 +326,7 @@ class HMCalculator(CCLHalosObject):
         self._get_ingredients(cosmo, a, False)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
-                                  mass_def=self.mass_def).T
+                                  mass_def=self._mdef).T
         i02 = self._integrate_over_mf(uk)
         return i02
 
@@ -363,7 +364,7 @@ class HMCalculator(CCLHalosObject):
         self._get_ingredients(cosmo, a, True)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
-                                  mass_def=self.mass_def).T
+                                  mass_def=self._mdef).T
         i02 = self._integrate_over_mbf(uk)
         return i02
 
@@ -415,9 +416,9 @@ class HMCalculator(CCLHalosObject):
 
         self._get_ingredients(cosmo, a, False)
         uk12 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
-                                      prof2=prof2, mass_def=self.mass_def).T
+                                      prof2=prof2, mass_def=self._mdef).T
         uk34 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
-                                      prof2=prof4, mass_def=self.mass_def).T
+                                      prof2=prof4, mass_def=self._mdef).T
         i04 = self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
         return i04
 

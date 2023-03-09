@@ -238,9 +238,9 @@ def _build_string_simple(self):
     return f"<{self.__module__}.{self.__class__.__qualname__}>"
 
 
-def _build_string_from_init_attrs(self):
-    """Build a generic representation when all `__init__` parameters
-    are also instance attributes.
+def _build_string_from_attrs(self):
+    """Build a representation for an object from a list of attribute names
+    given in the hook ``__repr_attrs__`.
 
     Example output ::
 
@@ -249,25 +249,17 @@ def _build_string_from_init_attrs(self):
             halo_bias = HaloBiasTinker10,  HASH = 0x9da644b5
             mass_def = pyccl.halos.MassDef(Delta=500, rho_type=critical)
     """
-
-    # collect the dictionary of input values different to defaults
-    params = self.__class__.__signature__.parameters
+    params = {param: getattr(self, param) for param in self.__repr_attrs__}
     defaults = {param: value.default
-                for param, value in params.items()
+                for param, value in self.__signature__.parameters.items()
                 if param != "self"}
 
-    passed = {param: getattr(self, param) for param in defaults}
-
     s = _build_string_simple(self)
-    dic = {param: value
-           for param, value in passed.items()
-           if value != defaults[param]}
-    if not dic:
-        return s
-
     newline = "\n\t"
-    for param, value in dic.items():
-        # print the non-default attributes one-by one
+    for param, value in params.items():
+        if param in defaults and value == defaults[param]:
+            # skip printing when value is the default
+            continue
         s += f"{newline}{param} = "
         if "\n" in repr(value):
             # if too long, print the type and its hash
@@ -293,7 +285,7 @@ def _build_string_HaloProfile(self):
     """
     H = hex(hash_(self.precision_fftlog))
     newline = "\n\t"
-    s = _build_string_from_init_attrs(self)
+    s = _build_string_from_attrs(self)
     s += f"{newline}HASH_FFTLOG = {H}"
     return s
 
