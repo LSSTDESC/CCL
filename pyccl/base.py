@@ -2,7 +2,7 @@ import sys
 import functools
 from collections import OrderedDict
 import numpy as np
-from inspect import signature, isabstract
+from inspect import signature
 from _thread import RLock
 from abc import ABCMeta
 
@@ -635,18 +635,9 @@ class CCLHalosObject(CCLObject):
                 other = 19
     """
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        if not ("__repr__" in vars(cls)
-                or hasattr(cls, "__repr_attrs__")
-                or isabstract(cls)):
-            # pyccl will exit with this error on import should there exist
-            # any subclasses which have not been configured correctly.
-            raise ValueError(
-                f"{cls.__name__} which is an instance of CCLHalosObject "
-                "does not have a `__repr__` method or a `__repr_attrs__` "
-                "class attribute.")
-
     def __repr__(self):
-        from ._repr import _build_string_from_attrs
-        return _build_string_from_attrs(self)
+        # Build string from specified `__repr_attrs__` or use Python's default.
+        if hasattr(self.__class__, "__repr_attrs__"):
+            from ._repr import _build_string_from_attrs
+            return _build_string_from_attrs(self)
+        return object.__repr__(self)

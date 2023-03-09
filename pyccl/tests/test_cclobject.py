@@ -162,6 +162,10 @@ def init_decorator(func):
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
         func(self, *args, **kwargs)
+        if not hasattr(self, "__repr_attrs__"):
+            # If `__repr_attrs__` is not specified, use local repr or inherit.
+            return
+
         flag = [attr for attr in self.__repr_attrs__
                 if not (hasattr(self, attr) or in_mro(self))]
         if flag:
