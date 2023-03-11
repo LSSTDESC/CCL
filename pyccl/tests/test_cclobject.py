@@ -143,6 +143,13 @@ def test_CCLObject_default_behavior():
     assert hash(instances[0]) != hash(instances[1])
 
 
+def test_HaloProfile_abstractmethods():
+    # Test that `HaloProfile` and its subclasses can't be instantiated if
+    # either `_real` or `_fourier` have not been defined.
+    with pytest.raises(TypeError):
+        ccl.halos.HaloProfile()
+
+
 def init_decorator(func):
     """Check that all attributes listed in ``__repr_attrs__`` are defined in
     the constructor of all subclasses of ``CCLHalosObject``.
