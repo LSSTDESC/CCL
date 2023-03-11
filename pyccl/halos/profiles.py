@@ -37,6 +37,12 @@ class HaloProfile(CCLHalosObject):
     is_number_counts = False
 
     def __init__(self):
+        # Check that at least one of (`_real`, `_fourier`) exist.
+        if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
+            raise TypeError(
+                f"Can't instantiate class {self.__class__.__name__} "
+                "with no methods _real or _fourier")
+
         self.precision_fftlog = {'padding_lo_fftlog': 0.1,
                                  'padding_lo_extra': 0.1,
                                  'padding_hi_fftlog': 10.,
