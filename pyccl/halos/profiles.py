@@ -1,7 +1,7 @@
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
-from ..base import CCLHalosObject, unlock_instance
+from ..base import CCLHalosObject, UnlockInstance, unlock_instance
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
@@ -1343,7 +1343,8 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         # Tabulate if not done yet
         if self._fourier_interp is None:
-            self._fourier_interp = self._integ_interp()
+            with UnlockInstance(self):
+                self._fourier_interp = self._integ_interp()
 
         # Input handling
         M_use = np.atleast_1d(M)

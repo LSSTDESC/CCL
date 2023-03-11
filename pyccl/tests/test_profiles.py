@@ -324,7 +324,7 @@ def get_nfw(real=False, fourier=False):
     if real:
         NFW._real = ccl.halos.HaloProfileNFW._real
     if fourier:
-        NFW._fourier = ccl.halos.HaloProfileNFW._fourier
+        NFW._fourier = ccl.halos.HaloProfileNFW._fourier_analytic
     return NFW
 
 
