@@ -6,7 +6,6 @@ from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
 from scipy.special import sici, erf, gamma, gammainc
-from abc import abstractmethod
 
 
 class HaloProfile(CCLHalosObject):
@@ -35,7 +34,6 @@ class HaloProfile(CCLHalosObject):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
-    __linked_abstractmethods__ = '_real', '_fourier'
     is_number_counts = False
 
     def __init__(self):
@@ -149,18 +147,6 @@ class HaloProfile(CCLHalosObject):
         """
         return self.precision_fftlog['plaw_projected']
 
-    @abstractmethod
-    def _real(self, cosmo, r, M, a, mass_def):
-        """Implementation of the 3D real-space profile.
-        Either `_real` or `_fourier` have to be defined.
-        """
-
-    @abstractmethod
-    def _fourier(self, cosmo, k, M, a, mass_def):
-        """Implementation of the 3D fourier-space profile.
-        Either `_real` or `_fourier` have to be defined.
-        """
-
     def real(self, cosmo, r, M, a, mass_def=None):
         """ Returns the 3D real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
@@ -180,10 +166,9 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        prof = self.__class__  # see if defined at the class level
-        if "_real" in vars(prof):
+        if getattr(self, '_real', None):
             f_r = self._real(cosmo, r, M, a, mass_def)
-        elif "_fourier" in vars(prof):
+        elif getattr(self, '_fourier', None):
             f_r = self._fftlog_wrap(cosmo, r, M, a, mass_def,
                                     fourier_out=False)
         return f_r
@@ -212,10 +197,9 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        prof = self.__class__  # see if defined at the class level
-        if "_fourier" in vars(prof):
+        if getattr(self, '_fourier', None):
             f_k = self._fourier(cosmo, k, M, a, mass_def)
-        elif "_real" in vars(prof):
+        elif getattr(self, '_real', None):
             f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
         return f_k
 
@@ -242,7 +226,7 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if hasattr(self, "_projected"):
+        if getattr(self, '_projected', None):
             s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
         else:
             s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
@@ -274,7 +258,7 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if hasattr(self, "_cumul2d"):
+        if getattr(self, '_cumul2d', None):
             s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
         else:
             s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
@@ -475,8 +459,7 @@ class HaloProfile(CCLHalosObject):
 
         sig_r_t_out = np.zeros([nM, r_t_use.size])
         # Compute Fourier-space profile
-        prof = self.__class__
-        if "_fourier" in vars(prof):
+        if getattr(self, '_fourier', None):
             # Compute from `_fourier` if available.
             p_fourier = self._fourier(cosmo, k_arr, M_use,
                                       a, mass_def)
@@ -1222,7 +1205,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         self.x_out = x_out
 
         # Interpolator for dimensionless Fourier-space profile
-        self._fourier_interp = self._integ_interp()
+        self._fourier_interp = None
         super(HaloProfilePressureGNFW, self).__init__()
 
     def update_parameters(self, mass_bias=None, P0=None,
@@ -1281,7 +1264,7 @@ class HaloProfilePressureGNFW(HaloProfile):
             re_fourier = True
             self.x_out = x_out
 
-        if re_fourier:
+        if re_fourier and (self._fourier is not None):
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):
@@ -1351,6 +1334,10 @@ class HaloProfilePressureGNFW(HaloProfile):
     def _fourier(self, cosmo, k, M, a, mass_def):
         # Fourier-space profile.
         # Output in units of eV * Mpc^3 / cm^3.
+
+        # Tabulate if not done yet
+        if self._fourier_interp is None:
+            self._fourier_interp = self._integ_interp()
 
         # Input handling
         M_use = np.atleast_1d(M)

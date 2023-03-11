@@ -4,7 +4,7 @@ from collections import OrderedDict
 import numpy as np
 from inspect import signature
 from _thread import RLock
-from abc import ABCMeta
+from abc import ABC
 
 
 def _to_hashable(obj):
@@ -301,31 +301,6 @@ class CachedObject:
         self.counter = 0
 
 
-def auto_assign(func, sig):
-    """Decorator to automatically assign all parameters as instance attributes.
-    This ought to be applied on constructor methods.
-
-    Arguments:
-        func (``function``):
-            Function which takes the instance as its first argument.
-            All function arguments will be assigned as attributes of the
-            instance.
-        sig (``inspect.Signature``):
-            The signature of the constructor this decorator is applied to.
-            This is needed to distinguish between parent class methods.
-    """
-    @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        bound = sig.bind_partial(self, *args, **kwargs)
-        bound.apply_defaults()
-        bound.arguments.pop("self")
-        for name, value in bound.arguments.items():
-            setattr(self, name, value)
-        # func may now override the attributes we just set
-        func(self, *args, **kwargs)
-    return wrapper
-
-
 class ObjectLock:
     """Control the lock state (immutability) of a ``CCLObject``."""
     _locked: bool = False
@@ -447,57 +422,7 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
     return wrapper
 
 
-class CCLObjectMeta(ABCMeta):
-    """Metaclass for ``CCLObject``.
-
-    Enables linking of abstract methods, if ``__linked_abstractmethods__``
-    is provided for the base class. Subclasses that define either of
-    the linked methods will satisfy the abstraction requirement.
-
-    Example:
-        Subclasses of the following class can be instantiated if either
-        ``method1`` or ``method2`` (and ``another_method``) are defined.
-        Otherwise, it falls back to normal ``abc.ABCMeta`` behavior:
-
-        >>> class MyBaseClass(metaclass=ABCMeta):
-                __linked_abstractmethods__ = 'method1', 'method2'
-                @abstractmethod
-                def method1(self):
-                    ...
-                @abstractmethod
-                def method2(self):
-                    ...
-                @abstractmethod
-                def another_method(self):
-                    ...
-    """
-
-    def __new__(mcls, name, bases, clsdict):
-        """Class factory for ``CCLObject``.
-
-        .. note:: Naming convention: ``mcls`` -- metaclass, ``cls`` -- class
-        """
-        cls = super().__new__(mcls, name, bases, clsdict)
-
-        # Check if abstraction criteria are satisfied.
-        if hasattr(cls, "__linked_abstractmethods__"):
-            # Tap into class creation and remove all linked abstract methods
-            # from the `__abstractmethods__` hook.
-            linked = cls.__linked_abstractmethods__
-
-            def is_abstract(cls, method):
-                # Check if the `method` of class `cls` is abstract.
-                meth = getattr(cls, method)
-                return getattr(meth, "__isabstractmethod__", False)
-
-            if not all([is_abstract(cls, method) for method in linked]):
-                abstracts = set(cls.__abstractmethods__) - set(linked)
-                cls.__abstractmethods__ = frozenset(abstracts)
-
-        return cls
-
-
-class CCLObject(metaclass=CCLObjectMeta):
+class CCLObject(ABC):
     """Base for CCL objects.
 
     All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.
