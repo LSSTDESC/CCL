@@ -4,6 +4,11 @@ import pyccl as ccl
 import numpy as np
 from collections import OrderedDict
 
+from pyccl.base import func_that_does_nothing
+
+assert func_that_does_nothing(1)
+
+
 OBJECTS = [ccl.Cosmology,  # class
            (0, 1, 2),      # tuple
            [0, 1, 2],      # list

@@ -6,6 +6,9 @@ from inspect import signature
 from _thread import RLock
 
 
+func_that_does_nothing = lambda x: x  # noqa
+
+
 def _to_hashable(obj):
     """Make unhashable objects hashable in a consistent manner."""
 
