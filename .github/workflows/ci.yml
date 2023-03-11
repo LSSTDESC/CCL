@@ -65,7 +65,7 @@ jobs:
             compilers pkg-config setuptools_scm pytest pandas pytest-cov \
             cython "camb=1.3.6" isitgr traitlets fast-pt
 
-          pip install "classy<3"
+          pip install "classy<3" pyproject-toml
 
           if [[ ${MATRIX_OS} == "macos-11" ]]; then
             mamba install llvm-openmp
