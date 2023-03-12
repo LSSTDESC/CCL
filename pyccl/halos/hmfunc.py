@@ -534,7 +534,7 @@ class MassFuncBocquet16(MassFunc):
     name = 'Bocquet16'
 
     def __init__(self, cosmo,
-                 mass_def= MassDef200m(),
+                 mass_def=MassDef200m(),
                  mass_def_strict=True,
                  hydro=True):
         self.hydro = hydro
@@ -738,7 +738,7 @@ class MassFuncAngulo12(MassFunc):
     name = 'Angulo12'
 
     def __init__(self, cosmo,
-                 mass_def= MassDef('fof', 'matter'),
+                 mass_def=MassDef('fof', 'matter'),
                  mass_def_strict=True):
         super(MassFuncAngulo12, self).__init__(cosmo,
                                                mass_def,
