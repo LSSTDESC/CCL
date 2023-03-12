@@ -49,12 +49,6 @@ jobs:
             exit 1
           fi
 
-      - name: coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          coveralls --service=github
-
       - name: remove homebrew
         if: matrix.os == 'macos-11'
         run: |
@@ -111,6 +105,12 @@ jobs:
       - name: benchmarks
         run: |
           OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
+
+      - name: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          coveralls --service=github
 
 #  build-doc-only-ubuntu:
 #    runs-on: ubuntu-latest
