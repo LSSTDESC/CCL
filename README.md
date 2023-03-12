@@ -1,5 +1,5 @@
 <!---
-STYLE CONVENTION USED   
+STYLE CONVENTION USED
     bolt italic:
         ***file***"
     code:
@@ -10,7 +10,7 @@ STYLE CONVENTION USED
         **`function`**
         **`type`** or **`structure`**
 -->
-# CCL     
+# CCL
 [![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL) [![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master) [![Documentation Status](https://readthedocs.org/projects/ccl/badge/?version=latest)](https://ccl.readthedocs.io/en/latest/?badge=latest)
 
 The Core Cosmology Library (CCL) is a standardized library of routines to calculate
@@ -111,13 +111,13 @@ for more information.
 # Contact
 
 If you have comments, questions, or feedback, please
-[write us an issue](https://github.com/LSSTDESC/CCL/issues). 
+[write us an issue](https://github.com/LSSTDESC/CCL/issues).
 
-The current lead of the LSST DESC CCL Topical Team is Danielle Leonard (c-d-leonard, danielle.leonard at ncl.ac.uk)
+The current lead of the LSST DESC CCL Topical Team is David Alonso (damonge, david.alonso at physics.ox.ac.uk)
 
 
 # Acknowledgements
 
 The DESC acknowledges ongoing support from the Institut National de Physique Nucleaire et de Physique des Particules in France; the Science \& Technology Facilities Council in the United Kingdom; and the Department of Energy, the National Science Foundation, and the LSST Corporation in the United States.  DESC uses resources of the IN2P3 Computing Center (CC-IN2P3--Lyon/Villeurbanne - France) funded by the Centre National de la Recherche Scientifique; the National Energy Research Scientific Computing Center, a DOE Office of Science User Facility supported by the Office of Science of the U.S. Department of Energy under Contract No. DE-AC02-05CH11231; STFC DiRAC HPC Facilities, funded by UK BIS National E-infrastructure capital grants; and the UK particle physics grid, supported by the GridPP Collaboration.  This work was performed in part under DOE Contract DE-AC02-76SF00515.
 
-NEC acknowledges support from a Royal Astronomical Society research fellowship and the Delta ITP consortium, a program of the Netherlands Organisation for Scientific Research (NWO) that is funded by the Dutch Ministry of Education, Culture and Science (OCW). DA acknowledges support from the Science and Technology Facilities Council through an Ernest Rutherford Fellowship, grant reference ST/P004474. AL and CG acknowledge support from the European Research Council under the European Union's Seventh Framework Programme (FP/2007-2013) / ERC Grant Agreement No. [616170] for work on the generic interface for theory inputs. 
+NEC acknowledges support from a Royal Astronomical Society research fellowship and the Delta ITP consortium, a program of the Netherlands Organisation for Scientific Research (NWO) that is funded by the Dutch Ministry of Education, Culture and Science (OCW). DA acknowledges support from the Science and Technology Facilities Council through an Ernest Rutherford Fellowship, grant reference ST/P004474. AL and CG acknowledge support from the European Research Council under the European Union's Seventh Framework Programme (FP/2007-2013) / ERC Grant Agreement No. [616170] for work on the generic interface for theory inputs.
