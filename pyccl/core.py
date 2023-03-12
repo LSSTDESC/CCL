@@ -761,7 +761,8 @@ class Cosmology(CCLObject):
         elif trf == 'boltzmann_isitgr':
             rescale_mg = False
             pk = get_isitgr_pk_lin(self)
-        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
+        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles',
+                     'bacco']:
             rescale_s8 = False
             rescale_mg = False
             pk = Pk2D.from_model(self, model=trf)
