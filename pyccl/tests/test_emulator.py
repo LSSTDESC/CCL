@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-from . import pyccl as ccl
-from . import EmulatorObject
+import pyccl as ccl
+from pyccl import EmulatorObject
 import warnings
 
 
