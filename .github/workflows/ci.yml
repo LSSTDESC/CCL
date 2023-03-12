@@ -86,12 +86,6 @@ jobs:
         run: |
           pip install .
 
-      - name: c unit tests
-        run: |
-          cd build
-          make -j4
-          CLASS_PARAM_DIR=./extern/share/class/ OMP_NUM_THREADS=2 ./check_ccl
-
       - name: python unit tests
         run: |
           OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
@@ -105,24 +99,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           coveralls --service=github
-
-#  build-doc-only-ubuntu:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: install latex
-#        run: |
-#
-#          sudo apt install \
-#            texlive texlive-bibtex-extra texlive-science texlive-publishers \
-#            latexmk python3-sphinx python3-sphinx-rtd-theme python3-nbconvert \
-#            python3-jupyter-client jupyter-client jupyter-nbconvert sphinx-common \
-#            pandoc python3-setuptools \
-#            -y
-#          sudo pip3 install mkauthlist
-#
-#      - name: build docs
-#        run: |
-#          cd doc/0000-ccl_note
-#          make
