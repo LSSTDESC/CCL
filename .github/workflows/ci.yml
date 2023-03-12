@@ -82,11 +82,11 @@ jobs:
         env:
           MATRIX_OS: ${{ matrix.os }}
 
-      - name: build CCL
+      - name: install CCL
         run: |
           pip install .
 
-      - name: python unit tests
+      - name: unit tests
         run: |
           OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
 
