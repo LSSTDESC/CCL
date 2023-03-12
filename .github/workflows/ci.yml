@@ -39,14 +39,6 @@ jobs:
           miniforge-version: latest
           miniforge-variant: Mambaforge
 
-      - name: remove homebrew
-        if: matrix.os == 'macos-11'
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
-          chmod u+x ./uninstall_homebrew.sh
-          ./uninstall_homebrew.sh -f -q >& /dev/null
-          rm -f uninstall_homebrew.sh
-
       - name: lint
         run: |
           export MAMBA_NO_BANNER=1
@@ -56,6 +48,20 @@ jobs:
           if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
             exit 1
           fi
+
+      - name: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          coveralls --service=github
+
+      - name: remove homebrew
+        if: matrix.os == 'macos-11'
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
+          chmod u+x ./uninstall_homebrew.sh
+          ./uninstall_homebrew.sh -f -q >& /dev/null
+          rm -f uninstall_homebrew.sh
 
       - name: install deps
         run: |
@@ -90,8 +96,7 @@ jobs:
 
       - name: build CCL
         run: |
-          python setup.py build
-          python setup.py develop
+          pip install .
 
       - name: c unit tests
         run: |
@@ -106,12 +111,6 @@ jobs:
       - name: benchmarks
         run: |
           OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
-
-      - name: coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          coveralls --service=github
 
 #  build-doc-only-ubuntu:
 #    runs-on: ubuntu-latest
