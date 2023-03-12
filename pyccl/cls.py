@@ -58,6 +58,8 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
+    if p_of_k_a is None:
+        p_of_k_a = cltracer1.name_delta + ':' + cltracer2.name_delta
     psp = parse_pk2d(cosmo_in, p_of_k_a)
 
     # Create tracer colections

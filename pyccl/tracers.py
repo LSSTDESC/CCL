@@ -175,6 +175,8 @@ class Tracer(object):
     tracers that get combined linearly when computing power spectra.
     Further details can be found in Section 4.9 of the CCL note.
     """
+    name_delta = 'delta_matter'
+
     def __init__(self):
         """By default this `Tracer` object will contain no actual
         tracers
