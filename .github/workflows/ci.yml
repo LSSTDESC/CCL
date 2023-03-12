@@ -84,7 +84,7 @@ jobs:
 
       - name: install CCL
         run: |
-          pip install .
+          pip install -e .
 
       - name: unit tests
         run: |
