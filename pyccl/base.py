@@ -424,6 +424,15 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
     return wrapper
 
 
+def Funlock(cls, name, mutate: bool):
+    """Helper to allow an instance to change or mutate when `name` is called.
+    """
+    func = vars(cls).get(name)
+    if func is not None:
+        newfunc = unlock_instance(mutate=mutate)(func)
+        setattr(cls, name, newfunc)
+
+
 class CCLObject(ABC):
     """Base for CCL objects.
 
@@ -484,13 +493,6 @@ class CCLObject(ABC):
             cls.__repr__ = cls.__ccl_repr__
 
         # 3. Unlock instance on specific methods.
-        def Funlock(cls, name, mutate):
-            # Allow instance to change or mutate if method `name` is called.
-            func = vars(cls).get(name)
-            if func is not None:
-                newfunc = unlock_instance(mutate=mutate)(func)
-                setattr(cls, name, newfunc)
-
         Funlock(cls, "__init__", False)
         Funlock(cls, "update_parameters", True)
 

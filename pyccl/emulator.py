@@ -1,4 +1,4 @@
-from .base import CCLObject, cache, unlock_instance
+from .base import CCLObject, cache, Funlock
 from .pk2d import Pk2D
 import numpy as np
 from abc import abstractmethod
@@ -97,13 +97,6 @@ class Emulator(CCLObject):
     """
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-
-        def Funlock(cl, name, mutate):
-            # Allow instance to change or mutate if method `name` is called.
-            func = vars(cl).get(name)
-            if func is not None:
-                newfunc = unlock_instance(mutate=mutate)(func)
-                setattr(cl, name, newfunc)
 
         Funlock(cls, "_build_parameters", False)
 
