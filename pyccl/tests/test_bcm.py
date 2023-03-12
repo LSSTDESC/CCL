@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 import warnings
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 COSMO = ccl.CosmologyVanillaLCDM(

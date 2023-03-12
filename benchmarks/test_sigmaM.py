@@ -1,5 +1,5 @@
 import numpy as np
-from . import pyccl as ccl
+import pyccl as ccl
 import pytest
 
 SIGMAM_TOLERANCE = 3.0E-5

@@ -1,9 +1,8 @@
 import copy
 import numpy as np
 from numpy.testing import assert_raises
-from . import pyccl
-from . import ccllib
-from . import CCLError
+import pyccl
+from pyccl import ccllib, CCLError
 
 PYCOSMO = pyccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
                           sigma8=0.8, n_s=0.96,
@@ -200,18 +199,3 @@ def test_swig_power():
         [0.5, 1.0],
         3,
         status)
-
-
-def test_swig_haloprofile():
-    status = 0
-    assert_raises(CCLError,
-                  ccllib.einasto_norm,
-                  [0.1, 1.0],
-                  [0.1, 1.0],
-                  [0.1, 1.0],
-                  4, status)
-    assert_raises(CCLError,
-                  ccllib.hernquist_norm,
-                  [0.1, 1.0],
-                  [0.1, 1.0],
-                  4, status)

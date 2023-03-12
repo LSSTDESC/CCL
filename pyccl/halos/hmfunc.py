@@ -8,7 +8,6 @@ from .massdef import MassDef, MassDef200m, MassDef200c
 import numpy as np
 from scipy.interpolate import interp1d
 import functools
-from abc import abstractmethod
 
 
 class MassFunc(CCLHalosObject):
@@ -41,7 +40,7 @@ class MassFunc(CCLHalosObject):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    __linked_abstractmethods__ = "_get_fsigma", "get_mass_function"
+    __repr_attrs__ = ("mdef", "mass_def_strict",)
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         # Initialize sigma(M) splines if needed
@@ -60,12 +59,6 @@ class MassFunc(CCLHalosObject):
             self._default_mdef()
         self._setup(cosmo)
 
-    @abstractmethod
-    def _default_mdef(self):
-        """ Assigns a default mass definition for this object if
-        none is passed at initialization.
-        """
-
     def _setup(self, cosmo):
         """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
@@ -74,7 +67,6 @@ class MassFunc(CCLHalosObject):
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         """
-        pass
 
     def _check_mdef_strict(self, mdef):
         return False
@@ -133,7 +125,6 @@ class MassFunc(CCLHalosObject):
             om_matt = omega_x(cosmo, a, 'matter')
             return delta * om_this / om_matt
 
-    @abstractmethod
     def get_mass_function(self, cosmo, M, a, mdef_other=None):
         """ Returns the mass function for input parameters.
 
@@ -171,7 +162,6 @@ class MassFunc(CCLHalosObject):
             mf = mf[0]
         return mf
 
-    @abstractmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         """ Get the :math:`f(\\sigma_M)` function for this mass function
         object (see description of this class for details).
@@ -216,19 +206,18 @@ class MassFuncPress74(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
+            The default is 'FoF'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Press74'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True):
         super(MassFuncPress74, self).__init__(cosmo,
                                               mass_def,
                                               mass_def_strict)
-
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.norm = np.sqrt(2/np.pi)
@@ -254,24 +243,24 @@ class MassFuncSheth99(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
+            The default is 'FoF'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
         use_delta_c_fit (bool): if True, use delta_crit given by
             the fit of Nakamura & Suto 1997. Otherwise use
             delta_crit = 1.68647.
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "use_delta_c_fit",)
     name = 'Sheth99'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
         super(MassFuncSheth99, self).__init__(cosmo,
                                               mass_def,
                                               mass_def_strict)
-
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.A = 0.21615998645
@@ -304,19 +293,18 @@ class MassFuncJenkins01(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
+            The default is 'FoF'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Jenkins01'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True):
         super(MassFuncJenkins01, self).__init__(cosmo,
                                                 mass_def=mass_def,
                                                 mass_def_strict=True)
-
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.A = 0.315
@@ -341,19 +329,18 @@ class MassFuncTinker08(MassFunc):
             a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Tinker08'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True):
         super(MassFuncTinker08, self).__init__(cosmo,
                                                mass_def,
                                                mass_def_strict)
-
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
 
     def _pd(self, ld):
         return 10.**(-(0.75/(ld - 1.8750612633))**1.2)
@@ -398,24 +385,21 @@ class MassFuncDespali16(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts any SO masses.
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "ellipsoidal",)
     name = 'Despali16'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True,
                  ellipsoidal=False):
         super(MassFuncDespali16, self).__init__(cosmo,
                                                 mass_def,
                                                 mass_def_strict)
         self.ellipsoidal = ellipsoidal
-
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
-
-    def _setup(self, cosmo):
-        pass
 
     def _check_mdef_strict(self, mdef):
         if mdef.Delta == 'fof':
@@ -458,23 +442,23 @@ class MassFuncTinker10(MassFunc):
             a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
         norm_all_z (bool): should we normalize the mass function
             at z=0 or at all z?
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True,
                  norm_all_z=False):
         self.norm_all_z = norm_all_z
         super(MassFuncTinker10, self).__init__(cosmo,
                                                mass_def,
                                                mass_def_strict)
-
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
         from scipy.interpolate import interp1d
@@ -539,24 +523,24 @@ class MassFuncBocquet16(MassFunc):
             a mass definition object.
             this parametrization accepts SO masses with
             Delta = 200 (matter, critical) and 500 (critical).
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
         hydro (bool): if `False`, use the parametrization found
             using dark-matter-only simulations. Otherwise, include
             baryonic effects (default).
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "hydro",)
     name = 'Bocquet16'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo,
+                 mass_def= MassDef200m(),
+                 mass_def_strict=True,
                  hydro=True):
         self.hydro = hydro
         super(MassFuncBocquet16, self).__init__(cosmo,
                                                 mass_def,
                                                 mass_def_strict)
-
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
         if int(self.mdef.Delta) == 200:
@@ -682,19 +666,18 @@ class MassFuncWatson13(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts fof and any SO masses.
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Watson13'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True):
         super(MassFuncWatson13, self).__init__(cosmo,
                                                mass_def,
                                                mass_def_strict)
-
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
         self.is_fof = self.mdef.Delta == 'fof'
@@ -748,19 +731,18 @@ class MassFuncAngulo12(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
+            The default is 'FoF'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Angulo12'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo,
+                 mass_def= MassDef('fof', 'matter'),
+                 mass_def_strict=True):
         super(MassFuncAngulo12, self).__init__(cosmo,
                                                mass_def,
                                                mass_def_strict)
-
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         self.A = 0.201
@@ -802,7 +784,9 @@ class MassFuncBocquet20(MassFunc, Emulator):
     """
     name = 'Bocquet20'
 
-    def __init__(self, cosmo, *, mass_def=None, mass_def_strict=True,
+    def __init__(self, cosmo, *,
+                 mass_def=MassDef200c(),
+                 mass_def_strict=True,
                  extrapolate=True):
         self.extrapolate = extrapolate
         if mass_def_strict is False:
@@ -810,9 +794,6 @@ class MassFuncBocquet20(MassFunc, Emulator):
             mass_def_strict = True
         super().__init__(cosmo=cosmo, mass_def=mass_def,
                          mass_def_strict=mass_def_strict)
-
-    def _default_mdef(self):
-        self.mdef = MassDef200c()
 
     def _check_mdef_strict(self, mdef):
         if (mdef.Delta, mdef.rho_type) != (200, "critical"):

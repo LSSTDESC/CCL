@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
-from . import pyccl as ccl
+import pyccl as ccl
+from pyccl import UnlockInstance
 
 
 COSMO = ccl.Cosmology(
@@ -10,7 +11,7 @@ M200 = ccl.halos.MassDef200c()
 M500c = ccl.halos.MassDef(500, 'critical')
 
 
-def one_f(cosmo, M, a=None, mdef=None):
+def one_f(cosmo, M, a=1, mdef=M200):
     if np.ndim(M) == 0:
         return 1
     else:
@@ -53,14 +54,25 @@ def test_empirical_smoke(prof_class):
     with pytest.raises(TypeError):
         p = prof_class(None)
 
-    if prof_class == ccl.halos.HaloProfileNFW:
+    if prof_class in [ccl.halos.HaloProfileNFW,
+                      ccl.halos.HaloProfileHernquist]:
         with pytest.raises(ValueError):
             p = prof_class(c,
                            projected_analytic=True,
                            truncated=True)
+        with pytest.raises(ValueError):
+            p = prof_class(c,
+                           cumul2d_analytic=True,
+                           truncated=True)
+        p = prof_class(c)
+        smoke_assert_prof_real(p, method='_fourier_analytic')
+        smoke_assert_prof_real(p, method='_projected_analytic')
+        smoke_assert_prof_real(p, method='_cumul2d_analytic')
 
     p = prof_class(c)
-    smoke_assert_prof_real(p)
+    smoke_assert_prof_real(p, method='real')
+    smoke_assert_prof_real(p, method='projected')
+    smoke_assert_prof_real(p, method='fourier')
 
 
 def test_cib_smoke():
@@ -93,6 +105,22 @@ def test_cib_2pt_raises():
                          prof2=p_tSZ, mass_def=M200)
 
 
+def test_einasto_smoke():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p = ccl.halos.HaloProfileEinasto(c)
+    for M in [1E14, [1E14, 1E15]]:
+        alpha_from_cosmo = p._get_alpha(COSMO, M, 1., M200)
+
+        p.update_parameters(alpha=1.)
+        alpha = p._get_alpha(COSMO, M, 1., M200)
+        assert np.ndim(M) == np.ndim(alpha)
+        assert np.all(p._get_alpha(COSMO, M, 1., M200) == np.full_like(M, 1.))
+
+        p.update_parameters(alpha='cosmo')
+        assert np.ndim(M) == np.ndim(alpha_from_cosmo)
+        assert np.all(p._get_alpha(COSMO, M, 1., M200) == alpha_from_cosmo)
+
+
 def test_gnfw_smoke():
     p = ccl.halos.HaloProfilePressureGNFW()
     beta_old = p.beta
@@ -115,7 +143,7 @@ def test_gnfw_refourier():
     p._integ_interp()
     p_f1 = p.fourier(COSMO, 1., 1E13, 1., M500c)
     # Check the Fourier profile gets recalculated
-    p.update_parameters(alpha=1.32)
+    p.update_parameters(alpha=1.32, c500=p.c500+0.1)
     p_f2 = p.fourier(COSMO, 1., 1E13, 1., M500c)
     assert p_f1 != p_f2
 
@@ -237,7 +265,7 @@ def test_gaussian_accuracy():
     p = ccl.halos.HaloProfileGaussian(one_f, one_f)
 
     k_arr = np.logspace(-3, 2, 1024)
-    fk_arr = p.fourier(COSMO, k_arr, 1., 1.)
+    fk_arr = p.fourier(COSMO, k_arr, 1., 1., M200)
     fk_arr_pred = fk(k_arr)
     res = np.fabs(fk_arr - fk_arr_pred)
     assert np.all(res < 5E-3)
@@ -260,7 +288,7 @@ def test_projected_plaw_accuracy(alpha):
     p.update_precision_fftlog(plaw_index=alpha)
 
     rt_arr = np.logspace(-3, 2, 1024)
-    srt_arr = p.projected(COSMO, rt_arr, 1., 1.)
+    srt_arr = p.projected(COSMO, rt_arr, 1., 1., M200)
     srt_arr_pred = s_r_t(rt_arr)
     res = np.fabs(srt_arr / srt_arr_pred - 1)
     assert np.all(res < 5E-3)
@@ -284,7 +312,7 @@ def test_plaw_accuracy(alpha):
     p.update_precision_fftlog(plaw_index=alpha)
 
     k_arr = np.logspace(-3, 2, 1024)
-    fk_arr = p.fourier(COSMO, k_arr, 1., 1.)
+    fk_arr = p.fourier(COSMO, k_arr, 1., 1., M200)
     fk_arr_pred = fk(k_arr)
     res = np.fabs(fk_arr / fk_arr_pred - 1)
     assert np.all(res < 5E-3)
@@ -296,7 +324,7 @@ def get_nfw(real=False, fourier=False):
     if real:
         NFW._real = ccl.halos.HaloProfileNFW._real
     if fourier:
-        NFW._fourier = ccl.halos.HaloProfileNFW._fourier
+        NFW._fourier = ccl.halos.HaloProfileNFW._fourier_analytic
     return NFW
 
 
@@ -330,7 +358,7 @@ def test_nfw_accuracy(use_analytic):
     assert np.all(res < tol)
 
 
-def test_f2r():
+def test_nfw_f2r():
     cM = ccl.halos.ConcentrationDuffy08(M200)
     p1 = ccl.halos.HaloProfileNFW(cM)
     # We force p2 to compute the real-space profile
@@ -389,7 +417,95 @@ def test_nfw_cumul2d_accuracy(fourier_analytic):
     assert np.all(res2 < 5E-3)
 
 
-def test_nfw_deprecated():
+@pytest.mark.parametrize("use_analytic", [True, False])
+def test_hernquist_accuracy(use_analytic):
+    from scipy.special import sici
+
+    tol = 1E-10 if use_analytic else 5E-3
     cM = ccl.halos.ConcentrationDuffy08(M200)
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        ccl.halos.HaloProfileNFW(cM, fourier_analytic=True)
+    p = ccl.halos.HaloProfileHernquist(cM, fourier_analytic=use_analytic)
+    M = 1E14
+    a = 0.5
+    c = cM.get_concentration(COSMO, M, a)
+    r_Delta = M200.get_radius(COSMO, M, a) / a
+    r_s = r_Delta / c
+
+    def fk(k):
+        x = k * r_s
+        cp1 = c + 1
+        Si1, Ci1 = sici(cp1 * x)
+        Si2, Ci2 = sici(x)
+        P1 = 1 / ((c / cp1)**2 / 2)
+        P2 = x * np.sin(x) * (Ci1 - Ci2) - x * np.cos(x) * (Si1 - Si2)
+        P3 = (-1 + np.sin(c * x) / (cp1**2 * x)
+              + cp1 * np.cos(c * x) / (cp1**2))
+        return M * P1 * (P2 - P3) / 2
+
+    k_arr = np.logspace(-2, 2, 256) / r_Delta
+    fk_arr = p.fourier(COSMO, k_arr, M, a, M200)
+    fk_arr_pred = fk(k_arr)
+    # Normalize to  1 at low k
+    res = np.fabs((fk_arr - fk_arr_pred) / M)
+    assert np.all(res < tol)
+
+
+def test_hernquist_f2r():
+    cM = ccl.halos.ConcentrationDuffy08(M200)
+    p1 = ccl.halos.HaloProfileHernquist(cM)
+    # We force p2 to compute the real-space profile
+    # by FFT-ing the Fourier-space one.
+    p2 = ccl.halos.HaloProfileHernquist(cM, fourier_analytic=True)
+    with UnlockInstance(p2):
+        p2._real = None
+    p2.update_precision_fftlog(padding_hi_fftlog=1E3)
+
+    M = 1E14
+    a = 0.5
+    r_Delta = M200.get_radius(COSMO, M, a) / a
+
+    r_arr = np.logspace(-2, 1, ) * r_Delta
+    pr_1 = p1.real(COSMO, r_arr, M, a, M200)
+    pr_2 = p2.real(COSMO, r_arr, M, a, M200)
+
+    id_good = r_arr < r_Delta  # Profile is 0 otherwise
+    res = np.fabs(pr_2[id_good] / pr_1[id_good] - 1)
+    assert np.all(res < 0.01)
+
+
+@pytest.mark.parametrize('fourier_analytic', [True, False])
+def test_hernquist_projected_accuracy(fourier_analytic):
+    cM = ccl.halos.ConcentrationDuffy08(M200)
+    # Analytic projected profile
+    p1 = ccl.halos.HaloProfileHernquist(cM, truncated=False,
+                                        projected_analytic=True)
+    # FFTLog
+    p2 = ccl.halos.HaloProfileHernquist(cM, truncated=False,
+                                        fourier_analytic=fourier_analytic)
+
+    M = 1E14
+    a = 0.5
+    rt = np.logspace(-3, 2, 1024)
+    srt1 = p1.projected(COSMO, rt, M, a, M200)
+    srt2 = p2.projected(COSMO, rt, M, a, M200)
+
+    res2 = np.fabs(srt2/srt1-1)
+    assert np.all(res2 < 5E-3)
+
+
+@pytest.mark.parametrize('fourier_analytic', [True, False])
+def test_hernquist_cumul2d_accuracy(fourier_analytic):
+    cM = ccl.halos.ConcentrationDuffy08(M200)
+    # Analytic cumul2d profile
+    p1 = ccl.halos.HaloProfileHernquist(cM, truncated=False,
+                                        cumul2d_analytic=True)
+    # FFTLog
+    p2 = ccl.halos.HaloProfileHernquist(cM, truncated=False,
+                                        fourier_analytic=fourier_analytic)
+    M = 1E14
+    a = 1.0
+    rt = np.logspace(-3, 2, 1024)
+    srt1 = p1.cumul2d(COSMO, rt, M, a, M200)
+    srt2 = p2.cumul2d(COSMO, rt, M, a, M200)
+
+    res2 = np.fabs(srt2/srt1-1)
+    assert np.all(res2 < 5E-3)

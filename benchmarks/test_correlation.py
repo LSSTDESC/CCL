@@ -1,7 +1,7 @@
 import os
 import time
 import numpy as np
-from . import pyccl as ccl
+import pyccl as ccl
 from scipy.interpolate import interp1d
 import pytest
 

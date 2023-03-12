@@ -4,8 +4,8 @@ from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
 import warnings
-from . import pyccl as ccl
-from . import CCLWarning
+import pyccl as ccl
+from pyccl import CCLWarning
 
 
 def pk1d(k):

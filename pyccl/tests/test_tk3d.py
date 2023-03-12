@@ -3,7 +3,7 @@ import pytest
 from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 def kf(k):

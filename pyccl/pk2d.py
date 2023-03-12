@@ -3,9 +3,9 @@ import functools
 import numpy as np
 
 from . import ccllib as lib
-from .errors import CCLWarning
+from .errors import CCLWarning, CCLError
 from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
-                      _get_spline2d_arrays)
+                      _get_spline1d_arrays, _get_spline2d_arrays)
 from .base import CCLObject, UnlockInstance, unlock_instance
 
 
@@ -28,54 +28,62 @@ class Pk2D(CCLObject):
     """A power spectrum class holding the information needed to reconstruct an
     arbitrary function of wavenumber and scale factor.
 
-    Args:
-        pkfunc (:obj:`function`): a function returning a floating point
-             number or numpy array with the signature `f(k,a)`, where k
-             is a wavenumber (in units of Mpc^-1) and a is the scale
-             factor. The function must able to take numpy arrays as `k`.
-             The function must return the value(s) of the power spectrum
-             (or its natural logarithm, depending on the value of
-             `is_logp`. The power spectrum units should be compatible
-             with those used by CCL (e.g. if you're passing a matter power
-             spectrum, its units should be Mpc^3). If this argument is not
-             `None`, this function will be sampled at the values of k and
-             a used internally by CCL to store the linear and non-linear
-             power spectra.
-        a_arr (array): an array holding values of the scale factor
-        lk_arr (array): an array holding values of the natural logarithm
-             of the wavenumber (in units of Mpc^-1).
-        pk_arr (array): a 2D array containing the values of the power
-             spectrum at the values of the scale factor and the wavenumber
-             held by `a_arr` and `lk_arr`. The shape of this array must be
-             `[na,nk]`, where `na` is the size of `a_arr` and `nk` is the
-             size of `lk_arr`. This array can be provided in a flattened
-             form as long as the total size matches `nk*na`. The array can
-             hold the values of the natural logarithm of the power
-             spectrum, depending on the value of `is_logp`. If `pkfunc`
-             is not None, then `a_arr`, `lk_arr` and `pk_arr` are ignored.
-             However, either `pkfunc` or all of the last three array must
-             be non-None. Note that, if you pass your own Pk array, you
-             are responsible of making sure that it is sufficiently well
-             sampled (i.e. the resolution of `a_arr` and `lk_arr` is high
-             enough to sample the main features in the power spectrum).
-             For reference, CCL will use bicubic interpolation to evaluate
-             the power spectrum at any intermediate point in k and a.
-        extrap_order_lok (int): extrapolation order to be used on k-values
-             below the minimum of the splines (use 0, 1 or 2). Note that
-             the extrapolation will be done in either log(P(k)) or P(k),
-             depending on the value of `is_logp`.
-        extrap_order_hik (int): extrapolation order to be used on k-values
-             above the maximum of the splines (use 0, 1 or 2). Note that
-             the extrapolation will be done in either log(P(k)) or P(k),
-             depending on the value of `is_logp`.
-        is_logp (boolean): if True, pkfunc/pkarr return/hold the natural
-             logarithm of the power spectrum. Otherwise, the true value
-             of the power spectrum is expected. Note that arrays will be
-             interpolated in log space if `is_logp` is set to `True`.
-        cosmo (:class:`~pyccl.core.Cosmology`, optional): Cosmology object.
-             Used to determine sampling rates in scale factor and wavenumber.
-        empty (bool): if True, just create an empty object, to be filled
-            out later
+    .. note::
+
+        The ``Pk2D`` class is a wrapper around CCL's bicubic interpolators.
+        Addition, subtraction, multiplication, division returning new objects
+        or in-place is supported between ``Pk2D`` objects and other ``Pk2D``
+        objects, integers, or floats. When the second object is also of type
+        ``Pk2D``, the a- and k-range changes to the most restrictive range.
+        Exponentiation is also supported for integers and floats.
+
+    .. note::
+
+        The power spectrum can be evaluated by directly calling the instance
+        ``pk(k, a)``, or by calling the ``eval`` method, ``pk.eval(k, a)``.
+        Calling the instance is vectorized in both ``k`` and ``a``.
+
+    Parameters
+    ----------
+    pkfunc : :obj:`callable`
+        Function with signature ``f(k, a)`` which takes vectorized input
+        in ``k`` (wavenumber in :math:`\\mathrm{Mpc}^{-1}``) and a scale factor
+        ``a``, and returns the value of the power spectrum, or its natural log
+        depending on ``is_logp``. Power spectrum units must be compatible
+        with  CCL (e.g. :math:`\\mathrm{Mpc}^3` for matter power spectrum).
+        If a ``pkfunc`` is provided the power spectrum is sampled at the
+        values of ``k`` and ``a`` used internally by CCL to store the linear
+        and non-linear power spectra.
+    a_arr : array
+        An array holding values of the scale factor
+    lk_arr : array
+        An array holding values of the natural logarithm of the wavenumber
+        (in :math:`\\mathrm{Mpc}^-1`).
+    pk_arr : array
+        A 2-D array of shape ``(na, nk)``, of the values of the power spectrum
+        at ``a_arr`` and ``lk_arr``. Input array could be flattened, provided
+        that its size is ``nk*na``. The array can hold the values of the
+        natural logarithm of the power spectrum, depending on the value of
+        ``is_logp``. If ``pkfunc`` is provided, all of ``a_arr``, ``lk_arr``
+        and ``pk_arr`` are ignored. However, either ``pkfunc`` or all of the
+        last three arrays must be provided. Note, if you pass your own Pk array
+        you are responsible of making sure that it is sufficiently well-sampled
+        i.e. the resolution of `a_arr` and `lk_arr` is high enough to sample
+        the main features in the power spectrum. CCL uses bicubic interpolation
+        to evaluate the power spectrum at any intermediate point in k and a.
+    extrap_order_lok, extrap_order_hik :  {0, 1, 2}
+        Extrapolation order to be used on k-values below and above the minimum
+        and maximum of the splines, respectively. Note that extrapolation is
+        either in log(P(k)) or in P(k), depending on the value of ``is_logp``.
+    is_logp : bool
+        If True, pkfunc/pkarr return/hold the natural logarithm of the power
+        spectrum. Otherwise, the true value of the power spectrum is expected.
+        If ``is_logp`` is ``True``, arrays are interpolate in log-space.
+    cosmo : :class:`~pyccl.core.Cosmology`, optional
+        Cosmological parameters.
+        Used to determine sampling rates in scale factor and wavenumber.
+    empty : bool
+        If ``True``, just create an empty object, to be filled out later.
     """
     from ._repr import _build_string_Pk2D as __repr__
 
@@ -197,6 +205,22 @@ class Pk2D(CCLObject):
         if pk_linear is None:
             pk_linear = self
 
+        if cosmo["wa"] != 0:
+            # HALOFIT translates (w0, wa) to a w0_eff. This requires computing
+            # the comoving distance to the CMB, which requires the background
+            # splines being sampled to sufficiently high redshifts.
+            cosmo.compute_distances()
+            _, a = _get_spline1d_arrays(cosmo.cosmo.data.achi)
+            if min(a) > 1/(1 + 3000):
+                raise CCLError("Comoving distance spline does not cover "
+                               "sufficiently high redshifts for HALOFIT. "
+                               "HALOFIT translates (w0, wa) to a w0_eff. This "
+                               "requires computing the comoving distance to "
+                               "the CMB, which requires the background "
+                               "splines being sampled to sufficiently high "
+                               "redshifts. If using the calculator mode, "
+                               "check the support of the background data.")
+
         pk2d = Pk2D(empty=True)
         status = 0
         ret = lib.apply_halofit(cosmo.cosmo, pk_linear.psp, status)
@@ -255,27 +279,28 @@ class Pk2D(CCLObject):
         return cosmo.baryon_correct(model, pk_nonlin)
 
     def eval(self, k, a, cosmo=None, *, derivative=False):
-        """Evaluate power spectrum or its logarithmic derivative:
+        """Evaluate the power spectrum or its logarithmic derivative.
 
-        .. math::
-           \\frac{d\\log P(k,a)}{d\\log k}
+        Arguments
+        ---------
+        k : float or array_like
+            Wavenumber value(s) in units of Mpc^-1.
+        a : float
+            Value of the scale factor
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmology object. Used to evaluate the power spectrum outside
+            of the interpolation range in ``a``, thorugh the linear growth
+            factor. If ``cosmo`` is ``None``, attempting to evaluate the power
+            spectrum outside of the interpolation range will raise an error.
+        derivative : bool
+            If ``False``, evaluate the power spectrum. If ``True``, evaluate
+            the logarithmic derivative of the power spectrum,
+            :math:`\\frac{\\mathrm{d} \\log P(k)}{\\mathrm{d} \\log k}`.
 
-        Args:
-            k (float or array_like): wavenumber value(s) in units of Mpc^-1.
-            a (float): value of the scale factor
-            cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object. The
-                cosmology object is needed in order to evaluate the power
-                spectrum outside the interpolation range in `a`. E.g. if you
-                want to evaluate the power spectrum at a very small a, not
-                covered by the arrays you passed when initializing this object,
-                the power spectrum will be extrapolated from the earliest
-                available value using the linear growth factor (for which a
-                cosmology is needed). If no Cosmology is passed, attempting
-                to evaluate the power spectrum outside of the scale factor
-                boundaries will raise an exception.
-
-        Returns:
-            float or array_like: value(s) of the power spectrum.
+        Returns
+        -------
+        P(k, a) : float or array_like
+            Value(s) of the power spectrum.
         """
         # determine if logarithmic derivative is needed
         if not derivative:
@@ -321,7 +346,7 @@ class Pk2D(CCLObject):
 
     def __call__(self, k, a, cosmo=None, *, derivative=False):
         """Callable vectorized instance."""
-        out = np.array([self.eval(k, aa, cosmo, derivative=derivative)
+        out = np.array([self.eval(k, aa, cosmo=cosmo, derivative=derivative)
                         for aa in np.atleast_1d(a).astype(float)])
         return out.squeeze()[()]
 
@@ -329,20 +354,7 @@ class Pk2D(CCLObject):
         """Return a copy of this Pk2D object."""
         if not self:
             return Pk2D(empty=True)
-
-        a_arr, lk_arr, pk_arr = self.get_spline_arrays()
-
-        is_logp = bool(self.psp.is_log)
-        if is_logp:
-            # log in-place
-            np.log(pk_arr, out=pk_arr)
-
-        pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
-                    is_logp=is_logp,
-                    extrap_order_lok=self.extrap_order_lok,
-                    extrap_order_hik=self.extrap_order_hik)
-
-        return pk2d
+        return self + 0
 
     def get_spline_arrays(self):
         """Get the spline data arrays.

@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 COSMO = ccl.Cosmology(
@@ -9,7 +9,8 @@ COSMO = ccl.Cosmology(
 M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200))
+P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
+                              fourier_analytic=True)
 P2 = P1
 PKC = ccl.halos.Profile2pt()
 KK = np.geomspace(1E-3, 10, 32)
@@ -301,5 +302,5 @@ def test_calculator_from_string_smoke():
         COSMO, massfunc=HMF, hbias=HBF, mass_def=M200)
     hmc2 = ccl.halos.HMCalculator(
         COSMO, massfunc="Tinker10", hbias="Tinker10", mass_def="200m")
-    for attr in ["_massfunc", "_hbias"]:
+    for attr in ["_massfunc", "_hbias", "_mdef"]:
         assert getattr(hmc1, attr).name == getattr(hmc2, attr).name

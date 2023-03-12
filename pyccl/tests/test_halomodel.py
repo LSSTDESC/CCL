@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-
-from . import pyccl as ccl
+import pyccl as ccl
+from pyccl.pyutils import assert_warns
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -16,7 +16,6 @@ COSMO = ccl.Cosmology(
     np.array([0.3, 0.5, 10])])
 @pytest.mark.parametrize('kind', ['one', 'two', 'total'])
 def test_halomodel_power(k, kind):
-    from . import assert_warns
     a = 0.8
 
     if kind == 'one':
@@ -37,7 +36,6 @@ def test_halomodel_power(k, kind):
     [1e14, 1e15],
     np.array([1e14, 1e15])])
 def test_halo_concentration(m):
-    from . import assert_warns
     a = 0.8
     # Deprecated.
     c = assert_warns(
@@ -81,7 +79,6 @@ def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
                                   ['shethtormen', 'constant_concentration'],
                                   ['tinker10', 'constant_concentration']])
 def test_halomodel_choices_smoke(mf_c):
-    from . import assert_warns
     mf, c = mf_c
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -101,7 +98,6 @@ def test_halomodel_choices_smoke(mf_c):
 
 
 def test_halomodel_choices_raises():
-    from . import assert_warns
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear',
@@ -114,7 +110,6 @@ def test_halomodel_choices_raises():
 
 
 def test_halomodel_power_consistent():
-    from . import assert_warns
     a = 0.8
     k = np.logspace(-1, 1, 10)
     # These are all deprecated.

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import warnings
 
-from . import pyccl as ccl
+import pyccl as ccl
 
 POWER_NU_TOL = 1.0E-3
 
