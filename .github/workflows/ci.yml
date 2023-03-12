@@ -68,11 +68,7 @@ jobs:
           if [[ ${MATRIX_OS} == "macos-11" ]]; then
             export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
             export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
-          fi
 
-          pip install "classy<3"
-
-          if [[ ${MATRIX_OS} == "macos-11" ]]; then
             mamba install llvm-openmp
             echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
             SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
@@ -80,12 +76,16 @@ jobs:
             echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
             echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
           fi
+
+          pip install "classy<3"
+
         env:
           MATRIX_OS: ${{ matrix.os }}
 
       - name: build CCL
         run: |
-          pip install .
+          python setup.py build
+          python setup.py develop
 
       - name: c unit tests
         run: |
