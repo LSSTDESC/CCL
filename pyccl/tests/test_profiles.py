@@ -112,6 +112,22 @@ def test_cib_2pt_raises():
                          prof2=p_tSZ, mass_def=M200)
 
 
+def test_einasto_smoke():
+    c = ccl.halos.ConcentrationDuffy08(M200)
+    p = ccl.halos.HaloProfileEinasto(c)
+    for M in [1E14, [1E14, 1E15]]:
+        alpha_from_cosmo = p._get_alpha(COSMO, M, 1., M200)
+
+        p.update_parameters(alpha=1.)
+        alpha = p._get_alpha(COSMO, M, 1., M200)
+        assert np.ndim(M) == np.ndim(alpha)
+        assert np.all(p._get_alpha(COSMO, M, 1., M200) == np.full_like(M, 1.))
+
+        p.update_parameters(alpha='cosmo')
+        assert np.ndim(M) == np.ndim(alpha_from_cosmo)
+        assert np.all(p._get_alpha(COSMO, M, 1., M200) == alpha_from_cosmo)
+
+
 def test_gnfw_smoke():
     p = ccl.halos.HaloProfilePressureGNFW()
     beta_old = p.beta
@@ -134,7 +150,7 @@ def test_gnfw_refourier():
     p._integ_interp()
     p_f1 = p.fourier(COSMO, 1., 1E13, 1., M500c)
     # Check the Fourier profile gets recalculated
-    p.update_parameters(alpha=1.32)
+    p.update_parameters(alpha=1.32, c500=p.c500+0.1)
     p_f2 = p.fourier(COSMO, 1., 1E13, 1., M500c)
     assert p_f1 != p_f2
 

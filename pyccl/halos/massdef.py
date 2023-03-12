@@ -108,6 +108,8 @@ class MassDef(object):
     def __eq__(self, other):
         """ Allows you to compare two mass definitions
         """
+        if not isinstance(other, MassDef):
+            return False
         return (self.Delta == other.Delta) and \
             (self.rho_type == other.rho_type)
 

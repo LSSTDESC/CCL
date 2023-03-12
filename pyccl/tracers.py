@@ -413,7 +413,7 @@ class Tracer(object):
         # Sampling scale factor from a very small (at CMB for example)
         # all the way to 1 here and today for the transfer function.
         # For a < a_single it is GR (no early MG)
-        if isinstance(z, float):
+        if isinstance(z, (int, float)):
             a_single = 1/(1+z)
             a = np.linspace(a_single, 1, 100)
             # a_single is for example like for the CMB surface
@@ -554,6 +554,10 @@ class Tracer(object):
             tka_s = tka_s.flatten()
             ta_s = NoneArr
             tk_s = NoneArr
+
+        if not (np.diff(a_s) > 0).all():
+            raise ValueError("Scale factor must be monotonically "
+                             "increasing")
 
         status = 0
         ret = lib.cl_tracer_t_new_wrapper(cosmo.cosmo,
