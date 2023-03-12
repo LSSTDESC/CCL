@@ -4,10 +4,10 @@ Installation
 
 CCL can be installed from ``pip``, ``conda``, or directly from source.
 It is configured to install most of its requirements automatically. However, if
-you want to use CCL with Boltzmann codes like ``CLASS`` or ``CAMB``, or do 
+you want to use CCL with Boltzmann codes like ``CLASS`` or ``CAMB``, or do
 perturbation theory calculations with ``FAST-PT``, you will
 need to make sure these packages and their ``Python`` wrappers are installed
-as well. See the instructions for :ref:`boltzmann-codes` and 
+as well. See the instructions for :ref:`boltzmann-codes` and
 :ref:`getting-fast-pt` below.
 
 CCL works on Linux or Mac OS. Windows installation is not supported.
@@ -39,6 +39,19 @@ Once you have ``CMake``, simply run:
 .. code-block:: bash
 
    $ pip install pyccl
+
+
+Google Colab
+============
+
+To install ``pyccl`` on https://colab.research.google.com then one way is the following
+
+.. code-block:: python
+
+   !pip install -q condacolab
+   import condacolab
+   condacolab.install()
+   !mamba install pyccl
 
 
 .. _boltzmann-codes:
@@ -91,6 +104,7 @@ If you are working in a ``conda`` environment, then ``ISiTGR`` is also available
 Note that if you installed CCL with ``conda``, ``isitgr``
 should already be in your environment.
 
+
 .. _getting-fast-pt:
 
 Getting FAST-PT
@@ -102,8 +116,9 @@ To use ``FAST-PT`` with CCL, you can install it with:
 
    $ pip install fast-pt
 
-Note the hyphen in the package name! You can also get it directly from the 
+Note the hyphen in the package name! You can also get it directly from the
 `FAST-PT <https://github.com/JoeMcEwen/FAST-PT>`__ repo.
+
 
 .. _getting-cmake:
 
@@ -134,18 +149,6 @@ For instance with ``homebrew``, you can run
 .. code-block:: bash
 
    $ brew install cmake
-   
-Google Colab
--------------
-
-To install ``pyccl`` on https://colab.research.google.com then one way is the following
-
-.. code-block:: python
-
-   !pip install -q condacolab
-   import condacolab
-   condacolab.install()
-   !mamba install pyccl
 
 
 Known Installation Issues
@@ -159,20 +162,21 @@ Known Installation Issues
       $ sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
 
    which will install all the required headers into ``/usr/include``.
-   
+
    On Mac OSX 10.15 or greater, this patch is no longer included.
    Instead, you can manually add the location of required headers to your CPATH by running the following, or adding to your ``.bash_profile``:
-   
+
    .. code:: bash
-        
+
       $ export CPATH="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include"
-      
+
 #. Newer versions of Xcode do not automatically have the required command line tools installed. This can be done from the command line:
- 
+
     .. code:: bash
-      
+
       $ sudo xcode-select --install
       $ sudo xcodebuild -license
+
 
 .. _uninstalling:
 
