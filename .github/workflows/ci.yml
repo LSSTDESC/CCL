@@ -80,7 +80,8 @@ jobs:
 
       - name: build CCL
         run: |
-          pip install .
+          python setup.py build
+          python setup.py develop
 
       - name: c unit tests
         run: |
