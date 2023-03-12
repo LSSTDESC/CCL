@@ -84,8 +84,7 @@ jobs:
 
       - name: build CCL
         run: |
-          python setup.py build
-          python setup.py develop
+          pip install .
 
       - name: c unit tests
         run: |
