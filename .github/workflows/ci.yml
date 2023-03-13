@@ -59,23 +59,11 @@ jobs:
           ./uninstall_homebrew.sh -f -q >& /dev/null
           rm -f uninstall_homebrew.sh
 
-      - name: Set cache date
-        run: |
-          echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-          export MAMBA_NO_BANNER=1  # hide mamba banner from output
-
-      - uses: actions/cache@v3
-        id: cache
-        with:
-          path: ${{ matrix.prefix }}
-          key: ${{ matrix.label }}-conda-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
-
       - name: Lint
         uses: py-actions/flake8@v2
         with:
           ignore: "E741,E226,W503,W504"
-          path: "pyccl/"
-          path: "benchmarks/"
+          path: "pyccl/", "benchmarks/"
           exclude: "benchmarks/data/"
 
       # - name: lint
@@ -86,6 +74,17 @@ jobs:
       #     if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
       #       exit 1
       #     fi
+
+      - name: Set cache date
+        run: |
+          echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+          export MAMBA_NO_BANNER=1  # hide mamba banner from output
+
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ matrix.prefix }}
+          key: ${{ matrix.label }}-conda-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
