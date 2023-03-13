@@ -84,6 +84,7 @@ class MassDef(CCLHalosObject):
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
+    __repr_attrs__ = ("name",)
 
     def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense
@@ -105,9 +106,12 @@ class MassDef(CCLHalosObject):
         else:
             self._concentration_init(c_m_relation)
 
-    def __repr__(self):
-        return (f"pyccl.halos.MassDef(Delta={self.Delta}, "
-                f"rho_type={self.rho_type})")
+    @property
+    def name(self):
+        """Give a name to this mass definition."""
+        if isinstance(self.Delta, (int, float)):
+            return f"{self.Delta}{self.rho_type[0]}"
+        return f"{self.Delta}"
 
     def _concentration_init(self, c_m_relation):
         from .concentration import Concentration, concentration_from_name
@@ -249,8 +253,7 @@ class MassDef(CCLHalosObject):
 
 
 def MassDef200m(c_m='Duffy08'):
-    """`MassDef` class for the mass definition with Delta=200 times the matter
-    density.
+    r""":math:`\Delta = 200m` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
@@ -259,8 +262,7 @@ def MassDef200m(c_m='Duffy08'):
 
 
 def MassDef200c(c_m='Duffy08'):
-    """`MassDef` class for the mass definition with Delta=200 times the critical
-    density.
+    r""":math:`\Delta = 200c` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
@@ -269,8 +271,7 @@ def MassDef200c(c_m='Duffy08'):
 
 
 def MassDef500c(c_m='Ishiyama21'):
-    """`MassDef` class for the mass definition
-    with Delta=500 times the critical density.
+    r""":math:`\Delta = 500m` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
@@ -279,8 +280,7 @@ def MassDef500c(c_m='Ishiyama21'):
 
 
 def MassDefVir(c_m='Klypin11'):
-    """`MassDef` class for the mass definition with Delta=Delta_vir times the
-    critical density.
+    r""":math:`\Delta = \rm vir` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.

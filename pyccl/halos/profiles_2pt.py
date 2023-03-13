@@ -22,8 +22,9 @@ class Profile2pt(CCLHalosObject):
             in ``arXiv:1909.09102`` and ``arXiv:2102.07701``.
             Defaults to ``r_corr=0``, returning simply the product
             of the fourier profiles.
-
     """
+    __repr_attrs__ = ("r_corr",)
+
     def __init__(self, r_corr=0.):
         self.r_corr = r_corr
 

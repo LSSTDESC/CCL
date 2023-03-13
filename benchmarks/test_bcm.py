@@ -1,5 +1,5 @@
 import numpy as np
-from . import pyccl as ccl
+import pyccl as ccl
 
 BCM_TOLERANCE = 1e-4
 

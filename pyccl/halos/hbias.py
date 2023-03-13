@@ -27,7 +27,7 @@ class HaloBias(CCLHalosObject):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    name = "default"
+    __repr_attrs__ = ("mdef", "mass_def_strict",)
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         cosmo.compute_sigma()
@@ -190,6 +190,7 @@ class HaloBiasSheth99(HaloBias):
             the fit of Nakamura & Suto 1997. Otherwise use
             delta_crit = 1.68647.
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "use_delta_c_fit",)
     name = "Sheth99"
 
     def __init__(self, cosmo, mass_def=None,

@@ -1,5 +1,5 @@
 import numpy as np
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 def test_cibcl():

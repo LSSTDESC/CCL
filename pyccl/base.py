@@ -4,7 +4,7 @@ from collections import OrderedDict
 import numpy as np
 from inspect import signature
 from _thread import RLock
-from abc import ABCMeta
+from abc import ABC
 
 
 def _to_hashable(obj):
@@ -24,13 +24,11 @@ def _to_hashable(obj):
         elif isinstance(obj, dict):
             # Dictionaries: Build a tuple from key-value pairs,
             # where all values are converted to hashables.
-            out = dict.fromkeys(obj)
-            for key, value in obj.items():
-                out[key] = _to_hashable(value)
+            out = {key: _to_hashable(value) for key, value in obj.items()}
             # Sort unordered dictionaries for hash consistency.
             if isinstance(obj, OrderedDict):
-                return tuple(obj.items())
-            return tuple(sorted(obj.items()))
+                return tuple(out.items())
+            return tuple(sorted(out.items()))
 
         else:
             # Iterables: Build a tuple from values converted to hashables.
@@ -53,7 +51,8 @@ def hash_(obj):
 
 class _ClassPropertyMeta(type):
     """Implement `property` to a `classmethod`."""
-    # TODO: in py39+ decorators `classmethod` and `property` can be combined
+    # NOTE: Only in 3.8 < py < 3.11 can `classmethod` wrap `property`.
+    # https://docs.python.org/3.11/library/functions.html#classmethod
     @property
     def maxsize(cls):
         return cls._maxsize
@@ -101,7 +100,7 @@ class Caching(metaclass=_ClassPropertyMeta):
         policy (``'fifo'``, ``'lru'``, ``'lfu'``):
             Cache retention policy.
     """
-    _enabled: bool = True
+    _enabled: bool = False
     _policies: list = ['fifo', 'lru', 'lfu']
     _default_maxsize: int = 128   # class default maxsize
     _default_policy: str = 'lru'  # class default policy
@@ -302,31 +301,6 @@ class CachedObject:
         self.counter = 0
 
 
-def auto_assign(func, sig):
-    """Decorator to automatically assign all parameters as instance attributes.
-    This ought to be applied on constructor methods.
-
-    Arguments:
-        func (``function``):
-            Function which takes the instance as its first argument.
-            All function arguments will be assigned as attributes of the
-            instance.
-        sig (``inspect.Signature``):
-            The signature of the constructor this decorator is applied to.
-            This is needed to distinguish between parent class methods.
-    """
-    @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        bound = sig.bind_partial(self, *args, **kwargs)
-        bound.apply_defaults()
-        bound.arguments.pop("self")
-        for name, value in bound.arguments.items():
-            setattr(self, name, value)
-        # func may now override the attributes we just set
-        func(self, *args, **kwargs)
-    return wrapper
-
-
 class ObjectLock:
     """Control the lock state (immutability) of a ``CCLObject``."""
     _locked: bool = False
@@ -370,7 +344,7 @@ class UnlockInstance:
             representation is automatically deleted.
     """
 
-    def __init__(self, instance, mutate=True):
+    def __init__(self, instance, *, mutate=True):
         self.instance = instance
         self.mutate = mutate
         # Define these attributes for easy access.
@@ -427,6 +401,7 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
             Function which changes one of its ``CCLObject`` arguments.
         argv (``int``):
             Which argument should be unlocked. Defaults to the first argument.
+            This should be a ``CCLObject``, or the decorator will do nothing.
         mutate (``bool``):
             If after the function ``instance_old != instance_new``, the
             instance is mutated. If ``True``, the representation of the
@@ -447,57 +422,7 @@ def unlock_instance(func=None, *, argv=0, mutate=True):
     return wrapper
 
 
-class CCLObjectMeta(ABCMeta):
-    """Metaclass for ``CCLObject``.
-
-    Enables linking of abstract methods, if ``__linked_abstractmethods__``
-    is provided for the base class. Subclasses that define either of
-    the linked methods will satisfy the abstraction requirement.
-
-    Example:
-        Subclasses of the following class can be instantiated if either
-        ``method1`` or ``method2`` (and ``another_method``) are defined.
-        Otherwise, it falls back to normal ``abc.ABCMeta`` behavior:
-
-        >>> class MyBaseClass(metaclass=ABCMeta):
-                __linked_abstractmethods__ = 'method1', 'method2'
-                @abstractmethod
-                def method1(self):
-                    ...
-                @abstractmethod
-                def method2(self):
-                    ...
-                @abstractmethod
-                def another_method(self):
-                    ...
-    """
-
-    def __new__(mcls, name, bases, clsdict):
-        """Class factory for ``CCLObject``.
-
-        .. note:: Naming convention: ``mcls`` -- metaclass, ``cls`` -- class
-        """
-        cls = super().__new__(mcls, name, bases, clsdict)
-
-        # Check if abstraction criteria are satisfied.
-        if hasattr(cls, "__linked_abstractmethods__"):
-            # Tap into class creation and remove all linked abstract methods
-            # from the `__abstractmethods__` hook.
-            linked = cls.__linked_abstractmethods__
-
-            def is_abstract(cls, method):
-                # Check if the `method` of class `cls` is abstract.
-                meth = getattr(cls, method)
-                return getattr(meth, "__isabstractmethod__", False)
-
-            if not all([is_abstract(cls, method) for method in linked]):
-                abstracts = set(cls.__abstractmethods__) - set(linked)
-                cls.__abstractmethods__ = frozenset(abstracts)
-
-        return cls
-
-
-class CCLObject(metaclass=CCLObjectMeta):
+class CCLObject(ABC):
     """Base for CCL objects.
 
     All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.
@@ -545,13 +470,7 @@ class CCLObject(metaclass=CCLObjectMeta):
         # 1. Store the signature of the constructor on import.
         cls.__signature__ = signature(cls.__init__)
 
-        # 2. Assign the arguments of the constructor if needed.
-        if (hasattr(cls, "__init_attrs__")
-                and cls.__init_attrs__
-                and "__init__" in vars(cls)):
-            cls.__init__ = auto_assign(cls.__init__, sig=cls.__signature__)
-
-        # 3. Replace repr (if implemented) with its cached version.
+        # 2. Replace repr (if implemented) with its cached version.
         if "__repr__" in vars(cls):
             # If the class defines a custom `__repr__`, this will be the new
             # `_repr` (which is cached). Decorator `cached_property` requires
@@ -562,7 +481,7 @@ class CCLObject(metaclass=CCLObjectMeta):
             # Fall back to using `__ccl_repr__` from `CCLObject`.
             cls.__repr__ = cls.__ccl_repr__
 
-        # 4. Unlock instance on specific methods.
+        # 3. Unlock instance on specific methods.
         def Funlock(cls, name, mutate):
             # Allow instance to change or mutate if method `name` is called.
             func = vars(cls).get(name)
@@ -618,14 +537,32 @@ class CCLObject(metaclass=CCLObjectMeta):
 
 
 class CCLHalosObject(CCLObject):
-    """Base for halo objects. Automatically assign all ``__init__``
-    parameters as attributes.
+    """Base for halo objects. Representations for instances are built from a
+    list of attribute names specified as a class variable in ``__repr_attrs__``
+    (acting as a hook).
+
+    Example:
+        The representation (also hash) of instances of the following class
+        is built based only on the attributes specified in ``__repr_attrs__``:
+
+        >>> class MyClass(CCLHalosObject):
+            __repr_attrs__ = ("a", "b", "other")
+            def __init__(self, a=1, b=2, c=3, d=4, e=5):
+                self.a = a
+                self.b = b
+                self.c = c
+                self.other = d + e
+
+        >>> repr(MyClass(6, 7, 8, 9, 10))
+            <__main__.MyClass>
+                a = 6
+                b = 7
+                other = 19
     """
-    __init_attrs__ = True
 
     def __repr__(self):
-        # If all the passed parameters have been assigned as instance
-        # attributes during construction, we can use these parameters
-        # to build a unique string for each instance.
-        from ._repr import _build_string_from_init_attrs
-        return _build_string_from_init_attrs(self)
+        # Build string from specified `__repr_attrs__` or use Python's default.
+        if hasattr(self.__class__, "__repr_attrs__"):
+            from ._repr import _build_string_from_attrs
+            return _build_string_from_attrs(self)
+        return object.__repr__(self)

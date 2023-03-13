@@ -1,13 +1,9 @@
-from __future__ import print_function
 import pickle
 import tempfile
-
 import pytest
-
 import numpy as np
 from numpy.testing import assert_raises, assert_, assert_no_warnings
-
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 def test_cosmo_methods():
@@ -18,8 +14,7 @@ def test_cosmo_methods():
     from pyccl import background, bcm, boltzmann, \
         cls, correlations, covariances, neutrinos, \
         pk2d, power, tk3d, tracers, halos, nl_pt
-    from . import CosmologyVanillaLCDM
-    cosmo = CosmologyVanillaLCDM()
+    cosmo = ccl.CosmologyVanillaLCDM()
     subs = [background, boltzmann, bcm, cls, correlations, covariances,
             neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
@@ -59,6 +54,15 @@ def test_cosmology_critical_init():
         Omega_g=0,
         Omega_k=0)
     assert np.allclose(cosmo.cosmo.data.growth0, 1)
+
+
+def test_cosmology_As_sigma8_populates():
+    # Check that cosmo.sigma8() pupulates sigma8 if it is missing.
+    cosmo = ccl.Cosmology(Omega_c=0.265, Omega_b=0.045, h=0.675,
+                          n_s=0.965, A_s=2e-9)
+    assert np.isnan(cosmo["sigma8"])
+    cosmo.sigma8()
+    assert cosmo["sigma8"] == cosmo.sigma8()
 
 
 def test_cosmology_init():
