@@ -62,9 +62,7 @@ jobs:
       - name: Lint
         uses: py-actions/flake8@v2
         with:
-          ignore: ["E741", "E226", "W503", "W504"]
-          path: "pyccl/ benchmarks/"
-          exclude: "benchmarks/data/"
+          args: "--config .flake8"
 
       # - name: lint
       #   run: |
