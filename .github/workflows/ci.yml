@@ -42,6 +42,11 @@ jobs:
 
       - uses: actions/checkout@v3
 
+      - name: Lint
+        uses: py-actions/flake8@v2
+        with:
+          args: "--config .flake8"
+
       - uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: ${{ matrix.py }}
@@ -58,20 +63,6 @@ jobs:
           chmod u+x ./uninstall_homebrew.sh
           ./uninstall_homebrew.sh -f -q >& /dev/null
           rm -f uninstall_homebrew.sh
-
-      - name: Lint
-        uses: py-actions/flake8@v2
-        with:
-          args: "--config .flake8"
-
-      # - name: lint
-      #   run: |
-      #     mamba install flake8
-      #     flake8 pyccl
-      #     flake8 benchmarks --exclude=data
-      #     if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
-      #       exit 1
-      #     fi
 
       - name: Set cache date
         run: |
