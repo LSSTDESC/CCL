@@ -1,24 +1,13 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
-  - python=3.8
   - pip
-  - numpy
-  - nose
-  - coveralls
-  - pyyaml
-  - gsl
-  - fftw
   - cmake
   - swig
+  - numpy
   - scipy
-  - compilers
-  - pkg-config
-  - setuptools_scm
-  - pytest
-  - pytest-cov
-  - pandas
-  - cython
   - camb=1.3.6
   - isitgr
   - fast-pt
-  - traitlets
+  - pytest
+  - pytest-cov
+  - coveralls
