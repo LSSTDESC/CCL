@@ -2,9 +2,7 @@ name: test  # default testing environment name from conda-incubator
 dependencies:
   - pip
   - cmake
-  # - swig
-  # - gsl
-  - pkg-config
+  - gsl
   - numpy
   - scipy
   - camb=1.3.6
