@@ -14,5 +14,5 @@ dependencies:
   - nose
   - gsl
   - fftw
-  # - pkg-config
-  # - setuptools_scm
+  - pkg-config
+  - setuptools_scm
