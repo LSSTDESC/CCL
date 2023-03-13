@@ -23,6 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [macos-11, ubuntu-latest]
         include:
           - os: macos-11
             label: osx-64
