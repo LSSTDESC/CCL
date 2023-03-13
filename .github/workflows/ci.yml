@@ -10,6 +10,7 @@ on:
 
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
+  DEPENDENCIES: .github/workflows/dependencies.yml
 
 
 jobs:
@@ -68,7 +69,7 @@ jobs:
         id: cache
         with:
           path: ${{ matrix.prefix }}
-          key: ${{ matrix.label }}-conda-${{ hashFiles('dependencies.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+          key: ${{ matrix.label }}-conda-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
 
       # - name: lint
       #   run: |
@@ -83,7 +84,7 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          mamba env update --file dependencies.yml --prune
+          mamba env update --file ${{ env.DEPENDENCIES }} --prune
           # mamba install \
           #   pip \
           #   numpy nose coveralls pyyaml gsl fftw cmake swig scipy \
