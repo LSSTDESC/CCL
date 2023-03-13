@@ -9,4 +9,4 @@ dependencies:
   - pytest
   - pytest-cov
   - coveralls
-  - gsl
+  # - gsl
