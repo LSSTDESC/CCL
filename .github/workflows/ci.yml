@@ -18,17 +18,26 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - macos-11
-          - ubuntu-latest
+        include:
+          - os: macos-11
+            label: osx-64
+            prefix: /Users/runner/mambaforge
+
+          - os: ubuntu-latest
+            label: linux-64
+            prefix: /usr/share/mambaforge
+        # os:
+        #   - macos-11
+        #   - ubuntu-latest
         py:
           - 3.8
 
     steps:
-      - name: cancel previous runs
+      - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
@@ -44,7 +53,7 @@ jobs:
           miniforge-version: latest
           miniforge-variant: Mambaforge
 
-      - name: remove homebrew
+      - name: Remove homebrew
         if: matrix.os == 'macos-11'
         run: |
           curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
@@ -55,11 +64,11 @@ jobs:
       - name: Set cache date
         run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
+        id: cache
         with:
           path: ${{ matrix.prefix }}
           key: ${{ matrix.label }}-conda-${{ hashFiles('dependencies.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
-        id: cache
 
       # - name: lint
       #   run: |
@@ -71,7 +80,7 @@ jobs:
       #       exit 1
       #     fi
 
-      - name: install dependencies
+      - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           mamba env update --file dependencies.yml --prune
@@ -98,19 +107,19 @@ jobs:
         env:
           MATRIX_OS: ${{ matrix.os }}
 
-      - name: install CCL
+      - name: Install CCL
         run: |
           pip install -e .
 
-      - name: unit tests
+      - name: Unit tests
         run: |
           OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
 
-      - name: benchmarks
+      - name: Benchmarks
         run: |
           OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
 
-      - name: coveralls
+      - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
