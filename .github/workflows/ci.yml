@@ -70,11 +70,19 @@ jobs:
           path: ${{ matrix.prefix }}
           key: ${{ matrix.label }}-conda-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
 
+      - name: Lint
+        uses: py-actions/flake8@v2
+        with:
+          ignore: "E741,E226,W503,W504"
+          path: "pyccl/"
+          path: "benchmarks/"
+          exclude: "benchmarks/data/"
+
       # - name: lint
       #   run: |
       #     mamba install flake8
       #     flake8 pyccl
-      #     flake8 --exclude=data benchmarks
+      #     flake8 benchmarks --exclude=data
       #     if [[ `grep "$(printf '\t')" pyccl/*.py` != "" ]]; then
       #       exit 1
       #     fi
