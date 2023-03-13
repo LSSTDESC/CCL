@@ -8,6 +8,11 @@ on:
       - releases/*
   pull_request: null
 
+env:
+  CACHE_NUMBER: 0  # increase to reset cache manually
+  DATE: ${{ date +"%Y%m%d" }}
+  DEPENDENCIES: .github/workflows/dependencies.yml
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -46,10 +51,6 @@ jobs:
           show-channel-urls: true
           miniforge-version: latest
           miniforge-variant: Mambaforge
-        env:
-          CACHE_NUMBER: 0  # increase to reset cache manually
-          DEPENDENCIES: .github/workflows/dependencies.yml
-        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
       - name: Remove homebrew
         if: matrix.os == 'macos-11'
