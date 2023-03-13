@@ -10,7 +10,6 @@ on:
 
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
-  DATE: ${{ date +"%Y%m%d" }}
   DEPENDENCIES: .github/workflows/dependencies.yml
 
 jobs:
@@ -59,6 +58,9 @@ jobs:
           chmod u+x ./uninstall_homebrew.sh
           ./uninstall_homebrew.sh -f -q >& /dev/null
           rm -f uninstall_homebrew.sh
+
+      - name: Set cache date
+        run: echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
       - uses: actions/cache@v3
         id: cache
