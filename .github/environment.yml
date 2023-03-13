@@ -1,6 +1,7 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
   - pip
+  - gsl
   - numpy
   - scipy
   - camb=1.3.6
@@ -9,4 +10,3 @@ dependencies:
   - pytest
   - pytest-cov
   - coveralls
-  # - gsl
