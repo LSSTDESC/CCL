@@ -89,9 +89,6 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          if [[ ${{ matrix.label }} == "osx-64" ]]; then
-          fi
-
           mamba env update --file ${{ env.DEPENDENCIES }} --prune
           pip install "classy<3"
 
