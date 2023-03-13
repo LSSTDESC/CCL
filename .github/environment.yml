@@ -14,9 +14,9 @@ dependencies:
   - nose
   - gsl
   - fftw
-  - compilers
+  # - compilers
   - pkg-config
   - setuptools_scm
-  - pandas
-  - cython
-  - traitlets
+  # - pandas
+  # - cython
+  # - traitlets
