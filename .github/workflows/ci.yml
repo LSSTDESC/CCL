@@ -10,7 +10,7 @@ on:
 
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
-  DEPENDENCIES: .github/workflows/environment.yml
+  DEPENDENCIES: .github/environment.yml
 
 jobs:
   build:
