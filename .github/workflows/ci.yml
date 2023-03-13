@@ -89,6 +89,7 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
+          export PATH="${matrix.prefix}/envs/test/bin:$PATH"
           mamba env update --file ${{ env.DEPENDENCIES }} --prune
           pip install "classy<3"
 
