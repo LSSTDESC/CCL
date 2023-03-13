@@ -94,7 +94,7 @@ setup(
     distclass=Distribution,
     python_requires='>=3.7',
     setup_requires=['setuptools_scm'],
-    install_requires=['cmake', 'numpy', 'swig'],
+    install_requires=['numpy', 'swig'],
     cmdclass={'build_py': Build, 'develop': Develop, 'clean': Clean},
     classifiers=[
         'Development Status :: 5 - Production/Stable',
