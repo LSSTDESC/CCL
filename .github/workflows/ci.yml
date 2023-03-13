@@ -26,11 +26,11 @@ jobs:
         include:
           - os: macos-11
             label: osx-64
-            prefix: /Users/runner/mambaforge
+            prefix: /Users/runner/miniconda3
 
           - os: ubuntu-latest
             label: linux-64
-            prefix: /usr/share/mambaforge
+            prefix: /usr/share/miniconda3
         # os:
         #   - macos-11
         #   - ubuntu-latest

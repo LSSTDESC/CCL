@@ -1,4 +1,4 @@
-name: gha_ci
+name: base
 dependencies:
   - python=3.8
   - pip
