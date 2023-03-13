@@ -82,7 +82,7 @@ jobs:
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          if [[ ${matrix.label} == "osx-64" ]]; then
+          if [[ ${{ matrix.label }} == "osx-64" ]]; then
             mamba install llvm-openmp
             echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
             SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
