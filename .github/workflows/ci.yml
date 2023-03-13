@@ -51,18 +51,28 @@ jobs:
           miniforge-version: latest
           miniforge-variant: Mambaforge
 
-      - name: Lint
-        uses: py-actions/flake8@v2
-        with:
-          args: "--config .flake8"
-
-      - name: Remove homebrew
+      - name: "macOS: remove homebrew & set env variables"
         if: matrix.label == 'osx-64'
         run: |
           curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
           chmod u+x ./uninstall_homebrew.sh
           ./uninstall_homebrew.sh -f -q >& /dev/null
           rm -f uninstall_homebrew.sh
+
+          mamba install llvm-openmp
+          echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
+          SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+          echo "SDKROOT: ${SDKROOT}"
+          echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
+          echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
+
+          export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
+          export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+
+      - name: Lint
+        uses: py-actions/flake8@v2
+        with:
+          args: "--config .flake8"
 
       - name: Set cache date
         run: |
@@ -79,15 +89,6 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           if [[ ${{ matrix.label }} == "osx-64" ]]; then
-            mamba install llvm-openmp
-            echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
-            SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-            echo "SDKROOT: ${SDKROOT}"
-            echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
-            echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
-
-            export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
-            export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
           fi
 
           mamba env update --file ${{ env.DEPENDENCIES }} --prune
