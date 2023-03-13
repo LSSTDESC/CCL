@@ -66,6 +66,9 @@ jobs:
             cython "camb=1.3.6" isitgr traitlets fast-pt
 
           if [[ ${MATRIX_OS} == "macos-11" ]]; then
+            export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
+            export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+
             mamba install llvm-openmp
             echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
             SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
