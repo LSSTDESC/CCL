@@ -1293,12 +1293,17 @@ def halomod_Tk3D_SSC(cosmo, hmc,
 
     if prof2 is None:
         prof2 = prof1
+        normprof2 = normprof1
     if prof3 is None:
         prof3 = prof1
+        normprof3 = normprof1
     if prof4 is None:
         prof4 = prof2
+        normprof4 = normprof2
     if prof12_2pt is None:
         prof12_2pt = Profile2pt()
+    if prof34_2pt is None:
+        prof34_2pt = prof12_2pt
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
@@ -1321,9 +1326,6 @@ def halomod_Tk3D_SSC(cosmo, hmc,
     for prof, norm in profs.items():
         if prof.is_number_counts and not norm:
             raise ValueError("normprof must be True if prof.is_number_counts")
-
-    if prof34_2pt is None:
-        prof34_2pt = prof12_2pt
 
     # Power spectrum
     if isinstance(p_of_k_a, Pk2D):
