@@ -4,7 +4,6 @@ dependencies:
   - pip
   - numpy
   - nose
-  - flake8
   - coveralls
   - pyyaml
   - gsl

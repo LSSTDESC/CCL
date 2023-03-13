@@ -68,6 +68,7 @@ jobs:
 
           export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
           export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+          export PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:$PATH"
 
       - name: Lint
         uses: py-actions/flake8@v2
