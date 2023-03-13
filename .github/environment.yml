@@ -12,11 +12,7 @@ dependencies:
   - pytest-cov
   - coveralls
   - nose
-  - gsl
-  - fftw
-  # - compilers
+  # - gsl
+  # - fftw
   - pkg-config
   - setuptools_scm
-  # - pandas
-  # - cython
-  # - traitlets
