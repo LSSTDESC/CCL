@@ -51,6 +51,12 @@ jobs:
           miniforge-version: latest
           miniforge-variant: Mambaforge
 
+      - name: Lint
+        uses: py-actions/flake8@v2
+        with:
+          args: "--config .flake8"
+        if: matrix.label == 'linux-64'
+
       - name: "macOS: remove homebrew & set env variables"
         if: matrix.label == 'osx-64'
         run: |
@@ -85,12 +91,6 @@ jobs:
         run: |
           mamba env update --file ${{ env.DEPENDENCIES }} --prune
           pip install "classy<3"
-
-      - name: Lint
-        uses: py-actions/flake8@v2
-        with:
-          args: "--config .flake8"
-        if: matrix.label == 'linux-64'
 
       - name: Install CCL
         run: |
