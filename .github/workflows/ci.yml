@@ -22,9 +22,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-11, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
         include:
-          - os: macos-11
+          - os: macos-latest
             label: osx-64
             prefix: /Users/runner/miniconda3
 
