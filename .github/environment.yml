@@ -3,6 +3,7 @@ dependencies:
   - pip
   - cmake
   - gsl
+  - swig
   - numpy
   - scipy
   - camb=1.3.6

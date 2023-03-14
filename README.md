@@ -54,9 +54,10 @@ or
 $ pip install pyccl
 ```
 
-For the PyPi installation, you will need ``CMake`` installed locally. See
-[Getting CMake](https://ccl.readthedocs.io/en/latest/source/installation.html#getting-cmake)
-for instructions. Note that the code only supports Linux or Mac OS, but no Windows.
+For the PyPi installation, you will need ``CMake`` and ``SWIG`` installed locally.
+See [Getting CMake](https://ccl.readthedocs.io/en/latest/source/installation.html#getting-cmake)
+and [Installing SWIG](https://pypi.org/project/swig/) for instructions.
+Note that the code only supports Linux or Mac OS, but no Windows.
 
 Once you have the code installed, you can take it for a spin!
 
@@ -81,7 +82,7 @@ lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
 
 # Calculate the angular cross-spectrum of the two tracers as a function of ell
 ell = np.arange(2, 10)
-cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
+cls = cosmo.angular_cl(lens1, lens2, ell)
 print(cls)
 ```
 
@@ -113,7 +114,7 @@ for more information.
 If you have comments, questions, or feedback, please
 [write us an issue](https://github.com/LSSTDESC/CCL/issues).
 
-The current lead of the LSST DESC CCL Topical Team is Danielle Leonard (c-d-leonard, danielle.leonard at ncl.ac.uk)
+The current lead of the LSST DESC CCL Topical Team is Danielle Leonard (c-d-leonard, danielle.leonard at ncl.ac.uk).
 
 
 # Acknowledgements
