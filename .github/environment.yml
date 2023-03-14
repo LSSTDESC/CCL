@@ -4,6 +4,7 @@ dependencies:
   - cmake
   - gsl
   - swig
+  - flake8
   - numpy
   - scipy
   - camb=1.3.6
