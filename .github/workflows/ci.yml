@@ -108,6 +108,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: Checkout CCL repository
+        uses: actions/checkout@v3
+
       - name: Lint
         uses: py-actions/flake8@v2
         with:
