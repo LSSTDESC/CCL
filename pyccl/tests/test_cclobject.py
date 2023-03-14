@@ -20,6 +20,9 @@ def test_fancy_repr():
     with pytest.raises(AttributeError):
         cosmo1._fancy_repr.disable()
 
+    with pytest.raises(NotImplementedError):
+        ccl.base.FancyRepr()
+
 
 def test_CCLObject():
     # Test eq --> repr <-- hash for all kinds of CCL objects.
