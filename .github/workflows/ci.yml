@@ -91,18 +91,18 @@ jobs:
 
       - name: Unit tests
         run: |
-          OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
+          OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl --cov-report=lcov:lcov.info
 
       - name: Benchmarks
         run: |
-          OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
+          OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-report=lcov:lcov.info --cov-append
 
       - name: Coveralls parallel
         uses: coverallsapp/github-action@v2
         with:
           flag-name: ${{ matrix.label }}
           parallel: true
-          path-to-lcov: .coveragerc
+          path-to-lcov: lcov.info
 
   lint:
     runs-on: ubuntu-latest
