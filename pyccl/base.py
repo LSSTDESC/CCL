@@ -6,6 +6,7 @@ from inspect import signature
 from _thread import RLock
 
 
+
 def _to_hashable(obj):
     """Make unhashable objects hashable in a consistent manner."""
 
