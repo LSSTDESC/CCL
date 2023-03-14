@@ -109,17 +109,17 @@ jobs:
       #   run: |
       #     coveralls --service=github
 
-  finish:
-      needs: build
-      runs-on: ${{ matrix.os }}
-      steps:
+  # finish:
+  #     needs: build
+  #     runs-on: ${{ matrix.os }}
+  #     steps:
 
       - name: Lint
         uses: py-actions/flake8@v2
         with:
           args: "--config .flake8"
 
-      # - name: Coveralls
-      #   uses: coverallsapp/github-action@v2
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
