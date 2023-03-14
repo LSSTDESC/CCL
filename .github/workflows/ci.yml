@@ -90,6 +90,7 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           args: "--config .flake8"
+        if: matrix.label == 'linux-64'
 
       - name: Install CCL
         run: |
@@ -108,3 +109,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           coveralls --service=github
+        if: matrix.label == 'linux-64'
