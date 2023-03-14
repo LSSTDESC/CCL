@@ -9,7 +9,7 @@ on:
   pull_request: null
 
 env:
-  CACHE_NUMBER: 50  # increase to reset cache manually
+  CACHE_NUMBER: 0  # increase to reset cache manually
   DEPENDENCIES: .github/environment.yml
 
 jobs:
@@ -69,7 +69,7 @@ jobs:
       - name: Compute cache key
         run: |
           echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-          echo "CACHE_KEY=${{ matrix.label }}-conda-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}" >> $GITHUB_ENV
+          echo "CACHE_KEY=${{ matrix.label }}-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}" >> $GITHUB_ENV
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
 
       - name: Get cached dependencies
