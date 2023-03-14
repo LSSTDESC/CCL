@@ -97,11 +97,11 @@ jobs:
         run: |
           OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
 
-    # - name: Coveralls parallel flag
-    #   uses: coverallsapp/github-action@v1
-    #   with:
-    #     flag-name: ${{ matrix.label }}
-    #     parallel: true
+      - name: Coveralls parallel flag
+        uses: coverallsapp/github-action@v1
+        with:
+          flag-name: ${{ matrix.label }}
+          parallel: true
 
   lint:
     runs-on: ubuntu-latest
