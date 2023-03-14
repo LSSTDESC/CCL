@@ -68,8 +68,8 @@ jobs:
 
       - name: Compute cache key
         run: |
-          echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-          echo "CACHE_KEY=${{ matrix.os }}-conda-py${{ matrix.py }}-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}" >> $GITHUB_ENV
+          export DATE=$(date +'%Y%m%d')
+          echo "CACHE_KEY=${{ matrix.os }}-conda-py${{ matrix.py }}-${{ hashFiles(env.DEPENDENCIES) }}-${{ DATE }}-${{ env.CACHE_NUMBER }}" >> $GITHUB_ENV
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
 
       - name: Get cached dependencies
@@ -132,7 +132,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
-          carryforward: "osx-64,linux-64"
+          carryforward: "linux-64"
 
 
 # Legacy step: uninstall homebrew (CI works without it).
