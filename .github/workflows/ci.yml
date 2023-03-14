@@ -122,4 +122,4 @@ jobs:
 
       - name: Coveralls
         uses: coverallsapp/github-action@v2
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: secrets.GITHUB_TOKEN
