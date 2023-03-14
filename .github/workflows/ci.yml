@@ -69,11 +69,6 @@ jobs:
           export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
           export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
 
-      # - name: Lint
-      #   uses: py-actions/flake8@v2
-      #   with:
-      #     args: "--config .flake8"
-
       - name: Set cache date
         run: |
           echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
@@ -91,8 +86,10 @@ jobs:
           mamba env update --file ${{ env.DEPENDENCIES }} --prune
           pip install "classy<3"
 
-        env:
-          MATRIX_OS: ${{ matrix.os }}
+      - name: Lint
+        uses: py-actions/flake8@v2
+        with:
+          args: "--config .flake8"
 
       - name: Install CCL
         run: |
