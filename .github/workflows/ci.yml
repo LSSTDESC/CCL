@@ -104,20 +104,14 @@ jobs:
       #   run: |
       #     coveralls --service=github
 
-  # finish:
-  #     needs: build
-  #     runs-on: ${{ matrix.os }}
-  #     steps:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
 
-  # lint:
-  #   needs: build
-  #   if: ${{ always() && (matrix.label == 'linux-64')}}
-  #   steps:
-
-  #     - name: Lint
-  #       uses: py-actions/flake8@v2
-  #       with:
-  #         args: "--config .flake8"
+      - name: Lint
+        uses: py-actions/flake8@v2
+        with:
+          args: "--config .flake8"
 
   #     - name: Coveralls
   #       uses: coverallsapp/github-action@v2
