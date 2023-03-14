@@ -53,15 +53,10 @@ jobs:
           miniforge-version: latest
           miniforge-variant: Mambaforge
 
-      - name: "macOS: remove homebrew & set env variables"
+      - name: "macOS: set env variables"
         if: matrix.label == 'osx-64'
         run: |
-          # curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
-          # chmod u+x ./uninstall_homebrew.sh
-          # ./uninstall_homebrew.sh -f -q >& /dev/null
-          # rm -f uninstall_homebrew.sh
-
-          # mamba install llvm-openmp
+          mamba install llvm-openmp
           echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
           SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           echo "SDKROOT: ${SDKROOT}"
@@ -128,3 +123,18 @@ jobs:
   #       uses: coverallsapp/github-action@v2
   #       with:
   #         github-token: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
+
+
+
+# Legacy step: uninstall homebrew (CI works without it).
+# - name: "macOS: remove homebrew"
+#   if: matrix.label == 'osx-64'
+#   run: |
+#     curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
+#     chmod u+x ./uninstall_homebrew.sh
+#     ./uninstall_homebrew.sh -f -q >& /dev/null
+#     rm -f uninstall_homebrew.sh
