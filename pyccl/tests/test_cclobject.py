@@ -4,6 +4,26 @@ import pyccl as ccl
 import functools
 
 
+def test_fancy_repr():
+    # Test fancy-repr controls.
+    cosmo1 = ccl.CosmologyVanillaLCDM()
+    cosmo2 = ccl.CosmologyVanillaLCDM()
+
+    ccl.CCLObject._fancy_repr.disable()
+    assert repr(cosmo1) == object.__repr__(cosmo1)
+    assert cosmo1 != cosmo2
+
+    ccl.CCLObject._fancy_repr.enable()
+    assert repr(cosmo1) != object.__repr__(cosmo2)
+    assert cosmo1 == cosmo2
+
+    with pytest.raises(AttributeError):
+        cosmo1._fancy_repr.disable()
+
+    with pytest.raises(NotImplementedError):
+        ccl.base.FancyRepr()
+
+
 def test_CCLObject():
     # Test eq --> repr <-- hash for all kinds of CCL objects.
 
@@ -28,6 +48,7 @@ def test_CCLObject():
     PK2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
     assert PK1 == PK2
     assert ccl.Pk2D(empty=True) == ccl.Pk2D(empty=True)
+    assert 2*PK1 != PK2
 
     # 3.1. Using a factorizable Tk3D object.
     a_arr, lk_arr, pk_arr = PK1.get_spline_arrays()
@@ -35,7 +56,10 @@ def test_CCLObject():
                    pk1_arr=pk_arr, pk2_arr=pk_arr, is_logt=False)
     TK2 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                    pk1_arr=pk_arr, pk2_arr=pk_arr, is_logt=False)
+    TK3 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
+                   pk1_arr=2*pk_arr, pk2_arr=2*pk_arr, is_logt=False)
     assert TK1 == TK2
+    assert TK1 != TK3
 
     # 3.2. Using a non-factorizable Tk3D object.
     a_arr_2 = np.arange(0.5, 0.9, 0.1)
@@ -83,10 +107,9 @@ def test_CCLHalosObject():
     assert MDEF == HMC._mdef
     assert HMF == HMC._massfunc
     assert HBF == HMC._hbias
-    # TODO: Uncomment once CCLv3 is released (uniform keyword naming).
-    # HMC2 = ccl.halos.HMCalculator(
-    #     cosmo, massfunc=HMF, hbias=HBF, mass_def=MDEF)
-    # assert HMC == HMC2
+    HMC2 = ccl.halos.HMCalculator(
+        cosmo, massfunc=HMF, hbias=HBF, mass_def=MDEF)
+    assert HMC == HMC2
 
     # 4. Test halo profiles.
     CM1 = ccl.halos.Concentration.from_name("Duffy08")()

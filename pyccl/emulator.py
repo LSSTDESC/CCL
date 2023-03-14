@@ -1,4 +1,4 @@
-from .base import CCLObject, cache, Funlock
+from .base import CCLObject, cache, UnlockInstance
 from .pk2d import Pk2D
 import numpy as np
 from abc import abstractmethod
@@ -98,7 +98,7 @@ class Emulator(CCLObject):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
 
-        Funlock(cls, "_build_parameters", False)
+        UnlockInstance.Funlock(cls, "_build_parameters", mutate=False)
 
         # Subclasses with `_load_emu` methods are emulator implementations.
         # Automatically cache the result, and convert it to class method.
