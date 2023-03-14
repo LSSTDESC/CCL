@@ -111,7 +111,6 @@ jobs:
 
   finish:
       needs: build
-      if: matrix.label == 'linux-64'
       runs-on: ${{ matrix.os }}
       steps:
 
