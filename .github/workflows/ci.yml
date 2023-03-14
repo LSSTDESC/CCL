@@ -103,13 +103,6 @@ jobs:
         flag-name: ${{ matrix.label }}
         parallel: true
 
-      # - name: Coveralls
-      #   if: matrix.label == 'linux-64'
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     coveralls --service=github
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -149,3 +142,10 @@ jobs:
 #     chmod u+x ./uninstall_homebrew.sh
 #     ./uninstall_homebrew.sh -f -q >& /dev/null
 #     rm -f uninstall_homebrew.sh
+
+# - name: Coveralls
+#   if: matrix.label == 'linux-64'
+#   env:
+#     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#   run: |
+#     coveralls --service=github
