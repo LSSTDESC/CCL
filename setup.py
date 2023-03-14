@@ -92,18 +92,19 @@ setup(
     include_package_data=True,
     use_scm_version=True,
     distclass=Distribution,
-    python_requires='>=3.7.0',
+    python_requires='>=3.7',
     setup_requires=['setuptools_scm'],
-    install_requires=['numpy', 'pyyaml'],
+    install_requires=['numpy'],
     cmdclass={'build_py': Build, 'develop': Develop, 'clean': Clean},
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved',
+        'License :: OSI Approved :: BSD License',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
         'Programming Language :: C',
         'Programming Language :: Python',
-        'Topic :: Scientific/Engineering :: Physics'
+        'Topic :: Scientific/Engineering :: Physics',
+        'Topic :: Scientific/Engineering :: Astronomy',
     ]
 )
