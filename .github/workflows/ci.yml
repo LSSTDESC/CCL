@@ -77,7 +77,7 @@ jobs:
         id: cache
         with:
           path: ${{ matrix.prefix }}
-          key: ${ env.CACHE_KEY }}
+          key: ${{ env.CACHE_KEY }}
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
