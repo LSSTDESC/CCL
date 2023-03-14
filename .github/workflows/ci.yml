@@ -109,19 +109,17 @@ jobs:
       #   run: |
       #     coveralls --service=github
 
-finish:
-  - needs: build
-    if: matrix.label == 'linux-64'
-    runs-on: ${{ matrix.os }}
-    steps:
-
-    - name: Lint
+  finish:
+    - needs: build
       if: matrix.label == 'linux-64'
-      uses: py-actions/flake8@v2
-      with:
-        args: "--config .flake8"
+      runs-on: ${{ matrix.os }}
+      steps:
 
-    - name: Coveralls
-      if: matrix.label == 'linux-64'
-      uses: coverallsapp/github-action@v2
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lint
+        uses: py-actions/flake8@v2
+        with:
+          args: "--config .flake8"
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
+        github-token: ${{ secrets.GITHUB_TOKEN }}
