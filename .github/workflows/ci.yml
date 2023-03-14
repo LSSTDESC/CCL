@@ -25,17 +25,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [${{ env.MACOS_VERSION }}, ${{ env.LINUX_VERSION }}]
+        os: [env.MACOS_VERSION, env.LINUX_VERSION]
         include:
-          - os: ${{ env.MACOS_VERSION }}
+          - os: env.MACOS_VERSION
             label: osx-64
             prefix: /Users/runner/miniconda3
 
-          - os: ${{ env.LINUX_VERSION }}
+          - os: env.LINUX_VERSION
             label: linux-64
             prefix: /usr/share/miniconda3
         py:
-          - ${{ env.PYTHON_VERSION }}
+          - env.PYTHON_VERSION
 
     steps:
       - name: Cancel previous runs
