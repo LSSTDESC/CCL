@@ -68,7 +68,8 @@ jobs:
 
       - name: Compute cache key
         run: |
-          echo "CACHE_KEY=${{ matrix.os }}-conda-py${{ matrix.py }}-${{ hashFiles(env.DEPENDENCIES) }}-${{ date +'%Y%m%d' }}-${{ env.CACHE_NUMBER }}" >> $GITHUB_ENV
+          echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+          echo "CACHE_KEY=${{ matrix.os }}-conda-py${{ matrix.py }}-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}" >> $GITHUB_ENV
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
 
       - name: Get cached dependencies
@@ -131,7 +132,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
-          carryforward: "linux-64"
+          carryforward: "osx-64,linux-64"
 
 
 # Legacy step: uninstall homebrew (CI works without it).
@@ -142,3 +143,10 @@ jobs:
 #     chmod u+x ./uninstall_homebrew.sh
 #     ./uninstall_homebrew.sh -f -q >& /dev/null
 #     rm -f uninstall_homebrew.sh
+
+# - name: Coveralls
+#   if: matrix.label == 'linux-64'
+#   env:
+#     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#   run: |
+#     coveralls --service=github
