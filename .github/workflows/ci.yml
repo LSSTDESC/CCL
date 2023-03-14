@@ -97,11 +97,12 @@ jobs:
         run: |
           OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-append
 
-      - name: Coveralls parallel flag
-        uses: coverallsapp/github-action@v1
+      - name: Coveralls parallel
+        uses: coverallsapp/github-action@v2
         with:
           flag-name: ${{ matrix.label }}
           parallel: true
+          path-to-lcov: .coveragerc
 
   lint:
     runs-on: ubuntu-latest
@@ -126,7 +127,7 @@ jobs:
       - name: Checkout CCL repository
         uses: actions/checkout@v3
 
-      - name: Coveralls
+      - name: Coveralls finished
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
