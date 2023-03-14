@@ -114,7 +114,7 @@ for more information.
 If you have comments, questions, or feedback, please
 [write us an issue](https://github.com/LSSTDESC/CCL/issues).
 
-The current lead of the LSST DESC CCL Topical Team is Danielle Leonard (c-d-leonard, danielle.leonard at ncl.ac.uk).
+The current lead of the LSST DESC CCL Topical Team is David Alonso (damonge, david.alonso at physics.ox.ac.uk).
 
 
 # Acknowledgements
