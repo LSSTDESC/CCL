@@ -9,7 +9,7 @@ on:
   pull_request: null
 
 env:
-  CACHE_NUMBER: 1  # increase to reset cache manually
+  CACHE_NUMBER: 0  # increase to reset cache manually
   DEPENDENCIES: .github/environment.yml
 
 jobs:
@@ -69,7 +69,7 @@ jobs:
       - name: Compute cache key
         run: |
           echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-          echo "CACHE_KEY=${{ matrix.label }}-conda-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}" >> $GITHUB_ENV
+          echo "CACHE_KEY=${{ matrix.os }}-conda-py${{ matrix.py }}-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}" >> $GITHUB_ENV
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
 
       - name: Get cached dependencies
@@ -115,14 +115,18 @@ jobs:
         with:
           args: "--config .flake8"
 
-  # coverage:
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   steps:
-  #     - name: Coveralls
-  #       uses: coverallsapp/github-action@v2
-  #       with:
-  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  coverage:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ success() }}
+    steps:
+      - name: Checkout CCL repository
+        uses: actions/checkout@v3
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
 
 # Legacy step: uninstall homebrew (CI works without it).
