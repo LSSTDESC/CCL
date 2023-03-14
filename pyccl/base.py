@@ -392,43 +392,46 @@ class UnlockInstance:
             # Lock the instance on exit.
             self.object_lock.lock()
 
+    @classmethod
+    def unlock_instance(cls, func=None, *, argv=0, mutate=True):
+        """Decorator that temporarily unlocks an instance of CCLObject.
 
-def unlock_instance(func=None, *, argv=0, mutate=True):
-    """Decorator that temporarily unlocks an instance of CCLObject.
+        Arguments:
+            func (``function``):
+                Function which changes one of its ``CCLObject`` arguments.
+            argv (``int``):
+                Which argument should be unlocked. Defaults to the first one.
+                If not a ``CCLObject`` the decorator will do nothing.
+            mutate (``bool``):
+                If after the function ``instance_old != instance_new``, the
+                instance is mutated. If ``True``, the representation of the
+                object will be reset.
+        """
+        if func is None:
+            # called with parentheses
+            return functools.partial(cls.unlock_instance, argv=argv,
+                                     mutate=mutate)
 
-    Arguments:
-        func (``function``):
-            Function which changes one of its ``CCLObject`` arguments.
-        argv (``int``):
-            Which argument should be unlocked. Defaults to the first argument.
-            This should be a ``CCLObject``, or the decorator will do nothing.
-        mutate (``bool``):
-            If after the function ``instance_old != instance_new``, the
-            instance is mutated. If ``True``, the representation of the
-            object will be reset.
-    """
-    if func is None:
-        # called with parentheses
-        return functools.partial(unlock_instance, argv=argv, mutate=mutate)
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Pick argument from list of `args` or `kwargs` as needed.
+            size = len(args)
+            arg = args[argv] if size > argv else list(kwargs.values())[argv-size]  # noqa
+            with UnlockInstance(arg, mutate=mutate):
+                out = func(*args, **kwargs)
+            return out
+        return wrapper
 
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        # Pick argument from list of `args` or `kwargs` as needed.
-        size = len(args)
-        arg = args[argv] if size > argv else list(kwargs.values())[argv-size]
-        with UnlockInstance(arg, mutate=mutate):
-            out = func(*args, **kwargs)
-        return out
-    return wrapper
+    @classmethod
+    def Funlock(cls, cl, name, mutate: bool):
+        """Allow an instance to change or mutate when `name` is called."""
+        func = vars(cl).get(name)
+        if func is not None:
+            newfunc = cls.unlock_instance(mutate=mutate)(func)
+            setattr(cl, name, newfunc)
 
 
-def Funlock(cls, name, mutate: bool):
-    """Helper to allow an instance to change or mutate when `name` is called.
-    """
-    func = vars(cls).get(name)
-    if func is not None:
-        newfunc = unlock_instance(mutate=mutate)(func)
-        setattr(cls, name, newfunc)
+unlock_instance = UnlockInstance.unlock_instance
 
 
 class FancyRepr:
@@ -436,24 +439,28 @@ class FancyRepr:
     _enabled: bool = True
     _classes: dict = {}
 
-    def __repr__(self):
-        return f"FancyRepr(enabled={self._enabled})"
+    def __init__(self):
+        # This is only a framework class, we do not instantiate it.
+        raise NotImplementedError
 
-    def add(self, cls):
+    @classmethod
+    def add(cls, cl):
         """Add class to the internal dictionary of fancy-repr classes."""
-        self._classes[cls] = cls.__repr__
+        cls._classes[cl] = cl.__repr__
 
-    def enable(self):
+    @classmethod
+    def enable(cls):
         """Enable fancy representations if they exist."""
-        for cl, method in self._classes.items():
+        for cl, method in cls._classes.items():
             FancyRepr.bind_and_replace(cl, method)
-        self._enabled = True
+        cls._enabled = True
 
-    def disable(self):
+    @classmethod
+    def disable(cls):
         """Disable fancy representations and fall back to Python defaults."""
-        for cl in self._classes.keys():
+        for cl in cls._classes.keys():
             cl.__repr__ = object.__repr__
-        self._enabled = False
+        cls._enabled = False
 
     @classmethod
     def bind_and_replace(cls, cl, method):
@@ -520,7 +527,7 @@ class CCLObject(ABC):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
-    _fancy_repr = FancyRepr()
+    _fancy_repr = FancyRepr
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -535,8 +542,8 @@ class CCLObject(ABC):
             FancyRepr.bind_and_replace(cls, cls.__repr__)
 
         # 3. Unlock instance on specific methods.
-        Funlock(cls, "__init__", mutate=False)
-        Funlock(cls, "update_parameters", mutate=True)
+        UnlockInstance.Funlock(cls, "__init__", mutate=False)
+        UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
 
     def __new__(cls, *args, **kwargs):
         # Populate every instance with an `ObjectLock` as attribute.

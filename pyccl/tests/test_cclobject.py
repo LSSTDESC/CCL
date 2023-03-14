@@ -10,12 +10,10 @@ def test_fancy_repr():
     cosmo2 = ccl.CosmologyVanillaLCDM()
 
     ccl.CCLObject._fancy_repr.disable()
-    assert "False" in repr(ccl.CCLObject._fancy_repr)
     assert repr(cosmo1) == object.__repr__(cosmo1)
     assert cosmo1 != cosmo2
 
     ccl.CCLObject._fancy_repr.enable()
-    assert "True" in repr(ccl.CCLObject._fancy_repr)
     assert repr(cosmo1) != object.__repr__(cosmo2)
     assert cosmo1 == cosmo2
 
