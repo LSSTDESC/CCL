@@ -11,4 +11,5 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
+  - flake8
   - coveralls
