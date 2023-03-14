@@ -464,7 +464,7 @@ class FancyRepr:
 
     @classmethod
     def bind_and_replace(cls, cl, method):
-        """Bind a method to a class, and replace original with default.
+        """Bind ``method`` to class ``cl``, and replace original with default.
         This helper only works for binding and replacing ``__repr__`` methods
         for ``CCLObjects``.
         """
