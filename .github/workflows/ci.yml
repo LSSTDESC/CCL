@@ -80,7 +80,7 @@ jobs:
             matrix.os }}--${{
             hashFiles(env.CONDA_ENV) }}-${{
             hashFiles('setup.py') }}--${{
-            $TODAY }}-${{
+            $env.TODAY }}-${{
             env.CACHE_NUMBER }}
         env:
           TODAY=${{ date +'%Y%m%d' }}
