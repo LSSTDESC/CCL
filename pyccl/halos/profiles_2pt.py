@@ -111,7 +111,7 @@ class Profile2ptHOD(Profile2pt):
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile` or None):
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfileHOD` or None):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
                 an auto-correlation. Note that only auto-correlations
@@ -126,13 +126,7 @@ class Profile2ptHOD(Profile2pt):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
-        if not isinstance(prof, HaloProfileHOD):
-            raise TypeError("prof must be of type `HaloProfileHOD`")
-        if prof2 is not None:
-            if not isinstance(prof2, HaloProfileHOD):
-                raise TypeError("prof2 must be of type "
-                                "`HaloProfileHOD` or None")
-        else:
+        if prof2 is None:
             prof2 = prof
 
         if not prof == prof2:
