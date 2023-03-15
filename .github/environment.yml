@@ -11,4 +11,3 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
-  - coveralls
