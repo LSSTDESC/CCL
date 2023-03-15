@@ -1336,7 +1336,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         pk2d = cosmo.get_nonlin_power('delta_matter:delta_matter')
     else:
         raise ValueError("p_of_k_a must be `None`, 'linear', "
-                        "'nonlinear' or a `Pk2D` object")
+                         "'nonlinear' or a `Pk2D` object")
 
     def get_norm(normprof, prof, sf):
         return hmc.profile_norm(cosmo, sf, prof) if normprof else 1
@@ -1390,7 +1390,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             i02_12 = hmc.I_0_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2)
             P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
-            b1 = i11_1*norm1 if prof1.is_number_counts else np.zeros_like(k_use)
+            b1 = i11_1*norm1 if prof1.is_number_counts else np.zeros_like(k_use)  # noqa
 
             if prof2.is_number_counts:
                 b2 = i11_2 * norm2

@@ -129,6 +129,9 @@ class Profile2ptHOD(Profile2pt):
         if prof2 is None:
             prof2 = prof
 
+        if not (isinstance(prof, HaloProfileHOD)
+                and isinstance(prof2, HaloProfileHOD)):
+            raise TypeError("prof and prof2 should be HaloProfileHOD")
         if not prof == prof2:
             raise ValueError("prof and prof2 must be equivalent")
 
