@@ -70,7 +70,7 @@ jobs:
         run: |
           echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
-      - name: Get cached dependencies
+      - name: Get cached environment
         uses: actions/cache@v3
         id: cache
         with:
@@ -83,7 +83,7 @@ jobs:
             env.DATE }}-${{
             env.CACHE_NUMBER }}
 
-      - name: Install dependencies
+      - name: Install environment packages
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
