@@ -14,11 +14,14 @@ def test_fancy_repr():
     assert cosmo1 != cosmo2
 
     ccl.CCLObject._fancy_repr.enable()
-    assert repr(cosmo1) != object.__repr__(cosmo2)
+    assert repr(cosmo1) != object.__repr__(cosmo1)
     assert cosmo1 == cosmo2
 
     with pytest.raises(AttributeError):
         cosmo1._fancy_repr.disable()
+
+    with pytest.raises(AttributeError):
+        ccl.Cosmology._fancy_repr.disable()
 
     with pytest.raises(NotImplementedError):
         ccl.base.FancyRepr()
