@@ -1270,7 +1270,7 @@ class HaloProfilePressureGNFW(HaloProfile):
             re_fourier = True
             self.x_out = x_out
 
-        if re_fourier and (self._fourier is not None):
+        if re_fourier and (self._fourier_interp is not None):
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):

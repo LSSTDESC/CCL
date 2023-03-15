@@ -49,8 +49,8 @@ def hash_(obj):
     return digest
 
 
-class _ClassPropertyMeta(type):
-    """Implement `property` to a `classmethod`."""
+class _CachingMeta(type):
+    """Implement ``property`` to a ``classmethod`` for ``Caching``."""
     # NOTE: Only in 3.8 < py < 3.11 can `classmethod` wrap `property`.
     # https://docs.python.org/3.11/library/functions.html#classmethod
     @property
@@ -88,7 +88,7 @@ class _ClassPropertyMeta(type):
             func.cache_info.policy = value
 
 
-class Caching(metaclass=_ClassPropertyMeta):
+class Caching(metaclass=_CachingMeta):
     """Infrastructure to hold cached objects.
 
     Caching is used for pre-computed objects that are expensive to compute.
@@ -392,34 +392,98 @@ class UnlockInstance:
             # Lock the instance on exit.
             self.object_lock.lock()
 
+    @classmethod
+    def unlock_instance(cls, func=None, *, argv=0, mutate=True):
+        """Decorator that temporarily unlocks an instance of CCLObject.
 
-def unlock_instance(func=None, *, argv=0, mutate=True):
-    """Decorator that temporarily unlocks an instance of CCLObject.
+        Arguments:
+            func (``function``):
+                Function which changes one of its ``CCLObject`` arguments.
+            argv (``int``):
+                Which argument should be unlocked. Defaults to the first one.
+                If not a ``CCLObject`` the decorator will do nothing.
+            mutate (``bool``):
+                If after the function ``instance_old != instance_new``, the
+                instance is mutated. If ``True``, the representation of the
+                object will be reset.
+        """
+        if func is None:
+            # called with parentheses
+            return functools.partial(cls.unlock_instance, argv=argv,
+                                     mutate=mutate)
 
-    Arguments:
-        func (``function``):
-            Function which changes one of its ``CCLObject`` arguments.
-        argv (``int``):
-            Which argument should be unlocked. Defaults to the first argument.
-            This should be a ``CCLObject``, or the decorator will do nothing.
-        mutate (``bool``):
-            If after the function ``instance_old != instance_new``, the
-            instance is mutated. If ``True``, the representation of the
-            object will be reset.
-    """
-    if func is None:
-        # called with parentheses
-        return functools.partial(unlock_instance, argv=argv, mutate=mutate)
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Pick argument from list of `args` or `kwargs` as needed.
+            size = len(args)
+            arg = args[argv] if size > argv else list(kwargs.values())[argv-size]  # noqa
+            with UnlockInstance(arg, mutate=mutate):
+                out = func(*args, **kwargs)
+            return out
+        return wrapper
 
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        # Pick argument from list of `args` or `kwargs` as needed.
-        size = len(args)
-        arg = args[argv] if size > argv else list(kwargs.values())[argv-size]
-        with UnlockInstance(arg, mutate=mutate):
-            out = func(*args, **kwargs)
-        return out
-    return wrapper
+    @classmethod
+    def Funlock(cls, cl, name, mutate: bool):
+        """Allow an instance to change or mutate when `name` is called."""
+        func = vars(cl).get(name)
+        if func is not None:
+            newfunc = cls.unlock_instance(mutate=mutate)(func)
+            setattr(cl, name, newfunc)
+
+
+unlock_instance = UnlockInstance.unlock_instance
+
+
+class FancyRepr:
+    """Controls the usage of fancy ``__repr__` for ``CCLObjects."""
+    _enabled: bool = True
+    _classes: dict = {}
+
+    def __init__(self):
+        # This is only a framework class, we do not instantiate it.
+        raise NotImplementedError
+
+    @classmethod
+    def add(cls, cl):
+        """Add class to the internal dictionary of fancy-repr classes."""
+        cls._classes[cl] = cl.__repr__
+
+    @classmethod
+    def enable(cls):
+        """Enable fancy representations if they exist."""
+        for cl, method in cls._classes.items():
+            FancyRepr.bind_and_replace(cl, method)
+        cls._enabled = True
+
+    @classmethod
+    def disable(cls):
+        """Disable fancy representations and fall back to Python defaults."""
+        for cl in cls._classes.keys():
+            cl.__repr__ = object.__repr__
+        cls._enabled = False
+
+    @classmethod
+    def bind_and_replace(cls, cl, method):
+        """Bind ``method`` to class ``cl``, and replace original with default.
+        This helper only works for binding and replacing ``__repr__`` methods
+        for ``CCLObjects``.
+        """
+        # If the class defines a custom `__repr__`, this will be the new
+        # `_repr` (which is cached). Decorator `cached_property` requires
+        # that `__set_name__` is called on it.
+        bmethod = functools.cached_property(method)
+        cl._repr = bmethod
+        bmethod.__set_name__(cl, "_repr")
+        # Fall back to using `__ccl_repr__` from `CCLObject`.
+        cl.__repr__ = cl.__ccl_repr__
+
+
+class _DisableGetMethod:
+    """Descriptor that disables the dot (``getattr``)."""
+
+    def __get__(self, instance, owner):
+        raise AttributeError(
+            "To access fancy-repr info use `CCLObject._fancy_repr`.")
 
 
 class CCLObject(ABC):
@@ -463,6 +527,7 @@ class CCLObject(ABC):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
+    _fancy_repr = FancyRepr
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -471,26 +536,14 @@ class CCLObject(ABC):
         cls.__signature__ = signature(cls.__init__)
 
         # 2. Replace repr (if implemented) with its cached version.
+        cls._fancy_repr = _DisableGetMethod()
         if "__repr__" in vars(cls):
-            # If the class defines a custom `__repr__`, this will be the new
-            # `_repr` (which is cached). Decorator `cached_property` requires
-            # that `__set_name__` is called on it.
-            bmethod = functools.cached_property(cls.__repr__)
-            cls._repr = bmethod
-            bmethod.__set_name__(cls, "_repr")
-            # Fall back to using `__ccl_repr__` from `CCLObject`.
-            cls.__repr__ = cls.__ccl_repr__
+            CCLObject._fancy_repr.add(cls)
+            FancyRepr.bind_and_replace(cls, cls.__repr__)
 
         # 3. Unlock instance on specific methods.
-        def Funlock(cls, name, mutate):
-            # Allow instance to change or mutate if method `name` is called.
-            func = vars(cls).get(name)
-            if func is not None:
-                newfunc = unlock_instance(mutate=mutate)(func)
-                setattr(cls, name, newfunc)
-
-        Funlock(cls, "__init__", False)
-        Funlock(cls, "update_parameters", True)
+        UnlockInstance.Funlock(cls, "__init__", mutate=False)
+        UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
 
     def __new__(cls, *args, **kwargs):
         # Populate every instance with an `ObjectLock` as attribute.
