@@ -1,0 +1,7 @@
+[flake8]
+ignore = E741,E226,W503,W504
+exclude = 
+    build/,
+    .eggs/,
+    benchmarks/data,
+    pyccl/ccllib.py
