@@ -69,14 +69,19 @@ jobs:
       - name: Compute cache key
         run: |
           echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-          echo "CACHE_KEY=${{ matrix.os }}-conda-py${{ matrix.py }}-${{ hashFiles(env.DEPENDENCIES) }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}" >> $GITHUB_ENV
 
       - name: Get cached dependencies
         uses: actions/cache@v3
         id: cache
         with:
           path: ${{ matrix.prefix }}
-          key: ${{ env.CACHE_KEY }}
+          key:
+            conda-py${{ matrix.py }}--${{
+            matrix.os }}--${{
+            hashFiles(env.DEPENDENCIES) }}-${{
+            hashFiles('pyccl/setup.py') }}--${{
+            env.DATE }}-${{
+            env.CACHE_NUMBER }}
 
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
