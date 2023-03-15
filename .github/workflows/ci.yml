@@ -79,7 +79,7 @@ jobs:
             conda-py${{ matrix.py }}--${{
             matrix.os }}--${{
             hashFiles(env.DEPENDENCIES) }}-${{
-            hashFiles('pyccl/setup.py') }}--${{
+            hashFiles('setup.py') }}--${{
             env.DATE }}-${{
             env.CACHE_NUMBER }}
 
