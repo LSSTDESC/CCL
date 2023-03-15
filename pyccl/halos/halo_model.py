@@ -12,12 +12,13 @@ from ..power import linear_matter_power, nonlin_matter_power
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
+from ..base import CCLHalosObject, unlock_instance
 from ..parameters import physical_constants as const
 import numpy as np
 
 
-class HMCalculator(object):
-    """ This class implements a set of methods that can be used to
+class HMCalculator(CCLHalosObject):
+    """This class implements a set of methods that can be used to
     compute various halo model quantities. A lot of these quantities
     will involve integrals of the sort:
 
@@ -52,6 +53,7 @@ class HMCalculator(object):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
+    __repr_attrs__ = ("_massfunc", "_hbias", "_mdef", "_prec",)
 
     def __init__(self, cosmo, massfunc, hbias, mass_def,
                  log10M_min=8., log10M_max=16.,
@@ -115,6 +117,7 @@ class HMCalculator(object):
         # Spline integrator
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
+    @unlock_instance(mutate=False)
     def _get_mass_function(self, cosmo, a, rho0):
         # Compute the mass function at this cosmo and a.
         if a != self._a_mf or cosmo != self._cosmo_mf:
@@ -124,6 +127,7 @@ class HMCalculator(object):
             self._mf0 = (rho0 - integ) / self._m0
             self._cosmo_mf, self._a_mf = cosmo, a  # cache
 
+    @unlock_instance(mutate=False)
     def _get_halo_bias(self, cosmo, a, rho0):
         # Compute the halo bias at this cosmo and a.
         if cosmo != self._cosmo_bf or a != self._a_bf:

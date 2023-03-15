@@ -1,12 +1,14 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
+from ..base import CCLHalosObject
 from .massdef import MassDef, MassDef200m
 import numpy as np
 import functools
+from abc import abstractmethod
 
 
-class HaloBias(object):
+class HaloBias(CCLHalosObject):
     """ This class enables the calculation of halo bias functions.
     We currently assume that all halo bias functions can be written
     as functions that depend on M only through sigma_M (where
@@ -25,7 +27,7 @@ class HaloBias(object):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    name = "default"
+    __repr_attrs__ = ("mdef", "mass_def_strict",)
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         cosmo.compute_sigma()
@@ -41,11 +43,11 @@ class HaloBias(object):
             self._default_mdef()
         self._setup(cosmo)
 
+    @abstractmethod
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         """ Use this function to initialize any internal attributes
@@ -128,13 +130,11 @@ class HaloBias(object):
             float or array_like: halo bias.
         """
         M_use = np.atleast_1d(M)
-        logM = self._get_consistent_mass(cosmo, M_use,
-                                         a, mdef_other)
+        logM = self._get_consistent_mass(cosmo, M_use, a, mdef_other)
 
         # sigma(M)
         status = 0
-        sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
-                                    len(logM), status)
+        sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM, len(logM), status)
         check(status, cosmo=cosmo)
 
         b = self._get_bsigma(cosmo, sigM, a)
@@ -142,6 +142,7 @@ class HaloBias(object):
             b = b[0]
         return b
 
+    @abstractmethod
     def _get_bsigma(self, cosmo, sigM, a):
         """ Get the halo bias as a function of sigmaM.
 
@@ -154,8 +155,6 @@ class HaloBias(object):
         Returns:
             float or array_like: f(sigma_M) function.
         """
-        raise NotImplementedError("Use one of the non-default "
-                                  "HaloBias classes")
 
     @classmethod
     def from_name(cls, name):
@@ -191,6 +190,7 @@ class HaloBiasSheth99(HaloBias):
             the fit of Nakamura & Suto 1997. Otherwise use
             delta_crit = 1.68647.
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "use_delta_c_fit",)
     name = "Sheth99"
 
     def __init__(self, cosmo, mass_def=None,

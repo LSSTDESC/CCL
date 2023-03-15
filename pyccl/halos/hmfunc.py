@@ -2,12 +2,14 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
 from ..parameters import physical_constants
+from ..base import CCLHalosObject
 from .massdef import MassDef, MassDef200m
 import numpy as np
 import functools
+from abc import abstractmethod
 
 
-class MassFunc(object):
+class MassFunc(CCLHalosObject):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
 
@@ -30,7 +32,7 @@ class MassFunc(object):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    name = 'default'
+    __repr_attrs__ = ("mdef", "mass_def_strict",)
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         # Initialize sigma(M) splines if needed
@@ -49,11 +51,11 @@ class MassFunc(object):
             self._default_mdef()
         self._setup(cosmo)
 
+    @abstractmethod
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self, cosmo):
         """ Use this function to initialize any internal attributes
@@ -159,6 +161,7 @@ class MassFunc(object):
             mf = mf[0]
         return mf
 
+    @abstractmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         """ Get the :math:`f(\\sigma_M)` function for this mass function
         object (see description of this class for details).
@@ -176,8 +179,6 @@ class MassFunc(object):
         Returns:
             float or array_like: :math:`f(\\sigma_M)` function.
         """
-        raise NotImplementedError("Use one of the non-default "
-                                  "MassFunction classes")
 
     @classmethod
     def from_name(cls, name):
@@ -250,6 +251,7 @@ class MassFuncSheth99(MassFunc):
             the fit of Nakamura & Suto 1997. Otherwise use
             delta_crit = 1.68647.
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "use_delta_c_fit",)
     name = 'Sheth99'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
@@ -391,6 +393,7 @@ class MassFuncDespali16(MassFunc):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "ellipsoidal",)
     name = 'Despali16'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
@@ -453,6 +456,7 @@ class MassFuncTinker10(MassFunc):
         norm_all_z (bool): should we normalize the mass function
             at z=0 or at all z?
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
@@ -535,6 +539,7 @@ class MassFuncBocquet16(MassFunc):
             using dark-matter-only simulations. Otherwise, include
             baryonic effects (default).
     """
+    __repr_attrs__ = ("mdef", "mass_def_strict", "hydro",)
     name = 'Bocquet16'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,

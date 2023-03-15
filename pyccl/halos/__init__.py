@@ -95,7 +95,7 @@ __all__ = (
     'MassFunc', 'MassFuncPress74', 'MassFuncSheth99', 'MassFuncJenkins01',
     'MassFuncTinker08', 'MassFuncTinker10', 'MassFuncWatson13',
     'MassFuncAngulo12', 'MassFuncDespali16', 'MassFuncBocquet16',
-    'MassFuncBocquet20', 'mass_function_from_name',
+    'mass_function_from_name',
     'HaloBias', 'HaloBiasSheth99', 'HaloBiasSheth01', 'HaloBiasTinker10',
     'HaloBiasBhattacharya11', 'halo_bias_from_name',
     'HaloProfile', 'HaloProfileGaussian', 'HaloProfilePowerLaw',

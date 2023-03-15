@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 import pytest
 import pyccl as ccl
-from pyccl.halos.halo_model import halomod_bias_1pt
+from pyccl import UnlockInstance
 from pyccl.pyutils import assert_warns
 
 
@@ -18,7 +18,8 @@ P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
 # P2 will have is_number_counts = True
 P2 = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
 P2_nogc = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
-P2_nogc.is_number_counts = False
+with UnlockInstance(P2_nogc):
+    P2_nogc.is_number_counts = False
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
 Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
@@ -50,9 +51,9 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
         P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
         if prof1.is_number_counts:
-            b1 = halomod_bias_1pt(COSMO, hmc, k, a, prof1) * norm1
+            b1 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof1) * norm1
         if prof2.is_number_counts:
-            b2 = halomod_bias_1pt(COSMO, hmc, k, a, prof2) * norm2
+            b2 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof2) * norm2
 
     return (b1 + b2) * P_12
 
@@ -117,7 +118,6 @@ def test_tkkssc_smoke(pars):
 
 
 def test_tkkssc_errors():
-
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
@@ -337,7 +337,8 @@ def test_tkkssc_linear_bias(kwargs):
     # True counter terms
     tkc12 = []
     tkc34 = []
-    prof.is_number_counts = True  # Trick the function below
+    with UnlockInstance(prof):
+        prof.is_number_counts = True  # Trick the function below
     for aa in a_arr:
         # Divide by 2 to account for ~(1 + 1)
         tkc_ia = get_ssc_counterterm_gc(k_arr, aa, hmc, prof, prof, PKC,

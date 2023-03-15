@@ -23,11 +23,15 @@ del parse, numpy
 # SWIG-generated
 from . import ccllib as lib
 
-# CCL base
+# Hashing, Caching, CCL base, Mutation locks
 from .base import (
+    CCLObject,
+    CCLHalosObject,
     Caching,
     cache,
     hash_,
+    UnlockInstance,
+    unlock_instance,
 )
 
 # Errors
@@ -167,9 +171,9 @@ from .haloprofile import (
 
 
 __all__ = (
-    'lib',
-    'Caching', 'cache', 'hash_',
-    'CCLParameters', 'spline_params', 'gsl_params', 'physical_constants',
+    'lib', 'Caching', 'cache', 'hash_', 'CCLObject', 'CCLHalosObject',
+    'UnlockInstance', 'unlock_instance',
+    'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
     'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
     'growth_factor', 'growth_factor_unnorm', 'growth_rate',

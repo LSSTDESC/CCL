@@ -1,7 +1,8 @@
+from ..base import CCLHalosObject
 from .profiles import HaloProfile, HaloProfileHOD
 
 
-class Profile2pt(object):
+class Profile2pt(CCLHalosObject):
     """ This class implements the 1-halo 2-point correlator between
     two halo profiles.
 
@@ -21,8 +22,9 @@ class Profile2pt(object):
             in ``arXiv:1909.09102`` and ``arXiv:2102.07701``.
             Defaults to ``r_corr=0``, returning simply the product
             of the fourier profiles.
-
     """
+    __repr_attrs__ = ("r_corr",)
+
     def __init__(self, r_corr=0.):
         self.r_corr = r_corr
 

@@ -1,10 +1,10 @@
 from . import ccllib as lib
-
 from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
+from .base import CCLObject
 import numpy as np
 
 
-class Tk3D(object):
+class Tk3D(CCLObject):
     """A container for \"isotropized\" connected trispectra relevant for
     covariance matrix calculations. I.e. functions of 3 variables of the
     form :math:`T(k_1,k_2,a)`, where :math:`k_i` are wave vector moduli
@@ -85,6 +85,8 @@ class Tk3D(object):
             expected. Note that arrays will be interpolated in log space
             if `is_logt` is set to `True`.
     """
+    from ._repr import _build_string_Tk3D as __repr__
+
     def __init__(self, a_arr, lk_arr, tkk_arr=None,
                  pk1_arr=None, pk2_arr=None, extrap_order_lok=1,
                  extrap_order_hik=1, is_logt=True):
