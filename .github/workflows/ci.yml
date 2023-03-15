@@ -66,9 +66,8 @@ jobs:
           export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
           export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
 
-       # - name: Compute cache key
-       #   run: |
-       #     echo "TODAY=$(date +'%Y%m%d')" >> $GITHUB_ENV
+      - name: Set current date as environment variable
+        run: echo "TODAY=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
 
       - name: Get cached environment
         uses: actions/cache@v3
@@ -82,8 +81,6 @@ jobs:
             hashFiles('setup.py') }}--${{
             env.TODAY }}-${{
             env.CACHE_NUMBER }}
-        env:
-          TODAY=${{ date +'%Y%m%d' }}
 
       - name: Install environment packages
         if: steps.cache.outputs.cache-hit != 'true'
