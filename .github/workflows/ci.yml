@@ -11,7 +11,6 @@ on:
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
   CONDA_ENV: .github/environment.yml
-  TODAY: ${{ date +'%Y%m%d' }}
 
 jobs:
   build:
@@ -81,8 +80,10 @@ jobs:
             matrix.os }}--${{
             hashFiles(env.CONDA_ENV) }}-${{
             hashFiles('setup.py') }}--${{
-            env.TODAY }}-${{
+            $TODAY }}-${{
             env.CACHE_NUMBER }}
+        env:
+          TODAY=${{ date +'%Y%m%d' }}
 
       - name: Install environment packages
         if: steps.cache.outputs.cache-hit != 'true'
