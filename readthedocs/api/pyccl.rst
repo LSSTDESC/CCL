@@ -17,6 +17,7 @@ Submodules
    :maxdepth: 4
 
    pyccl.background
+   pyccl.base
    pyccl.bcm
    pyccl.boltzmann
    pyccl.cls
