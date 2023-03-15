@@ -59,8 +59,9 @@ tests/benchmark/codes/.ipynb_checkpoints/*
 # Ignore rope project
 .ropeproject
 
-# Ignore the automatically generated coverage file
-.coverage
+# Ignore the automatically generated coverage files
+.coverage*
+*cov.info
 
 # Ignore DS_Store file
 .DS_Store
