@@ -1,3 +1,4 @@
+sphinx==3.4.3
 sphinx_mdinclude
 numpy
 scipy
