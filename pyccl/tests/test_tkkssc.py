@@ -235,7 +235,7 @@ def test_tkkssc_counterterms_gc(kwargs):
     if kwargs['prof3'] is None:
         kwargs['prof3'] = kwargs['prof1']
     if kwargs['prof4'] is None:
-        kwargs['prof4'] = kwargs['prof3']
+        kwargs['prof4'] = kwargs['prof2']
 
     # Tk's of the clustering terms
     tkc12 = []
