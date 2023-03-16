@@ -78,6 +78,7 @@ class Profile2pt(CCLHalosObject):
 
         uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
 
+        # TODO: change to == when __eq__ is properly implemented
         if prof is prof2:
             uk2 = uk1
         else:
@@ -132,6 +133,7 @@ class Profile2ptHOD(Profile2pt):
         if not (isinstance(prof, HaloProfileHOD)
                 and isinstance(prof2, HaloProfileHOD)):
             raise TypeError("prof and prof2 should be HaloProfileHOD")
+        # TODO: change to != when __eq__ is properly implemented
         if prof is not prof2:
             raise ValueError("prof and prof2 must be equivalent")
 
