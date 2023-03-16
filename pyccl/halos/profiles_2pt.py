@@ -28,6 +28,10 @@ class Profile2pt(CCLHalosObject):
     def __init__(self, r_corr=0.):
         self.r_corr = r_corr
 
+    __eq__ = object.__eq__
+
+    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
+
     def update_parameters(self, r_corr=None):
         """ Update any of the parameters associated with this 1-halo
         2-point correlator. Any parameter set to `None` won't be updated.
@@ -71,16 +75,16 @@ class Profile2pt(CCLHalosObject):
         """
         if not isinstance(prof, HaloProfile):
             raise TypeError("prof must be of type `HaloProfile`")
+        if prof2 is None:
+            prof2 = prof
+        elif not isinstance(prof2, HaloProfile):
+            raise TypeError("prof2 must be of type `HaloProfile` or None")
 
         uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
 
-        if prof2 is None:
+        if prof == prof2:
             uk2 = uk1
         else:
-            if not isinstance(prof2, HaloProfile):
-                raise TypeError("prof2 must be of type "
-                                "`HaloProfile` or `None`")
-
             uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
 
         return uk1 * uk2 * (1 + self.r_corr)
@@ -111,7 +115,7 @@ class Profile2ptHOD(Profile2pt):
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`):
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfileHOD` or None):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
                 an auto-correlation. Note that only auto-correlations
@@ -126,11 +130,13 @@ class Profile2ptHOD(Profile2pt):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
-        if not isinstance(prof, HaloProfileHOD):
-            raise TypeError("prof must be of type `HaloProfileHOD`")
+        if prof2 is None:
+            prof2 = prof
 
-        if prof2 is not None:
-            if prof2 is not prof:
-                raise ValueError("prof2 must be the same as prof")
+        if not (isinstance(prof, HaloProfileHOD)
+                and isinstance(prof2, HaloProfileHOD)):
+            raise TypeError("prof and prof2 should be HaloProfileHOD")
+        if prof != prof2:
+            raise ValueError("prof and prof2 must be equivalent")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)

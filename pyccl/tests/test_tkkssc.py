@@ -149,10 +149,11 @@ def test_tkkssc_errors():
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof4=P2, normprof4=False)
 
     # Negative profile in logspace
-    assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,
-                 COSMO, hmc, P3, prof2=Pneg,
-                 lk_arr=np.log(k_arr), a_arr=a_arr,
-                 use_log=True)
+    with pytest.warns(ccl.CCLWarning):
+        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P3, prof2=Pneg,
+                                   prof3=P3, prof4=P3,
+                                   lk_arr=np.log(k_arr), a_arr=a_arr,
+                                   use_log=True)
 
 
 @pytest.mark.parametrize('kwargs', [
@@ -235,7 +236,7 @@ def test_tkkssc_counterterms_gc(kwargs):
     if kwargs['prof3'] is None:
         kwargs['prof3'] = kwargs['prof1']
     if kwargs['prof4'] is None:
-        kwargs['prof4'] = kwargs['prof3']
+        kwargs['prof4'] = kwargs['prof2']
 
     # Tk's of the clustering terms
     tkc12 = []

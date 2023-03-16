@@ -53,6 +53,10 @@ class HaloProfile(CCLHalosObject):
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
 
+    __eq__ = object.__eq__
+
+    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
+
     @unlock_instance(mutate=True)
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by
@@ -660,7 +664,7 @@ class HaloProfileNFW(HaloProfile):
                  cumul2d_analytic=False,
                  truncated=True):
         if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`)")
+            raise TypeError("c_M_relation must be of type `Concentration`")
 
         self.cM = c_M_relation
         self.truncated = truncated
@@ -852,7 +856,7 @@ class HaloProfileEinasto(HaloProfile):
 
     def __init__(self, c_M_relation, truncated=True, alpha='cosmo'):
         if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`)")
+            raise TypeError("c_M_relation must be of type `Concentration`")
 
         self.cM = c_M_relation
         self.truncated = truncated
@@ -967,7 +971,7 @@ class HaloProfileHernquist(HaloProfile):
                  projected_analytic=False,
                  cumul2d_analytic=False):
         if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`)")
+            raise TypeError("c_M_relation must be of type `Concentration`")
 
         self.cM = c_M_relation
         self.truncated = truncated
@@ -1483,7 +1487,7 @@ class HaloProfileHOD(HaloProfile):
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
                  a_pivot=1., ns_independent=False):
         if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`)")
+            raise TypeError("c_M_relation must be of type `Concentration`")
 
         self.cM = c_M_relation
         self.lMmin_0 = lMmin_0
