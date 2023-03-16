@@ -22,7 +22,7 @@ with UnlockInstance(P2_nogc):
     P2_nogc.is_number_counts = False
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
-Pneg = ccl.halos.HaloProfilePressureGNFW(P0=1j)  # (1j*1j = -1)
+Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
 PKC = ccl.halos.Profile2pt()
 PKCH = ccl.halos.Profile2ptHOD()
 KK = np.geomspace(1E-3, 10, 32)
@@ -149,8 +149,9 @@ def test_tkkssc_errors():
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof4=P2, normprof4=False)
 
     # Negative profile in logspace
-    with pytest.warns((ccl.CCLWarning, np.ComplexWarning)):
+    with pytest.warns(ccl.CCLWarning):
         ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P3, prof2=Pneg,
+                                   prof3=P3, prof4=P3,
                                    lk_arr=np.log(k_arr), a_arr=a_arr,
                                    use_log=True)
 
