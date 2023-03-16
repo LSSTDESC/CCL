@@ -185,6 +185,29 @@ class Tracer(CCLObject):
         # Do nothing, just initialize list of tracers
         self._trc = []
 
+    def __eq__(self, other):
+        # Check the object class.
+        if self.__class__ is not other.__class__:
+            return False
+        # If the tracer collections are empty, return early.
+        if not (self or other):
+            return True
+        # If the tracer collections are not the same length, return early.
+        if len(self._trc) != len(other._trc):
+            return False
+        # Check `der_angles` & `der_bessel` for each tracer in the collection.
+        for tr1, tr2 in zip(self._trc, other._trc):
+            if not (tr1.der_angles == tr2.der_angles
+                    and tr1.der_bessel == tr2.der_bessel):
+                return False
+        # TODO: Check the kernels. :: get_kernel() doesn't really work...
+        if not np.allclose(
+                self.get_kernel(), other.get_kernel(),
+                atol=0, rtol=1e-12):
+            return False
+        # TODO: Check the transfer functions.
+        return True
+
     def __bool__(self):
         return bool(self._trc)
 

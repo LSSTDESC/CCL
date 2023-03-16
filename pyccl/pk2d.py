@@ -130,17 +130,34 @@ class Pk2D(CCLObject):
                                                         int(is_logp), status)
         check(status, cosmo=cosmo)
 
+    def __eq__(self, other):
+        # Check the object class.
+        if self.__class__ is not other.__class__:
+            return False
+        # If the objects contain no data, return early.
+        if not (self or other):
+            return True
+        # Check extrapolation orders.
+        if not (self.extrap_order_lok == other.extrap_order_lok
+                and self.extrap_order_hik == other.extrap_order_hik):
+            return False
+        # Check the individual splines.
+        a1, lk1, pk1 = self.get_spline_arrays()
+        a2, lk2, pk2 = other.get_spline_arrays()
+        return ((a1 == a2).all() and (lk1 == lk2).all()
+                and np.allclose(pk1, pk2, atol=0, rtol=1e-12))
+
     @property
     def has_psp(self):
         return 'psp' in vars(self)
 
     @property
     def extrap_order_lok(self):
-        return self.psp.extrap_order_lok
+        return self.psp.extrap_order_lok if self else None
 
     @property
     def extrap_order_hik(self):
-        return self.psp.extrap_order_hik
+        return self.psp.extrap_order_hik if self else None
 
     @classmethod
     def from_model(cls, cosmo, model):

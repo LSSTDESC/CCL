@@ -84,7 +84,7 @@ class MassDef(CCLHalosObject):
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
-    __repr_attrs__ = ("name",)
+    __repr_attrs__ = __eq_attrs__ = ("name",)
 
     def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense

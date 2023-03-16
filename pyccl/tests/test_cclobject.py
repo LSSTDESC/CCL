@@ -2,23 +2,21 @@ import pytest
 import numpy as np
 import pyccl as ccl
 import functools
+import copy
 
 
 def test_fancy_repr():
     # Test fancy-repr controls.
-    cosmo1 = ccl.CosmologyVanillaLCDM()
-    cosmo2 = ccl.CosmologyVanillaLCDM()
+    cosmo = ccl.CosmologyVanillaLCDM()
 
     ccl.CCLObject._fancy_repr.disable()
-    assert repr(cosmo1) == object.__repr__(cosmo1)
-    assert cosmo1 != cosmo2
+    assert repr(cosmo) == object.__repr__(cosmo)
 
     ccl.CCLObject._fancy_repr.enable()
-    assert repr(cosmo1) != object.__repr__(cosmo1)
-    assert cosmo1 == cosmo2
+    assert repr(cosmo) != object.__repr__(cosmo)
 
     with pytest.raises(AttributeError):
-        cosmo1._fancy_repr.disable()
+        cosmo._fancy_repr.disable()
 
     with pytest.raises(AttributeError):
         ccl.Cosmology._fancy_repr.disable()
@@ -34,13 +32,12 @@ def test_CCLObject():
     extras = {"camb": {"halofit_version": "mead2020", "HMCode_logT_AGN": 7.8}}
     kwargs = {"transfer_function": "bbks",
               "matter_power_spectrum": "emu",
-              "z_mg": np.ones(10),
-              "df_mg": np.ones(10),
               "extra_parameters": extras}
     COSMO1 = ccl.CosmologyVanillaLCDM(**kwargs)
     COSMO2 = ccl.CosmologyVanillaLCDM(**kwargs)
     assert COSMO1 == COSMO2
-    kwargs["df_mg"] *= 2
+    kwargs = copy.deepcopy(kwargs)
+    kwargs["extra_parameters"]["camb"]["halofit_version"] = "mead2020_feedback"
     COSMO2 = ccl.CosmologyVanillaLCDM(**kwargs)
     assert COSMO1 != COSMO2
 
