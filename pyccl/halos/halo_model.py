@@ -426,6 +426,7 @@ class HMCalculator(CCLHalosObject):
         self._get_ingredients(cosmo, a, False)
         uk12 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                       prof2=prof2, mass_def=self._mdef).T
+        # TODO: change to == when __eq__ is properly implemented
         if (prof3 is prof1) and (prof4 is prof2):
             # 4pt approximation of the same profile
             uk34 = uk12
