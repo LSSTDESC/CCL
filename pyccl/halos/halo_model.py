@@ -426,8 +426,7 @@ class HMCalculator(CCLHalosObject):
         self._get_ingredients(cosmo, a, False)
         uk12 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                       prof2=prof2, mass_def=self._mdef).T
-        # TODO: change to == when __eq__ is properly implemented
-        if (prof3 is prof1) and (prof4 is prof2):
+        if (prof1, prof2) == (prof3, prof4):
             # 4pt approximation of the same profile
             uk34 = uk12
         else:
@@ -667,8 +666,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         else:
             norm1 = 1
         # Compute second profile normalization
-        # TODO: change to == when __eq__ is properly implemented
-        if prof2 is prof:
+        if prof2 == prof:
             norm2 = norm1
         else:
             if normprof2:
@@ -682,8 +680,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
 
             # Compute second bias factor
-            # TODO: change to == when __eq__ is properly implemented
-            if prof2 is prof:
+            if prof2 == prof:
                 i11_2 = i11_1
             else:
                 i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
@@ -915,20 +912,17 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
         # Compute profile normalizations
         norm1 = get_norm(normprof1, prof1, aa)
         # Compute second profile normalization
-        # TODO: change to == when __eq__ is properly implemented
-        if prof2 is prof1:
+        if prof2 == prof1:
             norm2 = norm1
         else:
             norm2 = get_norm(normprof2, prof2, aa)
 
-        # TODO: change to == when __eq__ is properly implemented
-        if prof3 is prof1:
+        if prof3 == prof1:
             norm3 = norm1
         else:
             norm3 = get_norm(normprof3, prof3, aa)
 
-        # TODO: change to == when __eq__ is properly implemented
-        if prof4 is prof2:
+        if prof4 == prof2:
             norm4 = norm2
         else:
             norm4 = get_norm(normprof4, prof4, aa)
@@ -1354,24 +1348,21 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         norm1 = get_norm(normprof1, prof1, aa)
         i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof1)
         # Compute second profile normalization
-        # TODO: change to == when __eq__ is properly implemented
-        if prof2 is prof1:
+        if prof2 == prof1:
             norm2 = norm1
             i11_2 = i11_1
         else:
             norm2 = get_norm(normprof2, prof2, aa)
             i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
 
-        # TODO: change to == when __eq__ is properly implemented
-        if prof3 is prof1:
+        if prof3 == prof1:
             norm3 = norm1
             i11_3 = i11_1
         else:
             norm3 = get_norm(normprof3, prof3, aa)
             i11_3 = hmc.I_1_1(cosmo, k_use, aa, prof3)
 
-        # TODO: change to == when __eq__ is properly implemented
-        if prof4 is prof2:
+        if prof4 == prof2:
             norm4 = norm2
             i11_4 = i11_2
         else:
@@ -1380,8 +1371,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
 
         i12_12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2)
 
-        # TODO: change to == when __eq__ is properly implemented
-        if (prof3 is prof1) and (prof4 is prof2):
+        if (prof1, prof2) == (prof3, prof4):
             i12_34 = i12_12
         else:
             i12_34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof4)
@@ -1404,8 +1394,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             if prof1.is_number_counts:
                 b1 = i11_1 * norm1
 
-            # TODO: change to == when __eq__ is properly implemented
-            if prof2 is prof1:
+            if prof2 == prof1:
                 b2 = b1
             elif prof2.is_number_counts:
                 b2 = i11_2 * norm2
@@ -1414,22 +1403,18 @@ def halomod_Tk3D_SSC(cosmo, hmc,
 
         if any([p.is_number_counts for p in [prof3, prof4]]):
             b3 = b4 = np.zeros_like(k_use)
-            # TODO: change to == when __eq__ is properly implemented
-            if ((prof3 is prof1) and (prof4 is prof2) and
-                    (prof34_2pt is prof12_2pt)):
+            if (prof1, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
                 i02_34 = i02_12
             else:
                 i02_34 = hmc.I_0_2(cosmo, k_use, aa, prof3, prof34_2pt, prof4)
             P_34 = norm34 * (pk * i11_3 * i11_4 + i02_34)
 
-            # TODO: change to == when __eq__ is properly implemented
-            if prof3 is prof1:
+            if prof3 == prof1:
                 b3 = b1
             elif prof3.is_number_counts:
                 b3 = i11_3 * norm3
 
-            # TODO: change to == when __eq__ is properly implemented
-            if prof4 is prof2:
+            if prof4 == prof2:
                 b4 = b2
             elif prof4.is_number_counts:
                 b4 = i11_4 * norm4

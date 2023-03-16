@@ -28,6 +28,17 @@ class Profile2pt(CCLHalosObject):
     def __init__(self, r_corr=0.):
         self.r_corr = r_corr
 
+    __eq__ = object.__eq__
+
+    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
+
+    # def __eq__(self, other):
+    #     return self is other
+
+    # def __hash__(self):
+    #     # TODO: remove once __eq__ is replaced.
+    #     return id(self)
+
     def update_parameters(self, r_corr=None):
         """ Update any of the parameters associated with this 1-halo
         2-point correlator. Any parameter set to `None` won't be updated.
@@ -78,8 +89,7 @@ class Profile2pt(CCLHalosObject):
 
         uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
 
-        # TODO: change to == when __eq__ is properly implemented
-        if prof is prof2:
+        if prof == prof2:
             uk2 = uk1
         else:
             uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
@@ -133,8 +143,7 @@ class Profile2ptHOD(Profile2pt):
         if not (isinstance(prof, HaloProfileHOD)
                 and isinstance(prof2, HaloProfileHOD)):
             raise TypeError("prof and prof2 should be HaloProfileHOD")
-        # TODO: change to != when __eq__ is properly implemented
-        if prof is not prof2:
+        if prof != prof2:
             raise ValueError("prof and prof2 must be equivalent")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)

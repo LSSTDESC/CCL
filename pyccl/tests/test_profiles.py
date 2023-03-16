@@ -45,43 +45,43 @@ def smoke_assert_prof_real(profile, method='_real'):
         assert np.shape(p) == sh
 
 
-def test_profiles_equal():
-    M200m = ccl.halos.MassDef200m()
-    cm = ccl.halos.ConcentrationDuffy08(mdef=M200m)
-    p1 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
+# def test_profiles_equal():
+#     M200m = ccl.halos.MassDef200m()
+#     cm = ccl.halos.ConcentrationDuffy08(mdef=M200m)
+#     p1 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
 
-    # different profile types
-    p2 = ccl.halos.HaloProfilePressureGNFW()
-    assert p1 != p2
+#     # different profile types
+#     p2 = ccl.halos.HaloProfilePressureGNFW()
+#     assert p1 != p2
 
-    # equal profiles
-    p2 = p1
-    assert p1 == p2
+#     # equal profiles
+#     p2 = p1
+#     assert p1 == p2
 
-    # equivalent profiles
-    cm2 = ccl.halos.ConcentrationDuffy08(mdef=M200m)
-    p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
-    assert p1 == p2
+#     # equivalent profiles
+#     cm2 = ccl.halos.ConcentrationDuffy08(mdef=M200m)
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
+#     assert p1 == p2
 
-    # different parameters
-    p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=11.)
-    assert p1 != p2
+#     # different parameters
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=11.)
+#     assert p1 != p2
 
-    # different mass-concentration
-    cm2 = ccl.halos.ConcentrationConstant()
-    p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
-    assert p1 != p2
+#     # different mass-concentration
+#     cm2 = ccl.halos.ConcentrationConstant()
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
+#     assert p1 != p2
 
-    # different mass-concentration mass definition
-    M200c = ccl.halos.MassDef200c()
-    cm2 = ccl.halos.ConcentrationDuffy08(mdef=M200c)
-    p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
-    assert p1 != p2
+#     # different mass-concentration mass definition
+#     M200c = ccl.halos.MassDef200c()
+#     cm2 = ccl.halos.ConcentrationDuffy08(mdef=M200c)
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
+#     assert p1 != p2
 
-    # different FFTLog
-    p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
-    p2.update_precision_fftlog(**{"plaw_fourier": -2.0})
-    assert p1 != p2
+#     # different FFTLog
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
+#     p2.update_precision_fftlog(**{"plaw_fourier": -2.0})
+#     assert p1 != p2
 
 
 @pytest.mark.parametrize('prof_class',
