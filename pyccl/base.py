@@ -5,7 +5,8 @@ import numpy as np
 import warnings
 from inspect import signature, Parameter
 from _thread import RLock
-from abc import ABCMeta
+from abc import ABC
+from .errors import CCLDeprecationWarning
 
 
 def _to_hashable(obj):
@@ -25,13 +26,11 @@ def _to_hashable(obj):
         elif isinstance(obj, dict):
             # Dictionaries: Build a tuple from key-value pairs,
             # where all values are converted to hashables.
-            out = dict.fromkeys(obj)
-            for key, value in obj.items():
-                out[key] = _to_hashable(value)
+            out = {key: _to_hashable(value) for key, value in obj.items()}
             # Sort unordered dictionaries for hash consistency.
             if isinstance(obj, OrderedDict):
-                return tuple(obj.items())
-            return tuple(sorted(obj.items()))
+                return tuple(out.items())
+            return tuple(sorted(out.items()))
 
         else:
             # Iterables: Build a tuple from values converted to hashables.
@@ -52,9 +51,10 @@ def hash_(obj):
     return digest
 
 
-class _ClassPropertyMeta(type):
-    """Implement `property` to a `classmethod`."""
-    # TODO: in py39+ decorators `classmethod` and `property` can be combined
+class _CachingMeta(type):
+    """Implement ``property`` to a ``classmethod`` for ``Caching``."""
+    # NOTE: Only in 3.8 < py < 3.11 can `classmethod` wrap `property`.
+    # https://docs.python.org/3.11/library/functions.html#classmethod
     @property
     def maxsize(cls):
         return cls._maxsize
@@ -90,7 +90,7 @@ class _ClassPropertyMeta(type):
             func.cache_info.policy = value
 
 
-class Caching(metaclass=_ClassPropertyMeta):
+class Caching(metaclass=_CachingMeta):
     """Infrastructure to hold cached objects.
 
     Caching is used for pre-computed objects that are expensive to compute.
@@ -102,7 +102,7 @@ class Caching(metaclass=_ClassPropertyMeta):
         policy (``'fifo'``, ``'lru'``, ``'lfu'``):
             Cache retention policy.
     """
-    _enabled: bool = True
+    _enabled: bool = False
     _policies: list = ['fifo', 'lru', 'lfu']
     _default_maxsize: int = 128   # class default maxsize
     _default_policy: str = 'lru'  # class default policy
@@ -152,9 +152,7 @@ class Caching(metaclass=_ClassPropertyMeta):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             if not cls._enabled:
-                # Cache emulators even when caching is disabled.
-                if not func.__name__ == "_load_emu":
-                    return func(*args, **kwargs)
+                return func(*args, **kwargs)
 
             key = cls._get_key(func, *args, **kwargs)
             # shorthand access
@@ -305,54 +303,6 @@ class CachedObject:
         self.counter = 0
 
 
-def auto_assign(func, sig):
-    """Decorator to automatically assign all parameters as instance attributes.
-    This ought to be applied on constructor methods.
-
-    Arguments:
-        func (``function``):
-            Function which takes the instance as its first argument.
-            All function arguments will be assigned as attributes of the
-            instance.
-        sig (``inspect.Signature``):
-            The signature of the constructor this decorator is applied to.
-            This is needed to distinguish between parent class methods.
-    """
-# TODO: Replace body of `auto_assign` with this (faster) code for CCLv3.
-#     @functools.wraps(func)
-#     def wrapper(self, *args, **kwargs):
-#         bound = sig.bind_partial(self, *args, **kwargs)
-#         bound.apply_defaults()
-#         bound.arguments.pop("self")
-#         for name, value in bound.arguments.items():
-#             setattr(self, name, value)
-#         # func may now override the attributes we just set
-#         func(self, *args, **kwargs)
-#     return wrapper
-
-    _, *params = [n for n in sig.parameters]
-    _, *defaults = [p.default for p in sig.parameters.values()]
-
-    @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        # collect all input in a dictionary
-        dic = {**dict(zip(params, args)), **kwargs}
-
-        # assign the declared parameters
-        for param, value in dic.items():
-            setattr(self, param, value)
-
-        # assign the undelcared parameters with default values
-        for param, default in zip(reversed(params), reversed(defaults)):
-            if not hasattr(self, param):
-                setattr(self, param, default)
-
-        # func may now override the attributes we just set
-        func(self, *args, **kwargs)
-
-    return wrapper
-
-
 class ObjectLock:
     """Control the lock state (immutability) of a ``CCLObject``."""
     _locked: bool = False
@@ -396,7 +346,7 @@ class UnlockInstance:
             representation is automatically deleted.
     """
 
-    def __init__(self, instance, mutate=True):
+    def __init__(self, instance, *, mutate=True):
         self.instance = instance
         self.mutate = mutate
         # Define these attributes for easy access.
@@ -444,33 +394,90 @@ class UnlockInstance:
             # Lock the instance on exit.
             self.object_lock.lock()
 
+    @classmethod
+    def unlock_instance(cls, func=None, *, argv=0, mutate=True):
+        """Decorator that temporarily unlocks an instance of CCLObject.
 
-def unlock_instance(func=None, *, argv=0, mutate=True):
-    """Decorator that temporarily unlocks an instance of CCLObject.
+        Arguments:
+            func (``function``):
+                Function which changes one of its ``CCLObject`` arguments.
+            argv (``int``):
+                Which argument should be unlocked. Defaults to the first one.
+                If not a ``CCLObject`` the decorator will do nothing.
+            mutate (``bool``):
+                If after the function ``instance_old != instance_new``, the
+                instance is mutated. If ``True``, the representation of the
+                object will be reset.
+        """
+        if func is None:
+            # called with parentheses
+            return functools.partial(cls.unlock_instance, argv=argv,
+                                     mutate=mutate)
 
-    Arguments:
-        func (``function``):
-            Function which changes one of its ``CCLObject`` arguments.
-        argv (``int``):
-            Which argument should be unlocked. Defaults to the first argument.
-        mutate (``bool``):
-            If after the function ``instance_old != instance_new``, the
-            instance is mutated. If ``True``, the representation of the
-            object will be reset.
-    """
-    if func is None:
-        # called with parentheses
-        return functools.partial(unlock_instance, argv=argv, mutate=mutate)
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Pick argument from list of `args` or `kwargs` as needed.
+            size = len(args)
+            arg = args[argv] if size > argv else list(kwargs.values())[argv-size]  # noqa
+            with UnlockInstance(arg, mutate=mutate):
+                out = func(*args, **kwargs)
+            return out
+        return wrapper
 
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        # Pick argument from list of `args` or `kwargs` as needed.
-        size = len(args)
-        arg = args[argv] if size > argv else list(kwargs.values())[argv-size]
-        with UnlockInstance(arg, mutate=mutate):
-            out = func(*args, **kwargs)
-        return out
-    return wrapper
+    @classmethod
+    def Funlock(cls, cl, name, mutate: bool):
+        """Allow an instance to change or mutate when `name` is called."""
+        func = vars(cl).get(name)
+        if func is not None:
+            newfunc = cls.unlock_instance(mutate=mutate)(func)
+            setattr(cl, name, newfunc)
+
+
+unlock_instance = UnlockInstance.unlock_instance
+
+
+class FancyRepr:
+    """Controls the usage of fancy ``__repr__` for ``CCLObjects."""
+    _enabled: bool = True
+    _classes: dict = {}
+
+    def __init__(self):
+        # This is only a framework class, we do not instantiate it.
+        raise NotImplementedError
+
+    @classmethod
+    def add(cls, cl):
+        """Add class to the internal dictionary of fancy-repr classes."""
+        cls._classes[cl] = cl.__repr__
+
+    @classmethod
+    def enable(cls):
+        """Enable fancy representations if they exist."""
+        for cl, method in cls._classes.items():
+            FancyRepr.bind_and_replace(cl, method)
+        cls._enabled = True
+
+    @classmethod
+    def disable(cls):
+        """Disable fancy representations and fall back to Python defaults."""
+        for cl in cls._classes.keys():
+            cl.__repr__ = object.__repr__
+        cls._enabled = False
+
+    @classmethod
+    def bind_and_replace(cls, cl, method):
+        """Bind ``method`` to class ``cl``, and replace original with default.
+        This helper only works for binding and replacing ``__repr__`` methods
+        for ``CCLObjects``.
+        """
+        # If the class defines a custom `__repr__`, this will be the new
+        # `_repr` (which is cached). Decorator `cached_property` requires
+        # that `__set_name__` is called on it.
+        bmethod = functools.cached_property(method)
+        cl._repr = bmethod
+        bmethod.__set_name__(cl, "_repr")
+        # Fall back to using `__ccl_repr__` from `CCLObject`.
+        cl.__repr__ = cl.__ccl_repr__
 
 
 # +==========================================================================+
@@ -483,8 +490,6 @@ def deprecated(new_function=None):
     pass it as `new_function`.
     """
     def decorator(func):
-        from .errors import CCLDeprecationWarning
-
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             s = f"The function {func.__qualname__} is deprecated."
@@ -547,28 +552,27 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        from .errors import CCLDeprecationWarning
+        # Custom definition of `isinstance` to avoic cyclic imports.
+        is_instance = lambda obj, cl: cl in obj.__class__.__name__  # noqa
 
         # API compatibility with `cosmo` as a first argument in `halos`.
-        from .core import Cosmology
         catch_cosmo = args[1] if len(args) > 1 else kwargs.get("cosmo")
         if ("pyccl.halos" in func.__module__
                 and func.__name__ == "__init__"
-                and isinstance(catch_cosmo, Cosmology)):
+                and is_instance(catch_cosmo, "Cosmology")):
             warnings.warn(
                 f"Use of argument `cosmo` has been deprecated in {name}. "
                 "This will trigger an exception in the future.",
                 CCLDeprecationWarning)
             # `cosmo` may be in `args` or in `kwargs`, so we check both.
             args = tuple(
-                item for item in args if not isinstance(item, Cosmology))
+                item for item in args if not is_instance(item, "Cosmology"))
             kwargs.pop("cosmo", None)
 
         # API compatibility for reordered positionals in `fourier_2pt`.
-        from .halos.profiles import HaloProfile
         first_arg = args[1] if len(args) > 1 else None
         if (func.__name__ == "fourier_2pt"
-                and isinstance(first_arg, HaloProfile)):
+                and is_instance(first_arg, "HaloProfile")):
             api = dict(zip(["prof", "cosmo", "k", "M", "a"], args[1: 6]))
             args = (args[0],) + args[6:]  # discard args [1-5]
             kwargs.update(api)            # they are now kwargs
@@ -662,8 +666,6 @@ def deprecate_attr(getter=None, *, pairs=[]):
 
     @functools.wraps(getter)
     def wrapper(cls, name):
-        from .errors import CCLDeprecationWarning
-
         if name in rename:
             new_name = rename[name]
             class_name = cls.__class__.__name__
@@ -676,57 +678,15 @@ def deprecate_attr(getter=None, *, pairs=[]):
     return wrapper
 
 
-class CCLObjectMeta(ABCMeta):
-    """Metaclass for ``CCLObject``.
+class _DisableGetMethod:
+    """Descriptor that disables the dot (``getattr``)."""
 
-    Enables linking of abstract methods, if ``__linked_abstractmethods__``
-    is provided for the base class. Subclasses that define either of
-    the linked methods will satisfy the abstraction requirement.
-
-    Example:
-        Subclasses of the following class can be instantiated if either
-        ``method1`` or ``method2`` (and ``another_method``) are defined.
-        Otherwise, it falls back to normal ``abc.ABCMeta`` behavior:
-
-        >>> class MyBaseClass(metaclass=ABCMeta):
-                __linked_abstractmethods__ = 'method1', 'method2'
-                @abstractmethod
-                def method1(self):
-                    ...
-                @abstractmethod
-                def method2(self):
-                    ...
-                @abstractmethod
-                def another_method(self):
-                    ...
-    """
-
-    def __new__(mcls, name, bases, clsdict):
-        """Class factory for ``CCLObject``.
-
-        .. note:: Naming convention: ``mcls`` -- metaclass, ``cls`` -- class
-        """
-        cls = super().__new__(mcls, name, bases, clsdict)
-
-        # Check if abstraction criteria are satisfied.
-        if hasattr(cls, "__linked_abstractmethods__"):
-            # Tap into class creation and remove all linked abstract methods
-            # from the `__abstractmethods__` hook.
-            linked = cls.__linked_abstractmethods__
-
-            def is_abstract(cls, method):
-                # Check if the `method` of class `cls` is abstract.
-                meth = getattr(cls, method)
-                return getattr(meth, "__isabstractmethod__", False)
-
-            if not all([is_abstract(cls, method) for method in linked]):
-                abstracts = set(cls.__abstractmethods__) - set(linked)
-                cls.__abstractmethods__ = frozenset(abstracts)
-
-        return cls
+    def __get__(self, instance, owner):
+        raise AttributeError(
+            "To access fancy-repr info use `CCLObject._fancy_repr`.")
 
 
-class CCLObject(metaclass=CCLObjectMeta):
+class CCLObject(ABC):
     """Base for CCL objects.
 
     All CCL objects inherit ``__eq__`` and ``__hash__`` methods from here.
@@ -767,6 +727,7 @@ class CCLObject(metaclass=CCLObjectMeta):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
+    _fancy_repr = FancyRepr
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -774,33 +735,15 @@ class CCLObject(metaclass=CCLObjectMeta):
         # 1. Store the signature of the constructor on import.
         cls.__signature__ = signature(cls.__init__)
 
-        # 2. Assign the arguments of the constructor if needed.
-        if (hasattr(cls, "__init_attrs__")
-                and cls.__init_attrs__
-                and "__init__" in vars(cls)):
-            cls.__init__ = auto_assign(cls.__init__, sig=cls.__signature__)
-
-        # 3. Replace repr (if implemented) with its cached version.
+        # 2. Replace repr (if implemented) with its cached version.
+        cls._fancy_repr = _DisableGetMethod()
         if "__repr__" in vars(cls):
-            # If the class defines a custom `__repr__`, this will be the new
-            # `_repr` (which is cached). Decorator `cached_property` requires
-            # that `__set_name__` is called on it.
-            bmethod = functools.cached_property(cls.__repr__)
-            cls._repr = bmethod
-            bmethod.__set_name__(cls, "_repr")
-            # Fall back to using `__ccl_repr__` from `CCLObject`.
-            cls.__repr__ = cls.__ccl_repr__
+            CCLObject._fancy_repr.add(cls)
+            FancyRepr.bind_and_replace(cls, cls.__repr__)
 
-        # 4. Unlock instance on specific methods.
-        def Funlock(cls, name, mutate):
-            # Allow instance to change or mutate if method `name` is called.
-            func = vars(cls).get(name)
-            if func is not None:
-                newfunc = unlock_instance(mutate=mutate)(func)
-                setattr(cls, name, newfunc)
-
-        Funlock(cls, "__init__", False)
-        Funlock(cls, "update_parameters", True)
+        # 3. Unlock instance on specific methods.
+        UnlockInstance.Funlock(cls, "__init__", mutate=False)
+        UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
 
     def __new__(cls, *args, **kwargs):
         # Populate every instance with an `ObjectLock` as attribute.
@@ -847,18 +790,28 @@ class CCLObject(metaclass=CCLObjectMeta):
 
 
 class CCLHalosObject(CCLObject):
-    """Base for halo objects. Automatically assign all ``__init__``
-    parameters as attributes.
+    """Base for halo objects. Representations for instances are built from a
+    list of attribute names specified as a class variable in ``__repr_attrs__``
+    (acting as a hook).
+
+    Example:
+        The representation (also hash) of instances of the following class
+        is built based only on the attributes specified in ``__repr_attrs__``:
+
+        >>> class MyClass(CCLHalosObject):
+            __repr_attrs__ = ("a", "b", "other")
+            def __init__(self, a=1, b=2, c=3, d=4, e=5):
+                self.a = a
+                self.b = b
+                self.c = c
+                self.other = d + e
+
+        >>> repr(MyClass(6, 7, 8, 9, 10))
+            <__main__.MyClass>
+                a = 6
+                b = 7
+                other = 19
     """
-    __init_attrs__ = True
-
-    def __repr__(self):
-        # If all the passed parameters have been assigned as instance
-        # attributes during construction, we can use these parameters
-        # to build a unique string for each instance.
-        from ._repr import _build_string_from_init_attrs
-        return _build_string_from_init_attrs(self)
-
     # Decorate the default `__getattribute__` to preserve API following
     # the name changes of the specified instance attrbiutes.
     # TODO: remove for CCLv3.
@@ -869,3 +822,10 @@ class CCLHalosObject(CCLObject):
                ('_massfunc', 'mass_function'),
                ('_hbias', 'halo_bias')]
     )(super.__getattribute__)
+
+    def __repr__(self):
+        # Build string from specified `__repr_attrs__` or use Python's default.
+        if hasattr(self.__class__, "__repr_attrs__"):
+            from ._repr import _build_string_from_attrs
+            return _build_string_from_attrs(self)
+        return object.__repr__(self)

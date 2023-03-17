@@ -17,6 +17,7 @@ Submodules
    :maxdepth: 4
 
    pyccl.background
+   pyccl.base
    pyccl.bcm
    pyccl.boltzmann
    pyccl.cls
@@ -28,6 +29,7 @@ Submodules
    pyccl.haloprofile
    pyccl.massfunction
    pyccl.neutrinos
+   pyccl.parameters
    pyccl.pk2d
    pyccl.power
    pyccl.pyutils

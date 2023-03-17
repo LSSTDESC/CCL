@@ -1,13 +1,13 @@
 import pytest
 import numpy as np
-from . import pyccl as ccl
+import pyccl as ccl
 
 COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
                       h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,
                       w0=-1, wa=0, T_CMB=2.7)
 
 
-def test_mdef_eq():
+def test_mass_def_eq():
     hmd_200m = ccl.halos.MassDef200m()
     hmd_200m_b = ccl.halos.MassDef(200, 'matter')
     assert hmd_200m == hmd_200m_b

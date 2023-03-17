@@ -5,10 +5,7 @@ from ._types import error_types
 from .parameters import spline_params
 from .errors import CCLError
 import numpy as np
-try:
-    from collections.abc import Iterable
-except ImportError:  # pragma: no cover  (for py2.7)
-    from collections import Iterable
+from collections.abc import Iterable
 
 NoneArr = np.array([])
 
@@ -25,6 +22,7 @@ extrap_types = {'none': lib.f1d_extrap_0,
 
 def check(status, cosmo=None):
     """Check the status returned by a ccllib function.
+
     Args:
         status (int or :obj:`~pyccl.core.error_types`):
             Flag or error describing the success of a function.
@@ -113,8 +111,8 @@ def debug_mode(debug):
 
 
 def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument, with a cosmology dependence.
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with one vector argument, with a cosmology dependence.
 
     Args:
         fn (callable): Function with a single argument.
@@ -160,8 +158,9 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
 
 
 def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument and one integer argument, with a cosmology dependence.
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with one vector argument and one integer argument,
+    with a cosmology dependence.
 
     Args:
         fn (callable): Function with a single argument.
@@ -206,8 +205,9 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
 
 
 def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL functions with
-    one vector argument and two float arguments, with a cosmology dependence.
+    """Generic wrapper to allow vectorized (1D array) access to CCL
+    functions with one vector argument and two float arguments, with
+    a cosmology dependence.
 
     Args:
         fn (callable): Function with a single argument.
@@ -622,3 +622,19 @@ def _get_spline3d_arrays(gsl_spline, length):
     check(status)
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))
+
+
+def check_openmp_version():
+    """Return the OpenMP specification release date.
+    Return 0 if OpenMP is not working.
+    """
+
+    return lib.openmp_version()
+
+
+def check_openmp_threads():
+    """Returns the number of processors available to the device.
+    Return 0 if OpenMP is not working.
+    """
+
+    return lib.openmp_threads()

@@ -1,3 +1,5 @@
+import warnings
+from .errors import CCLDeprecationWarning
 from . import ccllib as lib
 
 
@@ -33,9 +35,13 @@ class CCLParameters:
             if key == "this":
                 return object.__setattr__(self, key, value)
             name = self.__class__.__name__
-            raise AttributeError(
-                f"Direct assignment of {name} is not supported. "
-                f"Set via `pyccl.{name}.{key}` before instantiation.")
+            # TODO: Deprecation cycle for fully immutable Cosmology objects.
+            # raise AttributeError(f"Direct assignment in {name} not supported.")  # noqa
+            warnings.warn(
+                f"Direct assignment of {name} is deprecated "
+                "and an error will be raised in the next CCL release. "
+                f"Set via `pyccl.{name}.{key}` before instantiation.",
+                CCLDeprecationWarning)
             object.__setattr__(self, key, value)
 
         cls._instance.__class__.__setattr__ = _new_setattr

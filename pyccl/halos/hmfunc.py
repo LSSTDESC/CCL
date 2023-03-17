@@ -1,8 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import omega_x
-from .massdef import MassDef, MassDef200m, MassDef200c
-from ..emulator import Emulator, EmulatorObject
+from .massdef import MassDef, MassDef200m
 from ..parameters import physical_constants
 from ..base import CCLHalosObject, deprecated, warn_api
 import numpy as np
@@ -25,10 +24,6 @@ class MassFunc(CCLHalosObject):
     * Subclasses implementing analytical mass function parametrizations
       can be created by overriding the ``_get_fsigma`` method.
 
-    * Subclasses implementing emulators can be created by overriding
-      the ``get_mass_function`` method, via multiple inheritance with
-      ``pyccl.emulator.Emulator``.
-
     * Subclasses may have particular implementations of
       ``_check_mass_def_strict`` to ensure consistency of the halo mass
       definition.
@@ -41,7 +36,7 @@ class MassFunc(CCLHalosObject):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    __linked_abstractmethods__ = "_get_fsigma", "get_mass_function"
+    __repr_attrs__ = ("mass_def", "mass_def_strict",)
 
     @warn_api
     def __init__(self, *, mass_def=None, mass_def_strict=True):
@@ -54,22 +49,13 @@ class MassFunc(CCLHalosObject):
                                  " Delta = %s, " % (mass_def.Delta) +
                                  " rho = " + mass_def.rho_type)
             self.mass_def = mass_def
-        else:
-            self._default_mass_def()
         self._setup()
-
-    @abstractmethod
-    def _default_mass_def(self):
-        """ Assigns a default mass definition for this object if
-        none is passed at initialization.
-        """
 
     def _setup(self):
         """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
         constructor call.
         """
-        pass
 
     def _check_mass_def_strict(self, mass_def):
         return False
@@ -131,7 +117,6 @@ class MassFunc(CCLHalosObject):
             return delta * om_this / om_matt
 
     @warn_api(pairs=[("mdef_other", "mass_def_other")])
-    @abstractmethod
     def get_mass_function(self, cosmo, M, a, *, mass_def_other=None):
         """ Returns the mass function for input parameters.
 
@@ -216,18 +201,17 @@ class MassFuncPress74(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
+            The default is 'fof'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Press74'
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self):
         self.norm = np.sqrt(2/np.pi)
@@ -252,23 +236,23 @@ class MassFuncSheth99(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
+            The default is 'fof'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
         use_delta_c_fit (bool): if True, use delta_crit given by
             the fit of Nakamura & Suto 1997. Otherwise use
             delta_crit = 1.68647.
     """
+    __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = 'Sheth99'
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True,
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self):
         self.A = 0.21615998645
@@ -300,18 +284,17 @@ class MassFuncJenkins01(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
+            The default is 'fof'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Jenkins01'
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self):
         self.A = 0.315
@@ -335,25 +318,22 @@ class MassFuncTinker08(MassFunc):
             a mass definition object.
             this parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Tinker08'
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef200m()
 
     def _pd(self, ld):
         return 10.**(-(0.75/(ld - 1.8750612633))**1.2)
 
     def _setup(self):
-        from scipy.interpolate import interp1d
-
         delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
                           1200.0, 1600.0, 2400.0, 3200.0])
         alpha = np.array([0.186, 0.200, 0.212, 0.218, 0.248,
@@ -390,24 +370,21 @@ class MassFuncDespali16(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts any SO masses.
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
         ellipsoidal (bool): use the ellipsoidal parametrization.
     """
+    __repr_attrs__ = ("mass_def", "mass_def_strict", "ellipsoidal",)
     name = 'Despali16'
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True,
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True,
                  ellipsoidal=False):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
         self.ellipsoidal = ellipsoidal
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef200m()
-
-    def _setup(self):
-        pass
 
     def _check_mass_def_strict(self, mass_def):
         if mass_def.Delta == 'fof':
@@ -455,20 +432,18 @@ class MassFuncTinker10(MassFunc):
         norm_all_z (bool): should we normalize the mass function
             at z=0 or at all z?
     """
+    __repr_attrs__ = ("mass_def", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True,
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True,
                  norm_all_z=False):
         self.norm_all_z = norm_all_z
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
-    def _default_mass_def(self):
-        self.mass_def = MassDef200m()
-
     def _setup(self):
-        from scipy.interpolate import interp1d
-
         delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
                           1200.0, 1600.0, 2400.0, 3200.0])
         alpha = np.array([0.368, 0.363, 0.385, 0.389, 0.393,
@@ -528,23 +503,23 @@ class MassFuncBocquet16(MassFunc):
             a mass definition object.
             this parametrization accepts SO masses with
             Delta = 200 (matter, critical) and 500 (critical).
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
         hydro (bool): if `False`, use the parametrization found
             using dark-matter-only simulations. Otherwise, include
             baryonic effects (default).
     """
+    __repr_attrs__ = ("mass_def", "mass_def_strict", "hydro",)
     name = 'Bocquet16'
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True,
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True,
                  hydro=True):
         self.hydro = hydro
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef200m()
 
     def _setup(self):
         if int(self.mass_def.Delta) == 200:
@@ -668,6 +643,7 @@ class MassFuncWatson13(MassFunc):
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts fof and any SO masses.
+            The default is '200m'.
             If `None`, Delta = 200 (matter) will be used.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
@@ -675,11 +651,10 @@ class MassFuncWatson13(MassFunc):
     name = 'Watson13'
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef200m()
 
     def _setup(self):
         self.is_fof = self.mass_def.Delta == 'fof'
@@ -739,11 +714,10 @@ class MassFuncAngulo12(MassFunc):
     name = 'Angulo12'
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self):
         self.A = 0.201
@@ -759,163 +733,6 @@ class MassFuncAngulo12(MassFunc):
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         return self.A * ((self.a / sigM)**self.b + 1.) * \
             np.exp(-self.c / sigM**2)
-
-
-class MassFuncBocquet20(MassFunc, Emulator):
-    """ Emulated mass function described in arXiv:2003.12116.
-
-    This emulator is based on a Mira-Titan Universe suite of
-    cosmological N-body simulations.
-
-    Parameters:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            A mass definition object.
-            This parametrization accepts SO masses with
-            Delta = 200 critical.
-        mass_def_strict (bool):
-            This emulator only accepts SO masses with Delta = 200 critical.
-            If False, an exception will be raised.
-        extrapolate (bool):
-            If True, the queried mass range outside of the emulator's
-            training mass range will be extrapolated in log-space,
-            linearly for the low masses and quadratically for the
-            high masses. Otherwise, it will return zero for those
-            masses. The default is True.
-    """
-    name = 'Bocquet20'
-
-    def __init__(self, *, mass_def=None, mass_def_strict=True,
-                 extrapolate=True):
-        self.extrapolate = extrapolate
-        if mass_def_strict is False:
-            # this will trigger an exception
-            mass_def_strict = True
-        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef200c()
-
-    def _check_mass_def_strict(self, mass_def):
-        if (mass_def.Delta, mass_def.rho_type) != (200, "critical"):
-            return True
-        return False
-
-    def _load_emu(self):
-        from MiraTitanHMFemulator import Emulator as HMFemu
-        model = HMFemu()
-        # build the emulator bounds
-        bounds = model.param_limits.copy()
-        bounds["z"] = [0., 2.02]
-        bounds["M_min"] = [1e13, np.inf]
-        return EmulatorObject(model, bounds)
-
-    def _build_parameters(self, cosmo=None, M=None, a=None):
-        from ..neutrinos import Omega_nu_h2
-
-        self._parameters = {}
-        if cosmo is not None:
-            h = cosmo["h"]
-            m_nu = np.sum(cosmo["m_nu"])
-            T_CMB = cosmo["T_CMB"]
-            Omega_c = cosmo["Omega_c"]
-            Omega_b = cosmo["Omega_b"]
-            # Neutrinos are treated as a background quantity
-            # and are rescaled internally.
-            Omega_nu_h2 = Omega_nu_h2(1., m_nu=m_nu, T_CMB=T_CMB)
-
-            self._parameters["Ommh2"] = (Omega_c + Omega_b)*h**2
-            self._parameters["Ombh2"] = Omega_b * h**2
-            self._parameters["Omnuh2"] = Omega_nu_h2
-            self._parameters["n_s"] = cosmo["n_s"]
-            self._parameters["h"] = cosmo["h"]
-            self._parameters["sigma_8"] = cosmo["sigma8"]
-            self._parameters["w_0"] = cosmo["w0"]
-            self._parameters["w_b"] = (-cosmo["wa"] - cosmo["w0"])**0.25
-
-            self._parameters["z"] = 1/a - 1
-            if not self.extrapolate:
-                self._parameters["M_min"] = np.min(M*h)
-
-    def _finalize_parameters(self, wa):
-        # Translate parameters to final emulator input
-        self._parameters["w_a"] = wa
-        self._parameters.pop("w_b")
-        self._parameters.pop("z")
-        if not self.extrapolate:
-            self._parameters.pop("M_min")
-
-    def _extrapolate_hmf(self, hmf, M, eps=1e-12):
-        M_use = np.atleast_1d(M)
-        # indices where the emulator outputs reasonable values
-        idx = np.where(hmf >= eps)[0]
-
-        # extrapolate low masses linearly...
-        M_lo, hmf_lo = M_use[idx][:2], hmf[idx][:2]
-        F_lo = interp1d(np.log(M_lo), np.log(hmf_lo), kind="linear",
-                        bounds_error=False, fill_value="extrapolate")
-        # ...and high masses quadratically
-        M_hi, hmf_hi = M_use[idx][-3:], hmf[idx][-3:]
-        F_hi = interp1d(np.log(M_hi), np.log(hmf_hi), kind="quadratic",
-                        bounds_error=False, fill_value="extrapolate")
-
-        hmf[:idx[0]] = np.exp(F_lo(np.log(M_use[:idx[0]])))
-        hmf[idx[-1]:] = np.exp(F_hi(np.log(M_use[idx[-1]:])))
-        return hmf
-
-    def get_mass_function(self, cosmo, M, a):
-        # load and build parameters
-        emu = self._load_emu()
-        self._build_parameters(cosmo, M, a)
-        emu.check_bounds(self._parameters)
-        self._finalize_parameters(cosmo["wa"])
-
-        def hmf_dummy(cosmo, M, a):
-            # Populate the queried masses with some emulator-friendly
-            # values and re-calculate the mass function.
-            M = np.atleast_1d(M)
-            M_dummy = np.logspace(13, 16, 64)
-            M_dummy = np.sort(np.append(M_dummy, M))
-            idx_ask = np.searchsorted(M_dummy, M).tolist()
-            hmf = self.get_mass_function(cosmo, M_dummy, a)
-            return hmf, idx_ask
-
-        M_use = np.atleast_1d(M) * cosmo["h"]
-        hmf = np.zeros_like(M_use)
-        # keep only the masses inside the emulator's range
-        idx = np.where(M_use > 1e13)[0]
-        if len(idx) > 0:
-            # Under normal use, this block runs.
-            M_emu = M_use[idx]
-            hmf[idx] = emu.model.predict(
-                self._parameters, 1/a-1, M_emu,
-                get_errors=False)[0]
-            hmf *= cosmo["h"]**3
-        else:
-            # No masses inside the emulator range.
-            # Create a dummy mass array, extrapolate,
-            # and throw away all but the queried masses.
-            hmf, idx_ask = hmf_dummy(cosmo, M_use/cosmo["h"], a)
-            hmf = hmf[idx_ask]
-
-        if np.any(hmf < 1e-12):
-            # M_lo == 0 ; M_hi == O(1e-300)
-            # If this is the case, extrapolate to replace the small values.
-            if np.size(M) >= 3:
-                # Quadratic interpolation/extrapolation requires
-                # at least 3 points.
-                if self.extrapolate:
-                    hmf = self._extrapolate_hmf(hmf, M, 1e-12)
-            else:
-                # Masses partially inside the emulator range,
-                # but too few points, so can't safely extrapolate.
-                # Create a dummy mass array and extrapolate,
-                # and throw away all but the queried masses.
-                hmf, idx_ask = hmf_dummy(cosmo, M_use/cosmo["h"], a)
-                hmf = hmf[idx_ask]
-
-        if np.ndim(M) == 0:
-            hmf = hmf[0]
-        return hmf
 
 
 @functools.wraps(MassFunc.from_name)

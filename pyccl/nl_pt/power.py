@@ -452,7 +452,7 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
                 nonloc_pk_type='nonlinear',
                 a_arr=None, extrap_order_lok=1, extrap_order_hik=2,
                 return_ia_bb=False, return_ia_ee_and_bb=False,
-                return_ptc=False):
+                return_ptc=False, update_ptc=True):
     """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the PT power spectrum for two quantities defined by
     two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
@@ -510,6 +510,8 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
             initialized when this function is called. If `False` (default)
             the ptc is not output, whether or not it is initialized as
             part of the function call.
+        update_ptc (bool): if `False`, do not recompute the tracer-independent
+            perturbative quantitities in the fastpt object.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
@@ -537,6 +539,7 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
         ptc = PTCalculator(with_dd=with_dd,
                            with_NC=with_NC,
                            with_IA=with_IA)
+        update_ptc = True
     if not isinstance(ptc, PTCalculator):
         raise TypeError("ptc should be of type `PTCalculator`")
 
@@ -565,8 +568,9 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
     ga = growth_factor(cosmo, a_arr)
     ga4 = ga**4
 
-    # update the PTC to have the require Pk components
-    ptc.update_pk(pk_lin_z0)
+    if update_ptc:
+        # update the PTC to have the require Pk components
+        ptc.update_pk(pk_lin_z0)
 
     if nonlin_pk_type == 'nonlinear':
         Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
@@ -694,11 +698,15 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
         pt_pk_ee = Pk2D(a_arr=a_arr,
                         lk_arr=np.log(ptc.ks),
                         pk_arr=p_pt[0].T,
-                        is_logp=False)
+                        is_logp=False,
+                        extrap_order_lok=extrap_order_lok,
+                        extrap_order_hik=extrap_order_hik)
         pt_pk_bb = Pk2D(a_arr=a_arr,
                         lk_arr=np.log(ptc.ks),
                         pk_arr=p_pt[1].T,
-                        is_logp=False)
+                        is_logp=False,
+                        extrap_order_lok=extrap_order_lok,
+                        extrap_order_hik=extrap_order_hik)
         if return_ptc:
             return pt_pk_ee, pt_pk_bb, ptc
         else:
@@ -707,7 +715,9 @@ def get_pt_pk2d(cosmo, ptc=None, tracer1=None, tracer2=None, *,
         pt_pk = Pk2D(a_arr=a_arr,
                      lk_arr=np.log(ptc.ks),
                      pk_arr=p_pt.T,
-                     is_logp=False)
+                     is_logp=False,
+                     extrap_order_lok=extrap_order_lok,
+                     extrap_order_hik=extrap_order_hik)
         if return_ptc:
             return pt_pk, ptc
         else:

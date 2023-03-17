@@ -1,7 +1,6 @@
 import pytest
 import numpy as np
-import warnings
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 COSMO = ccl.CosmologyVanillaLCDM(
@@ -68,30 +67,3 @@ def test_arg_deprecated():
     k_arr, a = np.logspace(-1, 1, 32), 1.
     assert np.allclose(cosmo1.nonlin_matter_power(k_arr, a),
                        cosmo2.nonlin_matter_power(k_arr, a), rtol=0)
-
-
-@pytest.mark.parametrize('model', ['bcm', 'bacco', ])
-def test_baryon_correct_smoke(model):
-    # we compare each model with BCM
-    extras = {"bacco": {'M_c': 14, 'eta': -0.3, 'beta': -0.22,
-                        'M1_z0_cen': 10.5, 'theta_out': 0.25,
-                        'theta_inn': -0.86, 'M_inn': 13.4},
-              }  # other models go in here
-
-    cosmo = ccl.CosmologyVanillaLCDM(
-        matter_power_spectrum="halofit",
-        extra_parameters=extras)
-    cosmo.compute_nonlin_power()
-    pknl = cosmo.get_nonlin_power()
-
-    k_arr = np.geomspace(1e-1, 1, 16)
-    for z in [0., 0.5, 2.]:
-        a = 1./(1+z)
-        with warnings.catch_warnings():
-            # filter all warnings related to the emulator packages
-            warnings.simplefilter("ignore")
-            pkb = cosmo.baryon_correct(model, pknl)
-
-        pk0 = pknl.eval(k_arr, a, cosmo)
-        pk1 = pkb.eval(k_arr, a, cosmo)
-        assert not np.array_equal(pk1, pk0)

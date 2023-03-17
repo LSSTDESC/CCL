@@ -179,7 +179,13 @@ def sigma8(cosmo, *, p_of_k_a=None):
     Returns:
         float: RMS variance in top-hat sphere of radius 8 Mpc/h.
     """
-    return sigmaR(cosmo, 8.0 / cosmo['h'], p_of_k_a=p_of_k_a)
+    psp = parse_pk2d(cosmo, p_of_k_a, is_linear=True)
+    status = 0
+    s8, status = lib.sigma8(cosmo.cosmo, psp, status)
+    check(status, cosmo)
+    if np.isnan(cosmo._params.sigma8):
+        cosmo._params.sigma8 = s8
+    return s8
 
 
 @warn_api

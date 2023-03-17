@@ -1,6 +1,6 @@
 """Test the hashing function of CCL."""
 import pytest
-from . import pyccl as ccl
+import pyccl as ccl
 import numpy as np
 from collections import OrderedDict
 

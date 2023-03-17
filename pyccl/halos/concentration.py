@@ -18,7 +18,7 @@ class Concentration(CCLHalosObject):
             object that fixes the mass definition used by this c(M)
             parametrization.
     """
-    name = 'default'
+    __repr_attrs__ = ("mass_def",)
 
     @warn_api
     def __init__(self, *, mass_def=None):
@@ -404,6 +404,7 @@ class ConcentrationIshiyama21(Concentration):
             method. Otherwise, use the concentration found with profile
             fitting. The default is False.
     """
+    __repr_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'
 
     @warn_api(pairs=[("mdef", "mass_def")])
@@ -564,6 +565,7 @@ class ConcentrationConstant(Concentration):
             the mass definition used by this c(M)
             parametrization. In this case it's arbitrary.
     """
+    __repr_attrs__ = ("mass_def", "c",)
     name = 'Constant'
 
     @warn_api(pairs=[("mdef", "mass_def")])

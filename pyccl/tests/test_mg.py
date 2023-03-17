@@ -1,4 +1,4 @@
-from . import pyccl as ccl
+import pyccl as ccl
 import pytest
 
 

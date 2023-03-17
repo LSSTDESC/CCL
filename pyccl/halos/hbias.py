@@ -26,10 +26,12 @@ class HaloBias(CCLHalosObject):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    name = "default"
+    __repr_attrs__ = ("mass_def", "mass_def_strict",)
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def=None,
+                 mass_def_strict=True):
         self.mass_def_strict = mass_def_strict
         if mass_def is not None:
             if self._check_mass_def(mass_def):
@@ -38,22 +40,13 @@ class HaloBias(CCLHalosObject):
                                  " Delta = %s, " % (mass_def.Delta) +
                                  " rho = " + mass_def.rho_type)
             self.mass_def = mass_def
-        else:
-            self._default_mass_def()
         self._setup()
-
-    @abstractmethod
-    def _default_mass_def(self):
-        """ Assigns a default mass definition for this object if
-        none is passed at initialization.
-        """
 
     def _setup(self):
         """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
         constructor call.
         """
-        pass
 
     def _check_mass_def_strict(self, mass_def):
         return False
@@ -190,17 +183,16 @@ class HaloBiasSheth99(HaloBias):
             the fit of Nakamura & Suto 1997. Otherwise use
             delta_crit = 1.68647.
     """
+    __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = "Sheth99"
 
     @warn_api
-    def __init__(self, *, mass_def=None,
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
                  mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self):
         self.p = 0.3
@@ -240,11 +232,10 @@ class HaloBiasSheth01(HaloBias):
     name = "Sheth01"
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self):
         self.a = 0.707
@@ -282,11 +273,10 @@ class HaloBiasBhattacharya11(HaloBias):
     name = "Bhattacharya11"
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef('fof', 'matter')
 
     def _setup(self):
         self.a = 0.788
@@ -322,11 +312,10 @@ class HaloBiasTinker10(HaloBias):
     name = "Tinker10"
 
     @warn_api
-    def __init__(self, *, mass_def=None, mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef200m()
 
     def _AC(self, ld):
         xp = np.exp(-(4./ld)**4.)

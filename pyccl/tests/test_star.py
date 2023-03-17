@@ -5,6 +5,7 @@ which contains the `warn_api` and `deprecate_attr` decorators.
 import pyccl as ccl
 from pyccl.errors import CCLDeprecationWarning
 import pytest
+import warnings
 
 COSMO = ccl.CosmologyVanillaLCDM()
 M200 = ccl.halos.MassDef200c()
@@ -22,7 +23,8 @@ PK2D = ccl.boltzmann.get_camb_pk_lin(COSMO)
 
 def test_API_preserve_warnings():
     # 0. no warnings for the following exemplary functions
-    with pytest.warns(None) as w_rec:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         R1 = ccl.Omega_nu_h2(1., m_nu=[1, 1, 1], T_CMB=2.7)
         R2 = ccl.nu_masses(Om_nu_h2=0.05, mass_split="normal")
         R3 = ccl.correlation_multipole(COSMO, 1., ell=2, dist=1., beta=1.5)
@@ -44,7 +46,6 @@ def test_API_preserve_warnings():
         S3 = ccl.halos.MassFuncTinker10(mass_def=M200, mass_def_strict=False)
         from pyccl import baryons as M1
         from pyccl import cells as M2
-    assert len(w_rec) == 0
 
     # 1. renamed function
     with pytest.warns(ccl.CCLDeprecationWarning):
@@ -107,7 +108,7 @@ def test_API_preserve_warnings():
         s1 = ccl.halos.halomod_bias_1pt(COSMO, HMC, 1., 1., PROF)
     assert s1 == S1
 
-    with pytest.warns(None) as w_rec:
+    with pytest.warns(ccl.CCLDeprecationWarning) as w_rec:
         s2 = ccl.halos.halomod_power_spectrum(COSMO, HMC, 1., 1.,
                                               PROF, None, PROF)
     assert len(w_rec) == 2
@@ -142,9 +143,9 @@ def test_API_preserve_warnings():
 def test_renamed_attribute(prof_class):
     prof = prof_class(c_m_relation=CON)
 
-    with pytest.warns(None) as w_rec:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         prof.c_m_relation
-    assert len(w_rec) == 0
 
     with pytest.warns(CCLDeprecationWarning):
         prof.cM
@@ -152,10 +153,10 @@ def test_renamed_attribute(prof_class):
 
 def test_pk2d_renamed_methods_warns():
     pkl = COSMO.get_camb_pk_lin()
-    with pytest.warns(None) as w_rec:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         Q1 = pkl.eval_dlPk_dlk(1., 1., COSMO)
         Q2 = ccl.Pk2D.from_model(COSMO, "bbks")
-    assert len(w_rec) == 0
 
     with pytest.warns(CCLDeprecationWarning):
         q1 = pkl.eval_dlogpk_dlogk(1., 1., COSMO)

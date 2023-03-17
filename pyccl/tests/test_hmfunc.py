@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 COSMO = ccl.CosmologyVanillaLCDM(transfer_function='bbks',
@@ -13,8 +13,7 @@ HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncTinker10,
         ccl.halos.MassFuncWatson13,
         ccl.halos.MassFuncDespali16,
-        ccl.halos.MassFuncBocquet16,
-        ccl.halos.MassFuncBocquet20]
+        ccl.halos.MassFuncBocquet16,]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 MFOF = ccl.halos.MassDef('fof', 'matter')
 MVIR = ccl.halos.MassDef('vir', 'critical')
@@ -74,9 +73,9 @@ def test_nM_despali_smoke():
         assert np.shape(n) == np.shape(m)
 
 
-@pytest.mark.parametrize('mdef', [MFOF, M200m])
-def test_nM_watson_smoke(mdef):
-    nM = ccl.halos.MassFuncWatson13(mass_def=mdef)
+@pytest.mark.parametrize('mass_def', [MFOF, M200m])
+def test_nM_watson_smoke(mass_def):
+    nM = ccl.halos.MassFuncWatson13(mass_def=mass_def)
     for m in MS:
         n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -163,17 +162,3 @@ def test_func_deprecated():
         mf1 = ccl.halos.mass_function_from_name("Tinker08")
     mf2 = ccl.halos.MassFunc.from_name("Tinker08")
     assert mf1 == mf2
-
-
-def test_nM_bocquet20_extrap():
-    hmf0 = ccl.halos.MassFuncBocquet20(extrapolate=True)
-    hmf1 = ccl.halos.MassFuncBocquet20(extrapolate=False)
-    M_arr = np.logspace(14, 16, 32)  # inside the emulator range
-    n0 = hmf0.get_mass_function(COSMO, M_arr, 1)
-    n1 = hmf1.get_mass_function(COSMO, M_arr, 1)
-    assert np.allclose(n0, n1, rtol=0)
-
-
-def test_nM_bocquet20_raises():
-    with pytest.raises(ValueError):
-        ccl.halos.MassFuncBocquet20(mass_def=MVIR, mass_def_strict=False)

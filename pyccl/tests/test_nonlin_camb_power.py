@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 def test_nonlin_camb_power():
@@ -69,3 +69,10 @@ def test_nonlin_camb_power_with_sigma8():
     # Check that non-linear power spectrum isn't being used with sigma8
     with pytest.raises(ccl.errors.CCLError):
         ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)
+
+
+def test_nonlin_camb_power_raises():
+    # Test that it raises when (trf, mps) == (no camb, camb).
+    with pytest.raises(ccl.CCLError):
+        ccl.CosmologyVanillaLCDM(transfer_function="boltzmann_class",
+                                 matter_power_spectrum="camb")

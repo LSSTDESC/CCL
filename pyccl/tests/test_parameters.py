@@ -1,8 +1,8 @@
 import tempfile
 import numpy as np
 import pytest
-
-from . import pyccl as ccl
+import pyccl as ccl
+import warnings
 
 
 def test_parameters_lcdm_defaults():
@@ -317,7 +317,8 @@ def test_parameters_valid_input():
     """
     Check that valid parameter arguments are accepted.
     """
-    with pytest.warns(None) as w_rec:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96)
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       Omega_k=0.05)
@@ -334,7 +335,6 @@ def test_parameters_valid_input():
         # Try a set of parameters with non-zero mu0 / Sig0
         ccl.Cosmology(h=0.7, Omega_c=0.25, Omega_b=0.05, A_s=2.1e-9, n_s=0.96,
                       mu_0=0.1, sigma_0=0.1)
-    assert len(w_rec) == 0
 
 
 def test_parameters_missing():
@@ -377,14 +377,14 @@ def test_parameters_missing():
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.8)
 
     # Make sure that optional parameters are optional
-    with pytest.warns(None) as w_rec:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
                       A_s=2.1e-9, n_s=0.96, z_mg=None, df_mg=None)
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
                       A_s=2.1e-9, n_s=0.96, z_mg=None)
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
                       A_s=2.1e-9, n_s=0.96, df_mg=None)
-    assert len(w_rec) == 0
 
 
 def test_parameters_set():
@@ -420,19 +420,19 @@ def test_parameters_mgrowth():
 
     # Valid constructions
     for omega_g in [None, 0.0, 0.1]:
-        with pytest.warns(None) as w_rec:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
             with pytest.warns(ccl.CCLDeprecationWarning):
                 ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
                               A_s=2.1e-9, n_s=0.96, z_mg=zarr,
                               df_mg=dfarr, Omega_g=omega_g)
-        assert len(w_rec) == 0
 
-        with pytest.warns(None) as w_rec:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
             with pytest.warns(ccl.CCLDeprecationWarning):
                 ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
                               A_s=2.1e-9, n_s=0.96, z_mg=[0., 0.1, 0.2],
                               df_mg=[0.1, 0.1, 0.1], Omega_g=omega_g)
-        assert len(w_rec) == 0
 
         # Invalid constructions
         with pytest.warns(ccl.CCLDeprecationWarning):

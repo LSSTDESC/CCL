@@ -1,3 +1,4 @@
+# flake8: noqa E402
 from pkg_resources import get_distribution, DistributionNotFound
 try:
     __version__ = get_distribution(__name__).version
@@ -12,14 +13,40 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 del environ, path
 
+# Patch for deprecated alias in Numpy >= 1.20.0 (used in ISiTGR & FAST-PT).
+# Deprecation cycle starts in Numpy 1.20 and ends in Numpy 1.24.
+from packaging.version import parse
+import numpy
+numpy.int = int if parse(numpy.__version__) >= parse("1.20.0") else numpy.int
+del parse, numpy
+
 # SWIG-generated
 from . import ccllib as lib
+
+# Hashing, Caching, CCL base, Mutation locks
+from .base import (
+    CCLObject,
+    CCLHalosObject,
+    Caching,
+    cache,
+    hash_,
+    UnlockInstance,
+    unlock_instance,
+)
 
 # Errors
 from .errors import (
     CCLError,
     CCLWarning,
     CCLDeprecationWarning,
+)
+
+# Constants and accuracy parameters
+from .parameters import (
+    CCLParameters,
+    gsl_params,
+    spline_params,
+    physical_constants,
 )
 
 # Core data structures
@@ -120,32 +147,6 @@ from .covariances import (
     sigma2_B_from_mask,
 )
 
-# Hashing, Caching, CCL base, Mutation locks
-from .base import (
-    CCLObject,
-    CCLHalosObject,
-    Caching,
-    cache,
-    hash_,
-    UnlockInstance,
-    unlock_instance,
-)
-
-# Parameters
-from .parameters import (
-    CCLParameters,
-    gsl_params,
-    spline_params,
-    physical_constants,
-)
-
-# Emulators
-from .emulator import (
-    EmulatorObject,
-    Emulator,
-    PowerSpectrumEmulator
-)
-
 # Miscellaneous
 from .pyutils import debug_mode, resample_array
 
@@ -211,7 +212,6 @@ __all__ = (
     'correlation_3dRsd', 'correlation_3dRsd_avgmu', 'correlation_pi_sigma',
     'angular_cl_cov_cNG', 'angular_cl_cov_SSC',
     'sigma2_B_disc', 'sigma2_B_from_mask',
-    'EmulatorObject', 'Emulator', 'PowerSpectrumEmulator',
     'debug_mode', 'resample_array',
     'halomodel_matter_power', 'halo_concentration',
     'onehalo_matter_power', 'twohalo_matter_power',

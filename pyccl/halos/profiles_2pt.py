@@ -23,11 +23,16 @@ class Profile2pt(CCLHalosObject):
             in ``arXiv:1909.09102`` and ``arXiv:2102.07701``.
             Defaults to ``r_corr=0``, returning simply the product
             of the fourier profiles.
-
     """
+    __repr_attrs__ = ("r_corr",)
+
     @warn_api
     def __init__(self, *, r_corr=0.):
         self.r_corr = r_corr
+
+    __eq__ = object.__eq__
+
+    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
 
     @warn_api
     def update_parameters(self, *, r_corr=None):
@@ -111,7 +116,7 @@ class Profile2ptHOD(Profile2pt):
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile` or None):
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfileHOD` or None):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
                 an auto-correlation. Note that only auto-correlations
@@ -126,16 +131,13 @@ class Profile2ptHOD(Profile2pt):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
-        if not isinstance(prof, HaloProfileHOD):
-            raise TypeError("prof must be of type `HaloProfileHOD`")
-        if prof2 is not None:
-            if not isinstance(prof2, HaloProfileHOD):
-                raise TypeError("prof2 must be of type "
-                                "`HaloProfileHOD` or None")
-        else:
+        if prof2 is None:
             prof2 = prof
 
-        if not prof == prof2:
+        if not (isinstance(prof, HaloProfileHOD)
+                and isinstance(prof2, HaloProfileHOD)):
+            raise TypeError("prof and prof2 should be HaloProfileHOD")
+        if prof != prof2:
             raise ValueError("prof and prof2 must be equivalent")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)

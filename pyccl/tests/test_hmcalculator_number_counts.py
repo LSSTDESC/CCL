@@ -1,5 +1,5 @@
 import numpy as np
-from . import pyccl as ccl
+import pyccl as ccl
 import scipy.integrate
 
 
@@ -161,8 +161,8 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         _func,
         amin,
         amax,
-        lambda x: hmc._prec['log10M_min'],
-        lambda x: hmc._prec['log10M_max'],
+        lambda x: hmc.precision['log10M_min'],
+        lambda x: hmc.precision['log10M_max'],
     )
 
     mtot_hmc = hmc.number_counts(cosmo, selection=sel, a_min=amin, a_max=amax)

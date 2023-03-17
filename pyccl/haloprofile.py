@@ -4,9 +4,9 @@ from .base import deprecated
 
 @deprecated(hal.HaloProfileNFW)
 def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
-    """Calculate the 3D NFW halo profile at a given radius or an array of radii,
-    for a halo with a given mass, mass definition, and concentration,
-    at a given scale factor, with a cosmology dependence.
+    """Calculate the 3D NFW halo profile at a given radius or an array
+    of radii, for a halo with a given mass, mass definition, and
+    concentration, at a given scale factor, with a cosmology dependence.
 
     .. note:: Note that this function is deprecated. Please use the
               functionality in the :mod:`~pyccl.halos.profiles` module.

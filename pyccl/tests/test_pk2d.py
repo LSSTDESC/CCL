@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
-import warnings
-from . import pyccl as ccl
-from . import CCLWarning, CCLDeprecationWarning
+import pyccl as ccl
+from pyccl import CCLWarning, CCLDeprecationWarning
 
 
 def pk1d(k):
@@ -69,8 +68,7 @@ def test_pk2d_smoke():
 
 
 @pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu',
-                                   'eisenstein_hu_nowiggles',
-                                   'bacco'])
+                                   'eisenstein_hu_nowiggles',])
 def test_pk2d_from_model(model):
     cosmo_fixed = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96)
@@ -87,7 +85,7 @@ def test_pk2d_from_model(model):
         assert maxdiff < 1E-10
 
 
-@pytest.mark.parametrize('model', ['halofit', 'bacco', ])
+@pytest.mark.parametrize('model', ['halofit',])
 def test_pk2d_apply_nonlin_model_smoke(model):
     cosmo = ccl.CosmologyVanillaLCDM()
     cosmo.compute_linear_power()
@@ -96,11 +94,7 @@ def test_pk2d_apply_nonlin_model_smoke(model):
     k_arr = np.logspace(-1, 1, 16)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
-        with warnings.catch_warnings():
-            # filter all warnings related to the emulator packages
-            warnings.simplefilter("ignore")
-            pknl = ccl.Pk2D.apply_nonlin_model(
-                cosmo, model=model, pk_linear=pkl)
+        pknl = pkl.apply_nonlin_model(cosmo, model=model)
 
         pk0 = pkl.eval(k_arr, a, cosmo)
         pk1 = pknl.eval(k_arr, a, cosmo)

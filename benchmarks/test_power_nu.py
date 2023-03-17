@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import warnings
 
-from . import pyccl as ccl
+import pyccl as ccl
 
 # NOTE: We now check up to kmax=23
 # because CLASS v3 has a slight mismatch

@@ -1,6 +1,30 @@
 import pytest
 import numpy as np
-from . import pyccl as ccl
+import pyccl as ccl
+import functools
+
+
+def test_fancy_repr():
+    # Test fancy-repr controls.
+    cosmo1 = ccl.CosmologyVanillaLCDM()
+    cosmo2 = ccl.CosmologyVanillaLCDM()
+
+    ccl.CCLObject._fancy_repr.disable()
+    assert repr(cosmo1) == object.__repr__(cosmo1)
+    assert cosmo1 != cosmo2
+
+    ccl.CCLObject._fancy_repr.enable()
+    assert repr(cosmo1) != object.__repr__(cosmo1)
+    assert cosmo1 == cosmo2
+
+    with pytest.raises(AttributeError):
+        cosmo1._fancy_repr.disable()
+
+    with pytest.raises(AttributeError):
+        ccl.Cosmology._fancy_repr.disable()
+
+    with pytest.raises(NotImplementedError):
+        ccl.base.FancyRepr()
 
 
 def test_CCLObject():
@@ -26,6 +50,7 @@ def test_CCLObject():
     PK2 = ccl.Pk2D.from_model(cosmo, "bbks")
     assert PK1 == PK2
     assert ccl.Pk2D(empty=True) == ccl.Pk2D(empty=True)
+    assert 2*PK1 != PK2
 
     # 3.1. Using a factorizable Tk3D object.
     a_arr, lk_arr, pk_arr = PK1.get_spline_arrays()
@@ -33,7 +58,10 @@ def test_CCLObject():
                    pk1_arr=pk_arr, pk2_arr=pk_arr, is_logt=False)
     TK2 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                    pk1_arr=pk_arr, pk2_arr=pk_arr, is_logt=False)
+    TK3 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
+                   pk1_arr=2*pk_arr, pk2_arr=2*pk_arr, is_logt=False)
     assert TK1 == TK2
+    assert TK1 != TK3
 
     # 3.2. Using a non-factorizable Tk3D object.
     a_arr_2 = np.arange(0.5, 0.9, 0.1)
@@ -91,15 +119,16 @@ def test_CCLHalosObject():
     CM2 = ccl.halos.ConcentrationDuffy08()
     assert CM1 == CM2
 
-    P1 = ccl.halos.HaloProfileHOD(c_m_relation=CM1)
-    P2 = ccl.halos.HaloProfileHOD(c_m_relation=CM2)
-    assert P1 == P2
+    # TODO: uncomment once __eq__ methods are implemented.
+    # P1 = ccl.halos.HaloProfileHOD(c_m_relation=CM1)
+    # P2 = ccl.halos.HaloProfileHOD(c_m_relation=CM2)
+    # assert P1 == P2
 
-    PCOV1 = ccl.halos.Profile2pt(r_corr=1.5)
-    PCOV2 = ccl.halos.Profile2pt(r_corr=1.0)
-    assert PCOV1 != PCOV2
-    PCOV2.update_parameters(r_corr=1.5)
-    assert PCOV1 == PCOV2
+    # PCOV1 = ccl.halos.Profile2pt(r_corr=1.5)
+    # PCOV2 = ccl.halos.Profile2pt(r_corr=1.0)
+    # assert PCOV1 != PCOV2
+    # PCOV2.update_parameters(r_corr=1.5)
+    # assert PCOV1 == PCOV2
 
 
 def test_CCLObject_immutable():
@@ -125,12 +154,13 @@ def test_CCLObject_immutable():
     prof.update_parameters(mass_bias=0.7)
     assert prof.mass_bias == 0.7
 
+    # TODO: uncomment once __eq__ methods are implemented.
     # Check that the hash repr is deleted as required.
-    prof1 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
-    prof2 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
-    assert prof1 == prof2                   # repr is cached
-    prof2.update_parameters(mass_bias=0.7)  # cached repr is deleted
-    assert prof1 != prof2                   # repr is cached again
+    # prof1 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
+    # prof2 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
+    # assert prof1 == prof2                   # repr is cached
+    # prof2.update_parameters(mass_bias=0.7)  # cached repr is deleted
+    # assert prof1 != prof2                   # repr is cached again
 
 
 def test_CCLObject_default_behavior():
@@ -139,3 +169,49 @@ def test_CCLObject_default_behavior():
     instances = [MyType() for _ in range(2)]
     assert instances[0] != instances[1]
     assert hash(instances[0]) != hash(instances[1])
+
+
+def test_HaloProfile_abstractmethods():
+    # Test that `HaloProfile` and its subclasses can't be instantiated if
+    # either `_real` or `_fourier` have not been defined.
+    with pytest.raises(TypeError):
+        ccl.halos.HaloProfile()
+
+
+def init_decorator(func):
+    """Check that all attributes listed in ``__repr_attrs__`` are defined in
+    the constructor of all subclasses of ``CCLHalosObject``.
+    NOTE: Used in ``conftest.py``.
+    """
+
+    def in_mro(self):
+        """Determine if `__repr_attrs__` is defined somewhere in the MRO."""
+        # NOTE: This helper function makes sure that an AttributeError is not
+        # raised when `super().__init__` is called inside another `__init__`.
+        mro = self.__class__.__mro__[1:]  # MRO excluding this class
+        for cls in mro:
+            if hasattr(cls, "__repr_attrs__"):
+                return True
+        return False
+
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        func(self, *args, **kwargs)
+        if not hasattr(self, "__repr_attrs__"):
+            # If `__repr_attrs__` is not specified, use local repr or inherit.
+            return
+
+        flag = [attr for attr in self.__repr_attrs__
+                if not (hasattr(self, attr) or in_mro(self))]
+        if flag:
+            # NOTE: Set the attributes before calling `super`.
+            raise AttributeError(f"{self.__class__.__name__}: attribute(s) "
+                                 f"{flag} not set in __init__.")
+
+    return wrapper
+
+
+def all_subclasses(cls):
+    """Get all subclasses of ``cls``. NOTE: Used in ``conftest.py``."""
+    return set(cls.__subclasses__()).union([s for c in cls.__subclasses__()
+                                            for s in all_subclasses(c)])

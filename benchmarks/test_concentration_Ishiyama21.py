@@ -6,7 +6,7 @@ With many thanks to Tomoaki Ishiyama for kindly providing
 the benchmarks.
 """
 import os
-from . import pyccl as ccl
+import pyccl as ccl
 import pytest
 import numpy as np
 

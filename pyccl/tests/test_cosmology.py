@@ -3,29 +3,28 @@ import tempfile
 import pytest
 import warnings
 import numpy as np
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 def test_cosmo_methods():
     """ Check that all pyccl functions that take cosmo
     as their first argument are methods of the Cosmology object.
     """
+    from importlib import import_module
     from inspect import getmembers, isfunction, signature
-    from pyccl import background, baryons, boltzmann, \
-        cells, correlations, covariances, neutrinos, \
-        pk2d, power, tk3d, tracers, halos, nl_pt
-    from . import CosmologyVanillaLCDM
-    cosmo = CosmologyVanillaLCDM()
-    subs = [background, boltzmann, baryons, cells, correlations, covariances,
-            neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
-    funcs = [getmembers(sub, isfunction) for sub in subs]
-    funcs = [func for sub in funcs for func in sub]
+    from pyccl.core import _modules, Cosmology
+
+    modules = [import_module(f".{module}", "pyccl") for module in _modules]
+    funcs = [getmembers(module, isfunction) for module in modules]
+    funcs = [func for sublist in funcs for func in sublist]
+
     for name, func in funcs:
         pars = signature(func).parameters
-        if list(pars)[0] == "cosmo":
-            _ = getattr(cosmo, name)
+        if pars and list(pars)[0] == "cosmo":
+            assert hasattr(Cosmology, name)
 
     # quantitative
+    cosmo = ccl.CosmologyVanillaLCDM()
     assert ccl.sigma8(cosmo) == cosmo.sigma8()
     assert ccl.rho_x(cosmo, 1., "matter", is_comoving=False) == \
         cosmo.rho_x(1., "matter", is_comoving=False)
@@ -58,6 +57,15 @@ def test_cosmology_critical_init():
         Omega_g=0,
         Omega_k=0)
     assert np.allclose(cosmo.cosmo.data.growth0, 1)
+
+
+def test_cosmology_As_sigma8_populates():
+    # Check that cosmo.sigma8() pupulates sigma8 if it is missing.
+    cosmo = ccl.Cosmology(Omega_c=0.265, Omega_b=0.045, h=0.675,
+                          n_s=0.965, A_s=2e-9)
+    assert np.isnan(cosmo["sigma8"])
+    cosmo.sigma8()
+    assert cosmo["sigma8"] == cosmo.sigma8()
 
 
 def test_cosmology_init():
@@ -112,10 +120,10 @@ def test_cosmology_output():
                           n_s=0.96)
 
     # Return and print status messages
-    with pytest.warns(None) as w_rec:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         cosmo.status()
         print(cosmo)
-    assert len(w_rec) == 0
 
     # Test status methods for different precomputable quantities
     assert cosmo.has_distances is False
@@ -125,13 +133,13 @@ def test_cosmology_output():
     assert cosmo.has_sigma is False
 
     # Check that quantities can be precomputed
-    with pytest.warns(None) as w_rec:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         cosmo.compute_distances()
         cosmo.compute_growth()
         cosmo.compute_linear_power()
         cosmo.compute_nonlin_power()
         cosmo.compute_sigma()
-    assert len(w_rec) == 0
 
     assert cosmo.has_distances is True
     assert cosmo.has_growth is True
@@ -370,7 +378,7 @@ def test_cosmology_halomodel_deprecated():
                 for x in [cosmo2, cosmo3]])
 
 
-@pytest.mark.parametrize('model', ['halofit', 'bacco', ])
+@pytest.mark.parametrize('model', ['halofit',])
 def test_cosmo_mps_smoke(model):
     knl = np.geomspace(0.1, 5, 16)
     cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum=model)
@@ -383,14 +391,9 @@ def test_cosmo_mps_smoke(model):
     assert np.all(pknl > pkl)
 
 
-@pytest.mark.parametrize('model', ['bcm', 'bacco', ])
+@pytest.mark.parametrize('model', ['bcm',])
 def test_cosmo_bps_smoke(model):
     extras = {}
-    if model == "bacco":
-        extras = {"bacco":
-                  {'M_c': 14, 'eta': -0.3, 'beta': -0.22, 'M1_z0_cen': 10.5,
-                   'theta_out': 0.25, 'theta_inn': -0.86, 'M_inn': 13.4}
-                  }
     knl = np.geomspace(0.1, 5, 16)
     cosmo = ccl.CosmologyVanillaLCDM(baryons_power_spectrum="nobaryons")
     cosmo.compute_nonlin_power()
@@ -410,20 +413,19 @@ def test_pyccl_default_params():
     """Check that the Python-layer for setting the gsl and spline parameters
     works on par with the C-layer.
     """
-    HM_MMIN = ccl.gsl_params["HM_MMIN"]
-
     # we will test with this parameter
-    assert HM_MMIN == 1e7
+    ccl.gsl_params.reload()
+    HM_MMIN = ccl.gsl_params["HM_MMIN"]
 
     # can be accessed as an attribute and as a dictionary item
     assert ccl.gsl_params.HM_MMIN == ccl.gsl_params["HM_MMIN"]
 
     # can be assigned as an attribute
-    ccl.gsl_params.HM_MMIN = 1e5
-    assert ccl.gsl_params["HM_MMIN"] == 1e5  # cross-check
+    ccl.gsl_params.HM_MMIN = HM_MMIN/100
+    assert ccl.gsl_params["HM_MMIN"] == HM_MMIN/100  # cross-check
 
-    ccl.gsl_params["HM_MMIN"] = 1e6
-    assert ccl.gsl_params.HM_MMIN == 1e6
+    ccl.gsl_params["HM_MMIN"] = HM_MMIN/10
+    assert ccl.gsl_params.HM_MMIN == HM_MMIN/10
 
     # does not accept extra assignment
     with pytest.raises(KeyError):
@@ -470,7 +472,7 @@ def test_cosmology_default_params():
     assert v3 == v1
 
     # warns when we try to mutate instantiated `cvar` objects
-    with pytest.raises(AttributeError):
+    with pytest.warns(ccl.CCLDeprecationWarning):
         cosmo1.cosmo.spline_params.A_SPLINE_MIN = 0.5
 
 

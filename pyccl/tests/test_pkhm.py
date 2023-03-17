@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from . import pyccl as ccl
+import pyccl as ccl
 
 
 COSMO = ccl.Cosmology(
@@ -10,7 +10,7 @@ M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(c_m_relation=CON)
+P1 = ccl.halos.HaloProfileNFW(c_m_relation=CON, fourier_analytic=True)
 P2 = P1
 PKC = ccl.halos.Profile2pt()
 KK = np.geomspace(1E-3, 10, 32)
@@ -237,10 +237,6 @@ def test_pkhm_pk2d():
                                   P1, prof2=P1, prof3=None, prof4=None,
                                   prof12_2pt=PKC, prof34_2pt=PKC),
                        I0, rtol=0)
-    with pytest.raises(ValueError):
-        hmc.I_0_22(COSMO, KK, AA,
-                   P1, prof2=P1, prof3=None, prof4=P1,
-                   prof12_2pt=PKC, prof34_2pt=PKC)
 
     # 1h/2h transition
     def alpha0(a):  # no smoothing

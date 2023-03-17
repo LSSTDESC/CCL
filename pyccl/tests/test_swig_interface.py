@@ -1,9 +1,8 @@
 import pytest
 import copy
 import numpy as np
-from . import pyccl
-from . import ccllib
-from . import CCLError
+import pyccl
+from pyccl import ccllib, CCLError
 
 pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
 PYCOSMO = pyccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
@@ -116,14 +115,6 @@ def test_swig_power():
             func(COSMO, None, 1.0, [1.0, 2.0], 3, status)
     with pytest.raises(CCLError):
         ccllib.kNL_vec(COSMO, None, [0.5, 1.0], 3, status)
-
-
-def test_swig_haloprofile():
-    status = 0
-    with pytest.raises(CCLError):
-        ccllib.einasto_norm([0.1, 1.0], [0.1, 1.0], [0.1, 1.0], 4, status)
-    with pytest.raises(CCLError):
-        ccllib.hernquist_norm([0.1, 1.0], [0.1, 1.0], 4, status)
 
 
 pyccl.gsl_params.reload()

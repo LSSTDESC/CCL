@@ -43,21 +43,6 @@ _docstring_extra_parameters = \
               is one of ['Tinker10', 'Sheth99'], the 'halo_bias' will be
               coupled to the 'mass_function'.
 
-    * ``'bacco'`` ::
-
-        'bacco': {'M_c': 14,
-                  'eta': -0.3,
-                  'beta': -0.22,
-                  'M1_z0_cen': 10.5,
-                  'theta_out': 0.25,
-                  'theta_inn': -0.86,
-                  'M_inn': 13.4}
-
-    .. note:: 'BACCO' is the the suite of power spectrum emulators described
-              in Arico et al. (2021b), :arXiv:`2104.14568`. Extra parameters
-              are passed into the baryon model described in Arico et al.
-              (2021a), :arXiv:`2011.15018`.
-
     * ``'PlanckMG'`` ::
 
         'PlanckMG': {'c1': 1.0,

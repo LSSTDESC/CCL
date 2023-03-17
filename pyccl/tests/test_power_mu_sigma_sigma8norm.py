@@ -1,13 +1,10 @@
 import numpy as np
 import pytest
 from unittest import mock
-from . import pyccl as ccl
+import pyccl as ccl
 import sys
-from . import get_isitgr_pk_lin
-try:
-    from importlib import reload
-except ImportError:
-    pass  # in 2.7, reload is a global function.
+from pyccl.boltzmann import get_isitgr_pk_lin
+from importlib import reload
 
 
 @pytest.mark.parametrize('tf', [
@@ -36,9 +33,9 @@ def test_power_mu_sigma_sigma8norm(tf):
         assert np.allclose(pk_rat, gfac)
 
     with mock.patch.dict(sys.modules, {'isitgr': None}):
-        with pytest.raises(ImportError):
+        with pytest.raises(ModuleNotFoundError):
             get_isitgr_pk_lin(cosmo)
-    # Importing ccl without isitgr is fine.  No ImportError triggered.
+    # Importing ccl without isitgr is fine.  No ModuleNotFoundError triggered.
     with mock.patch.dict(sys.modules, {'isitgr': None}):
         reload(ccl.boltzmann)
 
