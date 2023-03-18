@@ -12,3 +12,5 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
+  - pip:
+      - classy<3

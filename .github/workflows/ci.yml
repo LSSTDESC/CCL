@@ -87,11 +87,9 @@ jobs:
         run: |
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
           mamba env update --file ${{ env.CONDA_ENV }} --prune
-          pip install "classy<3"
 
       - name: Install CCL
-        run: |
-          pip install -e .
+        run: pip install -e .
 
       - name: Unit tests
         run: |
