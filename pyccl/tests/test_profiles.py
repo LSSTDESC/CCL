@@ -278,10 +278,17 @@ def test_hod_2pt():
     # p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood,
     #                prof2=pgood, mass_def=M200)
 
+    # p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood,
+    #                prof2=pgood_b, mass_def=M200)
+
     with pytest.raises(ValueError):
         pgood_b.update_parameters(lM0_0=10.)
         p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood,
                        prof2=pgood_b, mass_def=M200)
+
+    with pytest.raises(TypeError):
+        p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood,
+                       prof2=pbad, mass_def=M200)
 
 
 def test_2pt_rcorr_smoke():

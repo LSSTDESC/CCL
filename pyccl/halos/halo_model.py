@@ -308,11 +308,14 @@ class HMCalculator(CCLHalosObject):
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
                 second halo profile. If `None`, `prof` will be used as
-                `prof2`.
+            prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+                a profile covariance object
+                returning the the two-point moment of the two profiles
+                being correlated.
             prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object returning the the two-point
                 moment of the two profiles being correlated.
@@ -349,7 +352,7 @@ class HMCalculator(CCLHalosObject):
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
                 second halo profile. If `None`, `prof` will be used as
@@ -891,34 +894,33 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
     a_use = np.atleast_1d(a).astype(float)
     k_use = np.atleast_1d(k).astype(float)
 
+    if prof2 is None:
+        prof2 = prof
+    if prof3 is None:
+        prof3 = prof
+    if prof4 is None:
+        prof4 = prof2
+    if prof12_2pt is None:
+        prof12_2pt = Profile2pt()
+    if prof34_2pt is None:
+        prof34_2pt = prof12_2pt
+
     # Check inputs
     if not isinstance(prof, HaloProfile):
         raise TypeError("prof must be of type `HaloProfile`")
-    if prof2 is None:
-        prof2 = prof
-    elif not isinstance(prof2, HaloProfile):
+    if not isinstance(prof2, HaloProfile):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    if prof3 is None:
-        prof3 = prof
-    elif not isinstance(prof3, HaloProfile):
+    if not isinstance(prof3, HaloProfile):
         raise TypeError("prof3 must be of type `HaloProfile` or `None`")
-    if prof4 is None:
-        prof4 = prof2
-    elif not isinstance(prof4, HaloProfile):
+    if not isinstance(prof4, HaloProfile):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
-    if prof12_2pt is None:
-        prof12_2pt = Profile2pt()
-    elif not isinstance(prof12_2pt, Profile2pt):
+    if not isinstance(prof12_2pt, Profile2pt):
         raise TypeError("prof12_2pt must be of type `Profile2pt` or `None`")
-    if prof34_2pt is None:
-        prof34_2pt = prof12_2pt
-    elif not isinstance(prof34_2pt, Profile2pt):
+    if not isinstance(prof34_2pt, Profile2pt):
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
     def get_norm(normprof, prof, sf):
-        if normprof:
-            return hmc.profile_norm(cosmo, sf, prof)
-        return 1
+        return hmc.profile_norm(cosmo, sf, prof) if normprof else 1
 
     na = len(a_use)
     nk = len(k_use)
@@ -1332,9 +1334,9 @@ def halomod_Tk3D_SSC(
     # Check inputs
     if not isinstance(prof, HaloProfile):
         raise TypeError("prof must be of type `HaloProfile`")
-    elif not isinstance(prof2, HaloProfile):
+    if not isinstance(prof2, HaloProfile):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    elif not isinstance(prof3, HaloProfile):
+    if not isinstance(prof3, HaloProfile):
         raise TypeError("prof3 must be of type `HaloProfile` or `None`")
     if not isinstance(prof4, HaloProfile):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
@@ -1378,6 +1380,7 @@ def halomod_Tk3D_SSC(
         else:
             norm2 = get_norm(normprof2, prof2, aa)
             i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
+
         if prof3 == prof:
             norm3 = norm1
             i11_3 = i11_1

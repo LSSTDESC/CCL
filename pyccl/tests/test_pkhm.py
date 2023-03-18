@@ -238,6 +238,48 @@ def test_pkhm_pk2d():
                                   prof12_2pt=PKC, prof34_2pt=PKC),
                        I0, rtol=0)
 
+    # Testing profiles which are not equivalent (but very close)
+    G1 = ccl.halos.HaloProfileHOD(c_m_relation=CON, lMmin_0=12.00000)
+    G2 = ccl.halos.HaloProfileHOD(c_m_relation=CON, lMmin_0=11.99999)
+    assert G1 != G2
+
+    # I_1_1
+    pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, G1,
+                                           prof2=G1, normprof=False,
+                                           normprof2=False)
+    pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, G1,
+                                           prof2=G2, normprof=False,
+                                           normprof2=False)
+    assert np.allclose(pk1, pk0, rtol=1e-4)
+
+    # Profile normalization
+    pk0 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, G1,
+                                           prof2=G1, normprof=True,
+                                           normprof2=True)
+    pk1 = ccl.halos.halomod_power_spectrum(COSMO, hmc, k_arr, a_arr, G1,
+                                           prof2=G2, normprof=True,
+                                           normprof2=True)
+    assert np.allclose(pk1, pk0, rtol=1e-4)
+
+    # I_0_2 & I_1_2
+    assert np.allclose(hmc.I_0_2(COSMO, KK, AA, P1, prof_2pt=PKC),
+                       hmc.I_0_2(COSMO, KK, AA, P1, prof2=P1, prof_2pt=PKC),
+                       rtol=0)
+    assert np.allclose(hmc.I_1_2(COSMO, KK, AA, P1, prof_2pt=PKC),
+                       hmc.I_1_2(COSMO, KK, AA, P1, prof2=P1, prof_2pt=PKC),
+                       rtol=0)
+    # I_0_22
+    I0 = hmc.I_0_22(COSMO, KK, AA, P1, prof2=P1, prof3=P1, prof4=P1,
+                    prof12_2pt=PKC, prof34_2pt=PKC)
+    assert np.allclose(hmc.I_0_22(COSMO, KK, AA,
+                                  P1, prof2=P1, prof3=P1, prof4=P1,
+                                  prof12_2pt=PKC, prof34_2pt=None),
+                       I0, rtol=0)
+    assert np.allclose(hmc.I_0_22(COSMO, KK, AA,
+                                  P1, prof2=P1, prof3=None, prof4=None,
+                                  prof12_2pt=PKC, prof34_2pt=PKC),
+                       I0, rtol=0)
+
     # 1h/2h transition
     def alpha0(a):  # no smoothing
         return 1.
