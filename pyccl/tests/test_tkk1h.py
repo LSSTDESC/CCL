@@ -125,17 +125,18 @@ def test_tkk1h_tk3d():
     assert np.allclose(tkk_arr, tkk_arr_2, rtol=1E-4)
 
     # Standard sampling
-    tk3d = ccl.halos.halomod_Tk3D_1h(COSMO, hmc,
-                                     P1, prof2=P2,
-                                     prof12_2pt=PKC,
-                                     prof3=P3, prof4=P4,
-                                     prof34_2pt=PKC,
-                                     normprof=True,
-                                     normprof2=True,
-                                     normprof3=True,
-                                     normprof4=True,
-                                     lk_arr=np.log(k_arr),
-                                     use_log=True)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        tk3d = ccl.halos.halomod_Tk3D_1h(COSMO, hmc,
+                                         P1, prof2=P2,
+                                         prof12_2pt=PKC,
+                                         prof3=P3, prof4=P4,
+                                         prof34_2pt=PKC,
+                                         normprof=True,
+                                         normprof2=True,
+                                         normprof3=True,
+                                         normprof4=True,
+                                         lk_arr=np.log(k_arr),
+                                         use_log=True)
     tkk_arr_2 = np.array([tk3d.eval(k_arr, a) for a in a_arr])
     assert np.allclose(tkk_arr, tkk_arr_2, rtol=1E-4)
 

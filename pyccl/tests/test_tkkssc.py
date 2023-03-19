@@ -21,7 +21,7 @@ with UnlockInstance(P2_nogc):
     P2_nogc.is_number_counts = False
 P3 = ccl.halos.HaloProfilePressureGNFW()
 P4 = P1
-Pneg = ccl.halos.HaloProfilePressureGNFW(P0=1j)
+Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
 PKC = ccl.halos.Profile2pt()
 PKCH = ccl.halos.Profile2ptHOD()
 KK = np.geomspace(1E-3, 10, 32)

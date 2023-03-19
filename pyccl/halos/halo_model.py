@@ -85,11 +85,11 @@ class HMCalculator(CCLHalosObject):
                             "or a halo bias name string")
 
         self.precision = {
-            'log10M_min': lM_min, 'log10M_max': lM_max, 'nlog10M': nlM,
+            'log10M_min': lM_min, 'log10M_max': lM_max, 'nlM': nlM,
             'integration_method_M': integration_method_M, 'k_norm': k_norm}
         self._lmass = np.linspace(self.precision['log10M_min'],
                                   self.precision['log10M_max'],
-                                  self.precision['nlog10M'])
+                                  self.precision['nlM'])
         self._mass = 10.**self._lmass
         self._m0 = self._mass[0]
 
@@ -1047,6 +1047,7 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
                                  prof34_2pt=prof34_2pt,
                                  normprof=normprof, normprof2=normprof2,
                                  normprof3=normprof3, normprof4=normprof4)
+
     if use_log:
         # avoid zeros (this is system-dependent)
         tiny = np.nextafter(0, 1)
@@ -1349,8 +1350,8 @@ def halomod_Tk3D_SSC(
     profs = {prof: normprof, prof2: normprof2,
              prof3: normprof3, prof4: normprof4}
 
-    for i, (prof, norm) in enumerate(profs.items()):
-        if prof.is_number_counts and not norm:
+    for i, (p, n) in enumerate(profs.items()):
+        if p.is_number_counts and not n:
             raise ValueError(
                 f"normprof{i+1} must be True if prof{i+1}.is_number_counts")
 
@@ -1365,8 +1366,8 @@ def halomod_Tk3D_SSC(
         raise ValueError("p_of_k_a must be `None`, 'linear', "
                          "'nonlinear' or a `Pk2D` object")
 
-    def get_norm(normprof, prof, sf):
-        return hmc.profile_norm(cosmo, sf, prof) if normprof else 1
+    def get_norm(normalize, profile, sf):
+        return hmc.profile_norm(cosmo, sf, profile) if normalize else 1
 
     dpk12, dpk34 = [np.zeros((len(a_arr), len(k_use))) for _ in range(2)]
     for ia, aa in enumerate(a_arr):
