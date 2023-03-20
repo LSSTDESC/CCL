@@ -3,14 +3,14 @@ from ..pyutils import check
 from ..background import growth_factor, growth_rate
 from .massdef import MassDef, mass2radius_lagrangian
 from ..power import linear_matter_power, sigmaM
-from ..base import CCLHalosObject
+from ..base import CCLAutoreprObject
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 import functools
 from abc import abstractmethod
 
 
-class Concentration(CCLHalosObject):
+class Concentration(CCLAutoreprObject):
     """ This class enables the calculation of halo concentrations.
 
     Args:

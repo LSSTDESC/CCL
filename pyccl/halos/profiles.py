@@ -1,14 +1,14 @@
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
-from ..base import CCLHalosObject, UnlockInstance, unlock_instance
+from ..base import CCLAutoreprObject, UnlockInstance, unlock_instance
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
 from scipy.special import sici, erf, gamma, gammainc
 
 
-class HaloProfile(CCLHalosObject):
+class HaloProfile(CCLAutoreprObject):
     """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL

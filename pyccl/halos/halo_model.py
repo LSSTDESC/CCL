@@ -12,12 +12,12 @@ from ..power import linear_matter_power, nonlin_matter_power
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
-from ..base import CCLHalosObject, unlock_instance
+from ..base import CCLAutoreprObject, unlock_instance
 from ..parameters import physical_constants as const
 import numpy as np
 
 
-class HMCalculator(CCLHalosObject):
+class HMCalculator(CCLAutoreprObject):
     """This class implements a set of methods that can be used to
     compute various halo model quantities. A lot of these quantities
     will involve integrals of the sort:

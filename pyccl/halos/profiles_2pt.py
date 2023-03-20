@@ -1,8 +1,8 @@
-from ..base import CCLHalosObject
+from ..base import CCLAutoreprObject
 from .profiles import HaloProfile, HaloProfileHOD
 
 
-class Profile2pt(CCLHalosObject):
+class Profile2pt(CCLAutoreprObject):
     """ This class implements the 1-halo 2-point correlator between
     two halo profiles.
 
