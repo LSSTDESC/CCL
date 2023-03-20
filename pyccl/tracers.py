@@ -233,22 +233,22 @@ class Tracer(CCLObject):
                 if getattr(t1.transfer, arg) != getattr(t2.transfer, arg):
                     return False
 
-            # c2py = {"fa": _get_spline1d_arrays,
-            #         "fk": _get_spline1d_arrays,
-            #         "fka": _get_spline2d_arrays}
-            # for attr in c2py.keys():
-            #     spl1 = getattr(t1.transfer, attr, None)
-            #     spl2 = getattr(t2.transfer, attr, None)
-            #     if bool(spl1) ^ bool(spl2):
-            #         # only one of them has this transfer type
-            #         return False
-            #     if spl1 is None:
-            #         # none of them has this transfer type
-            #         continue
-            #     if not np.allclose(c2py[attr](spl1),
-            #                         c2py[attr](spl2), **kwargs):
-            #         # both have this transfer type, but they are unequal
-            #         return False
+            c2py = {"fa": _get_spline1d_arrays,
+                    "fk": _get_spline1d_arrays,
+                    "fka": _get_spline2d_arrays}
+            for attr in c2py.keys():
+                spl1 = getattr(t1.transfer, attr, None)
+                spl2 = getattr(t2.transfer, attr, None)
+                if bool(spl1) ^ bool(spl2):
+                    # only one of them has this transfer type
+                    return False
+                if spl1 is None:
+                    # none of them has this transfer type
+                    continue
+                if not np.allclose(c2py[attr](spl1),
+                                    c2py[attr](spl2), **kwargs):
+                    # both have this transfer type, but they are unequal
+                    return False
         return True
 
     def __bool__(self):

@@ -418,6 +418,11 @@ def test_tracer_repr():
     t_k = np.ones_like(lk)
     tr6.add_tracer(COSMO, transfer_k=(lk, t_k))
     tr7.add_tracer(COSMO, transfer_k=(lk, t_k))
+    assert tr6 == tr7
+    # transfer_a
+    tr6.add_tracer(COSMO, transfer_a=(1/(1+z)[::-1], nz))
+    tr7.add_tracer(COSMO, transfer_a=(1/(1+z)[::-1], nz))
+    assert tr6 == tr7
     # transfer_ka
     a = np.linspace(0.5, 1.0, 8)
     t_ka = np.ones((a.size, lk.size))
