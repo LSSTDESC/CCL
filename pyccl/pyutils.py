@@ -3,7 +3,7 @@ well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
 from ._types import error_types
 from .parameters import spline_params
-from .errors import CCLError, CCLWarning
+from .errors import CCLError, CCLDeprecationWarning
 import functools
 import warnings
 import numpy as np
@@ -469,7 +469,7 @@ def deprecated(new_function=None):
             s = "The function {} is deprecated.".format(func.__name__)
             if new_function:
                 s += " Use {} instead.".format(new_function.__name__)
-            warnings.warn(s, CCLWarning)
+            warnings.warn(s, CCLDeprecationWarning)
             return func(*args, **kwargs)
         return new_func
     return _depr_decorator

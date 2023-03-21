@@ -26,7 +26,8 @@ def test_massfunc_models_smoke(mf_type):
     hmf = hmf_cls(cosmo)
     for m in MS:
         # Deprecated
-        nm_old = assert_warns(ccl.CCLWarning, ccl.massfunc, cosmo, m, 1.)
+        nm_old = assert_warns(ccl.CCLDeprecationWarning,
+                              ccl.massfunc, cosmo, m, 1.)
         nm_new = hmf.get_mass_function(cosmo, m, 1.)
         assert np.all(np.isfinite(nm_old))
         assert np.shape(nm_old) == np.shape(m)
@@ -44,7 +45,8 @@ def test_halo_bias_models_smoke(mf_type):
     hbf = hbf_cls(cosmo)
     for m in MS:
         # Deprecated
-        bm_old = assert_warns(ccl.CCLWarning, ccl.halo_bias, cosmo, m, 1.)
+        bm_old = assert_warns(ccl.CCLDeprecationWarning,
+                              ccl.halo_bias, cosmo, m, 1.)
         bm_new = hbf.get_halo_bias(cosmo, m, 1.)
         assert np.all(np.isfinite(bm_old))
         assert np.shape(bm_old) == np.shape(m)
@@ -72,7 +74,7 @@ def test_massfunc_smoke(m):
 def test_massfunc_m2r_smoke(m):
     # Deprecated
     # TODO: switch to mass2radius_lagrangian
-    r = assert_warns(ccl.CCLWarning, ccl.massfunc_m2r, COSMO, m)
+    r = assert_warns(ccl.CCLDeprecationWarning, ccl.massfunc_m2r, COSMO, m)
     assert np.all(np.isfinite(r))
     assert np.shape(r) == np.shape(m)
 
@@ -98,6 +100,6 @@ def test_halo_bias_smoke(m):
     a = 0.8
     # Deprecated
     # TODO: switch to HaloBias
-    b = assert_warns(ccl.CCLWarning, ccl.halo_bias, COSMO, m, a)
+    b = assert_warns(ccl.CCLDeprecationWarning, ccl.halo_bias, COSMO, m, a)
     assert np.all(np.isfinite(b))
     assert np.shape(b) == np.shape(m)

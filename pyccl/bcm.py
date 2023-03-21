@@ -1,7 +1,9 @@
 from .base import unlock_instance
 from .baryons import BaryonicEffectsBCM
+from .pyutils import deprecated
 
 
+@deprecated(BaryonicEffectsBCM)
 def bcm_model_fka(cosmo, k, a):
     """The BCM model correction factor for baryons.
 
@@ -28,6 +30,7 @@ def bcm_model_fka(cosmo, k, a):
     return bcm.boost_factor(cosmo, k, a)
 
 
+@deprecated(BaryonicEffectsBCM)
 @unlock_instance(mutate=True, argv=1)
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
