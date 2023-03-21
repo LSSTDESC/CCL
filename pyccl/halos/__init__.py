@@ -50,6 +50,7 @@ from .hbias import (
 # Halo profiles
 from .profiles import (
     HaloProfile,
+    HaloProfileCIBShang12,
     HaloProfileGaussian,
     HaloProfilePowerLaw,
     HaloProfileNFW,
@@ -63,25 +64,30 @@ from .profiles import (
 from .profiles_2pt import (
     Profile2pt,
     Profile2ptHOD,
+    Profile2ptCIB,
 )
 
-# Halo model power spectrum
-from .halo_model import (
-    HMCalculator,
+# Halo model
+from .halo_model import HMCalculator
+
+# 1-point halo model
+from .pk_1pt import (
     halomod_mean_profile_1pt,
     halomod_bias_1pt,
+)
+
+# 2-point halo model
+from .pk_2pt import (
     halomod_power_spectrum,
     halomod_Pk2D,
+)
+
+# 4-point halo model
+from .pk_4pt import (
     halomod_trispectrum_1h,
     halomod_Tk3D_1h,
     halomod_Tk3D_SSC,
     halomod_Tk3D_SSC_linear_bias,
-)
-
-# CIB profiles
-from .profiles_cib import (
-    HaloProfileCIBShang12,
-    Profile2ptCIB,
 )
 
 
