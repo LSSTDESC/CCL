@@ -117,6 +117,7 @@ from .neutrinos import (
 from .cls import angular_cl
 from .tracers import (
     Tracer,
+    NzTracer,
     NumberCountsTracer,
     WeakLensingTracer,
     CMBLensingTracer,

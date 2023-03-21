@@ -210,24 +210,6 @@ class Tracer(CCLObject):
         chis = [tr.chi_max for tr in self._trc]
         return max(chis) if chis else None
 
-    def _dndz(self, z):
-        raise NotImplementedError("`get_dndz` not implemented for "
-                                  "this `Tracer` type.")
-
-    def get_dndz(self, z):
-        """Get the redshift distribution for this tracer.
-        Only available for some tracers (:class:`NumberCountsTracer` and
-        :class:`WeakLensingTracer`).
-
-        Args:
-            z (float or array_like): redshift values.
-
-        Returns:
-            array_like: redshift distribution evaluated at the
-                input values of `z`.
-        """
-        return self._dndz(z)
-
     def get_kernel(self, chi=None):
         """Get the radial kernels for all tracers contained
         in this `Tracer`.
@@ -582,6 +564,24 @@ class Tracer(CCLObject):
                 lib.cl_tracer_t_free(t)
 
 
+class NzTracer(Tracer):
+    """Specific for tracers with an internal `_dndz` redshift
+    distribution interpolator. Currently only used for
+    :class:`NumberCountsTracer` and :class:`WeakLensingTracer`.
+    """
+    def get_dndz(self, z):
+        """Get the redshift distribution for this tracer.
+
+        Args:
+            z (float or array_like): redshift values.
+
+        Returns:
+            array_like: redshift distribution evaluated at the
+                input values of `z`.
+        """
+        return self._dndz(z)
+
+
 @warn_api(reorder=["has_rsd", "dndz", "bias", "mag_bias"])
 def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
                        has_rsd, n_samples=256):
@@ -608,7 +608,7 @@ def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
             in radial distance. The kernel is quite smooth, so usually O(100)
             samples is enough.
     """
-    tracer = Tracer()
+    tracer = NzTracer()
 
     # we need the distance functions at the C layer
     cosmo.compute_distances()
@@ -683,7 +683,7 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
-    tracer = Tracer()
+    tracer = NzTracer()
 
     # we need the distance functions at the C layer
     cosmo.compute_distances()
