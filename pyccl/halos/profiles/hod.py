@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..concentration import Concentration
 from .profile_base import HaloProfile
 import numpy as np
@@ -70,7 +71,7 @@ class HaloProfileHOD(HaloProfile):
     HOD profile.
 
     Args:
-        c_M_relation (:obj:`Concentration`): concentration-mass
+        c_m_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
         lMmin_0 (float): offset parameter for
             :math:`\\log_{10}M_{\\rm min}`.
@@ -108,24 +109,26 @@ class HaloProfileHOD(HaloProfile):
         ns_independent (bool): drop requirement to only form
             satellites when centrals are present.
     """
-    __repr_attrs__ = ("cM", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p",
-                      "lM0_0", "lM0_p", "lM1_0", "lM1_p", "alpha_0", "alpha_p",
-                      "fc_0", "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p",
-                      "a_pivot", "ns_independent", "precision_fftlog",)
+    __repr_attrs__ = (
+        "c_m_relation", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p", "lM0_0",
+        "lM0_p", "lM1_0", "lM1_p", "alpha_0", "alpha_p", "fc_0", "fc_p",
+        "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
+        "ns_independent", "precision_fftlog",)
     name = 'HOD'
     is_number_counts = True
 
-    def __init__(self, c_M_relation,
+    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
+    def __init__(self, *, c_m_relation,
                  lMmin_0=12., lMmin_p=0., siglM_0=0.4,
                  siglM_p=0., lM0_0=7., lM0_p=0.,
                  lM1_0=13.3, lM1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
                  a_pivot=1., ns_independent=False):
-        if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`")
+        if not isinstance(c_m_relation, Concentration):
+            raise TypeError("c_m_relation must be of type `Concentration`")
 
-        self.cM = c_M_relation
+        self.c_m_relation = c_m_relation
         self.lMmin_0 = lMmin_0
         self.lMmin_p = lMmin_p
         self.lM0_0 = lM0_0
@@ -146,10 +149,12 @@ class HaloProfileHOD(HaloProfile):
         self.ns_independent = ns_independent
         super(HaloProfileHOD, self).__init__()
 
-    def _get_cM(self, cosmo, M, a, mdef=None):
-        return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
+    def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
+        return self.c_m_relation.get_concentration(cosmo, M, a,
+                                                   mass_def_other=mass_def)
 
-    def update_parameters(self, lMmin_0=None, lMmin_p=None,
+    @warn_api
+    def update_parameters(self, *, lMmin_0=None, lMmin_p=None,
                           siglM_0=None, siglM_p=None,
                           lM0_0=None, lM0_p=None,
                           lM1_0=None, lM1_p=None,
@@ -244,7 +249,7 @@ class HaloProfileHOD(HaloProfile):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
@@ -270,7 +275,7 @@ class HaloProfileHOD(HaloProfile):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
         c_M *= bmax / bg
 

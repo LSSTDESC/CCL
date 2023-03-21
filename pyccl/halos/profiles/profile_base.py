@@ -1,6 +1,6 @@
 from ...background import sigma_critical
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import CCLHalosObject, unlock_instance
+from ...base import CCLHalosObject, unlock_instance, warn_api
 import numpy as np
 
 
@@ -128,6 +128,9 @@ class HaloProfile(CCLHalosObject):
                 parameter is recommended when implementing a new profile.
                 Default value: -1.
         """
+        for par in kwargs:
+            if par not in self.precision_fftlog:
+                raise KeyError(f"Parameter {par} not recognized")
         self.precision_fftlog.update(kwargs)
 
     def _get_plaw_fourier(self, cosmo, a):
@@ -156,7 +159,8 @@ class HaloProfile(CCLHalosObject):
         """
         return self.precision_fftlog['plaw_projected']
 
-    def real(self, cosmo, r, M, a, mass_def=None):
+    @warn_api
+    def real(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 3D real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
 
@@ -182,7 +186,8 @@ class HaloProfile(CCLHalosObject):
                                     fourier_out=False)
         return f_r
 
-    def fourier(self, cosmo, k, M, a, mass_def):
+    @warn_api
+    def fourier(self, cosmo, k, M, a, *, mass_def=None):
         """ Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
         scale factor.
@@ -212,7 +217,8 @@ class HaloProfile(CCLHalosObject):
             f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
         return f_k
 
-    def projected(self, cosmo, r_t, M, a, mass_def):
+    @warn_api(pairs=[("r_t", "r")])
+    def projected(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
 
@@ -235,15 +241,16 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_projected', None):
-            s_r_t = self._projected(cosmo, r_t, M, a, mass_def)
+        if hasattr(self, "_projected"):
+            s_r_t = self._projected(cosmo, r, M, a, mass_def)
         else:
-            s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
+            s_r_t = self._projected_fftlog_wrap(cosmo, r, M,
                                                 a, mass_def,
                                                 is_cumul2d=False)
         return s_r_t
 
-    def cumul2d(self, cosmo, r_t, M, a, mass_def):
+    @warn_api(pairs=[("r_t", "r")])
+    def cumul2d(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
         factor.
@@ -267,15 +274,16 @@ class HaloProfile(CCLHalosObject):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_cumul2d', None):
-            s_r_t = self._cumul2d(cosmo, r_t, M, a, mass_def)
+        if hasattr(self, "_cumul2d"):
+            s_r_t = self._cumul2d(cosmo, r, M, a, mass_def)
         else:
-            s_r_t = self._projected_fftlog_wrap(cosmo, r_t, M,
+            s_r_t = self._projected_fftlog_wrap(cosmo, r, M,
                                                 a, mass_def,
                                                 is_cumul2d=True)
         return s_r_t
 
-    def convergence(self, cosmo, r, M, a_lens, a_source, mass_def):
+    @warn_api
+    def convergence(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the convergence as a function of cosmology,
         radius, halo mass and the scale factors of the source
         and the lens.
@@ -299,11 +307,13 @@ class HaloProfile(CCLHalosObject):
             float or array_like: convergence \
                 :math:`\\kappa`
         """
-        Sigma = self.projected(cosmo, r, M, a_lens, mass_def) / a_lens**2
-        Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
+        Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
+        Sigma /= a_lens**2
+        Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
         return Sigma / Sigma_crit
 
-    def shear(self, cosmo, r, M, a_lens, a_source, mass_def):
+    @warn_api
+    def shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the shear (tangential) as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -330,12 +340,13 @@ class HaloProfile(CCLHalosObject):
             float or array_like: shear \
                 :math:`\\gamma`
         """
-        Sigma = self.projected(cosmo, r, M, a_lens, mass_def)
-        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def)
-        Sigma_crit = sigma_critical(cosmo, a_lens, a_source)
+        Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
+        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def=mass_def)
+        Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
-    def reduced_shear(self, cosmo, r, M, a_lens, a_source, mass_def):
+    @warn_api
+    def reduced_shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the reduced shear as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -360,11 +371,14 @@ class HaloProfile(CCLHalosObject):
             float or array_like: reduced shear \
                 :math:`g_t`
         """
-        convergence = self.convergence(cosmo, r, M, a_lens, a_source, mass_def)
-        shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
+        convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
+                                       a_source=a_source, mass_def=mass_def)
+        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source,
+                           mass_def=mass_def)
         return shear / (1.0 - convergence)
 
-    def magnification(self, cosmo, r, M, a_lens, a_source, mass_def):
+    @warn_api
+    def magnification(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
         """ Returns the magnification for input parameters.
 
         .. math::
@@ -388,8 +402,10 @@ class HaloProfile(CCLHalosObject):
             float or array_like: magnification\
                 :math:`\\mu`
         """
-        convergence = self.convergence(cosmo, r, M, a_lens, a_source, mass_def)
-        shear = self.shear(cosmo, r, M, a_lens, a_source, mass_def)
+        convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
+                                       a_source=a_source, mass_def=mass_def)
+        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source,
+                           mass_def=mass_def)
 
         return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 

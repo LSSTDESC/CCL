@@ -1,4 +1,4 @@
-from ...base import UnlockInstance
+from ...base import UnlockInstance, warn_api
 from ...background import h_over_h0
 from .profile_base import HaloProfile
 import numpy as np
@@ -71,7 +71,8 @@ class HaloProfilePressureGNFW(HaloProfile):
                       "precision_fftlog",)
     name = 'GNFW'
 
-    def __init__(self, mass_bias=0.8, P0=6.41,
+    @warn_api
+    def __init__(self, *, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
                  qrange=(1e-3, 1e3), nq=128, x_out=np.inf):
@@ -91,7 +92,8 @@ class HaloProfilePressureGNFW(HaloProfile):
         self._fourier_interp = None
         super(HaloProfilePressureGNFW, self).__init__()
 
-    def update_parameters(self, mass_bias=None, P0=None,
+    @warn_api
+    def update_parameters(self, *, mass_bias=None, P0=None,
                           c500=None, alpha=None, beta=None, gamma=None,
                           alpha_P=None, P0_hexp=None, x_out=None):
         """Update any of the parameters associated with this profile.

@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..concentration import Concentration
 from .profile_base import HaloProfile
 import numpy as np
@@ -27,7 +28,7 @@ class HaloProfileHernquist(HaloProfile):
     By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
 
     Args:
-        c_M_relation (:obj:`Concentration`): concentration-mass
+        c_m_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
         fourier_analytic (bool): set to `True` if you want to compute
             the Fourier profile analytically (and not through FFTLog).
@@ -42,19 +43,20 @@ class HaloProfileHernquist(HaloProfile):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
-    __repr_attrs__ = ("cM", "fourier_analytic", "projected_analytic",
+    __repr_attrs__ = ("c_m_relation", "fourier_analytic", "projected_analytic",
                       "cumul2d_analytic", "truncated", "precision_fftlog",)
     name = 'Hernquist'
 
-    def __init__(self, c_M_relation,
+    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
+    def __init__(self, *, c_m_relation,
                  truncated=True,
                  fourier_analytic=False,
                  projected_analytic=False,
                  cumul2d_analytic=False):
-        if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`")
+        if not isinstance(c_m_relation, Concentration):
+            raise TypeError("c_m_relation must be of type `Concentration`")
 
-        self.cM = c_M_relation
+        self.c_m_relation = c_m_relation
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic
@@ -79,8 +81,9 @@ class HaloProfileHernquist(HaloProfile):
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
-    def _get_cM(self, cosmo, M, a, mdef=None):
-        return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
+    def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
+        return self.c_m_relation.get_concentration(cosmo, M, a,
+                                                   mass_def_other=mass_def)
 
     def _norm(self, M, Rs, c):
         # Hernquist normalization from mass, radius and concentration
@@ -92,7 +95,7 @@ class HaloProfileHernquist(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         norm = self._norm(M_use, R_s, c_M)
@@ -131,7 +134,7 @@ class HaloProfileHernquist(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -170,7 +173,7 @@ class HaloProfileHernquist(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -190,7 +193,7 @@ class HaloProfileHernquist(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         x = k_use[None, :] * R_s[:, None]

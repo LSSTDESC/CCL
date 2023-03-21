@@ -1,3 +1,4 @@
+from ...base import warn_api
 from .profile_base import HaloProfile
 import numpy as np
 
@@ -14,19 +15,20 @@ class HaloProfileGaussian(HaloProfile):
     Args:
         r_scale (:obj:`function`): the width of the profile.
             The signature of this function should be
-            `f(cosmo, M, a, mdef)`, where `cosmo` is a
+            `f(cosmo, M, a, mass_def)`, where `cosmo` is a
             :class:`~pyccl.core.Cosmology` object, `M` is a halo mass in
-            units of M_sun, `a` is the scale factor and `mdef`
+            units of M_sun, `a` is the scale factor and `mass_def`
             is a :class:`~pyccl.halos.massdef.MassDef` object.
         rho0 (:obj:`function`): the amplitude of the profile.
             It should have the same signature as `r_scale`.
     """
-    __repr_attrs__ = ("r_s", "rho_0", "precision_fftlog",)
+    __repr_attrs__ = ("r_scale", "rho_0", "precision_fftlog",)
     name = 'Gaussian'
 
-    def __init__(self, r_scale, rho0):
+    @warn_api
+    def __init__(self, *, r_scale, rho0):
         self.rho_0 = rho0
-        self.r_s = r_scale
+        self.r_scale = r_scale
         super(HaloProfileGaussian, self).__init__()
         self.update_precision_fftlog(padding_lo_fftlog=0.01,
                                      padding_hi_fftlog=100.,
@@ -37,7 +39,7 @@ class HaloProfileGaussian(HaloProfile):
         M_use = np.atleast_1d(M)
 
         # Compute scale
-        rs = self.r_s(cosmo, M_use, a, mass_def)
+        rs = self.r_scale(cosmo, M_use, a, mass_def)
         # Compute normalization
         rho0 = self.rho_0(cosmo, M_use, a, mass_def)
         # Form factor

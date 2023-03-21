@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ...power import sigmaM
 from ..concentration import Concentration
 from ..massdef import MassDef
@@ -31,7 +32,7 @@ class HaloProfileEinasto(HaloProfile):
     By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
 
     Args:
-        c_M_relation (:obj:`Concentration`): concentration-mass
+        c_m_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
         truncated (bool): set to `True` if the profile should be
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
@@ -39,14 +40,16 @@ class HaloProfileEinasto(HaloProfile):
         alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
             'cosmo' to calculate the value from cosmology. Default: 'cosmo'
     """
-    __repr_attrs__ = ("cM", "truncated", "alpha", "precision_fftlog",)
+    __repr_attrs__ = ("c_m_relation", "truncated", "alpha",
+                      "precision_fftlog",)
     name = 'Einasto'
 
-    def __init__(self, c_M_relation, truncated=True, alpha='cosmo'):
-        if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`")
+    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
+    def __init__(self, *, c_m_relation, truncated=True, alpha='cosmo'):
+        if not isinstance(c_m_relation, Concentration):
+            raise TypeError("c_m_relation must be of type `Concentration`")
 
-        self.cM = c_M_relation
+        self.c_m_relation = c_m_relation
         self.truncated = truncated
         self.alpha = alpha
         super(HaloProfileEinasto, self).__init__()
@@ -68,19 +71,18 @@ class HaloProfileEinasto(HaloProfile):
         if alpha is not None and alpha != self.alpha:
             self.alpha = alpha
 
-    def _get_cM(self, cosmo, M, a, mdef=None):
-        return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
-
-    def _get_alpha(self, cosmo, M, a, mdef):
+    def _get_alpha(self, cosmo, M, a, mass_def):
         if self.alpha == 'cosmo':
-            mdef_vir = MassDef('vir', 'matter')
-            Mvir = mdef.translate_mass(cosmo, M, a, mdef_vir)
+            Mvir = mass_def.translate_mass(
+                cosmo, M, a, mass_def_other=MassDef('vir', 'matter'))
             sM = sigmaM(cosmo, Mvir, a)
             nu = 1.686 / sM
-            alpha = 0.155 + 0.0095 * nu * nu
-        else:
-            alpha = np.full_like(M, self.alpha)
-        return alpha
+            return 0.155 + 0.0095 * nu * nu
+        return np.full_like(M, self.alpha)
+
+    def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
+        return self.c_m_relation.get_concentration(cosmo, M, a,
+                                                   mass_def_other=mass_def)
 
     def _norm(self, M, Rs, c, alpha):
         # Einasto normalization from mass, radius, concentration and alpha
@@ -94,7 +96,7 @@ class HaloProfileEinasto(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
         R_s = R_M / c_M
 
         alpha = self._get_alpha(cosmo, M_use, a, mass_def)
