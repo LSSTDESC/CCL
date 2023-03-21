@@ -114,7 +114,7 @@ from .neutrinos import (
 )
 
 # Cells & Tracers
-from .cls import angular_cl
+from .cells import angular_cl
 from .tracers import (
     Tracer,
     NzTracer,
