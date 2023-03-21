@@ -1,6 +1,6 @@
 from .base import unlock_instance
 from .baryons import BaryonicEffectsBCM
-from .pyutils import deprecated
+from .base import deprecated
 
 
 @deprecated(BaryonicEffectsBCM)

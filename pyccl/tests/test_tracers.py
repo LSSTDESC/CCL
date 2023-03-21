@@ -21,7 +21,7 @@ def get_tracer(tracer_type, cosmo=None, **tracer_kwargs):
 
     if tracer_type == 'nc':
         ntr = 3
-        tr = ccl.NumberCountsTracer(cosmo, True,
+        tr = ccl.NumberCountsTracer(cosmo, has_rsd=True,
                                     dndz=(z, n),
                                     bias=(z, b),
                                     mag_bias=(z, b),
@@ -34,7 +34,7 @@ def get_tracer(tracer_type, cosmo=None, **tracer_kwargs):
                                    **tracer_kwargs)
     elif tracer_type == 'cl':
         ntr = 1
-        tr = ccl.CMBLensingTracer(cosmo, 1100., **tracer_kwargs)
+        tr = ccl.CMBLensingTracer(cosmo, z_source=1100., **tracer_kwargs)
     else:
         ntr = 0
         tr = ccl.Tracer(**tracer_kwargs)
@@ -50,16 +50,16 @@ def test_tracer_mag_0p4():
     s_no = np.ones_like(z)*0.4
     s_yes = np.zeros_like(z)
     # Tracer with no magnification by construction
-    t1 = ccl.NumberCountsTracer(COSMO, True,
+    t1 = ccl.NumberCountsTracer(COSMO, has_rsd=True,
                                 dndz=(z, n),
                                 bias=(z, b))
     # Tracer with s=0.4
-    t2 = ccl.NumberCountsTracer(COSMO, True,
+    t2 = ccl.NumberCountsTracer(COSMO, has_rsd=True,
                                 dndz=(z, n),
                                 bias=(z, b),
                                 mag_bias=(z, s_no))
     # Tracer with magnification
-    t3 = ccl.NumberCountsTracer(COSMO, True,
+    t3 = ccl.NumberCountsTracer(COSMO, has_rsd=True,
                                 dndz=(z, n),
                                 bias=(z, b),
                                 mag_bias=(z, s_yes))
@@ -180,7 +180,7 @@ def test_tracer_nz_support():
     n = dndz(z)
 
     with pytest.raises(ValueError):
-        _ = ccl.WeakLensingTracer(calculator_cosmo, (z, n))
+        _ = ccl.WeakLensingTracer(calculator_cosmo, dndz=(z, n))
 
     with pytest.raises(ValueError):
         _ = ccl.NumberCountsTracer(calculator_cosmo, has_rsd=False,
@@ -279,13 +279,13 @@ def test_tracer_magnification_kernel_spline_vs_gsl_intergation(z_min, z_max,
         assert n[0] > 0
 
     ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
-    tr_mg = ccl.NumberCountsTracer(cosmo, False, dndz=(z, n),
+    tr_mg = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z, n),
                                    bias=(z, b), mag_bias=(z, b))
     w_mg_spline, _ = tr_mg.get_kernel(chi=None)
     ccl.gsl_params.reload()
 
     ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
-    tr_mg = ccl.NumberCountsTracer(cosmo, False, dndz=(z, n),
+    tr_mg = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z, n),
                                    bias=(z, b), mag_bias=(z, b))
     w_mg_gsl, chi = tr_mg.get_kernel(chi=None)
     tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
@@ -316,7 +316,7 @@ def test_tracer_delta_function_nz():
 
     # Single source plane tracer to compare against
     chi_kappa, w_kappa = ccl.tracers.get_kappa_kernel(COSMO, z_source=z_s,
-                                                      nsamples=100)
+                                                      n_samples=100)
 
     # Use the same comoving distances
     w = tr_wl.get_kernel(chi=chi_kappa)

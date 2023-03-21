@@ -10,7 +10,7 @@ COSMO = ccl.Cosmology(
 PKA = ccl.Pk2D(lambda k, a: np.log(a/k), cosmo=COSMO)
 ZZ = np.linspace(0., 1., 200)
 NN = np.exp(-((ZZ-0.5)/0.1)**2)
-LENS = ccl.WeakLensingTracer(COSMO, (ZZ, NN))
+LENS = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, NN))
 
 
 @pytest.mark.parametrize('p_of_k_a', [None, PKA])
@@ -19,13 +19,14 @@ def test_cls_smoke(p_of_k_a):
     z = np.linspace(0., 1., 200)
     n = np.exp(-((z-0.5)/0.1)**2)
     b = np.sqrt(1. + z)
-    lens1 = ccl.WeakLensingTracer(COSMO, (z, n))
+    lens1 = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
     lens2 = ccl.WeakLensingTracer(COSMO, dndz=(z, n), ia_bias=(z, n))
-    nc1 = ccl.NumberCountsTracer(COSMO, False, dndz=(z, n), bias=(z, b))
-    nc2 = ccl.NumberCountsTracer(COSMO, True, dndz=(z, n), bias=(z, b))
+    nc1 = ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=(z, n),
+                                 bias=(z, b))
+    nc2 = ccl.NumberCountsTracer(COSMO, has_rsd=True, dndz=(z, n), bias=(z, b))
     nc3 = ccl.NumberCountsTracer(
-        COSMO, True, dndz=(z, n), bias=(z, b), mag_bias=(z, b))
-    cmbl = ccl.CMBLensingTracer(COSMO, 1100.)
+        COSMO, has_rsd=True, dndz=(z, n), bias=(z, b), mag_bias=(z, b))
+    cmbl = ccl.CMBLensingTracer(COSMO, z_source=1100.)
     tracers = [lens1, lens2, nc1, nc2, nc3, cmbl]
 
     ell_scl = 4.
@@ -49,13 +50,14 @@ def test_cls_smoke(p_of_k_a):
 
     # Check invalid dndz
     with assert_raises(ValueError):
-        ccl.NumberCountsTracer(COSMO, False, dndz=z, bias=(z, b))
+        ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=z, bias=(z, b))
     with assert_raises(ValueError):
-        ccl.NumberCountsTracer(COSMO, False, dndz=(z, n, n), bias=(z, b))
+        ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=(z, n, n),
+                               bias=(z, b))
     with assert_raises(ValueError):
-        ccl.NumberCountsTracer(COSMO, False, dndz=(z,), bias=(z, b))
+        ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=(z,), bias=(z, b))
     with assert_raises(ValueError):
-        ccl.NumberCountsTracer(COSMO, False, dndz=(1, 2), bias=(z, b))
+        ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=(1, 2), bias=(z, b))
     with assert_raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=z)
     with assert_raises(ValueError):
@@ -106,8 +108,8 @@ def test_cls_mg():
 
     # get the Cells
     ell = np.geomspace(2, 2000, 128)
-    tr_MG = ccl.CMBLensingTracer(cosmo_MG, 1100.)
-    tr_calc = ccl.CMBLensingTracer(cosmo_calc, 1100.)
+    tr_MG = ccl.CMBLensingTracer(cosmo_MG, z_source=1100.)
+    tr_calc = ccl.CMBLensingTracer(cosmo_calc, z_source=1100.)
 
     cl0 = ccl.angular_cl(cosmo_MG, tr_MG, tr_MG, ell)
     cosmo_calc.compute_growth()
