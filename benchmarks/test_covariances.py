@@ -42,7 +42,7 @@ def test_ssc_WL():
 
     z, nofz = np.loadtxt(os.path.join(data_dir, "ssc_WL_nofz.txt"),
                          unpack=True)
-    WL_tracer = ccl.WeakLensingTracer(cosmo, (z, nofz))
+    WL_tracer = ccl.WeakLensingTracer(cosmo, dndz=(z, nofz))
 
     ell = np.loadtxt(os.path.join(data_dir, "ssc_WL_ell.txt"))
 
