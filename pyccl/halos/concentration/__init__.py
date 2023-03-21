@@ -12,7 +12,6 @@ __all__ = (
     "Concentration", "concentration_from_name",
     "ConcentrationBhattacharya13",
     "ConcentrationConstant",
-    "ConcentrationConstant",
     "ConcentrationDiemer15",
     "ConcentrationDuffy08",
     "ConcentrationIshiyama21",
