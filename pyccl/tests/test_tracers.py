@@ -83,13 +83,6 @@ def test_tracer_dndz_smoke(tracer_type):
         assert np.all(np.fabs(n1 / n2 - 1) < 1E-5)
 
 
-@pytest.mark.parametrize('tracer_type', ['cl', 'not'])
-def test_tracer_dndz_errors(tracer_type):
-    tr, _ = get_tracer(tracer_type)
-    with pytest.raises(NotImplementedError):
-        tr.get_dndz(0.5)
-
-
 @pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl', 'not'])
 def test_tracer_kernel_smoke(tracer_type):
     tr, ntr = get_tracer(tracer_type)
@@ -405,7 +398,7 @@ def test_tracer_repr():
     # Check empty tracer.
     z = np.linspace(0, 0.5, 128)
     nz = np.ones_like(z)
-    tr4 = ccl.Tracer()
+    tr4 = ccl.NzTracer()
     tr5 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=False)  # all off
     assert tr4 == tr5
     # Check tracers with transfer functions.
