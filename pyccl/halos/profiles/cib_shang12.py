@@ -1,5 +1,6 @@
 from ..concentration import Concentration
-from .profiles import HaloProfile, HaloProfileNFW
+from .profile_base import HaloProfile
+from .nfw import HaloProfileNFW
 import numpy as np
 from scipy.integrate import simps
 from scipy.special import lambertw
