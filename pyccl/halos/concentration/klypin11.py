@@ -2,6 +2,9 @@ from ..massdef import MassDef
 from .concentration_base import Concentration
 
 
+__all__ = ("ConcentrationKlypin11",)
+
+
 class ConcentrationKlypin11(Concentration):
     """ Concentration-mass relation by Klypin et al. 2011
     (arXiv:1002.3660). This parametrization is only valid for

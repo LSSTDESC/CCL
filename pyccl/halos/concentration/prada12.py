@@ -3,6 +3,9 @@ from .concentration_base import Concentration
 import numpy as np
 
 
+__all__ = ("ConcentrationPrada12",)
+
+
 class ConcentrationPrada12(Concentration):
     """ Concentration-mass relation by Prada et al. 2012
     (arXiv:1104.5130). This parametrization is only valid for

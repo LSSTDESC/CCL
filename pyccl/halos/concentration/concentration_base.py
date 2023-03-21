@@ -4,6 +4,9 @@ from abc import abstractmethod
 import functools
 
 
+__all__ = ("Concentration", "concentration_from_name",)
+
+
 class Concentration(CCLHalosObject):
     """ This class enables the calculation of halo concentrations.
 

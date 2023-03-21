@@ -3,6 +3,9 @@ from ..massdef import MassDef
 from .concentration_base import Concentration
 
 
+__all__ = ("ConcentrationBhattacharya13",)
+
+
 class ConcentrationBhattacharya13(Concentration):
     """ Concentration-mass relation by Bhattacharya et al. 2013
     (arXiv:1112.5479). This parametrization is only valid for

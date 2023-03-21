@@ -6,6 +6,9 @@ import numpy as np
 from scipy.optimize import brentq, root_scalar
 
 
+__all__ = ("ConcentrationIshiyama21",)
+
+
 class ConcentrationIshiyama21(Concentration):
     """ Concentration-mass relation by Ishiyama et al. 2021
     (arXiv:2007.14720). This parametrization is only valid for

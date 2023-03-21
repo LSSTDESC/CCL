@@ -3,6 +3,9 @@ from .concentration_base import Concentration
 import numpy as np
 
 
+__all__ = ("ConcentrationConstant",)
+
+
 class ConcentrationConstant(Concentration):
     """ Constant contentration-mass relation.
 

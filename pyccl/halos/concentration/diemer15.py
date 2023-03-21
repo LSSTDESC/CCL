@@ -3,6 +3,9 @@ from .concentration_base import Concentration
 import numpy as np
 
 
+__all__ = ("ConcentrationDiemer15",)
+
+
 class ConcentrationDiemer15(Concentration):
     """ Concentration-mass relation by Diemer & Kravtsov 2015
     (arXiv:1407.4730). This parametrization is only valid for
