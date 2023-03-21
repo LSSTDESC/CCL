@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..massdef import MassDef200m
 from .hmfunc_base import MassFunc
 import numpy as np
@@ -10,29 +11,27 @@ class MassFuncWatson13(MassFunc):
     """ Implements mass function described in arXiv:1212.0095.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts fof and any SO masses.
+            The default is '200m'.
             If `None`, Delta = 200 (matter) will be used.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Watson13'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
-        super(MassFuncWatson13, self).__init__(cosmo,
-                                               mass_def,
-                                               mass_def_strict)
+    @warn_api
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True):
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
+    def _setup(self):
+        self.is_fof = self.mass_def.Delta == 'fof'
 
-    def _setup(self, cosmo):
-        self.is_fof = self.mdef.Delta == 'fof'
-
-    def _check_mdef_strict(self, mdef):
-        if mdef.Delta == 'vir':
+    def _check_mass_def_strict(self, mass_def):
+        if mass_def.Delta == 'vir':
             return True
         return False
 
@@ -45,7 +44,7 @@ class MassFuncWatson13(MassFunc):
             return pA * ((pb / sigM)**pa + 1.) * np.exp(-pc / sigM**2)
         else:
             om = cosmo.omega_x(a, "matter")
-            Delta_178 = self.mdef.Delta / 178.0
+            Delta_178 = self.mass_def.Delta / 178.0
 
             if a == 1.0:
                 pA = 0.194

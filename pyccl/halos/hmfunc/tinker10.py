@@ -1,6 +1,8 @@
+from ...base import warn_api
 from ..massdef import MassDef200m
 from .hmfunc_base import MassFunc
 import numpy as np
+from scipy.interpolate import interp1d
 
 
 __all__ = ("MassFuncTinker10",)
@@ -10,7 +12,6 @@ class MassFuncTinker10(MassFunc):
     """ Implements mass function described in arXiv:1001.3162.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts SO masses with
@@ -21,22 +22,18 @@ class MassFuncTinker10(MassFunc):
         norm_all_z (bool): should we normalize the mass function
             at z=0 or at all z?
     """
-    __repr_attrs__ = ("mdef", "mass_def_strict", "norm_all_z",)
+    __repr_attrs__ = ("mass_def", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    @warn_api
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True,
                  norm_all_z=False):
         self.norm_all_z = norm_all_z
-        super(MassFuncTinker10, self).__init__(cosmo,
-                                               mass_def,
-                                               mass_def_strict)
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
-
-    def _setup(self, cosmo):
-        from scipy.interpolate import interp1d
-
+    def _setup(self):
         delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
                           1200.0, 1600.0, 2400.0, 3200.0])
         alpha = np.array([0.368, 0.363, 0.385, 0.389, 0.393,
@@ -64,8 +61,8 @@ class MassFuncTinker10(MassFunc):
             self.pp0 = interp1d(ldelta, p)
             self.pq0 = interp1d(ldelta, q)
 
-    def _check_mdef_strict(self, mdef):
-        if mdef.Delta == 'fof':
+    def _check_mass_def_strict(self, mass_def):
+        if mass_def.Delta == 'fof':
             return True
         return False
 

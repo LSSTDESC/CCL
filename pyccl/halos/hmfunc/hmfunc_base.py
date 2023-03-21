@@ -2,7 +2,7 @@ from ... import ccllib as lib
 from ...core import check
 from ...background import omega_x
 from ...parameters import physical_constants
-from ...base import CCLHalosObject
+from ...base import CCLHalosObject, warn_api, deprecated, deprecate_attr
 import numpy as np
 import functools
 from abc import abstractmethod
@@ -21,12 +21,15 @@ class MassFunc(CCLHalosObject):
 
     where :math:`\\sigma_M^2` is the overdensity variance on spheres with a
     radius given by the Lagrangian radius for mass M.
-    All sub-classes implementing specific mass function parametrizations
-    can therefore be simply created by replacing this class'
-    `_get_fsigma` method.
+
+    * Subclasses implementing analytical mass function parametrizations
+      can be created by overriding the ``_get_fsigma`` method.
+
+    * Subclasses may have particular implementations of
+      ``_check_mass_def_strict`` to ensure consistency of the halo mass
+      definition.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object that fixes
             the mass definition used by this mass function
@@ -34,52 +37,40 @@ class MassFunc(CCLHalosObject):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    __repr_attrs__ = ("mdef", "mass_def_strict",)
+    __repr_attrs__ = ("mass_def", "mass_def_strict",)
+    __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
+                                 )(super.__getattribute__)
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
-        # Initialize sigma(M) splines if needed
-        cosmo.compute_sigma()
+    @warn_api
+    def __init__(self, *, mass_def=None, mass_def_strict=True):
         self.mass_def_strict = mass_def_strict
-        # Check if mass function was provided and check that it's
-        # sensible.
+        # Check if mass definition was provided and check that it's sensible.
         if mass_def is not None:
-            if self._check_mdef(mass_def):
+            if self._check_mass_def(mass_def):
                 raise ValueError("Mass function " + self.name +
                                  " is not compatible with mass definition" +
                                  " Delta = %s, " % (mass_def.Delta) +
                                  " rho = " + mass_def.rho_type)
-            self.mdef = mass_def
-        else:
-            self._default_mdef()
-        self._setup(cosmo)
+            self.mass_def = mass_def
+        self._setup()
 
-    @abstractmethod
-    def _default_mdef(self):
-        """ Assigns a default mass definition for this object if
-        none is passed at initialization.
-        """
-
-    def _setup(self, cosmo):
+    def _setup(self):
         """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
         constructor call.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         """
-        pass
 
-    def _check_mdef_strict(self, mdef):
+    def _check_mass_def_strict(self, mass_def):
         return False
 
-    def _check_mdef(self, mdef):
+    def _check_mass_def(self, mass_def):
         """ Return False if the input mass definition agrees with
         the definitions for which this mass function parametrization
         works. True otherwise. This function gets called at the
         start of the constructor call.
 
         Args:
-            mdef (:class:`~pyccl.halos.massdef.MassDef`):
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
         Returns:
@@ -87,10 +78,10 @@ class MassFunc(CCLHalosObject):
                 this mass function parametrization. False otherwise.
         """
         if self.mass_def_strict:
-            return self._check_mdef_strict(mdef)
+            return self._check_mass_def_strict(mass_def)
         return False
 
-    def _get_consistent_mass(self, cosmo, M, a, mdef_other):
+    def _get_consistent_mass(self, cosmo, M, a, mass_def_other):
         """ Transform a halo mass with a given mass definition into
         the corresponding mass definition that was used to initialize
         this object.
@@ -99,15 +90,17 @@ class MassFunc(CCLHalosObject):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
         Returns:
             float or array_like: mass according to this object's \
                 mass definition.
         """
-        if mdef_other is not None:
-            M_use = mdef_other.translate_mass(cosmo, M, a, self.mdef)
+        if mass_def_other is not None:
+            M_use = mass_def_other.translate_mass(
+                cosmo, M, a,
+                mass_def_other=self.mass_def)
         else:
             M_use = M
         return np.log10(M_use)
@@ -118,31 +111,35 @@ class MassFunc(CCLHalosObject):
         mostly for the Tinker mass functions, which are defined for any
         SO mass in general, but explicitly only for Delta_matter.
         """
-        delta = self.mdef.get_Delta(cosmo, a)
-        if self.mdef.rho_type == 'matter':
+        delta = self.mass_def.get_Delta(cosmo, a)
+        if self.mass_def.rho_type == 'matter':
             return delta
         else:
-            om_this = omega_x(cosmo, a, self.mdef.rho_type)
+            om_this = omega_x(cosmo, a, self.mass_def.rho_type)
             om_matt = omega_x(cosmo, a, 'matter')
             return delta * om_this / om_matt
 
-    def get_mass_function(self, cosmo, M, a, mdef_other=None):
+    @warn_api(pairs=[("mdef_other", "mass_def_other")])
+    def get_mass_function(self, cosmo, M, a, *, mass_def_other=None):
         """ Returns the mass function for input parameters.
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
                 the mass definition object that defines M.
 
         Returns:
             float or array_like: mass function \
                 :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
         """
+        # Initialize sigma(M) splines if needed
+        cosmo.compute_sigma()
+
         M_use = np.atleast_1d(M)
         logM = self._get_consistent_mass(cosmo, M_use,
-                                         a, mdef_other)
+                                         a, mass_def_other)
 
         # sigma(M)
         status = 0
@@ -200,5 +197,6 @@ class MassFunc(CCLHalosObject):
 
 
 @functools.wraps(MassFunc.from_name)
+@deprecated(new_function=MassFunc.from_name)
 def mass_function_from_name(name):
     return MassFunc.from_name(name)

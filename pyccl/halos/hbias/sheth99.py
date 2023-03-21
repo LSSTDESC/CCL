@@ -1,4 +1,5 @@
 from ... import ccllib as lib
+from ...base import warn_api
 from ...core import check
 from ..massdef import MassDef
 from .hbias_base import HaloBias
@@ -12,7 +13,6 @@ class HaloBiasSheth99(HaloBias):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
@@ -23,27 +23,24 @@ class HaloBiasSheth99(HaloBias):
             the fit of Nakamura & Suto 1997. Otherwise use
             delta_crit = 1.68647.
     """
-    __repr_attrs__ = ("mdef", "mass_def_strict", "use_delta_c_fit",)
+    __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = "Sheth99"
 
-    def __init__(self, cosmo, mass_def=None,
+    @warn_api
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
                  mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
-        super(HaloBiasSheth99, self).__init__(cosmo,
-                                              mass_def,
-                                              mass_def_strict)
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
-
-    def _setup(self, cosmo):
+    def _setup(self):
         self.p = 0.3
         self.a = 0.707
 
-    def _check_mdef_strict(self, mdef):
+    def _check_mass_def_strict(self, mass_def):
         if self.mass_def_strict:
-            if mdef.Delta != 'fof':
+            if mass_def.Delta != 'fof':
                 return True
         return False
 

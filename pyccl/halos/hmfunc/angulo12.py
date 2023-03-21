@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..massdef import MassDef
 from .hmfunc_base import MassFunc
 import numpy as np
@@ -11,7 +12,6 @@ class MassFuncAngulo12(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
@@ -21,22 +21,20 @@ class MassFuncAngulo12(MassFunc):
     """
     name = 'Angulo12'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
-        super(MassFuncAngulo12, self).__init__(cosmo,
-                                               mass_def,
-                                               mass_def_strict)
+    @warn_api
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True):
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
-
-    def _setup(self, cosmo):
+    def _setup(self):
         self.A = 0.201
         self.a = 2.08
         self.b = 1.7
         self.c = 1.172
 
-    def _check_mdef_strict(self, mdef):
-        if mdef.Delta != 'fof':
+    def _check_mass_def_strict(self, mass_def):
+        if mass_def.Delta != 'fof':
             return True
         return False
 

@@ -1,6 +1,6 @@
 from ...background import sigma_critical
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import CCLHalosObject, unlock_instance, warn_api
+from ...base import CCLHalosObject, unlock_instance, warn_api, deprecate_attr
 import numpy as np
 
 
@@ -34,6 +34,8 @@ class HaloProfile(CCLHalosObject):
     calculation.
     """
     is_number_counts = False
+    __getattr__ = deprecate_attr(pairs=[('cM', 'c_m_relation')]
+                                 )(super.__getattribute__)
 
     def __init__(self):
         # Check that at least one of (`_real`, `_fourier`) exist.

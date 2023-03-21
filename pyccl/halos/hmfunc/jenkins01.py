@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..massdef import MassDef
 from .hmfunc_base import MassFunc
 import numpy as np
@@ -11,31 +12,28 @@ class MassFuncJenkins01(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
+            The default is 'fof'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
     name = 'Jenkins01'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
-        super(MassFuncJenkins01, self).__init__(cosmo,
-                                                mass_def=mass_def,
-                                                mass_def_strict=True)
+    @warn_api
+    def __init__(self, *,
+                 mass_def=MassDef('fof', 'matter'),
+                 mass_def_strict=True):
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
-    def _default_mdef(self):
-        self.mdef = MassDef('fof', 'matter')
-
-    def _setup(self, cosmo):
+    def _setup(self):
         self.A = 0.315
         self.b = 0.61
         self.q = 3.8
 
-    def _check_mdef_strict(self, mdef):
-        if mdef.Delta != 'fof':
+    def _check_mass_def_strict(self, mass_def):
+        if mass_def.Delta != 'fof':
             return True
         return False
 

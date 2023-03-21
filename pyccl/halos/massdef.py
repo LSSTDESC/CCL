@@ -1,7 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import species_types, rho_x, omega_x
-from ..base import CCLHalosObject
+from ..base import CCLHalosObject, warn_api, deprecate_attr
 import numpy as np
 
 
@@ -24,7 +24,8 @@ def mass2radius_lagrangian(cosmo, M):
     return R
 
 
-def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
+@warn_api
+def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration `c_new` is
     found by solving the equation:
@@ -85,8 +86,11 @@ class MassDef(CCLHalosObject):
             definition (and hence one can't translate into other definitions).
     """
     __repr_attrs__ = ("name",)
+    __getattr__ = deprecate_attr(pairs=[('concentration', 'c_m_relation')]
+                                 )(super.__getattribute__)
 
-    def __init__(self, Delta, rho_type, c_m_relation=None):
+    @warn_api
+    def __init__(self, Delta, rho_type=None, *, c_m_relation=None):
         # Check it makes sense
         if (Delta != 'fof') and (Delta != 'vir'):
             if isinstance(Delta, str):
@@ -102,7 +106,7 @@ class MassDef(CCLHalosObject):
         self.species = species_types[rho_type]
         # c(M) relation
         if c_m_relation is None:
-            self.concentration = None
+            self.c_m_relation = None
         else:
             self._concentration_init(c_m_relation)
 
@@ -114,14 +118,14 @@ class MassDef(CCLHalosObject):
         return f"{self.Delta}"
 
     def _concentration_init(self, c_m_relation):
-        from .concentration import Concentration, concentration_from_name
+        from .concentration import Concentration
         if isinstance(c_m_relation, Concentration):
-            self.concentration = c_m_relation
+            self.c_m_relation = c_m_relation
         elif isinstance(c_m_relation, str):
             # Grab class
-            conc_class = concentration_from_name(c_m_relation)
+            conc_class = Concentration.from_name(c_m_relation)
             # instantiate with this mass definition
-            self.concentration = conc_class(mdef=self)
+            self.c_m_relation = conc_class(mass_def=self)
         else:
             raise ValueError("c_m_relation must be `None`, "
                              " a string or a `Concentration` object")
@@ -200,28 +204,29 @@ class MassDef(CCLHalosObject):
         Returns:
             float or array_like: halo concentration.
         """
-        if self.concentration is None:
+        if self.c_m_relation is None:
             raise RuntimeError("This mass definition doesn't have "
                                "an associated c(M) relation")
         else:
-            return self.concentration.get_concentration(cosmo, M, a)
+            return self.c_m_relation.get_concentration(cosmo, M, a)
 
-    def translate_mass(self, cosmo, M, a, m_def_other):
+    @warn_api(pairs=[("mdef_other", "mass_def_other")])
+    def translate_mass(self, cosmo, M, a, *, mass_def_other):
         """ Translate halo mass in this definition into another definition
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            m_def_other (:obj:`MassDef`): another mass definition.
+            mass_def_other (:obj:`MassDef`): another mass definition.
 
         Returns:
             float or array_like: halo masses in new definition.
         """
-        if self == m_def_other:
+        if self == mass_def_other:
             return M
         else:
-            if self.concentration is None:
+            if self.c_m_relation is None:
                 raise RuntimeError("This mass definition doesn't have "
                                    "an associated c(M) relation")
             else:
@@ -229,11 +234,13 @@ class MassDef(CCLHalosObject):
                 D_this = self.get_Delta(cosmo, a) * om_this
                 c_this = self._get_concentration(cosmo, M, a)
                 R_this = self.get_radius(cosmo, M, a)
-                om_new = omega_x(cosmo, a, m_def_other.rho_type)
-                D_new = m_def_other.get_Delta(cosmo, a) * om_new
-                c_new = convert_concentration(cosmo, c_this, D_this, D_new)
+                om_new = omega_x(cosmo, a, mass_def_other.rho_type)
+                D_new = mass_def_other.get_Delta(cosmo, a) * om_new
+                c_new = convert_concentration(cosmo, c_old=c_this,
+                                              Delta_old=D_this,
+                                              Delta_new=D_new)
                 R_new = c_new * R_this / c_this
-                return m_def_other.get_mass(cosmo, R_new, a)
+                return mass_def_other.get_mass(cosmo, R_new, a)
 
     @classmethod
     def from_name(cls, name):
@@ -252,37 +259,41 @@ class MassDef(CCLHalosObject):
             raise ValueError(f"Mass definition {name} not implemented.")
 
 
-def MassDef200m(c_m='Duffy08'):
+@warn_api(pairs=[('c_m', 'c_m_relation')])
+def MassDef200m(c_m_relation='Duffy08'):
     r""":math:`\Delta = 200m` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation.
+        c_m_relation (string): concentration-mass relation.
     """
-    return MassDef(200, 'matter', c_m_relation=c_m)
+    return MassDef(200, 'matter', c_m_relation=c_m_relation)
 
 
-def MassDef200c(c_m='Duffy08'):
+@warn_api(pairs=[('c_m', 'c_m_relation')])
+def MassDef200c(c_m_relation='Duffy08'):
     r""":math:`\Delta = 200c` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation.
+        c_m_relation (string): concentration-mass relation.
     """
-    return MassDef(200, 'critical', c_m_relation=c_m)
+    return MassDef(200, 'critical', c_m_relation=c_m_relation)
 
 
-def MassDef500c(c_m='Ishiyama21'):
+@warn_api(pairs=[('c_m', 'c_m_relation')])
+def MassDef500c(c_m_relation='Ishiyama21'):
     r""":math:`\Delta = 500m` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
     """
-    return MassDef(500, 'critical', c_m_relation=c_m)
+    return MassDef(500, 'critical', c_m_relation=c_m_relation)
 
 
-def MassDefVir(c_m='Klypin11'):
+@warn_api(pairs=[('c_m', 'c_m_relation')])
+def MassDefVir(c_m_relation='Klypin11'):
     r""":math:`\Delta = \rm vir` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation.
+        c_m_relation (string): concentration-mass relation.
     """
-    return MassDef('vir', 'critical', c_m_relation=c_m)
+    return MassDef('vir', 'critical', c_m_relation=c_m_relation)

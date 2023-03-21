@@ -3,7 +3,6 @@ import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl import UnlockInstance
-from pyccl.pyutils import assert_warns
 
 
 COSMO = ccl.Cosmology(
@@ -391,7 +390,7 @@ def test_tkkssc_linear_bias_smoke_and_errors():
                                                p_of_k_a=P1)
 
     # Negative profile in logspace
-    assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_SSC_linear_bias,
-                 COSMO, hmc, prof, bias1=-1,
-                 lk_arr=np.log(k_arr), a_arr=a_arr,
-                 use_log=True)
+    with pytest.warns(ccl.CCLWarning):
+        ccl.halos.halomod_Tk3D_SSC(
+            COSMO, hmc, P3, prof2=Pneg, prof3=P3, prof4=P3, normprof=False,
+            lk_arr=np.log(k_arr), a_arr=a_arr, use_log=True)

@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ... import ccllib as lib
 from ...pyutils import check
 from ..massdef import MassDef200m
@@ -12,32 +13,27 @@ class MassFuncDespali16(MassFunc):
     """ Implements mass function described in arXiv:1507.05627.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts any SO masses.
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
+        ellipsoidal (bool): use the ellipsoidal parametrization.
     """
-    __repr_attrs__ = ("mdef", "mass_def_strict", "ellipsoidal",)
+    __repr_attrs__ = ("mass_def", "mass_def_strict", "ellipsoidal",)
     name = 'Despali16'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    @warn_api
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True,
                  ellipsoidal=False):
-        super(MassFuncDespali16, self).__init__(cosmo,
-                                                mass_def,
-                                                mass_def_strict)
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
         self.ellipsoidal = ellipsoidal
 
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
-
-    def _setup(self, cosmo):
-        pass
-
-    def _check_mdef_strict(self, mdef):
-        if mdef.Delta == 'fof':
+    def _check_mass_def_strict(self, mass_def):
+        if mass_def.Delta == 'fof':
             return True
         return False
 
@@ -49,8 +45,8 @@ class MassFuncDespali16(MassFunc):
         Dv, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
         check(status, cosmo=cosmo)
 
-        x = np.log10(self.mdef.get_Delta(cosmo, a) *
-                     cosmo.omega_x(a, self.mdef.rho_type) / Dv)
+        x = np.log10(self.mass_def.get_Delta(cosmo, a) *
+                     cosmo.omega_x(a, self.mass_def.rho_type) / Dv)
 
         if self.ellipsoidal:
             A = -0.1768 * x + 0.3953

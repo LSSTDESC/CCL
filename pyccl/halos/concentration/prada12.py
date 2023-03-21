@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..massdef import MassDef
 from .concentration_base import Concentration
 import numpy as np
@@ -12,24 +13,25 @@ class ConcentrationPrada12(Concentration):
     S.O. masses with Delta = 200-critical.
 
     Args:
-        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
             definition object that fixes
             the mass definition used by this c(M)
             parametrization.
     """
     name = 'Prada12'
 
-    def __init__(self, mdef=None):
-        super(ConcentrationPrada12, self).__init__(mdef)
+    @warn_api(pairs=[("mdef", "mass_def")])
+    def __init__(self, *, mass_def=None):
+        super(ConcentrationPrada12, self).__init__(mass_def=mass_def)
 
-    def _default_mdef(self):
-        self.mdef = MassDef(200, 'critical')
+    def _default_mass_def(self):
+        self.mass_def = MassDef(200, 'critical')
 
-    def _check_mdef(self, mdef):
-        if isinstance(mdef.Delta, str):
+    def _check_mass_def(self, mass_def):
+        if isinstance(mass_def.Delta, str):
             return True
-        elif not ((int(mdef.Delta) == 200) and
-                  (mdef.rho_type == 'critical')):
+        elif not ((int(mass_def.Delta) == 200) and
+                  (mass_def.rho_type == 'critical')):
             return True
         return False
 

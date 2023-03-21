@@ -1,3 +1,4 @@
+from ..base import warn_api
 from .profiles import HaloProfile
 import numpy as np
 
@@ -5,8 +6,8 @@ import numpy as np
 __all__ = ("halomod_mean_profile_1pt", "halomod_bias_1pt",)
 
 
-def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof,
-                             normprof=False):
+@warn_api
+def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
     """ Returns the mass-weighted mean halo profile.
 
     .. math::
@@ -57,7 +58,8 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof,
     return out
 
 
-def halomod_bias_1pt(cosmo, hmc, k, a, prof, normprof=False):
+@warn_api
+def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=False):
     """ Returns the mass-and-bias-weighted mean halo profile.
 
     .. math::

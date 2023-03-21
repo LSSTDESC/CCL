@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..massdef import MassDef
 from .concentration_base import Concentration
 
@@ -12,34 +13,35 @@ class ConcentrationDuffy08(Concentration):
     By default it will be initialized for Delta = 200-critical.
 
     Args:
-        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
             definition object that fixes
             the mass definition used by this c(M)
             parametrization.
     """
     name = 'Duffy08'
 
-    def __init__(self, mdef=None):
-        super(ConcentrationDuffy08, self).__init__(mdef)
+    @warn_api(pairs=[("mdef", "mass_def")])
+    def __init__(self, *, mass_def=None):
+        super(ConcentrationDuffy08, self).__init__(mass_def=mass_def)
 
-    def _default_mdef(self):
-        self.mdef = MassDef(200, 'critical')
+    def _default_mass_def(self):
+        self.mass_def = MassDef(200, 'critical')
 
-    def _check_mdef(self, mdef):
-        if mdef.Delta != 'vir':
-            if isinstance(mdef.Delta, str):
+    def _check_mass_def(self, mass_def):
+        if mass_def.Delta != 'vir':
+            if isinstance(mass_def.Delta, str):
                 return True
-            elif int(mdef.Delta) != 200:
+            elif int(mass_def.Delta) != 200:
                 return True
         return False
 
     def _setup(self):
-        if self.mdef.Delta == 'vir':
+        if self.mass_def.Delta == 'vir':
             self.A = 7.85
             self.B = -0.081
             self.C = -0.71
         else:  # Now Delta has to be 200
-            if self.mdef.rho_type == 'matter':
+            if self.mass_def.rho_type == 'matter':
                 self.A = 10.14
                 self.B = -0.081
                 self.C = -1.01

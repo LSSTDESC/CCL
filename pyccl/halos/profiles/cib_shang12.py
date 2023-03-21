@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..concentration import Concentration
 from .profile_base import HaloProfile
 from .nfw import HaloProfileNFW
@@ -66,7 +67,7 @@ class HaloProfileCIBShang12(HaloProfile):
     dependence of the form :math:`T_d=T_0(1+z)^\\alpha`.
 
     Args:
-        c_M_relation (:obj:`Concentration`): concentration-mass
+        c_m_relation (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
         nu_GHz (float): frequency in GHz.
         alpha (float): dust temperature evolution parameter.
@@ -80,16 +81,18 @@ class HaloProfileCIBShang12(HaloProfile):
         L0 (float): luminosity scale (in
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
     """
-    __repr_attrs__ = ("cM", "nu", "alpha", "T0", "beta", "gamma", "s_z",
-                      "l10meff", "sigLM", "Mmin", "L0", "precision_fftlog",)
+    __repr_attrs__ = (
+        "c_m_relation", "nu", "alpha", "T0", "beta", "gamma", "s_z",
+        "l10meff", "sigLM", "Mmin", "L0", "precision_fftlog",)
     name = 'CIBShang12'
     _one_over_4pi = 0.07957747154
 
-    def __init__(self, c_M_relation, nu_GHz, alpha=0.36, T0=24.4, beta=1.75,
+    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
+    def __init__(self, *, c_m_relation, nu_GHz, alpha=0.36, T0=24.4, beta=1.75,
                  gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707, Mmin=1E10,
                  L0=6.4E-8):
-        if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`")
+        if not isinstance(c_m_relation, Concentration):
+            raise TypeError("c_m_relation must be of type `Concentration`")
 
         self.nu = nu_GHz
         self.alpha = alpha
@@ -101,8 +104,8 @@ class HaloProfileCIBShang12(HaloProfile):
         self.sigLM = sigLM
         self.Mmin = Mmin
         self.L0 = L0
-        self.cM = c_M_relation
-        self.pNFW = HaloProfileNFW(c_M_relation)
+        self.c_m_relation = c_m_relation
+        self.pNFW = HaloProfileNFW(c_m_relation=c_m_relation)
         super(HaloProfileCIBShang12, self).__init__()
 
     def dNsub_dlnM_TinkerWetzel10(self, Msub, Mparent):

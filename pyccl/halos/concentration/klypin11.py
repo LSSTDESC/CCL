@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..massdef import MassDef
 from .concentration_base import Concentration
 
@@ -11,21 +12,22 @@ class ConcentrationKlypin11(Concentration):
     S.O. masses with Delta = Delta_vir.
 
     Args:
-        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
             definition object that fixes
             the mass definition used by this c(M)
             parametrization.
     """
     name = 'Klypin11'
 
-    def __init__(self, mdef=None):
-        super(ConcentrationKlypin11, self).__init__(mdef)
+    @warn_api(pairs=[("mdef", "mass_def")])
+    def __init__(self, *, mass_def=None):
+        super(ConcentrationKlypin11, self).__init__(mass_def=mass_def)
 
-    def _default_mdef(self):
-        self.mdef = MassDef('vir', 'critical')
+    def _default_mass_def(self):
+        self.mass_def = MassDef('vir', 'critical')
 
-    def _check_mdef(self, mdef):
-        if mdef.Delta != 'vir':
+    def _check_mass_def(self, mass_def):
+        if mass_def.Delta != 'vir':
             return True
         return False
 

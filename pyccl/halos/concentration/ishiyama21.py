@@ -1,4 +1,5 @@
 from ... import ccllib as lib
+from ...base import warn_api
 from ...pyutils import check
 from ..massdef import MassDef
 from .concentration_base import Concentration
@@ -16,7 +17,7 @@ class ConcentrationIshiyama21(Concentration):
     By default it will be initialized for Delta = 500-critical.
 
     Args:
-        mdef (:class:`~pyccl.halos.massdef.MassDef`):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object that fixes the mass definition
             used by this c(M) parametrization.
         relaxed (bool):
@@ -27,33 +28,34 @@ class ConcentrationIshiyama21(Concentration):
             method. Otherwise, use the concentration found with profile
             fitting. The default is False.
     """
-    __repr_attrs__ = ("mdef", "relaxed", "Vmax",)
+    __repr_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'
 
-    def __init__(self, mdef=None, relaxed=False, Vmax=False):
+    @warn_api(pairs=[("mdef", "mass_def")])
+    def __init__(self, *, mass_def=None, relaxed=False, Vmax=False):
         self.relaxed = relaxed
         self.Vmax = Vmax
-        super().__init__(mass_def=mdef)
+        super().__init__(mass_def=mass_def)
 
-    def _default_mdef(self):
-        self.mdef = MassDef(500, 'critical')
+    def _default_mass_def(self):
+        self.mass_def = MassDef(500, 'critical')
 
-    def _check_mdef(self, mdef):
-        if mdef.Delta != 'vir':
-            if isinstance(mdef.Delta, str):
+    def _check_mass_def(self, mass_def):
+        if mass_def.Delta != 'vir':
+            if isinstance(mass_def.Delta, str):
                 return True
-            elif mdef.rho_type != 'critical':
+            elif mass_def.rho_type != 'critical':
                 return True
-            elif mdef.Delta not in [200, 500]:
+            elif mass_def.Delta not in [200, 500]:
                 return True
-            elif (mdef.Delta == 500) and self.Vmax:
+            elif (mass_def.Delta == 500) and self.Vmax:
                 return True
         return False
 
     def _setup(self):
         if self.Vmax:  # use numerical method
             if self.relaxed:  # fit only relaxed halos
-                if self.mdef.Delta == 'vir':
+                if self.mass_def.Delta == 'vir':
                     self.kappa = 2.40
                     self.a0 = 2.27
                     self.a1 = 1.80
@@ -68,7 +70,7 @@ class ConcentrationIshiyama21(Concentration):
                     self.b1 = 9.24
                     self.c_alpha = 0.51
             else:  # fit all halos
-                if self.mdef.Delta == 'vir':
+                if self.mass_def.Delta == 'vir':
                     self.kappa = 0.76
                     self.a0 = 2.34
                     self.a1 = 1.82
@@ -84,7 +86,7 @@ class ConcentrationIshiyama21(Concentration):
                     self.c_alpha = 0.32
         else:  # use profile fitting method
             if self.relaxed:  # fit only relaxed halos
-                if self.mdef.Delta == 'vir':
+                if self.mass_def.Delta == 'vir':
                     self.kappa = 1.22
                     self.a0 = 2.52
                     self.a1 = 1.87
@@ -92,7 +94,7 @@ class ConcentrationIshiyama21(Concentration):
                     self.b1 = 4.19
                     self.c_alpha = -0.017
                 else:  # now it's either 200c or 500c
-                    if int(self.mdef.Delta) == 200:
+                    if int(self.mass_def.Delta) == 200:
                         self.kappa = 0.60
                         self.a0 = 2.14
                         self.a1 = 2.63
@@ -107,7 +109,7 @@ class ConcentrationIshiyama21(Concentration):
                         self.b1 = 2.99
                         self.c_alpha = 0.42
             else:  # fit all halos
-                if self.mdef.Delta == 'vir':
+                if self.mass_def.Delta == 'vir':
                     self.kappa = 1.64
                     self.a0 = 2.67
                     self.a1 = 1.23
@@ -115,7 +117,7 @@ class ConcentrationIshiyama21(Concentration):
                     self.b1 = 1.30
                     self.c_alpha = -0.19
                 else:  # now it's either 200c or 500c
-                    if int(self.mdef.Delta) == 200:
+                    if int(self.mass_def.Delta) == 200:
                         self.kappa = 1.19
                         self.a0 = 2.54
                         self.a1 = 1.33

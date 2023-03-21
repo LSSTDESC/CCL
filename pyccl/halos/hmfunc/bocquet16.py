@@ -1,3 +1,4 @@
+from ...base import warn_api
 from ..massdef import MassDef200m
 from .hmfunc_base import MassFunc
 import numpy as np
@@ -10,41 +11,38 @@ class MassFuncBocquet16(MassFunc):
     """ Implements mass function described in arXiv:1502.07357.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object.
             this parametrization accepts SO masses with
             Delta = 200 (matter, critical) and 500 (critical).
-            If `None`, Delta = 200 (matter) will be used.
+            The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
         hydro (bool): if `False`, use the parametrization found
             using dark-matter-only simulations. Otherwise, include
             baryonic effects (default).
     """
-    __repr_attrs__ = ("mdef", "mass_def_strict", "hydro",)
+    __repr_attrs__ = ("mass_def", "mass_def_strict", "hydro",)
     name = 'Bocquet16'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True,
+    @warn_api
+    def __init__(self, *,
+                 mass_def=MassDef200m(),
+                 mass_def_strict=True,
                  hydro=True):
         self.hydro = hydro
-        super(MassFuncBocquet16, self).__init__(cosmo,
-                                                mass_def,
-                                                mass_def_strict)
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
-    def _default_mdef(self):
-        self.mdef = MassDef200m()
-
-    def _setup(self, cosmo):
-        if int(self.mdef.Delta) == 200:
-            if self.mdef.rho_type == 'matter':
-                self.mdef_type = '200m'
-            elif self.mdef.rho_type == 'critical':
-                self.mdef_type = '200c'
-        elif int(self.mdef.Delta) == 500:
-            if self.mdef.rho_type == 'critical':
-                self.mdef_type = '500c'
-        if self.mdef_type == '200m':
+    def _setup(self):
+        if int(self.mass_def.Delta) == 200:
+            if self.mass_def.rho_type == 'matter':
+                self.mass_def_type = '200m'
+            elif self.mass_def.rho_type == 'critical':
+                self.mass_def_type = '200c'
+        elif int(self.mass_def.Delta) == 500:
+            if self.mass_def.rho_type == 'critical':
+                self.mass_def_type = '500c'
+        if self.mass_def_type == '200m':
             if self.hydro:
                 self.A0 = 0.228
                 self.a0 = 2.15
@@ -63,7 +61,7 @@ class MassFuncBocquet16(MassFunc):
                 self.az = -0.040
                 self.bz = -0.194
                 self.cz = -0.021
-        elif self.mdef_type == '200c':
+        elif self.mass_def_type == '200c':
             if self.hydro:
                 self.A0 = 0.202
                 self.a0 = 2.21
@@ -82,7 +80,7 @@ class MassFuncBocquet16(MassFunc):
                 self.az = 0.321
                 self.bz = -0.621
                 self.cz = -0.153
-        elif self.mdef_type == '500c':
+        elif self.mass_def_type == '500c':
             if self.hydro:
                 self.A0 = 0.180
                 self.a0 = 2.29
@@ -102,15 +100,14 @@ class MassFuncBocquet16(MassFunc):
                 self.bz = -0.698
                 self.cz = -0.310
 
-    def _check_mdef_strict(self, mdef):
-        if isinstance(mdef.Delta, str):
+    def _check_mass_def_strict(self, mass_def):
+        if isinstance(mass_def.Delta, str):
             return True
-        elif int(mdef.Delta) == 200:
-            if (mdef.rho_type != 'matter') and \
-               (mdef.rho_type != 'critical'):
+        elif int(mass_def.Delta) == 200:
+            if mass_def.rho_type not in ['matter', 'critical']:
                 return True
-        elif int(mdef.Delta) == 500:
-            if mdef.rho_type != 'critical':
+        elif int(mass_def.Delta) == 500:
+            if mass_def.rho_type != 'critical':
                 return True
         else:
             return True
@@ -125,7 +122,7 @@ class MassFuncBocquet16(MassFunc):
 
         f = AA * ((sigM / bb)**-aa + 1.0) * np.exp(-cc / sigM**2)
 
-        if self.mdef_type == '200c':
+        if self.mass_def_type == '200c':
             z = 1./a-1
             Omega_m = cosmo.omega_x(a, "matter")
             gamma0 = 3.54E-2 + Omega_m**0.09
@@ -138,7 +135,7 @@ class MassFuncBocquet16(MassFunc):
             delta = delta0 + delta1 * z
             M200c_M200m = gamma + delta * lnM
             f *= M200c_M200m
-        elif self.mdef_type == '500c':
+        elif self.mass_def_type == '500c':
             z = 1./a-1
             Omega_m = cosmo.omega_x(a, "matter")
             alpha0 = 0.880 + 0.329 * Omega_m

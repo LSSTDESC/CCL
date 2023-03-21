@@ -1,4 +1,4 @@
-from ...base import CCLHalosObject
+from ...base import CCLHalosObject, warn_api, deprecated, deprecate_attr
 import numpy as np
 from abc import abstractmethod
 import functools
@@ -15,21 +15,24 @@ class Concentration(CCLHalosObject):
             object that fixes the mass definition used by this c(M)
             parametrization.
     """
-    __repr_attrs__ = ("mdef",)
+    __repr_attrs__ = ("mass_def",)
+    __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
+                                 )(super.__getattribute__)
 
-    def __init__(self, mass_def=None):
+    @warn_api
+    def __init__(self, *, mass_def=None):
         if mass_def is not None:
-            if self._check_mdef(mass_def):
+            if self._check_mass_def(mass_def):
                 raise ValueError(
                     f"Mass definition {mass_def.Delta}-{mass_def.rho_type} "
                     f"is not compatible with c(M) {self.name} configuration.")
-            self.mdef = mass_def
+            self.mass_def = mass_def
         else:
-            self._default_mdef()
+            self._default_mass_def()
         self._setup()
 
     @abstractmethod
-    def _default_mdef(self):
+    def _default_mass_def(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
@@ -41,14 +44,14 @@ class Concentration(CCLHalosObject):
         """
         pass
 
-    def _check_mdef(self, mdef):
+    def _check_mass_def(self, mass_def):
         """ Return False if the input mass definition agrees with
         the definitions for which this concentration-mass relation
         works. True otherwise. This function gets called at the
         start of the constructor call.
 
         Args:
-            mdef (:class:`~pyccl.halos.massdef.MassDef`):
+            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
         Returns:
@@ -57,7 +60,7 @@ class Concentration(CCLHalosObject):
         """
         return False
 
-    def _get_consistent_mass(self, cosmo, M, a, mdef_other):
+    def _get_consistent_mass(self, cosmo, M, a, mass_def_other):
         """ Transform a halo mass with a given mass definition into
         the corresponding mass definition that was used to initialize
         this object.
@@ -66,15 +69,17 @@ class Concentration(CCLHalosObject):
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
 
         Returns:
             float or array_like: mass according to this object's
             mass definition.
         """
-        if mdef_other is not None:
-            M_use = mdef_other.translate_mass(cosmo, M, a, self.mdef)
+        if mass_def_other is not None:
+            M_use = mass_def_other.translate_mass(
+                cosmo, M, a,
+                mass_def_other=self.mass_def)
         else:
             M_use = M
         return M_use
@@ -83,14 +88,15 @@ class Concentration(CCLHalosObject):
     def _concentration(self, cosmo, M, a):
         """Implementation of the c(M) relation."""
 
-    def get_concentration(self, cosmo, M, a, mdef_other=None):
+    @warn_api(pairs=[("mdef_other", "mass_def_other")])
+    def get_concentration(self, cosmo, M, a, *, mass_def_other=None):
         """ Returns the concentration for input parameters.
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mdef_other (:class:`~pyccl.halos.massdef.MassDef`):
+            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
                 the mass definition object that defines M.
 
         Returns:
@@ -98,7 +104,7 @@ class Concentration(CCLHalosObject):
         """
         M_use = self._get_consistent_mass(cosmo,
                                           np.atleast_1d(M),
-                                          a, mdef_other)
+                                          a, mass_def_other)
 
         c = self._concentration(cosmo, M_use, a)
         if np.ndim(M) == 0:
@@ -123,5 +129,6 @@ class Concentration(CCLHalosObject):
 
 
 @functools.wraps(Concentration.from_name)
+@deprecated(new_function=Concentration.from_name)
 def concentration_from_name(name):
     return Concentration.from_name(name)
