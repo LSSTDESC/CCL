@@ -68,21 +68,21 @@ def set_up(request):
 
     # Initialize tracers
     trc = {}
-    trc['g1'] = ccl.NumberCountsTracer(cosmo, False,
-                                       (z1, pz1),
-                                       (z2, bz))
-    trc['g2'] = ccl.NumberCountsTracer(cosmo, False,
-                                       (z2, pz2),
-                                       (z2, bz))
-    trc['l1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1))
-    trc['l2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2))
-    trc['i1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1),
+    trc['g1'] = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                       dndz=(z1, pz1),
+                                       bias=(z2, bz))
+    trc['g2'] = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                       dndz=(z2, pz2),
+                                       bias=(z2, bz))
+    trc['l1'] = ccl.WeakLensingTracer(cosmo, dndz=(z1, pz1))
+    trc['l2'] = ccl.WeakLensingTracer(cosmo, dndz=(z2, pz2))
+    trc['i1'] = ccl.WeakLensingTracer(cosmo, dndz=(z1, pz1),
                                       has_shear=False,
                                       ia_bias=(z1, a1))
-    trc['i2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2),
+    trc['i2'] = ccl.WeakLensingTracer(cosmo, dndz=(z2, pz2),
                                       has_shear=False,
                                       ia_bias=(z2, a2))
-    trc['ct'] = ccl.CMBLensingTracer(cosmo, 1100.)
+    trc['ct'] = ccl.CMBLensingTracer(cosmo, z_source=1100.)
 
     # Read benchmarks
     def read_bm(fname):

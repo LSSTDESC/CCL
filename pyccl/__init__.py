@@ -26,7 +26,7 @@ from . import ccllib as lib
 # Hashing, Caching, CCL base, Mutation locks
 from .base import (
     CCLObject,
-    CCLHalosObject,
+    CCLAutoreprObject,
     Caching,
     cache,
     hash_,
@@ -117,6 +117,7 @@ from .neutrinos import (
 from .cls import angular_cl
 from .tracers import (
     Tracer,
+    NzTracer,
     NumberCountsTracer,
     WeakLensingTracer,
     CMBLensingTracer,
@@ -169,9 +170,14 @@ from .haloprofile import (
     nfw_profile_2d,
 )
 
+from .baryons import (
+    BaryonicEffects,
+    BaryonicEffectsBCM
+)
+
 
 __all__ = (
-    'lib', 'Caching', 'cache', 'hash_', 'CCLObject', 'CCLHalosObject',
+    'lib', 'Caching', 'cache', 'hash_', 'CCLObject', 'CCLAutoreprObject',
     'UnlockInstance', 'unlock_instance',
     'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
     'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
@@ -200,4 +206,5 @@ __all__ = (
     'onehalo_matter_power', 'twohalo_matter_power',
     'massfunc', 'halo_bias', 'massfunc_m2r', 'nfw_profile_3d',
     'einasto_profile_3d', 'hernquist_profile_3d', 'nfw_profile_2d',
+    'BaryonicEffects', 'BaryonicEffectsBCM',
 )

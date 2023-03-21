@@ -25,7 +25,7 @@ def test_halomodel_power(k, kind):
     else:
         func = ccl.halomodel_matter_power
 
-    pk = assert_warns(ccl.CCLWarning, func, COSMO, k, a)
+    pk = assert_warns(ccl.CCLDeprecationWarning, func, COSMO, k, a)
     assert np.all(np.isfinite(pk))
     assert np.shape(k) == np.shape(pk)
 
@@ -39,7 +39,7 @@ def test_halo_concentration(m):
     a = 0.8
     # Deprecated.
     c = assert_warns(
-        ccl.CCLWarning,
+        ccl.CCLDeprecationWarning,
         ccl.halo_concentration, COSMO, m, a)
     assert np.all(np.isfinite(c))
     assert np.shape(c) == np.shape(m)
@@ -90,7 +90,8 @@ def test_halomodel_choices_smoke(mf_c):
     # TODO: Convert this and other places to using the non-deprecated syntax
     # Or, since this wasn't already done, maybe this is a useful convenience
     # function?
-    p = assert_warns(ccl.CCLWarning, ccl.twohalo_matter_power, cosmo, k, a)
+    p = assert_warns(ccl.CCLDeprecationWarning,
+                     ccl.twohalo_matter_power, cosmo, k, a)
     pb = get_pk_new(mf, c, cosmo, a, k, False, True)
 
     assert np.all(np.isfinite(p))
@@ -106,7 +107,8 @@ def test_halomodel_choices_raises():
     k = np.geomspace(1E-2, 1, 10)
 
     with pytest.raises(ValueError):
-        assert_warns(ccl.CCLWarning, ccl.twohalo_matter_power, cosmo, k, a)
+        assert_warns(ccl.CCLDeprecationWarning,
+                     ccl.twohalo_matter_power, cosmo, k, a)
 
 
 def test_halomodel_power_consistent():
@@ -114,13 +116,13 @@ def test_halomodel_power_consistent():
     k = np.logspace(-1, 1, 10)
     # These are all deprecated.
     tot = assert_warns(
-        ccl.CCLWarning,
+        ccl.CCLDeprecationWarning,
         ccl.halomodel_matter_power, COSMO, k, a)
     one = assert_warns(
-        ccl.CCLWarning,
+        ccl.CCLDeprecationWarning,
         ccl.onehalo_matter_power, COSMO, k, a)
     two = assert_warns(
-        ccl.CCLWarning,
+        ccl.CCLDeprecationWarning,
         ccl.twohalo_matter_power, COSMO, k, a)
 
     assert np.allclose(one + two, tot)

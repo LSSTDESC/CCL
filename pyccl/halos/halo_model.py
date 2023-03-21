@@ -3,7 +3,7 @@ from .hmfunc import MassFunc
 from .hbias import HaloBias
 from ..pyutils import _spline_integrate
 from .. import background
-from ..base import CCLHalosObject, unlock_instance
+from ..base import CCLAutoreprObject, unlock_instance
 from ..parameters import physical_constants as const
 import numpy as np
 
@@ -11,7 +11,7 @@ import numpy as np
 __all__ = ("HMCalculator",)
 
 
-class HMCalculator(CCLHalosObject):
+class HMCalculator(CCLAutoreprObject):
     """This class implements a set of methods that can be used to
     compute various halo model quantities. A lot of these quantities
     will involve integrals of the sort:

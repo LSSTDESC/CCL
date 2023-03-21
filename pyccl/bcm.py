@@ -1,10 +1,9 @@
-from . import ccllib as lib
-from .pyutils import check
-from .pk2d import Pk2D
 from .base import unlock_instance
-import numpy as np
+from .baryons import BaryonicEffectsBCM
+from .base import deprecated
 
 
+@deprecated(BaryonicEffectsBCM)
 def bcm_model_fka(cosmo, k, a):
     """The BCM model correction factor for baryons.
 
@@ -25,17 +24,13 @@ def bcm_model_fka(cosmo, k, a):
     Returns:
         float or array_like: Correction factor to apply to the power spectrum.
     """
-    k_use = np.atleast_1d(k)
-    status = 0
-    fka, status = lib.bcm_model_fka_vec(cosmo.cosmo, a, k_use,
-                                        len(k_use), status)
-    check(status, cosmo)
-
-    if np.ndim(k) == 0:
-        fka = fka[0]
-    return fka
+    bcm = BaryonicEffectsBCM(log10Mc=cosmo['bcm_log10Mc'],
+                             eta_b=cosmo['bcm_etab'],
+                             k_s=cosmo['bcm_ks'])
+    return bcm.boost_factor(cosmo, k, a)
 
 
+@deprecated(BaryonicEffectsBCM)
 @unlock_instance(mutate=True, argv=1)
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
@@ -44,8 +39,8 @@ def bcm_correct_pk2d(cosmo, pk2d):
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
     """
-    if not isinstance(pk2d, Pk2D):
-        raise TypeError("pk2d must be a Pk2D object")
-    status = 0
-    status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
-    check(status, cosmo)
+
+    bcm = BaryonicEffectsBCM(log10Mc=cosmo['bcm_log10Mc'],
+                             eta_b=cosmo['bcm_etab'],
+                             k_s=cosmo['bcm_ks'])
+    bcm.apply_baryons(cosmo, pk2d, in_place=True)

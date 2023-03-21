@@ -1,5 +1,5 @@
 from . import halos as hal
-from .pyutils import deprecated
+from .base import deprecated
 from .errors import CCLError
 from .power import sigmaM  # noqa
 
