@@ -245,9 +245,12 @@ class Tracer(CCLObject):
                 if spl1 is None:
                     # none of them has this transfer type
                     continue
-                if not np.allclose(c2py[attr](spl1),
-                                    c2py[attr](spl2), **kwargs):
+                # unpack the grid points and the transfer functions separately
+                (*pts1, tk1), (*pts2, tk2) = c2py[attr](spl1), c2py[attr](spl2)
+                if not (np.allclose(pts1, pts2, **kwargs)
+                        and np.allclose(tk1, tk2, **kwargs)):
                     # both have this transfer type, but they are unequal
+                    # or are defined at different grid points
                     return False
         return True
 
