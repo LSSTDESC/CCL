@@ -773,8 +773,9 @@ def ZPowerTracer(cosmo, *, A, alpha, z_min=0., z_max=6., n_chi=1024):
     """
     tracer = Tracer()
 
+    chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
     chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-    chi_arr = np.linspace(0, chi_max, n_chi)
+    chi_arr = np.linspace(chi_min, chi_max, n_chi)
     a_arr = scale_factor_of_chi(cosmo, chi_arr)
     w_arr = A * a_arr**alpha
 
@@ -833,7 +834,7 @@ def CIBTracer(cosmo, *, z_min=0., z_max=6., n_chi=1024):
         n_chi (float): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
-    return ZPowerTracer(cosmo, A=1.0, alpha=1, z_min=0.,
+    return ZPowerTracer(cosmo, A=1.0, alpha=1, z_min=z_min,
                         z_max=z_max, n_chi=n_chi)
 
 
