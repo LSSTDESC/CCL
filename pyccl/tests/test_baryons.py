@@ -4,7 +4,7 @@ import pyccl as ccl
 
 
 COSMO = ccl.CosmologyVanillaLCDM()
-bar = ccl.BaryonsBCM()
+bar = ccl.BaryonsSchneider15()
 
 
 @pytest.mark.parametrize('k', [
@@ -31,6 +31,6 @@ def test_bcm_correct_smoke():
 
 
 def test_baryons_from_name():
-    bar2 = ccl.Baryons.from_name('BCM')
+    bar2 = ccl.Baryons.from_name('Schneider15')
     assert bar.name == bar2.name
-    assert bar2.name == 'BCM'
+    assert bar2.name == 'Schneider15'

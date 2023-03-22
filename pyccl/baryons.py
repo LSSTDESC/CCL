@@ -23,9 +23,13 @@ class Baryons(CCLAutoreprObject):
             pk (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
             in_place (:obj:`bool`): if True, `pk` itself is modified,
                 instead of returning a new `ccl.Pk2D` object.
+
+        Returns:
+            :obj:`~pyccl.pk2d.Pk2D` object or `None` (if `in_place`
+            is `True`.
         """
-        self._include_baryonic_effects(cosmo, pk,
-                                       in_place=in_place)
+        return self._include_baryonic_effects(cosmo, pk,
+                                              in_place=in_place)
 
     @unlock_instance(mutate=True, argv=2)
     def _new_pk(self, cosmo, pk, a_arr, lk_arr, pk_arr, logp, in_place):
@@ -60,7 +64,7 @@ class Baryons(CCLAutoreprObject):
         return models[name]
 
 
-class BaryonsBCM(Baryons):
+class BaryonsSchneider15(Baryons):
     """The BCM model boost factor for baryons.
 
     .. note:: BCM stands for the "baryonic correction model" of Schneider &
@@ -80,7 +84,7 @@ class BaryonsBCM(Baryons):
         k_s (:obj:`float`): Characteristic scale (wavenumber) of
             the stellar component. Defaults to 55.0.
     """
-    name = 'BCM'
+    name = 'Schneider15'
     __repr_attrs__ = ("log10Mc", "eta_b", "k_s")
 
     def __init__(self, log10Mc=np.log10(1.2E14), eta_b=0.5, k_s=55.0):

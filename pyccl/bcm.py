@@ -1,9 +1,9 @@
 from .base import unlock_instance
-from .baryons import BaryonsBCM
+from .baryons import BaryonsSchneider15
 from .pyutils import deprecated
 
 
-@deprecated(BaryonsBCM)
+@deprecated(BaryonsSchneider15)
 def bcm_model_fka(cosmo, k, a):
     """The BCM model correction factor for baryons.
 
@@ -24,13 +24,13 @@ def bcm_model_fka(cosmo, k, a):
     Returns:
         float or array_like: Correction factor to apply to the power spectrum.
     """
-    bcm = BaryonsBCM(log10Mc=cosmo['bcm_log10Mc'],
-                     eta_b=cosmo['bcm_etab'],
-                     k_s=cosmo['bcm_ks'])
+    bcm = BaryonsSchneider15(log10Mc=cosmo['bcm_log10Mc'],
+                             eta_b=cosmo['bcm_etab'],
+                             k_s=cosmo['bcm_ks'])
     return bcm.boost_factor(cosmo, k, a)
 
 
-@deprecated(BaryonsBCM)
+@deprecated(BaryonsSchneider15)
 @unlock_instance(mutate=True, argv=1)
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
@@ -40,7 +40,7 @@ def bcm_correct_pk2d(cosmo, pk2d):
         pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
     """
 
-    bcm = BaryonsBCM(log10Mc=cosmo['bcm_log10Mc'],
-                     eta_b=cosmo['bcm_etab'],
-                     k_s=cosmo['bcm_ks'])
+    bcm = BaryonsSchneider15(log10Mc=cosmo['bcm_log10Mc'],
+                             eta_b=cosmo['bcm_etab'],
+                             k_s=cosmo['bcm_ks'])
     bcm.include_baryonic_effects(cosmo, pk2d, in_place=True)
