@@ -4,6 +4,7 @@ from .pyutils import check
 from .pk2d import Pk2D
 from .base import unlock_instance
 import numpy as np
+from abc import abstractmethod
 
 
 class Baryons(CCLAutoreprObject):
@@ -14,6 +15,21 @@ class Baryons(CCLAutoreprObject):
     effects.
     """
     name = 'base'
+
+    @abstractmethod
+    def _include_baryonic_effects(self, cosmo, pk, in_place=False):
+        """Apply baryonic effects to a given power spectrum.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+            pk (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
+            in_place (:obj:`bool`): if True, `pk` itself is modified,
+                instead of returning a new `ccl.Pk2D` object.
+
+        Returns:
+            :obj:`~pyccl.pk2d.Pk2D` object or `None` (if `in_place`
+            is `True`.
+        """
 
     def include_baryonic_effects(self, cosmo, pk, in_place=False):
         """Apply baryonic effects to a given power spectrum.
