@@ -1,7 +1,7 @@
 from ... import ccllib as lib
 from ...core import check
 from ...background import omega_x
-from ...base import CCLHalosObject
+from ...base import CCLAutoreprObject
 import numpy as np
 import functools
 from abc import abstractmethod
@@ -10,7 +10,7 @@ from abc import abstractmethod
 __all__ = ("HaloBias", "halo_bias_from_name",)
 
 
-class HaloBias(CCLHalosObject):
+class HaloBias(CCLAutoreprObject):
     """ This class enables the calculation of halo bias functions.
     We currently assume that all halo bias functions can be written
     as functions that depend on M only through sigma_M (where
