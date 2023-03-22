@@ -1,10 +1,11 @@
-from . import ccllib as lib
-from .pyutils import check
-from .pk2d import Pk2D
 from .base import unlock_instance
+from .baryons import BaryonsSchneider15
+from .pyutils import deprecated, check
+from . import ccllib as lib
 import numpy as np
 
 
+@deprecated(BaryonsSchneider15)
 def bcm_model_fka(cosmo, k, a):
     """The BCM model correction factor for baryons.
 
@@ -25,17 +26,13 @@ def bcm_model_fka(cosmo, k, a):
     Returns:
         float or array_like: Correction factor to apply to the power spectrum.
     """
-    k_use = np.atleast_1d(k)
-    status = 0
-    fka, status = lib.bcm_model_fka_vec(cosmo.cosmo, a, k_use,
-                                        len(k_use), status)
-    check(status, cosmo)
-
-    if np.ndim(k) == 0:
-        fka = fka[0]
-    return fka
+    bcm = BaryonsSchneider15(log10Mc=cosmo['bcm_log10Mc'],
+                             eta_b=cosmo['bcm_etab'],
+                             k_s=cosmo['bcm_ks'])
+    return bcm.boost_factor(cosmo, k, a)
 
 
+@deprecated(BaryonsSchneider15)
 @unlock_instance(mutate=True, argv=1)
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
@@ -44,8 +41,21 @@ def bcm_correct_pk2d(cosmo, pk2d):
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
     """
-    if not isinstance(pk2d, Pk2D):
-        raise TypeError("pk2d must be a Pk2D object")
+
+    bcm = BaryonsSchneider15(log10Mc=cosmo['bcm_log10Mc'],
+                             eta_b=cosmo['bcm_etab'],
+                             k_s=cosmo['bcm_ks'])
+    a_arr, lk_arr, pk_arr = pk2d.get_spline_arrays()
+    k_arr = np.exp(lk_arr)
+    fka = bcm.boost_factor(cosmo, k_arr, a_arr)
+    pk_arr *= fka
+    if pk2d.psp.is_log:
+        np.log(pk_arr, out=pk_arr)
+    lib.f2d_t_free(pk2d.psp)
     status = 0
-    status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
+    pk2d.psp, status = lib.set_pk2d_new_from_arrays(
+        lk_arr, a_arr, pk_arr.flatten(),
+        int(pk2d.extrap_order_lok),
+        int(pk2d.extrap_order_hik),
+        pk2d.psp.is_log, status)
     check(status, cosmo)

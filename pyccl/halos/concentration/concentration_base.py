@@ -1,4 +1,4 @@
-from ...base import CCLHalosObject, warn_api, deprecated, deprecate_attr
+from ...base import CCLAutoreprObject, warn_api, deprecated, deprecate_attr
 import numpy as np
 from abc import abstractmethod
 import functools
@@ -7,7 +7,7 @@ import functools
 __all__ = ("Concentration", "concentration_from_name",)
 
 
-class Concentration(CCLHalosObject):
+class Concentration(CCLAutoreprObject):
     """ This class enables the calculation of halo concentrations.
 
     Args:

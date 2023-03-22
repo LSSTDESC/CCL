@@ -2,7 +2,7 @@ from ... import ccllib as lib
 from ...core import check
 from ...background import omega_x
 from ...parameters import physical_constants
-from ...base import CCLHalosObject, warn_api, deprecated, deprecate_attr
+from ...base import CCLAutoreprObject, warn_api, deprecated, deprecate_attr
 import numpy as np
 import functools
 from abc import abstractmethod
@@ -11,7 +11,7 @@ from abc import abstractmethod
 __all__ = ("MassFunc", "mass_function_from_name",)
 
 
-class MassFunc(CCLHalosObject):
+class MassFunc(CCLAutoreprObject):
     """ This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
 

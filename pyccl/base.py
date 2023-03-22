@@ -591,16 +591,16 @@ class CCLObject(ABC):
         return repr(self) == repr(other)
 
 
-class CCLHalosObject(CCLObject):
-    """Base for halo objects. Representations for instances are built from a
-    list of attribute names specified as a class variable in ``__repr_attrs__``
-    (acting as a hook).
+class CCLAutoreprObject(CCLObject):
+    """Base for objects with automatic representation. Representations
+    for instances are built from a list of attribute names specified as
+    a class variable in ``__repr_attrs__`` (acting as a hook).
 
     Example:
         The representation (also hash) of instances of the following class
         is built based only on the attributes specified in ``__repr_attrs__``:
 
-        >>> class MyClass(CCLHalosObject):
+        >>> class MyClass(CCLAutoreprObject):
             __repr_attrs__ = ("a", "b", "other")
             def __init__(self, a=1, b=2, c=3, d=4, e=5):
                 self.a = a

@@ -1,7 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import species_types, rho_x, omega_x
-from ..base import CCLHalosObject, warn_api, deprecate_attr
+from ..base import CCLAutoreprObject, warn_api, deprecate_attr
 import numpy as np
 
 
@@ -63,7 +63,7 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     return c_new
 
 
-class MassDef(CCLHalosObject):
+class MassDef(CCLAutoreprObject):
     """Halo mass definition. Halo masses are defined in terms of an overdensity
     parameter :math:`\\Delta` and an associated density :math:`X` (either the
     matter density or the critical density):
