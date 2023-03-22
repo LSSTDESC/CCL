@@ -12,7 +12,6 @@ class Baryons(CCLAutoreprObject):
     returns another `ccl.Pk2D` object that now accounts for baryonic
     effects.
     """
-    name = 'base'
 
     @abstractmethod
     def _include_baryonic_effects(self, cosmo, pk):
