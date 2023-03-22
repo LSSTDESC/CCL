@@ -98,15 +98,16 @@ class BaryonsSchneider15(Baryons):
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
             k (float or array_like): Wavenumber; Mpc^-1.
-            a (float): Scale factor.
+            a (float or array_like): Scale factor.
 
         Returns:
             float or array_like: Correction factor to apply to
                 the power spectrum.
         """
-        k_use = np.atleast_1d(k)
+        a_use, k_use = map(np.atleast_1d, [a, k])
+        a_use, k_use = a_use[:, None], k_use[None, :]
 
-        z = 1/a - 1
+        z = 1/a_use - 1
         kh = k_use / cosmo['h']
         b0 = 0.105*self.log10Mc - 1.27
         bfunc = b0 / (1. + (z/2.3)**2.5)
@@ -116,7 +117,9 @@ class BaryonsSchneider15(Baryons):
         fka = gf * scomp
 
         if np.ndim(k) == 0:
-            fka = fka[0]
+            fka = np.squeeze(fka, axis=-1)
+        if np.ndim(a) == 0:
+            fka = np.squeeze(fka, axis=0)
         return fka
 
     def update_parameters(self, log10Mc=None, eta_b=None, k_s=None):
@@ -142,7 +145,7 @@ class BaryonsSchneider15(Baryons):
         # Applies boost factor
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         k_arr = np.exp(lk_arr)
-        fka = np.array([self.boost_factor(cosmo, k_arr, a) for a in a_arr])
+        fka = self.boost_factor(cosmo, k_arr, a_arr)
         pk_arr *= fka
 
         if pk.psp.is_log:
