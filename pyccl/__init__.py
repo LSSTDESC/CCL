@@ -171,8 +171,8 @@ from .haloprofile import (
 )
 
 from .baryons import (
-    BaryonicEffects,
-    BaryonicEffectsBCM
+    Baryons,
+    BaryonsSchneider15
 )
 
 
@@ -206,5 +206,5 @@ __all__ = (
     'onehalo_matter_power', 'twohalo_matter_power',
     'massfunc', 'halo_bias', 'massfunc_m2r', 'nfw_profile_3d',
     'einasto_profile_3d', 'hernquist_profile_3d', 'nfw_profile_2d',
-    'BaryonicEffects', 'BaryonicEffectsBCM',
+    'Baryons', 'BaryonsSchneider15',
 )
