@@ -1,5 +1,5 @@
 from .baryons_base import Baryons
-from ..base import unlock_instance
+from ..pk2d import Pk2D
 import numpy as np
 
 
@@ -82,8 +82,7 @@ class BaryonsSchneider15(Baryons):
         if k_s is not None:
             self.k_s = k_s
 
-    @unlock_instance(mutate=True, argv=2)
-    def _include_baryonic_effects(self, cosmo, pk, in_place=False):
+    def _include_baryonic_effects(self, cosmo, pk):
         # Applies boost factor
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         k_arr = np.exp(lk_arr)
@@ -93,5 +92,7 @@ class BaryonsSchneider15(Baryons):
         if pk.psp.is_log:
             np.log(pk_arr, out=pk_arr)  # in-place log
 
-        return self._new_pk(cosmo, pk, a_arr, lk_arr, pk_arr,
-                            pk.psp.is_log, in_place)
+        return Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
+                    is_logp=pk.psp.is_log,
+                    extrap_order_lok=pk.extrap_order_lok,
+                    extrap_order_hik=pk.extrap_order_hik)

@@ -1,6 +1,8 @@
 from .base import unlock_instance
 from .baryons import BaryonsSchneider15
-from .pyutils import deprecated
+from .pyutils import deprecated, check
+from . import ccllib as lib
+import numpy as np
 
 
 @deprecated(BaryonsSchneider15)
@@ -43,4 +45,17 @@ def bcm_correct_pk2d(cosmo, pk2d):
     bcm = BaryonsSchneider15(log10Mc=cosmo['bcm_log10Mc'],
                              eta_b=cosmo['bcm_etab'],
                              k_s=cosmo['bcm_ks'])
-    bcm.include_baryonic_effects(cosmo, pk2d, in_place=True)
+    a_arr, lk_arr, pk_arr = pk2d.get_spline_arrays()
+    k_arr = np.exp(lk_arr)
+    fka = bcm.boost_factor(cosmo, k_arr, a_arr)
+    pk_arr *= fka
+    if pk2d.psp.is_log:
+        np.log(pk_arr, out=pk_arr)
+    lib.f2d_t_free(pk2d.psp)
+    status = 0
+    pk2d.psp, status = lib.set_pk2d_new_from_arrays(
+        lk_arr, a_arr, pk_arr.flatten(),
+        int(pk2d.extrap_order_lok),
+        int(pk2d.extrap_order_hik),
+        pk2d.psp.is_log, status)
+    check(status, cosmo)
