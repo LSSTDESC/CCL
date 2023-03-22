@@ -29,6 +29,14 @@ def test_bcm_correct_smoke():
     assert np.all(np.fabs(pk_wbar/(pk_nobar*fka)-1) < 1E-5)
 
 
+def test_bcm_update_params():
+    bar2 = ccl.BaryonsSchneider15(log10Mc=14.1, eta_b=0.7, k_s=40.)
+    bar2.update_parameters(log10Mc=bar.log10Mc,
+                           eta_b=bar.eta_b,
+                           k_s=bar.k_s)
+    assert bar == bar2
+
+
 def test_baryons_from_name():
     bar2 = ccl.Baryons.from_name('Schneider15')
     assert bar.name == bar2.name
