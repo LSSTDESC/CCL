@@ -3,9 +3,8 @@ import numpy as np
 import pyccl as ccl
 
 
-COSMO = ccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-    transfer_function='bbks', matter_power_spectrum='halofit')
+COSMO = ccl.CosmologyVanillaLCDM()
+bar = ccl.BaryonsBCM()
 
 
 @pytest.mark.parametrize('k', [
@@ -15,19 +14,23 @@ COSMO = ccl.Cosmology(
     np.array([0.3, 0.5, 10])])
 def test_bcm_smoke(k):
     a = 0.8
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        fka = ccl.bcm_model_fka(COSMO, k, a)
+    fka = bar.boost_factor(COSMO, k, a)
     assert np.all(np.isfinite(fka))
     assert np.shape(fka) == np.shape(k)
 
 
 def test_bcm_correct_smoke():
     k_arr = np.geomspace(1E-2, 1, 10)
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        fka = ccl.bcm_model_fka(COSMO, k_arr, 0.5)
+    fka = bar.boost_factor(COSMO, k_arr, 0.5)
     pk_nobar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        ccl.bcm_correct_pk2d(
-            COSMO, COSMO._pk_nl['delta_matter:delta_matter'])
+    bar.include_baryonic_effects(
+        COSMO, COSMO._pk_nl['delta_matter:delta_matter'],
+        in_place=True)
     pk_wbar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
     assert np.all(np.fabs(pk_wbar/(pk_nobar*fka)-1) < 1E-5)
+
+
+def test_baryons_from_name():
+    bar2 = ccl.Baryons.from_name('BCM')
+    assert bar.name == bar2.name
+    assert bar2.name == 'BCM'
