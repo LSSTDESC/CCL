@@ -53,12 +53,14 @@ class Baryons(CCLAutoreprObject):
 
     @classmethod
     def _subclasses(cls):
+        # This helper returns a set of all subclasses
         return set(cls.__subclasses__()).union(
             [sub for cl in cls.__subclasses__() for sub in cl._subclasses()])
 
     @classmethod
     def from_name(cls, name):
         """
+        Obtain `Baryons` subclass with name `name`.
         """
         models = {p.name: p for p in cls._subclasses()}
         return models[name]
