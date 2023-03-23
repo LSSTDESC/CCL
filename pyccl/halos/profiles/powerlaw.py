@@ -22,7 +22,7 @@ class HaloProfilePowerLaw(HaloProfile):
             profile. The signature of this function should
             be `f(cosmo, a)`.
     """
-    __repr_attrs__ = ("r_scale", "tilt", "precision_fftlog",)
+    __repr_attrs__ = ("r_scale", "tilt", "precision_fftlog", "normprof",)
     name = 'PowerLaw'
 
     @warn_api

@@ -44,7 +44,8 @@ class HaloProfileHernquist(HaloProfileMatter):
             radii.
     """
     __repr_attrs__ = ("c_m_relation", "fourier_analytic", "projected_analytic",
-                      "cumul2d_analytic", "truncated", "precision_fftlog",)
+                      "cumul2d_analytic", "truncated", "precision_fftlog",
+                      "normprof",)
     name = 'Hernquist'
 
     @warn_api(pairs=[("c_M_relation", "c_m_relation")])

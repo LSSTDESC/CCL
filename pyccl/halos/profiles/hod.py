@@ -113,7 +113,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         "c_m_relation", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p", "lM0_0",
         "lM0_p", "lM1_0", "lM1_p", "alpha_0", "alpha_p", "fc_0", "fc_p",
         "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
-        "ns_independent", "precision_fftlog",)
+        "ns_independent", "precision_fftlog", "normprof",)
     name = 'HOD'
 
     @warn_api(pairs=[("c_M_relation", "c_m_relation")])

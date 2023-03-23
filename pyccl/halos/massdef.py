@@ -5,6 +5,10 @@ from ..base import CCLAutoreprObject, warn_api, deprecate_attr
 import numpy as np
 
 
+__all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
+           "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir")
+
+
 def mass2radius_lagrangian(cosmo, M):
     """ Returns Lagrangian radius for a halo of mass M.
     The lagrangian radius is defined as that enclosing

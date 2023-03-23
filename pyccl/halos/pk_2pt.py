@@ -1,7 +1,5 @@
-from .. import ccllib as lib
 from ..base import UnlockInstance, warn_api
 from ..pk2d import Pk2D
-from ..pyutils import check
 from .profiles_2pt import Profile2pt
 import numpy as np
 
@@ -257,26 +255,18 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
         :class:`~pyccl.pk2d.Pk2D`: halo model power spectrum.
     """
     if lk_arr is None:
-        status = 0
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status, cosmo=cosmo)
+        lk_arr = cosmo.get_pk_spline_lk()
     if a_arr is None:
-        status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+        a_arr = cosmo.get_pk_spline_a()
 
-    pk_arr = halomod_power_spectrum(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                    prof, prof_2pt=prof_2pt,
-                                    prof2=prof2, p_of_k_a=p_of_k_a,
-                                    normprof1=normprof1, normprof2=normprof2,
-                                    get_1h=get_1h, get_2h=get_2h,
-                                    smooth_transition=smooth_transition,
-                                    suppress_1h=suppress_1h)
+    pk_arr = halomod_power_spectrum(
+        cosmo, hmc, np.exp(lk_arr), a_arr,
+        prof, prof2=prof2, prof_2pt=prof_2pt, p_of_k_a=p_of_k_a,
+        normprof1=normprof1, normprof2=normprof2,  # TODO: remove for CCLv3
+        get_1h=get_1h, get_2h=get_2h,
+        smooth_transition=smooth_transition, suppress_1h=suppress_1h)
 
-    pk2d = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
+    return Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                 extrap_order_lok=extrap_order_lok,
                 extrap_order_hik=extrap_order_hik,
                 is_logp=False)
-    return pk2d

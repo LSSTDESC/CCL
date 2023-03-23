@@ -2,6 +2,9 @@ from ..base import CCLAutoreprObject, warn_api
 from .profiles import HaloProfileHOD, HaloProfileCIBShang12
 
 
+__all__ = ("Profile2pt", "Profile2ptHOD", "Profile2ptCIB",)
+
+
 class Profile2pt(CCLAutoreprObject):
     """ This class implements the 1-halo 2-point correlator between
     two halo profiles.

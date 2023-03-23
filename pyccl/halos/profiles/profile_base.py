@@ -4,7 +4,8 @@ from ...base import (CCLAutoreprObject, unlock_instance,
 import numpy as np
 
 
-__all__ = ("HaloProfile",)
+__all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
+           "HaloProfilePressure", "HaloProfileCIB",)
 
 
 class HaloProfile(CCLAutoreprObject):
