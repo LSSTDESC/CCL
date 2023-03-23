@@ -195,7 +195,7 @@ __all__ = (
     'Omeganuh2', 'nu_masses',
     'angular_cl',
     'Tracer', 'NumberCountsTracer', 'WeakLensingTracer', 'CMBLensingTracer',
-    'tSZTracer', 'CIBTracer', 'ISWTracer',
+    'tSZTracer', 'CIBTracer', 'ISWTracer', 'NzTracer',
     'get_density_kernel', 'get_kappa_kernel', 'get_lensing_kernel',
     'correlation', 'correlation_3d', 'correlation_multipole',
     'correlation_3dRsd', 'correlation_3dRsd_avgmu', 'correlation_pi_sigma',

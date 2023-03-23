@@ -59,4 +59,4 @@ def bcm_correct_pk2d(cosmo, pk2d):
         int(pk2d.extrap_order_lok),
         int(pk2d.extrap_order_hik),
         pk2d.psp.is_log, status)
-    check(status, cosmo)
+    check(status)
