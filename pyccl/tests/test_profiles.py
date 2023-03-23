@@ -286,7 +286,7 @@ def test_hod_2pt():
         p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood,
                        prof2=pgood_b, mass_def=M200)
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood,
                        prof2=pbad, mass_def=M200)
 
@@ -306,12 +306,6 @@ def test_2pt_rcorr_smoke():
     assert p2pt.r_corr == -1.
     F3 = p2pt.fourier_2pt(COSMO, 1., 1e13, 1., p, mass_def=M200)
     assert F3 == 0
-
-    # Errors
-    with pytest.raises(TypeError):
-        p2pt.fourier_2pt(COSMO, 1., 1e13, 1., None, mass_def=M200)
-    with pytest.raises(TypeError):
-        p2pt.fourier_2pt(COSMO, 1., 1e13, 1., p, prof2=0, mass_def=M200)
 
 
 @pytest.mark.parametrize('prof_class',

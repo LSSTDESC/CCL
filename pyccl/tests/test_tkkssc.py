@@ -50,9 +50,11 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
         P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
         if prof1.is_number_counts:
-            b1 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof1) * norm1
+            b1 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof1,
+                                            normprof=False) * norm1
         if prof2.is_number_counts:
-            b2 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof2) * norm2
+            b2 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof2,
+                                            normprof=False) * norm2
 
     return (b1 + b2) * P_12
 
@@ -116,36 +118,10 @@ def test_tkkssc_smoke(pars):
     assert np.all(np.isfinite(tk))
 
 
-def test_tkkssc_errors():
+def test_tkkssc_warns():
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
-
-    # Wrong first profile
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, None)
-    # Wrong other profiles
-    for i in range(2, 4):
-        kw = {'prof%d' % i: PKC}
-        with pytest.raises(TypeError):
-            ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, **kw)
-    # Wrong 2pts
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1,
-                                   prof12_2pt=P2)
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1,
-                                   prof34_2pt=P2)
-
-    # No normalization for number counts profile
-    with pytest.raises(ValueError):
-        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P2, normprof1=False)
-    with pytest.raises(ValueError):
-        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof2=P2, normprof2=False)
-    with pytest.raises(ValueError):
-        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof3=P2, normprof3=False)
-    with pytest.raises(ValueError):
-        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1, prof4=P2, normprof4=False)
 
     # Negative profile in logspace
     with pytest.warns(ccl.CCLWarning):
@@ -212,10 +188,13 @@ def test_tkkssc_counterterms_gc(kwargs):
     keys = list(kwargs.keys())
     for k in keys:
         v = kwargs[k]
-        if isinstance(v, ccl.halos.HaloProfileHOD):
-            kwargs_nogc[k] = P2_nogc
-            kwargs_nogc['norm' + k] = True
-            kwargs['norm' + k] = True
+        if isinstance(v, ccl.halos.HaloProfile):
+            is_HOD = isinstance(v, ccl.halos.HaloProfileHOD)
+            if is_HOD:
+                kwargs_nogc[k] = P2_nogc
+            kwargs_nogc['norm' + k] = is_HOD
+            kwargs['norm' + k] = is_HOD
+
     tkk_nogc = ccl.halos.halomod_Tk3D_SSC(COSMO, hmc,
                                           lk_arr=np.log(k_arr), a_arr=a_arr,
                                           **kwargs_nogc)
@@ -392,5 +371,5 @@ def test_tkkssc_linear_bias_smoke_and_errors():
     # Negative profile in logspace
     with pytest.warns(ccl.CCLWarning):
         ccl.halos.halomod_Tk3D_SSC(
-            COSMO, hmc, P3, prof2=Pneg, prof3=P3, prof4=P3, normprof=False,
+            COSMO, hmc, P3, prof2=Pneg, prof3=P3, prof4=P3, normprof1=False,
             lk_arr=np.log(k_arr), a_arr=a_arr, use_log=True)

@@ -122,7 +122,7 @@ def test_Sigma2B():
     # Check projected variance calculation against
     # explicit integration
     from scipy.special import jv
-    from scipy.integrate import simps
+    from scipy.integrate import simpson
 
     fsky = 0.1
     # Default sampling
@@ -148,7 +148,7 @@ def test_Sigma2B():
         return w*w*k*k*pk/(2*np.pi)
 
     lk_arr = np.log(np.geomspace(1E-4, 1E1, 1024))
-    s2b_d = np.array([simps(integrand(lk_arr, a, R), x=lk_arr)
+    s2b_d = np.array([simpson(integrand(lk_arr, a, R), x=lk_arr)
                       for a, R in zip(a_use, Rs)])
 
     assert np.all(np.fabs(s2b_b/s2b_a[idx]-1) < 1E-10)

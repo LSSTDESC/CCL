@@ -3,7 +3,7 @@ from ..concentration import Concentration
 from .profile_base import HaloProfileCIB
 from .nfw import HaloProfileNFW
 import numpy as np
-from scipy.integrate import simps
+from scipy.integrate import simpson
 from scipy.special import lambertw
 
 
@@ -211,7 +211,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         Lum = self._Lum(msub, a)
         dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(10**msub, M_use)
         integ = dnsubdlnm * Lum
-        Lumsat = simps(integ, x=np.log(10)*msub)
+        Lumsat = simpson(integ, x=np.log(10)*msub)
         res[-len(Lumsat):] = Lumsat
         return res
 

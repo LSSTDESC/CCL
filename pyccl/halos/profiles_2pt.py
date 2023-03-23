@@ -1,5 +1,5 @@
 from ..base import CCLAutoreprObject, warn_api
-from .profiles import HaloProfile, HaloProfileHOD, HaloProfileCIBShang12
+from .profiles import HaloProfileHOD, HaloProfileCIBShang12
 
 
 class Profile2pt(CCLAutoreprObject):
@@ -75,12 +75,8 @@ class Profile2pt(CCLAutoreprObject):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
-        if not isinstance(prof, HaloProfile):
-            raise TypeError("prof must be of type `HaloProfile`")
         if prof2 is None:
             prof2 = prof
-        elif not isinstance(prof2, HaloProfile):
-            raise TypeError("prof2 must be of type `HaloProfile` or None")
 
         uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
 
@@ -133,11 +129,10 @@ class Profile2ptHOD(Profile2pt):
         if prof2 is None:
             prof2 = prof
 
-        if not (isinstance(prof, HaloProfileHOD)
-                and isinstance(prof2, HaloProfileHOD)):
-            raise TypeError("prof and prof2 should be HaloProfileHOD")
         if prof != prof2:
             raise ValueError("prof and prof2 must be equivalent")
+        if not isinstance(prof, HaloProfileHOD):
+            raise TypeError("prof and prof2 should be HaloProfileHOD")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)
 
@@ -187,5 +182,4 @@ class Profile2ptCIB(Profile2pt):
             if not isinstance(prof2, HaloProfileCIBShang12):
                 raise TypeError("prof must be of type `HaloProfileCIB`")
             nu2 = prof2.nu
-        return prof._fourier_variance(cosmo, k, M, a, mass_def,
-                                      nu_other=nu2)
+        return prof._fourier_variance(cosmo, k, M, a, mass_def, nu_other=nu2)

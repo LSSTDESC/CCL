@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..concentration import Concentration
-from .profile_base import HaloProfile
+from .profile_base import HaloProfileNumberCounts
 import numpy as np
 from scipy.special import sici, erf
 
@@ -8,7 +8,7 @@ from scipy.special import sici, erf
 __all__ = ("HaloProfileHOD",)
 
 
-class HaloProfileHOD(HaloProfile):
+class HaloProfileHOD(HaloProfileNumberCounts):
     """ A generic halo occupation distribution (HOD)
     profile describing the number density of galaxies
     as a function of halo mass.
@@ -115,7 +115,6 @@ class HaloProfileHOD(HaloProfile):
         "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
         "ns_independent", "precision_fftlog",)
     name = 'HOD'
-    is_number_counts = True
 
     @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation,

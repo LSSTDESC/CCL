@@ -445,7 +445,7 @@ class HMCalculator(CCLAutoreprObject):
             cosmo, k, self._mass, a, prof,
             prof2=prof2, mass_def=self.mass_def).T
 
-        if (prof, prof2) == (prof3, prof4):
+        if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
             # 4pt approximation of the same profile
             uk34 = uk12
         else:

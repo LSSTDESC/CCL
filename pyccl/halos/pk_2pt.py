@@ -1,8 +1,7 @@
 from .. import ccllib as lib
-from ..base import warn_api
+from ..base import UnlockInstance, warn_api
 from ..pk2d import Pk2D
 from ..pyutils import check
-from .profiles import HaloProfile
 from .profiles_2pt import Profile2pt
 import numpy as np
 
@@ -10,11 +9,11 @@ import numpy as np
 __all__ = ("halomod_power_spectrum", "halomod_Pk2D",)
 
 
-@warn_api(pairs=[("normprof1", "normprof"), ("supress_1h", "suppress_1h")],
-          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
+@warn_api(pairs=[("supress_1h", "suppress_1h")],
+          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof1", "normprof2"])
 def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof_2pt=None,
-                           normprof=False, normprof2=False,
+                           normprof1=None, normprof2=None,
                            p_of_k_a=None,
                            get_1h=True, get_2h=True,
                            smooth_transition=None, suppress_1h=None):
@@ -42,11 +41,13 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
             second halo profile. If `None`, `prof` will be used as
             `prof2`.
-        normprof (bool): if `True`, this integral will be
+        normprof1 (bool): (Deprecated - do not use)
+            if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
-        normprof2 (bool): if `True`, this integral will be
+        normprof2 (bool): (Deprecated - do not use)
+            if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
             (see :meth:`~HMCalculator.I_0_1`), where
             :math:`v` is the profile represented by `prof2`.
@@ -87,31 +88,27 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     k_use = np.atleast_1d(k).astype(float)
 
     # Check inputs
-    if not isinstance(prof, HaloProfile):
-        raise TypeError("prof must be of type `HaloProfile`")
-    if prof2 is None:
-        prof2 = prof
-    elif not isinstance(prof2, HaloProfile):
-        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    if prof_2pt is None:
-        prof_2pt = Profile2pt()
-    elif not isinstance(prof_2pt, Profile2pt):
-        raise TypeError("prof_2pt must be of type "
-                        "`Profile2pt` or `None`")
     if smooth_transition is not None:
         if not (get_1h and get_2h):
             raise ValueError("transition region can only be modified "
                              "when both 1-halo and 2-halo terms are queried")
-        if not callable(smooth_transition):
-            raise TypeError("smooth_transition must be "
-                            "a function of `a` or None")
     if suppress_1h is not None:
         if not get_1h:
             raise ValueError("can't suppress the 1-halo term "
                              "when get_1h is False")
-        if not callable(suppress_1h):
-            raise TypeError("suppress_1h must be "
-                            "a function of `a` or None")
+
+    if prof2 is None:
+        prof2 = prof
+    if prof_2pt is None:
+        prof_2pt = Profile2pt()
+
+    # TODO: Remove for CCLv3.
+    if normprof1 is not None:
+        with UnlockInstance(prof):
+            prof.normprof = normprof1
+    if normprof2 is not None:
+        with UnlockInstance(prof2):
+            prof2.normprof = normprof2
 
     # Power spectrum
     if isinstance(p_of_k_a, Pk2D):
@@ -132,7 +129,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         # Compute first profile normalization
-        if normprof:
+        if prof.normprof:
             norm1 = hmc.profile_norm(cosmo, aa, prof)
         else:
             norm1 = 1
@@ -140,7 +137,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
         if prof2 == prof:
             norm2 = norm1
         else:
-            if normprof2:
+            if prof2.normprof:
                 norm2 = hmc.profile_norm(cosmo, aa, prof2)
             else:
                 norm2 = 1
@@ -184,11 +181,11 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     return out
 
 
-@warn_api(pairs=[("normprof1", "normprof"), ("supress_1h", "suppress_1h")],
-          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof", "normprof2"])
+@warn_api(pairs=[("supress_1h", "suppress_1h")],
+          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof1", "normprof2"])
 def halomod_Pk2D(cosmo, hmc, prof, *,
                  prof2=None, prof_2pt=None,
-                 normprof=False, normprof2=False,
+                 normprof1=None, normprof2=None,
                  p_of_k_a=None,
                  get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
@@ -213,7 +210,7 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
             being correlated. If `None`, the default second moment
             will be used, corresponding to the products of the means
             of both profiles.
-        normprof (bool): if `True`, this integral will be
+        normprof1 (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
@@ -273,7 +270,7 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
     pk_arr = halomod_power_spectrum(cosmo, hmc, np.exp(lk_arr), a_arr,
                                     prof, prof_2pt=prof_2pt,
                                     prof2=prof2, p_of_k_a=p_of_k_a,
-                                    normprof=normprof, normprof2=normprof2,
+                                    normprof1=normprof1, normprof2=normprof2,
                                     get_1h=get_1h, get_2h=get_2h,
                                     smooth_transition=smooth_transition,
                                     suppress_1h=suppress_1h)

@@ -726,6 +726,12 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
 
         # API compatibility for renamed arguments.
         warn_names = set(kwargs) - set(params)
+        unexpected = [k for k in warn_names if k not in rename]
+        if unexpected:
+            # emulate Python default behavior for arguments that don't exist
+            raise TypeError(
+                f"{func.__name__}() got an unexpected keyword argument "
+                f"'{unexpected[0]}'")
         if warn_names:
             s = plural(warn_names)
             warnings.warn(
@@ -755,12 +761,12 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
                 f"deprecated in {func.__qualname__}.", CCLDeprecationWarning)
 
         # API compatibility for `normprof` as a required argument.
-        if "normprof" in set(params) - set(kwargs):
-            kwargs["normprof"] = False
+        if any(["normprof" in par for par in kwargs.items()]):
             warnings.warn(
-                "Halo profile normalization `normprof` has become a required "
-                f"argument in {name}. Not specifying it will trigger an "
-                "exception in the future", CCLDeprecationWarning)
+                "Argument `normprof` has been become a profile attribute and "
+                "specifying it is deprecated. To change the default value use "
+                "`with UnlockInstance(...): prof.normprof = [True|False]`.",
+                CCLDeprecationWarning)
 
         # Collect what's remaining and sort to preserve signature order.
         pos = dict(zip(pos_names, args))

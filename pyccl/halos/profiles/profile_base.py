@@ -33,6 +33,7 @@ class HaloProfile(CCLAutoreprObject):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
+    normprof = False
     is_number_counts = False
     __getattr__ = deprecate_attr(pairs=[('cM', 'c_m_relation')]
                                  )(super.__getattribute__)
@@ -536,8 +537,15 @@ class HaloProfile(CCLAutoreprObject):
         return sig_r_t_out
 
 
+class HaloProfileNumberCounts(HaloProfile):
+    """Base for number counts halo profiles."""
+    normprof = True
+    is_number_counts = True
+
+
 class HaloProfileMatter(HaloProfile):
     """Base for matter halo profiles."""
+    normprof = True
 
 
 class HaloProfilePressure(HaloProfile):
