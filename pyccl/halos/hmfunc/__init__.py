@@ -1,4 +1,4 @@
-from .hmfunc_base import MassFunc, mass_function_from_name
+from ..halo_model_base import MassFunc, mass_function_from_name
 from .angulo12 import MassFuncAngulo12
 from .bocquet16 import MassFuncBocquet16
 from .despali16 import MassFuncDespali16

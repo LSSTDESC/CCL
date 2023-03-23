@@ -1,6 +1,6 @@
-from ...background import sigma_critical
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import CCLAutoreprObject, unlock_instance, warn_api, deprecate_attr
+from ...base import (CCLAutoreprObject, unlock_instance,
+                     warn_api, deprecate_attr)
 import numpy as np
 
 
@@ -311,7 +311,7 @@ class HaloProfile(CCLAutoreprObject):
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
         Sigma /= a_lens**2
-        Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
+        Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return Sigma / Sigma_crit
 
     @warn_api
@@ -344,7 +344,7 @@ class HaloProfile(CCLAutoreprObject):
         """
         Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
         Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def=mass_def)
-        Sigma_crit = sigma_critical(cosmo, a_lens=a_lens, a_source=a_source)
+        Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
     @warn_api
@@ -534,3 +534,15 @@ class HaloProfile(CCLAutoreprObject):
         if np.ndim(M) == 0:
             sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
         return sig_r_t_out
+
+
+class HaloProfileMatter(HaloProfile):
+    """Base for matter halo profiles."""
+
+
+class HaloProfilePressure(HaloProfile):
+    """Base for pressure halo profiles."""
+
+
+class HaloProfileCIB(HaloProfile):
+    """Base for CIB halo profiles."""

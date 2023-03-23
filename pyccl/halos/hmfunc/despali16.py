@@ -2,7 +2,7 @@ from ...base import warn_api
 from ... import ccllib as lib
 from ...pyutils import check
 from ..massdef import MassDef200m
-from .hmfunc_base import MassFunc
+from ..halo_model_base import MassFunc
 import numpy as np
 
 

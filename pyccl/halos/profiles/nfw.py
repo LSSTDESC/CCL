@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..concentration import Concentration
-from .profile_base import HaloProfile
+from .profile_base import HaloProfileMatter
 import numpy as np
 from scipy.special import sici
 
@@ -8,7 +8,7 @@ from scipy.special import sici
 __all__ = ("HaloProfileNFW",)
 
 
-class HaloProfileNFW(HaloProfile):
+class HaloProfileNFW(HaloProfileMatter):
     """ Navarro-Frenk-White (astro-ph:astro-ph/9508025) profile.
 
     .. math::

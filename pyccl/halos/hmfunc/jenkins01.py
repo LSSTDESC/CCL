@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..massdef import MassDef
-from .hmfunc_base import MassFunc
+from ..halo_model_base import MassFunc
 import numpy as np
 
 

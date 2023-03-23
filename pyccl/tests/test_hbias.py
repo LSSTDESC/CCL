@@ -52,5 +52,5 @@ def test_bM_from_string(name):
 
 
 def test_bM_from_string_raises():
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.halos.HaloBias.from_name('Tinker11')

@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..concentration import Concentration
-from .profile_base import HaloProfile
+from .profile_base import HaloProfileMatter
 import numpy as np
 from scipy.special import sici
 
@@ -8,7 +8,7 @@ from scipy.special import sici
 __all__ = ("HaloProfileHernquist",)
 
 
-class HaloProfileHernquist(HaloProfile):
+class HaloProfileHernquist(HaloProfileMatter):
     """ Hernquist (1990ApJ...356..359H).
 
     .. math::

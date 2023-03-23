@@ -2,7 +2,7 @@ from ...base import warn_api
 from ...power import sigmaM
 from ..concentration import Concentration
 from ..massdef import MassDef
-from .profile_base import HaloProfile
+from .profile_base import HaloProfileMatter
 import numpy as np
 from scipy.special import gamma, gammainc
 
@@ -10,7 +10,7 @@ from scipy.special import gamma, gammainc
 __all__ = ("HaloProfileEinasto",)
 
 
-class HaloProfileEinasto(HaloProfile):
+class HaloProfileEinasto(HaloProfileMatter):
     """ Einasto profile (1965TrAlm...5...87E).
 
     .. math::

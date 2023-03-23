@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..massdef import MassDef
-from .hbias_base import HaloBias
+from ..halo_model_base import HaloBias
 
 
 __all__ = ("HaloBiasSheth01",)

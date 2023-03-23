@@ -1,4 +1,4 @@
-from .concentration_base import Concentration, concentration_from_name
+from ..halo_model_base import Concentration, concentration_from_name
 from .bhattacharya13 import ConcentrationBhattacharya13
 from .constant import ConcentrationConstant
 from .diemer15 import ConcentrationDiemer15

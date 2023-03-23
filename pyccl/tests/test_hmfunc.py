@@ -117,7 +117,7 @@ def test_nM_from_string(name):
 
 
 def test_nM_from_string_raises():
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.halos.MassFunc.from_name('Tinker09')
 
 

@@ -2,7 +2,7 @@ from ... import ccllib as lib
 from ...base import warn_api
 from ...pyutils import check
 from ..massdef import MassDef
-from .concentration_base import Concentration
+from ..halo_model_base import Concentration
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 
@@ -32,15 +32,13 @@ class ConcentrationIshiyama21(Concentration):
     name = 'Ishiyama21'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def=None, relaxed=False, Vmax=False):
+    def __init__(self, *, mass_def=MassDef(500, 'critical'),
+                 relaxed=False, Vmax=False):
         self.relaxed = relaxed
         self.Vmax = Vmax
         super().__init__(mass_def=mass_def)
 
-    def _default_mass_def(self):
-        self.mass_def = MassDef(500, 'critical')
-
-    def _check_mass_def(self, mass_def):
+    def _check_mass_def_strict(self, mass_def):
         if mass_def.Delta != 'vir':
             if isinstance(mass_def.Delta, str):
                 return True

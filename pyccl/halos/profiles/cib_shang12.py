@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..concentration import Concentration
-from .profile_base import HaloProfile
+from .profile_base import HaloProfileCIB
 from .nfw import HaloProfileNFW
 import numpy as np
 from scipy.integrate import simps
@@ -10,7 +10,7 @@ from scipy.special import lambertw
 __all__ = ("HaloProfileCIBShang12",)
 
 
-class HaloProfileCIBShang12(HaloProfile):
+class HaloProfileCIBShang12(HaloProfileCIB):
     """ CIB profile implementing the model by Shang et al.
     (2012MNRAS.421.2832S).
 

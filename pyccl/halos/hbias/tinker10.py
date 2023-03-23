@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..massdef import MassDef200m
-from .hbias_base import HaloBias
+from ..halo_model_base import HaloBias
 import numpy as np
 
 

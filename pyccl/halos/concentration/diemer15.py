@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..massdef import MassDef, mass2radius_lagrangian
-from .concentration_base import Concentration
+from ..halo_model_base import Concentration
 import numpy as np
 
 
@@ -21,11 +21,8 @@ class ConcentrationDiemer15(Concentration):
     name = 'Diemer15'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def=None):
+    def __init__(self, *, mass_def=MassDef(200, 'critical')):
         super(ConcentrationDiemer15, self).__init__(mass_def=mass_def)
-
-    def _default_mass_def(self):
-        self.mass_def = MassDef(200, 'critical')
 
     def _setup(self):
         self.kappa = 1.0
@@ -36,7 +33,7 @@ class ConcentrationDiemer15(Concentration):
         self.alpha = 1.08
         self.beta = 1.77
 
-    def _check_mass_def(self, mass_def):
+    def _check_mass_def_strict(self, mass_def):
         if isinstance(mass_def.Delta, str):
             return True
         elif not ((int(mass_def.Delta) == 200) and

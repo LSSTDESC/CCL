@@ -1,6 +1,6 @@
 from .. import ccllib as lib
 from ..core import check
-from ..background import species_types, rho_x, omega_x
+from ..background import species_types
 from ..base import CCLAutoreprObject, warn_api, deprecate_attr
 import numpy as np
 
@@ -18,7 +18,7 @@ def mass2radius_lagrangian(cosmo, M):
         float or array_like: lagrangian radius in comoving Mpc.
     """
     M_use = np.atleast_1d(M)
-    R = (M_use / (4.18879020479 * rho_x(cosmo, 1, 'matter')))**(1./3.)
+    R = (M_use / (4.18879020479 * cosmo.rho_x(1, 'matter')))**(1./3.)
     if np.ndim(M) == 0:
         R = R[0]
     return R
@@ -168,7 +168,7 @@ class MassDef(CCLAutoreprObject):
         """
         R_use = np.atleast_1d(R)
         Delta = self.get_Delta(cosmo, a)
-        M = 4.18879020479 * rho_x(cosmo, a, self.rho_type) * Delta * R_use**3
+        M = 4.18879020479 * cosmo.rho_x(a, self.rho_type) * Delta * R_use**3
         if np.ndim(R) == 0:
             M = M[0]
         return M
@@ -188,7 +188,7 @@ class MassDef(CCLAutoreprObject):
         M_use = np.atleast_1d(M)
         Delta = self.get_Delta(cosmo, a)
         R = (M_use / (4.18879020479 * Delta *
-                      rho_x(cosmo, a, self.rho_type)))**(1./3.)
+                      cosmo.rho_x(a, self.rho_type)))**(1./3.)
         if np.ndim(M) == 0:
             R = R[0]
         return R
@@ -230,11 +230,11 @@ class MassDef(CCLAutoreprObject):
                 raise RuntimeError("This mass definition doesn't have "
                                    "an associated c(M) relation")
             else:
-                om_this = omega_x(cosmo, a, self.rho_type)
+                om_this = cosmo.omega_x(a, self.rho_type)
                 D_this = self.get_Delta(cosmo, a) * om_this
                 c_this = self._get_concentration(cosmo, M, a)
                 R_this = self.get_radius(cosmo, M, a)
-                om_new = omega_x(cosmo, a, mass_def_other.rho_type)
+                om_new = cosmo.omega_x(a, mass_def_other.rho_type)
                 D_new = mass_def_other.get_Delta(cosmo, a) * om_new
                 c_new = convert_concentration(cosmo, c_old=c_this,
                                               Delta_old=D_this,

@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..massdef import MassDef
-from .concentration_base import Concentration
+from ..halo_model_base import Concentration
 import numpy as np
 
 
@@ -21,13 +21,10 @@ class ConcentrationPrada12(Concentration):
     name = 'Prada12'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def=None):
+    def __init__(self, *, mass_def=MassDef(200, 'critical')):
         super(ConcentrationPrada12, self).__init__(mass_def=mass_def)
 
-    def _default_mass_def(self):
-        self.mass_def = MassDef(200, 'critical')
-
-    def _check_mass_def(self, mass_def):
+    def _check_mass_def_strict(self, mass_def):
         if isinstance(mass_def.Delta, str):
             return True
         elif not ((int(mass_def.Delta) == 200) and

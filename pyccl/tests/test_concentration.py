@@ -69,5 +69,5 @@ def test_cM_from_string(name):
 
 
 def test_cM_from_string_raises():
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.halos.Concentration.from_name('Duffy09')

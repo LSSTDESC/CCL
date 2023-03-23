@@ -1,13 +1,12 @@
 from ...base import UnlockInstance, warn_api
-from ...background import h_over_h0
-from .profile_base import HaloProfile
+from .profile_base import HaloProfilePressure
 import numpy as np
 
 
 __all__ = ("HaloProfilePressureGNFW",)
 
 
-class HaloProfilePressureGNFW(HaloProfile):
+class HaloProfilePressureGNFW(HaloProfilePressure):
     """ Generalized NFW pressure profile by Arnaud et al.
     (2010A&A...517A..92A).
 
@@ -190,7 +189,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         h70 = cosmo["h"]/0.7
         C0 = 1.65*h70**2
         CM = (h70*M*mb/3E14)**(2/3+self.alpha_P)   # M dependence
-        Cz = h_over_h0(cosmo, a)**(8/3)  # z dependence
+        Cz = cosmo.h_over_h0(a)**(8/3)  # z dependence
         P0_corr = self.P0 * h70**self.P0_hexp  # h-corrected P_0
         return P0_corr * C0 * CM * Cz
 

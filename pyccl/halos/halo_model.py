@@ -54,17 +54,17 @@ class HMCalculator(CCLAutoreprObject):
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
                      ("log10M_min", "lM_min"), ("log10M_max", "lM_max"),
                      ("nlog10M", "nlM"), ("k_min", "k_norm")])
-    def __init__(self, *, mass_function, halo_bias, mass_def,
+    def __init__(self, *, mass_function, halo_bias, mass_def=None,
                  lM_min=8., lM_max=16., nlM=128,
                  integration_method_M='simpson', k_norm=1E-5):
-        # halo mass definition
-        if isinstance(mass_def, MassDef):
+        # halo mass definition (1/2)
+        if mass_def is None or isinstance(mass_def, MassDef):
             self.mass_def = mass_def
         elif isinstance(mass_def, str):
             self.mass_def = MassDef.from_name(mass_def)()
         else:
-            raise TypeError("mass_def must be of type `MassDef` "
-                            "or a mass definition name string")
+            raise TypeError("mass_def must be `MassDef`, a string, or None.")
+
         # halo mass function
         if isinstance(mass_function, MassFunc):
             self.mass_function = mass_function
@@ -83,6 +83,18 @@ class HMCalculator(CCLAutoreprObject):
         else:
             raise TypeError("halo_bias must be of type `HaloBias` "
                             "or a halo bias name string")
+
+        # halo mass definition (2/2)
+        if mass_def is None:
+            self.mass_def = self.mass_function.mass_def
+
+        # Check mass definition consistency
+        if (self.mass_def
+                != self.mass_function.mass_def
+                != self.halo_bias.mass_def):
+            raise ValueError(
+                "HMCalculator received different mass definitions "
+                "in mass_def, mass_function, halo_bias.")
 
         self.precision = {
             'log10M_min': lM_min, 'log10M_max': lM_max, 'nlM': nlM,
