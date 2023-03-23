@@ -36,7 +36,7 @@ def bcm_model_fka(cosmo, k, a):
     return fka
 
 
-@unlock_instance(mutate=True, argv=1)
+@unlock_instance(mutate=True, name="pk2d")
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
 
