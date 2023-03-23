@@ -574,8 +574,7 @@ class Tracer(CCLObject):
                 distance on which we sample the kernel.
         """
         if z_min >= z_max:
-            raise ValueError("z_min should be smaller than z_max, but "
-                             f"{z_min} >= {z_max}\n")
+            raise ValueError("z_min should be smaller than z_max.")
 
         tracer = cls()
 
