@@ -395,14 +395,14 @@ class UnlockInstance:
             self.object_lock.lock()
 
     @classmethod
-    def unlock_instance(cls, func=None, *, argv=0, mutate=True):
+    def unlock_instance(cls, func=None, *, name=None, mutate=True):
         """Decorator that temporarily unlocks an instance of CCLObject.
 
         Arguments:
             func (``function``):
                 Function which changes one of its ``CCLObject`` arguments.
-            argv (``int``):
-                Which argument should be unlocked. Defaults to the first one.
+            name (``str``):
+                Name of the parameter to unlock. Defaults to the first one.
                 If not a ``CCLObject`` the decorator will do nothing.
             mutate (``bool``):
                 If after the function ``instance_old != instance_new``, the
@@ -411,17 +411,23 @@ class UnlockInstance:
         """
         if func is None:
             # called with parentheses
-            return functools.partial(cls.unlock_instance, argv=argv,
+            return functools.partial(cls.unlock_instance, name=name,
                                      mutate=mutate)
+
+        if not hasattr(func, "__signature__"):
+            # store the function signature
+            func.__signature__ = signature(func)
+        names = list(func.__signature__.parameters.keys())
+        name = names[0] if name is None else name  # default name
+        if name not in names:
+            # ensure the name makes sense
+            raise NameError(f"{name} does not exist in {func.__name__}.")
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            # Pick argument from list of `args` or `kwargs` as needed.
-            size = len(args)
-            arg = args[argv] if size > argv else list(kwargs.values())[argv-size]  # noqa
-            with UnlockInstance(arg, mutate=mutate):
-                out = func(*args, **kwargs)
-            return out
+            bound = func.__signature__.bind(*args, **kwargs)
+            with UnlockInstance(bound.arguments[name], mutate=mutate):
+                return func(*args, **kwargs)
         return wrapper
 
     @classmethod

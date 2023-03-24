@@ -1,11 +1,11 @@
 # flake8: noqa E402
-from pkg_resources import get_distribution, DistributionNotFound
+from importlib.metadata import version, PackageNotFoundError
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+    __version__ = version(__name__)
+except PackageNotFoundError:
     # package is not installed
     pass
-del get_distribution, DistributionNotFound
+del version, PackageNotFoundError
 
 # Set the environment variable for default config path
 from os import environ, path
