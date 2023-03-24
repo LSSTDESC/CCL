@@ -202,10 +202,10 @@ class Cosmology(CCLObject):
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
     # an attribute of this class.
-    from . import (background, bcm, boltzmann, cls,
+    from . import (background, bcm, boltzmann, cells,
                    correlations, covariances, neutrinos,
                    pk2d, power, pyutils, tk3d, tracers, halos, nl_pt)
-    subs = [background, boltzmann, bcm, cls, correlations, covariances,
+    subs = [background, boltzmann, bcm, cells, correlations, covariances,
             neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
@@ -214,7 +214,7 @@ class Cosmology(CCLObject):
         if pars and pars[0] == "cosmo":
             vars()[name] = func
     # clear unnecessary locals
-    del (background, boltzmann, bcm, cls, correlations, covariances,
+    del (background, boltzmann, bcm, cells, correlations, covariances,
          neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt,
          subs, funcs, func, name, pars)
 

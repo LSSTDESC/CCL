@@ -4,6 +4,12 @@ import pyccl as ccl
 import functools
 
 
+def all_subclasses(cls):
+    """Get all subclasses of ``cls``. NOTE: Used in ``conftest.py``."""
+    return set(cls.__subclasses__()).union([s for c in cls.__subclasses__()
+                                            for s in all_subclasses(c)])
+
+
 def test_fancy_repr():
     # Test fancy-repr controls.
     cosmo1 = ccl.CosmologyVanillaLCDM()
@@ -211,7 +217,19 @@ def init_decorator(func):
     return wrapper
 
 
-def all_subclasses(cls):
-    """Get all subclasses of ``cls``. NOTE: Used in ``conftest.py``."""
-    return set(cls.__subclasses__()).union([s for c in cls.__subclasses__()
-                                            for s in all_subclasses(c)])
+def test_unlock_instance_errors():
+    # Test that unlock_instance gives the correct errors.
+
+    # 1. Developer error
+    with pytest.raises(NameError):
+        @ccl.unlock_instance(name="hello")
+        def func1(item, pk, a0=0, *, a1=None, a2):
+            return
+
+    # 2. User error
+    @ccl.unlock_instance(name="pk")
+    def func2(item, pk, a0=0, *, a1=None, a2):
+        return
+
+    with pytest.raises(TypeError):
+        func2()

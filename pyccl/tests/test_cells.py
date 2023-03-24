@@ -13,9 +13,12 @@ ZZ = np.linspace(0., 1., 200)
 NN = np.exp(-((ZZ-0.5)/0.1)**2)
 LENS = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, NN))
 
+with pytest.warns(ccl.CCLDeprecationWarning):
+    ccl.cls
+
 
 @pytest.mark.parametrize('p_of_k_a', [None, PKA])
-def test_cls_smoke(p_of_k_a):
+def test_cells_smoke(p_of_k_a):
     # make a set of tracers to test with
     z = np.linspace(0., 1., 200)
     n = np.exp(-((z-0.5)/0.1)**2)
@@ -70,25 +73,25 @@ def test_cls_smoke(p_of_k_a):
 
 
 @pytest.mark.parametrize('ells', [[3, 2, 1], [1, 3, 2], [2, 3, 1]])
-def test_cls_raise_ell_reversed(ells):
+def test_cells_raise_ell_reversed(ells):
     with pytest.raises(ValueError):
         ccl.angular_cl(COSMO, LENS, LENS, ells)
 
 
-def test_cls_raise_integ_method():
+def test_cells_raise_integ_method():
     ells = [10, 11]
     with pytest.raises(ValueError):
         ccl.angular_cl(COSMO, LENS, LENS, ells,
                        limber_integration_method='guad')
 
 
-def test_cls_raise_weird_pk():
+def test_cells_raise_weird_pk():
     ells = [10, 11]
     with pytest.raises(ValueError):
         ccl.angular_cl(COSMO, LENS, LENS, ells, p_of_k_a=lambda k, a: 10)
 
 
-def test_cls_mg():
+def test_cells_mg():
     # Check that if we feed the non-linear matter power spectrum from a MG
     # cosmology into a Calculator and get Cells using MG tracers, we get the
     # same results.
