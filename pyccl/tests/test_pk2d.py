@@ -39,22 +39,27 @@ def test_pk2d_init():
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
     # If no input
-    assert_raises(ValueError, ccl.Pk2D)
+    with pytest.raises(ValueError):
+        ccl.Pk2D()
 
     # Input function has incorrect signature
-    assert_raises(ValueError, ccl.Pk2D, pkfunc=pk1d)
-    ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    with pytest.raises(ValueError):
+        with pytest.warns(ccl.CCLDeprecationWarning):
+            ccl.Pk2D(pkfunc=pk1d)
+
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
 
     # Input arrays have incorrect sizes
     lkarr = -4.+6*np.arange(100)/99.
     aarr = 0.05+0.95*np.arange(100)/99.
     pkarr = np.zeros([len(aarr), len(lkarr)])
-    assert_raises(
-        ValueError, ccl.Pk2D, a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr[1:])
+    with pytest.raises(ValueError):
+        ccl.Pk2D(a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr[1:])
 
     # Scale factor is not monotonically increasing
-    assert_raises(
-        ValueError, ccl.Pk2D, a_arr=aarr[::-1], lk_arr=lkarr, pk_arr=pkarr)
+    with pytest.raises(ValueError):
+        ccl.Pk2D(a_arr=aarr[::-1], lk_arr=lkarr, pk_arr=pkarr)
 
 
 def test_pk2d_smoke():
@@ -144,7 +149,8 @@ def test_pk2d_function():
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
-    psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
 
     # Test at single point
     ktest = 1E-2
@@ -172,7 +178,8 @@ def test_pk2d_function():
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is not logarithmic
-    psp = ccl.Pk2D(pkfunc=pk2d, is_logp=False, cosmo=cosmo)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        psp = ccl.Pk2D(pkfunc=pk2d, is_logp=False, cosmo=cosmo)
     phere = psp.eval(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
     dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
@@ -211,7 +218,8 @@ def test_pk2d_cls():
         ValueError, ccl.angular_cl, cosmo, lens1, lens1, ells, p_of_k_a=1)
 
     # Check that passing a correct power spectrum runs as expected
-    psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
     cells = ccl.angular_cl(cosmo, lens1, lens1, ells, p_of_k_a=psp)
     assert all_finite(cells)
 
@@ -365,8 +373,10 @@ def test_pk2d_mul_pow():
 
 def test_pk2d_pkfunc_init_without_cosmo():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
-    arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
     assert np.allclose(arr1, arr2, rtol=0)
 
 
@@ -387,7 +397,8 @@ def test_pk2d_descriptor():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     cosmo.compute_linear_power()
     pkl = cosmo.get_linear_power()
-    pk1 = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        pk1 = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
     pk2 = pkl.apply_halofit(cosmo)
     assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])
 
@@ -464,5 +475,6 @@ def test_pk2d_from_model_smoke():
     # Verify that both `from_model` methods are equivalent.
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     pk1 = ccl.Pk2D.from_model(cosmo, "bbks")
-    pk2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        pk2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
     assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])

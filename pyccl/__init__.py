@@ -84,6 +84,7 @@ from .boltzmann import (
 from .pk2d import (
     Pk2D,
     parse_pk2d,
+    sample_pk_function,
 )
 
 # Generalized connected trispectra

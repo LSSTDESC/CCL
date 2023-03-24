@@ -16,7 +16,8 @@ PKC = ccl.halos.Profile2pt()
 KK = np.geomspace(1E-3, 10, 32)
 MM = np.geomspace(1E11, 1E15, 16)
 AA = 1.0
-PK2D = ccl.Pk2D(cosmo=COSMO, pkfunc=lambda k, a: a / k)
+a, lk, pk = ccl.sample_pk_function(lambda k, a: a / k)
+PK2D = ccl.Pk2D(a_arr=a, lk_arr=lk, pk_arr=pk)
 
 
 def test_prof2pt_smoke():

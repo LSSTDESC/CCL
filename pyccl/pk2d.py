@@ -3,24 +3,32 @@ import functools
 import numpy as np
 
 from . import ccllib as lib
-from .errors import CCLWarning, CCLError
+from .errors import CCLWarning, CCLError, CCLDeprecationWarning
 from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline1d_arrays, _get_spline2d_arrays)
-from .base import CCLObject, UnlockInstance, unlock_instance
+from .base import (CCLObject, UnlockInstance, unlock_instance,
+                   warn_api, deprecated)
 
 
 class _Pk2D_descriptor:
-    """Descriptor to enable usage of `Pk2D` class methods as instance methods.
-    """
+    """Descriptor to deprecate usage of `Pk2D` methods as class methods."""
     def __init__(self, func):
         self.func = func
 
     def __get__(self, instance, base):
-        this = instance if instance else base
+        if instance is None:
+            warnings.warn("Use of the power spectrum as an argument "
+                          f"is deprecated in {self.func.__name__}. "
+                          "Use the instance method instead.",
+                          CCLDeprecationWarning)
+            this = base
+        else:
+            this = instance
 
         @functools.wraps(self.func)
         def new_func(*args, **kwargs):
             return self.func(this, *args, **kwargs)
+
         return new_func
 
 
@@ -45,15 +53,6 @@ class Pk2D(CCLObject):
 
     Parameters
     ----------
-    pkfunc : :obj:`callable`
-        Function with signature ``f(k, a)`` which takes vectorized input
-        in ``k`` (wavenumber in :math:`\\mathrm{Mpc}^{-1}``) and a scale factor
-        ``a``, and returns the value of the power spectrum, or its natural log
-        depending on ``is_logp``. Power spectrum units must be compatible
-        with  CCL (e.g. :math:`\\mathrm{Mpc}^3` for matter power spectrum).
-        If a ``pkfunc`` is provided the power spectrum is sampled at the
-        values of ``k`` and ``a`` used internally by CCL to store the linear
-        and non-linear power spectra.
     a_arr : array
         An array holding values of the scale factor
     lk_arr : array
@@ -71,6 +70,19 @@ class Pk2D(CCLObject):
         i.e. the resolution of `a_arr` and `lk_arr` is high enough to sample
         the main features in the power spectrum. CCL uses bicubic interpolation
         to evaluate the power spectrum at any intermediate point in k and a.
+    pkfunc : :obj:`callable`
+        Function with signature ``f(k, a)`` which takes vectorized input
+        in ``k`` (wavenumber in :math:`\\mathrm{Mpc}^{-1}``) and a scale factor
+        ``a``, and returns the value of the power spectrum, or its natural log
+        depending on ``is_logp``. Power spectrum units must be compatible
+        with  CCL (e.g. :math:`\\mathrm{Mpc}^3` for matter power spectrum).
+        If a ``pkfunc`` is provided the power spectrum is sampled at the
+        values of ``k`` and ``a`` used internally by CCL to store the linear
+        and non-linear power spectra. This is deprecated in favour of using
+        `sample_pk_function` and passing the resulting arrays.
+    cosmo : :class:`~pyccl.core.Cosmology`, optional cosmological parameters.
+        Used to determine sampling rates in scale factor and wavenumber if
+        using `pkfunc` (deprecated).
     extrap_order_lok, extrap_order_hik :  {0, 1, 2}
         Extrapolation order to be used on k-values below and above the minimum
         and maximum of the splines, respectively. Note that extrapolation is
@@ -79,17 +91,16 @@ class Pk2D(CCLObject):
         If True, pkfunc/pkarr return/hold the natural logarithm of the power
         spectrum. Otherwise, the true value of the power spectrum is expected.
         If ``is_logp`` is ``True``, arrays are interpolate in log-space.
-    cosmo : :class:`~pyccl.core.Cosmology`, optional
-        Cosmological parameters.
-        Used to determine sampling rates in scale factor and wavenumber.
     empty : bool
         If ``True``, just create an empty object, to be filled out later.
     """
     from ._repr import _build_string_Pk2D as __repr__
 
-    def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
-                 is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
-                 cosmo=None, empty=False):
+    @warn_api(reorder=["pkfunc", "a_arr", "lk_arr", "pk_arr", "is_logp",
+                       "extrap_order_lok", "extrap_order_hik", "cosmo"])
+    def __init__(self, *, a_arr=None, lk_arr=None, pk_arr=None,
+                 pkfunc=None, cosmo=None, is_logp=True,
+                 extrap_order_lok=1, extrap_order_hik=2, empty=False):
         if empty:
             return
 
@@ -109,18 +120,11 @@ class Pk2D(CCLObject):
             if (len(a_arr)*len(lk_arr) != len(pkflat)):
                 raise ValueError("Size of input arrays is inconsistent")
         else:  # Initialize power spectrum from function
-            # Check that the input function has the right signature
-            try:
-                pkfunc(k=np.array([1E-2, 2E-2]), a=0.5)
-            except Exception:
-                raise ValueError("Can't use input function")
-
-            # Set k and a sampling from CCL parameters
-            a_arr = get_pk_spline_a(cosmo=cosmo)
-            lk_arr = get_pk_spline_lk(cosmo=cosmo)
-
-            # Compute power spectrum on 2D grid
-            pkflat = np.array([pkfunc(k=np.exp(lk_arr), a=a) for a in a_arr])
+            warnings.warn("The use of a function when initialising a ``Pk2D`` "
+                          "object is deprecated. Use `sample_pk_function`"
+                          "and pass the resulting arrays.",
+                          CCLDeprecationWarning)
+            a_arr, lk_arr, pkflat = sample_pk_function(pkfunc, cosmo=cosmo)
             pkflat = pkflat.flatten()
 
         status = 0
@@ -128,7 +132,7 @@ class Pk2D(CCLObject):
                                                         int(extrap_order_lok),
                                                         int(extrap_order_hik),
                                                         int(is_logp), status)
-        check(status, cosmo=cosmo)
+        check(status)
 
     @property
     def has_psp(self):
@@ -147,15 +151,21 @@ class Pk2D(CCLObject):
         """`Pk2D` constructor returning the power spectrum associated with
         a given numerical model.
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            model (:obj:`str`): model to use. Three models allowed:
-                `'bbks'` (Bardeen et al. ApJ 304 (1986) 15).
-                `'eisenstein_hu'` (Eisenstein & Hu astro-ph/9709112).
-                `'eisenstein_hu_nowiggles'` (Eisenstein & Hu astro-ph/9709112).
-                `'emu'` (arXiv:1508.02654).
-        """
-        pk2d = Pk2D(empty=True)
+        Arguments:
+            cosmo (:class:`~pyccl.core.Cosmology`)
+                A Cosmology object.
+            model (:obj:`str`)
+                model to use. These models allowed:
+                  - `'bbks'` (Bardeen et al. ApJ 304 (1986) 15)
+                  - `'eisenstein_hu'` (Eisenstein & Hu astro-ph/9709112)
+                  - `'eisenstein_hu_nowiggles'` (Eisenstein & Hu astro-ph/9709112)
+                  - `'emu'` (arXiv:1508.02654).
+        Returns:
+            :class:`~pyccl.pk2d.Pk2D`
+                The power spectrum of the input model.
+        """  # noqa E501
+
+        pk2d = cls(empty=True)
         status = 0
         if model == 'bbks':
             cosmo.compute_growth()
@@ -182,21 +192,16 @@ class Pk2D(CCLObject):
 
     @classmethod
     @functools.wraps(from_model)
+    @deprecated(new_function=from_model.__func__)
     def pk_from_model(cls, cosmo, model):
         return cls.from_model(cosmo, model)
 
     @_Pk2D_descriptor
-    def apply_halofit(self, cosmo, pk_linear=None):
+    @warn_api
+    def apply_halofit(self, cosmo, *, pk_linear=None):
         """Pk2D constructor that applies the "HALOFIT" transformation of
-        Takahashi et al. 2012 (arXiv:1208.2701) on an input linear
-        power spectrum in `pk_linear`.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`):
-                A Cosmology object.
-            pk_linear (:class:`Pk2D`, optional):
-                A :class:`Pk2D` object containing the linear power spectrum
-                to transform.
+        Takahashi et al. 2012 (arXiv:1208.2701) on an input linear power
+        spectrum in `pk_linear`. See ``Pk2D.apply_nonlin_model`` for details.
         """
         if pk_linear is None:
             pk_linear = self
@@ -494,7 +499,8 @@ class Pk2D(CCLObject):
         return self
 
 
-def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
+@warn_api
+def parse_pk2d(cosmo, p_of_k_a, *, is_linear=False):
     """ Return the C-level `f2d` spline associated with a
     :class:`Pk2D` object.
 
@@ -527,3 +533,45 @@ def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
             pk = cosmo.get_nonlin_power(name)
         psp = pk.psp
     return psp
+
+
+def sample_pk_function(pkfunc, cosmo=None):
+    """ Samples a function of wavenumber and scale factor at the default
+    internal nodes used by CCL.
+
+    Args:
+        pkfunc : :obj:`callable`
+            Function with signature ``f(k, a)`` which takes vectorized input
+            in ``k`` (wavenumber in :math:`\\mathrm{Mpc}^{-1}``) and a scale
+            factor`a``, and returns the value of the corresponding quantity.
+            ``pkfunc`` will be sampled at the values of ``k`` and ``a`` used
+            internally by CCL to store the linear and non-linear power spectra.
+        cosmo : :class:`~pyccl.core.Cosmology`, optional cosmological
+            parameters. Used to determine sampling rates in scale factor and
+            wavenumber.
+
+    Returns:
+        a : array_like
+            Array containing the nodes in scale factor at which the power
+            spectrum has been sampled.
+        logk : array_like
+            Array containing the nodes in log(k) (natural logarithm) at which
+            the power spectrum has been sampled.
+        pk : array_like
+            Two-dimensional array of shape `[len(a), len(logk)]` containing
+            the power spectrum sampled at the corresponding values of `a` and
+            `logk` (i.e. `pk[i, j] = pkfunc(exp(logk[j]), a[i])`).
+    """
+    # Check that the input function has the right signature
+    try:
+        pkfunc(k=np.array([1E-2, 2E-2]), a=0.5)
+    except Exception:
+        raise ValueError("Can't use input function")
+
+    # Set k and a sampling from CCL parameters
+    a_arr = get_pk_spline_a(cosmo=cosmo)
+    lk_arr = get_pk_spline_lk(cosmo=cosmo)
+
+    # Compute power spectrum on 2D grid
+    pk_out = np.array([pkfunc(k=np.exp(lk_arr), a=a) for a in a_arr])
+    return a_arr, lk_arr, pk_out
