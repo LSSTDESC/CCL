@@ -1,18 +1,20 @@
 import numpy as np
 
+from . import ccllib as lib
+from .pyutils import check
+from .base import warn_api
+from .pk2d import Pk2D
+from .errors import CCLError
+from .parameters import physical_constants
+
 try:
     import isitgr  # noqa: F401
 except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
-from . import ccllib as lib
-from .pyutils import check
-from .pk2d import Pk2D
-from .errors import CCLError
-from .parameters import physical_constants
 
-
-def get_camb_pk_lin(cosmo, nonlin=False):
+@warn_api
+def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 
     Args:
@@ -289,8 +291,7 @@ def get_isitgr_pk_lin(cosmo):
     cp.ombh2 = cosmo['Omega_b'] * h2
     cp.omch2 = cosmo['Omega_c'] * h2
     cp.omk = cosmo['Omega_k']
-#   cp.GR = 1 means GR modified!
-    cp.GR = 1
+    cp.GR = 1  # means GR modified!
     cp.ISiTGR_muSigma = True
     cp.mu0 = cosmo['mu_0']
     cp.Sigma0 = cosmo['sigma_0']
