@@ -127,6 +127,8 @@ class Cosmology(CCLObject):
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
+        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
+            temperature. The default is 0.71611.
         bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
             BCM model. Defaults to `np.log10(1.2e14)`.
         bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
@@ -222,7 +224,7 @@ class Cosmology(CCLObject):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None,
             Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., m_nu_type=None,
-            w0=-1., wa=0., T_CMB=None,
+            w0=-1., wa=0., T_CMB=None, T_ncdm=0.71611,
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0.,
             c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
@@ -238,7 +240,7 @@ class Cosmology(CCLObject):
         self._params_init_kwargs = dict(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
-            m_nu_type=m_nu_type, w0=w0, wa=wa, T_CMB=T_CMB,
+            m_nu_type=m_nu_type, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
             bcm_log10Mc=bcm_log10Mc,
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
@@ -419,7 +421,7 @@ class Cosmology(CCLObject):
     def _build_parameters(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
             A_s=None, Omega_k=None, Neff=None, m_nu=None, m_nu_type=None,
-            w0=None, wa=None, T_CMB=None,
+            w0=None, wa=None, T_CMB=None, T_ncdm=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, c1_mg=None, c2_mg=None, lambda_mg=None,
             z_mg=None, df_mg=None, Omega_g=None,
@@ -603,14 +605,14 @@ class Cosmology(CCLObject):
                 # Create ccl_parameters without modified growth
                 self._params, status = lib.parameters_create_nu(
                     Omega_c, Omega_b, Omega_k, Neff,
-                    w0, wa, h, norm_pk, n_s, bcm_log10Mc,
+                    w0, wa, h, norm_pk, n_s, T_ncdm, bcm_log10Mc,
                     bcm_etab, bcm_ks, mu_0, sigma_0, c1_mg,
                     c2_mg, lambda_mg, mnu_final_list, status)
             else:
                 # Create ccl_parameters with modified growth arrays
                 self._params, status = lib.parameters_create_nu_vec(
                     Omega_c, Omega_b, Omega_k, Neff, w0, wa, h,
-                    norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                    norm_pk, n_s, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
                     mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, z_mg,
                     df_mg, mnu_final_list, status)
             check(status)
@@ -1110,6 +1112,8 @@ class CosmologyCalculator(Cosmology):
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
+        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
+            temperature. The default is 0.71611.
         mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
@@ -1171,7 +1175,8 @@ class CosmologyCalculator(Cosmology):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=None, mu_0=0., sigma_0=0., background=None, growth=None,
+            T_CMB=None, T_ncdm=0.71611, mu_0=0., sigma_0=0.,
+            background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None):
         if pk_linear:
             transfer_function = 'calculator'
@@ -1188,7 +1193,8 @@ class CosmologyCalculator(Cosmology):
             n_s=n_s, sigma8=sigma8, A_s=A_s,
             Omega_k=Omega_k, Omega_g=Omega_g,
             Neff=Neff, m_nu=m_nu, m_nu_type=m_nu_type,
-            w0=w0, wa=wa, T_CMB=T_CMB, mu_0=mu_0, sigma_0=sigma_0,
+            w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
+            mu_0=mu_0, sigma_0=sigma_0,
             transfer_function=transfer_function,
             matter_power_spectrum=matter_power_spectrum)
 

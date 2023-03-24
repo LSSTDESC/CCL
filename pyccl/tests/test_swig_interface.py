@@ -113,7 +113,7 @@ def test_swig_core():
     assert_raises(
         CCLError,
         ccllib.parameters_create_nu_vec,
-        0.25, 0.05, 0.0, 3.0, -1.0, 0.0, 0.7, 2e-9, 0.95, 1, 0.0, 0.0,
+        0.25, 0.05, 0.0, 3.0, -1.0, 0.0, 0.7, 2e-9, 0.95, 0.72, 1, 0.0, 0.0,
         0.0, 0.0, 1.0, 1.0, 0.0, [1.0, 2.0],
         [0.0, 0.3, 0.5],
         [0.02, 0.01, 0.2],
@@ -160,7 +160,7 @@ def test_swig_neurtinos():
     assert_raises(
         CCLError,
         ccllib.Omeganuh2_vec,
-        3, 2.7,
+        3, 2.7, 0.72,
         [0.0, 1.0],
         [0.05, 0.1, 0.2],
         4,
@@ -169,7 +169,7 @@ def test_swig_neurtinos():
     assert_raises(
         CCLError,
         ccllib.Omeganuh2_vec,
-        3, 2.7,
+        3, 2.7, 0.72,
         [0.0, 1.0],
         [0.1, 0.2],
         2,

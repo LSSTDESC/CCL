@@ -23,6 +23,7 @@ static double h_over_h0(double a, ccl_cosmology * cosmo, int *status)
   if ((cosmo->params.N_nu_mass)>1e-12) {
     Om_mass_nu = ccl_Omeganuh2(
       a, cosmo->params.N_nu_mass, cosmo->params.m_nu, cosmo->params.T_CMB,
+      cosmo->params.T_ncdm,
       status) / (cosmo->params.h) / (cosmo->params.h);
   }
   else {
@@ -66,7 +67,7 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
   if ((cosmo->params.N_nu_mass) > 0.0001) {
     // Call the massive neutrino density function just once at this redshift.
     OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.m_nu,
-                           cosmo->params.T_CMB, status);
+                           cosmo->params.T_CMB, cosmo->params.T_ncdm, status);
   }
   else {
     OmNuh2 = 0.;

@@ -325,7 +325,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   params->Omega_g = rho_g/rho_crit;
 
   // Get the N_nu_rel from Neff and N_nu_mass
-  params->N_nu_rel = params->Neff - params->N_nu_mass * pow(ccl_constants.TNCDM, 4) / pow(4./11.,4./3.);
+  params->N_nu_rel = params->Neff - params->N_nu_mass * pow(params->T_ncdm, 4) / pow(4./11.,4./3.);
 
   // Temperature of the relativistic neutrinos in K
   double T_nu= (params->T_CMB) * pow(4./11.,1./3.);
@@ -339,7 +339,8 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   // If non-relativistic neutrinos are present, calculate the phase_space integral.
   if((params->N_nu_mass)>0) {
     params->Omega_nu_mass = ccl_Omeganuh2(
-      1.0, params->N_nu_mass, params->m_nu, params->T_CMB, status) / ((params->h)*(params->h));
+      1.0, params->N_nu_mass, params->m_nu, params->T_CMB, params->T_ncdm,
+      status) / ((params->h)*(params->h));
   }
   else{
     params->Omega_nu_mass = 0.;
@@ -386,7 +387,7 @@ n_s: index of the primordial PS
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double bcm_log10Mc, double bcm_etab,
+				     double n_s, double T_ncdm, double bcm_log10Mc, double bcm_etab,
 				     double bcm_ks, double mu_0, double sigma_0,
 				     double c1_mg, double c2_mg, double lambda_mg,
 				     int nz_mgrowth, double *zarr_mgrowth,
@@ -407,6 +408,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.Omega_b = Omega_b;
   params.Omega_k = Omega_k;
   params.Neff = Neff;
+  params.T_ncdm = T_ncdm;
   params.m_nu = malloc(n_mnu*sizeof(double));
   params.sum_nu_masses = 0.;
   for(int i = 0; i<n_mnu; i=i+1){

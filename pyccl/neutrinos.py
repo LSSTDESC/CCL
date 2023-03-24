@@ -1,8 +1,10 @@
-import numpy as np
 from . import ccllib as lib
 from .core import check
 from .parameters import physical_constants
 from .base import deprecated, warn_api
+from .errors import CCLDeprecationWarning
+import numpy as np
+import warnings
 
 neutrino_mass_splits = {
     'normal': lib.nu_normal,
@@ -13,7 +15,7 @@ neutrino_mass_splits = {
 }
 
 
-def Omega_nu_h2(a, *, m_nu, T_CMB=None):
+def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=0.71611):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
 
@@ -21,6 +23,8 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None):
         a (float or array-like): Scale factor, normalized to 1 today.
         m_nu (float or array-like): Neutrino mass(es) (in eV)
         T_CMB (float, optional): Temperature of the CMB (K). Default: 2.725.
+        T_ncdm (float, optional): Non-CDM temperature in units of photon
+            temperature. The default is 0.71611.
 
     Returns:
         float or array_like: :math:`\\Omega_\\nu\\,h^2` at a given
@@ -41,7 +45,7 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None):
     N_nu_mass = len(m_nu)
 
     # Call function
-    OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB,
+    OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm,
                                        a, m_nu, a.size, status)
 
     # Check status and return
@@ -65,15 +69,17 @@ def nu_masses(*, Omega_nu_h2, mass_split, T_CMB=None):
         Omega_nu_h2 (float): Neutrino energy density at z=0 times h^2
         mass_split (str): indicates how the masses should be split up
             Should be one of 'normal', 'inverted', 'equal' or 'sum'.
-        T_CMB (float, optional): Temperature of the CMB (K). Default: 2.725.
+        T_CMB (float, optional): Deprecated - do not use.
+            Temperature of the CMB (K). Default: 2.725.
 
     Returns:
         float or array-like: Neutrino mass(es) corresponding to this Omeganuh2
     """
     status = 0
 
-    if T_CMB is None:
-        T_CMB = physical_constants.T_CMB
+    if T_CMB is not None:
+        warnings.warn("T_CMB is deprecated as an argument of `nu_masses.",
+                      CCLDeprecationWarning)
 
     if mass_split not in neutrino_mass_splits.keys():
         raise ValueError(
@@ -84,10 +90,10 @@ def nu_masses(*, Omega_nu_h2, mass_split, T_CMB=None):
     # Call function
     if mass_split in ['normal', 'inverted', 'equal']:
         mnu, status = lib.nu_masses_vec(
-            Omega_nu_h2, neutrino_mass_splits[mass_split], T_CMB, 3, status)
+            Omega_nu_h2, neutrino_mass_splits[mass_split], 3, status)
     elif mass_split in ['sum', 'single']:
         mnu, status = lib.nu_masses_vec(
-            Omega_nu_h2, neutrino_mass_splits[mass_split], T_CMB, 1, status)
+            Omega_nu_h2, neutrino_mass_splits[mass_split], 1, status)
         mnu = mnu[0]
 
     # Check status and return
