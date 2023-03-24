@@ -352,7 +352,8 @@ def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
             non-linear power spectra stored in `cosmo` (e.g.
             `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
-        use_spline (bool): whether to use a spline.
+        use_spline: switch that determines whether the RSD correlation
+            function is calculated using global splines of multipoles.
 
     Returns:
         Value(s) of the correlation function at the input pi and sigma.
