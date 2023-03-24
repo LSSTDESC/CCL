@@ -249,7 +249,7 @@ basic physical constants
   - CLIGHT: speed of light in m/s
   - EV_IN_J: conversion factor between electron volts and Joules
   - T_CMB: temperature of the CMB in K
-  - TNCDM: temperature of the cosmological neutrino background in K
+  - T_ncdm: temperature of the cosmological neutrino background in K
 
 neutrino mass splittings
 

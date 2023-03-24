@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from .core import check
-from .parameters import physical_constants
+from .parameters import physical_constants as const
 from .base import deprecated, warn_api
 from .errors import CCLDeprecationWarning
 import numpy as np
@@ -15,16 +15,17 @@ neutrino_mass_splits = {
 }
 
 
-def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=0.71611):
+def Omega_nu_h2(a, *, m_nu, T_CMB=const.T_CMB, T_ncdm=const.T_ncdm):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
 
     Args:
         a (float or array-like): Scale factor, normalized to 1 today.
         m_nu (float or array-like): Neutrino mass(es) (in eV)
-        T_CMB (float, optional): Temperature of the CMB (K). Default: 2.725.
+        T_CMB (float, optional): Temperature of the CMB (K).
+            The default is ``pyccl.physical_constants.T_CMB``.
         T_ncdm (float, optional): Non-CDM temperature in units of photon
-            temperature. The default is 0.71611.
+            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
 
     Returns:
         float or array_like: :math:`\\Omega_\\nu\\,h^2` at a given
@@ -32,9 +33,6 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=0.71611):
     """
     status = 0
     scalar = True if np.ndim(a) == 0 else False
-
-    if T_CMB is None:
-        T_CMB = physical_constants.T_CMB
 
     # Convert to array if it's not already an array
     if not isinstance(a, np.ndarray):

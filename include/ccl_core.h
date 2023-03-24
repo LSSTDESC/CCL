@@ -82,6 +82,12 @@ typedef struct ccl_physical_constants {
   /**
    * T_ncdm, as taken from CLASS, explanatory.ini
    */
+  double T_ncdm;
+
+  /**
+   * TNCDM: repeat the value to preserve API because we renamed TNCDM to T_ncdm.
+   * TODO: Remove for CCLv3.
+   */
   double TNCDM;
 
   /**

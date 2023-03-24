@@ -15,7 +15,8 @@ from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
-from .parameters import CCLParameters, physical_constants
+from .parameters import CCLParameters
+from .parameters import physical_constants as const
 
 # Configuration types
 transfer_function_types = {
@@ -128,7 +129,7 @@ class Cosmology(CCLObject):
             ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is 0.71611.
+            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
         bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
             BCM model. Defaults to `np.log10(1.2e14)`.
         bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
@@ -222,9 +223,9 @@ class Cosmology(CCLObject):
 
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
-            sigma8=None, A_s=None,
-            Omega_k=0., Omega_g=None, Neff=3.046, m_nu=0., m_nu_type=None,
-            w0=-1., wa=0., T_CMB=None, T_ncdm=0.71611,
+            sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
+            Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
+            T_CMB=const.T_CMB, T_ncdm=const.T_ncdm,
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0.,
             c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
@@ -564,7 +565,7 @@ class Cosmology(CCLObject):
             for i in range(0, 3):
                 if (mnu_list[i] > 0.00017):  # Lesgourges et al. 2012
                     N_nu_mass = N_nu_mass + 1
-            N_nu_rel = Neff - (N_nu_mass * 0.71611**4 * (4./11.)**(-4./3.))
+            N_nu_rel = Neff - (N_nu_mass * T_ncdm**4 * (4./11.)**(-4./3.))
             if N_nu_rel < 0.:
                 raise ValueError("Neff and m_nu must result in a number "
                                  "of relativistic neutrino species greater "
@@ -596,10 +597,10 @@ class Cosmology(CCLObject):
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
-        T_CMB_old = physical_constants.T_CMB
+        T_CMB_old = const.T_CMB
         try:
             if T_CMB is not None:
-                physical_constants.T_CMB = T_CMB
+                const.T_CMB = T_CMB
             status = 0
             if nz_mg == -1:
                 # Create ccl_parameters without modified growth
@@ -617,7 +618,7 @@ class Cosmology(CCLObject):
                     df_mg, mnu_final_list, status)
             check(status)
         finally:
-            physical_constants.T_CMB = T_CMB_old
+            const.T_CMB = T_CMB_old
 
         if Omega_g is not None:
             total = self._params.Omega_g + self._params.Omega_l
@@ -1113,7 +1114,7 @@ class CosmologyCalculator(Cosmology):
             ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is 0.71611.
+            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
         mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
@@ -1175,7 +1176,7 @@ class CosmologyCalculator(Cosmology):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=None, T_ncdm=0.71611, mu_0=0., sigma_0=0.,
+            T_CMB=const.T_CMB, T_ncdm=const.T_ncdm, mu_0=0., sigma_0=0.,
             background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None):
         if pk_linear:
