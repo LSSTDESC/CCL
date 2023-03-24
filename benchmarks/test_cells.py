@@ -193,8 +193,8 @@ def set_up(request):
                           ('i2', 'i2', 'ii_22',   # IA2-IA2
                            'll_22', 'll_22', 'll_22', 'll_22',
                            'fl_ll')])
-def test_cls(set_up, t1, t2, bm,
-             a1b1, a1b2, a2b1, a2b2, fl):
+def test_cells(set_up, t1, t2, bm,
+               a1b1, a1b2, a2b1, a2b2, fl):
     cosmo, trcs, lfc, bmk = set_up
     cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], lfc['ells'],
                         limber_integration_method='qag_quad') * lfc[fl]
@@ -213,8 +213,8 @@ def test_cls(set_up, t1, t2, bm,
                           ('l2', 'l2', 'll_22',   # WL2-WL2
                            'll_22', 'll_22', 'll_22', 'll_22',
                            'fl_ll')])
-def test_cls_spline(set_up, t1, t2, bm,
-                    a1b1, a1b2, a2b1, a2b2, fl):
+def test_cells_spline(set_up, t1, t2, bm,
+                      a1b1, a1b2, a2b1, a2b2, fl):
     cosmo, trcs, lfc, bmk = set_up
     cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], lfc['ells'],
                         limber_integration_method='spline') * lfc[fl]
