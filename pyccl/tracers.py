@@ -4,8 +4,6 @@ import numpy as np
 
 from . import ccllib as lib
 from .core import check
-from .background import (comoving_radial_distance, growth_rate,
-                         growth_factor, scale_factor_of_chi, h_over_h0)
 from .errors import CCLWarning
 from .parameters import physical_constants
 from .base import CCLObject, UnlockInstance, unlock_instance, warn_api
@@ -68,7 +66,7 @@ def get_density_kernel(cosmo, *, dndz):
     z_n, n = _check_array_params(dndz, 'dndz')
     _check_background_spline_compatibility(cosmo, dndz[0])
     # this call inits the distance splines neded by the kernel functions
-    chi = comoving_radial_distance(cosmo, 1./(1.+z_n))
+    chi = cosmo.comoving_radial_distance(1./(1.+z_n))
     status = 0
     wchi, status = lib.get_number_counts_kernel_wrapper(cosmo.cosmo,
                                                         z_n, n,
@@ -115,9 +113,9 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
         warnings.warn(
             f"The number of samples in the n(z) ({len(z_n)}) is smaller than "
             f"the number of samples in the lensing kernel ({n_chi}). Consider "
-            f"disabling spline integration for the lensing kernel by setting "
-            f"pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False"
-            f"before instantiating the Cosmology passed.", category=CCLWarning)
+            "disabling spline integration for the lensing kernel by setting "
+            "pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False "
+            "before instantiating the Cosmology passed.", category=CCLWarning)
 
     # Compute array of chis
     status = 0
@@ -147,7 +145,7 @@ def get_kappa_kernel(cosmo, *, z_source, n_samples=100):
     """
     _check_background_spline_compatibility(cosmo, np.array([z_source]))
     # this call inits the distance splines neded by the kernel functions
-    chi_source = comoving_radial_distance(cosmo, 1./(1.+z_source))
+    chi_source = cosmo.comoving_radial_distance(1./(1.+z_source))
     chi = np.linspace(0, chi_source, n_samples)
 
     status = 0
@@ -555,6 +553,40 @@ class Tracer(CCLObject):
                                           status)
         self._trc.append(_check_returned_tracer(ret))
 
+    @classmethod
+    def from_zPower(cls, cosmo, *, A, alpha, z_min=0., z_max=6., n_chi=1024):
+        """Constructor for tracers associated with a radial kernel of the form
+
+        .. math::
+           W(\\chi) = \\frac{A}{(1+z)^\alpha},
+
+        where :math:`A` is an amplitude and :math:`\alpha` is a power
+        law index. The kernel only has support in the redshift range
+        [`z_min`, `z_max`].
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
+            A (float): amplitude parameter.
+            alpha (float): power law index.
+            z_min (float): minimum redshift from to which we define the kernel.
+            z_max (float): maximum redshift up to which we define the kernel.
+            n_chi (float): number of intervals in the radial comoving
+                distance on which we sample the kernel.
+        """
+        if z_min >= z_max:
+            raise ValueError("z_min should be smaller than z_max.")
+
+        tracer = cls()
+
+        chi_min = cosmo.comoving_radial_distance(1./(1+z_min))
+        chi_max = cosmo.comoving_radial_distance(1./(1+z_max))
+        chi_arr = np.linspace(chi_min, chi_max, n_chi)
+        a_arr = cosmo.scale_factor_of_chi(chi_arr)
+        w_arr = A * a_arr**alpha
+
+        tracer.add_tracer(cosmo, kernel=(chi_arr, w_arr))
+        return tracer
+
     def __del__(self):
         # Sometimes lib is freed before some Tracers, in which case, this
         # doesn't work.
@@ -566,8 +598,7 @@ class Tracer(CCLObject):
 
 class NzTracer(Tracer):
     """Specific for tracers with an internal `_dndz` redshift
-    distribution interpolator. Currently only used for
-    :class:`NumberCountsTracer` and :class:`WeakLensingTracer`.
+    distribution interpolator.
     """
     def get_dndz(self, z):
         """Get the redshift distribution for this tracer.
@@ -636,7 +667,7 @@ def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
         # Transfer (growth rate)
         z_b, _ = _check_array_params(dndz, 'dndz')
         a_s = 1./(1+z_b[::-1])
-        t_a = (a_s, -growth_rate(cosmo, a_s))
+        t_a = (a_s, -cosmo.growth_rate(a_s))
         tracer.add_tracer(cosmo, kernel=kernel_d,
                           transfer_a=t_a, der_bessel=2)
     if mag_bias is not None:  # Has magnification bias
@@ -709,7 +740,7 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
         kernel_i = get_density_kernel(cosmo, dndz=dndz)
         if use_A_ia:
             # Normalize so that A_IA=1
-            D = growth_factor(cosmo, 1./(1+z_a))
+            D = cosmo.growth_factor(1./(1+z_a))
             # Transfer
             # See Joachimi et al. (2011), arXiv: 1008.3491, Eq. 6.
             # and note that we use C_1= 5e-14 from arXiv:0705.0166
@@ -752,37 +783,6 @@ def CMBLensingTracer(cosmo, *, z_source, n_samples=100):
     return tracer
 
 
-def ZPowerTracer(cosmo, *, A, alpha, z_min=0., z_max=6., n_chi=1024):
-    """Specific :class:`Tracer` associated with a radial kernel of the form
-
-    .. math::
-       W(\\chi) = \\frac{A}{(1+z)^\alpha},
-
-    where :math:`A` is an amplitude and :math:`\alpha` is a power
-    law index. The kernel only has support in the redshift range
-    [`z_min`, `z_max`].
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
-        A (float): amplitude parameter.
-        alpha (float): power law index.
-        z_min (float): minimum redshift from to which we define the kernel.
-        z_max (float): maximum redshift up to which we define the kernel.
-        n_chi (float): number of intervals in the radial comoving
-            distance on which we sample the kernel.
-    """
-    tracer = Tracer()
-
-    chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
-    chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-    chi_arr = np.linspace(chi_min, chi_max, n_chi)
-    a_arr = scale_factor_of_chi(cosmo, chi_arr)
-    w_arr = A * a_arr**alpha
-
-    tracer.add_tracer(cosmo, kernel=(chi_arr, w_arr))
-    return tracer
-
-
 @warn_api
 def tSZTracer(cosmo, *, z_max=6., n_chi=1024):
     """Specific :class:`Tracer` associated with the thermal Sunyaev Zel'dovich
@@ -807,8 +807,8 @@ def tSZTracer(cosmo, *, z_max=6., n_chi=1024):
     """
     # This is \sigma_T / (m_e * c^2)
     prefac = 4.01710079e-06
-    return ZPowerTracer(cosmo, A=prefac, alpha=1, z_min=0.,
-                        z_max=z_max, n_chi=n_chi)
+    return Tracer.from_zPower(cosmo, A=prefac, alpha=1, z_min=0.,
+                              z_max=z_max, n_chi=n_chi)
 
 
 @warn_api
@@ -834,8 +834,8 @@ def CIBTracer(cosmo, *, z_min=0., z_max=6., n_chi=1024):
         n_chi (float): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
-    return ZPowerTracer(cosmo, A=1.0, alpha=1, z_min=z_min,
-                        z_max=z_max, n_chi=n_chi)
+    return Tracer.from_zPower(cosmo, A=1.0, alpha=1, z_min=z_min,
+                              z_max=z_max, n_chi=n_chi)
 
 
 def ISWTracer(cosmo, *, z_max=6., n_chi=1024):
@@ -865,13 +865,13 @@ def ISWTracer(cosmo, *, z_max=6., n_chi=1024):
     """
     tracer = Tracer()
 
-    chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+    chi_max = cosmo.comoving_radial_distance(1./(1+z_max))
     chi = np.linspace(0, chi_max, n_chi)
-    a_arr = scale_factor_of_chi(cosmo, chi)
+    a_arr = cosmo.scale_factor_of_chi(chi)
     H0 = cosmo['h'] / physical_constants.CLIGHT_HMPC
     OM = cosmo['Omega_c']+cosmo['Omega_b']
-    Ez = h_over_h0(cosmo, a_arr)
-    fz = growth_rate(cosmo, a_arr)
+    Ez = cosmo.h_over_h0(a_arr)
+    fz = cosmo.growth_rate(a_arr)
     w_arr = 3*cosmo['T_CMB']*H0**3*OM*Ez*chi**2*(1-fz)
 
     tracer.add_tracer(cosmo, kernel=(chi, w_arr), der_bessel=-1)

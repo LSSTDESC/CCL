@@ -171,8 +171,8 @@ from .haloprofile import (
 )
 
 from .baryons import (
-    BaryonicEffects,
-    BaryonicEffectsBCM
+    Baryons,
+    BaryonsSchneider15
 )
 
 
@@ -195,7 +195,7 @@ __all__ = (
     'Omeganuh2', 'nu_masses',
     'angular_cl',
     'Tracer', 'NumberCountsTracer', 'WeakLensingTracer', 'CMBLensingTracer',
-    'tSZTracer', 'CIBTracer', 'ISWTracer',
+    'tSZTracer', 'CIBTracer', 'ISWTracer', 'NzTracer',
     'get_density_kernel', 'get_kappa_kernel', 'get_lensing_kernel',
     'correlation', 'correlation_3d', 'correlation_multipole',
     'correlation_3dRsd', 'correlation_3dRsd_avgmu', 'correlation_pi_sigma',
@@ -206,5 +206,5 @@ __all__ = (
     'onehalo_matter_power', 'twohalo_matter_power',
     'massfunc', 'halo_bias', 'massfunc_m2r', 'nfw_profile_3d',
     'einasto_profile_3d', 'hernquist_profile_3d', 'nfw_profile_2d',
-    'BaryonicEffects', 'BaryonicEffectsBCM',
+    'Baryons', 'BaryonsSchneider15',
 )
