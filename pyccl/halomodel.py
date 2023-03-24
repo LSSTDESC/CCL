@@ -1,5 +1,5 @@
 from . import ccllib as lib
-from .pyutils import deprecated
+from .base import deprecated
 from . import halos as hal
 
 

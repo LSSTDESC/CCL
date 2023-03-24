@@ -1,6 +1,7 @@
 from .base import unlock_instance
 from .baryons import BaryonsSchneider15
-from .pyutils import deprecated, check
+from .base import deprecated
+from .pyutils import check
 from . import ccllib as lib
 import numpy as np
 
@@ -58,4 +59,4 @@ def bcm_correct_pk2d(cosmo, pk2d):
         int(pk2d.extrap_order_lok),
         int(pk2d.extrap_order_hik),
         pk2d.psp.is_log, status)
-    check(status, cosmo)
+    check(status)

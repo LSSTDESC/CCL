@@ -199,7 +199,7 @@ def test_pk2d_cls():
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
     z = np.linspace(0., 1., 200)
     n = np.exp(-((z-0.5)/0.1)**2)
-    lens1 = ccl.WeakLensingTracer(cosmo, (z, n))
+    lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
     ells = np.arange(2, 10)
 
     # Check that passing no power spectrum is fine
@@ -231,7 +231,7 @@ def test_pk2d_parsing():
                    'a:b': pk_arr})
     z = np.linspace(0., 1., 200)
     n = np.exp(-((z-0.5)/0.1)**2)
-    lens1 = ccl.WeakLensingTracer(cosmo, (z, n))
+    lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
     ells = np.linspace(2, 100, 10)
 
     cls1 = ccl.angular_cl(cosmo, lens1, lens1, ells,
