@@ -367,6 +367,12 @@ def test_tracer_chi_min_max():
     assert tr.chi_max == tr._trc[1].chi_max
 
 
+def test_zpower_raises():
+    with pytest.raises(ValueError):
+        ccl.Tracer.from_zPower(COSMO, A=1., z_min=1.0,
+                               z_max=0.1, alpha=1.0)
+
+
 def test_tracer_increase_sf():
     z = np.linspace(0, 3., 32)
     one = np.ones(len(z))

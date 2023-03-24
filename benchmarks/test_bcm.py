@@ -25,14 +25,14 @@ def test_bcm():
     k = data[:, 0] * cosmo['h']
     a = 1
 
-    bar = ccl.BaryonicEffectsBCM(log10Mc=14.)
+    bar = ccl.BaryonsSchneider15(log10Mc=14.)
     fbcm = bar.boost_factor(cosmo, k, a)
     err = np.abs(data[:, 1]/data_nobar[:, 1]/fbcm - 1)
     assert np.allclose(err, 0, atol=BCM_TOLERANCE, rtol=0)
 
     cosmo.compute_nonlin_power()
     pk_nobar = cosmo.get_nonlin_power()
-    pk_wbar = bar.apply_baryons(cosmo, pk_nobar)
+    pk_wbar = bar.include_baryonic_effects(cosmo, pk_nobar)
     ratio = pk_wbar.eval(k, a)/pk_nobar.eval(k, a)
     err = np.abs(data[:, 1]/data_nobar[:, 1]/ratio - 1)
     assert np.allclose(err, 0, atol=BCM_TOLERANCE, rtol=0)
