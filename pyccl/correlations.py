@@ -151,15 +151,15 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
     return wth
 
 
-@warn_api
-def correlation_3d(cosmo, *, a, r, p_of_k_a=None):
+@warn_api(reorder=['a', 'r'])
+def correlation_3d(cosmo, *, r, a, p_of_k_a=None):
     """Compute the 3D correlation function.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        a (float): scale factor.
         r (float or array_like): distance(s) at which to calculate the 3D
                                  correlation function (in Mpc).
+        a (float): scale factor.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
@@ -193,17 +193,18 @@ def correlation_3d(cosmo, *, a, r, p_of_k_a=None):
     return xi
 
 
-@warn_api(pairs=[('s', 'r'), ('l', 'ell')])
-def correlation_multipole(cosmo, *, a, beta, ell, r, p_of_k_a=None):
+@warn_api(pairs=[('s', 'r'), ('l', 'ell')],
+          reorder=['a', 'beta', 'ell', 'r'])
+def correlation_multipole(cosmo, *, r, a, beta, ell, p_of_k_a=None):
     """Compute the correlation multipoles.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+        r (float or array_like): distance(s) at which to calculate the 3DRsd
+                                 correlation function (in Mpc).
         a (float): scale factor.
         beta (float): growth rate divided by galaxy bias.
         ell (int) : the desired multipole
-        r (float or array_like): distance(s) at which to calculate the 3DRsd
-                                 correlation function (in Mpc).
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
@@ -237,8 +238,8 @@ def correlation_multipole(cosmo, *, a, beta, ell, r, p_of_k_a=None):
     return xis
 
 
-@warn_api(pairs=[('s', 'r')])
-def correlation_3dRsd(cosmo, *, a, r, mu, beta,
+@warn_api(pairs=[('s', 'r')], reorder=['a', 'r'])
+def correlation_3dRsd(cosmo, *, r, a, mu, beta,
                       use_spline=True, p_of_k_a=None):
     """
     Compute the 3DRsd correlation function using linear approximation
@@ -246,9 +247,9 @@ def correlation_3dRsd(cosmo, *, a, r, mu, beta,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        a (float): scale factor.
         r (float or array_like): distance(s) at which to calculate the
                                  3DRsd correlation function (in Mpc).
+        a (float): scale factor.
         mu (float): cosine of the angle at which to calculate the 3DRsd
                     correlation function (in Radian).
         beta (float): growth rate divided by galaxy bias.
@@ -287,16 +288,16 @@ def correlation_3dRsd(cosmo, *, a, r, mu, beta,
     return xis
 
 
-@warn_api(pairs=[('s', 'r')])
-def correlation_3dRsd_avgmu(cosmo, *, a, r, beta, p_of_k_a=None):
+@warn_api(pairs=[('s', 'r')], reorder=['a', 'r'])
+def correlation_3dRsd_avgmu(cosmo, *, r, a, beta, p_of_k_a=None):
     """
     Compute the 3DRsd correlation function averaged over mu at constant s.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        a (float): scale factor.
         r (float or array_like): distance(s) at which to calculate the 3DRsd
                                  correlation function (in Mpc).
+        a (float): scale factor.
         beta (float): growth rate divided by galaxy bias.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
@@ -331,18 +332,19 @@ def correlation_3dRsd_avgmu(cosmo, *, a, r, beta, p_of_k_a=None):
     return xis
 
 
-@warn_api(pairs=[("sig", "sigma")])
-def correlation_pi_sigma(cosmo, *, a, beta, pi, sigma,
+@warn_api(pairs=[("sig", "sigma")],
+          reorder=['a', 'beta', 'pi', 'sigma'])
+def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
                          use_spline=True, p_of_k_a=None):
     """
     Compute the 3DRsd correlation in pi-sigma space.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        a (float): scale factor.
         pi (float): distance times cosine of the angle (in Mpc).
         sigma (float or array-like): distance(s) times sine of the angle
                                      (in Mpc).
+        a (float): scale factor.
         beta (float): growth rate divided by galaxy bias.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
