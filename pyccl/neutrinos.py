@@ -2,6 +2,7 @@ import numpy as np
 from . import ccllib as lib
 from .core import check
 from .parameters import physical_constants
+from .base import deprecated, warn_api
 
 neutrino_mass_splits = {
     'normal': lib.nu_normal,
@@ -12,7 +13,7 @@ neutrino_mass_splits = {
 }
 
 
-def Omeganuh2(a, m_nu, T_CMB=None):
+def Omega_nu_h2(a, *, m_nu, T_CMB=None):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
 
@@ -50,12 +51,18 @@ def Omeganuh2(a, m_nu, T_CMB=None):
     return OmNuh2
 
 
-def nu_masses(OmNuh2, mass_split, T_CMB=None):
-    """Returns the neutrinos mass(es) for a given OmNuh2, according to the
+@deprecated(Omega_nu_h2)
+def Omeganuh2(a, m_nu, T_CMB=None):
+    return Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
+
+
+@warn_api(pairs=[("OmNuh2", "Omega_nu_h2")])
+def nu_masses(*, Omega_nu_h2, mass_split, T_CMB=None):
+    """Returns the neutrinos mass(es) for a given Omega_nu_h2, according to the
     splitting convention specified by the user.
 
     Args:
-        OmNuh2 (float): Neutrino energy density at z=0 times h^2
+        Omega_nu_h2 (float): Neutrino energy density at z=0 times h^2
         mass_split (str): indicates how the masses should be split up
             Should be one of 'normal', 'inverted', 'equal' or 'sum'.
         T_CMB (float, optional): Temperature of the CMB (K). Default: 2.725.
@@ -77,10 +84,10 @@ def nu_masses(OmNuh2, mass_split, T_CMB=None):
     # Call function
     if mass_split in ['normal', 'inverted', 'equal']:
         mnu, status = lib.nu_masses_vec(
-            OmNuh2, neutrino_mass_splits[mass_split], T_CMB, 3, status)
+            Omega_nu_h2, neutrino_mass_splits[mass_split], T_CMB, 3, status)
     elif mass_split in ['sum', 'single']:
         mnu, status = lib.nu_masses_vec(
-            OmNuh2, neutrino_mass_splits[mass_split], T_CMB, 1, status)
+            Omega_nu_h2, neutrino_mass_splits[mass_split], T_CMB, 1, status)
         mnu = mnu[0]
 
     # Check status and return

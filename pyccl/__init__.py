@@ -109,7 +109,8 @@ from .bcm import (
 )
 
 from .neutrinos import (
-    Omeganuh2,
+    Omega_nu_h2,
+    Omeganuh2,  # TODO: deprecate this in v3
     nu_masses,
 )
 
@@ -192,7 +193,7 @@ __all__ = (
     'linear_matter_power', 'nonlin_matter_power',
     'sigmaR', 'sigmaV', 'sigma8', 'sigmaM', 'kNL',
     'bcm_model_fka', 'bcm_correct_pk2d',
-    'Omeganuh2', 'nu_masses',
+    'Omeganuh2', 'Omega_nu_h2', 'nu_masses',
     'angular_cl',
     'Tracer', 'NumberCountsTracer', 'WeakLensingTracer', 'CMBLensingTracer',
     'tSZTracer', 'CIBTracer', 'ISWTracer', 'NzTracer',

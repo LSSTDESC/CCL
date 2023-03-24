@@ -1,5 +1,6 @@
+import warnings
 from . import ccllib as lib
-from .errors import warnings, CCLDeprecationWarning
+from .errors import CCLDeprecationWarning
 
 
 class CCLParameters:
