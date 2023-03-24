@@ -14,9 +14,10 @@ These strings define the `species` inputs to the functions below.
 """
 import numpy as np
 from . import ccllib as lib
-from .pyutils import _vectorize_fn, _vectorize_fn3
-from .pyutils import _vectorize_fn4, _vectorize_fn5
+from .pyutils import (_vectorize_fn, _vectorize_fn3,
+                      _vectorize_fn4, _vectorize_fn5)
 from .parameters import physical_constants
+from .base import warn_api
 
 species_types = {
     'critical': lib.species_crit_label,
@@ -248,7 +249,8 @@ def omega_x(cosmo, a, species):
                           lib.omega_x_vec, cosmo, a, species_types[species])
 
 
-def rho_x(cosmo, a, species, is_comoving=False):
+@warn_api
+def rho_x(cosmo, a, species, *, is_comoving=False):
     """Physical or comoving density as a function of scale factor.
 
     Args:
@@ -280,7 +282,8 @@ def rho_x(cosmo, a, species, is_comoving=False):
         species_types[species], int(is_comoving))
 
 
-def sigma_critical(cosmo, a_lens, a_source):
+@warn_api
+def sigma_critical(cosmo, *, a_lens, a_source):
     """Returns the critical surface mass density.
 
     .. math::
