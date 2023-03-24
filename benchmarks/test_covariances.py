@@ -48,11 +48,11 @@ def test_ssc_WL():
 
     fsky = 0.05
 
-    sigma2_B = ccl.sigma2_B_disc(cosmo, a=a, fsky=fsky)
+    sigma2_B = ccl.sigma2_B_disc(cosmo, a_arr=a, fsky=fsky)
     cov_ssc = ccl.covariances.angular_cl_cov_SSC(cosmo,
-                                                 cltracer1=WL_tracer,
-                                                 cltracer2=WL_tracer,
-                                                 ell=ell, tkka=tk3D,
+                                                 tracer1=WL_tracer,
+                                                 tracer2=WL_tracer,
+                                                 ell=ell, t_of_kk_a=tk3D,
                                                  sigma2_B=(a, sigma2_B),
                                                  fsky=None)
     var_ssc_ccl = np.diag(cov_ssc)

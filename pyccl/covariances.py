@@ -5,15 +5,20 @@ from .pyutils import check, integ_types, _check_array_params
 from .background import comoving_radial_distance, comoving_angular_distance
 from .tk3d import Tk3D
 from .pk2d import parse_pk2d
+from .base import warn_api
 
 # Define symbolic 'None' type for arrays, to allow proper handling by swig
 # wrapper
 NoneArr = np.array([])
 
 
-def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
-                       cltracer3=None, cltracer4=None, ell2=None,
-                       integration_method='qag_quad'):
+@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
+                 ("cltracer3", "tracer3"), ("cltracer4", "tracer4"),
+                 ("tkka", "t_of_kk_a")],
+          reorder=['fsky', 'tracer3', 'tracer4', 'ell2'])
+def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
+                       tracer3=None, tracer4=None, ell2=None,
+                       fsky=1., integration_method='qag_quad'):
     """Calculate the connected non-Gaussian covariance for a pair of
     power spectra :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
     between two pairs of tracers (:math:`(a,b)` and :math:`(c,d)`).
@@ -38,21 +43,22 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        cltracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+        tracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
             of any kind.
-        cltracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
+        tracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
             of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the first dimension of the angular power spectrum covariance.
-        tkka (:class:`~pyccl.tk3d.Tk3D` or None): 3D connected trispectrum.
-        fsky (float): sky fraction.
-        cltracer3 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
-            of any kind. If `None`, `cltracer1` will be used instead.
-        cltracer4 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
-            of any kind. If `None`, `cltracer1` will be used instead.
+        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D` or None): 3D connected
+            trispectrum.
+        tracer3 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+            of any kind. If `None`, `tracer1` will be used instead.
+        tracer4 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+            of any kind. If `None`, `tracer1` will be used instead.
         ell2 (float or array_like): Angular wavenumber(s) at which to evaluate
             the second dimension of the angular power spectrum covariance. If
             `None`, `ell` will be used instead.
+        fsky (float): sky fraction.
         integration_method (string) : integration method to be used
             for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
             method backed up by `quad` when it fails) and 'spline' (the
@@ -77,30 +83,30 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    if isinstance(tkka, Tk3D):
-        tsp = tkka.tsp
+    if isinstance(t_of_kk_a, Tk3D):
+        tsp = t_of_kk_a.tsp
     else:
-        raise ValueError("tkka must be a pyccl.Tk3D")
+        raise ValueError("t_of_kk_a must be of type pyccl.Tk3D")
 
     # Create tracer colections
     status = 0
     clt1, status = lib.cl_tracer_collection_t_new(status)
-    for t in cltracer1._trc:
+    for t in tracer1._trc:
         status = lib.add_cl_tracer_to_collection(clt1, t, status)
     clt2, status = lib.cl_tracer_collection_t_new(status)
-    for t in cltracer2._trc:
+    for t in tracer2._trc:
         status = lib.add_cl_tracer_to_collection(clt2, t, status)
-    if cltracer3 is None:
+    if tracer3 is None:
         clt3 = clt1
     else:
         clt3, status = lib.cl_tracer_collection_t_new(status)
-        for t in cltracer3._trc:
+        for t in tracer3._trc:
             status = lib.add_cl_tracer_to_collection(clt3, t, status)
-    if cltracer4 is None:
+    if tracer4 is None:
         clt4 = clt2
     else:
         clt4, status = lib.cl_tracer_collection_t_new(status)
-        for t in cltracer4._trc:
+        for t in tracer4._trc:
             status = lib.add_cl_tracer_to_collection(clt4, t, status)
 
     ell1_use = np.atleast_1d(ell)
@@ -122,16 +128,17 @@ def angular_cl_cov_cNG(cosmo, cltracer1, cltracer2, ell, tkka, fsky=1.,
     # Free up tracer collections
     lib.cl_tracer_collection_t_free(clt1)
     lib.cl_tracer_collection_t_free(clt2)
-    if cltracer3 is not None:
+    if tracer3 is not None:
         lib.cl_tracer_collection_t_free(clt3)
-    if cltracer4 is not None:
+    if tracer4 is not None:
         lib.cl_tracer_collection_t_free(clt4)
 
     check(status, cosmo=cosmo_in)
     return cov
 
 
-def sigma2_B_disc(cosmo, a=None, fsky=1., p_of_k_a=None):
+@warn_api(pairs=[('a', 'a_arr')])
+def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
     """Returns the variance of the projected linear density field
     over a circular disc covering a sky fraction `fsky` as a function
     of scale factor. This is given by
@@ -158,12 +165,15 @@ def sigma2_B_disc(cosmo, a=None, fsky=1., p_of_k_a=None):
         float or array_like: values of the projected variance.
     """
     status = 0
-    if a is None:
+    full_output = a_arr is None  # return sampling?
+    ndim = np.ndim(a_arr)
+
+    if full_output:
         na = lib.get_pk_spline_na(cosmo.cosmo)
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
         check(status, cosmo=cosmo)
     else:
-        a_arr = np.atleast_1d(a)
+        a_arr = np.atleast_1d(a_arr)
         na = len(a_arr)
 
     chi_arr = comoving_radial_distance(cosmo, a_arr)
@@ -173,16 +183,17 @@ def sigma2_B_disc(cosmo, a=None, fsky=1., p_of_k_a=None):
     s2B_arr, status = lib.sigma2b_vec(cosmo.cosmo, a_arr, R_arr, psp,
                                       na, status)
     check(status, cosmo=cosmo)
-    if a is None:
+    if full_output:
         return a_arr, s2B_arr
     else:
-        if np.ndim(a) == 0:
+        if ndim == 0:
             return s2B_arr[0]
         else:
             return s2B_arr
 
 
-def sigma2_B_from_mask(cosmo, a=None, mask_wl=None, p_of_k_a=None):
+@warn_api(pairs=[('a', 'a_arr')])
+def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
     """ Returns the variance of the projected linear density field, given the
         angular power spectrum of the footprint mask and scale factor.
         This is given by
@@ -198,7 +209,7 @@ def sigma2_B_from_mask(cosmo, a=None, mask_wl=None, p_of_k_a=None):
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        a (float, array_like or `None`): an array of scale factor
+        a_arr (float, array_like or `None`): an array of scale factor
             values at which to evaluate the projected variance.
         mask_wl (array_like): Array with the angular power spectrum of the
             masks. The power spectrum should be given at integer multipoles,
@@ -217,7 +228,8 @@ def sigma2_B_from_mask(cosmo, a=None, mask_wl=None, p_of_k_a=None):
         cosmo.compute_linear_power()
         p_of_k_a = cosmo.get_linear_power()
 
-    a_arr = np.atleast_1d(a)
+    ndim = np.ndim(a_arr)
+    a_arr = np.atleast_1d(a_arr)
     chi = comoving_angular_distance(cosmo, a=a_arr)
 
     ell = np.arange(mask_wl.size)
@@ -228,7 +240,7 @@ def sigma2_B_from_mask(cosmo, a=None, mask_wl=None, p_of_k_a=None):
             # For a=1, the integral becomes independent of the footprint in
             # the flat-sky approximation. So we are just using the method
             # for the disc geometry here
-            sigma2_B[i] = sigma2_B_disc(cosmo=cosmo, a=a_arr[i],
+            sigma2_B[i] = sigma2_B_disc(cosmo=cosmo, a_arr=a_arr[i],
                                         p_of_k_a=p_of_k_a)
         else:
             k = (ell+0.5)/chi[i]
@@ -236,15 +248,19 @@ def sigma2_B_from_mask(cosmo, a=None, mask_wl=None, p_of_k_a=None):
             # See eq. E.10 of 2007.01844
             sigma2_B[i] = np.sum(pk * mask_wl)/chi[i]**2
 
-    if np.ndim(a) == 0:
+    if ndim == 0:
         return sigma2_B[0]
     else:
         return sigma2_B
 
 
-def angular_cl_cov_SSC(cosmo, cltracer1, cltracer2, ell, tkka,
+@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
+                 ("cltracer3", "tracer3"), ("cltracer4", "tracer4"),
+                 ('tkka', 't_of_kk_a')],
+          reorder=['sigma2_B', 'fsky', 'tracer3', 'tracer4', 'ell2'])
+def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
+                       tracer3=None, tracer4=None, ell2=None,
                        sigma2_B=None, fsky=1.,
-                       cltracer3=None, cltracer4=None, ell2=None,
                        integration_method='qag_quad'):
     """Calculate the super-sample contribution to the connected
     non-Gaussian covariance for a pair of power spectra
@@ -271,26 +287,27 @@ def angular_cl_cov_SSC(cosmo, cltracer1, cltracer2, ell, tkka,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        cltracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+        tracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
             of any kind.
-        cltracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
+        tracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
             of any kind.
         ell (float or array_like): Angular wavenumber(s) at which to evaluate
             the first dimension of the angular power spectrum covariance.
-        tkka (:class:`~pyccl.tk3d.Tk3D` or None): 3D connected trispectrum.
+        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D` or None): 3D connected
+            trispectrum.
+        tracer3 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+            of any kind. If `None`, `tracer1` will be used instead.
+        tracer4 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+            of any kind. If `None`, `tracer1` will be used instead.
+        ell2 (float or array_like): Angular wavenumber(s) at which to evaluate
+            the second dimension of the angular power spectrum covariance. If
+            `None`, `ell` will be used instead.
         sigma2_B (tuple of arrays or `None`): A tuple of arrays
             (a, sigma2_B(a)) containing the variance of the projected matter
             overdensity over the footprint as a function of the scale factor.
             If `None`, a compact circular footprint will be assumed covering
             a sky fraction `fsky`.
         fsky (float): sky fraction.
-        cltracer3 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
-            of any kind. If `None`, `cltracer1` will be used instead.
-        cltracer4 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
-            of any kind. If `None`, `cltracer1` will be used instead.
-        ell2 (float or array_like): Angular wavenumber(s) at which to evaluate
-            the second dimension of the angular power spectrum covariance. If
-            `None`, `ell` will be used instead.
         integration_method (string) : integration method to be used
             for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
             method backed up by `quad` when it fails) and 'spline' (the
@@ -315,30 +332,30 @@ def angular_cl_cov_SSC(cosmo, cltracer1, cltracer2, ell, tkka,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    if isinstance(tkka, Tk3D):
-        tsp = tkka.tsp
+    if isinstance(t_of_kk_a, Tk3D):
+        tsp = t_of_kk_a.tsp
     else:
-        raise ValueError("tkka must be a pyccl.Tk3D")
+        raise ValueError("t_of_kk_a must be of type pyccl.Tk3D")
 
     # Create tracer colections
     status = 0
     clt1, status = lib.cl_tracer_collection_t_new(status)
-    for t in cltracer1._trc:
+    for t in tracer1._trc:
         status = lib.add_cl_tracer_to_collection(clt1, t, status)
     clt2, status = lib.cl_tracer_collection_t_new(status)
-    for t in cltracer2._trc:
+    for t in tracer2._trc:
         status = lib.add_cl_tracer_to_collection(clt2, t, status)
-    if cltracer3 is None:
+    if tracer3 is None:
         clt3 = clt1
     else:
         clt3, status = lib.cl_tracer_collection_t_new(status)
-        for t in cltracer3._trc:
+        for t in tracer3._trc:
             status = lib.add_cl_tracer_to_collection(clt3, t, status)
-    if cltracer4 is None:
+    if tracer4 is None:
         clt4 = clt2
     else:
         clt4, status = lib.cl_tracer_collection_t_new(status)
-        for t in cltracer4._trc:
+        for t in tracer4._trc:
             status = lib.add_cl_tracer_to_collection(clt4, t, status)
 
     ell1_use = np.atleast_1d(ell)
@@ -364,9 +381,9 @@ def angular_cl_cov_SSC(cosmo, cltracer1, cltracer2, ell, tkka,
     # Free up tracer collections
     lib.cl_tracer_collection_t_free(clt1)
     lib.cl_tracer_collection_t_free(clt2)
-    if cltracer3 is not None:
+    if tracer3 is not None:
         lib.cl_tracer_collection_t_free(clt3)
-    if cltracer4 is not None:
+    if tracer4 is not None:
         lib.cl_tracer_collection_t_free(clt4)
 
     check(status, cosmo=cosmo_in)
