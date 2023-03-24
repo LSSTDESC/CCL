@@ -167,3 +167,10 @@ def test_Sigma2B():
     s2b_e = ccl.sigma2_B_from_mask(COSMO, a_arr=a_use, mask_wl=mask_wl)
     s2b_f = ccl.sigma2_B_disc(COSMO, a_arr=a_use, fsky=fsky)
     assert np.all(np.fabs(s2b_e/s2b_f-1) < 1E-3)
+
+    # Test passing a_arr=None (smoke)
+    a_s, s2b = ccl.sigma2_B_from_mask(COSMO, a_arr=None,
+                                      mask_wl=mask_wl)
+    a_cosmo = COSMO.get_pk_spline_a()
+    assert np.all(a_s == a_cosmo)
+    assert len(a_s) == len(s2b)

@@ -7,10 +7,6 @@ from .tk3d import Tk3D
 from .pk2d import parse_pk2d
 from .base import warn_api
 
-# Define symbolic 'None' type for arrays, to allow proper handling by swig
-# wrapper
-NoneArr = np.array([])
-
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
                  ("cltracer3", "tracer3"), ("cltracer4", "tracer4"),
@@ -161,35 +157,36 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
             power spectrum to use. Defaults to `None`, in which case the
             internal linear power spectrum from `cosmo` is used.
 
+
     Returns:
-        float or array_like: values of the projected variance.
+        a_arr (array_like): an array of scale factor values at which the
+            projected variance has been evaluated. Only returned if `a_arr` is
+            `None` on input.
+        sigma2_B (float or array_like): projected variance.
     """
-    status = 0
-    full_output = a_arr is None  # return sampling?
-    ndim = np.ndim(a_arr)
+    full_output = a_arr is None
 
     if full_output:
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+        a_arr = cosmo.get_pk_spline_a()
+        ndim = np.ndim(a_arr)
     else:
+        ndim = np.ndim(a_arr)
         a_arr = np.atleast_1d(a_arr)
-        na = len(a_arr)
 
     chi_arr = comoving_radial_distance(cosmo, a_arr)
     R_arr = chi_arr * np.arccos(1-2*fsky)
     psp = parse_pk2d(cosmo, p_of_k_a, is_linear=True)
 
+    status = 0
     s2B_arr, status = lib.sigma2b_vec(cosmo.cosmo, a_arr, R_arr, psp,
-                                      na, status)
+                                      len(a_arr), status)
     check(status, cosmo=cosmo)
+
     if full_output:
         return a_arr, s2B_arr
-    else:
-        if ndim == 0:
-            return s2B_arr[0]
-        else:
-            return s2B_arr
+    if ndim == 0:
+        return s2B_arr[0]
+    return s2B_arr
 
 
 @warn_api(pairs=[('a', 'a_arr')])
@@ -222,15 +219,23 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
             internal linear power spectrum from `cosmo` is used.
 
     Returns:
-        float or array_like: values of the projected variance.
+        a_arr (array_like): an array of scale factor values at which the
+            projected variance has been evaluated. Only returned if `a_arr` is
+            `None` on input.
+        sigma2_B (float or array_like): projected variance.
     """
+    full_output = a_arr is None
+
+    if full_output:
+        a_arr = cosmo.get_pk_spline_a()
+        ndim = np.ndim(a_arr)
+    else:
+        ndim = np.ndim(a_arr)
+        a_arr = np.atleast_1d(a_arr)
+
     if p_of_k_a is None:
         cosmo.compute_linear_power()
         p_of_k_a = cosmo.get_linear_power()
-
-    ndim = np.ndim(a_arr)
-    a_arr = np.atleast_1d(a_arr)
-    chi = comoving_angular_distance(cosmo, a=a_arr)
 
     ell = np.arange(mask_wl.size)
 
@@ -243,15 +248,17 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
             sigma2_B[i] = sigma2_B_disc(cosmo=cosmo, a_arr=a_arr[i],
                                         p_of_k_a=p_of_k_a)
         else:
+            chi = comoving_angular_distance(cosmo, a=a_arr)
             k = (ell+0.5)/chi[i]
             pk = p_of_k_a.eval(k, a_arr[i], cosmo)
             # See eq. E.10 of 2007.01844
             sigma2_B[i] = np.sum(pk * mask_wl)/chi[i]**2
 
+    if full_output:
+        return a_arr, sigma2_B
     if ndim == 0:
         return sigma2_B[0]
-    else:
-        return sigma2_B
+    return sigma2_B
 
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
