@@ -1,6 +1,6 @@
 from . import ccllib as lib
 from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
-from .base import CCLObject
+from .base import CCLObject, warn_api
 import numpy as np
 
 
@@ -57,7 +57,7 @@ class Tk3D(CCLObject):
             `is_logt`. If `tkk_arr` is `None`, then it is assumed that
             the trispectrum can be factorized as described above, and
             the two functions :math:`f_i(k_i,a)` are described by
-            `pk1_arr` and `pk2_arr`. You are responsible of making sure
+            `pk1_arr` and `pk2_arr`. You are responsible for making sure
             all these arrays are sufficiently well sampled (i.e. the
             resolution of `a_arr` and `lk_arr` is high enough to sample
             the main features in the trispectrum). For reference, CCL
@@ -72,6 +72,11 @@ class Tk3D(CCLObject):
             `None`.
         pk2_arr (array): a 2D array with shape `[na,nk]` describing the
             second factor :math:`f_2(k,a)` for a factorizable trispectrum.
+        is_logt (boolean): if True, `tkk_arr`/`pk1_arr`/`pk2_arr` hold the
+            natural logarithm of the trispectrum (or its factors).
+            Otherwise, the true values of the corresponding quantities are
+            expected. Note that arrays will be interpolated in log space
+            if `is_logt` is set to `True`.
         extrap_order_lok (int): extrapolation order to be used on k-values
             below the minimum of the splines (use 0 or 1). Note that
             the extrapolation will be done in either
@@ -79,17 +84,13 @@ class Tk3D(CCLObject):
             depending on the value of `is_logt`.
         extrap_order_hik (int): same as `extrap_order_lok` for
             k-values above the maximum of the splines.
-        is_logt (boolean): if True, `tkk_arr`/`pk1_arr`/`pk2_arr` hold the
-            natural logarithm of the trispectrum (or its factors).
-            Otherwise, the true values of the corresponding quantities are
-            expected. Note that arrays will be interpolated in log space
-            if `is_logt` is set to `True`.
     """
     from ._repr import _build_string_Tk3D as __repr__
 
-    def __init__(self, a_arr, lk_arr, tkk_arr=None,
-                 pk1_arr=None, pk2_arr=None, extrap_order_lok=1,
-                 extrap_order_hik=1, is_logt=True):
+    @warn_api(reorder=['extrap_order_lok', 'extrap_order_hik', 'is_logt'])
+    def __init__(self, *, a_arr, lk_arr, tkk_arr=None,
+                 pk1_arr=None, pk2_arr=None, is_logt=True,
+                 extrap_order_lok=1, extrap_order_hik=1):
         na = len(a_arr)
         nk = len(lk_arr)
 
