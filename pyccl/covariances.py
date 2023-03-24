@@ -168,7 +168,6 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
 
     if full_output:
         a_arr = cosmo.get_pk_spline_a()
-        ndim = np.ndim(a_arr)
     else:
         ndim = np.ndim(a_arr)
         a_arr = np.atleast_1d(a_arr)
@@ -228,7 +227,6 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
 
     if full_output:
         a_arr = cosmo.get_pk_spline_a()
-        ndim = np.ndim(a_arr)
     else:
         ndim = np.ndim(a_arr)
         a_arr = np.atleast_1d(a_arr)
