@@ -190,7 +190,7 @@ def test_pk2d_function():
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
 
-def test_pk2d_cls():
+def test_pk2d_cells():
     """
     Test interplay between Pk2D and the Limber integrator
     """
@@ -234,21 +234,21 @@ def test_pk2d_parsing():
     lens1 = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
     ells = np.linspace(2, 100, 10)
 
-    cls1 = ccl.angular_cl(cosmo, lens1, lens1, ells,
-                          p_of_k_a=None)
-    cls2 = ccl.angular_cl(cosmo, lens1, lens1, ells,
-                          p_of_k_a='delta_matter:delta_matter')
-    cls3 = ccl.angular_cl(cosmo, lens1, lens1, ells,
-                          p_of_k_a='a:b')
-    cls4 = ccl.angular_cl(cosmo, lens1, lens1, ells,
-                          p_of_k_a=psp)
-    assert all_finite(cls1)
-    assert all_finite(cls2)
-    assert all_finite(cls3)
-    assert all_finite(cls4)
-    assert np.all(np.fabs(cls2/cls1-1) < 1E-10)
-    assert np.all(np.fabs(cls3/cls1-1) < 1E-10)
-    assert np.all(np.fabs(cls4/cls1-1) < 1E-10)
+    cells1 = ccl.angular_cl(cosmo, lens1, lens1, ells,
+                            p_of_k_a=None)
+    cells2 = ccl.angular_cl(cosmo, lens1, lens1, ells,
+                            p_of_k_a='delta_matter:delta_matter')
+    cells3 = ccl.angular_cl(cosmo, lens1, lens1, ells,
+                            p_of_k_a='a:b')
+    cells4 = ccl.angular_cl(cosmo, lens1, lens1, ells,
+                            p_of_k_a=psp)
+    assert all_finite(cells1)
+    assert all_finite(cells2)
+    assert all_finite(cells3)
+    assert all_finite(cells4)
+    assert np.all(np.fabs(cells2/cells1-1) < 1E-10)
+    assert np.all(np.fabs(cells3/cells1-1) < 1E-10)
+    assert np.all(np.fabs(cells4/cells1-1) < 1E-10)
 
     # Wrong name
     with pytest.raises(KeyError):

@@ -114,7 +114,7 @@ from .neutrinos import (
 )
 
 # Cells & Tracers
-from .cls import angular_cl
+from .cells import angular_cl
 from .tracers import (
     Tracer,
     NzTracer,
@@ -150,6 +150,17 @@ from .covariances import (
 from .pyutils import debug_mode, resample_array
 
 # Deprecated & Renamed modules
+def __getattr__(name):
+    rename = {"cls": "cells"}
+    if name in rename:
+        from .errors import CCLDeprecationWarning
+        import warnings
+        warnings.warn(f"Module {name} has been renamed to {rename[name]}.",
+                      CCLDeprecationWarning)
+        name = rename[name]
+        return eval(name)
+    raise AttributeError(f"No module named {name}.")
+
 from .halomodel import (
     halomodel_matter_power,
     halo_concentration,
