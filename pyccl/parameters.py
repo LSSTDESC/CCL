@@ -58,8 +58,7 @@ class CCLParameters:
             return get(self, name)
 
     def __setattr__(self, key, value):
-        if self._frozen and key != "T_CMB":
-            # `T_CMB` mutates in Cosmology.
+        if self._frozen:
             name = self.__class__.__name__
             raise AttributeError(f"Instances of {name} are frozen.")
         if not hasattr(self._instance, key):
