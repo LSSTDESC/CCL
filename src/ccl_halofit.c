@@ -43,7 +43,6 @@ static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int
   // create a cosmology with the same parameters as the input except w0-wa. Instead
   // the cosmology is created with w0 = w0eff.
   ccl_parameters params_w0eff;
-  double norm_pk;
   double mnu[3];
   int i;
 

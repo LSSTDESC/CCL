@@ -118,7 +118,6 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
     // current one but with mu_0 and Sigma_0=0, for scaling P(k)
 
     // Get a list of the three neutrino masses already calculated
-    double norm_pk;
     double mnu_list[3] = {0, 0, 0};
     ccl_parameters params_GR;
     params_GR.m_nu = NULL;
