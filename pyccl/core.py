@@ -128,8 +128,6 @@ class Cosmology(CCLObject):
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
-        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
         bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
             BCM model. Defaults to `np.log10(1.2e14)`.
         bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
@@ -182,6 +180,9 @@ class Cosmology(CCLObject):
         extra_parameters (:obj:`dict`, optional): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB, with
             details described below. Defaults to None.
+        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
+            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
+            # TODO: Move after T_CMB for CCLv3.
 
     Currently supported extra parameters for CAMB are:
 
@@ -225,7 +226,7 @@ class Cosmology(CCLObject):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=None, T_ncdm=None,
+            T_CMB=None,
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0.,
             c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
@@ -235,7 +236,8 @@ class Cosmology(CCLObject):
             mass_function='tinker10',
             halo_concentration='duffy2008',
             emulator_neutrinos='strict',
-            extra_parameters=None):
+            extra_parameters=None,
+            T_ncdm=None):
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -1093,8 +1095,6 @@ class CosmologyCalculator(Cosmology):
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             ``None`` uses the global CCL value in
             ``pyccl.physical_constants.T_CMB``.
-        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
         mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
@@ -1151,14 +1151,17 @@ class CosmologyCalculator(Cosmology):
             computed. The only non-linear model supported is `'halofit'`,
             corresponding to the "HALOFIT" transformation of
             Takahashi et al. 2012 (arXiv:1208.2701).
+        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
+            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
+            # TODO: Move to after T_CMB for CCLv3.
     """
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=None, T_ncdm=None, mu_0=0., sigma_0=0.,
+            T_CMB=None, mu_0=0., sigma_0=0.,
             background=None, growth=None,
-            pk_linear=None, pk_nonlin=None, nonlinear_model=None):
+            pk_linear=None, pk_nonlin=None, nonlinear_model=None, T_ncdm=None):
         if pk_linear:
             transfer_function = 'calculator'
         else:
