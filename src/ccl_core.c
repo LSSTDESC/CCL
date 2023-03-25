@@ -327,7 +327,6 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
     ccl_constants.RHO_CRITICAL *
     ccl_constants.SOLAR_MASS/pow(ccl_constants.MPC_TO_METER, 3) *
     pow(params->h, 2);
-  params->Omega_g = rho_g/rho_crit;
 
   // Get the N_nu_rel from Neff and N_nu_mass
   params->N_nu_rel = params->Neff - params->N_nu_mass * pow(params->T_ncdm, 4) / pow(4./11.,4./3.);
@@ -352,7 +351,18 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
   }
 
   params->Omega_m = params->Omega_b + params-> Omega_c + params->Omega_nu_mass;
-  params->Omega_l = 1.0 - params->Omega_m - params->Omega_g - params->Omega_nu_rel - params->Omega_k;
+  params->Omega_l = 1.0 - params->Omega_m - rho_g/rho_crit - params->Omega_nu_rel - params->Omega_k;
+
+  if (isnan(params->Omega_g)) {
+    // No value passed for Omega_g
+    params->Omega_g = rho_g/rho_crit;
+  }
+  else {
+    // Omega_g was passed - modify Omega_l
+    double total = rho_g/rho_crit + params->Omega_l;
+    params->Omega_l = total - params->Omega_g;
+  }
+
   // Initially undetermined parameters - set to nan to trigger
   // problems if they are mistakenly used.
   if (isfinite(params->A_s)) {params->sigma8 = NAN;}
@@ -388,12 +398,13 @@ h: Hubble's constant divided by (100 km/s/Mpc).
 A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
 T_CMB: CMB temperature
+Omega_g: radiation density parameter
 
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double T_CMB, double T_ncdm,
+				     double n_s, double T_CMB, double Omega_g, double T_ncdm,
 				     double bcm_log10Mc, double bcm_etab, double bcm_ks,
 				     double mu_0, double sigma_0,
 				     double c1_mg, double c2_mg, double lambda_mg,
@@ -416,6 +427,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.Omega_k = Omega_k;
   params.Neff = Neff;
   params.T_CMB = T_CMB;
+  params.Omega_g = Omega_g;
   params.T_ncdm = T_ncdm;
   params.m_nu = malloc(n_mnu*sizeof(double));
   params.sum_nu_masses = 0.;

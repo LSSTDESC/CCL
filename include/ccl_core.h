@@ -333,6 +333,7 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
  * @param n_s the power-law index of the power spectrum
  * @param T_CMB CMB temperature
+ * @param Omega_g radiation density parameter
  * @param T_ncdm the non-CDM temperature in units of photon temperature
  * @param bcm_log10Mc log10 cluster mass, one of the parameters of the BCM model
  * @param bcm_etab ejection radius parameter, one of the parameters of the BCM model
@@ -347,7 +348,7 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
                                      double Neff, double* mnu, int n_mnu,
                                      double w0, double wa, double h, double norm_pk,
-                                     double n_s, double T_CMB, double T_ncdm,
+                                     double n_s, double T_CMB, double Omega_g, double T_ncdm,
                                      double bcm_log10Mc, double bcm_etab, double bcm_ks,
                                      double mu_0, double sigma_0, double c1_mg, double c2_mg, double lambda_mg,
                                      int nz_mgrowth, double *zarr_mgrowth,
