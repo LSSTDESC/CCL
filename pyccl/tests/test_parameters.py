@@ -406,12 +406,6 @@ def test_parameters_set():
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
         n_s=0.96)
 
-    # Check that values of sigma8 and A_s won't be misinterpreted by the C code
-    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05,
-                  h=0.7, A_s=2e-5, n_s=0.96)
-    assert_raises(ValueError, ccl.Cosmology, Omega_c=0.25, Omega_b=0.05,
-                  h=0.7, sigma8=9e-6, n_s=0.96)
-
     # Check that error is raised when unrecognized parameter requested
     assert_raises(KeyError, lambda: params['wibble'])
 

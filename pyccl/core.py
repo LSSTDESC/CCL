@@ -429,6 +429,8 @@ class Cosmology(CCLObject):
             extra_parameters=None):
         """Build a ccl_parameters struct"""
         # Fill-in defaults
+        A_s = np.nan if A_s is None else A_s
+        sigma8 = np.nan if sigma8 is None else sigma8
         T_CMB = const.T_CMB if T_CMB is None else T_CMB
         Om_g = np.nan if Omega_g is None else Omega_g  # SWIG interprets as NAN
         T_ncdm = const.T_ncdm if T_ncdm is None else T_ncdm
@@ -457,20 +459,16 @@ class Cosmology(CCLObject):
             nz_mg = -1
 
         # Check to make sure specified amplitude parameter is consistent
-        if ((A_s is None and sigma8 is None) or
-                (A_s is not None and sigma8 is not None)):
-            raise ValueError("Must set either A_s or sigma8 and not both.")
+        if [A_s, sigma8].count(np.nan) != 1:
+            raise ValueError("Set either A_s or sigma8 and not both.")
 
-        # Set norm_pk to either A_s or sigma8
-        norm_pk = A_s if A_s is not None else sigma8
-
-        # The C library decides whether A_s or sigma8 was the input parameter
-        # based on value, so we need to make sure this is consistent too
-        if norm_pk >= 1e-5 and A_s is not None:
-            raise ValueError("A_s must be less than 1e-5.")
-
-        if norm_pk < 1e-5 and sigma8 is not None:
-            raise ValueError("sigma8 must be greater than 1e-5.")
+        # Check if any compulsory parameters are not set
+        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, n_s]
+        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa', 'h', 'n_s']
+        for nm, item in zip(names, compul):
+            if item is None:
+                raise ValueError("Necessary parameter '%s' was not set "
+                                 "(or set to None)." % nm)
 
         # Make sure the neutrino parameters are consistent
         # and if a sum is given for mass, split into three masses.
@@ -588,16 +586,6 @@ class Cosmology(CCLObject):
         else:
             mnu_final_list = [0.]
 
-        # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, norm_pk,
-                  n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa',
-                 'h', 'norm_pk', 'n_s']
-        for nm, item in zip(names, compul):
-            if item is None:
-                raise ValueError("Necessary parameter '%s' was not set "
-                                 "(or set to None)." % nm)
-
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
@@ -605,13 +593,13 @@ class Cosmology(CCLObject):
         if nz_mg == -1:
             # Create ccl_parameters without modified growth
             self._params, status = lib.parameters_create_nu(
-                Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s,
+                Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, A_s, sigma8, n_s,
                 T_CMB, Om_g, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
                 mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, mnu_final_list, status)
         else:
             # Create ccl_parameters with modified growth arrays
             self._params, status = lib.parameters_create_nu_vec(
-                Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, norm_pk, n_s,
+                Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, A_s, sigma8, n_s,
                 T_CMB, Om_g, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
                 mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, z_mg, df_mg,
                 mnu_final_list, status)

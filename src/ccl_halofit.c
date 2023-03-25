@@ -52,15 +52,10 @@ static ccl_cosmology *create_w0eff_cosmo(double w0eff, ccl_cosmology *cosmo, int
   for(i=0; i<cosmo->params.N_nu_mass; ++i)
     mnu[i] = cosmo->params.m_nu[i];
 
-  if (isnan(cosmo->params.A_s))
-    norm_pk = cosmo->params.sigma8;
-  else
-    norm_pk = cosmo->params.A_s;
-
   params_w0eff = ccl_parameters_create(
     cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k,
     cosmo->params.Neff, mnu, cosmo->params.N_nu_mass,
-    w0eff, 0, cosmo->params.h, norm_pk,
+    w0eff, 0, cosmo->params.h, cosmo->params.A_s, cosmo->params.sigma8,
     cosmo->params.n_s, cosmo->params.T_CMB, cosmo->params.Omega_g, cosmo->params.T_ncdm,
     cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
     cosmo->params.bcm_ks, cosmo->params.mu_0, cosmo->params.sigma_0,

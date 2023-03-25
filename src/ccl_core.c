@@ -312,8 +312,8 @@ DEFINITIONS:
 Omega_g = (Omega_g*h^2)/h^2 is the radiation parameter; "g" is for photons, as in CLASS
 T_CMB: CMB temperature in Kelvin
 Omega_l: Lambda
-A_s: amplitude of the primordial PS, enforced here to initially set to NaN
-sigma8: variance in 8 Mpc/h spheres for normalization of matter PS, enforced here to initially set to NaN
+A_s: amplitude of the primordial PS
+sigma8: variance in 8 Mpc/h spheres for normalization of matter PS
 z_star: recombination redshift
  */
 void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
@@ -363,10 +363,7 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
     params->Omega_l = total - params->Omega_g;
   }
 
-  // Initially undetermined parameters - set to nan to trigger
-  // problems if they are mistakenly used.
-  if (isfinite(params->A_s)) {params->sigma8 = NAN;}
-  if (isfinite(params->sigma8)) {params->A_s = NAN;}
+  // NULL to NAN in case it is not set
   params->z_star = NAN;
 
   if(fabs(params->Omega_k)<1E-6)
@@ -396,6 +393,7 @@ wa: Dark energy eq of state parameter, time variation
 H0: Hubble's constant in km/s/Mpc.
 h: Hubble's constant divided by (100 km/s/Mpc).
 A_s: amplitude of the primordial PS
+sigma8: variance of matter density fluctuations at 8 Mpc/h
 n_s: index of the primordial PS
 T_CMB: CMB temperature
 Omega_g: radiation density parameter
@@ -403,7 +401,7 @@ Omega_g: radiation density parameter
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, int n_mnu,
-				     double w0, double wa, double h, double norm_pk,
+				     double w0, double wa, double h, double A_s, double sigma8,
 				     double n_s, double T_CMB, double Omega_g, double T_ncdm,
 				     double bcm_log10Mc, double bcm_etab, double bcm_ks,
 				     double mu_0, double sigma_0,
@@ -420,27 +418,30 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.m_nu = NULL;
   params.z_mgrowth=NULL;
   params.df_mgrowth=NULL;
-  params.sigma8 = NAN;
-  params.A_s = NAN;
-  params.Omega_c = Omega_c;
-  params.Omega_b = Omega_b;
-  params.Omega_k = Omega_k;
-  params.Neff = Neff;
-  params.T_CMB = T_CMB;
-  params.Omega_g = Omega_g;
-  params.T_ncdm = T_ncdm;
   params.m_nu = malloc(n_mnu*sizeof(double));
+
+  // Neutrinos
   params.sum_nu_masses = 0.;
   for(int i = 0; i<n_mnu; i=i+1){
      params.m_nu[i] = mnu[i];
      params.sum_nu_masses = params.sum_nu_masses + mnu[i];
   }
-
   if(params.sum_nu_masses<1e-15){
     params.N_nu_mass = 0;
   }else{
     params.N_nu_mass = n_mnu;
    }
+  params.Neff = Neff;
+  params.T_ncdm = T_ncdm;
+
+  // Matter & curvature
+  params.Omega_c = Omega_c;
+  params.Omega_b = Omega_b;
+  params.Omega_k = Omega_k;
+
+  // Radiation
+  params.T_CMB = T_CMB;
+  params.Omega_g = Omega_g;
 
   // Dark Energy
   params.w0 = w0;
@@ -451,10 +452,8 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.H0 = h*100;
 
   // Primordial power spectra
-  if(norm_pk<1E-5)
-    params.A_s=norm_pk;
-  else
-    params.sigma8=norm_pk;
+  params.A_s = A_s;
+  params.sigma8 = sigma8;
   params.n_s = n_s;
 
   //Baryonic params
