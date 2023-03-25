@@ -320,7 +320,6 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  params->T_CMB =  ccl_constants.T_CMB;
   // kg / m^3
   double rho_g = 4. * ccl_constants.STBOLTZ / pow(ccl_constants.CLIGHT, 3) * pow(params->T_CMB, 4);
   // kg / m^3
@@ -388,13 +387,15 @@ H0: Hubble's constant in km/s/Mpc.
 h: Hubble's constant divided by (100 km/s/Mpc).
 A_s: amplitude of the primordial PS
 n_s: index of the primordial PS
+T_CMB: CMB temperature
 
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
 				     double Neff, double* mnu, int n_mnu,
 				     double w0, double wa, double h, double norm_pk,
-				     double n_s, double T_ncdm, double bcm_log10Mc, double bcm_etab,
-				     double bcm_ks, double mu_0, double sigma_0,
+				     double n_s, double T_CMB, double T_ncdm,
+				     double bcm_log10Mc, double bcm_etab, double bcm_ks,
+				     double mu_0, double sigma_0,
 				     double c1_mg, double c2_mg, double lambda_mg,
 				     int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
@@ -414,6 +415,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.Omega_b = Omega_b;
   params.Omega_k = Omega_k;
   params.Neff = Neff;
+  params.T_CMB = T_CMB;
   params.T_ncdm = T_ncdm;
   params.m_nu = malloc(n_mnu*sizeof(double));
   params.sum_nu_masses = 0.;

@@ -38,15 +38,15 @@ void parameters_get_nu_masses(ccl_parameters *params, int nout, double* output) 
 ccl_parameters parameters_create_nu(
                         double Omega_c, double Omega_b, double Omega_k,
                         double Neff, double w0, double wa, double h,
-                        double norm_pk, double n_s, double T_ncdm, double bcm_log10Mc,
-                        double bcm_etab, double bcm_ks, double mu_0,
+                        double norm_pk, double n_s, double T_CMB, double T_ncdm,
+                        double bcm_log10Mc, double bcm_etab, double bcm_ks, double mu_0,
                         double sigma_0, double c1_mg, double c2_mg, double lambda_mg,
                         double* m_nu, int n_m, int* status)
 {
     return ccl_parameters_create(
                         Omega_c, Omega_b, Omega_k, Neff, m_nu, n_m,
-                        w0, wa, h, norm_pk, n_s, T_ncdm, bcm_log10Mc, bcm_etab,
-                        bcm_ks, mu_0, sigma_0, c1_mg, c2_mg, lambda_mg,
+                        w0, wa, h, norm_pk, n_s, T_CMB, T_ncdm, bcm_log10Mc,
+                        bcm_etab, bcm_ks, mu_0, sigma_0, c1_mg, c2_mg, lambda_mg,
                         -1, NULL, NULL, status );
 }
 
@@ -61,8 +61,8 @@ ccl_parameters parameters_create_nu(
 ccl_parameters parameters_create_nu_vec(
                         double Omega_c, double Omega_b, double Omega_k,
                         double Neff, double w0, double wa, double h,
-                        double norm_pk, double n_s, double T_ncdm, double bcm_log10Mc,
-                        double bcm_etab, double bcm_ks, double mu_0,
+                        double norm_pk, double n_s, double T_CMB, double T_ncdm,
+                        double bcm_log10Mc, double bcm_etab, double bcm_ks, double mu_0,
                         double sigma_0, double c1_mg, double c2_mg, double lambda_mg,
                         double* zarr, int nz,
                         double* dfarr, int nf, double* m_nu,
@@ -71,7 +71,8 @@ ccl_parameters parameters_create_nu_vec(
     if (nz == 0){ nz = -1; }
     return ccl_parameters_create(
                         Omega_c, Omega_b, Omega_k, Neff, m_nu, n_m,
-                        w0, wa, h, norm_pk, n_s, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
+                        w0, wa, h, norm_pk, n_s, T_CMB, T_ncdm,
+                        bcm_log10Mc, bcm_etab, bcm_ks,
                         mu_0, sigma_0, c1_mg, c2_mg, lambda_mg,
                         nz, zarr, dfarr, status);
 }

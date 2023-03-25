@@ -147,7 +147,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k,
         cosmo->params.Neff, mnu_list, cosmo->params.N_nu_mass,
         cosmo->params.w0, cosmo->params.wa, cosmo->params.h,
-        norm_pk, cosmo->params.n_s, cosmo->params.T_ncdm,
+        norm_pk, cosmo->params.n_s, cosmo->params.T_CMB, cosmo->params.T_ncdm,
         cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
         cosmo->params.bcm_ks, 0., 0., 1., 1., 0.,cosmo->params.nz_mgrowth,
         cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);
