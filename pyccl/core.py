@@ -225,7 +225,7 @@ class Cosmology(CCLObject):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=const.T_CMB, T_ncdm=const.T_ncdm,
+            T_CMB=None, T_ncdm=None,
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0.,
             c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
@@ -428,6 +428,10 @@ class Cosmology(CCLObject):
             z_mg=None, df_mg=None, Omega_g=None,
             extra_parameters=None):
         """Build a ccl_parameters struct"""
+        # Fill-in defaults
+        T_CMB = const.T_CMB if T_CMB is None else T_CMB
+        Om_g = np.nan if Omega_g is None else Omega_g  # SWIG interprets as NAN
+        T_ncdm = const.T_ncdm if T_ncdm is None else T_ncdm
 
         # Check to make sure Omega_k is within reasonable bounds.
         if Omega_k is not None and Omega_k < -1.0135:
@@ -597,7 +601,6 @@ class Cosmology(CCLObject):
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
-        Om_g = np.nan if Omega_g is None else Omega_g  # SWIG interprets as NAN
         status = 0
         if nz_mg == -1:
             # Create ccl_parameters without modified growth
@@ -1165,7 +1168,7 @@ class CosmologyCalculator(Cosmology):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=const.T_CMB, T_ncdm=const.T_ncdm, mu_0=0., sigma_0=0.,
+            T_CMB=None, T_ncdm=None, mu_0=0., sigma_0=0.,
             background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None):
         if pk_linear:

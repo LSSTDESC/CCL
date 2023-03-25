@@ -15,7 +15,7 @@ neutrino_mass_splits = {
 }
 
 
-def Omega_nu_h2(a, *, m_nu, T_CMB=const.T_CMB, T_ncdm=const.T_ncdm):
+def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=None):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
 
@@ -42,7 +42,10 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=const.T_CMB, T_ncdm=const.T_ncdm):
 
     N_nu_mass = len(m_nu)
 
-    # Call function
+    # Fill-in defaults
+    T_CMB = const.T_CMB if T_CMB is None else T_CMB
+    T_ncdm = const.T_ncdm if T_ncdm is None else T_ncdm
+
     OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm,
                                        a, m_nu, a.size, status)
 
