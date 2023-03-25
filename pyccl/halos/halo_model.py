@@ -179,6 +179,12 @@ class HMCalculator(CCLAutoreprObject):
         norm = 1. / self._integrate_over_mf(uk0)
         return norm
 
+    def get_profile_norm(self, cosmo, a, prof):
+        """Compute ``profile_norm`` if ``prof.normprof`` is ``True``."""
+        if prof.normprof:
+            return self.profile_norm(cosmo, a, prof)
+        return np.ones_like(a)[()]
+
     @warn_api(pairs=[("sel", "selection"),
                      ("amin", "a_min"),
                      ("amax", "a_max")],

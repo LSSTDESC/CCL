@@ -649,7 +649,7 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
       - functions/methods whose arguments have been ranamed,
       - functions/methods with changed argument order,
       - constructors in the ``halos`` sub-package where ``cosmo`` is removed,
-      - functions/methods where ``normprof`` is now a required argument.
+      - functions/methods where ``normprof`` is deprecated.
 
     Parameters:
         pairs : list of pairs, optional

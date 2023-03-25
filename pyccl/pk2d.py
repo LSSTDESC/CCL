@@ -279,7 +279,7 @@ class Pk2D(CCLObject):
 
         # Catch scale factor extrapolation bounds error.
         if status == lib.CCL_ERROR_SPLINE_EV:
-            raise TypeError(
+            raise ValueError(
                 "Pk2D evaluation scale factor is outside of the "
                 "interpolation range. To extrapolate, pass a Cosmology.")
         check(status, cosmo)
@@ -527,3 +527,16 @@ def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
             pk = cosmo.get_nonlin_power(name)
         psp = pk.psp
     return psp
+
+
+def parse_pk(cosmo, p_of_k_a):
+    """Helper to retrieve the power spectrum in the halo model."""
+    if isinstance(p_of_k_a, Pk2D):
+        return p_of_k_a
+    elif p_of_k_a is None or p_of_k_a == "linear":
+        cosmo.compute_linear_power()
+        return cosmo.get_linear_power()
+    elif p_of_k_a == "nonlinear":
+        cosmo.compute_nonlin_power()
+        return cosmo.get_nonlin_power()
+    raise TypeError("p_of_k_a must [None|'linear'|'nonlinear'] or Pk2D.")

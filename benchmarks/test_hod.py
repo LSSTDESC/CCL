@@ -63,11 +63,9 @@ def test_hodcl():
                                    bmax_0=rmax)
     prf2pt = ccl.halos.Profile2ptHOD()
     # P(k)
-    k_arr = np.geomspace(1E-4, 1E2, 512)
-    a_arr = np.linspace(0.8, 1, 32)
+    a_arr, lk_arr, _ = cosmo.get_linear_power().get_spline_arrays()
     pk_hod = ccl.halos.halomod_Pk2D(cosmo, hmc, prf, prof_2pt=prf2pt,
-                                    normprof1=True, lk_arr=np.log(k_arr),
-                                    a_arr=a_arr)
+                                    normprof1=True, lk_arr=lk_arr, a_arr=a_arr)
     # C_ell
     tr = ccl.NumberCountsTracer(cosmo, False, (z_arr, dndz),
                                 (z_arr, np.ones(len(dndz))))

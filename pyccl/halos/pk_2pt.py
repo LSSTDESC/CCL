@@ -1,5 +1,5 @@
 from ..base import UnlockInstance, warn_api
-from ..pk2d import Pk2D
+from ..pk2d import Pk2D, parse_pk
 from .profiles_2pt import Profile2pt
 import numpy as np
 
@@ -88,12 +88,12 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     # Check inputs
     if smooth_transition is not None:
         if not (get_1h and get_2h):
-            raise ValueError("transition region can only be modified "
-                             "when both 1-halo and 2-halo terms are queried")
+            raise ValueError("Transition region can only be modified "
+                             "when both 1-halo and 2-halo terms are queried.")
     if suppress_1h is not None:
         if not get_1h:
-            raise ValueError("can't suppress the 1-halo term "
-                             "when get_1h is False")
+            raise ValueError("Can't suppress the 1-halo term "
+                             "when get_1h is False.")
 
     if prof2 is None:
         prof2 = prof
@@ -108,69 +108,50 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
         with UnlockInstance(prof2):
             prof2.normprof = normprof2
 
-    # Power spectrum
-    if isinstance(p_of_k_a, Pk2D):
-        def pkf(sf):
-            return p_of_k_a.eval(k_use, sf, cosmo)
-    elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
-        def pkf(sf):
-            return cosmo.linear_matter_power(k_use, sf)
-    elif str(p_of_k_a) == 'nonlinear':
-        def pkf(sf):
-            return cosmo.nonlin_matter_power(k_use, sf)
-    else:
-        raise TypeError("p_of_k_a must be `None`, \'linear\', "
-                        "\'nonlinear\' or a `Pk2D` object")
+    pk2d = parse_pk(cosmo, p_of_k_a)
 
     na = len(a_use)
     nk = len(k_use)
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
-        # Compute first profile normalization
-        if prof.normprof:
-            norm1 = hmc.profile_norm(cosmo, aa, prof)
-        else:
-            norm1 = 1
-        # Compute second profile normalization
+        # normalizations
+        norm1 = hmc.get_profile_norm(cosmo, aa, prof)
+
         if prof2 == prof:
             norm2 = norm1
         else:
-            if prof2.normprof:
-                norm2 = hmc.profile_norm(cosmo, aa, prof2)
-            else:
-                norm2 = 1
-        norm = norm1 * norm2
+            norm2 = hmc.get_profile_norm(cosmo, aa, prof2)
 
         if get_2h:
-            # Compute first bias factor
+            # bias factors
             i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
 
-            # Compute second bias factor
             if prof2 == prof:
                 i11_2 = i11_1
             else:
                 i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
 
-            # Compute 2-halo power spectrum
-            pk_2h = pkf(aa) * i11_1 * i11_2
+            pk_2h = pk2d(k_use, aa) * i11_1 * i11_2  # 2-halo term
         else:
-            pk_2h = 0.
+            pk_2h = 0
 
         if get_1h:
             pk_1h = hmc.I_0_2(cosmo, k_use, aa, prof,
-                              prof2=prof2, prof_2pt=prof_2pt)
+                              prof2=prof2, prof_2pt=prof_2pt)  # 1-halo term
+
             if suppress_1h is not None:
+                # large-scale damping of 1-halo term
                 ks = suppress_1h(aa)
                 pk_1h *= (k_use / ks)**4 / (1 + (k_use / ks)**4)
         else:
-            pk_1h = 0.
+            pk_1h = 0
 
-        # Transition region
+        # smooth 1h/2h transition region
         if smooth_transition is None:
-            out[ia, :] = (pk_1h + pk_2h) * norm
+            out[ia] = (pk_1h + pk_2h) * norm1 * norm2
         else:
             alpha = smooth_transition(aa)
-            out[ia, :] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) * norm
+            out[ia] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) * norm1 * norm2
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
