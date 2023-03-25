@@ -220,7 +220,8 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
                                  is_number_counts4=False,
                                  p_of_k_a=None, lk_arr=None,
                                  a_arr=None, extrap_order_lok=1,
-                                 extrap_order_hik=1, use_log=False):
+                                 extrap_order_hik=1, use_log=False,
+                                 extrap_pk=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
@@ -273,6 +274,10 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
+        extrap_pk (bool):
+            Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
+            support. If False, and the queried values are out of bounds,
+            an error is raised. The default is False.
 
     Returns:
         :class:`~pyccl.tk3d.Tk3D`: SSC effective trispectrum.
@@ -294,7 +299,9 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
 
     k_use = np.exp(lk_arr)
     prof_2pt = Profile2pt()
+
     pk2d = parse_pk(cosmo, p_of_k_a)
+    extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     na = len(a_arr)
     nk = len(k_use)
@@ -303,8 +310,8 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
         norm = hmc.get_profile_norm(cosmo, aa, prof)**2
         i12 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof, prof_2pt=prof_2pt)
 
-        pk = pk2d(k_use, aa)
-        dpk = pk2d(k_use, aa, derivative=True)
+        pk = pk2d(k_use, aa, cosmo=extrap)
+        dpk = pk2d(k_use, aa, derivative=True, cosmo=extrap)
 
         # ~ (47/21 - 1/3 dlogPk/dlogk) * Pk + I12
         dpk12[ia] = ((47/21 - dpk/3)*pk + i12 * norm)
@@ -349,7 +356,8 @@ def halomod_Tk3D_SSC(
         prof12_2pt=None, prof34_2pt=None,
         normprof1=None, normprof2=None, normprof3=None, normprof4=None,
         p_of_k_a=None, lk_arr=None, a_arr=None,
-        extrap_order_lok=1, extrap_order_hik=1, use_log=False):
+        extrap_order_lok=1, extrap_order_hik=1, use_log=False,
+        extrap_pk=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
@@ -417,6 +425,10 @@ def halomod_Tk3D_SSC(
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
+        extrap_pk (bool):
+            Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
+            support. If False, and the queried values are out of bounds,
+            an error is raised. The default is False.
 
     Returns:
         :class:`~pyccl.tk3d.Tk3D`: SSC effective trispectrum.
@@ -433,6 +445,7 @@ def halomod_Tk3D_SSC(
 
     k_use = np.exp(lk_arr)
     pk2d = parse_pk(cosmo, p_of_k_a)
+    extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     dpk12, dpk34 = [np.zeros((len(a_arr), len(k_use))) for _ in range(2)]
     for ia, aa in enumerate(a_arr):
@@ -471,8 +484,8 @@ def halomod_Tk3D_SSC(
                                prof2=prof4, prof_2pt=prof34_2pt)
 
         # power spectrum
-        pk = pk2d(k_use, aa)
-        dpk = pk2d(k_use, aa, derivative=True)
+        pk = pk2d(k_use, aa, cosmo=extrap)
+        dpk = pk2d(k_use, aa, derivative=True, cosmo=extrap)
 
         # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk + I12
         dpk12[ia] = norm1 * norm2 * ((47/21 - dpk/3)*i11_1*i11_2*pk + i12_12)

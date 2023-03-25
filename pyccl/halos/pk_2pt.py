@@ -14,7 +14,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
                            normprof1=None, normprof2=None,
                            p_of_k_a=None,
                            get_1h=True, get_2h=True,
-                           smooth_transition=None, suppress_1h=None):
+                           smooth_transition=None, suppress_1h=None,
+                           extrap_pk=False):
     """ Computes the halo model power spectrum for two
     quantities defined by their respective halo profiles.
     The halo model power spectrum for two profiles
@@ -74,6 +75,10 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
             defined as in HMCODE-2020 (``arXiv:2009.01858``):
             :math:`\\frac{(k/k_*(a))^4}{1+(k/k_*(a))^4}`.
             If `None` the standard 1-halo term is returned with no damping.
+        extrap_pk (bool):
+            Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
+            support. If False, and the queried values are out of bounds,
+            an error is raised. The default is False.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -109,6 +114,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
             prof2.normprof = normprof2
 
     pk2d = parse_pk(cosmo, p_of_k_a)
+    extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     na = len(a_use)
     nk = len(k_use)
@@ -131,13 +137,13 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
             else:
                 i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
 
-            pk_2h = pk2d(k_use, aa) * i11_1 * i11_2  # 2-halo term
+            pk_2h = pk2d(k_use, aa, cosmo=extrap) * i11_1 * i11_2  # 2h term
         else:
             pk_2h = 0
 
         if get_1h:
             pk_1h = hmc.I_0_2(cosmo, k_use, aa, prof,
-                              prof2=prof2, prof_2pt=prof_2pt)  # 1-halo term
+                              prof2=prof2, prof_2pt=prof_2pt)  # 1h term
 
             if suppress_1h is not None:
                 # large-scale damping of 1-halo term
@@ -169,7 +175,7 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
                  get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
                  extrap_order_lok=1, extrap_order_hik=2,
-                 smooth_transition=None, suppress_1h=None):
+                 smooth_transition=None, suppress_1h=None, extrap_pk=False):
     """ Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the halo-model power spectrum for two quantities defined by
     their respective halo profiles. See :meth:`halomod_power_spectrum`
@@ -231,6 +237,10 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
             defined as in HMCODE-2020 (``arXiv:2009.01858``):
             :math:`\\frac{(k/k_*(a))^4}{1+(k/k_*(a))^4}`.
             If `None` the standard 1-halo term is returned with no damping.
+        extrap_pk (bool):
+            Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
+            support. If False, and the queried values are out of bounds,
+            an error is raised. The default is False.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: halo model power spectrum.
@@ -245,7 +255,8 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
         prof, prof2=prof2, prof_2pt=prof_2pt, p_of_k_a=p_of_k_a,
         normprof1=normprof1, normprof2=normprof2,  # TODO: remove for CCLv3
         get_1h=get_1h, get_2h=get_2h,
-        smooth_transition=smooth_transition, suppress_1h=suppress_1h)
+        smooth_transition=smooth_transition, suppress_1h=suppress_1h,
+        extrap_pk=extrap_pk)
 
     return Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                 extrap_order_lok=extrap_order_lok,
