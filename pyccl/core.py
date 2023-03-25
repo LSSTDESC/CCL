@@ -428,11 +428,11 @@ class Cosmology(CCLObject):
             z_mg=None, df_mg=None, Omega_g=None,
             extra_parameters=None):
         """Build a ccl_parameters struct"""
-        # Fill-in defaults
+        # Fill-in defaults (SWIG converts `numpy.nan` to `NAN`)
         A_s = np.nan if A_s is None else A_s
         sigma8 = np.nan if sigma8 is None else sigma8
         T_CMB = const.T_CMB if T_CMB is None else T_CMB
-        Om_g = np.nan if Omega_g is None else Omega_g  # SWIG interprets as NAN
+        Omega_g = np.nan if Omega_g is None else Omega_g
         T_ncdm = const.T_ncdm if T_ncdm is None else T_ncdm
 
         # Check to make sure Omega_k is within reasonable bounds.
@@ -594,13 +594,13 @@ class Cosmology(CCLObject):
             # Create ccl_parameters without modified growth
             self._params, status = lib.parameters_create_nu(
                 Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, A_s, sigma8, n_s,
-                T_CMB, Om_g, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
+                T_CMB, Omega_g, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
                 mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, mnu_final_list, status)
         else:
             # Create ccl_parameters with modified growth arrays
             self._params, status = lib.parameters_create_nu_vec(
                 Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, A_s, sigma8, n_s,
-                T_CMB, Om_g, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
+                T_CMB, Omega_g, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
                 mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, z_mg, df_mg,
                 mnu_final_list, status)
         check(status)
