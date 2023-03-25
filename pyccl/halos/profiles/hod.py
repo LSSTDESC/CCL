@@ -114,7 +114,6 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         "lM0_p", "lM1_0", "lM1_p", "alpha_0", "alpha_p", "fc_0", "fc_p",
         "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
         "ns_independent", "precision_fftlog", "normprof",)
-    name = 'HOD'
 
     @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation,
@@ -146,7 +145,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         self.bmax_p = bmax_p
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
-        super(HaloProfileHOD, self).__init__()
+        super().__init__()
 
     def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
         return self.c_m_relation.get_concentration(cosmo, M, a,

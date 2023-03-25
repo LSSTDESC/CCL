@@ -84,7 +84,6 @@ class HaloProfileCIBShang12(HaloProfileCIB):
     __repr_attrs__ = (
         "c_m_relation", "nu", "alpha", "T0", "beta", "gamma", "s_z",
         "l10meff", "sigLM", "Mmin", "L0", "precision_fftlog", "normprof")
-    name = 'CIBShang12'
     _one_over_4pi = 0.07957747154
 
     @warn_api(pairs=[("c_M_relation", "c_m_relation")])

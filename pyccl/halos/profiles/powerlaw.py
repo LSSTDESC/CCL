@@ -23,7 +23,7 @@ class HaloProfilePowerLaw(HaloProfile):
             be `f(cosmo, a)`.
     """
     __repr_attrs__ = ("r_scale", "tilt", "precision_fftlog", "normprof",)
-    name = 'PowerLaw'
+    normprof = False
 
     @warn_api
     def __init__(self, *, r_scale, tilt):

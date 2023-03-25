@@ -48,7 +48,6 @@ class HaloProfileNFW(HaloProfileMatter):
     __repr_attrs__ = ("c_m_relation", "fourier_analytic", "projected_analytic",
                       "cumul2d_analytic", "truncated", "precision_fftlog",
                       "normprof",)
-    name = 'NFW'
 
     @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation,

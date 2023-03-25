@@ -2,6 +2,7 @@ from ...pyutils import resample_array, _fftlog_transform
 from ...base import (CCLAutoreprObject, unlock_instance,
                      warn_api, deprecate_attr)
 import numpy as np
+from abc import abstractproperty
 
 
 __all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
@@ -34,8 +35,6 @@ class HaloProfile(CCLAutoreprObject):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
-    normprof = False
-    is_number_counts = False
     __getattr__ = deprecate_attr(pairs=[('cM', 'c_m_relation')]
                                  )(super.__getattribute__)
 
@@ -59,6 +58,10 @@ class HaloProfile(CCLAutoreprObject):
     __eq__ = object.__eq__
 
     __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
+
+    @abstractproperty
+    def normprof(self) -> bool:
+        """Whether to normalize this profile in halo model calculations."""
 
     @unlock_instance(mutate=True)
     def update_precision_fftlog(self, **kwargs):
@@ -541,7 +544,6 @@ class HaloProfile(CCLAutoreprObject):
 class HaloProfileNumberCounts(HaloProfile):
     """Base for number counts halo profiles."""
     normprof = True
-    is_number_counts = True
 
 
 class HaloProfileMatter(HaloProfile):
@@ -551,7 +553,9 @@ class HaloProfileMatter(HaloProfile):
 
 class HaloProfilePressure(HaloProfile):
     """Base for pressure halo profiles."""
+    normprof = False
 
 
 class HaloProfileCIB(HaloProfile):
     """Base for CIB halo profiles."""
+    normprof = False

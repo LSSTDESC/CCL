@@ -42,7 +42,6 @@ class HaloProfileEinasto(HaloProfileMatter):
     """
     __repr_attrs__ = ("c_m_relation", "truncated", "alpha",
                       "precision_fftlog", "normprof",)
-    name = 'Einasto'
 
     @warn_api(pairs=[("c_M_relation", "c_m_relation")])
     def __init__(self, *, c_m_relation, truncated=True, alpha='cosmo'):

@@ -23,7 +23,7 @@ class HaloProfileGaussian(HaloProfile):
             It should have the same signature as `r_scale`.
     """
     __repr_attrs__ = ("r_scale", "rho_0", "precision_fftlog", "normprof",)
-    name = 'Gaussian'
+    normprof = False
 
     @warn_api
     def __init__(self, *, r_scale, rho0):

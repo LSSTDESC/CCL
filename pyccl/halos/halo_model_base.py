@@ -7,10 +7,7 @@ import functools
 from abc import abstractmethod
 
 
-__all__ = ("HMIngredients", "MassFunc", "HaloBias", "Concentration",
-           "get_mass_function_and_halo_bias",
-           "mass_function_from_name", "halo_bias_from_name",
-           "concentration_from_name",)
+__all__ = ("HMIngredients", "get_mass_function_and_halo_bias",)
 
 
 class HMIngredients(CCLAutoreprObject):
