@@ -77,7 +77,7 @@ class HaloProfileNFW(HaloProfileMatter):
                                  "for truncated NFW. Set `truncated` or "
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
-        super(HaloProfileNFW, self).__init__()
+        super().__init__()
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-2,
                                      n_per_decade=1000,

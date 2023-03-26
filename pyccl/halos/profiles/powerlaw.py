@@ -29,7 +29,7 @@ class HaloProfilePowerLaw(HaloProfile):
     def __init__(self, *, r_scale, tilt):
         self.r_scale = r_scale
         self.tilt = tilt
-        super(HaloProfilePowerLaw, self).__init__()
+        super().__init__()
 
     def _get_plaw_fourier(self, cosmo, a):
         # This is the optimal value for a pure power law

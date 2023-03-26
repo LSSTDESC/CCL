@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..concentration import Concentration
 from .profile_base import HaloProfileCIB
 from .nfw import HaloProfileNFW
 import numpy as np
@@ -90,8 +89,6 @@ class HaloProfileCIBShang12(HaloProfileCIB):
     def __init__(self, *, c_m_relation, nu_GHz, alpha=0.36, T0=24.4, beta=1.75,
                  gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707, Mmin=1E10,
                  L0=6.4E-8):
-        if not isinstance(c_m_relation, Concentration):
-            raise TypeError("c_m_relation must be of type `Concentration`")
 
         self.nu = nu_GHz
         self.alpha = alpha
@@ -105,7 +102,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         self.L0 = L0
         self.c_m_relation = c_m_relation
         self.pNFW = HaloProfileNFW(c_m_relation=c_m_relation)
-        super(HaloProfileCIBShang12, self).__init__()
+        super().__init__()
 
     def dNsub_dlnM_TinkerWetzel10(self, Msub, Mparent):
         """Subhalo mass function of Tinker & Wetzel (2010ApJ...719...88T)

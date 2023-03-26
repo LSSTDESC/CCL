@@ -23,7 +23,7 @@ class ConcentrationBhattacharya13(Concentration):
 
     @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, *, mass_def=MassDef(200, 'critical')):
-        super(ConcentrationBhattacharya13, self).__init__(mass_def=mass_def)
+        super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):
         if mass_def.Delta != 'vir':

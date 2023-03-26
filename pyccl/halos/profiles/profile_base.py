@@ -111,11 +111,10 @@ class HaloProfile(CCLAutoreprObject):
             squeezed out on output.
         """
         if getattr(self, '_real', None):
-            f_r = self._real(cosmo, r, M, a, mass_def)
+            return self._real(cosmo, r, M, a, mass_def)
         elif getattr(self, '_fourier', None):
-            f_r = self._fftlog_wrap(cosmo, r, M, a, mass_def,
-                                    fourier_out=False)
-        return f_r
+            return self._fftlog_wrap(cosmo, r, M, a, mass_def,
+                                     fourier_out=False)
 
     @warn_api
     def fourier(self, cosmo, k, M, a, *, mass_def=None):
@@ -143,10 +142,10 @@ class HaloProfile(CCLAutoreprObject):
             squeezed out on output.
         """
         if getattr(self, '_fourier', None):
-            f_k = self._fourier(cosmo, k, M, a, mass_def)
+            return self._fourier(cosmo, k, M, a, mass_def)
         elif getattr(self, '_real', None):
-            f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
-        return f_k
+            return self._fftlog_wrap(cosmo, k, M, a, mass_def,
+                                     fourier_out=True)
 
     @warn_api(pairs=[("r_t", "r")])
     def projected(self, cosmo, r, M, a, *, mass_def=None):
@@ -173,12 +172,10 @@ class HaloProfile(CCLAutoreprObject):
             squeezed out on output.
         """
         if hasattr(self, "_projected"):
-            s_r_t = self._projected(cosmo, r, M, a, mass_def)
+            return self._projected(cosmo, r, M, a, mass_def)
         else:
-            s_r_t = self._projected_fftlog_wrap(cosmo, r, M,
-                                                a, mass_def,
-                                                is_cumul2d=False)
-        return s_r_t
+            return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
+                                               is_cumul2d=False)
 
     @warn_api(pairs=[("r_t", "r")])
     def cumul2d(self, cosmo, r, M, a, *, mass_def=None):
@@ -206,12 +203,10 @@ class HaloProfile(CCLAutoreprObject):
             squeezed out on output.
         """
         if hasattr(self, "_cumul2d"):
-            s_r_t = self._cumul2d(cosmo, r, M, a, mass_def)
+            return self._cumul2d(cosmo, r, M, a, mass_def)
         else:
-            s_r_t = self._projected_fftlog_wrap(cosmo, r, M,
-                                                a, mass_def,
-                                                is_cumul2d=True)
-        return s_r_t
+            return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
+                                               is_cumul2d=True)
 
     @warn_api
     def convergence(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):

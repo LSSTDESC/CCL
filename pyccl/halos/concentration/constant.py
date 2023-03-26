@@ -23,7 +23,7 @@ class ConcentrationConstant(Concentration):
     @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, c=1, *, mass_def=MassDef(200, 'critical')):
         self.c = c
-        super(ConcentrationConstant, self).__init__(mass_def=mass_def)
+        super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):
         return False

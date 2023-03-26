@@ -75,7 +75,7 @@ class HaloProfileHernquist(HaloProfileMatter):
                                  "for truncated Hernquist. Set `truncated` or "
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
-        super(HaloProfileHernquist, self).__init__()
+        super().__init__()
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-4,
                                      n_per_decade=1000,

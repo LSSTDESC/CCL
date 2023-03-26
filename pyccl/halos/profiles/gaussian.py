@@ -29,7 +29,7 @@ class HaloProfileGaussian(HaloProfile):
     def __init__(self, *, r_scale, rho0):
         self.rho_0 = rho0
         self.r_scale = r_scale
-        super(HaloProfileGaussian, self).__init__()
+        super().__init__()
         self.update_precision_fftlog(padding_lo_fftlog=0.01,
                                      padding_hi_fftlog=100.,
                                      n_per_decade=10000)

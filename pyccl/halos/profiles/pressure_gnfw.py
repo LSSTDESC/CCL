@@ -88,7 +88,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
 
         # Interpolator for dimensionless Fourier-space profile
         self._fourier_interp = None
-        super(HaloProfilePressureGNFW, self).__init__()
+        super().__init__()
 
     @warn_api
     def update_parameters(self, *, mass_bias=None, P0=None,

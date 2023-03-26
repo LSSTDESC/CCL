@@ -51,7 +51,7 @@ class HaloProfileEinasto(HaloProfileMatter):
         self.c_m_relation = c_m_relation
         self.truncated = truncated
         self.alpha = alpha
-        super(HaloProfileEinasto, self).__init__()
+        super().__init__()
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-2,
                                      n_per_decade=1000,

@@ -22,7 +22,7 @@ class ConcentrationDiemer15(Concentration):
 
     @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, *, mass_def=MassDef(200, 'critical')):
-        super(ConcentrationDiemer15, self).__init__(mass_def=mass_def)
+        super().__init__(mass_def=mass_def)
 
     def _setup(self):
         self.kappa = 1.0
