@@ -28,10 +28,6 @@ class Profile2pt(CCLHalosObject):
     def __init__(self, r_corr=0.):
         self.r_corr = r_corr
 
-    __eq__ = object.__eq__
-
-    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
-
     def update_parameters(self, r_corr=None):
         """ Update any of the parameters associated with this 1-halo
         2-point correlator. Any parameter set to `None` won't be updated.

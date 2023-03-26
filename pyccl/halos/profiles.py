@@ -53,10 +53,6 @@ class HaloProfile(CCLHalosObject):
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
 
-    __eq__ = object.__eq__
-
-    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
-
     @unlock_instance(mutate=True)
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by

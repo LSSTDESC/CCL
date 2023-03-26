@@ -36,10 +36,12 @@ def test_CCLObject():
     COSMO1 = ccl.CosmologyVanillaLCDM(**kwargs)
     COSMO2 = ccl.CosmologyVanillaLCDM(**kwargs)
     assert COSMO1 == COSMO2
+    assert repr(COSMO1) == repr(COSMO2)
     kwargs = copy.deepcopy(kwargs)
     kwargs["extra_parameters"]["camb"]["halofit_version"] = "mead2020_feedback"
     COSMO2 = ccl.CosmologyVanillaLCDM(**kwargs)
     assert COSMO1 != COSMO2
+    assert repr(COSMO1) != repr(COSMO2)
 
     # 2. Using a Pk2D object.
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
@@ -47,8 +49,11 @@ def test_CCLObject():
     PK1 = cosmo.get_linear_power()
     PK2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
     assert PK1 == PK2
+    assert repr(PK1) == repr(PK2)
     assert ccl.Pk2D(empty=True) == ccl.Pk2D(empty=True)
+    assert repr(ccl.Pk2D(empty=True)) == repr(ccl.Pk2D(empty=True))
     assert 2*PK1 != PK2
+    assert repr(2*PK1) != repr(PK2)
 
     # 3.1. Using a factorizable Tk3D object.
     a_arr, lk_arr, pk_arr = PK1.get_spline_arrays()
@@ -59,7 +64,9 @@ def test_CCLObject():
     TK3 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                    pk1_arr=2*pk_arr, pk2_arr=2*pk_arr, is_logt=False)
     assert TK1 == TK2
+    assert repr(TK1) == repr(TK2)
     assert TK1 != TK3
+    assert repr(TK1) != repr(TK3)
 
     # 3.2. Using a non-factorizable Tk3D object.
     a_arr_2 = np.arange(0.5, 0.9, 0.1)
@@ -71,6 +78,7 @@ def test_CCLObject():
         a_arr=a_arr_2, lk_arr=lk_arr_2,
         tkk_arr=np.ones((a_arr_2.size, lk_arr_2.size, lk_arr_2.size)))
     assert TK1 == TK2
+    assert repr(TK1) == repr(TK2)
 
     # 4. Using a CosmologyCalculator.
     pk_linear = {"a": a_arr,
@@ -83,11 +91,13 @@ def test_CCLObject():
         Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
         pk_linear=pk_linear, pk_nonlin=pk_linear)
     assert COSMO1 == COSMO2
+    assert repr(COSMO1) == repr(COSMO2)
 
     # 5. Using a Tracer object.
     TR1 = ccl.CMBLensingTracer(cosmo, z_source=1101)
     TR2 = ccl.CMBLensingTracer(cosmo, z_source=1101)
     assert TR1 == TR2
+    assert repr(TR1) == repr(TR2)
 
 
 def test_CCLHalosObject():
@@ -116,16 +126,19 @@ def test_CCLHalosObject():
     CM2 = ccl.halos.ConcentrationDuffy08()
     assert CM1 == CM2
 
-    # TODO: uncomment once __eq__ methods are implemented.
-    # P1 = ccl.halos.HaloProfileHOD(c_M_relation=CM1)
-    # P2 = ccl.halos.HaloProfileHOD(c_M_relation=CM2)
-    # assert P1 == P2
+    P1 = ccl.halos.HaloProfileHOD(c_M_relation=CM1)
+    P2 = ccl.halos.HaloProfileHOD(c_M_relation=CM2)
+    assert P1 == P2
+    assert repr(P1) == repr(P2)
+    P1.update_parameters(lMmin_0=P1.lMmin_0/2)
+    assert P1 != P2
+    assert repr(P1) != repr(P2)
 
-    # PCOV1 = ccl.halos.Profile2pt(r_corr=1.5)
-    # PCOV2 = ccl.halos.Profile2pt(r_corr=1.0)
-    # assert PCOV1 != PCOV2
-    # PCOV2.update_parameters(r_corr=1.5)
-    # assert PCOV1 == PCOV2
+    PCOV1 = ccl.halos.Profile2pt(r_corr=1.5)
+    PCOV2 = ccl.halos.Profile2pt(r_corr=1.0)
+    assert PCOV1 != PCOV2
+    PCOV2.update_parameters(r_corr=1.5)
+    assert PCOV1 == PCOV2
 
 
 def test_CCLObject_immutable():
@@ -151,13 +164,14 @@ def test_CCLObject_immutable():
     prof.update_parameters(mass_bias=0.7)
     assert prof.mass_bias == 0.7
 
-    # TODO: uncomment once __eq__ methods are implemented.
     # Check that the hash repr is deleted as required.
-    # prof1 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
-    # prof2 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
-    # assert prof1 == prof2                   # repr is cached
-    # prof2.update_parameters(mass_bias=0.7)  # cached repr is deleted
-    # assert prof1 != prof2                   # repr is cached again
+    prof1 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
+    prof2 = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
+    assert prof1 == prof2                   # repr is cached
+    assert hash(prof1) == hash(prof2)
+    prof2.update_parameters(mass_bias=0.7)  # cached repr is deleted
+    assert prof1 != prof2                   # repr is cached again
+    assert hash(prof1) != hash(prof2)
 
 
 def test_CCLObject_default_behavior():
