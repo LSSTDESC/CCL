@@ -99,16 +99,12 @@ def test_CCLObject():
     TR2 = ccl.CMBLensingTracer(cosmo, z_source=1101)
     assert TR1 == TR2
     assert repr(TR1) == repr(TR2)
-    # with transfer
-    z_n = np.linspace(0, 1, 500)
-    n = np.ones(z_n.shape)
-    TR3 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
-    TR4 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
-    assert TR3 == TR4
-    assert repr(TR3) == repr(TR4)
-    TR5 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, 2*n))
-    assert TR3 != TR5
-    assert repr(TR3) != repr(TR5)
+    lk = np.linspace(-5, 1, 32)
+    a = np.linspace(0.5, 1, 4)
+    tka = np.ones((a.size, lk.size))
+    TR1.add_tracer(cosmo, transfer_ka=(a, lk, tka))
+    assert TR1 != TR2
+    assert repr(TR1) != repr(TR2)
 
 
 def test_CCLHalosObject():
