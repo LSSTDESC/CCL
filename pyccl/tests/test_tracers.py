@@ -60,6 +60,12 @@ def test_Tracer_eq_repr_hash():
     t2.add_tracer(COSMO)
     assert check_eq_repr_hash(t1, t2, equal=False)
 
+    # edge-case: only one has specific transfer type
+    t1, t2 = ccl.Tracer(), ccl.Tracer()
+    t1.add_tracer(COSMO, transfer_k=(lk, np.ones_like(lk)))
+    t2.add_tracer(COSMO, transfer_a=(a, np.ones_like(a)))
+    assert check_eq_repr_hash(t1, t2, equal=False)
+
 
 def dndz(z):
     return np.exp(-((z-0.5)/0.1)**2)
