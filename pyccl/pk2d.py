@@ -147,6 +147,9 @@ class Pk2D(CCLObject):
         return ((a1 == a2).all() and (lk1 == lk2).all()
                 and np.allclose(pk1, pk2, atol=0, rtol=1e-12))
 
+    def __hash__(self):
+        return hash(repr(self))
+
     @property
     def has_psp(self):
         return 'psp' in vars(self)

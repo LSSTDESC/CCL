@@ -245,14 +245,18 @@ class Tracer(CCLObject):
                 if spl1 is None:
                     # none of them has this transfer type
                     continue
-                # unpack the grid points and the transfer functions separately
-                (*pts1, tk1), (*pts2, tk2) = c2py[attr](spl1), c2py[attr](spl2)
-                if not (np.allclose(pts1, pts2, **kwargs)
-                        and np.allclose(tk1, tk2, **kwargs)):
-                    # both have this transfer type, but they are unequal
-                    # or are defined at different grid points
-                    return False
+                # `pts` contain the the grid points and the transfer functions
+                pts1, pts2 = c2py[attr](spl1), c2py[attr](spl2)
+                for pt1, pt2 in zip(pts1, pts2):
+                    # loop through output points of `_get_splinend_arrays`
+                    if not np.allclose(pt1, pt2, **kwargs):
+                        # both have this transfer type, but they are unequal
+                        # or are defined at different grid points
+                        return False
         return True
+
+    def __hash__(self):
+        return hash(repr(self))
 
     def __bool__(self):
         return bool(self._trc)

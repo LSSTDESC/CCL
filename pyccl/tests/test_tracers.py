@@ -2,10 +2,63 @@ import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl import CCLWarning
+from .test_cclobject import check_eq_repr_hash
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
+COSMO.compute_distances()  # needed to suppress C-level warnings
+
+
+def test_Tracer_eq_repr_hash():
+    # Test eq, repr, hash for Tracer.
+    # empty Tracer
+    assert check_eq_repr_hash(ccl.Tracer(), ccl.Tracer())
+
+    # no transfer
+    TR1 = ccl.CMBLensingTracer(COSMO, z_source=1101)
+    TR2 = ccl.CMBLensingTracer(COSMO, z_source=1101)
+    assert check_eq_repr_hash(TR1, TR2)
+
+    TR3 = ccl.CMBLensingTracer(COSMO, z_source=1100)
+    assert check_eq_repr_hash(TR1, TR3, equal=False)
+
+    # transfer_fka
+    lk = np.linspace(-5, 1, 32)
+    a = np.linspace(0.5, 1, 4)
+    tka = np.ones((a.size, lk.size))
+    TR1.add_tracer(COSMO, transfer_ka=(a, lk, tka))
+    TR2.add_tracer(COSMO, transfer_ka=(a, lk, 2*tka))
+    assert check_eq_repr_hash(TR1, TR2, equal=False)
+
+    # transfer_fk
+    TR4 = ccl.CMBLensingTracer(COSMO, z_source=1101)
+    TR5 = ccl.CMBLensingTracer(COSMO, z_source=1101)
+    TR4.add_tracer(COSMO, transfer_k=(lk, np.ones_like(lk)))
+    TR5.add_tracer(COSMO, transfer_k=(lk, 2*np.ones_like(lk)))
+    assert check_eq_repr_hash(TR4, TR5, equal=False)
+
+    # edge-case: different type
+    assert check_eq_repr_hash(ccl.Tracer(), 1, equal=False)
+
+    # edge-case: different `der_angles` & `der_bessel`
+    t1, t2 = ccl.Tracer(), ccl.Tracer()
+    t1.add_tracer(COSMO, der_angles=0, der_bessel=0)
+    t2.add_tracer(COSMO, der_angles=1, der_bessel=1)
+    assert check_eq_repr_hash(t1, t2, equal=False)
+
+    # edge-case: only one has kernel
+    chi = np.linspace(0, 50, 16)
+    t1, t2 = ccl.Tracer(), ccl.Tracer()
+    t1.add_tracer(COSMO, kernel=(chi, np.ones_like(chi)))
+    t2.add_tracer(COSMO)
+    assert check_eq_repr_hash(t1, t2, equal=False)
+
+    # edge-case: only one has transfer
+    t1, t2 = ccl.Tracer(), ccl.Tracer()
+    t1.add_tracer(COSMO, transfer_k=(lk, np.ones_like(lk)))
+    t2.add_tracer(COSMO)
+    assert check_eq_repr_hash(t1, t2, equal=False)
 
 
 def dndz(z):

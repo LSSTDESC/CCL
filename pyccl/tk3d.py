@@ -154,6 +154,9 @@ class Tk3D(CCLObject):
                 and (lk11 == lk21).all() and (lk21 == lk22).all()
                 and np.allclose(tk1, tk2, atol=0, rtol=1e-12))
 
+    def __hash__(self):
+        return hash(repr(self))
+
     @property
     def has_tsp(self):
         return 'tsp' in vars(self)
