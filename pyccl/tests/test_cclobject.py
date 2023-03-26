@@ -94,10 +94,21 @@ def test_CCLObject():
     assert repr(COSMO1) == repr(COSMO2)
 
     # 5. Using a Tracer object.
+    # no transfer
     TR1 = ccl.CMBLensingTracer(cosmo, z_source=1101)
     TR2 = ccl.CMBLensingTracer(cosmo, z_source=1101)
     assert TR1 == TR2
     assert repr(TR1) == repr(TR2)
+    # with transfer
+    z_n = np.linspace(0, 1, 500)
+    n = np.ones(z_n.shape)
+    TR3 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
+    TR4 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
+    assert TR3 == TR4
+    assert repr(TR3) == repr(TR4)
+    TR5 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, 2*n))
+    assert TR3 != TR5
+    assert repr(TR3) != repr(TR5)
 
 
 def test_CCLHalosObject():
@@ -187,6 +198,14 @@ def test_HaloProfile_abstractmethods():
     # either `_real` or `_fourier` have not been defined.
     with pytest.raises(TypeError):
         ccl.halos.HaloProfile()
+
+
+def repr_attrs_default():
+    """Test that all subclasses of ``CCLHalosObject`` use Python's default
+    ``repr`` if no ``__repr_attrs__`` has been defined.
+    """
+    ccl.CCLHalosObject() != ccl.CCLHalosObject()
+    repr(ccl.CCLHalosObject) != repr(ccl.CCLHalosObject())
 
 
 def init_decorator(func):
