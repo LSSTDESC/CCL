@@ -484,7 +484,7 @@ def test_nfw_cumul2d_accuracy(fourier_analytic):
 def test_upd_fftlog_raises():
     prof = ccl.halos.HaloProfilePressureGNFW()
     new_params = {"hello_there": 0.}
-    with pytest.raises(KeyError):
+    with pytest.raises(AttributeError):
         prof.update_precision_fftlog(**new_params)
 
 

@@ -1,8 +1,10 @@
 from ...pyutils import resample_array, _fftlog_transform
 from ...base import (CCLAutoreprObject, unlock_instance,
                      warn_api, deprecate_attr)
+from ...parameters import FFTLogParams
 import numpy as np
 from abc import abstractproperty
+import functools
 
 
 __all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
@@ -39,21 +41,12 @@ class HaloProfile(CCLAutoreprObject):
                                  )(super.__getattribute__)
 
     def __init__(self):
-        # Check that at least one of (`_real`, `_fourier`) exist.
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
+            # Check that at least one of (`_real`, `_fourier`) exist.
             raise TypeError(
                 f"Can't instantiate class {self.__class__.__name__} "
                 "with no methods _real or _fourier")
-
-        self.precision_fftlog = {'padding_lo_fftlog': 0.1,
-                                 'padding_lo_extra': 0.1,
-                                 'padding_hi_fftlog': 10.,
-                                 'padding_hi_extra': 10.,
-                                 'large_padding_2D': False,
-                                 'n_per_decade': 100,
-                                 'extrapol': 'linx_liny',
-                                 'plaw_fourier': -1.5,
-                                 'plaw_projected': -1.}
+        self.precision_fftlog = FFTLogParams()
 
     __eq__ = object.__eq__
 
@@ -61,84 +54,15 @@ class HaloProfile(CCLAutoreprObject):
 
     @abstractproperty
     def normprof(self) -> bool:
-        """Whether to normalize this profile in halo model calculations."""
+        """Normalize the profile in auto- and cross-correlations by
+        :math:`I^0_1(k\\rightarrow 0, a|u)`
+        (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`).
+        """
 
     @unlock_instance(mutate=True)
+    @functools.wraps(FFTLogParams.update_parameters)
     def update_precision_fftlog(self, **kwargs):
-        """ Update any of the precision parameters used by
-        FFTLog to compute Hankel transforms. The available
-        parameters are:
-
-        Args:
-            padding_lo_fftlog (float): when computing a Hankel
-                transform we often need to extend the range of the
-                input (e.g. the r-range for the real-space profile
-                when computing the Fourier-space one) to avoid
-                aliasing and boundary effects. This parameter
-                controls the factor by which we multiply the lower
-                end of the range (e.g. a value of 0.1 implies that
-                we will extend the range by one decade on the
-                left). Note that FFTLog works in logarithmic
-                space. Default value: 0.1.
-            padding_hi_fftlog (float): same as `padding_lo_fftlog`
-                for the upper end of the range (e.g. a value of
-                10 implies extending the range by one decade on
-                the right). Default value: 10.
-            n_per_decade (float): number of samples of the
-                profile taken per decade when computing Hankel
-                transforms.
-            padding_lo_extra (float): when computing the projected
-                2D profile or the 2D cumulative density,
-                sometimes two Hankel transforms are needed (from
-                3D real-space to Fourier, then from Fourier to
-                2D real-space). This parameter controls the k range
-                of the intermediate transform. The logic here is to
-                avoid the range twice by `padding_lo_fftlog` (which
-                can be overkill and slow down the calculation).
-                Default value: 0.1.
-            padding_hi_extra (float): same as `padding_lo_extra`
-                for the upper end of the range. Default value: 10.
-                large_padding_2D (bool): if set to `True`, the
-                intermediate Hankel transform in the calculation of
-                the 2D projected profile and cumulative mass
-                density will use `padding_lo_fftlog` and
-                `padding_hi_fftlog` instead of `padding_lo_extra`
-                and `padding_hi_extra` to extend the range of the
-                intermediate Hankel transform.
-            extrapol (string): type of extrapolation used in the
-                uncommon scenario that FFTLog returns a profile on a
-                range that does not cover the intended output range.
-                Pass `linx_liny` if you want to extrapolate linearly
-                in the profile and `linx_logy` if you want to
-                extrapolate linearly in its logarithm.
-                Default value: `linx_liny`.
-            plaw_fourier (float): FFTLog is able to perform more
-                accurate Hankel transforms by prewhitening its arguments
-                (essentially making them flatter over the range of
-                integration to avoid aliasing). This parameter
-                corresponds to a guess of what the tilt of the profile
-                is (i.e. profile(r) = r^tilt), which FFTLog uses to
-                prewhiten it. This parameter is used when computing the
-                real <-> Fourier transforms. The methods
-                `_get_plaw_fourier` allows finer control over this
-                parameter. The default value allows for a slightly faster
-                (but potentially less accurate) FFTLog transform. Some
-                level of experimentation with this parameter is
-                recommended when implementing a new profile.
-                Default value: -1.5.
-            plaw_projected (float): same as `plaw_fourier` for the
-                calculation of the 2D projected and cumulative density
-                profiles. Finer control can be achieved with the
-                `_get_plaw_projected`. The default value allows for a
-                slightly faster (but potentially less accurate) FFTLog
-                transform.  Some level of experimentation with this
-                parameter is recommended when implementing a new profile.
-                Default value: -1.
-        """
-        for par in kwargs:
-            if par not in self.precision_fftlog:
-                raise KeyError(f"Parameter {par} not recognized")
-        self.precision_fftlog.update(kwargs)
+        self.precision_fftlog.update_parameters(**kwargs)
 
     def _get_plaw_fourier(self, cosmo, a):
         """ This controls the value of `plaw_fourier` to be used

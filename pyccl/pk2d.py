@@ -529,7 +529,7 @@ def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
     return psp
 
 
-def parse_pk(cosmo, p_of_k_a):
+def parse_pk(cosmo, p_of_k_a=None):
     """Helper to retrieve the power spectrum in the halo model."""
     if isinstance(p_of_k_a, Pk2D):
         return p_of_k_a

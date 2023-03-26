@@ -142,7 +142,7 @@ class HMCalculator(CCLAutoreprObject):
             self._mbf0 = (rho0 - integ) / self._m0
             self._cosmo_bf, self._a_bf = cosmo, a  # cache
 
-    def _get_ingredients(self, cosmo, a, get_bf):
+    def _get_ingredients(self, cosmo, a, *, get_bf):
         """Compute mass function and halo bias at some scale factor."""
         rho0 = const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"]**2
         self._get_mass_function(cosmo, a, rho0)
@@ -172,12 +172,10 @@ class HMCalculator(CCLAutoreprObject):
         Returns:
             float or array_like: integral value.
         """
-        # Compute mass function
-        self._get_ingredients(cosmo, a, False)
+        self._get_ingredients(cosmo, a, get_bf=False)
         uk0 = prof.fourier(cosmo, self.precision['k_norm'],
                            self._mass, a, mass_def=self.mass_def).T
-        norm = 1. / self._integrate_over_mf(uk0)
-        return norm
+        return 1 / self._integrate_over_mf(uk0)
 
     def get_profile_norm(self, cosmo, a, prof):
         """Compute ``profile_norm`` if ``prof.normprof`` is ``True``."""
@@ -223,7 +221,6 @@ class HMCalculator(CCLAutoreprObject):
         Returns:
             float: the total number of clusters
         """  # noqa
-
         # get a values for integral
         if a_min is None:
             a_min = cosmo.cosmo.spline_params.A_SPLINE_MIN
@@ -240,7 +237,7 @@ class HMCalculator(CCLAutoreprObject):
         # now do m intergrals in a loop
         mint = np.zeros_like(a)
         for i, _a in enumerate(a):
-            self._get_ingredients(cosmo, _a, False)
+            self._get_ingredients(cosmo, _a, get_bf=False)
             _selm = np.atleast_2d(selection(self._mass, _a)).T
             mint[i] = self._integrator(
                 dvda[i] * self._mf[..., :] * _selm[..., :],
@@ -248,9 +245,7 @@ class HMCalculator(CCLAutoreprObject):
             )
 
         # now do scale factor integral
-        mtot = self._integrator(mint, a)
-
-        return mtot
+        return self._integrator(mint, a)
 
     def I_0_1(self, cosmo, k, a, prof):
         """ Solves the integral:
@@ -273,12 +268,10 @@ class HMCalculator(CCLAutoreprObject):
             float or array_like: integral values evaluated at each
             value of `k`.
         """
-        # Compute mass function
-        self._get_ingredients(cosmo, a, False)
+        self._get_ingredients(cosmo, a, get_bf=False)
         uk = prof.fourier(cosmo, k, self._mass, a,
                           mass_def=self.mass_def).T
-        i01 = self._integrate_over_mf(uk)
-        return i01
+        return self._integrate_over_mf(uk)
 
     def I_1_1(self, cosmo, k, a, prof):
         """ Solves the integral:
@@ -303,12 +296,10 @@ class HMCalculator(CCLAutoreprObject):
             float or array_like: integral values evaluated at each
             value of `k`.
         """
-        # Compute mass function and halo bias
-        self._get_ingredients(cosmo, a, True)
+        self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof.fourier(cosmo, k, self._mass, a,
                           mass_def=self.mass_def).T
-        i11 = self._integrate_over_mbf(uk)
-        return i11
+        return self._integrate_over_mbf(uk)
 
     @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
     def I_0_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
@@ -345,13 +336,11 @@ class HMCalculator(CCLAutoreprObject):
         if prof2 is None:
             prof2 = prof
 
-        # Compute mass function
-        self._get_ingredients(cosmo, a, False)
+        self._get_ingredients(cosmo, a, get_bf=False)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
                                   prof2=prof2,
                                   mass_def=self.mass_def).T
-        i02 = self._integrate_over_mf(uk)
-        return i02
+        return self._integrate_over_mf(uk)
 
     @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
     def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
@@ -387,13 +376,11 @@ class HMCalculator(CCLAutoreprObject):
         if prof2 is None:
             prof2 = prof
 
-        # Compute mass function
-        self._get_ingredients(cosmo, a, True)
+        self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
                                   prof2=prof2,
                                   mass_def=self.mass_def).T
-        i02 = self._integrate_over_mbf(uk)
-        return i02
+        return self._integrate_over_mbf(uk)
 
     @warn_api(pairs=[("prof1", "prof")],
               reorder=["prof12_2pt", "prof2", "prof3", "prof34_2pt", "prof4"])
@@ -446,7 +433,7 @@ class HMCalculator(CCLAutoreprObject):
         if prof34_2pt is None:
             prof34_2pt = prof12_2pt
 
-        self._get_ingredients(cosmo, a, False)
+        self._get_ingredients(cosmo, a, get_bf=False)
         uk12 = prof12_2pt.fourier_2pt(
             cosmo, k, self._mass, a, prof,
             prof2=prof2, mass_def=self.mass_def).T
@@ -459,5 +446,4 @@ class HMCalculator(CCLAutoreprObject):
                 cosmo, k, self._mass, a, prof3,
                 prof2=prof4, mass_def=self.mass_def).T
 
-        i04 = self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
-        return i04
+        return self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
