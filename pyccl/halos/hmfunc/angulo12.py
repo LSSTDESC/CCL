@@ -27,17 +27,15 @@ class MassFuncAngulo12(MassFunc):
                  mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
+    def _check_mass_def_strict(self, mass_def):
+        return mass_def.Delta != "fof"
+
     def _setup(self):
         self.A = 0.201
         self.a = 2.08
         self.b = 1.7
         self.c = 1.172
 
-    def _check_mass_def_strict(self, mass_def):
-        if mass_def.Delta != 'fof':
-            return True
-        return False
-
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        return self.A * ((self.a / sigM)**self.b + 1.) * \
-            np.exp(-self.c / sigM**2)
+        return self.A * ((self.a / sigM)**self.b + 1.) * (
+            np.exp(-self.c / sigM**2))

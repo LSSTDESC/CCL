@@ -34,15 +34,12 @@ class HaloBiasSheth99(HaloBias):
         self.use_delta_c_fit = use_delta_c_fit
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
+    def _check_mass_def_strict(self, mass_def):
+        return mass_def.Delta != "fof"
+
     def _setup(self):
         self.p = 0.3
         self.a = 0.707
-
-    def _check_mass_def_strict(self, mass_def):
-        if self.mass_def_strict:
-            if mass_def.Delta != 'fof':
-                return True
-        return False
 
     def _get_bsigma(self, cosmo, sigM, a):
         if self.use_delta_c_fit:
@@ -54,4 +51,4 @@ class HaloBiasSheth99(HaloBias):
 
         nu = delta_c / sigM
         anu2 = self.a * nu**2
-        return 1. + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/delta_c
+        return 1 + (anu2 - 1. + 2. * self.p / (1. + anu2**self.p))/delta_c

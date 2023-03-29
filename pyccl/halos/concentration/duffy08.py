@@ -25,28 +25,16 @@ class ConcentrationDuffy08(Concentration):
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):
-        if mass_def.Delta != 'vir':
-            if isinstance(mass_def.Delta, str):
-                return True
-            elif int(mass_def.Delta) != 200:
-                return True
-        return False
+        return mass_def.name not in ["vir", "200m", "200c"]
 
     def _setup(self):
-        if self.mass_def.Delta == 'vir':
-            self.A = 7.85
-            self.B = -0.081
-            self.C = -0.71
-        else:  # Now Delta has to be 200
-            if self.mass_def.rho_type == 'matter':
-                self.A = 10.14
-                self.B = -0.081
-                self.C = -1.01
-            else:  # Now rho_type has to be critical
-                self.A = 5.71
-                self.B = -0.084
-                self.C = -0.47
+        vals = {("vir", "critical"): (7.85, -0.081, -0.71),
+                (200, "matter"): (10.14, -0.081, -1.01),
+                (200, "critical"): (5.71, -0.084, -0.47)}
+
+        key = (self.mass_def.Delta, self.mass_def.rho_type)
+        self.A, self.B, self.C = vals[key]
 
     def _concentration(self, cosmo, M, a):
-        M_pivot_inv = cosmo.cosmo.params.h * 5E-13
+        M_pivot_inv = cosmo["h"] * 5E-13
         return self.A * (M * M_pivot_inv)**self.B * a**(-self.C)

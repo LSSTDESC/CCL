@@ -35,14 +35,13 @@ class MassFuncSheth99(MassFunc):
         self.use_delta_c_fit = use_delta_c_fit
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
+    def _check_mass_def_strict(self, mass_def):
+        return mass_def.Delta != "fof"
+
     def _setup(self):
         self.A = 0.21615998645
         self.p = 0.3
         self.a = 0.707
-
-    def _check_mass_def_strict(self, mass_def):
-        if mass_def.Delta != 'fof':
-            return True
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         if self.use_delta_c_fit:
@@ -53,5 +52,5 @@ class MassFuncSheth99(MassFunc):
             delta_c = 1.68647
 
         nu = delta_c / sigM
-        return nu * self.A * (1. + (self.a * nu**2)**(-self.p)) * \
-            np.exp(-self.a * nu**2/2.)
+        return nu * self.A * (1. + (self.a * nu**2)**(-self.p)) * (
+            np.exp(-self.a * nu**2/2.))

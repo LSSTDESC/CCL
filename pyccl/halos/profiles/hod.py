@@ -147,10 +147,6 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         self.ns_independent = ns_independent
         super().__init__()
 
-    def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
-        return self.c_m_relation.get_concentration(cosmo, M, a,
-                                                   mass_def_other=mass_def)
-
     @warn_api
     def update_parameters(self, *, lMmin_0=None, lMmin_p=None,
                           siglM_0=None, siglM_p=None,
@@ -247,7 +243,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self.c_m_relation.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
@@ -273,7 +269,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self.c_m_relation.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 

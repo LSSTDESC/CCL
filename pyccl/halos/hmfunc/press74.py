@@ -27,16 +27,10 @@ class MassFuncPress74(MassFunc):
                  mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
-    def _setup(self):
-        self.norm = np.sqrt(2/np.pi)
-
     def _check_mass_def_strict(self, mass_def):
-        if mass_def.Delta != 'fof':
-            return True
-        return False
+        return mass_def.Delta != "fof"
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         delta_c = 1.68647
-
         nu = delta_c/sigM
-        return self.norm * nu * np.exp(-0.5 * nu**2)
+        return np.sqrt(2/np.pi) * nu * np.exp(-0.5 * nu**2)

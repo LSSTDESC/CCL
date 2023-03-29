@@ -24,10 +24,8 @@ class ConcentrationKlypin11(Concentration):
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):
-        if mass_def.Delta != 'vir':
-            return True
-        return False
+        return mass_def.name !="vir"
 
     def _concentration(self, cosmo, M, a):
-        M_pivot_inv = cosmo.cosmo.params.h * 1E-12
+        M_pivot_inv = cosmo["h"] * 1E-12
         return 9.6 * (M * M_pivot_inv)**-0.075

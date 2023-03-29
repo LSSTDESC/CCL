@@ -28,15 +28,15 @@ class HMIngredients(CCLAutoreprObject):
         self.mass_def = mass_def
         self._setup()
 
+    @abstractmethod
+    def _check_mass_def_strict(self, mass_def):
+        """Check if this class is defined for mass definition ``mass_def``."""
+
     def _setup(self):
         """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
         constructor call.
         """
-
-    @abstractmethod
-    def _check_mass_def_strict(self, mass_def):
-        """Check if this class is defined for mass definition ``mass_def``."""
 
     def _check_mass_def(self, mass_def):
         """ Return False if the input mass definition agrees with
@@ -56,48 +56,10 @@ class HMIngredients(CCLAutoreprObject):
             return self._check_mass_def_strict(mass_def)
         return False
 
-    def _get_consistent_mass(self, cosmo, M, a, mass_def_other):
-        """ Transform a halo mass with a given mass definition into
-        the corresponding mass definition that was used to initialize
-        this object.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
-            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
-
-        Returns:
-            float or array_like: mass according to this object's \
-                mass definition.
-        """
-        if mass_def_other is not None:
-            M_use = mass_def_other.translate_mass(
-                cosmo, M, a,
-                mass_def_other=self.mass_def)
-        else:
-            M_use = M
-        return M_use
-
-    def _get_Delta_m(self, cosmo, a):
-        """ For SO-based mass definitions, this returns the corresponding
-        value of Delta for a rho_matter-based definition. This is useful
-        mostly for the Tinker mass functions, which are defined for any
-        SO mass in general, but explicitly only for Delta_matter.
-        """
-        delta = self.mass_def.get_Delta(cosmo, a)
-        if self.mass_def.rho_type == 'matter':
-            return delta
-        else:
-            om_this = cosmo.omega_x(a, self.mass_def.rho_type)
-            om_matt = cosmo.omega_x(a, 'matter')
-            return delta * om_this / om_matt
-
-    def _get_logM_sigM(self, cosmo, M, a, mass_def, *, return_dlns=False):
+    def _get_logM_sigM(self, cosmo, M, a, *, return_dlns=False):
         """Compute ``logM``, ``sigM``, and (optionally) ``dlns_dlogM``."""
         cosmo.compute_sigma()  # initialize sigma(M) splines if needed
-        logM = np.log10(self._get_consistent_mass(cosmo, M, a, mass_def))
+        logM = np.log10(M)
 
         # sigma(M)
         status = 0
@@ -169,16 +131,13 @@ class MassFunc(HMIngredients):
             float or array_like: :math:`f(\\sigma_M)` function.
         """
 
-    @warn_api(pairs=[("mdef_other", "mass_def_other")])
-    def get_mass_function(self, cosmo, M, a, *, mass_def_other=None):
+    def get_mass_function(self, cosmo, M, a):
         """ Returns the mass function for input parameters.
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
-                the mass definition object that defines M.
 
         Returns:
             float or array_like: mass function \
@@ -186,15 +145,32 @@ class MassFunc(HMIngredients):
         """
         M_use = np.atleast_1d(M)
         logM, sigM, dlns_dlogM = self._get_logM_sigM(
-            cosmo, M_use, a, mass_def_other, return_dlns=True)
+            cosmo, M_use, a, return_dlns=True)
 
         rho = (physical_constants.RHO_CRITICAL *
                cosmo['Omega_m'] * cosmo['h']**2)
         f = self._get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
         mf = f * rho * dlns_dlogM / M_use
         if np.ndim(M) == 0:
-            mf = mf[0]
+            return mf[0]
         return mf
+
+
+class MassFuncTinker(HMIngredients):
+    """Base for the Tinker mass functions."""
+
+    def _get_Delta_m(self, cosmo, a):
+        """ For SO-based mass definitions, this returns the corresponding
+        value of Delta for a rho_matter-based definition. This is useful
+        mostly for the Tinker mass functions, which are defined for any
+        SO mass in general, but explicitly only for Delta_matter.
+        """
+        delta = self.mass_def.get_Delta(cosmo, a)
+        if self.mass_def.rho_type == 'matter':
+            return delta
+        om_this = cosmo.omega_x(a, self.mass_def.rho_type)
+        om_matt = cosmo.omega_x(a, 'matter')
+        return delta * om_this / om_matt
 
 
 class HaloBias(HMIngredients):
@@ -230,25 +206,22 @@ class HaloBias(HMIngredients):
             float or array_like: f(sigma_M) function.
         """
 
-    @warn_api(pairs=[("mdef_other", "mass_def_other")])
-    def get_halo_bias(self, cosmo, M, a, *, mass_def_other=None):
+    def get_halo_bias(self, cosmo, M, a):
         """ Returns the halo bias for input parameters.
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
-                the mass definition object that defines M.
 
         Returns:
             float or array_like: halo bias.
         """
         M_use = np.atleast_1d(M)
-        logM, sigM = self._get_logM_sigM(cosmo, M_use, a, mass_def_other)
+        logM, sigM = self._get_logM_sigM(cosmo, M_use, a)
         b = self._get_bsigma(cosmo, sigM, a)
         if np.ndim(M) == 0:
-            b = b[0]
+            return b[0]
         return b
 
 
@@ -269,25 +242,21 @@ class Concentration(HMIngredients):
     def _concentration(self, cosmo, M, a):
         """Implementation of the c(M) relation."""
 
-    @warn_api(pairs=[("mdef_other", "mass_def_other")])
-    def get_concentration(self, cosmo, M, a, *, mass_def_other=None):
+    def get_concentration(self, cosmo, M, a):
         """ Returns the concentration for input parameters.
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def_other (:class:`~pyccl.halos.massdef.MassDef`):
-                the mass definition object that defines M.
 
         Returns:
             float or array_like: concentration.
         """
         M_use = np.atleast_1d(M)
-        M_use = self._get_consistent_mass(cosmo, M_use, a, mass_def_other)
         c = self._concentration(cosmo, M_use, a)
         if np.ndim(M) == 0:
-            c = c[0]
+            return c[0]
         return c
 
 
@@ -304,7 +273,7 @@ def get_mass_function_and_halo_bias(cosmo, hmc, M, a):
     # halo bias
     b = hmc.halo_bias._get_bsigma(cosmo, sigM, a)
     if np.ndim(M) == 0:
-        mf, b = mf[0], b[0]
+        return mf[0], b[0]
     return mf, b
 
 

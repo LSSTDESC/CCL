@@ -26,6 +26,9 @@ class HaloBiasSheth01(HaloBias):
                  mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
+    def _check_mass_def_strict(self, mass_def):
+        return mass_def.Delta != "fof"
+
     def _setup(self):
         self.a = 0.707
         self.sqrta = 0.84083292038
@@ -33,15 +36,10 @@ class HaloBiasSheth01(HaloBias):
         self.c = 0.6
         self.dc = 1.68647
 
-    def _check_mass_def_strict(self, mass_def):
-        if mass_def.Delta != 'fof':
-            return True
-        return False
-
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc/sigM
         anu2 = self.a * nu**2
         anu2c = anu2**self.c
         t1 = self.b * (1.0 - self.c) * (1.0 - 0.5 * self.c)
-        return 1. + (self.sqrta * anu2 * (1 + self.b / anu2c) -
-                     anu2c / (anu2c + t1)) / (self.sqrta * self.dc)
+        return 1 + (self.sqrta * anu2 * (1 + self.b / anu2c) -
+                    anu2c / (anu2c + t1)) / (self.sqrta * self.dc)

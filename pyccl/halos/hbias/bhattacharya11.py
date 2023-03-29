@@ -26,6 +26,9 @@ class HaloBiasBhattacharya11(HaloBias):
                  mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
+    def _check_mass_def_strict(self, mass_def):
+        return mass_def.Delta != "fof"
+
     def _setup(self):
         self.a = 0.788
         self.az = 0.01
@@ -33,13 +36,8 @@ class HaloBiasBhattacharya11(HaloBias):
         self.q = 1.795
         self.dc = 1.68647
 
-    def _check_mass_def_strict(self, mass_def):
-        if mass_def.Delta != 'fof':
-            return True
-        return False
-
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM
         a = self.a * a**self.az
         anu2 = a * nu**2
-        return 1. + (anu2 - self.q + 2*self.p / (1 + anu2**self.p)) / self.dc
+        return 1 + (anu2 - self.q + 2*self.p / (1 + anu2**self.p)) / self.dc

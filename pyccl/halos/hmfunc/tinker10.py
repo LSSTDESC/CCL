@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..massdef import MassDef200m
-from ..halo_model_base import MassFunc
+from ..halo_model_base import MassFuncTinker
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -8,7 +8,7 @@ from scipy.interpolate import interp1d
 __all__ = ("MassFuncTinker10",)
 
 
-class MassFuncTinker10(MassFunc):
+class MassFuncTinker10(MassFuncTinker):
     """ Implements mass function described in arXiv:1001.3162.
 
     Args:
@@ -33,19 +33,23 @@ class MassFuncTinker10(MassFunc):
         self.norm_all_z = norm_all_z
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
+    def _check_mass_def_strict(self, mass_def):
+        return mass_def.Delta == "fof"
+
     def _setup(self):
-        delta = np.array([200.0, 300.0, 400.0, 600.0, 800.0,
-                          1200.0, 1600.0, 2400.0, 3200.0])
-        alpha = np.array([0.368, 0.363, 0.385, 0.389, 0.393,
-                          0.365, 0.379, 0.355, 0.327])
-        beta = np.array([0.589, 0.585, 0.544, 0.543, 0.564,
-                         0.623, 0.637, 0.673, 0.702])
-        gamma = np.array([0.864, 0.922, 0.987, 1.09, 1.20,
-                          1.34, 1.50, 1.68, 1.81])
-        phi = np.array([-0.729, -0.789, -0.910, -1.05, -1.20,
-                        -1.26, -1.45, -1.50, -1.49])
-        eta = np.array([-0.243, -0.261, -0.261, -0.273, -0.278,
-                        -0.301, -0.301, -0.319, -0.336])
+        delta = np.array(
+            [200., 300., 400., 600., 800., 1200., 1600., 2400., 3200.])
+        alpha = np.array(
+            [0.368, 0.363, 0.385, 0.389, 0.393, 0.365, 0.379, 0.355, 0.327])
+        beta = np.array(
+            [0.589, 0.585, 0.544, 0.543, 0.564, 0.623, 0.637, 0.673, 0.702])
+        gamma = np.array(
+            [0.864, 0.922, 0.987, 1.09, 1.20, 1.34, 1.50, 1.68, 1.81])
+        phi = np.array(
+            [-0.729, -0.789, -0.910, -1.05, -1.20, -1.26, -1.45, -1.50, -1.49])
+        eta = np.array(
+            [-0.243, -0.261, -0.261, -0.273,
+             -0.278, -0.301, -0.301, -0.319, -0.336])
 
         ldelta = np.log10(delta)
         self.pA0 = interp1d(ldelta, alpha)
@@ -54,17 +58,14 @@ class MassFuncTinker10(MassFunc):
         self.pc0 = interp1d(ldelta, gamma)
         self.pd0 = interp1d(ldelta, phi)
         if self.norm_all_z:
-            p = np.array([-0.158, -0.195, -0.213, -0.254, -0.281,
-                          -0.349, -0.367, -0.435, -0.504])
-            q = np.array([0.0128, 0.0128, 0.0143, 0.0154, 0.0172,
-                          0.0174, 0.0199, 0.0203, 0.0205])
+            p = np.array(
+                [-0.158, -0.195, -0.213, -0.254, -0.281,
+                 -0.349, -0.367, -0.435, -0.504])
+            q = np.array(
+                [0.0128, 0.0128, 0.0143, 0.0154, 0.0172,
+                 0.0174, 0.0199, 0.0203, 0.0205])
             self.pp0 = interp1d(ldelta, p)
             self.pq0 = interp1d(ldelta, q)
-
-    def _check_mass_def_strict(self, mass_def):
-        if mass_def.Delta == 'fof':
-            return True
-        return False
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         ld = np.log10(self._get_Delta_m(cosmo, a))
@@ -77,9 +78,9 @@ class MassFuncTinker10(MassFunc):
         pd = self.pd0(ld) * a**0.08
         pA0 = self.pA0(ld)
         if self.norm_all_z:
-            z = 1./a - 1
+            z = 1/a - 1
             pp = self.pp0(ld)
             pq = self.pq0(ld)
-            pA0 *= np.exp(z*(pp+pq*z))
-        return nu * pA0 * (1 + (pb * nu)**(-2 * pd)) * \
-            nu**(2 * pa) * np.exp(-0.5 * pc * nu**2)
+            pA0 *= np.exp(z * (pp + pq * z))
+        return nu * pA0 * (1 + (pb * nu)**(-2 * pd)) * (
+            nu**(2 * pa) * np.exp(-0.5 * pc * nu**2))

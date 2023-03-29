@@ -29,7 +29,4 @@ class ConcentrationConstant(Concentration):
         return False
 
     def _concentration(self, cosmo, M, a):
-        if np.ndim(M) == 0:
-            return self.c
-        else:
-            return self.c * np.ones(M.size)
+        return np.full_like(M, self.c)

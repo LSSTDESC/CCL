@@ -25,12 +25,7 @@ class ConcentrationPrada12(Concentration):
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):
-        if isinstance(mass_def.Delta, str):
-            return True
-        elif not ((int(mass_def.Delta) == 200) and
-                  (mass_def.rho_type == 'critical')):
-            return True
-        return False
+        return mass_def.name != "200c"
 
     def _setup(self):
         self.c0 = 3.681
@@ -44,19 +39,19 @@ class ConcentrationPrada12(Concentration):
         self.cnorm = 1. / self._cmin(1.393)
         self.inorm = 1. / self._imin(1.393)
 
+    def _form(self, x, x0, v0, v1, v2):
+        # form factor for `cmin` and `imin`
+        return v0 + (v1 - v0) * (np.arctan(v2 * (x - x0)) / np.pi + 0.5)
+
     def _cmin(self, x):
-        return self.c0 + (self.c1 - self.c0) * \
-            (np.arctan(self.al * (x - self.x0)) / np.pi + 0.5)
+        return self._form(x, x0=self.x0, v0=self.c0, v1=self.c1, v2=self.al)
 
     def _imin(self, x):
-        return self.i0 + (self.i1 - self.i0) * \
-            (np.arctan(self.be * (x - self.x1)) / np.pi + 0.5)
+        return self._form(x, x0=self.x1, v0=self.i0, v1=self.i1, v2=self.be)
 
     def _concentration(self, cosmo, M, a):
         sig = cosmo.sigmaM(M, a)
-        om = cosmo.cosmo.params.Omega_m
-        ol = cosmo.cosmo.params.Omega_l
-        x = a * (ol / om)**(1. / 3.)
+        x = a * (cosmo["Omega_l"] / cosmo["Omega_m"])**(1. / 3.)
         B0 = self._cmin(x) * self.cnorm
         B1 = self._imin(x) * self.inorm
         sig_p = B1 * sig

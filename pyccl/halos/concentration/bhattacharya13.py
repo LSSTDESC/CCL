@@ -26,27 +26,15 @@ class ConcentrationBhattacharya13(Concentration):
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):
-        if mass_def.Delta != 'vir':
-            if isinstance(mass_def.Delta, str):
-                return True
-            elif int(mass_def.Delta) != 200:
-                return True
-        return False
+        return mass_def.name not in ["vir", "200m", "200c"]
 
     def _setup(self):
-        if self.mass_def.Delta == 'vir':
-            self.A = 7.7
-            self.B = 0.9
-            self.C = -0.29
-        else:  # Now Delta has to be 200
-            if self.mass_def.rho_type == 'matter':
-                self.A = 9.0
-                self.B = 1.15
-                self.C = -0.29
-            else:  # Now rho_type has to be critical
-                self.A = 5.9
-                self.B = 0.54
-                self.C = -0.35
+        vals = {("vir", "critical"): (7.7, 0.9, -0.29),
+                (200, "matter"): (9.0, 1.15, -0.29),
+                (200, "critical"): (5.9, 0.54, -0.35)}
+
+        key = (self.mass_def.Delta, self.mass_def.rho_type)
+        self.A, self.B, self.C = vals[key]
 
     def _concentration(self, cosmo, M, a):
         gz = cosmo.growth_factor(a)
