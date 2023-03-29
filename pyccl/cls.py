@@ -35,6 +35,9 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
             method backed up by `quad` when it fails) and 'spline' (the
             integrand is splined and then integrated numerically).
+        non_limber_integration_method (string) : integration method to be used
+            for the non-Limber integrals. Possibilites: 'FKEM','MATTER'.
+            See N5K (arXiv:2212.04291) paper for more information.
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values, \
@@ -77,9 +80,10 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
 
     # Return Cl values, according to whether ell is an array or not
     cl, status = lib.angular_cl_vec(
-        cosmo, clt1, clt2, psp, l_limber,
+        cosmo, clt1, clt2, psp, 
         ell_use, integ_types[limber_integration_method],
         ell_use.size, status)
+    
     if np.ndim(ell) == 0:
         cl = cl[0]
 
