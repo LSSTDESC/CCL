@@ -2,6 +2,7 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import species_types
 from ..base import CCLAutoreprObject, warn_api, deprecate_attr
+from .halo_model_base import initialize_from_input
 import numpy as np
 
 
@@ -24,7 +25,7 @@ def mass2radius_lagrangian(cosmo, M):
     M_use = np.atleast_1d(M)
     R = (M_use / (4.18879020479 * cosmo.rho_x(1, 'matter')))**(1./3.)
     if np.ndim(M) == 0:
-        R = R[0]
+        return R[0]
     return R
 
 
@@ -60,10 +61,10 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
                                                   Delta_old, c_old_use,
                                                   Delta_new, c_old_use.size,
                                                   status)
-    if np.isscalar(c_old):
-        c_new = c_new[0]
-
     check(status, cosmo=cosmo)
+
+    if np.isscalar(c_old):
+        return c_new[0]
     return c_new
 
 
@@ -96,23 +97,23 @@ class MassDef(CCLAutoreprObject):
     @warn_api
     def __init__(self, Delta, rho_type=None, *, concentration=None):
         # Check it makes sense
-        if (Delta != 'fof') and (Delta != 'vir'):
-            if isinstance(Delta, str):
-                raise ValueError("Unknown Delta type " + Delta)
-            if Delta <= 0:
-                raise ValueError("Delta must be a positive number")
-        self.Delta = Delta
-        # Can only be matter or critical
+        if isinstance(Delta, str) and Delta not in ["fof", "vir"]:
+            raise ValueError(f"Unknown Delta type {Delta}.")
+        if isinstance(Delta, (int, float)) and Delta < 0:
+            raise ValueError("Delta must be a positive number.")
         if rho_type not in ['matter', 'critical']:
-            raise ValueError("rho_type must be either \'matter\' "
-                             "or \'critical\'")
+            raise ValueError("rho_type must be either ['matter'|'critical].'")
+
+        self.Delta = Delta
         self.rho_type = rho_type
         self.species = species_types[rho_type]
         # c(M) relation
         if concentration is None:
             self.concentration = None
         else:
-            self._concentration_init(concentration)
+            from .concentration import Concentration
+            self.concentration = Concentration.initialize_from_input(
+                concentration, mass_def=self)
 
     @property
     def name(self):
@@ -120,19 +121,6 @@ class MassDef(CCLAutoreprObject):
         if isinstance(self.Delta, (int, float)):
             return f"{self.Delta}{self.rho_type[0]}"
         return f"{self.Delta}"
-
-    def _concentration_init(self, concentration):
-        from .concentration import Concentration
-        if isinstance(concentration, Concentration):
-            self.concentration = concentration
-        elif isinstance(concentration, str):
-            # Grab class
-            conc_class = Concentration.from_name(concentration)
-            # instantiate with this mass definition
-            self.concentration = conc_class(mass_def=self)
-        else:
-            raise ValueError("concentration must be `None`, "
-                             " a string or a `Concentration` object")
 
     def get_Delta(self, cosmo, a):
         """ Gets overdensity parameter associated to this mass
@@ -145,15 +133,14 @@ class MassDef(CCLAutoreprObject):
         Returns:
             float : value of the overdensity parameter.
         """
+        if self.Delta == 'fof':
+            raise ValueError("FoF masses don't have an associated overdensity."
+                             "Nor can they be translated into other masses")
         if self.Delta == 'vir':
             status = 0
             D, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
             return D
-        elif self.Delta == 'fof':
-            raise ValueError("FoF masses don't have an associated overdensity."
-                             "Nor can they be translated into other masses")
-        else:
-            return self.Delta
+        return self.Delta
 
     def get_mass(self, cosmo, R, a):
         """ Translates a halo radius into a mass
@@ -174,7 +161,7 @@ class MassDef(CCLAutoreprObject):
         Delta = self.get_Delta(cosmo, a)
         M = 4.18879020479 * cosmo.rho_x(a, self.rho_type) * Delta * R_use**3
         if np.ndim(R) == 0:
-            M = M[0]
+            return M[0]
         return M
 
     def get_radius(self, cosmo, M, a):
@@ -194,7 +181,7 @@ class MassDef(CCLAutoreprObject):
         R = (M_use / (4.18879020479 * Delta *
                       cosmo.rho_x(a, self.rho_type)))**(1./3.)
         if np.ndim(M) == 0:
-            R = R[0]
+            return R[0]
         return R
 
     def _get_concentration(self, cosmo, M, a):
@@ -256,6 +243,8 @@ class MassDef(CCLAutoreprObject):
             return eval(f"MassDef{name.capitalize()}")
         except NameError:
             raise ValueError(f"Mass definition {name} not implemented.")
+
+    initialize_from_input = classmethod(initialize_from_input)
 
 
 @warn_api(pairs=[('c_m', 'concentration')])

@@ -11,6 +11,33 @@ __all__ = ("HMIngredients", "get_mass_function_and_halo_bias",
            "TinkerFunction")
 
 
+def _subclasses(cls):
+    # This helper returns a set of all subclasses.
+    direct_subs = cls.__subclasses__()
+    deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
+    return set(direct_subs).union(deep_subs)
+
+
+def from_name(cls, name):
+    """Obtain particular model."""
+    mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
+    return mod[name]
+
+
+def initialize_from_input(cls, input_, **kwargs):
+    """Process the input and generate an object of the class.
+    Input can be an instance of the class, or a name string.
+    Optional ``**kwargs`` may be passed.
+    """
+    if isinstance(input_, cls):
+        return input_
+    if isinstance(input_, str):
+        class_ = cls.from_name(input_)
+        return class_(**kwargs)
+    good, bad = cls.__name__, input_.__class__.__name__
+    raise TypeError(f"Expected {good} or str but received {bad}.")
+
+
 class HMIngredients(CCLAutoreprObject):
     """Base class for halo model ingredients."""
     __repr_attrs__ = ("mass_def", "mass_def_strict",)
@@ -19,21 +46,9 @@ class HMIngredients(CCLAutoreprObject):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-
-        def _subclasses(cls):
-            # This helper returns a set of all subclasses.
-            direct_subs = cls.__subclasses__()
-            deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
-            return set(direct_subs).union(deep_subs)
-
-        @classmethod
-        def from_name(cls, name):
-            """Obtain particular model."""
-            mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
-            return mod[name]
-
         cls._subclasses = classmethod(_subclasses)
         cls.from_name = classmethod(from_name)
+        cls.initialize_from_input = classmethod(initialize_from_input)
 
     @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):

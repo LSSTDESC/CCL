@@ -57,34 +57,13 @@ class HMCalculator(CCLAutoreprObject):
     def __init__(self, *, mass_function, halo_bias, mass_def=None,
                  lM_min=8., lM_max=16., nlM=128,
                  integration_method_M='simpson', k_norm=1E-5):
-        # halo mass definition
-        if mass_def is None or isinstance(mass_def, MassDef):
-            self.mass_def = mass_def
-        elif isinstance(mass_def, str):
-            self.mass_def = MassDef.from_name(mass_def)()
-        else:
-            raise TypeError("mass_def must be `MassDef`, a string, or None.")
+        # Initialize halo model ingredients
+        self.mass_def = MassDef.initialize_from_input(mass_def)
+        kw = {"mass_def": self.mass_def}
+        self.mass_function = MassFunc.initialize_from_input(mass_function, **kw)  # noqa
+        self.halo_bias = HaloBias.initialize_from_input(halo_bias, **kw)
 
-        # halo mass function
-        if isinstance(mass_function, MassFunc):
-            self.mass_function = mass_function
-        elif isinstance(mass_function, str):
-            nMclass = MassFunc.from_name(mass_function)
-            self.mass_function = nMclass(mass_def=self.mass_def)
-        else:
-            raise TypeError("mass_function must be of type `MassFunc` "
-                            "or a mass function name string")
-        # halo bias function
-        if isinstance(halo_bias, HaloBias):
-            self.halo_bias = halo_bias
-        elif isinstance(halo_bias, str):
-            bMclass = HaloBias.from_name(halo_bias)
-            self.halo_bias = bMclass(mass_def=self.mass_def)
-        else:
-            raise TypeError("halo_bias must be of type `HaloBias` "
-                            "or a halo bias name string")
-
-        # Check mass definition consistency
+        # Check mass definition consistency.
         if (self.mass_def
                 != self.mass_function.mass_def
                 != self.halo_bias.mass_def):
