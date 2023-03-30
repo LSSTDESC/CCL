@@ -43,17 +43,17 @@ def test_ssc_WL():
 
     z, nofz = np.loadtxt(os.path.join(data_dir, "ssc_WL_nofz.txt"),
                          unpack=True)
-    WL_tracer = ccl.WeakLensingTracer(cosmo, (z, nofz))
+    WL_tracer = ccl.WeakLensingTracer(cosmo, dndz=(z, nofz))
 
     ell = np.loadtxt(os.path.join(data_dir, "ssc_WL_ell.txt"))
 
     fsky = 0.05
 
-    sigma2_B = ccl.sigma2_B_disc(cosmo, a=a, fsky=fsky)
+    sigma2_B = ccl.sigma2_B_disc(cosmo, a_arr=a, fsky=fsky)
     cov_ssc = ccl.covariances.angular_cl_cov_SSC(cosmo,
-                                                 cltracer1=WL_tracer,
-                                                 cltracer2=WL_tracer,
-                                                 ell=ell, tkka=tk3D,
+                                                 tracer1=WL_tracer,
+                                                 tracer2=WL_tracer,
+                                                 ell=ell, t_of_kk_a=tk3D,
                                                  sigma2_B=(a, sigma2_B),
                                                  fsky=None)
     var_ssc_ccl = np.diag(cov_ssc)

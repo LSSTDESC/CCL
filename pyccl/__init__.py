@@ -1,11 +1,11 @@
 # flake8: noqa E402
-from pkg_resources import get_distribution, DistributionNotFound
+from importlib.metadata import version, PackageNotFoundError
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+    __version__ = version(__name__)
+except PackageNotFoundError:
     # package is not installed
     pass
-del get_distribution, DistributionNotFound
+del version, PackageNotFoundError
 
 # Set the environment variable for default config path
 from os import environ, path
@@ -114,9 +114,10 @@ from .neutrinos import (
 )
 
 # Cells & Tracers
-from .cls import angular_cl
+from .cells import angular_cl
 from .tracers import (
     Tracer,
+    NzTracer,
     NumberCountsTracer,
     WeakLensingTracer,
     CMBLensingTracer,
@@ -149,6 +150,17 @@ from .covariances import (
 from .pyutils import debug_mode, resample_array
 
 # Deprecated & Renamed modules
+def __getattr__(name):
+    rename = {"cls": "cells"}
+    if name in rename:
+        from .errors import CCLDeprecationWarning
+        import warnings
+        warnings.warn(f"Module {name} has been renamed to {rename[name]}.",
+                      CCLDeprecationWarning)
+        name = rename[name]
+        return eval(name)
+    raise AttributeError(f"No module named {name}.")
+
 from .halomodel import (
     halomodel_matter_power,
     halo_concentration,
@@ -194,7 +206,7 @@ __all__ = (
     'Omeganuh2', 'nu_masses',
     'angular_cl',
     'Tracer', 'NumberCountsTracer', 'WeakLensingTracer', 'CMBLensingTracer',
-    'tSZTracer', 'CIBTracer', 'ISWTracer',
+    'tSZTracer', 'CIBTracer', 'ISWTracer', 'NzTracer',
     'get_density_kernel', 'get_kappa_kernel', 'get_lensing_kernel',
     'correlation', 'correlation_3d', 'correlation_multipole',
     'correlation_3dRsd', 'correlation_3dRsd_avgmu', 'correlation_pi_sigma',

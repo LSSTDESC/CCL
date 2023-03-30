@@ -3,14 +3,9 @@ well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
 from ._types import error_types
 from .parameters import spline_params
-from .errors import CCLError, CCLDeprecationWarning
-import functools
-import warnings
+from .errors import CCLError
 import numpy as np
-try:
-    from collections.abc import Iterable
-except ImportError:  # pragma: no cover  (for py2.7)
-    from collections import Iterable
+from collections.abc import Iterable
 
 NoneArr = np.array([])
 
@@ -455,24 +450,6 @@ def resample_array(x_in, y_in, x_out,
                                           x_out.size, status)
     check(status)
     return y_out
-
-
-def deprecated(new_function=None):
-    """This is a decorator which can be used to mark functions
-    as deprecated. It will result in a warning being emitted
-    when the function is used. If there is a replacement function,
-    pass it as `new_function`.
-    """
-    def _depr_decorator(func):
-        @functools.wraps(func)
-        def new_func(*args, **kwargs):
-            s = "The function {} is deprecated.".format(func.__name__)
-            if new_function:
-                s += " Use {} instead.".format(new_function.__name__)
-            warnings.warn(s, CCLDeprecationWarning)
-            return func(*args, **kwargs)
-        return new_func
-    return _depr_decorator
 
 
 def _fftlog_transform(rs, frs,

@@ -12,10 +12,10 @@ def test_cosmo_methods():
     """
     from inspect import getmembers, isfunction, signature
     from pyccl import background, bcm, boltzmann, \
-        cls, correlations, covariances, neutrinos, \
+        cells, correlations, covariances, neutrinos, \
         pk2d, power, tk3d, tracers, halos, nl_pt
     cosmo = ccl.CosmologyVanillaLCDM()
-    subs = [background, boltzmann, bcm, cls, correlations, covariances,
+    subs = [background, boltzmann, bcm, cells, correlations, covariances,
             neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
