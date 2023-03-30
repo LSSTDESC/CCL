@@ -15,11 +15,11 @@ def test_fancy_repr():
     cosmo1 = ccl.CosmologyVanillaLCDM()
     cosmo2 = ccl.CosmologyVanillaLCDM()
 
-    ccl.CCLObject._fancy_repr.disable()
+    ccl.FancyRepr.disable()
     assert repr(cosmo1) == object.__repr__(cosmo1)
     assert cosmo1 != cosmo2
 
-    ccl.CCLObject._fancy_repr.enable()
+    ccl.FancyRepr.enable()
     assert repr(cosmo1) != object.__repr__(cosmo1)
     assert cosmo1 == cosmo2
 
@@ -28,9 +28,6 @@ def test_fancy_repr():
 
     with pytest.raises(AttributeError):
         ccl.Cosmology._fancy_repr.disable()
-
-    with pytest.raises(NotImplementedError):
-        ccl.base.FancyRepr()
 
 
 def test_CCLObject():

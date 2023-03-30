@@ -335,6 +335,6 @@ class CCLAutoreprObject(CCLObject):
         # Build string from specified `__repr_attrs__` or use Python's default.
         # Subclasses overriding `__repr__`, stop using `__repr_attrs__`.
         if hasattr(self.__class__, "__repr_attrs__"):
-            from ._repr import _build_string_from_attrs
-            return _build_string_from_attrs(self)
+            from .repr_ import build_string_from_attrs
+            return build_string_from_attrs(self)
         return object.__repr__(self)
