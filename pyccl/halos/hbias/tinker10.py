@@ -1,13 +1,13 @@
 from ...base import warn_api
 from ..massdef import MassDef200m
-from ..halo_model_base import HaloBias
+from ..halo_model_base import HaloBias, TinkerFunction
 import numpy as np
 
 
 __all__ = ("HaloBiasTinker10",)
 
 
-class HaloBiasTinker10(HaloBias):
+class HaloBiasTinker10(HaloBias, TinkerFunction):
     """ Implements halo bias described in arXiv:1001.3162.
 
     Args:

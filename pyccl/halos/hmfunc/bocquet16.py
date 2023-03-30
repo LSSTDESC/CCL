@@ -34,7 +34,7 @@ class MassFuncBocquet16(MassFunc):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
-        return mass_def.Delta not in ["200m", "200c", "500c"]
+        return mass_def.name not in ["200m", "200c", "500c"]
 
     def _setup(self):
         # key: (hydro, mass_def.name)

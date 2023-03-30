@@ -29,20 +29,22 @@ class MassFuncDespali16(MassFunc):
                  mass_def=MassDef200m(),
                  mass_def_strict=True,
                  ellipsoidal=False):
-        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
         self.ellipsoidal = ellipsoidal
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
         return mass_def.Delta == "fof"
 
     def _setup(self):
-        # key: (ellipsoidal)
+        # key: ellipsoidal
         vals = {True: (0.3953, -0.1768, 0.7057, 0.2125, 0.3268,
                        0.2206, 0.1937, -0.04570),
                 False: (0.3292, -0.1362, 0.7665, 0.2263, 0.4332,
                         0.2488, 0.2554, -0.1151)}
-        self.A0, self.A1, self.a0, self.a1, self.a1, \
-            self.p0, self.p1, self.p2 = vals[self.ellipsoidal]
+
+        A0, A1, a0, a1, a2, p0, p1, p2 = vals[self.ellipsoidal]
+        coeffs = [[A1, A0], [a2, a1, a0], [p2, p2, p0]]
+        self.poly_A, self.poly_a, self.poly_p = map(np.poly1d, coeffs)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         status = 0
@@ -55,9 +57,7 @@ class MassFuncDespali16(MassFunc):
         x = np.log10(self.mass_def.get_Delta(cosmo, a) *
                      cosmo.omega_x(a, self.mass_def.rho_type) / Dv)
 
-        A = self.A1 * x + self.A0
-        a = self.a2 * x**2 + self.a1 * x + self.a0
-        p = self.p2 * x**2 + self.p1 * x + self.p0
+        A, a, p = self.poly_A(x), self.poly_a(x), self.poly_p(x)
 
         nu_p = a * (delta_c/sigM)**2
         return 2.0 * A * np.sqrt(nu_p / 2.0 / np.pi) * (

@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..massdef import MassDef200m
-from ..halo_model_base import MassFuncTinker
+from ..halo_model_base import MassFunc, TinkerFunction
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -8,7 +8,7 @@ from scipy.interpolate import interp1d
 __all__ = ("MassFuncTinker08",)
 
 
-class MassFuncTinker08(MassFuncTinker):
+class MassFuncTinker08(MassFunc, TinkerFunction):
     """ Implements mass function described in arXiv:0803.2706.
 
     Args:

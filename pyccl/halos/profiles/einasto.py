@@ -79,10 +79,6 @@ class HaloProfileEinasto(HaloProfileMatter):
             return 0.155 + 0.0095 * nu * nu
         return np.full_like(M, self.alpha)
 
-    def _get_c_m_relation(self, cosmo, M, a, mass_def=None):
-        return self.c_m_relation.get_concentration(cosmo, M, a,
-                                                   mass_def_other=mass_def)
-
     def _norm(self, M, Rs, c, alpha):
         # Einasto normalization from mass, radius, concentration and alpha
         return M / (np.pi * Rs**3 * 2**(2-3/alpha) * alpha**(-1+3/alpha)
@@ -95,7 +91,7 @@ class HaloProfileEinasto(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_c_m_relation(cosmo, M_use, a, mass_def=mass_def)
+        c_M = self.c_m_relation.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         alpha = self._get_alpha(cosmo, M_use, a, mass_def)

@@ -50,7 +50,7 @@ class MassFuncWatson13(MassFunc):
             pa = 1.805
             pb = 2.267
             pc = 1.287
-        elif a < 0.14285714285714285:  # z>6
+        elif a < 1/(1+6):
             pA = 0.563
             pa = 3.810
             pb = 0.874

@@ -57,7 +57,7 @@ class HMCalculator(CCLAutoreprObject):
     def __init__(self, *, mass_function, halo_bias, mass_def=None,
                  lM_min=8., lM_max=16., nlM=128,
                  integration_method_M='simpson', k_norm=1E-5):
-        # halo mass definition (1/2)
+        # halo mass definition
         if mass_def is None or isinstance(mass_def, MassDef):
             self.mass_def = mass_def
         elif isinstance(mass_def, str):
@@ -83,10 +83,6 @@ class HMCalculator(CCLAutoreprObject):
         else:
             raise TypeError("halo_bias must be of type `HaloBias` "
                             "or a halo bias name string")
-
-        # halo mass definition (2/2)
-        if mass_def is None:
-            self.mass_def = self.mass_function.mass_def
 
         # Check mass definition consistency
         if (self.mass_def
@@ -269,8 +265,7 @@ class HMCalculator(CCLAutoreprObject):
             value of `k`.
         """
         self._get_ingredients(cosmo, a, get_bf=False)
-        uk = prof.fourier(cosmo, k, self._mass, a,
-                          mass_def=self.mass_def).T
+        uk = prof.fourier(cosmo, k, self._mass, a, mass_def=self.mass_def).T
         return self._integrate_over_mf(uk)
 
     def I_1_1(self, cosmo, k, a, prof):
@@ -297,8 +292,7 @@ class HMCalculator(CCLAutoreprObject):
             value of `k`.
         """
         self._get_ingredients(cosmo, a, get_bf=True)
-        uk = prof.fourier(cosmo, k, self._mass, a,
-                          mass_def=self.mass_def).T
+        uk = prof.fourier(cosmo, k, self._mass, a, mass_def=self.mass_def).T
         return self._integrate_over_mbf(uk)
 
     @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
@@ -338,8 +332,7 @@ class HMCalculator(CCLAutoreprObject):
 
         self._get_ingredients(cosmo, a, get_bf=False)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
-                                  prof2=prof2,
-                                  mass_def=self.mass_def).T
+                                  prof2=prof2, mass_def=self.mass_def).T
         return self._integrate_over_mf(uk)
 
     @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
@@ -378,8 +371,7 @@ class HMCalculator(CCLAutoreprObject):
 
         self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
-                                  prof2=prof2,
-                                  mass_def=self.mass_def).T
+                                  prof2=prof2, mass_def=self.mass_def).T
         return self._integrate_over_mbf(uk)
 
     @warn_api(pairs=[("prof1", "prof")],

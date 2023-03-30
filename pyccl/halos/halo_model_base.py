@@ -1,13 +1,14 @@
 from .. import ccllib as lib
 from ..core import check
-from ..parameters import physical_constants
+from ..parameters import physical_constants as const
 from ..base import CCLAutoreprObject, warn_api, deprecated, deprecate_attr
 import numpy as np
 import functools
 from abc import abstractmethod
 
 
-__all__ = ("HMIngredients", "get_mass_function_and_halo_bias",)
+__all__ = ("HMIngredients", "get_mass_function_and_halo_bias",
+           "TinkerFunction")
 
 
 class HMIngredients(CCLAutoreprObject):
@@ -15,6 +16,24 @@ class HMIngredients(CCLAutoreprObject):
     __repr_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
                                  )(super.__getattribute__)
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        def _subclasses(cls):
+            # This helper returns a set of all subclasses.
+            direct_subs = cls.__subclasses__()
+            deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
+            return set(direct_subs).union(deep_subs)
+
+        @classmethod
+        def from_name(cls, name):
+            """Obtain particular model."""
+            mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
+            return mod[name]
+
+        cls._subclasses = classmethod(_subclasses)
+        cls.from_name = classmethod(from_name)
 
     @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):
@@ -73,16 +92,6 @@ class HMIngredients(CCLAutoreprObject):
                                                    len(logM), status)
         check(status, cosmo=cosmo)
         return logM, sigM, dlns_dlogM
-
-    @classmethod
-    def from_name(cls, name):
-        """Get particular model from name string.
-
-        Args:
-            name (string): the model name
-        """
-        models = {c.name: c for c in cls.__subclasses__()}
-        return models[name]
 
 
 class MassFunc(HMIngredients):
@@ -147,30 +156,12 @@ class MassFunc(HMIngredients):
         logM, sigM, dlns_dlogM = self._get_logM_sigM(
             cosmo, M_use, a, return_dlns=True)
 
-        rho = (physical_constants.RHO_CRITICAL *
-               cosmo['Omega_m'] * cosmo['h']**2)
+        rho = (const.RHO_CRITICAL * cosmo['Omega_m'] * cosmo['h']**2)
         f = self._get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
         mf = f * rho * dlns_dlogM / M_use
         if np.ndim(M) == 0:
             return mf[0]
         return mf
-
-
-class MassFuncTinker(HMIngredients):
-    """Base for the Tinker mass functions."""
-
-    def _get_Delta_m(self, cosmo, a):
-        """ For SO-based mass definitions, this returns the corresponding
-        value of Delta for a rho_matter-based definition. This is useful
-        mostly for the Tinker mass functions, which are defined for any
-        SO mass in general, but explicitly only for Delta_matter.
-        """
-        delta = self.mass_def.get_Delta(cosmo, a)
-        if self.mass_def.rho_type == 'matter':
-            return delta
-        om_this = cosmo.omega_x(a, self.mass_def.rho_type)
-        om_matt = cosmo.omega_x(a, 'matter')
-        return delta * om_this / om_matt
 
 
 class HaloBias(HMIngredients):
@@ -266,8 +257,7 @@ def get_mass_function_and_halo_bias(cosmo, hmc, M, a):
     logM, sigM, dlns_dlogM = hmc.mass_function._get_logM_sigM(
         cosmo, M, a, hmc.mass_def, return_dlns=True)
     # mass function
-    rho = (physical_constants.RHO_CRITICAL *
-           cosmo['Omega_m'] * cosmo['h']**2)
+    rho = (const.RHO_CRITICAL * cosmo['Omega_m'] * cosmo['h']**2)
     f = hmc.mass_function._get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
     mf = f * rho * dlns_dlogM / M_use
     # halo bias
@@ -275,6 +265,23 @@ def get_mass_function_and_halo_bias(cosmo, hmc, M, a):
     if np.ndim(M) == 0:
         return mf[0], b[0]
     return mf, b
+
+
+class TinkerFunction:
+    """Mixins inherit this class' methods. Useful for the Tinker classes."""
+
+    def _get_Delta_m(self, cosmo, a):
+        """ For SO-based mass definitions, this returns the corresponding
+        value of Delta for a rho_matter-based definition. This is useful
+        mostly for the Tinker mass functions, which are defined for any
+        SO mass in general, but explicitly only for Delta_matter.
+        """
+        delta = self.mass_def.get_Delta(cosmo, a)
+        if self.mass_def.rho_type == 'matter':
+            return delta
+        om_this = cosmo.omega_x(a, self.mass_def.rho_type)
+        om_matt = cosmo.omega_x(a, 'matter')
+        return delta * om_this / om_matt
 
 
 @functools.wraps(MassFunc.from_name)

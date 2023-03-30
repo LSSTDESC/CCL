@@ -29,12 +29,11 @@ class ConcentrationBhattacharya13(Concentration):
         return mass_def.name not in ["vir", "200m", "200c"]
 
     def _setup(self):
-        vals = {("vir", "critical"): (7.7, 0.9, -0.29),
-                (200, "matter"): (9.0, 1.15, -0.29),
-                (200, "critical"): (5.9, 0.54, -0.35)}
+        vals = {"vir": (7.7, 0.9, -0.29),
+                "200m": (9.0, 1.15, -0.29),
+                "200c": (5.9, 0.54, -0.35)}
 
-        key = (self.mass_def.Delta, self.mass_def.rho_type)
-        self.A, self.B, self.C = vals[key]
+        self.A, self.B, self.C = vals[self.mass_def.name]
 
     def _concentration(self, cosmo, M, a):
         gz = cosmo.growth_factor(a)

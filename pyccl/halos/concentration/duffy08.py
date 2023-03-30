@@ -28,12 +28,11 @@ class ConcentrationDuffy08(Concentration):
         return mass_def.name not in ["vir", "200m", "200c"]
 
     def _setup(self):
-        vals = {("vir", "critical"): (7.85, -0.081, -0.71),
-                (200, "matter"): (10.14, -0.081, -1.01),
-                (200, "critical"): (5.71, -0.084, -0.47)}
+        vals = {"vir": (7.85, -0.081, -0.71),
+                "200m": (10.14, -0.081, -1.01),
+                "200c": (5.71, -0.084, -0.47)}
 
-        key = (self.mass_def.Delta, self.mass_def.rho_type)
-        self.A, self.B, self.C = vals[key]
+        self.A, self.B, self.C = vals[self.mass_def.name]
 
     def _concentration(self, cosmo, M, a):
         M_pivot_inv = cosmo["h"] * 5E-13
