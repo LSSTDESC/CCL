@@ -84,6 +84,7 @@ jobs:
         run: |
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
           mamba env update --file ${{ env.CONDA_ENV }} --prune
+          find . -name "conda-py*" -type f -atime +1 -exec rm {} \;  # del caches older than 24 hrs
 
       - name: Install CCL
         run: pip install -e .
