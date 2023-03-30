@@ -32,7 +32,7 @@ class HaloProfileEinasto(HaloProfileMatter):
     By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
 
     Args:
-        c_m_relation (:obj:`Concentration`): concentration-mass
+        concentration (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
         truncated (bool): set to `True` if the profile should be
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
@@ -40,15 +40,15 @@ class HaloProfileEinasto(HaloProfileMatter):
         alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
             'cosmo' to calculate the value from cosmology. Default: 'cosmo'
     """
-    __repr_attrs__ = ("c_m_relation", "truncated", "alpha",
+    __repr_attrs__ = ("concentration", "truncated", "alpha",
                       "precision_fftlog", "normprof",)
 
-    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
-    def __init__(self, *, c_m_relation, truncated=True, alpha='cosmo'):
-        if not isinstance(c_m_relation, Concentration):
-            raise TypeError("c_m_relation must be of type `Concentration`")
+    @warn_api(pairs=[("concentration", "concentration")])
+    def __init__(self, *, concentration, truncated=True, alpha='cosmo'):
+        if not isinstance(concentration, Concentration):
+            raise TypeError("concentration must be of type `Concentration`")
 
-        self.c_m_relation = c_m_relation
+        self.concentration = concentration
         self.truncated = truncated
         self.alpha = alpha
         super().__init__()
@@ -91,7 +91,7 @@ class HaloProfileEinasto(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.c_m_relation.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         alpha = self._get_alpha(cosmo, M_use, a, mass_def)

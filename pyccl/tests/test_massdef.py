@@ -85,7 +85,7 @@ def test_get_concentration():
 
 def test_get_concentration_raises():
     hmd = ccl.halos.MassDef(200, 'matter')
-    with pytest.raises(RuntimeError):
+    with pytest.raises(AttributeError):
         hmd._get_concentration(COSMO, 1E12, 1.)
 
 
@@ -103,9 +103,8 @@ def test_translate_mass():
 def test_translate_mass_raises():
     hmd = ccl.halos.MassDef(200, 'matter')
     hmdb = ccl.halos.MassDef(200, 'critical')
-    with pytest.raises(RuntimeError):
-        hmd.translate_mass(COSMO, 1E12,
-                           1., hmdb)
+    with pytest.raises(AttributeError):
+        hmd.translate_mass(COSMO, 1E12, 1., hmdb)
 
 
 @pytest.mark.parametrize('scls', [ccl.halos.MassDef200m,

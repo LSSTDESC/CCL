@@ -66,7 +66,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
     dependence of the form :math:`T_d=T_0(1+z)^\\alpha`.
 
     Args:
-        c_m_relation (:obj:`Concentration`): concentration-mass
+        concentration (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
         nu_GHz (float): frequency in GHz.
         alpha (float): dust temperature evolution parameter.
@@ -81,14 +81,14 @@ class HaloProfileCIBShang12(HaloProfileCIB):
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
     """
     __repr_attrs__ = (
-        "c_m_relation", "nu", "alpha", "T0", "beta", "gamma", "s_z",
+        "concentration", "nu", "alpha", "T0", "beta", "gamma", "s_z",
         "l10meff", "sigLM", "Mmin", "L0", "precision_fftlog", "normprof")
     _one_over_4pi = 0.07957747154
 
-    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
-    def __init__(self, *, c_m_relation, nu_GHz, alpha=0.36, T0=24.4, beta=1.75,
-                 gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707, Mmin=1E10,
-                 L0=6.4E-8):
+    @warn_api(pairs=[("concentration", "concentration")])
+    def __init__(self, *, concentration, nu_GHz, alpha=0.36, T0=24.4,
+                 beta=1.75, gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707,
+                 Mmin=1E10, L0=6.4E-8):
 
         self.nu = nu_GHz
         self.alpha = alpha
@@ -100,8 +100,8 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         self.sigLM = sigLM
         self.Mmin = Mmin
         self.L0 = L0
-        self.c_m_relation = c_m_relation
-        self.pNFW = HaloProfileNFW(c_m_relation=c_m_relation)
+        self.concentration = concentration
+        self.pNFW = HaloProfileNFW(concentration=concentration)
         super().__init__()
 
     def dNsub_dlnM_TinkerWetzel10(self, Msub, Mparent):

@@ -83,18 +83,18 @@ class MassDef(CCLAutoreprObject):
         Delta (float): overdensity parameter. Pass 'vir' if using virial
             overdensity.
         rho_type (string): either 'critical' or 'matter'.
-        c_m_relation (function, optional): concentration-mass relation.
+        concentration (function, optional): concentration-mass relation.
             Provided as a `Concentration` object, or a string corresponding
             to one of the supported concentration-mass relations.
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
     __repr_attrs__ = ("name",)
-    __getattr__ = deprecate_attr(pairs=[('concentration', 'c_m_relation')]
+    __getattr__ = deprecate_attr(pairs=[('c_m_relation', 'concentration')]
                                  )(super.__getattribute__)
 
     @warn_api
-    def __init__(self, Delta, rho_type=None, *, c_m_relation=None):
+    def __init__(self, Delta, rho_type=None, *, concentration=None):
         # Check it makes sense
         if (Delta != 'fof') and (Delta != 'vir'):
             if isinstance(Delta, str):
@@ -109,10 +109,10 @@ class MassDef(CCLAutoreprObject):
         self.rho_type = rho_type
         self.species = species_types[rho_type]
         # c(M) relation
-        if c_m_relation is None:
-            self.c_m_relation = None
+        if concentration is None:
+            self.concentration = None
         else:
-            self._concentration_init(c_m_relation)
+            self._concentration_init(concentration)
 
     @property
     def name(self):
@@ -121,17 +121,17 @@ class MassDef(CCLAutoreprObject):
             return f"{self.Delta}{self.rho_type[0]}"
         return f"{self.Delta}"
 
-    def _concentration_init(self, c_m_relation):
+    def _concentration_init(self, concentration):
         from .concentration import Concentration
-        if isinstance(c_m_relation, Concentration):
-            self.c_m_relation = c_m_relation
-        elif isinstance(c_m_relation, str):
+        if isinstance(concentration, Concentration):
+            self.concentration = concentration
+        elif isinstance(concentration, str):
             # Grab class
-            conc_class = Concentration.from_name(c_m_relation)
+            conc_class = Concentration.from_name(concentration)
             # instantiate with this mass definition
-            self.c_m_relation = conc_class(mass_def=self)
+            self.concentration = conc_class(mass_def=self)
         else:
-            raise ValueError("c_m_relation must be `None`, "
+            raise ValueError("concentration must be `None`, "
                              " a string or a `Concentration` object")
 
     def get_Delta(self, cosmo, a):
@@ -208,11 +208,9 @@ class MassDef(CCLAutoreprObject):
         Returns:
             float or array_like: halo concentration.
         """
-        if self.c_m_relation is None:
-            raise RuntimeError("This mass definition doesn't have "
-                               "an associated c(M) relation")
-        else:
-            return self.c_m_relation.get_concentration(cosmo, M, a)
+        if self.concentration is None:
+            raise AttributeError("mass_def has no associated concentration.")
+        return self.concentration.get_concentration(cosmo, M, a)
 
     @warn_api(pairs=[("mdef_other", "mass_def_other")])
     def translate_mass(self, cosmo, M, a, *, mass_def_other):
@@ -229,22 +227,19 @@ class MassDef(CCLAutoreprObject):
         """
         if self == mass_def_other:
             return M
-        else:
-            if self.c_m_relation is None:
-                raise RuntimeError("This mass definition doesn't have "
-                                   "an associated c(M) relation")
-            else:
-                om_this = cosmo.omega_x(a, self.rho_type)
-                D_this = self.get_Delta(cosmo, a) * om_this
-                c_this = self._get_concentration(cosmo, M, a)
-                R_this = self.get_radius(cosmo, M, a)
-                om_new = cosmo.omega_x(a, mass_def_other.rho_type)
-                D_new = mass_def_other.get_Delta(cosmo, a) * om_new
-                c_new = convert_concentration(cosmo, c_old=c_this,
-                                              Delta_old=D_this,
-                                              Delta_new=D_new)
-                R_new = c_new * R_this / c_this
-                return mass_def_other.get_mass(cosmo, R_new, a)
+        if self.concentration is None:
+            raise AttributeError("mass_def has no associated concentration.")
+        om_this = cosmo.omega_x(a, self.rho_type)
+        D_this = self.get_Delta(cosmo, a) * om_this
+        c_this = self._get_concentration(cosmo, M, a)
+        R_this = self.get_radius(cosmo, M, a)
+        om_new = cosmo.omega_x(a, mass_def_other.rho_type)
+        D_new = mass_def_other.get_Delta(cosmo, a) * om_new
+        c_new = convert_concentration(cosmo, c_old=c_this,
+                                      Delta_old=D_this,
+                                      Delta_new=D_new)
+        R_new = c_new * R_this / c_this
+        return mass_def_other.get_mass(cosmo, R_new, a)
 
     @classmethod
     def from_name(cls, name):
@@ -263,41 +258,41 @@ class MassDef(CCLAutoreprObject):
             raise ValueError(f"Mass definition {name} not implemented.")
 
 
-@warn_api(pairs=[('c_m', 'c_m_relation')])
-def MassDef200m(c_m_relation='Duffy08'):
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDef200m(concentration='Duffy08'):
     r""":math:`\Delta = 200m` mass definition.
 
     Args:
-        c_m_relation (string): concentration-mass relation.
+        concentration (string): concentration-mass relation.
     """
-    return MassDef(200, 'matter', c_m_relation=c_m_relation)
+    return MassDef(200, 'matter', concentration=concentration)
 
 
-@warn_api(pairs=[('c_m', 'c_m_relation')])
-def MassDef200c(c_m_relation='Duffy08'):
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDef200c(concentration='Duffy08'):
     r""":math:`\Delta = 200c` mass definition.
 
     Args:
-        c_m_relation (string): concentration-mass relation.
+        concentration (string): concentration-mass relation.
     """
-    return MassDef(200, 'critical', c_m_relation=c_m_relation)
+    return MassDef(200, 'critical', concentration=concentration)
 
 
-@warn_api(pairs=[('c_m', 'c_m_relation')])
-def MassDef500c(c_m_relation='Ishiyama21'):
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDef500c(concentration='Ishiyama21'):
     r""":math:`\Delta = 500m` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
     """
-    return MassDef(500, 'critical', c_m_relation=c_m_relation)
+    return MassDef(500, 'critical', concentration=concentration)
 
 
-@warn_api(pairs=[('c_m', 'c_m_relation')])
-def MassDefVir(c_m_relation='Klypin11'):
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDefVir(concentration='Klypin11'):
     r""":math:`\Delta = \rm vir` mass definition.
 
     Args:
-        c_m_relation (string): concentration-mass relation.
+        concentration (string): concentration-mass relation.
     """
-    return MassDef('vir', 'critical', c_m_relation=c_m_relation)
+    return MassDef('vir', 'critical', concentration=concentration)

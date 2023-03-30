@@ -63,9 +63,8 @@ class CCLParameters:
             raise AttributeError(f"Instances of {name} are frozen.")
         if not hasattr(self._instance, key):
             raise KeyError(f"Parameter {key} does not exist.")
-        if (key, value) == ("A_SPLINE_MAX", 1.0):
-            # Setting `A_SPLINE_MAX` to its default value; do nothing.
-            return
+        if key == "A_SPLINE_MAX" and value != 1.0:
+            raise ValueError("A_SPLINE_MAX is fixed to 1.")
         object.__setattr__(self._instance, key, value)
 
     __getitem__ = __getattribute__

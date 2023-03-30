@@ -37,7 +37,7 @@ class HaloProfile(CCLAutoreprObject):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
-    __getattr__ = deprecate_attr(pairs=[('cM', 'c_m_relation')]
+    __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
                                  )(super.__getattribute__)
 
     def __init__(self):

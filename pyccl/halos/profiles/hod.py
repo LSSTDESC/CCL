@@ -71,7 +71,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
     HOD profile.
 
     Args:
-        c_m_relation (:obj:`Concentration`): concentration-mass
+        concentration (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
         lMmin_0 (float): offset parameter for
             :math:`\\log_{10}M_{\\rm min}`.
@@ -110,23 +110,23 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             satellites when centrals are present.
     """
     __repr_attrs__ = (
-        "c_m_relation", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p", "lM0_0",
+        "concentration", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p", "lM0_0",
         "lM0_p", "lM1_0", "lM1_p", "alpha_0", "alpha_p", "fc_0", "fc_p",
         "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
         "ns_independent", "precision_fftlog", "normprof",)
 
-    @warn_api(pairs=[("c_M_relation", "c_m_relation")])
-    def __init__(self, *, c_m_relation,
+    @warn_api(pairs=[("concentration", "concentration")])
+    def __init__(self, *, concentration,
                  lMmin_0=12., lMmin_p=0., siglM_0=0.4,
                  siglM_p=0., lM0_0=7., lM0_p=0.,
                  lM1_0=13.3, lM1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
                  a_pivot=1., ns_independent=False):
-        if not isinstance(c_m_relation, Concentration):
-            raise TypeError("c_m_relation must be of type `Concentration`")
+        if not isinstance(concentration, Concentration):
+            raise TypeError("concentration must be of type `Concentration`")
 
-        self.c_m_relation = c_m_relation
+        self.concentration = concentration
         self.lMmin_0 = lMmin_0
         self.lMmin_p = lMmin_p
         self.lM0_0 = lM0_0
@@ -243,7 +243,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.c_m_relation.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
@@ -269,7 +269,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.c_m_relation.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
