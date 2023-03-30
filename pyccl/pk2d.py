@@ -85,7 +85,7 @@ class Pk2D(CCLObject):
     empty : bool
         If ``True``, just create an empty object, to be filled out later.
     """
-    from ._repr import _build_string_Pk2D as __repr__
+    from .base.repr_ import build_string_Pk2D as __repr__
 
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,

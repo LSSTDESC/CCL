@@ -197,7 +197,7 @@ class Cosmology(CCLObject):
                                      "HMCode_logT_AGN": 7.8}}
 
     """
-    from ._repr import _build_string_Cosmology as __repr__
+    from .base.repr_ import build_string_Cosmology as __repr__
 
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
