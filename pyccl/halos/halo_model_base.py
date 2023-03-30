@@ -7,8 +7,7 @@ import functools
 from abc import abstractmethod
 
 
-__all__ = ("HMIngredients", "get_mass_function_and_halo_bias",
-           "TinkerFunction")
+__all__ = ("HMIngredients", "TinkerFunction",)
 
 
 def _subclasses(cls):
@@ -264,22 +263,6 @@ class Concentration(HMIngredients):
         if np.ndim(M) == 0:
             return c[0]
         return c
-
-
-def get_mass_function_and_halo_bias(cosmo, hmc, M, a):
-    """Helper to get mass function and halo bias in a single step."""
-    M_use = np.atleast_1d(M)
-    logM, sigM, dlns_dlogM = hmc.mass_function._get_logM_sigM(
-        cosmo, M, a, hmc.mass_def, return_dlns=True)
-    # mass function
-    rho = (const.RHO_CRITICAL * cosmo['Omega_m'] * cosmo['h']**2)
-    f = hmc.mass_function._get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
-    mf = f * rho * dlns_dlogM / M_use
-    # halo bias
-    b = hmc.halo_bias._get_bsigma(cosmo, sigM, a)
-    if np.ndim(M) == 0:
-        return mf[0], b[0]
-    return mf, b
 
 
 class TinkerFunction:

@@ -482,10 +482,14 @@ def test_nfw_cumul2d_accuracy(fourier_analytic):
 
 
 def test_upd_fftlog_raises():
+    # Verify that FFTLogParams is immutable unless changed in a control manner.
     prof = ccl.halos.HaloProfilePressureGNFW()
     new_params = {"hello_there": 0.}
     with pytest.raises(AttributeError):
         prof.update_precision_fftlog(**new_params)
+
+    with pytest.raises(AttributeError):
+        prof.precision_fftlog.plaw_projected = 1
 
 
 @pytest.mark.parametrize("use_analytic", [True, False])

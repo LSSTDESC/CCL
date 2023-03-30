@@ -173,6 +173,10 @@ def test_CCLObject_default_behavior():
     assert instances[0] != instances[1]
     assert hash(instances[0]) != hash(instances[1])
 
+    MyType = type("MyType", (ccl.CCLAutoreprObject,), {"test": 0})
+    instances = [MyType() for _ in range(2)]
+    assert instances[0] != instances[1]
+
 
 def test_HaloProfile_abstractmethods():
     # Test that `HaloProfile` and its subclasses can't be instantiated if
@@ -230,3 +234,7 @@ def test_unlock_instance_errors():
 
     with pytest.raises(TypeError):
         func2()
+
+    # 3. Doesn't do anything if instance is not CCLObject.
+    with ccl.UnlockInstance(True, mutate=False):
+        pass

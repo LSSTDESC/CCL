@@ -64,9 +64,9 @@ class HMCalculator(CCLAutoreprObject):
         self.halo_bias = HaloBias.initialize_from_input(halo_bias, **kw)
 
         # Check mass definition consistency.
-        if (self.mass_def
-                != self.mass_function.mass_def
-                != self.halo_bias.mass_def):
+        if not (self.mass_def
+                == self.mass_function.mass_def
+                == self.halo_bias.mass_def):
             raise ValueError(
                 "HMCalculator received different mass definitions "
                 "in mass_def, mass_function, halo_bias.")
@@ -110,7 +110,7 @@ class HMCalculator(CCLAutoreprObject):
     @unlock_instance(mutate=False)
     def _get_halo_bias(self, cosmo, a, rho0):
         # Compute the halo bias at this cosmo and a.
-        if cosmo != self._cosmo_bf or a != self._a_bf:
+        if a != self._a_bf or cosmo != self._cosmo_bf:
             hbias = self.halo_bias.get_halo_bias
             self._bf = hbias(cosmo, self._mass, a)
             integ = self._integrator(self._mf*self._bf*self._mass, self._lmass)

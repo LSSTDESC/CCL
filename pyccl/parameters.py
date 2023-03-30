@@ -148,12 +148,8 @@ class FFTLogParams:
         return getattr(self, name)
 
     def __setattr__(self, name, value):
-        if name in self.params:
-            return object.__setattr__(self, name, value)
-        raise AttributeError(f"Parameter {name} does not exist.")
-
-    def __setitem__(self, name, value):
-        setattr(self, name, value)
+        raise AttributeError("FFTLogParams can only be updated via "
+                             "`updated_parameters`.")
 
     def __repr__(self):
         return repr(self.to_dict())
@@ -198,4 +194,6 @@ class FFTLogParams:
             The defaults are -1.5 and -1.0, respectively.
         """
         for name, value in kwargs.items():
-            setattr(self, name, value)
+            if name not in self.params:
+                raise AttributeError(f"Parameter {name} does not exist.")
+            object.__setattr__(self, name, value)

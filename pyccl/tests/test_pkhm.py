@@ -279,6 +279,15 @@ def test_pkhm_errors():
 
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
 
+    # Inconsistent mass definitions
+    m200c = ccl.halos.MassDef.initialize_from_input("200c")
+    m200m = ccl.halos.MassDef.initialize_from_input("200m")
+    hmf = ccl.halos.MassFunc.initialize_from_input("Tinker08", mass_def=m200c)
+    hbf = ccl.halos.HaloBias.initialize_from_input("Tinker10", mass_def=m200m)
+    with pytest.raises(ValueError):
+        ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                               mass_def=m200c)
+
     # Wrong pk2d
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
@@ -298,7 +307,7 @@ def test_pkhm_errors():
                                          supress_1h=func, get_1h=False)
 
 
-def test_calculator_from_string_smoke():
+def test_hmcalculator_from_string_smoke():
     hmc1 = ccl.halos.HMCalculator(
         COSMO, massfunc=HMF, hbias=HBF, mass_def=M200)
     hmc2 = ccl.halos.HMCalculator(
