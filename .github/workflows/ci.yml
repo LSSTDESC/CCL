@@ -84,7 +84,22 @@ jobs:
         run: |
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
           mamba env update --file ${{ env.CONDA_ENV }} --prune
-          find . -name "conda-py*" -type f -atime +1 -exec rm {} \;  # del caches older than 24 hrs
+          # remove caches older than 24 hours
+          find . -name "conda-py*${" -type f -atime +1 -exec rm {} \;  # del caches older than 24 hrs
+
+      - name: Delete old caches
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OLDER_THAN=$(date --date='24 hours ago' --utc +%Y-%m-%dT%H:%M:%SZ)
+          CACHES=$(curl -s -X GET -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                   "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/cache" \
+                   | jq --raw-output ".[] | select(.created_at < \"${OLDER_THAN}\") | .id")
+          for CACHE in $CACHES; do
+            echo "Deleting cache ${CACHE}..."
+            curl -s -X DELETE -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/cache/${CACHE}"
+          done
 
       - name: Install CCL
         run: pip install -e .
