@@ -465,10 +465,6 @@ class FancyRepr:
     _enabled: bool = True
     _classes: dict = {}
 
-    def __init__(self):
-        # This is only a framework class, we do not instantiate it.
-        raise NotImplementedError
-
     @classmethod
     def add(cls, cl):
         """Add class to the internal dictionary of fancy-repr classes."""
@@ -502,14 +498,6 @@ class FancyRepr:
         bmethod.__set_name__(cl, "_repr")
         # Fall back to using `__ccl_repr__` from `CCLObject`.
         cl.__repr__ = cl.__ccl_repr__
-
-
-class _DisableGetMethod:
-    """Descriptor that disables the dot (``getattr``)."""
-
-    def __get__(self, instance, owner):
-        raise AttributeError(
-            "To access fancy-repr info use `CCLObject._fancy_repr`.")
 
 
 class CCLObject(ABC):
@@ -553,7 +541,6 @@ class CCLObject(ABC):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
-    _fancy_repr = FancyRepr
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -562,9 +549,8 @@ class CCLObject(ABC):
         cls.__signature__ = signature(cls.__init__)
 
         # 2. Replace repr (if implemented) with its cached version.
-        cls._fancy_repr = _DisableGetMethod()
         if "__repr__" in vars(cls):
-            CCLObject._fancy_repr.add(cls)
+            FancyRepr.add(cls)
             FancyRepr.bind_and_replace(cls, cls.__repr__)
 
         # 3. Unlock instance on specific methods.
