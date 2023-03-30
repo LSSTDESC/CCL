@@ -11,7 +11,7 @@ STYLE CONVENTION USED
         **`type`** or **`structure`**
 -->
 # CCL
-[![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL) [![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master) [![Documentation Status](https://readthedocs.org/projects/ccl/badge/?version=latest)](https://ccl.readthedocs.io/en/latest/?badge=latest)
+![Build Status](https://github.com/LSSTDESC/CCL/workflows/continuous-integration/badge.svg?branch=master) ![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master) ![Documentation Status](https://readthedocs.org/projects/ccl/badge/?version=latest)](https://ccl.readthedocs.io/en/latest/?badge=latest)
 
 The Core Cosmology Library (CCL) is a standardized library of routines to calculate
 basic observables used in cosmology. It will be the standard analysis package used by the
