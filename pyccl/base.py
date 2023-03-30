@@ -438,6 +438,24 @@ class UnlockInstance:
             newfunc = cls.unlock_instance(mutate=mutate)(func)
             setattr(cl, name, newfunc)
 
+    # TODO: Remove for CCLv3 & replace with Funlock.
+    @classmethod
+    def Funlock2(cls, cl, name):
+        """Replacement for Funlock incompatibility with signature.bind."""
+
+        def lock_on_exit(func):
+            @functools.wraps(func)
+            def wrapper(self, *args, **kwargs):
+                out = func(self, *args, **kwargs)
+                self._object_lock.lock()
+                return out
+            return wrapper
+
+        func = vars(cl).get(name)
+        if func is not None:
+            newfunc = lock_on_exit(func)
+            setattr(cl, name, newfunc)
+
 
 unlock_instance = UnlockInstance.unlock_instance
 
@@ -550,7 +568,8 @@ class CCLObject(ABC):
             FancyRepr.bind_and_replace(cls, cls.__repr__)
 
         # 3. Unlock instance on specific methods.
-        UnlockInstance.Funlock(cls, "__init__", mutate=False)
+        # UnlockInstance.Funlock(cls, "__init__", mutate=False)
+        UnlockInstance.Funlock2(cls, "__init__")  # TODO: Replace in CCLv3.
         UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
 
     def __new__(cls, *args, **kwargs):
