@@ -43,7 +43,7 @@ def test_pk2d_init():
         ccl.Pk2D()
 
     # Input function has incorrect signature
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         with pytest.warns(ccl.CCLDeprecationWarning):
             ccl.Pk2D(pkfunc=pk1d)
 
@@ -149,8 +149,10 @@ def test_pk2d_function():
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
+    psp = ccl.Pk2D.from_function(pkfunc=lpk2d, cosmo=cosmo)
     with pytest.warns(ccl.CCLDeprecationWarning):
-        psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+        psp2 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    assert psp.eval(1.0, 1.0) == psp2.eval(1.0, 1.0)
 
     # Test at single point
     ktest = 1E-2
