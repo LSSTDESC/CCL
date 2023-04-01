@@ -7,7 +7,8 @@ import numpy as np
 
 
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
-           "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir")
+           "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
+           "MassDefFof",)
 
 
 def mass2radius_lagrangian(cosmo, M):

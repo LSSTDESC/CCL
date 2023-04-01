@@ -158,3 +158,11 @@ def test_nM_tinker10_norm():
     zs = np.linspace(0, 1, 4)
     ns = np.array([norm(z) for z in zs])
     assert np.all(np.fabs(ns-1) < 0.005)
+
+
+def test_mass_function_mass_def_strict_always_raises():
+    # Verify that when the property `_mass_def_strict_always` is set to True,
+    # the `mass_def_strict` check cannot be relaxed.
+    mdef = ccl.halos.MassDef(400, "critical")
+    with pytest.raises(ValueError):
+        ccl.halos.MassFuncBocquet16(mass_def=mdef, mass_def_strict=False)
