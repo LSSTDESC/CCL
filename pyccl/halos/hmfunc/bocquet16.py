@@ -56,6 +56,8 @@ class MassFuncBocquet16(MassFunc):
             self.Az, self.az, self.bz, self.cz = vals[key]
 
     def _M200c_M200m(self, cosmo, a):
+        # Translates the parameters of M200c to those of M200m
+        # for which the base Bocquet16 model is defined.
         z = 1/a - 1
         Omega_m = cosmo.omega_x(a, "matter")
         gamma0 = 3.54E-2 + Omega_m**0.09
@@ -69,6 +71,8 @@ class MassFuncBocquet16(MassFunc):
         return gamma, delta
 
     def _M500c_M200m(self, cosmo, a):
+        # Translates the parameters of M500c to those of M200m
+        # for which the base Bocquet16 model is defined.
         z = 1/a - 1
         Omega_m = cosmo.omega_x(a, "matter")
         alpha0 = 0.880 + 0.329 * Omega_m

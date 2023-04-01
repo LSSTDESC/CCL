@@ -94,7 +94,7 @@ class MassDef(CCLAutoreprObject):
     __getattr__ = deprecate_attr(pairs=[('c_m_relation', 'concentration')]
                                  )(super.__getattribute__)
 
-    @warn_api
+    @warn_api(pairs=[("c_m_relation", "concentration")])
     def __init__(self, Delta, rho_type=None, *, concentration=None):
         # Check it makes sense
         if isinstance(Delta, str) and Delta not in ["fof", "vir"]:
@@ -141,6 +141,17 @@ class MassDef(CCLAutoreprObject):
             D, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
             return D
         return self.Delta
+
+    def _get_Delta_m(self, cosmo, a):
+        """ For SO-based mass definitions, this returns the corresponding
+        value of Delta for a rho_matter-based definition.
+        """
+        delta = self.get_Delta(cosmo, a)
+        if self.rho_type == 'matter':
+            return delta
+        om_this = cosmo.omega_x(a, self.rho_type)
+        om_matt = cosmo.omega_x(a, 'matter')
+        return delta * om_this / om_matt
 
     def get_mass(self, cosmo, R, a):
         """ Translates a halo radius into a mass

@@ -56,7 +56,8 @@ class ConcentrationIshiyama21(Concentration):
                 (False, False, 500): (1.83, 1.95, 1.17, 3.57, 0.91, 0.26)}
 
         key = (self.Vmax, self.relaxed, self.mass_def.Delta)
-        self.kappa, self.a0, self.a1, self.b0, self.b1, self.c_alpha = vals[key]  # noqa
+        self.kappa, self.a0, self.a1, \
+            self.b0, self.b1, self.c_alpha = vals[key]
 
     def _dlsigmaR(self, cosmo, M, a):
         # kappa multiplies radius, so in log, 3*kappa multiplies mass

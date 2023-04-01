@@ -29,4 +29,4 @@ class ConcentrationConstant(Concentration):
         return False
 
     def _concentration(self, cosmo, M, a):
-        return np.full_like(M, self.c)
+        return np.full_like(M, self.c)[()]

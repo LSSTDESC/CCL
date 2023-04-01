@@ -33,6 +33,7 @@ class MassFuncDespali16(MassFunc):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
+        # True for FoF since Despali16 is not defined for this mass def.
         return mass_def.Delta == "fof"
 
     def _setup(self):

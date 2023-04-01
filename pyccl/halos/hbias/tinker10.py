@@ -1,13 +1,13 @@
 from ...base import warn_api
 from ..massdef import MassDef200m
-from ..halo_model_base import HaloBias, TinkerFunction
+from ..halo_model_base import HaloBias
 import numpy as np
 
 
 __all__ = ("HaloBiasTinker10",)
 
 
-class HaloBiasTinker10(HaloBias, TinkerFunction):
+class HaloBiasTinker10(HaloBias):
     """ Implements halo bias described in arXiv:1001.3162.
 
     Args:
@@ -28,6 +28,7 @@ class HaloBiasTinker10(HaloBias, TinkerFunction):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
+        # True for FoF since Tinker10 is not defined for this mass def.
         return mass_def.Delta == "fof"
 
     def _setup(self):
@@ -38,7 +39,7 @@ class HaloBiasTinker10(HaloBias, TinkerFunction):
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM
-        ld = np.log10(self._get_Delta_m(cosmo, a))
+        ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
         xp = np.exp(-(4./ld)**4.)
         A = 1.0 + 0.24 * ld * xp
         C = 0.019 + 0.107 * ld + 0.19*xp

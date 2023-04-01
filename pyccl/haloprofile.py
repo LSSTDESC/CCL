@@ -24,9 +24,9 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
     mdef = hal.MassDef(odelta, 'matter')
-    c = hal.ConcentrationConstant(c=concentration, mdef=mdef)
+    c = hal.ConcentrationConstant(c=concentration, mass_def=mdef)
     p = hal.HaloProfileNFW(c, truncated=False)
-    return p.real(cosmo, r, halo_mass, a, mdef)
+    return p.real(cosmo, r, halo_mass, a, mass_def=mdef)
 
 
 @deprecated(hal.HaloProfileEinasto)
@@ -54,10 +54,10 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
     mdef = hal.MassDef(odelta, 'matter')
-    c = hal.ConcentrationConstant(c=concentration, mdef=mdef)
+    c = hal.ConcentrationConstant(c=concentration, mass_def=mdef)
     mdef = hal.MassDef(odelta, 'matter', concentration=c)
     p = hal.HaloProfileEinasto(c, truncated=False)
-    return p.real(cosmo, r, halo_mass, a, mdef)
+    return p.real(cosmo, r, halo_mass, a, mass_def=mdef)
 
 
 @deprecated(hal.HaloProfileHernquist)
@@ -83,9 +83,9 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
         float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
     """
     mdef = hal.MassDef(odelta, 'matter')
-    c = hal.ConcentrationConstant(c=concentration, mdef=mdef)
+    c = hal.ConcentrationConstant(c=concentration, mass_def=mdef)
     p = hal.HaloProfileHernquist(c, truncated=False)
-    return p.real(cosmo, r, halo_mass, a, mdef)
+    return p.real(cosmo, r, halo_mass, a, mass_def=mdef)
 
 
 @deprecated(hal.HaloProfileNFW)
@@ -112,6 +112,6 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
          in units of Msun/Mpc^2.
     """
     mdef = hal.MassDef(odelta, 'matter')
-    c = hal.ConcentrationConstant(c=concentration, mdef=mdef)
+    c = hal.ConcentrationConstant(c=concentration, mass_def=mdef)
     p = hal.HaloProfileNFW(c, truncated=False, projected_analytic=True)
-    return p.projected(cosmo, r, halo_mass, a, mdef)
+    return p.projected(cosmo, r, halo_mass, a, mass_def=mdef)

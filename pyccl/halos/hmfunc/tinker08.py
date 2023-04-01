@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ..massdef import MassDef200m
-from ..halo_model_base import MassFunc, TinkerFunction
+from ..halo_model_base import MassFunc
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -8,7 +8,7 @@ from scipy.interpolate import interp1d
 __all__ = ("MassFuncTinker08",)
 
 
-class MassFuncTinker08(MassFunc, TinkerFunction):
+class MassFuncTinker08(MassFunc):
     """ Implements mass function described in arXiv:0803.2706.
 
     Args:
@@ -49,7 +49,7 @@ class MassFuncTinker08(MassFunc, TinkerFunction):
         self.pc = interp1d(ldelta, phi)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        ld = np.log10(self._get_Delta_m(cosmo, a))
+        ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
         pA = self.pA0(ld) * a**0.14
         pa = self.pa0(ld) * a**0.06
         pd = 10.**(-(0.75/(ld - 1.8750612633))**1.2)
