@@ -1,4 +1,4 @@
-from ...base import warn_api
+from ...base import warn_api, deprecated
 from .profile_base import HaloProfile
 import numpy as np
 
@@ -25,6 +25,7 @@ class HaloProfileGaussian(HaloProfile):
     __repr_attrs__ = ("r_scale", "rho_0", "precision_fftlog", "normprof",)
     normprof = False
 
+    @deprecated()
     @warn_api
     def __init__(self, *, r_scale, rho0):
         self.rho_0 = rho0
