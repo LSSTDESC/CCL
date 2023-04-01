@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef
 from ..halo_model_base import Concentration
 import numpy as np
 
@@ -12,16 +11,16 @@ class ConcentrationConstant(Concentration):
 
     Args:
         c (float): constant concentration value.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
             definition object that fixes
             the mass definition used by this c(M)
-            parametrization. In this case it's arbitrary.
+            parametrization, or a name string. In this case it's arbitrary.
     """
     __repr_attrs__ = ("mass_def", "c",)
     name = 'Constant'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, c=1, *, mass_def=MassDef(200, 'critical')):
+    def __init__(self, c=1, *, mass_def="200c"):
         self.c = c
         super().__init__(mass_def=mass_def)
 

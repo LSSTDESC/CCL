@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef
 from ..halo_model_base import Concentration
 import numpy as np
 
@@ -13,15 +12,15 @@ class ConcentrationDiemer15(Concentration):
     S.O. masses with Delta = 200-critical.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
             a mass definition object that fixes
             the mass definition used by this c(M)
-            parametrization.
+            parametrization, or a name string.
     """
     name = 'Diemer15'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def=MassDef(200, 'critical')):
+    def __init__(self, *, mass_def="200c"):
         super().__init__(mass_def=mass_def)
 
     def _setup(self):

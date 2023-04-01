@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef
 from ..halo_model_base import Concentration
 
 
@@ -13,15 +12,15 @@ class ConcentrationDuffy08(Concentration):
     By default it will be initialized for Delta = 200-critical.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
             definition object that fixes
             the mass definition used by this c(M)
-            parametrization.
+            parametrization, or a name string.
     """
     name = 'Duffy08'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def=MassDef(200, 'critical')):
+    def __init__(self, *, mass_def="200c"):
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):

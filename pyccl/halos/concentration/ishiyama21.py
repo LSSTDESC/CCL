@@ -1,7 +1,6 @@
 from ... import ccllib as lib
 from ...base import warn_api
 from ...pyutils import check
-from ..massdef import MassDef
 from ..halo_model_base import Concentration
 import numpy as np
 from scipy.optimize import brentq, root_scalar
@@ -17,9 +16,9 @@ class ConcentrationIshiyama21(Concentration):
     By default it will be initialized for Delta = 500-critical.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
             a mass definition object that fixes the mass definition
-            used by this c(M) parametrization.
+            used by this c(M) parametrization, or a name string.
         relaxed (bool):
             If True, use concentration for relaxed halos. Otherwise,
             use concentration for all halos. The default is False.
@@ -32,7 +31,7 @@ class ConcentrationIshiyama21(Concentration):
     name = 'Ishiyama21'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def=MassDef(500, 'critical'),
+    def __init__(self, *, mass_def="500c",
                  relaxed=False, Vmax=False):
         self.relaxed = relaxed
         self.Vmax = Vmax

@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef200m
 from ..halo_model_base import MassFunc
 import numpy as np
 
@@ -11,9 +10,9 @@ class MassFuncBocquet16(MassFunc):
     """ Implements mass function described in arXiv:1502.07357.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object.
-            this parametrization accepts SO masses with
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
+            This parametrization accepts SO masses with
             Delta = 200 (matter, critical) and 500 (critical).
             The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
@@ -27,7 +26,7 @@ class MassFuncBocquet16(MassFunc):
 
     @warn_api
     def __init__(self, *,
-                 mass_def=MassDef200m(),
+                 mass_def="200m",
                  mass_def_strict=True,
                  hydro=True):
         self.hydro = hydro

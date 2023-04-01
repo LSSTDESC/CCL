@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef200m
 from ..halo_model_base import HaloBias
 import numpy as np
 
@@ -11,9 +10,9 @@ class HaloBiasTinker10(HaloBias):
     """ Implements halo bias described in arXiv:1001.3162.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object.
-            this parametrization accepts SO masses with
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
+            This parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
         mass_def_strict (bool): if False, consistency of the mass
@@ -23,7 +22,7 @@ class HaloBiasTinker10(HaloBias):
 
     @warn_api
     def __init__(self, *,
-                 mass_def=MassDef200m(),
+                 mass_def="200m",
                  mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

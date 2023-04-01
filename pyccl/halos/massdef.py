@@ -122,6 +122,12 @@ class MassDef(CCLAutoreprObject):
             return f"{self.Delta}{self.rho_type[0]}"
         return f"{self.Delta}"
 
+    def __eq__(self, other):
+        # TODO: Remove after #1033 is merged.
+        if type(self) != type(other):
+            return False
+        return self.name == other.name
+
     def get_Delta(self, cosmo, a):
         """ Gets overdensity parameter associated to this mass
         definition.
@@ -296,3 +302,13 @@ def MassDefVir(concentration='Klypin11'):
         concentration (string): concentration-mass relation.
     """
     return MassDef('vir', 'critical', concentration=concentration)
+
+
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDefFof(concentration=None):
+    r""":math:`\Delta = \rm FoF` mass definition.
+
+    Args:
+        concentration (string): concentration-mass relation.
+    """
+    return MassDef('fof', 'matter', concentration=concentration)

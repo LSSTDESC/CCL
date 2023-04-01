@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef200m
 from ..halo_model_base import MassFunc
 import numpy as np
 from scipy.interpolate import interp1d
@@ -12,9 +11,9 @@ class MassFuncTinker08(MassFunc):
     """ Implements mass function described in arXiv:0803.2706.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object.
-            this parametrization accepts SO masses with
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
+            This parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
@@ -24,7 +23,7 @@ class MassFuncTinker08(MassFunc):
 
     @warn_api
     def __init__(self, *,
-                 mass_def=MassDef200m(),
+                 mass_def="200m",
                  mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

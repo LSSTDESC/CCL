@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef
 from ..halo_model_base import Concentration
 
 
@@ -12,15 +11,15 @@ class ConcentrationKlypin11(Concentration):
     S.O. masses with Delta = Delta_vir.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
             definition object that fixes
             the mass definition used by this c(M)
-            parametrization.
+            parametrization, or a name string.
     """
     name = 'Klypin11'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def=MassDef('vir', 'critical')):
+    def __init__(self, *, mass_def="vir"):
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):

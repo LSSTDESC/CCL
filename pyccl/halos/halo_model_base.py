@@ -51,6 +51,8 @@ class HMIngredients(CCLAutoreprObject):
 
     @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):
+        from .massdef import MassDef
+        mass_def = MassDef.initialize_from_input(mass_def)
         self.mass_def_strict = mass_def_strict
         # Check if mass definition was provided and check that it's sensible.
         if self._check_mass_def(mass_def):
