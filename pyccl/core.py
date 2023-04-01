@@ -182,7 +182,6 @@ class Cosmology(CCLObject):
             details described below. Defaults to None.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is ``pyccl.physical_constants.T_ncdm``.
-            # TODO: Move after T_CMB for CCLv3.
 
     Currently supported extra parameters for CAMB are:
 
@@ -201,6 +200,7 @@ class Cosmology(CCLObject):
                                      "HMCode_logT_AGN": 7.8}}
 
     """
+    # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
     from ._repr import _build_string_Cosmology as __repr__
 
     # Go through all functions in the main package and the subpackages
@@ -1153,8 +1153,8 @@ class CosmologyCalculator(Cosmology):
             Takahashi et al. 2012 (arXiv:1208.2701).
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is ``pyccl.physical_constants.T_ncdm``.
-            # TODO: Move to after T_CMB for CCLv3.
     """
+    # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
