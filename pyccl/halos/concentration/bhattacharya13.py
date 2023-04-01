@@ -8,16 +8,25 @@ __all__ = ("ConcentrationBhattacharya13",)
 
 
 class ConcentrationBhattacharya13(Concentration):
-    """ Concentration-mass relation by Bhattacharya et al. 2013
-    (arXiv:1112.5479). This parametrization is only valid for
-    S.O. masses with Delta = Delta_vir, 200-matter and 200-critical.
-    By default it will be initialized for Delta = 200-critical.
+    r"""Concentration-mass relation by Bhattacharya et al. (2013)
+    :arXiv:1112.5479. Valid only for S.O. masses with
+    :math:`\Delta=200m` and :math:`\Delta=200c`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object that fixes
-            the mass definition used by this c(M)
-            parametrization.
+    The concentration takes the form
+
+    .. math::
+
+        c(M, z) = A \times D(z)^B \nu^C,
+
+    where :math:`D(z)` is the growth factor at redshift :math:`z`,
+    :math:`\nu=\frac{\delta_c}{\sigma_\rm{M}}` is the peak height, and
+    :math:`(A,B,C)` are given by the fitting formula.
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef`
+        Mass definition for this :math:`c(M)` parametrization.
+        The default is :math:`\Delta=200c`.
     """
     name = 'Bhattacharya13'
 

@@ -8,15 +8,30 @@ __all__ = ("ConcentrationDiemer15",)
 
 
 class ConcentrationDiemer15(Concentration):
-    """ Concentration-mass relation by Diemer & Kravtsov 2015
-    (arXiv:1407.4730). This parametrization is only valid for
-    S.O. masses with Delta = 200-critical.
+    r"""Concentration-mass relation by Diemer & Kravtsov (2015)
+    :arXiv:1407.4730. Valid only for S.O. :math:`\Delta = 200c`
+    mass definitions.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object that fixes
-            the mass definition used by this c(M)
-            parametrization.
+    The concentration takes the form
+
+    .. math::
+
+        c_{\rm 200c}(M, z) = \frac{c_{\rm min}}{2} \left[
+            \left( \frac{\nu}{\nu_{\rm min}} \right)^{-\alpha}
+            + \left( \frac{\nu}{\nu_{\rm min}} \right)^\beta \right],
+
+    where :math:`c_{\rm min}` and :math:`\nu_{\rm min}` take the functional
+    form :math:`X_{\rm min} = \chi_0 + \chi_1 n`. :math:`n` is the slope
+    of the power spectrum, and :math:`(\chi_0,\chi_1)` are fitting parameters.
+
+    .. note::
+
+        The mass definition for this concentration is fixed to :math:`200c`.
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef`
+        Mass definition for this :math:`c(M)` parametrization.
     """
     name = 'Diemer15'
 

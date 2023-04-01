@@ -8,14 +8,16 @@ __all__ = ("ConcentrationConstant",)
 
 
 class ConcentrationConstant(Concentration):
-    """ Constant contentration-mass relation.
+    """Constant contentration-mass relation.
 
-    Args:
-        c (float): constant concentration value.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object that fixes
-            the mass definition used by this c(M)
-            parametrization. In this case it's arbitrary.
+    .. note::
+        The mass definition for this concentration is arbitrary, and is
+        internally set to ``None``.
+
+    Parameters
+    ---------
+    c : float
+        Value of the constant concentration.
     """
     __repr_attrs__ = ("mass_def", "c",)
     name = 'Constant'

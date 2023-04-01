@@ -8,15 +8,51 @@ __all__ = ("ConcentrationPrada12",)
 
 
 class ConcentrationPrada12(Concentration):
-    """ Concentration-mass relation by Prada et al. 2012
-    (arXiv:1104.5130). This parametrization is only valid for
-    S.O. masses with Delta = 200-critical.
+    r"""Concentration-mass relation by Prada et al. (2012)
+    :arXiv:1104.5130. Valid only for S.O. masses with :math:`\Delta = 200c`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object that fixes
-            the mass definition used by this c(M)
-            parametrization.
+    The concentration takes the form
+
+    .. math::
+
+        c(M, z) &= B_0(x) \, \mathcal{C}(\sigma'), \\
+        \sigma' &= B_1(x) \, \sigma(M, x), \\
+        \mathcal{C}(\sigma') &= A \left[
+            \left( \frac{\sigma'}{b} \right)^c + 1 \right]
+            \exp \left( \frac{d}{\sigma'^2} \right),
+
+    where :math:`(A,b,c,d) = (2.881, 1.257, 1.022, 0.060)`. The approximations
+    for :math:`B_0(x)` and :math:`B_1(x)` are
+
+     .. math::
+
+         B_0(x) &= \frac{c_{\min}(x)}{c_{\min}(1.393)}, \\
+         B_1(x) &= \frac{\sigma_{\min}^{-1}(x)}{\sigma_{\min}^{-1}(1.393)},
+
+    where :math:`c_{\min}` and :math:`\sigma_{\min}^{-1}` define the minimum
+    of the halo concentrations and the value of :math:`\sigma` at the minimum:
+
+    .. math::
+
+        c_{\min}(x) &= c_0 + (c_1 - c_0) \left[ \frac{1}{\pi}
+        \arctan \left[ \alpha (x - x_0) \right] + \frac{1}{2} \right] \\
+        \sigma_{\min}^{-1}(x) &= \sigma_0^{-1}
+        + (\sigma_1^{-1} - \sigma_0^{-1}) \left[ \frac{1}{\pi}
+        \arctan \left[ \beta (x - x_1) \right] + \frac{1}{2} \right],
+
+    where :math:`(c_0, c_1, \alpha, x_0) = (3.681, 5.033, 6.948, 0.424)`
+    and :math:`(\sigma_0^{-1}, \sigma_1^{-1}, \beta, x_1)
+    = (1.047, 1.646, 7.386, 0.526)`.
+
+    .. note::
+
+        The mass definition for this concentration is fixed to :math:`200c`.
+
+    Parameters
+    ---------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef`
+        Mass definition for this :math:`c(M)` parametrization.
+        **Note**: can't be changed for this ``Concentration`` subclass.
     """
     name = 'Prada12'
 

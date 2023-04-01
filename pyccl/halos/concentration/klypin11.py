@@ -7,15 +7,28 @@ __all__ = ("ConcentrationKlypin11",)
 
 
 class ConcentrationKlypin11(Concentration):
-    """ Concentration-mass relation by Klypin et al. 2011
-    (arXiv:1002.3660). This parametrization is only valid for
-    S.O. masses with Delta = Delta_vir.
+    r"""Concentration-mass relation by Klypin et al. (2011)
+    :arXiv:1002.3660. Only valid for S.O. masses with
+    :math:`\Delta = \Delta_{\rm vir}`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object that fixes
-            the mass definition used by this c(M)
-            parametrization.
+    The concentration takes the form
+
+    .. math::
+
+        c(M_{\rm vir}) = 9.60 \left(
+            \frac{M_{\rm vir}}{10^{12} h^{-1} \, {\rm M_\odot}}
+            \right)^{-0.075},
+
+    for distrinct halos.
+
+    .. note::
+
+        The mass definition for this concentration is fixed to :math:`vir`.
+
+    Parameters
+    ---------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef`
+        Mass definition for this :math:`c(M)` parametrization.
     """
     name = 'Klypin11'
 

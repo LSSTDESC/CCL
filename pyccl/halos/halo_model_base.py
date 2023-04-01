@@ -231,14 +231,37 @@ class HaloBias(HMIngredients):
 
 
 class Concentration(HMIngredients):
-    """ This class enables the calculation of halo concentrations.
+    r"""Base class for halo mass-concentration relations.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass definition
-            object that fixes the mass definition used by this c(M)
-            parametrization.
+    Implementation
+    --------------
+    Subclasses must define a :meth:`_concentration()` method which implements
+    the concentration relation. These are a function of cosmology, mass, and
+    scale factor. Optionally, the :meth:`_setup()` method can be used to run
+    a piece of code after construction. See :meth:`HMIngredients._setup()`.
+
+    Theory
+    ------
+    Halo mass-concentration relations are typically defined through the NFW
+    profile,
+
+    .. math::
+
+        \rho(r) = \rho_{\rm crit} \frac{\delta_c}{(r/r_s)(1 + r/r_s)^2},
+
+    where :math:`r_s` is a scale radius. The concentration is then defined as
+
+    .. math::
+
+        c_\Delta \equiv \frac{r_\Delta}{r_s},
+
+    where :math:`\Delta` is the density contrast.
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef`
+        Mass definition for this :math:`c(M)` parametrization.
     """
-
     @warn_api
     def __init__(self, *, mass_def):
         super().__init__(mass_def=mass_def, mass_def_strict=True)
