@@ -1,6 +1,5 @@
 from ...base import warn_api
-from ..massdef import MassDef200m
-from ..halo_model_base import MassFunc, TinkerFunction
+from ..halo_model_base import MassFunc
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -8,13 +7,13 @@ from scipy.interpolate import interp1d
 __all__ = ("MassFuncTinker10",)
 
 
-class MassFuncTinker10(MassFunc, TinkerFunction):
+class MassFuncTinker10(MassFunc):
     """ Implements mass function described in arXiv:1001.3162.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object.
-            this parametrization accepts SO masses with
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
+            This parametrization accepts SO masses with
             200 < Delta < 3200 with respect to the matter density.
             If `None`, Delta = 200 (matter) will be used.
         mass_def_strict (bool): if False, consistency of the mass
@@ -27,7 +26,7 @@ class MassFuncTinker10(MassFunc, TinkerFunction):
 
     @warn_api
     def __init__(self, *,
-                 mass_def=MassDef200m(),
+                 mass_def="200m",
                  mass_def_strict=True,
                  norm_all_z=False):
         self.norm_all_z = norm_all_z
@@ -68,7 +67,7 @@ class MassFuncTinker10(MassFunc, TinkerFunction):
             self.pq0 = interp1d(ldelta, q)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        ld = np.log10(self._get_Delta_m(cosmo, a))
+        ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
         nu = 1.686 / sigM
         # redshift evolution only up to z=3
         a = np.clip(a, 0.25, 1)

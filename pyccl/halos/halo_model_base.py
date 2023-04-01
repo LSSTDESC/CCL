@@ -7,7 +7,7 @@ import functools
 from abc import abstractmethod
 
 
-__all__ = ("HMIngredients", "TinkerFunction",)
+__all__ = ("HMIngredients",)
 
 
 def _subclasses(cls):
@@ -51,6 +51,8 @@ class HMIngredients(CCLAutoreprObject):
 
     @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):
+        from .massdef import MassDef
+        mass_def = MassDef.initialize_from_input(mass_def)
         self.mass_def_strict = mass_def_strict
         # Check if mass definition was provided and check that it's sensible.
         if self._check_mass_def(mass_def):
@@ -286,23 +288,6 @@ class Concentration(HMIngredients):
         if np.ndim(M) == 0:
             return c[0]
         return c
-
-
-class TinkerFunction:
-    """Mixins inherit this class' methods. Useful for the Tinker classes."""
-
-    def _get_Delta_m(self, cosmo, a):
-        """ For SO-based mass definitions, this returns the corresponding
-        value of Delta for a rho_matter-based definition. This is useful
-        mostly for the Tinker mass functions, which are defined for any
-        SO mass in general, but explicitly only for Delta_matter.
-        """
-        delta = self.mass_def.get_Delta(cosmo, a)
-        if self.mass_def.rho_type == 'matter':
-            return delta
-        om_this = cosmo.omega_x(a, self.mass_def.rho_type)
-        om_matt = cosmo.omega_x(a, 'matter')
-        return delta * om_this / om_matt
 
 
 @functools.wraps(MassFunc.from_name)

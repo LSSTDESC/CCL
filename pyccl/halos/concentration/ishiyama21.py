@@ -1,7 +1,6 @@
 from ... import ccllib as lib
 from ...base import warn_api
 from ...pyutils import check
-from ..massdef import MassDef
 from ..halo_model_base import Concentration
 import numpy as np
 from scipy.optimize import brentq, root_scalar
@@ -58,12 +57,13 @@ class ConcentrationIshiyama21(Concentration):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef`
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
         Mass definition for this :math:`c(M)` parametrization.
-    relaxed : bool
+        The default is :math:`\Delta=500c`.
+    relaxed : bool, optional
         If True, use concentration for relaxed halos. Otherwise,
         use concentration for all halos. The default is False.
-    Vmax : bool
+    Vmax : bool, optional
         If True, use the concentration found with the Vmax numerical
         method. Otherwise, use the concentration found with profile
         fitting. The default is False.
@@ -72,7 +72,7 @@ class ConcentrationIshiyama21(Concentration):
     name = 'Ishiyama21'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def=MassDef(500, 'critical'),
+    def __init__(self, *, mass_def="500c",
                  relaxed=False, Vmax=False):
         self.relaxed = relaxed
         self.Vmax = Vmax
@@ -96,7 +96,8 @@ class ConcentrationIshiyama21(Concentration):
                 (False, False, 500): (1.83, 1.95, 1.17, 3.57, 0.91, 0.26)}
 
         key = (self.Vmax, self.relaxed, self.mass_def.Delta)
-        self.kappa, self.a0, self.a1, self.b0, self.b1, self.c_alpha = vals[key]  # noqa
+        self.kappa, self.a0, self.a1, \
+            self.b0, self.b1, self.c_alpha = vals[key]
 
     def _dlsigmaR(self, cosmo, M, a):
         # kappa multiplies radius, so in log, 3*kappa multiplies mass

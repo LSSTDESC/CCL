@@ -94,7 +94,7 @@ class MassDef(CCLAutoreprObject):
     __getattr__ = deprecate_attr(pairs=[('c_m_relation', 'concentration')]
                                  )(super.__getattribute__)
 
-    @warn_api
+    @warn_api(pairs=[("c_m_relation", "concentration")])
     def __init__(self, Delta, rho_type=None, *, concentration=None):
         # Check it makes sense
         if isinstance(Delta, str) and Delta not in ["fof", "vir"]:
@@ -122,6 +122,12 @@ class MassDef(CCLAutoreprObject):
             return f"{self.Delta}{self.rho_type[0]}"
         return f"{self.Delta}"
 
+    def __eq__(self, other):
+        # TODO: Remove after #1033 is merged.
+        if type(self) != type(other):
+            return False
+        return self.name == other.name
+
     def get_Delta(self, cosmo, a):
         """ Gets overdensity parameter associated to this mass
         definition.
@@ -141,6 +147,17 @@ class MassDef(CCLAutoreprObject):
             D, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
             return D
         return self.Delta
+
+    def _get_Delta_m(self, cosmo, a):
+        """ For SO-based mass definitions, this returns the corresponding
+        value of Delta for a rho_matter-based definition.
+        """
+        delta = self.get_Delta(cosmo, a)
+        if self.rho_type == 'matter':
+            return delta
+        om_this = cosmo.omega_x(a, self.rho_type)
+        om_matt = cosmo.omega_x(a, 'matter')
+        return delta * om_this / om_matt
 
     def get_mass(self, cosmo, R, a):
         """ Translates a halo radius into a mass
@@ -285,3 +302,13 @@ def MassDefVir(concentration='Klypin11'):
         concentration (string): concentration-mass relation.
     """
     return MassDef('vir', 'critical', concentration=concentration)
+
+
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDefFof(concentration=None):
+    r""":math:`\Delta = \rm FoF` mass definition.
+
+    Args:
+        concentration (string): concentration-mass relation.
+    """
+    return MassDef('fof', 'matter', concentration=concentration)

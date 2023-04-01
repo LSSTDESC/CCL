@@ -1,7 +1,6 @@
 from ...base import warn_api
 from ... import ccllib as lib
 from ...pyutils import check
-from ..massdef import MassDef200m
 from ..halo_model_base import MassFunc
 import numpy as np
 
@@ -13,9 +12,9 @@ class MassFuncDespali16(MassFunc):
     """ Implements mass function described in arXiv:1507.05627.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object.
-            this parametrization accepts any SO masses.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
+            This parametrization accepts any SO masses.
             The default is '200m'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
@@ -26,13 +25,14 @@ class MassFuncDespali16(MassFunc):
 
     @warn_api
     def __init__(self, *,
-                 mass_def=MassDef200m(),
+                 mass_def="200m",
                  mass_def_strict=True,
                  ellipsoidal=False):
         self.ellipsoidal = ellipsoidal
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
+        # True for FoF since Despali16 is not defined for this mass def.
         return mass_def.Delta == "fof"
 
     def _setup(self):

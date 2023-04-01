@@ -45,7 +45,6 @@ class HMCalculator(CCLAutoreprObject):
     """
     __repr_attrs__ = ("mass_function", "halo_bias", "mass_def", "precision",)
     __getattr__ = deprecate_attr(pairs=[('_mdef', 'mass_def'),
-                                        ('_mdef', 'mass_def'),
                                         ('_massfunc', 'mass_function'),
                                         ('_hbias', 'halo_bias'),
                                         ('_prec', 'precision')]
@@ -290,7 +289,7 @@ class HMCalculator(CCLAutoreprObject):
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             a (float): scale factor.
-            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
                 second halo profile. If `None`, `prof` will be used as
@@ -331,7 +330,7 @@ class HMCalculator(CCLAutoreprObject):
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             a (float): scale factor.
-            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
                 second halo profile. If `None`, `prof` will be used as

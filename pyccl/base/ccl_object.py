@@ -152,7 +152,10 @@ class UnlockInstance:
             @functools.wraps(func)
             def wrapper(self, *args, **kwargs):
                 out = func(self, *args, **kwargs)
-                self._object_lock.lock()
+                init_name = self.__class__.__init__.__qualname__
+                this_name = func.__qualname__
+                if this_name is init_name:  # skip this if called via `super()`
+                    self._object_lock.lock()
                 return out
             return wrapper
 

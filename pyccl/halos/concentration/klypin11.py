@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef
 from ..halo_model_base import Concentration
 
 
@@ -27,13 +26,14 @@ class ConcentrationKlypin11(Concentration):
 
     Parameters
     ---------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef`
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
         Mass definition for this :math:`c(M)` parametrization.
+        The default is :math:`\Delta={\rm vir}`.
     """
     name = 'Klypin11'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def=MassDef('vir', 'critical')):
+    def __init__(self, *, mass_def="vir"):
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):

@@ -30,6 +30,7 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
       - functions/methods whose arguments have been ranamed,
       - functions/methods with changed argument order,
       - constructors in the ``halos`` sub-package where ``cosmo`` is removed,
+      - constructors in ``halos`` where the default ``MassDef`` is not None,
       - functions/methods where ``normprof`` is deprecated.
 
     Parameters:
@@ -147,6 +148,16 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
                 "Argument `normprof` has been become a profile attribute and "
                 "specifying it is deprecated. To change the default value use "
                 "`with UnlockInstance(...): prof.normprof = [True|False]`.",
+                CCLDeprecationWarning)
+
+        # API compatibility for non-None default `MassDef` in `halos`.
+        if (params.get("mass_def") is not None
+                and "mass_def" in kwargs
+                and kwargs["mass_def"] is None):
+            kwargs["mass_def"] = params["mass_def"].default
+            warnings.warn(
+                "`None` has been deprecated as a value for mass_def. "
+                "To use the default, leave the parameter empty.",
                 CCLDeprecationWarning)
 
         # Collect what's remaining and sort to preserve signature order.

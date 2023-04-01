@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef
 from ..halo_model_base import MassFunc
 import numpy as np
 
@@ -12,8 +11,8 @@ class MassFuncAngulo12(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
             this parametrization accepts FoF masses only.
             If `None`, FoF masses will be used.
         mass_def_strict (bool): if False, consistency of the mass
@@ -23,7 +22,7 @@ class MassFuncAngulo12(MassFunc):
 
     @warn_api
     def __init__(self, *,
-                 mass_def=MassDef('fof', 'matter'),
+                 mass_def="fof",
                  mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

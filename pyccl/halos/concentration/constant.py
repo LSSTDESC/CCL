@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..massdef import MassDef
 from ..halo_model_base import Concentration
 import numpy as np
 
@@ -10,20 +9,20 @@ __all__ = ("ConcentrationConstant",)
 class ConcentrationConstant(Concentration):
     """Constant contentration-mass relation.
 
-    .. note::
-        The mass definition for this concentration is arbitrary, and is
-        internally set to ``None``.
-
     Parameters
     ---------
-    c : float
+    c : float, optional
         Value of the constant concentration.
+        The default is :math:`1.0`.
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+        The mass definition for this :math:`c(M)` parametrization is arbitrary
+        and is not used for any calculations.
     """
     __repr_attrs__ = ("mass_def", "c",)
     name = 'Constant'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, c=1, *, mass_def=MassDef(200, 'critical')):
+    def __init__(self, c=1, *, mass_def="200c"):
         self.c = c
         super().__init__(mass_def=mass_def)
 
@@ -31,4 +30,4 @@ class ConcentrationConstant(Concentration):
         return False
 
     def _concentration(self, cosmo, M, a):
-        return np.full_like(M, self.c)
+        return np.full_like(M, self.c)[()]

@@ -13,7 +13,6 @@ def test_ssc_WL():
     h = 0.7
     cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=h, n_s=0.97,
                           sigma8=0.8, m_nu=0.0)
-    cosmo.compute_linear_power()
 
     mass_def = ccl.halos.MassDef200m()
     hmf = ccl.halos.MassFuncTinker10(cosmo,

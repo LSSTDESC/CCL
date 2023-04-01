@@ -1,7 +1,6 @@
 from ... import ccllib as lib
 from ...base import warn_api
 from ...pyutils import check
-from ..massdef import MassDef
 from ..halo_model_base import MassFunc
 import numpy as np
 
@@ -14,9 +13,9 @@ class MassFuncSheth99(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object.
-            this parametrization accepts FoF masses only.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
+            This parametrization accepts FoF masses only.
             The default is 'fof'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
@@ -29,7 +28,7 @@ class MassFuncSheth99(MassFunc):
 
     @warn_api
     def __init__(self, *,
-                 mass_def=MassDef('fof', 'matter'),
+                 mass_def="fof",
                  mass_def_strict=True,
                  use_delta_c_fit=False):
         self.use_delta_c_fit = use_delta_c_fit
