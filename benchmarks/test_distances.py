@@ -1,6 +1,4 @@
 import numpy as np
-from numpy.testing import assert_allclose
-import numpy.testing
 import pyccl as ccl
 import pytest
 
@@ -340,13 +338,13 @@ def compare_distances(z, chi_bench, dm_bench, Omega_v, w0, wa):
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+    assert np.allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
     # compare distance moudli where a!=1
     a_not_one = (a != 1).nonzero()
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
 
-    assert_allclose(
+    assert np.allclose(
         dm, dm_bench[a_not_one], atol=1e-3, rtol=DISTANCES_TOLERANCE*10)
 
 
@@ -368,7 +366,7 @@ def compare_distances_hiz(z, chi_bench, Omega_v, w0, wa):
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+    assert np.allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
 
 def compare_distances_mnu(z, chi_bench, dm_bench, Omega_v, w0, wa, Neff, mnu):
@@ -388,13 +386,14 @@ def compare_distances_mnu(z, chi_bench, dm_bench, Omega_v, w0, wa, Neff, mnu):
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a)
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
+    assert np.allclose(chi, chi_bench,
+                       atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
 
     # compare distance moudli where a!=1
     a_not_one = (a != 1).nonzero()
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
 
-    assert_allclose(
+    assert np.allclose(
         dm, dm_bench[a_not_one], atol=1e-3, rtol=DISTANCES_TOLERANCE_MNU)
 
 
@@ -416,13 +415,14 @@ def compare_distances_mnu_hiz(z, chi_bench, dm_bench, Omega_v,
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a)
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
+    assert np.allclose(chi, chi_bench,
+                       atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
 
     # compare distance moudli where a!=1
     a_not_one = (a != 1).nonzero()
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
 
-    assert_allclose(
+    assert np.allclose(
         dm, dm_bench[a_not_one], atol=1e-3, rtol=DISTANCES_TOLERANCE_MNU)
 
 
@@ -441,12 +441,12 @@ def compare_class_distances(z, chi_bench, dm_bench, Neff=3.0, m_nu=0.0,
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a)
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, rtol=DISTANCES_TOLERANCE_CLASS)
+    assert np.allclose(chi, chi_bench, rtol=DISTANCES_TOLERANCE_CLASS)
 
     # Compare distance moudli where a!=1
     a_not_one = a != 1
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
-    assert_allclose(dm, dm_bench[a_not_one], rtol=DISTANCES_TOLERANCE_CLASS)
+    assert np.allclose(dm, dm_bench[a_not_one], rtol=DISTANCES_TOLERANCE_CLASS)
 
 
 def compare_distances_muSig(z, chi_bench, dm_bench, Omega_v, w0, wa):
@@ -469,13 +469,13 @@ def compare_distances_muSig(z, chi_bench, dm_bench, Omega_v, w0, wa):
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+    assert np.allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
     # compare distance moudli where a!=1
     a_not_one = (a != 1).nonzero()
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
 
-    assert_allclose(
+    assert np.allclose(
         dm, dm_bench[a_not_one], atol=1e-3, rtol=DISTANCES_TOLERANCE*10)
 
 
@@ -499,7 +499,7 @@ def compare_distances_hiz_muSig(z, chi_bench, Omega_v, w0, wa):
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+    assert np.allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
 
 @pytest.mark.parametrize('i', list(range(5)))

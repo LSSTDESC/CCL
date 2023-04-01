@@ -2,7 +2,6 @@ import pickle
 import tempfile
 import pytest
 import numpy as np
-from numpy.testing import assert_raises, assert_, assert_no_warnings
 import pyccl as ccl
 
 
@@ -71,43 +70,34 @@ def test_cosmology_init():
     Check that Cosmology objects can only be constructed in a valid way.
     """
     # Make sure error raised if invalid transfer/power spectrum etc. passed
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        matter_power_spectrum='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        transfer_function='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        baryons_power_spectrum='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        mass_function='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        halo_concentration='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        emulator_neutrinos='x')
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=np.array([0.1, 0.1, 0.1, 0.1]))
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=ccl)
-    assert_raises(
-        ValueError, ccl.Cosmology,
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=np.array([0.1, 0.1, 0.1]),
-        m_nu_type='normal')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      matter_power_spectrum='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      transfer_function='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      baryons_power_spectrum='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      mass_function='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      halo_concentration='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      emulator_neutrinos='x')
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      m_nu=np.array([0.1, 0.1, 0.1, 0.1]))
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      m_nu=ccl)
+    with pytest.raises(ValueError):
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      m_nu=np.array([0.1, 0.1, 0.1]),
+                      m_nu_type='normal')
 
 
 def test_cosmology_setitem():
@@ -126,27 +116,26 @@ def test_cosmology_output():
                           n_s=0.96)
 
     # Return and print status messages
-    assert_no_warnings(cosmo.status)
-    assert_no_warnings(print, cosmo)
+    assert cosmo.cosmo.status == 0
 
     # Test status methods for different precomputable quantities
-    assert_(cosmo.has_distances is False)
-    assert_(cosmo.has_growth is False)
-    assert_(cosmo.has_linear_power is False)
-    assert_(cosmo.has_nonlin_power is False)
-    assert_(cosmo.has_sigma is False)
+    assert not cosmo.has_distances
+    assert not cosmo.has_growth
+    assert not cosmo.has_linear_power
+    assert not cosmo.has_nonlin_power
+    assert not cosmo.has_sigma
 
-    # Check that quantities can be precomputed
-    assert_no_warnings(cosmo.compute_distances)
-    assert_no_warnings(cosmo.compute_growth)
-    assert_no_warnings(cosmo.compute_linear_power)
-    assert_no_warnings(cosmo.compute_nonlin_power)
-    assert_no_warnings(cosmo.compute_sigma)
-    assert_(cosmo.has_distances is True)
-    assert_(cosmo.has_growth is True)
-    assert_(cosmo.has_linear_power is True)
-    assert_(cosmo.has_nonlin_power is True)
-    assert_(cosmo.has_sigma is True)
+    cosmo.compute_distances()
+    cosmo.compute_growth()
+    cosmo.compute_linear_power()
+    cosmo.compute_nonlin_power()
+    cosmo.compute_sigma()
+
+    assert cosmo.has_distances
+    assert cosmo.has_growth
+    assert cosmo.has_linear_power
+    assert cosmo.has_nonlin_power
+    assert cosmo.has_sigma
 
 
 def test_cosmology_pickles():
@@ -162,9 +151,9 @@ def test_cosmology_pickles():
         fp.seek(0)
         cosmo2 = pickle.load(fp)
 
-    assert_(
-        ccl.comoving_radial_distance(cosmo, 0.5) ==
-        ccl.comoving_radial_distance(cosmo2, 0.5))
+    assert np.allclose(ccl.comoving_radial_distance(cosmo, 0.5),
+                       ccl.comoving_radial_distance(cosmo2, 0.5),
+                       atol=0, rtol=0)
 
 
 def test_cosmology_lcdm():
@@ -175,8 +164,9 @@ def test_cosmology_lcdm():
                        h=0.67, n_s=0.96,
                        sigma8=0.81)
     c2 = ccl.CosmologyVanillaLCDM()
-    assert_(ccl.comoving_radial_distance(c1, 0.5) ==
-            ccl.comoving_radial_distance(c2, 0.5))
+    assert np.allclose(ccl.comoving_radial_distance(c1, 0.5),
+                       ccl.comoving_radial_distance(c2, 0.5),
+                       atol=0, rtol=0)
 
 
 def test_cosmology_p18lcdm_raises():
@@ -198,8 +188,8 @@ def test_cosmology_context():
         assert cosmo.has_distances
 
     # make sure it does not!
-    assert_(not hasattr(cosmo, "cosmo"))
-    assert_(not hasattr(cosmo, "_params"))
+    assert not hasattr(cosmo, "cosmo")
+    assert not hasattr(cosmo, "_params")
 
     with pytest.raises(AttributeError):
         cosmo.has_growth

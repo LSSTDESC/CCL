@@ -15,7 +15,6 @@ COSMO_HM = ccl.Cosmology(
 
 
 def test_halomod_f2d_copy():
-    from pyccl.pyutils import assert_warns
     mdef = ccl.halos.MassDef('vir', 'matter')
     hmf = ccl.halos.MassFuncSheth99(mass_def=mdef,
                                     mass_def_strict=False,
@@ -29,9 +28,8 @@ def test_halomod_f2d_copy():
     pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf)
     psp_new = pk2d.psp
     # This just triggers the internal calculation
-    pk_old = assert_warns(
-        ccl.CCLWarning,
-        ccl.nonlin_matter_power, COSMO_HM, 1., 0.8)
+    with pytest.warns(ccl.CCLWarning):
+        pk_old = ccl.nonlin_matter_power(COSMO_HM, 1., 0.8)
     pk_new = pk2d.eval(1., 0.8, COSMO_HM)
     psp_old = COSMO_HM.get_nonlin_power().psp
     assert psp_new.lkmin == psp_old.lkmin
