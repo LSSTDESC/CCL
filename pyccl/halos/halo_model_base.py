@@ -99,14 +99,14 @@ class HMIngredients(CCLAutoreprObject):
             # Passed mass is incompatible with model.
 
             if self._mass_def_strict_always:
-                # Class has no universal model and is incompatible with
+                # Class has no universal model and mass is incompatible.
                 raise ValueError(
                     f"{msg} and this requirement cannot be relaxed.")
 
             if self.mass_def_strict:
                 # Strict mass_def check enabled and mass is incompatible.
                 raise ValueError(
-                    f"{msg}. To relax this check set `mass_def_strict=True`.")
+                    f"{msg}. To relax this check set `mass_def_strict=False`.")
 
     def _get_logM_sigM(self, cosmo, M, a, *, return_dlns=False):
         """Compute ``logM``, ``sigM``, and (optionally) ``dlns_dlogM``."""
