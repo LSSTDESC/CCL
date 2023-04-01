@@ -4,7 +4,7 @@ from ..parameters import physical_constants as const
 from ..base import CCLAutoreprObject, warn_api, deprecated, deprecate_attr
 import numpy as np
 import functools
-from abc import abstractmethod
+from abc import abstractmethod, abstractproperty
 
 
 __all__ = ("HMIngredients",)
@@ -51,29 +51,38 @@ class HMIngredients(CCLAutoreprObject):
 
     @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):
+        # Check mass definition consistency.
         from .massdef import MassDef
         mass_def = MassDef.initialize_from_input(mass_def)
         self.mass_def_strict = mass_def_strict
-        # Check if mass definition was provided and check that it's sensible.
-        if self._check_mass_def(mass_def):
-            classname = self.__class__.name
-            raise ValueError(
-                f"{classname} is not defined for {mass_def.name}-based masses."
-                " To disable this exception set `mass_def_strict=True`.")
+        self._check_mass_def(mass_def)
         self.mass_def = mass_def
         self._setup()
 
+    @abstractproperty
+    def _mass_def_strict_always(self) -> bool:
+        """Property that dictates whether ``mass_def_strict`` can be set
+        as False on initialization.
+
+        Some models are set up in a way so that the set of fitted parameters
+        depends on the mass definition, (i.e. no one universal model exists
+        to cover all cases). Setting this to True fixes ``mass_def_strict``
+        to True irrespective of what the user passes.
+
+        Set this propery to False to allow users to override strict checks.
+        """
+
     @abstractmethod
-    def _check_mass_def_strict(self, mass_def):
+    def _check_mass_def_strict(self, mass_def) -> bool:
         """Check if this class is defined for mass definition ``mass_def``."""
 
-    def _setup(self):
+    def _setup(self) -> None:
         """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
         constructor call.
         """
 
-    def _check_mass_def(self, mass_def):
+    def _check_mass_def(self, mass_def) -> None:
         """ Return False if the input mass definition agrees with
         the definitions for which this mass function parametrization
         works. True otherwise. This function gets called at the
@@ -82,14 +91,22 @@ class HMIngredients(CCLAutoreprObject):
         Args:
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
-
-        Returns:
-            bool: True if the mass definition is not compatible with \
-                this mass function parametrization. False otherwise.
         """
-        if self.mass_def_strict:
-            return self._check_mass_def_strict(mass_def)
-        return False
+        classname = self.__class__.__name__
+        msg = f"{classname} is not defined for {mass_def.name} masses"
+
+        if self._check_mass_def_strict(mass_def):
+            # Passed mass is incompatible with model.
+
+            if self._mass_def_strict_always:
+                # Class has no universal model and is incompatible with
+                raise ValueError(
+                    f"{msg} and this requirement cannot be relaxed.")
+
+            if self.mass_def_strict:
+                # Strict mass_def check enabled and mass is incompatible.
+                raise ValueError(
+                    f"{msg}. To relax this check set `mass_def_strict=True`.")
 
     def _get_logM_sigM(self, cosmo, M, a, *, return_dlns=False):
         """Compute ``logM``, ``sigM``, and (optionally) ``dlns_dlogM``."""
@@ -136,6 +153,7 @@ class MassFunc(HMIngredients):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
+    _mass_def_strict_always = False
 
     @abstractmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
@@ -198,6 +216,7 @@ class HaloBias(HMIngredients):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
+    _mass_def_strict_always = False
 
     @abstractmethod
     def _get_bsigma(self, cosmo, sigM, a):
@@ -264,6 +283,8 @@ class Concentration(HMIngredients):
     mass_def : :class:`~pyccl.halos.massdef.MassDef`
         Mass definition for this :math:`c(M)` parametrization.
     """
+    _mass_def_strict_always = True
+
     @warn_api
     def __init__(self, *, mass_def):
         super().__init__(mass_def=mass_def, mass_def_strict=True)
