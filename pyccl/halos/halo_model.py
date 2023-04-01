@@ -71,10 +71,10 @@ class HMCalculator(CCLAutoreprObject):
                 "in mass_def, mass_function, halo_bias.")
 
         self.precision = {
-            'log10M_min': lM_min, 'log10M_max': lM_max, 'nlM': nlM,
+            'lM_min': lM_min, 'lM_max': lM_max, 'nlM': nlM,
             'integration_method_M': integration_method_M, 'k_norm': k_norm}
-        self._lmass = np.linspace(self.precision['log10M_min'],
-                                  self.precision['log10M_max'],
+        self._lmass = np.linspace(self.precision['lM_min'],
+                                  self.precision['lM_max'],
                                   self.precision['nlM'])
         self._mass = 10.**self._lmass
         self._m0 = self._mass[0]

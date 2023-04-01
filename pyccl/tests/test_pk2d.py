@@ -194,7 +194,7 @@ def test_pk2d_cells():
     """
     Test interplay between Pk2D and the Limber integrator
     """
-
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
     z = np.linspace(0., 1., 200)
@@ -215,6 +215,8 @@ def test_pk2d_cells():
     cells = ccl.angular_cl(cosmo, lens1, lens1, ells, p_of_k_a=psp)
     assert all_finite(cells)
 
+    ccl.gsl_params.reload()  # reset to the default parameters
+
 
 def test_pk2d_parsing():
     a_arr = np.linspace(0.1, 1, 100)
@@ -224,6 +226,7 @@ def test_pk2d_parsing():
     psp = ccl.Pk2D(a_arr=a_arr, lk_arr=np.log(k_arr),
                    pk_arr=np.log(pk_arr))
 
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
     cosmo = ccl.CosmologyCalculator(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         pk_nonlin={'a': a_arr, 'k': k_arr,
@@ -259,6 +262,8 @@ def test_pk2d_parsing():
     with pytest.raises(ValueError):
         ccl.angular_cl(cosmo, lens1, lens1, ells,
                        p_of_k_a=3)
+
+    ccl.gsl_params.reload()  # reset to the default parameters
 
 
 def test_pk2d_get_spline_arrays():

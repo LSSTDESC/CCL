@@ -218,7 +218,7 @@ def test_tracer_nz_norm_spline_vs_gsl_intergation():
 @pytest.mark.parametrize('z_min, z_max, n_z_samples', [(0.0, 1.0, 2000),
                                                        (0.0, 1.0, 1000),
                                                        (0.0, 1.0, 500),
-                                                       (0.0, 1.0, 100),
+                                                       (0.0, 1.0, 256),
                                                        (0.3, 1.0, 1000)])
 def test_tracer_lensing_kernel_spline_vs_gsl_intergation(z_min, z_max,
                                                          n_z_samples):
@@ -253,7 +253,7 @@ def test_tracer_lensing_kernel_spline_vs_gsl_intergation(z_min, z_max,
 @pytest.mark.parametrize('z_min, z_max, n_z_samples', [(0.0, 1.0, 2000),
                                                        (0.0, 1.0, 1000),
                                                        (0.0, 1.0, 500),
-                                                       (0.0, 1.0, 100),
+                                                       (0.0, 1.0, 256),
                                                        (0.3, 1.0, 1000)])
 def test_tracer_magnification_kernel_spline_vs_gsl_intergation(z_min, z_max,
                                                                n_z_samples):

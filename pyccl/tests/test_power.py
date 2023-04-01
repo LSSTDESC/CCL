@@ -17,15 +17,16 @@ COSMO_HM = ccl.Cosmology(
 def test_halomod_f2d_copy():
     from pyccl.pyutils import assert_warns
     mdef = ccl.halos.MassDef('vir', 'matter')
-    hmf = ccl.halos.MassFuncSheth99(COSMO_HM, mdef,
+    hmf = ccl.halos.MassFuncSheth99(mass_def=mdef,
                                     mass_def_strict=False,
                                     use_delta_c_fit=True)
-    hbf = ccl.halos.HaloBiasSheth99(COSMO_HM, mass_def=mdef,
+    hbf = ccl.halos.HaloBiasSheth99(mass_def=mdef,
                                     mass_def_strict=False)
-    cc = ccl.halos.ConcentrationDuffy08(mdef)
-    prf = ccl.halos.HaloProfileNFW(cc)
-    hmc = ccl.halos.HMCalculator(COSMO_HM, hmf, hbf, mdef)
-    pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf, normprof1=True)
+    cc = ccl.halos.ConcentrationDuffy08(mass_def=mdef)
+    prf = ccl.halos.HaloProfileNFW(concentration=cc)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mdef)
+    pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf)
     psp_new = pk2d.psp
     # This just triggers the internal calculation
     pk_old = assert_warns(
@@ -60,16 +61,16 @@ def test_nonlin_matter_power_halomod(k):
 
     # New implementation
     mdef = ccl.halos.MassDef('vir', 'matter')
-    hmf = ccl.halos.MassFuncSheth99(COSMO_HM, mdef,
+    hmf = ccl.halos.MassFuncSheth99(mass_def=mdef,
                                     mass_def_strict=False,
                                     use_delta_c_fit=True)
-    hbf = ccl.halos.HaloBiasSheth99(COSMO_HM, mass_def=mdef,
+    hbf = ccl.halos.HaloBiasSheth99(mass_def=mdef,
                                     mass_def_strict=False)
-    cc = ccl.halos.ConcentrationDuffy08(mdef)
-    prf = ccl.halos.HaloProfileNFW(cc)
-    hmc = ccl.halos.HMCalculator(COSMO_HM, hmf, hbf, mdef)
-    pkb = ccl.halos.halomod_power_spectrum(COSMO_HM, hmc, k, a,
-                                           prf, normprof1=True)
+    cc = ccl.halos.ConcentrationDuffy08(mass_def=mdef)
+    prf = ccl.halos.HaloProfileNFW(concentration=cc)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mdef)
+    pkb = ccl.halos.halomod_power_spectrum(COSMO_HM, hmc, k, a, prf)
 
     assert np.allclose(pk, pkb)
     assert np.all(np.isfinite(pk))
