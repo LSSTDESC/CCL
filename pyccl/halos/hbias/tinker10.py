@@ -14,7 +14,20 @@ class HaloBiasTinker10(HaloBias):
 
     .. math::
 
-        1 + 1 = 2
+        b(M, z) = 1 - A \frac{\nu^a}{\nu^a \delta_{\rm c}^a}
+        + B \nu^b + C \nu^c,
+
+    where :math:`\nu(M, z) = \delta_{\rm c}(z) / \sigma(M, z)` is the peak
+    height of the density field, :math:`(B, b, c) = (0.183, 1.5, 2.4)` are
+    fitted parameters, and :math:`(A, a, C)` are given by the fitting formulas
+
+    .. math::
+
+        A &= 1.0 + 0.24y \exp{-(4/y)^4}, \\
+        a &= 0.44y - 0.88, \\
+        C &= 0.019 + 0.017y + 0.19 \exp{-(4/y)^4},
+
+    where :math:`y \equiv \log_{10} \Delta`.
 
     Parameters
     ----------

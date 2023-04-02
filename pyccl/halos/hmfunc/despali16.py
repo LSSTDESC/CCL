@@ -8,7 +8,7 @@ import numpy as np
 __all__ = ("MassFuncDespali16",)
 
 
-class MassFuncDespali16(MassFunc):#
+class MassFuncDespali16(MassFunc):
     r"""Halo mass function by Despali et al. (2016) :arXiv:1507.05627.
     Valid for any S.O. masses.
 

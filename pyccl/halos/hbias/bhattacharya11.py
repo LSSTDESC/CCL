@@ -16,8 +16,8 @@ class HaloBiasBhattacharya11(HaloBias):
         b(M, z) = 1 + \frac{\tilde{\alpha}\nu - \tilde{q}}{\delta_{\rm c}}
         + \frac{2\tilde{p}/\delta_{\rm c}}{1+(\tilde{\alpha}\nu)^{\tilde{p}}},
 
-    where :math:`\nu = \delta_{\rm c}^2 / \sigma^2`, and every parameter
-    with a tilde derives from redshift via a power law of the form
+    where :math:`\nu(M, z) = \delta_{\rm c}(z)^2 / \sigma(M, z)^2`, and every
+    parameter with a tilde derives from redshift via a power law of the form
     :math:`\tilde{x} = x_0 / (1 + z)^{\alpha_x}`, where :math:`x_0`
     and :math:`\alpha_x` are fitted parameters.
 

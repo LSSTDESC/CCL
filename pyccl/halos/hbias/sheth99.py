@@ -15,7 +15,11 @@ class HaloBiasSheth99(HaloBias):
 
     .. math::
 
-        1 + 1 = 2
+        b(M, z) = 1 + \frac{a\nu - 1}{\delta_{\rm c}}
+        + \frac{2p / \delta_{\rm c}}{1 + (a\nu)^p},
+
+    where :math:`\nu(M, z) = \delta_{\rm c}(z)^2 / \sigma(M, z)^2`, and
+    :math:`(a, p) = (0.707, 0.3)` are fitted parameters.
 
     Parameters
     ----------

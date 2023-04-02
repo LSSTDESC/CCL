@@ -1,5 +1,6 @@
 from ...base import warn_api
 from ..halo_model_base import HaloBias
+import numpy as np
 
 
 __all__ = ("HaloBiasSheth01",)
@@ -13,7 +14,14 @@ class HaloBiasSheth01(HaloBias):
 
     .. math::
 
-        1 + 1 = 2
+        b(M, z) = 1 + \frac{1}{\sqrt{a}\delta_{\rm c}} \left[ \sqrt{a}
+        \left( a\nu^2 \right) + \sqrt{a} b \left( a\nu^2 \right)^{1-c}
+        - \frac{ \left( a\nu^2 \right)^c}{ \left( a\nu^2 \right)^c
+                                          + b (1-c) (1-c/2)} \right],
+
+    where :math:`\nu(M, z) = \delta_{\rm c}(z) / \sigma(M, z)` is the peak
+    height of the density field and :math:`(a,b,c) = (0.707, 0.5, 0.6)`
+    are fitted parameters.
 
     Parameters
     ----------
@@ -39,7 +47,7 @@ class HaloBiasSheth01(HaloBias):
 
     def _setup(self):
         self.a = 0.707
-        self.sqrta = 0.84083292038
+        self.sqrta = np.sqrt(self.a)
         self.b = 0.5
         self.c = 0.6
         self.dc = 1.68647
