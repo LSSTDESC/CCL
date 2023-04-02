@@ -2,7 +2,6 @@ from .massdef import MassDef
 from .hmfunc import MassFunc
 from .hbias import HaloBias
 from ..pyutils import _spline_integrate
-from .. import background
 from ..base import CCLAutoreprObject, unlock_instance, warn_api, deprecate_attr
 from ..parameters import physical_constants as const
 import numpy as np
@@ -12,36 +11,66 @@ __all__ = ("HMCalculator",)
 
 
 class HMCalculator(CCLAutoreprObject):
-    """This class implements a set of methods that can be used to
-    compute various halo model quantities. A lot of these quantities
-    will involve integrals of the sort:
+    r"""Implementation of methods used to compute quantities related to the
+    halo model. A lot of these quantities involve integrals of the sort:
 
     .. math::
-       \\int dM\\,n(M,a)\\,f(M,k,a),
 
-    where :math:`n(M,a)` is the halo mass function, and :math:`f` is
-    an arbitrary function of mass, scale factor and Fourier scales.
+        I^0_X &= \int {\rm d}M \, n(M, a) \, f(M, k, a), \\
+        I^1_X &= \int {\rm d}M \, b(M, a) \, n(M, a) \, f(M, k, a),
 
-    Args:
-        mass_function (str or :class:`~pyccl.halos.hmfunc.MassFunc`):
-            the mass function to use
-        halo_bias (str or :class:`~pyccl.halos.hbias.HaloBias`):
-            the halo bias function to use
-        mass_def (str or :class:`~pyccl.halos.massdef.MassDef`):
-            the halo mass definition to use
-        lM_min, lM_max (float): lower and upper integration bounds
-            of logarithmic (base-10) mass (in units of solar mass).
-            Default range: 8, 16.
-        nlM (int): number of uniformly-spaced samples in log(Mass)
-            to be used in the mass integrals. Default: 128.
-        integration_method_M (string): integration method to use
-            in the mass integrals. Options: "simpson" and "spline".
-            Default: "simpson".
-        k_norm (float): some of the integrals solved by this class
-            will often be normalized by their value on very large
-            scales. This parameter (in units of inverse Mpc)
-            determines what is considered a "very large" scale.
-            Default: 1E-5.
+    where :math:`n(M, a)` is the halo mass function, :math:`b(M, a)` is the
+    halo bias function, and :math:`f` is an arbitrary function of mass,
+    scale factor and Fourier scales.
+
+    In the integrals, ``I_0_X`` denotes that the integrand is multiplied by
+    the mass function only, while ``I_1_X`` denotes multiplication by mass
+    function and halo bias function. The number ``X`` denotes the number of
+    halo profiles involved in the calculation.
+
+    The method of integration, as well as its precision, can be fine-tuned.
+
+    Parameters
+    ----------
+    mass_function : :class:`~pyccl.halos.MassFunc` or str
+        Mass function used in the calculations. If an instantiated mass
+        function is provided, its mass definition must be equal to the mass
+        definition passed into the halo model calculator.
+    halo_bias : :class:`~pyccl.halos.HaloBias` or str
+        Halo bias used in the calculations. If an instantiated halo bias is
+        provided, its mass definition must be equal to the mass definition
+        passed into the halo model calculator.
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str
+        Mass definition used in the calculations. It must be equal to the mass
+        definitions of ``mass_function`` and ``halo_bias``. If strings are
+        provided, the instantiated models will share a common mass definition.
+    lM_min, lM_max : float
+        Lower and upper mass integration bounds.
+        These are the base-10 logarithms of mass in units of
+        `:math:`\rm M_\odot`. The defaults are :math:`(8. 16)`.
+    nlM : int
+        Number of uniformly-spaced samples in :math:`log_{10}M` used in the
+        mass integrals. The default is 128.
+    integration_method_M : {'simpson'|'spline'}
+        Integration method to use.
+        ``'simpson'`` uses ``scipy.integrate.simpson``, while ``'spline'``
+        integrates using the knots of a cubic spline fitted to the integrand.
+        The default is ``'simpson'``.
+    k_norm : float
+        Large-scale value used for normalization of the Fourier-space halo
+        profiles, expressed in units of :math:`\rm Mpc^{-1}`.
+        The default is :math:`10^{-5}`.
+
+    Attributes
+    ----------
+    mass_function : :class:`~pyccl.halos.MassFunc`
+        Instantiated mass function.
+    halo_bias : :class:`~pyccl.halos.HaloBias`
+        Instantiated halo bias.
+    mass_def : :class:`~pyccl.halos.MassDef`
+        Instantiated mass definition.
+    precision : dict
+        Integration settings.
     """
     __repr_attrs__ = ("mass_function", "halo_bias", "mass_def", "precision",)
     __getattr__ = deprecate_attr(pairs=[('_mdef', 'mass_def'),
@@ -53,7 +82,7 @@ class HMCalculator(CCLAutoreprObject):
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
                      ("log10M_min", "lM_min"), ("log10M_max", "lM_max"),
                      ("nlog10M", "nlM"), ("k_min", "k_norm")])
-    def __init__(self, *, mass_function, halo_bias, mass_def=None,
+    def __init__(self, *, mass_function, halo_bias, mass_def,
                  lM_min=8., lM_max=16., nlM=128,
                  integration_method_M='simpson', k_norm=1E-5):
         # Initialize halo model ingredients
@@ -134,17 +163,27 @@ class HMCalculator(CCLAutoreprObject):
         return i1 + self._mbf0 * array_2[..., 0]
 
     def profile_norm(self, cosmo, a, prof):
-        """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
-        (see :meth:`~HMCalculator.I_0_1`).
+        r"""Compute the large-scale normalization of a profile:
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
-                profile.
+        .. math::
 
-        Returns:
-            float or array_like: integral value.
+            I^0_1(k \rightarrow 0, \, a|u).
+
+        See :meth:`~HMCalculator.I_0_1` for details.
+
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        a : float
+            Scale factor.
+        prof : :class:`~pyccl.halos.profiles.HaloProfile`
+            Halo profile.
+
+        Returns
+        -------
+        norm : float
+            Profile normalization at the given scale factor.
         """
         self._get_ingredients(cosmo, a, get_bf=False)
         uk0 = prof.fourier(cosmo, self.precision['k_norm'],
@@ -152,7 +191,28 @@ class HMCalculator(CCLAutoreprObject):
         return 1 / self._integrate_over_mf(uk0)
 
     def get_profile_norm(self, cosmo, a, prof):
-        """Compute ``profile_norm`` if ``prof.normprof`` is ``True``."""
+        """Compute the profile normalization.
+
+        Halo profiles contain the boolean attribute ``normprof`` which flags
+        when a profile needs normalization. This function returns :math:`1`
+        if the profile does not need normalization (``prof.normprof`` is False)
+        and :meth:`~pyccl.halos.HMCalculator.profile_norm` if ``prof.normprof``
+        is True.
+
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        a : float
+            Scale factor.
+        prof : :class:`~pyccl.halos.profiles.HaloProfile`
+            Halo profile.
+
+        Returns
+        -------
+        norm : float
+            Profile normalization at the given scale factor.
+        """
         if prof.normprof:
             return self.profile_norm(cosmo, a, prof)
         return np.ones_like(a)[()]
@@ -163,38 +223,41 @@ class HMCalculator(CCLAutoreprObject):
               reorder=["na", "a_min", "a_max"])
     def number_counts(self, cosmo, *, selection,
                       a_min=None, a_max=1.0, na=128):
-        """ Solves the integral:
+        r"""Compute halo number counts:
 
         .. math::
-            nc(sel) = \\int dM\\int da\\,\\frac{dV}{dad\\Omega}\\,n(M,a)\\,sel(M,a)
 
-        where :math:`n(M,a)` is the halo mass function, and
-        :math:`sel(M,a)` is the selection function as a function of halo mass
-        and scale factor.
+            {\rm n_c}({\rm sel}) = \int {\rm d}M \int {\rm d}a \,
+            \frac{{\rm d}V}{{\rm d}a \, {\rm d}\Omega} \,
+            n(M, a) \, {\rm sel}(M, a),
 
-        Note that the selection function is normalized to integrate to unity and
-        assumed to represent the selection probaility per unit scale factor and
-        per unit mass.
+        where :math:`n(M, a)` is the halo mass function, and
+        :math:`\mathrm{sel}(M, a)` is the selection function.
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            selection (callable): function of mass and scale factor
-                that returns the selection function. This function
-                should take in floats or arrays with a signature ``sel(m, a)``
-                and return an array with shape ``(len(m), len(a))`` according
-                to the numpy broadcasting rules.
-            a_min (float): the minimum scale factor at which to start integrals
-                over the selection function.
-                Default: value of ``cosmo.cosmo.spline_params.A_SPLINE_MIN``
-            a_max (float): the maximum scale factor at which to end integrals
-                over the selection function.
-                Default: 1.0
-            na (int): number of samples in scale factor to be used in
-                the integrals. Default: 128.
+        The selection function represents the selection probability
+        per unit mass per unit scale factor and integrates to :math:`1`.
 
-        Returns:
-            float: the total number of clusters
-        """  # noqa
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        sel : callable
+            Selection function with signature ``sel(M, a)``. The function must
+            be vectorized in both ``M`` and ``a``, and the output shape must
+            be ``(na, nM)`` as per ``numpy`` broadcasting rules.
+        amin, amax : float, optional
+            Minimum and maximum scale factors used in the selection function
+            integrals. The defaults are
+            (``cosmo._spline_params.A_SPLINE_MIN``, :math:`1.0`).
+        na : int, optional
+            Number of scale factor samples for the integrals. The default is
+            calculated from the spline parameters stored in ``cosmo``.
+
+        Returns
+        -------
+        n_c : float
+            The total number of clusters.
+        """
         # get a values for integral
         if a_min is None:
             a_min = cosmo.cosmo.spline_params.A_SPLINE_MIN
@@ -202,8 +265,8 @@ class HMCalculator(CCLAutoreprObject):
 
         # compute the volume element
         abs_dzda = 1 / a / a
-        dc = background.comoving_angular_distance(cosmo, a)
-        ez = background.h_over_h0(cosmo, a)
+        dc = cosmo.comoving_angular_distance(a)
+        ez = cosmo.h_over_h0(a)
         dh = const.CLIGHT_HMPC / cosmo['h']
         dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda
@@ -222,52 +285,64 @@ class HMCalculator(CCLAutoreprObject):
         return self._integrator(mint, a)
 
     def I_0_1(self, cosmo, k, a, prof):
-        """ Solves the integral:
+        r"""Compute the integral:
 
         .. math::
-            I^0_1(k,a|u) = \\int dM\\,n(M,a)\\,\\langle u(k,a|M)\\rangle,
 
-        where :math:`n(M,a)` is the halo mass function, and
-        :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
-        function of scale, scale factor and halo mass.
+            I^0_1(k,a|u) = \int {\rm d}M \, n(M, a) \,
+            \langle u(k, a|M) \rangle,
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
-                profile.
+        where :math:`n(M, a)` is the halo mass function, and
+        :math:`\langle u(k, a|M) \rangle` is the halo profile as a
+        function of wavenumber, scale factor and halo mass.
 
-        Returns:
-            float or array_like: integral values evaluated at each
-            value of `k`.
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        k : float or (nk,) array_like
+            Comoving wavenumber in :math:`\rm Mpc^{-1}`.
+        a : float
+            Scale factor.
+        prof : :class:`~pyccl.halos.profiles.HaloProfile`
+            Halo profile.
+
+        Returns
+        -------
+        I_0_1 : float or (nk,) ``numpy.ndarray``
+            Integral value.
         """
         self._get_ingredients(cosmo, a, get_bf=False)
         uk = prof.fourier(cosmo, k, self._mass, a, mass_def=self.mass_def).T
         return self._integrate_over_mf(uk)
 
     def I_1_1(self, cosmo, k, a, prof):
-        """ Solves the integral:
+        r"""Compute the integral:
 
         .. math::
-            I^1_1(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
-            \\langle u(k,a|M)\\rangle,
 
-        where :math:`n(M,a)` is the halo mass function,
-        :math:`b(M,a)` is the halo bias, and
-        :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
-        function of scale, scale factor and halo mass.
+            I^1_1(k, a|u) = \int {\rm d}M \, n(M, a) \, b(M, a) \,
+            \langle u(k, a|M) \rangle,
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
-                profile.
+        where :math:`n(M, a)` is the halo mass function, :math:`b(M, a)` is
+        the halo bias function, and :math:`\langle u(k, a|M) \rangle` is the
+        halo profile as a function of wavenumber, scale factor and halo mass.
 
-        Returns:
-            float or array_like: integral values evaluated at each
-            value of `k`.
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        k : float or (nk,) array_like
+            Comoving wavenumber in :math:`\rm Mpc^{-1}`.
+        a : float
+            Scale factor.
+        prof : :class:`~pyccl.halos.profiles.HaloProfile`
+            Halo profile.
+
+        Returns
+        -------
+        I_1_1 : float or (nk,) ``numpy.ndarray``
+            Integral value.
         """
         self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof.fourier(cosmo, k, self._mass, a, mass_def=self.mass_def).T
@@ -275,35 +350,34 @@ class HMCalculator(CCLAutoreprObject):
 
     @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
     def I_0_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
-        """ Solves the integral:
+        r"""Compute the integral:
 
         .. math::
-            I^0_2(k,a|u,v) = \\int dM\\,n(M,a)\\,
-            \\langle u(k,a|M) v(k,a|M)\\rangle,
 
-        where :math:`n(M,a)` is the halo mass function, and
-        :math:`\\langle u(k,a|M) v(k,a|M)\\rangle` is the two-point
+            I^0_2(k, a | u,v) = \int \mathrm{d}M \, n(M, a) \,
+            \langle u(k, a|M) v(k, a|M) \rangle,
+
+        where :math:`n(M, a)` is the halo mass function, and
+        :math:`\langle u(k,a|M) v(k,a|M)\rangle` is the two-point
         moment of the two halo profiles.
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
-                profile.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof` will be used as
-            prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-                a profile covariance object
-                returning the the two-point moment of the two profiles
-                being correlated.
-            prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-                a profile covariance object returning the the two-point
-                moment of the two profiles being correlated.
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        k : float or (nk,) array_like
+            Comoving wavenumber in :math:`\rm Mpc^{-1}`.
+        a : float
+            Scale factor.
+        prof, prof2 : :class:`~pyccl.halos.profiles.HaloProfile`
+            Halo profiles. If ``prof2 is None``, ``prof`` will be used.
+        prof_2pt : :class:`~pyccl.halos.profiles_2pt.Profile2pt`
+            2-point correlator of ``prof`` and ``prof2``.
 
-        Returns:
-             float or array_like: integral values evaluated at each
-             value of `k`.
+        Returns
+        -------
+        I_0_2 : float or (nk,) ``numpy.ndarray``
+            Integral value.
         """
         if prof2 is None:
             prof2 = prof
@@ -315,34 +389,34 @@ class HMCalculator(CCLAutoreprObject):
 
     @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
     def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
-        """ Solves the integral:
+        r"""Compute the integral:
 
         .. math::
-            I^1_2(k,a|u,v) = \\int dM\\,n(M,a)\\,b(M,a)\\,
-            \\langle u(k,a|M) v(k,a|M)\\rangle,
 
-        where :math:`n(M,a)` is the halo mass function,
-        :math:`b(M,a)` is the halo bias, and
-        :math:`\\langle u(k,a|M) v(k,a|M)\\rangle` is the two-point
-        moment of the two halo profiles.
+            I^1_2(k, a|u,v) = \int {\rm d}M \, n(M, a) \, b(M, a) \,
+            \langle u(k, a|M) v(k, a|M) \rangle,
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
-                profile.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof` will be used as
-                `prof2`.
-            prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-                a profile covariance object
-                returning the the two-point moment of the two profiles
-                being correlated.
+        where :math:`n(M, a)` is the halo mass function, :math:`b(M, a)` is
+        the halo bias, and :math:`\langle u(k,a|M) v(k,a|M) \rangle` is the
+        two-point moment of the two halo profiles.
 
-        Returns:
-             float or array_like: integral values evaluated at each
-             value of `k`.
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        k : float or (nk,) array_like
+            Comoving wavenumber in :math:`\rm Mpc^{-1}`.
+        a : float
+            Scale factor.
+        prof, prof2 : :class:`~pyccl.halos.profiles.HaloProfile`
+            Halo profiles. If ``prof2 is None``, ``prof`` will be used.
+        prof_2pt : :class:`~pyccl.halos.profiles_2pt.Profile2pt`
+            2-point correlator of ``prof`` and ``prof2``.
+
+        Returns
+        -------
+        I_1_2 : float or (nk,) ``numpy.ndarray``
+            Integral value.
         """
         if prof2 is None:
             prof2 = prof
@@ -357,43 +431,40 @@ class HMCalculator(CCLAutoreprObject):
     def I_0_22(self, cosmo, k, a, prof, *,
                prof2=None, prof3=None, prof4=None,
                prof12_2pt, prof34_2pt=None):
-        """ Solves the integral:
+        r"""Compute the integral:
 
         .. math::
-            I^0_{2,2}(k_u,k_v,a|u_{1,2},v_{1,2}) =
-            \\int dM\\,n(M,a)\\,
-            \\langle u_1(k_u,a|M) u_2(k_u,a|M)\\rangle
-            \\langle v_1(k_v,a|M) v_2(k_v,a|M)\\rangle,
+
+            I^0_{2,2}(k_u, k_v, a|(u_{1,2},v_{1,2})) =
+            \int {\rm d}M \, n(M, a) \,
+            \langle u_1(k_u, a|M) u_2(k_u, a|M) \rangle \,
+            \langle v_1(k_v, a|M) v_2(k_v, a|M) \rangle,
 
         where :math:`n(M,a)` is the halo mass function, and
-        :math:`\\langle u(k,a|M) v(k,a|M)\\rangle` is the
+        :math:`\langle u(k,a|M) v(k,a|M) \rangle` is the
         two-point moment of the two halo profiles.
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
-                profile.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof` will be used as
-                `prof2`.
-            prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                third halo profile. If `None`, `prof` will be used as
-                `prof3`.
-            prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                fourth halo profile. If `None`, `prof2` will be used as
-                `prof4`.
-            prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-                a profile covariance object returning the the
-                two-point moment of `prof` and `prof2`.
-            prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
-                a profile covariance object returning the the
-                two-point moment of `prof3` and `prof4`.
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        k : float or (nk,) array_like
+            Comoving wavenumber in :math:`\rm Mpc^{-1}`.
+        a : float
+            Scale factor.
+        prof, prof2, prof3, prof4 : :class:`~pyccl.halos.profiles.HaloProfile`
+            Halo profiles.
+            - If ``prof2 is None``, ``prof`` will be used.
+            - If ``prof3 is None``, ``prof`` will be used.
+            - If ``prof4 is None``, ``prof2`` will be used.
+        prof12_2pt, prof34_wpt : :class:`~pyccl.halos.profiles_2pt.Profile2pt`
+            2-point correlators of the profile pairs.
+            If ``prof34_2pt is None``, ``prof12_2pt`` will be used.
 
-        Returns:
-             float or array_like: integral values evaluated at each
-             value of `k`.
+        Returns
+        -------
+        I_0_22 : float or (nk, nk) ``numpy.ndarray``
+             Integral value.
         """
         if prof3 is None:
             prof3 = prof
