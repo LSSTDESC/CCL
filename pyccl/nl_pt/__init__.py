@@ -7,12 +7,14 @@ from .tracers import (
     translate_IA_norm,
 )
 
-# Power spectra
-from .power import (
+# Old power spectrum calculator
+from .power_deprecated import (
     PTCalculator,
     get_pt_pk2d,
 )
 
+# Eulerian PT
+from  .ept import EulerianPTCalculator
 
 __all__ = (
     'PTTracer',
@@ -20,6 +22,7 @@ __all__ = (
     'PTNumberCountsTracer',
     'PTIntrinsicAlignmentTracer',
     'translate_IA_norm',
-    'PTCalculator',
-    'get_pt_pk2d',
+    'EulerianPTCalculator',
+    'PTCalculator',  # TODO v3: depr
+    'get_pt_pk2d',  # TODO v3: depr
 )
