@@ -2,9 +2,11 @@ import numpy as np
 from scipy.interpolate import interp1d
 from ..pyutils import _check_array_params
 from ..parameters import physical_constants
+from ..base import CCLAutoreprObject, warn_api
 
 
-def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
+@warn_api
+def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
                       Om_m2_for_c2=False, Om_m_fid=0.3):
     """
     Function to convert from a_ia values to c_ia values,
@@ -49,7 +51,7 @@ def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
     return c1, c1delta, c2
 
 
-class PTTracer(object):
+class PTTracer(CCLAutoreprObject):
     """PTTracers contain the information necessary to describe the
     perturbative, non-linear inhomogeneities associated with
     different physical quantities.
@@ -59,6 +61,8 @@ class PTTracer(object):
     in a perturbation theory framework to provide N-point
     correlations.
     """
+    __repr_attrs__ = ('type', 'biases')
+
     def __init__(self):
         self.biases = {}
         self.type = None

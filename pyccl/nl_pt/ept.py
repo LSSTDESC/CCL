@@ -179,22 +179,23 @@ class EulerianPTCalculator(object):
         self._g4 = None
 
         # All valid Pk pair labels and their aliases
-        self._pk_alias = {'m:m': 'm:m', 'm:d1': 'm:m', 'm:d2': 'm:d2',
-                          'm:d3nl': 'm:d3nl', 'm:s2': 'm:s2', 'm:k2': 'm:k2',
-                          'm:c1': 'm:m', 'm:c2': 'm:c2', 'm:cd': 'm:cd',
-                          'd1:d1': 'm:m', 'd1:d2': 'm:d2', 'd1:d3nl': 'm:d3nl',
-                          'd1:s2': 'm:s2', 'd1:k2': 'm:k2', 'd1:c1': 'm:m',
-                          'd1:c2': 'm:c2', 'd1:cd': 'm:cd', 'd2:d2': 'd2:d2',
-                          'd2:d3nl': 'zero', 'd2:s2': 'd2:s2', 'd2:k2': 'zero',
-                          'd2:c1': 'zero', 'd2:c2': 'zero', 'd2:cd': 'zero',
-                          'd3nl:d3nl': 'zero', 'd3nl:s2': 'zero',
-                          'd3nl:k2': 'zero', 'd3nl:c1': 'zero', 'd3nl:c2':
-                          'zero', 'd3nl:cd': 'zero', 's2:s2': 's2:s2',
-                          's2:k2': 'zero', 's2:c1': 'zero', 's2:c2': 'zero',
-                          's2:cd': 'zero', 'k2:k2': 'zero', 'k2:c1': 'zero',
-                          'k2:c2': 'zero', 'k2:cd': 'zero', 'c1:c1': 'm:m',
-                          'c1:c2': 'm:c2', 'c1:cd': 'm:cd', 'c2:c2': 'c2:c2',
-                          'c2:cd': 'c2:cd', 'cd:cd': 'cd:cd'}
+        self._pk_alias = {
+            'm:m': 'm:m', 'm:b1': 'm:m', 'm:b2': 'm:b2',
+            'm:b3nl': 'm:b3nl', 'm:bs': 'm:bs', 'm:bk2': 'm:bk2',
+            'm:c1': 'm:m', 'm:c2': 'm:c2', 'm:cdelta': 'm:cdelta',
+            'b1:b1': 'm:m', 'b1:b2': 'm:b2', 'b1:b3nl': 'm:b3nl',
+            'b1:bs': 'm:bs', 'b1:bk2': 'm:bk2', 'b1:c1': 'm:m',
+            'b1:c2': 'm:c2', 'b1:cdelta': 'm:cdelta', 'b2:b2': 'b2:b2',
+            'b2:b3nl': 'zero', 'b2:bs': 'b2:bs', 'b2:bk2': 'zero',
+            'b2:c1': 'zero', 'b2:c2': 'zero', 'b2:cdelta': 'zero',
+            'b3nl:b3nl': 'zero', 'b3nl:bs': 'zero',
+            'b3nl:bk2': 'zero', 'b3nl:c1': 'zero', 'b3nl:c2':
+            'zero', 'b3nl:cdelta': 'zero', 'bs:bs': 'bs:bs',
+            'bs:bk2': 'zero', 'bs:c1': 'zero', 'bs:c2': 'zero',
+            'bs:cdelta': 'zero', 'bk2:bk2': 'zero', 'bk2:c1': 'zero',
+            'bk2:c2': 'zero', 'bk2:cdelta': 'zero', 'c1:c1': 'm:m',
+            'c1:c2': 'm:c2', 'c1:cdelta': 'm:cdelta', 'c2:c2': 'c2:c2',
+            'c2:cdelta': 'c2:cdelta', 'cdelta:cdelta': 'cdelta:cdelta'}
         # All valid Pk pair labels
         self._pk_valid = list(self._pk_alias.keys())
         # List of Pk2Ds to fill out
@@ -503,6 +504,9 @@ class EulerianPTCalculator(object):
         if return_ia_bb:
             return_ia_bb = True
 
+        if tracer2 is None:
+            tracer2 = tracer1
+
         t1 = tracer1.type
         t2 = tracer2.type
 
@@ -551,14 +555,14 @@ class EulerianPTCalculator(object):
         combination returned is determined by `kind`, which must be
         a string of the form `'q1:q2'`, where `q1` and `q2` denote
         the two operators whose power spectrum is sought. Valid
-        operator names are: `'m'` (matter overdensity), `'d1'`
-        (first-order overdensity), `'d2'` (:math:`\\delta^2`
-        term in galaxy bias expansion), `'s2'` (:math:`s^2` term
-        in galaxy bias expansion), `'d3nl'` (:math:`\\psi_{nl}`
-        term in galaxy bias expansion), `'k2'` (non-local
+        operator names are: `'m'` (matter overdensity), `'b1'`
+        (first-order overdensity), `'b2'` (:math:`\\delta^2`
+        term in galaxy bias expansion), `'bs'` (:math:`s^2` term
+        in galaxy bias expansion), `'b3nl'` (:math:`\\psi_{nl}`
+        term in galaxy bias expansion), `'bk2'` (non-local
         :math:`\\nabla^2 \\delta` term in galaxy bias expansion),
         `'c1'` (linear IA term), `'c2'` (:math:`s^2` term in IA
-        expansion), `'cd'` (:math:`s\\delta` term in IA expansion).
+        expansion), `'cdelta'` (:math:`s\\delta` term in IA expansion).
 
         Args:
             kind (str): string defining the pair of PT operators for
@@ -584,7 +588,11 @@ class EulerianPTCalculator(object):
             if not (kind_reverse in self._pk_valid):
                 raise ValueError(f"Pk template {kind} not valid")
             kind = kind_reverse
-        pk_name = self._pk_alias(kind)
+        pk_name = self._pk_alias[kind]
+
+        if return_ia_bb and (pk_name in ['c2:c2', 'c2:cdelta',
+                                         'cdelta:cdelta']):
+            pk_name += '_bb'
 
         # If already built, return
         if pk_name in self._pk2d_temp:
@@ -594,45 +602,42 @@ class EulerianPTCalculator(object):
         s4 = 0.
         if pk_name == 'm:m':
             pk = self.pk_b1
-        elif pk_name == 'm:d2':
+        elif pk_name == 'm:b2':
             pk = 0.5*self._g4[:, None]*self.dd_bias[2][None, :]
-        elif pk_name == 'm:d3nl':
+        elif pk_name == 'm:b3nl':
             pk = 0.5*self._g4[:, None]*self.dd_bias[8][None, :]
-        elif pk_name == 'm:s2':
+        elif pk_name == 'm:bs':
             pk = 0.5*self._g4[:, None]*self.dd_bias[4][None, :]
-        elif pk_name == 'm:k2':
+        elif pk_name == 'm:bk2':
             pk = 0.5*self.pk_bk*(self.k_s**2)[None, :]
         elif pk_name == 'm:c2':
             pk = self._g4[:, None] * (self.ia_mix[0]+self.ia_mix[1])[None, :]
-        elif pk_name == 'm:cd':
+        elif pk_name == 'm:cdelta':
             pk = self._g4[:, None] * (self.ia_ta[0]+self.ia_ta[1])[None, :]
-        elif pk_name == 'd2:d2':
+        elif pk_name == 'b2:b2':
             if self.fastpt_par['sub_lowk']:
                 s4 = self.dd_bias[7][:, None]
             pk = 0.25*self._g4[:, None]*(self.dd_bias[3][None, :] - 2*s4)
-        elif pk_name == 'd2:s2':
+        elif pk_name == 'b2:bs':
             if self.fastpt_par['sub_lowk']:
                 s4 = self.dd_bias[7][:, None]
             pk = 0.25*self._g4[:, None]*(self.dd_bias[5][None, :] - 4*s4/3)
-        elif pk_name == 's2:s2':
+        elif pk_name == 'bs:bs':
             if self.fastpt_par['sub_lowk']:
                 s4 = self.dd_bias[7][:, None]
             pk = 0.25*self._g4[:, None]*(self.dd_bias[6][None, :] - 8*s4/9)
         elif pk_name == 'c2:c2':
-            if return_ia_bb:
-                pk = self._g4[:, None] * self.ia_tt[1][None, :]
-            else:
-                pk = self._g4[:, None] * self.ia_tt[0][None, :]
-        elif pk_name == 'c2:cd':
-            if return_ia_bb:
-                pk = self._g4[:, None] * self.ia_mix[3][None, :]
-            else:
-                pk = self._g4[:, None] * self.ia_mix[2][None, :]
-        elif pk_name == 'cd:cd':
-            if return_ia_bb:
-                pk = self._g4[:, None] * self.ia_ta[3][None, :]
-            else:
-                pk = self._g4[:, None] * self.ia_ta[2][None, :]
+            pk = self._g4[:, None] * self.ia_tt[0][None, :]
+        elif pk_name == 'c2:c2_bb':
+            pk = self._g4[:, None] * self.ia_tt[1][None, :]
+        elif pk_name == 'c2:cdelta':
+            pk = self._g4[:, None] * self.ia_mix[2][None, :]
+        elif pk_name == 'c2:cdelta_bb':
+            pk = self._g4[:, None] * self.ia_mix[3][None, :]
+        elif pk_name == 'cdelta:cdelta':
+            pk = self._g4[:, None] * self.ia_ta[2][None, :]
+        elif pk_name == 'cdelta:cdelta_bb':
+            pk = self._g4[:, None] * self.ia_ta[3][None, :]
         elif pk_name == 'zero':
             # If zero, store None and return
             self._pk2d_temp[pk_name] = None
