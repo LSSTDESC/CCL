@@ -2,6 +2,8 @@ import numpy as np
 import pyccl as ccl
 import pytest
 
+# TODO v3: deprecate these tests
+
 NZ = 128
 ZZ = np.linspace(0., 1., NZ)
 BZ_C = 2.
