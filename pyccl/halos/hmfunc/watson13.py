@@ -7,16 +7,25 @@ __all__ = ("MassFuncWatson13",)
 
 
 class MassFuncWatson13(MassFunc):
-    """ Implements mass function described in arXiv:1212.0095.
+    r"""Halo mass function by Watson et al. (2013) :arXiv:1212.0095.
+    Valid for any S.O. and FoF masses.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
-            a mass definition object, or a name string.
-            This parametrization accepts fof and any SO masses.
-            The default is '200m'.
-            If `None`, Delta = 200 (matter) will be used.
-        mass_def_strict (bool): if False, consistency of the mass
-            definition will be ignored.
+    The mass function takes the form
+
+    .. math::
+
+        1 + 1 = 2
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+        Mass definition for this :math:`n(M)` parametrization.
+        The default is :math:`200{\rm m}`.
+    mass_def_strict : bool, optional
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+        The default is True.
     """
     name = 'Watson13'
 

@@ -7,16 +7,25 @@ __all__ = ("MassFuncJenkins01",)
 
 
 class MassFuncJenkins01(MassFunc):
-    """ Implements mass function described in astro-ph/0005260.
-    This parametrization is only valid for 'fof' masses.
+    r"""Halo mass function by Jenkins et al. (2001) :arXiv:astro-ph/0005260.
+    Valid for FoF masses only.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
-            a mass definition object, or a name string.
-            This parametrization accepts FoF masses only.
-            The default is 'fof'.
-        mass_def_strict (bool): if False, consistency of the mass
-            definition will be ignored.
+    The mass function takes the form
+
+    .. math::
+
+        1 + 1 = 2
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+        Mass definition for this :math:`n(M)` parametrization.
+        The default is :math:`{\rm FoF}`.
+    mass_def_strict : bool, optional
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+        The default is True.
     """
     name = 'Jenkins01'
 

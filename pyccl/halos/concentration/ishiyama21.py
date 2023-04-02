@@ -12,8 +12,8 @@ __all__ = ("ConcentrationIshiyama21",)
 class ConcentrationIshiyama21(Concentration):
     r"""Concentration-mass relation by Ishiyama et al. (2021)
     :arXiv:2007.14720. Only valid for S.O. masses with
-    :math:`\Delta = \Delta_{\rm vir}`, :math:`\Delta = 200c`,
-    or :math:`\Delta = 500c`.
+    :math:`\Delta_{\rm vir}`, :math:`\Delta_{200{\rm c}}`,
+    or :math:`\Delta_{500{\rm c}}`.
 
     The concentration takes the form
 
@@ -59,7 +59,7 @@ class ConcentrationIshiyama21(Concentration):
     ----------
     mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
         Mass definition for this :math:`c(M)` parametrization.
-        The default is :math:`\Delta=500c`.
+        The default is :math:`\Delta_{500{\rm c}}`.
     relaxed : bool, optional
         If True, use concentration for relaxed halos. Otherwise,
         use concentration for all halos. The default is False.

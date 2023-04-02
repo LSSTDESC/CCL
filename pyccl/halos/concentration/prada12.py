@@ -7,8 +7,8 @@ __all__ = ("ConcentrationPrada12",)
 
 
 class ConcentrationPrada12(Concentration):
-    r"""Concentration-mass relation by Prada et al. (2012)
-    :arXiv:1104.5130. Valid only for S.O. masses with :math:`\Delta = 200c`.
+    r"""Concentration-mass relation by Prada et al. (2012) :arXiv:1104.5130.
+    Valid only for S.O. masses with :math:`\Delta_{200{\rm c}}`.
 
     The concentration takes the form
 
@@ -43,15 +43,11 @@ class ConcentrationPrada12(Concentration):
     and :math:`(\sigma_0^{-1}, \sigma_1^{-1}, \beta, x_1)
     = (1.047, 1.646, 7.386, 0.526)`.
 
-    .. note::
-
-        The mass definition for this concentration is fixed to :math:`200c`.
-
     Parameters
     ---------
     mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
         Mass definition for this :math:`c(M)` parametrization.
-        The default is :math:`\Delta=200c`.
+        It is fixed to :math:`\Delta_{200{\rm c}}`.
     """
     name = 'Prada12'
 

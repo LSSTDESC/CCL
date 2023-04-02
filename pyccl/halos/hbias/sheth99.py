@@ -8,19 +8,30 @@ __all__ = ("HaloBiasSheth99",)
 
 
 class HaloBiasSheth99(HaloBias):
-    """ Implements halo bias described in 1999MNRAS.308..119S
-    This parametrization is only valid for 'fof' masses.
+    r"""Halo bias relation by Sheth & Tormen (1999) :arXiv:astro-ph/9901122.
+    Valid for FoF masses only.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
-            a mass definition object, or a name string.
-            This parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
-        mass_def_strict (bool): if False, consistency of the mass
-            definition will be ignored.
-        use_delta_c_fit (bool): if True, use delta_crit given by
-            the fit of Nakamura & Suto 1997. Otherwise use
-            delta_crit = 1.68647.
+    The halo bias takes the form
+
+    .. math::
+
+        1 + 1 = 2
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+        Mass definition for this :math:`b(M)` parametrization.
+        The default is :math:`{\rm FoF}`.
+    mass_def_strict : bool, optional
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+        The default is True.
+    use_delta_c_fit : bool, optional
+        If True, use the formula for :math:`\delta_{\rm crit}` given by the
+        fit of Nakamura & Suto (1997). If False, use
+        :math:`\delta_{\rm crit} \simeq 1.68647` given by spherical collapse
+        theory. The default is False.
     """
     __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = "Sheth99"

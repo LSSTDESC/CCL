@@ -8,17 +8,29 @@ import numpy as np
 __all__ = ("MassFuncDespali16",)
 
 
-class MassFuncDespali16(MassFunc):
-    """ Implements mass function described in arXiv:1507.05627.
+class MassFuncDespali16(MassFunc):#
+    r"""Halo mass function by Despali et al. (2016) :arXiv:1507.05627.
+    Valid for any S.O. masses.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
-            a mass definition object, or a name string.
-            This parametrization accepts any SO masses.
-            The default is '200m'.
-        mass_def_strict (bool): if False, consistency of the mass
-            definition will be ignored.
-        ellipsoidal (bool): use the ellipsoidal parametrization.
+    The mass function takes the form
+
+    .. math::
+
+        1 + 1 = 2
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+        Mass definition for this :math:`n(M)` parametrization.
+        The default is :math:`200{\rm m}`.
+    mass_def_strict : bool, optional
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+        The default is True.
+    ellipsoidal : bool, optional
+        Whether to use the fit parameters found by running an Ellipsoidal
+        Overdensity finder. The default is True.
     """
     __repr_attrs__ = ("mass_def", "mass_def_strict", "ellipsoidal",)
     name = 'Despali16'

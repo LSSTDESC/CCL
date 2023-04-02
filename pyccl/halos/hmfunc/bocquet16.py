@@ -7,19 +7,28 @@ __all__ = ("MassFuncBocquet16",)
 
 
 class MassFuncBocquet16(MassFunc):
-    """ Implements mass function described in arXiv:1502.07357.
+    r"""Halo mass function by Bocquet et al. (2016) :arXiv:1502.07357.
+    Defined for S.O. masses with :math:`\Delta_{200{\rm m}}`,
+    :math:`\Delta_{200{\rm c}}`, and :math:`\Delta_{500{\rm c}}`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
-            a mass definition object, or a name string.
-            This parametrization accepts SO masses with
-            Delta = 200 (matter, critical) and 500 (critical).
-            The default is '200m'.
-        mass_def_strict (bool): if False, consistency of the mass
-            definition will be ignored.
-        hydro (bool): if `False`, use the parametrization found
-            using dark-matter-only simulations. Otherwise, include
-            baryonic effects (default).
+    The mass function takes the form
+
+    .. math::
+
+        1 + 1 = 2
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+        Mass definition for this :math:`n(M)` parametrization.
+        The default is :math:`200{\rm m}`.
+    mass_def_strict : bool, optional
+        This mass function necessarily needs one of the valid mass definitions.
+        It is fixed to True and cannot be changed.
+    hydro : bool, optional
+        Whether to use the fitting formulas from simulations with baryons.
+        If False, use the parametrization found using DM-only simulations.
+        The default is True.
     """
     __repr_attrs__ = ("mass_def", "mass_def_strict", "hydro",)
     _mass_def_strict_always = True

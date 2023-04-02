@@ -7,16 +7,32 @@ __all__ = ("HaloBiasTinker10",)
 
 
 class HaloBiasTinker10(HaloBias):
-    """ Implements halo bias described in arXiv:1001.3162.
+    r"""Halo bias relation by Tinker et al. (2010) :arXiv:1001.3162.
+    Valid for any S.O. masses with :math:`\Delta \in (200{\rm m},3200{\rm m})`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
-            a mass definition object, or a name string.
-            This parametrization accepts SO masses with
-            200 < Delta < 3200 with respect to the matter density.
-            If `None`, Delta = 200 (matter) will be used.
-        mass_def_strict (bool): if False, consistency of the mass
-            definition will be ignored.
+    The halo bias takes the form
+
+    .. math::
+
+        1 + 1 = 2
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+        Mass definition for this :math:`n(M)` parametrization.
+        The default is :math:`200{\rm m}`.
+    mass_def_strict : bool, optional
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+        The default is True.
+
+    Raises
+    ------
+    ValueError
+        Interpolation out of bounds. :math:`\Delta_m` for the particular
+        combination of mass definition and scale factor is out of bounds with
+        the range of the mass function.
     """
     name = "Tinker10"
 

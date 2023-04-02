@@ -6,28 +6,26 @@ __all__ = ("HaloBiasSheth01",)
 
 
 class HaloBiasSheth01(HaloBias):
-    r"""Halo bias relation by Sheth et al. (2001) :arXiv:astro-ph/9907024.
-    Valid for FoF masses only.
+    r"""Halo bias relation by Sheth, Mo & Tormen (2001)
+    :arXiv:astro-ph/9907024. Valid for FoF masses only.
 
     The halo bias takes the form
 
     .. math::
 
-        b(M, z) = 1 + \frac{\tilde{\alpha}\nu - \tilde{q}}{\delta_{\rm c}}
-        + \frac{2\tilde{p}/\delta_{\rm c}}{1+(\tilde{\alpha}\nu)^{\tilde{p}}},
-
-    where :math:`\nu = \delta_{\rm c}^2 / \sigma^2`, and every parameter
-    with a tilde derives from redshift via a power law of the form
-    :math:`\tilde{x} = x_0 / (1 + z)^{\alpha_x}`, where :math:`x_0`
-    and :math:`\alpha_x` are fitted parameters.
+        1 + 1 = 2
 
     Parameters
     ----------
     mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
         Mass definition for this :math:`b(M)` parametrization.
         The default is :math:`{\rm FoF}`.
+    mass_def_strict : bool, optional
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+        The default is True.
     """
-
     name = "Sheth01"
 
     @warn_api

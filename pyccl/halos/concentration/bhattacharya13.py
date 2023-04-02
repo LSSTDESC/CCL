@@ -9,7 +9,8 @@ __all__ = ("ConcentrationBhattacharya13",)
 class ConcentrationBhattacharya13(Concentration):
     r"""Concentration-mass relation by Bhattacharya et al. (2013)
     :arXiv:1112.5479. Valid only for S.O. masses with
-    :math:`\Delta=200m` and :math:`\Delta=200c`.
+    :math:`\Delta_{\rm vir}`, :math:`\Delta_{200{\rm m}}`
+    and :math:`\Delta_{200{\rm c}}`.
 
     The concentration takes the form
 

@@ -23,15 +23,11 @@ class ConcentrationDiemer15(Concentration):
     form :math:`X_{\rm min} = \chi_0 + \chi_1 n`. :math:`n` is the slope
     of the power spectrum, and :math:`(\chi_0,\chi_1)` are fitting parameters.
 
-    .. note::
-
-        The mass definition for this concentration is fixed to :math:`200c`.
-
     Parameters
     ----------
     mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
-        Mass definition for this :math:`c(M)` parametrization.
-        The default is :math:`\Delta=200c`.
+        Mass definition for this :math:`c(M)` parametrization. It is fixed to
+        :math:`\Delta=200c`.
     """
     name = 'Diemer15'
 

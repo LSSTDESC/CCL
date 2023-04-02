@@ -7,16 +7,25 @@ __all__ = ("MassFuncAngulo12",)
 
 
 class MassFuncAngulo12(MassFunc):
-    """ Implements mass function described in arXiv:1203.3216.
-    This parametrization is only valid for 'fof' masses.
+    r"""Halo mass function by Angulo et al. (2012) :arXiv:1203.3216.
+    Valid for FoF masses only.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
-            a mass definition object, or a name string.
-            this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
-        mass_def_strict (bool): if False, consistency of the mass
-            definition will be ignored.
+    The mass function takes the form
+
+    .. math::
+
+        1 + 1 = 2
+
+    Parameters
+    ----------
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+        Mass definition for this :math:`n(M)` parametrization.
+        The default is :math:`{\rm FoF}`.
+    mass_def_strict : bool, optional
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+        The default is True.
     """
     name = 'Angulo12'
 

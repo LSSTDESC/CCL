@@ -7,8 +7,8 @@ __all__ = ("ConcentrationDuffy08",)
 
 class ConcentrationDuffy08(Concentration):
     r"""Concentration-mass relation by Duffy et al. (2008) :arXiv:0804.2486.
-    Only valid for S.O. masses with :math:`\Delta = \Delta_{\rm vir}`,
-    :math:`\Delta = 200m`, or :math:`\Delta = 200c`.
+    Only valid for S.O. masses with :math:`\Delta_{\rm vir}`,
+    :math:`\Delta_{200{\rm m}}`, or :math:`\Delta_{200{\rm c}}`.
 
     The concentration takes the form
 
@@ -23,7 +23,7 @@ class ConcentrationDuffy08(Concentration):
     ---------
     mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
         Mass definition for this :math:`c(M)` parametrization.
-        The default is :math:`\Delta=200c`.
+        The default is :math:`\Delta_{200{\rm c}}`.
     """
     name = 'Duffy08'
 
