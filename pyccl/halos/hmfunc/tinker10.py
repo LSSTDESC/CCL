@@ -90,7 +90,7 @@ class MassFuncTinker10(MassFunc):
             self.pq0 = interp1d(ldelta, q)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
+        ld = np.log10(self.mass_def.get_Delta_matter(cosmo, a))
         nu = 1.686 / sigM
         # redshift evolution only up to z=3
         a = np.clip(a, 0.25, 1)

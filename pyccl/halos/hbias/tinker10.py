@@ -67,7 +67,7 @@ class HaloBiasTinker10(HaloBias):
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM
-        ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
+        ld = np.log10(self.mass_def.get_Delta_matter(cosmo, a))
         xp = np.exp(-(4./ld)**4.)
         A = 1.0 + 0.24 * ld * xp
         C = 0.019 + 0.107 * ld + 0.19*xp

@@ -84,7 +84,7 @@ class MassFuncTinker08(MassFunc):
         self.pc = interp1d(ldelta, phi)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
+        ld = np.log10(self.mass_def.get_Delta_matter(cosmo, a))
         pA = self.pA0(ld) * a**0.14
         pa = self.pa0(ld) * a**0.06
         pd = 10.**(-(0.75/(ld - 1.8750612633))**1.2)
