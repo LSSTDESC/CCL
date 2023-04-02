@@ -5,6 +5,8 @@ from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import growth_factor
 from .tracers import PTTracer
+from ..errors import CCLDeprecationWarning
+import warnings
 
 
 class PTCalculator(object):
@@ -62,6 +64,10 @@ class PTCalculator(object):
                  pad_factor=1, low_extrap=-5, high_extrap=3,
                  P_window=None, C_window=.75,
                  k_cutoff=None, n_exp_cutoff=4):
+        warnings.warn("PTCalculators are deprecated and will be removed in "
+                      "future versions. Use the new perturbation theory "
+                      "calculators (e.g. EulerianPTCalculator).",
+                      CCLDeprecationWarning)
         self.with_dd = with_dd
         self.with_NC = with_NC
         self.with_IA = with_IA
@@ -510,6 +516,11 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
         :class:`~pyccl.nl_pt.power.PTCalculator`: PT Calc [optional]
     """
+    warnings.warn("get_pt_pk2d is deprecated and will be removed in "
+                  "future versions. Use the methods of the new perturbation "
+                  "theory calculators (e.g. "
+                  "EulerianPTCalculator.get_pk2d_biased).",
+                  CCLDeprecationWarning)
     if a_arr is None:
         status = 0
         na = lib.get_pk_spline_na(cosmo.cosmo)

@@ -14,7 +14,7 @@ from .power_deprecated import (
 )
 
 # Eulerian PT
-from  .ept import EulerianPTCalculator
+from .ept import EulerianPTCalculator
 
 __all__ = (
     'PTTracer',

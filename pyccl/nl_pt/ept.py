@@ -21,7 +21,7 @@ class EulerianPTCalculator(object):
 
     .. math::
         s^I_{ij}=c_1\\,s_{ij}+c_2(s_{ik}s_{jk}-s^2\\delta_{ik}/3)
-        +c_\\delta\\,\\delta\,s_{ij}
+        +c_\\delta\\,\\delta\\,s_{ij}
 
     (note that the higher-order terms are not divided by 2!).
 
@@ -559,7 +559,7 @@ class EulerianPTCalculator(object):
         term in galaxy bias expansion), `'k2'` (non-local
         :math:`\\nabla^2 \\delta` term in galaxy bias expansion),
         `'c1'` (linear IA term), `'c2'` (:math:`s^2` term in IA
-        expansion), `'cd'` (:math:`s\delta` term in IA expansion).
+        expansion), `'cd'` (:math:`s\\delta` term in IA expansion).
 
         Args:
             kind (str): string defining the pair of PT operators for
