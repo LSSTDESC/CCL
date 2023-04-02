@@ -14,7 +14,8 @@ class MassFuncPress74(MassFunc):
 
     .. math::
 
-        1 + 1 = 2
+        n(M, z) = \sqrt{\frac{2}{\pi}} \, \frac{\delta_c}{\sigma} \,
+        \exp{\left[ -0.5 \left( \frac{\delta_c}{\sigma} \right)^2 \right]}.
 
     Parameters
     ----------

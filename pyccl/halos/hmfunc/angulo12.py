@@ -14,7 +14,11 @@ class MassFuncAngulo12(MassFunc):
 
     .. math::
 
-        1 + 1 = 2
+        n(M, z) = A \times \left[ \frac{a}{\sigma} + 1 \right]^b
+        \exp{ \left[ \frac{-c}{\sigma^2} \right]},
+
+    where :math:`(A, a, b, c)` = (0.201, 2.08, 1.7, 1.172)` are fitted
+    parameters.
 
     Parameters
     ----------

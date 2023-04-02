@@ -15,7 +15,27 @@ class MassFuncTinker08(MassFunc):
 
     .. math::
 
-        1 + 1 = 2
+        \frac{{\rm d}N}{{\rm d}M} = f(\sigma) \, \frac{\bar{\rho}_{\rm m}}{M}\,
+        \frac{{\rm d}\ln \sigma^{-1}}{{\rm d}M},
+
+    where
+
+    .. math::
+
+        f(\sigma) = A \left[\left( \frac{\sigma}{b} \right)^{-a} + 1 \right] \,
+        \exp{\left( -\frac{c}{\sigma^2} \right)},
+
+    with :math:`A`, :math:`a`, :math:`b`, and :math:`c` given by
+
+    .. math::
+
+        A &= \begin{cases}
+            0.1 \, \log_{10} \Delta - 0.05  &  \Delta < 1600 \\
+            0.26                       &  \Delta \ge 1600,
+            \end{cases} \\
+        a &= 1.43 + (\log_{10} \Delta - 2.3)^{1.5}, \\
+        b &= 1.0 + (\log_{10} \Delta - 1.6)^{1.5}, \\
+        c &= 1.2 + (\log_{10} \Delta -2.35)^{1.6}.
 
     Parameters
     ----------

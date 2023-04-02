@@ -15,7 +15,13 @@ class MassFuncTinker10(MassFunc):
 
     .. math::
 
-        1 + 1 = 2
+        n(M, z) = \alpha \, \left[ 1 + (\beta\nu)^{-2\phi} \right] \,
+        \nu^{2\eta} \, \exp{ \left( -\frac{\gamma\nu^2}{2} \right) },
+
+    where :math:`\nu \equiv \delta_c/\sigma` is the peak height, and
+    :math:`\alpha`, :math:`\beta`, :math:`\gamma`, :math:`\eta`, :math:`\phi`
+    follow time-dependent power laws of the form :math:`x = x_0 (1+z)^{x_z}`,
+    with :math:`(x_0, x_z)` fitted parameters.
 
     Parameters
     ----------

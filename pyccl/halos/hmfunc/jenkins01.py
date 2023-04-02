@@ -14,7 +14,8 @@ class MassFuncJenkins01(MassFunc):
 
     .. math::
 
-        1 + 1 = 2
+        n(M) = 0.315 \, \exp{
+            \left( -\left| \sigma^{-1} + 0.61 \right|^{3.8} \right)}.
 
     Parameters
     ----------

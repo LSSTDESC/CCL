@@ -16,7 +16,12 @@ class MassFuncSheth99(MassFunc):
 
     .. math::
 
-        1 + 1 = 2
+        n(M, z) = A \, \nu \, \left( 1 + \left(a\nu^2\right)^{-p} \right) \,
+        \exp{\left( -\frac{a\nu^2}{2} \right)},
+
+    where :math:`\nu \equiv \delta_c/\sigma`, :math:`A` is the normalization
+    factor which makes the integral of :math:`f(\nu){\rm d}\nu` to be unity,
+    and :math:`(a, p) = (0.707, 0.3)` are fitted parameters.
 
     Parameters
     ----------
@@ -29,9 +34,9 @@ class MassFuncSheth99(MassFunc):
         If False, do not check for model consistency for the mass definition.
         The default is True.
     use_delta_c_fit : bool, optional
-        If True, use the formula for :math:`\delta_{\rm crit}` given by the
+        If True, use the formula for :math:`\delta_{\rm c}` given by the
         fit of Nakamura & Suto (1997). If False, use
-        :math:`\delta_{\rm crit} \simeq 1.68647` given by spherical collapse
+        :math:`\delta_{\rm c} \simeq 1.68647` given by spherical collapse
         theory. The default is False.
     """
     __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)

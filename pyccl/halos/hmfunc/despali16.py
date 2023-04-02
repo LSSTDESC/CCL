@@ -16,7 +16,26 @@ class MassFuncDespali16(MassFunc):
 
     .. math::
 
-        1 + 1 = 2
+        f(M, z) = f(\nu) \frac{{\rm d}\nu}{{\rm d}M}
+
+    where :math:`\nu \equiv \delta_{\rm c}^2 / \sigma^2` is the peak height
+    of the density field and
+
+    .. math::
+
+        \nu f(\nu) = A \left( 1 + \frac{1}{\nu'^p} \right)
+        \left( \frac{\nu'}{2\pi} \right)^{1/2} \exp (-\nu'/2),
+
+    with :math:`(A, a, p)` representing the polynomials
+
+    .. math::
+
+        A &= A_1 x + A_0, \\
+        a &= a_2 x^2 + a_1 x + a_0, \\
+        p &= p_2 x^2 + p_1 x + p_0,
+
+    where :math:`x \equiv \log_{10}(\Delta(z_0) / \Delta_{\rm vir}(z_0=0))`,
+    and the polynomial coefficients are fitted parameters.
 
     Parameters
     ----------

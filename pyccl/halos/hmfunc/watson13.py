@@ -14,7 +14,26 @@ class MassFuncWatson13(MassFunc):
 
     .. math::
 
-        1 + 1 = 2
+        \frac{{\rm d}n}{{\rm d}M} = \frac{\bar{\rho}_{\rm m}}{M^2} \, f(\sigma)
+        \, \frac{{\rm d} \ln \sigma^{-1}}{{\rm d} \ln M}.
+
+    where
+
+    .. math::
+
+        f(\sigma) = A \, \left[\left( \frac{\beta}{\sigma} \right)^\alpha + 1
+        \right] \, \exp \left( -\frac{\gamma}{\sigma^2} \right),
+
+    For FoF masses, :math:`A`, :math:`\alpha`, :math:`\beta`, :math:`\gamma`
+    are fitted parameters. For S.O. masses these parameters experience a time-
+    dependent modified power law evolution up to :math:`z=6`, after which they
+    are fixed. The modified power law has the form
+
+    .. math::
+
+        X(z) = \Omega_{\rm m}(z) \left( x_1 \times (1+z)^{-x_2} + x_3 \right),
+
+    where :math:`x_1`, :math:`x_2`, and :math:`x_3` are fitted parameters.
 
     Parameters
     ----------

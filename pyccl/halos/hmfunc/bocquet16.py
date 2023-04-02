@@ -15,7 +15,74 @@ class MassFuncBocquet16(MassFunc):
 
     .. math::
 
-        1 + 1 = 2
+        f(M, z) = A \left[ \left( \frac{\sigma}{b} \right)^{-a} \right]
+        \exp{\left( -\frac{c}{\sigma^2} \right)},
+
+    where :math:`(A, a, b, c)` follow redshift-dependent power laws of the form
+    :math:`x(z) = x_0 (1+z)^{x_z}` with free parameters :math:`x_0` and
+    :math:`x_z`.
+
+    To translate to other mass definitions the authors assume an NFW halo
+    profile and the mass-concentration relation by Duffy et al. (2008).
+    These are expressed as a function of the :math:`\Delta_{200{\rm m}}` mass
+    function as
+
+    .. math::
+
+        \frac{{\rm d}n}{{\rm d}M_{\Delta{\rm c}}} = \left( f(\sigma)
+        \frac{\bar{\rho}_{\rm m}}{M_{\Delta{\rm m}}}
+        \frac{{\rm d} \ln \sigma^{-1}}{{\rm d}M_{\Delta{\rm c}}} \right)
+        \frac{M_{\Delta{\rm c}}}{M_{200{\rm m}}},
+
+    where the mass conversions are given by
+
+    .. math::
+
+        \frac{M_{\Delta{\rm c}}}{M_{200{\rm m}}} \equiv \alpha + \beta
+        \ln \frac{M_{\Delta{\rm c}}}{\rm M_{\odot}},
+
+    For the :math:`\Delta_{500{\rm c}}` mass definition, parameters
+    :math:`\alpha` and :math:`\beta` are
+
+    .. math::
+
+        \alpha(\Omega_{\rm m}, z) &= \alpha_0
+        \frac{\alpha_1 z + \alpha_2}{z + \alpha_2}, \\
+        \beta(\Omega_{\rm m}) &= -1.70 \times 10^{-2}
+        + \Omega_{\rm m} 3.74 \times 10^{-3},
+
+    with
+
+    .. math::
+
+        a_0(\Omega_{\rm m}) &= 0.880 + 0.329 \Omega_{\rm m}, \\
+        a_1(\Omega_{\rm m}) &= 1.00 + 4.31 \times 10^{-2} / \Omega_{\rm m}, \\
+        a_2(\Omega_{\rm m}) &= -0.365 + 0.254 / \Omega_{\rm m}.
+
+    For the :math:`\Delta_{200{\rm c}}` mass definition, parameters
+    :math:`\alpha` and :math:`\beta` are
+
+    .. math::
+
+        \alpha(\Omega_{\rm m}, z) &= \alpha_0 + \alpha_1
+        \exp{\left[ -\left( \frac{\alpha_2 - z}{\alpha_3} \right)^2\right]}, \\
+        \beta(\Omega_{\rm m}, z) &= \beta_0 + \beta_1 z,
+
+    with
+
+    .. math::
+
+        \alpha_0(\Omega_{\rm m}) &= 3.54 \times 10^{-2}
+        + \Omega_{\rm m}^{0.09}, \\
+        \alpha_1(\Omega_{\rm m}) &= 4.56 \times 10^{-2}
+        + 2.68 \times 10^{-2} / \Omega_{\rm m}, \\
+        \alpha_2(\Omega_{\rm m}) &= 0.721
+        + 3.50 \times 10^{-2} / \Omega_{\rm m}, \\
+        \alpha_3(\Omega_{\rm m}) &= 0.628 + 0.164 / \Omega_{\rm m}, \\
+        \beta_0(\Omega_{\rm m}) &= -1.67 \times 10^{-2}
+        + 2.18 \times 10^{-2} \Omega_{\rm m}, \\
+        \beta_1(\Omega_{\rm m}) &= 6.52 \times 10^{-3}
+        - 6.86 \times 10^{-3} \Omega_{\rm m}.
 
     Parameters
     ----------

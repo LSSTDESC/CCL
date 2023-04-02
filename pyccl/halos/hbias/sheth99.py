@@ -32,9 +32,9 @@ class HaloBiasSheth99(HaloBias):
         If False, do not check for model consistency for the mass definition.
         The default is True.
     use_delta_c_fit : bool, optional
-        If True, use the formula for :math:`\delta_{\rm crit}` given by the
+        If True, use the formula for :math:`\delta_{\rm c}` given by the
         fit of Nakamura & Suto (1997). If False, use
-        :math:`\delta_{\rm crit} \simeq 1.68647` given by spherical collapse
+        :math:`\delta_{\rm c} \simeq 1.68647` given by spherical collapse
         theory. The default is False.
     """
     __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)
