@@ -176,8 +176,7 @@ class EulerianPTCalculator(object):
         self.ia_ta = None
         self.ia_tt = None
         self.ia_mix = None
-        self._gf = None
-        self._gf4 = None
+        self._g4 = None
 
         # All valid Pk pair labels and their aliases
         self._pk_alias = {'m:m': 'm:m', 'm:d1': 'm:m', 'm:d2': 'm:d2',
@@ -208,8 +207,8 @@ class EulerianPTCalculator(object):
             cosmo (:class:`~pyccl.core.Cosmology`): a `Cosmology` object.
         """
         pklz0 = cosmo.linear_matter_power(self.k_s, 1.0)
-        self._g = cosmo.growth_factor(self.a_s)
-        self._g4 = self._gf**4
+        g = cosmo.growth_factor(self.a_s)
+        self._g4 = g**4
 
         # Galaxy clustering templates
         if self.with_NC:
@@ -243,15 +242,15 @@ class EulerianPTCalculator(object):
         if 'linear' in [self.b1_pk_kind, self.bk_pk_kind]:
             pks['linear'] = np.array([cosmo.linear_matter_power(self.k_s, a)
                                       for a in self.a_s])
-        if 'spt' in [self.b1_pk_kind, self.bk_pk_kind]:
+        if 'pt' in [self.b1_pk_kind, self.bk_pk_kind]:
             if 'linear' in pks:
                 pk = pks['linear']
             else:
                 pk = np.array([cosmo.linear_matter_power(self.k_s, a)
                                for a in self.a_s])
             # Add SPT correction
-            pk += self._gf4[:, None] * self.one_loop_dd[0][None, :]
-            pks['spt'] = pk
+            pk += self._g4[:, None] * self.one_loop_dd[0][None, :]
+            pks['pt'] = pk
         self.pk_b1 = pks[self.b1_pk_kind]
         self.pk_bk = pks[self.bk_pk_kind]
 
