@@ -9,6 +9,37 @@ class EulerianPTCalculator(object):
     are currently based on FAST-PT
     (https://github.com/JoeMcEwen/FAST-PT).
 
+    In the parametrisation used here, the galaxy overdensity
+    is expanded as:
+
+    .. math::
+        \\delta_g=b_1\\,\\delta+\\frac{b_2}{2}\\delta^2+
+        \\frac{b_s}{2}s^2+\\frac{b_{3nl}}{2}\\psi_{nl}+
+        \\frac{b_{k2}}{2}\\nabla^2\\delta.
+
+    In turn, the intrinsic alignment component is expanded as
+
+    .. math::
+        s^I_{ij}=c_1\\,s_{ij}+c_2(s_{ik}s_{jk}-s^2\\delta_{ik}/3)
+        +c_\\delta\\,\\delta\,s_{ij}
+
+    (note that the higher-order terms are not divided by 2!).
+
+    .. note:: Only the leading-order non-local term (i.e.
+              :math:`\\langle \\delta\\,\\nabla^2\\delta`) is
+              taken into account in the expansion. All others are
+              set to zero.
+
+    .. note:: Terms of the form
+              :math:`\\langle \\delta^2 \\psi_{nl}\\rangle` (and
+              likewise for :math:`s^2`) are set to zero.
+
+    .. note:: The full non-linear model for the cross-correlation
+              between number counts and intrinsic alignments is
+              still work in progress in FastPT. As a workaround
+              CCL assumes a non-linear treatment of IAs, but only
+              linearly biased number counts.
+
     Args:
         with_NC (bool): set to True if you'll want to use
             this calculator to compute correlations involving
@@ -229,35 +260,18 @@ class EulerianPTCalculator(object):
 
     def _get_pgg(self, tr1, tr2):
         """ Get the number counts auto-spectrum at the internal
-        set of wavenumbers (given by this object's `ks` attribute)
-        and a number of redshift values.
+        set of wavenumbers and scale factors.
 
         Args:
-            b11 (array_like): 1-st order bias for the first tracer
-                being correlated at the same set of input redshifts.
-            b21 (array_like): 2-nd order bias for the first tracer
-                being correlated at the same set of input redshifts.
-            bs1 (array_like): tidal bias for the first tracer
-                being correlated at the same set of input redshifts.
-            b12 (array_like): 1-st order bias for the second tracer
-                being correlated at the same set of input redshifts.
-            b22 (array_like): 2-nd order bias for the second tracer
-                being correlated at the same set of input redshifts.
-            bs2 (array_like): tidal bias for the second tracer
-                being correlated at the same set of input redshifts.
-            b3nl1 (array_like): 3-rd order bias for the first tracer.
-                If `None`, this contribution won't be included.
-            b3nl2 (array_like): 3-rd order bias for the second tracer.
-                If `None`, this contribution won't be included.
-            bk21 (array_like): non-local bias for the first tracer.
-                If `None`, this contribution won't be included.
-            bk22 (array_like): non-local bias for the second tracer.
-                If `None`, this contribution won't be included.
+            tr1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): first
+                tracer to correlate.
+            tr2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): first
+                tracer to correlate.
 
         Returns:
-            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
+            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
                 is the size of this object's `k_s` attribute, and \
-                `N_z` is the size of the object's `a_s` attribute.
+                `N_a` is the size of the object's `a_s` attribute.
         """
         # Get Pk templates
         Pd1d1 = self.pk_b1
@@ -298,9 +312,8 @@ class EulerianPTCalculator(object):
         return pgg*self.exp_cutoff
 
     def _get_pgi(self, trg, tri):
-        """ Get the number counts - IA cross-spectrum at the
-        internal set of wavenumbers (given by this object's
-        `ks` attribute) and a number of redshift values.
+        """ Get the number counts - IA cross-spectrum at the internal
+        set of wavenumbers and scale factors.
 
         .. note:: The full non-linear model for the cross-correlation
                   between number counts and intrinsic alignments is
@@ -309,24 +322,15 @@ class EulerianPTCalculator(object):
                   linearly biased number counts.
 
         Args:
-            b1 (array_like): 1-st order bias for the number counts
-                being correlated at the same set of input redshifts.
-            b2 (array_like): 2-nd order bias for the number counts
-                being correlated at the same set of input redshifts.
-            bs (array_like): tidal bias for the number counts
-                being correlated at the same set of input redshifts.
-            c1 (array_like): 1-st order bias for the IA tracer
-                being correlated at the same set of input redshifts.
-            c2 (array_like): 2-nd order bias for the IA tracer
-                being correlated at the same set of input redshifts.
-            cd (array_like): overdensity bias for the IA tracer
-                being correlated at the same set of input redshifts.
+            trg (:class:`~pyccl.nl_pt.tracers.PTTracer`): number
+                counts tracer.
+            tri (:class:`~pyccl.nl_pt.tracers.PTTracer`): intrinsic
+                alignment tracer.
 
         Returns:
-            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
-                is the size of this object's `ks` attribute, and \
-                `N_z` is the size of the input redshift-dependent \
-                biases and growth factor.
+            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+                is the size of this object's `k_s` attribute, and \
+                `N_a` is the size of the object's `a_s` attribute.
         """
         # Get Pk templates
         Pd1d1 = self.pk_b1
@@ -345,34 +349,17 @@ class EulerianPTCalculator(object):
         return pgi*self.exp_cutoff
 
     def _get_pgm(self, trg):
-        """ Get the number counts - matter cross-spectrum at the
-        internal set of wavenumbers (given by this object's `ks`
-        attribute) and a number of redshift values.
+        """ Get the number counts - matter cross-spectrum at the internal
+        set of wavenumbers and scale factors.
 
         Args:
-            b1 (array_like): 1-st order bias for the number counts
-                tracer being correlated at the same set of input
-                redshifts.
-            b2 (array_like): 2-nd order bias for the number counts
-                tracer being correlated at the same set of input
-                redshifts.
-            bs (array_like): tidal bias for the number counts
-                tracer being correlated at the same set of input
-                redshifts.
-            b3nl (array_like): 3-rd order bias for the number counts
-                tracer being correlated at the same set of input
-                redshifts. If `None`, this contribution won't be
-                included.
-            bk2 (array_like): non-local bias for the number counts
-                tracer being correlated at the same set of input
-                redshifts. If `None`, this contribution won't be
-                included.
+            trg (:class:`~pyccl.nl_pt.tracers.PTTracer`): number
+                counts tracer.
 
         Returns:
-            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
-                is the size of this object's `ks` attribute, and \
-                `N_z` is the size of the input redshift-dependent \
-                biases and growth factor.
+            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+                is the size of this object's `k_s` attribute, and \
+                `N_a` is the size of the object's `a_s` attribute.
         """
         # Get Pk templates
         Pd1d1 = self.pk_b1
@@ -398,32 +385,18 @@ class EulerianPTCalculator(object):
 
     def _get_pii(self, tr1, tr2, return_bb=False):
         """ Get the intrinsic alignment auto-spectrum at the internal
-        set of wavenumbers (given by this object's `ks` attribute)
-        and a number of redshift values.
+        set of wavenumbers and scale factors.
 
         Args:
-            c11 (array_like): 1-st order bias for the first tracer
-                being correlated at the same set of input redshifts.
-            c21 (array_like): 2-nd order bias for the first tracer
-                being correlated at the same set of input redshifts.
-            cd1 (array_like): overdensity bias for the first tracer
-                being correlated at the same set of input redshifts.
-            c12 (array_like): 1-st order bias for the second tracer
-                being correlated at the same set of input redshifts.
-            c22 (array_like): 2-nd order bias for the second tracer
-                being correlated at the same set of input redshifts.
-            cd2 (array_like): overdensity bias for the second tracer
-                being correlated at the same set of input redshifts.
-            return_bb (bool): if `True`, the B-mode power spectrum
-                will be returned.
-            return_both (bool): if `True`, both the E- and B-mode
-                power spectra will be returned. Supersedes `return_bb`.
+            tr1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): first tracer
+                to correlate.
+            tr2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): first tracer
+                to correlate.
 
         Returns:
-            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
-                is the size of this object's `ks` attribute, and \
-                `N_z` is the size of the input redshift-dependent \
-                biases and growth factor.
+            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+                is the size of this object's `k_s` attribute, and \
+                `N_a` is the size of the object's `a_s` attribute.
         """
         # Get Pk templates
         Pd1d1 = self.pk_b1
@@ -454,26 +427,17 @@ class EulerianPTCalculator(object):
         return pii*self.exp_cutoff
 
     def _get_pim(self, tri):
-        """ Get the intrinsic alignment - matter cross-spectrum at
-        the internal set of wavenumbers (given by this object's `ks`
-        attribute) and a number of redshift values.
+        """ Get the matter - IA cross-spectrum at the internal
+        set of wavenumbers and scale factors.
 
         Args:
-            c1 (array_like): 1-st order bias for the IA
-                tracer being correlated at the same set of input
-                redshifts.
-            c2 (array_like): 2-nd order bias for the IA
-                tracer being correlated at the same set of input
-                redshifts.
-            cd (array_like): overdensity bias for the IA
-                tracer being correlated at the same set of input
-                redshifts.
+            tri (:class:`~pyccl.nl_pt.tracers.PTTracer`): intrinsic
+                alignment tracer.
 
         Returns:
-            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
-                is the size of this object's `ks` attribute, and \
-                `N_z` is the size of the input redshift-dependent \
-                biases and growth factor.
+            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+                is the size of this object's `k_s` attribute, and \
+                `N_a` is the size of the object's `a_s` attribute.
         """
         # Get Pk templates
         Pd1d1 = self.pk_b1
@@ -493,18 +457,10 @@ class EulerianPTCalculator(object):
     def _get_pmm(self):
         """ Get the one-loop matter power spectrum.
 
-        Args:
-            Pd1d1_lin (array_like): 1-loop linear matter power spectrum
-                at the wavenumber values given by this object's
-                `ks` list.
-            g4 (array_like): fourth power of the growth factor at
-                a number of redshifts.
-
         Returns:
-            array_like: 2D array of shape `(N_k, N_z)`, where `N_k` \
-                is the size of this object's `ks` attribute, and \
-                `N_z` is the size of the input redshift-dependent \
-                biases and growth factor.
+            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+                is the size of this object's `k_s` attribute, and \
+                `N_a` is the size of the object's `a_s` attribute.
         """
         if self.b1_pk_kind == 'linear':
             P1loop = self._g4[:, None] * self.one_loop_dd[0][None, :]
@@ -591,6 +547,38 @@ class EulerianPTCalculator(object):
 
     def get_pk2d_template(self, kind, *, extrap_order_lok=1,
                           extrap_order_hik=2, return_ia_bb=False):
+        """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
+        the power spectrum template for two of the PT operators. The
+        combination returned is determined by `kind`, which must be
+        a string of the form `'q1:q2'`, where `q1` and `q2` denote
+        the two operators whose power spectrum is sought. Valid
+        operator names are: `'m'` (matter overdensity), `'d1'`
+        (first-order overdensity), `'d2'` (:math:`\\delta^2`
+        term in galaxy bias expansion), `'s2'` (:math:`s^2` term
+        in galaxy bias expansion), `'d3nl'` (:math:`\\psi_{nl}`
+        term in galaxy bias expansion), `'k2'` (non-local
+        :math:`\\nabla^2 \\delta` term in galaxy bias expansion),
+        `'c1'` (linear IA term), `'c2'` (:math:`s^2` term in IA
+        expansion), `'cd'` (:math:`s\delta` term in IA expansion).
+
+        Args:
+            kind (str): string defining the pair of PT operators for
+                which we want the power spectrum.
+            return_ia_bb (bool): if `True`, the B-mode power spectrum
+                for intrinsic alignments will be returned (if both
+                input tracers are of type
+                :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
+                If `False` (default) E-mode power spectrum is returned.
+            extrap_order_lok (int): extrapolation order to be used on
+                k-values below the minimum of the splines. See
+                :class:`~pyccl.pk2d.Pk2D`.
+            extrap_order_hik (int): extrapolation order to be used on
+                k-values above the maximum of the splines. See
+                :class:`~pyccl.pk2d.Pk2D`.
+
+        Returns:
+            :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
+        """
         if not (kind in self._pk_valid):
             # Reverse order and check again
             kind_reverse = ':'.join(kind.split(':')[::-1])
@@ -604,26 +592,33 @@ class EulerianPTCalculator(object):
             return self._pk2d_temp[pk_name]
 
         # Construct power spectrum array
+        s4 = 0.
         if pk_name == 'm:m':
             pk = self.pk_b1
         elif pk_name == 'm:d2':
-            pk = self._g4[:, None] * self.dd_bias[2][None, :]
+            pk = 0.5*self._g4[:, None]*self.dd_bias[2][None, :]
         elif pk_name == 'm:d3nl':
-            pk = self._g4[:, None] * self.dd_bias[8][None, :]
+            pk = 0.5*self._g4[:, None]*self.dd_bias[8][None, :]
         elif pk_name == 'm:s2':
-            pk = self._g4[:, None] * self.dd_bias[4][None, :]
+            pk = 0.5*self._g4[:, None]*self.dd_bias[4][None, :]
         elif pk_name == 'm:k2':
-            pk = self.pk_bk * (self.k_s**2)[None, :]
+            pk = 0.5*self.pk_bk*(self.k_s**2)[None, :]
         elif pk_name == 'm:c2':
             pk = self._g4[:, None] * (self.ia_mix[0]+self.ia_mix[1])[None, :]
         elif pk_name == 'm:cd':
             pk = self._g4[:, None] * (self.ia_ta[0]+self.ia_ta[1])[None, :]
         elif pk_name == 'd2:d2':
-            pk = self._g4[:, None] * self.dd_bias[3][None, :]
+            if self.fastpt_par['sub_lowk']:
+                s4 = self.dd_bias[7][:, None]
+            pk = 0.25*self._g4[:, None]*(self.dd_bias[3][None, :] - 2*s4)
         elif pk_name == 'd2:s2':
-            pk = self._g4[:, None] * self.dd_bias[5][None, :]
+            if self.fastpt_par['sub_lowk']:
+                s4 = self.dd_bias[7][:, None]
+            pk = 0.25*self._g4[:, None]*(self.dd_bias[5][None, :] - 4*s4/3)
         elif pk_name == 's2:s2':
-            pk = self._g4[:, None] * self.dd_bias[6][None, :]
+            if self.fastpt_par['sub_lowk']:
+                s4 = self.dd_bias[7][:, None]
+            pk = 0.25*self._g4[:, None]*(self.dd_bias[6][None, :] - 8*s4/9)
         elif pk_name == 'c2:c2':
             if return_ia_bb:
                 pk = self._g4[:, None] * self.ia_tt[1][None, :]

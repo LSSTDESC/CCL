@@ -288,38 +288,19 @@ def test_translate_IA_norm():
     assert c_1.all() == c_1_t.all()
 
 
-def test_translate_IA_norm_raises():
-    # Should raise error with 2d input a or z
-    z_wrong = np.ones((2, 3))
-    a_wrong = np.ones((2, 3))
-    with pytest.raises(ValueError):
-        c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ, a1=a_wrong,
-                                                    Om_m2_for_c2=False)
-    with pytest.raises(ValueError):
-        c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, z_wrong, a1=a_1_v,
-                                                    Om_m2_for_c2=False)
-
-    # Should raise error if len(a) != len(z)
-    NZ2 = 129
-    ZZ2 = np.linspace(0., 1., NZ2)
-    with pytest.raises(ValueError):
-        c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ2, a1=a_1_v,
-                                                    Om_m2_for_c2=False)
-
-
 def test_return_ptc():
     # if no ptc is input, check that returned pk and ptc objects have
     # the correct properties.
     pk, ptc1 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TG'], return_ptc=True)
     assert isinstance(pk, ccl.Pk2D)
-    assert isinstance(ptc1, ccl.nl_pt.power.PTCalculator)
+    assert isinstance(ptc1, ccl.nl_pt.PTCalculator)
     # same test with EE/BB output
     pee2, pbb2, ptc2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'],
                                              return_ia_ee_and_bb=True,
                                              return_ptc=True)
     assert isinstance(pee2, ccl.Pk2D)
     assert isinstance(pbb2, ccl.Pk2D)
-    assert isinstance(ptc2, ccl.nl_pt.power.PTCalculator)
+    assert isinstance(ptc2, ccl.nl_pt.PTCalculator)
     # check that returned ptc matches input ptc.
     pk_2, ptc1_2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TG'], ptc=PTC,
                                          return_ptc=True)

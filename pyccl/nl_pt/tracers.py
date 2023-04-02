@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.interpolate import interp1d
 from ..pyutils import _check_array_params
-from ..background import growth_factor
 from ..parameters import physical_constants
 
 
@@ -33,7 +32,7 @@ def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
     Om_m = cosmo['Omega_m']
     rho_crit = physical_constants.RHO_CRITICAL
     c1 = c1delta = c2 = None
-    gz = growth_factor(cosmo, 1./(1+z))
+    gz = cosmo.growth_factor(1./(1+z))
 
     if a1 is not None:
         c1 = -1*a1*5e-14*rho_crit*Om_m/gz
