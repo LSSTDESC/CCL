@@ -8,7 +8,8 @@ from .tracers import (
 )
 
 # Old power spectrum calculator
-from .power_deprecated import (
+# TODO v3: deprecate this
+from .power import (
     PTCalculator,
     get_pt_pk2d,
 )
