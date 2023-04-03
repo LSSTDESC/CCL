@@ -50,6 +50,10 @@ class EulerianPTCalculator(object):
         with_matter_1loop(bool): set to True if you'll want to use
             this calculator to compute the one-loop matter power
             spectrum (automatically on if `with_NC==True`).
+        cosmo (:class:`~pyccl.core.Cosmology`): a `Cosmology` object.
+            If present, internal PT power spectrum templates will
+            be initialized. If `None`, you will need to initialize
+            them using the `update_ingredients` method.
         log10k_min (float): decimal logarithm of the minimum
             Fourier scale (in Mpc^-1) for which you want to
             calculate perturbation theory quantities.
@@ -79,7 +83,7 @@ class EulerianPTCalculator(object):
             power spectrum. `'nonlinear'`: use the non-linear matter
             power spectrum. `'pt'`: use the 1-loop SPT matter
             power spectrum. Default: `'nonlinear'`.
-        bk_pk_kind (str): prescription to use for the
+        bk2_pk_kind (str): prescription to use for the
             power spectrum to use for the non-local bias terms
             in the expansion. Same options and default as
             `b1_pk_kind`.
@@ -106,11 +110,11 @@ class EulerianPTCalculator(object):
           contribution to some of the terms will be subtracted.
           Default: `False`.
     """
-    def __init__(self, with_NC=False, with_IA=False,
-                 with_matter_1loop=True,
+    def __init__(self, *, with_NC=False, with_IA=False,
+                 with_matter_1loop=True, cosmo=None,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  a_arr=None, k_cutoff=None, n_exp_cutoff=4,
-                 b1_pk_kind='nonlinear', bk_pk_kind='nonlinear',
+                 b1_pk_kind='nonlinear', bk2_pk_kind='nonlinear',
                  extra_params=None):
         self.with_matter_1loop = with_matter_1loop
         self.with_NC = with_NC
@@ -161,14 +165,15 @@ class EulerianPTCalculator(object):
         # b1/bk P(k) prescription
         if b1_pk_kind not in ['linear', 'nonlinear', 'pt']:
             raise ValueError(f"Unknown P(k) prescription {b1_pk_kind}")
-        if bk_pk_kind not in ['linear', 'nonlinear', 'pt']:
-            raise ValueError(f"Unknown P(k) prescription {bk_pk_kind}")
+        if bk2_pk_kind not in ['linear', 'nonlinear', 'pt']:
+            raise ValueError(f"Unknown P(k) prescription {bk2_pk_kind}")
         self.b1_pk_kind = b1_pk_kind
-        self.bk_pk_kind = bk_pk_kind
-        if (self.b1_pk_kind == 'pt') or (self.bk_pk_kind == 'pt'):
+        self.bk2_pk_kind = bk2_pk_kind
+        if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt'):
             self.with_matter_1loop = True
 
         # Initialize all expensive arrays to `None`.
+        self._pt_init = False
         self.pk_b1 = None
         self.pk_bk = None
         self.one_loop_dd = None
@@ -177,6 +182,9 @@ class EulerianPTCalculator(object):
         self.ia_tt = None
         self.ia_mix = None
         self._g4 = None
+        # Fill them out if cosmo is present
+        if cosmo is not None:
+            self.update_ingredients(cosmo)
 
         # All valid Pk pair labels and their aliases
         self._pk_alias = {
@@ -200,6 +208,13 @@ class EulerianPTCalculator(object):
         self._pk_valid = list(self._pk_alias.keys())
         # List of Pk2Ds to fill out
         self._pk2d_temp = {}
+
+    def _check_pt_init(self):
+        if self._pt_init:
+            return
+        raise RuntimeError("PT templates have not been initialised "
+                           "for this calculator. Please do so using "
+                           "`update_ingredients`.")
 
     def update_ingredients(self, cosmo):
         """ Update the internal PT arrays.
@@ -237,13 +252,13 @@ class EulerianPTCalculator(object):
 
         # b1/bk power spectrum
         pks = {}
-        if 'nonlinear' in [self.b1_pk_kind, self.bk_pk_kind]:
+        if 'nonlinear' in [self.b1_pk_kind, self.bk2_pk_kind]:
             pks['nonlinear'] = np.array([cosmo.nonlin_matter_power(self.k_s, a)
                                          for a in self.a_s])
-        if 'linear' in [self.b1_pk_kind, self.bk_pk_kind]:
+        if 'linear' in [self.b1_pk_kind, self.bk2_pk_kind]:
             pks['linear'] = np.array([cosmo.linear_matter_power(self.k_s, a)
                                       for a in self.a_s])
-        if 'pt' in [self.b1_pk_kind, self.bk_pk_kind]:
+        if 'pt' in [self.b1_pk_kind, self.bk2_pk_kind]:
             if 'linear' in pks:
                 pk = pks['linear']
             else:
@@ -253,10 +268,11 @@ class EulerianPTCalculator(object):
             pk += self._g4[:, None] * self.one_loop_dd[0][None, :]
             pks['pt'] = pk
         self.pk_b1 = pks[self.b1_pk_kind]
-        self.pk_bk = pks[self.bk_pk_kind]
+        self.pk_bk = pks[self.bk2_pk_kind]
 
         # Reset template power spectra
         self._pk2d_temp = {}
+        self._pt_init = True
 
     def _get_pgg(self, tr1, tr2):
         """ Get the number counts auto-spectrum at the internal
@@ -273,6 +289,7 @@ class EulerianPTCalculator(object):
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
+        self._check_pt_init()
         # Get Pk templates
         Pd1d1 = self.pk_b1
         Pd1d2 = self._g4[:, None] * self.dd_bias[2][None, :]
@@ -332,6 +349,7 @@ class EulerianPTCalculator(object):
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
+        self._check_pt_init()
         # Get Pk templates
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
@@ -361,6 +379,7 @@ class EulerianPTCalculator(object):
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
+        self._check_pt_init()
         # Get Pk templates
         Pd1d1 = self.pk_b1
         Pd1d2 = self._g4[:, None] * self.dd_bias[2][None, :]
@@ -398,6 +417,7 @@ class EulerianPTCalculator(object):
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
+        self._check_pt_init()
         # Get Pk templates
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
@@ -439,6 +459,7 @@ class EulerianPTCalculator(object):
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
+        self._check_pt_init()
         # Get Pk templates
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
@@ -462,6 +483,7 @@ class EulerianPTCalculator(object):
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
+        self._check_pt_init()
         if self.b1_pk_kind == 'linear':
             P1loop = self._g4[:, None] * self.one_loop_dd[0][None, :]
         else:
