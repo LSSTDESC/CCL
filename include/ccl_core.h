@@ -320,6 +320,7 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  * @param Neff Number of relativistic neutrino species in the early universe
  * @param mnu neutrino mass, either sum or list of length 3
  * @param mnu_type determines neutrino mass convention (ccl_mnu_list, ccl_mnu_sum, ccl_mnu_sum_inverted, ccl_mnu_sum_equal)
+ * @params T_CMB CMB temperature.
  * @param w0 Dark energy EoS parameter
  * @param wa Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
@@ -336,7 +337,7 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  * @return void
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-                                     double Neff, double* mnu, int n_mnu,
+                                     double Neff, double* mnu, int n_mnu, double T_CMB,
                                      double w0, double wa, double h, double norm_pk,
                                      double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
                                      double mu_0, double sigma_0, double c1_mg, double c2_mg, double lambda_mg,

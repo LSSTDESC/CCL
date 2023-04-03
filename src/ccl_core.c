@@ -314,7 +314,6 @@ void ccl_parameters_fill_initial(ccl_parameters * params, int *status)
 {
   // Fixed radiation parameters
   // Omega_g * h**2 is known from T_CMB
-  params->T_CMB =  ccl_constants.T_CMB;
   // kg / m^3
   double rho_g = 4. * ccl_constants.STBOLTZ / pow(ccl_constants.CLIGHT, 3) * pow(params->T_CMB, 4);
   // kg / m^3
@@ -384,7 +383,7 @@ n_s: index of the primordial PS
 
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
-				     double Neff, double* mnu, int n_mnu,
+				     double Neff, double* mnu, int n_mnu, double T_CMB,
 				     double w0, double wa, double h, double norm_pk,
 				     double n_s, double bcm_log10Mc, double bcm_etab,
 				     double bcm_ks, double mu_0, double sigma_0,
@@ -406,6 +405,7 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
   params.Omega_c = Omega_c;
   params.Omega_b = Omega_b;
   params.Omega_k = Omega_k;
+  params.T_CMB = T_CMB;
   params.Neff = Neff;
   params.m_nu = malloc(n_mnu*sizeof(double));
   params.sum_nu_masses = 0.;

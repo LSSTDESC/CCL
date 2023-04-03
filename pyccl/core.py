@@ -594,28 +594,24 @@ class Cosmology(CCLObject):
         # Create new instance of ccl_parameters object
         # Create an internal status variable; needed to check massive neutrino
         # integral.
-        T_CMB_old = physical_constants.T_CMB
-        try:
-            if T_CMB is not None:
-                physical_constants.T_CMB = T_CMB
-            status = 0
-            if nz_mg == -1:
-                # Create ccl_parameters without modified growth
-                self._params, status = lib.parameters_create_nu(
-                    Omega_c, Omega_b, Omega_k, Neff,
-                    w0, wa, h, norm_pk, n_s, bcm_log10Mc,
-                    bcm_etab, bcm_ks, mu_0, sigma_0, c1_mg,
-                    c2_mg, lambda_mg, mnu_final_list, status)
-            else:
-                # Create ccl_parameters with modified growth arrays
-                self._params, status = lib.parameters_create_nu_vec(
-                    Omega_c, Omega_b, Omega_k, Neff, w0, wa, h,
-                    norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
-                    mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, z_mg,
-                    df_mg, mnu_final_list, status)
-            check(status)
-        finally:
-            physical_constants.T_CMB = T_CMB_old
+        if T_CMB is None:
+            T_CMB = physical_constants.T_CMB
+        status = 0
+        if nz_mg == -1:
+            # Create ccl_parameters without modified growth
+            self._params, status = lib.parameters_create_nu(
+                Omega_c, Omega_b, Omega_k, Neff,
+                w0, wa, h, norm_pk, n_s, bcm_log10Mc,
+                bcm_etab, bcm_ks, mu_0, sigma_0, c1_mg,
+                c2_mg, lambda_mg, mnu_final_list, T_CMB, status)
+        else:
+            # Create ccl_parameters with modified growth arrays
+            self._params, status = lib.parameters_create_nu_vec(
+                Omega_c, Omega_b, Omega_k, Neff, w0, wa, h,
+                norm_pk, n_s, bcm_log10Mc, bcm_etab, bcm_ks,
+                mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, z_mg,
+                df_mg, mnu_final_list, T_CMB, status)
+        check(status)
 
         if Omega_g is not None:
             total = self._params.Omega_g + self._params.Omega_l
