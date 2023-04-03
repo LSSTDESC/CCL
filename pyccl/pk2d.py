@@ -158,12 +158,15 @@ class Pk2D(CCLObject):
                 corresponding quantity. ``pkfunc`` will be sampled at the
                 values of ``k`` and ``a`` used internally by CCL to store the
                 linear and non-linear power spectra.
-            spline_params : :obj:`~pyccl.ccllib.spline_params`, optional spline
-                parameters. Used to determine sampling rates in scale factor
-                and wavenumber. Custom parameters can be passed via the
-                ``Cosmology`` object with ``cosmo.cosmo.spline_params``.
-                Defaults to the global accuracy parameters in CCL at the moment
-                this function is called.
+            spline_params : :obj:`~pyccl.parameters.SplineParameters` or \
+                    :obj:`~pyccl.ccllib.spline_params`
+                optional spline parameters. Used to determine sampling rates
+                in scale factor and wavenumber. Custom parameters can be passed
+                via the ``Cosmology`` object with
+                ``cosmo.cosmo.spline_params`` (C API), or with an instance of
+                ``ccl.parameters.SplineParameters`` (Python API). Defaults to
+                the global accuracy parameters in CCL at the moment this
+                function is called.
 
         Returns:
             :class:`~pyccl.pk2d.Pk2D`

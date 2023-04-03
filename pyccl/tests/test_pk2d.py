@@ -206,23 +206,31 @@ def test_pk2d_from_function_spline_params():
     k = np.logspace(-1, 0.5, 8)
     a = 0.8
 
-    # sampling from CCL's spline parameters
+    # Sampling from CCL's spline parameters.
     pk1 = ccl.Pk2D.from_function(pk2d, is_logp=False)
     a_arr, lk_arr, _ = pk1.get_spline_arrays()
     assert np.allclose(pk2d(k, a), pk1(k, a), atol=0, rtol=1e-10)
     assert np.array_equal(a_arr, get_pk_spline_a())
     assert np.array_equal(lk_arr, get_pk_spline_lk())
 
-    # sampling with custom spline parameters
+    # Sampling with custom spline parameters (C API).
     ccl.spline_params.N_K -= 10
     ccl.spline_params.A_SPLINE_NA_PK -= 10
     cosmo = ccl.CosmologyVanillaLCDM()  # contains a copy of the new params
     pk2 = ccl.Pk2D.from_function(pk2d, is_logp=False,
                                  spline_params=cosmo.cosmo.spline_params)
-    a_arr, lk_arr, _ = pk2.get_spline_arrays()
+    a_arr, lk_arr, pk_arr = pk2.get_spline_arrays()
     assert np.allclose(pk2d(k, a), pk2(k, a), atol=0, rtol=1e-9)
     assert np.array_equal(a_arr, get_pk_spline_a())
     assert np.array_equal(lk_arr, get_pk_spline_lk())
+
+    # Sampling with custom spline parameters (Python API)
+    pk3 = ccl.Pk2D.from_function(pk2d, is_logp=False,
+                                 spline_params=ccl.spline_params)
+    a_arr2, lk_arr2, pk_arr2 = pk3.get_spline_arrays()
+    assert np.array_equal(a_arr, a_arr2)
+    assert np.array_equal(lk_arr, lk_arr2)
+    assert np.array_equal(pk_arr, pk_arr2)
 
     ccl.spline_params.reload()
 
