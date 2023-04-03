@@ -8,6 +8,7 @@ from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline1d_arrays, _get_spline2d_arrays)
 from .base import (CCLObject, UnlockInstance, unlock_instance,
                    warn_api, deprecated)
+from .parameters import spline_params
 
 
 class _Pk2D_descriptor:
@@ -143,7 +144,8 @@ class Pk2D(CCLObject):
         check(status)
 
     @classmethod
-    def from_function(cls, pkfunc, *, is_logp=True, cosmo=None,
+    def from_function(cls, pkfunc, *, is_logp=True,
+                      spline_params=spline_params,
                       extrap_order_lok=1, extrap_order_hik=2):
         """ Generates a `Pk2D` object from a function that calculates a power
         spectrum.
@@ -156,17 +158,20 @@ class Pk2D(CCLObject):
                 corresponding quantity. ``pkfunc`` will be sampled at the
                 values of ``k`` and ``a`` used internally by CCL to store the
                 linear and non-linear power spectra.
-            cosmo : :class:`~pyccl.core.Cosmology`, optional cosmological
+            spline_params : :obj:`~pyccl.ccllib.spline_params`, optional spline
                 parameters. Used to determine sampling rates in scale factor
-                and wavenumber.
+                and wavenumber. Custom parameters can be passed via the
+                ``Cosmology`` object with ``cosmo.cosmo.spline_params``.
+                Defaults to the global accuracy parameters in CCL at the moment
+                this function is called.
 
         Returns:
             :class:`~pyccl.pk2d.Pk2D`
                 Power spectrum object.
         """
         # Set k and a sampling from CCL parameters
-        a_arr = get_pk_spline_a(cosmo=cosmo)
-        lk_arr = get_pk_spline_lk(cosmo=cosmo)
+        a_arr = get_pk_spline_a(spline_params=spline_params)
+        lk_arr = get_pk_spline_lk(spline_params=spline_params)
 
         # Compute power spectrum on 2D grid
         pk_arr = np.array([pkfunc(k=np.exp(lk_arr), a=a) for a in a_arr])

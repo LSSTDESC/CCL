@@ -5,6 +5,7 @@ from numpy.testing import (
     assert_raises, assert_almost_equal, assert_allclose)
 import pyccl as ccl
 from pyccl import CCLWarning, CCLObject
+from pyccl.pyutils import get_pk_spline_a, get_pk_spline_lk
 
 
 def pk1d(k):
@@ -197,6 +198,32 @@ def test_pk2d_function():
     assert_allclose(phere, ptrue, rtol=1E-6)
     dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
+
+
+def test_pk2d_from_function_spline_params():
+    """Verify that passing spline_params as an argument works as expected."""
+    k = np.logspace(-1, 0.5, 8)
+    a = 0.8
+
+    # sampling from CCL's spline parameters
+    pk1 = ccl.Pk2D.from_function(pk2d, is_logp=False)
+    a_arr, lk_arr, _ = pk1.get_spline_arrays()
+    assert np.allclose(pk2d(k, a), pk1(k, a), atol=0, rtol=1e-10)
+    assert np.array_equal(a_arr, get_pk_spline_a())
+    assert np.array_equal(lk_arr, get_pk_spline_lk())
+
+    # sampling with custom spline parameters
+    ccl.spline_params.N_K -= 10
+    ccl.spline_params.A_SPLINE_NA_PK -= 10
+    cosmo = ccl.CosmologyVanillaLCDM()  # contains a copy of the new params
+    pk2 = ccl.Pk2D.from_function(pk2d, is_logp=False,
+                                 spline_params=cosmo.cosmo.spline_params)
+    a_arr, lk_arr, _ = pk2.get_spline_arrays()
+    assert np.allclose(pk2d(k, a), pk2(k, a), atol=0, rtol=1e-9)
+    assert np.array_equal(a_arr, get_pk_spline_a())
+    assert np.array_equal(lk_arr, get_pk_spline_lk())
+
+    ccl.spline_params.reload()
 
 
 def test_pk2d_cells():
