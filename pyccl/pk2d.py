@@ -325,8 +325,8 @@ class Pk2D(CCLObject):
             cosmo.compute_growth()  # growth factors for extrapolation
             self.psp.extrap_linear_growth = 401  # flag extrapolation
 
-        a_use = np.atleast_1d(a)
-        k_use = np.atleast_1d(k)
+        a_use = np.atleast_1d(a).astype(float)
+        k_use = np.atleast_1d(k).astype(float)
         lk_use = np.log(k_use)
 
         status = 0

@@ -159,8 +159,8 @@ class Tk3D(CCLObject):
         Returns:
             float or array_like: value(s) of the trispectrum.
         """
-        a_use = np.atleast_1d(a)
-        k_use = np.atleast_1d(k)
+        a_use = np.atleast_1d(a).astype(float)
+        k_use = np.atleast_1d(k).astype(float)
         lk_use = np.log(k_use)
 
         nk = k_use.size
