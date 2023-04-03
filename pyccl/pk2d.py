@@ -91,7 +91,8 @@ class Pk2D(CCLObject):
         spectrum. Otherwise, the true value of the power spectrum is expected.
         If ``is_logp`` is ``True``, arrays are interpolate in log-space.
     empty : bool
-        If ``True``, just create an empty object, to be filled out later.
+        If ``True``, just create an empty object, to be filled out later
+        (deprecated).
     """
     from ._repr import _build_string_Pk2D as __repr__
 
@@ -101,6 +102,10 @@ class Pk2D(CCLObject):
                  pkfunc=None, cosmo=None, is_logp=True,
                  extrap_order_lok=1, extrap_order_hik=2, empty=False):
         if empty:
+            warnings.warn("The creation of empty Pk2D objects is now "
+                          "deprecated. If you want an empty object, use "
+                          "`CCLObject.__new__(Pk2D)`.",
+                          category=CCLDeprecationWarning)
             return
 
         if pkfunc is None:  # Initialize power spectrum from 2D array
@@ -201,7 +206,7 @@ class Pk2D(CCLObject):
                 The power spectrum of the input model.
         """  # noqa E501
 
-        pk2d = cls(empty=True)
+        pk2d = CCLObject.__new__(cls)
         status = 0
         if model == 'bbks':
             cosmo.compute_growth()
@@ -258,7 +263,7 @@ class Pk2D(CCLObject):
                                "redshifts. If using the calculator mode, "
                                "check the support of the background data.")
 
-        pk2d = Pk2D(empty=True)
+        pk2d = CCLObject.__new__(Pk2D)
         status = 0
         ret = lib.apply_halofit(cosmo.cosmo, pk_linear.psp, status)
         if np.ndim(ret) == 0:
@@ -358,7 +363,7 @@ class Pk2D(CCLObject):
     def copy(self):
         """Return a copy of this Pk2D object."""
         if not self:
-            return Pk2D(empty=True)
+            return CCLObject.__new__(Pk2D)
         return self + 0
 
     def get_spline_arrays(self):

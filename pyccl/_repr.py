@@ -206,7 +206,7 @@ def _build_string_Pk2D(self, na=6, nk=6, decimals=2):
             +===============+=============================================+
     """
     if not self.has_psp:
-        return "pyccl.Pk2D(empty=True)"
+        return "pyccl.Pk2D(empty)"
 
     # get what's needed from the Pk2D object
     a, lk, pk = self.get_spline_arrays()

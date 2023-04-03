@@ -4,7 +4,7 @@ from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
 import pyccl as ccl
-from pyccl import CCLWarning
+from pyccl import CCLWarning, CCLObject
 
 
 def pk1d(k):
@@ -272,7 +272,7 @@ def test_pk2d_parsing():
 
 
 def test_pk2d_get_spline_arrays():
-    empty_pk2d = ccl.Pk2D(empty=True)
+    empty_pk2d = CCLObject.__new__(ccl.Pk2D)
 
     # Pk2D needs splines defined to get splines out
     with pytest.raises(ValueError):
@@ -285,7 +285,7 @@ def test_pk2d_add():
     zarr_a = np.outer(x, np.exp(log_y))
     zarr_b = np.outer(-1*x, 4*np.exp(log_y))
 
-    empty_pk2d = ccl.Pk2D(empty=True)
+    empty_pk2d = CCLObject.__new__(ccl.Pk2D)
     pk2d_a = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a),
                       is_logp=True)
     pk2d_b = ccl.Pk2D(a_arr=2*x, lk_arr=log_y, pk_arr=zarr_b,
@@ -432,7 +432,7 @@ def test_pk2d_copy():
                        rtol=1e-15)
     assert bool(pk) is bool(pkc) is True  # they both have `psp`
 
-    pk = ccl.Pk2D(empty=True)
+    pk = CCLObject.__new__(ccl.Pk2D)
     pkc = pk.copy()
     assert bool(pk) is bool(pkc) is False
 
