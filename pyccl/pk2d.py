@@ -277,58 +277,14 @@ class Pk2D(CCLObject):
     def eval(self, k, a, cosmo=None, *, derivative=False):
         warnings.warn("Pk2D.eval is deprecated. Simply use the object's "
                       "__call__ method.", category=CCLDeprecationWarning)
-        return self._eval_single_a(k, a, cosmo=cosmo, derivative=derivative)
-
-    def _eval_single_a(self, k, a, cosmo=None, *, derivative=False):
-        """Evaluate the power spectrum or its logarithmic derivative at
-        a single value of the scale factor.
-        """
-        # determine if logarithmic derivative is needed
-        if not derivative:
-            eval_funcs = lib.pk2d_eval_single, lib.pk2d_eval_multi
-        else:
-            eval_funcs = lib.pk2d_der_eval_single, lib.pk2d_der_eval_multi
-
-        # handle scale factor extrapolation
-        if cosmo is None:
-            cosmo = self._eval_single_a._cosmo
-            self.psp.extrap_linear_growth = 404  # flag no extrapolation
-        else:
-            cosmo.compute_growth()  # growth factors for extrapolation
-            self.psp.extrap_linear_growth = 401  # flag extrapolation
-
-        status = 0
-        if isinstance(k, int):
-            k = float(k)
-        if isinstance(k, float):
-            f, status = eval_funcs[0](self.psp, np.log(k), a,
-                                      cosmo.cosmo, status)
-        else:
-            k_use = np.atleast_1d(k)
-            f, status = eval_funcs[1](self.psp, np.log(k_use), a,
-                                      cosmo.cosmo, k_use.size, status)
-
-        # Catch scale factor extrapolation bounds error.
-        if status == lib.CCL_ERROR_SPLINE_EV:
-            raise TypeError(
-                "Pk2D evaluation scale factor is outside of the "
-                "interpolation range. To extrapolate, pass a Cosmology.")
-        check(status, cosmo)
-        return f
-
-    # Save a dummy cosmology as an attribute of the `_eval_single_a` method
-    # so we don't have to initialize one every time no `cosmo` is passed.
-    # This is gentle with memory too, as `free` does not work for an empty
-    # cosmology.
-    _eval_single_a._cosmo = type("Dummy", (object,),
-                                 {"cosmo": lib.cosmology()})()
+        return self.__call__(k, a, cosmo=cosmo, derivative=derivative)
 
     def eval_dlogpk_dlogk(self, k, a, cosmo):
         """Evaluate logarithmic derivative. See ``Pk2D.eval`` for details."""
         warnings.warn("Pk2D.eval_dlogpk_dlogk is deprecated. Simply use "
                       "the object's __call__ method with `derivative=True`.",
                       category=CCLDeprecationWarning)
-        return self._eval_single_a(k, a, cosmo=cosmo, derivative=True)
+        return self.__call__(k, a, cosmo=cosmo, derivative=True)
 
     def __call__(self, k, a, cosmo=None, *, derivative=False):
         """Evaluate the power spectrum or its logarithmic derivative at
@@ -355,10 +311,47 @@ class Pk2D(CCLObject):
         P(k, a) : float or array_like
             Value(s) of the power spectrum.
         """
-        out = np.array([self._eval_single_a(k, aa, cosmo=cosmo,
-                                            derivative=derivative)
-                        for aa in np.atleast_1d(a).astype(float)])
-        return out.squeeze()[()]
+        # determine if logarithmic derivative is needed
+        if not derivative:
+            eval_func = lib.pk2d_eval_multi
+        else:
+            eval_func = lib.pk2d_der_eval_multi
+
+        # handle scale factor extrapolation
+        if cosmo is None:
+            cosmo = self.__call__._cosmo
+            self.psp.extrap_linear_growth = 404  # flag no extrapolation
+        else:
+            cosmo.compute_growth()  # growth factors for extrapolation
+            self.psp.extrap_linear_growth = 401  # flag extrapolation
+
+        a_use = np.atleast_1d(a)
+        k_use = np.atleast_1d(k)
+
+        status = 0
+        out = np.zeros([len(a_use), len(k_use)])
+        for ia, aa in enumerate(a_use):
+            out[ia, :], status = eval_func(self.psp, np.log(k_use), aa,
+                                           cosmo.cosmo, k_use.size, status)
+
+            # Catch scale factor extrapolation bounds error.
+            if status == lib.CCL_ERROR_SPLINE_EV:
+                raise TypeError(
+                    "Pk2D evaluation scale factor is outside of the "
+                    "interpolation range. To extrapolate, pass a Cosmology.")
+            check(status, cosmo)
+
+        if np.ndim(k) == 0:
+            out = np.squeeze(out, axis=-1)
+        if np.ndim(a) == 0:
+            out = np.squeeze(out, axis=0)
+        return out
+
+    # Save a dummy cosmology as an attribute of the `_eval_single_a` method
+    # so we don't have to initialize one every time no `cosmo` is passed.
+    # This is gentle with memory too, as `free` does not work for an empty
+    # cosmology.
+    __call__._cosmo = type("Dummy", (object,), {"cosmo": lib.cosmology()})()
 
     def copy(self):
         """Return a copy of this Pk2D object."""
