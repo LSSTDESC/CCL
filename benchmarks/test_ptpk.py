@@ -23,7 +23,7 @@ a_arr = 1./(1+np.array([0., 0.25, 0.5, 0.75, 1.]))[::-1]
 ptc = pt.EulerianPTCalculator(with_NC=True, with_IA=True,
                               log10k_min=-4, log10k_max=2,
                               nk_per_decade=20, a_arr=a_arr,
-                              b1_pk_kind='pt', bk_pk_kind='pt',
+                              b1_pk_kind='pt', bk2_pk_kind='pt',
                               extra_params={'pad_factor': 0.5})
 ptc.update_ingredients(COSMO)
 
