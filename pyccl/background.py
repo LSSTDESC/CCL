@@ -30,52 +30,12 @@ species_types = {
 }
 
 
-def growth_factor(cosmo, a):
-    """Growth factor.
-
-    Arguments
-    ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
-        Cosmological parameters.
-    a : float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
-
-    Returns
-    -------
-    D : float or (na,) ``numpy.ndarray``
-        Growth factor at ``a``.
-    """
-    cosmo.compute_growth()
-    return _vectorize_fn(lib.growth_factor, lib.growth_factor_vec, cosmo, a)
-
-
-def growth_factor_unnorm(cosmo, a):
-    """Unnormalized growth factor.
-
-    Arguments
-    ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
-        Cosmological parameters.
-    a : float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
-
-    Returns
-    -------
-    D_unnorm : float or (na,) ``numpy.ndarray``
-        Unnormalized growth factor at ``a``.
-    """
-    cosmo.compute_growth()
-    return _vectorize_fn(lib.growth_factor_unnorm,
-                         lib.growth_factor_unnorm_vec, cosmo, a)
-
-
-def growth_rate(cosmo, a):
-    r"""Growth rate defined as the logarithmic derivative of the
-    growth factor,
+def h_over_h0(cosmo, a):
+    r"""Ratio of Hubble constant at ``a`` over Hubble constant today.
 
     .. math::
 
-        \frac{\mathrm{d}\ln{D}}{\mathrm{d}\ln{a}}.
+        E(a) = \frac{H(a)}{H_0}.
 
     Arguments
     ---------
@@ -86,12 +46,12 @@ def growth_rate(cosmo, a):
 
     Returns
     -------
-    dlnD_dlna : float or (na,) ``numpy.ndarray``
-        Growth rate at ``a``.
+    Ez : float or (na,) ndarray
+        Value of the fraction.
     """
-    cosmo.compute_growth()
-    return _vectorize_fn(lib.growth_rate,
-                         lib.growth_rate_vec, cosmo, a)
+    cosmo.compute_distances()
+    return _vectorize_fn(lib.h_over_h0,
+                         lib.h_over_h0_vec, cosmo, a)
 
 
 def comoving_radial_distance(cosmo, a):
@@ -116,6 +76,26 @@ def comoving_radial_distance(cosmo, a):
     cosmo.compute_distances()
     return _vectorize_fn(lib.comoving_radial_distance,
                          lib.comoving_radial_distance_vec, cosmo, a)
+
+
+def scale_factor_of_chi(cosmo, chi):
+    r"""Scale factor at some comoving radial distance, :math:`a(\chi)`.
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    chi : float or (nchi,) array_like
+        Comoving radial distance :math:`\chi` in :math:`\rm Mpc`.
+
+    Returns
+    -------
+    a_chi : float or (nchi,) ndarray
+        Scale factor at ``chi``.
+    """
+    cosmo.compute_distances()
+    return _vectorize_fn(lib.scale_factor_of_chi,
+                         lib.scale_factor_of_chi_vec, cosmo, chi)
 
 
 def comoving_angular_distance(cosmo, a):
@@ -144,10 +124,17 @@ def comoving_angular_distance(cosmo, a):
     -------
     D_M : float or (na,) ``numpy.ndarray``
         Comoving angular distance at ``a``.
+
+    See also
+    --------
+    transverse_comoving_distance : alias of comoving_angular_distance
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.comoving_angular_distance,
                          lib.comoving_angular_distance_vec, cosmo, a)
+
+
+transverse_comoving_distance = comoving_angular_distance  # alias
 
 
 def angular_diameter_distance(cosmo, a1, a2=None):
@@ -210,30 +197,6 @@ def angular_diameter_distance(cosmo, a1, a2=None):
                           cosmo, np.ones(len(a1)), a1)
 
 
-def h_over_h0(cosmo, a):
-    r"""Ratio of Hubble constant at ``a`` over Hubble constant today.
-
-    .. math::
-
-        E(a) = \frac{H(a)}{H_0}.
-
-    Arguments
-    ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
-        Cosmological parameters.
-    a : float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
-
-    Returns
-    -------
-    Ez : float or (na,) ndarray
-        Value of the fraction.
-    """
-    cosmo.compute_distances()
-    return _vectorize_fn(lib.h_over_h0,
-                         lib.h_over_h0_vec, cosmo, a)
-
-
 def luminosity_distance(cosmo, a):
     r"""Luminosity distance.
 
@@ -252,7 +215,7 @@ def luminosity_distance(cosmo, a):
 
     Returns
     -------
-    D_L : float or (na,) ndarray
+    D_L : float or (na,) ``numpy.ndarray``
         Luminosity distance at ``a``.
     """
     cosmo.compute_distances()
@@ -280,7 +243,7 @@ def distance_modulus(cosmo, a):
 
     Returns
     -------
-    D_M : float or (na,) ndarray
+    D_M : float or (na,) ``numpy.ndarray``
         Distance modulus at ``a``.
     """
     cosmo.compute_distances()
@@ -288,24 +251,95 @@ def distance_modulus(cosmo, a):
                          lib.distance_modulus_vec, cosmo, a)
 
 
-def scale_factor_of_chi(cosmo, chi):
-    r"""Scale factor at some comoving radial distance, :math:`a(\chi)`.
+def hubble_distance(cosmo, a):
+    r"""Hubble distance in :math:`\rm Mpc`.
+
+    .. math::
+
+        D_{\rm H} = \frac{cz}{H_0}
 
     Arguments
     ---------
     cosmo : :class:`~pyccl.core.Cosmology`
         Cosmological parameters.
-    chi : float or (nchi,) array_like
-        Comoving radial distance :math:`\chi` in :math:`\rm Mpc`.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
 
     Returns
     -------
-    a_chi : float or (nchi,) ndarray
-        Scale factor at ``chi``.
+    D_H : float or (na,) ``numpy.ndarray``
+        Hubble distance.
     """
-    cosmo.compute_distances()
-    return _vectorize_fn(lib.scale_factor_of_chi,
-                         lib.scale_factor_of_chi_vec, cosmo, chi)
+    return (1/a - 1) * const.CLIGHT_HMPC / cosmo["h"]
+
+
+def comoving_volume_element(cosmo, a):
+    r"""Comoving volume element in :math:`\rm Mpc^3 \, sr^{-1}`.
+
+    .. math::
+
+        \frac{\mathrm{d}V}{\mathrm{d}a \, \mathrm{d} \Omega}
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+
+    Returns
+    -------
+    dV : float or (na,) ``numpy.ndarray``
+        Comoving volume per unit scale factor per unit solid angle.
+
+    See Also
+    --------
+    comoving_volume : integral of the comoving volume element
+    """
+    Dm = comoving_angular_distance(cosmo, a)
+    Ez = h_over_h0(cosmo, a)
+    Dh = const.CLIGHT_HMPC / cosmo["h"]
+    return Dh * Dm**2 / (Ez * a**2)
+
+
+def comoving_volume(cosmo, a, *, solid_angle=4*np.pi, squeeze=True):
+    r"""Comoving volume, in :math:`\rm Mpc^3`.
+
+    .. math::
+
+        V_{\rm C} = \int_{\Omega} \mathrm{{d}}\Omega \int_z \mathrm{d}z
+        D_{\rm H} \frac{(1+z)^2 D_{\mathrm{A}}^2}{E(z)}
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+    solid_angle : float
+        Solid angle subtended in the sky for which
+        the comoving volume is calculated.
+
+    Returns
+    -------
+    V_C : float or (na,) ndarray
+        Comoving volume at ``a``.
+
+    See Also
+    --------
+    comoving_volume_element : comoving volume element
+    """
+    Omk, sqrtk = cosmo["Omega_k"], cosmo["sqrtk"]
+    Dm = comoving_angular_distance(cosmo, a)
+    if Omk == 0:
+        return solid_angle/3 * Dm**3
+
+    Dh = hubble_distance(cosmo, a)
+    DmDh = Dm / Dh
+    arcsinn = np.arcsin if Omk < 0 else np.arcsinh
+    return ((solid_angle * Dh**3 / (2 * Omk))
+            * (DmDh * np.sqrt(1 + Omk * DmDh**2)
+               - arcsinn(sqrtk * DmDh)/sqrtk))
 
 
 def omega_x(cosmo, a, species):
@@ -385,6 +419,69 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
                          f"Available options are: {species_types.keys()}.")
     return _vectorize_fn4(lib.rho_x, lib.rho_x_vec, cosmo, a,
                           species_types[species], int(is_comoving))
+
+
+def growth_factor(cosmo, a):
+    """Growth factor.
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+
+    Returns
+    -------
+    D : float or (na,) ``numpy.ndarray``
+        Growth factor at ``a``.
+    """
+    cosmo.compute_growth()
+    return _vectorize_fn(lib.growth_factor, lib.growth_factor_vec, cosmo, a)
+
+
+def growth_factor_unnorm(cosmo, a):
+    """Unnormalized growth factor.
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+
+    Returns
+    -------
+    D_unnorm : float or (na,) ``numpy.ndarray``
+        Unnormalized growth factor at ``a``.
+    """
+    cosmo.compute_growth()
+    return _vectorize_fn(lib.growth_factor_unnorm,
+                         lib.growth_factor_unnorm_vec, cosmo, a)
+
+
+def growth_rate(cosmo, a):
+    r"""Growth rate defined as the logarithmic derivative of the
+    growth factor,
+
+    .. math::
+
+        \frac{\mathrm{d}\ln{D}}{\mathrm{d}\ln{a}}.
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+
+    Returns
+    -------
+    dlnD_dlna : float or (na,) ``numpy.ndarray``
+        Growth rate at ``a``.
+    """
+    cosmo.compute_growth()
+    return _vectorize_fn(lib.growth_rate, lib.growth_rate_vec, cosmo, a)
 
 
 @warn_api

@@ -262,14 +262,7 @@ class HMCalculator(CCLAutoRepr):
         if a_min is None:
             a_min = cosmo.cosmo.spline_params.A_SPLINE_MIN
         a = np.linspace(a_min, a_max, na)
-
-        # compute the volume element
-        abs_dzda = 1 / a / a
-        dc = cosmo.comoving_angular_distance(a)
-        ez = cosmo.h_over_h0(a)
-        dh = const.CLIGHT_HMPC / cosmo['h']
-        dvdz = dh * dc**2 / ez
-        dvda = dvdz * abs_dzda
+        dVda = cosmo.comoving_volume_element(a)
 
         # now do m intergrals in a loop
         mint = np.zeros_like(a)
@@ -277,7 +270,7 @@ class HMCalculator(CCLAutoRepr):
             self._get_ingredients(cosmo, _a, get_bf=False)
             _selm = np.atleast_2d(selection(self._mass, _a)).T
             mint[i] = self._integrator(
-                dvda[i] * self._mf[..., :] * _selm[..., :],
+                dVda[i] * self._mf[..., :] * _selm[..., :],
                 self._lmass
             )
 
