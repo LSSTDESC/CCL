@@ -94,7 +94,7 @@ class Pk2D(CCLObject):
         If ``True``, just create an empty object, to be filled out later
         (deprecated).
     """
-    from ._repr import _build_string_Pk2D as __repr__
+    from .base.repr_ import build_string_Pk2D as __repr__
 
     @warn_api(reorder=["pkfunc", "a_arr", "lk_arr", "pk_arr", "is_logp",
                        "extrap_order_lok", "extrap_order_hik", "cosmo"])

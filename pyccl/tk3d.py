@@ -87,7 +87,7 @@ class Tk3D(CCLObject):
         extrap_order_hik (int): same as `extrap_order_lok` for
             k-values above the maximum of the splines.
     """
-    from ._repr import _build_string_Tk3D as __repr__
+    from .base.repr_ import build_string_Tk3D as __repr__
 
     @warn_api(reorder=['extrap_order_lok', 'extrap_order_hik', 'is_logt'])
     def __init__(self, *, a_arr, lk_arr, tkk_arr=None,
