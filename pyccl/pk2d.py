@@ -242,7 +242,7 @@ class Pk2D(CCLObject):
     def apply_halofit(self, cosmo, *, pk_linear=None):
         """Pk2D constructor that applies the "HALOFIT" transformation of
         Takahashi et al. 2012 (arXiv:1208.2701) on an input linear power
-        spectrum in `pk_linear`. See ``Pk2D.apply_nonlin_model`` for details.
+        spectrum in `pk_linear`.
         """
         if pk_linear is None:
             pk_linear = self
