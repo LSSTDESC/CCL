@@ -1,6 +1,8 @@
 import numpy as np
+import warnings
 from ..pk2d import Pk2D
 from ..base import CCLAutoreprObject, unlock_instance
+from ..errors import CCLWarning
 
 
 class EulerianPTCalculator(CCLAutoreprObject):
@@ -40,6 +42,10 @@ class EulerianPTCalculator(CCLAutoreprObject):
               still work in progress in FastPT. As a workaround
               CCL assumes a non-linear treatment of IAs, but only
               linearly biased number counts.
+
+    .. note:: This calculator does not account for any form of
+              stochastic bias contribution to the power spectra.
+              If necessary, consider adding it in post-processing.
 
     Args:
         with_NC (bool): set to True if you'll want to use
@@ -363,6 +369,16 @@ class EulerianPTCalculator(CCLAutoreprObject):
 
         # Get biases
         b1 = trg.b1(self.z_s)
+        b2 = trg.b2(self.z_s)
+        bs = trg.bs(self.z_s)
+        bk2 = trg.bk2(self.z_s)
+        b3nl = trg.b3nl(self.z_s)
+        if (np.any(b2 != 0) or np.any(bs != 0) or
+                np.any(bk2 != 0) or np.any(b3nl != 0)):
+            warnings.warn(
+                "EulerianPTCalculators assume linear galaxy bias "
+                "when computing galaxy-IA cross-correlations.",
+                category=CCLWarning)
         c1 = tri.c1(self.z_s)
         c2 = tri.c2(self.z_s)
         cd = tri.cdelta(self.z_s)

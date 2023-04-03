@@ -241,6 +241,13 @@ def test_ept_calculator_raises():
                                              cosmo=COSMO)
         ptc.get_pk2d_template('b1:b3')
 
+    # Warning when computing IA-gal correlation
+    with pytest.warns(ccl.CCLWarning):
+        ptc = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
+                                             cosmo=COSMO)
+        tg = ccl.nl_pt.PTNumberCountsTracer(b1=1.0, b2=1.0)
+        ptc.get_pk2d_biased(tg, tracer2=TRS['TI'])
+
 
 def test_ept_template_swap():
     # Test that swapping operator order gets you the same
