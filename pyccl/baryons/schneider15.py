@@ -44,7 +44,7 @@ class BaryonsSchneider15(Baryons):
         self.k_s = k_s
 
     def boost_factor(self, cosmo, k, a):
-        """Compute the baryonic boost factor.
+        r"""Compute the baryonic boost factor.
 
         Arguments
         ---------
@@ -79,7 +79,7 @@ class BaryonsSchneider15(Baryons):
         return fka
 
     def update_parameters(self, log10Mc=None, eta_b=None, k_s=None):
-        """Update the model parameters. Those set to ``None`` will not be
+        r"""Update the model parameters. Those set to ``None`` will not be
         updated.
 
         Arguments

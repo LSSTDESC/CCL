@@ -313,7 +313,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             raise AttributeError("Mass definition has no associated c(M).")
         om_this = cosmo.omega_x(a, self.rho_type)
         D_this = self.get_Delta(cosmo, a) * om_this
-        c_this = self._get_concentration(cosmo, M, a)
+        c_this = self.concentration(cosmo, M, a)
         R_this = self.get_radius(cosmo, M, a)
         om_new = cosmo.omega_x(a, mass_def_other.rho_type)
         D_new = mass_def_other.get_Delta(cosmo, a) * om_new
