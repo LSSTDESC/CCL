@@ -132,8 +132,8 @@ def test_pt_pk2d_bb():
                                 return_ia_bb=True)
     pee2, pbb2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'], ptc=PTC,
                                        return_ia_ee_and_bb=True)
-    assert pee.eval(0.1, 0.9, COSMO) == pee2.eval(0.1, 0.9, COSMO)
-    assert pbb.eval(0.1, 0.9, COSMO) == pbb2.eval(0.1, 0.9, COSMO)
+    assert pee(0.1, 0.9, COSMO) == pee2(0.1, 0.9, COSMO)
+    assert pbb(0.1, 0.9, COSMO) == pbb2(0.1, 0.9, COSMO)
 
 
 @pytest.mark.parametrize('nl', ['nonlinear', 'linear', 'spt'])
@@ -161,8 +161,8 @@ def test_k2pk_types(typ_nlin, typ_nloc):
     pkgg = ccl.nl_pt.get_pt_pk2d(COSMO, tg, tracer2=tg, ptc=PTC,
                                  nonloc_pk_type=typ_nloc)
     ks = np.geomspace(1E-3, 1E1, 128)
-    p1 = pkgg.eval(ks, 1., COSMO)
-    p2 = pkmm.eval(ks, 1., COSMO)+ks**2*pkmm_t.eval(ks, 1., COSMO)
+    p1 = pkgg(ks, 1., COSMO)
+    p2 = pkmm(ks, 1., COSMO)+ks**2*pkmm_t(ks, 1., COSMO)
     assert np.all(np.fabs(p1/p2-1) < 1E-4)
 
 
@@ -330,9 +330,9 @@ def test_return_ptc():
     assert ptc2_2 is PTC
     # check that the result outputs are the same
     # for the internally initialized ptc.
-    assert np.allclose(pk_2.eval(ks, 1., COSMO), pk.eval(ks, 1., COSMO))
-    assert np.allclose(pee2_2.eval(ks, 1., COSMO), pee2.eval(ks, 1., COSMO))
-    assert np.allclose(pbb2_2.eval(ks, 1., COSMO), pbb2.eval(ks, 1., COSMO))
+    assert np.allclose(pk_2(ks, 1., COSMO), pk(ks, 1., COSMO))
+    assert np.allclose(pee2_2(ks, 1., COSMO), pee2(ks, 1., COSMO))
+    assert np.allclose(pbb2_2(ks, 1., COSMO), pbb2(ks, 1., COSMO))
 
 
 def test_pt_no_ptc_update():
@@ -349,5 +349,5 @@ def test_pt_no_ptc_update():
                                            update_ptc=False)
     pee2 = ccl.nl_pt.get_pt_pk2d(COSMO2, TRS['TI'], ptc=PTC)
 
-    assert pee1.eval(0.1, 0.9, COSMO) == pee1_no_update.eval(0.1, 0.9, COSMO)
-    assert pee2.eval(0.1, 0.9, COSMO) != pee2_no_update.eval(0.1, 0.9, COSMO2)
+    assert pee1(0.1, 0.9, COSMO) == pee1_no_update(0.1, 0.9, COSMO)
+    assert pee2(0.1, 0.9, COSMO) != pee2_no_update(0.1, 0.9, COSMO2)

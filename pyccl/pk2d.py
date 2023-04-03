@@ -48,8 +48,7 @@ class Pk2D(CCLObject):
     .. note::
 
         The power spectrum can be evaluated by directly calling the instance
-        ``pk(k, a)``, or by calling the ``eval`` method, ``pk.eval(k, a)``.
-        Calling the instance is vectorized in both ``k`` and ``a``.
+        ``pk(k, a)``. This is vectorized in both ``k`` and ``a``.
 
     Parameters
     ----------
@@ -271,28 +270,13 @@ class Pk2D(CCLObject):
         return pk2d
 
     def eval(self, k, a, cosmo=None, *, derivative=False):
-        """Evaluate the power spectrum or its logarithmic derivative.
+        warnings.warn("Pk2D.eval is deprecated. Simply use the object's "
+                      "__call__ method.", category=CCLDeprecationWarning)
+        return self._eval_single_a(k, a, cosmo=cosmo, derivative=derivative)
 
-        Arguments
-        ---------
-        k : float or array_like
-            Wavenumber value(s) in units of Mpc^-1.
-        a : float
-            Value of the scale factor
-        cosmo : :class:`~pyccl.core.Cosmology`
-            Cosmology object. Used to evaluate the power spectrum outside
-            of the interpolation range in ``a``, thorugh the linear growth
-            factor. If ``cosmo`` is ``None``, attempting to evaluate the power
-            spectrum outside of the interpolation range will raise an error.
-        derivative : bool
-            If ``False``, evaluate the power spectrum. If ``True``, evaluate
-            the logarithmic derivative of the power spectrum,
-            :math:`\\frac{\\mathrm{d} \\log P(k)}{\\mathrm{d} \\log k}`.
-
-        Returns
-        -------
-        P(k, a) : float or array_like
-            Value(s) of the power spectrum.
+    def _eval_single_a(self, k, a, cosmo=None, *, derivative=False):
+        """Evaluate the power spectrum or its logarithmic derivative at a single
+        value of the scale factor.
         """
         # determine if logarithmic derivative is needed
         if not derivative:
@@ -302,7 +286,7 @@ class Pk2D(CCLObject):
 
         # handle scale factor extrapolation
         if cosmo is None:
-            cosmo = self.eval._cosmo
+            cosmo = self._eval_single_a._cosmo
             self.psp.extrap_linear_growth = 404  # flag no extrapolation
         else:
             cosmo.compute_growth()  # growth factors for extrapolation
@@ -327,18 +311,44 @@ class Pk2D(CCLObject):
         check(status, cosmo)
         return f
 
-    # Save a dummy cosmology as an attribute of the `eval` method so we don't
+    # Save a dummy cosmology as an attribute of the `_eval_single_a` method so we don't
     # have to initialize one every time no `cosmo` is passed. This is gentle
     # with memory too, as `free` does not work for an empty cosmology.
-    eval._cosmo = type("Dummy", (object,), {"cosmo": lib.cosmology()})()
+    _eval_single_a._cosmo = type("Dummy", (object,), {"cosmo": lib.cosmology()})()
 
     def eval_dlogpk_dlogk(self, k, a, cosmo):
         """Evaluate logarithmic derivative. See ``Pk2D.eval`` for details."""
-        return self.eval(k, a, cosmo=cosmo, derivative=True)
+        warnings.warn("Pk2D.eval_dlogpk_dlogk is deprecated. Simply use "
+                      "the object's __call__ method with `derivative=True`.",
+                      category=CCLDeprecationWarning)
+        return self._eval_single_a(k, a, cosmo=cosmo, derivative=True)
 
     def __call__(self, k, a, cosmo=None, *, derivative=False):
-        """Callable vectorized instance."""
-        out = np.array([self.eval(k, aa, cosmo=cosmo, derivative=derivative)
+        """Evaluate the power spectrum or its logarithmic derivative at a single
+        value of the scale factor.
+
+        Arguments
+        ---------
+        k : float or array_like
+            Wavenumber value(s) in units of Mpc^-1.
+        a : float or array_like
+            Value of the scale factor
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmology object. Used to evaluate the power spectrum outside
+            of the interpolation range in ``a``, thorugh the linear growth
+            factor. If ``cosmo`` is ``None``, attempting to evaluate the power
+            spectrum outside of the interpolation range will raise an error.
+        derivative : bool
+            If ``False``, evaluate the power spectrum. If ``True``, evaluate
+            the logarithmic derivative of the power spectrum,
+            :math:`\\frac{\\mathrm{d} \\log P(k)}{\\mathrm{d} \\log k}`.
+
+        Returns
+        -------
+        P(k, a) : float or array_like
+            Value(s) of the power spectrum.
+        """
+        out = np.array([self._eval_single_a(k, aa, cosmo=cosmo, derivative=derivative)
                         for aa in np.atleast_1d(a).astype(float)])
         return out.squeeze()[()]
 

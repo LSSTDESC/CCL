@@ -70,7 +70,7 @@ def test_pk2d_smoke():
     aarr = 0.05+0.95*np.arange(100)/99.
     pkarr = np.zeros([len(aarr), len(lkarr)])
     psp = ccl.Pk2D(a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr)
-    assert_(not np.isnan(psp.eval(1E-2, 0.5, cosmo)))
+    assert_(not np.isnan(psp(1E-2, 0.5, cosmo)))
 
 
 @pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu',
@@ -85,7 +85,7 @@ def test_pk2d_from_model(model):
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
-        pk1 = pk.eval(ks, a, cosmo)
+        pk1 = pk(ks, a, cosmo)
         pk2 = ccl.linear_matter_power(cosmo, ks, a)
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1E-10
@@ -120,7 +120,7 @@ def test_pk2d_from_model_emu():
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
-        pk1 = pk.eval(ks, a, cosmo)
+        pk1 = pk(ks, a, cosmo)
         pk2 = ccl.nonlin_matter_power(cosmo, ks, a)
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1E-10
@@ -152,39 +152,39 @@ def test_pk2d_function():
     psp = ccl.Pk2D.from_function(pkfunc=lpk2d, cosmo=cosmo)
     with pytest.warns(ccl.CCLDeprecationWarning):
         psp2 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
-    assert psp.eval(1.0, 1.0) == psp2.eval(1.0, 1.0)
+    assert psp(1.0, 1.0) == psp2(1.0, 1.0)
 
     # Test at single point
     ktest = 1E-2
     atest = 0.5
     ptrue = pk2d(ktest, atest)
-    phere = psp.eval(ktest, atest, cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_almost_equal(dphere, -1., 6)
 
     ktest = 1
     atest = 0.5
     ptrue = pk2d(ktest, atest)
-    phere = psp.eval(ktest, atest, cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_almost_equal(dphere, -1., 6)
 
     # Test at array of points
     ktest = np.logspace(-3, 1, 10)
     ptrue = pk2d(ktest, atest)
-    phere = psp.eval(ktest, atest, cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is not logarithmic
     with pytest.warns(ccl.CCLDeprecationWarning):
         psp = ccl.Pk2D(pkfunc=pk2d, is_logp=False, cosmo=cosmo)
-    phere = psp.eval(ktest, atest, cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is arrays
@@ -193,9 +193,9 @@ def test_pk2d_function():
     parr = np.array([pk2d(karr, a) for a in aarr])
     psp = ccl.Pk2D(
         a_arr=aarr, lk_arr=np.log(karr), pk_arr=parr, is_logp=False)
-    phere = psp.eval(ktest, atest, cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
 
@@ -411,12 +411,12 @@ def test_pk2d_eval_cosmo():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     cosmo.compute_linear_power()
     pk = cosmo.get_linear_power()
-    assert pk.eval(1., 1.) == pk.eval(1., 1., cosmo)
+    assert pk(1., 1.) == pk(1., 1., cosmo)
 
     amin = pk.psp.amin
-    pk.eval(1., amin*0.99, cosmo)  # doesn't fail because cosmo is provided
+    pk(1., amin*0.99, cosmo)  # doesn't fail because cosmo is provided
     with pytest.raises(TypeError):
-        pk.eval(1., amin*0.99)
+        pk(1., amin*0.99)
 
 
 def test_pk2d_copy():

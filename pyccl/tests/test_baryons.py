@@ -25,7 +25,7 @@ def test_bcm_correct_smoke():
     pk_nobar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
     pkb = bar.include_baryonic_effects(
         COSMO, COSMO.get_nonlin_power())
-    pk_wbar = pkb.eval(k_arr, 0.5)
+    pk_wbar = pkb(k_arr, 0.5)
     assert np.all(np.fabs(pk_wbar/(pk_nobar*fka)-1) < 1E-5)
 
 

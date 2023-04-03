@@ -173,7 +173,7 @@ def test_pkhm_pk2d():
     pk2d = ccl.halos.halomod_Pk2D(COSMO, hmc, P1,
                                   lk_arr=np.log(k_arr),
                                   a_arr=a_arr, normprof1=True)
-    pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
+    pk_arr_2 = np.array([pk2d(k_arr, a, COSMO)
                          for a in a_arr])
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
                   < 1E-4)
@@ -181,7 +181,7 @@ def test_pkhm_pk2d():
     # Standard sampling
     pk2d = ccl.halos.halomod_Pk2D(COSMO, hmc, P1,
                                   normprof1=True)
-    pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
+    pk_arr_2 = np.array([pk2d(k_arr, a, COSMO)
                          for a in a_arr])
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
                   < 1E-4)

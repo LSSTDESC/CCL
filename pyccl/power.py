@@ -10,7 +10,7 @@ def linear_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
-        a (float): Scale factor.
+        a (float or array_like): Scale factor.
         p_of_k_a (str): string specifying the power spectrum to
             compute (which should be stored in `cosmo`). Defaults to
             the linear matter power spectrum.
@@ -21,7 +21,7 @@ def linear_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     cosmo.compute_linear_power()
     if p_of_k_a not in cosmo._pk_lin:
         raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_lin[p_of_k_a].eval(k, a, cosmo)
+    return cosmo._pk_lin[p_of_k_a](k, a, cosmo)
 
 
 def nonlin_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
@@ -30,7 +30,7 @@ def nonlin_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
-        a (float): Scale factor.
+        a (float or array_like): Scale factor.
         p_of_k_a (str): string specifying the power spectrum to
             compute (which should be stored in `cosmo`). Defaults to
             the non-linear matter power spectrum.
@@ -41,7 +41,7 @@ def nonlin_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     cosmo.compute_nonlin_power()
     if p_of_k_a not in cosmo._pk_nl:
         raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_nl[p_of_k_a].eval(k, a, cosmo)
+    return cosmo._pk_nl[p_of_k_a](k, a, cosmo)
 
 
 def linear_matter_power(cosmo, k, a):
@@ -50,14 +50,13 @@ def linear_matter_power(cosmo, k, a):
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
-        a (float): Scale factor.
+        a (float or array_like): Scale factor.
 
     Returns:
         float or array_like: Linear matter power spectrum; Mpc^3.
     """
     cosmo.compute_linear_power()
-    return cosmo._pk_lin['delta_matter:delta_matter'].eval(k, a,
-                                                           cosmo)
+    return cosmo._pk_lin['delta_matter:delta_matter'](k, a, cosmo)
 
 
 def nonlin_matter_power(cosmo, k, a):
@@ -66,14 +65,13 @@ def nonlin_matter_power(cosmo, k, a):
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
-        a (float): Scale factor.
+        a (float or array_like): Scale factor.
 
     Returns:
         float or array_like: Nonlinear matter power spectrum; Mpc^3.
     """
     cosmo.compute_nonlin_power()
-    return cosmo._pk_nl['delta_matter:delta_matter'].eval(k, a,
-                                                          cosmo)
+    return cosmo._pk_nl['delta_matter:delta_matter'](k, a, cosmo)
 
 
 def sigmaM(cosmo, M, a):
