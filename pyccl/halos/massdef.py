@@ -1,8 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import species_types
-from ..base import CCLAutoreprObject, warn_api, deprecate_attr
-from .halo_model_base import initialize_from_input
+from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
 import numpy as np
 
 
@@ -89,7 +88,7 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     return c_new
 
 
-class MassDef(CCLAutoreprObject):
+class MassDef(CCLAutoRepr, CCLNamedClass):
     r"""Halo mass definition.
 
     Halo masses are defined in terms of an overdensity parameter :math:`\Delta`
@@ -356,8 +355,6 @@ class MassDef(CCLAutoreprObject):
             raise ValueError("Could not parse mass definition string.")
         Delta, rho_type = name[:-1], parser[name[-1]]
         return lambda cm=None: cls(Delta, rho_type, concentration=cm)  # noqa
-
-    initialize_from_input = classmethod(initialize_from_input)
 
 
 @warn_api(pairs=[('c_m', 'concentration')])

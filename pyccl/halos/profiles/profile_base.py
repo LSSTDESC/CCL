@@ -1,5 +1,5 @@
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import (CCLAutoreprObject, unlock_instance,
+from ...base import (CCLAutoRepr, unlock_instance,
                      warn_api, deprecate_attr)
 from ...parameters import FFTLogParams
 import numpy as np
@@ -11,7 +11,7 @@ __all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
            "HaloProfilePressure", "HaloProfileCIB",)
 
 
-class HaloProfile(CCLAutoreprObject):
+class HaloProfile(CCLAutoRepr):
     """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL

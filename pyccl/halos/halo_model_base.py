@@ -1,7 +1,8 @@
 from .. import ccllib as lib
 from ..core import check
 from ..parameters import physical_constants as const
-from ..base import CCLAutoreprObject, warn_api, deprecated, deprecate_attr
+from ..base import (CCLAutoRepr, CCLNamedClass,
+                    warn_api, deprecated, deprecate_attr)
 import numpy as np
 import functools
 from abc import abstractmethod, abstractproperty
@@ -10,44 +11,11 @@ from abc import abstractmethod, abstractproperty
 __all__ = ("HMIngredients",)
 
 
-def _subclasses(cls):
-    # This helper returns a set of all subclasses.
-    direct_subs = cls.__subclasses__()
-    deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
-    return set(direct_subs).union(deep_subs)
-
-
-def from_name(cls, name):
-    """Obtain particular model."""
-    mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
-    return mod[name]
-
-
-def initialize_from_input(cls, input_, **kwargs):
-    """Process the input and generate an object of the class.
-    Input can be an instance of the class, or a name string.
-    Optional ``**kwargs`` may be passed.
-    """
-    if isinstance(input_, cls):
-        return input_
-    if isinstance(input_, str):
-        class_ = cls.from_name(input_)
-        return class_(**kwargs)
-    good, bad = cls.__name__, input_.__class__.__name__
-    raise TypeError(f"Expected {good} or str but received {bad}.")
-
-
-class HMIngredients(CCLAutoreprObject):
+class HMIngredients(CCLAutoRepr, CCLNamedClass):
     """Base class for halo model ingredients."""
     __repr_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
                                  )(super.__getattribute__)
-
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls._subclasses = classmethod(_subclasses)
-        cls.from_name = classmethod(from_name)
-        cls.initialize_from_input = classmethod(initialize_from_input)
 
     @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):

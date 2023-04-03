@@ -2,7 +2,7 @@ from .massdef import MassDef
 from .hmfunc import MassFunc
 from .hbias import HaloBias
 from ..pyutils import _spline_integrate
-from ..base import CCLAutoreprObject, unlock_instance, warn_api, deprecate_attr
+from ..base import CCLAutoRepr, unlock_instance, warn_api, deprecate_attr
 from ..parameters import physical_constants as const
 import numpy as np
 
@@ -10,7 +10,7 @@ import numpy as np
 __all__ = ("HMCalculator",)
 
 
-class HMCalculator(CCLAutoreprObject):
+class HMCalculator(CCLAutoRepr):
     r"""Implementation of methods used to compute quantities related to the
     halo model. A lot of these quantities involve integrals of the sort:
 
