@@ -327,12 +327,13 @@ class Pk2D(CCLObject):
 
         a_use = np.atleast_1d(a)
         k_use = np.atleast_1d(k)
+        lk_use = np.log(k_use)
 
         status = 0
         out = np.zeros([len(a_use), len(k_use)])
         for ia, aa in enumerate(a_use):
-            out[ia, :], status = eval_func(self.psp, np.log(k_use), aa,
-                                           cosmo.cosmo, k_use.size, status)
+            f, status = eval_func(self.psp, lk_use, aa,
+                                  cosmo.cosmo, k_use.size, status)
 
             # Catch scale factor extrapolation bounds error.
             if status == lib.CCL_ERROR_SPLINE_EV:
@@ -340,6 +341,7 @@ class Pk2D(CCLObject):
                     "Pk2D evaluation scale factor is outside of the "
                     "interpolation range. To extrapolate, pass a Cosmology.")
             check(status, cosmo)
+            out[ia, :] = f
 
         if np.ndim(k) == 0:
             out = np.squeeze(out, axis=-1)
@@ -347,7 +349,7 @@ class Pk2D(CCLObject):
             out = np.squeeze(out, axis=0)
         return out
 
-    # Save a dummy cosmology as an attribute of the `_eval_single_a` method
+    # Save a dummy cosmology as an attribute of the `__call__` method
     # so we don't have to initialize one every time no `cosmo` is passed.
     # This is gentle with memory too, as `free` does not work for an empty
     # cosmology.
