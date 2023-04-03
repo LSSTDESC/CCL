@@ -98,16 +98,8 @@ def test_tk3d_smoke():
     tsp1 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=fka1_arr,
                     pk2_arr=fka2_arr)
     tsp2 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkka_arr)
-    assert_(not np.isnan(tsp1.eval(1E-2, 0.5)))
-    assert_(not np.isnan(tsp2.eval(1E-2, 0.5)))
-
-
-def test_tk3d_eval_errors():
-    (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
-    tsp = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=fka1_arr,
-                   pk2_arr=fka2_arr)
-    with pytest.raises(TypeError):
-        tsp.eval(1E-2, np.array([0.1]))
+    assert_(not np.isnan(tsp1(1E-2, 0.5)))
+    assert_(not np.isnan(tsp2(1E-2, 0.5)))
 
 
 def test_tk3d_delete():
@@ -132,19 +124,19 @@ def test_tk3d_eval(is_product):
     ktest = 0.7
     atest = 0.5
     ptrue = tkkaf(ktest, ktest, atest)
-    phere = tsp.eval(ktest, atest)
+    phere = tsp(ktest, atest)
     assert_almost_equal(phere/ptrue, 1., 6)
 
     ktest = 5E-5
     atest = 0.5
     ptrue = tkkaf(ktest, ktest, atest)
-    phere = tsp.eval(ktest, atest)
+    phere = tsp(ktest, atest)
     assert_almost_equal(phere/ptrue, 1., 6)
 
     # Test at array of points
     ktest = np.logspace(-3, 1, 10)
     ptrue = tkkaf(ktest[None, :], ktest[:, None], atest)
-    phere = tsp.eval(ktest, atest)
+    phere = tsp(ktest, atest)
     assert_allclose(phere.flatten(), ptrue.flatten(), rtol=1E-6)
 
 
@@ -153,7 +145,7 @@ def test_tk3d_call():
     (a_arr, lk_arr, fka1_arr, fka2_arr, tkka_arr) = get_arrays()
     tsp = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkka_arr)
     assert bool(tsp) is tsp.has_tsp
-    assert np.allclose(np.array([tsp.eval(np.exp(lk_arr), a) for a in a_arr]),
+    assert np.allclose(np.array([tsp(np.exp(lk_arr), a) for a in a_arr]),
                        tsp(np.exp(lk_arr), a_arr), rtol=1e-15)
 
 

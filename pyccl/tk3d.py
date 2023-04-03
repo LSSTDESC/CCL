@@ -1,6 +1,8 @@
+import warnings
 from . import ccllib as lib
 from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 from .base import CCLObject, warn_api
+from .errors import CCLDeprecationWarning
 import numpy as np
 
 
@@ -139,22 +141,12 @@ class Tk3D(CCLObject):
         return 'tsp' in vars(self)
 
     def eval(self, k, a):
-        """Evaluate trispectrum. If `k` is a 1D array with size `nk`, the
-        output `out` will be a 2D array with shape `[nk,nk]` holding
-        `out[i,j] = T(k[j],k[i],a)`, where `T` is the trispectrum function
-        held by this `Tk3D` object.
+        warnings.warn("Tk3D.eval is deprecated. Simply use the object's "
+                      "__call__ method.", category=CCLDeprecationWarning)
+        return self._eval_single_a(k, a)
 
-        Args:
-            k (float or array_like): wavenumber value(s) in units of Mpc^-1.
-            a (float): value of the scale factor
-
-        Returns:
-            float or array_like: value(s) of the trispectrum.
-        """
+    def _eval_single_a(self, k, a):
         status = 0
-
-        if np.ndim(a) != 0:
-            raise TypeError("a must be a floating point number")
 
         if isinstance(k, int):
             k = float(k)
@@ -170,8 +162,20 @@ class Tk3D(CCLObject):
         return f
 
     def __call__(self, k, a):
-        """Callable vectorized instance."""
-        out = np.array([self.eval(k, aa)
+        """Evaluate trispectrum. If `k` is a 1D array with size `nk`, and
+        `a` is a scalar, the output `out` will be a 2D array with shape
+        `[nk,nk]` holding `out[i,j] = T(k[j],k[i],a)`, where `T` is the
+        trispectrum function held by this `Tk3D` object. If `a` is an array,
+        the shape will be `[len(a),nk,nk]`.
+
+        Args:
+            k (float or array_like): wavenumber value(s) in units of Mpc^-1.
+            a (float or array_like): value(s) of the scale factor
+
+        Returns:
+            float or array_like: value(s) of the trispectrum.
+        """
+        out = np.array([self._eval_single_a(k, aa)
                         for aa in np.atleast_1d(a).astype(float)])
         return out.squeeze()[()]
 

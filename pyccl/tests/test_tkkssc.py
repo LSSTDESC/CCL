@@ -113,7 +113,7 @@ def test_tkkssc_smoke(pars):
                                      p_of_k_a=pars['pk'],
                                      lk_arr=np.log(k_arr), a_arr=a_arr,
                                      )
-    tk = tkk.eval(0.1, 0.5)
+    tk = tkk(0.1, 0.5)
     assert np.all(np.isfinite(tk))
 
 
