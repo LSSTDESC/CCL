@@ -1,8 +1,9 @@
 import numpy as np
 from ..pk2d import Pk2D
+from ..base import CCLAutoreprObject, unlock_instance
 
 
-class EulerianPTCalculator(object):
+class EulerianPTCalculator(CCLAutoreprObject):
     """ This class implements a set of methods that can be
     used to compute the various components needed to estimate
     Eulerian perturbation theory correlations. These calculations
@@ -110,6 +111,10 @@ class EulerianPTCalculator(object):
           contribution to some of the terms will be subtracted.
           Default: `False`.
     """
+    __repr_attrs__ = ('with_NC', 'with_IA', 'with_matter_1loop',
+                      'k_s', 'a_s', 'exp_cutoff',
+                      'b1_pk_kind', 'bk2_pk_kind', 'fastpt_par')
+
     def __init__(self, *, with_NC=False, with_IA=False,
                  with_matter_1loop=True, cosmo=None,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
@@ -216,6 +221,7 @@ class EulerianPTCalculator(object):
                            "for this calculator. Please do so using "
                            "`update_ingredients`.")
 
+    @unlock_instance
     def update_ingredients(self, cosmo):
         """ Update the internal PT arrays.
 
