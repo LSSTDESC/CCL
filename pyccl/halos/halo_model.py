@@ -51,7 +51,7 @@ class HMCalculator(CCLAutoRepr):
     nlM : int
         Number of uniformly-spaced samples in :math:`log_{10}M` used in the
         mass integrals. The default is 128.
-    integration_method_M : {'simpson'|'spline'}
+    integration_method_M : {'simpson', 'spline'}
         Integration method to use.
         ``'simpson'`` uses ``scipy.integrate.simpson``, while ``'spline'``
         integrates using the knots of a cubic spline fitted to the integrand.

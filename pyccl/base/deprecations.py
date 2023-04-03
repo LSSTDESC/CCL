@@ -33,33 +33,35 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
       - constructors in ``halos`` where the default ``MassDef`` is not None,
       - functions/methods where ``normprof`` is deprecated.
 
-    Parameters:
-        pairs : list of pairs, optional
-            List of renaming pairs ``('old', 'new')``.
-        reorder : list, optional
-            List of the **previous** order of the arguments whose order
-            has been changed, under their **new** name.
+    Parameters
+    ----------
+    pairs : list of pairs, optional
+        List of renaming pairs ``('old', 'new')``.
+    reorder : list, optional
+        List of the **previous** order of the arguments whose order
+        has been changed, under their **new** name.
 
-    Example:
-        We have the legacy constructor:
+    Example
+    -------
+    We have the legacy constructor:
 
-        >>> def __init__(self, cosmo, a, b, c=0, d=1, normprof=False):
-                # do something
-                return a, b, c, d, normprof
+    >>> def __init__(self, cosmo, a, b, c=0, d=1, normprof=False):
+            # do something
+            return a, b, c, d, normprof
 
-        and we want to change the API to
+    and we want to change the API to
 
-        >>> def __init__(self, a, *, see=0, bee, d=1, normprof=None):
-                # do the same thing
-                return a, bee, see, d, normprof
+    >>> def __init__(self, a, *, see=0, bee, d=1, normprof=None):
+            # do the same thing
+            return a, bee, see, d, normprof
 
-        Then, adding this decorator to our new function would preserve API
+    Then, adding this decorator to our new function would preserve API
 
-        >>> @warn_api(pairs=[('b', 'bee'), ('c', 'see')],
-                      reorder=['bee', 'see'])
+    >>> @warn_api(pairs=[('b', 'bee'), ('c', 'see')],
+                  reorder=['bee', 'see'])
 
-        - ``cosmo`` is automatically detected for all constructors in ``halos``
-        - ``normprof`` is automatically detected for all decorated functions.
+    - ``cosmo`` is automatically detected for all constructors in ``halos``
+    - ``normprof`` is automatically detected for all decorated functions.
     """
     if func is None:
         # called with parentheses
@@ -194,10 +196,11 @@ def deprecate_attr(getter=None, *, pairs=[]):
     Now, every time the attribute is called via its old name, the user will
     be warned about the renaming, and the attribute value will be returned.
 
-    .. note:: Make sure that you bind ``__getattr__`` to the decorator,
-              rather than ``__getattribute__``, because ``__getattr__``
-              provides the fallback mechanism we want to use. Otherwise,
-              an infinite recursion will initiate.
+    .. note::
+
+        Make sure that you bind ``__getattr__`` to the decorator, rather than
+        ``__getattribute__``, because ``__getattr__`` provides the fallback
+        mechanism we want to use, or an infinite recursion will commence.
 
     """
     if getter is None:

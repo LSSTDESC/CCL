@@ -103,10 +103,10 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
     Parameters
     ----------
-    Delta : float, int-castable str, or {'fof'|'vir'}
+    Delta : float, int-castable str, or {'fof', 'vir'}
         Spherical overdensity (S.O.) parameter. ``'fof'`` for friends-of-
         friends masses and ``'vir'`` for Virial masses.
-    rho_type : {'critical'|'matter'}
+    rho_type : {'critical', 'matter'}
         Reference mean density type.
     concentration : :class:`~pyccl.halos.Concentration`, str, or None, optional
         Concentration-mass relation. Provided either as a name string,
@@ -116,9 +116,9 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
     Attributes
     ----------
-    Delta : float or {'fof'|'vir'}
+    Delta : float or {'fof', 'vir'}
         S.O. parameter.
-    rho_type : {'critical'|'matter'}
+    rho_type : {'critical', 'matter'}
         Reference mean density type.
     concentration : :class:`~pyccl.halos.Concentration`
         Concentration-mass relation.
@@ -140,7 +140,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         if isinstance(Delta, (int, float)) and Delta < 0:
             raise ValueError("Delta must be a positive number.")
         if rho_type not in ['matter', 'critical']:
-            raise ValueError("rho_type must be either ['matter'|'critical].'")
+            raise ValueError("rho_type must be either ['matter', 'critical].'")
 
         self.Delta = Delta
         self.rho_type = rho_type
@@ -157,9 +157,9 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
     def name(self):
         r"""Name of the mass definition.
 
-        If ``Delta`` is ``{'fof'|'vir'}`` just this is used.
+        If ``Delta`` is ``{'fof', 'vir'}`` just this is used.
         If it is a number, it is appended by the first letter of the reference
-        density type, ``{'c'|'m'}``, as conventionally denoted.
+        density type, ``{'c', 'm'}``, as conventionally denoted.
         """
         if isinstance(self.Delta, (int, float)):
             return f"{self.Delta}{self.rho_type[0]}"

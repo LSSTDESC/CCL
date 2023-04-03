@@ -9,7 +9,21 @@ __all__ = ("ObjectLock", "UnlockInstance", "unlock_instance", "FancyRepr",
 
 
 class ObjectLock:
-    """Control the lock state (immutability) of a ``CCLObject``."""
+    """Control the lock state (immutability) of a ``CCLObject``.
+
+    This lock is injected into every instance of ``CCLObject``, where
+    ``__setattr__`` checks the lock's ``locked`` property to see
+    if the instance is immutable.
+
+    Instances of this class work together with ``CCLObject`` (instances of
+    which are locked) and ``UnlockInstance`` (which holds the key to
+    temporarily unlock a ``CCLObject``).
+
+    Attributes
+    ----------
+    locked
+    active
+    """
     _locked: bool = False
     _lock_id: int = None
 
@@ -39,16 +53,16 @@ class ObjectLock:
 
 
 class UnlockInstance:
-    """Context manager that temporarily unlocks an immutable instance
-    of ``CCLObject``.
+    """Context manager that temporarily unlocks an instance of ``CCLObject``.
 
-    Parameters:
-        instance (``CCLObject``):
-            Instance of ``CCLObject`` to unlock within the scope
-            of the context manager.
-        mutate (``bool``):
-            If the enclosed function mutates the object, the stored
-            representation is automatically deleted.
+    Parameters
+    ----------
+    instance : :obj:`~pyccl.base.CCLObject`
+        Instance of ``CCLObject`` to unlock within the context manager block.
+    mutate : bool
+        Whether the object that is temporarily unlocked mutates.
+        If the enclosed function mutates the object, the cached
+        representation and hash are automatically deleted.
     """
 
     def __init__(self, instance, *, mutate=True):
@@ -57,8 +71,8 @@ class UnlockInstance:
         # Define these attributes for easy access.
         self.id = id(self)
         self.thread_lock = RLock()
-        # We want to catch and exit if the instance is not a CCLObject.
-        # Hopefully this will be caught downstream.
+        # This context manager only acts on CCLObjects. With this check
+        # we exit early if what we are trying to unlock is not a CCLObject.
         self.check_instance = isinstance(instance, CCLObject)
         if self.check_instance:
             self.object_lock = instance._object_lock
@@ -101,18 +115,20 @@ class UnlockInstance:
 
     @classmethod
     def unlock_instance(cls, func=None, *, name=None, mutate=True):
-        """Decorator that temporarily unlocks an instance of CCLObject.
+        """Wrapper that temporarily unlocks an instance of CCLObject.
 
-        Arguments:
-            func (``function``):
-                Function which changes one of its ``CCLObject`` arguments.
-            name (``str``):
-                Name of the parameter to unlock. Defaults to the first one.
-                If not a ``CCLObject`` the decorator will do nothing.
-            mutate (``bool``):
-                If after the function ``instance_old != instance_new``, the
-                instance is mutated. If ``True``, the representation of the
-                object will be reset.
+        Arguments
+        ---------
+        func : function
+            Function which changes one of its ``CCLObject`` arguments.
+        name : str
+            Name of the parameter to unlock. If not a ``CCLObject`` the
+            decorator will do nothing. The default is the first argument
+            (which is usually ``self``).
+        mutate : bool
+            If, after the function runs, ``instance_old != instance_new``,
+            the instance mutates. If ``True``, the representation of the
+            object will be reset. The default is ``True``.
         """
         if func is None:
             # called with parentheses
@@ -136,12 +152,26 @@ class UnlockInstance:
         return wrapper
 
     @classmethod
-    def Funlock(cls, cl, name, mutate: bool):
-        """Allow an instance to change or mutate when `name` is called."""
-        func = vars(cl).get(name)
+    def Funlock(cls, cl, *, funcname, argname=None, mutate=True):
+        """Helper which wraps a method in a class with ``unlock_instance``
+        to allow for mutation of a ``CCLObject``.
+
+        Parameters
+        ----------
+        cl : class
+            Class whose method will be wrapped and replaced.
+        funcname : str
+            Name of the method to wrap.
+        argname : str, optional
+            Name of the argument that changes in ``funcname``.
+            The default is the first argument (usually ``self``).
+        mutate : bool, optional
+            Whether the object mutates. The default is ``True``.
+        """
+        func = vars(cl).get(funcname)
         if func is not None:
-            newfunc = cls.unlock_instance(mutate=mutate)(func)
-            setattr(cl, name, newfunc)
+            newfunc = cls.unlock_instance(name=argname, mutate=mutate)(func)
+            setattr(cl, funcname, newfunc)
 
     # TODO: Remove for CCLv3 & replace with Funlock.
     @classmethod
@@ -169,18 +199,24 @@ unlock_instance = UnlockInstance.unlock_instance
 
 
 class FancyRepr:
-    """Controls the usage of fancy ``__repr__` for ``CCLObjects."""
+    """Control the usage of fancy ``__repr__` for ``CCLObjects.
+
+    Fancy repr is considered to be an implementation of ``__repr__`` in the
+    class, which override's Python's default ``<qualname at id>``. These custom
+    representations can be turned on or off, with the changes also applying to
+    already instantiated objects.
+    """
     _enabled: bool = True
     _classes: dict = {}
 
     @classmethod
     def add(cls, cl):
-        """Add class to the internal dictionary of fancy-repr classes."""
+        """Add class to the internal dictionary of classes with fancy repr."""
         cls._classes[cl] = cl.__repr__
 
     @classmethod
     def enable(cls):
-        """Enable fancy representations if they exist."""
+        """Enable fancy representations throughout the library."""
         for cl, method in cls._classes.items():
             FancyRepr.bind_and_replace(cl, method)
         cls._enabled = True
@@ -248,6 +284,13 @@ class CCLObject(ABC):
     may be called with ``@unlock_instance(mutate=False)`` (or equivalently
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
+
+    Raises
+    ------
+    AttributeError
+        Trying to set an attribute of an immutable instance.
+    NotImplementedError
+        Trying to update the parameters of an immutable instance.
     """
 
     def __init_subclass__(cls, **kwargs):
@@ -262,9 +305,9 @@ class CCLObject(ABC):
             FancyRepr.bind_and_replace(cls, cls.__repr__)
 
         # 3. Unlock instance on specific methods.
-        # UnlockInstance.Funlock(cls, "__init__", mutate=False)
+        # UnlockInstance.Funlock(cls, funcname="__init__", mutate=False)
         UnlockInstance.Funlock2(cls, "__init__")  # TODO: Replace in CCLv3.
-        UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
+        UnlockInstance.Funlock(cls, funcname="update_parameters", mutate=True)
 
     def __new__(cls, *args, **kwargs):
         # Populate every instance with an `ObjectLock` as attribute.
@@ -279,6 +322,7 @@ class CCLObject(ABC):
         object.__setattr__(self, name, value)
 
     def update_parameters(self, **kwargs):
+        """Instances of this class are immutable."""
         name = self.__class__.__qualname__
         raise NotImplementedError(f"{name} objects are immutable.")
 
@@ -311,27 +355,30 @@ class CCLObject(ABC):
 
 
 class CCLAutoRepr(CCLObject):
-    """Base for objects with automatic representation. Representations
-    for instances are built from a list of attribute names specified as
-    a class variable in ``__repr_attrs__`` (acting as a hook).
+    """Base for objects with automatic representation.
 
-    Example:
-        The representation (also hash) of instances of the following class
-        is built based only on the attributes specified in ``__repr_attrs__``:
+    Representations for instances are built from a list of attribute names
+    specified as a class attribute in ``__repr_attrs__`` (acting as a hook).
+    If ``__repr_attrs__`` does not exist, Python's default repr will be used.
 
-        >>> class MyClass(CCLAutoRepr):
-            __repr_attrs__ = ("a", "b", "other")
-            def __init__(self, a=1, b=2, c=3, d=4, e=5):
-                self.a = a
-                self.b = b
-                self.c = c
-                self.other = d + e
+    Example
+    -------
+    The representation (also hash) of instances of the following class
+    is built based only on the attributes specified in ``__repr_attrs__``:
 
-        >>> repr(MyClass(6, 7, 8, 9, 10))
-            <__main__.MyClass>
-                a = 6
-                b = 7
-                other = 19
+    >>> class MyClass(CCLAutoRepr):
+        __repr_attrs__ = ("a", "b", "other")
+        def __init__(self, a=1, b=2, c=3, d=4, e=5):
+            self.a = a
+            self.b = b
+            self.c = c
+            self.other = d + e
+
+    >>> repr(MyClass(6, 7, 8, 9, 10))
+        <__main__.MyClass>
+            a = 6
+            b = 7
+            other = 19
     """
 
     def __repr__(self):
@@ -377,13 +424,16 @@ class CCLNamedClass(CCLObject):
     Implementation
     --------------
     Subclasses must define a ``name`` class attribute which allows the tree to
-    be searched to retrieve the particular model, using its name.
+    be searched to retrieve the particular model, using its name. Subclasses
+    may also contain their own implementation of ``from_name``. Method
+    ``initialize_from_input`` is automatically added.
     """
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         cls._subclasses = classmethod(_subclasses)
         if not hasattr(cls, "from_name"):
+            # Add a `from_name` method if one is not provided.
             cls.from_name = classmethod(from_name)
         cls.initialize_from_input = classmethod(initialize_from_input)
 

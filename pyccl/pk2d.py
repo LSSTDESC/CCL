@@ -539,4 +539,4 @@ def parse_pk(cosmo, p_of_k_a=None):
     elif p_of_k_a == "nonlinear":
         cosmo.compute_nonlin_power()
         return cosmo.get_nonlin_power()
-    raise TypeError("p_of_k_a must [None|'linear'|'nonlinear'] or Pk2D.")
+    raise TypeError("p_of_k_a must be {None, 'linear', 'nonlinear'} or Pk2D.")

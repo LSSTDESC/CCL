@@ -3,8 +3,51 @@ from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 from .caching import _to_hashable, hash_
 
 
+def build_string_simple(self):
+    """Simple representation.
+
+    Example output ::
+
+        <pyccl.emulator.Emulator>
+    """
+    return f"<{self.__module__}.{self.__class__.__qualname__}>"
+
+
+def build_string_from_attrs(self):
+    """Build a representation for an object from a list of attribute names
+    given in the hook ``__repr_attrs__`.
+
+    Example output ::
+
+        <pyccl.halos.halo_model.HMCalculator>
+            mass_function = MassFuncTinker08,  HASH = 0xd3b29dd3
+            halo_bias = HaloBiasTinker10,  HASH = 0x9da644b5
+            mass_def = pyccl.halos.MassDef(Delta=500, rho_type=critical)
+    """
+    params = {param: getattr(self, param) for param in self.__repr_attrs__}
+    defaults = {param: value.default
+                for param, value in self.__signature__.parameters.items()
+                if param != "self"}
+
+    s = build_string_simple(self)
+    newline = "\n\t"
+    for param, value in params.items():
+        if param in defaults and value == defaults[param]:
+            # skip printing when value is the default
+            continue
+        s += f"{newline}{param} = "
+        if "\n" in repr(value):
+            # if too long, print the type and its hash
+            name = value.__class__.__qualname__
+            H = hex(hash_(value))
+            s += f"{name},  HASH = {H}"
+        else:
+            s += f"{value}"
+    return s
+
+
 class Table:
-    """Build nice tables.
+    """Build nice tables. Used in the representations of ``Pk2D`` and ``Tk3D``.
 
     Comments describing the capabilities of each method are included below.
     """
@@ -228,46 +271,60 @@ def build_string_Pk2D(self, na=6, nk=6, decimals=2):
     return s
 
 
-def build_string_simple(self):
-    """Simple representation.
+def build_string_Tk3D(self, na=2, nk=4, decimals=2):
+    """Build a representation for a Tk3D object.
 
     Example output ::
 
-        <pyccl.emulator.Emulator>
+        <pyccl.Tk3D>
+            +================+=============================================+
+            | a \\ log10(k1) | -4.00e+00 -3.33e+00 ...  1.33e+00  2.00e+00 |
+            +================+=============================================+
+            |   5.00e-02     |  4.46e+07  9.62e+06 ...  2.07e+02  4.46e+01 |
+            |       ...      |                     ...                     |
+            |   1.00e+00     |  2.00e+09  4.30e+08 ...  9.26e+03  2.00e+03 |
+            +================+=============================================+
+            +================+=============================================+
+            | a \\ log10(k2) | -4.00e+00 -3.33e+00 ...  1.33e+00  2.00e+00 |
+            +================+=============================================+
+            |   5.00e-02     |  4.46e+01  1.78e+00 ...  2.82e-10  1.12e-11 |
+            |       ...      |                     ...                     |
+            |   1.00e+00     |  2.00e+03  7.94e+01 ...  1.26e-08  5.01e-10 |
+            +================+=============================================+
+            | is_log = True , extrap_orders = (1, 1)                       |
+            | HASH_ARRS = 0x780972f4                                       |
+            +================+=============================================+
     """
-    return f"<{self.__module__}.{self.__class__.__qualname__}>"
+    if not self.has_tsp:
+        return "pyccl.Tk3D(empty=True)"
 
+    # get what's needed from the Tk3D object
+    a, lk1, lk2, tks = self.get_spline_arrays()
+    lk1 /= np.log(10)  # easier to read in log10
+    lk2 /= np.log(10)  # easier to read in log10
+    islog = str(bool(self.tsp.is_log))
+    extrap = (self.tsp.extrap_order_lok, self.tsp.extrap_order_hik)
+    H = hex(sum([hash_(obj) for obj in [a, lk1, lk2, *tks]]))
 
-def build_string_from_attrs(self):
-    """Build a representation for an object from a list of attribute names
-    given in the hook ``__repr_attrs__`.
-
-    Example output ::
-
-        <pyccl.halos.halo_model.HMCalculator>
-            mass_function = MassFuncTinker08,  HASH = 0xd3b29dd3
-            halo_bias = HaloBiasTinker10,  HASH = 0x9da644b5
-            mass_def = pyccl.halos.MassDef(Delta=500, rho_type=critical)
-    """
-    params = {param: getattr(self, param) for param in self.__repr_attrs__}
-    defaults = {param: value.default
-                for param, value in self.__signature__.parameters.items()
-                if param != "self"}
-
-    s = build_string_simple(self)
     newline = "\n\t"
-    for param, value in params.items():
-        if param in defaults and value == defaults[param]:
-            # skip printing when value is the default
-            continue
-        s += f"{newline}{param} = "
-        if "\n" in repr(value):
-            # if too long, print the type and its hash
-            name = value.__class__.__qualname__
-            H = hex(hash_(value))
-            s += f"{name},  HASH = {H}"
-        else:
-            s += f"{value}"
+    meta = [f"is_log = {islog:5.5s}, extrap_orders = {extrap}"]
+    meta += [f"HASH_ARRS = {H:34}"]
+
+    # we will print 2 tables
+    if not self.tsp.is_product:
+        # get the start and the end of the trispectrum, diagonally in `k`
+        tks = [tks[0][:, 0, :], tks[0][:, :, -1]]
+
+    T = Table(n_y=na, n_x=nk, decimals=decimals, newline=newline,
+              data_y=a, legend="a \\ log10(k1)", meta=[])
+
+    s = build_string_simple(self) + f"{newline}"
+    T.data_x, T.data_z = lk1, tks[0]
+    s += T.build() + f"{newline}"
+    T.legend = "a \\ log10(k2)"
+    T.data_x, T.data_z = lk2, tks[1]
+    T.meta = meta
+    s += T.build()
     return s
 
 
@@ -323,61 +380,4 @@ def build_string_Tracer(self):
     s += print_row(newline, "num", "kernel", "transfer", "prefac", "bessel")
     for num, tracer in enumerate(tracers):
         s += print_row(newline, num, *get_tracer_info(tracer))
-    return s
-
-
-def build_string_Tk3D(self, na=2, nk=4, decimals=2):
-    """Build a representation for a Tk3D object.
-
-    Example output ::
-
-        <pyccl.Tk3D>
-            +================+=============================================+
-            | a \\ log10(k1) | -4.00e+00 -3.33e+00 ...  1.33e+00  2.00e+00 |
-            +================+=============================================+
-            |   5.00e-02     |  4.46e+07  9.62e+06 ...  2.07e+02  4.46e+01 |
-            |       ...      |                     ...                     |
-            |   1.00e+00     |  2.00e+09  4.30e+08 ...  9.26e+03  2.00e+03 |
-            +================+=============================================+
-            +================+=============================================+
-            | a \\ log10(k2) | -4.00e+00 -3.33e+00 ...  1.33e+00  2.00e+00 |
-            +================+=============================================+
-            |   5.00e-02     |  4.46e+01  1.78e+00 ...  2.82e-10  1.12e-11 |
-            |       ...      |                     ...                     |
-            |   1.00e+00     |  2.00e+03  7.94e+01 ...  1.26e-08  5.01e-10 |
-            +================+=============================================+
-            | is_log = True , extrap_orders = (1, 1)                       |
-            | HASH_ARRS = 0x780972f4                                       |
-            +================+=============================================+
-    """
-    if not self.has_tsp:
-        return "pyccl.Tk3D(empty=True)"
-
-    # get what's needed from the Tk3D object
-    a, lk1, lk2, tks = self.get_spline_arrays()
-    lk1 /= np.log(10)  # easier to read in log10
-    lk2 /= np.log(10)  # easier to read in log10
-    islog = str(bool(self.tsp.is_log))
-    extrap = (self.tsp.extrap_order_lok, self.tsp.extrap_order_hik)
-    H = hex(sum([hash_(obj) for obj in [a, lk1, lk2, *tks]]))
-
-    newline = "\n\t"
-    meta = [f"is_log = {islog:5.5s}, extrap_orders = {extrap}"]
-    meta += [f"HASH_ARRS = {H:34}"]
-
-    # we will print 2 tables
-    if not self.tsp.is_product:
-        # get the start and the end of the trispectrum, diagonally in `k`
-        tks = [tks[0][:, 0, :], tks[0][:, :, -1]]
-
-    T = Table(n_y=na, n_x=nk, decimals=decimals, newline=newline,
-              data_y=a, legend="a \\ log10(k1)", meta=[])
-
-    s = build_string_simple(self) + f"{newline}"
-    T.data_x, T.data_z = lk1, tks[0]
-    s += T.build() + f"{newline}"
-    T.legend = "a \\ log10(k2)"
-    T.data_x, T.data_z = lk2, tks[1]
-    T.meta = meta
-    s += T.build()
     return s

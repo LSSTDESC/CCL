@@ -19,20 +19,21 @@ class BaryonsSchneider15(Baryons):
 
     Parameters
     ----------
-    log10Mc : float
+    log10Mc : float, optional
         Logarithmic mass scale of hot gas suppression.
         The default is :math:`\log_{10}\left(1.2 \times 10^{14} \right)`.
-    eta_b : float
+    eta_b : float, optional
         Ratio of escape to ejection radii (see Teyssier et al. 2015).
         The default is :math:`0.5`.
-    k_s : float
+    k_s : float, optional
         Characteristic scale (wavenumber) of the stellar component.
         The default is :math:`55.0`.
 
     Attributes
     ----------
-    log10Mc, eta_b, k_s : float
-        The parameters of the model.
+    log10Mc
+    eta_b
+    k_s
     """
     __repr_attrs__ = ("log10Mc", "eta_b", "k_s")
     name = 'Schneider15'
