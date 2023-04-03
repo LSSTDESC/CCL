@@ -28,7 +28,7 @@ void angular_cl_vec(ccl_cosmology * cosmo,
   // Since N5K integration, this piece does Limber integration only
   // Compute Limber across the full ell range
 
-    ccl_angular_cls_limber(cosmo, clt1, clt2, pspec, nell, ell, output,
+    ccl_angular_cls_limber(cosmox, clt1, clt2, pspec, nell, ell, output,
                            integration_type, status);
 
 }
