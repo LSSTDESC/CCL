@@ -275,8 +275,8 @@ class Pk2D(CCLObject):
         return self._eval_single_a(k, a, cosmo=cosmo, derivative=derivative)
 
     def _eval_single_a(self, k, a, cosmo=None, *, derivative=False):
-        """Evaluate the power spectrum or its logarithmic derivative at a single
-        value of the scale factor.
+        """Evaluate the power spectrum or its logarithmic derivative at
+        a single value of the scale factor.
         """
         # determine if logarithmic derivative is needed
         if not derivative:
@@ -311,10 +311,12 @@ class Pk2D(CCLObject):
         check(status, cosmo)
         return f
 
-    # Save a dummy cosmology as an attribute of the `_eval_single_a` method so we don't
-    # have to initialize one every time no `cosmo` is passed. This is gentle
-    # with memory too, as `free` does not work for an empty cosmology.
-    _eval_single_a._cosmo = type("Dummy", (object,), {"cosmo": lib.cosmology()})()
+    # Save a dummy cosmology as an attribute of the `_eval_single_a` method
+    # so we don't have to initialize one every time no `cosmo` is passed.
+    # This is gentle with memory too, as `free` does not work for an empty
+    # cosmology.
+    _eval_single_a._cosmo = type("Dummy", (object,),
+                                 {"cosmo": lib.cosmology()})()
 
     def eval_dlogpk_dlogk(self, k, a, cosmo):
         """Evaluate logarithmic derivative. See ``Pk2D.eval`` for details."""
@@ -324,8 +326,8 @@ class Pk2D(CCLObject):
         return self._eval_single_a(k, a, cosmo=cosmo, derivative=True)
 
     def __call__(self, k, a, cosmo=None, *, derivative=False):
-        """Evaluate the power spectrum or its logarithmic derivative at a single
-        value of the scale factor.
+        """Evaluate the power spectrum or its logarithmic derivative at
+        a single value of the scale factor.
 
         Arguments
         ---------
@@ -348,7 +350,8 @@ class Pk2D(CCLObject):
         P(k, a) : float or array_like
             Value(s) of the power spectrum.
         """
-        out = np.array([self._eval_single_a(k, aa, cosmo=cosmo, derivative=derivative)
+        out = np.array([self._eval_single_a(k, aa, cosmo=cosmo,
+                                            derivative=derivative)
                         for aa in np.atleast_1d(a).astype(float)])
         return out.squeeze()[()]
 
