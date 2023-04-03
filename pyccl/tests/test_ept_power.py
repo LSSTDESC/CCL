@@ -3,79 +3,19 @@ import pyccl as ccl
 import pytest
 
 
-NZ = 128
-ZZ = np.linspace(0., 1., NZ)
-BZ_C = 2.
-BZ = BZ_C * np.ones(NZ)
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
-TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
-                                            (ZZ, BZ),
-                                            (ZZ, BZ)),
-       'TI': ccl.nl_pt.PTIntrinsicAlignmentTracer((ZZ, BZ),
-                                                  (ZZ, BZ),
-                                                  (ZZ, BZ)),
+TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer(b1=2.0, b2=2.0, bs=2.0),
+       'TI': ccl.nl_pt.PTIntrinsicAlignmentTracer(c1=2.0, c2=2.0,
+                                                  cdelta=2.0),
        'TM': ccl.nl_pt.PTMatterTracer()}
 PTC = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
                                      with_matter_1loop=True,
                                      cosmo=COSMO)
 
 
-def test_pt_tracer_smoke():
-    ccl.nl_pt.PTTracer()
-
-
-def test_pt_tracer_m_smoke():
-    ccl.nl_pt.PTMatterTracer()
-
-
-@pytest.mark.parametrize('b2', [(ZZ, BZ), BZ_C, None])
-def test_pt_tracer_nc_smoke(b2):
-    pt_tr = ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
-                                           b2=b2,
-                                           bs=(ZZ, BZ))
-
-    # Test b1 and bs do the right thing
-    for b in [pt_tr.b1, pt_tr.bs]:
-        assert b(0.2) == BZ_C
-
-    # Test b2 does the right thing
-    if b2 is not None:
-        assert pt_tr.b2(0.2) == BZ_C
-        zz = np.array([0.2])
-        assert pt_tr.b2(zz).squeeze() == BZ_C
-
-
-@pytest.mark.parametrize('c2', [(ZZ, BZ), BZ_C, None])
-def test_pt_tracer_ia_smoke(c2):
-    pt_tr = ccl.nl_pt.PTIntrinsicAlignmentTracer((ZZ, BZ),
-                                                 c2=c2,
-                                                 cdelta=(ZZ, BZ))
-
-    # Test c1 and cdelta do the right thing
-    for b in [pt_tr.c1, pt_tr.cdelta]:
-        assert b(0.2) == BZ_C
-
-    # Test c2 does the right thing
-    if c2 is not None:
-        assert pt_tr.c2(0.2) == BZ_C
-        zz = np.array([0.2])
-        assert pt_tr.c2(zz).squeeze() == BZ_C
-
-
-def test_pt_tracer_get_bias():
-    pt_tr = ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
-                                           b2=(ZZ, BZ),
-                                           bs=(ZZ, BZ))
-    b = pt_tr.get_bias('b1', 0.1)
-    assert b == BZ_C
-
-    with pytest.raises(KeyError):
-        pt_tr.get_bias('b_one', 0.1)
-
-
-def test_pt_calculator_smoke():
+def test_ept_calculator_smoke():
     c = ccl.nl_pt.EulerianPTCalculator(log10k_min=-3,
                                        log10k_max=1,
                                        nk_per_decade=10,
@@ -94,7 +34,7 @@ def test_pt_calculator_smoke():
                                      ['TM', 'TG', False, False],
                                      ['TM', 'TI', False, False],
                                      ['TM', 'TM', False, False]])
-def test_pt_get_pk2d_smoke(options):
+def test_ept_get_pk2d_smoke(options):
     if options[0] == options[1]:
         t2 = None
     else:
@@ -109,14 +49,14 @@ def test_pt_get_pk2d_smoke(options):
     assert isinstance(pk, ccl.Pk2D)
 
 
-def test_pt_pk2d_bb_smoke():
+def test_ept_pk2d_bb_smoke():
     pee = PTC.get_pk2d_biased(TRS['TI'])
     pbb = PTC.get_pk2d_biased(TRS['TI'], return_ia_bb=True)
     assert pee.eval(0.1, 0.9, COSMO) != pbb.eval(0.1, 0.9, COSMO)
 
 
 @pytest.mark.parametrize('nl', ['nonlinear', 'linear', 'pt'])
-def test_pt_get_pk2d_nl(nl):
+def test_ept_get_pk2d_nl(nl):
     ptc = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
         b1_pk_kind=nl, bk2_pk_kind=nl, cosmo=COSMO)
@@ -128,7 +68,7 @@ def test_pt_get_pk2d_nl(nl):
                                                ('nonlinear', 'linear'),
                                                ('nonlinear', 'pt'),
                                                ('linear', 'pt')])
-def test_k2pk_types(typ_nlin, typ_nloc):
+def test_ept_k2pk_types(typ_nlin, typ_nloc):
     tg = ccl.nl_pt.PTNumberCountsTracer(1., 0., 0., bk2=1.)
     tm = ccl.nl_pt.PTNumberCountsTracer(1., 0., 0.)
     ptc1 = ccl.nl_pt.EulerianPTCalculator(
@@ -160,7 +100,7 @@ def test_k2pk_types(typ_nlin, typ_nloc):
                           'bs:cdelta', 'bk2:bk2', 'bk2:c1', 'bk2:c2',
                           'bk2:cdelta', 'c1:c1', 'c1:c2', 'c1:cdelta',
                           'c2:c2', 'c2:cdelta', 'cdelta:cdelta'])
-def test_deconstruction(kind):
+def test_ept_deconstruction(kind):
     b_nc = ['b1', 'b2', 'b3nl', 'bs', 'bk2']
     b_ia = ['c1', 'c2', 'cdelta']
     pk1 = PTC.get_pk2d_template(kind)
@@ -199,7 +139,7 @@ def test_deconstruction(kind):
 
 @pytest.mark.parametrize('kind',
                          ['c2:c2', 'c2:cdelta', 'cdelta:cdelta'])
-def test_deconstruction_bb(kind):
+def test_ept_deconstruction_bb(kind):
     b_ia = ['c1', 'c2', 'cdelta']
     pk1 = PTC.get_pk2d_template(kind, return_ia_bb=True)
 
@@ -219,7 +159,7 @@ def test_deconstruction_bb(kind):
     assert pk1.eval(0.5, 1.0, COSMO) == pk2.eval(0.5, 1.0, COSMO)
 
 
-def test_pk_cutoff():
+def test_ept_pk_cutoff():
     # Tests the exponential cutoff
     ks = np.geomspace(1E-2, 15., 128)
 
