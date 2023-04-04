@@ -427,6 +427,24 @@ class Cosmology(CCLObject):
         # Store ccl_configuration for later access
         self._config = config
 
+    def _Omega_nu_h2(self, m_nu, T_CMB, T_ncdm):
+        """Computes :math:`\\Omega_\\nu\\,h^2` at z=0
+        given neutrino masses.
+        """
+        status = 0
+
+        a = np.array([1.0])
+        if not isinstance(m_nu, np.ndarray):
+            m_nu = np.array([m_nu, ]).flatten()
+
+        m_nu = m_nu[m_nu > 0.]
+        N_nu_mass = len(m_nu)
+
+        OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm,
+                                           a, m_nu, a.size, status)
+        check(status)
+        return OmNuh2[0]
+
     def _build_parameters(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
             A_s=None, Omega_k=None, Neff=None, m_nu=None, m_nu_type=None,
@@ -594,9 +612,7 @@ class Cosmology(CCLObject):
         Omega_nu_rel = rho_nu_rel / rho_crit
 
         # For non-relativistic neutrinos, calculate the phase-space integral.
-        self._fill_params(m_nu=nu_mass, N_nu_mass=N_nu_mass,
-                          T_CMB=T_CMB, T_ncdm=T_ncdm)
-        Omega_nu_mass = self.OmNuh2(1.,) / h**2 if N_nu_mass > 0 else 0
+        Omega_nu_mass = self._Omega_nu_h2(nu_mass, T_CMB, T_ncdm)/h**2
 
         Omega_m = Omega_b + Omega_c + Omega_nu_mass
         Omega_l = 1 - Omega_m - rho_g/rho_crit - Omega_nu_rel - Omega_k
@@ -611,7 +627,8 @@ class Cosmology(CCLObject):
         sqrtk = np.sqrt(np.abs(Omega_k)) * h / c.CLIGHT_HMPC
 
         self._fill_params(
-            sum_nu_masses=sum(nu_mass), N_nu_rel=N_nu_rel, Neff=Neff,
+            m_nu=nu_mass, N_nu_mass=N_nu_mass, sum_nu_masses=sum(nu_mass),
+            T_CMB=T_CMB, T_ncdm=T_ncdm, N_nu_rel=N_nu_rel, Neff=Neff,
             Omega_nu_mass=Omega_nu_mass, Omega_nu_rel=Omega_nu_rel,
             Omega_m=Omega_m, Omega_c=Omega_c, Omega_b=Omega_b, Omega_k=Omega_k,
             sqrtk=sqrtk, k_sign=int(k_sign), Omega_g=Omega_g, w0=w0, wa=wa,
