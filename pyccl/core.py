@@ -611,13 +611,13 @@ class Cosmology(CCLObject):
         sqrtk = np.sqrt(np.abs(Omega_k)) * h / c.CLIGHT_HMPC
 
         self._fill_params(
-            sum_nu_masses=sum(nu_mass), N_nu_mass=N_nu_mass, N_nu_rel=N_nu_rel,
-            Neff=Neff, Omega_nu_mass=Omega_nu_mass, Omega_nu_rel=Omega_nu_rel,
-            T_ncdm=T_ncdm, Omega_m=Omega_m, Omega_c=Omega_c, Omega_b=Omega_b,
-            Omega_k=Omega_k, sqrtk=sqrtk, k_sign=int(k_sign), T_CMB=T_CMB,
-            Omega_g=Omega_g, w0=w0, wa=wa, Omega_l=Omega_l, h=h, H0=h*100,
-            A_s=A_s, sigma8=sigma8, n_s=n_s, mu_0=mu_0, sigma_0=sigma_0,
-            c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
+            sum_nu_masses=sum(nu_mass), N_nu_rel=N_nu_rel, Neff=Neff,
+            Omega_nu_mass=Omega_nu_mass, Omega_nu_rel=Omega_nu_rel,
+            Omega_m=Omega_m, Omega_c=Omega_c, Omega_b=Omega_b, Omega_k=Omega_k,
+            sqrtk=sqrtk, k_sign=int(k_sign), Omega_g=Omega_g, w0=w0, wa=wa,
+            Omega_l=Omega_l, h=h, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
+            mu_0=mu_0, sigma_0=sigma_0, c1_mg=c1_mg, c2_mg=c2_mg,
+            lambda_mg=lambda_mg,
             bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab, bcm_ks=bcm_ks)
 
         # Modified growth (deprecated)

@@ -146,12 +146,16 @@ from .covariances import (
 from .pyutils import debug_mode, resample_array
 
 # Deprecated & Renamed modules
+import warnings as _warnings
+_warnings.warn(
+    "The default CMB temperature (T_CMB) will change in CCLv3.0.0, "
+    "from 2.725 to 2.7255 (Kelvin).", CCLDeprecationWarning)
+
 def __getattr__(name):
     rename = {"cls": "cells"}
     if name in rename:
         from .errors import CCLDeprecationWarning
-        import warnings
-        warnings.warn(f"Module {name} has been renamed to {rename[name]}.",
+        _warnings.warn(f"Module {name} has been renamed to {rename[name]}.",
                       CCLDeprecationWarning)
         name = rename[name]
         return eval(name)
