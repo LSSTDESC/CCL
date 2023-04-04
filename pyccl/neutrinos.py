@@ -40,6 +40,8 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
     if not isinstance(m_nu, np.ndarray):
         m_nu = np.array([m_nu, ]).flatten()
 
+    # Keep only massive neutrinos
+    m_nu = m_nu[m_nu > 0.]
     N_nu_mass = len(m_nu)
 
     OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm,
