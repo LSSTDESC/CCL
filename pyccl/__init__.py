@@ -42,12 +42,7 @@ from .errors import (
 )
 
 # Constants and accuracy parameters
-from .parameters import (
-    CCLParameters,
-    gsl_params,
-    spline_params,
-    physical_constants,
-)
+from .parameters import *
 
 # Core data structures
 from .core import (
@@ -191,7 +186,6 @@ from .baryons import (
 __all__ = (
     'lib', 'Caching', 'cache', 'hash_', 'CCLObject', 'CCLAutoreprObject',
     'UnlockInstance', 'unlock_instance',
-    'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
     'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
     'growth_factor', 'growth_factor_unnorm', 'growth_rate',

@@ -1,8 +1,8 @@
 from . import ccllib as lib
-from .core import check
-from .parameters import physical_constants as const
+from .pyutils import check
 from .base import deprecated, warn_api
 from .errors import CCLDeprecationWarning
+from .core import _Defaults
 import numpy as np
 import warnings
 
@@ -15,7 +15,7 @@ neutrino_mass_splits = {
 }
 
 
-def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=None):
+def Omega_nu_h2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
 
@@ -23,9 +23,9 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=None):
         a (float or array-like): Scale factor, normalized to 1 today.
         m_nu (float or array-like): Neutrino mass(es) (in eV)
         T_CMB (float, optional): Temperature of the CMB (K).
-            The default is ``pyccl.physical_constants.T_CMB``.
+            The default is the same as the Cosmology default.
         T_ncdm (float, optional): Non-CDM temperature in units of photon
-            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
+            temperature. The default is the same as the Cosmology default.
 
     Returns:
         float or array_like: :math:`\\Omega_\\nu\\,h^2` at a given
@@ -42,10 +42,6 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=None):
 
     N_nu_mass = len(m_nu)
 
-    # Fill-in defaults
-    T_CMB = const.T_CMB if T_CMB is None else T_CMB
-    T_ncdm = const.T_ncdm if T_ncdm is None else T_ncdm
-
     OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm,
                                        a, m_nu, a.size, status)
 
@@ -54,6 +50,12 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=None):
     if scalar:
         return OmNuh2[0]
     return OmNuh2
+
+
+def OmNuh2(cosmo, a):
+    """Like Omega_nu_h2 but it uses the parameters from a Cosmology object."""
+    return Omega_nu_h2(a, m_nu=cosmo["m_nu"],
+                       T_CMB=cosmo["T_CMB"], T_ncdm=cosmo["T_ncdm"])
 
 
 @deprecated(Omega_nu_h2)

@@ -27,14 +27,13 @@ def test_parameters_lcdm_defaults():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
     assert np.allclose(cosmo['Neff'], 3.046)
     assert cosmo['N_nu_mass'] == 0
     assert np.allclose(cosmo['N_nu_rel'], 3.046)
     assert np.allclose(cosmo['sum_nu_masses'], 0)
     assert np.allclose(cosmo['m_nu'], 0)
     assert np.allclose(cosmo['Omega_nu_mass'], 0)
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -121,8 +120,7 @@ def test_parameters_nu_list():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -172,8 +170,7 @@ def test_parameters_nu_normal():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -222,8 +219,7 @@ def test_parameters_nu_inverted():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -272,8 +268,7 @@ def test_parameters_nu_equal():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))

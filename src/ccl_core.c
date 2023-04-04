@@ -227,12 +227,6 @@ ccl_physical_constants ccl_constants = {
   0.71611,
 
   /**
-   * TNCDM: repeat the value to preserve API because we renamed TNCDM to T_ncdm.
-   * TODO: Remove for CCLv3.
-   */
-  0.71611,
-
-  /**
    * neutrino mass splitting differences
    * See Lesgourgues and Pastor, 2012 for these values.
    * Adv. High Energy Phys. 2012 (2012) 608515,
