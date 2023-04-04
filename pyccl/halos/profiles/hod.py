@@ -115,7 +115,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
         "ns_independent", "precision_fftlog", "normprof",)
 
-    @warn_api(pairs=[("concentration", "concentration")])
+    @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration,
                  lMmin_0=12., lMmin_p=0., siglM_0=0.4,
                  siglM_p=0., lM0_0=7., lM0_p=0.,
