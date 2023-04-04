@@ -499,7 +499,7 @@ def sigma_critical(cosmo, *, a_lens, a_source):
 
     .. math::
 
-         \Sigma_{\mathrm{crit}} = \frac{c^2}{4 \pi G}
+         \Sigma_{{\rm c}} = \frac{c^2}{4 \pi G}
          \frac{D_{\rm s}}{D_{\rm l}D_{\rm ls}},
 
     where :math:`c` is the speed of light, :math:`G` is the
@@ -519,7 +519,7 @@ def sigma_critical(cosmo, *, a_lens, a_source):
     Returns
     -------
     sigma_critical : float, (na_lens,) or (na_source,) ``numpy.ndarray``
-        :math:`\Sigma_{\rm crit} in units of :math:`\rm M_\odot / Mpc^2`.
+        :math:`\Sigma_{\rm c} in units of :math:`\rm M_\odot / Mpc^2`.
 
     See also
     --------

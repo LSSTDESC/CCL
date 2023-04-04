@@ -215,7 +215,7 @@ class HaloProfile(CCLAutoRepr):
         and the lens.
 
         .. math::
-           \\kappa(R) = \\frac{\\Sigma(R)}{\\Sigma_{\\mathrm{crit}}},\\
+           \\kappa(R) = \\frac{\\Sigma(R)}{\\Sigma_{\\mathrm{c}}},\\
 
         where :math:`\\Sigma(R)` is the 2D projected surface mass density.
 
@@ -245,9 +245,9 @@ class HaloProfile(CCLAutoRepr):
         source and the lens.
 
         .. math::
-           \\gamma(R) = \\frac{\\Delta\\Sigma(R)}{\\Sigma_{\\mathrm{crit}}} =
+           \\gamma(R) = \\frac{\\Delta\\Sigma(R)}{\\Sigma_{\\mathrm{c}}} =
            \\frac{\\overline{\\Sigma}(< R) -
-           \\Sigma(R)}{\\Sigma_{\\mathrm{crit}}},\\
+           \\Sigma(R)}{\\Sigma_{\\mathrm{c}}},\\
 
         where :math:`\\overline{\\Sigma}(< R)` is the average surface density
         within R.

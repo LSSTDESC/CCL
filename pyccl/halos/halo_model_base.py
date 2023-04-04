@@ -12,7 +12,30 @@ __all__ = ("HMIngredients",)
 
 
 class HMIngredients(CCLAutoRepr, CCLNamedClass):
-    """Base class for halo model ingredients."""
+    """Base class for halo model ingredients.
+
+    This class contains methods that check for consistency of mass definition
+    and model at initialization. Subclasses must define a
+    ``_mass_def_strict_always`` class attribute and a
+    ``_check_mass_def_strict`` class method.
+
+    Parameters
+    ----------
+    mass_def : :obj:`~pyccl.halos.MassDef`
+        Mass definition.
+    mass_def_strict : bool
+        Whether the instance will allow for incompatible mass definitions.
+
+    Raises
+    ------
+    ValueError
+        If the mass definition is incompatible with the model setup.
+
+    Attributes
+    ----------
+    mass_def
+    mass_def_strict
+    """
     __repr_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
                                  )(super.__getattribute__)
@@ -42,23 +65,38 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
 
     @abstractmethod
     def _check_mass_def_strict(self, mass_def) -> bool:
-        """Check if this class is defined for mass definition ``mass_def``."""
+        """Check if a mass definition is compatible with the model.
+
+        Arguments
+        ---------
+        mass_def : :class:`~pyccl.halos.MassDef`
+            Mass definition to check for compatibility.
+
+        Returns
+        -------
+        compatibility : bool
+            Flag denoting whether the mass definition is compatible.
+        """
 
     def _setup(self) -> None:
-        """ Use this function to initialize any internal attributes
-        of this object. This function is called at the very end of the
-        constructor call.
+        """Initialize any internal attributes of this object.
+        This function is the equivalent of a post-init method, called at
+        the end of initialization.
         """
 
     def _check_mass_def(self, mass_def) -> None:
-        """ Return False if the input mass definition agrees with
-        the definitions for which this mass function parametrization
-        works. True otherwise. This function gets called at the
-        start of the constructor call.
+        """Check if a mass definition is compatible with the model and the
+        initialization parameters.
 
-        Args:
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
+        Arguments
+        ---------
+        mass_def : :class:`~pyccl.halos.MassDef`
+            Mass definition to check for compatibility.
+
+        Raises
+        ------
+        ValueError
+            If the mass definition is incompatible with the model setup.
         """
         classname = self.__class__.__name__
         msg = f"{classname} is not defined for {mass_def.name} masses"
@@ -96,63 +134,81 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
 
 
 class MassFunc(HMIngredients):
-    """ This class enables the calculation of halo mass functions.
-    We currently assume that all mass functions can be written as
+    r"""Base class for halo mass functions.
+
+    Implementation
+    --------------
+    - Subclasses must include arguments ``mass_def`` and ``mass_def_strict``
+      in their :meth:`__init__()` methods.
+    - Subclasses must define a :meth:`_get_fsigma()` method which implements
+      the mass function.
+    - Subclasses must define a :meth:`_check_mass_def_strict()`` method which
+      flags if the input mass definition is incompatible with the model.
+    - :meth:`_setup()` may be used to set up the model post-init.
+      See :meth:`HMIngredients._setup()` for details.
+    - Boolean class attribute ``_mass_def_strict_always`` may be set to prevent
+      relaxing the mass definition consistency checks. Do not omit argument
+      ``mass_def_strict`` in :meth:`__init__()` as this will depart from the
+      uniform way to instantiate mass functions.
+
+    Theory
+    ------
+    We assume that all mass functions can be written as
 
     .. math::
-        \\frac{dn}{d\\log_{10}M} = f(\\sigma_M)\\,\\frac{\\rho_M}{M}\\,
-        \\frac{d\\log \\sigma_M}{d\\log_{10} M}
 
-    where :math:`\\sigma_M^2` is the overdensity variance on spheres with a
-    radius given by the Lagrangian radius for mass M.
+        \frac{{\rm d}n}{{\rm d}\log_{10}M} = f(\sigma_M) \, \frac{\rho_M}{M} \,
+        \frac{{\rm d}\log \sigma_M}{{\rm d}\log_{10} M}
 
-    * Subclasses implementing analytical mass function parametrizations
-      can be created by overriding the ``_get_fsigma`` method.
-
-    * Subclasses may have particular implementations of
-      ``_check_mass_def_strict`` to ensure consistency of the halo mass
-      definition.
-
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object that fixes
-            the mass definition used by this mass function
-            parametrization.
-        mass_def_strict (bool): if False, consistency of the mass
-            definition will be ignored.
+    where :math:`\sigma_M^2` is the overdensity variance on spheres with a
+    radius given by the Lagrangian radius for mass :math:`M`.
     """
     _mass_def_strict_always = False
 
     @abstractmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        """ Get the :math:`f(\\sigma_M)` function for this mass function
-        object (see description of this class for details).
+        r"""Compute :math:`f(\sigma_M)`.
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            sigM (float or array_like): standard deviation in the
-                overdensity field on the scale of this halo.
-            a (float): scale factor.
-            lnM (float or array_like): natural logarithm of the
-                halo mass in units of M_sun (provided in addition
-                to sigM for convenience in some mass function
-                parametrizations).
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        sigM : (nM,) ``numpy.ndarray``
+            Standard deviation in the overdensity field on the scale of
+            halos of mass :math:`M`. Input will always be an array, and there
+            is no need for the implemented function to convert it to one.
+        a : float
+            Scale factor.
+        lnM : (nM,) ``numpy.ndarray``
+            Natural logarithm of the halo mass in units of :math:`\rm M_\odot`
+            (provided in addition to sigM for convenience in some mass function
+            parametrizations). Input will always be an array, and there is no
+            need for the implemented function to convert it to one.
 
-        Returns:
-            float or array_like: :math:`f(\\sigma_M)` function.
+        Returns
+        -------
+        f_sigma : (nM,) ``numpy.ndarray``
+            Values of :math:`f(\sigma_M)`. Output is expected to be an array
+            and there is no need to squeeze extra dimensions.
         """
 
     def __call__(self, cosmo, M, a):
-        """ Returns the mass function for input parameters.
+        r"""Call the mass function.
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        M : float or (nM,) array_like
+            Halo mass in units of :math:`\rm M_\odot`.
+        a : float
+            Scale factor.
 
-        Returns:
-            float or array_like: mass function \
-                :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
+        Returns
+        -------
+        mass_function : float or (nM,) ``numpy.ndarray``
+            Mass function :math:`\frac{{\rm d}n}{{\rm d}\log_{10}M}`
+            in units of comoving :math:`\rm Mpc^{-3}`.
         """
         M_use = np.atleast_1d(M)
         logM, sigM, dlns_dlogM = self._get_logM_sigM(
@@ -169,49 +225,70 @@ class MassFunc(HMIngredients):
 
 
 class HaloBias(HMIngredients):
-    """ This class enables the calculation of halo bias functions.
-    We currently assume that all halo bias functions can be written
-    as functions that depend on M only through sigma_M (where
-    sigma_M^2 is the overdensity variance on spheres with a
-    radius given by the Lagrangian radius for mass M).
-    All sub-classes implementing specific parametrizations
-    can therefore be simply created by replacing this class'
-    `_get_bsigma method`.
+    r"""Base class for halo bias functions.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object that fixes
-            the mass definition used by this halo bias
-            parametrization.
-        mass_def_strict (bool): if False, consistency of the mass
-            definition will be ignored.
+    Implementation
+    --------------
+    - Subclasses must include arguments ``mass_def`` and ``mass_def_strict``
+      in their :meth:`__init__()` methods.
+    - Subclasses must define a :meth:`_get_bsigma()` method which implements
+      the halo bias.
+    - Subclasses must define a :meth:`_check_mass_def_strict()`` method which
+      flags if the input mass definition is incompatible with the model.
+    - :meth:`_setup()` may be used to set up the model post-init.
+      See :meth:`HMIngredients._setup()` for details.
+    - Boolean class attribute ``_mass_def_strict_always`` may be set to prevent
+      relaxing the mass definition consistency checks. Do not omit argument
+      ``mass_def_strict`` in :meth:`__init__()` as this will depart from the
+      uniform way to instantiate mass functions.
+
+    Theory
+    ------
+    We assume that all halo bias parametrizations can be written as functions
+    that depend only on :math:`M` through :math:`\sigma_M`, the overdensity
+    variance on spheres of the Lagrangian radius that corresponds to mass
+    :math:`M`.
     """
     _mass_def_strict_always = False
 
     @abstractmethod
     def _get_bsigma(self, cosmo, sigM, a):
-        """ Get the halo bias as a function of sigmaM.
+        r"""Compute :math:`b(\sigma_M)`.
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            sigM (float or array_like): standard deviation in the
-                overdensity field on the scale of this halo.
-            a (float): scale factor.
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        sigM : (nM,) ``numpy.ndarray``
+            Standard deviation in the overdensity field on the scale of
+            halos of mass :math:`M`. Input will always be an array, and there
+            is no need for the implemented function to convert it to one.
+        a : float
+            Scale factor.
 
-        Returns:
-            float or array_like: f(sigma_M) function.
+        Returns
+        -------
+        b_sigma : (nM,) ``numpy.ndarray``
+            Values of :math:`b(\sigma_M)`. Output is expected to be an array
+            and there is no need to squeeze extra dimensions.
         """
 
     def __call__(self, cosmo, M, a):
-        """ Returns the halo bias for input parameters.
+        r"""Call the halo bias function.
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        M : float or (nM,) array_like
+            Halo mass in units of :math:`\rm M_\odot`.
+        a : float
+            Scale factor.
 
-        Returns:
-            float or array_like: halo bias.
+        Returns
+        -------
+        halo_bias : float or (nM,) ``numpy.ndarray``
+            Value(s) of the halo bias function at ``M`` and ``a``.
         """
         M_use = np.atleast_1d(M)
         logM, sigM = self._get_logM_sigM(cosmo, M_use, a)
@@ -228,10 +305,14 @@ class Concentration(HMIngredients):
 
     Implementation
     --------------
-    Subclasses must define a :meth:`_concentration()` method which implements
-    the concentration relation. These are a function of cosmology, mass, and
-    scale factor. Optionally, the :meth:`_setup()` method can be used to run
-    a piece of code after construction. See :meth:`HMIngredients._setup()`.
+    - Subclasses must include arguments ``mass_def`` and ``mass_def_strict``
+      in their :meth:`__init__()` methods.
+    - Subclasses must define a :meth:`_concentration()` method which implements
+      the concentration relation.
+    - :meth:`_setup()` may be used to set up the model post-init.
+      See :meth:`HMIngredients._setup()` for details.
+    - The mass definition checks are always strict for the mass-concentration
+      relations.
 
     Theory
     ------
@@ -240,7 +321,7 @@ class Concentration(HMIngredients):
 
     .. math::
 
-        \rho(r) = \rho_{\rm crit} \frac{\delta_c}{(r/r_s)(1 + r/r_s)^2},
+        \rho(r) = \rho_{\rm c} \frac{\delta_c}{(r/r_s)(1 + r/r_s)^2},
 
     where :math:`r_s` is a scale radius. The concentration is then defined as
 
@@ -249,11 +330,6 @@ class Concentration(HMIngredients):
         c_\Delta \equiv \frac{r_\Delta}{r_s},
 
     where :math:`\Delta` is the density contrast.
-
-    Parameters
-    ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef`
-        Mass definition for this :math:`c(M)` parametrization.
     """
     _mass_def_strict_always = True
 
@@ -263,18 +339,42 @@ class Concentration(HMIngredients):
 
     @abstractmethod
     def _concentration(self, cosmo, M, a):
-        """Implementation of the c(M) relation."""
+        r"""Compute :math:`c(M)`.
+
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        M : (nM,) ``numpy.ndarray``
+            Halo mass in units of :math:`\rm M_\odot`.
+            Input will always be an  array, and there is no need for the
+            implemented function to convert it to one.
+        a : float
+            Scale factor.
+
+        Returns
+        -------
+        concentration : (nM,) ``numpy.ndarray``
+            Values of :math:`c(M)`. Output is expected to be an array
+            and there is no need to squeeze extra dimensions.
+        """
 
     def __call__(self, cosmo, M, a):
-        """ Returns the concentration for input parameters.
+        r"""Call the concentration relation.
 
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+        Arguments
+        ---------
+        cosmo : :class:`~pyccl.core.Cosmology`
+            Cosmological parameters.
+        M : float or (nM,) array_like
+            Halo mass in units of :math:`\rm M_\odot`.
+        a : float
+            Scale factor.
 
-        Returns:
-            float or array_like: concentration.
+        Returns
+        -------
+        concentration : float or (nM,) ``numpy.ndarray``
+            Value(s) of the concentration :math:`c(M)` at ``M`` and ``a``.
         """
         M_use = np.atleast_1d(M)
         c = self._concentration(cosmo, M_use, a)
