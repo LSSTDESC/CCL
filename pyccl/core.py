@@ -427,24 +427,6 @@ class Cosmology(CCLObject):
         # Store ccl_configuration for later access
         self._config = config
 
-    def _Omega_nu_h2(self, m_nu, T_CMB, T_ncdm):
-        """Computes :math:`\\Omega_\\nu\\,h^2` at z=0
-        given neutrino masses.
-        """
-        status = 0
-
-        a = np.array([1.0])
-        if not isinstance(m_nu, np.ndarray):
-            m_nu = np.array([m_nu, ]).flatten()
-
-        m_nu = m_nu[m_nu > 0.]
-        N_nu_mass = len(m_nu)
-
-        OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm,
-                                           a, m_nu, a.size, status)
-        check(status)
-        return OmNuh2[0]
-
     def _build_parameters(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
             A_s=None, Omega_k=None, Neff=None, m_nu=None, m_nu_type=None,
@@ -599,6 +581,10 @@ class Cosmology(CCLObject):
             nu_mass = [0.]
 
         c = const
+        # Curvature parameters.
+        k_sign = -np.sign(Omega_k) if np.abs(Omega_k) > 1e-6 else 0
+        sqrtk = np.sqrt(np.abs(Omega_k)) * h / c.CLIGHT_HMPC
+
         # Fixed radiation parameters: (Omega_g h^2) is known from T_CMB.
         rho_g = 4 * c.STBOLTZ / c.CLIGHT**3 * T_CMB**4
         rho_crit = c.RHO_CRITICAL * c.SOLAR_MASS / c.MPC_TO_METER**3 * h**2
@@ -612,7 +598,9 @@ class Cosmology(CCLObject):
         Omega_nu_rel = rho_nu_rel / rho_crit
 
         # For non-relativistic neutrinos, calculate the phase-space integral.
-        Omega_nu_mass = self._Omega_nu_h2(nu_mass, T_CMB, T_ncdm)/h**2
+        self._fill_params(m_nu=nu_mass, N_nu_mass=N_nu_mass,
+                          T_CMB=T_CMB, T_ncdm=T_ncdm, h=h)
+        Omega_nu_mass = self._get_Omega_nu()
 
         Omega_m = Omega_b + Omega_c + Omega_nu_mass
         Omega_l = 1 - Omega_m - rho_g/rho_crit - Omega_nu_rel - Omega_k
@@ -623,16 +611,12 @@ class Cosmology(CCLObject):
             # Omega_g was passed - modify Omega_l
             Omega_l += rho_g/rho_crit - Omega_g
 
-        k_sign = -np.sign(Omega_k) if np.abs(Omega_k) > 1e-6 else 0
-        sqrtk = np.sqrt(np.abs(Omega_k)) * h / c.CLIGHT_HMPC
-
         self._fill_params(
-            m_nu=nu_mass, N_nu_mass=N_nu_mass, sum_nu_masses=sum(nu_mass),
-            T_CMB=T_CMB, T_ncdm=T_ncdm, N_nu_rel=N_nu_rel, Neff=Neff,
+            sum_nu_masses=sum(nu_mass), N_nu_rel=N_nu_rel, Neff=Neff,
             Omega_nu_mass=Omega_nu_mass, Omega_nu_rel=Omega_nu_rel,
             Omega_m=Omega_m, Omega_c=Omega_c, Omega_b=Omega_b, Omega_k=Omega_k,
             sqrtk=sqrtk, k_sign=int(k_sign), Omega_g=Omega_g, w0=w0, wa=wa,
-            Omega_l=Omega_l, h=h, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
+            Omega_l=Omega_l, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
             mu_0=mu_0, sigma_0=sigma_0, c1_mg=c1_mg, c2_mg=c2_mg,
             lambda_mg=lambda_mg,
             bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab, bcm_ks=bcm_ks)
@@ -647,42 +631,18 @@ class Cosmology(CCLObject):
         [setattr(self._params, par, val) for par, val in kwargs.items()]
 
     def __getitem__(self, key):
-        """Access parameter values by name."""
-        try:
-            if key == 'm_nu':
-                val = lib.parameters_get_nu_masses(self._params, 3)
-            elif key == 'extra_parameters':
-                val = self._params_init_kwargs["extra_parameters"]
-            else:
-                val = getattr(self._params, key)
-        except AttributeError:
-            raise KeyError("Parameter '%s' not recognized." % key)
-        return val
-
-    def __setitem__(self, key, val):
-        """Set parameter values by name."""
-        raise NotImplementedError("Cosmology objects are immutable; create a "
-                                  "new Cosmology() instance instead.")
+        if key == 'extra_parameters':
+            return self._params_init_kwargs["extra_parameters"]
+        return getattr(self._params, key)
 
     def __del__(self):
         """Free the C memory this object is managing as it is being garbage
         collected (hopefully)."""
         if hasattr(self, "cosmo"):
-            if (self.cosmo is not None and
-                    hasattr(lib, 'cosmology_free') and
-                    lib.cosmology_free is not None):
-                lib.cosmology_free(self.cosmo)
-        if hasattr(self, "_params"):
-            if (self._params is not None and
-                    hasattr(lib, 'parameters_free') and
-                    lib.parameters_free is not None):
-                lib.parameters_free(self._params)
-
-        # finally delete some attributes we don't want to be around for safety
-        # when the context manager exits or if __del__ is called twice
-        if hasattr(self, "cosmo"):
+            lib.cosmology_free(self.cosmo)
             delattr(self, "cosmo")
         if hasattr(self, "_params"):
+            lib.parameters_free(self._params)
             delattr(self, "_params")
 
     def __enter__(self):
@@ -1005,6 +965,31 @@ class Cosmology(CCLObject):
         if name not in self._pk_nl:
             raise KeyError("Unknown power spectrum %s." % name)
         return self._pk_nl[name]
+
+    def _get_Omega_nu(self, a=1):
+        r"""Compute :math:`\Omega_\nu`.
+
+        Arguments
+        ---------
+        a : float or (na,) array-like
+            Scale factor(s), normalized to 1 today.
+
+        Returns
+        -------
+        omega_nu : float or (na,) ``numpy.ndarray``
+            Value(s) of :math:`\Omega_\nu` at ``a``.
+        """
+        a_use = np.atleast_1d(a).astype(float)
+
+        status = 0
+        OmNuh2, status = lib.Omeganuh2_vec(
+            self["N_nu_mass"], self["T_CMB"], self["T_ncdm"],
+            a_use, self["m_nu"], a_use.size, status)
+        check(status)
+
+        if np.ndim(a) == 0:
+            return OmNuh2[0] / self["h"]**2
+        return OmNuh2 / self["h"]**2
 
     @property
     def has_distances(self):

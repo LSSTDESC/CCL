@@ -3,6 +3,7 @@ from .pyutils import check
 from .base import deprecated, warn_api
 from .errors import CCLDeprecationWarning
 from .core import _Defaults
+from .background import omega_x
 import numpy as np
 import warnings
 
@@ -15,6 +16,7 @@ neutrino_mass_splits = {
 }
 
 
+@deprecated(new_function=omega_x)
 def Omega_nu_h2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
@@ -52,12 +54,6 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
     if scalar:
         return OmNuh2[0]
     return OmNuh2
-
-
-def OmNuh2(cosmo, a):
-    """Like Omega_nu_h2 but it uses the parameters from a Cosmology object."""
-    return Omega_nu_h2(a, m_nu=cosmo["m_nu"],
-                       T_CMB=cosmo["T_CMB"], T_ncdm=cosmo["T_ncdm"])
 
 
 @deprecated(Omega_nu_h2)
