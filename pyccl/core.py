@@ -594,11 +594,9 @@ class Cosmology(CCLObject):
         Omega_nu_rel = rho_nu_rel / rho_crit
 
         # For non-relativistic neutrinos, calculate the phase-space integral.
-        self._fill_params(m_nu=nu_mass)
-        from .neutrinos import Omega_nu_h2
-        kw = {"m_nu": nu_mass, "T_CMB": T_CMB, "T_ncdm": T_ncdm}
-        Omega_nu_mass = Omega_nu_h2(1., **kw) / h**2 if N_nu_mass > 0 else 0
-        # Omega_nu_mass = self.OmNuh2(1.,) / h**2 if N_nu_mass > 0 else 0
+        self._fill_params(m_nu=nu_mass, N_nu_mass=N_nu_mass,
+                          T_CMB=T_CMB, T_ncdm=T_ncdm)
+        Omega_nu_mass = self.OmNuh2(1.,) / h**2 if N_nu_mass > 0 else 0
 
         Omega_m = Omega_b + Omega_c + Omega_nu_mass
         Omega_l = 1 - Omega_m - rho_g/rho_crit - Omega_nu_rel - Omega_k
