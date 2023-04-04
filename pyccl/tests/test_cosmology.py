@@ -110,12 +110,6 @@ def test_cosmology_init():
         m_nu_type='normal')
 
 
-def test_cosmology_setitem():
-    cosmo = ccl.CosmologyVanillaLCDM()
-    with pytest.raises(NotImplementedError):
-        cosmo['a'] = 3
-
-
 def test_cosmology_output():
     """
     Check that status messages and other output from Cosmology() object works

@@ -7,6 +7,10 @@ from .background import omega_x
 import numpy as np
 import warnings
 
+
+__all__ = ("nu_masses", "Omeganuh2",)
+
+
 neutrino_mass_splits = {
     'normal': lib.nu_normal,
     'inverted': lib.nu_inverted,
@@ -17,7 +21,7 @@ neutrino_mass_splits = {
 
 
 @deprecated(new_function=omega_x)
-def Omega_nu_h2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
+def Omeganuh2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
 
@@ -54,11 +58,6 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
     if scalar:
         return OmNuh2[0]
     return OmNuh2
-
-
-@deprecated(Omega_nu_h2)
-def Omeganuh2(a, m_nu, T_CMB=None):
-    return Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
 
 
 @warn_api(pairs=[("OmNuh2", "Omega_nu_h2")])

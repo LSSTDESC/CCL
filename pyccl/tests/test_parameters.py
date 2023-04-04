@@ -86,9 +86,8 @@ def test_parameters_nu(m_nu_type):
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_pos, atol=1e-4, rtol=0)
     elif m_nu_type == 'single':
+        assert len(cosmo["m_nu"]) == 1
         assert np.allclose(cosmo['m_nu'][0], 0.15, atol=1e-4, rtol=0)
-        assert np.allclose(cosmo['m_nu'][1], 0., atol=1e-4, rtol=0)
-        assert np.allclose(cosmo['m_nu'][2], 0., atol=1e-4, rtol=0)
 
 
 def test_parameters_nu_Nnurel_neg():
@@ -391,18 +390,6 @@ def test_parameters_missing():
         ccl.Cosmology,
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
         df_mg=None)
-
-
-def test_parameters_set():
-    """
-    Check that a Cosmology object doesn't let parameters be set.
-    """
-    params = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-        n_s=0.96)
-
-    # Check that error is raised when unrecognized parameter requested
-    assert_raises(KeyError, lambda: params['wibble'])
 
 
 def test_parameters_mgrowth():

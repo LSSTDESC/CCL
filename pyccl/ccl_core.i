@@ -48,13 +48,7 @@ void parameters_mgrowth_set_custom(ccl_parameters *params,
 %inline %{
 
 void parameters_get_nu_masses(ccl_parameters *params, int nout, double* output) {
-    output[0] = 0;
-    output[1] = 0;
-    output[2] = 0;
-
-    for (int i=0; i<params->N_nu_mass; ++i) {
-        output[i] = params->m_nu[i];
-    }
+  memcpy(output, params->m_nu, nout*sizeof(double));
 }
 
 %}
