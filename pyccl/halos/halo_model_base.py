@@ -23,7 +23,7 @@ def from_name(cls, name):
     return mod[name]
 
 
-def initialize_from_input(cls, input_, **kwargs):
+def create_instance(cls, input_, **kwargs):
     """Process the input and generate an object of the class.
     Input can be an instance of the class, or a name string.
     Optional ``**kwargs`` may be passed.
@@ -47,13 +47,13 @@ class HMIngredients(CCLAutoreprObject):
         super().__init_subclass__(**kwargs)
         cls._subclasses = classmethod(_subclasses)
         cls.from_name = classmethod(from_name)
-        cls.initialize_from_input = classmethod(initialize_from_input)
+        cls.create_instance = classmethod(create_instance)
 
     @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):
         # Check mass definition consistency.
         from .massdef import MassDef
-        mass_def = MassDef.initialize_from_input(mass_def)
+        mass_def = MassDef.create_instance(mass_def)
         self.mass_def_strict = mass_def_strict
         self._check_mass_def(mass_def)
         self.mass_def = mass_def

@@ -2,7 +2,7 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import species_types
 from ..base import CCLAutoreprObject, warn_api, deprecate_attr
-from .halo_model_base import initialize_from_input
+from .halo_model_base import create_instance
 import numpy as np
 
 
@@ -113,7 +113,7 @@ class MassDef(CCLAutoreprObject):
             self.concentration = None
         else:
             from .concentration import Concentration
-            self.concentration = Concentration.initialize_from_input(
+            self.concentration = Concentration.create_instance(
                 concentration, mass_def=self)
 
     @property
@@ -262,7 +262,7 @@ class MassDef(CCLAutoreprObject):
         except NameError:
             raise ValueError(f"Mass definition {name} not implemented.")
 
-    initialize_from_input = classmethod(initialize_from_input)
+    create_instance = classmethod(create_instance)
 
 
 @warn_api(pairs=[('c_m', 'concentration')])

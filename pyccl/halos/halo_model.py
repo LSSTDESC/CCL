@@ -59,10 +59,10 @@ class HMCalculator(CCLAutoreprObject):
                  lM_min=8., lM_max=16., nlM=128,
                  integration_method_M='simpson', k_min=1E-5):
         # Initialize halo model ingredients
-        self.mass_def = MassDef.initialize_from_input(mass_def)
+        self.mass_def = MassDef.create_instance(mass_def)
         kw = {"mass_def": self.mass_def}
-        self.mass_function = MassFunc.initialize_from_input(mass_function, **kw)  # noqa
-        self.halo_bias = HaloBias.initialize_from_input(halo_bias, **kw)
+        self.mass_function = MassFunc.create_instance(mass_function, **kw)
+        self.halo_bias = HaloBias.create_instance(halo_bias, **kw)
 
         # Check mass definition consistency.
         if not (self.mass_def
@@ -150,7 +150,7 @@ class HMCalculator(CCLAutoreprObject):
             float or array_like: integral value.
         """
         self._get_ingredients(cosmo, a, get_bf=False)
-        uk0 = prof.fourier(cosmo, self._prec['k_norm'],
+        uk0 = prof.fourier(cosmo, self.precision['k_min'],
                            self._mass, a, mass_def=self.mass_def).T
         return 1. / self._integrate_over_mf(uk0)
 

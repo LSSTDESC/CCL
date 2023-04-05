@@ -280,10 +280,10 @@ def test_pkhm_errors():
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
 
     # Inconsistent mass definitions
-    m200c = ccl.halos.MassDef.initialize_from_input("200c")
-    m200m = ccl.halos.MassDef.initialize_from_input("200m")
-    hmf = ccl.halos.MassFunc.initialize_from_input("Tinker08", mass_def=m200c)
-    hbf = ccl.halos.HaloBias.initialize_from_input("Tinker10", mass_def=m200m)
+    m200c = ccl.halos.MassDef.create_instance("200c")
+    m200m = ccl.halos.MassDef.create_instance("200m")
+    hmf = ccl.halos.MassFunc.create_instance("Tinker08", mass_def=m200c)
+    hbf = ccl.halos.HaloBias.create_instance("Tinker10", mass_def=m200m)
     with pytest.raises(ValueError):
         ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                mass_def=m200c)
