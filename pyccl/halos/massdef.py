@@ -1,7 +1,7 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import species_types
-from ..base import CCLAutoreprObject, warn_api, deprecate_attr
+from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
 from .halo_model_base import create_instance
 import numpy as np
 
@@ -69,7 +69,7 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     return c_new
 
 
-class MassDef(CCLAutoreprObject):
+class MassDef(CCLAutoRepr, CCLNamedClass):
     """Halo mass definition. Halo masses are defined in terms of an overdensity
     parameter :math:`\\Delta` and an associated density :math:`X` (either the
     matter density or the critical density):
@@ -261,8 +261,6 @@ class MassDef(CCLAutoreprObject):
             return eval(f"MassDef{name.capitalize()}")
         except NameError:
             raise ValueError(f"Mass definition {name} not implemented.")
-
-    create_instance = classmethod(create_instance)
 
 
 @warn_api(pairs=[('c_m', 'concentration')])
