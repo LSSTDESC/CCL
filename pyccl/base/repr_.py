@@ -19,7 +19,7 @@ def build_string_from_attrs(self):
 
     Example output ::
 
-        <pyccl.halos.halo_model.HMCalculator>
+        <pyccl.halos.halo_model.HaloModel>
             mass_function = MassFuncTinker08,  HASH = 0xd3b29dd3
             halo_bias = HaloBiasTinker10,  HASH = 0x9da644b5
             mass_def = pyccl.halos.MassDef(Delta=500, rho_type=critical)

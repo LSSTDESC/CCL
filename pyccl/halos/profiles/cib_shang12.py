@@ -85,7 +85,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         "l10meff", "sigLM", "Mmin", "L0", "precision_fftlog", "normprof")
     _one_over_4pi = 0.07957747154
 
-    @warn_api(pairs=[("concentration", "concentration")])
+    @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration, nu_GHz, alpha=0.36, T0=24.4,
                  beta=1.75, gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707,
                  Mmin=1E10, L0=6.4E-8):

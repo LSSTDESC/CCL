@@ -150,7 +150,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             self.concentration = None
         else:
             from .concentration import Concentration
-            self.concentration = Concentration.initialize_from_input(
+            self.concentration = Concentration.create_instance(
                 concentration, mass_def=self)
 
     @property

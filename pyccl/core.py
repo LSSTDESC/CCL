@@ -835,7 +835,7 @@ class Cosmology(CCLObject):
                              "current choice of mass function with the "
                              "deprecated implementation.")
         prf = hal.HaloProfileNFW(c)
-        hmc = hal.HMCalculator(self, hmf, hbf, mdef)
+        hmc = hal.HaloModel(self, hmf, hbf, mdef)
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
     @cache(maxsize=3)

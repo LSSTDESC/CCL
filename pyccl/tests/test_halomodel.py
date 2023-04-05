@@ -66,7 +66,7 @@ def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
     elif c == 'bhattacharya2011':
         cc = ccl.halos.ConcentrationBhattacharya13(mdef)
     prf = ccl.halos.HaloProfileNFW(cc)
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = ccl.halos.HaloModel(cosmo, hmf, hbf, mdef)
     p = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, a,
                                          prf, normprof1=True,
                                          get_1h=get_1h,
