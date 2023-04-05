@@ -10,7 +10,7 @@ COSMO.compute_nonlin_power()
 M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
-HMC = ccl.halos.HMCalculator(
+HMC = ccl.halos.HaloModel(
     mass_function=HMF, halo_bias=HBF, mass_def=M200, nlM=2)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 

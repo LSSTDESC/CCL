@@ -30,7 +30,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
         I^0_{2,2}(k_u,k_v,a|u_{1,2},v_{1,2})
 
     where :math:`I^0_{2,2}` is defined in the documentation
-    of :meth:`~HMCalculator.I_0_22`.
+    of :meth:`~HaloModel.I_0_22`.
 
     .. note:: This approximation assumes that the 4-point
               profile cumulant is the same as the product of two
@@ -39,7 +39,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HMCalculator`): a halo model calculator.
+        hmc (:class:`HaloModel`): a halo model calculator.
         k (float or array_like): comoving wavenumber in Mpc^-1.
         a (float or array_like): scale factor.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
@@ -63,7 +63,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
         normprof1 (bool): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.I_0_1`), where
+            (see :meth:`~HaloModel.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
@@ -142,7 +142,7 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HMCalculator`): a halo model calculator.
+        hmc (:class:`HaloModel`): a halo model calculator.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
@@ -164,7 +164,7 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
         normprof1 (bool): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.I_0_1`), where
+            (see :meth:`~HaloModel.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
@@ -234,13 +234,13 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
         P_L(k)+I^1_2(k|u,v) - (b_{u} + b_{v}) P_{u,v}(k) \\right)
 
     where the :math:`I^1_2` is defined in the documentation
-    :meth:`~HMCalculator.I_1_2` and :math:`b_{}` and :math:`b_{vv}` are the
+    :meth:`~HaloModel.I_1_2` and :math:`b_{}` and :math:`b_{vv}` are the
     linear halo biases for quantities :math:`u` and :math:`v`, respectively
     (zero if they are not clustering).
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HMCalculator`): a halo model calculator.
+        hmc (:class:`HaloModel`): a halo model calculator.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo NFW
             profile.
         bias1 (float or array): linear galaxy bias for quantity 1. If an array,
@@ -371,13 +371,13 @@ def halomod_Tk3D_SSC(
         P_{u,v}(k)
 
     where the :math:`I^a_b` are defined in the documentation
-    of :meth:`~HMCalculator.I_1_1` and  :meth:`~HMCalculator.I_1_2` and
+    of :meth:`~HaloModel.I_1_1` and  :meth:`~HaloModel.I_1_2` and
     :math:`b_{u}` and :math:`b_{v}` are the linear halo biases for quantities
     :math:`u` and :math:`v`, respectively (zero if they are not clustering).
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HMCalculator`): a halo model calculator.
+        hmc (:class:`HaloModel`): a halo model calculator.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
@@ -399,7 +399,7 @@ def halomod_Tk3D_SSC(
         normprof1 (bool): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.I_0_1`), where
+            (see :meth:`~HaloModel.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.

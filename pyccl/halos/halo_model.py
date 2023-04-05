@@ -3,15 +3,19 @@ from .hmfunc import MassFunc
 from .hbias import HaloBias
 from ..pyutils import _spline_integrate
 from .. import background
-from ..base import CCLAutoreprObject, unlock_instance, warn_api, deprecate_attr
+from ..base import (CCLAutoRepr, unlock_instance,
+                    warn_api, deprecate_attr, deprecated)
+from ..errors import CCLDeprecationWarning
 from ..parameters import physical_constants as const
 import numpy as np
+import functools
+import warnings
 
 
-__all__ = ("HMCalculator",)
+__all__ = ("HaloModel", "HMCalculator",)
 
 
-class HMCalculator(CCLAutoreprObject):
+class HaloModel(CCLAutoRepr):
     """This class implements a set of methods that can be used to
     compute various halo model quantities. A lot of these quantities
     will involve integrals of the sort:
@@ -37,7 +41,8 @@ class HMCalculator(CCLAutoreprObject):
         integration_method_M (string): integration method to use
             in the mass integrals. Options: "simpson" and "spline".
             Default: "simpson".
-        k_norm (float): some of the integrals solved by this class
+        k_min (float): Deprecated - do not use
+            some of the integrals solved by this class
             will often be normalized by their value on very large
             scales. This parameter (in units of inverse Mpc)
             determines what is considered a "very large" scale.
@@ -52,27 +57,27 @@ class HMCalculator(CCLAutoreprObject):
 
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
                      ("log10M_min", "lM_min"), ("log10M_max", "lM_max"),
-                     ("nlog10M", "nlM"), ("k_min", "k_norm")])
+                     ("nlog10M", "nlM")])
     def __init__(self, *, mass_function, halo_bias, mass_def=None,
                  lM_min=8., lM_max=16., nlM=128,
-                 integration_method_M='simpson', k_norm=1E-5):
+                 integration_method_M='simpson', k_min=1E-5):
         # Initialize halo model ingredients
-        self.mass_def = MassDef.initialize_from_input(mass_def)
+        self.mass_def = MassDef.create_instance(mass_def)
         kw = {"mass_def": self.mass_def}
-        self.mass_function = MassFunc.initialize_from_input(mass_function, **kw)  # noqa
-        self.halo_bias = HaloBias.initialize_from_input(halo_bias, **kw)
+        self.mass_function = MassFunc.create_instance(mass_function, **kw)
+        self.halo_bias = HaloBias.create_instance(halo_bias, **kw)
 
         # Check mass definition consistency.
         if not (self.mass_def
                 == self.mass_function.mass_def
                 == self.halo_bias.mass_def):
             raise ValueError(
-                "HMCalculator received different mass definitions "
+                "HaloModel received different mass definitions "
                 "in mass_def, mass_function, halo_bias.")
 
         self.precision = {
             'lM_min': lM_min, 'lM_max': lM_max, 'nlM': nlM,
-            'integration_method_M': integration_method_M, 'k_norm': k_norm}
+            'integration_method_M': integration_method_M, 'k_min': k_min}
         self._lmass = np.linspace(self.precision['lM_min'],
                                   self.precision['lM_max'],
                                   self.precision['nlM'])
@@ -100,8 +105,7 @@ class HMCalculator(CCLAutoreprObject):
     def _get_mass_function(self, cosmo, a, rho0):
         # Compute the mass function at this cosmo and a.
         if a != self._a_mf or cosmo != self._cosmo_mf:
-            massfunc = self.mass_function.get_mass_function
-            self._mf = massfunc(cosmo, self._mass, a)
+            self._mf = self.mass_function(cosmo, self._mass, a)
             integ = self._integrator(self._mf*self._mass, self._lmass)
             self._mf0 = (rho0 - integ) / self._m0
             self._cosmo_mf, self._a_mf = cosmo, a  # cache
@@ -110,8 +114,7 @@ class HMCalculator(CCLAutoreprObject):
     def _get_halo_bias(self, cosmo, a, rho0):
         # Compute the halo bias at this cosmo and a.
         if a != self._a_bf or cosmo != self._cosmo_bf:
-            hbias = self.halo_bias.get_halo_bias
-            self._bf = hbias(cosmo, self._mass, a)
+            self._bf = self.halo_bias(cosmo, self._mass, a)
             integ = self._integrator(self._mf*self._bf*self._mass, self._lmass)
             self._mbf0 = (rho0 - integ) / self._m0
             self._cosmo_bf, self._a_bf = cosmo, a  # cache
@@ -124,18 +127,19 @@ class HMCalculator(CCLAutoreprObject):
             self._get_halo_bias(cosmo, a, rho0)
 
     def _integrate_over_mf(self, array_2):
-        i1 = self._integrator(self._mf[..., :] * array_2,
-                              self._lmass)
+        #  ∫ dM n(M) f(M)
+        i1 = self._integrator(self._mf * array_2, self._lmass)
         return i1 + self._mf0 * array_2[..., 0]
 
     def _integrate_over_mbf(self, array_2):
-        i1 = self._integrator((self._mf * self._bf)[..., :] * array_2,
-                              self._lmass)
+        #  ∫ dM n(M) b(M) f(M)
+        i1 = self._integrator(self._mf * self._bf * array_2, self._lmass)
         return i1 + self._mbf0 * array_2[..., 0]
 
+    @deprecated()
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
-        (see :meth:`~HMCalculator.I_0_1`).
+        (see :meth:`~HaloModel.I_0_1`).
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -147,15 +151,19 @@ class HMCalculator(CCLAutoreprObject):
             float or array_like: integral value.
         """
         self._get_ingredients(cosmo, a, get_bf=False)
-        uk0 = prof.fourier(cosmo, self.precision['k_norm'],
+        uk0 = prof.fourier(cosmo, self.precision['k_min'],
                            self._mass, a, mass_def=self.mass_def).T
-        return 1 / self._integrate_over_mf(uk0)
+        return 1. / self._integrate_over_mf(uk0)
 
     def get_profile_norm(self, cosmo, a, prof):
-        """Compute ``profile_norm`` if ``prof.normprof`` is ``True``."""
-        if prof.normprof:
-            return self.profile_norm(cosmo, a, prof)
-        return np.ones_like(a)[()]
+        """Compute the normalization of a profile."""
+        if not prof.normprof:  # TODO: Remove for CCLv3.
+            return 1
+        uk0 = prof._normalization(self)(cosmo=cosmo, a=a)
+        if isinstance(uk0, (int, float)):
+            return 1 / uk0
+        self._get_ingredients(cosmo, a, get_bf=False)
+        return 1 / self._integrate_over_mf(uk0)
 
     @warn_api(pairs=[("sel", "selection"),
                      ("amin", "a_min"),
@@ -417,3 +425,14 @@ class HMCalculator(CCLAutoreprObject):
                 prof2=prof4, mass_def=self.mass_def).T
 
         return self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
+
+
+class HMCalculator(HaloModel):
+    __doc__ = HaloModel.__doc__
+    __qualname__ = __name__ = "HaloModel"
+
+    @functools.wraps(HaloModel.__init__)
+    def __init__(self, *args, **kwargs):
+        warnings.warn("`HMCalculator` has been renamed to `HaloModel`.",
+                      CCLDeprecationWarning)
+        super().__init__(*args, **kwargs)

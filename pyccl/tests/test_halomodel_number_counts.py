@@ -3,7 +3,7 @@ import pyccl as ccl
 import scipy.integrate
 
 
-def test_hmcalculator_number_counts_smoke():
+def test_halomodel_number_counts_smoke():
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
@@ -11,8 +11,7 @@ def test_hmcalculator_number_counts_smoke():
     hmf = ccl.halos.MassFuncTinker10(mass_def=mdef, mass_def_strict=False)
     hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
-                                 mass_def=mdef)
+    hmc = ccl.halos.HaloModel(mass_function=hmf, halo_bias=hbf, mass_def=mdef)
 
     def sel(m, a):
         m = np.atleast_1d(m)
@@ -31,7 +30,7 @@ def test_hmcalculator_number_counts_smoke():
     assert not np.allclose(nc, 0)
 
 
-def test_hmcalculator_number_counts_zero():
+def test_halomodel_number_counts_zero():
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
@@ -39,8 +38,7 @@ def test_hmcalculator_number_counts_zero():
     hmf = ccl.halos.MassFuncTinker10(mass_def=mdef, mass_def_strict=False)
     hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
-                                 mass_def=mdef)
+    hmc = ccl.halos.HaloModel(mass_function=hmf, halo_bias=hbf, mass_def=mdef)
 
     def sel(m, a):
         m = np.atleast_1d(m)
@@ -53,7 +51,7 @@ def test_hmcalculator_number_counts_zero():
     assert np.allclose(nc, 0)
 
 
-def test_hmcalculator_number_counts_norm():
+def test_halomodel_number_counts_norm():
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
@@ -61,8 +59,7 @@ def test_hmcalculator_number_counts_norm():
     hmf = ccl.halos.MassFuncTinker10(mass_def=mdef, mass_def_strict=False)
     hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
-                                 mass_def=mdef)
+    hmc = ccl.halos.HaloModel(mass_function=hmf, halo_bias=hbf, mass_def=mdef)
 
     def sel2(m, a):
         m = np.atleast_1d(m)
@@ -98,7 +95,7 @@ def test_hmcalculator_number_counts_norm():
     assert np.allclose(nc2 * 2, nc4)
 
 
-def test_hmcalculator_number_counts_scipy_dblquad():
+def test_halomodel_number_counts_scipy_dblquad():
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -124,7 +121,7 @@ def test_hmcalculator_number_counts_scipy_dblquad():
     mmin = 1e14
     mmax = 1e15
 
-    hmc = ccl.halos.HMCalculator(
+    hmc = ccl.halos.HaloModel(
         mass_function=hmf, halo_bias=hbf, mass_def=mdef,
         lM_min=np.log10(mmin),
         lM_max=np.log10(mmax),
@@ -151,7 +148,7 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda
 
-        val = hmf.get_mass_function(cosmo, 10**m, a) * sel(10**m, a)
+        val = hmf(cosmo, 10**m, a) * sel(10**m, a)
         return val[0, 0] * dvda
 
     mtot, _ = scipy.integrate.dblquad(
