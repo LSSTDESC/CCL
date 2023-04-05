@@ -154,6 +154,8 @@ class HMCalculator(CCLAutoRepr):
 
     def get_profile_norm(self, cosmo, a, prof):
         """Compute the normalization of a profile."""
+        if not prof.normprof:  # TODO: Remove for CCLv3.
+            return 1
         uk0 = prof._normalization(self)(cosmo=cosmo, a=a)
         if isinstance(uk0, (int, float)):
             return 1 / uk0
