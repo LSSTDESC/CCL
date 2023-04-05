@@ -150,6 +150,13 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
                 "normalization options will be provided with CCLv3.0.0.",
                 CCLDeprecationWarning)
 
+        # API compatibility for deprecated HMCalculator argument k_min.
+        if func.__qualname__ == "HMCalculator.__init__" and "k_min" in kwargs:
+            warnings.warn(
+                "Argument `k_min` has been deprecated in `HMCalculator. "
+                "This is now specified in each profile's `_normalization()` "
+                "method.", CCLDeprecationWarning)
+
         # API compatibility for non-None default `MassDef` in `halos`.
         if (params.get("mass_def") is not None
                 and "mass_def" in kwargs

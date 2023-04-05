@@ -38,7 +38,8 @@ class HMCalculator(CCLAutoreprObject):
         integration_method_M (string): integration method to use
             in the mass integrals. Options: "simpson" and "spline".
             Default: "simpson".
-        k_norm (float): some of the integrals solved by this class
+        k_min (float): Deprecated - do not use
+            some of the integrals solved by this class
             will often be normalized by their value on very large
             scales. This parameter (in units of inverse Mpc)
             determines what is considered a "very large" scale.
@@ -53,10 +54,10 @@ class HMCalculator(CCLAutoreprObject):
 
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
                      ("log10M_min", "lM_min"), ("log10M_max", "lM_max"),
-                     ("nlog10M", "nlM"), ("k_min", "k_norm")])
+                     ("nlog10M", "nlM")])
     def __init__(self, *, mass_function, halo_bias, mass_def=None,
                  lM_min=8., lM_max=16., nlM=128,
-                 integration_method_M='simpson', k_norm=1E-5):
+                 integration_method_M='simpson', k_min=1E-5):
         # Initialize halo model ingredients
         self.mass_def = MassDef.initialize_from_input(mass_def)
         kw = {"mass_def": self.mass_def}
@@ -73,7 +74,7 @@ class HMCalculator(CCLAutoreprObject):
 
         self.precision = {
             'log10M_min': lM_min, 'log10M_max': lM_max, 'nlM': nlM,
-            'integration_method_M': integration_method_M, 'k_norm': k_norm}
+            'integration_method_M': integration_method_M, 'k_min': k_min}
         self._lmass = np.linspace(self.precision['log10M_min'],
                                   self.precision['log10M_max'],
                                   self.precision['nlM'])
@@ -155,10 +156,10 @@ class HMCalculator(CCLAutoreprObject):
 
     def get_profile_norm(self, cosmo, a, prof):
         """Compute the normalization of a profile."""
-        self._get_ingredients(cosmo, a, get_bf=False)
         uk0 = prof._normalization(self)(cosmo=cosmo, a=a)
         if isinstance(uk0, (int, float)):
-            return uk0
+            return 1 / uk0
+        self._get_ingredients(cosmo, a, get_bf=False)
         return 1 / self._integrate_over_mf(uk0)
 
     @warn_api(pairs=[("sel", "selection"),

@@ -61,22 +61,25 @@ class HaloProfile(CCLAutoreprObject):
 
     # TODO: CCLv3 - Rename & allocate _normprof_bool to the subclasses.
 
-    def _normprof_false(self, hmc):
+    def _normprof_false(self, hmc, **settings):
         """Option for ``normprof = False``."""
         return lambda *args, cosmo, a, **kwargs: 1.
 
-    def _normprof_true(self, hmc):
+    def _normprof_true(self, hmc, k_min=1e-5):
         """Option for ``normprof = True``."""
-        k, M, mass_def = hmc.precision["k_norm"], hmc._mass, hmc.mass_def
-        return functools.partial(self.fourier, k=k, M=M, mass_def=mass_def)
+        # TODO: remove the first two lines in CCLv3.
+        k_hmc = hmc.precision["k_min"]
+        k_min = k_hmc if k_hmc != k_min else k_min
+        M, mass_def = hmc._mass, hmc.mass_def
+        return functools.partial(self.fourier, k=k_min, M=M, mass_def=mass_def)
 
-    def _normalization(self, hmc):
+    def _normalization(self, hmc, **settings):
         """This is the API adapter and it decides which norm to use.
         It returns a function of ``cosmo`` and ``a``. Optional args & kwargs.
         """
         if self.normprof:
-            return self._normprof_true(hmc)
-        return self._normprof_false(hmc)
+            return self._normprof_true(hmc, **settings)
+        return self._normprof_false(hmc, **settings)
 
     @unlock_instance(mutate=True)
     @functools.wraps(FFTLogParams.update_parameters)
