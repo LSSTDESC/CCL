@@ -28,7 +28,7 @@ def test_massfunc_models_smoke(mf_type):
         # Deprecated
         nm_old = assert_warns(ccl.CCLDeprecationWarning,
                               ccl.massfunc, cosmo, m, 1.)
-        nm_new = hmf.get_mass_function(cosmo, m, 1.)
+        nm_new = hmf(cosmo, m, 1.)
         assert np.all(np.isfinite(nm_old))
         assert np.shape(nm_old) == np.shape(m)
         assert np.all(np.array(nm_old) ==
@@ -47,7 +47,7 @@ def test_halo_bias_models_smoke(mf_type):
         # Deprecated
         bm_old = assert_warns(ccl.CCLDeprecationWarning,
                               ccl.halo_bias, cosmo, m, 1.)
-        bm_new = hbf.get_halo_bias(cosmo, m, 1.)
+        bm_new = hbf(cosmo, m, 1.)
         assert np.all(np.isfinite(bm_old))
         assert np.shape(bm_old) == np.shape(m)
         assert np.all(np.array(bm_old) ==
@@ -61,7 +61,7 @@ def test_halo_bias_models_smoke(mf_type):
     np.array([1e14, 1e15])])
 def test_massfunc_smoke(m):
     a = 0.8
-    mf = ccl.halos.MassFuncTinker10(COSMO).get_mass_function(COSMO, m, a)
+    mf = ccl.halos.MassFuncTinker10(COSMO)(COSMO, m, a)
     assert np.all(np.isfinite(mf))
     assert np.shape(mf) == np.shape(m)
 

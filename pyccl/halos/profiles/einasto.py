@@ -91,7 +91,7 @@ class HaloProfileEinasto(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         alpha = self._get_alpha(cosmo, M_use, a, mass_def)

@@ -156,7 +156,7 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda
 
-        val = hmf.get_mass_function(cosmo, 10**m, a) * sel(10**m, a)
+        val = hmf(cosmo, 10**m, a) * sel(10**m, a)
         return val[0, 0] * dvda
 
     mtot, _ = scipy.integrate.dblquad(

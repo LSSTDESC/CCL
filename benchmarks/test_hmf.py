@@ -22,7 +22,7 @@ def test_hmf_despali16():
     m = d_hmf[0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
-        nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
+        nm_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
@@ -34,7 +34,7 @@ def test_hmf_bocquet16():
     m = d_hmf[0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
-        nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
+        nm_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
@@ -45,7 +45,7 @@ def test_hmf_watson13():
     m = d_hmf[0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
-        nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
+        nm_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
@@ -56,7 +56,7 @@ def test_hmf_tinker08():
     m = d_hmf[0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
-        nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
+        nm_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
@@ -67,7 +67,7 @@ def test_hmf_press74():
     m = d_hmf[0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
-        nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
+        nm_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
@@ -78,7 +78,7 @@ def test_hmf_angulo12():
     m = d_hmf[0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
-        nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
+        nm_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
@@ -89,7 +89,7 @@ def test_hmf_sheth99():
     m = d_hmf[0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
-        nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
+        nm_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
@@ -100,5 +100,5 @@ def test_hmf_jenkins01():
     m = d_hmf[0]
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
-        nm_h = mf.get_mass_function(cosmo, m, 1. / (1 + z))
+        nm_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)

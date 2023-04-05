@@ -102,8 +102,7 @@ class HMCalculator(CCLAutoRepr):
     def _get_mass_function(self, cosmo, a, rho0):
         # Compute the mass function at this cosmo and a.
         if a != self._a_mf or cosmo != self._cosmo_mf:
-            massfunc = self.mass_function.get_mass_function
-            self._mf = massfunc(cosmo, self._mass, a)
+            self._mf = self.mass_function(cosmo, self._mass, a)
             integ = self._integrator(self._mf*self._mass, self._lmass)
             self._mf0 = (rho0 - integ) / self._m0
             self._cosmo_mf, self._a_mf = cosmo, a  # cache
@@ -112,8 +111,7 @@ class HMCalculator(CCLAutoRepr):
     def _get_halo_bias(self, cosmo, a, rho0):
         # Compute the halo bias at this cosmo and a.
         if a != self._a_bf or cosmo != self._cosmo_bf:
-            hbias = self.halo_bias.get_halo_bias
-            self._bf = hbias(cosmo, self._mass, a)
+            self._bf = self.halo_bias(cosmo, self._mass, a)
             integ = self._integrator(self._mf*self._bf*self._mass, self._lmass)
             self._mbf0 = (rho0 - integ) / self._m0
             self._cosmo_bf, self._a_bf = cosmo, a  # cache

@@ -94,7 +94,7 @@ class HaloProfileNFW(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -132,7 +132,7 @@ class HaloProfileNFW(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -168,7 +168,7 @@ class HaloProfileNFW(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -188,7 +188,7 @@ class HaloProfileNFW(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = k_use[None, :] * R_s[:, None]

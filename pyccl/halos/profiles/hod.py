@@ -243,7 +243,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
@@ -269,7 +269,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration.get_concentration(cosmo, M_use, a)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
