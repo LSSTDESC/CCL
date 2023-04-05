@@ -5,14 +5,17 @@ from ..pyutils import _spline_integrate
 from .. import background
 from ..base import (CCLAutoRepr, unlock_instance,
                     warn_api, deprecate_attr, deprecated)
+from ..errors import CCLDeprecationWarning
 from ..parameters import physical_constants as const
 import numpy as np
+import functools
+import warnings
 
 
-__all__ = ("HMCalculator",)
+__all__ = ("HaloModel", "HMCalculator",)
 
 
-class HMCalculator(CCLAutoRepr):
+class HaloModel(CCLAutoRepr):
     """This class implements a set of methods that can be used to
     compute various halo model quantities. A lot of these quantities
     will involve integrals of the sort:
@@ -69,7 +72,7 @@ class HMCalculator(CCLAutoRepr):
                 == self.mass_function.mass_def
                 == self.halo_bias.mass_def):
             raise ValueError(
-                "HMCalculator received different mass definitions "
+                "HaloModel received different mass definitions "
                 "in mass_def, mass_function, halo_bias.")
 
         self.precision = {
@@ -136,7 +139,7 @@ class HMCalculator(CCLAutoRepr):
     @deprecated()
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
-        (see :meth:`~HMCalculator.I_0_1`).
+        (see :meth:`~HaloModel.I_0_1`).
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -422,3 +425,14 @@ class HMCalculator(CCLAutoRepr):
                 prof2=prof4, mass_def=self.mass_def).T
 
         return self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
+
+
+class HMCalculator(HaloModel):
+    __doc__ = HaloModel.__doc__
+    __qualname__ = __name__ = "HaloModel"
+
+    @functools.wraps(HaloModel.__init__)
+    def __init__(self, *args, **kwargs):
+        warnings.warn("`HMCalculator` has been renamed to `HaloModel`.",
+                      CCLDeprecationWarning)
+        super().__init__(*args, **kwargs)

@@ -150,10 +150,10 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
                 "normalization options will be provided with CCLv3.0.0.",
                 CCLDeprecationWarning)
 
-        # API compatibility for deprecated HMCalculator argument k_min.
-        if func.__qualname__ == "HMCalculator.__init__" and "k_min" in kwargs:
+        # API compatibility for deprecated HaloModel argument k_min.
+        if func.__qualname__ == "HaloModel.__init__" and "k_min" in kwargs:
             warnings.warn(
-                "Argument `k_min` has been deprecated in `HMCalculator. "
+                "Argument `k_min` has been deprecated in `HaloModel. "
                 "This is now specified in each profile's `_normalization()` "
                 "method.", CCLDeprecationWarning)
 

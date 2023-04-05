@@ -56,8 +56,8 @@ def smoke_assert_tkk1h_real(func):
      (P2, P2, PKCH, P2, P2, None),
      (P1, P2, PKC, P3, P4, PKC)])
 def test_tkk1h_smoke(p1, p2, cv12, p3, p4, cv34):
-    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
-                                 mass_def=M200, nlog10M=2)
+    hmc = ccl.halos.HaloModel(mass_function=HMF, halo_bias=HBF,
+                              mass_def=M200, nlog10M=2)
 
     def f(k, a):
         return ccl.halos.halomod_trispectrum_1h(
@@ -68,8 +68,7 @@ def test_tkk1h_smoke(p1, p2, cv12, p3, p4, cv34):
 
 
 def test_tkk1h_tk3d():
-    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
-                                 mass_def=M200)
+    hmc = ccl.halos.HaloModel(mass_function=HMF, halo_bias=HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
     tkk_arr = ccl.halos.halomod_trispectrum_1h(
@@ -99,8 +98,7 @@ def test_tkk1h_tk3d():
 
 
 def test_tkk1h_warns():
-    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
-                                 mass_def=M200)
+    hmc = ccl.halos.HaloModel(mass_function=HMF, halo_bias=HBF, mass_def=M200)
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
 
     # Negative profile in logspace

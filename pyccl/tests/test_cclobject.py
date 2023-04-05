@@ -101,7 +101,7 @@ def test_CCLAutoRepr():
 
     # 1. Build a halo model calculator using the default parametrizations.
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    HMC = ccl.halos.HMCalculator(
+    HMC = ccl.halos.HaloModel(
         cosmo, massfunc="Tinker08", hbias="Tinker10", mass_def="200m")
 
     # 2. Define separate default halo model ingredients.
@@ -113,7 +113,7 @@ def test_CCLAutoRepr():
     assert MDEF == HMC._mdef
     assert HMF == HMC._massfunc
     assert HBF == HMC._hbias
-    HMC2 = ccl.halos.HMCalculator(
+    HMC2 = ccl.halos.HaloModel(
         cosmo, massfunc=HMF, hbias=HBF, mass_def=MDEF)
     assert HMC == HMC2
 
