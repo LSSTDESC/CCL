@@ -58,7 +58,7 @@ class HaloModel(CCLAutoRepr):
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
                      ("log10M_min", "lM_min"), ("log10M_max", "lM_max"),
                      ("nlog10M", "nlM")])
-    def __init__(self, *, mass_function, halo_bias, mass_def=None,
+    def __init__(self, *, mass_function, halo_bias, mass_def,
                  lM_min=8., lM_max=16., nlM=128,
                  integration_method_M='simpson', k_min=1E-5):
         # Initialize halo model ingredients
