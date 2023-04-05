@@ -64,21 +64,15 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
   // If massive neutrinos are present, compute the phase-space integral and
   // get OmegaNuh2. If not, set OmegaNuh2 to zero.
   double OmNuh2;
-  if ((cosmo->params.N_nu_mass) > 0.0001) {
-    // Call the massive neutrino density function just once at this redshift.
-    OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.m_nu,
-                           cosmo->params.T_CMB, cosmo->params.T_ncdm, status);
-  }
-  else {
-    OmNuh2 = 0.;
-  }
-
   double hnorm = h_over_h0(a, cosmo, status);
 
   switch(label) {
     case ccl_species_crit_label :
       return 1.;
     case ccl_species_m_label :
+      // Call the massive neutrino density function just once at this redshift.
+      OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.m_nu,
+                             cosmo->params.T_CMB, cosmo->params.T_ncdm, status);
       return (cosmo->params.Omega_c + cosmo->params.Omega_b) / (a*a*a) / hnorm / hnorm +
           OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / hnorm / hnorm;
     case ccl_species_l_label :
@@ -93,6 +87,9 @@ double ccl_omega_x(ccl_cosmology * cosmo, double a, ccl_species_x_label label, i
     case ccl_species_ur_label :
       return cosmo->params.Omega_nu_rel / (a*a*a*a) / hnorm / hnorm;
     case ccl_species_nu_label :
+      // Call the massive neutrino density function just once at this redshift.
+      OmNuh2 = ccl_Omeganuh2(a, cosmo->params.N_nu_mass, cosmo->params.m_nu,
+                             cosmo->params.T_CMB, cosmo->params.T_ncdm, status);
       return OmNuh2 / (cosmo->params.h) / (cosmo->params.h) / hnorm / hnorm;
     default:
       *status = CCL_ERROR_PARAMETERS;
