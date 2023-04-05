@@ -3,7 +3,8 @@ from .hmfunc import MassFunc
 from .hbias import HaloBias
 from ..pyutils import _spline_integrate
 from .. import background
-from ..base import CCLAutoreprObject, unlock_instance, warn_api, deprecate_attr
+from ..base import (CCLAutoreprObject, unlock_instance,
+                    warn_api, deprecate_attr, deprecated)
 from ..parameters import physical_constants as const
 import numpy as np
 
@@ -124,15 +125,16 @@ class HMCalculator(CCLAutoreprObject):
             self._get_halo_bias(cosmo, a, rho0)
 
     def _integrate_over_mf(self, array_2):
-        i1 = self._integrator(self._mf[..., :] * array_2,
-                              self._lmass)
+        #  ∫ dM n(M) f(M)
+        i1 = self._integrator(self._mf * array_2, self._lmass)
         return i1 + self._mf0 * array_2[..., 0]
 
     def _integrate_over_mbf(self, array_2):
-        i1 = self._integrator((self._mf * self._bf)[..., :] * array_2,
-                              self._lmass)
+        #  ∫ dM n(M) b(M) f(M)
+        i1 = self._integrator(self._mf * self._bf * array_2, self._lmass)
         return i1 + self._mbf0 * array_2[..., 0]
 
+    @deprecated()
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
         (see :meth:`~HMCalculator.I_0_1`).
@@ -147,15 +149,17 @@ class HMCalculator(CCLAutoreprObject):
             float or array_like: integral value.
         """
         self._get_ingredients(cosmo, a, get_bf=False)
-        uk0 = prof.fourier(cosmo, self.precision['k_norm'],
+        uk0 = prof.fourier(cosmo, self._prec['k_norm'],
                            self._mass, a, mass_def=self.mass_def).T
-        return 1 / self._integrate_over_mf(uk0)
+        return 1. / self._integrate_over_mf(uk0)
 
     def get_profile_norm(self, cosmo, a, prof):
-        """Compute ``profile_norm`` if ``prof.normprof`` is ``True``."""
-        if prof.normprof:
-            return self.profile_norm(cosmo, a, prof)
-        return np.ones_like(a)[()]
+        """Compute the normalization of a profile."""
+        self._get_ingredients(cosmo, a, get_bf=False)
+        uk0 = prof._normalization(self)(cosmo=cosmo, a=a)
+        if isinstance(uk0, (int, float)):
+            return uk0
+        return 1 / self._integrate_over_mf(uk0)
 
     @warn_api(pairs=[("sel", "selection"),
                      ("amin", "a_min"),

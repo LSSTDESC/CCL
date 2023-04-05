@@ -59,6 +59,25 @@ class HaloProfile(CCLAutoreprObject):
         (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`).
         """
 
+    # TODO: CCLv3 - Rename & allocate _normprof_bool to the subclasses.
+
+    def _normprof_false(self, hmc):
+        """Option for ``normprof = False``."""
+        return lambda *args, cosmo, a, **kwargs: 1.
+
+    def _normprof_true(self, hmc):
+        """Option for ``normprof = True``."""
+        k, M, mass_def = hmc.precision["k_norm"], hmc._mass, hmc.mass_def
+        return functools.partial(self.fourier, k=k, M=M, mass_def=mass_def)
+
+    def _normalization(self, hmc):
+        """This is the API adapter and it decides which norm to use.
+        It returns a function of ``cosmo`` and ``a``. Optional args & kwargs.
+        """
+        if self.normprof:
+            return self._normprof_true(hmc)
+        return self._normprof_false(hmc)
+
     @unlock_instance(mutate=True)
     @functools.wraps(FFTLogParams.update_parameters)
     def update_precision_fftlog(self, **kwargs):
