@@ -122,7 +122,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
                  lM1_0=13.3, lM1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False):
+                 a_pivot=1., ns_independent=False, **fftlog):
         if not isinstance(concentration, Concentration):
             raise TypeError("concentration must be of type `Concentration`")
 
@@ -145,7 +145,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         self.bmax_p = bmax_p
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
-        super().__init__()
+        super().__init__(**fftlog)
 
     @warn_api
     def update_parameters(self, *, lMmin_0=None, lMmin_p=None,

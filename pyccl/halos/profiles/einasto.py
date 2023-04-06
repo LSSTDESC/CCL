@@ -44,18 +44,17 @@ class HaloProfileEinasto(HaloProfileMatter):
                       "precision_fftlog", "normprof",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, concentration, truncated=True, alpha='cosmo'):
+    def __init__(self, *, concentration, truncated=True, alpha='cosmo',
+                 **fftlog):
         if not isinstance(concentration, Concentration):
             raise TypeError("concentration must be of type `Concentration`")
 
         self.concentration = concentration
         self.truncated = truncated
         self.alpha = alpha
-        super().__init__()
-        self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
-                                     n_per_decade=1000,
-                                     plaw_fourier=-2.)
+        default_fftlog = {"padding_lo_fftlog": 0.01, "padding_hi_fftlog": 100,
+                          "n_per_decade": 1000, "plaw_fourier": -2}
+        super().__init__(**{**default_fftlog, **fftlog})
 
     def update_parameters(self, alpha=None):
         """Update any of the parameters associated with this profile.

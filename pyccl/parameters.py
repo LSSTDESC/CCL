@@ -1,5 +1,6 @@
 from . import ccllib as lib
 from .errors import warnings, CCLDeprecationWarning
+from dataclasses import dataclass
 
 
 class CCLParameters:
@@ -120,45 +121,27 @@ gsl_params = GSLParams()
 physical_constants = PhysicalConstants()
 
 
+@dataclass(kw_only=True, unsafe_hash=True, frozen=True)
 class FFTLogParams:
     """Objects of this class store the FFTLog accuracy parameters."""
-    padding_lo_fftlog = 0.1   # | Anti-aliasing: multiply the lower boundary.
-    padding_hi_fftlog = 10.   # |                multiply the upper boundary.
+    padding_lo_fftlog: float = 0.1  # | Anti-aliasing: lower boundary factor.
+    padding_hi_fftlog: float = 10.  # |                upper boundary factor.
 
-    n_per_decade = 100        # Samples per decade for the Hankel transforms.
-    extrapol = "linx_liny"     # Extrapolation type.
+    n_per_decade: int = 100         # Hankel transforms samples per dex.
+    extrapol: str = "linx_liny"     # Extrapolation type.
 
-    padding_lo_extra = 0.1    # Padding for the intermediate step of a double
-    padding_hi_extra = 10.    # transform. Doesn't have to be as precise.
-    large_padding_2D = False  # If True, high precision intermediate transform.
+    padding_lo_extra: float = 0.1   # Padding for the middle step of a double
+    padding_hi_extra: float = 10.   # transform. Doesn't have to be as precise.
+    large_padding_2D: bool = False  # Flag for high precision middle transform.
 
-    plaw_fourier = -1.5       # Real <--> Fourier transforms.
-    plaw_projected = -1.0     # 2D projected & cumulative density profiles.
-
-    @property
-    def params(self):
-        return ["padding_lo_fftlog", "padding_hi_fftlog", "n_per_decade",
-                "extrapol", "padding_lo_extra", "padding_hi_extra",
-                "large_padding_2D", "plaw_fourier", "plaw_projected"]
-
-    def to_dict(self):
-        return {param: getattr(self, param) for param in self.params}
+    plaw_fourier: float = -1.5      # Real <--> Fourier transforms.
+    plaw_projected: float = -1.0    # 2D proj & cumul density profiles.
 
     def __getitem__(self, name):
         return getattr(self, name)
 
-    def __setattr__(self, name, value):
-        raise AttributeError("FFTLogParams can only be updated via "
-                             "`updated_parameters`.")
-
-    def __repr__(self):
-        return repr(self.to_dict())
-
-    def __eq__(self, other):
-        if type(self) != type(other):
-            return False
-        return self.to_dict() == other.to_dict()
-
+    # TODO: docs_v3 - This entire docstring as explanatory in HaloProfile base
+    # and remove from here.
     def update_parameters(self, **kwargs):
         """Update the precision of FFTLog for the Hankel transforms.
 
@@ -194,6 +177,6 @@ class FFTLogParams:
             The defaults are -1.5 and -1.0, respectively.
         """
         for name, value in kwargs.items():
-            if name not in self.params:
+            if not hasattr(self, name):
                 raise AttributeError(f"Parameter {name} does not exist.")
             object.__setattr__(self, name, value)

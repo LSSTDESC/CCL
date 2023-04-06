@@ -27,10 +27,10 @@ class HaloProfilePowerLaw(HaloProfile):
 
     @deprecated()
     @warn_api
-    def __init__(self, *, r_scale, tilt):
+    def __init__(self, *, r_scale, tilt, **fftlog):
         self.r_scale = r_scale
         self.tilt = tilt
-        super().__init__()
+        super().__init__(**fftlog)
 
     def _get_plaw_fourier(self, cosmo, a):
         # This is the optimal value for a pure power law

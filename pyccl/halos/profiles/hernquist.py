@@ -52,7 +52,8 @@ class HaloProfileHernquist(HaloProfileMatter):
                  truncated=True,
                  fourier_analytic=False,
                  projected_analytic=False,
-                 cumul2d_analytic=False):
+                 cumul2d_analytic=False,
+                 **fftlog):
         if not isinstance(concentration, Concentration):
             raise TypeError("concentration must be of type `Concentration`")
 
@@ -75,11 +76,10 @@ class HaloProfileHernquist(HaloProfileMatter):
                                  "for truncated Hernquist. Set `truncated` or "
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
-        super().__init__()
-        self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-4,
-                                     n_per_decade=1000,
-                                     plaw_fourier=-2.)
+
+        default_fftlog = {"padding_lo_fftlog": 1e-4, "padding_hi_fftlog": 100,
+                          "n_per_decade": 1000, "plaw_fourier": -2}
+        super().__init__(**{**default_fftlog, **fftlog})
 
     def _norm(self, M, Rs, c):
         # Hernquist normalization from mass, radius and concentration

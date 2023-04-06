@@ -40,8 +40,8 @@ class HaloProfile(CCLAutoRepr):
     __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
                                  )(super.__getattribute__)
 
-    def __init__(self):
-        self.precision_fftlog = FFTLogParams()
+    def __init__(self, **fftlog):
+        self.precision_fftlog = FFTLogParams(**fftlog)
 
     __eq__ = object.__eq__
 
@@ -109,11 +109,11 @@ class HaloProfile(CCLAutoRepr):
         return self.precision_fftlog['plaw_projected']
 
     @abstractlinkedmethod
-    def _real(self, cosmo, r, M, a, *, mass_def=None):
+    def _real(self, cosmo, r, M, a, mass_def=None):
         """TODO: Write some useful docstring."""
 
     @abstractlinkedmethod
-    def _fourier(self, cosmo, k, M, a, *, mass_def=None):
+    def _fourier(self, cosmo, k, M, a, mass_def=None):
         "TODO: Write some useful docstring."""
 
     @warn_api

@@ -27,13 +27,13 @@ class HaloProfileGaussian(HaloProfile):
 
     @deprecated()
     @warn_api
-    def __init__(self, *, r_scale, rho0):
+    def __init__(self, *, r_scale, rho0, padding_lo_fftlog=0.01,
+                 padding_hi_fftlog=100, n_per_decade=10000, **fftlog):
         self.rho_0 = rho0
         self.r_scale = r_scale
-        super().__init__()
-        self.update_precision_fftlog(padding_lo_fftlog=0.01,
-                                     padding_hi_fftlog=100.,
-                                     n_per_decade=10000)
+        default_fftlog = {"padding_lo_fftlog": 0.01, "padding_hi_fftlog": 100,
+                          "n_per_decade": 10000}
+        super().__init__(**{**default_fftlog, **fftlog})
 
     def _real(self, cosmo, r, M, a, mass_def):
         r_use = np.atleast_1d(r)
