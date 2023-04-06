@@ -19,40 +19,39 @@ def test_ept_calculator_smoke():
     c = ccl.nl_pt.EulerianPTCalculator(log10k_min=-3,
                                        log10k_max=1,
                                        nk_per_decade=10,
-                                       extra_params={'pad_factor': 2})
+                                       pad_factor=2)
     assert len(c.k_s) == 40
 
 
-@pytest.mark.parametrize('options', [['TG', 'TG', False, False],
-                                     ['TG', 'TG', False, True],
-                                     ['TG', 'TI', False, False],
-                                     ['TG', 'TM', False, False],
-                                     ['TI', 'TG', False, False],
-                                     ['TI', 'TI', False, False],
-                                     ['TI', 'TI', True, False],
-                                     ['TI', 'TM', False, False],
-                                     ['TM', 'TG', False, False],
-                                     ['TM', 'TI', False, False],
-                                     ['TM', 'TM', False, False]])
-def test_ept_get_pk2d_smoke(options):
-    if options[0] == options[1]:
+@pytest.mark.parametrize('tr1,tr2,bb,sub_lowk',
+                         [['TG', 'TG', False, False],
+                          ['TG', 'TG', False, True],
+                          ['TG', 'TI', False, False],
+                          ['TG', 'TM', False, False],
+                          ['TI', 'TG', False, False],
+                          ['TI', 'TI', False, False],
+                          ['TI', 'TI', True, False],
+                          ['TI', 'TM', False, False],
+                          ['TM', 'TG', False, False],
+                          ['TM', 'TI', False, False],
+                          ['TM', 'TM', False, False]])
+def test_ept_get_pk2d_smoke(tr1, tr2, bb, sub_lowk):
+    if tr1 == tr2:
         t2 = None
     else:
-        t2 = TRS[options[1]]
+        t2 = TRS[tr2]
     ptc = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
-        extra_params={'sub_lowk': options[3]},
-        cosmo=COSMO)
-    pk = ptc.get_pk2d_biased(TRS[options[0]],
-                             tracer2=t2,
-                             return_ia_bb=options[2])
+        sub_lowk=sub_lowk, cosmo=COSMO)
+    pk = ptc.get_pk2d_biased(TRS[tr1], tracer2=t2,
+                             return_ia_bb=bb)
     assert isinstance(pk, ccl.Pk2D)
 
 
 def test_ept_pk2d_bb_smoke():
     pee = PTC.get_pk2d_biased(TRS['TI'])
     pbb = PTC.get_pk2d_biased(TRS['TI'], return_ia_bb=True)
-    assert pee.eval(0.1, 0.9, COSMO) != pbb.eval(0.1, 0.9, COSMO)
+    assert pee(0.1, 0.9, cosmo=COSMO) != pbb(0.1, 0.9, cosmo=COSMO)
 
 
 @pytest.mark.parametrize('nl', ['nonlinear', 'linear', 'pt'])
@@ -82,24 +81,12 @@ def test_ept_k2pk_types(typ_nlin, typ_nloc):
     pkmm2 = ptc2.get_pk2d_biased(tm, tracer2=tm)
     pkgg = ptc1.get_pk2d_biased(tg, tracer2=tg)
     ks = np.geomspace(1E-3, 1E1, 128)
-    p1 = pkgg.eval(ks, 1., COSMO)
-    p2 = pkmm.eval(ks, 1., COSMO)+ks**2*pkmm2.eval(ks, 1., COSMO)
+    p1 = pkgg(ks, 1., cosmo=COSMO)
+    p2 = pkmm(ks, 1., cosmo=COSMO)+ks**2*pkmm2(ks, 1., cosmo=COSMO)
     assert np.all(np.fabs(p1/p2-1) < 1E-4)
 
 
-@pytest.mark.parametrize('kind',
-                         ['m:m', 'm:b1', 'm:b2', 'm:b3nl', 'm:bs',
-                          'm:bk2', 'm:c1', 'm:c2', 'm:cdelta',
-                          'b1:b1', 'b1:b2', 'b1:b3nl', 'b1:bs',
-                          'b1:bk2', 'b1:c1', 'b1:c2', 'b1:cdelta',
-                          'b2:b2', 'b2:b3nl', 'b2:bs',
-                          'b2:bk2', 'b2:c1', 'b2:c2', 'b2:cdelta',
-                          'b3nl:b3nl', 'b3nl:bs', 'b3nl:bk2',
-                          'b3nl:c1', 'b3nl:c2', 'b3nl:cdelta',
-                          'bs:bs', 'bs:bk2', 'bs:c1', 'bs:c2',
-                          'bs:cdelta', 'bk2:bk2', 'bk2:c1', 'bk2:c2',
-                          'bk2:cdelta', 'c1:c1', 'c1:c2', 'c1:cdelta',
-                          'c2:c2', 'c2:cdelta', 'cdelta:cdelta'])
+@pytest.mark.parametrize('kind', ccl.nl_pt.ept._PK_ALIAS.keys())
 def test_ept_deconstruction(kind):
     b_nc = ['b1', 'b2', 'b3nl', 'bs', 'bk2']
     b_ia = ['c1', 'c2', 'cdelta']
@@ -129,12 +116,12 @@ def test_ept_deconstruction(kind):
     pk2 = PTC.get_pk2d_biased(t1, tracer2=t2)
 
     if pk1 is None:
-        assert pk2.eval(0.5, 1.0, COSMO) == 0.0
+        assert pk2(0.5, 1.0, cosmo=COSMO) == 0.0
     else:
-        assert pk1.eval(0.5, 1.0, COSMO) == pk2.eval(0.5, 1.0, COSMO)
+        assert pk1(0.5, 1.0, cosmo=COSMO) == pk2(0.5, 1.0, cosmo=COSMO)
         # Check cached
-        pk3 = PTC._pk2d_temp[PTC._pk_alias[kind]]
-        assert pk1.eval(0.5, 1.0, COSMO) == pk3.eval(0.5, 1.0, COSMO)
+        pk3 = PTC._pk2d_temp[ccl.nl_pt.ept._PK_ALIAS[kind]]
+        assert pk1(0.5, 1.0, cosmo=COSMO) == pk3(0.5, 1.0, cosmo=COSMO)
 
 
 @pytest.mark.parametrize('kind',
@@ -156,7 +143,7 @@ def test_ept_deconstruction_bb(kind):
 
     pk2 = PTC.get_pk2d_biased(t1, tracer2=t2, return_ia_bb=True)
 
-    assert pk1.eval(0.5, 1.0, COSMO) == pk2.eval(0.5, 1.0, COSMO)
+    assert pk1(0.5, 1.0, cosmo=COSMO) == pk2(0.5, 1.0, cosmo=COSMO)
 
 
 def test_ept_pk_cutoff():
@@ -167,13 +154,13 @@ def test_ept_pk_cutoff():
     ptc1 = ccl.nl_pt.EulerianPTCalculator(with_NC=True,
                                           cosmo=COSMO)
     pk2d1 = ptc1.get_pk2d_biased(t, tracer2=t)
-    pk1 = pk2d1.eval(ks, 1.0, COSMO)
+    pk1 = pk2d1(ks, 1.0, cosmo=COSMO)
     ptc2 = ccl.nl_pt.EulerianPTCalculator(with_NC=True,
                                           k_cutoff=10.,
                                           n_exp_cutoff=2.,
                                           cosmo=COSMO)
     pk2d2 = ptc2.get_pk2d_biased(t, tracer2=t)
-    pk2 = pk2d2.eval(ks, 1.0, COSMO)
+    pk2 = pk2d2(ks, 1.0, cosmo=COSMO)
 
     expcut = np.exp(-(ks/10.)**2)
     assert np.all(np.fabs(pk1*expcut/pk2-1) < 1E-3)
@@ -189,8 +176,8 @@ def test_ept_matter_1loop():
     tg = ccl.nl_pt.PTNumberCountsTracer(b1=1.0)
     tm = ccl.nl_pt.PTMatterTracer()
     ks = np.geomspace(1E-3, 10, 64)
-    pk1 = ptc1.get_pk2d_biased(tm).eval(ks, 1.0, COSMO)
-    pk2 = ptc2.get_pk2d_biased(tg).eval(ks, 1.0, COSMO)
+    pk1 = ptc1.get_pk2d_biased(tm)(ks, 1.0, cosmo=COSMO)
+    pk2 = ptc2.get_pk2d_biased(tg)(ks, 1.0, cosmo=COSMO)
     assert np.all(np.fabs(pk1/pk2-1) < 1E-3)
 
 
@@ -202,11 +189,11 @@ def test_ept_matter_linear():
     ptc1 = ccl.nl_pt.EulerianPTCalculator(with_matter_1loop=True,
                                           b1_pk_kind='linear',
                                           cosmo=COSMO)
-    pk1 = ptc1.get_pk2d_biased(TRS['TM']).eval(ks, 1.0, COSMO)
+    pk1 = ptc1.get_pk2d_biased(TRS['TM'])(ks, 1.0, cosmo=COSMO)
     ptc2 = ccl.nl_pt.EulerianPTCalculator(with_matter_1loop=True,
                                           b1_pk_kind='pt',
                                           cosmo=COSMO)
-    pk2 = ptc2.get_pk2d_biased(TRS['TM']).eval(ks, 1.0, COSMO)
+    pk2 = ptc2.get_pk2d_biased(TRS['TM'])(ks, 1.0, cosmo=COSMO)
     assert np.all(np.fabs(pk1/pk2-1) < 1E-10)
 
 
@@ -220,7 +207,7 @@ def test_ept_calculator_raises():
         ccl.nl_pt.EulerianPTCalculator(bk2_pk_kind='non-linear')
 
     # Uninitialized templates
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ccl.CCLError):
         ptc = ccl.nl_pt.EulerianPTCalculator(with_NC=True)
         ptc.get_pk2d_biased(TRS['TG'])
 
@@ -255,6 +242,6 @@ def test_ept_template_swap():
     ks = np.array([0.01, 0.1, 1.0])
     ptc = ccl.nl_pt.EulerianPTCalculator(with_NC=True,
                                          cosmo=COSMO)
-    pk1 = ptc.get_pk2d_template('b2:bs').eval(ks, 1.0, COSMO)
-    pk2 = ptc.get_pk2d_template('bs:b2').eval(ks, 1.0, COSMO)
+    pk1 = ptc.get_pk2d_template('b2:bs')(ks, 1.0, cosmo=COSMO)
+    pk2 = ptc.get_pk2d_template('bs:b2')(ks, 1.0, cosmo=COSMO)
     assert np.all(pk1 == pk2)
