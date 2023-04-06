@@ -227,8 +227,11 @@ parameters.
 Specifying Physical Constants
 -----------------------------
 
-The values of physical constants are set globally. These can be changed by
-assigning a new value to the attributes of ``pyccl.physical_constants``.
+The values of physical constants are set globally and are frozen. We do not
+recommend changing them, as some constants derive from others (such as Newton's
+gravitational constant and the solar mass). However, if you know what you are
+doing, you can unfreeze with ``pyccl.physical_constants.unfreeze()`` and then
+set your desired value to the parameter you would like to change.
 The following constants are defined and their default values are located
 in ``src/ccl_core.c``. Note that the neutrino mass splittings are taken
 from Lesgourgues & Pastor (2012; 1212.6154). Also, see the
@@ -248,8 +251,6 @@ basic physical constants
   - HPLANCK: Planck's constant in units kg m^2 / s
   - CLIGHT: speed of light in m/s
   - EV_IN_J: conversion factor between electron volts and Joules
-  - T_CMB: temperature of the CMB in K
-  - TNCDM: temperature of the cosmological neutrino background in K
 
 neutrino mass splittings
 

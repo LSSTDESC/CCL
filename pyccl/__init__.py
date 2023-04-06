@@ -42,12 +42,7 @@ from .errors import (
 )
 
 # Constants and accuracy parameters
-from .parameters import (
-    CCLParameters,
-    gsl_params,
-    spline_params,
-    physical_constants,
-)
+from .parameters import *
 
 # Core data structures
 from .core import (
@@ -108,11 +103,7 @@ from .bcm import (
     bcm_correct_pk2d,
 )
 
-from .neutrinos import (
-    Omega_nu_h2,
-    Omeganuh2,  # TODO: deprecate this in v3
-    nu_masses,
-)
+from .neutrinos import *
 
 # Cells & Tracers
 from .cells import angular_cl
@@ -151,12 +142,16 @@ from .covariances import (
 from .pyutils import debug_mode, resample_array
 
 # Deprecated & Renamed modules
+import warnings as _warnings
+_warnings.warn(
+    "The default CMB temperature (T_CMB) will change in CCLv3.0.0, "
+    "from 2.725 to 2.7255 (Kelvin).", CCLDeprecationWarning)
+
 def __getattr__(name):
     rename = {"cls": "cells"}
     if name in rename:
         from .errors import CCLDeprecationWarning
-        import warnings
-        warnings.warn(f"Module {name} has been renamed to {rename[name]}.",
+        _warnings.warn(f"Module {name} has been renamed to {rename[name]}.",
                       CCLDeprecationWarning)
         name = rename[name]
         return eval(name)
@@ -191,7 +186,6 @@ from .baryons import (
 __all__ = (
     'lib', 'Caching', 'cache', 'hash_', 'CCLObject', 'CCLAutoreprObject',
     'UnlockInstance', 'unlock_instance',
-    'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
     'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
     'growth_factor', 'growth_factor_unnorm', 'growth_rate',
@@ -204,7 +198,6 @@ __all__ = (
     'linear_matter_power', 'nonlin_matter_power',
     'sigmaR', 'sigmaV', 'sigma8', 'sigmaM', 'kNL',
     'bcm_model_fka', 'bcm_correct_pk2d',
-    'Omeganuh2', 'Omega_nu_h2', 'nu_masses',
     'angular_cl',
     'Tracer', 'NumberCountsTracer', 'WeakLensingTracer', 'CMBLensingTracer',
     'tSZTracer', 'CIBTracer', 'ISWTracer', 'NzTracer',
