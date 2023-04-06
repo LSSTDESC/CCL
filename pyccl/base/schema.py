@@ -1,11 +1,11 @@
 from _thread import RLock
-from abc import ABC
+from abc import ABC, abstractproperty
 from inspect import signature
 import functools
 
 
 __all__ = ("ObjectLock", "UnlockInstance", "unlock_instance", "FancyRepr",
-           "CCLObject", "CCLAutoreprObject",)
+           "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
 
 
 class ObjectLock:
@@ -310,7 +310,7 @@ class CCLObject(ABC):
         return repr(self) == repr(other)
 
 
-class CCLAutoreprObject(CCLObject):
+class CCLAutoRepr(CCLObject):
     """Base for objects with automatic representation. Representations
     for instances are built from a list of attribute names specified as
     a class variable in ``__repr_attrs__`` (acting as a hook).
@@ -319,7 +319,7 @@ class CCLAutoreprObject(CCLObject):
         The representation (also hash) of instances of the following class
         is built based only on the attributes specified in ``__repr_attrs__``:
 
-        >>> class MyClass(CCLAutoreprObject):
+        >>> class MyClass(CCLAutoRepr):
             __repr_attrs__ = ("a", "b", "other")
             def __init__(self, a=1, b=2, c=3, d=4, e=5):
                 self.a = a
@@ -341,3 +341,52 @@ class CCLAutoreprObject(CCLObject):
             from .repr_ import build_string_from_attrs
             return build_string_from_attrs(self)
         return object.__repr__(self)
+
+
+def _subclasses(cls):
+    # This helper returns a set of all subclasses.
+    direct_subs = cls.__subclasses__()
+    deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
+    return set(direct_subs).union(deep_subs)
+
+
+def from_name(cls, name):
+    """Obtain particular model."""
+    mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
+    return mod[name]
+
+
+def create_instance(cls, input_, **kwargs):
+    """Process the input and generate an object of the class.
+    Input can be an instance of the class, or a name string.
+    Optional ``**kwargs`` may be passed.
+    """
+    if isinstance(input_, cls):
+        return input_
+    if isinstance(input_, str):
+        class_ = cls.from_name(input_)
+        return class_(**kwargs)
+    good, bad = cls.__name__, input_.__class__.__name__
+    raise TypeError(f"Expected {good} or str but received {bad}.")
+
+
+class CCLNamedClass(CCLObject):
+    """Base for objects that contain methods ``from_name()`` and
+    ``create_instance()``.
+
+    Implementation
+    --------------
+    Subclasses must define a ``name`` class attribute which allows the tree to
+    be searched to retrieve the particular model, using its name.
+    """
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._subclasses = classmethod(_subclasses)
+        if not hasattr(cls, "from_name"):
+            cls.from_name = classmethod(from_name)
+        cls.create_instance = classmethod(create_instance)
+
+    @abstractproperty
+    def name(self) -> str:
+        """Class attribute denoting the name of the model."""

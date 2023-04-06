@@ -43,10 +43,8 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         i11 = func(cosmo, k_use, aa, prof)
-        if prof.normprof:
-            norm = hmc.profile_norm(cosmo, aa, prof)
-            i11 *= norm
-        out[ia, :] = i11
+        norm = hmc.get_profile_norm(cosmo, aa, prof)
+        out[ia] = i11 * norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)

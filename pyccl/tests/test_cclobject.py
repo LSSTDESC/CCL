@@ -96,7 +96,7 @@ def test_CCLObject():
     assert TR1 == TR2
 
 
-def test_CCLAutoreprObject():
+def test_CCLAutoRepr():
     # Test eq --> repr <-- hash for all kinds of CCL halo objects.
 
     # 1. Build a halo model calculator using the default parametrizations.
@@ -172,7 +172,7 @@ def test_CCLObject_default_behavior():
     assert instances[0] != instances[1]
     assert hash(instances[0]) != hash(instances[1])
 
-    MyType = type("MyType", (ccl.CCLAutoreprObject,), {"test": 0})
+    MyType = type("MyType", (ccl.CCLAutoRepr,), {"test": 0})
     instances = [MyType() for _ in range(2)]
     assert instances[0] != instances[1]
 
@@ -186,7 +186,7 @@ def test_HaloProfile_abstractmethods():
 
 def init_decorator(func):
     """Check that all attributes listed in ``__repr_attrs__`` are defined in
-    the constructor of all subclasses of ``CCLAutoreprObject``.
+    the constructor of all subclasses of ``CCLAutoRepr``.
     NOTE: Used in ``conftest.py``.
     """
 

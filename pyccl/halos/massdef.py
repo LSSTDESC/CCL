@@ -1,13 +1,13 @@
 from .. import ccllib as lib
 from ..core import check
 from ..background import species_types
-from ..base import CCLAutoreprObject, warn_api, deprecate_attr
-from .halo_model_base import initialize_from_input
+from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
 import numpy as np
 
 
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
-           "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir")
+           "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
+           "MassDefFof",)
 
 
 def mass2radius_lagrangian(cosmo, M):
@@ -68,7 +68,7 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     return c_new
 
 
-class MassDef(CCLAutoreprObject):
+class MassDef(CCLAutoRepr, CCLNamedClass):
     """Halo mass definition. Halo masses are defined in terms of an overdensity
     parameter :math:`\\Delta` and an associated density :math:`X` (either the
     matter density or the critical density):
@@ -112,7 +112,7 @@ class MassDef(CCLAutoreprObject):
             self.concentration = None
         else:
             from .concentration import Concentration
-            self.concentration = Concentration.initialize_from_input(
+            self.concentration = Concentration.create_instance(
                 concentration, mass_def=self)
 
     @property
@@ -201,21 +201,6 @@ class MassDef(CCLAutoreprObject):
             return R[0]
         return R
 
-    def _get_concentration(self, cosmo, M, a):
-        """ Returns concentration for this mass definition.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
-
-        Returns:
-            float or array_like: halo concentration.
-        """
-        if self.concentration is None:
-            raise AttributeError("mass_def has no associated concentration.")
-        return self.concentration.get_concentration(cosmo, M, a)
-
     @warn_api(pairs=[("mdef_other", "mass_def_other")])
     def translate_mass(self, cosmo, M, a, *, mass_def_other):
         """ Translate halo mass in this definition into another definition
@@ -235,7 +220,7 @@ class MassDef(CCLAutoreprObject):
             raise AttributeError("mass_def has no associated concentration.")
         om_this = cosmo.omega_x(a, self.rho_type)
         D_this = self.get_Delta(cosmo, a) * om_this
-        c_this = self._get_concentration(cosmo, M, a)
+        c_this = self.concentration(cosmo, M, a)
         R_this = self.get_radius(cosmo, M, a)
         om_new = cosmo.omega_x(a, mass_def_other.rho_type)
         D_new = mass_def_other.get_Delta(cosmo, a) * om_new
@@ -256,12 +241,16 @@ class MassDef(CCLAutoreprObject):
         Returns:
             MassDef subclass corresponding to the input name.
         """
-        try:
-            return eval(f"MassDef{name.capitalize()}")
-        except NameError:
-            raise ValueError(f"Mass definition {name} not implemented.")
-
-    initialize_from_input = classmethod(initialize_from_input)
+        MassDefName = f"MassDef{name.capitalize()}"
+        if MassDefName in globals():
+            # MassDef is defined in one of the implementations below.
+            return globals()[MassDefName]
+        parser = {"c": "critical", "m": "matter"}
+        if len(name) < 2 or name[-1] not in parser:
+            # Bogus input - can't parse it.
+            raise ValueError("Could not parse mass definition string.")
+        Delta, rho_type = name[:-1], parser[name[-1]]
+        return lambda cm=None: cls(Delta, rho_type, concentration=cm)  # noqa
 
 
 @warn_api(pairs=[('c_m', 'concentration')])
