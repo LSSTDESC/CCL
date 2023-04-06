@@ -283,16 +283,16 @@ class Pk2D(CCLObject):
         return pk2d
 
     def eval(self, k, a, cosmo=None, *, derivative=False):
-        warnings.warn("Pk2D.eval is deprecated. Simply use the object's "
-                      "__call__ method.", category=CCLDeprecationWarning)
-        return self.__call__(k, a, cosmo=cosmo, derivative=derivative)
+        warnings.warn("Pk2D.eval is deprecated. Simply call the object "
+                      "itself.", category=CCLDeprecationWarning)
+        return self(k, a, cosmo=cosmo, derivative=derivative)
 
     def eval_dlogpk_dlogk(self, k, a, cosmo):
         """Evaluate logarithmic derivative. See ``Pk2D.eval`` for details."""
-        warnings.warn("Pk2D.eval_dlogpk_dlogk is deprecated. Simply use "
-                      "the object's __call__ method with `derivative=True`.",
+        warnings.warn("Pk2D.eval_dlogpk_dlogk is deprecated. Simply call "
+                      "the object itself with `derivative=True`.",
                       category=CCLDeprecationWarning)
-        return self.__call__(k, a, cosmo=cosmo, derivative=True)
+        return self(k, a, cosmo=cosmo, derivative=True)
 
     def __call__(self, k, a, cosmo=None, *, derivative=False):
         """Evaluate the power spectrum or its logarithmic derivative at
@@ -349,7 +349,7 @@ class Pk2D(CCLObject):
                     "Pk2D evaluation scale factor is outside of the "
                     "interpolation range. To extrapolate, pass a Cosmology.")
             check(status, cosmo)
-            out[ia, :] = f
+            out[ia] = f
 
         if np.ndim(k) == 0:
             out = np.squeeze(out, axis=-1)
