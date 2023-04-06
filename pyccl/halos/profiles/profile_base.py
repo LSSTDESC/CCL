@@ -56,7 +56,7 @@ class HaloProfile(CCLAutoRepr):
     def normprof(self) -> bool:
         """Normalize the profile in auto- and cross-correlations by
         :math:`I^0_1(k\\rightarrow 0, a|u)`
-        (see :meth:`~pyccl.halos.halo_model.HaloModel.I_0_1`).
+        (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`).
         """
 
     # TODO: CCLv3 - Rename & allocate _normprof_bool to the subclasses.

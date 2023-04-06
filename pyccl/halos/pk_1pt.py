@@ -10,7 +10,7 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     """
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HaloModel`): a halo model calculator.
+        hmc (:class:`HMCalculator`): a halo model calculator.
         k (float or array_like): comoving wavenumber in Mpc^-1.
         a (float or array_like): scale factor.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
@@ -18,7 +18,7 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
         normprof (bool): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HaloModel.I_0_1`), where
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
 
     Returns:
