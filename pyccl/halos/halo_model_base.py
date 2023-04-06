@@ -5,7 +5,7 @@ from ..base import (CCLAutoRepr, CCLNamedClass,
                     warn_api, deprecated, deprecate_attr)
 import numpy as np
 import functools
-from abc import abstractmethod, abstractproperty
+from abc import abstractmethod
 
 
 __all__ = ("HMIngredients",)
@@ -27,7 +27,8 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
         self.mass_def = mass_def
         self._setup()
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def _mass_def_strict_always(self) -> bool:
         """Property that dictates whether ``mass_def_strict`` can be set
         as False on initialization.

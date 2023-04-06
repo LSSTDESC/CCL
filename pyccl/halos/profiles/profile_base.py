@@ -3,7 +3,7 @@ from ...base import (CCLAutoRepr, unlock_instance,
                      warn_api, deprecate_attr)
 from ...parameters import FFTLogParams
 import numpy as np
-from abc import abstractproperty
+from abc import abstractmethod
 import functools
 
 
@@ -52,7 +52,8 @@ class HaloProfile(CCLAutoRepr):
 
     __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def normprof(self) -> bool:
         """Normalize the profile in auto- and cross-correlations by
         :math:`I^0_1(k\\rightarrow 0, a|u)`

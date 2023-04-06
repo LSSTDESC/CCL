@@ -1,5 +1,5 @@
 from _thread import RLock
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod
 from inspect import signature
 import functools
 
@@ -387,6 +387,7 @@ class CCLNamedClass(CCLObject):
             cls.from_name = classmethod(from_name)
         cls.create_instance = classmethod(create_instance)
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self) -> str:
         """Class attribute denoting the name of the model."""
