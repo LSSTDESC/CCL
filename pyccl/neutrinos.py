@@ -1,10 +1,15 @@
 from . import ccllib as lib
-from .core import check
-from .parameters import physical_constants as const
+from .pyutils import check
 from .base import deprecated, warn_api
 from .errors import CCLDeprecationWarning
+from .core import _Defaults
+from .background import omega_x
 import numpy as np
 import warnings
+
+
+__all__ = ("nu_masses", "Omeganuh2",)
+
 
 neutrino_mass_splits = {
     'normal': lib.nu_normal,
@@ -15,7 +20,8 @@ neutrino_mass_splits = {
 }
 
 
-def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=None):
+@deprecated(new_function=omega_x)
+def Omeganuh2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
 
@@ -23,9 +29,9 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=None):
         a (float or array-like): Scale factor, normalized to 1 today.
         m_nu (float or array-like): Neutrino mass(es) (in eV)
         T_CMB (float, optional): Temperature of the CMB (K).
-            The default is ``pyccl.physical_constants.T_CMB``.
+            The default is the same as the Cosmology default.
         T_ncdm (float, optional): Non-CDM temperature in units of photon
-            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
+            temperature. The default is the same as the Cosmology default.
 
     Returns:
         float or array_like: :math:`\\Omega_\\nu\\,h^2` at a given
@@ -40,11 +46,9 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=None):
     if not isinstance(m_nu, np.ndarray):
         m_nu = np.array([m_nu, ]).flatten()
 
+    # Keep only massive neutrinos
+    m_nu = m_nu[m_nu > 0.]
     N_nu_mass = len(m_nu)
-
-    # Fill-in defaults
-    T_CMB = const.T_CMB if T_CMB is None else T_CMB
-    T_ncdm = const.T_ncdm if T_ncdm is None else T_ncdm
 
     OmNuh2, status = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm,
                                        a, m_nu, a.size, status)
@@ -54,11 +58,6 @@ def Omega_nu_h2(a, *, m_nu, T_CMB=None, T_ncdm=None):
     if scalar:
         return OmNuh2[0]
     return OmNuh2
-
-
-@deprecated(Omega_nu_h2)
-def Omeganuh2(a, m_nu, T_CMB=None):
-    return Omega_nu_h2(a, m_nu=m_nu, T_CMB=T_CMB)
 
 
 @warn_api(pairs=[("OmNuh2", "Omega_nu_h2")])

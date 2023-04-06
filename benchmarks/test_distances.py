@@ -46,7 +46,7 @@ Neff_mnu = 3.0
 def Neff_from_N_ur_N_ncdm(N_ur, N_ncdm):
     """Calculate N_eff from the number of relativistic
     and massive neutrinos."""
-    Neff = N_ur + N_ncdm * ccl.physical_constants.T_ncdm**4 / (4./11.)**(4./3.)
+    Neff = N_ur + N_ncdm * ccl.core._Defaults.T_ncdm**4 / (4./11.)**(4./3.)
     return Neff
 
 

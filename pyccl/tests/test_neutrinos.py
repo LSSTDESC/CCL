@@ -12,7 +12,8 @@ import pyccl as ccl
     [0.1, 0.8, 0.3],
     np.array([0.1, 0.8, 0.3])])
 def test_omnuh2_smoke(a, m):
-    om = ccl.Omega_nu_h2(a, m_nu=m)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        om = ccl.Omeganuh2(a, m_nu=m)
     assert np.all(np.isfinite(om))
     assert np.shape(om) == np.shape(a)
 
@@ -39,5 +40,6 @@ def test_neutrinos_raises():
 @pytest.mark.parametrize('split', ['normal', 'inverted', 'equal'])
 def test_nu_mass_consistency(a, split):
     m = ccl.nu_masses(Omega_nu_h2=0.1, mass_split=split)
-    assert np.allclose(ccl.Omega_nu_h2(a, m_nu=m),
-                       0.1, rtol=0, atol=1e-4)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        om = ccl.Omeganuh2(a, m_nu=m)
+    assert np.allclose(om, 0.1, rtol=0, atol=1e-4)

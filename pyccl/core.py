@@ -15,8 +15,9 @@ from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
-from .parameters import CCLParameters
+from .parameters import CCLParameters, CosmologyParams
 from .parameters import physical_constants as const
+
 
 # Configuration types
 transfer_function_types = {
@@ -66,6 +67,12 @@ emulator_neutrinos_types = {
     'strict': lib.emu_strict,
     'equalize': lib.emu_equalize
 }
+
+
+class _Defaults:
+    """Default cosmological parameters used throughout the library."""
+    T_CMB = 2.725
+    T_ncdm = 0.71611
 
 
 class Cosmology(CCLObject):
@@ -126,8 +133,7 @@ class Cosmology(CCLObject):
         wa (:obj:`float`, optional): Second order term of dark energy equation
             of state. Defaults to 0.
         T_CMB (:obj:`float`): The CMB temperature today. The default of
-            ``None`` uses the global CCL value in
-            ``pyccl.physical_constants.T_CMB``.
+            is 2.725.
         bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
             BCM model. Defaults to `np.log10(1.2e14)`.
         bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
@@ -181,7 +187,7 @@ class Cosmology(CCLObject):
             parameters. Currently supports extra parameters for CAMB, with
             details described below. Defaults to None.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
+            temperature. The default is 0.71611.
 
     Currently supported extra parameters for CAMB are:
 
@@ -226,7 +232,7 @@ class Cosmology(CCLObject):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=None,
+            T_CMB=_Defaults.T_CMB,
             bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
             bcm_ks=55., mu_0=0., sigma_0=0.,
             c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
@@ -237,7 +243,7 @@ class Cosmology(CCLObject):
             halo_concentration='duffy2008',
             emulator_neutrinos='strict',
             extra_parameters=None,
-            T_ncdm=None):
+            T_ncdm=_Defaults.T_ncdm):
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -433,32 +439,19 @@ class Cosmology(CCLObject):
         # Fill-in defaults (SWIG converts `numpy.nan` to `NAN`)
         A_s = np.nan if A_s is None else A_s
         sigma8 = np.nan if sigma8 is None else sigma8
-        T_CMB = const.T_CMB if T_CMB is None else T_CMB
         Omega_g = np.nan if Omega_g is None else Omega_g
-        T_ncdm = const.T_ncdm if T_ncdm is None else T_ncdm
 
         # Check to make sure Omega_k is within reasonable bounds.
         if Omega_k is not None and Omega_k < -1.0135:
             raise ValueError("Omega_k must be more than -1.0135.")
 
-        # Set nz_mg (no. of redshift bins for modified growth fns.)
-        if z_mg is not None and df_mg is not None:
-            # Get growth array size and do sanity check
-            z_mg = np.atleast_1d(z_mg)
-            df_mg = np.atleast_1d(df_mg)
-            if z_mg.size != df_mg.size:
-                raise ValueError(
-                    "The parameters `z_mg` and `dF_mg` are "
-                    "not the same shape!")
-            nz_mg = z_mg.size
-        else:
-            # If one or both of the MG growth arrays are set to zero, disable
-            # all of them
-            if z_mg is not None or df_mg is not None:
-                raise ValueError("Must specify both z_mg and df_mg.")
-            z_mg = None
-            df_mg = None
-            nz_mg = -1
+        # Modified growth.
+        if (z_mg is None) != (df_mg is None):
+            raise ValueError("Both z_mg and df_mg must be arrays or None.")
+        if z_mg is not None:
+            z_mg, df_mg = map(np.atleast_1d, [z_mg, df_mg])
+            if z_mg.shape != df_mg.shape:
+                raise ValueError("Shape mismatch for z_mg and df_mg.")
 
         # Check to make sure specified amplitude parameter is consistent
         if [A_s, sigma8].count(np.nan) != 1:
@@ -467,10 +460,9 @@ class Cosmology(CCLObject):
         # Check if any compulsory parameters are not set
         compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, n_s]
         names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa', 'h', 'n_s']
-        for nm, item in zip(names, compul):
+        for name, item in zip(names, compul):
             if item is None:
-                raise ValueError("Necessary parameter '%s' was not set "
-                                 "(or set to None)." % nm)
+                raise ValueError(f"Must set parameter {name}.")
 
         # Make sure the neutrino parameters are consistent
         # and if a sum is given for mass, split into three masses.
@@ -577,73 +569,80 @@ class Cosmology(CCLObject):
 
         # Fill an array with the non-relativistic neutrino masses
         if N_nu_mass > 0:
-            mnu_final_list = [0]*N_nu_mass
+            nu_mass = [0]*N_nu_mass
             relativistic = [0]*3
             for i in range(0, N_nu_mass):
                 for j in range(0, 3):
                     if (mnu_list[j] > 0.00017 and relativistic[j] == 0):
                         relativistic[j] = 1
-                        mnu_final_list[i] = mnu_list[j]
+                        nu_mass[i] = mnu_list[j]
                         break
         else:
-            mnu_final_list = [0.]
+            nu_mass = [0.]
 
-        # Create new instance of ccl_parameters object
-        # Create an internal status variable; needed to check massive neutrino
-        # integral.
-        status = 0
-        if nz_mg == -1:
-            # Create ccl_parameters without modified growth
-            self._params, status = lib.parameters_create_nu(
-                Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, A_s, sigma8, n_s,
-                T_CMB, Omega_g, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
-                mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, mnu_final_list, status)
+        c = const
+        # Curvature parameters.
+        k_sign = -np.sign(Omega_k) if np.abs(Omega_k) > 1e-6 else 0
+        sqrtk = np.sqrt(np.abs(Omega_k)) * h / c.CLIGHT_HMPC
+
+        # Fixed radiation parameters: (Omega_g h^2) is known from T_CMB.
+        rho_g = 4 * c.STBOLTZ / c.CLIGHT**3 * T_CMB**4
+        rho_crit = c.RHO_CRITICAL * c.SOLAR_MASS / c.MPC_TO_METER**3 * h**2
+
+        # Get the N_nu_rel from Neff and N_nu_mass.
+        N_nu_rel = Neff - N_nu_mass * T_ncdm**4 / (4/11)**(4/3)
+
+        # Temperature of the relativistic neutrinos in K.
+        T_nu = T_CMB * (4/11)**(1/3)
+        rho_nu_rel = N_nu_rel * (7/8) * 4 * c.STBOLTZ / c.CLIGHT**3 * T_nu**4
+        Omega_nu_rel = rho_nu_rel / rho_crit
+
+        # For non-relativistic neutrinos, calculate the phase-space integral.
+        self._fill_params(m_nu=nu_mass, N_nu_mass=N_nu_mass,
+                          T_CMB=T_CMB, T_ncdm=T_ncdm, h=h)
+        Omega_nu_mass = self._get_Omega_nu()
+
+        Omega_m = Omega_b + Omega_c + Omega_nu_mass
+        Omega_l = 1 - Omega_m - rho_g/rho_crit - Omega_nu_rel - Omega_k
+        if np.isnan(Omega_g):
+            # No value passed for Omega_g
+            Omega_g = rho_g/rho_crit
         else:
-            # Create ccl_parameters with modified growth arrays
-            self._params, status = lib.parameters_create_nu_vec(
-                Omega_c, Omega_b, Omega_k, Neff, w0, wa, h, A_s, sigma8, n_s,
-                T_CMB, Omega_g, T_ncdm, bcm_log10Mc, bcm_etab, bcm_ks,
-                mu_0, sigma_0, c1_mg, c2_mg, lambda_mg, z_mg, df_mg,
-                mnu_final_list, status)
-        check(status)
+            # Omega_g was passed - modify Omega_l
+            Omega_l += rho_g/rho_crit - Omega_g
+
+        self._fill_params(
+            sum_nu_masses=sum(nu_mass), N_nu_rel=N_nu_rel, Neff=Neff,
+            Omega_nu_mass=Omega_nu_mass, Omega_nu_rel=Omega_nu_rel,
+            Omega_m=Omega_m, Omega_c=Omega_c, Omega_b=Omega_b, Omega_k=Omega_k,
+            sqrtk=sqrtk, k_sign=int(k_sign), Omega_g=Omega_g, w0=w0, wa=wa,
+            Omega_l=Omega_l, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
+            mu_0=mu_0, sigma_0=sigma_0, c1_mg=c1_mg, c2_mg=c2_mg,
+            lambda_mg=lambda_mg,
+            bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab, bcm_ks=bcm_ks)
+
+        # Modified growth (deprecated)
+        if z_mg is not None:
+            self._params.mgrowth = [z_mg, df_mg]
+
+    def _fill_params(self, **kwargs):
+        if not hasattr(self, "_params"):
+            self._params = CosmologyParams()
+        [setattr(self._params, par, val) for par, val in kwargs.items()]
 
     def __getitem__(self, key):
-        """Access parameter values by name."""
-        try:
-            if key == 'm_nu':
-                val = lib.parameters_get_nu_masses(self._params, 3)
-            elif key == 'extra_parameters':
-                val = self._params_init_kwargs["extra_parameters"]
-            else:
-                val = getattr(self._params, key)
-        except AttributeError:
-            raise KeyError("Parameter '%s' not recognized." % key)
-        return val
-
-    def __setitem__(self, key, val):
-        """Set parameter values by name."""
-        raise NotImplementedError("Cosmology objects are immutable; create a "
-                                  "new Cosmology() instance instead.")
+        if key == 'extra_parameters':
+            return self._params_init_kwargs["extra_parameters"]
+        return getattr(self._params, key)
 
     def __del__(self):
         """Free the C memory this object is managing as it is being garbage
         collected (hopefully)."""
         if hasattr(self, "cosmo"):
-            if (self.cosmo is not None and
-                    hasattr(lib, 'cosmology_free') and
-                    lib.cosmology_free is not None):
-                lib.cosmology_free(self.cosmo)
-        if hasattr(self, "_params"):
-            if (self._params is not None and
-                    hasattr(lib, 'parameters_free') and
-                    lib.parameters_free is not None):
-                lib.parameters_free(self._params)
-
-        # finally delete some attributes we don't want to be around for safety
-        # when the context manager exits or if __del__ is called twice
-        if hasattr(self, "cosmo"):
+            lib.cosmology_free(self.cosmo)
             delattr(self, "cosmo")
         if hasattr(self, "_params"):
+            lib.parameters_free(self._params)
             delattr(self, "_params")
 
     def __enter__(self):
@@ -967,6 +966,31 @@ class Cosmology(CCLObject):
             raise KeyError("Unknown power spectrum %s." % name)
         return self._pk_nl[name]
 
+    def _get_Omega_nu(self, a=1):
+        r"""Compute :math:`\Omega_\nu`.
+
+        Arguments
+        ---------
+        a : float or (na,) array-like
+            Scale factor(s), normalized to 1 today.
+
+        Returns
+        -------
+        omega_nu : float or (na,) ``numpy.ndarray``
+            Value(s) of :math:`\Omega_\nu` at ``a``.
+        """
+        a_use = np.atleast_1d(a).astype(float)
+
+        status = 0
+        OmNuh2, status = lib.Omeganuh2_vec(
+            self["N_nu_mass"], self["T_CMB"], self["T_ncdm"],
+            a_use, self["m_nu"], a_use.size, status)
+        check(status)
+
+        if np.ndim(a) == 0:
+            return OmNuh2[0] / self["h"]**2
+        return OmNuh2 / self["h"]**2
+
     @property
     def has_distances(self):
         """Checks if the distances have been precomputed."""
@@ -1092,9 +1116,8 @@ class CosmologyCalculator(Cosmology):
             equation of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy
             equation of state. Defaults to 0.
-        T_CMB (:obj:`float`): The CMB temperature today. The default of
-            ``None`` uses the global CCL value in
-            ``pyccl.physical_constants.T_CMB``.
+        T_CMB (:obj:`float`): The CMB temperature today. The default is the
+            same as in the Cosmology base class.
         mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
@@ -1152,16 +1175,17 @@ class CosmologyCalculator(Cosmology):
             corresponding to the "HALOFIT" transformation of
             Takahashi et al. 2012 (arXiv:1208.2701).
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is ``pyccl.physical_constants.T_ncdm``.
+            temperature. The default is the same as in the base class
     """
     # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=None, mu_0=0., sigma_0=0.,
+            T_CMB=_Defaults.T_CMB, mu_0=0., sigma_0=0.,
             background=None, growth=None,
-            pk_linear=None, pk_nonlin=None, nonlinear_model=None, T_ncdm=None):
+            pk_linear=None, pk_nonlin=None, nonlinear_model=None,
+            T_ncdm=_Defaults.T_ncdm):
         if pk_linear:
             transfer_function = 'calculator'
         else:

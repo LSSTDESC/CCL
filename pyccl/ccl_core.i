@@ -15,70 +15,40 @@
 
 %include "../include/ccl_core.h"
 
-// Enable vectorised arguments for arrays
+
 %apply (double* IN_ARRAY1, int DIM1) {
-            (double* zarr, int nz),
-            (double* dfarr, int nf),
-            (double* m_nu, int n_m)
+       (double* mass, int num),
+       (double* zarr, int nz),
+       (double* dfarr, int ndf)
 };
+
+%inline %{
+void parameters_m_nu_set_custom(ccl_parameters *params, double *mass, int num) {
+  params->m_nu = (double*) malloc(num*sizeof(double));
+  memcpy(params->m_nu, mass, num*sizeof(double));
+}
+
+void parameters_mgrowth_set_custom(ccl_parameters *params,
+    double* zarr, int nz, double* dfarr, int ndf) {
+  if (nz > 0) {
+    params->has_mgrowth = true;
+    params->nz_mgrowth = nz;
+    params->z_mgrowth = (double*) malloc(nz*sizeof(double));
+    params->df_mgrowth = (double*) malloc(nz*sizeof(double));
+    memcpy(params->z_mgrowth, zarr, nz*sizeof(double));
+    memcpy(params->df_mgrowth, dfarr, nz*sizeof(double));
+  }
+}
+
+%}
+
+
 %apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
 
 %inline %{
 
 void parameters_get_nu_masses(ccl_parameters *params, int nout, double* output) {
-    output[0] = 0;
-    output[1] = 0;
-    output[2] = 0;
-
-    for (int i=0; i<params->N_nu_mass; ++i) {
-        output[i] = params->m_nu[i];
-    }
-}
-
-ccl_parameters parameters_create_nu(
-    double Omega_c, double Omega_b, double Omega_k, double Neff,
-    double w0, double wa, double h, double A_s, double sigma8, double n_s,
-    double T_CMB, double Omega_g, double T_ncdm,
-    double bcm_log10Mc, double bcm_etab, double bcm_ks, double mu_0,
-    double sigma_0, double c1_mg, double c2_mg, double lambda_mg,
-    double* m_nu, int n_m, int* status)
-{
-    return ccl_parameters_create(
-        Omega_c, Omega_b, Omega_k, Neff, m_nu, n_m, w0, wa, h,
-        A_s, sigma8, n_s, T_CMB, Omega_g, T_ncdm,
-        bcm_log10Mc, bcm_etab, bcm_ks,
-        mu_0, sigma_0, c1_mg, c2_mg, lambda_mg,
-        -1, NULL, NULL, status );
+  memcpy(output, params->m_nu, nout*sizeof(double));
 }
 
 %}
-
-%feature("pythonprepend") parameters_create_nu_vec %{
-    if numpy.shape(zarr) != numpy.shape(dfarr):
-        raise CCLError("Input shape for `zarr` must match `dfarr`!")
-%}
-
-%inline %{
-ccl_parameters parameters_create_nu_vec(
-    double Omega_c, double Omega_b, double Omega_k, double Neff,
-    double w0, double wa, double h, double A_s, double sigma8, double n_s,
-    double T_CMB, double Omega_g, double T_ncdm,
-    double bcm_log10Mc, double bcm_etab, double bcm_ks, double mu_0,
-    double sigma_0, double c1_mg, double c2_mg, double lambda_mg,
-    double* zarr, int nz,
-    double* dfarr, int nf, double* m_nu,
-    int n_m, int* status)
-{
-    if (nz == 0){ nz = -1; }
-    return ccl_parameters_create(
-        Omega_c, Omega_b, Omega_k, Neff, m_nu, n_m, w0, wa, h,
-        A_s, sigma8, n_s, T_CMB, Omega_g, T_ncdm,
-        bcm_log10Mc, bcm_etab, bcm_ks,
-        mu_0, sigma_0, c1_mg, c2_mg, lambda_mg,
-        nz, zarr, dfarr, status);
-}
-
-%}
-
-/* The directive gets carried between files, so we reset it at the end. */
-%feature("pythonprepend") %{ %}
