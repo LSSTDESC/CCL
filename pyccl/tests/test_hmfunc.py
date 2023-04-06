@@ -37,7 +37,7 @@ def test_sM_raises():
 def test_nM_subclasses_smoke(nM_class):
     nM = nM_class()
     for m in MS:
-        n = nM(COSMO, m, 0.9)
+        n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
         assert np.shape(n) == np.shape(m)
 
@@ -61,7 +61,7 @@ def test_nM_mdef_bad_delta(nM_class):
 def test_nM_SO_allgood(nM_class):
     nM = nM_class(mass_def=MVIR)
     for m in MS:
-        n = nM(COSMO, m, 0.9)
+        n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
         assert np.shape(n) == np.shape(m)
 
@@ -69,7 +69,7 @@ def test_nM_SO_allgood(nM_class):
 def test_nM_despali_smoke():
     nM = ccl.halos.MassFuncDespali16(ellipsoidal=True)
     for m in MS:
-        n = nM(COSMO, m, 0.9)
+        n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
         assert np.shape(n) == np.shape(m)
 
@@ -78,11 +78,11 @@ def test_nM_despali_smoke():
 def test_nM_watson_smoke(mdef):
     nM = ccl.halos.MassFuncWatson13(mass_def=mdef)
     for m in MS:
-        n = nM(COSMO, m, 0.9)
+        n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
         assert np.shape(n) == np.shape(m)
     for m in MS:
-        n = nM(COSMO, m, 0.1)
+        n = nM.get_mass_function(COSMO, m, 0.1)
         assert np.all(np.isfinite(n))
         assert np.shape(n) == np.shape(m)
 
@@ -95,7 +95,7 @@ def test_nM_bocquet_smoke(with_hydro):
     for md in [M500c, M200c, M200m]:
         nM = ccl.halos.MassFuncBocquet16(mass_def=md, hydro=with_hydro)
         for m in MS:
-            n = nM(COSMO, m, 0.9)
+            n = nM.get_mass_function(COSMO, m, 0.9)
             assert np.all(np.isfinite(n))
             assert np.shape(n) == np.shape(m)
 
@@ -106,7 +106,7 @@ def test_nM_from_string(name):
     nM_class = ccl.halos.MassFunc.from_name(name)
     nM = nM_class()
     for m in MS:
-        n = nM(COSMO, m, 0.9)
+        n = nM.get_mass_function(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
         assert np.shape(n) == np.shape(m)
 
@@ -128,7 +128,8 @@ def test_nM_tinker_crit(mf):
     mdef_m = ccl.halos.MassDef(delta_m, 'matter')
     nM_c = mf(mass_def=mdef_c)
     nM_m = mf(mass_def=mdef_m)
-    assert np.allclose(nM_c(COSMO, 1E13, a), nM_m(COSMO, 1E13, a))
+    assert np.allclose(nM_c.get_mass_function(COSMO, 1E13, a),
+                       nM_m.get_mass_function(COSMO, 1E13, a))
 
 
 def test_nM_tinker10_norm():
@@ -151,11 +152,3 @@ def test_nM_tinker10_norm():
     zs = np.linspace(0, 1, 4)
     ns = np.array([norm(z) for z in zs])
     assert np.all(np.fabs(ns-1) < 0.005)
-
-
-def test_mass_function_mass_def_strict_always_raises():
-    # Verify that when the property `_mass_def_strict_always` is set to True,
-    # the `mass_def_strict` check cannot be relaxed.
-    mdef = ccl.halos.MassDef(400, "critical")
-    with pytest.raises(ValueError):
-        ccl.halos.MassFuncBocquet16(mass_def=mdef, mass_def_strict=False)

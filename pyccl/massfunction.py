@@ -33,7 +33,9 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
     elif mf_par == 'angulo':
         mf = hal.MassFuncAngulo12(cosmo)
 
-    return mf(cosmo, halo_mass, a)
+    return mf.get_mass_function(cosmo,
+                                halo_mass,
+                                a)
 
 
 @deprecated(hal.HaloBias)
@@ -61,7 +63,9 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     else:
         raise CCLError("No b(M) fitting function implemented for "
                        "mass_function_method: "+mf_par)
-    return bf(cosmo, halo_mass, a)
+    return bf.get_halo_bias(cosmo,
+                            halo_mass,
+                            a)
 
 
 @deprecated(hal.mass2radius_lagrangian)

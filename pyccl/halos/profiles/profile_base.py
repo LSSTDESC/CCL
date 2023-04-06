@@ -1,5 +1,5 @@
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import (CCLAutoRepr, unlock_instance,
+from ...base import (CCLAutoreprObject, unlock_instance,
                      warn_api, deprecate_attr)
 from ...parameters import FFTLogParams
 import numpy as np
@@ -11,7 +11,7 @@ __all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
            "HaloProfilePressure", "HaloProfileCIB",)
 
 
-class HaloProfile(CCLAutoRepr):
+class HaloProfile(CCLAutoreprObject):
     """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL
@@ -56,30 +56,8 @@ class HaloProfile(CCLAutoRepr):
     def normprof(self) -> bool:
         """Normalize the profile in auto- and cross-correlations by
         :math:`I^0_1(k\\rightarrow 0, a|u)`
-        (see :meth:`~pyccl.halos.halo_model.HaloModel.I_0_1`).
+        (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`).
         """
-
-    # TODO: CCLv3 - Rename & allocate _normprof_bool to the subclasses.
-
-    def _normprof_false(self, hmc, **settings):
-        """Option for ``normprof = False``."""
-        return lambda *args, cosmo, a, **kwargs: 1.
-
-    def _normprof_true(self, hmc, k_min=1e-5):
-        """Option for ``normprof = True``."""
-        # TODO: remove the first two lines in CCLv3.
-        k_hmc = hmc.precision["k_min"]
-        k_min = k_hmc if k_hmc != k_min else k_min
-        M, mass_def = hmc._mass, hmc.mass_def
-        return functools.partial(self.fourier, k=k_min, M=M, mass_def=mass_def)
-
-    def _normalization(self, hmc, **settings):
-        """This is the API adapter and it decides which norm to use.
-        It returns a function of ``cosmo`` and ``a``. Optional args & kwargs.
-        """
-        if self.normprof:
-            return self._normprof_true(hmc, **settings)
-        return self._normprof_false(hmc, **settings)
 
     @unlock_instance(mutate=True)
     @functools.wraps(FFTLogParams.update_parameters)

@@ -22,7 +22,6 @@ class MassFuncBocquet16(MassFunc):
             baryonic effects (default).
     """
     __repr_attrs__ = ("mass_def", "mass_def_strict", "hydro",)
-    _mass_def_strict_always = True
     name = 'Bocquet16'
 
     @warn_api

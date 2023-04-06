@@ -1,56 +1,79 @@
 from .. import ccllib as lib
 from ..core import check
 from ..parameters import physical_constants as const
-from ..base import (CCLAutoRepr, CCLNamedClass,
-                    warn_api, deprecated, deprecate_attr)
+from ..base import CCLAutoreprObject, warn_api, deprecated, deprecate_attr
 import numpy as np
 import functools
-from abc import abstractmethod, abstractproperty
+from abc import abstractmethod
 
 
 __all__ = ("HMIngredients",)
 
 
-class HMIngredients(CCLAutoRepr, CCLNamedClass):
+def _subclasses(cls):
+    # This helper returns a set of all subclasses.
+    direct_subs = cls.__subclasses__()
+    deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
+    return set(direct_subs).union(deep_subs)
+
+
+def from_name(cls, name):
+    """Obtain particular model."""
+    mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
+    return mod[name]
+
+
+def initialize_from_input(cls, input_, **kwargs):
+    """Process the input and generate an object of the class.
+    Input can be an instance of the class, or a name string.
+    Optional ``**kwargs`` may be passed.
+    """
+    if isinstance(input_, cls):
+        return input_
+    if isinstance(input_, str):
+        class_ = cls.from_name(input_)
+        return class_(**kwargs)
+    good, bad = cls.__name__, input_.__class__.__name__
+    raise TypeError(f"Expected {good} or str but received {bad}.")
+
+
+class HMIngredients(CCLAutoreprObject):
     """Base class for halo model ingredients."""
     __repr_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
                                  )(super.__getattribute__)
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._subclasses = classmethod(_subclasses)
+        cls.from_name = classmethod(from_name)
+        cls.initialize_from_input = classmethod(initialize_from_input)
+
     @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):
-        # Check mass definition consistency.
         from .massdef import MassDef
-        mass_def = MassDef.create_instance(mass_def)
+        mass_def = MassDef.initialize_from_input(mass_def)
         self.mass_def_strict = mass_def_strict
-        self._check_mass_def(mass_def)
+        # Check if mass definition was provided and check that it's sensible.
+        if self._check_mass_def(mass_def):
+            classname = self.__class__.name
+            raise ValueError(
+                f"{classname} is not defined for {mass_def.name}-based masses."
+                " To disable this exception set `mass_def_strict=True`.")
         self.mass_def = mass_def
         self._setup()
 
-    @abstractproperty
-    def _mass_def_strict_always(self) -> bool:
-        """Property that dictates whether ``mass_def_strict`` can be set
-        as False on initialization.
-
-        Some models are set up in a way so that the set of fitted parameters
-        depends on the mass definition, (i.e. no one universal model exists
-        to cover all cases). Setting this to True fixes ``mass_def_strict``
-        to True irrespective of what the user passes.
-
-        Set this propery to False to allow users to override strict checks.
-        """
-
     @abstractmethod
-    def _check_mass_def_strict(self, mass_def) -> bool:
+    def _check_mass_def_strict(self, mass_def):
         """Check if this class is defined for mass definition ``mass_def``."""
 
-    def _setup(self) -> None:
+    def _setup(self):
         """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
         constructor call.
         """
 
-    def _check_mass_def(self, mass_def) -> None:
+    def _check_mass_def(self, mass_def):
         """ Return False if the input mass definition agrees with
         the definitions for which this mass function parametrization
         works. True otherwise. This function gets called at the
@@ -59,22 +82,14 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
         Args:
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
+
+        Returns:
+            bool: True if the mass definition is not compatible with \
+                this mass function parametrization. False otherwise.
         """
-        classname = self.__class__.__name__
-        msg = f"{classname} is not defined for {mass_def.name} masses"
-
-        if self._check_mass_def_strict(mass_def):
-            # Passed mass is incompatible with model.
-
-            if self._mass_def_strict_always:
-                # Class has no universal model and mass is incompatible.
-                raise ValueError(
-                    f"{msg} and this requirement cannot be relaxed.")
-
-            if self.mass_def_strict:
-                # Strict mass_def check enabled and mass is incompatible.
-                raise ValueError(
-                    f"{msg}. To relax this check set `mass_def_strict=False`.")
+        if self.mass_def_strict:
+            return self._check_mass_def_strict(mass_def)
+        return False
 
     def _get_logM_sigM(self, cosmo, M, a, *, return_dlns=False):
         """Compute ``logM``, ``sigM``, and (optionally) ``dlns_dlogM``."""
@@ -121,7 +136,6 @@ class MassFunc(HMIngredients):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    _mass_def_strict_always = False
 
     @abstractmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
@@ -142,7 +156,7 @@ class MassFunc(HMIngredients):
             float or array_like: :math:`f(\\sigma_M)` function.
         """
 
-    def __call__(self, cosmo, M, a):
+    def get_mass_function(self, cosmo, M, a):
         """ Returns the mass function for input parameters.
 
         Args:
@@ -165,10 +179,6 @@ class MassFunc(HMIngredients):
             return mf[0]
         return mf
 
-    @deprecated(new_function=__call__)
-    def get_mass_function(self, cosmo, M, a):
-        return self(cosmo, M, a)
-
 
 class HaloBias(HMIngredients):
     """ This class enables the calculation of halo bias functions.
@@ -188,7 +198,6 @@ class HaloBias(HMIngredients):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    _mass_def_strict_always = False
 
     @abstractmethod
     def _get_bsigma(self, cosmo, sigM, a):
@@ -204,7 +213,7 @@ class HaloBias(HMIngredients):
             float or array_like: f(sigma_M) function.
         """
 
-    def __call__(self, cosmo, M, a):
+    def get_halo_bias(self, cosmo, M, a):
         """ Returns the halo bias for input parameters.
 
         Args:
@@ -222,10 +231,6 @@ class HaloBias(HMIngredients):
             return b[0]
         return b
 
-    @deprecated(new_function=__call__)
-    def get_halo_bias(self, cosmo, M, a):
-        return self(cosmo, M, a)
-
 
 class Concentration(HMIngredients):
     """ This class enables the calculation of halo concentrations.
@@ -235,7 +240,6 @@ class Concentration(HMIngredients):
             object that fixes the mass definition used by this c(M)
             parametrization.
     """
-    _mass_def_strict_always = True
 
     @warn_api
     def __init__(self, *, mass_def):
@@ -245,7 +249,7 @@ class Concentration(HMIngredients):
     def _concentration(self, cosmo, M, a):
         """Implementation of the c(M) relation."""
 
-    def __call__(self, cosmo, M, a):
+    def get_concentration(self, cosmo, M, a):
         """ Returns the concentration for input parameters.
 
         Args:
@@ -261,10 +265,6 @@ class Concentration(HMIngredients):
         if np.ndim(M) == 0:
             return c[0]
         return c
-
-    @deprecated(new_function=__call__)
-    def get_concentration(self, cosmo, M, a):
-        return self(cosmo, M, a)
 
 
 @functools.wraps(MassFunc.from_name)

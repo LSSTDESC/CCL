@@ -43,7 +43,7 @@ class HaloProfileEinasto(HaloProfileMatter):
     __repr_attrs__ = ("concentration", "truncated", "alpha",
                       "precision_fftlog", "normprof",)
 
-    @warn_api(pairs=[("c_M_relation", "concentration")])
+    @warn_api(pairs=[("concentration", "concentration")])
     def __init__(self, *, concentration, truncated=True, alpha='cosmo'):
         if not isinstance(concentration, Concentration):
             raise TypeError("concentration must be of type `Concentration`")
@@ -91,7 +91,7 @@ class HaloProfileEinasto(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
+        c_M = self.concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         alpha = self._get_alpha(cosmo, M_use, a, mass_def)

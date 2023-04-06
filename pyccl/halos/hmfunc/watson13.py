@@ -26,6 +26,9 @@ class MassFuncWatson13(MassFunc):
                  mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
+    def _setup(self):
+        self.is_fof = self.mass_def.Delta == 'fof'
+
     def _check_mass_def_strict(self, mass_def):
         return mass_def.name == "vir"
 
@@ -65,6 +68,6 @@ class MassFuncWatson13(MassFunc):
         return f_178 * Gamma
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        if self.mass_def.name == 'fof':
+        if self.is_fof:
             return self._get_fsigma_fof(cosmo, sigM, a, lnM)
         return self._get_fsigma_SO(cosmo, sigM, a, lnM)

@@ -1,3 +1,3 @@
 from .caching import *
-from .schema import *
+from .ccl_object import *
 from .deprecations import *
