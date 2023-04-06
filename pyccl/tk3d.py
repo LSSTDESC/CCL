@@ -141,9 +141,9 @@ class Tk3D(CCLObject):
         return 'tsp' in vars(self)
 
     def eval(self, k, a):
-        warnings.warn("Tk3D.eval is deprecated. Simply use the object's "
-                      "__call__ method.", category=CCLDeprecationWarning)
-        return self.__call__(k, a)
+        warnings.warn("Tk3D.eval is deprecated. Simply call the object "
+                      "itself.", category=CCLDeprecationWarning)
+        return self.(k, a)
 
     def __call__(self, k, a):
         """Evaluate trispectrum. If `k` is a 1D array with size `nk`, and
@@ -171,7 +171,7 @@ class Tk3D(CCLObject):
             f, status = lib.tk3d_eval_multi(self.tsp, lk_use,
                                             aa, nk*nk, status)
             check(status)
-            out[ia, :, :] = f.reshape([nk, nk])
+            out[ia] = f.reshape([nk, nk])
 
         if np.ndim(k) == 0:
             out = np.squeeze(np.squeeze(out, axis=-1), axis=-1)
