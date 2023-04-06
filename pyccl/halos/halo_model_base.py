@@ -44,7 +44,7 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
     def __init__(self, *, mass_def, mass_def_strict=True):
         # Check mass definition consistency.
         from .massdef import MassDef
-        mass_def = MassDef.create_instance(mass_def)
+        mass_def = MassDef.initialize_from_input(mass_def)
         self.mass_def_strict = mass_def_strict
         self._check_mass_def(mass_def)
         self.mass_def = mass_def
@@ -221,9 +221,7 @@ class MassFunc(HMIngredients):
             return mf[0]
         return mf
 
-    @deprecated(new_function=__call__)
-    def get_mass_function(self, cosmo, M, a):
-        return self(cosmo, M, a)
+    get_mass_function = __call__
 
 
 class HaloBias(HMIngredients):
@@ -299,9 +297,7 @@ class HaloBias(HMIngredients):
             return b[0]
         return b
 
-    @deprecated(new_function=__call__)
-    def get_halo_bias(self, cosmo, M, a):
-        return self(cosmo, M, a)
+    get_halo_bias = __call__
 
 
 class Concentration(HMIngredients):
@@ -386,9 +382,7 @@ class Concentration(HMIngredients):
             return c[0]
         return c
 
-    @deprecated(new_function=__call__)
-    def get_concentration(self, cosmo, M, a):
-        return self(cosmo, M, a)
+    get_concentration = __call__
 
 
 @functools.wraps(MassFunc.from_name)

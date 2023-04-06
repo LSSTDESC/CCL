@@ -49,7 +49,7 @@ class HaloProfileNFW(HaloProfileMatter):
         "concentration", "fourier_analytic", "projected_analytic",
         "cumul2d_analytic", "truncated", "precision_fftlog", "normprof",)
 
-    @warn_api(pairs=[("c_M_relation", "concentration")])
+    @warn_api(pairs=[("concentration", "concentration")])
     def __init__(self, *, concentration,
                  fourier_analytic=True,
                  projected_analytic=False,
@@ -77,7 +77,6 @@ class HaloProfileNFW(HaloProfileMatter):
                                  "for truncated NFW. Set `truncated` or "
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
-        self._omln2 = 1 - np.log(2)
         super().__init__()
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-2,
@@ -94,7 +93,7 @@ class HaloProfileNFW(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
+        c_M = self.concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -132,13 +131,13 @@ class HaloProfileNFW(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
+        c_M = self.concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
         prof = self._fx_projected(x)
         norm = 2 * R_s * self._norm(M_use, R_s, c_M)
-        prof *= norm[:, None]
+        prof = prof[:, :] * norm[:, None]
 
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -159,7 +158,7 @@ class HaloProfileNFW(HaloProfileMatter):
         xf = x.flatten()
         f = np.piecewise(xf,
                          [xf < 1, xf > 1],
-                         [f1, f2, self._omln2]).reshape(x.shape)
+                         [f1, f2, 1-np.log(2)]).reshape(x.shape)
         return 2 * f / x**2
 
     def _cumul2d_analytic(self, cosmo, r, M, a, mass_def):
@@ -168,7 +167,7 @@ class HaloProfileNFW(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
+        c_M = self.concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -188,7 +187,7 @@ class HaloProfileNFW(HaloProfileMatter):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
+        c_M = self.concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = k_use[None, :] * R_s[:, None]

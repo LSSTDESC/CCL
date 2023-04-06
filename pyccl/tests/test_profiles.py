@@ -401,7 +401,7 @@ def test_nfw_accuracy(use_analytic):
     p = get_nfw(real=True, fourier=use_analytic)(concentration=cM)
     M = 1E14
     a = 0.5
-    c = cM(COSMO, M, a)
+    c = cM.get_concentration(COSMO, M, a)
     r_Delta = M200.get_radius(COSMO, M, a) / a
     r_s = r_Delta / c
 
@@ -502,7 +502,7 @@ def test_hernquist_accuracy(use_analytic):
                                        fourier_analytic=use_analytic)
     M = 1E14
     a = 0.5
-    c = cM(COSMO, M, a)
+    c = cM.get_concentration(COSMO, M, a)
     r_Delta = M200.get_radius(COSMO, M, a) / a
     r_s = r_Delta / c
 

@@ -114,9 +114,6 @@ class Profile2ptHOD(Profile2pt):
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfileHOD`):
-                halo profile for which the second-order moment
-                is desired.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfileHOD` or None):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want

@@ -403,7 +403,7 @@ def from_name(cls, name):
     return mod[name]
 
 
-def create_instance(cls, input_, **kwargs):
+def initialize_from_input(cls, input_, **kwargs):
     """Process the input and generate an object of the class.
     Input can be an instance of the class, or a name string.
     Optional ``**kwargs`` may be passed.
@@ -418,15 +418,15 @@ def create_instance(cls, input_, **kwargs):
 
 
 class CCLNamedClass(CCLObject):
-    """Base for objects that contain methods ``from_name()`` and
-    ``create_instance()``.
+    """Base for objects that contain ``from_name`` and
+    ``initialize_from_input`` methods.
 
     Implementation
     --------------
     Subclasses must define a ``name`` class attribute which allows the tree to
     be searched to retrieve the particular model, using its name. Subclasses
     may also contain their own implementation of ``from_name``. Method
-    ``create_instance`` is automatically added.
+    ``initialize_from_input`` is automatically added.
     """
 
     def __init_subclass__(cls, **kwargs):
@@ -435,7 +435,7 @@ class CCLNamedClass(CCLObject):
         if not hasattr(cls, "from_name"):
             # Add a `from_name` method if one is not provided.
             cls.from_name = classmethod(from_name)
-        cls.create_instance = classmethod(create_instance)
+        cls.initialize_from_input = classmethod(initialize_from_input)
 
     @abstractproperty
     def name(self) -> str:

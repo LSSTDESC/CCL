@@ -147,17 +147,10 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
         # API compatibility for `normprof` as a required argument.
         if any(["normprof" in par for par in kwargs.items()]):
             warnings.warn(
-                "Argument `normprof` has been deprecated. Change the default "
-                "value only by subclassing. More comprehensive profile "
-                "normalization options will be provided with CCLv3.0.0.",
+                "Argument `normprof` has been become a profile attribute and "
+                "specifying it is deprecated. To change the default value use "
+                "`with UnlockInstance(...): prof.normprof = [True|False]`.",
                 CCLDeprecationWarning)
-
-        # API compatibility for deprecated HaloModel argument k_min.
-        if func.__qualname__ == "HaloModel.__init__" and "k_min" in kwargs:
-            warnings.warn(
-                "Argument `k_min` has been deprecated in `HaloModel. "
-                "This is now specified in each profile's `_normalization()` "
-                "method.", CCLDeprecationWarning)
 
         # API compatibility for non-None default `MassDef` in `halos`.
         if (params.get("mass_def") is not None
