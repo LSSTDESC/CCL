@@ -103,7 +103,6 @@ def test_pkhm_pk_smoke(cv, pk, h1, h2, itg, p2):
                                                 get_1h=h1, get_2h=h2)
     smoke_assert_pkhm_real(f)
 
-
     hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
                                  mass_def=M200)
     k_arr = KK
