@@ -79,55 +79,6 @@ def test_pkhm_bias_smoke(prof):
     smoke_assert_pkhm_real(f)
 
 
-# @pytest.mark.parametrize('pars',
-#                          [{'cv': None, 'norm': True,
-#                            'pk': 'linear', 'h1': True,
-#                            'h2': True, 'itg': 'simpson',
-#                            'p2': None},
-#                           {'cv': PKC, 'norm': True,
-#                            'pk': 'linear', 'h1': True,
-#                            'h2': True, 'itg': 'simpson',
-#                            'p2': None},
-#                           {'cv': None, 'norm': False,
-#                            'pk': 'linear', 'h1': True,
-#                            'h2': True, 'itg': 'simpson',
-#                            'p2': None},
-#                           {'cv': None, 'norm': True,
-#                            'pk': 'nonlinear', 'h1': True,
-#                            'h2': True, 'itg': 'simpson',
-#                            'p2': None},
-#                           {'cv': None, 'norm': True,
-#                            'pk': PK2D, 'h1': True,
-#                            'h2': True, 'itg': 'simpson',
-#                            'p2': None},
-#                           {'cv': None, 'norm': True,
-#                            'pk': None, 'h1': True,
-#                            'h2': True, 'itg': 'simpson',
-#                            'p2': None},
-#                           {'cv': None, 'norm': True,
-#                            'pk': 'linear', 'h1': False,
-#                            'h2': True, 'itg': 'simpson',
-#                            'p2': None},
-#                           {'cv': None, 'norm': True,
-#                            'pk': 'linear', 'h1': True,
-#                            'h2': False, 'itg': 'simpson',
-#                            'p2': None},
-#                           {'cv': None, 'norm': True,
-#                            'pk': 'linear', 'h1': False,
-#                            'h2': False, 'itg': 'simpson',
-#                            'p2': None},
-#                           {'cv': None, 'norm': True,
-#                            'pk': 'linear', 'h1': True,
-#                            'h2': True, 'itg': 'spline',
-#                            'p2': None},
-#                           {'cv': None, 'norm': True,
-#                            'pk': 'linear', 'h1': True,
-#                            'h2': True, 'itg': 'simpson',
-#                            'p2': P2},
-#                           {'cv': None, 'norm': False,
-#                            'pk': 'linear', 'h1': True,
-#                            'h2': True, 'itg': 'simpson',
-#                            'p2': P2}])
 @pytest.mark.parametrize(
     "cv,pk,h1,h2,itg,p2",
     [(None, "linear", True, True, "simpson", None),
@@ -153,7 +104,6 @@ def test_pkhm_pk_smoke(cv, pk, h1, h2, itg, p2):
     smoke_assert_pkhm_real(f)
 
 
-def test_pkhm_pk2d():
     hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
                                  mass_def=M200)
     k_arr = KK

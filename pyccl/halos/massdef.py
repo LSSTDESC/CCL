@@ -256,10 +256,16 @@ class MassDef(CCLAutoreprObject):
         Returns:
             MassDef subclass corresponding to the input name.
         """
-        try:
-            return eval(f"MassDef{name.capitalize()}")
-        except NameError:
-            raise ValueError(f"Mass definition {name} not implemented.")
+        MassDefName = f"MassDef{name.capitalize()}"
+        if MassDefName in globals():
+            # MassDef is defined in one of the implementations below.
+            return globals()[MassDefName]
+        parser = {"c": "critical", "m": "matter"}
+        if len(name) < 2 or name[-1] not in parser:
+            # Bogus input - can't parse it.
+            raise ValueError("Could not parse mass definition string.")
+        Delta, rho_type = name[:-1], parser[name[-1]]
+        return lambda cm=None: cls(Delta, rho_type, concentration=cm)  # noqa
 
     initialize_from_input = classmethod(initialize_from_input)
 
