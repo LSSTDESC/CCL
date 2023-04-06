@@ -143,7 +143,7 @@ class Tk3D(CCLObject):
     def eval(self, k, a):
         warnings.warn("Tk3D.eval is deprecated. Simply call the object "
                       "itself.", category=CCLDeprecationWarning)
-        return self.(k, a)
+        return self(k, a)
 
     def __call__(self, k, a):
         """Evaluate trispectrum. If `k` is a 1D array with size `nk`, and
