@@ -4,7 +4,10 @@ from inspect import signature
 import functools
 
 
-__all__ = ("ObjectLock", "UnlockInstance", "unlock_instance", "FancyRepr",
+__all__ = ("ObjectLock",
+           "UnlockInstance", "unlock_instance",
+           "FancyRepr",
+           "abstractlinkedmethod",
            "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
 
 
@@ -208,6 +211,20 @@ class FancyRepr:
         cl.__repr__ = cl.__ccl_repr__
 
 
+def abstractlinkedmethod(func):
+    """A decorator indicating linked abstract methods.
+
+    Requires that the superclass is ``CCLObject`` or derived from it.
+    A subclass of ``CCLObject`` cannot be instantiated unless at least one of
+    its linked abstract methods is overridden.
+
+    If a subclass of a linked abstract class has one implementation of the
+    linked abstract methods, the linked abstract method register is cleared.
+    """
+    func.__isabstractlinkedmethod__ = True
+    return func
+
+
 class CCLObject(ABC):
     """Base for CCL objects.
 
@@ -249,11 +266,12 @@ class CCLObject(ABC):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
+    __abstractlinkedmethods__ = set()
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
 
-        # 1. Store the signature of the constructor on import.
+        # 1. Store the initialization signature on import.
         cls.__signature__ = signature(cls.__init__)
 
         # 2. Replace repr (if implemented) with its cached version.
@@ -266,7 +284,26 @@ class CCLObject(ABC):
         UnlockInstance.Funlock2(cls, "__init__")  # TODO: Replace in CCLv3.
         UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
 
+        # 4. Process linked abstract methods.
+        isabstract = lambda f: hasattr(f, "__isabstractlinkedmethod__")  # noqa
+        abstracts = cls.__abstractlinkedmethods__.copy()
+        for name, obj in vars(cls).items():
+            # add the new linked abstract methods
+            if isabstract(obj):
+                abstracts.add(name)
+        for name in abstracts:
+            # reset the linked abstract methods if one has been implemented
+            if not isabstract(getattr(cls, name)):
+                abstracts = set()
+        cls.__abstractlinkedmethods__ = abstracts
+
     def __new__(cls, *args, **kwargs):
+        # Check if there are any linked abstract methods.
+        if abstracts := cls.__abstractlinkedmethods__:
+            name, s = cls.__name__, (len(abstracts) > 1) * "s"
+            names = ", ".join(abstracts)
+            raise TypeError(f"Can't instantiate abstract class {name} "
+                            f"with linked abstract methods{s} {names}.")
         # Populate every instance with an `ObjectLock` as attribute.
         instance = super().__new__(cls)
         object.__setattr__(instance, "_object_lock", ObjectLock())

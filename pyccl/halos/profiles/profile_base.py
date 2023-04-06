@@ -1,5 +1,5 @@
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import (CCLAutoRepr, unlock_instance,
+from ...base import (CCLAutoRepr, abstractlinkedmethod, unlock_instance,
                      warn_api, deprecate_attr)
 from ...parameters import FFTLogParams
 import numpy as np
@@ -41,11 +41,6 @@ class HaloProfile(CCLAutoRepr):
                                  )(super.__getattribute__)
 
     def __init__(self):
-        if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
-            # Check that at least one of (`_real`, `_fourier`) exist.
-            raise TypeError(
-                f"Can't instantiate class {self.__class__.__name__} "
-                "with no methods _real or _fourier")
         self.precision_fftlog = FFTLogParams()
 
     __eq__ = object.__eq__
@@ -112,6 +107,14 @@ class HaloProfile(CCLAutoRepr):
             float: power law index to be used with FFTLog.
         """
         return self.precision_fftlog['plaw_projected']
+
+    @abstractlinkedmethod
+    def _real(self, cosmo, r, M, a, *, mass_def=None):
+        """TODO: Write some useful docstring."""
+
+    @abstractlinkedmethod
+    def _fourier(self, cosmo, k, M, a, *, mass_def=None):
+        "TODO: Write some useful docstring."""
 
     @warn_api
     def real(self, cosmo, r, M, a, *, mass_def=None):
