@@ -16,7 +16,7 @@ import numpy as np
 from . import ccllib as lib
 from .pyutils import (_vectorize_fn, _vectorize_fn3,
                       _vectorize_fn4, _vectorize_fn5)
-from .parameters import physical_constants
+from .base.parameters import physical_constants
 from .base import warn_api
 
 species_types = {

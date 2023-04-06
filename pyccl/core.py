@@ -15,8 +15,8 @@ from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
-from .parameters import CCLParameters, CosmologyParams
-from .parameters import physical_constants as const
+from .base.parameters import gsl_params, spline_params, CosmologyParams
+from .base.parameters import physical_constants as const
 
 
 # Configuration types
@@ -276,9 +276,8 @@ class Cosmology(CCLObject):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
-        self._spline_params = CCLParameters.get_params_dict("spline_params")
-        self._gsl_params = CCLParameters.get_params_dict("gsl_params")
-        self._accuracy_params = {**self._spline_params, **self._gsl_params}
+        self._spline_params = spline_params.copy()
+        self._gsl_params = gsl_params.copy()
 
         if self.cosmo.status != 0:
             raise CCLError(

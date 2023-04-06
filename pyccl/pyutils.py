@@ -2,7 +2,7 @@
 well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
 from ._types import error_types
-from .parameters import spline_params
+from .base.parameters import spline_params
 from .errors import CCLError
 import numpy as np
 from collections.abc import Iterable

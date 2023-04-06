@@ -33,9 +33,6 @@ from .errors import (
     CCLDeprecationWarning,
 )
 
-# Constants and accuracy parameters
-from .parameters import *
-
 # Core data structures
 from .core import (
     Cosmology,

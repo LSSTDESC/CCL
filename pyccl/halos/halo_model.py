@@ -6,7 +6,7 @@ from .. import background
 from ..base import (CCLAutoRepr, unlock_instance,
                     warn_api, deprecate_attr, deprecated)
 from ..errors import CCLDeprecationWarning
-from ..parameters import physical_constants as const
+from ..base.parameters import physical_constants as const
 import numpy as np
 import functools
 import warnings

@@ -2,7 +2,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from ..pyutils import _check_array_params
 from ..background import growth_factor
-from ..parameters import physical_constants
+from ..base.parameters import physical_constants
 
 
 def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,

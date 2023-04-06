@@ -1,7 +1,7 @@
 from ...pyutils import resample_array, _fftlog_transform
 from ...base import (CCLAutoRepr, unlock_instance,
                      warn_api, deprecate_attr)
-from ...parameters import FFTLogParams
+from ...base.parameters import FFTLogParams
 import numpy as np
 from abc import abstractproperty
 import functools

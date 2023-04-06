@@ -1,6 +1,6 @@
 from .. import ccllib as lib
 from ..core import check
-from ..parameters import physical_constants as const
+from ..base.parameters import physical_constants as const
 from ..base import (CCLAutoRepr, CCLNamedClass,
                     warn_api, deprecated, deprecate_attr)
 import numpy as np

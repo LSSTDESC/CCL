@@ -59,7 +59,7 @@ class UnlockInstance:
         self.thread_lock = RLock()
         # We want to catch and exit if the instance is not a CCLObject.
         # Hopefully this will be caught downstream.
-        self.check_instance = isinstance(instance, CCLObject)
+        self.check_instance = hasattr(instance, "_object_lock")
         if self.check_instance:
             self.object_lock = instance._object_lock
 
