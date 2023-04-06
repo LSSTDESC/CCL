@@ -1,8 +1,13 @@
 from .. import ccllib as lib
 from ..core import check
-from ..background import species_types, rho_x, omega_x
-from ..base import CCLAutoreprObject
+from ..background import species_types
+from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
 import numpy as np
+
+
+__all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
+           "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
+           "MassDefFof",)
 
 
 def mass2radius_lagrangian(cosmo, M):
@@ -18,13 +23,14 @@ def mass2radius_lagrangian(cosmo, M):
         float or array_like: lagrangian radius in comoving Mpc.
     """
     M_use = np.atleast_1d(M)
-    R = (M_use / (4.18879020479 * rho_x(cosmo, 1, 'matter')))**(1./3.)
+    R = (M_use / (4.18879020479 * cosmo.rho_x(1, 'matter')))**(1./3.)
     if np.ndim(M) == 0:
-        R = R[0]
+        return R[0]
     return R
 
 
-def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
+@warn_api
+def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration `c_new` is
     found by solving the equation:
@@ -55,14 +61,14 @@ def convert_concentration(cosmo, c_old, Delta_old, Delta_new):
                                                   Delta_old, c_old_use,
                                                   Delta_new, c_old_use.size,
                                                   status)
-    if np.isscalar(c_old):
-        c_new = c_new[0]
-
     check(status, cosmo=cosmo)
+
+    if np.isscalar(c_old):
+        return c_new[0]
     return c_new
 
 
-class MassDef(CCLAutoreprObject):
+class MassDef(CCLAutoRepr, CCLNamedClass):
     """Halo mass definition. Halo masses are defined in terms of an overdensity
     parameter :math:`\\Delta` and an associated density :math:`X` (either the
     matter density or the critical density):
@@ -78,33 +84,36 @@ class MassDef(CCLAutoreprObject):
         Delta (float): overdensity parameter. Pass 'vir' if using virial
             overdensity.
         rho_type (string): either 'critical' or 'matter'.
-        c_m_relation (function, optional): concentration-mass relation.
+        concentration (function, optional): concentration-mass relation.
             Provided as a `Concentration` object, or a string corresponding
             to one of the supported concentration-mass relations.
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
     __repr_attrs__ = ("name",)
+    __getattr__ = deprecate_attr(pairs=[('c_m_relation', 'concentration')]
+                                 )(super.__getattribute__)
 
-    def __init__(self, Delta, rho_type, c_m_relation=None):
+    @warn_api(pairs=[("c_m_relation", "concentration")])
+    def __init__(self, Delta, rho_type=None, *, concentration=None):
         # Check it makes sense
-        if (Delta != 'fof') and (Delta != 'vir'):
-            if isinstance(Delta, str):
-                raise ValueError("Unknown Delta type " + Delta)
-            if Delta <= 0:
-                raise ValueError("Delta must be a positive number")
-        self.Delta = Delta
-        # Can only be matter or critical
+        if isinstance(Delta, str) and Delta not in ["fof", "vir"]:
+            raise ValueError(f"Unknown Delta type {Delta}.")
+        if isinstance(Delta, (int, float)) and Delta < 0:
+            raise ValueError("Delta must be a positive number.")
         if rho_type not in ['matter', 'critical']:
-            raise ValueError("rho_type must be either \'matter\' "
-                             "or \'critical\'")
+            raise ValueError("rho_type must be either ['matter'|'critical].'")
+
+        self.Delta = Delta
         self.rho_type = rho_type
         self.species = species_types[rho_type]
         # c(M) relation
-        if c_m_relation is None:
+        if concentration is None:
             self.concentration = None
         else:
-            self._concentration_init(c_m_relation)
+            from .concentration import Concentration
+            self.concentration = Concentration.create_instance(
+                concentration, mass_def=self)
 
     @property
     def name(self):
@@ -113,18 +122,11 @@ class MassDef(CCLAutoreprObject):
             return f"{self.Delta}{self.rho_type[0]}"
         return f"{self.Delta}"
 
-    def _concentration_init(self, c_m_relation):
-        from .concentration import Concentration, concentration_from_name
-        if isinstance(c_m_relation, Concentration):
-            self.concentration = c_m_relation
-        elif isinstance(c_m_relation, str):
-            # Grab class
-            conc_class = concentration_from_name(c_m_relation)
-            # instantiate with this mass definition
-            self.concentration = conc_class(mdef=self)
-        else:
-            raise ValueError("c_m_relation must be `None`, "
-                             " a string or a `Concentration` object")
+    def __eq__(self, other):
+        # TODO: Remove after #1033 is merged.
+        if type(self) != type(other):
+            return False
+        return self.name == other.name
 
     def get_Delta(self, cosmo, a):
         """ Gets overdensity parameter associated to this mass
@@ -137,15 +139,25 @@ class MassDef(CCLAutoreprObject):
         Returns:
             float : value of the overdensity parameter.
         """
+        if self.Delta == 'fof':
+            raise ValueError("FoF masses don't have an associated overdensity."
+                             "Nor can they be translated into other masses")
         if self.Delta == 'vir':
             status = 0
             D, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
             return D
-        elif self.Delta == 'fof':
-            raise ValueError("FoF masses don't have an associated overdensity."
-                             "Nor can they be translated into other masses")
-        else:
-            return self.Delta
+        return self.Delta
+
+    def _get_Delta_m(self, cosmo, a):
+        """ For SO-based mass definitions, this returns the corresponding
+        value of Delta for a rho_matter-based definition.
+        """
+        delta = self.get_Delta(cosmo, a)
+        if self.rho_type == 'matter':
+            return delta
+        om_this = cosmo.omega_x(a, self.rho_type)
+        om_matt = cosmo.omega_x(a, 'matter')
+        return delta * om_this / om_matt
 
     def get_mass(self, cosmo, R, a):
         """ Translates a halo radius into a mass
@@ -164,9 +176,9 @@ class MassDef(CCLAutoreprObject):
         """
         R_use = np.atleast_1d(R)
         Delta = self.get_Delta(cosmo, a)
-        M = 4.18879020479 * rho_x(cosmo, a, self.rho_type) * Delta * R_use**3
+        M = 4.18879020479 * cosmo.rho_x(a, self.rho_type) * Delta * R_use**3
         if np.ndim(R) == 0:
-            M = M[0]
+            return M[0]
         return M
 
     def get_radius(self, cosmo, M, a):
@@ -184,56 +196,39 @@ class MassDef(CCLAutoreprObject):
         M_use = np.atleast_1d(M)
         Delta = self.get_Delta(cosmo, a)
         R = (M_use / (4.18879020479 * Delta *
-                      rho_x(cosmo, a, self.rho_type)))**(1./3.)
+                      cosmo.rho_x(a, self.rho_type)))**(1./3.)
         if np.ndim(M) == 0:
-            R = R[0]
+            return R[0]
         return R
 
-    def _get_concentration(self, cosmo, M, a):
-        """ Returns concentration for this mass definition.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
-
-        Returns:
-            float or array_like: halo concentration.
-        """
-        if self.concentration is None:
-            raise RuntimeError("This mass definition doesn't have "
-                               "an associated c(M) relation")
-        else:
-            return self.concentration.get_concentration(cosmo, M, a)
-
-    def translate_mass(self, cosmo, M, a, m_def_other):
+    @warn_api(pairs=[("mdef_other", "mass_def_other")])
+    def translate_mass(self, cosmo, M, a, *, mass_def_other):
         """ Translate halo mass in this definition into another definition
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            m_def_other (:obj:`MassDef`): another mass definition.
+            mass_def_other (:obj:`MassDef`): another mass definition.
 
         Returns:
             float or array_like: halo masses in new definition.
         """
-        if self == m_def_other:
+        if self == mass_def_other:
             return M
-        else:
-            if self.concentration is None:
-                raise RuntimeError("This mass definition doesn't have "
-                                   "an associated c(M) relation")
-            else:
-                om_this = omega_x(cosmo, a, self.rho_type)
-                D_this = self.get_Delta(cosmo, a) * om_this
-                c_this = self._get_concentration(cosmo, M, a)
-                R_this = self.get_radius(cosmo, M, a)
-                om_new = omega_x(cosmo, a, m_def_other.rho_type)
-                D_new = m_def_other.get_Delta(cosmo, a) * om_new
-                c_new = convert_concentration(cosmo, c_this, D_this, D_new)
-                R_new = c_new * R_this / c_this
-                return m_def_other.get_mass(cosmo, R_new, a)
+        if self.concentration is None:
+            raise AttributeError("mass_def has no associated concentration.")
+        om_this = cosmo.omega_x(a, self.rho_type)
+        D_this = self.get_Delta(cosmo, a) * om_this
+        c_this = self.concentration(cosmo, M, a)
+        R_this = self.get_radius(cosmo, M, a)
+        om_new = cosmo.omega_x(a, mass_def_other.rho_type)
+        D_new = mass_def_other.get_Delta(cosmo, a) * om_new
+        c_new = convert_concentration(cosmo, c_old=c_this,
+                                      Delta_old=D_this,
+                                      Delta_new=D_new)
+        R_new = c_new * R_this / c_this
+        return mass_def_other.get_mass(cosmo, R_new, a)
 
     @classmethod
     def from_name(cls, name):
@@ -252,37 +247,51 @@ class MassDef(CCLAutoreprObject):
             raise ValueError(f"Mass definition {name} not implemented.")
 
 
-def MassDef200m(c_m='Duffy08'):
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDef200m(concentration='Duffy08'):
     r""":math:`\Delta = 200m` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation.
+        concentration (string): concentration-mass relation.
     """
-    return MassDef(200, 'matter', c_m_relation=c_m)
+    return MassDef(200, 'matter', concentration=concentration)
 
 
-def MassDef200c(c_m='Duffy08'):
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDef200c(concentration='Duffy08'):
     r""":math:`\Delta = 200c` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation.
+        concentration (string): concentration-mass relation.
     """
-    return MassDef(200, 'critical', c_m_relation=c_m)
+    return MassDef(200, 'critical', concentration=concentration)
 
 
-def MassDef500c(c_m='Ishiyama21'):
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDef500c(concentration='Ishiyama21'):
     r""":math:`\Delta = 500m` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
     """
-    return MassDef(500, 'critical', c_m_relation=c_m)
+    return MassDef(500, 'critical', concentration=concentration)
 
 
-def MassDefVir(c_m='Klypin11'):
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDefVir(concentration='Klypin11'):
     r""":math:`\Delta = \rm vir` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation.
+        concentration (string): concentration-mass relation.
     """
-    return MassDef('vir', 'critical', c_m_relation=c_m)
+    return MassDef('vir', 'critical', concentration=concentration)
+
+
+@warn_api(pairs=[('c_m', 'concentration')])
+def MassDefFof(concentration=None):
+    r""":math:`\Delta = \rm FoF` mass definition.
+
+    Args:
+        concentration (string): concentration-mass relation.
+    """
+    return MassDef('fof', 'matter', concentration=concentration)

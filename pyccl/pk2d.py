@@ -85,7 +85,7 @@ class Pk2D(CCLObject):
     empty : bool
         If ``True``, just create an empty object, to be filled out later.
     """
-    from ._repr import _build_string_Pk2D as __repr__
+    from .base.repr_ import build_string_Pk2D as __repr__
 
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
@@ -279,7 +279,7 @@ class Pk2D(CCLObject):
 
         # Catch scale factor extrapolation bounds error.
         if status == lib.CCL_ERROR_SPLINE_EV:
-            raise TypeError(
+            raise ValueError(
                 "Pk2D evaluation scale factor is outside of the "
                 "interpolation range. To extrapolate, pass a Cosmology.")
         check(status, cosmo)
@@ -527,3 +527,16 @@ def parse_pk2d(cosmo, p_of_k_a, is_linear=False):
             pk = cosmo.get_nonlin_power(name)
         psp = pk.psp
     return psp
+
+
+def parse_pk(cosmo, p_of_k_a=None):
+    """Helper to retrieve the power spectrum in the halo model."""
+    if isinstance(p_of_k_a, Pk2D):
+        return p_of_k_a
+    elif p_of_k_a is None or p_of_k_a == "linear":
+        cosmo.compute_linear_power()
+        return cosmo.get_linear_power()
+    elif p_of_k_a == "nonlinear":
+        cosmo.compute_nonlin_power()
+        return cosmo.get_nonlin_power()
+    raise TypeError("p_of_k_a must [None|'linear'|'nonlinear'] or Pk2D.")

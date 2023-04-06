@@ -24,7 +24,7 @@ def test_halomod_f2d_copy():
                                     mass_def_strict=False)
     cc = ccl.halos.ConcentrationDuffy08(mdef)
     prf = ccl.halos.HaloProfileNFW(cc)
-    hmc = ccl.halos.HMCalculator(COSMO_HM, hmf, hbf, mdef)
+    hmc = ccl.halos.HaloModel(COSMO_HM, hmf, hbf, mdef)
     pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf, normprof1=True)
     psp_new = pk2d.psp
     # This just triggers the internal calculation
@@ -67,7 +67,7 @@ def test_nonlin_matter_power_halomod(k):
                                     mass_def_strict=False)
     cc = ccl.halos.ConcentrationDuffy08(mdef)
     prf = ccl.halos.HaloProfileNFW(cc)
-    hmc = ccl.halos.HMCalculator(COSMO_HM, hmf, hbf, mdef)
+    hmc = ccl.halos.HaloModel(COSMO_HM, hmf, hbf, mdef)
     pkb = ccl.halos.halomod_power_spectrum(COSMO_HM, hmc, k, a,
                                            prf, normprof1=True)
 

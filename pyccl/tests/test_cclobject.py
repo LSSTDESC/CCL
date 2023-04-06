@@ -15,11 +15,11 @@ def test_fancy_repr():
     cosmo1 = ccl.CosmologyVanillaLCDM()
     cosmo2 = ccl.CosmologyVanillaLCDM()
 
-    ccl.CCLObject._fancy_repr.disable()
+    ccl.FancyRepr.disable()
     assert repr(cosmo1) == object.__repr__(cosmo1)
     assert cosmo1 != cosmo2
 
-    ccl.CCLObject._fancy_repr.enable()
+    ccl.FancyRepr.enable()
     assert repr(cosmo1) != object.__repr__(cosmo1)
     assert cosmo1 == cosmo2
 
@@ -28,9 +28,6 @@ def test_fancy_repr():
 
     with pytest.raises(AttributeError):
         ccl.Cosmology._fancy_repr.disable()
-
-    with pytest.raises(NotImplementedError):
-        ccl.base.FancyRepr()
 
 
 def test_CCLObject():
@@ -99,12 +96,12 @@ def test_CCLObject():
     assert TR1 == TR2
 
 
-def test_CCLAutoreprObject():
+def test_CCLAutoRepr():
     # Test eq --> repr <-- hash for all kinds of CCL halo objects.
 
     # 1. Build a halo model calculator using the default parametrizations.
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    HMC = ccl.halos.HMCalculator(
+    HMC = ccl.halos.HaloModel(
         cosmo, massfunc="Tinker08", hbias="Tinker10", mass_def="200m")
 
     # 2. Define separate default halo model ingredients.
@@ -116,7 +113,7 @@ def test_CCLAutoreprObject():
     assert MDEF == HMC._mdef
     assert HMF == HMC._massfunc
     assert HBF == HMC._hbias
-    HMC2 = ccl.halos.HMCalculator(
+    HMC2 = ccl.halos.HaloModel(
         cosmo, massfunc=HMF, hbias=HBF, mass_def=MDEF)
     assert HMC == HMC2
 
@@ -176,6 +173,10 @@ def test_CCLObject_default_behavior():
     assert instances[0] != instances[1]
     assert hash(instances[0]) != hash(instances[1])
 
+    MyType = type("MyType", (ccl.CCLAutoRepr,), {"test": 0})
+    instances = [MyType() for _ in range(2)]
+    assert instances[0] != instances[1]
+
 
 def test_HaloProfile_abstractmethods():
     # Test that `HaloProfile` and its subclasses can't be instantiated if
@@ -186,7 +187,7 @@ def test_HaloProfile_abstractmethods():
 
 def init_decorator(func):
     """Check that all attributes listed in ``__repr_attrs__`` are defined in
-    the constructor of all subclasses of ``CCLAutoreprObject``.
+    the constructor of all subclasses of ``CCLAutoRepr``.
     NOTE: Used in ``conftest.py``.
     """
 
@@ -233,3 +234,7 @@ def test_unlock_instance_errors():
 
     with pytest.raises(TypeError):
         func2()
+
+    # 3. Doesn't do anything if instance is not CCLObject.
+    with ccl.UnlockInstance(True, mutate=False):
+        pass

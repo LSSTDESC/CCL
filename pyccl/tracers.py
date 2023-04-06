@@ -178,7 +178,7 @@ class Tracer(CCLObject):
     tracers that get combined linearly when computing power spectra.
     Further details can be found in Section 4.9 of the CCL note.
     """
-    from ._repr import _build_string_Tracer as __repr__
+    from .base.repr_ import build_string_Tracer as __repr__
 
     def __init__(self):
         """By default this `Tracer` object will contain no actual

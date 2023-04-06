@@ -1,6 +1,6 @@
 from ... import ccllib as lib
-from ..massdef import MassDef
-from .concentration_base import Concentration
+from ...base import warn_api
+from ..halo_model_base import Concentration
 
 
 __all__ = ("ConcentrationBhattacharya13",)
@@ -13,41 +13,26 @@ class ConcentrationBhattacharya13(Concentration):
     By default it will be initialized for Delta = 200-critical.
 
     Args:
-        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
             definition object that fixes
             the mass definition used by this c(M)
-            parametrization.
+            parametrization, or a name string.
     """
     name = 'Bhattacharya13'
 
-    def __init__(self, mdef=None):
-        super(ConcentrationBhattacharya13, self).__init__(mdef)
+    @warn_api(pairs=[("mdef", "mass_def")])
+    def __init__(self, *, mass_def="200c"):
+        super().__init__(mass_def=mass_def)
 
-    def _default_mdef(self):
-        self.mdef = MassDef(200, 'critical')
-
-    def _check_mdef(self, mdef):
-        if mdef.Delta != 'vir':
-            if isinstance(mdef.Delta, str):
-                return True
-            elif int(mdef.Delta) != 200:
-                return True
-        return False
+    def _check_mass_def_strict(self, mass_def):
+        return mass_def.name not in ["vir", "200m", "200c"]
 
     def _setup(self):
-        if self.mdef.Delta == 'vir':
-            self.A = 7.7
-            self.B = 0.9
-            self.C = -0.29
-        else:  # Now Delta has to be 200
-            if self.mdef.rho_type == 'matter':
-                self.A = 9.0
-                self.B = 1.15
-                self.C = -0.29
-            else:  # Now rho_type has to be critical
-                self.A = 5.9
-                self.B = 0.54
-                self.C = -0.35
+        vals = {"vir": (7.7, 0.9, -0.29),
+                "200m": (9.0, 1.15, -0.29),
+                "200c": (5.9, 0.54, -0.35)}
+
+        self.A, self.B, self.C = vals[self.mass_def.name]
 
     def _concentration(self, cosmo, M, a):
         gz = cosmo.growth_factor(a)

@@ -1,13 +1,12 @@
-from ...base import UnlockInstance
-from ...background import h_over_h0
-from .profile_base import HaloProfile
+from ...base import UnlockInstance, warn_api
+from .profile_base import HaloProfilePressure
 import numpy as np
 
 
 __all__ = ("HaloProfilePressureGNFW",)
 
 
-class HaloProfilePressureGNFW(HaloProfile):
+class HaloProfilePressureGNFW(HaloProfilePressure):
     """ Generalized NFW pressure profile by Arnaud et al.
     (2010A&A...517A..92A).
 
@@ -68,10 +67,10 @@ class HaloProfilePressureGNFW(HaloProfile):
     """
     __repr_attrs__ = ("mass_bias", "P0", "c500", "alpha", "alpha_P", "beta",
                       "gamma", "P0_hexp", "qrange", "nq", "x_out",
-                      "precision_fftlog",)
-    name = 'GNFW'
+                      "precision_fftlog", "normprof",)
 
-    def __init__(self, mass_bias=0.8, P0=6.41,
+    @warn_api
+    def __init__(self, *, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
                  qrange=(1e-3, 1e3), nq=128, x_out=np.inf):
@@ -89,9 +88,10 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         # Interpolator for dimensionless Fourier-space profile
         self._fourier_interp = None
-        super(HaloProfilePressureGNFW, self).__init__()
+        super().__init__()
 
-    def update_parameters(self, mass_bias=None, P0=None,
+    @warn_api
+    def update_parameters(self, *, mass_bias=None, P0=None,
                           c500=None, alpha=None, beta=None, gamma=None,
                           alpha_P=None, P0_hexp=None, x_out=None):
         """Update any of the parameters associated with this profile.
@@ -188,7 +188,7 @@ class HaloProfilePressureGNFW(HaloProfile):
         h70 = cosmo["h"]/0.7
         C0 = 1.65*h70**2
         CM = (h70*M*mb/3E14)**(2/3+self.alpha_P)   # M dependence
-        Cz = h_over_h0(cosmo, a)**(8/3)  # z dependence
+        Cz = cosmo.h_over_h0(a)**(8/3)  # z dependence
         P0_corr = self.P0 * h70**self.P0_hexp  # h-corrected P_0
         return P0_corr * C0 * CM * Cz
 

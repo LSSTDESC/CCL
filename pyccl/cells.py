@@ -8,10 +8,6 @@ from .pyutils import check, integ_types
 from .base import warn_api
 from .pk2d import parse_pk2d
 
-# Define symbolic 'None' type for arrays, to allow proper handling by swig
-# wrapper
-NoneArr = np.array([])
-
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
 def angular_cl(cosmo, tracer1, tracer2, ell, *, p_of_k_a=None,

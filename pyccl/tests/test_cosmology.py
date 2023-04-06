@@ -35,7 +35,7 @@ def test_cosmo_methods():
     hmd = ccl.halos.MassDef200m()
     hmf = ccl.halos.MassFuncTinker08(cosmo)
     hbf = ccl.halos.HaloBiasTinker10(cosmo)
-    hmc = ccl.halos.HMCalculator(cosmo, massfunc=hmf, hbias=hbf, mass_def=hmd)
+    hmc = ccl.halos.HaloModel(cosmo, massfunc=hmf, hbias=hbf, mass_def=hmd)
     assert ccl.halos.halomod_power_spectrum(cosmo, hmc, 1., 1., prof) == \
         cosmo.halomod_power_spectrum(hmc, 1., 1., prof)
 
@@ -226,7 +226,7 @@ def test_pyccl_default_params():
 
     # complains when we try to set A_SPLINE_MAX != 1.0
     ccl.spline_params.A_SPLINE_MAX = 1.0
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         ccl.spline_params.A_SPLINE_MAX = 0.9
 
     # complains when we try to change the spline type

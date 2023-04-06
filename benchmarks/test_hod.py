@@ -52,7 +52,7 @@ def test_hodcl():
     cm = ccl.halos.ConcentrationDuffy08(mass_def)
     hmf = ccl.halos.MassFuncTinker08(cosmo, mass_def=mass_def)
     hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mass_def)
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
+    hmc = ccl.halos.HaloModel(cosmo, hmf, hbf, mass_def)
     prf = ccl.halos.HaloProfileHOD(cm,
                                    lMmin_0=np.log10(10.**lMcut/cosmo['h']),
                                    siglM_0=sigma_Ncen,
@@ -63,11 +63,9 @@ def test_hodcl():
                                    bmax_0=rmax)
     prf2pt = ccl.halos.Profile2ptHOD()
     # P(k)
-    k_arr = np.geomspace(1E-4, 1E2, 512)
-    a_arr = np.linspace(0.8, 1, 32)
+    a_arr, lk_arr, _ = cosmo.get_linear_power().get_spline_arrays()
     pk_hod = ccl.halos.halomod_Pk2D(cosmo, hmc, prf, prof_2pt=prf2pt,
-                                    normprof1=True, lk_arr=np.log(k_arr),
-                                    a_arr=a_arr)
+                                    normprof1=True, lk_arr=lk_arr, a_arr=a_arr)
     # C_ell
     tr = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z_arr, dndz),
                                 bias=(z_arr, np.ones(len(dndz))))

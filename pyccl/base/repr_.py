@@ -1,6 +1,6 @@
 import numpy as np
-from .base import _to_hashable, hash_
-from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
+from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
+from .caching import _to_hashable, hash_
 
 
 class Table:
@@ -99,7 +99,7 @@ class Table:
         return s
 
 
-def _build_string_Cosmology(self):
+def build_string_Cosmology(self):
     """Build the ``Cosmology`` representation.
 
     Cosmology equivalence is tested via its representation. Therefore,
@@ -186,7 +186,7 @@ def _build_string_Cosmology(self):
     return s
 
 
-def _build_string_Pk2D(self, na=6, nk=6, decimals=2):
+def build_string_Pk2D(self, na=6, nk=6, decimals=2):
     """Build the ``Pk2D`` representation.
 
     Example output ::
@@ -223,12 +223,12 @@ def _build_string_Pk2D(self, na=6, nk=6, decimals=2):
     T = Table(n_y=na, n_x=nk, decimals=decimals, legend=legend,
               newline=newline, data_x=lk, data_y=a, data_z=pk, meta=meta)
 
-    s = _build_string_simple(self) + f"{newline}"
+    s = build_string_simple(self) + f"{newline}"
     s += T.build()
     return s
 
 
-def _build_string_simple(self):
+def build_string_simple(self):
     """Simple representation.
 
     Example output ::
@@ -238,13 +238,13 @@ def _build_string_simple(self):
     return f"<{self.__module__}.{self.__class__.__qualname__}>"
 
 
-def _build_string_from_attrs(self):
+def build_string_from_attrs(self):
     """Build a representation for an object from a list of attribute names
     given in the hook ``__repr_attrs__`.
 
     Example output ::
 
-        <pyccl.halos.halo_model.HMCalculator>
+        <pyccl.halos.halo_model.HaloModel>
             mass_function = MassFuncTinker08,  HASH = 0xd3b29dd3
             halo_bias = HaloBiasTinker10,  HASH = 0x9da644b5
             mass_def = pyccl.halos.MassDef(Delta=500, rho_type=critical)
@@ -254,7 +254,7 @@ def _build_string_from_attrs(self):
                 for param, value in self.__signature__.parameters.items()
                 if param != "self"}
 
-    s = _build_string_simple(self)
+    s = build_string_simple(self)
     newline = "\n\t"
     for param, value in params.items():
         if param in defaults and value == defaults[param]:
@@ -271,7 +271,7 @@ def _build_string_from_attrs(self):
     return s
 
 
-def _build_string_Tracer(self):
+def build_string_Tracer(self):
     """Buld a representation for a Tracer.
 
     .. note:: Tracer insertion order is important.
@@ -319,14 +319,14 @@ def _build_string_Tracer(self):
         return "pyccl.Tracer(empty=True)"
 
     newline = "\n\t"
-    s = _build_string_simple(self)
+    s = build_string_simple(self)
     s += print_row(newline, "num", "kernel", "transfer", "prefac", "bessel")
     for num, tracer in enumerate(tracers):
         s += print_row(newline, num, *get_tracer_info(tracer))
     return s
 
 
-def _build_string_Tk3D(self, na=2, nk=4, decimals=2):
+def build_string_Tk3D(self, na=2, nk=4, decimals=2):
     """Build a representation for a Tk3D object.
 
     Example output ::
@@ -373,7 +373,7 @@ def _build_string_Tk3D(self, na=2, nk=4, decimals=2):
     T = Table(n_y=na, n_x=nk, decimals=decimals, newline=newline,
               data_y=a, legend="a \\ log10(k1)", meta=[])
 
-    s = _build_string_simple(self) + f"{newline}"
+    s = build_string_simple(self) + f"{newline}"
     T.data_x, T.data_z = lk1, tks[0]
     s += T.build() + f"{newline}"
     T.legend = "a \\ log10(k2)"
