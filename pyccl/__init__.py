@@ -24,15 +24,7 @@ del parse, numpy
 from . import ccllib as lib
 
 # Hashing, Caching, CCL base, Mutation locks
-from .base import (
-    CCLObject,
-    CCLAutoreprObject,
-    Caching,
-    cache,
-    hash_,
-    UnlockInstance,
-    unlock_instance,
-)
+from .base import *
 
 # Errors
 from .errors import (
@@ -184,8 +176,8 @@ from .baryons import (
 
 
 __all__ = (
-    'lib', 'Caching', 'cache', 'hash_', 'CCLObject', 'CCLAutoreprObject',
-    'UnlockInstance', 'unlock_instance',
+    'lib',
+    'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
     'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
     'growth_factor', 'growth_factor_unnorm', 'growth_rate',

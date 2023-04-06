@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_raises
 import pyccl as ccl
 
 
@@ -60,7 +59,9 @@ def test_cov_NG_sanity(alpha, beta, typ):
         cov_p = pred_covar(ls[None, :], ls[:, None], alpha, beta)
 
         def cov_f(ll, **kwargs):
-            return ccl.angular_cl_cov_cNG(COSMO, tr, tr, ll, tsp, **kwargs)
+            return ccl.angular_cl_cov_cNG(
+                COSMO, tr, tr, ell=ll, t_of_kk_a=tsp,
+                **kwargs)
     elif typ == 'SSC':
         a_s = np.linspace(0.1, 1., 1024)
         s2b = np.ones_like(a_s)
@@ -68,8 +69,9 @@ def test_cov_NG_sanity(alpha, beta, typ):
                            prefac=1., chi_power=4)
 
         def cov_f(ll, **kwargs):
-            return ccl.angular_cl_cov_SSC(COSMO, tr, tr, ll, tsp,
-                                          sigma2_B=(a_s, s2b), **kwargs)
+            return ccl.angular_cl_cov_SSC(
+                COSMO, tr, tr, ell=ll, t_of_kk_a=tsp,
+                sigma2_B=(a_s, s2b), **kwargs)
 
     cov = cov_f(ls)
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
@@ -79,7 +81,7 @@ def test_cov_NG_sanity(alpha, beta, typ):
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 4E-2)
 
     # Different tracers
-    cov = cov_f(ls, cltracer3=tr, cltracer4=tr)
+    cov = cov_f(ls, tracer3=tr, tracer4=tr)
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
 
     # Different ells
@@ -110,12 +112,12 @@ def test_cov_NG_errors(typ):
     tr = get_tracer()
     ls = np.array([2., 20., 200.])
 
-    assert_raises(ValueError, cov_f,
-                  COSMO, tr, tr, ls, tsp,
-                  integration_method='cag_cuad')
+    with pytest.raises(ValueError):
+        cov_f(COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
+              integration_method='cag_cuad')
 
-    assert_raises(ValueError, cov_f,
-                  COSMO, tr, tr, ls, tr)
+    with pytest.raises(ValueError):
+        cov_f(COSMO, tr, tr, ell=ls, t_of_kk_a=tr)
 
 
 def test_Sigma2B():
@@ -131,9 +133,9 @@ def test_Sigma2B():
 
     a_use = a[idx]
     # Input sampling
-    s2b_b = ccl.sigma2_B_disc(COSMO, a=a_use, fsky=fsky)
+    s2b_b = ccl.sigma2_B_disc(COSMO, a_arr=a_use, fsky=fsky)
     # Scalar input sampling
-    s2b_c = np.array([ccl.sigma2_B_disc(COSMO, a=a, fsky=fsky)
+    s2b_c = np.array([ccl.sigma2_B_disc(COSMO, a_arr=a, fsky=fsky)
                       for a in a_use])
 
     # Alternative calculation
@@ -162,6 +164,13 @@ def test_Sigma2B():
     mask_wl = (ell+0.5)/(2*np.pi) * (2*jv(1, kR)/(kR))**2
 
     a_use = np.array([0.2, 0.5, 1.0])
-    s2b_e = ccl.sigma2_B_from_mask(COSMO, a=a_use, mask_wl=mask_wl)
-    s2b_f = ccl.sigma2_B_disc(COSMO, a=a_use, fsky=fsky)
+    s2b_e = ccl.sigma2_B_from_mask(COSMO, a_arr=a_use, mask_wl=mask_wl)
+    s2b_f = ccl.sigma2_B_disc(COSMO, a_arr=a_use, fsky=fsky)
     assert np.all(np.fabs(s2b_e/s2b_f-1) < 1E-3)
+
+    # Test passing a_arr=None (smoke)
+    a_s, s2b = ccl.sigma2_B_from_mask(COSMO, a_arr=None,
+                                      mask_wl=mask_wl)
+    a_cosmo = COSMO.get_pk_spline_a()
+    assert np.all(a_s == a_cosmo)
+    assert len(a_s) == len(s2b)
