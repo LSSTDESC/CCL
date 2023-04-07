@@ -129,8 +129,8 @@ class SplineParams(CCLParameters, instance=lib.cvar.user_spline_params):
     """Instances of this class hold the spline parameters."""
 
     def __setattr__(self, key, value):
-        if (key, value) == ("A_SPLINE_MAX", 1.0):
-            return  # Setting `A_SPLINE_MAX` to its default value; do nothing.
+        if key == "A_SPLINE_MAX" and value != 1.0:
+            raise ValueError("A_SPLINE_MAX is fixed to 1.")
         super().__setattr__(key, value)
 
 
