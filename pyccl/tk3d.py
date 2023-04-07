@@ -85,7 +85,7 @@ class Tk3D(CCLObject):
             expected. Note that arrays will be interpolated in log space
             if `is_logt` is set to `True`.
     """
-    from ._repr import _build_string_Tk3D as __repr__
+    from .base.repr_ import build_string_Tk3D as __repr__
 
     def __init__(self, a_arr, lk_arr, tkk_arr=None,
                  pk1_arr=None, pk2_arr=None, extrap_order_lok=1,

@@ -18,7 +18,6 @@ class Concentration(CCLHalosObject):
             object that fixes the mass definition used by this c(M)
             parametrization.
     """
-    __repr_attrs__ = __eq_attrs__ = ("mdef",)
 
     def __init__(self, mass_def=None):
         if mass_def is not None:

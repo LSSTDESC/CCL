@@ -3,6 +3,12 @@ import pyccl as ccl
 import functools
 
 
+def all_subclasses(cls):
+    """Get all subclasses of ``cls``. NOTE: Used in ``conftest.py``."""
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
+
+
 def test_fancy_repr():
     # Test fancy-repr controls.
     cosmo = ccl.CosmologyVanillaLCDM()
@@ -32,6 +38,44 @@ def check_eq_repr_hash(self, other, *, equal=True):
     return (self != other
             and repr(self) != repr(other)
             and hash(self) != hash(other))
+
+
+def test_CCLAutoreprObject():
+    # Test eq --> repr <-- hash for all kinds of CCL halo objects.
+
+    # 1. Build a halo model calculator using the default parametrizations.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    HMC = ccl.halos.HMCalculator(
+        cosmo, massfunc="Tinker08", hbias="Tinker10", mass_def="200m")
+
+    # 2. Define separate default halo model ingredients.
+    MDEF = ccl.halos.MassDef200m()
+    HMF = ccl.halos.MassFuncTinker08(cosmo, mass_def=MDEF)
+    HBF = ccl.halos.HaloBiasTinker10(cosmo, mass_def=MDEF)
+
+    # 3. Test equivalence.
+    assert MDEF == HMC._mdef
+    assert HMF == HMC._massfunc
+    assert HBF == HMC._hbias
+    HMC2 = ccl.halos.HMCalculator(
+        cosmo, massfunc=HMF, hbias=HBF, mass_def=MDEF)
+    assert HMC == HMC2
+
+    # 4. Test halo profiles.
+    CM1 = ccl.halos.Concentration.from_name("Duffy08")()
+    CM2 = ccl.halos.ConcentrationDuffy08()
+    assert CM1 == CM2
+
+    # TODO: uncomment once __eq__ methods are implemented.
+    # P1 = ccl.halos.HaloProfileHOD(c_M_relation=CM1)
+    # P2 = ccl.halos.HaloProfileHOD(c_M_relation=CM2)
+    # assert P1 == P2
+
+    # PCOV1 = ccl.halos.Profile2pt(r_corr=1.5)
+    # PCOV2 = ccl.halos.Profile2pt(r_corr=1.0)
+    # assert PCOV1 != PCOV2
+    # PCOV2.update_parameters(r_corr=1.5)
+    # assert PCOV1 == PCOV2
 
 
 def test_CCLObject_immutability():
@@ -79,7 +123,7 @@ def test_CCLObject_default_behavior():
 
 def init_decorator(func):
     """Check that all attributes listed in ``__repr_attrs__`` are defined in
-    the constructor of all subclasses of ``CCLHalosObject``.
+    the constructor of all subclasses of ``CCLAutoreprObject``.
     NOTE: Used in ``conftest.py``.
     """
 
@@ -110,7 +154,19 @@ def init_decorator(func):
     return wrapper
 
 
-def all_subclasses(cls):
-    """Get all subclasses of ``cls``. NOTE: Used in ``conftest.py``."""
-    return set(cls.__subclasses__()).union([s for c in cls.__subclasses__()
-                                            for s in all_subclasses(c)])
+def test_unlock_instance_errors():
+    # Test that unlock_instance gives the correct errors.
+
+    # 1. Developer error
+    with pytest.raises(NameError):
+        @ccl.unlock_instance(name="hello")
+        def func1(item, pk, a0=0, *, a1=None, a2):
+            return
+
+    # 2. User error
+    @ccl.unlock_instance(name="pk")
+    def func2(item, pk, a0=0, *, a1=None, a2):
+        return
+
+    with pytest.raises(TypeError):
+        func2()

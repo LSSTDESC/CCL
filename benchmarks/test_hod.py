@@ -69,8 +69,8 @@ def test_hodcl():
                                     normprof1=True, lk_arr=np.log(k_arr),
                                     a_arr=a_arr)
     # C_ell
-    tr = ccl.NumberCountsTracer(cosmo, False, (z_arr, dndz),
-                                (z_arr, np.ones(len(dndz))))
+    tr = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z_arr, dndz),
+                                bias=(z_arr, np.ones(len(dndz))))
     cl_hod = ccl.angular_cl(cosmo, tr, tr, l_bm, p_of_k_a=pk_hod)
 
     assert np.all(np.fabs(cl_hod/cl_bm-1) < 0.005)

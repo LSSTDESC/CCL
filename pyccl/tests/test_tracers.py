@@ -80,7 +80,7 @@ def get_tracer(tracer_type, cosmo=None, **tracer_kwargs):
 
     if tracer_type == 'nc':
         ntr = 3
-        tr = ccl.NumberCountsTracer(cosmo, True,
+        tr = ccl.NumberCountsTracer(cosmo, has_rsd=True,
                                     dndz=(z, n),
                                     bias=(z, b),
                                     mag_bias=(z, b),
@@ -93,7 +93,7 @@ def get_tracer(tracer_type, cosmo=None, **tracer_kwargs):
                                    **tracer_kwargs)
     elif tracer_type == 'cl':
         ntr = 1
-        tr = ccl.CMBLensingTracer(cosmo, 1100., **tracer_kwargs)
+        tr = ccl.CMBLensingTracer(cosmo, z_source=1100., **tracer_kwargs)
     else:
         ntr = 0
         tr = ccl.Tracer(**tracer_kwargs)
@@ -109,16 +109,16 @@ def test_tracer_mag_0p4():
     s_no = np.ones_like(z)*0.4
     s_yes = np.zeros_like(z)
     # Tracer with no magnification by construction
-    t1 = ccl.NumberCountsTracer(COSMO, True,
+    t1 = ccl.NumberCountsTracer(COSMO, has_rsd=True,
                                 dndz=(z, n),
                                 bias=(z, b))
     # Tracer with s=0.4
-    t2 = ccl.NumberCountsTracer(COSMO, True,
+    t2 = ccl.NumberCountsTracer(COSMO, has_rsd=True,
                                 dndz=(z, n),
                                 bias=(z, b),
                                 mag_bias=(z, s_no))
     # Tracer with magnification
-    t3 = ccl.NumberCountsTracer(COSMO, True,
+    t3 = ccl.NumberCountsTracer(COSMO, has_rsd=True,
                                 dndz=(z, n),
                                 bias=(z, b),
                                 mag_bias=(z, s_yes))
@@ -140,13 +140,6 @@ def test_tracer_dndz_smoke(tracer_type):
         n1 = dndz(z)
         n2 = tr.get_dndz(z)
         assert np.all(np.fabs(n1 / n2 - 1) < 1E-5)
-
-
-@pytest.mark.parametrize('tracer_type', ['cl', 'not'])
-def test_tracer_dndz_errors(tracer_type):
-    tr, _ = get_tracer(tracer_type)
-    with pytest.raises(NotImplementedError):
-        tr.get_dndz(0.5)
 
 
 @pytest.mark.parametrize('tracer_type', ['nc', 'wl', 'cl', 'not'])
@@ -239,7 +232,7 @@ def test_tracer_nz_support():
     n = dndz(z)
 
     with pytest.raises(ValueError):
-        _ = ccl.WeakLensingTracer(calculator_cosmo, (z, n))
+        _ = ccl.WeakLensingTracer(calculator_cosmo, dndz=(z, n))
 
     with pytest.raises(ValueError):
         _ = ccl.NumberCountsTracer(calculator_cosmo, has_rsd=False,
@@ -338,13 +331,13 @@ def test_tracer_magnification_kernel_spline_vs_gsl_intergation(z_min, z_max,
         assert n[0] > 0
 
     ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
-    tr_mg = ccl.NumberCountsTracer(cosmo, False, dndz=(z, n),
+    tr_mg = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z, n),
                                    bias=(z, b), mag_bias=(z, b))
     w_mg_spline, _ = tr_mg.get_kernel(chi=None)
     ccl.gsl_params.reload()
 
     ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = True
-    tr_mg = ccl.NumberCountsTracer(cosmo, False, dndz=(z, n),
+    tr_mg = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z, n),
                                    bias=(z, b), mag_bias=(z, b))
     w_mg_gsl, chi = tr_mg.get_kernel(chi=None)
     tr_wl = ccl.WeakLensingTracer(cosmo, dndz=(z, n))
@@ -375,7 +368,7 @@ def test_tracer_delta_function_nz():
 
     # Single source plane tracer to compare against
     chi_kappa, w_kappa = ccl.tracers.get_kappa_kernel(COSMO, z_source=z_s,
-                                                      nsamples=100)
+                                                      n_samples=100)
 
     # Use the same comoving distances
     w = tr_wl.get_kernel(chi=chi_kappa)
@@ -433,6 +426,12 @@ def test_tracer_chi_min_max():
     assert tr.chi_max == tr._trc[1].chi_max
 
 
+def test_zpower_raises():
+    with pytest.raises(ValueError):
+        ccl.Tracer.from_zPower(COSMO, A=1., z_min=1.0,
+                               z_max=0.1, alpha=1.0)
+
+
 def test_tracer_increase_sf():
     z = np.linspace(0, 3., 32)
     one = np.ones(len(z))
@@ -464,7 +463,7 @@ def test_tracer_repr():
     # Check empty tracer.
     z = np.linspace(0, 0.5, 128)
     nz = np.ones_like(z)
-    tr4 = ccl.Tracer()
+    tr4 = ccl.NzTracer()
     tr5 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=False)  # all off
     assert tr4 == tr5
     # Check tracers with transfer functions.

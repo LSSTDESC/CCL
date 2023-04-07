@@ -1,5 +1,5 @@
 from . import halos as hal
-from .pyutils import deprecated
+from .base import deprecated
 
 
 @deprecated(hal.HaloProfileNFW)
