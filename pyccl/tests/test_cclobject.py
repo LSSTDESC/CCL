@@ -6,8 +6,8 @@ import functools
 
 def all_subclasses(cls):
     """Get all subclasses of ``cls``. NOTE: Used in ``conftest.py``."""
-    return set(cls.__subclasses__()).union([s for c in cls.__subclasses__()
-                                            for s in all_subclasses(c)])
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
 
 
 def test_fancy_repr():

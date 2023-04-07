@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_raises, assert_, assert_no_warnings
 import pyccl as ccl
+import warnings
 
 
 def test_cosmo_methods():
@@ -107,12 +108,6 @@ def test_cosmology_init():
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
         m_nu=np.array([0.1, 0.1, 0.1]),
         m_nu_type='normal')
-
-
-def test_cosmology_setitem():
-    cosmo = ccl.CosmologyVanillaLCDM()
-    with pytest.raises(NotImplementedError):
-        cosmo['a'] = 3
 
 
 def test_cosmology_output():
@@ -242,6 +237,15 @@ def test_pyccl_default_params():
     # complains when we try to change the physical constants
     with pytest.raises(AttributeError):
         ccl.physical_constants.CLIGHT = 1
+
+    # but if we unfreeze them, we can change them
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        ccl.physical_constants.unfreeze()
+        ccl.physical_constants.CLIGHT = 1
+    assert ccl.physical_constants.CLIGHT == 1
+    ccl.physical_constants.freeze()
+    ccl.physical_constants.reload()
 
     # verify that this has changed
     assert ccl.gsl_params.HM_MMIN != HM_MMIN

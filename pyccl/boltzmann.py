@@ -5,7 +5,6 @@ from .pyutils import check
 from .base import warn_api
 from .pk2d import Pk2D
 from .errors import CCLError
-from .parameters import physical_constants
 
 try:
     import isitgr  # noqa: F401
@@ -97,14 +96,14 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
     # where T_nu is the standard neutrino temperature from first order
     # computations
     # CLASS defines the temperature of each neutrino species to be
-    # T_i_eff = TNCDM * T_cmb where TNCDM is a fudge factor to get the
+    # T_i_eff = T_ncdm * T_cmb where T_ncdm is a fudge factor to get the
     # total mass in terms of eV to match second-order computations of the
     # relationship between m_nu and Omega_nu.
     # We are trying to get both codes to use the same neutrino temperature.
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
-    # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
+    # value of g for CAMB. We get g = (T_ncdm / (11/4)^(-1/3))^4
     g = np.power(
-        physical_constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        cosmo["T_ncdm"] / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
@@ -318,14 +317,14 @@ def get_isitgr_pk_lin(cosmo):
     # where T_nu is the standard neutrino temperature from first order
     # computations
     # CLASS defines the temperature of each neutrino species to be
-    # T_i_eff = TNCDM * T_cmb where TNCDM is a fudge factor to get the
+    # T_i_eff = T_ncdm * T_cmb where T_ncdm is a fudge factor to get the
     # total mass in terms of eV to match second-order computations of the
     # relationship between m_nu and Omega_nu.
     # We are trying to get both codes to use the same neutrino temperature.
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
-    # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
+    # value of g for CAMB. We get g = (T_ncdm / (11/4)^(-1/3))^4
     g = np.power(
-        physical_constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        cosmo["T_ncdm"] / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
