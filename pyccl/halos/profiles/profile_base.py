@@ -1,6 +1,6 @@
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import (CCLAutoRepr, abstractlinkedmethod, unlock_instance,
-                     warn_api, deprecate_attr)
+from ...base import (CCLAutoRepr, abstractlinkedmethod, templatemethod,
+                     unlock_instance, warn_api, deprecate_attr)
 from ...parameters import FFTLogParams
 import numpy as np
 from abc import abstractmethod
@@ -109,12 +109,20 @@ class HaloProfile(CCLAutoRepr):
         return self.precision_fftlog['plaw_projected']
 
     @abstractlinkedmethod
-    def _real(self, cosmo, r, M, a, *, mass_def=None):
+    def _real(self, cosmo, r, M, a, mass_def=None):
         """TODO: Write some useful docstring."""
 
     @abstractlinkedmethod
-    def _fourier(self, cosmo, k, M, a, *, mass_def=None):
+    def _fourier(self, cosmo, k, M, a, mass_def=None):
         "TODO: Write some useful docstring."""
+
+    @templatemethod
+    def _projected(self, cosmo, r, M, a, mass_def=None):
+        """TODO: Write some useful docstring."""
+
+    @templatemethod
+    def _cumul2d(self, cosmo, r, M, a, mass_def=None):
+        """TODO: Write some useful docstring."""
 
     @warn_api
     def real(self, cosmo, r, M, a, *, mass_def=None):
@@ -136,11 +144,9 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_real', None):
+        if self._is_implemented("_real"):
             return self._real(cosmo, r, M, a, mass_def)
-        elif getattr(self, '_fourier', None):
-            return self._fftlog_wrap(cosmo, r, M, a, mass_def,
-                                     fourier_out=False)
+        return self._fftlog_wrap(cosmo, r, M, a, mass_def, fourier_out=False)
 
     @warn_api
     def fourier(self, cosmo, k, M, a, *, mass_def=None):
@@ -167,11 +173,9 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_fourier', None):
+        if self._is_implemented("_fourier"):
             return self._fourier(cosmo, k, M, a, mass_def)
-        elif getattr(self, '_real', None):
-            return self._fftlog_wrap(cosmo, k, M, a, mass_def,
-                                     fourier_out=True)
+        return self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
 
     @warn_api(pairs=[("r_t", "r")])
     def projected(self, cosmo, r, M, a, *, mass_def=None):
@@ -197,11 +201,10 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if hasattr(self, "_projected"):
+        if self._is_implemented("_projected"):
             return self._projected(cosmo, r, M, a, mass_def)
-        else:
-            return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
-                                               is_cumul2d=False)
+        return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
+                                           is_cumul2d=False)
 
     @warn_api(pairs=[("r_t", "r")])
     def cumul2d(self, cosmo, r, M, a, *, mass_def=None):
@@ -228,11 +231,10 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if hasattr(self, "_cumul2d"):
+        if self._is_implemented("_cumul2d"):
             return self._cumul2d(cosmo, r, M, a, mass_def)
-        else:
-            return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
-                                               is_cumul2d=True)
+        return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
+                                           is_cumul2d=True)
 
     @warn_api
     def convergence(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
@@ -436,7 +438,7 @@ class HaloProfile(CCLAutoRepr):
 
         sig_r_t_out = np.zeros([nM, r_t_use.size])
         # Compute Fourier-space profile
-        if getattr(self, '_fourier', None):
+        if self._is_implemented("_fourier"):
             # Compute from `_fourier` if available.
             p_fourier = self._fourier(cosmo, k_arr, M_use,
                                       a, mass_def)

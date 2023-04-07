@@ -7,7 +7,7 @@ import functools
 __all__ = ("ObjectLock",
            "UnlockInstance", "unlock_instance",
            "FancyRepr",
-           "abstractlinkedmethod",
+           "abstractlinkedmethod", "templatemethod",
            "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
 
 
@@ -211,18 +211,44 @@ class FancyRepr:
         cl.__repr__ = cl.__ccl_repr__
 
 
-def abstractlinkedmethod(func):
-    """A decorator indicating linked abstract methods.
+def _method_wrapper_factory(hook_name: str, default_value=True) -> callable:
+    """Decorator factory that sets hooks to functions.
 
-    Requires that the superclass is ``CCLObject`` or derived from it.
-    A subclass of ``CCLObject`` cannot be instantiated unless at least one of
-    its linked abstract methods is overridden.
+    The hooks can be used as abstraction criteria for implementations departing
+    from ``abc.ABCMeta``, which enforces that abstract methods are implemented.
 
-    If a subclass of a linked abstract class has one implementation of the
-    linked abstract methods, the linked abstract method register is cleared.
+    Arguments
+    ---------
+    hook_name : str
+        Name of the hook.
+    default_value : object
+        Any default value for the hook.
+
+    Returns
+    -------
+    wrapper : callable
+        Wrapper that can be used as a decorator that sets hooks.
     """
-    func.__isabstractlinkedmethod__ = True
-    return func
+    def wrapper(func):
+        setattr(func, hook_name, default_value)
+        return func
+    return wrapper
+
+
+# ~~ abstractlinkedmethod(func) ~~
+# Requires that the superclass is `CCLObject` or derived from it.
+# A subclass of `CCLObject` cannot be instantiated unless at least one of
+# its linked abstract methods is overridden.
+#
+# If a subclass of a linked abstract class has one implementation of the
+# linked abstract methods, the linked abstract method register is cleared.
+# `CCLObject._is_abstractlinked()` inspects whether the method is implemented.
+abstractlinkedmethod = _method_wrapper_factory("__isabstractlinkedmethod__")
+
+# ~~ templatemethod(func) ~~
+# Marks the method as template. Instance attribute checks may then be made
+# with `CCLObject._is_template()` to inspect if the method is implemented.
+templatemethod = _method_wrapper_factory("__istemplatemethod__")
 
 
 class CCLObject(ABC):
@@ -345,6 +371,18 @@ class CCLObject(ABC):
         if self.__class__ is not other.__class__:
             return False
         return repr(self) == repr(other)
+
+    def _is_abstractlinked(self, name):
+        # Check whether the abstract linked method `name` is implemented.
+        return hasattr(getattr(self, name), "__isabstractlinkedmethod__")
+
+    def _is_template(self, name):
+        # Check whether the template method `name` is implemented.
+        return hasattr(getattr(self, name), "__istemplatemethod__")
+
+    def _is_implemented(self, name):
+        # Check whether the method is implemented (not template or abstract).
+        return not (self._is_abstractlinked(name) or self._is_template(name))
 
 
 class CCLAutoRepr(CCLObject):
