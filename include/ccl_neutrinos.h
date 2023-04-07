@@ -38,23 +38,23 @@ typedef enum ccl_neutrino_mass_splits{
  * @param Neff The effective number of species with neutrino mass mnu.
  * @param mnu Pointer to array containing neutrino mass (can be 0).
  * @param T_CMB Temperature of the CMB
+ * @param T_ncdm Non-CDM temperature in units of photon temperature.
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return OmNuh2 Fractional energy density of neutrions with mass mnu, multiplied by h squared.
  */
-double ccl_Omeganuh2(double a, int N_nu_mass, double* mnu, double T_CMB, int * status);
+double ccl_Omeganuh2(double a, int N_nu_mass, double* mnu, double T_CMB, double T_ncdm, int * status);
 
 /**
  * Returns mass of one neutrino species at a scale factor a.
  * @param a Scale factor
  * @param Neff The effective number of species with neutrino mass mnu.
  * @param OmNuh2 Fractional energy density of neutrions with mass mnu, multiplied by h squared. (can be 0).
- * @param T_CMB Temperature of the CMB
  * @param status Status flag. 0 if there are no errors, nonzero otherwise.
  * For specific cases see documentation for ccl_error.c
  * @return Mnu Neutrino mass [eV].
  */
-double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, double T_CMB, int * status);
+double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, int * status);
 
 CCL_END_DECLS
 #endif

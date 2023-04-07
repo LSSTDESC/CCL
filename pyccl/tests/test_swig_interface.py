@@ -108,18 +108,6 @@ def test_swig_cls():
         status)
 
 
-def test_swig_core():
-    status = 0
-    assert_raises(
-        CCLError,
-        ccllib.parameters_create_nu_vec,
-        0.25, 0.05, 0.0, 3.0, -1.0, 0.0, 0.7, 2e-9, 0.95, 1, 0.0, 0.0,
-        0.0, 0.0, 1.0, 1.0, 0.0, [1.0, 2.0],
-        [0.0, 0.3, 0.5],
-        [0.02, 0.01, 0.2],
-        status)
-
-
 def test_swig_correlation():
     status = 0
     assert_raises(
@@ -160,7 +148,7 @@ def test_swig_neurtinos():
     assert_raises(
         CCLError,
         ccllib.Omeganuh2_vec,
-        3, 2.7,
+        3, 2.7, 0.72,
         [0.0, 1.0],
         [0.05, 0.1, 0.2],
         4,
@@ -169,7 +157,7 @@ def test_swig_neurtinos():
     assert_raises(
         CCLError,
         ccllib.Omeganuh2_vec,
-        3, 2.7,
+        3, 2.7, 0.72,
         [0.0, 1.0],
         [0.1, 0.2],
         2,
