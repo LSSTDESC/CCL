@@ -22,7 +22,9 @@ class HaloProfileGaussian(HaloProfile):
         rho0 (:obj:`function`): the amplitude of the profile.
             It should have the same signature as `r_scale`.
     """
-    __repr_attrs__ = ("r_scale", "rho_0", "precision_fftlog", "normprof",)
+    __repr_attrs__ = __eq_attrs__ = ("r_scale", "rho_0", "precision_fftlog",
+                                     "normprof",)
+    name = 'Gaussian'
     normprof = False
 
     @deprecated()

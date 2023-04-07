@@ -65,9 +65,11 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         Profile threshold, in units of :math:`R_{\\mathrm{500c}}`.
         Defaults to :math:`+\\infty`.
     """
-    __repr_attrs__ = ("mass_bias", "P0", "c500", "alpha", "alpha_P", "beta",
-                      "gamma", "P0_hexp", "qrange", "nq", "x_out",
-                      "precision_fftlog", "normprof",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta",
+        "gamma", "P0_hexp", "qrange", "nq", "x_out",
+        "precision_fftlog", "normprof",)
+    name = 'GNFW'
 
     @warn_api
     def __init__(self, *, mass_bias=0.8, P0=6.41,
@@ -144,7 +146,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
             re_fourier = True
             self.x_out = x_out
 
-        if re_fourier and not hasattr(self, "_fourier_interp"):
+        if re_fourier and hasattr(self, "_fourier_interp"):
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):

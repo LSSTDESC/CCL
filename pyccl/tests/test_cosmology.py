@@ -4,6 +4,47 @@ import pytest
 import numpy as np
 from numpy.testing import assert_raises, assert_, assert_no_warnings
 import pyccl as ccl
+import copy
+import warnings
+from .test_cclobject import check_eq_repr_hash
+
+
+def test_HMIngredients_eq_repr_hash():
+    # Test eq, repr, hash for Cosmology and CosmologyCalculator.
+    # 1. Using a complicated Cosmology object.
+    extras = {"camb": {"halofit_version": "mead2020", "HMCode_logT_AGN": 7.8}}
+    kwargs = {"transfer_function": "bbks",
+              "matter_power_spectrum": "linear",
+              "extra_parameters": extras}
+    COSMO1 = ccl.CosmologyVanillaLCDM(**kwargs)
+    COSMO2 = ccl.CosmologyVanillaLCDM(**kwargs)
+    assert check_eq_repr_hash(COSMO1, COSMO2)
+
+    # 2. Now make a copy and change it.
+    kwargs = copy.deepcopy(kwargs)
+    kwargs["extra_parameters"]["camb"]["halofit_version"] = "mead2020_feedback"
+    COSMO3 = ccl.CosmologyVanillaLCDM(**kwargs)
+    assert check_eq_repr_hash(COSMO1, COSMO3, equal=False)
+
+    # 3. Using a CosmologyCalculator.
+    COSMO1.compute_linear_power()
+    a_arr, lk_arr, pk_arr = COSMO1.get_linear_power().get_spline_arrays()
+    pk_linear = {"a": a_arr,
+                 "k": np.exp(lk_arr),
+                 "delta_matter:delta_matter": pk_arr}
+    COSMO4 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
+    COSMO5 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
+    assert check_eq_repr_hash(COSMO4, COSMO5)
+
+    pk_linear["delta_matter:delta_matter"] *= 2
+    COSMO6 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
+    assert check_eq_repr_hash(COSMO4, COSMO6, equal=False)
 
 
 def test_cosmo_methods():
@@ -107,12 +148,6 @@ def test_cosmology_init():
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
         m_nu=np.array([0.1, 0.1, 0.1]),
         m_nu_type='normal')
-
-
-def test_cosmology_setitem():
-    cosmo = ccl.CosmologyVanillaLCDM()
-    with pytest.raises(NotImplementedError):
-        cosmo['a'] = 3
 
 
 def test_cosmology_output():
@@ -227,7 +262,7 @@ def test_pyccl_default_params():
     with pytest.raises(KeyError):
         ccl.gsl_params.test = "hello_world"
     with pytest.raises(KeyError):
-        ccl.gsl_params["test"] = "hallo_world"
+        ccl.gsl_params["test"] = "hello_world"
 
     # complains when we try to set A_SPLINE_MAX != 1.0
     ccl.spline_params.A_SPLINE_MAX = 1.0
@@ -242,6 +277,15 @@ def test_pyccl_default_params():
     # complains when we try to change the physical constants
     with pytest.raises(AttributeError):
         ccl.physical_constants.CLIGHT = 1
+
+    # but if we unfreeze them, we can change them
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        ccl.physical_constants.unfreeze()
+        ccl.physical_constants.CLIGHT = 1
+    assert ccl.physical_constants.CLIGHT == 1
+    ccl.physical_constants.freeze()
+    ccl.physical_constants.reload()
 
     # verify that this has changed
     assert ccl.gsl_params.HM_MMIN != HM_MMIN

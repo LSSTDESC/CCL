@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import pyccl as ccl
+from .test_cclobject import check_eq_repr_hash
 
 
 COSMO = ccl.Cosmology(
@@ -18,6 +19,19 @@ MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 # are defined for FoF halos, or 400 critical.
 MDEF = ccl.halos.MassDef('fof', 'matter')
 M400 = ccl.halos.MassDef(400, 'critical')
+
+
+def test_Concentration_eq_repr_hash():
+    # Test eq, repr, hash for Concentration.
+    CM1 = ccl.halos.Concentration.from_name("Duffy08")()
+    CM2 = ccl.halos.ConcentrationDuffy08()
+    assert check_eq_repr_hash(CM1.mdef, CM2.mdef)
+    assert check_eq_repr_hash(CM1, CM2)
+
+    M200m = ccl.halos.MassDef200m()
+    CM3 = ccl.halos.ConcentrationDuffy08(mdef=M200m)
+    assert check_eq_repr_hash(CM1.mdef, CM3.mdef, equal=False)
+    assert check_eq_repr_hash(CM1, CM3, equal=False)
 
 
 @pytest.mark.parametrize('cM_class', CONCS)

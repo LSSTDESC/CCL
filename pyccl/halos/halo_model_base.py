@@ -3,6 +3,7 @@ from ..core import check
 from ..parameters import physical_constants as const
 from ..base import (CCLAutoRepr, CCLNamedClass, abstractlinkedmethod,
                     warn_api, deprecated, deprecate_attr)
+from .massdef import MassDef
 import numpy as np
 import functools
 from abc import abstractmethod
@@ -13,14 +14,13 @@ __all__ = ("HMIngredients",)
 
 class HMIngredients(CCLAutoRepr, CCLNamedClass):
     """Base class for halo model ingredients."""
-    __repr_attrs__ = ("mass_def", "mass_def_strict",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
                                  )(super.__getattribute__)
 
     @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):
         # Check mass definition consistency.
-        from .massdef import MassDef
         mass_def = MassDef.create_instance(mass_def)
         self.mass_def_strict = mass_def_strict
         self._check_mass_def(mass_def)

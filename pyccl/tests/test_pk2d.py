@@ -5,6 +5,29 @@ from numpy.testing import (
     assert_raises, assert_almost_equal, assert_allclose)
 import pyccl as ccl
 from pyccl import CCLWarning
+from .test_cclobject import check_eq_repr_hash
+
+
+def test_Pk2D_eq_repr_hash():
+    # Test eq, repr, hash for Pk2D.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    cosmo.compute_linear_power()
+    PK1 = cosmo.get_linear_power()
+    PK2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
+    assert check_eq_repr_hash(PK1, PK2)
+    assert check_eq_repr_hash(ccl.Pk2D(empty=True), ccl.Pk2D(empty=True))
+    assert check_eq_repr_hash(2*PK1, PK2, equal=False)
+
+    # edge-case: comparing different types
+    assert check_eq_repr_hash(PK1, 1, equal=False)
+
+    # edge-case: different extrapolation orders
+    a_arr, lk_arr, pk_arr = PK1.get_spline_arrays()
+    pk1 = ccl.Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
+                   is_logp=False, extrap_order_lok=0)
+    pk2 = ccl.Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
+                   is_logp=False, extrap_order_lok=1)
+    assert check_eq_repr_hash(pk1, pk2, equal=False)
 
 
 def pk1d(k):

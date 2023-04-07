@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl import UnlockInstance
+from .test_cclobject import check_eq_repr_hash
 
 
 COSMO = ccl.Cosmology(
@@ -10,6 +11,29 @@ COSMO = ccl.Cosmology(
 M200 = ccl.halos.MassDef200c()
 M500c = ccl.halos.MassDef(500, 'critical')
 FFTL = {"extrapol": "linx_liny", "large_padding_2D": True}
+
+
+def test_HaloProfile_eq_repr_hash():
+    # Test eq, repr, hash for HaloProfile and Profile2pt.
+    # 1. HaloProfile
+    CM1 = ccl.halos.Concentration.from_name("Duffy08")()
+    CM2 = ccl.halos.Concentration.from_name("Duffy08")()
+
+    P1 = ccl.halos.HaloProfileHOD(c_M_relation=CM1)
+    P2 = ccl.halos.HaloProfileHOD(c_M_relation=CM2)
+    assert check_eq_repr_hash(CM1, CM2)
+    assert check_eq_repr_hash(P1, P2)
+
+    P1.update_parameters(lMmin_0=P1.lMmin_0/2)
+    assert check_eq_repr_hash(P1, P2, equal=False)
+
+    # 2. Profile2pt
+    PCOV1 = ccl.halos.Profile2pt(r_corr=1.0)
+    PCOV2 = ccl.halos.Profile2pt(r_corr=1.0)
+    assert check_eq_repr_hash(PCOV1, PCOV2)
+
+    PCOV2.update_parameters(r_corr=1.5)
+    assert check_eq_repr_hash(PCOV1, PCOV2, equal=False)
 
 
 def one_f(cosmo, M, a=1, mass_def=M200):
@@ -197,11 +221,11 @@ def test_gnfw_smoke():
 def test_gnfw_refourier():
     p = ccl.halos.HaloProfilePressureGNFW()
     # Create Fourier template
-    p._integ_interp()
-    p_f1 = p.fourier(COSMO, 1., 1E13, 1., mass_def=M500c)
+    kwargs = {"cosmo": COSMO, "k": 1., "M": 1e13, "a": 1., "mass_def": M500c}
+    p_f1 = p.fourier(**kwargs)
     # Check the Fourier profile gets recalculated
     p.update_parameters(alpha=1.32, c500=p.c500+0.1)
-    p_f2 = p.fourier(COSMO, 1., 1E13, 1., mass_def=M500c)
+    p_f2 = p.fourier(**kwargs)
     assert p_f1 != p_f2
 
 
@@ -540,7 +564,11 @@ def test_hernquist_f2r():
     p2 = ccl.halos.HaloProfileHernquist(concentration=cM,
                                         fourier_analytic=True)
     with UnlockInstance(p2):
-        p2._real = None
+        # For the fourier computation, we require that the profile does not
+        # have an implemented `_real` method. This is internally checked
+        # by verifying that the hook `__islinkedabstractmethod__` is not there.
+        # Here, we replace the bound method with a function that has this hook.
+        p2._real = ccl.halos.HaloProfile._real
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14
@@ -593,3 +621,10 @@ def test_hernquist_cumul2d_accuracy(fourier_analytic):
 
     res2 = np.fabs(srt2/srt1-1)
     assert np.all(res2 < 5E-3)
+
+
+def test_HaloProfile_abstractmethods():
+    # Test that `HaloProfile` and its subclasses can't be instantiated if
+    # either `_real` or `_fourier` have not been defined.
+    with pytest.raises(TypeError):
+        ccl.halos.HaloProfile()
