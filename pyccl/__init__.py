@@ -41,6 +41,8 @@ from .parameters import (
     physical_constants,
 )
 
+from .parameters import FFTLogParams
+
 # Core data structures
 from .core import (
     Cosmology,

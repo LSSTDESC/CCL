@@ -2,7 +2,7 @@
 well as wrappers to automatically vectorize functions."""
 from . import ccllib as lib
 from ._types import error_types
-from .parameters import spline_params
+from .parameters import spline_params, extrap_types
 from .errors import CCLError
 import numpy as np
 from collections.abc import Iterable
@@ -11,13 +11,6 @@ NoneArr = np.array([])
 
 integ_types = {'qag_quad': lib.integration_qag_quad,
                'spline': lib.integration_spline}
-
-extrap_types = {'none': lib.f1d_extrap_0,
-                'constant': lib.f1d_extrap_const,
-                'linx_liny': lib.f1d_extrap_linx_liny,
-                'linx_logy': lib.f1d_extrap_linx_logy,
-                'logx_liny': lib.f1d_extrap_logx_liny,
-                'logx_logy': lib.f1d_extrap_logx_logy}
 
 
 def check(status, cosmo=None):
@@ -432,16 +425,6 @@ def resample_array(x_in, y_in, x_out,
     Returns:
         array_like: output array.
     """
-
-    if extrap_lo not in extrap_types.keys():
-        raise ValueError("'%s' is not a valid extrapolation type. "
-                         "Available options are: %s"
-                         % (extrap_lo, extrap_types.keys()))
-    if extrap_hi not in extrap_types.keys():
-        raise ValueError("'%s' is not a valid extrapolation type. "
-                         "Available options are: %s"
-                         % (extrap_hi, extrap_types.keys()))
-
     status = 0
     y_out, status = lib.array_1d_resample(x_in, y_in, x_out,
                                           fill_value_lo, fill_value_hi,

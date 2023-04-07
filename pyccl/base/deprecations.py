@@ -108,12 +108,21 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
 
         # API compatibility for renamed arguments.
         warn_names = set(kwargs) - set(params)
-        unexpected = [k for k in warn_names if k not in rename]
+        unexpected = set([k for k in warn_names if k not in rename])
+        if unexpected:
+            # check whether it is an FFTLog parameter (passed as kwarg)
+            if "HaloProfile" in func.__qualname__:
+                from ..parameters import FFTLogParams as FFTL
+                for param in list(unexpected):
+                    if hasattr(FFTL, param):
+                        # these aren't unexpected - they will be piped to FFTL
+                        unexpected.remove(param)
+                        warn_names.remove(param)
         if unexpected:
             # emulate Python default behavior for arguments that don't exist
             raise TypeError(
                 f"{func.__name__}() got an unexpected keyword argument "
-                f"'{unexpected[0]}'")
+                f"'{list(unexpected[0])}'")
         if warn_names:
             s = plural(warn_names)
             warnings.warn(
@@ -168,10 +177,20 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
                 CCLDeprecationWarning)
 
         # Collect what's remaining and sort to preserve signature order.
+        # Set aside the ones passed as kwargs (e.g. FFTL in HaloProfile).
+        others = {param: kwargs[param]
+                  for param in kwargs
+                  if param not in list(params)}
+        # Only these will be bound.
+        kwargs = {param: kwargs[param]
+                  for param in kwargs
+                  if param not in others}
         pos = dict(zip(pos_names, args))
         kwargs.update(pos)
         kwargs = {param: kwargs[param]
                   for param in sorted(kwargs, key=list(params).index)}
+        # Now, insert the other kwargs back in.
+        kwargs.update(others)
 
         return func(**kwargs)
     return wrapper

@@ -9,6 +9,7 @@ COSMO = ccl.Cosmology(
     transfer_function='bbks', matter_power_spectrum='linear')
 M200 = ccl.halos.MassDef200c()
 M500c = ccl.halos.MassDef(500, 'critical')
+FFTL = {"extrapol": "linx_liny", "large_padding_2D": True}
 
 
 def one_f(cosmo, M, a=1, mass_def=M200):
@@ -104,7 +105,7 @@ def test_empirical_smoke(prof_class):
             p = prof_class(concentration=c,
                            cumul2d_analytic=True,
                            truncated=True)
-        p = prof_class(concentration=c)
+        p = prof_class(concentration=c, **FFTL)
         smoke_assert_prof_real(p, method='_fourier_analytic')
         smoke_assert_prof_real(p, method='_projected_analytic')
         smoke_assert_prof_real(p, method='_cumul2d_analytic')
@@ -113,6 +114,12 @@ def test_empirical_smoke(prof_class):
     smoke_assert_prof_real(p, method='real')
     smoke_assert_prof_real(p, method='projected')
     smoke_assert_prof_real(p, method='fourier')
+
+
+def test_profile_fftlog_bad_parameter_raises():
+    # Verify that an exception is raised for invalid FFTLog extrapolation type.
+    with pytest.raises(ValueError):
+        ccl.halos.HaloProfilePressureGNFW(extrapol="invalid_type")
 
 
 def test_empirical_smoke_CIB():

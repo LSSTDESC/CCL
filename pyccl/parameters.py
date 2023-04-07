@@ -121,6 +121,14 @@ gsl_params = GSLParams()
 physical_constants = PhysicalConstants()
 
 
+extrap_types = {'none': lib.f1d_extrap_0,
+                'constant': lib.f1d_extrap_const,
+                'linx_liny': lib.f1d_extrap_linx_liny,
+                'linx_logy': lib.f1d_extrap_linx_logy,
+                'logx_liny': lib.f1d_extrap_logx_liny,
+                'logx_logy': lib.f1d_extrap_logx_logy}
+
+
 @dataclass(kw_only=True, unsafe_hash=True, frozen=True)
 class FFTLogParams:
     """Objects of this class store the FFTLog accuracy parameters."""
@@ -136,6 +144,10 @@ class FFTLogParams:
 
     plaw_fourier: float = -1.5      # Real <--> Fourier transforms.
     plaw_projected: float = -1.0    # 2D proj & cumul density profiles.
+
+    def __post_init__(self):
+        if self.extrapol not in extrap_types:
+            raise ValueError("Invalid FFTLog extrapolation type.")
 
     def __getitem__(self, name):
         return getattr(self, name)

@@ -27,8 +27,7 @@ class HaloProfileGaussian(HaloProfile):
 
     @deprecated()
     @warn_api
-    def __init__(self, *, r_scale, rho0, padding_lo_fftlog=0.01,
-                 padding_hi_fftlog=100, n_per_decade=10000, **fftlog):
+    def __init__(self, *, r_scale, rho0, padding_lo_fftlog=0.01, **fftlog):
         self.rho_0 = rho0
         self.r_scale = r_scale
         default_fftlog = {"padding_lo_fftlog": 0.01, "padding_hi_fftlog": 100,
