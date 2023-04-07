@@ -20,7 +20,7 @@ MDFS = [MVIR, MVIR, MFOF, MVIR]
 def test_bM_subclasses_smoke(bM_class):
     bM = bM_class(COSMO)
     for m in MS:
-        b = bM.get_halo_bias(COSMO, m, 0.9)
+        b = bM(COSMO, m, 0.9)
         assert np.all(np.isfinite(b))
         assert np.shape(b) == np.shape(m)
 
@@ -35,7 +35,7 @@ def test_bM_mdef_raises(bM_pair):
 def test_bM_SO_allgood():
     bM = ccl.halos.HaloBiasTinker10(COSMO, MVIR)
     for m in MS:
-        b = bM.get_halo_bias(COSMO, m, 0.9)
+        b = bM(COSMO, m, 0.9)
         assert np.all(np.isfinite(b))
         assert np.shape(b) == np.shape(m)
 
@@ -46,11 +46,11 @@ def test_bM_from_string(name):
     assert bM_class == ccl.halos.halo_bias_from_name(name)
     bM = bM_class(COSMO)
     for m in MS:
-        b = bM.get_halo_bias(COSMO, m, 0.9)
+        b = bM(COSMO, m, 0.9)
         assert np.all(np.isfinite(b))
         assert np.shape(b) == np.shape(m)
 
 
 def test_bM_from_string_raises():
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.halos.HaloBias.from_name('Tinker11')

@@ -48,21 +48,21 @@ def test_mdef_get_mass():
 
 def test_mdef_concentration():
     # Duffy 200 matter
-    cs_200m_dh = hmd_200m._get_concentration(cosmo, Ms, 1.)
+    cs_200m_dh = hmd_200m.concentration(cosmo, Ms, 1.)
     # Bhattacharya 200 matter
-    cs_200m_bh = hmd_200m_b._get_concentration(cosmo, Ms, 1.)
+    cs_200m_bh = hmd_200m_b.concentration(cosmo, Ms, 1.)
     # Duffy 200 critical
-    cs_200c_dh = hmd_200c._get_concentration(cosmo, Ms, 1.)
+    cs_200c_dh = hmd_200c.concentration(cosmo, Ms, 1.)
     # Bhattacharya 200 critical
-    cs_200c_bh = hmd_200c_b._get_concentration(cosmo, Ms, 1.)
+    cs_200c_bh = hmd_200c_b.concentration(cosmo, Ms, 1.)
     # Klypin virial
-    cs_vir_kh = hmd_vir._get_concentration(cosmo, Ms, 1.)
+    cs_vir_kh = hmd_vir.concentration(cosmo, Ms, 1.)
     # Bhattacharya virial
-    cs_vir_bh = hmd_vir_b._get_concentration(cosmo, Ms, 1.)
+    cs_vir_bh = hmd_vir_b.concentration(cosmo, Ms, 1.)
     # Prada 200 critical
-    cs_200c_ph = hmd_200c_p._get_concentration(cosmo, Ms, 1.)
+    cs_200c_ph = hmd_200c_p.concentration(cosmo, Ms, 1.)
     # Diemer 200 critical
-    cs_200c_dih = hmd_200c_di._get_concentration(cosmo, Ms, 1.)
+    cs_200c_dih = hmd_200c_di.concentration(cosmo, Ms, 1.)
     assert np.all(np.fabs(cs_200m_dh/cs_200m_d-1) < 1E-6)
     assert np.all(np.fabs(cs_200c_dh/cs_200c_d-1) < 1E-6)
     assert np.all(np.fabs(cs_200m_bh/cs_200m_b-1) < 3E-3)

@@ -1,11 +1,11 @@
-from ..base import CCLAutoreprObject
+from ..base import CCLAutoRepr, CCLNamedClass
 from abc import abstractmethod
 
 
 __all__ = ("Baryons",)
 
 
-class Baryons(CCLAutoreprObject):
+class Baryons(CCLAutoRepr, CCLNamedClass):
     """`BaryonicEffect` obects are used to include the imprint of baryons
     on the non-linear matter power spectrum. Their main ingredient is a
     method `include_baryonic_effects` that takes in a `ccl.Pk2D` and
@@ -36,17 +36,3 @@ class Baryons(CCLAutoreprObject):
             :obj:`~pyccl.pk2d.Pk2D` object or `None`.
         """
         return self._include_baryonic_effects(cosmo, pk)
-
-    @classmethod
-    def _subclasses(cls):
-        # This helper returns a set of all subclasses
-        return set(cls.__subclasses__()).union(
-            [sub for cl in cls.__subclasses__() for sub in cl._subclasses()])
-
-    @classmethod
-    def from_name(cls, name):
-        """
-        Obtain `Baryons` subclass with name `name`.
-        """
-        models = {p.name: p for p in cls._subclasses()}
-        return models[name]

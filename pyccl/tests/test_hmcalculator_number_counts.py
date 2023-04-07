@@ -119,7 +119,7 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         matter_power_spectrum='linear'
     )
     mdef = ccl.halos.MassDef(200, 'matter')
-    hmf = ccl.halos.MassFuncTinker08(cosmo, mdef,
+    hmf = ccl.halos.MassFuncTinker08(cosmo, mass_def=mdef,
                                      mass_def_strict=False)
     hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
                                      mass_def_strict=False)
@@ -156,10 +156,7 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda
 
-        val = hmf.get_mass_function(
-            cosmo, 10**m, a, mdef_other=mdef
-        )
-        val *= sel(10**m, a)
+        val = hmf(cosmo, 10**m, a) * sel(10**m, a)
         return val[0, 0] * dvda
 
     mtot, _ = scipy.integrate.dblquad(

@@ -13,10 +13,10 @@ def test_fancy_repr():
     # Test fancy-repr controls.
     cosmo = ccl.CosmologyVanillaLCDM()
 
-    ccl.CCLObject._fancy_repr.disable()
+    ccl.FancyRepr.disable()
     assert repr(cosmo) == object.__repr__(cosmo)
 
-    ccl.CCLObject._fancy_repr.enable()
+    ccl.FancyRepr.enable()
     assert repr(cosmo) != object.__repr__(cosmo)
 
     with pytest.raises(AttributeError):
@@ -24,9 +24,6 @@ def test_fancy_repr():
 
     with pytest.raises(AttributeError):
         ccl.Cosmology._fancy_repr.disable()
-
-    with pytest.raises(NotImplementedError):
-        ccl.base.FancyRepr()
 
 
 def check_eq_repr_hash(self, other, *, equal=True):
@@ -40,7 +37,7 @@ def check_eq_repr_hash(self, other, *, equal=True):
             and hash(self) != hash(other))
 
 
-def test_CCLAutoreprObject():
+def test_CCLAutoRepr():
     # Test eq --> repr <-- hash for all kinds of CCL halo objects.
 
     # 1. Build a halo model calculator using the default parametrizations.
@@ -110,10 +107,14 @@ def test_CCLObject_default_behavior():
     instances = [MyType() for _ in range(2)]
     assert check_eq_repr_hash(*instances, equal=False)
 
-    # Test that all subclasses of ``CCLAutoreprObject`` use Python's default
+    # Test that all subclasses of ``CCLAutoRepr`` use Python's default
     # ``repr`` if no ``__repr_attrs__`` has been defined.
-    instances = [ccl.CCLAutoreprObject() for _ in range(2)]
+    instances = [ccl.CCLAutoRepr() for _ in range(2)]
     assert check_eq_repr_hash(*instances, equal=False)
+
+    MyType = type("MyType", (ccl.CCLAutoRepr,), {"test": 0})
+    instances = [MyType() for _ in range(2)]
+    assert instances[0] != instances[1]
 
 
 # +==========================================================================+
@@ -123,7 +124,7 @@ def test_CCLObject_default_behavior():
 
 def init_decorator(func):
     """Check that all attributes listed in ``__repr_attrs__`` are defined in
-    the constructor of all subclasses of ``CCLAutoreprObject``.
+    the constructor of all subclasses of ``CCLAutoRepr``.
     NOTE: Used in ``conftest.py``.
     """
 
@@ -170,3 +171,7 @@ def test_unlock_instance_errors():
 
     with pytest.raises(TypeError):
         func2()
+
+    # 3. Doesn't do anything if instance is not CCLObject.
+    with ccl.UnlockInstance(True, mutate=False):
+        pass

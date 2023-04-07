@@ -1,5 +1,5 @@
-from ..massdef import MassDef
-from .concentration_base import Concentration
+from ...base import warn_api
+from ..halo_model_base import Concentration
 import numpy as np
 
 
@@ -12,26 +12,19 @@ class ConcentrationPrada12(Concentration):
     S.O. masses with Delta = 200-critical.
 
     Args:
-        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
             definition object that fixes
             the mass definition used by this c(M)
-            parametrization.
+            parametrization, or a name string.
     """
     name = 'Prada12'
 
-    def __init__(self, mdef=None):
-        super(ConcentrationPrada12, self).__init__(mdef)
+    @warn_api(pairs=[("mdef", "mass_def")])
+    def __init__(self, *, mass_def="200c"):
+        super().__init__(mass_def=mass_def)
 
-    def _default_mdef(self):
-        self.mdef = MassDef(200, 'critical')
-
-    def _check_mdef(self, mdef):
-        if isinstance(mdef.Delta, str):
-            return True
-        elif not ((int(mdef.Delta) == 200) and
-                  (mdef.rho_type == 'critical')):
-            return True
-        return False
+    def _check_mass_def_strict(self, mass_def):
+        return mass_def.name != "200c"
 
     def _setup(self):
         self.c0 = 3.681
@@ -45,19 +38,19 @@ class ConcentrationPrada12(Concentration):
         self.cnorm = 1. / self._cmin(1.393)
         self.inorm = 1. / self._imin(1.393)
 
+    def _form(self, x, x0, v0, v1, v2):
+        # form factor for `cmin` and `imin`
+        return v0 + (v1 - v0) * (np.arctan(v2 * (x - x0)) / np.pi + 0.5)
+
     def _cmin(self, x):
-        return self.c0 + (self.c1 - self.c0) * \
-            (np.arctan(self.al * (x - self.x0)) / np.pi + 0.5)
+        return self._form(x, x0=self.x0, v0=self.c0, v1=self.c1, v2=self.al)
 
     def _imin(self, x):
-        return self.i0 + (self.i1 - self.i0) * \
-            (np.arctan(self.be * (x - self.x1)) / np.pi + 0.5)
+        return self._form(x, x0=self.x1, v0=self.i0, v1=self.i1, v2=self.be)
 
     def _concentration(self, cosmo, M, a):
         sig = cosmo.sigmaM(M, a)
-        om = cosmo.cosmo.params.Omega_m
-        ol = cosmo.cosmo.params.Omega_l
-        x = a * (ol / om)**(1. / 3.)
+        x = a * (cosmo["Omega_l"] / cosmo["Omega_m"])**(1. / 3.)
         B0 = self._cmin(x) * self.cnorm
         B1 = self._imin(x) * self.inorm
         sig_p = B1 * sig

@@ -1,5 +1,5 @@
-from ..massdef import MassDef
-from .concentration_base import Concentration
+from ...base import warn_api
+from ..halo_model_base import Concentration
 
 
 __all__ = ("ConcentrationKlypin11",)
@@ -11,24 +11,20 @@ class ConcentrationKlypin11(Concentration):
     S.O. masses with Delta = Delta_vir.
 
     Args:
-        mdef (:class:`~pyccl.halos.massdef.MassDef`): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
             definition object that fixes
             the mass definition used by this c(M)
-            parametrization.
+            parametrization, or a name string.
     """
     name = 'Klypin11'
 
-    def __init__(self, mdef=None):
-        super(ConcentrationKlypin11, self).__init__(mdef)
+    @warn_api(pairs=[("mdef", "mass_def")])
+    def __init__(self, *, mass_def="vir"):
+        super().__init__(mass_def=mass_def)
 
-    def _default_mdef(self):
-        self.mdef = MassDef('vir', 'critical')
-
-    def _check_mdef(self, mdef):
-        if mdef.Delta != 'vir':
-            return True
-        return False
+    def _check_mass_def_strict(self, mass_def):
+        return mass_def.name != "vir"
 
     def _concentration(self, cosmo, M, a):
-        M_pivot_inv = cosmo.cosmo.params.h * 1E-12
-        return 9.6 * (M * M_pivot_inv)**-0.075
+        M_pivot_inv = cosmo["h"] * 1E-12
+        return 9.6 * (M * M_pivot_inv)**(-0.075)

@@ -42,6 +42,7 @@ def _to_hashable(obj):
         return obj
 
     # NotImplemented: Can't hash safely, so raise TypeError.
+    # Note: This will never be triggered since `type` has a repr slot wrapper.
     raise TypeError(f"Hashing for {type(obj)} not implemented.")
 
 

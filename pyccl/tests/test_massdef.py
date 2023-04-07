@@ -74,19 +74,13 @@ def test_get_radius():
         assert np.shape(r) == np.shape(M)
 
 
-def test_get_concentration():
+def test_concentration():
     hmd = ccl.halos.MassDef200m()
     for M in [1E12, [1E12, 2E12],
               np.array([1E12, 2E12])]:
-        c = hmd._get_concentration(COSMO, M, 1.)
+        c = hmd.concentration(COSMO, M, 1.)
         assert np.all(np.isfinite(c))
         assert np.shape(c) == np.shape(M)
-
-
-def test_get_concentration_raises():
-    hmd = ccl.halos.MassDef(200, 'matter')
-    with pytest.raises(RuntimeError):
-        hmd._get_concentration(COSMO, 1E12, 1.)
 
 
 def test_translate_mass():
@@ -103,9 +97,8 @@ def test_translate_mass():
 def test_translate_mass_raises():
     hmd = ccl.halos.MassDef(200, 'matter')
     hmdb = ccl.halos.MassDef(200, 'critical')
-    with pytest.raises(RuntimeError):
-        hmd.translate_mass(COSMO, 1E12,
-                           1., hmdb)
+    with pytest.raises(AttributeError):
+        hmd.translate_mass(COSMO, 1E12, 1., hmdb)
 
 
 @pytest.mark.parametrize('scls', [ccl.halos.MassDef200m,

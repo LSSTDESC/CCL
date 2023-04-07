@@ -1,5 +1,6 @@
+from ...base import warn_api
 from ..concentration import Concentration
-from .profile_base import HaloProfile
+from .profile_base import HaloProfileMatter
 import numpy as np
 from scipy.special import sici
 
@@ -7,7 +8,7 @@ from scipy.special import sici
 __all__ = ("HaloProfileHernquist",)
 
 
-class HaloProfileHernquist(HaloProfile):
+class HaloProfileHernquist(HaloProfileMatter):
     """ Hernquist (1990ApJ...356..359H).
 
     .. math::
@@ -27,7 +28,7 @@ class HaloProfileHernquist(HaloProfile):
     By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
 
     Args:
-        c_M_relation (:obj:`Concentration`): concentration-mass
+        concentration (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
         fourier_analytic (bool): set to `True` if you want to compute
             the Fourier profile analytically (and not through FFTLog).
@@ -43,19 +44,20 @@ class HaloProfileHernquist(HaloProfile):
             radii.
     """
     __repr_attrs__ = __eq_attrs__ = (
-        "cM", "fourier_analytic", "projected_analytic",
-        "cumul2d_analytic", "truncated", "precision_fftlog",)
+        "concentration", "fourier_analytic", "projected_analytic",
+        "cumul2d_analytic", "truncated", "precision_fftlog", "normprof",)
     name = 'Hernquist'
 
-    def __init__(self, c_M_relation,
+    @warn_api(pairs=[("c_M_relation", "concentration")])
+    def __init__(self, *, concentration,
                  truncated=True,
                  fourier_analytic=False,
                  projected_analytic=False,
                  cumul2d_analytic=False):
-        if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`")
+        if not isinstance(concentration, Concentration):
+            raise TypeError("concentration must be of type `Concentration`")
 
-        self.cM = c_M_relation
+        self.concentration = concentration
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic
@@ -74,14 +76,11 @@ class HaloProfileHernquist(HaloProfile):
                                  "for truncated Hernquist. Set `truncated` or "
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
-        super(HaloProfileHernquist, self).__init__()
+        super().__init__()
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-4,
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
-
-    def _get_cM(self, cosmo, M, a, mdef=None):
-        return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
 
     def _norm(self, M, Rs, c):
         # Hernquist normalization from mass, radius and concentration
@@ -93,7 +92,7 @@ class HaloProfileHernquist(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         norm = self._norm(M_use, R_s, c_M)
@@ -132,7 +131,7 @@ class HaloProfileHernquist(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -171,13 +170,13 @@ class HaloProfileHernquist(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
         prof = self._fx_cumul2d(x)
         norm = 2 * R_s * self._norm(M_use, R_s, c_M)
-        prof = prof[:, :] * norm[:, None]
+        prof = prof * norm[:, None]
 
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -191,7 +190,7 @@ class HaloProfileHernquist(HaloProfile):
 
         # Comoving virial radius
         R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = k_use[None, :] * R_s[:, None]

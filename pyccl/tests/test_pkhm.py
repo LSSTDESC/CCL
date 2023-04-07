@@ -36,18 +36,6 @@ def test_prof2pt_smoke():
     assert np.all(np.fabs((cv_NE - uk_NFW * uk_EIN)) < 1E-10)
 
 
-def test_prof2pt_errors():
-    # Wrong first profile
-    with pytest.raises(TypeError):
-        PKC.fourier_2pt(None, COSMO, KK, MM, AA,
-                        prof2=None, mass_def=M200)
-
-    # Wrong second profile
-    with pytest.raises(TypeError):
-        PKC.fourier_2pt(P1, COSMO, KK, MM, AA,
-                        prof2=M200, mass_def=M200)
-
-
 def smoke_assert_pkhm_real(func):
     sizes = [(0, 0),
              (2, 0),
@@ -318,33 +306,16 @@ def test_pkhm_errors():
     with pytest.raises(TypeError):
         ccl.halos.HMCalculator(COSMO, HMF, None, mass_def=M200)
 
-    # Wrong mass_def
-    with pytest.raises(TypeError):
-        ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=None)
-
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
 
-    # Wrong profile
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_mean_profile_1pt(COSMO, hmc, KK, AA, None)
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_bias_1pt(COSMO, hmc, KK, AA, None)
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, None)
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_Tk3D_SSC(COSMO, hmc, P1,
-                                   prof2=P1, prof3=P1, prof4="hello",
-                                   normprof1=True)
-
-    # Wrong prof2
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         prof2=KK)
-
-    # Wrong prof_2pt
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         prof_2pt=KK)
+    # Inconsistent mass definitions
+    m200c = ccl.halos.MassDef.create_instance("200c")
+    m200m = ccl.halos.MassDef.create_instance("200m")
+    hmf = ccl.halos.MassFunc.create_instance("Tinker08", mass_def=m200c)
+    hbf = ccl.halos.HaloBias.create_instance("Tinker10", mass_def=m200m)
+    with pytest.raises(ValueError):
+        ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                               mass_def=m200c)
 
     # Wrong pk2d
     with pytest.raises(TypeError):
@@ -355,24 +326,17 @@ def test_pkhm_errors():
         pass
 
     # Wrong 1h/2h smoothing
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         smooth_transition=True)
     with pytest.raises(ValueError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
                                          smooth_transition=func, get_1h=False)
 
     # Wrong 1h damping
-    with pytest.raises(TypeError):
-        ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         supress_1h=True)
-
     with pytest.raises(ValueError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
                                          supress_1h=func, get_1h=False)
 
 
-def test_calculator_from_string_smoke():
+def test_hmcalculator_from_string_smoke():
     hmc1 = ccl.halos.HMCalculator(
         COSMO, massfunc=HMF, hbias=HBF, mass_def=M200)
     hmc2 = ccl.halos.HMCalculator(
