@@ -110,9 +110,9 @@ def test_CCLObject_default_behavior():
     instances = [MyType() for _ in range(2)]
     assert check_eq_repr_hash(*instances, equal=False)
 
-    # Test that all subclasses of ``CCLHalosObject`` use Python's default
+    # Test that all subclasses of ``CCLAutoreprObject`` use Python's default
     # ``repr`` if no ``__repr_attrs__`` has been defined.
-    instances = [ccl.CCLHalosObject() for _ in range(2)]
+    instances = [ccl.CCLAutoreprObject() for _ in range(2)]
     assert check_eq_repr_hash(*instances, equal=False)
 
 

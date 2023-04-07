@@ -99,7 +99,7 @@ def _methods_of_cosmology(cls=None, *, modules=[]):
     return cls
 
 
-_modules = ["background", "bcm", "boltzmann", "cls", "correlations",
+_modules = ["background", "bcm", "boltzmann", "cells", "correlations",
             "covariances", "neutrinos", "pk2d", "power", "pyutils",
             "tk3d", "tracers", "halos", "nl_pt"]
 
@@ -237,7 +237,7 @@ class Cosmology(CCLObject):
 
     """
     # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
-    from ._repr import _build_string_Cosmology as __repr__
+    from .base.repr_ import build_string_Cosmology as __repr__
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_accuracy_params",)
 
