@@ -175,7 +175,8 @@ extrap_types = {'none': lib.f1d_extrap_0,
                 'logx_logy': lib.f1d_extrap_logx_logy}
 
 
-@dataclass(kw_only=True, unsafe_hash=True, frozen=True)
+# TODO: py310+ add `kw_only=True` argument to dataclass decorator.
+@dataclass(unsafe_hash=True, frozen=True)
 class FFTLogParams:
     """Objects of this class store the FFTLog accuracy parameters."""
     padding_lo_fftlog: float = 0.1  # | Anti-aliasing: lower boundary factor.
