@@ -87,15 +87,15 @@ def test_CCLObject_immutability():
 
     # `update_parameters` not implemented.
     cosmo = ccl.CosmologyVanillaLCDM()
-    with pytest.raises(AttributeError):
-        cosmo.my_attr = "hello_world"
+    # with pytest.raises(AttributeError):  # TODO: Uncomment for CCLv3.
+    #     cosmo.my_attr = "hello_world"
     with pytest.raises(NotImplementedError):
         cosmo.update_parameters(A_SPLINE_NA=120)
 
     # `update_parameters` implemented.
     prof = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
-    with pytest.raises(AttributeError):
-        prof.mass_bias = 0.7
+    # with pytest.raises(AttributeError):  # TODO: Uncomment for CCLv3.
+    #     prof.mass_bias = 0.7
     assert prof.mass_bias == 0.5
     prof.update_parameters(mass_bias=0.7)
     assert prof.mass_bias == 0.7

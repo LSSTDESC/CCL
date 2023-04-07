@@ -83,7 +83,8 @@ class HaloProfileCIBShang12(HaloProfileCIB):
     __repr_attrs__ = __eq_attrs__ = (
         "cM", "nu", "alpha", "T0", "beta", "gamma", "s_z",
         "l10meff", "sigLM", "Mmin", "L0", "precision_fftlog", "normprof",)
-    __getattr__ = deprecate_attr(pairs=[('l10meff', 'log10Meff'),
+    __getattr__ = deprecate_attr(pairs=[('cM', 'concentration'),
+                                        ('l10meff', 'log10Meff'),
                                         ('sigLM', 'siglog10M')]
                                  )(super.__getattribute__)
     name = 'CIBShang12'
