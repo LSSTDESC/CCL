@@ -16,6 +16,8 @@ class GSLParams(Parameters, instance=lib.cvar.user_gsl_params):
     GSL_EPSREL = 1e-4
     # Default number of iterations for integration and root-finding.
     GSL_N_ITERATION = 1_000
+
+    N_ITERATION = GSL_N_ITERATION
     # Default number of Gauss-Kronrod points in QAG integration.
     GSL_INTEGRATION_GAUSS_KRONROD_POINTS = GSL_INTEG_GAUSS41
     # Relative precision in sigma_R calculations.

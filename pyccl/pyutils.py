@@ -384,7 +384,8 @@ def get_pk_spline_lk(cosmo=None, spline_params=spline_params):
     if cosmo is not None:
         spline_params = cosmo._spline_params
     s = spline_params
-    return np.linspace(np.log(s.K_MIN), np.log(s.K_MAX), s.N_K)
+    nk = int(np.ceil(np.log10(s.K_MAX/s.K_MIN)*s.N_K))
+    return np.linspace(np.log(s.K_MIN), np.log(s.K_MAX), nk)
 
 
 def resample_array(x_in, y_in, x_out,

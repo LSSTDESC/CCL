@@ -38,7 +38,7 @@ class SplineParams(Parameters, instance=lib.cvar.user_spline_params):
     DLOGK_INTEGRATION = 0.025
     DCHI_INTEGRATION = 5
     N_K = 167
-    N_K_3DCORR = 100_000
+    N_K_3DCOR = 100_000
 
     # Correlation function parameters
     ELL_MIN_CORR = 0.01
