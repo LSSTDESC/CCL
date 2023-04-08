@@ -1,6 +1,4 @@
 import numpy as np
-from .. import ccllib as lib
-from ..core import check
 from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import growth_factor
@@ -511,10 +509,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         :class:`~pyccl.nl_pt.power.PTCalculator`: PT Calc [optional]
     """
     if a_arr is None:
-        status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+        a_arr = cosmo.get_pk_spline_a()
 
     if tracer2 is None:
         tracer2 = tracer1

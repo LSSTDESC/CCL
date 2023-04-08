@@ -66,9 +66,9 @@ class Parameters:
         return obj
 
     def __init__(self):
-        self.reload()
         if self._factory:
-            self.reload_from_C()
+            return self.set_parameter_names()
+        self.reload()
 
     @cached_property
     def _parameters(self):
@@ -147,9 +147,8 @@ class Parameters:
             object.__setattr__(self, par, value)
             object.__setattr__(self._instance, par, value)
 
-    def reload_from_C(self):
-        """Reload from the C library."""
-        delattr(self, "_parameters")
+    def set_parameter_names(self):
+        """Set the parameter names from the C library."""
         for par in dir(self._instance):
             if self._is_parameter(par):
                 object.__setattr__(self, par, getattr(self._instance, par))
