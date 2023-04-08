@@ -27,12 +27,12 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
 
     where :math:`P_{\\rm lin}(k,a)` is the linear matter
     power spectrum, :math:`I^1_1` is defined in the documentation
-    of :meth:`~HaloModel.I_1_1`, and :math:`I^0_2` is defined
-    in the documentation of :meth:`~HaloModel.I_0_2`.
+    of :meth:`~HMCalculator.I_1_1`, and :math:`I^0_2` is defined
+    in the documentation of :meth:`~HMCalculator.I_0_2`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HaloModel`): a halo model calculator.
+        hmc (:class:`HMCalculator`): a halo model calculator.
         k (float or array_like): comoving wavenumber in Mpc^-1.
         a (float or array_like): scale factor.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
@@ -43,12 +43,12 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
         normprof1 (bool): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HaloModel.I_0_1`), where
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
-            (see :meth:`~HaloModel.I_0_1`), where
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`v` is the profile represented by `prof2`.
         prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object
@@ -183,7 +183,7 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HaloModel`): a halo model calculator.
+        hmc (:class:`HMCalculator`): a halo model calculator.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
@@ -197,11 +197,11 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
             of both profiles.
         normprof1 (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HaloModel.I_0_1`), where
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
-            (see :meth:`~HaloModel.I_0_1`), where
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`v` is the profile represented by `prof2`.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`,

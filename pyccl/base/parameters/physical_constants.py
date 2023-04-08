@@ -44,9 +44,6 @@ class PhysicalConstants(Parameters, instance=lib.cvar.constants, freeze=True):
     SOLAR_MASS = 4 * PI*PI * AU**3 / GNEWT / YEAR**2
     # Critical density (100 M_sun/h / (Mpc/h)^3).
     RHO_CRITICAL = 3*1e4/(8*PI*GNEWT) * 1e6 * MPC_TO_METER / SOLAR_MASS
-    # Neutrino constant required in Omeganuh2.
-    NU_CONST = (8*PI**5 * (KBOLTZ/HPLANCK)**3 * (KBOLTZ/15/CLIGHT**3)
-                * (8*PI*GNEWT/3) * (MPC_TO_METER**2/CLIGHT**2/1e10))
     # Linear density contrast of spherical collapse.
     DELTA_C = (3/20) * (12*PI)**(2/3)
 

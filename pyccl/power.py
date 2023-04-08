@@ -1,8 +1,13 @@
 from . import ccllib as lib
-import numpy as np
-from .core import check
+from .pyutils import check
 from .pk2d import parse_pk2d
 from .base import warn_api
+import numpy as np
+
+
+__all__ = ("linear_power", "nonlin_power", "linear_matter_power",
+           "nonlin_matter_power", "sigmaM", "sigmaR", "sigmaV", "sigma8",
+           "kNL",)
 
 
 @warn_api

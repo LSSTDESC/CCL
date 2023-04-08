@@ -2,7 +2,7 @@ import numpy as np
 import pyccl as ccl
 
 
-def test_halomodel_number_counts_numcosmo():
+def test_hmcalculator_number_counts_numcosmo():
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -29,7 +29,7 @@ def test_halomodel_number_counts_numcosmo():
 
     for i in range(benches.shape[0]):
         bench = benches[i, :]
-        hmc = ccl.halos.HaloModel(
+        hmc = ccl.halos.HMCalculator(
             cosmo, hmf, hbf, mdef,
             log10M_min=np.log10(bench[1]),
             log10M_max=np.log10(bench[2]),
@@ -62,7 +62,7 @@ def test_halomodel_number_counts_numcosmo():
         assert np.allclose(nc, bench[0], atol=0, rtol=tol)
 
 
-def test_halomodel_number_counts_numcosmo_highacc():
+def test_hmcalculator_number_counts_numcosmo_highacc():
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -89,7 +89,7 @@ def test_halomodel_number_counts_numcosmo_highacc():
 
     for i in range(benches.shape[0]):
         bench = benches[i, :]
-        hmc = ccl.halos.HaloModel(
+        hmc = ccl.halos.HMCalculator(
             cosmo, hmf, hbf, mdef,
             log10M_min=np.log10(bench[1]),
             log10M_max=np.log10(bench[2]),

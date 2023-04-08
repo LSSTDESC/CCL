@@ -5,17 +5,14 @@ from ..pyutils import _spline_integrate
 from .. import background
 from ..base import (CCLAutoRepr, unlock_instance,
                     warn_api, deprecate_attr, deprecated)
-from ..errors import CCLDeprecationWarning
 from ..base.parameters import physical_constants as const
 import numpy as np
-import functools
-import warnings
 
 
-__all__ = ("HaloModel", "HMCalculator",)
+__all__ = ("HMCalculator",)
 
 
-class HaloModel(CCLAutoRepr):
+class HMCalculator(CCLAutoRepr):
     """This class implements a set of methods that can be used to
     compute various halo model quantities. A lot of these quantities
     will involve integrals of the sort:
@@ -33,10 +30,10 @@ class HaloModel(CCLAutoRepr):
             the halo bias function to use
         mass_def (str or :class:`~pyccl.halos.massdef.MassDef`):
             the halo mass definition to use
-        lM_min, lM_max (float): lower and upper integration bounds
+        log10M_min, log10M_max (float): lower and upper integration bounds
             of logarithmic (base-10) mass (in units of solar mass).
             Default range: 8, 16.
-        nlM (int): number of uniformly-spaced samples in log(Mass)
+        nM (int): number of uniformly-spaced samples in log(Mass)
             to be used in the mass integrals. Default: 128.
         integration_method_M (string): integration method to use
             in the mass integrals. Options: "simpson" and "spline".
@@ -56,10 +53,9 @@ class HaloModel(CCLAutoRepr):
                                  )(super.__getattribute__)
 
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
-                     ("log10M_min", "lM_min"), ("log10M_max", "lM_max"),
-                     ("nlog10M", "nlM")])
+                     ("nlog10M", "nM")])
     def __init__(self, *, mass_function, halo_bias, mass_def,
-                 lM_min=8., lM_max=16., nlM=128,
+                 log10M_min=8., log10M_max=16., nM=128,
                  integration_method_M='simpson', k_min=1E-5):
         # Initialize halo model ingredients
         self.mass_def = MassDef.create_instance(mass_def)
@@ -72,34 +68,32 @@ class HaloModel(CCLAutoRepr):
                 == self.mass_function.mass_def
                 == self.halo_bias.mass_def):
             raise ValueError(
-                "HaloModel received different mass definitions "
+                "HMCalculator received different mass definitions "
                 "in mass_def, mass_function, halo_bias.")
 
         self.precision = {
-            'log10M_min': lM_min, 'log10M_max': lM_max, 'nlM': nlM,
+            'log10M_min': log10M_min, 'log10M_max': log10M_max, 'nM': nM,
             'integration_method_M': integration_method_M, 'k_min': k_min}
-        self._lmass = np.linspace(self.precision['log10M_min'],
-                                  self.precision['log10M_max'],
-                                  self.precision['nlM'])
+        self._lmass = np.linspace(log10M_min, log10M_max, nM)
         self._mass = 10.**self._lmass
         self._m0 = self._mass[0]
 
-        if self.precision['integration_method_M'] not in ['spline', 'simpson']:
-            raise NotImplementedError("Only \'simpson\' and 'spline' "
-                                      "supported as integration methods")
-        elif self.precision['integration_method_M'] == 'simpson':
+        if integration_method_M == "simpson":
             from scipy.integrate import simpson
             self._integrator = simpson
-        else:
+        elif integration_method_M == "spline":
             self._integrator = self._integ_spline
+        else:
+            raise NotImplementedError(
+                "Only 'simpson' and 'spline integration is supported.")
 
         # Cache last results for mass function and halo bias.
         self._cosmo_mf = self._cosmo_bf = None
         self._a_mf = self._a_bf = -1
 
-    def _integ_spline(self, fM, lM):
+    def _integ_spline(self, fM, log10M):
         # Spline integrator
-        return _spline_integrate(lM, fM, lM[0], lM[-1])
+        return _spline_integrate(log10M, fM, log10M[0], log10M[-1])
 
     @unlock_instance(mutate=False)
     def _get_mass_function(self, cosmo, a, rho0):
@@ -139,7 +133,7 @@ class HaloModel(CCLAutoRepr):
     @deprecated()
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
-        (see :meth:`~HaloModel.I_0_1`).
+        (see :meth:`~HMCalculator.I_0_1`).
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -425,14 +419,3 @@ class HaloModel(CCLAutoRepr):
                 prof2=prof4, mass_def=self.mass_def).T
 
         return self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
-
-
-class HMCalculator(HaloModel):
-    __doc__ = HaloModel.__doc__
-    __qualname__ = __name__ = "HaloModel"
-
-    @functools.wraps(HaloModel.__init__)
-    def __init__(self, *args, **kwargs):
-        warnings.warn("`HMCalculator` has been renamed to `HaloModel`.",
-                      CCLDeprecationWarning)
-        super().__init__(*args, **kwargs)

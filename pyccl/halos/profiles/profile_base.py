@@ -1,9 +1,9 @@
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import (CCLAutoRepr, unlock_instance,
-                     warn_api, deprecate_attr)
+from ...base import (CCLAutoRepr, abstractlinkedmethod, templatemethod,
+                     unlock_instance, warn_api, deprecate_attr)
 from ...base.parameters import FFTLogParams
 import numpy as np
-from abc import abstractproperty
+from abc import abstractmethod
 import functools
 
 
@@ -41,22 +41,18 @@ class HaloProfile(CCLAutoRepr):
                                  )(super.__getattribute__)
 
     def __init__(self):
-        if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
-            # Check that at least one of (`_real`, `_fourier`) exist.
-            raise TypeError(
-                f"Can't instantiate class {self.__class__.__name__} "
-                "with no methods _real or _fourier")
         self.precision_fftlog = FFTLogParams()
 
     __eq__ = object.__eq__
 
     __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def normprof(self) -> bool:
         """Normalize the profile in auto- and cross-correlations by
         :math:`I^0_1(k\\rightarrow 0, a|u)`
-        (see :meth:`~pyccl.halos.halo_model.HaloModel.I_0_1`).
+        (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`).
         """
 
     # TODO: CCLv3 - Rename & allocate _normprof_bool to the subclasses.
@@ -112,6 +108,22 @@ class HaloProfile(CCLAutoRepr):
         """
         return self.precision_fftlog['plaw_projected']
 
+    @abstractlinkedmethod
+    def _real(self, cosmo, r, M, a, mass_def=None):
+        """TODO: Write some useful docstring."""
+
+    @abstractlinkedmethod
+    def _fourier(self, cosmo, k, M, a, mass_def=None):
+        "TODO: Write some useful docstring."""
+
+    @templatemethod
+    def _projected(self, cosmo, r, M, a, mass_def=None):
+        """TODO: Write some useful docstring."""
+
+    @templatemethod
+    def _cumul2d(self, cosmo, r, M, a, mass_def=None):
+        """TODO: Write some useful docstring."""
+
     @warn_api
     def real(self, cosmo, r, M, a, *, mass_def=None):
         """ Returns the 3D real-space value of the profile as a
@@ -132,11 +144,9 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_real', None):
+        if self._is_implemented("_real"):
             return self._real(cosmo, r, M, a, mass_def)
-        elif getattr(self, '_fourier', None):
-            return self._fftlog_wrap(cosmo, r, M, a, mass_def,
-                                     fourier_out=False)
+        return self._fftlog_wrap(cosmo, r, M, a, mass_def, fourier_out=False)
 
     @warn_api
     def fourier(self, cosmo, k, M, a, *, mass_def=None):
@@ -163,11 +173,9 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if getattr(self, '_fourier', None):
+        if self._is_implemented("_fourier"):
             return self._fourier(cosmo, k, M, a, mass_def)
-        elif getattr(self, '_real', None):
-            return self._fftlog_wrap(cosmo, k, M, a, mass_def,
-                                     fourier_out=True)
+        return self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
 
     @warn_api(pairs=[("r_t", "r")])
     def projected(self, cosmo, r, M, a, *, mass_def=None):
@@ -193,11 +201,10 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if hasattr(self, "_projected"):
+        if self._is_implemented("_projected"):
             return self._projected(cosmo, r, M, a, mass_def)
-        else:
-            return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
-                                               is_cumul2d=False)
+        return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
+                                           is_cumul2d=False)
 
     @warn_api(pairs=[("r_t", "r")])
     def cumul2d(self, cosmo, r, M, a, *, mass_def=None):
@@ -224,11 +231,10 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if hasattr(self, "_cumul2d"):
+        if self._is_implemented("_cumul2d"):
             return self._cumul2d(cosmo, r, M, a, mass_def)
-        else:
-            return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
-                                               is_cumul2d=True)
+        return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
+                                           is_cumul2d=True)
 
     @warn_api
     def convergence(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
@@ -432,7 +438,7 @@ class HaloProfile(CCLAutoRepr):
 
         sig_r_t_out = np.zeros([nM, r_t_use.size])
         # Compute Fourier-space profile
-        if getattr(self, '_fourier', None):
+        if self._is_implemented("_fourier"):
             # Compute from `_fourier` if available.
             p_fourier = self._fourier(cosmo, k_arr, M_use,
                                       a, mass_def)

@@ -1,11 +1,11 @@
 from .. import ccllib as lib
 from ..core import check
 from ..base.parameters import physical_constants as const
-from ..base import (CCLAutoRepr, CCLNamedClass,
+from ..base import (CCLAutoRepr, CCLNamedClass, abstractlinkedmethod,
                     warn_api, deprecated, deprecate_attr)
 import numpy as np
 import functools
-from abc import abstractmethod, abstractproperty
+from abc import abstractmethod
 
 
 __all__ = ("HMIngredients",)
@@ -27,7 +27,8 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
         self.mass_def = mass_def
         self._setup()
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def _mass_def_strict_always(self) -> bool:
         """Property that dictates whether ``mass_def_strict`` can be set
         as False on initialization.
@@ -123,7 +124,7 @@ class MassFunc(HMIngredients):
     """
     _mass_def_strict_always = False
 
-    @abstractmethod
+    @abstractlinkedmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         """ Get the :math:`f(\\sigma_M)` function for this mass function
         object (see description of this class for details).
@@ -142,6 +143,7 @@ class MassFunc(HMIngredients):
             float or array_like: :math:`f(\\sigma_M)` function.
         """
 
+    @abstractlinkedmethod
     def __call__(self, cosmo, M, a):
         """ Returns the mass function for input parameters.
 
@@ -190,7 +192,7 @@ class HaloBias(HMIngredients):
     """
     _mass_def_strict_always = False
 
-    @abstractmethod
+    @abstractlinkedmethod
     def _get_bsigma(self, cosmo, sigM, a):
         """ Get the halo bias as a function of sigmaM.
 
@@ -204,6 +206,7 @@ class HaloBias(HMIngredients):
             float or array_like: f(sigma_M) function.
         """
 
+    @abstractlinkedmethod
     def __call__(self, cosmo, M, a):
         """ Returns the halo bias for input parameters.
 
@@ -241,10 +244,11 @@ class Concentration(HMIngredients):
     def __init__(self, *, mass_def):
         super().__init__(mass_def=mass_def, mass_def_strict=True)
 
-    @abstractmethod
+    @abstractlinkedmethod
     def _concentration(self, cosmo, M, a):
         """Implementation of the c(M) relation."""
 
+    @abstractlinkedmethod
     def __call__(self, cosmo, M, a):
         """ Returns the concentration for input parameters.
 

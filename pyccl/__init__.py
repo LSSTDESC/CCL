@@ -74,17 +74,7 @@ from .pk2d import (
 from .tk3d import Tk3D
 
 # Power spectrum calculations, sigma8 and kNL
-from .power import (
-    linear_power,
-    nonlin_power,
-    linear_matter_power,
-    nonlin_matter_power,
-    sigmaR,
-    sigmaV,
-    sigma8,
-    sigmaM,
-    kNL,
-)
+from .power import *
 
 # Baryons & Neutrinos
 from .bcm import (
@@ -141,7 +131,7 @@ def __getattr__(name):
     if name in rename:
         from .errors import CCLDeprecationWarning
         _warnings.warn(f"Module {name} has been renamed to {rename[name]}.",
-                      CCLDeprecationWarning)
+                       CCLDeprecationWarning)
         name = rename[name]
         return eval(name)
     raise AttributeError(f"No module named {name}.")
@@ -182,9 +172,6 @@ __all__ = (
     'h_over_h0', 'scale_factor_of_chi', 'omega_x', 'rho_x', 'sigma_critical',
     'get_camb_pk_lin', 'get_isitgr_pk_lin', 'get_class_pk_lin',
     'Pk2D', 'parse_pk2d', 'Tk3D',
-    'linear_power', 'nonlin_power',
-    'linear_matter_power', 'nonlin_matter_power',
-    'sigmaR', 'sigmaV', 'sigma8', 'sigmaM', 'kNL',
     'bcm_model_fka', 'bcm_correct_pk2d',
     'angular_cl',
     'Tracer', 'NumberCountsTracer', 'WeakLensingTracer', 'CMBLensingTracer',

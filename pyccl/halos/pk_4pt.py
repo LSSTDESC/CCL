@@ -7,7 +7,6 @@ from .profiles import HaloProfileNumberCounts as ProfNC
 from .profiles_2pt import Profile2pt
 import numpy as np
 import warnings
-from functools import partial
 
 
 __all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
@@ -30,7 +29,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
         I^0_{2,2}(k_u,k_v,a|u_{1,2},v_{1,2})
 
     where :math:`I^0_{2,2}` is defined in the documentation
-    of :meth:`~HaloModel.I_0_22`.
+    of :meth:`~HMCalculator.I_0_22`.
 
     .. note:: This approximation assumes that the 4-point
               profile cumulant is the same as the product of two
@@ -39,7 +38,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HaloModel`): a halo model calculator.
+        hmc (:class:`HMCalculator`): a halo model calculator.
         k (float or array_like): comoving wavenumber in Mpc^-1.
         a (float or array_like): scale factor.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
@@ -63,7 +62,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
         normprof1 (bool): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HaloModel.I_0_1`), where
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
@@ -142,7 +141,7 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HaloModel`): a halo model calculator.
+        hmc (:class:`HMCalculator`): a halo model calculator.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
@@ -164,7 +163,7 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
         normprof1 (bool): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HaloModel.I_0_1`), where
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
@@ -234,13 +233,13 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
         P_L(k)+I^1_2(k|u,v) - (b_{u} + b_{v}) P_{u,v}(k) \\right)
 
     where the :math:`I^1_2` is defined in the documentation
-    :meth:`~HaloModel.I_1_2` and :math:`b_{}` and :math:`b_{vv}` are the
+    :meth:`~HMCalculator.I_1_2` and :math:`b_{}` and :math:`b_{vv}` are the
     linear halo biases for quantities :math:`u` and :math:`v`, respectively
     (zero if they are not clustering).
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HaloModel`): a halo model calculator.
+        hmc (:class:`HMCalculator`): a halo model calculator.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo NFW
             profile.
         bias1 (float or array): linear galaxy bias for quantity 1. If an array,
@@ -371,13 +370,13 @@ def halomod_Tk3D_SSC(
         P_{u,v}(k)
 
     where the :math:`I^a_b` are defined in the documentation
-    of :meth:`~HaloModel.I_1_1` and  :meth:`~HaloModel.I_1_2` and
+    of :meth:`~HMCalculator.I_1_1` and  :meth:`~HMCalculator.I_1_2` and
     :math:`b_{u}` and :math:`b_{v}` are the linear halo biases for quantities
     :math:`u` and :math:`v`, respectively (zero if they are not clustering).
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HaloModel`): a halo model calculator.
+        hmc (:class:`HMCalculator`): a halo model calculator.
         prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
@@ -399,7 +398,7 @@ def halomod_Tk3D_SSC(
         normprof1 (bool): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HaloModel.I_0_1`), where
+            (see :meth:`~HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by `prof`.
         normprof2 (bool): same as `normprof1` for `prof2`.
         normprof3 (bool): same as `normprof1` for `prof3`.
@@ -491,20 +490,26 @@ def halomod_Tk3D_SSC(
         dpk12[ia] = norm1 * norm2 * ((47/21 - dpk/3)*i11_1*i11_2*pk + i12_12)
         dpk34[ia] = norm3 * norm4 * ((47/21 - dpk/3)*i11_3*i11_4*pk + i12_34)
 
-        # Counter terms for clustering (i.e. - (bA + bB) * PAB
-        counterterm = partial(_get_counterterm, cosmo=cosmo, hmc=hmc,
-                              k=k_use, a=aa, pk=pk)
+        # Counter terms for clustering (i.e. - (bA + bB) * PAB)
+        def _get_counterterm(pA, pB, p2pt, nA, nB, i11_A, i11_B):
+            """Helper to compute counter-terms."""
+            # p : profiles | p2pt : 2-point | n : norms | i11 : I_1_1 integral
+            bA = i11_A * nA if isinstance(pA, ProfNC) else np.zeros_like(k_use)
+            bB = i11_B * nB if isinstance(pB, ProfNC) else np.zeros_like(k_use)
+            i02 = hmc.I_0_2(cosmo, k_use, aa, pA, prof2=pB, prof_2pt=p2pt)
+            P = nA * nB * (pk * i11_A * i11_B + i02)
+            return (bA + bB) * P
 
         if isinstance(prof, ProfNC) or isinstance(prof2, ProfNC):
-            dpk12[ia] -= counterterm(prof, prof2, prof12_2pt,
-                                     norm1, norm2, i11_1, i11_2)
+            dpk12[ia] -= _get_counterterm(prof, prof2, prof12_2pt,
+                                          norm1, norm2, i11_1, i11_2)
 
         if isinstance(prof3, ProfNC) or isinstance(prof4, ProfNC):
             if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
                 dpk34[ia] -= dpk12[ia]
             else:
-                dpk34[ia] -= counterterm(prof3, prof4, prof34_2pt,
-                                         norm3, norm4, i11_3, i11_4)
+                dpk34[ia] -= _get_counterterm(prof3, prof4, prof34_2pt,
+                                              norm3, norm4, i11_3, i11_4)
 
     dpk12, dpk34, use_log = _logged_output(dpk12, dpk34, log=use_log)
 
@@ -543,17 +548,6 @@ def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt,
             prof4.normprof = normprof4
 
     return prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt
-
-
-def _get_counterterm(pA, pB, p2pt, nA, nB, i11_A, i11_B, *,
-                     cosmo, hmc, k, a, pk):
-    """Helper to compute counter-terms."""
-    # p : profiles | p2pt : 2-point | n : norms | i11 : I_1_1 integral
-    bA = i11_A * nA if isinstance(pA, ProfNC) else np.zeros_like(k)
-    bB = i11_B * nB if isinstance(pB, ProfNC) else np.zeros_like(k)
-    i02 = hmc.I_0_2(cosmo, k, a, pA, prof2=pB, prof_2pt=p2pt)
-    P = nA * nB * (pk * i11_A * i11_B + i02)
-    return (bA + bB) * P
 
 
 def _logged_output(*arrs, log):
