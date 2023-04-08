@@ -75,6 +75,36 @@ class _Defaults:
     T_ncdm = 0.71611
 
 
+def _methods_of_cosmology(cls=None, *, modules=[]):
+    """Assign all functions in ``modules`` which take ``cosmo`` as their
+    first argument as methods of the class ``cls``.
+    """
+    import functools
+    from importlib import import_module
+
+    if cls is None:
+        # called with parentheses
+        return functools.partial(_methods_of_cosmology, modules=modules)
+
+    pkg = __name__.rsplit(".")[0]
+    modules = [import_module(f".{module}", pkg) for module in modules]
+    funcs = [getmembers(module, isfunction) for module in modules]
+    funcs = [func for sublist in funcs for func in sublist]
+
+    for name, func in funcs:
+        pars = signature(func).parameters
+        if pars and list(pars)[0] == "cosmo":
+            setattr(cls, name, func)
+
+    return cls
+
+
+_modules = ["background", "bcm", "boltzmann", "cells", "correlations",
+            "covariances", "neutrinos", "pk2d", "power", "pyutils",
+            "tk3d", "tracers", "halos", "nl_pt"]
+
+
+@_methods_of_cosmology(modules=_modules)
 class Cosmology(CCLObject):
     """A cosmology including parameters and associated data.
 
@@ -208,25 +238,8 @@ class Cosmology(CCLObject):
     """
     # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
     from .base.repr_ import build_string_Cosmology as __repr__
-
-    # Go through all functions in the main package and the subpackages
-    # and make every function that takes `cosmo` as its first argument
-    # an attribute of this class.
-    from . import (background, bcm, boltzmann, cells,
-                   correlations, covariances, neutrinos,
-                   pk2d, power, pyutils, tk3d, tracers, halos, nl_pt)
-    subs = [background, boltzmann, bcm, cells, correlations, covariances,
-            neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt]
-    funcs = [getmembers(sub, isfunction) for sub in subs]
-    funcs = [func for sub in funcs for func in sub]
-    for name, func in funcs:
-        pars = list(signature(func).parameters)
-        if pars and pars[0] == "cosmo":
-            vars()[name] = func
-    # clear unnecessary locals
-    del (background, boltzmann, bcm, cells, correlations, covariances,
-         neutrinos, pk2d, power, pyutils, tk3d, tracers, halos, nl_pt,
-         subs, funcs, func, name, pars)
+    __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
+                    "_spline_params", "_gsl_params",)
 
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -1177,6 +1190,9 @@ class CosmologyCalculator(Cosmology):
             temperature. The default is the same as in the base class
     """
     # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
+    __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
+                    "_spline_params", "_gsl_params", "_pk_lin", "_pk_nl",)
+
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,

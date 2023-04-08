@@ -22,7 +22,8 @@ class MassFuncTinker10(MassFunc):
         norm_all_z (bool): should we normalize the mass function
             at z=0 or at all z?
     """
-    __repr_attrs__ = ("mass_def", "mass_def_strict", "norm_all_z",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
+                                     "norm_all_z",)
     name = 'Tinker10'
 
     @warn_api

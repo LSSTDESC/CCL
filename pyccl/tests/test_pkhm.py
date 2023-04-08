@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import pyccl as ccl
+from .test_cclobject import check_eq_repr_hash
 
 
 COSMO = ccl.Cosmology(
@@ -60,6 +61,34 @@ def smoke_assert_pkhm_real(func):
         p = func(k, a)
         assert np.shape(p) == sh
         assert np.all(np.isfinite(p))
+
+
+def test_HMIngredients_eq_repr_hash():
+    # Test eq, repr, hash for the HMCalculator and its ingredients.
+    # 1. Build a halo model calculator using the default parametrizations.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    HMC = ccl.halos.HMCalculator(
+        cosmo, massfunc="Tinker08", hbias="Tinker10", mass_def="200m")
+
+    # 2. Define separate default halo model ingredients.
+    MDEF = ccl.halos.MassDef200m()
+    HMF = ccl.halos.MassFuncTinker08(cosmo, mass_def=MDEF)
+    HBF = ccl.halos.HaloBiasTinker10(cosmo, mass_def=MDEF)
+    HMC2 = ccl.halos.HMCalculator(
+        cosmo, massfunc=HMF, hbias=HBF, mass_def=MDEF)  # equal
+    HMC3 = ccl.halos.HMCalculator(
+        cosmo, massfunc="Press74", hbias="Sheth01", mass_def="fof")  # unequal
+
+    # 3. Test equivalence.
+    assert check_eq_repr_hash(MDEF, HMC._mdef)
+    assert check_eq_repr_hash(HMF, HMC._massfunc)
+    assert check_eq_repr_hash(HBF, HMC._hbias)
+    assert check_eq_repr_hash(HMC, HMC2)
+
+    assert check_eq_repr_hash(MDEF, HMC3._mdef, equal=False)
+    assert check_eq_repr_hash(HMF, HMC3._massfunc, equal=False)
+    assert check_eq_repr_hash(HBF, HMC3._hbias, equal=False)
+    assert check_eq_repr_hash(HMC, HMC3, equal=False)
 
 
 @pytest.mark.parametrize('norm', [True, False])

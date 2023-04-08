@@ -2,6 +2,7 @@ from _thread import RLock
 from abc import ABC, abstractmethod
 from inspect import signature
 import functools
+from operator import attrgetter
 
 
 __all__ = ("ObjectLock",
@@ -89,18 +90,8 @@ class UnlockInstance:
         if self.id != self.object_lock._lock_id:
             return
 
-        with self.thread_lock:
-            # Reset `repr` if the object has been mutated.
-            if self.mutate:
-                try:
-                    delattr(self.instance, "_repr")
-                    delattr(self.instance, "_hash")
-                except AttributeError:
-                    # Object mutated but none of these exist.
-                    pass
-
-            # Lock the instance on exit.
-            self.object_lock.lock()
+        # Lock the instance on exit.
+        # self.object_lock.lock()  # TODO: Uncomment for CCLv3.
 
     @classmethod
     def unlock_instance(cls, func=None, *, name=None, mutate=True):
@@ -146,27 +137,6 @@ class UnlockInstance:
             newfunc = cls.unlock_instance(mutate=mutate)(func)
             setattr(cl, name, newfunc)
 
-    # TODO: Remove for CCLv3 & replace with Funlock.
-    @classmethod
-    def Funlock2(cls, cl, name):
-        """Replacement for Funlock incompatibility with signature.bind."""
-
-        def lock_on_exit(func):
-            @functools.wraps(func)
-            def wrapper(self, *args, **kwargs):
-                out = func(self, *args, **kwargs)
-                init_name = self.__class__.__init__.__qualname__
-                this_name = func.__qualname__
-                if this_name is init_name:  # skip this if called via `super()`
-                    self._object_lock.lock()
-                return out
-            return wrapper
-
-        func = vars(cl).get(name)
-        if func is not None:
-            newfunc = lock_on_exit(func)
-            setattr(cl, name, newfunc)
-
 
 unlock_instance = UnlockInstance.unlock_instance
 
@@ -185,7 +155,7 @@ class FancyRepr:
     def enable(cls):
         """Enable fancy representations if they exist."""
         for cl, method in cls._classes.items():
-            FancyRepr.bind_and_replace(cl, method)
+            setattr(cl, "__repr__", method)
         cls._enabled = True
 
     @classmethod
@@ -194,21 +164,6 @@ class FancyRepr:
         for cl in cls._classes.keys():
             cl.__repr__ = object.__repr__
         cls._enabled = False
-
-    @classmethod
-    def bind_and_replace(cls, cl, method):
-        """Bind ``method`` to class ``cl``, and replace original with default.
-        This helper only works for binding and replacing ``__repr__`` methods
-        for ``CCLObjects``.
-        """
-        # If the class defines a custom `__repr__`, this will be the new
-        # `_repr` (which is cached). Decorator `cached_property` requires
-        # that `__set_name__` is called on it.
-        bmethod = functools.cached_property(method)
-        cl._repr = bmethod
-        bmethod.__set_name__(cl, "_repr")
-        # Fall back to using `__ccl_repr__` from `CCLObject`.
-        cl.__repr__ = cl.__ccl_repr__
 
 
 def _method_wrapper_factory(hook_name: str, default_value=True) -> callable:
@@ -303,12 +258,10 @@ class CCLObject(ABC):
         # 2. Replace repr (if implemented) with its cached version.
         if "__repr__" in vars(cls):
             FancyRepr.add(cls)
-            FancyRepr.bind_and_replace(cls, cls.__repr__)
 
-        # 3. Unlock instance on specific methods.
+        # 3. Unlock instance on specific methods.  # TODO: Uncomment for CCLv3.
         # UnlockInstance.Funlock(cls, "__init__", mutate=False)
-        UnlockInstance.Funlock2(cls, "__init__")  # TODO: Replace in CCLv3.
-        UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
+        # UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
 
         # 4. Process linked abstract methods.
         isabstract = lambda f: hasattr(f, "__isabstractlinkedmethod__")  # noqa
@@ -342,34 +295,27 @@ class CCLObject(ABC):
         object.__setattr__(self, name, value)
 
     def update_parameters(self, **kwargs):
-        name = self.__class__.__qualname__
+        name = self.__class__.__name__
         raise NotImplementedError(f"{name} objects are immutable.")
 
-    @functools.cached_property
-    def _repr(self):
+    def __repr__(self):
         # By default we use `__repr__` from `object`.
         return object.__repr__(self)
 
-    @functools.cached_property
-    def _hash(self):
+    def __hash__(self):
         # `__hash__` makes use of the `repr` of the object,
         # so we have to make sure that the `repr` is unique.
         return hash(repr(self))
-
-    def __ccl_repr__(self):
-        # The custom `__repr__` is converted to a
-        # cached property and is replaced by this method.
-        return self._repr
-
-    __repr__ = __ccl_repr__
-
-    def __hash__(self):
-        return self._hash
 
     def __eq__(self, other):
         # Two same-type objects are equal if their representations are equal.
         if self.__class__ is not other.__class__:
             return False
+        # Compare the attributes listed in `__eq_attrs__`.
+        if hasattr(self, "__eq_attrs__"):
+            return all([attrgetter(attr)(self) == attrgetter(attr)(other)
+                        for attr in self.__eq_attrs__])
+        # Fall back to repr comparison.
         return repr(self) == repr(other)
 
     def _is_abstractlinked(self, name):

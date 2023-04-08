@@ -41,8 +41,9 @@ class HaloProfileEinasto(HaloProfileMatter):
         alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
             'cosmo' to calculate the value from cosmology. Default: 'cosmo'
     """
-    __repr_attrs__ = ("concentration", "truncated", "alpha",
-                      "precision_fftlog", "normprof",)
+    __repr_attrs__ = __eq_attrs__ = ("concentration", "truncated", "alpha",
+                                     "precision_fftlog", "normprof",)
+    name = 'Einasto'
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration, truncated=True, alpha='cosmo'):

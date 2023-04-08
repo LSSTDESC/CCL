@@ -37,15 +37,12 @@ class HaloProfile(CCLAutoRepr):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
+    __repr_attrs__ = __eq_attrs__ = ("precision_fftlog",)
     __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
                                  )(super.__getattribute__)
 
     def __init__(self):
         self.precision_fftlog = FFTLogParams()
-
-    __eq__ = object.__eq__
-
-    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
 
     @property
     @abstractmethod

@@ -26,15 +26,11 @@ class Profile2pt(CCLAutoRepr):
             Defaults to ``r_corr=0``, returning simply the product
             of the fourier profiles.
     """
-    __repr_attrs__ = ("r_corr",)
+    __repr_attrs__ = __eq_attrs__ = ("r_corr",)
 
     @warn_api
     def __init__(self, *, r_corr=0.):
         self.r_corr = r_corr
-
-    __eq__ = object.__eq__
-
-    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
 
     @warn_api
     def update_parameters(self, *, r_corr=None):

@@ -109,7 +109,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         ns_independent (bool): drop requirement to only form
             satellites when centrals are present.
     """
-    __repr_attrs__ = (
+    __repr_attrs__ = __eq_attrs__ = (
         "concentration", "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p",
         "log10M0_0", "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0",
         "alpha_p", "fc_0", "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p",
@@ -120,6 +120,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
         ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")]
     )(super.__getattribute__)
+    name = 'HOD'
 
     @warn_api(pairs=[("c_M_relation", "concentration"),
                      ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),

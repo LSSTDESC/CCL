@@ -28,7 +28,7 @@ class ConcentrationIshiyama21(Concentration):
             method. Otherwise, use the concentration found with profile
             fitting. The default is False.
     """
-    __repr_attrs__ = ("mass_def", "relaxed", "Vmax",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'
 
     @warn_api(pairs=[("mdef", "mass_def")])

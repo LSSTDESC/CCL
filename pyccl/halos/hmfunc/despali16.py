@@ -20,7 +20,8 @@ class MassFuncDespali16(MassFunc):
             definition will be ignored.
         ellipsoidal (bool): use the ellipsoidal parametrization.
     """
-    __repr_attrs__ = ("mass_def", "mass_def_strict", "ellipsoidal",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
+                                     "ellipsoidal",)
     name = 'Despali16'
 
     @warn_api
