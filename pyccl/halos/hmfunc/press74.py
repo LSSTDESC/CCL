@@ -1,4 +1,5 @@
 from ...base import warn_api
+from ...base.parameters import physical_constants as const
 from ..halo_model_base import MassFunc
 import numpy as np
 
@@ -31,6 +32,6 @@ class MassFuncPress74(MassFunc):
         return mass_def.Delta != "fof"
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        delta_c = 1.68647
+        delta_c = const.DELTA_C
         nu = delta_c/sigM
         return self._norm * nu * np.exp(-0.5 * nu**2)

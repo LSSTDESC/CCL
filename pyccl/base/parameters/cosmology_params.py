@@ -23,3 +23,6 @@ class CosmologyParams(Parameters, factory=lib.parameters):
         if key == "mgrowth":
             return lib.parameters_mgrowth_set_custom(self._instance, *value)
         super().__setattr__(key, value)
+
+    def __del__(self):
+        lib.parameters_free(self._instance)

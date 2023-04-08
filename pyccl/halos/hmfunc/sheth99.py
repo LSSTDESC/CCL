@@ -1,5 +1,6 @@
 from ... import ccllib as lib
 from ...base import warn_api
+from ...base.parameters import physical_constants as const
 from ...pyutils import check
 from ..halo_model_base import MassFunc
 import numpy as np
@@ -19,9 +20,9 @@ class MassFuncSheth99(MassFunc):
             The default is 'fof'.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
-        use_delta_c_fit (bool): if True, use delta_crit given by
+        use_delta_c_fit (bool): if True, use delta_c given by
             the fit of Nakamura & Suto 1997. Otherwise use
-            delta_crit = 1.68647.
+            delta_c = 1.68647.
     """
     __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = 'Sheth99'
@@ -48,7 +49,7 @@ class MassFuncSheth99(MassFunc):
             delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
             check(status, cosmo=cosmo)
         else:
-            delta_c = 1.68647
+            delta_c = const.DELTA_C
 
         nu = delta_c / sigM
         return nu * self.A * (1. + (self.a * nu**2)**(-self.p)) * (

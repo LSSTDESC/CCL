@@ -1,5 +1,6 @@
 from ... import ccllib as lib
 from ...base import warn_api
+from ...base.parameters import physical_constants as const
 from ...pyutils import check
 from ..halo_model_base import Concentration
 import numpy as np
@@ -87,7 +88,7 @@ class ConcentrationIshiyama21(Concentration):
         return np.asarray(roots)
 
     def _concentration(self, cosmo, M, a):
-        nu = 1.686 / cosmo.sigmaM(M, a)
+        nu = const.DELTA_C / cosmo.sigmaM(M, a)
         n_eff = -2 * self._dlsigmaR(cosmo, M, a) - 3
         alpha_eff = cosmo.growth_rate(a)
 

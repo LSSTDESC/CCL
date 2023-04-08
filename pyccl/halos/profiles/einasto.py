@@ -1,4 +1,5 @@
 from ...base import warn_api
+from ...base.parameters import physical_constants as const
 from ...power import sigmaM
 from ..concentration import Concentration
 from ..massdef import MassDef
@@ -75,7 +76,7 @@ class HaloProfileEinasto(HaloProfileMatter):
             Mvir = mass_def.translate_mass(
                 cosmo, M, a, mass_def_other=MassDef('vir', 'matter'))
             sM = sigmaM(cosmo, Mvir, a)
-            nu = 1.686 / sM
+            nu = const.DELTA_C / sM
             return 0.155 + 0.0095 * nu * nu
         return np.full_like(M, self.alpha)
 

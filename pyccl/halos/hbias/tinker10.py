@@ -1,4 +1,5 @@
 from ...base import warn_api
+from ...base.parameters import physical_constants as const
 from ..halo_model_base import HaloBias
 import numpy as np
 
@@ -34,7 +35,7 @@ class HaloBiasTinker10(HaloBias):
         self.B = 0.183
         self.b = 1.5
         self.c = 2.4
-        self.dc = 1.68647
+        self.dc = const.DELTA_C
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM

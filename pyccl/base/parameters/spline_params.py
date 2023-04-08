@@ -13,7 +13,8 @@ class SplineParams(Parameters, instance=lib.cvar.user_spline_params):
     A_SPLINE_MIN = 0.1
     A_SPLINE_MINLOG_PK = 0.01
     A_SPLINE_MIN_PK = 0.1
-    A_SPLINE_MINLOG_SM = 0.1
+    A_SPLINE_MINLOG_SM = 0.01
+    A_SPLINE_MIN_SM = 0.1
     A_SPLINE_MAX = 1.0
     A_SPLINE_MINLOG = 0.000_1
     A_SPLINE_NLOG = 250
@@ -35,7 +36,7 @@ class SplineParams(Parameters, instance=lib.cvar.user_spline_params):
     K_MAX = 1e3
     K_MIN = 5e-5
     DLOGK_INTEGRATION = 0.025
-    DCHI_INTEGRATION = 5.
+    DCHI_INTEGRATION = 5
     N_K = 167
     N_K_3DCORR = 100_000
 
@@ -44,7 +45,17 @@ class SplineParams(Parameters, instance=lib.cvar.user_spline_params):
     ELL_MAX_CORR = 60_000
     N_ELL_CORR = 5_000
 
+    # Interpolation types
+    A_SPLINE_TYPE = None
+    K_SPLINE_TYPE = None
+    M_SPLINE_TYPE = None
+    PNL_SPLINE_TYPE = None
+    PLIN_SPLINE_TYPE = None
+    CORR_SPLINE_TYPE = None
+
     def __setattr__(self, key, value):
-        if (key, value) == ("A_SPLINE_MAX", 1.0):
-            return  # Setting `A_SPLINE_MAX` to its default value; do nothing.
+        if key == "A_SPLINE_MAX" and value != 1.0:
+            raise ValueError("A_SPLINE_MAX is fixed to 1.")
+        if "SPLINE_TYPE" in key and value is not None:
+            raise ValueError("Spline types are fixed constants.")
         super().__setattr__(key, value)

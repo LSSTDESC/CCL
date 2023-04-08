@@ -143,7 +143,9 @@ class Parameters:
         """Reload the original values of the parameters."""
         source = self.__class__ if source is None else source
         for par in self:
-            object.__setattr__(self, par, getattr(source, par))
+            value = getattr(source, par)
+            object.__setattr__(self, par, value)
+            object.__setattr__(self._instance, par, value)
 
     def reload_from_C(self):
         """Reload from the C library."""

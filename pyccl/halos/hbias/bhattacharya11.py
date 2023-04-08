@@ -1,4 +1,5 @@
 from ...base import warn_api
+from ...base.parameters import physical_constants as const
 from ..halo_model_base import HaloBias
 
 
@@ -33,7 +34,7 @@ class HaloBiasBhattacharya11(HaloBias):
         self.az = 0.01
         self.p = 0.807
         self.q = 1.795
-        self.dc = 1.68647
+        self.dc = const.DELTA_C
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM

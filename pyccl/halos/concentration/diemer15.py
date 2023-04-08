@@ -1,4 +1,5 @@
 from ...base import warn_api
+from ...base.parameters import physical_constants as const
 from ..halo_model_base import Concentration
 import numpy as np
 
@@ -45,7 +46,7 @@ class ConcentrationDiemer15(Concentration):
         n = pk(k_R, a, derivative=True)
 
         sig = cosmo.sigmaM(M, a)
-        delta_c = 1.68647
+        delta_c = const.DELTA_C
         nu = delta_c / sig
 
         floor = self.phi_0 + n * self.phi_1

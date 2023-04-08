@@ -450,9 +450,7 @@ def get_class_pk_lin(cosmo):
     # massive neutrinos
     if cosmo["N_nu_mass"] > 0:
         params["N_ncdm"] = cosmo["N_nu_mass"]
-        masses = lib.parameters_get_nu_masses(cosmo._params, 3)
-        params["m_ncdm"] = ", ".join(
-            ["%g" % m for m in masses[:cosmo["N_nu_mass"]]])
+        params["m_ncdm"] = ", ".join(["%g" % m for m in cosmo["m_nu"]])
 
     params["T_cmb"] = cosmo["T_CMB"]
 

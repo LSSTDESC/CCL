@@ -349,65 +349,42 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     return f
 
 
-def get_pk_spline_nk(cosmo=None):
-    """Get the number of sampling points in the wavenumber dimension.
+def loglin_spacing(logstart, xmin, xmax, num_log, num_lin):
+    """Create an array spaced first logarithmically, then linearly.
 
-    Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
-            Input cosmology.
+    .. note::
+
+        The number of logarithmically spaced points used is ``num_log - 1``
+        because the first point of the linearly spaced points is the same as
+        the end point of the logarithmically spaced points.
+
+    .. code-block:: text
+
+        |=== num_log ==|   |============== num_lin ================|
+      --*-*--*---*-----*---*---*---*---*---*---*---*---*---*---*---*--> (axis)
+        ^                  ^                                       ^
+     logstart             xmin                                    xmax
     """
+    log = np.geomspace(logstart, xmin, num_log-1, endpoint=False)
+    lin = np.linspace(xmin, xmax, num_lin)
+    return np.concatenate((log, lin))
+
+
+def get_pk_spline_a(cosmo=None, spline_params=spline_params):
+    """Get a sampling a-array. Used for P(k) splines."""
     if cosmo is not None:
-        return lib.get_pk_spline_nk(cosmo.cosmo)
-    ndecades = np.log10(spline_params.K_MAX / spline_params.K_MIN)
-    return int(np.ceil(ndecades*spline_params.N_K))
+        spline_params = cosmo._spline_params
+    s = spline_params
+    return loglin_spacing(s.A_SPLINE_MINLOG_PK, s.A_SPLINE_MIN_PK,
+                          s.A_SPLINE_MAX, s.A_SPLINE_NLOG_PK, s.A_SPLINE_NA_PK)
 
 
-def get_pk_spline_na(cosmo=None):
-    """Get the number of sampling points in the scale factor dimension.
-
-    Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
-            Input cosmology.
-    """
+def get_pk_spline_lk(cosmo=None, spline_params=spline_params):
+    """Get a sampling log(k)-array. Used for P(k) splines."""
     if cosmo is not None:
-        return lib.get_pk_spline_na(cosmo.cosmo)
-    return spline_params.A_SPLINE_NA_PK + spline_params.A_SPLINE_NLOG_PK - 1
-
-
-def get_pk_spline_lk(cosmo=None):
-    """Get a log(k)-array with sampling rate defined by ``ccl.spline_params``
-    or by the spline parameters of the input ``cosmo``.
-
-    Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
-            Input cosmology.
-    """
-    nk = get_pk_spline_nk(cosmo=cosmo)
-    if cosmo is not None:
-        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, 0)
-        check(status, cosmo)
-        return lk_arr
-    lk_arr, status = lib.get_pk_spline_lk_from_params(spline_params, nk, 0)
-    check(status)
-    return lk_arr
-
-
-def get_pk_spline_a(cosmo=None):
-    """Get an a-array with sampling rate defined by ``ccl.spline_params``
-    or by the spline parameters of the input ``cosmo``.
-
-    Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
-            Input cosmology.
-    """
-    na = get_pk_spline_na(cosmo=cosmo)
-    if cosmo is not None:
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, 0)
-        check(status, cosmo)
-        return a_arr
-    a_arr, status = lib.get_pk_spline_a_from_params(spline_params, na, 0)
-    check(status)
-    return a_arr
+        spline_params = cosmo._spline_params
+    s = spline_params
+    return np.linspace(np.log(s.K_MIN), np.log(s.K_MAX), s.N_K)
 
 
 def resample_array(x_in, y_in, x_out,
