@@ -5,10 +5,6 @@
 
 CCL_BEGIN_DECLS
 
-ccl_f2d_t *ccl_compute_linpower_bbks(ccl_cosmology *cosmo, int *status);
-
-ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int wiggled, int *status);
-
 ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status);
 
 ccl_f2d_t *ccl_apply_halofit(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status);

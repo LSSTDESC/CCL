@@ -13,15 +13,6 @@
 #include "ccl_emu17.h"
 #include "ccl_emu17_params.h"
 
-// helper functions for BBKS and EH98
-static double bbks_power(ccl_parameters *params, void *p, double k) {
-  return ccl_bbks_power(params, k);
-}
-
-static double eh_power(ccl_parameters *params, void *p, double k) {
-  return ccl_eh_power(params, (eh_struct*)p, k);
-}
-
 /*------ ROUTINE: ccl_cosmology_compute_power_analytic -----
 INPUT: cosmology
 TASK: provide spline for an analytic power spectrum with baryonic correction
@@ -145,28 +136,6 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
   free(z);
   free(y2d);
   return psp_out;
-}
-
-ccl_f2d_t *ccl_compute_linpower_bbks(ccl_cosmology *cosmo, int *status)
-{
-  ccl_f2d_t *psp=ccl_compute_linpower_analytic(cosmo, NULL, bbks_power, status);
-  return psp;
-}
-
-ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int wiggled, int *status)
-{
-  ccl_f2d_t *psp = NULL;
-  eh_struct *eh = NULL;
-  eh = ccl_eh_struct_new(&(cosmo->params),wiggled);
-  if (eh != NULL) {
-    psp=ccl_compute_linpower_analytic(cosmo, eh,
-                                      eh_power,
-                                      status);
-  }
-  else
-    *status = CCL_ERROR_MEMORY;
-  free(eh);
-  return psp;
 }
 
 /*------ ROUTINE: ccl_compute_power_emu -----
