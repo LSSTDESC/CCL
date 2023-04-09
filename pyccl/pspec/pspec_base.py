@@ -10,7 +10,7 @@ __all__ = ("rescale_power_spectrum", "PowerSpectrum", "PowerSpectrumAnalytic",)
 def rescale_power_spectrum(cosmo, pk, rescale_mg=False, rescale_s8=False):
     """
     """
-    rescale_mg = rescale_mg and cosmo["mu_0"] > 1e-14
+    rescale_mg = rescale_mg and np.abs(cosmo["mu_0"]) > 1e-14
     rescale_s8 = rescale_s8 and np.isfinite(cosmo["sigma8"])
     if not (rescale_mg or rescale_s8):
         return pk
@@ -21,10 +21,9 @@ def rescale_power_spectrum(cosmo, pk, rescale_mg=False, rescale_s8=False):
 
     # If scale-independent mu/Sigma modified gravity is in use and mu != 0,
     # get the unnormalized growth factor in MG and the one for the GR case
-    # to rescale the CLASS power spectrum.
+    # to rescale the power spectrum.
     if rescale_mg:
         # Set up a copy Cosmology in GR (mu_0 = Sigma_0 = 0) to rescale P(k).
-
         noGR = {"mu_0": 0, "sigma_0": 0,
                 "c1_mg": 1, "c2_mg": 1, "lambda_mg": 0}
         cosmo_GR = cosmo.copy(**noGR)

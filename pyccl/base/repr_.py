@@ -154,7 +154,7 @@ def build_string_Cosmology(self):
 
     def printextras(dic):
         # Print any extra parameters.
-        if dic["extra_parameters"] is None:
+        if not dic["extra_parameters"]:
             return ""
         tup = _to_hashable(dic["extra_parameters"])
 

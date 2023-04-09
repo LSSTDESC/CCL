@@ -673,7 +673,7 @@ class Cosmology(CCLObject):
         state.pop('cosmo', None)
         state.pop('_params', None)
         state.pop('_config', None)
-        return state
+        return copy.deepcopy(state)
 
     def __setstate__(self, state):
         self.__dict__ = state
