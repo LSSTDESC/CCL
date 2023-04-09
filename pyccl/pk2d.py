@@ -175,30 +175,21 @@ class Pk2D(CCLObject):
                 `'eisenstein_hu_nowiggles'` (Eisenstein & Hu astro-ph/9709112).
                 `'emu'` (arXiv:1508.02654).
         """
-        pk2d = Pk2D(empty=True)
-        status = 0
-        if model == 'bbks':
-            cosmo.compute_growth()
-            ret = lib.compute_linpower_bbks(cosmo.cosmo, status)
-        elif model == 'eisenstein_hu':
-            cosmo.compute_growth()
-            ret = lib.compute_linpower_eh(cosmo.cosmo, 1, status)
-        elif model == 'eisenstein_hu_nowiggles':
-            cosmo.compute_growth()
-            ret = lib.compute_linpower_eh(cosmo.cosmo, 0, status)
-        elif model == 'emu':
-            ret = lib.compute_power_emu(cosmo.cosmo, status)
-        else:
-            raise ValueError("Unknown model %s " % model)
+        if model == "emu":
+            ret = lib.compute_power_emu(cosmo.cosmo, 0)
+            psp, status = ret if np.ndim(ret) else (None, ret)
+            check(status, cosmo)
+            return cls.from_psp(psp)
 
-        if np.ndim(ret) == 0:
-            status = ret
-        else:
-            with UnlockInstance(pk2d):
-                pk2d.psp, status = ret
+        from .pspec import PowerSpectrum
+        # Parse extra parameters in `cosmo`.
+        extras_map = {"boltzmann_camb": "camb", "boltzmann_isitgr": "camb",
+                      "boltzmann_class": "class", }
+        extras_name = extras_map.get(model) or None
+        extras = cosmo["extra_parameters"].get(extras_name) or {}
 
-        check(status, cosmo)
-        return pk2d
+        pspec = PowerSpectrum.create_instance(model, **extras)
+        return pspec.get_power_spectrum(cosmo)
 
     @classmethod
     @functools.wraps(from_model)
@@ -512,6 +503,12 @@ class Pk2D(CCLObject):
     def __ipow__(self, other):
         self = self**other
         return self
+
+    @classmethod
+    def from_psp(cls, psp):
+        out = cls.__new__(cls)
+        out.psp = psp
+        return out
 
 
 def parse_pk2d(cosmo, p_of_k_a, is_linear=False):

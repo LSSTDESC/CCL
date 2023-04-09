@@ -13,10 +13,6 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status);
 
 ccl_f2d_t *ccl_apply_halofit(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status);
 
-void ccl_rescale_linpower(ccl_cosmology* cosmo, ccl_f2d_t *psp,
-                          int rescale_mg, int rescale_norm,
-                          int *status);
-
 /**
  * Variance of the projected matter density field with 2D (top-hat) smoothing scale R [Mpc].
  * Returns sigma2(R) for specified cosmology at a = 1.

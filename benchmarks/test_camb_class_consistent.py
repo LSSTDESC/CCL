@@ -4,6 +4,22 @@ import warnings
 
 import pyccl as ccl
 
+# FIXME: (NK): Increasing CAMB's precision appears to (paradoxically) decrease
+#              CAMB/CLASS agreement, even with CLASS' settings boosted to max.
+#              This hints a problem in the way CAMB is coded up. Once the
+#              problem is fixed, we can increase both models' precision to
+#              achieve 1e-4 everywhere.
+
+# extras = {"extra_parameters":
+#           {"class": {"k_per_decade_for_pk": 35,
+#                      "k_per_decade_for_bao": 40},
+#             "camb": {"AccuracyBoost": 1,
+#                      "lSampleBoost": 1,
+#                      "DoLateRadTruncation": True}
+#            }
+#           }
+extras = {}
+
 
 def test_camb_class_consistent_smoke(kwargs=None, pkerr=1e-3):
     kwargs = kwargs or {}
@@ -11,11 +27,11 @@ def test_camb_class_consistent_smoke(kwargs=None, pkerr=1e-3):
 
     c_camb = ccl.Cosmology(
         Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.95, A_s=2e-9,
-        transfer_function='boltzmann_camb', **kwargs)
+        transfer_function='boltzmann_camb', **kwargs, **extras)
 
     c_class = ccl.Cosmology(
         Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.95, A_s=2e-9,
-        transfer_function='boltzmann_class', **kwargs)
+        transfer_function='boltzmann_class', **kwargs, **extras)
 
     with warnings.catch_warnings():
         # We do some tests here with massive neutrinos, which currently raises
@@ -50,7 +66,7 @@ def test_camb_class_consistent_nu(kwargs):
     dict(w0=-0.9, wa=0.0),
     dict(w0=-0.9, wa=-0.1)])
 def test_camb_class_consistent_de(kwargs):
-    test_camb_class_consistent_smoke(kwargs=kwargs, pkerr=1e-3)
+    test_camb_class_consistent_smoke(kwargs=kwargs, pkerr=9e-4)
 
 
 @pytest.mark.parametrize('kwargs', [

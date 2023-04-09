@@ -52,11 +52,11 @@ def test_cosmo_methods():
     as their first argument are methods of the Cosmology object.
     """
     from inspect import getmembers, isfunction, signature
-    from pyccl import background, bcm, boltzmann, \
+    from pyccl import background, bcm, pspec, \
         cells, correlations, covariances, neutrinos, \
         pk2d, power, tk3d, tracers, halos, nl_pt
     cosmo = ccl.CosmologyVanillaLCDM()
-    subs = [background, boltzmann, bcm, cells, correlations, covariances,
+    subs = [background, pspec, bcm, cells, correlations, covariances,
             neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
@@ -69,8 +69,6 @@ def test_cosmo_methods():
     assert ccl.sigma8(cosmo) == cosmo.sigma8()
     assert ccl.rho_x(cosmo, 1., "matter", is_comoving=False) == \
         cosmo.rho_x(1., "matter", is_comoving=False)
-    assert ccl.get_camb_pk_lin(cosmo).eval(1., 1., cosmo) == \
-        cosmo.get_camb_pk_lin().eval(1., 1., cosmo)
     prof = ccl.halos.HaloProfilePressureGNFW()
     hmd = ccl.halos.MassDef200m()
     hmf = ccl.halos.MassFuncTinker08(cosmo)

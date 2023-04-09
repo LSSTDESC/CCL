@@ -6,11 +6,11 @@ import warnings
 import numpy as np
 import yaml
 from inspect import getmembers, isfunction, signature
+import copy
 
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
 from ._types import error_types
-from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
@@ -73,6 +73,7 @@ class _Defaults:
     """Default cosmological parameters used throughout the library."""
     T_CMB = 2.725
     T_ncdm = 0.71611
+    Neff_camb = 3.044
 
 
 def _methods_of_cosmology(cls=None, *, modules=[]):
@@ -99,7 +100,7 @@ def _methods_of_cosmology(cls=None, *, modules=[]):
     return cls
 
 
-_modules = ["background", "bcm", "boltzmann", "cells", "correlations",
+_modules = ["background", "bcm", "pspec", "cells", "correlations",
             "covariances", "neutrinos", "pk2d", "power", "pyutils",
             "tk3d", "tracers", "halos", "nl_pt"]
 
@@ -255,7 +256,7 @@ class Cosmology(CCLObject):
             mass_function='tinker10',
             halo_concentration='duffy2008',
             emulator_neutrinos='strict',
-            extra_parameters=None,
+            extra_parameters={},
             T_ncdm=_Defaults.T_ncdm):
 
         # going to save these for later
@@ -267,7 +268,7 @@ class Cosmology(CCLObject):
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
             z_mg=z_mg, df_mg=df_mg,
-            extra_parameters=extra_parameters)
+            extra_parameters=copy.deepcopy(extra_parameters))
 
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
@@ -675,13 +676,10 @@ class Cosmology(CCLObject):
         return state
 
     def __setstate__(self, state):
-        # This will create a new `Cosmology` object so we create another lock.
-        state["_object_lock"] = type(state.pop("_object_lock"))()
         self.__dict__ = state
         # we removed the C data when it was pickled, so now we unpickle
         # and rebuild the C data
         self._build_cosmo()
-        self._object_lock.lock()  # Lock on exit.
 
     def compute_distances(self):
         """Compute the distance splines."""
@@ -742,55 +740,25 @@ class Cosmology(CCLObject):
         # needed to init some models
         self.compute_growth()
 
-        # Populate power spectrum splines
-        trf = self._config_init_kwargs['transfer_function']
-        pk = None
-        rescale_s8 = True
-        rescale_mg = True
-        if trf is None:
-            raise CCLError("You want to compute the linear power spectrum, "
-                           "but you selected `transfer_function=None`.")
-        elif trf == 'boltzmann_class':
-            pk = get_class_pk_lin(self)
-        elif trf == 'boltzmann_isitgr':
-            rescale_mg = False
-            pk = get_isitgr_pk_lin(self)
-        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
-            rescale_s8 = False
-            rescale_mg = False
-            pk = Pk2D.from_model(self, model=trf)
-
         # Compute the CAMB nonlin power spectrum if needed,
         # to avoid repeating the code in `compute_nonlin_power`.
         # Because CAMB power spectra come in pairs with pkl always computed,
         # we set the nonlin power spectrum first, but keep the linear via a
         # status variable to use it later if the transfer function is CAMB too.
-        pkl = None
         if self._config_init_kwargs["matter_power_spectrum"] == "camb":
-            if abs(self["mu_0"]) > 1e-14:
-                warnings.warn("CAMB doesn't compute non-linear power spectra "
-                              "consistently with mu_0 > 0.", CCLWarning)
-            if not np.isfinite(self["A_s"]):
-                raise CCLError("CAMB doesn't rescale non-linear power spectra "
-                               "consistently without A_s.")
+            # If MPS is 'camb', then TRF must be 'boltzmann_camb'.
+            if not self["extra_parameters"].get("camb"):
+                self["extra_parameters"]["camb"] = {}
+            self["extra_parameters"]["camb"]["nonlin"] = True
 
-            # no rescaling because A_s is necessarily provided
-            rescale_mg = rescale_s8 = False
+        trf = self._config_init_kwargs['transfer_function']
+        pk = Pk2D.from_model(self, trf)
+
+        if isinstance(pk, tuple):
+            # (trf, mps) == CAMB so both pkl & pknl were returned
             name = "delta_matter:delta_matter"
-            pkl, self._pk_nl[name] = get_camb_pk_lin(self, nonlin=True)
-
-        if trf == "boltzmann_camb":
-            pk = pkl if pkl is not None else get_camb_pk_lin(self)
-
-        # Rescale by sigma8/mu-sigma if needed
-        if pk:
-            status = 0
-            status = lib.rescale_linpower(self.cosmo, pk.psp,
-                                          int(rescale_mg),
-                                          int(rescale_s8),
-                                          status)
-            check(status, self)
-
+            pkl, self._pk_nl[name] = pk
+            return pkl
         return pk
 
     @unlock_instance(mutate=False)
@@ -1054,6 +1022,16 @@ class Cosmology(CCLObject):
 
         # Return status information
         return "status(%s): %s" % (status, msg)
+
+    def copy(self, **params):
+        """Generate a copy of the object. Optionally, change some paramters."""
+        out = type(self).__new__(type(self))
+        new_state = self.__getstate__()
+        new_state["_params_init_kwargs"].update(**params)
+        if params:
+            new_state["_pk_lin"], new_state["_pk_nl"] = {}, {}
+        out.__setstate__(new_state)
+        return out
 
 
 def CosmologyVanillaLCDM(**kwargs):

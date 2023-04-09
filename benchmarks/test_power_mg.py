@@ -7,7 +7,7 @@ POWER_MG_TOL = 1e-2
 
 @pytest.mark.parametrize('model', list(range(5)))
 def test_power_mg(model):
-    mu_0 = [0., 0.1, -0.1, 0.1, -0.1]
+    mu_0 = [0., 0.1, -0.1, 0.1, -0.1]  # FIXME: fails only when -0.1
     sigma_0 = [0., 0.1, -0.1, -0.1, 0.1]
 
     cosmo = ccl.Cosmology(
