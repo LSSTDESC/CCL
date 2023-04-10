@@ -24,9 +24,9 @@ def rescale_power_spectrum(cosmo, pk, rescale_mg=False, rescale_s8=False):
     # to rescale the power spectrum.
     if rescale_mg:
         # Set up a copy Cosmology in GR (mu_0 = Sigma_0 = 0) to rescale P(k).
-        noGR = {"mu_0": 0, "sigma_0": 0,
+        noMG = {"mu_0": 0, "sigma_0": 0,
                 "c1_mg": 1, "c2_mg": 1, "lambda_mg": 0}
-        cosmo_GR = cosmo.copy(**noGR)
+        cosmo_GR = cosmo.copy(**noMG)
 
         D_MG = cosmo.growth_factor_unnorm(a_arr)
         D_GR = cosmo_GR.growth_factor_unnorm(a_arr)
@@ -94,7 +94,7 @@ class PowerSpectrumAnalytic(PowerSpectrum):
 
     def _get_analytic_power(self, cosmo, a_arr, lk_arr, pk_arr):
         """Expand an analytic P(k) into the time-dimension, scaling by the
-        growth factor, and rescale sigma8.
+        growth factor.
         """
         if not np.isfinite(cosmo["sigma8"]):
             raise ValueError("sigma8 required for analytic power spectra.")

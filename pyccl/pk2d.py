@@ -185,7 +185,7 @@ class Pk2D(CCLObject):
         # Parse extra parameters in `cosmo`.
         extras_map = {"boltzmann_camb": "camb", "boltzmann_isitgr": "camb",
                       "boltzmann_class": "class", }
-        extras_name = extras_map.get(model) or None
+        extras_name = extras_map.get(model)
         extras = cosmo["extra_parameters"].get(extras_name) or {}
 
         pspec = PowerSpectrum.create_instance(model, **extras)

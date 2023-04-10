@@ -73,7 +73,6 @@ class _Defaults:
     """Default cosmological parameters used throughout the library."""
     T_CMB = 2.725
     T_ncdm = 0.71611
-    Neff_camb = 3.044
 
 
 def _methods_of_cosmology(cls=None, *, modules=[]):
