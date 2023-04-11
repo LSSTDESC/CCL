@@ -374,6 +374,8 @@ def _subclasses(cls):
 def from_name(cls, name):
     """Obtain particular model."""
     mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
+    if name not in mod:
+        raise KeyError(f"Invalid model {name}.")
     return mod[name]
 
 
