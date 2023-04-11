@@ -97,8 +97,11 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
     @warn_api(pairs=[("c_m_relation", "concentration")])
     def __init__(self, Delta, rho_type=None, *, concentration=None):
         # Check it makes sense
-        if isinstance(Delta, str) and Delta not in ["fof", "vir"]:
-            raise ValueError(f"Unknown Delta type {Delta}.")
+        if isinstance(Delta, str):
+            if Delta.isdigit():
+                Delta = int(Delta)
+            elif Delta not in ["fof", "vir"]:
+                raise ValueError(f"Unknown Delta type {Delta}.")
         if isinstance(Delta, (int, float)) and Delta < 0:
             raise ValueError("Delta must be a positive number.")
         if rho_type not in ['matter', 'critical']:
