@@ -37,23 +37,17 @@ class MassConcentration(CCLAutoRepr):
         """Helper to access ``mass_def.get_Delta``."""
         return self.mass_def.get_Delta(cosmo, a)
 
-    def get_radius(self, cosmo, M, a):
-        """Helper to access ``mass_def.get_radius``."""
-        return self.mass_def.get_radius(cosmo, M, a)
-
     def get_mass(self, cosmo, R, a):
         """Helper to access ``mass_def.get_mass.``"""
         return self.mass_def.get_mass(cosmo, R, a)
 
+    def get_radius(self, cosmo, M, a):
+        """Helper to access ``mass_def.get_radius``."""
+        return self.mass_def.get_radius(cosmo, M, a)
+
     def get_concentration(self, cosmo, M, a):
         """Helper to call ``concentration``."""
         return self.concentration(cosmo, M, a)
-
-    def get_comoving_virial_radius(self, cosmo, M, a):
-        """Compute the comoving virial radius given the mass."""
-        R = self.get_radius(cosmo, M, a) / a
-        c = self.get_concentration(cosmo, M, a)
-        return R/c
 
     def mass_translator(self, other):
         """Translate between different mass definitions, using the internal

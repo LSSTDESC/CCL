@@ -307,27 +307,3 @@ def MassDefFof(concentration=None):
         concentration (string): concentration-mass relation.
     """
     return MassDef('fof', 'matter', concentration=concentration)
-
-
-def translate_mass(cosmo, M, a,
-                   mass_def_in: MassDef,
-                   mass_def_out: MassDef,
-                   concentration):
-    """
-    """
-    if mass_def_in == mass_def_out:
-        return M
-    from .halo_model_base import Concentration
-    cm = Concentration.create_instance(concentration, mass_def=mass_def_in)
-    c_in = cm(cosmo, M, a)
-
-    Om_in = cosmo.omega_x(a, mass_def_in.rho_type)
-    D_in = mass_def_in.get_Delta(cosmo, a) * Om_in
-    R_in = mass_def_in.get_radus(cosmo, M, a)
-
-    Om_out = cosmo.omega_x(a, mass_def_out.rho_type)
-    D_out = mass_def_out.get_Delta(cosmo, a) * Om_out
-    c_out = convert_concentration(
-        cosmo, c_old=c_in, Delta_old=D_in, Delta_new=D_out)
-    R_out = R_in * c_out/c_in
-    return mass_def_out.get_mass(cosmo, R_out, a)
