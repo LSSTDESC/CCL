@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..concentration import Concentration
 from .profile_base import HaloProfileMatter
 import numpy as np
 from scipy.special import sici
@@ -46,19 +45,16 @@ class HaloProfileNFW(HaloProfileMatter):
             radii.
     """
     __repr_attrs__ = __eq_attrs__ = (
-        "concentration", "fourier_analytic", "projected_analytic",
+        "mass_concentration", "fourier_analytic", "projected_analytic",
         "cumul2d_analytic", "truncated", "precision_fftlog", "normprof",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, concentration,
+    def __init__(self, *, mass_concentration,
                  fourier_analytic=True,
                  projected_analytic=False,
                  cumul2d_analytic=False,
                  truncated=True):
-        if not isinstance(concentration, Concentration):
-            raise TypeError("concentration must be of type `Concentration`")
 
-        self.concentration = concentration
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic
@@ -78,7 +74,7 @@ class HaloProfileNFW(HaloProfileMatter):
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
         self._omln2 = 1 - np.log(2)
-        super().__init__()
+        super().__init__(mass_concentration=mass_concentration)
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-2,
                                      n_per_decade=1000,
@@ -88,13 +84,13 @@ class HaloProfileNFW(HaloProfileMatter):
         # NFW normalization from mass, radius and concentration
         return M / (4 * np.pi * Rs**3 * (np.log(1+c) - c/(1+c)))
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
+        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
+        c_M = self.mass_concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -126,13 +122,13 @@ class HaloProfileNFW(HaloProfileMatter):
                             [xf < 1, xf > 1],
                             [f1, f2, 1./3.]).reshape(x.shape)
 
-    def _projected_analytic(self, cosmo, r, M, a, mass_def):
+    def _projected_analytic(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
+        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
+        c_M = self.mass_concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -162,13 +158,13 @@ class HaloProfileNFW(HaloProfileMatter):
                          [f1, f2, self._omln2]).reshape(x.shape)
         return 2 * f / x**2
 
-    def _cumul2d_analytic(self, cosmo, r, M, a, mass_def):
+    def _cumul2d_analytic(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
+        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
+        c_M = self.mass_concentration.get_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -187,9 +183,7 @@ class HaloProfileNFW(HaloProfileMatter):
         k_use = np.atleast_1d(k)
 
         # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
-        R_s = R_M / c_M
+        R_s, R_M, c_M = self._get_comoving_radius(cosmo, M_use, a)
 
         x = k_use[None, :] * R_s[:, None]
         Si2, Ci2 = sici(x)

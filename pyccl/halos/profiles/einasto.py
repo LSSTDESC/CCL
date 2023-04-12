@@ -1,7 +1,6 @@
 from ...base import warn_api
 from ...base.parameters import physical_constants as const
 from ...power import sigmaM
-from ..concentration import Concentration
 from ..massdef import MassDef
 from .profile_base import HaloProfileMatter
 import numpy as np
@@ -41,18 +40,17 @@ class HaloProfileEinasto(HaloProfileMatter):
         alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
             'cosmo' to calculate the value from cosmology. Default: 'cosmo'
     """
-    __repr_attrs__ = __eq_attrs__ = ("concentration", "truncated", "alpha",
-                                     "precision_fftlog", "normprof",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_concentration", "truncated",
+                                     "alpha", "precision_fftlog", "normprof",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, concentration, truncated=True, alpha='cosmo'):
-        if not isinstance(concentration, Concentration):
-            raise TypeError("concentration must be of type `Concentration`")
+    def __init__(self, *, mass_concentration, truncated=True, alpha='cosmo'):
 
-        self.concentration = concentration
         self.truncated = truncated
         self.alpha = alpha
-        super().__init__()
+        super().__init__(mass_concentration=mass_concentration)
+        mvir = MassDef("vir", "matter")
+        self._to_virial_mass = mass_concentration.mass_translator(mvir)
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-2,
                                      n_per_decade=1000,
@@ -71,10 +69,9 @@ class HaloProfileEinasto(HaloProfileMatter):
         if alpha is not None and alpha != self.alpha:
             self.alpha = alpha
 
-    def _get_alpha(self, cosmo, M, a, mass_def):
+    def _get_alpha(self, cosmo, M, a):
         if self.alpha == 'cosmo':
-            Mvir = mass_def.translate_mass(
-                cosmo, M, a, mass_def_other=MassDef('vir', 'matter'))
+            Mvir = self._to_virial_mass(cosmo, M, a)
             sM = sigmaM(cosmo, Mvir, a)
             nu = const.DELTA_C / sM
             return 0.155 + 0.0095 * nu * nu
@@ -86,16 +83,16 @@ class HaloProfileEinasto(HaloProfileMatter):
                     * np.exp(2/alpha)
                     * gamma(3/alpha) * gammainc(3/alpha, 2/alpha*c**alpha))
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration(cosmo, M_use, a)
+        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
+        c_M = self.mass_concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
-        alpha = self._get_alpha(cosmo, M_use, a, mass_def)
+        alpha = self._get_alpha(cosmo, M_use, a)
 
         norm = self._norm(M_use, R_s, c_M, alpha)
 

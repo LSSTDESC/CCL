@@ -14,7 +14,7 @@ class MassConcentration(CCLAutoRepr):
     def __init__(self, *, mass_def, concentration=None):
         self.mass_def = mass_def
         if (concentration is not None
-            and not isinstance(concentration, Concentration)):
+                and not isinstance(concentration, Concentration)):
             raise TypeError("concentration must be Concentration")
         self.concentration = concentration
 
