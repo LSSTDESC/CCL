@@ -2,7 +2,10 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import species_types
 from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
+from ..errors import CCLDeprecationWarning
 import numpy as np
+import weakref
+import warnings
 
 
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
@@ -96,6 +99,9 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
     @warn_api(pairs=[("c_m_relation", "concentration")])
     def __init__(self, Delta, rho_type=None, *, concentration=None):
+        if concentration is not None:
+            warnings.warn("concentration has been deprecated as an argument "
+                          "in MassDef.", CCLDeprecationWarning)
         # Check it makes sense
         if isinstance(Delta, str):
             if Delta.isdigit():
@@ -116,7 +122,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         else:
             from .concentration import Concentration
             self.concentration = Concentration.create_instance(
-                concentration, mass_def=self)
+                concentration, mass_def=weakref.proxy(self))
 
     @property
     def name(self):
@@ -211,6 +217,9 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         Returns:
             float or array_like: halo masses in new definition.
         """
+        warnings.warn("massdef.MassDef.translate_mass has been deprecated. To "
+                      "translate between mass definitions use "
+                      "massdef.translate_mass.", CCLDeprecationWarning)
         if self == mass_def_other:
             return M
         if self.concentration is None:
@@ -298,3 +307,27 @@ def MassDefFof(concentration=None):
         concentration (string): concentration-mass relation.
     """
     return MassDef('fof', 'matter', concentration=concentration)
+
+
+def translate_mass(cosmo, M, a,
+                   mass_def_in: MassDef,
+                   mass_def_out: MassDef,
+                   concentration):
+    """
+    """
+    if mass_def_in == mass_def_out:
+        return M
+    from .halo_model_base import Concentration
+    cm = Concentration.create_instance(concentration, mass_def=mass_def_in)
+    c_in = cm(cosmo, M, a)
+
+    Om_in = cosmo.omega_x(a, mass_def_in.rho_type)
+    D_in = mass_def_in.get_Delta(cosmo, a) * Om_in
+    R_in = mass_def_in.get_radus(cosmo, M, a)
+
+    Om_out = cosmo.omega_x(a, mass_def_out.rho_type)
+    D_out = mass_def_out.get_Delta(cosmo, a) * Om_out
+    c_out = convert_concentration(
+        cosmo, c_old=c_in, Delta_old=D_in, Delta_new=D_out)
+    R_out = R_in * c_out/c_in
+    return mass_def_out.get_mass(cosmo, R_out, a)

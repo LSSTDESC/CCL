@@ -24,7 +24,6 @@ class HaloProfilePowerLaw(HaloProfile):
     """
     __repr_attrs__ = __eq_attrs__ = ("r_scale", "tilt", "precision_fftlog",
                                      "normprof",)
-    name = 'PowerLaw'
     normprof = False
 
     @deprecated()

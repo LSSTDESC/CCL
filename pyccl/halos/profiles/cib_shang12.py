@@ -87,7 +87,6 @@ class HaloProfileCIBShang12(HaloProfileCIB):
                                         ('l10meff', 'log10Meff'),
                                         ('sigLM', 'siglog10M')]
                                  )(super.__getattribute__)
-    name = 'CIBShang12'
     _one_over_4pi = 0.07957747154
 
     @warn_api(pairs=[("c_M_relation", "concentration"),

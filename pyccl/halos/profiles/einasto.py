@@ -43,7 +43,6 @@ class HaloProfileEinasto(HaloProfileMatter):
     """
     __repr_attrs__ = __eq_attrs__ = ("concentration", "truncated", "alpha",
                                      "precision_fftlog", "normprof",)
-    name = 'Einasto'
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration, truncated=True, alpha='cosmo'):

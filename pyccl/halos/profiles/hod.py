@@ -120,7 +120,6 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
         ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")]
     )(super.__getattribute__)
-    name = 'HOD'
 
     @warn_api(pairs=[("c_M_relation", "concentration"),
                      ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
