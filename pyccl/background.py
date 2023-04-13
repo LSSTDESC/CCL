@@ -388,7 +388,7 @@ def comoving_volume_element(cosmo, a):
     return Dh * Dm**2 / (Ez * a**2)
 
 
-def comoving_volume(cosmo, a, *, solid_angle=4*np.pi, squeeze=True):
+def comoving_volume(cosmo, a, *, solid_angle=4*np.pi):
     r"""Comoving volume, in :math:`\rm Mpc^3`.
 
     .. math::
