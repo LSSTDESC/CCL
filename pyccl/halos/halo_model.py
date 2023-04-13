@@ -2,7 +2,6 @@ from .massdef import MassDef
 from .hmfunc import MassFunc
 from .hbias import HaloBias
 from ..pyutils import _spline_integrate
-from .. import background
 from ..base import (CCLAutoRepr, unlock_instance,
                     warn_api, deprecate_attr, deprecated)
 from ..base.parameters import physical_constants as const
@@ -204,12 +203,7 @@ class HMCalculator(CCLAutoRepr):
         a = np.linspace(a_min, a_max, na)
 
         # compute the volume element
-        abs_dzda = 1 / a / a
-        dc = background.comoving_angular_distance(cosmo, a)
-        ez = background.h_over_h0(cosmo, a)
-        dh = const.CLIGHT_HMPC / cosmo['h']
-        dvdz = dh * dc**2 / ez
-        dvda = dvdz * abs_dzda
+        dVda = cosmo.comoving_volume_element(a)
 
         # now do m intergrals in a loop
         mint = np.zeros_like(a)
@@ -217,7 +211,7 @@ class HMCalculator(CCLAutoRepr):
             self._get_ingredients(cosmo, _a, get_bf=False)
             _selm = np.atleast_2d(selection(self._mass, _a)).T
             mint[i] = self._integrator(
-                dvda[i] * self._mf[..., :] * _selm[..., :],
+                dVda[i] * self._mf[..., :] * _selm[..., :],
                 self._lmass
             )
 

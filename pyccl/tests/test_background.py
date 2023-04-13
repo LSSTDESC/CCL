@@ -85,6 +85,17 @@ def test_background_a_interface(a, func):
             assert np.allclose(val1, val2)
 
 
+def test_background_age_of_universe():
+    # Check that the we get an age close to the one given in Planck18.
+    Ombh2, Omch2, h, n_s, sigma8 = 0.02234, 0.11907, 0.6766, 0.9671, 0.8083
+    Omega_c, Omega_b = Omch2 / h**2, Ombh2 / h**2
+    cosmoP18 = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h,
+                             n_s=n_s, sigma8=sigma8)
+    T_P18 = 13.796
+    T_CCL = cosmoP18.age_of_universe(1)
+    assert np.allclose(T_CCL, T_P18, atol=0, rtol=1.5e-3)
+
+
 @pytest.mark.parametrize('a', AVALS)
 @pytest.mark.parametrize('kind', [
     'matter',

@@ -6,6 +6,8 @@ import warnings
 import numpy as np
 import yaml
 from inspect import getmembers, isfunction, signature
+from dataclasses import dataclass
+from scipy.interpolate import Akima1DInterpolator
 
 from . import ccllib as lib
 from .errors import CCLError, CCLWarning
@@ -102,6 +104,12 @@ def _methods_of_cosmology(cls=None, *, modules=[]):
 _modules = ["background", "bcm", "boltzmann", "cells", "correlations",
             "covariances", "neutrinos", "pk2d", "power", "pyutils",
             "tk3d", "tracers", "halos", "nl_pt"]
+
+
+@dataclass
+class CosmologyData:
+    lookback: Akima1DInterpolator = None
+    age0: float = None
 
 
 @_methods_of_cosmology(modules=_modules)
@@ -289,6 +297,7 @@ class Cosmology(CCLObject):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params._instance, self._config)
+        self.data = CosmologyData()
         self._spline_params = spline_params.copy()
         self._gsl_params = gsl_params.copy()
 
@@ -682,14 +691,6 @@ class Cosmology(CCLObject):
         # and rebuild the C data
         self._build_cosmo()
         self._object_lock.lock()  # Lock on exit.
-
-    def compute_distances(self):
-        """Compute the distance splines."""
-        if self.has_distances:
-            return
-        status = 0
-        status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self)
 
     def compute_growth(self):
         """Compute the growth function."""

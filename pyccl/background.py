@@ -13,10 +13,11 @@ CCL defines seven species types:
 These strings define the `species` inputs to the functions below.
 """
 import numpy as np
+from scipy.interpolate import Akima1DInterpolator as interp
 from . import ccllib as lib
 from .pyutils import (_vectorize_fn, _vectorize_fn3,
-                      _vectorize_fn4, _vectorize_fn5)
-from .base.parameters import physical_constants
+                      _vectorize_fn4, _vectorize_fn5, check, loglin_spacing)
+from .base.parameters import physical_constants as const
 from .base import warn_api
 
 species_types = {
@@ -28,6 +29,29 @@ species_types = {
     'neutrinos_rel': lib.species_ur_label,
     'neutrinos_massive': lib.species_nu_label,
 }
+
+
+def compute_distances(cosmo):
+    """Compute the distance splines."""
+    if cosmo.has_distances:
+        return
+    status = 0
+    status = lib.cosmology_compute_distances(cosmo.cosmo, status)
+    check(status, cosmo)
+
+    # lookback time
+    spl = cosmo.cosmo.spline_params  # Replace for CCLv3.
+    a = loglin_spacing(spl.A_SPLINE_MINLOG, spl.A_SPLINE_MIN, spl.A_SPLINE_MAX,
+                       spl.A_SPLINE_NLOG, spl.A_SPLINE_NA)
+    t_H = const.MPC_TO_METER / 1e14 / const.YEAR / cosmo["h"]
+    hoh0 = cosmo.h_over_h0(a)
+    integral = interp(a, 1/(a*hoh0)).antiderivative()
+    a_eval = np.r_[1.0, a]  # make a single call to the spline
+    vals = integral(a_eval)
+    t_arr = t_H * (vals[0] - vals[1:])
+
+    cosmo.data.lookback = interp(a, t_arr)
+    cosmo.data.age0 = cosmo.data.lookback(0, extrapolate=True)[()]
 
 
 def growth_factor(cosmo, a):
@@ -306,12 +330,142 @@ def sigma_critical(cosmo, *, a_lens, a_source):
     Ds = angular_diameter_distance(cosmo, a_source, a2=None)
     Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
     Dls = angular_diameter_distance(cosmo, a_lens, a_source)
-    A = (
-        physical_constants.CLIGHT**2
-        * physical_constants.MPC_TO_METER
-        / (4.0 * np.pi * physical_constants.GNEWT
-           * physical_constants.SOLAR_MASS)
-    )
+    A = (const.CLIGHT**2 * const.MPC_TO_METER
+        / (4.0 * np.pi * const.GNEWT * const.SOLAR_MASS))
 
     Sigma_crit = A * Ds / (Dl * Dls)
     return Sigma_crit
+
+
+def hubble_distance(cosmo, a):
+    r"""Hubble distance in :math:`\rm Mpc`.
+
+    .. math::
+
+        D_{\rm H} = \frac{cz}{H_0}
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+
+    Returns
+    -------
+    D_H : float or (na,) ``numpy.ndarray``
+        Hubble distance.
+    """
+    return (1/a - 1) * const.CLIGHT_HMPC / cosmo["h"]
+
+
+def comoving_volume_element(cosmo, a):
+    r"""Comoving volume element in :math:`\rm Mpc^3 \, sr^{-1}`.
+
+    .. math::
+
+        \frac{\mathrm{d}V}{\mathrm{d}a \, \mathrm{d} \Omega}
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+
+    Returns
+    -------
+    dV : float or (na,) ``numpy.ndarray``
+        Comoving volume per unit scale factor per unit solid angle.
+
+    See Also
+    --------
+    comoving_volume : integral of the comoving volume element
+    """
+    Dm = comoving_angular_distance(cosmo, a)
+    Ez = h_over_h0(cosmo, a)
+    Dh = const.CLIGHT_HMPC / cosmo["h"]
+    return Dh * Dm**2 / (Ez * a**2)
+
+
+def comoving_volume(cosmo, a, *, solid_angle=4*np.pi, squeeze=True):
+    r"""Comoving volume, in :math:`\rm Mpc^3`.
+
+    .. math::
+
+        V_{\rm C} = \int_{\Omega} \mathrm{{d}}\Omega \int_z \mathrm{d}z
+        D_{\rm H} \frac{(1+z)^2 D_{\mathrm{A}}^2}{E(z)}
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+    solid_angle : float
+        Solid angle subtended in the sky for which
+        the comoving volume is calculated.
+
+    Returns
+    -------
+    V_C : float or (na,) ndarray
+        Comoving volume at ``a``.
+
+    See Also
+    --------
+    comoving_volume_element : comoving volume element
+    """
+    Omk, sqrtk = cosmo["Omega_k"], cosmo["sqrtk"]
+    Dm = comoving_angular_distance(cosmo, a)
+    if Omk == 0:
+        return solid_angle/3 * Dm**3
+
+    Dh = hubble_distance(cosmo, a)
+    DmDh = Dm / Dh
+    arcsinn = np.arcsin if Omk < 0 else np.arcsinh
+    return ((solid_angle * Dh**3 / (2 * Omk))
+            * (DmDh * np.sqrt(1 + Omk * DmDh**2)
+               - arcsinn(sqrtk * DmDh)/sqrtk))
+
+
+def lookback_time(cosmo, a):
+    r"""Difference of the age of the Universe between some scale factor
+    and today, in :math:`\rm Gyr`.
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+
+    Returns
+    -------
+    t_L : float or (na,) ndarray
+        Lookback time at ``a``. ``nan`` if ``a`` is out of bounds of the spline
+        parametets stored in ``cosmo``.
+    """
+    cosmo.compute_distances()
+    out = cosmo.data.lookback(a)
+    return out[()]
+
+
+def age_of_universe(cosmo, a):
+    r"""Age of the Universe at some scale factor, in :math:`\rm Gyr`.
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.core.Cosmology`
+        Cosmological parameters.
+    a : float or (na,) array_like
+        Scale factor(s) normalized to 1 today.
+
+    Returns
+    -------
+    t_age : float or (na,) ndarray
+        Age of the Universe at ``a``. ``nan`` if ``a`` is out of bounds of the
+        spline parametets stored in ``cosmo``.
+    """
+    cosmo.compute_distances()
+    out = cosmo.data.age0 - cosmo.lookback_time(a)
+    return out[()]
