@@ -34,6 +34,11 @@ def test_halofit_highz(cosmo):
 
 
 def test_halofit_background_check():
+    ccl.spline_params.A_SPLINE_MIN = 0.4
+    ccl.spline_params.A_SPLINE_MINLOG = 0.3
+    ccl.spline_params.A_SPLINE_MIN_PK = 0.4
+    ccl.spline_params.A_SPLINE_MINLOG_PK = 0.3
+
     cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
                           n_s=0.97,
                           sigma8=0.8,
@@ -41,12 +46,9 @@ def test_halofit_background_check():
                           matter_power_spectrum="halofit",
                           transfer_function="eisenstein_hu")
 
-    cosmo.cosmo.spline_params.A_SPLINE_MIN = 0.4
-    cosmo.cosmo.spline_params.A_SPLINE_MINLOG = 0.3
-    cosmo.cosmo.spline_params.A_SPLINE_MIN_PK = 0.4
-    cosmo.cosmo.spline_params.A_SPLINE_MINLOG_PK = 0.3
-
     k = np.geomspace(1e-3, 1, 10)
 
     with pytest.raises(CCLError):
         ccl.nonlin_matter_power(cosmo, k, a=0.5)
+
+    ccl.spline_params.reload()

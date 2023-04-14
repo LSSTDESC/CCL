@@ -14,6 +14,7 @@ from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
+from .base import CCLObject, cache, unlock_instance
 from .parameters import CCLParameters, physical_constants
 
 # Configuration types
@@ -66,7 +67,7 @@ emulator_neutrinos_types = {
 }
 
 
-class Cosmology(object):
+class Cosmology(CCLObject):
     """A cosmology including parameters and associated data.
 
     .. note:: Although some arguments default to `None`, they will raise a
@@ -196,6 +197,8 @@ class Cosmology(object):
                                      "HMCode_logT_AGN": 7.8}}
 
     """
+    from ._repr import _build_string_Cosmology as __repr__
+
     # Go through all functions in the main package and the subpackages
     # and make every function that takes `cosmo` as its first argument
     # an attribute of this class.
@@ -676,58 +679,13 @@ class Cosmology(object):
         return state
 
     def __setstate__(self, state):
+        # This will create a new `Cosmology` object so we create another lock.
+        state["_object_lock"] = type(state.pop("_object_lock"))()
         self.__dict__ = state
         # we removed the C data when it was pickled, so now we unpickle
         # and rebuild the C data
         self._build_cosmo()
-
-    def __repr__(self):
-        """Make an eval-able string.
-
-        This feature can be used like this:
-
-        >>> import pyccl
-        >>> cosmo = pyccl.Cosmology(...)
-        >>> cosmo2 = eval(repr(cosmo))
-        """
-        string = "pyccl.Cosmology("
-        string += ", ".join(
-            "%s=%s" % (k, v)
-            for k, v in self._params_init_kwargs.items()
-            if k not in ['m_nu', 'm_nu_type', 'z_mg', 'df_mg'])
-
-        if hasattr(self._params_init_kwargs['m_nu'], '__len__'):
-            string += ", m_nu=[%s, %s, %s]" % tuple(
-                self._params_init_kwargs['m_nu'])
-        else:
-            string += ', m_nu=%s' % self._params_init_kwargs['m_nu']
-
-        if self._params_init_kwargs['m_nu_type'] is not None:
-            string += (
-                ", m_nu_type='%s'" % self._params_init_kwargs['m_nu_type'])
-        else:
-            string += ', m_nu_type=None'
-
-        if self._params_init_kwargs['z_mg'] is not None:
-            vals = ", ".join(
-                ["%s" % v for v in self._params_init_kwargs['z_mg']])
-            string += ", z_mg=[%s]" % vals
-        else:
-            string += ", z_mg=%s" % self._params_init_kwargs['z_mg']
-
-        if self._params_init_kwargs['df_mg'] is not None:
-            vals = ", ".join(
-                ["%s" % v for v in self._params_init_kwargs['df_mg']])
-            string += ", df_mg=[%s]" % vals
-        else:
-            string += ", df_mg=%s" % self._params_init_kwargs['df_mg']
-
-        string += ", "
-        string += ", ".join(
-            "%s='%s'" % (k, v) for k, v in self._config_init_kwargs.items())
-        string += ")"
-
-        return string
+        self._object_lock.lock()  # Lock on exit.
 
     def compute_distances(self):
         """Compute the distance splines."""
@@ -766,11 +724,9 @@ class Cosmology(object):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
-    def compute_linear_power(self):
-        """Compute the linear power spectrum."""
-        if self.has_linear_power:
-            return
-
+    @cache(maxsize=3)
+    def _compute_linear_power(self):
+        """Return the linear power spectrum."""
         if (self['N_nu_mass'] > 0 and
                 self._config_init_kwargs['transfer_function'] in
                 ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles', ]):
@@ -839,6 +795,14 @@ class Cosmology(object):
                                           status)
             check(status, self)
 
+        return pk
+
+    @unlock_instance(mutate=False)
+    def compute_linear_power(self):
+        """Compute the linear power spectrum."""
+        if self.has_linear_power:
+            return
+        pk = self._compute_linear_power()
         # Assign
         self._pk_lin['delta_matter:delta_matter'] = pk
 
@@ -874,11 +838,9 @@ class Cosmology(object):
         hmc = hal.HMCalculator(self, hmf, hbf, mdef)
         return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
-    def compute_nonlin_power(self):
-        """Compute the non-linear power spectrum."""
-        if self.has_nonlin_power:
-            return
-
+    @cache(maxsize=3)
+    def _compute_nonlin_power(self):
+        """Return the non-linear power spectrum."""
         if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
             if self._params_init_kwargs['df_mg'] is not None:
                 warnings.warn(
@@ -913,8 +875,9 @@ class Cosmology(object):
         if (mps != 'emu') and (mps is not None):
             self.compute_linear_power()
 
-        if mps == "camb":
-            return
+        if mps == "camb" and self.has_nonlin_power:
+            # Already computed
+            return self._pk_nl['delta_matter:delta_matter']
 
         if mps is None:
             raise CCLError("You want to compute the non-linear power "
@@ -941,6 +904,14 @@ class Cosmology(object):
         if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
             bcm_correct_pk2d(self, pk)
 
+        return pk
+
+    @unlock_instance(mutate=False)
+    def compute_nonlin_power(self):
+        """Compute the non-linear power spectrum."""
+        if self.has_nonlin_power:
+            return
+        pk = self._compute_nonlin_power()
         # Assign
         self._pk_nl['delta_matter:delta_matter'] = pk
 
@@ -1064,29 +1035,28 @@ class Cosmology(object):
         return "status(%s): %s" % (status, msg)
 
 
-class CosmologyVanillaLCDM(Cosmology):
+def CosmologyVanillaLCDM(**kwargs):
     """A cosmology with typical flat Lambda-CDM parameters (`Omega_c=0.25`,
     `Omega_b = 0.05`, `Omega_k = 0`, `sigma8 = 0.81`, `n_s = 0.96`, `h = 0.67`,
     no massive neutrinos).
 
-    Args:
+    Arguments:
         **kwargs (dict): a dictionary of parameters passed as arguments
             to the `Cosmology` constructor. It should not contain any of
             the LambdaCDM parameters (`"Omega_c"`, `"Omega_b"`, `"n_s"`,
             `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
     """
-    def __init__(self, **kwargs):
-        p = {'h': 0.67,
-             'Omega_c': 0.25,
-             'Omega_b': 0.05,
-             'n_s': 0.96,
-             'sigma8': 0.81,
-             'A_s': None}
-        if any(k in kwargs for k in p.keys()):
-            raise ValueError("You cannot change the LCDM parameters: "
-                             "%s " % list(p.keys()))
-        kwargs.update(p)
-        super(CosmologyVanillaLCDM, self).__init__(**kwargs)
+    p = {'Omega_c': 0.25,
+         'Omega_b': 0.05,
+         'h': 0.67,
+         'n_s': 0.96,
+         'sigma8': 0.81,
+         'A_s': None}
+    if set(p).intersection(set(kwargs)):
+        raise ValueError(
+            f"You cannot change the ΛCDM parameters: {list(p.keys())}.")
+    # TODO py39+: dictionary union operator `(p | kwargs)`.
+    return Cosmology(**{**p, **kwargs})
 
 
 class CosmologyCalculator(Cosmology):

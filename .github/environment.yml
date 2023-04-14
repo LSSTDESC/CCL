@@ -1,0 +1,17 @@
+name: test  # default testing environment name from conda-incubator
+dependencies:
+  - python=3.8
+  - pip
+  - cmake
+  - gsl
+  - swig
+  - pyyaml
+  - numpy
+  - scipy
+  - camb=1.3.6
+  - isitgr
+  - fast-pt
+  - pytest
+  - pytest-cov
+  - pip:
+      - classy<3

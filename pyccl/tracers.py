@@ -7,9 +7,10 @@ from .core import check
 from .background import (comoving_radial_distance, growth_rate,
                          growth_factor, scale_factor_of_chi, h_over_h0)
 from .errors import CCLWarning
+from .parameters import physical_constants
+from .base import CCLObject, UnlockInstance, unlock_instance
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays)
-from .parameters import physical_constants
 
 
 def _Sig_MG(cosmo, a, k=None):
@@ -22,9 +23,9 @@ def _Sig_MG(cosmo, a, k=None):
         k (float or array_like): Wavenumber for scale
 
     Returns:
-        float or array_like: Modification to Poisson equation under \
-            modified gravity at scale factor a. \
-            Sig_MG is assumed to be proportional to Omega_Lambda(z), \
+        float or array_like: Modification to Poisson equation under
+            modified gravity at scale factor a.
+            Sig_MG is assumed to be proportional to Omega_Lambda(z),
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
     """
     return _vectorize_fn6(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
@@ -152,7 +153,7 @@ def get_kappa_kernel(cosmo, z_source, nsamples):
     return chi, wchi
 
 
-class Tracer(object):
+class Tracer(CCLObject):
     """Tracers contain the information necessary to describe the
     contribution of a given sky observable to its cross-power spectrum
     with any other tracer. Tracers are composed of 4 main ingredients:
@@ -175,6 +176,8 @@ class Tracer(object):
     tracers that get combined linearly when computing power spectra.
     Further details can be found in Section 4.9 of the CCL note.
     """
+    from ._repr import _build_string_Tracer as __repr__
+
     def __init__(self):
         """By default this `Tracer` object will contain no actual
         tracers
@@ -216,12 +219,12 @@ class Tracer(object):
             z (float or array_like): redshift values.
 
         Returns:
-            array_like: redshift distribution evaluated at the \
+            array_like: redshift distribution evaluated at the
                 input values of `z`.
         """
         return self._dndz(z)
 
-    def get_kernel(self, chi):
+    def get_kernel(self, chi=None):
         """Get the radial kernels for all tracers contained
         in this `Tracer`.
 
@@ -240,9 +243,6 @@ class Tracer(object):
                 and the comoving radial distances corresponding to the internal
                 values used for interpolation.
         """
-        if not hasattr(self, '_trc'):
-            return []
-
         if chi is None:
             chis = []
         else:
@@ -276,15 +276,12 @@ class Tracer(object):
             ell (float or array_like): angular multipole values.
 
         Returns:
-            array_like: list of prefactors for each tracer. \
-                The shape will be `(n_tracer, ell.size)`, where \
-                `n_tracer` is the number of tracers. The last \
-                dimension will be squeezed if the input is a \
+            array_like: list of prefactors for each tracer.
+                The shape will be `(n_tracer, ell.size)`, where
+                `n_tracer` is the number of tracers. The last
+                dimension will be squeezed if the input is a
                 scalar.
         """
-        if not hasattr(self, '_trc'):
-            return []
-
         ell_use = np.atleast_1d(ell)
         f_ells = []
         for t in self._trc:
@@ -311,14 +308,11 @@ class Tracer(object):
             a (float or array_like): values of the scale factor.
 
         Returns:
-            array_like: list of transfer functions for each tracer. \
-                The shape will be `(n_tracer, lk.size, a.size)`, where \
-                `n_tracer` is the number of tracers. The other \
+            array_like: list of transfer functions for each tracer.
+                The shape will be `(n_tracer, lk.size, a.size)`, where
+                `n_tracer` is the number of tracers. The other
                 dimensions will be squeezed if the inputs are scalars.
         """
-        if not hasattr(self, '_trc'):
-            return []
-
         lk_use = np.atleast_1d(lk)
         a_use = np.atleast_1d(a)
         transfers = []
@@ -347,9 +341,6 @@ class Tracer(object):
         Returns:
             array_like: list of Bessel derivative orders for each tracer.
         """
-        if not hasattr(self, '_trc'):
-            return []
-
         return np.array([t.der_bessel for t in self._trc])
 
     def _MG_add_tracer(self, cosmo, kernel, z_b, der_bessel=0, der_angles=0,
@@ -443,6 +434,7 @@ class Tracer(object):
 
         return mg_transfer
 
+    @unlock_instance
     def add_tracer(self, cosmo, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
                    der_bessel=0, der_angles=0,
@@ -585,7 +577,8 @@ class Tracer(object):
                 lib.cl_tracer_t_free(t)
 
 
-class NumberCountsTracer(Tracer):
+def NumberCountsTracer(cosmo, has_rsd, dndz, bias=None,
+                       mag_bias=None, n_samples=256):
     """Specific `Tracer` associated to galaxy clustering with linear
     scale-independent bias, including redshift-space distortions and
     magnification.
@@ -609,57 +602,57 @@ class NumberCountsTracer(Tracer):
             in radial distance. The kernel is quite smooth, so usually O(100)
             samples is enough.
     """
-    def __init__(self, cosmo, has_rsd, dndz, bias, mag_bias=None,
-                 n_samples=256):
-        self._trc = []
+    tracer = Tracer()
 
-        # we need the distance functions at the C layer
-        cosmo.compute_distances()
+    # we need the distance functions at the C layer
+    cosmo.compute_distances()
 
-        from scipy.interpolate import interp1d
-        z_n, n = _check_array_params(dndz, 'dndz')
-        self._dndz = interp1d(z_n, n, bounds_error=False,
-                              fill_value=0)
+    from scipy.interpolate import interp1d
+    z_n, n = _check_array_params(dndz, 'dndz')
+    with UnlockInstance(tracer, mutate=False):
+        tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
 
-        kernel_d = None
-        if bias is not None:  # Has density term
-            # Kernel
-            if kernel_d is None:
-                kernel_d = get_density_kernel(cosmo, dndz)
-            # Transfer
-            z_b, b = _check_array_params(bias, 'bias')
-            # Reverse order for increasing a
-            t_a = (1./(1+z_b[::-1]), b[::-1])
-            self.add_tracer(cosmo, kernel=kernel_d, transfer_a=t_a)
+    kernel_d = None
+    if bias is not None:  # Has density term
+        # Kernel
+        if kernel_d is None:
+            kernel_d = get_density_kernel(cosmo, dndz)
+        # Transfer
+        z_b, b = _check_array_params(bias, 'bias')
+        # Reverse order for increasing a
+        t_a = (1./(1+z_b[::-1]), b[::-1])
+        tracer.add_tracer(cosmo, kernel=kernel_d, transfer_a=t_a)
 
-        if has_rsd:  # Has RSDs
-            # Kernel
-            if kernel_d is None:
-                kernel_d = get_density_kernel(cosmo, dndz)
-            # Transfer (growth rate)
+    if has_rsd:  # Has RSDs
+        # Kernel
+        if kernel_d is None:
+            kernel_d = get_density_kernel(cosmo, dndz)
+        # Transfer (growth rate)
+        z_b, _ = _check_array_params(dndz, 'dndz')
+        a_s = 1./(1+z_b[::-1])
+        t_a = (a_s, -growth_rate(cosmo, a_s))
+        tracer.add_tracer(cosmo, kernel=kernel_d,
+                          transfer_a=t_a, der_bessel=2)
+    if mag_bias is not None:  # Has magnification bias
+        # Kernel
+        chi, w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias,
+                                    n_chi=n_samples)
+        # Multiply by -2 for magnification
+        kernel_m = (chi, -2 * w)
+        if (cosmo['sigma_0'] == 0):
+            # GR case
+            tracer.add_tracer(cosmo, kernel=kernel_m,
+                              der_bessel=-1, der_angles=1)
+        else:
+            # MG case
             z_b, _ = _check_array_params(dndz, 'dndz')
-            a_s = 1./(1+z_b[::-1])
-            t_a = (a_s, -growth_rate(cosmo, a_s))
-            self.add_tracer(cosmo, kernel=kernel_d,
-                            transfer_a=t_a, der_bessel=2)
-        if mag_bias is not None:  # Has magnification bias
-            # Kernel
-            chi, w = get_lensing_kernel(cosmo, dndz, mag_bias=mag_bias,
-                                        n_chi=n_samples)
-            # Multiply by -2 for magnification
-            kernel_m = (chi, -2 * w)
-            if (cosmo['sigma_0'] == 0):
-                # GR case
-                self.add_tracer(cosmo, kernel=kernel_m,
-                                der_bessel=-1, der_angles=1)
-            else:
-                # MG case
-                z_b, _ = _check_array_params(dndz, 'dndz')
-                self._MG_add_tracer(cosmo, kernel_m, z_b,
-                                    der_bessel=-1, der_angles=1)
+            tracer._MG_add_tracer(cosmo, kernel_m, z_b,
+                                  der_bessel=-1, der_angles=1)
+    return tracer
 
 
-class WeakLensingTracer(Tracer):
+def WeakLensingTracer(cosmo, dndz, has_shear=True, ia_bias=None,
+                      use_A_ia=True, n_samples=256):
     """Specific `Tracer` associated to galaxy shape distortions including
     lensing shear and intrinsic alignments within the L-NLA model.
 
@@ -683,52 +676,51 @@ class WeakLensingTracer(Tracer):
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
-    def __init__(self, cosmo, dndz, has_shear=True, ia_bias=None,
-                 use_A_ia=True, n_samples=256):
-        self._trc = []
+    tracer = Tracer()
 
-        # we need the distance functions at the C layer
-        cosmo.compute_distances()
+    # we need the distance functions at the C layer
+    cosmo.compute_distances()
 
-        from scipy.interpolate import interp1d
-        z_n, n = _check_array_params(dndz, 'dndz')
-        self._dndz = interp1d(z_n, n, bounds_error=False,
-                              fill_value=0)
+    from scipy.interpolate import interp1d
+    z_n, n = _check_array_params(dndz, 'dndz')
+    with UnlockInstance(tracer, mutate=False):
+        tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
 
-        if has_shear:
-            kernel_l = get_lensing_kernel(cosmo, dndz, n_chi=n_samples)
-            if (cosmo['sigma_0'] == 0):
-                # GR case
-                self.add_tracer(cosmo, kernel=kernel_l,
-                                der_bessel=-1, der_angles=2)
-            else:
-                # MG case
-                self._MG_add_tracer(cosmo, kernel_l, z_n,
-                                    der_bessel=-1, der_angles=2)
-        if ia_bias is not None:  # Has intrinsic alignments
-            z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
-            # Kernel
-            kernel_i = get_density_kernel(cosmo, dndz)
-            if use_A_ia:
-                # Normalize so that A_IA=1
-                D = growth_factor(cosmo, 1./(1+z_a))
-                # Transfer
-                # See Joachimi et al. (2011), arXiv: 1008.3491, Eq. 6.
-                # and note that we use C_1= 5e-14 from arXiv:0705.0166
-                rho_m = physical_constants.RHO_CRITICAL * cosmo['Omega_m']
-                a = - tmp_a * 5e-14 * rho_m / D
-            else:
-                # use the raw input normalization. Normally, this will be 1
-                # to allow nonlinear PT IA models, where normalization is
-                # already applied to the power spectrum.
-                a = tmp_a
-            # Reverse order for increasing a
-            t_a = (1./(1+z_a[::-1]), a[::-1])
-            self.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
-                            der_bessel=-1, der_angles=2)
+    if has_shear:
+        kernel_l = get_lensing_kernel(cosmo, dndz, n_chi=n_samples)
+        if (cosmo['sigma_0'] == 0):
+            # GR case
+            tracer.add_tracer(cosmo, kernel=kernel_l,
+                              der_bessel=-1, der_angles=2)
+        else:
+            # MG case
+            tracer._MG_add_tracer(cosmo, kernel_l, z_n,
+                                  der_bessel=-1, der_angles=2)
+    if ia_bias is not None:  # Has intrinsic alignments
+        z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
+        # Kernel
+        kernel_i = get_density_kernel(cosmo, dndz)
+        if use_A_ia:
+            # Normalize so that A_IA=1
+            D = growth_factor(cosmo, 1./(1+z_a))
+            # Transfer
+            # See Joachimi et al. (2011), arXiv: 1008.3491, Eq. 6.
+            # and note that we use C_1= 5e-14 from arXiv:0705.0166
+            rho_m = physical_constants.RHO_CRITICAL * cosmo['Omega_m']
+            a = - tmp_a * 5e-14 * rho_m / D
+        else:
+            # use the raw input normalization. Normally, this will be 1
+            # to allow nonlinear PT IA models, where normalization is
+            # already applied to the power spectrum.
+            a = tmp_a
+        # Reverse order for increasing a
+        t_a = (1./(1+z_a[::-1]), a[::-1])
+        tracer.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
+                          der_bessel=-1, der_angles=2)
+    return tracer
 
 
-class CMBLensingTracer(Tracer):
+def CMBLensingTracer(cosmo, z_source, n_samples=100):
     """A Tracer for CMB lensing.
 
     Args:
@@ -739,20 +731,20 @@ class CMBLensingTracer(Tracer):
             The kernel is quite smooth, so usually O(100) samples
             is enough.
     """
-    def __init__(self, cosmo, z_source, n_samples=100):
-        self._trc = []
+    tracer = Tracer()
 
-        # we need the distance functions at the C layer
-        cosmo.compute_distances()
-        kernel = get_kappa_kernel(cosmo, z_source, n_samples)
-        if (cosmo['sigma_0'] == 0):
-            self.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
-        else:
-            self._MG_add_tracer(cosmo, kernel, z_source,
-                                der_bessel=-1, der_angles=1)
+    # we need the distance functions at the C layer
+    cosmo.compute_distances()
+    kernel = get_kappa_kernel(cosmo, z_source, n_samples)
+    if (cosmo['sigma_0'] == 0):
+        tracer.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
+    else:
+        tracer._MG_add_tracer(cosmo, kernel, z_source,
+                              der_bessel=-1, der_angles=1)
+    return tracer
 
 
-class tSZTracer(Tracer):
+def tSZTracer(cosmo, z_max=6., n_chi=1024):
     """Specific :class:`Tracer` associated with the thermal Sunyaev Zel'dovich
     Compton-y parameter. The radial kernel for this tracer is simply given by
 
@@ -773,19 +765,20 @@ class tSZTracer(Tracer):
         n_chi (float): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
-    def __init__(self, cosmo, z_max=6., n_chi=1024):
-        chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-        chi_arr = np.linspace(0, chi_max, n_chi)
-        a_arr = scale_factor_of_chi(cosmo, chi_arr)
-        # This is \sigma_T / (m_e * c^2)
-        prefac = 4.01710079e-06
-        w_arr = prefac * a_arr
+    tracer = Tracer()
 
-        self._trc = []
-        self.add_tracer(cosmo, kernel=(chi_arr, w_arr))
+    chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+    chi_arr = np.linspace(0, chi_max, n_chi)
+    a_arr = scale_factor_of_chi(cosmo, chi_arr)
+    # This is \sigma_T / (m_e * c^2)
+    prefac = 4.01710079e-06
+    w_arr = prefac * a_arr
+
+    tracer.add_tracer(cosmo, kernel=(chi_arr, w_arr))
+    return tracer
 
 
-class CIBTracer(Tracer):
+def CIBTracer(cosmo, z_min=0., z_max=6., n_chi=1024):
     """Specific :class:`Tracer` associated with the cosmic infrared
     background (CIB). The radial kernel for this tracer is simply
 
@@ -807,17 +800,18 @@ class CIBTracer(Tracer):
         n_chi (float): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
-    def __init__(self, cosmo, z_min=0., z_max=6., n_chi=1024):
-        chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-        chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
-        chi_arr = np.linspace(chi_min, chi_max, n_chi)
-        a_arr = scale_factor_of_chi(cosmo, chi_arr)
+    tracer = Tracer()
 
-        self._trc = []
-        self.add_tracer(cosmo, kernel=(chi_arr, a_arr))
+    chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+    chi_min = comoving_radial_distance(cosmo, 1./(1+z_min))
+    chi_arr = np.linspace(chi_min, chi_max, n_chi)
+    a_arr = scale_factor_of_chi(cosmo, chi_arr)
+
+    tracer.add_tracer(cosmo, kernel=(chi_arr, a_arr))
+    return tracer
 
 
-class ISWTracer(Tracer):
+def ISWTracer(cosmo, z_max=6., n_chi=1024):
     """Specific :class:`Tracer` associated with the integrated Sachs-Wolfe
     effect (ISW). Useful when cross-correlating any low-redshift probe with
     the primary CMB anisotropies. The ISW contribution to the temperature
@@ -842,23 +836,23 @@ class ISWTracer(Tracer):
         n_chi (float): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
-    def __init__(self, cosmo, z_max=6., n_chi=1024):
-        chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
-        chi = np.linspace(0, chi_max, n_chi)
-        a_arr = scale_factor_of_chi(cosmo, chi)
-        H0 = cosmo['h'] / physical_constants.CLIGHT_HMPC
-        OM = cosmo['Omega_c']+cosmo['Omega_b']
-        Ez = h_over_h0(cosmo, a_arr)
-        fz = growth_rate(cosmo, a_arr)
-        w_arr = 3*cosmo['T_CMB']*H0**3*OM*Ez*chi**2*(1-fz)
+    tracer = Tracer()
 
-        self._trc = []
-        self.add_tracer(cosmo, kernel=(chi, w_arr), der_bessel=-1)
+    chi_max = comoving_radial_distance(cosmo, 1./(1+z_max))
+    chi = np.linspace(0, chi_max, n_chi)
+    a_arr = scale_factor_of_chi(cosmo, chi)
+    H0 = cosmo['h'] / physical_constants.CLIGHT_HMPC
+    OM = cosmo['Omega_c']+cosmo['Omega_b']
+    Ez = h_over_h0(cosmo, a_arr)
+    fz = growth_rate(cosmo, a_arr)
+    w_arr = 3*cosmo['T_CMB']*H0**3*OM*Ez*chi**2*(1-fz)
+
+    tracer.add_tracer(cosmo, kernel=(chi, w_arr), der_bessel=-1)
+    return tracer
 
 
 def _check_returned_tracer(return_val):
-    """Wrapper to catch exceptions when tracers are spawned from C.
-    """
+    """Wrapper to catch exceptions when tracers are spawned from C."""
     if (isinstance(return_val, int)):
         check(return_val)
         tr = None

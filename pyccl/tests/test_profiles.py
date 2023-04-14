@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import pyccl as ccl
+from pyccl import UnlockInstance
 
 
 COSMO = ccl.Cosmology(
@@ -44,12 +45,43 @@ def smoke_assert_prof_real(profile, method='_real'):
         assert np.shape(p) == sh
 
 
-def test_defaults():
-    p = ccl.halos.HaloProfile()
-    with pytest.raises(NotImplementedError):
-        p.real(None, None, None, None, None)
-    with pytest.raises(NotImplementedError):
-        p.fourier(None, None, None, None, None)
+# def test_profiles_equal():
+#     M200m = ccl.halos.MassDef200m()
+#     cm = ccl.halos.ConcentrationDuffy08(mdef=M200m)
+#     p1 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
+
+#     # different profile types
+#     p2 = ccl.halos.HaloProfilePressureGNFW()
+#     assert p1 != p2
+
+#     # equal profiles
+#     p2 = p1
+#     assert p1 == p2
+
+#     # equivalent profiles
+#     cm2 = ccl.halos.ConcentrationDuffy08(mdef=M200m)
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
+#     assert p1 == p2
+
+#     # different parameters
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=11.)
+#     assert p1 != p2
+
+#     # different mass-concentration
+#     cm2 = ccl.halos.ConcentrationConstant()
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
+#     assert p1 != p2
+
+#     # different mass-concentration mass definition
+#     M200c = ccl.halos.MassDef200c()
+#     cm2 = ccl.halos.ConcentrationDuffy08(mdef=M200c)
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm2, lMmin_0=12.)
+#     assert p1 != p2
+
+#     # different FFTLog
+#     p2 = ccl.halos.HaloProfileHOD(c_M_relation=cm, lMmin_0=12.)
+#     p2.update_precision_fftlog(**{"plaw_fourier": -2.0})
+#     assert p1 != p2
 
 
 @pytest.mark.parametrize('prof_class',
@@ -80,6 +112,11 @@ def test_empirical_smoke(prof_class):
     smoke_assert_prof_real(p, method='real')
     smoke_assert_prof_real(p, method='projected')
     smoke_assert_prof_real(p, method='fourier')
+
+
+def test_empirical_smoke_CIB():
+    with pytest.raises(TypeError):
+        ccl.halos.HaloProfileCIBShang12(None, nu_GHz=417)
 
 
 def test_cib_smoke():
@@ -213,22 +250,40 @@ def test_hod_ns_independent(real_prof):
     assert p1.ns_independent is True
 
 
-def test_hod_2pt_raises():
+def test_hod_2pt():
     pbad = ccl.halos.HaloProfilePressureGNFW()
     c = ccl.halos.ConcentrationDuffy08(M200)
-    pgood = ccl.halos.HaloProfileHOD(c_M_relation=c)
-    pgood_b = ccl.halos.HaloProfileHOD(c_M_relation=c)
+    pgood = ccl.halos.HaloProfileHOD(c_M_relation=c, lM0_0=11.)
+    pgood_b = ccl.halos.HaloProfileHOD(c_M_relation=c, lM0_0=11.)
     p2 = ccl.halos.Profile2ptHOD()
+    F0 = p2.fourier_2pt(pgood, COSMO, 1., 1e13, 1.,
+                        prof2=pgood,
+                        mass_def=M200)
+    assert np.allclose(p2.fourier_2pt(pgood, COSMO, 1., 1e13, 1.,
+                                      prof2=None, mass_def=M200),
+                       F0, rtol=0)
+
     with pytest.raises(TypeError):
         p2.fourier_2pt(pbad, COSMO, 1., 1E13, 1.,
                        mass_def=M200)
 
-    with pytest.raises(ValueError):
-        p2.fourier_2pt(pgood, COSMO, 1., 1E13, 1.,
-                       prof2=pgood_b, mass_def=M200)
+    with pytest.raises(TypeError):
+        p2.fourier_2pt(pgood, COSMO, 1., 1e13, 1.,
+                       prof2=pbad,
+                       mass_def=M200)
 
+    # doesn't raise because profiles are equivalent
     p2.fourier_2pt(pgood, COSMO, 1., 1E13, 1.,
                    prof2=pgood, mass_def=M200)
+
+    # TODO: bring back when proper __eq__s are implemented
+    # p2.fourier_2pt(pgood, COSMO, 1., 1E13, 1.,
+    #                prof2=pgood_b, mass_def=M200)
+
+    with pytest.raises(ValueError):
+        pgood_b.update_parameters(lM0_0=10.)
+        p2.fourier_2pt(pgood, COSMO, 1., 1E13, 1.,
+                       prof2=pgood_b, mass_def=M200)
 
 
 def test_2pt_rcorr_smoke():
@@ -325,13 +380,23 @@ def test_plaw_accuracy(alpha):
     assert np.all(res < 5E-3)
 
 
+def get_nfw(real=False, fourier=False):
+    # Return a subclass of the NFW profile with or without fourier analytic.
+    NFW = type("NFW", (ccl.halos.HaloProfileNFW,), {})
+    if real:
+        NFW._real = ccl.halos.HaloProfileNFW._real
+    if fourier:
+        NFW._fourier = ccl.halos.HaloProfileNFW._fourier_analytic
+    return NFW
+
+
 @pytest.mark.parametrize("use_analytic", [True, False])
 def test_nfw_accuracy(use_analytic):
     from scipy.special import sici
 
     tol = 1E-10 if use_analytic else 5E-3
     cM = ccl.halos.ConcentrationDuffy08(M200)
-    p = ccl.halos.HaloProfileNFW(cM, fourier_analytic=use_analytic)
+    p = get_nfw(real=True, fourier=use_analytic)(cM)
     M = 1E14
     a = 0.5
     c = cM.get_concentration(COSMO, M, a)
@@ -360,8 +425,7 @@ def test_nfw_f2r():
     p1 = ccl.halos.HaloProfileNFW(cM)
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
-    p2 = ccl.halos.HaloProfileNFW(cM, fourier_analytic=True)
-    p2._real = None
+    p2 = get_nfw(fourier=True)(cM)
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14
@@ -384,8 +448,7 @@ def test_nfw_projected_accuracy(fourier_analytic):
     p1 = ccl.halos.HaloProfileNFW(cM, truncated=False,
                                   projected_analytic=True)
     # FFTLog
-    p2 = ccl.halos.HaloProfileNFW(cM, truncated=False,
-                                  fourier_analytic=fourier_analytic)
+    p2 = get_nfw(fourier=fourier_analytic)(cM, truncated=False)
 
     M = 1E14
     a = 0.5
@@ -404,8 +467,7 @@ def test_nfw_cumul2d_accuracy(fourier_analytic):
     p1 = ccl.halos.HaloProfileNFW(cM, truncated=False,
                                   cumul2d_analytic=True)
     # FFTLog
-    p2 = ccl.halos.HaloProfileNFW(cM, truncated=False,
-                                  fourier_analytic=fourier_analytic)
+    p2 = get_nfw(fourier=fourier_analytic)(cM, truncated=False)
 
     M = 1E14
     a = 1.0
@@ -455,7 +517,8 @@ def test_hernquist_f2r():
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
     p2 = ccl.halos.HaloProfileHernquist(cM, fourier_analytic=True)
-    p2._real = None
+    with UnlockInstance(p2):
+        p2._real = None
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14

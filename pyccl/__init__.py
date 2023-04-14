@@ -1,11 +1,11 @@
 # flake8: noqa E402
-from pkg_resources import get_distribution, DistributionNotFound
+from importlib.metadata import version, PackageNotFoundError
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
+    __version__ = version(__name__)
+except PackageNotFoundError:
     # package is not installed
     pass
-del get_distribution, DistributionNotFound
+del version, PackageNotFoundError
 
 # Set the environment variable for default config path
 from os import environ, path
@@ -13,16 +13,26 @@ if environ.get("CLASS_PARAM_DIR") is None:
     environ["CLASS_PARAM_DIR"] = path.dirname(path.abspath(__file__))
 del environ, path
 
+# Patch for deprecated alias in Numpy >= 1.20.0 (used in ISiTGR & FAST-PT).
+# Deprecation cycle starts in Numpy 1.20 and ends in Numpy 1.24.
+from packaging.version import parse
+import numpy
+numpy.int = int if parse(numpy.__version__) >= parse("1.20.0") else numpy.int
+del parse, numpy
+
 # SWIG-generated
 from . import ccllib as lib
 
-# monkey patch for isitgr and fast-pt if Numpy>=1.24
-from packaging.version import parse
-import numpy as np
-if parse(np.__version__) >= parse('1.24'):
-    np.int = int
-del parse
-del np
+# Hashing, Caching, CCL base, Mutation locks
+from .base import (
+    CCLObject,
+    CCLHalosObject,
+    Caching,
+    cache,
+    hash_,
+    UnlockInstance,
+    unlock_instance,
+)
 
 # Errors
 from .errors import (
@@ -135,10 +145,8 @@ from .covariances import (
     sigma2_B_from_mask,
 )
 
-
 # Miscellaneous
 from .pyutils import debug_mode, resample_array
-
 
 # Deprecated & Renamed modules
 from .halomodel import (
@@ -163,8 +171,9 @@ from .haloprofile import (
 
 
 __all__ = (
-    'lib',
-    'CCLParameters', 'spline_params', 'gsl_params', 'physical_constants',
+    'lib', 'Caching', 'cache', 'hash_', 'CCLObject', 'CCLHalosObject',
+    'UnlockInstance', 'unlock_instance',
+    'CCLParameters', 'physical_constants', 'gsl_params', 'spline_params',
     'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
     'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
     'growth_factor', 'growth_factor_unnorm', 'growth_rate',

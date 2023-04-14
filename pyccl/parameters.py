@@ -87,6 +87,14 @@ class CCLParameters:
             setattr(self, param, value)
         object.__setattr__(self, "_frozen", frozen)
 
+    def freeze(self):
+        """Freeze an instance of ``CCLParameters``."""
+        object.__setattr__(self, "_frozen", True)
+
+    def unfreeze(self):
+        """Unfreeze an instance of ``CCLParameters``."""
+        object.__setattr__(self, "_frozen", False)
+
     @classmethod
     def get_params_dict(cls, name):
         """Get a dictionary of the current parameters.

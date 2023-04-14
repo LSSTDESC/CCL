@@ -12,12 +12,13 @@ from ..power import linear_matter_power, nonlin_matter_power
 from ..pyutils import _spline_integrate
 from .. import background
 from ..errors import CCLWarning
-from ..parameters import physical_constants
+from ..base import CCLHalosObject, unlock_instance
+from ..parameters import physical_constants as const
 import numpy as np
 
 
-class HMCalculator(object):
-    """ This class implements a set of methods that can be used to
+class HMCalculator(CCLHalosObject):
+    """This class implements a set of methods that can be used to
     compute various halo model quantities. A lot of these quantities
     will involve integrals of the sort:
 
@@ -52,6 +53,8 @@ class HMCalculator(object):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
+    __repr_attrs__ = ("_massfunc", "_hbias", "_mdef", "_prec",)
+
     def __init__(self, cosmo, massfunc, hbias, mass_def,
                  log10M_min=8., log10M_max=16.,
                  nlog10M=128, integration_method_M='simpson',
@@ -106,46 +109,50 @@ class HMCalculator(object):
         else:
             self._integrator = self._integ_spline
 
-        self._a_current_mf = -1
-        self._a_current_bf = -1
+        # Cache last results for mass function and halo bias.
+        self._cosmo_mf = self._cosmo_bf = None
+        self._a_mf = self._a_bf = -1
 
     def _integ_spline(self, fM, lM):
         # Spline integrator
         return _spline_integrate(lM, fM, lM[0], lM[-1])
 
-    def _get_ingredients(self, a, cosmo, get_bf):
-        # Compute mass function and bias (if needed) at a new
-        # value of the scale factor.
-        rho0 = None
-        if a != self._a_current_mf:
-            rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
-            self.mf = self._massfunc.get_mass_function(cosmo, self._mass, a,
-                                                       mdef_other=self._mdef)
-            self.mf0 = (rho0 -
-                        self._integrator(self.mf * self._mass,
-                                         self._lmass)) / self._m0
-            self._a_current_mf = a
+    @unlock_instance(mutate=False)
+    def _get_mass_function(self, cosmo, a, rho0):
+        # Compute the mass function at this cosmo and a.
+        if a != self._a_mf or cosmo != self._cosmo_mf:
+            massfunc = self._massfunc.get_mass_function
+            self._mf = massfunc(cosmo, self._mass, a)
+            integ = self._integrator(self._mf*self._mass, self._lmass)
+            self._mf0 = (rho0 - integ) / self._m0
+            self._cosmo_mf, self._a_mf = cosmo, a  # cache
 
+    @unlock_instance(mutate=False)
+    def _get_halo_bias(self, cosmo, a, rho0):
+        # Compute the halo bias at this cosmo and a.
+        if cosmo != self._cosmo_bf or a != self._a_bf:
+            hbias = self._hbias.get_halo_bias
+            self._bf = hbias(cosmo, self._mass, a)
+            integ = self._integrator(self._mf*self._bf*self._mass, self._lmass)
+            self._mbf0 = (rho0 - integ) / self._m0
+            self._cosmo_bf, self._a_bf = cosmo, a  # cache
+
+    def _get_ingredients(self, cosmo, a, get_bf):
+        """Compute mass function and halo bias at some scale factor."""
+        rho0 = const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"]**2
+        self._get_mass_function(cosmo, a, rho0)
         if get_bf:
-            if a != self._a_current_bf:
-                if rho0 is None:
-                    rho0 = cosmo.rho_x(1., "matter", is_comoving=True)
-                self.bf = self._hbias.get_halo_bias(cosmo, self._mass, a,
-                                                    mdef_other=self._mdef)
-                self.mbf0 = (rho0 -
-                             self._integrator(self.mf * self.bf * self._mass,
-                                              self._lmass)) / self._m0
-            self._a_current_bf = a
+            self._get_halo_bias(cosmo, a, rho0)
 
     def _integrate_over_mf(self, array_2):
-        i1 = self._integrator(self.mf[..., :] * array_2,
+        i1 = self._integrator(self._mf[..., :] * array_2,
                               self._lmass)
-        return i1 + self.mf0 * array_2[..., 0]
+        return i1 + self._mf0 * array_2[..., 0]
 
     def _integrate_over_mbf(self, array_2):
-        i1 = self._integrator((self.mf * self.bf)[..., :] * array_2,
+        i1 = self._integrator((self._mf * self._bf)[..., :] * array_2,
                               self._lmass)
-        return i1 + self.mbf0 * array_2[..., 0]
+        return i1 + self._mbf0 * array_2[..., 0]
 
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
@@ -161,7 +168,7 @@ class HMCalculator(object):
             float or array_like: integral value.
         """
         # Compute mass function
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(cosmo, a, False)
         uk0 = prof.fourier(cosmo, self._prec['k_min'],
                            self._mass, a, mass_def=self._mdef).T
         norm = 1. / self._integrate_over_mf(uk0)
@@ -209,17 +216,17 @@ class HMCalculator(object):
         abs_dzda = 1 / a / a
         dc = background.comoving_angular_distance(cosmo, a)
         ez = background.h_over_h0(cosmo, a)
-        dh = physical_constants.CLIGHT_HMPC / cosmo['h']
+        dh = const.CLIGHT_HMPC / cosmo['h']
         dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda
 
         # now do m intergrals in a loop
         mint = np.zeros_like(a)
         for i, _a in enumerate(a):
-            self._get_ingredients(_a, cosmo, False)
+            self._get_ingredients(cosmo, _a, False)
             _selm = np.atleast_2d(sel(self._mass, _a)).T
             mint[i] = self._integrator(
-                dvda[i] * self.mf[..., :] * _selm[..., :],
+                dvda[i] * self._mf[..., :] * _selm[..., :],
                 self._lmass
             )
 
@@ -250,7 +257,7 @@ class HMCalculator(object):
             value of `k`.
         """
         # Compute mass function
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(cosmo, a, False)
         uk = prof.fourier(cosmo, k, self._mass, a,
                           mass_def=self._mdef).T
         i01 = self._integrate_over_mf(uk)
@@ -280,7 +287,7 @@ class HMCalculator(object):
             value of `k`.
         """
         # Compute mass function and halo bias
-        self._get_ingredients(a, cosmo, True)
+        self._get_ingredients(cosmo, a, True)
         uk = prof.fourier(cosmo, k, self._mass, a,
                           mass_def=self._mdef).T
         i11 = self._integrate_over_mbf(uk)
@@ -301,22 +308,25 @@ class HMCalculator(object):
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object
                 returning the the two-point moment of the two profiles
                 being correlated.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof` will be used as
+            prof2 (:class:`~pyccl.halos.profiles.HaloProfile` or None):
+                a second halo profile. If `None`, `prof1` will be used as
                 `prof2`.
 
         Returns:
              float or array_like: integral values evaluated at each
              value of `k`.
         """
+        if prof2 is None:
+            prof2 = prof1
+
         # Compute mass function
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(cosmo, a, False)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
                                   mass_def=self._mdef).T
@@ -339,22 +349,25 @@ class HMCalculator(object):
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+            prof1 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
                 profile.
             prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object
                 returning the the two-point moment of the two profiles
                 being correlated.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof` will be used as
+                second halo profile. If `None`, `prof1` will be used as
                 `prof2`.
 
         Returns:
              float or array_like: integral values evaluated at each
              value of `k`.
         """
+        if prof2 is None:
+            prof2 = prof1
+
         # Compute mass function
-        self._get_ingredients(a, cosmo, True)
+        self._get_ingredients(cosmo, a, True)
         uk = prof_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                   prof2=prof2,
                                   mass_def=self._mdef).T
@@ -389,13 +402,13 @@ class HMCalculator(object):
                 second halo profile. If `None`, `prof1` will be used as
                 `prof2`.
             prof3 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof1` will be used as
+                third halo profile. If `None`, `prof1` will be used as
                 `prof3`.
             prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
                 a profile covariance object returning the the
                 two-point moment of `prof3` and `prof4`.
             prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-                second halo profile. If `None`, `prof3` will be used as
+                fourth halo profile. If `None`, `prof2` will be used as
                 `prof4`.
 
         Returns:
@@ -404,14 +417,21 @@ class HMCalculator(object):
         """
         if prof3 is None:
             prof3 = prof1
+        if prof4 is None:
+            prof4 = prof2
+
         if prof34_2pt is None:
             prof34_2pt = prof12_2pt
 
-        self._get_ingredients(a, cosmo, False)
+        self._get_ingredients(cosmo, a, False)
         uk12 = prof12_2pt.fourier_2pt(prof1, cosmo, k, self._mass, a,
                                       prof2=prof2, mass_def=self._mdef).T
-        uk34 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
-                                      prof2=prof4, mass_def=self._mdef).T
+        if (prof1, prof2) == (prof3, prof4):
+            # 4pt approximation of the same profile
+            uk34 = uk12
+        else:
+            uk34 = prof34_2pt.fourier_2pt(prof3, cosmo, k, self._mass, a,
+                                          prof2=prof4, mass_def=self._mdef).T
         i04 = self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
         return i04
 
@@ -444,8 +464,8 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof,
         `k` and `a` respectively. If `k` or `a` are scalars, the
         corresponding dimension will be squeezed out on output.
     """
-    a_use = np.atleast_1d(a)
-    k_use = np.atleast_1d(k)
+    a_use = np.atleast_1d(a).astype(float)
+    k_use = np.atleast_1d(k).astype(float)
 
     # Check inputs
     if not isinstance(prof, HaloProfile):
@@ -498,8 +518,8 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, normprof=False):
         `k` and `a` respectively. If `k` or `a` are scalars, the
         corresponding dimension will be squeezed out on output.
     """
-    a_use = np.atleast_1d(a)
-    k_use = np.atleast_1d(k)
+    a_use = np.atleast_1d(a).astype(float)
+    k_use = np.atleast_1d(k).astype(float)
 
     # Check inputs
     if not isinstance(prof, HaloProfile):
@@ -592,13 +612,15 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
         `k` and `a` respectively. If `k` or `a` are scalars, the
         corresponding dimension will be squeezed out on output.
     """
-    a_use = np.atleast_1d(a)
-    k_use = np.atleast_1d(k)
+    a_use = np.atleast_1d(a).astype(float)
+    k_use = np.atleast_1d(k).astype(float)
 
     # Check inputs
     if not isinstance(prof, HaloProfile):
         raise TypeError("prof must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+    if prof2 is None:
+        prof2 = prof
+    elif not isinstance(prof2, HaloProfile):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
     if prof_2pt is None:
         prof_2pt = Profile2pt()
@@ -645,7 +667,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             norm1 = 1
         prefac1 = prof._get_prefactor(cosmo, aa, hmc)
         # Compute second profile normalization
-        if prof2 is None:
+        if prof2 == prof:
             norm2 = norm1
             prefac2 = prefac1
         else:
@@ -661,7 +683,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof,
             i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
 
             # Compute second bias factor
-            if prof2 is None:
+            if prof2 == prof:
                 i11_2 = i11_1
             else:
                 i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
@@ -833,7 +855,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
             `prof1` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof12_2pt` for `prof3` and `prof4`.
         normprof1 (bool): if `True`, this integral will be
@@ -853,24 +875,31 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
         If `k` or `a` are scalars, the corresponding dimension will
         be squeezed out on output.
     """
-    a_use = np.atleast_1d(a)
-    k_use = np.atleast_1d(k)
+    a_use = np.atleast_1d(a).astype(float)
+    k_use = np.atleast_1d(k).astype(float)
 
     # Check inputs
     if not isinstance(prof1, HaloProfile):
         raise TypeError("prof1 must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+    if prof2 is None:
+        prof2 = prof1
+    elif not isinstance(prof2, HaloProfile):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
+    if prof3 is None:
+        prof3 = prof1
+    elif not isinstance(prof3, HaloProfile):
         raise TypeError("prof3 must be of type `HaloProfile` or `None`")
-    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
+    if prof4 is None:
+        prof4 = prof2
+    elif not isinstance(prof4, HaloProfile):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
     if prof12_2pt is None:
         prof12_2pt = Profile2pt()
     elif not isinstance(prof12_2pt, Profile2pt):
-        raise TypeError("prof12_2pt must be of type "
-                        "`Profile2pt` or `None`")
-    if (prof34_2pt is not None) and (not isinstance(prof34_2pt, Profile2pt)):
+        raise TypeError("prof12_2pt must be of type `Profile2pt` or `None`")
+    if prof34_2pt is None:
+        prof34_2pt = prof12_2pt
+    elif not isinstance(prof34_2pt, Profile2pt):
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
     def get_norm(normprof, prof, sf):
@@ -886,16 +915,18 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a,
         # Compute profile normalizations
         norm1 = get_norm(normprof1, prof1, aa)
         # Compute second profile normalization
-        if prof2 is None:
+        if prof2 == prof1:
             norm2 = norm1
         else:
             norm2 = get_norm(normprof2, prof2, aa)
-        if prof3 is None:
+
+        if prof3 == prof1:
             norm3 = norm1
         else:
             norm3 = get_norm(normprof3, prof3, aa)
-        if prof4 is None:
-            norm4 = norm3
+
+        if prof4 == prof2:
+            norm4 = norm2
         else:
             norm4 = get_norm(normprof4, prof4, aa)
 
@@ -949,7 +980,7 @@ def halomod_Tk3D_1h(cosmo, hmc,
             `prof1` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof12_2pt` for `prof3` and `prof4`.
         normprof1 (bool): if `True`, this integral will be
@@ -1215,7 +1246,7 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             `prof1` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof12_2pt` for `prof3` and `prof4`.
         normprof1 (bool): if `True`, this integral will be
@@ -1263,106 +1294,102 @@ def halomod_Tk3D_SSC(cosmo, hmc,
 
     k_use = np.exp(lk_arr)
 
+    if prof2 is None:
+        prof2 = prof1
+        normprof2 = normprof1
+    if prof3 is None:
+        prof3 = prof1
+        normprof3 = normprof1
+    if prof4 is None:
+        prof4 = prof2
+        normprof4 = normprof2
+    if prof12_2pt is None:
+        prof12_2pt = Profile2pt()
+    if prof34_2pt is None:
+        prof34_2pt = prof12_2pt
+
     # Check inputs
     if not isinstance(prof1, HaloProfile):
         raise TypeError("prof1 must be of type `HaloProfile`")
-    if (prof2 is not None) and (not isinstance(prof2, HaloProfile)):
+    if not isinstance(prof2, HaloProfile):
         raise TypeError("prof2 must be of type `HaloProfile` or `None`")
-    if (prof3 is not None) and (not isinstance(prof3, HaloProfile)):
+    if not isinstance(prof3, HaloProfile):
         raise TypeError("prof3 must be of type `HaloProfile` or `None`")
-    if (prof4 is not None) and (not isinstance(prof4, HaloProfile)):
+    if not isinstance(prof4, HaloProfile):
         raise TypeError("prof4 must be of type `HaloProfile` or `None`")
-    if prof12_2pt is None:
-        prof12_2pt = Profile2pt()
-    elif not isinstance(prof12_2pt, Profile2pt):
-        raise TypeError("prof12_2pt must be of type "
-                        "`Profile2pt` or `None`")
-    if (prof34_2pt is not None) and (not isinstance(prof34_2pt, Profile2pt)):
+    if not isinstance(prof12_2pt, Profile2pt):
+        raise TypeError("prof12_2pt must be of type `Profile2pt` or `None`")
+    if not isinstance(prof34_2pt, Profile2pt):
         raise TypeError("prof34_2pt must be of type `Profile2pt` or `None`")
 
     # number counts profiles must be normalized
     profs = {prof1: normprof1, prof2: normprof2,
              prof3: normprof3, prof4: normprof4}
 
-    for i, (profile, normalization) in enumerate(profs.items()):
-        if (profile is not None
-                and profile.is_number_counts
-                and not normalization):
+    for i, (prof, norm) in enumerate(profs.items()):
+        if prof.is_number_counts and not norm:
             raise ValueError(
-                f"normprof{i+1} must be True if prof{i+1} is number counts")
-
-    if prof3 is None:
-        prof3_bak = prof1
-    else:
-        prof3_bak = prof3
-    if prof34_2pt is None:
-        prof34_2pt_bak = prof12_2pt
-    else:
-        prof34_2pt_bak = prof34_2pt
+                f"normprof{i+1} must be True if prof{i+1}.is_number_counts")
 
     # Power spectrum
     if isinstance(p_of_k_a, Pk2D):
         pk2d = p_of_k_a
-    elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+    elif (p_of_k_a is None) or str(p_of_k_a) == 'linear':
         pk2d = cosmo.get_linear_power('delta_matter:delta_matter')
     elif str(p_of_k_a) == 'nonlinear':
         pk2d = cosmo.get_nonlin_power('delta_matter:delta_matter')
     else:
-        raise TypeError("p_of_k_a must be `None`, \'linear\', "
-                        "\'nonlinear\' or a `Pk2D` object")
+        raise ValueError("p_of_k_a must be `None`, 'linear', "
+                         "'nonlinear' or a `Pk2D` object")
 
     def get_norm(normprof, prof, sf):
-        if normprof:
-            return hmc.profile_norm(cosmo, sf, prof)
-        else:
-            return 1
+        return hmc.profile_norm(cosmo, sf, prof) if normprof else 1
 
-    na = len(a_arr)
-    nk = len(k_use)
-    dpk12 = np.zeros([na, nk])
-    dpk34 = np.zeros([na, nk])
+    dpk12, dpk34 = [np.zeros((len(a_arr), len(k_use))) for _ in range(2)]
     for ia, aa in enumerate(a_arr):
         # Compute profile normalizations
         norm1 = get_norm(normprof1, prof1, aa)
         i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof1)
         # Compute second profile normalization
-        if prof2 is None:
+        if prof2 == prof1:
             norm2 = norm1
             i11_2 = i11_1
         else:
             norm2 = get_norm(normprof2, prof2, aa)
             i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
-        if prof3 is None:
+
+        if prof3 == prof1:
             norm3 = norm1
             i11_3 = i11_1
         else:
             norm3 = get_norm(normprof3, prof3, aa)
             i11_3 = hmc.I_1_1(cosmo, k_use, aa, prof3)
-        if prof4 is None:
-            norm4 = norm3
-            i11_4 = i11_3
+
+        if prof4 == prof2:
+            norm4 = norm2
+            i11_4 = i11_2
         else:
             norm4 = get_norm(normprof4, prof4, aa)
             i11_4 = hmc.I_1_1(cosmo, k_use, aa, prof4)
 
-        i12_12 = hmc.I_1_2(cosmo, k_use, aa, prof1,
-                           prof12_2pt, prof2)
-        if (prof3 is None) and (prof4 is None) and (prof34_2pt is None):
+        i12_12 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2)
+
+        if (prof1, prof2) == (prof3, prof4):
             i12_34 = i12_12
         else:
-            i12_34 = hmc.I_1_2(cosmo, k_use, aa, prof3_bak,
-                               prof34_2pt_bak, prof4)
+            i12_34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof4)
+
         norm12 = norm1 * norm2
         norm34 = norm3 * norm4
 
         pk = pk2d.eval(k_use, aa, cosmo)
         dpk = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo)
         # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk+I12
-        dpk12[ia, :] = norm12*((2.2380952381-dpk/3)*i11_1*i11_2*pk+i12_12)
-        dpk34[ia, :] = norm34*((2.2380952381-dpk/3)*i11_3*i11_4*pk+i12_34)
+        dpk12[ia, :] = norm12*((47/21 - dpk/3)*i11_1*i11_2*pk + i12_12)
+        dpk34[ia, :] = norm34*((47/21 - dpk/3)*i11_3*i11_4*pk + i12_34)
 
         # Counter terms for clustering (i.e. - (bA + bB) * PAB
-        if prof1.is_number_counts or (prof2 is None or prof2.is_number_counts):
+        if prof1.is_number_counts or prof2.is_number_counts:
             b1 = b2 = np.zeros_like(k_use)
             i02_12 = hmc.I_0_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2)
             P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
@@ -1370,31 +1397,28 @@ def halomod_Tk3D_SSC(cosmo, hmc,
             if prof1.is_number_counts:
                 b1 = i11_1 * norm1
 
-            if prof2 is None:
+            if prof2 == prof1:
                 b2 = b1
             elif prof2.is_number_counts:
                 b2 = i11_2 * norm2
 
             dpk12[ia, :] -= (b1 + b2) * P_12
 
-        if prof3_bak.is_number_counts or \
-                ((prof3_bak.is_number_counts and prof4 is None) or
-                 (prof4 is not None) and prof4.is_number_counts):
+        if any([p.is_number_counts for p in [prof3, prof4]]):
             b3 = b4 = np.zeros_like(k_use)
-            if (prof3 is None) and (prof4 is None) and (prof34_2pt is None):
+            if (prof1, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
                 i02_34 = i02_12
             else:
-                i02_34 = hmc.I_0_2(cosmo, k_use, aa, prof3_bak, prof34_2pt_bak,
-                                   prof4)
+                i02_34 = hmc.I_0_2(cosmo, k_use, aa, prof3, prof34_2pt, prof4)
             P_34 = norm34 * (pk * i11_3 * i11_4 + i02_34)
 
-            if prof3 is None:
+            if prof3 == prof1:
                 b3 = b1
             elif prof3.is_number_counts:
                 b3 = i11_3 * norm3
 
-            if prof4 is None:
-                b4 = b3
+            if prof4 == prof2:
+                b4 = b2
             elif prof4.is_number_counts:
                 b4 = i11_4 * norm4
 

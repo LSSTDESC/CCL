@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import pyccl as ccl
-from pyccl.errors import CCLWarning
+from pyccl import CCLWarning
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -386,3 +386,45 @@ def test_tracer_increase_sf():
     # Check it works in the right order
     tr.add_tracer(COSMO, kernel=(chi, one),
                   transfer_a=(sf[::-1], one))
+
+
+def test_tracer_repr():
+    """Check that the repr works as intended."""
+    # Equal Tracers with a kernel.
+    tr1 = ccl.CMBLensingTracer(COSMO, z_source=1100)
+    tr2 = ccl.CMBLensingTracer(COSMO, z_source=1100)
+    assert tr1 == tr2
+    # Unequal.
+    tr3 = ccl.CMBLensingTracer(COSMO, z_source=1101)
+    assert tr3 != tr1
+    # We add an extra tracer and check unequal.
+    chi = np.linspace(tr1.chi_min, tr1.chi_max, 128)
+    wchi = np.ones_like(chi)
+    tr2.add_tracer(COSMO, kernel=(chi, wchi))
+    assert tr2 != tr1
+    # Check empty tracer.
+    z = np.linspace(0, 0.5, 128)
+    nz = np.ones_like(z)
+    tr4 = ccl.Tracer()
+    tr5 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=False)  # all off
+    assert tr4 == tr5
+    # Check tracers with transfer functions.
+    # transfer_a
+    tr6 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=True)
+    tr7 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=True)
+    assert tr6 == tr7
+    # transfer_k
+    lk = np.linspace(-5, 2, 8)
+    t_k = np.ones_like(lk)
+    tr6.add_tracer(COSMO, transfer_k=(lk, t_k))
+    tr7.add_tracer(COSMO, transfer_k=(lk, t_k))
+    # transfer_ka
+    a = np.linspace(0.5, 1.0, 8)
+    t_ka = np.ones((a.size, lk.size))
+    tr6.add_tracer(COSMO, transfer_ka=(a, lk, t_ka))
+    tr7.add_tracer(COSMO, transfer_ka=(a, lk, t_ka))
+    assert tr6 == tr7
+    # different extrap orders
+    tr6.add_tracer(COSMO, transfer_ka=(a, lk, t_ka), extrap_order_lok=0)
+    tr7.add_tracer(COSMO, transfer_ka=(a, lk, t_ka), extrap_order_lok=1)
+    assert tr6 != tr7

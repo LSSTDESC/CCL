@@ -3,12 +3,14 @@ from ..pyutils import check
 from ..background import growth_factor, growth_rate
 from .massdef import MassDef, mass2radius_lagrangian
 from ..power import linear_matter_power, sigmaM
+from ..base import CCLHalosObject
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 import functools
+from abc import abstractmethod
 
 
-class Concentration(object):
+class Concentration(CCLHalosObject):
     """ This class enables the calculation of halo concentrations.
 
     Args:
@@ -16,7 +18,7 @@ class Concentration(object):
             object that fixes the mass definition used by this c(M)
             parametrization.
     """
-    name = 'default'
+    __repr_attrs__ = ("mdef",)
 
     def __init__(self, mass_def=None):
         if mass_def is not None:
@@ -29,11 +31,11 @@ class Concentration(object):
             self._default_mdef()
         self._setup()
 
+    @abstractmethod
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
         """
-        self.mdef = MassDef('fof', 'matter')
 
     def _setup(self):
         """ Use this function to initialize any internal attributes
@@ -79,6 +81,10 @@ class Concentration(object):
         else:
             M_use = M
         return M_use
+
+    @abstractmethod
+    def _concentration(self, cosmo, M, a):
+        """Implementation of the c(M) relation."""
 
     def get_concentration(self, cosmo, M, a, mdef_other=None):
         """ Returns the concentration for input parameters.
@@ -389,6 +395,7 @@ class ConcentrationIshiyama21(Concentration):
             method. Otherwise, use the concentration found with profile
             fitting. The default is False.
     """
+    __repr_attrs__ = ("mdef", "relaxed", "Vmax",)
     name = 'Ishiyama21'
 
     def __init__(self, mdef=None, relaxed=False, Vmax=False):
@@ -548,6 +555,7 @@ class ConcentrationConstant(Concentration):
             the mass definition used by this c(M)
             parametrization. In this case it's arbitrary.
     """
+    __repr_attrs__ = ("mdef", "c",)
     name = 'Constant'
 
     def __init__(self, c=1, mdef=None):

@@ -1,7 +1,6 @@
 import tempfile
 import filecmp
 import io
-
 import pyccl as ccl
 
 

@@ -6,6 +6,7 @@ from . import ccllib as lib
 from .errors import CCLWarning, CCLError
 from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline1d_arrays, _get_spline2d_arrays)
+from .base import CCLObject, UnlockInstance, unlock_instance
 
 
 class _Pk2D_descriptor:
@@ -23,7 +24,7 @@ class _Pk2D_descriptor:
         return new_func
 
 
-class Pk2D(object):
+class Pk2D(CCLObject):
     """A power spectrum class holding the information needed to reconstruct an
     arbitrary function of wavenumber and scale factor.
 
@@ -84,6 +85,7 @@ class Pk2D(object):
     empty : bool
         If ``True``, just create an empty object, to be filled out later.
     """
+    from ._repr import _build_string_Pk2D as __repr__
 
     def __init__(self, pkfunc=None, a_arr=None, lk_arr=None, pk_arr=None,
                  is_logp=True, extrap_order_lok=1, extrap_order_hik=2,
@@ -91,7 +93,6 @@ class Pk2D(object):
         if empty:
             return
 
-        status = 0
         if pkfunc is None:  # Initialize power spectrum from 2D array
             # Make sure input makes sense
             if (a_arr is None) or (lk_arr is None) or (pk_arr is None):
@@ -122,6 +123,7 @@ class Pk2D(object):
             pkflat = np.array([pkfunc(k=np.exp(lk_arr), a=a) for a in a_arr])
             pkflat = pkflat.flatten()
 
+        status = 0
         self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
                                                         int(extrap_order_lok),
                                                         int(extrap_order_hik),
@@ -172,7 +174,8 @@ class Pk2D(object):
         if np.ndim(ret) == 0:
             status = ret
         else:
-            pk2d.psp, status = ret
+            with UnlockInstance(pk2d):
+                pk2d.psp, status = ret
 
         check(status, cosmo)
         return pk2d
@@ -220,7 +223,8 @@ class Pk2D(object):
         if np.ndim(ret) == 0:
             status = ret
         else:
-            pk2d.psp, status = ret
+            with UnlockInstance(pk2d):
+                pk2d.psp, status = ret
         check(status, cosmo)
         return pk2d
 
@@ -464,22 +468,27 @@ class Pk2D(object):
     def __rtruediv__(self, other):
         return other * self**(-1)
 
+    @unlock_instance
     def __iadd__(self, other):
         self = self + other
         return self
 
+    @unlock_instance
     def __imul__(self, other):
         self = self * other
         return self
 
+    @unlock_instance
     def __isub__(self, other):
         self = self - other
         return self
 
+    @unlock_instance
     def __itruediv__(self, other):
         self = self / other
         return self
 
+    @unlock_instance
     def __ipow__(self, other):
         self = self**other
         return self

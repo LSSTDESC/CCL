@@ -3,13 +3,14 @@ import pyccl
 from ..background import h_over_h0, sigma_critical
 from ..power import sigmaM
 from ..pyutils import resample_array, _fftlog_transform
+from ..base import CCLHalosObject, UnlockInstance, unlock_instance
 from .concentration import Concentration
 from .massdef import MassDef
 import numpy as np
 from scipy.special import sici, erf, gamma, gammainc
 
 
-class HaloProfile(object):
+class HaloProfile(CCLHalosObject):
     """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL
@@ -35,10 +36,15 @@ class HaloProfile(object):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
-    name = 'default'
     is_number_counts = False
 
     def __init__(self):
+        # Check that at least one of (`_real`, `_fourier`) exist.
+        if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
+            raise TypeError(
+                f"Can't instantiate class {self.__class__.__name__} "
+                "with no methods _real or _fourier")
+
         self.precision_fftlog = {'padding_lo_fftlog': 0.1,
                                  'padding_lo_extra': 0.1,
                                  'padding_hi_fftlog': 10.,
@@ -49,6 +55,11 @@ class HaloProfile(object):
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
 
+    __eq__ = object.__eq__
+
+    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
+
+    @unlock_instance(mutate=True)
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by
         FFTLog to compute Hankel transforms. The available
@@ -164,8 +175,8 @@ class HaloProfile(object):
         """
         return 1.
 
-    def real(self, cosmo, r, M, a, mass_def):
-        """ Returns the 3D  real-space value of the profile as a
+    def real(self, cosmo, r, M, a, mass_def=None):
+        """ Returns the 3D real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
 
         Args:
@@ -188,10 +199,6 @@ class HaloProfile(object):
         elif getattr(self, '_fourier', None):
             f_r = self._fftlog_wrap(cosmo, r, M, a, mass_def,
                                     fourier_out=False)
-        else:
-            raise NotImplementedError("Profiles must have at least "
-                                      " either a _real or a "
-                                      " _fourier method.")
         return f_r
 
     def fourier(self, cosmo, k, M, a, mass_def):
@@ -221,12 +228,7 @@ class HaloProfile(object):
         if getattr(self, '_fourier', None):
             f_k = self._fourier(cosmo, k, M, a, mass_def)
         elif getattr(self, '_real', None):
-            f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def,
-                                    fourier_out=True)
-        else:
-            raise NotImplementedError("Profiles must have at least "
-                                      " either a _real or a "
-                                      " _fourier method.")
+            f_k = self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
         return f_k
 
     def projected(self, cosmo, r_t, M, a, mass_def):
@@ -552,6 +554,7 @@ class HaloProfileGaussian(HaloProfile):
         rho0 (:obj:`function`): the amplitude of the profile.
             It should have the same signature as `r_scale`.
     """
+    __repr_attrs__ = ("r_s", "rho_0", "precision_fftlog",)
     name = 'Gaussian'
 
     def __init__(self, r_scale, rho0):
@@ -598,6 +601,7 @@ class HaloProfilePowerLaw(HaloProfile):
             profile. The signature of this function should
             be `f(cosmo, a)`.
     """
+    __repr_attrs__ = ("r_s", "tilt", "precision_fftlog",)
     name = 'PowerLaw'
 
     def __init__(self, r_scale, tilt):
@@ -669,6 +673,8 @@ class HaloProfileNFW(HaloProfile):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
+    __repr_attrs__ = ("cM", "fourier_analytic", "projected_analytic",
+                      "cumul2d_analytic", "truncated", "precision_fftlog",)
     name = 'NFW'
 
     def __init__(self, c_M_relation,
@@ -677,10 +683,13 @@ class HaloProfileNFW(HaloProfile):
                  cumul2d_analytic=False,
                  truncated=True):
         if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`)")
+            raise TypeError("c_M_relation must be of type `Concentration`")
 
         self.cM = c_M_relation
         self.truncated = truncated
+        self.fourier_analytic = fourier_analytic
+        self.projected_analytic = projected_analytic
+        self.cumul2d_analytic = cumul2d_analytic
         if fourier_analytic:
             self._fourier = self._fourier_analytic
         if projected_analytic:
@@ -861,11 +870,12 @@ class HaloProfileEinasto(HaloProfile):
         alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
             'cosmo' to calculate the value from cosmology. Default: 'cosmo'
     """
+    __repr_attrs__ = ("cM", "truncated", "alpha", "precision_fftlog",)
     name = 'Einasto'
 
     def __init__(self, c_M_relation, truncated=True, alpha='cosmo'):
         if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`)")
+            raise TypeError("c_M_relation must be of type `Concentration`")
 
         self.cM = c_M_relation
         self.truncated = truncated
@@ -970,6 +980,8 @@ class HaloProfileHernquist(HaloProfile):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
+    __repr_attrs__ = ("cM", "fourier_analytic", "projected_analytic",
+                      "cumul2d_analytic", "truncated", "precision_fftlog",)
     name = 'Hernquist'
 
     def __init__(self, c_M_relation,
@@ -978,10 +990,13 @@ class HaloProfileHernquist(HaloProfile):
                  projected_analytic=False,
                  cumul2d_analytic=False):
         if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`)")
+            raise TypeError("c_M_relation must be of type `Concentration`")
 
         self.cM = c_M_relation
         self.truncated = truncated
+        self.fourier_analytic = fourier_analytic
+        self.projected_analytic = projected_analytic
+        self.cumul2d_analytic = cumul2d_analytic
         if fourier_analytic:
             self._fourier = self._fourier_analytic
         if projected_analytic:
@@ -1197,6 +1212,9 @@ class HaloProfilePressureGNFW(HaloProfile):
         Profile threshold, in units of :math:`R_{\\mathrm{500c}}`.
         Defaults to :math:`+\\infty`.
     """
+    __repr_attrs__ = ("mass_bias", "P0", "c500", "alpha", "alpha_P", "beta",
+                      "gamma", "P0_hexp", "qrange", "nq", "x_out",
+                      "precision_fftlog",)
     name = 'GNFW'
 
     def __init__(self, mass_bias=0.8, P0=6.41,
@@ -1348,7 +1366,8 @@ class HaloProfilePressureGNFW(HaloProfile):
 
         # Tabulate if not done yet
         if self._fourier_interp is None:
-            self._fourier_interp = self._integ_interp()
+            with UnlockInstance(self):
+                self._fourier_interp = self._integ_interp()
 
         # Input handling
         M_use = np.atleast_1d(M)
@@ -1471,7 +1490,11 @@ class HaloProfileHOD(HaloProfile):
         a_pivot (float): pivot scale factor :math:`a_*`.
         ns_independent (bool): drop requirement to only form
             satellites when centrals are present.
-        """
+    """
+    __repr_attrs__ = ("cM", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p",
+                      "lM0_0", "lM0_p", "lM1_0", "lM1_p", "alpha_0", "alpha_p",
+                      "fc_0", "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p",
+                      "a_pivot", "ns_independent", "precision_fftlog",)
     name = 'HOD'
     is_number_counts = True
 
@@ -1483,7 +1506,7 @@ class HaloProfileHOD(HaloProfile):
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
                  a_pivot=1., ns_independent=False):
         if not isinstance(c_M_relation, Concentration):
-            raise TypeError("c_M_relation must be of type `Concentration`)")
+            raise TypeError("c_M_relation must be of type `Concentration`")
 
         self.cM = c_M_relation
         self.lMmin_0 = lMmin_0

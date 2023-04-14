@@ -142,8 +142,6 @@ def test_tkk1h_tk3d():
 
 
 def test_tkk1h_errors():
-    from pyccl.pyutils import assert_warns
-
     hmc = ccl.halos.HMCalculator(COSMO, HMF, HBF, mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
@@ -170,7 +168,8 @@ def test_tkk1h_errors():
                                          P1, prof34_2pt=P2)
 
     # Negative profile in logspace
-    assert_warns(ccl.CCLWarning, ccl.halos.halomod_Tk3D_1h,
-                 COSMO, hmc, P3, prof2=Pneg,
-                 lk_arr=np.log(k_arr), a_arr=a_arr,
-                 use_log=True)
+    with pytest.warns(ccl.CCLWarning):
+        ccl.halos.halomod_Tk3D_1h(COSMO, hmc, P3, prof2=Pneg,
+                                  prof3=P3, prof4=P3,
+                                  lk_arr=np.log(k_arr), a_arr=a_arr,
+                                  use_log=True)

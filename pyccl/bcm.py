@@ -1,6 +1,7 @@
 from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D
+from .base import unlock_instance
 import numpy as np
 
 
@@ -35,6 +36,7 @@ def bcm_model_fka(cosmo, k, a):
     return fka
 
 
+@unlock_instance(mutate=True, name="pk2d")
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
 
