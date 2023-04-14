@@ -85,7 +85,7 @@ def test_prefactor():
     bM = ccl.halos.HaloBiasTinker10(cosmo, mass_def=hmd_200m)
     hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd_200m)
 
-    profile = ccl.halos.HaloProfile()
+    profile = ccl.halos.HaloProfileNFW(cM) # a simple profile
     assert np.all(np.abs(profile._get_prefactor(
         cosmo, 1., hmc)-1.0 < 1e-10))
 
