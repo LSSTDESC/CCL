@@ -250,3 +250,16 @@ def test_satellite_shear_profile():
 
     assert np.all(np.fabs(cl_GI_1h / cl_GI_benchmark - 1) < 0.01)
     assert np.all(np.fabs(cl_II_1h / cl_II_benchmark - 1) < 0.01)
+
+    # Below I am benchmarking the normalization factor of the
+    # delta-E power spectrum Eq. (17) in Fortuna et al. 2021.
+    # Specifically, the term f_s(z)*<N_s|M>/n_s(z).
+    mass_benchmark, norm_benchmark = np.loadtxt(
+        './benchmarks/data/IA_halomodel_norm_term.dat', unpack=True)
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_k=0,
+                          sigma8=0.81, n_s=0.96, h=1.)
+    cosmo.compute_sigma()
+    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd_200m)
+    Ns_M_mean = sat_gamma_HOD._Ns(mass_benchmark, 1.)
+    norm = Ns_M_mean * sat_gamma_HOD._get_prefactor(cosmo, 1, hmc)
+    assert np.all(np.fabs(norm / norm_benchmark - 1) < 0.005)
