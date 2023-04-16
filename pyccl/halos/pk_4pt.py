@@ -356,8 +356,8 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, prof, bias1=1, bias2=1, bias3=1,
         norm = hmc.profile_norm(cosmo, aa, prof) ** 2
         i12 = hmc.I_1_2(cosmo, k_use, aa, prof, prof_2pt, prof) * norm
 
-        pk = pk2d.eval(k_use, aa, cosmo)
-        dpk = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo)
+        pk = pk2d(k_use, aa, cosmo)
+        dpk = pk2d(k_use, aa, cosmo, derivative=True)
         # ~ [(47/21 - 1/3 dlogPk/dlogk) * Pk+I12]
         dpk12[ia] = ((2.2380952381-dpk/3)*pk + i12)
         dpk34[ia] = dpk12[ia].copy()  # Avoid surprises
@@ -582,8 +582,8 @@ def halomod_Tk3D_SSC(cosmo, hmc,
         norm12 = norm1 * norm2
         norm34 = norm3 * norm4
 
-        pk = pk2d.eval(k_use, aa, cosmo)
-        dpk = pk2d.eval_dlogpk_dlogk(k_use, aa, cosmo)
+        pk = pk2d(k_use, aa, cosmo)
+        dpk = pk2d(k_use, aa, cosmo, derivative=True)
         # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk+I12
         dpk12[ia, :] = norm12*((47/21 - dpk/3)*i11_1*i11_2*pk + i12_12)
         dpk34[ia, :] = norm34*((47/21 - dpk/3)*i11_3*i11_4*pk + i12_34)

@@ -5,6 +5,7 @@ from numpy.testing import (
     assert_raises, assert_almost_equal, assert_allclose)
 import pyccl as ccl
 from pyccl import CCLWarning
+from pyccl.pyutils import get_pk_spline_a, get_pk_spline_lk
 
 
 def pk1d(k):
@@ -39,22 +40,27 @@ def test_pk2d_init():
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
     # If no input
-    assert_raises(ValueError, ccl.Pk2D)
+    with pytest.raises(ValueError):
+        ccl.Pk2D()
 
     # Input function has incorrect signature
-    assert_raises(ValueError, ccl.Pk2D, pkfunc=pk1d)
-    ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    with pytest.raises(TypeError):
+        with pytest.warns(ccl.CCLDeprecationWarning):
+            ccl.Pk2D(pkfunc=pk1d)
+
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
 
     # Input arrays have incorrect sizes
     lkarr = -4.+6*np.arange(100)/99.
     aarr = 0.05+0.95*np.arange(100)/99.
     pkarr = np.zeros([len(aarr), len(lkarr)])
-    assert_raises(
-        ValueError, ccl.Pk2D, a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr[1:])
+    with pytest.raises(ValueError):
+        ccl.Pk2D(a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr[1:])
 
     # Scale factor is not monotonically increasing
-    assert_raises(
-        ValueError, ccl.Pk2D, a_arr=aarr[::-1], lk_arr=lkarr, pk_arr=pkarr)
+    with pytest.raises(ValueError):
+        ccl.Pk2D(a_arr=aarr[::-1], lk_arr=lkarr, pk_arr=pkarr)
 
 
 def test_pk2d_smoke():
@@ -65,7 +71,7 @@ def test_pk2d_smoke():
     aarr = 0.05+0.95*np.arange(100)/99.
     pkarr = np.zeros([len(aarr), len(lkarr)])
     psp = ccl.Pk2D(a_arr=aarr, lk_arr=lkarr, pk_arr=pkarr)
-    assert_(not np.isnan(psp.eval(1E-2, 0.5, cosmo)))
+    assert_(not np.isnan(psp(1E-2, 0.5, cosmo)))
 
 
 @pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu',
@@ -80,7 +86,7 @@ def test_pk2d_from_model(model):
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
-        pk1 = pk.eval(ks, a, cosmo)
+        pk1 = pk(ks, a, cosmo)
         pk2 = ccl.linear_matter_power(cosmo, ks, a)
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1E-10
@@ -115,7 +121,7 @@ def test_pk2d_from_model_emu():
     ks = np.geomspace(1E-3, 1E1, 128)
     for z in [0., 0.5, 2.]:
         a = 1./(1+z)
-        pk1 = pk.eval(ks, a, cosmo)
+        pk1 = pk(ks, a, cosmo)
         pk2 = ccl.nonlin_matter_power(cosmo, ks, a)
         maxdiff = np.amax(np.fabs(pk1/pk2-1))
         assert maxdiff < 1E-10
@@ -144,38 +150,43 @@ def test_pk2d_function():
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
-    psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    psp = ccl.Pk2D.from_function(pkfunc=lpk2d,
+                                 spline_params=cosmo.cosmo.spline_params)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        psp2 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    assert psp(1.0, 1.0) == psp2(1.0, 1.0)
 
     # Test at single point
     ktest = 1E-2
     atest = 0.5
     ptrue = pk2d(ktest, atest)
-    phere = psp.eval(ktest, atest, cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_almost_equal(dphere, -1., 6)
 
     ktest = 1
     atest = 0.5
     ptrue = pk2d(ktest, atest)
-    phere = psp.eval(ktest, atest, cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_almost_equal(np.fabs(phere/ptrue), 1., 6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_almost_equal(dphere, -1., 6)
 
     # Test at array of points
     ktest = np.logspace(-3, 1, 10)
     ptrue = pk2d(ktest, atest)
-    phere = psp.eval(ktest, atest, cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is not logarithmic
-    psp = ccl.Pk2D(pkfunc=pk2d, is_logp=False, cosmo=cosmo)
-    phere = psp.eval(ktest, atest, cosmo)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        psp = ccl.Pk2D(pkfunc=pk2d, is_logp=False, cosmo=cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
 
     # Test input is arrays
@@ -184,10 +195,44 @@ def test_pk2d_function():
     parr = np.array([pk2d(karr, a) for a in aarr])
     psp = ccl.Pk2D(
         a_arr=aarr, lk_arr=np.log(karr), pk_arr=parr, is_logp=False)
-    phere = psp.eval(ktest, atest, cosmo)
+    phere = psp(ktest, atest, cosmo)
     assert_allclose(phere, ptrue, rtol=1E-6)
-    dphere = psp.eval_dlogpk_dlogk(ktest, atest, cosmo)
+    dphere = psp(ktest, atest, cosmo, derivative=True)
     assert_allclose(dphere, -1.*np.ones_like(dphere), 6)
+
+
+def test_pk2d_from_function_spline_params():
+    """Verify that passing spline_params as an argument works as expected."""
+    k = np.logspace(-1, 0.5, 8)
+    a = 0.8
+
+    # Sampling from CCL's spline parameters.
+    pk1 = ccl.Pk2D.from_function(pk2d, is_logp=False)
+    a_arr, lk_arr, _ = pk1.get_spline_arrays()
+    assert np.allclose(pk2d(k, a), pk1(k, a), atol=0, rtol=1e-10)
+    assert np.array_equal(a_arr, get_pk_spline_a())
+    assert np.array_equal(lk_arr, get_pk_spline_lk())
+
+    # Sampling with custom spline parameters (C API).
+    ccl.spline_params.N_K -= 10
+    ccl.spline_params.A_SPLINE_NA_PK -= 10
+    cosmo = ccl.CosmologyVanillaLCDM()  # contains a copy of the new params
+    pk2 = ccl.Pk2D.from_function(pk2d, is_logp=False,
+                                 spline_params=cosmo.cosmo.spline_params)
+    a_arr, lk_arr, pk_arr = pk2.get_spline_arrays()
+    assert np.allclose(pk2d(k, a), pk2(k, a), atol=0, rtol=1e-9)
+    assert np.array_equal(a_arr, get_pk_spline_a())
+    assert np.array_equal(lk_arr, get_pk_spline_lk())
+
+    # Sampling with custom spline parameters (Python API)
+    pk3 = ccl.Pk2D.from_function(pk2d, is_logp=False,
+                                 spline_params=ccl.spline_params)
+    a_arr2, lk_arr2, pk_arr2 = pk3.get_spline_arrays()
+    assert np.array_equal(a_arr, a_arr2)
+    assert np.array_equal(lk_arr, lk_arr2)
+    assert np.array_equal(pk_arr, pk_arr2)
+
+    ccl.spline_params.reload()
 
 
 def test_pk2d_cells():
@@ -211,7 +256,8 @@ def test_pk2d_cells():
         ValueError, ccl.angular_cl, cosmo, lens1, lens1, ells, p_of_k_a=1)
 
     # Check that passing a correct power spectrum runs as expected
-    psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
     cells = ccl.angular_cl(cosmo, lens1, lens1, ells, p_of_k_a=psp)
     assert all_finite(cells)
 
@@ -262,7 +308,7 @@ def test_pk2d_parsing():
 
 
 def test_pk2d_get_spline_arrays():
-    empty_pk2d = ccl.Pk2D(empty=True)
+    empty_pk2d = ccl.Pk2D.__new__(ccl.Pk2D)
 
     # Pk2D needs splines defined to get splines out
     with pytest.raises(ValueError):
@@ -275,7 +321,7 @@ def test_pk2d_add():
     zarr_a = np.outer(x, np.exp(log_y))
     zarr_b = np.outer(-1*x, 4*np.exp(log_y))
 
-    empty_pk2d = ccl.Pk2D(empty=True)
+    empty_pk2d = ccl.Pk2D.__new__(ccl.Pk2D)
     pk2d_a = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=np.log(zarr_a),
                       is_logp=True)
     pk2d_b = ccl.Pk2D(a_arr=2*x, lk_arr=log_y, pk_arr=zarr_b,
@@ -365,8 +411,10 @@ def test_pk2d_mul_pow():
 
 def test_pk2d_pkfunc_init_without_cosmo():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
-    arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
     assert np.allclose(arr1, arr2, rtol=0)
 
 
@@ -387,7 +435,8 @@ def test_pk2d_descriptor():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     cosmo.compute_linear_power()
     pkl = cosmo.get_linear_power()
-    pk1 = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        pk1 = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
     pk2 = pkl.apply_halofit(cosmo)
     assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])
 
@@ -398,12 +447,12 @@ def test_pk2d_eval_cosmo():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     cosmo.compute_linear_power()
     pk = cosmo.get_linear_power()
-    assert pk.eval(1., 1.) == pk.eval(1., 1., cosmo)
+    assert pk(1., 1.) == pk(1., 1., cosmo)
 
     amin = pk.psp.amin
-    pk.eval(1., amin*0.99, cosmo)  # doesn't fail because cosmo is provided
+    pk(1., amin*0.99, cosmo)  # doesn't fail because cosmo is provided
     with pytest.raises(TypeError):
-        pk.eval(1., amin*0.99)
+        pk(1., amin*0.99)
 
 
 def test_pk2d_copy():
@@ -419,7 +468,7 @@ def test_pk2d_copy():
                        rtol=1e-15)
     assert bool(pk) is bool(pkc) is True  # they both have `psp`
 
-    pk = ccl.Pk2D(empty=True)
+    pk = ccl.Pk2D.__new__(ccl.Pk2D)
     pkc = pk.copy()
     assert bool(pk) is bool(pkc) is False
 
@@ -464,5 +513,6 @@ def test_pk2d_from_model_smoke():
     # Verify that both `from_model` methods are equivalent.
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     pk1 = ccl.Pk2D.from_model(cosmo, "bbks")
-    pk2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        pk2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
     assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])

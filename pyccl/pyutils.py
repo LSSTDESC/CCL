@@ -349,7 +349,7 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     return f
 
 
-def get_pk_spline_nk(cosmo=None):
+def get_pk_spline_nk(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the wavenumber dimension.
 
     Arguments:
@@ -362,7 +362,7 @@ def get_pk_spline_nk(cosmo=None):
     return int(np.ceil(ndecades*spline_params.N_K))
 
 
-def get_pk_spline_na(cosmo=None):
+def get_pk_spline_na(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the scale factor dimension.
 
     Arguments:
@@ -374,7 +374,7 @@ def get_pk_spline_na(cosmo=None):
     return spline_params.A_SPLINE_NA_PK + spline_params.A_SPLINE_NLOG_PK - 1
 
 
-def get_pk_spline_lk(cosmo=None):
+def get_pk_spline_lk(cosmo=None, spline_params=spline_params):
     """Get a log(k)-array with sampling rate defined by ``ccl.spline_params``
     or by the spline parameters of the input ``cosmo``.
 
@@ -382,7 +382,7 @@ def get_pk_spline_lk(cosmo=None):
         cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
             Input cosmology.
     """
-    nk = get_pk_spline_nk(cosmo=cosmo)
+    nk = get_pk_spline_nk(cosmo=cosmo, spline_params=spline_params)
     if cosmo is not None:
         lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, 0)
         check(status, cosmo)
@@ -392,7 +392,7 @@ def get_pk_spline_lk(cosmo=None):
     return lk_arr
 
 
-def get_pk_spline_a(cosmo=None):
+def get_pk_spline_a(cosmo=None, spline_params=spline_params):
     """Get an a-array with sampling rate defined by ``ccl.spline_params``
     or by the spline parameters of the input ``cosmo``.
 
@@ -400,7 +400,7 @@ def get_pk_spline_a(cosmo=None):
         cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
             Input cosmology.
     """
-    na = get_pk_spline_na(cosmo=cosmo)
+    na = get_pk_spline_na(cosmo=cosmo, spline_params=spline_params)
     if cosmo is not None:
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, 0)
         check(status, cosmo)

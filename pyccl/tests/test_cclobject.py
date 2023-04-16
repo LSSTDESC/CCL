@@ -6,8 +6,8 @@ import functools
 
 def all_subclasses(cls):
     """Get all subclasses of ``cls``. NOTE: Used in ``conftest.py``."""
-    return set(cls.__subclasses__()).union([s for c in cls.__subclasses__()
-                                            for s in all_subclasses(c)])
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
 
 
 def test_fancy_repr():
@@ -54,7 +54,7 @@ def test_CCLObject():
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     cosmo.compute_linear_power()
     PK1 = cosmo.get_linear_power()
-    PK2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
+    PK2 = ccl.Pk2D.from_model(cosmo, "bbks")
     assert PK1 == PK2
     assert ccl.Pk2D(empty=True) == ccl.Pk2D(empty=True)
     assert 2*PK1 != PK2

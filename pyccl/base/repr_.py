@@ -206,7 +206,7 @@ def build_string_Pk2D(self, na=6, nk=6, decimals=2):
             +===============+=============================================+
     """
     if not self.has_psp:
-        return "pyccl.Pk2D(empty=True)"
+        return "pyccl.Pk2D(empty)"
 
     # get what's needed from the Pk2D object
     a, lk, pk = self.get_spline_arrays()
@@ -351,7 +351,7 @@ def build_string_Tk3D(self, na=2, nk=4, decimals=2):
             +================+=============================================+
     """
     if not self.has_tsp:
-        return "pyccl.Tk3D(empty=True)"
+        return "pyccl.Tk3D(empty)"
 
     # get what's needed from the Tk3D object
     a, lk1, lk2, tks = self.get_spline_arrays()
