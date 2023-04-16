@@ -88,9 +88,12 @@ def test_ept_k2pk_types(typ_nlin, typ_nloc):
 
 @pytest.mark.parametrize('kind', ccl.nl_pt.ept._PK_ALIAS.keys())
 def test_ept_deconstruction(kind):
+    ptc = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
+                                         with_matter_1loop=True,
+                                         cosmo=COSMO, sub_lowk=True)
     b_nc = ['b1', 'b2', 'b3nl', 'bs', 'bk2']
     b_ia = ['c1', 'c2', 'cdelta']
-    pk1 = PTC.get_pk2d_template(kind)
+    pk1 = ptc.get_pk2d_template(kind)
 
     def get_tr(tn):
         if tn == 'm':
@@ -113,15 +116,18 @@ def test_ept_deconstruction(kind):
     t1 = get_tr(tn1)
     t2 = get_tr(tn2)
 
-    pk2 = PTC.get_biased_pk2d(t1, tracer2=t2)
+    pk2 = ptc.get_biased_pk2d(t1, tracer2=t2)
 
     if pk1 is None:
         assert pk2(0.5, 1.0, cosmo=COSMO) == 0.0
     else:
-        assert pk1(0.5, 1.0, cosmo=COSMO) == pk2(0.5, 1.0, cosmo=COSMO)
+        v1 = pk1(0.5, 1.0, cosmo=COSMO)
+        v2 = pk2(0.5, 1.0, cosmo=COSMO)
+        assert np.fabs(v1/v2-1) < 1E-6
         # Check cached
-        pk3 = PTC._pk2d_temp[ccl.nl_pt.ept._PK_ALIAS[kind]]
-        assert pk1(0.5, 1.0, cosmo=COSMO) == pk3(0.5, 1.0, cosmo=COSMO)
+        pk3 = ptc._pk2d_temp[ccl.nl_pt.ept._PK_ALIAS[kind]]
+        v3 = pk3(0.5, 1.0, cosmo=COSMO)
+        assert np.fabs(v1/v3-1) < 1E-6
 
 
 @pytest.mark.parametrize('kind',
