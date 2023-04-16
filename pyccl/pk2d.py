@@ -105,7 +105,7 @@ class Pk2D(CCLObject):
         if empty:
             warnings.warn("The creation of empty Pk2D objects is now "
                           "deprecated. If you want an empty object, use "
-                          "`CCLObject.__new__(Pk2D)`.",
+                          "`Pk2D.__new__(Pk2D)`.",
                           category=CCLDeprecationWarning)
             return
 
@@ -214,7 +214,7 @@ class Pk2D(CCLObject):
                 The power spectrum of the input model.
         """  # noqa E501
 
-        pk2d = CCLObject.__new__(cls)
+        pk2d = Pk2D.__new__(cls)
         status = 0
         if model == 'bbks':
             cosmo.compute_growth()
@@ -271,7 +271,7 @@ class Pk2D(CCLObject):
                                "redshifts. If using the calculator mode, "
                                "check the support of the background data.")
 
-        pk2d = CCLObject.__new__(Pk2D)
+        pk2d = Pk2D.__new__(Pk2D)
         status = 0
         ret = lib.apply_halofit(cosmo.cosmo, pk_linear.psp, status)
         if np.ndim(ret) == 0:
@@ -366,7 +366,7 @@ class Pk2D(CCLObject):
     def copy(self):
         """Return a copy of this Pk2D object."""
         if not self:
-            return CCLObject.__new__(Pk2D)
+            return Pk2D.__new__(Pk2D)
         return self + 0
 
     def get_spline_arrays(self):
