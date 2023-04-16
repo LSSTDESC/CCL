@@ -96,6 +96,18 @@ def test_background_age_of_universe():
     assert np.allclose(T_CCL, T_P18, atol=0, rtol=1.5e-3)
 
 
+@pytest.mark.parametrize("Omega_k", [0, -0.05, +0.05])
+def test_background_comoving_volume(Omega_k):
+    # Check that integrating the comoving volume element gives comoving volume.
+    cosmo = ccl.CosmologyVanillaLCDM(Omega_k=Omega_k)
+    from scipy.integrate import quad
+    a_min = 0.1
+    V = cosmo.comoving_volume(a=a_min, solid_angle=1.0)
+    vdv = quad(cosmo.comoving_volume_element, a=a_min, b=1.0)[0]
+    rtol = 1e-7 if Omega_k == 0 else 1e-2
+    assert np.allclose(vdv, V, atol=0, rtol=rtol)
+
+
 @pytest.mark.parametrize('a', AVALS)
 @pytest.mark.parametrize('kind', [
     'matter',

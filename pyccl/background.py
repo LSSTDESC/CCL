@@ -415,17 +415,18 @@ def comoving_volume(cosmo, a, *, solid_angle=4*np.pi):
     --------
     comoving_volume_element : comoving volume element
     """
-    Omk, sqrtk = cosmo["Omega_k"], cosmo["sqrtk"]
+    Omk = cosmo["Omega_k"]
     Dm = comoving_angular_distance(cosmo, a)
     if Omk == 0:
         return solid_angle/3 * Dm**3
 
     Dh = hubble_distance(cosmo, a)
+    sqrt = np.sqrt(np.abs(Omk))
     DmDh = Dm / Dh
     arcsinn = np.arcsin if Omk < 0 else np.arcsinh
     return ((solid_angle * Dh**3 / (2 * Omk))
             * (DmDh * np.sqrt(1 + Omk * DmDh**2)
-               - arcsinn(sqrtk * DmDh)/sqrtk))
+               - arcsinn(sqrt * DmDh)/sqrt))
 
 
 def lookback_time(cosmo, a):
