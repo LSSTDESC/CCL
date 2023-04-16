@@ -370,8 +370,7 @@ class EulerianPTCalculator(CCLAutoreprObject):
         bs = trg.bs(self.z_s)
         bk2 = trg.bk2(self.z_s)
         b3nl = trg.b3nl(self.z_s)
-        if (np.any(b2 != 0) or np.any(bs != 0) or
-                np.any(bk2 != 0) or np.any(b3nl != 0)):
+        if any([b.any() for b in [b2, bs, bk2, b3nl]]):
             warnings.warn(
                 "EulerianPTCalculators assume linear galaxy bias "
                 "when computing galaxy-IA cross-correlations.",
