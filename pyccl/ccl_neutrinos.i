@@ -20,17 +20,17 @@
 
 %inline %{
 
-void Omeganuh2_vec(int N_nu_mass, double T_CMB, double* a, int na,
+void Omeganuh2_vec(int N_nu_mass, double T_CMB, double T_ncdm, double* a, int na,
                    double* mnu, int nm, int nout, double* output, int* status) {
     for(int i=0; i < na; i++){
-        output[i] = ccl_Omeganuh2(a[i], N_nu_mass, mnu, T_CMB, status);
+        output[i] = ccl_Omeganuh2(a[i], N_nu_mass, mnu, T_CMB, T_ncdm, status);
     }
 }
 
-void nu_masses_vec(double OmNuh2, int label, double T_CMB,
+void nu_masses_vec(double OmNuh2, int label,
                    int nout, double* output, int* status) {
     double* mnu;
-    mnu = ccl_nu_masses(OmNuh2, label, T_CMB, status);
+    mnu = ccl_nu_masses(OmNuh2, label, status);
     for(int i=0; i < nout; i++){
         output[i] = *(mnu+i);
     }
