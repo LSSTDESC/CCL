@@ -48,7 +48,7 @@ def test_pt_pk(comb):
     ptt1 = ptt[t1]
     ptt2 = ptt[t2]
 
-    pk = ptc.get_pk2d_biased(ptt1, tracer2=ptt2,
+    pk = ptc.get_biased_pk2d(ptt1, tracer2=ptt2,
                              return_ia_bb=return_bb)
     for iz, z in enumerate(zs):
         a = 1./(1+z)

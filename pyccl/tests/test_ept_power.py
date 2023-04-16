@@ -43,14 +43,14 @@ def test_ept_get_pk2d_smoke(tr1, tr2, bb, sub_lowk):
     ptc = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
         sub_lowk=sub_lowk, cosmo=COSMO)
-    pk = ptc.get_pk2d_biased(TRS[tr1], tracer2=t2,
+    pk = ptc.get_biased_pk2d(TRS[tr1], tracer2=t2,
                              return_ia_bb=bb)
     assert isinstance(pk, ccl.Pk2D)
 
 
 def test_ept_pk2d_bb_smoke():
-    pee = PTC.get_pk2d_biased(TRS['TI'])
-    pbb = PTC.get_pk2d_biased(TRS['TI'], return_ia_bb=True)
+    pee = PTC.get_biased_pk2d(TRS['TI'])
+    pbb = PTC.get_biased_pk2d(TRS['TI'], return_ia_bb=True)
     assert pee(0.1, 0.9, cosmo=COSMO) != pbb(0.1, 0.9, cosmo=COSMO)
 
 
@@ -59,7 +59,7 @@ def test_ept_get_pk2d_nl(nl):
     ptc = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
         b1_pk_kind=nl, bk2_pk_kind=nl, cosmo=COSMO)
-    pk = ptc.get_pk2d_biased(TRS['TG'])
+    pk = ptc.get_biased_pk2d(TRS['TG'])
     assert isinstance(pk, ccl.Pk2D)
 
 
@@ -77,9 +77,9 @@ def test_ept_k2pk_types(typ_nlin, typ_nloc):
     ptc2 = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
         b1_pk_kind=typ_nloc, cosmo=COSMO)
-    pkmm = ptc1.get_pk2d_biased(tm, tracer2=tm)
-    pkmm2 = ptc2.get_pk2d_biased(tm, tracer2=tm)
-    pkgg = ptc1.get_pk2d_biased(tg, tracer2=tg)
+    pkmm = ptc1.get_biased_pk2d(tm, tracer2=tm)
+    pkmm2 = ptc2.get_biased_pk2d(tm, tracer2=tm)
+    pkgg = ptc1.get_biased_pk2d(tg, tracer2=tg)
     ks = np.geomspace(1E-3, 1E1, 128)
     p1 = pkgg(ks, 1., cosmo=COSMO)
     p2 = pkmm(ks, 1., cosmo=COSMO)+ks**2*pkmm2(ks, 1., cosmo=COSMO)
@@ -113,7 +113,7 @@ def test_ept_deconstruction(kind):
     t1 = get_tr(tn1)
     t2 = get_tr(tn2)
 
-    pk2 = PTC.get_pk2d_biased(t1, tracer2=t2)
+    pk2 = PTC.get_biased_pk2d(t1, tracer2=t2)
 
     if pk1 is None:
         assert pk2(0.5, 1.0, cosmo=COSMO) == 0.0
@@ -141,7 +141,7 @@ def test_ept_deconstruction_bb(kind):
     t1 = get_tr(tn1)
     t2 = get_tr(tn2)
 
-    pk2 = PTC.get_pk2d_biased(t1, tracer2=t2, return_ia_bb=True)
+    pk2 = PTC.get_biased_pk2d(t1, tracer2=t2, return_ia_bb=True)
 
     assert pk1(0.5, 1.0, cosmo=COSMO) == pk2(0.5, 1.0, cosmo=COSMO)
 
@@ -153,13 +153,13 @@ def test_ept_pk_cutoff():
     t = ccl.nl_pt.PTNumberCountsTracer(b1=1.0)
     ptc1 = ccl.nl_pt.EulerianPTCalculator(with_NC=True,
                                           cosmo=COSMO)
-    pk2d1 = ptc1.get_pk2d_biased(t, tracer2=t)
+    pk2d1 = ptc1.get_biased_pk2d(t, tracer2=t)
     pk1 = pk2d1(ks, 1.0, cosmo=COSMO)
     ptc2 = ccl.nl_pt.EulerianPTCalculator(with_NC=True,
                                           k_cutoff=10.,
                                           n_exp_cutoff=2.,
                                           cosmo=COSMO)
-    pk2d2 = ptc2.get_pk2d_biased(t, tracer2=t)
+    pk2d2 = ptc2.get_biased_pk2d(t, tracer2=t)
     pk2 = pk2d2(ks, 1.0, cosmo=COSMO)
 
     expcut = np.exp(-(ks/10.)**2)
@@ -176,8 +176,8 @@ def test_ept_matter_1loop():
     tg = ccl.nl_pt.PTNumberCountsTracer(b1=1.0)
     tm = ccl.nl_pt.PTMatterTracer()
     ks = np.geomspace(1E-3, 10, 64)
-    pk1 = ptc1.get_pk2d_biased(tm)(ks, 1.0, cosmo=COSMO)
-    pk2 = ptc2.get_pk2d_biased(tg)(ks, 1.0, cosmo=COSMO)
+    pk1 = ptc1.get_biased_pk2d(tm)(ks, 1.0, cosmo=COSMO)
+    pk2 = ptc2.get_biased_pk2d(tg)(ks, 1.0, cosmo=COSMO)
     assert np.all(np.fabs(pk1/pk2-1) < 1E-3)
 
 
@@ -189,11 +189,11 @@ def test_ept_matter_linear():
     ptc1 = ccl.nl_pt.EulerianPTCalculator(with_matter_1loop=True,
                                           b1_pk_kind='linear',
                                           cosmo=COSMO)
-    pk1 = ptc1.get_pk2d_biased(TRS['TM'])(ks, 1.0, cosmo=COSMO)
+    pk1 = ptc1.get_biased_pk2d(TRS['TM'])(ks, 1.0, cosmo=COSMO)
     ptc2 = ccl.nl_pt.EulerianPTCalculator(with_matter_1loop=True,
                                           b1_pk_kind='pt',
                                           cosmo=COSMO)
-    pk2 = ptc2.get_pk2d_biased(TRS['TM'])(ks, 1.0, cosmo=COSMO)
+    pk2 = ptc2.get_biased_pk2d(TRS['TM'])(ks, 1.0, cosmo=COSMO)
     assert np.all(np.fabs(pk1/pk2-1) < 1E-10)
 
 
@@ -209,18 +209,18 @@ def test_ept_calculator_raises():
     # Uninitialized templates
     with pytest.raises(ccl.CCLError):
         ptc = ccl.nl_pt.EulerianPTCalculator(with_NC=True)
-        ptc.get_pk2d_biased(TRS['TG'])
+        ptc.get_biased_pk2d(TRS['TG'])
 
     # Didn't ask for the right calculation
     with pytest.raises(ValueError):
         ptc = ccl.nl_pt.EulerianPTCalculator(with_NC=False,
                                              cosmo=COSMO)
-        ptc.get_pk2d_biased(TRS['TG'])
+        ptc.get_biased_pk2d(TRS['TG'])
 
     with pytest.raises(ValueError):
         ptc = ccl.nl_pt.EulerianPTCalculator(with_IA=False,
                                              cosmo=COSMO)
-        ptc.get_pk2d_biased(TRS['TI'])
+        ptc.get_biased_pk2d(TRS['TI'])
 
     # Wrong pair combination
     with pytest.raises(ValueError):
@@ -233,7 +233,7 @@ def test_ept_calculator_raises():
         ptc = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
                                              cosmo=COSMO)
         tg = ccl.nl_pt.PTNumberCountsTracer(b1=1.0, b2=1.0)
-        ptc.get_pk2d_biased(tg, tracer2=TRS['TI'])
+        ptc.get_biased_pk2d(tg, tracer2=TRS['TI'])
 
 
 def test_ept_template_swap():

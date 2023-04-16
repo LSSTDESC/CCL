@@ -519,7 +519,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     warnings.warn("get_pt_pk2d is deprecated and will be removed in "
                   "future versions. Use the methods of the new perturbation "
                   "theory calculators (e.g. "
-                  "EulerianPTCalculator.get_pk2d_biased).",
+                  "EulerianPTCalculator.get_biased_pk2d).",
                   CCLDeprecationWarning)
     if a_arr is None:
         status = 0

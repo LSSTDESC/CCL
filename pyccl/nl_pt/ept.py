@@ -510,7 +510,7 @@ class EulerianPTCalculator(CCLAutoreprObject):
         pk = self.pk_b1 + P1loop
         return pk*self.exp_cutoff
 
-    def get_pk2d_biased(self, tracer1, *, tracer2=None, return_ia_bb=False,
+    def get_biased_pk2d(self, tracer1, *, tracer2=None, return_ia_bb=False,
                         extrap_order_lok=1, extrap_order_hik=2):
         """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
         the PT power spectrum for two quantities defined by
