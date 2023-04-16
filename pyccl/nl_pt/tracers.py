@@ -1,11 +1,12 @@
 import numpy as np
 from scipy.interpolate import interp1d
 from ..pyutils import _check_array_params
-from ..background import growth_factor
 from ..parameters import physical_constants
+from ..base import CCLAutoreprObject, warn_api
 
 
-def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
+@warn_api
+def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
                       Om_m2_for_c2=False, Om_m_fid=0.3):
     """
     Function to convert from a_ia values to c_ia values,
@@ -30,29 +31,10 @@ def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
         c2 (float or array_like): IA c2 at input z values
     """
 
-    def check_input_array(a, name):
-        if a is None:
-            return
-
-        if np.ndim(a) > 1:
-            raise ValueError(name +
-                             " should be a scalar or 1D")
-
-        if np.ndim(a) == 1:
-            if len(a) != len(z):
-                raise ValueError("Both z and " + name +
-                                 " should have the same size")
-
-    if np.ndim(z) > 1:
-        raise ValueError("z should be a scalar or 1D")
-    check_input_array(a1, 'a1')
-    check_input_array(a2, 'a2')
-    check_input_array(a1delta, 'a1delta')
-
     Om_m = cosmo['Omega_m']
     rho_crit = physical_constants.RHO_CRITICAL
     c1 = c1delta = c2 = None
-    gz = growth_factor(cosmo, 1./(1+z))
+    gz = cosmo.growth_factor(1./(1+z))
 
     if a1 is not None:
         c1 = -1*a1*5e-14*rho_crit*Om_m/gz
@@ -69,7 +51,7 @@ def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
     return c1, c1delta, c2
 
 
-class PTTracer(object):
+class PTTracer(CCLAutoreprObject):
     """PTTracers contain the information necessary to describe the
     perturbative, non-linear inhomogeneities associated with
     different physical quantities.
@@ -79,6 +61,8 @@ class PTTracer(object):
     in a perturbation theory framework to provide N-point
     correlations.
     """
+    __repr_attrs__ = ('type', 'biases')
+
     def __init__(self):
         self.biases = {}
         self.type = None
