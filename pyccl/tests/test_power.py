@@ -31,7 +31,7 @@ def test_halomod_f2d_copy():
     pk_old = assert_warns(
         ccl.CCLWarning,
         ccl.nonlin_matter_power, COSMO_HM, 1., 0.8)
-    pk_new = pk2d.eval(1., 0.8, COSMO_HM)
+    pk_new = pk2d(1., 0.8, COSMO_HM)
     psp_old = COSMO_HM.get_nonlin_power().psp
     assert psp_new.lkmin == psp_old.lkmin
     assert psp_new.lkmax == psp_old.lkmax
@@ -377,9 +377,8 @@ def test_input_nonlinear_model():
                    'delta_matter:delta_matter': -pk_arr},
         nonlinear_model='halofit')
 
-    pk_CCL_input = cosmo_input.get_nonlin_power('a:b').eval(k_arr,
-                                                            0.5,
-                                                            cosmo_input)
+    pk_CCL_input = cosmo_input.get_nonlin_power('a:b')(k_arr, 0.5,
+                                                       cosmo_input)
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
     # Via `nonlin_power`

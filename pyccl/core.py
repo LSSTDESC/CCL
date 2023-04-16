@@ -877,7 +877,7 @@ class Cosmology(CCLObject):
             if pkl is None:
                 raise CCLError("The linear power spectrum is a "
                                "necessary input for halofit")
-            pk = Pk2D.apply_halofit(self, pkl)
+            pk = pkl.apply_halofit(self)
         elif mps == 'emu':
             pk = Pk2D.from_model(self, model='emu')
         elif mps == 'linear':
@@ -1399,7 +1399,7 @@ class CosmologyCalculator(Cosmology):
 
             if model == 'halofit':
                 pkl = self._pk_lin[name]
-                self._pk_nl[name] = Pk2D.apply_halofit(self, pkl)
+                self._pk_nl[name] = pkl.apply_halofit(self)
             elif model is None:
                 pass
             else:

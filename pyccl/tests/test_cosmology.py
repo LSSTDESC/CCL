@@ -29,8 +29,8 @@ def test_cosmo_methods():
     assert ccl.sigma8(cosmo) == cosmo.sigma8()
     assert ccl.rho_x(cosmo, 1., "matter", is_comoving=False) == \
         cosmo.rho_x(1., "matter", is_comoving=False)
-    assert ccl.get_camb_pk_lin(cosmo).eval(1., 1., cosmo) == \
-        cosmo.get_camb_pk_lin().eval(1., 1., cosmo)
+    assert ccl.get_camb_pk_lin(cosmo)(1., 1., cosmo) == \
+        cosmo.get_camb_pk_lin()(1., 1., cosmo)
     prof = ccl.halos.HaloProfilePressureGNFW()
     hmd = ccl.halos.MassDef200m()
     hmf = ccl.halos.MassFuncTinker08(cosmo)

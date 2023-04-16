@@ -120,7 +120,7 @@ def test_tkk1h_tk3d():
                                      lk_arr=np.log(k_arr),
                                      a_arr=a_arr,
                                      use_log=True)
-    tkk_arr_2 = np.array([tk3d.eval(k_arr, a) for a in a_arr])
+    tkk_arr_2 = tk3d(k_arr, a_arr)
     assert np.all(np.fabs((tkk_arr / tkk_arr_2 - 1)).flatten()
                   < 1E-4)
 
@@ -136,7 +136,7 @@ def test_tkk1h_tk3d():
                                      normprof4=True,
                                      lk_arr=np.log(k_arr),
                                      use_log=True)
-    tkk_arr_2 = np.array([tk3d.eval(k_arr, a) for a in a_arr])
+    tkk_arr_2 = tk3d(k_arr, a_arr)
     assert np.all(np.fabs((tkk_arr / tkk_arr_2 - 1)).flatten()
                   < 1E-4)
 
