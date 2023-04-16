@@ -4,7 +4,7 @@ from numpy.testing import (
     assert_,
     assert_raises, assert_almost_equal, assert_allclose)
 import pyccl as ccl
-from pyccl import CCLWarning, CCLObject
+from pyccl import CCLWarning
 from pyccl.pyutils import get_pk_spline_a, get_pk_spline_lk
 
 
