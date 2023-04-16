@@ -83,7 +83,7 @@ def test_ept_k2pk_types(typ_nlin, typ_nloc):
     ks = np.geomspace(1E-3, 1E1, 128)
     p1 = pkgg(ks, 1., cosmo=COSMO)
     p2 = pkmm(ks, 1., cosmo=COSMO)+ks**2*pkmm2(ks, 1., cosmo=COSMO)
-    assert np.all(np.fabs(p1/p2-1) < 1E-4)
+    assert np.allclose(p1, p2, atol=0, rtol=1E-4)
 
 
 @pytest.mark.parametrize('kind', ccl.nl_pt.ept._PK_ALIAS.keys())
@@ -163,7 +163,7 @@ def test_ept_pk_cutoff():
     pk2 = pk2d2(ks, 1.0, cosmo=COSMO)
 
     expcut = np.exp(-(ks/10.)**2)
-    assert np.all(np.fabs(pk1*expcut/pk2-1) < 1E-3)
+    assert np.allclose(pk1*expcut, pk2, atol=0, rtol=1E-3)
 
 
 def test_ept_matter_1loop():
@@ -178,7 +178,7 @@ def test_ept_matter_1loop():
     ks = np.geomspace(1E-3, 10, 64)
     pk1 = ptc1.get_biased_pk2d(tm)(ks, 1.0, cosmo=COSMO)
     pk2 = ptc2.get_biased_pk2d(tg)(ks, 1.0, cosmo=COSMO)
-    assert np.all(np.fabs(pk1/pk2-1) < 1E-3)
+    assert np.allclose(pk1, pk2, atol=0, rtol=1E-3)
 
 
 def test_ept_matter_linear():
@@ -194,7 +194,7 @@ def test_ept_matter_linear():
                                           b1_pk_kind='pt',
                                           cosmo=COSMO)
     pk2 = ptc2.get_biased_pk2d(TRS['TM'])(ks, 1.0, cosmo=COSMO)
-    assert np.all(np.fabs(pk1/pk2-1) < 1E-10)
+    assert np.allclose(pk1, pk2, atol=0, rtol=1E-10)
 
 
 def test_ept_calculator_raises():
