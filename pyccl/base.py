@@ -597,6 +597,7 @@ class CCLObject(ABC):
             for attr in self.__eq_attrs__:
                 if any(getattr(self, attr) != getattr(other, attr)):
                     return False
+            return True
         # Fall back to repr comparison.
         return repr(self) == repr(other)
 
