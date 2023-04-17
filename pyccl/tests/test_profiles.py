@@ -554,11 +554,7 @@ def test_hernquist_f2r():
     p2 = ccl.halos.HaloProfileHernquist(concentration=cM,
                                         fourier_analytic=True)
     with UnlockInstance(p2):
-        # For the fourier computation, we require that the profile does not
-        # have an implemented `_real` method. This is internally checked
-        # by verifying that the hook `__islinkedabstractmethod__` is not there.
-        # Here, we replace the bound method with a function that has this hook.
-        p2._real = ccl.halos.HaloProfile._real
+        p2._real = None
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
     M = 1E14

@@ -268,10 +268,6 @@ class CCLObject(ABC):
         # Fall back to default Python comparison.
         return id(self) == id(other)
 
-    def _is_implemented(self, name):
-        # Check whether the method is implemented.
-        return getattr(self, name, NotImplemented) is not NotImplemented
-
 
 class CCLAutoRepr(CCLObject):
     """Base for objects with automatic representation. Representations
