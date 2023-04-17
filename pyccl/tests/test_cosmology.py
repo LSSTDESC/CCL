@@ -4,6 +4,7 @@ import pytest
 import warnings
 import numpy as np
 import pyccl as ccl
+import warnings
 
 
 def test_cosmo_methods():
@@ -446,6 +447,15 @@ def test_pyccl_default_params():
     # complains when we try to change the physical constants
     with pytest.raises(AttributeError):
         ccl.physical_constants.CLIGHT = 1
+
+    # but if we unfreeze them, we can change them
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        ccl.physical_constants.unfreeze()
+        ccl.physical_constants.CLIGHT = 1
+    assert ccl.physical_constants.CLIGHT == 1
+    ccl.physical_constants.freeze()
+    ccl.physical_constants.reload()
 
     # verify that this has changed
     assert ccl.gsl_params.HM_MMIN != HM_MMIN

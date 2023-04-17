@@ -1,9 +1,8 @@
 from . import ccllib as lib
 from .pyutils import check
 from .pk2d import Pk2D
-from .base import unlock_instance, deprecated
+from .base import unlock_instance
 import numpy as np
-import functools
 
 
 def bcm_model_fka(cosmo, k, a):
@@ -37,7 +36,8 @@ def bcm_model_fka(cosmo, k, a):
     return fka
 
 
-def _bcm_correct_pk2d(cosmo, pk2d):
+@unlock_instance(mutate=True, name="pk2d")
+def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
     This function operates directly onto the input Pk2D object.
 
@@ -50,38 +50,3 @@ def _bcm_correct_pk2d(cosmo, pk2d):
     status = 0
     status = lib.bcm_correct(cosmo.cosmo, pk2d.psp, status)
     check(status, cosmo)
-
-
-def baryon_correct(cosmo, model, pk2d):
-    """Correct the power spectrum for baryons, given a model name string.
-    This function operates on a copy of the input Pk2D object.
-
-    Arguments:
-        cosmo (:class:`~pyccl.core.Cosmology`):
-            Cosmological parameters.
-        model (str):
-            Model to use.
-        pk2d (:class:`~pyccl.pk2d.Pk2D`):
-            Power spectrum.
-
-    Returns:
-        :class:`~pyccl.pk2d.Pk2D: a copy of the input `Pk2D` object with the
-        baryon correction applied to it
-    """
-    if not isinstance(pk2d, Pk2D):
-        raise TypeError("pk2d must be a Pk2D object")
-
-    if model == "bcm":
-        pk2d_new = pk2d.copy()
-        _bcm_correct_pk2d(cosmo, pk2d_new)
-    else:
-        raise NotImplementedError(f"Baryon correction model {model} "
-                                  "not recogized")
-    return pk2d_new
-
-
-@unlock_instance(mutate=True, argv=1)
-@functools.wraps(_bcm_correct_pk2d)
-@deprecated(new_function=baryon_correct)
-def bcm_correct_pk2d(cosmo, pk2d):
-    _bcm_correct_pk2d(cosmo, pk2d)
