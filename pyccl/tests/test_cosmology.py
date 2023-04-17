@@ -64,7 +64,7 @@ def test_cosmo_methods():
     funcs = [func for sub in funcs for func in sub]
     for name, func in funcs:
         pars = signature(func).parameters
-        if list(pars)[0] == "cosmo":
+        if pars and list(pars)[0] == "cosmo":
             _ = getattr(cosmo, name)
 
     # quantitative
@@ -264,11 +264,11 @@ def test_pyccl_default_params():
     with pytest.raises(KeyError):
         ccl.gsl_params.test = "hello_world"
     with pytest.raises(KeyError):
-        ccl.gsl_params["test"] = "hallo_world"
+        ccl.gsl_params["test"] = "hello_world"
 
     # complains when we try to set A_SPLINE_MAX != 1.0
     ccl.spline_params.A_SPLINE_MAX = 1.0
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ValueError):
         ccl.spline_params.A_SPLINE_MAX = 0.9
 
     # complains when we try to change the spline type

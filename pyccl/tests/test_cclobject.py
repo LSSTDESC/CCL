@@ -9,24 +9,34 @@ def all_subclasses(cls):
         [s for c in cls.__subclasses__() for s in all_subclasses(c)])
 
 
-def test_fancy_repr():
-    # Test fancy-repr controls.
+def test_method_control_raises():
+    # All method control subclasses must contain a default implementation.
+    with pytest.raises(ValueError):
+        class MyMethodControl(ccl.base.schema._CustomMethod, method="name"):
+            pass
+
+
+def test_repr_control():
+    # Test custom repr controls.
     cosmo = ccl.CosmologyVanillaLCDM()
 
-    ccl.CCLObject._fancy_repr.disable()
+    ccl.CustomRepr.disable()
     assert repr(cosmo) == object.__repr__(cosmo)
 
-    ccl.CCLObject._fancy_repr.enable()
+    ccl.CustomRepr.enable()
     assert repr(cosmo) != object.__repr__(cosmo)
 
-    with pytest.raises(AttributeError):
-        cosmo._fancy_repr.disable()
 
-    with pytest.raises(AttributeError):
-        ccl.Cosmology._fancy_repr.disable()
+def test_eq_control():
+    # Test custom eq controls.
+    cosmo = [ccl.CosmologyVanillaLCDM() for _ in range(2)]
+    assert id(cosmo[0]) != id(cosmo[1])
 
-    with pytest.raises(NotImplementedError):
-        ccl.base.FancyRepr()
+    ccl.CustomEq.disable()
+    assert cosmo[0] != cosmo[1]
+
+    ccl.CustomEq.enable()
+    assert cosmo[0] == cosmo[1]
 
 
 def check_eq_repr_hash(self, other, *, equal=True):
@@ -52,15 +62,15 @@ def test_CCLObject_immutability():
 
     # `update_parameters` not implemented.
     cosmo = ccl.CosmologyVanillaLCDM()
-    with pytest.raises(AttributeError):
-        cosmo.my_attr = "hello_world"
+    # with pytest.raises(AttributeError):  # TODO: Uncomment for CCLv3.
+    #     cosmo.my_attr = "hello_world"
     with pytest.raises(NotImplementedError):
         cosmo.update_parameters(A_SPLINE_NA=120)
 
     # `update_parameters` implemented.
     prof = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
-    with pytest.raises(AttributeError):
-        prof.mass_bias = 0.7
+    # with pytest.raises(AttributeError):  # TODO: Uncomment for CCLv3.
+    #     prof.mass_bias = 0.7
     assert prof.mass_bias == 0.5
     prof.update_parameters(mass_bias=0.7)
     assert prof.mass_bias == 0.7
@@ -72,9 +82,9 @@ def test_CCLObject_default_behavior():
     instances = [MyType() for _ in range(2)]
     assert check_eq_repr_hash(*instances, equal=False)
 
-    # Test that all subclasses of ``CCLAutoreprObject`` use Python's default
+    # Test that all subclasses of ``CCLAutoRepr`` use Python's default
     # ``repr`` if no ``__repr_attrs__`` has been defined.
-    instances = [ccl.CCLAutoreprObject() for _ in range(2)]
+    instances = [ccl.CCLAutoRepr() for _ in range(2)]
     assert check_eq_repr_hash(*instances, equal=False)
 
 
@@ -85,7 +95,7 @@ def test_CCLObject_default_behavior():
 
 def init_decorator(func):
     """Check that all attributes listed in ``__repr_attrs__`` are defined in
-    the constructor of all subclasses of ``CCLAutoreprObject``.
+    the constructor of all subclasses of ``CCLAutoRepr``.
     NOTE: Used in ``conftest.py``.
     """
 
@@ -132,3 +142,7 @@ def test_unlock_instance_errors():
 
     with pytest.raises(TypeError):
         func2()
+
+    # 3. Doesn't do anything if instance is not CCLObject.
+    with ccl.UnlockInstance(True, mutate=False):
+        pass

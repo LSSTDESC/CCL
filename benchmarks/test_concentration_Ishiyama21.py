@@ -58,5 +58,5 @@ def test_concentration_Ishiyama21(pars):
 
     for i, zz in enumerate(Z):
         dat = data[:, i+1]
-        mod = cm.get_concentration(COSMO, M_use/H100, 1/(1+zz))
+        mod = cm(COSMO, M_use/H100, 1/(1+zz))
         assert np.allclose(mod, dat, rtol=UCHUU_DATA_SCATTER)

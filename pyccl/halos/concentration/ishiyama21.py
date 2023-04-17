@@ -1,7 +1,7 @@
 from ... import ccllib as lib
+from ...base import warn_api
 from ...pyutils import check
-from ..massdef import MassDef
-from .concentration_base import Concentration
+from ..halo_model_base import Concentration
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 
@@ -16,9 +16,9 @@ class ConcentrationIshiyama21(Concentration):
     By default it will be initialized for Delta = 500-critical.
 
     Args:
-        mdef (:class:`~pyccl.halos.massdef.MassDef`):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
             a mass definition object that fixes the mass definition
-            used by this c(M) parametrization.
+            used by this c(M) parametrization, or a name string.
         relaxed (bool):
             If True, use concentration for relaxed halos. Otherwise,
             use concentration for all halos. The default is False.
@@ -27,108 +27,36 @@ class ConcentrationIshiyama21(Concentration):
             method. Otherwise, use the concentration found with profile
             fitting. The default is False.
     """
-    __repr_attrs__ = __eq_attrs__ = ("mdef", "relaxed", "Vmax",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'
 
-    def __init__(self, mdef=None, relaxed=False, Vmax=False):
+    @warn_api(pairs=[("mdef", "mass_def")])
+    def __init__(self, *, mass_def="500c",
+                 relaxed=False, Vmax=False):
         self.relaxed = relaxed
         self.Vmax = Vmax
-        super().__init__(mass_def=mdef)
+        super().__init__(mass_def=mass_def)
 
-    def _default_mdef(self):
-        self.mdef = MassDef(500, 'critical')
-
-    def _check_mdef(self, mdef):
-        if mdef.Delta != 'vir':
-            if isinstance(mdef.Delta, str):
-                return True
-            elif mdef.rho_type != 'critical':
-                return True
-            elif mdef.Delta not in [200, 500]:
-                return True
-            elif (mdef.Delta == 500) and self.Vmax:
-                return True
-        return False
+    def _check_mass_def_strict(self, mass_def):
+        is_500Vmax = mass_def.Delta == 500 and self.Vmax
+        return mass_def.name not in ["vir", "200c", "500c"] or is_500Vmax
 
     def _setup(self):
-        if self.Vmax:  # use numerical method
-            if self.relaxed:  # fit only relaxed halos
-                if self.mdef.Delta == 'vir':
-                    self.kappa = 2.40
-                    self.a0 = 2.27
-                    self.a1 = 1.80
-                    self.b0 = 0.56
-                    self.b1 = 13.24
-                    self.c_alpha = 0.079
-                else:  # now it's 200c
-                    self.kappa = 1.79
-                    self.a0 = 2.15
-                    self.a1 = 2.06
-                    self.b0 = 0.88
-                    self.b1 = 9.24
-                    self.c_alpha = 0.51
-            else:  # fit all halos
-                if self.mdef.Delta == 'vir':
-                    self.kappa = 0.76
-                    self.a0 = 2.34
-                    self.a1 = 1.82
-                    self.b0 = 1.83
-                    self.b1 = 3.52
-                    self.c_alpha = -0.18
-                else:  # now it's 200c
-                    self.kappa = 1.10
-                    self.a0 = 2.30
-                    self.a1 = 1.64
-                    self.b0 = 1.72
-                    self.b1 = 3.60
-                    self.c_alpha = 0.32
-        else:  # use profile fitting method
-            if self.relaxed:  # fit only relaxed halos
-                if self.mdef.Delta == 'vir':
-                    self.kappa = 1.22
-                    self.a0 = 2.52
-                    self.a1 = 1.87
-                    self.b0 = 2.13
-                    self.b1 = 4.19
-                    self.c_alpha = -0.017
-                else:  # now it's either 200c or 500c
-                    if int(self.mdef.Delta) == 200:
-                        self.kappa = 0.60
-                        self.a0 = 2.14
-                        self.a1 = 2.63
-                        self.b0 = 1.69
-                        self.b1 = 6.36
-                        self.c_alpha = 0.37
-                    else:  # now it's 500c
-                        self.kappa = 0.38
-                        self.a0 = 1.44
-                        self.a1 = 3.41
-                        self.b0 = 2.86
-                        self.b1 = 2.99
-                        self.c_alpha = 0.42
-            else:  # fit all halos
-                if self.mdef.Delta == 'vir':
-                    self.kappa = 1.64
-                    self.a0 = 2.67
-                    self.a1 = 1.23
-                    self.b0 = 3.92
-                    self.b1 = 1.30
-                    self.c_alpha = -0.19
-                else:  # now it's either 200c or 500c
-                    if int(self.mdef.Delta) == 200:
-                        self.kappa = 1.19
-                        self.a0 = 2.54
-                        self.a1 = 1.33
-                        self.b0 = 4.04
-                        self.b1 = 1.21
-                        self.c_alpha = 0.22
-                    else:  # now it's 500c
-                        self.kappa = 1.83
-                        self.a0 = 1.95
-                        self.a1 = 1.17
-                        self.b0 = 3.57
-                        self.b1 = 0.91
-                        self.c_alpha = 0.26
+        # key: (Vmax, relaxed, Delta)
+        vals = {(True, True, 200): (1.79, 2.15, 2.06, 0.88, 9.24, 0.51),
+                (True, False, 200): (1.10, 2.30, 1.64, 1.72, 3.60, 0.32),
+                (False, True, 200): (0.60, 2.14, 2.63, 1.69, 6.36, 0.37),
+                (False, False, 200): (1.19, 2.54, 1.33, 4.04, 1.21, 0.22),
+                (True, True, "vir"): (2.40, 2.27, 1.80, 0.56, 13.24, 0.079),
+                (True, False, "vir"): (0.76, 2.34, 1.82, 1.83, 3.52, -0.18),
+                (False, True, "vir"): (1.22, 2.52, 1.87, 2.13, 4.19, -0.017),
+                (False, False, "vir"): (1.64, 2.67, 1.23, 3.92, 1.30, -0.19),
+                (False, True, 500): (0.38, 1.44, 3.41, 2.86, 2.99, 0.42),
+                (False, False, 500): (1.83, 1.95, 1.17, 3.57, 0.91, 0.26)}
+
+        key = (self.Vmax, self.relaxed, self.mass_def.Delta)
+        self.kappa, self.a0, self.a1, \
+            self.b0, self.b1, self.c_alpha = vals[key]
 
     def _dlsigmaR(self, cosmo, M, a):
         # kappa multiplies radius, so in log, 3*kappa multiplies mass
@@ -159,10 +87,8 @@ class ConcentrationIshiyama21(Concentration):
         return np.asarray(roots)
 
     def _concentration(self, cosmo, M, a):
-        M_use = np.atleast_1d(M)
-
-        nu = 1.686 / cosmo.sigmaM(M_use, a)
-        n_eff = -2 * self._dlsigmaR(cosmo, M_use, a) - 3
+        nu = 1.686 / cosmo.sigmaM(M, a)
+        n_eff = -2 * self._dlsigmaR(cosmo, M, a) - 3
         alpha_eff = cosmo.growth_rate(a)
 
         A = self.a0 * (1 + self.a1 * (n_eff + 3))
@@ -170,8 +96,4 @@ class ConcentrationIshiyama21(Concentration):
         C = 1 - self.c_alpha * (1 - alpha_eff)
         arg = A / nu * (1 + nu**2 / B)
         G = self._G_inv(arg, n_eff)
-        c = C * G
-
-        if np.ndim(M) == 0:
-            c = c[0]
-        return c
+        return C * G

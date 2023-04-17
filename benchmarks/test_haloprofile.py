@@ -58,8 +58,7 @@ def test_profile_Einasto():
 
     mdef = ccl.halos.MassDef(mDelta, 'matter')
     c = ccl.halos.ConcentrationConstant(c=concentration, mdef=mdef)
-    mdef = ccl.halos.MassDef(mDelta, 'matter',
-                             c_m_relation=c)
+    mdef = ccl.halos.MassDef(mDelta, 'matter', concentration=c)
     p = ccl.halos.HaloProfileEinasto(c, truncated=False)
 
     prof = p.real(COSMO, r, halomass, a, mdef)
@@ -118,7 +117,7 @@ def test_haloprofile(model):
                                      projected_analytic=True)
         prof = p.projected(COSMO, r, halomass, a, mdef)
     elif model == 'einasto':
-        mdef = ccl.halos.MassDef(halomassdef, 'matter', c_m_relation=c)
+        mdef = ccl.halos.MassDef(halomassdef, 'matter', concentration=c)
         p = ccl.halos.HaloProfileEinasto(c, truncated=False)
         prof = p.real(COSMO, r, halomass, a, mdef)
     elif model == 'hernquist':

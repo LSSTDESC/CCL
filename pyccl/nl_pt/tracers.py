@@ -2,7 +2,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from ..pyutils import _check_array_params
 from ..parameters import physical_constants
-from ..base import CCLAutoreprObject, warn_api
+from ..base import CCLAutoRepr, warn_api
 
 
 @warn_api
@@ -51,7 +51,7 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
     return c1, c1delta, c2
 
 
-class PTTracer(CCLAutoreprObject):
+class PTTracer(CCLAutoRepr):
     """PTTracers contain the information necessary to describe the
     perturbative, non-linear inhomogeneities associated with
     different physical quantities.

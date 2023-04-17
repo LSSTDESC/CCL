@@ -1,8 +1,11 @@
-from ..base import CCLAutoreprObject
-from .profiles import HaloProfile, HaloProfileHOD, HaloProfileCIBShang12
+from ..base import CCLAutoRepr, warn_api
+from .profiles import HaloProfileHOD, HaloProfileCIBShang12
 
 
-class Profile2pt(CCLAutoreprObject):
+__all__ = ("Profile2pt", "Profile2ptHOD", "Profile2ptCIB",)
+
+
+class Profile2pt(CCLAutoRepr):
     """ This class implements the 1-halo 2-point correlator between
     two halo profiles.
 
@@ -25,18 +28,20 @@ class Profile2pt(CCLAutoreprObject):
     """
     __repr_attrs__ = __eq_attrs__ = ("r_corr",)
 
-    def __init__(self, r_corr=0.):
+    @warn_api
+    def __init__(self, *, r_corr=0.):
         self.r_corr = r_corr
 
-    def update_parameters(self, r_corr=None):
+    @warn_api
+    def update_parameters(self, *, r_corr=None):
         """ Update any of the parameters associated with this 1-halo
         2-point correlator. Any parameter set to `None` won't be updated.
         """
         if r_corr is not None:
             self.r_corr = r_corr
 
-    def fourier_2pt(self, prof, cosmo, k, M, a,
-                    prof2=None, mass_def=None):
+    @warn_api
+    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None, mass_def):
         """ Return the Fourier-space two-point moment between
         two profiles.
 
@@ -44,9 +49,6 @@ class Profile2pt(CCLAutoreprObject):
            (1+\\rho_{u_1,u_2})\\langle u_1(k)\\rangle\\langle u_2(k) \\rangle
 
         Args:
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`):
-                halo profile for which the second-order moment
-                is desired.
             cosmo (:class:`~pyccl.core.Cosmology`):
                 a Cosmology object.
             k (float or array_like):
@@ -55,6 +57,9 @@ class Profile2pt(CCLAutoreprObject):
                 halo mass in units of M_sun.
             a (float):
                 scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfile`):
+                halo profile for which the second-order moment
+                is desired.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
@@ -69,12 +74,8 @@ class Profile2pt(CCLAutoreprObject):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
-        if not isinstance(prof, HaloProfile):
-            raise TypeError("prof must be of type `HaloProfile`")
         if prof2 is None:
             prof2 = prof
-        elif not isinstance(prof2, HaloProfile):
-            raise TypeError("prof2 must be of type `HaloProfile` or None")
 
         uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
 
@@ -98,19 +99,20 @@ class Profile2ptHOD(Profile2pt):
     where all quantities are described in the documentation of
     :class:`~pyccl.halos.profiles.HaloProfileHOD`.
     """
-    def fourier_2pt(self, prof, cosmo, k, M, a,
-                    prof2=None, mass_def=None):
+
+    @warn_api
+    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None, mass_def):
         """ Returns the Fourier-space two-point moment for the HOD
         profile.
 
         Args:
-            prof (:class:`~pyccl.halos.profiles.HaloProfileHOD`):
-                halo profile for which the second-order moment
-                is desired.
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
+            prof (:class:`~pyccl.halos.profiles.HaloProfileHOD`):
+                halo profile for which the second-order moment
+                is desired.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfileHOD` or None):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
@@ -129,11 +131,10 @@ class Profile2ptHOD(Profile2pt):
         if prof2 is None:
             prof2 = prof
 
-        if not (isinstance(prof, HaloProfileHOD)
-                and isinstance(prof2, HaloProfileHOD)):
-            raise TypeError("prof and prof2 should be HaloProfileHOD")
         if prof != prof2:
             raise ValueError("prof and prof2 must be equivalent")
+        if not isinstance(prof, HaloProfileHOD):
+            raise TypeError("prof and prof2 should be HaloProfileHOD")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)
 
@@ -145,19 +146,21 @@ class Profile2ptCIB(Profile2pt):
     (see :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`
     and Eq. 15 of McCarthy & Madhavacheril (2021PhRvD.103j3515M)).
     """
-    def fourier_2pt(self, prof, cosmo, k, M, a,
+
+    @warn_api
+    def fourier_2pt(self, cosmo, k, M, a, prof, *,
                     prof2=None, mass_def=None):
         """ Returns the Fourier-space two-point moment for the CIB
         profile.
 
         Args:
-            prof (:class:`HaloProfileCIBShang12`):
-                halo profile for which the second-order moment
-                is desired.
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
+            prof (:class:`HaloProfileCIBShang12`):
+                halo profile for which the second-order moment
+                is desired.
             prof2 (:class:`HaloProfileCIBShang12`):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
@@ -181,5 +184,4 @@ class Profile2ptCIB(Profile2pt):
             if not isinstance(prof2, HaloProfileCIBShang12):
                 raise TypeError("prof must be of type `HaloProfileCIB`")
             nu2 = prof2.nu
-        return prof._fourier_variance(cosmo, k, M, a, mass_def,
-                                      nu_other=nu2)
+        return prof._fourier_variance(cosmo, k, M, a, mass_def, nu_other=nu2)

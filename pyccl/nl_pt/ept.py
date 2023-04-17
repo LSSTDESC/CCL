@@ -1,7 +1,7 @@
 import numpy as np
 import warnings
 from ..pk2d import Pk2D
-from ..base import CCLAutoreprObject, unlock_instance
+from ..base import CCLAutoRepr, unlock_instance
 from ..errors import CCLWarning, CCLError
 from ..pyutils import get_pk_spline_a
 
@@ -26,7 +26,7 @@ _PK_ALIAS = {
     'c2:cdelta': 'c2:cdelta', 'cdelta:cdelta': 'cdelta:cdelta'}
 
 
-class EulerianPTCalculator(CCLAutoreprObject):
+class EulerianPTCalculator(CCLAutoRepr):
     """ This class implements a set of methods that can be
     used to compute the various components needed to estimate
     Eulerian perturbation theory correlations. These calculations

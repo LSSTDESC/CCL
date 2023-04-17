@@ -34,7 +34,6 @@ def test_correlation_smoke(method):
                                   ['l+', 'GG+'],
                                   ['l-', 'GG-']])
 def test_correlation_newtypes(typs):
-    from pyccl.pyutils import assert_warns
     z = np.linspace(0., 1., 200)
     n = np.ones(z.shape)
     lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
@@ -43,10 +42,9 @@ def test_correlation_newtypes(typs):
     cl = ccl.angular_cl(COSMO, lens, lens, ell)
 
     theta = np.logspace(-2., np.log10(5.), 5)
-    corr_old = assert_warns(
-        ccl.CCLDeprecationWarning,
-        ccl.correlation, COSMO, ell=ell, C_ell=cl,
-        theta=theta, corr_type=typs[0])
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        corr_old = ccl.correlation(COSMO, ell=ell, C_ell=cl, theta=theta,
+                                   corr_type=typs[0])
     corr_new = ccl.correlation(COSMO, ell=ell, C_ell=cl, theta=theta,
                                type=typs[1])
     assert np.all(corr_new == corr_old)

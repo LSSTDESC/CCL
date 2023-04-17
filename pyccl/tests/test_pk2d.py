@@ -474,7 +474,7 @@ def test_pk2d_eval_cosmo():
 
     amin = pk.psp.amin
     pk(1., amin*0.99, cosmo)  # doesn't fail because cosmo is provided
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         pk(1., amin*0.99)
 
 
