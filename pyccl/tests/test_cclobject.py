@@ -35,7 +35,7 @@ def test_eq_control():
     ccl.CustomEq.disable()
     assert cosmo[0] != cosmo[1]
 
-    ccl.CustomRepr.enable()
+    ccl.CustomEq.enable()
     assert cosmo[0] == cosmo[1]
 
 

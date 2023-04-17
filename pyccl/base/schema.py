@@ -162,25 +162,21 @@ class _CustomMethod:
         cls._method = method
         cls._enabled: bool = True
         cls._classes: dict = {}
-        # Assign the class methods that control the behavior.
-        cls.register = classmethod(_CustomMethod.register)
-        cls.enable = classmethod(_CustomMethod.enable)
-        cls.disable = classmethod(_CustomMethod.disable)
 
-    @staticmethod
+    @classmethod
     def register(cls, cl):
         """Register class to the dictionary of classes with custom methods."""
         if cls._method in vars(cls):
             cls._classes[cl] = getattr(cl, cls._method)
 
-    @staticmethod
+    @classmethod
     def enable(cls):
         """Enable the custom methods if they exist."""
         for cl, method in cls._classes.items():
             setattr(cl, cls._method, method)
         cls._enabled = True
 
-    @staticmethod
+    @classmethod
     def disable(cls):
         """Disable custom methods and fall back to Python defaults."""
         for cl in cls._classes.keys():
@@ -333,33 +329,6 @@ class CCLAutoRepr(CCLObject):
         return object.__repr__(self)
 
 
-def _subclasses(cls):
-    # This helper returns a set of all subclasses.
-    direct_subs = cls.__subclasses__()
-    deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
-    return set(direct_subs).union(deep_subs)
-
-
-def from_name(cls, name):
-    """Obtain particular model."""
-    mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
-    return mod[name]
-
-
-def create_instance(cls, input_, **kwargs):
-    """Process the input and generate an object of the class.
-    Input can be an instance of the class, or a name string.
-    Optional ``**kwargs`` may be passed.
-    """
-    if isinstance(input_, cls):
-        return input_
-    if isinstance(input_, str):
-        class_ = cls.from_name(input_)
-        return class_(**kwargs)
-    good, bad = cls.__name__, input_.__class__.__name__
-    raise TypeError(f"Expected {good} or str but received {bad}.")
-
-
 class CCLNamedClass(CCLObject):
     """Base for objects that contain methods ``from_name()`` and
     ``create_instance()``.
@@ -370,18 +339,34 @@ class CCLNamedClass(CCLObject):
     be searched to retrieve the particular model, using its name.
     """
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls._subclasses = classmethod(_subclasses)
-        if not hasattr(cls, "from_name"):
-            cls.from_name = classmethod(from_name)
-        cls.create_instance = classmethod(create_instance)
-        # cls._subclasses = classmethod(CCLNamedClass._subclasses)
-        # if not hasattr(cls, "from_name"):
-        #     cls.from_name = classmethod(CCLNamedClass.from_name)
-        # cls.create_instance = classmethod(CCLNamedClass.create_instance)
-
     @property
     @abstractmethod
     def name(self) -> str:
         """Class attribute denoting the name of the model."""
+
+    @classmethod
+    def _subclasses(cls):
+        # This helper returns a set of all subclasses.
+        direct_subs = cls.__subclasses__()
+        deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
+        return set(direct_subs).union(deep_subs)
+
+    @classmethod
+    def from_name(cls, name):
+        """Obtain particular model."""
+        mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
+        return mod[name]
+
+    @classmethod
+    def create_instance(cls, input_, **kwargs):
+        """Process the input and generate an object of the class.
+        Input can be an instance of the class, or a name string.
+        Optional ``**kwargs`` may be passed.
+        """
+        if isinstance(input_, cls):
+            return input_
+        if isinstance(input_, str):
+            class_ = cls.from_name(input_)
+            return class_(**kwargs)
+        good, bad = cls.__name__, input_.__class__.__name__
+        raise TypeError(f"Expected {good} or str but received {bad}.")
