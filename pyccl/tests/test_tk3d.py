@@ -3,6 +3,60 @@ import pytest
 from numpy.testing import (
     assert_, assert_almost_equal, assert_allclose)
 import pyccl as ccl
+from .test_cclobject import check_eq_repr_hash
+
+
+def test_Tk3D_eq_repr_hash():
+    # Test eq, repr, hash for Tk3D.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    cosmo.compute_linear_power()
+    PK1 = cosmo.get_linear_power()
+
+    # 1. Using a factorizable Tk3D object.
+    a_arr, lk_arr, pk_arr = PK1.get_spline_arrays()
+    TK1 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
+                   pk1_arr=pk_arr, pk2_arr=pk_arr, is_logt=False)
+    TK2 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
+                   pk1_arr=pk_arr, pk2_arr=pk_arr, is_logt=False)
+    assert check_eq_repr_hash(TK1, TK2)
+
+    TK3 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr,
+                   pk1_arr=2*pk_arr, pk2_arr=2*pk_arr, is_logt=False)
+    assert check_eq_repr_hash(TK1, TK3, equal=False)
+
+    # 2. Using a non-factorizable Tk3D object.
+    a_arr_2 = np.arange(0.5, 0.9, 0.1)
+    lk_arr_2 = np.linspace(-2, 1, 8)
+    TK4 = ccl.Tk3D(
+        a_arr=a_arr_2, lk_arr=lk_arr_2,
+        tkk_arr=np.ones((a_arr_2.size, lk_arr_2.size, lk_arr_2.size)))
+    TK5 = ccl.Tk3D(
+        a_arr=a_arr_2, lk_arr=lk_arr_2,
+        tkk_arr=np.ones((a_arr_2.size, lk_arr_2.size, lk_arr_2.size)))
+    assert check_eq_repr_hash(TK4, TK5)
+
+    TK6 = ccl.Tk3D(
+        a_arr=a_arr_2, lk_arr=lk_arr_2,
+        tkk_arr=2*np.ones((a_arr_2.size, lk_arr_2.size, lk_arr_2.size)))
+    assert check_eq_repr_hash(TK4, TK6, equal=False)
+
+    # edge-case: comparing different types
+    assert check_eq_repr_hash(TK1, 1, equal=False)
+
+    # edge-case: empty objects
+    tka1, tka2 = [ccl.Tk3D.__new__(ccl.Tk3D) for _ in range(2)]
+    assert check_eq_repr_hash(tka1, tka2)
+
+    # edge-case: only one Tk is factorizable (exits early)
+    assert check_eq_repr_hash(TK1, TK4, equal=False)
+
+    # edge-case: different extrapolation orders
+    a_arr, lk_arr, pk_arr = PK1.get_spline_arrays()
+    t1 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=pk_arr, pk2_arr=pk_arr,
+                  is_logt=False, extrap_order_lok=0)
+    t2 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=pk_arr, pk2_arr=pk_arr,
+                  is_logt=False, extrap_order_lok=1)
+    assert check_eq_repr_hash(t1, t2, equal=False)
 
 
 def kf(k):

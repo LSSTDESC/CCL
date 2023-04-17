@@ -21,7 +21,7 @@ class MassFuncTinker10(MassFunc):
         norm_all_z (bool): should we normalize the mass function
             at z=0 or at all z?
     """
-    __repr_attrs__ = ("mdef", "mass_def_strict", "norm_all_z",)
+    __repr_attrs__ = __eq_attrs__ = ("mdef", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,

@@ -3,6 +3,7 @@ from ..core import check
 from ..background import species_types, rho_x, omega_x
 from ..base import CCLAutoreprObject
 import numpy as np
+from functools import cached_property
 
 
 def mass2radius_lagrangian(cosmo, M):
@@ -84,7 +85,7 @@ class MassDef(CCLAutoreprObject):
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
-    __repr_attrs__ = ("name",)
+    __repr_attrs__ = __eq_attrs__ = ("name",)
 
     def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense
@@ -106,7 +107,7 @@ class MassDef(CCLAutoreprObject):
         else:
             self._concentration_init(c_m_relation)
 
-    @property
+    @cached_property
     def name(self):
         """Give a name to this mass definition."""
         if isinstance(self.Delta, (int, float)):
@@ -286,3 +287,12 @@ def MassDefVir(c_m='Klypin11'):
         c_m (string): concentration-mass relation.
     """
     return MassDef('vir', 'critical', c_m_relation=c_m)
+
+
+def MassDefFof():
+    r""":math:`\Delta = \rm FoF` mass definition.
+
+    Args:
+        c_m (string): concentration-mass relation.
+    """
+    return MassDef('fof', 'matter')

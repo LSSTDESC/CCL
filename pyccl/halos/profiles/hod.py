@@ -108,10 +108,11 @@ class HaloProfileHOD(HaloProfile):
         ns_independent (bool): drop requirement to only form
             satellites when centrals are present.
     """
-    __repr_attrs__ = ("cM", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p",
-                      "lM0_0", "lM0_p", "lM1_0", "lM1_p", "alpha_0", "alpha_p",
-                      "fc_0", "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p",
-                      "a_pivot", "ns_independent", "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "lMmin_0", "lMmin_p", "siglM_0", "siglM_p", "lM0_0", "lM0_p", "lM1_0",
+        "lM1_p", "alpha_0", "alpha_p", "fc_0", "fc_p", "bg_0", "bg_p",
+        "bmax_0", "bmax_p", "a_pivot", "ns_independent",
+        "cM", "precision_fftlog",)
     name = 'HOD'
     is_number_counts = True
 

@@ -34,7 +34,7 @@ class MassFunc(CCLAutoreprObject):
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
     """
-    __repr_attrs__ = ("mdef", "mass_def_strict",)
+    __repr_attrs__ = __eq_attrs__ = ("mdef", "mass_def_strict",)
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
         # Initialize sigma(M) splines if needed

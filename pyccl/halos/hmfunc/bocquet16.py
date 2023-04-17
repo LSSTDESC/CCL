@@ -22,7 +22,7 @@ class MassFuncBocquet16(MassFunc):
             using dark-matter-only simulations. Otherwise, include
             baryonic effects (default).
     """
-    __repr_attrs__ = ("mdef", "mass_def_strict", "hydro",)
+    __repr_attrs__ = __eq_attrs__ = ("mdef", "mass_def_strict", "hydro",)
     name = 'Bocquet16'
 
     def __init__(self, cosmo, mass_def=None, mass_def_strict=True,

@@ -27,7 +27,7 @@ class ConcentrationIshiyama21(Concentration):
             method. Otherwise, use the concentration found with profile
             fitting. The default is False.
     """
-    __repr_attrs__ = ("mdef", "relaxed", "Vmax",)
+    __repr_attrs__ = __eq_attrs__ = ("mdef", "relaxed", "Vmax",)
     name = 'Ishiyama21'
 
     def __init__(self, mdef=None, relaxed=False, Vmax=False):

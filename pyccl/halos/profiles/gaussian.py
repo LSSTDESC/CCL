@@ -21,7 +21,7 @@ class HaloProfileGaussian(HaloProfile):
         rho0 (:obj:`function`): the amplitude of the profile.
             It should have the same signature as `r_scale`.
     """
-    __repr_attrs__ = ("r_s", "rho_0", "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = ("r_s", "rho_0", "precision_fftlog",)
     name = 'Gaussian'
 
     def __init__(self, r_scale, rho0):

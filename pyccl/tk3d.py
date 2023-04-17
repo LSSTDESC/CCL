@@ -136,9 +136,41 @@ class Tk3D(CCLObject):
                                                         int(is_logt), status)
         check(status)
 
+    def __eq__(self, other):
+        # Check the object class.
+        if type(self) is not type(other):
+            return False
+        # If the objects contain no data, return early.
+        if not (self or other):
+            return True
+        # If one is factorizable and the other one is not, return early.
+        if self.tsp.is_product ^ other.tsp.is_product:
+            return False
+        # Check extrapolation orders.
+        if not (self.extrap_order_lok == other.extrap_order_lok
+                and self.extrap_order_hik == other.extrap_order_hik):
+            return False
+        # Check the individual splines.
+        a1, lk11, lk12, tk1 = self.get_spline_arrays()
+        a2, lk21, lk22, tk2 = other.get_spline_arrays()
+        return ((a1 == a2).all()
+                and (lk11 == lk21).all() and (lk21 == lk22).all()
+                and np.array_equal(tk1, tk2))
+
+    def __hash__(self):
+        return hash(repr(self))
+
     @property
     def has_tsp(self):
         return 'tsp' in vars(self)
+
+    @property
+    def extrap_order_lok(self):
+        return self.tsp.extrap_order_lok if self else None
+
+    @property
+    def extrap_order_hik(self):
+        return self.tsp.extrap_order_hik if self else None
 
     def eval(self, k, a):
         warnings.warn("Tk3D.eval is deprecated. Simply call the object "

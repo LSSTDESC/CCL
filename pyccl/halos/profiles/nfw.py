@@ -44,8 +44,9 @@ class HaloProfileNFW(HaloProfile):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
-    __repr_attrs__ = ("cM", "fourier_analytic", "projected_analytic",
-                      "cumul2d_analytic", "truncated", "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "fourier_analytic", "projected_analytic",
+        "cumul2d_analytic", "truncated", "cM", "precision_fftlog",)
     name = 'NFW'
 
     def __init__(self, c_M_relation,
