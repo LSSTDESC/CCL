@@ -9,15 +9,34 @@ def all_subclasses(cls):
         [s for c in cls.__subclasses__() for s in all_subclasses(c)])
 
 
-def test_fancy_repr():
-    # Test fancy-repr controls.
+def test_method_control_raises():
+    # All method control subclasses must contain a default implementation.
+    with pytest.raises(ValueError):
+        class MyMethodControl(ccl.base.schema._CustomMethod, method="name"):
+            pass
+
+
+def test_repr_control():
+    # Test custom repr controls.
     cosmo = ccl.CosmologyVanillaLCDM()
 
-    ccl.FancyRepr.disable()
+    ccl.CustomRepr.disable()
     assert repr(cosmo) == object.__repr__(cosmo)
 
-    ccl.FancyRepr.enable()
+    ccl.CustomRepr.enable()
     assert repr(cosmo) != object.__repr__(cosmo)
+
+
+def test_eq_control():
+    # Test custom eq controls.
+    cosmo = [ccl.CosmologyVanillaLCDM() for _ in range(2)]
+    assert id(cosmo[0]) != id(cosmo[1])
+
+    ccl.CustomEq.disable()
+    assert cosmo[0] != cosmo[1]
+
+    ccl.CustomEq.enable()
+    assert cosmo[0] == cosmo[1]
 
 
 def check_eq_repr_hash(self, other, *, equal=True):

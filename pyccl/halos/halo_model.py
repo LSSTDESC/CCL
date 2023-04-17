@@ -55,11 +55,17 @@ class HMCalculator(CCLAutoRepr):
 
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
                      ("nlog10M", "nM")])
-    def __init__(self, *, mass_function, halo_bias, mass_def,
+    def __init__(self, *, mass_function, halo_bias, mass_def=None,
                  log10M_min=8., log10M_max=16., nM=128,
                  integration_method_M='simpson', k_min=1E-5):
         # Initialize halo model ingredients
-        self.mass_def = MassDef.create_instance(mass_def)
+        if mass_def is not None:
+            self.mass_def = MassDef.create_instance(mass_def)
+        else:
+            if isinstance(mass_function, str) or isinstance(halo_bias, str):
+                raise ValueError("Need to provide mass_def if mass_function "
+                                 "or halo_bias are str.")
+            self.mass_def = mass_function.mass_def
         kw = {"mass_def": self.mass_def}
         self.mass_function = MassFunc.create_instance(mass_function, **kw)
         self.halo_bias = HaloBias.create_instance(halo_bias, **kw)

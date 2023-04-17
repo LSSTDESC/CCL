@@ -7,7 +7,7 @@ import numpy as np
 
 __all__ = ("ObjectLock",
            "UnlockInstance", "unlock_instance",
-           "FancyRepr",
+           "CustomRepr", "CustomEq",
            "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
 
 
@@ -149,29 +149,56 @@ def is_equal(this, other):
         return False
 
 
-class FancyRepr:
-    """Controls the usage of fancy ``__repr__` for ``CCLObjects."""
-    _enabled: bool = True
-    _classes: dict = {}
+class _CustomMethod:
+    """Subclasses specifying a method string control whether the custom
+    method is used in subclasses of ``CCLObject``.
+    """
+
+    def __init_subclass__(cls, *, method):
+        super().__init_subclass__()
+        if method not in vars(cls):
+            raise ValueError(
+                f"Subclass must contain a default {method} implementation.")
+        cls._method = method
+        cls._enabled: bool = True
+        cls._classes: dict = {}
 
     @classmethod
-    def add(cls, cl):
-        """Add class to the internal dictionary of fancy-repr classes."""
-        cls._classes[cl] = cl.__repr__
+    def register(cls, cl):
+        """Register class to the dictionary of classes with custom methods."""
+        if cls._method in vars(cls):
+            cls._classes[cl] = getattr(cl, cls._method)
 
     @classmethod
     def enable(cls):
-        """Enable fancy representations if they exist."""
+        """Enable the custom methods if they exist."""
         for cl, method in cls._classes.items():
-            setattr(cl, "__repr__", method)
+            setattr(cl, cls._method, method)
         cls._enabled = True
 
     @classmethod
     def disable(cls):
-        """Disable fancy representations and fall back to Python defaults."""
+        """Disable custom methods and fall back to Python defaults."""
         for cl in cls._classes.keys():
-            cl.__repr__ = object.__repr__
+            default = getattr(cls, cls._method)
+            setattr(cl, cls._method, default)
         cls._enabled = False
+
+
+class CustomEq(_CustomMethod, method="__eq__"):
+    """Controls the usage of custom ``__eq__`` for ``CCLObjects``."""
+
+    def __eq__(self, other):
+        # Default `eq`.
+        return self is other
+
+
+class CustomRepr(_CustomMethod, method="__repr__"):
+    """Controls the usage of custom ``__repr__`` for ``CCLObjects``."""
+
+    def __repr__(self):
+        # Default `repr`.
+        return object.__repr__(self)
 
 
 class CCLObject(ABC):
@@ -222,9 +249,9 @@ class CCLObject(ABC):
         # 1. Store the initialization signature on import.
         cls.__signature__ = signature(cls.__init__)
 
-        # 2. Replace repr (if implemented) with its cached version.
-        if "__repr__" in vars(cls):
-            FancyRepr.add(cls)
+        # 2. Register subclasses with custom dunder method implementations.
+        CustomEq.register(cls)
+        CustomRepr.register(cls)
 
         # 3. Unlock instance on specific methods.  # TODO: Uncomment for CCLv3.
         # UnlockInstance.Funlock(cls, "__init__", mutate=False)
@@ -302,33 +329,6 @@ class CCLAutoRepr(CCLObject):
         return object.__repr__(self)
 
 
-def _subclasses(cls):
-    # This helper returns a set of all subclasses.
-    direct_subs = cls.__subclasses__()
-    deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
-    return set(direct_subs).union(deep_subs)
-
-
-def from_name(cls, name):
-    """Obtain particular model."""
-    mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
-    return mod[name]
-
-
-def create_instance(cls, input_, **kwargs):
-    """Process the input and generate an object of the class.
-    Input can be an instance of the class, or a name string.
-    Optional ``**kwargs`` may be passed.
-    """
-    if isinstance(input_, cls):
-        return input_
-    if isinstance(input_, str):
-        class_ = cls.from_name(input_)
-        return class_(**kwargs)
-    good, bad = cls.__name__, input_.__class__.__name__
-    raise TypeError(f"Expected {good} or str but received {bad}.")
-
-
 class CCLNamedClass(CCLObject):
     """Base for objects that contain methods ``from_name()`` and
     ``create_instance()``.
@@ -339,14 +339,36 @@ class CCLNamedClass(CCLObject):
     be searched to retrieve the particular model, using its name.
     """
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls._subclasses = classmethod(_subclasses)
-        if not hasattr(cls, "from_name"):
-            cls.from_name = classmethod(from_name)
-        cls.create_instance = classmethod(create_instance)
-
     @property
     @abstractmethod
     def name(self) -> str:
         """Class attribute denoting the name of the model."""
+
+    @classmethod
+    def _subclasses(cls):
+        # This helper returns a set of all subclasses.
+        direct_subs = cls.__subclasses__()
+        deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
+        return set(direct_subs).union(deep_subs)
+
+    @classmethod
+    def from_name(cls, name):
+        """Obtain particular model."""
+        mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
+        if name not in mod:
+            raise KeyError(f"Invalid model {name}.")
+        return mod[name]
+
+    @classmethod
+    def create_instance(cls, input_, **kwargs):
+        """Process the input and generate an object of the class.
+        Input can be an instance of the class, or a name string.
+        Optional ``**kwargs`` may be passed.
+        """
+        if isinstance(input_, cls):
+            return input_
+        if isinstance(input_, str):
+            class_ = cls.from_name(input_)
+            return class_(**kwargs)
+        good, bad = cls.__name__, input_.__class__.__name__
+        raise TypeError(f"Expected {good} or str but received {bad}.")

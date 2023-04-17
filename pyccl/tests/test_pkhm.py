@@ -341,3 +341,13 @@ def test_hmcalculator_from_string_smoke():
         COSMO, massfunc="Tinker10", hbias="Tinker10", mass_def="200m")
     for attr in ["_massfunc", "_hbias", "_mdef"]:
         assert getattr(hmc1, attr).name == getattr(hmc2, attr).name
+
+
+def test_hmcalculator_from_string_raises():
+    # Check that if the necessary arguments aren't provided, it raises.
+    kw = {"mass_function": "Tinker10", "halo_bias": "Tinker10"}
+    with pytest.raises(ValueError):
+        # needs a mass_def to pass to the halo model ingredients
+        ccl.halos.HMCalculator(**kw)
+    # but this one is fine
+    ccl.halos.HMCalculator(**kw, mass_def="200c")
