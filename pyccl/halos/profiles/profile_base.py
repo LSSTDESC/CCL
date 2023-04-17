@@ -173,8 +173,8 @@ class HaloProfile(CCLAutoRepr):
             return self._fourier(cosmo, k, M, a)
         return self._fftlog_wrap(cosmo, k, M, a, fourier_out=True)
 
-    @warn_api(pairs=[("r_t", "r")])
-    def projected(self, cosmo, r, M, a):
+    @warn_api
+    def projected(self, cosmo, r_t, M, a):
         """ Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
 
@@ -184,7 +184,7 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
+            r_t (float or array_like): transverse comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
@@ -198,11 +198,11 @@ class HaloProfile(CCLAutoRepr):
             squeezed out on output.
         """
         if getattr(self, "_projected", None):
-            return self._projected(cosmo, r, M, a)
-        return self._projected_fftlog_wrap(cosmo, r, M, a, is_cumul2d=False)
+            return self._projected(cosmo, r_t, M, a)
+        return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=False)
 
-    @warn_api(pairs=[("r_t", "r")])
-    def cumul2d(self, cosmo, r, M, a):
+    @warn_api
+    def cumul2d(self, cosmo, r_t, M, a):
         """ Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
         factor.
@@ -213,7 +213,7 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
+            r_t (float or array_like): transverse comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
             mass_def (:class:`~pyccl.halos.massdef.MassDef`):
@@ -227,8 +227,8 @@ class HaloProfile(CCLAutoRepr):
             squeezed out on output.
         """
         if getattr(self, "_cumul2d", None):
-            return self._cumul2d(cosmo, r, M, a)
-        return self._projected_fftlog_wrap(cosmo, r, M, a, is_cumul2d=True)
+            return self._cumul2d(cosmo, r_t, M, a)
+        return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=True)
 
     @warn_api
     def convergence(self, cosmo, r, M, *, a_lens, a_source):
