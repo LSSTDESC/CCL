@@ -80,7 +80,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         L0 (float): luminosity scale (in
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
     """
-    __repr_attrs__ = (
+    __repr_attrs__ = __eq_attrs__ = (
         "nu", "alpha", "T0", "beta", "gamma", "s_z", "log10Meff", "siglog10M",
         "Mmin", "L0", "concentration", "precision_fftlog", "normprof")
     __getattr__ = deprecate_attr(pairs=[('l10meff', 'log10Meff'),

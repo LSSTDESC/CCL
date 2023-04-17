@@ -43,7 +43,7 @@ class HaloProfileHernquist(HaloProfileMatter):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
-    __repr_attrs__ = (
+    __repr_attrs__ = __eq_attrs__ = (
         "fourier_analytic", "projected_analytic", "cumul2d_analytic",
         "truncated", "concentration", "precision_fftlog", "normprof",)
 
