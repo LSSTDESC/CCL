@@ -9,7 +9,7 @@ import warnings
 from .test_cclobject import check_eq_repr_hash
 
 
-def test_HMIngredients_eq_repr_hash():
+def test_Cosmology_eq_repr_hash():
     # Test eq, repr, hash for Cosmology and CosmologyCalculator.
     # 1. Using a complicated Cosmology object.
     extras = {"camb": {"halofit_version": "mead2020", "HMCode_logT_AGN": 7.8}}
@@ -40,7 +40,9 @@ def test_HMIngredients_eq_repr_hash():
         pk_linear=pk_linear, pk_nonlin=pk_linear)
     assert check_eq_repr_hash(COSMO4, COSMO5)
 
-    pk_linear["delta_matter:delta_matter"] *= 2
+    pk_linear = {"a": a_arr,
+                 "k": np.exp(lk_arr),
+                 "delta_matter:delta_matter": 2*pk_arr}
     COSMO6 = ccl.CosmologyCalculator(
         Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
         pk_linear=pk_linear, pk_nonlin=pk_linear)

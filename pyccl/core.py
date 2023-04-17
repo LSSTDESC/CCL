@@ -1181,7 +1181,7 @@ class CosmologyCalculator(Cosmology):
             Takahashi et al. 2012 (arXiv:1208.2701).
     """
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
-                    "_accuracy_params", "_pk_lin", "_pk_nl",)
+                    "_accuracy_params", "_input_arrays",)
 
     def __init__(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -1215,6 +1215,9 @@ class CosmologyCalculator(Cosmology):
         has_pknl = pk_nonlin is not None
         has_nonlin_model = nonlinear_model is not None
 
+        self._input_arrays = {"background": background, "growth": growth,
+                              "pk_linear": pk_linear, "pk_nonlin": pk_nonlin,
+                              "nonlinear_model": nonlinear_model}
         if has_bg:
             self._init_bg(background)
         if has_dz:

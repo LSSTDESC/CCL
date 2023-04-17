@@ -440,6 +440,15 @@ class UnlockInstance:
 unlock_instance = UnlockInstance.unlock_instance
 
 
+def is_equal(this, other):
+    """Powerful helper for equivalence checking."""
+    try:
+        np.testing.assert_equal(this, other)
+        return True
+    except AssertionError:
+        return False
+
+
 class FancyRepr:
     """Controls the usage of fancy ``__repr__` for ``CCLObjects."""
     _enabled: bool = True
@@ -595,7 +604,7 @@ class CCLObject(ABC):
         # Compare the attributes listed in `__eq_attrs__`.
         if hasattr(self, "__eq_attrs__"):
             for attr in self.__eq_attrs__:
-                if np.any(getattr(self, attr) != getattr(other, attr)):
+                if not is_equal(getattr(self, attr), getattr(other, attr)):
                     return False
             return True
         # Fall back to repr comparison.
