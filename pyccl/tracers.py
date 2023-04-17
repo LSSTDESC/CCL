@@ -7,7 +7,7 @@ from .core import check
 from .background import (comoving_radial_distance, growth_rate,
                          growth_factor, scale_factor_of_chi, h_over_h0)
 from .errors import CCLWarning
-from .parameters import physical_constants
+from .parameters import physical_constants, EQ_TOL
 from .base import CCLObject, UnlockInstance, unlock_instance
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays, _get_spline2d_arrays)
@@ -205,7 +205,7 @@ class Tracer(CCLObject):
             return False
 
         # Check the kernels.
-        kwargs = {"atol": 0, "rtol": 1e-12, "equal_nan": True}
+        kwargs = {"atol": 0, "rtol": EQ_TOL, "equal_nan": True}
         for t1, t2 in zip(self._trc, other._trc):
             if bool(t1.kernel) ^ bool(t2.kernel):
                 # only one of them has a kernel
