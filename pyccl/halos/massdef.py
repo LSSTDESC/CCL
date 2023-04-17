@@ -2,8 +2,11 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import species_types
 from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
+from ..errors import CCLDeprecationWarning
 import numpy as np
 from functools import cached_property
+import weakref
+import warnings
 
 
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
@@ -97,6 +100,9 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
     @warn_api(pairs=[("c_m_relation", "concentration")])
     def __init__(self, Delta, rho_type=None, *, concentration=None):
+        if concentration is not None:
+            warnings.warn("concentration has been deprecated as an argument "
+                          "in MassDef.", CCLDeprecationWarning)
         # Check it makes sense
         if isinstance(Delta, str):
             if Delta.isdigit():
@@ -117,7 +123,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         else:
             from .concentration import Concentration
             self.concentration = Concentration.create_instance(
-                concentration, mass_def=self)
+                concentration, mass_def=weakref.proxy(self))
 
     @cached_property
     def name(self):
