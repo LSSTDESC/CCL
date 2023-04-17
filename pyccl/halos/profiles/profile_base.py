@@ -1,10 +1,10 @@
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import (CCLAutoRepr, abstractlinkedmethod, templatemethod,
-                     unlock_instance, warn_api, deprecate_attr)
+from ...base import CCLAutoRepr, unlock_instance, warn_api, deprecate_attr
 from ...parameters import FFTLogParams
 import numpy as np
 from abc import abstractmethod
 import functools
+from typing import Callable
 
 
 __all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
@@ -41,6 +41,10 @@ class HaloProfile(CCLAutoRepr):
                                  )(super.__getattribute__)
 
     def __init__(self):
+        if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
+            name = self.__class__.__name__
+            raise TypeError(f"Can't instantiate {name} with no "
+                            "_real or _fourier implementation.")
         self.precision_fftlog = FFTLogParams()
 
     @property
@@ -104,21 +108,13 @@ class HaloProfile(CCLAutoRepr):
         """
         return self.precision_fftlog['plaw_projected']
 
-    @abstractlinkedmethod
-    def _real(self, cosmo, r, M, a, mass_def=None):
-        """TODO: Write some useful docstring."""
+    _real: Callable       # implementation of the real profile
 
-    @abstractlinkedmethod
-    def _fourier(self, cosmo, k, M, a, mass_def=None):
-        "TODO: Write some useful docstring."""
+    _fourier: Callable    # implementation of the Fourier profile
 
-    @templatemethod
-    def _projected(self, cosmo, r, M, a, mass_def=None):
-        """TODO: Write some useful docstring."""
+    _projected: Callable  # implementation of the projected profile
 
-    @templatemethod
-    def _cumul2d(self, cosmo, r, M, a, mass_def=None):
-        """TODO: Write some useful docstring."""
+    _cumul2d: Callable    # implementation of the cumulative surface density
 
     @warn_api
     def real(self, cosmo, r, M, a, *, mass_def=None):
@@ -140,7 +136,7 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if self._is_implemented("_real"):
+        if getattr(self, "_real", None):
             return self._real(cosmo, r, M, a, mass_def)
         return self._fftlog_wrap(cosmo, r, M, a, mass_def, fourier_out=False)
 
@@ -169,7 +165,7 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if self._is_implemented("_fourier"):
+        if getattr(self, "_fourier", None):
             return self._fourier(cosmo, k, M, a, mass_def)
         return self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
 
@@ -197,7 +193,7 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if self._is_implemented("_projected"):
+        if getattr(self, "_projected", None):
             return self._projected(cosmo, r, M, a, mass_def)
         return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
                                            is_cumul2d=False)
@@ -227,7 +223,7 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if self._is_implemented("_cumul2d"):
+        if getattr(self, "_cumul2d", None):
             return self._cumul2d(cosmo, r, M, a, mass_def)
         return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
                                            is_cumul2d=True)
@@ -434,7 +430,7 @@ class HaloProfile(CCLAutoRepr):
 
         sig_r_t_out = np.zeros([nM, r_t_use.size])
         # Compute Fourier-space profile
-        if self._is_implemented("_fourier"):
+        if getattr(self, "_fourier", None):
             # Compute from `_fourier` if available.
             p_fourier = self._fourier(cosmo, k_arr, M_use,
                                       a, mass_def)
