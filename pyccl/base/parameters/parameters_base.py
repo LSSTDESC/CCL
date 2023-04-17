@@ -1,6 +1,8 @@
 import warnings
 from .errors import CCLDeprecationWarning
-from . import ccllib as lib
+
+
+__all__ = ("CCLParameters",)
 
 
 class CCLParameters:
@@ -110,21 +112,3 @@ class CCLParameters:
             if not par.startswith("_") and par not in ["this", "thisown"]:
                 out[par] = getattr(pars, par)
         return out
-
-
-class SplineParams(CCLParameters, instance=lib.cvar.user_spline_params):
-    """Instances of this class hold the spline parameters."""
-
-
-class GSLParams(CCLParameters, instance=lib.cvar.user_gsl_params):
-    """Instances of this class hold the gsl parameters."""
-
-
-class PhysicalConstants(CCLParameters, instance=lib.cvar.constants,
-                        freeze=True):
-    """Instances of this class hold the physical constants."""
-
-
-spline_params = SplineParams()
-gsl_params = GSLParams()
-physical_constants = PhysicalConstants()

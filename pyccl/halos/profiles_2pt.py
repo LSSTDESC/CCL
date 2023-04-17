@@ -141,3 +141,52 @@ class Profile2ptHOD(Profile2pt):
             raise ValueError("prof and prof2 must be equivalent")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)
+
+
+class Profile2ptCIB(Profile2pt):
+    """ This class implements the Fourier-space 1-halo 2-point
+    correlator for the CIB profile. It follows closely the
+    implementation of the equivalent HOD quantity
+    (see :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`
+    and Eq. 15 of McCarthy & Madhavacheril (2021PhRvD.103j3515M)).
+    """
+
+    @warn_api
+    def fourier_2pt(self, cosmo, k, M, a, prof, *,
+                    prof2=None, mass_def=None):
+        """ Returns the Fourier-space two-point moment for the CIB
+        profile.
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            k (float or array_like): comoving wavenumber in Mpc^-1.
+            M (float or array_like): halo mass in units of M_sun.
+            a (float): scale factor.
+            prof (:class:`HaloProfileCIBShang12`):
+                halo profile for which the second-order moment
+                is desired.
+            prof2 (:class:`HaloProfileCIBShang12`):
+                second halo profile for which the second-order moment
+                is desired. If `None`, the assumption is that you want
+                an auto-correlation. Note that only auto-correlations
+                are allowed in this case.
+            mass_def (:obj:`~pyccl.halos.massdef.MassDef`): a mass
+                definition object.
+
+        Returns:
+            float or array_like: second-order Fourier-space
+            moment. The shape of the output will be `(N_M, N_k)`
+            where `N_k` and `N_m` are the sizes of `k` and `M`
+            respectively. If `k` or `M` are scalars, the
+            corresponding dimension will be squeezed out on output.
+        """
+        if not isinstance(prof, HaloProfileCIBShang12):
+            raise TypeError("prof must be of type `HaloProfileCIB`")
+
+        nu2 = None
+        if prof2 is not None:
+            if not isinstance(prof2, HaloProfileCIBShang12):
+                raise TypeError("prof must be of type `HaloProfileCIB`")
+            nu2 = prof2.nu
+        return prof._fourier_variance(cosmo, k, M, a, mass_def,
+                                      nu_other=nu2)
