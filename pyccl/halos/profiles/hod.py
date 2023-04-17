@@ -109,11 +109,11 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         ns_independent (bool): drop requirement to only form
             satellites when centrals are present.
     """
-    __repr_attrs__ = (
-        "concentration", "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p",
-        "log10M0_0", "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0",
-        "alpha_p", "fc_0", "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p",
-        "a_pivot", "ns_independent", "precision_fftlog", "normprof",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
+        "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0", "alpha_p", "fc_0",
+        "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
+        "ns_independent", "concentration", "precision_fftlog", "normprof",)
     __getattr__ = deprecate_attr(pairs=[
         ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
         ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),

@@ -143,7 +143,7 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
                 f"deprecated in {func.__qualname__}.", CCLDeprecationWarning)
 
         # API compatibility for `normprof` as a required argument.
-        if any(["normprof" in par for par in kwargs.items()]):
+        if any(["normprof" in par for par in kwargs]):
             warnings.warn(
                 "Argument `normprof` has been deprecated. Change the default "
                 "value only by subclassing. More comprehensive profile "

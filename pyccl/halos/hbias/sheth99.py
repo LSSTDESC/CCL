@@ -22,7 +22,8 @@ class HaloBiasSheth99(HaloBias):
             the fit of Nakamura & Suto 1997. Otherwise use
             delta_crit = 1.68647.
     """
-    __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
+                                     "use_delta_c_fit",)
     name = "Sheth99"
 
     @warn_api

@@ -13,7 +13,7 @@ __all__ = ("HMIngredients",)
 
 class HMIngredients(CCLAutoRepr, CCLNamedClass):
     """Base class for halo model ingredients."""
-    __repr_attrs__ = ("mass_def", "mass_def_strict",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
                                  )(super.__getattribute__)
 

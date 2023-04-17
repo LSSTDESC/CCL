@@ -4,7 +4,49 @@ import pytest
 import numpy as np
 from numpy.testing import assert_raises, assert_, assert_no_warnings
 import pyccl as ccl
+import copy
 import warnings
+from .test_cclobject import check_eq_repr_hash
+
+
+def test_Cosmology_eq_repr_hash():
+    # Test eq, repr, hash for Cosmology and CosmologyCalculator.
+    # 1. Using a complicated Cosmology object.
+    extras = {"camb": {"halofit_version": "mead2020", "HMCode_logT_AGN": 7.8}}
+    kwargs = {"transfer_function": "bbks",
+              "matter_power_spectrum": "linear",
+              "extra_parameters": extras}
+    COSMO1 = ccl.CosmologyVanillaLCDM(**kwargs)
+    COSMO2 = ccl.CosmologyVanillaLCDM(**kwargs)
+    assert check_eq_repr_hash(COSMO1, COSMO2)
+
+    # 2. Now make a copy and change it.
+    kwargs = copy.deepcopy(kwargs)
+    kwargs["extra_parameters"]["camb"]["halofit_version"] = "mead2020_feedback"
+    COSMO3 = ccl.CosmologyVanillaLCDM(**kwargs)
+    assert check_eq_repr_hash(COSMO1, COSMO3, equal=False)
+
+    # 3. Using a CosmologyCalculator.
+    COSMO1.compute_linear_power()
+    a_arr, lk_arr, pk_arr = COSMO1.get_linear_power().get_spline_arrays()
+    pk_linear = {"a": a_arr,
+                 "k": np.exp(lk_arr),
+                 "delta_matter:delta_matter": pk_arr}
+    COSMO4 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
+    COSMO5 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
+    assert check_eq_repr_hash(COSMO4, COSMO5)
+
+    pk_linear = {"a": a_arr,
+                 "k": np.exp(lk_arr),
+                 "delta_matter:delta_matter": 2*pk_arr}
+    COSMO6 = ccl.CosmologyCalculator(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
+    assert check_eq_repr_hash(COSMO4, COSMO6, equal=False)
 
 
 def test_cosmo_methods():
@@ -22,15 +64,15 @@ def test_cosmo_methods():
     funcs = [func for sub in funcs for func in sub]
     for name, func in funcs:
         pars = signature(func).parameters
-        if list(pars)[0] == "cosmo":
+        if pars and list(pars)[0] == "cosmo":
             _ = getattr(cosmo, name)
 
     # quantitative
     assert ccl.sigma8(cosmo) == cosmo.sigma8()
     assert ccl.rho_x(cosmo, 1., "matter", is_comoving=False) == \
         cosmo.rho_x(1., "matter", is_comoving=False)
-    assert ccl.get_camb_pk_lin(cosmo).eval(1., 1., cosmo) == \
-        cosmo.get_camb_pk_lin().eval(1., 1., cosmo)
+    assert ccl.get_camb_pk_lin(cosmo)(1., 1., cosmo) == \
+        cosmo.get_camb_pk_lin()(1., 1., cosmo)
     prof = ccl.halos.HaloProfilePressureGNFW()
     hmd = ccl.halos.MassDef200m()
     hmf = ccl.halos.MassFuncTinker08(cosmo)
@@ -222,7 +264,7 @@ def test_pyccl_default_params():
     with pytest.raises(KeyError):
         ccl.gsl_params.test = "hello_world"
     with pytest.raises(KeyError):
-        ccl.gsl_params["test"] = "hallo_world"
+        ccl.gsl_params["test"] = "hello_world"
 
     # complains when we try to set A_SPLINE_MAX != 1.0
     ccl.spline_params.A_SPLINE_MAX = 1.0

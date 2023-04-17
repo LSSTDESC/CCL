@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl import UnlockInstance
+from .test_cclobject import check_eq_repr_hash
 
 
 COSMO = ccl.Cosmology(
@@ -11,11 +12,31 @@ M200 = ccl.halos.MassDef200c()
 M500c = ccl.halos.MassDef(500, 'critical')
 
 
+def test_HaloProfile_eq_repr_hash():
+    # Test eq, repr, hash for HaloProfile and Profile2pt.
+    # 1. HaloProfile
+    CM1 = ccl.halos.Concentration.from_name("Duffy08")()
+    CM2 = ccl.halos.Concentration.from_name("Duffy08")()
+
+    P1 = ccl.halos.HaloProfileHOD(c_M_relation=CM1)
+    P2 = ccl.halos.HaloProfileHOD(c_M_relation=CM2)
+    assert check_eq_repr_hash(CM1, CM2)
+    assert check_eq_repr_hash(P1, P2)
+
+    P1.update_parameters(lMmin_0=P1.lMmin_0/2)
+    assert check_eq_repr_hash(P1, P2, equal=False)
+
+    # 2. Profile2pt
+    PCOV1 = ccl.halos.Profile2pt(r_corr=1.0)
+    PCOV2 = ccl.halos.Profile2pt(r_corr=1.0)
+    assert check_eq_repr_hash(PCOV1, PCOV2)
+
+    PCOV2.update_parameters(r_corr=1.5)
+    assert check_eq_repr_hash(PCOV1, PCOV2, equal=False)
+
+
 def one_f(cosmo, M, a=1, mass_def=M200):
-    if np.ndim(M) == 0:
-        return 1
-    else:
-        return np.ones(M.size)
+    return 1 if np.isscalar(M) else np.ones(M.size)
 
 
 def smoke_assert_prof_real(profile, method='_real'):
@@ -590,3 +611,10 @@ def test_hernquist_cumul2d_accuracy(fourier_analytic):
 
     res2 = np.fabs(srt2/srt1-1)
     assert np.all(res2 < 5E-3)
+
+
+def test_HaloProfile_abstractmethods():
+    # Test that `HaloProfile` and its subclasses can't be instantiated if
+    # either `_real` or `_fourier` have not been defined.
+    with pytest.raises(TypeError):
+        ccl.halos.HaloProfile()

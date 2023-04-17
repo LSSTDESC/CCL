@@ -45,7 +45,8 @@ class HMCalculator(CCLAutoRepr):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
-    __repr_attrs__ = ("mass_function", "halo_bias", "mass_def", "precision",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_function", "halo_bias", "mass_def", "precision",)
     __getattr__ = deprecate_attr(pairs=[('_mdef', 'mass_def'),
                                         ('_massfunc', 'mass_function'),
                                         ('_hbias', 'halo_bias'),

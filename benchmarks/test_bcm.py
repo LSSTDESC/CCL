@@ -33,6 +33,6 @@ def test_bcm():
     cosmo.compute_nonlin_power()
     pk_nobar = cosmo.get_nonlin_power()
     pk_wbar = bar.include_baryonic_effects(cosmo, pk_nobar)
-    ratio = pk_wbar.eval(k, a)/pk_nobar.eval(k, a)
+    ratio = pk_wbar(k, a)/pk_nobar(k, a)
     err = np.abs(data[:, 1]/data_nobar[:, 1]/ratio - 1)
     assert np.allclose(err, 0, atol=BCM_TOLERANCE, rtol=0)

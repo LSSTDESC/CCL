@@ -81,8 +81,8 @@ class HaloProfileCIBShang12(HaloProfileCIB):
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
     """
     __repr_attrs__ = (
-        "concentration", "nu", "alpha", "T0", "beta", "gamma", "s_z",
-        "log10Meff", "siglog10M", "Mmin", "L0", "precision_fftlog", "normprof")
+        "nu", "alpha", "T0", "beta", "gamma", "s_z", "log10Meff", "siglog10M",
+        "Mmin", "L0", "concentration", "precision_fftlog", "normprof")
     __getattr__ = deprecate_attr(pairs=[('l10meff', 'log10Meff'),
                                         ('sigLM', 'siglog10M')]
                                  )(super.__getattribute__)

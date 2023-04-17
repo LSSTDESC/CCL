@@ -1,6 +1,10 @@
 import numpy as np
 import pyccl as ccl
 import pytest
+from pyccl import UnlockInstance
+
+
+# TODO v3: deprecate these tests
 
 NZ = 128
 ZZ = np.linspace(0., 1., NZ)
@@ -37,59 +41,6 @@ c_2_t = a_2*5*5e-14*rho_crit*COSMO['Omega_m']**2/(Om_m_fid*gz**2)
 c_2_t_des = a_2*5*5e-14*rho_crit*COSMO['Omega_m']/(gz**2)
 
 ks = np.logspace(-3, 2, 512)
-
-
-def test_pt_tracer_smoke():
-    ccl.nl_pt.PTTracer()
-
-
-def test_pt_tracer_m_smoke():
-    ccl.nl_pt.PTMatterTracer()
-
-
-@pytest.mark.parametrize('b2', [(ZZ, BZ), BZ_C, None])
-def test_pt_tracer_nc_smoke(b2):
-    pt_tr = ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
-                                           b2=b2,
-                                           bs=(ZZ, BZ))
-
-    # Test b1 and bs do the right thing
-    for b in [pt_tr.b1, pt_tr.bs]:
-        assert b(0.2) == BZ_C
-
-    # Test b2 does the right thing
-    if b2 is not None:
-        assert pt_tr.b2(0.2) == BZ_C
-        zz = np.array([0.2])
-        assert pt_tr.b2(zz).squeeze() == BZ_C
-
-
-@pytest.mark.parametrize('c2', [(ZZ, BZ), BZ_C, None])
-def test_pt_tracer_ia_smoke(c2):
-    pt_tr = ccl.nl_pt.PTIntrinsicAlignmentTracer((ZZ, BZ),
-                                                 c2=c2,
-                                                 cdelta=(ZZ, BZ))
-
-    # Test c1 and cdelta do the right thing
-    for b in [pt_tr.c1, pt_tr.cdelta]:
-        assert b(0.2) == BZ_C
-
-    # Test c2 does the right thing
-    if c2 is not None:
-        assert pt_tr.c2(0.2) == BZ_C
-        zz = np.array([0.2])
-        assert pt_tr.c2(zz).squeeze() == BZ_C
-
-
-def test_pt_tracer_get_bias():
-    pt_tr = ccl.nl_pt.PTNumberCountsTracer((ZZ, BZ),
-                                           b2=(ZZ, BZ),
-                                           bs=(ZZ, BZ))
-    b = pt_tr.get_bias('b1', 0.1)
-    assert b == BZ_C
-
-    with pytest.raises(KeyError):
-        pt_tr.get_bias('b_one', 0.1)
 
 
 def test_pt_workspace_smoke():
@@ -132,8 +83,8 @@ def test_pt_pk2d_bb():
                                 return_ia_bb=True)
     pee2, pbb2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'], ptc=PTC,
                                        return_ia_ee_and_bb=True)
-    assert pee.eval(0.1, 0.9, COSMO) == pee2.eval(0.1, 0.9, COSMO)
-    assert pbb.eval(0.1, 0.9, COSMO) == pbb2.eval(0.1, 0.9, COSMO)
+    assert pee(0.1, 0.9, COSMO) == pee2(0.1, 0.9, COSMO)
+    assert pbb(0.1, 0.9, COSMO) == pbb2(0.1, 0.9, COSMO)
 
 
 @pytest.mark.parametrize('nl', ['nonlinear', 'linear', 'spt'])
@@ -161,8 +112,8 @@ def test_k2pk_types(typ_nlin, typ_nloc):
     pkgg = ccl.nl_pt.get_pt_pk2d(COSMO, tg, tracer2=tg, ptc=PTC,
                                  nonloc_pk_type=typ_nloc)
     ks = np.geomspace(1E-3, 1E1, 128)
-    p1 = pkgg.eval(ks, 1., COSMO)
-    p2 = pkmm.eval(ks, 1., COSMO)+ks**2*pkmm_t.eval(ks, 1., COSMO)
+    p1 = pkgg(ks, 1., COSMO)
+    p2 = pkmm(ks, 1., COSMO)+ks**2*pkmm_t(ks, 1., COSMO)
     assert np.all(np.fabs(p1/p2-1) < 1E-4)
 
 
@@ -255,7 +206,8 @@ def test_pt_get_pk2d_raises():
 
     # Wrong tracer types
     tdum = ccl.nl_pt.PTMatterTracer()
-    tdum.type = 'A'
+    with UnlockInstance(tdum):
+        tdum.type = 'A'
     for t in ['TG', 'TI', 'TM']:
         with pytest.raises(NotImplementedError):
             ccl.nl_pt.get_pt_pk2d(COSMO, TRS[t],
@@ -288,38 +240,19 @@ def test_translate_IA_norm():
     assert c_1.all() == c_1_t.all()
 
 
-def test_translate_IA_norm_raises():
-    # Should raise error with 2d input a or z
-    z_wrong = np.ones((2, 3))
-    a_wrong = np.ones((2, 3))
-    with pytest.raises(ValueError):
-        c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ, a1=a_wrong,
-                                                    Om_m2_for_c2=False)
-    with pytest.raises(ValueError):
-        c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, z_wrong, a1=a_1_v,
-                                                    Om_m2_for_c2=False)
-
-    # Should raise error if len(a) != len(z)
-    NZ2 = 129
-    ZZ2 = np.linspace(0., 1., NZ2)
-    with pytest.raises(ValueError):
-        c_1, c_d, c_2 = ccl.nl_pt.translate_IA_norm(COSMO, ZZ2, a1=a_1_v,
-                                                    Om_m2_for_c2=False)
-
-
 def test_return_ptc():
     # if no ptc is input, check that returned pk and ptc objects have
     # the correct properties.
     pk, ptc1 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TG'], return_ptc=True)
     assert isinstance(pk, ccl.Pk2D)
-    assert isinstance(ptc1, ccl.nl_pt.power.PTCalculator)
+    assert isinstance(ptc1, ccl.nl_pt.PTCalculator)
     # same test with EE/BB output
     pee2, pbb2, ptc2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TI'],
                                              return_ia_ee_and_bb=True,
                                              return_ptc=True)
     assert isinstance(pee2, ccl.Pk2D)
     assert isinstance(pbb2, ccl.Pk2D)
-    assert isinstance(ptc2, ccl.nl_pt.power.PTCalculator)
+    assert isinstance(ptc2, ccl.nl_pt.PTCalculator)
     # check that returned ptc matches input ptc.
     pk_2, ptc1_2 = ccl.nl_pt.get_pt_pk2d(COSMO, TRS['TG'], ptc=PTC,
                                          return_ptc=True)
@@ -330,9 +263,9 @@ def test_return_ptc():
     assert ptc2_2 is PTC
     # check that the result outputs are the same
     # for the internally initialized ptc.
-    assert np.allclose(pk_2.eval(ks, 1., COSMO), pk.eval(ks, 1., COSMO))
-    assert np.allclose(pee2_2.eval(ks, 1., COSMO), pee2.eval(ks, 1., COSMO))
-    assert np.allclose(pbb2_2.eval(ks, 1., COSMO), pbb2.eval(ks, 1., COSMO))
+    assert np.allclose(pk_2(ks, 1., COSMO), pk(ks, 1., COSMO))
+    assert np.allclose(pee2_2(ks, 1., COSMO), pee2(ks, 1., COSMO))
+    assert np.allclose(pbb2_2(ks, 1., COSMO), pbb2(ks, 1., COSMO))
 
 
 def test_pt_no_ptc_update():
@@ -349,5 +282,5 @@ def test_pt_no_ptc_update():
                                            update_ptc=False)
     pee2 = ccl.nl_pt.get_pt_pk2d(COSMO2, TRS['TI'], ptc=PTC)
 
-    assert pee1.eval(0.1, 0.9, COSMO) == pee1_no_update.eval(0.1, 0.9, COSMO)
-    assert pee2.eval(0.1, 0.9, COSMO) != pee2_no_update.eval(0.1, 0.9, COSMO2)
+    assert pee1(0.1, 0.9, COSMO) == pee1_no_update(0.1, 0.9, COSMO)
+    assert pee2(0.1, 0.9, COSMO) != pee2_no_update(0.1, 0.9, COSMO2)

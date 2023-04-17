@@ -27,7 +27,7 @@ class BaryonsSchneider15(Baryons):
             the stellar component. Defaults to 55.0.
     """
     name = 'Schneider15'
-    __repr_attrs__ = ("log10Mc", "eta_b", "k_s")
+    __repr_attrs__ = __eq_attrs__ = ("log10Mc", "eta_b", "k_s")
 
     def __init__(self, log10Mc=np.log10(1.2E14), eta_b=0.5, k_s=55.0):
         self.log10Mc = log10Mc

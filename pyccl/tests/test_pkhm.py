@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import pyccl as ccl
+from .test_cclobject import check_eq_repr_hash
 
 
 COSMO = ccl.Cosmology(
@@ -16,7 +17,7 @@ PKC = ccl.halos.Profile2pt()
 KK = np.geomspace(1E-3, 10, 32)
 MM = np.geomspace(1E11, 1E15, 16)
 AA = 1.0
-PK2D = ccl.Pk2D(cosmo=COSMO, pkfunc=lambda k, a: a / k)
+PK2D = ccl.Pk2D.from_function(lambda k, a: a / k)
 
 
 def test_prof2pt_smoke():
@@ -60,6 +61,34 @@ def smoke_assert_pkhm_real(func):
         p = func(k, a)
         assert np.shape(p) == sh
         assert np.all(np.isfinite(p))
+
+
+def test_HMIngredients_eq_repr_hash():
+    # Test eq, repr, hash for the HMCalculator and its ingredients.
+    # 1. Build a halo model calculator using the default parametrizations.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    HMC = ccl.halos.HMCalculator(
+        cosmo, massfunc="Tinker08", hbias="Tinker10", mass_def="200m")
+
+    # 2. Define separate default halo model ingredients.
+    MDEF = ccl.halos.MassDef200m()
+    HMF = ccl.halos.MassFuncTinker08(cosmo, mass_def=MDEF)
+    HBF = ccl.halos.HaloBiasTinker10(cosmo, mass_def=MDEF)
+    HMC2 = ccl.halos.HMCalculator(
+        cosmo, massfunc=HMF, hbias=HBF, mass_def=MDEF)  # equal
+    HMC3 = ccl.halos.HMCalculator(
+        cosmo, massfunc="Press74", hbias="Sheth01", mass_def="fof")  # unequal
+
+    # 3. Test equivalence.
+    assert check_eq_repr_hash(MDEF, HMC._mdef)
+    assert check_eq_repr_hash(HMF, HMC._massfunc)
+    assert check_eq_repr_hash(HBF, HMC._hbias)
+    assert check_eq_repr_hash(HMC, HMC2)
+
+    assert check_eq_repr_hash(MDEF, HMC3._mdef, equal=False)
+    assert check_eq_repr_hash(HMF, HMC3._massfunc, equal=False)
+    assert check_eq_repr_hash(HBF, HMC3._hbias, equal=False)
+    assert check_eq_repr_hash(HMC, HMC3, equal=False)
 
 
 @pytest.mark.parametrize('norm', [True, False])
@@ -161,16 +190,14 @@ def test_pkhm_pk2d():
     pk2d = ccl.halos.halomod_Pk2D(COSMO, hmc, P1,
                                   lk_arr=np.log(k_arr),
                                   a_arr=a_arr, normprof1=True)
-    pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
-                         for a in a_arr])
+    pk_arr_2 = pk2d(k_arr, a_arr, COSMO)
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
                   < 1E-4)
 
     # Standard sampling
     pk2d = ccl.halos.halomod_Pk2D(COSMO, hmc, P1,
                                   normprof1=True)
-    pk_arr_2 = np.array([pk2d.eval(k_arr, a, COSMO)
-                         for a in a_arr])
+    pk_arr_2 = pk2d(k_arr, a_arr, COSMO)
     assert np.all(np.fabs((pk_arr / pk_arr_2 - 1)).flatten()
                   < 1E-4)
 

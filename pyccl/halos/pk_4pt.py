@@ -313,7 +313,7 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
         dpk = pk2d(k_use, aa, derivative=True, cosmo=extrap)
 
         # ~ (47/21 - 1/3 dlogPk/dlogk) * Pk + I12
-        dpk12[ia] = ((47/21 - dpk/3)*pk + i12 * norm)
+        dpk12[ia] = (47/21 - dpk/3)*pk + i12 * norm
         dpk34[ia] = dpk12[ia].copy()
 
         # Counter terms for clustering (i.e. - (bA + bB) * PAB)
