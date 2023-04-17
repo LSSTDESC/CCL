@@ -651,8 +651,8 @@ class HaloProfileNFW(HaloProfile):
             radii.
     """
     __repr_attrs__ = __eq_attrs__ = (
-        "cM", "fourier_analytic", "projected_analytic",
-        "cumul2d_analytic", "truncated", "precision_fftlog",)
+        "fourier_analytic", "projected_analytic",
+        "cumul2d_analytic", "truncated", "cM", "precision_fftlog",)
     name = 'NFW'
 
     def __init__(self, c_M_relation,
@@ -848,8 +848,8 @@ class HaloProfileEinasto(HaloProfile):
         alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
             'cosmo' to calculate the value from cosmology. Default: 'cosmo'
     """
-    __repr_attrs__ = __eq_attrs__ = ("cM", "truncated", "alpha",
-                                     "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = ("truncated", "alpha",
+                                     "cM", "precision_fftlog",)
     name = 'Einasto'
 
     def __init__(self, c_M_relation, truncated=True, alpha='cosmo'):
@@ -960,8 +960,8 @@ class HaloProfileHernquist(HaloProfile):
             radii.
     """
     __repr_attrs__ = __eq_attrs__ = (
-        "cM", "fourier_analytic", "projected_analytic",
-        "cumul2d_analytic", "truncated", "precision_fftlog",)
+        "fourier_analytic", "projected_analytic", "cumul2d_analytic",
+        "truncated", "cM", "precision_fftlog",)
     name = 'Hernquist'
 
     def __init__(self, c_M_relation,
@@ -1472,9 +1472,10 @@ class HaloProfileHOD(HaloProfile):
             satellites when centrals are present.
     """
     __repr_attrs__ = __eq_attrs__ = (
-        "cM", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p", "lM0_0", "lM0_p",
-        "lM1_0", "lM1_p", "alpha_0", "alpha_p", "fc_0", "fc_p", "bg_0", "bg_p",
-        "bmax_0", "bmax_p", "a_pivot", "ns_independent", "precision_fftlog",)
+        "lMmin_0", "lMmin_p", "siglM_0", "siglM_p", "lM0_0", "lM0_p", "lM1_0",
+        "lM1_p", "alpha_0", "alpha_p", "fc_0", "fc_p", "bg_0", "bg_p",
+        "bmax_0", "bmax_p", "a_pivot", "ns_independent",
+        "cM", "precision_fftlog",)
     name = 'HOD'
     is_number_counts = True
 

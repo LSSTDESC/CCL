@@ -3,6 +3,7 @@ from ..core import check
 from ..background import species_types, rho_x, omega_x
 from ..base import CCLHalosObject
 import numpy as np
+from functools import cached_property
 
 
 def mass2radius_lagrangian(cosmo, M):
@@ -106,7 +107,7 @@ class MassDef(CCLHalosObject):
         else:
             self._concentration_init(c_m_relation)
 
-    @property
+    @cached_property
     def name(self):
         """Give a name to this mass definition."""
         if isinstance(self.Delta, (int, float)):

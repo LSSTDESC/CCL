@@ -5,7 +5,6 @@ import numpy as np
 from inspect import signature
 from _thread import RLock
 from abc import ABC
-from operator import attrgetter
 
 
 def _to_hashable(obj):
@@ -595,7 +594,7 @@ class CCLObject(ABC):
             return False
         # Compare the attributes listed in `__eq_attrs__`.
         if hasattr(self, "__eq_attrs__"):
-            return all([attrgetter(attr)(self) == attrgetter(attr)(other)
+            return all([getattr(self, attr) == getattr(other, attr)
                         for attr in self.__eq_attrs__])
         # Fall back to repr comparison.
         return repr(self) == repr(other)
