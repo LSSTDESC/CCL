@@ -53,7 +53,7 @@ class HMCalculator(CCLHalosObject):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
-    __repr_attrs__ = ("_massfunc", "_hbias", "_mdef", "_prec",)
+    __repr_attrs__ = __eq_attrs__ = ("_massfunc", "_hbias", "_mdef", "_prec",)
 
     def __init__(self, cosmo, massfunc, hbias, mass_def,
                  log10M_min=8., log10M_max=16.,

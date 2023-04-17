@@ -23,14 +23,10 @@ class Profile2pt(CCLHalosObject):
             Defaults to ``r_corr=0``, returning simply the product
             of the fourier profiles.
     """
-    __repr_attrs__ = ("r_corr",)
+    __repr_attrs__ = __eq_attrs__ = ("r_corr",)
 
     def __init__(self, r_corr=0.):
         self.r_corr = r_corr
-
-    __eq__ = object.__eq__
-
-    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
 
     def update_parameters(self, r_corr=None):
         """ Update any of the parameters associated with this 1-halo

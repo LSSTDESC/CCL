@@ -53,10 +53,6 @@ class HaloProfile(CCLHalosObject):
                                  'plaw_fourier': -1.5,
                                  'plaw_projected': -1.}
 
-    __eq__ = object.__eq__
-
-    __hash__ = object.__hash__  # TODO: remove once __eq__ is replaced.
-
     @unlock_instance(mutate=True)
     def update_precision_fftlog(self, **kwargs):
         """ Update any of the precision parameters used by
@@ -535,7 +531,7 @@ class HaloProfileGaussian(HaloProfile):
         rho0 (:obj:`function`): the amplitude of the profile.
             It should have the same signature as `r_scale`.
     """
-    __repr_attrs__ = ("r_s", "rho_0", "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = ("r_s", "rho_0", "precision_fftlog",)
     name = 'Gaussian'
 
     def __init__(self, r_scale, rho0):
@@ -582,7 +578,7 @@ class HaloProfilePowerLaw(HaloProfile):
             profile. The signature of this function should
             be `f(cosmo, a)`.
     """
-    __repr_attrs__ = ("r_s", "tilt", "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = ("r_s", "tilt", "precision_fftlog",)
     name = 'PowerLaw'
 
     def __init__(self, r_scale, tilt):
@@ -654,8 +650,9 @@ class HaloProfileNFW(HaloProfile):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
-    __repr_attrs__ = ("cM", "fourier_analytic", "projected_analytic",
-                      "cumul2d_analytic", "truncated", "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "fourier_analytic", "projected_analytic",
+        "cumul2d_analytic", "truncated", "cM", "precision_fftlog",)
     name = 'NFW'
 
     def __init__(self, c_M_relation,
@@ -851,7 +848,8 @@ class HaloProfileEinasto(HaloProfile):
         alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
             'cosmo' to calculate the value from cosmology. Default: 'cosmo'
     """
-    __repr_attrs__ = ("cM", "truncated", "alpha", "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = ("truncated", "alpha",
+                                     "cM", "precision_fftlog",)
     name = 'Einasto'
 
     def __init__(self, c_M_relation, truncated=True, alpha='cosmo'):
@@ -961,8 +959,9 @@ class HaloProfileHernquist(HaloProfile):
             truncated at :math:`r = R_\\Delta` (i.e. zero at larger
             radii.
     """
-    __repr_attrs__ = ("cM", "fourier_analytic", "projected_analytic",
-                      "cumul2d_analytic", "truncated", "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "fourier_analytic", "projected_analytic", "cumul2d_analytic",
+        "truncated", "cM", "precision_fftlog",)
     name = 'Hernquist'
 
     def __init__(self, c_M_relation,
@@ -1193,9 +1192,9 @@ class HaloProfilePressureGNFW(HaloProfile):
         Profile threshold, in units of :math:`R_{\\mathrm{500c}}`.
         Defaults to :math:`+\\infty`.
     """
-    __repr_attrs__ = ("mass_bias", "P0", "c500", "alpha", "alpha_P", "beta",
-                      "gamma", "P0_hexp", "qrange", "nq", "x_out",
-                      "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
+        "P0_hexp", "qrange", "nq", "x_out", "precision_fftlog",)
     name = 'GNFW'
 
     def __init__(self, mass_bias=0.8, P0=6.41,
@@ -1472,10 +1471,11 @@ class HaloProfileHOD(HaloProfile):
         ns_independent (bool): drop requirement to only form
             satellites when centrals are present.
     """
-    __repr_attrs__ = ("cM", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p",
-                      "lM0_0", "lM0_p", "lM1_0", "lM1_p", "alpha_0", "alpha_p",
-                      "fc_0", "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p",
-                      "a_pivot", "ns_independent", "precision_fftlog",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "lMmin_0", "lMmin_p", "siglM_0", "siglM_p", "lM0_0", "lM0_p", "lM1_0",
+        "lM1_p", "alpha_0", "alpha_p", "fc_0", "fc_p", "bg_0", "bg_p",
+        "bmax_0", "bmax_p", "a_pivot", "ns_independent",
+        "cM", "precision_fftlog",)
     name = 'HOD'
     is_number_counts = True
 
