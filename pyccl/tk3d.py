@@ -135,7 +135,7 @@ class Tk3D(CCLObject):
 
     def __eq__(self, other):
         # Check the object class.
-        if self.__class__ is not other.__class__:
+        if type(self) is not type(other):
             return False
         # If the objects contain no data, return early.
         if not (self or other):

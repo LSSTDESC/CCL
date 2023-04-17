@@ -187,7 +187,7 @@ class Tracer(CCLObject):
 
     def __eq__(self, other):
         # Check the object class.
-        if self.__class__ is not other.__class__:
+        if type(self) is not type(other):
             return False
 
         # If the tracer collections are empty, return early.
