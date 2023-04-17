@@ -7,7 +7,6 @@ from .errors import CCLWarning, CCLError
 from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline1d_arrays, _get_spline2d_arrays)
 from .base import CCLObject, UnlockInstance, unlock_instance
-from .parameters import EQ_TOL
 
 
 class _Pk2D_descriptor:
@@ -146,7 +145,7 @@ class Pk2D(CCLObject):
         a1, lk1, pk1 = self.get_spline_arrays()
         a2, lk2, pk2 = other.get_spline_arrays()
         return ((a1 == a2).all() and (lk1 == lk2).all()
-                and np.allclose(pk1, pk2, atol=0, rtol=EQ_TOL))
+                and np.array_equal(pk1, pk2))
 
     def __hash__(self):
         return hash(repr(self))

@@ -7,7 +7,7 @@ from .core import check
 from .background import (comoving_radial_distance, growth_rate,
                          growth_factor, scale_factor_of_chi, h_over_h0)
 from .errors import CCLWarning
-from .parameters import physical_constants, EQ_TOL
+from .parameters import physical_constants
 from .base import CCLObject, UnlockInstance, unlock_instance
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays, _get_spline2d_arrays)
@@ -205,7 +205,6 @@ class Tracer(CCLObject):
             return False
 
         # Check the kernels.
-        kwargs = {"atol": 0, "rtol": EQ_TOL, "equal_nan": True}
         for t1, t2 in zip(self._trc, other._trc):
             if bool(t1.kernel) ^ bool(t2.kernel):
                 # only one of them has a kernel
@@ -213,9 +212,8 @@ class Tracer(CCLObject):
             if t1.kernel is None:
                 # none of them has a kernel
                 continue
-            if not np.allclose(_get_spline1d_arrays(t1.kernel.spline),
-                               _get_spline1d_arrays(t2.kernel.spline),
-                               **kwargs):
+            if not np.array_equal(_get_spline1d_arrays(t1.kernel.spline),
+                                  _get_spline1d_arrays(t2.kernel.spline)):
                 # both have kernels, but they are unequal
                 return False
 
@@ -249,7 +247,7 @@ class Tracer(CCLObject):
                 pts1, pts2 = c2py[attr](spl1), c2py[attr](spl2)
                 for pt1, pt2 in zip(pts1, pts2):
                     # loop through output points of `_get_splinend_arrays`
-                    if not np.allclose(pt1, pt2, **kwargs):
+                    if not np.array_equal(pt1, pt2):
                         # both have this transfer type, but they are unequal
                         # or are defined at different grid points
                         return False

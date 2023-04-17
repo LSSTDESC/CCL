@@ -2,9 +2,6 @@ from . import ccllib as lib
 from .errors import warnings, CCLDeprecationWarning
 
 
-EQ_TOL = 0.  # tolerance when comparing arrays in `__eq__` methods
-
-
 class CCLParameters:
     """Base for classes holding global CCL parameters and their values.
 

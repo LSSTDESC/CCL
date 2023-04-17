@@ -1,7 +1,6 @@
 from . import ccllib as lib
 from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 from .base import CCLObject
-from .parameters import EQ_TOL
 import numpy as np
 
 
@@ -153,7 +152,7 @@ class Tk3D(CCLObject):
         a2, lk21, lk22, tk2 = other.get_spline_arrays()
         return ((a1 == a2).all()
                 and (lk11 == lk21).all() and (lk21 == lk22).all()
-                and np.allclose(tk1, tk2, atol=0, rtol=EQ_TOL))
+                and np.array_equal(tk1, tk2))
 
     def __hash__(self):
         return hash(repr(self))
