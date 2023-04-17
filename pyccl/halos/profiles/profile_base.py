@@ -1,6 +1,5 @@
 from ...pyutils import resample_array, _fftlog_transform
-from ...base import (CCLAutoRepr, abstractlinkedmethod, templatemethod,
-                     unlock_instance, warn_api, deprecate_attr)
+from ...base import CCLAutoRepr, unlock_instance, warn_api, deprecate_attr
 from ...parameters import FFTLogParams
 import numpy as np
 from abc import abstractmethod
@@ -42,6 +41,11 @@ class HaloProfile(CCLAutoRepr):
 
     def __init__(self):
         self.precision_fftlog = FFTLogParams()
+        if not (self._is_implemented("_real")
+                or self._is_implemented("_fourier")):
+            name = self.__class__.__name__
+            raise TypeError(f"Can't instantiate {name} with no "
+                            "_real or _fourier implementation.")
 
     @property
     @abstractmethod
@@ -104,21 +108,13 @@ class HaloProfile(CCLAutoRepr):
         """
         return self.precision_fftlog['plaw_projected']
 
-    @abstractlinkedmethod
-    def _real(self, cosmo, r, M, a, mass_def=None):
-        """TODO: Write some useful docstring."""
+    _real = NotImplemented
 
-    @abstractlinkedmethod
-    def _fourier(self, cosmo, k, M, a, mass_def=None):
-        "TODO: Write some useful docstring."""
+    _fourier = NotImplemented
 
-    @templatemethod
-    def _projected(self, cosmo, r, M, a, mass_def=None):
-        """TODO: Write some useful docstring."""
+    _projected = NotImplemented
 
-    @templatemethod
-    def _cumul2d(self, cosmo, r, M, a, mass_def=None):
-        """TODO: Write some useful docstring."""
+    _cumul2d = NotImplemented
 
     @warn_api
     def real(self, cosmo, r, M, a, *, mass_def=None):

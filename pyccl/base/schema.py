@@ -8,7 +8,6 @@ import numpy as np
 __all__ = ("ObjectLock",
            "UnlockInstance", "unlock_instance",
            "FancyRepr",
-           "abstractlinkedmethod", "templatemethod",
            "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
 
 
@@ -175,46 +174,6 @@ class FancyRepr:
         cls._enabled = False
 
 
-def _method_wrapper_factory(hook_name: str, default_value=True) -> callable:
-    """Decorator factory that sets hooks to functions.
-
-    The hooks can be used as abstraction criteria for implementations departing
-    from ``abc.ABCMeta``, which enforces that abstract methods are implemented.
-
-    Arguments
-    ---------
-    hook_name : str
-        Name of the hook.
-    default_value : object
-        Any default value for the hook.
-
-    Returns
-    -------
-    wrapper : callable
-        Wrapper that can be used as a decorator that sets hooks.
-    """
-    def wrapper(func):
-        setattr(func, hook_name, default_value)
-        return func
-    return wrapper
-
-
-# ~~ abstractlinkedmethod(func) ~~
-# Requires that the superclass is `CCLObject` or derived from it.
-# A subclass of `CCLObject` cannot be instantiated unless at least one of
-# its linked abstract methods is overridden.
-#
-# If a subclass of a linked abstract class has one implementation of the
-# linked abstract methods, the linked abstract method register is cleared.
-# `CCLObject._is_abstractlinked()` inspects whether the method is implemented.
-abstractlinkedmethod = _method_wrapper_factory("__isabstractlinkedmethod__")
-
-# ~~ templatemethod(func) ~~
-# Marks the method as template. Instance attribute checks may then be made
-# with `CCLObject._is_template()` to inspect if the method is implemented.
-templatemethod = _method_wrapper_factory("__istemplatemethod__")
-
-
 class CCLObject(ABC):
     """Base for CCL objects.
 
@@ -256,7 +215,6 @@ class CCLObject(ABC):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
-    __abstractlinkedmethods__ = set()
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -272,26 +230,7 @@ class CCLObject(ABC):
         # UnlockInstance.Funlock(cls, "__init__", mutate=False)
         # UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
 
-        # 4. Process linked abstract methods.
-        isabstract = lambda f: hasattr(f, "__isabstractlinkedmethod__")  # noqa
-        abstracts = cls.__abstractlinkedmethods__.copy()
-        for name, obj in vars(cls).items():
-            # add the new linked abstract methods
-            if isabstract(obj):
-                abstracts.add(name)
-        for name in abstracts:
-            # reset the linked abstract methods if one has been implemented
-            if not isabstract(getattr(cls, name)):
-                abstracts = set()
-        cls.__abstractlinkedmethods__ = abstracts
-
     def __new__(cls, *args, **kwargs):
-        # Check if there are any linked abstract methods.
-        if abstracts := cls.__abstractlinkedmethods__:
-            name, s = cls.__name__, (len(abstracts) > 1) * "s"
-            names = ", ".join(abstracts)
-            raise TypeError(f"Can't instantiate abstract class {name} "
-                            f"with linked abstract methods{s} {names}.")
         # Populate every instance with an `ObjectLock` as attribute.
         instance = super().__new__(cls)
         object.__setattr__(instance, "_object_lock", ObjectLock())
@@ -329,17 +268,9 @@ class CCLObject(ABC):
         # Fall back to default Python comparison.
         return id(self) == id(other)
 
-    def _is_abstractlinked(self, name):
-        # Check whether the abstract linked method `name` is implemented.
-        return hasattr(getattr(self, name), "__isabstractlinkedmethod__")
-
-    def _is_template(self, name):
-        # Check whether the template method `name` is implemented.
-        return hasattr(getattr(self, name), "__istemplatemethod__")
-
     def _is_implemented(self, name):
-        # Check whether the method is implemented (not template or abstract).
-        return not (self._is_abstractlinked(name) or self._is_template(name))
+        # Check whether the method is implemented.
+        return getattr(self, name, NotImplemented) is not NotImplemented
 
 
 class CCLAutoRepr(CCLObject):
