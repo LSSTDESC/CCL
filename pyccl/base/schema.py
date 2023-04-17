@@ -7,7 +7,7 @@ import numpy as np
 
 __all__ = ("ObjectLock",
            "UnlockInstance", "unlock_instance",
-           "FancyRepr",
+           "CustomRepr", "CustomEq",
            "abstractlinkedmethod", "templatemethod",
            "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
 
@@ -150,29 +150,60 @@ def is_equal(this, other):
         return False
 
 
-class FancyRepr:
-    """Controls the usage of fancy ``__repr__` for ``CCLObjects."""
-    _enabled: bool = True
-    _classes: dict = {}
+class _CustomMethod:
+    """Subclasses specifying a method string control whether the custom
+    method is used in subclasses of ``CCLObject``.
+    """
 
-    @classmethod
-    def add(cls, cl):
-        """Add class to the internal dictionary of fancy-repr classes."""
-        cls._classes[cl] = cl.__repr__
+    def __init_subclass__(cls, *, method):
+        super().__init_subclass__()
+        if method not in vars(cls):
+            raise ValueError(
+                f"Subclass must contain a default {method} implementation.")
+        cls._method = method
+        cls._enabled: bool = True
+        cls._classes: dict = {}
+        # Assign the class methods that control the behavior.
+        cls.register = classmethod(_CustomMethod.register)
+        cls.enable = classmethod(_CustomMethod.enable)
+        cls.disable = classmethod(_CustomMethod.disable)
 
-    @classmethod
+    @staticmethod
+    def register(cls, cl):
+        """Register class to the dictionary of classes with custom methods."""
+        if cls._method in vars(cls):
+            cls._classes[cl] = getattr(cl, cls._method)
+
+    @staticmethod
     def enable(cls):
-        """Enable fancy representations if they exist."""
+        """Enable the custom methods if they exist."""
         for cl, method in cls._classes.items():
-            setattr(cl, "__repr__", method)
+            setattr(cl, cls._method, method)
         cls._enabled = True
 
-    @classmethod
+    @staticmethod
     def disable(cls):
-        """Disable fancy representations and fall back to Python defaults."""
+        """Disable custom methods and fall back to Python defaults."""
         for cl in cls._classes.keys():
-            cl.__repr__ = object.__repr__
+            default = getattr(cls, cls._method)
+            setattr(cl, cls._method, default)
         cls._enabled = False
+
+
+class CustomEq(_CustomMethod, method="__eq__"):
+    """Controls the usage of custom ``__eq__`` for ``CCLObjects``."""
+
+    def __eq__(self, other):
+        # Default `eq`.
+        return self is other
+
+
+class CustomRepr(_CustomMethod, method="__repr__"):
+    """Controls the usage of custom ``__repr__`` for ``CCLObjects``."""
+
+    def __repr__(self):
+        # Default `repr`.
+        return object.__repr__(self)
 
 
 def _method_wrapper_factory(hook_name: str, default_value=True) -> callable:
@@ -264,9 +295,9 @@ class CCLObject(ABC):
         # 1. Store the initialization signature on import.
         cls.__signature__ = signature(cls.__init__)
 
-        # 2. Replace repr (if implemented) with its cached version.
-        if "__repr__" in vars(cls):
-            FancyRepr.add(cls)
+        # 2. Register subclasses with custom dunder method implementations.
+        CustomEq.register(cls)
+        CustomRepr.register(cls)
 
         # 3. Unlock instance on specific methods.  # TODO: Uncomment for CCLv3.
         # UnlockInstance.Funlock(cls, "__init__", mutate=False)
@@ -418,6 +449,10 @@ class CCLNamedClass(CCLObject):
         if not hasattr(cls, "from_name"):
             cls.from_name = classmethod(from_name)
         cls.create_instance = classmethod(create_instance)
+        # cls._subclasses = classmethod(CCLNamedClass._subclasses)
+        # if not hasattr(cls, "from_name"):
+        #     cls.from_name = classmethod(CCLNamedClass.from_name)
+        # cls.create_instance = classmethod(CCLNamedClass.create_instance)
 
     @property
     @abstractmethod
