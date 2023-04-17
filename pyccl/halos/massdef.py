@@ -289,9 +289,5 @@ def MassDefVir(concentration='Klypin11'):
 
 
 def MassDefFof():
-    r""":math:`\Delta = \rm FoF` mass definition.
-
-    Args:
-        c_m (string): concentration-mass relation.
-    """
+    r""":math:`\Delta = \rm FoF` mass definition."""
     return MassDef('fof', 'matter')
