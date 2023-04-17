@@ -590,12 +590,12 @@ class CCLObject(ABC):
 
     def __eq__(self, other):
         # Two same-type objects are equal if their representations are equal.
-        if self.__class__ is not other.__class__:
+        if type(self) is not type(other):
             return False
         # Compare the attributes listed in `__eq_attrs__`.
         if hasattr(self, "__eq_attrs__"):
             for attr in self.__eq_attrs__:
-                if any(getattr(self, attr) != getattr(other, attr)):
+                if np.any(getattr(self, attr) != getattr(other, attr)):
                     return False
             return True
         # Fall back to repr comparison.
