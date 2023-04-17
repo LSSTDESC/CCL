@@ -40,12 +40,12 @@ class HaloProfile(CCLAutoRepr):
                                  )(super.__getattribute__)
 
     def __init__(self):
-        self.precision_fftlog = FFTLogParams()
         if not (self._is_implemented("_real")
                 or self._is_implemented("_fourier")):
             name = self.__class__.__name__
             raise TypeError(f"Can't instantiate {name} with no "
                             "_real or _fourier implementation.")
+        self.precision_fftlog = FFTLogParams()
 
     @property
     @abstractmethod
