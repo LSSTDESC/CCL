@@ -607,8 +607,8 @@ class CCLObject(ABC):
                 if not is_equal(getattr(self, attr), getattr(other, attr)):
                     return False
             return True
-        # Fall back to repr comparison.
-        return repr(self) == repr(other)
+        # Fall back to default Python comparison.
+        return id(self) == id(other)
 
 
 class CCLHalosObject(CCLObject):
