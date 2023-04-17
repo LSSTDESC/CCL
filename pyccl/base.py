@@ -594,8 +594,9 @@ class CCLObject(ABC):
             return False
         # Compare the attributes listed in `__eq_attrs__`.
         if hasattr(self, "__eq_attrs__"):
-            return all([getattr(self, attr) == getattr(other, attr)
-                        for attr in self.__eq_attrs__])
+            for attr in self.__eq_attrs__:
+                if any(getattr(self, attr) != getattr(other, attr)):
+                    return False
         # Fall back to repr comparison.
         return repr(self) == repr(other)
 
