@@ -26,14 +26,13 @@ def test_parameters_lcdm_defaults():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
     assert np.allclose(cosmo['Neff'], 3.046)
     assert cosmo['N_nu_mass'] == 0
     assert np.allclose(cosmo['N_nu_rel'], 3.046)
     assert np.allclose(cosmo['sum_nu_masses'], 0)
     assert np.allclose(cosmo['m_nu'], 0)
     assert np.allclose(cosmo['Omega_nu_mass'], 0)
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -86,9 +85,8 @@ def test_parameters_nu(m_nu_type):
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_pos, atol=1e-4, rtol=0)
     elif m_nu_type == 'single':
+        assert len(cosmo["m_nu"]) == 1
         assert np.allclose(cosmo['m_nu'][0], 0.15, atol=1e-4, rtol=0)
-        assert np.allclose(cosmo['m_nu'][1], 0., atol=1e-4, rtol=0)
-        assert np.allclose(cosmo['m_nu'][2], 0., atol=1e-4, rtol=0)
 
 
 def test_parameters_nu_Nnurel_neg():
@@ -122,8 +120,7 @@ def test_parameters_nu_list():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -173,8 +170,7 @@ def test_parameters_nu_normal():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -223,8 +219,7 @@ def test_parameters_nu_inverted():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -273,8 +268,7 @@ def test_parameters_nu_equal():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.isnan(cosmo['z_star'])
-    assert np.allclose(cosmo['T_CMB'], ccl.physical_constants.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -388,25 +382,6 @@ def test_parameters_missing():
                       z_mg=None)
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       df_mg=None)
-
-
-def test_parameters_set():
-    """
-    Check that a Cosmology object doesn't let parameters be set.
-    """
-    params = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-        n_s=0.96)
-
-    # Check that values of sigma8 and A_s won't be misinterpreted by the C code
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2e-5, n_s=0.96)
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, sigma8=9e-6, n_s=0.96)
-
-    # Check that error is raised when unrecognized parameter requested
-    with pytest.raises(KeyError):
-        params['wibble']
 
 
 def test_parameters_mgrowth():

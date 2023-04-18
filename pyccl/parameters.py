@@ -1,29 +1,42 @@
+import warnings
 from . import ccllib as lib
-from .errors import warnings, CCLDeprecationWarning
+from .errors import CCLDeprecationWarning
+
+
+__all__ = ("CCLParameters", "SplineParams", "spline_params", "GSLParams",
+           "gsl_params", "PhysicalConstants", "physical_constants",
+           "CosmologyParams",)
 
 
 class CCLParameters:
     """Base for classes holding global CCL parameters and their values.
 
     Subclasses contain a reference to the C-struct with the collection
-    of parameters and their values (via SWIG). All subclasses act as proxies
+    of parameters (and their values) (via SWIG). All subclasses act as proxies
     to the CCL parameters at the C-level.
 
     Subclasses automatically store a backup of the initial parameter state
     to enable ad hoc reloading.
     """
 
-    def __init_subclass__(cls, instance=None, freeze=False):
+    def __init_subclass__(cls, *, instance=None, factory=None, freeze=False):
         """Routine for subclass initialization.
 
-        Parameters:
-            instance (``pyccl.ccllib.cvar``):
-                Reference to ``cvar`` where the parameters are implemented.
-            freeze (``bool``):
-                Disable parameter mutation.
+        Parameters
+        ----------
+        instance : :obj:`pyccl.ccllib`
+            Reference to the instance where the parameters are implemented.
+        factory : :class:`pyccl.ccllib`
+            The SWIG factory class where the parameters are stored.
+        freeze : bool
+            Disable parameter mutation.
         """
         super().__init_subclass__()
+        if not (bool(instance) ^ bool(factory)):  # XNOR
+            raise ValueError(
+                "Provide either the instance, or an instance factory.")
         cls._instance = instance
+        cls._factory = factory
         cls._frozen = freeze
 
         def _new_setattr(self, key, value):
@@ -43,9 +56,14 @@ class CCLParameters:
                 CCLDeprecationWarning)
             object.__setattr__(self, key, value)
 
-        cls._instance.__class__.__setattr__ = _new_setattr
+        # Replace C-level `__setattr__`.
+        class_ = cls._factory if cls._factory else cls._instance.__class__
+        class_.__setattr__ = _new_setattr
 
     def __init__(self):
+        # Create a new instance if a factory is provided.
+        if self._factory:
+            object.__setattr__(self, "_instance", self._factory())
         # Keep a copy of the default parameters.
         object.__setattr__(self, "_bak", CCLParameters.get_params_dict(self))
 
@@ -57,14 +75,11 @@ class CCLParameters:
             return get(self, name)
 
     def __setattr__(self, key, value):
-        if self._frozen and key != "T_CMB":
-            # `T_CMB` mutates in Cosmology.
+        if self._frozen:
             name = self.__class__.__name__
             raise AttributeError(f"Instances of {name} are frozen.")
         if not hasattr(self._instance, key):
             raise KeyError(f"Parameter {key} does not exist.")
-        if key == "A_SPLINE_MAX" and value != 1.0:
-            raise ValueError("A_SPLINE_MAX is fixed to 1.")
         object.__setattr__(self._instance, key, value)
 
     __getitem__ = __getattribute__
@@ -86,6 +101,14 @@ class CCLParameters:
             setattr(self, param, value)
         object.__setattr__(self, "_frozen", frozen)
 
+    def freeze(self):
+        """Freeze an instance of ``CCLParameters``."""
+        object.__setattr__(self, "_frozen", True)
+
+    def unfreeze(self):
+        """Unfreeze an instance of ``CCLParameters``."""
+        object.__setattr__(self, "_frozen", False)
+
     @classmethod
     def get_params_dict(cls, name):
         """Get a dictionary of the current parameters.
@@ -105,6 +128,11 @@ class CCLParameters:
 class SplineParams(CCLParameters, instance=lib.cvar.user_spline_params):
     """Instances of this class hold the spline parameters."""
 
+    def __setattr__(self, key, value):
+        if key == "A_SPLINE_MAX" and value != 1.0:
+            raise ValueError("A_SPLINE_MAX is fixed to 1.")
+        super().__setattr__(key, value)
+
 
 class GSLParams(CCLParameters, instance=lib.cvar.user_gsl_params):
     """Instances of this class hold the gsl parameters."""
@@ -113,6 +141,24 @@ class GSLParams(CCLParameters, instance=lib.cvar.user_gsl_params):
 class PhysicalConstants(CCLParameters, instance=lib.cvar.constants,
                         freeze=True):
     """Instances of this class hold the physical constants."""
+
+
+class CosmologyParams(CCLParameters, factory=lib.parameters):
+    """Instances of this class hold cosmological parameters."""
+
+    def __getattribute__(self, key):
+        if key == "m_nu":
+            N_nu_mass = self._instance.N_nu_mass
+            nu_masses = lib.parameters_get_nu_masses(self._instance, N_nu_mass)
+            return nu_masses.tolist()
+        return super().__getattribute__(key)
+
+    def __setattr__(self, key, value):
+        if key == "m_nu":
+            return lib.parameters_m_nu_set_custom(self._instance, value)
+        if key == "mgrowth":
+            return lib.parameters_mgrowth_set_custom(self._instance, *value)
+        super().__setattr__(key, value)
 
 
 spline_params = SplineParams()

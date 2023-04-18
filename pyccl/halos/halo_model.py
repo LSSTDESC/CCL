@@ -30,10 +30,10 @@ class HMCalculator(CCLAutoRepr):
             the halo bias function to use
         mass_def (str or :class:`~pyccl.halos.massdef.MassDef`):
             the halo mass definition to use
-        lM_min, lM_max (float): lower and upper integration bounds
+        log10M_min, log10M_max (float): lower and upper integration bounds
             of logarithmic (base-10) mass (in units of solar mass).
             Default range: 8, 16.
-        nlM (int): number of uniformly-spaced samples in log(Mass)
+        nM (int): number of uniformly-spaced samples in log(Mass)
             to be used in the mass integrals. Default: 128.
         integration_method_M (string): integration method to use
             in the mass integrals. Options: "simpson" and "spline".
@@ -45,7 +45,8 @@ class HMCalculator(CCLAutoRepr):
             determines what is considered a "very large" scale.
             Default: 1E-5.
     """
-    __repr_attrs__ = ("mass_function", "halo_bias", "mass_def", "precision",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_function", "halo_bias", "mass_def", "precision",)
     __getattr__ = deprecate_attr(pairs=[('_mdef', 'mass_def'),
                                         ('_massfunc', 'mass_function'),
                                         ('_hbias', 'halo_bias'),
@@ -53,13 +54,18 @@ class HMCalculator(CCLAutoRepr):
                                  )(super.__getattribute__)
 
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
-                     ("log10M_min", "lM_min"), ("log10M_max", "lM_max"),
-                     ("nlog10M", "nlM")])
-    def __init__(self, *, mass_function, halo_bias, mass_def,
-                 lM_min=8., lM_max=16., nlM=128,
+                     ("nlog10M", "nM")])
+    def __init__(self, *, mass_function, halo_bias, mass_def=None,
+                 log10M_min=8., log10M_max=16., nM=128,
                  integration_method_M='simpson', k_min=1E-5):
         # Initialize halo model ingredients
-        self.mass_def = MassDef.create_instance(mass_def)
+        if mass_def is not None:
+            self.mass_def = MassDef.create_instance(mass_def)
+        else:
+            if isinstance(mass_function, str) or isinstance(halo_bias, str):
+                raise ValueError("Need to provide mass_def if mass_function "
+                                 "or halo_bias are str.")
+            self.mass_def = mass_function.mass_def
         kw = {"mass_def": self.mass_def}
         self.mass_function = MassFunc.create_instance(mass_function, **kw)
         self.halo_bias = HaloBias.create_instance(halo_bias, **kw)
@@ -73,30 +79,28 @@ class HMCalculator(CCLAutoRepr):
                 "in mass_def, mass_function, halo_bias.")
 
         self.precision = {
-            'lM_min': lM_min, 'lM_max': lM_max, 'nlM': nlM,
+            'log10M_min': log10M_min, 'log10M_max': log10M_max, 'nM': nM,
             'integration_method_M': integration_method_M, 'k_min': k_min}
-        self._lmass = np.linspace(self.precision['lM_min'],
-                                  self.precision['lM_max'],
-                                  self.precision['nlM'])
+        self._lmass = np.linspace(log10M_min, log10M_max, nM)
         self._mass = 10.**self._lmass
         self._m0 = self._mass[0]
 
-        if self.precision['integration_method_M'] not in ['spline', 'simpson']:
-            raise NotImplementedError("Only \'simpson\' and 'spline' "
-                                      "supported as integration methods")
-        elif self.precision['integration_method_M'] == 'simpson':
+        if integration_method_M == "simpson":
             from scipy.integrate import simpson
             self._integrator = simpson
-        else:
+        elif integration_method_M == "spline":
             self._integrator = self._integ_spline
+        else:
+            raise NotImplementedError(
+                "Only 'simpson' and 'spline integration is supported.")
 
         # Cache last results for mass function and halo bias.
         self._cosmo_mf = self._cosmo_bf = None
         self._a_mf = self._a_bf = -1
 
-    def _integ_spline(self, fM, lM):
+    def _integ_spline(self, fM, log10M):
         # Spline integrator
-        return _spline_integrate(lM, fM, lM[0], lM[-1])
+        return _spline_integrate(log10M, fM, log10M[0], log10M[-1])
 
     @unlock_instance(mutate=False)
     def _get_mass_function(self, cosmo, a, rho0):

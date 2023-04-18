@@ -16,7 +16,7 @@ class ConcentrationConstant(Concentration):
             the mass definition used by this c(M)
             parametrization, or a name string. In this case it's arbitrary.
     """
-    __repr_attrs__ = ("mass_def", "c",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "c",)
     name = 'Constant'
 
     @warn_api(pairs=[("mdef", "mass_def")])

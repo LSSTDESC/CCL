@@ -156,11 +156,13 @@ static double nu_phasespace_intg(double mnuOT, int* status)
 
 /* -------- ROUTINE: Omeganuh2 ---------
 INPUTS: a: scale factor, Nnumass: number of massive neutrino species,
-        mnu: total mass in eV of neutrinos, T_CMB: CMB temperature, status: pointer to status integer.
+        mnu: total mass in eV of neutrinos, T_CMB: CMB temperature,
+        T_ncdm: non-CDM temperature in units of photon temperature,
+        status: pointer to status integer.
 TASK: Compute Omeganu * h^2 as a function of time.
 !! To all practical purposes, Neff is simply N_nu_mass !!
 */
-double ccl_Omeganuh2(double a, int N_nu_mass, double* mnu, double T_CMB, int* status) {
+double ccl_Omeganuh2(double a, int N_nu_mass, double* mnu, double T_CMB, double T_ncdm, int* status) {
   double Tnu, a4, prefix_massless, OmNuh2;
   double Tnu_eff, mnuOT, intval, prefix_massive;
 
@@ -169,24 +171,24 @@ double ccl_Omeganuh2(double a, int N_nu_mass, double* mnu, double T_CMB, int* st
 
   Tnu = T_CMB*pow(4./11.,1./3.);
   a4 = a*a*a*a;
-  
+
   // Tnu_eff is used in the massive case because CLASS uses an effective
   // temperature of nonLCDM components to match to mnu / Omeganu =93.14eV. Tnu_eff = T_ncdm * T_CMB = 0.71611 * T_CMB
-  Tnu_eff = Tnu * ccl_constants.TNCDM / (pow(4./11.,1./3.));
+  Tnu_eff = Tnu * T_ncdm / (pow(4./11.,1./3.));
 
   // Define the prefix using the effective temperature (to get mnu / Omega = 93.14 eV) for the massive case:
   prefix_massive = NU_CONST * Tnu_eff * Tnu_eff * Tnu_eff * Tnu_eff;
 
   OmNuh2 = 0.; // Initialize to 0 - we add to this for each massive neutrino species.
   for(int i=0; i < N_nu_mass; i++) {
-      
+
     // Check whether this species is effectively massless
     // In this case, invoke the analytic massless limit:
     if (mnu[i] < 0.00017) {  // Limit taken from Lesgourges et al. 2012
-      prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu;	
-      OmNuh2 = N_nu_mass*prefix_massless*7./8./a4 + OmNuh2;	
-    } else {  
-       // For the true massive case:  
+      prefix_massless = NU_CONST  * Tnu * Tnu * Tnu * Tnu;
+      OmNuh2 = N_nu_mass*prefix_massless*7./8./a4 + OmNuh2;
+    } else {
+       // For the true massive case:
        // Get mass over T (mass (eV) / ((kb eV/s/K) Tnu_eff (K))
        // This returns the density normalized so that we get nuh2 at a=0
        mnuOT = mnu[i] / (Tnu_eff/a) * (ccl_constants.EV_IN_J / (ccl_constants.KBOLTZ));
@@ -203,12 +205,11 @@ double ccl_Omeganuh2(double a, int N_nu_mass, double* mnu, double T_CMB, int* st
 /* -------- ROUTINE: Omeganuh2_to_Mnu ---------
 INPUTS: OmNuh2: neutrino mass density today Omeganu * h^2,
         label: how you want to split up the masses, see ccl_neutrinos.h for options,
-        T_CMB: CMB temperature, status: pointer to status integer.
+        status: pointer to status integer.
 TASK: Given Omeganuh2 today, the method of splitting into masses, and the temperature of the
       CMB, output a pointer to the array of neutrino masses (may be length 1 if label asks for sum)
 */
-double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split,
-                      double T_CMB,  int* status) {
+double* ccl_nu_masses(double OmNuh2, ccl_neutrino_mass_splits mass_split, int* status) {
   double sumnu;
   double *mnu = NULL;
 

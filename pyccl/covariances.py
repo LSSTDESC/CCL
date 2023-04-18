@@ -248,7 +248,7 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
         else:
             chi = comoving_angular_distance(cosmo, a=a_arr)
             k = (ell+0.5)/chi[i]
-            pk = p_of_k_a.eval(k, a_arr[i], cosmo)
+            pk = p_of_k_a(k, a_arr[i], cosmo)
             # See eq. E.10 of 2007.01844
             sigma2_B[i] = np.sum(pk * mask_wl)/chi[i]**2
 

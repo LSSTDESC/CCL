@@ -4,11 +4,11 @@
 #include <math.h>
 
 #define NZ 1024
-#define Z0_GC 1.0 
+#define Z0_GC 1.0
 #define SZ_GC 0.02
 #define NL 499
 
-#define CLS_PRECISION 3E-3 
+#define CLS_PRECISION 3E-3
 
 CTEST_DATA(angpow) {
   double Omega_c;
@@ -30,7 +30,7 @@ CTEST_DATA(angpow) {
 
 
 
-// Set up the cosmological parameters to be used 
+// Set up the cosmological parameters to be used
 CTEST_SETUP(angpow){
   data->Omega_c = 0.25;
   data->Omega_b = 0.05;
@@ -55,7 +55,7 @@ static void test_angpow_precision(struct angpow_data * data)
 {
   // Status flag
   int status =0;
-  
+
   // Initialize cosmological parameters
   ccl_configuration ccl_config=default_config;
   ccl_config.transfer_function_method=ccl_boltzmann_class;
@@ -78,7 +78,7 @@ static void test_angpow_precision(struct angpow_data * data)
       nz_arr_gc[i]=exp(-0.5*pow((z_arr_gc[i]-Z0_GC)/SZ_GC,2));
       bz_arr[i]=1;
     }
-  
+
   // Galaxy clustering tracer
   CCL_ClTracer *ct_gc_A=ccl_cl_tracer_number_counts(ccl_cosmo,1,1,0,
 						    NZ,z_arr_gc,nz_arr_gc,
@@ -88,7 +88,7 @@ static void test_angpow_precision(struct angpow_data * data)
 						    NZ,z_arr_gc,nz_arr_gc,
 						    NZ,z_arr_gc,bz_arr,
 						    -1,NULL,NULL, &status);
-  
+
   int *ells=malloc(NL*sizeof(int));
   double *cells_gg_angpow=malloc(NL*sizeof(double));
   for(int ii=0;ii<NL;ii++)
@@ -98,7 +98,7 @@ static void test_angpow_precision(struct angpow_data * data)
   // Workspaces
   double linstep = 40;
   double logstep = 1.15;
-  
+
   // Compute C_ell
   ccl_angular_cls_nonlimber(ccl_cosmo,logstep,linstep,
 			    ct_gc_A,ct_gc_A,NULL,
@@ -117,13 +117,13 @@ static void test_angpow_precision(struct angpow_data * data)
   fclose(f);
   rel_precision /= NL;
   ASSERT_TRUE(rel_precision < CLS_PRECISION);
-  
+
   //Free up tracers
   ccl_cl_tracer_free(ct_gc_A);
   ccl_cl_tracer_free(ct_gc_B);
   free(ells);
   free(cells_gg_angpow);
-  ccl_cosmology_free(ccl_cosmo);  
+  ccl_cosmology_free(ccl_cosmo);
 }
 
 CTEST2(angpow,precision) {

@@ -1,16 +1,23 @@
 from . import ccllib as lib
-import numpy as np
-from .core import check
+from .pyutils import check
 from .pk2d import parse_pk2d
+from .base import warn_api
+import numpy as np
 
 
-def linear_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
+__all__ = ("linear_power", "nonlin_power", "linear_matter_power",
+           "nonlin_matter_power", "sigmaM", "sigmaR", "sigmaV", "sigma8",
+           "kNL",)
+
+
+@warn_api
+def linear_power(cosmo, k, a, *, p_of_k_a='delta_matter:delta_matter'):
     """The linear power spectrum.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
-        a (float): Scale factor.
+        a (float or array_like): Scale factor.
         p_of_k_a (str): string specifying the power spectrum to
             compute (which should be stored in `cosmo`). Defaults to
             the linear matter power spectrum.
@@ -21,16 +28,17 @@ def linear_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     cosmo.compute_linear_power()
     if p_of_k_a not in cosmo._pk_lin:
         raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_lin[p_of_k_a].eval(k, a, cosmo)
+    return cosmo._pk_lin[p_of_k_a](k, a, cosmo)
 
 
-def nonlin_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
+@warn_api
+def nonlin_power(cosmo, k, a, *, p_of_k_a='delta_matter:delta_matter'):
     """The non-linear power spectrum.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
-        a (float): Scale factor.
+        a (float or array_like): Scale factor.
         p_of_k_a (str): string specifying the power spectrum to
             compute (which should be stored in `cosmo`). Defaults to
             the non-linear matter power spectrum.
@@ -41,7 +49,7 @@ def nonlin_power(cosmo, k, a, p_of_k_a='delta_matter:delta_matter'):
     cosmo.compute_nonlin_power()
     if p_of_k_a not in cosmo._pk_nl:
         raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_nl[p_of_k_a].eval(k, a, cosmo)
+    return cosmo._pk_nl[p_of_k_a](k, a, cosmo)
 
 
 def linear_matter_power(cosmo, k, a):
@@ -50,14 +58,13 @@ def linear_matter_power(cosmo, k, a):
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
-        a (float): Scale factor.
+        a (float or array_like): Scale factor.
 
     Returns:
         float or array_like: Linear matter power spectrum; Mpc^3.
     """
     cosmo.compute_linear_power()
-    return cosmo._pk_lin['delta_matter:delta_matter'].eval(k, a,
-                                                           cosmo)
+    return cosmo._pk_lin['delta_matter:delta_matter'](k, a, cosmo)
 
 
 def nonlin_matter_power(cosmo, k, a):
@@ -66,14 +73,13 @@ def nonlin_matter_power(cosmo, k, a):
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         k (float or array_like): Wavenumber; Mpc^-1.
-        a (float): Scale factor.
+        a (float or array_like): Scale factor.
 
     Returns:
         float or array_like: Nonlinear matter power spectrum; Mpc^3.
     """
     cosmo.compute_nonlin_power()
-    return cosmo._pk_nl['delta_matter:delta_matter'].eval(k, a,
-                                                          cosmo)
+    return cosmo._pk_nl['delta_matter:delta_matter'](k, a, cosmo)
 
 
 def sigmaM(cosmo, M, a):
@@ -101,7 +107,8 @@ def sigmaM(cosmo, M, a):
     return sigM
 
 
-def sigmaR(cosmo, R, a=1., p_of_k_a=None):
+@warn_api
+def sigmaR(cosmo, R, a=1., *, p_of_k_a=None):
     """RMS variance in a top-hat sphere of radius R in Mpc.
 
     Args:
@@ -129,7 +136,8 @@ def sigmaR(cosmo, R, a=1., p_of_k_a=None):
     return sR
 
 
-def sigmaV(cosmo, R, a=1., p_of_k_a=None):
+@warn_api
+def sigmaV(cosmo, R, a=1., *, p_of_k_a=None):
     """RMS variance in the displacement field in a top-hat sphere of radius R.
     The linear displacement field is the gradient of the linear density field.
 
@@ -158,7 +166,8 @@ def sigmaV(cosmo, R, a=1., p_of_k_a=None):
     return sV
 
 
-def sigma8(cosmo, p_of_k_a=None):
+@warn_api
+def sigma8(cosmo, *, p_of_k_a=None):
     """RMS variance in a top-hat sphere of radius 8 Mpc/h.
 
     .. note:: 8 Mpc/h is rescaled based on the chosen value of the Hubble
@@ -184,7 +193,8 @@ def sigma8(cosmo, p_of_k_a=None):
     return s8
 
 
-def kNL(cosmo, a, p_of_k_a=None):
+@warn_api
+def kNL(cosmo, a, *, p_of_k_a=None):
     """Scale for the non-linear cut.
 
     .. note:: k_NL is calculated based on Lagrangian perturbation theory as the

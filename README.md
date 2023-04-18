@@ -75,7 +75,7 @@ cosmo = ccl.Cosmology(
     transfer_function='bbks')
 
 # Define a simple binned galaxy number density curve as a function of redshift
-z_n = np.linspace(0., 1., 200)
+z_n = np.linspace(0., 1., 500)
 n = np.ones(z_n.shape)
 
 # Create objects to represent tracers of the weak lensing signal with this

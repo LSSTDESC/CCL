@@ -57,7 +57,7 @@ def smoke_assert_tkk1h_real(func):
      (P1, P2, PKC, P3, P4, PKC)])
 def test_tkk1h_smoke(p1, p2, cv12, p3, p4, cv34):
     hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
-                                 mass_def=M200, nlM=2)
+                                 mass_def=M200, nM=2)
 
     def f(k, a):
         return ccl.halos.halomod_trispectrum_1h(

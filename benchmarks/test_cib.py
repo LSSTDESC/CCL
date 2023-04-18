@@ -28,8 +28,8 @@ def test_cibcl():
                          beta=1.75,
                          gamma=1.7,
                          s_z=3.6,
-                         log10meff=12.6,
-                         sigLM=np.sqrt(0.5),
+                         log10Meff=12.6,
+                         siglog10M=np.sqrt(0.5),
                          Mmin=1E10,
                          L0=6.4E-8)
 

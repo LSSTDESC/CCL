@@ -126,8 +126,8 @@ def test_hmcalculator_number_counts_scipy_dblquad():
 
     hmc = ccl.halos.HMCalculator(
         mass_function=hmf, halo_bias=hbf, mass_def=mdef,
-        lM_min=np.log10(mmin),
-        lM_max=np.log10(mmax),
+        log10M_min=np.log10(mmin),
+        log10M_max=np.log10(mmax),
         integration_method_M='spline')
 
     def sel(m, a):
@@ -158,8 +158,8 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         _func,
         amin,
         amax,
-        lambda x: hmc.precision['lM_min'],
-        lambda x: hmc.precision['lM_max'],
+        lambda x: hmc.precision['log10M_min'],
+        lambda x: hmc.precision['log10M_max'],
     )
 
     mtot_hmc = hmc.number_counts(cosmo, selection=sel, a_min=amin, a_max=amax)

@@ -7,7 +7,6 @@ from .profiles import HaloProfileNumberCounts as ProfNC
 from .profiles_2pt import Profile2pt
 import numpy as np
 import warnings
-from functools import partial
 
 
 __all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
@@ -314,7 +313,7 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
         dpk = pk2d(k_use, aa, derivative=True, cosmo=extrap)
 
         # ~ (47/21 - 1/3 dlogPk/dlogk) * Pk + I12
-        dpk12[ia] = ((47/21 - dpk/3)*pk + i12 * norm)
+        dpk12[ia] = (47/21 - dpk/3)*pk + i12 * norm
         dpk34[ia] = dpk12[ia].copy()
 
         # Counter terms for clustering (i.e. - (bA + bB) * PAB)
@@ -491,20 +490,26 @@ def halomod_Tk3D_SSC(
         dpk12[ia] = norm1 * norm2 * ((47/21 - dpk/3)*i11_1*i11_2*pk + i12_12)
         dpk34[ia] = norm3 * norm4 * ((47/21 - dpk/3)*i11_3*i11_4*pk + i12_34)
 
-        # Counter terms for clustering (i.e. - (bA + bB) * PAB
-        counterterm = partial(_get_counterterm, cosmo=cosmo, hmc=hmc,
-                              k=k_use, a=aa, pk=pk)
+        # Counter terms for clustering (i.e. - (bA + bB) * PAB)
+        def _get_counterterm(pA, pB, p2pt, nA, nB, i11_A, i11_B):
+            """Helper to compute counter-terms."""
+            # p : profiles | p2pt : 2-point | n : norms | i11 : I_1_1 integral
+            bA = i11_A * nA if isinstance(pA, ProfNC) else np.zeros_like(k_use)
+            bB = i11_B * nB if isinstance(pB, ProfNC) else np.zeros_like(k_use)
+            i02 = hmc.I_0_2(cosmo, k_use, aa, pA, prof2=pB, prof_2pt=p2pt)
+            P = nA * nB * (pk * i11_A * i11_B + i02)
+            return (bA + bB) * P
 
         if isinstance(prof, ProfNC) or isinstance(prof2, ProfNC):
-            dpk12[ia] -= counterterm(prof, prof2, prof12_2pt,
-                                     norm1, norm2, i11_1, i11_2)
+            dpk12[ia] -= _get_counterterm(prof, prof2, prof12_2pt,
+                                          norm1, norm2, i11_1, i11_2)
 
         if isinstance(prof3, ProfNC) or isinstance(prof4, ProfNC):
             if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
                 dpk34[ia] -= dpk12[ia]
             else:
-                dpk34[ia] -= counterterm(prof3, prof4, prof34_2pt,
-                                         norm3, norm4, i11_3, i11_4)
+                dpk34[ia] -= _get_counterterm(prof3, prof4, prof34_2pt,
+                                              norm3, norm4, i11_3, i11_4)
 
     dpk12, dpk34, use_log = _logged_output(dpk12, dpk34, log=use_log)
 
@@ -543,17 +548,6 @@ def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt,
             prof4.normprof = normprof4
 
     return prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt
-
-
-def _get_counterterm(pA, pB, p2pt, nA, nB, i11_A, i11_B, *,
-                     cosmo, hmc, k, a, pk):
-    """Helper to compute counter-terms."""
-    # p : profiles | p2pt : 2-point | n : norms | i11 : I_1_1 integral
-    bA = i11_A * nA if isinstance(pA, ProfNC) else np.zeros_like(k)
-    bB = i11_B * nB if isinstance(pB, ProfNC) else np.zeros_like(k)
-    i02 = hmc.I_0_2(cosmo, k, a, pA, prof2=pB, prof_2pt=p2pt)
-    P = nA * nB * (pk * i11_A * i11_B + i02)
-    return (bA + bB) * P
 
 
 def _logged_output(*arrs, log):

@@ -107,7 +107,7 @@ def test_subclasses_smoke(scls):
     assert np.isfinite(hmd.get_Delta(COSMO, 1.))
 
 
-@pytest.mark.parametrize('name', ['200m', '200c', '500c', 'vir'])
+@pytest.mark.parametrize('name', ['200m', '200c', '500c', 'vir', '350m'])
 def test_massdef_from_string_smoke(name):
     hmd_class = ccl.halos.MassDef.from_name(name)
     hmd = hmd_class()

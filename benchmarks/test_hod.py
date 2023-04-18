@@ -6,8 +6,8 @@ def test_hodcl():
     # With many thanks to Ryu Makiya, Eiichiro Komatsu
     # and Shin'ichiro Ando for providing this benchmark.
     # HOD params
-    lMcut = 11.8
-    lM1 = 11.73
+    log10Mcut = 11.8
+    log10M1 = 11.73
     sigma_Ncen = 0.15
     alp_Nsat = 0.77
     rmax = 4.39
@@ -54,14 +54,15 @@ def test_hodcl():
     hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def)
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mass_def)
-    prf = ccl.halos.HaloProfileHOD(concentration=cm,
-                                   lMmin_0=np.log10(10.**lMcut/cosmo['h']),
-                                   siglM_0=sigma_Ncen,
-                                   lM0_0=np.log10(10.**lMcut/cosmo['h']),
-                                   lM1_0=np.log10(10.**lM1/cosmo['h']),
-                                   alpha_0=alp_Nsat,
-                                   bg_0=rgs,
-                                   bmax_0=rmax)
+    prf = ccl.halos.HaloProfileHOD(
+        concentration=cm,
+        log10Mmin_0=np.log10(10.**log10Mcut/cosmo['h']),
+        siglnM_0=sigma_Ncen,
+        log10M0_0=np.log10(10.**log10Mcut/cosmo['h']),
+        log10M1_0=np.log10(10.**log10M1/cosmo['h']),
+        alpha_0=alp_Nsat,
+        bg_0=rgs,
+        bmax_0=rmax)
     prf2pt = ccl.halos.Profile2ptHOD()
     # P(k)
     a_arr, lk_arr, _ = cosmo.get_linear_power().get_spline_arrays()

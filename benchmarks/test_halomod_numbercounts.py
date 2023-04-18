@@ -29,8 +29,8 @@ def test_hmcalculator_number_counts_numcosmo():
         bench = benches[i, :]
         hmc = ccl.halos.HMCalculator(
             mass_function=hmf, halo_bias=hbf, mass_def=mdef,
-            lM_min=np.log10(bench[1]),
-            lM_max=np.log10(bench[2]),
+            log10M_min=np.log10(bench[1]),
+            log10M_max=np.log10(bench[2]),
             integration_method_M='spline')
 
         a_2 = 1.0 / (1.0 + bench[4])
@@ -88,10 +88,10 @@ def test_hmcalculator_number_counts_numcosmo_highacc():
         bench = benches[i, :]
         hmc = ccl.halos.HMCalculator(
             mass_function=hmf, halo_bias=hbf, mass_def=mdef,
-            lM_min=np.log10(bench[1]),
-            lM_max=np.log10(bench[2]),
+            log10M_min=np.log10(bench[1]),
+            log10M_max=np.log10(bench[2]),
             integration_method_M='spline',
-            nlM=4096,
+            nM=4096,
         )
 
         a_2 = 1.0 / (1.0 + bench[4])

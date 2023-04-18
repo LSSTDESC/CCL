@@ -3,6 +3,12 @@ from ..core import check
 from ..background import species_types
 from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
 import numpy as np
+from functools import cached_property
+
+
+__all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
+           "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
+           "MassDefFof",)
 
 
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
@@ -90,15 +96,18 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             If `None`, no c(M) relation will be attached to this mass
             definition (and hence one can't translate into other definitions).
     """
-    __repr_attrs__ = ("name",)
+    __repr_attrs__ = __eq_attrs__ = ("name",)
     __getattr__ = deprecate_attr(pairs=[('c_m_relation', 'concentration')]
                                  )(super.__getattribute__)
 
     @warn_api(pairs=[("c_m_relation", "concentration")])
     def __init__(self, Delta, rho_type=None, *, concentration=None):
         # Check it makes sense
-        if isinstance(Delta, str) and Delta not in ["fof", "vir"]:
-            raise ValueError(f"Unknown Delta type {Delta}.")
+        if isinstance(Delta, str):
+            if Delta.isdigit():
+                Delta = int(Delta)
+            elif Delta not in ["fof", "vir"]:
+                raise ValueError(f"Unknown Delta type {Delta}.")
         if isinstance(Delta, (int, float)) and Delta < 0:
             raise ValueError("Delta must be a positive number.")
         if rho_type not in ['matter', 'critical']:
@@ -115,18 +124,12 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             self.concentration = Concentration.create_instance(
                 concentration, mass_def=self)
 
-    @property
+    @cached_property
     def name(self):
         """Give a name to this mass definition."""
         if isinstance(self.Delta, (int, float)):
             return f"{self.Delta}{self.rho_type[0]}"
         return f"{self.Delta}"
-
-    def __eq__(self, other):
-        # TODO: Remove after #1033 is merged.
-        if type(self) != type(other):
-            return False
-        return self.name == other.name
 
     def get_Delta(self, cosmo, a):
         """ Gets overdensity parameter associated to this mass
@@ -293,11 +296,6 @@ def MassDefVir(concentration='Klypin11'):
     return MassDef('vir', 'critical', concentration=concentration)
 
 
-@warn_api(pairs=[('c_m', 'concentration')])
-def MassDefFof(concentration=None):
-    r""":math:`\Delta = \rm FoF` mass definition.
-
-    Args:
-        concentration (string): concentration-mass relation.
-    """
-    return MassDef('fof', 'matter', concentration=concentration)
+def MassDefFof():
+    r""":math:`\Delta = \rm FoF` mass definition."""
+    return MassDef('fof', 'matter')
