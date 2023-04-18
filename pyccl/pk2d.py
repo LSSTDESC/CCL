@@ -184,6 +184,9 @@ class Pk2D(CCLObject):
                    extrap_order_hik=extrap_order_hik)
 
     def __eq__(self, other):
+        # Check object id.
+        if self is other:
+            return True
         # Check the object class.
         if type(self) is not type(other):
             return False
