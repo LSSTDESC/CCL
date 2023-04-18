@@ -188,6 +188,10 @@ class Tracer(CCLObject):
         self._trc = []
 
     def __eq__(self, other):
+        # Check object id.
+        if self is other:
+            return True
+
         # Check the object class.
         if type(self) is not type(other):
             return False
