@@ -87,6 +87,10 @@ def test_CCLObject_default_behavior():
     instances = [ccl.CCLAutoRepr() for _ in range(2)]
     assert check_eq_repr_hash(*instances, equal=False)
 
+    MyType = type("MyType", (ccl.CCLAutoRepr,), {"test": 0})
+    instances = [MyType() for _ in range(2)]
+    assert instances[0] != instances[1]
+
 
 # +==========================================================================+
 # | The following functions are used by `conftest.py` to check correct setup.|

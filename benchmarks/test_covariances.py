@@ -15,13 +15,12 @@ def test_ssc_WL():
                           sigma8=0.8, m_nu=0.0)
 
     mass_def = ccl.halos.MassDef200m()
-    hmf = ccl.halos.MassFuncTinker10(cosmo,
-                                     mass_def=mass_def)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo,
-                                     mass_def=mass_def)
-    nfw = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(mass_def),
-                                   fourier_analytic=True)
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
+    hmf = ccl.halos.MassFuncTinker10(mass_def=mass_def)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def)
+    con = ccl.halos.ConcentrationDuffy08(mass_def=mass_def)
+    nfw = ccl.halos.HaloProfileNFW(concentration=con, fourier_analytic=True)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mass_def)
 
     n_z = 100
 
@@ -33,12 +32,8 @@ def test_ssc_WL():
     k = np.geomspace(k_min, k_max, n_k)
 
     tk3D = ccl.halos.halomod_Tk3D_SSC(cosmo=cosmo, hmc=hmc,
-                                      prof1=nfw,
-                                      prof2=nfw,
-                                      prof12_2pt=None,
-                                      normprof1=True, normprof2=True,
-                                      lk_arr=np.log(k), a_arr=a,
-                                      use_log=True)
+                                      prof=nfw, prof2=nfw, prof12_2pt=None,
+                                      lk_arr=np.log(k), a_arr=a, use_log=True)
 
     z, nofz = np.loadtxt(os.path.join(data_dir, "ssc_WL_nofz.txt"),
                          unpack=True)

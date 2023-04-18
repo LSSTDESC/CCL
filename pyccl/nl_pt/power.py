@@ -540,9 +540,12 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         with_IA = ((tracer1.type == 'IA')
                    or (tracer2.type == 'IA'))
         with_dd = nonlin_pk_type == 'spt'
-        ptc = PTCalculator(with_dd=with_dd,
-                           with_NC=with_NC,
-                           with_IA=with_IA)
+        with warnings.catch_warnings():
+            # ignore deprecation warning because the function already has one
+            warnings.simplefilter("ignore")
+            ptc = PTCalculator(with_dd=with_dd,
+                               with_NC=with_NC,
+                               with_IA=with_IA)
         update_ptc = True
     if not isinstance(ptc, PTCalculator):
         raise TypeError("ptc should be of type `PTCalculator`")

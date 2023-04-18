@@ -25,7 +25,7 @@ class CCLWarning(RuntimeWarning):
         return hash(repr(self))
 
 
-class CCLDeprecationWarning(FutureWarning):
+class CCLDeprecationWarning(DeprecationWarning):
     """A CCL-specific deprecation warning."""
     def __repr__(self):
         return 'pyccl.CCLDeprecationWarning(%r)' % (str(self))

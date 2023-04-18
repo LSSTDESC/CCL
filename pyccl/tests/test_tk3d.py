@@ -1,7 +1,5 @@
 import numpy as np
 import pytest
-from numpy.testing import (
-    assert_, assert_almost_equal, assert_allclose)
 import pyccl as ccl
 from .test_cclobject import check_eq_repr_hash
 
@@ -152,8 +150,8 @@ def test_tk3d_smoke():
     tsp1 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=fka1_arr,
                     pk2_arr=fka2_arr)
     tsp2 = ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkka_arr)
-    assert_(not np.isnan(tsp1(1E-2, 0.5)))
-    assert_(not np.isnan(tsp2(1E-2, 0.5)))
+    assert not np.isnan(tsp1(1E-2, 0.5))
+    assert not np.isnan(tsp2(1E-2, 0.5))
 
 
 def test_tk3d_delete():
@@ -179,19 +177,19 @@ def test_tk3d_eval(is_product):
     atest = 0.5
     ptrue = tkkaf(ktest, ktest, atest)
     phere = tsp(ktest, atest)
-    assert_almost_equal(phere/ptrue, 1., 6)
+    assert np.allclose(phere, ptrue, atol=0, rtol=1e-6)
 
     ktest = 5E-5
     atest = 0.5
     ptrue = tkkaf(ktest, ktest, atest)
     phere = tsp(ktest, atest)
-    assert_almost_equal(phere/ptrue, 1., 6)
+    assert np.allclose(phere, ptrue, atol=0, rtol=1e-6)
 
     # Test at array of points
     ktest = np.logspace(-3, 1, 10)
     ptrue = tkkaf(ktest[None, :], ktest[:, None], atest)
     phere = tsp(ktest, atest)
-    assert_allclose(phere.flatten(), ptrue.flatten(), rtol=1E-6)
+    assert np.allclose(phere, ptrue, atol=0, rtol=1e-6)
 
 
 def test_tk3d_call():

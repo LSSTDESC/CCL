@@ -11,7 +11,7 @@ M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 HMC = ccl.halos.HMCalculator(
-    mass_function=HMF, halo_bias=HBF, mass_def=M200, nlog10M=2)
+    mass_function=HMF, halo_bias=HBF, mass_def=M200, nM=2)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 
 NFW = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)

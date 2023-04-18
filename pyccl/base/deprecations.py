@@ -117,7 +117,7 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
         if warn_names:
             s = plural(warn_names)
             warnings.warn(
-                f"Use of argument{s} {list(warn_names)} is deprecated "
+                f"Use of argument{s} {', '.join(warn_names)} is deprecated "
                 f"in {name}. Pass the new name{s} of the argument{s} "
                 f"{', '.join([rename[k] for k in warn_names])}, respectively.",
                 CCLDeprecationWarning)
@@ -139,11 +139,12 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
             kwargs.update(extras)
             s = plural(extras)
             warnings.warn(
-                f"Use of argument{s} {list(extras)} as positional is "
+                f"Use of argument{s} {', '.join(extras)} as positional is "
                 f"deprecated in {func.__qualname__}.", CCLDeprecationWarning)
 
         # API compatibility for `normprof` as a required argument.
-        if any(["normprof" in par for par in kwargs]):
+        if any([par.startswith("normprof") and kwargs.get(par) is not None
+                for par in kwargs]):
             warnings.warn(
                 "Argument `normprof` has been deprecated. Change the default "
                 "value only by subclassing. More comprehensive profile "
