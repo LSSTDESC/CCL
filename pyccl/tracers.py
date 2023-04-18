@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 
 from . import ccllib as lib
-from .core import check
+from .pyutils import check
 from .errors import CCLWarning
 from .parameters import physical_constants
 from .base import CCLObject, UnlockInstance, unlock_instance, warn_api

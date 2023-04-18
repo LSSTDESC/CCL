@@ -2,7 +2,7 @@ from . import ccllib as lib
 from .pyutils import check
 from .base import deprecated, warn_api
 from .errors import CCLDeprecationWarning
-from .core import _Defaults
+from .cosmology import _Defaults
 from .background import omega_x
 import numpy as np
 import warnings

@@ -138,7 +138,8 @@ class Cosmology(CCLObject):
               the generic relative accuracy for integration by executing
               ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
 = 1e-5``.
-              See the module level documentation of `pyccl.core` for details.
+              See the module level documentation of `pyccl.cosmology`
+              for details.
 
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.

@@ -16,7 +16,7 @@ class HaloProfileGaussian(HaloProfile):
         r_scale (:obj:`function`): the width of the profile.
             The signature of this function should be
             `f(cosmo, M, a, mass_def)`, where `cosmo` is a
-            :class:`~pyccl.core.Cosmology` object, `M` is a halo mass in
+            :class:`~pyccl.cosmology.Cosmology` object, `M` is a halo mass in
             units of M_sun, `a` is the scale factor and `mass_def`
             is a :class:`~pyccl.halos.massdef.MassDef` object.
         rho0 (:obj:`function`): the amplitude of the profile.

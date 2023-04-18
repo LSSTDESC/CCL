@@ -37,11 +37,7 @@ from .errors import (
 from .parameters import *
 
 # Core data structures
-from .core import (
-    Cosmology,
-    CosmologyVanillaLCDM,
-    CosmologyCalculator,
-)
+from .cosmology import *
 
 # Background cosmology functions and growth functions
 from .background import (
@@ -125,7 +121,7 @@ from .pyutils import debug_mode, resample_array
 
 # Deprecated & Renamed modules
 def __getattr__(name):
-    rename = {"cls": "cells"}
+    rename = {"core": "cosmology", "cls": "cells"}
     if name in rename:
         from .errors import CCLDeprecationWarning
         import warnings

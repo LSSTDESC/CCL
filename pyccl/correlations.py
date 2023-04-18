@@ -8,7 +8,7 @@ Choices of algorithms used to compute correlation functions:
 
 from . import ccllib as lib
 from . import constants as const
-from .core import check
+from .pyutils import check
 from .pk2d import parse_pk2d
 from .base import warn_api
 from .errors import CCLDeprecationWarning

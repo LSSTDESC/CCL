@@ -15,7 +15,7 @@ class HaloProfilePowerLaw(HaloProfile):
         r_scale (:obj:`function`): the correlation length of
             the profile. The signature of this function
             should be `f(cosmo, M, a, mass_def)`, where `cosmo`
-            is a :class:`~pyccl.core.Cosmology` object, `M` is a halo mass
+            is a :class:`~pyccl.cosmology.Cosmology` object, `M` is a halo mass
             in units of M_sun, `a` is the scale factor and
             `mass_def` is a :class:`~pyccl.halos.massdef.MassDef` object.
         tilt (:obj:`function`): the power law index of the
