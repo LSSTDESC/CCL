@@ -1,7 +1,8 @@
 from ...pyutils import resample_array, _fftlog_transform
 from ...base import CCLAutoRepr, unlock_instance, warn_api, deprecate_attr
 from ...parameters import FFTLogParams
-from ..mass_concentration import MassConcentration
+from ..massdef import MassDef
+from ..concentration import Concentration
 import numpy as np
 from abc import abstractmethod
 import functools
@@ -41,15 +42,18 @@ class HaloProfile(CCLAutoRepr):
     __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
                                  )(super.__getattribute__)
 
-    def __init__(self, *, mass_concentration):
+    def __init__(self, *, mass_def, concentration=None):
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
             name = self.__class__.__name__
             raise TypeError(f"Can't instantiate {name} with no "
                             "_real or _fourier implementation.")
         self.precision_fftlog = FFTLogParams()
-        if not isinstance(mass_concentration, MassConcentration):
-            raise TypeError("mass_concentration must be MassConcentration")
-        self.mass_concentration = mass_concentration
+
+        self.mass_def = MassDef.create_instance(mass_def)
+        if concentration is not None:
+            concentration = Concentration.create_instance(concentration,
+                                                          mass_def=mass_def)
+        self.concentration = concentration
 
     @property
     @abstractmethod

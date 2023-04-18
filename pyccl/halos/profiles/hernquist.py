@@ -47,11 +47,12 @@ class HaloProfileHernquist(HaloProfileMatter):
         "truncated", "mass_concentration", "precision_fftlog", "normprof",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, mass_concentration,
+    def __init__(self, *, concentration,
                  truncated=True,
                  fourier_analytic=False,
                  projected_analytic=False,
-                 cumul2d_analytic=False):
+                 cumul2d_analytic=False,
+                 mass_def):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic
@@ -70,7 +71,7 @@ class HaloProfileHernquist(HaloProfileMatter):
                                  "for truncated Hernquist. Set `truncated` or "
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
-        super().__init__(mass_concentration=mass_concentration)
+        super().__init__(mass_def=mass_def, concentration=concentration)
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-4,
                                      n_per_decade=1000,
@@ -85,8 +86,8 @@ class HaloProfileHernquist(HaloProfileMatter):
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
-        c_M = self.mass_concentration.get_concentration(cosmo, M_use, a)
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         norm = self._norm(M_use, R_s, c_M)
@@ -124,8 +125,8 @@ class HaloProfileHernquist(HaloProfileMatter):
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
-        c_M = self.mass_concentration.get_concentration(cosmo, M_use, a)
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -163,8 +164,8 @@ class HaloProfileHernquist(HaloProfileMatter):
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
-        c_M = self.mass_concentration.get_concentration(cosmo, M_use, a)
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
@@ -183,8 +184,8 @@ class HaloProfileHernquist(HaloProfileMatter):
         k_use = np.atleast_1d(k)
 
         # Comoving virial radius
-        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
-        c_M = self.mass_concentration.get_concentration(cosmo, M_use, a)
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         x = k_use[None, :] * R_s[:, None]

@@ -112,7 +112,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
         "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0", "alpha_p", "fc_0",
         "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
-        "ns_independent", "mass_concentration", "precision_fftlog",
+        "ns_independent", "mass_def", "concentration", "precision_fftlog",
         "normprof",)
     __getattr__ = deprecate_attr(pairs=[
         ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
@@ -126,13 +126,13 @@ class HaloProfileHOD(HaloProfileNumberCounts):
                      ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
                      ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
                      ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")])
-    def __init__(self, *, mass_concentration,
+    def __init__(self, *, concentration,
                  log10Mmin_0=12., log10Mmin_p=0., siglnM_0=0.4,
                  siglnM_p=0., log10M0_0=7., log10M0_p=0.,
                  log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False):
+                 a_pivot=1., ns_independent=False, mass_def):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p
         self.log10M0_0 = log10M0_0
@@ -151,7 +151,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         self.bmax_p = bmax_p
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
-        super().__init__(mass_concentration=mass_concentration)
+        super().__init__(mass_def=mass_def, concentration=concentration)
 
     @warn_api(pairs=[("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
                      ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
@@ -277,8 +277,8 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         # Comoving virial radius
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
-        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
-        c_M = self.mass_concentration.get_concentration(cosmo, M_use, a)
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 

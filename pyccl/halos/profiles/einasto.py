@@ -1,6 +1,6 @@
 from ...base import warn_api
 from ...power import sigmaM
-from ..massdef import MassDef
+from ..massdef import MassDef, mass_translator
 from .profile_base import HaloProfileMatter
 import numpy as np
 from scipy.special import gamma, gammainc
@@ -40,16 +40,19 @@ class HaloProfileEinasto(HaloProfileMatter):
             'cosmo' to calculate the value from cosmology. Default: 'cosmo'
     """
     __repr_attrs__ = __eq_attrs__ = (
-        "truncated", "alpha", "precision_fftlog", "mass_concentration",
+        "truncated", "alpha", "mass_def", "concentration", "precision_fftlog",
         "normprof",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, mass_concentration, truncated=True, alpha='cosmo'):
+    def __init__(self, *, concentration, truncated=True, alpha='cosmo',
+                 mass_def):
         self.truncated = truncated
         self.alpha = alpha
-        super().__init__(mass_concentration=mass_concentration)
+        super().__init__(mass_def=mass_def, concentration=concentration)
         mvir = MassDef("vir", "matter")
-        self._to_virial_mass = mass_concentration.mass_translator(mvir)
+        self._to_virial_mass = mass_translator(
+            mass_in=self.mass_def, mass_out=mvir,
+            concentration=self.concentration)
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-2,
                                      n_per_decade=1000,
@@ -87,8 +90,8 @@ class HaloProfileEinasto(HaloProfileMatter):
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
-        c_M = self.mass_concentration(cosmo, M_use, a)
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
         alpha = self._get_alpha(cosmo, M_use, a)

@@ -67,14 +67,14 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
-        "P0_hexp", "qrange", "nq", "x_out", "mass_concentration",
+        "P0_hexp", "qrange", "nq", "x_out", "mass_def",
         "precision_fftlog", "normprof",)
 
     @warn_api
-    def __init__(self, *, mass_concentration, mass_bias=0.8, P0=6.41,
+    def __init__(self, *, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
-                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf):
+                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, mass_def):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
@@ -89,7 +89,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
 
         # Interpolator for dimensionless Fourier-space profile
         self._fourier_interp = None
-        super().__init__(mass_concentration=mass_concentration)
+        super().__init__(mass_def=mass_def)
 
     @warn_api
     def update_parameters(self, *, mass_bias=None, P0=None,
@@ -203,7 +203,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         # (1-b)
         mb = self.mass_bias
         # R_Delta*(1+z)
-        R = self.mass_concentration.get_radius(cosmo, M_use * mb, a) / a
+        R = self.mass_def.get_radius(cosmo, M_use * mb, a) / a
 
         nn = self._norm(cosmo, M_use, a, mb)
         prof = self._form_factor(r_use[None, :] / R[:, None])
@@ -230,7 +230,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
 
         mb = self.mass_bias
         # R_Delta*(1+z)
-        R = self.mass_concentration.get_radius(cosmo, M_use*mb, a) / a
+        R = self.mass_def.get_radius(cosmo, M_use*mb, a) / a
 
         ff = self._fourier_interp(np.log(k_use[None, :] * R[:, None]))
         nn = self._norm(cosmo, M_use, a, mb)

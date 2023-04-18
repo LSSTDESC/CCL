@@ -3,7 +3,6 @@ from .concentration import *
 from .hmfunc import *
 from .hbias import *
 from .massdef import *
-from .mass_concentration import *
 from .profiles import *
 from .profiles_2pt import *
 from .halo_model import *
