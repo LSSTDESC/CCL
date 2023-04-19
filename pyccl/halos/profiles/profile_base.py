@@ -69,7 +69,7 @@ class HaloProfile(CCLAutoRepr):
             return self.fourier(cosmo=cosmo,
                                 k=hmc.precision['k_min'],
                                 M=M, a=a, mass_def=hmc.mass_def)
-        return hmc.integrate_over_massfunc(integ)
+        return hmc.integrate_over_massfunc(integ, cosmo, a)
         # TODO: CCLv3 replace by the below in v3 (profiles will all have a
         # default normalization of 1. Normalization will always be applied).
         # return 1.0

@@ -334,7 +334,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
                 return Nc*fc + Ns
             else:
                 return Nc*(fc + Ns)
-        return hmc.integrate_over_massfunc(integ)
+        return hmc.integrate_over_massfunc(integ, cosmo, a)
 
     def _fourier(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)
