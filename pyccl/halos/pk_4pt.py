@@ -89,25 +89,29 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
         # normalizations
-        norm1 = prof.get_normalization(cosmo, aa, hmc=hmc) if normprof1 else 1
+        norm1 = prof.get_normalization(cosmo, aa,
+                                       hmc=hmc) if normprof1 else 1
         # TODO: CCLv3 remove if
 
         if prof2 == prof:
             norm2 = norm1
         else:
-            norm2 = prof2.get_normalization(cosmo, aa, hmc=hmc) if normprof2 else 1
+            norm2 = prof2.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof2 else 1
             # TODO: CCLv3 remove if
 
         if prof3 == prof:
             norm3 = norm1
         else:
-            norm3 = prof3.get_normalization(cosmo, aa, hmc=hmc) if normprof3 else 1
+            norm3 = prof3.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof3 else 1
             # TODO: CCLv3 remove if
 
         if prof4 == prof2:
             norm4 = norm2
         else:
-            norm4 = prof4.get_normalization(cosmo, aa, hmc=hmc) if normprof4 else 1
+            norm4 = prof4.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof4 else 1
             # TODO: CCLv3 remove if
 
         # trispectrum
@@ -452,7 +456,8 @@ def halomod_Tk3D_SSC(
     dpk12, dpk34 = [np.zeros((len(a_arr), len(k_use))) for _ in range(2)]
     for ia, aa in enumerate(a_arr):
         # normalizations & I11 integral
-        norm1 = prof.get_normalization(cosmo, aa, hmc=hmc) if normprof1 else 1
+        norm1 = prof.get_normalization(cosmo, aa,
+                                       hmc=hmc) if normprof1 else 1
         # TODO: CCLv3 remove if
         i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
 
@@ -460,7 +465,8 @@ def halomod_Tk3D_SSC(
             norm2 = norm1
             i11_2 = i11_1
         else:
-            norm2 = prof2.get_normalization(cosmo, aa, hmc=hmc) if normprof2 else 1
+            norm2 = prof2.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof2 else 1
             # TODO: CCLv3 remove if
             i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
 
@@ -468,7 +474,8 @@ def halomod_Tk3D_SSC(
             norm3 = norm1
             i11_3 = i11_1
         else:
-            norm3 = prof3.get_normalization(cosmo, aa, hmc=hmc) if normprof3 else 1
+            norm3 = prof3.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof3 else 1
             # TODO: CCLv3 remove if
             i11_3 = hmc.I_1_1(cosmo, k_use, aa, prof3)
 
@@ -476,7 +483,8 @@ def halomod_Tk3D_SSC(
             norm4 = norm2
             i11_4 = i11_2
         else:
-            norm4 = prof4.get_normalization(cosmo, aa, hmc=hmc) if normprof4 else 1
+            norm4 = prof4.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof4 else 1
             # TODO: CCLv3 remove if
             i11_4 = hmc.I_1_1(cosmo, k_use, aa, prof4)
 

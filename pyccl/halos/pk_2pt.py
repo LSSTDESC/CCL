@@ -119,7 +119,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
         if prof2 == prof:
             norm2 = norm1
         else:
-            norm2 = prof2.get_normalization(cosmo, aa, hmc=hmc) if normprof2 else 1
+            norm2 = prof2.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof2 else 1
             # TODO: CCLv3, remove if
 
         if get_2h:
