@@ -561,39 +561,34 @@ class Cosmology(CCLObject):
     def _get_neutrino_masses(self, m_nu, m_nu_type):
         if isinstance(m_nu, Real) and m_nu == 0:  # no massive neutrinos
             return np.array([])
-
         if isinstance(m_nu, Iterable):  # input was list
             return np.asarray(m_nu).copy()
-
         if m_nu_type == "single":
             return np.atleast_1d(m_nu)
-
         if m_nu_type == "equal":
             return np.full(3, m_nu/3)
 
         c = const
         D12, D13p, D13n = c.DELTAM12_sq, c.DELTAM13_sq_pos, c.DELTAM13_sq_neg
 
-        def M_nu(mass, total, D13):
-            return np.array([mass.sum() - total,
+        def M_nu(mass, D13):
+            return np.array([mass.sum() - m_nu,
                              mass[1]**2 - D12 - mass[0]**2,
                              mass[2]**2 - D13 - mass[0]**2])
 
+        def check_mnu(val):
+            if m_nu < val:
+                raise ValueError(
+                    f"m_nu < {val} incompatible with mass hierarchy")
+
         if m_nu_type == 'normal':
-            if m_nu < np.sqrt(D12) + np.sqrt(D13p):
-                raise ValueError(
-                    "m_nu < 0.0592 is incompatible with normal hierarchy")
-
+            check_mnu(np.sqrt(D12) + np.sqrt(D13p))
             x0 = [0, np.sqrt(D12), np.sqrt(D13p)]
-            return root(M_nu, x0, args=(m_nu, D13p)).x
-
+            return root(M_nu, x0, args=(D13p,)).x
         if m_nu_type == 'inverted':
-            if m_nu < np.sqrt(-(D13n + D12)) + np.sqrt(-D13n):
-                raise ValueError(
-                    "m_nu < 0.0978 is incompatible with inverted hierarchy")
-
+            check_mnu(np.sqrt(-(D13n + D12)) + np.sqrt(-D13n))
             x0 = np.array([0, np.sqrt(-(D13n + D12)), np.sqrt(-D13n)])
-            return root(M_nu, x0, args=(m_nu, D13n)).x
+            return root(M_nu, x0, args=(D13n,)).x
 
     def _fill_params(self, **kwargs):
         if not hasattr(self, "_params"):
@@ -1102,6 +1097,7 @@ class CosmologyCalculator(Cosmology):
 
     def _init_pk_nonlinear(self, pk_nonlin, nonlinear_model):
         a, lk = pk_nonlin["a"], np.log(pk_nonlin["k"])
+        self._check_scale_factor(a)
         na, nk = a.size, lk.size
 
         if DEFAULT_POWER_SPECTRUM not in pk_nonlin and nonlinear_model is None:
