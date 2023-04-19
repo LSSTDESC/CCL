@@ -113,22 +113,22 @@ def test_cosmology_init():
     Check that Cosmology objects can only be constructed in a valid way.
     """
     # Make sure error raised if invalid transfer/power spectrum etc. passed
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       matter_power_spectrum='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       transfer_function='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       baryons_power_spectrum='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       mass_function='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       halo_concentration='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       emulator_neutrinos='x')
     with pytest.raises(ValueError):

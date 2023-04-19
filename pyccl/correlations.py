@@ -8,6 +8,7 @@ Choices of algorithms used to compute correlation functions:
 
 from . import ccllib as lib
 from . import constants as const
+from . import DEFAULT_POWER_SPECTRUM
 from .pyutils import check
 from .pk2d import parse_pk2d
 from .base import warn_api
@@ -152,7 +153,7 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
 
 
 @warn_api(reorder=['a', 'r'])
-def correlation_3d(cosmo, *, r, a, p_of_k_a=None):
+def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """Compute the 3D correlation function.
 
     Args:
@@ -163,8 +164,7 @@ def correlation_3d(cosmo, *, r, a, p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
 
     Returns:
         Value(s) of the correlation function at the input distance(s).
@@ -195,7 +195,8 @@ def correlation_3d(cosmo, *, r, a, p_of_k_a=None):
 
 @warn_api(pairs=[('s', 'r'), ('l', 'ell')],
           reorder=['a', 'beta', 'ell', 'r'])
-def correlation_multipole(cosmo, *, r, a, beta, ell, p_of_k_a=None):
+def correlation_multipole(cosmo, *, r, a, beta, ell,
+                          p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """Compute the correlation multipoles.
 
     Args:
@@ -208,8 +209,7 @@ def correlation_multipole(cosmo, *, r, a, beta, ell, p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
 
     Returns:
         Value(s) of the correlation function at the input distance(s).
@@ -241,7 +241,7 @@ def correlation_multipole(cosmo, *, r, a, beta, ell, p_of_k_a=None):
 @warn_api(pairs=[('s', 'r')],
           reorder=['a', 'r', 'mu', 'beta', 'use_spline', 'p_of_k_a'])
 def correlation_3dRsd(cosmo, *, r, a, mu, beta,
-                      p_of_k_a=None, use_spline=True):
+                      p_of_k_a=DEFAULT_POWER_SPECTRUM, use_spline=True):
     """
     Compute the 3DRsd correlation function using linear approximation
     with multipoles.
@@ -257,8 +257,7 @@ def correlation_3dRsd(cosmo, *, r, a, mu, beta,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
         use_spline: switch that determines whether the RSD correlation
             function is calculated using global splines of multipoles.
 
@@ -290,7 +289,8 @@ def correlation_3dRsd(cosmo, *, r, a, mu, beta,
 
 
 @warn_api(pairs=[('s', 'r')], reorder=['a', 'r'])
-def correlation_3dRsd_avgmu(cosmo, *, r, a, beta, p_of_k_a=None):
+def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
+                            p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """
     Compute the 3DRsd correlation function averaged over mu at constant s.
 
@@ -303,8 +303,7 @@ def correlation_3dRsd_avgmu(cosmo, *, r, a, beta, p_of_k_a=None):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
 
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
@@ -336,7 +335,7 @@ def correlation_3dRsd_avgmu(cosmo, *, r, a, beta, p_of_k_a=None):
 @warn_api(pairs=[("sig", "sigma")],
           reorder=['a', 'beta', 'pi', 'sigma'])
 def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
-                         use_spline=True, p_of_k_a=None):
+                         use_spline=True, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """
     Compute the 3DRsd correlation in pi-sigma space.
 
@@ -350,8 +349,7 @@ def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
         use_spline: switch that determines whether the RSD correlation
             function is calculated using global splines of multipoles.
 

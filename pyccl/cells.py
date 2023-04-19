@@ -4,13 +4,15 @@ import numpy as np
 
 from .errors import CCLWarning
 from . import ccllib as lib
+from . import DEFAULT_POWER_SPECTRUM
 from .pyutils import check, integ_types
 from .base import warn_api
 from .pk2d import parse_pk2d
 
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
-def angular_cl(cosmo, tracer1, tracer2, ell, *, p_of_k_a=None,
+def angular_cl(cosmo, tracer1, tracer2, ell, *,
+               p_of_k_a=DEFAULT_POWER_SPECTRUM,
                l_limber=-1., limber_integration_method='qag_quad'):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
@@ -25,8 +27,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *, p_of_k_a=None,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to project. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
         limber_integration_method (string) : integration method to be used
@@ -55,7 +56,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *, p_of_k_a=None,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = parse_pk2d(cosmo_in, p_of_k_a, is_linear=False)
 
     # Create tracer colections
     status = 0

@@ -23,6 +23,9 @@ del parse, numpy
 # SWIG-generated
 from . import ccllib as lib
 
+# Name of the default power spectrum.
+DEFAULT_POWER_SPECTRUM = "delta_matter:delta_matter"
+
 # Hashing, Caching, CCL base, Mutation locks
 from .base import *
 
@@ -160,7 +163,6 @@ from .baryons import (
 __all__ = (
     'lib',
     'CCLError', 'CCLWarning', 'CCLDeprecationWarning',
-    'Cosmology', 'CosmologyVanillaLCDM', 'CosmologyCalculator',
     'growth_factor', 'growth_factor_unnorm', 'growth_rate',
     'comoving_radial_distance', 'angular_diameter_distance',
     'comoving_angular_distance', 'luminosity_distance', 'distance_modulus',

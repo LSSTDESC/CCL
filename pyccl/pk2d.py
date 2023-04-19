@@ -3,6 +3,7 @@ import functools
 import numpy as np
 
 from . import ccllib as lib
+from . import DEFAULT_POWER_SPECTRUM
 from .errors import CCLWarning, CCLError, CCLDeprecationWarning
 from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline1d_arrays, _get_spline2d_arrays)
@@ -578,17 +579,17 @@ class Pk2D(CCLObject):
 
 
 @warn_api
-def parse_pk2d(cosmo, p_of_k_a, *, is_linear=False):
+def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
     """ Return the C-level `f2d` spline associated with a
     :class:`Pk2D` object.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        p_of_k_a (:class:`Pk2D`, :obj:`str` or `None`): if a
+        p_of_k_a (:class:`Pk2D` or :obj:`str`): if a
             :class:`Pk2D` object, its `f2d` spline will be used. If
             a string, the linear or non-linear power spectrum stored
-            by `cosmo` under this name will be used. If `None`, the
-            matter power spectrum stored by `cosmo` will be used.
+            by `cosmo` under this name will be used. Defaults to the
+            matter power spectrum stored in `cosmo`.
         is_linear (:obj:`bool`): if `True`, and if `p_of_k_a` is a
             string or `None`, the linear version of the corresponding
             power spectrum will be used (otherwise it'll be the
