@@ -6,6 +6,9 @@ import warnings
 import numpy as np
 import yaml
 from inspect import getmembers, isfunction, signature
+from typing import Iterable
+from numbers import Real
+from scipy.optimize import root
 
 from . import ccllib as lib
 from . import DEFAULT_POWER_SPECTRUM
@@ -160,11 +163,15 @@ class Cosmology(CCLObject):
             parameters.
         Neff (:obj:`float`, optional): Effective number of massless
             neutrinos present. Defaults to 3.046.
-        m_nu (:obj:`float`, optional): Total mass in eV of the massive
-            neutrinos present. Defaults to 0.
+        m_nu (:obj:`float` or array_like, optional):
+            Mass in eV of the massive neutrinos present. Defaults to 0.
+            If a sequence is passed, it is assumed that the elements of the
+            sequence represent the individual neutrino masses.
         m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
-            be one of 'inverted', 'normal', 'equal', 'single', or 'list'.
-            The default of None is the same as 'normal'.
+            be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
+            the mass as being held by one massive neutrino. The other options
+            split the mass into 3 massive neutrinos. Ignored if a sequence is
+            passed in m_nu. Default is 'normal'.
         w0 (:obj:`float`, optional): First order term of dark energy equation
             of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy equation
@@ -250,7 +257,7 @@ class Cosmology(CCLObject):
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
-            Neff=None, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
+            Neff=None, m_nu=0., m_nu_type='normal', w0=-1., wa=0.,
             T_CMB=_Defaults.T_CMB,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=0, sigma_0=0, c1_mg=1, c2_mg=1, lambda_mg=0,
@@ -352,9 +359,7 @@ class Cosmology(CCLObject):
         self._accuracy_params = {**self._spline_params, **self._gsl_params}
 
         if self.cosmo.status != 0:
-            raise CCLError(
-                "(%d): %s"
-                % (self.cosmo.status, self.cosmo.status_message))
+            raise CCLError(f"{self.cosmo.status}: {self.cosmo.status_message}")
 
     def write_yaml(self, filename):
         """Write a YAML representation of the parameters to file.
@@ -476,7 +481,7 @@ class Cosmology(CCLObject):
         Omega_g = np.nan if Omega_g is None else Omega_g
 
         # Check to make sure Omega_k is within reasonable bounds.
-        if Omega_k is not None and Omega_k < -1.0135:
+        if Omega_k < -1.0135:
             raise ValueError("Omega_k must be more than -1.0135.")
 
         # Modified growth.
@@ -487,155 +492,48 @@ class Cosmology(CCLObject):
             if z_mg.shape != df_mg.shape:
                 raise ValueError("Shape mismatch for z_mg and df_mg.")
 
-        # Check to make sure specified amplitude parameter is consistent
+        # Check to make sure specified amplitude parameter is consistent.
         if [A_s, sigma8].count(np.nan) != 1:
             raise ValueError("Set either A_s or sigma8 and not both.")
 
-        # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa', 'h', 'n_s']
-        for name, item in zip(names, compul):
-            if item is None:
-                raise ValueError(f"Must set parameter {name}.")
+        # Check if any compulsory parameters are not set.
+        compul = {"Omega_c": Omega_c, "Omega_b": Omega_b, "h": h, "n_s": n_s}
+        for param, value in compul.items():
+            if value is None:
+                raise ValueError(f"Must set parameter {param}.")
 
-        # Make sure the neutrino parameters are consistent
-        # and if a sum is given for mass, split into three masses.
-        if hasattr(m_nu, "__len__"):
-            if (len(m_nu) != 3):
-                raise ValueError("m_nu must be a float or array-like object "
-                                 "with length 3.")
-            elif m_nu_type in ['normal', 'inverted', 'equal']:
-                raise ValueError(
-                    "m_nu_type '%s' cannot be passed with a list "
-                    "of neutrino masses, only with a sum." % m_nu_type)
-            elif m_nu_type is None:
-                m_nu_type = 'list'  # False
-            mnu_list = [0]*3
-            for i in range(0, 3):
-                mnu_list[i] = m_nu[i]
-
-        else:
-            try:
-                m_nu = float(m_nu)
-            except Exception:
-                raise ValueError(
-                    "m_nu must be a float or array-like object with "
-                    "length 3.")
-
-            if m_nu_type is None:
-                m_nu_type = 'normal'
-            m_nu = [m_nu]
-            if (m_nu_type == 'normal'):
-                if (m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
-                        and (m_nu[0] > 1e-15)):
-                    raise ValueError("if m_nu_type is 'normal', we are "
-                                     "using the normal hierarchy and so "
-                                     "m_nu must be greater than (~)0.0592 "
-                                     "(or zero)")
-
-                # Split the sum into 3 masses under normal hierarchy.
-                if (m_nu[0] > 1e-15):
-                    mnu_list = [0]*3
-                    # This is a starting guess.
-                    mnu_list[0] = 0.
-                    mnu_list[1] = np.sqrt(7.62E-5)
-                    mnu_list[2] = np.sqrt(2.55E-3)
-                    sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
-                    # This is the Newton's method
-                    while (np.abs(m_nu[0] - sum_check) > 1e-15):
-                        dsdm1 = (1. + mnu_list[0] / mnu_list[1]
-                                 + mnu_list[0] / mnu_list[2])
-                        mnu_list[0] = mnu_list[0] - (sum_check
-                                                     - m_nu[0]) / dsdm1
-                        mnu_list[1] = np.sqrt(mnu_list[0]*mnu_list[0]
-                                              + 7.62E-5)
-                        mnu_list[2] = np.sqrt(mnu_list[0]*mnu_list[0]
-                                              + 2.55E-3)
-                        sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
-
-            elif (m_nu_type == 'inverted'):
-                if (m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
-                        and (m_nu[0] > 1e-15)):
-                    raise ValueError("if m_nu_type is 'inverted', we "
-                                     "are using the inverted hierarchy "
-                                     "and so m_nu must be greater than "
-                                     "(~)0.0978 (or zero)")
-                # Split the sum into 3 masses under inverted hierarchy.
-                if (m_nu[0] > 1e-15):
-                    mnu_list = [0]*3
-                    mnu_list[0] = 0.  # This is a starting guess.
-                    mnu_list[1] = np.sqrt(2.43e-3 - 7.62E-5)
-                    mnu_list[2] = np.sqrt(2.43e-3)
-                    sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
-                    # This is the Newton's method
-                    while (np.abs(m_nu[0] - sum_check) > 1e-15):
-                        dsdm1 = (1. + (mnu_list[0] / mnu_list[1])
-                                 + (mnu_list[0] / mnu_list[2]))
-                        mnu_list[0] = mnu_list[0] - (sum_check
-                                                     - m_nu[0]) / dsdm1
-                        mnu_list[1] = np.sqrt(mnu_list[0]*mnu_list[0]
-                                              + 7.62E-5)
-                        mnu_list[2] = np.sqrt(mnu_list[0]*mnu_list[0]
-                                              - 2.43e-3)
-                        sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
-            elif (m_nu_type == 'equal'):
-                mnu_list = [0]*3
-                mnu_list[0] = m_nu[0]/3.
-                mnu_list[1] = m_nu[0]/3.
-                mnu_list[2] = m_nu[0]/3.
-            elif (m_nu_type == 'single'):
-                mnu_list = [0]*3
-                mnu_list[0] = m_nu[0]
-                mnu_list[1] = 0.
-                mnu_list[2] = 0.
-
-        # Check which of the neutrino species are non-relativistic today
-        N_nu_mass = 0
-        if (np.abs(np.amax(m_nu) > 1e-15)):
-            for i in range(0, 3):
-                if (mnu_list[i] > 0.00017):  # Lesgourges et al. 2012
-                    N_nu_mass = N_nu_mass + 1
-            N_nu_rel = Neff - (N_nu_mass * T_ncdm**4 * (4./11.)**(-4./3.))
-            if N_nu_rel < 0.:
-                raise ValueError("Neff and m_nu must result in a number "
-                                 "of relativistic neutrino species greater "
-                                 "than or equal to zero.")
-
-        # Fill an array with the non-relativistic neutrino masses
-        if N_nu_mass > 0:
-            nu_mass = [0]*N_nu_mass
-            relativistic = [0]*3
-            for i in range(0, N_nu_mass):
-                for j in range(0, 3):
-                    if (mnu_list[j] > 0.00017 and relativistic[j] == 0):
-                        relativistic[j] = 1
-                        nu_mass[i] = mnu_list[j]
-                        break
-        else:
-            nu_mass = [0.]
+        # Make sure the neutrino parameters are consistent.
+        if not isinstance(m_nu, (Real, Iterable)):
+            raise ValueError("m_nu must be float or sequence")
 
         c = const
-        # Curvature parameters.
+        # Initialize curvature.
         k_sign = -np.sign(Omega_k) if np.abs(Omega_k) > 1e-6 else 0
         sqrtk = np.sqrt(np.abs(Omega_k)) * h / c.CLIGHT_HMPC
 
-        # Fixed radiation parameters: (Omega_g h^2) is known from T_CMB.
+        # Initialize radiation.
         rho_g = 4 * c.STBOLTZ / c.CLIGHT**3 * T_CMB**4
         rho_crit = c.RHO_CRITICAL * c.SOLAR_MASS / c.MPC_TO_METER**3 * h**2
 
-        # Get the N_nu_rel from Neff and N_nu_mass.
-        N_nu_rel = Neff - N_nu_mass * T_ncdm**4 / (4/11)**(4/3)
+        # Initialize neutrinos.
+        g = (4/11)**(1/3)
+        T_nu = g * T_CMB
+        massless_limit = T_nu * c.KBOLTZ / c.EV_IN_J
 
-        # Temperature of the relativistic neutrinos in K.
-        T_nu = T_CMB * (4/11)**(1/3)
+        mnu_list = self._get_neutrino_masses(m_nu, m_nu_type)
+        nu_mass = mnu_list[mnu_list > massless_limit]
+        N_nu_mass = len(nu_mass)
+        N_nu_rel = Neff - N_nu_mass * (T_ncdm/g)**4
+
         rho_nu_rel = N_nu_rel * (7/8) * 4 * c.STBOLTZ / c.CLIGHT**3 * T_nu**4
         Omega_nu_rel = rho_nu_rel / rho_crit
+        Omega_nu_mass = self._OmNuh2(nu_mass, N_nu_mass, T_CMB, T_ncdm) / h**2
 
-        # For non-relativistic neutrinos, calculate the phase-space integral.
-        self._fill_params(m_nu=nu_mass, N_nu_mass=N_nu_mass,
-                          T_CMB=T_CMB, T_ncdm=T_ncdm, h=h)
-        Omega_nu_mass = self._get_Omega_nu()
+        if N_nu_rel < 0:
+            raise ValueError("Unphysical Neff and m_nu combination results to "
+                             "negative number of relativistic neutrinos.")
 
+        # Initialize matter & dark energy.
         Omega_m = Omega_b + Omega_c + Omega_nu_mass
         Omega_l = 1 - Omega_m - rho_g/rho_crit - Omega_nu_rel - Omega_k
         if np.isnan(Omega_g):
@@ -646,11 +544,12 @@ class Cosmology(CCLObject):
             Omega_l += rho_g/rho_crit - Omega_g
 
         self._fill_params(
-            sum_nu_masses=sum(nu_mass), N_nu_rel=N_nu_rel, Neff=Neff,
-            Omega_nu_mass=Omega_nu_mass, Omega_nu_rel=Omega_nu_rel,
-            Omega_m=Omega_m, Omega_c=Omega_c, Omega_b=Omega_b, Omega_k=Omega_k,
-            sqrtk=sqrtk, k_sign=int(k_sign), Omega_g=Omega_g, w0=w0, wa=wa,
-            Omega_l=Omega_l, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
+            m_nu=nu_mass, sum_nu_masses=sum(nu_mass), N_nu_mass=N_nu_mass,
+            N_nu_rel=N_nu_rel, Neff=Neff, Omega_nu_mass=Omega_nu_mass,
+            Omega_nu_rel=Omega_nu_rel, Omega_m=Omega_m, Omega_c=Omega_c,
+            Omega_b=Omega_b, Omega_k=Omega_k, sqrtk=sqrtk, k_sign=int(k_sign),
+            T_CMB=T_CMB, T_ncdm=T_ncdm, Omega_g=Omega_g, w0=w0, wa=wa,
+            Omega_l=Omega_l, h=h, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
             mu_0=mu_0, sigma_0=sigma_0, c1_mg=c1_mg, c2_mg=c2_mg,
             lambda_mg=lambda_mg,
             bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab, bcm_ks=bcm_ks)
@@ -658,6 +557,43 @@ class Cosmology(CCLObject):
         # Modified growth (deprecated)
         if z_mg is not None:
             self._params.mgrowth = [z_mg, df_mg]
+
+    def _get_neutrino_masses(self, m_nu, m_nu_type):
+        if isinstance(m_nu, Real) and m_nu == 0:  # no massive neutrinos
+            return np.array([])
+
+        if isinstance(m_nu, Iterable):  # input was list
+            return np.asarray(m_nu).copy()
+
+        if m_nu_type == "single":
+            return np.atleast_1d(m_nu)
+
+        if m_nu_type == "equal":
+            return np.full(3, m_nu/3)
+
+        c = const
+        D12, D13p, D13n = c.DELTAM12_sq, c.DELTAM13_sq_pos, c.DELTAM13_sq_neg
+
+        def M_nu(mass, total, D13):
+            return np.array([mass.sum() - total,
+                             mass[1]**2 - D12 - mass[0]**2,
+                             mass[2]**2 - D13 - mass[0]**2])
+
+        if m_nu_type == 'normal':
+            if m_nu < np.sqrt(D12) + np.sqrt(D13p):
+                raise ValueError(
+                    "m_nu < 0.0592 is incompatible with normal hierarchy")
+
+            x0 = [0, np.sqrt(D12), np.sqrt(D13p)]
+            return root(M_nu, x0, args=(m_nu, D13p)).x
+
+        if m_nu_type == 'inverted':
+            if m_nu < np.sqrt(-(D13n + D12)) + np.sqrt(-D13n):
+                raise ValueError(
+                    "m_nu < 0.0978 is incompatible with inverted hierarchy")
+
+            x0 = np.array([0, np.sqrt(-(D13n + D12)), np.sqrt(-D13n)])
+            return root(M_nu, x0, args=(m_nu, D13n)).x
 
     def _fill_params(self, **kwargs):
         if not hasattr(self, "_params"):
@@ -912,30 +848,11 @@ class Cosmology(CCLObject):
             raise KeyError(f"Power spectrum {name} does not exist.")
         return pk
 
-    def _get_Omega_nu(self, a=1):
-        r"""Compute :math:`\Omega_\nu`.
-
-        Arguments
-        ---------
-        a : float or (na,) array-like
-            Scale factor(s), normalized to 1 today.
-
-        Returns
-        -------
-        omega_nu : float or (na,) ``numpy.ndarray``
-            Value(s) of :math:`\Omega_\nu` at ``a``.
-        """
-        a_use = np.atleast_1d(a).astype(float)
-
-        status = 0
-        OmNuh2, status = lib.Omeganuh2_vec(
-            self["N_nu_mass"], self["T_CMB"], self["T_ncdm"],
-            a_use, self["m_nu"], a_use.size, status)
-        check(status)
-
-        if np.ndim(a) == 0:
-            return OmNuh2[0] / self["h"]**2
-        return OmNuh2 / self["h"]**2
+    def _OmNuh2(self, m_nu, N_nu_mass, T_CMB, T_ncdm):
+        # Compute OmNuh2 today.
+        ret, st = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm, [1], m_nu, 1, 0)
+        check(st)
+        return ret[0]
 
     @property
     def has_distances(self):
@@ -1026,11 +943,15 @@ class CosmologyCalculator(Cosmology):
             be non-zero in the parameters.
         Neff (:obj:`float`, optional): Effective number of massless
             neutrinos present. Defaults to 3.046.
-        m_nu (:obj:`float`, optional): Total mass in eV of the massive
-            neutrinos present. Defaults to 0.
-        m_nu_type (:obj:`str`, optional): The type of massive neutrinos.
-            Should be one of 'inverted', 'normal', 'equal', 'single', or
-            'list'. The default of None is the same as 'normal'.
+        m_nu (:obj:`float` or array_like, optional):
+            Mass in eV of the massive neutrinos present. Defaults to 0.
+            If a sequence is passed, it is assumed that the elements of the
+            sequence represent the individual neutrino masses.
+        m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
+            be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
+            the mass as being held by one massive neutrino. The other options
+            split the mass into 3 massive neutrinos. Ignored if a sequence is
+            passed in m_nu. Default is 'normal'.
         w0 (:obj:`float`, optional): First order term of dark energy
             equation of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy
@@ -1103,7 +1024,7 @@ class CosmologyCalculator(Cosmology):
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
-            Neff=None, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
+            Neff=None, m_nu=0., m_nu_type="normal", w0=-1., wa=0.,
             T_CMB=_Defaults.T_CMB, mu_0=0., sigma_0=0.,
             background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None,

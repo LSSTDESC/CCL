@@ -137,10 +137,6 @@ def test_cosmology_init():
     with pytest.raises(ValueError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       m_nu=ccl)
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-                      m_nu=np.array([0.1, 0.1, 0.1]),
-                      m_nu_type='normal')
 
 
 def test_cosmology_output():
