@@ -113,7 +113,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
         "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0", "alpha_p", "fc_0",
         "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
-        "ns_independent", "concentration", "precision_fftlog", "normprof",)
+        "ns_independent", "concentration", "precision_fftlog",)
     __getattr__ = deprecate_attr(pairs=[
         ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
         ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
@@ -321,6 +321,20 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
+
+    def normalization(self, hmc, cosmo, a):
+        """Returns the normalization of this profile, which is the
+        mean galaxy number density.
+        """
+        Nc = self._Nc(hmc._mass, a)
+        Ns = self._Ns(hmc._mass, a)
+        fc = self._fc(a)
+        if self.ns_independent:
+            Ngal = Nc*fc + Ns
+        else:
+            Ngal = Nc*(fc + Ns)
+        hmc._get_ingredients(cosmo, a, get_bf=False)
+        return hmc._integrate_over_mf(Ngal)
 
     def _fourier(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)

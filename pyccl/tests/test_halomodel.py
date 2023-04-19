@@ -69,7 +69,8 @@ def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
                                  mass_def=mdef)
     return ccl.halos.halomod_power_spectrum(cosmo, hmc, k, a, prf,
                                             get_1h=get_1h,
-                                            get_2h=get_2h)
+                                            get_2h=get_2h,
+                                            normprof1=True)
 
 
 @pytest.mark.parametrize('mf_c', [['shethtormen', 'bhattacharya2011'],

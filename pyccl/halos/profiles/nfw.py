@@ -47,7 +47,7 @@ class HaloProfileNFW(HaloProfileMatter):
     """
     __repr_attrs__ = __eq_attrs__ = (
         "fourier_analytic", "projected_analytic", "cumul2d_analytic",
-        "truncated", "concentration", "precision_fftlog", "normprof",)
+        "truncated", "concentration", "precision_fftlog",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration,

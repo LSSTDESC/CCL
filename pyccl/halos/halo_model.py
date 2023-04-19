@@ -156,16 +156,6 @@ class HMCalculator(CCLAutoRepr):
                            self._mass, a, mass_def=self.mass_def).T
         return 1. / self._integrate_over_mf(uk0)
 
-    def get_profile_norm(self, cosmo, a, prof):
-        """Compute the normalization of a profile."""
-        if not prof.normprof:  # TODO: Remove for CCLv3.
-            return 1
-        uk0 = prof._normalization(self)(cosmo=cosmo, a=a)
-        if isinstance(uk0, (int, float)):
-            return 1 / uk0
-        self._get_ingredients(cosmo, a, get_bf=False)
-        return 1 / self._integrate_over_mf(uk0)
-
     @warn_api(pairs=[("sel", "selection"),
                      ("amin", "a_min"),
                      ("amax", "a_max")],

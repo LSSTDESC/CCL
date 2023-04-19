@@ -67,7 +67,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
-        "P0_hexp", "qrange", "nq", "x_out", "precision_fftlog", "normprof",)
+        "P0_hexp", "qrange", "nq", "x_out", "precision_fftlog",)
 
     @warn_api
     def __init__(self, *, mass_bias=0.8, P0=6.41,

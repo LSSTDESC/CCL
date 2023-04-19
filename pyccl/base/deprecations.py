@@ -146,9 +146,8 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
         if any([par.startswith("normprof") and kwargs.get(par) is not None
                 for par in kwargs]):
             warnings.warn(
-                "Argument `normprof` has been deprecated. Change the default "
-                "value only by subclassing. More comprehensive profile "
-                "normalization options will be provided with CCLv3.0.0.",
+                "Argument `normprof` will be deprecated in CCL v3. All "
+                "profiles will carry their own normalisation.",
                 CCLDeprecationWarning)
 
         # API compatibility for deprecated HMCalculator argument k_min.

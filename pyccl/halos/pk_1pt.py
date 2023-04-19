@@ -1,4 +1,4 @@
-from ..base import UnlockInstance, warn_api
+from ..base import warn_api
 import numpy as np
 
 
@@ -28,11 +28,6 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
         `k` and `a` respectively. If `k` or `a` are scalars, the
         corresponding dimension will be squeezed out on output.
     """
-    # TODO: Remove for CCLv3.
-    if normprof is not None:
-        with UnlockInstance(prof):
-            prof.normprof = normprof
-
     func = getattr(hmc, func)
 
     a_use = np.atleast_1d(a).astype(float)
@@ -43,8 +38,9 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         i11 = func(cosmo, k_use, aa, prof)
-        norm = hmc.get_profile_norm(cosmo, aa, prof)
-        out[ia] = i11 * norm
+        norm = prof.normalization(hmc, cosmo, aa) if normprof else 1
+        # TODO: CCLv3 remove if
+        out[ia] = i11 / norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
