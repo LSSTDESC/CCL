@@ -38,7 +38,7 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         i11 = func(cosmo, k_use, aa, prof)
-        norm = prof.get_normalization(cosmo, aa, hmc) if normprof else 1
+        norm = prof.get_normalization(cosmo, aa, hmc=hmc) if normprof else 1
         # TODO: CCLv3 remove if
         out[ia] = i11 / norm
 

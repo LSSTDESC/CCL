@@ -47,7 +47,7 @@ class HaloProfile(CCLAutoRepr):
                             "_real or _fourier implementation.")
         self.precision_fftlog = FFTLogParams()
 
-    def get_normalization(self, cosmo, a, hmc):
+    def get_normalization(self, cosmo, a, *, hmc=None):
         """Profiles may be normalised by an overall function of redshift
         (or scale factor). This function may be cosmology dependent and
         often comes from integrating certain halo properties over mass.
@@ -65,13 +65,14 @@ class HaloProfile(CCLAutoRepr):
         Reurns:
             float: normalisation factor of this profile.
         """
-        uk0 = self.fourier(cosmo=cosmo, k=hmc.precision['k_min'],
-                           M=hmc.M, a=a, mass_def=hmc.mass_def)
-        hmc.update_ingredients(cosmo, a, get_bf=False)
-        return hmc.integrate_massfunc(uk0)
+        def integ(M):
+            return self.fourier(cosmo=cosmo,
+                                k=hmc.precision['k_min'],
+                                M=M, a=a, mass_def=hmc.mass_def)
+        return hmc.integrate_over_massfunc(integ)
         # TODO: CCLv3 replace by the below in v3 (profiles will all have a
         # default normalisation of 1. Normalisation will always be applied).
-        # return lambda *args, cosmo, a, **kwargs: 1.
+        # return 1.0
 
     @unlock_instance(mutate=True)
     @functools.wraps(FFTLogParams.update_parameters)
@@ -483,7 +484,7 @@ class HaloProfileNumberCounts(HaloProfile):
 class HaloProfileMatter(HaloProfile):
     """Base for matter halo profiles."""
 
-    def get_normalization(self, cosmo, a, hmc):
+    def get_normalization(self, cosmo, a, *, hmc=None):
         """Returns the normalization of all matter overdensity
         profiles, which is simply the comoving matter density.
         """

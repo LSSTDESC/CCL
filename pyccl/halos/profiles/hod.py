@@ -326,15 +326,15 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         """Returns the normalization of this profile, which is the
         mean galaxy number density.
         """
-        Nc = self._Nc(hmc.M, a)
-        Ns = self._Ns(hmc.M, a)
-        fc = self._fc(a)
-        if self.ns_independent:
-            Ngal = Nc*fc + Ns
-        else:
-            Ngal = Nc*(fc + Ns)
-        hmc.update_ingredients(cosmo, a, get_bf=False)
-        return hmc.integrate_massfunc(Ngal)
+        def integ(M):
+            Nc = self._Nc(M, a)
+            Ns = self._Ns(M, a)
+            fc = self._fc(a)
+            if self.ns_independent:
+                return Nc*fc + Ns
+            else:
+                return Nc*(fc + Ns)
+        return hmc.integrate_over_massfunc(integ)
 
     def _fourier(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)
