@@ -67,7 +67,8 @@ def test_hodcl():
     # P(k)
     a_arr, lk_arr, _ = cosmo.get_linear_power().get_spline_arrays()
     pk_hod = ccl.halos.halomod_Pk2D(cosmo, hmc, prf, prof_2pt=prf2pt,
-                                    lk_arr=lk_arr, a_arr=a_arr)
+                                    lk_arr=lk_arr, a_arr=a_arr,
+                                    normprof1=True)
     # C_ell
     tr = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z_arr, dndz),
                                 bias=(z_arr, np.ones(len(dndz))))
