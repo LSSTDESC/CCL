@@ -67,7 +67,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
-        "P0_hexp", "qrange", "nq", "x_out", "precision_fftlog", "normprof",)
+        "P0_hexp", "qrange", "nq", "x_out", "precision_fftlog",)
 
     @warn_api
     def __init__(self, *, mass_bias=0.8, P0=6.41,
@@ -182,8 +182,8 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         return Fq
 
     def _norm(self, cosmo, M, a, mb):
-        # Computes the normalisation factor of the GNFW profile.
-        # Normalisation factor is given in units of eV/cm^3.
+        # Computes the normalization factor of the GNFW profile.
+        # Normalization factor is given in units of eV/cm^3.
         # (Bolliet et al. 2017).
         h70 = cosmo["h"]/0.7
         C0 = 1.65*h70**2

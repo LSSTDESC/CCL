@@ -1,8 +1,8 @@
 from ...pyutils import resample_array, _fftlog_transform
 from ...base import CCLAutoRepr, unlock_instance, warn_api, deprecate_attr
 from ...parameters import FFTLogParams
+from ...parameters import physical_constants as const
 import numpy as np
-from abc import abstractmethod
 import functools
 from typing import Callable
 
@@ -47,35 +47,32 @@ class HaloProfile(CCLAutoRepr):
                             "_real or _fourier implementation.")
         self.precision_fftlog = FFTLogParams()
 
-    @property
-    @abstractmethod
-    def normprof(self) -> bool:
-        """Normalize the profile in auto- and cross-correlations by
-        :math:`I^0_1(k\\rightarrow 0, a|u)`
-        (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`).
+    def get_normalization(self, cosmo, a, *, hmc=None):
+        """Profiles may be normalized by an overall function of redshift
+        (or scale factor). This function may be cosmology dependent and
+        often comes from integrating certain halo properties over mass.
+        This method returns this normalizing factor. For example,
+        to get the normalized profile in real space, one would call
+        the `real` method, and then **divide** the result by the value
+        returned by this method.
+
+        Args:
+            hmc (:class:`~pyccl.halos.HMCalculator`): a halo model calculator
+                object.
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            a (float): scale factor.
+
+        Reurns:
+            float: normalization factor of this profile.
         """
-
-    # TODO: CCLv3 - Rename & allocate _normprof_bool to the subclasses.
-
-    def _normprof_false(self, hmc, **settings):
-        """Option for ``normprof = False``."""
-        return lambda *args, cosmo, a, **kwargs: 1.
-
-    def _normprof_true(self, hmc, k_min=1e-5):
-        """Option for ``normprof = True``."""
-        # TODO: remove the first two lines in CCLv3.
-        k_hmc = hmc.precision["k_min"]
-        k_min = k_hmc if k_hmc != k_min else k_min
-        M, mass_def = hmc._mass, hmc.mass_def
-        return functools.partial(self.fourier, k=k_min, M=M, mass_def=mass_def)
-
-    def _normalization(self, hmc, **settings):
-        """This is the API adapter and it decides which norm to use.
-        It returns a function of ``cosmo`` and ``a``. Optional args & kwargs.
-        """
-        if self.normprof:
-            return self._normprof_true(hmc, **settings)
-        return self._normprof_false(hmc, **settings)
+        def integ(M):
+            return self.fourier(cosmo=cosmo,
+                                k=hmc.precision['k_min'],
+                                M=M, a=a, mass_def=hmc.mass_def)
+        return hmc.integrate_over_massfunc(integ, cosmo, a)
+        # TODO: CCLv3 replace by the below in v3 (profiles will all have a
+        # default normalization of 1. Normalization will always be applied).
+        # return 1.0
 
     @unlock_instance(mutate=True)
     @functools.wraps(FFTLogParams.update_parameters)
@@ -482,19 +479,21 @@ class HaloProfile(CCLAutoRepr):
 
 class HaloProfileNumberCounts(HaloProfile):
     """Base for number counts halo profiles."""
-    normprof = True
 
 
 class HaloProfileMatter(HaloProfile):
     """Base for matter halo profiles."""
-    normprof = True
+
+    def get_normalization(self, cosmo, a, *, hmc=None):
+        """Returns the normalization of all matter overdensity
+        profiles, which is simply the comoving matter density.
+        """
+        return const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"]**2
 
 
 class HaloProfilePressure(HaloProfile):
     """Base for pressure halo profiles."""
-    normprof = False
 
 
 class HaloProfileCIB(HaloProfile):
     """Base for CIB halo profiles."""
-    normprof = False

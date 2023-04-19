@@ -1,7 +1,6 @@
 import os
-
 import numpy as np
-
+import pytest
 import pyccl as ccl
 
 
@@ -31,9 +30,12 @@ def test_ssc_WL():
     a = np.linspace(1/(1+6), 1, n_z)
     k = np.geomspace(k_min, k_max, n_k)
 
-    tk3D = ccl.halos.halomod_Tk3D_SSC(cosmo=cosmo, hmc=hmc,
-                                      prof=nfw, prof2=nfw, prof12_2pt=None,
-                                      lk_arr=np.log(k), a_arr=a, use_log=True)
+    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
+        tk3D = ccl.halos.halomod_Tk3D_SSC(cosmo=cosmo, hmc=hmc,
+                                          prof=nfw, prof2=nfw, prof12_2pt=None,
+                                          lk_arr=np.log(k), a_arr=a,
+                                          use_log=True,
+                                          normprof1=True, normprof2=True)
 
     z, nofz = np.loadtxt(os.path.join(data_dir, "ssc_WL_nofz.txt"),
                          unpack=True)

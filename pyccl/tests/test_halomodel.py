@@ -67,9 +67,11 @@ def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
     prf = ccl.halos.HaloProfileNFW(concentration=cc)
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mdef)
-    return ccl.halos.halomod_power_spectrum(cosmo, hmc, k, a, prf,
-                                            get_1h=get_1h,
-                                            get_2h=get_2h)
+    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
+        return ccl.halos.halomod_power_spectrum(cosmo, hmc, k, a, prf,
+                                                get_1h=get_1h,
+                                                get_2h=get_2h,
+                                                normprof1=True)
 
 
 @pytest.mark.parametrize('mf_c', [['shethtormen', 'bhattacharya2011'],
