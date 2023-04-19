@@ -182,8 +182,8 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         return Fq
 
     def _norm(self, cosmo, M, a, mb):
-        # Computes the normalisation factor of the GNFW profile.
-        # Normalisation factor is given in units of eV/cm^3.
+        # Computes the normalization factor of the GNFW profile.
+        # Normalization factor is given in units of eV/cm^3.
         # (Bolliet et al. 2017).
         h70 = cosmo["h"]/0.7
         C0 = 1.65*h70**2

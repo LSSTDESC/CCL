@@ -48,11 +48,11 @@ class HaloProfile(CCLAutoRepr):
         self.precision_fftlog = FFTLogParams()
 
     def get_normalization(self, cosmo, a, *, hmc=None):
-        """Profiles may be normalised by an overall function of redshift
+        """Profiles may be normalized by an overall function of redshift
         (or scale factor). This function may be cosmology dependent and
         often comes from integrating certain halo properties over mass.
-        This method returns this normalising factor. For example,
-        to get the normalised profile in real space, one would call
+        This method returns this normalizing factor. For example,
+        to get the normalized profile in real space, one would call
         the `real` method, and then **divide** the result by the value
         returned by this method.
 
@@ -63,7 +63,7 @@ class HaloProfile(CCLAutoRepr):
             a (float): scale factor.
 
         Reurns:
-            float: normalisation factor of this profile.
+            float: normalization factor of this profile.
         """
         def integ(M):
             return self.fourier(cosmo=cosmo,
@@ -71,7 +71,7 @@ class HaloProfile(CCLAutoRepr):
                                 M=M, a=a, mass_def=hmc.mass_def)
         return hmc.integrate_over_massfunc(integ)
         # TODO: CCLv3 replace by the below in v3 (profiles will all have a
-        # default normalisation of 1. Normalisation will always be applied).
+        # default normalization of 1. Normalization will always be applied).
         # return 1.0
 
     @unlock_instance(mutate=True)
