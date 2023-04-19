@@ -146,6 +146,7 @@ class SatelliteShearHOD(HaloProfileHOD):
                          log10M0_p=log10M0_p,
                          log10M1_0=log10M1_0,
                          log10M1_p=log10M1_p,
+                         fc_0=0.0, fc_p=0.0,
                          alpha_0=alpha_0,
                          alpha_p=alpha_p,
                          bg_0=bg_0,
@@ -303,6 +304,18 @@ class SatelliteShearHOD(HaloProfileHOD):
         if phik is not None:
             l_sum *= np.exp(1j * 2 * phik)
         return 2 ** l * l_sum
+
+    def get_normalization(self, cosmo, a, hmc):
+        """Returns the normalization of this profile, which is the
+        mean galaxy number density.
+        """
+        def integ(M):
+            Nc = self._Nc(M, a)
+            Ns = self._Ns(M, a)
+            if self.ns_independent:
+                return Nc+Ns
+            return Nc*(1+Ns)
+        return hmc.integrate_over_massfunc(integ, cosmo, a)
 
     def gamma_I(self, r, r_vir):
         '''
