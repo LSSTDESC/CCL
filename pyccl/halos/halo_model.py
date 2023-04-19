@@ -153,7 +153,7 @@ class HMCalculator(CCLAutoRepr):
                 the mass function.
         """
         fM = func(self._mass)
-        self.update_ingredients(cosmo, a, get_bf=False)
+        self._get_ingredients(cosmo, a, get_bf=False)
         return self._integrate_over_mf(fM)
 
     @deprecated()
