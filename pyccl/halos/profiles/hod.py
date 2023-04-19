@@ -322,19 +322,19 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def normalization(self, hmc, cosmo, a):
+    def get_normalization(self, cosmo, a, hmc):
         """Returns the normalization of this profile, which is the
         mean galaxy number density.
         """
-        Nc = self._Nc(hmc._mass, a)
-        Ns = self._Ns(hmc._mass, a)
+        Nc = self._Nc(hmc.M, a)
+        Ns = self._Ns(hmc.M, a)
         fc = self._fc(a)
         if self.ns_independent:
             Ngal = Nc*fc + Ns
         else:
             Ngal = Nc*(fc + Ns)
-        hmc._get_ingredients(cosmo, a, get_bf=False)
-        return hmc._integrate_over_mf(Ngal)
+        hmc.update_ingredients(cosmo, a, get_bf=False)
+        return hmc.integrate_massfunc(Ngal)
 
     def _fourier(self, cosmo, k, M, a, mass_def):
         M_use = np.atleast_1d(M)

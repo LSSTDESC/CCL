@@ -113,13 +113,13 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         # normalizations
-        norm1 = prof.normalization(hmc, cosmo, aa) if normprof1 else 1
+        norm1 = prof.get_normalization(cosmo, aa, hmc) if normprof1 else 1
         # TODO: CCLv3, remove if
 
         if prof2 == prof:
             norm2 = norm1
         else:
-            norm2 = prof2.normalization(hmc, cosmo, aa) if normprof2 else 1
+            norm2 = prof2.get_normalization(cosmo, aa, hmc) if normprof2 else 1
             # TODO: CCLv3, remove if
 
         if get_2h:

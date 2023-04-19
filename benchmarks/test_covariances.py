@@ -30,7 +30,7 @@ def test_ssc_WL():
     a = np.linspace(1/(1+6), 1, n_z)
     k = np.geomspace(k_min, k_max, n_k)
 
-    with pytest.warns():
+    with pytest.warns(ccl.CCLDeprecationWarning):
         tk3D = ccl.halos.halomod_Tk3D_SSC(cosmo=cosmo, hmc=hmc,
                                           prof=nfw, prof2=nfw, prof12_2pt=None,
                                           lk_arr=np.log(k), a_arr=a,

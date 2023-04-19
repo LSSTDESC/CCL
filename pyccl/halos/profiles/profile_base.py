@@ -47,8 +47,14 @@ class HaloProfile(CCLAutoRepr):
                             "_real or _fourier implementation.")
         self.precision_fftlog = FFTLogParams()
 
-    def normalization(self, hmc, cosmo, a):
-        """Returns the overall normalisation factor of this profile.
+    def get_normalization(self, cosmo, a, hmc):
+        """Profiles may be normalised by an overall function of redshift
+        (or scale factor). This function may be cosmology dependent and
+        often comes from integrating certain halo properties over mass.
+        This method returns this normalising factor. For example,
+        to get the normalised profile in real space, one would call
+        the `real` method, and then **divide** the result by the value
+        returned by this method.
 
         Args:
             hmc (:class:`~pyccl.halos.HMCalculator`): a halo model calculator
@@ -57,12 +63,12 @@ class HaloProfile(CCLAutoRepr):
             a (float): scale factor.
 
         Reurns:
-            float: normalisation of this profile.
+            float: normalisation factor of this profile.
         """
         uk0 = self.fourier(cosmo=cosmo, k=hmc.precision['k_min'],
-                           M=hmc._mass, a=a, mass_def=hmc.mass_def)
-        hmc._get_ingredients(cosmo, a, get_bf=False)
-        return hmc._integrate_over_mf(uk0)
+                           M=hmc.M, a=a, mass_def=hmc.mass_def)
+        hmc.update_ingredients(cosmo, a, get_bf=False)
+        return hmc.integrate_massfunc(uk0)
         # TODO: CCLv3 replace by the below in v3 (profiles will all have a
         # default normalisation of 1. Normalisation will always be applied).
         # return lambda *args, cosmo, a, **kwargs: 1.
@@ -477,7 +483,7 @@ class HaloProfileNumberCounts(HaloProfile):
 class HaloProfileMatter(HaloProfile):
     """Base for matter halo profiles."""
 
-    def normalization(self, hmc, cosmo, a):
+    def get_normalization(self, cosmo, a, hmc):
         """Returns the normalization of all matter overdensity
         profiles, which is simply the comoving matter density.
         """

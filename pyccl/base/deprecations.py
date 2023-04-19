@@ -147,7 +147,7 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
                 for par in kwargs]):
             warnings.warn(
                 "Argument `normprof` will be deprecated in CCL v3. All "
-                "profiles will carry their own normalisation.",
+                "profiles will carry their own normalization.",
                 CCLDeprecationWarning)
 
         # API compatibility for deprecated HMCalculator argument k_min.
