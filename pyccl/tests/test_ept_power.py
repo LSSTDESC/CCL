@@ -253,3 +253,31 @@ def test_ept_template_swap():
     pk1 = ptc.get_pk2d_template('b2:bs')(ks, 1.0, cosmo=COSMO)
     pk2 = ptc.get_pk2d_template('bs:b2')(ks, 1.0, cosmo=COSMO)
     assert np.all(pk1 == pk2)
+
+
+def test_ept_eq():
+    ptc1 = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
+                                          with_matter_1loop=True)
+    # Should be the same
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
+                                          with_matter_1loop=True)
+    assert ptc1 == ptc2
+    # Should still be the same
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=True, with_matter_1loop=True,
+        a_arr=ccl.pyutils.get_pk_spline_a())
+    assert ptc1 == ptc2
+    # Different a sampling
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=True, with_matter_1loop=True,
+        a_arr=np.linspace(0.5, 1., 30))
+    assert ptc1 != ptc2
+    # Different PT templates
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=False, with_matter_1loop=True)
+    assert ptc1 != ptc2
+    # Different FastPT params
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=True, with_matter_1loop=True,
+        C_window=0.5)
+    assert ptc1 != ptc2

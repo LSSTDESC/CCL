@@ -3,6 +3,7 @@ from scipy.interpolate import interp1d
 from ..pyutils import _check_array_params
 from ..parameters import physical_constants
 from ..base import CCLAutoRepr, warn_api
+from abc import abstractmethod
 
 
 @warn_api
@@ -61,12 +62,18 @@ class PTTracer(CCLAutoRepr):
     in a perturbation theory framework to provide N-point
     correlations.
     """
-    __repr_attrs__ = ('type', 'biases')
+    __repr_attrs__ = __eq_attrs__ = ('type', 'biases')
 
     def __init__(self):
         self.biases = {}
-        self.type = None
         pass
+
+    @property
+    @abstractmethod
+    def type(self):
+        """String defining tracer type (`M`, `NC` and
+        `IA` supported).
+        """
 
     def get_bias(self, bias_name, z):
         """Get the value of one of the bias functions at a given
@@ -106,9 +113,10 @@ class PTTracer(CCLAutoRepr):
 class PTMatterTracer(PTTracer):
     """:class:`PTTracer` representing matter fluctuations.
     """
+    type = 'M'
+
     def __init__(self):
         self.biases = {}
-        self.type = 'M'
 
 
 class PTNumberCountsTracer(PTTracer):
@@ -132,9 +140,10 @@ class PTNumberCountsTracer(PTTracer):
         bk2 (float or tuple of arrays): as above for the
             non-local bias.
     """
+    type = 'NC'
+
     def __init__(self, b1, b2=None, bs=None, b3nl=None, bk2=None):
         self.biases = {}
-        self.type = 'NC'
 
         # Initialize b1
         self.biases['b1'] = self._get_bias_function(b1)
@@ -195,10 +204,11 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         cdelta (float or tuple of arrays): as above for the
             overdensity bias.
     """
+    type = 'IA'
+
     def __init__(self, c1, c2=None, cdelta=None):
 
         self.biases = {}
-        self.type = 'IA'
 
         # Initialize c1
         self.biases['c1'] = self._get_bias_function(c1)
