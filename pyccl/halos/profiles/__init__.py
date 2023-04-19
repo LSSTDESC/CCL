@@ -7,3 +7,4 @@ from .einasto import *
 from .hernquist import *
 from .pressure_gnfw import *
 from .hod import *
+from .IA import *

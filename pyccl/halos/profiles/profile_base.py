@@ -354,11 +354,11 @@ class HaloProfile(CCLAutoRepr):
 
     def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
                      fourier_out=False,
-                     large_padding=True):
+                     large_padding=True, ell=0):
         # This computes the 3D Hankel transform
-        #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_0(k r)
-        # if fourier_out == False, and
-        #  \rho(r) = \frac{1}{2\pi^2} \int dk k^2 \rho(k) j_0(k r)
+        #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_ell(k r)
+        # if fourier_out == True, and
+        #  \rho(r) = \frac{1}{2\pi^2} \int dk k^2 \rho(k) j_ell(k r)
         # otherwise.
 
         # Select which profile should be the input
@@ -390,7 +390,7 @@ class HaloProfile(CCLAutoRepr):
 
         # Compute Fourier profile through fftlog
         k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
-                                               3, 0, plaw_index)
+                                               3, ell, plaw_index)
         lk_arr = np.log(k_arr)
 
         for im, p_k_arr in enumerate(p_fourier_M):

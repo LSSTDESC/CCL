@@ -194,7 +194,7 @@ def test_satellite_shear_profile():
     hmd_200m = ccl.halos.MassDef200m()
     cM = ccl.halos.ConcentrationDuffy08(hmd_200m)
 
-    sat_gamma_HOD_simps = ccl.halos.SatelliteShearHOD(cM, lmax=6,
+    sat_gamma_HOD_simps = ccl.halos.SatelliteShearHOD(concentration=cM, lmax=6,
                                                       a1h=0.000989)
     gamma_k_CCL = sat_gamma_HOD_simps._usat_fourier(cosmo,
                                                     k_arr,
@@ -221,16 +221,19 @@ def test_satellite_shear_profile():
     bM = ccl.halos.HaloBiasTinker10(cosmo, mass_def=hmd_200m)
     hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd_200m, nlog10M=64)
 
-    sat_gamma_HOD = ccl.halos.SatelliteShearHOD(cM)
+    sat_gamma_HOD = ccl.halos.SatelliteShearHOD(concentration=cM)
     NFW = ccl.halos.HaloProfileNFW(cM, truncated=True, fourier_analytic=True)
 
     pk_GI_1h = ccl.halos.halomod_Pk2D(cosmo, hmc, NFW,
                                       normprof1=True,
+                                      normprof2=True,
                                       prof2=sat_gamma_HOD,
                                       get_2h=False,
                                       lk_arr=np.log(k_arr),
                                       a_arr=a_arr)
     pk_II_1h = ccl.halos.halomod_Pk2D(cosmo, hmc, sat_gamma_HOD,
+                                      normprof1=True,
+                                      normprof2=True,
                                       get_2h=False,
                                       lk_arr=np.log(k_arr),
                                       a_arr=a_arr)
@@ -249,6 +252,8 @@ def test_satellite_shear_profile():
     cl_II_1h = ccl.angular_cl(cosmo, ia_tracer, ia_tracer, l_arr,
                               p_of_k_a=pk_II_1h)
 
+    print(cl_GI_1h/cl_GI_benchmark-1)
+    print(cl_II_1h/cl_II_benchmark-1)
     assert np.all(np.fabs(cl_GI_1h / cl_GI_benchmark - 1) < 0.01)
     assert np.all(np.fabs(cl_II_1h / cl_II_benchmark - 1) < 0.01)
 
