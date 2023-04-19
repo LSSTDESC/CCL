@@ -9,10 +9,6 @@ BZ_C = 2.
 BZ = BZ_C * np.ones(NZ)
 
 
-def test_pt_tracer_smoke():
-    ccl.nl_pt.PTTracer()
-
-
 def test_pt_tracer_m_smoke():
     ccl.nl_pt.PTMatterTracer()
 
