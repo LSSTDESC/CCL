@@ -84,7 +84,7 @@ def test_tkkssc_linear_bias(isNC1, isNC2, isNC3, isNC4):
     assert np.allclose(tkkl_12, tkkl_34, atol=0, rtol=1e-12)
 
     # Test with the full T(k1,k2,a) for an NFW profile with bias ~1.
-    with pytest.warns(ccl.CCLDeprecationWarning):
+    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
         tkk = ccl.halos.halomod_Tk3D_SSC(
             COSMO, HMC, prof=NFW, lk_arr=np.log(KK), a_arr=AA,
             normprof1=True)

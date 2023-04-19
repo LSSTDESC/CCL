@@ -67,7 +67,7 @@ def test_hodcl():
     prf2pt = ccl.halos.Profile2ptHOD()
     # P(k)
     a_arr, lk_arr, _ = cosmo.get_linear_power().get_spline_arrays()
-    with pytest.warns(ccl.CCLDeprecationWarning):
+    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
         pk_hod = ccl.halos.halomod_Pk2D(cosmo, hmc, prf, prof_2pt=prf2pt,
                                         lk_arr=lk_arr, a_arr=a_arr,
                                         normprof1=True)
