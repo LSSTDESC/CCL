@@ -33,6 +33,9 @@ species_types = {
 def growth_factor(cosmo, a):
     """Growth factor.
 
+    .. note:: CCL is not able to compute the scale-dependent growth
+              factor for cosmologies with massive neutrinos.
+
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
@@ -47,6 +50,9 @@ def growth_factor(cosmo, a):
 
 def growth_factor_unnorm(cosmo, a):
     """Unnormalized growth factor.
+
+    .. note:: CCL is not able to compute the scale-dependent growth
+              factor for cosmologies with massive neutrinos.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
@@ -64,6 +70,9 @@ def growth_factor_unnorm(cosmo, a):
 def growth_rate(cosmo, a):
     """Growth rate defined as the logarithmic derivative of the
     growth factor, dlnD/dlna.
+
+    .. note:: CCL is not able to compute the scale-dependent growth
+              rate for cosmologies with massive neutrinos.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.

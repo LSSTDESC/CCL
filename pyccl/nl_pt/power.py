@@ -1,6 +1,6 @@
 import numpy as np
 from .. import ccllib as lib
-from ..core import check
+from ..pyutils import check
 from ..pk2d import Pk2D
 from ..power import linear_matter_power, nonlin_matter_power
 from ..background import growth_factor

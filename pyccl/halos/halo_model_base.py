@@ -1,5 +1,5 @@
 from .. import ccllib as lib
-from ..core import check
+from ..pyutils import check
 from ..parameters import physical_constants as const
 from ..base import (CCLAutoRepr, CCLNamedClass,
                     warn_api, deprecated, deprecate_attr)

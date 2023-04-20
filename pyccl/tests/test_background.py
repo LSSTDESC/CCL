@@ -220,12 +220,12 @@ def test_input_arrays_raises():
                                 n_s=0.965, A_s=2e-9,
                                 background=3)
     # Incomplete dictionary
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
                                 n_s=0.965, A_s=2e-9,
                                 background={'a': input_a_array,
                                             'h_over_h0': input_hoh0})
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
                                 n_s=0.965, A_s=2e-9,
                                 growth={'a': input_a_array,

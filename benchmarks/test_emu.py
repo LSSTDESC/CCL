@@ -25,7 +25,7 @@ def test_emu_nu(model):
         w0=cosmos[model, 5],
         wa=cosmos[model, 6],
         m_nu=mnu,
-        m_nu_type='list',
+        mass_split='list',
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,
@@ -36,9 +36,7 @@ def test_emu_nu(model):
     a = 1
     k = data[:, 0]
 
-    # Catch warning about neutrino linear growth
-    with pytest.warns(ccl.CCLWarning):
-        pk = ccl.nonlin_matter_power(cosmo, k, a)
+    pk = ccl.nonlin_matter_power(cosmo, k, a)
 
     err = np.abs(pk/data[:, 1]-1)
     assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)
@@ -90,7 +88,7 @@ def test_emu_lin(model):
         w0=cosmos[model, 5],
         wa=cosmos[model, 6],
         m_nu=mnu,
-        m_nu_type='list',
+        mass_split='list',
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,
@@ -101,16 +99,8 @@ def test_emu_lin(model):
     a = 1
     k = np.logspace(-3, -2, 50)
 
-    # Catch warning about neutrino linear growth
-    if (np.sum(mnu) > 0):
-        with pytest.warns(ccl.CCLWarning):
-            pk = ccl.nonlin_matter_power(cosmo, k, a)
-    else:
-        pk = ccl.nonlin_matter_power(cosmo, k, a)
-
-    # Catch warning about linear matter power
-    with pytest.warns(ccl.CCLWarning):
-        pk_lin = ccl.linear_matter_power(cosmo, k, a)
+    pk = ccl.nonlin_matter_power(cosmo, k, a)
+    pk_lin = ccl.linear_matter_power(cosmo, k, a)
 
     err = np.abs(pk/pk_lin-1)
     assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)

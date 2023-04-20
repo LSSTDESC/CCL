@@ -40,7 +40,7 @@ if on_rtd:
 
     MOCK_MODULES = [
         "pyccl.ccllib",
-        "pyccl._types.cc;lib",
+        "pyccl._types.ccllib",
         "pyccl.background.ccllib",
         "pyccl.bcm.ccllib",
         "pyccl.boltzmann.ccllib",
@@ -52,7 +52,7 @@ if on_rtd:
         "pyccl.neutrinos.ccllib",
         "pyccl.ccllibutils.ccllib",
         "pyccl.cls.ccllib",
-        "pyccl.core.ccllib",
+        "pyccl.cosmology.ccllib",
         "pyccl.massfunction.ccllib",
         "pyccl.power.ccllib",
         "pyccl.pyutils.ccllib",

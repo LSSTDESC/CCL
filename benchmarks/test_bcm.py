@@ -12,7 +12,7 @@ def test_bcm():
         A_s=2.2e-9,
         n_s=0.96,
         Neff=3.046,
-        m_nu_type='normal',
+        mass_split='normal',
         m_nu=0.0,
         Omega_g=0,
         Omega_k=0,
