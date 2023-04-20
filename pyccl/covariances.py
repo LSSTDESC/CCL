@@ -9,6 +9,10 @@ from .pk2d import parse_pk2d
 from .base import warn_api
 
 
+__all__ = ("angular_cl_cov_cNG", "sigma2_B_disc", "sigma2_B_from_mask",
+           "angular_cl_cov_SSC",)
+
+
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
                  ("cltracer3", "tracer3"), ("cltracer4", "tracer4"),
                  ("tkka", "t_of_kk_a")],

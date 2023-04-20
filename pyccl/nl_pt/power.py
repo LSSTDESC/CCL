@@ -9,6 +9,9 @@ from ..errors import CCLDeprecationWarning
 import warnings
 
 
+__all__ = ("PTCalculator", "get_pt_pk2d",)
+
+
 class PTCalculator(object):
     """ This class implements a set of methods that can be
     used to compute the various components needed to estimate

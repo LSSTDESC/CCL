@@ -7,7 +7,6 @@ Choices of algorithms used to compute correlation functions:
 """
 
 from . import ccllib as lib
-from . import constants as const
 from . import DEFAULT_POWER_SPECTRUM
 from .pyutils import check
 from .pk2d import parse_pk2d
@@ -16,17 +15,23 @@ from .errors import CCLDeprecationWarning
 import numpy as np
 import warnings
 
-correlation_methods = {
-    'fftlog': const.CCL_CORR_FFTLOG,
-    'bessel': const.CCL_CORR_BESSEL,
-    'legendre': const.CCL_CORR_LGNDRE,
+
+__all__ = ("CorrelationMethods", "CorrelationTypes", "correlation",
+           "correlation_3d", "correlation_multipole", "correlation_3dRsd",
+           "correlation_3dRsd_avgmu", "correlation_pi_sigma",)
+
+
+CorrelationMethods = {
+    'fftlog': lib.CCL_CORR_FFTLOG,
+    'bessel': lib.CCL_CORR_BESSEL,
+    'legendre': lib.CCL_CORR_LGNDRE,
 }
 
-correlation_types = {
-    'NN': const.CCL_CORR_GG,
-    'NG': const.CCL_CORR_GL,
-    'GG+': const.CCL_CORR_LP,
-    'GG-': const.CCL_CORR_LM,
+CorrelationTypes = {
+    'NN': lib.CCL_CORR_GG,
+    'NG': lib.CCL_CORR_GL,
+    'GG+': lib.CCL_CORR_LP,
+    'GG-': lib.CCL_CORR_LM,
 }
 
 
@@ -125,10 +130,10 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
                       CCLDeprecationWarning)
     method = method.lower()
 
-    if type not in correlation_types.keys():
+    if type not in CorrelationTypes.keys():
         raise ValueError("'%s' is not a valid correlation type." % type)
 
-    if method not in correlation_methods.keys():
+    if method not in CorrelationMethods.keys():
         raise ValueError("'%s' is not a valid correlation method." % method)
 
     # Convert scalar input into an array
@@ -143,8 +148,8 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
     else:
         # Call correlation function
         wth, status = lib.correlation_vec(cosmo, ell, C_ell, theta,
-                                          correlation_types[type],
-                                          correlation_methods[method],
+                                          CorrelationTypes[type],
+                                          CorrelationMethods[method],
                                           len(theta), status)
     check(status, cosmo_in)
     if scalar:

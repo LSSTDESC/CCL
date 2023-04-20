@@ -1,7 +1,7 @@
 from ...pyutils import resample_array, _fftlog_transform
 from ...base import CCLAutoRepr, unlock_instance, warn_api, deprecate_attr
-from ...parameters import FFTLogParams
-from ...parameters import physical_constants as const
+from ...base.parameters import FFTLogParams
+from ...base.parameters import physical_constants as const
 import numpy as np
 import functools
 from typing import Callable

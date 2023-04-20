@@ -6,6 +6,9 @@ from .errors import CCLDeprecationWarning
 import numpy as np
 
 
+__all__ = ("Tk3D",)
+
+
 class Tk3D(CCLObject):
     """A container for \"isotropized\" connected trispectra relevant for
     covariance matrix calculations. I.e. functions of 3 variables of the

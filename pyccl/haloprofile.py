@@ -2,6 +2,10 @@ from . import halos as hal
 from .base import deprecated
 
 
+__all__ = ("nfw_profile_3d", "einasto_profile_3d", "hernquist_profile_3d",
+           "nfw_profile_2d",)
+
+
 @deprecated(hal.HaloProfileNFW)
 def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D NFW halo profile at a given radius or an array

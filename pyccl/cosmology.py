@@ -12,22 +12,22 @@ from numbers import Real
 from . import ccllib as lib
 from . import DEFAULT_POWER_SPECTRUM
 from .errors import CCLError, CCLDeprecationWarning
-from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
-from .pyutils import check
+from .pyutils import check, CLevelErrors
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
 from .base.deprecations import warn_api, deprecated
-from .parameters import CCLParameters, CosmologyParams
-from .parameters import physical_constants as const
+from .base.parameters import CCLParameters, CosmologyParams
+from .base.parameters import physical_constants as const
 
 
-__all__ = ("Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
+__all__ = ("TransferFunctions", "MatterPowerSpectra",
+           "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
 
 
 # Configuration types
-transfer_function_types = {
+TransferFunctions = {
     'eisenstein_hu': lib.eisenstein_hu,
     'eisenstein_hu_nowiggles': lib.eisenstein_hu_nowiggles,
     'bbks': lib.bbks,
@@ -37,7 +37,7 @@ transfer_function_types = {
     'calculator': lib.pklin_from_input
 }
 
-matter_power_spectrum_types = {
+MatterPowerSpectra = {
     'halo_model': lib.halo_model,
     'halofit': lib.halofit,
     'linear': lib.linear,
@@ -46,7 +46,7 @@ matter_power_spectrum_types = {
     'camb': lib.pknl_from_boltzman
 }
 
-baryons_power_spectrum_types = {
+BaryonPowerSpectra = {
     'nobaryons': lib.nobaryons,
     'bcm': lib.bcm
 }
@@ -424,12 +424,12 @@ class Cosmology(CCLObject):
                 "the transfer function should be 'boltzmann_camb'.")
 
         config = lib.configuration()
-        tf = transfer_function_types[transfer_function]
+        tf = TransferFunctions[transfer_function]
         config.transfer_function_method = tf
-        mps = matter_power_spectrum_types[matter_power_spectrum]
+        mps = MatterPowerSpectra[matter_power_spectrum]
         config.matter_power_spectrum_method = mps
         # TODO: Remove for CCLv3.
-        bps = baryons_power_spectrum_types[baryons_power_spectrum]
+        bps = BaryonPowerSpectra[baryons_power_spectrum]
         config.baryons_power_spectrum_method = bps
         # TODO: Remove for CCLv3.
         mf = mass_function_types[mass_function]
@@ -822,8 +822,8 @@ class Cosmology(CCLObject):
             :obj:`str` containing the status message.
         """
         # Get status ID string if one exists
-        if self.cosmo.status in error_types.keys():
-            status = error_types[self.cosmo.status]
+        if self.cosmo.status in CLevelErrors.keys():
+            status = CLevelErrors[self.cosmo.status]
         else:
             status = self.cosmo.status
 

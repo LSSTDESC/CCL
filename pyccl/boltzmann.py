@@ -12,6 +12,9 @@ except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
 
+__all__ = ("get_camb_pk_lin", "get_isitgr_pk_lin", "get_class_pk_lin",)
+
+
 @warn_api
 def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.

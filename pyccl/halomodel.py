@@ -3,6 +3,10 @@ from .base import deprecated
 from . import halos as hal
 
 
+__all__ = ("halo_concentration", "onehalo_matter_power",
+           "twohalo_matter_power", "halomodel_matter_power",)
+
+
 def _get_concentration(cosmo, mass_def):
     if cosmo._config.halo_concentration_method == lib.bhattacharya2011:
         c = hal.ConcentrationBhattacharya13(mdef=mass_def)

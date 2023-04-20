@@ -10,6 +10,9 @@ from .base import warn_api
 from .pk2d import parse_pk2d
 
 
+__all__ = ("angular_cl",)
+
+
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
 def angular_cl(cosmo, tracer1, tracer2, ell, *,
                p_of_k_a=DEFAULT_POWER_SPECTRUM,

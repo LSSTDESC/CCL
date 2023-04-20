@@ -6,6 +6,9 @@ from . import ccllib as lib
 import numpy as np
 
 
+__all__ = ("bcm_model_fka", "bcm_correct_pk2d",)
+
+
 @deprecated(BaryonsSchneider15)
 def bcm_model_fka(cosmo, k, a):
     """The BCM model correction factor for baryons.

@@ -1,6 +1,6 @@
 from .. import ccllib as lib
 from ..pyutils import check
-from ..background import species_types
+from ..background import Species
 from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
 import numpy as np
 from functools import cached_property
@@ -110,7 +110,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
         self.Delta = Delta
         self.rho_type = rho_type
-        self.species = species_types[rho_type]
+        self.species = Species[rho_type]
         # c(M) relation
         if concentration is None:
             self.concentration = None

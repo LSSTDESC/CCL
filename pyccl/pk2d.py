@@ -9,7 +9,10 @@ from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
                       _get_spline1d_arrays, _get_spline2d_arrays)
 from .base import (CCLObject, UnlockInstance, unlock_instance,
                    warn_api, deprecated)
-from .parameters import spline_params
+from .base.parameters import spline_params
+
+
+__all__ = ("Pk2D", "parse_pk2d", "parse_pk",)
 
 
 class _Pk2D_descriptor:

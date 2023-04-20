@@ -4,7 +4,7 @@ from .base.deprecations import deprecated, warn_api
 from .errors import CCLDeprecationWarning
 from .cosmology import _Defaults
 from .background import omega_x
-from .parameters import physical_constants as const
+from .base.parameters import physical_constants as const
 
 import numpy as np
 from enum import Enum

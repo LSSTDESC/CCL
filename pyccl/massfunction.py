@@ -4,6 +4,9 @@ from .errors import CCLError
 from .power import sigmaM  # noqa
 
 
+__all__ = ("massfunc", "halo_bias", "massfunc_m2r",)
+
+
 @deprecated(hal.MassFunc)
 def massfunc(cosmo, halo_mass, a, overdensity=200):
     """Halo mass function, dn/dlog10M.

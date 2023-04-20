@@ -6,6 +6,9 @@ from ..errors import CCLWarning, CCLError
 from ..pyutils import get_pk_spline_a
 
 
+__all__ = ("EulerianPTCalculator",)
+
+
 # All valid Pk pair labels and their aliases
 _PK_ALIAS = {
     'm:m': 'm:m', 'm:b1': 'm:m', 'm:b2': 'm:b2',
