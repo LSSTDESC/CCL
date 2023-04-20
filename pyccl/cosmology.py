@@ -11,16 +11,16 @@ from numbers import Real
 
 from . import ccllib as lib
 from . import DEFAULT_POWER_SPECTRUM
-from .errors import CCLError, CCLWarning
+from .errors import CCLError, CCLWarning, CCLDeprecationWarning
+from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
-from .base.deprecations import warn_api
+from .base.deprecations import warn_api, deprecated
 from .parameters import CCLParameters, CosmologyParams
 from .parameters import physical_constants as const
-from .errors import CCLDeprecationWarning
 
 
 __all__ = ("Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
@@ -497,8 +497,9 @@ class Cosmology(CCLObject):
         T_nu = g * T_CMB
         massless_limit = T_nu * c.KBOLTZ / c.EV_IN_J
 
-        from .neutrinos import get_neutrino_masses
-        mnu_list = get_neutrino_masses(m_nu=m_nu, mass_split=mass_split)
+        from .neutrinos import nu_masses
+        mnu_list = nu_masses(m_total=m_nu, mass_split=mass_split,
+                             is_Omega_nu_h2=False)
         nu_mass = mnu_list[mnu_list > massless_limit]
         N_nu_mass = len(nu_mass)
         N_nu_rel = Neff - N_nu_mass * (T_ncdm/g)**4
@@ -820,6 +821,26 @@ class Cosmology(CCLObject):
         """Checks if sigma(M) is precomputed."""
         return bool(self.cosmo.computed_sigma)
 
+    @deprecated()
+    def status(self):
+        """Get error status of the ccl_cosmology object.
+        .. note:: The error statuses are currently under development and
+                  may not be fully descriptive.
+        Returns:
+            :obj:`str` containing the status message.
+        """
+        # Get status ID string if one exists
+        if self.cosmo.status in error_types.keys():
+            status = error_types[self.cosmo.status]
+        else:
+            status = self.cosmo.status
+
+        # Get status message
+        msg = self.cosmo.status_message
+
+        # Return status information
+        return "status(%s): %s" % (status, msg)
+
 
 def CosmologyVanillaLCDM(**kwargs):
     """A cosmology with typical flat Lambda-CDM parameters (`Omega_c=0.25`,
@@ -1004,6 +1025,13 @@ class CosmologyCalculator(Cosmology):
         if not a.shape == arr1.shape == arr2.shape:
             raise ValueError("Shape mismatch of input arrays.")
 
+    def _check_pk_name(self, name):
+        qs = name.split(':')
+        if len(qs) != 2:
+            raise ValueError("Power spectrum label %s could " % name +
+                             "not be parsed. Label must be of the " +
+                             "form 'q1:q2'")
+
     def _init_background(self, background):
         a, chi, E = background["a"], background["chi"], background["h_over_h0"]
         self._check_input(a, chi, E)
@@ -1022,6 +1050,7 @@ class CosmologyCalculator(Cosmology):
     def _init_pk_linear(self, pk_linear):
         a, lk = pk_linear["a"], np.log(pk_linear["k"])
         self._check_scale_factor(a)
+        # needed for high-z extrapolation
         self.compute_growth()
         na, nk = a.size, lk.size
 
@@ -1031,6 +1060,7 @@ class CosmologyCalculator(Cosmology):
 
         pk_names = set(pk_linear.keys()) - set(["a", "k"])
         for name in pk_names:
+            self._check_pk_name(name)
             pk = pk_linear[name]
             if pk.shape != (na, nk):
                 raise ValueError("Power spectrum shape mismatch. "
@@ -1053,6 +1083,7 @@ class CosmologyCalculator(Cosmology):
 
         pk_names = set(pk_nonlin.keys()) - set(["a", "k"])
         for name in pk_names:
+            self._check_pk_name(name)
             pk = pk_nonlin[name]
             if pk.shape != (na, nk):
                 raise ValueError("Power spectrum shape mismatch. "

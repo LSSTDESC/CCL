@@ -13,7 +13,7 @@ def test_emu_nu(model):
 
     cosmos = np.loadtxt("./benchmarks/data/emu_nu_cosmologies.txt")
 
-    mnu = ccl.nu_masses(Omega_nu_h2=cosmos[model, 7]*cosmos[model, 2]**2,
+    mnu = ccl.nu_masses(m_total=cosmos[model, 7]*cosmos[model, 2]**2,
                         mass_split='equal')
 
     cosmo = ccl.Cosmology(
@@ -25,7 +25,7 @@ def test_emu_nu(model):
         w0=cosmos[model, 5],
         wa=cosmos[model, 6],
         m_nu=mnu,
-        m_nu_type='list',
+        mass_split='list',
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,
@@ -76,7 +76,7 @@ def test_emu(model):
 def test_emu_lin(model):
     cosmos = np.loadtxt("./benchmarks/data/emu_input_cosmologies.txt")
 
-    mnu = ccl.nu_masses(Omega_nu_h2=cosmos[model, 7]*cosmos[model, 2]**2,
+    mnu = ccl.nu_masses(m_total=cosmos[model, 7]*cosmos[model, 2]**2,
                         mass_split='equal')
 
     cosmo = ccl.Cosmology(
@@ -88,7 +88,7 @@ def test_emu_lin(model):
         w0=cosmos[model, 5],
         wa=cosmos[model, 6],
         m_nu=mnu,
-        m_nu_type='list',
+        mass_split='list',
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,

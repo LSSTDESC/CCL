@@ -14,8 +14,7 @@ from scipy.optimize import root
 import warnings
 
 
-__all__ = ("NeutrinoMassSplits", "nu_masses", "get_neutrino_masses",
-           "Omeganuh2",)
+__all__ = ("NeutrinoMassSplits", "nu_masses", "Omeganuh2",)
 
 
 class NeutrinoMassSplits(Enum):
@@ -68,17 +67,21 @@ def Omeganuh2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
     return OmNuh2
 
 
-@warn_api(pairs=[("OmNuh2", "Omega_nu_h2")])
-def nu_masses(*, Omega_nu_h2, mass_split, T_CMB=None):
+@warn_api(pairs=[("OmNuh2", "m_total")])
+def nu_masses(*, m_total, mass_split, T_CMB=None, is_Omega_nu_h2=True):
     """Returns the neutrinos mass(es) for a given Omega_nu_h2, according to the
     splitting convention specified by the user.
 
     Args:
-        Omega_nu_h2 (float): Neutrino energy density at z=0 times h^2
+        m_total (float): Total neutrino mass or fractional energy density
+            times h^2 at z=0.
         mass_split (str): indicates how the masses should be split up
             Should be one of 'normal', 'inverted', 'equal' or 'sum'.
         T_CMB (float, optional): Deprecated - do not use.
             Temperature of the CMB (K). Default: 2.725.
+        is_Omega_nu_h2 (bool, optional): if True, `m_total` is the
+            fractional energy density in massive neutrinos at z=0
+            (times h^2).
 
     Returns:
         float or array-like: Neutrino mass(es) corresponding to this Omeganuh2
@@ -86,10 +89,13 @@ def nu_masses(*, Omega_nu_h2, mass_split, T_CMB=None):
     if T_CMB is not None:
         warnings.warn("T_CMB is deprecated as an argument of `nu_masses.",
                       CCLDeprecationWarning)
-    return get_neutrino_masses(m_nu=93.14*Omega_nu_h2, mass_split=mass_split)
+    if is_Omega_nu_h2:
+        # Input is Omega_nu_h2, convert to total mass
+        m_total *= 93.14
+    return _get_neutrino_masses(m_nu=m_total, mass_split=mass_split)
 
 
-def get_neutrino_masses(*, m_nu, mass_split):
+def _get_neutrino_masses(*, m_nu, mass_split):
     """
     """
     if isinstance(m_nu, Real) and m_nu == 0:  # no massive neutrinos
