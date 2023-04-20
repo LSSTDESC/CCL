@@ -11,7 +11,7 @@ from numbers import Real
 
 from . import ccllib as lib
 from . import DEFAULT_POWER_SPECTRUM
-from .errors import CCLError, CCLWarning, CCLDeprecationWarning
+from .errors import CCLError, CCLDeprecationWarning
 from ._types import error_types
 from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
 from .pyutils import check
@@ -614,10 +614,7 @@ class Cosmology(CCLObject):
         pk = None
         rescale_s8 = True
         rescale_mg = True
-        if trf is None:
-            raise CCLError("You want to compute the linear power spectrum, "
-                           "but you selected `transfer_function=None`.")
-        elif trf == 'boltzmann_class':
+        if trf == 'boltzmann_class':
             pk = get_class_pk_lin(self)
         elif trf == 'boltzmann_isitgr':
             rescale_mg = False
@@ -634,13 +631,9 @@ class Cosmology(CCLObject):
         # status variable to use it later if the transfer function is CAMB too.
         pkl = None
         if self._config_init_kwargs["matter_power_spectrum"] == "camb":
-            if abs(self["mu_0"]) > 1e-14:
-                warnings.warn("CAMB doesn't compute non-linear power spectra "
-                              "consistently with mu_0 > 0.", CCLWarning)
             if not np.isfinite(self["A_s"]):
                 raise CCLError("CAMB doesn't rescale non-linear power spectra "
                                "consistently without A_s.")
-
             # no rescaling because A_s is necessarily provided
             rescale_mg = rescale_s8 = False
             name = "delta_matter:delta_matter"
