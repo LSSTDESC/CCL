@@ -313,15 +313,14 @@ class Cosmology(CCLObject):
             warn("z_mg and df_mg are deprecated from Cosmology. Custom growth "
                  "arrays can be passed to CosmologyCalculator.",
                  CCLDeprecationWarning)
-        if emulator_neutrinos is None:
-            emulator_neutrinos = "strict"
-        else:
-            warn("emulator_neutrinos has been moved to extra_parameters using "
+        extra_parameters = extra_parameters or {}
+        if emulator_neutrinos is not None:
+            warn("emulator_neutrinos has been moved to extra_parameters  "
                  "and can be specified using e.g. "
                  "{'emu': {'neutrinos': 'strict'}}.", CCLDeprecationWarning)
-
-        extra_parameters = extra_parameters or {}
-        extra_parameters["emu"] = {"neutrinos": emulator_neutrinos}
+            extra_parameters["emu"] = {"neutrinos": emulator_neutrinos}
+        if "emu" not in extra_parameters:
+            extra_parameters["emu"] = {"neutrinos": "strict"}
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -361,7 +360,7 @@ class Cosmology(CCLObject):
         if self.cosmo.status != 0:
             raise CCLError(f"{self.cosmo.status}: {self.cosmo.status_message}")
 
-    def write_yaml(self, filename):
+    def write_yaml(self, filename, *, sort_keys=False):
         """Write a YAML representation of the parameters to file.
 
         Args:
@@ -369,27 +368,22 @@ class Cosmology(CCLObject):
                 "parameters to."
         """
         def make_yaml_friendly(d):
+            # serialize numpy types and dicts
             for k, v in d.items():
-                if isinstance(v, float):
-                    d[k] = float(v)
-                elif isinstance(v, int):
+                if isinstance(v, int):
                     d[k] = int(v)
-                elif isinstance(v, bool):
-                    d[k] = bool(v)
+                elif isinstance(v, float):
+                    d[k] = float(v)
                 elif isinstance(v, dict):
                     make_yaml_friendly(v)
 
-        params = {**self._params_init_kwargs,
-                  **self._config_init_kwargs}
+        params = {**self._params_init_kwargs, **self._config_init_kwargs}
         make_yaml_friendly(params)
 
         if isinstance(filename, str):
             with open(filename, "w") as fp:
-                yaml.dump(params, fp,
-                          default_flow_style=False, sort_keys=False)
-        else:
-            yaml.dump(params, filename,
-                      default_flow_style=False, sort_keys=False)
+                return yaml.dump(params, fp, sort_keys=sort_keys)
+        return yaml.dump(params, filename, sort_keys=sort_keys)
 
     @classmethod
     def read_yaml(cls, filename, **kwargs):
@@ -400,29 +394,11 @@ class Cosmology(CCLObject):
                 parameters from.
             **kwargs (dict) Additional keywords that supersede file contents
         """
+        loader = yaml.Loader
         if isinstance(filename, str):
             with open(filename, 'r') as fp:
-                params = yaml.load(fp, Loader=yaml.Loader)
-        else:
-            params = yaml.load(filename, Loader=yaml.Loader)
-
-        if "sigma8" in params and params["sigma8"] == "nan":
-            del params["sigma8"]
-        if "A_s" in params and params["A_s"] == "nan":
-            del params["A_s"]
-
-        # Get the call signature of Cosmology (i.e., the names of
-        # all arguments)
-        init_param_names = cls.__signature__.parameters.keys()
-
-        # Read the values we need from the loaded yaml dictionary. Missing
-        # values take their default values from Cosmology.__init__
-        inits = {k: params[k] for k in init_param_names if k in params}
-
-        # Overwrite with extra values
-        inits.update(kwargs)
-
-        return cls(**inits)
+                return cls(**{**yaml.load(fp, Loader=loader), **kwargs})
+        return cls(**{**yaml.load(filename, Loader=loader), **kwargs})
 
     def _build_config(
             self, transfer_function=None, matter_power_spectrum=None,
@@ -460,8 +436,8 @@ class Cosmology(CCLObject):
         # TODO: Remove for CCLv3.
         cm = halo_concentration_types[halo_concentration]
         config.halo_concentration_method = cm
-        emu_nu = emulator_neutrinos_types[extra_parameters["emu"]["neutrinos"]]
-        config.emulator_neutrinos_method = emu_nu
+        ent = extra_parameters["emu"]["neutrinos"]
+        config.emulator_neutrinos_method = emulator_neutrinos_types[ent]
 
         # Store ccl_configuration for later access
         self._config = config
@@ -571,10 +547,9 @@ class Cosmology(CCLObject):
         c = const
         D12, D13p, D13n = c.DELTAM12_sq, c.DELTAM13_sq_pos, c.DELTAM13_sq_neg
 
-        def M_nu(mass, D13):
-            return np.array([mass.sum() - m_nu,
-                             mass[1]**2 - D12 - mass[0]**2,
-                             mass[2]**2 - D13 - mass[0]**2])
+        def M_nu(m, D13):
+            m2 = m * m
+            return np.array([m.sum()-m_nu, m2[1]-m2[0]-D12, m2[2]-m2[0]-D13])
 
         def check_mnu(val):
             if m_nu < val:
@@ -587,8 +562,14 @@ class Cosmology(CCLObject):
             return root(M_nu, x0, args=(D13p,)).x
         if m_nu_type == 'inverted':
             check_mnu(np.sqrt(-(D13n + D12)) + np.sqrt(-D13n))
-            x0 = np.array([0, np.sqrt(-(D13n + D12)), np.sqrt(-D13n)])
+            x0 = [0, np.sqrt(-(D13n + D12)), np.sqrt(-D13n)]
             return root(M_nu, x0, args=(D13n,)).x
+
+    def _OmNuh2(self, m_nu, N_nu_mass, T_CMB, T_ncdm):
+        # Compute OmNuh2 today.
+        ret, st = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm, [1], m_nu, 1, 0)
+        check(st)
+        return ret[0]
 
     def _fill_params(self, **kwargs):
         if not hasattr(self, "_params"):
@@ -842,12 +823,6 @@ class Cosmology(CCLObject):
         if pk is None:
             raise KeyError(f"Power spectrum {name} does not exist.")
         return pk
-
-    def _OmNuh2(self, m_nu, N_nu_mass, T_CMB, T_ncdm):
-        # Compute OmNuh2 today.
-        ret, st = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm, [1], m_nu, 1, 0)
-        check(st)
-        return ret[0]
 
     @property
     def has_distances(self):
