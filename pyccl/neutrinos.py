@@ -67,21 +67,21 @@ def Omeganuh2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
     return OmNuh2
 
 
-@warn_api(pairs=[("OmNuh2", "m_total")])
-def nu_masses(*, m_total, mass_split, T_CMB=None, is_Omega_nu_h2=True):
+@warn_api(pairs=[("OmNuh2", "Omega_nu_h2")])
+def nu_masses(*, Omega_nu_h2=None, mass_split, T_CMB=None, m_nu=None):
     """Returns the neutrinos mass(es) for a given Omega_nu_h2, according to the
     splitting convention specified by the user.
 
     Args:
-        m_total (float): Total neutrino mass or fractional energy density
-            times h^2 at z=0.
+        Omega_nu_h2 (float): Neutrino energy density at z=0 times h^2
         mass_split (str): indicates how the masses should be split up
             Should be one of 'normal', 'inverted', 'equal' or 'sum'.
         T_CMB (float, optional): Deprecated - do not use.
             Temperature of the CMB (K). Default: 2.725.
-        is_Omega_nu_h2 (bool, optional): if True, `m_total` is the
-            fractional energy density in massive neutrinos at z=0
-            (times h^2).
+        m_nu (:obj:`float` or array_like, optional):
+            Mass in eV of the massive neutrinos present.
+            If a sequence is passed, it is assumed that the elements of the
+            sequence represent the individual neutrino masses.
 
     Returns:
         float or array-like: Neutrino mass(es) corresponding to this Omeganuh2
@@ -89,10 +89,9 @@ def nu_masses(*, m_total, mass_split, T_CMB=None, is_Omega_nu_h2=True):
     if T_CMB is not None:
         warnings.warn("T_CMB is deprecated as an argument of `nu_masses.",
                       CCLDeprecationWarning)
-    if is_Omega_nu_h2:
-        # Input is Omega_nu_h2, convert to total mass
-        m_total *= 93.14
-    return _get_neutrino_masses(m_nu=m_total, mass_split=mass_split)
+    if m_nu is None:
+        m_nu = 93.14 * Omega_nu_h2
+    return _get_neutrino_masses(m_nu=m_nu, mass_split=mass_split)
 
 
 def _get_neutrino_masses(*, m_nu, mass_split):

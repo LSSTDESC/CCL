@@ -498,8 +498,7 @@ class Cosmology(CCLObject):
         massless_limit = T_nu * c.KBOLTZ / c.EV_IN_J
 
         from .neutrinos import nu_masses
-        mnu_list = nu_masses(m_total=m_nu, mass_split=mass_split,
-                             is_Omega_nu_h2=False)
+        mnu_list = nu_masses(m_nu=m_nu, mass_split=mass_split)
         nu_mass = mnu_list[mnu_list > massless_limit]
         N_nu_mass = len(nu_mass)
         N_nu_rel = Neff - N_nu_mass * (T_ncdm/g)**4
@@ -1025,12 +1024,10 @@ class CosmologyCalculator(Cosmology):
         if not a.shape == arr1.shape == arr2.shape:
             raise ValueError("Shape mismatch of input arrays.")
 
-    def _check_pk_name(self, name):
-        qs = name.split(':')
-        if len(qs) != 2:
-            raise ValueError("Power spectrum label %s could " % name +
-                             "not be parsed. Label must be of the " +
-                             "form 'q1:q2'")
+    def _check_label(self, name):
+        if len(name.split(":")) != 2:
+            raise ValueError(f"Could not parse power spectrum {name}. "
+                             "Label must be of the form 'q1:q2'.")
 
     def _init_background(self, background):
         a, chi, E = background["a"], background["chi"], background["h_over_h0"]
@@ -1050,8 +1047,7 @@ class CosmologyCalculator(Cosmology):
     def _init_pk_linear(self, pk_linear):
         a, lk = pk_linear["a"], np.log(pk_linear["k"])
         self._check_scale_factor(a)
-        # needed for high-z extrapolation
-        self.compute_growth()
+        self.compute_growth()  # needed for high-z extrapolation
         na, nk = a.size, lk.size
 
         if DEFAULT_POWER_SPECTRUM not in pk_linear:
@@ -1060,7 +1056,7 @@ class CosmologyCalculator(Cosmology):
 
         pk_names = set(pk_linear.keys()) - set(["a", "k"])
         for name in pk_names:
-            self._check_pk_name(name)
+            self._check_label(name)
             pk = pk_linear[name]
             if pk.shape != (na, nk):
                 raise ValueError("Power spectrum shape mismatch. "
@@ -1083,7 +1079,7 @@ class CosmologyCalculator(Cosmology):
 
         pk_names = set(pk_nonlin.keys()) - set(["a", "k"])
         for name in pk_names:
-            self._check_pk_name(name)
+            self._check_label(name)
             pk = pk_nonlin[name]
             if pk.shape != (na, nk):
                 raise ValueError("Power spectrum shape mismatch. "
