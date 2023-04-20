@@ -56,8 +56,8 @@ def test_parameters_lcdm_defaults():
         1)
 
 
-@pytest.mark.parametrize('m_nu_type', ['normal', 'inverted', 'single'])
-def test_parameters_nu(m_nu_type):
+@pytest.mark.parametrize('mass_split', ['normal', 'inverted', 'single'])
+def test_parameters_nu(mass_split):
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -69,24 +69,24 @@ def test_parameters_nu(m_nu_type):
         Neff=3.046,
         Omega_k=0.0,
         m_nu=0.15,
-        m_nu_type=m_nu_type
+        mass_split=mass_split
     )
 
-    if m_nu_type == 'inverted':
+    if mass_split == 'inverted':
         assert np.allclose(cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
                            ccl.physical_constants.DELTAM12_sq,
                            atol=1e-4, rtol=0)
         assert np.allclose(
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_neg, atol=1e-4, rtol=0)
-    elif m_nu_type == 'normal':
+    elif mass_split == 'normal':
         assert np.allclose(cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
                            ccl.physical_constants.DELTAM12_sq,
                            atol=1e-4, rtol=0)
         assert np.allclose(
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_pos, atol=1e-4, rtol=0)
-    elif m_nu_type == 'single':
+    elif mass_split == 'single':
         assert len(cosmo["m_nu"]) == 1
         assert np.allclose(cosmo['m_nu'][0], 0.15, atol=1e-4, rtol=0)
 
@@ -96,7 +96,7 @@ def test_parameters_nu_Nnurel_neg():
         ccl.Cosmology(
             Omega_c=0.27, Omega_b=0.049,
             h=0.67, sigma8=0.8, n_s=0.96, m_nu=[0.03, 0.02, 0.04],
-            Neff=3., m_nu_type='list')
+            Neff=3., mass_split='list')
 
 
 def test_parameters_nu_list():
@@ -107,7 +107,7 @@ def test_parameters_nu_list():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=[0.1, 0.01, 0.003],
-        m_nu_type='list')
+        mass_split='list')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -157,7 +157,7 @@ def test_parameters_nu_normal():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=0.3,
-        m_nu_type='normal')
+        mass_split='normal')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -206,7 +206,7 @@ def test_parameters_nu_inverted():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=0.3,
-        m_nu_type='inverted')
+        mass_split='inverted')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -255,7 +255,7 @@ def test_parameters_nu_equal():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=0.3,
-        m_nu_type='equal')
+        mass_split='equal')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -307,7 +307,7 @@ def test_parameters_nu_unphysical_raises(m_nu, kind):
             A_s=2.1e-9,
             n_s=0.96,
             m_nu=m_nu,
-            m_nu_type=kind)
+            mass_split=kind)
 
 
 # TODO: Uncomment for CCLv3: these throw depr. warnings due to Neff
@@ -420,7 +420,7 @@ def test_parameters_read_write():
     """Check that Cosmology objects can be read and written"""
     params = ccl.Cosmology(
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=[0.02, 0.1, 0.05], m_nu_type='list')
+        m_nu=[0.02, 0.1, 0.05], mass_split='list')
 
     # Make a temporary file name
     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:

@@ -14,7 +14,8 @@ from scipy.optimize import root
 import warnings
 
 
-__all__ = ("nu_masses", "get_neutrino_masses", "Omeganuh2",)
+__all__ = ("NeutrinoMassSplits", "nu_masses", "get_neutrino_masses",
+           "Omeganuh2",)
 
 
 class NeutrinoMassSplits(Enum):

@@ -93,7 +93,7 @@ def test_cosmology_critical_init():
         m_nu=0.0,
         w0=-1.0,
         wa=0.0,
-        m_nu_type='normal',
+        mass_split='normal',
         Omega_g=0,
         Omega_k=0)
     assert np.allclose(cosmo.cosmo.data.growth0, 1)
@@ -175,7 +175,7 @@ def test_cosmology_pickles():
     """Check that a Cosmology object pickles."""
     cosmo = ccl.Cosmology(
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=[0.02, 0.1, 0.05], m_nu_type='list',
+        m_nu=[0.02, 0.1, 0.05], mass_split='list',
         z_mg=[0.0, 1.0], df_mg=[0.01, 0.0])
 
     with tempfile.TemporaryFile() as fp:
@@ -213,7 +213,7 @@ def test_cosmology_context():
     frees C resources properly."""
     with ccl.Cosmology(
             Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            m_nu=np.array([0.02, 0.1, 0.05]), m_nu_type='list',
+            m_nu=np.array([0.02, 0.1, 0.05]), mass_split='list',
             z_mg=np.array([0.0, 1.0]), df_mg=np.array([0.01, 0.0])) as cosmo:
         # make sure it works
         assert not cosmo.has_distances
