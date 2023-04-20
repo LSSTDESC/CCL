@@ -8,7 +8,6 @@ import yaml
 from inspect import getmembers, isfunction, signature
 from typing import Iterable
 from numbers import Real
-from scipy.optimize import root
 
 from . import ccllib as lib
 from . import DEFAULT_POWER_SPECTRUM
@@ -18,6 +17,7 @@ from .pyutils import check
 from .pk2d import Pk2D
 from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
+from .base.deprecations import warn_api
 from .parameters import CCLParameters, CosmologyParams
 from .parameters import physical_constants as const
 from .errors import CCLDeprecationWarning
@@ -167,7 +167,7 @@ class Cosmology(CCLObject):
             Mass in eV of the massive neutrinos present. Defaults to 0.
             If a sequence is passed, it is assumed that the elements of the
             sequence represent the individual neutrino masses.
-        m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
+        mass_split (:obj:`str`, optional): Type of massive neutrinos. Should
             be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
             the mass as being held by one massive neutrino. The other options
             split the mass into 3 massive neutrinos. Ignored if a sequence is
@@ -224,7 +224,7 @@ class Cosmology(CCLObject):
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
-            m_nu_type = 'equal', and 'equalize', which will redistribute
+            mass_split = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emulator but results in
             internal inconsistencies. Defaults to 'strict'.
         extra_parameters (:obj:`dict`, optional): Dictionary holding extra
@@ -254,10 +254,11 @@ class Cosmology(CCLObject):
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_accuracy_params",)
 
+    @warn_api(pairs=[("m_nu_type", "mass_split")])
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
-            Neff=None, m_nu=0., m_nu_type='normal', w0=-1., wa=0.,
+            Neff=None, m_nu=0., mass_split='normal', w0=-1., wa=0.,
             T_CMB=_Defaults.T_CMB,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=0, sigma_0=0, c1_mg=1, c2_mg=1, lambda_mg=0,
@@ -326,7 +327,7 @@ class Cosmology(CCLObject):
         self._params_init_kwargs = dict(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
-            m_nu_type=m_nu_type, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
+            mass_split=mass_split, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
             bcm_log10Mc=bcm_log10Mc,
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
@@ -444,7 +445,7 @@ class Cosmology(CCLObject):
 
     def _build_parameters(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
-            A_s=None, Omega_k=None, Neff=None, m_nu=None, m_nu_type=None,
+            A_s=None, Omega_k=None, Neff=None, m_nu=None, mass_split=None,
             w0=None, wa=None, T_CMB=None, T_ncdm=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, c1_mg=None, c2_mg=None, lambda_mg=None,
@@ -496,7 +497,8 @@ class Cosmology(CCLObject):
         T_nu = g * T_CMB
         massless_limit = T_nu * c.KBOLTZ / c.EV_IN_J
 
-        mnu_list = self._get_neutrino_masses(m_nu, m_nu_type)
+        from .neutrinos import get_neutrino_masses
+        mnu_list = get_neutrino_masses(m_nu=m_nu, mass_split=mass_split)
         nu_mass = mnu_list[mnu_list > massless_limit]
         N_nu_mass = len(nu_mass)
         N_nu_rel = Neff - N_nu_mass * (T_ncdm/g)**4
@@ -533,37 +535,6 @@ class Cosmology(CCLObject):
         # Modified growth (deprecated)
         if z_mg is not None:
             self._params.mgrowth = [z_mg, df_mg]
-
-    def _get_neutrino_masses(self, m_nu, m_nu_type):
-        if isinstance(m_nu, Real) and m_nu == 0:  # no massive neutrinos
-            return np.array([])
-        if isinstance(m_nu, Iterable):  # input was list
-            return np.asarray(m_nu).copy()
-        if m_nu_type == "single":
-            return np.atleast_1d(m_nu)
-        if m_nu_type == "equal":
-            return np.full(3, m_nu/3)
-
-        c = const
-        D12, D13p, D13n = c.DELTAM12_sq, c.DELTAM13_sq_pos, c.DELTAM13_sq_neg
-
-        def M_nu(m, D13):
-            m2 = m * m
-            return np.array([m.sum()-m_nu, m2[1]-m2[0]-D12, m2[2]-m2[0]-D13])
-
-        def check_mnu(val):
-            if m_nu < val:
-                raise ValueError(
-                    f"m_nu < {val} incompatible with mass hierarchy")
-
-        if m_nu_type == 'normal':
-            check_mnu(np.sqrt(D12) + np.sqrt(D13p))
-            x0 = [0, np.sqrt(D12), np.sqrt(D13p)]
-            return root(M_nu, x0, args=(D13p,)).x
-        if m_nu_type == 'inverted':
-            check_mnu(np.sqrt(-(D13n + D12)) + np.sqrt(-D13n))
-            x0 = [0, np.sqrt(-(D13n + D12)), np.sqrt(-D13n)]
-            return root(M_nu, x0, args=(D13n,)).x
 
     def _OmNuh2(self, m_nu, N_nu_mass, T_CMB, T_ncdm):
         # Compute OmNuh2 today.
@@ -917,7 +888,7 @@ class CosmologyCalculator(Cosmology):
             Mass in eV of the massive neutrinos present. Defaults to 0.
             If a sequence is passed, it is assumed that the elements of the
             sequence represent the individual neutrino masses.
-        m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
+        mass_split (:obj:`str`, optional): Type of massive neutrinos. Should
             be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
             the mass as being held by one massive neutrino. The other options
             split the mass into 3 massive neutrinos. Ignored if a sequence is
@@ -991,10 +962,11 @@ class CosmologyCalculator(Cosmology):
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_accuracy_params", "_input_arrays",)
 
+    @warn_api(pairs=[("m_nu_type", "mass_split")])
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
-            Neff=None, m_nu=0., m_nu_type="normal", w0=-1., wa=0.,
+            Neff=None, m_nu=0., mass_split="normal", w0=-1., wa=0.,
             T_CMB=_Defaults.T_CMB, mu_0=0., sigma_0=0.,
             background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None,
@@ -1003,7 +975,7 @@ class CosmologyCalculator(Cosmology):
         super().__init__(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
-            m_nu_type=m_nu_type, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
+            mass_split=mass_split, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
             mu_0=mu_0, sigma_0=sigma_0,
             transfer_function="calculator", matter_power_spectrum="calculator")
 
