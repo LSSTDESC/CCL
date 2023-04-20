@@ -310,33 +310,6 @@ def test_parameters_nu_unphysical_raises(m_nu, kind):
             mass_split=kind)
 
 
-# TODO: Uncomment for CCLv3: these throw depr. warnings due to Neff
-# def test_parameters_valid_input():
-#     """
-#     Check that valid parameter arguments are accepted.
-#     """
-#     with warnings.catch_warnings():
-#         warnings.simplefilter("error")
-#         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-#                       A_s=2.1e-9, n_s=0.96)
-#         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-#                       A_s=2.1e-9, n_s=0.96, Omega_k=0.05)
-#         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-#                       A_s=2.1e-9, n_s=0.96, Neff=2.046)
-#         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-#                       A_s=2.1e-9, n_s=0.96, Neff=3.046, m_nu=0.06)
-#         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-#                       A_s=2.1e-9, n_s=0.96, w0=-0.9)
-#         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-#                       A_s=2.1e-9, n_s=0.96, w0=-0.9, wa=0.1)
-#         # Check that kwarg order doesn't matter
-#         ccl.Cosmology(h=0.7, Omega_c=0.25, Omega_b=0.05,
-#                       A_s=2.1e-9, n_s=0.96)
-#         # Try a set of parameters with non-zero mu0 / Sig0
-#         ccl.Cosmology(h=0.7, Omega_c=0.25, Omega_b=0.05,
-#                       A_s=2.1e-9, n_s=0.96, mu_0=0.1, sigma_0=0.1)
-
-
 def test_parameters_missing():
     """
     Check that errors are raised when compulsory parameters are missing, but
