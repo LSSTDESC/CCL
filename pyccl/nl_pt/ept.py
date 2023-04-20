@@ -131,9 +131,9 @@ class EulerianPTCalculator(CCLAutoRepr):
              contribution to some of the terms will be subtracted.
              Default: `False`.
     """
-    __repr_attrs__ = ('with_NC', 'with_IA', 'with_matter_1loop',
-                      'k_s', 'a_s', 'exp_cutoff',
-                      'b1_pk_kind', 'bk2_pk_kind', 'fastpt_par')
+    __repr_attrs__ = __eq_attrs__ = ('with_NC', 'with_IA', 'with_matter_1loop',
+                                     'k_s', 'a_s', 'exp_cutoff', 'b1_pk_kind',
+                                     'bk2_pk_kind', 'fastpt_par', )
 
     def __init__(self, *, with_NC=False, with_IA=False,
                  with_matter_1loop=True, cosmo=None,

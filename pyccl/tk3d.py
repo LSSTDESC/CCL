@@ -137,6 +137,9 @@ class Tk3D(CCLObject):
         check(status)
 
     def __eq__(self, other):
+        # Check object id.
+        if self is other:
+            return True
         # Check the object class.
         if type(self) is not type(other):
             return False

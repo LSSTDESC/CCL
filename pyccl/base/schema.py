@@ -283,6 +283,9 @@ class CCLObject(ABC):
         return hash(repr(self))
 
     def __eq__(self, other):
+        # Exit early if it is the same object.
+        if self is other:
+            return True
         # Two same-type objects are equal if their representations are equal.
         if type(self) is not type(other):
             return False
@@ -292,8 +295,7 @@ class CCLObject(ABC):
                 if not is_equal(getattr(self, attr), getattr(other, attr)):
                     return False
             return True
-        # Fall back to default Python comparison.
-        return id(self) == id(other)
+        return False
 
 
 class CCLAutoRepr(CCLObject):

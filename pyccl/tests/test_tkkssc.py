@@ -11,7 +11,7 @@ M200 = ccl.halos.MassDef200m()
 HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 HMC = ccl.halos.HMCalculator(
-    mass_function=HMF, halo_bias=HBF, mass_def=M200, nlog10M=2)
+    mass_function=HMF, halo_bias=HBF, mass_def=M200, nM=2)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 
 NFW = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
@@ -84,8 +84,10 @@ def test_tkkssc_linear_bias(isNC1, isNC2, isNC3, isNC4):
     assert np.allclose(tkkl_12, tkkl_34, atol=0, rtol=1e-12)
 
     # Test with the full T(k1,k2,a) for an NFW profile with bias ~1.
-    tkk = ccl.halos.halomod_Tk3D_SSC(
-        COSMO, HMC, prof=NFW, lk_arr=np.log(KK), a_arr=AA)
+    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
+        tkk = ccl.halos.halomod_Tk3D_SSC(
+            COSMO, HMC, prof=NFW, lk_arr=np.log(KK), a_arr=AA,
+            normprof1=True)
     *_, (tkk_12, tkk_34) = tkk.get_spline_arrays()
     assert np.allclose(tkkl_12, tkk_12, atol=0, rtol=5e-3)
     assert np.allclose(tkkl_34, tkk_34, atol=0, rtol=5e-3)

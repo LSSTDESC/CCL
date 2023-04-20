@@ -17,6 +17,7 @@ from .bcm import bcm_correct_pk2d
 from .base import CCLObject, cache, unlock_instance
 from .parameters import CCLParameters, CosmologyParams
 from .parameters import physical_constants as const
+from .errors import CCLDeprecationWarning
 
 
 # Configuration types
@@ -73,6 +74,11 @@ class _Defaults:
     """Default cosmological parameters used throughout the library."""
     T_CMB = 2.725
     T_ncdm = 0.71611
+
+
+warnings.warn(
+    "The default CMB temperature (T_CMB) will change in CCLv3.0.0, "
+    "from 2.725 to 2.7255 (Kelvin).", CCLDeprecationWarning)
 
 
 def _methods_of_cosmology(cls=None, *, modules=[]):
@@ -809,30 +815,31 @@ class Cosmology(CCLObject):
         mfm = self._config.mass_function_method
 
         if conc == lib.bhattacharya2011:
-            c = hal.ConcentrationBhattacharya13(mdef=mdef)
+            c = hal.ConcentrationBhattacharya13(mass_def=mdef)
         elif conc == lib.duffy2008:
-            c = hal.ConcentrationDuffy08(mdef=mdef)
+            c = hal.ConcentrationDuffy08(mass_def=mdef)
         elif conc == lib.constant_concentration:
-            c = hal.ConcentrationConstant(c=4., mdef=mdef)
+            c = hal.ConcentrationConstant(c=4., mass_def=mdef)
 
         if mfm == lib.tinker10:
-            hmf = hal.MassFuncTinker10(self, mass_def=mdef,
+            hmf = hal.MassFuncTinker10(mass_def=mdef,
                                        mass_def_strict=False)
-            hbf = hal.HaloBiasTinker10(self, mass_def=mdef,
+            hbf = hal.HaloBiasTinker10(mass_def=mdef,
                                        mass_def_strict=False)
         elif mfm == lib.shethtormen:
-            hmf = hal.MassFuncSheth99(self, mass_def=mdef,
+            hmf = hal.MassFuncSheth99(mass_def=mdef,
                                       mass_def_strict=False,
                                       use_delta_c_fit=True)
-            hbf = hal.HaloBiasSheth99(self, mass_def=mdef,
+            hbf = hal.HaloBiasSheth99(mass_def=mdef,
                                       mass_def_strict=False)
         else:
             raise ValueError("Halo model spectra not available for your "
                              "current choice of mass function with the "
                              "deprecated implementation.")
-        prf = hal.HaloProfileNFW(c)
-        hmc = hal.HMCalculator(self, hmf, hbf, mdef)
-        return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
+        prf = hal.HaloProfileNFW(concentration=c)
+        hmc = hal.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                               mass_def=mdef)
+        return hal.halomod_Pk2D(self, hmc, prf)
 
     @cache(maxsize=3)
     def _compute_nonlin_power(self):

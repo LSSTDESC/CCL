@@ -184,6 +184,9 @@ class Pk2D(CCLObject):
                    extrap_order_hik=extrap_order_hik)
 
     def __eq__(self, other):
+        # Check object id.
+        if self is other:
+            return True
         # Check the object class.
         if type(self) is not type(other):
             return False
@@ -615,6 +618,11 @@ def parse_pk2d(cosmo, p_of_k_a, *, is_linear=False):
 
 def parse_pk(cosmo, p_of_k_a=None):
     """Helper to retrieve the power spectrum in the halo model."""
+    if not (p_of_k_a is None
+            or isinstance(p_of_k_a, Pk2D)
+            or isinstance(p_of_k_a, str)):
+        raise TypeError("p_of_k_a must be None, 'linear', 'nonlinear', Pk2D.")
+
     if isinstance(p_of_k_a, Pk2D):
         return p_of_k_a
     elif p_of_k_a is None or p_of_k_a == "linear":
@@ -623,4 +631,3 @@ def parse_pk(cosmo, p_of_k_a=None):
     elif p_of_k_a == "nonlinear":
         cosmo.compute_nonlin_power()
         return cosmo.get_nonlin_power()
-    raise TypeError("p_of_k_a must [None|'linear'|'nonlinear'] or Pk2D.")

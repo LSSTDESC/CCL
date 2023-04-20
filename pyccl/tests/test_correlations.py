@@ -3,6 +3,7 @@ import pyccl as ccl
 import pytest
 from timeit import default_timer
 
+ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
@@ -154,3 +155,6 @@ def test_correlation_zero_ends():
     theta = np.logspace(0, 2, 20)
     with pytest.raises(ccl.CCLError):
         ccl.correlation(COSMO, ell=ell, C_ell=C_ell, theta=theta)
+
+
+ccl.gsl_params.reload()  # reset to the default parameters

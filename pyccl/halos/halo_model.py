@@ -137,6 +137,25 @@ class HMCalculator(CCLAutoRepr):
         i1 = self._integrator(self._mf * self._bf * array_2, self._lmass)
         return i1 + self._mbf0 * array_2[..., 0]
 
+    def integrate_over_massfunc(self, func, cosmo, a):
+        """ Returns the integral over mass of a given funcion times
+        the mass function.
+
+        Args:
+            func (callable): a function accepting an array of halo masses
+                as a single argument, and returning an array of the
+                same size.
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            a (float): scale factor.
+
+        Returns:
+            float or array_like: integral over mass of the function times
+                the mass function.
+        """
+        fM = func(self._mass)
+        self._get_ingredients(cosmo, a, get_bf=False)
+        return self._integrate_over_mf(fM)
+
     @deprecated()
     def profile_norm(self, cosmo, a, prof):
         """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
@@ -155,16 +174,6 @@ class HMCalculator(CCLAutoRepr):
         uk0 = prof.fourier(cosmo, self.precision['k_min'],
                            self._mass, a, mass_def=self.mass_def).T
         return 1. / self._integrate_over_mf(uk0)
-
-    def get_profile_norm(self, cosmo, a, prof):
-        """Compute the normalization of a profile."""
-        if not prof.normprof:  # TODO: Remove for CCLv3.
-            return 1
-        uk0 = prof._normalization(self)(cosmo=cosmo, a=a)
-        if isinstance(uk0, (int, float)):
-            return 1 / uk0
-        self._get_ingredients(cosmo, a, get_bf=False)
-        return 1 / self._integrate_over_mf(uk0)
 
     @warn_api(pairs=[("sel", "selection"),
                      ("amin", "a_min"),

@@ -22,8 +22,7 @@ class HaloProfilePowerLaw(HaloProfile):
             be `f(cosmo, a)`.
     """
     __repr_attrs__ = __eq_attrs__ = ("r_scale", "tilt", "mass_def",
-                                     "precision_fftlog", "normprof",)
-    normprof = False
+                                     "precision_fftlog",)
 
     @deprecated()
     @warn_api

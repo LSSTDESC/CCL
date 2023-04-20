@@ -1,6 +1,7 @@
 import numpy as np
 import pyccl as ccl
 import pytest
+from contextlib import nullcontext
 
 
 COSMO = ccl.Cosmology(
@@ -36,15 +37,14 @@ def test_ept_calculator_smoke():
                           ['TM', 'TI', False, False],
                           ['TM', 'TM', False, False]])
 def test_ept_get_pk2d_smoke(tr1, tr2, bb, sub_lowk):
-    if tr1 == tr2:
-        t2 = None
-    else:
-        t2 = TRS[tr2]
+    t2 = None if tr2 == tr1 else TRS[tr2]
     ptc = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
         sub_lowk=sub_lowk, cosmo=COSMO)
-    pk = ptc.get_biased_pk2d(TRS[tr1], tracer2=t2,
-                             return_ia_bb=bb)
+
+    will_warn = set([tr1, tr2]) == set(["TG", "TI"])
+    with pytest.warns(ccl.CCLWarning) if will_warn else nullcontext():
+        pk = ptc.get_biased_pk2d(TRS[tr1], tracer2=t2, return_ia_bb=bb)
     assert isinstance(pk, ccl.Pk2D)
 
 
@@ -116,18 +116,20 @@ def test_ept_deconstruction(kind):
     t1 = get_tr(tn1)
     t2 = get_tr(tn2)
 
-    pk2 = ptc.get_biased_pk2d(t1, tracer2=t2)
-
+    is_nl = tn1 in ["b2", "bs", "bk2", "b3nl"]
+    is_g = tn2 in ["c1", "c2", "cdelta"]
+    with pytest.warns(ccl.CCLWarning) if is_nl and is_g else nullcontext():
+        pk2 = ptc.get_biased_pk2d(t1, tracer2=t2)
     if pk1 is None:
         assert pk2(0.5, 1.0, cosmo=COSMO) == 0.0
     else:
         v1 = pk1(0.5, 1.0, cosmo=COSMO)
         v2 = pk2(0.5, 1.0, cosmo=COSMO)
-        assert np.fabs(v1/v2-1) < 1E-6
+        assert np.allclose(v1, v2, atol=0, rtol=1e-6)
         # Check cached
         pk3 = ptc._pk2d_temp[ccl.nl_pt.ept._PK_ALIAS[kind]]
         v3 = pk3(0.5, 1.0, cosmo=COSMO)
-        assert np.fabs(v1/v3-1) < 1E-6
+        assert np.allclose(v1, v3, atol=0, rtol=1e-6)
 
 
 @pytest.mark.parametrize('kind',
@@ -251,3 +253,31 @@ def test_ept_template_swap():
     pk1 = ptc.get_pk2d_template('b2:bs')(ks, 1.0, cosmo=COSMO)
     pk2 = ptc.get_pk2d_template('bs:b2')(ks, 1.0, cosmo=COSMO)
     assert np.all(pk1 == pk2)
+
+
+def test_ept_eq():
+    ptc1 = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
+                                          with_matter_1loop=True)
+    # Should be the same
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
+                                          with_matter_1loop=True)
+    assert ptc1 == ptc2
+    # Should still be the same
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=True, with_matter_1loop=True,
+        a_arr=ccl.pyutils.get_pk_spline_a())
+    assert ptc1 == ptc2
+    # Different a sampling
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=True, with_matter_1loop=True,
+        a_arr=np.linspace(0.5, 1., 30))
+    assert ptc1 != ptc2
+    # Different PT templates
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=False, with_matter_1loop=True)
+    assert ptc1 != ptc2
+    # Different FastPT params
+    ptc2 = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=True, with_matter_1loop=True,
+        C_window=0.5)
+    assert ptc1 != ptc2
