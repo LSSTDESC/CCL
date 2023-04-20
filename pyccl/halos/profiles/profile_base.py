@@ -2,7 +2,6 @@ from ...pyutils import resample_array, _fftlog_transform
 from ...base import CCLAutoRepr, unlock_instance, warn_api, deprecate_attr
 from ...parameters import FFTLogParams
 from ..massdef import MassDef
-from ..concentration import Concentration
 from ...parameters import physical_constants as const
 import numpy as np
 import functools
@@ -42,18 +41,21 @@ class HaloProfile(CCLAutoRepr):
     __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
                                  )(super.__getattribute__)
 
-    def __init__(self, *, mass_def, concentration=None):
+    def __init__(self, *, mass_def=None, concentration=None):
+        # Verify that profile can be initialized.
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
-            name = self.__class__.__name__
+            name = type(self).__name__
             raise TypeError(f"Can't instantiate {name} with no "
                             "_real or _fourier implementation.")
+
+        # Initialize FFTLog.
         self.precision_fftlog = FFTLogParams()
 
-        self.mass_def = MassDef.create_instance(mass_def)
-        if concentration is not None:
-            concentration = Concentration.create_instance(concentration,
-                                                          mass_def=mass_def)
-        self.concentration = concentration
+        # Initialize mass_def and concentration.
+        self.mass_def, *out = MassDef.from_specs(
+            mass_def, concentration=concentration)
+        if out:
+            self.concentration = out[0]
 
     def get_normalization(self, cosmo, a, *, hmc=None):
         """Profiles may be normalized by an overall function of redshift
@@ -74,12 +76,11 @@ class HaloProfile(CCLAutoRepr):
             float: normalization factor of this profile.
         """
         def integ(M):
-            return self.fourier(cosmo=cosmo,
-                                k=hmc.precision['k_min'],
-                                M=M, a=a, mass_def=hmc.mass_def)
+            return self.fourier(cosmo, hmc.precision["k_min"], M, a)
         return hmc.integrate_over_massfunc(integ, cosmo, a)
         # TODO: CCLv3 replace by the below in v3 (profiles will all have a
         # default normalization of 1. Normalization will always be applied).
+        # NK: (cosmo, a) have to take None defaults in v3.
         # return 1.0
 
     @unlock_instance(mutate=True)
@@ -131,8 +132,6 @@ class HaloProfile(CCLAutoRepr):
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -160,8 +159,6 @@ class HaloProfile(CCLAutoRepr):
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -188,8 +185,6 @@ class HaloProfile(CCLAutoRepr):
             r_t (float or array_like): transverse comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -217,8 +212,6 @@ class HaloProfile(CCLAutoRepr):
             r_t (float or array_like): transverse comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -249,8 +242,6 @@ class HaloProfile(CCLAutoRepr):
             a_lens (float): scale factor of lens.
             a_source (float or array_like): scale factor of source.
                 If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: convergence \
@@ -282,8 +273,6 @@ class HaloProfile(CCLAutoRepr):
             a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
                 If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: shear \
@@ -313,8 +302,6 @@ class HaloProfile(CCLAutoRepr):
             a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
                 If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: reduced shear \
@@ -343,8 +330,6 @@ class HaloProfile(CCLAutoRepr):
             a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
                 If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: magnification\

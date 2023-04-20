@@ -2,6 +2,8 @@ from .. import ccllib as lib
 from ..core import check
 from ..background import species_types
 from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
+from .hmfunc import MassFunc
+from .hbias import HaloBias
 from .concentration import Concentration
 import numpy as np
 from functools import cached_property
@@ -216,7 +218,76 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             # Bogus input - can't parse it.
             raise ValueError("Could not parse mass definition string.")
         Delta, rho_type = name[:-1], parser[name[-1]]
-        return lambda cm=None: cls(Delta, rho_type, concentration=cm)  # noqa
+        return lambda: cls(Delta, rho_type)  # noqa
+
+    @classmethod
+    def from_specs(cls, mass_def=None, *,
+                   mass_function=None, halo_bias=None, concentration=None):
+        """Instantiate mass definition and halo model ingredients.
+
+        Unspecified halo model ingredients are ignored. ``mass_def`` is always
+        instantiated.
+
+        Parameters
+        ----------
+        mass_def : MassDef, str or None, optional
+            Mass definition. If a string, instantiate from its name. If None,
+            obtain the one from the first specified halo model ingredient.
+            The default is None.
+        mass_function, halo_bias, concentration : \
+            (MassFunc, HaloBias, Concentration), str or None, optional
+            Halo model ingredients. Strings are auto-instantiated using
+            ``mass_def``. None values are ignored. The defaults are None.
+
+        Returns
+        -------
+        mass_def : MassDef
+
+        mass_function : MassFunction, if specified
+
+        halo_bias : HaloBias, if specified
+
+        concentration : Concentration, if specified
+
+        Raises
+        ------
+        ValueError
+            If mass definition cannot be retrieved from halo model ingredients.
+        ValueError
+            If mass definitions are inconsistent.
+        """
+        values = mass_function, halo_bias, concentration
+        idx = [value is not None for value in values]
+
+        # Filter only the specified ones.
+        values = np.array(values)[idx]
+        names = np.array(["mass_function", "halo_bias", "concentration"])[idx]
+        Types = np.array([MassFunc, HaloBias, Concentration])[idx]
+
+        # Sanity check.
+        if mass_def is None:
+            for name, value in zip(names, values):
+                if isinstance(value, str):
+                    raise ValueError(f"Need mass_def if {name} is str.")
+
+        # Instantiate mass_def.
+        if mass_def is not None:
+            mass_def = cls.create_instance(mass_def)  # instantiate directly
+        else:
+            mass_def = values[0].mass_def  # use the one in HMIngredients
+
+        # Instantiate halo model ingredients.
+        out = []
+        for name, value, Type in zip(names, values, Types):
+            instance = Type.create_instance(value, mass_def=mass_def)
+            out.append(instance)
+
+        # Check mass definition consistency.
+        if hmd := set([x.mass_def for x in out]):
+            if hmd != set([mass_def]):
+                raise ValueError("Inconsistent mass definitions.")
+
+        return mass_def, *out
 
 
 def MassDef200m():

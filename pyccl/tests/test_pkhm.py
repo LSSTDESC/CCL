@@ -13,7 +13,7 @@ HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 P1 = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
 P2 = P1
-P3 = ccl.halos.HaloProfilePressureGNFW()
+P3 = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
 PKC = ccl.halos.Profile2pt()
 KK = np.geomspace(1E-3, 10, 32)
 MM = np.geomspace(1E11, 1E15, 16)
@@ -22,14 +22,14 @@ PK2D = ccl.Pk2D.from_function(lambda k, a: a / k)
 
 
 def test_prof2pt_smoke():
-    uk_NFW = P1.fourier(COSMO, KK, MM, AA, mass_def=M200)
-    uk_EIN = P2.fourier(COSMO, KK, MM, AA, mass_def=M200)
+    uk_NFW = P1.fourier(COSMO, KK, MM, AA)
+    uk_EIN = P2.fourier(COSMO, KK, MM, AA)
     # Variance
-    cv_NN = PKC.fourier_2pt(COSMO, KK, MM, AA, P1, mass_def=M200)
+    cv_NN = PKC.fourier_2pt(COSMO, KK, MM, AA, P1)
     assert np.all(np.fabs((cv_NN - uk_NFW**2)) < 1E-10)
 
     # 2-point
-    cv_NE = PKC.fourier_2pt(COSMO, KK, MM, AA, P1, prof2=P2, mass_def=M200)
+    cv_NE = PKC.fourier_2pt(COSMO, KK, MM, AA, P1, prof2=P2)
     assert np.all(np.fabs((cv_NE - uk_NFW * uk_EIN)) < 1E-10)
 
 
@@ -236,19 +236,6 @@ def test_pkhm_errors():
         ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
                                mass_def=M200, integration_method_M='Sampson')
 
-    # Wrong hmf
-    with pytest.raises(TypeError):
-        ccl.halos.HMCalculator(mass_function=None, halo_bias=HBF,
-                               mass_def=M200)
-
-    # Wrong hbf
-    with pytest.raises(TypeError):
-        ccl.halos.HMCalculator(mass_function=HMF, halo_bias=None,
-                               mass_def=M200)
-
-    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
-                                 mass_def=M200)
-
     # Inconsistent mass definitions
     m200c = ccl.halos.MassDef.create_instance("200c")
     m200m = ccl.halos.MassDef.create_instance("200m")
@@ -257,6 +244,9 @@ def test_pkhm_errors():
     with pytest.raises(ValueError):
         ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                mass_def=m200c)
+
+    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
+                                 mass_def=M200)
 
     # Wrong pk2d
     with pytest.raises(TypeError):

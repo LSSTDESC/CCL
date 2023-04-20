@@ -93,7 +93,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
                      ("sigLM", "siglog10M")])
     def __init__(self, *, concentration, nu_GHz, alpha=0.36, T0=24.4,
                  beta=1.75, gamma=1.7, s_z=3.6, log10Meff=12.6,
-                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8, mass_def):
+                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8, mass_def=None):
         self.nu = nu_GHz
         self.alpha = alpha
         self.T0 = T0

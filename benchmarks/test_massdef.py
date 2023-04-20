@@ -22,13 +22,16 @@ cs_200c_p = dc[7]
 cs_200c_di = dc[8]
 
 hmd_vir = ccl.halos.MassDefVir()
-hmd_vir_b = ccl.halos.MassDefVir('Bhattacharya13')
+# hmd_vir_b = ccl.halos.MassDefVir('Bhattacharya13')
+
 hmd_200m = ccl.halos.MassDef200m()
-hmd_200m_b = ccl.halos.MassDef200m('Bhattacharya13')
+# hmd_200m_b = ccl.halos.MassDef200m('Bhattacharya13')
+
 hmd_200c = ccl.halos.MassDef200c()
-hmd_200c_b = ccl.halos.MassDef200c('Bhattacharya13')
-hmd_200c_p = ccl.halos.MassDef200c('Prada12')
-hmd_200c_di = ccl.halos.MassDef200c('Diemer15')
+# hmd_200c_b = ccl.halos.MassDef200c('Bhattacharya13')
+# hmd_200c_p = ccl.halos.MassDef200c('Prada12')
+# hmd_200c_di = ccl.halos.MassDef200c('Diemer15')
+
 hmd_500c = ccl.halos.MassDef(500, 'critical')
 
 
@@ -46,33 +49,34 @@ def test_mdef_get_mass():
     assert np.all(np.fabs(Ms_h/Ms-1) < 1E-6)
 
 
+def get_cm(name, mass_def):
+    return ccl.halos.Concentration.create_instance(name, mass_def=mass_def)
+
+
 def test_mdef_concentration():
-    # Duffy 200 matter
-    cs_200m_dh = hmd_200m.concentration(cosmo, Ms, 1.)
-    # Bhattacharya 200 matter
-    cs_200m_bh = hmd_200m_b.concentration(cosmo, Ms, 1.)
-    # Duffy 200 critical
-    cs_200c_dh = hmd_200c.concentration(cosmo, Ms, 1.)
-    # Bhattacharya 200 critical
-    cs_200c_bh = hmd_200c_b.concentration(cosmo, Ms, 1.)
-    # Klypin virial
-    cs_vir_kh = hmd_vir.concentration(cosmo, Ms, 1.)
-    # Bhattacharya virial
-    cs_vir_bh = hmd_vir_b.concentration(cosmo, Ms, 1.)
-    # Prada 200 critical
-    cs_200c_ph = hmd_200c_p.concentration(cosmo, Ms, 1.)
-    # Diemer 200 critical
-    cs_200c_dih = hmd_200c_di.concentration(cosmo, Ms, 1.)
-    assert np.all(np.fabs(cs_200m_dh/cs_200m_d-1) < 1E-6)
-    assert np.all(np.fabs(cs_200c_dh/cs_200c_d-1) < 1E-6)
-    assert np.all(np.fabs(cs_200m_bh/cs_200m_b-1) < 3E-3)
-    assert np.all(np.fabs(cs_200c_bh/cs_200c_b-1) < 3E-3)
-    assert np.all(np.fabs(cs_200c_ph/cs_200c_p-1) < 1E-3)
-    assert np.all(np.fabs(cs_200c_dih/cs_200c_di-1) < 1E-2)
-    assert np.all(np.fabs(cs_vir_kh/cs_vir_k-1) < 1E-3)
-    assert np.all(np.fabs(cs_vir_bh/cs_vir_b-1) < 3E-3)
+    cs_200m_dh = get_cm("Duffy08", "200m")(cosmo, Ms, 1)
+    cs_200m_bh = get_cm("Bhattacharya13", "200m")(cosmo, Ms, 1)
+    assert np.allclose(cs_200m_dh, cs_200m_d, atol=0, rtol=1e-6)
+    assert np.allclose(cs_200m_bh, cs_200m_b, atol=0, rtol=3e-3)
+
+    cs_200c_dh = get_cm("Duffy08", "200c")(cosmo, Ms, 1)
+    cs_200c_bh = get_cm("Bhattacharya13", "200c")(cosmo, Ms, 1)
+    assert np.allclose(cs_200c_dh, cs_200c_d, atol=0, rtol=1e-6)
+    assert np.allclose(cs_200c_bh, cs_200c_b, atol=0, rtol=3e-3)
+
+    cs_vir_kh = get_cm("Klypin11", "vir")(cosmo, Ms, 1)
+    cs_vir_bh = get_cm("Bhattacharya13", "vir")(cosmo, Ms, 1)
+    assert np.allclose(cs_vir_kh, cs_vir_k, atol=0, rtol=1e-6)
+    assert np.allclose(cs_vir_bh, cs_vir_b, atol=0, rtol=3e-3)
+
+    cs_200c_ph = get_cm("Prada12", "200c")(cosmo, Ms, 1)
+    cs_200c_dih = get_cm("Diemer15", "200c")(cosmo, Ms, 1)
+    assert np.allclose(cs_200c_ph, cs_200c_p, atol=0, rtol=1e-3)
+    assert np.allclose(cs_200c_dih, cs_200c_di, atol=0, rtol=1e-2)
 
 
 def test_mdef_translate_mass():
-    Ms_500c_h = hmd_200m.translate_mass(cosmo, Ms, 1., mass_def_other=hmd_500c)
+    translator = ccl.halos.mass_translator(mass_in=hmd_200m, mass_out=hmd_500c,
+                                           concentration="Duffy08")
+    Ms_500c_h = translator(cosmo, Ms, 1.)
     assert np.all(np.fabs(Ms_500c_h/Ms_500c-1) < 1E-6)

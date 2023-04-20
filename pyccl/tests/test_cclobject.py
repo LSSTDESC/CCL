@@ -68,7 +68,8 @@ def test_CCLObject_immutability():
         cosmo.update_parameters(A_SPLINE_NA=120)
 
     # `update_parameters` implemented.
-    prof = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
+    mdef = ccl.halos.MassDef200c()
+    prof = ccl.halos.HaloProfilePressureGNFW(mass_def=mdef, mass_bias=0.5)
     # with pytest.raises(AttributeError):  # TODO: Uncomment for CCLv3.
     #     prof.mass_bias = 0.7
     assert prof.mass_bias == 0.5

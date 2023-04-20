@@ -72,21 +72,15 @@ def test_get_radius():
         assert np.shape(r) == np.shape(M)
 
 
-def test_concentration():
-    hmd = ccl.halos.MassDef200m()
-    for M in [1E12, [1E12, 2E12],
-              np.array([1E12, 2E12])]:
-        c = hmd.concentration(COSMO, M, 1.)
-        assert np.all(np.isfinite(c))
-        assert np.shape(c) == np.shape(M)
-
-
 def test_translate_mass():
     hmd = ccl.halos.MassDef200m()
     hmdb = ccl.halos.MassDef200c()
+    cm = ccl.halos.Concentration.create_instance("Duffy08", mass_def=hmd)
+    translator = ccl.halos.mass_translator(mass_in=hmd, mass_out=hmdb,
+                                           concentration=cm)
     for M in [1E12, [1E12, 2E12],
               np.array([1E12, 2E12])]:
-        m = hmd.translate_mass(COSMO, M, 1., mass_def_other=hmdb)
+        m = translator(COSMO, M, 1)
         assert np.all(np.isfinite(m))
         assert np.shape(m) == np.shape(M)
 

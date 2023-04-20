@@ -44,7 +44,7 @@ class HaloProfileEinasto(HaloProfileMatter):
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration, truncated=True, alpha='cosmo',
-                 mass_def):
+                 mass_def=None):
         self.truncated = truncated
         self.alpha = alpha
         super().__init__(mass_def=mass_def, concentration=concentration)

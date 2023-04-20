@@ -72,8 +72,8 @@ def test_cosmo_methods():
         cosmo.rho_x(1., "matter", is_comoving=False)
     assert ccl.get_camb_pk_lin(cosmo)(1., 1., cosmo) == \
         cosmo.get_camb_pk_lin()(1., 1., cosmo)
-    prof = ccl.halos.HaloProfilePressureGNFW()
     hmd = ccl.halos.MassDef200m()
+    prof = ccl.halos.HaloProfilePressureGNFW(mass_def=hmd)
     hmf = ccl.halos.MassFuncTinker08()
     hbf = ccl.halos.HaloBiasTinker10()
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,

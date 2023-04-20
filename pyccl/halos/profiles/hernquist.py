@@ -52,7 +52,7 @@ class HaloProfileHernquist(HaloProfileMatter):
                  fourier_analytic=False,
                  projected_analytic=False,
                  cumul2d_analytic=False,
-                 mass_def):
+                 mass_def=None):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic

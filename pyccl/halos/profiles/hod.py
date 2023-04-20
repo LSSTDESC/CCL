@@ -131,7 +131,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
                  log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False, mass_def):
+                 a_pivot=1., ns_independent=False, mass_def=None):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p
         self.log10M0_0 = log10M0_0
@@ -250,8 +250,8 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         # Comoving virial radius
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
-        R_M = self.mass_concentration.get_radius(cosmo, M_use, a) / a
-        c_M = self.mass_concentration.get_concentration(cosmo, M_use, a)
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
