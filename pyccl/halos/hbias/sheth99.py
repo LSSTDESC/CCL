@@ -1,11 +1,8 @@
-from ... import ccllib as lib
-from ...base import warn_api
-from ...base.parameters import physical_constants as const
-from ...core import check
-from ..halo_model_base import HaloBias
-
-
 __all__ = ("HaloBiasSheth99",)
+
+from ... import check, lib, warn_api
+from ... import physical_constants as const
+from . import HaloBias
 
 
 class HaloBiasSheth99(HaloBias):

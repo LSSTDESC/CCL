@@ -2,26 +2,46 @@
 the cosmology and parameters objects used to instantiate a model from which one
 can compute a set of theoretical predictions.
 """
-import warnings
-import numpy as np
-import yaml
-from inspect import getmembers, isfunction, signature
+__all__ = ("TransferFunctions", "MatterPowerSpectra",
+           "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
 
-from . import ccllib as lib
-from .errors import CCLError, CCLWarning
-from ._types import error_types
-from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
-from .pyutils import check
-from .pk2d import Pk2D
-from .bcm import bcm_correct_pk2d
-from .base import CCLObject, cache, unlock_instance
-from .base.parameters import gsl_params, spline_params, CosmologyParams
-from .base.parameters import physical_constants as const
+import warnings
+import yaml
+from enum import Enum
+from inspect import getmembers, isfunction, signature
+from numbers import Real
+from typing import Iterable
+
+import numpy as np
+
+from . import (
+    CCLError, CCLDeprecationWarning, CCLObject, CLevelErrors, CosmologyParams,
+    DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, cache, check, gsl_params, lib,
+    spline_params, unlock_instance, warn_api, deprecated)
+from . import physical_constants as const
+
+
+class TransferFunctions(Enum):
+    BBKS = "bbks"
+    EISENSTEIN_HU = "eisenstein_hu"
+    EISENSTEIN_HU_NOWIGGLES = "eisenstein_hu_nowiggles"
+    BOLTZMANN_CLASS = "boltzmann_class"
+    BOLTZMANN_CAMB = "boltzmann_camb"
+    BOLTZMANN_ISITGR = "boltzmann_isitgr"
+    CALCULATOR = "calculator"
+
+
+class MatterPowerSpectra(Enum):
+    LINEAR = "linear"
+    HALOFIT = "halofit"
+    HALOMODEL = "halomodel"
+    EMU = "emu"
+    CAMB = "camb"
+    CALCULATOR = "calculator"
 
 
 # Configuration types
 transfer_function_types = {
-    None: lib.transfer_none,
     'eisenstein_hu': lib.eisenstein_hu,
     'eisenstein_hu_nowiggles': lib.eisenstein_hu_nowiggles,
     'bbks': lib.bbks,
@@ -31,8 +51,8 @@ transfer_function_types = {
     'calculator': lib.pklin_from_input
 }
 
+
 matter_power_spectrum_types = {
-    None: lib.pknl_none,
     'halo_model': lib.halo_model,
     'halofit': lib.halofit,
     'linear': lib.linear,
@@ -45,9 +65,6 @@ baryons_power_spectrum_types = {
     'nobaryons': lib.nobaryons,
     'bcm': lib.bcm
 }
-
-# List which transfer functions can be used with the muSigma_MG
-# parameterisation of modified gravity
 
 mass_function_types = {
     'angulo': lib.angulo,
@@ -68,15 +85,11 @@ emulator_neutrinos_types = {
     'equalize': lib.emu_equalize
 }
 
-
-class _Defaults:
-    """Default cosmological parameters used throughout the library."""
-    T_CMB = 2.725
-    T_ncdm = 0.71611
+_TOP_LEVEL_MODULES = ("",)
 
 
-def _methods_of_cosmology(cls=None, *, modules=[]):
-    """Assign all functions in ``modules`` which take ``cosmo`` as their
+def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
+    """Assign all functions in ``modules`` which take ``name`` as their
     first argument as methods of the class ``cls``.
     """
     import functools
@@ -84,7 +97,7 @@ def _methods_of_cosmology(cls=None, *, modules=[]):
 
     if cls is None:
         # called with parentheses
-        return functools.partial(_methods_of_cosmology, modules=modules)
+        return functools.partial(_make_methods, modules=modules)
 
     pkg = __name__.rsplit(".")[0]
     modules = [import_module(f".{module}", pkg) for module in modules]
@@ -99,12 +112,7 @@ def _methods_of_cosmology(cls=None, *, modules=[]):
     return cls
 
 
-_modules = ["background", "bcm", "boltzmann", "cells", "correlations",
-            "covariances", "neutrinos", "pk2d", "power", "pyutils",
-            "tk3d", "tracers", "halos", "nl_pt"]
-
-
-@_methods_of_cosmology(modules=_modules)
+@_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
 class Cosmology(CCLObject):
     """A cosmology including parameters and associated data.
 
@@ -153,11 +161,15 @@ class Cosmology(CCLObject):
             parameters.
         Neff (:obj:`float`, optional): Effective number of massless
             neutrinos present. Defaults to 3.046.
-        m_nu (:obj:`float`, optional): Total mass in eV of the massive
-            neutrinos present. Defaults to 0.
-        m_nu_type (:obj:`str`, optional): The type of massive neutrinos. Should
-            be one of 'inverted', 'normal', 'equal', 'single', or 'list'.
-            The default of None is the same as 'normal'.
+        m_nu (:obj:`float` or array_like, optional):
+            Mass in eV of the massive neutrinos present. Defaults to 0.
+            If a sequence is passed, it is assumed that the elements of the
+            sequence represent the individual neutrino masses.
+        mass_split (:obj:`str`, optional): Type of massive neutrinos. Should
+            be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
+            the mass as being held by one massive neutrino. The other options
+            split the mass into 3 massive neutrinos. Ignored if a sequence is
+            passed in m_nu. Default is 'normal'.
         w0 (:obj:`float`, optional): First order term of dark energy equation
             of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy equation
@@ -210,7 +222,7 @@ class Cosmology(CCLObject):
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
-            m_nu_type = 'equal', and 'equalize', which will redistribute
+            mass_split = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emulator but results in
             internal inconsistencies. Defaults to 'strict'.
         extra_parameters (:obj:`dict`, optional): Dictionary holding extra
@@ -241,28 +253,80 @@ class Cosmology(CCLObject):
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_spline_params", "_gsl_params",)
 
+    @warn_api(pairs=[("m_nu_type", "mass_split")])
     def __init__(
-            self, Omega_c=None, Omega_b=None, h=None, n_s=None,
+            self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
-            Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=_Defaults.T_CMB,
-            bcm_log10Mc=np.log10(1.2e14), bcm_etab=0.5,
-            bcm_ks=55., mu_0=0., sigma_0=0.,
-            c1_mg=1., c2_mg=1., lambda_mg=0., z_mg=None, df_mg=None,
+            Neff=None, m_nu=0., mass_split='normal', w0=-1., wa=0.,
+            T_CMB=DefaultParams.T_CMB,
+            bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
+            mu_0=0, sigma_0=0, c1_mg=1, c2_mg=1, lambda_mg=0,
+            z_mg=None, df_mg=None,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
-            baryons_power_spectrum='nobaryons',
-            mass_function='tinker10',
-            halo_concentration='duffy2008',
-            emulator_neutrinos='strict',
+            baryons_power_spectrum=None,
+            mass_function=None,
+            halo_concentration=None,
+            emulator_neutrinos=None,
             extra_parameters=None,
-            T_ncdm=_Defaults.T_ncdm):
+            T_ncdm=DefaultParams.T_ncdm):
+
+        # DEPRECATIONS
+        warn = warnings.warn
+        msg = lambda par: f"{par} is deprecated in Cosmology."  # noqa
+
+        if Neff is None:
+            warn("Neff will change from 3.046 to 3.044 in CCLv3.0.0.",
+                 CCLDeprecationWarning)
+            Neff = 3.046
+        if mass_function is None:
+            mass_function = "tinker10"
+        else:
+            warn(f"{msg('mass_function')} Use the halo model functionality.",
+                 CCLDeprecationWarning)
+        if halo_concentration is None:
+            halo_concentration = "duffy2008"
+        else:
+            warn(f"{msg('halo_concentration')} Use the halo model "
+                 "functionality.", CCLDeprecationWarning)
+        if bcm_log10Mc is None:
+            bcm_log10Mc = np.log10(1.2e14)
+        else:
+            warn(f"{msg('bcm_log10Mc')} Use the baryons functionality.",
+                 CCLDeprecationWarning)
+        if bcm_etab is None:
+            bcm_etab = 0.5
+        else:
+            warn(f"{msg('bcm_etab')} Use the baryons functionality.",
+                 CCLDeprecationWarning)
+        if bcm_ks is None:
+            bcm_ks = 55.
+        else:
+            warn(f"{msg('bcm_ks')} Use the baryons functionality.",
+                 CCLDeprecationWarning)
+        if baryons_power_spectrum is None:
+            baryons_power_spectrum = "nobaryons"
+        else:
+            warn(f"{msg('baryons_power_spectrum')} Use the baryons "
+                 "functionality.", CCLDeprecationWarning)
+        if z_mg is not None or df_mg is not None:
+            warn("z_mg and df_mg are deprecated from Cosmology. Custom growth "
+                 "arrays can be passed to CosmologyCalculator.",
+                 CCLDeprecationWarning)
+        extra_parameters = extra_parameters or {}
+        if emulator_neutrinos is not None:
+            warn("emulator_neutrinos has been moved to extra_parameters  "
+                 "and can be specified using e.g. "
+                 "{'emu': {'neutrinos': 'strict'}}.", CCLDeprecationWarning)
+            extra_parameters["emu"] = {"neutrinos": emulator_neutrinos}
+        if "emu" not in extra_parameters:
+            extra_parameters["emu"] = {"neutrinos": "strict"}
 
         # going to save these for later
         self._params_init_kwargs = dict(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
-            m_nu_type=m_nu_type, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
+            mass_split=mass_split, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
             bcm_log10Mc=bcm_log10Mc,
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
@@ -275,7 +339,7 @@ class Cosmology(CCLObject):
             baryons_power_spectrum=baryons_power_spectrum,
             mass_function=mass_function,
             halo_concentration=halo_concentration,
-            emulator_neutrinos=emulator_neutrinos)
+            extra_parameters=extra_parameters)
 
         self._build_cosmo()
 
@@ -293,11 +357,9 @@ class Cosmology(CCLObject):
         self._gsl_params = gsl_params.copy()
 
         if self.cosmo.status != 0:
-            raise CCLError(
-                "(%d): %s"
-                % (self.cosmo.status, self.cosmo.status_message))
+            raise CCLError(f"{self.cosmo.status}: {self.cosmo.status_message}")
 
-    def write_yaml(self, filename):
+    def write_yaml(self, filename, *, sort_keys=False):
         """Write a YAML representation of the parameters to file.
 
         Args:
@@ -305,27 +367,22 @@ class Cosmology(CCLObject):
                 "parameters to."
         """
         def make_yaml_friendly(d):
+            # serialize numpy types and dicts
             for k, v in d.items():
-                if isinstance(v, float):
-                    d[k] = float(v)
-                elif isinstance(v, int):
+                if isinstance(v, int):
                     d[k] = int(v)
-                elif isinstance(v, bool):
-                    d[k] = bool(v)
+                elif isinstance(v, float):
+                    d[k] = float(v)
                 elif isinstance(v, dict):
                     make_yaml_friendly(v)
 
-        params = {**self._params_init_kwargs,
-                  **self._config_init_kwargs}
+        params = {**self._params_init_kwargs, **self._config_init_kwargs}
         make_yaml_friendly(params)
 
         if isinstance(filename, str):
             with open(filename, "w") as fp:
-                yaml.dump(params, fp,
-                          default_flow_style=False, sort_keys=False)
-        else:
-            yaml.dump(params, filename,
-                      default_flow_style=False, sort_keys=False)
+                return yaml.dump(params, fp, sort_keys=sort_keys)
+        return yaml.dump(params, filename, sort_keys=sort_keys)
 
     @classmethod
     def read_yaml(cls, filename, **kwargs):
@@ -336,35 +393,17 @@ class Cosmology(CCLObject):
                 parameters from.
             **kwargs (dict) Additional keywords that supersede file contents
         """
+        loader = yaml.Loader
         if isinstance(filename, str):
             with open(filename, 'r') as fp:
-                params = yaml.load(fp, Loader=yaml.Loader)
-        else:
-            params = yaml.load(filename, Loader=yaml.Loader)
-
-        if "sigma8" in params and params["sigma8"] == "nan":
-            del params["sigma8"]
-        if "A_s" in params and params["A_s"] == "nan":
-            del params["A_s"]
-
-        # Get the call signature of Cosmology (i.e., the names of
-        # all arguments)
-        init_param_names = signature(cls).parameters.keys()
-
-        # Read the values we need from the loaded yaml dictionary. Missing
-        # values take their default values from Cosmology.__init__
-        inits = {k: params[k] for k in init_param_names if k in params}
-
-        # Overwrite with extra values
-        inits.update(kwargs)
-
-        return cls(**inits)
+                return cls(**{**yaml.load(fp, Loader=loader), **kwargs})
+        return cls(**{**yaml.load(filename, Loader=loader), **kwargs})
 
     def _build_config(
             self, transfer_function=None, matter_power_spectrum=None,
             baryons_power_spectrum=None,
             mass_function=None, halo_concentration=None,
-            emulator_neutrinos=None):
+            extra_parameters=None):
         """Build a ccl_configuration struct.
 
         This function builds C ccl_configuration struct. This structure
@@ -376,72 +415,35 @@ class Cosmology(CCLObject):
         It also does some error checking on the inputs to make sure they
         are valid and physically consistent.
         """
-
-        # Check validity of configuration-related arguments
-        if transfer_function not in transfer_function_types.keys():
-            raise ValueError(
-                "'%s' is not a valid transfer_function type. "
-                "Available options are: %s"
-                % (transfer_function,
-                   transfer_function_types.keys()))
-        if matter_power_spectrum not in matter_power_spectrum_types.keys():
-            raise ValueError(
-                "'%s' is not a valid matter_power_spectrum "
-                "type. Available options are: %s"
-                % (matter_power_spectrum,
-                   matter_power_spectrum_types.keys()))
-        if (baryons_power_spectrum not in
-                baryons_power_spectrum_types.keys()):
-            raise ValueError(
-                "'%s' is not a valid baryons_power_spectrum "
-                "type. Available options are: %s"
-                % (baryons_power_spectrum,
-                   baryons_power_spectrum_types.keys()))
-        if mass_function not in mass_function_types.keys():
-            raise ValueError(
-                "'%s' is not a valid mass_function type. "
-                "Available options are: %s"
-                % (mass_function,
-                   mass_function_types.keys()))
-        if halo_concentration not in halo_concentration_types.keys():
-            raise ValueError(
-                "'%s' is not a valid halo_concentration type. "
-                "Available options are: %s"
-                % (halo_concentration,
-                   halo_concentration_types.keys()))
-        if emulator_neutrinos not in emulator_neutrinos_types.keys():
-            raise ValueError("'%s' is not a valid emulator neutrinos "
-                             "method. Available options are: %s"
-                             % (emulator_neutrinos,
-                                emulator_neutrinos_types.keys()))
         if (matter_power_spectrum == "camb"
                 and transfer_function != "boltzmann_camb"):
             raise CCLError(
                 "To compute the non-linear matter power spectrum with CAMB "
                 "the transfer function should be 'boltzmann_camb'.")
 
-        # Assign values to new ccl_configuration object
         config = lib.configuration()
-
-        config.transfer_function_method = \
-            transfer_function_types[transfer_function]
-        config.matter_power_spectrum_method = \
-            matter_power_spectrum_types[matter_power_spectrum]
-        config.baryons_power_spectrum_method = \
-            baryons_power_spectrum_types[baryons_power_spectrum]
-        config.mass_function_method = \
-            mass_function_types[mass_function]
-        config.halo_concentration_method = \
-            halo_concentration_types[halo_concentration]
-        config.emulator_neutrinos_method = \
-            emulator_neutrinos_types[emulator_neutrinos]
+        tf = transfer_function_types[transfer_function]
+        config.transfer_function_method = tf
+        mps = matter_power_spectrum_types[matter_power_spectrum]
+        config.matter_power_spectrum_method = mps
+        # TODO: Remove for CCLv3.
+        bps = baryons_power_spectrum_types[baryons_power_spectrum]
+        config.baryons_power_spectrum_method = bps
+        # TODO: Remove for CCLv3.
+        mf = mass_function_types[mass_function]
+        config.mass_function_method = mf
+        # TODO: Remove for CCLv3.
+        cm = halo_concentration_types[halo_concentration]
+        config.halo_concentration_method = cm
+        ent = extra_parameters["emu"]["neutrinos"]
+        config.emulator_neutrinos_method = emulator_neutrinos_types[ent]
 
         # Store ccl_configuration for later access
         self._config = config
 
     def _build_parameters(
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
-            A_s=None, Omega_k=None, Neff=None, m_nu=None, m_nu_type=None,
+            A_s=None, Omega_k=None, Neff=None, m_nu=None, mass_split=None,
             w0=None, wa=None, T_CMB=None, T_ncdm=None,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=None, sigma_0=None, c1_mg=None, c2_mg=None, lambda_mg=None,
@@ -454,7 +456,7 @@ class Cosmology(CCLObject):
         Omega_g = np.nan if Omega_g is None else Omega_g
 
         # Check to make sure Omega_k is within reasonable bounds.
-        if Omega_k is not None and Omega_k < -1.0135:
+        if Omega_k < -1.0135:
             raise ValueError("Omega_k must be more than -1.0135.")
 
         # Modified growth.
@@ -465,155 +467,49 @@ class Cosmology(CCLObject):
             if z_mg.shape != df_mg.shape:
                 raise ValueError("Shape mismatch for z_mg and df_mg.")
 
-        # Check to make sure specified amplitude parameter is consistent
+        # Check to make sure specified amplitude parameter is consistent.
         if [A_s, sigma8].count(np.nan) != 1:
             raise ValueError("Set either A_s or sigma8 and not both.")
 
-        # Check if any compulsory parameters are not set
-        compul = [Omega_c, Omega_b, Omega_k, w0, wa, h, n_s]
-        names = ['Omega_c', 'Omega_b', 'Omega_k', 'w0', 'wa', 'h', 'n_s']
-        for name, item in zip(names, compul):
-            if item is None:
-                raise ValueError(f"Must set parameter {name}.")
+        # Check if any compulsory parameters are not set.
+        compul = {"Omega_c": Omega_c, "Omega_b": Omega_b, "h": h, "n_s": n_s}
+        for param, value in compul.items():
+            if value is None:
+                raise ValueError(f"Must set parameter {param}.")
 
-        # Make sure the neutrino parameters are consistent
-        # and if a sum is given for mass, split into three masses.
-        if hasattr(m_nu, "__len__"):
-            if (len(m_nu) != 3):
-                raise ValueError("m_nu must be a float or array-like object "
-                                 "with length 3.")
-            elif m_nu_type in ['normal', 'inverted', 'equal']:
-                raise ValueError(
-                    "m_nu_type '%s' cannot be passed with a list "
-                    "of neutrino masses, only with a sum." % m_nu_type)
-            elif m_nu_type is None:
-                m_nu_type = 'list'  # False
-            mnu_list = [0]*3
-            for i in range(0, 3):
-                mnu_list[i] = m_nu[i]
-
-        else:
-            try:
-                m_nu = float(m_nu)
-            except Exception:
-                raise ValueError(
-                    "m_nu must be a float or array-like object with "
-                    "length 3.")
-
-            if m_nu_type is None:
-                m_nu_type = 'normal'
-            m_nu = [m_nu]
-            if (m_nu_type == 'normal'):
-                if (m_nu[0] < (np.sqrt(7.62E-5) + np.sqrt(2.55E-3))
-                        and (m_nu[0] > 1e-15)):
-                    raise ValueError("if m_nu_type is 'normal', we are "
-                                     "using the normal hierarchy and so "
-                                     "m_nu must be greater than (~)0.0592 "
-                                     "(or zero)")
-
-                # Split the sum into 3 masses under normal hierarchy.
-                if (m_nu[0] > 1e-15):
-                    mnu_list = [0]*3
-                    # This is a starting guess.
-                    mnu_list[0] = 0.
-                    mnu_list[1] = np.sqrt(7.62E-5)
-                    mnu_list[2] = np.sqrt(2.55E-3)
-                    sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
-                    # This is the Newton's method
-                    while (np.abs(m_nu[0] - sum_check) > 1e-15):
-                        dsdm1 = (1. + mnu_list[0] / mnu_list[1]
-                                 + mnu_list[0] / mnu_list[2])
-                        mnu_list[0] = mnu_list[0] - (sum_check
-                                                     - m_nu[0]) / dsdm1
-                        mnu_list[1] = np.sqrt(mnu_list[0]*mnu_list[0]
-                                              + 7.62E-5)
-                        mnu_list[2] = np.sqrt(mnu_list[0]*mnu_list[0]
-                                              + 2.55E-3)
-                        sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
-
-            elif (m_nu_type == 'inverted'):
-                if (m_nu[0] < (np.sqrt(2.43e-3 - 7.62e-5) + np.sqrt(2.43e-3))
-                        and (m_nu[0] > 1e-15)):
-                    raise ValueError("if m_nu_type is 'inverted', we "
-                                     "are using the inverted hierarchy "
-                                     "and so m_nu must be greater than "
-                                     "(~)0.0978 (or zero)")
-                # Split the sum into 3 masses under inverted hierarchy.
-                if (m_nu[0] > 1e-15):
-                    mnu_list = [0]*3
-                    mnu_list[0] = 0.  # This is a starting guess.
-                    mnu_list[1] = np.sqrt(2.43e-3 - 7.62E-5)
-                    mnu_list[2] = np.sqrt(2.43e-3)
-                    sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
-                    # This is the Newton's method
-                    while (np.abs(m_nu[0] - sum_check) > 1e-15):
-                        dsdm1 = (1. + (mnu_list[0] / mnu_list[1])
-                                 + (mnu_list[0] / mnu_list[2]))
-                        mnu_list[0] = mnu_list[0] - (sum_check
-                                                     - m_nu[0]) / dsdm1
-                        mnu_list[1] = np.sqrt(mnu_list[0]*mnu_list[0]
-                                              + 7.62E-5)
-                        mnu_list[2] = np.sqrt(mnu_list[0]*mnu_list[0]
-                                              - 2.43e-3)
-                        sum_check = mnu_list[0] + mnu_list[1] + mnu_list[2]
-            elif (m_nu_type == 'equal'):
-                mnu_list = [0]*3
-                mnu_list[0] = m_nu[0]/3.
-                mnu_list[1] = m_nu[0]/3.
-                mnu_list[2] = m_nu[0]/3.
-            elif (m_nu_type == 'single'):
-                mnu_list = [0]*3
-                mnu_list[0] = m_nu[0]
-                mnu_list[1] = 0.
-                mnu_list[2] = 0.
-
-        # Check which of the neutrino species are non-relativistic today
-        N_nu_mass = 0
-        if (np.abs(np.amax(m_nu) > 1e-15)):
-            for i in range(0, 3):
-                if (mnu_list[i] > 0.00017):  # Lesgourges et al. 2012
-                    N_nu_mass = N_nu_mass + 1
-            N_nu_rel = Neff - (N_nu_mass * T_ncdm**4 * (4./11.)**(-4./3.))
-            if N_nu_rel < 0.:
-                raise ValueError("Neff and m_nu must result in a number "
-                                 "of relativistic neutrino species greater "
-                                 "than or equal to zero.")
-
-        # Fill an array with the non-relativistic neutrino masses
-        if N_nu_mass > 0:
-            nu_mass = [0]*N_nu_mass
-            relativistic = [0]*3
-            for i in range(0, N_nu_mass):
-                for j in range(0, 3):
-                    if (mnu_list[j] > 0.00017 and relativistic[j] == 0):
-                        relativistic[j] = 1
-                        nu_mass[i] = mnu_list[j]
-                        break
-        else:
-            nu_mass = [0.]
+        # Make sure the neutrino parameters are consistent.
+        if not isinstance(m_nu, (Real, Iterable)):
+            raise ValueError("m_nu must be float or sequence")
 
         c = const
-        # Curvature parameters.
+        # Initialize curvature.
         k_sign = -np.sign(Omega_k) if np.abs(Omega_k) > 1e-6 else 0
         sqrtk = np.sqrt(np.abs(Omega_k)) * h / c.CLIGHT_HMPC
 
-        # Fixed radiation parameters: (Omega_g h^2) is known from T_CMB.
+        # Initialize radiation.
         rho_g = 4 * c.STBOLTZ / c.CLIGHT**3 * T_CMB**4
         rho_crit = c.RHO_CRITICAL * c.SOLAR_MASS / c.MPC_TO_METER**3 * h**2
 
-        # Get the N_nu_rel from Neff and N_nu_mass.
-        N_nu_rel = Neff - N_nu_mass * T_ncdm**4 / (4/11)**(4/3)
+        # Initialize neutrinos.
+        g = (4/11)**(1/3)
+        T_nu = g * T_CMB
+        massless_limit = T_nu * c.KBOLTZ / c.EV_IN_J
 
-        # Temperature of the relativistic neutrinos in K.
-        T_nu = T_CMB * (4/11)**(1/3)
+        from .neutrinos import nu_masses
+        mnu_list = nu_masses(m_nu=m_nu, mass_split=mass_split)
+        nu_mass = mnu_list[mnu_list > massless_limit]
+        N_nu_mass = len(nu_mass)
+        N_nu_rel = Neff - N_nu_mass * (T_ncdm/g)**4
+
         rho_nu_rel = N_nu_rel * (7/8) * 4 * c.STBOLTZ / c.CLIGHT**3 * T_nu**4
         Omega_nu_rel = rho_nu_rel / rho_crit
+        Omega_nu_mass = self._OmNuh2(nu_mass, N_nu_mass, T_CMB, T_ncdm) / h**2
 
-        # For non-relativistic neutrinos, calculate the phase-space integral.
-        self._fill_params(m_nu=nu_mass, N_nu_mass=N_nu_mass,
-                          T_CMB=T_CMB, T_ncdm=T_ncdm, h=h)
-        Omega_nu_mass = self._get_Omega_nu()
+        if N_nu_rel < 0:
+            raise ValueError("Unphysical Neff and m_nu combination results to "
+                             "negative number of relativistic neutrinos.")
 
+        # Initialize matter & dark energy.
         Omega_m = Omega_b + Omega_c + Omega_nu_mass
         Omega_l = 1 - Omega_m - rho_g/rho_crit - Omega_nu_rel - Omega_k
         if np.isnan(Omega_g):
@@ -624,11 +520,12 @@ class Cosmology(CCLObject):
             Omega_l += rho_g/rho_crit - Omega_g
 
         self._fill_params(
-            sum_nu_masses=sum(nu_mass), N_nu_rel=N_nu_rel, Neff=Neff,
-            Omega_nu_mass=Omega_nu_mass, Omega_nu_rel=Omega_nu_rel,
-            Omega_m=Omega_m, Omega_c=Omega_c, Omega_b=Omega_b, Omega_k=Omega_k,
-            sqrtk=sqrtk, k_sign=int(k_sign), Omega_g=Omega_g, w0=w0, wa=wa,
-            Omega_l=Omega_l, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
+            m_nu=nu_mass, sum_nu_masses=sum(nu_mass), N_nu_mass=N_nu_mass,
+            N_nu_rel=N_nu_rel, Neff=Neff, Omega_nu_mass=Omega_nu_mass,
+            Omega_nu_rel=Omega_nu_rel, Omega_m=Omega_m, Omega_c=Omega_c,
+            Omega_b=Omega_b, Omega_k=Omega_k, sqrtk=sqrtk, k_sign=int(k_sign),
+            T_CMB=T_CMB, T_ncdm=T_ncdm, Omega_g=Omega_g, w0=w0, wa=wa,
+            Omega_l=Omega_l, h=h, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
             mu_0=mu_0, sigma_0=sigma_0, c1_mg=c1_mg, c2_mg=c2_mg,
             lambda_mg=lambda_mg,
             bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab, bcm_ks=bcm_ks)
@@ -636,6 +533,12 @@ class Cosmology(CCLObject):
         # Modified growth (deprecated)
         if z_mg is not None:
             self._params.mgrowth = [z_mg, df_mg]
+
+    def _OmNuh2(self, m_nu, N_nu_mass, T_CMB, T_ncdm):
+        # Compute OmNuh2 today.
+        ret, st = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm, [1], m_nu, 1, 0)
+        check(st)
+        return ret[0]
 
     def _fill_params(self, **kwargs):
         if not hasattr(self, "_params"):
@@ -695,27 +598,6 @@ class Cosmology(CCLObject):
         """Compute the growth function."""
         if self.has_growth:
             return
-        if self['N_nu_mass'] > 0:
-            warnings.warn(
-                "CCL does not properly compute the linear growth rate in "
-                "cosmological models with massive neutrinos!",
-                category=CCLWarning)
-
-            if self._params_init_kwargs['df_mg'] is not None:
-                warnings.warn(
-                    "Modified growth rates via the `df_mg` keyword argument "
-                    "cannot be consistently combined with cosmological models "
-                    "with massive neutrinos in CCL!",
-                    category=CCLWarning)
-
-            if (self._params_init_kwargs['mu_0'] > 0 or
-                    self._params_init_kwargs['sigma_0'] > 0):
-                warnings.warn(
-                    "Modified growth rates via the mu-Sigma model "
-                    "cannot be consistently combined with cosmological models "
-                    "with massive neutrinos in CCL!",
-                    category=CCLWarning)
-
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
@@ -723,23 +605,6 @@ class Cosmology(CCLObject):
     @cache(maxsize=3)
     def _compute_linear_power(self):
         """Return the linear power spectrum."""
-        if (self['N_nu_mass'] > 0 and
-                self._config_init_kwargs['transfer_function'] in
-                ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles', ]):
-            warnings.warn(
-                "The '%s' linear power spectrum model does not properly "
-                "account for massive neutrinos!" %
-                self._config_init_kwargs['transfer_function'],
-                category=CCLWarning)
-
-        if self._config_init_kwargs['matter_power_spectrum'] == 'emu':
-            warnings.warn(
-                "None of the linear power spectrum models in CCL are "
-                "consistent with that implicitly used in the emulated "
-                "non-linear power spectrum!",
-                category=CCLWarning)
-
-        # needed to init some models
         self.compute_growth()
 
         # Populate power spectrum splines
@@ -747,14 +612,11 @@ class Cosmology(CCLObject):
         pk = None
         rescale_s8 = True
         rescale_mg = True
-        if trf is None:
-            raise CCLError("You want to compute the linear power spectrum, "
-                           "but you selected `transfer_function=None`.")
-        elif trf == 'boltzmann_class':
-            pk = get_class_pk_lin(self)
+        if trf == 'boltzmann_class':
+            pk = self.get_class_pk_lin()
         elif trf == 'boltzmann_isitgr':
             rescale_mg = False
-            pk = get_isitgr_pk_lin(self)
+            pk = self.get_isitgr_pk_lin()
         elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
             rescale_s8 = False
             rescale_mg = False
@@ -767,20 +629,16 @@ class Cosmology(CCLObject):
         # status variable to use it later if the transfer function is CAMB too.
         pkl = None
         if self._config_init_kwargs["matter_power_spectrum"] == "camb":
-            if abs(self["mu_0"]) > 1e-14:
-                warnings.warn("CAMB doesn't compute non-linear power spectra "
-                              "consistently with mu_0 > 0.", CCLWarning)
             if not np.isfinite(self["A_s"]):
                 raise CCLError("CAMB doesn't rescale non-linear power spectra "
                                "consistently without A_s.")
-
             # no rescaling because A_s is necessarily provided
             rescale_mg = rescale_s8 = False
             name = "delta_matter:delta_matter"
-            pkl, self._pk_nl[name] = get_camb_pk_lin(self, nonlin=True)
+            pkl, self._pk_nl[name] = self.get_camb_pk_lin(nonlin=True)
 
         if trf == "boltzmann_camb":
-            pk = pkl if pkl is not None else get_camb_pk_lin(self)
+            pk = pkl if pkl is not None else self.get_camb_pk_lin()
 
         # Rescale by sigma8/mu-sigma if needed
         if pk:
@@ -798,71 +656,49 @@ class Cosmology(CCLObject):
         """Compute the linear power spectrum."""
         if self.has_linear_power:
             return
-        pk = self._compute_linear_power()
-        # Assign
-        self._pk_lin['delta_matter:delta_matter'] = pk
+        self._pk_lin[DEFAULT_POWER_SPECTRUM] = self._compute_linear_power()
 
     def _get_halo_model_nonlin_power(self):
+        warnings.warn(
+            "The halo model option for the internal CCL matter power "
+            "spectrum is deprecated. Use the more general functionality "
+            "in the `halos` module.", category=CCLDeprecationWarning)
+
         from . import halos as hal
         mdef = hal.MassDef('vir', 'matter')
         conc = self._config.halo_concentration_method
         mfm = self._config.mass_function_method
 
         if conc == lib.bhattacharya2011:
-            c = hal.ConcentrationBhattacharya13(mdef=mdef)
+            c = hal.ConcentrationBhattacharya13(mass_def=mdef)
         elif conc == lib.duffy2008:
-            c = hal.ConcentrationDuffy08(mdef=mdef)
+            c = hal.ConcentrationDuffy08(mass_def=mdef)
         elif conc == lib.constant_concentration:
-            c = hal.ConcentrationConstant(c=4., mdef=mdef)
+            c = hal.ConcentrationConstant(c=4., mass_def=mdef)
 
         if mfm == lib.tinker10:
-            hmf = hal.MassFuncTinker10(self, mass_def=mdef,
+            hmf = hal.MassFuncTinker10(mass_def=mdef,
                                        mass_def_strict=False)
-            hbf = hal.HaloBiasTinker10(self, mass_def=mdef,
+            hbf = hal.HaloBiasTinker10(mass_def=mdef,
                                        mass_def_strict=False)
         elif mfm == lib.shethtormen:
-            hmf = hal.MassFuncSheth99(self, mass_def=mdef,
+            hmf = hal.MassFuncSheth99(mass_def=mdef,
                                       mass_def_strict=False,
                                       use_delta_c_fit=True)
-            hbf = hal.HaloBiasSheth99(self, mass_def=mdef,
+            hbf = hal.HaloBiasSheth99(mass_def=mdef,
                                       mass_def_strict=False)
         else:
             raise ValueError("Halo model spectra not available for your "
                              "current choice of mass function with the "
                              "deprecated implementation.")
-        prf = hal.HaloProfileNFW(c)
-        hmc = hal.HMCalculator(self, hmf, hbf, mdef)
-        return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
+        prf = hal.HaloProfileNFW(concentration=c)
+        hmc = hal.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                               mass_def=mdef)
+        return hal.halomod_Pk2D(self, hmc, prf)
 
     @cache(maxsize=3)
     def _compute_nonlin_power(self):
         """Return the non-linear power spectrum."""
-        if self._config_init_kwargs['matter_power_spectrum'] != 'linear':
-            if self._params_init_kwargs['df_mg'] is not None:
-                warnings.warn(
-                    "Modified growth rates via the `df_mg` keyword argument "
-                    "cannot be consistently combined with '%s' for "
-                    "computing the non-linear power spectrum!" %
-                    self._config_init_kwargs['matter_power_spectrum'],
-                    category=CCLWarning)
-
-            if (self._params_init_kwargs['mu_0'] != 0 or
-                    self._params_init_kwargs['sigma_0'] != 0):
-                warnings.warn(
-                    "mu-Sigma modified cosmologies "
-                    "cannot be consistently combined with '%s' "
-                    "for computing the non-linear power spectrum!" %
-                    self._config_init_kwargs['matter_power_spectrum'],
-                    category=CCLWarning)
-
-        if (self['N_nu_mass'] > 0 and
-                self._config_init_kwargs['baryons_power_spectrum'] == 'bcm'):
-            warnings.warn(
-                "The BCM baryonic correction model's default parameters "
-                "were not calibrated for cosmological models with "
-                "massive neutrinos!",
-                category=CCLWarning)
-
         self.compute_distances()
 
         # Populate power spectrum splines
@@ -873,32 +709,25 @@ class Cosmology(CCLObject):
 
         if mps == "camb" and self.has_nonlin_power:
             # Already computed
-            return self._pk_nl['delta_matter:delta_matter']
+            return self._pk_nl[DEFAULT_POWER_SPECTRUM]
 
-        if mps is None:
-            raise CCLError("You want to compute the non-linear power "
-                           "spectrum, but you selected "
-                           "`matter_power_spectrum=None`.")
-        elif mps == 'halo_model':
-            warnings.warn(
-                "The halo model option for the internal CCL matter power "
-                "spectrum is deprecated. Use the more general functionality "
-                "in the `halos` module.", category=CCLWarning)
+        if mps == 'halo_model':
             pk = self._get_halo_model_nonlin_power()
         elif mps == 'halofit':
-            pkl = self._pk_lin['delta_matter:delta_matter']
-            if pkl is None:
-                raise CCLError("The linear power spectrum is a "
-                               "necessary input for halofit")
-            pk = Pk2D.apply_halofit(self, pkl)
+            pkl = self._pk_lin[DEFAULT_POWER_SPECTRUM]
+            pk = pkl.apply_halofit(self)
         elif mps == 'emu':
             pk = Pk2D.from_model(self, model='emu')
         elif mps == 'linear':
-            pk = self._pk_lin['delta_matter:delta_matter']
+            pk = self._pk_lin[DEFAULT_POWER_SPECTRUM]
 
         # Correct for baryons if required
         if self._config_init_kwargs['baryons_power_spectrum'] == 'bcm':
-            bcm_correct_pk2d(self, pk)
+            warnings.warn("Adding baryonic effects to the non-linear matter "
+                          "power spectrum automatically is deprecated in "
+                          "Cosmology. Use the functionality in baryons.",
+                          CCLDeprecationWarning)
+            self.bcm_correct_pk2d(pk)
 
         return pk
 
@@ -907,101 +736,55 @@ class Cosmology(CCLObject):
         """Compute the non-linear power spectrum."""
         if self.has_nonlin_power:
             return
-        pk = self._compute_nonlin_power()
-        # Assign
-        self._pk_nl['delta_matter:delta_matter'] = pk
+        self._pk_nl[DEFAULT_POWER_SPECTRUM] = self._compute_nonlin_power()
 
     def compute_sigma(self):
         """Compute the sigma(M) spline."""
         if self.has_sigma:
             return
 
-        # we need these things before building the mass function splines
-        if self['N_nu_mass'] > 0:
-            # these are not consistent with anything - fun
-            warnings.warn(
-                "All of the halo mass function, concentration, and bias "
-                "models in CCL are not properly calibrated for cosmological "
-                "models with massive neutrinos!",
-                category=CCLWarning)
-
-        if self._config_init_kwargs['baryons_power_spectrum'] != 'nobaryons':
-            warnings.warn(
-                "All of the halo mass function, concentration, and bias "
-                "models in CCL are not consistently adjusted for baryons "
-                "when the power spectrum is via the BCM model!",
-                category=CCLWarning)
-
-        self.compute_linear_power()
-        pk = self._pk_lin['delta_matter:delta_matter']
-        if pk is None:
-            raise CCLError("Linear power spectrum can't be None")
+        pk = self.get_linear_power()
         status = 0
         status = lib.cosmology_compute_sigma(self.cosmo, pk.psp, status)
         check(status, self)
 
-    def get_linear_power(self, name='delta_matter:delta_matter'):
+    def get_linear_power(self, name=DEFAULT_POWER_SPECTRUM):
         """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
         the linear power spectrum with name `name`.
 
         Args:
             name (:obj:`str` or `None`): name of the power spectrum to
-                return. If `None`, `'delta_matter:delta_matter'` will
-                be used.
+                return.
 
         Returns:
             :class:`~pyccl.pk2d.Pk2D` object containing the linear
             power spectrum with name `name`.
         """
-        if name is None:
-            name = 'delta_matter:delta_matter'
-        if name not in self._pk_lin:
-            raise KeyError("Unknown power spectrum %s." % name)
-        return self._pk_lin[name]
+        if name == DEFAULT_POWER_SPECTRUM:
+            self.compute_linear_power()
+        pk = self._pk_lin.get(name)
+        if pk is None:
+            raise KeyError(f"Power spectrum {name} does not exist.")
+        return pk
 
-    def get_nonlin_power(self, name='delta_matter:delta_matter'):
+    def get_nonlin_power(self, name=DEFAULT_POWER_SPECTRUM):
         """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
         the non-linear power spectrum with name `name`.
 
         Args:
             name (:obj:`str` or `None`): name of the power spectrum to
-                return. If `None`, `'delta_matter:delta_matter'` will
-                be used.
+                return.
 
         Returns:
             :class:`~pyccl.pk2d.Pk2D` object containing the non-linear
             power spectrum with name `name`.
         """
-        if name is None:
-            name = 'delta_matter:delta_matter'
-        if name not in self._pk_nl:
-            raise KeyError("Unknown power spectrum %s." % name)
-        return self._pk_nl[name]
-
-    def _get_Omega_nu(self, a=1):
-        r"""Compute :math:`\Omega_\nu`.
-
-        Arguments
-        ---------
-        a : float or (na,) array-like
-            Scale factor(s), normalized to 1 today.
-
-        Returns
-        -------
-        omega_nu : float or (na,) ``numpy.ndarray``
-            Value(s) of :math:`\Omega_\nu` at ``a``.
-        """
-        a_use = np.atleast_1d(a).astype(float)
-
-        status = 0
-        OmNuh2, status = lib.Omeganuh2_vec(
-            self["N_nu_mass"], self["T_CMB"], self["T_ncdm"],
-            a_use, self["m_nu"], a_use.size, status)
-        check(status)
-
-        if np.ndim(a) == 0:
-            return OmNuh2[0] / self["h"]**2
-        return OmNuh2 / self["h"]**2
+        if name == DEFAULT_POWER_SPECTRUM:
+            self.compute_nonlin_power()
+        pk = self._pk_nl.get(name)
+        if pk is None:
+            raise KeyError(f"Power spectrum {name} does not exist.")
+        return pk
 
     @property
     def has_distances(self):
@@ -1016,36 +799,29 @@ class Cosmology(CCLObject):
     @property
     def has_linear_power(self):
         """Checks if the linear power spectra have been precomputed."""
-        try:
-            return isinstance(self._pk_lin["delta_matter:delta_matter"], Pk2D)
-        except KeyError:
-            return False
+        return DEFAULT_POWER_SPECTRUM in self._pk_lin
 
     @property
     def has_nonlin_power(self):
         """Checks if the non-linear power spectra have been precomputed."""
-        try:
-            return isinstance(self._pk_nl["delta_matter:delta_matter"], Pk2D)
-        except KeyError:
-            return False
+        return DEFAULT_POWER_SPECTRUM in self._pk_nl
 
     @property
     def has_sigma(self):
         """Checks if sigma(M) is precomputed."""
         return bool(self.cosmo.computed_sigma)
 
+    @deprecated()
     def status(self):
         """Get error status of the ccl_cosmology object.
-
         .. note:: The error statuses are currently under development and
                   may not be fully descriptive.
-
         Returns:
             :obj:`str` containing the status message.
         """
         # Get status ID string if one exists
-        if self.cosmo.status in error_types.keys():
-            status = error_types[self.cosmo.status]
+        if self.cosmo.status in CLevelErrors.keys():
+            status = CLevelErrors[self.cosmo.status]
         else:
             status = self.cosmo.status
 
@@ -1119,11 +895,15 @@ class CosmologyCalculator(Cosmology):
             be non-zero in the parameters.
         Neff (:obj:`float`, optional): Effective number of massless
             neutrinos present. Defaults to 3.046.
-        m_nu (:obj:`float`, optional): Total mass in eV of the massive
-            neutrinos present. Defaults to 0.
-        m_nu_type (:obj:`str`, optional): The type of massive neutrinos.
-            Should be one of 'inverted', 'normal', 'equal', 'single', or
-            'list'. The default of None is the same as 'normal'.
+        m_nu (:obj:`float` or array_like, optional):
+            Mass in eV of the massive neutrinos present. Defaults to 0.
+            If a sequence is passed, it is assumed that the elements of the
+            sequence represent the individual neutrino masses.
+        mass_split (:obj:`str`, optional): Type of massive neutrinos. Should
+            be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
+            the mass as being held by one massive neutrino. The other options
+            split the mass into 3 massive neutrinos. Ignored if a sequence is
+            passed in m_nu. Default is 'normal'.
         w0 (:obj:`float`, optional): First order term of dark energy
             equation of state. Defaults to -1.
         wa (:obj:`float`, optional): Second order term of dark energy
@@ -1191,233 +971,141 @@ class CosmologyCalculator(Cosmology):
     """
     # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
-                    "_spline_params", "_gsl_params", "_pk_lin", "_pk_nl",)
+                    "_spline_params", "_gsl_params", "_input_arrays",)
 
+    @warn_api(pairs=[("m_nu_type", "mass_split")])
     def __init__(
-            self, Omega_c=None, Omega_b=None, h=None, n_s=None,
+            self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
-            Neff=3.046, m_nu=0., m_nu_type=None, w0=-1., wa=0.,
-            T_CMB=_Defaults.T_CMB, mu_0=0., sigma_0=0.,
+            Neff=None, m_nu=0., mass_split="normal", w0=-1., wa=0.,
+            T_CMB=DefaultParams.T_CMB, mu_0=0., sigma_0=0.,
             background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None,
-            T_ncdm=_Defaults.T_ncdm):
-        if pk_linear:
-            transfer_function = 'calculator'
-        else:
-            transfer_function = None
-        if pk_nonlin or nonlinear_model:
-            matter_power_spectrum = 'calculator'
-        else:
-            matter_power_spectrum = None
+            T_ncdm=DefaultParams.T_ncdm):
 
-        # Cosmology
-        super(CosmologyCalculator, self).__init__(
-            Omega_c=Omega_c, Omega_b=Omega_b, h=h,
-            n_s=n_s, sigma8=sigma8, A_s=A_s,
-            Omega_k=Omega_k, Omega_g=Omega_g,
-            Neff=Neff, m_nu=m_nu, m_nu_type=m_nu_type,
-            w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
+        super().__init__(
+            Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
+            A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
+            mass_split=mass_split, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
             mu_0=mu_0, sigma_0=sigma_0,
-            transfer_function=transfer_function,
-            matter_power_spectrum=matter_power_spectrum)
+            transfer_function="calculator", matter_power_spectrum="calculator")
 
-        # Parse arrays
-        has_bg = background is not None
-        has_dz = growth is not None
-        has_pklin = pk_linear is not None
-        has_pknl = pk_nonlin is not None
-        has_nonlin_model = nonlinear_model is not None
+        self._input_arrays = {"background": background, "growth": growth,
+                              "pk_linear": pk_linear, "pk_nonlin": pk_nonlin,
+                              "nonlinear_model": nonlinear_model}
 
-        if has_bg:
-            self._init_bg(background)
-        if has_dz:
+        if background is not None:
+            self._init_background(background)
+        if growth is not None:
             self._init_growth(growth)
-        if has_pklin:
-            self._init_pklin(pk_linear)
-        if has_pknl:
-            self._init_pknl(pk_nonlin, has_nonlin_model)
+        if pk_linear is not None:
+            self._init_pk_linear(pk_linear)
+        if pk_nonlin is not None:
+            self._init_pk_nonlinear(pk_nonlin, nonlinear_model)
         self._apply_nonlinear_model(nonlinear_model)
 
-    def _init_bg(self, background):
-        # Background
-        if not isinstance(background, dict):
-            raise TypeError("`background` must be a dictionary.")
-        if (('a' not in background) or ('chi' not in background) or
-                ('h_over_h0' not in background)):
-            raise ValueError("`background` must contain keys "
-                             "'a', 'chi' and 'h_over_h0'")
-        a = background['a']
-        chi = background['chi']
-        hoh0 = background['h_over_h0']
-        # Check that input arrays have the same size.
-        if not (a.shape == chi.shape == hoh0.shape):
-            raise ValueError("Input arrays must have the same size.")
-        # Check that `a` is a monotonically increasing array.
-        if not np.array_equal(a, np.sort(a)):
-            raise ValueError("Input scale factor array is not "
-                             "monotonically increasing.")
-        # Check that the last element of a_array_back is 1:
-        if np.abs(a[-1]-1.0) > 1e-5:
-            raise ValueError("The last element of the input scale factor"
-                             "array must be 1.0.")
+    def _check_scale_factor(self, a):
+        if not (np.diff(a) > 0).all():
+            raise ValueError("Scale factor not monotonically increasing.")
+        if np.abs(a[-1] - 1) > 1e-5:
+            raise ValueError("Scale factor should end at 1.")
+
+    def _check_input(self, a, arr1, arr2):
+        self._check_scale_factor(a)
+        if not a.shape == arr1.shape == arr2.shape:
+            raise ValueError("Shape mismatch of input arrays.")
+
+    def _check_label(self, name):
+        if len(name.split(":")) != 2:
+            raise ValueError(f"Could not parse power spectrum {name}. "
+                             "Label must be of the form 'q1:q2'.")
+
+    def _init_background(self, background):
+        a, chi, E = background["a"], background["chi"], background["h_over_h0"]
+        self._check_input(a, chi, E)
         status = 0
-        status = lib.cosmology_distances_from_input(self.cosmo,
-                                                    a, chi, hoh0,
+        status = lib.cosmology_distances_from_input(self.cosmo, a, chi, E,
                                                     status)
         check(status, self)
 
     def _init_growth(self, growth):
-        # Growth
-        if not isinstance(growth, dict):
-            raise TypeError("`growth` must be a dictionary.")
-        if (('a' not in growth) or ('growth_factor' not in growth) or
-                ('growth_rate' not in growth)):
-            raise ValueError("`growth` must contain keys "
-                             "'a', 'growth_factor' and 'growth_rate'")
-        a = growth['a']
-        dz = growth['growth_factor']
-        fz = growth['growth_rate']
-        # Check that input arrays have the same size.
-        if not (a.shape == dz.shape
-                == fz.shape):
-            raise ValueError("Input arrays must have the same size.")
-        # Check that a_array_grth is a monotonically increasing array.
-        if not np.array_equal(a,
-                              np.sort(a)):
-            raise ValueError("Input scale factor array is not "
-                             "monotonically increasing.")
-        # Check that the last element of a is 1:
-        if np.abs(a[-1]-1.0) > 1e-5:
-            raise ValueError("The last element of the input scale factor"
-                             "array must be 1.0.")
+        a, gz, fz = growth["a"], growth["growth_factor"], growth["growth_rate"]
+        self._check_input(a, gz, fz)
         status = 0
-        status = lib.cosmology_growth_from_input(self.cosmo,
-                                                 a, dz, fz,
-                                                 status)
+        status = lib.cosmology_growth_from_input(self.cosmo, a, gz, fz, status)
         check(status, self)
 
-    def _init_pklin(self, pk_linear):
-        # Linear power spectrum
-        if not isinstance(pk_linear, dict):
-            raise TypeError("`pk_linear` must be a dictionary")
-        if (('delta_matter:delta_matter' not in pk_linear) or
-                ('a' not in pk_linear) or ('k' not in pk_linear)):
-            raise ValueError("`pk_linear` must contain keys 'a', 'k' "
-                             "and 'delta_matter:delta_matter' "
-                             "(at least)")
+    def _init_pk_linear(self, pk_linear):
+        a, lk = pk_linear["a"], np.log(pk_linear["k"])
+        self._check_scale_factor(a)
+        self.compute_growth()  # needed for high-z extrapolation
+        na, nk = a.size, lk.size
 
-        # Check that `a` is a monotonically increasing array.
-        if not np.array_equal(pk_linear['a'], np.sort(pk_linear['a'])):
-            raise ValueError("Input scale factor array in `pk_linear` is not "
-                             "monotonically increasing.")
+        if DEFAULT_POWER_SPECTRUM not in pk_linear:
+            raise ValueError("pk_linear does not contain "
+                             f"{DEFAULT_POWER_SPECTRUM}")
 
-        # needed for high-z extrapolation
-        self.compute_growth()
-
-        na = len(pk_linear['a'])
-        nk = len(pk_linear['k'])
-        lk = np.log(pk_linear['k'])
-        pk_names = [key for key in pk_linear if key not in ('a', 'k')]
-        for n in pk_names:
-            qs = n.split(':')
-            if len(qs) != 2:
-                raise ValueError("Power spectrum label %s could " % n +
-                                 "not be parsed. Label must be of the " +
-                                 "form 'q1:q2'")
-            pk = pk_linear[n]
+        pk_names = set(pk_linear.keys()) - set(["a", "k"])
+        for name in pk_names:
+            self._check_label(name)
+            pk = pk_linear[name]
             if pk.shape != (na, nk):
-                raise ValueError("Power spectrum %s has shape " % n +
-                                 str(pk.shape) + " but shape " +
-                                 "(%d, %d) was expected." % (na, nk))
+                raise ValueError("Power spectrum shape mismatch. "
+                                 f"Expected {(na, nk)}. Received {pk.shape}.")
             # Spline in log-space if the P(k) is positive-definite
-            use_log = np.all(pk > 0)
+            use_log = (pk > 0).all()
             if use_log:
                 pk = np.log(pk)
-            # Initialize and store
-            pk = Pk2D(pkfunc=None,
-                      a_arr=pk_linear['a'], lk_arr=lk, pk_arr=pk,
-                      is_logp=use_log, extrap_order_lok=1,
-                      extrap_order_hik=2, cosmo=None)
-            self._pk_lin[n] = pk
+            self._pk_lin[name] = Pk2D(a_arr=a, lk_arr=lk, pk_arr=pk,
+                                      is_logp=use_log)
 
-    def _init_pknl(self, pk_nonlin, has_nonlin_model):
-        # Non-linear power spectrum
-        if not isinstance(pk_nonlin, dict):
-            raise TypeError("`pk_nonlin` must be a dictionary")
-        if (('a' not in pk_nonlin) or ('k' not in pk_nonlin)):
-            raise ValueError("`pk_nonlin` must contain keys "
-                             "'a' and 'k' (at least)")
-        # Check that `a` is a monotonically increasing array.
-        if not np.array_equal(pk_nonlin['a'], np.sort(pk_nonlin['a'])):
-            raise ValueError("Input scale factor array in `pk_nonlin` is not "
-                             "monotonically increasing.")
+    def _init_pk_nonlinear(self, pk_nonlin, nonlinear_model):
+        a, lk = pk_nonlin["a"], np.log(pk_nonlin["k"])
+        self._check_scale_factor(a)
+        na, nk = a.size, lk.size
 
-        if ((not has_nonlin_model) and
-                ('delta_matter:delta_matter' not in pk_nonlin)):
-            raise ValueError("`pk_nonlin` must contain key "
-                             "'delta_matter:delta_matter' or "
-                             "use halofit to compute it")
-        na = len(pk_nonlin['a'])
-        nk = len(pk_nonlin['k'])
-        lk = np.log(pk_nonlin['k'])
-        pk_names = [key for key in pk_nonlin if key not in ('a', 'k')]
-        for n in pk_names:
-            qs = n.split(':')
-            if len(qs) != 2:
-                raise ValueError("Power spectrum label %s could " % n +
-                                 "not be parsed. Label must be of the " +
-                                 "form 'q1:q2'")
-            pk = pk_nonlin[n]
+        if DEFAULT_POWER_SPECTRUM not in pk_nonlin and nonlinear_model is None:
+            raise ValueError(f"{DEFAULT_POWER_SPECTRUM} not specified in "
+                             "`pk_nonlin` and `nonlinear_model` is None")
+
+        pk_names = set(pk_nonlin.keys()) - set(["a", "k"])
+        for name in pk_names:
+            self._check_label(name)
+            pk = pk_nonlin[name]
             if pk.shape != (na, nk):
-                raise ValueError("Power spectrum %s has shape " % n +
-                                 str(pk.shape) + " but shape " +
-                                 "(%d, %d) was expected." % (na, nk))
+                raise ValueError("Power spectrum shape mismatch. "
+                                 f"Expected {(na, nk)}. Received {pk.shape}.")
             # Spline in log-space if the P(k) is positive-definite
-            use_log = np.all(pk > 0)
+            use_log = (pk > 0).all()
             if use_log:
                 pk = np.log(pk)
-            # Initialize and store
-            pk = Pk2D(pkfunc=None,
-                      a_arr=pk_nonlin['a'], lk_arr=lk, pk_arr=pk,
-                      is_logp=use_log, extrap_order_lok=1,
-                      extrap_order_hik=2, cosmo=None)
-            self._pk_nl[n] = pk
+            self._pk_nl[name] = Pk2D(a_arr=a, lk_arr=lk, pk_arr=pk,
+                                     is_logp=use_log)
 
     def _apply_nonlinear_model(self, nonlin_model):
         if nonlin_model is None:
             return
-        elif isinstance(nonlin_model, str):
-            if not self._pk_lin:
-                raise ValueError("You asked to use the non-linear "
-                                 "model " + nonlin_model + " but "
-                                 "provided no linear power spectrum "
-                                 "to apply it to.")
-            nld = {n: nonlin_model
-                   for n in self._pk_lin}
-        elif isinstance(nonlin_model, dict):
-            nld = nonlin_model
-        else:
-            raise TypeError("`nonlinear_model` must be a string, "
-                            "a dictionary or `None`")
 
-        for name, model in nld.items():
+        if not isinstance(nonlin_model, (str, dict)):
+            raise ValueError("`nonlin_model` must be str, dict, or None.")
+        if isinstance(nonlin_model, str) and not self.has_linear_power:
+            raise ValueError("Linear power spectrum is empty.")
+
+        if isinstance(nonlin_model, str):
+            nonlin_model = {name: nonlin_model for name in self._pk_lin}
+
+        for name, model in nonlin_model.items():
             if name in self._pk_nl:
                 continue
 
             if name not in self._pk_lin:
-                raise KeyError(name + " is not a "
-                               "known linear power spectrum")
-
-            if ((name == 'delta_matter:delta_matter') and
-                    (model is None)):
-                raise ValueError("The non-linear matter power spectrum "
-                                 "can't be `None`")
+                raise KeyError(f"Linear power spectrum {name} does not exist.")
+            if model not in [None, "halofit"]:
+                raise KeyError(f"{model} is not a valid non-linear model.")
+            if name == DEFAULT_POWER_SPECTRUM and model is None:
+                raise ValueError("The non-linear matter power spectrum must "
+                                 "not be None.")
 
             if model == 'halofit':
                 pkl = self._pk_lin[name]
-                self._pk_nl[name] = Pk2D.apply_halofit(self, pkl)
-            elif model is None:
-                pass
-            else:
-                raise KeyError(model + " is not a valid "
-                               "non-linear model.")
+                self._pk_nl[name] = pkl.apply_halofit(self)

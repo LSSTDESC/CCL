@@ -1,9 +1,13 @@
+__all__ = ("get_density_kernel", "get_lensing_kernel", "get_kappa_kernel",
+           "Tracer", "NzTracer", "NumberCountsTracer", "WeakLensingTracer",
+           "CMBLensingTracer", "tSZTracer", "CIBTracer", "ISWTracer",)
+
 import warnings
 
 import numpy as np
 
 from . import ccllib as lib
-from .core import check
+from .pyutils import check
 from .errors import CCLWarning
 from .base.parameters import physical_constants
 from .base import CCLObject, UnlockInstance, unlock_instance, warn_api
@@ -39,10 +43,10 @@ def _check_background_spline_compatibility(cosmo, z):
     a = 1/(1+z)
 
     if a.min() < a_bg.min() or a.max() > a_bg.max():
-        raise ValueError(f"Tracer defined over wider redshift range than "
-                         f"internal CCL splines. Tracer: "
-                         f"z=[{1/a.max()-1}, {1/a.min()-1}]. Background "
-                         f"splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
+        raise ValueError(
+            "Tracer has wider redshift support than internal CCL splines. "
+            f"Tracer: z=[{1/a.max()-1}, {1/a.min()-1}]. "
+            f"Background splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
 
 
 @warn_api
@@ -188,8 +192,12 @@ class Tracer(CCLObject):
         self._trc = []
 
     def __eq__(self, other):
+        # Check object id.
+        if self is other:
+            return True
+
         # Check the object class.
-        if self.__class__ is not other.__class__:
+        if type(self) is not type(other):
             return False
 
         # If the tracer collections are empty, return early.
@@ -207,7 +215,6 @@ class Tracer(CCLObject):
             return False
 
         # Check the kernels.
-        kwargs = {"atol": 0, "rtol": 1e-12, "equal_nan": True}
         for t1, t2 in zip(self._trc, other._trc):
             if bool(t1.kernel) ^ bool(t2.kernel):
                 # only one of them has a kernel
@@ -215,9 +222,8 @@ class Tracer(CCLObject):
             if t1.kernel is None:
                 # none of them has a kernel
                 continue
-            if not np.allclose(_get_spline1d_arrays(t1.kernel.spline),
-                               _get_spline1d_arrays(t2.kernel.spline),
-                               **kwargs):
+            if not np.array_equal(_get_spline1d_arrays(t1.kernel.spline),
+                                  _get_spline1d_arrays(t2.kernel.spline)):
                 # both have kernels, but they are unequal
                 return False
 
@@ -251,7 +257,7 @@ class Tracer(CCLObject):
                 pts1, pts2 = c2py[attr](spl1), c2py[attr](spl2)
                 for pt1, pt2 in zip(pts1, pts2):
                     # loop through output points of `_get_splinend_arrays`
-                    if not np.allclose(pt1, pt2, **kwargs):
+                    if not np.array_equal(pt1, pt2):
                         # both have this transfer type, but they are unequal
                         # or are defined at different grid points
                         return False

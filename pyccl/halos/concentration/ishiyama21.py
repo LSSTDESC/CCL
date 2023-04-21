@@ -1,13 +1,12 @@
-from ... import ccllib as lib
-from ...base import warn_api
-from ...base.parameters import physical_constants as const
-from ...pyutils import check
-from ..halo_model_base import Concentration
+__all__ = ("ConcentrationIshiyama21",)
+
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 
-
-__all__ = ("ConcentrationIshiyama21",)
+from ... import lib, warn_api
+from ... import check
+from ... import physical_constants as const
+from . import Concentration
 
 
 class ConcentrationIshiyama21(Concentration):

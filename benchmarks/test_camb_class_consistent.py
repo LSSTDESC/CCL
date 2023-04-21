@@ -1,6 +1,5 @@
 import pytest
 import numpy as np
-import warnings
 
 import pyccl as ccl
 
@@ -17,13 +16,7 @@ def test_camb_class_consistent_smoke(kwargs=None, pkerr=1e-3):
         Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.95, A_s=2e-9,
         transfer_function='boltzmann_class', **kwargs)
 
-    with warnings.catch_warnings():
-        # We do some tests here with massive neutrinos, which currently raises
-        # a warning.
-        # XXX: Do you really want to be raising a warning for this?
-        #      This seems spurious to me.  (MJ)
-        warnings.simplefilter("ignore")
-        rel_sigma8 = np.abs(ccl.sigma8(c_camb) / ccl.sigma8(c_class) - 1)
+    rel_sigma8 = np.abs(ccl.sigma8(c_camb) / ccl.sigma8(c_class) - 1)
 
     a = 0.845
     k = np.logspace(-3, 1, 100)

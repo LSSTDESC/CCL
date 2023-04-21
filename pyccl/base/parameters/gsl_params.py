@@ -1,8 +1,7 @@
+__all__ = ("GSLParams", "gsl_params",)
+
 from ... import ccllib as lib
-from .parameters_base import Parameters
-
-
-__all__ = ("GSLParams",)
+from . import Parameters
 
 
 class GSLParams(Parameters, instance=lib.cvar.user_gsl_params):
@@ -68,3 +67,6 @@ class GSLParams(Parameters, instance=lib.cvar.user_gsl_params):
     # Flags for spline integration.
     NZ_NORM_SPLINE_INTEGRATION = True
     LENSING_KERNEL_SPLINE_INTEGRATION = True
+
+
+gsl_params = GSLParams()

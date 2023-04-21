@@ -1,10 +1,10 @@
-from ...base import warn_api
-from ...base.parameters import physical_constants as const
-from ..halo_model_base import HaloBias
+__all__ = ("HaloBiasTinker10",)
+
 import numpy as np
 
-
-__all__ = ("HaloBiasTinker10",)
+from ... import warn_api
+from ... import physical_constants as const
+from . import HaloBias
 
 
 class HaloBiasTinker10(HaloBias):

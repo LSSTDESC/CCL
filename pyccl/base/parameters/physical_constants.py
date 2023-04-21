@@ -1,3 +1,5 @@
+__all__ = ("PhysicalConstants", "physical_constants",)
+
 from ... import ccllib as lib
 from .parameters_base import Parameters
 
@@ -55,3 +57,6 @@ class PhysicalConstants(Parameters, instance=lib.cvar.constants, freeze=True):
     DELTAM12_sq = 7.62e-5
     DELTAM13_sq_pos = 2.55e-3
     DELTAM13_sq_neg = -2.43e-3
+
+
+physical_constants = PhysicalConstants()

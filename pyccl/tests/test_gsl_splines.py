@@ -26,7 +26,7 @@ def test_spline2d():
         ccl.pyutils._get_spline2d_arrays(pk2d_gsl_spline2d)
 
     cosmo = ccl.CosmologyVanillaLCDM()
-    zarr_out_eval = pk2d.eval(k=np.exp(log_y), a=x[-1], cosmo=cosmo)
+    zarr_out_eval = pk2d(k=np.exp(log_y), a=x[-1], cosmo=cosmo)
 
     assert np.allclose(x, xarr)
     assert np.allclose(log_y, yarr)

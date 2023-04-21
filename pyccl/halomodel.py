@@ -1,5 +1,7 @@
-from . import ccllib as lib
-from .base import deprecated
+__all__ = ("halo_concentration", "onehalo_matter_power",
+           "twohalo_matter_power", "halomodel_matter_power",)
+
+from . import deprecated, lib
 from . import halos as hal
 
 

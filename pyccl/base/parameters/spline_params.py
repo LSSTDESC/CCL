@@ -1,8 +1,7 @@
+__all__ = ("SplineParams", "spline_params",)
+
 from ... import ccllib as lib
-from .parameters_base import Parameters
-
-
-__all__ = ("SplineParams",)
+from . import Parameters
 
 
 class SplineParams(Parameters, instance=lib.cvar.user_spline_params):
@@ -59,3 +58,6 @@ class SplineParams(Parameters, instance=lib.cvar.user_spline_params):
         if "SPLINE_TYPE" in key and value is not None:
             raise ValueError("Spline types are fixed constants.")
         super().__setattr__(key, value)
+
+
+spline_params = SplineParams()

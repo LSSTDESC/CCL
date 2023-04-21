@@ -2,12 +2,12 @@ import numpy as np
 import pytest
 import pyccl as ccl
 
-from numpy.testing import assert_raises
-
+ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
-PKA = ccl.Pk2D(lambda k, a: np.log(a/k), cosmo=COSMO)
+with pytest.warns(ccl.CCLDeprecationWarning):
+    PKA = ccl.Pk2D(pkfunc=lambda k, a: np.log(a/k), cosmo=COSMO)
 ZZ = np.linspace(0., 1., 200)
 NN = np.exp(-((ZZ-0.5)/0.1)**2)
 LENS = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, NN))
@@ -16,7 +16,7 @@ with pytest.warns(ccl.CCLDeprecationWarning):
     ccl.cls
 
 
-@pytest.mark.parametrize('p_of_k_a', [None, PKA])
+@pytest.mark.parametrize('p_of_k_a', [ccl.DEFAULT_POWER_SPECTRUM, PKA])
 def test_cells_smoke(p_of_k_a):
     # make a set of tracers to test with
     z = np.linspace(0., 1., 200)
@@ -52,22 +52,22 @@ def test_cells_smoke(p_of_k_a):
                 assert np.allclose(corr, corr_rev)
 
     # Check invalid dndz
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=z, bias=(z, b))
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=(z, n, n),
                                bias=(z, b))
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=(z,), bias=(z, b))
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.NumberCountsTracer(COSMO, has_rsd=False, dndz=(1, 2), bias=(z, b))
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=z)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=(z, n, n))
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=(z,))
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         ccl.WeakLensingTracer(COSMO, dndz=(1, 2))
 
 
@@ -118,3 +118,6 @@ def test_cells_mg():
     cosmo_calc.compute_growth()
     cl1 = ccl.angular_cl(cosmo_calc, tr_calc, tr_calc, ell)
     assert np.all(np.fabs(1 - cl1 / cl0) < 1E-10)
+
+
+ccl.gsl_params.reload()  # reset to the default parameters

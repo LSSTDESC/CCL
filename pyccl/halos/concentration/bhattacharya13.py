@@ -1,9 +1,7 @@
-from ... import ccllib as lib
-from ...base import warn_api
-from ..halo_model_base import Concentration
-
-
 __all__ = ("ConcentrationBhattacharya13",)
+
+from ... import lib, warn_api
+from . import Concentration
 
 
 class ConcentrationBhattacharya13(Concentration):
