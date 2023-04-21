@@ -19,6 +19,8 @@ __all__ = (
     "sigma_critical", "omega_x", "rho_x",
     "growth_factor", "growth_factor_unnorm", "growth_rate",)
 
+from enum import Enum
+
 import numpy as np
 
 from . import lib, physical_constants, warn_api
@@ -26,7 +28,17 @@ from .pyutils import (_vectorize_fn, _vectorize_fn3,
                       _vectorize_fn4, _vectorize_fn5)
 
 
-Species = {
+class Species(Enum):
+    CRITICAL = "critical"
+    MATTER = "matter"
+    DARK_ENERGY = "dark_energy"
+    RADIATION = "radiation"
+    CURVATURE = "curvature"
+    NEUTRINOS_REL = "neutrinos_rel"
+    NEUTRINOS_MASSIVE = "neutrinos_massive"
+
+
+species_types = {
     'critical': lib.species_crit_label,
     'matter': lib.species_m_label,
     'dark_energy': lib.species_l_label,
@@ -35,8 +47,6 @@ Species = {
     'neutrinos_rel': lib.species_ur_label,
     'neutrinos_massive': lib.species_nu_label,
 }
-
-species = Species  # TODO: alias CCLv3.
 
 
 def h_over_h0(cosmo, a):
@@ -238,11 +248,11 @@ def omega_x(cosmo, a, species):
                              scale factor.
     """
     # TODO: Replace docstring enum with ref to Species.
-    if species not in Species:
+    if species not in species_types:
         raise ValueError(f"Unknown species {species}.")
 
     return _vectorize_fn3(lib.omega_x,
-                          lib.omega_x_vec, cosmo, a, Species[species])
+                          lib.omega_x_vec, cosmo, a, species_types[species])
 
 
 @warn_api
@@ -269,12 +279,12 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
         at a scale factor, in units of Msun / Mpc^3.
     """
     # TODO: Replace docstring enum with ref to Species.
-    if species not in Species:
+    if species not in species_types:
         raise ValueError(f"Unknown species {species}.")
 
     return _vectorize_fn4(
         lib.rho_x, lib.rho_x_vec, cosmo, a,
-        Species[species], int(is_comoving))
+        species_types[species], int(is_comoving))
 
 
 def growth_factor(cosmo, a):

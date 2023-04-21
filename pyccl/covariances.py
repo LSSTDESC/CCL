@@ -3,9 +3,8 @@ __all__ = ("angular_cl_cov_cNG", "sigma2_B_disc", "sigma2_B_from_mask",
 
 import numpy as np
 
-from . import (DEFAULT_POWER_SPECTRUM, IntegrationMethods,
-               check, lib, warn_api)
-from .pyutils import _check_array_params
+from . import DEFAULT_POWER_SPECTRUM, check, lib, warn_api
+from .pyutils import _check_array_params, integ_types
 
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
@@ -68,7 +67,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`\\ell_2`. The ordering is such that \
             `out[i2, i1] = Cov(ell2[i2], ell[i1])`.
     """
-    if integration_method not in IntegrationMethods:
+    if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals
@@ -108,7 +107,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
 
     cov, status = lib.angular_cov_vec(
         cosmo, clt1, clt2, clt3, clt4, tsp,
-        ell1_use, ell2_use, IntegrationMethods[integration_method],
+        ell1_use, ell2_use, integ_types[integration_method],
         6, 1./(4*np.pi*fsky), ell1_use.size*ell2_use.size, status)
 
     cov = cov.reshape([ell2_use.size, ell1_use.size])
@@ -324,7 +323,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`\\ell_2`. The ordering is such that \
             `out[i2, i1] = Cov(ell2[i2], ell[i1])`.
     """
-    if integration_method not in IntegrationMethods:
+    if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals
@@ -368,7 +367,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         a_arr, s2b_arr = _check_array_params(sigma2_B, 'sigma2_B')
     cov, status = lib.angular_cov_ssc_vec(
         cosmo, clt1, clt2, clt3, clt4, tsp, a_arr, s2b_arr,
-        ell1_use, ell2_use, IntegrationMethods[integration_method],
+        ell1_use, ell2_use, integ_types[integration_method],
         4, 1., ell1_use.size*ell2_use.size, status)
 
     cov = cov.reshape([ell2_use.size, ell1_use.size])

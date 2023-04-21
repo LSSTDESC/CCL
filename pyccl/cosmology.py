@@ -7,6 +7,7 @@ __all__ = ("TransferFunctions", "MatterPowerSpectra",
 
 import warnings
 import yaml
+from enum import Enum
 from inspect import getmembers, isfunction, signature
 from numbers import Real
 from typing import Iterable
@@ -20,8 +21,27 @@ from . import (
 from . import physical_constants as const
 
 
+class TransferFunctions(Enum):
+    BBKS = "bbks"
+    EISENSTEIN_HU = "eisenstein_hu"
+    EISENSTEIN_HU_NOWIGGLES = "eisenstein_hu_nowiggles"
+    BOLTZMANN_CLASS = "boltzmann_class"
+    BOLTZMANN_CAMB = "boltzmann_camb"
+    BOLTZMANN_ISITGR = "boltzmann_isitgr"
+    CALCULATOR = "calculator"
+
+
+class MatterPowerSpectra(Enum):
+    LINEAR = "linear"
+    HALOFIT = "halofit"
+    HALOMODEL = "halomodel"
+    EMU = "emu"
+    CAMB = "camb"
+    CALCULATOR = "calculator"
+
+
 # Configuration types
-TransferFunctions = {
+transfer_function_types = {
     'eisenstein_hu': lib.eisenstein_hu,
     'eisenstein_hu_nowiggles': lib.eisenstein_hu_nowiggles,
     'bbks': lib.bbks,
@@ -31,9 +51,8 @@ TransferFunctions = {
     'calculator': lib.pklin_from_input
 }
 
-transfer_function_types = TransferFunctions  # TODO: Alias CCLv3.
 
-MatterPowerSpectra = {
+matter_power_spectrum_types = {
     'halo_model': lib.halo_model,
     'halofit': lib.halofit,
     'linear': lib.linear,
@@ -42,17 +61,10 @@ MatterPowerSpectra = {
     'camb': lib.pknl_from_boltzman
 }
 
-matter_power_spectrum_types = MatterPowerSpectra  # TODO: Alias CCLv3.
-
-BaryonPowerSpectra = {
+baryons_power_spectrum_types = {
     'nobaryons': lib.nobaryons,
     'bcm': lib.bcm
 }
-
-baryons_power_spectrum_types = BaryonPowerSpectra  # TODO: Alias CCLv3.
-
-# List which transfer functions can be used with the muSigma_MG
-# parameterisation of modified gravity
 
 mass_function_types = {
     'angulo': lib.angulo,
@@ -410,12 +422,12 @@ class Cosmology(CCLObject):
                 "the transfer function should be 'boltzmann_camb'.")
 
         config = lib.configuration()
-        tf = TransferFunctions[transfer_function]
+        tf = transfer_function_types[transfer_function]
         config.transfer_function_method = tf
-        mps = MatterPowerSpectra[matter_power_spectrum]
+        mps = matter_power_spectrum_types[matter_power_spectrum]
         config.matter_power_spectrum_method = mps
         # TODO: Remove for CCLv3.
-        bps = BaryonPowerSpectra[baryons_power_spectrum]
+        bps = baryons_power_spectrum_types[baryons_power_spectrum]
         config.baryons_power_spectrum_method = bps
         # TODO: Remove for CCLv3.
         mf = mass_function_types[mass_function]
