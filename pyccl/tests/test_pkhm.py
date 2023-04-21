@@ -284,3 +284,12 @@ def test_hmcalculator_from_string_raises():
         ccl.halos.HMCalculator(**kw)
     # but this one is fine
     ccl.halos.HMCalculator(**kw, mass_def="200c")
+
+
+def test_hmcalculator_inconsistent_mass_def_raises():
+    # Check that HMCalculator complains for inconsistent mass definitions.
+    hmc = ccl.halos.HMCalculator(
+        mass_function="Tinker10", halo_bias="Tinker10", mass_def="200c")
+    prof = ccl.halos.HaloProfilePressureGNFW(mass_def="500c")
+    with pytest.raises(ValueError):
+        hmc._check_mass_def(prof)

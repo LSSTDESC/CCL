@@ -93,6 +93,12 @@ def test_CCLObject_default_behavior():
     assert instances[0] != instances[1]
 
 
+def test_named_class_raises():
+    # Test that an error is raised if `create_instance` gets the wrong type.
+    with pytest.raises(TypeError):
+        ccl.halos.MassDef.create_instance(1)
+
+
 # +==========================================================================+
 # | The following functions are used by `conftest.py` to check correct setup.|
 # +==========================================================================+

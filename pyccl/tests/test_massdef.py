@@ -111,3 +111,20 @@ def test_massdef_from_string_smoke(name):
 def test_massdef_from_string_raises():
     with pytest.raises(ValueError):
         ccl.halos.MassDef.from_name("my_mass_def")
+
+
+def test_mass_translator():
+    # Check that the mass translator complains for inconsistent masses.
+    cm = ccl.halos.Concentration.create_instance("Duffy08")
+    mdef1 = ccl.halos.MassDef.create_instance("250c")
+    mdef2 = ccl.halos.MassDef.create_instance("500c")
+    with pytest.raises(ValueError):
+        ccl.halos.mass_translator(mass_in=mdef1, mass_out=mdef2,
+                                  concentration=cm)
+
+    # Check that if we pass the same mass definition, it returns the same M.
+    mdef1 = mdef2 = cm.mass_def
+    translator = ccl.halos.mass_translator(mass_in=mdef1, mass_out=mdef2,
+                                           concentration=cm)
+    cosmo = ccl.CosmologyVanillaLCDM()
+    assert translator(cosmo, 1e14, 1) == 1e14
