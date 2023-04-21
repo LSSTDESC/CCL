@@ -91,7 +91,7 @@ class PTTracer(CCLAutoRepr):
             float or array_like: bias value at the input redshifts.
         """
         if bias_name not in self.biases:
-            raise KeyError("Bias %s not included in this tracer" % bias_name)
+            raise KeyError(f"Bias {bias_name} not included in this tracer")
         return self.biases[bias_name](z)
 
     def _get_bias_function(self, b):

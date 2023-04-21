@@ -44,10 +44,10 @@ def _check_background_spline_compatibility(cosmo, z):
     a = 1/(1+z)
 
     if a.min() < a_bg.min() or a.max() > a_bg.max():
-        raise ValueError(f"Tracer defined over wider redshift range than "
-                         f"internal CCL splines. Tracer: "
-                         f"z=[{1/a.max()-1}, {1/a.min()-1}]. Background "
-                         f"splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
+        raise ValueError(
+            "Tracer has wider redshift support than internal CCL splines. "
+            f"Tracer: z=[{1/a.max()-1}, {1/a.min()-1}]. "
+            f"Background splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
 
 
 @warn_api

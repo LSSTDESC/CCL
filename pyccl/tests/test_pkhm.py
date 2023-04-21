@@ -232,7 +232,7 @@ def test_pkhm_pk2d():
 
 def test_pkhm_errors():
     # Wrong integration
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(ValueError):
         ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
                                mass_def=M200, integration_method_M='Sampson')
 

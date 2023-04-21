@@ -1025,7 +1025,7 @@ class CosmologyCalculator(Cosmology):
 
         if DEFAULT_POWER_SPECTRUM not in pk_linear:
             raise ValueError("pk_linear does not contain "
-                             "{DEFAULT_POWER_SPECTRUM}")
+                             f"{DEFAULT_POWER_SPECTRUM}")
 
         pk_names = set(pk_linear.keys()) - set(["a", "k"])
         for name in pk_names:

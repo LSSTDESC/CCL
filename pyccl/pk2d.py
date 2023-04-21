@@ -117,13 +117,13 @@ class Pk2D(CCLObject):
                                  "you must provide arrays")
 
             # Check that `a` is a monotonically increasing array.
-            if not np.all((a_arr[1:] - a_arr[:-1]) > 0):
+            if not (np.diff(a_arr) > 0).all():
                 raise ValueError("Input scale factor array in `a_arr` is not "
                                  "monotonically increasing.")
 
             pkflat = pk_arr.flatten()
             # Check dimensions make sense
-            if (len(a_arr)*len(lk_arr) != len(pkflat)):
+            if len(pkflat) != len(a_arr)*len(lk_arr):
                 raise ValueError("Size of input arrays is inconsistent")
         else:  # Initialize power spectrum from function
             warnings.warn("The use of a function when initialising a ``Pk2D`` "
@@ -252,7 +252,7 @@ class Pk2D(CCLObject):
         elif model == 'emu':
             ret = lib.compute_power_emu(cosmo.cosmo, status)
         else:
-            raise ValueError("Unknown model %s " % model)
+            raise ValueError(f"Invalid model {model}.")
 
         if np.ndim(ret) == 0:
             status = ret
@@ -601,7 +601,7 @@ def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
     if isinstance(p_of_k_a, Pk2D):
         psp = p_of_k_a.psp
     else:
-        if (p_of_k_a is None) or isinstance(p_of_k_a, str):
+        if p_of_k_a is None or isinstance(p_of_k_a, str):
             name = p_of_k_a
         else:
             raise ValueError("p_of_k_a must be a pyccl.Pk2D object, "

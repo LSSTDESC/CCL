@@ -117,8 +117,7 @@ def _get_neutrino_masses(*, m_nu, mass_split):
 
     def check_mnu(val):
         if m_nu < val:
-            raise ValueError(
-                f"m_nu < {val} incompatible with mass hierarchy")
+            raise ValueError(f"m_nu < {val} incompatible with mass hierarchy")
 
     if split(mass_split) == split.NORMAL:
         check_mnu(np.sqrt(D12) + np.sqrt(D13p))

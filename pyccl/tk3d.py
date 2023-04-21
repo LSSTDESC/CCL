@@ -99,7 +99,7 @@ class Tk3D(CCLObject):
         na = len(a_arr)
         nk = len(lk_arr)
 
-        if not np.all(a_arr[1:]-a_arr[:-1] > 0):
+        if not (np.diff(a_arr) > 0).all():
             raise ValueError("`a_arr` must be strictly increasing")
 
         if not np.all(lk_arr[1:]-lk_arr[:-1] > 0):
@@ -236,7 +236,7 @@ class Tk3D(CCLObject):
             out (list of ``numpy.ndarray``):
                 The trispectrum T(k1, k2, z) or its factors f(k1, z), f(k2, z).
         """
-        if not self.has_tsp:
+        if not self:
             raise ValueError("Tk3D object does not have data.")
 
         out = []

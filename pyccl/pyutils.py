@@ -68,11 +68,11 @@ def check(status, cosmo=None):
 
     # Check for known error status
     if status in CLevelErrors.keys():
-        raise CCLError("Error %s: %s" % (CLevelErrors[status], msg))
+        raise CCLError(f"Error {CLevelErrors[status]}: {msg}")
 
     # Check for unknown error
     if status != 0:
-        raise CCLError("Error %d: %s" % (status, msg))
+        raise CCLError(f"Error {status}: {msg}")
 
 
 def debug_mode(debug):
@@ -459,15 +459,11 @@ def resample_array(x_in, y_in, x_out,
     Returns:
         array_like: output array.
     """
-
+    # TODO: point to the enum in CCLv3 docs.
     if extrap_lo not in ExtrapolationMethods.keys():
-        raise ValueError("'%s' is not a valid extrapolation type. "
-                         "Available options are: %s"
-                         % (extrap_lo, ExtrapolationMethods.keys()))
+        raise ValueError("Invalid extrapolation type.")
     if extrap_hi not in ExtrapolationMethods.keys():
-        raise ValueError("'%s' is not a valid extrapolation type. "
-                         "Available options are: %s"
-                         % (extrap_hi, ExtrapolationMethods.keys()))
+        raise ValueError("Invalid extrapolation type.")
 
     status = 0
     y_out, status = lib.array_1d_resample(x_in, y_in, x_out,
@@ -492,7 +488,7 @@ def _fftlog_transform(rs, frs,
         n_transforms, n_r = frs.shape
 
     if len(rs) != n_r:
-        raise ValueError("rs should have %d elements" % n_r)
+        raise ValueError(f"rs should have {n_r} elements")
 
     status = 0
     result, status = lib.fftlog_transform(n_transforms,
@@ -522,7 +518,7 @@ def _spline_integrate(x, ys, a, b):
         n_integ, n_x = ys.shape
 
     if len(x) != n_x:
-        raise ValueError("x should have %d elements" % n_x)
+        raise ValueError(f"x should have {n_x} elements")
 
     if np.ndim(a) > 0 or np.ndim(b) > 0:
         raise TypeError("Integration limits should be scalar")
@@ -557,7 +553,7 @@ def _check_array_params(f_arg, name=None, arr3=False):
             or (len(f_arg) != (3 if arr3 else 2))
             or (not (isinstance(f_arg[0], Iterable)
                      and isinstance(f_arg[1], Iterable)))):
-            raise ValueError("%s needs to be a tuple of two arrays." % name)
+            raise ValueError(f"{name} must be a tuple of two arrays.")
 
         f1 = np.atleast_1d(np.array(f_arg[0], dtype=float))
         f2 = np.atleast_1d(np.array(f_arg[1], dtype=float))

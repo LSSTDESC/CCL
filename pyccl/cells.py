@@ -43,9 +43,9 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
             category=CCLWarning)
-    if limber_integration_method not in ['qag_quad', 'spline']:
-        raise ValueError("Integration method %s not supported" %
-                         limber_integration_method)
+    if limber_integration_method not in IntegrationMethods:
+        raise ValueError(
+            f"Unknown integration method {limber_integration_method}.")
 
     # we need the distances for the integrals
     cosmo.compute_distances()
@@ -68,7 +68,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
     ell_use = np.atleast_1d(ell)
 
     # Check the values of ell are monotonically increasing
-    if not (ell_use[:-1] < ell_use[1:]).all():
+    if not (np.diff(ell_use) > 0).all():
         raise ValueError("ell values must be monotonically increasing")
 
     # Return Cl values, according to whether ell is an array or not

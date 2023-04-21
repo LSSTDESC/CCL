@@ -22,10 +22,7 @@ def linear_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     Returns:
         float or array_like: Linear power spectrum.
     """
-    cosmo.compute_linear_power()
-    if p_of_k_a not in cosmo._pk_lin:
-        raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_lin[p_of_k_a](k, a, cosmo)
+    return cosmo.get_linear_power(p_of_k_a)(k, a, cosmo)
 
 
 @warn_api
@@ -43,10 +40,7 @@ def nonlin_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     Returns:
         float or array_like: Non-linear power spectrum.
     """
-    cosmo.compute_nonlin_power()
-    if p_of_k_a not in cosmo._pk_nl:
-        raise KeyError("Power spectrum %s unknown" % p_of_k_a)
-    return cosmo._pk_nl[p_of_k_a](k, a, cosmo)
+    return cosmo.get_nonlin_power(p_of_k_a)(k, a, cosmo)
 
 
 def linear_matter_power(cosmo, k, a):
@@ -60,8 +54,7 @@ def linear_matter_power(cosmo, k, a):
     Returns:
         float or array_like: Linear matter power spectrum; Mpc^3.
     """
-    cosmo.compute_linear_power()
-    return cosmo._pk_lin[DEFAULT_POWER_SPECTRUM](k, a, cosmo)
+    return cosmo.linear_power(k, a, p_of_k_a=DEFAULT_POWER_SPECTRUM)
 
 
 def nonlin_matter_power(cosmo, k, a):
@@ -75,8 +68,7 @@ def nonlin_matter_power(cosmo, k, a):
     Returns:
         float or array_like: Nonlinear matter power spectrum; Mpc^3.
     """
-    cosmo.compute_nonlin_power()
-    return cosmo._pk_nl[DEFAULT_POWER_SPECTRUM](k, a, cosmo)
+    return cosmo.nonlin_power(k, a, p_of_k_a=DEFAULT_POWER_SPECTRUM)
 
 
 def sigmaM(cosmo, M, a):
@@ -93,7 +85,6 @@ def sigmaM(cosmo, M, a):
     """
     cosmo.compute_sigma()
 
-    # sigma(M)
     logM = np.log10(np.atleast_1d(M))
     status = 0
     sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
@@ -105,7 +96,7 @@ def sigmaM(cosmo, M, a):
 
 
 @warn_api
-def sigmaR(cosmo, R, a=1., *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
+def sigmaR(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """RMS variance in a top-hat sphere of radius R in Mpc.
 
     Args:
@@ -132,7 +123,7 @@ def sigmaR(cosmo, R, a=1., *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
 
 @warn_api
-def sigmaV(cosmo, R, a=1., *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
+def sigmaV(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """RMS variance in the displacement field in a top-hat sphere of radius R.
     The linear displacement field is the gradient of the linear density field.
 
@@ -176,13 +167,10 @@ def sigma8(cosmo, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     Returns:
         float: RMS variance in top-hat sphere of radius 8 Mpc/h.
     """
-    psp = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
-    status = 0
-    s8, status = lib.sigma8(cosmo.cosmo, psp, status)
-    check(status, cosmo)
-    if np.isnan(cosmo._params.sigma8):
-        cosmo._params.sigma8 = s8
-    return s8
+    sig8 = cosmo.sigmaR(8/cosmo["h"], p_of_k_a=p_of_k_a)
+    if np.isnan(cosmo["sigma8"]):
+        cosmo._fill_params(sigma8=sig8)
+    return sig8
 
 
 @warn_api

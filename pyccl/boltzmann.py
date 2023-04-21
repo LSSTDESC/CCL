@@ -54,7 +54,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -125,8 +125,8 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
     camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
-        raise ValueError("The only dark energy models CCL supports with"
-                         " camb are fluid and ppf.")
+        raise ValueError("The only dark energy models CCL supports with "
+                         "CAMB are fluid and ppf.")
     cp.set_classes(
         dark_energy_model=camb_de_model
     )
@@ -267,7 +267,7 @@ def get_isitgr_pk_lin(cosmo):
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -346,16 +346,15 @@ def get_isitgr_pk_lin(cosmo):
     camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
-        raise ValueError("The only dark energy models CCL supports with"
-                         " camb are fluid and ppf.")
+        raise ValueError("The only dark energy models CCL supports with "
+                         "CAMB are fluid and ppf.")
     cp.set_classes(
         dark_energy_model=camb_de_model
     )
     if camb_de_model not in camb_de_models[:2] and cosmo['wa'] and \
             (cosmo['w0'] < -1 - 1e-6 or
                 1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
-        raise ValueError("If you want to use w crossing -1,"
-                         " then please set the dark_energy_model to ppf.")
+        raise ValueError("For w to cross -1, set `dark_energy_model=ppf`.")
     cp.DarkEnergy.set_params(
         w=cosmo['w0'],
         wa=cosmo['wa']
@@ -464,7 +463,7 @@ def get_class_pk_lin(cosmo):
         params["A_s"] = A_s_fid
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 

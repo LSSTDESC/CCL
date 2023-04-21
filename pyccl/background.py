@@ -229,15 +229,15 @@ def omega_x(cosmo, a, species):
             - 'curvature': curvature density
             - 'neutrinos_rel': relativistic neutrinos
             - 'neutrinos_massive': massive neutrinos
+            - 'critical'
 
     Returns:
         float or array_like: Density fraction of a given species at a \
                              scale factor.
     """
-    if species not in Species.keys():
-        raise ValueError("'%s' is not a valid species type. "
-                         "Available options are: %s"
-                         % (species, Species.keys()))
+    # TODO: Replace docstring enum with ref to Species.
+    if species not in Species:
+        raise ValueError(f"Unknown species {species}.")
 
     return _vectorize_fn3(lib.omega_x,
                           lib.omega_x_vec, cosmo, a, Species[species])
@@ -258,6 +258,7 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
             - 'curvature': curvature density
             - 'neutrinos_rel': relativistic neutrinos
             - 'neutrinos_massive': massive neutrinos
+            - 'critical'
 
         is_comoving (bool): either physical (False, default) or comoving (True)
 
@@ -265,11 +266,9 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
         rho_x (float or array_like): Physical density of a given species
         at a scale factor, in units of Msun / Mpc^3.
     """
-
-    if species not in Species.keys():
-        raise ValueError("'%s' is not a valid species type. "
-                         "Available options are: %s"
-                         % (species, Species.keys()))
+    # TODO: Replace docstring enum with ref to Species.
+    if species not in Species:
+        raise ValueError(f"Unknown species {species}.")
 
     return _vectorize_fn4(
         lib.rho_x, lib.rho_x_vec, cosmo, a,

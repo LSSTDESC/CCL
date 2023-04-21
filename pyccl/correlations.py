@@ -126,11 +126,11 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
                       CCLDeprecationWarning)
     method = method.lower()
 
-    if type not in CorrelationTypes.keys():
-        raise ValueError("'%s' is not a valid correlation type." % type)
+    if type not in CorrelationTypes:
+        raise ValueError(f"Invalud correlation type {type}.")
 
     if method not in CorrelationMethods.keys():
-        raise ValueError("'%s' is not a valid correlation method." % method)
+        raise ValueError(f"Invalid correlation method {method}.")
 
     # Convert scalar input into an array
     if scalar := isinstance(theta, (int, float)):

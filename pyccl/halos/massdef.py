@@ -105,7 +105,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         if isinstance(Delta, (int, float)) and Delta < 0:
             raise ValueError("Delta must be a positive number.")
         if rho_type not in ['matter', 'critical']:
-            raise ValueError("rho_type must be either ['matter'|'critical].'")
+            raise ValueError("rho_type must be {'matter', 'critical'}.")
 
         self.Delta = Delta
         self.rho_type = rho_type

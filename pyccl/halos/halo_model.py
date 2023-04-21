@@ -88,8 +88,7 @@ class HMCalculator(CCLAutoRepr):
         elif integration_method_M == "spline":
             self._integrator = self._integ_spline
         else:
-            raise NotImplementedError(
-                "Only 'simpson' and 'spline integration is supported.")
+            raise ValueError("Invalid integration method.")
 
         # Cache last results for mass function and halo bias.
         self._cosmo_mf = self._cosmo_bf = None
