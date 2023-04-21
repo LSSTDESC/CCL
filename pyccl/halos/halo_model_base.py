@@ -6,7 +6,7 @@ from abc import abstractmethod
 import numpy as np
 
 from .. import CCLAutoRepr, CCLNamedClass, lib, check
-from .. import warn_api, deprecated, deprecate_attr
+from .. import deprecate_attr, deprecated, warn_api, mass_def_api
 from .. import physical_constants as const
 
 
@@ -141,6 +141,7 @@ class MassFunc(HMIngredients):
             float or array_like: :math:`f(\\sigma_M)` function.
         """
 
+    @mass_def_api
     def __call__(self, cosmo, M, a):
         """ Returns the mass function for input parameters.
 
@@ -202,6 +203,7 @@ class HaloBias(HMIngredients):
             float or array_like: f(sigma_M) function.
         """
 
+    @mass_def_api
     def __call__(self, cosmo, M, a):
         """ Returns the halo bias for input parameters.
 
@@ -242,6 +244,7 @@ class Concentration(HMIngredients):
     def _concentration(self, cosmo, M, a):
         """Implementation of the c(M) relation."""
 
+    @mass_def_api
     def __call__(self, cosmo, M, a):
         """ Returns the concentration for input parameters.
 

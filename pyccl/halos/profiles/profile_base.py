@@ -1,16 +1,17 @@
 __all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
            "HaloProfilePressure", "HaloProfileCIB",)
 
+import warnings
 import functools
 from typing import Callable
 
 import numpy as np
 
 from ... import CCLAutoRepr, FFTLogParams, unlock_instance
-from ... import deprecate_attr, warn_api
+from ... import CCLDeprecationWarning, deprecate_attr, warn_api, mass_def_api
 from ... import physical_constants as const
-from .. import MassDef
 from ...pyutils import resample_array, _fftlog_transform
+from .. import MassDef
 
 
 class HaloProfile(CCLAutoRepr):
@@ -51,6 +52,16 @@ class HaloProfile(CCLAutoRepr):
 
         # Initialize FFTLog.
         self.precision_fftlog = FFTLogParams()
+
+        if (mass_def, concentration) == (None, None):
+            warnings.warn(
+                "mass_def (or concentration where applicable) will become a "
+                "required argument for HaloProfile instantiation in CCLv3 "
+                "and will be moved from (real, fourier, projected, cumul2d "
+                "convergence, shear, reduced_shear, magnification).",
+                CCLDeprecationWarning)
+            self.mass_def = self.concentration = None
+            return
 
         # Initialize mass_def and concentration.
         self.mass_def, *out = MassDef.from_specs(
@@ -123,7 +134,7 @@ class HaloProfile(CCLAutoRepr):
 
     _cumul2d: Callable    # implementation of the cumulative surface density
 
-    @warn_api
+    @mass_def_api
     def real(self, cosmo, r, M, a):
         """ Returns the 3D real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
@@ -145,7 +156,7 @@ class HaloProfile(CCLAutoRepr):
             return self._real(cosmo, r, M, a)
         return self._fftlog_wrap(cosmo, r, M, a, fourier_out=False)
 
-    @warn_api
+    @mass_def_api
     def fourier(self, cosmo, k, M, a):
         """ Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
@@ -172,7 +183,7 @@ class HaloProfile(CCLAutoRepr):
             return self._fourier(cosmo, k, M, a)
         return self._fftlog_wrap(cosmo, k, M, a, fourier_out=True)
 
-    @warn_api
+    @mass_def_api
     def projected(self, cosmo, r_t, M, a):
         """ Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
@@ -198,7 +209,7 @@ class HaloProfile(CCLAutoRepr):
             return self._projected(cosmo, r_t, M, a)
         return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=False)
 
-    @warn_api
+    @mass_def_api
     def cumul2d(self, cosmo, r_t, M, a):
         """ Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
@@ -225,6 +236,7 @@ class HaloProfile(CCLAutoRepr):
             return self._cumul2d(cosmo, r_t, M, a)
         return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=True)
 
+    @mass_def_api
     @warn_api
     def convergence(self, cosmo, r, M, *, a_lens, a_source):
         """ Returns the convergence as a function of cosmology,
@@ -253,6 +265,7 @@ class HaloProfile(CCLAutoRepr):
         Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return Sigma / Sigma_crit
 
+    @mass_def_api
     @warn_api
     def shear(self, cosmo, r, M, *, a_lens, a_source):
         """ Returns the shear (tangential) as a function of cosmology,
@@ -284,6 +297,7 @@ class HaloProfile(CCLAutoRepr):
         Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
+    @mass_def_api
     @warn_api
     def reduced_shear(self, cosmo, r, M, *, a_lens, a_source):
         """ Returns the reduced shear as a function of cosmology,
@@ -313,6 +327,7 @@ class HaloProfile(CCLAutoRepr):
         shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source)
         return shear / (1.0 - convergence)
 
+    @mass_def_api
     @warn_api
     def magnification(self, cosmo, r, M, *, a_lens, a_source):
         """ Returns the magnification for input parameters.

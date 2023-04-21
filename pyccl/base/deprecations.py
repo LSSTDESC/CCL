@@ -1,10 +1,11 @@
-__all__ = ("deprecated", "warn_api", "deprecate_attr",)
+__all__ = ("deprecated", "warn_api", "mass_def_api", "deprecate_attr",)
 
 import functools
 import warnings
 from inspect import Parameter, signature
 
 from .. import CCLDeprecationWarning
+from . import unlock_instance
 
 
 def deprecated(new_function=None):
@@ -23,6 +24,26 @@ def deprecated(new_function=None):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def mass_def_api(func):
+    """Preserve ``mass_def`` as a final argument of the decorated function."""
+    # TODO: CCLv3 - remove `mass_def=None` default from some HaloProfiles.
+    @functools.wraps(func)
+    @unlock_instance
+    def wrapper(self, *args, mass_def=None, **kwargs):
+        if type(args[-1]).__name__ == "MassDef":
+            *args, mass_def = args
+
+        if mass_def is not None:
+            warnings.warn(
+                "mass_def is deprecated as an argument of {func.__name__} "
+                "and will be removed in CCLv3. Pass it to the constructor.",
+                CCLDeprecationWarning)
+            self.mass_def = mass_def
+
+        return func(self, *args, **kwargs)
+    return wrapper
 
 
 def warn_api(func=None, *, pairs=[], reorder=[]):
