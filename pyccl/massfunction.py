@@ -1,10 +1,8 @@
-from . import halos as hal
-from .base import deprecated
-from .errors import CCLError
-from .power import sigmaM  # noqa
-
-
 __all__ = ("massfunc", "halo_bias", "massfunc_m2r",)
+
+from . import CCLError, deprecated
+from . import halos as hal
+from .power import sigmaM  # noqa
 
 
 @deprecated(hal.MassFunc)

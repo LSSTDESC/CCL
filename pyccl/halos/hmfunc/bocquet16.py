@@ -1,9 +1,9 @@
-from ...base import warn_api
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncBocquet16",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncBocquet16",)
+from ... import warn_api
+from . import MassFunc
 
 
 class MassFuncBocquet16(MassFunc):

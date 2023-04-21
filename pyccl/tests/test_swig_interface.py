@@ -69,7 +69,7 @@ def test_swig_cls():
 
     with pytest.raises(CCLError):
         ccllib.angular_cl_vec(COSMO, None, None, None, 1, 0,
-                              pyccl.pyutils.integ_types['spline'],
+                              pyccl.IntegrationMethods['spline'],
                               "none", status)
 
 

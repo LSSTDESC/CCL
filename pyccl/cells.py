@@ -1,16 +1,11 @@
+__all__ = ("angular_cl",)
+
 import warnings
 
 import numpy as np
 
-from .errors import CCLWarning
-from . import ccllib as lib
-from . import DEFAULT_POWER_SPECTRUM
-from .pyutils import check, integ_types
-from .base import warn_api
-from .pk2d import parse_pk2d
-
-
-__all__ = ("angular_cl",)
+from . import (DEFAULT_POWER_SPECTRUM, CCLWarning, IntegrationMethods,
+               check, lib, warn_api)
 
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
@@ -59,7 +54,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a, is_linear=False)
+    psp = cosmo_in.parse_pk2d(p_of_k_a, is_linear=False)
 
     # Create tracer colections
     status = 0
@@ -79,7 +74,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
     # Return Cl values, according to whether ell is an array or not
     cl, status = lib.angular_cl_vec(
         cosmo, clt1, clt2, psp, l_limber,
-        ell_use, integ_types[limber_integration_method],
+        ell_use, IntegrationMethods[limber_integration_method],
         ell_use.size, status)
     if np.ndim(ell) == 0:
         cl = cl[0]

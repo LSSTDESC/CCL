@@ -1,14 +1,13 @@
-from .. import ccllib as lib
-from ..pyutils import check
-from ..background import Species
-from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
-import numpy as np
-from functools import cached_property
-
-
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
            "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
            "MassDefFof",)
+
+from functools import cached_property
+
+import numpy as np
+
+from .. import CCLAutoRepr, CCLNamedClass, lib, check
+from .. import warn_api, deprecate_attr
 
 
 def mass2radius_lagrangian(cosmo, M):
@@ -110,7 +109,6 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
         self.Delta = Delta
         self.rho_type = rho_type
-        self.species = Species[rho_type]
         # c(M) relation
         if concentration is None:
             self.concentration = None

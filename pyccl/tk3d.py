@@ -1,12 +1,12 @@
+__all__ = ("Tk3D",)
+
 import warnings
-from . import ccllib as lib
-from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
-from .base import CCLObject, warn_api
-from .errors import CCLDeprecationWarning
+
 import numpy as np
 
-
-__all__ = ("Tk3D",)
+from . import CCLObject, check, lib
+from . import CCLDeprecationWarning, warn_api
+from .pyutils import _get_spline2d_arrays, _get_spline3d_arrays
 
 
 class Tk3D(CCLObject):

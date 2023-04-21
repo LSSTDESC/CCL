@@ -1,12 +1,11 @@
-from ...base import warn_api, deprecate_attr
-from .profile_base import HaloProfileCIB
-from .nfw import HaloProfileNFW
+__all__ = ("HaloProfileCIBShang12",)
+
 import numpy as np
 from scipy.integrate import simpson
 from scipy.special import lambertw
 
-
-__all__ = ("HaloProfileCIBShang12",)
+from ... import warn_api, deprecate_attr
+from . import HaloProfileNFW, HaloProfileCIB
 
 
 class HaloProfileCIBShang12(HaloProfileCIB):

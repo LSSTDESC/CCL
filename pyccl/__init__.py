@@ -3,8 +3,7 @@ from importlib.metadata import version, PackageNotFoundError
 try:
     __version__ = version(__name__)
 except PackageNotFoundError:
-    # package is not installed
-    pass
+    pass  # not installed
 del version, PackageNotFoundError
 
 # Set the environment variable for default config path
@@ -20,31 +19,36 @@ import numpy
 numpy.int = int if parse(numpy.__version__) >= parse("1.20.0") else numpy.int
 del parse, numpy
 
-DEFAULT_POWER_SPECTRUM = "delta_matter:delta_matter"
-
 from . import ccllib as lib
 from .errors import *
 from .base import *
-from .base.parameters import *
-from .cosmology import *
+from .pyutils import *
+
 from .background import *
-from .boltzmann import *
-from .pk2d import *
-from .tk3d import *
 from .power import *
-from .neutrinos import *
-from .cells import *
+
 from .tracers import *
+from .cells import *
 from .correlations import *
 from .covariances import *
-from .pyutils import debug_mode, resample_array
 
-# Deprecated & Renamed modules
-from .bcm import *
-from .halomodel import *
-from .massfunction import *
-from .haloprofile import *
+from .pk2d import *
+from .tk3d import *
+
+from .boltzmann import *
 from .baryons import *
+from .neutrinos import *
+
+from . import halos
+from . import nl_pt
+
+from .bcm import *           # deprecated
+from .halomodel import *     # deprecated
+from .massfunction import *  # deprecated
+from .haloprofile import *   # deprecated
+
+from .cosmology import *
+
 
 def __getattr__(name):
     rename = {"core": "cosmology", "cls": "cells"}

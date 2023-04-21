@@ -1,10 +1,10 @@
-from ..errors import CCLDeprecationWarning
-from inspect import signature, Parameter
+__all__ = ("deprecated", "warn_api", "deprecate_attr",)
+
 import functools
 import warnings
+from inspect import Parameter, signature
 
-
-__all__ = ("deprecated", "warn_api", "deprecate_attr",)
+from .. import CCLDeprecationWarning
 
 
 def deprecated(new_function=None):

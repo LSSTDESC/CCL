@@ -1,14 +1,13 @@
-from .. import ccllib as lib
-from ..pyutils import check
-from ..base.parameters import physical_constants as const
-from ..base import (CCLAutoRepr, CCLNamedClass,
-                    warn_api, deprecated, deprecate_attr)
-import numpy as np
+__all__ = ("HMIngredients",)
+
 import functools
 from abc import abstractmethod
 
+import numpy as np
 
-__all__ = ("HMIngredients",)
+from .. import CCLAutoRepr, CCLNamedClass, lib, check
+from .. import warn_api, deprecated, deprecate_attr
+from .. import physical_constants as const
 
 
 class HMIngredients(CCLAutoRepr, CCLNamedClass):

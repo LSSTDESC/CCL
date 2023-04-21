@@ -1,13 +1,13 @@
-import numpy as np
-from scipy.interpolate import interp1d
-from ..pyutils import _check_array_params
-from ..base.parameters import physical_constants
-from ..base import CCLAutoRepr, warn_api
-from abc import abstractmethod
-
-
 __all__ = ("translate_IA_norm", "PTTracer", "PTMatterTracer",
            "PTNumberCountsTracer", "PTIntrinsicAlignmentTracer",)
+
+from abc import abstractmethod
+
+import numpy as np
+from scipy.interpolate import interp1d
+
+from .. import CCLAutoRepr, physical_constants, warn_api
+from ..pyutils import _check_array_params
 
 
 @warn_api

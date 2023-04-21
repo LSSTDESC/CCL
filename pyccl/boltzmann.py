@@ -1,18 +1,13 @@
-import numpy as np
+__all__ = ("get_camb_pk_lin", "get_isitgr_pk_lin", "get_class_pk_lin",)
 
-from . import ccllib as lib
-from .pyutils import check
-from .base import warn_api
-from .pk2d import Pk2D
-from .errors import CCLError
+import numpy as np
 
 try:
     import isitgr  # noqa: F401
 except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
-
-__all__ = ("get_camb_pk_lin", "get_isitgr_pk_lin", "get_class_pk_lin",)
+from . import CCLError, Pk2D, check, lib, warn_api
 
 
 @warn_api

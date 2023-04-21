@@ -1,12 +1,11 @@
-import numpy as np
-import warnings
-from ..pk2d import Pk2D
-from ..base import CCLAutoRepr, unlock_instance
-from ..errors import CCLWarning, CCLError
-from ..pyutils import get_pk_spline_a
-
-
 __all__ = ("EulerianPTCalculator",)
+
+import warnings
+
+import numpy as np
+
+from .. import (CCLAutoRepr, CCLError, CCLWarning, Pk2D,
+                get_pk_spline_a, unlock_instance)
 
 
 # All valid Pk pair labels and their aliases

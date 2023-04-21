@@ -1,8 +1,7 @@
-from ..base import CCLAutoRepr, warn_api
-from .profiles import HaloProfileHOD, HaloProfileCIBShang12
-
-
 __all__ = ("Profile2pt", "Profile2ptHOD", "Profile2ptCIB",)
+
+from .. import CCLAutoRepr, warn_api
+from . import HaloProfileHOD, HaloProfileCIBShang12
 
 
 class Profile2pt(CCLAutoRepr):

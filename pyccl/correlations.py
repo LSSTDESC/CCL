@@ -5,20 +5,16 @@ Choices of algorithms used to compute correlation functions:
     'FFTLog' is fast using a fast Fourier transform.
     'Legendre' uses a sum over Legendre polynomials.
 """
-
-from . import ccllib as lib
-from . import DEFAULT_POWER_SPECTRUM
-from .pyutils import check
-from .pk2d import parse_pk2d
-from .base import warn_api
-from .errors import CCLDeprecationWarning
-import numpy as np
-import warnings
-
-
 __all__ = ("CorrelationMethods", "CorrelationTypes", "correlation",
            "correlation_3d", "correlation_multipole", "correlation_3dRsd",
            "correlation_3dRsd_avgmu", "correlation_pi_sigma",)
+
+import warnings
+
+import numpy as np
+
+from . import DEFAULT_POWER_SPECTRUM, check, lib
+from . import CCLDeprecationWarning, warn_api
 
 
 CorrelationMethods = {
@@ -179,7 +175,7 @@ def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 
@@ -224,7 +220,7 @@ def correlation_multipole(cosmo, *, r, a, beta, ell,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 
@@ -274,7 +270,7 @@ def correlation_3dRsd(cosmo, *, r, a, mu, beta,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 
@@ -318,7 +314,7 @@ def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 
@@ -366,7 +362,7 @@ def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 

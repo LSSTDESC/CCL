@@ -1,16 +1,11 @@
-import numpy as np
-
-from . import ccllib as lib
-from . import DEFAULT_POWER_SPECTRUM
-from .pyutils import check, integ_types, _check_array_params
-from .background import comoving_radial_distance, comoving_angular_distance
-from .tk3d import Tk3D
-from .pk2d import parse_pk2d
-from .base import warn_api
-
-
 __all__ = ("angular_cl_cov_cNG", "sigma2_B_disc", "sigma2_B_from_mask",
            "angular_cl_cov_SSC",)
+
+import numpy as np
+
+from . import (DEFAULT_POWER_SPECTRUM, IntegrationMethods,
+               check, lib, warn_api)
+from .pyutils import _check_array_params
 
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
@@ -84,10 +79,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    if isinstance(t_of_kk_a, Tk3D):
-        tsp = t_of_kk_a.tsp
-    else:
-        raise ValueError("t_of_kk_a must be of type pyccl.Tk3D")
+    tsp = t_of_kk_a.tsp
 
     # Create tracer colections
     status = 0
@@ -117,7 +109,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
 
     cov, status = lib.angular_cov_vec(
         cosmo, clt1, clt2, clt3, clt4, tsp,
-        ell1_use, ell2_use, integ_types[integration_method],
+        ell1_use, ell2_use, IntegrationMethods[integration_method],
         6, 1./(4*np.pi*fsky), ell1_use.size*ell2_use.size, status)
 
     cov = cov.reshape([ell2_use.size, ell1_use.size])
@@ -178,9 +170,9 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
         ndim = np.ndim(a_arr)
         a_arr = np.atleast_1d(a_arr)
 
-    chi_arr = comoving_radial_distance(cosmo, a_arr)
+    chi_arr = cosmo.comoving_radial_distance(a_arr)
     R_arr = chi_arr * np.arccos(1-2*fsky)
-    psp = parse_pk2d(cosmo, p_of_k_a, is_linear=True)
+    psp = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
 
     status = 0
     s2B_arr, status = lib.sigma2b_vec(cosmo.cosmo, a_arr, R_arr, psp,
@@ -253,7 +245,7 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
             sigma2_B[i] = sigma2_B_disc(cosmo=cosmo, a_arr=a_arr[i],
                                         p_of_k_a=p_of_k_a)
         else:
-            chi = comoving_angular_distance(cosmo, a=a_arr)
+            chi = cosmo.comoving_angular_distance(a=a_arr)
             k = (ell+0.5)/chi[i]
             pk = p_of_k_a(k, a_arr[i], cosmo)
             # See eq. E.10 of 2007.01844
@@ -344,10 +336,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    if isinstance(t_of_kk_a, Tk3D):
-        tsp = t_of_kk_a.tsp
-    else:
-        raise ValueError("t_of_kk_a must be of type pyccl.Tk3D")
+    tsp = t_of_kk_a.tsp
 
     # Create tracer colections
     status = 0
@@ -381,7 +370,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         a_arr, s2b_arr = _check_array_params(sigma2_B, 'sigma2_B')
     cov, status = lib.angular_cov_ssc_vec(
         cosmo, clt1, clt2, clt3, clt4, tsp, a_arr, s2b_arr,
-        ell1_use, ell2_use, integ_types[integration_method],
+        ell1_use, ell2_use, IntegrationMethods[integration_method],
         4, 1., ell1_use.size*ell2_use.size, status)
 
     cov = cov.reshape([ell2_use.size, ell1_use.size])

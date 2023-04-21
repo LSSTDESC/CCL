@@ -1,11 +1,11 @@
-from ...base import warn_api
-from ..concentration import Concentration
-from .profile_base import HaloProfileMatter
+__all__ = ("HaloProfileNFW",)
+
 import numpy as np
 from scipy.special import sici
 
-
-__all__ = ("HaloProfileNFW",)
+from ... import warn_api
+from .. import Concentration
+from . import HaloProfileMatter
 
 
 class HaloProfileNFW(HaloProfileMatter):

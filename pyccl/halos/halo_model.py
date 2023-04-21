@@ -1,15 +1,12 @@
-from .massdef import MassDef
-from .hmfunc import MassFunc
-from .hbias import HaloBias
-from ..pyutils import _spline_integrate
-from .. import background
-from ..base import (CCLAutoRepr, unlock_instance,
-                    warn_api, deprecate_attr, deprecated)
-from ..base.parameters import physical_constants as const
+__all__ = ("HMCalculator",)
+
 import numpy as np
 
-
-__all__ = ("HMCalculator",)
+from .. import CCLAutoRepr, unlock_instance
+from .. import warn_api, deprecate_attr, deprecated
+from .. import physical_constants as const
+from . import HaloBias, MassDef, MassFunc
+from ..pyutils import _spline_integrate
 
 
 class HMCalculator(CCLAutoRepr):
@@ -220,8 +217,8 @@ class HMCalculator(CCLAutoRepr):
 
         # compute the volume element
         abs_dzda = 1 / a / a
-        dc = background.comoving_angular_distance(cosmo, a)
-        ez = background.h_over_h0(cosmo, a)
+        dc = cosmo.comoving_angular_distance(a)
+        ez = cosmo.h_over_h0(a)
         dh = const.CLIGHT_HMPC / cosmo['h']
         dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda

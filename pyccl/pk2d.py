@@ -1,18 +1,15 @@
-import warnings
+__all__ = ("Pk2D", "parse_pk2d", "parse_pk",)
+
 import functools
+import warnings
+
 import numpy as np
 
-from . import ccllib as lib
-from . import DEFAULT_POWER_SPECTRUM
-from .errors import CCLWarning, CCLError, CCLDeprecationWarning
-from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
-                      _get_spline1d_arrays, _get_spline2d_arrays)
-from .base import (CCLObject, UnlockInstance, unlock_instance,
-                   warn_api, deprecated)
-from .base.parameters import spline_params
-
-
-__all__ = ("Pk2D", "parse_pk2d", "parse_pk",)
+from . import (
+    CCLObject, DEFAULT_POWER_SPECTRUM, UnlockInstance, check, get_pk_spline_a,
+    get_pk_spline_lk, lib, spline_params, unlock_instance)
+from . import CCLWarning, CCLError, CCLDeprecationWarning, warn_api, deprecated
+from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 
 
 class _Pk2D_descriptor:

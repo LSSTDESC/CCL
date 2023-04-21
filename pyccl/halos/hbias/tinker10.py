@@ -1,9 +1,9 @@
-from ...base import warn_api
-from ..halo_model_base import HaloBias
+__all__ = ("HaloBiasTinker10",)
+
 import numpy as np
 
-
-__all__ = ("HaloBiasTinker10",)
+from ... import warn_api
+from . import HaloBias
 
 
 class HaloBiasTinker10(HaloBias):

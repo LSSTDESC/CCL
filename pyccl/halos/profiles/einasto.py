@@ -1,13 +1,11 @@
-from ...base import warn_api
-from ...power import sigmaM
-from ..concentration import Concentration
-from ..massdef import MassDef
-from .profile_base import HaloProfileMatter
+__all__ = ("HaloProfileEinasto",)
+
 import numpy as np
 from scipy.special import gamma, gammainc
 
-
-__all__ = ("HaloProfileEinasto",)
+from ... import warn_api
+from .. import Concentration, MassDef
+from . import HaloProfileMatter
 
 
 class HaloProfileEinasto(HaloProfileMatter):
@@ -74,7 +72,7 @@ class HaloProfileEinasto(HaloProfileMatter):
         if self.alpha == 'cosmo':
             Mvir = mass_def.translate_mass(
                 cosmo, M, a, mass_def_other=MassDef('vir', 'matter'))
-            sM = sigmaM(cosmo, Mvir, a)
+            sM = cosmo.sigmaM(Mvir, a)
             nu = 1.686 / sM
             return 0.155 + 0.0095 * nu * nu
         return np.full_like(M, self.alpha)

@@ -1,14 +1,14 @@
-from _thread import RLock
-from abc import ABC, abstractmethod
-from inspect import signature
-import functools
-import numpy as np
-
-
 __all__ = ("ObjectLock",
            "UnlockInstance", "unlock_instance",
            "CustomRepr", "CustomEq",
            "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
+
+import functools
+from abc import ABC, abstractmethod
+from inspect import signature
+from _thread import RLock
+
+import numpy as np
 
 
 class ObjectLock:

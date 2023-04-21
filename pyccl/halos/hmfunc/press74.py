@@ -1,9 +1,9 @@
-from ...base import warn_api
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncPress74",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncPress74",)
+from ... import warn_api
+from . import MassFunc
 
 
 class MassFuncPress74(MassFunc):

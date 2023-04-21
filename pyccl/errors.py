@@ -1,7 +1,6 @@
-import warnings
-
-
 __all__ = ("CCLError", "CCLWarning", "CCLDeprecationWarning",)
+
+import warnings
 
 
 class CCLError(RuntimeError):
