@@ -22,17 +22,9 @@ cs_200c_p = dc[7]
 cs_200c_di = dc[8]
 
 hmd_vir = ccl.halos.MassDefVir()
-# hmd_vir_b = ccl.halos.MassDefVir('Bhattacharya13')
-
 hmd_200m = ccl.halos.MassDef200m()
-# hmd_200m_b = ccl.halos.MassDef200m('Bhattacharya13')
-
 hmd_200c = ccl.halos.MassDef200c()
-# hmd_200c_b = ccl.halos.MassDef200c('Bhattacharya13')
-# hmd_200c_p = ccl.halos.MassDef200c('Prada12')
-# hmd_200c_di = ccl.halos.MassDef200c('Diemer15')
-
-hmd_500c = ccl.halos.MassDef(500, 'critical')
+hmd_500c = ccl.halos.MassDef500c()
 
 
 def test_mdef_get_radius():
