@@ -1,5 +1,4 @@
 from ...base import warn_api
-from ..concentration import Concentration
 from .profile_base import HaloProfileMatter
 import numpy as np
 from scipy.special import sici
@@ -45,18 +44,15 @@ class HaloProfileHernquist(HaloProfileMatter):
     """
     __repr_attrs__ = __eq_attrs__ = (
         "fourier_analytic", "projected_analytic", "cumul2d_analytic",
-        "truncated", "concentration", "precision_fftlog",)
+        "truncated", "mass_def", "concentration", "precision_fftlog",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration,
                  truncated=True,
                  fourier_analytic=False,
                  projected_analytic=False,
-                 cumul2d_analytic=False):
-        if not isinstance(concentration, Concentration):
-            raise TypeError("concentration must be of type `Concentration`")
-
-        self.concentration = concentration
+                 cumul2d_analytic=False,
+                 mass_def=None):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic
@@ -75,7 +71,7 @@ class HaloProfileHernquist(HaloProfileMatter):
                                  "for truncated Hernquist. Set `truncated` or "
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
-        super().__init__()
+        super().__init__(mass_def=mass_def, concentration=concentration)
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-4,
                                      n_per_decade=1000,
@@ -85,12 +81,12 @@ class HaloProfileHernquist(HaloProfileMatter):
         # Hernquist normalization from mass, radius and concentration
         return M / (2 * np.pi * Rs**3 * (c / (1 + c))**2)
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
         c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
@@ -124,12 +120,12 @@ class HaloProfileHernquist(HaloProfileMatter):
                             [xf < 1, xf > 1],
                             [f1, f2, 2./15.]).reshape(x.shape)
 
-    def _projected_analytic(self, cosmo, r, M, a, mass_def):
+    def _projected_analytic(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
         c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
@@ -163,12 +159,12 @@ class HaloProfileHernquist(HaloProfileMatter):
 
         return f / x**2
 
-    def _cumul2d_analytic(self, cosmo, r, M, a, mass_def):
+    def _cumul2d_analytic(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
         c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 
@@ -183,12 +179,12 @@ class HaloProfileHernquist(HaloProfileMatter):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier_analytic(self, cosmo, k, M, a, mass_def):
+    def _fourier_analytic(self, cosmo, k, M, a):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
         # Comoving virial radius
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
         c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
 

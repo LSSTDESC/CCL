@@ -26,7 +26,7 @@ def test_szcl():
     hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def)
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mass_def)
-    prf = ccl.halos.HaloProfilePressureGNFW()
+    prf = ccl.halos.HaloProfilePressureGNFW(mass_def=mass_def)
     prf.update_parameters(mass_bias=1./1.41, x_out=6.)
     tr = ccl.tSZTracer(COSMO, z_max=3.)
 
