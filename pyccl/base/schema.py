@@ -372,5 +372,5 @@ class CCLNamedClass(CCLObject):
         if isinstance(input_, str):
             class_ = cls.from_name(input_)
             return class_(**kwargs)
-        good, bad = cls.__name__, input_.__class__.__name__
+        good, bad = cls.__name__, type(input_).__name__
         raise TypeError(f"Expected {good} or str but received {bad}.")

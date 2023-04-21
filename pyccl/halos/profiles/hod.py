@@ -4,7 +4,6 @@ import numpy as np
 from scipy.special import sici, erf
 
 from ... import warn_api, deprecate_attr
-from .. import Concentration
 from . import HaloProfileNumberCounts
 
 
@@ -113,7 +112,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
         "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0", "alpha_p", "fc_0",
         "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
-        "ns_independent", "concentration", "precision_fftlog",)
+        "ns_independent", "mass_def", "concentration", "precision_fftlog",)
     __getattr__ = deprecate_attr(pairs=[
         ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
         ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
@@ -132,11 +131,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
                  log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False):
-        if not isinstance(concentration, Concentration):
-            raise TypeError("concentration must be of type `Concentration`")
-
-        self.concentration = concentration
+                 a_pivot=1., ns_independent=False, mass_def=None):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p
         self.log10M0_0 = log10M0_0
@@ -155,7 +150,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         self.bmax_p = bmax_p
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
-        super().__init__()
+        super().__init__(mass_def=mass_def, concentration=concentration)
 
     @warn_api(pairs=[("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
                      ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
@@ -248,14 +243,14 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         if ns_independent is not None:
             self.ns_independent = ns_independent
 
-    def _usat_real(self, cosmo, r, M, a, mass_def):
+    def _usat_real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
         c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
@@ -274,14 +269,14 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _usat_fourier(self, cosmo, k, M, a, mass_def):
+    def _usat_fourier(self, cosmo, k, M, a):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
         # Comoving virial radius
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
         c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
@@ -301,7 +296,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
@@ -309,7 +304,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         Ns = self._Ns(M_use, a)
         fc = self._fc(a)
         # NFW profile
-        ur = self._usat_real(cosmo, r_use, M_use, a, mass_def)
+        ur = self._usat_real(cosmo, r_use, M_use, a)
 
         if self.ns_independent:
             prof = Nc[:, None] * fc + Ns[:, None] * ur
@@ -336,7 +331,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
                 return Nc*(fc + Ns)
         return hmc.integrate_over_massfunc(integ, cosmo, a)
 
-    def _fourier(self, cosmo, k, M, a, mass_def):
+    def _fourier(self, cosmo, k, M, a):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
@@ -344,7 +339,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         Ns = self._Ns(M_use, a)
         fc = self._fc(a)
         # NFW profile
-        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
+        uk = self._usat_fourier(cosmo, k_use, M_use, a)
 
         if self.ns_independent:
             prof = Nc[:, None] * fc + Ns[:, None] * uk
@@ -357,7 +352,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier_variance(self, cosmo, k, M, a, mass_def):
+    def _fourier_variance(self, cosmo, k, M, a):
         # Fourier-space variance of the HOD profile
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
@@ -366,7 +361,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         Ns = self._Ns(M_use, a)
         fc = self._fc(a)
         # NFW profile
-        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
+        uk = self._usat_fourier(cosmo, k_use, M_use, a)
 
         prof = Ns[:, None] * uk
         if self.ns_independent:

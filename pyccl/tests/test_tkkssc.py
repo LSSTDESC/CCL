@@ -16,7 +16,7 @@ CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 
 NFW = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
 HOD = ccl.halos.HaloProfileHOD(concentration=CON)
-GNFW = ccl.halos.HaloProfilePressureGNFW()
+GNFW = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
 
 PKC = ccl.halos.Profile2pt()
 PKCH = ccl.halos.Profile2ptHOD()
@@ -117,7 +117,7 @@ def test_tkkssc_linear_bias(isNC1, isNC2, isNC3, isNC4):
 
 def test_tkkssc_warns():
     """Test that it warns if the profile is negative and use_log is True."""
-    Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
+    Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1, mass_def=HMC.mass_def)
     with pytest.warns(ccl.CCLWarning):
         ccl.halos.halomod_Tk3D_SSC(
             COSMO, HMC, prof=GNFW, prof2=Pneg,

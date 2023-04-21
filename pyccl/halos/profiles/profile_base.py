@@ -9,6 +9,7 @@ import numpy as np
 from ... import CCLAutoRepr, FFTLogParams, unlock_instance
 from ... import deprecate_attr, warn_api
 from ... import physical_constants as const
+from .. import MassDef
 from ...pyutils import resample_array, _fftlog_transform
 
 
@@ -41,12 +42,21 @@ class HaloProfile(CCLAutoRepr):
     __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
                                  )(super.__getattribute__)
 
-    def __init__(self):
+    def __init__(self, *, mass_def=None, concentration=None):
+        # Verify that profile can be initialized.
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
-            name = self.__class__.__name__
+            name = type(self).__name__
             raise TypeError(f"Can't instantiate {name} with no "
                             "_real or _fourier implementation.")
+
+        # Initialize FFTLog.
         self.precision_fftlog = FFTLogParams()
+
+        # Initialize mass_def and concentration.
+        self.mass_def, *out = MassDef.from_specs(
+            mass_def, concentration=concentration)
+        if out:
+            self.concentration = out[0]
 
     def get_normalization(self, cosmo, a, *, hmc=None):
         """Profiles may be normalized by an overall function of redshift
@@ -67,12 +77,11 @@ class HaloProfile(CCLAutoRepr):
             float: normalization factor of this profile.
         """
         def integ(M):
-            return self.fourier(cosmo=cosmo,
-                                k=hmc.precision['k_min'],
-                                M=M, a=a, mass_def=hmc.mass_def)
+            return self.fourier(cosmo, hmc.precision["k_min"], M, a)
         return hmc.integrate_over_massfunc(integ, cosmo, a)
         # TODO: CCLv3 replace by the below in v3 (profiles will all have a
         # default normalization of 1. Normalization will always be applied).
+        # NK: (cosmo, a) have to take None defaults in v3.
         # return 1.0
 
     @unlock_instance(mutate=True)
@@ -115,7 +124,7 @@ class HaloProfile(CCLAutoRepr):
     _cumul2d: Callable    # implementation of the cumulative surface density
 
     @warn_api
-    def real(self, cosmo, r, M, a, *, mass_def=None):
+    def real(self, cosmo, r, M, a):
         """ Returns the 3D real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
 
@@ -124,8 +133,6 @@ class HaloProfile(CCLAutoRepr):
             r (float or array_like): comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -135,11 +142,11 @@ class HaloProfile(CCLAutoRepr):
             squeezed out on output.
         """
         if getattr(self, "_real", None):
-            return self._real(cosmo, r, M, a, mass_def)
-        return self._fftlog_wrap(cosmo, r, M, a, mass_def, fourier_out=False)
+            return self._real(cosmo, r, M, a)
+        return self._fftlog_wrap(cosmo, r, M, a, fourier_out=False)
 
     @warn_api
-    def fourier(self, cosmo, k, M, a, *, mass_def=None):
+    def fourier(self, cosmo, k, M, a):
         """ Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
         scale factor.
@@ -153,8 +160,6 @@ class HaloProfile(CCLAutoRepr):
             k (float or array_like): comoving wavenumber in Mpc^-1.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -164,11 +169,11 @@ class HaloProfile(CCLAutoRepr):
             squeezed out on output.
         """
         if getattr(self, "_fourier", None):
-            return self._fourier(cosmo, k, M, a, mass_def)
-        return self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
+            return self._fourier(cosmo, k, M, a)
+        return self._fftlog_wrap(cosmo, k, M, a, fourier_out=True)
 
     @warn_api
-    def projected(self, cosmo, r_t, M, a, *, mass_def=None):
+    def projected(self, cosmo, r_t, M, a):
         """ Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
 
@@ -181,8 +186,6 @@ class HaloProfile(CCLAutoRepr):
             r_t (float or array_like): transverse comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -192,12 +195,11 @@ class HaloProfile(CCLAutoRepr):
             squeezed out on output.
         """
         if getattr(self, "_projected", None):
-            return self._projected(cosmo, r_t, M, a, mass_def)
-        return self._projected_fftlog_wrap(cosmo, r_t, M, a, mass_def,
-                                           is_cumul2d=False)
+            return self._projected(cosmo, r_t, M, a)
+        return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=False)
 
     @warn_api
-    def cumul2d(self, cosmo, r_t, M, a, *, mass_def=None):
+    def cumul2d(self, cosmo, r_t, M, a):
         """ Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
         factor.
@@ -211,8 +213,6 @@ class HaloProfile(CCLAutoRepr):
             r_t (float or array_like): transverse comoving radius in Mpc.
             M (float or array_like): halo mass in units of M_sun.
             a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: halo profile. The shape of the
@@ -222,12 +222,11 @@ class HaloProfile(CCLAutoRepr):
             squeezed out on output.
         """
         if getattr(self, "_cumul2d", None):
-            return self._cumul2d(cosmo, r_t, M, a, mass_def)
-        return self._projected_fftlog_wrap(cosmo, r_t, M, a, mass_def,
-                                           is_cumul2d=True)
+            return self._cumul2d(cosmo, r_t, M, a)
+        return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=True)
 
     @warn_api
-    def convergence(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
+    def convergence(self, cosmo, r, M, *, a_lens, a_source):
         """ Returns the convergence as a function of cosmology,
         radius, halo mass and the scale factors of the source
         and the lens.
@@ -244,20 +243,18 @@ class HaloProfile(CCLAutoRepr):
             a_lens (float): scale factor of lens.
             a_source (float or array_like): scale factor of source.
                 If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: convergence \
                 :math:`\\kappa`
         """
-        Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
+        Sigma = self.projected(cosmo, r, M, a_lens)
         Sigma /= a_lens**2
         Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return Sigma / Sigma_crit
 
     @warn_api
-    def shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
+    def shear(self, cosmo, r, M, *, a_lens, a_source):
         """ Returns the shear (tangential) as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -277,20 +274,18 @@ class HaloProfile(CCLAutoRepr):
             a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
                 If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: shear \
                 :math:`\\gamma`
         """
-        Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
-        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def=mass_def)
+        Sigma = self.projected(cosmo, r, M, a_lens)
+        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens)
         Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
     @warn_api
-    def reduced_shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
+    def reduced_shear(self, cosmo, r, M, *, a_lens, a_source):
         """ Returns the reduced shear as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
@@ -308,21 +303,18 @@ class HaloProfile(CCLAutoRepr):
             a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
                 If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: reduced shear \
                 :math:`g_t`
         """
         convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
-                                       a_source=a_source, mass_def=mass_def)
-        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source,
-                           mass_def=mass_def)
+                                       a_source=a_source)
+        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source)
         return shear / (1.0 - convergence)
 
     @warn_api
-    def magnification(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
+    def magnification(self, cosmo, r, M, *, a_lens, a_source):
         """ Returns the magnification for input parameters.
 
         .. math::
@@ -339,23 +331,19 @@ class HaloProfile(CCLAutoRepr):
             a_lens (float): scale factor of lens.
             a_source (float or array_like): source's scale factor.
                 If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: magnification\
                 :math:`\\mu`
         """
         convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
-                                       a_source=a_source, mass_def=mass_def)
-        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source,
-                           mass_def=mass_def)
+                                       a_source=a_source)
+        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source)
 
         return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 
-    def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
-                     fourier_out=False,
-                     large_padding=True):
+    def _fftlog_wrap(self, cosmo, k, M, a,
+                     fourier_out=False, large_padding=True):
         # This computes the 3D Hankel transform
         #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_0(k r)
         # if fourier_out == False, and
@@ -385,7 +373,7 @@ class HaloProfile(CCLAutoRepr):
 
         p_k_out = np.zeros([nM, k_use.size])
         # Compute real profile values
-        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def)
+        p_real_M = p_func(cosmo, r_arr, M_use, a)
         # Power-law index to pass to FFTLog.
         plaw_index = self._get_plaw_fourier(cosmo, a)
 
@@ -410,8 +398,7 @@ class HaloProfile(CCLAutoRepr):
             p_k_out = np.squeeze(p_k_out, axis=0)
         return p_k_out
 
-    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def,
-                               is_cumul2d=False):
+    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, is_cumul2d=False):
         # This computes Sigma(R) from the Fourier-space profile as:
         # Sigma(R) = \frac{1}{2\pi} \int dk k J_0(k R) \rho(k)
         r_t_use = np.atleast_1d(r_t)
@@ -430,17 +417,12 @@ class HaloProfile(CCLAutoRepr):
         # Compute Fourier-space profile
         if getattr(self, "_fourier", None):
             # Compute from `_fourier` if available.
-            p_fourier = self._fourier(cosmo, k_arr, M_use,
-                                      a, mass_def)
+            p_fourier = self._fourier(cosmo, k_arr, M_use, a)
         else:
             # Compute with FFTLog otherwise.
             lpad = self.precision_fftlog['large_padding_2D']
-            p_fourier = self._fftlog_wrap(cosmo,
-                                          k_arr,
-                                          M_use, a,
-                                          mass_def,
-                                          fourier_out=True,
-                                          large_padding=lpad)
+            p_fourier = self._fftlog_wrap(cosmo, k_arr, M_use, a,
+                                          fourier_out=True, large_padding=lpad)
         if is_cumul2d:
             # The cumulative profile involves a factor 1/(k R) in
             # the integrand.

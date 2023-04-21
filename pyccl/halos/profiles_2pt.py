@@ -40,7 +40,7 @@ class Profile2pt(CCLAutoRepr):
             self.r_corr = r_corr
 
     @warn_api
-    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None, mass_def):
+    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
         """ Return the Fourier-space two-point moment between
         two profiles.
 
@@ -63,8 +63,6 @@ class Profile2pt(CCLAutoRepr):
                 second halo profile for which the second-order moment
                 is desired. If `None`, the assumption is that you want
                 an auto-correlation, and `prof` will be used as `prof2`.
-            mass_def (:obj:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
 
         Returns:
             float or array_like: second-order Fourier-space
@@ -76,12 +74,12 @@ class Profile2pt(CCLAutoRepr):
         if prof2 is None:
             prof2 = prof
 
-        uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
+        uk1 = prof.fourier(cosmo, k, M, a)
 
         if prof == prof2:
             uk2 = uk1
         else:
-            uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
+            uk2 = prof2.fourier(cosmo, k, M, a)
 
         return uk1 * uk2 * (1 + self.r_corr)
 
@@ -100,7 +98,7 @@ class Profile2ptHOD(Profile2pt):
     """
 
     @warn_api
-    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None, mass_def):
+    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
         """ Returns the Fourier-space two-point moment for the HOD
         profile.
 
@@ -117,8 +115,6 @@ class Profile2ptHOD(Profile2pt):
                 is desired. If `None`, the assumption is that you want
                 an auto-correlation. Note that only auto-correlations
                 are allowed in this case.
-            mass_def (:obj:`~pyccl.halos.massdef.MassDef`): a mass
-                definition object.
 
         Returns:
             float or array_like: second-order Fourier-space
@@ -136,7 +132,7 @@ class Profile2ptHOD(Profile2pt):
         if not (isinstance(prof, HOD) and isinstance(prof2, HOD)):
             raise TypeError("prof and prof2 must be HaloProfileHOD")
 
-        return prof._fourier_variance(cosmo, k, M, a, mass_def)
+        return prof._fourier_variance(cosmo, k, M, a)
 
 
 class Profile2ptCIB(Profile2pt):
@@ -148,8 +144,7 @@ class Profile2ptCIB(Profile2pt):
     """
 
     @warn_api
-    def fourier_2pt(self, cosmo, k, M, a, prof, *,
-                    prof2=None, mass_def=None):
+    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
         """ Returns the Fourier-space two-point moment for the CIB
         profile.
 
@@ -166,8 +161,6 @@ class Profile2ptCIB(Profile2pt):
                 is desired. If `None`, the assumption is that you want
                 an auto-correlation. Note that only auto-correlations
                 are allowed in this case.
-            mass_def (:obj:`~pyccl.halos.massdef.MassDef`): a mass
-                definition object.
 
         Returns:
             float or array_like: second-order Fourier-space
@@ -183,5 +176,4 @@ class Profile2ptCIB(Profile2pt):
         if not (isinstance(prof, Shang12) and isinstance(prof2, Shang12)):
             raise TypeError("prof and prof2 must be HaloProfileCIB")
 
-        return prof._fourier_variance(cosmo, k, M, a, mass_def,
-                                      nu_other=prof2.nu)
+        return prof._fourier_variance(cosmo, k, M, a, nu_other=prof2.nu)
