@@ -29,7 +29,7 @@ MDFS = [MVIR, MVIR, MVIR, MVIR,
 
 @pytest.mark.parametrize('nM_class', HMFS)
 def test_nM_subclasses_smoke(nM_class):
-    nM = nM_class(COSMO)
+    nM = nM_class()
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -40,20 +40,20 @@ def test_nM_subclasses_smoke(nM_class):
 def test_nM_mdef_raises(nM_pair):
     nM_class, mdef = nM_pair
     with pytest.raises(ValueError):
-        nM_class(COSMO, mdef)
+        nM_class(mass_def=mdef)
 
 
 @pytest.mark.parametrize('nM_class', [ccl.halos.MassFuncTinker08,
                                       ccl.halos.MassFuncTinker10])
 def test_nM_mdef_bad_delta(nM_class):
     with pytest.raises(ValueError):
-        nM_class(COSMO, MFOF)
+        nM_class(mass_def=MFOF)
 
 
 @pytest.mark.parametrize('nM_class', [ccl.halos.MassFuncTinker08,
                                       ccl.halos.MassFuncTinker10])
 def test_nM_SO_allgood(nM_class):
-    nM = nM_class(COSMO, MVIR)
+    nM = nM_class(mass_def=MVIR)
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -61,8 +61,7 @@ def test_nM_SO_allgood(nM_class):
 
 
 def test_nM_despali_smoke():
-    nM = ccl.halos.MassFuncDespali16(COSMO,
-                                     ellipsoidal=True)
+    nM = ccl.halos.MassFuncDespali16(ellipsoidal=True)
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -71,8 +70,7 @@ def test_nM_despali_smoke():
 
 @pytest.mark.parametrize('mdef', [MFOF, M200m])
 def test_nM_watson_smoke(mdef):
-    nM = ccl.halos.MassFuncWatson13(COSMO,
-                                    mdef)
+    nM = ccl.halos.MassFuncWatson13(mass_def=mdef)
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -86,12 +84,10 @@ def test_nM_watson_smoke(mdef):
 @pytest.mark.parametrize('with_hydro', [True, False])
 def test_nM_bocquet_smoke(with_hydro):
     with pytest.raises(ValueError):
-        ccl.halos.MassFuncBocquet16(COSMO, M500m,
-                                    hydro=with_hydro)
+        ccl.halos.MassFuncBocquet16(mass_def=M500m, hydro=with_hydro)
 
     for md in [M500c, M200c, M200m]:
-        nM = ccl.halos.MassFuncBocquet16(COSMO, md,
-                                         hydro=with_hydro)
+        nM = ccl.halos.MassFuncBocquet16(mass_def=md, hydro=with_hydro)
         for m in MS:
             n = nM(COSMO, m, 0.9)
             assert np.all(np.isfinite(n))
@@ -102,8 +98,7 @@ def test_nM_bocquet_smoke(with_hydro):
                                   'Despali16', 'Angulo12'])
 def test_nM_from_string(name):
     nM_class = ccl.halos.MassFunc.from_name(name)
-    assert nM_class == ccl.halos.mass_function_from_name(name)
-    nM = nM_class(COSMO)
+    nM = nM_class()
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -125,8 +120,8 @@ def test_nM_tinker_crit(mf):
     delta_m = delta_c * oc / om
     mdef_c = ccl.halos.MassDef(delta_c, 'critical')
     mdef_m = ccl.halos.MassDef(delta_m, 'matter')
-    nM_c = mf(COSMO, mdef_c)
-    nM_m = mf(COSMO, mdef_m)
+    nM_c = mf(mass_def=mdef_c)
+    nM_m = mf(mass_def=mdef_m)
     assert np.allclose(nM_c(COSMO, 1E13, a), nM_m(COSMO, 1E13, a))
 
 
@@ -134,9 +129,8 @@ def test_nM_tinker10_norm():
     from scipy.integrate import quad
 
     md = ccl.halos.MassDef(300, rho_type='matter')
-    mf = ccl.halos.MassFuncTinker10(COSMO, mass_def=md,
-                                    norm_all_z=True)
-    bf = ccl.halos.HaloBiasTinker10(COSMO, mass_def=md)
+    mf = ccl.halos.MassFuncTinker10(mass_def=md, norm_all_z=True)
+    bf = ccl.halos.HaloBiasTinker10(mass_def=md)
 
     def integrand(lnu, z):
         nu = np.exp(lnu)

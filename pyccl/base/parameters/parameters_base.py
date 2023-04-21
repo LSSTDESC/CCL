@@ -1,10 +1,10 @@
-from ...errors import CCLDeprecationWarning
-from ..schema import ObjectLock
-from functools import cached_property
-import warnings
-
-
 __all__ = ("Parameters",)
+
+import warnings
+from functools import cached_property
+
+from ... import CCLDeprecationWarning
+from .. import ObjectLock
 
 
 class Parameters:

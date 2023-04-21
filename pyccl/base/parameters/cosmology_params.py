@@ -1,8 +1,7 @@
-from ... import ccllib as lib
-from .parameters_base import Parameters
-
-
 __all__ = ("CosmologyParams",)
+
+from ... import lib
+from . import Parameters
 
 
 class CosmologyParams(Parameters, factory=lib.parameters):

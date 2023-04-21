@@ -1,10 +1,10 @@
-from ...base import warn_api
-from ...base.parameters import physical_constants as const
-from ..halo_model_base import Concentration
+__all__ = ("ConcentrationDiemer15",)
+
 import numpy as np
 
-
-__all__ = ("ConcentrationDiemer15",)
+from ... import warn_api
+from ... import physical_constants as const
+from . import Concentration
 
 
 class ConcentrationDiemer15(Concentration):

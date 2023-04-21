@@ -1,11 +1,11 @@
-from ...base import warn_api
-from ...base.parameters import physical_constants as const
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncTinker10",)
+
 import numpy as np
 from scipy.interpolate import interp1d
 
-
-__all__ = ("MassFuncTinker10",)
+from ... import warn_api
+from ... import physical_constants as const
+from . import MassFunc
 
 
 class MassFuncTinker10(MassFunc):

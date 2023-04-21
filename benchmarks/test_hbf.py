@@ -17,7 +17,7 @@ zs = np.array([0., 0.5, 1.])
 def test_hbf_tinker10():
     d_hbf = np.loadtxt(os.path.join(dirdat, 'hbf_tinker10.txt'),
                        unpack=True)
-    mf = ccl.halos.HaloBiasTinker10(cosmo)
+    mf = ccl.halos.HaloBiasTinker10()
     m = d_hbf[0]
     for iz, z in enumerate(zs):
         hb_d = d_hbf[iz+1]
@@ -28,7 +28,7 @@ def test_hbf_tinker10():
 def test_hbf_sheth01():
     d_hbf = np.loadtxt(os.path.join(dirdat, 'hbf_sheth01.txt'),
                        unpack=True)
-    mf = ccl.halos.HaloBiasSheth01(cosmo)
+    mf = ccl.halos.HaloBiasSheth01()
     m = d_hbf[0]
     for iz, z in enumerate(zs):
         hb_d = d_hbf[iz+1]
@@ -39,7 +39,7 @@ def test_hbf_sheth01():
 def test_hbf_bhattacharya11():
     d_hbf = np.loadtxt(os.path.join(dirdat, 'hbf_bhattacharya11.txt'),
                        unpack=True)
-    mf = ccl.halos.HaloBiasBhattacharya11(cosmo)
+    mf = ccl.halos.HaloBiasBhattacharya11()
     m = d_hbf[0]
     for iz, z in enumerate(zs):
         hb_d = d_hbf[iz+1]

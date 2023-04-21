@@ -36,6 +36,8 @@ class FFTLogParams:
         return repr(self.to_dict())
 
     def __eq__(self, other):
+        if self is other:
+            True
         if type(self) != type(other):
             return False
         return self.to_dict() == other.to_dict()

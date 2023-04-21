@@ -8,12 +8,11 @@ def test_hmcalculator_number_counts_smoke():
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
     mdef = ccl.halos.MassDef(200, 'matter')
-    hmf = ccl.halos.MassFuncTinker10(cosmo, mdef,
-                                     mass_def_strict=False)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
-                                     mass_def_strict=False)
+    hmf = ccl.halos.MassFuncTinker10(mass_def=mdef, mass_def_strict=False)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mdef)
 
     def sel(m, a):
         m = np.atleast_1d(m)
@@ -27,7 +26,7 @@ def test_hmcalculator_number_counts_smoke():
         val[~msk] = 0
         return val
 
-    nc = hmc.number_counts(cosmo, sel) * 4.0 * np.pi
+    nc = hmc.number_counts(cosmo, selection=sel) * 4.0 * np.pi
     assert np.isfinite(nc)
     assert not np.allclose(nc, 0)
 
@@ -37,12 +36,11 @@ def test_hmcalculator_number_counts_zero():
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
     mdef = ccl.halos.MassDef(200, 'matter')
-    hmf = ccl.halos.MassFuncTinker10(cosmo, mdef,
-                                     mass_def_strict=False)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
-                                     mass_def_strict=False)
+    hmf = ccl.halos.MassFuncTinker10(mass_def=mdef, mass_def_strict=False)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mdef)
 
     def sel(m, a):
         m = np.atleast_1d(m)
@@ -50,7 +48,7 @@ def test_hmcalculator_number_counts_zero():
         val = np.zeros_like(m.reshape(-1, 1) * a.reshape(1, -1))
         return val
 
-    nc = hmc.number_counts(cosmo, sel) * 4.0 * np.pi
+    nc = hmc.number_counts(cosmo, selection=sel) * 4.0 * np.pi
     assert np.isfinite(nc)
     assert np.allclose(nc, 0)
 
@@ -60,12 +58,11 @@ def test_hmcalculator_number_counts_norm():
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function='bbks', matter_power_spectrum='linear')
     mdef = ccl.halos.MassDef(200, 'matter')
-    hmf = ccl.halos.MassFuncTinker10(cosmo, mdef,
-                                     mass_def_strict=False)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
-                                     mass_def_strict=False)
+    hmf = ccl.halos.MassFuncTinker10(mass_def=mdef, mass_def_strict=False)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mdef)
 
     def sel2(m, a):
         m = np.atleast_1d(m)
@@ -91,10 +88,10 @@ def test_hmcalculator_number_counts_norm():
         val[~msk] = 0
         return val
 
-    nc2 = hmc.number_counts(cosmo, sel2) * 4.0 * np.pi
+    nc2 = hmc.number_counts(cosmo, selection=sel2) * 4.0 * np.pi
     assert np.isfinite(nc2)
     assert not np.allclose(nc2, 0)
-    nc4 = hmc.number_counts(cosmo, sel4) * 4.0 * np.pi
+    nc4 = hmc.number_counts(cosmo, selection=sel4) * 4.0 * np.pi
     assert np.isfinite(nc4)
     assert not np.allclose(nc4, 0)
 
@@ -119,10 +116,8 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         matter_power_spectrum='linear'
     )
     mdef = ccl.halos.MassDef(200, 'matter')
-    hmf = ccl.halos.MassFuncTinker08(cosmo, mass_def=mdef,
-                                     mass_def_strict=False)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
-                                     mass_def_strict=False)
+    hmf = ccl.halos.MassFuncTinker08(mass_def=mdef, mass_def_strict=False)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
     amin = 0.75
     amax = 1.0
@@ -130,7 +125,7 @@ def test_hmcalculator_number_counts_scipy_dblquad():
     mmax = 1e15
 
     hmc = ccl.halos.HMCalculator(
-        cosmo, hmf, hbf, mdef,
+        mass_function=hmf, halo_bias=hbf, mass_def=mdef,
         log10M_min=np.log10(mmin),
         log10M_max=np.log10(mmax),
         integration_method_M='spline')
@@ -163,9 +158,9 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         _func,
         amin,
         amax,
-        lambda x: hmc._prec['log10M_min'],
-        lambda x: hmc._prec['log10M_max'],
+        lambda x: hmc.precision['log10M_min'],
+        lambda x: hmc.precision['log10M_max'],
     )
 
-    mtot_hmc = hmc.number_counts(cosmo, sel, amin=amin, amax=amax)
+    mtot_hmc = hmc.number_counts(cosmo, selection=sel, a_min=amin, a_max=amax)
     assert np.allclose(mtot_hmc, mtot, atol=0, rtol=0.02)
