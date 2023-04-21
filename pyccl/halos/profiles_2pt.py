@@ -132,8 +132,9 @@ class Profile2ptHOD(Profile2pt):
 
         if prof != prof2:
             raise ValueError("prof and prof2 must be equivalent")
-        if not isinstance(prof, HaloProfileHOD):
-            raise TypeError("prof and prof2 should be HaloProfileHOD")
+        HOD = HaloProfileHOD
+        if not (isinstance(prof, HOD) and isinstance(prof2, HOD)):
+            raise TypeError("prof and prof2 must be HaloProfileHOD")
 
         return prof._fourier_variance(cosmo, k, M, a, mass_def)
 
@@ -175,12 +176,12 @@ class Profile2ptCIB(Profile2pt):
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
-        if not isinstance(prof, HaloProfileCIBShang12):
-            raise TypeError("prof must be of type `HaloProfileCIB`")
+        if prof2 is None:
+            prof2 = prof
 
-        nu2 = None
-        if prof2 is not None:
-            if not isinstance(prof2, HaloProfileCIBShang12):
-                raise TypeError("prof must be of type `HaloProfileCIB`")
-            nu2 = prof2.nu
-        return prof._fourier_variance(cosmo, k, M, a, mass_def, nu_other=nu2)
+        Shang12 = HaloProfileCIBShang12
+        if not (isinstance(prof, Shang12) and isinstance(prof2, Shang12)):
+            raise TypeError("prof and prof2 must be HaloProfileCIB")
+
+        return prof._fourier_variance(cosmo, k, M, a, mass_def,
+                                      nu_other=prof2.nu)

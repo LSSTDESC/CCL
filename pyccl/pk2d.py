@@ -619,9 +619,7 @@ def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
 
 def parse_pk(cosmo, p_of_k_a=None):
     """Helper to retrieve the power spectrum in the halo model."""
-    if not (p_of_k_a is None
-            or isinstance(p_of_k_a, Pk2D)
-            or isinstance(p_of_k_a, str)):
+    if not (p_of_k_a is None or isinstance(p_of_k_a, (str, Pk2D))):
         raise TypeError("p_of_k_a must be None, 'linear', 'nonlinear', Pk2D.")
 
     if isinstance(p_of_k_a, Pk2D):

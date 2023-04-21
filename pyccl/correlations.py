@@ -133,9 +133,7 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
         raise ValueError("'%s' is not a valid correlation method." % method)
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(theta, (int, float)):
-        scalar = True
+    if scalar := isinstance(theta, (int, float)):
         theta = np.array([theta, ])
 
     if np.all(np.array(C_ell) == 0):
@@ -180,9 +178,7 @@ def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(r, (int, float)):
-        scalar = True
+    if scalar := isinstance(r, (int, float)):
         r = np.array([r, ])
 
     # Call 3D correlation function
@@ -225,9 +221,7 @@ def correlation_multipole(cosmo, *, r, a, beta, ell,
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(r, (int, float)):
-        scalar = True
+    if scalar := isinstance(r, (int, float)):
         r = np.array([r, ])
 
     # Call 3D correlation function
@@ -275,9 +269,7 @@ def correlation_3dRsd(cosmo, *, r, a, mu, beta,
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(r, (int, float)):
-        scalar = True
+    if scalar := isinstance(r, (int, float)):
         r = np.array([r, ])
 
     # Call 3D correlation function
@@ -319,9 +311,7 @@ def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(r, (int, float)):
-        scalar = True
+    if scalar := isinstance(r, (int, float)):
         r = np.array([r, ])
 
     # Call 3D correlation function
@@ -367,9 +357,7 @@ def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(sigma, (int, float)):
-        scalar = True
+    if scalar := isinstance(sigma, (int, float)):
         sigma = np.array([sigma, ])
 
     # Call 3D correlation function

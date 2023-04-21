@@ -70,7 +70,7 @@ emulator_neutrinos_types = {
 _TOP_LEVEL_MODULES = ("",)
 
 
-def _methods_of_cosmology(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
+def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
     """Assign all functions in ``modules`` which take ``name`` as their
     first argument as methods of the class ``cls``.
     """
@@ -79,7 +79,7 @@ def _methods_of_cosmology(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
 
     if cls is None:
         # called with parentheses
-        return functools.partial(_methods_of_cosmology, modules=modules)
+        return functools.partial(_make_methods, modules=modules)
 
     pkg = __name__.rsplit(".")[0]
     modules = [import_module(f".{module}", pkg) for module in modules]
@@ -94,7 +94,7 @@ def _methods_of_cosmology(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
     return cls
 
 
-@_methods_of_cosmology(modules=("", "halos", "nl_pt",), name="cosmo")
+@_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
 class Cosmology(CCLObject):
     """A cosmology including parameters and associated data.
 

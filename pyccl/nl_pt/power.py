@@ -8,7 +8,7 @@ from .. import CCLDeprecationWarning, Pk2D, check, lib
 from . import PTTracer
 
 
-class PTCalculator(object):
+class PTCalculator:
     """ This class implements a set of methods that can be
     used to compute the various components needed to estimate
     perturbation theory correlations. These calculations are
