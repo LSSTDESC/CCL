@@ -1,8 +1,8 @@
-from ..base import warn_api
+__all__ = ("halomod_mean_profile_1pt", "halomod_bias_1pt",)
+
 import numpy as np
 
-
-__all__ = ("halomod_mean_profile_1pt", "halomod_bias_1pt",)
+from .. import warn_api
 
 
 def _Ix1(func, cosmo, hmc, k, a, prof, normprof):

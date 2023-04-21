@@ -5,10 +5,15 @@ import numpy as np
 from . import ccllib as lib
 from .pyutils import check
 from .errors import CCLWarning
-from .parameters import physical_constants
+from .base.parameters import physical_constants
 from .base import CCLObject, UnlockInstance, unlock_instance, warn_api
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays, _get_spline2d_arrays)
+
+
+__all__ = ("get_density_kernel", "get_lensing_kernel", "get_kappa_kernel",
+           "Tracer", "NzTracer", "NumberCountsTracer", "WeakLensingTracer",
+           "CMBLensingTracer", "tSZTracer", "CIBTracer", "ISWTracer",)
 
 
 def _Sig_MG(cosmo, a, k):
@@ -39,10 +44,10 @@ def _check_background_spline_compatibility(cosmo, z):
     a = 1/(1+z)
 
     if a.min() < a_bg.min() or a.max() > a_bg.max():
-        raise ValueError(f"Tracer defined over wider redshift range than "
-                         f"internal CCL splines. Tracer: "
-                         f"z=[{1/a.max()-1}, {1/a.min()-1}]. Background "
-                         f"splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
+        raise ValueError(
+            "Tracer has wider redshift support than internal CCL splines. "
+            f"Tracer: z=[{1/a.max()-1}, {1/a.min()-1}]. "
+            f"Background splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
 
 
 @warn_api

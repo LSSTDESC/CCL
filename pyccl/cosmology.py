@@ -2,28 +2,42 @@
 the cosmology and parameters objects used to instantiate a model from which one
 can compute a set of theoretical predictions.
 """
+__all__ = ("TransferFunctions", "MatterPowerSpectra",
+           "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
+
 import warnings
-import numpy as np
 import yaml
+from enum import Enum
 from inspect import getmembers, isfunction, signature
-from typing import Iterable
 from numbers import Real
+from typing import Iterable
 
-from . import ccllib as lib
-from . import DEFAULT_POWER_SPECTRUM
-from .errors import CCLError, CCLDeprecationWarning
-from ._types import error_types
-from .boltzmann import get_class_pk_lin, get_camb_pk_lin, get_isitgr_pk_lin
-from .pyutils import check
-from .pk2d import Pk2D
-from .bcm import bcm_correct_pk2d
-from .base import CCLObject, cache, unlock_instance
-from .base.deprecations import warn_api, deprecated
-from .parameters import CCLParameters, CosmologyParams
-from .parameters import physical_constants as const
+import numpy as np
+
+from . import (
+    CCLError, CCLDeprecationWarning, CCLObject, CCLParameters, CLevelErrors,
+    CosmologyParams, DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, cache, check,
+    lib, unlock_instance, warn_api, deprecated)
+from . import physical_constants as const
 
 
-__all__ = ("Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
+class TransferFunctions(Enum):
+    BBKS = "bbks"
+    EISENSTEIN_HU = "eisenstein_hu"
+    EISENSTEIN_HU_NOWIGGLES = "eisenstein_hu_nowiggles"
+    BOLTZMANN_CLASS = "boltzmann_class"
+    BOLTZMANN_CAMB = "boltzmann_camb"
+    BOLTZMANN_ISITGR = "boltzmann_isitgr"
+    CALCULATOR = "calculator"
+
+
+class MatterPowerSpectra(Enum):
+    LINEAR = "linear"
+    HALOFIT = "halofit"
+    HALOMODEL = "halomodel"
+    EMU = "emu"
+    CAMB = "camb"
+    CALCULATOR = "calculator"
 
 
 # Configuration types
@@ -36,6 +50,7 @@ transfer_function_types = {
     'boltzmann_isitgr': lib.boltzmann_isitgr,
     'calculator': lib.pklin_from_input
 }
+
 
 matter_power_spectrum_types = {
     'halo_model': lib.halo_model,
@@ -50,9 +65,6 @@ baryons_power_spectrum_types = {
     'nobaryons': lib.nobaryons,
     'bcm': lib.bcm
 }
-
-# List which transfer functions can be used with the muSigma_MG
-# parameterisation of modified gravity
 
 mass_function_types = {
     'angulo': lib.angulo,
@@ -73,20 +85,11 @@ emulator_neutrinos_types = {
     'equalize': lib.emu_equalize
 }
 
-
-class _Defaults:
-    """Default cosmological parameters used throughout the library."""
-    T_CMB = 2.725
-    T_ncdm = 0.71611
+_TOP_LEVEL_MODULES = ("",)
 
 
-warnings.warn(
-    "The default CMB temperature (T_CMB) will change in CCLv3.0.0, "
-    "from 2.725 to 2.7255 (Kelvin).", CCLDeprecationWarning)
-
-
-def _methods_of_cosmology(cls=None, *, modules=[]):
-    """Assign all functions in ``modules`` which take ``cosmo`` as their
+def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
+    """Assign all functions in ``modules`` which take ``name`` as their
     first argument as methods of the class ``cls``.
     """
     import functools
@@ -94,7 +97,7 @@ def _methods_of_cosmology(cls=None, *, modules=[]):
 
     if cls is None:
         # called with parentheses
-        return functools.partial(_methods_of_cosmology, modules=modules)
+        return functools.partial(_make_methods, modules=modules)
 
     pkg = __name__.rsplit(".")[0]
     modules = [import_module(f".{module}", pkg) for module in modules]
@@ -109,12 +112,7 @@ def _methods_of_cosmology(cls=None, *, modules=[]):
     return cls
 
 
-_modules = ["background", "bcm", "boltzmann", "cells", "correlations",
-            "covariances", "neutrinos", "pk2d", "power", "pyutils",
-            "tk3d", "tracers", "halos", "nl_pt"]
-
-
-@_methods_of_cosmology(modules=_modules)
+@_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
 class Cosmology(CCLObject):
     """A cosmology including parameters and associated data.
 
@@ -259,7 +257,7 @@ class Cosmology(CCLObject):
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=None, m_nu=0., mass_split='normal', w0=-1., wa=0.,
-            T_CMB=_Defaults.T_CMB,
+            T_CMB=DefaultParams.T_CMB,
             bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
             mu_0=0, sigma_0=0, c1_mg=1, c2_mg=1, lambda_mg=0,
             z_mg=None, df_mg=None,
@@ -270,7 +268,7 @@ class Cosmology(CCLObject):
             halo_concentration=None,
             emulator_neutrinos=None,
             extra_parameters=None,
-            T_ncdm=_Defaults.T_ncdm):
+            T_ncdm=DefaultParams.T_ncdm):
 
         # DEPRECATIONS
         warn = warnings.warn
@@ -615,10 +613,10 @@ class Cosmology(CCLObject):
         rescale_s8 = True
         rescale_mg = True
         if trf == 'boltzmann_class':
-            pk = get_class_pk_lin(self)
+            pk = self.get_class_pk_lin()
         elif trf == 'boltzmann_isitgr':
             rescale_mg = False
-            pk = get_isitgr_pk_lin(self)
+            pk = self.get_isitgr_pk_lin()
         elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
             rescale_s8 = False
             rescale_mg = False
@@ -637,10 +635,10 @@ class Cosmology(CCLObject):
             # no rescaling because A_s is necessarily provided
             rescale_mg = rescale_s8 = False
             name = "delta_matter:delta_matter"
-            pkl, self._pk_nl[name] = get_camb_pk_lin(self, nonlin=True)
+            pkl, self._pk_nl[name] = self.get_camb_pk_lin(nonlin=True)
 
         if trf == "boltzmann_camb":
-            pk = pkl if pkl is not None else get_camb_pk_lin(self)
+            pk = pkl if pkl is not None else self.get_camb_pk_lin()
 
         # Rescale by sigma8/mu-sigma if needed
         if pk:
@@ -729,7 +727,7 @@ class Cosmology(CCLObject):
                           "power spectrum automatically is deprecated in "
                           "Cosmology. Use the functionality in baryons.",
                           CCLDeprecationWarning)
-            bcm_correct_pk2d(self, pk)
+            self.bcm_correct_pk2d(pk)
 
         return pk
 
@@ -822,8 +820,8 @@ class Cosmology(CCLObject):
             :obj:`str` containing the status message.
         """
         # Get status ID string if one exists
-        if self.cosmo.status in error_types.keys():
-            status = error_types[self.cosmo.status]
+        if self.cosmo.status in CLevelErrors.keys():
+            status = CLevelErrors[self.cosmo.status]
         else:
             status = self.cosmo.status
 
@@ -980,10 +978,10 @@ class CosmologyCalculator(Cosmology):
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=None, m_nu=0., mass_split="normal", w0=-1., wa=0.,
-            T_CMB=_Defaults.T_CMB, mu_0=0., sigma_0=0.,
+            T_CMB=DefaultParams.T_CMB, mu_0=0., sigma_0=0.,
             background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None,
-            T_ncdm=_Defaults.T_ncdm):
+            T_ncdm=DefaultParams.T_ncdm):
 
         super().__init__(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
@@ -1045,7 +1043,7 @@ class CosmologyCalculator(Cosmology):
 
         if DEFAULT_POWER_SPECTRUM not in pk_linear:
             raise ValueError("pk_linear does not contain "
-                             "{DEFAULT_POWER_SPECTRUM}")
+                             f"{DEFAULT_POWER_SPECTRUM}")
 
         pk_names = set(pk_linear.keys()) - set(["a", "k"])
         for name in pk_names:

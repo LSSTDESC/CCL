@@ -1,12 +1,10 @@
+__all__ = ("angular_cl_cov_cNG", "sigma2_B_disc", "sigma2_B_from_mask",
+           "angular_cl_cov_SSC",)
+
 import numpy as np
 
-from . import ccllib as lib
-from . import DEFAULT_POWER_SPECTRUM
-from .pyutils import check, integ_types, _check_array_params
-from .background import comoving_radial_distance, comoving_angular_distance
-from .tk3d import Tk3D
-from .pk2d import parse_pk2d
-from .base import warn_api
+from . import DEFAULT_POWER_SPECTRUM, check, lib, warn_api
+from .pyutils import _check_array_params, integ_types
 
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
@@ -69,9 +67,8 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`\\ell_2`. The ordering is such that \
             `out[i2, i1] = Cov(ell2[i2], ell[i1])`.
     """
-    if integration_method not in ['qag_quad', 'spline']:
-        raise ValueError("Integration method %s not supported" %
-                         integration_method)
+    if integration_method not in integ_types:
+        raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals
     cosmo.compute_distances()
@@ -80,10 +77,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    if isinstance(t_of_kk_a, Tk3D):
-        tsp = t_of_kk_a.tsp
-    else:
-        raise ValueError("t_of_kk_a must be of type pyccl.Tk3D")
+    tsp = t_of_kk_a.tsp
 
     # Create tracer colections
     status = 0
@@ -174,9 +168,9 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
         ndim = np.ndim(a_arr)
         a_arr = np.atleast_1d(a_arr)
 
-    chi_arr = comoving_radial_distance(cosmo, a_arr)
+    chi_arr = cosmo.comoving_radial_distance(a_arr)
     R_arr = chi_arr * np.arccos(1-2*fsky)
-    psp = parse_pk2d(cosmo, p_of_k_a, is_linear=True)
+    psp = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
 
     status = 0
     s2B_arr, status = lib.sigma2b_vec(cosmo.cosmo, a_arr, R_arr, psp,
@@ -249,7 +243,7 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
             sigma2_B[i] = sigma2_B_disc(cosmo=cosmo, a_arr=a_arr[i],
                                         p_of_k_a=p_of_k_a)
         else:
-            chi = comoving_angular_distance(cosmo, a=a_arr)
+            chi = cosmo.comoving_angular_distance(a=a_arr)
             k = (ell+0.5)/chi[i]
             pk = p_of_k_a(k, a_arr[i], cosmo)
             # See eq. E.10 of 2007.01844
@@ -329,9 +323,8 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`\\ell_2`. The ordering is such that \
             `out[i2, i1] = Cov(ell2[i2], ell[i1])`.
     """
-    if integration_method not in ['qag_quad', 'spline']:
-        raise ValueError("Integration method %s not supported" %
-                         integration_method)
+    if integration_method not in integ_types:
+        raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals
     cosmo.compute_distances()
@@ -340,10 +333,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    if isinstance(t_of_kk_a, Tk3D):
-        tsp = t_of_kk_a.tsp
-    else:
-        raise ValueError("t_of_kk_a must be of type pyccl.Tk3D")
+    tsp = t_of_kk_a.tsp
 
     # Create tracer colections
     status = 0

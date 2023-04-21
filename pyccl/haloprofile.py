@@ -1,5 +1,8 @@
+__all__ = ("nfw_profile_3d", "einasto_profile_3d", "hernquist_profile_3d",
+           "nfw_profile_2d",)
+
+from .import deprecated
 from . import halos as hal
-from .base import deprecated
 
 
 @deprecated(hal.HaloProfileNFW)

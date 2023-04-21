@@ -1,15 +1,16 @@
-from ...pyutils import resample_array, _fftlog_transform
-from ...base import CCLAutoRepr, unlock_instance, warn_api, deprecate_attr
-from ...parameters import FFTLogParams
-from ..massdef import MassDef
-from ...parameters import physical_constants as const
-import numpy as np
+__all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
+           "HaloProfilePressure", "HaloProfileCIB",)
+
 import functools
 from typing import Callable
 
+import numpy as np
 
-__all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
-           "HaloProfilePressure", "HaloProfileCIB",)
+from ... import CCLAutoRepr, FFTLogParams, unlock_instance
+from ... import deprecate_attr, warn_api
+from ... import physical_constants as const
+from .. import MassDef
+from ...pyutils import resample_array, _fftlog_transform
 
 
 class HaloProfile(CCLAutoRepr):

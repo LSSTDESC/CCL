@@ -62,6 +62,8 @@ def test_cosmo_methods():
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
     for name, func in funcs:
+        if name.startswith("_"):  # no private functions
+            continue
         pars = signature(func).parameters
         if pars and list(pars)[0] == "cosmo":
             _ = getattr(cosmo, name)

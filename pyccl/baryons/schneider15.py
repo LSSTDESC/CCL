@@ -1,9 +1,9 @@
-from .baryons_base import Baryons
-from ..pk2d import Pk2D
+__all__ = ("BaryonsSchneider15",)
+
 import numpy as np
 
-
-__all__ = ("BaryonsSchneider15",)
+from .. import Pk2D
+from . import Baryons
 
 
 class BaryonsSchneider15(Baryons):

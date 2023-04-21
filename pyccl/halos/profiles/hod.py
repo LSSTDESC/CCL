@@ -1,10 +1,10 @@
-from ...base import warn_api, deprecate_attr
-from .profile_base import HaloProfileNumberCounts
+__all__ = ("HaloProfileHOD",)
+
 import numpy as np
 from scipy.special import sici, erf
 
-
-__all__ = ("HaloProfileHOD",)
+from ... import warn_api, deprecate_attr
+from . import HaloProfileNumberCounts
 
 
 class HaloProfileHOD(HaloProfileNumberCounts):

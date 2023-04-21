@@ -1,8 +1,9 @@
-from ...base import warn_api, deprecated
-from .profile_base import HaloProfile
+__all__ = ("HaloProfilePowerLaw",)
+
 import numpy as np
 
-__all__ = ("HaloProfilePowerLaw",)
+from ... import warn_api, deprecated
+from . import HaloProfile
 
 
 class HaloProfilePowerLaw(HaloProfile):

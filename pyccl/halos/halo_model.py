@@ -1,13 +1,12 @@
-from .massdef import MassDef
-from ..pyutils import _spline_integrate
-from .. import background
-from ..base import (CCLAutoRepr, unlock_instance,
-                    warn_api, deprecate_attr, deprecated)
-from ..parameters import physical_constants as const
+__all__ = ("HMCalculator",)
+
 import numpy as np
 
-
-__all__ = ("HMCalculator",)
+from .. import CCLAutoRepr, unlock_instance
+from .. import warn_api, deprecate_attr, deprecated
+from .. import physical_constants as const
+from . import MassDef
+from ..pyutils import _spline_integrate
 
 
 class HMCalculator(CCLAutoRepr):
@@ -73,8 +72,7 @@ class HMCalculator(CCLAutoRepr):
         elif integration_method_M == "spline":
             self._integrator = self._integ_spline
         else:
-            raise NotImplementedError(
-                "Only 'simpson' and 'spline integration is supported.")
+            raise ValueError("Invalid integration method.")
 
         # Cache last results for mass function and halo bias.
         self._cosmo_mf = self._cosmo_bf = None
@@ -207,8 +205,8 @@ class HMCalculator(CCLAutoRepr):
 
         # compute the volume element
         abs_dzda = 1 / a / a
-        dc = background.comoving_angular_distance(cosmo, a)
-        ez = background.h_over_h0(cosmo, a)
+        dc = cosmo.comoving_angular_distance(a)
+        ez = cosmo.h_over_h0(a)
         dh = const.CLIGHT_HMPC / cosmo['h']
         dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda

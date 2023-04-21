@@ -1,9 +1,9 @@
-from ...base import UnlockInstance, warn_api
-from .profile_base import HaloProfilePressure
+__all__ = ("HaloProfilePressureGNFW",)
+
 import numpy as np
 
-
-__all__ = ("HaloProfilePressureGNFW",)
+from ... import UnlockInstance, warn_api
+from . import HaloProfilePressure
 
 
 class HaloProfilePressureGNFW(HaloProfilePressure):

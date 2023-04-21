@@ -1,18 +1,15 @@
-from .. import ccllib as lib
-from ..pyutils import check
-from ..background import species_types
-from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
-from .hmfunc import MassFunc
-from .hbias import HaloBias
-from .concentration import Concentration
-import numpy as np
-from functools import cached_property
-from typing import Union, Callable
-
-
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
            "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
            "MassDefFof", "mass_translator",)
+
+from functools import cached_property
+from typing import Union, Callable
+
+import numpy as np
+
+from .. import CCLAutoRepr, CCLNamedClass, lib, check
+from .. import warn_api, deprecate_attr
+from . import Concentration, HaloBias, MassFunc
 
 
 def mass2radius_lagrangian(cosmo, M):
@@ -109,11 +106,10 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         if isinstance(Delta, (int, float)) and Delta < 0:
             raise ValueError("Delta must be a positive number.")
         if rho_type not in ['matter', 'critical']:
-            raise ValueError("rho_type must be either ['matter'|'critical].'")
+            raise ValueError("rho_type must be {'matter', 'critical'}.")
 
         self.Delta = Delta
         self.rho_type = rho_type
-        self.species = species_types[rho_type]
 
     @cached_property
     def name(self):

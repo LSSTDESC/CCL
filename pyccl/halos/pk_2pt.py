@@ -1,10 +1,10 @@
-from ..base import warn_api
-from ..pk2d import Pk2D, parse_pk
-from .profiles_2pt import Profile2pt
+__all__ = ("halomod_power_spectrum", "halomod_Pk2D",)
+
 import numpy as np
 
-
-__all__ = ("halomod_power_spectrum", "halomod_Pk2D",)
+from .. import Pk2D
+from .. import warn_api
+from . import Profile2pt
 
 
 @warn_api(pairs=[("supress_1h", "suppress_1h")],
@@ -105,7 +105,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     if prof_2pt is None:
         prof_2pt = Profile2pt()
 
-    pk2d = parse_pk(cosmo, p_of_k_a)
+    pk2d = cosmo.parse_pk(p_of_k_a)
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     na = len(a_use)

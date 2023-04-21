@@ -1,16 +1,13 @@
-from ..base import warn_api
-from ..pk2d import parse_pk
-from ..tk3d import Tk3D
-from ..errors import CCLWarning
-from .profiles import HaloProfileNFW
-from .profiles import HaloProfileNumberCounts as ProfNC
-from .profiles_2pt import Profile2pt
-import numpy as np
-import warnings
-
-
 __all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
            "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC",)
+
+import warnings
+
+import numpy as np
+
+from .. import CCLWarning, Tk3D, warn_api
+from . import HaloProfileNFW, Profile2pt
+from . import HaloProfileNumberCounts as ProfNC
 
 
 @warn_api(pairs=[("prof1", "prof")], reorder=["prof12_2pt", "prof3", "prof4"])
@@ -306,7 +303,7 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
     k_use = np.exp(lk_arr)
     prof_2pt = Profile2pt()
 
-    pk2d = parse_pk(cosmo, p_of_k_a)
+    pk2d = cosmo.parse_pk(p_of_k_a)
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     na = len(a_arr)
@@ -450,7 +447,7 @@ def halomod_Tk3D_SSC(
         _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt)
 
     k_use = np.exp(lk_arr)
-    pk2d = parse_pk(cosmo, p_of_k_a)
+    pk2d = cosmo.parse_pk(p_of_k_a)
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     dpk12, dpk34 = [np.zeros((len(a_arr), len(k_use))) for _ in range(2)]

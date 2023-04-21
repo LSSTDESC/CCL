@@ -1,34 +1,31 @@
-from . import ccllib as lib
-from .pyutils import check
-from .base.deprecations import deprecated, warn_api
-from .errors import CCLDeprecationWarning
-from .cosmology import _Defaults
-from .background import omega_x
-from .parameters import physical_constants as const
+__all__ = ("NeutrinoMassSplits", "nu_masses", "Omeganuh2",)
+
+import warnings
+from enum import Enum
+from numbers import Real
+from typing import Iterable
 
 import numpy as np
-from enum import Enum
-from typing import Iterable
-from numbers import Real
 from scipy.optimize import root
-import warnings
 
-
-__all__ = ("NeutrinoMassSplits", "nu_masses", "Omeganuh2",)
+from . import DefaultParams, check, lib, omega_x
+from . import CCLDeprecationWarning, deprecated, warn_api
+from . import physical_constants as const
 
 
 class NeutrinoMassSplits(Enum):
+    SUM = 'sum'
     SINGLE = 'single'
     EQUAL = 'equal'
     NORMAL = 'normal'
     INVERTED = 'inverted'
-    # placeholders for backwards-compatibility
-    SUM = 'sum'
-    LIST = 'list'
+    LIST = 'list'  # placeholder for backwards-compatibility
 
 
 @deprecated(new_function=omega_x)
-def Omeganuh2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
+def Omeganuh2(a, *, m_nu,
+              T_CMB=DefaultParams.T_CMB,
+              T_ncdm=DefaultParams.T_ncdm):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
 
@@ -120,8 +117,7 @@ def _get_neutrino_masses(*, m_nu, mass_split):
 
     def check_mnu(val):
         if m_nu < val:
-            raise ValueError(
-                f"m_nu < {val} incompatible with mass hierarchy")
+            raise ValueError(f"m_nu < {val} incompatible with mass hierarchy")
 
     if split(mass_split) == split.NORMAL:
         check_mnu(np.sqrt(D12) + np.sqrt(D13p))

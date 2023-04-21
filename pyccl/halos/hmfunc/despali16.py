@@ -1,11 +1,9 @@
-from ...base import warn_api
-from ... import ccllib as lib
-from ...pyutils import check
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncDespali16",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncDespali16",)
+from ... import check, lib, warn_api
+from . import MassFunc
 
 
 class MassFuncDespali16(MassFunc):

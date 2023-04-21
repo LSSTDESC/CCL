@@ -1,10 +1,10 @@
-from ...base import warn_api
-from .profile_base import HaloProfileMatter
+__all__ = ("HaloProfileHernquist",)
+
 import numpy as np
 from scipy.special import sici
 
-
-__all__ = ("HaloProfileHernquist",)
+from ... import warn_api
+from . import HaloProfileMatter
 
 
 class HaloProfileHernquist(HaloProfileMatter):
