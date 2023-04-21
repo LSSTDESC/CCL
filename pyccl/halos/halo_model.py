@@ -971,7 +971,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof1, prof2=None,
             profile (corresponding to :math:`u_1` above.
         prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`u_2` above. If `None`,
-         ccl.halos.halomod_Tk3D_SSC_linear_bias()   `prof1` will be used as `prof2`.
+            `prof1` will be used as `prof2`.
         prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object returning the the two-point
             moment of `prof1` and `prof2`. If `None`, the default
@@ -1480,7 +1480,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof1, prof2=None,
         # only depends on the module of ki + kj
         pk = get_pk(k_use, a)[:, None]
         pkr = get_pk(kr.flatten(), a).reshape(kr.shape)
-        P3 = scipy.integrate.romb(pkr * f2, dtheta, axis=-1)
+        P3 = scipy.integrate.romb(pkr * f2, dtheta, axis=-1) / np.pi
 
         Bpt = 6. / 7. * pk * pk.T + 2 * pk * P3
         Bpt += Bpt.T
@@ -1669,8 +1669,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
 
     def isotropize(arr):
         int_arr = scipy.integrate.romb(arr, dtheta, axis=-1)
-        #return int_arr / (2 * np.pi)
-        return int_arr / (np.pi)
+        return int_arr / np.pi
 
     def get_kr_f2_f2T_X():
         k = k_use[:, None, None]
@@ -1744,7 +1743,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof1, prof2=None,
     if np.ndim(k) == 0:
         out = np.squeeze(out, axis=-1)
         out = np.squeeze(out, axis=-1)
-    return out
+    return t1113 + t1122 # out
 
 def halomod_Tk3D_1h(cosmo, hmc,
                     prof1, prof2=None, prof12_2pt=None,
