@@ -42,14 +42,6 @@ ccl_f3d_t *tk3d_new_factorizable(double* lkarr,int nk,
   return tsp;
 }
 
-double tk3d_eval_single(ccl_f3d_t *tsp,double lk,double a,int *status)
-{
-  ccl_a_finder *finda = ccl_a_finder_new_from_f3d(tsp);
-  double tkk = ccl_f3d_t_eval(tsp,lk,lk,a,finda,NULL,status);
-  ccl_a_finder_free(finda);
-  return tkk;
-}
-
 void tk3d_eval_multi(ccl_f3d_t *tsp,double* lkarr,int nk,
 		     double a,int ndout,double *doutput,
                      int *status)

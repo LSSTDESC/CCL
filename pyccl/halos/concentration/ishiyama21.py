@@ -1,12 +1,12 @@
-from ... import ccllib as lib
-from ...base import warn_api
-from ...pyutils import check
-from ..halo_model_base import Concentration
+__all__ = ("ConcentrationIshiyama21",)
+
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 
-
-__all__ = ("ConcentrationIshiyama21",)
+from ... import lib, warn_api
+from ... import check
+from ... import physical_constants as const
+from . import Concentration
 
 
 class ConcentrationIshiyama21(Concentration):
@@ -87,7 +87,7 @@ class ConcentrationIshiyama21(Concentration):
         return np.asarray(roots)
 
     def _concentration(self, cosmo, M, a):
-        nu = 1.686 / cosmo.sigmaM(M, a)
+        nu = const.DELTA_C / cosmo.sigmaM(M, a)
         n_eff = -2 * self._dlsigmaR(cosmo, M, a) - 3
         alpha_eff = cosmo.growth_rate(a)
 

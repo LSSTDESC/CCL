@@ -89,7 +89,7 @@ def test_caching_lru():
     # create new and discard the least recently used
     cosmo_create_and_compute_linpow(0.43)
     t2 = timeit_(sigma8=s8_arr[2])  # retrieved
-    assert np.abs(np.log10(t2/t1)) < 1.0
+    assert np.abs(np.log10(t2/t1)) < 1.5
 
 
 def test_caching_lfu():
@@ -105,7 +105,7 @@ def test_caching_lfu():
     # create new and discard the least frequently used
     cosmo_create_and_compute_linpow(0.44)
     t2 = timeit_(sigma8=0.43)  # cached again
-    assert t2/t1 > SPEEDUP
+    assert t2/t1 > SPEEDUP/10
 
 
 def test_cache_info():

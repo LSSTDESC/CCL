@@ -1,8 +1,8 @@
-from ..base import CCLAutoRepr, CCLNamedClass
+__all__ = ("Baryons",)
+
 from abc import abstractmethod
 
-
-__all__ = ("Baryons",)
+from .. import CCLAutoRepr, CCLNamedClass
 
 
 class Baryons(CCLAutoRepr, CCLNamedClass):

@@ -4,7 +4,7 @@
 Quickstart
 **********
 
-CCL is structured around :class:`~pyccl.core.Cosmology` objects which hold the cosmological
+CCL is structured around :class:`~pyccl.cosmology.Cosmology` objects which hold the cosmological
 parameters and any tabulated data associated with a given cosmology. The
 library then provides functions to compute specific quantities of interest.
 See the full API documentation through the :mod:`pyccl` module and submodules for more details.
@@ -13,7 +13,7 @@ Further, CCL follows the following conventions:
 
   - all units are non-h-inverse (e.g., Mpc as opposed to Mpc/h)
   - the scale factor ``a`` is preferred over redshift ``z`` as a time coordinate.
-  - the :class:`~pyccl.core.Cosmology` object always comes first in
+  - the :class:`~pyccl.cosmology.Cosmology` object always comes first in
     most function calls
   - argument ordering for power spectra is ``(k, a)``
 

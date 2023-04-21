@@ -1,10 +1,11 @@
-from ...base import warn_api
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncTinker10",)
+
 import numpy as np
 from scipy.interpolate import interp1d
 
-
-__all__ = ("MassFuncTinker10",)
+from ... import warn_api
+from ... import physical_constants as const
+from . import MassFunc
 
 
 class MassFuncTinker10(MassFunc):
@@ -69,7 +70,7 @@ class MassFuncTinker10(MassFunc):
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
-        nu = 1.686 / sigM
+        nu = const.DELTA_C / sigM
         # redshift evolution only up to z=3
         a = np.clip(a, 0.25, 1)
         pa = self.pa0(ld) * a**(-0.27)

@@ -1,9 +1,9 @@
-from ...base import warn_api, deprecated
-from .profile_base import HaloProfile
+__all__ = ("HaloProfileGaussian",)
+
 import numpy as np
 
-
-__all__ = ("HaloProfileGaussian",)
+from ... import warn_api, deprecated
+from . import HaloProfile
 
 
 class HaloProfileGaussian(HaloProfile):
@@ -15,35 +15,33 @@ class HaloProfileGaussian(HaloProfile):
     Args:
         r_scale (:obj:`function`): the width of the profile.
             The signature of this function should be
-            `f(cosmo, M, a, mass_def)`, where `cosmo` is a
-            :class:`~pyccl.core.Cosmology` object, `M` is a halo mass in
-            units of M_sun, `a` is the scale factor and `mass_def`
-            is a :class:`~pyccl.halos.massdef.MassDef` object.
+            `f(cosmo, M, a)`, where `cosmo` is a
+            :class:`~pyccl.cosmology.Cosmology` object, `M` is a halo mass in
+            units of M_sun, and `a` is the scale factor.
         rho0 (:obj:`function`): the amplitude of the profile.
             It should have the same signature as `r_scale`.
     """
-    __repr_attrs__ = __eq_attrs__ = ("r_scale", "rho_0", "precision_fftlog",
-                                     "normprof",)
-    name = 'Gaussian'
-    normprof = False
+    __repr_attrs__ = __eq_attrs__ = ("r_scale", "rho_0", "mass_def",
+                                     "precision_fftlog",)
 
     @deprecated()
     @warn_api
-    def __init__(self, *, r_scale, rho0, padding_lo_fftlog=0.01, **fftlog):
+    def __init__(self, *, r_scale, rho0, padding_lo_fftlog=0.01, mass_def,
+                 **fftlog):
         self.rho_0 = rho0
         self.r_scale = r_scale
         default_fftlog = {"padding_lo_fftlog": 0.01, "padding_hi_fftlog": 100,
                           "n_per_decade": 10000}
-        super().__init__(**{**default_fftlog, **fftlog})
+        super().__init__(mass_def=mass_def, **{**default_fftlog, **fftlog})
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Compute scale
-        rs = self.r_scale(cosmo, M_use, a, mass_def)
+        rs = self.r_scale(cosmo, M_use, a)
         # Compute normalization
-        rho0 = self.rho_0(cosmo, M_use, a, mass_def)
+        rho0 = self.rho_0(cosmo, M_use, a)
         # Form factor
         prof = np.exp(-(r_use[None, :] / rs[:, None])**2)
         prof = prof * rho0[:, None]

@@ -1,10 +1,10 @@
-from ..errors import CCLDeprecationWarning
-from inspect import signature, Parameter
+__all__ = ("deprecated", "warn_api", "deprecate_attr",)
+
 import functools
 import warnings
+from inspect import Parameter, signature
 
-
-__all__ = ("deprecated", "warn_api", "deprecate_attr",)
+from .. import CCLDeprecationWarning
 
 
 def deprecated(new_function=None):
@@ -112,7 +112,7 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
         if unexpected:
             # check whether it is an FFTLog parameter (passed as kwarg)
             if "HaloProfile" in func.__qualname__:
-                from ..parameters import FFTLogParams as FFTL
+                from . import FFTLogParams as FFTL
                 for param in list(unexpected):
                     if hasattr(FFTL, param):
                         # these aren't unexpected - they will be piped to FFTL
@@ -122,11 +122,11 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
             # emulate Python default behavior for arguments that don't exist
             raise TypeError(
                 f"{func.__name__}() got an unexpected keyword argument "
-                f"'{list(unexpected[0])}'")
+                f"'{list(unexpected)[0]}'")
         if warn_names:
             s = plural(warn_names)
             warnings.warn(
-                f"Use of argument{s} {list(warn_names)} is deprecated "
+                f"Use of argument{s} {', '.join(warn_names)} is deprecated "
                 f"in {name}. Pass the new name{s} of the argument{s} "
                 f"{', '.join([rename[k] for k in warn_names])}, respectively.",
                 CCLDeprecationWarning)
@@ -148,15 +148,15 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
             kwargs.update(extras)
             s = plural(extras)
             warnings.warn(
-                f"Use of argument{s} {list(extras)} as positional is "
+                f"Use of argument{s} {', '.join(extras)} as positional is "
                 f"deprecated in {func.__qualname__}.", CCLDeprecationWarning)
 
         # API compatibility for `normprof` as a required argument.
-        if any(["normprof" in par for par in kwargs.items()]):
+        if any([par.startswith("normprof") and kwargs.get(par) is not None
+                for par in kwargs]):
             warnings.warn(
-                "Argument `normprof` has been deprecated. Change the default "
-                "value only by subclassing. More comprehensive profile "
-                "normalization options will be provided with CCLv3.0.0.",
+                "Argument `normprof` will be deprecated in CCL v3. All "
+                "profiles will carry their own normalization.",
                 CCLDeprecationWarning)
 
         # API compatibility for deprecated HMCalculator argument k_min.

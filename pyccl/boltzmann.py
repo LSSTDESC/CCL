@@ -1,15 +1,13 @@
-import numpy as np
+__all__ = ("get_camb_pk_lin", "get_isitgr_pk_lin", "get_class_pk_lin",)
 
-from . import ccllib as lib
-from .pyutils import check
-from .base import warn_api
-from .pk2d import Pk2D
-from .errors import CCLError
+import numpy as np
 
 try:
     import isitgr  # noqa: F401
 except ModuleNotFoundError:
     pass  # prevent nans from isitgr
+
+from . import CCLError, Pk2D, warn_api
 
 
 @warn_api
@@ -39,11 +37,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         pass
 
     # z sampling from CCL parameters
-    na = lib.get_pk_spline_na(cosmo.cosmo)
-    status = 0
-    a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-    check(status, cosmo=cosmo)
-    a_arr = np.sort(a_arr)
+    a_arr = cosmo.get_pk_spline_a()
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
 
@@ -56,7 +50,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -127,8 +121,8 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
     camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
-        raise ValueError("The only dark energy models CCL supports with"
-                         " camb are fluid and ppf.")
+        raise ValueError("The only dark energy models CCL supports with "
+                         "CAMB are fluid and ppf.")
     cp.set_classes(
         dark_energy_model=camb_de_model
     )
@@ -252,11 +246,7 @@ def get_isitgr_pk_lin(cosmo):
         pass
 
     # z sampling from CCL parameters
-    na = lib.get_pk_spline_na(cosmo.cosmo)
-    status = 0
-    a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-    check(status, cosmo=cosmo)
-    a_arr = np.sort(a_arr)
+    a_arr = cosmo.get_pk_spline_a()
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
 
@@ -269,7 +259,7 @@ def get_isitgr_pk_lin(cosmo):
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -348,16 +338,15 @@ def get_isitgr_pk_lin(cosmo):
     camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
-        raise ValueError("The only dark energy models CCL supports with"
-                         " camb are fluid and ppf.")
+        raise ValueError("The only dark energy models CCL supports with "
+                         "CAMB are fluid and ppf.")
     cp.set_classes(
         dark_energy_model=camb_de_model
     )
     if camb_de_model not in camb_de_models[:2] and cosmo['wa'] and \
             (cosmo['w0'] < -1 - 1e-6 or
                 1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
-        raise ValueError("If you want to use w crossing -1,"
-                         " then please set the dark_energy_model to ppf.")
+        raise ValueError("For w to cross -1, set `dark_energy_model=ppf`.")
     cp.DarkEnergy.set_params(
         w=cosmo['w0'],
         wa=cosmo['wa']
@@ -450,9 +439,7 @@ def get_class_pk_lin(cosmo):
     # massive neutrinos
     if cosmo["N_nu_mass"] > 0:
         params["N_ncdm"] = cosmo["N_nu_mass"]
-        masses = lib.parameters_get_nu_masses(cosmo._params, 3)
-        params["m_ncdm"] = ", ".join(
-            ["%g" % m for m in masses[:cosmo["N_nu_mass"]]])
+        params["m_ncdm"] = ", ".join(["%g" % m for m in cosmo["m_nu"]])
 
     params["T_cmb"] = cosmo["T_CMB"]
 
@@ -466,7 +453,7 @@ def get_class_pk_lin(cosmo):
         params["A_s"] = A_s_fid
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -477,21 +464,19 @@ def get_class_pk_lin(cosmo):
         model.compute()
 
         # Set k and a sampling from CCL parameters
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        status = 0
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+        nk = len(cosmo.get_pk_spline_lk())
+        a_arr = cosmo.get_pk_spline_a()
+        na = len(a_arr)
 
         # FIXME - getting the lowest CLASS k value from the python interface
         # appears to be broken - setting to 1e-5 which is close to the
         # old value
         lk_arr = np.log(np.logspace(
             -5,
-            np.log10(cosmo.cosmo.spline_params.K_MAX_SPLINE), nk))
+            np.log10(cosmo._spline_params.K_MAX_SPLINE), nk))
 
         # we need to cut this to the max value used for calling CLASS
-        msk = lk_arr < np.log(cosmo.cosmo.spline_params.K_MAX_SPLINE)
+        msk = lk_arr < np.log(cosmo._spline_params.K_MAX_SPLINE)
         nk = int(np.sum(msk))
         lk_arr = lk_arr[msk]
 

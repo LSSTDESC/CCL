@@ -1,8 +1,8 @@
-from ...base import warn_api
-from ..halo_model_base import HaloBias
-
-
 __all__ = ("HaloBiasSheth01",)
+
+from ... import warn_api
+from ... import physical_constants as const
+from . import HaloBias
 
 
 class HaloBiasSheth01(HaloBias):
@@ -33,7 +33,7 @@ class HaloBiasSheth01(HaloBias):
         self.sqrta = 0.84083292038
         self.b = 0.5
         self.c = 0.6
-        self.dc = 1.68647
+        self.dc = const.DELTA_C
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc/sigM

@@ -1,9 +1,9 @@
-from ...base import warn_api
-from ..halo_model_base import Concentration
+__all__ = ("ConcentrationConstant",)
+
 import numpy as np
 
-
-__all__ = ("ConcentrationConstant",)
+from ... import warn_api
+from . import Concentration
 
 
 class ConcentrationConstant(Concentration):

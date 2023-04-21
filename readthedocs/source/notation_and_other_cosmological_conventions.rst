@@ -240,17 +240,23 @@ for a discussion of the values of these constants from different sources.
 
 basic physical constants
 
+  - AU: astronomical unit in units of m
+  - DAY: mean solar day in units of s
+  - YEAR: sidereal year in units of s
   - CLIGHT_HMPC: speed of light / H0 in units of Mpc/h
   - GNEWT: Newton's gravitational constant in units of m^3/Kg/s^2
   - SOLAR_MASS: solar mass in units of kg
-  - MPC_TO_METER: conversion factor for Mpc to meters.
-  - PC_TO_METER: conversion factor for parsecs to meters.
+  - MPC_TO_METER: conversion factor for Mpc to m.
+  - PC_TO_METER: conversion factor for parsecs to m.
   - RHO_CRITICAL: critical density in units of M_sun/h / (Mpc/h)^3
   - KBOLTZ: Boltzmann constant in units of J/K
   - STBOLTZ: Stefan-Boltzmann constant in units of kg/s^3 / K^4
-  - HPLANCK: Planck's constant in units kg m^2 / s
+  - HPLANCK: Planck's constant in units of kg m^2 / s
+  - HBAR: reduced Planck's constant in units of kg m^2 / s
   - CLIGHT: speed of light in m/s
   - EV_IN_J: conversion factor between electron volts and Joules
+  - ELECTRON_CHARGE: another alias for EV_IN_J
+  - DELTA_C: linear density contrast of spherical collapse
 
 neutrino mass splittings
 

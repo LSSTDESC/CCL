@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.testing import assert_allclose
 import pytest
 
 import pyccl as ccl
@@ -97,10 +96,11 @@ def compare_growth(
 
     # Compare to benchmark data
     if high_tol:
-        assert_allclose(
-            gfac, gfac_bench, atol=1e-12, rtol=GROWTH_HIZ_TOLERANCE)
+        assert np.allclose(gfac, gfac_bench,
+                           atol=1e-12, rtol=GROWTH_HIZ_TOLERANCE)
     else:
-        assert_allclose(gfac, gfac_bench, atol=1e-12, rtol=GROWTH_TOLERANCE)
+        assert np.allclose(gfac, gfac_bench,
+                           atol=1e-12, rtol=GROWTH_TOLERANCE)
 
 
 @pytest.mark.parametrize('i', list(range(5)))
@@ -160,5 +160,5 @@ def test_growth_mg():
     d2r = d1 * np.exp(0.1*(a-1.))
 
     # Check that ratio of calculated and analytic results is within tolerance
-    assert_allclose(d2r, d2, rtol=GROWTH_TOLERANCE)
-    assert_allclose(f2r, f2, rtol=GROWTH_TOLERANCE)
+    assert np.allclose(d2r, d2, atol=0, rtol=GROWTH_TOLERANCE)
+    assert np.allclose(f2r, f2, atol=0, rtol=GROWTH_TOLERANCE)

@@ -1,15 +1,14 @@
-from _thread import RLock
-from abc import ABC, abstractmethod
-from inspect import signature
-import functools
-from operator import attrgetter
-
-
 __all__ = ("ObjectLock",
            "UnlockInstance", "unlock_instance",
-           "FancyRepr",
-           "abstractlinkedmethod", "templatemethod",
+           "CustomRepr", "CustomEq",
            "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
+
+import functools
+from abc import ABC, abstractmethod
+from inspect import signature
+from _thread import RLock
+
+import numpy as np
 
 
 class ObjectLock:
@@ -63,7 +62,7 @@ class UnlockInstance:
         self.thread_lock = RLock()
         # We want to catch and exit if the instance is not a CCLObject.
         # Hopefully this will be caught downstream.
-        self.check_instance = isinstance(instance, CCLObject)
+        self.check_instance = hasattr(instance, "_object_lock")
         if self.check_instance:
             self.object_lock = instance._object_lock
 
@@ -141,69 +140,65 @@ class UnlockInstance:
 unlock_instance = UnlockInstance.unlock_instance
 
 
-class FancyRepr:
-    """Controls the usage of fancy ``__repr__` for ``CCLObjects."""
-    _enabled: bool = True
-    _classes: dict = {}
+def is_equal(this, other):
+    """Powerful helper for equivalence checking."""
+    try:
+        np.testing.assert_equal(this, other)
+        return True
+    except AssertionError:
+        return False
+
+
+class _CustomMethod:
+    """Subclasses specifying a method string control whether the custom
+    method is used in subclasses of ``CCLObject``.
+    """
+
+    def __init_subclass__(cls, *, method):
+        super().__init_subclass__()
+        if method not in vars(cls):
+            raise ValueError(
+                f"Subclass must contain a default {method} implementation.")
+        cls._method = method
+        cls._enabled: bool = True
+        cls._classes: dict = {}
 
     @classmethod
-    def add(cls, cl):
-        """Add class to the internal dictionary of fancy-repr classes."""
-        cls._classes[cl] = cl.__repr__
+    def register(cls, cl):
+        """Register class to the dictionary of classes with custom methods."""
+        if cls._method in vars(cls):
+            cls._classes[cl] = getattr(cl, cls._method)
 
     @classmethod
     def enable(cls):
-        """Enable fancy representations if they exist."""
+        """Enable the custom methods if they exist."""
         for cl, method in cls._classes.items():
-            setattr(cl, "__repr__", method)
+            setattr(cl, cls._method, method)
         cls._enabled = True
 
     @classmethod
     def disable(cls):
-        """Disable fancy representations and fall back to Python defaults."""
+        """Disable custom methods and fall back to Python defaults."""
         for cl in cls._classes.keys():
-            cl.__repr__ = object.__repr__
+            default = getattr(cls, cls._method)
+            setattr(cl, cls._method, default)
         cls._enabled = False
 
 
-def _method_wrapper_factory(hook_name: str, default_value=True) -> callable:
-    """Decorator factory that sets hooks to functions.
+class CustomEq(_CustomMethod, method="__eq__"):
+    """Controls the usage of custom ``__eq__`` for ``CCLObjects``."""
 
-    The hooks can be used as abstraction criteria for implementations departing
-    from ``abc.ABCMeta``, which enforces that abstract methods are implemented.
-
-    Arguments
-    ---------
-    hook_name : str
-        Name of the hook.
-    default_value : object
-        Any default value for the hook.
-
-    Returns
-    -------
-    wrapper : callable
-        Wrapper that can be used as a decorator that sets hooks.
-    """
-    def wrapper(func):
-        setattr(func, hook_name, default_value)
-        return func
-    return wrapper
+    def __eq__(self, other):
+        # Default `eq`.
+        return self is other
 
 
-# ~~ abstractlinkedmethod(func) ~~
-# Requires that the superclass is `CCLObject` or derived from it.
-# A subclass of `CCLObject` cannot be instantiated unless at least one of
-# its linked abstract methods is overridden.
-#
-# If a subclass of a linked abstract class has one implementation of the
-# linked abstract methods, the linked abstract method register is cleared.
-# `CCLObject._is_abstractlinked()` inspects whether the method is implemented.
-abstractlinkedmethod = _method_wrapper_factory("__isabstractlinkedmethod__")
+class CustomRepr(_CustomMethod, method="__repr__"):
+    """Controls the usage of custom ``__repr__`` for ``CCLObjects``."""
 
-# ~~ templatemethod(func) ~~
-# Marks the method as template. Instance attribute checks may then be made
-# with `CCLObject._is_template()` to inspect if the method is implemented.
-templatemethod = _method_wrapper_factory("__istemplatemethod__")
+    def __repr__(self):
+        # Default `repr`.
+        return object.__repr__(self)
 
 
 class CCLObject(ABC):
@@ -247,7 +242,6 @@ class CCLObject(ABC):
     for the context manager ``UnlockInstance(..., mutate=False)``). Otherwise,
     the instance is assumed to have mutated.
     """
-    __abstractlinkedmethods__ = set()
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -255,34 +249,15 @@ class CCLObject(ABC):
         # 1. Store the initialization signature on import.
         cls.__signature__ = signature(cls.__init__)
 
-        # 2. Replace repr (if implemented) with its cached version.
-        if "__repr__" in vars(cls):
-            FancyRepr.add(cls)
+        # 2. Register subclasses with custom dunder method implementations.
+        CustomEq.register(cls)
+        CustomRepr.register(cls)
 
         # 3. Unlock instance on specific methods.  # TODO: Uncomment for CCLv3.
         # UnlockInstance.Funlock(cls, "__init__", mutate=False)
         # UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
 
-        # 4. Process linked abstract methods.
-        isabstract = lambda f: hasattr(f, "__isabstractlinkedmethod__")  # noqa
-        abstracts = cls.__abstractlinkedmethods__.copy()
-        for name, obj in vars(cls).items():
-            # add the new linked abstract methods
-            if isabstract(obj):
-                abstracts.add(name)
-        for name in abstracts:
-            # reset the linked abstract methods if one has been implemented
-            if not isabstract(getattr(cls, name)):
-                abstracts = set()
-        cls.__abstractlinkedmethods__ = abstracts
-
     def __new__(cls, *args, **kwargs):
-        # Check if there are any linked abstract methods.
-        if abstracts := cls.__abstractlinkedmethods__:
-            name, s = cls.__name__, (len(abstracts) > 1) * "s"
-            names = ", ".join(abstracts)
-            raise TypeError(f"Can't instantiate abstract class {name} "
-                            f"with linked abstract methods{s} {names}.")
         # Populate every instance with an `ObjectLock` as attribute.
         instance = super().__new__(cls)
         object.__setattr__(instance, "_object_lock", ObjectLock())
@@ -308,27 +283,19 @@ class CCLObject(ABC):
         return hash(repr(self))
 
     def __eq__(self, other):
+        # Exit early if it is the same object.
+        if self is other:
+            return True
         # Two same-type objects are equal if their representations are equal.
-        if self.__class__ is not other.__class__:
+        if type(self) is not type(other):
             return False
         # Compare the attributes listed in `__eq_attrs__`.
         if hasattr(self, "__eq_attrs__"):
-            return all([attrgetter(attr)(self) == attrgetter(attr)(other)
-                        for attr in self.__eq_attrs__])
-        # Fall back to repr comparison.
-        return repr(self) == repr(other)
-
-    def _is_abstractlinked(self, name):
-        # Check whether the abstract linked method `name` is implemented.
-        return hasattr(getattr(self, name), "__isabstractlinkedmethod__")
-
-    def _is_template(self, name):
-        # Check whether the template method `name` is implemented.
-        return hasattr(getattr(self, name), "__istemplatemethod__")
-
-    def _is_implemented(self, name):
-        # Check whether the method is implemented (not template or abstract).
-        return not (self._is_abstractlinked(name) or self._is_template(name))
+            for attr in self.__eq_attrs__:
+                if not is_equal(getattr(self, attr), getattr(other, attr)):
+                    return False
+            return True
+        return False
 
 
 class CCLAutoRepr(CCLObject):
@@ -364,33 +331,6 @@ class CCLAutoRepr(CCLObject):
         return object.__repr__(self)
 
 
-def _subclasses(cls):
-    # This helper returns a set of all subclasses.
-    direct_subs = cls.__subclasses__()
-    deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
-    return set(direct_subs).union(deep_subs)
-
-
-def from_name(cls, name):
-    """Obtain particular model."""
-    mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
-    return mod[name]
-
-
-def create_instance(cls, input_, **kwargs):
-    """Process the input and generate an object of the class.
-    Input can be an instance of the class, or a name string.
-    Optional ``**kwargs`` may be passed.
-    """
-    if isinstance(input_, cls):
-        return input_
-    if isinstance(input_, str):
-        class_ = cls.from_name(input_)
-        return class_(**kwargs)
-    good, bad = cls.__name__, input_.__class__.__name__
-    raise TypeError(f"Expected {good} or str but received {bad}.")
-
-
 class CCLNamedClass(CCLObject):
     """Base for objects that contain methods ``from_name()`` and
     ``create_instance()``.
@@ -401,14 +341,36 @@ class CCLNamedClass(CCLObject):
     be searched to retrieve the particular model, using its name.
     """
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls._subclasses = classmethod(_subclasses)
-        if not hasattr(cls, "from_name"):
-            cls.from_name = classmethod(from_name)
-        cls.create_instance = classmethod(create_instance)
-
     @property
     @abstractmethod
     def name(self) -> str:
         """Class attribute denoting the name of the model."""
+
+    @classmethod
+    def _subclasses(cls):
+        # This helper returns a set of all subclasses.
+        direct_subs = cls.__subclasses__()
+        deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
+        return set(direct_subs).union(deep_subs)
+
+    @classmethod
+    def from_name(cls, name):
+        """Obtain particular model."""
+        mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
+        if name not in mod:
+            raise KeyError(f"Invalid model {name}.")
+        return mod[name]
+
+    @classmethod
+    def create_instance(cls, input_, **kwargs):
+        """Process the input and generate an object of the class.
+        Input can be an instance of the class, or a name string.
+        Optional ``**kwargs`` may be passed.
+        """
+        if isinstance(input_, cls):
+            return input_
+        if isinstance(input_, str):
+            class_ = cls.from_name(input_)
+            return class_(**kwargs)
+        good, bad = cls.__name__, type(input_).__name__
+        raise TypeError(f"Expected {good} or str but received {bad}.")

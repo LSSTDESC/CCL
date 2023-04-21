@@ -27,31 +27,6 @@ ccl_f2d_t *set_pk2d_new_from_arrays(double* lkarr,int nk,
   return psp;
 }
 
-void get_pk_spline_a(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
-{
-  ccl_get_pk_spline_a_array(cosmo,ndout,doutput,status);
-}
-
-void get_pk_spline_a_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status)
-{
-  ccl_get_pk_spline_a_array_from_params(spline_params, ndout, doutput, status);
-}
-
-void get_pk_spline_lk(ccl_cosmology *cosmo,int ndout,double* doutput,int *status)
-{
-  ccl_get_pk_spline_lk_array(cosmo,ndout,doutput,status);
-}
-
-void get_pk_spline_lk_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status)
-{
-  ccl_get_pk_spline_lk_array_from_params(spline_params, ndout, doutput, status);
-}
-
-double pk2d_eval_single(ccl_f2d_t *psp,double lk,double a,ccl_cosmology *cosmo,int *status)
-{
-  return ccl_f2d_t_eval(psp,lk,a,cosmo,status);
-}
-
 void pk2d_eval_multi(ccl_f2d_t *psp,double* lkarr,int nk,
 		     double a,ccl_cosmology *cosmo,
 		     int ndout,double *doutput,int *status)
@@ -60,14 +35,9 @@ void pk2d_eval_multi(ccl_f2d_t *psp,double* lkarr,int nk,
     doutput[ii]=ccl_f2d_t_eval(psp,lkarr[ii],a,cosmo,status);
 }
 
-double pk2d_der_eval_single(ccl_f2d_t *psp,double lk,double a,ccl_cosmology *cosmo,int *status)
-{
-  return ccl_f2d_t_dlogf_dlk_eval(psp,lk,a,cosmo,status);
-}
-
- void pk2d_der_eval_multi(ccl_f2d_t *psp,double* lkarr,int nk,
-                          double a,ccl_cosmology *cosmo,
-                          int ndout,double *doutput,int *status)
+void pk2d_der_eval_multi(ccl_f2d_t *psp,double* lkarr,int nk,
+			 double a,ccl_cosmology *cosmo,
+			 int ndout,double *doutput,int *status)
 {
   for(int ii=0;ii<ndout;ii++)
     doutput[ii]=ccl_f2d_t_dlogf_dlk_eval(psp,lkarr[ii],a,cosmo,status);

@@ -1,9 +1,9 @@
-from ...base import UnlockInstance, warn_api
-from .profile_base import HaloProfilePressure
+__all__ = ("HaloProfilePressureGNFW",)
+
 import numpy as np
 
-
-__all__ = ("HaloProfilePressureGNFW",)
+from ... import UnlockInstance, warn_api
+from . import HaloProfilePressure
 
 
 class HaloProfilePressureGNFW(HaloProfilePressure):
@@ -66,16 +66,14 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         Defaults to :math:`+\\infty`.
     """
     __repr_attrs__ = __eq_attrs__ = (
-        "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta",
-        "gamma", "P0_hexp", "qrange", "nq", "x_out",
-        "precision_fftlog", "normprof",)
-    name = 'GNFW'
+        "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
+        "P0_hexp", "qrange", "nq", "x_out", "mass_def", "precision_fftlog",)
 
     @warn_api
     def __init__(self, *, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
-                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, **fftlog):
+                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, mass_def, **fftlog):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
@@ -87,7 +85,10 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         self.gamma = gamma
         self.P0_hexp = P0_hexp
         self.x_out = x_out
-        super().__init__(**fftlog)
+
+        # Interpolator for dimensionless Fourier-space profile
+        self._fourier_interp = None
+        super().__init__(mass_def=mass_def, **fftlog)
 
     @warn_api
     def update_parameters(self, *, mass_bias=None, P0=None,
@@ -146,7 +147,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
             re_fourier = True
             self.x_out = x_out
 
-        if re_fourier and hasattr(self, "_fourier_interp"):
+        if re_fourier and self._fourier_interp is not None:
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):
@@ -181,8 +182,8 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         return Fq
 
     def _norm(self, cosmo, M, a, mb):
-        # Computes the normalisation factor of the GNFW profile.
-        # Normalisation factor is given in units of eV/cm^3.
+        # Computes the normalization factor of the GNFW profile.
+        # Normalization factor is given in units of eV/cm^3.
         # (Bolliet et al. 2017).
         h70 = cosmo["h"]/0.7
         C0 = 1.65*h70**2
@@ -191,7 +192,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         P0_corr = self.P0 * h70**self.P0_hexp  # h-corrected P_0
         return P0_corr * C0 * CM * Cz
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         # Real-space profile.
         # Output in units of eV/cm^3
         r_use = np.atleast_1d(r)
@@ -201,7 +202,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         # (1-b)
         mb = self.mass_bias
         # R_Delta*(1+z)
-        R = mass_def.get_radius(cosmo, M_use * mb, a) / a
+        R = self.mass_def.get_radius(cosmo, M_use * mb, a) / a
 
         nn = self._norm(cosmo, M_use, a, mb)
         prof = self._form_factor(r_use[None, :] / R[:, None])
@@ -213,12 +214,12 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier(self, cosmo, k, M, a, mass_def):
+    def _fourier(self, cosmo, k, M, a):
         # Fourier-space profile.
         # Output in units of eV * Mpc^3 / cm^3.
 
         # Tabulate if not done yet
-        if not hasattr(self, "_fourier_interp"):
+        if self._fourier_interp is None:
             with UnlockInstance(self):
                 self._fourier_interp = self._integ_interp()
 
@@ -226,10 +227,9 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
-        # hydrostatic bias
         mb = self.mass_bias
         # R_Delta*(1+z)
-        R = mass_def.get_radius(cosmo, M_use * mb, a) / a
+        R = self.mass_def.get_radius(cosmo, M_use*mb, a) / a
 
         ff = self._fourier_interp(np.log(k_use[None, :] * R[:, None]))
         nn = self._norm(cosmo, M_use, a, mb)
