@@ -283,9 +283,8 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             out.append(instance)
 
         # Check mass definition consistency.
-        if hmd := set([x.mass_def for x in out]):
-            if hmd != set([mass_def]):
-                raise ValueError("Inconsistent mass definitions.")
+        if out and set([x.mass_def for x in out]) != set([mass_def]):
+            raise ValueError("Inconsistent mass definitions.")
 
         return mass_def, *out
 
