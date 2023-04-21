@@ -23,12 +23,16 @@ CorrelationMethods = {
     'legendre': lib.CCL_CORR_LGNDRE,
 }
 
+correlation_methods = CorrelationMethods  # TODO: Alias CCLv3.
+
 CorrelationTypes = {
     'NN': lib.CCL_CORR_GG,
     'NG': lib.CCL_CORR_GL,
     'GG+': lib.CCL_CORR_LP,
     'GG-': lib.CCL_CORR_LM,
 }
+
+correlation_types = CorrelationTypes  # TODO: Alias CCLv3.
 
 
 @warn_api

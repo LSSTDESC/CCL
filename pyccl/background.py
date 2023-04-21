@@ -36,6 +36,8 @@ Species = {
     'neutrinos_massive': lib.species_nu_label,
 }
 
+species = Species  # TODO: alias CCLv3.
+
 
 def h_over_h0(cosmo, a):
     """Ratio of Hubble constant at `a` over Hubble constant today.

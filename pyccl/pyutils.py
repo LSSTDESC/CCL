@@ -18,6 +18,8 @@ IntegrationMethods = {
     'qag_quad': lib.integration_qag_quad,
     'spline': lib.integration_spline}
 
+integ_types = IntegrationMethods  # TODO: Alias CCLv3.
+
 ExtrapolationMethods = {
     'none': lib.f1d_extrap_0,
     'constant': lib.f1d_extrap_const,
@@ -25,6 +27,8 @@ ExtrapolationMethods = {
     'linx_logy': lib.f1d_extrap_linx_logy,
     'logx_liny': lib.f1d_extrap_logx_liny,
     'logx_logy': lib.f1d_extrap_logx_logy}
+
+extrap_types = ExtrapolationMethods  # TODO: Alias CCLv3.
 
 # This is defined here instead of in `errors.py` because SWIG needs `CCLError`
 # from `.errors`, resulting in a cyclic import.

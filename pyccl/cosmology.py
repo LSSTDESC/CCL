@@ -31,6 +31,8 @@ TransferFunctions = {
     'calculator': lib.pklin_from_input
 }
 
+transfer_function_types = TransferFunctions  # TODO: Alias CCLv3.
+
 MatterPowerSpectra = {
     'halo_model': lib.halo_model,
     'halofit': lib.halofit,
@@ -40,10 +42,14 @@ MatterPowerSpectra = {
     'camb': lib.pknl_from_boltzman
 }
 
+matter_power_spectrum_types = MatterPowerSpectra  # TODO: Alias CCLv3.
+
 BaryonPowerSpectra = {
     'nobaryons': lib.nobaryons,
     'bcm': lib.bcm
 }
+
+baryons_power_spectrum_types = BaryonPowerSpectra  # TODO: Alias CCLv3.
 
 # List which transfer functions can be used with the muSigma_MG
 # parameterisation of modified gravity
