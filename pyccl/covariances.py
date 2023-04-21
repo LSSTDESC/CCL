@@ -1,6 +1,7 @@
 import numpy as np
 
 from . import ccllib as lib
+from . import DEFAULT_POWER_SPECTRUM
 from .pyutils import check, integ_types, _check_array_params
 from .background import comoving_radial_distance, comoving_angular_distance
 from .tk3d import Tk3D
@@ -134,7 +135,8 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
 
 
 @warn_api(pairs=[('a', 'a_arr')])
-def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
+def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
+                  p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """Returns the variance of the projected linear density field
     over a circular disc covering a sky fraction `fsky` as a function
     of scale factor. This is given by
@@ -153,9 +155,9 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
             values at which to evaluate the projected variance. If
             `None`, a default sampling will be used.
         fsky (float): sky fraction.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, str, or `None`): Linear
-            power spectrum to use. Defaults to `None`, in which case the
-            internal linear power spectrum from `cosmo` is used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or str): Linear
+            power spectrum to use. Defaults to the
+            internal linear power spectrum from `cosmo`.
 
 
     Returns:
@@ -189,7 +191,8 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1., p_of_k_a=None):
 
 
 @warn_api(pairs=[('a', 'a_arr')])
-def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
+def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
+                       p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """ Returns the variance of the projected linear density field, given the
         angular power spectrum of the footprint mask and scale factor.
         This is given by
@@ -213,9 +216,9 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
             as :math:`(2\\ell+1)\\sum_m W^A_{\\ell m} {W^B}^*_{\\ell m}`. It is
             the responsibility of the user to the provide the mask power out to
             sufficiently high ell for their required precision.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, str, or `None`): Linear
-            power spectrum to use. Defaults to `None`, in which case the
-            internal linear power spectrum from `cosmo` is used.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or str): Linear
+            power spectrum to use. Defaults to the
+            internal linear power spectrum from `cosmo`.
 
     Returns:
         a_arr (array_like): an array of scale factor values at which the
@@ -231,7 +234,7 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=None):
         ndim = np.ndim(a_arr)
         a_arr = np.atleast_1d(a_arr)
 
-    if p_of_k_a is None:
+    if p_of_k_a is DEFAULT_POWER_SPECTRUM:
         cosmo.compute_linear_power()
         p_of_k_a = cosmo.get_linear_power()
 

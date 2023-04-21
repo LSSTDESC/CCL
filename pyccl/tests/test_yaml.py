@@ -21,7 +21,7 @@ def test_yaml():
         assert filecmp.cmp(tmpfile1.name, tmpfile2.name, shallow=False)
 
     cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.97, m_nu=0.1, m_nu_type="equal",
+                          n_s=0.97, m_nu=0.1, mass_split="equal",
                           transfer_function="boltzmann_camb")
 
     stream = io.StringIO()

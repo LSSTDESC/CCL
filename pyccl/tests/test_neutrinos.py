@@ -22,10 +22,11 @@ def test_omnuh2_smoke(a, m):
                                    'single'])
 def test_nu_masses_smoke(split):
     m = ccl.nu_masses(Omega_nu_h2=0.1, mass_split=split)
-    if split in ['sum', 'single']:
-        assert np.ndim(m) == 0
+    if split == "sum":
+        assert np.shape(m) == ()
+    elif split == "single":
+        assert np.shape(m) == (1,)
     else:
-        assert np.ndim(m) == 1
         assert np.shape(m) == (3,)
 
 

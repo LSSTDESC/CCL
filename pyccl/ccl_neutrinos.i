@@ -27,13 +27,4 @@ void Omeganuh2_vec(int N_nu_mass, double T_CMB, double T_ncdm, double* a, int na
     }
 }
 
-void nu_masses_vec(double OmNuh2, int label,
-                   int nout, double* output, int* status) {
-    double* mnu;
-    mnu = ccl_nu_masses(OmNuh2, label, status);
-    for(int i=0; i < nout; i++){
-        output[i] = *(mnu+i);
-    }
-}
-
 %}

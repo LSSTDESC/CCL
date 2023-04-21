@@ -1,5 +1,5 @@
 from .. import ccllib as lib
-from ..core import check
+from ..pyutils import check
 from ..background import species_types
 from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
 from .hmfunc import MassFunc

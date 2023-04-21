@@ -88,7 +88,7 @@ def test_tkk1h_tk3d():
     assert np.allclose(tkk_arr, tkk_arr_2, atol=0, rtol=1e-4)
 
     # Standard sampling
-    with np.errstate(divide="ignore", invalid="ignore"):
+    with pytest.warns(ccl.CCLWarning):
         tk3d = ccl.halos.halomod_Tk3D_1h(
             COSMO, hmc,
             prof=P1, prof2=P2, prof12_2pt=PKC,

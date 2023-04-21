@@ -30,7 +30,7 @@ def test_power_nu(model):
         w0=w_0[model],
         wa=w_a[model],
         m_nu=mnu[model],
-        m_nu_type='list',
+        mass_split='list',
         transfer_function='boltzmann_class')
 
     a = 1

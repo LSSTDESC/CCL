@@ -42,7 +42,7 @@ def test_hodcl():
         n_s=0.9645,
         A_s=2.0E-9,
         m_nu=0.00001,
-        m_nu_type='equal',
+        mass_split='equal',
         pk_linear={'a': 1./(1.+zs[::-1]),
                    'k': ks,
                    'delta_matter:delta_matter': pks[::-1, :]})

@@ -1,6 +1,6 @@
 from ... import ccllib as lib
 from ...base import warn_api
-from ...core import check
+from ...pyutils import check
 from ..halo_model_base import HaloBias
 
 

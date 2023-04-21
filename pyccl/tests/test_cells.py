@@ -16,7 +16,7 @@ with pytest.warns(ccl.CCLDeprecationWarning):
     ccl.cls
 
 
-@pytest.mark.parametrize('p_of_k_a', [None, PKA])
+@pytest.mark.parametrize('p_of_k_a', [ccl.DEFAULT_POWER_SPECTRUM, PKA])
 def test_cells_smoke(p_of_k_a):
     # make a set of tracers to test with
     z = np.linspace(0., 1., 200)

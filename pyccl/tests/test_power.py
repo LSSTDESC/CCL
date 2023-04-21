@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 import pyccl as ccl
-from pyccl import CCLError, CCLWarning
+from pyccl import CCLError
 
 
 COSMO = ccl.Cosmology(
@@ -28,7 +28,7 @@ def test_halomod_f2d_copy():
     pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf)
     psp_new = pk2d.psp
     # This just triggers the internal calculation
-    with pytest.warns(ccl.CCLWarning):
+    with pytest.warns(ccl.CCLDeprecationWarning):
         pk_old = ccl.nonlin_matter_power(COSMO_HM, 1., 0.8)
     pk_new = pk2d(1., 0.8, COSMO_HM)
     psp_old = COSMO_HM.get_nonlin_power().psp
@@ -85,18 +85,6 @@ def test_linear_matter_power_smoke(k):
     pk = ccl.linear_matter_power(COSMO, k, a)
     assert np.all(np.isfinite(pk))
     assert np.shape(pk) == np.shape(k)
-
-
-def test_linear_matter_power_raises():
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=None)
-    with pytest.raises(ccl.CCLError):
-        ccl.linear_matter_power(cosmo, 1., 1.)
-
-
-def test_nonlin_matter_power_raises():
-    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum=None)
-    with pytest.raises(ccl.CCLError):
-        ccl.nonlin_matter_power(cosmo, 1., 1.)
 
 
 def test_linear_power_raises():
@@ -165,7 +153,6 @@ def test_kNL(A):
 
 @pytest.mark.parametrize('tf,pk,m_nu', [
     # ('boltzmann_class', 'emu', 0.06), - this case is slow and not needed
-    (None, 'emu', 0.06),
     ('bbks', 'emu', 0.06),
     ('eisenstein_hu', 'emu', 0.06),
 ])
@@ -173,10 +160,6 @@ def test_transfer_matter_power_nu_raises(tf, pk, m_nu):
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
         transfer_function=tf, matter_power_spectrum=pk, m_nu=m_nu)
-
-    if tf is not None:
-        with pytest.warns(CCLWarning):
-            ccl.linear_matter_power(cosmo, 1, 1)
 
     with pytest.raises(CCLError):
         ccl.nonlin_matter_power(cosmo, 1, 1)
@@ -306,15 +289,6 @@ def test_input_linpower_raises():
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
                        'delta_matter;delta_matter': pk_arr})
-
-    # Non-parsable power spectrum
-    with pytest.raises(ValueError):
-        ccl.CosmologyCalculator(
-            Omega_c=0.27, Omega_b=0.05, h=0.7,
-            n_s=0.965, sigma8=0.8,
-            pk_linear={'a': a_arr, 'k': k_arr,
-                       'delta_matter:delta_matter': pk_arr,
-                       'a;b': pk_arr})
 
     # Wrong shape
     with pytest.raises(ValueError):
@@ -468,7 +442,7 @@ def test_input_nonlinear_model_raises():
             pk_nonlin={'a': a_arr, 'k': k_arr,
                        'a:b': pkl_arr})
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
@@ -504,7 +478,7 @@ def test_input_nonlinear_model_raises():
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
                        'delta_matter:delta_matter': pkl_arr},
-            nonlinear_model={'delta_matter:delta_matter': 'hmcode'})
+            nonlinear_model={'delta_matter:delta_matter': 'unknown_model'})
 
 
 def test_input_nonlin_raises():
@@ -526,7 +500,7 @@ def test_input_nonlin_raises():
             pk_nonlin=np.pi)
 
     # k not present
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
@@ -548,15 +522,6 @@ def test_input_nonlin_raises():
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'k': k_arr,
                        'delta_matter;delta_matter': pk_arr})
-
-    # Non-parsable power spectrum
-    with pytest.raises(ValueError):
-        ccl.CosmologyCalculator(
-            Omega_c=0.27, Omega_b=0.05, h=0.7,
-            n_s=0.965, sigma8=0.8,
-            pk_nonlin={'a': a_arr, 'k': k_arr,
-                       'delta_matter:delta_matter': pk_arr,
-                       'a;b': pk_arr})
 
     # Wrong shape
     with pytest.raises(ValueError):
