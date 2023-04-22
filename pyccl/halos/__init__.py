@@ -3,9 +3,9 @@ from .concentration import *
 from .hbias import *
 from .hmfunc import *
 from .massdef import *
-from .halo_model import *
 from .profiles import *
 from .profiles_2pt import *
 from .pk_1pt import *
 from .pk_2pt import *
 from .pk_4pt import *
+from .halo_model import *

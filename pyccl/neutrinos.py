@@ -23,7 +23,7 @@ class NeutrinoMassSplits(Enum):
 
 
 @deprecated(new_function=omega_x)
-def Omeganuh2(a, *, m_nu,
+def Omeganuh2(a, m_nu,
               T_CMB=DefaultParams.T_CMB,
               T_ncdm=DefaultParams.T_ncdm):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given

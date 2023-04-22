@@ -440,7 +440,7 @@ def halomod_Tk3D_SSC(
     if lk_arr is None:
         lk_arr = cosmo.get_pk_spline_lk()
     if a_arr is None:
-        a_arr = cosmo.get_pk_splne_a()
+        a_arr = cosmo.get_pk_spline_a()
 
     # define all the profiles
     prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt = \

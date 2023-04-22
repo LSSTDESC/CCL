@@ -6,7 +6,7 @@ from abc import abstractmethod
 import numpy as np
 
 from .. import CCLAutoRepr, CCLNamedClass, lib, check
-from .. import warn_api, deprecated, deprecate_attr
+from .. import deprecate_attr, deprecated, warn_api, mass_def_api
 from .. import physical_constants as const
 
 
@@ -165,6 +165,7 @@ class MassFunc(HMIngredients):
         return mf
 
     @deprecated(new_function=__call__)
+    @mass_def_api
     def get_mass_function(self, cosmo, M, a):
         return self(cosmo, M, a)
 
@@ -221,6 +222,7 @@ class HaloBias(HMIngredients):
         return b
 
     @deprecated(new_function=__call__)
+    @mass_def_api
     def get_halo_bias(self, cosmo, M, a):
         return self(cosmo, M, a)
 
@@ -260,6 +262,7 @@ class Concentration(HMIngredients):
         return c
 
     @deprecated(new_function=__call__)
+    @mass_def_api
     def get_concentration(self, cosmo, M, a):
         return self(cosmo, M, a)
 

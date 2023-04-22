@@ -27,7 +27,7 @@ class HaloProfilePowerLaw(HaloProfile):
 
     @deprecated()
     @warn_api
-    def __init__(self, *, r_scale, tilt, mass_def):
+    def __init__(self, *, r_scale, tilt, mass_def=None):
         self.r_scale = r_scale
         self.tilt = tilt
         super().__init__(mass_def=mass_def)

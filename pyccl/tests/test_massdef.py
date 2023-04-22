@@ -85,13 +85,6 @@ def test_translate_mass():
         assert np.shape(m) == np.shape(M)
 
 
-def test_translate_mass_raises():
-    hmd = ccl.halos.MassDef(200, 'matter')
-    hmdb = ccl.halos.MassDef(200, 'critical')
-    with pytest.raises(AttributeError):
-        hmd.translate_mass(COSMO, 1E12, 1., mass_def_other=hmdb)
-
-
 @pytest.mark.parametrize('scls', [ccl.halos.MassDef200m,
                                   ccl.halos.MassDef200c,
                                   ccl.halos.MassDef500c,

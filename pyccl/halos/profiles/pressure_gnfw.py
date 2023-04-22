@@ -73,7 +73,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
     def __init__(self, *, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
-                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, mass_def):
+                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, mass_def=None):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias

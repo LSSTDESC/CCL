@@ -26,7 +26,7 @@ class HaloProfileGaussian(HaloProfile):
 
     @deprecated()
     @warn_api
-    def __init__(self, *, r_scale, rho0, mass_def):
+    def __init__(self, *, r_scale, rho0, mass_def=None):
         self.rho_0 = rho0
         self.r_scale = r_scale
         super().__init__(mass_def=mass_def)
