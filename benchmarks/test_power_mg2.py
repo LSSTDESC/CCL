@@ -34,6 +34,6 @@ def test_power_mg(model):
     pk_ccl = ccl.linear_matter_power(cosmoMG, k, a)
     err = np.abs(pk_ccl/pk - 1)
     print(cosmoMG)
-# cut two points due to cosmic variance
+    # cut two points due to cosmic variance
     cut = data[:, 0] > 1e-04
     assert np.allclose(err[cut], 0, rtol=0, atol=POWER_MG_TOL)

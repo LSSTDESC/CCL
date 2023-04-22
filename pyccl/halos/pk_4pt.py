@@ -1,17 +1,13 @@
-from ..base import UnlockInstance, warn_api
-from ..pk2d import parse_pk
-from ..tk3d import Tk3D
-from ..errors import CCLWarning
-from .profiles import HaloProfileNFW
-from .profiles import HaloProfileNumberCounts as ProfNC
-from .profiles_2pt import Profile2pt
-import numpy as np
-import warnings
-from functools import partial
-
-
 __all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
            "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC",)
+
+import warnings
+
+import numpy as np
+
+from .. import CCLWarning, Tk3D, warn_api
+from . import HaloProfileNFW, Profile2pt
+from . import HaloProfileNumberCounts as ProfNC
 
 
 @warn_api(pairs=[("prof1", "prof")], reorder=["prof12_2pt", "prof3", "prof4"])
@@ -83,30 +79,37 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
 
     # define all the profiles
     prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt = \
-        _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt,
-                           normprof1, normprof2, normprof3, normprof4)
+        _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt)
 
     na = len(a_use)
     nk = len(k_use)
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
         # normalizations
-        norm1 = hmc.get_profile_norm(cosmo, aa, prof)
+        norm1 = prof.get_normalization(cosmo, aa,
+                                       hmc=hmc) if normprof1 else 1
+        # TODO: CCLv3 remove if
 
         if prof2 == prof:
             norm2 = norm1
         else:
-            norm2 = hmc.get_profile_norm(cosmo, aa, prof2)
+            norm2 = prof2.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof2 else 1
+            # TODO: CCLv3 remove if
 
         if prof3 == prof:
             norm3 = norm1
         else:
-            norm3 = hmc.get_profile_norm(cosmo, aa, prof3)
+            norm3 = prof3.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof3 else 1
+            # TODO: CCLv3 remove if
 
         if prof4 == prof2:
             norm4 = norm2
         else:
-            norm4 = hmc.get_profile_norm(cosmo, aa, prof4)
+            norm4 = prof4.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof4 else 1
+            # TODO: CCLv3 remove if
 
         # trispectrum
         tk_1h = hmc.I_0_22(cosmo, k_use, aa,
@@ -115,7 +118,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
                            prof12_2pt=prof12_2pt,
                            prof34_2pt=prof34_2pt)
 
-        out[ia] = tk_1h * norm1 * norm2 * norm3 * norm4  # assign
+        out[ia] = tk_1h / (norm1 * norm2 * norm3 * norm4)  # assign
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -300,21 +303,22 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
     k_use = np.exp(lk_arr)
     prof_2pt = Profile2pt()
 
-    pk2d = parse_pk(cosmo, p_of_k_a)
+    pk2d = cosmo.parse_pk(p_of_k_a)
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     na = len(a_arr)
     nk = len(k_use)
     dpk12, dpk34 = [np.zeros([na, nk]) for _ in range(2)]
     for ia, aa in enumerate(a_arr):
-        norm = hmc.get_profile_norm(cosmo, aa, prof)**2
+        norm = prof.get_normalization(cosmo, aa, hmc=hmc)**2
+        # TODO: CCLv3 remove if
         i12 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof, prof_2pt=prof_2pt)
 
         pk = pk2d(k_use, aa, cosmo=extrap)
         dpk = pk2d(k_use, aa, derivative=True, cosmo=extrap)
 
         # ~ (47/21 - 1/3 dlogPk/dlogk) * Pk + I12
-        dpk12[ia] = ((47/21 - dpk/3)*pk + i12 * norm)
+        dpk12[ia] = (47/21 - dpk/3)*pk + i12 / norm
         dpk34[ia] = dpk12[ia].copy()
 
         # Counter terms for clustering (i.e. - (bA + bB) * PAB)
@@ -324,7 +328,7 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
             i02 = hmc.I_0_2(cosmo, k_use, aa, prof,
                             prof2=prof, prof_2pt=prof_2pt)
 
-            P_12 = P_34 = pk + i02 * norm
+            P_12 = P_34 = pk + i02 / norm
 
             if is_number_counts1:
                 b1 = bias1[ia]
@@ -436,42 +440,49 @@ def halomod_Tk3D_SSC(
     if lk_arr is None:
         lk_arr = cosmo.get_pk_spline_lk()
     if a_arr is None:
-        a_arr = cosmo.get_pk_splne_a()
+        a_arr = cosmo.get_pk_spline_a()
 
     # define all the profiles
     prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt = \
-        _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt,
-                           normprof1, normprof2, normprof3, normprof4)
+        _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt)
 
     k_use = np.exp(lk_arr)
-    pk2d = parse_pk(cosmo, p_of_k_a)
+    pk2d = cosmo.parse_pk(p_of_k_a)
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     dpk12, dpk34 = [np.zeros((len(a_arr), len(k_use))) for _ in range(2)]
     for ia, aa in enumerate(a_arr):
         # normalizations & I11 integral
-        norm1 = hmc.get_profile_norm(cosmo, aa, prof)
+        norm1 = prof.get_normalization(cosmo, aa,
+                                       hmc=hmc) if normprof1 else 1
+        # TODO: CCLv3 remove if
         i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
 
         if prof2 == prof:
             norm2 = norm1
             i11_2 = i11_1
         else:
-            norm2 = hmc.get_profile_norm(cosmo, aa, prof2)
+            norm2 = prof2.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof2 else 1
+            # TODO: CCLv3 remove if
             i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
 
         if prof3 == prof:
             norm3 = norm1
             i11_3 = i11_1
         else:
-            norm3 = hmc.get_profile_norm(cosmo, aa, prof3)
+            norm3 = prof3.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof3 else 1
+            # TODO: CCLv3 remove if
             i11_3 = hmc.I_1_1(cosmo, k_use, aa, prof3)
 
         if prof4 == prof2:
             norm4 = norm2
             i11_4 = i11_2
         else:
-            norm4 = hmc.get_profile_norm(cosmo, aa, prof4)
+            norm4 = prof4.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof4 else 1
+            # TODO: CCLv3 remove if
             i11_4 = hmc.I_1_1(cosmo, k_use, aa, prof4)
 
         # I12 integral
@@ -488,23 +499,29 @@ def halomod_Tk3D_SSC(
         dpk = pk2d(k_use, aa, derivative=True, cosmo=extrap)
 
         # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk + I12
-        dpk12[ia] = norm1 * norm2 * ((47/21 - dpk/3)*i11_1*i11_2*pk + i12_12)
-        dpk34[ia] = norm3 * norm4 * ((47/21 - dpk/3)*i11_3*i11_4*pk + i12_34)
+        dpk12[ia] = ((47/21 - dpk/3)*i11_1*i11_2*pk + i12_12) / (norm1 * norm2)
+        dpk34[ia] = ((47/21 - dpk/3)*i11_3*i11_4*pk + i12_34) / (norm3 * norm4)
 
-        # Counter terms for clustering (i.e. - (bA + bB) * PAB
-        counterterm = partial(_get_counterterm, cosmo=cosmo, hmc=hmc,
-                              k=k_use, a=aa, pk=pk)
+        # Counter terms for clustering (i.e. - (bA + bB) * PAB)
+        def _get_counterterm(pA, pB, p2pt, nA, nB, i11_A, i11_B):
+            """Helper to compute counter-terms."""
+            # p : profiles | p2pt : 2-point | n : norms | i11 : I_1_1 integral
+            bA = i11_A / nA if isinstance(pA, ProfNC) else np.zeros_like(k_use)
+            bB = i11_B / nB if isinstance(pB, ProfNC) else np.zeros_like(k_use)
+            i02 = hmc.I_0_2(cosmo, k_use, aa, pA, prof2=pB, prof_2pt=p2pt)
+            P = (pk * i11_A * i11_B + i02) / (nA * nB)
+            return (bA + bB) * P
 
         if isinstance(prof, ProfNC) or isinstance(prof2, ProfNC):
-            dpk12[ia] -= counterterm(prof, prof2, prof12_2pt,
-                                     norm1, norm2, i11_1, i11_2)
+            dpk12[ia] -= _get_counterterm(prof, prof2, prof12_2pt,
+                                          norm1, norm2, i11_1, i11_2)
 
         if isinstance(prof3, ProfNC) or isinstance(prof4, ProfNC):
             if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
                 dpk34[ia] -= dpk12[ia]
             else:
-                dpk34[ia] -= counterterm(prof3, prof4, prof34_2pt,
-                                         norm3, norm4, i11_3, i11_4)
+                dpk34[ia] -= _get_counterterm(prof3, prof4, prof34_2pt,
+                                              norm3, norm4, i11_3, i11_4)
 
     dpk12, dpk34, use_log = _logged_output(dpk12, dpk34, log=use_log)
 
@@ -514,8 +531,7 @@ def halomod_Tk3D_SSC(
                 extrap_order_hik=extrap_order_hik, is_logt=use_log)
 
 
-def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt,
-                       normprof1, normprof2, normprof3, normprof4):
+def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt):
     """Helper that controls how the undefined profiles are allocated."""
     if prof2 is None:
         prof2 = prof
@@ -528,32 +544,7 @@ def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt,
     if prof34_2pt is None:
         prof34_2pt = prof12_2pt
 
-    # TODO: Remove for CCLv3.
-    if normprof1 is not None:
-        with UnlockInstance(prof):
-            prof.normprof = normprof1
-    if normprof2 is not None:
-        with UnlockInstance(prof2):
-            prof2.normprof = normprof2
-    if normprof3 is not None:
-        with UnlockInstance(prof3):
-            prof3.normprof = normprof3
-    if normprof4 is not None:
-        with UnlockInstance(prof4):
-            prof4.normprof = normprof4
-
     return prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt
-
-
-def _get_counterterm(pA, pB, p2pt, nA, nB, i11_A, i11_B, *,
-                     cosmo, hmc, k, a, pk):
-    """Helper to compute counter-terms."""
-    # p : profiles | p2pt : 2-point | n : norms | i11 : I_1_1 integral
-    bA = i11_A * nA if isinstance(pA, ProfNC) else np.zeros_like(k)
-    bB = i11_B * nB if isinstance(pB, ProfNC) else np.zeros_like(k)
-    i02 = hmc.I_0_2(cosmo, k, a, pA, prof2=pB, prof_2pt=p2pt)
-    P = nA * nB * (pk * i11_A * i11_B + i02)
-    return (bA + bB) * P
 
 
 def _logged_output(*arrs, log):

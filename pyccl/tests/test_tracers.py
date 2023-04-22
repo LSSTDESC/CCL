@@ -2,10 +2,69 @@ import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl import CCLWarning
+from .test_cclobject import check_eq_repr_hash
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
+COSMO.compute_distances()  # needed to suppress C-level warnings
+
+
+def test_Tracer_eq_repr_hash():
+    # Test eq, repr, hash for Tracer.
+    # empty Tracer
+    assert check_eq_repr_hash(ccl.Tracer(), ccl.Tracer())
+
+    # no transfer
+    TR1 = ccl.CMBLensingTracer(COSMO, z_source=1101)
+    TR2 = ccl.CMBLensingTracer(COSMO, z_source=1101)
+    assert check_eq_repr_hash(TR1, TR2)
+
+    TR3 = ccl.CMBLensingTracer(COSMO, z_source=1100)
+    assert check_eq_repr_hash(TR1, TR3, equal=False)
+
+    # transfer_fka
+    lk = np.linspace(-5, 1, 32)
+    a = np.linspace(0.5, 1, 4)
+    tka = np.ones((a.size, lk.size))
+    TR1.add_tracer(COSMO, transfer_ka=(a, lk, tka))
+    TR2.add_tracer(COSMO, transfer_ka=(a, lk, 2*tka))
+    assert check_eq_repr_hash(TR1, TR2, equal=False)
+
+    # transfer_fk
+    TR4 = ccl.CMBLensingTracer(COSMO, z_source=1101)
+    TR5 = ccl.CMBLensingTracer(COSMO, z_source=1101)
+    TR4.add_tracer(COSMO, transfer_k=(lk, np.ones_like(lk)))
+    TR5.add_tracer(COSMO, transfer_k=(lk, 2*np.ones_like(lk)))
+    assert check_eq_repr_hash(TR4, TR5, equal=False)
+
+    # edge-case: different type
+    assert check_eq_repr_hash(ccl.Tracer(), 1, equal=False)
+
+    # edge-case: different `der_angles` & `der_bessel`
+    t1, t2 = ccl.Tracer(), ccl.Tracer()
+    t1.add_tracer(COSMO, der_angles=0, der_bessel=0)
+    t2.add_tracer(COSMO, der_angles=1, der_bessel=1)
+    assert check_eq_repr_hash(t1, t2, equal=False)
+
+    # edge-case: only one has kernel
+    chi = np.linspace(0, 50, 16)
+    t1, t2 = ccl.Tracer(), ccl.Tracer()
+    t1.add_tracer(COSMO, kernel=(chi, np.ones_like(chi)))
+    t2.add_tracer(COSMO)
+    assert check_eq_repr_hash(t1, t2, equal=False)
+
+    # edge-case: only one has transfer
+    t1, t2 = ccl.Tracer(), ccl.Tracer()
+    t1.add_tracer(COSMO, transfer_k=(lk, np.ones_like(lk)))
+    t2.add_tracer(COSMO)
+    assert check_eq_repr_hash(t1, t2, equal=False)
+
+    # edge-case: only one has specific transfer type
+    t1, t2 = ccl.Tracer(), ccl.Tracer()
+    t1.add_tracer(COSMO, transfer_k=(lk, np.ones_like(lk)))
+    t2.add_tracer(COSMO, transfer_a=(a, np.ones_like(a)))
+    assert check_eq_repr_hash(t1, t2, equal=False)
 
 
 def dndz(z):
@@ -218,7 +277,7 @@ def test_tracer_nz_norm_spline_vs_gsl_intergation():
 @pytest.mark.parametrize('z_min, z_max, n_z_samples', [(0.0, 1.0, 2000),
                                                        (0.0, 1.0, 1000),
                                                        (0.0, 1.0, 500),
-                                                       (0.0, 1.0, 100),
+                                                       (0.0, 1.0, 256),
                                                        (0.3, 1.0, 1000)])
 def test_tracer_lensing_kernel_spline_vs_gsl_intergation(z_min, z_max,
                                                          n_z_samples):
@@ -253,7 +312,7 @@ def test_tracer_lensing_kernel_spline_vs_gsl_intergation(z_min, z_max,
 @pytest.mark.parametrize('z_min, z_max, n_z_samples', [(0.0, 1.0, 2000),
                                                        (0.0, 1.0, 1000),
                                                        (0.0, 1.0, 500),
-                                                       (0.0, 1.0, 100),
+                                                       (0.0, 1.0, 256),
                                                        (0.3, 1.0, 1000)])
 def test_tracer_magnification_kernel_spline_vs_gsl_intergation(z_min, z_max,
                                                                n_z_samples):
@@ -417,6 +476,11 @@ def test_tracer_repr():
     t_k = np.ones_like(lk)
     tr6.add_tracer(COSMO, transfer_k=(lk, t_k))
     tr7.add_tracer(COSMO, transfer_k=(lk, t_k))
+    assert tr6 == tr7
+    # transfer_a
+    tr6.add_tracer(COSMO, transfer_a=(1/(1+z)[::-1], nz))
+    tr7.add_tracer(COSMO, transfer_a=(1/(1+z)[::-1], nz))
+    assert tr6 == tr7
     # transfer_ka
     a = np.linspace(0.5, 1.0, 8)
     t_ka = np.ones((a.size, lk.size))

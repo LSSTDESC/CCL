@@ -1,13 +1,13 @@
-from .massdef import MassDef
-from .hmfunc import MassFunc
-from .hbias import HaloBias
-from ..pyutils import _spline_integrate
-from ..base import CCLAutoRepr, unlock_instance, warn_api, deprecate_attr
-from ..parameters import physical_constants as const
+__all__ = ("HMCalculator",)
+
+import warnings
 import numpy as np
 
-
-__all__ = ("HMCalculator",)
+from .. import CCLAutoRepr, CCLDeprecationWarning, unlock_instance
+from .. import warn_api, deprecate_attr, deprecated
+from .. import physical_constants as const
+from . import MassDef
+from ..pyutils import _spline_integrate
 
 
 class HMCalculator(CCLAutoRepr):
@@ -72,7 +72,8 @@ class HMCalculator(CCLAutoRepr):
     precision : dict
         Integration settings.
     """
-    __repr_attrs__ = ("mass_function", "halo_bias", "mass_def", "precision",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_function", "halo_bias", "mass_def", "precision",)
     __getattr__ = deprecate_attr(pairs=[('_mdef', 'mass_def'),
                                         ('_massfunc', 'mass_function'),
                                         ('_hbias', 'halo_bias'),
@@ -80,57 +81,47 @@ class HMCalculator(CCLAutoRepr):
                                  )(super.__getattribute__)
 
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
-                     ("log10M_min", "lM_min"), ("log10M_max", "lM_max"),
-                     ("nlog10M", "nlM")])
-    def __init__(self, *, mass_function, halo_bias, mass_def,
-                 lM_min=8., lM_max=16., nlM=128,
-                 integration_method_M='simpson', k_norm=1E-5):
-        # Initialize halo model ingredients
-        self.mass_def = MassDef.initialize_from_input(mass_def)
-        kw = {"mass_def": self.mass_def}
-        self.mass_function = MassFunc.initialize_from_input(mass_function, **kw)  # noqa
-        self.halo_bias = HaloBias.initialize_from_input(halo_bias, **kw)
-
-        # Check mass definition consistency.
-        if not (self.mass_def
-                == self.mass_function.mass_def
-                == self.halo_bias.mass_def):
-            raise ValueError(
-                "HMCalculator received different mass definitions "
-                "in mass_def, mass_function, halo_bias.")
+                     ("nlog10M", "nM")])
+    def __init__(self, *, mass_function, halo_bias, mass_def=None,
+                 log10M_min=8., log10M_max=16., nM=128,
+                 integration_method_M='simpson', k_min=1E-5):
+        # Initialize halo model ingredients.
+        self.mass_def, self.mass_function, self.halo_bias = MassDef.from_specs(
+            mass_def, mass_function=mass_function, halo_bias=halo_bias)
 
         self.precision = {
-            'log10M_min': lM_min, 'log10M_max': lM_max, 'nlM': nlM,
-            'integration_method_M': integration_method_M, 'k_norm': k_norm}
-        self._lmass = np.linspace(self.precision['log10M_min'],
-                                  self.precision['log10M_max'],
-                                  self.precision['nlM'])
+            'log10M_min': log10M_min, 'log10M_max': log10M_max, 'nM': nM,
+            'integration_method_M': integration_method_M, 'k_min': k_min}
+        self._lmass = np.linspace(log10M_min, log10M_max, nM)
         self._mass = 10.**self._lmass
         self._m0 = self._mass[0]
 
-        if self.precision['integration_method_M'] not in ['spline', 'simpson']:
-            raise NotImplementedError("Only \'simpson\' and 'spline' "
-                                      "supported as integration methods")
-        elif self.precision['integration_method_M'] == 'simpson':
+        if integration_method_M == "simpson":
             from scipy.integrate import simpson
             self._integrator = simpson
-        else:
+        elif integration_method_M == "spline":
             self._integrator = self._integ_spline
+        else:
+            raise ValueError("Invalid integration method.")
 
         # Cache last results for mass function and halo bias.
         self._cosmo_mf = self._cosmo_bf = None
         self._a_mf = self._a_bf = -1
 
-    def _integ_spline(self, fM, lM):
+    def _integ_spline(self, fM, log10M):
         # Spline integrator
-        return _spline_integrate(lM, fM, lM[0], lM[-1])
+        return _spline_integrate(log10M, fM, log10M[0], log10M[-1])
+
+    def _check_mass_def(self, *others):
+        # Verify that internal & external mass definitions are consistent.
+        if set([x.mass_def for x in others]) != set([self.mass_def]):
+            raise ValueError("Inconsistent mass definitions.")
 
     @unlock_instance(mutate=False)
     def _get_mass_function(self, cosmo, a, rho0):
         # Compute the mass function at this cosmo and a.
         if a != self._a_mf or cosmo != self._cosmo_mf:
-            massfunc = self.mass_function.get_mass_function
-            self._mf = massfunc(cosmo, self._mass, a)
+            self._mf = self.mass_function(cosmo, self._mass, a)
             integ = self._integrator(self._mf*self._mass, self._lmass)
             self._mf0 = (rho0 - integ) / self._m0
             self._cosmo_mf, self._a_mf = cosmo, a  # cache
@@ -139,8 +130,7 @@ class HMCalculator(CCLAutoRepr):
     def _get_halo_bias(self, cosmo, a, rho0):
         # Compute the halo bias at this cosmo and a.
         if a != self._a_bf or cosmo != self._cosmo_bf:
-            hbias = self.halo_bias.get_halo_bias
-            self._bf = hbias(cosmo, self._mass, a)
+            self._bf = self.halo_bias(cosmo, self._mass, a)
             integ = self._integrator(self._mf*self._bf*self._mass, self._lmass)
             self._mbf0 = (rho0 - integ) / self._m0
             self._cosmo_bf, self._a_bf = cosmo, a  # cache
@@ -153,24 +143,38 @@ class HMCalculator(CCLAutoRepr):
             self._get_halo_bias(cosmo, a, rho0)
 
     def _integrate_over_mf(self, array_2):
-        i1 = self._integrator(self._mf[..., :] * array_2,
-                              self._lmass)
+        #  ∫ dM n(M) f(M)
+        i1 = self._integrator(self._mf * array_2, self._lmass)
         return i1 + self._mf0 * array_2[..., 0]
 
     def _integrate_over_mbf(self, array_2):
-        i1 = self._integrator((self._mf * self._bf)[..., :] * array_2,
-                              self._lmass)
+        #  ∫ dM n(M) b(M) f(M)
+        i1 = self._integrator(self._mf * self._bf * array_2, self._lmass)
         return i1 + self._mbf0 * array_2[..., 0]
 
+    def integrate_over_massfunc(self, func, cosmo, a):
+        """ Returns the integral over mass of a given funcion times
+        the mass function.
+
+        Args:
+            func (callable): a function accepting an array of halo masses
+                as a single argument, and returning an array of the
+                same size.
+            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+            a (float): scale factor.
+
+        Returns:
+            float or array_like: integral over mass of the function times
+                the mass function.
+        """
+        fM = func(self._mass)
+        self._get_ingredients(cosmo, a, get_bf=False)
+        return self._integrate_over_mf(fM)
+
+    @deprecated()
     def profile_norm(self, cosmo, a, prof):
         r"""Compute the large-scale normalization of a profile:
 
-        .. math::
-
-            I^0_1(k \rightarrow 0, \, a|u).
-
-        See :meth:`~HMCalculator.I_0_1` for details.
-
         Arguments
         ---------
         cosmo : :class:`~pyccl.core.Cosmology`
@@ -185,37 +189,10 @@ class HMCalculator(CCLAutoRepr):
         norm : float
             Profile normalization at the given scale factor.
         """
+        self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=False)
-        uk0 = prof.fourier(cosmo, self.precision['k_norm'],
-                           self._mass, a, mass_def=self.mass_def).T
-        return 1 / self._integrate_over_mf(uk0)
-
-    def get_profile_norm(self, cosmo, a, prof):
-        """Compute the profile normalization.
-
-        Halo profiles contain the boolean attribute ``normprof`` which flags
-        when a profile needs normalization. This function returns :math:`1`
-        if the profile does not need normalization (``prof.normprof`` is False)
-        and :meth:`~pyccl.halos.HMCalculator.profile_norm` if ``prof.normprof``
-        is True.
-
-        Arguments
-        ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
-            Cosmological parameters.
-        a : float
-            Scale factor.
-        prof : :class:`~pyccl.halos.profiles.HaloProfile`
-            Halo profile.
-
-        Returns
-        -------
-        norm : float
-            Profile normalization at the given scale factor.
-        """
-        if prof.normprof:
-            return self.profile_norm(cosmo, a, prof)
-        return np.ones_like(a)[()]
+        uk0 = prof.fourier(cosmo, self.precision['k_min'], self._mass, a).T
+        return 1. / self._integrate_over_mf(uk0)
 
     @warn_api(pairs=[("sel", "selection"),
                      ("amin", "a_min"),
@@ -262,7 +239,14 @@ class HMCalculator(CCLAutoRepr):
         if a_min is None:
             a_min = cosmo.cosmo.spline_params.A_SPLINE_MIN
         a = np.linspace(a_min, a_max, na)
-        dVda = cosmo.comoving_volume_element(a)
+
+        # compute the volume element
+        abs_dzda = 1 / a / a
+        dc = cosmo.comoving_angular_distance(a)
+        ez = cosmo.h_over_h0(a)
+        dh = const.CLIGHT_HMPC / cosmo['h']
+        dvdz = dh * dc**2 / ez
+        dVda = dvdz * abs_dzda
 
         # now do m intergrals in a loop
         mint = np.zeros_like(a)
@@ -305,8 +289,9 @@ class HMCalculator(CCLAutoRepr):
         I_0_1 : float or (nk,) ``numpy.ndarray``
             Integral value.
         """
+        self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=False)
-        uk = prof.fourier(cosmo, k, self._mass, a, mass_def=self.mass_def).T
+        uk = prof.fourier(cosmo, k, self._mass, a).T
         return self._integrate_over_mf(uk)
 
     def I_1_1(self, cosmo, k, a, prof):
@@ -337,8 +322,9 @@ class HMCalculator(CCLAutoRepr):
         I_1_1 : float or (nk,) ``numpy.ndarray``
             Integral value.
         """
+        self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=True)
-        uk = prof.fourier(cosmo, k, self._mass, a, mass_def=self.mass_def).T
+        uk = prof.fourier(cosmo, k, self._mass, a).T
         return self._integrate_over_mbf(uk)
 
     @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
@@ -375,9 +361,9 @@ class HMCalculator(CCLAutoRepr):
         if prof2 is None:
             prof2 = prof
 
+        self._check_mass_def(prof, prof2)
         self._get_ingredients(cosmo, a, get_bf=False)
-        uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
-                                  prof2=prof2, mass_def=self.mass_def).T
+        uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
         return self._integrate_over_mf(uk)
 
     @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
@@ -417,6 +403,13 @@ class HMCalculator(CCLAutoRepr):
         self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
                                   prof2=prof2, mass_def=self.mass_def).T
+        return self._integrate_over_mbf(uk)
+        if prof2 is None:
+            prof2 = prof
+
+        self._check_mass_def(prof, prof2)
+        self._get_ingredients(cosmo, a, get_bf=True)
+        uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
         return self._integrate_over_mbf(uk)
 
     @warn_api(pairs=[("prof1", "prof")],
@@ -467,17 +460,36 @@ class HMCalculator(CCLAutoRepr):
         if prof34_2pt is None:
             prof34_2pt = prof12_2pt
 
+        self._check_mass_def(prof, prof2, prof3, prof4)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk12 = prof12_2pt.fourier_2pt(
-            cosmo, k, self._mass, a, prof,
-            prof2=prof2, mass_def=self.mass_def).T
+            cosmo, k, self._mass, a, prof, prof2=prof2).T
 
         if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
             # 4pt approximation of the same profile
             uk34 = uk12
         else:
             uk34 = prof34_2pt.fourier_2pt(
-                cosmo, k, self._mass, a, prof3,
-                prof2=prof4, mass_def=self.mass_def).T
+                cosmo, k, self._mass, a, prof3, prof2=prof4).T
 
         return self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
+
+
+# TODO: Remove for CCLv3.
+def __getattr__(name):
+    warn = lambda n, m: warnings.warn(  # noqa
+        f"{n} is moved to pyccl.halos.{m}", CCLDeprecationWarning)
+    if name in ["halomod_mean_profile_1pt", "halomod_bias_1pt"]:
+        from .pk_1pt import __dict__ as mod_dict
+        warn(name, "pk_1pt")
+        return mod_dict[name]
+    elif name in ["halomod_power_spectrum", "halomod_Pk2D"]:
+        from .pk_2pt import __dict__ as mod_dict
+        warn(name, "pk_2pt")
+        return mod_dict[name]
+    elif name in ["halomod_trispectrum_1h", "halomod_Tk3D_1h",
+                  "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC"]:
+        from .pk_4pt import __dict__ as mod_dict
+        warn(name, "pk_4pt")
+        return mod_dict[name]
+    return eval(name) if name in locals() else None

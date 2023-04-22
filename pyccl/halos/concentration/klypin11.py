@@ -1,8 +1,7 @@
-from ...base import warn_api
-from ..halo_model_base import Concentration
-
-
 __all__ = ("ConcentrationKlypin11",)
+
+from ... import warn_api
+from . import Concentration
 
 
 class ConcentrationKlypin11(Concentration):

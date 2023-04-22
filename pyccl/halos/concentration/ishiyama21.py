@@ -1,12 +1,11 @@
-from ... import ccllib as lib
-from ...base import warn_api
-from ...pyutils import check
-from ..halo_model_base import Concentration
+__all__ = ("ConcentrationIshiyama21",)
+
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 
-
-__all__ = ("ConcentrationIshiyama21",)
+from ... import lib, warn_api
+from ... import check
+from . import Concentration
 
 
 class ConcentrationIshiyama21(Concentration):
@@ -68,7 +67,7 @@ class ConcentrationIshiyama21(Concentration):
         method. Otherwise, use the concentration found with profile
         fitting. The default is False.
     """
-    __repr_attrs__ = ("mass_def", "relaxed", "Vmax",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'
 
     @warn_api(pairs=[("mdef", "mass_def")])

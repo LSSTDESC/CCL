@@ -1,10 +1,10 @@
-from ...base import warn_api
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncTinker10",)
+
 import numpy as np
 from scipy.interpolate import interp1d
 
-
-__all__ = ("MassFuncTinker10",)
+from ... import warn_api
+from . import MassFunc
 
 
 class MassFuncTinker10(MassFunc):
@@ -44,7 +44,8 @@ class MassFuncTinker10(MassFunc):
         combination of mass definition and scale factor is out of bounds with
         the range of the mass function.
     """
-    __repr_attrs__ = ("mass_def", "mass_def_strict", "norm_all_z",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_def", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
 
     @warn_api

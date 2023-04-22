@@ -1,12 +1,12 @@
+__all__ = ("hash_", "Caching", "cache", "CacheInfo", "CachedObject",)
+
 import sys
 import functools
 from collections import OrderedDict
-import numpy as np
-from _thread import RLock
 from inspect import signature
+from _thread import RLock
 
-
-__all__ = ("hash_", "Caching", "cache", "CacheInfo", "CachedObject",)
+import numpy as np
 
 
 def _to_hashable(obj):

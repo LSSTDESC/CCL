@@ -12,20 +12,31 @@ CCL defines seven species types:
 
 These strings define the `species` inputs to the functions below.
 """
+__all__ = (
+    "Species", "h_over_h0", "comoving_radial_distance", "scale_factor_of_chi",
+    "comoving_angular_distance", "angular_diameter_distance",
+    "luminosity_distance", "distance_modulus",
+    "sigma_critical", "omega_x", "rho_x",
+    "growth_factor", "growth_factor_unnorm", "growth_rate",)
+
+from enum import Enum
+
 import numpy as np
-from . import ccllib as lib
+
+from . import lib, warn_api
+from . import physical_constants as const
 from .pyutils import (_vectorize_fn, _vectorize_fn3,
                       _vectorize_fn4, _vectorize_fn5)
-from .parameters import physical_constants as const
-from .base import warn_api
 
 
-__all__ = ("h_over_h0", "comoving_radial_distance", "scale_factor_of_chi",
-           "comoving_angular_distance", "transverse_comoving_distance",
-           "angular_diameter_distance", "luminosity_distance",
-           "distance_modulus", "hubble_distance", "comoving_volume_element",
-           "comoving_volume", "omega_x", "rho_x", "growth_factor",
-           "growth_factor_unnorm", "growth_rate", "sigma_critical",)
+class Species(Enum):
+    CRITICAL = "critical"
+    MATTER = "matter"
+    DARK_ENERGY = "dark_energy"
+    RADIATION = "radiation"
+    CURVATURE = "curvature"
+    NEUTRINOS_REL = "neutrinos_rel"
+    NEUTRINOS_MASSIVE = "neutrinos_massive"
 
 
 species_types = {
@@ -143,9 +154,6 @@ def comoving_angular_distance(cosmo, a):
                          lib.comoving_angular_distance_vec, cosmo, a)
 
 
-transverse_comoving_distance = comoving_angular_distance  # alias
-
-
 def angular_diameter_distance(cosmo, a1, a2=None):
     r"""Angular diameter distance (in :math:`\rm Mpc `).
 
@@ -260,97 +268,6 @@ def distance_modulus(cosmo, a):
                          lib.distance_modulus_vec, cosmo, a)
 
 
-def hubble_distance(cosmo, a):
-    r"""Hubble distance in :math:`\rm Mpc`.
-
-    .. math::
-
-        D_{\rm H} = \frac{cz}{H_0}
-
-    Arguments
-    ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
-        Cosmological parameters.
-    a : float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
-
-    Returns
-    -------
-    D_H : float or (na,) ``numpy.ndarray``
-        Hubble distance.
-    """
-    return (1/a - 1) * const.CLIGHT_HMPC / cosmo["h"]
-
-
-def comoving_volume_element(cosmo, a):
-    r"""Comoving volume element in :math:`\rm Mpc^3 \, sr^{-1}`.
-
-    .. math::
-
-        \frac{\mathrm{d}V}{\mathrm{d}a \, \mathrm{d} \Omega}
-
-    Arguments
-    ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
-        Cosmological parameters.
-    a : float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
-
-    Returns
-    -------
-    dV : float or (na,) ``numpy.ndarray``
-        Comoving volume per unit scale factor per unit solid angle.
-
-    See Also
-    --------
-    comoving_volume : integral of the comoving volume element
-    """
-    Dm = comoving_angular_distance(cosmo, a)
-    Ez = h_over_h0(cosmo, a)
-    Dh = const.CLIGHT_HMPC / cosmo["h"]
-    return Dh * Dm**2 / (Ez * a**2)
-
-
-def comoving_volume(cosmo, a, *, solid_angle=4*np.pi, squeeze=True):
-    r"""Comoving volume, in :math:`\rm Mpc^3`.
-
-    .. math::
-
-        V_{\rm C} = \int_{\Omega} \mathrm{{d}}\Omega \int_z \mathrm{d}z
-        D_{\rm H} \frac{(1+z)^2 D_{\mathrm{A}}^2}{E(z)}
-
-    Arguments
-    ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
-        Cosmological parameters.
-    a : float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
-    solid_angle : float
-        Solid angle subtended in the sky for which
-        the comoving volume is calculated.
-
-    Returns
-    -------
-    V_C : float or (na,) ndarray
-        Comoving volume at ``a``.
-
-    See Also
-    --------
-    comoving_volume_element : comoving volume element
-    """
-    Omk, sqrtk = cosmo["Omega_k"], cosmo["sqrtk"]
-    Dm = comoving_angular_distance(cosmo, a)
-    if Omk == 0:
-        return solid_angle/3 * Dm**3
-
-    Dh = hubble_distance(cosmo, a)
-    DmDh = Dm / Dh
-    arcsinn = np.arcsin if Omk < 0 else np.arcsinh
-    return ((solid_angle * Dh**3 / (2 * Omk))
-            * (DmDh * np.sqrt(1 + Omk * DmDh**2)
-               - arcsinn(sqrtk * DmDh)/sqrtk))
-
-
 def omega_x(cosmo, a, species):
     r"""Density fraction of a given species at a particular scale factor.
 
@@ -382,11 +299,12 @@ def omega_x(cosmo, a, species):
     ValueError
         Wrong species type.
     """
-    if species not in species_types.keys():
-        raise ValueError(f"{species} is not a valid species type. "
-                         f"Available options are: {species_types.keys()}.")
-    return _vectorize_fn3(lib.omega_x, lib.omega_x_vec,
-                          cosmo, a, species_types[species])
+    # TODO: Replace docstring enum with ref to Species.
+    if species not in species_types:
+        raise ValueError(f"Unknown species {species}.")
+
+    return _vectorize_fn3(lib.omega_x,
+                          lib.omega_x_vec, cosmo, a, species_types[species])
 
 
 @warn_api
@@ -423,11 +341,13 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
     ValueError
         Wrong species type.
     """
-    if species not in species_types.keys():
-        raise ValueError(f"{species} is not a valid species type. "
-                         f"Available options are: {species_types.keys()}.")
-    return _vectorize_fn4(lib.rho_x, lib.rho_x_vec, cosmo, a,
-                          species_types[species], int(is_comoving))
+    # TODO: Replace docstring enum with ref to Species.
+    if species not in species_types:
+        raise ValueError(f"Unknown species {species}.")
+
+    return _vectorize_fn4(
+        lib.rho_x, lib.rho_x_vec, cosmo, a,
+        species_types[species], int(is_comoving))
 
 
 def growth_factor(cosmo, a):

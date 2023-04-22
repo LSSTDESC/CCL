@@ -1,9 +1,9 @@
-from .baryons_base import Baryons
-from ..pk2d import Pk2D
+__all__ = ("BaryonsSchneider15",)
+
 import numpy as np
 
-
-__all__ = ("BaryonsSchneider15",)
+from .. import Pk2D
+from . import Baryons
 
 
 class BaryonsSchneider15(Baryons):
@@ -35,7 +35,7 @@ class BaryonsSchneider15(Baryons):
     eta_b
     k_s
     """
-    __repr_attrs__ = ("log10Mc", "eta_b", "k_s")
+    __repr_attrs__ = __eq_attrs__ = ("log10Mc", "eta_b", "k_s")
     name = 'Schneider15'
 
     def __init__(self, log10Mc=np.log10(1.2E14), eta_b=0.5, k_s=55.0):
@@ -101,7 +101,7 @@ class BaryonsSchneider15(Baryons):
         if k_s is not None:
             self.k_s = k_s
 
-    def include_baryonic_effects(self, cosmo, pk):
+    def _include_baryonic_effects(self, cosmo, pk):
         # Apply boost factor.
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         fka = self.boost_factor(cosmo, np.exp(lk_arr), a_arr)

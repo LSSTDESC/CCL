@@ -1,10 +1,10 @@
-from ..base import UnlockInstance, warn_api
-from ..pk2d import Pk2D, parse_pk
-from .profiles_2pt import Profile2pt
+__all__ = ("halomod_power_spectrum", "halomod_Pk2D",)
+
 import numpy as np
 
-
-__all__ = ("halomod_power_spectrum", "halomod_Pk2D",)
+from .. import Pk2D
+from .. import warn_api
+from . import Profile2pt
 
 
 @warn_api(pairs=[("supress_1h", "suppress_1h")],
@@ -105,15 +105,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     if prof_2pt is None:
         prof_2pt = Profile2pt()
 
-    # TODO: Remove for CCLv3.
-    if normprof1 is not None:
-        with UnlockInstance(prof):
-            prof.normprof = normprof1
-    if normprof2 is not None:
-        with UnlockInstance(prof2):
-            prof2.normprof = normprof2
-
-    pk2d = parse_pk(cosmo, p_of_k_a)
+    pk2d = cosmo.parse_pk(p_of_k_a)
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     na = len(a_use)
@@ -121,12 +113,15 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         # normalizations
-        norm1 = hmc.get_profile_norm(cosmo, aa, prof)
+        norm1 = prof.get_normalization(cosmo, aa, hmc=hmc) if normprof1 else 1
+        # TODO: CCLv3, remove if
 
         if prof2 == prof:
             norm2 = norm1
         else:
-            norm2 = hmc.get_profile_norm(cosmo, aa, prof2)
+            norm2 = prof2.get_normalization(cosmo, aa,
+                                            hmc=hmc) if normprof2 else 1
+            # TODO: CCLv3, remove if
 
         if get_2h:
             # bias factors
@@ -154,10 +149,10 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
 
         # smooth 1h/2h transition region
         if smooth_transition is None:
-            out[ia] = (pk_1h + pk_2h) * norm1 * norm2
+            out[ia] = (pk_1h + pk_2h) / (norm1 * norm2)
         else:
             alpha = smooth_transition(aa)
-            out[ia] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) * norm1 * norm2
+            out[ia] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) / (norm1*norm2)
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)

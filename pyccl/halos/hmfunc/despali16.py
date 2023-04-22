@@ -1,11 +1,9 @@
-from ...base import warn_api
-from ... import ccllib as lib
-from ...pyutils import check
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncDespali16",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncDespali16",)
+from ... import check, lib, warn_api
+from . import MassFunc
 
 
 class MassFuncDespali16(MassFunc):
@@ -51,7 +49,8 @@ class MassFuncDespali16(MassFunc):
         Whether to use the fit parameters found by running an Ellipsoidal
         Overdensity finder. The default is True.
     """
-    __repr_attrs__ = ("mass_def", "mass_def_strict", "ellipsoidal",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_def", "mass_def_strict", "ellipsoidal",)
     name = 'Despali16'
 
     @warn_api

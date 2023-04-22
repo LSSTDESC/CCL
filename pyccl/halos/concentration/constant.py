@@ -1,9 +1,9 @@
-from ...base import warn_api
-from ..halo_model_base import Concentration
+__all__ = ("ConcentrationConstant",)
+
 import numpy as np
 
-
-__all__ = ("ConcentrationConstant",)
+from ... import warn_api
+from . import Concentration
 
 
 class ConcentrationConstant(Concentration):
@@ -18,7 +18,7 @@ class ConcentrationConstant(Concentration):
         The mass definition for this :math:`c(M)` parametrization is arbitrary
         and is not used for any calculations.
     """
-    __repr_attrs__ = ("mass_def", "c",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "c",)
     name = 'Constant'
 
     @warn_api(pairs=[("mdef", "mass_def")])

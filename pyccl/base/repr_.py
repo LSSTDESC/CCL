@@ -1,4 +1,5 @@
 import numpy as np
+
 from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 from .caching import _to_hashable, hash_
 
@@ -157,7 +158,7 @@ def build_string_Cosmology(self):
 
     Example output ::
 
-        <pyccl.core.Cosmology>
+        <pyccl.cosmology.Cosmology>
             Omega_b = 0.05
             Omega_c = 0.25
             h       = 0.67
@@ -221,7 +222,7 @@ def build_string_Cosmology(self):
             s += f"{newline}HASH_PK = {H}"
         return s
 
-    s = "<pyccl.core.Cosmology>"
+    s = "<pyccl.cosmology.Cosmology>"
     s += printdict(self._params_init_kwargs)
     s += printdict(self._config_init_kwargs)
     s += printextras(self._params_init_kwargs)
@@ -249,7 +250,7 @@ def build_string_Pk2D(self, na=6, nk=6, decimals=2):
             +===============+=============================================+
     """
     if not self.has_psp:
-        return "pyccl.Pk2D(empty=True)"
+        return "pyccl.Pk2D(empty)"
 
     # get what's needed from the Pk2D object
     a, lk, pk = self.get_spline_arrays()

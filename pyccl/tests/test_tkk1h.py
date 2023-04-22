@@ -6,12 +6,12 @@ import pyccl as ccl
 COSMO = ccl.CosmologyVanillaLCDM(transfer_function='bbks',
                                  matter_power_spectrum='linear')
 M200 = ccl.halos.MassDef200m()
-HMF = ccl.halos.MassFuncTinker10(COSMO, mass_def=M200)
-HBF = ccl.halos.HaloBiasTinker10(COSMO, mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(M200),
-                              fourier_analytic=True)
-P2 = ccl.halos.HaloProfileHOD(ccl.halos.ConcentrationDuffy08(M200))
-P3 = ccl.halos.HaloProfilePressureGNFW()
+HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
+HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
+CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+P1 = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
+P2 = ccl.halos.HaloProfileHOD(concentration=CON)
+P3 = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
 P4 = P1
 PKC = ccl.halos.Profile2pt()
 PKCH = ccl.halos.Profile2ptHOD()
@@ -57,7 +57,7 @@ def smoke_assert_tkk1h_real(func):
      (P1, P2, PKC, P3, P4, PKC)])
 def test_tkk1h_smoke(p1, p2, cv12, p3, p4, cv34):
     hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
-                                 mass_def=M200, nlog10M=2)
+                                 mass_def=M200, nM=2)
 
     def f(k, a):
         return ccl.halos.halomod_trispectrum_1h(
@@ -88,11 +88,12 @@ def test_tkk1h_tk3d():
     assert np.allclose(tkk_arr, tkk_arr_2, atol=0, rtol=1e-4)
 
     # Standard sampling
-    tk3d = ccl.halos.halomod_Tk3D_1h(
-        COSMO, hmc,
-        prof=P1, prof2=P2, prof12_2pt=PKC,
-        prof3=P3, prof4=P4, prof34_2pt=PKC,
-        lk_arr=np.log(k_arr), use_log=True)
+    with pytest.warns(ccl.CCLWarning):
+        tk3d = ccl.halos.halomod_Tk3D_1h(
+            COSMO, hmc,
+            prof=P1, prof2=P2, prof12_2pt=PKC,
+            prof3=P3, prof4=P4, prof34_2pt=PKC,
+            lk_arr=np.log(k_arr), use_log=True)
 
     tkk_arr_2 = tk3d(k_arr, a_arr)
     assert np.allclose(tkk_arr, tkk_arr_2, atol=0, rtol=1e-4)
@@ -104,7 +105,7 @@ def test_tkk1h_warns():
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
 
     # Negative profile in logspace
-    Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
+    Pneg = ccl.halos.HaloProfilePressureGNFW(mass_def=M200, P0=-1)
     with pytest.warns(ccl.CCLWarning):
         ccl.halos.halomod_Tk3D_1h(
             COSMO, hmc, P3, prof2=Pneg, prof3=P3, prof4=P3,

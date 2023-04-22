@@ -1,23 +1,66 @@
 """Utility functions to analyze status and error messages passed from CCL, as
-well as wrappers to automatically vectorize functions."""
-from . import ccllib as lib
-from ._types import error_types
-from .parameters import spline_params
-from .errors import CCLError
+well as wrappers to automatically vectorize functions.
+"""
+__all__ = (
+    "CLevelErrors", "ExtrapolationMethods", "IntegrationMethods", "check",
+    "debug_mode", "get_pk_spline_lk", "get_pk_spline_a", "resample_array")
+
+from enum import Enum
+from typing import Iterable
+
 import numpy as np
-from collections.abc import Iterable
+
+from . import CCLError, lib, spline_params
+
 
 NoneArr = np.array([])
 
-integ_types = {'qag_quad': lib.integration_qag_quad,
-               'spline': lib.integration_spline}
 
-extrap_types = {'none': lib.f1d_extrap_0,
-                'constant': lib.f1d_extrap_const,
-                'linx_liny': lib.f1d_extrap_linx_liny,
-                'linx_logy': lib.f1d_extrap_linx_logy,
-                'logx_liny': lib.f1d_extrap_logx_liny,
-                'logx_logy': lib.f1d_extrap_logx_logy}
+class IntegrationMethods(Enum):
+    QAG_QUAD = "qag_quad"
+    SPLINE = "spline"
+
+
+class ExtrapolationMethods(Enum):
+    NONE = "none"
+    CONSTANT = "constant"
+    LINX_LINY = "linx_liny"
+    LINX_LOGY = "linx_logy"
+    LOGX_LINY = "logx_liny"
+    LOGX_LOGY = "logx_logy"
+
+
+integ_types = {
+    'qag_quad': lib.integration_qag_quad,
+    'spline': lib.integration_spline}
+
+extrap_types = {
+    'none': lib.f1d_extrap_0,
+    'constant': lib.f1d_extrap_const,
+    'linx_liny': lib.f1d_extrap_linx_liny,
+    'linx_logy': lib.f1d_extrap_linx_logy,
+    'logx_liny': lib.f1d_extrap_logx_liny,
+    'logx_logy': lib.f1d_extrap_logx_logy}
+
+# This is defined here instead of in `errors.py` because SWIG needs `CCLError`
+# from `.errors`, resulting in a cyclic import.
+CLevelErrors = {
+    lib.CCL_ERROR_CLASS: 'CCL_ERROR_CLASS',
+    lib.CCL_ERROR_INCONSISTENT: 'CCL_ERROR_INCONSISTENT',
+    lib.CCL_ERROR_INTEG: 'CCL_ERROR_INTEG',
+    lib.CCL_ERROR_LINSPACE: 'CCL_ERROR_LINSPACE',
+    lib.CCL_ERROR_MEMORY: 'CCL_ERROR_MEMORY',
+    lib.CCL_ERROR_ROOT: 'CCL_ERROR_ROOT',
+    lib.CCL_ERROR_SPLINE: 'CCL_ERROR_SPLINE',
+    lib.CCL_ERROR_SPLINE_EV: 'CCL_ERROR_SPLINE_EV',
+    lib.CCL_ERROR_COMPUTECHI: 'CCL_ERROR_COMPUTECHI',
+    lib.CCL_ERROR_MF: 'CCL_ERROR_MF',
+    lib.CCL_ERROR_HMF_INTERP: 'CCL_ERROR_HMF_INTERP',
+    lib.CCL_ERROR_PARAMETERS: 'CCL_ERROR_PARAMETERS',
+    lib.CCL_ERROR_NU_INT: 'CCL_ERROR_NU_INT',
+    lib.CCL_ERROR_EMULATOR_BOUND: 'CCL_ERROR_EMULATOR_BOUND',
+    lib.CCL_ERROR_MISSING_CONFIG_FILE: 'CCL_ERROR_MISSING_CONFIG_FILE',
+}
 
 
 def check(status, cosmo=None):
@@ -40,12 +83,12 @@ def check(status, cosmo=None):
         msg = ""
 
     # Check for known error status
-    if status in error_types.keys():
-        raise CCLError("Error %s: %s" % (error_types[status], msg))
+    if status in CLevelErrors.keys():
+        raise CCLError(f"Error {CLevelErrors[status]}: {msg}")
 
     # Check for unknown error
     if status != 0:
-        raise CCLError("Error %d: %s" % (status, msg))
+        raise CCLError(f"Error {status}: {msg}")
 
 
 def debug_mode(debug):
@@ -349,7 +392,7 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     return f
 
 
-def get_pk_spline_nk(cosmo=None):
+def get_pk_spline_nk(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the wavenumber dimension.
 
     Arguments:
@@ -362,7 +405,7 @@ def get_pk_spline_nk(cosmo=None):
     return int(np.ceil(ndecades*spline_params.N_K))
 
 
-def get_pk_spline_na(cosmo=None):
+def get_pk_spline_na(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the scale factor dimension.
 
     Arguments:
@@ -374,7 +417,7 @@ def get_pk_spline_na(cosmo=None):
     return spline_params.A_SPLINE_NA_PK + spline_params.A_SPLINE_NLOG_PK - 1
 
 
-def get_pk_spline_lk(cosmo=None):
+def get_pk_spline_lk(cosmo=None, spline_params=spline_params):
     """Get a log(k)-array with sampling rate defined by ``ccl.spline_params``
     or by the spline parameters of the input ``cosmo``.
 
@@ -382,7 +425,7 @@ def get_pk_spline_lk(cosmo=None):
         cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
             Input cosmology.
     """
-    nk = get_pk_spline_nk(cosmo=cosmo)
+    nk = get_pk_spline_nk(cosmo=cosmo, spline_params=spline_params)
     if cosmo is not None:
         lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, 0)
         check(status, cosmo)
@@ -392,7 +435,7 @@ def get_pk_spline_lk(cosmo=None):
     return lk_arr
 
 
-def get_pk_spline_a(cosmo=None):
+def get_pk_spline_a(cosmo=None, spline_params=spline_params):
     """Get an a-array with sampling rate defined by ``ccl.spline_params``
     or by the spline parameters of the input ``cosmo``.
 
@@ -400,7 +443,7 @@ def get_pk_spline_a(cosmo=None):
         cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
             Input cosmology.
     """
-    na = get_pk_spline_na(cosmo=cosmo)
+    na = get_pk_spline_na(cosmo=cosmo, spline_params=spline_params)
     if cosmo is not None:
         a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, 0)
         check(status, cosmo)
@@ -432,15 +475,11 @@ def resample_array(x_in, y_in, x_out,
     Returns:
         array_like: output array.
     """
-
+    # TODO: point to the enum in CCLv3 docs.
     if extrap_lo not in extrap_types.keys():
-        raise ValueError("'%s' is not a valid extrapolation type. "
-                         "Available options are: %s"
-                         % (extrap_lo, extrap_types.keys()))
+        raise ValueError("Invalid extrapolation type.")
     if extrap_hi not in extrap_types.keys():
-        raise ValueError("'%s' is not a valid extrapolation type. "
-                         "Available options are: %s"
-                         % (extrap_hi, extrap_types.keys()))
+        raise ValueError("Invalid extrapolation type.")
 
     status = 0
     y_out, status = lib.array_1d_resample(x_in, y_in, x_out,
@@ -465,7 +504,7 @@ def _fftlog_transform(rs, frs,
         n_transforms, n_r = frs.shape
 
     if len(rs) != n_r:
-        raise ValueError("rs should have %d elements" % n_r)
+        raise ValueError(f"rs should have {n_r} elements")
 
     status = 0
     result, status = lib.fftlog_transform(n_transforms,
@@ -495,7 +534,7 @@ def _spline_integrate(x, ys, a, b):
         n_integ, n_x = ys.shape
 
     if len(x) != n_x:
-        raise ValueError("x should have %d elements" % n_x)
+        raise ValueError(f"x should have {n_x} elements")
 
     if np.ndim(a) > 0 or np.ndim(b) > 0:
         raise TypeError("Integration limits should be scalar")
@@ -530,7 +569,7 @@ def _check_array_params(f_arg, name=None, arr3=False):
             or (len(f_arg) != (3 if arr3 else 2))
             or (not (isinstance(f_arg[0], Iterable)
                      and isinstance(f_arg[1], Iterable)))):
-            raise ValueError("%s needs to be a tuple of two arrays." % name)
+            raise ValueError(f"{name} must be a tuple of two arrays.")
 
         f1 = np.atleast_1d(np.array(f_arg[0], dtype=float))
         f2 = np.atleast_1d(np.array(f_arg[1], dtype=float))
@@ -540,25 +579,6 @@ def _check_array_params(f_arg, name=None, arr3=False):
         return f1, f2, f3
     else:
         return f1, f2
-
-
-def assert_warns(wtype, f, *args, **kwargs):
-    """Check that a function call `f(*args, **kwargs)` raises a warning of
-    type wtype.
-
-    Returns the output of `f(*args, **kwargs)` unless there was no warning,
-    in which case an AssertionError is raised.
-    """
-    import warnings
-    # Check that f() raises a warning, but not an error.
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        res = f(*args, **kwargs)
-    assert len(w) >= 1, "Expected warning was not raised."
-    assert issubclass(w[0].category, wtype), \
-        "Warning raised was the wrong type (got %s, expected %s)" % (
-            w[0].category, wtype)
-    return res
 
 
 def _get_spline1d_arrays(gsl_spline):

@@ -1,11 +1,10 @@
-from ...base import warn_api
-from ..concentration import Concentration
-from .profile_base import HaloProfileNumberCounts
+__all__ = ("HaloProfileHOD",)
+
 import numpy as np
 from scipy.special import sici, erf
 
-
-__all__ = ("HaloProfileHOD",)
+from ... import warn_api, deprecate_attr
+from . import HaloProfileNumberCounts
 
 
 class HaloProfileHOD(HaloProfileNumberCounts):
@@ -73,21 +72,21 @@ class HaloProfileHOD(HaloProfileNumberCounts):
     Args:
         concentration (:obj:`Concentration`): concentration-mass
             relation to use with this profile.
-        lMmin_0 (float): offset parameter for
+        log10Mmin_0 (float): offset parameter for
             :math:`\\log_{10}M_{\\rm min}`.
-        lMmin_p (float): tilt parameter for
+        log10Mmin_p (float): tilt parameter for
             :math:`\\log_{10}M_{\\rm min}`.
-        siglM_0 (float): offset parameter for
+        siglnM_0 (float): offset parameter for
             :math:`\\sigma_{{\\rm ln}M}`.
-        siglM_p (float): tilt parameter for
+        siglnM_p (float): tilt parameter for
             :math:`\\sigma_{{\\rm ln}M}`.
-        lM0_0 (float): offset parameter for
+        log10M0_0 (float): offset parameter for
             :math:`\\log_{10}M_0`.
-        lM0_p (float): tilt parameter for
+        log10M0_p (float): tilt parameter for
             :math:`\\log_{10}M_0`.
-        lM1_0 (float): offset parameter for
+        log10M1_0 (float): offset parameter for
             :math:`\\log_{10}M_1`.
-        lM1_p (float): tilt parameter for
+        log10M1_p (float): tilt parameter for
             :math:`\\log_{10}M_1`.
         alpha_0 (float): offset parameter for
             :math:`\\alpha`.
@@ -109,32 +108,38 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         ns_independent (bool): drop requirement to only form
             satellites when centrals are present.
     """
-    __repr_attrs__ = (
-        "concentration", "lMmin_0", "lMmin_p", "siglM_0", "siglM_p", "lM0_0",
-        "lM0_p", "lM1_0", "lM1_p", "alpha_0", "alpha_p", "fc_0", "fc_p",
-        "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
-        "ns_independent", "precision_fftlog", "normprof",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
+        "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0", "alpha_p", "fc_0",
+        "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
+        "ns_independent", "mass_def", "concentration", "precision_fftlog",)
+    __getattr__ = deprecate_attr(pairs=[
+        ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
+        ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
+        ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
+        ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")]
+    )(super.__getattribute__)
 
-    @warn_api(pairs=[("concentration", "concentration")])
+    @warn_api(pairs=[("c_M_relation", "concentration"),
+                     ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
+                     ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
+                     ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
+                     ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")])
     def __init__(self, *, concentration,
-                 lMmin_0=12., lMmin_p=0., siglM_0=0.4,
-                 siglM_p=0., lM0_0=7., lM0_p=0.,
-                 lM1_0=13.3, lM1_p=0., alpha_0=1.,
+                 log10Mmin_0=12., log10Mmin_p=0., siglnM_0=0.4,
+                 siglnM_p=0., log10M0_0=7., log10M0_p=0.,
+                 log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False):
-        if not isinstance(concentration, Concentration):
-            raise TypeError("concentration must be of type `Concentration`")
-
-        self.concentration = concentration
-        self.lMmin_0 = lMmin_0
-        self.lMmin_p = lMmin_p
-        self.lM0_0 = lM0_0
-        self.lM0_p = lM0_p
-        self.lM1_0 = lM1_0
-        self.lM1_p = lM1_p
-        self.siglM_0 = siglM_0
-        self.siglM_p = siglM_p
+                 a_pivot=1., ns_independent=False, mass_def=None):
+        self.log10Mmin_0 = log10Mmin_0
+        self.log10Mmin_p = log10Mmin_p
+        self.log10M0_0 = log10M0_0
+        self.log10M0_p = log10M0_p
+        self.log10M1_0 = log10M1_0
+        self.log10M1_p = log10M1_p
+        self.siglnM_0 = siglnM_0
+        self.siglnM_p = siglnM_p
         self.alpha_0 = alpha_0
         self.alpha_p = alpha_p
         self.fc_0 = fc_0
@@ -145,13 +150,16 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         self.bmax_p = bmax_p
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
-        super().__init__()
+        super().__init__(mass_def=mass_def, concentration=concentration)
 
-    @warn_api
-    def update_parameters(self, *, lMmin_0=None, lMmin_p=None,
-                          siglM_0=None, siglM_p=None,
-                          lM0_0=None, lM0_p=None,
-                          lM1_0=None, lM1_p=None,
+    @warn_api(pairs=[("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
+                     ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
+                     ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
+                     ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")])
+    def update_parameters(self, *, log10Mmin_0=None, log10Mmin_p=None,
+                          siglnM_0=None, siglnM_p=None,
+                          log10M0_0=None, log10M0_p=None,
+                          log10M1_0=None, log10M1_p=None,
                           alpha_0=None, alpha_p=None,
                           fc_0=None, fc_p=None,
                           bg_0=None, bg_p=None,
@@ -162,21 +170,21 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         this profile. Any parameter set to `None` won't be updated.
 
         Args:
-            lMmin_0 (float): offset parameter for
+            log10Mmin_0 (float): offset parameter for
                 :math:`\\log_{10}M_{\\rm min}`.
-            lMmin_p (float): tilt parameter for
+            log10Mmin_p (float): tilt parameter for
                 :math:`\\log_{10}M_{\\rm min}`.
-            siglM_0 (float): offset parameter for
+            siglnM_0 (float): offset parameter for
                 :math:`\\sigma_{{\\rm ln}M}`.
-            siglM_p (float): tilt parameter for
+            siglnM_p (float): tilt parameter for
                 :math:`\\sigma_{{\\rm ln}M}`.
-            lM0_0 (float): offset parameter for
+            log10M0_0 (float): offset parameter for
                 :math:`\\log_{10}M_0`.
-            lM0_p (float): tilt parameter for
+            log10M0_p (float): tilt parameter for
                 :math:`\\log_{10}M_0`.
-            lM1_0 (float): offset parameter for
+            log10M1_0 (float): offset parameter for
                 :math:`\\log_{10}M_1`.
-            lM1_p (float): tilt parameter for
+            log10M1_p (float): tilt parameter for
                 :math:`\\log_{10}M_1`.
             alpha_0 (float): offset parameter for
                 :math:`\\alpha`.
@@ -198,22 +206,22 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             ns_independent (bool): drop requirement to only form
                 satellites when centrals are present
         """
-        if lMmin_0 is not None:
-            self.lMmin_0 = lMmin_0
-        if lMmin_p is not None:
-            self.lMmin_p = lMmin_p
-        if lM0_0 is not None:
-            self.lM0_0 = lM0_0
-        if lM0_p is not None:
-            self.lM0_p = lM0_p
-        if lM1_0 is not None:
-            self.lM1_0 = lM1_0
-        if lM1_p is not None:
-            self.lM1_p = lM1_p
-        if siglM_0 is not None:
-            self.siglM_0 = siglM_0
-        if siglM_p is not None:
-            self.siglM_p = siglM_p
+        if log10Mmin_0 is not None:
+            self.log10Mmin_0 = log10Mmin_0
+        if log10Mmin_p is not None:
+            self.log10Mmin_p = log10Mmin_p
+        if log10M0_0 is not None:
+            self.log10M0_0 = log10M0_0
+        if log10M0_p is not None:
+            self.log10M0_p = log10M0_p
+        if log10M1_0 is not None:
+            self.log10M1_0 = log10M1_0
+        if log10M1_p is not None:
+            self.log10M1_p = log10M1_p
+        if siglnM_0 is not None:
+            self.siglnM_0 = siglnM_0
+        if siglnM_p is not None:
+            self.siglnM_p = siglnM_p
         if alpha_0 is not None:
             self.alpha_0 = alpha_0
         if alpha_p is not None:
@@ -235,15 +243,15 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         if ns_independent is not None:
             self.ns_independent = ns_independent
 
-    def _usat_real(self, cosmo, r, M, a, mass_def):
+    def _usat_real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
         # Comoving virial radius
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration.get_concentration(cosmo, M_use, a)
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
@@ -261,15 +269,15 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _usat_fourier(self, cosmo, k, M, a, mass_def):
+    def _usat_fourier(self, cosmo, k, M, a):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
         # Comoving virial radius
         bg = self.bg_0 + self.bg_p * (a - self.a_pivot)
         bmax = self.bmax_0 + self.bmax_p * (a - self.a_pivot)
-        R_M = mass_def.get_radius(cosmo, M_use, a) / a
-        c_M = self.concentration.get_concentration(cosmo, M_use, a)
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
         R_s = R_M / c_M
         c_M *= bmax / bg
 
@@ -288,7 +296,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
@@ -296,7 +304,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         Ns = self._Ns(M_use, a)
         fc = self._fc(a)
         # NFW profile
-        ur = self._usat_real(cosmo, r_use, M_use, a, mass_def)
+        ur = self._usat_real(cosmo, r_use, M_use, a)
 
         if self.ns_independent:
             prof = Nc[:, None] * fc + Ns[:, None] * ur
@@ -309,7 +317,21 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier(self, cosmo, k, M, a, mass_def):
+    def get_normalization(self, cosmo, a, hmc):
+        """Returns the normalization of this profile, which is the
+        mean galaxy number density.
+        """
+        def integ(M):
+            Nc = self._Nc(M, a)
+            Ns = self._Ns(M, a)
+            fc = self._fc(a)
+            if self.ns_independent:
+                return Nc*fc + Ns
+            else:
+                return Nc*(fc + Ns)
+        return hmc.integrate_over_massfunc(integ, cosmo, a)
+
+    def _fourier(self, cosmo, k, M, a):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
@@ -317,7 +339,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         Ns = self._Ns(M_use, a)
         fc = self._fc(a)
         # NFW profile
-        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
+        uk = self._usat_fourier(cosmo, k_use, M_use, a)
 
         if self.ns_independent:
             prof = Nc[:, None] * fc + Ns[:, None] * uk
@@ -330,7 +352,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier_variance(self, cosmo, k, M, a, mass_def):
+    def _fourier_variance(self, cosmo, k, M, a):
         # Fourier-space variance of the HOD profile
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
@@ -339,7 +361,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         Ns = self._Ns(M_use, a)
         fc = self._fc(a)
         # NFW profile
-        uk = self._usat_fourier(cosmo, k_use, M_use, a, mass_def)
+        uk = self._usat_fourier(cosmo, k_use, M_use, a)
 
         prof = Ns[:, None] * uk
         if self.ns_independent:
@@ -359,13 +381,13 @@ class HaloProfileHOD(HaloProfileNumberCounts):
 
     def _Nc(self, M, a):
         # Number of centrals
-        Mmin = 10.**(self.lMmin_0 + self.lMmin_p * (a - self.a_pivot))
-        siglM = self.siglM_0 + self.siglM_p * (a - self.a_pivot)
-        return 0.5 * (1 + erf(np.log(M/Mmin)/siglM))
+        Mmin = 10.**(self.log10Mmin_0 + self.log10Mmin_p * (a - self.a_pivot))
+        siglnM = self.siglnM_0 + self.siglnM_p * (a - self.a_pivot)
+        return 0.5 * (1 + erf(np.log(M/Mmin)/siglnM))
 
     def _Ns(self, M, a):
         # Number of satellites
-        M0 = 10.**(self.lM0_0 + self.lM0_p * (a - self.a_pivot))
-        M1 = 10.**(self.lM1_0 + self.lM1_p * (a - self.a_pivot))
+        M0 = 10.**(self.log10M0_0 + self.log10M0_p * (a - self.a_pivot))
+        M1 = 10.**(self.log10M1_0 + self.log10M1_p * (a - self.a_pivot))
         alpha = self.alpha_0 + self.alpha_p * (a - self.a_pivot)
         return np.heaviside(M-M0, 1) * (np.fabs(M-M0) / M1)**alpha

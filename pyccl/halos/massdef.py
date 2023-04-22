@@ -1,13 +1,17 @@
-from .. import ccllib as lib
-from ..core import check
-from ..background import species_types
-from ..base import CCLAutoRepr, CCLNamedClass, warn_api, deprecate_attr
-import numpy as np
-
-
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
            "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
-           "MassDefFof",)
+           "MassDefFof", "mass_translator",)
+
+import warnings
+import weakref
+from functools import cached_property
+from typing import Union, Callable
+
+import numpy as np
+
+from .. import CCLDeprecationWarning, CCLNamedClass, CCLObject, lib, check
+from .. import warn_api, deprecate_attr
+from . import Concentration, HaloBias, MassFunc
 
 
 def mass2radius_lagrangian(cosmo, M):
@@ -88,7 +92,7 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     return c_new
 
 
-class MassDef(CCLAutoRepr, CCLNamedClass):
+class MassDef(CCLNamedClass, CCLObject):
     r"""Halo mass definition.
 
     Halo masses are defined in terms of an overdensity parameter :math:`\Delta`
@@ -126,34 +130,34 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         Short name of the mass definition, e.g. ``'200m'`` for
         ``(Delta, rho_type) == (200, 'matter')``.
     """
-    __repr_attrs__ = ("name",)
+    __eq_attrs__ = ("name",)
     __getattr__ = deprecate_attr(pairs=[('c_m_relation', 'concentration')]
                                  )(super.__getattribute__)
 
-    @warn_api(pairs=[("c_m_relation", "concentration")])
-    def __init__(self, Delta, rho_type, *, concentration=None):
+    def __init__(self, Delta, rho_type, *, c_m_relation=None):
         # Check it makes sense
-        if isinstance(Delta, str) and Delta.isdigit():
-            Delta = int(Delta)
-        if isinstance(Delta, str) and Delta not in ["fof", "vir"]:
-            raise ValueError(f"Unknown Delta type {Delta}.")
+        if isinstance(Delta, str):
+            if Delta.isdigit():
+                Delta = int(Delta)
+            elif Delta not in ["fof", "vir"]:
+                raise ValueError(f"Unknown Delta type {Delta}.")
         if isinstance(Delta, (int, float)) and Delta < 0:
             raise ValueError("Delta must be a positive number.")
         if rho_type not in ['matter', 'critical']:
-            raise ValueError("rho_type must be either ['matter', 'critical].'")
+            raise ValueError("rho_type must be {'matter', 'critical'}.")
 
         self.Delta = Delta
         self.rho_type = rho_type
-        self._species = species_types[rho_type]
-        # c(M) relation
-        if concentration is None:
-            self.concentration = None
-        else:
-            from .concentration import Concentration
-            self.concentration = Concentration.initialize_from_input(
-                concentration, mass_def=self)
 
-    @property
+        # TODO: Remove c_m_relation for CCLv3.
+        if c_m_relation is not None:
+            warnings.warn("c_m_relation is deprecated from MassDef and will "
+                          "be removed in CCLv3.0.0.", CCLDeprecationWarning)
+            c_m_relation = Concentration.create_instance(
+                c_m_relation, mass_def=weakref.proxy(self))
+        self.concentration = c_m_relation
+
+    @cached_property
     def name(self):
         r"""Name of the mass definition.
 
@@ -165,11 +169,8 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             return f"{self.Delta}{self.rho_type[0]}"
         return f"{self.Delta}"
 
-    def __eq__(self, other):
-        # TODO: Remove after #1033 is merged.
-        if type(self) != type(other):
-            return False
-        return self.name == other.name
+    def __repr__(self):
+        return f"MassDef(Delta={self.Delta}, rho_type={self.rho_type})"
 
     def get_Delta(self, cosmo, a):
         r"""Compute the overdensity parameter for this mass definition.
@@ -193,8 +194,8 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             overdensity parameter.
         """
         if self.Delta == 'fof':
-            raise ValueError("FoF masses have no associated overdensity "
-                             "and can't be translated into other masses.")
+            raise ValueError("FoF masses don't have an associated overdensity."
+                             "Nor can they be translated into other masses")
         if self.Delta == 'vir':
             status = 0
             D, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
@@ -307,6 +308,10 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         AttributeError
             If the mass definition has no associated concentration.
         """
+        # TODO: Remove for CCLv3.
+        warnings.warn("translate_mass is a deprecated method of MassDef and "
+                      "will be removed in CCLv3.0.0. Use `pyccl.halos.mass_"
+                      "translator`.", CCLDeprecationWarning)
         if self == mass_def_other:
             return M
         if self.concentration is None:
@@ -354,69 +359,179 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             # Bogus input - can't parse it.
             raise ValueError("Could not parse mass definition string.")
         Delta, rho_type = name[:-1], parser[name[-1]]
-        return lambda cm=None: cls(Delta, rho_type, concentration=cm)  # noqa
+        # return cls(Delta, rho_type)  # TODO: Uncomment for CCLv3.
+        return lambda: cls(Delta, rho_type)  # noqa  # TODO: Remove for CCLv3.
+
+    # TODO: Uncomment for CCLv3 and remove CCLNamedClass inheritance.
+    # create_instance = from_name
+
+    @classmethod
+    def from_specs(cls, mass_def=None, *,
+                   mass_function=None, halo_bias=None, concentration=None):
+        """Instantiate mass definition and halo model ingredients.
+
+        Unspecified halo model ingredients are ignored. ``mass_def`` is always
+        instantiated.
+
+        Parameters
+        ----------
+        mass_def : MassDef, str or None, optional
+            Mass definition. If a string, instantiate from its name. If None,
+            obtain the one from the first specified halo model ingredient.
+            The default is None.
+        mass_function, halo_bias, concentration : \
+            (MassFunc, HaloBias, Concentration), str or None, optional
+            Halo model ingredients. Strings are auto-instantiated using
+            ``mass_def``. None values are ignored. The defaults are None.
+
+        Returns
+        -------
+        mass_def : MassDef
+
+        mass_function : MassFunction, if specified
+
+        halo_bias : HaloBias, if specified
+
+        concentration : Concentration, if specified
+
+        Raises
+        ------
+        ValueError
+            If mass definition cannot be retrieved from halo model ingredients.
+        ValueError
+            If mass definitions are inconsistent.
+        """
+        values = mass_function, halo_bias, concentration
+        idx = [value is not None for value in values]
+
+        # Filter only the specified ones.
+        values = np.array(values)[idx]
+        names = np.array(["mass_function", "halo_bias", "concentration"])[idx]
+        Types = np.array([MassFunc, HaloBias, Concentration])[idx]
+
+        # Sanity check.
+        if mass_def is None:
+            for name, value in zip(names, values):
+                if isinstance(value, str):
+                    raise ValueError(f"Need mass_def if {name} is str.")
+
+        # Instantiate mass_def.
+        if mass_def is not None:
+            mass_def = cls.create_instance(mass_def)  # instantiate directly
+        else:
+            mass_def = values[0].mass_def  # use the one in HMIngredients
+
+        # Instantiate halo model ingredients.
+        out = []
+        for name, value, Type in zip(names, values, Types):
+            instance = Type.create_instance(value, mass_def=mass_def)
+            out.append(instance)
+
+        # Check mass definition consistency.
+        if out and set([x.mass_def for x in out]) != set([mass_def]):
+            raise ValueError("Inconsistent mass definitions.")
+
+        return mass_def, *out
 
 
-@warn_api(pairs=[('c_m', 'concentration')])
-def MassDef200m(concentration='Duffy08'):
+# TODO: Remove these definitions and uncomment the new ones for CCLv3.
+# These will all throw warnings now.
+factory_warn = lambda: warnings.warn(  # noqa
+    "In CCLv3.0.0 MassDef factories will become variables.",
+    CCLDeprecationWarning)
+
+
+def MassDef200m(c_m='Duffy08'):
     r""":math:`\Delta_{200{\rm m}}` mass definition.
 
     Arguments
     ---------
-    concentration : str
+    c_m : str
         Name of the concentration-mass relation.
         The default is ``'Duffy08'``.
     """
-    return MassDef(200, 'matter', concentration=concentration)
+    factory_warn()
+    return MassDef(200, 'matter', c_m_relation=c_m)
 
 
-@warn_api(pairs=[('c_m', 'concentration')])
-def MassDef200c(concentration='Duffy08'):
+def MassDef200c(c_m='Duffy08'):
     r""":math:`\Delta_{200{\rm c}}` mass definition.
 
     Arguments
     ---------
-    concentration : str
+    c_m : str
         Name of the concentration-mass relation.
         The default is ``'Duffy08'``.
     """
-    return MassDef(200, 'critical', concentration=concentration)
+    factory_warn()
+    return MassDef(200, 'critical', c_m_relation=c_m)
 
 
-@warn_api(pairs=[('c_m', 'concentration')])
-def MassDef500c(concentration='Ishiyama21'):
+def MassDef500c(c_m='Ishiyama21'):
     r""":math:`\Delta_{500{\rm c}}` mass definition.
 
     Arguments
     ---------
-    concentration : str
+    c_m : str
         Name of the concentration-mass relation.
         The default is ``'Ishiyama21'``.
     """
-    return MassDef(500, 'critical', concentration=concentration)
+    factory_warn()
+    return MassDef(500, 'critical', c_m_relation=c_m)
 
 
-@warn_api(pairs=[('c_m', 'concentration')])
-def MassDefVir(concentration='Klypin11'):
+def MassDefVir(c_m='Klypin11'):
     r""":math:`\Delta_{\rm vir}` mass definition.
 
     Arguments
     ---------
-    concentration : str
+    c_m : str
         Name of the concentration-mass relation.
         The default is ``'Klypin11'``.
     """
-    return MassDef('vir', 'critical', concentration=concentration)
+    factory_warn()
+    return MassDef('vir', 'critical', c_m_relation=c_m)
 
 
-@warn_api(pairs=[('c_m', 'concentration')])
-def MassDefFof(concentration=None):
-    r""":math:`\Delta_{\rm FoF}` mass definition.
+def MassDefFof():
+    r""":math:`\Delta_{\rm FoF}` mass definition."""
+    return MassDef("fof", "matter")
 
-    Arguments
-    ---------
-    concentration : str
-        This mass definition has no associated concentration.
-        The default is ``None``.
-    """
-    return MassDef('fof', 'matter', concentration=concentration)
+
+# MassDef200m = MassDef(200, "matter")
+# MassDef200c = MassDef(200, "critical")
+# MassDef500c = MassDef(500, "critical")
+# MassDefVir = MassDef("vir", "critical")
+# MassDefFof = MassDef("fof", "matter")
+
+
+def mass_translator(*,
+                    mass_in: Union[str, MassDef],
+                    mass_out: Union[str, MassDef],
+                    concentration: Union[str, Concentration]) -> Callable:
+    """Translate between mass definitions, assuming an NFW profile."""
+
+    mass_in = MassDef.create_instance(mass_in)
+    mass_out = MassDef.create_instance(mass_out)
+    concentration = Concentration.create_instance(concentration,
+                                                  mass_def=mass_in)
+    if concentration.mass_def != mass_in:
+        raise ValueError("mass_def of concentration doesn't match mass_in")
+
+    def translate(cosmo, M, a):
+        if mass_in == mass_out:
+            return M
+
+        c_in = concentration(cosmo, M, a)
+        Om_in = cosmo.omega_x(a, mass_in.rho_type)
+        D_in = mass_in.get_Delta(cosmo, a) * Om_in
+        R_in = mass_in.get_radius(cosmo, M, a)
+
+        Om_out = cosmo.omega_x(a, mass_out.rho_type)
+        D_out = mass_out.get_Delta(cosmo, a) * Om_out
+        c_out = convert_concentration(
+            cosmo, c_old=c_in, Delta_old=D_in, Delta_new=D_out)
+        R_out = R_in * c_out/c_in
+        return mass_out.get_mass(cosmo, R_out, a)
+
+    return translate

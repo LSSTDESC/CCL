@@ -1,10 +1,11 @@
-from ..errors import CCLDeprecationWarning
-from inspect import signature, Parameter
+__all__ = ("deprecated", "warn_api", "mass_def_api", "deprecate_attr",)
+
 import functools
 import warnings
+from inspect import Parameter, signature
 
-
-__all__ = ("deprecated", "warn_api", "deprecate_attr",)
+from .. import CCLDeprecationWarning
+from . import unlock_instance
 
 
 def deprecated(new_function=None):
@@ -23,6 +24,27 @@ def deprecated(new_function=None):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def mass_def_api(func):
+    """Preserve ``mass_def`` as a final argument of the decorated function."""
+    # TODO: CCLv3 - remove `mass_def=None` default from some HaloProfiles.
+    @functools.wraps(func)
+    @unlock_instance
+    def wrapper(self, *args, mass_def=None, mdef_other=None, **kwargs):
+        if type(args[-1]).__name__ == "MassDef":
+            *args, mass_def = args
+
+        mass_def = mass_def or mdef_other
+        if mass_def is not None:
+            warnings.warn(
+                "mass_def is deprecated as an argument of {func.__name__} "
+                "and will be removed in CCLv3. Pass it to the constructor.",
+                CCLDeprecationWarning)
+            self.mass_def = mass_def
+
+        return func(self, *args, **kwargs)
+    return wrapper
 
 
 def warn_api(func=None, *, pairs=[], reorder=[]):
@@ -119,9 +141,9 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
         if warn_names:
             s = plural(warn_names)
             warnings.warn(
-                f"Use of argument{s} {list(warn_names)} is deprecated "
+                f"Use of argument{s} {', '.join(warn_names)} is deprecated "
                 f"in {name}. Pass the new name{s} of the argument{s} "
-                f"{[rename[k] for k in warn_names]}, respectively.",
+                f"{', '.join([rename[k] for k in warn_names])}, respectively.",
                 CCLDeprecationWarning)
             for param in warn_names:
                 kwargs[rename[param]] = kwargs.pop(param)
@@ -141,16 +163,23 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
             kwargs.update(extras)
             s = plural(extras)
             warnings.warn(
-                f"Use of argument{s} {list(extras)} as positional is "
+                f"Use of argument{s} {', '.join(extras)} as positional is "
                 f"deprecated in {func.__qualname__}.", CCLDeprecationWarning)
 
         # API compatibility for `normprof` as a required argument.
-        if any(["normprof" in par for par in kwargs.items()]):
+        if any([par.startswith("normprof") and kwargs.get(par) is not None
+                for par in kwargs]):
             warnings.warn(
-                "Argument `normprof` has been become a profile attribute and "
-                "specifying it is deprecated. To change the default value use "
-                "`with UnlockInstance(...): prof.normprof = [True|False]`.",
+                "Argument `normprof` will be deprecated in CCL v3. All "
+                "profiles will carry their own normalization.",
                 CCLDeprecationWarning)
+
+        # API compatibility for deprecated HMCalculator argument k_min.
+        if func.__qualname__ == "HMCalculator.__init__" and "k_min" in kwargs:
+            warnings.warn(
+                "Argument `k_min` has been deprecated in `HMCalculator. "
+                "This is now specified in each profile's `_normalization()` "
+                "method.", CCLDeprecationWarning)
 
         # API compatibility for non-None default `MassDef` in `halos`.
         if (params.get("mass_def") is not None

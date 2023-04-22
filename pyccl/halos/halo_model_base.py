@@ -1,14 +1,13 @@
-from .. import ccllib as lib
-from ..core import check
-from ..parameters import physical_constants as const
-from ..base import (CCLAutoRepr, CCLNamedClass,
-                    warn_api, deprecated, deprecate_attr)
-import numpy as np
-import functools
-from abc import abstractmethod, abstractproperty
-
-
 __all__ = ("HMIngredients",)
+
+import functools
+from abc import abstractmethod
+
+import numpy as np
+
+from .. import CCLAutoRepr, CCLNamedClass, lib, check
+from .. import deprecate_attr, deprecated, warn_api, mass_def_api
+from .. import physical_constants as const
 
 
 class HMIngredients(CCLAutoRepr, CCLNamedClass):
@@ -34,9 +33,10 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
     Attributes
     ----------
     mass_def
+
     mass_def_strict
     """
-    __repr_attrs__ = ("mass_def", "mass_def_strict",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
                                  )(super.__getattribute__)
 
@@ -44,13 +44,14 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
     def __init__(self, *, mass_def, mass_def_strict=True):
         # Check mass definition consistency.
         from .massdef import MassDef
-        mass_def = MassDef.initialize_from_input(mass_def)
+        mass_def = MassDef.create_instance(mass_def)
         self.mass_def_strict = mass_def_strict
         self._check_mass_def(mass_def)
         self.mass_def = mass_def
         self._setup()
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def _mass_def_strict_always(self) -> bool:
         """Property that dictates whether ``mass_def_strict`` can be set
         as False on initialization.
@@ -165,7 +166,6 @@ class MassFunc(HMIngredients):
     """
     _mass_def_strict_always = False
 
-    @abstractmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         r"""Compute :math:`f(\sigma_M)`.
 
@@ -221,7 +221,10 @@ class MassFunc(HMIngredients):
             return mf[0]
         return mf
 
-    get_mass_function = __call__
+    @deprecated(new_function=__call__)
+    @mass_def_api
+    def get_mass_function(self, cosmo, M, a):
+        return self(cosmo, M, a)
 
 
 class HaloBias(HMIngredients):
@@ -251,7 +254,6 @@ class HaloBias(HMIngredients):
     """
     _mass_def_strict_always = False
 
-    @abstractmethod
     def _get_bsigma(self, cosmo, sigM, a):
         r"""Compute :math:`b(\sigma_M)`.
 
@@ -297,7 +299,10 @@ class HaloBias(HMIngredients):
             return b[0]
         return b
 
-    get_halo_bias = __call__
+    @deprecated(new_function=__call__)
+    @mass_def_api
+    def get_halo_bias(self, cosmo, M, a):
+        return self(cosmo, M, a)
 
 
 class Concentration(HMIngredients):
@@ -337,7 +342,6 @@ class Concentration(HMIngredients):
     def __init__(self, *, mass_def):
         super().__init__(mass_def=mass_def, mass_def_strict=True)
 
-    @abstractmethod
     def _concentration(self, cosmo, M, a):
         r"""Compute :math:`c(M)`.
 
@@ -382,7 +386,10 @@ class Concentration(HMIngredients):
             return c[0]
         return c
 
-    get_concentration = __call__
+    @deprecated(new_function=__call__)
+    @mass_def_api
+    def get_concentration(self, cosmo, M, a):
+        return self(cosmo, M, a)
 
 
 @functools.wraps(MassFunc.from_name)

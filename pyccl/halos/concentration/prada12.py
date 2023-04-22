@@ -1,9 +1,9 @@
-from ...base import warn_api
-from ..halo_model_base import Concentration
+__all__ = ("ConcentrationPrada12",)
+
 import numpy as np
 
-
-__all__ = ("ConcentrationPrada12",)
+from ... import warn_api
+from . import Concentration
 
 
 class ConcentrationPrada12(Concentration):

@@ -1,8 +1,8 @@
-from ..base import CCLAutoRepr, CCLNamedClass
+__all__ = ("Baryons",)
+
 from abc import abstractmethod
 
-
-__all__ = ("Baryons",)
+from .. import CCLAutoRepr, CCLNamedClass
 
 
 class Baryons(CCLAutoRepr, CCLNamedClass):
@@ -24,6 +24,9 @@ class Baryons(CCLAutoRepr, CCLNamedClass):
             func.__doc__ = Baryons.include_baryonic_effects.__doc__
 
     @abstractmethod
+    def _include_baryonic_effects(self, cosmo, pk):
+        ...
+
     def include_baryonic_effects(self, cosmo, pk):
         """Apply baryonic effects to a given power spectrum.
 
@@ -39,3 +42,6 @@ class Baryons(CCLAutoRepr, CCLNamedClass):
         pk_bar : :obj:`~pyccl.pk2d.Pk2D` object
             Power spectrum that includes baryonic effects.
         """
+        return self._include_baryonic_effects(cosmo, pk)
+
+    _include_baryonic_effects.__doc__ = include_baryonic_effects.__doc__

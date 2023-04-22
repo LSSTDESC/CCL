@@ -1,9 +1,9 @@
-from ...base import warn_api
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncBocquet16",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncBocquet16",)
+from ... import warn_api
+from . import MassFunc
 
 
 class MassFuncBocquet16(MassFunc):
@@ -97,7 +97,7 @@ class MassFuncBocquet16(MassFunc):
         If False, use the parametrization found using DM-only simulations.
         The default is True.
     """
-    __repr_attrs__ = ("mass_def", "mass_def_strict", "hydro",)
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict", "hydro",)
     _mass_def_strict_always = True
     name = 'Bocquet16'
 

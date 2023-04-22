@@ -1,12 +1,11 @@
-from ...base import warn_api
-from .profile_base import HaloProfileCIB
-from .nfw import HaloProfileNFW
+__all__ = ("HaloProfileCIBShang12",)
+
 import numpy as np
 from scipy.integrate import simpson
 from scipy.special import lambertw
 
-
-__all__ = ("HaloProfileCIBShang12",)
+from ... import warn_api, deprecate_attr
+from . import HaloProfileNFW, HaloProfileCIB
 
 
 class HaloProfileCIBShang12(HaloProfileCIB):
@@ -74,35 +73,39 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         beta (float): dust spectral index.
         gamma (float): high frequency slope.
         s_z (float): luminosity evolution slope.
-        log10meff (float): log10 of the most efficient mass.
-        sigLM (float): logarithmic scatter in mass.
+        log10Meff (float): log10 of the most efficient mass.
+        siglog10M (float): logarithmic scatter in mass.
         Mmin (float): minimum subhalo mass.
         L0 (float): luminosity scale (in
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
     """
-    __repr_attrs__ = (
-        "concentration", "nu", "alpha", "T0", "beta", "gamma", "s_z",
-        "l10meff", "sigLM", "Mmin", "L0", "precision_fftlog", "normprof")
-    _one_over_4pi = 0.07957747154
+    __repr_attrs__ = __eq_attrs__ = (
+        "nu", "alpha", "T0", "beta", "gamma", "s_z", "log10Meff", "siglog10M",
+        "Mmin", "L0", "mass_def", "concentration", "precision_fftlog",)
+    __getattr__ = deprecate_attr(pairs=[('l10meff', 'log10Meff'),
+                                        ('sigLM', 'siglog10M')]
+                                 )(super.__getattribute__)
 
-    @warn_api(pairs=[("concentration", "concentration")])
+    @warn_api(pairs=[("c_M_relation", "concentration"),
+                     ("log10meff", "log10Meff"),
+                     ("sigLM", "siglog10M")])
     def __init__(self, *, concentration, nu_GHz, alpha=0.36, T0=24.4,
-                 beta=1.75, gamma=1.7, s_z=3.6, log10meff=12.6, sigLM=0.707,
-                 Mmin=1E10, L0=6.4E-8):
-
+                 beta=1.75, gamma=1.7, s_z=3.6, log10Meff=12.6,
+                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8, mass_def=None):
+        self._one_over_4pi = 1/(4*np.pi)
         self.nu = nu_GHz
         self.alpha = alpha
         self.T0 = T0
         self.beta = beta
         self.gamma = gamma
         self.s_z = s_z
-        self.l10meff = log10meff
-        self.sigLM = sigLM
+        self.log10Meff = log10Meff
+        self.siglog10M = siglog10M
         self.Mmin = Mmin
         self.L0 = L0
-        self.concentration = concentration
-        self.pNFW = HaloProfileNFW(concentration=concentration)
-        super().__init__()
+        kwargs = {"concentration": concentration, "mass_def": mass_def}
+        self.pNFW = HaloProfileNFW(**kwargs)
+        super().__init__(**kwargs)
 
     def dNsub_dlnM_TinkerWetzel10(self, Msub, Mparent):
         """Subhalo mass function of Tinker & Wetzel (2010ApJ...719...88T)
@@ -116,9 +119,11 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         """
         return 0.30*(Msub/Mparent)**(-0.7)*np.exp(-9.9*(Msub/Mparent)**2.5)
 
+    @warn_api(pairs=[("log10meff", "log10Meff"),
+                     ("sigLM", "siglog10M")])
     def update_parameters(self, nu_GHz=None,
                           alpha=None, T0=None, beta=None, gamma=None,
-                          s_z=None, log10meff=None, sigLM=None,
+                          s_z=None, log10Meff=None, siglog10M=None,
                           Mmin=None, L0=None):
         """ Update any of the parameters associated with
         this profile. Any parameter set to `None` won't be updated.
@@ -130,8 +135,8 @@ class HaloProfileCIBShang12(HaloProfileCIB):
             beta (float): dust spectral index.
             gamma (float): high frequency slope.
             s_z (float): luminosity evolution slope.
-            log10meff (float): log10 of the most efficient mass.
-            sigLM (float): logarithmic scatter in mass.
+            log10Meff (float): log10 of the most efficient mass.
+            siglog10M (float): logarithmic scatter in mass.
             Mmin (float): minimum subhalo mass.
             L0 (float): luminosity scale (in
                 :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
@@ -148,10 +153,10 @@ class HaloProfileCIBShang12(HaloProfileCIB):
             self.gamma = gamma
         if s_z is not None:
             self.s_z = s_z
-        if log10meff is not None:
-            self.l10meff = log10meff
-        if sigLM is not None:
-            self.sigLM = sigLM
+        if log10Meff is not None:
+            self.log10Meff = log10Meff
+        if siglog10M is not None:
+            self.siglog10M = siglog10M
         if Mmin is not None:
             self.Mmin = Mmin
         if L0 is not None:
@@ -183,9 +188,10 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         # Redshift evolution
         phi_z = a**(-self.s_z)
         # Mass dependence
-        # M/sqrt(2*pi*sigLM^2)
-        sig_pref = 10**l10M/(2.50662827463*self.sigLM)
-        sigma_m = sig_pref * np.exp(-0.5*((l10M - self.l10meff)/self.sigLM)**2)
+        # M/sqrt(2*pi*siglog10M^2)
+        sig_pref = 10**l10M/(2.50662827463*self.siglog10M)
+        sigma_m = sig_pref * np.exp(-0.5*((l10M - self.log10Meff)
+                                          / self.siglog10M)**2)
         return self.L0*phi_z*sigma_m
 
     def _Lumcen(self, M, a):
@@ -211,7 +217,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         res[-len(Lumsat):] = Lumsat
         return res
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         M_use = np.atleast_1d(M)
         r_use = np.atleast_1d(r)
 
@@ -219,8 +225,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         spec_nu = self._spectrum(self.nu/a, a)
 
         Ls = self._Lumsat(M_use, a)
-        ur = self.pNFW._real(cosmo, r_use, M_use,
-                             a, mass_def)/M_use[:, None]
+        ur = self.pNFW._real(cosmo, r_use, M_use, a)/M_use[:, None]
 
         prof = Ls[:, None]*ur*spec_nu*self._one_over_4pi
 
@@ -230,7 +235,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier(self, cosmo, k, M, a, mass_def):
+    def _fourier(self, cosmo, k, M, a):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
@@ -239,8 +244,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
 
         Lc = self._Lumcen(M_use, a)
         Ls = self._Lumsat(M_use, a)
-        uk = self.pNFW._fourier(cosmo, k_use, M_use,
-                                a, mass_def)/M_use[:, None]
+        uk = self.pNFW._fourier(cosmo, k_use, M_use, a)/M_use[:, None]
 
         prof = (Lc[:, None]+Ls[:, None]*uk)*spec_nu*self._one_over_4pi
 
@@ -250,7 +254,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier_variance(self, cosmo, k, M, a, mass_def, nu_other=None):
+    def _fourier_variance(self, cosmo, k, M, a, nu_other=None):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
@@ -262,8 +266,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
 
         Lc = self._Lumcen(M_use, a)
         Ls = self._Lumsat(M_use, a)
-        uk = self.pNFW._fourier(cosmo, k_use, M_use,
-                                a, mass_def)/M_use[:, None]
+        uk = self.pNFW._fourier(cosmo, k_use, M_use, a)/M_use[:, None]
 
         prof = Ls[:, None]*uk
         prof = 2*Lc[:, None]*prof + prof**2

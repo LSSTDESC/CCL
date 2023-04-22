@@ -1,5 +1,7 @@
-from . import ccllib as lib
-from .base import deprecated
+__all__ = ("halo_concentration", "onehalo_matter_power",
+           "twohalo_matter_power", "halomodel_matter_power",)
+
+from . import deprecated, lib
 from . import halos as hal
 
 
@@ -47,8 +49,7 @@ def halo_concentration(cosmo, halo_mass, a, odelta=200):
     """
     mdef = hal.MassDef(odelta, 'matter')
     c = _get_concentration(cosmo, mdef)
-
-    return c.get_concentration(cosmo, halo_mass, a)
+    return c(cosmo, halo_mass, a)
 
 
 @deprecated(hal.halomod_power_spectrum)

@@ -1,11 +1,9 @@
-from ... import ccllib as lib
-from ...base import warn_api
-from ...pyutils import check
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncSheth99",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncSheth99",)
+from ... import check, lib, warn_api
+from . import MassFunc
 
 
 class MassFuncSheth99(MassFunc):
@@ -39,7 +37,8 @@ class MassFuncSheth99(MassFunc):
         :math:`\delta_{\rm c} \simeq 1.68647` given by spherical collapse
         theory. The default is False.
     """
-    __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = 'Sheth99'
 
     @warn_api

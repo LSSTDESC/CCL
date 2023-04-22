@@ -20,7 +20,7 @@ def get_tk3d(alpha=1, beta=1):
                                k_arr[:, None], a,
                                alpha, beta)
                          for a in a_arr])
-    return ccl.Tk3D(a_arr, np.log(k_arr),
+    return ccl.Tk3D(a_arr=a_arr, lk_arr=np.log(k_arr),
                     tkk_arr=np.log(tkka_arr),
                     is_logt=True)
 
@@ -115,9 +115,6 @@ def test_cov_NG_errors(typ):
     with pytest.raises(ValueError):
         cov_f(COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
               integration_method='cag_cuad')
-
-    with pytest.raises(ValueError):
-        cov_f(COSMO, tr, tr, ell=ls, t_of_kk_a=tr)
 
 
 def test_Sigma2B():

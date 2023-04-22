@@ -1,10 +1,7 @@
-from ... import ccllib as lib
-from ...base import warn_api
-from ...core import check
-from ..halo_model_base import HaloBias
-
-
 __all__ = ("HaloBiasSheth99",)
+
+from ... import check, lib, warn_api
+from . import HaloBias
 
 
 class HaloBiasSheth99(HaloBias):
@@ -37,7 +34,8 @@ class HaloBiasSheth99(HaloBias):
         :math:`\delta_{\rm c} \simeq 1.68647` given by spherical collapse
         theory. The default is False.
     """
-    __repr_attrs__ = ("mass_def", "mass_def_strict", "use_delta_c_fit",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = "Sheth99"
 
     @warn_api

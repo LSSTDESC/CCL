@@ -1,11 +1,14 @@
-from _thread import RLock
-from abc import ABC, abstractproperty
-from inspect import signature
-import functools
-
-
-__all__ = ("ObjectLock", "UnlockInstance", "unlock_instance", "FancyRepr",
+__all__ = ("ObjectLock",
+           "UnlockInstance", "unlock_instance",
+           "CustomRepr", "CustomEq",
            "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
+
+import functools
+from abc import ABC, abstractmethod
+from inspect import signature
+from _thread import RLock
+
+import numpy as np
 
 
 class ObjectLock:
@@ -100,18 +103,8 @@ class UnlockInstance:
         if self.id != self.object_lock._lock_id:
             return
 
-        with self.thread_lock:
-            # Reset `repr` if the object has been mutated.
-            if self.mutate:
-                try:
-                    delattr(self.instance, "_repr")
-                    delattr(self.instance, "_hash")
-                except AttributeError:
-                    # Object mutated but none of these exist.
-                    pass
-
-            # Lock the instance on exit.
-            self.object_lock.lock()
+        # Lock the instance on exit.
+        # self.object_lock.lock()  # TODO: Uncomment for CCLv3.
 
     @classmethod
     def unlock_instance(cls, func=None, *, name=None, mutate=True):
@@ -198,50 +191,65 @@ class UnlockInstance:
 unlock_instance = UnlockInstance.unlock_instance
 
 
-class FancyRepr:
-    """Control the usage of fancy ``__repr__` for ``CCLObjects.
+def is_equal(this, other):
+    """Powerful helper for equivalence checking."""
+    try:
+        np.testing.assert_equal(this, other)
+        return True
+    except AssertionError:
+        return False
 
-    Fancy repr is considered to be an implementation of ``__repr__`` in the
-    class, which override's Python's default ``<qualname at id>``. These custom
-    representations can be turned on or off, with the changes also applying to
-    already instantiated objects.
+
+class _CustomMethod:
+    """Subclasses specifying a method string control whether the custom
+    method is used in subclasses of ``CCLObject``.
     """
-    _enabled: bool = True
-    _classes: dict = {}
+
+    def __init_subclass__(cls, *, method):
+        super().__init_subclass__()
+        if method not in vars(cls):
+            raise ValueError(
+                f"Subclass must contain a default {method} implementation.")
+        cls._method = method
+        cls._enabled: bool = True
+        cls._classes: dict = {}
 
     @classmethod
-    def add(cls, cl):
-        """Add class to the internal dictionary of classes with fancy repr."""
-        cls._classes[cl] = cl.__repr__
+    def register(cls, cl):
+        """Register class to the dictionary of classes with custom methods."""
+        if cls._method in vars(cls):
+            cls._classes[cl] = getattr(cl, cls._method)
 
     @classmethod
     def enable(cls):
-        """Enable fancy representations throughout the library."""
+        """Enable the custom methods if they exist."""
         for cl, method in cls._classes.items():
-            FancyRepr.bind_and_replace(cl, method)
+            setattr(cl, cls._method, method)
         cls._enabled = True
 
     @classmethod
     def disable(cls):
-        """Disable fancy representations and fall back to Python defaults."""
+        """Disable custom methods and fall back to Python defaults."""
         for cl in cls._classes.keys():
-            cl.__repr__ = object.__repr__
+            default = getattr(cls, cls._method)
+            setattr(cl, cls._method, default)
         cls._enabled = False
 
-    @classmethod
-    def bind_and_replace(cls, cl, method):
-        """Bind ``method`` to class ``cl``, and replace original with default.
-        This helper only works for binding and replacing ``__repr__`` methods
-        for ``CCLObjects``.
-        """
-        # If the class defines a custom `__repr__`, this will be the new
-        # `_repr` (which is cached). Decorator `cached_property` requires
-        # that `__set_name__` is called on it.
-        bmethod = functools.cached_property(method)
-        cl._repr = bmethod
-        bmethod.__set_name__(cl, "_repr")
-        # Fall back to using `__ccl_repr__` from `CCLObject`.
-        cl.__repr__ = cl.__ccl_repr__
+
+class CustomEq(_CustomMethod, method="__eq__"):
+    """Controls the usage of custom ``__eq__`` for ``CCLObjects``."""
+
+    def __eq__(self, other):
+        # Default `eq`.
+        return self is other
+
+
+class CustomRepr(_CustomMethod, method="__repr__"):
+    """Controls the usage of custom ``__repr__`` for ``CCLObjects``."""
+
+    def __repr__(self):
+        # Default `repr`.
+        return object.__repr__(self)
 
 
 class CCLObject(ABC):
@@ -296,18 +304,16 @@ class CCLObject(ABC):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
 
-        # 1. Store the signature of the constructor on import.
+        # 1. Store the initialization signature on import.
         cls.__signature__ = signature(cls.__init__)
 
-        # 2. Replace repr (if implemented) with its cached version.
-        if "__repr__" in vars(cls):
-            FancyRepr.add(cls)
-            FancyRepr.bind_and_replace(cls, cls.__repr__)
+        # 2. Register subclasses with custom dunder method implementations.
+        CustomEq.register(cls)
+        CustomRepr.register(cls)
 
-        # 3. Unlock instance on specific methods.
-        # UnlockInstance.Funlock(cls, funcname="__init__", mutate=False)
-        UnlockInstance.Funlock2(cls, "__init__")  # TODO: Replace in CCLv3.
-        UnlockInstance.Funlock(cls, funcname="update_parameters", mutate=True)
+        # 3. Unlock instance on specific methods.  # TODO: Uncomment for CCLv3.
+        # UnlockInstance.Funlock(cls, "__init__", mutate=False)
+        # UnlockInstance.Funlock(cls, "update_parameters", mutate=True)
 
     def __new__(cls, *args, **kwargs):
         # Populate every instance with an `ObjectLock` as attribute.
@@ -322,40 +328,38 @@ class CCLObject(ABC):
         object.__setattr__(self, name, value)
 
     def update_parameters(self, **kwargs):
-        """Instances of this class are immutable."""
-        name = self.__class__.__qualname__
+        name = self.__class__.__name__
         raise NotImplementedError(f"{name} objects are immutable.")
 
-    @functools.cached_property
-    def _repr(self):
+    def __repr__(self):
         # By default we use `__repr__` from `object`.
         return object.__repr__(self)
 
-    @functools.cached_property
-    def _hash(self):
+    def __hash__(self):
         # `__hash__` makes use of the `repr` of the object,
         # so we have to make sure that the `repr` is unique.
         return hash(repr(self))
 
-    def __ccl_repr__(self):
-        # The custom `__repr__` is converted to a
-        # cached property and is replaced by this method.
-        return self._repr
-
-    __repr__ = __ccl_repr__
-
-    def __hash__(self):
-        return self._hash
-
     def __eq__(self, other):
+        # Exit early if it is the same object.
+        if self is other:
+            return True
         # Two same-type objects are equal if their representations are equal.
-        if self.__class__ is not other.__class__:
+        if type(self) is not type(other):
             return False
-        return repr(self) == repr(other)
+        # Compare the attributes listed in `__eq_attrs__`.
+        if hasattr(self, "__eq_attrs__"):
+            for attr in self.__eq_attrs__:
+                if not is_equal(getattr(self, attr), getattr(other, attr)):
+                    return False
+            return True
+        return False
 
 
 class CCLAutoRepr(CCLObject):
-    """Base for objects with automatic representation.
+    """Base for objects with automatic representation. Representations
+    for instances are built from a list of attribute names specified as
+    a class variable in ``__repr_attrs__`` (acting as a hook).
 
     Representations for instances are built from a list of attribute names
     specified as a class attribute in ``__repr_attrs__`` (acting as a hook).
@@ -390,53 +394,46 @@ class CCLAutoRepr(CCLObject):
         return object.__repr__(self)
 
 
-def _subclasses(cls):
-    # This helper returns a set of all subclasses.
-    direct_subs = cls.__subclasses__()
-    deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
-    return set(direct_subs).union(deep_subs)
-
-
-def from_name(cls, name):
-    """Obtain particular model."""
-    mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
-    return mod[name]
-
-
-def initialize_from_input(cls, input_, **kwargs):
-    """Process the input and generate an object of the class.
-    Input can be an instance of the class, or a name string.
-    Optional ``**kwargs`` may be passed.
-    """
-    if isinstance(input_, cls):
-        return input_
-    if isinstance(input_, str):
-        class_ = cls.from_name(input_)
-        return class_(**kwargs)
-    good, bad = cls.__name__, input_.__class__.__name__
-    raise TypeError(f"Expected {good} or str but received {bad}.")
-
-
 class CCLNamedClass(CCLObject):
-    """Base for objects that contain ``from_name`` and
-    ``initialize_from_input`` methods.
+    """Base for objects that contain methods ``from_name()`` and
+    ``create_instance()``.
 
     Implementation
     --------------
     Subclasses must define a ``name`` class attribute which allows the tree to
-    be searched to retrieve the particular model, using its name. Subclasses
-    may also contain their own implementation of ``from_name``. Method
-    ``initialize_from_input`` is automatically added.
+    be searched to retrieve the particular model, using its name.
     """
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        cls._subclasses = classmethod(_subclasses)
-        if not hasattr(cls, "from_name"):
-            # Add a `from_name` method if one is not provided.
-            cls.from_name = classmethod(from_name)
-        cls.initialize_from_input = classmethod(initialize_from_input)
-
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self) -> str:
         """Class attribute denoting the name of the model."""
+
+    @classmethod
+    def _subclasses(cls):
+        # This helper returns a set of all subclasses.
+        direct_subs = cls.__subclasses__()
+        deep_subs = [sub for cl in direct_subs for sub in cl._subclasses()]
+        return set(direct_subs).union(deep_subs)
+
+    @classmethod
+    def from_name(cls, name):
+        """Obtain particular model."""
+        mod = {p.name: p for p in cls._subclasses() if hasattr(p, "name")}
+        if name not in mod:
+            raise KeyError(f"Invalid model {name}.")
+        return mod[name]
+
+    @classmethod
+    def create_instance(cls, input_, **kwargs):
+        """Process the input and generate an object of the class.
+        Input can be an instance of the class, or a name string.
+        Optional ``**kwargs`` may be passed.
+        """
+        if isinstance(input_, cls):
+            return input_
+        if isinstance(input_, str):
+            class_ = cls.from_name(input_)
+            return class_(**kwargs)
+        good, bad = cls.__name__, type(input_).__name__
+        raise TypeError(f"Expected {good} or str but received {bad}.")
