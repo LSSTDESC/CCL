@@ -141,7 +141,6 @@ class MassFunc(HMIngredients):
             float or array_like: :math:`f(\\sigma_M)` function.
         """
 
-    @mass_def_api
     def __call__(self, cosmo, M, a):
         """ Returns the mass function for input parameters.
 
@@ -166,6 +165,7 @@ class MassFunc(HMIngredients):
         return mf
 
     @deprecated(new_function=__call__)
+    @mass_def_api
     def get_mass_function(self, cosmo, M, a):
         return self(cosmo, M, a)
 
@@ -203,7 +203,6 @@ class HaloBias(HMIngredients):
             float or array_like: f(sigma_M) function.
         """
 
-    @mass_def_api
     def __call__(self, cosmo, M, a):
         """ Returns the halo bias for input parameters.
 
@@ -223,6 +222,7 @@ class HaloBias(HMIngredients):
         return b
 
     @deprecated(new_function=__call__)
+    @mass_def_api
     def get_halo_bias(self, cosmo, M, a):
         return self(cosmo, M, a)
 
@@ -244,7 +244,6 @@ class Concentration(HMIngredients):
     def _concentration(self, cosmo, M, a):
         """Implementation of the c(M) relation."""
 
-    @mass_def_api
     def __call__(self, cosmo, M, a):
         """ Returns the concentration for input parameters.
 
@@ -263,6 +262,7 @@ class Concentration(HMIngredients):
         return c
 
     @deprecated(new_function=__call__)
+    @mass_def_api
     def get_concentration(self, cosmo, M, a):
         return self(cosmo, M, a)
 

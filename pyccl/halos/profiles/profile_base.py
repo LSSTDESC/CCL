@@ -53,6 +53,9 @@ class HaloProfile(CCLAutoRepr):
         # Initialize FFTLog.
         self.precision_fftlog = FFTLogParams()
 
+        # TODO: Remove for CCLv3.
+        self._is_number_counts = isinstance(self, HaloProfileNumberCounts)
+
         if (mass_def, concentration) == (None, None):
             warnings.warn(
                 "mass_def (or concentration where applicable) will become a "
@@ -68,9 +71,6 @@ class HaloProfile(CCLAutoRepr):
             mass_def, concentration=concentration)
         if out:
             self.concentration = out[0]
-
-        # TODO: Remove for CCLv3.
-        self._is_number_counts = isinstance(self, HaloProfileNumberCounts)
 
     @property
     def is_number_counts(self):
