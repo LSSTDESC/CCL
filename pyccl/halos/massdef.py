@@ -254,7 +254,11 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             # Bogus input - can't parse it.
             raise ValueError("Could not parse mass definition string.")
         Delta, rho_type = name[:-1], parser[name[-1]]
-        return lambda: cls(Delta, rho_type)  # noqa
+        # return cls(Delta, rho_type)  # TODO: Uncomment for CCLv3.
+        return lambda: cls(Delta, rho_type)  # noqa  # TODO: Remove for CCLv3.
+
+    # TODO: Uncomment for CCLv3 and remove CCLNamedClass inheritance.
+    # create_instance = from_name
 
     @classmethod
     def from_specs(cls, mass_def=None, *,
@@ -327,12 +331,18 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
 # TODO: Remove these definitions and uncomment the new ones for CCLv3.
 # These will all throw warnings now.
+factory_warn = lambda: warnings.warn(  # noqa
+    "In CCLv3.0.0 MassDef factories will become variables.",
+    CCLDeprecationWarning)
+
+
 def MassDef200m(c_m='Duffy08'):
     r""":math:`\Delta = 200m` mass definition.
 
     Args:
         c_m (string): concentration-mass relation.
     """
+    factory_warn()
     return MassDef(200, 'matter', c_m_relation=c_m)
 
 
@@ -342,6 +352,7 @@ def MassDef200c(c_m='Duffy08'):
     Args:
         c_m (string): concentration-mass relation.
     """
+    factory_warn()
     return MassDef(200, 'critical', c_m_relation=c_m)
 
 
@@ -351,6 +362,7 @@ def MassDef500c(c_m='Ishiyama21'):
     Args:
         c_m (string): concentration-mass relation.
     """
+    factory_warn()
     return MassDef(500, 'critical', c_m_relation=c_m)
 
 
@@ -360,32 +372,19 @@ def MassDefVir(c_m='Klypin11'):
     Args:
         c_m (string): concentration-mass relation.
     """
+    factory_warn()
     return MassDef('vir', 'critical', c_m_relation=c_m)
 
 
-# def MassDef200m():
-#     r""":math:`\Delta = 200m` mass definition."""
-#     return MassDef(200, 'matter')
-
-
-# def MassDef200c():
-#     r""":math:`\Delta = 200c` mass definition."""
-#     return MassDef(200, 'critical')
-
-
-# def MassDef500c():
-#     r""":math:`\Delta = 500m` mass definition."""
-#     return MassDef(500, 'critical')
-
-
-# def MassDefVir():
-#     r""":math:`\Delta = \rm vir` mass definition."""
-#     return MassDef('vir', 'critical')
-
-
 def MassDefFof():
-    r""":math:`\Delta = \rm FoF` mass definition."""
-    return MassDef('fof', 'matter')
+    return MassDef("fof", "matter")
+
+
+# MassDef200m = MassDef(200, "matter")
+# MassDef200c = MassDef(200, "critical")
+# MassDef500c = MassDef(500, "critical")
+# MassDefVir = MassDef("vir", "critical")
+# MassDefFof = MassDef("fof", "matter")
 
 
 def mass_translator(*,
