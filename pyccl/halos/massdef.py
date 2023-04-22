@@ -2,12 +2,14 @@ __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
            "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
            "MassDefFof", "mass_translator",)
 
+import warnings
+import weakref
 from functools import cached_property
 from typing import Union, Callable
 
 import numpy as np
 
-from .. import CCLAutoRepr, CCLNamedClass, lib, check
+from .. import CCLAutoRepr, CCLDeprecationWarning, CCLNamedClass, lib, check
 from .. import warn_api, deprecate_attr
 from . import Concentration, HaloBias, MassFunc
 
@@ -96,7 +98,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
     __getattr__ = deprecate_attr(pairs=[('c_m_relation', 'concentration')]
                                  )(super.__getattribute__)
 
-    def __init__(self, Delta, rho_type=None):
+    def __init__(self, Delta, rho_type, c_m_relation=None):
         # Check it makes sense
         if isinstance(Delta, str):
             if Delta.isdigit():
@@ -110,6 +112,14 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
         self.Delta = Delta
         self.rho_type = rho_type
+
+        # TODO: Remove c_m_relation for CCLv3.
+        if c_m_relation is not None:
+            warnings.warn("c_m_relation is deprecated from MassDef and will "
+                          "be removed in CCLv3.0.0.", CCLDeprecationWarning)
+            c_m_relation = Concentration.create_instance(
+                c_m_relation, mass_def=weakref.proxy(self))
+        self.concentration = c_m_relation
 
     @cached_property
     def name(self):
@@ -193,6 +203,36 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         if np.ndim(M) == 0:
             return R[0]
         return R
+
+    def translate_mass(self, cosmo, M, a, m_def_other):
+        """ Translate halo mass in this definition into another definition
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            M (float or array_like): halo mass in units of M_sun.
+            a (float): scale factor.
+            m_def_other (:obj:`MassDef`): another mass definition.
+
+        Returns:
+            float or array_like: halo masses in new definition.
+        """
+        # TODO: Remove for CCLv3.
+        warnings.warn("translate_mass is a deprecated method of MassDef and "
+                      "will be removed in CCLv3.0.0. Use `pyccl.halos.mass_"
+                      "translator`.", CCLDeprecationWarning)
+        if self == m_def_other:
+            return M
+        if self.concentration is None:
+            raise ValueError("No associated c(M) relation.")
+        om_this = cosmo.omega_x(a, self.rho_type)
+        D_this = self.get_Delta(cosmo, a) * om_this
+        c_this = self._get_concentration(cosmo, M, a)
+        R_this = self.get_radius(cosmo, M, a)
+        om_new = cosmo.omega_x(a, m_def_other.rho_type)
+        D_new = m_def_other.get_Delta(cosmo, a) * om_new
+        c_new = convert_concentration(cosmo, c_this, D_this, D_new)
+        R_new = c_new * R_this / c_this
+        return m_def_other.get_mass(cosmo, R_new, a)
 
     @classmethod
     def from_name(cls, name):
@@ -285,24 +325,62 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         return mass_def, *out
 
 
-def MassDef200m():
-    r""":math:`\Delta = 200m` mass definition."""
-    return MassDef(200, 'matter')
+# TODO: Remove these definitions and uncomment the new ones for CCLv3.
+# These will all throw warnings now.
+def MassDef200m(c_m='Duffy08'):
+    r""":math:`\Delta = 200m` mass definition.
+
+    Args:
+        c_m (string): concentration-mass relation.
+    """
+    return MassDef(200, 'matter', c_m_relation=c_m)
 
 
-def MassDef200c():
-    r""":math:`\Delta = 200c` mass definition."""
-    return MassDef(200, 'critical')
+def MassDef200c(c_m='Duffy08'):
+    r""":math:`\Delta = 200c` mass definition.
+
+    Args:
+        c_m (string): concentration-mass relation.
+    """
+    return MassDef(200, 'critical', c_m_relation=c_m)
 
 
-def MassDef500c():
-    r""":math:`\Delta = 500m` mass definition."""
-    return MassDef(500, 'critical')
+def MassDef500c(c_m='Ishiyama21'):
+    r""":math:`\Delta = 500m` mass definition.
+
+    Args:
+        c_m (string): concentration-mass relation.
+    """
+    return MassDef(500, 'critical', c_m_relation=c_m)
 
 
-def MassDefVir():
-    r""":math:`\Delta = \rm vir` mass definition."""
-    return MassDef('vir', 'critical')
+def MassDefVir(c_m='Klypin11'):
+    r""":math:`\Delta = \rm vir` mass definition.
+
+    Args:
+        c_m (string): concentration-mass relation.
+    """
+    return MassDef('vir', 'critical', c_m_relation=c_m)
+
+
+# def MassDef200m():
+#     r""":math:`\Delta = 200m` mass definition."""
+#     return MassDef(200, 'matter')
+
+
+# def MassDef200c():
+#     r""":math:`\Delta = 200c` mass definition."""
+#     return MassDef(200, 'critical')
+
+
+# def MassDef500c():
+#     r""":math:`\Delta = 500m` mass definition."""
+#     return MassDef(500, 'critical')
+
+
+# def MassDefVir():
+#     r""":math:`\Delta = \rm vir` mass definition."""
+#     return MassDef('vir', 'critical')
 
 
 def MassDefFof():
