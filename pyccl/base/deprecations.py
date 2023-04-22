@@ -31,10 +31,11 @@ def mass_def_api(func):
     # TODO: CCLv3 - remove `mass_def=None` default from some HaloProfiles.
     @functools.wraps(func)
     @unlock_instance
-    def wrapper(self, *args, mass_def=None, **kwargs):
+    def wrapper(self, *args, mass_def=None, mdef_other=None, **kwargs):
         if type(args[-1]).__name__ == "MassDef":
             *args, mass_def = args
 
+        mass_def = mass_def or mdef_other
         if mass_def is not None:
             warnings.warn(
                 "mass_def is deprecated as an argument of {func.__name__} "

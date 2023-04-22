@@ -69,6 +69,20 @@ class HaloProfile(CCLAutoRepr):
         if out:
             self.concentration = out[0]
 
+        # TODO: Remove for CCLv3.
+        self._is_number_counts = isinstance(self, HaloProfileNumberCounts)
+
+    @property
+    def is_number_counts(self):
+        # TODO: Remove for CCLv3.
+        return self._is_number_counts
+
+    @is_number_counts.setter
+    @unlock_instance
+    def is_number_counts(self, value):
+        # TODO: Remove for CCLv3.
+        self._is_number_counts = value
+
     def get_normalization(self, cosmo, a, *, hmc=None):
         """Profiles may be normalized by an overall function of redshift
         (or scale factor). This function may be cosmology dependent and

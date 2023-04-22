@@ -1,8 +1,9 @@
 __all__ = ("HMCalculator",)
 
+import warnings
 import numpy as np
 
-from .. import CCLAutoRepr, unlock_instance
+from .. import CCLAutoRepr, CCLDeprecationWarning, unlock_instance
 from .. import warn_api, deprecate_attr, deprecated
 from .. import physical_constants as const
 from . import MassDef
@@ -421,3 +422,23 @@ class HMCalculator(CCLAutoRepr):
                 cosmo, k, self._mass, a, prof3, prof2=prof4).T
 
         return self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
+
+
+# TODO: Remove for CCLv3.
+def __getattr__(name):
+    warn = lambda n, m: warnings.warn(  # noqa
+        f"{n} is moved to pyccl.halos.{m}", CCLDeprecationWarning)
+    if name in ["halomod_mean_profile_1pt", "halomod_bias_1pt"]:
+        from .pk_1pt import __dict__ as mod_dict
+        warn(name, "pk_1pt")
+        return mod_dict[name]
+    elif name in ["halomod_power_spectrum", "halomod_Pk2D"]:
+        from .pk_2pt import __dict__ as mod_dict
+        warn(name, "pk_2pt")
+        return mod_dict[name]
+    elif name in ["halomod_trispectrum_1h", "halomod_Tk3D_1h",
+                  "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC"]:
+        from .pk_4pt import __dict__ as mod_dict
+        warn(name, "pk_4pt")
+        return mod_dict[name]
+    return eval(name) if name in locals() else None
