@@ -99,6 +99,16 @@ def test_named_class_raises():
         ccl.halos.MassDef.create_instance(1)
 
 
+def test_ccl_parameters_abstract():
+    # Test that the Parameters base class is abstract and cannot instantiate
+    # if `instance` or `factory` are not specified.
+    with pytest.raises(TypeError):
+        ccl.CCLParameters()
+    with pytest.raises(ValueError):
+        class MyPars(ccl.CCLParameters):
+            pass
+
+
 # +==========================================================================+
 # | The following functions are used by `conftest.py` to check correct setup.|
 # +==========================================================================+
