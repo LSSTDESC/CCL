@@ -73,11 +73,12 @@ class CCLParameters:
         class_.__setattr__ = _new_setattr
 
     def __init__(self):
-        # Create a new instance if a factory is provided.
+        # Emulate abstraction so that base class cannot be instantiated.
         if not (hasattr(self, "_instance") or hasattr(self, "_factory")):
             name = type(self).__name__
             raise TypeError(f"Can't instantiate {name} with no set "
                             "`instance` or `factory`.")
+        # Create a new instance if a factory is provided.
         if self._factory:
             object.__setattr__(self, "_instance", self._factory())
         # Keep a copy of the default parameters.

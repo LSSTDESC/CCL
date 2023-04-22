@@ -257,6 +257,7 @@ def test_input_lin_power_spectrum():
                                           p_of_k_a='a:b')
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
+    # Shape mismatch of input arrays
     with pytest.raises(ValueError):
         ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
