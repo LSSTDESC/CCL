@@ -257,6 +257,15 @@ def test_input_lin_power_spectrum():
                                           p_of_k_a='a:b')
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
+    # Shape mismatch of input arrays
+    with pytest.raises(ValueError):
+        ccl.CosmologyCalculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, A_s=2e-9,
+            background={'a': a_arr,
+                        'chi': chi_from_ccl,
+                        'h_over_h0': hoh0_from_ccl[:-1]})
+
 
 def test_input_linpower_raises():
     cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7,
@@ -297,6 +306,15 @@ def test_input_linpower_raises():
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
                        'delta_matter:delta_matter': pk_arr,
+                       'a:b': pk_arr[0]})
+
+    # Wrong pk label
+    with pytest.raises(ValueError):
+        ccl.CosmologyCalculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_linear={'a': a_arr, 'k': k_arr,
+                       'hello_there': pk_arr,
                        'a:b': pk_arr[0]})
 
     # Check new power spectrum is stored

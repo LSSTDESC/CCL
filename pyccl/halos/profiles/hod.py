@@ -327,8 +327,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             fc = self._fc(a)
             if self.ns_independent:
                 return Nc*fc + Ns
-            else:
-                return Nc*(fc + Ns)
+            return Nc*(fc + Ns)
         return hmc.integrate_over_massfunc(integ, cosmo, a)
 
     def _fourier(self, cosmo, k, M, a):

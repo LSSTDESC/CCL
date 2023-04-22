@@ -104,6 +104,9 @@ def test_profiles_equal():
     p2.update_precision_fftlog(**{"plaw_fourier": -2.0})
     assert p1 != p2
 
+    # different FFTLog type
+    assert p1.precision_fftlog != 1
+
 
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileNFW,
@@ -256,6 +259,28 @@ def test_hod_ns_independent(real_prof):
 
     p1.update_parameters(ns_independent=True)
     assert p1.ns_independent is True
+
+
+@pytest.mark.parametrize("ns_indep", [True, False])
+def test_hod_normalization(ns_indep):
+    # Test that the HOD normalization works as expected.
+    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
+    a_arr = np.linspace(0.5, 1.0, 8)
+    hmc = ccl.halos.HMCalculator(
+        mass_function="Tinker10", halo_bias="Tinker10", mass_def="200c")
+    cm = ccl.halos.Concentration.create_instance(
+        "Duffy08", mass_def=hmc.mass_def)
+    prof = ccl.halos.HaloProfileHOD(concentration=cm, ns_independent=ns_indep)
+
+    norm = np.array([prof.get_normalization(cosmo, a, hmc) for a in a_arr])
+
+    def profile_norm(a):
+        hmc._get_ingredients(cosmo, a, get_bf=False)
+        uk0 = prof.fourier(cosmo, k=1e-5, M=hmc._mass, a=a).T
+        return hmc._integrate_over_mf(uk0)
+
+    norm_fourier = np.array([profile_norm(a) for a in a_arr])
+    assert np.allclose(norm, norm_fourier, atol=0, rtol=1e-5)
 
 
 def test_hod_2pt():
