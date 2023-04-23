@@ -6,6 +6,7 @@ from ... import warn_api, deprecated
 from . import HaloProfile
 
 
+@deprecated
 class HaloProfileGaussian(HaloProfile):
     """ Gaussian profile
 
@@ -24,7 +25,6 @@ class HaloProfileGaussian(HaloProfile):
     __repr_attrs__ = __eq_attrs__ = ("r_scale", "rho_0", "mass_def",
                                      "precision_fftlog",)
 
-    @deprecated()
     @warn_api
     def __init__(self, *, r_scale, rho0, mass_def=None):
         self.rho_0 = rho0

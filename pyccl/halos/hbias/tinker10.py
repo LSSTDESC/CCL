@@ -7,8 +7,9 @@ from . import HaloBias
 
 
 class HaloBiasTinker10(HaloBias):
-    r"""Halo bias relation by Tinker et al. (2010) :arXiv:1001.3162.
-    Valid for any S.O. masses with :math:`\Delta \in (200{\rm m},3200{\rm m})`.
+    r"""Halo bias relation by `Tinker et al. (2010)
+    <https://arxiv.org/abs/1001.3162>`_. Valid for any S.O. masses with
+    :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
 
     The halo bias takes the form
 

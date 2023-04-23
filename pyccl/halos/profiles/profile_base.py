@@ -7,14 +7,14 @@ from typing import Callable
 
 import numpy as np
 
-from ... import CCLAutoRepr, FFTLogParams, unlock_instance
+from ... import CCLObject, FFTLogParams, unlock_instance
 from ... import CCLDeprecationWarning, deprecate_attr, warn_api, mass_def_api
 from ... import physical_constants as const
 from ...pyutils import resample_array, _fftlog_transform
 from .. import MassDef
 
 
-class HaloProfile(CCLAutoRepr):
+class HaloProfile(CCLObject):
     """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL
@@ -109,7 +109,7 @@ class HaloProfile(CCLAutoRepr):
         # NK: (cosmo, a) have to take None defaults in v3.
         # return 1.0
 
-    @unlock_instance(mutate=True)
+    @unlock_instance
     @functools.wraps(FFTLogParams.update_parameters)
     def update_precision_fftlog(self, **kwargs):
         self.precision_fftlog.update_parameters(**kwargs)

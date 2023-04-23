@@ -14,7 +14,7 @@ class ConcentrationConstant(Concentration):
     c : float, optional
         Value of the constant concentration.
         The default is :math:`1.0`.
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, fixed
         The mass definition for this :math:`c(M)` parametrization is arbitrary
         and is not used for any calculations.
     """

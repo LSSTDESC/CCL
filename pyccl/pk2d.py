@@ -265,7 +265,7 @@ class Pk2D(CCLObject):
 
     @classmethod
     @functools.wraps(from_model)
-    @deprecated(new_function=from_model.__func__)
+    @deprecated(new_api=from_model.__func__)
     def pk_from_model(cls, cosmo, model):
         return cls.from_model(cosmo, model)
 

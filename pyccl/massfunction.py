@@ -5,7 +5,7 @@ from . import halos as hal
 from .power import sigmaM  # noqa
 
 
-@deprecated(hal.MassFunc)
+@deprecated(new_api=hal.MassFunc)
 def massfunc(cosmo, halo_mass, a, overdensity=200):
     """Halo mass function, dn/dlog10M.
 
@@ -37,7 +37,7 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
     return mf(cosmo, halo_mass, a)
 
 
-@deprecated(hal.HaloBias)
+@deprecated(new_api=hal.HaloBias)
 def halo_bias(cosmo, halo_mass, a, overdensity=200):
     """Halo bias
 
@@ -65,7 +65,7 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     return bf(cosmo, halo_mass, a)
 
 
-@deprecated(hal.mass2radius_lagrangian)
+@deprecated(new_api=hal.mass2radius_lagrangian)
 def massfunc_m2r(cosmo, halo_mass):
     """Converts smoothing halo mass into smoothing halo radius.
 

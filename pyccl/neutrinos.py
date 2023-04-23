@@ -22,7 +22,7 @@ class NeutrinoMassSplits(Enum):
     LIST = 'list'  # placeholder for backwards-compatibility
 
 
-@deprecated(new_function=omega_x)
+@deprecated(new_api=omega_x)
 def Omeganuh2(a, m_nu,
               T_CMB=DefaultParams.T_CMB,
               T_ncdm=DefaultParams.T_ncdm):

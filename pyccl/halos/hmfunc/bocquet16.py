@@ -7,9 +7,10 @@ from . import MassFunc
 
 
 class MassFuncBocquet16(MassFunc):
-    r"""Halo mass function by Bocquet et al. (2016) :arXiv:1502.07357.
-    Defined for S.O. masses with :math:`\Delta_{200{\rm m}}`,
-    :math:`\Delta_{200{\rm c}}`, and :math:`\Delta_{500{\rm c}}`.
+    r"""Halo mass function by `Bocquet et al. (2016)
+    <https://arxiv.org/abs/1502.07357>`_. Defined for S.O. masses with
+    :math:`\Delta_{200{\rm m}}`, :math:`\Delta_{200{\rm c}}`, and
+    :math:`\Delta_{500{\rm c}}`.
 
     The mass function takes the form
 
@@ -86,7 +87,7 @@ class MassFuncBocquet16(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`n(M)` parametrization.
         The default is :math:`200{\rm m}`.
     mass_def_strict : bool, optional

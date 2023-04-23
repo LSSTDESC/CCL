@@ -7,8 +7,8 @@ from . import MassFunc
 
 
 class MassFuncWatson13(MassFunc):
-    r"""Halo mass function by Watson et al. (2013) :arXiv:1212.0095.
-    Valid for any S.O. and FoF masses.
+    r"""Halo mass function by `Watson et al. (2013)
+    <https://arxiv.org/abs/1212.0095>`_. Valid for any S.O. and FoF masses.
 
     The mass function takes the form
 
@@ -37,7 +37,7 @@ class MassFuncWatson13(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`n(M)` parametrization.
         The default is :math:`200{\rm m}`.
     mass_def_strict : bool, optional

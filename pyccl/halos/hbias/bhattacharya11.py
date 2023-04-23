@@ -5,8 +5,8 @@ from . import HaloBias
 
 
 class HaloBiasBhattacharya11(HaloBias):
-    r"""Halo bias relation by Bhattacharya et al. (2011) :arXiv:1005.2239.
-    Valid for FoF masses only.
+    r"""Halo bias relation by `Bhattacharya et al. (2011)
+    <https://arxiv.org/abs/1005.2239>`_. Valid for FoF masses only.
 
     The halo bias takes the form
 

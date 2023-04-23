@@ -734,7 +734,7 @@ def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
 
     from scipy.interpolate import interp1d
     z_n, n = _check_array_params(dndz, 'dndz')
-    with UnlockInstance(tracer, mutate=False):
+    with UnlockInstance(tracer):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
 
     kernel_d = None
@@ -809,7 +809,7 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
 
     from scipy.interpolate import interp1d
     z_n, n = _check_array_params(dndz, 'dndz')
-    with UnlockInstance(tracer, mutate=False):
+    with UnlockInstance(tracer):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
 
     if has_shear:

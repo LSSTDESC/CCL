@@ -5,8 +5,8 @@ from . import Concentration
 
 
 class ConcentrationBhattacharya13(Concentration):
-    r"""Concentration-mass relation by Bhattacharya et al. (2013)
-    :arXiv:1112.5479. Valid only for S.O. masses with
+    r"""Concentration-mass relation by `Bhattacharya et al. (2013)
+    <https://arxiv.org/abs/1112.5479>`_. Valid only for S.O. masses with
     :math:`\Delta_{\rm vir}`, :math:`\Delta_{200{\rm m}}`
     and :math:`\Delta_{200{\rm c}}`.
 
@@ -22,7 +22,7 @@ class ConcentrationBhattacharya13(Concentration):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`c(M)` parametrization.
         The default is :math:`\Delta=200c`.
     """

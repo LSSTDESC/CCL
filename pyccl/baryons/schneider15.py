@@ -7,14 +7,17 @@ from . import Baryons
 
 
 class BaryonsSchneider15(Baryons):
-    r"""Baryonic correction model of Schneider & Teyssier (2015),
-    :arXiv:1510.06034.
+    r"""Baryonic correction model of `Schneider & Teyssier (2015)
+    <https://arxiv.org/abs/1510.06034>`_.
 
-    The boost factor is applied multiplicatively so that
-    :math:`P_{\rm bar}(k, a) = P_{\rm nobar}(k, a) \, f_{\rm ST15}(k, a)`.
+    The boost factor :math:`f` is applied multiplicatively so that
+
+    .. math::
+
+        P_{\rm bar}(k, a) = P_{\rm nobar}(k, a) \, f(k, a).
 
     Refer to the `DESC Note
-    <https://github.com/LSSTDESC/CCL/blob/master/doc/0000-ccl_note/main.pdf>`_
+    <https://github.com/LSSTDESC/CCL/blob/master/doc/0000-ccl_note/>`_
     for details (needs compilation).
 
     Parameters
@@ -23,16 +26,20 @@ class BaryonsSchneider15(Baryons):
         Logarithmic mass scale of hot gas suppression.
         The default is :math:`\log_{10}\left(1.2 \times 10^{14} \right)`.
     eta_b : float, optional
-        Ratio of escape to ejection radii (see Teyssier et al. 2015).
+        Ratio of escape to ejection radii (see linked publication).
         The default is :math:`0.5`.
     k_s : float, optional
-        Characteristic scale (wavenumber) of the stellar component.
-        The default is :math:`55.0`.
+        Characteristic scale (wavenumber) of the stellar component, in units of
+        :math:`\rm Mpc^{-1}`. The default is :math:`55.0`.
 
     Attributes
     ----------
+    name : str
+        Name of the model, used when instantiating from the base class.
     log10Mc
+
     eta_b
+
     k_s
     """
     __repr_attrs__ = __eq_attrs__ = ("log10Mc", "eta_b", "k_s")
@@ -48,16 +55,16 @@ class BaryonsSchneider15(Baryons):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         k : float or (nk,) array_like
             Comoving wavenumber in :math:`\rm Mpc^{-1}`.
         a : float or (na,) array_like
-            Scale factor(s).
+            Scale factor.
 
         Returns
         -------
-        boost_factor : float or ``numpy.ndarray``
+        boost_factor : float or (nk,) ``numpy.ndarray``
             Baryonic boost multiplicative factor.
         """
         a_use, k_use = map(np.atleast_1d, [a, k])
@@ -79,20 +86,8 @@ class BaryonsSchneider15(Baryons):
         return fka
 
     def update_parameters(self, log10Mc=None, eta_b=None, k_s=None):
-        r"""Update the model parameters. Those set to ``None`` will not be
-        updated.
-
-        Arguments
-        ---------
-        log10Mc : float or None
-            Logarithmic mass scale of hot gas suppression.
-            The default is :math:`\log_{10}\left(1.2 \times 10^{14} \right)`.
-        eta_b : float or None
-            Ratio of escape to ejection radii (see Teyssier et al. 2015).
-            The default is :math:`0.5`.
-        k_s : float or None
-            Characteristic scale (wavenumber) of the stellar component.
-            The default is :math:`55.0`.
+        r"""Update the model parameters. All parameters in :meth:`__init__`
+        can be updated.
         """
         if log10Mc is not None:
             self.log10Mc = log10Mc

@@ -263,12 +263,15 @@ class CacheInfo:
     Attributes
     ----------
     maxsize
+
     policy
+
     hits : int
         Number of times the function has been bypassed (cache hit).
     misses : int
         Number of times the function has computed something (cache miss).
-    current_size
+    current_size : int
+        Current size of cache dictionary.
     """
 
     def __init__(self, func, maxsize=Caching.maxsize, policy=Caching.policy):

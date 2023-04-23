@@ -7,8 +7,8 @@ from . import MassFunc
 
 
 class MassFuncDespali16(MassFunc):
-    r"""Halo mass function by Despali et al. (2016) :arXiv:1507.05627.
-    Valid for any S.O. masses.
+    r"""Halo mass function by `Despali et al. (2016)
+    <https://arxiv.org/abs/1507.05627>`_. Valid for any S.O. masses.
 
     The mass function takes the form
 
@@ -37,7 +37,7 @@ class MassFuncDespali16(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`n(M)` parametrization.
         The default is :math:`200{\rm m}`.
     mass_def_strict : bool, optional

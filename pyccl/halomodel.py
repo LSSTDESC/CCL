@@ -34,7 +34,7 @@ def _get_mf_hb(cosmo, mass_def):
     return hmf, hbf
 
 
-@deprecated(hal.Concentration)
+@deprecated(new_api=hal.Concentration)
 def halo_concentration(cosmo, halo_mass, a, odelta=200):
     """Halo mass concentration relation
 
@@ -52,7 +52,7 @@ def halo_concentration(cosmo, halo_mass, a, odelta=200):
     return c(cosmo, halo_mass, a)
 
 
-@deprecated(hal.halomod_power_spectrum)
+@deprecated(new_api=hal.halomod_power_spectrum)
 def onehalo_matter_power(cosmo, k, a):
     """One-halo term for matter power spectrum assuming NFW density profiles
 
@@ -76,7 +76,7 @@ def onehalo_matter_power(cosmo, k, a):
                                       get_2h=False)
 
 
-@deprecated(hal.halomod_power_spectrum)
+@deprecated(new_api=hal.halomod_power_spectrum)
 def twohalo_matter_power(cosmo, k, a):
     """Two-halo term for matter power spectrum assuming NFW density profiles
 
@@ -99,7 +99,7 @@ def twohalo_matter_power(cosmo, k, a):
                                       get_1h=False)
 
 
-@deprecated(hal.halomod_power_spectrum)
+@deprecated(new_api=hal.halomod_power_spectrum)
 def halomodel_matter_power(cosmo, k, a):
     """Matter power spectrum from halo model assuming NFW density profiles
 

@@ -2,28 +2,35 @@ __all__ = ("HMIngredients",)
 
 import functools
 from abc import abstractmethod
+from Numbers import Real
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
+import numpy.typing as npt
 
-from .. import CCLAutoRepr, CCLNamedClass, lib, check
+from .. import CCLNamedClass, lib, check
 from .. import deprecate_attr, deprecated, warn_api, mass_def_api
 from .. import physical_constants as const
 
+if TYPE_CHECKING:
+    from .. import Cosmology
+    from . import MassDef  # noqa
 
-class HMIngredients(CCLAutoRepr, CCLNamedClass):
-    """Base class for halo model ingredients.
 
-    This class contains methods that check for consistency of mass definition
-    and model at initialization. Subclasses must define a
-    ``_mass_def_strict_always`` class attribute and a
+class HMIngredients(CCLNamedClass):
+    """Abstract base class for halo model ingredients.
+
+    This class ensures mass definition consistency. Subclasses must define a
+    ``_mass_def_strict_always`` class variable and a
     ``_check_mass_def_strict`` class method.
 
     Parameters
     ----------
-    mass_def : :obj:`~pyccl.halos.MassDef`
+    mass_def : :obj:`~pyccl.halos.MassDef` or str
         Mass definition.
-    mass_def_strict : bool
+    mass_def_strict : bool, optional
         Whether the instance will allow for incompatible mass definitions.
+        The default is True.
 
     Raises
     ------
@@ -35,15 +42,21 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
     mass_def
 
     mass_def_strict
+
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
                                  )(super.__getattribute__)
 
     @warn_api
-    def __init__(self, *, mass_def, mass_def_strict=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[MassDef, str],
+            mass_def_strict: bool = True
+    ):
         # Check mass definition consistency.
-        from .massdef import MassDef
+        from .massdef import MassDef  # noqa
         mass_def = MassDef.create_instance(mass_def)
         self.mass_def_strict = mass_def_strict
         self._check_mass_def(mass_def)
@@ -65,7 +78,7 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
         """
 
     @abstractmethod
-    def _check_mass_def_strict(self, mass_def) -> bool:
+    def _check_mass_def_strict(self, mass_def: MassDef) -> bool:
         """Check if a mass definition is compatible with the model.
 
         Arguments
@@ -85,7 +98,7 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
         the end of initialization.
         """
 
-    def _check_mass_def(self, mass_def) -> None:
+    def _check_mass_def(self, mass_def: MassDef) -> None:
         """Check if a mass definition is compatible with the model and the
         initialization parameters.
 
@@ -137,21 +150,6 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
 class MassFunc(HMIngredients):
     r"""Base class for halo mass functions.
 
-    Implementation
-    --------------
-    - Subclasses must include arguments ``mass_def`` and ``mass_def_strict``
-      in their :meth:`__init__()` methods.
-    - Subclasses must define a :meth:`_get_fsigma()` method which implements
-      the mass function.
-    - Subclasses must define a :meth:`_check_mass_def_strict()`` method which
-      flags if the input mass definition is incompatible with the model.
-    - :meth:`_setup()` may be used to set up the model post-init.
-      See :meth:`HMIngredients._setup()` for details.
-    - Boolean class attribute ``_mass_def_strict_always`` may be set to prevent
-      relaxing the mass definition consistency checks. Do not omit argument
-      ``mass_def_strict`` in :meth:`__init__()` as this will depart from the
-      uniform way to instantiate mass functions.
-
     Theory
     ------
     We assume that all mass functions can be written as
@@ -163,6 +161,17 @@ class MassFunc(HMIngredients):
 
     where :math:`\sigma_M^2` is the overdensity variance on spheres with a
     radius given by the Lagrangian radius for mass :math:`M`.
+
+    Implementation
+    --------------
+    - Subclasses must define :meth:`_get_fsigma` which implements the mass
+      function, or override :meth:`__call__`f.
+    - Subclasses must define :meth:`_check_mass_def_strict` which flags if the
+      input mass definition is incompatible with the model.
+    - :meth:`_setup` may be used to set up the model post-init.
+      See :meth:`HMIngredients._setup` for details.
+    - Boolean class attribute ``_mass_def_strict_always`` may be set to prevent
+      relaxing the mass definition consistency checks.
     """
     _mass_def_strict_always = False
 
@@ -177,7 +186,7 @@ class MassFunc(HMIngredients):
             Standard deviation in the overdensity field on the scale of
             halos of mass :math:`M`. Input will always be an array, and there
             is no need for the implemented function to convert it to one.
-        a : float
+        a : int or float
             Scale factor.
         lnM : (nM,) ``numpy.ndarray``
             Natural logarithm of the halo mass in units of :math:`\rm M_\odot`
@@ -192,16 +201,21 @@ class MassFunc(HMIngredients):
             and there is no need to squeeze extra dimensions.
         """
 
-    def __call__(self, cosmo, M, a):
+    def __call__(
+            self,
+            cosmo: Cosmology,
+            M: Union[Real, npt.NDArray],
+            a: Real
+    ):
         r"""Call the mass function.
 
         Arguments
         ---------
         cosmo : :class:`~pyccl.core.Cosmology`
             Cosmological parameters.
-        M : float or (nM,) array_like
+        M : int, float or (nM,) array_like
             Halo mass in units of :math:`\rm M_\odot`.
-        a : float
+        a : int or float
             Scale factor.
 
         Returns
@@ -221,7 +235,7 @@ class MassFunc(HMIngredients):
             return mf[0]
         return mf
 
-    @deprecated(new_function=__call__)
+    @deprecated(new_api=__call__)
     @mass_def_api
     def get_mass_function(self, cosmo, M, a):
         return self(cosmo, M, a)
@@ -230,27 +244,23 @@ class MassFunc(HMIngredients):
 class HaloBias(HMIngredients):
     r"""Base class for halo bias functions.
 
-    Implementation
-    --------------
-    - Subclasses must include arguments ``mass_def`` and ``mass_def_strict``
-      in their :meth:`__init__()` methods.
-    - Subclasses must define a :meth:`_get_bsigma()` method which implements
-      the halo bias.
-    - Subclasses must define a :meth:`_check_mass_def_strict()`` method which
-      flags if the input mass definition is incompatible with the model.
-    - :meth:`_setup()` may be used to set up the model post-init.
-      See :meth:`HMIngredients._setup()` for details.
-    - Boolean class attribute ``_mass_def_strict_always`` may be set to prevent
-      relaxing the mass definition consistency checks. Do not omit argument
-      ``mass_def_strict`` in :meth:`__init__()` as this will depart from the
-      uniform way to instantiate mass functions.
-
     Theory
     ------
     We assume that all halo bias parametrizations can be written as functions
     that depend only on :math:`M` through :math:`\sigma_M`, the overdensity
     variance on spheres of the Lagrangian radius that corresponds to mass
     :math:`M`.
+
+    Implementation
+    --------------
+    - Subclasses must define :meth:`_get_bsigma` method which implements the
+      halo bias, or override :meth:`__call__`
+    - Subclasses must define :meth:`_check_mass_def_strict` which flags if the
+      input mass definition is incompatible with the model.
+    - :meth:`_setup` may be used to set up the model post-init.
+      See :meth:`HMIngredients._setup` for details.
+    - Boolean class attribute ``_mass_def_strict_always`` may be set to prevent
+      relaxing the mass definition consistency checks.
     """
     _mass_def_strict_always = False
 
@@ -265,7 +275,7 @@ class HaloBias(HMIngredients):
             Standard deviation in the overdensity field on the scale of
             halos of mass :math:`M`. Input will always be an array, and there
             is no need for the implemented function to convert it to one.
-        a : float
+        a : int or float
             Scale factor.
 
         Returns
@@ -275,7 +285,12 @@ class HaloBias(HMIngredients):
             and there is no need to squeeze extra dimensions.
         """
 
-    def __call__(self, cosmo, M, a):
+    def __call__(
+            self,
+            cosmo: Cosmology,
+            M: Union[Real, npt.NDArray],
+            a: Real
+    ):
         r"""Call the halo bias function.
 
         Arguments
@@ -284,7 +299,7 @@ class HaloBias(HMIngredients):
             Cosmological parameters.
         M : float or (nM,) array_like
             Halo mass in units of :math:`\rm M_\odot`.
-        a : float
+        a : int or float
             Scale factor.
 
         Returns
@@ -299,7 +314,7 @@ class HaloBias(HMIngredients):
             return b[0]
         return b
 
-    @deprecated(new_function=__call__)
+    @deprecated(new_api=__call__)
     @mass_def_api
     def get_halo_bias(self, cosmo, M, a):
         return self(cosmo, M, a)
@@ -307,17 +322,6 @@ class HaloBias(HMIngredients):
 
 class Concentration(HMIngredients):
     r"""Base class for halo mass-concentration relations.
-
-    Implementation
-    --------------
-    - Subclasses must include arguments ``mass_def`` and ``mass_def_strict``
-      in their :meth:`__init__()` methods.
-    - Subclasses must define a :meth:`_concentration()` method which implements
-      the concentration relation.
-    - :meth:`_setup()` may be used to set up the model post-init.
-      See :meth:`HMIngredients._setup()` for details.
-    - The mass definition checks are always strict for the mass-concentration
-      relations.
 
     Theory
     ------
@@ -335,6 +339,15 @@ class Concentration(HMIngredients):
         c_\Delta \equiv \frac{r_\Delta}{r_s},
 
     where :math:`\Delta` is the density contrast.
+
+    Implementation
+    --------------
+    - Subclasses must define :meth:`_concentration` which implements the
+      concentration relation, or override :meth:`__call__`.
+    - :meth:`_setup` may be used to set up the model post-init.
+      See :meth:`HMIngredients._setup` for details.
+    - The mass definition checks are always strict for the mass-concentration
+      relations.
     """
     _mass_def_strict_always = True
 
@@ -363,16 +376,21 @@ class Concentration(HMIngredients):
             and there is no need to squeeze extra dimensions.
         """
 
-    def __call__(self, cosmo, M, a):
+    def __call__(
+            self,
+            cosmo: Cosmology,
+            M: Union[Real, npt.NDArray],
+            a: Real
+    ):
         r"""Call the concentration relation.
 
         Arguments
         ---------
         cosmo : :class:`~pyccl.core.Cosmology`
             Cosmological parameters.
-        M : float or (nM,) array_like
+        M : int, float or (nM,) array_like
             Halo mass in units of :math:`\rm M_\odot`.
-        a : float
+        a : int or float
             Scale factor.
 
         Returns
@@ -386,25 +404,25 @@ class Concentration(HMIngredients):
             return c[0]
         return c
 
-    @deprecated(new_function=__call__)
+    @deprecated(new_api=__call__)
     @mass_def_api
     def get_concentration(self, cosmo, M, a):
         return self(cosmo, M, a)
 
 
 @functools.wraps(MassFunc.from_name)
-@deprecated(new_function=MassFunc.from_name)
+@deprecated(new_api=MassFunc.from_name)
 def mass_function_from_name(name):
     return MassFunc.from_name(name)
 
 
 @functools.wraps(HaloBias.from_name)
-@deprecated(new_function=HaloBias.from_name)
+@deprecated(new_api=HaloBias.from_name)
 def halo_bias_from_name(name):
     return HaloBias.from_name(name)
 
 
 @functools.wraps(Concentration.from_name)
-@deprecated(new_function=Concentration.from_name)
+@deprecated(new_api=Concentration.from_name)
 def concentration_from_name(name):
     return Concentration.from_name(name)

@@ -9,8 +9,8 @@ from . import Concentration
 
 
 class ConcentrationIshiyama21(Concentration):
-    r"""Concentration-mass relation by Ishiyama et al. (2021)
-    :arXiv:2007.14720. Only valid for S.O. masses with
+    r"""Concentration-mass relation by `Ishiyama et al. (2021)
+    <https://arxiv.org/abs/2007.14720>`_. Only valid for S.O. masses with
     :math:`\Delta_{\rm vir}`, :math:`\Delta_{200{\rm c}}`,
     or :math:`\Delta_{500{\rm c}}`.
 
@@ -56,7 +56,7 @@ class ConcentrationIshiyama21(Concentration):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`c(M)` parametrization.
         The default is :math:`\Delta_{500{\rm c}}`.
     relaxed : bool, optional

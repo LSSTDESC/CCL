@@ -8,8 +8,9 @@ from . import MassFunc
 
 
 class MassFuncTinker10(MassFunc):
-    r"""Halo mass function by Tinker et al. (2010) :arXiv:1001.3162.
-    Valid for any S.O. masses with :math:`\Delta \in (200{\rm m},3200{\rm m})`.
+    r"""Halo mass function by `Tinker et al. (2010)
+    <https://arxiv.org/abs/1001.3162>`_. Valid for any S.O. masses with
+    :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
 
     The mass function takes the form
 
@@ -25,7 +26,7 @@ class MassFuncTinker10(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`n(M)` parametrization.
         The default is :math:`200{\rm m}`.
     mass_def_strict : bool, optional

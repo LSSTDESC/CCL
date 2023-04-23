@@ -7,8 +7,8 @@ from . import MassFunc
 
 
 class MassFuncJenkins01(MassFunc):
-    r"""Halo mass function by Jenkins et al. (2001) :arXiv:astro-ph/0005260.
-    Valid for FoF masses only.
+    r"""Halo mass function by `Jenkins et al. (2001)
+    <https://arxiv.org/abs/astro-ph/0005260>`_. Valid for FoF masses only.
 
     The mass function takes the form
 
@@ -19,7 +19,7 @@ class MassFuncJenkins01(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`n(M)` parametrization.
         The default is :math:`{\rm FoF}`.
     mass_def_strict : bool, optional

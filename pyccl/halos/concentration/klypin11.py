@@ -5,8 +5,8 @@ from . import Concentration
 
 
 class ConcentrationKlypin11(Concentration):
-    r"""Concentration-mass relation by Klypin et al. (2011)
-    :arXiv:1002.3660. Only valid for S.O. masses with
+    r"""Concentration-mass relation by `Klypin et al. (2011)
+    <https://arxiv.org/abs/1002.3660>`_. Only valid for S.O. masses with
     :math:`\Delta_{\rm vir}`.
 
     The concentration takes the form
@@ -21,7 +21,7 @@ class ConcentrationKlypin11(Concentration):
 
     Parameters
     ---------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, fixed
         Mass definition for this :math:`c(M)` parametrization.
         It is fixed to :math:`\Delta_{\rm vir}`.
     """

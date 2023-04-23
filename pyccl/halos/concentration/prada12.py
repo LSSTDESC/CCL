@@ -7,8 +7,9 @@ from . import Concentration
 
 
 class ConcentrationPrada12(Concentration):
-    r"""Concentration-mass relation by Prada et al. (2012) :arXiv:1104.5130.
-    Valid only for S.O. masses with :math:`\Delta_{200{\rm c}}`.
+    r"""Concentration-mass relation by `Prada et al. (2012)
+    <https://arxiv.org/abs/1104.5130>`_. Valid only for S.O. masses with
+    :math:`\Delta_{200{\rm c}}`.
 
     The concentration takes the form
 
@@ -45,7 +46,7 @@ class ConcentrationPrada12(Concentration):
 
     Parameters
     ---------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, fixed
         Mass definition for this :math:`c(M)` parametrization.
         It is fixed to :math:`\Delta_{200{\rm c}}`.
     """

@@ -5,7 +5,10 @@ from . import CCLParameters
 
 
 class CosmologyParams(CCLParameters, factory=lib.parameters):
-    """Instances of this class hold cosmological parameters."""
+    """Instances of this class hold cosmological parameters.
+
+    Stored in instances of :obj:`~pyccl.Cosmology`.
+    """
 
     def __getattribute__(self, key):
         if key == "m_nu":

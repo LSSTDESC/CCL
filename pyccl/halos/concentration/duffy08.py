@@ -5,9 +5,10 @@ from . import Concentration
 
 
 class ConcentrationDuffy08(Concentration):
-    r"""Concentration-mass relation by Duffy et al. (2008) :arXiv:0804.2486.
-    Only valid for S.O. masses with :math:`\Delta_{\rm vir}`,
-    :math:`\Delta_{200{\rm m}}`, or :math:`\Delta_{200{\rm c}}`.
+    r"""Concentration-mass relation by `Duffy et al. (2008)
+    <https://arxiv.org/abs/0804.2486>`_. Only valid for S.O. masses with
+    :math:`\Delta_{\rm vir}`, :math:`\Delta_{200{\rm m}}`, or
+    :math:`\Delta_{200{\rm c}}`.
 
     The concentration takes the form
 
@@ -20,7 +21,7 @@ class ConcentrationDuffy08(Concentration):
 
     Parameters
     ---------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`c(M)` parametrization.
         The default is :math:`\Delta_{200{\rm c}}`.
     """
@@ -41,5 +42,5 @@ class ConcentrationDuffy08(Concentration):
         self.A, self.B, self.C = vals[self.mass_def.name]
 
     def _concentration(self, cosmo, M, a):
-        M_pivot_inv = cosmo["h"] * 5E-13
+        M_pivot_inv = cosmo["h"] * 5e-13
         return self.A * (M * M_pivot_inv)**self.B * a**(-self.C)

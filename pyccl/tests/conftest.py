@@ -16,8 +16,8 @@ def pytest_generate_tests(metafunc):
 
 
 # For testing, we want to make sure that all instances of the subclasses
-# of `CCLAutoRepr` contain all attributes listed in `__repr_attrs__`.
+# of `CCLObject` contain all attributes listed in `__repr_attrs__`.
 # We run some things post-init for these subclasses, which are triggered
 # during smoke tests.
-for sub in list(all_subclasses(pyccl.CCLAutoRepr)):
+for sub in list(all_subclasses(pyccl.CCLObject)):
     sub.__init__ = init_decorator(sub.__init__)

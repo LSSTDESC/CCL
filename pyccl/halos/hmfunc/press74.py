@@ -7,7 +7,8 @@ from . import MassFunc
 
 
 class MassFuncPress74(MassFunc):
-    r"""Halo mass function by Press et al. (1974) 1974ApJ...187..425P.
+    r"""Halo mass function by `Press et al. (1974)
+    <https://ui.adsabs.harvard.edu/abs/1974ApJ...187..425P/abstract>`_.
     Valid for FoF masses only.
 
     The mass function takes the form
@@ -19,7 +20,7 @@ class MassFuncPress74(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`n(M)` parametrization.
         The default is :math:`{\rm FoF}`.
     mass_def_strict : bool, optional

@@ -7,8 +7,8 @@ from . import MassFunc
 
 
 class MassFuncAngulo12(MassFunc):
-    r"""Halo mass function by Angulo et al. (2012) :arXiv:1203.3216.
-    Valid for FoF masses only.
+    r"""Halo mass function by `Angulo et al. (2012)
+    <https://arxiv.org/abs/1203.3216>`_. Valid for FoF masses only.
 
     The mass function takes the form
 
@@ -22,7 +22,7 @@ class MassFuncAngulo12(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`n(M)` parametrization.
         The default is :math:`{\rm FoF}`.
     mass_def_strict : bool, optional
@@ -34,9 +34,7 @@ class MassFuncAngulo12(MassFunc):
     name = 'Angulo12'
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="fof",
-                 mass_def_strict=True):
+    def __init__(self, *, mass_def="fof", mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):

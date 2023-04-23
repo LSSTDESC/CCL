@@ -78,21 +78,12 @@ def test_CCLObject_immutability():
 
 
 def test_CCLObject_default_behavior():
-    # Test that if `__repr__` is not defined the fall back is safe.
+    # Test that all subclasses of ``CCLObject`` use Python's default
+    # ``repr`` if no ``__repr_attrs__`` exists.
+    instances = [ccl.CCLObject() for _ in range(2)]
+    assert check_eq_repr_hash(*instances, equal=False)
+
     MyType = type("MyType", (ccl.CCLObject,), {"test": 0})
-    instances = [MyType() for _ in range(2)]
-    assert check_eq_repr_hash(*instances, equal=False)
-
-    # Test that all subclasses of ``CCLAutoRepr`` use Python's default
-    # ``repr`` if no ``__repr_attrs__`` has been defined.
-    instances = [ccl.CCLAutoRepr() for _ in range(2)]
-    assert check_eq_repr_hash(*instances, equal=False)
-
-    MyType = type("MyType", (ccl.CCLAutoRepr,), {"test": 0})
-    instances = [MyType() for _ in range(2)]
-    assert instances[0] != instances[1]
-
-    MyType = type("MyType", (ccl.CCLAutoRepr,), {"test": 0})
     instances = [MyType() for _ in range(2)]
     assert instances[0] != instances[1]
 
@@ -110,7 +101,7 @@ def test_named_class_raises():
 
 def init_decorator(func):
     """Check that all attributes listed in ``__repr_attrs__`` are defined in
-    the constructor of all subclasses of ``CCLAutoRepr``.
+    the constructor of all subclasses of ``CCLObject``.
     NOTE: Used in ``conftest.py``.
     """
 
@@ -159,5 +150,5 @@ def test_unlock_instance_errors():
         func2()
 
     # 3. Doesn't do anything if instance is not CCLObject.
-    with ccl.UnlockInstance(True, mutate=False):
+    with ccl.UnlockInstance(True):
         pass

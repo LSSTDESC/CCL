@@ -8,22 +8,25 @@ from .. import CCLDeprecationWarning
 from . import unlock_instance
 
 
-def deprecated(new_function=None):
-    """This is a decorator which can be used to mark functions
-    as deprecated. It will result in a warning being emitted
-    when the function is used. If there is a replacement function,
-    pass it as `new_function`.
+def deprecated(obj=None, *, new_api=None):
+    """Decorator to mark deprecated callables.
+
+    Parameters
+    ----------
+    new_api : callable, optional
+        Point users to new API.
     """
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            s = f"The function {func.__qualname__} is deprecated."
-            if new_function:
-                s += f" Use {new_function.__qualname__} instead."
-            warnings.warn(s, CCLDeprecationWarning)
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+    if obj is None:
+        return functools.partial(deprecated, new_api=new_api)
+
+    @functools.wraps(obj)
+    def wrapper(*args, **kwargs):
+        s = f"{obj.__qualname__} is deprecated."
+        if new_api:
+            s += f" Use {new_api.__qualname__} instead."
+        warnings.warn(s, CCLDeprecationWarning)
+        return obj(*args, **kwargs)
+    return wrapper
 
 
 def mass_def_api(func):

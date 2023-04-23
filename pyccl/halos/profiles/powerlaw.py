@@ -6,6 +6,7 @@ from ... import warn_api, deprecated
 from . import HaloProfile
 
 
+@deprecated
 class HaloProfilePowerLaw(HaloProfile):
     """ Power-law profile
 
@@ -25,7 +26,6 @@ class HaloProfilePowerLaw(HaloProfile):
     __repr_attrs__ = __eq_attrs__ = ("r_scale", "tilt", "mass_def",
                                      "precision_fftlog",)
 
-    @deprecated()
     @warn_api
     def __init__(self, *, r_scale, tilt, mass_def=None):
         self.r_scale = r_scale

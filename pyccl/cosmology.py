@@ -17,7 +17,7 @@ import numpy as np
 from . import (
     CCLError, CCLDeprecationWarning, CCLObject, CCLParameters, CLevelErrors,
     CosmologyParams, DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, cache, check,
-    lib, unlock_instance, warn_api, deprecated)
+    lib, warn_api, deprecated)
 from . import physical_constants as const
 
 
@@ -503,7 +503,7 @@ class Cosmology(CCLObject):
 
         rho_nu_rel = N_nu_rel * (7/8) * 4 * c.STBOLTZ / c.CLIGHT**3 * T_nu**4
         Omega_nu_rel = rho_nu_rel / rho_crit
-        Omega_nu_mass = self._OmNuh2(nu_mass, N_nu_mass, T_CMB, T_ncdm) / h**2
+        Omega_nu_mass = self._OmNuh2(nu_mass, T_CMB, T_ncdm) / h**2
 
         if N_nu_rel < 0:
             raise ValueError("Unphysical Neff and m_nu combination results to "
@@ -534,9 +534,9 @@ class Cosmology(CCLObject):
         if z_mg is not None:
             self._params.mgrowth = [z_mg, df_mg]
 
-    def _OmNuh2(self, m_nu, N_nu_mass, T_CMB, T_ncdm):
+    def _OmNuh2(self, m_nu, T_CMB, T_ncdm):
         # Compute OmNuh2 today.
-        ret, st = lib.Omeganuh2_vec(N_nu_mass, T_CMB, T_ncdm, [1], m_nu, 1, 0)
+        ret, st = lib.Omeganuh2_vec(len(m_nu), T_CMB, T_ncdm, [1], m_nu, 1, 0)
         check(st)
         return ret[0]
 
@@ -651,7 +651,6 @@ class Cosmology(CCLObject):
 
         return pk
 
-    @unlock_instance(mutate=False)
     def compute_linear_power(self):
         """Compute the linear power spectrum."""
         if self.has_linear_power:
@@ -731,7 +730,6 @@ class Cosmology(CCLObject):
 
         return pk
 
-    @unlock_instance(mutate=False)
     def compute_nonlin_power(self):
         """Compute the non-linear power spectrum."""
         if self.has_nonlin_power:
@@ -811,7 +809,7 @@ class Cosmology(CCLObject):
         """Checks if sigma(M) is precomputed."""
         return bool(self.cosmo.computed_sigma)
 
-    @deprecated()
+    @deprecated
     def status(self):
         """Get error status of the ccl_cosmology object.
         .. note:: The error statuses are currently under development and

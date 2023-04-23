@@ -7,7 +7,8 @@ from . import MassFunc
 
 
 class MassFuncSheth99(MassFunc):
-    r"""Halo mass function by Sheth & Tormen (1999) :arXiv:astro-ph/9901122.
+    r"""Halo mass function by `Sheth & Tormen (1999)
+    <https://arxiv.org/abs/astro-ph/9901122>`_.
     Valid for FoF masses only.
 
     The mass function takes the form
@@ -23,7 +24,7 @@ class MassFuncSheth99(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`n(M)` parametrization.
         The default is :math:`{\rm FoF}`.
     mass_def_strict : bool, optional

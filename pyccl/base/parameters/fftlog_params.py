@@ -2,7 +2,10 @@ __all__ = ("FFTLogParams",)
 
 
 class FFTLogParams:
-    """Objects of this class store the FFTLog accuracy parameters."""
+    """Objects of this class store the FFTLog accuracy parameters.
+
+    Stored in instances of :obj:`~pyccl.halos.HaloProfile`.
+    """
     padding_lo_fftlog = 0.1   # | Anti-aliasing: multiply the lower boundary.
     padding_hi_fftlog = 10.   # |                multiply the upper boundary.
 
@@ -37,13 +40,13 @@ class FFTLogParams:
 
     def __eq__(self, other):
         if self is other:
-            True
+            return True
         if type(self) != type(other):
             return False
         return self.to_dict() == other.to_dict()
 
     def update_parameters(self, **kwargs):
-        """Update the precision of FFTLog for the Hankel transforms.
+        r"""Update the precision of FFTLog for the Hankel transforms.
 
         Arguments
         ---------
@@ -69,7 +72,7 @@ class FFTLogParams:
         plaw_fourier, plaw_projected : float
             FFTLog pre-whitens its arguments (makes them flatter) to avoid
             aliasing. The ``plaw`` parameters describe the tilt of the profile,
-            :math:`P(r) \\sim r^{\\mathrm{tilt}}`, between real and Fourier
+            :math:`P(r) \sim r^{\rm tilt}`, between real and Fourier
             transforms, and between 2D projected and cumulative density,
             respectively. Subclasses of ``HaloProfile`` may obtain finer
             control via ``_get_plaw_[fourier | projected]``, and some level of

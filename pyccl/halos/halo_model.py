@@ -1,16 +1,19 @@
 __all__ = ("HMCalculator",)
 
 import warnings
+from numbers import Real
+from typing import Literal, Union
+
 import numpy as np
 
-from .. import CCLAutoRepr, CCLDeprecationWarning, unlock_instance
+from .. import CCLObject, CCLDeprecationWarning, unlock_instance
 from .. import warn_api, deprecate_attr, deprecated
 from .. import physical_constants as const
-from . import MassDef
+from . import MassDef, MassFunc, HaloBias
 from ..pyutils import _spline_integrate
 
 
-class HMCalculator(CCLAutoRepr):
+class HMCalculator(CCLObject):
     r"""Implementation of methods used to compute quantities related to the
     halo model. A lot of these quantities involve integrals of the sort:
 
@@ -40,10 +43,12 @@ class HMCalculator(CCLAutoRepr):
         Halo bias used in the calculations. If an instantiated halo bias is
         provided, its mass definition must be equal to the mass definition
         passed into the halo model calculator.
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str
+    mass_def : :class:`~pyccl.halos.MassDef`, str or None, optional
         Mass definition used in the calculations. It must be equal to the mass
         definitions of ``mass_function`` and ``halo_bias``. If strings are
         provided, the instantiated models will share a common mass definition.
+        May be omitted if ``mass_function`` and ``halo_bias`` are provided
+        instantiated; their internal mass definition will be used.
     lM_min, lM_max : float
         Lower and upper mass integration bounds.
         These are the base-10 logarithms of mass in units of
@@ -56,7 +61,7 @@ class HMCalculator(CCLAutoRepr):
         ``'simpson'`` uses ``scipy.integrate.simpson``, while ``'spline'``
         integrates using the knots of a cubic spline fitted to the integrand.
         The default is ``'simpson'``.
-    k_norm : float
+    k_min : float - Deprecated; do not use.
         Large-scale value used for normalization of the Fourier-space halo
         profiles, expressed in units of :math:`\rm Mpc^{-1}`.
         The default is :math:`10^{-5}`.
@@ -82,9 +87,17 @@ class HMCalculator(CCLAutoRepr):
 
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
                      ("nlog10M", "nM")])
-    def __init__(self, *, mass_function, halo_bias, mass_def=None,
-                 log10M_min=8., log10M_max=16., nM=128,
-                 integration_method_M='simpson', k_min=1E-5):
+    def __init__(
+            self, *,
+            mass_function: Union[MassFunc, str],
+            halo_bias: Union[HaloBias, str],
+            mass_def: Union[MassDef, str, None] = None,
+            log10M_min: Real = 8.,
+            log10M_max: Real = 16.,
+            nM: int = 128,
+            integration_method_M: Literal["simpson", "spline"] = "simpson",
+            k_min: Real = 1e-5
+    ):
         # Initialize halo model ingredients.
         self.mass_def, self.mass_function, self.halo_bias = MassDef.from_specs(
             mass_def, mass_function=mass_function, halo_bias=halo_bias)
@@ -117,7 +130,7 @@ class HMCalculator(CCLAutoRepr):
         if set([x.mass_def for x in others]) != set([self.mass_def]):
             raise ValueError("Inconsistent mass definitions.")
 
-    @unlock_instance(mutate=False)
+    @unlock_instance
     def _get_mass_function(self, cosmo, a, rho0):
         # Compute the mass function at this cosmo and a.
         if a != self._a_mf or cosmo != self._cosmo_mf:
@@ -126,7 +139,7 @@ class HMCalculator(CCLAutoRepr):
             self._mf0 = (rho0 - integ) / self._m0
             self._cosmo_mf, self._a_mf = cosmo, a  # cache
 
-    @unlock_instance(mutate=False)
+    @unlock_instance
     def _get_halo_bias(self, cosmo, a, rho0):
         # Compute the halo bias at this cosmo and a.
         if a != self._a_bf or cosmo != self._cosmo_bf:
@@ -171,7 +184,7 @@ class HMCalculator(CCLAutoRepr):
         self._get_ingredients(cosmo, a, get_bf=False)
         return self._integrate_over_mf(fM)
 
-    @deprecated()
+    @deprecated
     def profile_norm(self, cosmo, a, prof):
         r"""Compute the large-scale normalization of a profile:
 

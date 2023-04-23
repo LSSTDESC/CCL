@@ -5,7 +5,7 @@ import numpy as np
 from . import BaryonsSchneider15, check, deprecated, lib, unlock_instance
 
 
-@deprecated(BaryonsSchneider15)
+@deprecated(new_api=BaryonsSchneider15)
 def bcm_model_fka(cosmo, k, a):
     """The BCM model correction factor for baryons.
 
@@ -32,8 +32,8 @@ def bcm_model_fka(cosmo, k, a):
     return bcm.boost_factor(cosmo, k, a)
 
 
-@deprecated(BaryonsSchneider15)
-@unlock_instance(mutate=True, name="pk2d")
+@deprecated(new_api=BaryonsSchneider15)
+@unlock_instance(name="pk2d")
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
 

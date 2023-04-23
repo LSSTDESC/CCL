@@ -5,7 +5,7 @@ from .import deprecated
 from . import halos as hal
 
 
-@deprecated(hal.HaloProfileNFW)
+@deprecated(new_api=hal.HaloProfileNFW)
 def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D NFW halo profile at a given radius or an array
     of radii, for a halo with a given mass, mass definition, and
@@ -32,7 +32,7 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     return p.real(cosmo, r, halo_mass, a)
 
 
-@deprecated(hal.HaloProfileEinasto)
+@deprecated(new_api=hal.HaloProfileEinasto)
 def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D Einasto halo profile
     at a given radius or an array of radii,
@@ -62,7 +62,7 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     return p.real(cosmo, r, halo_mass, a)
 
 
-@deprecated(hal.HaloProfileHernquist)
+@deprecated(new_api=hal.HaloProfileHernquist)
 def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D Hernquist halo profile
     at a given radius or an array of radii,
@@ -90,7 +90,7 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     return p.real(cosmo, r, halo_mass, a)
 
 
-@deprecated(hal.HaloProfileNFW)
+@deprecated(new_api=hal.HaloProfileNFW)
 def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 2D projected NFW halo profile
     at a given radius or an array of radii,

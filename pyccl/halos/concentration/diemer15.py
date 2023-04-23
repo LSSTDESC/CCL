@@ -7,9 +7,9 @@ from . import Concentration
 
 
 class ConcentrationDiemer15(Concentration):
-    r"""Concentration-mass relation by Diemer & Kravtsov (2015)
-    :arXiv:1407.4730. Valid only for S.O. :math:`\Delta = 200c`
-    mass definitions.
+    r"""Concentration-mass relation by `Diemer & Kravtsov (2015)
+    <https://arxiv.org/abs/1407.4730>`_. Valid only for S.O.
+    :math:`\Delta = 200c` mass definitions.
 
     The concentration takes the form
 
@@ -25,7 +25,7 @@ class ConcentrationDiemer15(Concentration):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, fixed
         Mass definition for this :math:`c(M)` parametrization. It is fixed to
         :math:`\Delta=200c`.
     """

@@ -179,7 +179,7 @@ class MassDef(CCLNamedClass, CCLObject):
         ---------
         cosmo : :class:`~pyccl.core.Cosmology`
             Cosmological parameters.
-        a : float
+        a : int or float
             Scale factor.
 
         Returns
@@ -211,7 +211,7 @@ class MassDef(CCLNamedClass, CCLObject):
         ---------
         cosmo : :class:`~pyccl.core.Cosmology`
             Cosmological parameters.
-        a : float
+        a : int or float
             Scale factor.
 
         Returns
@@ -237,9 +237,9 @@ class MassDef(CCLNamedClass, CCLObject):
         ---------
         cosmo : :class:`~pyccl.core.Cosmology`
             Cosmological parameters.
-        R: float or (nR,) array_like
+        R: int, float or (nR,) array_like
             Halo radius in physical :math:`\rm Mpc`.
-        a : float
+        a : int or float
             Scale factor.
 
         Returns
@@ -265,9 +265,9 @@ class MassDef(CCLNamedClass, CCLObject):
         ---------
         cosmo : :class:`~pyccl.core.Cosmology`
             Cosmological parameters.
-        M : float or (nM,) array_like
+        M : int, float or (nM,) array_like
             Halo mass in :math:`\rm M_\odot`.
-        a : float
+        a : int or float
             Scale factor.
 
         Returns
@@ -291,9 +291,9 @@ class MassDef(CCLNamedClass, CCLObject):
         ---------
         cosmo : :class:`~pyccl.core.Cosmology`
             Cosmological parameters.
-        M : float or (nM,) array_like
+        M : int, float or (nM,) array_like
             Halo mass in :math:`\rm M_\odot`.
-        a : float
+        a : int or float
             Scale factor.
         mass_def_other : :class:`~pyccl.halos.massdef.MassDef`
             Mass definition to translate to.
@@ -366,8 +366,14 @@ class MassDef(CCLNamedClass, CCLObject):
     # create_instance = from_name
 
     @classmethod
-    def from_specs(cls, mass_def=None, *,
-                   mass_function=None, halo_bias=None, concentration=None):
+    def from_specs(
+            cls,
+            mass_def: Union["MassDef", str, None] = None,
+            *,
+            mass_function: Union[MassFunc, str, None] = None,
+            halo_bias: Union[HaloBias, str, None] = None,
+            concentration: Union[Concentration, str, None] = None
+    ):
         """Instantiate mass definition and halo model ingredients.
 
         Unspecified halo model ingredients are ignored. ``mass_def`` is always

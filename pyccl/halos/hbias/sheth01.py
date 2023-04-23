@@ -7,8 +7,8 @@ from . import HaloBias
 
 
 class HaloBiasSheth01(HaloBias):
-    r"""Halo bias relation by Sheth, Mo & Tormen (2001)
-    :arXiv:astro-ph/9907024. Valid for FoF masses only.
+    r"""Halo bias relation by `Sheth, Mo & Tormen (2001)
+    <https://arxiv.org/abs/astro-ph/9907024>`_. Valid for FoF masses only.
 
     The halo bias takes the form
 
@@ -25,7 +25,7 @@ class HaloBiasSheth01(HaloBias):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
         Mass definition for this :math:`b(M)` parametrization.
         The default is :math:`{\rm FoF}`.
     mass_def_strict : bool, optional
