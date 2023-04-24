@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 __all__ = ("HMIngredients",)
 
 import functools
 from abc import abstractmethod
-from Numbers import Real
+from numbers import Real
 from typing import TYPE_CHECKING, Union
 
 import numpy as np
@@ -14,7 +16,7 @@ from .. import physical_constants as const
 
 if TYPE_CHECKING:
     from .. import Cosmology
-    from . import MassDef  # noqa
+    from . import MassDef
 
 
 class HMIngredients(CCLNamedClass):
@@ -165,7 +167,7 @@ class MassFunc(HMIngredients):
     Implementation
     --------------
     - Subclasses must define :meth:`_get_fsigma` which implements the mass
-      function, or override :meth:`__call__`f.
+      function, or override :meth:`__call__`.
     - Subclasses must define :meth:`_check_mass_def_strict` which flags if the
       input mass definition is incompatible with the model.
     - :meth:`_setup` may be used to set up the model post-init.
@@ -180,7 +182,7 @@ class MassFunc(HMIngredients):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         sigM : (nM,) ``numpy.ndarray``
             Standard deviation in the overdensity field on the scale of
@@ -211,7 +213,7 @@ class MassFunc(HMIngredients):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         M : int, float or (nM,) array_like
             Halo mass in units of :math:`\rm M_\odot`.
@@ -269,7 +271,7 @@ class HaloBias(HMIngredients):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         sigM : (nM,) ``numpy.ndarray``
             Standard deviation in the overdensity field on the scale of
@@ -295,7 +297,7 @@ class HaloBias(HMIngredients):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         M : float or (nM,) array_like
             Halo mass in units of :math:`\rm M_\odot`.
@@ -360,7 +362,7 @@ class Concentration(HMIngredients):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         M : (nM,) ``numpy.ndarray``
             Halo mass in units of :math:`\rm M_\odot`.
@@ -386,7 +388,7 @@ class Concentration(HMIngredients):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         M : int, float or (nM,) array_like
             Halo mass in units of :math:`\rm M_\odot`.
