@@ -30,13 +30,23 @@ from .pyutils import (_vectorize_fn, _vectorize_fn3,
 
 
 class Species(Enum):
-    CRITICAL = "critical"  # critical density
-    MATTER = "matter"  # cold dark matter, massive neutrinos, baryons
-    DARK_ENERGY = "dark_energy"  # cosmological constant or otherwise
-    RADIATION = "radiation"  # relativistic species besides massless neutrinos
-    CURVATURE = "curvature"  # curvature
-    NEUTRINOS_REL = "neutrinos_rel"  # relativistic neutrinos
-    NEUTRINOS_MASSIVE = "neutrinos_massive"  # massive neutrinos
+    """Energy species types defined in CCL.
+
+    * critical - critical density
+    * matter - cold dark matter, baryons, massive neutrinos
+    * dark_energy - cosmological constant or otherwise
+    * radiation - relativistic species besides massless neutrinos
+    * curvature - curvature
+    * neutrinos_rel - relativistic neutrinos
+    * neutrinos_massive - massive neutrinos
+    """
+    CRITICAL = "critical"
+    MATTER = "matter"
+    DARK_ENERGY = "dark_energy"
+    RADIATION = "radiation"
+    CURVATURE = "curvature"
+    NEUTRINOS_REL = "neutrinos_rel"
+    NEUTRINOS_MASSIVE = "neutrinos_massive"
 
 
 species_types = {
