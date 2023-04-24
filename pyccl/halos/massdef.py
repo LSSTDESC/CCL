@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
            "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
            "MassDefFof", "mass_translator",)
@@ -5,13 +7,18 @@ __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
 import warnings
 import weakref
 from functools import cached_property
-from typing import Union, Callable
+from numbers import Real
+from typing import TYPE_CHECKING, Union, Callable
 
 import numpy as np
+import numpy.typing as npt
 
 from .. import CCLDeprecationWarning, CCLNamedClass, CCLObject, lib, check
 from .. import warn_api, deprecate_attr
 from . import Concentration, HaloBias, MassFunc
+
+if TYPE_CHECKING:
+    from .. import Cosmology
 
 
 def mass2radius_lagrangian(cosmo, M):
@@ -29,9 +36,9 @@ def mass2radius_lagrangian(cosmo, M):
 
     Parameters
     ----------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.core.Cosmology`
         Cosmological parameters.
-    M : float or (nM,) array_like
+    M : int, float or (nM,) array_like
         Halo mass in :math:`\rm M_\odot`.
 
     Returns
@@ -67,9 +74,9 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
 
     Arguments
     ---------
-    c_old : float or (nc,) array_like
+    c_old : int, float or (nc,) array_like
         Concentration to translate.
-    Delta_old, Delta_new : float
+    Delta_old, Delta_new : int or float
         Overdensity (:math:`\Delta`) parameters associated with the
         halo mass definition of the old and new concentrations, respectively.
         See :class:`~pyccl.halos.massdef.MassDef` for details.
@@ -120,7 +127,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
     Attributes
     ----------
-    Delta : float or {'fof', 'vir'}
+    Delta : int, float or {'fof', 'vir'}
         S.O. parameter.
     rho_type : {'critical', 'matter'}
         Reference mean density type.
@@ -177,7 +184,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.core.Cosmology`
             Cosmological parameters.
         a : int or float
             Scale factor.
@@ -209,7 +216,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.core.Cosmology`
             Cosmological parameters.
         a : int or float
             Scale factor.
@@ -235,7 +242,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.core.Cosmology`
             Cosmological parameters.
         R: int, float or (nR,) array_like
             Halo radius in physical :math:`\rm Mpc`.
@@ -263,7 +270,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.core.Cosmology`
             Cosmological parameters.
         M : int, float or (nM,) array_like
             Halo mass in :math:`\rm M_\odot`.
@@ -289,7 +296,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.core.Cosmology`
             Cosmological parameters.
         M : int, float or (nM,) array_like
             Halo mass in :math:`\rm M_\odot`.
@@ -511,10 +518,13 @@ def MassDefFof():
 # MassDefFof = MassDef("fof", "matter")
 
 
-def mass_translator(*,
-                    mass_in: Union[str, MassDef],
-                    mass_out: Union[str, MassDef],
-                    concentration: Union[str, Concentration]) -> Callable:
+def mass_translator(
+        *,
+        mass_in: Union[str, MassDef],
+        mass_out: Union[str, MassDef],
+        concentration: Union[str, Concentration]
+) -> Callable[[Cosmology, Union[Real, npt.NDarray], Real],
+              Union[Real, npt.NDarray]]:
     """Translate between mass definitions, assuming an NFW profile."""
 
     mass_in = MassDef.create_instance(mass_in)

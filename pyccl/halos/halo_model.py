@@ -166,19 +166,25 @@ class HMCalculator(CCLObject):
         return i1 + self._mbf0 * array_2[..., 0]
 
     def integrate_over_massfunc(self, func, cosmo, a):
-        """ Returns the integral over mass of a given funcion times
-        the mass function.
+        r"""Compute the integral over mass of a function, times mass function.
 
-        Args:
-            func (callable): a function accepting an array of halo masses
-                as a single argument, and returning an array of the
-                same size.
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            a (float): scale factor.
+        .. math::
 
-        Returns:
-            float or array_like: integral over mass of the function times
-                the mass function.
+            I = \int {\rm d}M \, n(M) \, f(M)
+
+        Arguments
+        ---------
+        func : callable
+            Function of halo mass.
+        cosmo : :obj:`~pyccl.Cosmology`
+            Cosmological parameters.
+        a : int or float
+            Scale factor.
+
+        Returns
+        -------
+        I : float or ``numpy.ndarray``
+            Integral over mass times mass function.
         """
         fM = func(self._mass)
         self._get_ingredients(cosmo, a, get_bf=False)
@@ -190,7 +196,7 @@ class HMCalculator(CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.core.Cosmology`
             Cosmological parameters.
         a : float
             Scale factor.
@@ -229,13 +235,13 @@ class HMCalculator(CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.core.Cosmology`
             Cosmological parameters.
         sel : callable
             Selection function with signature ``sel(M, a)``. The function must
             be vectorized in both ``M`` and ``a``, and the output shape must
             be ``(na, nM)`` as per ``numpy`` broadcasting rules.
-        amin, amax : float, optional
+        amin, amax : int or float, optional
             Minimum and maximum scale factors used in the selection function
             integrals. The defaults are
             (``cosmo._spline_params.A_SPLINE_MIN``, :math:`1.0`).
@@ -288,13 +294,13 @@ class HMCalculator(CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        k : float or (nk,) array_like
+        k : int, float or (nk,) array_like
             Comoving wavenumber in :math:`\rm Mpc^{-1}`.
-        a : float
+        a : int or float
             Scale factor.
-        prof : :class:`~pyccl.halos.profiles.HaloProfile`
+        prof : :obj:`~pyccl.halos.HaloProfile`
             Halo profile.
 
         Returns
@@ -321,13 +327,13 @@ class HMCalculator(CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        k : float or (nk,) array_like
+        k : int, float or (nk,) array_like
             Comoving wavenumber in :math:`\rm Mpc^{-1}`.
-        a : float
+        a : int or float
             Scale factor.
-        prof : :class:`~pyccl.halos.profiles.HaloProfile`
+        prof : :obj:`~pyccl.halos.HaloProfile`
             Halo profile.
 
         Returns
@@ -355,15 +361,15 @@ class HMCalculator(CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        k : float or (nk,) array_like
+        k : int, float or (nk,) array_like
             Comoving wavenumber in :math:`\rm Mpc^{-1}`.
-        a : float
+        a : int or float
             Scale factor.
-        prof, prof2 : :class:`~pyccl.halos.profiles.HaloProfile`
+        prof, prof2 : :obj:`~pyccl.halos.HaloProfile`
             Halo profiles. If ``prof2 is None``, ``prof`` will be used.
-        prof_2pt : :class:`~pyccl.halos.profiles_2pt.Profile2pt`
+        prof_2pt : :obj:`~pyccl.halos.Profile2pt`
             2-point correlator of ``prof`` and ``prof2``.
 
         Returns
@@ -394,15 +400,15 @@ class HMCalculator(CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        k : float or (nk,) array_like
+        k : int, float or (nk,) array_like
             Comoving wavenumber in :math:`\rm Mpc^{-1}`.
-        a : float
+        a : int or float
             Scale factor.
-        prof, prof2 : :class:`~pyccl.halos.profiles.HaloProfile`
+        prof, prof2 : :obj:`~pyccl.halos.HaloProfile`
             Halo profiles. If ``prof2 is None``, ``prof`` will be used.
-        prof_2pt : :class:`~pyccl.halos.profiles_2pt.Profile2pt`
+        prof_2pt : :obj:`~pyccl.halos.Profile2pt`
             2-point correlator of ``prof`` and ``prof2``.
 
         Returns
@@ -445,18 +451,18 @@ class HMCalculator(CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.core.Cosmology`
+        cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        k : float or (nk,) array_like
+        k : int, float or (nk,) array_like
             Comoving wavenumber in :math:`\rm Mpc^{-1}`.
-        a : float
+        a : int or float
             Scale factor.
-        prof, prof2, prof3, prof4 : :class:`~pyccl.halos.profiles.HaloProfile`
+        prof, prof2, prof3, prof4 : :obh:`~pyccl.halos.HaloProfile`
             Halo profiles.
             - If ``prof2 is None``, ``prof`` will be used.
             - If ``prof3 is None``, ``prof`` will be used.
             - If ``prof4 is None``, ``prof2`` will be used.
-        prof12_2pt, prof34_wpt : :class:`~pyccl.halos.profiles_2pt.Profile2pt`
+        prof12_2pt, prof34_wpt : :obj:`~pyccl.halos.Profile2pt`
             2-point correlators of the profile pairs.
             If ``prof34_2pt is None``, ``prof12_2pt`` will be used.
 

@@ -42,9 +42,9 @@ class Baryons(CCLNamedClass):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.Cosmology`
+        cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        pk : :class:`~pyccl.Pk2D`
+        pk : :obj:`~pyccl.Pk2D`
             Power spectrum.
 
         Returns

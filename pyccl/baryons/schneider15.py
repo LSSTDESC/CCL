@@ -55,11 +55,11 @@ class BaryonsSchneider15(Baryons):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.Cosmology`
+        cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        k : float or (nk,) array_like
+        k : int, float or (nk,) array_like
             Comoving wavenumber in :math:`\rm Mpc^{-1}`.
-        a : float or (na,) array_like
+        a : int, float or (na,) array_like
             Scale factor.
 
         Returns

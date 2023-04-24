@@ -30,13 +30,13 @@ from .pyutils import (_vectorize_fn, _vectorize_fn3,
 
 
 class Species(Enum):
-    CRITICAL = "critical"
-    MATTER = "matter"
-    DARK_ENERGY = "dark_energy"
-    RADIATION = "radiation"
-    CURVATURE = "curvature"
-    NEUTRINOS_REL = "neutrinos_rel"
-    NEUTRINOS_MASSIVE = "neutrinos_massive"
+    CRITICAL = "critical"  # critical density
+    MATTER = "matter"  # cold dark matter, massive neutrinos, baryons
+    DARK_ENERGY = "dark_energy"  # cosmological constant or otherwise
+    RADIATION = "radiation"  # relativistic species besides massless neutrinos
+    CURVATURE = "curvature"  # curvature
+    NEUTRINOS_REL = "neutrinos_rel"  # relativistic neutrinos
+    NEUTRINOS_MASSIVE = "neutrinos_massive"  # massive neutrinos
 
 
 species_types = {
@@ -59,9 +59,9 @@ def h_over_h0(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
 
     Returns
@@ -83,9 +83,9 @@ def comoving_radial_distance(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
 
     Returns
@@ -103,9 +103,9 @@ def scale_factor_of_chi(cosmo, chi):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    chi : float or (nchi,) array_like
+    chi : int, float or (nchi,) array_like
         Comoving radial distance :math:`\chi` in :math:`\rm Mpc`.
 
     Returns
@@ -135,9 +135,9 @@ def comoving_angular_distance(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
 
     Returns
@@ -166,7 +166,7 @@ def angular_diameter_distance(cosmo, a1, a2=None):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
            Cosmological parameters.
     a1 : float or (na1,) array_like
         Scale factor(s), normalized to 1 today.
@@ -183,7 +183,7 @@ def angular_diameter_distance(cosmo, a1, a2=None):
 
     Returns
     -------
-    D_A : float, (na1,) or (na2,) ``numpy.ndarray``
+    D_a : int or float, (na1,) or (na2,) ``numpy.ndarray``
         Angular diameter distance.
 
         - If ``a2`` is ``None`` the output shape is (na1,).
@@ -225,9 +225,9 @@ def luminosity_distance(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
 
     Returns
@@ -253,9 +253,9 @@ def distance_modulus(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
 
     Returns
@@ -277,17 +277,13 @@ def omega_x(cosmo, a, species):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor, normalized to 1 today.
     species : str
-        Species type. Should be one of:
-            - 'matter': cold dark matter, massive neutrinos, and baryons
-            - 'dark_energy': cosmological constant or otherwise
-            - 'radiation': relativistic species besides massless neutrinos
-            - 'neutrinos_rel': relativistic neutrinos
-            - 'neutrinos_massive': massive neutrinos
+        Species type. Available options are enumerated in
+        :class:`~pyccl.Species`.
 
     Returns
     -------
@@ -313,20 +309,13 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
     species : str
-        Species type. Should be one of
-
-        - 'matter': cold dark matter, massive neutrinos, and baryons
-        - 'dark_energy': cosmological constant or otherwise
-        - 'radiation': relativistic species besides massless neutrinos
-        - 'curvature': curvature density
-        - 'neutrinos_rel': relativistic neutrinos
-        - 'neutrinos_massive': massive neutrinos
-
+        Species type. Available options are enumerated in
+        :class:`~pyccl.Species`.
     is_comoving : bool, optional
         Either physical or comoving. Default is ``False`` for physical.
 
@@ -355,9 +344,9 @@ def growth_factor(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
 
     Returns
@@ -374,9 +363,9 @@ def growth_factor_unnorm(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
 
     Returns
@@ -399,9 +388,9 @@ def growth_rate(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         Cosmological parameters.
-    a : float or (na,) array_like
+    a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
 
     Returns
@@ -429,7 +418,7 @@ def sigma_critical(cosmo, *, a_lens, a_source):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.core.Cosmology`
+    cosmo : :obj:`~pyccl.Cosmology`
         A Cosmology object.
     a_lens : float or (na_lens,) array_like
         Scale factor of lens.
