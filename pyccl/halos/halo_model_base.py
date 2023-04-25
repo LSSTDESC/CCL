@@ -1,3 +1,12 @@
+"""
+===========================================================
+Halo model ingredients (:mod:`pyccl.halos.halo_model_base`)
+===========================================================
+
+Abstract base class for halo mass functions, halo bias functions, and
+mass-concentration relation.
+"""
+
 from __future__ import annotations
 
 __all__ = ("HMIngredients",)
@@ -184,13 +193,13 @@ class MassFunc(HMIngredients):
         ---------
         cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        sigM : (nM,) ``numpy.ndarray``
+        sigM : (nM,) numpy.ndarray
             Standard deviation in the overdensity field on the scale of
             halos of mass :math:`M`. Input will always be an array, and there
             is no need for the implemented function to convert it to one.
         a : int or float
             Scale factor.
-        lnM : (nM,) ``numpy.ndarray``
+        lnM : (nM,) numpy.ndarray
             Natural logarithm of the halo mass in units of :math:`\rm M_\odot`
             (provided in addition to sigM for convenience in some mass function
             parametrizations). Input will always be an array, and there is no
@@ -198,7 +207,7 @@ class MassFunc(HMIngredients):
 
         Returns
         -------
-        f_sigma : (nM,) ``numpy.ndarray``
+        f_sigma : (nM,) numpy.ndarray
             Values of :math:`f(\sigma_M)`. Output is expected to be an array
             and there is no need to squeeze extra dimensions.
         """
@@ -222,7 +231,7 @@ class MassFunc(HMIngredients):
 
         Returns
         -------
-        mass_function : float or (nM,) ``numpy.ndarray``
+        mass_function : float or (nM,) numpy.ndarray
             Mass function :math:`\frac{{\rm d}n}{{\rm d}\log_{10}M}`
             in units of comoving :math:`\rm Mpc^{-3}`.
         """
@@ -273,7 +282,7 @@ class HaloBias(HMIngredients):
         ---------
         cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        sigM : (nM,) ``numpy.ndarray``
+        sigM : (nM,) numpy.ndarray
             Standard deviation in the overdensity field on the scale of
             halos of mass :math:`M`. Input will always be an array, and there
             is no need for the implemented function to convert it to one.
@@ -282,7 +291,7 @@ class HaloBias(HMIngredients):
 
         Returns
         -------
-        b_sigma : (nM,) ``numpy.ndarray``
+        b_sigma : (nM,) numpy.ndarray
             Values of :math:`b(\sigma_M)`. Output is expected to be an array
             and there is no need to squeeze extra dimensions.
         """
@@ -306,7 +315,7 @@ class HaloBias(HMIngredients):
 
         Returns
         -------
-        halo_bias : float or (nM,) ``numpy.ndarray``
+        halo_bias : float or (nM,) numpy.ndarray
             Value(s) of the halo bias function at ``M`` and ``a``.
         """
         M_use = np.atleast_1d(M)
@@ -364,7 +373,7 @@ class Concentration(HMIngredients):
         ---------
         cosmo : :obj:`~pyccl.Cosmology`
             Cosmological parameters.
-        M : (nM,) ``numpy.ndarray``
+        M : (nM,) numpy.ndarray
             Halo mass in units of :math:`\rm M_\odot`.
             Input will always be an  array, and there is no need for the
             implemented function to convert it to one.
@@ -373,7 +382,7 @@ class Concentration(HMIngredients):
 
         Returns
         -------
-        concentration : (nM,) ``numpy.ndarray``
+        concentration : (nM,) numpy.ndarray
             Values of :math:`c(M)`. Output is expected to be an array
             and there is no need to squeeze extra dimensions.
         """
@@ -397,7 +406,7 @@ class Concentration(HMIngredients):
 
         Returns
         -------
-        concentration : float or (nM,) ``numpy.ndarray``
+        concentration : float or (nM,) numpy.ndarray
             Value(s) of the concentration :math:`c(M)` at ``M`` and ``a``.
         """
         M_use = np.atleast_1d(M)

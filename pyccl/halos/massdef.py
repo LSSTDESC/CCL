@@ -1,3 +1,11 @@
+"""
+=============================================
+Mass definitions (:mod:`pyccl.halos.massdef`)
+=============================================
+
+Functionality related to halo mass definitions.
+"""
+
 from __future__ import annotations
 
 __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
@@ -14,7 +22,7 @@ import numpy as np
 import numpy.typing as npt
 
 from .. import CCLDeprecationWarning, CCLNamedClass, CCLObject, lib, check
-from .. import warn_api, deprecate_attr
+from .. import warn_api
 from . import Concentration, HaloBias, MassFunc
 
 if TYPE_CHECKING:
@@ -43,7 +51,7 @@ def mass2radius_lagrangian(cosmo, M):
 
     Returns
     -------
-    radius : float or (nM,) ``numpy.ndarray``
+    radius : float or (nM,) numpy.ndarray
         Lagrangian radius in comoving :math:`\rm Mpc`.
     """
     M_use = np.atleast_1d(M)
@@ -83,7 +91,7 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
 
     Returns
     -------
-    c_new : float or (nc,) ``numpy.ndarray``
+    c_new : float or (nc,) numpy.ndarray
         Concentration expressed in terms of the new overdensity parameter.
     """
     status = 0
@@ -136,10 +144,13 @@ class MassDef(CCLNamedClass, CCLObject):
     name : str
         Short name of the mass definition, e.g. ``'200m'`` for
         ``(Delta, rho_type) == (200, 'matter')``.
+
+    Raises
+    ------
+    ValueError
+        If ``Delta`` or ``rho_type`` are invalid.
     """
     __eq_attrs__ = ("name",)
-    __getattr__ = deprecate_attr(pairs=[('c_m_relation', 'concentration')]
-                                 )(super.__getattribute__)
 
     def __init__(self, Delta, rho_type, *, c_m_relation=None):
         # Check it makes sense
@@ -251,7 +262,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Returns
         -------
-        mass : float or (nR,) ``numpy.ndarray``
+        mass : float or (nR,) numpy.ndarray
             Halo mass in physical :math:`\rm M_\odot`.
         """
         R_use = np.atleast_1d(R)
@@ -279,7 +290,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Returns
         -------
-        mass : float or (nM,) ``numpy.ndarray``
+        mass : float or (nM,) numpy.ndarray
             Halo radius in physical :math:`\rm Mpc`.
         """
         M_use = np.atleast_1d(M)

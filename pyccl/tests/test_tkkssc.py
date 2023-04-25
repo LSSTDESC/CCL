@@ -26,15 +26,14 @@ AA = np.linspace(0.3, 1.0, 4)
 
 @pytest.mark.parametrize(
     "p1,p2,cv12,p3,p4,cv34,pk",
-    [(NFW, None, None, None, None, None, None),
-     (HOD, None, None, None, None, None, None),
-     (NFW, HOD, None, None, None, None, None),
-     (NFW, None, None, GNFW, None, None, None),
-     (NFW, None, None, None, NFW, None, None),
-     (NFW, HOD, None, GNFW, NFW, None, None),
-     (HOD, HOD, PKCH, HOD, HOD, None, None),
-     (NFW, HOD, PKC, GNFW, NFW, PKC, None),
-     (NFW, None, None, None, None, None, "linear"),
+    [(NFW, None, None, None, None, None, "linear"),
+     (HOD, None, None, None, None, None, "linear"),
+     (NFW, HOD, None, None, None, None, "linear"),
+     (NFW, None, None, GNFW, None, None, "linear"),
+     (NFW, None, None, None, NFW, None, "linear"),
+     (NFW, HOD, None, GNFW, NFW, None, "linear"),
+     (HOD, HOD, PKCH, HOD, HOD, None, "linear"),
+     (NFW, HOD, PKC, GNFW, NFW, PKC, "linear"),
      (NFW, None, None, None, None, None, "nonlinear"),
      (NFW, None, None, None, None, None, COSMO.get_nonlin_power())])
 def test_tkkssc_smoke(p1, p2, cv12, p3, p4, cv34, pk):

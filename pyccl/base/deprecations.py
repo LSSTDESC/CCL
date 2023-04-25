@@ -1,3 +1,11 @@
+"""
+=============================================
+Deprecations (:mod:`pyccl.base.deprecations`)
+=============================================
+
+Functionality related to deprecated syntax.
+"""
+
 __all__ = ("deprecated", "warn_api", "mass_def_api", "deprecate_attr",)
 
 import functools

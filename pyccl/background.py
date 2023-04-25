@@ -100,7 +100,7 @@ def comoving_radial_distance(cosmo, a):
 
     Returns
     -------
-    D_C : float or (na,) ``numpy.ndarray``
+    D_C : float or (na,) numpy.ndarray
         Comoving radial distance at ``a``.
     """
     cosmo.compute_distances()
@@ -132,6 +132,7 @@ def comoving_angular_distance(cosmo, a):
     r"""Comoving angular distance (in :math:`\rm Mpc`).
 
     .. math::
+
         D_{\rm M} = \mathrm{sinn}(\chi(a)).
 
     .. note::
@@ -152,12 +153,8 @@ def comoving_angular_distance(cosmo, a):
 
     Returns
     -------
-    D_M : float or (na,) ``numpy.ndarray``
-        Comoving angular distance at ``a``.
-
-    See also
-    --------
-    transverse_comoving_distance : alias of comoving_angular_distance
+    D_M : float or (na,) numpy.ndarray
+        Comoving angular distance.
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.comoving_angular_distance,
@@ -193,7 +190,7 @@ def angular_diameter_distance(cosmo, a1, a2=None):
 
     Returns
     -------
-    D_a : int or float, (na1,) or (na2,) ``numpy.ndarray``
+    D_a : int or float, (na1,) or (na2,) numpy.ndarray
         Angular diameter distance.
 
         - If ``a2`` is ``None`` the output shape is (na1,).
@@ -242,7 +239,7 @@ def luminosity_distance(cosmo, a):
 
     Returns
     -------
-    D_L : float or (na,) ``numpy.ndarray``
+    D_L : float or (na,) numpy.ndarray
         Luminosity distance at ``a``.
     """
     cosmo.compute_distances()
@@ -270,7 +267,7 @@ def distance_modulus(cosmo, a):
 
     Returns
     -------
-    D_M : float or (na,) ``numpy.ndarray``
+    D_M : float or (na,) numpy.ndarray
         Distance modulus at ``a``.
     """
     cosmo.compute_distances()
@@ -361,7 +358,7 @@ def growth_factor(cosmo, a):
 
     Returns
     -------
-    D : float or (na,) ``numpy.ndarray``
+    D : float or (na,) numpy.ndarray
         Growth factor at ``a``.
     """
     cosmo.compute_growth()
@@ -380,7 +377,7 @@ def growth_factor_unnorm(cosmo, a):
 
     Returns
     -------
-    D_unnorm : float or (na,) ``numpy.ndarray``
+    D_unnorm : float or (na,) numpy.ndarray
         Unnormalized growth factor at ``a``.
     """
     cosmo.compute_growth()
@@ -405,7 +402,7 @@ def growth_rate(cosmo, a):
 
     Returns
     -------
-    dlnD_dlna : float or (na,) ``numpy.ndarray``
+    dlnD_dlna : float or (na,) numpy.ndarray
         Growth rate at ``a``.
     """
     cosmo.compute_growth()
@@ -437,7 +434,7 @@ def sigma_critical(cosmo, *, a_lens, a_source):
 
     Returns
     -------
-    sigma_critical : float, (na_lens,) or (na_source,) ``numpy.ndarray``
+    sigma_critical : float, (na_lens,) or (na_source,) numpy.ndarray
         :math:`\Sigma_{\rm c} in units of :math:`\rm M_\odot / Mpc^2`.
 
     See also

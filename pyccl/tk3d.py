@@ -229,11 +229,11 @@ class Tk3D(CCLObject):
         """Get the spline data arrays.
 
         Returns:
-            a_arr (1D ``numpy.ndarray``):
+            a_arr (1D numpy.ndarray):
                 Array of scale factors.
-            lk_arr1, lk_arr2 (1D ``numpy.ndarray``):
+            lk_arr1, lk_arr2 (1D numpy.ndarray):
                 Arrays of :math:``ln(k)``.
-            out (list of ``numpy.ndarray``):
+            out (list of numpy.ndarray):
                 The trispectrum T(k1, k2, z) or its factors f(k1, z), f(k2, z).
         """
         if not self:

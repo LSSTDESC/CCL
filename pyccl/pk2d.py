@@ -617,16 +617,19 @@ def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
     return psp
 
 
-def parse_pk(cosmo, p_of_k_a=None):
+def parse_pk(cosmo, p_of_k_a="linear"):
     """Helper to retrieve the power spectrum in the halo model."""
-    if not (p_of_k_a is None or isinstance(p_of_k_a, (str, Pk2D))):
-        raise TypeError("p_of_k_a must be None, 'linear', 'nonlinear', Pk2D.")
+    if p_of_k_a is None:
+        warnings.warn(
+            "None is deprecated as a p_of_k_a value. The default is 'linear'.",
+            CCLDeprecationWarning)
+        p_of_k_a = "linear"
+    if not (isinstance(p_of_k_a, Pk2D) or p_of_k_a in ["linear", "nonlinear"]):
+        raise TypeError("p_of_k_a must be 'linear', 'nonlinear', Pk2D.")
 
+    if p_of_k_a == "linear":
+        return cosmo.get_linear_power()
+    if p_of_k_a == "nonlinear":
+        return cosmo.get_nonlin_power()
     if isinstance(p_of_k_a, Pk2D):
         return p_of_k_a
-    elif p_of_k_a is None or p_of_k_a == "linear":
-        cosmo.compute_linear_power()
-        return cosmo.get_linear_power()
-    elif p_of_k_a == "nonlinear":
-        cosmo.compute_nonlin_power()
-        return cosmo.get_nonlin_power()

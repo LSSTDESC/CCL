@@ -1,5 +1,13 @@
-"""Abstract base class for models that add baryonic effects to power spectra.
 """
+========================================
+Baryons (:mod:`pyccl.base.baryons_base`)
+========================================
+
+Abstract base class for models that add baryonic effects to power spectra.
+"""
+
+from __future__ import annotations
+
 __all__ = ("Baryons",)
 
 from abc import abstractmethod
@@ -17,16 +25,12 @@ class Baryons(CCLNamedClass):
 
     Implementation
     --------------
-    - Subclasses must define :meth:`_include_baryonic_effects` implementing
+    * Subclasses inherit from ``CCLNamedClass``. Refer to the docs for further
+      information.
+    * Subclasses must define :meth:`_include_baryonic_effects` implementing
       the specific baryon model by operating on a :obj:`~pyccl.pk2d.Pk2D`
       power spectrum. The signature must be the same as
       :meth:`include_baryonic_effects`.
-    - Subclasses must define a ``name`` class attribute, used to instantiate
-      from the base class.
-    - Subclasses may define a ``__repr_attrs__`` class attribute for automatic
-      creation of :meth:`__repr__`.
-    - Subclasses may include :meth:`update_parameters` to update the model
-      parameters.
     """
 
     @abstractmethod
@@ -35,8 +39,8 @@ class Baryons(CCLNamedClass):
 
     def include_baryonic_effects(
             self,
-            cosmo: "Cosmology",
-            pk: "Pk2D"
+            cosmo: Cosmology,
+            pk: Pk2D
     ) -> "Pk2D":
         """Apply baryonic effects to a given power spectrum.
 

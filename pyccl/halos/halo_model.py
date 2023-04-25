@@ -1,3 +1,11 @@
+"""
+==========================================
+Halo model (:mod:`pyccl.halos.halo_model`)
+==========================================
+
+Functionality to compute halo model integrals.
+"""
+
 __all__ = ("HMCalculator",)
 
 import warnings
@@ -35,15 +43,15 @@ class HMCalculator(CCLObject):
 
     Parameters
     ----------
-    mass_function : :class:`~pyccl.halos.MassFunc` or str
+    mass_function : :obj:`~pyccl.halos.MassFunc` or str
         Mass function used in the calculations. If an instantiated mass
         function is provided, its mass definition must be equal to the mass
         definition passed into the halo model calculator.
-    halo_bias : :class:`~pyccl.halos.HaloBias` or str
+    halo_bias : :obj:`~pyccl.halos.HaloBias` or str
         Halo bias used in the calculations. If an instantiated halo bias is
         provided, its mass definition must be equal to the mass definition
         passed into the halo model calculator.
-    mass_def : :class:`~pyccl.halos.MassDef`, str or None, optional
+    mass_def : :obj:`~pyccl.halos.MassDef`, str or None, optional
         Mass definition used in the calculations. It must be equal to the mass
         definitions of ``mass_function`` and ``halo_bias``. If strings are
         provided, the instantiated models will share a common mass definition.
@@ -68,14 +76,23 @@ class HMCalculator(CCLObject):
 
     Attributes
     ----------
-    mass_function : :class:`~pyccl.halos.MassFunc`
+    mass_function : :obj:`~pyccl.halos.MassFunc`
         Instantiated mass function.
-    halo_bias : :class:`~pyccl.halos.HaloBias`
+    halo_bias : :obj:`~pyccl.halos.HaloBias`
         Instantiated halo bias.
-    mass_def : :class:`~pyccl.halos.MassDef`
+    mass_def : :obj:`~pyccl.halos.MassDef`
         Instantiated mass definition.
     precision : dict
         Integration settings.
+
+    Raises
+    ------
+    ValueError
+        If the mass integration method does not exist.
+    ValueError
+        In the methods accepting a :obj:`~pyccl.halos.HaloProfile`, if the
+        mass definition of the halo profile is inconsistent with the one of the
+        halo model workspace.
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_function", "halo_bias", "mass_def", "precision",)
@@ -183,7 +200,7 @@ class HMCalculator(CCLObject):
 
         Returns
         -------
-        I : float or ``numpy.ndarray``
+        I : float or numpy.ndarray
             Integral over mass times mass function.
         """
         fM = func(self._mass)
@@ -305,7 +322,7 @@ class HMCalculator(CCLObject):
 
         Returns
         -------
-        I_0_1 : float or (nk,) ``numpy.ndarray``
+        I_0_1 : float or (nk,) numpy.ndarray
             Integral value.
         """
         self._check_mass_def(prof)
@@ -338,7 +355,7 @@ class HMCalculator(CCLObject):
 
         Returns
         -------
-        I_1_1 : float or (nk,) ``numpy.ndarray``
+        I_1_1 : float or (nk,) numpy.ndarray
             Integral value.
         """
         self._check_mass_def(prof)
@@ -374,7 +391,7 @@ class HMCalculator(CCLObject):
 
         Returns
         -------
-        I_0_2 : float or (nk,) ``numpy.ndarray``
+        I_0_2 : float or (nk,) numpy.ndarray
             Integral value.
         """
         if prof2 is None:
@@ -413,16 +430,9 @@ class HMCalculator(CCLObject):
 
         Returns
         -------
-        I_1_2 : float or (nk,) ``numpy.ndarray``
+        I_1_2 : float or (nk,) numpy.ndarray
             Integral value.
         """
-        if prof2 is None:
-            prof2 = prof
-
-        self._get_ingredients(cosmo, a, get_bf=True)
-        uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
-                                  prof2=prof2, mass_def=self.mass_def).T
-        return self._integrate_over_mbf(uk)
         if prof2 is None:
             prof2 = prof
 
@@ -468,7 +478,7 @@ class HMCalculator(CCLObject):
 
         Returns
         -------
-        I_0_22 : float or (nk, nk) ``numpy.ndarray``
+        I_0_22 : float or (nk, nk) numpy.ndarray
              Integral value.
         """
         if prof3 is None:

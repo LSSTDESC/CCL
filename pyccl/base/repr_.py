@@ -1,3 +1,11 @@
+"""
+=========================================
+Representations (:mod:`pyccl.base.repr_`)
+=========================================
+
+Specialized representation strings for complicated CCL objects.
+"""
+
 import numpy as np
 
 from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays

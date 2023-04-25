@@ -1,3 +1,11 @@
+"""
+===================================
+Caching (:mod:`pyccl.base.caching`)
+===================================
+
+Framework that enables caching.
+"""
+
 __all__ = ("hash_", "Caching", "cache", "CacheInfo", "CachedObject",)
 
 import sys

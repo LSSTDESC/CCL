@@ -1,3 +1,11 @@
+"""
+=================================
+Schema (:mod:`pyccl.base.schema`)
+=================================
+
+Base class for all CCL objects, and functionality related to it.
+"""
+
 __all__ = ("ObjectLock",
            "UnlockInstance", "unlock_instance",
            "CustomRepr", "CustomEq",
@@ -349,8 +357,10 @@ class CCLNamedClass(CCLObject):
 
     Implementation
     --------------
-    Subclasses must define a ``name`` class attribute which allows the tree to
-    be searched to retrieve the particular model, using its name.
+    * Subclasses inherit from ``CCLObject``. Refer to the docs for further
+      information.
+    * Subclasses must define a ``name`` class attribute which allows the tree
+      to be searched to retrieve the particular model, using its name.
     """
 
     @property

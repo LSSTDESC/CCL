@@ -64,7 +64,7 @@ class BaryonsSchneider15(Baryons):
 
         Returns
         -------
-        boost_factor : float or (nk,) ``numpy.ndarray``
+        boost_factor : float or (na, nk) numpy.ndarray
             Baryonic boost multiplicative factor.
         """
         a_use, k_use = map(np.atleast_1d, [a, k])

@@ -46,20 +46,22 @@ class NeutrinoMassSplits(Enum):
 def Omeganuh2(a, m_nu,
               T_CMB=DefaultParams.T_CMB,
               T_ncdm=DefaultParams.T_ncdm):
-    """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
+    r"""Calculate :math:`\Omega_{\nu} \, h^2` at a given scale factor given
     the neutrino masses.
 
-    Args:
-        a (float or array-like): Scale factor, normalized to 1 today.
-        m_nu (float or array-like): Neutrino mass(es) (in eV)
-        T_CMB (float, optional): Temperature of the CMB (K).
-            The default is the same as the Cosmology default.
-        T_ncdm (float, optional): Non-CDM temperature in units of photon
-            temperature. The default is the same as the Cosmology default.
+    Arguments
+    ---------
+    a (float or array-like): Scale factor, normalized to 1 today.
+    m_nu (float or array-like): Neutrino mass(es) (in eV)
+    T_CMB (float, optional): Temperature of the CMB (K).
+        The default is the same as the Cosmology default.
+    T_ncdm (float, optional): Non-CDM temperature in units of photon
+        temperature. The default is the same as the Cosmology default.
 
-    Returns:
-        float or array_like: :math:`\\Omega_\\nu\\,h^2` at a given
-        scale factor given the neutrino masses
+    Returns
+    -------
+    OmNuh2 : float or numpy.ndarray
+        :math:`\Omega_{\nu} \, h^2`
     """
     status = 0
     scalar = True if np.ndim(a) == 0 else False
@@ -96,7 +98,7 @@ def nu_masses(*, Omega_nu_h2=None, mass_split, T_CMB=None, m_nu=None):
     mass_split : str
         Mass hierarchy. Available options are enumerated in
         :class:`~pyccl.NeutrinoMassSplits`.
-    T_CMB : float, optional): Deprecated - do not use.
+    T_CMB : float, optional - Deprecated, do not use.
         Temperature of the CMB in :math:`\rm K`.
     m_nu : int, float or (n,) array_like, optional
         Mass in :math:`\rm eV` of the massive neutrinos present. If a sequence,
@@ -106,7 +108,7 @@ def nu_masses(*, Omega_nu_h2=None, mass_split, T_CMB=None, m_nu=None):
 
     Returns
     -------
-    masses : float or ``numpy.ndarray``
+    masses : float or (n,) numpy.ndarray
         Neutrino mass(es) according to the specified mass hierarchy.
     """
     if T_CMB is not None:
