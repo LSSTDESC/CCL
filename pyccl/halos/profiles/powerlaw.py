@@ -1,9 +1,23 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfilePowerLaw",)
 
+from numbers import Real
+from typing import TYPE_CHECKING, Callable, Union
+
 import numpy as np
+import numpy.typing as npt
 
 from ... import warn_api, deprecated
 from . import HaloProfile
+
+if TYPE_CHECKING:
+    from ... import Cosmology
+    from .. import MassDef
+
+    FuncSignature = Callable[
+        [Cosmology, Union[Real, npt.NDArray], Real],
+        npt.NDArray]
 
 
 @deprecated
@@ -27,7 +41,13 @@ class HaloProfilePowerLaw(HaloProfile):
                                      "precision_fftlog",)
 
     @warn_api
-    def __init__(self, *, r_scale, tilt, mass_def=None):
+    def __init__(
+            self,
+            *,
+            r_scale: FuncSignature,
+            tilt: FuncSignature,
+            mass_def: Union[str, MassDef] = None
+    ):
         self.r_scale = r_scale
         self.tilt = tilt
         super().__init__(mass_def=mass_def)

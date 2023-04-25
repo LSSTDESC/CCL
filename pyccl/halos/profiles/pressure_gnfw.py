@@ -1,9 +1,17 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfilePressureGNFW",)
+
+from numbers import Real
+from typing import TYPE_CHECKING, Sequence, Union
 
 import numpy as np
 
 from ... import UnlockInstance, warn_api
 from . import HaloProfilePressure
+
+if TYPE_CHECKING:
+    from .. import MassDef
 
 
 class HaloProfilePressureGNFW(HaloProfilePressure):
@@ -70,10 +78,22 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         "P0_hexp", "qrange", "nq", "x_out", "mass_def", "precision_fftlog",)
 
     @warn_api
-    def __init__(self, *, mass_bias=0.8, P0=6.41,
-                 c500=1.81, alpha=1.33, alpha_P=0.12,
-                 beta=4.13, gamma=0.31, P0_hexp=-1.,
-                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, mass_def=None):
+    def __init__(
+            self,
+            *,
+            mass_bias: Real = 0.8,
+            P0: Real = 6.41,
+            c500: Real = 1.81,
+            alpha: Real = 1.33,
+            alpha_P: Real = 0.12,
+            beta: Real = 4.13,
+            gamma: Real = 0.31,
+            P0_hexp: Real = -1,
+            qrange: Sequence[Real, Real] = (1e-3, 1e3),
+            nq: int = 128,
+            x_out: Real = np.inf,
+            mass_def: Union[str, MassDef, None] = None
+    ):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
@@ -90,35 +110,15 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         self._fourier_interp = None
         super().__init__(mass_def=mass_def)
 
+    # TODO: Uncomment for CCLv3.
+    # @update(names=["mass_bias", "alpha_P", "P0", "P0_hexp"])
     @warn_api
-    def update_parameters(self, *, mass_bias=None, P0=None,
-                          c500=None, alpha=None, beta=None, gamma=None,
-                          alpha_P=None, P0_hexp=None, x_out=None):
-        """Update any of the parameters associated with this profile.
-        Any parameter set to ``None`` won't be updated.
-
-        .. note::
-
-            A change in ``alpha``, ``beta``, ``gamma``, ``c500``, or ``x_out``
-            recomputes the Fourier-space template, which may be slow.
-
-        Arguments
-        ---------
-        mass_bias : float
-            The mass bias parameter :math:`1-b`.
-        P0 : float
-            Profile normalization.
-        c500 : float
-            Concentration parameter.
-        alpha, beta, gamma : float
-            Profile shape parameter.
-        alpha_P : float
-            Additional mass-dependence exponent.
-        P0_hexp : float
-            Power of ``h`` with which the normalization scales.
-            SZ-based normalizations: -1. X-ray-based normalizations: -3/2.
-        x_out : float
-            Profile threshold (as a fraction of r500c).
+    def update_parameters(
+            self, *, mass_bias=None, P0=None, c500=None, alpha=None, beta=None,
+            gamma=None, alpha_P=None, P0_hexp=None, x_out=None):
+        """Update the profile parameters. All numerical parameters except those
+        related to the Fourier interpolation settings (``qrange, nq``) are
+        updatable.
         """
         if mass_bias is not None:
             self.mass_bias = mass_bias

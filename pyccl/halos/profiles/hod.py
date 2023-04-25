@@ -1,10 +1,18 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfileHOD",)
+
+from numbers import Real
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.special import sici, erf
 
 from ... import warn_api, deprecate_attr
 from . import HaloProfileNumberCounts
+
+if TYPE_CHECKING:
+    from .. import Concentration, MassDef
 
 
 class HaloProfileHOD(HaloProfileNumberCounts):
@@ -125,13 +133,22 @@ class HaloProfileHOD(HaloProfileNumberCounts):
                      ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
                      ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
                      ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")])
-    def __init__(self, *, concentration,
-                 log10Mmin_0=12., log10Mmin_p=0., siglnM_0=0.4,
-                 siglnM_p=0., log10M0_0=7., log10M0_p=0.,
-                 log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
-                 alpha_p=0., fc_0=1., fc_p=0.,
-                 bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False, mass_def=None):
+    def __init__(
+            self,
+            *,
+            concentration: Union[str, Concentration],
+            log10Mmin_0: Real = 12, log10Mmin_p: Real = 0,
+            siglnM_0: Real = 0.4, siglnM_p: Real = 0,
+            log10M0_0: Real = 7, log10M0_p: Real = 0,
+            log10M1_0: Real = 13.3, log10M1_p: Real = 0,
+            alpha_0: Real = 1, alpha_p: Real = 0,
+            fc_0: Real = 1, fc_p: Real = 0,
+            bg_0: Real = 1, bg_p: Real = 0,
+            bmax_0: Real = 1, bmax_p: Real = 0,
+            a_pivot: Real = 1,
+            ns_independent: bool = False,
+            mass_def: Union[str, MassDef, None] = None
+    ):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p
         self.log10M0_0 = log10M0_0
@@ -152,59 +169,25 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         self.ns_independent = ns_independent
         super().__init__(mass_def=mass_def, concentration=concentration)
 
+    # TODO: Uncomment for CCLv3.
+    # @update(names=[
+    #     "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
+    #     "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0", "alpha_p", "fc_0",
+    #     "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
+    #     "ns_independent"])
     @warn_api(pairs=[("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
                      ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
                      ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
                      ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")])
-    def update_parameters(self, *, log10Mmin_0=None, log10Mmin_p=None,
-                          siglnM_0=None, siglnM_p=None,
-                          log10M0_0=None, log10M0_p=None,
-                          log10M1_0=None, log10M1_p=None,
-                          alpha_0=None, alpha_p=None,
-                          fc_0=None, fc_p=None,
-                          bg_0=None, bg_p=None,
-                          bmax_0=None, bmax_p=None,
-                          a_pivot=None,
-                          ns_independent=None):
-        """ Update any of the parameters associated with
-        this profile. Any parameter set to `None` won't be updated.
-
-        Args:
-            log10Mmin_0 (float): offset parameter for
-                :math:`\\log_{10}M_{\\rm min}`.
-            log10Mmin_p (float): tilt parameter for
-                :math:`\\log_{10}M_{\\rm min}`.
-            siglnM_0 (float): offset parameter for
-                :math:`\\sigma_{{\\rm ln}M}`.
-            siglnM_p (float): tilt parameter for
-                :math:`\\sigma_{{\\rm ln}M}`.
-            log10M0_0 (float): offset parameter for
-                :math:`\\log_{10}M_0`.
-            log10M0_p (float): tilt parameter for
-                :math:`\\log_{10}M_0`.
-            log10M1_0 (float): offset parameter for
-                :math:`\\log_{10}M_1`.
-            log10M1_p (float): tilt parameter for
-                :math:`\\log_{10}M_1`.
-            alpha_0 (float): offset parameter for
-                :math:`\\alpha`.
-            alpha_p (float): tilt parameter for
-                :math:`\\alpha`.
-            fc_0 (float): offset parameter for
-                :math:`f_c`.
-            fc_p (float): tilt parameter for
-                :math:`f_c`.
-            bg_0 (float): offset parameter for
-                :math:`\\beta_g`.
-            bg_p (float): tilt parameter for
-                :math:`\\beta_g`.
-            bmax_0 (float): offset parameter for
-                :math:`\\beta_{\\rm max}`.
-            bmax_p (float): tilt parameter for
-                :math:`\\beta_{\\rm max}`.
-            a_pivot (float): pivot scale factor :math:`a_*`.
-            ns_independent (bool): drop requirement to only form
-                satellites when centrals are present
+    def update_parameters(
+            self, *,
+            log10Mmin_0=None, log10Mmin_p=None, siglnM_0=None, siglnM_p=None,
+            log10M0_0=None, log10M0_p=None, log10M1_0=None, log10M1_p=None,
+            alpha_0=None, alpha_p=None, fc_0=None, fc_p=None,
+            bg_0=None, bg_p=None, bmax_0=None, bmax_p=None,
+            a_pivot=None, ns_independent=None):
+        """Update the profile parameters. All numerical parameters in
+        :meth:`__init__`, as well as ``ns_independent``, are updatable.
         """
         if log10Mmin_0 is not None:
             self.log10Mmin_0 = log10Mmin_0
@@ -318,8 +301,8 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         return prof
 
     def get_normalization(self, cosmo, a, hmc):
-        """Returns the normalization of this profile, which is the
-        mean galaxy number density.
+        """Compute the normalization of the HOD profile, which is the mean
+        galaxy number density.
         """
         def integ(M):
             Nc = self._Nc(M, a)
@@ -327,8 +310,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             fc = self._fc(a)
             if self.ns_independent:
                 return Nc*fc + Ns
-            else:
-                return Nc*(fc + Ns)
+            return Nc*(fc + Ns)
         return hmc.integrate_over_massfunc(integ, cosmo, a)
 
     def _fourier(self, cosmo, k, M, a):

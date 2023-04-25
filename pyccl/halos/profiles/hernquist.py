@@ -1,10 +1,17 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfileHernquist",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.special import sici
 
 from ... import warn_api
 from . import HaloProfileMatter
+
+if TYPE_CHECKING:
+    from .. import Concentration, MassDef
 
 
 class HaloProfileHernquist(HaloProfileMatter):
@@ -47,12 +54,16 @@ class HaloProfileHernquist(HaloProfileMatter):
         "truncated", "mass_def", "concentration", "precision_fftlog",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, concentration,
-                 truncated=True,
-                 fourier_analytic=False,
-                 projected_analytic=False,
-                 cumul2d_analytic=False,
-                 mass_def=None):
+    def __init__(
+            self,
+            *,
+            concentration: Union[str, Concentration],
+            truncated: bool = True,
+            fourier_analytic: bool = False,
+            projected_analytic: bool = False,
+            cumul2d_analytic: bool = False,
+            mass_def: Union[str, MassDef, None] = None
+    ):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic

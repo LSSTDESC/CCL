@@ -1,11 +1,19 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfileEinasto",)
+
+from numbers import Real
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.special import gamma, gammainc
 
-from ... import unlock_instance, warn_api
+from ... import unlock_instance, update, warn_api
 from .. import MassDef, mass_translator
 from . import HaloProfileMatter
+
+if TYPE_CHECKING:
+    from .. import Concentration
 
 
 class HaloProfileEinasto(HaloProfileMatter):
@@ -42,8 +50,14 @@ class HaloProfileEinasto(HaloProfileMatter):
         "truncated", "alpha", "mass_def", "concentration", "precision_fftlog",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, concentration, truncated=True, alpha='cosmo',
-                 mass_def=None):
+    def __init__(
+            self,
+            *,
+            concentration: Union[str, Concentration],
+            truncated: bool = True,
+            alpha: Union[str, Real] = 'cosmo',
+            mass_def: Union[str, MassDef, None] = None
+    ):
         self.truncated = truncated
         self.alpha = alpha
         super().__init__(mass_def=mass_def, concentration=concentration)
@@ -61,18 +75,12 @@ class HaloProfileEinasto(HaloProfileMatter):
             mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
             concentration=self.concentration)
 
-    def update_parameters(self, alpha=None):
-        """Update any of the parameters associated with this profile.
-        Any parameter set to ``None`` won't be updated.
-
-        Arguments
-        ---------
-        alpha : float, 'cosmo'
-            Profile shape parameter. Set to
-            'cosmo' to calculate the value from cosmology
+    @warn_api
+    @update(names=["alpha"])
+    def update_parameters(self):
+        """Update the profile parameters. All numerical parameters in
+        :meth:`__init__` are updatable.
         """
-        if alpha is not None and alpha != self.alpha:
-            self.alpha = alpha
 
     def _get_alpha(self, cosmo, M, a):
         if self.alpha == 'cosmo':

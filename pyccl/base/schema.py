@@ -6,14 +6,14 @@ Schema (:mod:`pyccl.base.schema`)
 Base class for all CCL objects, and functionality related to it.
 """
 
-__all__ = ("ObjectLock",
-           "UnlockInstance", "unlock_instance",
+__all__ = ("ObjectLock", "UnlockInstance", "unlock_instance",
            "CustomRepr", "CustomEq",
+           "update",
            "CCLObject", "CCLNamedClass",)
 
 import functools
 from abc import ABC, abstractmethod
-from inspect import signature
+from inspect import signature, Parameter
 from _thread import RLock
 
 import numpy as np
@@ -237,6 +237,42 @@ class CustomRepr(_CustomMethod, method="__repr__"):
     def __repr__(self):
         # Default `repr`.
         return object.__repr__(self)
+
+
+def update(func=None, *, names):
+    """Wrapper to automatically update model parameters.
+
+    Extend the signature of a function to accept new keyword arguments, and
+    update the corresponding instance attributes if the value of the parameter
+    is not None.
+
+    Arguments
+    ---------
+    func : function
+        Function to wrap.
+    names : Sequence
+        Extend the original signature to make these parameters updatable.
+    """
+    if func is None:
+        return functools.partial(update, names=names)
+
+    # Extend the original signature.
+    sig = signature(func)
+    params = list(sig.parameters.values())
+    for name in names:
+        params.append(Parameter(name, Parameter.KEYWORD_ONLY, default=None))
+    func.__signature__ = sig.replace(parameters=params)
+
+    @functools.wraps(func)
+    def wrapper(self, **kwargs):
+        new = {param: v for param, v in kwargs.items() if param in names}
+        old = {param: v for param, v in kwargs.items() if param not in names}
+        for param, value in new.items():
+            if value is not None:
+                setattr(self, param, value)
+        return func(self, **old)
+
+    return wrapper
 
 
 class CCLObject(ABC):

@@ -2,7 +2,7 @@ __all__ = ("BaryonsSchneider15",)
 
 import numpy as np
 
-from .. import Pk2D
+from .. import Pk2D, update
 from . import Baryons
 
 
@@ -85,16 +85,11 @@ class BaryonsSchneider15(Baryons):
             fka = np.squeeze(fka, axis=0)
         return fka
 
-    def update_parameters(self, log10Mc=None, eta_b=None, k_s=None):
+    @update(names=["log10Mc", "eta_b", "k_s"])
+    def update_parameters(self):
         r"""Update the model parameters. All parameters in :meth:`__init__`
         can be updated.
         """
-        if log10Mc is not None:
-            self.log10Mc = log10Mc
-        if eta_b is not None:
-            self.eta_b = eta_b
-        if k_s is not None:
-            self.k_s = k_s
 
     def _include_baryonic_effects(self, cosmo, pk):
         # Apply boost factor.

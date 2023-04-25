@@ -1,4 +1,9 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfileCIBShang12",)
+
+from numbers import Real
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.integrate import simpson
@@ -6,6 +11,9 @@ from scipy.special import lambertw
 
 from ... import warn_api, deprecate_attr
 from . import HaloProfileNFW, HaloProfileCIB
+
+if TYPE_CHECKING:
+    from .. import Concentration, MassDef
 
 
 class HaloProfileCIBShang12(HaloProfileCIB):
@@ -89,9 +97,22 @@ class HaloProfileCIBShang12(HaloProfileCIB):
     @warn_api(pairs=[("c_M_relation", "concentration"),
                      ("log10meff", "log10Meff"),
                      ("sigLM", "siglog10M")])
-    def __init__(self, *, concentration, nu_GHz, alpha=0.36, T0=24.4,
-                 beta=1.75, gamma=1.7, s_z=3.6, log10Meff=12.6,
-                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8, mass_def=None):
+    def __init__(
+            self,
+            *,
+            concentration: Union[str, Concentration],
+            nu_GHz: Real,
+            alpha: Real = 0.36,
+            T0: Real = 24.4,
+            beta: Real = 1.75,
+            gamma: Real = 1.7,
+            s_z: Real = 3.6,
+            log10Meff: Real = 12.6,
+            siglog10M: Real = 0.707,
+            Mmin: Real = 1e10,
+            L0: Real = 6.4E-8,
+            mass_def: Union[str, MassDef, None] = None
+    ):
         self._one_over_4pi = 1/(4*np.pi)
         self.nu = nu_GHz
         self.alpha = alpha
@@ -119,27 +140,16 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         """
         return 0.30*(Msub/Mparent)**(-0.7)*np.exp(-9.9*(Msub/Mparent)**2.5)
 
+    # TODO: Uncomment for CCLv3.
+    # @update(names=["nu_GHz", "alpha", "T0", "beta", "gamma", "s_z",
+    #                       "log10Meff", "siglog10M", "Mmin", "L0"])
     @warn_api(pairs=[("log10meff", "log10Meff"),
                      ("sigLM", "siglog10M")])
-    def update_parameters(self, nu_GHz=None,
-                          alpha=None, T0=None, beta=None, gamma=None,
-                          s_z=None, log10Meff=None, siglog10M=None,
-                          Mmin=None, L0=None):
-        """ Update any of the parameters associated with
-        this profile. Any parameter set to `None` won't be updated.
-
-        Args:
-            nu_GHz (float): frequency in GHz.
-            alpha (float): dust temperature evolution parameter.
-            T0 (float): dust temperature at :math:`z=0` in Kelvin.
-            beta (float): dust spectral index.
-            gamma (float): high frequency slope.
-            s_z (float): luminosity evolution slope.
-            log10Meff (float): log10 of the most efficient mass.
-            siglog10M (float): logarithmic scatter in mass.
-            Mmin (float): minimum subhalo mass.
-            L0 (float): luminosity scale (in
-                :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
+    def update_parameters(
+            self, *, nu_GHz=None, alpha=None, T0=None, beta=None, gamma=None,
+            s_z=None, log10Meff=None, siglog10M=None, Mmin=None, L0=None):
+        """Update the profile parameters. All numerical parameters in
+        :meth:`__init__` are updatable.
         """
         if nu_GHz is not None:
             self.nu = nu_GHz
