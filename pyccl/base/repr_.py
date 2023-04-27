@@ -9,9 +9,10 @@ Specialized representation strings for complicated CCL objects.
 __all__ = ()
 
 import numpy as np
+import yaml
 
 from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
-from .caching import _to_hashable, hash_
+from .caching import hash_
 
 
 def build_string_simple(self):
@@ -156,88 +157,42 @@ class Table:
 def build_string_Cosmology(self):
     """Build the ``Cosmology`` representation.
 
-    Cosmology equivalence is tested via its representation. Therefore,
-    there is limiting behavior where ``'=='`` will return ``False``
-    even though the compared cosmologies return the same theoretical
-    predictions. This happens whenever:
-        - Exactly one Cosmology is an instance of ``CosmologyCalculator``.
-        - Cosmologies defined with different parameter sets, where one can
-          be computed from the other (e.g. ``sigma8`` and ``A_s``).
-        - Instances of ``CosmologyCalculator`` which do not contain exactly
-          the same linear & non-linear power spectrum entries.
-
     Example output ::
 
         <pyccl.cosmology.Cosmology>
-            Omega_b = 0.05
-            Omega_c = 0.25
-            h       = 0.67
-            n_s     = 0.96
-            sigma8  = 0.81
-            extra_parameters =
-                test = {'param': 18.4}
-            HASH_ACCURACY_PARAMS = 0x1959cbc9
-            HASH_PK = 0xbca03ab0
+            Omega_b: 0.05
+            Omega_c: 0.25
+            h: 0.67
+            n_s: 0.96
+            sigma8: 0.81
+            extra_parameters:
+              test:
+                param: 18.4
+            transfer_funcion: boltzmann_camb
+            HASH_INPUT_ARRS = 0xbca03ab0
     """
     newline = "\n\t"
-    cls = self.__class__
 
-    def test_eq(key, val, default):
-        # Neutrino masses can be a list, so use `np.all` for comparison.
-        # `np.all` is expensive, so only use that with `m_nu`.
-        if key not in ["m_nu", "z_mg", "df_mg"]:
-            return val == default
-        return np.all(val == default)
-
-    def printdict(dic):
-        # Print the non-default parameters listed in a parameter dictionary.
-        base = cls.__base__ if cls.__qualname__ != "Cosmology" else cls
-        params = base.__signature__.parameters
+    def remove_defaults(dic):
+        # Remove the parameters that are equal to the default ones.
+        from .. import Cosmology, is_equal
+        params = Cosmology.__signature__.parameters
         defaults = {param: value.default for param, value in params.items()}
-        dic = {key: val for key, val in dic.items()
-               if not test_eq(key, val, defaults.get(key))}
-        dic.pop("extra_parameters", None)
-        if not dic:
-            return ""
-        length = max(len(key) for key, val in dic.items())
-        tup = _to_hashable(dic)
-        s = ""
-        for param, value in tup:
-            s += f"{newline}{param:{length}} = {value}"
-        return s
-
-    def printextras(dic):
-        # Print any extra parameters.
-        if dic["extra_parameters"] is None:
-            return ""
-        tup = _to_hashable(dic["extra_parameters"])
-
-        s = f"{newline}extra_parameters ="
-        for key, value in tup:
-            s += f"{newline}\t{key} = {dict(value)}"
-        return s
+        return {key: val for key, val in dic.items()
+                if not is_equal(val, defaults.get(key))}
 
     def metadata():
         # Print hashes for the accuracy parameters and the stored Pk2D's.
-        H = hex(hash_(self._accuracy_params))
-        s = f"{newline}HASH_ACCURACY_PARAMS = {H}"
-        if self.__class__.__qualname__ == "CosmologyCalculator":
+        if type(self).__name__ == "CosmologyCalculator":
             # only need the pk's if we compare CosmologyCalculator objects
-            H = 0
-            if self.has_linear_power:
-                H += sum([hash_(pk) for pk in self._pk_lin.values()])
-            if self.has_nonlin_power:
-                H += sum([hash_(pk) for pk in self._pk_nl.values()])
-            H = hex(H)
-            s += f"{newline}HASH_PK = {H}"
-        return s
+            H = hex(hash_(self._input_arrays))
+            return f"{newline}HASH_INPUT_ARRS = {H}"
+        return ""
 
-    s = "<pyccl.cosmology.Cosmology>"
-    s += printdict(self._params_init_kwargs)
-    s += printdict(self._config_init_kwargs)
-    s += printextras(self._params_init_kwargs)
-    s += metadata()
-    return s
+    dump = yaml.dump(remove_defaults(self._pretty_print()), sort_keys=False)
+    dump = "\n" + dump.strip("\n")
+    dump = dump.replace("\n", newline)
+    return "<pyccl.cosmology.Cosmology>" + dump + metadata()
 
 
 def build_string_Pk2D(self, na=6, nk=6, decimals=2):

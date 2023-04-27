@@ -59,7 +59,8 @@ autodoc_default_options = {
     "member-order": "bysource",
     "show-inheritance": True,
     "inherited-members": True,
-    "special-members": "__call__",}
+    "special-members": "__call__",
+}
 
 # Options for `sphnix_autodoc_typehints`.
 typehints_fully_qualified = False

@@ -6,8 +6,8 @@ import warnings
 import numpy as np
 
 from . import (
-    CCLObject, DEFAULT_POWER_SPECTRUM, Unlock, check, get_pk_spline_a,
-    get_pk_spline_lk, lib, spline_params, unlock)
+    CCLObject, DEFAULT_POWER_SPECTRUM, check, get_pk_spline_a,
+    get_pk_spline_lk, lib, spline_params, unlock_instance)
 from . import CCLWarning, CCLError, CCLDeprecationWarning, warn_api, deprecated
 from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 
@@ -257,7 +257,7 @@ class Pk2D(CCLObject):
         if np.ndim(ret) == 0:
             status = ret
         else:
-            with Unlock(pk2d):
+            with pk2d.unlock():
                 pk2d.psp, status = ret
 
         check(status, cosmo)
@@ -301,7 +301,7 @@ class Pk2D(CCLObject):
         if np.ndim(ret) == 0:
             status = ret
         else:
-            with Unlock(pk2d):
+            with pk2d.unlock():
                 pk2d.psp, status = ret
         check(status, cosmo)
         return pk2d
@@ -553,27 +553,27 @@ class Pk2D(CCLObject):
     def __rtruediv__(self, other):
         return other * self**(-1)
 
-    @unlock
+    @unlock_instance
     def __iadd__(self, other):
         self = self + other
         return self
 
-    @unlock
+    @unlock_instance
     def __imul__(self, other):
         self = self * other
         return self
 
-    @unlock
+    @unlock_instance
     def __isub__(self, other):
         self = self - other
         return self
 
-    @unlock
+    @unlock_instance
     def __itruediv__(self, other):
         self = self / other
         return self
 
-    @unlock
+    @unlock_instance
     def __ipow__(self, other):
         self = self**other
         return self

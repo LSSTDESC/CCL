@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
 import numpy as np
 import numpy.testing as npt
 
-from .. import CCLObject, CCLDeprecationWarning, unlock
+from .. import CCLObject, CCLDeprecationWarning, unlock_instance
 from .. import warn_api, deprecate_attr, deprecated
 from .. import physical_constants as const
 from . import MassDef, MassFunc, HaloBias
@@ -153,7 +153,7 @@ class HMCalculator(CCLObject):
         if set([x.mass_def for x in others]) != set([self.mass_def]):
             raise ValueError("Inconsistent mass definitions.")
 
-    @unlock
+    @unlock_instance
     def _get_mass_function(self, cosmo, a, rho0):
         # Compute the mass function at this cosmo and a.
         if a != self._a_mf or cosmo != self._cosmo_mf:
@@ -162,7 +162,7 @@ class HMCalculator(CCLObject):
             self._mf0 = (rho0 - integ) / self._m0
             self._cosmo_mf, self._a_mf = cosmo, a  # cache
 
-    @unlock
+    @unlock_instance
     def _get_halo_bias(self, cosmo, a, rho0):
         # Compute the halo bias at this cosmo and a.
         if a != self._a_bf or cosmo != self._cosmo_bf:
@@ -224,7 +224,7 @@ class HMCalculator(CCLObject):
             cosmo: Cosmology,
             a: Real,
             prof: HaloProfile,
-     ) -> float:
+    ) -> float:
         r"""Compute the large-scale normalization of a profile:
 
         .. note::
@@ -306,6 +306,8 @@ class HMCalculator(CCLObject):
         # get a values for integral
         if a_min is None:
             a_min = cosmo.cosmo.spline_params.A_SPLINE_MIN
+        if a_max is None:
+            a_max = cosmo.cosmo.spline_params.A_SPLINE_MAX
         a = np.linspace(a_min, a_max, na)
 
         # compute the volume element

@@ -13,7 +13,7 @@ import warnings
 from inspect import Parameter, signature
 
 from .. import CCLDeprecationWarning
-from . import unlock
+from . import unlock_instance
 
 
 def deprecated(obj=None, *, new_api=None):
@@ -41,7 +41,7 @@ def mass_def_api(func):
     """Preserve ``mass_def`` as a final argument of the decorated function."""
     # TODO: CCLv3 - remove `mass_def=None` default from some HaloProfiles.
     @functools.wraps(func)
-    @unlock
+    @unlock_instance
     def wrapper(self, *args, mass_def=None, mdef_other=None, **kwargs):
         if type(args[-1]).__name__ == "MassDef":
             *args, mass_def = args

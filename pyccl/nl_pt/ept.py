@@ -4,7 +4,8 @@ import warnings
 
 import numpy as np
 
-from .. import CCLObject, CCLError, CCLWarning, Pk2D, get_pk_spline_a, unlock
+from .. import (CCLObject, CCLError, CCLWarning, Pk2D,
+                get_pk_spline_a, unlock_instance)
 
 
 # All valid Pk pair labels and their aliases
@@ -219,7 +220,7 @@ class EulerianPTCalculator(CCLObject):
     def initialised(self):
         return hasattr(self, "pk_bk")
 
-    @unlock
+    @unlock_instance
     def update_ingredients(self, cosmo):
         """ Update the internal PT arrays.
 

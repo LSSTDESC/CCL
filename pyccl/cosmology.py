@@ -359,14 +359,9 @@ class Cosmology(CCLObject):
         if self.cosmo.status != 0:
             raise CCLError(f"{self.cosmo.status}: {self.cosmo.status_message}")
 
-    def write_yaml(self, filename, *, sort_keys=False):
-        """Write a YAML representation of the parameters to file.
-
-        Args:
-            filename (:obj:`str`) Filename, file pointer, or stream to write "
-                "parameters to."
-        """
-        def make_yaml_friendly(d):
+    def _pretty_print(self):
+        """Pretty print for `yaml` export and `repr`."""
+        def make_pretty(d):
             # serialize numpy types and dicts
             for k, v in d.items():
                 if isinstance(v, int):
@@ -374,10 +369,20 @@ class Cosmology(CCLObject):
                 elif isinstance(v, float):
                     d[k] = float(v)
                 elif isinstance(v, dict):
-                    make_yaml_friendly(v)
+                    make_pretty(v)
 
         params = {**self._params_init_kwargs, **self._config_init_kwargs}
-        make_yaml_friendly(params)
+        make_pretty(params)
+        return params
+
+    def write_yaml(self, filename, *, sort_keys=False):
+        """Write a YAML representation of the parameters to file.
+
+        Args:
+            filename (:obj:`str`) Filename, file pointer, or stream to write "
+                "parameters to."
+        """
+        params = self._pretty_print()
 
         if isinstance(filename, str):
             with open(filename, "w") as fp:
@@ -578,13 +583,10 @@ class Cosmology(CCLObject):
         return state
 
     def __setstate__(self, state):
-        # This will create a new `Cosmology` object so we create another lock.
-        state["_lock"] = type(state.pop("_lock"))()
         self.__dict__ = state
         # we removed the C data when it was pickled, so now we unpickle
         # and rebuild the C data
         self._build_cosmo()
-        self._lock.lock()  # Lock on exit.
 
     def compute_distances(self):
         """Compute the distance splines."""

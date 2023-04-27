@@ -196,7 +196,7 @@ def test_pt_get_pk2d_raises():
 
     # Wrong tracer types
     tdum = ccl.nl_pt.PTMatterTracer()
-    with ccl.Unlock(tdum):
+    with tdum.unlock():
         tdum.type = 'A'
     for t in ['TG', 'TI', 'TM']:
         with pytest.raises(NotImplementedError):

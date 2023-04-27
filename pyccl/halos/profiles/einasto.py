@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Union
 import numpy as np
 from scipy.special import gamma, gammainc
 
-from ... import unlock, update, warn_api
+from ... import update, warn_api
 from .. import MassDef, mass_translator
 from . import HaloProfileMatter
 
@@ -67,13 +67,13 @@ class HaloProfileEinasto(HaloProfileMatter):
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
-    @unlock
     def _init_mass_translator(self):
         # Set the mass translator to Mvir as an attribute.
-        # TODO: Move to `__init__` in CCLv3.
-        self._to_virial_mass = mass_translator(
-            mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
-            concentration=self.concentration)
+        # TODO: Move to `__init__` in CCLv3 (without the context).
+        with self.unlock():
+            self._to_virial_mass = mass_translator(
+                mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
+                concentration=self.concentration)
 
     @warn_api
     @update(names=["alpha"])

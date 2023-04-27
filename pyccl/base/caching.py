@@ -12,56 +12,56 @@ import sys
 import functools
 from collections import OrderedDict
 from inspect import signature
+from numbers import Number
 from _thread import RLock
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Hashable, Iterable, Literal, final
 
 import numpy as np
 
 
-def _to_hashable(obj):
-    """Make unhashable objects hashable in a consistent manner."""
+def _to_string(obj: Any) -> Hashable:
+    """Make unhashable objects hashable in a consistent manner.
 
-    if isinstance(obj, (int, float, str)):
-        # Strings and Numbers are hashed directly.
+    Arguments
+    ---------
+    obj
+        Any object to be hashed.
+
+    See Also
+    --------
+    :func:`~hash_`
+    """
+    if isinstance(obj, str):                     # strings returned directly
         return obj
-
-    elif hasattr(obj, "__iter__"):
-        # Encapsulate all the iterables to quickly discard as needed.
-
-        if isinstance(obj, np.ndarray):
-            # Numpy arrays: Convert the data buffer to a byte string.
-            return obj.tobytes()
-
-        elif isinstance(obj, dict):
-            # Dictionaries: Build a tuple from key-value pairs,
-            # where all values are converted to hashables.
-            out = {key: _to_hashable(value) for key, value in obj.items()}
-            # Sort unordered dictionaries for hash consistency.
-            if isinstance(obj, OrderedDict):
-                return tuple(out.items())
-            return tuple(sorted(out.items()))
-
-        else:
-            # Iterables: Build a tuple from values converted to hashables.
-            out = [_to_hashable(item) for item in obj]
-            return tuple(out)
-
-    elif hasattr(obj, "__hash__"):
-        # Hashables: Just return the object.
-        return obj
-
-    # NotImplemented: Can't hash safely, so raise TypeError.
-    # Note: This will never be triggered since `type` has a repr slot wrapper.
-    raise TypeError(f"Hashing for {type(obj)} not implemented.")
+    if isinstance(obj, Number):                  # numbers converted to strings
+        return str(obj)
+    if isinstance(obj, np.ndarray):              # arrays converted to bytes
+        return str(obj.tobytes())
+    if isinstance(obj, dict):                    # recurse dicts
+        out = {key: _to_string(value) for key, value in obj.items()}
+        if isinstance(obj, OrderedDict):
+            return repr(tuple(out.items()))      # ordered dicts unsorted
+        return repr(tuple(sorted(out.items())))  # dicts sorted
+    if isinstance(obj, Iterable):                # recurse iterables
+        return repr(tuple([_to_string(item) for item in obj]))
+    return repr(obj)                             # rely on unique repr
 
 
 def hash_(obj: Any) -> str:
-    """Generic hash method, which changes between processes.
-    It is designed to hash every type, even those that are by default
-    unhashable, through their representation string.
+    """Generic hash method, which changes between processes. It is designed to
+    hash every type, even those that are by default unhashable.
+
+    The steps of the algorithm are (in order):
+
+    * Strings are returned directly.
+    * Numerical types are converted to strings because some numbers share hash.
+    * For numpy arrays, return the bytes data buffer.
+    * Dictionaries are sorted and iterated recursively with the above rules.
+    * Ordered dictionaries follow dictionaries, but their order is preserved.
+    * Other iterables are iterated recursively.
+    * If none of the above holds, the representation string is returned.
     """
-    digest = hash(repr(_to_hashable(obj))) + sys.maxsize + 1
-    return digest
+    return hash(_to_string(obj)) + sys.maxsize + 1
 
 
 class _CachingMeta(type):
@@ -105,6 +105,7 @@ class _CachingMeta(type):
             func.cache_info.policy = value
 
 
+@final
 class Caching(metaclass=_CachingMeta):
     """Utility class that implements the infrastructure for caching.
 
@@ -123,17 +124,6 @@ class Caching(metaclass=_CachingMeta):
     _maxsize = _default_maxsize   # user-defined maxsize
     _policy = _default_policy     # user-defined policy
     _cached_functions: list = []
-
-    @classmethod
-    def _get_key(cls, func, *args, **kwargs):
-        """Calculate the hex hash from arguments and keyword arguments."""
-        # get a dictionary of default parameters
-        params = func.cache_info._signature.parameters
-        # get a dictionary of the passed parameters
-        passed = {**dict(zip(params, args)), **kwargs}
-        # discard the values equal to the default
-        defaults = {param: value.default for param, value in params.items()}
-        return hex(hash_({**defaults, **passed}))
 
     @classmethod
     def _get(cls, dic, key, policy):
@@ -156,45 +146,6 @@ class Caching(metaclass=_CachingMeta):
             idx = np.argmin([item.counter for item in dic.values()])
             dic.move_to_end(keys[idx], last=False)
         dic.popitem(last=False)
-
-    @classmethod
-    def _decorator(cls, func, maxsize, policy):
-        # assign caching attributes to decorated function
-        func.cache_info = CacheInfo(func, maxsize=maxsize, policy=policy)
-        func.clear_cache = func.cache_info._clear_cache
-        cls._cached_functions.append(func)
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            if not cls._enabled:
-                return func(*args, **kwargs)
-
-            key = cls._get_key(func, *args, **kwargs)
-            # shorthand access
-            caches = func.cache_info._caches
-            maxsize = func.cache_info.maxsize
-            policy = func.cache_info.policy
-
-            with RLock():
-                if key in caches:
-                    # output has been cached; update stats and return it
-                    out = cls._get(caches, key, policy)
-                    func.cache_info.hits += 1
-                    return out.item
-
-            with RLock():
-                while len(caches) >= maxsize:
-                    # output not cached and no space available, so remove
-                    # items as per the caching policy until there is space
-                    cls._pop(caches, policy)
-
-            # cache new entry and update stats
-            out = CachedObject(func(*args, **kwargs))
-            caches[key] = out
-            func.cache_info.misses += 1
-            return out.item
-
-        return wrapper
 
     @classmethod
     def cache(
@@ -237,11 +188,49 @@ class Caching(metaclass=_CachingMeta):
             raise ValueError("Cache retention policy not recognized.")
 
         if func is None:
-            # `@cache` with parentheses
+            # `@cache()` with parentheses
             return functools.partial(
-                cls._decorator, maxsize=maxsize, policy=policy)
-        # `@cache()` without parentheses
-        return cls._decorator(func, maxsize=maxsize, policy=policy)
+                cls.cache, maxsize=maxsize, policy=policy)
+
+        # Store the signature: it is accessed to make a key.
+        func.__signature__ = signature(func)
+        # assign caching attributes to decorated function
+        func.cache_info = CacheInfo(maxsize=maxsize, policy=policy)
+        func.clear_cache = func.cache_info._clear_cache
+        cls._cached_functions.append(func)
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if not cls._enabled:
+                # caching is disabled
+                return func(*args, **kwargs)
+
+            key = hash_(func.__signature__.bind(*args, **kwargs).arguments)
+            # shorthand access
+            caches = func.cache_info._caches
+            maxsize = func.cache_info.maxsize
+            policy = func.cache_info.policy
+
+            with RLock():
+                if key in caches:
+                    # output has been cached; update stats and return it
+                    out = cls._get(caches, key, policy)
+                    func.cache_info.hits += 1
+                    return out.item
+
+            with RLock():
+                while len(caches) >= maxsize:
+                    # output not cached and no space available, so remove
+                    # items as per the caching policy until there is space
+                    cls._pop(caches, policy)
+
+            # cache new entry and update stats
+            out = CachedObject(func(*args, **kwargs))
+            caches[key] = out
+            func.cache_info.misses += 1
+            return out.item
+
+        return wrapper
 
     @classmethod
     def enable(cls):
@@ -274,9 +263,6 @@ class CacheInfo:
 
     Parameters
     ----------
-    func
-        Function in which an instance of this class will be assigned.
-        Used to access the function signature.
     maxsize
         Maximum number of caches to store.
     policy
@@ -297,14 +283,10 @@ class CacheInfo:
 
     def __init__(
             self,
-            func: Callable,
             *,
             maxsize: int = Caching.maxsize,
             policy: Literal["fifo", "lru", "lfu"] = Caching.policy
     ):
-        # we store the signature of the function on import
-        # as it is the most expensive operation (~30x slower)
-        self._signature = signature(func)
         self._caches = OrderedDict()
         self.maxsize = maxsize
         self.policy = policy

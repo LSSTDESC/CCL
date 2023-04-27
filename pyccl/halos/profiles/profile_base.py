@@ -7,7 +7,7 @@ from typing import Callable
 
 import numpy as np
 
-from ... import CCLObject, FFTLogParams, unlock
+from ... import CCLObject, FFTLogParams
 from ... import CCLDeprecationWarning, deprecate_attr, warn_api, mass_def_api
 from ... import physical_constants as const
 from ...pyutils import resample_array, _fftlog_transform
@@ -78,10 +78,10 @@ class HaloProfile(CCLObject):
         return self._is_number_counts
 
     @is_number_counts.setter
-    @unlock
     def is_number_counts(self, value):
         # TODO: Remove for CCLv3.
-        self._is_number_counts = value
+        with self.unlock():
+            self._is_number_counts = value
 
     def get_normalization(self, cosmo, a, *, hmc=None):
         """Profiles may be normalized by an overall function of redshift
@@ -109,7 +109,6 @@ class HaloProfile(CCLObject):
         # NK: (cosmo, a) have to take None defaults in v3.
         # return 1.0
 
-    @unlock
     @functools.wraps(FFTLogParams.update_parameters)
     def update_precision_fftlog(self, **kwargs):
         self.precision_fftlog.update_parameters(**kwargs)

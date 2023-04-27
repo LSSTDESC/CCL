@@ -53,12 +53,6 @@ def check_eq_repr_hash(self, other, *, equal=True):
 def test_CCLObject_immutability():
     # These tests check the behavior of immutable objects, i.e. instances
     # of classes where `Funlock` or `unlock` is not used.
-    # test `CCLObject` lock
-    obj = ccl.CCLObject()
-    obj._lock.unlock()
-    assert "locked=False" in repr(obj._lock)
-    obj._lock.lock()
-    assert "locked=True" in repr(obj._lock)
 
     # `update_parameters` not implemented.
     cosmo = ccl.CosmologyVanillaLCDM()
@@ -137,18 +131,14 @@ def test_unlock_errors():
 
     # 1. Developer error
     with pytest.raises(NameError):
-        @ccl.unlock(name="hello")
+        @ccl.unlock_instance(name="hello")
         def func1(item, pk, a0=0, *, a1=None, a2):
             return
 
     # 2. User error
-    @ccl.unlock(name="pk")
+    @ccl.unlock_instance(name="pk")
     def func2(item, pk, a0=0, *, a1=None, a2):
         return
 
     with pytest.raises(TypeError):
         func2()
-
-    # 3. Doesn't do anything if instance is not CCLObject.
-    with ccl.Unlock(True):
-        pass

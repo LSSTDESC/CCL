@@ -32,7 +32,6 @@ class Baryons(CCLNamedClass):
         :meta public:
         """
 
-
     def include_baryonic_effects(self, cosmo: Cosmology, pk: Pk2D) -> Pk2D:
         """Apply baryonic effects to a given power spectrum.
 

@@ -72,18 +72,18 @@ def halomod_trispectrum_1h(
     prof, prof2, prof3, prof4 : :class:`~pyccl.halos.HaloProfile`
         Halo profiles. Unspecified profiles are allocated as follows
 
-        * if ``prof2`` is None, ``prof`` is used
-        * if ``prof3`` is None, ``prof`` is used
-        * if ``prof4`` is None, ``prof2`` is used.
+        * if `prof2` is None, `prof` is used
+        * if `prof3` is None, `prof` is used
+        * if `prof4` is None, `prof2` is used.
 
     prof12_2pt, prof34_2pt : :class:`~pyccl.halos.Profile2pt`, optional
-        Profile covariances. If ``prof34_2pt`` is not specified, ``prof12_2pt``
-        is used. The default ``prof12_2pt`` is
+        Profile covariances. If `prof34_2pt` is not specified, `prof12_2pt`
+        is used. The default `prof12_2pt` is
         :class:`~pyccl.halos.Profile2pt`.
     normprof1, normprof2, normprof3, normprof4 : bool - Deprecated, do not use
         If True, normalize by :math:`I^0_1(k\rightarrow 0,a|u)`
         (see :meth:`~HMCalculator.I_0_1`), where :math:`u` is the profile
-        represented by ``(prof, prof2, prof3, prof4)``, respectively.
+        represented by `(prof, prof2, prof3, prof4)`, respectively.
 
     Returns
     -------
@@ -171,11 +171,11 @@ def halomod_Tk3D_1h(
     Create a :class:`~pyccl.Tk3D` container of the trispectrum.
 
     * Information on the arguments is in :func:`halomod_trispectrum_1h`.
-    * Arguments ``(a_arr, lk_arr, extrap_order_lok, extrap_order_hik)`` are
+    * Arguments `(a_arr, lk_arr, extrap_order_lok, extrap_order_hik)` are
       passed to the :class:`~pyccl.Tk3D` constructor.
-    * If ``lk_arr`` or ``a_arr`` are not specified, the sampling arrays are
-      computed from the spline parameters stored in ``cosmo``.
-    * If ``use_log`` is True, the trispectrum is interpolated in log-space.
+    * If `lk_arr` or `a_arr` are not specified, the sampling arrays are
+      computed from the spline parameters stored in `cosmo`.
+    * If `use_log` is True, the trispectrum is interpolated in log-space.
     """
     if lk_arr is None:
         lk_arr = cosmo.get_pk_spline_lk()
@@ -244,26 +244,26 @@ def halomod_Tk3D_SSC_linear_bias(
     prof : :class:`~pyccl.halos.HaloProfileNFW`
         NFW profile.
     bias{1, 2, 3, 4} : float or (na,) array_like, optional
-        Linear galaxy biases. Shape of array-like input must match ``a_arr``.
+        Linear galaxy biases. Shape of array-like input must match `a_arr`.
     is_number_counts{1, 2, 3, 4} : bool, optional - Deprecated, do not use.
         Whether to compute the clustering counter terms for the repsective
         profiles. The default is False.
     p_of_k_a : {'linear', 'nonlinear} or :class:`~pyccl.Pk2D`, optional
-        Power spectrum to integrate. ``'linear'`` and ``'nonlinear'`` get the
-        corresponding power stored in ``cosmo``. The default is ``'linear'``.
+        Power spectrum to integrate. `'linear'` and `'nonlinear'` get the
+        corresponding power stored in `cosmo`. The default is `'linear'`.
     a_arr : (na,) array_like, optional
         Scale factor where the trispectrum is sampled. The default is None,
-        which retrieves the sampling rate from ``cosmo``.
+        which retrieves the sampling rate from `cosmo`.
     lk_arr : array_like, optional
         :math:`\ln k`, where :math:`k` is the wavenumber where the trispectrum
         is sampled (in :math:`rm Mpc^{-1}`). The default is None, which
-        retrieves the sampling rate from ``cosmo``.
+        retrieves the sampling rate from `cosmo`.
     extrap_order_lok, extrap_order_hik : int, optional
         Spline extrapolation orders passed to :class:`~pyccl.Tk3D`.
     use_log : bool, optional
         Whether to interpolate in log-space. The default is False.
     extrap_pk : bool, optional
-        Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
+        Whether to extrapolate `p_of_k_a` in case `a` is out of its
         support. If False, and the queried values are out of bounds,
         an error is raised. The default is False.
 
@@ -378,33 +378,33 @@ def halomod_Tk3D_SSC(
     prof, prof2, prof3, prof4 : :class:`~pyccl.halos.HaloProfile`
         Halo profiles. Unspecified profiles are allocated as follows
 
-        * if ``prof2`` is None, ``prof`` is used
-        * if ``prof3`` is None, ``prof`` is used
-        * if ``prof4`` is None, ``prof2`` is used.
+        * if `prof2` is None, `prof` is used
+        * if `prof3` is None, `prof` is used
+        * if `prof4` is None, `prof2` is used.
 
     prof12_2pt, prof34_2pt : :class:`~pyccl.halos.Profile2pt`, optional
-        Profile covariances. If ``prof34_2pt`` is not specified, ``prof12_2pt``
-        is used. The default ``prof12_2pt`` is :class:`~pyccl.halos.Profile2pt`.
+        Profile covariances. If `prof34_2pt` is not specified, `prof12_2pt`
+        is used. The default `prof12_2pt` is :class:`~pyccl.halos.Profile2pt`.
     normprof1, normprof2, normprof3, normprof4 : bool - Deprecated, do not use
         If True, normalize by :math:`I^0_1(k\rightarrow 0,a|u)`
         (see :meth:`~HMCalculator.I_0_1`), where :math:`u` is the profile
-        represented by ``(prof, prof2, prof3, prof4)``, respectively.
+        represented by `(prof, prof2, prof3, prof4)`, respectively.
     p_of_k_a : {'linear', 'nonlinear} or :class:`~pyccl.Pk2D`, optional
-        Power spectrum to integrate. ``'linear'`` and ``'nonlinear'`` get the
-        corresponding power stored in ``cosmo``. The default is ``'linear'``.
+        Power spectrum to integrate. `'linear'` and `'nonlinear'` get the
+        corresponding power stored in `cosmo`. The default is `'linear'`.
     a_arr : (na,) array_like, optional
         Scale factor where the trispectrum is sampled. The default is None,
-        which retrieves the sampling rate from ``cosmo``.
+        which retrieves the sampling rate from `cosmo`.
     lk_arr : array_like, optional
         :math:`\ln k`, where :math:`k` is the wavenumber where the trispectrum
         is sampled (in :math:`rm Mpc^{-1}`). The default is None, which
-        retrieves the sampling rate from ``cosmo``.
+        retrieves the sampling rate from `cosmo`.
     extrap_order_lok, extrap_order_hik : int, optional
         Spline extrapolation orders passed to :class:`~pyccl.Tk3D`.
     use_log : bool, optional
         Whether to interpolate in log-space. The default is False.
     extrap_pk : bool, optional
-        Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
+        Whether to extrapolate `p_of_k_a` in case `a` is out of its
         support. If False, and the queried values are out of bounds,
         an error is raised. The default is False.
 

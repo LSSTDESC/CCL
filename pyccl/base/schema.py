@@ -6,266 +6,18 @@ Schema (:mod:`pyccl.base.schema`)
 Base class for all CCL objects, and functionality related to it.
 """
 
-__all__ = ("Lock", "Unlock", "unlock",
-           "CustomRepr", "CustomEq", "is_equal",
-           "update",
-           "CCLObject", "CCLNamedClass",)
+__all__ = (
+    "CustomEq", "CustomRepr",
+    "unlock_instance", "funlock", "update", "is_equal",
+    "Immutable", "CCLObject", "CCLNamedClass",)
 
 import functools
 from abc import ABC, abstractmethod
+from contextlib import nullcontext
 from inspect import signature, Parameter
-from _thread import RLock
-from typing import Any, Callable, Optional, Sequence, Type, Union
+from typing import Callable, Optional, Sequence, Type, Union, final
 
 import numpy as np
-
-
-class Lock:
-    """Control the lock state (immutability) of an instance.
-
-    This lock may be injected to instances during construction and, with
-    :meth:`__setattr__` modified to check the :attr:`locked` property of the
-    lock, object immutabilty (and controlled mutability) can be achieved.
-
-    Example
-    -------
-
-    .. code-block:: python
-
-        class Immutable:
-
-            def __new__(cls):
-                # create a new instance
-                instance = super().__new__(cls)
-                # inject a new lock
-                object.__setattr__(instance, "_lock", Lock())
-                return instance
-
-            def __setattr__(self, name, value):
-                if self._lock.locked:  # check if locked
-                    raise AttributeError("Immutable class.")
-                object.__setattr__(self, name, value)
-
-        obj = Immutable()
-        obj._lock.lock()  # lock the object
-        obj.my_attr = 1  # AttributeError
-
-    See Also
-    --------
-    :class:`~Unlock` : Temporarily unlock an immutable instance.
-    """
-    _locked: bool = False
-    _lock_id: int = None
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}(locked={self.locked})"
-
-    @property
-    def locked(self) -> bool:
-        """Check if the object is locked."""
-        return self._locked
-
-    @property
-    def active(self) -> bool:
-        """Check if an unlocking context manager is active."""
-        return self._lock_id is not None
-
-    def lock(self) -> None:
-        """Lock the object."""
-        self._locked = True
-        self._lock_id = None
-
-    def unlock(self, manager_id: Optional[Any] = None) -> None:
-        """Unlock the object.
-
-        Arguments
-        ---------
-        manager_id : Any, optional
-            Unique identifier of unlocker. May be used to prevent double-
-            unlocking.
-        """
-        self._locked = False
-        if manager_id is not None:
-            self._lock_id = manager_id
-
-
-class Unlock:
-    """Context manager to temporarily unlock instances that contain a
-    :class:`~Lock`.
-
-    Parameters
-    ----------
-    instance : object
-        Instance to unlock within the context manager block.
-    lock_name : str
-        Name of the attribute containing the :class:`~Lock`.
-        The default is `'_lock'`.
-
-    Example
-    -------
-    We instantiate class `Immutable` which is defined in the docs of
-    :class:`~Lock`.
-
-    .. code-block:: python
-
-        obj = Immutable()
-        obj._lock.lock()  # lock the object
-
-        obj.my_attr = 1  # raises AttributeError
-
-        with Unlock(obj):
-            obj.my_attr = 1  # this works
-    """
-
-    def __init__(self, instance: object, *, lock_name: str = "_lock"):
-        self.instance = instance
-        # Define these attributes for easy access.
-        self.id = id(self)
-        self.thread_lock = RLock()
-        # This context manager only unlocks objects containing an `Lock`.
-        # We exit early if the object us not unlockable.
-        attr = getattr(instance, lock_name, None)
-        self.check_instance = isinstance(attr, Lock)
-        if self.check_instance:
-            self.object_lock = instance._lock
-
-    def __enter__(self):
-        if not self.check_instance:
-            return
-
-        with self.thread_lock:
-            # Prevent simultaneous enclosing of a single instance.
-            if self.object_lock.active:
-                # Context manager already active.
-                return
-
-            # Unlock and store the fingerprint of this context manager so that
-            # only this context manager is allowed to run on the instance.
-            self.object_lock.unlock(manager_id=self.id)
-
-    def __exit__(self, type, value, traceback):
-        if not self.check_instance:
-            return
-
-        # If another context manager is running,
-        # do nothing; otherwise reset.
-        if self.id != self.object_lock._lock_id:
-            return
-
-        # Lock the instance on exit.
-        # self.object_lock.lock()  # TODO: Uncomment for CCLv3.
-
-    @classmethod
-    def unlock(cls, func: Callable = None, *,
-                        name: Optional[str] = None) -> Callable:
-        """Wrapper to temporarily unlock a locked instance.
-
-        Arguments
-        ---------
-        func : function
-            Function which changes one of its locked arguments.
-        name : str, optional
-            Name of the parameter to unlock. If the parameter does not contain
-            a lock the decorator will do nothing. The default is the first
-            argument (which is usually `self`).
-
-        Returns
-        -------
-        new_func : function
-            Wrapped function which unlocks argument `name`.
-
-        Raises
-        ------
-        NameError
-            If `name` does not exist in the signature of `func`.
-
-        Example
-        -------
-        We work with the `Immutable` class which is defined in the docs of
-        :class:`~Lock`.
-
-        .. code-block:: python
-
-            @unlock(name="a")  # unlock argument `a` in `func`
-            def func(a: Immutable):
-                a.my_attr = 1
-                a.my_other_attr = 2
-
-        If the first argument is to be unlocked, `name` can be skipped.
-        """
-        if func is None:
-            # called with parentheses
-            return functools.partial(cls.unlock, name=name)
-
-        if not hasattr(func, "__signature__"):
-            # store the function signature
-            func.__signature__ = signature(func)
-        names = list(func.__signature__.parameters.keys())
-        name = names[0] if name is None else name  # default name
-        if name not in names:
-            # ensure the name makes sense
-            raise NameError(f"{name} does not exist in {func.__name__}.")
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            bound = func.__signature__.bind(*args, **kwargs)
-            with cls(bound.arguments[name]):
-                return func(*args, **kwargs)
-        return wrapper
-
-    @classmethod
-    def Funlock(cls, cl, *, funcname: str, argname: str = "self") -> None:
-        """Helper which wraps a method in a class with :meth:`~unlock`
-        to allow for mutation of a locked instance.
-
-        Arguments
-        ---------
-        cl : class
-            Class whose method will be wrapped and replaced.
-        funcname : str
-            Name of the method to wrap.
-        argname : str, optional
-            Name of the argument that changes in `funcname`. The default is
-            `'self'`: the implicit first argument of instance methods.
-
-        Example
-        -------
-        We subclass `Immutable` which is defined in the docs of
-        :class:`~Lock`. We do not want to have to wrap with
-        `@unlock` the :meth:`__init__` of all subclasses.
-
-        .. code-block:: python
-
-            class AutoImmutable(Immutable):
-
-                def __init_subclass__(cls):
-                    Unlock.Funlock(cls, funcname='__init__')
-
-            class MyClass(AutoImmutable):
-
-                def __init__(self):  # automatically wrapped to unlock `self`
-                    self.my_attr = 1
-        """
-        func = vars(cl).get(funcname)
-        if func is not None:
-            newfunc = cls.unlock(name=argname)(func)
-            setattr(cl, funcname, newfunc)
-
-
-unlock = Unlock.unlock
-
-
-def is_equal(this, other) -> bool:
-    """Powerful helper for equivalence checking.
-
-    See `numpy.assert_equal <https://numpy.org/doc/stable/reference/generated/
-    numpy.testing.assert_equal.html>`_.
-    """
-    try:
-        np.testing.assert_equal(this, other)
-        return True
-    except AssertionError:
-        return False
 
 
 class _CustomMethod:
@@ -304,6 +56,7 @@ class _CustomMethod:
         cls._enabled = False
 
 
+@final
 class CustomEq(_CustomMethod, method="__eq__"):
     """Control the usage of custom :meth:`__eq__` for all registered classes.
 
@@ -338,6 +91,7 @@ class CustomEq(_CustomMethod, method="__eq__"):
         return self is other
 
 
+@final
 class CustomRepr(_CustomMethod, method="__repr__"):
     """Control the usage of custom :meth:`__repr__` for all registered classes.
 
@@ -369,6 +123,146 @@ class CustomRepr(_CustomMethod, method="__repr__"):
         return object.__repr__(self)
 
 
+@final
+class _UnlockContext:
+    """Temporarily unlock instances of :class:`~Immutable`.
+
+    .. warning::
+
+        This context manager is coupled to :class:`~Immutable`. It should not
+        be used directly. Instead, use :meth:`~Immutable.unlock`.
+
+    .. warning::
+
+        Do not nest more than one context manager unlocking the same instance.
+
+    Parameters
+    ----------
+    instance
+        Instance to unlock with the context manager protocol. Works as a
+        :class:`~nullcontext` if not specified.
+    """
+
+    def __init__(self, instance: Optional["Immutable"] = None):
+        self.instance = instance
+
+    def __enter__(self):
+        if self.instance is not None:
+            self.instance._locked = False
+
+    def __exit__(self, type, value, traceback):
+        if self.instance is not None:
+            self.instance._locked = True
+
+
+def unlock_instance(
+        func: Callable = None,
+        *,
+        name: Optional[str] = None
+) -> Callable:
+    """Wrapper to temporarily unlock a locked instance.
+
+    Arguments
+    ---------
+    func
+        Function which changes one of its locked arguments.
+    name
+        Name of the parameter to unlock. If the parameter is not an instance of
+        :class:`~Immutable` the decorator will do nothing. The default is the
+        first argument (which is usually `self`).
+
+    Returns
+    -------
+
+        Wrapped function which unlocks argument `name`.
+
+    Raises
+    ------
+    NameError
+        If `name` does not exist in the signature of `func`.
+
+    Example
+    -------
+
+    .. code-block:: python
+
+        from pyccl import Immutable
+
+        @unlock_instance(name="a")  # unlock argument `a` in `func`
+        def func(a: Immutable):
+            a.my_attr = 1
+            a.my_other_attr = 2
+
+    If the first argument is to be unlocked, `name` can be omitted.
+
+    See Also
+    --------
+    :meth:`~Immutable.unlock`
+        Temporarily unlock an instance within a context manager.
+    :func:`~funlock`
+        Helper to unlock a specific method in a class.
+    """
+    if func is None:
+        # called with parentheses
+        return functools.partial(unlock_instance, name=name)
+
+    if not hasattr(func, "__signature__"):
+        # store the function signature
+        func.__signature__ = signature(func)
+    names = list(func.__signature__.parameters.keys())
+    name = names[0] if name is None else name  # default name
+    if name not in names:
+        # ensure the name makes sense
+        raise NameError(f"{name} does not exist in {func.__name__}.")
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        arguments = func.__signature__.bind(*args, **kwargs).arguments
+        obj = arguments[name]
+        with obj.unlock() if isinstance(obj, Immutable) else nullcontext():
+            return func(*args, **kwargs)
+    return wrapper
+
+
+def funlock(cls: Type, name: str) -> None:
+    """Helper which wraps a method in a class with :meth:`~unlock_instance` to
+    allow for mutation of a locked instance.
+
+    Arguments
+    ---------
+    cls
+        Class whose method will be wrapped and replaced.
+    name
+        Name of the method to wrap.
+
+    Example
+    -------
+    We want to unlock `my_method` in all subclasses.
+
+    .. code-block:: python
+
+        class MyImmutable(Immutable):
+
+            def __init_subclass__(cls):
+                funlock(cls, 'my_method')
+
+        class MyClass(MyImmutable):
+
+            def my_method(self):  # automatically wrapped to unlock `self`
+                self.my_attr = 1
+
+    See Also
+    --------
+    :meth:`~Immutable.unlock`
+        Temporarily unlock an instance within a context manager.
+    :func:`~unlock_instance`
+        Decorator to unlock an instance within the body of a function.
+    """
+    func = vars(cls).get(name)
+    if func is not None:
+        setattr(cls, name, unlock_instance(func))
+
+
 def update(func: Callable = None, *, names: Sequence[str]) -> Callable:
     """Wrapper to automatically update model parameters.
 
@@ -378,14 +272,14 @@ def update(func: Callable = None, *, names: Sequence[str]) -> Callable:
 
     Arguments
     ---------
-    func : function
+    func
         Function to wrap.
-    names : Sequence
+    names
         Extend the original signature to make these parameters updatable.
 
     Returns
     -------
-    new_func : function
+
         Function with extended signature as specified by `names`.
 
     Example
@@ -424,11 +318,108 @@ def update(func: Callable = None, *, names: Sequence[str]) -> Callable:
     return wrapper
 
 
-class CCLObject(ABC):
-    """Base for CCL objects.
+def is_equal(this, other) -> bool:
+    """Powerful helper for equivalence checking.
 
-    Provide a framework for immutability, homogeneous representation and
-    hashing (used for caching), and comparison.
+    See `numpy.assert_equal <https://numpy.org/doc/stable/reference/generated/
+    numpy.testing.assert_equal.html>`_.
+    """
+    try:
+        np.testing.assert_equal(this, other)
+        return True
+    except AssertionError:
+        return False
+
+
+class Immutable(ABC):
+    r"""Implementation of an immutable object.
+
+    Instances of this class are by default immutable, providing a failsafe
+    mechanism, where, changing attributes has to trigger a re-computation of
+    somethnig else inside the instance, rather than simply a value change.
+
+    Subclasses which define :meth:`__init__` or :meth:`update_parameters`
+    automatically unlock temporarily when these methods are called.
+
+    Raises
+    ------
+    AttributeError
+        Trying to set an attribute of an immutable instance.
+    NotImplementedError
+        Trying to update the parameters of an immutable instance.
+
+    Example
+    -------
+
+    .. code-block:: python
+
+        obj = Immutable()
+        obj.my_attr = 1  # AttributeError
+
+    See Also
+    --------
+    :func:`~update`
+        Decorator to extend the signature of
+        :meth:`~Immutable.update_parameters` for simple parameter updating
+        (i.e. no re-computation of something internal).
+    """
+    _locked: bool = False  # TODO: Change to True for CCLv3.
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        # Unlock instance on specific methods.  # TODO: Uncomment for CCLv3.
+        # funlock(cls, "__init__")
+        # funlock(cls, "update_parameters")
+
+    def unlock(self) -> _UnlockContext:
+        """Context manager to temporarily unlock the instance.
+
+        Example
+        -------
+
+        .. code-block::
+
+            from pyccl import Immutable
+
+            obj = Immutable()
+            with obj.unlock():
+                obj.my_attr = 1
+
+        See Also
+        --------
+        :func:`~unlock_instance`
+            Decorator to unlock an instance within the body of a function.
+        :func:`~funlock`
+            Helper to unlock a specific method in a class.
+        """
+        instance = self if self._locked else None
+        return _UnlockContext(instance)
+
+    def __setattr__(self, name, value):
+        if self._locked and name != "_locked":
+            tp = type(self).__name__
+            raise AttributeError(f"Instances of {tp} can only be updated via "
+                                 "`update_parameters()`, if implemented.")
+        super().__setattr__(name, value)
+
+    def __delattr__(self, name):
+        if self._locked:
+            raise AttributeError("Can't delete attributes of a locked object.")
+        super().__delattr__(name)
+
+    def update_parameters(self, **kwargs) -> None:
+        """Override to allow parameter udpating. This is the default which
+        raises :exc:`NotImplementedError`.
+        """
+        name = self.__class__.__name__
+        raise NotImplementedError(f"{name} objects are immutable.")
+
+
+class CCLObject(Immutable):
+    r"""Base for CCL objects.
+
+    Provide a framework representation and hashing (used for caching) and
+    comparisons.
 
     Comparison
     ----------
@@ -466,7 +457,8 @@ class CCLObject(ABC):
 
     .. note::
 
-        Subclasses overriding :meth:`__eq__` need to define :meth:`__repr__`.
+        Subclasses overriding :meth:`__eq__` need to define :meth:`__hash__`
+        because Python discards it.
 
     Representations
     ---------------
@@ -498,33 +490,9 @@ class CCLObject(ABC):
                 return f'<MyClass>{sep}a = {self.a}{sep}b = {self.b}'
 
         print(MyClass(a=1, b=2))
-        <MyClass>
-          a = 1
-          b = 2
-
-    Mutation
-    --------
-    Instances of this class are by default immutable. This provides a failsafe
-    mechanism, where, changing attributes has to trigger a re-computation
-    of something else inside of the instance, rather than simply doing a value
-    change.
-
-    This immutability mechanism can be bypassed if a subclass defines
-    :meth:`update_parameters`. Instances temporarily unlock when this method
-    is called. To temporarily unlock an instance in other methods, use the
-    :func:`~unlock` decorator, or enclose the code block in an
-    :func:`~Unlock` context manager.
-
-    For simple updating of an instance attribute that only requires a value
-    change (i.e. no re-computation of something internal), the :func:`~update`
-    wrapper is provided.
-
-    Raises
-    ------
-    AttributeError
-        Trying to set an attribute of an immutable instance.
-    NotImplementedError
-        Trying to update the parameters of an immutable instance.
+        # <MyClass>
+        #   a = 1
+        #   b = 2
 
     See Also
     --------
@@ -533,36 +501,11 @@ class CCLObject(ABC):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
+        cls.__signature__ = signature(cls.__init__)  # store the signature
 
-        # 1. Store the initialization signature on import.
-        cls.__signature__ = signature(cls.__init__)
-
-        # 2. Register subclasses with custom dunder method implementations.
+        # Register subclasses with custom dunder method implementations.
         CustomEq.register(cls)
         CustomRepr.register(cls)
-
-        # 3. Unlock instance on specific methods.  # TODO: Uncomment for CCLv3.
-        # Unlock.Funlock(cls, "__init__")
-        # Unlock.Funlock(cls, "update_parameters")
-
-    def __new__(cls, *args, **kwargs):
-        # Populate every instance with an `Lock` as attribute.
-        instance = super().__new__(cls)
-        object.__setattr__(instance, "_lock", Lock())
-        return instance
-
-    def __setattr__(self, name, value):
-        if self._lock.locked:
-            raise AttributeError("CCL objects can only be updated via "
-                                 "`update_parameters`, if implemented.")
-        object.__setattr__(self, name, value)
-
-    def update_parameters(self, **kwargs) -> None:
-        """Override to allow parameter udpating. This is the default which
-        raises a `NotImplementedError`.
-        """
-        name = self.__class__.__name__
-        raise NotImplementedError(f"{name} objects are immutable.")
 
     def __repr__(self):
         # Build string from specified `__repr_attrs__` or use Python's default.
@@ -604,15 +547,10 @@ class CCLObject(ABC):
 class CCLNamedClass(CCLObject):
     """Base for objects with :meth:`from_name` and :meth:`create_instance`.
 
-    Implementation
-    --------------
-    * Subclasses must define a `name` class attribute which allows the tree
-      to be searched to retrieve the particular model, using its name.
-
     Example
     -------
     To avoid name collision, we typically subclass into an abstract class which
-    covers all the individual models.
+    covers all related models.
 
     .. code-block:: python
 
@@ -646,12 +584,12 @@ class CCLNamedClass(CCLObject):
 
         Arguments
         ---------
-        name : str
+        name
             Name of model.
 
         Returns
         -------
-        subclass : Type
+
             Subclass of `cls` with the particular name.
 
         Raises
@@ -669,13 +607,13 @@ class CCLNamedClass(CCLObject):
         return mod[name]
 
     @classmethod
-    def create_instance(cls, input_: Union[object, str], **kwargs) -> object:
+    def create_instance(cls, spec: Union[object, str], **kwargs) -> object:
         """Process the input and generate an instance of the class. Input can
         be an instance or a name string. Optional `**kwargs` may be passed.
 
         Arguments
         ---------
-        input_ : object or str
+        spec
             If an `object`, return it. If a string, instantiate the subclass
             with that name.
         **kwargs
@@ -683,14 +621,13 @@ class CCLNamedClass(CCLObject):
 
         Returns
         -------
-        instance : object
+
             Instantiated model.
 
         Raises
         ------
         TypeError
-            If the `input_` is neither a model name nor an instance of
-            `cls`.
+            If `spec` is neither a model name nor an instance of `cls`.
 
         Example
         -------
@@ -713,10 +650,10 @@ class CCLNamedClass(CCLObject):
         --------
         :meth:`~from_name` : Obtain the model class without instantiating it.
         """
-        if isinstance(input_, cls):
-            return input_
-        if isinstance(input_, str):
-            class_ = cls.from_name(input_)
+        if isinstance(spec, cls):
+            return spec
+        if isinstance(spec, str):
+            class_ = cls.from_name(spec)
             return class_(**kwargs)
-        good, bad = cls.__name__, type(input_).__name__
+        good, bad = cls.__name__, type(spec).__name__
         raise TypeError(f"Expected {good} or str but received {bad}.")
