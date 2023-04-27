@@ -9,79 +9,108 @@ from . import DEFAULT_POWER_SPECTRUM, check, lib, warn_api
 
 @warn_api
 def linear_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
-    """The linear power spectrum.
+    r"""The linear power spectrum.
 
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): Wavenumber; Mpc^-1.
-        a (float or array_like): Scale factor.
-        p_of_k_a (str): string specifying the power spectrum to
-            compute (which should be stored in `cosmo`). Defaults to
-            the linear matter power spectrum.
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.Cosmology`
+        Cosmological parameters.
+    k : int, float or (nk,) array_like
+        Wavenumber in :math:`\rm Mpc^{-1}`.
+    a : int, float or (na,) array_like
+        Scale factor.
+    p_of_k_a : str
+        Power spectrum name. Should be stored in ``cosmo``.
+        The default is :py:data:`~pyccl.DEFAULT_POWER_SPECTRUM`.
 
-    Returns:
-        float or array_like: Linear power spectrum.
+    Returns
+    -------
+    P_L : floar or (na, nk) numpy.array
+        Linear power spectrum, in units of :math:`\rm Mpc^3`.
     """
     return cosmo.get_linear_power(p_of_k_a)(k, a, cosmo)
 
 
 @warn_api
 def nonlin_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
-    """The non-linear power spectrum.
+    r"""The non-linear power spectrum.
 
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): Wavenumber; Mpc^-1.
-        a (float or array_like): Scale factor.
-        p_of_k_a (str): string specifying the power spectrum to
-            compute (which should be stored in `cosmo`). Defaults to
-            the non-linear matter power spectrum.
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.Cosmology`
+        Cosmological parameters.
+    k : int, float or (nk,) array_like
+        Wavenumber in :math:`\rm Mpc^{-1}`.
+    a : int, float or (na,) array_like
+        Scale factor.
+    p_of_k_a : str
+        Power spectrum name. Should be stored in ``cosmo``.
+        The default is :py:data:`~pyccl.DEFAULT_POWER_SPECTRUM`.
 
-    Returns:
-        float or array_like: Non-linear power spectrum.
+    Returns
+    -------
+    P_NL : floar or (na, nk) numpy.array
+        Non-inear power spectrum, in units of :math:`\rm Mpc^3`.
     """
     return cosmo.get_nonlin_power(p_of_k_a)(k, a, cosmo)
 
 
 def linear_matter_power(cosmo, k, a):
-    """The linear matter power spectrum; Mpc^3.
+    r"""The linear matter power spectrum.
 
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): Wavenumber; Mpc^-1.
-        a (float or array_like): Scale factor.
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.Cosmology`
+        Cosmological parameters.
+    k : int, float or (nk,) array_like
+        Wavenumber in :math:`\rm Mpc^{-1}`.
+    a : int, float or (na,) array_like
+        Scale factor.
 
-    Returns:
-        float or array_like: Linear matter power spectrum; Mpc^3.
+    Returns
+    -------
+    P_L : floar or (na, nk) numpy.array
+        Linear matter power spectrum, in units of :math:`\rm Mpc^3`.
     """
     return cosmo.linear_power(k, a, p_of_k_a=DEFAULT_POWER_SPECTRUM)
 
 
 def nonlin_matter_power(cosmo, k, a):
-    """The nonlinear matter power spectrum; Mpc^3.
+    r"""The non-linear matter power spectrum.
 
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): Wavenumber; Mpc^-1.
-        a (float or array_like): Scale factor.
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.Cosmology`
+        Cosmological parameters.
+    k : int, float or (nk,) array_like
+        Wavenumber in :math:`\rm Mpc^{-1}`.
+    a : int, float or (na,) array_like
+        Scale factor.
 
-    Returns:
-        float or array_like: Nonlinear matter power spectrum; Mpc^3.
+    Returns
+    -------
+    P_NL : floar or (na, nk) numpy.array
+        Non-linear matter power spectrum, in units of :math:`\rm Mpc^3`.
     """
     return cosmo.nonlin_power(k, a, p_of_k_a=DEFAULT_POWER_SPECTRUM)
 
 
 def sigmaM(cosmo, M, a):
-    """Root mean squared variance for the given halo mass of the linear power
-    spectrum; Msun.
+    r"""Root mean squared variance of the linear power spectrum.
 
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        M (float or array_like): Halo masses; Msun.
-        a (float): scale factor.
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.Cosmology`
+        Cosmological parameters.
+    M : int, float or (nM,) array_like
+        Halo mass in :math:`\rm M_{\odot}`.
+    a : int, float or (na,) array_like
+        Scale factor.
 
-    Returns:
-        float or array_like: RMS variance of halo mass.
+    Returns
+    -------
+    sigM : float or (na, nM) numpy.ndarray
+        RMS variance of halo mass.
     """
     cosmo.compute_sigma()
 
@@ -97,7 +126,7 @@ def sigmaM(cosmo, M, a):
 
 @warn_api
 def sigmaR(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
-    """RMS variance in a top-hat sphere of radius R in Mpc.
+    r"""RMS variance in a top-hat sphere of radius R in Mpc.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.

@@ -579,12 +579,12 @@ class Cosmology(CCLObject):
 
     def __setstate__(self, state):
         # This will create a new `Cosmology` object so we create another lock.
-        state["_object_lock"] = type(state.pop("_object_lock"))()
+        state["_lock"] = type(state.pop("_lock"))()
         self.__dict__ = state
         # we removed the C data when it was pickled, so now we unpickle
         # and rebuild the C data
         self._build_cosmo()
-        self._object_lock.lock()  # Lock on exit.
+        self._lock.lock()  # Lock on exit.
 
     def compute_distances(self):
         """Compute the distance splines."""

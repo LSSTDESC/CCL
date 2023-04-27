@@ -13,6 +13,7 @@ import functools
 from collections import OrderedDict
 from inspect import signature
 from _thread import RLock
+from typing import Any, Callable, Literal
 
 import numpy as np
 
@@ -54,7 +55,7 @@ def _to_hashable(obj):
     raise TypeError(f"Hashing for {type(obj)} not implemented.")
 
 
-def hash_(obj):
+def hash_(obj: Any) -> str:
     """Generic hash method, which changes between processes.
     It is designed to hash every type, even those that are by default
     unhashable, through their representation string.
@@ -64,7 +65,7 @@ def hash_(obj):
 
 
 class _CachingMeta(type):
-    """Implement ``property`` to a ``classmethod`` for ``Caching``."""
+    """Implement `property` to a `classmethod` for `Caching`."""
     # NOTE: Only in 3.8 < py < 3.11 can `classmethod` wrap `property`.
     # https://docs.python.org/3.11/library/functions.html#classmethod
     @property
@@ -196,24 +197,37 @@ class Caching(metaclass=_CachingMeta):
         return wrapper
 
     @classmethod
-    def cache(cls, func=None, *, maxsize=_maxsize, policy=_policy):
-        """Cache the output of the decorated function, using the input
-        arguments as a proxy to build a hash key.
+    def cache(
+            cls,
+            func: Callable = None,
+            *,
+            maxsize: int = _maxsize,
+            policy: Literal["fifo", "lru", "lfu"] = _policy
+    ) -> Callable:
+        """Wrapper to cache the output of a function, using the input arguments
+        as a proxy to build a hash key.
 
         Arguments
         ---------
-        func : function
+        func
             Function to be wrapped.
-        maxsize : int, optional
+        maxsize
             Maximum cache size for the wrapped function. The default is 128.
-        policy : {'fifo', 'lru', 'lfu'}, optional
-            Cache retention policy. When the registry reaches ``maxsize`` and
-            a new object needs to be stored, decide which cached object will
-            be discarded. The default is ``'lru'``.
+        policy
+            `Cache retention policy
+            <https://en.wikipedia.org/wiki/Cache_replacement_policies>`_. When
+            the registry reaches `maxsize` and a new object needs to be
+            stored, decide which cached object will be discarded. The default
+            is `'lru'`.
 
-            * ``'fifo'``: first-in-first-out,
-            * ``'lru'``: least-recently-used,
-            * ``'lfu'``: least-frequently-used.
+            * `'fifo'`: first-in-first-out,
+            * `'lru'`: least-recently-used,
+            * `'lfu'`: least-frequently-used.
+
+        Returns
+        -------
+
+            Wrapped function.
         """
         if maxsize < 0:
             raise ValueError(
@@ -256,16 +270,16 @@ cache = Caching.cache
 
 class CacheInfo:
     """Container that holds stats for caching.
-    Assigned to every cached function as ``function.cache_info``.
+    Assigned as an attribute to every cached function as `cache_info`.
 
     Parameters
     ----------
-    func : function
+    func
         Function in which an instance of this class will be assigned.
         Used to access the function signature.
-    maxsize : int
+    maxsize
         Maximum number of caches to store.
-    policy :  {'fifo', 'lru', 'lfu'}
+    policy
         Cache retention policy.
 
     Attributes
@@ -278,11 +292,16 @@ class CacheInfo:
         Number of times the function has been bypassed (cache hit).
     misses : int
         Number of times the function has computed something (cache miss).
-    current_size : int
-        Current size of cache dictionary.
+    current_size
     """
 
-    def __init__(self, func, maxsize=Caching.maxsize, policy=Caching.policy):
+    def __init__(
+            self,
+            func: Callable,
+            *,
+            maxsize: int = Caching.maxsize,
+            policy: Literal["fifo", "lru", "lfu"] = Caching.policy
+    ):
         # we store the signature of the function on import
         # as it is the most expensive operation (~30x slower)
         self._signature = signature(func)
@@ -292,7 +311,7 @@ class CacheInfo:
         self.hits = self.misses = 0
 
     @property
-    def current_size(self):
+    def current_size(self) -> int:
         """Current size of the cache dictionary."""
         return len(self._caches)
 
@@ -304,8 +323,11 @@ class CacheInfo:
         s += f"\n\t current_size = {self.current_size!r}"
         return s
 
-    def _clear_cache(self):
-        # Reset cache for this function only.
+    def _clear_cache(self) -> None:
+        """Reset cache for this function only.
+
+        :meta public:
+        """
         self._caches = OrderedDict()
         self.hits = self.misses = 0
 
@@ -319,29 +341,29 @@ class CachedObject:
 
     Parameters
     ----------
-    obj : object
+    obj
         Any object to be cached.
 
     Attributes
     ----------
-    item : object
+    item : Any
         The cached object.
-    counter : int
+    counter
         Number of times the cached item has been retrieved (cache hits).
     """
-    counter: int = 0
 
-    def __init__(self, obj):
+    def __init__(self, obj: Any):
         self.item = obj
+        self.counter = 0
 
     def __repr__(self):
         s = f"CachedObject(counter={self.counter})"
         return s
 
-    def increment(self):
+    def increment(self) -> None:
         """Increment the cache hit counter."""
         self.counter += 1
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset the cache hit counter."""
         self.counter = 0

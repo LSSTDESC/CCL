@@ -7,7 +7,7 @@ from . import CCLParameters
 class CosmologyParams(CCLParameters, factory=lib.parameters):
     """Instances of this class hold cosmological parameters.
 
-    Stored in instances of :obj:`~pyccl.Cosmology`.
+    Stored in instances of :class:`~pyccl.cosmology.Cosmology`.
     """
 
     def __getattribute__(self, key):

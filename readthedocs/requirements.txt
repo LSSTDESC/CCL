@@ -1,4 +1,7 @@
 sphinx==3.4.3
+sphinx-book-theme
+sphinx-autodoc-typehints
+sphinxcontrib-bibtex
 sphinx_mdinclude
 numpy
 scipy

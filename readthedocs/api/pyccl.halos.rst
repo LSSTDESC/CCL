@@ -1,20 +1,30 @@
 pyccl.halos package
 ===================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyccl.halos.concentration
+   pyccl.halos.hbias
+   pyccl.halos.hmfunc
+   pyccl.halos.profiles
+
 Submodules
 ----------
 
 .. toctree::
    :maxdepth: 4
 
-   pyccl.halos.concentration
    pyccl.halos.halo_model
-   pyccl.halos.hbias
-   pyccl.halos.hmfunc
+   pyccl.halos.halo_model_base
    pyccl.halos.massdef
-   pyccl.halos.profiles
+   pyccl.halos.pk_1pt
+   pyccl.halos.pk_2pt
+   pyccl.halos.pk_4pt
    pyccl.halos.profiles_2pt
-   pyccl.halos.profiles_cib
 
 Module contents
 ---------------

@@ -28,15 +28,15 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     r"""
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
-    hmc : :obj:`~pyccl.halos.HMCalculator`
+    hmc : :class:`~pyccl.halos.HMCalculator`
         Halo model workspace.
     k : int, float or (nk,) array_like
         Comoving wavenumber, in :math:`\rm Mpc^{-1}`.
     a : int, float or (na,) array_like
         Scale factor.
-    prof : :obj:`~pyccl.halos.HaloProfile`
+    prof : :class:`~pyccl.halos.HaloProfile`
         Halo profile.
     normprof : bool - Deprecated, do not use.
         If True, normalize by :math:`I^0_1(k\rightarrow 0,a|u)`

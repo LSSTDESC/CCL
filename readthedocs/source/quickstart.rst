@@ -26,16 +26,14 @@ power spectrum using the BBKS transfer function:
    >>> cosmo = pyccl.Cosmology(Omega_c=0.25, Omega_b=0.05,
                                h=0.7, n_s=0.95, sigma8=0.8,
                                transfer_function='bbks')
-   >>> pyccl.sigma8(cosmo)  # get sigma8
-   0.7999999999999998
    >>> z = 1
-   >>> pyccl.comoving_radial_distance(cosmo, 1./(1+z))  # comoving distance to z=1 in Mpc
+   >>> cosmo.comoving_radial_distance(1/(1+z))  # comoving distance to z=1 in Mpc
    3303.5261651302458
-   >>> pyccl.nonlin_matter_power(cosmo, k=1, a=0.5)  # HALOFIT P(k) at k,z = 1,1
+   >>> cosmo.nonlin_matter_power(k=1, a=0.5)  # HALOFIT P(k) at k,z = 1,1
    143.6828250598087
 
 See :ref:`models` for more details on the supported models for various cosmological
 quantities (e.g., the power spectrum) and the specification of the cosmological parameters.
 
 A comprehensive set of examples showcasing the different types of functionality
-implemented in CCL can be found `here <https://github.com/LSSTDESC/CCLX>`_.
+implemented in CCL can be found in `CCLX <https://github.com/LSSTDESC/CCLX>`_.

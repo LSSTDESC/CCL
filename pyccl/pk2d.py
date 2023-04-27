@@ -6,8 +6,8 @@ import warnings
 import numpy as np
 
 from . import (
-    CCLObject, DEFAULT_POWER_SPECTRUM, UnlockInstance, check, get_pk_spline_a,
-    get_pk_spline_lk, lib, spline_params, unlock_instance)
+    CCLObject, DEFAULT_POWER_SPECTRUM, Unlock, check, get_pk_spline_a,
+    get_pk_spline_lk, lib, spline_params, unlock)
 from . import CCLWarning, CCLError, CCLDeprecationWarning, warn_api, deprecated
 from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 
@@ -257,7 +257,7 @@ class Pk2D(CCLObject):
         if np.ndim(ret) == 0:
             status = ret
         else:
-            with UnlockInstance(pk2d):
+            with Unlock(pk2d):
                 pk2d.psp, status = ret
 
         check(status, cosmo)
@@ -301,7 +301,7 @@ class Pk2D(CCLObject):
         if np.ndim(ret) == 0:
             status = ret
         else:
-            with UnlockInstance(pk2d):
+            with Unlock(pk2d):
                 pk2d.psp, status = ret
         check(status, cosmo)
         return pk2d
@@ -381,10 +381,9 @@ class Pk2D(CCLObject):
             out = np.squeeze(out, axis=0)
         return out
 
-    # Save a dummy cosmology as an attribute of the `__call__` method
-    # so we don't have to initialize one every time no `cosmo` is passed.
-    # This is gentle with memory too, as `free` does not work for an empty
-    # cosmology.
+    # Save a dummy cosmology as an attribute of the `__call__` method so we
+    # don't have to initialize one every time no `cosmo` is passed. This is
+    # gentle with memory too, as `free` does not work for an empty cosmology.
     __call__._cosmo = type("Dummy", (object,), {"cosmo": lib.cosmology()})()
 
     def copy(self):
@@ -411,7 +410,6 @@ class Pk2D(CCLObject):
         a_arr, lk_arr, pk_arr = _get_spline2d_arrays(self.psp.fka)
         if self.psp.is_log:
             pk_arr = np.exp(pk_arr)
-
         return a_arr, lk_arr, pk_arr
 
     def __del__(self):
@@ -423,10 +421,10 @@ class Pk2D(CCLObject):
         return self.has_psp
 
     def __contains__(self, other):
-        if not (self.psp.lkmin <= other.psp.lkmin
-                and self.psp.lkmax >= other.psp.lkmax
-                and self.psp.amin <= other.psp.amin
-                and self.psp.amax >= other.psp.amax):
+        if (self.psp.lkmin > other.psp.lkmin
+                or self.psp.lkmax < other.psp.lkmax
+                or self.psp.amin > other.psp.amin
+                or self.psp.amax < other.psp.amax):
             return False
         return True
 
@@ -555,27 +553,27 @@ class Pk2D(CCLObject):
     def __rtruediv__(self, other):
         return other * self**(-1)
 
-    @unlock_instance
+    @unlock
     def __iadd__(self, other):
         self = self + other
         return self
 
-    @unlock_instance
+    @unlock
     def __imul__(self, other):
         self = self * other
         return self
 
-    @unlock_instance
+    @unlock
     def __isub__(self, other):
         self = self - other
         return self
 
-    @unlock_instance
+    @unlock
     def __itruediv__(self, other):
         self = self / other
         return self
 
-    @unlock_instance
+    @unlock
     def __ipow__(self, other):
         self = self**other
         return self

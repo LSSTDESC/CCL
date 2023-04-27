@@ -2,7 +2,7 @@ __all__ = ("bcm_model_fka", "bcm_correct_pk2d",)
 
 import numpy as np
 
-from . import BaryonsSchneider15, check, deprecated, lib, unlock_instance
+from . import BaryonsSchneider15, check, deprecated, lib, unlock
 
 
 @deprecated(new_api=BaryonsSchneider15)
@@ -33,7 +33,7 @@ def bcm_model_fka(cosmo, k, a):
 
 
 @deprecated(new_api=BaryonsSchneider15)
-@unlock_instance(name="pk2d")
+@unlock(name="pk2d")
 def bcm_correct_pk2d(cosmo, pk2d):
     """Apply the BCM model correction factor to a given power spectrum.
 

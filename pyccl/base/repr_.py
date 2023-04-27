@@ -6,6 +6,8 @@ Representations (:mod:`pyccl.base.repr_`)
 Specialized representation strings for complicated CCL objects.
 """
 
+__all__ = ()
+
 import numpy as np
 
 from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
@@ -24,7 +26,7 @@ def build_string_simple(self):
 
 def build_string_from_attrs(self):
     """Build a representation for an object from a list of attribute names
-    given in the hook ``__repr_attrs__`.
+    given in the hook ``__repr_attrs__``.
 
     Example output ::
 

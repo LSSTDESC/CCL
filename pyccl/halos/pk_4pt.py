@@ -61,24 +61,25 @@ def halomod_trispectrum_1h(
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
-    hmc : :obj:`~pyccl.halos.HMCalculator`
+    hmc : :class:`~pyccl.halos.HMCalculator`
         Halo model workspace.
     k : int, float or (nk,) array_like
         Comoving wavenumber, in :math:`\rm Mpc^{-1}`.
     a : int, float or (na,) array_like
         Scale factor.
-    prof, prof2, prof3, prof4 : :obj:`~pyccl.halos.HaloProfile`
+    prof, prof2, prof3, prof4 : :class:`~pyccl.halos.HaloProfile`
         Halo profiles. Unspecified profiles are allocated as follows
 
         * if ``prof2`` is None, ``prof`` is used
         * if ``prof3`` is None, ``prof`` is used
         * if ``prof4`` is None, ``prof2`` is used.
 
-    prof12_2pt, prof34_2pt : :obj:`~pyccl.halos.Profile2pt`, optional
+    prof12_2pt, prof34_2pt : :class:`~pyccl.halos.Profile2pt`, optional
         Profile covariances. If ``prof34_2pt`` is not specified, ``prof12_2pt``
-        is used. The default ``prof12_2pt`` is :obj:`~pyccl.halos.Profile2pt`.
+        is used. The default ``prof12_2pt`` is
+        :class:`~pyccl.halos.Profile2pt`.
     normprof1, normprof2, normprof3, normprof4 : bool - Deprecated, do not use
         If True, normalize by :math:`I^0_1(k\rightarrow 0,a|u)`
         (see :meth:`~HMCalculator.I_0_1`), where :math:`u` is the profile
@@ -167,7 +168,7 @@ def halomod_Tk3D_1h(
 ) -> Tk3D:
     """Get the halo model 1-halo trispectrum.
 
-    Create a :obj:`~pyccl.Tk3D` container of the trispectrum.
+    Create a :class:`~pyccl.Tk3D` container of the trispectrum.
 
     * Information on the arguments is in :func:`halomod_trispectrum_1h`.
     * Arguments ``(a_arr, lk_arr, extrap_order_lok, extrap_order_hik)`` are
@@ -236,18 +237,18 @@ def halomod_Tk3D_SSC_linear_bias(
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
-    hmc : :obj:`~pyccl.halos.HMCalculator`
+    hmc : :class:`~pyccl.halos.HMCalculator`
         Halo model workspace.
-    prof : :obj:`~pyccl.halos.HaloProfileNFW`
+    prof : :class:`~pyccl.halos.HaloProfileNFW`
         NFW profile.
     bias{1, 2, 3, 4} : float or (na,) array_like, optional
         Linear galaxy biases. Shape of array-like input must match ``a_arr``.
     is_number_counts{1, 2, 3, 4} : bool, optional - Deprecated, do not use.
         Whether to compute the clustering counter terms for the repsective
         profiles. The default is False.
-    p_of_k_a : {'linear', 'nonlinear} or :obj:`~pyccl.Pk2D`, optional
+    p_of_k_a : {'linear', 'nonlinear} or :class:`~pyccl.Pk2D`, optional
         Power spectrum to integrate. ``'linear'`` and ``'nonlinear'`` get the
         corresponding power stored in ``cosmo``. The default is ``'linear'``.
     a_arr : (na,) array_like, optional
@@ -268,7 +269,7 @@ def halomod_Tk3D_SSC_linear_bias(
 
     Returns
     -------
-    tk3d : :obj:`~pyccl.Tk3D`
+    tk3d : :class:`~pyccl.Tk3D`
         SSC effective trispectrum.
     """
     if lk_arr is None:
@@ -370,25 +371,25 @@ def halomod_Tk3D_SSC(
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
-    hmc : :obj:`~pyccl.halos.HMCalculator`
+    hmc : :class:`~pyccl.halos.HMCalculator`
         Halo model workspace.
-    prof, prof2, prof3, prof4 : :obj:`~pyccl.halos.HaloProfile`
+    prof, prof2, prof3, prof4 : :class:`~pyccl.halos.HaloProfile`
         Halo profiles. Unspecified profiles are allocated as follows
 
         * if ``prof2`` is None, ``prof`` is used
         * if ``prof3`` is None, ``prof`` is used
         * if ``prof4`` is None, ``prof2`` is used.
 
-    prof12_2pt, prof34_2pt : :obj:`~pyccl.halos.Profile2pt`, optional
+    prof12_2pt, prof34_2pt : :class:`~pyccl.halos.Profile2pt`, optional
         Profile covariances. If ``prof34_2pt`` is not specified, ``prof12_2pt``
-        is used. The default ``prof12_2pt`` is :obj:`~pyccl.halos.Profile2pt`.
+        is used. The default ``prof12_2pt`` is :class:`~pyccl.halos.Profile2pt`.
     normprof1, normprof2, normprof3, normprof4 : bool - Deprecated, do not use
         If True, normalize by :math:`I^0_1(k\rightarrow 0,a|u)`
         (see :meth:`~HMCalculator.I_0_1`), where :math:`u` is the profile
         represented by ``(prof, prof2, prof3, prof4)``, respectively.
-    p_of_k_a : {'linear', 'nonlinear} or :obj:`~pyccl.Pk2D`, optional
+    p_of_k_a : {'linear', 'nonlinear} or :class:`~pyccl.Pk2D`, optional
         Power spectrum to integrate. ``'linear'`` and ``'nonlinear'`` get the
         corresponding power stored in ``cosmo``. The default is ``'linear'``.
     a_arr : (na,) array_like, optional

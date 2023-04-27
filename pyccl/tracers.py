@@ -6,7 +6,7 @@ from . import ccllib as lib
 from .pyutils import check
 from .errors import CCLWarning
 from .base.parameters import physical_constants
-from .base import CCLObject, UnlockInstance, unlock_instance, warn_api
+from .base import CCLObject, Unlock, unlock, warn_api
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays, _get_spline2d_arrays)
 
@@ -507,7 +507,7 @@ class Tracer(CCLObject):
         return mg_transfer
 
     @warn_api
-    @unlock_instance
+    @unlock
     def add_tracer(self, cosmo, *, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
                    der_bessel=0, der_angles=0,
@@ -734,7 +734,7 @@ def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
 
     from scipy.interpolate import interp1d
     z_n, n = _check_array_params(dndz, 'dndz')
-    with UnlockInstance(tracer):
+    with Unlock(tracer):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
 
     kernel_d = None
@@ -809,7 +809,7 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
 
     from scipy.interpolate import interp1d
     z_n, n = _check_array_params(dndz, 'dndz')
-    with UnlockInstance(tracer):
+    with Unlock(tracer):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
 
     if has_shear:

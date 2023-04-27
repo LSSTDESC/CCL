@@ -10,6 +10,7 @@ import warnings
 from ... import CCLDeprecationWarning, lib
 
 DEFAULT_POWER_SPECTRUM = "delta_matter:delta_matter"
+"""Name of the default power spectrum."""
 
 
 class DefaultParams:
@@ -38,9 +39,9 @@ class CCLParameters:
 
         Parameters
         ----------
-        instance : :obj:`~pyccl.ccllib`
+        instance : :mod:`~pyccl.ccllib`
             Reference to the instance where the parameters are implemented.
-        factory : :class:`~pyccl.ccllib`
+        factory : :mod:`~pyccl.ccllib`
             The SWIG factory class where the parameters are stored.
         freeze : bool
             Disable parameter mutation.
@@ -128,7 +129,7 @@ class CCLParameters:
         """Get a dictionary of the current parameters.
 
         Arguments:
-            name (str or :obj:`CCLParameters`):
+            name (str or :class:`CCLParameters`):
                 Name or instance of the parameters to look up.
         """
         pars = eval(name) if isinstance(name, str) else name

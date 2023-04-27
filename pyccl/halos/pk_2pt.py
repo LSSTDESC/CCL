@@ -59,23 +59,23 @@ def halomod_power_spectrum(
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
-    hmc : :obj:`~pyccl.halos.HMCalculator`
+    hmc : :class:`~pyccl.halos.HMCalculator`
         Halo model workspace.
     k : int, float or (nk,) array_like
         Comoving wavenumber, in :math:`\rm Mpc^{-1}`.
     a : int, float or (na,) array_like
         Scale factor.
-    prof, prof2 : :obj:`~pyccl.halos.HaloProfile`, required, optional
+    prof, prof2 : :class:`~pyccl.halos.HaloProfile`, required, optional
         Halo profiles. If ``prof2`` is None, ``prof`` is used.
     normprof1, normprof2 : bool, optional - Deprecated, do not use.
         If True, normalize by :math:`I^0_1(k\rightarrow 0,a|u)`
         (see :meth:`~HMCalculator.I_0_1`), where :math:`u` is the profile
         represented by ``prof`` and ``prof2``, respectively.
-    prof_2pt : :obj:`~pyccl.halos.Profile2pt`, optional
-        Profile covariance. The default is :obj:`pyccl.halos.Profile2pt`.
-    p_of_k_a : :obj:`~pyccl.Pk2D` or 'linear',  optional
+    prof_2pt : :class:`~pyccl.halos.Profile2pt`, optional
+        Profile covariance. The default is :class:`pyccl.halos.Profile2pt`.
+    p_of_k_a : :class:`~pyccl.Pk2D` or 'linear',  optional
         Linear power spectrum to integrate. ``'linear'`` gets the linear matter
         power spectrum stored in ``cosmo``. The default is ``'linear'``.
     get_1h, get_2h : bool, optional
@@ -204,7 +204,7 @@ def halomod_Pk2D(
 ) -> Pk2D:
     """Get the halo model power spectrum.
 
-    Create a :obj:`~pyccl.Pk2D` container of the power spectrum.
+    Create a :class:`~pyccl.Pk2D` container of the power spectrum.
 
     * Information on the arguments is in :func:`halomod_power_spectrum`.
     * Arguments ``(a_arr, lk_arr, extrap_order_lok, extrap_order_hik)`` are

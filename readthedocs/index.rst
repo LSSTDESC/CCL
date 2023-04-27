@@ -32,6 +32,15 @@ The source code is available on github at https://github.com/LSSTDESC/CCL.
 
 .. toctree::
    :maxdepth: 1
+   :caption: Reference
+   :name: apiref
+
+   source/notation_and_other_cosmological_conventions.rst
+   API Documentation<api/modules>
+   source/changelog
+
+.. toctree::
+   :maxdepth: 1
    :caption: Developer Guide
    :name: devguide
 
@@ -43,12 +52,3 @@ The source code is available on github at https://github.com/LSSTDESC/CCL.
    source/development_workflow
    source/writing_and_running_unit_tests
    source/writing_and_running_benchmarks
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Reference
-   :name: apiref
-
-   source/notation_and_other_cosmological_conventions.rst
-   API Documentation<api/modules>
-   source/changelog

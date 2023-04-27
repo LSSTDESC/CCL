@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Sequence, Union
 
 import numpy as np
 
-from ... import UnlockInstance, warn_api
+from ... import Unlock, warn_api
 from . import HaloProfilePressure
 
 if TYPE_CHECKING:
@@ -220,7 +220,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
 
         # Tabulate if not done yet
         if self._fourier_interp is None:
-            with UnlockInstance(self):
+            with Unlock(self):
                 self._fourier_interp = self._integ_interp()
 
         # Input handling

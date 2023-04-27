@@ -52,7 +52,7 @@ class Profile2pt(CCLObject):
 
         Arguments
         ---------
-        cosmo : :obj:`~pyccl.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         k : int, float or (nk,) array_like
             Comoving wavenumber, in units of :math:`\rm Mpc^{-1}`.
@@ -60,7 +60,7 @@ class Profile2pt(CCLObject):
             Halo mass in units of :math:`\rm M_{\odot}`.
         a : int or float
             Scale factor.
-        prof, prof2 : :obj:`~pyccl.halos.HaloProfile`, required, optional
+        prof, prof2 : :class:`~pyccl.halos.HaloProfile`, required, optional
             Halo profiles to correlate. If ``prof2`` is not provided, ``prof``
             is auto-correlated.
 
@@ -102,7 +102,7 @@ class Profile2ptHOD(Profile2pt):
 
         Arguments
         ---------
-        cosmo : :obj:`~pyccl.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         k : int, float or (nk,) array_like
             Comoving wavenumber, in units of :math:`\rm Mpc^{-1}`.
@@ -110,7 +110,7 @@ class Profile2ptHOD(Profile2pt):
             Halo mass in units of :math:`\rm M_{\odot}`.
         a : int or float
             Scale factor.
-        prof, prof2 : :obj:`~pyccl.halos.HaloProfileHOD`, required, optional
+        prof, prof2 : :class:`~pyccl.halos.HaloProfileHOD`, required, optional
             Halo profiles to correlate. If ``prof2`` is provided it must be the
             equal to ``prof``.
 
@@ -150,7 +150,7 @@ class Profile2ptCIB(Profile2pt):
 
         Arguments
         ---------
-        cosmo : :obj:`~pyccl.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         k : int, float or (nk,) array_like
             Comoving wavenumber, in units of :math:`\rm Mpc^{-1}`.
@@ -158,7 +158,7 @@ class Profile2ptCIB(Profile2pt):
             Halo mass in units of :math:`\rm M_{\odot}`.
         a : int or float
             Scale factor.
-        prof, prof2 : :obj:`~pyccl.halos.HaloProfileCIB`, required, optional
+        prof, prof2 : :class:`~pyccl.halos.HaloProfileCIB`, required, optional
             Halo profiles to correlate. If ``prof2`` is not provided, ``prof``
             is auto-correlated.
 

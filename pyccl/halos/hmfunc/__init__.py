@@ -6,7 +6,7 @@ Mass Function (:mod:`pyccl.halos.hmfunc`)
 Models of the halo mass function.
 """
 
-from ..halo_model_base import MassFunc, mass_function_from_name
+from .. import MassFunc
 from .angulo12 import *
 from .bocquet16 import *
 from .despali16 import *

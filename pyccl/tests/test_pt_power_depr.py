@@ -1,7 +1,6 @@
 import numpy as np
 import pyccl as ccl
 import pytest
-from pyccl import UnlockInstance
 from pyccl.nl_pt import PTCalculator, get_pt_pk2d
 
 
@@ -197,7 +196,7 @@ def test_pt_get_pk2d_raises():
 
     # Wrong tracer types
     tdum = ccl.nl_pt.PTMatterTracer()
-    with UnlockInstance(tdum):
+    with ccl.Unlock(tdum):
         tdum.type = 'A'
     for t in ['TG', 'TI', 'TM']:
         with pytest.raises(NotImplementedError):

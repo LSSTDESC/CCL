@@ -69,7 +69,7 @@ def h_over_h0(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
@@ -93,7 +93,7 @@ def comoving_radial_distance(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
@@ -113,7 +113,7 @@ def scale_factor_of_chi(cosmo, chi):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     chi : int, float or (nchi,) array_like
         Comoving radial distance :math:`\chi` in :math:`\rm Mpc`.
@@ -146,7 +146,7 @@ def comoving_angular_distance(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
@@ -162,7 +162,7 @@ def comoving_angular_distance(cosmo, a):
 
 
 def angular_diameter_distance(cosmo, a1, a2=None):
-    r"""Angular diameter distance (in :math:`\rm Mpc `).
+    r"""Angular diameter distance (in :math:`\rm Mpc`).
 
     Defined as the ratio of an object's physical transverse size to its
     angular size. It is related to the comoving angular distance as:
@@ -173,7 +173,7 @@ def angular_diameter_distance(cosmo, a1, a2=None):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
            Cosmological parameters.
     a1 : float or (na1,) array_like
         Scale factor(s), normalized to 1 today.
@@ -232,7 +232,7 @@ def luminosity_distance(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
@@ -260,7 +260,7 @@ def distance_modulus(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
@@ -284,7 +284,7 @@ def omega_x(cosmo, a, species):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor, normalized to 1 today.
@@ -316,7 +316,7 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
@@ -351,7 +351,7 @@ def growth_factor(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
@@ -370,7 +370,7 @@ def growth_factor_unnorm(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
@@ -395,7 +395,7 @@ def growth_rate(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     a : int, float or (na,) array_like
         Scale factor(s) normalized to 1 today.
@@ -425,7 +425,7 @@ def sigma_critical(cosmo, *, a_lens, a_source):
 
     Arguments
     ---------
-    cosmo : :obj:`~pyccl.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         A Cosmology object.
     a_lens : float or (na_lens,) array_like
         Scale factor of lens.

@@ -4,7 +4,7 @@ __all__ = ("FFTLogParams",)
 class FFTLogParams:
     """Objects of this class store the FFTLog accuracy parameters.
 
-    Stored in instances of :obj:`~pyccl.halos.HaloProfile`.
+    Stored in instances of :class:`~pyccl.halos.HaloProfile`.
     """
     padding_lo_fftlog = 0.1   # | Anti-aliasing: multiply the lower boundary.
     padding_hi_fftlog = 10.   # |                multiply the upper boundary.

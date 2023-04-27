@@ -1,5 +1,5 @@
 pyccl.cosmology module
-=================
+======================
 
 .. automodule:: pyccl.cosmology
    :members:

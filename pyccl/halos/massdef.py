@@ -44,7 +44,7 @@ def mass2radius_lagrangian(cosmo, M):
 
     Parameters
     ----------
-    cosmo : :obj:`~pyccl.core.Cosmology`
+    cosmo : :class:`~pyccl.Cosmology`
         Cosmological parameters.
     M : int, float or (nM,) array_like
         Halo mass in :math:`\rm M_\odot`.
@@ -195,7 +195,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :obj:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         a : int or float
             Scale factor.
@@ -227,7 +227,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :obj:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         a : int or float
             Scale factor.
@@ -253,7 +253,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :obj:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         R: int, float or (nR,) array_like
             Halo radius in physical :math:`\rm Mpc`.
@@ -281,7 +281,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :obj:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         M : int, float or (nM,) array_like
             Halo mass in :math:`\rm M_\odot`.
@@ -307,7 +307,7 @@ class MassDef(CCLNamedClass, CCLObject):
 
         Arguments
         ---------
-        cosmo : :obj:`~pyccl.core.Cosmology`
+        cosmo : :class:`~pyccl.Cosmology`
             Cosmological parameters.
         M : int, float or (nM,) array_like
             Halo mass in :math:`\rm M_\odot`.

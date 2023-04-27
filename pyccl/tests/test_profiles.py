@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import pyccl as ccl
-from pyccl import UnlockInstance
+from pyccl import Unlock
 from .test_cclobject import check_eq_repr_hash
 
 
@@ -535,7 +535,7 @@ def test_hernquist_f2r():
     # by FFT-ing the Fourier-space one.
     p2 = ccl.halos.HaloProfileHernquist(concentration=cM,
                                         fourier_analytic=True)
-    with UnlockInstance(p2):
+    with Unlock(p2):
         p2._real = None
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
