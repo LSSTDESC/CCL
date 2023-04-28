@@ -371,6 +371,7 @@ class Immutable(ABC):
         # funlock(cls, "__init__")
         # funlock(cls, "update_parameters")
 
+    @final
     def unlock(self) -> _UnlockContext:
         """Context manager to temporarily unlock the instance.
 

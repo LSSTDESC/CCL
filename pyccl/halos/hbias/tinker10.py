@@ -1,15 +1,21 @@
+from __future__ import annotations
+
 __all__ = ("HaloBiasTinker10",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import HaloBias
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class HaloBiasTinker10(HaloBias):
-    r"""Halo bias relation by `Tinker et al. (2010)
-    <https://arxiv.org/abs/1001.3162>`_. Valid for any S.O. masses with
-    :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
+    r"""Halo bias relation by :footcite:t:`Tinker10`. Valid for any S.O. masses
+    with :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
 
     The halo bias takes the form
 
@@ -32,14 +38,12 @@ class HaloBiasTinker10(HaloBias):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.massdef.MassDef` or str, optional
+    mass_def
         Mass definition for this :math:`n(M)` parametrization.
-        The default is :math:`200{\rm m}`.
-    mass_def_strict : bool, optional
+    mass_def_strict
         If True, only allow the mass definitions for which this halo bias
         relation was fitted, and raise if another mass definition is passed.
         If False, do not check for model consistency for the mass definition.
-        The default is True.
 
     Raises
     ------
@@ -47,13 +51,26 @@ class HaloBiasTinker10(HaloBias):
         Interpolation out of bounds. :math:`\Delta_m` for the particular
         combination of mass definition and scale factor is out of bounds with
         the range of the mass function.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
+
+    mass_def_strict
     """
     name = "Tinker10"
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True
+    ):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):

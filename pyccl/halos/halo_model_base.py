@@ -19,7 +19,7 @@ from numbers import Real
 from typing import TYPE_CHECKING, Union
 
 import numpy as np
-import numpy.typing as npt
+from numpy.typing import NDArray
 
 from .. import CCLNamedClass, lib, check
 from .. import deprecate_attr, deprecated, warn_api, mass_def_api
@@ -40,7 +40,6 @@ class HMIngredients(CCLNamedClass):
         Mass definition.
     mass_def_strict
         Whether the instance will allow for incompatible mass definitions.
-        The default is True.
 
     Raises
     ------
@@ -52,7 +51,6 @@ class HMIngredients(CCLNamedClass):
     mass_def
 
     mass_def_strict
-
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
@@ -93,6 +91,8 @@ class HMIngredients(CCLNamedClass):
     def _check_mass_def_strict(self, mass_def: MassDef) -> bool:
         r"""Check if a mass definition is compatible with the model.
 
+        :meta public:
+
         Arguments
         ---------
         mass_def
@@ -102,8 +102,6 @@ class HMIngredients(CCLNamedClass):
         -------
 
             Flag denoting whether the mass definition is compatible.
-
-        :meta public:
         """
 
     def _setup(self) -> None:
@@ -118,17 +116,17 @@ class HMIngredients(CCLNamedClass):
         r"""Check if a mass definition is compatible with the model and the
         initialization parameters.
 
+        :meta public:
+
         Arguments
         ---------
-        mass_def : :class:`~pyccl.halos.MassDef`
+        mass_def
             Mass definition to check for compatibility.
 
         Raises
         ------
         ValueError
             If the mass definition is incompatible with the model setup.
-
-        :meta public:
         """
         classname = self.__class__.__name__
         msg = f"{classname} is not defined for {mass_def.name} masses"
@@ -183,10 +181,10 @@ class MassFunc(HMIngredients):
     def _get_fsigma(
             self,
             cosmo: Cosmology,
-            sigM: npt.NDArray[float, 1],
+            sigM: NDArray[float],
             a: Real,
-            lnM: npt.NDArray[float, 1]
-    ) -> npt.NDArray[float, 1]:
+            lnM: NDArray[float]
+    ) -> NDArray[float]:
         r"""Compute :math:`f(\sigma_M)`.
 
         :meta public:
@@ -217,9 +215,9 @@ class MassFunc(HMIngredients):
     def __call__(
             self,
             cosmo: Cosmology,
-            M: Union[Real, npt.NDArray[Real, 1]],
+            M: Union[Real, NDArray[Real]],
             a: Real
-    ) -> Union[float, npt.NDArray[float, 1]]:
+    ) -> Union[float, NDArray[float]]:
         r"""Call the mass function. Calls :meth:`MassFunc._get_fsigma`.
 
         Arguments
@@ -273,9 +271,9 @@ class HaloBias(HMIngredients):
     def _get_bsigma(
             self,
             cosmo: Cosmology,
-            sigM: npt.NDArray[float, 1],
+            sigM: NDArray[float],
             a: Real
-    ) -> npt.NDArray[float, 1]:
+    ) -> NDArray[float]:
         r"""Compute :math:`b(\sigma_M)`.
 
         :meta public:
@@ -301,9 +299,9 @@ class HaloBias(HMIngredients):
     def __call__(
             self,
             cosmo: Cosmology,
-            M: Union[Real, npt.NDArray[Real, 1]],
+            M: Union[Real, NDArray[Real]],
             a: Real
-    ) -> Union[Real, npt.NDArray[Real, 1]]:
+    ) -> Union[Real, NDArray[Real]]:
         r"""Call the halo bias function. Calls :meth:`~HaloBias._get_bsigma`.
 
         Arguments
@@ -365,9 +363,9 @@ class Concentration(HMIngredients):
     def _concentration(
             self,
             cosmo: Cosmology,
-            M: npt.NDArray[float, 1],
+            M: NDArray[float],
             a: Real
-    ) -> npt.NDArray[float, 1]:
+    ) -> NDArray[float]:
         r"""Compute :math:`c(M)`.
 
         :meta public:
@@ -393,9 +391,9 @@ class Concentration(HMIngredients):
     def __call__(
             self,
             cosmo: Cosmology,
-            M: Union[Real, npt.NDArray[Real, 1]],
+            M: Union[Real, NDArray[Real]],
             a: Real
-    ) -> Union[Real, npt.NDArray[Real, 1]]:
+    ) -> Union[Real, NDArray[Real]]:
         r"""Call the concentration relation. Calls
         :meth:`~Concentration._concentration`.
 

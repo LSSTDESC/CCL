@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 __all__ = ("ConcentrationIshiyama21",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.optimize import brentq, root_scalar
@@ -7,12 +11,14 @@ from ... import lib, warn_api
 from ... import check
 from . import Concentration
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class ConcentrationIshiyama21(Concentration):
-    r"""Concentration-mass relation by `Ishiyama et al. (2021)
-    <https://arxiv.org/abs/2007.14720>`_. Only valid for S.O. masses with
-    :math:`\Delta_{\rm vir}`, :math:`\Delta_{200{\rm c}}`,
-    or :math:`\Delta_{500{\rm c}}`.
+    r"""Concentration-mass relation by :footcite:t:`Ishiyama21`. Only valid for
+    S.O. masses with :math:`\Delta_{\rm vir}`, :math:`\Delta_{200{\rm c}}`, or
+    :math:`\Delta_{500{\rm c}}`.
 
     The concentration takes the form
 
@@ -56,23 +62,39 @@ class ConcentrationIshiyama21(Concentration):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
+    mass_def
         Mass definition for this :math:`c(M)` parametrization.
-        The default is :math:`\Delta_{500{\rm c}}`.
-    relaxed : bool, optional
+    relaxed
         If True, use concentration for relaxed halos. Otherwise,
-        use concentration for all halos. The default is False.
-    Vmax : bool, optional
+        use concentration for all halos.
+    Vmax
         If True, use the concentration found with the Vmax numerical
         method. Otherwise, use the concentration found with profile
-        fitting. The default is False.
+        fitting.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
+
+    relaxed
+
+    Vmax
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def="500c",
-                 relaxed=False, Vmax=False):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "500c",
+            relaxed: bool = False,
+            Vmax: bool = False
+    ):
         self.relaxed = relaxed
         self.Vmax = Vmax
         super().__init__(mass_def=mass_def)

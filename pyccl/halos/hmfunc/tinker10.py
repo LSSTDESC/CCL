@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncTinker10",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -6,11 +10,13 @@ from scipy.interpolate import interp1d
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncTinker10(MassFunc):
-    r"""Halo mass function by `Tinker et al. (2010)
-    <https://arxiv.org/abs/1001.3162>`_. Valid for any S.O. masses with
-    :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
+    r"""Halo mass function by :footcite:t:`Tinker10`. Valid for any S.O. masses
+    with :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
 
     The mass function takes the form
 
@@ -26,17 +32,15 @@ class MassFuncTinker10(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
+    mass_def
         Mass definition for this :math:`n(M)` parametrization.
-        The default is :math:`200{\rm m}`.
-    mass_def_strict : bool, optional
+    mass_def_strict
         If True, only allow the mass definitions for which this halo bias
         relation was fitted, and raise if another mass definition is passed.
         If False, do not check for model consistency for the mass definition.
-        The default is True.
-    norm_all_z : bool, optional
+    norm_all_z
         Whether the mass function is normalized at all :math:`z`. If False,
-        it is only normalized at :math:`z=0`. The default is False.
+        it is only normalized at :math:`z=0`.
 
     Raises
     ------
@@ -44,16 +48,31 @@ class MassFuncTinker10(MassFunc):
         Interpolation out of bounds. :math:`\Delta_m` for the particular
         combination of mass definition and scale factor is out of bounds with
         the range of the mass function.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
+
+    mass_def_strict
+
+    norm_all_z
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_def", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True,
-                 norm_all_z=False):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True,
+            norm_all_z: bool = False
+    ):
         self.norm_all_z = norm_all_z
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

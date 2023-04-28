@@ -14,7 +14,7 @@ from numbers import Real
 from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
-import numpy.typing as npt
+from numpy.typing import NDArray
 
 from .. import warn_api
 
@@ -28,24 +28,29 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     r"""
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    hmc : :class:`~pyccl.halos.HMCalculator`
+    hmc
         Halo model workspace.
-    k : int, float or (nk,) array_like
+    k : array_like (nk,)
         Comoving wavenumber, in :math:`\rm Mpc^{-1}`.
-    a : int, float or (na,) array_like
+    a : array_like (na,)
         Scale factor.
-    prof : :class:`~pyccl.halos.HaloProfile`
+    prof
         Halo profile.
-    normprof : bool - Deprecated, do not use.
+    normprof
         If True, normalize by :math:`I^0_1(k\rightarrow 0,a|u)`
         (see :meth:`~HMCalculator.I_0_1`), where :math:`u` is the profile
-        represented by ``prof``.
+        represented by `prof`.
+
+        .. deprecated:: 2.8.0
+
+            Halo profiles normalized with
+            :meth:`~HaloProfile.get_normalization`.
 
     Returns
     -------
-    I_1 : float or (na, nk) numpy.ndarray
+    array_like (na, nk)
         Value of the integral.
     """
     func = getattr(hmc, func)
@@ -73,12 +78,12 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
 def halomod_mean_profile_1pt(
         cosmo: Cosmology,
         hmc: HMCalculator,
-        k: Union[Real, npt.NDArray],
-        a: Union[Real, npt.NDArray],
+        k: Union[Real, NDArray[Real]],
+        a: Union[Real, NDArray[Real]],
         prof: HaloProfile,
         *,
         normprof: Optional[bool] = None
-) -> Union[float, npt.NDArray]:
+) -> Union[float, NDArray[float]]:
     r"""Compute the mass-weighted mean halo profile.
 
     .. math::
@@ -96,12 +101,12 @@ def halomod_mean_profile_1pt(
 def halomod_bias_1pt(
         cosmo: Cosmology,
         hmc: HMCalculator,
-        k: Union[Real, npt.NDArray],
-        a: Union[Real, npt.NDArray],
+        k: Union[Real, NDArray[Real]],
+        a: Union[Real, NDArray[Real]],
         prof: HaloProfile,
         *,
         normprof: Optional[bool] = None
-) -> Union[float, npt.NDArray]:
+) -> Union[float, NDArray[float]]:
     r"""Compute the mass-and-bias-weighted mean halo profile.
 
     .. math::

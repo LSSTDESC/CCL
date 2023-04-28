@@ -15,7 +15,7 @@ from numbers import Real
 from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
 
 import numpy as np
-import numpy.testing as npt
+from numpy.typing import NDArray
 
 from .. import CCLObject, CCLDeprecationWarning, unlock_instance
 from .. import warn_api, deprecate_attr, deprecated
@@ -63,7 +63,7 @@ class HMCalculator(CCLObject):
         definitions of `mass_function` and `halo_bias`. If strings are
         provided, the instantiated models will share a common mass definition.
         May be omitted if `mass_function` and `halo_bias` are provided
-        instantiated; their internal mass definition will be used.
+        instantiated; their internal mass definition is used.
     log10M_min, log10M_max
         Lower and upper mass integration bounds.
         These are the base-10 logarithms of mass in units of
@@ -190,7 +190,7 @@ class HMCalculator(CCLObject):
 
     def integrate_over_massfunc(
             self,
-            func: Callable[[npt.NDArray[Real, 1]], npt.NDArray[Real, 1]],
+            func: Callable[[NDArray[Real]], NDArray[Real]],
             cosmo: Cosmology,
             a: Real
     ) -> float:
@@ -227,9 +227,9 @@ class HMCalculator(CCLObject):
     ) -> float:
         r"""Compute the large-scale normalization of a profile:
 
-        .. note::
+        .. deprecated:: 2.8.0
 
-            Deprecated, use :meth:`HaloProfile.get_normalization`.
+            Use ``HaloProfile.get_normalization``.
 
         Arguments
         ---------
@@ -259,9 +259,9 @@ class HMCalculator(CCLObject):
             cosmo: Cosmology,
             *,
             selection: Callable[
-                [npt.NDArray[float, 1],
-                 npt.NDArray[float, 1]],
-                npt.NDArray[float, 2]],
+                [NDArray[float],
+                 NDArray[float]],
+                NDArray[float]],
             a_min: Optional[Real] = None,
             a_max: Optional[Real] = None,
             na: int = 128
@@ -334,10 +334,10 @@ class HMCalculator(CCLObject):
     def I_0_1(
             self,
             cosmo: Cosmology,
-            k: Union[float, npt.NDArray[float, 1]],
+            k: Union[float, NDArray[float]],
             a: Real,
             prof: HaloProfile
-    ) -> Union[float, npt.NDArray[float, 1]]:
+    ) -> Union[float, NDArray[float]]:
         r"""Compute the integral:
 
         .. math::
@@ -373,10 +373,10 @@ class HMCalculator(CCLObject):
     def I_1_1(
             self,
             cosmo: Cosmology,
-            k: Union[float, npt.NDArray[float, 1]],
+            k: Union[float, NDArray[float]],
             a: Real,
             prof: HaloProfile
-    ) -> Union[float, npt.NDArray[float, 1]]:
+    ) -> Union[float, NDArray[float]]:
         r"""Compute the integral:
 
         .. math::
@@ -413,13 +413,13 @@ class HMCalculator(CCLObject):
     def I_0_2(
             self,
             cosmo: Cosmology,
-            k: Union[float, npt.NDArray[float, 1]],
+            k: Union[float, NDArray[float]],
             a: Real,
             prof: HaloProfile,
             *,
             prof2: Optional[HaloProfile] = None,
             prof_2pt: Profile2pt
-    ) -> Union[float, npt.NDArray[float, 1]]:
+    ) -> Union[float, NDArray[float]]:
         r"""Compute the integral:
 
         .. math::
@@ -442,7 +442,7 @@ class HMCalculator(CCLObject):
         prof, prof2
             Halo profiles. If `prof2 is None`, `prof` is used.
         prof_2pt
-            2-point correlator of `prof` and `prof2`.
+            Covariance of `prof` and `prof2`.
 
         Returns
         -------
@@ -461,13 +461,13 @@ class HMCalculator(CCLObject):
     def I_1_2(
             self,
             cosmo: Cosmology,
-            k: Union[float, npt.NDArray[float, 1]],
+            k: Union[float, NDArray[float]],
             a: Real,
             prof: HaloProfile,
             *,
             prof2: Optional[HaloProfile] = None,
             prof_2pt: Profile2pt
-    ) -> Union[float, npt.NDArray[float, 1]]:
+    ) -> Union[float, NDArray[float]]:
         r"""Compute the integral:
 
         .. math::
@@ -490,7 +490,7 @@ class HMCalculator(CCLObject):
         prof, prof2
             Halo profiles. If `prof2 is None`, `prof` is used.
         prof_2pt
-            2-point correlator of `prof` and `prof2`.
+            Covariance of `prof` and `prof2`.
 
         Returns
         -------
@@ -510,7 +510,7 @@ class HMCalculator(CCLObject):
     def I_0_22(
             self,
             cosmo: Cosmology,
-            k: Union[float, npt.NDArray[float, 1]],
+            k: Union[float, NDArray[float]],
             a: Real,
             prof: HaloProfile,
             *,
@@ -519,7 +519,7 @@ class HMCalculator(CCLObject):
             prof4: Optional[HaloProfile] = None,
             prof12_2pt: Profile2pt,
             prof34_2pt: Optional[Profile2pt] = None
-    ) -> Union[float, npt.NDArray[float, 2]]:
+    ) -> Union[float, NDArray[float]]:
         r"""Compute the integral:
 
         .. math::
@@ -550,10 +550,10 @@ class HMCalculator(CCLObject):
         prof4
             Fourth halo profile. If `None`, `prof2` is used.
         prof12_2pt
-            2-point correlator of `prof` and `prof2`.
+            Covariance of `prof` and `prof2`.
         prof34_2pt
-            2-point correlator of `prof3` and `prof4`
-            If `None`, `prof12_2pt` will be used.
+            Covariance of `prof3` and `prof4`
+            If `None`, `prof12_2pt` is used.
 
         Returns
         -------

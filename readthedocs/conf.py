@@ -54,7 +54,6 @@ extensions = [
 bibtex_bibfiles = ['refs.bib']
 
 # Additional `autodoc` options.
-# autodoc_type_aliases = {"npt.ArrayLike": "ArrayLike"}
 autodoc_default_options = {
     "member-order": "bysource",
     "show-inheritance": True,

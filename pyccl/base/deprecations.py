@@ -38,7 +38,7 @@ def deprecated(obj=None, *, new_api=None):
 
 
 def mass_def_api(func):
-    """Preserve ``mass_def`` as a final argument of the decorated function."""
+    """Preserve `mass_def` as a final argument of the decorated function."""
     # TODO: CCLv3 - remove `mass_def=None` default from some HaloProfiles.
     @functools.wraps(func)
     @unlock_instance
@@ -62,14 +62,14 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
     """This decorator translates old API to new API for:
       - functions/methods whose arguments have been ranamed,
       - functions/methods with changed argument order,
-      - constructors in the ``halos`` sub-package where ``cosmo`` is removed,
-      - constructors in ``halos`` where the default ``MassDef`` is not None,
-      - functions/methods where ``normprof`` is deprecated.
+      - constructors in the `halos` sub-package where `cosmo` is removed,
+      - constructors in `halos` where the default `MassDef` is not None,
+      - functions/methods where `normprof` is deprecated.
 
     Parameters
     ----------
     pairs : list of pairs, optional
-        List of renaming pairs ``('old', 'new')``.
+        List of renaming pairs `('old', 'new')`.
     reorder : list, optional
         List of the **previous** order of the arguments whose order
         has been changed, under their **new** name.
@@ -93,8 +93,8 @@ def warn_api(func=None, *, pairs=[], reorder=[]):
     >>> @warn_api(pairs=[('b', 'bee'), ('c', 'see')],
                   reorder=['bee', 'see'])
 
-    - ``cosmo`` is automatically detected for all constructors in ``halos``
-    - ``normprof`` is automatically detected for all decorated functions.
+    - `cosmo` is automatically detected for all constructors in `halos`
+    - `normprof` is automatically detected for all decorated functions.
     """
     if func is None:
         # called with parentheses
@@ -218,17 +218,17 @@ def deprecate_attr(getter=None, *, pairs=[]):
 
     Parameters
     ----------
-    getter : slot wrapper ``__getattribute__``
+    getter : slot wrapper `__getattribute__`
         This is the getter method to be decorated.
     pairs : list of pairs
-        List of renaming pairs ``('old', 'new')``.
+        List of renaming pairs `('old', 'new')`.
 
     Example
     -------
-    We have the legacy attribute ``old_name`` which we want to rename
-    to ``new_name``. To achieve this we decorate the ``__getattribute__``
+    We have the legacy attribute `old_name` which we want to rename
+    to `new_name`. To achieve this we decorate the `__getattribute__`
     method of the parent class in the main class body to retrieve the
-    ``__getattr__`` method for the main class, like so:
+    `__getattr__` method for the main class, like so:
 
     >>>  __getattr__ = deprecate_attr([('old_name', 'new_name')])(
              super.__getattribute__)
@@ -236,10 +236,10 @@ def deprecate_attr(getter=None, *, pairs=[]):
     Now, every time the attribute is called via its old name, the user will
     be warned about the renaming, and the attribute value will be returned.
 
-    .. note::
+    .. warning::
 
-        Make sure that you bind ``__getattr__`` to the decorator, rather than
-        ``__getattribute__``, because ``__getattr__`` provides the fallback
+        Make sure that you bind `__getattr__` to the decorator, rather than
+        `__getattribute__`, because `__getattr__` provides the fallback
         mechanism we want to use, or an infinite recursion will commence.
 
     """

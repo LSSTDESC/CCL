@@ -15,7 +15,7 @@ from numbers import Real
 from typing import TYPE_CHECKING, Callable, Optional, Union
 
 import numpy as np
-import numpy.typing as npt
+from numpy.typing import NDArray
 
 from .. import CCLWarning, Pk2D, warn_api
 from . import Profile2pt
@@ -30,8 +30,8 @@ if TYPE_CHECKING:
 def halomod_power_spectrum(
         cosmo: Cosmology,
         hmc: HMCalculator,
-        k: Union[Real, npt.NDArray],
-        a: Union[Real, npt.NDArray],
+        k: Union[Real, NDArray[Real]],
+        a: Union[Real, NDArray[Real]],
         prof: HaloProfile,
         *,
         prof2: Optional[HaloProfile] = None,
@@ -44,7 +44,7 @@ def halomod_power_spectrum(
         smooth_transition: Optional[Callable[[Real], Real]] = None,
         suppress_1h: Optional[Callable[[Real], Real]] = None,
         extrap_pk: bool = False
-) -> Union[Real, npt.NDArray]:
+) -> Union[float, NDArray[float]]:
     r"""Compute the halo model power spectrum:
 
     .. math::
@@ -59,51 +59,71 @@ def halomod_power_spectrum(
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    hmc : :class:`~pyccl.halos.HMCalculator`
+    hmc
         Halo model workspace.
-    k : int, float or (nk,) array_like
+    k : array_like (nk,)
         Comoving wavenumber, in :math:`\rm Mpc^{-1}`.
-    a : int, float or (na,) array_like
+    a : array_like (na,)
         Scale factor.
-    prof, prof2 : :class:`~pyccl.halos.HaloProfile`, required, optional
-        Halo profiles. If ``prof2`` is None, ``prof`` is used.
-    normprof1, normprof2 : bool, optional - Deprecated, do not use.
+    prof
+        First halo profile.
+    prof2
+        Second halo profile. If None, `prof` is used.
+    normprof1, normprof2
         If True, normalize by :math:`I^0_1(k\rightarrow 0,a|u)`
         (see :meth:`~HMCalculator.I_0_1`), where :math:`u` is the profile
-        represented by ``prof`` and ``prof2``, respectively.
-    prof_2pt : :class:`~pyccl.halos.Profile2pt`, optional
-        Profile covariance. The default is :class:`pyccl.halos.Profile2pt`.
-    p_of_k_a : :class:`~pyccl.Pk2D` or 'linear',  optional
-        Linear power spectrum to integrate. ``'linear'`` gets the linear matter
-        power spectrum stored in ``cosmo``. The default is ``'linear'``.
-    get_1h, get_2h : bool, optional
+        represented by `prof` and `prof2`, respectively.
+
+        .. deprecated:: 2.8.0
+
+            Halo profiles normalized with
+            :meth:`~HaloProfile.get_normalization`.
+
+    prof_2pt
+        Profile covariance. The default is :obj:`~Profile2pt()`.
+    p_of_k_a
+        Linear power spectrum to integrate. `'linear'` gets the linear matter
+        power spectrum stored in `cosmo`.
+    get_1h, get_2h
         Whether to compute the 1-halo term and the 2-halo term, respectively.
-        The defaults are True.
-    smooth_transition, suppress_1h : callable, optional
-        Functions to (i) smooth the 1-halo/2-halo transition region (ii)
-        suppress the 1-halo large-scale contribution, as defined in HMCODE-2020
-        (`Mead et al., 2020 <https://arxiv.org/abs/2009.01858>`_). These are
-        time-dependent and modify the power spectrum as
+    smooth_transition
+        Smooth the 1-halo/2-halo transition region, as defined in HMcode-2020
+        :footcite:p:`Mead21`:
 
         .. math::
 
-            P(k,a) &= \left(P_{\rm 1h}^{\alpha(a)}(k)
-            + P_{\rm 2h}^{\alpha(a)}(k) \right)^{1 / \alpha} \\
-            P_{\rm 1h} &\rightarrow \frac{(k / k_*(a))^4}{1+(k / k_*(a))^4}
+            P(k,a) = \left(P_{\rm 1h}^{\alpha(a)}(k)
+            + P_{\rm 2h}^{\alpha(a)}(k) \right)^{1 / \alpha}
 
-        By default these modifications to the power spectrum are not imposed.
+        By default, this modification to the power spectrum is not imposed.
 
-    extrap_pk : bool
-        Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
+    suppress_1h
+        Suppress the 1-halo large-scale contribution, as defined in HMCODE-2020
+        :footcite:p:`Mead21`:
+
+        .. math::
+
+            P_{\rm 1h} \rightarrow \frac{(k / k_*(a))^4}{1+(k / k_*(a))^4}
+
+        By default, this modification to the power spectrum is not imposed.
+
+    extrap_pk
+        Whether to extrapolate `p_of_k_a` in case `a` is out of its
         support. If False, and the queried values are out of bounds, an
         exception is raised. The default is False.
 
+        .. versionadded:: 2.8.0
+
     Returns
     -------
-    pka : float or (na, nk) numpy.ndarray
+    ndarray (na, nk)
         Halo model power spectrum.
+
+    References
+    ----------
+    .. footbibliography::
     """
     a_use = np.atleast_1d(a).astype(float)
     k_use = np.atleast_1d(k).astype(float)
@@ -193,8 +213,8 @@ def halomod_Pk2D(
         p_of_k_a: Union[str, Pk2D] = "linear",
         get_1h: bool = True,
         get_2h: bool = True,
-        lk_arr: Optional[npt.NDArray] = None,
-        a_arr: Optional[npt.NDArray] = None,
+        lk_arr: Optional[NDArray[Real]] = None,
+        a_arr: Optional[NDArray[Real]] = None,
         extrap_order_lok: int = 1,
         extrap_order_hik: int = 2,
         smooth_transition: Optional[Callable[[Real], Real]] = None,
@@ -204,14 +224,14 @@ def halomod_Pk2D(
 ) -> Pk2D:
     """Get the halo model power spectrum.
 
-    Create a :class:`~pyccl.Pk2D` container of the power spectrum.
+    Create a :class:`~Pk2D` container of the power spectrum.
 
-    * Information on the arguments is in :func:`halomod_power_spectrum`.
-    * Arguments ``(a_arr, lk_arr, extrap_order_lok, extrap_order_hik)`` are
-      passed to the :class:`~pyccl.Pk2D` constructor.
-    * If ``lk_arr`` or ``a_arr`` are not specified, the sampling arrays are
-      computed from the spline parameters stored in ``cosmo``.
-    * If ``use_log`` is True, the power spectrum is interpolated in log-space.
+    * Information on the arguments is in :func:`~halomod_power_spectrum`.
+    * If `lk_arr` or `a_arr` are not specified, the sampling arrays are
+      computed from the spline parameters stored in `cosmo`.
+    * If `use_log` is True, the power spectrum is interpolated in log-space.
+    * Arguments `(a_arr, lk_arr, extrap_order_lok, extrap_order_hik)` are
+      passed to :class:`~Pk2D`.
     """
     if lk_arr is None:
         lk_arr = cosmo.get_pk_spline_lk()

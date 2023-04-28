@@ -1,14 +1,21 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncDespali16",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import check, lib, warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncDespali16(MassFunc):
-    r"""Halo mass function by `Despali et al. (2016)
-    <https://arxiv.org/abs/1507.05627>`_. Valid for any S.O. masses.
+    r"""Halo mass function by :footcite:t:`Despali16`. Valid for any S.O.
+    masses.
 
     The mass function takes the form
 
@@ -37,27 +44,40 @@ class MassFuncDespali16(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
+    mass_def
         Mass definition for this :math:`n(M)` parametrization.
-        The default is :math:`200{\rm m}`.
-    mass_def_strict : bool, optional
+    mass_def_strict
         If True, only allow the mass definitions for which this halo bias
         relation was fitted, and raise if another mass definition is passed.
         If False, do not check for model consistency for the mass definition.
-        The default is True.
-    ellipsoidal : bool, optional
+    ellipsoidal
         Whether to use the fit parameters found by running an Ellipsoidal
-        Overdensity finder. The default is True.
+        Overdensity finder.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
+
+    mass_def_strict
+
+    ellispoidal
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_def", "mass_def_strict", "ellipsoidal",)
     name = 'Despali16'
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True,
-                 ellipsoidal=False):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True,
+            ellipsoidal: bool = False
+    ):
         self.ellipsoidal = ellipsoidal
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

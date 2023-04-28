@@ -69,8 +69,10 @@ class _CachingMeta(type):
     # NOTE: Only in 3.8 < py < 3.11 can `classmethod` wrap `property`.
     # https://docs.python.org/3.11/library/functions.html#classmethod
     @property
-    def maxsize(cls):
-        """Capacity of the cache registry."""
+    def maxsize(cls) -> int:
+        """Maximum number of caches to store. If the register is full, new
+        caches are assigned according to the cache retention policy.
+        """
         return cls._maxsize
 
     @maxsize.setter
@@ -84,8 +86,10 @@ class _CachingMeta(type):
             func.cache_info.maxsize = value
 
     @property
-    def policy(cls):
-        """Cache retention policy."""
+    def policy(cls) -> Literal["fifo", "lru", "lfu"]:
+        """`Cache retention policy
+        <https://en.wikipedia.org/wiki/Cache_replacement_policies#Policies>`_.
+        """
         return cls._policy
 
     @policy.setter
@@ -112,18 +116,21 @@ class Caching(metaclass=_CachingMeta):
     Attributes
     ----------
     maxsize : int
-        Maximum number of caches to store. If the registry is full, new
-        caches are assigned according to the set cache retention policy.
-    policy : {'fifo', 'lru', 'lfu'}
-        Cache retention policy.
+        Maximum number of caches to store. If the register is full, new caches
+        are assigned according to the cache retention policy.
+    policy : Literal["fifo", "lru", "lfu"]
+        `Cache retention policy
+        <https://en.wikipedia.org/wiki/Cache_replacement_policies#Policies>`_.
     """
-    _enabled: bool = False
-    _policies: list = ['fifo', 'lru', 'lfu']
-    _default_maxsize: int = 128   # class default maxsize
-    _default_policy: str = 'lru'  # class default policy
-    _maxsize = _default_maxsize   # user-defined maxsize
-    _policy = _default_policy     # user-defined policy
-    _cached_functions: list = []
+    _enabled = False
+
+    _policies = ['fifo', 'lru', 'lfu']
+    _default_maxsize = 128   # class default maxsize
+    _default_policy = 'lru'  # class default policy
+
+    _maxsize: int = _default_maxsize                          # user maxsize
+    _policy: Literal["fifo", "lru", "lfu"] = _default_policy  # user policy
+    _cached_functions = []
 
     @classmethod
     def _get(cls, dic, key, policy):
@@ -155,25 +162,20 @@ class Caching(metaclass=_CachingMeta):
             maxsize: int = _maxsize,
             policy: Literal["fifo", "lru", "lfu"] = _policy
     ) -> Callable:
-        """Wrapper to cache the output of a function, using the input arguments
-        as a proxy to build a hash key.
+        """Wrapper to cache the output of a function.
+
+        Binds the arguments to the function signature and hashes the created
+        dictionary with :func:`~hash_`.
 
         Arguments
         ---------
         func
             Function to be wrapped.
         maxsize
-            Maximum cache size for the wrapped function. The default is 128.
+            Maximum cache size for the wrapped function. The default is
+            :attr:`~Caching.maxsize`.
         policy
-            `Cache retention policy
-            <https://en.wikipedia.org/wiki/Cache_replacement_policies>`_. When
-            the registry reaches `maxsize` and a new object needs to be
-            stored, decide which cached object will be discarded. The default
-            is `'lru'`.
-
-            * `'fifo'`: first-in-first-out,
-            * `'lru'`: least-recently-used,
-            * `'lfu'`: least-frequently-used.
+            Cache retention policy. The default is :attr:`~Caching.policy`.
 
         Returns
         -------
@@ -259,7 +261,8 @@ cache = Caching.cache
 
 class CacheInfo:
     """Container that holds stats for caching.
-    Assigned as an attribute to every cached function as `cache_info`.
+    Assigned as an attribute to every cached function as
+    :attr:`func.cache_info`.
 
     Parameters
     ----------
@@ -278,7 +281,6 @@ class CacheInfo:
         Number of times the function has been bypassed (cache hit).
     misses : int
         Number of times the function has computed something (cache miss).
-    current_size
     """
 
     def __init__(
@@ -301,8 +303,8 @@ class CacheInfo:
         s = f"<{self.__class__.__name__}>"
         for par, val in self.__dict__.items():
             if not par.startswith("_"):
-                s += f"\n\t {par} = {val!r}"
-        s += f"\n\t current_size = {self.current_size!r}"
+                s += f"\n\t{par} = {val!r}"
+        s += f"\n\tcurrent_size = {self.current_size!r}"
         return s
 
     def _clear_cache(self) -> None:
@@ -317,7 +319,7 @@ class CacheInfo:
 class CachedObject:
     """Container for the cached object.
 
-    This is what is actually stored in the cache registry, rather than the bare
+    This is what is actually stored in the cache register, rather than the bare
     object that is cached. In this way, the caching framework is fully agnostic
     to the internal CCL types.
 
@@ -330,7 +332,7 @@ class CachedObject:
     ----------
     item : Any
         The cached object.
-    counter
+    counter : int
         Number of times the cached item has been retrieved (cache hits).
     """
 

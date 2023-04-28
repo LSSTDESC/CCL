@@ -6,10 +6,21 @@
 Fourier-space 1-halo 2-point correlators for different halo profiles.
 """
 
+from __future__ import annotations
+
 __all__ = ("Profile2pt", "Profile2ptHOD", "Profile2ptCIB",)
 
-from .. import CCLObject, mass_def_api, warn_api
-from . import HaloProfileHOD, HaloProfileCIBShang12
+from numbers import Real
+from typing import TYPE_CHECKING, Optional, Union
+
+from numpy.typing import NDArray
+
+from .. import CCLObject, mass_def_api, warn_api  # update # TODO: CCLv3 uncomm
+from . import HaloProfileHOD, HaloProfileCIB
+
+if TYPE_CHECKING:
+    from .. import Cosmology
+    from . import HaloProfile
 
 
 class Profile2pt(CCLObject):
@@ -21,29 +32,46 @@ class Profile2pt(CCLObject):
 
     Parameters
     ----------
-    r_corr : int or float
+    r_corr
         Scale the correlation by :math:`(1 + \rho_{u_1, u_2})`. Useful when the
         individual 1-halo terms are not fully correlated. Example usecases can
-        be found in `Koukoufilippas et al. (2020)
-        <https://arxiv.org/abs/1909.09102>`_ and `Yan et al. (2021)
-        <https://arxiv.org/abs/2102.07701>`_. The default is :math:`0`, which
-        is equivalent to the product of the Fourier halo profiles.
+        be found in :footcite:t:`Koukoufilippas20` and :footcite:t:`Yan21`.
+        The default is equivalent to the product of the Fourier halo profiles.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    r_corr
     """
     __repr_attrs__ = __eq_attrs__ = ("r_corr",)
 
     @warn_api
-    def __init__(self, *, r_corr=0):
+    def __init__(self, *, r_corr: Real = 0):
         self.r_corr = r_corr
 
     @warn_api
-    def update_parameters(self, *, r_corr=None):
+    # @update(names=["r_corr"])  # TODO: Uncomment in CCLv3.
+    # def update_parameters(self) -> None:
+    def update_parameters(self, *, r_corr=None) -> None:
         """Update the parameters of the 2-point correlator."""
         if r_corr is not None:
             self.r_corr = r_corr
 
     @mass_def_api
     @warn_api
-    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
+    def fourier_2pt(
+            self,
+            cosmo: Cosmology,
+            k: Union[Real, NDArray[Real]],
+            M: Union[Real, NDArray[Real]],
+            a: Real,
+            prof: HaloProfile,
+            *,
+            prof2: Optional[HaloProfile] = None
+    ) -> Union[float, NDArray[float]]:
         r"""Compute the Fourier-space two-point moment between two profiles.
 
         .. math::
@@ -52,21 +80,22 @@ class Profile2pt(CCLObject):
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.Cosmology`
+        cosmo
             Cosmological parameters.
-        k : int, float or (nk,) array_like
+        k : array_like (nk,)
             Comoving wavenumber, in units of :math:`\rm Mpc^{-1}`.
-        M : int, float or (nM,) array_like
+        M : array_like (nM,)
             Halo mass in units of :math:`\rm M_{\odot}`.
-        a : int or float
+        a
             Scale factor.
-        prof, prof2 : :class:`~pyccl.halos.HaloProfile`, required, optional
-            Halo profiles to correlate. If ``prof2`` is not provided, ``prof``
-            is auto-correlated.
+        prof
+            First halo profile.
+        prof2
+            Second halo profile. If None, `prof` is used.
 
         Returns
         -------
-        p2pt : float or (nM, nk) numpy.ndarray
+        array_like (nM, nk)
             Second-order Fourier-space moment.
         """
         if prof2 is None:
@@ -92,31 +121,41 @@ class Profile2ptHOD(Profile2pt):
              + ( \bar{N}_s(M,a) \, u_{\rm sat}(r | M,a))^2 \right],
 
     where all quantities are described in the documentation of
-    :class:`~pyccl.halos.HaloProfileHOD`.
+    :class:`~HaloProfileHOD`.
     """
 
     @mass_def_api
     @warn_api
-    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
+    def fourier_2pt(
+            self,
+            cosmo: Cosmology,
+            k: Union[Real, NDArray[Real]],
+            M: Union[Real, NDArray[Real]],
+            a: Real,
+            prof: HaloProfileHOD,
+            *,
+            prof2: Optional[HaloProfileHOD] = None
+    ) -> Union[float, NDArray[float]]:
         r"""Compute the Fourier-space two-point moment for the HOD profile.
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.Cosmology`
+        cosmo
             Cosmological parameters.
-        k : int, float or (nk,) array_like
+        k : array_like (nk,)
             Comoving wavenumber, in units of :math:`\rm Mpc^{-1}`.
-        M : int, float or (nM,) array_like
+        M : array_like (nM,)
             Halo mass in units of :math:`\rm M_{\odot}`.
-        a : int or float
+        a
             Scale factor.
-        prof, prof2 : :class:`~pyccl.halos.HaloProfileHOD`, required, optional
-            Halo profiles to correlate. If ``prof2`` is provided it must be the
-            equal to ``prof``.
+        prof
+            First halo profile.
+        prof2
+            Second halo profile. If None, `prof` is used.
 
         Returns
         -------
-        p2pt : float or (nM, nk) numpy.ndarray
+        array_like (nM, nk)
             Second-order Fourier-space moment.
 
         Raises
@@ -138,33 +177,46 @@ class Profile2ptHOD(Profile2pt):
 class Profile2ptCIB(Profile2pt):
     """Fourier-space 1-halo 2-point correlator for the CIB profile.
 
-    It follows closely the implementation of the HOD 2-point correlator
-    (:class:`~pyccl.halos.Profile2ptHOD`) and Equation 15 of `McCarthy &
-    Madhavacheril  <https://arxiv.org/abs/2010.16405>`_.
+    Follows closely the implementation of the HOD 2-point correlator
+    (:class:`~Profile2ptHOD`) and Equation 15 of :footcite:t:`McCarthy21`.
+
+    References
+    ----------
+    .. footbibliography::
     """
 
     @mass_def_api
     @warn_api
-    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
+    def fourier_2pt(
+            self,
+            cosmo: Cosmology,
+            k: Union[Real, NDArray[Real]],
+            M: Union[Real, NDArray[Real]],
+            a: Real,
+            prof: HaloProfileCIB,
+            *,
+            prof2: Optional[HaloProfileCIB] = None
+    ) -> Union[float, NDArray[float]]:
         r"""Compute the Fourier-space two-point moment for the HOD profile.
 
         Arguments
         ---------
-        cosmo : :class:`~pyccl.Cosmology`
+        cosmo
             Cosmological parameters.
-        k : int, float or (nk,) array_like
+        k : array_like (nk,)
             Comoving wavenumber, in units of :math:`\rm Mpc^{-1}`.
-        M : int, float or (nM,) array_like
+        M : array_like (nM,)
             Halo mass in units of :math:`\rm M_{\odot}`.
-        a : int or float
+        a
             Scale factor.
-        prof, prof2 : :class:`~pyccl.halos.HaloProfileCIB`, required, optional
-            Halo profiles to correlate. If ``prof2`` is not provided, ``prof``
-            is auto-correlated.
+        prof
+            First halo profile.
+        prof2
+            Second halo profile. If None, `prof` is used.
 
         Returns
         -------
-        p2pt : float or (nM, nk) numpy.ndarray
+        array_like (nM, nk)
             Second-order Fourier-space moment.
 
         Raises
@@ -175,8 +227,8 @@ class Profile2ptCIB(Profile2pt):
         if prof2 is None:
             prof2 = prof
 
-        Shang12 = HaloProfileCIBShang12
-        if not (isinstance(prof, Shang12) and isinstance(prof2, Shang12)):
+        CIB = HaloProfileCIB
+        if not (isinstance(prof, CIB) and isinstance(prof2, CIB)):
             raise TypeError("prof and prof2 must be HaloProfileCIB")
 
         return prof._fourier_variance(cosmo, k, M, a, nu_other=prof2.nu)

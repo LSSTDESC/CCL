@@ -1,15 +1,21 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncBocquet16",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncBocquet16(MassFunc):
-    r"""Halo mass function by `Bocquet et al. (2016)
-    <https://arxiv.org/abs/1502.07357>`_. Defined for S.O. masses with
-    :math:`\Delta_{200{\rm m}}`, :math:`\Delta_{200{\rm c}}`, and
+    r"""Halo mass function by :footcite:t:`Bocquet16`. Defined for S.O. masses
+    with :math:`\Delta_{200{\rm m}}`, :math:`\Delta_{200{\rm c}}`, and
     :math:`\Delta_{500{\rm c}}`.
 
     The mass function takes the form
@@ -87,26 +93,39 @@ class MassFuncBocquet16(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
+    mass_def
         Mass definition for this :math:`n(M)` parametrization.
-        The default is :math:`200{\rm m}`.
-    mass_def_strict : bool, optional
+    mass_def_strict
         This mass function necessarily needs one of the valid mass definitions.
         It is fixed to True and cannot be changed.
-    hydro : bool, optional
+    hydro
         Whether to use the fitting formulas from simulations with baryons.
         If False, use the parametrization found using DM-only simulations.
-        The default is True.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
+
+    mass_def_strict
+
+    hydro
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict", "hydro",)
     _mass_def_strict_always = True
     name = 'Bocquet16'
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True,
-                 hydro=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True,
+            hydro: bool = True
+    ):
         self.hydro = hydro
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

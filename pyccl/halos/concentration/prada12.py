@@ -1,15 +1,21 @@
+from __future__ import annotations
+
 __all__ = ("ConcentrationPrada12",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import Concentration
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class ConcentrationPrada12(Concentration):
-    r"""Concentration-mass relation by `Prada et al. (2012)
-    <https://arxiv.org/abs/1104.5130>`_. Valid only for S.O. masses with
-    :math:`\Delta_{200{\rm c}}`.
+    r"""Concentration-mass relation by :footcite:t:`Prada12`. Valid only for
+    S.O. masses with :math:`\Delta_{200{\rm c}}`.
 
     The concentration takes the form
 
@@ -46,14 +52,22 @@ class ConcentrationPrada12(Concentration):
 
     Parameters
     ---------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, fixed
+    mass_def
         Mass definition for this :math:`c(M)` parametrization.
         It is fixed to :math:`\Delta_{200{\rm c}}`.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
     """
     name = 'Prada12'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def="200c"):
+    def __init__(self, *, mass_def: Union[str, MassDef] = "200c"):
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):

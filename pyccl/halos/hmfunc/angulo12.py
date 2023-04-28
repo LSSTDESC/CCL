@@ -1,14 +1,21 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncAngulo12",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncAngulo12(MassFunc):
-    r"""Halo mass function by `Angulo et al. (2012)
-    <https://arxiv.org/abs/1203.3216>`_. Valid for FoF masses only.
+    r"""Halo mass function by :footcite:t:`Angulo12`. Valid for FoF masses
+    only.
 
     The mass function takes the form
 
@@ -22,19 +29,32 @@ class MassFuncAngulo12(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
+    mass_def
         Mass definition for this :math:`n(M)` parametrization.
-        The default is :math:`{\rm FoF}`.
-    mass_def_strict : bool, optional
+    mass_def_strict
         If True, only allow the mass definitions for which this halo bias
         relation was fitted, and raise if another mass definition is passed.
         If False, do not check for model consistency for the mass definition.
-        The default is True.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
+
+    mass_def_strict
     """
     name = 'Angulo12'
 
     @warn_api
-    def __init__(self, *, mass_def="fof", mass_def_strict=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "fof",
+            mass_def_strict: bool = True
+    ):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):

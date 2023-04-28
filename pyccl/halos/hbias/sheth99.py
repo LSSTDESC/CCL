@@ -1,12 +1,18 @@
+from __future__ import annotations
+
 __all__ = ("HaloBiasSheth99",)
+
+from typing import TYPE_CHECKING, Union
 
 from ... import check, lib, warn_api
 from . import HaloBias
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class HaloBiasSheth99(HaloBias):
-    r"""Halo bias relation by `Sheth & Tormen (1999)
-    <https://arxiv.org/abs/astro-ph/9901122>`_. Valid for FoF masses only.
+    r"""Halo bias relation by :footcite:t:`Sheth99`. Valid for FoF masses only.
 
     The halo bias takes the form
 
@@ -20,29 +26,42 @@ class HaloBiasSheth99(HaloBias):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
+    mass_def
         Mass definition for this :math:`b(M)` parametrization.
-        The default is :math:`{\rm FoF}`.
-    mass_def_strict : bool, optional
+    mass_def_strict
         If True, only allow the mass definitions for which this halo bias
         relation was fitted, and raise if another mass definition is passed.
         If False, do not check for model consistency for the mass definition.
-        The default is True.
-    use_delta_c_fit : bool, optional
+    use_delta_c_fit
         If True, use the formula for :math:`\delta_{\rm c}` given by the
         fit of Nakamura & Suto (1997). If False, use
         :math:`\delta_{\rm c} \simeq 1.68647` given by spherical collapse
-        theory. The default is False.
+        theory.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
+
+    mass_def_strict
+
+    use_delta_c_fit
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = "Sheth99"
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="fof",
-                 mass_def_strict=True,
-                 use_delta_c_fit=False):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "fof",
+            mass_def_strict: bool = True,
+            use_delta_c_fit: bool = False
+    ):
         self.use_delta_c_fit = use_delta_c_fit
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

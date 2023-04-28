@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncTinker08",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -6,11 +10,13 @@ from scipy.interpolate import interp1d
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncTinker08(MassFunc):
-    r"""Halo mass function by `Tinker et al. (2008)
-    <https://arxiv.org/abs/0803.2706>`_. Valid for any S.O. masses with
-    :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
+    r"""Halo mass function by :footcite:t:`Tinker08`. Valid for any S.O. masses
+    with :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
 
     The mass function takes the form
 
@@ -40,14 +46,12 @@ class MassFuncTinker08(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
+    mass_def
         Mass definition for this :math:`n(M)` parametrization.
-        The default is :math:`200{\rm m}`.
-    mass_def_strict : bool, optional
+    mass_def_strict
         If True, only allow the mass definitions for which this halo bias
         relation was fitted, and raise if another mass definition is passed.
         If False, do not check for model consistency for the mass definition.
-        The default is True.
 
     Raises
     ------
@@ -55,13 +59,26 @@ class MassFuncTinker08(MassFunc):
         Interpolation out of bounds. :math:`\Delta_m` for the particular
         combination of mass definition and scale factor is out of bounds with
         the range of the mass function.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
+
+    mass_def_strict
     """
     name = 'Tinker08'
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True
+    ):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):

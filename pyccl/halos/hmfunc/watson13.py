@@ -1,14 +1,21 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncWatson13",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncWatson13(MassFunc):
-    r"""Halo mass function by `Watson et al. (2013)
-    <https://arxiv.org/abs/1212.0095>`_. Valid for any S.O. and FoF masses.
+    r"""Halo mass function by :footcite:t:`Watson13`. Valid for any S.O. and
+    FoF masses.
 
     The mass function takes the form
 
@@ -37,21 +44,32 @@ class MassFuncWatson13(MassFunc):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, optional
+    mass_def
         Mass definition for this :math:`n(M)` parametrization.
-        The default is :math:`200{\rm m}`.
-    mass_def_strict : bool, optional
+    mass_def_strict
         If True, only allow the mass definitions for which this halo bias
         relation was fitted, and raise if another mass definition is passed.
         If False, do not check for model consistency for the mass definition.
-        The default is True.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
+
+    mass_def_strict
     """
     name = 'Watson13'
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True
+    ):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):

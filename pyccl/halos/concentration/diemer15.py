@@ -1,15 +1,21 @@
+from __future__ import annotations
+
 __all__ = ("ConcentrationDiemer15",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import Concentration
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class ConcentrationDiemer15(Concentration):
-    r"""Concentration-mass relation by `Diemer & Kravtsov (2015)
-    <https://arxiv.org/abs/1407.4730>`_. Valid only for S.O.
-    :math:`\Delta = 200c` mass definitions.
+    r"""Concentration-mass relation by :footcite:t:`Diemer15`. Valid only for
+    S.O. :math:`\Delta = 200c` mass definitions.
 
     The concentration takes the form
 
@@ -25,14 +31,22 @@ class ConcentrationDiemer15(Concentration):
 
     Parameters
     ----------
-    mass_def : :class:`~pyccl.halos.MassDef` or str, fixed
+    mass_def
         Mass definition for this :math:`c(M)` parametrization. It is fixed to
         :math:`\Delta=200c`.
+
+    References
+    ----------
+    .. footbibliography::
+
+    Attributes
+    ----------
+    mass_def
     """
     name = 'Diemer15'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def="200c"):
+    def __init__(self, *, mass_def: Union[str, MassDef] = "200c"):
         super().__init__(mass_def=mass_def)
 
     def _setup(self):

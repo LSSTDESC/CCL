@@ -11,7 +11,6 @@ __all__ = ()
 import numpy as np
 import yaml
 
-from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 from .caching import hash_
 
 
@@ -306,6 +305,8 @@ def build_string_Tracer(self):
              0  0x82ad882c232406bb  0xa0657c0f1c98fd77    0       2
              1  0x7ab385bb323530da         None           0       0
     """
+    from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
+
     def get_tracer_info(tr):
         # Return a string with info for the C-level tracer.
 
