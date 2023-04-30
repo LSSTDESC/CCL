@@ -75,17 +75,11 @@ class ConcentrationIshiyama21(Concentration):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    relaxed
-
-    Vmax
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'
+    relaxed: bool
+    Vmax: bool
 
     @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(

@@ -234,17 +234,11 @@ class MassDef(CCLNamedClass, CCLObject):  # TODO: Only keep CCLObject in CCLv3.
     ------
     ValueError
         If `Delta` or `rho_type` are invalid.
-
-    Attributes
-    ----------
-    Delta
-
-    rho_type
-
-    concentration
-        `c_m_relation`
     """
     __eq_attrs__ = ("name",)
+    Delta: Real
+    rho_type: Literal["matter", "critical"]
+    concentration: Concentration
 
     def __init__(
             self,

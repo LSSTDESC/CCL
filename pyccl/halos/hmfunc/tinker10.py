@@ -52,18 +52,11 @@ class MassFuncTinker10(MassFunc):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
-
-    norm_all_z
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_def", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
+    norm_all_z: bool
 
     @warn_api
     def __init__(

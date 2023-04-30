@@ -59,10 +59,6 @@ class ConcentrationPrada12(Concentration):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
     """
     name = 'Prada12'
 

@@ -38,10 +38,6 @@ class ConcentrationDiemer15(Concentration):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
     """
     name = 'Diemer15'
 

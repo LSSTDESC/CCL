@@ -105,18 +105,11 @@ class MassFuncBocquet16(MassFunc):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
-
-    hydro
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict", "hydro",)
     _mass_def_strict_always = True
     name = 'Bocquet16'
+    hydro: bool
 
     @warn_api
     def __init__(

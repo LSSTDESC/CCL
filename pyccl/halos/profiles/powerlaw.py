@@ -15,31 +15,38 @@ if TYPE_CHECKING:
     from ... import Cosmology
     from .. import MassDef
 
-    FuncSignature = Callable[
-        [Cosmology, Union[Real, NDArray], Real],
-        NDArray]
+    FuncSignature = Callable[[Cosmology,
+                              Union[Real, NDArray[Real]],
+                              Real],
+                             NDArray[float]]
 
 
-@deprecated
 class HaloProfilePowerLaw(HaloProfile):
-    """ Power-law profile
+    r"""Power-law halo profile.
 
     .. math::
-        \\rho(r) = (r/r_s)^\\alpha
 
-    Args:
-        r_scale (:obj:`function`): the correlation length of
-            the profile. The signature of this function
-            should be `f(cosmo, M, a)`, where `cosmo`
-            is a :class:`~pyccl.cosmology.Cosmology` object, `M` is a halo mass
-            in units of M_sun, and `a` is the scale factor.
-        tilt (:obj:`function`): the power law index of the
-            profile. The signature of this function should
-            be `f(cosmo, a)`.
+        \rho(r) = (r/r_s)^\alpha
+
+    .. deprecated:: 2.8.0
+
+        This profile will be removed in the next major release.
+
+    Parameters
+    ----------
+    r_scale
+        Correlation length of the profile.
+    tilt
+        Power law index of the profile.
+    mass_def
+        Halo mass definition.
+
+        .. versionadded:: 2.8.0
     """
     __repr_attrs__ = __eq_attrs__ = ("r_scale", "tilt", "mass_def",
                                      "precision_fftlog",)
 
+    @deprecated
     @warn_api
     def __init__(
             self,

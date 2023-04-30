@@ -63,12 +63,6 @@ class MassFuncTinker08(MassFunc):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
     """
     name = 'Tinker08'
 

@@ -44,18 +44,11 @@ class MassFuncSheth99(MassFunc):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
-
-    use_delta_c_fit
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = 'Sheth99'
+    use_delta_c_fit: bool
 
     @warn_api
     def __init__(

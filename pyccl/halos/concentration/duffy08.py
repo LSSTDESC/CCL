@@ -33,10 +33,6 @@ class ConcentrationDuffy08(Concentration):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
     """
     name = 'Duffy08'
 

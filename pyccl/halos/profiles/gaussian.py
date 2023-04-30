@@ -15,37 +15,45 @@ if TYPE_CHECKING:
     from ... import Cosmology
     from .. import MassDef
 
-    FuncSignature = Callable[
-        [Cosmology, Union[Real, NDArray], Real],
-        NDArray]
+    FuncSignature = Callable[[Cosmology,
+                              Union[Real, NDArray[Real]],
+                              Real],
+                             NDArray[float]]
 
 
-@deprecated
 class HaloProfileGaussian(HaloProfile):
-    """ Gaussian profile
+    r""" Gaussian profile
 
     .. math::
-        \\rho(r) = \\rho_0\\, e^{-(r/r_s)^2}
 
-    Args:
-        r_scale (:obj:`function`): the width of the profile.
-            The signature of this function should be
-            `f(cosmo, M, a)`, where `cosmo` is a
-            :class:`~pyccl.cosmology.Cosmology` object, `M` is a halo mass in
-            units of M_sun, and `a` is the scale factor.
-        rho0 (:obj:`function`): the amplitude of the profile.
-            It should have the same signature as `r_scale`.
+        \rho(r) = \rho_0 \, e^{-(r/r_s)^2}
+
+    .. deprecated:: 2.8.0
+
+        This profile will be removed in the next major release.
+
+    Parameters
+    ----------
+    r_scale
+        The width of the profile.
+    rho0
+        The amplitude of the profile.
+    mass_def
+        Halo mass definition.
+
+        .. versionadded:: 2.8.0
     """
     __repr_attrs__ = __eq_attrs__ = ("r_scale", "rho_0", "mass_def",
                                      "precision_fftlog",)
 
+    @deprecated
     @warn_api
     def __init__(
             self,
             *,
             r_scale: FuncSignature,
             rho0: FuncSignature,
-            mass_def: Union[str, MassDef, None] = None
+            mass_def: Union[str, MassDef] = None
     ):
         self.rho_0 = rho0
         self.r_scale = r_scale

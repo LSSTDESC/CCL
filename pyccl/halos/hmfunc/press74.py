@@ -35,12 +35,6 @@ class MassFuncPress74(MassFunc):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
     """
     name = 'Press74'
 

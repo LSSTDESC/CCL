@@ -80,17 +80,6 @@ class HMCalculator(CCLObject):
         Large-scale value used for normalization of the Fourier-space halo
         profiles, expressed in units of :math:`\rm Mpc^{-1}`.
 
-    Attributes
-    ----------
-    mass_function : MassFunc
-        Instantiated mass function.
-    halo_bias : HaloBias
-        Instantiated halo bias.
-    mass_def : MassDef
-        Instantiated mass definition.
-    precision : dict
-        Integration settings.
-
     Raises
     ------
     ValueError
@@ -107,6 +96,11 @@ class HMCalculator(CCLObject):
                                         ('_hbias', 'halo_bias'),
                                         ('_prec', 'precision')]
                                  )(super.__getattribute__)
+    mass_function: MassFunc
+    halo_bias: HaloBias
+    mass_def: MassDef
+    precision: dict
+    """Integration settings."""
 
     @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
                      ("nlog10M", "nM")])

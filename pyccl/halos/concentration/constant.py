@@ -25,15 +25,10 @@ class ConcentrationConstant(Concentration):
     mass_def
         The mass definition for this :math:`c(M)` parametrization is arbitrary
         and is not used for any calculations.
-
-    Attributes
-    ----------
-    c
-
-    mass_def
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "c",)
     name = 'Constant'
+    c: Real
 
     @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, c: Real = 1, *, mass_def: Union[str, MassDef] = "200c"):

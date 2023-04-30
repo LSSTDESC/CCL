@@ -3,7 +3,7 @@ from __future__ import annotations
 __all__ = ("HaloProfileHOD",)
 
 from numbers import Real
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
 from scipy.special import sici, erf
@@ -12,109 +12,97 @@ from ... import warn_api, deprecate_attr
 from . import HaloProfileNumberCounts
 
 if TYPE_CHECKING:
-    from .. import Concentration, MassDef
+    from ... import Cosmology
+    from .. import Concentration, HMCalculator, MassDef
 
 
 class HaloProfileHOD(HaloProfileNumberCounts):
-    """ A generic halo occupation distribution (HOD)
-    profile describing the number density of galaxies
-    as a function of halo mass.
+    r"""Generic halo occupation distribution (HOD) halo profile describing the
+    number density of galaxies.
 
     The parametrization for the mean profile is:
 
     .. math::
-       \\langle n_g(r)|M,a\\rangle = \\bar{N}_c(M,a)
-       \\left[f_c(a)+\\bar{N}_s(M,a) u_{\\rm sat}(r|M,a)\\right]
 
-    where :math:`\\bar{N}_c` and :math:`\\bar{N}_s` are the
-    mean number of central and satellite galaxies respectively,
-    :math:`f_c` is the observed fraction of central galaxies, and
-    :math:`u_{\\rm sat}(r|M,a)` is the distribution of satellites
-    as a function of distance to the halo centre.
+       \langle n_g(r) | M,a \rangle = \bar{N}_c(M,a)
+       \left[ f_c(a) + \bar{N}_s(M,a) u_{\rm sat}(r|M,a) \right]
+
+    where :math:`\bar{N}_c` and :math:`\bar{N}_s` are the mean number of
+    central and satellite galaxies respectively,:math:`f_c` is the observed
+    fraction of central galaxies, and :math:`u_{\rm sat}(r|M,a)` is the
+    distribution of satellites as a function of distance to the halo centre.
 
     These quantities are parametrized as follows:
 
     .. math::
-       \\bar{N}_c(M,a)=\\frac{1}{2}\\left[1+{\\rm erf}
-       \\left(\\frac{\\log(M/M_{\\rm min})}{\\sigma_{{\\rm ln}M}}
-       \\right)\\right]
+
+       \bar{N}_c(M,a) &= \frac{1}{2} \left[1 + {\rm erf} \left(
+           \frac{\log(M / M_{\rm min})}{\sigma_{{\rm ln}M}} \right)\right] \\
+       \bar{N}_s(M,a) &= \Theta(M-M_0) \left(\frac{M-M_0}{M_1}\right)^\alpha \\
+       u_s(r|M,a) &\propto \frac{\Theta(r_{\rm max}-r)}{(r/r_g)(1 + r/r_g)^2},
+
+    where :math:`\Theta(x)` is the Heaviside step function, and the
+    proportionality constant in the last equation is such that
+    :math:`\int_V {\rm d}V u_s = 1`. The radius :math:`r_g` is related to the
+    NFW scale radius :math:`r_s` through :math:`r_g=\beta_g \, r_s`, and the
+    radius :math:`r_{\rm max}` is related to the overdensity radius
+    :math:`r_\Delta` as :math:`r_{\rm max} = \beta_{\rm max} \, r_\Delta`. The
+    scale radius is related to the comoving overdensity halo radius via
+    :math:`R_\Delta(M) = c(M) \, r_s`.
+
+    All the quantities :math:`\log_{10}M_{\rm min}`, :math:`\log_{10}M_0`,
+    :math:`\log_{10}M_1`, :math:`\sigma_{{\rm ln}M}`, :math:`f_c`,
+    :math:`\alpha`, :math:`\beta_g` and :math:`\beta_{\rm max}` are
+    time-dependent via a linear expansion around a pivot scale factor
+    :math:`a_*` with an offset :math:`X_0` and a tilt parameter :math:`X_p`:
 
     .. math::
-       \\bar{N}_s(M,a)=\\Theta(M-M_0)\\left(\\frac{M-M_0}{M_1}
-       \\right)^\\alpha
 
-    .. math::
-       u_s(r|M,a)\\propto\\frac{\\Theta(r_{\\rm max}-r)}
-       {(r/r_g)(1+r/r_g)^2}
+       X(a) = X_0 + X_p \, (a - a_*).
 
-    Where :math:`\\Theta(x)` is the Heaviside step function,
-    and the proportionality constant in the last equation is
-    such that the volume integral of :math:`u_s` is 1. The
-    radius :math:`r_g` is related to the NFW scale radius :math:`r_s`
-    through :math:`r_g=\\beta_g\\,r_s`, and the radius
-    :math:`r_{\\rm max}` is related to the overdensity radius
-    :math:`r_\\Delta` as :math:`r_{\\rm max}=\\beta_{\\rm max}r_\\Delta`.
-    The scale radius is related to the comoving overdensity halo
-    radius via :math:`R_\\Delta(M) = c(M)\\,r_s`.
+    This definition of the HOD profile draws from several publications,
+    including :footcite:t:`Zheng05`, :footcite:t:`Ando17`, and
+    :footcite:t:`Nicola20`. The default values used here are roughly compatible
+    with those quoted in the latter paper.
 
-    All the quantities :math:`\\log_{10}M_{\\rm min}`,
-    :math:`\\log_{10}M_0`, :math:`\\log_{10}M_1`,
-    :math:`\\sigma_{{\\rm ln}M}`, :math:`f_c`, :math:`\\alpha`,
-    :math:`\\beta_g` and :math:`\\beta_{\\rm max}` are
-    time-dependent via a linear expansion around a pivot scale
-    factor :math:`a_*` with an offset (:math:`X_0`) and a tilt
-    parameter (:math:`X_p`):
+    .. note::
 
-    .. math::
-       X(a) = X_0 + X_p\\,(a-a_*).
+        This profile has its own covariance implementation.
 
-    This definition of the HOD profile draws from several papers
-    in the literature, including: astro-ph/0408564, arXiv:1706.05422
-    and arXiv:1912.08209. The default values used here are roughly
-    compatible with those found in the latter paper.
+    Parameters
+    ----------
+    concentration
+        Concentration-mass relation. If a string, `mass_def` must be specified.
+    log10Mmin_0, log10Mmin_0
+        :math:`\log_{10}M_{\rm min}`.
+    siglnM_0, siglnM_p
+        :math:`\sigma_{{\rm ln}M}`.
+    log10M0_0, log10M0_p
+        :math:`\log_{10}M_0`.
+    log10M1_0, log10M1_p
+        :math:`\log_{10}M_1`.
+    alpha_0, alpha_p
+        :math:`\alpha`.
+    fc_0, fc_p
+        :math:`f_c`.
+    bg_0, bg_p
+        :math:`\beta_g`.
+    bmax_0, bmax_p
+        :math:`\beta_{\rm max}`.
+    a_pivot
+        Pivot scale factor :math:`a_*`.
+    ns_independent
+        If True, relax the requirement to only form satellites when centrals
+        are present.
+    mass_def
+        Halo mass definition. If `concentration` is instantiated, this
+        parameter is optional.
 
-    See :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`) for a
-    description of the Fourier-space two-point correlator of the
-    HOD profile.
+        .. versionadded:: 2.8.0
 
-    Args:
-        concentration (:obj:`Concentration`): concentration-mass
-            relation to use with this profile.
-        log10Mmin_0 (float): offset parameter for
-            :math:`\\log_{10}M_{\\rm min}`.
-        log10Mmin_p (float): tilt parameter for
-            :math:`\\log_{10}M_{\\rm min}`.
-        siglnM_0 (float): offset parameter for
-            :math:`\\sigma_{{\\rm ln}M}`.
-        siglnM_p (float): tilt parameter for
-            :math:`\\sigma_{{\\rm ln}M}`.
-        log10M0_0 (float): offset parameter for
-            :math:`\\log_{10}M_0`.
-        log10M0_p (float): tilt parameter for
-            :math:`\\log_{10}M_0`.
-        log10M1_0 (float): offset parameter for
-            :math:`\\log_{10}M_1`.
-        log10M1_p (float): tilt parameter for
-            :math:`\\log_{10}M_1`.
-        alpha_0 (float): offset parameter for
-            :math:`\\alpha`.
-        alpha_p (float): tilt parameter for
-            :math:`\\alpha`.
-        fc_0 (float): offset parameter for
-            :math:`f_c`.
-        fc_p (float): tilt parameter for
-            :math:`f_c`.
-        bg_0 (float): offset parameter for
-            :math:`\\beta_g`.
-        bg_p (float): tilt parameter for
-            :math:`\\beta_g`.
-        bmax_0 (float): offset parameter for
-            :math:`\\beta_{\\rm max}`.
-        bmax_p (float): tilt parameter for
-            :math:`\\beta_{\\rm max}`.
-        a_pivot (float): pivot scale factor :math:`a_*`.
-        ns_independent (bool): drop requirement to only form
-            satellites when centrals are present.
+    References
+    ----------
+    .. footbibliography::
     """
     __repr_attrs__ = __eq_attrs__ = (
         "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
@@ -147,7 +135,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             bmax_0: Real = 1, bmax_p: Real = 0,
             a_pivot: Real = 1,
             ns_independent: bool = False,
-            mass_def: Union[str, MassDef, None] = None
+            mass_def: Optional[Union[str, MassDef]] = None
     ):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p
@@ -175,6 +163,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
     #     "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0", "alpha_p", "fc_0",
     #     "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
     #     "ns_independent"])
+    # def update_parameters(self) -> None:
     @warn_api(pairs=[("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
                      ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
                      ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
@@ -187,7 +176,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             bg_0=None, bg_p=None, bmax_0=None, bmax_p=None,
             a_pivot=None, ns_independent=None):
         """Update the profile parameters. All numerical parameters in
-        :meth:`__init__`, as well as ``ns_independent``, are updatable.
+        :meth:`__init__`, as well as `ns_independent`, are updatable.
         """
         if log10Mmin_0 is not None:
             self.log10Mmin_0 = log10Mmin_0
@@ -300,7 +289,13 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def get_normalization(self, cosmo, a, hmc):
+    def get_normalization(
+            self,
+            cosmo: Cosmology,
+            a: Real,
+            *,
+            hmc: HMCalculator
+    ) -> float:
         """Compute the normalization of the HOD profile, which is the mean
         galaxy number density.
         """

@@ -54,12 +54,6 @@ class MassFuncWatson13(MassFunc):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
     """
     name = 'Watson13'
 

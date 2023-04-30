@@ -41,12 +41,9 @@ class Profile2pt(CCLObject):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    r_corr
     """
     __repr_attrs__ = __eq_attrs__ = ("r_corr",)
+    r_corr: Real
 
     @warn_api
     def __init__(self, *, r_corr: Real = 0):

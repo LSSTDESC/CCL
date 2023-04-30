@@ -36,12 +36,6 @@ class MassFuncJenkins01(MassFunc):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
     """
     name = 'Jenkins01'
 

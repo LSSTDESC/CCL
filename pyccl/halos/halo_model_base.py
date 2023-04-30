@@ -45,16 +45,12 @@ class HMIngredients(CCLNamedClass):
     ------
     ValueError
         If the mass definition is incompatible with the model setup.
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",)
     __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
                                  )(super.__getattribute__)
+    mass_def: MassDef
+    mass_def_strict: bool
 
     @warn_api
     def __init__(
@@ -354,7 +350,8 @@ class Concentration(HMIngredients):
 
     where :math:`\Delta` is the density contrast.
     """
-    _mass_def_strict_always = True
+    _mass_def_strict_always: bool = True
+    mass_def_strict: bool = True
 
     @warn_api
     def __init__(self, *, mass_def):

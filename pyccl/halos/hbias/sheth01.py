@@ -41,12 +41,6 @@ class HaloBiasSheth01(HaloBias):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
     """
     name = "Sheth01"
 

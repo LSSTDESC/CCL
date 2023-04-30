@@ -55,12 +55,6 @@ class HaloBiasTinker10(HaloBias):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
     """
     name = "Tinker10"
 

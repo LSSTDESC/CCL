@@ -34,10 +34,6 @@ class ConcentrationKlypin11(Concentration):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
     """
     name = 'Klypin11'
 

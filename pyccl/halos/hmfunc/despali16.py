@@ -57,18 +57,11 @@ class MassFuncDespali16(MassFunc):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
-
-    ellispoidal
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_def", "mass_def_strict", "ellipsoidal",)
     name = 'Despali16'
+    ellispoidal: bool
 
     @warn_api
     def __init__(

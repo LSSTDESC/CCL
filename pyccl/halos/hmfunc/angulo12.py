@@ -39,12 +39,6 @@ class MassFuncAngulo12(MassFunc):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
     """
     name = 'Angulo12'
 

@@ -39,12 +39,6 @@ class HaloBiasBhattacharya11(HaloBias):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
-
-    mass_def_strict
     """
     name = "Bhattacharya11"
 

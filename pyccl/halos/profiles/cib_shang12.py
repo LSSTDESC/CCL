@@ -3,9 +3,10 @@ from __future__ import annotations
 __all__ = ("HaloProfileCIBShang12",)
 
 from numbers import Real
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
+from numpy.typing import NDArray
 from scipy.integrate import simpson
 from scipy.special import lambertw
 
@@ -17,75 +18,94 @@ if TYPE_CHECKING:
 
 
 class HaloProfileCIBShang12(HaloProfileCIB):
-    """ CIB profile implementing the model by Shang et al.
-    (2012MNRAS.421.2832S).
+    r"""CIB profile implementing the model by :footcite:t:`Shang12`.
 
     The parametrization for the mean profile is:
 
     .. math::
-        j_\\nu(r) = \\frac{1}{4\\pi}
-        \\left(L^{\\rm cen}_{\\nu(1+z)}(M)+
-        L^{\\rm sat}_{\\nu(1+z)}u_{\\rm sat}(r|M)
-        \\right),
 
-    where the luminosity from centrals and satellites is
-    modelled as:
+        j_\nu(r) = \frac{1}{4\pi}
+        \left(L^{\rm cen}_{\nu(1+z)}(M)
+              + L^{\rm sat}_{\nu (1+z)} \, u_{\rm sat}(r|M)
+        \right),
 
-    .. math::
-        L^{\\rm cen}_{\\nu}(M) = L^{\\rm gal}_\\nu(M)\\,
-        N_{\\rm cen}(M),
+    where the luminosity from centrals and satellites is modelled as:
 
     .. math::
-        L^{\\rm sat}_{\\nu}(M) = \\int_{M_{\\rm min}}^{M} dm
-        \\frac{dN_{\\rm sub}}{dm}\\,L^{\\rm gal}_\\nu(m).
 
-    Here, :math:`dN_{\\rm sub}/dm` is the subhalo mass function,
-    :math:`u_{\\rm sat}` is the satellite galaxy density profile
-    (modelled as a truncated NFW profile), and the infrared
-    galaxy luminosity is parametrized as
+        L^{\rm cen}_{\nu}(M) &= L^{\rm gal}_\nu(M) \, N_{\rm cen}(M), \\
+        L^{\rm sat}_{\nu}(M) &= \int_{M_{\rm min}}^{M} {\rm d}M
+        \frac{{\rm d}N_{\rm sub}}{{\rm d}M} \, L^{\rm gal}_\nu(M).
+
+    Here, :math:`{\rm d}N_{\rm sub}/{\rm d}M` is the subhalo mass function,
+    :math:`u_{\rm sat}` is the satellite galaxy density profile (modelled as a
+    truncated NFW profile), and the infrared galaxy luminosity is parametrized
+    as
 
     .. math::
-        L^{\\rm gal}_{\\nu}(M,z)=L_0(1+z)^{s_z}\\,
-        \\Sigma(M)\\,S_\\nu,
+
+        L^{\rm gal}_{\nu}(M,z) = L_0(1+z)^{s_z} \, \Sigma(M) \, S_\nu,
 
     where the mass dependence is lognormal
 
     .. math::
-        \\Sigma(M) = \\frac{M}{\\sqrt{2\\pi\\sigma_{LM}^2}}
-        \\exp\\left[-\\frac{\\log_{10}^2(M/M_{\\rm eff})}
-        {2\\sigma_{LM}^2}\\right],
+
+        \Sigma(M) = \frac{M}{\sqrt{2\pi\sigma_{\log_{10}M}^2}}
+        \exp \left[ -\frac{\log_{10}^2(M/M_{\rm eff})}
+        {2\sigma_{\log_{10}M}^2} \right],
 
     and the spectrum is a modified black-body law
 
     .. math::
-        S_\\nu \\propto\\left\\{
-        \\begin{array}{cc}
-           \\nu^\\beta\\,B_\\nu(T_d) & \\nu < \\nu_0 \\\\
-           \\nu^\\gamma & \\nu \\geq \\nu_0
-        \\end{array}
-        \\right.,
 
-    with the normalization fixed by :math:`S_{\\nu_0}=1`,
-    and :math:`\\nu_0` defined so the spectrum has a continuous
-    derivative for all :math:`\\nu`.
+        S_\nu \propto \begin{cases}
+           \nu^\beta \, B_\nu(T_d), & \nu < \nu_0 \\
+           \nu^\gamma, & \nu \geq \nu_0
+        \end{cases}
 
-    Finally, the dust temperature is assumed to have a redshift
-    dependence of the form :math:`T_d=T_0(1+z)^\\alpha`.
+    with the normalization fixed by :math:`S_{\nu_0}=1`, and :math:`\nu_0`
+    defined so the spectrum has a continuous derivative for all :math:`\nu`.
 
-    Args:
-        concentration (:obj:`Concentration`): concentration-mass
-            relation to use with this profile.
-        nu_GHz (float): frequency in GHz.
-        alpha (float): dust temperature evolution parameter.
-        T0 (float): dust temperature at :math:`z=0` in Kelvin.
-        beta (float): dust spectral index.
-        gamma (float): high frequency slope.
-        s_z (float): luminosity evolution slope.
-        log10Meff (float): log10 of the most efficient mass.
-        siglog10M (float): logarithmic scatter in mass.
-        Mmin (float): minimum subhalo mass.
-        L0 (float): luminosity scale (in
-            :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
+    Finally, the dust temperature is assumed to have a redshift-dependence of
+    the form :math:`T_d = T_0(1+z)^\alpha`.
+
+    .. note::
+
+        This profile has its own covariance implementation.
+
+    Parameters
+    ----------
+    concentration
+        Concentration-mass relation. If a string, `mass_def` must be specified.
+    nu_GHz
+        Frequency in :math:`\rm GHz`.
+    alpha
+        Dust temperature evolution parameter.
+    T0
+        Dust temperature at :math:`z = 0` in :math:`\rm K`.
+    beta
+        Dust spectral index.
+    gamma
+        High frequency slope.
+    s_z
+        Luminosity evolution slope.
+    log10Meff
+        :math:`\log_{10}` of the most efficient mass.
+    siglog10M
+        Logarithmic scatter in mass.
+    Mmin
+        Minimum subhalo mass.
+    L0
+        Luminosity scale in :math:`\rm Jy \, Mpc^2 M_\odot^{-1}`.
+    mass_def
+        Halo mass definition. If `concentration` is instantiated, this
+        parameter is optional.
+
+        .. versionadded:: 2.8.0
+
+    References
+    ----------
+    .. footbibliography::
     """
     __repr_attrs__ = __eq_attrs__ = (
         "nu", "alpha", "T0", "beta", "gamma", "s_z", "log10Meff", "siglog10M",
@@ -111,7 +131,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
             siglog10M: Real = 0.707,
             Mmin: Real = 1e10,
             L0: Real = 6.4E-8,
-            mass_def: Union[str, MassDef, None] = None
+            mass_def: Optional[Union[str, MassDef]] = None
     ):
         self._one_over_4pi = 1/(4*np.pi)
         self.nu = nu_GHz
@@ -128,26 +148,41 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         self.pNFW = HaloProfileNFW(**kwargs)
         super().__init__(**kwargs)
 
-    def dNsub_dlnM_TinkerWetzel10(self, Msub, Mparent):
-        """Subhalo mass function of Tinker & Wetzel (2010ApJ...719...88T)
+    def dNsub_dlnM_TinkerWetzel10(
+            self,
+            Msub: Union[Real, NDArray[Real]],
+            Mparent: Real
+    ) -> Union[float, NDArray[float]]:
+        r"""Subhalo mass function of :footcite:t:`TinkerWetzel10`.
 
-        Args:
-            Msub (float or array_like): sub-halo mass (in solar masses).
-            Mparent (float): parent halo mass (in solar masses).
+        Arguments
+        ---------
+        Msub : array_like (nM,)
+            Sub-halo mass in :math:`\rm M_\odot`.
+        Mparent
+            Parent halo mass in :math:`\rm M_\odot`.
 
-        Returns:
-            float or array_like: average number of subhalos.
+        Returns
+        -------
+        array_like (nM,)
+            Average number of subhalos.
+
+        References
+        ----------
+        .. footbibliography::
         """
         return 0.30*(Msub/Mparent)**(-0.7)*np.exp(-9.9*(Msub/Mparent)**2.5)
 
     # TODO: Uncomment for CCLv3.
     # @update(names=["nu_GHz", "alpha", "T0", "beta", "gamma", "s_z",
-    #                       "log10Meff", "siglog10M", "Mmin", "L0"])
+    #                "log10Meff", "siglog10M", "Mmin", "L0"])
+    # def update_parameters(self) -> None:
     @warn_api(pairs=[("log10meff", "log10Meff"),
                      ("sigLM", "siglog10M")])
     def update_parameters(
             self, *, nu_GHz=None, alpha=None, T0=None, beta=None, gamma=None,
-            s_z=None, log10Meff=None, siglog10M=None, Mmin=None, L0=None):
+            s_z=None, log10Meff=None, siglog10M=None, Mmin=None, L0=None
+    ) -> None:
         """Update the profile parameters. All numerical parameters in
         :meth:`__init__` are updatable.
         """
@@ -206,8 +241,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
 
     def _Lumcen(self, M, a):
         Lum = self._Lum(np.log10(M), a)
-        Lumcen = np.heaviside(M-self.Mmin, 1)*Lum
-        return Lumcen
+        return np.heaviside(M-self.Mmin, 1)*Lum
 
     def _Lumsat(self, M, a):
         if not np.max(M) > self.Mmin:

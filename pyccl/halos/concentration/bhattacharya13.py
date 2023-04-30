@@ -34,10 +34,6 @@ class ConcentrationBhattacharya13(Concentration):
     References
     ----------
     .. footbibliography::
-
-    Attributes
-    ----------
-    mass_def
     """
     name = 'Bhattacharya13'
 
