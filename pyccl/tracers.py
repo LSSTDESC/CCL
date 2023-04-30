@@ -489,10 +489,7 @@ class Tracer(CCLObject):
             a = 1./(1.+z)
         a.sort()
         # Scale-dependant MG case with an array of k
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        status = 0
-        lk, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status, cosmo=cosmo)
+        lk = cosmo.get_pk_spline_lk()
         k = np.exp(lk)
         # computing MG factor array
         mgfac_1d = 1

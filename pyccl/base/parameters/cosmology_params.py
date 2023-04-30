@@ -310,16 +310,6 @@ class CosmologyParams(Parameters, factory=lib.parameters):
     :meta hide-value:
     """
 
-    has_mgrowth: bool = False
-    r"""Flag indicating whether the cosmology has modified growth.
-
-    .. deprecated:: 2.8.0
-
-        This parameter will be removed in the next major release.
-
-    :meta hide-value:
-    """
-
     nz_mgrowth: int = 0
     r"""Number of samples of the modified growth arrays.
 
@@ -330,20 +320,35 @@ class CosmologyParams(Parameters, factory=lib.parameters):
     :meta hide-value:
     """
 
-    def __getattribute__(self, name):
-        if name == "m_nu":
-            N_nu_mass = self._instance.N_nu_mass
-            nu_masses = lib.parameters_get_nu_masses(self._instance, N_nu_mass)
-            return nu_masses.tolist()
-        return super().__getattribute__(name)
+    has_mgrowth: bool = False
+    r"""Flag indicating whether the cosmology has modified growth.
+
+    .. deprecated:: 2.8.0
+
+        This parameter will be removed in the next major release.
+
+    :meta hide-value:
+    """
+
+    @property
+    def z_mg(self) -> Optional[NDArray[Real]]:
+        """Alias for `z_mgrowth`."""
+        return self.z_mgrowth
+
+    @property
+    def df_mg(self) -> Optional[NDArray[Real]]:
+        """Alias for `df_mgrowth`."""
+        return self.df_mgrowth
 
     def __setattr__(self, name, value):
         if name == "m_nu":
-            object.__setattr__(self, "m_nu", self._instance.m_nu)
+            object.__setattr__(self, "m_nu", list(value))
             return lib.parameters_m_nu_set_custom(self._instance, value)
         if name == "mgrowth":
-            object.__setattr__(self, "z_mg", value[0])
-            object.__setattr__(self, "df_mg", value[1])
+            object.__setattr__(self, "z_mgrowth", value[0])
+            object.__setattr__(self, "df_mgrowth", value[1])
+            object.__setattr__(self, "nz_mgrowth", len(value[0]))
+            object.__setattr__(self, "has_mgrowth", True)
             return lib.parameters_mgrowth_set_custom(self._instance, *value)
         super().__setattr__(name, value)
 

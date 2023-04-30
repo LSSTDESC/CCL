@@ -4,39 +4,15 @@ import warnings
 
 
 class CCLError(RuntimeError):
-    """A CCL-specific RuntimeError"""
-    def __repr__(self):
-        return "pyccl.CCLError(%r)" % (str(self))
-
-    def __eq__(self, other):
-        return repr(self) == repr(other)
-
-    def __hash__(self):
-        return hash(repr(self))
+    """Generic error."""
 
 
 class CCLWarning(RuntimeWarning):
-    """A CCL-specific warning"""
-    def __repr__(self):
-        return "pyccl.CCLWarning(%r)" % (str(self))
-
-    def __eq__(self, other):
-        return repr(self) == repr(other)
-
-    def __hash__(self):
-        return hash(repr(self))
+    """Generic warning."""
 
 
 class CCLDeprecationWarning(DeprecationWarning):
-    """A CCL-specific deprecation warning."""
-    def __repr__(self):
-        return "pyccl.CCLDeprecationWarning(%r)" % (str(self))
-
-    def __eq__(self, other):
-        return repr(self) == repr(other)
-
-    def __hash__(self):
-        return hash(repr(self))
+    """Warning for deprecated features."""
 
     @classmethod
     def enable(cls):

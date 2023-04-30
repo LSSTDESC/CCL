@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from .. import CCLDeprecationWarning, Pk2D, check, lib
+from .. import CCLDeprecationWarning, Pk2D
 from . import PTTracer
 
 
@@ -521,10 +521,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                   "EulerianPTCalculator.get_biased_pk2d).",
                   CCLDeprecationWarning)
     if a_arr is None:
-        status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+        a_arr = cosmo.get_pk_spline_a()
 
     if tracer2 is None:
         tracer2 = tracer1

@@ -7,7 +7,7 @@ try:
 except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
-from . import CCLError, Pk2D, check, lib, warn_api
+from . import CCLError, Pk2D, warn_api
 
 
 @warn_api
@@ -37,11 +37,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         pass
 
     # z sampling from CCL parameters
-    na = lib.get_pk_spline_na(cosmo.cosmo)
-    status = 0
-    a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-    check(status, cosmo=cosmo)
-    a_arr = np.sort(a_arr)
+    a_arr = cosmo.get_pk_spline_a()
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
 
@@ -250,11 +246,7 @@ def get_isitgr_pk_lin(cosmo):
         pass
 
     # z sampling from CCL parameters
-    na = lib.get_pk_spline_na(cosmo.cosmo)
-    status = 0
-    a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-    check(status, cosmo=cosmo)
-    a_arr = np.sort(a_arr)
+    a_arr = cosmo.get_pk_spline_a()
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
 
@@ -420,8 +412,8 @@ def get_class_pk_lin(cosmo):
     params = {
         "output": "mPk",
         "non linear": "none",
-        "P_k_max_1/Mpc": cosmo.cosmo.spline_params.K_MAX_SPLINE,
-        "z_max_pk": 1.0/cosmo.cosmo.spline_params.A_SPLINE_MINLOG_PK-1.0,
+        "P_k_max_1/Mpc": cosmo._spline_params.K_MAX_SPLINE,
+        "z_max_pk": 1.0/cosmo._spline_params.A_SPLINE_MINLOG_PK-1.0,
         "modes": "s",
         "lensing": "no",
         "h": cosmo["h"],
@@ -474,21 +466,19 @@ def get_class_pk_lin(cosmo):
         model.compute()
 
         # Set k and a sampling from CCL parameters
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        status = 0
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+        nk = len(cosmo.get_pk_spline_lk())
+        a_arr = cosmo.get_pk_spline_a()
+        na = len(a_arr)
 
         # FIXME - getting the lowest CLASS k value from the python interface
         # appears to be broken - setting to 1e-5 which is close to the
         # old value
         lk_arr = np.log(np.logspace(
             -5,
-            np.log10(cosmo.cosmo.spline_params.K_MAX_SPLINE), nk))
+            np.log10(cosmo._spline_params.K_MAX_SPLINE), nk))
 
         # we need to cut this to the max value used for calling CLASS
-        msk = lk_arr < np.log(cosmo.cosmo.spline_params.K_MAX_SPLINE)
+        msk = lk_arr < np.log(cosmo._spline_params.K_MAX_SPLINE)
         nk = int(np.sum(msk))
         lk_arr = lk_arr[msk]
 
@@ -504,7 +494,7 @@ def get_class_pk_lin(cosmo):
             model.struct_cleanup()
             model.empty()
 
-    params["P_k_max_1/Mpc"] = cosmo.cosmo.spline_params.K_MAX_SPLINE
+    params["P_k_max_1/Mpc"] = cosmo._spline_params.K_MAX_SPLINE
 
     # make the Pk2D object
     pk_lin = Pk2D(
