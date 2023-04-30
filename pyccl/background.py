@@ -1,17 +1,12 @@
-"""Smooth background quantities
-
-CCL defines seven species types:
-
-- 'matter': cold dark matter and baryons
-- 'dark_energy': cosmological constant or otherwise
-- 'radiation': relativistic species besides massless neutrinos (i.e.,
-  only photons)
-- 'curvature': curvature density
-- 'neutrinos_rel': relativistic neutrinos
-- 'neutrinos_massive': massive neutrinos
-
-These strings define the `species` inputs to the functions below.
 """
+====================================
+Background (:mod:`pyccl.background`)
+====================================
+
+Functions to compute background quantities: distances, energies, growth.
+"""
+from __future__ import annotations
+
 __all__ = (
     "Species", "h_over_h0", "comoving_radial_distance", "scale_factor_of_chi",
     "comoving_angular_distance", "angular_diameter_distance",
@@ -20,25 +15,31 @@ __all__ = (
     "growth_factor", "growth_factor_unnorm", "growth_rate",)
 
 from enum import Enum
+from numbers import Real
+from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
+from numpy.typing import NDArray
 
 from . import lib, warn_api
 from . import physical_constants as const
 from .pyutils import (_vectorize_fn, _vectorize_fn3,
                       _vectorize_fn4, _vectorize_fn5)
 
+if TYPE_CHECKING:
+    from . import Cosmology
+
 
 class Species(Enum):
     """Energy species types defined in CCL.
 
-    * critical - critical density
-    * matter - cold dark matter, baryons, massive neutrinos
-    * dark_energy - cosmological constant or otherwise
-    * radiation - relativistic species besides massless neutrinos
-    * curvature - curvature
-    * neutrinos_rel - relativistic neutrinos
-    * neutrinos_massive - massive neutrinos
+    * 'critical' - critical density
+    * 'matter' - cold dark matter, baryons, massive neutrinos
+    * 'dark_energy' - cosmological constant or otherwise
+    * 'radiation' - relativistic species besides massless neutrinos
+    * 'curvature' - curvature
+    * 'neutrinos_rel' - relativistic neutrinos
+    * 'neutrinos_massive' - massive neutrinos
     """
     CRITICAL = "critical"
     MATTER = "matter"
@@ -60,8 +61,11 @@ species_types = {
 }
 
 
-def h_over_h0(cosmo, a):
-    r"""Ratio of Hubble constant at ``a`` over Hubble constant today.
+def h_over_h0(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]]
+) -> Union[float, NDArray[float]]:
+    r"""Ratio of Hubble constant at `a` over Hubble constant today.
 
     .. math::
 
@@ -69,22 +73,25 @@ def h_over_h0(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
+    a : array_like (na,)
+        Scale factor.
 
     Returns
     -------
-    Ez : float or (na,) ndarray
-        Value of the fraction.
+    array_like (na,)
+        :math:`E(a)`.
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.h_over_h0,
                          lib.h_over_h0_vec, cosmo, a)
 
 
-def comoving_radial_distance(cosmo, a):
+def comoving_radial_distance(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]]
+) -> Union[float, NDArray[float]]:
     r"""Comoving radial distance (in :math:`\rm Mpc`).
 
     .. math::
@@ -93,42 +100,48 @@ def comoving_radial_distance(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
+    a : array_like (na,)
+        Scale factor.
 
     Returns
     -------
-    D_C : float or (na,) numpy.ndarray
-        Comoving radial distance at ``a``.
+    array_like (na,)
+        Comoving radial distance.
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.comoving_radial_distance,
                          lib.comoving_radial_distance_vec, cosmo, a)
 
 
-def scale_factor_of_chi(cosmo, chi):
+def scale_factor_of_chi(
+        cosmo: Cosmology,
+        chi: Union[Real, NDArray[Real]]
+) -> Union[float, NDArray[float]]:
     r"""Scale factor at some comoving radial distance, :math:`a(\chi)`.
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    chi : int, float or (nchi,) array_like
+    chi : array_like (nchi,)
         Comoving radial distance :math:`\chi` in :math:`\rm Mpc`.
 
     Returns
     -------
-    a_chi : float or (nchi,) ndarray
-        Scale factor at ``chi``.
+    array_like (nchi)
+        Scale factor at `chi`.
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.scale_factor_of_chi,
                          lib.scale_factor_of_chi_vec, cosmo, chi)
 
 
-def comoving_angular_distance(cosmo, a):
+def comoving_angular_distance(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]]
+) -> Union[float, NDArray[float]]:
     r"""Comoving angular distance (in :math:`\rm Mpc`).
 
     .. math::
@@ -146,14 +159,14 @@ def comoving_angular_distance(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
+    a : array_like (na,)
+        Scale factor.
 
     Returns
     -------
-    D_M : float or (na,) numpy.ndarray
+    array_like (na,)
         Comoving angular distance.
     """
     cosmo.compute_distances()
@@ -161,7 +174,11 @@ def comoving_angular_distance(cosmo, a):
                          lib.comoving_angular_distance_vec, cosmo, a)
 
 
-def angular_diameter_distance(cosmo, a1, a2=None):
+def angular_diameter_distance(
+        cosmo: Cosmology,
+        a1: Union[Real, NDArray[Real]],
+        a2: Optional[Union[Real, NDArray[Real]]] = None
+) -> Union[float, NDArray[float]]:
     r"""Angular diameter distance (in :math:`\rm Mpc`).
 
     Defined as the ratio of an object's physical transverse size to its
@@ -171,38 +188,39 @@ def angular_diameter_distance(cosmo, a1, a2=None):
 
         D_{\rm A} = \frac{D_{\rm M}}{1 + z}
 
+    ``angular_diameter_distance`` can be called with a varying number of
+    positional arguments:
+
+        * ``angular_diameter_distance(cosmo, a1)``: Distances are calculated
+          between `a1` and :math:`1`.
+        * ``angular_diameter_distance(cosmo, a1, a2)``: If
+          `a1.shape == a2.shape`, the pairwise distances are computed.
+          Otherwise, `a1` must be scalar and the distances are computed between
+          one object at `a1` and multiple objects at `a2`.
+
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
            Cosmological parameters.
-    a1 : float or (na1,) array_like
-        Scale factor(s), normalized to 1 today.
-    a2 : float, (na1,) or (na2,) array_like, optional
-        Scale factor(s) **smaller** than ``a1``, normalized to 1 today.
-
-        - If nothing is passed, the distance is calculated from ``a1`` to 1.
-        - If a float or is passed, ``a1`` must also be a float.
-        - If an array of shape (na1,) is passed, the pairwise distances are
-          computed.
-        - If an array of shape (na2,) is passed, ``a1`` must be a float.
-
-        The default is ``None``.
+    a1 : array_like (na1,)
+        Scale factor.
+    a2 : array_like (na1,) or (na2,)
+        Scale factor **smaller** than `a1`.
 
     Returns
     -------
-    D_a : int or float, (na1,) or (na2,) numpy.ndarray
-        Angular diameter distance.
-
-        - If ``a2`` is ``None`` the output shape is (na1,).
-        - If ``shape(a1) == shape(a2)`` the pairwise distances are computed
-          and the output shape is the common (na,).
-        - If ``a1`` is a float and ``a2`` is an array the output shape is
-          (na2,).
+    array_like (na1,) or (na2,)
+        Angular diameter distance. If `a2` is provided and
+        `a1.shape != a2.shape`, the output has shape `(a2,)`. Otherwise, it has
+        shape `(a1,)`.
 
     Raises
     ------
     CCLError
         Shape mismatch of input arrays.
+    CCLError
+        `CCL_ERROR_COMPUTECHI`: Distances are not pairwise, and `a2` is larger
+        than `a1`.
     """
     cosmo.compute_distances()
     if a2 is not None:
@@ -221,33 +239,40 @@ def angular_diameter_distance(cosmo, a1, a2=None):
                           cosmo, np.ones(len(a1)), a1)
 
 
-def luminosity_distance(cosmo, a):
+def luminosity_distance(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]]
+) -> Union[float, NDArray[float]]:
     r"""Luminosity distance.
 
     Defined by the relationship between bolometric flux :math:`S` and
     bolometric luminosity :math:`L`.
 
     .. math::
+
         D_{\rm L} = \sqrt{\frac{L}{4 \pi S}}
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
+    a : array_like (na,)
+        Scale factor.
 
     Returns
     -------
-    D_L : float or (na,) numpy.ndarray
-        Luminosity distance at ``a``.
+    array_like (na,)
+        Luminosity distance at `a`.
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.luminosity_distance,
                          lib.luminosity_distance_vec, cosmo, a)
 
 
-def distance_modulus(cosmo, a):
+def distance_modulus(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]]
+) -> Union[float, NDArray[float]]:
     r"""Distance modulus.
 
     Used to convert between apparent and absolute magnitudes
@@ -260,22 +285,72 @@ def distance_modulus(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
+    a : array_like (na,)
+        Scale factor.
 
     Returns
     -------
-    D_M : float or (na,) numpy.ndarray
-        Distance modulus at ``a``.
+    array_like (na,)
+        Distance modulus at `a`.
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.distance_modulus,
                          lib.distance_modulus_vec, cosmo, a)
 
 
-def omega_x(cosmo, a, species):
+@warn_api
+def sigma_critical(
+        cosmo: Cosmology,
+        *,
+        a_lens: Union[Real, NDArray[Real]],
+        a_source: Union[Real, NDArray[Real]]
+) -> Union[float, NDArray[float]]:
+    r"""Compute the critical surface mass density.
+
+    .. math::
+
+         \Sigma_{{\rm c}} = \frac{c^2}{4 \pi G}
+         \frac{D_{\rm s}}{D_{\rm l}D_{\rm ls}},
+
+    where :math:`c` is the speed of light, :math:`G` is the gravitational
+    constant, and :math:`D_i` is the angular diameter distance. Labels
+    :math:`\rm {s, l, ls}` denote the distances to the source, lens, and
+    between source and lens, respectively.
+
+    .. note::
+
+        See :func:`~angular_diameter_distance` for accepted input and output
+        shapes of `a_lens` and `a_source`.
+
+    Arguments
+    ---------
+    cosmo
+        Cosmological parameters.
+    a_lens : array_like (na_lens,)
+        Scale factor of lens.
+    a_source : array_like (na_lens,) or (na_source)
+        Scale factor of source.
+
+    Returns
+    -------
+    array_like (na_lens,) or (na_source,)
+        :math:`\Sigma_{\rm c}` in units of :math:`\rm M_\odot / Mpc^2`.
+    """
+    Ds = angular_diameter_distance(cosmo, a_source, a2=None)
+    Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
+    Dls = angular_diameter_distance(cosmo, a_lens, a_source)
+    A = (const.CLIGHT**2 * const.MPC_TO_METER
+         / (4.0 * np.pi * const.GNEWT * const.SOLAR_MASS))
+    return A * Ds / (Dl * Dls)
+
+
+def omega_x(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]],
+        species: str
+) -> Union[float, NDArray[float]]:
     r"""Density fraction of a given species at a particular scale factor.
 
     .. math::
@@ -284,25 +359,23 @@ def omega_x(cosmo, a, species):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor, normalized to 1 today.
-    species : str
-        Species type. Available options are enumerated in
-        :class:`~pyccl.Species`.
+    a : array_like (na,)
+        Scale factor.
+    species
+        Species type. Available options are enumerated in :class:`~Species`.
 
     Returns
     -------
-    Omega_x : float or (na,) ndarray
-        Density fraction of a given species at ``a``.
+    array_like (na,)
+        Density fraction of a given species at `a`.
 
     Raises
     ------
     ValueError
         Wrong species type.
     """
-    # TODO: Replace docstring enum with ref to Species.
     if species not in species_types:
         raise ValueError(f"Unknown species {species}.")
 
@@ -311,24 +384,29 @@ def omega_x(cosmo, a, species):
 
 
 @warn_api
-def rho_x(cosmo, a, species, *, is_comoving=False):
+def rho_x(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]],
+        species: str,
+        *,
+        is_comoving: bool = False
+) -> Union[float, NDArray[float]]:
     r"""Physical or comoving density as a function of scale factor.
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
-    species : str
-        Species type. Available options are enumerated in
-        :class:`~pyccl.Species`.
-    is_comoving : bool, optional
-        Either physical or comoving. Default is ``False`` for physical.
+    a : array_like (na,)
+        Scale factor.
+    species
+        Species type. Available options are enumerated in :class:`~Species`.
+    is_comoving
+        Either physical or comoving.
 
     Returns
     -------
-    rho_x : float or (na,) ndarray
+    array_like (na,)
         Physical density of a given species at a scale factor,
         in units of :math:`\rm M_\odot / Mpc^3`.
 
@@ -337,7 +415,6 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
     ValueError
         Wrong species type.
     """
-    # TODO: Replace docstring enum with ref to Species.
     if species not in species_types:
         raise ValueError(f"Unknown species {species}.")
 
@@ -346,46 +423,55 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
         species_types[species], int(is_comoving))
 
 
-def growth_factor(cosmo, a):
+def growth_factor(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]],
+) -> Union[float, NDArray[float]]:
     """Growth factor.
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
+    a : array_like (na,)
+        Scale factor.
 
     Returns
     -------
-    D : float or (na,) numpy.ndarray
-        Growth factor at ``a``.
+    array_like (na,)
+        Growth factor at `a`.
     """
     cosmo.compute_growth()
     return _vectorize_fn(lib.growth_factor, lib.growth_factor_vec, cosmo, a)
 
 
-def growth_factor_unnorm(cosmo, a):
+def growth_factor_unnorm(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]],
+) -> Union[float, NDArray[float]]:
     """Unnormalized growth factor.
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
+    a : array_like (na,)
+        Scale factor.
 
     Returns
     -------
-    D_unnorm : float or (na,) numpy.ndarray
-        Unnormalized growth factor at ``a``.
+    array_like (na,)
+        Unnormalized growth factor at `a`.
     """
     cosmo.compute_growth()
     return _vectorize_fn(lib.growth_factor_unnorm,
                          lib.growth_factor_unnorm_vec, cosmo, a)
 
 
-def growth_rate(cosmo, a):
+def growth_rate(
+        cosmo: Cosmology,
+        a: Union[Real, NDArray[Real]],
+) -> Union[float, NDArray[float]]:
     r"""Growth rate defined as the logarithmic derivative of the
     growth factor,
 
@@ -395,55 +481,15 @@ def growth_rate(cosmo, a):
 
     Arguments
     ---------
-    cosmo : :class:`~pyccl.Cosmology`
+    cosmo
         Cosmological parameters.
-    a : int, float or (na,) array_like
-        Scale factor(s) normalized to 1 today.
+    a : array_like (na,)
+        Scale factor.
 
     Returns
     -------
-    dlnD_dlna : float or (na,) numpy.ndarray
-        Growth rate at ``a``.
+    array_like (na,)
+        Growth rate at `a`.
     """
     cosmo.compute_growth()
     return _vectorize_fn(lib.growth_rate, lib.growth_rate_vec, cosmo, a)
-
-
-@warn_api
-def sigma_critical(cosmo, *, a_lens, a_source):
-    r"""Returns the critical surface mass density.
-
-    .. math::
-
-         \Sigma_{{\rm c}} = \frac{c^2}{4 \pi G}
-         \frac{D_{\rm s}}{D_{\rm l}D_{\rm ls}},
-
-    where :math:`c` is the speed of light, :math:`G` is the
-    gravitational constant, and :math:`D_i` is the angular diameter distance
-    The labels :math:`\rm (s, l, ls)` denote the distances to the source, lens,
-    and between source and lens, respectively.
-
-    Arguments
-    ---------
-    cosmo : :class:`~pyccl.Cosmology`
-        A Cosmology object.
-    a_lens : float or (na_lens,) array_like
-        Scale factor of lens.
-    a_source : float, (na_lens,) or (na_source,) array_like
-        Scale factor of source.
-
-    Returns
-    -------
-    sigma_critical : float, (na_lens,) or (na_source,) numpy.ndarray
-        :math:`\Sigma_{\rm c} in units of :math:`\rm M_\odot / Mpc^2`.
-
-    See also
-    --------
-    angular_diameter_distance : description of input array shape options
-    """
-    Ds = angular_diameter_distance(cosmo, a_source, a2=None)
-    Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
-    Dls = angular_diameter_distance(cosmo, a_lens, a_source)
-    A = (const.CLIGHT**2 * const.MPC_TO_METER
-         / (4.0 * np.pi * const.GNEWT * const.SOLAR_MASS))
-    return A * Ds / (Dl * Dls)

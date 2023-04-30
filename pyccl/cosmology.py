@@ -1,7 +1,16 @@
-"""The core functionality of ccl, including the core data types. This includes
-the cosmology and parameters objects used to instantiate a model from which one
-can compute a set of theoretical predictions.
 """
+==================================
+Cosmology (:mod:`pyccl.cosmology`)
+==================================
+
+Classes that store cosmological parameters. Main functionality of CCL.
+
+.. note::
+
+    All of the standalone functions in other modules, which take `cosmo` as
+    their first argument, are methods of :class:`~Cosmology`.
+"""
+
 __all__ = ("TransferFunctions", "MatterPowerSpectra",
            "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
 
@@ -10,18 +19,20 @@ import yaml
 from enum import Enum
 from inspect import getmembers, isfunction, signature
 from numbers import Real
-from typing import Iterable
+from typing import Iterable, Optional, Sequence, Union
 
 import numpy as np
+from numpy.typing import NDArray
 
 from . import (
-    CCLError, CCLDeprecationWarning, CCLObject, CCLParameters, CLevelErrors,
-    CosmologyParams, DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, cache, check,
-    lib, warn_api, deprecated)
+    CCLError, CCLDeprecationWarning, CCLObject, CLevelErrors, CosmologyParams,
+    DEFAULT_POWER_SPECTRUM, Pk2D, cache, check, gsl_params, lib, spline_params,
+    warn_api, deprecated)
 from . import physical_constants as const
 
 
 class TransferFunctions(Enum):
+    """Available choices for the computation of the linear power spectrum."""
     BBKS = "bbks"
     EISENSTEIN_HU = "eisenstein_hu"
     EISENSTEIN_HU_NOWIGGLES = "eisenstein_hu_nowiggles"
@@ -32,6 +43,8 @@ class TransferFunctions(Enum):
 
 
 class MatterPowerSpectra(Enum):
+    """Available choices for the computation of the non-linear power spectrum.
+    """
     LINEAR = "linear"
     HALOFIT = "halofit"
     HALOMODEL = "halomodel"
@@ -85,6 +98,7 @@ emulator_neutrinos_types = {
     'equalize': lib.emu_equalize
 }
 
+
 _TOP_LEVEL_MODULES = ("",)
 
 
@@ -114,122 +128,103 @@ def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
 
 @_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
 class Cosmology(CCLObject):
-    """A cosmology including parameters and associated data.
+    """Stores the cosmological parameters, and associated data.
 
-    .. note:: Although some arguments default to `None`, they will raise a
-              ValueError inside this function if not specified, so they are not
-              optional.
+    .. note::
 
-    .. note:: The parameter Omega_g can be used to set the radiation density
-              (not including relativistic neutrinos) to zero. Doing this will
-              give you a model that is physically inconsistent since the
-              temperature of the CMB will still be non-zero. Note however
-              that this approximation is common for late-time LSS computations.
+        Setting `Omega_g` to zero, yields a physically inconsistent model
+        (since `T_CMB` is non-zero). However, this approximation is common for
+        late-time LSS computations.
 
-    .. note:: BCM stands for the "baryonic correction model" of Schneider &
-              Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
-              `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
-/0000-ccl_note/main.pdf>`_
-              for details.
-
-    .. note:: After instantiation, you can set parameters related to the
-              internal splines and numerical integration accuracy by setting
-              the values of the attributes of
-              :obj:`Cosmology.cosmo.spline_params` and
-              :obj:`Cosmology.cosmo.gsl_params`. For example, you can set
-              the generic relative accuracy for integration by executing
-              ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
-= 1e-5``.
-              See the module level documentation of `pyccl.core` for details.
-
-    Args:
-        Omega_c (:obj:`float`): Cold dark matter density fraction.
-        Omega_b (:obj:`float`): Baryonic matter density fraction.
-        h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc; unitless.
-        A_s (:obj:`float`): Power spectrum normalization. Exactly one of A_s
-            and sigma_8 is required.
-        sigma8 (:obj:`float`): Variance of matter density perturbations at
-            an 8 Mpc/h scale. Exactly one of A_s and sigma_8 is required.
-        n_s (:obj:`float`): Primordial scalar perturbation spectral index.
-        Omega_k (:obj:`float`, optional): Curvature density fraction.
-            Defaults to 0.
-        Omega_g (:obj:`float`, optional): Density in relativistic species
-            except massless neutrinos. The default of `None` corresponds
-            to setting this from the CMB temperature. Note that if a non-`None`
-            value is given, this may result in a physically inconsistent model
-            because the CMB temperature will still be non-zero in the
-            parameters.
-        Neff (:obj:`float`, optional): Effective number of massless
-            neutrinos present. Defaults to 3.046.
-        m_nu (:obj:`float` or array_like, optional):
-            Mass in eV of the massive neutrinos present. Defaults to 0.
-            If a sequence is passed, it is assumed that the elements of the
-            sequence represent the individual neutrino masses.
-        mass_split (:obj:`str`, optional): Type of massive neutrinos. Should
-            be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
-            the mass as being held by one massive neutrino. The other options
-            split the mass into 3 massive neutrinos. Ignored if a sequence is
-            passed in m_nu. Default is 'normal'.
-        w0 (:obj:`float`, optional): First order term of dark energy equation
-            of state. Defaults to -1.
-        wa (:obj:`float`, optional): Second order term of dark energy equation
-            of state. Defaults to 0.
-        T_CMB (:obj:`float`): The CMB temperature today. The default of
-            is 2.725.
-        bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
-            BCM model. Defaults to `np.log10(1.2e14)`.
-        bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
-            model. Defaults to 0.5.
-        bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
-            model. Defaults to 55.0.
-        mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        c1_mg (:obj:`float`, optional): MG parameter that enters in the scale
-            dependence of mu affecting its large scale behavior. Default to 1.
-            See, e.g., Eqs. (46) in Ade et al. 2015, arXiv:1502.01590
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
-        c2_mg (:obj:`float`, optional): MG parameter that enters in the scale
-            dependence of Sigma affecting its large scale behavior. Default 1.
-            See, e.g., Eqs. (47) in Ade et al. 2015, arXiv:1502.01590
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
-        lambda_mg (:obj:`float`, optional): MG parameter that sets the start
-            of dependance on c1 and c2 MG parameters. Defaults to 0.0
-            See, e.g., Eqs. (46) & (47) in Ade et al. 2015, arXiv:1502.01590
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
-        df_mg (array_like, optional): Perturbations to the GR growth rate as
-            a function of redshift :math:`\\Delta f`. Used to implement simple
-            modified growth scenarios.
-        z_mg (array_like, optional): Array of redshifts corresponding to df_mg.
-        transfer_function (:obj:`str`, optional): The transfer function to
-            use. Defaults to 'boltzmann_camb'.
-        matter_power_spectrum (:obj:`str`, optional): The matter power
-            spectrum to use. Defaults to 'halofit'.
-        baryons_power_spectrum (:obj:`str`, optional): The correction from
-            baryonic effects to be implemented. Defaults to 'nobaryons'.
-        mass_function (:obj:`str`, optional): The mass function to use.
-            Defaults to 'tinker10' (2010).
-        halo_concentration (:obj:`str`, optional): The halo concentration
-            relation to use. Defaults to Duffy et al. (2008) 'duffy2008'.
-        emulator_neutrinos (:obj:`str`, optional): If using the emulator for
-            the power spectrum, specified treatment of unequal neutrinos.
-            Options are 'strict', which will raise an error and quit if the
-            user fails to pass either a set of three equal masses or a sum with
-            mass_split = 'equal', and 'equalize', which will redistribute
-            masses to be equal right before calling the emulator but results in
-            internal inconsistencies. Defaults to 'strict'.
-        extra_parameters (:obj:`dict`, optional): Dictionary holding extra
-            parameters. Currently supports extra parameters for CAMB, with
-            details described below. Defaults to None.
-        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is 0.71611.
+    Parameters
+    ----------
+    Omega_c (:obj:`float`): Cold dark matter density fraction.
+    Omega_b (:obj:`float`): Baryonic matter density fraction.
+    h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc; unitless.
+    A_s (:obj:`float`): Power spectrum normalization. Exactly one of A_s
+        and sigma_8 is required.
+    sigma8 (:obj:`float`): Variance of matter density perturbations at
+        an 8 Mpc/h scale. Exactly one of A_s and sigma_8 is required.
+    n_s (:obj:`float`): Primordial scalar perturbation spectral index.
+    Omega_k (:obj:`float`, optional): Curvature density fraction.
+        Defaults to 0.
+    Omega_g (:obj:`float`, optional): Density in relativistic species
+        except massless neutrinos. The default of `None` corresponds
+        to setting this from the CMB temperature. Note that if a non-`None`
+        value is given, this may result in a physically inconsistent model
+        because the CMB temperature will still be non-zero in the
+        parameters.
+    Neff (:obj:`float`, optional): Effective number of massless
+        neutrinos present. Defaults to 3.046.
+    m_nu (:obj:`float` or array_like, optional):
+        Mass in eV of the massive neutrinos present. Defaults to 0.
+        If a sequence is passed, it is assumed that the elements of the
+        sequence represent the individual neutrino masses.
+    mass_split (:obj:`str`, optional): Type of massive neutrinos. Should
+        be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
+        the mass as being held by one massive neutrino. The other options
+        split the mass into 3 massive neutrinos. Ignored if a sequence is
+        passed in m_nu. Default is 'normal'.
+    w0 (:obj:`float`, optional): First order term of dark energy equation
+        of state. Defaults to -1.
+    wa (:obj:`float`, optional): Second order term of dark energy equation
+        of state. Defaults to 0.
+    T_CMB (:obj:`float`): The CMB temperature today. The default of
+        is 2.725.
+    bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
+        BCM model. Defaults to `np.log10(1.2e14)`.
+    bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
+        model. Defaults to 0.5.
+    bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
+        model. Defaults to 55.0.
+    mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+        modified gravity model. Defaults to 0.0
+    sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+        modified gravity model. Defaults to 0.0
+    c1_mg (:obj:`float`, optional): MG parameter that enters in the scale
+        dependence of mu affecting its large scale behavior. Default to 1.
+        See, e.g., Eqs. (46) in Ade et al. 2015, arXiv:1502.01590
+        where their f1 and f2 functions are set equal to the commonly used
+        ratio of dark energy density parameter at scale factor a over
+        the dark energy density parameter today
+    c2_mg (:obj:`float`, optional): MG parameter that enters in the scale
+        dependence of Sigma affecting its large scale behavior. Default 1.
+        See, e.g., Eqs. (47) in Ade et al. 2015, arXiv:1502.01590
+        where their f1 and f2 functions are set equal to the commonly used
+        ratio of dark energy density parameter at scale factor a over
+        the dark energy density parameter today
+    lambda_mg (:obj:`float`, optional): MG parameter that sets the start
+        of dependance on c1 and c2 MG parameters. Defaults to 0.0
+        See, e.g., Eqs. (46) & (47) in Ade et al. 2015, arXiv:1502.01590
+        where their f1 and f2 functions are set equal to the commonly used
+        ratio of dark energy density parameter at scale factor a over
+        the dark energy density parameter today
+    df_mg (array_like, optional): Perturbations to the GR growth rate as
+        a function of redshift :math:`\\Delta f`. Used to implement simple
+        modified growth scenarios.
+    z_mg (array_like, optional): Array of redshifts corresponding to df_mg.
+    transfer_function (:obj:`str`, optional): The transfer function to
+        use. Defaults to 'boltzmann_camb'.
+    matter_power_spectrum (:obj:`str`, optional): The matter power
+        spectrum to use. Defaults to 'halofit'.
+    baryons_power_spectrum (:obj:`str`, optional): The correction from
+        baryonic effects to be implemented. Defaults to 'nobaryons'.
+    mass_function (:obj:`str`, optional): The mass function to use.
+        Defaults to 'tinker10' (2010).
+    halo_concentration (:obj:`str`, optional): The halo concentration
+        relation to use. Defaults to Duffy et al. (2008) 'duffy2008'.
+    emulator_neutrinos (:obj:`str`, optional): If using the emulator for
+        the power spectrum, specified treatment of unequal neutrinos.
+        Options are 'strict', which will raise an error and quit if the
+        user fails to pass either a set of three equal masses or a sum with
+        mass_split = 'equal', and 'equalize', which will redistribute
+        masses to be equal right before calling the emulator but results in
+        internal inconsistencies. Defaults to 'strict'.
+    extra_parameters (:obj:`dict`, optional): Dictionary holding extra
+        parameters. Currently supports extra parameters for CAMB, with
+        details described below. Defaults to None.
+    T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
+        temperature. The default is 0.71611.
 
     Currently supported extra parameters for CAMB are:
 
@@ -246,30 +241,49 @@ class Cosmology(CCLObject):
 
         extra_parameters = {"camb": {"halofit_version": "mead2020_feedback",
                                      "HMCode_logT_AGN": 7.8}}
-
     """
+    # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
     from .base.repr_ import build_string_Cosmology as __repr__
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
-                    "_accuracy_params",)
+                    "_gsl_params", "_spline_params",)
 
     @warn_api(pairs=[("m_nu_type", "mass_split")])
     def __init__(
-            self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
-            sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
-            Neff=None, m_nu=0., mass_split='normal', w0=-1., wa=0.,
-            T_CMB=DefaultParams.T_CMB,
-            bcm_log10Mc=None, bcm_etab=None, bcm_ks=None,
-            mu_0=0, sigma_0=0, c1_mg=1, c2_mg=1, lambda_mg=0,
-            z_mg=None, df_mg=None,
-            transfer_function='boltzmann_camb',
-            matter_power_spectrum='halofit',
-            baryons_power_spectrum=None,
-            mass_function=None,
-            halo_concentration=None,
-            emulator_neutrinos=None,
-            extra_parameters=None,
-            T_ncdm=DefaultParams.T_ncdm):
-
+            self,
+            *,
+            Omega_c: Real,
+            Omega_b: Real,
+            h: Real,
+            n_s: Real,
+            sigma8: Optional[Real] = None,
+            A_s: Optional[Real] = None,
+            Omega_k: Real = 0,
+            Omega_g=None,
+            Neff=None,
+            m_nu: Union[Real, Sequence[Real]] = 0.,
+            mass_split: str = 'normal',
+            w0: Real = -1,
+            wa: Real = 0,
+            T_CMB: Real = CosmologyParams.T_CMB,
+            bcm_log10Mc: Optional[Real] = None,
+            bcm_etab: Optional[Real] = None,
+            bcm_ks: Optional[Real] = None,
+            mu_0: Real = 0,
+            sigma_0: Real = 0,
+            c1_mg: Real = 1,
+            c2_mg: Real = 1,
+            lambda_mg: Real = 0,
+            z_mg: Optional[NDArray[Real]] = None,
+            df_mg: Optional[NDArray[Real]] = None,
+            transfer_function: str = 'boltzmann_camb',
+            matter_power_spectrum: str = 'halofit',
+            baryons_power_spectrum: Optional[str] = None,
+            mass_function: Optional[str] = None,
+            halo_concentration: Optional[str] = None,
+            emulator_neutrinos: Optional[str] = None,
+            extra_parameters: Optional[dict] = None,
+            T_ncdm: Real = CosmologyParams.T_ncdm  # TODO: v3 after T_CMB
+    ):
         # DEPRECATIONS
         warn = warnings.warn
         msg = lambda par: f"{par} is deprecated in Cosmology."  # noqa
@@ -351,10 +365,9 @@ class Cosmology(CCLObject):
         # and then we make the cosmology.
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
-        self.cosmo = lib.cosmology_create(self._params, self._config)
-        self._spline_params = CCLParameters.get_params_dict("spline_params")
-        self._gsl_params = CCLParameters.get_params_dict("gsl_params")
-        self._accuracy_params = {**self._spline_params, **self._gsl_params}
+        self.cosmo = lib.cosmology_create(self._params._instance, self._config)
+        self._gsl_params = gsl_params.copy()
+        self._spline_params = spline_params.copy()
 
         if self.cosmo.status != 0:
             raise CCLError(f"{self.cosmo.status}: {self.cosmo.status_message}")
@@ -476,12 +489,6 @@ class Cosmology(CCLObject):
         if [A_s, sigma8].count(np.nan) != 1:
             raise ValueError("Set either A_s or sigma8 and not both.")
 
-        # Check if any compulsory parameters are not set.
-        compul = {"Omega_c": Omega_c, "Omega_b": Omega_b, "h": h, "n_s": n_s}
-        for param, value in compul.items():
-            if value is None:
-                raise ValueError(f"Must set parameter {param}.")
-
         # Make sure the neutrino parameters are consistent.
         if not isinstance(m_nu, (Real, Iterable)):
             raise ValueError("m_nu must be float or sequence")
@@ -524,15 +531,18 @@ class Cosmology(CCLObject):
             # Omega_g was passed - modify Omega_l
             Omega_l += rho_g/rho_crit - Omega_g
 
-        self._fill_params(
-            m_nu=nu_mass, sum_nu_masses=sum(nu_mass), N_nu_mass=N_nu_mass,
-            N_nu_rel=N_nu_rel, Neff=Neff, Omega_nu_mass=Omega_nu_mass,
-            Omega_nu_rel=Omega_nu_rel, Omega_m=Omega_m, Omega_c=Omega_c,
-            Omega_b=Omega_b, Omega_k=Omega_k, sqrtk=sqrtk, k_sign=int(k_sign),
-            T_CMB=T_CMB, T_ncdm=T_ncdm, Omega_g=Omega_g, w0=w0, wa=wa,
-            Omega_l=Omega_l, h=h, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
-            mu_0=mu_0, sigma_0=sigma_0, c1_mg=c1_mg, c2_mg=c2_mg,
-            lambda_mg=lambda_mg,
+        self._params = CosmologyParams(
+            Omega_k=Omega_k, k_sign=int(k_sign), sqrtk=sqrtk,
+            n_s=n_s, sigma8=sigma8, A_s=A_s,
+            N_nu_mass=N_nu_mass, N_nu_rel=N_nu_rel, Neff=Neff,
+            Omega_nu_mass=Omega_nu_mass, Omega_nu_rel=Omega_nu_rel,
+            sum_nu_masses=sum(nu_mass), m_nu=nu_mass, mass_split=mass_split,
+            T_nu=T_nu, Omega_g=Omega_g, T_CMB=T_CMB, T_ncdm=T_ncdm,
+            Omega_c=Omega_c, Omega_b=Omega_b, Omega_m=Omega_m,
+            h=h, H0=h*100,
+            Omega_l=Omega_l, w0=w0, wa=wa,
+            mu_0=mu_0, sigma_0=sigma_0,
+            c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
             bcm_log10Mc=bcm_log10Mc, bcm_etab=bcm_etab, bcm_ks=bcm_ks)
 
         # Modified growth (deprecated)
@@ -545,11 +555,6 @@ class Cosmology(CCLObject):
         check(st)
         return ret[0]
 
-    def _fill_params(self, **kwargs):
-        if not hasattr(self, "_params"):
-            self._params = CosmologyParams()
-        [setattr(self._params, par, val) for par, val in kwargs.items()]
-
     def __getitem__(self, key):
         if key == 'extra_parameters':
             return self._params_init_kwargs["extra_parameters"]
@@ -561,9 +566,6 @@ class Cosmology(CCLObject):
         if hasattr(self, "cosmo"):
             lib.cosmology_free(self.cosmo)
             delattr(self, "cosmo")
-        if hasattr(self, "_params"):
-            lib.parameters_free(self._params)
-            delattr(self, "_params")
 
     def __enter__(self):
         return self
@@ -971,17 +973,35 @@ class CosmologyCalculator(Cosmology):
     """
     # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
-                    "_accuracy_params", "_input_arrays",)
+                    "_gsl_params", "_spline_params", "_input_arrays",)
 
     @warn_api(pairs=[("m_nu_type", "mass_split")])
     def __init__(
-            self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
-            sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
-            Neff=None, m_nu=0., mass_split="normal", w0=-1., wa=0.,
-            T_CMB=DefaultParams.T_CMB, mu_0=0., sigma_0=0.,
-            background=None, growth=None,
-            pk_linear=None, pk_nonlin=None, nonlinear_model=None,
-            T_ncdm=DefaultParams.T_ncdm):
+            self,
+            *,
+            Omega_c=None,
+            Omega_b=None,
+            h=None,
+            n_s=None,
+            sigma8=None,
+            A_s=None,
+            Omega_k=0.,
+            Omega_g=None,
+            Neff=None,
+            m_nu=0.,
+            mass_split="normal",
+            w0=-1.,
+            wa=0.,
+            T_CMB=CosmologyParams.T_CMB,
+            mu_0=0.,
+            sigma_0=0.,
+            background=None,
+            growth=None,
+            pk_linear=None,
+            pk_nonlin=None,
+            nonlinear_model=None,
+            T_ncdm: Real = CosmologyParams.T_ncdm  # TODO: v3 after T_CMB
+    ):
 
         super().__init__(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,

@@ -41,17 +41,12 @@ class BaryonsSchneider15(Baryons):
     k_s
         Characteristic scale (wavenumber) of the stellar component, in units of
         :math:`\rm Mpc^{-1}`.
-
-    Attributes
-    ----------
-    log10Mc
-
-    eta_b
-
-    k_s
     """
     __repr_attrs__ = __eq_attrs__ = ("log10Mc", "eta_b", "k_s")
     name = 'Schneider15'
+    log10Mc: Real
+    eta_b: Real
+    k_s: Real
 
     def __init__(
             self,

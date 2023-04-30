@@ -224,7 +224,6 @@ def test_cosmology_context():
 
     # make sure it does not!
     assert not hasattr(cosmo, "cosmo")
-    assert not hasattr(cosmo, "_params")
 
     with pytest.raises(AttributeError):
         cosmo.has_growth
@@ -250,9 +249,9 @@ def test_pyccl_default_params():
     assert ccl.gsl_params.HM_MMIN == 1e6
 
     # does not accept extra assignment
-    with pytest.raises(KeyError):
+    with pytest.raises(AttributeError):
         ccl.gsl_params.test = "hello_world"
-    with pytest.raises(KeyError):
+    with pytest.raises(AttributeError):
         ccl.gsl_params["test"] = "hello_world"
 
     # complains when we try to set A_SPLINE_MAX != 1.0
@@ -262,7 +261,7 @@ def test_pyccl_default_params():
 
     # complains when we try to change the spline type
     ccl.spline_params.A_SPLINE_TYPE = None
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         ccl.spline_params.A_SPLINE_TYPE = "something_else"
 
     # complains when we try to change the physical constants
@@ -309,8 +308,3 @@ def test_cosmology_default_params():
 
 def test_ccl_physical_constants_smoke():
     assert ccl.physical_constants.CLIGHT == ccl.ccllib.cvar.constants.CLIGHT
-
-
-def test_ccl_global_parameters_repr():
-    ccl.spline_params.reload()
-    assert eval(repr(ccl.spline_params)) == ccl.spline_params._bak

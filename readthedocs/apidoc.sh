@@ -1,3 +1,3 @@
 # bash
 
-sphinx-apidoc -f -e -o api/ ../pyccl/ ../pyccl/tests/* ../pyccl/tests ../pyccl/ccllib.py ../pyccl/constants.py
+sphinx-apidoc -f -e -o api/ ../pyccl/ ../pyccl/tests/* ../pyccl/tests ../pyccl/ccllib.py 

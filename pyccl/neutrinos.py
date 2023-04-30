@@ -4,63 +4,49 @@ Neutrinos (:mod:`pyccl.neutrinos`)
 ==================================
 
 Functionality related to neutrinos:
-    * NeutrinoMassSplits - Enum that lists the acceptable neutrino hierarchies.
     * Omeganuh2 - (Deprecated) Compute OmNuh2.
     * nu_masses - Compute neutrino masses, according to a mass hierarchy.
 """
 
-__all__ = ("NeutrinoMassSplits", "nu_masses", "Omeganuh2",)
+__all__ = ("nu_masses", "Omeganuh2",)
 
 import warnings
-from enum import Enum
 from numbers import Real
-from typing import Iterable
+from typing import Iterable, Optional, Sequence, Union
 
 import numpy as np
+from numpy.typing import NDArray
 from scipy.optimize import root
 
-from . import DefaultParams, check, lib, omega_x
+from . import CosmologyParams, NeutrinoMassSplits, check, lib, omega_x
 from . import CCLDeprecationWarning, deprecated, warn_api
 from . import physical_constants as const
 
 
-class NeutrinoMassSplits(Enum):
-    """Neutrino mass splits.
-
-    * sum - use the sum of the neutrino masses only
-    * single - one massive neutrino
-    * equal - equally split into 3 massive neutrinos
-    * normal - normal mass hierarchy
-    * inverted - inverted mass hierarchy
-    * list - sequence of already-split masses
-    """
-    SUM = 'sum'
-    SINGLE = 'single'
-    EQUAL = 'equal'
-    NORMAL = 'normal'
-    INVERTED = 'inverted'
-    LIST = 'list'  # placeholder for backwards-compatibility
-
-
 @deprecated(new_api=omega_x)
-def Omeganuh2(a, m_nu,
-              T_CMB=DefaultParams.T_CMB,
-              T_ncdm=DefaultParams.T_ncdm):
+def Omeganuh2(
+        a: Union[Real, NDArray[Real]],
+        m_nu: Union[Real, Sequence[Real]],
+        T_CMB: float = CosmologyParams.T_CMB,
+        T_ncdm: float = CosmologyParams.T_ncdm
+) -> Union[float, NDArray[float]]:
     r"""Calculate :math:`\Omega_{\nu} \, h^2` at a given scale factor given
     the neutrino masses.
 
     Arguments
     ---------
-    a (float or array-like): Scale factor, normalized to 1 today.
-    m_nu (float or array-like): Neutrino mass(es) (in eV)
-    T_CMB (float, optional): Temperature of the CMB (K).
-        The default is the same as the Cosmology default.
-    T_ncdm (float, optional): Non-CDM temperature in units of photon
-        temperature. The default is the same as the Cosmology default.
+    a : array_like (na,)
+        Scale factor.
+    m_nu
+        Neutrino mass in :math:`\rm eV`.
+    T_CMB
+        Temperature of the CMB in :`\rm K`.
+    T_ncdm
+        Non-CDM temperature in units of photon temperature.
 
     Returns
     -------
-    OmNuh2 : float or numpy.ndarray
+    array_like (na,)
         :math:`\Omega_{\nu} \, h^2`
     """
     status = 0
@@ -87,28 +73,40 @@ def Omeganuh2(a, m_nu,
 
 
 @warn_api(pairs=[("OmNuh2", "Omega_nu_h2")])
-def nu_masses(*, Omega_nu_h2=None, mass_split, T_CMB=None, m_nu=None):
+def nu_masses(
+        *,
+        Omega_nu_h2: Optional[Real] = None,
+        mass_split: str,
+        T_CMB: Optional[Real] = None,
+        m_nu: Optional[Union[Real, Sequence[Real]]] = None  # TODO: v3 2nd arg
+) -> NDArray[Real]:
     r"""Compute the neutrinos mass(es) given a mass hierarchy.
 
     Arguments
     ---------
-    Omega_nu_h2 : int or float, optional
+    Omega_nu_h2
         Neutrino energy density today, times :math:`h^2`.
-        Either this or ``m_nu`` have to be specified.
-    mass_split : str
+        Either this or `m_nu` have to be specified.
+    mass_split
         Mass hierarchy. Available options are enumerated in
-        :class:`~pyccl.NeutrinoMassSplits`.
-    T_CMB : float, optional - Deprecated, do not use.
+        :class:`~NeutrinoMassSplits`.
+    T_CMB
         Temperature of the CMB in :math:`\rm K`.
-    m_nu : int, float or (n,) array_like, optional
+
+        .. deprecated:: 2.8.0
+
+            `T_CMB` is not used internally and will be removed in the next
+            major release.
+
+    m_nu : array_like (nm,)
         Mass in :math:`\rm eV` of the massive neutrinos present. If a sequence,
-        it is assumed that the elements of thesequence represent the individual
-        neutrino masses, and ``mass_split`` is ignored. Either this or
-        ``Omega_nu_h2`` have to be specified.
+        it is assumed that the elements represent the individualneutrino
+        masses, and `mass_split` is ignored. Either this or `Omega_nu_h2` have
+        to be provided.
 
     Returns
     -------
-    masses : float or (n,) numpy.ndarray
+    array_like (nm,)
         Neutrino mass(es) according to the specified mass hierarchy.
     """
     if T_CMB is not None:
