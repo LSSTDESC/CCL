@@ -270,18 +270,13 @@ class CacheInfo:
         Maximum number of caches to store.
     policy
         Cache retention policy.
-
-    Attributes
-    ----------
-    maxsize
-
-    policy
-
-    hits : int
-        Number of times the function has been bypassed (cache hit).
-    misses : int
-        Number of times the function has computed something (cache miss).
     """
+    maxsize: int
+    policy: Literal["fifo", "lru", "lfu"]
+    hits: int
+    """Number of times the function has been bypassed (cache hit)."""
+    misses: int
+    """Number of times the function has computed something (cache miss)."""
 
     def __init__(
             self,

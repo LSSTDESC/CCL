@@ -142,6 +142,7 @@ class _UnlockContext:
         Instance to unlock with the context manager protocol. Works as a
         :class:`~nullcontext` if not specified.
     """
+    instance: "Immutable"
 
     def __init__(self, instance: Optional["Immutable"] = None):
         self.instance = instance
@@ -502,7 +503,7 @@ class CCLObject(Immutable):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls.__signature__ = signature(cls.__init__)  # store the signature
+        cls.__signature__ = signature(cls)  # store the signature
 
         # Register subclasses with custom dunder method implementations.
         CustomEq.register(cls)
