@@ -34,7 +34,7 @@ class Profile2pt(object):
             self.r_corr = r_corr
 
     def fourier_2pt(self, prof, cosmo, k, M, a,
-                    prof2=None, mass_def=None):
+                    prof2=None, mass_def=None, diag=True):
         """ Return the Fourier-space two-point moment between
         two profiles.
 
@@ -59,6 +59,8 @@ class Profile2pt(object):
                 an auto-correlation, and `prof` will be used as `prof2`.
             mass_def (:obj:`~pyccl.halos.massdef.MassDef`):
                 a mass definition object.
+            diag (bool): If True, both halo profiles depend on the same k. If
+            False, they will depend on k and k', respectively. Default True.
 
         Returns:
             float or array_like: second-order Fourier-space
@@ -81,7 +83,14 @@ class Profile2pt(object):
 
             uk2 = prof2.fourier(cosmo, k, M, a, mass_def=mass_def)
 
-        return uk1 * uk2 * (1 + self.r_corr)
+        if (diag is True) or (isinstance(k, float)):
+            output = uk1 * uk2 * (1 + self.r_corr)
+        elif isinstance(M, float):
+            output = uk1[:, None] * uk2[None, :] * (1 + self.r_corr)
+        else:
+            output = uk1[:, :, None] * uk2[:, None, :] * (1 + self.r_corr)
+
+        return output
 
 
 class Profile2ptHOD(Profile2pt):
@@ -97,7 +106,7 @@ class Profile2ptHOD(Profile2pt):
     :class:`~pyccl.halos.profiles.HaloProfileHOD`.
     """
     def fourier_2pt(self, prof, cosmo, k, M, a,
-                    prof2=None, mass_def=None):
+                    prof2=None, mass_def=None, diag=True):
         """ Returns the Fourier-space two-point moment for the HOD
         profile.
 
@@ -116,6 +125,9 @@ class Profile2ptHOD(Profile2pt):
                 are allowed in this case.
             mass_def (:obj:`~pyccl.halos.massdef.MassDef`): a mass
                 definition object.
+            diag (bool): If True, both halo profiles depend on the same k. If
+            False, they will depend on k and k', respectively and we will
+            approximate <uk uk'> to <uk><uk'>. Default True.
 
         Returns:
             float or array_like: second-order Fourier-space
@@ -131,4 +143,13 @@ class Profile2ptHOD(Profile2pt):
             if prof2 is not prof:
                 raise ValueError("prof2 must be the same as prof")
 
-        return prof._fourier_variance(cosmo, k, M, a, mass_def)
+        if (diag is True) or (isinstance(k, float)):
+            output = prof._fourier_variance(cosmo, k, M, a, mass_def)
+        elif isinstance(M, float):
+            uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
+            output = uk1[:, None] * uk1[None, :] * (1 + self.r_corr)
+        else:
+            uk1 = prof.fourier(cosmo, k, M, a, mass_def=mass_def)
+            output = uk1[:, :, None] * uk1[:, None, :] * (1 + self.r_corr)
+
+        return output

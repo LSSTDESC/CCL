@@ -254,6 +254,8 @@ class Cosmology(object):
 
         self._pk_lin = {}
         self._pk_nl = {}
+        self._cM = {}
+        self.has_cM = False
 
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
@@ -841,7 +843,47 @@ class Cosmology(object):
 
         # Assign
         self._pk_lin['delta_matter:delta_matter'] = pk
+    
+    def compute_ConcentrationDiemer15_200m(self):
+        if self.has_cM:
+            return
 
+        from .power import sigma8
+        from scipy.interpolate import RectBivariateSpline as rbs
+        from colossus.cosmology import cosmology as colcosmology
+        from colossus.halo import concentration as colconcentration
+        from colossus.halo.mass_defs import changeMassDefinition as colchangeMassDefinition
+        
+        h = self["h"]
+        H0 = 100 * h
+        Om0 = self["Omega_c"] + self["Omega_b"]
+        
+        if np.isnan(self["sigma8"]):
+            sigma8(self)
+            
+        Mh = np.logspace(8,17,100)  # Msol/h
+        a = np.linspace(1/(1+1.5),1.,10)
+        params = {'flat': True, 'H0': H0, 'Om0': Om0,
+                  'Ob0': self["Omega_b"], 'sigma8': self["sigma8"], 'ns': self["n_s"], 'persistence': ''}
+        colcosmo = colcosmology.setCosmology('myCosmo', params)
+        
+        c200m = np.zeros((len(a),len(Mh)))
+        c_vir = np.zeros((len(a),len(Mh)))
+        
+        for i in range(len(a)):
+            c200m[i] = colconcentration.concentration(Mh, '200m', 1/a[i] -1, model="diemer15")
+            M_vir, R_vir, c_vir[i] = colchangeMassDefinition(Mh, c200m[i], 1/a[i] -1, mdef_in='200m', mdef_out='vir', profile='nfw')
+        
+        c200m_rbs = rbs(a,np.log10(Mh/h),c200m)
+        c_vir_rbs = rbs(a,np.log10(Mh/h),c_vir)
+        
+        self._cM['200m'] = c200m_rbs
+        self._cM['vir'] = c_vir_rbs
+        self.has_cM = True
+        
+    def get_ConcentrationDiemer15_200m(self, name='200m'):
+        return self._cM[name]
+        
     def _get_halo_model_nonlin_power(self):
         from . import halos as hal
         mdef = hal.MassDef('vir', 'matter')

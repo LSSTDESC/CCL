@@ -915,7 +915,6 @@ class HaloProfileEinasto(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-
 class HaloProfileHernquist(HaloProfile):
     """ Hernquist (1990ApJ...356..359H).
 
@@ -1711,3 +1710,177 @@ class HaloProfileHOD(HaloProfile):
         M1 = 10.**(self.lM1_0 + self.lM1_p * (a - self.a_pivot))
         alpha = self.alpha_0 + self.alpha_p * (a - self.a_pivot)
         return np.heaviside(M-M0, 1) * (np.fabs(M-M0) / M1)**alpha
+
+    
+class HaloProfileDK14(HaloProfile):
+    """ Einasto profile (1965TrAlm...5...87E).
+
+    .. math::
+       \\rho(r) = \\rho_0\\,\\exp(-2 ((r/r_s)^\\alpha-1) / \\alpha)
+
+    where :math:`r_s` is related to the spherical overdensity
+    halo radius :math:`R_\\Delta(M)` through the concentration
+    parameter :math:`c(M)` as
+
+    .. math::
+       R_\\Delta(M) = c(M)\\,r_s
+
+    and the normalization :math:`\\rho_0` is the mean density
+    within the :math:`R_\\Delta(M)` of the halo. The index
+    :math:`\\alpha` depends on halo mass and redshift, and we
+    use the parameterization of Diemer & Kravtsov
+    (arXiv:1401.1216).
+
+    By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
+
+    Args:
+        c_M_relation (:obj:`Concentration`): concentration-mass
+            relation to use with this profile.
+        truncated (bool): set to `True` if the profile should be
+            truncated at :math:`r = R_\\Delta` (i.e. zero at larger
+            radii.
+        alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
+            'cosmo' to calculate the value from cosmology. Default: 'cosmo'
+    """
+    name = 'DK14'
+
+    def __init__(self, c_M_relation, hbf, pl, adjusted_2hterm=False ,force_to_2hterm=False, M_pivot=None, beta=4, gamma=8, be=1.0, se=1.5):
+        if not isinstance(c_M_relation, Concentration):
+            raise TypeError("c_M_relation must be of type `Concentration`)")
+
+        self.cM = c_M_relation
+        self.hbf = hbf
+        self.pl = pl
+        self.force = force_to_2hterm
+        self.adjusted = adjusted_2hterm
+        self.M_pivot = M_pivot
+        self.beta = beta
+        self.gamma = gamma
+        self.be = be
+        self.se = se
+        super(HaloProfileDK14, self).__init__()
+        self.update_precision_fftlog(padding_hi_fftlog=1E2,
+                                     padding_lo_fftlog=1E-2,
+                                     n_per_decade=1000,
+                                     plaw_fourier=-2.)
+
+    def update_parameters(self, alpha=None):
+        """Update any of the parameters associated with this profile.
+        Any parameter set to ``None`` won't be updated.
+
+        Arguments
+        ---------
+        alpha : float, 'cosmo'
+            Profile shape parameter. Set to
+            'cosmo' to calculate the value from cosmology
+        """
+        if alpha is not None and alpha != self.alpha:
+            self.alpha = alpha
+
+    def _get_cM(self, cosmo, M, a, mdef=None):
+        return self.cM.get_concentration(cosmo, M, a, mdef_other=mdef)
+
+    def _get_alpha_rt(self, cosmo, M, a, mdef):
+        if self.alpha == 'cosmo':
+            mdef_vir = MassDef('vir', 'matter')
+            Mvir = mdef.translate_mass(cosmo, M, a, mdef_vir)
+            sM = sigmaM(cosmo, Mvir, a)
+            nu = 1.686 / sM
+            alpha = 0.155 + 0.0095 * nu * nu
+            
+            mdef_200m = MassDef('200m', 'matter')
+            M200m = mdef.translate_mass(cosmo, M, a, mdef_200m)
+            R_200m = mass_def.get_radius(cosmo, M200m, a) / a
+            r_t = (1.9 - 0.18 *nu) * R_200m
+            
+        else:
+            alpha = np.full_like(M, self.alpha)
+        return alpha, r_t 
+
+    
+    def _norm(self, M, Rs, c, alpha):
+        # Einasto normalization from mass, radius, concentration and alpha
+        return M / (np.pi * Rs**3 * 2**(2-3/alpha) * alpha**(-1+3/alpha)
+                    * np.exp(2/alpha)
+                    * gamma(3/alpha) * gammainc(3/alpha, 2/alpha*c**alpha))
+
+    def _real(self, cosmo, r, M, a, mass_def):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self._get_cM(cosmo, M_use, a, mdef=mass_def)
+        R_s = R_M / c_M
+
+        mdef_vir = MassDef('vir', 'matter')
+        Mvir = mass_def.translate_mass(cosmo, M_use, a, mdef_vir)
+        Rvir = mdef_vir.get_radius(cosmo, Mvir, a) / a
+        sM = sigmaM(cosmo, Mvir, a)
+        nu = 1.686 / sM
+        alpha = 0.155 + 0.0095 * nu * nu
+            
+        mdef_200m = MassDef(200, 'matter')
+        M200m = mass_def.translate_mass(cosmo, M_use, a, mdef_200m)
+        R_200m = mdef_200m.get_radius(cosmo, M200m, a) / a
+        r_t = (1.9 - 0.18 * nu) * R_200m
+        
+        #alpha, r_t = self._get_alpha(cosmo, M_use, a, mass_def)
+
+        norm = self._norm(M_use, R_s, c_M, alpha)
+
+        x = r_use[None, :] / R_s[:, None]
+        prof_in = norm[:, None] * np.exp(-2. * (x**alpha[:, None] - 1) /
+                                      alpha[:, None])
+        
+        beta = self.beta
+        gamma = self.gamma
+        
+        f_trans = (1 + (r_use[None, :]/r_t[:, None])**beta) **(-gamma/beta)
+        
+        rho_m = cosmo.rho_x(1, 'matter', is_comoving=True)
+        
+        bias = self.hbf.get_halo_bias(cosmo, M_use, a)
+        xi_mm = cosmo.correlation_3d(a, r_use, p_of_k_a=None)
+        prof_corr = rho_m * (bias[:, None] * xi_mm[None, :] + 1)
+
+        if self.pl:
+            be = self.be
+            se = self.se
+            
+            if self.force:
+                prof_out = rho_m * (bias[:, None] * xi_mm[None, :] *  (1 + be * (r_use[None, :]/(5*R_200m[:, None])) ** (-se)) + 1)
+
+                prof = prof_in * f_trans + prof_out
+             
+            
+            else:
+                if self.adjusted:
+                    prof_out = rho_m * (bias[:, None] * xi_mm[None, :] *  (be * (r_use[None, :]/(5*R_200m[:, None])) ** (-se)) + 1)
+
+                    prof = prof_in * f_trans + prof_out
+                
+                else:
+                    prof_out = rho_m * (be * (r_use[None, :]/(5*R_200m[:, None])) ** (-se) + 1)
+
+                    prof = prof_in * f_trans + prof_out
+
+                # r > 9 R_vir
+                if self.M_pivot == None:
+                    prof[r_use[None, :] > 9 * Rvir[:, None]] = prof_corr[r_use[None, :] > 9 * Rvir[:, None]]
+
+                else:
+                    M_pivot_vir = mass_def.translate_mass(cosmo, self.M_pivot, a, mdef_vir)
+                    R_pivot = mdef_vir.get_radius(cosmo, M_pivot_vir, a) / a
+                    prof[r_use[None, :] > 9 * R_pivot] = prof_corr[r_use[None, :] > 9 * R_pivot]
+
+        else: 
+            prof = prof_in * f_trans + prof_corr
+            
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+            
+        return prof
+

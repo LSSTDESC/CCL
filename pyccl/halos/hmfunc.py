@@ -33,7 +33,7 @@ class MassFunc(object):
     """
     name = 'default'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo, mass_def=None, mass_def_strict=True, darkemulator=None):
         # Initialize sigma(M) splines if needed
         cosmo.compute_sigma()
         self.mass_def_strict = mass_def_strict
@@ -48,8 +48,10 @@ class MassFunc(object):
             self.mdef = mass_def
         else:
             self._default_mdef()
+        
+        self.emu = darkemulator
         self._setup(cosmo)
-
+                
     def _default_mdef(self):
         """ Assigns a default mass definition for this object if
         none is passed at initialization.
@@ -782,31 +784,33 @@ class MassFuncDarkEmulator(MassFunc):
     """
     name = 'DarkEmulator'
 
-    def __init__(self, cosmo, mass_def=None, mass_def_strict=True):
+    def __init__(self, cosmo, mass_def=None, mass_def_strict=True, darkemulator=None):
         super(MassFuncDarkEmulator, self).__init__(cosmo,
                                               mass_def,
-                                              mass_def_strict)
+                                              mass_def_strict,
+                                              darkemulator)
     def _default_mdef(self):
         self.mdef = MassDef200m()
 
     def _setup(self, cosmo):
-        Omega_c = cosmo["Omega_c"]
-        Omega_b = cosmo["Omega_b"]
-        h = cosmo["h"]
-        n_s = cosmo["n_s"]
-        A_s = cosmo["A_s"]
+        if self.emu == None:
+            Omega_c = cosmo["Omega_c"]
+            Omega_b = cosmo["Omega_b"]
+            h = cosmo["h"]
+            n_s = cosmo["n_s"]
+            A_s = cosmo["A_s"]
 
-        omega_c = Omega_c * h ** 2
-        omega_b = Omega_b * h ** 2
-        omega_nu = 0.00064
-        Omega_L = 1 - ((omega_c + omega_b + omega_nu) / h **2)
+            omega_c = Omega_c * h ** 2
+            omega_b = Omega_b * h ** 2
+            omega_nu = 0.00064
+            Omega_L = 1 - ((omega_c + omega_b + omega_nu) / h **2)
 
-        emu = darkemu.de_interface.base_class()
+            emu = darkemu.de_interface.base_class()
 
-        #Parameters cparam (numpy array) : Cosmological parameters (𝜔𝑏, 𝜔𝑐, Ω𝑑𝑒, ln(10^10 𝐴𝑠), 𝑛𝑠, 𝑤)  
-        cparam = np.array([omega_b,omega_c,Omega_L,np.log(10 ** 10 * A_s),n_s,-1.])
-        emu.set_cosmology(cparam)
-        self.emu = emu
+            #Parameters cparam (numpy array) : Cosmological parameters (𝜔𝑏, 𝜔𝑐, Ω𝑑𝑒, ln(10^10 𝐴𝑠), 𝑛𝑠, 𝑤)  
+            cparam = np.array([omega_b,omega_c,Omega_L,np.log(10 ** 10 * A_s),n_s,-1.])
+            emu.set_cosmology(cparam)
+            self.emu = emu
     
     def _check_mdef_strict(self, mdef):
         if isinstance(mdef.Delta, str):

@@ -70,6 +70,7 @@ from .pk2d import (
 
 # Generalized connected trispectra
 from .tk3d import Tk3D
+from .tk3d import Tk3D_SSC_Terasawa22 #RT: do we need it for test?
 
 # Power spectrum calculations, sigma8 and kNL
 from .power import (

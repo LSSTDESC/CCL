@@ -12,7 +12,8 @@ from .massdef import (
 # Halo mass-concentration relations
 from .concentration import (
     Concentration,
-    ConcentrationDiemer15_colossus,
+    ConcentrationDiemer15_colossus200m,
+    ConcentrationDiemer15_colossus_vir,
     ConcentrationDiemer15_ius,
     ConcentrationDiemer15,
     ConcentrationBhattacharya13,
@@ -60,6 +61,7 @@ from .profiles import (
     HaloProfileHernquist,
     HaloProfilePressureGNFW,
     HaloProfileHOD,
+    HaloProfileDK14,
 )
 
 # Halo profile 2-point cumulants
@@ -70,15 +72,37 @@ from .profiles_2pt import (
 
 # Halo model power spectrum
 from .halo_model import (
+#     HMCalculator,
+#     halomod_mean_profile_1pt,
+#     halomod_bias_1pt,
+#     halomod_power_spectrum,
+#     halomod_Pk2D,
+    halomod_trispectrum_1h,
+    halomod_trispectrum_2h_13,
+    halomod_trispectrum_2h_22,
+    halomod_trispectrum_3h,
+    halomod_trispectrum_4h,
+    halomod_Tk3D_1h,
+    halomod_Tk3D_2h,
+    halomod_Tk3D_3h,
+    halomod_Tk3D_4h,
+    halomod_Tk3D_SSC,
+    halomod_Tk3D_SSC_linear_bias,
+    halomod_Tk3D_cNG    
+)
+
+from .halo_model_orig import (
     HMCalculator,
     halomod_mean_profile_1pt,
     halomod_bias_1pt,
     halomod_power_spectrum,
     halomod_Pk2D,
-    halomod_trispectrum_1h,
-    halomod_Tk3D_1h,
-    halomod_Tk3D_SSC,
-    halomod_Tk3D_SSC_linear_bias,
+#     halomod_trispectrum_1h,
+#     halomod_Tk3D_1h,
+    halomod_Tk3D_SSC_orig,
+    halomod_Tk3D_SSC_debug,
+    
+    halomod_Tk3D_SSC_linear_bias_orig,
 )
 
 # CIB profiles
