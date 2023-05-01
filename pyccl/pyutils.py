@@ -17,8 +17,12 @@ NoneArr = np.array([])
 
 
 class IntegrationMethods(Enum):
+    """General integration methods."""
     QAG_QUAD = "qag_quad"
+    """Adaptive quadrature integration."""
+
     SPLINE = "spline"
+    """Integration using the spline coefficients of the integrand."""
 
 
 integ_types = {

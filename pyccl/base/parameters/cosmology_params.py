@@ -344,7 +344,7 @@ class CosmologyParams(Parameters, factory=lib.parameters):
         if name == "m_nu":
             object.__setattr__(self, "m_nu", list(value))
             return lib.parameters_m_nu_set_custom(self._instance, value)
-        if name == "mgrowth":
+        if name == "mgrowth":  # TODO: Remove for CCLv3.
             object.__setattr__(self, "z_mgrowth", value[0])
             object.__setattr__(self, "df_mgrowth", value[1])
             object.__setattr__(self, "nz_mgrowth", len(value[0]))

@@ -1,42 +1,81 @@
+r"""
+====================================
+:math:`C(\ell)` (:mod:`pyccl.cells`)
+====================================
+
+Computations of angular power spectra.
+"""
+from __future__ import annotations
+
 __all__ = ("angular_cl",)
 
 import warnings
+from numbers import Real
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
+from numpy.typing import NDArray
 
 from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warn_api
 from .pyutils import integ_types
 
+if TYPE_CHECKING:
+    from . import Cosmology, Pk2D, Tracer
+
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
-def angular_cl(cosmo, tracer1, tracer2, ell, *,
-               p_of_k_a=DEFAULT_POWER_SPECTRUM,
-               l_limber=-1., limber_integration_method='qag_quad'):
-    """Calculate the angular (cross-)power spectrum for a pair of tracers.
+def angular_cl(
+        cosmo: Cosmology,
+        tracer1: Tracer,
+        tracer2: Tracer,
+        ell: Union[Real, NDArray[Real]],
+        *,
+        p_of_k_a: Union[str, Pk2D] = DEFAULT_POWER_SPECTRUM,
+        l_limber: Real = -1,
+        limber_integration_method: str = 'qag_quad'
+) -> Union[float, NDArray[float]]:
+    r"""Angular (cross-)power spectrum for a pair of tracers.
 
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        tracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
-            of any kind.
-        tracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
-            of any kind.
-        ell (float or array_like): Angular wavenumber(s) at which to evaluate
-            the angular power spectrum.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
-            to project. If a string, it must correspond to one of the
-            non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`).
-        l_limber (float) : Angular wavenumber beyond which Limber's
-            approximation will be used. Defaults to -1.
-        limber_integration_method (string) : integration method to be used
-            for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
-            method backed up by `quad` when it fails) and 'spline' (the
-            integrand is splined and then integrated numerically).
+    Currently uses the Limber approximation :footcite:p:`Limber53`:
 
-    Returns:
-        float or array_like: Angular (cross-)power spectrum values, \
-            :math:`C_\\ell`, for the pair of tracers, as a function of \
-            :math:`\\ell`.
+    .. math::
+
+        C_{uv}(\ell) = \int {\rm d}\chi \frac{W_u(\chi) W_v(\chi)}{\chi^2} \,
+        P_{UV}\left( k = \frac{\ell + 1/2}{\chi}, z(\chi) \right),
+
+    where :math:`(u, v)` are the correlated quantities, :math:`W(\chi)` are the
+    associated radial kernels, and :math:`P(k, z)` is the 3-D power spectrum of
+    :math:`u` and :math:`v`:
+
+    .. math::
+
+        \langle U(\mathbf{k}) V^*(\mathbf{k'}) \rangle = (2\pi)^3
+        \delta(\mathbf{k} - \mathbf{k'}) \, P_{UV}(k).
+
+    Arguments
+    ---------
+    cosmo
+        Cosmological parameters.
+    tracer1, tracer2
+        Tracer.
+    ell : array_like (nell,)
+        Multipoles at which the angular power spectrum is evaluated.
+    p_of_k_a
+        3-D power spectrum to project.
+    l_limber
+        Cutoff wavenumber (in :math:`\rm Mpc^{-1}`) for Limber integration.
+    limber_integration_method
+        Integration method. Available options in
+        :class:`~pyccl.pyutils.IntegrationMethods`.
+
+    Returns
+    -------
+    array_like (nell,)
+        Angular power spectrum, :math:`C(\ell)`.
+
+    References
+    ----------
+    .. footbibliography::
     """
     if cosmo['Omega_k'] != 0:
         warnings.warn(

@@ -25,6 +25,18 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum object. The linear power \
             spectrum. If ``nonlin=True``, returns a tuple \
             ``(pk_lin, pk_nonlin)``.
+
+    Currently supported extra parameters for CAMB are:
+
+        * `halofit_version`
+        * `HMCode_A_baryon`
+        * `HMCode_eta_baryon`
+        * `HMCode_logT_AGN`
+        * `kmax`
+        * `lmax`
+        * `dark_energy_model`
+
+    Consult the CAMB documentation for their usage.
     """
     import camb
     import camb.model
