@@ -14,7 +14,8 @@ __all__ = (
 
 from enum import Enum
 from numbers import Number, Real
-from typing import TYPE_CHECKING, Callable, Iterable, Optional, Sequence, Union
+from typing import (TYPE_CHECKING, Callable, Iterable, Optional, Sequence,
+                    Tuple, Union)
 
 import numpy as np
 from numpy.typing import NDArray
@@ -182,7 +183,7 @@ def loglin_spacing(logstart: Real, xmin: Real, xmax: Real,
 
     .. code-block:: text
 
-        |=== num_log ==|   |============== num_lin ================|
+        | num_log - 1  |   |============== num_lin ================|
       --*-*--*---*-----*---*---*---*---*---*---*---*---*---*---*---*--> (axis)
         ^                  ^                                       ^
      logstart             xmin                                    xmax
@@ -250,32 +251,42 @@ def get_pk_spline_lk(
     return np.linspace(np.log(s.K_MIN), np.log(s.K_MAX), nk)
 
 
-def resample_array(x_in, y_in, x_out,
-                   extrap_lo='none', extrap_hi='none',
-                   fill_value_lo=0, fill_value_hi=0):
-    """ Interpolates an input y array onto a set of x values.
+def resample_array(
+        x_in: NDArray[Real],
+        y_in: NDArray[Real],
+        x_out: Union[Real, NDArray[Real]],
+        extrap_lo: str = 'none',
+        extrap_hi: str = 'none',
+        fill_value_lo: Real = 0,
+        fill_value_hi: Real = 0
+) -> NDArray[float]:
+    """Interpolate an array on a (new) set of values
 
-    Args:
-        x_in (array_like): input x-values.
-        y_in (array_like): input y-values.
-        x_out (array_like): x-values for output array.
-        extrap_lo (string): type of extrapolation for x-values below the
-            range of `x_in`. 'none' (for no interpolation), 'constant',
-            'linx_liny' (linear in x and y), 'linx_logy', 'logx_liny' and
-            'logx_logy'.
-        extrap_hi (string): type of extrapolation for x-values above the
-            range of `x_in`.
-        fill_value_lo (float): constant value if `extrap_lo` is
-            'constant'.
-        fill_value_hi (float): constant value if `extrap_hi` is
-            'constant'.
-    Returns:
-        array_like: output array.
+    Arguments
+    ---------
+    x_in, y_in
+        Input coordinates.
+    x_out
+        Interpolated `x` coordinates.
+    extrap_lo, extrap_hi
+        Extrapolation type, if `x_out` is outside of the range of `x_in`.
+        Available options in
+        :class:`~pyccl.base.parameters.fftlog_params.ExtrapolationMethods`.
+    fill_value_lo, fill_value_hi
+        Constant value to fill out-of-bounds if `extrap_xx` is ``'constant'``.
+
+    Returns
+    -------
+
+        Interpolated values.
+
+    Raises
+    ------
+    ValueError
+        If the requested value is outside of the interpolation range.
     """
-    # TODO: point to the enum in CCLv3 docs.
-    if extrap_lo not in extrap_types.keys():
-        raise ValueError("Invalid extrapolation type.")
-    if extrap_hi not in extrap_types.keys():
+    types = extrap_types.keys()
+    if not (extrap_lo in types and extrap_hi in types):
         raise ValueError("Invalid extrapolation type.")
 
     status = 0
@@ -284,12 +295,15 @@ def resample_array(x_in, y_in, x_out,
                                           extrap_types[extrap_lo],
                                           extrap_types[extrap_hi],
                                           x_out.size, status)
+
+    if status == lib.CCL_ERROR_SPLINE_EV:
+        raise ValueError("Value outside of interpolation range. "
+                         "To extrapolate, pass `extrap_xx`.")
     check(status)
     return y_out
 
 
-def _fftlog_transform(rs, frs,
-                      dim, mu, power_law_index):
+def _fftlog_transform(rs, frs, dim, mu, power_law_index):
     if np.ndim(rs) != 1:
         raise ValueError("rs should be a 1D array")
     if np.ndim(frs) < 1 or np.ndim(frs) > 2:
@@ -315,7 +329,6 @@ def _fftlog_transform(rs, frs,
     fks = result[1:]
     if np.ndim(frs) == 1:
         fks = fks.squeeze()
-
     return ks, fks
 
 
@@ -333,20 +346,16 @@ def _spline_integrate(x, ys, a, b):
 
     if len(x) != n_x:
         raise ValueError(f"x should have {n_x} elements")
-
     if np.ndim(a) or np.ndim(b):
         raise TypeError("Integration limits should be scalar")
 
     status = 0
-    result, status = lib.spline_integrate(n_integ,
-                                          x, ys.flatten(),
-                                          a, b, n_integ,
-                                          status)
+    result, status = lib.spline_integrate(
+        n_integ, x, ys.flatten(), a, b, n_integ, status)
     check(status)
 
     if np.ndim(ys) == 1:
         result = result[0]
-
     return result
 
 
@@ -378,83 +387,71 @@ def _check_array_params(f_arg, name=None, arr3=False):
     return f1, f2
 
 
-def _get_spline1d_arrays(gsl_spline):
-    """Get array data from a 1D GSL spline.
+def _get_spline1d_arrays(gsl_spline) -> Tuple(NDArray[float]):
+    """Get array data from a 1-D GSL spline.
 
-    Args:
-        gsl_spline: `SWIGObject` of gsl_spline
-            The SWIG object of the GSL spline.
+    Arguments
+    ---------
+    gsl_spline : SwigPyObject of type gsl_spline *
+        The SWIG object of the GSL spline.
 
-    Returns:
-        xarr: array_like
-            The x array of the spline.
-        yarr: array_like
-            The y array of the spline.
+    Returns
+    -------
+    x, y : ndarray
+        Arrays of the spline.
     """
     status = 0
     size, status = lib.get_spline1d_array_size(gsl_spline, status)
     check(status)
-
-    xarr, yarr, status = lib.get_spline1d_arrays(gsl_spline, size, size,
-                                                 status)
+    *arrs, status = lib.get_spline1d_arrays(gsl_spline, size, size, status)
     check(status)
+    return arrs
 
-    return xarr, yarr
 
+def _get_spline2d_arrays(gsl_spline) -> Tuple(NDArray[float]):
+    """Get array data from a 2-D GSL spline.
 
-def _get_spline2d_arrays(gsl_spline):
-    """Get array data from a 2D GSL spline.
+    Arguments
+    ---------
+    gsl_spline: SwigPyObject of type gsl_spline2d *
+        The SWIG object of the GSL spline.
 
-    Args:
-        gsl_spline: `SWIGObject` of gsl_spline2d *
-            The SWIG object of the 2D GSL spline.
-
-    Returns:
-        yarr: array_like
-            The y array of the spline.
-        xarr: array_like
-            The x array of the spline.
-        zarr: array_like
-            The z array of the spline. The shape is (yarr.size, xarr.size).
+    Returns
+    -------
+    y, x, z : ndarray
+        Arrays of the spline.
     """
     status = 0
     x_size, y_size, status = lib.get_spline2d_array_sizes(gsl_spline, status)
     check(status)
-
     z_size = x_size*y_size
-    xarr, yarr, zarr, status = lib.get_spline2d_arrays(gsl_spline,
-                                                       x_size, y_size, z_size,
-                                                       status)
+    xarr, yarr, zarr, status = lib.get_spline2d_arrays(
+        gsl_spline, x_size, y_size, z_size, status)
     check(status)
-
     return yarr, xarr, zarr.reshape(y_size, x_size)
 
 
-def _get_spline3d_arrays(gsl_spline, length):
-    """Get array data from an array of 2D GSL splines.
+def _get_spline3d_arrays(gsl_spline, length: int) -> Tuple(NDArray[float]):
+    """Get array data from an array of 2-D GSL splines.
 
-    Args:
-        gsl_spline (`SWIGObject` of gsl_spline2d **):
-            The SWIG object of the 2D GSL spline.
-        length (int):
-            The length of the 3rd dimension.
+    Arguments
+    ---------
+    gsl_spline: SwigPyObject of type gsl_spline2d **
+        The SWIG object of the GSL spline.
+    length
+        Length of the 3rd dimension.
 
-    Returns:
-        xarr: array_like
-            The x array of the spline.
-        yarr: array_like
-            The y array of the spline.
-        zarr: array_like
-            The z array of the spline. The shape is (yarr.size, xarr.size).
+    Returns
+    -------
+    x, y, z : ndarray
+        Arrays of the spline.
     """
     status = 0
     x_size, y_size, status = lib.get_spline3d_array_sizes(gsl_spline, status)
     check(status)
-
     z_size = x_size*y_size*length
-    xarr, yarr, zarr, status = lib.get_spline3d_arrays(gsl_spline,
-                                                       x_size, y_size, z_size,
-                                                       length, status)
+    xarr, yarr, zarr, status = lib.get_spline3d_arrays(
+        gsl_spline, x_size, y_size, z_size, length, status)
     check(status)
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))

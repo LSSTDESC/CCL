@@ -19,6 +19,10 @@ class SplineParams(Parameters, instance=lib.cvar.user_spline_params):
         * CORR - Correlation functions.
         * SPLT - Spline types (all fixed to `Akima
           <https://en.wikipedia.org/wiki/Akima_spline>`_).
+
+    See Also
+    --------
+    :func:`~pyccl.pyutils.loglin_spacing` : Diagram of lin-log sampling.
     """
     A_SPLINE_MINLOG: Real = 0.000_1
     """(SF) Minimum scale factor."""
