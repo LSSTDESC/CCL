@@ -4,9 +4,9 @@ import warnings
 
 import numpy as np
 
-from . import CCLObject, check, lib
+from . import CCLObject, lib
 from . import CCLDeprecationWarning, warn_api
-from .pyutils import _get_spline2d_arrays, _get_spline3d_arrays
+from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
 
 
 class Tk3D(CCLObject):

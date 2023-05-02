@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Union
 import numpy as np
 from numpy.typing import NDArray
 
-from . import DEFAULT_POWER_SPECTRUM, check, lib, warn_api
+from . import DEFAULT_POWER_SPECTRUM, lib, warn_api
 
 if TYPE_CHECKING:
     from . import Cosmology, Pk2D
@@ -157,7 +157,7 @@ def sigmaM(
     status = 0
     sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
                                 len(logM), status)
-    check(status, cosmo=cosmo)
+    cosmo.check(status)
     if np.ndim(M) == 0:
         sigM = sigM[0]
     return sigM
@@ -195,7 +195,7 @@ def sigmaR(
     status = 0
     R_use = np.atleast_1d(R)
     sR, status = lib.sigmaR_vec(cosmo.cosmo, psp, a, R_use, R_use.size, status)
-    check(status, cosmo)
+    cosmo.check(status)
     if np.ndim(R) == 0:
         sR = sR[0]
     return sR
@@ -236,7 +236,7 @@ def sigmaV(
     status = 0
     R_use = np.atleast_1d(R)
     sV, status = lib.sigmaV_vec(cosmo.cosmo, psp, a, R_use, R_use.size, status)
-    check(status, cosmo)
+    cosmo.check(status)
     if np.ndim(R) == 0:
         sV = sV[0]
     return sV
@@ -312,7 +312,7 @@ def kNL(
     status = 0
     a_use = np.atleast_1d(a)
     knl, status = lib.kNL_vec(cosmo.cosmo, psp, a_use, a_use.size, status)
-    check(status, cosmo)
+    cosmo.check(status)
     if np.ndim(a) == 0:
         knl = knl[0]
     return knl

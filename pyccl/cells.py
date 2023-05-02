@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Union
 import numpy as np
 from numpy.typing import NDArray
 
-from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warn_api
+from . import DEFAULT_POWER_SPECTRUM, CCLWarning, lib, warn_api
 from .pyutils import integ_types
 
 if TYPE_CHECKING:
@@ -122,5 +122,5 @@ def angular_cl(
     lib.cl_tracer_collection_t_free(clt1)
     lib.cl_tracer_collection_t_free(clt2)
 
-    check(status, cosmo=cosmo_in)
+    cosmo_in.check(status)
     return cl

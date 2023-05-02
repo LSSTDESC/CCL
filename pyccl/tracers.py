@@ -3,12 +3,11 @@ import warnings
 import numpy as np
 
 from . import ccllib as lib
-from .pyutils import check
 from .errors import CCLWarning
 from .base.parameters import physical_constants
 from .base import CCLObject, warn_api
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn,
-                      _get_spline1d_arrays, _get_spline2d_arrays)
+                      _get_spline1d_arrays, _get_spline2d_arrays, check)
 
 
 __all__ = ("get_density_kernel", "get_lensing_kernel", "get_kappa_kernel",
@@ -77,7 +76,7 @@ def get_density_kernel(cosmo, *, dndz):
                                                         z_n, n,
                                                         len(z_n),
                                                         status)
-    check(status, cosmo=cosmo)
+    cosmo.check(status)
     return chi, wchi
 
 
@@ -131,7 +130,7 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
                                                   z_n, n, z_n[-1],
                                                   int(has_magbias), z_s, s,
                                                   chi, n_chi, status)
-    check(status, cosmo=cosmo)
+    cosmo.check(status)
     return chi, wchi
 
 
@@ -964,7 +963,7 @@ def ISWTracer(cosmo, *, z_max=6., n_chi=1024):
 
 def _check_returned_tracer(return_val):
     """Wrapper to catch exceptions when tracers are spawned from C."""
-    if (isinstance(return_val, int)):
+    if isinstance(return_val, int):
         check(return_val)
         tr = None
     else:

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
-from ... import check, lib, warn_api
+from ... import lib, warn_api
 from . import MassFunc
 
 if TYPE_CHECKING:
@@ -72,7 +72,7 @@ class MassFuncSheth99(MassFunc):
         if self.use_delta_c_fit:
             status = 0
             delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-            check(status, cosmo=cosmo)
+            cosmo.check(status)
         else:
             delta_c = 1.68647
 

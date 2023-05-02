@@ -26,9 +26,10 @@ from numpy.typing import NDArray
 
 from . import (
     CCLError, CCLDeprecationWarning, CCLObject, CLevelErrors, CosmologyParams,
-    DEFAULT_POWER_SPECTRUM, Pk2D, cache, check, gsl_params, lib, spline_params,
+    DEFAULT_POWER_SPECTRUM, Pk2D, cache, gsl_params, lib, spline_params,
     warn_api, deprecated)
 from . import physical_constants as const
+from .pyutils import check as check_
 
 
 class TransferFunctions(Enum):
@@ -560,7 +561,7 @@ class Cosmology(CCLObject):
     def _OmNuh2(self, m_nu, T_CMB, T_ncdm):
         # Compute OmNuh2 today.
         ret, st = lib.Omeganuh2_vec(len(m_nu), T_CMB, T_ncdm, [1], m_nu, 1, 0)
-        check(st)
+        check_(st)
         return ret[0]
 
     def __getitem__(self, key):
@@ -597,7 +598,7 @@ class Cosmology(CCLObject):
             return
         status = 0
         status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self)
+        self.check(status)
 
     def compute_growth(self) -> None:
         """Compute the growth splines."""
@@ -605,7 +606,7 @@ class Cosmology(CCLObject):
             return
         status = 0
         status = lib.cosmology_compute_growth(self.cosmo, status)
-        check(status, self)
+        self.check(status)
 
     @cache(maxsize=3)
     def _compute_linear_power(self):
@@ -652,7 +653,7 @@ class Cosmology(CCLObject):
                                           int(rescale_mg),
                                           int(rescale_s8),
                                           status)
-            check(status, self)
+            self.check(status)
 
         return pk
 
@@ -749,7 +750,7 @@ class Cosmology(CCLObject):
         pk = self.get_linear_power()
         status = 0
         status = lib.cosmology_compute_sigma(self.cosmo, pk.psp, status)
-        check(status, self)
+        self.check(status)
 
     def get_linear_power(self, name: str = DEFAULT_POWER_SPECTRUM) -> Pk2D:
         """Get the linear power spectrum. (Compute if necessary.)
@@ -811,6 +812,17 @@ class Cosmology(CCLObject):
     def has_sigma(self) -> bool:
         r"""Check whether the :math:`\sigma(M)` splines exist."""
         return bool(self.cosmo.computed_sigma)
+
+    def check(self, status: int) -> None:
+        """Check the status returned by a :mod:`~pyccl.ccllib` function.
+
+        Arguments
+        ---------
+        status
+            Error type flag. The dictionary mapping is in
+            :py:data:`~pyccl.pyutils.CLevelErrors`.
+        """
+        return check_(status=status, cosmo=self)
 
     @deprecated
     def status(self) -> str:
@@ -1036,14 +1048,14 @@ class CosmologyCalculator(Cosmology):
         status = 0
         status = lib.cosmology_distances_from_input(self.cosmo, a, chi, E,
                                                     status)
-        check(status, self)
+        self.check(status)
 
     def _init_growth(self, growth):
         a, gz, fz = growth["a"], growth["growth_factor"], growth["growth_rate"]
         self._check_input(a, gz, fz)
         status = 0
         status = lib.cosmology_growth_from_input(self.cosmo, a, gz, fz, status)
-        check(status, self)
+        self.check(status)
 
     def _init_pk_linear(self, pk_linear):
         a, lk = pk_linear["a"], np.log(pk_linear["k"])

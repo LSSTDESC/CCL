@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
-from ... import check, lib, warn_api
+from ... import lib, warn_api
 from . import MassFunc
 
 if TYPE_CHECKING:
@@ -92,10 +92,10 @@ class MassFuncDespali16(MassFunc):
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         status = 0
         delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status, cosmo=cosmo)
+        cosmo.check(status)
 
         Dv, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
-        check(status, cosmo=cosmo)
+        cosmo.check(status)
 
         x = np.log10(self.mass_def.get_Delta(cosmo, a) *
                      cosmo.omega_x(a, self.mass_def.rho_type) / Dv)

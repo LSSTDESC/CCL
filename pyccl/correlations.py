@@ -14,7 +14,7 @@ import warnings
 
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, check, lib
+from . import DEFAULT_POWER_SPECTRUM, lib
 from . import CCLDeprecationWarning, warn_api
 
 
@@ -159,7 +159,7 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
                                           correlation_types[type],
                                           correlation_methods[method],
                                           len(theta), status)
-    check(status, cosmo_in)
+    cosmo_in.check(status)
     if scalar:
         return wth[0]
     return wth
@@ -198,7 +198,7 @@ def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     # Call 3D correlation function
     xi, status = lib.correlation_3d_vec(cosmo, psp, a, r,
                                         len(r), status)
-    check(status, cosmo_in)
+    cosmo_in.check(status)
     if scalar:
         return xi[0]
     return xi
@@ -241,7 +241,7 @@ def correlation_multipole(cosmo, *, r, a, beta, ell,
     # Call 3D correlation function
     xis, status = lib.correlation_multipole_vec(cosmo, psp, a, beta, ell, r,
                                                 len(r), status)
-    check(status, cosmo_in)
+    cosmo_in.check(status)
     if scalar:
         return xis[0]
     return xis
@@ -289,7 +289,7 @@ def correlation_3dRsd(cosmo, *, r, a, mu, beta,
     # Call 3D correlation function
     xis, status = lib.correlation_3dRsd_vec(cosmo, psp, a, mu, beta, r,
                                             len(r), int(use_spline), status)
-    check(status, cosmo_in)
+    cosmo_in.check(status)
     if scalar:
         return xis[0]
     return xis
@@ -331,7 +331,7 @@ def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
     # Call 3D correlation function
     xis, status = lib.correlation_3dRsd_avgmu_vec(cosmo, psp, a, beta, r,
                                                   len(r), status)
-    check(status, cosmo_in)
+    cosmo_in.check(status)
     if scalar:
         return xis[0]
     return xis
@@ -378,7 +378,7 @@ def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
     xis, status = lib.correlation_pi_sigma_vec(cosmo, psp, a, beta, pi, sigma,
                                                len(sigma), int(use_spline),
                                                status)
-    check(status, cosmo_in)
+    cosmo_in.check(status)
     if scalar:
         return xis[0]
     return xis

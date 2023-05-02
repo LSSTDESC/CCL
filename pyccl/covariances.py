@@ -3,7 +3,7 @@ __all__ = ("angular_cl_cov_cNG", "sigma2_B_disc", "sigma2_B_from_mask",
 
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, check, lib, warn_api
+from . import DEFAULT_POWER_SPECTRUM, lib, warn_api
 from .pyutils import _check_array_params, integ_types
 
 
@@ -124,7 +124,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     if tracer4 is not None:
         lib.cl_tracer_collection_t_free(clt4)
 
-    check(status, cosmo=cosmo_in)
+    cosmo_in.check(status)
     return cov
 
 
@@ -175,7 +175,7 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
     status = 0
     s2B_arr, status = lib.sigma2b_vec(cosmo.cosmo, a_arr, R_arr, psp,
                                       len(a_arr), status)
-    check(status, cosmo=cosmo)
+    cosmo.check(status)
 
     if full_output:
         return a_arr, s2B_arr
@@ -384,5 +384,5 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     if tracer4 is not None:
         lib.cl_tracer_collection_t_free(clt4)
 
-    check(status, cosmo=cosmo_in)
+    cosmo_in.check(status)
     return cov

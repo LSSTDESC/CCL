@@ -9,17 +9,17 @@ Utility and helper functions used throughout the source code.
 from __future__ import annotations
 
 __all__ = (
-    "CLevelErrors", "IntegrationMethods", "check",
-    "debug_mode", "get_pk_spline_lk", "get_pk_spline_a", "resample_array")
+    "CLevelErrors", "IntegrationMethods", "debug_mode", "get_pk_spline_lk",
+    "get_pk_spline_a", "loglin_spacing", "resample_array")
 
 from enum import Enum
 from numbers import Number, Real
-from typing import TYPE_CHECKING, Callable, Iterable, Sequence, Union
+from typing import TYPE_CHECKING, Callable, Iterable, Optional, Sequence, Union
 
 import numpy as np
 from numpy.typing import NDArray
 
-from . import CCLError, lib, spline_params
+from . import CCLError, SplineParams, lib
 
 if TYPE_CHECKING:
     from . import Cosmology
@@ -70,7 +70,7 @@ CLevelErrors = {
 
 
 def check(status: int, cosmo: Cosmology = None) -> None:
-    """Check the status returned by a :mod:~pyccl.ccllib` function.
+    """Check the status returned by a :mod:`~pyccl.ccllib` function.
 
     Arguments
     ---------
@@ -166,11 +166,12 @@ def _vectorize_fn(
         args = list(varargs) + xarrs + [int(size)]
 
     ret, status = func(cosmo.cosmo, *args, 0)
-    check(status, cosmo)
+    cosmo.check(status)
     return ret
 
 
-def loglin_spacing(logstart, xmin, xmax, num_log, num_lin):
+def loglin_spacing(logstart: Real, xmin: Real, xmax: Real,
+                   num_log: int, num_lin: int) -> NDArray[float]:
     """Create an array spaced first logarithmically, then linearly.
 
     .. note::
@@ -191,19 +192,59 @@ def loglin_spacing(logstart, xmin, xmax, num_log, num_lin):
     return np.concatenate((log, lin))
 
 
-def get_pk_spline_a(cosmo=None, spline_params=spline_params):
-    """Get a sampling a-array. Used for P(k) splines."""
+def get_pk_spline_a(
+        cosmo: Optional[Cosmology] = None,
+        spline_params: Optional[Union[SplineParams, lib.spline_params]] = None
+) -> NDArray[float]:
+    r"""Get a sampling a-array. Used for P(k) splines.
+
+    Arguments
+    ---------
+    cosmo
+        Get the sampling rate from a :class:`~Cosmology` object.
+    spline_params
+        Get the sampling rate from a :class:`~SplineParams` instance, or from
+        the C-level :class:`~lib.spline_params` struct. Ignored if `cosmo` is
+        provided.
+
+    Returns
+    -------
+
+        Samples in :math:`a`.
+    """
     if cosmo is not None:
         spline_params = cosmo._spline_params
+    if spline_params is None:
+        from . import spline_params
     s = spline_params
     return loglin_spacing(s.A_SPLINE_MINLOG_PK, s.A_SPLINE_MIN_PK,
                           s.A_SPLINE_MAX, s.A_SPLINE_NLOG_PK, s.A_SPLINE_NA_PK)
 
 
-def get_pk_spline_lk(cosmo=None, spline_params=spline_params):
-    """Get a sampling log(k)-array. Used for P(k) splines."""
+def get_pk_spline_lk(
+        cosmo: Optional[Cosmology] = None,
+        spline_params: Optional[Union[SplineParams, lib.spline_params]] = None
+) -> NDArray[float]:
+    r"""Get a sampling log(k)-array. Used for P(k) splines.
+
+    Arguments
+    ---------
+    cosmo
+        Get the sampling rate from a :class:`~Cosmology` object.
+    spline_params
+        Get the sampling rate from a :class:`~SplineParams` instance, or from
+        the C-level :class:`~lib.spline_params` struct. Ignored if `cosmo` is
+        provided.
+
+    Returns
+    -------
+
+        Samples in :math:`\log(k)`.
+    """
     if cosmo is not None:
         spline_params = cosmo._spline_params
+    if spline_params is None:
+        from . import spline_params
     s = spline_params
     nk = int(np.ceil(np.log10(s.K_MAX/s.K_MIN)*s.N_K))
     return np.linspace(np.log(s.K_MIN), np.log(s.K_MAX), nk)

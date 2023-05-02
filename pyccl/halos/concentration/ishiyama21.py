@@ -8,7 +8,6 @@ import numpy as np
 from scipy.optimize import brentq, root_scalar
 
 from ... import lib, warn_api
-from ... import check
 from . import Concentration
 
 if TYPE_CHECKING:
@@ -121,7 +120,7 @@ class ConcentrationIshiyama21(Concentration):
         status = 0
         dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
                                                    len(logM), status)
-        check(status, cosmo=cosmo)
+        cosmo.check(status)
         return -3/np.log(10) * dlns_dlogM
 
     def _G(self, x, n_eff):

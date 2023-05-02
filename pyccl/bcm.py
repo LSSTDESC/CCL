@@ -2,7 +2,8 @@ __all__ = ("bcm_model_fka", "bcm_correct_pk2d",)
 
 import numpy as np
 
-from . import BaryonsSchneider15, check, deprecated, lib, unlock_instance
+from . import BaryonsSchneider15, deprecated, lib, unlock_instance
+from .pyutils import check
 
 
 @deprecated(new_api=BaryonsSchneider15)

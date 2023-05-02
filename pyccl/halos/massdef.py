@@ -23,7 +23,7 @@ from typing import (TYPE_CHECKING,
 import numpy as np
 from numpy.typing import NDArray
 
-from .. import CCLDeprecationWarning, CCLNamedClass, CCLObject, lib, check
+from .. import CCLDeprecationWarning, CCLNamedClass, CCLObject, lib
 from .. import warn_api
 from . import Concentration, HaloBias, MassFunc
 
@@ -113,7 +113,7 @@ def convert_concentration(
     c_old_use = np.atleast_1d(c_old)
     c_new, status = lib.convert_concentration_vec(
         cosmo.cosmo, Delta_old, c_old_use, Delta_new, c_old_use.size, status)
-    check(status, cosmo=cosmo)
+    cosmo.check(status)
     if np.ndim(c_old) == 0:
         return c_new[0]
     return c_new
@@ -312,7 +312,7 @@ class MassDef(CCLNamedClass, CCLObject):  # TODO: Only keep CCLObject in CCLv3.
         if self.Delta == 'vir':
             status = 0
             D, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
-            check(status)
+            cosmo.check(status)
             return D
         return self.Delta
 

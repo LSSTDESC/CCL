@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Union
 import numpy as np
 from numpy.typing import NDArray
 
-from .. import CCLNamedClass, lib, check
+from .. import CCLNamedClass, lib
 from .. import deprecate_attr, deprecated, warn_api, mass_def_api
 from .. import physical_constants as const
 
@@ -148,14 +148,14 @@ class HMIngredients(CCLNamedClass):
         # sigma(M)
         status = 0
         sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM, len(logM), status)
-        check(status, cosmo=cosmo)
+        cosmo.check(status)
         if not return_dlns:
             return logM, sigM
 
         # dlogsigma(M)/dlog10(M)
         dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
                                                    len(logM), status)
-        check(status, cosmo=cosmo)
+        cosmo.check(status)
         return logM, sigM, dlns_dlogM
 
 

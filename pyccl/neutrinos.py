@@ -18,9 +18,10 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import root
 
-from . import CosmologyParams, NeutrinoMassSplits, check, lib, omega_x
+from . import CosmologyParams, NeutrinoMassSplits, lib, omega_x
 from . import CCLDeprecationWarning, deprecated, warn_api
 from . import physical_constants as const
+from .pyutils import check
 
 
 @deprecated(new_api=omega_x)

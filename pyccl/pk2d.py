@@ -18,10 +18,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from . import (
-    CCLObject, DEFAULT_POWER_SPECTRUM, check, get_pk_spline_a,
+    CCLObject, DEFAULT_POWER_SPECTRUM, get_pk_spline_a,
     get_pk_spline_lk, lib, unlock_instance)
 from . import CCLWarning, CCLError, CCLDeprecationWarning, warn_api, deprecated
-from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
+from .pyutils import check, _get_spline1d_arrays, _get_spline2d_arrays
 
 if TYPE_CHECKING:
     from . import Cosmology, SplineParams
@@ -294,7 +294,7 @@ class Pk2D(CCLObject):
             with pk2d.unlock():
                 pk2d.psp, status = ret
 
-        check(status, cosmo)
+        cosmo.check(status)
         return pk2d
 
     @classmethod
@@ -352,7 +352,7 @@ class Pk2D(CCLObject):
         else:
             with pk2d.unlock():
                 pk2d.psp, status = ret
-        check(status, cosmo)
+        cosmo.check(status)
         return pk2d
 
     def eval(self, k, a, cosmo=None, *, derivative=False):
