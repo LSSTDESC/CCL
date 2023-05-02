@@ -1,17 +1,28 @@
-"""Utility functions to analyze status and error messages passed from CCL, as
-well as wrappers to automatically vectorize functions.
 """
+============================
+Utils (:mod:`pyccl.pyutils`)
+============================
+
+Utility and helper functions used throughout the source code.
+"""
+
+from __future__ import annotations
+
 __all__ = (
     "CLevelErrors", "IntegrationMethods", "check",
     "debug_mode", "get_pk_spline_lk", "get_pk_spline_a", "resample_array")
 
 from enum import Enum
-from typing import Iterable
+from numbers import Number, Real
+from typing import TYPE_CHECKING, Callable, Iterable, Sequence, Union
 
 import numpy as np
+from numpy.typing import NDArray
 
 from . import CCLError, lib, spline_params
 
+if TYPE_CHECKING:
+    from . import Cosmology
 
 NoneArr = np.array([])
 
@@ -58,333 +69,105 @@ CLevelErrors = {
 }
 
 
-def check(status, cosmo=None):
-    """Check the status returned by a ccllib function.
+def check(status: int, cosmo: Cosmology = None) -> None:
+    """Check the status returned by a :mod:~pyccl.ccllib` function.
 
-    Args:
-        status (int or :obj:`~pyccl.core.error_types`):
-            Flag or error describing the success of a function.
-        cosmo (:class:`~pyccl.core.Cosmology`, optional):
-            A Cosmology object.
+    Arguments
+    ---------
+    status
+        Error type flag. The dictionary mapping is in
+        :py:data:`~pyccl.pyutils.CLevelErrors`.
+    cosmo
+        :class:`~Cosmology` object that carries the error message.
     """
-    # Check for normal status (no action required)
     if status == 0:
-        return
+        return  # normal status (no errors raised)
 
     # Get status message from Cosmology object, if there is one
-    if cosmo is not None:
-        msg = cosmo.cosmo.status_message
-    else:
-        msg = ""
+    msg = cosmo.cosmo.status_message if cosmo is not None else ""
 
-    # Check for known error status
-    if status in CLevelErrors.keys():
+    if status in CLevelErrors:
         raise CCLError(f"Error {CLevelErrors[status]}: {msg}")
-
-    # Check for unknown error
-    if status != 0:
-        raise CCLError(f"Error {status}: {msg}")
+    raise CCLError(f"Error {status}: {msg}")  # raise unknown error
 
 
-def debug_mode(debug):
-    """Toggle debug mode on or off. If debug mode is on, the C backend is
-    forced to print error messages as soon as they are raised, even if the
-    flow of the program continues. This makes it easier to track down errors.
+def debug_mode(debug: bool) -> None:
+    """Toggle debug mode.
 
-    If debug mode is off, the C code will not print errors, and the Python
-    wrapper will raise the last error that was detected. If multiple errors
-    were raised, all but the last will be overwritten within the C code, so the
-    user will not necessarily be informed of the root cause of the error.
+    If debug mode is True (on), C-level errors are printed as soon as they are
+    raised, ignoring normal program flow. Makes it easier to locate errors.
+    If it is False (off), only the final C-level error is raised by the Python
+    wrapper, once the program flow ends. Traceback not available.
 
-    Args:
-        debug (bool): Switch debug mode on (True) or off (False).
-
+    Arguments
+    ---------
+    debug
+        Debug mode toggle switch.
     """
-    if debug:
-        lib.set_debug_policy(lib.CCL_DEBUG_MODE_ON)
-    else:
-        lib.set_debug_policy(lib.CCL_DEBUG_MODE_OFF)
+    lib.set_debug_policy(int(debug))
 
 
-# This function is not used anymore so we don't want Coveralls to
-# include it, but we keep it in case it is needed at some point.
-# def _vectorize_fn_simple(fn, fn_vec, x,
-#                          returns_status=True):  # pragma: no cover
-#     """Generic wrapper to allow vectorized (1D array) access to CCL
-#     functions with one vector argument (but no dependence on cosmology).
-#
-#     Args:
-#         fn (callable): Function with a single argument.
-#         fn_vec (callable): Function that has a vectorized implementation in
-#                            a .i file.
-#         x (float or array_like): Argument to fn.
-#         returns_stats (bool): Indicates whether fn returns a status.
-#
-#     """
-#     status = 0
-#     if isinstance(x, int):
-#         x = float(x)
-#     if isinstance(x, float):
-#         # Use single-value function
-#         if returns_status:
-#             f, status = fn(x, status)
-#         else:
-#             f = fn(x)
-#     elif isinstance(x, np.ndarray):
-#         # Use vectorised function
-#         if returns_status:
-#             f, status = fn_vec(x, x.size, status)
-#         else:
-#             f = fn_vec(x, x.size)
-#     else:
-#         # Use vectorised function
-#         if returns_status:
-#             f, status = fn_vec(x, len(x), status)
-#         else:
-#             f = fn_vec(x, len(x))
-#
-#     # Check result and return
-#     check(status)
-#     return f
+def check_openmp_version() -> str:
+    """Get the OpenMP specification release date. 0 if not working."""
+    return lib.openmp_version()
 
 
-def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL
-    functions with one vector argument, with a cosmology dependence.
+def check_openmp_threads() -> int:
+    """Get the number of available threads. 0 if OpenMP is not working."""
+    return lib.openmp_threads()
 
-    Args:
-        fn (callable): Function with a single argument.
-        fn_vec (callable): Function that has a vectorized implementation in
-                           a .i file.
-        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
-                                            converted to a ccl_cosmology.
-        x (float or array_like): Argument to fn.
-        returns_stats (bool): Indicates whether fn returns a status.
 
+def cast_to_float(x: Union[Number, Sequence]) -> Union[Number, Sequence]:
+    """Cast a scalar or a sequence to float."""
+    if isinstance(x, Number):
+        return float(x)
+    if isinstance(x, np.ndarray):
+        return x.astype(float)
+    return [float(item) for item in x]
+
+
+def _vectorize_fn(
+        fn: Callable,
+        fn_vec: Callable,
+        cosmo: Cosmology,
+        *varargs,
+        x: Union[Real, NDArray[Real]],
+        x2: Union[Real, NDArray[Real]] = None,
+        pairwise: bool = False
+) -> Union[float, NDArray[float]]:
+    """Generic wrapper to allow vectorized access to CCL functions.
+
+    Calling unvectorized functions is faster; this wrapper allocates the values
+    as needed to increase efficiency. Vectorized functions are declared in an
+    interface (``*.i``) module.
+
+    fn
+        Unvectorized function.
+    fn_vec
+        Vectorized function.
+    cosmo
+        Cosmological parameters.
+    *varargs
+        Other arguments to pass to the C function.
+    x, x2
+        Main axes.
+    pairwise
+        If True, call pairwise on `(x, x2)`. If False, orthogonalize `x2`.
     """
+    xarrs = [arr for arr in [x, x2] if arr is not None]
+    xarrs = list(map(cast_to_float, xarrs))
 
-    # Access ccl_cosmology object
-    cosmo_in = cosmo
-    cosmo = cosmo.cosmo
-
-    status = 0
-
-    if isinstance(x, int):
-        x = float(x)
-    if isinstance(x, float):
-        # Use single-value function
-        if returns_status:
-            f, status = fn(cosmo, x, status)
-        else:
-            f = fn(cosmo, x)
-    elif isinstance(x, np.ndarray):
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, x, x.size, status)
-        else:
-            f = fn_vec(cosmo, x, x.size)
+    if isinstance(x, Number):
+        func = fn
+        args = xarrs + list(varargs)
     else:
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, x, len(x), status)
-        else:
-            f = fn_vec(cosmo, x, len(x))
+        func = fn_vec
+        size = len(x) if pairwise else np.product([len(arr) for arr in xarrs])
+        args = list(varargs) + xarrs + [int(size)]
 
-    # Check result and return
-    check(status, cosmo_in)
-    return f
-
-
-def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL
-    functions with one vector argument and one integer argument,
-    with a cosmology dependence.
-
-    Args:
-        fn (callable): Function with a single argument.
-        fn_vec (callable): Function that has a vectorized implementation in
-                           a .i file.
-        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
-                                            converted to a ccl_cosmology.
-        x (float or array_like): Argument to fn.
-        n (int): Integer argument to fn.
-        returns_stats (bool): Indicates whether fn returns a status.
-
-    """
-    # Access ccl_cosmology object
-    cosmo_in = cosmo
-    cosmo = cosmo.cosmo
-    status = 0
-
-    if isinstance(x, int):
-        x = float(x)
-    if isinstance(x, float):
-        # Use single-value function
-        if returns_status:
-            f, status = fn(cosmo, x, n, status)
-        else:
-            f = fn(cosmo, x, n)
-    elif isinstance(x, np.ndarray):
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, n, x, x.size, status)
-        else:
-            f = fn_vec(cosmo, n, x, x.size)
-    else:
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, n, x, len(x), status)
-        else:
-            f = fn_vec(cosmo, n, x, len(x))
-
-    # Check result and return
-    check(status, cosmo_in)
-    return f
-
-
-def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL
-    functions with one vector argument and two float arguments, with
-    a cosmology dependence.
-
-    Args:
-        fn (callable): Function with a single argument.
-        fn_vec (callable): Function that has a vectorized implementation in
-                           a .i file.
-        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
-                                            converted to a ccl_cosmology.
-        x (float or array_like): Argument to fn.
-        a (float): Float argument to fn.
-        d (float): Float argument to fn.
-        returns_stats (bool): Indicates whether fn returns a status.
-
-    """
-    # Access ccl_cosmology object
-    cosmo_in = cosmo
-    cosmo = cosmo.cosmo
-    status = 0
-
-    if isinstance(x, int):
-        x = float(x)
-    if isinstance(x, float):
-        if returns_status:
-            f, status = fn(cosmo, x, a, d, status)
-        else:
-            f = fn(cosmo, x, a, d)
-    elif isinstance(x, np.ndarray):
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, a, d, x, x.size, status)
-        else:
-            f = fn_vec(cosmo, a, d, x, x.size)
-    else:
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, a, d, x, len(x), status)
-        else:
-            f = fn_vec(cosmo, a, d, x, len(x))
-
-    # Check result and return
-    check(status, cosmo_in)
-    return f
-
-
-def _vectorize_fn5(fn, fn_vec, cosmo, x1, x2, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL
-    functions with two vector arguments of the same length,
-    with a cosmology dependence.
-
-    Args:
-        fn (callable): Function with a single argument.
-        fn_vec (callable): Function that has a vectorized implementation in
-                           a .i file.
-        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
-                                            converted to a ccl_cosmology.
-        x1 (float or array_like): Argument to fn.
-        x2 (float or array_like): Argument to fn.
-        returns_stats (bool): Indicates whether fn returns a status.
-
-    """
-    # Access ccl_cosmology object
-    cosmo_in = cosmo
-    cosmo = cosmo.cosmo
-    status = 0
-
-    # If a scalar was passed, convert to an array
-    if isinstance(x1, int):
-        x1 = float(x1)
-        x2 = float(x2)
-    if isinstance(x1, float):
-        # Use single-value function
-        if returns_status:
-            f, status = fn(cosmo, x1, x2, status)
-        else:
-            f = fn(cosmo, x1, x2)
-    elif isinstance(x1, np.ndarray):
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, x1, x2, x1.size, status)
-        else:
-            f = fn_vec(cosmo, x1, x2, x1.size)
-    else:
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, x1, x2, len(x2), status)
-        else:
-            f = fn_vec(cosmo, x1, x2, len(x2))
-
-    # Check result and return
-    check(status, cosmo_in)
-    return f
-
-
-def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
-    """Generic wrapper to allow vectorized (1D array) access to CCL
-    functions with two vector arguments of the any length,
-    with a cosmology dependence.
-
-    Args:
-        fn (callable): Function with a single argument.
-        fn_vec (callable): Function that has a vectorized implementation in
-                           a .i file.
-        cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
-                                            converted to a ccl_cosmology.
-        x1 (float or array_like): Argument to fn.
-        x2 (float or array_like): Argument to fn.
-        returns_stats (bool): Indicates whether fn returns a status.
-
-    """
-    # Access ccl_cosmology object
-    cosmo_in = cosmo
-    cosmo = cosmo.cosmo
-    status = 0
-
-    # If a scalar was passed, convert to an array
-    if isinstance(x1, int):
-        x1 = float(x1)
-        x2 = float(x2)
-    if isinstance(x1, float):
-        # Use single-value function
-        if returns_status:
-            f, status = fn(cosmo, x1, x2, status)
-        else:
-            f = fn(cosmo, x1, x2)
-    elif isinstance(x1, np.ndarray):
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, x1, x2, int(x1.size*x2.size), status)
-        else:
-            f = fn_vec(cosmo, x1, x2, int(x1.size*x2.size))
-    else:
-        # Use vectorised function
-        if returns_status:
-            f, status = fn_vec(cosmo, x1, x2, int(len(x1)*len(x2)), status)
-        else:
-            f = fn_vec(cosmo, x1, x2, int(len(x1)*len(x2)))
-
-    # Check result and return
-    check(status, cosmo_in)
-    return f
+    ret, status = func(cosmo.cosmo, *args, 0)
+    check(status, cosmo)
+    return ret
 
 
 def loglin_spacing(logstart, xmin, xmax, num_log, num_lin):
@@ -498,8 +281,9 @@ def _fftlog_transform(rs, frs,
 def _spline_integrate(x, ys, a, b):
     if np.ndim(x) != 1:
         raise ValueError("x should be a 1D array")
-    if np.ndim(ys) < 1 or np.ndim(ys) > 2:
+    if np.ndim(ys) not in [1, 2]:
         raise ValueError("ys should be 1D or a 2D array")
+
     if np.ndim(ys) == 1:
         n_integ = 1
         n_x = len(ys)
@@ -509,7 +293,7 @@ def _spline_integrate(x, ys, a, b):
     if len(x) != n_x:
         raise ValueError(f"x should have {n_x} elements")
 
-    if np.ndim(a) > 0 or np.ndim(b) > 0:
+    if np.ndim(a) or np.ndim(b):
         raise TypeError("Integration limits should be scalar")
 
     status = 0
@@ -550,8 +334,7 @@ def _check_array_params(f_arg, name=None, arr3=False):
             f3 = np.atleast_1d(np.array(f_arg[2], dtype=float))
     if arr3:
         return f1, f2, f3
-    else:
-        return f1, f2
+    return f1, f2
 
 
 def _get_spline1d_arrays(gsl_spline):
@@ -634,19 +417,3 @@ def _get_spline3d_arrays(gsl_spline, length):
     check(status)
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))
-
-
-def check_openmp_version():
-    """Return the OpenMP specification release date.
-    Return 0 if OpenMP is not working.
-    """
-
-    return lib.openmp_version()
-
-
-def check_openmp_threads():
-    """Returns the number of processors available to the device.
-    Return 0 if OpenMP is not working.
-    """
-
-    return lib.openmp_threads()

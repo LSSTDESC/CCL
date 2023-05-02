@@ -23,8 +23,7 @@ from numpy.typing import NDArray
 
 from . import lib, warn_api
 from . import physical_constants as const
-from .pyutils import (_vectorize_fn, _vectorize_fn3,
-                      _vectorize_fn4, _vectorize_fn5)
+from .pyutils import _vectorize_fn
 
 if TYPE_CHECKING:
     from . import Cosmology
@@ -84,8 +83,7 @@ def h_over_h0(
         :math:`E(a)`.
     """
     cosmo.compute_distances()
-    return _vectorize_fn(lib.h_over_h0,
-                         lib.h_over_h0_vec, cosmo, a)
+    return _vectorize_fn(lib.h_over_h0, lib.h_over_h0_vec, cosmo, x=a)
 
 
 def comoving_radial_distance(
@@ -112,7 +110,7 @@ def comoving_radial_distance(
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.comoving_radial_distance,
-                         lib.comoving_radial_distance_vec, cosmo, a)
+                         lib.comoving_radial_distance_vec, cosmo, x=a)
 
 
 def scale_factor_of_chi(
@@ -135,7 +133,7 @@ def scale_factor_of_chi(
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.scale_factor_of_chi,
-                         lib.scale_factor_of_chi_vec, cosmo, chi)
+                         lib.scale_factor_of_chi_vec, cosmo, x=chi)
 
 
 def comoving_angular_distance(
@@ -171,7 +169,7 @@ def comoving_angular_distance(
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.comoving_angular_distance,
-                         lib.comoving_angular_distance_vec, cosmo, a)
+                         lib.comoving_angular_distance_vec, cosmo, x=a)
 
 
 def angular_diameter_distance(
@@ -223,20 +221,14 @@ def angular_diameter_distance(
         than `a1`.
     """
     cosmo.compute_distances()
-    if a2 is not None:
-        # One lens, multiple sources
-        if (np.ndim(a1) == 0) and (np.ndim(a2) != 0):
-            a1 = np.full(len(a2), a1)
-        return _vectorize_fn5(lib.angular_diameter_distance,
-                              lib.angular_diameter_distance_vec,
-                              cosmo, a1, a2)
-    if isinstance(a1, (int, float)):
-        return _vectorize_fn5(lib.angular_diameter_distance,
-                              lib.angular_diameter_distance_vec,
-                              cosmo, 1., a1)
-    return _vectorize_fn5(lib.angular_diameter_distance,
-                          lib.angular_diameter_distance_vec,
-                          cosmo, np.ones(len(a1)), a1)
+    if a2 is None:
+        a1, a2 = np.ones_like(a1)[()], a1
+    else:
+        a1 = np.broadcast_to(a1, np.shape(a2))[()]
+
+    return _vectorize_fn(lib.angular_diameter_distance,
+                         lib.angular_diameter_distance_vec,
+                         cosmo, x=a1, x2=a2, pairwise=True)
 
 
 def luminosity_distance(
@@ -266,7 +258,7 @@ def luminosity_distance(
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.luminosity_distance,
-                         lib.luminosity_distance_vec, cosmo, a)
+                         lib.luminosity_distance_vec, cosmo, x=a)
 
 
 def distance_modulus(
@@ -297,7 +289,7 @@ def distance_modulus(
     """
     cosmo.compute_distances()
     return _vectorize_fn(lib.distance_modulus,
-                         lib.distance_modulus_vec, cosmo, a)
+                         lib.distance_modulus_vec, cosmo, x=a)
 
 
 @warn_api
@@ -379,8 +371,8 @@ def omega_x(
     if species not in species_types:
         raise ValueError(f"Unknown species {species}.")
 
-    return _vectorize_fn3(lib.omega_x,
-                          lib.omega_x_vec, cosmo, a, species_types[species])
+    return _vectorize_fn(lib.omega_x, lib.omega_x_vec,
+                         cosmo, species_types[species], x=a)
 
 
 @warn_api
@@ -418,9 +410,8 @@ def rho_x(
     if species not in species_types:
         raise ValueError(f"Unknown species {species}.")
 
-    return _vectorize_fn4(
-        lib.rho_x, lib.rho_x_vec, cosmo, a,
-        species_types[species], int(is_comoving))
+    return _vectorize_fn(lib.rho_x, lib.rho_x_vec,
+                         cosmo, species_types[species], int(is_comoving), x=a)
 
 
 def growth_factor(
@@ -442,7 +433,7 @@ def growth_factor(
         Growth factor at `a`.
     """
     cosmo.compute_growth()
-    return _vectorize_fn(lib.growth_factor, lib.growth_factor_vec, cosmo, a)
+    return _vectorize_fn(lib.growth_factor, lib.growth_factor_vec, cosmo, x=a)
 
 
 def growth_factor_unnorm(
@@ -465,7 +456,7 @@ def growth_factor_unnorm(
     """
     cosmo.compute_growth()
     return _vectorize_fn(lib.growth_factor_unnorm,
-                         lib.growth_factor_unnorm_vec, cosmo, a)
+                         lib.growth_factor_unnorm_vec, cosmo, x=a)
 
 
 def growth_rate(
@@ -492,4 +483,4 @@ def growth_rate(
         Growth rate at `a`.
     """
     cosmo.compute_growth()
-    return _vectorize_fn(lib.growth_rate, lib.growth_rate_vec, cosmo, a)
+    return _vectorize_fn(lib.growth_rate, lib.growth_rate_vec, cosmo, x=a)

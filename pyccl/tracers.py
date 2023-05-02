@@ -7,7 +7,7 @@ from .pyutils import check
 from .errors import CCLWarning
 from .base.parameters import physical_constants
 from .base import CCLObject, warn_api
-from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
+from .pyutils import (_check_array_params, NoneArr, _vectorize_fn,
                       _get_spline1d_arrays, _get_spline2d_arrays)
 
 
@@ -32,7 +32,7 @@ def _Sig_MG(cosmo, a, k):
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
     """
     cosmo.compute_distances()
-    return _vectorize_fn6(lib.Sig_MG, lib.Sig_MG_vec, cosmo, a, k)
+    return _vectorize_fn(lib.Sig_MG, lib.Sig_MG_vec, cosmo, x=a, x2=k)
 
 
 def _check_background_spline_compatibility(cosmo, z):
