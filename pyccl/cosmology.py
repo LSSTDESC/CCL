@@ -156,7 +156,6 @@ emulator_neutrinos_types = {
     'strict': lib.emu_strict,
     'equalize': lib.emu_equalize
 }
-"""Options for the behavior of ``CosmicEmu`` with unequal neutrino masses."""
 
 
 _TOP_LEVEL_MODULES = ("",)

@@ -57,7 +57,10 @@ class Pk2D(CCLObject):
     Supported binary operations: ``+``, ``-``, ``*``, ``/``, ``**``
     (and in-place) between :class:`~Pk2D` objects and numbers. Exponentiation
     is only supported for numbers. For mismatch of interpolated ranges, the one
-    with the narrowest support is output.
+    with the narrowest support is output. Comparison supported: ``==``, ``!=``.
+    Membership supported: ``in`` (checks if range of one is contained in the
+    range of the other).
+
 
     Parameters
     ----------
@@ -90,8 +93,8 @@ class Pk2D(CCLObject):
         Whether `pk_arr` holds the power spectrum in linear- or log-scale.
     extrap_order_lok, extrap_order_hik :  {0, 1, 2}
         Extrapolation order when calling the power spectrum beyond the
-        interpolation boundaries. Extrapolated in linear- or log-scale,
-        depending on `is_logp`.
+        interpolation boundaries in :math:`k`. Extrapolated in linear- or
+        log-scale, depending on `is_logp`.
     empty
         Initialize an empty object.
 
@@ -135,13 +138,12 @@ class Pk2D(CCLObject):
 
             # Check that `a` is a monotonically increasing array.
             if not (np.diff(a_arr) > 0).all():
-                raise ValueError("Input scale factor array in `a_arr` is not "
-                                 "monotonically increasing.")
+                raise ValueError("a_arr must be monotonically increasing")
 
             pkflat = pk_arr.flatten()
             # Check dimensions make sense
             if len(pkflat) != len(a_arr)*len(lk_arr):
-                raise ValueError("Size of input arrays is inconsistent")
+                raise ValueError("Shape mismatch of input arrays.")
         else:  # Initialize power spectrum from function
             warnings.warn("The use of a function when initialising a ``Pk2D`` "
                           "object is deprecated. Use `Pk2D.from_function`.",
@@ -163,6 +165,9 @@ class Pk2D(CCLObject):
 
     @property
     def has_psp(self):  # TODO: Remove for CCLv3.
+        """
+        .. deprecated:: 2.8.0
+        """
         return 'psp' in vars(self)
 
     @property
@@ -382,8 +387,6 @@ class Pk2D(CCLObject):
     ) -> Union[float, NDArray[float]]:
         r"""Evaluate the power spectrum or its logarithmic derivative.
 
-        :meta public:
-
         Arguments
         ---------
         k : array_like (nk,)
@@ -476,7 +479,7 @@ class Pk2D(CCLObject):
 
     def __del__(self):
         """Free memory associated with this Pk2D structure."""
-        if self:
+        if self:  # TODO: Remove if in CCLv3.
             lib.f2d_t_free(self.psp)
 
     def __bool__(self):  # TODO: Remove for CCLv3.

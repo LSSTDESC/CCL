@@ -1,4 +1,16 @@
+"""
+==========================================
+Boltzmann solvers (:mod:`pyccl.boltzmann`)
+==========================================
+
+Functions to get the power spectrum from Boltzmann equation solvers.
+"""
+
+from __future__ import annotations
+
 __all__ = ("get_camb_pk_lin", "get_isitgr_pk_lin", "get_class_pk_lin",)
+
+from typing import TYPE_CHECKING, Tuple, Union
 
 import numpy as np
 
@@ -9,34 +21,43 @@ except ModuleNotFoundError:
 
 from . import CCLError, Pk2D, warn_api
 
+if TYPE_CHECKING:
+    from . import Cosmology
+
 
 @warn_api
-def get_camb_pk_lin(cosmo, *, nonlin=False):
-    """Run CAMB and return the linear power spectrum.
+def get_camb_pk_lin(
+        cosmo: Cosmology,
+        *,
+        nonlin: bool = False
+) -> Union[Pk2D, Tuple[Pk2D, Pk2D]]:
+    """Compute the linear (and optionally non-linear) power spectrum from CAMB.
 
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
-            parameters. The cosmological parameters with
-            which to run CAMB.
-        nonlin (:obj:`bool`, optional): Whether to compute and return the
-            non-linear power spectrum as well.
+    Arguments
+    ---------
+    cosmo
+        Cosmological parameters.
+    nonlin
+        If True, also compute and return the non-linear power spectrum.
+        For the non-linear power spectrum, these additional parameters may be
+        specified in `cosmo`:
 
-    Returns:
-        :class:`~pyccl.pk2d.Pk2D`: Power spectrum object. The linear power \
-            spectrum. If ``nonlin=True``, returns a tuple \
-            ``(pk_lin, pk_nonlin)``.
+            * `'halofit_version'`
+            * `'HMCode_A_baryon'`
+            * `'HMCode_eta_baryon'`
+            * `'HMCode_logT_AGN'`
+            * `'kmax'`
+            * `'lmax'`
+            * `'dark_energy_model'`
 
-    Currently supported extra parameters for CAMB are:
+        Specified as e.g. ``extra_parameters={"camb": {"kmax": 50}}``.
+        More information in `CAMB Non-linear models <https://camb.readthedocs.
+        io/en/latest/nonlinear.html#camb.nonlinear.Halofit>`_.
 
-        * `halofit_version`
-        * `HMCode_A_baryon`
-        * `HMCode_eta_baryon`
-        * `HMCode_logT_AGN`
-        * `kmax`
-        * `lmax`
-        * `dark_energy_model`
+    Returns
+    -------
 
-    Consult the CAMB documentation for their usage.
+        Linear (and optionally non-linear) power spectra.
     """
     import camb
     import camb.model
@@ -235,17 +256,19 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         return pk_lin, pk_nonlin
 
 
-def get_isitgr_pk_lin(cosmo):
-    """Run ISiTGR-CAMB and return the linear power spectrum.
+def get_isitgr_pk_lin(cosmo: Cosmology) -> Pk2D:
+    """Compute the modified-gravity linear power spectrum using ISiTGR
+    (based on CAMB).
 
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
-            parameters. The cosmological parameters with
-            which to run ISiTGR-CAMB.
+    Arguments
+    ---------
+    cosmo
+        Cosmological parameters.
 
-    Returns:
-        :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
-            object. The linear power spectrum.
+    Returns
+    -------
+
+        Linear power spectrum.
     """
     import isitgr  # noqa: F811
     import isitgr.model
@@ -407,17 +430,18 @@ def get_isitgr_pk_lin(cosmo):
     return pk_lin
 
 
-def get_class_pk_lin(cosmo):
-    """Run CLASS and return the linear power spectrum.
+def get_class_pk_lin(cosmo: Cosmology) -> Pk2D:
+    """Compute the linear power spectrum from CLASS.
 
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
-            parameters. The cosmological parameters with
-            which to run CLASS.
+    Arguments
+    ---------
+    cosmo
+        Cosmological parameters.
 
-    Returns:
-        :class:`~pyccl.pk2d.Pk2D`: Power spectrum object.\
-            The linear power spectrum.
+    Returns
+    -------
+
+        Linear power spectrum.
     """
     import classy
 
