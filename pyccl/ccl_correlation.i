@@ -13,6 +13,7 @@
     (double* theta, int nt),
     (double* r, int nr),
     (double* s, int ns),
+    (double* mu, int nmu),
     (double* sig, int nsig)}
 %apply (int DIM1, double* ARGOUT_ARRAY1) {
     (int nout, double* output),
@@ -77,24 +78,14 @@ void correlation_multipole_vec(ccl_cosmology *cosmo,ccl_f2d_t *psp,
   ccl_correlation_multipole(cosmo,psp,a,beta,l,ns,s,xis,status);
 }
 
-void correlation_3dRsd_vec(ccl_cosmology *cosmo,ccl_f2d_t *psp,
-                           double a,double mu,double beta,
-                           double *s,int ns,
-                           int nxis,double *xis,int use_spline,
+void correlation_3dRsd_vec(ccl_cosmology *cosmo, ccl_f2d_t *psp,
+                           double a, double beta,
+                           double *mu, int nmu,
+                           double *s, int ns,
+                           int nxis, double *xis,
+                           int use_spline,
                            int *status){
   ccl_correlation_3dRsd(cosmo,psp,a,ns,s,mu,beta,xis,use_spline,status);
 }
 
-void correlation_3dRsd_avgmu_vec(ccl_cosmology *cosmo,ccl_f2d_t *psp,
-                                 double a,double beta,double *s,int ns,
-                                 int nxis,double *xis,int *status){
-  ccl_correlation_3dRsd_avgmu(cosmo,psp,a,ns,s,beta,xis,status);
-}
-
-void correlation_pi_sigma_vec(ccl_cosmology *cosmo,ccl_f2d_t *psp,
-                              double a,double beta,double pie,double *sig,
-                              int nsig,int nxis,double* xis,int use_spline,
-                              int *status){
-  ccl_correlation_pi_sigma(cosmo,psp,a,beta,pie,nsig,sig,xis,use_spline,status);
-}
 %}

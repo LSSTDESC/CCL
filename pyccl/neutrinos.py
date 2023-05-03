@@ -80,7 +80,7 @@ def nu_masses(
         mass_split: str,
         T_CMB: Optional[Real] = None,
         m_nu: Optional[Union[Real, Sequence[Real]]] = None  # TODO: v3 2nd arg
-) -> NDArray[Real]:
+) -> Union[float, NDArray[float]]:
     r"""Compute the neutrinos mass(es) given a mass hierarchy.
 
     Arguments
@@ -115,10 +115,7 @@ def nu_masses(
                       CCLDeprecationWarning)
     if m_nu is None:
         m_nu = 93.14 * Omega_nu_h2
-    return _get_neutrino_masses(m_nu=m_nu, mass_split=mass_split)
 
-
-def _get_neutrino_masses(*, m_nu, mass_split):
     # Split the neutrino masses according to a mass hierarchy.
     if isinstance(m_nu, Real) and m_nu == 0:  # no massive neutrinos
         return np.array([])

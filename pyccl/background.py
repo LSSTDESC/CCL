@@ -347,7 +347,7 @@ def omega_x(
 
     .. math::
 
-        \Omega_x(a) = \frac{\rho_x(a)}{\rho_{\rm c}(a)}
+        \Omega_{\rm x}(a) \equiv \frac{\rho_{\rm x}(a)}{\rho_{\rm c}(a)}
 
     Arguments
     ---------
@@ -383,7 +383,7 @@ def rho_x(
         *,
         is_comoving: bool = False
 ) -> Union[float, NDArray[float]]:
-    r"""Physical or comoving density as a function of scale factor.
+    r"""Physical or comoving density, :math:`\rho_{\rm x}`.
 
     Arguments
     ---------
@@ -418,7 +418,7 @@ def growth_factor(
         cosmo: Cosmology,
         a: Union[Real, NDArray[Real]],
 ) -> Union[float, NDArray[float]]:
-    """Growth factor.
+    """Growth factor, :math:`D(a)`.
 
     Arguments
     ---------
@@ -468,7 +468,7 @@ def growth_rate(
 
     .. math::
 
-        \frac{\mathrm{d}\ln{D}}{\mathrm{d}\ln{a}}.
+        \frac{{\rm d}\ln{D(a)}}{{\rm d}\ln{a}}.
 
     Arguments
     ---------

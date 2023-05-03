@@ -49,6 +49,11 @@ def linear_power(
     -------
     array_like (na, nk)
         Linear power spectrum, in units of :math:`\rm Mpc^3`.
+
+    See Also
+    --------
+    :func:`~linear_matter_power` : Evaluate the linear matter power spectrum.
+    :meth:`~Pk2D.__call__` : Evaluate any power spectrum.
     """
     return cosmo.get_linear_power(p_of_k_a)(k, a, cosmo)
 
@@ -61,7 +66,28 @@ def nonlin_power(
         *,
         p_of_k_a: str = DEFAULT_POWER_SPECTRUM
 ) -> Union[float, NDArray[float]]:
-    r"""The non-linear power spectrum.
+    r"""The non-linear power spectrum, :math:`P(k)`:
+
+    .. math::
+
+        \xi(r) = \int \frac{{\rm d^3}k}{(2\pi)^3} \, P(k) \,
+        e^{i {\bf k} \dot ({\bf x} - {\bf x'})},
+
+    where :math:`\xi(r)` is the *autocorrelation function*, defined as
+
+    .. math::
+
+        \xi(r) &\equiv \langle \delta({\bf x}) \delta({\bf x'}) \rangle \\
+        &= \frac{1}{V} \int {\rm d^3}{\bf x} \, \delta({\bf x})
+        \delta({\bf x} - {\bf r}),
+
+    where :math:`\delta` is the matter overdensity
+
+    .. math::
+
+        \delta({\bf x}) \equiv \frac{\rho({\bf x}) - \bar\rho}{\bar\rho},
+
+    and :math:`\bar\rho` is the average density over all space.
 
     Arguments
     ---------
@@ -78,6 +104,15 @@ def nonlin_power(
     -------
     array_like (na, nk)
         Non-inear power spectrum, in units of :math:`\rm Mpc^3`.
+
+    See Also
+    --------
+    :func:`~pyccl.correlations.correlation`
+        Inverse Fourier transform of the power spectrum.
+    :func:`~nonlin_matter_power`
+        Evaluate the non-linear matter power spectrum.
+    :meth:`~Pk2D.__call__`
+        Evaluate any power spectrum.
     """
     return cosmo.get_nonlin_power(p_of_k_a)(k, a, cosmo)
 
@@ -102,6 +137,11 @@ def linear_matter_power(
     -------
     array_like (na, nk)
         Linear matter power spectrum, in units of :math:`\rm Mpc^3`.
+
+    See Also
+    --------
+    :func:`~linear_power` : Evaluate any linear power spectrum.
+    :meth:`~Pk2D.__call__` : Evaluate any power spectrum.
     """
     return cosmo.linear_power(k, a, p_of_k_a=DEFAULT_POWER_SPECTRUM)
 
@@ -126,6 +166,11 @@ def nonlin_matter_power(
     -------
     array_like (na, nk)
         Non-linear matter power spectrum, in units of :math:`\rm Mpc^3`.
+
+    See Also
+    --------
+    :func:`~nonlin_power` : Evaluate any non-linear power spectrum.
+    :meth:`~Pk2D.__call__` : Evaluate any power spectrum.
     """
     return cosmo.nonlin_power(k, a, p_of_k_a=DEFAULT_POWER_SPECTRUM)
 
@@ -136,6 +181,14 @@ def sigmaM(
         a: Union[Real, NDArray[Real]]
 ) -> Union[float, NDArray[float]]:
     r"""Root mean squared variance of the linear power spectrum.
+
+    Defined via :math:`\sigma_R`, using the Lagrangian scale of the halo
+
+    .. math::
+
+        R = \left( \frac{3M}{4\pi \bar\rho_{\rm m}} \right)^{\frac{1}{3}},
+
+    where :math:`\bar\rho_{\rm m}` is the average matter density.
 
     Arguments
     ---------
@@ -150,6 +203,10 @@ def sigmaM(
     -------
     array_like (na, nM)
         RMS variance of halo mass.
+
+    See Also
+    --------
+    :func:`~sigmaR` : RMS variance in top-hat spheres of radius :math:`R`.
     """
     cosmo.compute_sigma()
 
@@ -165,13 +222,25 @@ def sigmaM(
 
 @warn_api
 def sigmaR(
-        cosmo,
+        cosmo: Cosmology,
         R: Union[Real, NDArray[Real]],
         a: Union[Real, NDArray[Real]] = 1,
         *,
         p_of_k_a: Union[str, Pk2D] = DEFAULT_POWER_SPECTRUM
 ):
-    r"""RMS variance in a top-hat sphere of radius `R` :math:`\rm Mpc`.
+    r"""RMS variance in a top-hat sphere of radius `R` :math:`\rm Mpc`,
+
+    .. math::
+
+        \sigma_R^2 = \frac{1}{2\pi^2} \int {\rm d}k \, k^2 \, P_{\rm L}(k)
+        \tilde{W}_R^2(k),
+
+    where :math:`P_{\rm L}` is the linear matter power spectrum and
+    :math:`\tilde{W}` is the Fourier transform of the spherical top-hat window
+
+    .. math::
+
+        \tilde{W}_R(k) = \frac{3}{(kR)^3} \left( \sin(kR) - kR \cos(kR)\right).
 
     Arguments
     ---------
@@ -190,6 +259,10 @@ def sigmaR(
     -------
     array_like (na, nR)
         RMS variance in a top-hat sphere of radius `R`.
+
+    See Also
+    --------
+    :func:`~sigmaM` : RMS variance of the density field smoothed on :math:`M`.
     """
     psp = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
     status = 0

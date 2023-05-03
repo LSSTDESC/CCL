@@ -29,11 +29,12 @@ from .power import *
 
 from .tracers import *
 from .cells import *
-from .correlations import *
-from .covariances import *
 
 from .pk2d import *
 from .tk3d import *
+
+from .correlations import *
+from .covariances import *
 
 from .boltzmann import *
 from .baryons import *

@@ -601,7 +601,7 @@ void ccl_correlation_multipole(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     ccl_fftlog_ComputeXi3D(4, 0, 1, N_ARR, k_arr, &pk_arr, s_arr, &xi_arr0, status);
     for (i = 0; i < N_ARR; i++) xi_arr[i] = 8. / 35 * beta * beta * xi_arr0[i];
   } else {
-    ccl_cosmology_set_status_message(cosmo, "unavailable value of l\n");
+    ccl_cosmology_set_status_message(cosmo, "unavailable value of ell\n");
     return;
   }
 
@@ -831,7 +831,7 @@ Correlation function result will be in array xi
 
 void ccl_correlation_3dRsd(ccl_cosmology *cosmo, ccl_f2d_t *psp,
                            double a, int n_s, double *s,
-                           double mu, double beta, double *xi, int use_spline,
+                           double *mu, double beta, double *xi, int use_spline,
                            int *status) {
   int i;
   double *xi_arr0, *xi_arr2, *xi_arr4;
@@ -866,8 +866,8 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, ccl_f2d_t *psp,
     ccl_correlation_multipole(cosmo, psp, a, beta, 2, n_s, s, xi_arr2, status);
     ccl_correlation_multipole(cosmo, psp, a, beta, 4, n_s, s, xi_arr4, status);
     for (i = 0; i < n_s; i++)
-      xi[i] = xi_arr0[i] + xi_arr2[i] * gsl_sf_legendre_Pl(2, mu) +
-              xi_arr4[i] * gsl_sf_legendre_Pl(4, mu);
+      xi[i] = xi_arr0[i] + xi_arr2[i] * gsl_sf_legendre_Pl(2, mu[i]) +
+              xi_arr4[i] * gsl_sf_legendre_Pl(4, mu[i]);
     free(xi_arr0);
     free(xi_arr2);
     free(xi_arr4);
@@ -884,91 +884,10 @@ void ccl_correlation_3dRsd(ccl_cosmology *cosmo, ccl_f2d_t *psp,
         ccl_f1d_t_eval(cosmo->data.rsd_splines[0],s[i]) -
         (4. / 3 * beta + 4. / 7 * beta * beta) *
         ccl_f1d_t_eval(cosmo->data.rsd_splines[1],s[i]) *
-        gsl_sf_legendre_Pl(2, mu) +
+        gsl_sf_legendre_Pl(2, mu[i]) +
         8. / 35 * beta * beta * ccl_f1d_t_eval(cosmo->data.rsd_splines[2],s[i]) *
-        gsl_sf_legendre_Pl(4, mu);
+        gsl_sf_legendre_Pl(4, mu[i]);
   }
-
-  return;
-}
-
-/*--------ROUTINE: ccl_correlation_3dRsd_avgmu ------
-TASK: Calculate the average of redshift-space correlation function xi(s,mu) over mu at constant s
-
-INPUT:  cosmology, scale factor a, number of s values, s values, beta (= growth rate / bias)
-
-The result will be in array xi
-*/
-
-void ccl_correlation_3dRsd_avgmu(ccl_cosmology *cosmo, ccl_f2d_t *psp,
-                                 double a, int n_s, double *s,
-                                 double beta, double *xi,
-                                 int *status) {
-// The average is just the l=0 multipole - the higher multiples inetegrate to zero.
-  ccl_correlation_multipole(cosmo, psp, a, beta, 0, n_s, s, xi, status);
-
-  return;
-}
-
-/*--------ROUTINE: ccl_correlation_pi_sigma ------
-TASK: Calculate the redshift-space correlation function using longitudinal and
-      transverse coordinates pi and sigma.
-
-INPUT:  cosmology, scale factor a, beta (= growth rate / bias),
-        pi, number of sigma values, sigma values,
-        key for using spline
-
-Correlation function result will be in array xi
-*/
-
-void ccl_correlation_pi_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp,
-                              double a, double beta,
-                              double pi, int n_sig, double *sig, double *xi,
-                              int use_spline, int *status) {
-  int i;
-  double *mu_arr, *s_arr, *xi_arr;
-
-  mu_arr = malloc(sizeof(double) * n_sig);
-  if (mu_arr == NULL) {
-    *status = CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo,
-           "ccl_correlation.c: ccl_correlation_pi_sigma(): ran out of memory\n");
-    return;
-  }
-
-  s_arr = malloc(sizeof(double) * n_sig);
-  if (s_arr == NULL) {
-    free(mu_arr);
-    *status = CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo,
-           "ccl_correlation.c: ccl_correlation_pi_sigma(): ran out of memory\n");
-    return;
-  }
-
-  xi_arr = malloc(sizeof(double) * n_sig);
-  if (xi_arr == NULL) {
-    free(mu_arr);
-    free(s_arr);
-    *status = CCL_ERROR_MEMORY;
-    ccl_cosmology_set_status_message(cosmo,
-           "ccl_correlation.c: ccl_correlation_pi_sigma(): ran out of memory\n");
-    return;
-  }
-
-  for (i = 0; i < n_sig; i++) {
-    s_arr[i] = sqrt(pi * pi + sig[i] * sig[i]);
-    mu_arr[i] = pi / s_arr[i];
-  }
-
-  for (i = 0; i < n_sig; i++) {
-    ccl_correlation_3dRsd(cosmo, psp, a, n_sig, s_arr, mu_arr[i], beta, xi_arr,
-                          use_spline, status);
-    xi[i] = xi_arr[i];
-  }
-
-  free(mu_arr);
-  free(xi_arr);
-  free(s_arr);
 
   return;
 }
