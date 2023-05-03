@@ -92,7 +92,7 @@ class SatelliteShearHOD(HaloProfileHOD):
                  siglnM_p=0., log10M0_0=7., log10M0_p=0.,
                  log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
                  alpha_p=0., bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False,
+                 a_pivot=1., ns_independent=False, mass_def=None,
                  integration_method='FFTLog', rmin=0.001, N_r=512,
                  N_jn=10000):
         if lmax >= 13:
@@ -153,7 +153,9 @@ class SatelliteShearHOD(HaloProfileHOD):
                          bg_p=bg_p,
                          bmax_0=bmax_0,
                          bmax_p=bmax_p,
-                         a_pivot=a_pivot, ns_independent=ns_independent)
+                         a_pivot=a_pivot,
+                         ns_independent=ns_independent,
+                         mass_def=mass_def)
         self.update_precision_fftlog(padding_lo_fftlog=1E-2,
                                      padding_hi_fftlog=1E3,
                                      n_per_decade=350,
@@ -340,7 +342,7 @@ class SatelliteShearHOD(HaloProfileHOD):
             gamma_out[gamma_out > 0.3] = 0.3
             return gamma_out
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         '''
         Returns the real part of the satellite intrinsic shear field,
         .. math::
@@ -351,9 +353,9 @@ class SatelliteShearHOD(HaloProfileHOD):
         M_use = np.atleast_1d(M)
         r_use = np.atleast_1d(r)
 
-        rvir = mass_def.get_radius(cosmo, M_use, a) / a
+        rvir = self.mass_def.get_radius(cosmo, M_use, a) / a
         # Density profile from HOD class - truncated NFW
-        u = self._usat_real(cosmo, r_use, M_use, a, mass_def)
+        u = self._usat_real(cosmo, r_use, M_use, a)
         prof = self.gamma_I(r_use, rvir) * u
 
         if np.ndim(r) == 0:
@@ -363,7 +365,7 @@ class SatelliteShearHOD(HaloProfileHOD):
 
         return prof
 
-    def _usat_fourier(self, cosmo, k, M, a, mass_def):
+    def _usat_fourier(self, cosmo, k, M, a):
         '''
         Returns the fourier transform of the satellite intrinsic shear field.
         The density profile of the halo is assumed to be a truncated NFW
@@ -378,7 +380,7 @@ class SatelliteShearHOD(HaloProfileHOD):
             # function sampling. The bessel function will be sampled
             # and interpolated to gain speed.
             r_use = np.linspace(self.rmin,
-                                mass_def.get_radius(cosmo, M_use, a) / a,
+                                self.mass_def.get_radius(cosmo, M_use, a) / a,
                                 self.N_r).T
             x_jn = np.geomspace(k_use.min() * r_use.min(),
                                 k_use.max() * r_use.max(),
@@ -397,8 +399,8 @@ class SatelliteShearHOD(HaloProfileHOD):
                 jn[j] = spherical_jn(l_arr[j], x_jn)
                 k_dot_r = np.multiply.outer(k_use, r_use)
                 jn_interp = np.interp(k_dot_r, x_jn, jn[j])
-                integrand = r_use**2 * self._real(cosmo, r_use, M_use,
-                                                  a, mass_def) * jn_interp
+                integrand = (r_use**2 * jn_interp *
+                             self._real(cosmo, r_use, M_use, a))
                 if self.integration_method == 'simpson':
                     from scipy.integrate import simpson
                     for i, M_i in enumerate(M_use):
