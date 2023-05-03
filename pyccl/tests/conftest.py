@@ -1,8 +1,8 @@
 """Config file for pytest. Allow caching for faster test completion.
 `$ pytest tests/ --use-cache`
 """
-from pyccl import CCLHalosObject
 from .test_cclobject import all_subclasses, init_decorator
+import pyccl
 
 
 def pytest_addoption(parser):
@@ -16,8 +16,8 @@ def pytest_generate_tests(metafunc):
 
 
 # For testing, we want to make sure that all instances of the subclasses
-# of `CCLHalosObject` contain all attributes listed in `__repr_attrs__`.
+# of `CCLAutoRepr` contain all attributes listed in `__repr_attrs__`.
 # We run some things post-init for these subclasses, which are triggered
 # during smoke tests.
-for sub in list(all_subclasses(CCLHalosObject)):
+for sub in list(all_subclasses(pyccl.CCLAutoRepr)):
     sub.__init__ = init_decorator(sub.__init__)

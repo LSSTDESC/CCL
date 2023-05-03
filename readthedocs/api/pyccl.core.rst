@@ -1,7 +1,7 @@
-pyccl.core module
+pyccl.cosmology module
 =================
 
-.. automodule:: pyccl.core
+.. automodule:: pyccl.cosmology
    :members:
    :undoc-members:
    :show-inheritance:

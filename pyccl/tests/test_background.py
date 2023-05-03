@@ -133,14 +133,14 @@ def test_background_omega_x_raises():
     'neutrinos_massive'])
 @pytest.mark.parametrize('is_comoving', [True, False])
 def test_background_rho_x(a, kind, is_comoving):
-    val = ccl.rho_x(COSMO_NU, a, kind, is_comoving)
+    val = ccl.rho_x(COSMO_NU, a, kind, is_comoving=is_comoving)
     assert np.all(np.isfinite(val))
     assert np.shape(val) == np.shape(a)
 
 
 def test_background_rho_x_raises():
     with pytest.raises(ValueError):
-        ccl.rho_x(COSMO, 1, 'blah', False)
+        ccl.rho_x(COSMO, 1, 'blah', is_comoving=False)
 
 
 def test_input_arrays():
@@ -220,12 +220,12 @@ def test_input_arrays_raises():
                                 n_s=0.965, A_s=2e-9,
                                 background=3)
     # Incomplete dictionary
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
                                 n_s=0.965, A_s=2e-9,
                                 background={'a': input_a_array,
                                             'h_over_h0': input_hoh0})
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
                                 n_s=0.965, A_s=2e-9,
                                 growth={'a': input_a_array,

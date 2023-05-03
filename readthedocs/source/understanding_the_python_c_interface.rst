@@ -72,8 +72,9 @@ Example ``Python`` and ``C`` Code
 =================================
 
 Putting together all of the information above, here is example code based on the
-CCL ``pyccl.bcm`` module. Note that the code snippets here may be out of date
-relative to their current form in the repository.
+old CCL ``pyccl.bcm`` module. Note that these code snippets are outdated, since
+the BCM module has now been fully migrated into python. Still, this provides a
+useful example of how the ``C`` and ``Python`` interact in CCL.
 
 
 C Header File ``include/ccl_bcm.h``

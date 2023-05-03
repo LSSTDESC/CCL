@@ -1,7 +1,6 @@
 import os
-
 import numpy as np
-
+import pytest
 import pyccl as ccl
 
 
@@ -15,13 +14,12 @@ def test_ssc_WL():
                           sigma8=0.8, m_nu=0.0)
 
     mass_def = ccl.halos.MassDef200m()
-    hmf = ccl.halos.MassFuncTinker10(cosmo,
-                                     mass_def=mass_def)
-    hbf = ccl.halos.HaloBiasTinker10(cosmo,
-                                     mass_def=mass_def)
-    nfw = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(mass_def),
-                                   fourier_analytic=True)
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mass_def)
+    hmf = ccl.halos.MassFuncTinker10(mass_def=mass_def)
+    hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def)
+    con = ccl.halos.ConcentrationDuffy08(mass_def=mass_def)
+    nfw = ccl.halos.HaloProfileNFW(concentration=con, fourier_analytic=True)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mass_def)
 
     n_z = 100
 
@@ -32,27 +30,26 @@ def test_ssc_WL():
     a = np.linspace(1/(1+6), 1, n_z)
     k = np.geomspace(k_min, k_max, n_k)
 
-    tk3D = ccl.halos.halomod_Tk3D_SSC(cosmo=cosmo, hmc=hmc,
-                                      prof1=nfw,
-                                      prof2=nfw,
-                                      prof12_2pt=None,
-                                      normprof1=True, normprof2=True,
-                                      lk_arr=np.log(k), a_arr=a,
-                                      use_log=True)
+    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
+        tk3D = ccl.halos.halomod_Tk3D_SSC(cosmo=cosmo, hmc=hmc,
+                                          prof=nfw, prof2=nfw, prof12_2pt=None,
+                                          lk_arr=np.log(k), a_arr=a,
+                                          use_log=True,
+                                          normprof1=True, normprof2=True)
 
     z, nofz = np.loadtxt(os.path.join(data_dir, "ssc_WL_nofz.txt"),
                          unpack=True)
-    WL_tracer = ccl.WeakLensingTracer(cosmo, (z, nofz))
+    WL_tracer = ccl.WeakLensingTracer(cosmo, dndz=(z, nofz))
 
     ell = np.loadtxt(os.path.join(data_dir, "ssc_WL_ell.txt"))
 
     fsky = 0.05
 
-    sigma2_B = ccl.sigma2_B_disc(cosmo, a=a, fsky=fsky)
+    sigma2_B = ccl.sigma2_B_disc(cosmo, a_arr=a, fsky=fsky)
     cov_ssc = ccl.covariances.angular_cl_cov_SSC(cosmo,
-                                                 cltracer1=WL_tracer,
-                                                 cltracer2=WL_tracer,
-                                                 ell=ell, tkka=tk3D,
+                                                 tracer1=WL_tracer,
+                                                 tracer2=WL_tracer,
+                                                 ell=ell, t_of_kk_a=tk3D,
                                                  sigma2_B=(a, sigma2_B),
                                                  fsky=None)
     var_ssc_ccl = np.diag(cov_ssc)

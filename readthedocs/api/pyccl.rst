@@ -21,7 +21,7 @@ Submodules
    pyccl.bcm
    pyccl.boltzmann
    pyccl.cls
-   pyccl.core
+   pyccl.cosmology
    pyccl.correlations
    pyccl.covariances
    pyccl.errors

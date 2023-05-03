@@ -12,11 +12,31 @@ CCL defines seven species types:
 
 These strings define the `species` inputs to the functions below.
 """
+__all__ = (
+    "Species", "h_over_h0", "comoving_radial_distance", "scale_factor_of_chi",
+    "comoving_angular_distance", "angular_diameter_distance",
+    "luminosity_distance", "distance_modulus",
+    "sigma_critical", "omega_x", "rho_x",
+    "growth_factor", "growth_factor_unnorm", "growth_rate",)
+
+from enum import Enum
+
 import numpy as np
-from . import ccllib as lib
-from .pyutils import _vectorize_fn, _vectorize_fn3
-from .pyutils import _vectorize_fn4, _vectorize_fn5
-from .parameters import physical_constants
+
+from . import lib, physical_constants, warn_api
+from .pyutils import (_vectorize_fn, _vectorize_fn3,
+                      _vectorize_fn4, _vectorize_fn5)
+
+
+class Species(Enum):
+    CRITICAL = "critical"
+    MATTER = "matter"
+    DARK_ENERGY = "dark_energy"
+    RADIATION = "radiation"
+    CURVATURE = "curvature"
+    NEUTRINOS_REL = "neutrinos_rel"
+    NEUTRINOS_MASSIVE = "neutrinos_massive"
+
 
 species_types = {
     'critical': lib.species_crit_label,
@@ -29,52 +49,19 @@ species_types = {
 }
 
 
-def growth_factor(cosmo, a):
-    """Growth factor.
+def h_over_h0(cosmo, a):
+    """Ratio of Hubble constant at `a` over Hubble constant today.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         a (float or array_like): Scale factor(s), normalized to 1 today.
 
     Returns:
-        float or array_like: Growth factor, normalized to unity today.
+        float or array_like: H(a)/H0.
     """
-    cosmo.compute_growth()
-    return _vectorize_fn(lib.growth_factor,
-                         lib.growth_factor_vec, cosmo, a)
-
-
-def growth_factor_unnorm(cosmo, a):
-    """Unnormalized growth factor.
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        a (float or array_like): Scale factor(s), normalized to 1 today.
-
-    Returns:
-        float or array_like: Unnormalized growth factor, normalized to \
-            the scale factor at early times.
-    """
-    cosmo.compute_growth()
-    return _vectorize_fn(lib.growth_factor_unnorm,
-                         lib.growth_factor_unnorm_vec, cosmo, a)
-
-
-def growth_rate(cosmo, a):
-    """Growth rate defined as the logarithmic derivative of the
-    growth factor, dlnD/dlna.
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        a (float or array_like): Scale factor(s), normalized to 1 today.
-
-    Returns:
-        float or array_like: Growth rate.
-
-    """
-    cosmo.compute_growth()
-    return _vectorize_fn(lib.growth_rate,
-                         lib.growth_rate_vec, cosmo, a)
+    cosmo.compute_distances()
+    return _vectorize_fn(lib.h_over_h0,
+                         lib.h_over_h0_vec, cosmo, a)
 
 
 def comoving_radial_distance(cosmo, a):
@@ -90,6 +77,21 @@ def comoving_radial_distance(cosmo, a):
     cosmo.compute_distances()
     return _vectorize_fn(lib.comoving_radial_distance,
                          lib.comoving_radial_distance_vec, cosmo, a)
+
+
+def scale_factor_of_chi(cosmo, chi):
+    """Scale factor, a, at a comoving radial distance chi.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        chi (float or array_like): Comoving radial distance(s); Mpc.
+
+    Returns:
+        float or array_like: Scale factor(s), normalized to 1 today.
+    """
+    cosmo.compute_distances()
+    return _vectorize_fn(lib.scale_factor_of_chi,
+                         lib.scale_factor_of_chi_vec, cosmo, chi)
 
 
 def comoving_angular_distance(cosmo, a):
@@ -156,21 +158,6 @@ def angular_diameter_distance(cosmo, a1, a2=None):
                                   cosmo, np.ones(len(a1)), a1)
 
 
-def h_over_h0(cosmo, a):
-    """Ratio of Hubble constant at `a` over Hubble constant today.
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        a (float or array_like): Scale factor(s), normalized to 1 today.
-
-    Returns:
-        float or array_like: H(a)/H0.
-    """
-    cosmo.compute_distances()
-    return _vectorize_fn(lib.h_over_h0,
-                         lib.h_over_h0_vec, cosmo, a)
-
-
 def luminosity_distance(cosmo, a):
     """Luminosity distance.
 
@@ -205,82 +192,8 @@ def distance_modulus(cosmo, a):
                          lib.distance_modulus_vec, cosmo, a)
 
 
-def scale_factor_of_chi(cosmo, chi):
-    """Scale factor, a, at a comoving radial distance chi.
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        chi (float or array_like): Comoving radial distance(s); Mpc.
-
-    Returns:
-        float or array_like: Scale factor(s), normalized to 1 today.
-    """
-    cosmo.compute_distances()
-    return _vectorize_fn(lib.scale_factor_of_chi,
-                         lib.scale_factor_of_chi_vec, cosmo, chi)
-
-
-def omega_x(cosmo, a, species):
-    """Density fraction of a given species at a redshift different than z=0.
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        a (float or array_like): Scale factor(s), normalized to 1 today.
-        species (string): species type. Should be one of
-
-            - 'matter': cold dark matter, massive neutrinos, and baryons
-            - 'dark_energy': cosmological constant or otherwise
-            - 'radiation': relativistic species besides massless neutrinos
-            - 'curvature': curvature density
-            - 'neutrinos_rel': relativistic neutrinos
-            - 'neutrinos_massive': massive neutrinos
-
-    Returns:
-        float or array_like: Density fraction of a given species at a \
-                             scale factor.
-    """
-    if species not in species_types.keys():
-        raise ValueError("'%s' is not a valid species type. "
-                         "Available options are: %s"
-                         % (species, species_types.keys()))
-
-    return _vectorize_fn3(lib.omega_x,
-                          lib.omega_x_vec, cosmo, a, species_types[species])
-
-
-def rho_x(cosmo, a, species, is_comoving=False):
-    """Physical or comoving density as a function of scale factor.
-
-    Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        a (float or array_like): Scale factor(s), normalized to 1 today.
-        species (string): species type. Should be one of
-
-            - 'matter': cold dark matter, massive neutrinos, and baryons
-            - 'dark_energy': cosmological constant or otherwise
-            - 'radiation': relativistic species besides massless neutrinos
-            - 'curvature': curvature density
-            - 'neutrinos_rel': relativistic neutrinos
-            - 'neutrinos_massive': massive neutrinos
-
-        is_comoving (bool): either physical (False, default) or comoving (True)
-
-    Returns:
-        rho_x (float or array_like): Physical density of a given species
-        at a scale factor, in units of Msun / Mpc^3.
-    """
-
-    if species not in species_types.keys():
-        raise ValueError("'%s' is not a valid species type. "
-                         "Available options are: %s"
-                         % (species, species_types.keys()))
-
-    return _vectorize_fn4(
-        lib.rho_x, lib.rho_x_vec, cosmo, a,
-        species_types[species], int(is_comoving))
-
-
-def sigma_critical(cosmo, a_lens, a_source):
+@warn_api
+def sigma_critical(cosmo, *, a_lens, a_source):
     """Returns the critical surface mass density.
 
     .. math::
@@ -312,3 +225,120 @@ def sigma_critical(cosmo, a_lens, a_source):
 
     Sigma_crit = A * Ds / (Dl * Dls)
     return Sigma_crit
+
+
+def omega_x(cosmo, a, species):
+    """Density fraction of a given species at a redshift different than z=0.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+        species (string): species type. Should be one of
+
+            - 'matter': cold dark matter, massive neutrinos, and baryons
+            - 'dark_energy': cosmological constant or otherwise
+            - 'radiation': relativistic species besides massless neutrinos
+            - 'curvature': curvature density
+            - 'neutrinos_rel': relativistic neutrinos
+            - 'neutrinos_massive': massive neutrinos
+            - 'critical'
+
+    Returns:
+        float or array_like: Density fraction of a given species at a \
+                             scale factor.
+    """
+    # TODO: Replace docstring enum with ref to Species.
+    if species not in species_types:
+        raise ValueError(f"Unknown species {species}.")
+
+    return _vectorize_fn3(lib.omega_x,
+                          lib.omega_x_vec, cosmo, a, species_types[species])
+
+
+@warn_api
+def rho_x(cosmo, a, species, *, is_comoving=False):
+    """Physical or comoving density as a function of scale factor.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+        species (string): species type. Should be one of
+
+            - 'matter': cold dark matter, massive neutrinos, and baryons
+            - 'dark_energy': cosmological constant or otherwise
+            - 'radiation': relativistic species besides massless neutrinos
+            - 'curvature': curvature density
+            - 'neutrinos_rel': relativistic neutrinos
+            - 'neutrinos_massive': massive neutrinos
+            - 'critical'
+
+        is_comoving (bool): either physical (False, default) or comoving (True)
+
+    Returns:
+        rho_x (float or array_like): Physical density of a given species
+        at a scale factor, in units of Msun / Mpc^3.
+    """
+    # TODO: Replace docstring enum with ref to Species.
+    if species not in species_types:
+        raise ValueError(f"Unknown species {species}.")
+
+    return _vectorize_fn4(
+        lib.rho_x, lib.rho_x_vec, cosmo, a,
+        species_types[species], int(is_comoving))
+
+
+def growth_factor(cosmo, a):
+    """Growth factor.
+
+    .. note:: CCL is not able to compute the scale-dependent growth
+              factor for cosmologies with massive neutrinos.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+
+    Returns:
+        float or array_like: Growth factor, normalized to unity today.
+    """
+    cosmo.compute_growth()
+    return _vectorize_fn(lib.growth_factor,
+                         lib.growth_factor_vec, cosmo, a)
+
+
+def growth_factor_unnorm(cosmo, a):
+    """Unnormalized growth factor.
+
+    .. note:: CCL is not able to compute the scale-dependent growth
+              factor for cosmologies with massive neutrinos.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+
+    Returns:
+        float or array_like: Unnormalized growth factor, normalized to \
+            the scale factor at early times.
+    """
+    cosmo.compute_growth()
+    return _vectorize_fn(lib.growth_factor_unnorm,
+                         lib.growth_factor_unnorm_vec, cosmo, a)
+
+
+def growth_rate(cosmo, a):
+    """Growth rate defined as the logarithmic derivative of the
+    growth factor, dlnD/dlna.
+
+    .. note:: CCL is not able to compute the scale-dependent growth
+              rate for cosmologies with massive neutrinos.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+        a (float or array_like): Scale factor(s), normalized to 1 today.
+
+    Returns:
+        float or array_like: Growth rate.
+
+    """
+    cosmo.compute_growth()
+    return _vectorize_fn(lib.growth_rate,
+                         lib.growth_rate_vec, cosmo, a)
