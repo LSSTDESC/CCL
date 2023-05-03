@@ -4,11 +4,11 @@ Base (:mod:`pyccl.base`)
 ========================
 
 Core functionality of CCL:
-    * parameters - Classes with module-level and object-specific parameters.
-    * caching - Hashing and caching framework.
-    * deprecations - Control deprecations.
-    * repr_ - Custom object representations.
-    * schema - Control the behavior of objects in the library.
+    * :mod:`parameters` - Classes with global and object-specific parameters.
+    * :mod:`caching` - Hashing and caching framework.
+    * :mod:`deprecations` - Control deprecations.
+    * :mod:`repr_` - Custom object representations.
+    * :mod:`schema` - Control the behavior of objects in the library.
 """
 
 from .parameters import *

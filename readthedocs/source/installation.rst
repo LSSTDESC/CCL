@@ -46,7 +46,7 @@ Google Colab
 
 To install ``pyccl`` on https://colab.research.google.com then one way is the following
 
-.. code-block:: python
+.. code-block:: sh
 
    !pip install -q condacolab
    import condacolab

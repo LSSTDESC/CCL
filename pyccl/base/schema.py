@@ -527,7 +527,7 @@ class CCLObject(Immutable):
         # Exit early if it is the same object.
         if self is other:
             return True
-        # Two same-type objects are equal if their representations are equal.
+        # Different type objects are unequal.
         if type(self) is not type(other):
             return False
         # Compare the attributes listed in `__eq_attrs__`.
