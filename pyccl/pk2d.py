@@ -1,14 +1,15 @@
-import warnings
+__all__ = ("Pk2D", "parse_pk2d", "parse_pk",)
+
 import functools
+import warnings
+
 import numpy as np
 
-from . import ccllib as lib
-from .errors import CCLWarning, CCLError, CCLDeprecationWarning
-from .pyutils import (check, get_pk_spline_a, get_pk_spline_lk,
-                      _get_spline1d_arrays, _get_spline2d_arrays)
-from .base import (CCLObject, UnlockInstance, unlock_instance,
-                   warn_api, deprecated)
-from .parameters import spline_params
+from . import (
+    CCLObject, DEFAULT_POWER_SPECTRUM, UnlockInstance, check, get_pk_spline_a,
+    get_pk_spline_lk, lib, spline_params, unlock_instance)
+from . import CCLWarning, CCLError, CCLDeprecationWarning, warn_api, deprecated
+from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 
 
 class _Pk2D_descriptor:
@@ -116,13 +117,13 @@ class Pk2D(CCLObject):
                                  "you must provide arrays")
 
             # Check that `a` is a monotonically increasing array.
-            if not np.all((a_arr[1:] - a_arr[:-1]) > 0):
+            if not (np.diff(a_arr) > 0).all():
                 raise ValueError("Input scale factor array in `a_arr` is not "
                                  "monotonically increasing.")
 
             pkflat = pk_arr.flatten()
             # Check dimensions make sense
-            if (len(a_arr)*len(lk_arr) != len(pkflat)):
+            if len(pkflat) != len(a_arr)*len(lk_arr):
                 raise ValueError("Size of input arrays is inconsistent")
         else:  # Initialize power spectrum from function
             warnings.warn("The use of a function when initialising a ``Pk2D`` "
@@ -251,7 +252,7 @@ class Pk2D(CCLObject):
         elif model == 'emu':
             ret = lib.compute_power_emu(cosmo.cosmo, status)
         else:
-            raise ValueError("Unknown model %s " % model)
+            raise ValueError(f"Invalid model {model}.")
 
         if np.ndim(ret) == 0:
             status = ret
@@ -581,17 +582,17 @@ class Pk2D(CCLObject):
 
 
 @warn_api
-def parse_pk2d(cosmo, p_of_k_a, *, is_linear=False):
+def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
     """ Return the C-level `f2d` spline associated with a
     :class:`Pk2D` object.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        p_of_k_a (:class:`Pk2D`, :obj:`str` or `None`): if a
+        p_of_k_a (:class:`Pk2D` or :obj:`str`): if a
             :class:`Pk2D` object, its `f2d` spline will be used. If
             a string, the linear or non-linear power spectrum stored
-            by `cosmo` under this name will be used. If `None`, the
-            matter power spectrum stored by `cosmo` will be used.
+            by `cosmo` under this name will be used. Defaults to the
+            matter power spectrum stored in `cosmo`.
         is_linear (:obj:`bool`): if `True`, and if `p_of_k_a` is a
             string or `None`, the linear version of the corresponding
             power spectrum will be used (otherwise it'll be the
@@ -600,7 +601,7 @@ def parse_pk2d(cosmo, p_of_k_a, *, is_linear=False):
     if isinstance(p_of_k_a, Pk2D):
         psp = p_of_k_a.psp
     else:
-        if (p_of_k_a is None) or isinstance(p_of_k_a, str):
+        if p_of_k_a is None or isinstance(p_of_k_a, str):
             name = p_of_k_a
         else:
             raise ValueError("p_of_k_a must be a pyccl.Pk2D object, "
@@ -618,9 +619,7 @@ def parse_pk2d(cosmo, p_of_k_a, *, is_linear=False):
 
 def parse_pk(cosmo, p_of_k_a=None):
     """Helper to retrieve the power spectrum in the halo model."""
-    if not (p_of_k_a is None
-            or isinstance(p_of_k_a, Pk2D)
-            or isinstance(p_of_k_a, str)):
+    if not (p_of_k_a is None or isinstance(p_of_k_a, (str, Pk2D))):
         raise TypeError("p_of_k_a must be None, 'linear', 'nonlinear', Pk2D.")
 
     if isinstance(p_of_k_a, Pk2D):

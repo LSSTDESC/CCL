@@ -1,9 +1,8 @@
-from .base import unlock_instance
-from .baryons import BaryonsSchneider15
-from .base import deprecated
-from .pyutils import check
-from . import ccllib as lib
+__all__ = ("bcm_model_fka", "bcm_correct_pk2d",)
+
 import numpy as np
+
+from . import BaryonsSchneider15, check, deprecated, lib, unlock_instance
 
 
 @deprecated(BaryonsSchneider15)

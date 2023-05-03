@@ -2,10 +2,10 @@ import tempfile
 import numpy as np
 import pytest
 import pyccl as ccl
-import warnings
+# import warnings  # TODO: Uncomment for CCLv3.
 
 
-def test_parameters_lcdm_defaults():
+def test_parameters_lcdmDefaultParams():
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -32,12 +32,14 @@ def test_parameters_lcdm_defaults():
     assert np.allclose(cosmo['sum_nu_masses'], 0)
     assert np.allclose(cosmo['m_nu'], 0)
     assert np.allclose(cosmo['Omega_nu_mass'], 0)
-    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
 
+    # TODO: Remove these for CCLv3.
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
     assert np.allclose(cosmo['bcm_etab'], 0.5)
 
+    # TODO: Remove these for CCLv3.
     assert not cosmo['has_mgrowth']
     assert cosmo['nz_mgrowth'] == 0
     assert cosmo['z_mgrowth'] is None
@@ -54,8 +56,8 @@ def test_parameters_lcdm_defaults():
         1)
 
 
-@pytest.mark.parametrize('m_nu_type', ['normal', 'inverted', 'single'])
-def test_parameters_nu(m_nu_type):
+@pytest.mark.parametrize('mass_split', ['normal', 'inverted', 'single'])
+def test_parameters_nu(mass_split):
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
         Omega_b=0.05,
@@ -67,24 +69,24 @@ def test_parameters_nu(m_nu_type):
         Neff=3.046,
         Omega_k=0.0,
         m_nu=0.15,
-        m_nu_type=m_nu_type
+        mass_split=mass_split
     )
 
-    if m_nu_type == 'inverted':
+    if mass_split == 'inverted':
         assert np.allclose(cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
                            ccl.physical_constants.DELTAM12_sq,
                            atol=1e-4, rtol=0)
         assert np.allclose(
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_neg, atol=1e-4, rtol=0)
-    elif m_nu_type == 'normal':
+    elif mass_split == 'normal':
         assert np.allclose(cosmo['m_nu'][1]**2 - cosmo['m_nu'][0]**2,
                            ccl.physical_constants.DELTAM12_sq,
                            atol=1e-4, rtol=0)
         assert np.allclose(
             cosmo['m_nu'][2]**2 - cosmo['m_nu'][0]**2,
             ccl.physical_constants.DELTAM13_sq_pos, atol=1e-4, rtol=0)
-    elif m_nu_type == 'single':
+    elif mass_split == 'single':
         assert len(cosmo["m_nu"]) == 1
         assert np.allclose(cosmo['m_nu'][0], 0.15, atol=1e-4, rtol=0)
 
@@ -94,7 +96,7 @@ def test_parameters_nu_Nnurel_neg():
         ccl.Cosmology(
             Omega_c=0.27, Omega_b=0.049,
             h=0.67, sigma8=0.8, n_s=0.96, m_nu=[0.03, 0.02, 0.04],
-            Neff=3., m_nu_type='list')
+            Neff=3., mass_split='list')
 
 
 def test_parameters_nu_list():
@@ -105,7 +107,7 @@ def test_parameters_nu_list():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=[0.1, 0.01, 0.003],
-        m_nu_type='list')
+        mass_split='list')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -120,7 +122,7 @@ def test_parameters_nu_list():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -155,7 +157,7 @@ def test_parameters_nu_normal():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=0.3,
-        m_nu_type='normal')
+        mass_split='normal')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -170,7 +172,7 @@ def test_parameters_nu_normal():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -204,7 +206,7 @@ def test_parameters_nu_inverted():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=0.3,
-        m_nu_type='inverted')
+        mass_split='inverted')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -219,7 +221,7 @@ def test_parameters_nu_inverted():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -253,7 +255,7 @@ def test_parameters_nu_equal():
         A_s=2.1e-9,
         n_s=0.96,
         m_nu=0.3,
-        m_nu_type='equal')
+        mass_split='equal')
 
     assert np.allclose(cosmo['Omega_c'], 0.25)
     assert np.allclose(cosmo['Omega_b'], 0.05)
@@ -268,7 +270,7 @@ def test_parameters_nu_equal():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.allclose(cosmo['T_CMB'], ccl.core._Defaults.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -305,33 +307,7 @@ def test_parameters_nu_unphysical_raises(m_nu, kind):
             A_s=2.1e-9,
             n_s=0.96,
             m_nu=m_nu,
-            m_nu_type=kind)
-
-
-def test_parameters_valid_input():
-    """
-    Check that valid parameter arguments are accepted.
-    """
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-                      A_s=2.1e-9, n_s=0.96)
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-                      A_s=2.1e-9, n_s=0.96, Omega_k=0.05)
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-                      A_s=2.1e-9, n_s=0.96, Neff=2.046)
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-                      A_s=2.1e-9, n_s=0.96, Neff=3.046, m_nu=0.06)
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-                      A_s=2.1e-9, n_s=0.96, w0=-0.9)
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7,
-                      A_s=2.1e-9, n_s=0.96, w0=-0.9, wa=0.1)
-        # Check that kwarg order doesn't matter
-        ccl.Cosmology(h=0.7, Omega_c=0.25, Omega_b=0.05,
-                      A_s=2.1e-9, n_s=0.96)
-        # Try a set of parameters with non-zero mu0 / Sig0
-        ccl.Cosmology(h=0.7, Omega_c=0.25, Omega_b=0.05,
-                      A_s=2.1e-9, n_s=0.96, mu_0=0.1, sigma_0=0.1)
+            mass_split=kind)
 
 
 def test_parameters_missing():
@@ -355,17 +331,6 @@ def test_parameters_missing():
     with pytest.raises(ValueError):
         ccl.Cosmology(Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96)
 
-    # Make sure that compulsory parameters are compulsory
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-                      Omega_k=None)
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-                      w0=None)
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-                      wa=None)
-
     # Check that sigma8 vs A_s is handled ok.
     with pytest.raises(ValueError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.8,
@@ -373,22 +338,13 @@ def test_parameters_missing():
     with pytest.raises(ValueError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.8)
 
-    # Make sure that optional parameters are optional
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-                      z_mg=None, df_mg=None)
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-                      z_mg=None)
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-                      df_mg=None)
-
 
 def test_parameters_mgrowth():
     """
     Check that valid modified growth inputs are allowed, and invalid ones are
     rejected.
     """
+    # TODO: Remove this test for CCLv3.
     zarr = np.linspace(0., 1., 15)
     dfarr = 0.1 * np.ones(15)
 
@@ -397,8 +353,7 @@ def test_parameters_mgrowth():
 
     # Valid constructions
     for omega_g in [None, 0.0, 0.1]:
-        with warnings.catch_warnings():
-            warnings.simplefilter("error")
+        with pytest.warns(ccl.CCLDeprecationWarning):
             ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
                           n_s=0.96, z_mg=zarr, df_mg=dfarr, Omega_g=omega_g)
             ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
@@ -414,13 +369,13 @@ def test_parameters_mgrowth():
                           n_s=0.96, df_mg=dfarr, Omega_g=omega_g)
         with pytest.raises(ValueError):
             ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=None, df_mg=dfarr, Omega_g=omega_g)
+                          n_s=0.96, z_mg=None, df_mg=dfarr)
         with pytest.raises(ValueError):
             ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=zarr, df_mg=0.1, Omega_g=omega_g)
+                          n_s=0.96, z_mg=zarr, df_mg=0.1)
         with pytest.raises(ValueError):
             ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=zarr, df_mg=f_func, Omega_g=omega_g)
+                          n_s=0.96, z_mg=zarr, df_mg=f_func)
 
         # Mis-matched array sizes and dimensionality
         with pytest.raises(ValueError):
@@ -438,8 +393,7 @@ def test_parameters_read_write():
     """Check that Cosmology objects can be read and written"""
     params = ccl.Cosmology(
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=[0.02, 0.1, 0.05], m_nu_type='list',
-        z_mg=[0.0, 1.0], df_mg=[0.01, 0.0])
+        m_nu=[0.02, 0.1, 0.05], mass_split='list')
 
     # Make a temporary file name
     with tempfile.NamedTemporaryFile(delete=False) as tmpfile:

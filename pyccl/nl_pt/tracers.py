@@ -1,9 +1,13 @@
+__all__ = ("translate_IA_norm", "PTTracer", "PTMatterTracer",
+           "PTNumberCountsTracer", "PTIntrinsicAlignmentTracer",)
+
+from abc import abstractmethod
+
 import numpy as np
 from scipy.interpolate import interp1d
+
+from .. import CCLAutoRepr, physical_constants, warn_api
 from ..pyutils import _check_array_params
-from ..parameters import physical_constants
-from ..base import CCLAutoRepr, warn_api
-from abc import abstractmethod
 
 
 @warn_api
@@ -87,7 +91,7 @@ class PTTracer(CCLAutoRepr):
             float or array_like: bias value at the input redshifts.
         """
         if bias_name not in self.biases:
-            raise KeyError("Bias %s not included in this tracer" % bias_name)
+            raise KeyError(f"Bias {bias_name} not included in this tracer")
         return self.biases[bias_name](z)
 
     def _get_bias_function(self, b):

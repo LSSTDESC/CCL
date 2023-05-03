@@ -11,7 +11,7 @@ HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 P1 = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
 P2 = ccl.halos.HaloProfileHOD(concentration=CON)
-P3 = ccl.halos.HaloProfilePressureGNFW()
+P3 = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
 P4 = P1
 PKC = ccl.halos.Profile2pt()
 PKCH = ccl.halos.Profile2ptHOD()
@@ -88,7 +88,7 @@ def test_tkk1h_tk3d():
     assert np.allclose(tkk_arr, tkk_arr_2, atol=0, rtol=1e-4)
 
     # Standard sampling
-    with np.errstate(divide="ignore", invalid="ignore"):
+    with pytest.warns(ccl.CCLWarning):
         tk3d = ccl.halos.halomod_Tk3D_1h(
             COSMO, hmc,
             prof=P1, prof2=P2, prof12_2pt=PKC,
@@ -105,7 +105,7 @@ def test_tkk1h_warns():
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
 
     # Negative profile in logspace
-    Pneg = ccl.halos.HaloProfilePressureGNFW(P0=-1)
+    Pneg = ccl.halos.HaloProfilePressureGNFW(mass_def=M200, P0=-1)
     with pytest.warns(ccl.CCLWarning):
         ccl.halos.halomod_Tk3D_1h(
             COSMO, hmc, P3, prof2=Pneg, prof3=P3, prof4=P3,

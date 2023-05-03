@@ -1,10 +1,10 @@
-from ...base import warn_api
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncTinker08",)
+
 import numpy as np
 from scipy.interpolate import interp1d
 
-
-__all__ = ("MassFuncTinker08",)
+from ... import warn_api
+from . import MassFunc
 
 
 class MassFuncTinker08(MassFunc):

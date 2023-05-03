@@ -62,6 +62,8 @@ def test_cosmo_methods():
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
     for name, func in funcs:
+        if name.startswith("_"):  # no private functions
+            continue
         pars = signature(func).parameters
         if pars and list(pars)[0] == "cosmo":
             _ = getattr(cosmo, name)
@@ -72,8 +74,8 @@ def test_cosmo_methods():
         cosmo.rho_x(1., "matter", is_comoving=False)
     assert ccl.get_camb_pk_lin(cosmo)(1., 1., cosmo) == \
         cosmo.get_camb_pk_lin()(1., 1., cosmo)
-    prof = ccl.halos.HaloProfilePressureGNFW()
     hmd = ccl.halos.MassDef200m()
+    prof = ccl.halos.HaloProfilePressureGNFW(mass_def=hmd)
     hmf = ccl.halos.MassFuncTinker08()
     hbf = ccl.halos.HaloBiasTinker10()
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
@@ -93,7 +95,7 @@ def test_cosmology_critical_init():
         m_nu=0.0,
         w0=-1.0,
         wa=0.0,
-        m_nu_type='normal',
+        mass_split='normal',
         Omega_g=0,
         Omega_k=0)
     assert np.allclose(cosmo.cosmo.data.growth0, 1)
@@ -113,22 +115,22 @@ def test_cosmology_init():
     Check that Cosmology objects can only be constructed in a valid way.
     """
     # Make sure error raised if invalid transfer/power spectrum etc. passed
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       matter_power_spectrum='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       transfer_function='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       baryons_power_spectrum='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       mass_function='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       halo_concentration='x')
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       emulator_neutrinos='x')
     with pytest.raises(ValueError):
@@ -137,10 +139,6 @@ def test_cosmology_init():
     with pytest.raises(ValueError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
                       m_nu=ccl)
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-                      m_nu=np.array([0.1, 0.1, 0.1]),
-                      m_nu_type='normal')
 
 
 def test_cosmology_output():
@@ -179,7 +177,7 @@ def test_cosmology_pickles():
     """Check that a Cosmology object pickles."""
     cosmo = ccl.Cosmology(
         Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-        m_nu=[0.02, 0.1, 0.05], m_nu_type='list',
+        m_nu=[0.02, 0.1, 0.05], mass_split='list',
         z_mg=[0.0, 1.0], df_mg=[0.01, 0.0])
 
     with tempfile.TemporaryFile() as fp:
@@ -217,7 +215,7 @@ def test_cosmology_context():
     frees C resources properly."""
     with ccl.Cosmology(
             Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
-            m_nu=np.array([0.02, 0.1, 0.05]), m_nu_type='list',
+            m_nu=np.array([0.02, 0.1, 0.05]), mass_split='list',
             z_mg=np.array([0.0, 1.0]), df_mg=np.array([0.01, 0.0])) as cosmo:
         # make sure it works
         assert not cosmo.has_distances

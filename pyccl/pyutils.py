@@ -1,23 +1,66 @@
 """Utility functions to analyze status and error messages passed from CCL, as
-well as wrappers to automatically vectorize functions."""
-from . import ccllib as lib
-from ._types import error_types
-from .parameters import spline_params
-from .errors import CCLError
+well as wrappers to automatically vectorize functions.
+"""
+__all__ = (
+    "CLevelErrors", "ExtrapolationMethods", "IntegrationMethods", "check",
+    "debug_mode", "get_pk_spline_lk", "get_pk_spline_a", "resample_array")
+
+from enum import Enum
+from typing import Iterable
+
 import numpy as np
-from collections.abc import Iterable
+
+from . import CCLError, lib, spline_params
+
 
 NoneArr = np.array([])
 
-integ_types = {'qag_quad': lib.integration_qag_quad,
-               'spline': lib.integration_spline}
 
-extrap_types = {'none': lib.f1d_extrap_0,
-                'constant': lib.f1d_extrap_const,
-                'linx_liny': lib.f1d_extrap_linx_liny,
-                'linx_logy': lib.f1d_extrap_linx_logy,
-                'logx_liny': lib.f1d_extrap_logx_liny,
-                'logx_logy': lib.f1d_extrap_logx_logy}
+class IntegrationMethods(Enum):
+    QAG_QUAD = "qag_quad"
+    SPLINE = "spline"
+
+
+class ExtrapolationMethods(Enum):
+    NONE = "none"
+    CONSTANT = "constant"
+    LINX_LINY = "linx_liny"
+    LINX_LOGY = "linx_logy"
+    LOGX_LINY = "logx_liny"
+    LOGX_LOGY = "logx_logy"
+
+
+integ_types = {
+    'qag_quad': lib.integration_qag_quad,
+    'spline': lib.integration_spline}
+
+extrap_types = {
+    'none': lib.f1d_extrap_0,
+    'constant': lib.f1d_extrap_const,
+    'linx_liny': lib.f1d_extrap_linx_liny,
+    'linx_logy': lib.f1d_extrap_linx_logy,
+    'logx_liny': lib.f1d_extrap_logx_liny,
+    'logx_logy': lib.f1d_extrap_logx_logy}
+
+# This is defined here instead of in `errors.py` because SWIG needs `CCLError`
+# from `.errors`, resulting in a cyclic import.
+CLevelErrors = {
+    lib.CCL_ERROR_CLASS: 'CCL_ERROR_CLASS',
+    lib.CCL_ERROR_INCONSISTENT: 'CCL_ERROR_INCONSISTENT',
+    lib.CCL_ERROR_INTEG: 'CCL_ERROR_INTEG',
+    lib.CCL_ERROR_LINSPACE: 'CCL_ERROR_LINSPACE',
+    lib.CCL_ERROR_MEMORY: 'CCL_ERROR_MEMORY',
+    lib.CCL_ERROR_ROOT: 'CCL_ERROR_ROOT',
+    lib.CCL_ERROR_SPLINE: 'CCL_ERROR_SPLINE',
+    lib.CCL_ERROR_SPLINE_EV: 'CCL_ERROR_SPLINE_EV',
+    lib.CCL_ERROR_COMPUTECHI: 'CCL_ERROR_COMPUTECHI',
+    lib.CCL_ERROR_MF: 'CCL_ERROR_MF',
+    lib.CCL_ERROR_HMF_INTERP: 'CCL_ERROR_HMF_INTERP',
+    lib.CCL_ERROR_PARAMETERS: 'CCL_ERROR_PARAMETERS',
+    lib.CCL_ERROR_NU_INT: 'CCL_ERROR_NU_INT',
+    lib.CCL_ERROR_EMULATOR_BOUND: 'CCL_ERROR_EMULATOR_BOUND',
+    lib.CCL_ERROR_MISSING_CONFIG_FILE: 'CCL_ERROR_MISSING_CONFIG_FILE',
+}
 
 
 def check(status, cosmo=None):
@@ -40,12 +83,12 @@ def check(status, cosmo=None):
         msg = ""
 
     # Check for known error status
-    if status in error_types.keys():
-        raise CCLError("Error %s: %s" % (error_types[status], msg))
+    if status in CLevelErrors.keys():
+        raise CCLError(f"Error {CLevelErrors[status]}: {msg}")
 
     # Check for unknown error
     if status != 0:
-        raise CCLError("Error %d: %s" % (status, msg))
+        raise CCLError(f"Error {status}: {msg}")
 
 
 def debug_mode(debug):
@@ -432,15 +475,11 @@ def resample_array(x_in, y_in, x_out,
     Returns:
         array_like: output array.
     """
-
+    # TODO: point to the enum in CCLv3 docs.
     if extrap_lo not in extrap_types.keys():
-        raise ValueError("'%s' is not a valid extrapolation type. "
-                         "Available options are: %s"
-                         % (extrap_lo, extrap_types.keys()))
+        raise ValueError("Invalid extrapolation type.")
     if extrap_hi not in extrap_types.keys():
-        raise ValueError("'%s' is not a valid extrapolation type. "
-                         "Available options are: %s"
-                         % (extrap_hi, extrap_types.keys()))
+        raise ValueError("Invalid extrapolation type.")
 
     status = 0
     y_out, status = lib.array_1d_resample(x_in, y_in, x_out,
@@ -465,7 +504,7 @@ def _fftlog_transform(rs, frs,
         n_transforms, n_r = frs.shape
 
     if len(rs) != n_r:
-        raise ValueError("rs should have %d elements" % n_r)
+        raise ValueError(f"rs should have {n_r} elements")
 
     status = 0
     result, status = lib.fftlog_transform(n_transforms,
@@ -495,7 +534,7 @@ def _spline_integrate(x, ys, a, b):
         n_integ, n_x = ys.shape
 
     if len(x) != n_x:
-        raise ValueError("x should have %d elements" % n_x)
+        raise ValueError(f"x should have {n_x} elements")
 
     if np.ndim(a) > 0 or np.ndim(b) > 0:
         raise TypeError("Integration limits should be scalar")
@@ -530,7 +569,7 @@ def _check_array_params(f_arg, name=None, arr3=False):
             or (len(f_arg) != (3 if arr3 else 2))
             or (not (isinstance(f_arg[0], Iterable)
                      and isinstance(f_arg[1], Iterable)))):
-            raise ValueError("%s needs to be a tuple of two arrays." % name)
+            raise ValueError(f"{name} must be a tuple of two arrays.")
 
         f1 = np.atleast_1d(np.array(f_arg[0], dtype=float))
         f2 = np.atleast_1d(np.array(f_arg[1], dtype=float))

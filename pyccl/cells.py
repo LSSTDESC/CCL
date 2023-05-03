@@ -1,16 +1,16 @@
+__all__ = ("angular_cl",)
+
 import warnings
 
 import numpy as np
 
-from .errors import CCLWarning
-from . import ccllib as lib
-from .pyutils import check, integ_types
-from .base import warn_api
-from .pk2d import parse_pk2d
+from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warn_api
+from .pyutils import integ_types
 
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
-def angular_cl(cosmo, tracer1, tracer2, ell, *, p_of_k_a=None,
+def angular_cl(cosmo, tracer1, tracer2, ell, *,
+               p_of_k_a=DEFAULT_POWER_SPECTRUM,
                l_limber=-1., limber_integration_method='qag_quad'):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
@@ -25,8 +25,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *, p_of_k_a=None,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to project. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
         l_limber (float) : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
         limber_integration_method (string) : integration method to be used
@@ -44,9 +43,9 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *, p_of_k_a=None,
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
             category=CCLWarning)
-    if limber_integration_method not in ['qag_quad', 'spline']:
-        raise ValueError("Integration method %s not supported" %
-                         limber_integration_method)
+    if limber_integration_method not in integ_types:
+        raise ValueError(
+            f"Unknown integration method {limber_integration_method}.")
 
     # we need the distances for the integrals
     cosmo.compute_distances()
@@ -55,7 +54,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *, p_of_k_a=None,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a, is_linear=False)
 
     # Create tracer colections
     status = 0
@@ -69,7 +68,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *, p_of_k_a=None,
     ell_use = np.atleast_1d(ell)
 
     # Check the values of ell are monotonically increasing
-    if not (ell_use[:-1] < ell_use[1:]).all():
+    if not (np.diff(ell_use) > 0).all():
         raise ValueError("ell values must be monotonically increasing")
 
     # Return Cl values, according to whether ell is an array or not

@@ -1,15 +1,14 @@
-import numpy as np
-from .. import ccllib as lib
-from ..core import check
-from ..pk2d import Pk2D
-from ..power import linear_matter_power, nonlin_matter_power
-from ..background import growth_factor
-from .tracers import PTTracer
-from ..errors import CCLDeprecationWarning
+__all__ = ("PTCalculator", "get_pt_pk2d",)
+
 import warnings
 
+import numpy as np
 
-class PTCalculator(object):
+from .. import CCLDeprecationWarning, Pk2D, check, lib
+from . import PTTracer
+
+
+class PTCalculator:
     """ This class implements a set of methods that can be
     used to compute the various components needed to estimate
     perturbation theory correlations. These calculations are
@@ -569,10 +568,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     # z
     z_arr = 1. / a_arr - 1
     # P_lin(k) at z=0
-    pk_lin_z0 = linear_matter_power(cosmo, ptc.ks, 1.)
+    pk_lin_z0 = cosmo.linear_matter_power(ptc.ks, 1.)
 
     # Linear growth factor
-    ga = growth_factor(cosmo, a_arr)
+    ga = cosmo.growth_factor(a_arr)
     ga4 = ga**4
 
     if update_ptc:
@@ -580,13 +579,13 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
         ptc.update_pk(pk_lin_z0)
 
     if nonlin_pk_type == 'nonlinear':
-        Pd1d1 = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
+        Pd1d1 = np.array([cosmo.nonlin_matter_power(ptc.ks, a)
                           for a in a_arr]).T
     elif nonlin_pk_type == 'linear':
-        Pd1d1 = np.array([linear_matter_power(cosmo, ptc.ks, a)
+        Pd1d1 = np.array([cosmo.linear_matter_power(ptc.ks, a)
                           for a in a_arr]).T
     elif nonlin_pk_type == 'spt':
-        pklin = np.array([linear_matter_power(cosmo, ptc.ks, a)
+        pklin = np.array([cosmo.linear_matter_power(ptc.ks, a)
                           for a in a_arr]).T
         Pd1d1 = ptc.get_pmm(pklin, ga4)
     else:
@@ -598,13 +597,13 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
     if (((tracer1.type == 'NC') or (tracer2.type == 'NC')) and
             (nonloc_pk_type != nonlin_pk_type)):
         if nonloc_pk_type == 'nonlinear':
-            Pgrad = np.array([nonlin_matter_power(cosmo, ptc.ks, a)
+            Pgrad = np.array([cosmo.nonlin_matter_power(ptc.ks, a)
                               for a in a_arr]).T
         elif nonloc_pk_type == 'linear':
-            Pgrad = np.array([linear_matter_power(cosmo, ptc.ks, a)
+            Pgrad = np.array([cosmo.linear_matter_power(ptc.ks, a)
                               for a in a_arr]).T
         elif nonloc_pk_type == 'spt':
-            pklin = np.array([linear_matter_power(cosmo, ptc.ks, a)
+            pklin = np.array([cosmo.linear_matter_power(ptc.ks, a)
                               for a in a_arr]).T
             Pgrad = ptc.get_pmm(pklin, ga4)
         else:

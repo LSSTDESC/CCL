@@ -1,12 +1,11 @@
-from ...base import warn_api, deprecate_attr
-from .profile_base import HaloProfileCIB
-from .nfw import HaloProfileNFW
+__all__ = ("HaloProfileCIBShang12",)
+
 import numpy as np
 from scipy.integrate import simpson
 from scipy.special import lambertw
 
-
-__all__ = ("HaloProfileCIBShang12",)
+from ... import warn_api, deprecate_attr
+from . import HaloProfileNFW, HaloProfileCIB
 
 
 class HaloProfileCIBShang12(HaloProfileCIB):
@@ -82,7 +81,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
     """
     __repr_attrs__ = __eq_attrs__ = (
         "nu", "alpha", "T0", "beta", "gamma", "s_z", "log10Meff", "siglog10M",
-        "Mmin", "L0", "concentration", "precision_fftlog",)
+        "Mmin", "L0", "mass_def", "concentration", "precision_fftlog",)
     __getattr__ = deprecate_attr(pairs=[('l10meff', 'log10Meff'),
                                         ('sigLM', 'siglog10M')]
                                  )(super.__getattribute__)
@@ -93,8 +92,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
                      ("sigLM", "siglog10M")])
     def __init__(self, *, concentration, nu_GHz, alpha=0.36, T0=24.4,
                  beta=1.75, gamma=1.7, s_z=3.6, log10Meff=12.6,
-                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8):
-
+                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8, mass_def=None):
         self.nu = nu_GHz
         self.alpha = alpha
         self.T0 = T0
@@ -105,9 +103,9 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         self.siglog10M = siglog10M
         self.Mmin = Mmin
         self.L0 = L0
-        self.concentration = concentration
-        self.pNFW = HaloProfileNFW(concentration=concentration)
-        super().__init__()
+        kwargs = {"concentration": concentration, "mass_def": mass_def}
+        self.pNFW = HaloProfileNFW(**kwargs)
+        super().__init__(**kwargs)
 
     def dNsub_dlnM_TinkerWetzel10(self, Msub, Mparent):
         """Subhalo mass function of Tinker & Wetzel (2010ApJ...719...88T)
@@ -219,7 +217,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         res[-len(Lumsat):] = Lumsat
         return res
 
-    def _real(self, cosmo, r, M, a, mass_def):
+    def _real(self, cosmo, r, M, a):
         M_use = np.atleast_1d(M)
         r_use = np.atleast_1d(r)
 
@@ -227,8 +225,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         spec_nu = self._spectrum(self.nu/a, a)
 
         Ls = self._Lumsat(M_use, a)
-        ur = self.pNFW._real(cosmo, r_use, M_use,
-                             a, mass_def)/M_use[:, None]
+        ur = self.pNFW._real(cosmo, r_use, M_use, a)/M_use[:, None]
 
         prof = Ls[:, None]*ur*spec_nu*self._one_over_4pi
 
@@ -238,7 +235,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier(self, cosmo, k, M, a, mass_def):
+    def _fourier(self, cosmo, k, M, a):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
@@ -247,8 +244,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
 
         Lc = self._Lumcen(M_use, a)
         Ls = self._Lumsat(M_use, a)
-        uk = self.pNFW._fourier(cosmo, k_use, M_use,
-                                a, mass_def)/M_use[:, None]
+        uk = self.pNFW._fourier(cosmo, k_use, M_use, a)/M_use[:, None]
 
         prof = (Lc[:, None]+Ls[:, None]*uk)*spec_nu*self._one_over_4pi
 
@@ -258,7 +254,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _fourier_variance(self, cosmo, k, M, a, mass_def, nu_other=None):
+    def _fourier_variance(self, cosmo, k, M, a, nu_other=None):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
@@ -270,8 +266,7 @@ class HaloProfileCIBShang12(HaloProfileCIB):
 
         Lc = self._Lumcen(M_use, a)
         Ls = self._Lumsat(M_use, a)
-        uk = self.pNFW._fourier(cosmo, k_use, M_use,
-                                a, mass_def)/M_use[:, None]
+        uk = self.pNFW._fourier(cosmo, k_use, M_use, a)/M_use[:, None]
 
         prof = Ls[:, None]*uk
         prof = 2*Lc[:, None]*prof + prof**2

@@ -72,30 +72,17 @@ def test_get_radius():
         assert np.shape(r) == np.shape(M)
 
 
-def test_concentration():
-    hmd = ccl.halos.MassDef200m()
-    for M in [1E12, [1E12, 2E12],
-              np.array([1E12, 2E12])]:
-        c = hmd.concentration(COSMO, M, 1.)
-        assert np.all(np.isfinite(c))
-        assert np.shape(c) == np.shape(M)
-
-
 def test_translate_mass():
     hmd = ccl.halos.MassDef200m()
     hmdb = ccl.halos.MassDef200c()
+    cm = ccl.halos.Concentration.create_instance("Duffy08", mass_def=hmd)
+    translator = ccl.halos.mass_translator(mass_in=hmd, mass_out=hmdb,
+                                           concentration=cm)
     for M in [1E12, [1E12, 2E12],
               np.array([1E12, 2E12])]:
-        m = hmd.translate_mass(COSMO, M, 1., mass_def_other=hmdb)
+        m = translator(COSMO, M, 1)
         assert np.all(np.isfinite(m))
         assert np.shape(m) == np.shape(M)
-
-
-def test_translate_mass_raises():
-    hmd = ccl.halos.MassDef(200, 'matter')
-    hmdb = ccl.halos.MassDef(200, 'critical')
-    with pytest.raises(AttributeError):
-        hmd.translate_mass(COSMO, 1E12, 1., mass_def_other=hmdb)
 
 
 @pytest.mark.parametrize('scls', [ccl.halos.MassDef200m,
@@ -117,3 +104,20 @@ def test_massdef_from_string_smoke(name):
 def test_massdef_from_string_raises():
     with pytest.raises(ValueError):
         ccl.halos.MassDef.from_name("my_mass_def")
+
+
+def test_mass_translator():
+    # Check that the mass translator complains for inconsistent masses.
+    cm = ccl.halos.Concentration.create_instance("Duffy08")
+    mdef1 = ccl.halos.MassDef.create_instance("250c")
+    mdef2 = ccl.halos.MassDef.create_instance("500c")
+    with pytest.raises(ValueError):
+        ccl.halos.mass_translator(mass_in=mdef1, mass_out=mdef2,
+                                  concentration=cm)
+
+    # Check that if we pass the same mass definition, it returns the same M.
+    mdef1 = mdef2 = cm.mass_def
+    translator = ccl.halos.mass_translator(mass_in=mdef1, mass_out=mdef2,
+                                           concentration=cm)
+    cosmo = ccl.CosmologyVanillaLCDM()
+    assert translator(cosmo, 1e14, 1) == 1e14

@@ -13,7 +13,7 @@ COSMO = ccl.Cosmology(
     w0=-1,
     wa=0,
     m_nu=0,
-    m_nu_type='normal',
+    mass_split='normal',
     Neff=3.046,
     Omega_k=0,
     transfer_function='eisenstein_hu',
@@ -36,7 +36,7 @@ def test_profile_Hernquist():
     c = ccl.halos.ConcentrationConstant(c=concentration, mass_def=mdef)
     p = ccl.halos.HaloProfileHernquist(concentration=c, truncated=False)
 
-    prof = p.real(COSMO, r, halomass, a, mass_def=mdef)
+    prof = p.real(COSMO, r, halomass, a)
 
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])
@@ -57,10 +57,9 @@ def test_profile_Einasto():
 
     mdef = ccl.halos.MassDef(mDelta, 'matter')
     c = ccl.halos.ConcentrationConstant(c=concentration, mass_def=mdef)
-    mdef = ccl.halos.MassDef(mDelta, 'matter', concentration=c)
     p = ccl.halos.HaloProfileEinasto(concentration=c, truncated=False)
 
-    prof = p.real(COSMO, r, halomass, a, mass_def=mdef)
+    prof = p.real(COSMO, r, halomass, a)
 
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])
@@ -83,7 +82,7 @@ def test_profile_NFW():
     c = ccl.halos.ConcentrationConstant(c=concentration, mass_def=mdef)
     p = ccl.halos.HaloProfileNFW(concentration=c, truncated=False)
 
-    prof = p.real(COSMO, r, halomass, a, mass_def=mdef)
+    prof = p.real(COSMO, r, halomass, a)
 
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])
@@ -110,18 +109,18 @@ def test_haloprofile(model):
 
     if model == 'nfw':
         p = ccl.halos.HaloProfileNFW(concentration=c, truncated=False)
-        prof = p.real(COSMO, r, halomass, a, mass_def=mdef)
+        prof = p.real(COSMO, r, halomass, a)
     elif model == 'projected_nfw':
         p = ccl.halos.HaloProfileNFW(concentration=c, truncated=False,
                                      projected_analytic=True)
-        prof = p.projected(COSMO, r, halomass, a, mass_def=mdef)
+        prof = p.projected(COSMO, r, halomass, a)
     elif model == 'einasto':
-        mdef = ccl.halos.MassDef(halomassdef, 'matter', concentration=c)
+        mdef = ccl.halos.MassDef(halomassdef, 'matter')
         p = ccl.halos.HaloProfileEinasto(concentration=c, truncated=False)
-        prof = p.real(COSMO, r, halomass, a, mass_def=mdef)
+        prof = p.real(COSMO, r, halomass, a)
     elif model == 'hernquist':
         p = ccl.halos.HaloProfileHernquist(concentration=c, truncated=False)
-        prof = p.real(COSMO, r, halomass, a, mass_def=mdef)
+        prof = p.real(COSMO, r, halomass, a)
 
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err = np.abs(prof - data[:, 1])
@@ -155,25 +154,25 @@ def test_weak_lensing_functions():
     )
 
     kappa = p.convergence(COSMO, r_al, halomass,
-                          a_lens=a_lens, a_source=a_source, mass_def=mdef)
+                          a_lens=a_lens, a_source=a_source)
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 1]), 1e-12, np.inf)
     err_kappa = np.abs(kappa - data[:, 1])
     assert np.all(err_kappa <= tol)
 
     gamma = p.shear(COSMO, r_al, halomass,
-                    a_lens=a_lens, a_source=a_source, mass_def=mdef)
+                    a_lens=a_lens, a_source=a_source)
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 2]), 1e-12, np.inf)
     err_gamma = np.abs(gamma - data[:, 2])
     assert np.all(err_gamma <= tol)
 
     gt = p.reduced_shear(COSMO, r_al, halomass,
-                         a_lens=a_lens, a_source=a_source, mass_def=mdef)
+                         a_lens=a_lens, a_source=a_source)
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 3]), 1e-12, np.inf)
     err_gt = np.abs(gt - data[:, 3])
     assert np.all(err_gt <= tol)
 
     mu = p.magnification(COSMO, r_al, halomass,
-                         a_lens=a_lens, a_source=a_source, mass_def=mdef)
+                         a_lens=a_lens, a_source=a_source)
     tol = np.clip(np.abs(HALOPROFILE_TOLERANCE * data[:, 4]), 1e-12, np.inf)
     err_mu = np.abs(mu - data[:, 4])
     assert np.all(err_mu <= tol)

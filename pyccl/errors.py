@@ -1,10 +1,12 @@
+__all__ = ("CCLError", "CCLWarning", "CCLDeprecationWarning",)
+
 import warnings
 
 
 class CCLError(RuntimeError):
     """A CCL-specific RuntimeError"""
     def __repr__(self):
-        return 'pyccl.CCLError(%r)' % (str(self))
+        return "pyccl.CCLError(%r)" % (str(self))
 
     def __eq__(self, other):
         return repr(self) == repr(other)
@@ -16,7 +18,7 @@ class CCLError(RuntimeError):
 class CCLWarning(RuntimeWarning):
     """A CCL-specific warning"""
     def __repr__(self):
-        return 'pyccl.CCLWarning(%r)' % (str(self))
+        return "pyccl.CCLWarning(%r)" % (str(self))
 
     def __eq__(self, other):
         return repr(self) == repr(other)
@@ -28,7 +30,7 @@ class CCLWarning(RuntimeWarning):
 class CCLDeprecationWarning(DeprecationWarning):
     """A CCL-specific deprecation warning."""
     def __repr__(self):
-        return 'pyccl.CCLDeprecationWarning(%r)' % (str(self))
+        return "pyccl.CCLDeprecationWarning(%r)" % (str(self))
 
     def __eq__(self, other):
         return repr(self) == repr(other)

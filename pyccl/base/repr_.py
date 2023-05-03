@@ -1,4 +1,5 @@
 import numpy as np
+
 from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 from .caching import _to_hashable, hash_
 
@@ -114,7 +115,7 @@ def build_string_Cosmology(self):
 
     Example output ::
 
-        <pyccl.core.Cosmology>
+        <pyccl.cosmology.Cosmology>
             Omega_b = 0.05
             Omega_c = 0.25
             h       = 0.67
@@ -178,7 +179,7 @@ def build_string_Cosmology(self):
             s += f"{newline}HASH_PK = {H}"
         return s
 
-    s = "<pyccl.core.Cosmology>"
+    s = "<pyccl.cosmology.Cosmology>"
     s += printdict(self._params_init_kwargs)
     s += printdict(self._config_init_kwargs)
     s += printextras(self._params_init_kwargs)

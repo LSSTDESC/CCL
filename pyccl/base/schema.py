@@ -1,14 +1,14 @@
-from _thread import RLock
-from abc import ABC, abstractmethod
-from inspect import signature
-import functools
-import numpy as np
-
-
 __all__ = ("ObjectLock",
            "UnlockInstance", "unlock_instance",
            "CustomRepr", "CustomEq",
            "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
+
+import functools
+from abc import ABC, abstractmethod
+from inspect import signature
+from _thread import RLock
+
+import numpy as np
 
 
 class ObjectLock:
@@ -372,5 +372,5 @@ class CCLNamedClass(CCLObject):
         if isinstance(input_, str):
             class_ = cls.from_name(input_)
             return class_(**kwargs)
-        good, bad = cls.__name__, input_.__class__.__name__
+        good, bad = cls.__name__, type(input_).__name__
         raise TypeError(f"Expected {good} or str but received {bad}.")

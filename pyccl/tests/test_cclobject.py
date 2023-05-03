@@ -68,7 +68,8 @@ def test_CCLObject_immutability():
         cosmo.update_parameters(A_SPLINE_NA=120)
 
     # `update_parameters` implemented.
-    prof = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
+    mdef = ccl.halos.MassDef200c()
+    prof = ccl.halos.HaloProfilePressureGNFW(mass_def=mdef, mass_bias=0.5)
     # with pytest.raises(AttributeError):  # TODO: Uncomment for CCLv3.
     #     prof.mass_bias = 0.7
     assert prof.mass_bias == 0.5
@@ -90,6 +91,22 @@ def test_CCLObject_default_behavior():
     MyType = type("MyType", (ccl.CCLAutoRepr,), {"test": 0})
     instances = [MyType() for _ in range(2)]
     assert instances[0] != instances[1]
+
+
+def test_named_class_raises():
+    # Test that an error is raised if `create_instance` gets the wrong type.
+    with pytest.raises(TypeError):
+        ccl.halos.MassDef.create_instance(1)
+
+
+def test_ccl_parameters_abstract():
+    # Test that the Parameters base class is abstract and cannot instantiate
+    # if `instance` or `factory` are not specified.
+    with pytest.raises(TypeError):
+        ccl.CCLParameters()
+    with pytest.raises(ValueError):
+        class MyPars(ccl.CCLParameters):
+            pass
 
 
 # +==========================================================================+

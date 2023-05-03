@@ -1,27 +1,31 @@
-from . import ccllib as lib
-from .pyutils import check
-from .base import deprecated, warn_api
-from .errors import CCLDeprecationWarning
-from .core import _Defaults
-from .background import omega_x
-import numpy as np
+__all__ = ("NeutrinoMassSplits", "nu_masses", "Omeganuh2",)
+
 import warnings
+from enum import Enum
+from numbers import Real
+from typing import Iterable
+
+import numpy as np
+from scipy.optimize import root
+
+from . import DefaultParams, check, lib, omega_x
+from . import CCLDeprecationWarning, deprecated, warn_api
+from . import physical_constants as const
 
 
-__all__ = ("nu_masses", "Omeganuh2",)
-
-
-neutrino_mass_splits = {
-    'normal': lib.nu_normal,
-    'inverted': lib.nu_inverted,
-    'equal': lib.nu_equal,
-    'sum': lib.nu_sum,
-    'single': lib.nu_single,
-}
+class NeutrinoMassSplits(Enum):
+    SUM = 'sum'
+    SINGLE = 'single'
+    EQUAL = 'equal'
+    NORMAL = 'normal'
+    INVERTED = 'inverted'
+    LIST = 'list'  # placeholder for backwards-compatibility
 
 
 @deprecated(new_function=omega_x)
-def Omeganuh2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
+def Omeganuh2(a, m_nu,
+              T_CMB=DefaultParams.T_CMB,
+              T_ncdm=DefaultParams.T_ncdm):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
 
@@ -61,7 +65,7 @@ def Omeganuh2(a, *, m_nu, T_CMB=_Defaults.T_CMB, T_ncdm=_Defaults.T_ncdm):
 
 
 @warn_api(pairs=[("OmNuh2", "Omega_nu_h2")])
-def nu_masses(*, Omega_nu_h2, mass_split, T_CMB=None):
+def nu_masses(*, Omega_nu_h2=None, mass_split, T_CMB=None, m_nu=None):
     """Returns the neutrinos mass(es) for a given Omega_nu_h2, according to the
     splitting convention specified by the user.
 
@@ -71,31 +75,55 @@ def nu_masses(*, Omega_nu_h2, mass_split, T_CMB=None):
             Should be one of 'normal', 'inverted', 'equal' or 'sum'.
         T_CMB (float, optional): Deprecated - do not use.
             Temperature of the CMB (K). Default: 2.725.
+        m_nu (:obj:`float` or array_like, optional):
+            Mass in eV of the massive neutrinos present.
+            If a sequence is passed, it is assumed that the elements of the
+            sequence represent the individual neutrino masses.
 
     Returns:
         float or array-like: Neutrino mass(es) corresponding to this Omeganuh2
     """
-    status = 0
-
     if T_CMB is not None:
         warnings.warn("T_CMB is deprecated as an argument of `nu_masses.",
                       CCLDeprecationWarning)
+    if m_nu is None:
+        m_nu = 93.14 * Omega_nu_h2
+    return _get_neutrino_masses(m_nu=m_nu, mass_split=mass_split)
 
-    if mass_split not in neutrino_mass_splits.keys():
-        raise ValueError(
-            "'%s' is not a valid species type. "
-            "Available options are: %s"
-            % (mass_split, neutrino_mass_splits.keys()))
 
-    # Call function
-    if mass_split in ['normal', 'inverted', 'equal']:
-        mnu, status = lib.nu_masses_vec(
-            Omega_nu_h2, neutrino_mass_splits[mass_split], 3, status)
-    elif mass_split in ['sum', 'single']:
-        mnu, status = lib.nu_masses_vec(
-            Omega_nu_h2, neutrino_mass_splits[mass_split], 1, status)
-        mnu = mnu[0]
+def _get_neutrino_masses(*, m_nu, mass_split):
+    """
+    """
+    if isinstance(m_nu, Real) and m_nu == 0:  # no massive neutrinos
+        return np.array([])
+    if isinstance(m_nu, Iterable):  # input was list
+        return np.asarray(m_nu).copy()
 
-    # Check status and return
-    check(status)
-    return mnu
+    split = NeutrinoMassSplits
+
+    if split(mass_split) == split.SUM:
+        return m_nu
+    if split(mass_split) == split.SINGLE:
+        return np.atleast_1d(m_nu)
+    if split(mass_split) == split.EQUAL:
+        return np.full(3, m_nu/3)
+
+    c = const
+    D12, D13p, D13n = c.DELTAM12_sq, c.DELTAM13_sq_pos, c.DELTAM13_sq_neg
+
+    def M_nu(m, D13):
+        m2 = m * m
+        return np.array([m.sum()-m_nu, m2[1]-m2[0]-D12, m2[2]-m2[0]-D13])
+
+    def check_mnu(val):
+        if m_nu < val:
+            raise ValueError(f"m_nu < {val} incompatible with mass hierarchy")
+
+    if split(mass_split) == split.NORMAL:
+        check_mnu(np.sqrt(D12) + np.sqrt(D13p))
+        x0 = [0, np.sqrt(D12), np.sqrt(D13p)]
+        return root(M_nu, x0, args=(D13p,)).x
+    if split(mass_split) == split.INVERTED:
+        check_mnu(np.sqrt(-(D13n + D12)) + np.sqrt(-D13n))
+        x0 = [0, np.sqrt(-(D13n + D12)), np.sqrt(-D13n)]
+        return root(M_nu, x0, args=(D13n,)).x
