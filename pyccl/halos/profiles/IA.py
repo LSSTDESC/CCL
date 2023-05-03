@@ -388,8 +388,7 @@ class SatelliteShearHOD(HaloProfileHOD):
         # Loop over all multipoles:
         for j, l in enumerate(l_arr):
             if self.integration_method == 'FFTLog':
-                prof += (self._fftlog_wrap(cosmo, k_use,
-                                           M_use, a, mass_def,
+                prof += (self._fftlog_wrap(cosmo, k_use, M_use, a,
                                            ell=int(l), fourier_out=True)
                          * (1j**l).real * (2*l+1) * self._angular_fl[j]
                          / (4*np.pi))

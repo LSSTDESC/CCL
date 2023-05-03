@@ -7,7 +7,6 @@ import numpy as np
 
 from .. import CCLWarning, Tk3D, warn_api
 from . import HaloProfileNFW, Profile2pt
-from . import HaloProfileNumberCounts as ProfNC
 
 
 @warn_api(pairs=[("prof1", "prof")], reorder=["prof12_2pt", "prof3", "prof4"])
@@ -506,17 +505,17 @@ def halomod_Tk3D_SSC(
         def _get_counterterm(pA, pB, p2pt, nA, nB, i11_A, i11_B):
             """Helper to compute counter-terms."""
             # p : profiles | p2pt : 2-point | n : norms | i11 : I_1_1 integral
-            bA = i11_A / nA if isinstance(pA, ProfNC) else np.zeros_like(k_use)
-            bB = i11_B / nB if isinstance(pB, ProfNC) else np.zeros_like(k_use)
+            bA = i11_A / nA if pA.is_number_counts else np.zeros_like(k_use)
+            bB = i11_B / nB if pB.is_number_counts else np.zeros_like(k_use)
             i02 = hmc.I_0_2(cosmo, k_use, aa, pA, prof2=pB, prof_2pt=p2pt)
             P = (pk * i11_A * i11_B + i02) / (nA * nB)
             return (bA + bB) * P
 
-        if isinstance(prof, ProfNC) or isinstance(prof2, ProfNC):
+        if prof.is_number_counts or prof2.is_number_counts:
             dpk12[ia] -= _get_counterterm(prof, prof2, prof12_2pt,
                                           norm1, norm2, i11_1, i11_2)
 
-        if isinstance(prof3, ProfNC) or isinstance(prof4, ProfNC):
+        if prof3.is_number_counts or prof4.is_number_counts:
             if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
                 dpk34[ia] -= dpk12[ia]
             else:

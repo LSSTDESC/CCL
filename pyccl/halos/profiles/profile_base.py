@@ -1,4 +1,4 @@
-__all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
+__all__ = ("HaloProfile", "HaloProfileMatter",
            "HaloProfilePressure", "HaloProfileCIB",)
 
 import warnings
@@ -43,7 +43,8 @@ class HaloProfile(CCLAutoRepr):
     __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
                                  )(super.__getattribute__)
 
-    def __init__(self, *, mass_def=None, concentration=None):
+    def __init__(self, *, mass_def=None, concentration=None,
+                 is_number_counts=False):
         # Verify that profile can be initialized.
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
             name = type(self).__name__
@@ -53,8 +54,7 @@ class HaloProfile(CCLAutoRepr):
         # Initialize FFTLog.
         self.precision_fftlog = FFTLogParams()
 
-        # TODO: Remove for CCLv3.
-        self._is_number_counts = isinstance(self, HaloProfileNumberCounts)
+        self._is_number_counts = is_number_counts
 
         if (mass_def, concentration) == (None, None):
             warnings.warn(
@@ -74,13 +74,11 @@ class HaloProfile(CCLAutoRepr):
 
     @property
     def is_number_counts(self):
-        # TODO: Remove for CCLv3.
         return self._is_number_counts
 
     @is_number_counts.setter
     @unlock_instance
     def is_number_counts(self, value):
-        # TODO: Remove for CCLv3.
         self._is_number_counts = value
 
     def get_normalization(self, cosmo, a, *, hmc=None):
@@ -488,10 +486,6 @@ class HaloProfile(CCLAutoRepr):
         if np.ndim(M) == 0:
             sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
         return sig_r_t_out
-
-
-class HaloProfileNumberCounts(HaloProfile):
-    """Base for number counts halo profiles."""
 
 
 class HaloProfileMatter(HaloProfile):
