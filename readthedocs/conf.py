@@ -27,7 +27,7 @@ root_path = abspath(pjoin(this_dir, '../'))
 if os.path.isdir(root_path):
     sys.path.insert(0, root_path)
 
-autodoc_mock_imports = ["pyccl.pyccl"]
+autodoc_mock_imports = ["pyccl.ccllib"]
 
 # -- General configuration ------------------------------------------------
 
