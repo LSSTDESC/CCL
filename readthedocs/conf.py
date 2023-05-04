@@ -29,7 +29,10 @@ if os.path.isdir(root_path):
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if on_rtd:
-    from mock import Mock as MagicMock
+    try:
+        from unittest.mock import MagicMock
+    except ImportError:
+        from mock import Mock as MagicMock
 
     class Mock(MagicMock):
         @classmethod
@@ -38,10 +41,26 @@ if on_rtd:
 
     MOCK_MODULES = [
         "pyccl.ccllib",
-        "pyccl.lib",
-    ]
+        "pyccl._types.ccllib",
+        "pyccl.background.ccllib",
+        "pyccl.bcm.ccllib",
+        "pyccl.boltzmann.ccllib",
+        "pyccl.halomodel.ccllib",
+        "pyccl.haloprofile.ccllib",
+        "pyccl.tracers.ccllib",
+        "pyccl.constants.ccllib",
+        "pyccl.correlation.ccllib",
+        "pyccl.neutrinos.ccllib",
+        "pyccl.ccllibutils.ccllib",
+        "pyccl.cls.ccllib",
+        "pyccl.cosmology.ccllib",
+        "pyccl.massfunction.ccllib",
+        "pyccl.power.ccllib",
+        "pyccl.pyutils.ccllib",
+        "yaml"]
 
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+
 
 # -- General configuration ------------------------------------------------
 
