@@ -21,7 +21,7 @@ html: generate-api
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 clean-api:
-	rm -rf api/*.rst
+	rm -rf api
 .PHONY: clean
 clean: clean-api
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

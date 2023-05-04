@@ -10,28 +10,9 @@ from __future__ import annotations
 
 __all__ = ("Parameters",)
 
-# import warnings
 from dataclasses import dataclass, fields
 from functools import cached_property
 from typing import Any
-
-# from ... import CCLDeprecationWarning
-
-
-# def _new_setattr(self, key, value):
-#     # Make instances of the SWIG-level class immutable so that everything is
-#     # handled only through Python. SWIG assigns attribute `this` via the low-
-#     # level `_ccllib`; we therefore disable all other direct assignments.
-#     if key == "this":
-#         return object.__setattr__(self, key, value)
-#     name = type(self).__name__
-#     # TODO: Deprecation cycle for fully immutable Cosmology objects.
-#     # raise AttributeError(f"Direct assignment in {name} not supported.")
-#     warnings.warn(
-#         f"Direct assignment of {name} is deprecated and an exception will be "
-#         "raised in the next major release. Use the Python interface "
-#         "(pyccl.Parameters) instead.", CCLDeprecationWarning)
-#     object.__setattr__(self, key, value)
 
 
 class Parameters:
@@ -68,11 +49,6 @@ class Parameters:
 
         # Make subclasses data classes.
         cls = dataclass(init=True, eq=True, repr=True, unsafe_hash=True)(cls)
-
-        # if (instance, factory) != (None, None):
-        #     # Replace C-level `__setattr__`.
-        #     class_ = cls._factory if cls._factory else cls._instance.__class__
-        #     class_.__setattr__ = _new_setattr
 
     def __new__(cls, **kwargs):
         obj = super().__new__(cls)  # create a new object
