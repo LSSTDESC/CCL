@@ -1,4 +1,4 @@
-sphinx==3.4.3
+sphinx==6
 sphinx-book-theme
 sphinx-autodoc-typehints
 sphinxcontrib-bibtex
