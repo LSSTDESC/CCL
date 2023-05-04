@@ -5,6 +5,7 @@ class
 readthedocs/_build
 readthedocs/*~
 readthedocs/source/*~
+readthedocs/api
 
 # Ignore compile and link build files.
 *.o
