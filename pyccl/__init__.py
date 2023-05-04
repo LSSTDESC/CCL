@@ -19,8 +19,7 @@ import numpy
 numpy.int = int if parse(numpy.__version__) >= parse("1.20.0") else numpy.int
 del parse, numpy
 
-# from . import ccllib as lib
-lib = None
+from . import ccllib as lib
 from .errors import *
 from .base import *
 from .pyutils import *
