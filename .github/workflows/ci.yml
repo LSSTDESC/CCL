@@ -11,6 +11,7 @@ on:
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
   CONDA_ENV: .github/environment.yml
+  DOCS_ENV: readthedocs/environment.yml
 
 jobs:
   build:
@@ -113,6 +114,46 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           args: "--config .flake8"
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CCL repository
+        uses: actions/checkout@v3
+
+      - name: Set up conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          channels: conda-forge, defaults
+          channel-priority: strict
+          show-channel-urls: true
+          miniforge-version: latest
+          miniforge-variant: Mambaforge
+
+      - name: Set current date as environment variable
+        run: echo "TODAY=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
+
+      - name: Get cached environment
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ matrix.prefix }}
+          key:
+            docs-build-${{
+            hashFiles(env.DOCS_ENV) }}--${{
+            env.TODAY }}
+
+      - name: Install environment packages
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          export MAMBA_NO_BANNER=1  # hide mamba banner from output
+          mamba env update --file ${{ env.DOCS_ENV }} --prune
+
+      - name: Build docs
+        run: |
+        cd readthedocs
+        # convert warnings to erros, but keep going to the end
+        make clean && make SPHINXOPTS="-W --keep-going" html
 
 
 # Legacy step: uninstall homebrew (CI works without it).

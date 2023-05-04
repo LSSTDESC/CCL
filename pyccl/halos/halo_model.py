@@ -12,7 +12,7 @@ __all__ = ("HMCalculator",)
 
 import warnings
 from numbers import Real
-from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
+from typing import Callable, Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -20,12 +20,9 @@ from numpy.typing import NDArray
 from .. import CCLObject, CCLDeprecationWarning, unlock_instance
 from .. import warn_api, deprecate_attr, deprecated
 from .. import physical_constants as const
-from . import MassDef, MassFunc, HaloBias
+from . import HaloBias, HaloProfile, MassDef, MassFunc, Profile2pt
+from ..cosmology import Cosmology
 from ..pyutils import _spline_integrate
-
-if TYPE_CHECKING:
-    from .. import Cosmology
-    from . import HaloProfile, Profile2pt
 
 
 class HMCalculator(CCLObject):

@@ -40,13 +40,13 @@ from .boltzmann import *
 from .baryons import *
 from .neutrinos import *
 
-from . import halos
-from . import nl_pt
-
 from .bcm import *           # deprecated
 from .halomodel import *     # deprecated
 from .massfunction import *  # deprecated
 from .haloprofile import *   # deprecated
+
+from . import halos
+from . import nl_pt
 
 from .cosmology import *
 

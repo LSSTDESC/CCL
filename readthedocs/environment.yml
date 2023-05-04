@@ -1,0 +1,12 @@
+name: test  # default testing environment name from conda-incubator
+dependencies:
+  - python=3.11
+  - pip
+  - sphinx=6
+  - sphinx-book-theme
+  - sphinx-autodoc-typehints
+  - sphinxcontrib-bibtex
+  - numpy
+  - scipy
+  - pip:
+      - sphinx_mdinclude
