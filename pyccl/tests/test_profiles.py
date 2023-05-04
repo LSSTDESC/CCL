@@ -615,3 +615,83 @@ def test_HaloProfile_abstractmethods():
     # either `_real` or `_fourier` have not been defined.
     with pytest.raises(TypeError):
         ccl.halos.HaloProfile()
+
+
+def test_IA_update():
+    cM = ccl.halos.ConcentrationDuffy08(mass_def="200m")
+    p = ccl.halos.SatelliteShearHOD(concentration=cM, mass_def="200m")
+    for attr in ['a1h', 'b', 'log10Mmin_0', 'log10Mmin_p',
+                 'log10M0_0', 'log10M0_p', 'log10M1_0', 'log10M1_p',
+                 'siglnM_0', 'siglnM_p', 'alpha_0', 'alpha_p',
+                 'bg_0', 'bg_p', 'bmax_0', 'bmax_p', 'a_pivot',
+                 'rmin', 'N_r', 'N_jn']:
+        p.update_parameters(**{attr: -123})
+        assert getattr(p, attr) == -123
+    # Special cases
+    p.update_parameters(lmax=5)
+    assert p.lmax == 5
+    p.update_parameters(ns_independent=True)
+    assert p.ns_independent
+
+
+def test_IA_profile():
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.83, n_s=0.96)
+    k_arr = np.geomspace(1E-3, 1e3, 256)  # For evaluating
+    cM = ccl.halos.ConcentrationDuffy08(mass_def="200m")
+
+    # lmax too low
+    with pytest.warns(ccl.CCLWarning):
+        ccl.halos.SatelliteShearHOD(concentration=cM, lmax=1,
+                                    mass_def="200m")
+
+    # lmax too high
+    with pytest.warns(ccl.CCLWarning):
+        ccl.halos.SatelliteShearHOD(concentration=cM, lmax=14,
+                                    mass_def="200m")
+
+    # lmax odd
+    assert (ccl.halos.SatelliteShearHOD(concentration=cM, mass_def="200m",
+                                        lmax=7).lmax) % 2 == 0
+
+    # Run with b!={0,2}
+    assert (ccl.halos.SatelliteShearHOD(
+        concentration=cM, b=-1.9, mass_def="200m",
+        lmax=12)._angular_fl).shape == (6, 1)
+
+    # Testing FFTLog accuracy vs simps and spline method.
+    s_g_HOD1 = ccl.halos.SatelliteShearHOD(concentration=cM,
+                                           mass_def="200m")
+    s_g_HOD2 = ccl.halos.SatelliteShearHOD(concentration=cM,
+                                           mass_def="200m",
+                                           integration_method='simpson')
+    s_g_HOD3 = ccl.halos.SatelliteShearHOD(concentration=cM,
+                                           mass_def="200m",
+                                           integration_method='spline')
+    s_g1 = s_g_HOD1._usat_fourier(cosmo, k_arr, 1e13, 1.)
+    s_g2 = s_g_HOD2._usat_fourier(cosmo, k_arr, 1e13, 1.)
+    s_g3 = s_g_HOD3._usat_fourier(cosmo, k_arr, 1e13, 1.)
+    assert np.all(np.abs((s_g1 - s_g2) / s_g2)) > 0.05
+    assert np.all(np.abs((s_g3 - s_g2) / s_g3)) > 0.05
+
+    # Wrong integration method
+    with pytest.raises(ValueError):
+        ccl.halos.SatelliteShearHOD(concentration=cM,
+                                    mass_def="200m",
+                                    integration_method="something_else")
+
+
+def test_prefactor():
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.83, n_s=0.96)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def="200m")
+    nM = ccl.halos.MassFuncTinker08(mass_def="200m")
+    bM = ccl.halos.HaloBiasTinker10(mass_def="200m")
+    hmc = ccl.halos.HMCalculator(mass_function=nM,
+                                 halo_bias=bM, mass_def="200m")
+
+    p = ccl.halos.HaloProfilePressureGNFW(mass_def="200m")  # a simple profile
+    assert np.all(np.abs(p.get_normalization(cosmo, 1., hmc=hmc)-1.0 < 1e-10))
+
+    p = ccl.halos.SatelliteShearHOD(concentration=cM, mass_def="200m")
+    assert p.get_normalization(cosmo, 1., hmc=hmc) > 0
