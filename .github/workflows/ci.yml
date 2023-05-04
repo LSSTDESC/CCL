@@ -129,9 +129,9 @@ jobs:
 
       - name: Build docs
         run: |
-        cd readthedocs
-        # convert warnings to erros, but keep going to the end
-        make clean && make SPHINXOPTS="-W --keep-going" html
+          cd readthedocs
+          # convert warnings to erros, but keep going to the end
+          make clean && make SPHINXOPTS="-W --keep-going" html
 
 
 # Legacy step: uninstall homebrew (CI works without it).
