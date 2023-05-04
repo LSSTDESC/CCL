@@ -38,10 +38,10 @@ if on_rtd:
 
     MOCK_MODULES = [
         "pyccl.ccllib",
-        "yaml"]
+        "pyccl.lib",
+    ]
 
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
 
 # -- General configuration ------------------------------------------------
 
