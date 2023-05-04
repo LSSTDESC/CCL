@@ -374,6 +374,31 @@ class Cosmology(CCLObject):
         self._pk_lin = {}
         self._pk_nl = {}
 
+    @property
+    def has_distances(self) -> bool:
+        """Check whether the distance splines exist."""
+        return bool(self.cosmo.computed_distances)
+
+    @property
+    def has_growth(self) -> bool:
+        """Check whether the growth splines exist."""
+        return bool(self.cosmo.computed_growth)
+
+    @property
+    def has_linear_power(self) -> bool:
+        """Check whether the linear power spectrum exists."""
+        return DEFAULT_POWER_SPECTRUM in self._pk_lin
+
+    @property
+    def has_nonlin_power(self) -> bool:
+        """Check whether the non-linear power spectrum exists."""
+        return DEFAULT_POWER_SPECTRUM in self._pk_nl
+
+    @property
+    def has_sigma(self) -> bool:
+        r"""Check whether the :math:`\sigma(M)` splines exist."""
+        return bool(self.cosmo.computed_sigma)
+
     def _build_cosmo(self):
         """Assemble all of the input data into a valid ccl_cosmology object."""
         # We have to make all of the C stuff that goes into a cosmology
@@ -786,31 +811,6 @@ class Cosmology(CCLObject):
         if pk is None:
             raise KeyError(f"Power spectrum {name} does not exist.")
         return pk
-
-    @property
-    def has_distances(self) -> bool:
-        """Check whether the distance splines exist."""
-        return bool(self.cosmo.computed_distances)
-
-    @property
-    def has_growth(self) -> bool:
-        """Check whether the growth splines exist."""
-        return bool(self.cosmo.computed_growth)
-
-    @property
-    def has_linear_power(self) -> bool:
-        """Check whether the linear power spectrum exists."""
-        return DEFAULT_POWER_SPECTRUM in self._pk_lin
-
-    @property
-    def has_nonlin_power(self) -> bool:
-        """Check whether the non-linear power spectrum exists."""
-        return DEFAULT_POWER_SPECTRUM in self._pk_nl
-
-    @property
-    def has_sigma(self) -> bool:
-        r"""Check whether the :math:`\sigma(M)` splines exist."""
-        return bool(self.cosmo.computed_sigma)
 
     def check(self, status: int) -> None:
         """Check the status returned by a :mod:`~pyccl.ccllib` function.

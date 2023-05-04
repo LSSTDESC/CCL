@@ -91,7 +91,7 @@ class Pk2D(CCLObject):
 
     is_logp
         Whether `pk_arr` holds the power spectrum in linear- or log-scale.
-    extrap_order_lok, extrap_order_hik :  {0, 1, 2}
+    extrap_order_lok, extrap_order_hik
         Extrapolation order when calling the power spectrum beyond the
         interpolation boundaries in :math:`k`. Extrapolated in linear- or
         log-scale, depending on `is_logp`.
