@@ -249,7 +249,7 @@ def get_kappa_kernel(
 
 
 class Tracer(CCLObject):
-    """Tracer of the large-scale structure.
+    r"""Tracer of the large-scale structure.
 
     Contains the necessary information to describe the contribution of
     observables to the power spectrum. Tracers are composed of four main
@@ -582,7 +582,7 @@ class Tracer(CCLObject):
                 samplesize = int(z[0]/stepsize)
                 z_0_to_zmin = np.linspace(0.0, z[0] - stepsize, samplesize)
                 z = np.concatenate((z_0_to_zmin, z))
-            a = 1./(1.+z)
+            a = 1 / (1 + z[::-1])
         # Scale-dependant MG case with an array of k
         lk = cosmo.get_pk_spline_lk()
         k = np.exp(lk)

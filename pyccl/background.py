@@ -5,6 +5,7 @@ Background (:mod:`pyccl.background`)
 
 Functions to compute background quantities: distances, energies, growth.
 """
+
 from __future__ import annotations
 
 __all__ = (
