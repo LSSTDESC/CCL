@@ -51,9 +51,6 @@ class CCLParameters:
         cls._factory = factory
         cls._frozen = freeze
 
-        # Replace C-level `__setattr__`.
-        class_ = cls._factory if cls._factory else cls._instance.__class__
-
     def __init__(self):
         # Emulate abstraction so that base class cannot be instantiated.
         if not (hasattr(self, "_instance") or hasattr(self, "_factory")):
