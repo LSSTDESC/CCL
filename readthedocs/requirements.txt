@@ -1,1 +1,4 @@
+sphinx==6
 sphinx_mdinclude
+numpy
+scipy
