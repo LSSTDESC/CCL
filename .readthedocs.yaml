@@ -7,7 +7,6 @@ version: 2
 
 build:
   os: ubuntu-22.04
-nikfilippas marked this conversation as resolved.
   tools:
     python: "3.11"
 
