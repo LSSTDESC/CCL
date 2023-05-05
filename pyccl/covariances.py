@@ -153,12 +153,13 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
             power spectrum to use. Defaults to the
             internal linear power spectrum from `cosmo`.
 
-
     Returns:
-        a_arr (array_like): an array of scale factor values at which the
-            projected variance has been evaluated. Only returned if `a_arr` is
-            `None` on input.
-        sigma2_B (float or array_like): projected variance.
+        Tuple containing
+
+        - a_arr (array_like): an array of scale factor values at which the
+          projected variance has been evaluated. Only returned if `a_arr` is
+          `None` on input.
+        - sigma2_B (float or array_like): projected variance.
     """
     full_output = a_arr is None
 
@@ -215,10 +216,12 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
             internal linear power spectrum from `cosmo`.
 
     Returns:
-        a_arr (array_like): an array of scale factor values at which the
-            projected variance has been evaluated. Only returned if `a_arr` is
-            `None` on input.
-        sigma2_B (float or array_like): projected variance.
+        Tuple containing
+
+        - a_arr (array_like): an array of scale factor values at which the
+          projected variance has been evaluated. Only returned if `a_arr` is
+          `None` on input.
+        - sigma2_B (float or array_like): projected variance.
     """
     full_output = a_arr is None
 

@@ -71,22 +71,20 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
 
     The different spin combinaisons are:
 
-      -  :math:`s_a=s_b=0` e.g. galaxy-galaxy, galaxy-:math:`\kappa`
-         and :math:`\kappa`-:math:`\kappa`
-
-      - :math:`s_a=2`, `s_b=0` e.g. galaxy-shear, and :math:`\kappa`-shear
-
-      - :math:`s_a=s_b=2` e.g. shear-shear.
+        * :math:`s_a=s_b=0` e.g. galaxy-galaxy, galaxy-:math:`\kappa`
+          and :math:`\kappa`-:math:`\kappa`
+        * :math:`s_a=2`, `s_b=0` e.g. galaxy-shear, and :math:`\kappa`-shear
+        * :math:`s_a=s_b=2` e.g. shear-shear.
 
     .. note::
-
         For scales smaller than :math:`\sim 0.1^{\circ}`, the input power
         spectrum should be sampled to sufficienly high :math:`\ell` to ensure
         the Hankel transform is well-behaved. The following spline parameters,
         related to ``FFTLog``-sampling may also be modified for accuracy:
-            - ``ccl.spline_params.ELL_MIN_CORR``
-            - ``ccl.spline_params.ELL_MAX_CORR``
-            - ``ccl.spline_params.N_ELL_CORR``.
+
+            * ``ccl.spline_params.ELL_MIN_CORR``
+            * ``ccl.spline_params.ELL_MAX_CORR``
+            * ``ccl.spline_params.N_ELL_CORR``.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.

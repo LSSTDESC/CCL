@@ -1,5 +1,5 @@
-pyccl.nl\_pt package
-====================
+pyccl.baryons package
+=====================
 
 Submodules
 ----------
@@ -7,14 +7,13 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   pyccl.nl_pt.ept
-   pyccl.nl_pt.power
-   pyccl.nl_pt.tracers
+   pyccl.baryons.baryons_base
+   pyccl.baryons.schneider15
 
 Module contents
 ---------------
 
-.. automodule:: pyccl.nl_pt
+.. automodule:: pyccl.baryons
    :members:
    :undoc-members:
    :show-inheritance:
