@@ -814,8 +814,10 @@ class Cosmology(CCLObject):
     @deprecated()
     def status(self):
         """Get error status of the ccl_cosmology object.
+
         .. note:: The error statuses are currently under development and
                   may not be fully descriptive.
+
         Returns:
             :obj:`str` containing the status message.
         """

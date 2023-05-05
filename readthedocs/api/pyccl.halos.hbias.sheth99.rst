@@ -1,7 +1,7 @@
-pyccl.halos.profiles\_cib module
+pyccl.halos.hbias.sheth99 module
 ================================
 
-.. automodule:: pyccl.halos.profiles_cib
+.. automodule:: pyccl.halos.hbias.sheth99
    :members:
    :undoc-members:
    :show-inheritance:

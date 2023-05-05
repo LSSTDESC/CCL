@@ -107,13 +107,14 @@ def build_string_Cosmology(self):
     there is limiting behavior where ``'=='`` will return ``False``
     even though the compared cosmologies return the same theoretical
     predictions. This happens whenever:
-        - Exactly one Cosmology is an instance of ``CosmologyCalculator``.
-        - Cosmologies defined with different parameter sets, where one can
+
+        * Exactly one Cosmology is an instance of ``CosmologyCalculator``.
+        * Cosmologies defined with different parameter sets, where one can
           be computed from the other (e.g. ``sigma8`` and ``A_s``).
-        - Instances of ``CosmologyCalculator`` which do not contain exactly
+        * Instances of ``CosmologyCalculator`` which do not contain exactly
           the same linear & non-linear power spectrum entries.
 
-    Example output ::
+    Example output::
 
         <pyccl.cosmology.Cosmology>
             Omega_b = 0.05
@@ -241,9 +242,9 @@ def build_string_simple(self):
 
 def build_string_from_attrs(self):
     """Build a representation for an object from a list of attribute names
-    given in the hook ``__repr_attrs__`.
+    given in the hook ``__repr_attrs__``.
 
-    Example output ::
+    Example output::
 
         <pyccl.halos.halo_model.HMCalculator>
             mass_function = MassFuncTinker08,  HASH = 0xd3b29dd3

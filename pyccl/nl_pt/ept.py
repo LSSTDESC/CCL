@@ -522,6 +522,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                   still work in progress in FastPT. As a workaround
                   CCL assumes a non-linear treatment of IAs, but only
                   linearly biased number counts.
+
         Args:
             tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
                 tracer being correlated.
