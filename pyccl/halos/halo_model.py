@@ -57,8 +57,12 @@ class HMCalculator(CCLAutoRepr):
                  log10M_min=8., log10M_max=16., nM=128,
                  integration_method_M='simpson', k_min=1E-5):
         # Initialize halo model ingredients.
-        self.mass_def, self.mass_function, self.halo_bias = MassDef.from_specs(
-            mass_def, mass_function=mass_function, halo_bias=halo_bias)
+        out = MassDef.from_specs(mass_def, mass_function=mass_function,
+                                 halo_bias=halo_bias)
+        if len(out) != 3:
+            raise ValueError("A valid mass function and halo bias is "
+                             "needed")
+        self.mass_def, self.mass_function, self.halo_bias = out
 
         self.precision = {
             'log10M_min': log10M_min, 'log10M_max': log10M_max, 'nM': nM,

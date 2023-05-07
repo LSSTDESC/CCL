@@ -25,7 +25,7 @@ def test_halomod_f2d_copy():
     prf = ccl.halos.HaloProfileNFW(concentration=cc)
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mdef)
-    pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf)
+    pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf, normprof1=True)
     psp_new = pk2d.psp
     # This just triggers the internal calculation
     with pytest.warns(ccl.CCLDeprecationWarning):
