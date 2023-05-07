@@ -83,6 +83,14 @@ class HMCalculator(CCLAutoRepr):
         self._cosmo_mf = self._cosmo_bf = None
         self._a_mf = self._a_bf = -1
 
+    def _fix_profile_mass_def(self, prof):
+        # TODO v3: remove this (in v3 all profiles have a mass_def).
+        # If profile has no mass definition assigned, assign one.
+        if prof.mass_def is None:
+            warnings.warn("In v3 all profiles will need an associated "
+                          "mass definition.", CCLDeprecationWarning)
+            prof.mass_def = self.mass_def
+
     def _integ_spline(self, fM, log10M):
         # Spline integrator
         return _spline_integrate(log10M, fM, log10M[0], log10M[-1])
@@ -160,6 +168,7 @@ class HMCalculator(CCLAutoRepr):
         Returns:
             float or array_like: integral value.
         """
+        self._fix_profile_mass_def(prof)
         self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk0 = prof.fourier(cosmo, self.precision['k_min'], self._mass, a).T
@@ -250,6 +259,7 @@ class HMCalculator(CCLAutoRepr):
             float or array_like: integral values evaluated at each
             value of `k`.
         """
+        self._fix_profile_mass_def(prof)
         self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk = prof.fourier(cosmo, k, self._mass, a).T
@@ -278,6 +288,7 @@ class HMCalculator(CCLAutoRepr):
             float or array_like: integral values evaluated at each
             value of `k`.
         """
+        self._fix_profile_mass_def(prof)
         self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof.fourier(cosmo, k, self._mass, a).T
@@ -317,6 +328,8 @@ class HMCalculator(CCLAutoRepr):
         """
         if prof2 is None:
             prof2 = prof
+        self._fix_profile_mass_def(prof)
+        self._fix_profile_mass_def(prof2)
 
         self._check_mass_def(prof, prof2)
         self._get_ingredients(cosmo, a, get_bf=False)
@@ -356,6 +369,8 @@ class HMCalculator(CCLAutoRepr):
         """
         if prof2 is None:
             prof2 = prof
+        self._fix_profile_mass_def(prof)
+        self._fix_profile_mass_def(prof2)
 
         self._check_mass_def(prof, prof2)
         self._get_ingredients(cosmo, a, get_bf=True)
@@ -413,6 +428,10 @@ class HMCalculator(CCLAutoRepr):
         if prof34_2pt is None:
             prof34_2pt = prof12_2pt
 
+        self._fix_profile_mass_def(prof)
+        self._fix_profile_mass_def(prof2)
+        self._fix_profile_mass_def(prof3)
+        self._fix_profile_mass_def(prof4)
         self._check_mass_def(prof, prof2, prof3, prof4)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk12 = prof12_2pt.fourier_2pt(
