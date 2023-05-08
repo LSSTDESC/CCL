@@ -17,7 +17,7 @@ from .caching import hash_
 def build_string_simple(self):
     """Simple representation.
 
-    Example output ::
+    Example output::
 
         <pyccl.emulator.Emulator>
     """
@@ -28,7 +28,7 @@ def build_string_from_attrs(self):
     """Build a representation for an object from a list of attribute names
     given in the hook ``__repr_attrs__``.
 
-    Example output ::
+    Example output::
 
         <pyccl.halos.halo_model.HMCalculator>
             mass_function = MassFuncTinker08,  HASH = 0xd3b29dd3
@@ -156,7 +156,7 @@ class Table:
 def build_string_Cosmology(self):
     """Build the ``Cosmology`` representation.
 
-    Example output ::
+    Example output::
 
         <pyccl.cosmology.Cosmology>
             Omega_b: 0.05
@@ -197,7 +197,7 @@ def build_string_Cosmology(self):
 def build_string_Pk2D(self, na=6, nk=6, decimals=2):
     """Build the ``Pk2D`` representation.
 
-    Example output ::
+    Example output::
 
         <pyccl.Pk2D>
             +===============+=============================================+
@@ -239,7 +239,7 @@ def build_string_Pk2D(self, na=6, nk=6, decimals=2):
 def build_string_Tk3D(self, na=2, nk=4, decimals=2):
     """Build a representation for a Tk3D object.
 
-    Example output ::
+    Example output::
 
         <pyccl.Tk3D>
             +================+=============================================+
@@ -298,7 +298,7 @@ def build_string_Tracer(self):
 
     .. note:: Tracer insertion order is important.
 
-    Example output ::
+    Example output::
 
         <pyccl.tracers.Tracer>
             num       kernel             transfer       prefac  bessel

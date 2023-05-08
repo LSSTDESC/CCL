@@ -130,9 +130,9 @@ def correlation(
         the Hankel transform is well-behaved. The relevant spline parameters
         may be adjusted to improve accuracy:
 
-        - :attr:`ccl.spline_params.ELL_MIN_CORR`,
-        - :attr:`ccl.spline_params.ELL_MAX_CORR`,
-        - :attr:`ccl.spline_params.N_ELL_CORR`.
+        * :attr:`ccl.spline_params.ELL_MIN_CORR`,
+        * :attr:`ccl.spline_params.ELL_MAX_CORR`,
+        * :attr:`ccl.spline_params.N_ELL_CORR`.
 
     Arguments
     ---------
