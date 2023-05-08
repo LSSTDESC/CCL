@@ -5,19 +5,20 @@ from . import HaloBias
 
 
 class HaloBiasSheth99(HaloBias):
-    """ Implements halo bias described in 1999MNRAS.308..119S
+    """ Implements halo bias described in `Sheth & Tormen 1999
+    <https://arxiv.org/abs/astro-ph/9901122>`_.
     This parametrization is only valid for 'fof' masses.
 
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
             a mass definition object, or a name string.
-            This parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (bool): if ``False``, consistency of the mass
             definition will be ignored.
-        use_delta_c_fit (bool): if True, use delta_crit given by
-            the fit of Nakamura & Suto 1997. Otherwise use
-            delta_crit = 1.68647.
+        use_delta_c_fit (bool): if ``True``, use the fit to the
+            critical overdensity :math:`\\delta_c` by
+            `Nakamura & Suto 1997
+            <https://arxiv.org/abs/astro-ph/9612074>`_. Otherwise use
+            :math:`\\delta_c = 1.68647`.
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
                                      "use_delta_c_fit",)

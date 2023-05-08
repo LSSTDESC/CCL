@@ -5,15 +5,14 @@ from . import HaloBias
 
 
 class HaloBiasBhattacharya11(HaloBias):
-    """ Implements halo bias described in arXiv:1005.2239.
-    This parametrization is only valid for 'fof' masses.
+    """ Implements halo bias described of `Bhattacharya et al. 2011
+    <https://arxiv.org/abs/1005.2239>`_. This parametrization is only
+    valid for 'fof' masses.
 
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
             a mass definition object, or a name string.
-            this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (bool): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = "Bhattacharya11"

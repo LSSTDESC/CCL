@@ -7,15 +7,16 @@ from . import HaloBias
 
 
 class HaloBiasTinker10(HaloBias):
-    """ Implements halo bias described in arXiv:1001.3162.
+    """ Implements halo bias described in `Tinker et al. 2010
+    <https://arxiv.org/abs/1001.3162>`_. This parametrization accepts S.O.
+    masses with :math:`200 < \\Delta < 3200`, defined with respect to the
+    matter density. This can be automatically translated to S.O. masses
+    defined with respect to the critical density.
 
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
             a mass definition object, or a name string.
-            This parametrization accepts SO masses with
-            200 < Delta < 3200 with respect to the matter density.
-            If `None`, Delta = 200 (matter) will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (bool): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = "Tinker10"
