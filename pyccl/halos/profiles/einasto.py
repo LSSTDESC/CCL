@@ -9,34 +9,37 @@ from . import HaloProfileMatter
 
 
 class HaloProfileEinasto(HaloProfileMatter):
-    """ Einasto profile (1965TrAlm...5...87E).
+    """ `Einasto 1965
+    <https://ui.adsabs.harvard.edu/abs/1965TrAlm...5...87E/abstract>`_
+    profile.
 
     .. math::
        \\rho(r) = \\rho_0\\,\\exp(-2 ((r/r_s)^\\alpha-1) / \\alpha)
 
-    where :math:`r_s` is related to the spherical overdensity
-    halo radius :math:`R_\\Delta(M)` through the concentration
+    where :math:`r_s` is related to the comoving spherical overdensity
+    halo radius :math:`r_\\Delta(M)` through the concentration
     parameter :math:`c(M)` as
 
     .. math::
-       R_\\Delta(M) = c(M)\\,r_s
+       r_\\Delta(M) = c(M)\\,r_s
 
     and the normalization :math:`\\rho_0` is the mean density
-    within the :math:`R_\\Delta(M)` of the halo. The index
+    within the :math:`r_\\Delta(M)` of the halo. The index
     :math:`\\alpha` depends on halo mass and redshift, and we
-    use the parameterization of Diemer & Kravtsov
-    (arXiv:1401.1216).
+    use the parameterization of `Diemer & Kravtsov
+    <https://arxiv.org/abs/1401.1216>`_.
 
-    By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
+    By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
 
     Args:
-        concentration (:obj:`Concentration`): concentration-mass
-            relation to use with this profile.
-        truncated (bool): set to `True` if the profile should be
-            truncated at :math:`r = R_\\Delta` (i.e. zero at larger
-            radii.
-        alpha (float, 'cosmo'): Set the Einasto alpha parameter or set to
-            'cosmo' to calculate the value from cosmology. Default: 'cosmo'
+        concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
+            concentration-mass relation to use with this profile.
+        truncated (bool): set to ``True`` if the profile should be
+            truncated at :math:`r = r_\\Delta`.
+        alpha (float or str): :math:`\\alpha` parameter, or
+            set to ``'cosmo'`` to calculate the value from cosmology.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
         "truncated", "alpha", "mass_def", "concentration", "precision_fftlog",)
@@ -65,11 +68,9 @@ class HaloProfileEinasto(HaloProfileMatter):
         """Update any of the parameters associated with this profile.
         Any parameter set to ``None`` won't be updated.
 
-        Arguments
-        ---------
-        alpha : float, 'cosmo'
-            Profile shape parameter. Set to
-            'cosmo' to calculate the value from cosmology
+        Args:
+            alpha (float or str): :math:`\\alpha` parameter, or
+                set to ``'cosmo'`` to calculate the value from cosmology.
         """
         if alpha is not None and alpha != self.alpha:
             self.alpha = alpha

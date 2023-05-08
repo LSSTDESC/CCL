@@ -1,4 +1,4 @@
-__all__ = ("HMIngredients",)
+__all__ = ("HMIngredients", "Concentration", "MassFunc", "HaloBias", )
 
 import functools
 from abc import abstractmethod

@@ -47,31 +47,35 @@ class HaloProfileHOD(HaloProfileNumberCounts):
     :math:`r_{\\rm max}` is related to the overdensity radius
     :math:`r_\\Delta` as :math:`r_{\\rm max}=\\beta_{\\rm max}r_\\Delta`.
     The scale radius is related to the comoving overdensity halo
-    radius via :math:`R_\\Delta(M) = c(M)\\,r_s`.
+    radius through the concentration-mass relation via
+    :math:`r_\\Delta(M) = c(M)\\,r_s`.
 
     All the quantities :math:`\\log_{10}M_{\\rm min}`,
     :math:`\\log_{10}M_0`, :math:`\\log_{10}M_1`,
     :math:`\\sigma_{{\\rm ln}M}`, :math:`f_c`, :math:`\\alpha`,
     :math:`\\beta_g` and :math:`\\beta_{\\rm max}` are
     time-dependent via a linear expansion around a pivot scale
-    factor :math:`a_*` with an offset (:math:`X_0`) and a tilt
-    parameter (:math:`X_p`):
+    factor :math:`a_*` with an offset and a tilt parameter
+    (:math:`X_0` and :math:`X_p` respectively):
 
     .. math::
        X(a) = X_0 + X_p\\,(a-a_*).
 
     This definition of the HOD profile draws from several papers
-    in the literature, including: astro-ph/0408564, arXiv:1706.05422
-    and arXiv:1912.08209. The default values used here are roughly
-    compatible with those found in the latter paper.
+    in the literature, including: `Zheng et al. 2005
+    <https://arxiv.org/abs/astro-ph/0408564>`_, `Ando et al. 2018
+    <https://arxiv.org/abs/1706.05422>`_, and `Nicola et al. 2020
+    <https://arxiv.org/abs/1912.08209>`_. The default values used
+    here are roughly compatible with those found in the latter
+    paper.
 
     See :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`) for a
     description of the Fourier-space two-point correlator of the
     HOD profile.
 
     Args:
-        concentration (:obj:`Concentration`): concentration-mass
-            relation to use with this profile.
+        concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
+            concentration-mass relation to use with this profile.
         log10Mmin_0 (float): offset parameter for
             :math:`\\log_{10}M_{\\rm min}`.
         log10Mmin_p (float): tilt parameter for
@@ -107,6 +111,8 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         a_pivot (float): pivot scale factor :math:`a_*`.
         ns_independent (bool): drop requirement to only form
             satellites when centrals are present.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
         "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
@@ -167,7 +173,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
                           a_pivot=None,
                           ns_independent=None):
         """ Update any of the parameters associated with
-        this profile. Any parameter set to `None` won't be updated.
+        this profile. Any parameter set to ``None`` won't be updated.
 
         Args:
             log10Mmin_0 (float): offset parameter for

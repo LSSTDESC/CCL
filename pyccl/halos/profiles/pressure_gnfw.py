@@ -7,8 +7,8 @@ from . import HaloProfilePressure
 
 
 class HaloProfilePressureGNFW(HaloProfilePressure):
-    """ Generalized NFW pressure profile by Arnaud et al.
-    (2010A&A...517A..92A).
+    """ Generalized NFW electron pressure profile by
+    `Arnaud et al. 2010 <https://arxiv.org/abs/0910.1234>`_.
 
     The parametrization is:
 
@@ -22,48 +22,51 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
     .. math::
 
        C = 1.65\\,h_{70}^2\\left(\\frac{H(z)}{H_0}\\right)^{8/3}
-       \\left[\\frac{h_{70}\\tilde{M}_{500}}
+       \\left[\\frac{h_{70}\\tilde{M}_{500c}}
        {3\\times10^{14}\\,M_\\odot}\\right]^{2/3+\\alpha_{\\mathrm{P}}},
 
-    :math:`x = r/\\tilde{r}_{500}`, :math:`h_{70}=h/0.7`, and the
+    :math:`x = r/\\tilde{r}_{500c}`, :math:`h_{70}=h/0.7`, and the
     exponent :math:`E` is -1 for SZ-based profile normalizations
     and -1.5 for X-ray-based normalizations. The biased mass
-    :math:`\\tilde{M}_{500}` is related to the true overdensity
-    mass :math:`M_{500}` via the mass bias parameter :math:`(1-b)`
-    as :math:`\\tilde{M}_{500}=(1-b)M_{500}`. :math:`\\tilde{r}_{500}`
-    is the overdensity halo radius associated with :math:`\\tilde{M}_{500}`
+    :math:`\\tilde{M}_{500c}` is related to the true overdensity
+    mass :math:`M_{500c}` via the mass bias parameter :math:`(1-b)`
+    as :math:`\\tilde{M}_{500c}=(1-b)M_{500c}`. :math:`\\tilde{r}_{500c}`
+    is the overdensity halo radius associated with :math:`\\tilde{M}_{500c}`
     (note the intentional tilde!), and the profile is defined for
     a halo overdensity :math:`\\Delta=500` with respect to the
     critical density.
 
     The default arguments (other than ``mass_bias``), correspond to the
-    profile parameters used in the Planck 2013 (V) paper. The profile is
+    profile parameters used in the `Planck 2013 (XX)
+    <https://arxiv.org/abs/1303.5080>`_ paper. The profile is
     calculated in physical (non-comoving) units of :math:`\\mathrm{eV/cm^3}`.
 
-    Parameters
-    ----------
-    mass_bias : float
-        The mass bias parameter :math:`1-b`.
-    P0 : float
-        Profile normalization.
-    c500 : float
-        Concentration parameter.
-    alpha, beta, gamma : float
-        Profile shape parameters.
-    alpha_P : float
-        Additional mass dependence exponent
-    P0_hexp : float
-        Power of :math:`h` with which the normalization parameter scales.
-        Equal to :math:`-1` for SZ-based normalizations,
-        and :math:`-3/2` for X-ray-based normalizations.
-    qrange : 2-sequence
-        Limits of integration used when computing the Fourier-space
-        profile template, in units of :math:`R_{\\mathrm{vir}}`.
-    nq : int
-        Number of sampling points of the Fourier-space profile template.
-    x_out : float
-        Profile threshold, in units of :math:`R_{\\mathrm{500c}}`.
-        Defaults to :math:`+\\infty`.
+    Args:
+        mass_bias (float):
+            The mass bias parameter :math:`1-b`.
+        P0 (float):
+            Profile normalization.
+        c500 (float):
+            Concentration parameter.
+        alpha, beta, gamma (float):
+            Profile shape parameters.
+        alpha_P (float):
+            Additional mass dependence exponent
+        P0_hexp (float):
+            Power of :math:`h` with which the normalization parameter scales.
+            Equal to :math:`-1` for SZ-based normalizations,
+            and :math:`-3/2` for X-ray-based normalizations.
+        qrange (tuple):
+            Tuple of two numbers denoting the limits of integration used when
+            computing the Fourier-space profile template, in units of
+            :math:`r_{\\mathrm{vir}}`.
+        nq (int):
+            Number of sampling points of the Fourier-space profile template.
+        x_out (float):
+            Profile threshold, in units of :math:`r_{\\mathrm{500c}}`.
+            Defaults to :math:`+\\infty`.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+            a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
@@ -102,23 +105,24 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
             A change in ``alpha``, ``beta``, ``gamma``, ``c500``, or ``x_out``
             recomputes the Fourier-space template, which may be slow.
 
-        Arguments
-        ---------
-        mass_bias : float
-            The mass bias parameter :math:`1-b`.
-        P0 : float
-            Profile normalization.
-        c500 : float
-            Concentration parameter.
-        alpha, beta, gamma : float
-            Profile shape parameter.
-        alpha_P : float
-            Additional mass-dependence exponent.
-        P0_hexp : float
-            Power of ``h`` with which the normalization scales.
-            SZ-based normalizations: -1. X-ray-based normalizations: -3/2.
-        x_out : float
-            Profile threshold (as a fraction of r500c).
+        Args:
+            mass_bias (float):
+                The mass bias parameter :math:`1-b`.
+            P0 (float):
+                Profile normalization.
+            c500 (float):
+                Concentration parameter.
+            alpha, beta, gamma (float):
+                Profile shape parameters.
+            alpha_P (float):
+                Additional mass dependence exponent
+            P0_hexp (float):
+                Power of :math:`h` with which the normalization parameter
+                scales. Equal to :math:`-1` for SZ-based normalizations,
+                and :math:`-3/2` for X-ray-based normalizations.
+            x_out (float):
+                Profile threshold, in units of :math:`r_{\\mathrm{500c}}`.
+                Defaults to :math:`+\\infty`.
         """
         if mass_bias is not None:
             self.mass_bias = mass_bias
