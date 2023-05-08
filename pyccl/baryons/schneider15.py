@@ -7,24 +7,27 @@ from . import Baryons
 
 
 class BaryonsSchneider15(Baryons):
-    """The BCM model boost factor for baryons.
+    """The "BCM" model boost factor for baryons.
 
-    .. note:: BCM stands for the "baryonic correction model" of Schneider &
-              Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
+    .. note:: BCM stands for the "baryonic correction model" of `Schneider &
+              Teyssier 2015 <https://arxiv.org/abs/1510.06034>`_. See the
               `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
 /0000-ccl_note/main.pdf>`_
               for details.
 
-    .. note:: The boost factor is applied multiplicatively so that
-              :math:`P_{\\rm corrected}(k, a) = P(k, a)\\, f_{\\rm bcm}(k, a)`.
+              The boost factor is applied multiplicatively so that
+              :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\,
+              f_{\\rm BCM}(k, a)`.
 
     Args:
         log10Mc (:obj:`float`): logarithmic mass scale of hot
-            gas suppression. Defaults to log10(1.2E14).
+            gas suppression. Defaults to
+            :math:`\\log_{10}(1.2\\,10^{14}\\,M_\\odot)`.
         eta_b (:obj:`float`): ratio of escape to ejection radii (see
             Teyssier et al. 2015). Defaults to 0.5.
         k_s (:obj:`float`): Characteristic scale (wavenumber) of
-            the stellar component. Defaults to 55.0.
+            the stellar component in units of :math:`{\\rm Mpc}\\,h^{-1}`.
+            Defaults to 55.
     """
     name = 'Schneider15'
     __repr_attrs__ = __eq_attrs__ = ("log10Mc", "eta_b", "k_s")
@@ -39,7 +42,7 @@ class BaryonsSchneider15(Baryons):
 
         Args:
             cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-            k (float or array_like): Wavenumber; Mpc^-1.
+            k (float or array_like): Wavenumber (in :math:`{\\rm Mpc}^{-1}`).
             a (float or array_like): Scale factor.
 
         Returns:
@@ -65,15 +68,15 @@ class BaryonsSchneider15(Baryons):
         return fka
 
     def update_parameters(self, log10Mc=None, eta_b=None, k_s=None):
-        """Update BCM parameters.
+        """Update BCM parameters. All parameters set to ``None`` will
+        be left untouched.
 
         Args:
             log10Mc (:obj:`float`): logarithmic mass scale of hot
-                gas suppression. Defaults to 14.08.
-            eta_b (:obj:`float`): ratio of escape to ejection radii (see
-                Teyssier et al. 2015). Defaults to 0.5.
+                gas suppression.
+            eta_b (:obj:`float`): ratio of escape to ejection radii.
             k_s (:obj:`float`): Characteristic scale (wavenumber) of
-                the stellar component. Defaults to 55.0.
+                the stellar component.
         """
         if log10Mc is not None:
             self.log10Mc = log10Mc

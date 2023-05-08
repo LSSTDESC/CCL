@@ -6,11 +6,12 @@ from .. import CCLAutoRepr, CCLNamedClass
 
 
 class Baryons(CCLAutoRepr, CCLNamedClass):
-    """`BaryonicEffect` obects are used to include the imprint of baryons
-    on the non-linear matter power spectrum. Their main ingredient is a
-    method `include_baryonic_effects` that takes in a `ccl.Pk2D` and
-    returns another `ccl.Pk2D` object that now accounts for baryonic
-    effects.
+    """:class:`Baryons` objects are used to include the effects of
+    baryons on the non-linear matter power spectrum. Their main ingredient
+    is a method :meth:`include_baryonic_effects` that takes in a
+    :class:`~pyccl.pk2d.Pk2D` and returns another :class:`~pyccl.pk2d.Pk2D`
+    object that now accounts for baryonic effects (according to the model
+    implemented in the corresponding :class:`Baryons` object).
     """
 
     @abstractmethod
@@ -33,6 +34,6 @@ class Baryons(CCLAutoRepr, CCLNamedClass):
             pk (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
 
         Returns:
-            :obj:`~pyccl.pk2d.Pk2D` object or `None`.
+            :obj:`~pyccl.pk2d.Pk2D` object or ``None``.
         """
         return self._include_baryonic_effects(cosmo, pk)
