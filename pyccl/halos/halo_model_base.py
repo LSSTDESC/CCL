@@ -96,7 +96,7 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
 
 
 class MassFunc(HMIngredients):
-    """ This class enables the calculation of halo mass functions.
+    """This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
 
     .. math::
@@ -113,13 +113,16 @@ class MassFunc(HMIngredients):
       ``_check_mass_def_strict`` to ensure consistency of the halo mass
       definition.
 
+    * Subclasses for parametrizations that cannot be written in terms of
+      :math:`\\sigma_M` can simply overload the :meth:`__call__` method.
+
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object that fixes
-            the mass definition used by this mass function
-            parametrization.
+            a mass definition object or a name string.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
+
+    .. automethod:: __call__
     """
     _mass_def_strict_always = False
 
@@ -128,7 +131,7 @@ class MassFunc(HMIngredients):
         object (see description of this class for details).
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
             sigM (float or array_like): standard deviation in the
                 overdensity field on the scale of this halo.
             a (float): scale factor.
@@ -145,8 +148,8 @@ class MassFunc(HMIngredients):
         """ Returns the mass function for input parameters.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            M (float or array_like): halo mass.
             a (float): scale factor.
 
         Returns:
@@ -167,26 +170,41 @@ class MassFunc(HMIngredients):
     @deprecated(new_function=__call__)
     @mass_def_api
     def get_mass_function(self, cosmo, M, a):
+        """
+        get_mass_function(cosmo, M, a)
+        Returns the mass function for input parameters.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            M (float or array_like): halo mass.
+            a (float): scale factor.
+
+        Returns:
+            float or array_like: mass function \
+                :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
+        """
         return self(cosmo, M, a)
 
 
 class HaloBias(HMIngredients):
-    """ This class enables the calculation of halo bias functions.
+    """This class enables the calculation of halo bias functions.
     We currently assume that all halo bias functions can be written
-    as functions that depend on M only through sigma_M (where
-    sigma_M^2 is the overdensity variance on spheres with a
-    radius given by the Lagrangian radius for mass M).
-    All sub-classes implementing specific parametrizations
-    can therefore be simply created by replacing this class'
-    `_get_bsigma method`.
+    as functions that depend on M only through :math:`\\sigma_M`
+    (where :math:`\\sigma_M^2` is the overdensity variance on
+    spheres with a radius given by the Lagrangian radius for
+    mass :math:`M`). All sub-classes implementing specific
+    parametrizations can therefore be simply created by replacing
+    this class' ``_get_bsigma`` method. New classes departing
+    from this paradigm can simply overload the
+    :meth:`__call__` method.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object that fixes
-            the mass definition used by this halo bias
-            parametrization.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object or a name string.
         mass_def_strict (bool): if False, consistency of the mass
             definition will be ignored.
+
+    .. automethod:: __call__
     """
     _mass_def_strict_always = False
 
@@ -194,7 +212,7 @@ class HaloBias(HMIngredients):
         """ Get the halo bias as a function of sigmaM.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
             sigM (float or array_like): standard deviation in the
                 overdensity field on the scale of this halo.
             a (float): scale factor.
@@ -204,11 +222,11 @@ class HaloBias(HMIngredients):
         """
 
     def __call__(self, cosmo, M, a):
-        """ Returns the halo bias for input parameters.
+        """Returns the halo bias for input parameters.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            M (float or array_like): halo mass.
             a (float): scale factor.
 
         Returns:
@@ -224,16 +242,29 @@ class HaloBias(HMIngredients):
     @deprecated(new_function=__call__)
     @mass_def_api
     def get_halo_bias(self, cosmo, M, a):
+        """
+        get_halo_bias(cosmo, M, a)
+        Returns the halo bias for input parameters.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            M (float or array_like): halo mass.
+            a (float): scale factor.
+
+        Returns:
+            float or array_like: halo bias.
+        """
         return self(cosmo, M, a)
 
 
 class Concentration(HMIngredients):
-    """ This class enables the calculation of halo concentrations.
+    """
+    This class enables the calculation of halo concentrations.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass definition
-            object that fixes the mass definition used by this c(M)
-            parametrization.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object or a name string.
+    .. automethod:: __call__
     """
     _mass_def_strict_always = True
 
@@ -245,11 +276,11 @@ class Concentration(HMIngredients):
         """Implementation of the c(M) relation."""
 
     def __call__(self, cosmo, M, a):
-        """ Returns the concentration for input parameters.
+        """Returns the concentration for input parameters.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            M (float or array_like): halo mass.
             a (float): scale factor.
 
         Returns:
@@ -264,6 +295,18 @@ class Concentration(HMIngredients):
     @deprecated(new_function=__call__)
     @mass_def_api
     def get_concentration(self, cosmo, M, a):
+        """
+        get_concentration(cosmo, M, a)
+        Returns the concentration for input parameters.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            M (float or array_like): halo mass.
+            a (float): scale factor.
+
+        Returns:
+            float or array_like: concentration.
+        """
         return self(cosmo, M, a)
 
 
