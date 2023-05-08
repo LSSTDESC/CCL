@@ -84,7 +84,7 @@ class Tk3D(CCLObject):
         regions.
     pk1_arr, pk2_arr : ndarray (na, nk)
         Array of the function which makes up a factorizable trispectrum, i.e.
-        :math:`:math:`T(k_1, k_2, a) = f_1(k_1, a) \, f_2(k_2, a)`. Ignored if
+        :math:`T(k_1, k_2, a) = f_1(k_1, a) \, f_2(k_2, a)`. Ignored if
         `tkk_arr` is provided.
     is_logt
         Whether the arrays hold the trispectrum in linear- or log-scale.

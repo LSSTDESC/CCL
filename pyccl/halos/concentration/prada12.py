@@ -30,10 +30,10 @@ class ConcentrationPrada12(Concentration):
     where :math:`(A,b,c,d) = (2.881, 1.257, 1.022, 0.060)`. The approximations
     for :math:`B_0(x)` and :math:`B_1(x)` are
 
-     .. math::
+    .. math::
 
-         B_0(x) &= \frac{c_{\min}(x)}{c_{\min}(1.393)}, \\
-         B_1(x) &= \frac{\sigma_{\min}^{-1}(x)}{\sigma_{\min}^{-1}(1.393)},
+        B_0(x) &= \frac{c_{\min}(x)}{c_{\min}(1.393)}, \\
+        B_1(x) &= \frac{\sigma_{\min}^{-1}(x)}{\sigma_{\min}^{-1}(1.393)},
 
     where :math:`c_{\min}` and :math:`\sigma_{\min}^{-1}` define the minimum
     of the halo concentrations and the value of :math:`\sigma` at the minimum:

@@ -77,7 +77,7 @@ class CosmologyParams(Parameters, factory=lib.parameters):
 
     sigma8: Real = np.nan
     r"""Variance of matter density perturbations at a scale of
-    :math:`8 {\rm Mpc}/h`, :math:`\sigma_8`.
+    :math:`8 \, {\rm Mpc}/h`, :math:`\sigma_8`.
 
     :meta hide-value:
     """

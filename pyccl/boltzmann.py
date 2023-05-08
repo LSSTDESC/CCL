@@ -42,13 +42,13 @@ def get_camb_pk_lin(
         For the non-linear power spectrum, these additional parameters may be
         specified in `cosmo`:
 
-            * `'halofit_version'`
-            * `'HMCode_A_baryon'`
-            * `'HMCode_eta_baryon'`
-            * `'HMCode_logT_AGN'`
-            * `'kmax'`
-            * `'lmax'`
-            * `'dark_energy_model'`
+        * `'halofit_version'`
+        * `'HMCode_A_baryon'`
+        * `'HMCode_eta_baryon'`
+        * `'HMCode_logT_AGN'`
+        * `'kmax'`
+        * `'lmax'`
+        * `'dark_energy_model'`
 
         Specified as e.g. ``extra_parameters={"camb": {"kmax": 50}}``.
         More information in `CAMB Non-linear models <https://camb.readthedocs.

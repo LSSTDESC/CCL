@@ -53,7 +53,7 @@ extensions = [
 ]
 
 # Specify bibliography for `spinxcontrib.bibtex`.
-bibtex_bibfiles = ['refs.bib']
+bibtex_bibfiles = ['refs.bib',]
 
 # Additional `autodoc` options.
 autodoc_default_options = {
@@ -115,7 +115,7 @@ todo_include_todos = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-options = ["sphinx_rtd_theme", "sphinx_book_theme", "pydata_sphinx_theme"]
+options = ["sphinx_rtd_theme", "sphinx_book_theme",]
 html_theme = options[1]
 html_theme_module = importlib.import_module(html_theme)
 try:
@@ -123,14 +123,23 @@ try:
 except AttributeError:
     pass
 
-html_logo = '../doc/ccl_paper/.logos/desc-logo.png'
-html_logo_width = 100
-html_logo_height = 100
-
 # Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
+# further. For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    "repository_url": "https://github.com/LSSTDESC/CCL",
+    "use_repository_button": True,
+    "use_issues_button": True,
+    "use_fullscreen_button": False,
+    "use_download_button": False,
+    "logo": {
+        "image_light": "source/_static/desc-logo.png",
+        "image_dark": "source/_static/desc-logo-dark.png",
+        "alt_text": "LSST DESC logo",
+        "text": "Core Cosmology Library",
+    },
+    "article_header_start": "breadcrumbs.html",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

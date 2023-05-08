@@ -266,10 +266,10 @@ class Pk2D(CCLObject):
             :class:`~pyccl.cosmology.TransferFunctions` and
             :class:`~pyccl.cosmology.MatterPowerSpectra`, these are available:
 
-              * ``'bbks'``,
-              * ``'eisenstein_hu'``,
-              * ``'eisenstein_hu_nowiggles'``,
-              * ``'emu'``.
+            * ``'bbks'``,
+            * ``'eisenstein_hu'``,
+            * ``'eisenstein_hu_nowiggles'``,
+            * ``'emu'``.
 
         Returns
         -------

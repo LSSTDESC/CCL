@@ -12,13 +12,13 @@ class SplineParams(Parameters, instance=lib.cvar.user_spline_params):
     Descriptions of the parameters start with a key indicating which splines
     the parameter is used in:
 
-        * SF - Scale factor splines.
-        * PS - Power spectrum splines.
-        * SM - :math:`\sigma(M)` splines.
-        * LMB - Limber integration.
-        * CORR - Correlation functions.
-        * SPLT - Spline types (all fixed to `Akima
-          <https://en.wikipedia.org/wiki/Akima_spline>`_).
+    * SF - Scale factor splines.
+    * PS - Power spectrum splines.
+    * SM - :math:`\sigma(M)` splines.
+    * LMB - Limber integration.
+    * CORR - Correlation functions.
+    * SPLT - Spline types (all fixed to `Akima
+      <https://en.wikipedia.org/wiki/Akima_spline>`_).
 
     See Also
     --------

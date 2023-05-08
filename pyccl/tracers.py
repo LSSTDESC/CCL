@@ -673,15 +673,15 @@ class Tracer(CCLObject):
             Flag for the the :math:`\ell`-dependent prefactor associated with
             the tracer:
 
-                * ``0`` for no prefactor,
+            * ``0`` for no prefactor,
 
-                * ``1`` for :math:`\ell (\ell + 1)`
-                  (associated withthe angular Laplacian e.g. lensing
-                  convergence and magnification),
+            * ``1`` for :math:`\ell (\ell + 1)`
+              (associated withthe angular Laplacian e.g. lensing
+              convergence and magnification),
 
-                * ``2`` for :math:`\sqrt \frac{(\ell + 2)!}{(\ell - 2)!}`
-                  (associated with the angular derivatives of spin-2 fields,
-                  e.g. cosmic shear, IA).
+            * ``2`` for :math:`\sqrt \frac{(\ell + 2)!}{(\ell - 2)!}`
+              (associated with the angular derivatives of spin-2 fields,
+              e.g. cosmic shear, IA).
 
         is_logt
             Whether `transfer_x` holds the transfer function in linear- or

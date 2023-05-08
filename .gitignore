@@ -1,11 +1,7 @@
-# If CLASS was installed via our script, don't include it.
-class
-
 # Ignore RTD documentation special files
 readthedocs/_build
 readthedocs/*~
 readthedocs/source/*~
-readthedocs/api
 
 # Ignore compile and link build files.
 *.o
@@ -17,8 +13,6 @@ readthedocs/api
 .libs
 .deps
 .dirstamp
-class/build
-class/
 autom4te.cache/
 
 # Ignores compiled examples

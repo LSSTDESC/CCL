@@ -118,10 +118,10 @@ def correlation(
 
     Spin combinations (also listed in :class:`CorrelationTypes`) are:
 
-      * :math:`s_a=s_b=0` e.g. galaxy-galaxy, galaxy-:math:`\kappa`
-        and :math:`\kappa`-:math:`\kappa`
-      * :math:`s_a=2`, `s_b=0` e.g. galaxy-shear, and :math:`\kappa`-shear
-      * :math:`s_a=s_b=2` e.g. shear-shear.
+    * :math:`s_a=s_b=0` e.g. galaxy-galaxy, galaxy-:math:`\kappa`
+      and :math:`\kappa`-:math:`\kappa`
+    * :math:`s_a=2`, `s_b=0` e.g. galaxy-shear, and :math:`\kappa`-shear
+    * :math:`s_a=s_b=2` e.g. shear-shear.
 
     .. note::
 
@@ -130,9 +130,9 @@ def correlation(
         the Hankel transform is well-behaved. The relevant spline parameters
         may be adjusted to improve accuracy:
 
-            - :attr:`ccl.spline_params.ELL_MIN_CORR`,
-            - :attr:`ccl.spline_params.ELL_MAX_CORR`,
-            - :attr:`ccl.spline_params.N_ELL_CORR`.
+        - :attr:`ccl.spline_params.ELL_MIN_CORR`,
+        - :attr:`ccl.spline_params.ELL_MAX_CORR`,
+        - :attr:`ccl.spline_params.N_ELL_CORR`.
 
     Arguments
     ---------
@@ -345,11 +345,11 @@ def correlation3D_RSD(
     This function provides the choice of working in :math:`r`/:math:`\mu` or
     :math:`\pi`/:math:`\sigma` coordinates.
 
-        * For :math:`r`/:math:`\mu`, `mu` is optional; omitting it will compute
-          the average correlation function.
-        * For :math:`\pi`/:math:`\sigma`, both `pi` and `sigma` are required
-          (and the average cannot be computed since `mu` will be nonzero).
-        * The shapes of the input coordinate arrays must be broadcastable.
+    * For :math:`r`/:math:`\mu`, `mu` is optional; omitting it will compute
+      the average correlation function.
+    * For :math:`\pi`/:math:`\sigma`, both `pi` and `sigma` are required
+      (and the average cannot be computed since `mu` will be nonzero).
+    * The shapes of the input coordinate arrays must be broadcastable.
 
     Arguments
     ---------

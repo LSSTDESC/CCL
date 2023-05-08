@@ -190,12 +190,12 @@ def angular_diameter_distance(
     ``angular_diameter_distance`` can be called with a varying number of
     positional arguments:
 
-        * ``angular_diameter_distance(cosmo, a1)``: Distances are calculated
-          between `a1` and :math:`1`.
-        * ``angular_diameter_distance(cosmo, a1, a2)``: If
-          `a1.shape == a2.shape`, the pairwise distances are computed.
-          Otherwise, `a1` must be scalar and the distances are computed between
-          one object at `a1` and multiple objects at `a2`.
+    * ``angular_diameter_distance(cosmo, a1)``: Distances are calculated
+      between `a1` and :math:`1`.
+    * ``angular_diameter_distance(cosmo, a1, a2)``: If
+      `a1.shape == a2.shape`, the pairwise distances are computed.
+      Otherwise, `a1` must be scalar and the distances are computed between
+      one object at `a1` and multiple objects at `a2`.
 
     Arguments
     ---------
