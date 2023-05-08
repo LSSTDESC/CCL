@@ -7,14 +7,15 @@ from . import MassFunc
 
 
 class MassFuncDespali16(MassFunc):
-    """ Implements mass function described in arXiv:1507.05627.
+    """ Implements mass function described in `Despali et al. 2016
+    <https://arxiv.org/abs/1507.05627>`_. This parametrization accepts
+    any S.O. masses.
+
 
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
             a mass definition object, or a name string.
-            This parametrization accepts any SO masses.
-            The default is '200m'.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (bool): if ``False``, consistency of the mass
             definition will be ignored.
         ellipsoidal (bool): use the ellipsoidal parametrization.
     """

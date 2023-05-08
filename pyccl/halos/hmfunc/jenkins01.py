@@ -7,15 +7,14 @@ from . import MassFunc
 
 
 class MassFuncJenkins01(MassFunc):
-    """ Implements mass function described in astro-ph/0005260.
-    This parametrization is only valid for 'fof' masses.
+    """ Implements mass function described in `Jenkins et al. 2001
+    <https://arxiv.org/abs/astro-ph/0005260>`_. This parametrization
+    is only valid for 'fof' masses.
 
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
             a mass definition object, or a name string.
-            This parametrization accepts FoF masses only.
-            The default is 'fof'.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (bool): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = 'Jenkins01'
