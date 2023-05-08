@@ -2,19 +2,31 @@ __all__ = ("FFTLogParams",)
 
 
 class FFTLogParams:
-    """Objects of this class store the FFTLog accuracy parameters."""
-    padding_lo_fftlog = 0.1   # | Anti-aliasing: multiply the lower boundary.
-    padding_hi_fftlog = 10.   # |                multiply the upper boundary.
+    """Objects of this class store the FFTLog accuracy parameters.
+    See documentation in :meth:`update_parameters` for a full
+    description of all allowed parameters.
+    """
+    #: Anti-aliasing. Factor mulitplying the lower boundary.
+    padding_lo_fftlog = 0.1
+    #: Anti-aliasing. Factor mulitplying the upper boundary.
+    padding_hi_fftlog = 10.
 
-    n_per_decade = 100        # Samples per decade for the Hankel transforms.
-    extrapol = "linx_liny"     # Extrapolation type.
+    #: Samples per decade for the Hankel transforms.
+    n_per_decade = 100
+    #: Extrapolation type (`linx_liny`, `linx_logy` etc.).
+    extrapol = "linx_liny"
 
-    padding_lo_extra = 0.1    # Padding for the intermediate step of a double
-    padding_hi_extra = 10.    # transform. Doesn't have to be as precise.
-    large_padding_2D = False  # If True, high precision intermediate transform.
+    #: Padding for intermediate transforms (lower bound).
+    padding_lo_extra = 0.1
+    #: Padding for intermediate transforms (upper bound).
+    padding_hi_extra = 10.
+    #: If True, high precision intermediate transforms.
+    large_padding_2D = False
 
-    plaw_fourier = -1.5       # Real <--> Fourier transforms.
-    plaw_projected = -1.0     # 2D projected & cumulative density profiles.
+    #: Power law index used to prewhiten data before transform.
+    plaw_fourier = -1.5
+    #: Pre-whitening power law index for 2D and cumulative profiles.
+    plaw_projected = -1.0
 
     @property
     def params(self):
@@ -23,6 +35,8 @@ class FFTLogParams:
                 "large_padding_2D", "plaw_fourier", "plaw_projected"]
 
     def to_dict(self):
+        """ Returns a dictionary containing this object's parameters.
+        """
         return {param: getattr(self, param) for param in self.params}
 
     def __getitem__(self, name):
@@ -47,34 +61,38 @@ class FFTLogParams:
 
         Arguments
         ---------
-        padding_lo_fftlog, padding_hi_fftlog : float
-            Multiply the lower and upper boundary of the input range
-            to avoid aliasing. The defaults are 0.1 and 10.0, respectively.
+        padding_lo_fftlog: float
+            Factor by which the minimum scale is multiplied to avoid
+            aliasing. Default: 0.1.
+        padding_hi_fftlog: float
+            Factor by which the maximum scale is multiplied to avoid
+            aliasing. Default: 10.
         n_per_decade : float
-            Samples per decade for the Hankel transforms.
-            The default is 100.
+            Samples per decade for the Hankel transforms. Default: 100.
         extrapol : {'linx_liny', 'linx_logy'}
             Extrapolation type when FFTLog has narrower output support.
-            The default is 'linx_liny'.
-        padding_lo_extra, padding_hi_extra : float
-            Padding for the intermediate step of a double Hankel transform.
-            Used to compute the 2D projected profile and the 2D cumulative
-            density, where the first transform goes from 3D real space to
-            Fourier, then from Fourier to 2D real space. Usually, it doesn't
-            have to be as precise as ``padding_xx_fftlog``.
-            The defaults are 0.1 and 10.0, respectively.
+            Default ``'linx_liny'``.
+        padding_lo_extra: float
+            Additional minimum scale padding for double Hankel transforms,
+            used when computing 2D projected and cumulative profiles. In
+            these, the first transform goes from 3D real space to
+            Fourier, and the second transform goes from Fourier to 2D
+            real space.
+            Default: 0.1.
+        padding_hi_extra: float
+            As ``padding_lo_extra`` for the maximum scale.
+            Default: 10.
         large_padding_2D : bool
             Override ``padding_xx_extra`` in the intermediate transform,
             and use ``padding_xx_fftlog``. The default is False.
-        plaw_fourier, plaw_projected : float
+        plaw_fourier: float
             FFTLog pre-whitens its arguments (makes them flatter) to avoid
-            aliasing. The ``plaw`` parameters describe the tilt of the profile,
-            :math:`P(r) \\sim r^{\\mathrm{tilt}}`, between real and Fourier
-            transforms, and between 2D projected and cumulative density,
-            respectively. Subclasses of ``HaloProfile`` may obtain finer
-            control via ``_get_plaw_[fourier | projected]``, and some level of
-            experimentation with these parameters is recommended.
-            The defaults are -1.5 and -1.0, respectively.
+            aliasing. The ``plaw_fourier`` parameter describes the tilt of
+            the profile, :math:`P(r) \\propto r^{\\mathrm{tilt}}`, for
+            standard 3D transforms. Default: -1.5
+        plaw_fourier_projected: float
+            As ``plaw_fourier`` for 2D transforms (when computing 2D
+            projected or cumulative profiles. Default: -1.0.
         """
         for name, value in kwargs.items():
             if name not in self.params:
