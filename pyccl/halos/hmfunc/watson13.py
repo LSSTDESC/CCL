@@ -7,7 +7,7 @@ from . import MassFunc
 
 
 class MassFuncWatson13(MassFunc):
-    """ Implements mass function described in `Watson et al. 2013
+    """Implements the mass function of `Watson et al. 2013
     <https://arxiv.org/abs/1212.0095>`_. This parametrization accepts
     `fof` and any S.O. masses.
 

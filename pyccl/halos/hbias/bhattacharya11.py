@@ -5,7 +5,7 @@ from . import HaloBias
 
 
 class HaloBiasBhattacharya11(HaloBias):
-    """ Implements halo bias described of `Bhattacharya et al. 2011
+    """ Implements halo bias as described in `Bhattacharya et al. 2011
     <https://arxiv.org/abs/1005.2239>`_. This parametrization is only
     valid for 'fof' masses.
 

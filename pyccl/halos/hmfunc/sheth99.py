@@ -7,7 +7,7 @@ from . import MassFunc
 
 
 class MassFuncSheth99(MassFunc):
-    """ Implements mass function described in `Sheth & Tormen 1999
+    """Implements the mass function of `Sheth & Tormen 1999
     <https://arxiv.org/abs/astro-ph/9901122>`_.
     This parametrization is only valid for 'fof' masses.
 

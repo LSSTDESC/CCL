@@ -8,7 +8,7 @@ from . import MassFunc
 
 
 class MassFuncTinker10(MassFunc):
-    """ Implements the mass function described in `Tinker et al. 2010
+    """Implements the mass function of `Tinker et al. 2010
     <https://arxiv.org/abs/1001.3162>`_. This parametrization accepts S.O.
     masses with :math:`200 < \\Delta < 3200`, defined with respect to the
     matter density. This can be automatically translated to S.O. masses

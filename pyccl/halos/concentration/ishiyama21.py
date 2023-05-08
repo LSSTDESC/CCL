@@ -9,7 +9,7 @@ from . import Concentration
 
 
 class ConcentrationIshiyama21(Concentration):
-    """ Concentration-mass relation by `Ishiyama et al. 2021
+    """Concentration-mass relation by `Ishiyama et al. 2021
     <http://arxiv.org/abs/2007.14720>`_. This parametrization is only
     valid for S.O. masses with :math:`\\Delta = \\Delta_{\\rm vir}`, or
     :math:`\\Delta=200` or :math:`500` times the critical density.

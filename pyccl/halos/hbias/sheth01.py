@@ -5,7 +5,7 @@ from . import HaloBias
 
 
 class HaloBiasSheth01(HaloBias):
-    """ Implements halo bias described in `Sheth et al. 2001
+    """Implements halo bias as described in `Sheth et al. 2001
     <https://arxiv.org/abs/astro-ph/9907024>`_. This
     parametrization is only valid for 'fof' masses.
 

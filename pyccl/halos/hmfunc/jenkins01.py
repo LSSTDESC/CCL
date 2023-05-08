@@ -7,7 +7,7 @@ from . import MassFunc
 
 
 class MassFuncJenkins01(MassFunc):
-    """ Implements mass function described in `Jenkins et al. 2001
+    """Implements the mass function of `Jenkins et al. 2001
     <https://arxiv.org/abs/astro-ph/0005260>`_. This parametrization
     is only valid for 'fof' masses.
 

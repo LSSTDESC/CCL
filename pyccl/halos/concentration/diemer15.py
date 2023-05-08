@@ -7,7 +7,7 @@ from . import Concentration
 
 
 class ConcentrationDiemer15(Concentration):
-    """ Concentration-mass relation by `Diemer & Kravtsov 2015
+    """Concentration-mass relation by `Diemer & Kravtsov 2015
     <https://arxiv.org/abs/1407.4730>`_. This parametrization
     is only valid for S.O. masses with :math:`\\Delta = 200`
     times the critical density.

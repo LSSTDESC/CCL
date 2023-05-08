@@ -7,7 +7,7 @@ from . import MassFunc
 
 
 class MassFuncBocquet16(MassFunc):
-    """ Implements mass function described in `Bocquet et al. 2016
+    """Implements the mass function of `Bocquet et al. 2016
     <https://arxiv.org/abs/1502.07357>`_. This parametrization accepts
     S.O. masses with :math:`\\Delta = 200` with respect to the matter
     or critical densities, and :math:`\\Delta=500` with respect to the

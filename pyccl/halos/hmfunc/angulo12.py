@@ -7,7 +7,7 @@ from . import MassFunc
 
 
 class MassFuncAngulo12(MassFunc):
-    """ Implements mass function described in `Angulo et al. 2012
+    """Implements the mass function of `Angulo et al. 2012
     <https://arxiv.org/abs/1203.3216>`_. This parametrization is
     only valid for 'fof' masses.
 

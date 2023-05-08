@@ -7,7 +7,7 @@ from . import MassFunc
 
 
 class MassFuncPress74(MassFunc):
-    """ Implements mass function described in `Press & Schechter 1974
+    """Implements the mass function of `Press & Schechter 1974
     <https://ui.adsabs.harvard.edu/abs/1974ApJ...187..425P/abstract>`_.
     This parametrization is only valid for 'fof' masses.
 

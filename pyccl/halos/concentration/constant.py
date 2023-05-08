@@ -7,7 +7,7 @@ from . import Concentration
 
 
 class ConcentrationConstant(Concentration):
-    """ Constant contentration-mass relation.
+    """Constant contentration-mass relation.
 
     Args:
         c (float): constant concentration value.

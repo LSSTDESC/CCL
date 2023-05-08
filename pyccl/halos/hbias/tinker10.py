@@ -7,7 +7,7 @@ from . import HaloBias
 
 
 class HaloBiasTinker10(HaloBias):
-    """ Implements halo bias as described in `Tinker et al. 2010
+    """Implements halo bias as described in `Tinker et al. 2010
     <https://arxiv.org/abs/1001.3162>`_. This parametrization accepts S.O.
     masses with :math:`200 < \\Delta < 3200`, defined with respect to the
     matter density. This can be automatically translated to S.O. masses

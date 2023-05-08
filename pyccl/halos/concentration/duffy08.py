@@ -5,7 +5,7 @@ from . import Concentration
 
 
 class ConcentrationDuffy08(Concentration):
-    """ Concentration-mass relation by `Duffy et al. 2008
+    """Concentration-mass relation by `Duffy et al. 2008
     <https://arxiv.org/abs/0804.2486>`_. This parametrization is only
     valid for S.O. masses with :math:`\\Delta = \\Delta_{\\rm vir}`,
     of :math:`\\Delta=200` times the matter or critical density.

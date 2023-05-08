@@ -7,8 +7,8 @@ from . import Concentration
 
 
 class ConcentrationPrada12(Concentration):
-    """ Concentration-mass relation by `Prada et al. 2012
-    <https://arXiv.comg:1104.5130>`_. This parametrization is only valid for
+    """Concentration-mass relation by `Prada et al. 2012
+    <https://arXiv.org/abs/1104.5130>`_. This parametrization is only valid for
     S.O. masses with :math:`\\Delta = 200` times the critical density.
 
     Args:

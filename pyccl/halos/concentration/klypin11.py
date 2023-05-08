@@ -5,7 +5,7 @@ from . import Concentration
 
 
 class ConcentrationKlypin11(Concentration):
-    """ Concentration-mass relation by `Klypin et al. 2011
+    """Concentration-mass relation by `Klypin et al. 2011
     <https://arxiv.org/abs/1002.3660>`_. This parametrization is only
     valid for S.O. masses with :math:`\\Delta = \\Delta_{\\rm vir}`.
 

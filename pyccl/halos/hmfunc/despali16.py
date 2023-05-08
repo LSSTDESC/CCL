@@ -7,7 +7,7 @@ from . import MassFunc
 
 
 class MassFuncDespali16(MassFunc):
-    """ Implements mass function described in `Despali et al. 2016
+    """Implements the mass function of `Despali et al. 2016
     <https://arxiv.org/abs/1507.05627>`_. This parametrization accepts
     any S.O. masses.
 
