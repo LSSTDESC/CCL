@@ -5,16 +5,15 @@ from . import Concentration
 
 
 class ConcentrationBhattacharya13(Concentration):
-    """ Concentration-mass relation by Bhattacharya et al. 2013
-    (arXiv:1112.5479). This parametrization is only valid for
-    S.O. masses with Delta = Delta_vir, 200-matter and 200-critical.
-    By default it will be initialized for Delta = 200-critical.
+    """ Concentration-mass relation by `Bhattacharya et al. 2013
+    <https://arxiv.org/abs/1112.5479>`_. This parametrization is only valid for
+    S.O. masses with :math:`\\Delta = \\Delta_{\\rm vir}`, or
+    :math:`\\Delta=200` times the critical or matter densities. By default it
+    will be initialized for :math:`M_{200c}`.
 
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
-            definition object that fixes
-            the mass definition used by this c(M)
-            parametrization, or a name string.
+            definition object or name string.
     """
     name = 'Bhattacharya13'
 

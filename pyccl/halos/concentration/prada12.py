@@ -7,15 +7,13 @@ from . import Concentration
 
 
 class ConcentrationPrada12(Concentration):
-    """ Concentration-mass relation by Prada et al. 2012
-    (arXiv:1104.5130). This parametrization is only valid for
-    S.O. masses with Delta = 200-critical.
+    """ Concentration-mass relation by `Prada et al. 2012
+    <https://arXiv.comg:1104.5130>`_. This parametrization is only valid for
+    S.O. masses with :math:`\\Delta = 200` times the critical density.
 
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
-            definition object that fixes
-            the mass definition used by this c(M)
-            parametrization, or a name string.
+            definition object ora name string.
     """
     name = 'Prada12'
 
