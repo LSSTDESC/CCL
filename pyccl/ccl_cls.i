@@ -10,14 +10,14 @@
 %apply (double* IN_ARRAY1, int DIM1) {(double* ell, int nell)};
 %apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
 
-%feature("pythonprepend") angular_cl_vec %{
+%feature("pythonprepend") angular_cl_vec_limber %{
     if numpy.shape(ell) != (nout,):
         raise CCLError("Input shape for `ell` must match `(nout,)`!")
 %}
 
 %inline %{
 
-void angular_cl_vec(ccl_cosmology * cosmo,
+void angular_cl_vec_limber(ccl_cosmology * cosmo,
                     ccl_cl_tracer_collection_t *clt1,
                     ccl_cl_tracer_collection_t *clt2,
                     ccl_f2d_t *pspec, 

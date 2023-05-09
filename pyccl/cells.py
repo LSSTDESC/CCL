@@ -105,7 +105,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
     ell_use_limber = ell_use[ell_use>l_limber]
     # Return Cl values, according to whether ell is an array or not
     if len(ell_use_limber) > 0:
-        cl_limber, status = lib.angular_cl_vec(
+        cl_limber, status = lib.angular_cl_vec_limber(
             cosmo, clt1, clt2, psp, 
             ell_use_limber, integ_types[limber_integration_method],
             ell_use_limber.size, status)
