@@ -694,7 +694,7 @@ class Cosmology(CCLObject):
         prf = hal.HaloProfileNFW(concentration=c)
         hmc = hal.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                mass_def=mdef)
-        return hal.halomod_Pk2D(self, hmc, prf)
+        return hal.halomod_Pk2D(self, hmc, prf, normprof1=True)
 
     @cache(maxsize=3)
     def _compute_nonlin_power(self):
@@ -814,8 +814,10 @@ class Cosmology(CCLObject):
     @deprecated()
     def status(self):
         """Get error status of the ccl_cosmology object.
+
         .. note:: The error statuses are currently under development and
                   may not be fully descriptive.
+
         Returns:
             :obj:`str` containing the status message.
         """

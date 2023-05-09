@@ -51,27 +51,6 @@ class CCLParameters:
         cls._factory = factory
         cls._frozen = freeze
 
-        def _new_setattr(self, key, value):
-            # Make instances of the SWIG-level class immutable
-            # so that everything is handled through this interface.
-            # SWIG only assigns `this` via the low level `_ccllib`;
-            # we therefore disable all other direct assignments.
-            if key == "this":
-                return object.__setattr__(self, key, value)
-            name = self.__class__.__name__
-            # TODO: Deprecation cycle for fully immutable Cosmology objects.
-            # raise AttributeError(f"Direct assignment in {name} not supported.")  # noqa
-            warnings.warn(
-                f"Direct assignment of {name} is deprecated "
-                "and an error will be raised in the next CCL release. "
-                f"Set via `pyccl.{name}.{key}` before instantiation.",
-                CCLDeprecationWarning)
-            object.__setattr__(self, key, value)
-
-        # Replace C-level `__setattr__`.
-        class_ = cls._factory if cls._factory else cls._instance.__class__
-        class_.__setattr__ = _new_setattr
-
     def __init__(self):
         # Emulate abstraction so that base class cannot be instantiated.
         if not (hasattr(self, "_instance") or hasattr(self, "_factory")):

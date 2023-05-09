@@ -246,13 +246,12 @@ class CacheInfo:
         policy (``Caching.policy``):
             Cache retention policy.
 
-    .. note ::
-
-        To assist in deciding an optimal ``maxsize`` and ``policy``, instances
-        of this class contain the following attributes:
-            - ``hits``: number of times the function has been bypassed
-            - ``misses``: number of times the function has computed something
-            - ``current_size``: current size of the cache dictionary
+    .. note:: To assist in deciding an optimal ``maxsize`` and ``policy``,
+              instances of this class contain the following attributes:
+              - ``hits``: number of times the function has been bypassed.
+              - ``misses``: number of times the function has computed
+              something.
+              - ``current_size``: current size of the cache dictionary.
     """
 
     def __init__(self, func, maxsize=Caching.maxsize, policy=Caching.policy):

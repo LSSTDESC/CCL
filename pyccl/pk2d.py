@@ -601,7 +601,13 @@ def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
     if isinstance(p_of_k_a, Pk2D):
         psp = p_of_k_a.psp
     else:
-        if p_of_k_a is None or isinstance(p_of_k_a, str):
+        if p_of_k_a is None:
+            warnings.warn("The default power spectrum can is now designated "
+                          "via ``ccl.DEFAULT_POWER_SPECTRUM``. The use of "
+                          "``None`` will be deprecated in future versions.",
+                          CCLDeprecationWarning)
+            name = DEFAULT_POWER_SPECTRUM
+        elif isinstance(p_of_k_a, str):
             name = p_of_k_a
         else:
             raise ValueError("p_of_k_a must be a pyccl.Pk2D object, "

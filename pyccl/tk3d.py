@@ -30,7 +30,7 @@ class Tk3D(CCLObject):
           \\int \\frac{d\\varphi_2}{2\\pi}
           T_{abcd}({\\bf k_1},-{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
 
-      where :math:`{\bf k}_i\\equiv k_i(\\cos\\varphi_i,\\sin\\varphi_i,0)`,
+      where :math:`{\\bf k}_i\\equiv k_i(\\cos\\varphi_i,\\sin\\varphi_i,0)`,
       and :math:`T_{abcd}({\\bf k}_a,{\\bf k}_b,{\\bf k}_c,{\\bf k}_d)` is
       the connected trispectrum of fields :math:`\\{a,b,c,d\\}`.
 
@@ -229,12 +229,14 @@ class Tk3D(CCLObject):
         """Get the spline data arrays.
 
         Returns:
-            a_arr (1D ``numpy.ndarray``):
-                Array of scale factors.
-            lk_arr1, lk_arr2 (1D ``numpy.ndarray``):
-                Arrays of :math:``ln(k)``.
-            out (list of ``numpy.ndarray``):
-                The trispectrum T(k1, k2, z) or its factors f(k1, z), f(k2, z).
+            Tuple containing
+
+            - a_arr (1D ``numpy.ndarray``): Array of scale factors.
+            - lk_arr1, lk_arr2 (1D ``numpy.ndarray``): Arrays of
+              :math:`ln(k)`.
+            - out (list of ``numpy.ndarray``): The trispectrum
+              :math:`T(k_1, k_2, z)` or its factors
+              :math:`f(k_1, z),\\,\\,f(k_2, z)`.
         """
         if not self:
             raise ValueError("Tk3D object does not have data.")

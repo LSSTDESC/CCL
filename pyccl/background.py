@@ -199,10 +199,11 @@ def sigma_critical(cosmo, *, a_lens, a_source):
     .. math::
          \\Sigma_{\\mathrm{crit}} = \\frac{c^2}{4\\pi G}
           \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}},
-           where :math:`c` is the speed of light, :math:`G` is the
-           gravitational constant, and :math:`D_i` is the angular diameter
-           distance. The labels :math:`i =` s, l and ls denotes the distances
-           to the source, lens, and between source and lens, respectively.
+
+    where :math:`c` is the speed of light, :math:`G` is the
+    gravitational constant, and :math:`D_i` is the angular diameter
+    distance. The labels :math:`i =` s, l and ls denotes the distances
+    to the source, lens, and between source and lens, respectively.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.

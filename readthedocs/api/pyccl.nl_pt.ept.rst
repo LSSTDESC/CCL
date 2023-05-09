@@ -1,7 +1,7 @@
-pyccl.parameters module
+pyccl.nl\_pt.ept module
 =======================
 
-.. automodule:: pyccl.parameters
+.. automodule:: pyccl.nl_pt.ept
    :members:
    :undoc-members:
    :show-inheritance:

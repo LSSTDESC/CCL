@@ -7,6 +7,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   pyccl.nl_pt.ept
    pyccl.nl_pt.power
    pyccl.nl_pt.tracers
 
