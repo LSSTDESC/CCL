@@ -31,7 +31,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             non-linear power spectra stored in `cosmo` (e.g.
             `'delta_matter:delta_matter'`). If `None`, the non-linear matter
             power spectrum stored in `cosmo` will be used.
-        l_limber (float or 'auto') : Angular wavenumber beyond which Limber's
+        l_limber (int, float or 'auto') : Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1. If 'auto', then the non-limber
             integrator will be used to compute the right transition point given the value
             of limber_max_error.
@@ -63,7 +63,12 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     if non_limber_integration_method not in ['FKEM','MATTER']:
         raise ValueError("Non-Limber integration method %s not supported" %
                          limber_integration_method)
-
+    if type(l_limber)=='str':
+        if (l_limer!='auto'):
+            raise ValueError("l_limber cannot be a string other than 'auto'")
+        auto_limber=True
+    else:
+        auto_limber=False
 
     # we need the distances for the integrals
     cosmo.compute_distances()
@@ -89,7 +94,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
     if not (ell_use[:-1] < ell_use[1:]).all():
         raise ValueError("ell values must be monotonically increasing")
 
-    if l_limber == 'auto' or ell_use[0]<l_limber:
+    if auto_limber or ell_use[0]<l_limber:
         if non_limber_integration_method=='FKEM':
             l_limber, cl_non_limber, status = implement_FKEM (cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error)
         else: #it has to be matter, since we checked the input
@@ -107,7 +112,7 @@ def angular_cl(cosmo, cltracer1, cltracer2, ell, p_of_k_a=None,
             ell_use_limber, integ_types[limber_integration_method],
             ell_use_limber.size, status)
         if status != 0:
-            raise ValueError("Error in non-Limber integrator.")    
+            raise ValueError("Error in Limber integrator.")    
 
     # put pieces together
     cl = np.concatenate((cl_non_limber,cl_limber))
