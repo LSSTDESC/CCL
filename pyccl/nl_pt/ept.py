@@ -71,29 +71,29 @@ class EulerianPTCalculator(CCLAutoRepr):
               If necessary, consider adding it in post-processing.
 
     Args:
-        with_NC (bool): set to True if you'll want to use
+        with_NC (bool): set to ``True`` if you'll want to use
             this calculator to compute correlations involving
             number counts.
-        with_IA(bool): set to True if you'll want to use
+        with_IA(bool): set to ``True`` if you'll want to use
             this calculator to compute correlations involving
             intrinsic alignments.
-        with_matter_1loop(bool): set to True if you'll want to use
+        with_matter_1loop(bool): set to ``True`` if you'll want to use
             this calculator to compute the one-loop matter power
-            spectrum (automatically on if `with_NC==True`).
-        cosmo (:class:`~pyccl.core.Cosmology`): a `Cosmology` object.
+            spectrum (automatically on if ``with_NC==True``).
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
             If present, internal PT power spectrum templates will
-            be initialized. If `None`, you will need to initialize
-            them using the `update_ingredients` method.
+            be initialized. If ``None``, you will need to initialize
+            them using the :meth:`update_ingredients` method.
         log10k_min (float): decimal logarithm of the minimum
-            Fourier scale (in Mpc^-1) for which you want to
+            Fourier scale (in :math:`{\\rm Mpc}^{-1}`) for which you want to
             calculate perturbation theory quantities.
         log10k_max (float): decimal logarithm of the maximum
-            Fourier scale (in Mpc^-1) for which you want to
+            Fourier scale (in :math:`{\\rm Mpc}^{-1}`) for which you want to
             calculate perturbation theory quantities.
         nk_per_decade (int or float): number of k values per
             decade.
         a_arr (array_like): array of values of the scale factor at
-            which all power spectra will be evaluated. If `None`,
+            which all power spectra will be evaluated. If ``None``,
             the default sampling used internally by CCL will be
             used. Note that this may be slower than a bespoke sampling
             optimised for your particular application.
@@ -103,35 +103,34 @@ class EulerianPTCalculator(CCLAutoRepr):
             the cutoff scale. This may be useful when using the
             resulting power spectra to compute correlation
             functions if some of the PT contributions do not
-            fall sufficiently fast on small scales. If `None`
+            fall sufficiently fast on small scales. If ``None``
             (default), no cutoff factor will be applied.
         n_exp_cutoff (float): exponent of the cutoff factor (see
-            `k_cutoff`).
+            ``k_cutoff``).
         b1_pk_kind (str): power spectrum to use for the first-order
-            bias terms in the expansion. `'linear'`: use the linear
-            matter power spectrum. `'nonlinear'`: use the non-linear
-            matter power spectrum. `'pt'`: use the 1-loop SPT matter
-            power spectrum. Default: `'nonlinear'`.
+            bias terms in the expansion. ``'linear'``: use the linear
+            matter power spectrum. ``'nonlinear'``: use the non-linear
+            matter power spectrum. ``'pt'``: use the 1-loop SPT matter
+            power spectrum.
         bk2_pk_kind (str): power spectrum to use for the non-local
             bias terms in the expansion. Same options and default as
-            `b1_pk_kind`.
-        pad_factor (float): fraction of the log10(k) interval you
-             to add as padding for FFTLog calculations. Default: 1.0.
+            ``b1_pk_kind``.
+        pad_factor (float): fraction of the :math:`\\log_{10}(k)`
+             interval you to add as padding for FFTLog calculations.
         low_extrap (float): decimal logaritm of the minimum Fourier
-             scale (in Mpc^-1) for which FAST-PT will extrapolate.
-             Default: -5.0.
+             scale (in :math:`{\\rm Mpc}^{-1}`) for which FAST-PT will
+             extrapolate.
         high_extrap (float): decimal logaritm of the maximum Fourier
-             scale (in Mpc^-1) for which FAST-PT will extrapolate.
-             Default: 3.0.
+             scale (in :math:`{\\rm Mpc}^{-1}`) for which FAST-PT will
+             extrapolate.
         P_window (array_like): 2-element array describing the
              tapering window used by FAST-PT. See FAST-PT
-             documentation for more details. Default: `None`.
+             documentation for more details.
         C_window (float):  `C_window` parameter used by FAST-PT to
              smooth the edges and avoid ringing. See FAST-PT
-             documentation for more details. Default: 0.75.
-        sub_lowk (bool): if `True`, the small-scale white noise
+             documentation for more details.
+        sub_lowk (bool): if ``True``, the small-scale white noise
              contribution to some of the terms will be subtracted.
-             Default: `False`.
     """
     __repr_attrs__ = __eq_attrs__ = ('with_NC', 'with_IA', 'with_matter_1loop',
                                      'k_s', 'a_s', 'exp_cutoff', 'b1_pk_kind',
@@ -197,7 +196,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt'):
             self.with_matter_1loop = True
 
-        # Initialize all expensive arrays to `None`.
+        # Initialize all expensive arrays to ``None``.
         self._cosmo = None
 
         # Fill them out if cosmo is present
@@ -225,7 +224,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         """ Update the internal PT arrays.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a `Cosmology` object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
         """
         if self.initialised and (cosmo == self._cosmo):
             return
@@ -527,13 +526,13 @@ class EulerianPTCalculator(CCLAutoRepr):
             tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
                 tracer being correlated.
             tracer2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the second
-                tracer being correlated. If `None`, the auto-correlation
+                tracer being correlated. If ``None``, the auto-correlation
                 of the first tracer will be returned.
-            return_ia_bb (bool): if `True`, the B-mode power spectrum
+            return_ia_bb (bool): if ``True``, the B-mode power spectrum
                 for intrinsic alignments will be returned (if both
                 input tracers are of type
                 :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
-                If `False` (default) E-mode power spectrum is returned.
+                If ``False`` (default) E-mode power spectrum is returned.
             extrap_order_lok (int): extrapolation order to be used on
                 k-values below the minimum of the splines. See
                 :class:`~pyccl.pk2d.Pk2D`.
@@ -595,17 +594,17 @@ class EulerianPTCalculator(CCLAutoRepr):
                           extrap_order_hik=2, return_ia_bb=False):
         """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
         the power spectrum template for two of the PT operators. The
-        combination returned is determined by `kind`, which must be
-        a string of the form `'q1:q2'`, where `q1` and `q2` denote
+        combination returned is determined by ``kind``, which must be
+        a string of the form ``'q1:q2'``, where ``q1`` and ``q2`` denote
         the two operators whose power spectrum is sought. Valid
-        operator names are: `'m'` (matter overdensity), `'b1'`
-        (first-order overdensity), `'b2'` (:math:`\\delta^2`
-        term in galaxy bias expansion), `'bs'` (:math:`s^2` term
-        in galaxy bias expansion), `'b3nl'` (:math:`\\psi_{nl}`
-        term in galaxy bias expansion), `'bk2'` (non-local
+        operator names are: ``'m'`` (matter overdensity), ``'b1'``
+        (first-order overdensity), ``'b2'`` (:math:`\\delta^2`
+        term in galaxy bias expansion), ``'bs'`` (:math:`s^2` term
+        in galaxy bias expansion), ``'b3nl'`` (:math:`\\psi_{nl}`
+        term in galaxy bias expansion), ``'bk2'`` (non-local
         :math:`\\nabla^2 \\delta` term in galaxy bias expansion),
-        `'c1'` (linear IA term), `'c2'` (:math:`s^2` term in IA
-        expansion), `'cdelta'` (:math:`s\\delta` term in IA expansion).
+        ``'c1'`` (linear IA term), ``'c2'`` (:math:`s^2` term in IA
+        expansion), ``'cdelta'`` (:math:`s\\delta` term in IA expansion).
 
         Args:
             kind (str): string defining the pair of PT operators for
@@ -616,11 +615,11 @@ class EulerianPTCalculator(CCLAutoRepr):
             extrap_order_hik (int): extrapolation order to be used on
                 k-values above the maximum of the splines. See
                 :class:`~pyccl.pk2d.Pk2D`.
-            return_ia_bb (bool): if `True`, the B-mode power spectrum
+            return_ia_bb (bool): if ``True``, the B-mode power spectrum
                 for intrinsic alignments will be returned (if both
                 input tracers are of type
                 :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
-                If `False` (default) E-mode power spectrum is returned.
+                If ``False`` (default) E-mode power spectrum is returned.
 
         Returns:
             :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.

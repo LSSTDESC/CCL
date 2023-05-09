@@ -9,7 +9,11 @@ from . import PTTracer
 
 
 class PTCalculator:
-    """ This class implements a set of methods that can be
+    """
+    .. note:: This class is deprecated in favour of the
+              :class:`~pyccl.nl_pt.ept.EulerianPTCalculator` class.
+
+    This class implements a set of methods that can be
     used to compute the various components needed to estimate
     perturbation theory correlations. These calculations are
     currently based on FAST-PT
