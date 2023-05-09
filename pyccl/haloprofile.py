@@ -1,3 +1,9 @@
+"""
+.. warning:: The functionality contained in this module has been deprecated
+             in favour of the newer halo model implementation
+             :py:mod:`~pyccl.halos`.
+"""
+
 __all__ = ("nfw_profile_3d", "einasto_profile_3d", "hernquist_profile_3d",
            "nfw_profile_2d",)
 
@@ -10,9 +16,6 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     """Calculate the 3D NFW halo profile at a given radius or an array
     of radii, for a halo with a given mass, mass definition, and
     concentration, at a given scale factor, with a cosmology dependence.
-
-    .. note:: Note that this function is deprecated. Please use the
-              functionality in the :mod:`~pyccl.halos.profiles` module.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
@@ -41,9 +44,6 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     The alpha parameter is calibrated using the relation with peak height in
     https://arxiv.org/pdf/1401.1216.pdf eqn5, assuming virial mass.
 
-    .. note:: Note that this function is deprecated. Please use the
-              functionality in the :mod:`~pyccl.halos.profiles` module.
-
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
         concentration (float): halo concentration.
@@ -69,9 +69,6 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
 
-    .. note:: Note that this function is deprecated. Please use the
-              functionality in the :mod:`~pyccl.halos.profiles` module.
-
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
         concentration (float): halo concentration.
@@ -96,9 +93,6 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
     at a given radius or an array of radii,
     for a halo with a given mass, mass definition, and concentration,
     at a given scale factor, with a cosmology dependence.
-
-    .. note:: Note that this function is deprecated. Please use the
-              functionality in the :mod:`~pyccl.halos.profiles` module.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.

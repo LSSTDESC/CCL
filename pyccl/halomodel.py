@@ -1,3 +1,9 @@
+"""
+.. warning:: The functionality contained in this module has been deprecated
+             in favour of the newer halo model implementation
+             :py:mod:`~pyccl.halos`.
+"""
+
 __all__ = ("halo_concentration", "onehalo_matter_power",
            "twohalo_matter_power", "halomodel_matter_power",)
 

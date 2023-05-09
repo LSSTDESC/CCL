@@ -13,8 +13,8 @@ DEFAULT_POWER_SPECTRUM = "delta_matter:delta_matter"
 class DefaultParams:
     """Default cosmological parameters used throughout the library.
 
-    .. note:: The default values of ``T_CMB`` and ``T_ncdm`` will change
-              in v3 of CCL.
+    .. warning:: The default values of ``T_CMB`` and ``T_ncdm`` will change
+                 in v3 of CCL.
     """
     #: Mean CMB temperature in Kelvin.
     T_CMB = 2.725

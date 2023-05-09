@@ -87,9 +87,9 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
     translate masses between different definitions if a concentration-mass
     relation is provided.
 
-    .. note:: Translating between halo mass definitions via ``MassDef``
-              objects is deprecated and will disappear in CCL v3 in favour
-              of :func:`~pyccl.halos.massdef.mass_translator`.
+    .. warning:: Translating between halo mass definitions via ``MassDef``
+                 objects is deprecated and will disappear in CCL v3 in favour
+                 of :func:`~pyccl.halos.massdef.mass_translator`.
 
     You may also define halo masses based on a Friends-of-Friends algorithm,
     in which case simply pass ``Delta='fof'`` below.

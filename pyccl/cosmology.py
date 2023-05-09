@@ -128,9 +128,13 @@ class Cosmology(CCLObject):
 
     .. note:: BCM stands for the "baryonic correction model" of Schneider &
               Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
-              `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
-/0000-ccl_note/main.pdf>`_
+              `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc/0000-ccl_note/main.pdf>`_
               for details.
+
+    .. warning:: The option to include baryons at the level of the CCL
+              cosmology object via the BCM model will be deprecated in 
+              v3, in favour of the more general :py:mod:`~pyccl.baryons`
+              module.
 
     .. note:: After instantiation, you can set parameters related to the
               internal splines and numerical integration accuracy by setting
@@ -247,7 +251,7 @@ class Cosmology(CCLObject):
         extra_parameters = {"camb": {"halofit_version": "mead2020_feedback",
                                      "HMCode_logT_AGN": 7.8}}
 
-    """
+    """ # noqa
     from .base.repr_ import build_string_Cosmology as __repr__
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_accuracy_params",)

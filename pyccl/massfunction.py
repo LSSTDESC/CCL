@@ -1,3 +1,9 @@
+"""
+.. warning:: The functionality contained in this module has been deprecated
+             in favour of the newer halo model implementation
+             :py:mod:`~pyccl.halos`.
+"""
+
 __all__ = ("massfunc", "halo_bias", "massfunc_m2r",)
 
 from . import CCLError, deprecated
@@ -8,9 +14,6 @@ from .power import sigmaM  # noqa
 @deprecated(hal.MassFunc)
 def massfunc(cosmo, halo_mass, a, overdensity=200):
     """Halo mass function, dn/dlog10M.
-
-    .. note:: Note that this function is deprecated. Please use the
-              functionality in the :mod:`~pyccl.halos.hmfunc` module.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
@@ -41,9 +44,6 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
 def halo_bias(cosmo, halo_mass, a, overdensity=200):
     """Halo bias
 
-    .. note:: Note that this function is deprecated. Please use the
-              functionality in the :mod:`~pyccl.halos.hbias` module.
-
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         halo_mass (float or array_like): Halo masses; Msun.
@@ -71,9 +71,6 @@ def massfunc_m2r(cosmo, halo_mass):
 
     .. note:: This is :math:`R=(3M/(4\\pi\\rho_M))^{1/3}``, where
               :math:`\\rho_M` is the mean comoving matter density.
-
-    .. note:: Note that this function is deprecated. Please use
-              :meth:`~pyccl.halos.massdef.mass2radius_lagrangian`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
