@@ -81,7 +81,7 @@ Known Issues
 #. For some Mac OSX versions, the standard ``C`` headers are not in the usual spot, resulting in an
    error of ``fatal error: 'stdio.h' file not found``. This can be resolved with the command:
 
-   .. code:: bash
+   .. code-block:: bash
 
       $ sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
 
@@ -96,7 +96,7 @@ Known Issues
 
 #. Newer versions of Xcode do not automatically have the required command line tools installed. This can be done from the command line:
 
-    .. code:: bash
+   .. code-block:: bash
 
       $ sudo xcode-select --install
       $ sudo xcodebuild -license

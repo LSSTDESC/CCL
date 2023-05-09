@@ -87,7 +87,7 @@ parameters.
 Consistent Naming
 -----------------
 When extending the API make sure that the names you give to functions and
-arguments is consistent with the rest of CCL. Remember, functions generally
+arguments are consistent with the rest of CCL. Remember, functions generally
 operate on some argument, so their name should start with a verb.
 
 .. code-block:: python
@@ -347,7 +347,7 @@ uses `Sphinx <https://www.sphinx-doc.org/en/master/>`_ and largely follows the
 for documenting code. A comprehensive explanation of what Sphinx can do
 (with emphasis on the Directives and the Roles) can be found in the
 `reStructured Text (reST) primer
-<https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ page
+<https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
 of the Sphinx docs.
 
 
@@ -405,7 +405,7 @@ Other points to remember:
 
 * You may make private or dunder functions/methods show in the documentation
   by adding the ``:meta public:`` info field. We only recommend that you do this in
-  abstract classes or other special where exposing a private function is
+  abstract classes or other special cases where exposing a private function is
   appropriate. All :meth:`__call__` methods are automatically exposed. See the
   `autodoc documentation
   <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_ for
@@ -475,6 +475,7 @@ self-explanatory, so we don't have to add extra information in the description.
     from typing import Union
 
     from numpy.typing import ArrayLike
+
 
     class Pk2D:
 
@@ -556,7 +557,7 @@ Properties are 'special' attributes, and they should appear right after
 
 Module/Subpackage Summaries
 ----------------------------
-New modules should contain a brief description of its contents, at the top:
+New modules should contain a brief description of the contents, at the top:
 
 .. code-block::
     :caption: background.py

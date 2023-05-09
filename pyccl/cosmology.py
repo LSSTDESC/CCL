@@ -879,14 +879,14 @@ class CosmologyCalculator(Cosmology):
 
     Construct a cosmology from arrays describing
 
-        * background expansion
-          (override :meth:`~Cosmology.compute_distances`),
-        * growth
-          (override :meth:`~Cosmology.compute_growth`),
-        * linear power spectra
-          (override :meth:`~Cosmology.compute_linear_power`),
-        * non-linear power spectra
-          (override :meth:`~Cosmology.compute_nonlin_power`).
+    * background expansion
+      (override :meth:`~Cosmology.compute_distances`),
+    * growth
+      (override :meth:`~Cosmology.compute_growth`),
+    * linear power spectra
+      (override :meth:`~Cosmology.compute_linear_power`),
+    * non-linear power spectra
+      (override :meth:`~Cosmology.compute_nonlin_power`).
 
 
     While the input arrays are generally adequate for computing the majority of
