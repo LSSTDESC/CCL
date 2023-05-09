@@ -12,6 +12,7 @@ Submodules
    pyccl.halos.profiles.gaussian
    pyccl.halos.profiles.hernquist
    pyccl.halos.profiles.hod
+   pyccl.halos.profiles.ia
    pyccl.halos.profiles.nfw
    pyccl.halos.profiles.powerlaw
    pyccl.halos.profiles.pressure_gnfw

@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 import pyccl as ccl
 
 HALOPROFILE_TOLERANCE = 1E-3
