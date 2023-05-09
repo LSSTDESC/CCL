@@ -1,4 +1,4 @@
-__all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
+__all__ = ("HaloProfile", "HaloProfileMatter",
            "HaloProfilePressure", "HaloProfileCIB",)
 
 import warnings
@@ -43,7 +43,8 @@ class HaloProfile(CCLAutoRepr):
     __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
                                  )(super.__getattribute__)
 
-    def __init__(self, *, mass_def=None, concentration=None):
+    def __init__(self, *, mass_def=None, concentration=None,
+                 is_number_counts=False):
         # Verify that profile can be initialized.
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
             name = type(self).__name__
@@ -53,8 +54,7 @@ class HaloProfile(CCLAutoRepr):
         # Initialize FFTLog.
         self.precision_fftlog = FFTLogParams()
 
-        # TODO: Remove for CCLv3.
-        self._is_number_counts = isinstance(self, HaloProfileNumberCounts)
+        self._is_number_counts = is_number_counts
 
         if (mass_def, concentration) == (None, None):
             warnings.warn(
@@ -74,13 +74,11 @@ class HaloProfile(CCLAutoRepr):
 
     @property
     def is_number_counts(self):
-        # TODO: Remove for CCLv3.
         return self._is_number_counts
 
     @is_number_counts.setter
     @unlock_instance
     def is_number_counts(self, value):
-        # TODO: Remove for CCLv3.
         self._is_number_counts = value
 
     def get_normalization(self, cosmo, a, *, hmc=None):
@@ -372,11 +370,12 @@ class HaloProfile(CCLAutoRepr):
         return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 
     def _fftlog_wrap(self, cosmo, k, M, a,
-                     fourier_out=False, large_padding=True):
+                     fourier_out=False,
+                     large_padding=True, ell=0):
         # This computes the 3D Hankel transform
-        #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_0(k r)
-        # if fourier_out == False, and
-        #  \rho(r) = \frac{1}{2\pi^2} \int dk k^2 \rho(k) j_0(k r)
+        #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_ell(k r)
+        # if fourier_out == True, and
+        #  \rho(r) = \frac{1}{2\pi^2} \int dk k^2 \rho(k) j_ell(k r)
         # otherwise.
 
         # Select which profile should be the input
@@ -408,7 +407,7 @@ class HaloProfile(CCLAutoRepr):
 
         # Compute Fourier profile through fftlog
         k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
-                                               3, 0, plaw_index)
+                                               3, ell, plaw_index)
         lk_arr = np.log(k_arr)
 
         for im, p_k_arr in enumerate(p_fourier_M):
@@ -487,10 +486,6 @@ class HaloProfile(CCLAutoRepr):
         if np.ndim(M) == 0:
             sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
         return sig_r_t_out
-
-
-class HaloProfileNumberCounts(HaloProfile):
-    """Base for number counts halo profiles."""
 
 
 class HaloProfileMatter(HaloProfile):
