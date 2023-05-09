@@ -15,23 +15,22 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        tracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        tracer1 (:class:`~pyccl.tracers.Tracer`): a Tracer object,
             of any kind.
-        tracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
-            of any kind.
-        ell (float or array_like): Angular wavenumber(s) at which to evaluate
+        tracer2 (:class:`~pyccl.tracers.Tracer`): a second Tracer object.
+        ell (float or array_like): Angular multipole(s) at which to evaluate
             the angular power spectrum.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
-            to project. If a string, it must correspond to one of the
-            non-linear power spectra stored in `cosmo` (e.g.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or `None`): 3D Power
+            spectrum to project. If a string, it must correspond to one of
+            the non-linear power spectra stored in `cosmo` (e.g.
             `'delta_matter:delta_matter'`).
-        l_limber (float) : Angular wavenumber beyond which Limber's
+        l_limber (float): Angular wavenumber beyond which Limber's
             approximation will be used. Defaults to -1.
-        limber_integration_method (string) : integration method to be used
-            for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
-            method backed up by `quad` when it fails) and 'spline' (the
-            integrand is splined and then integrated numerically).
+        limber_integration_method (string): integration method to be used
+            for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
+            `qag` method backed up by `quad` when it fails) and ``'spline'``
+            (the integrand is splined and then integrated numerically).
 
     Returns:
         float or array_like: Angular (cross-)power spectrum values, \
