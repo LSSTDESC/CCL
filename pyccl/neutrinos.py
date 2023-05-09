@@ -14,6 +14,16 @@ from . import physical_constants as const
 
 
 class NeutrinoMassSplits(Enum):
+    """Enumeration listing all allowed neutrino mass
+    split types.
+
+    - 'sum': sum of masses.
+    - 'single': single massive neutrino.
+    - 'equal': total mass distributed equally among 3 species.
+    - 'normal': normal hierarchy.
+    - 'inverted': inverted hierarchy.
+    - 'list': a list of 3 different masses is passed.
+    """
     SUM = 'sum'
     SINGLE = 'single'
     EQUAL = 'equal'
@@ -28,6 +38,9 @@ def Omeganuh2(a, m_nu,
               T_ncdm=DefaultParams.T_ncdm):
     """Calculate :math:`\\Omega_\\nu\\,h^2` at a given scale factor given
     the neutrino masses.
+
+    .. warning:: This function is deprecated in v3. Use
+                 :func:`~pyccl.background.omega_x` instead.
 
     Args:
         a (float or array-like): Scale factor, normalized to 1 today.
@@ -66,11 +79,12 @@ def Omeganuh2(a, m_nu,
 
 @warn_api(pairs=[("OmNuh2", "Omega_nu_h2")])
 def nu_masses(*, Omega_nu_h2=None, mass_split, T_CMB=None, m_nu=None):
-    """Returns the neutrinos mass(es) for a given Omega_nu_h2, according to the
-    splitting convention specified by the user.
+    """Returns the neutrinos mass(es) for a given value of
+    :math:`\\Omega_\\nu h^2`, according to the splitting convention
+    specified by the user.
 
     Args:
-        Omega_nu_h2 (float): Neutrino energy density at z=0 times h^2
+        Omega_nu_h2 (float): Neutrino energy density at z=0 times :math:`h^2`.
         mass_split (str): indicates how the masses should be split up
             Should be one of 'normal', 'inverted', 'equal' or 'sum'.
         T_CMB (float, optional): Deprecated - do not use.
@@ -81,7 +95,8 @@ def nu_masses(*, Omega_nu_h2=None, mass_split, T_CMB=None, m_nu=None):
             sequence represent the individual neutrino masses.
 
     Returns:
-        float or array-like: Neutrino mass(es) corresponding to this Omeganuh2
+        float or array-like: Neutrino mass(es) corresponding to this
+        :math:`\\Omega_\\nu h^2`.
     """
     if T_CMB is not None:
         warnings.warn("T_CMB is deprecated as an argument of `nu_masses.",

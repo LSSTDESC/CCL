@@ -264,6 +264,7 @@ class Concentration(HMIngredients):
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object or a name string.
+
     .. automethod:: __call__
     """
     _mass_def_strict_always = True
