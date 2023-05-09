@@ -68,7 +68,8 @@ def test_nonlin_matter_power_halomod(k):
     prf = ccl.halos.HaloProfileNFW(concentration=cc)
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mdef)
-    pkb = ccl.halos.halomod_power_spectrum(COSMO_HM, hmc, k, a, prf)
+    pkb = ccl.halos.halomod_power_spectrum(COSMO_HM, hmc, k, a, prf,
+                                           normprof1=True)
 
     assert np.allclose(pk, pkb)
     assert np.all(np.isfinite(pk))
