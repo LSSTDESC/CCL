@@ -226,7 +226,7 @@ ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
         double mnu_eq[3] = {cosmo->params.sum_nu_masses / 3.,
                             cosmo->params.sum_nu_masses / 3.,
                             cosmo->params.sum_nu_masses / 3.};
-        Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, status);
+        Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, cosmo->params.T_ncdm, status);
       }
     } else {
       if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){

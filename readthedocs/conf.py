@@ -40,7 +40,7 @@ if on_rtd:
 
     MOCK_MODULES = [
         "pyccl.ccllib",
-        "pyccl._types.cc;lib",
+        "pyccl._types.ccllib",
         "pyccl.background.ccllib",
         "pyccl.bcm.ccllib",
         "pyccl.boltzmann.ccllib",
@@ -52,7 +52,7 @@ if on_rtd:
         "pyccl.neutrinos.ccllib",
         "pyccl.ccllibutils.ccllib",
         "pyccl.cls.ccllib",
-        "pyccl.core.ccllib",
+        "pyccl.cosmology.ccllib",
         "pyccl.massfunction.ccllib",
         "pyccl.power.ccllib",
         "pyccl.pyutils.ccllib",
@@ -111,7 +111,7 @@ release = u'2.X'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

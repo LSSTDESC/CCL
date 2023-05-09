@@ -1,11 +1,17 @@
+__all__ = ("translate_IA_norm", "PTTracer", "PTMatterTracer",
+           "PTNumberCountsTracer", "PTIntrinsicAlignmentTracer",)
+
+from abc import abstractmethod
+
 import numpy as np
 from scipy.interpolate import interp1d
+
+from .. import CCLAutoRepr, physical_constants, warn_api
 from ..pyutils import _check_array_params
-from ..background import growth_factor
-from ..parameters import physical_constants
 
 
-def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
+@warn_api
+def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
                       Om_m2_for_c2=False, Om_m_fid=0.3):
     """
     Function to convert from a_ia values to c_ia values,
@@ -30,29 +36,10 @@ def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
         c2 (float or array_like): IA c2 at input z values
     """
 
-    def check_input_array(a, name):
-        if a is None:
-            return
-
-        if np.ndim(a) > 1:
-            raise ValueError(name +
-                             " should be a scalar or 1D")
-
-        if np.ndim(a) == 1:
-            if len(a) != len(z):
-                raise ValueError("Both z and " + name +
-                                 " should have the same size")
-
-    if np.ndim(z) > 1:
-        raise ValueError("z should be a scalar or 1D")
-    check_input_array(a1, 'a1')
-    check_input_array(a2, 'a2')
-    check_input_array(a1delta, 'a1delta')
-
     Om_m = cosmo['Omega_m']
     rho_crit = physical_constants.RHO_CRITICAL
     c1 = c1delta = c2 = None
-    gz = growth_factor(cosmo, 1./(1+z))
+    gz = cosmo.growth_factor(1./(1+z))
 
     if a1 is not None:
         c1 = -1*a1*5e-14*rho_crit*Om_m/gz
@@ -69,7 +56,7 @@ def translate_IA_norm(cosmo, z, a1=1.0, a1delta=None, a2=None,
     return c1, c1delta, c2
 
 
-class PTTracer(object):
+class PTTracer(CCLAutoRepr):
     """PTTracers contain the information necessary to describe the
     perturbative, non-linear inhomogeneities associated with
     different physical quantities.
@@ -79,10 +66,18 @@ class PTTracer(object):
     in a perturbation theory framework to provide N-point
     correlations.
     """
+    __repr_attrs__ = __eq_attrs__ = ('type', 'biases')
+
     def __init__(self):
         self.biases = {}
-        self.type = None
         pass
+
+    @property
+    @abstractmethod
+    def type(self):
+        """String defining tracer type (`M`, `NC` and
+        `IA` supported).
+        """
 
     def get_bias(self, bias_name, z):
         """Get the value of one of the bias functions at a given
@@ -96,7 +91,7 @@ class PTTracer(object):
             float or array_like: bias value at the input redshifts.
         """
         if bias_name not in self.biases:
-            raise KeyError("Bias %s not included in this tracer" % bias_name)
+            raise KeyError(f"Bias {bias_name} not included in this tracer")
         return self.biases[bias_name](z)
 
     def _get_bias_function(self, b):
@@ -122,9 +117,10 @@ class PTTracer(object):
 class PTMatterTracer(PTTracer):
     """:class:`PTTracer` representing matter fluctuations.
     """
+    type = 'M'
+
     def __init__(self):
         self.biases = {}
-        self.type = 'M'
 
 
 class PTNumberCountsTracer(PTTracer):
@@ -148,9 +144,10 @@ class PTNumberCountsTracer(PTTracer):
         bk2 (float or tuple of arrays): as above for the
             non-local bias.
     """
+    type = 'NC'
+
     def __init__(self, b1, b2=None, bs=None, b3nl=None, bk2=None):
         self.biases = {}
-        self.type = 'NC'
 
         # Initialize b1
         self.biases['b1'] = self._get_bias_function(b1)
@@ -211,10 +208,11 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         cdelta (float or tuple of arrays): as above for the
             overdensity bias.
     """
+    type = 'IA'
+
     def __init__(self, c1, c2=None, cdelta=None):
 
         self.biases = {}
-        self.type = 'IA'
 
         # Initialize c1
         self.biases['c1'] = self._get_bias_function(c1)

@@ -1,7 +1,12 @@
-from . import ccllib as lib
-from .pyutils import check, _get_spline2d_arrays, _get_spline3d_arrays
-from .base import CCLObject
+__all__ = ("Tk3D",)
+
+import warnings
+
 import numpy as np
+
+from . import CCLObject, check, lib
+from . import CCLDeprecationWarning, warn_api
+from .pyutils import _get_spline2d_arrays, _get_spline3d_arrays
 
 
 class Tk3D(CCLObject):
@@ -25,7 +30,7 @@ class Tk3D(CCLObject):
           \\int \\frac{d\\varphi_2}{2\\pi}
           T_{abcd}({\\bf k_1},-{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
 
-      where :math:`{\bf k}_i\\equiv k_i(\\cos\\varphi_i,\\sin\\varphi_i,0)`,
+      where :math:`{\\bf k}_i\\equiv k_i(\\cos\\varphi_i,\\sin\\varphi_i,0)`,
       and :math:`T_{abcd}({\\bf k}_a,{\\bf k}_b,{\\bf k}_c,{\\bf k}_d)` is
       the connected trispectrum of fields :math:`\\{a,b,c,d\\}`.
 
@@ -57,7 +62,7 @@ class Tk3D(CCLObject):
             `is_logt`. If `tkk_arr` is `None`, then it is assumed that
             the trispectrum can be factorized as described above, and
             the two functions :math:`f_i(k_i,a)` are described by
-            `pk1_arr` and `pk2_arr`. You are responsible of making sure
+            `pk1_arr` and `pk2_arr`. You are responsible for making sure
             all these arrays are sufficiently well sampled (i.e. the
             resolution of `a_arr` and `lk_arr` is high enough to sample
             the main features in the trispectrum). For reference, CCL
@@ -72,6 +77,11 @@ class Tk3D(CCLObject):
             `None`.
         pk2_arr (array): a 2D array with shape `[na,nk]` describing the
             second factor :math:`f_2(k,a)` for a factorizable trispectrum.
+        is_logt (boolean): if True, `tkk_arr`/`pk1_arr`/`pk2_arr` hold the
+            natural logarithm of the trispectrum (or its factors).
+            Otherwise, the true values of the corresponding quantities are
+            expected. Note that arrays will be interpolated in log space
+            if `is_logt` is set to `True`.
         extrap_order_lok (int): extrapolation order to be used on k-values
             below the minimum of the splines (use 0 or 1). Note that
             the extrapolation will be done in either
@@ -79,21 +89,17 @@ class Tk3D(CCLObject):
             depending on the value of `is_logt`.
         extrap_order_hik (int): same as `extrap_order_lok` for
             k-values above the maximum of the splines.
-        is_logt (boolean): if True, `tkk_arr`/`pk1_arr`/`pk2_arr` hold the
-            natural logarithm of the trispectrum (or its factors).
-            Otherwise, the true values of the corresponding quantities are
-            expected. Note that arrays will be interpolated in log space
-            if `is_logt` is set to `True`.
     """
-    from ._repr import _build_string_Tk3D as __repr__
+    from .base.repr_ import build_string_Tk3D as __repr__
 
-    def __init__(self, a_arr, lk_arr, tkk_arr=None,
-                 pk1_arr=None, pk2_arr=None, extrap_order_lok=1,
-                 extrap_order_hik=1, is_logt=True):
+    @warn_api(reorder=['extrap_order_lok', 'extrap_order_hik', 'is_logt'])
+    def __init__(self, *, a_arr, lk_arr, tkk_arr=None,
+                 pk1_arr=None, pk2_arr=None, is_logt=True,
+                 extrap_order_lok=1, extrap_order_hik=1):
         na = len(a_arr)
         nk = len(lk_arr)
 
-        if not np.all(a_arr[1:]-a_arr[:-1] > 0):
+        if not (np.diff(a_arr) > 0).all():
             raise ValueError("`a_arr` must be strictly increasing")
 
         if not np.all(lk_arr[1:]-lk_arr[:-1] > 0):
@@ -133,46 +139,83 @@ class Tk3D(CCLObject):
                                                         int(is_logt), status)
         check(status)
 
+    def __eq__(self, other):
+        # Check object id.
+        if self is other:
+            return True
+        # Check the object class.
+        if type(self) is not type(other):
+            return False
+        # If the objects contain no data, return early.
+        if not (self or other):
+            return True
+        # If one is factorizable and the other one is not, return early.
+        if self.tsp.is_product ^ other.tsp.is_product:
+            return False
+        # Check extrapolation orders.
+        if not (self.extrap_order_lok == other.extrap_order_lok
+                and self.extrap_order_hik == other.extrap_order_hik):
+            return False
+        # Check the individual splines.
+        a1, lk11, lk12, tk1 = self.get_spline_arrays()
+        a2, lk21, lk22, tk2 = other.get_spline_arrays()
+        return ((a1 == a2).all()
+                and (lk11 == lk21).all() and (lk21 == lk22).all()
+                and np.array_equal(tk1, tk2))
+
+    def __hash__(self):
+        return hash(repr(self))
+
     @property
     def has_tsp(self):
         return 'tsp' in vars(self)
 
+    @property
+    def extrap_order_lok(self):
+        return self.tsp.extrap_order_lok if self else None
+
+    @property
+    def extrap_order_hik(self):
+        return self.tsp.extrap_order_hik if self else None
+
     def eval(self, k, a):
-        """Evaluate trispectrum. If `k` is a 1D array with size `nk`, the
-        output `out` will be a 2D array with shape `[nk,nk]` holding
-        `out[i,j] = T(k[j],k[i],a)`, where `T` is the trispectrum function
-        held by this `Tk3D` object.
+        warnings.warn("Tk3D.eval is deprecated. Simply call the object "
+                      "itself.", category=CCLDeprecationWarning)
+        return self(k, a)
+
+    def __call__(self, k, a):
+        """Evaluate trispectrum. If `k` is a 1D array with size `nk`, and
+        `a` is a scalar, the output `out` will be a 2D array with shape
+        `[nk,nk]` holding `out[i,j] = T(k[j],k[i],a)`, where `T` is the
+        trispectrum function held by this `Tk3D` object. If `a` is an array,
+        the shape will be `[len(a),nk,nk]`.
 
         Args:
             k (float or array_like): wavenumber value(s) in units of Mpc^-1.
-            a (float): value of the scale factor
+            a (float or array_like): value(s) of the scale factor
 
         Returns:
             float or array_like: value(s) of the trispectrum.
         """
+        a_use = np.atleast_1d(a).astype(float)
+        k_use = np.atleast_1d(k).astype(float)
+        lk_use = np.log(k_use)
+
+        nk = k_use.size
+        out = np.zeros([len(a_use), nk, nk])
+
         status = 0
+        for ia, aa in enumerate(a_use):
+            f, status = lib.tk3d_eval_multi(self.tsp, lk_use,
+                                            aa, nk*nk, status)
+            check(status)
+            out[ia] = f.reshape([nk, nk])
 
-        if np.ndim(a) != 0:
-            raise TypeError("a must be a floating point number")
-
-        if isinstance(k, int):
-            k = float(k)
-        if isinstance(k, float):
-            f, status = lib.tk3d_eval_single(self.tsp, np.log(k), a, status)
-        else:
-            k_use = np.atleast_1d(k)
-            nk = k_use.size
-            f, status = lib.tk3d_eval_multi(self.tsp, np.log(k_use),
-                                            a, nk*nk, status)
-            f = f.reshape([nk, nk])
-        check(status)
-        return f
-
-    def __call__(self, k, a):
-        """Callable vectorized instance."""
-        out = np.array([self.eval(k, aa)
-                        for aa in np.atleast_1d(a).astype(float)])
-        return out.squeeze()[()]
+        if np.ndim(k) == 0:
+            out = np.squeeze(np.squeeze(out, axis=-1), axis=-1)
+        if np.ndim(a) == 0:
+            out = np.squeeze(out, axis=0)
+        return out
 
     def __del__(self):
         if hasattr(self, 'has_tsp'):
@@ -186,14 +229,16 @@ class Tk3D(CCLObject):
         """Get the spline data arrays.
 
         Returns:
-            a_arr (1D ``numpy.ndarray``):
-                Array of scale factors.
-            lk_arr1, lk_arr2 (1D ``numpy.ndarray``):
-                Arrays of :math:``ln(k)``.
-            out (list of ``numpy.ndarray``):
-                The trispectrum T(k1, k2, z) or its factors f(k1, z), f(k2, z).
+            Tuple containing
+
+            - a_arr (1D ``numpy.ndarray``): Array of scale factors.
+            - lk_arr1, lk_arr2 (1D ``numpy.ndarray``): Arrays of
+              :math:`ln(k)`.
+            - out (list of ``numpy.ndarray``): The trispectrum
+              :math:`T(k_1, k_2, z)` or its factors
+              :math:`f(k_1, z),\\,\\,f(k_2, z)`.
         """
-        if not self.has_tsp:
+        if not self:
             raise ValueError("Tk3D object does not have data.")
 
         out = []
