@@ -1,6 +1,7 @@
-"""The core functionality of ccl, including the core data types. This includes
-the cosmology and parameters objects used to instantiate a model from which one
-can compute a set of theoretical predictions.
+"""The core functionality of CCL, including the core data types lives in this module.
+Its focus is :class:`Cosmology` class, which plays a central role, carrying the
+information on cosmological parameters and derived quantities needed in most of the
+calculations carried out by CCL.
 """
 __all__ = ("TransferFunctions", "MatterPowerSpectra",
            "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
@@ -114,17 +115,17 @@ def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
 
 @_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
 class Cosmology(CCLObject):
-    """A cosmology including parameters and associated data.
+    """A cosmology including parameters and associated data (e.g. distances,
+    power spectra).
 
     .. note:: Although some arguments default to `None`, they will raise a
               ValueError inside this function if not specified, so they are not
               optional.
 
-    .. note:: The parameter Omega_g can be used to set the radiation density
+    .. note:: The parameter ``Omega_g`` can be used to set the radiation density
               (not including relativistic neutrinos) to zero. Doing this will
               give you a model that is physically inconsistent since the
-              temperature of the CMB will still be non-zero. Note however
-              that this approximation is common for late-time LSS computations.
+              temperature of the CMB will still be non-zero.
 
     .. note:: BCM stands for the "baryonic correction model" of Schneider &
               Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
@@ -181,11 +182,11 @@ class Cosmology(CCLObject):
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             is 2.725.
         bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
-            BCM model. Defaults to `np.log10(1.2e14)`.
+            BCM model. Deprecated.
         bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
-            model. Defaults to 0.5.
+            model. Deprecated.
         bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
-            model. Defaults to 55.0.
+            model. Deprecated.
         mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
@@ -210,18 +211,21 @@ class Cosmology(CCLObject):
             the dark energy density parameter today
         df_mg (array_like, optional): Perturbations to the GR growth rate as
             a function of redshift :math:`\\Delta f`. Used to implement simple
-            modified growth scenarios.
+            modified growth scenarios. Deprecated.
         z_mg (array_like, optional): Array of redshifts corresponding to df_mg.
+            Deprecated.
         transfer_function (:obj:`str`, optional): The transfer function to
             use. Defaults to 'boltzmann_camb'.
         matter_power_spectrum (:obj:`str`, optional): The matter power
             spectrum to use. Defaults to 'halofit'.
         baryons_power_spectrum (:obj:`str`, optional): The correction from
             baryonic effects to be implemented. Defaults to 'nobaryons'.
+            Deprecated.
         mass_function (:obj:`str`, optional): The mass function to use.
-            Defaults to 'tinker10' (2010).
+            Defaults to 'tinker10' (2010). Deprecated.
         halo_concentration (:obj:`str`, optional): The halo concentration
             relation to use. Defaults to Duffy et al. (2008) 'duffy2008'.
+            Deprecated.
         emulator_neutrinos (:obj:`str`, optional): If using the emulator for
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
@@ -754,7 +758,7 @@ class Cosmology(CCLObject):
 
     def get_linear_power(self, name=DEFAULT_POWER_SPECTRUM):
         """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
-        the linear power spectrum with name `name`.
+        the linear power spectrum with name ``name``.
 
         Args:
             name (:obj:`str` or `None`): name of the power spectrum to
@@ -773,7 +777,7 @@ class Cosmology(CCLObject):
 
     def get_nonlin_power(self, name=DEFAULT_POWER_SPECTRUM):
         """Get the :class:`~pyccl.pk2d.Pk2D` object associated with
-        the non-linear power spectrum with name `name`.
+        the non-linear power spectrum with name ``name``.
 
         Args:
             name (:obj:`str` or `None`): name of the power spectrum to
@@ -841,12 +845,12 @@ class Cosmology(CCLObject):
 def CosmologyVanillaLCDM(**kwargs):
     """A cosmology with typical flat Lambda-CDM parameters (`Omega_c=0.25`,
     `Omega_b = 0.05`, `Omega_k = 0`, `sigma8 = 0.81`, `n_s = 0.96`, `h = 0.67`,
-    no massive neutrinos).
+    no massive neutrinos) for quick instantiation.
 
     Arguments:
         **kwargs (dict): a dictionary of parameters passed as arguments
-            to the `Cosmology` constructor. It should not contain any of
-            the LambdaCDM parameters (`"Omega_c"`, `"Omega_b"`, `"n_s"`,
+            to the :class:`Cosmology` constructor. It should not contain any of
+            the :math:`\\Lambda`-CDM parameters (`"Omega_c"`, `"Omega_b"`, `"n_s"`,
             `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
     """
     p = {'Omega_c': 0.25,
@@ -869,7 +873,7 @@ class CosmologyCalculator(Cosmology):
     linear and non-linear power spectra, which can then be used
     to compute more complex observables (e.g. angular power
     spectra or halo-model quantities). These are stored in
-    `background`, `growth`, `pk_linear` and `pk_nonlin`.
+    ``background``, ``growth``, ``pk_linear`` and ``pk_nonlin``.
 
     .. note:: Although in principle these arrays should suffice
               to compute most observable quantities some
@@ -877,7 +881,7 @@ class CosmologyCalculator(Cosmology):
               mass function) requires knowledge of basic
               cosmological parameters such as :math:`\\Omega_M`.
               For this reason, users must pass a minimal set
-              of :math:`\\Lambda` CDM cosmological parameters.
+              of :math:`\\Lambda`-CDM cosmological parameters.
 
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
@@ -921,57 +925,57 @@ class CosmologyCalculator(Cosmology):
         sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         background (:obj:`dict`): a dictionary describing the background
-            expansion. It must contain three mandatory entries: `'a'`: an
-            array of monotonically ascending scale-factor values. `'chi'`:
+            expansion. It must contain three mandatory entries: ``'a'``: an
+            array of monotonically ascending scale-factor values. ``'chi'``:
             an array containing the values of the comoving radial distance
-            (in units of Mpc) at the scale factor values stored in `a`.
-            '`h_over_h0`': an array containing the Hubble expansion rate at
-            the scale factor values stored in `a`, divided by its value
-            today (at `a=1`).
+            (in units of Mpc) at the scale factor values stored in ``a``.
+            '``h_over_h0``': an array containing the Hubble expansion rate at
+            the scale factor values stored in ``a``, divided by its value
+            today (at ``a=1``).
         growth (:obj:`dict`): a dictionary describing the linear growth of
             matter fluctuations. It must contain three mandatory entries:
-            `'a'`: an array of monotonically ascending scale-factor
-            values. `'growth_factor'`: an array containing the values of
+            ``'a'``: an array of monotonically ascending scale-factor
+            values. ``'growth_factor'``: an array containing the values of
             the linear growth factor :math:`D(a)` at the scale factor
-            values stored in `a`. '`growth_rate`': an array containing the
+            values stored in ``a``. '``growth_rate``': an array containing the
             growth rate :math:`f(a)\\equiv d\\log D/d\\log a` at the scale
-            factor values stored in `a`.
+            factor values stored in ``a``.
         pk_linear (:obj:`dict`): a dictionary containing linear power
             spectra. It must contain the following mandatory entries:
-            `'a'`: an array of scale factor values. `'k'`: an array of
+            ``'a'``: an array of scale factor values. ``'k'``: an array of
             comoving wavenumbers in units of inverse Mpc.
-            `'delta_matter:delta_matter'`: a 2D array of shape
-            `(n_a, n_k)`, where `n_a` and `n_k` are the lengths of
-            `'a'` and `'k'` respectively, containing the linear matter
+            ``'delta_matter:delta_matter'``: a 2D array of shape
+            ``(n_a, n_k)``, where ``n_a`` and ``n_k`` are the lengths of
+            ``'a'`` and ``'k'`` respectively, containing the linear matter
             power spectrum :math:`P(k,a)`. This dictionary may also
-            contain other entries with keys of the form `'q1:q2'`,
+            contain other entries with keys of the form ``'q1:q2'``,
             containing other cross-power spectra between quantities
-            `'q1'` and `'q2'`.
+            ``'q1'`` and ``'q2'``.
         pk_nonlin (:obj:`dict`): a dictionary containing non-linear
             power spectra. It must contain the following mandatory
-            entries: `'a'`: an array of scale factor values.
-            `'k'`: an array of comoving wavenumbers in units of
-            inverse Mpc. If `nonlinear_model` is `None`, it should also
-            contain `'delta_matter:delta_matter'`: a 2D array of
-            shape `(n_a, n_k)`, where `n_a` and `n_k` are the lengths
-            of `'a'` and `'k'` respectively, containing the non-linear
+            entries: ``'a'``: an array of scale factor values.
+            ``'k'``: an array of comoving wavenumbers in units of
+            inverse Mpc. If ``nonlinear_model`` is ``None``, it should also
+            contain ``'delta_matter:delta_matter'``: a 2D array of
+            shape ``(n_a, n_k)``, where ``n_a`` and ``n_k`` are the lengths
+            of ``'a'`` and ``'k'`` respectively, containing the non-linear
             matter power spectrum :math:`P(k,a)`. This dictionary may
-            also contain other entries with keys of the form `'q1:q2'`,
+            also contain other entries with keys of the form ``'q1:q2'``,
             containing other cross-power spectra between quantities
-            `'q1'` and `'q2'`.
+            ``'q1'`` and ``'q2'``.
         nonlinear_model (:obj:`str`, :obj:`dict` or `None`): model to
             compute non-linear power spectra. If a string, the associated
-            non-linear model will be applied to all entries in `pk_linear`
-            which do not appear in `pk_nonlin`. If a dictionary, it should
-            contain entries of the form `'q1:q2': model`, where `model`
+            non-linear model will be applied to all entries in ``pk_linear``
+            which do not appear in ``pk_nonlin``. If a dictionary, it should
+            contain entries of the form ``'q1:q2': model``, where ``model``
             is a string designating the non-linear model to apply to the
-            `'q1:q2'` power spectrum, which must also be present in
-            `pk_linear`. If `model` is `None`, this non-linear power
-            spectrum will not be calculated. If `nonlinear_model` is
-            `None`, no additional non-linear power spectra will be
-            computed. The only non-linear model supported is `'halofit'`,
+            ``'q1:q2'`` power spectrum, which must also be present in
+            ``pk_linear``. If ``model`` is ``None``, this non-linear power
+            spectrum will not be calculated. If ``nonlinear_model`` is
+            ``None``, no additional non-linear power spectra will be
+            computed. The only non-linear model supported is ``'halofit'``,
             corresponding to the "HALOFIT" transformation of
-            Takahashi et al. 2012 (arXiv:1208.2701).
+            `Takahashi et al. 2012 <https://arxiv.org/abs/1208.2701>`_.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is the same as in the base class
     """
