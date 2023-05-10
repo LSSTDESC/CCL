@@ -428,8 +428,8 @@ def test_tracer_chi_min_max():
 
 def test_zpower_raises():
     with pytest.raises(ValueError):
-        ccl.Tracer.from_zPower(COSMO, A=1., z_min=1.0,
-                               z_max=0.1, alpha=1.0)
+        ccl.Tracer.from_z_power(COSMO, A=1., z_min=1.0,
+                                z_max=0.1, alpha=1.0)
 
 
 def test_tracer_increase_sf():
