@@ -1,7 +1,7 @@
-"""The core functionality of CCL, including the core data types lives in this module.
-Its focus is :class:`Cosmology` class, which plays a central role, carrying the
-information on cosmological parameters and derived quantities needed in most of the
-calculations carried out by CCL.
+"""The core functionality of CCL, including the core data types lives in this
+odule. Its focus is :class:`Cosmology` class, which plays a central role,
+carrying the information on cosmological parameters and derived quantities
+needed in most of the calculations carried out by CCL.
 """
 __all__ = ("TransferFunctions", "MatterPowerSpectra",
            "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
@@ -850,8 +850,8 @@ def CosmologyVanillaLCDM(**kwargs):
     Arguments:
         **kwargs (dict): a dictionary of parameters passed as arguments
             to the :class:`Cosmology` constructor. It should not contain any of
-            the :math:`\\Lambda`-CDM parameters (`"Omega_c"`, `"Omega_b"`, `"n_s"`,
-            `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
+            the :math:`\\Lambda`-CDM parameters (`"Omega_c"`, `"Omega_b"`,
+            `"n_s"`, `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
     """
     p = {'Omega_c': 0.25,
          'Omega_b': 0.05,
