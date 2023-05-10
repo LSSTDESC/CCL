@@ -142,7 +142,9 @@ def halomod_power_spectrum(
         prof2 = prof
     if prof_2pt is None:
         prof_2pt = Profile2pt()
-
+    hmc._fix_profile_mass_def(prof)
+    hmc._fix_profile_mass_def(prof2
+                              )
     pk2d = cosmo.parse_pk(p_of_k_a)
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 

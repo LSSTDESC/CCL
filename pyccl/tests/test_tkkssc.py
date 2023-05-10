@@ -16,6 +16,8 @@ CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 
 NFW = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
 HOD = ccl.halos.HaloProfileHOD(concentration=CON)
+HOD_nogc = ccl.halos.HaloProfileHOD(concentration=CON)
+HOD_nogc.is_number_counts = False
 GNFW = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
 
 PKC = ccl.halos.Profile2pt()
@@ -127,3 +129,102 @@ def test_tkkssc_linear_bias_raises():
     """Test that it raises if the profile is not NFW."""
     with pytest.raises(TypeError):
         ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, HMC, prof=GNFW)
+
+
+def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
+                           normalize=False):
+    P_12 = b1 = b2 = np.zeros_like(k)
+    if prof1.is_number_counts or prof2.is_number_counts:
+        norm1 = 1 / prof1.get_normalization(COSMO, a, hmc=hmc)
+        norm2 = 1 / prof2.get_normalization(COSMO, a, hmc=hmc)
+        norm12 = 1
+        if prof1.is_number_counts or normalize:
+            norm12 *= norm1
+        if prof2.is_number_counts or normalize:
+            norm12 *= norm2
+
+        i11_1 = hmc.I_1_1(COSMO, k, a, prof1)
+        i11_2 = hmc.I_1_1(COSMO, k, a, prof2)
+        i02_12 = hmc.I_0_2(COSMO, k, a, prof1,
+                           prof_2pt=prof12_2pt, prof2=prof2)
+
+        pk = COSMO.linear_matter_power(k, a)
+        P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
+
+        if prof1.is_number_counts:
+            b1 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof1) * norm1
+        if prof2.is_number_counts:
+            b2 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof2) * norm2
+
+    return (b1 + b2) * P_12
+
+
+@pytest.mark.parametrize(
+    'prof,prof2,prof3,prof4,prof34_2pt',
+    [(NFW, NFW, NFW, NFW, None),
+     (HOD, NFW, NFW, NFW, None),
+     (HOD, HOD, NFW, NFW, None),
+     (HOD, HOD, HOD, NFW, None),
+     (NFW, NFW, HOD, HOD, None),
+     (HOD, NFW, HOD, HOD, None),
+     (HOD, HOD, NFW, HOD, None),
+     (HOD, None, NFW, None, None),
+     (HOD, None, None, None, None),
+     (HOD, HOD, None, None, None),
+     (NFW, NFW, None, None, None),  # as in benchmarks/test_covariances.py
+     (NFW, NFW, None, None, None),
+     (NFW, NFW, None, None, PKC),  # set a profile covariance
+     (HOD, HOD, HOD, HOD, None)])  # all NC
+def test_tkkssc_counterterms_gc(prof, prof2, prof3, prof4, prof34_2pt):
+    k_arr = KK
+    a_arr = np.array([0.3, 0.5, 0.7, 1.0])
+
+    # Tk's without clustering terms. Set is_number_counts=False for HOD profs.
+    # Ensure HOD profiles are normalized.
+    kwargs = dict(zip(["prof", "prof2", "prof3", "prof4", "prof34_2pt"],
+                      [prof, prof2, prof3, prof4, prof34_2pt]))
+    kwargs_nogc = kwargs.copy()
+    keys = list(kwargs.keys())
+    for k in keys:
+        v = kwargs[k]
+        if isinstance(v, ccl.halos.HaloProfileHOD):
+            kwargs_nogc[k] = HOD_nogc
+            normname = 'norm'+k
+            if k == 'prof':
+                normname = 'normprof1'
+            kwargs_nogc[normname] = True
+            kwargs[normname] = True
+    tkk_nogc = ccl.halos.halomod_Tk3D_SSC(COSMO, HMC,
+                                          lk_arr=np.log(k_arr), a_arr=a_arr,
+                                          **kwargs_nogc)
+    _, _, _, tkk_nogc_arrs = tkk_nogc.get_spline_arrays()
+    tk_nogc_12, tk_nogc_34 = tkk_nogc_arrs
+
+    # Tk's with clustering terms
+    tkk_gc = ccl.halos.halomod_Tk3D_SSC(COSMO, HMC,
+                                        lk_arr=np.log(k_arr), a_arr=a_arr,
+                                        **kwargs)
+    _, _, _, tkk_gc_arrs = tkk_gc.get_spline_arrays()
+    tk_gc_12, tk_gc_34 = tkk_gc_arrs
+
+    # Update the None's to their corresponding values
+    if kwargs['prof2'] is None:
+        kwargs['prof2'] = kwargs['prof']
+    if kwargs['prof3'] is None:
+        kwargs['prof3'] = kwargs['prof']
+    if kwargs['prof4'] is None:
+        kwargs['prof4'] = kwargs['prof2']
+
+    # Tk's of the clustering terms
+    tkc12 = []
+    tkc34 = []
+    for aa in a_arr:
+        tkc12.append(get_ssc_counterterm_gc(k_arr, aa, HMC, kwargs['prof'],
+                                            kwargs['prof2'], PKC))
+        tkc34.append(get_ssc_counterterm_gc(k_arr, aa, HMC, kwargs['prof3'],
+                                            kwargs['prof4'], PKC))
+    tkc12 = np.asarray(tkc12)
+    tkc34 = np.asarray(tkc34)
+
+    assert np.abs((tk_nogc_12 - tkc12) / tk_gc_12 - 1).max() < 1e-5
+    assert np.abs((tk_nogc_34 - tkc34) / tk_gc_34 - 1).max() < 1e-5

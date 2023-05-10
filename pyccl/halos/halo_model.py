@@ -113,8 +113,11 @@ class HMCalculator(CCLObject):
             k_min: Real = 1e-5
     ):
         # Initialize halo model ingredients.
-        self.mass_def, self.mass_function, self.halo_bias = MassDef.from_specs(
+        self.mass_def, *specs = MassDef.from_specs(
             mass_def, mass_function=mass_function, halo_bias=halo_bias)
+        if len(specs) != 2:
+            raise ValueError("Invalid mass function or halo bias.")
+        self.mass_function, self.halo_bias = specs
 
         self.precision = {
             'log10M_min': log10M_min, 'log10M_max': log10M_max, 'nM': nM,
@@ -134,6 +137,14 @@ class HMCalculator(CCLObject):
         # Cache last results for mass function and halo bias.
         self._cosmo_mf = self._cosmo_bf = None
         self._a_mf = self._a_bf = -1
+
+    def _fix_profile_mass_def(self, prof):
+        # TODO v3: remove this (in v3 all profiles have a mass_def).
+        # If profile has no mass definition assigned, assign one.
+        if prof.mass_def is None:
+            warnings.warn("In v3 all profiles will need an associated "
+                          "mass definition.", CCLDeprecationWarning)
+            prof.mass_def = self.mass_def
 
     def _integ_spline(self, fM, log10M):
         # Spline integrator
@@ -236,6 +247,7 @@ class HMCalculator(CCLObject):
         norm : float
             Profile normalization at the given scale factor.
         """
+        self._fix_profile_mass_def(prof)
         self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk0 = prof.fourier(cosmo, self.precision['k_min'], self._mass, a).T
@@ -356,6 +368,7 @@ class HMCalculator(CCLObject):
         I_0_1 : float or (nk,) numpy.ndarray
             Integral value.
         """
+        self._fix_profile_mass_def(prof)
         self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk = prof.fourier(cosmo, k, self._mass, a).T
@@ -395,6 +408,7 @@ class HMCalculator(CCLObject):
         I_1_1 : float or (nk,) numpy.ndarray
             Integral value.
         """
+        self._fix_profile_mass_def(prof)
         self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof.fourier(cosmo, k, self._mass, a).T
@@ -443,6 +457,8 @@ class HMCalculator(CCLObject):
         if prof2 is None:
             prof2 = prof
 
+        self._fix_profile_mass_def(prof)
+        self._fix_profile_mass_def(prof2)
         self._check_mass_def(prof, prof2)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
@@ -491,6 +507,8 @@ class HMCalculator(CCLObject):
         if prof2 is None:
             prof2 = prof
 
+        self._fix_profile_mass_def(prof)
+        self._fix_profile_mass_def(prof2)
         self._check_mass_def(prof, prof2)
         self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
@@ -559,6 +577,10 @@ class HMCalculator(CCLObject):
         if prof34_2pt is None:
             prof34_2pt = prof12_2pt
 
+        self._fix_profile_mass_def(prof)
+        self._fix_profile_mass_def(prof2)
+        self._fix_profile_mass_def(prof3)
+        self._fix_profile_mass_def(prof4)
         self._check_mass_def(prof, prof2, prof3, prof4)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk12 = prof12_2pt.fourier_2pt(

@@ -20,7 +20,7 @@ from typing import (TYPE_CHECKING, Callable, Iterable, Optional, Sequence,
 import numpy as np
 from numpy.typing import NDArray
 
-from . import CCLError, SplineParams, lib
+from . import CCLError, SplineParams, deprecated, lib
 
 if TYPE_CHECKING:
     from . import Cosmology
@@ -455,3 +455,21 @@ def _get_spline3d_arrays(gsl_spline, length: int) -> Tuple(NDArray[float]):
     check(status)
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))
+
+@deprecated
+def assert_warns(wtype, f, *args, **kwargs):
+    """Check that a function call `f(*args, **kwargs)` raises a warning of
+    type wtype.
+    Returns the output of `f(*args, **kwargs)` unless there was no warning,
+    in which case an AssertionError is raised.
+    """
+    import warnings
+    # Check that f() raises a warning, but not an error.
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        res = f(*args, **kwargs)
+    assert len(w) >= 1, "Expected warning was not raised."
+    assert issubclass(w[0].category, wtype), \
+        "Warning raised was the wrong type (got %s, expected %s)" % (
+            w[0].category, wtype)
+    return res

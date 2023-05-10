@@ -21,7 +21,7 @@ for a spin!
 
     # Define a binned galaxy number density curve as a function of redshift.
     z_n = np.linspace(0, 1, 500)
-    n = np.ones(z_n.shape)
+    n = np.ones_like(z_n)
 
     # Create objects to represent tracers of the weak lensing signal with this
     # number density and no intrinsic alignments.

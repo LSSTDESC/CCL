@@ -94,6 +94,7 @@ def halomod_mean_profile_1pt(
     :math:`\langle u(k,a|M) \rangle` is the halo profile as a function of
     scale, scale factor and halo mass.
     """
+    hmc._fix_profile_mass_def(prof)
     return _Ix1("I_0_1", cosmo, hmc, k, a, prof, normprof)
 
 
@@ -118,6 +119,7 @@ def halomod_bias_1pt(
     bias, and :math:`\langle u(k,a|M) \rangle` is the halo profile as a
     function of scale, scale factor and halo mass.
     """
+    hmc._fix_profile_mass_def(prof)
     return _Ix1("I_1_1", cosmo, hmc, k, a, prof, normprof)
 
 
