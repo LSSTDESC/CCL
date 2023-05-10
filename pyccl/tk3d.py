@@ -93,7 +93,7 @@ class Tk3D(CCLObject):
 
     .. automethod:: __call__
     """
-    from .base.repr_ import build_string_Tk3D as __repr__
+    from ._core.repr_ import build_string_Tk3D as __repr__
 
     @warn_api(reorder=['extrap_order_lok', 'extrap_order_hik', 'is_logt'])
     def __init__(self, *, a_arr, lk_arr, tkk_arr=None,

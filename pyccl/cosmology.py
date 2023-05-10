@@ -256,7 +256,7 @@ class Cosmology(CCLObject):
                                      "HMCode_logT_AGN": 7.8}}
 
     """ # noqa
-    from .base.repr_ import build_string_Cosmology as __repr__
+    from ._core.repr_ import build_string_Cosmology as __repr__
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_accuracy_params",)
 

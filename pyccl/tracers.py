@@ -33,8 +33,8 @@ import numpy as np
 from . import ccllib as lib
 from .pyutils import check
 from .errors import CCLWarning
-from .base.parameters import physical_constants
-from .base import CCLObject, UnlockInstance, unlock_instance, warn_api
+from ._core.parameters import physical_constants
+from ._core import CCLObject, UnlockInstance, unlock_instance, warn_api
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays, _get_spline2d_arrays)
 
@@ -217,7 +217,7 @@ class Tracer(CCLObject):
     A ``Tracer`` object will in reality be a list of different such
     tracers that get combined linearly when computing power spectra.
     """
-    from .base.repr_ import build_string_Tracer as __repr__
+    from ._core.repr_ import build_string_Tracer as __repr__
 
     def __init__(self):
         """By default this `Tracer` object will contain no actual
