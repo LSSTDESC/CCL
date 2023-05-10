@@ -21,7 +21,7 @@ def test_cibcl():
     hmc = ccl.halos.HMCalculator(mass_function=nM, halo_bias=bM,
                                  mass_def=mdef)
     pr = ccl.halos.HaloProfileCIBShang12(concentration=cM, nu_GHz=217,
-                                         Mmin=1E10)
+                                         Mmin=1E10, mass_def=mdef)
     pr.update_parameters(nu_GHz=217,
                          alpha=0.36,
                          T0=24.4,

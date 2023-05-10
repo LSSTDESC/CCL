@@ -456,6 +456,7 @@ def _get_spline3d_arrays(gsl_spline, length: int) -> Tuple(NDArray[float]):
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))
 
+
 @deprecated
 def assert_warns(wtype, f, *args, **kwargs):
     """Check that a function call `f(*args, **kwargs)` raises a warning of

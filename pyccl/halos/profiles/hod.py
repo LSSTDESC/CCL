@@ -9,14 +9,14 @@ import numpy as np
 from scipy.special import sici, erf
 
 from ... import warn_api, deprecate_attr
-from . import HaloProfileNumberCounts
+from . import HaloProfile
 
 if TYPE_CHECKING:
     from ... import Cosmology
     from .. import Concentration, HMCalculator, MassDef
 
 
-class HaloProfileHOD(HaloProfileNumberCounts):
+class HaloProfileHOD(HaloProfile):
     r"""Generic halo occupation distribution (HOD) halo profile describing the
     number density of galaxies.
 
@@ -99,6 +99,8 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         parameter is optional.
 
         .. versionadded:: 2.8.0
+    is_number_counts
+        Whether the profile represents galaxy overdensity.
 
     References
     ----------
@@ -108,7 +110,8 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
         "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0", "alpha_p", "fc_0",
         "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
-        "ns_independent", "mass_def", "concentration", "precision_fftlog",)
+        "_is_number_counts", "ns_independent", "mass_def", "concentration",
+        "precision_fftlog",)
     __getattr__ = deprecate_attr(pairs=[
         ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
         ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
@@ -135,7 +138,8 @@ class HaloProfileHOD(HaloProfileNumberCounts):
             bmax_0: Real = 1, bmax_p: Real = 0,
             a_pivot: Real = 1,
             ns_independent: bool = False,
-            mass_def: Optional[Union[str, MassDef]] = None
+            mass_def: Optional[Union[str, MassDef]] = None,
+            is_number_counts: bool = True
     ):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p
@@ -155,7 +159,8 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         self.bmax_p = bmax_p
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
-        super().__init__(mass_def=mass_def, concentration=concentration)
+        super().__init__(mass_def=mass_def, concentration=concentration,
+                         is_number_counts=is_number_counts)
 
     # TODO: Uncomment for CCLv3.
     # @update(names=[

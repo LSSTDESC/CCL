@@ -7,8 +7,6 @@ from .test_cclobject import check_eq_repr_hash
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
-M200 = ccl.halos.MassDef200c()
-M500c = ccl.halos.MassDef(500, 'critical')
 
 
 def test_HaloProfile_eq_repr_hash():
@@ -34,7 +32,7 @@ def test_HaloProfile_eq_repr_hash():
     assert check_eq_repr_hash(PCOV1, PCOV2, equal=False)
 
 
-def one_f(cosmo, M, a=1, mass_def=M200):
+def one_f(cosmo, M, a=1):
     return 1 if np.isscalar(M) else np.ones(M.size)
 
 
@@ -66,12 +64,11 @@ def smoke_assert_prof_real(profile, method='_real'):
 
 
 def test_profiles_equal():
-    M200m = ccl.halos.MassDef200m()
-    cm = ccl.halos.ConcentrationDuffy08(mass_def=M200m)
+    cm = ccl.halos.ConcentrationDuffy08(mass_def='200m')
     p1 = ccl.halos.HaloProfileHOD(concentration=cm, log10Mmin_0=12.)
 
     # different profile types
-    p2 = ccl.halos.HaloProfilePressureGNFW(mass_def=M200m)
+    p2 = ccl.halos.HaloProfilePressureGNFW(mass_def='200m')
     assert p1 != p2
 
     # equal profiles
@@ -79,7 +76,7 @@ def test_profiles_equal():
     assert p1 == p2
 
     # equivalent profiles
-    cm2 = ccl.halos.ConcentrationDuffy08(mass_def=M200m)
+    cm2 = ccl.halos.ConcentrationDuffy08(mass_def='200m')
     p2 = ccl.halos.HaloProfileHOD(concentration=cm2, log10Mmin_0=12.)
     assert p1 == p2
 
@@ -93,8 +90,7 @@ def test_profiles_equal():
     assert p1 != p2
 
     # different mass-concentration mass definition
-    M200c = ccl.halos.MassDef200c()
-    cm2 = ccl.halos.ConcentrationDuffy08(mass_def=M200c)
+    cm2 = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p2 = ccl.halos.HaloProfileHOD(concentration=cm2, log10Mmin_0=12.)
     assert p1 != p2
 
@@ -103,13 +99,16 @@ def test_profiles_equal():
     p2.update_precision_fftlog(**{"plaw_fourier": -2.0})
     assert p1 != p2
 
+    # different FFTLog type
+    assert p1.precision_fftlog != 1
+
 
 @pytest.mark.parametrize('prof_class',
                          [ccl.halos.HaloProfileNFW,
                           ccl.halos.HaloProfileHernquist,
                           ccl.halos.HaloProfileEinasto])
 def test_empirical_smoke(prof_class):
-    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
 
     if prof_class in [ccl.halos.HaloProfileNFW,
                       ccl.halos.HaloProfileHernquist]:
@@ -133,8 +132,9 @@ def test_empirical_smoke(prof_class):
 
 
 def test_cib_smoke():
-    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
-    p = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=217)
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
+    p = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=217,
+                                        mass_def='200c')
     beta_old = p.beta
     smoke_assert_prof_real(p, method='_real')
     smoke_assert_prof_real(p, method='_fourier')
@@ -150,9 +150,10 @@ def test_cib_smoke():
 
 
 def test_cib_2pt_raises():
-    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
-    p_cib = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=217)
-    p_tSZ = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
+    p_cib = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=217,
+                                            mass_def='200c')
+    p_tSZ = ccl.halos.HaloProfilePressureGNFW(mass_def='200c')
     p2pt = ccl.halos.Profile2ptCIB()
     with pytest.raises(TypeError):
         p2pt.fourier_2pt(COSMO, 0.1, 1E13, 1., p_tSZ)
@@ -161,7 +162,7 @@ def test_cib_2pt_raises():
 
 
 def test_einasto_smoke():
-    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p = ccl.halos.HaloProfileEinasto(concentration=c)
     for M in [1E14, [1E14, 1E15]]:
         alpha_from_cosmo = p._get_alpha(COSMO, M, 1)
@@ -177,7 +178,7 @@ def test_einasto_smoke():
 
 
 def test_gnfw_smoke():
-    p = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
+    p = ccl.halos.HaloProfilePressureGNFW(mass_def='200c')
     beta_old = p.beta
     smoke_assert_prof_real(p)
     p.update_parameters(mass_bias=0.7,
@@ -193,7 +194,7 @@ def test_gnfw_smoke():
 
 
 def test_gnfw_refourier():
-    p = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
+    p = ccl.halos.HaloProfilePressureGNFW(mass_def='200c')
     # Create Fourier template
     p._integ_interp()
     p_f1 = p.fourier(COSMO, 1., 1E13, 1)
@@ -205,7 +206,7 @@ def test_gnfw_refourier():
 
 def test_hod_smoke():
     prof_class = ccl.halos.HaloProfileHOD
-    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
 
     p = prof_class(concentration=c)
     smoke_assert_prof_real(p)
@@ -227,7 +228,7 @@ def test_hod_ns_independent(real_prof):
     def func(prof):
         return prof._real if real_prof else prof._fourier
 
-    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p1 = ccl.halos.HaloProfileHOD(concentration=c,
                                   log10Mmin_0=12.,
                                   ns_independent=False)
@@ -258,8 +259,8 @@ def test_hod_ns_independent(real_prof):
 
 
 def test_hod_2pt():
-    pbad = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
-    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    pbad = ccl.halos.HaloProfilePressureGNFW(mass_def='200c')
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     pgood = ccl.halos.HaloProfileHOD(concentration=c)
     pgood_b = ccl.halos.HaloProfileHOD(concentration=c)
     p2 = ccl.halos.Profile2ptHOD()
@@ -284,11 +285,11 @@ def test_hod_2pt():
 
     with pytest.raises(ValueError):
         p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood,
-                       prof2=pbad, mass_def=M200)
+                       prof2=pbad, mass_def=ccl.halos.MassDef(200, "critical"))
 
 
 def test_2pt_rcorr_smoke():
-    c = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p = ccl.halos.HaloProfileNFW(concentration=c)
     F0 = ccl.halos.Profile2pt().fourier_2pt(COSMO, 1., 1e13, 1., p)
     p2pt = ccl.halos.Profile2pt(r_corr=0)
@@ -312,9 +313,9 @@ def test_simple_smoke(prof_class):
 
     with pytest.warns(ccl.CCLDeprecationWarning):
         if prof_class == ccl.halos.HaloProfileGaussian:
-            p = prof_class(r_scale=r_s, rho0=one_f, mass_def=M200)
+            p = prof_class(r_scale=r_s, rho0=one_f, mass_def='200c')
         else:
-            p = prof_class(r_scale=r_s, tilt=one_f, mass_def=M200)
+            p = prof_class(r_scale=r_s, tilt=one_f, mass_def='200c')
     smoke_assert_prof_real(p)
 
 
@@ -324,7 +325,7 @@ def test_gaussian_accuracy():
 
     with pytest.warns(ccl.CCLDeprecationWarning):
         p = ccl.halos.HaloProfileGaussian(r_scale=one_f, rho0=one_f,
-                                          mass_def=M200)
+                                          mass_def='200c')
 
     k_arr = np.logspace(-3, 2, 1024)
     fk_arr = p.fourier(COSMO, k_arr, 1., 1.)
@@ -348,7 +349,7 @@ def test_projected_plaw_accuracy(alpha):
 
     with pytest.warns(ccl.CCLDeprecationWarning):
         p = ccl.halos.HaloProfilePowerLaw(r_scale=one_f, tilt=alpha_f,
-                                          mass_def=M200)
+                                          mass_def='200c')
     p.update_precision_fftlog(plaw_fourier=alpha)
 
     rt_arr = np.logspace(-3, 2, 1024)
@@ -374,7 +375,7 @@ def test_plaw_accuracy(alpha):
 
     with pytest.warns(ccl.CCLDeprecationWarning):
         p = ccl.halos.HaloProfilePowerLaw(r_scale=one_f, tilt=alpha_f,
-                                          mass_def=M200)
+                                          mass_def='200c')
     p.update_precision_fftlog(plaw_fourier=alpha)
 
     k_arr = np.logspace(-3, 2, 1024)
@@ -399,12 +400,12 @@ def test_nfw_accuracy(use_analytic):
     from scipy.special import sici
 
     tol = 1E-10 if use_analytic else 5E-3
-    cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p = get_nfw(real=True, fourier=use_analytic)(concentration=cM)
     M = 1E14
     a = 0.5
     c = cM(COSMO, M, a)
-    r_Delta = M200.get_radius(COSMO, M, a) / a
+    r_Delta = cM.mass_def.get_radius(COSMO, M, a) / a
     r_s = r_Delta / c
 
     def fk(k):
@@ -425,7 +426,7 @@ def test_nfw_accuracy(use_analytic):
 
 
 def test_nfw_f2r():
-    cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p1 = ccl.halos.HaloProfileNFW(concentration=cM)
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
@@ -434,7 +435,7 @@ def test_nfw_f2r():
 
     M = 1E14
     a = 0.5
-    r_Delta = M200.get_radius(COSMO, M, a) / a
+    r_Delta = cM.mass_def.get_radius(COSMO, M, a) / a
 
     r_arr = np.logspace(-2, 1, ) * r_Delta
     pr_1 = p1.real(COSMO, r_arr, M, a)
@@ -447,7 +448,7 @@ def test_nfw_f2r():
 
 @pytest.mark.parametrize('fourier_analytic', [True, False])
 def test_nfw_projected_accuracy(fourier_analytic):
-    cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     # Analytic projected profile
     p1 = ccl.halos.HaloProfileNFW(concentration=cM, truncated=False,
                                   projected_analytic=True)
@@ -466,7 +467,7 @@ def test_nfw_projected_accuracy(fourier_analytic):
 
 @pytest.mark.parametrize('fourier_analytic', [True, False])
 def test_nfw_cumul2d_accuracy(fourier_analytic):
-    cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     # Analytic cumul2d profile
     p1 = ccl.halos.HaloProfileNFW(concentration=cM, truncated=False,
                                   cumul2d_analytic=True)
@@ -485,7 +486,7 @@ def test_nfw_cumul2d_accuracy(fourier_analytic):
 
 def test_upd_fftlog_raises():
     # Verify that FFTLogParams is immutable unless changed in a control manner.
-    prof = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
+    prof = ccl.halos.HaloProfilePressureGNFW(mass_def='200c')
     new_params = {"hello_there": 0.}
     with pytest.raises(AttributeError):
         prof.update_precision_fftlog(**new_params)
@@ -499,13 +500,13 @@ def test_hernquist_accuracy(use_analytic):
     from scipy.special import sici
 
     tol = 1E-10 if use_analytic else 5E-3
-    cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p = ccl.halos.HaloProfileHernquist(concentration=cM,
                                        fourier_analytic=use_analytic)
     M = 1E14
     a = 0.5
     c = cM(COSMO, M, a)
-    r_Delta = M200.get_radius(COSMO, M, a) / a
+    r_Delta = cM.mass_def.get_radius(COSMO, M, a) / a
     r_s = r_Delta / c
 
     def fk(k):
@@ -528,7 +529,7 @@ def test_hernquist_accuracy(use_analytic):
 
 
 def test_hernquist_f2r():
-    cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p1 = ccl.halos.HaloProfileHernquist(concentration=cM)
     # We force p2 to compute the real-space profile
     # by FFT-ing the Fourier-space one.
@@ -540,7 +541,7 @@ def test_hernquist_f2r():
 
     M = 1E14
     a = 0.5
-    r_Delta = M200.get_radius(COSMO, M, a) / a
+    r_Delta = cM.mass_def.get_radius(COSMO, M, a) / a
 
     r_arr = np.logspace(-2, 1, ) * r_Delta
     pr_1 = p1.real(COSMO, r_arr, M, a)
@@ -553,7 +554,7 @@ def test_hernquist_f2r():
 
 @pytest.mark.parametrize('fourier_analytic', [True, False])
 def test_hernquist_projected_accuracy(fourier_analytic):
-    cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     # Analytic projected profile
     p1 = ccl.halos.HaloProfileHernquist(concentration=cM, truncated=False,
                                         projected_analytic=True)
@@ -573,7 +574,7 @@ def test_hernquist_projected_accuracy(fourier_analytic):
 
 @pytest.mark.parametrize('fourier_analytic', [True, False])
 def test_hernquist_cumul2d_accuracy(fourier_analytic):
-    cM = ccl.halos.ConcentrationDuffy08(mass_def=M200)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     # Analytic cumul2d profile
     p1 = ccl.halos.HaloProfileHernquist(concentration=cM, truncated=False,
                                         cumul2d_analytic=True)
@@ -595,3 +596,77 @@ def test_HaloProfile_abstractmethods():
     # either `_real` or `_fourier` have not been defined.
     with pytest.raises(TypeError):
         ccl.halos.HaloProfile()
+
+
+def test_IA_update():
+    cM = ccl.halos.ConcentrationDuffy08(mass_def="200m")
+    p = ccl.halos.SatelliteShearHOD(concentration=cM, mass_def="200m")
+    for attr in ['a1h', 'b', 'log10Mmin_0', 'log10Mmin_p',
+                 'log10M0_0', 'log10M0_p', 'log10M1_0', 'log10M1_p',
+                 'siglnM_0', 'siglnM_p', 'alpha_0', 'alpha_p',
+                 'bg_0', 'bg_p', 'bmax_0', 'bmax_p', 'a_pivot',
+                 'r_min', 'N_r', 'N_jn']:
+        p.update_parameters(**{attr: -123})
+        assert getattr(p, attr) == -123
+    # Special cases
+    p.update_parameters(l_max=5)
+    assert p.l_max == 5
+    p.update_parameters(ns_independent=True)
+    assert p.ns_independent
+
+
+def test_IA_profile():
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.83, n_s=0.96)
+    k_arr = np.geomspace(1E-3, 1e3, 256)  # For evaluating
+    cM = ccl.halos.ConcentrationDuffy08(mass_def="200m")
+
+    # l_max too low
+    with pytest.warns(ccl.CCLWarning):
+        ccl.halos.SatelliteShearHOD(concentration=cM, l_max=1,
+                                    mass_def="200m")
+
+    # l_max too high
+    with pytest.warns(ccl.CCLWarning):
+        ccl.halos.SatelliteShearHOD(concentration=cM, l_max=14,
+                                    mass_def="200m")
+
+    # l_max odd
+    assert (ccl.halos.SatelliteShearHOD(concentration=cM, mass_def="200m",
+                                        l_max=7).l_max) % 2 == 0
+
+    # Run with b!={0,2}
+    assert (ccl.halos.SatelliteShearHOD(
+        concentration=cM, b=-1.9, mass_def="200m",
+        l_max=12)._angular_fl).shape == (6, 1)
+
+    # Testing FFTLog accuracy vs simps and spline method.
+    s_g_HOD1 = ccl.halos.SatelliteShearHOD(concentration=cM,
+                                           mass_def="200m")
+    s_g_HOD2 = ccl.halos.SatelliteShearHOD(concentration=cM,
+                                           mass_def="200m",
+                                           integration_method='simpson')
+    s_g_HOD3 = ccl.halos.SatelliteShearHOD(concentration=cM,
+                                           mass_def="200m",
+                                           integration_method='spline')
+    s_g1 = s_g_HOD1._usat_fourier(cosmo, k_arr, 1e13, 1.)
+    s_g2 = s_g_HOD2._usat_fourier(cosmo, k_arr, 1e13, 1.)
+    s_g3 = s_g_HOD3._usat_fourier(cosmo, k_arr, 1e13, 1.)
+    assert np.all(np.abs((s_g1 - s_g2) / s_g2)) > 0.05
+    assert np.all(np.abs((s_g3 - s_g2) / s_g3)) > 0.05
+
+
+def test_prefactor():
+    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
+                          sigma8=0.83, n_s=0.96)
+    cM = ccl.halos.ConcentrationDuffy08(mass_def="200m")
+    nM = ccl.halos.MassFuncTinker08(mass_def="200m")
+    bM = ccl.halos.HaloBiasTinker10(mass_def="200m")
+    hmc = ccl.halos.HMCalculator(mass_function=nM,
+                                 halo_bias=bM, mass_def="200m")
+
+    p = ccl.halos.HaloProfilePressureGNFW(mass_def="200m")  # a simple profile
+    assert np.all(np.abs(p.get_normalization(cosmo, 1., hmc=hmc)-1.0 < 1e-10))
+
+    p = ccl.halos.SatelliteShearHOD(concentration=cM, mass_def="200m")
+    assert p.get_normalization(cosmo, 1., hmc=hmc) > 0

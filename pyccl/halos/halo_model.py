@@ -456,6 +456,8 @@ class HMCalculator(CCLObject):
         """
         if prof2 is None:
             prof2 = prof
+        self._fix_profile_mass_def(prof)
+        self._fix_profile_mass_def(prof2)
 
         self._fix_profile_mass_def(prof)
         self._fix_profile_mass_def(prof2)
@@ -506,6 +508,8 @@ class HMCalculator(CCLObject):
         """
         if prof2 is None:
             prof2 = prof
+        self._fix_profile_mass_def(prof)
+        self._fix_profile_mass_def(prof2)
 
         self._fix_profile_mass_def(prof)
         self._fix_profile_mass_def(prof2)

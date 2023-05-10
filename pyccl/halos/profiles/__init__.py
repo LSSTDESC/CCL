@@ -13,5 +13,6 @@ from .einasto import *
 from .gaussian import *
 from .hernquist import *
 from .hod import *
+from .ia import *
 from .powerlaw import *
 from .pressure_gnfw import *

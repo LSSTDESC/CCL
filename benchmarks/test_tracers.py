@@ -27,7 +27,6 @@ def set_up():
     cosmo = ccl.Cosmology(Omega_c=0.30, Omega_b=0.00, Omega_g=0, Omega_k=0,
                           h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,
                           w0=-1, wa=0, transfer_function='bbks',
-                          mass_function='tinker',
                           matter_power_spectrum='linear')
 
     ccl.physical_constants.reload()

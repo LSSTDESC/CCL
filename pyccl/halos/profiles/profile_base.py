@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-__all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
-           "HaloProfilePressure", "HaloProfileCIB",)
+__all__ = ("HaloProfile", "HaloProfileMatter", "HaloProfilePressure",
+           "HaloProfileCIB",)
 
 import warnings
 from numbers import Real
@@ -39,6 +39,8 @@ class HaloProfile(CCLObject):
     concentration
         Mass-concentration relation, used to calculate the scale radius in
         some halo profiles.
+    is_number_counts
+        Whether the profile represents galaxy overdensity.
 
     Raises
     ------
@@ -60,7 +62,8 @@ class HaloProfile(CCLObject):
             self,
             *,  # TODO: Move mass_def to the beginning of the docs in CCLv3.
             mass_def: Optional[str, MassDef] = None,
-            concentration: Optional[str, Concentration] = None
+            concentration: Optional[str, Concentration] = None,
+            is_number_counts: bool = False
     ):
         # Verify that profile can be initialized.
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
@@ -68,11 +71,10 @@ class HaloProfile(CCLObject):
             raise TypeError(f"Can't instantiate {name} with no "
                             "_real or _fourier implementation.")
 
+        self.is_number_counts = is_number_counts
+
         # Initialize FFTLog.
         self.precision_fftlog = FFTLogParams()
-
-        # TODO: Remove for CCLv3.
-        self._is_number_counts = isinstance(self, HaloProfileNumberCounts)
 
         if (mass_def, concentration) == (None, None):
             warnings.warn(
@@ -92,12 +94,10 @@ class HaloProfile(CCLObject):
 
     @property
     def is_number_counts(self) -> bool:
-        # TODO: Remove for CCLv3.
         return self._is_number_counts
 
     @is_number_counts.setter
     def is_number_counts(self, value):
-        # TODO: Remove for CCLv3.
         with self.unlock():
             self._is_number_counts = value
 
@@ -608,12 +608,13 @@ class HaloProfile(CCLObject):
 
         return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 
-    def _fftlog_wrap(self, cosmo, k, M, a,
+    def _fftlog_wrap(self, cosmo, k, M, a, *,
                      fourier_out=False,
-                     large_padding=True):
+                     large_padding=True,
+                     ell=0):
         # This computes the 3D Hankel transform
-        #  ρ(k) = 4π ∫ dr r^2 ρ(r) j_0(k r), if fourier_out is False;
-        #  ρ(r) = 1/(2π^2) ∫ dk k^2 ρ(k) j_0(k r), if fourier_out is True.
+        #  ρ(k) = 4π ∫ dr r^2 ρ(r) j_0(k r), if fourier_out is True;
+        #  ρ(r) = 1/(2π^2) ∫ dk k^2 ρ(k) j_0(k r), if fourier_out is False.
 
         # Select which profile should be the input
         p_func = self._real if fourier_out else self._fourier
@@ -642,7 +643,7 @@ class HaloProfile(CCLObject):
 
         # Compute Fourier profile through fftlog
         k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
-                                               3, 0, plaw_index)
+                                               3, ell, plaw_index)
         lk_arr = np.log(k_arr)
 
         for im, p_k_arr in enumerate(p_fourier_M):
@@ -721,10 +722,6 @@ class HaloProfile(CCLObject):
         if np.ndim(M) == 0:
             sig_r_t_out = np.squeeze(sig_r_t_out, axis=0)
         return sig_r_t_out
-
-
-class HaloProfileNumberCounts(HaloProfile):
-    """Base for number counts halo profiles."""
 
 
 class HaloProfileMatter(HaloProfile):
