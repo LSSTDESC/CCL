@@ -19,7 +19,7 @@ def mass2radius_lagrangian(cosmo, M):
     the mass of the halo assuming a homogeneous Universe.
 
     .. math::
-        r = \\left(\\frac{3\\,M}{4\\pi\\,\\rho_{M,0}}\\right)^{1/3}
+        R = \\left(\\frac{3\\,M}{4\\pi\\,\\rho_{M,0}}\\right)^{1/3}
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.

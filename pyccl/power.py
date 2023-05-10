@@ -13,10 +13,10 @@ def linear_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): Wavenumber; Mpc^-1.
+        k (float or array_like): Wavenumber; :math:`{\\rm Mpc}^{-1}`.
         a (float or array_like): Scale factor.
         p_of_k_a (str): string specifying the power spectrum to
-            compute (which should be stored in `cosmo`). Defaults to
+            compute (which should be stored in ``cosmo``). Defaults to
             the linear matter power spectrum.
 
     Returns:
@@ -31,10 +31,10 @@ def nonlin_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): Wavenumber; Mpc^-1.
+        k (float or array_like): Wavenumber; :math:`{\\rm Mpc}^{-1}`.
         a (float or array_like): Scale factor.
         p_of_k_a (str): string specifying the power spectrum to
-            compute (which should be stored in `cosmo`). Defaults to
+            compute (which should be stored in ``cosmo``). Defaults to
             the non-linear matter power spectrum.
 
     Returns:
@@ -44,40 +44,44 @@ def nonlin_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
 
 def linear_matter_power(cosmo, k, a):
-    """The linear matter power spectrum; Mpc^3.
+    """The linear matter power spectrum
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): Wavenumber; Mpc^-1.
+        k (float or array_like): Wavenumber; :math:`{\\rm Mpc}^{-1}`.
         a (float or array_like): Scale factor.
 
     Returns:
-        float or array_like: Linear matter power spectrum; Mpc^3.
+        float or array_like: Linear matter power spectrum;
+        :math:`{\\rm Mpc}^3`.
     """
     return cosmo.linear_power(k, a, p_of_k_a=DEFAULT_POWER_SPECTRUM)
 
 
 def nonlin_matter_power(cosmo, k, a):
-    """The nonlinear matter power spectrum; Mpc^3.
+    """The nonlinear matter power spectrum
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): Wavenumber; Mpc^-1.
+        k (float or array_like): Wavenumber; :math:`{\\rm Mpc}^{-1}`.
         a (float or array_like): Scale factor.
 
     Returns:
-        float or array_like: Nonlinear matter power spectrum; Mpc^3.
+        float or array_like: Nonlinear matter power spectrum;
+        :math:`{\\rm Mpc}^3`.
     """
     return cosmo.nonlin_power(k, a, p_of_k_a=DEFAULT_POWER_SPECTRUM)
 
 
 def sigmaM(cosmo, M, a):
-    """Root mean squared variance for the given halo mass of the linear power
-    spectrum; Msun.
+    """RMS on the scale of a halo of mass :math:`M`. Calculated
+    as :math:`\\sigma_R` (see :func:`sigmaR`) with :math:`R` being
+    the Lagrangian radius of a halo of mass :math:`M` (see
+    :func:`~pyccl.halos.massdef.mass2radius_lagrangian`).
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        M (float or array_like): Halo masses; Msun.
+        M (float or array_like): Halo masses.
         a (float): scale factor.
 
     Returns:
@@ -97,20 +101,25 @@ def sigmaM(cosmo, M, a):
 
 @warn_api
 def sigmaR(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
-    """RMS variance in a top-hat sphere of radius R in Mpc.
+    """RMS of the matter overdensity a top-hat sphere of radius :math:`R`.
+
+    .. math::
+        \\sigma_R^2(z)=\\frac{1}{2\\pi^2}\\int dk\\,k^2\\,P(k,z)\\,
+        |W(kR)|^2,
+
+    with :math:`W(x)=(3\\sin(x)-x\\cos(x))/x^3`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         R (float or array_like): Radius; Mpc.
-        a (float): optional scale factor; defaults to a=1
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+        a (float): optional scale factor.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): power spectrum
             to integrate. If a string, it must correspond to one of the
-            non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`).
+            linear power spectra stored in ``cosmo`` (e.g.
+            ``'delta_matter:delta_matter'``).
 
     Returns:
-        float or array_like: RMS variance in the density field in top-hat \
-            sphere; Mpc.
+        float or array_like: :math:`\\sigma_R`.
     """
     psp = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
     status = 0
@@ -124,21 +133,24 @@ def sigmaR(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
 @warn_api
 def sigmaV(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
-    """RMS variance in the displacement field in a top-hat sphere of radius R.
-    The linear displacement field is the gradient of the linear density field.
+    """RMS of the linear displacement field in a top-hat sphere of radius R.
+
+    .. math::
+        \\sigma_V^2(z)=\\frac{1}{6\\pi^2}\\int dk\\,P(k,z)\\,|W(kR)|^2,
+
+    with :math:`W(x)=(3\\sin(x)-x\\cos(x))/x^3`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         R (float or array_like): Radius; Mpc.
-        a (float): optional scale factor; defaults to a=1
+        a (float): optional scale factor.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
-            non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`).
+            linear power spectra stored in ``cosmo`` (e.g.
+            ``'delta_matter:delta_matter'``).
 
     Returns:
-        sigmaV (float or array_like): RMS variance in the displacement field \
-            in top-hat sphere.
+        float or array_like: :math:`\\sigma_V` (:math:`{\\rm Mpc}`).
     """
     psp = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
     status = 0
@@ -152,20 +164,19 @@ def sigmaV(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
 @warn_api
 def sigma8(cosmo, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
-    """RMS variance in a top-hat sphere of radius 8 Mpc/h.
+    """RMS variance in a top-hat sphere of radius :math:`8\\,{\\rm Mpc}/h`,
+    (with the value of :math:`h` extracted from ``cosmo``) at :math:`z=0`.
 
-    .. note:: 8 Mpc/h is rescaled based on the chosen value of the Hubble
-              constant within `cosmo`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
-            non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`).
+            linear power spectra stored in ``cosmo`` (e.g.
+            ``'delta_matter:delta_matter'``).
 
     Returns:
-        float: RMS variance in top-hat sphere of radius 8 Mpc/h.
+        float: :math:`\\sigma_8`.
     """
     sig8 = cosmo.sigmaR(8/cosmo["h"], p_of_k_a=p_of_k_a)
     if np.isnan(cosmo["sigma8"]):
@@ -175,11 +186,12 @@ def sigma8(cosmo, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
 @warn_api
 def kNL(cosmo, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
-    """Scale for the non-linear cut.
+    r"""Non-linear scale :math:`k_{\rm NL}`. Calculated based on Lagrangian
+    perturbation theory as the inverse of the rms of the displacement
+    field, i.e.:
 
-    .. note:: k_NL is calculated based on Lagrangian perturbation theory as the
-              inverse of the variance of the displacement field, i.e.
-              k_NL = 1/sigma_eta = [1/(6 pi^2) * int P_L(k) dk]^{-1/2}.
+    .. math::
+        k_{\rm NL}(z) = \left[\frac{1}{6\pi^2} \int dk\,P_L(k,z)\right]^{-1/2}.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
@@ -187,10 +199,10 @@ def kNL(cosmo, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`).
+            ``'delta_matter:delta_matter'``).
 
     Returns:
-        float or array-like: Scale of non-linear cut-off; Mpc^-1.
+        float or array-like: :math:`k_{\\rm NL}`.
     """
     psp = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
     status = 0
