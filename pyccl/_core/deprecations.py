@@ -1,7 +1,7 @@
 """
-=============================================
-Deprecations (:mod:`pyccl.base.deprecations`)
-=============================================
+==============================================
+Deprecations (:mod:`pyccl._core.deprecations`)
+==============================================
 
 Functionality related to deprecated syntax.
 """

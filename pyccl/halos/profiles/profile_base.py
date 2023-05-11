@@ -40,7 +40,10 @@ class HaloProfile(CCLObject):
         Mass-concentration relation, used to calculate the scale radius in
         some halo profiles.
     is_number_counts
-        Whether the profile represents galaxy overdensity.
+        Whether the profile represents source-count overdensities. If True, it
+        is normalized by the mean number density within their survey window
+        function. This must be propagated when estimated super-sample effects
+        in the covariance matrix.
 
     Raises
     ------

@@ -421,6 +421,11 @@ def growth_factor(
 ) -> Union[float, NDArray[float]]:
     """Growth factor, :math:`D(a)`.
 
+    .. warning::
+
+        CCL is not able to compute the scale-dependent growth factor for
+        cosmologies with massive neutrinos.
+
     Arguments
     ---------
     cosmo
@@ -442,6 +447,11 @@ def growth_factor_unnorm(
         a: Union[Real, NDArray[Real]],
 ) -> Union[float, NDArray[float]]:
     """Unnormalized growth factor.
+
+    .. warning::
+
+        CCL is not able to compute the scale-dependent growth factor for
+        cosmologies with massive neutrinos.
 
     Arguments
     ---------
@@ -470,6 +480,11 @@ def growth_rate(
     .. math::
 
         \frac{{\rm d}\ln{D(a)}}{{\rm d}\ln{a}}.
+
+    .. warning::
+
+        CCL is not able to compute the scale-dependent growth factor for
+        cosmologies with massive neutrinos.
 
     Arguments
     ---------

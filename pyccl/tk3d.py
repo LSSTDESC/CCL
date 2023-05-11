@@ -30,8 +30,8 @@ class Tk3D(CCLObject):
     **Typical Use**
 
     Store isotropized connected trispectra, i.e. functions of 3 variables of
-    the form :math:`T(k_1, k_2, a)`, where  :math:`k_i` are wave vector moduli
-    and :math:`a` is the scale factor.
+    the form :math:`T(k_1, k_2, a)`, where  :math:`k_i` are wavenumbers and
+    :math:`a` is the scale factor.
 
     The function may be provided as a 3-D array (one dimension per variable)
     or as two 2-D arrays corresponding to functions :math:`f_i(k,a)` such that
@@ -93,7 +93,7 @@ class Tk3D(CCLObject):
         interpolation boundaries in :math:`k`. Extrapolated in linear- or
         log-scale, depending on `is_logt`.
     """
-    from .base.repr_ import build_string_Tk3D as __repr__
+    from ._core.repr_ import build_string_Tk3D as __repr__
     tsp: lib.f3d_t
     """The associated C-level f3d struct."""
 

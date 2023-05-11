@@ -21,12 +21,13 @@ class HaloProfileNFW(HaloProfileMatter):
 
        \rho(r) = \frac{\rho_0} {\frac{r}{r_s} \left(1+\frac{r}{r_s} \right)^2},
 
-    where :math:`r_s` is related to the spherical overdensity halo radius
-    :math:`R_\Delta(M)` through the concentration parameter :math:`c(M)` as
+    where :math:`r_s` is related to the comoving spherical overdensity halo
+    radius :math:`r_\Delta(M)` through the concentration parameter :math:`c(M)`
+    as
 
     .. math::
 
-       R_\Delta(M) = c(M) \, r_s
+       r_\Delta(M) = c(M) \, r_s
 
     and the normalization :math:`\rho_0` is
 
@@ -34,7 +35,7 @@ class HaloProfileNFW(HaloProfileMatter):
 
        \rho_0 = \frac{M}{4\pi \, r_s^3 \, [\log(1+c) - c/(1+c)]}
 
-    By default, this profile is truncated at :math:`r = R_\Delta(M)`.
+    By default, this profile is truncated at :math:`r = r_\Delta(M)`.
 
     Parameters
     ----------
@@ -47,7 +48,7 @@ class HaloProfileNFW(HaloProfileMatter):
     cumul2d_analytic
         If True, compute the 2-D cumulative surface density analytically.
     truncated
-        If True, truncate the profile at :math:`r = R_\Delta`.
+        If True, truncate the profile at :math:`r = r_\Delta`.
     mass_def
         Halo mass definition. If `concentration` is instantiated, this
         parameter is optional.

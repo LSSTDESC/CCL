@@ -1,7 +1,7 @@
 """
-===================================================
-Parameters Base (:mod:`pyccl.base.parameters_base`)
-===================================================
+====================================================
+Parameters Base (:mod:`pyccl._core.parameters_base`)
+====================================================
 
 Base class for all kinds of parameters handled by CCL.
 """

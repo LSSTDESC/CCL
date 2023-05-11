@@ -1,7 +1,7 @@
 """
-========================================
-Baryons (:mod:`pyccl.base.baryons_base`)
-========================================
+===========================================
+Baryons (:mod:`pyccl.baryons.baryons_base`)
+===========================================
 
 Abstract base class for models that add baryonic effects to power spectra.
 """

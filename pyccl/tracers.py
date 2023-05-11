@@ -1,9 +1,37 @@
-"""
+r"""
 ==============================
 Tracers (:mod:`pyccl.tracers`)
 ==============================
 
 Tracers of the large-scale structure.
+
+Tracers represent projected quantities which can be cross-correlated to compute
+angular power spectra (see :func:`~pyccl.cells.angular_cl`). In the most
+general case, the angular power spectrum between two tracers is given by
+
+.. math::
+
+    C^{\alpha\beta}_\ell = \frac{2}{\pi} \int {\rm d}\chi_1 \, {\rm d}\chi_2 \,
+    {\rm d}k \, k^2 \, P_{\alpha\beta}(k, \chi_1, \chi_2) \,
+    \Delta^\alpha_\ell(k, \chi_1) \, \Delta^\beta_\ell(k, \chi_2),
+
+where :math:`P_{\alpha\beta}` is a generalized power spectrum (see
+:class:`~pyccl.pk2d.Pk2D`), and :math:`\Delta^\alpha_\ell(k,\chi)` is the sum
+of different contributions associated to tracer :math:`\alpha`, where every
+contribution takes the form
+
+.. math::
+
+    \Delta^\alpha_\ell(k, \chi) = f^\alpha_\ell \, W_\alpha(\chi) \,
+    T_\alpha(k, \chi) \, j^{(n_\alpha)}_\ell(k\chi).
+
+Here, :math:`f^\alpha_\ell` is an :math:`\ell`-dependent *prefactor*,
+:math:`W_\alpha(\chi)` is the *radial kernel*, :math:`T_\alpha(k,\chi)` is
+the *transfer function*, and :math:`j^{(n)}_\ell(x)` is a generalized version
+of the *spherical Bessel functions*.
+
+Descriptions of each of these ingredients, and how to implement generalised
+tracers, can be found in the documentation of :class:`Tracer`.
 """
 
 from __future__ import annotations
@@ -21,8 +49,8 @@ from numpy.typing import NDArray
 
 from . import ccllib as lib
 from .errors import CCLWarning
-from .base.parameters import physical_constants
-from .base import CCLObject, warn_api
+from ._core.parameters import physical_constants
+from ._core import CCLObject, warn_api
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn,
                       _get_spline1d_arrays, _get_spline2d_arrays, check)
 
@@ -271,7 +299,7 @@ class Tracer(CCLObject):
     combined to calculate their total imprint on the power spectrum. Refer to
     Sec. 4.9 of the CCL note for details.
     """
-    from .base.repr_ import build_string_Tracer as __repr__
+    from ._core.repr_ import build_string_Tracer as __repr__
 
     def __init__(self):
         # Do nothing, just initialize list of tracers
@@ -740,7 +768,7 @@ class Tracer(CCLObject):
         self._trc.append(_check_returned_tracer(ret))
 
     @classmethod
-    def from_zPower(
+    def from_z_Power(
             cls,
             cosmo: Cosmology,
             *,
@@ -832,8 +860,15 @@ def NumberCountsTracer(
         has_rsd: bool,
         n_samples: int = 256
 ) -> NzTracer:
-    """Galaxy clustering tracer with linear scale-independent bias, including
+    r"""Galaxy clustering tracer with linear scale-independent bias, including
     redshift-space distortions and magnification.
+
+    .. note::
+
+        For redshift-space distortions, the current implementation assumes
+        linear, scale-independent growth, which is only generally true for
+        :math:`\Lambda \rm CDM` and on large scales (especially when
+        considering a broad :math:`N(z)`),
 
     Arguments
     ---------
@@ -936,8 +971,8 @@ def WeakLensingTracer(
         tracer will not have intrinsic alignments.
     use_A_ia
         Whether to use the conventional IA normalization. If False, use the raw
-        input amplitude (which is usually :math:`1`) for use with PT IA
-        modeling.
+        input amplitude (which is usually :math:`1`) for use with perturbation
+        theory IA modeling.
     n_samples
         Number of eqispaced radial distance samples for the magnification
         lensing kernel. O(100) is usually enough, as the kernel is smooth.
@@ -1062,7 +1097,7 @@ def tSZTracer(
     """
     # This is \sigma_T / (m_e * c^2)
     prefac = 4.01710079e-06
-    return Tracer.from_zPower(cosmo, A=prefac, alpha=1, z_min=0.,
+    return Tracer.from_z_power(cosmo, A=prefac, alpha=1, z_min=0.,
                               z_max=z_max, n_chi=n_chi)
 
 
@@ -1097,7 +1132,7 @@ def CIBTracer(
     n_chi
         Number of intervals in comoving radial distance to sample the kernel.
     """
-    return Tracer.from_zPower(cosmo, A=1.0, alpha=1, z_min=z_min,
+    return Tracer.from_z_power(cosmo, A=1.0, alpha=1, z_min=z_min,
                               z_max=z_max, n_chi=n_chi)
 
 

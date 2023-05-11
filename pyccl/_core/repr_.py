@@ -1,7 +1,7 @@
 """
-=========================================
-Representations (:mod:`pyccl.base.repr_`)
-=========================================
+==========================================
+Representations (:mod:`pyccl._core.repr_`)
+==========================================
 
 Specialized representation strings for complicated CCL objects.
 """

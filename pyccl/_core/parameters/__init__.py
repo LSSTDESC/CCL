@@ -1,7 +1,7 @@
 """
-=========================================
-Parameters (:mod:`pyccl.base.parameters`)
-=========================================
+==========================================
+Parameters (:mod:`pyccl._core.parameters`)
+==========================================
 
 Definitions of physical constants, accuracy parameters, and object-specific
 parameter structures.

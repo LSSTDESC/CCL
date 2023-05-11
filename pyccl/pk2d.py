@@ -100,7 +100,7 @@ class Pk2D(CCLObject):
 
         .. deprecated:: 2.8.0
     """
-    from .base.repr_ import build_string_Pk2D as __repr__
+    from ._core.repr_ import build_string_Pk2D as __repr__
     psp: lib.f2d_t
     """The associated C-level `f2d` struct."""
 

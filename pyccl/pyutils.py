@@ -271,7 +271,7 @@ def resample_array(
     extrap_lo, extrap_hi
         Extrapolation type, if `x_out` is outside of the range of `x_in`.
         Available options in
-        :class:`~pyccl.base.parameters.fftlog_params.ExtrapolationMethods`.
+        :class:`~pyccl._core.parameters.fftlog_params.ExtrapolationMethods`.
     fill_value_lo, fill_value_hi
         Constant value to fill out-of-bounds if `extrap_xx` is ``'constant'``.
 

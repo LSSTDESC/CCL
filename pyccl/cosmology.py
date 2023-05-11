@@ -190,7 +190,7 @@ class Cosmology(CCLObject):
     """Stores the cosmological parameters, and associated data.
 
     A list of the cosmological parameters stored in new instances of this class
-    lives in :class:`~pyccl.base.parameters.cosmology_params.CosmologyParams`
+    lives in :class:`~pyccl._core.parameters.cosmology_params.CosmologyParams`
     Note that only a subset of these parameters exist in the signature of
     :class:`~Cosmology`. The rest are calculated during initialization.
 
@@ -256,7 +256,7 @@ class Cosmology(CCLObject):
           :py:data:`~pyccl.cosmology.emulator_neutrinos_types`.
     """
     # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
-    from .base.repr_ import build_string_Cosmology as __repr__
+    from ._core.repr_ import build_string_Cosmology as __repr__
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_gsl_params", "_spline_params",)
     cosmo: lib.cosmology
@@ -920,7 +920,7 @@ class CosmologyCalculator(Cosmology):
 
             * ``'a'`` - Monotonically increasing array of scale factor,
             * ``'k'`` - Comoving wavenumber (in :math:`\rm Mpc^{-1}`),
-            * :py:data:`~pyccl.base.parameters.cosmology_params.\
+            * :py:data:`~pyccl._core.parameters.cosmology_params.\
               DEFAULT_POWER_SPECTRUM` - Array-like `(na, nk)` with the linear
               matter power spectrum, :math:`P_{\rm L}(k, a)` (in
               :math:`\rm Mpc^3`).
@@ -932,7 +932,7 @@ class CosmologyCalculator(Cosmology):
 
             * ``'a'`` - Monotonically increasing array of scale factor,
             * ``'k'`` - Comoving wavenumber (in :math:`\rm Mpc^{-1}`),
-            * :py:data:`~pyccl.base.parameters.cosmology_params.\
+            * :py:data:`~pyccl._core.parameters.cosmology_params.\
               DEFAULT_POWER_SPECTRUM` - If `nonlinear_model` is not specified,
               array-like `(na, nk)` with the non-linear matter power spectrum,
               :math:`P_{\rm NL}(k, a)` (in :math:`\rm Mpc^3`).

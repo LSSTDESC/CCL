@@ -284,7 +284,19 @@ def sigmaV(
 ):
     r"""RMS variance in the displacement field in a top-hat sphere of radius
     `R`. The linear displacement field is the gradient of the linear density
-    field.
+    field:
+
+    .. math::
+
+        \sigma_V^2(z) = \frac{1}{6\pi^2} \int {\rm d}k \, P_{\rm L}(k)
+        \tilde{W}_R^2(k),
+
+    where :math:`P_{\rm L}` is the linear matter power spectrum and
+    :math:`\tilde{W}` is the Fourier transform of the spherical top-hat window
+
+    .. math::
+
+        \tilde{W}_R(k) = \frac{3}{(kR)^3} \left( \sin(kR) - kR \cos(kR)\right).
 
     Arguments
     ---------

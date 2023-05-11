@@ -12,7 +12,7 @@ def all_subclasses(cls):
 def test_method_control_raises():
     # All method control subclasses must contain a default implementation.
     with pytest.raises(ValueError):
-        class MyMethodControl(ccl.base.schema._CustomMethod, method="name"):
+        class MyMethodControl(ccl._core.schema._CustomMethod, method="name"):
             pass
 
 

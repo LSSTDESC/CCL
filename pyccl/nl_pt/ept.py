@@ -60,11 +60,11 @@ class EulerianPTCalculator(CCLObject):
               :math:`\\langle \\delta^2 \\psi_{nl}\\rangle` (and
               likewise for :math:`s^2`) are set to zero.
 
-    .. note:: The full non-linear model for the cross-correlation
-              between number counts and intrinsic alignments is
-              still work in progress in FastPT. As a workaround
-              CCL assumes a non-linear treatment of IAs, but only
-              linearly biased number counts.
+    .. warning:: The full non-linear model for the cross-correlation
+                between number counts and intrinsic alignments is
+                still work in progress in FastPT. As a workaround
+                CCL assumes a non-linear treatment of IAs, but only
+                linearly biased number counts.
 
     .. note:: This calculator does not account for any form of
               stochastic bias contribution to the power spectra.

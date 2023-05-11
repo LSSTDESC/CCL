@@ -219,7 +219,7 @@ class MassDef(CCLNamedClass, CCLObject):  # TODO: Only keep CCLObject in CCLv3.
     ----------
     Delta : float, int-castable str, or {'fof', 'vir'}
         Spherical overdensity (S.O.) parameter. `'fof'` for friends-of-
-        friends masses and `'vir'` for Virial masses.
+        friends halos and `'vir'` for Virial masses.
     rho_type : {'critical', 'matter'}
         Reference mean density type.
     c_m_relation
@@ -349,7 +349,7 @@ class MassDef(CCLNamedClass, CCLObject):  # TODO: Only keep CCLObject in CCLv3.
 
         .. math::
 
-            M = \frac{4 \pi}{3} \Delta \,\rho_{\rm X} \, R^3
+            M_\Delta = \frac{4 \pi}{3} \Delta \,\rho_{\rm X} \, R_\Delta^3
 
         Arguments
         ---------

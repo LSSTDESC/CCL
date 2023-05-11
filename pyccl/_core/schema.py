@@ -1,7 +1,7 @@
 """
-=================================
-Schema (:mod:`pyccl.base.schema`)
-=================================
+==================================
+Schema (:mod:`pyccl._core.schema`)
+==================================
 
 Base class for all CCL objects, and functionality related to it.
 """
