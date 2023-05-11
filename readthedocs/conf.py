@@ -50,7 +50,6 @@ extensions = [
     'sphinx_autodoc_typehints',
     'sphinx_mdinclude',
     'sphinxcontrib.bibtex',
-    'nbsphinx',
 ]
 
 # Specify bibliography for `spinxcontrib.bibtex`.
