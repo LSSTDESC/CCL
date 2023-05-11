@@ -768,7 +768,7 @@ class Tracer(CCLObject):
         self._trc.append(_check_returned_tracer(ret))
 
     @classmethod
-    def from_z_Power(
+    def from_z_power(
             cls,
             cosmo: Cosmology,
             *,
@@ -1098,7 +1098,7 @@ def tSZTracer(
     # This is \sigma_T / (m_e * c^2)
     prefac = 4.01710079e-06
     return Tracer.from_z_power(cosmo, A=prefac, alpha=1, z_min=0.,
-                              z_max=z_max, n_chi=n_chi)
+                               z_max=z_max, n_chi=n_chi)
 
 
 @warn_api
@@ -1133,7 +1133,7 @@ def CIBTracer(
         Number of intervals in comoving radial distance to sample the kernel.
     """
     return Tracer.from_z_power(cosmo, A=1.0, alpha=1, z_min=z_min,
-                              z_max=z_max, n_chi=n_chi)
+                               z_max=z_max, n_chi=n_chi)
 
 
 def ISWTracer(
