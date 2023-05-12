@@ -253,38 +253,39 @@ a subclass of :class:`~pyccl.cosmology.Cosmology`.
 
 Flag Overuse
 ------------
-In functional languages (such as C) it is common to use boolean flags for type
-control. This is hardly ever the case with object-oriented languages, and must
-be avoided.
+In functional languages (such as C) it is common to use (boolean) flags for
+type control. This is hardly ever the case with object-oriented languages, and
+must be avoided.
 
 .. code-block:: python
 
     # DON'T
     class HaloProfile:
-        _is_number_counts = False
+        _is_Pressure = False
 
-    class HaloProfileHOD(HaloProfile):
-        _is_number_counts = True
+    class HaloProfilePressureGNFW(HaloProfile):
+        _is_Pressure = True
 
-    class SatelliteShearHOD(HaloProfileHOD):
-        _is_number_counts = False
+    # type-checking
+    HaloProfilePressureGNFW()._is_Pressure
 
     # DO
     class HaloProfile: ...
 
-    class HOD(HaloProfile):
-        """Implementation of the most generic HOD model."""
+    class HaloProfilePressure(HaloProfile): ...
 
-    class NumberCounts(HaloProfile): ...
+    class HaloProfilePressureGNFW(HaloProfilePressure): ...
 
-    class HaloProfileHOD(HOD, NumberCounts): ...
-
-    class SatelliteShearHOD(HOD): ...
+    # type-checking
+    isinstance(HaloProfilePressureGNFW(), HaloProfilePressure)
 
 Flags can almost always be refactored with inheritance and/or
 composition. If you find that you have to use them, this is a hint that your
 inheritance structure is flawed. Type checks ought to use :func:`isinstance`
 instead of accessing internal object attributes/properties.
+
+In general, only use flags for dynamic attributes. Attributes which represent
+fixed constants for objects should not be flags.
 
 
 Early Returns

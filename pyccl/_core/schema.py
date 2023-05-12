@@ -142,7 +142,7 @@ class _UnlockContext:
         Instance to unlock with the context manager protocol. Works as a
         :class:`~nullcontext` if not specified.
     """
-    instance: "Immutable"
+    instance: Optional["Immutable"]
 
     def __init__(self, instance: Optional["Immutable"] = None):
         self.instance = instance

@@ -64,8 +64,8 @@ class HaloProfile(CCLObject):
     def __init__(
             self,
             *,  # TODO: Move mass_def to the beginning of the docs in CCLv3.
-            mass_def: Optional[str, MassDef] = None,
-            concentration: Optional[str, Concentration] = None,
+            mass_def: Union[str, MassDef, None] = None,
+            concentration: Union[str, Concentration, None] = None,
             is_number_counts: bool = False
     ):
         # Verify that profile can be initialized.

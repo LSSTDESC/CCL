@@ -401,7 +401,7 @@ class Tracer(CCLObject):
 
     def get_kernel(
             self,
-            chi: Optional[Real, NDArray[Real]] = None
+            chi: Union[Real, NDArray[Real], None] = None
     ) -> Union[List[NDArray[float]],
                Tuple[List[NDArray[float]],
                      List[NDArray[float]]]]:

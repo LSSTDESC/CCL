@@ -12,7 +12,7 @@ __all__ = ("Parameters",)
 
 from dataclasses import dataclass, fields
 from functools import cached_property
-from typing import Any
+from typing import Any, Optional
 
 
 class Parameters:
@@ -100,7 +100,7 @@ class Parameters:
         """Unfreeze the instance."""
         self._frozen = False
 
-    def reload(self, *, source: Parameters = None) -> None:
+    def reload(self, *, source: Optional[Parameters] = None) -> None:
         """Reload the original values.
 
         Arguments

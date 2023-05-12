@@ -14,7 +14,7 @@ from collections import OrderedDict
 from inspect import signature
 from numbers import Number
 from _thread import RLock
-from typing import Any, Callable, Hashable, Iterable, Literal, final
+from typing import Any, Callable, Hashable, Iterable, List, Literal, final
 
 import numpy as np
 
@@ -130,7 +130,7 @@ class Caching(metaclass=_CachingMeta):
 
     _maxsize: int = _default_maxsize                          # user maxsize
     _policy: Literal["fifo", "lru", "lfu"] = _default_policy  # user policy
-    _cached_functions = []
+    _cached_functions: List[Callable] = []
 
     @classmethod
     def _get(cls, dic, key, policy):
