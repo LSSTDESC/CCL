@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 import pyccl as ccl
-from pyccl.pyutils import assert_warns
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
@@ -25,7 +24,8 @@ def test_halomodel_power(k, kind):
     else:
         func = ccl.halomodel_matter_power
 
-    pk = assert_warns(ccl.CCLWarning, func, COSMO, k, a)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        pk = func(COSMO, k, a)
     assert np.all(np.isfinite(pk))
     assert np.shape(k) == np.shape(pk)
 
@@ -38,9 +38,8 @@ def test_halomodel_power(k, kind):
 def test_halo_concentration(m):
     a = 0.8
     # Deprecated.
-    c = assert_warns(
-        ccl.CCLWarning,
-        ccl.halo_concentration, COSMO, m, a)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        c = ccl.halo_concentration(COSMO, m, a)
     assert np.all(np.isfinite(c))
     assert np.shape(c) == np.shape(m)
 
@@ -48,30 +47,31 @@ def test_halo_concentration(m):
 def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
     mdef = ccl.halos.MassDef('vir', 'matter')
     if mf == 'shethtormen':
-        hmf = ccl.halos.MassFuncSheth99(cosmo, mdef,
+        hmf = ccl.halos.MassFuncSheth99(mass_def=mdef,
                                         mass_def_strict=False,
                                         use_delta_c_fit=True)
-        hbf = ccl.halos.HaloBiasSheth99(cosmo, mass_def=mdef,
+        hbf = ccl.halos.HaloBiasSheth99(mass_def=mdef,
                                         mass_def_strict=False)
     elif mf == 'tinker10':
-        hmf = ccl.halos.MassFuncTinker10(cosmo, mdef,
+        hmf = ccl.halos.MassFuncTinker10(mass_def=mdef,
                                          mass_def_strict=False)
-        hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
+        hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef,
                                          mass_def_strict=False)
 
     if c == 'constant_concentration':
-        cc = ccl.halos.ConcentrationConstant(4., mdef)
+        cc = ccl.halos.ConcentrationConstant(4., mass_def=mdef)
     elif c == 'duffy2008':
-        cc = ccl.halos.ConcentrationDuffy08(mdef)
+        cc = ccl.halos.ConcentrationDuffy08(mass_def=mdef)
     elif c == 'bhattacharya2011':
-        cc = ccl.halos.ConcentrationBhattacharya13(mdef)
-    prf = ccl.halos.HaloProfileNFW(cc)
-    hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
-    p = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, a,
-                                         prf, normprof1=True,
-                                         get_1h=get_1h,
-                                         get_2h=get_2h)
-    return p
+        cc = ccl.halos.ConcentrationBhattacharya13(mass_def=mdef)
+    prf = ccl.halos.HaloProfileNFW(concentration=cc)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def=mdef)
+    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
+        return ccl.halos.halomod_power_spectrum(cosmo, hmc, k, a, prf,
+                                                get_1h=get_1h,
+                                                get_2h=get_2h,
+                                                normprof1=True)
 
 
 @pytest.mark.parametrize('mf_c', [['shethtormen', 'bhattacharya2011'],
@@ -90,7 +90,8 @@ def test_halomodel_choices_smoke(mf_c):
     # TODO: Convert this and other places to using the non-deprecated syntax
     # Or, since this wasn't already done, maybe this is a useful convenience
     # function?
-    p = assert_warns(ccl.CCLWarning, ccl.twohalo_matter_power, cosmo, k, a)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        p = ccl.twohalo_matter_power(cosmo, k, a)
     pb = get_pk_new(mf, c, cosmo, a, k, False, True)
 
     assert np.all(np.isfinite(p))
@@ -106,21 +107,19 @@ def test_halomodel_choices_raises():
     k = np.geomspace(1E-2, 1, 10)
 
     with pytest.raises(ValueError):
-        assert_warns(ccl.CCLWarning, ccl.twohalo_matter_power, cosmo, k, a)
+        with pytest.warns(ccl.CCLDeprecationWarning):
+            ccl.twohalo_matter_power(cosmo, k, a)
 
 
 def test_halomodel_power_consistent():
     a = 0.8
     k = np.logspace(-1, 1, 10)
     # These are all deprecated.
-    tot = assert_warns(
-        ccl.CCLWarning,
-        ccl.halomodel_matter_power, COSMO, k, a)
-    one = assert_warns(
-        ccl.CCLWarning,
-        ccl.onehalo_matter_power, COSMO, k, a)
-    two = assert_warns(
-        ccl.CCLWarning,
-        ccl.twohalo_matter_power, COSMO, k, a)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        tot = ccl.halomodel_matter_power(COSMO, k, a)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        one = ccl.onehalo_matter_power(COSMO, k, a)
+    with pytest.warns(ccl.CCLDeprecationWarning):
+        two = ccl.twohalo_matter_power(COSMO, k, a)
 
     assert np.allclose(one + two, tot)

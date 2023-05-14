@@ -17,31 +17,31 @@ zs = np.array([0., 0.5, 1.])
 def test_hbf_tinker10():
     d_hbf = np.loadtxt(os.path.join(dirdat, 'hbf_tinker10.txt'),
                        unpack=True)
-    mf = ccl.halos.HaloBiasTinker10(cosmo)
+    mf = ccl.halos.HaloBiasTinker10()
     m = d_hbf[0]
     for iz, z in enumerate(zs):
         hb_d = d_hbf[iz+1]
-        hb_h = mf.get_halo_bias(cosmo, m, 1. / (1 + z))
+        hb_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(hb_h / hb_d - 1) < 1E-3)
 
 
 def test_hbf_sheth01():
     d_hbf = np.loadtxt(os.path.join(dirdat, 'hbf_sheth01.txt'),
                        unpack=True)
-    mf = ccl.halos.HaloBiasSheth01(cosmo)
+    mf = ccl.halos.HaloBiasSheth01()
     m = d_hbf[0]
     for iz, z in enumerate(zs):
         hb_d = d_hbf[iz+1]
-        hb_h = mf.get_halo_bias(cosmo, m, 1. / (1 + z))
+        hb_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(hb_h / hb_d - 1) < 1E-3)
 
 
 def test_hbf_bhattacharya11():
     d_hbf = np.loadtxt(os.path.join(dirdat, 'hbf_bhattacharya11.txt'),
                        unpack=True)
-    mf = ccl.halos.HaloBiasBhattacharya11(cosmo)
+    mf = ccl.halos.HaloBiasBhattacharya11()
     m = d_hbf[0]
     for iz, z in enumerate(zs):
         hb_d = d_hbf[iz+1]
-        hb_h = mf.get_halo_bias(cosmo, m, 1. / (1 + z))
+        hb_h = mf(cosmo, m, 1. / (1 + z))
         assert np.all(np.fabs(hb_h / hb_d - 1) < 1E-3)

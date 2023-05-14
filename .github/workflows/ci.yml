@@ -31,8 +31,6 @@ jobs:
           - os: ubuntu-latest
             label: linux-64
             prefix: /usr/share/miniconda3
-        py:
-          - 3.8
 
     steps:
       - name: Cancel previous runs
@@ -46,7 +44,6 @@ jobs:
       - name: Set up conda
         uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: ${{ matrix.py }}
           channels: conda-forge, defaults
           channel-priority: strict
           show-channel-urls: true
@@ -87,11 +84,9 @@ jobs:
         run: |
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
           mamba env update --file ${{ env.CONDA_ENV }} --prune
-          pip install "classy<3"
 
       - name: Install CCL
-        run: |
-          pip install -e .
+        run: pip install -e .
 
       - name: Unit tests
         run: |

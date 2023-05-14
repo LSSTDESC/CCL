@@ -147,5 +147,13 @@ def test_caching_policy_raises():
         ccl.Caching.policy = "my_policy"
 
 
+def test_caching_parentheses():
+    """Verify that ``cache`` can be used with or without parentheses."""
+    func1, func2 = [lambda: None for _ in range(2)]
+    ccl.cache(func1)
+    ccl.cache(maxsize=10, policy="lru")(func2)
+    assert all([hasattr(func, "cache_info") for func in [func1, func2]])
+
+
 # Revert to defaults.
 ccl.Caching._enabled = DEFAULT_CACHING_STATUS

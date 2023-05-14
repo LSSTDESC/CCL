@@ -11,7 +11,10 @@ STYLE CONVENTION USED
         **`type`** or **`structure`**
 -->
 # CCL
-[![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL) [![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master) [![Documentation Status](https://readthedocs.org/projects/ccl/badge/?version=latest)](https://ccl.readthedocs.io/en/latest/?badge=latest)
+![Build](https://github.com/LSSTDESC/CCL/workflows/continuous-integration/badge.svg?branch=master)&nbsp;
+[![Coverage](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master)&nbsp;
+[![Documentation](https://readthedocs.org/projects/ccl/badge/?version=latest)](https://ccl.readthedocs.io/en/latest/)&nbsp;
+[![DOI](https://img.shields.io/badge/DOI-10.3847%2F1538--4365%2Fab1658-B31B1B.svg)](https://iopscience.iop.org/article/10.3847/1538-4365/ab1658)
 
 The Core Cosmology Library (CCL) is a standardized library of routines to calculate
 basic observables used in cosmology. It will be the standard analysis package used by the
@@ -72,7 +75,7 @@ cosmo = ccl.Cosmology(
     transfer_function='bbks')
 
 # Define a simple binned galaxy number density curve as a function of redshift
-z_n = np.linspace(0., 1., 200)
+z_n = np.linspace(0., 1., 500)
 n = np.ones(z_n.shape)
 
 # Create objects to represent tracers of the weak lensing signal with this
