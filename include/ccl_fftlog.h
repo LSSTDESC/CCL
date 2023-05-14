@@ -4,6 +4,25 @@
 
 CCL_BEGIN_DECLS
 
+/**
+ * Compute the function
+ *   \xi_\mu(\theta) = \int \frac{d\ell}{2\pi} j_\mu(\ell\theta)\,C_\ell
+ * C_\ell will be multiplied by ell^{1-\epsilon}, so \epsilon can be used to minimize ringing.
+ * @param mu Bessel function order.
+ * @param epsilon FFTLog bias exponent.
+ * @param ncl number of power spectra that should be converted into correlation functions.
+ * @param N size of l (and the output th).
+ * @param l logarithmically spaced values of l.
+ * @param cl array of power spectra to be converted. Each of them should be sampled at the values of l.
+ * @param th output values of theta (N of them, logarithmically spaced). This array is modified on output.
+ * @param xi array of output correlation functions sampled at th.
+ */
+void ccl_fftlog_ComputeXi_general(double mu, double q, 
+    int npk, int N, double *k, double **pk,
+    int spherical_bessel, double bessel_deriv, double window_frac, 
+    double *r, double **xi, int *status);
+
+
 
 /**
  * Compute the function

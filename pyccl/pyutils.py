@@ -505,7 +505,35 @@ def _fftlog_transform(rs, frs,
 
     return ks, fks
 
+def _fftlog_transform_general(rs, frs,
+                      mu, q, spherical_bessel, bessel_deriv, window_frac):
+    if np.ndim(rs) != 1:
+        raise ValueError("rs should be a 1D array")
+    if np.ndim(frs) < 1 or np.ndim(frs) > 2:
+        raise ValueError("frs should be a 1D or 2D array")
+    if np.ndim(frs) == 1:
+        n_transforms = 1
+        n_r = len(frs)
+    else:
+        n_transforms, n_r = frs.shape
 
+    if len(rs) != n_r:
+        raise ValueError("rs should have %d elements" % n_r)
+
+    status = 0
+    result, status = lib.fftlog_transform_general(n_transforms,
+                                          rs, frs.flatten(),
+                                           mu, q, spherical_bessel, bessel_deriv, window_frac,
+                                          (n_transforms + 1) * n_r,
+                                          status)
+    check(status)
+    result = result.reshape([n_transforms + 1, n_r])
+    ks = result[0]
+    fks = result[1:]
+    if np.ndim(frs) == 1:
+        fks = fks.squeeze()
+
+    return ks, fks
 def _spline_integrate(x, ys, a, b):
     if np.ndim(x) != 1:
         raise ValueError("x should be a 1D array")
