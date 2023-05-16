@@ -786,7 +786,7 @@ class Cosmology(CCLObject):
 
         Returns:
             :class:`~pyccl.pk2d.Pk2D` object containing the non-linear
-            power spectrum with name `name`.
+            power spectrum with name ``name``.
         """
         if name == DEFAULT_POWER_SPECTRUM:
             self.compute_nonlin_power()
