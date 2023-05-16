@@ -383,7 +383,7 @@ class HaloProfile(CCLAutoRepr):
            \\mu(R) = \\frac{1}{\\left[(1 - \\kappa(R))^2 -
            \\vert \\gamma(R) \\vert^2 \\right]]},
 
-        where :math:`\\gamma(R)` is the shear and `\\kappa(R)` is the
+        where :math:`\\gamma(R)` is the shear and :math:`\\kappa(R)` is the
         convergence (see :meth:`shear` and :meth:`convergence`).
 
         Args:
