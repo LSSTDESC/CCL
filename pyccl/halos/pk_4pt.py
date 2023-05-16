@@ -176,12 +176,12 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
         a_arr (array): an array holding values of the scale factor
             at which the trispectrum should be calculated for
             interpolation. If ``None``, the internal values used
-            by `cosmo` will be used.
+            by ``cosmo`` will be used.
         lk_arr (array): an array holding values of the natural
             logarithm of the wavenumber (in units of
             :math:`{\\rm Mpc}^{-1}`) at which the trispectrum should
             be calculated for interpolation. If ``None``, the internal
-            values used by `cosmo` will be used.
+            values used by ``cosmo`` will be used.
         extrap_order_lok (:obj:`int`): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.tk3d.Tk3D`.
@@ -260,16 +260,16 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
         is_number_counts4 (:obj:`bool`): as ``is_number_counts1`` but for quantity 4.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If ``None``,
-            the power spectrum stored within `cosmo` will be used.
+            the power spectrum stored within ``cosmo`` will be used.
         a_arr (array): an array holding values of the scale factor
             at which the trispectrum should be calculated for
             interpolation. If ``None``, the internal values used
-            by `cosmo` will be used.
+            by ``cosmo`` will be used.
         lk_arr (array): an array holding values of the natural
             logarithm of the wavenumber (in units of
             :math:`{\\rm Mpc}^{-1}`) at which the trispectrum should be
             calculated for interpolation. If ``None``, the internal values
-            used by `cosmo` will be used.
+            used by ``cosmo`` will be used.
         extrap_order_lok (:obj:`int`): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.tk3d.Tk3D`.
@@ -417,16 +417,16 @@ def halomod_Tk3D_SSC(
         normprof4 (:obj:`bool`): same as ``normprof1`` for ``prof4``.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If ``None``,
-            the power spectrum stored within `cosmo` will be used.
+            the power spectrum stored within ``cosmo`` will be used.
         a_arr (array): an array holding values of the scale factor
             at which the trispectrum should be calculated for
             interpolation. If ``None``, the internal values used
-            by `cosmo` will be used.
+            by ``cosmo`` will be used.
         lk_arr (array): an array holding values of the natural
             logarithm of the wavenumber (in units of
             :math:`{\\rm Mpc}^{-1}`) at which the trispectrum should
             be calculated for interpolation. If ``None``, the internal
-            values used by `cosmo` will be used.
+            values used by ``cosmo`` will be used.
         extrap_order_lok (:obj:`int`): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.tk3d.Tk3D`.
