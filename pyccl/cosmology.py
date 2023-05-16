@@ -1,5 +1,5 @@
 """The core functionality of CCL, including the core data types lives in this
-odule. Its focus is :class:`Cosmology` class, which plays a central role,
+module. Its focus is :class:`Cosmology` class, which plays a central role,
 carrying the information on cosmological parameters and derived quantities
 needed in most of the calculations carried out by CCL.
 """
