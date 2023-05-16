@@ -74,7 +74,7 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
 
         * :math:`s_a=s_b=0` e.g. galaxy-galaxy, galaxy-:math:`\kappa`
           and :math:`\kappa`-:math:`\kappa`
-        * :math:`s_a=2`, `s_b=0` e.g. galaxy-shear, and :math:`\kappa`-shear
+        * :math:`s_a=2`, :math:`s_b=0` e.g. galaxy-shear, and :math:`\kappa`-shear
         * :math:`s_a=s_b=2` e.g. shear-shear.
 
     .. note::
