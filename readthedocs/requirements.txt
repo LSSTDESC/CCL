@@ -1,5 +1,4 @@
 sphinx==6
 sphinx_mdinclude
-sphinx-book-theme
 numpy
 scipy
