@@ -14,9 +14,9 @@ from . import CCLDeprecationWarning, warn_api
 class CorrelationMethods(Enum):
     """Choices of algorithms used to compute correlation functions:
 
-    - 'Bessel' is a direct integration using Bessel functions.
-    - 'FFTLog' is fast using a fast Fourier transform.
-    - 'Legendre' uses a sum over Legendre polynomials.
+    * 'Bessel' is a direct integration using Bessel functions.
+    * 'FFTLog' is fast using a fast Fourier transform.
+    * 'Legendre' uses a sum over Legendre polynomials.
     """
     FFTLOG = "fftlog"
     BESSEL = "bessel"

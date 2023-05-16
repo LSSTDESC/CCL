@@ -2,16 +2,15 @@
 
 CCL defines seven species types:
 
-- 'matter': cold dark matter and baryons
-- 'dark_energy': cosmological constant or otherwise
-- 'radiation': relativistic species besides massless neutrinos (i.e.,
-  only photons)
-- 'curvature': curvature density
-- 'neutrinos_rel': relativistic neutrinos
-- 'neutrinos_massive': massive neutrinos
+* 'matter': cold dark matter and baryons
+* 'dark_energy': cosmological constant or otherwise
+* 'radiation': relativistic species besides massless neutrinos (i.e., only photons)
+* 'curvature': curvature density
+* 'neutrinos_rel': relativistic neutrinos
+* 'neutrinos_massive': massive neutrinos
 
 These strings define the `species` inputs to the functions below.
-"""
+""" # noqa
 __all__ = (
     "Species", "h_over_h0", "comoving_radial_distance", "scale_factor_of_chi",
     "comoving_angular_distance", "angular_diameter_distance",
@@ -236,13 +235,13 @@ def omega_x(cosmo, a, species):
         a (:obj:`float` or `array`): Scale factor(s), normalized to 1 today.
         species (:obj:`str`): species type. Should be one of
 
-            - 'matter': cold dark matter, massive neutrinos, and baryons
-            - 'dark_energy': cosmological constant or otherwise
-            - 'radiation': relativistic species besides massless neutrinos
-            - 'curvature': curvature density
-            - 'neutrinos_rel': relativistic neutrinos
-            - 'neutrinos_massive': massive neutrinos
-            - 'critical'
+            * 'matter': cold dark matter, massive neutrinos, and baryons
+            * 'dark_energy': cosmological constant or otherwise
+            * 'radiation': relativistic species besides massless neutrinos
+            * 'curvature': curvature density
+            * 'neutrinos_rel': relativistic neutrinos
+            * 'neutrinos_massive': massive neutrinos
+            * 'critical'
 
     Returns:
         (:obj:`float` or `array`): Density fraction of a given species at a \
