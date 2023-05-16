@@ -189,7 +189,7 @@ class MassFunc(HMIngredients):
 class HaloBias(HMIngredients):
     """This class enables the calculation of halo bias functions.
     We currently assume that all halo bias functions can be written
-    as functions that depend on M only through :math:`\\sigma_M`
+    as functions that depend on :math:`M` only through :math:`\\sigma_M`
     (where :math:`\\sigma_M^2` is the overdensity variance on
     spheres with a radius given by the Lagrangian radius for
     mass :math:`M`). All sub-classes implementing specific
