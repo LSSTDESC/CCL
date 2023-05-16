@@ -119,7 +119,7 @@ class MassFunc(HMIngredients):
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object or a name string.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if False, consistency of the mass
             definition will be ignored.
 
     .. automethod:: __call__
@@ -132,16 +132,16 @@ class MassFunc(HMIngredients):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            sigM (float or array_like): standard deviation in the
+            sigM (:obj:`float` or `array`): standard deviation in the
                 overdensity field on the scale of this halo.
-            a (float): scale factor.
-            lnM (float or array_like): natural logarithm of the
+            a (:obj:`float`): scale factor.
+            lnM (:obj:`float` or `array`): natural logarithm of the
                 halo mass in units of M_sun (provided in addition
                 to sigM for convenience in some mass function
                 parametrizations).
 
         Returns:
-            float or array_like: :math:`f(\\sigma_M)` function.
+            (:obj:`float` or `array`): :math:`f(\\sigma_M)` function.
         """
 
     def __call__(self, cosmo, M, a):
@@ -149,11 +149,11 @@ class MassFunc(HMIngredients):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass.
-            a (float): scale factor.
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: mass function \
+            (:obj:`float` or `array`): mass function \
                 :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
         """
         M_use = np.atleast_1d(M)
@@ -176,11 +176,11 @@ class MassFunc(HMIngredients):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass.
-            a (float): scale factor.
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: mass function \
+            (:obj:`float` or `array`): mass function \
                 :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
         """
         return self(cosmo, M, a)
@@ -201,7 +201,7 @@ class HaloBias(HMIngredients):
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
             a mass definition object or a name string.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if False, consistency of the mass
             definition will be ignored.
 
     .. automethod:: __call__
@@ -213,12 +213,12 @@ class HaloBias(HMIngredients):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            sigM (float or array_like): standard deviation in the
+            sigM (:obj:`float` or `array`): standard deviation in the
                 overdensity field on the scale of this halo.
-            a (float): scale factor.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: f(sigma_M) function.
+            (:obj:`float` or `array`): f(sigma_M) function.
         """
 
     def __call__(self, cosmo, M, a):
@@ -226,11 +226,11 @@ class HaloBias(HMIngredients):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass.
-            a (float): scale factor.
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo bias.
+            (:obj:`float` or `array`): halo bias.
         """
         M_use = np.atleast_1d(M)
         logM, sigM = self._get_logM_sigM(cosmo, M_use, a)
@@ -248,11 +248,11 @@ class HaloBias(HMIngredients):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass.
-            a (float): scale factor.
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo bias.
+            (:obj:`float` or `array`): halo bias.
         """
         return self(cosmo, M, a)
 
@@ -281,11 +281,11 @@ class Concentration(HMIngredients):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass.
-            a (float): scale factor.
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: concentration.
+            (:obj:`float` or `array`): concentration.
         """
         M_use = np.atleast_1d(M)
         c = self._concentration(cosmo, M_use, a)
@@ -302,11 +302,11 @@ class Concentration(HMIngredients):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass.
-            a (float): scale factor.
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: concentration.
+            (:obj:`float` or `array`): concentration.
         """
         return self(cosmo, M, a)
 

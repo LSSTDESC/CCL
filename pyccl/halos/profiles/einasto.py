@@ -34,11 +34,11 @@ class HaloProfileEinasto(HaloProfileMatter):
     Args:
         concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
-        truncated (bool): set to ``True`` if the profile should be
+        truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
-        alpha (float or str): :math:`\\alpha` parameter, or
+        alpha (:obj:`float` or :obj:`str`): :math:`\\alpha` parameter, or
             set to ``'cosmo'`` to calculate the value from cosmology.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
@@ -69,7 +69,7 @@ class HaloProfileEinasto(HaloProfileMatter):
         Any parameter set to ``None`` won't be updated.
 
         Args:
-            alpha (float or str): :math:`\\alpha` parameter, or
+            alpha (:obj:`float` or :obj:`str`): :math:`\\alpha` parameter, or
                 set to ``'cosmo'`` to calculate the value from cosmology.
         """
         if alpha is not None and alpha != self.alpha:

@@ -18,16 +18,16 @@ def nfw_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     concentration, at a given scale factor, with a cosmology dependence.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
-        concentration (float): halo concentration.
-        halo_mass (float): halo masses; in units of Msun.
-        odelta (float): overdensity with respect to mean matter density.
-        a (float): scale factor.
-        r (float or array_like): radius or radii to calculate profile for,
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmological parameters.
+        concentration (:obj:`float`): halo concentration.
+        halo_mass (:obj:`float`): halo masses; in units of Msun.
+        odelta (:obj:`float`): overdensity with respect to mean matter density.
+        a (:obj:`float`): scale factor.
+        r (:obj:`float` or `array`): radius or radii to calculate profile for,
          in units of Mpc.
 
     Returns:
-        float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
+        (:obj:`float` or `array`): 3D NFW density at r, in units of Msun/Mpc^3.
     """
     mdef = hal.MassDef(odelta, 'matter')
     c = hal.ConcentrationConstant(c=concentration, mass_def=mdef)
@@ -45,16 +45,16 @@ def einasto_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     https://arxiv.org/pdf/1401.1216.pdf eqn5, assuming virial mass.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
-        concentration (float): halo concentration.
-        halo_mass (float): halo masses; in units of Msun.
-        odelta (float): overdensity with respect to mean matter density.
-        a (float): scale factor.
-        r (float or array_like): radius or radii to calculate profile for,
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmological parameters.
+        concentration (:obj:`float`): halo concentration.
+        halo_mass (:obj:`float`): halo masses; in units of Msun.
+        odelta (:obj:`float`): overdensity with respect to mean matter density.
+        a (:obj:`float`): scale factor.
+        r (:obj:`float` or `array`): radius or radii to calculate profile for,
          in units of Mpc.
 
     Returns:
-        float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
+        (:obj:`float` or `array`): 3D NFW density at r, in units of Msun/Mpc^3.
     """
     mdef = hal.MassDef(odelta, 'matter')
     c = hal.ConcentrationConstant(c=concentration, mass_def=mdef)
@@ -70,16 +70,16 @@ def hernquist_profile_3d(cosmo, concentration, halo_mass, odelta, a, r):
     at a given scale factor, with a cosmology dependence.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
-        concentration (float): halo concentration.
-        halo_mass (float): halo masses; in units of Msun.
-        odelta (float): overdensity with respect to mean matter density.
-        a (float): scale factor.
-        r (float or array_like): radius or radii to calculate profile for,
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmological parameters.
+        concentration (:obj:`float`): halo concentration.
+        halo_mass (:obj:`float`): halo masses; in units of Msun.
+        odelta (:obj:`float`): overdensity with respect to mean matter density.
+        a (:obj:`float`): scale factor.
+        r (:obj:`float` or `array`): radius or radii to calculate profile for,
          in units of Mpc.
 
     Returns:
-        float or array_like: 3D NFW density at r, in units of Msun/Mpc^3.
+        (:obj:`float` or `array`): 3D NFW density at r, in units of Msun/Mpc^3.
     """
     mdef = hal.MassDef(odelta, 'matter')
     c = hal.ConcentrationConstant(c=concentration, mass_def=mdef)
@@ -95,16 +95,16 @@ def nfw_profile_2d(cosmo, concentration, halo_mass, odelta, a, r):
     at a given scale factor, with a cosmology dependence.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): cosmological parameters.
-        concentration (float): halo concentration.
-        halo_mass (float): halo masses; in units of Msun.
-        odelta (float): overdensity with respect to mean matter density.
-        a (float): scale factor.
-        r (float or array_like): radius or radii to calculate profile for,
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmological parameters.
+        concentration (:obj:`float`): halo concentration.
+        halo_mass (:obj:`float`): halo masses; in units of Msun.
+        odelta (:obj:`float`): overdensity with respect to mean matter density.
+        a (:obj:`float`): scale factor.
+        r (:obj:`float` or `array`): radius or radii to calculate profile for,
          in units of Mpc.
 
     Returns:
-        float or array_like: 2D projected NFW density at r, \
+        (:obj:`float` or `array`): 2D projected NFW density at r, \
          in units of Msun/Mpc^2.
     """
     mdef = hal.MassDef(odelta, 'matter')

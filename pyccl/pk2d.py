@@ -53,12 +53,12 @@ class Pk2D(CCLObject):
         ``pk(k, a)``. This is vectorized in both ``k`` and ``a``.
 
     Args:
-        a_arr : array
+        a_arr (`array`): 
             An array holding values of the scale factor
-        lk_arr : array
+        lk_arr (`array`):
             An array holding values of the natural logarithm of the wavenumber
             (in :math:`\\mathrm{Mpc}^{-1}`).
-        pk_arr : array
+        pk_arr (`array`) :
             A 2-D array of shape ``(na, nk)``, of the values of the power spectrum
             at ``a_arr`` and ``lk_arr``. Input array could be flattened, provided
             that its size is ``nk*na``. The array can hold the values of the
@@ -70,7 +70,7 @@ class Pk2D(CCLObject):
             i.e. the resolution of `a_arr` and `lk_arr` is high enough to sample
             the main features in the power spectrum. CCL uses bicubic interpolation
             to evaluate the power spectrum at any intermediate point in k and a.
-        pkfunc : :obj:`callable`
+        pkfunc (:obj:`callable`):
             Function with signature ``f(k, a)`` which takes vectorized input
             in ``k`` (wavenumber in :math:`\\mathrm{Mpc}^{-1}`) and a scale factor
             ``a``, and returns the value of the power spectrum, or its natural log
@@ -80,23 +80,23 @@ class Pk2D(CCLObject):
             values of ``k`` and ``a`` used internally by CCL to store the linear
             and non-linear power spectra. This is deprecated in favour of using
             the :meth:`Pk2D.from_function` class method.
-        cosmo : :class:`~pyccl.cosmology.Cosmology`, optional cosmological parameters.
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmological parameters.
             Used to determine sampling rates in scale factor and wavenumber if
             using ``pkfunc`` (deprecated).
-        extrap_order_lok :  {0, 1, 2}
+        extrap_order_lok (:obj:`int`):  ``{0, 1, 2}``.
             Extrapolation order to be used on k-values below the minimum
             the splines. Note that extrapolation is either in :math:`\\log(P(k))`
             or in :math:`P(k)`, depending on the value of ``is_logp``.
-        extrap_order_hik :  {0, 1, 2}
+        extrap_order_hik (:obj:`int`) :  ``{0, 1, 2}``.
             Extrapolation order to be used on k-values above the maximum of the
             splines. Note that extrapolation is either in :math:`\\log(P(k))` or
             in :math:`P(k)`, depending on the value of ``is_logp``.
-        is_logp : bool
+        is_logp (:obj:`bool`):
             If True, ``pkfunc``/``pkarr`` return/hold the natural logarithm of the
             power spectrum. Otherwise, the true value of the power spectrum is
             expected. If ``is_logp`` is ``True``, arrays are interpolate in
             log-space.
-        empty : bool
+        empty (:obj:`bool`):
             If ``True``, just create an empty object, to be filled out later
             (deprecated).
 
@@ -158,14 +158,14 @@ class Pk2D(CCLObject):
         spectrum.
 
         Args:
-            pkfunc : :obj:`callable`
+            pkfunc (:obj:`callable`):
                 Function with signature ``f(k, a)`` which takes vectorized
                 input in ``k`` (wavenumber in :math:`\\mathrm{Mpc}^{-1}`)
                 and a scale factor`a``, and returns the value of the
                 corresponding quantity. ``pkfunc`` will be sampled at the
                 values of ``k`` and ``a`` used internally by CCL to store the
                 linear and non-linear power spectra.
-            spline_params : :obj:`~pyccl._core.parameters.parameters_base.SplineParameters`
+            spline_params (:obj:`~pyccl._core.parameters.parameters_base.SplineParameters`):
                 optional spline parameters. Used to determine sampling rates
                 in scale factor and wavenumber. Custom parameters can be passed
                 via the :class:`~pyccl.cosmology.Cosmology` object with
@@ -285,7 +285,7 @@ class Pk2D(CCLObject):
         linear power spectrum.
 
         Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmoloy`): a Cosmology object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
             pk_linear (:class:`Pk2D`): a Pk2D object containing the linear power
                 spectrum on which the HALOFIT method is to be applied. If ``None``,
                 HALOFIT is applied on the power spectrum represented by the
@@ -351,23 +351,23 @@ class Pk2D(CCLObject):
 
         Arguments
         ---------
-        k : float or array_like
+        k : :obj:`float` or `array`
             Wavenumber value(s) in units of :math:`{\\ rm Mpc}^{-1}`.
-        a : float or array_like
+        a : :obj:`float` or `array`
             Value of the scale factor
         cosmo : :class:`~pyccl.cosmology.Cosmology`
             Cosmology object. Used to evaluate the power spectrum outside
             of the interpolation range in ``a``, thorugh the linear growth
             factor. If ``cosmo`` is ``None``, attempting to evaluate the power
             spectrum outside of the interpolation range will raise an error.
-        derivative : bool
+        derivative : :obj:`bool`
             If ``False``, evaluate the power spectrum. If ``True``, evaluate
             the logarithmic derivative of the power spectrum,
             :math:`d\\log P(k)/d\\log k`.
 
         Returns
         -------
-        P(k, a) : float or array_like
+        P(k, a) : (:obj:`float` or `array`)
             Value(s) of the power spectrum. or its derivative.
         """
         # determine if logarithmic derivative is needed
@@ -655,10 +655,10 @@ def parse_pk(cosmo, p_of_k_a=None):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or `None`): 3D Power
-            spectrum to project. If a string, it must correspond to one of
-            the non-linear power spectra stored in ``cosmo`` (e.g.
-            `'delta_matter:delta_matter'`).
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`):
+            3D Power spectrum to project. If a string, it must correspond
+            to one of the non-linear power spectra stored in ``cosmo``
+            (e.g. `'delta_matter:delta_matter'`).
 
     Returns:
         :class:`Pk2D` object corresponding to ``p_of_k_a``.

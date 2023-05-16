@@ -18,7 +18,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run CAMB.
-        nonlin (bool, optional): Whether to compute and return the
+        nonlin (:obj:`bool`): Whether to compute and return the
             non-linear power spectrum as well.
 
     Returns:

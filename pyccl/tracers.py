@@ -50,11 +50,11 @@ def _Sig_MG(cosmo, a, k):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-        a (float or array_like): Scale factor(s), normalized to 1 today.
-        k (float or array_like): Wavenumber for scale
+        a (:obj:`float` or `array`): Scale factor(s), normalized to 1 today.
+        k (:obj:`float` or `array`): Wavenumber for scale
 
     Returns:
-        float or array_like: Modification to Poisson equation under
+        (:obj:`float` or `array`): Modification to Poisson equation under
             modified gravity at scale factor a.
             Sig_MG is assumed to be proportional to Omega_Lambda(z),
             see e.g. Abbott et al. 2018, 1810.02499, Eq. 9.
@@ -91,7 +91,7 @@ def get_density_kernel(cosmo, *, dndz):
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmology object
             used to transform redshifts into distances.
-        dndz (tulple of arrays): A tuple of arrays ``(z, N(z))``
+        dndz (:obj:`tuple`): A tuple of arrays ``(z, N(z))``
             giving the redshift distribution of the objects.
             The units are arbitrary; ``N(z)`` will be normalized
             to unity.
@@ -129,10 +129,10 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmology object used to
             transform redshifts into distances.
-        dndz (tulple of arrays): A tuple of arrays ``(z, N(z))``
+        dndz (:obj:`tuple`): A tuple of arrays ``(z, N(z))``
             giving the redshift distribution of the objects.
             The units are arbitrary; ``N(z)`` will be normalized to unity.
-        mag_bias (tuple of arrays, optional): A tuple of arrays ``(z, s(z))``
+        mag_bias (:obj:`tuple`): A tuple of arrays ``(z, s(z))``
             giving the magnification bias as a function of redshift. If
             ``None``, ``s=0`` will be assumed.
     """
@@ -177,8 +177,8 @@ def get_kappa_kernel(cosmo, *, z_source, n_samples=100):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmology object.
-        z_source (float): Redshift of source plane for CMB lensing.
-        n_samples (int): number of samples over which the kernel
+        z_source (:obj:`float`): Redshift of source plane for CMB lensing.
+        n_samples (:obj:`int`): number of samples over which the kernel
             is desired. These will be equi-spaced in radial distance.
             The kernel is quite smooth, so usually O(100) samples
             is enough.
@@ -329,12 +329,12 @@ class Tracer(CCLObject):
         in this ``Tracer``.
 
         Args:
-            chi (float or array_like, optional): values of the comoving
+            chi ((:obj:`float` or `array`)): values of the comoving
                 radial distance in increasing order and in Mpc. If ``None``,
                 returns the kernel at the internal spline nodes.
 
         Returns:
-            array_like: list of radial kernels for each tracer. The shape
+            `array`: list of radial kernels for each tracer. The shape
             will be ``(n_tracer, chi.size)``, where ``n_tracer`` is the
             number of tracers. The last dimension will be squeezed if the
             input is a scalar.
@@ -371,10 +371,10 @@ class Tracer(CCLObject):
         contained in this `Tracer`.
 
         Args:
-            ell (float or array_like): angular multipole values.
+            ell (:obj:`float` or `array`): angular multipole values.
 
         Returns:
-            array_like: list of prefactors for each tracer.
+            `array`: list of prefactors for each tracer.
             The shape will be ``(n_tracer, ell.size)``, where
             ``n_tracer`` is the number of tracers. The last
             dimension will be squeezed if the input ``ell`` is a
@@ -400,13 +400,13 @@ class Tracer(CCLObject):
         in this ``Tracer``.
 
         Args:
-            lk (float or array_like): values of the natural logarithm of
+            lk (:obj:`float` or `array`): values of the natural logarithm of
                 the wave number (in units of inverse Mpc) in increasing
                 order.
-            a (float or array_like): values of the scale factor.
+            a (:obj:`float` or `array`): values of the scale factor.
 
         Returns:
-            array_like: list of transfer functions for each tracer.
+            `array`: list of transfer functions for each tracer.
             The shape will be ``(n_tracer, lk.size, a.size)``, where
             ``n_tracer`` is the number of tracers. The other dimensions
             will be squeezed if the inputs are scalars.
@@ -437,7 +437,7 @@ class Tracer(CCLObject):
         contained in this ``Tracer``.
 
         Returns:
-            array_like: list of Bessel derivative orders for each tracer.
+            `array`: list of Bessel derivative orders for each tracer.
         """
         return np.array([t.der_bessel for t in self._trc])
 
@@ -548,7 +548,7 @@ class Tracer(CCLObject):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmology object.
-            kernel (tulple of arrays, optional): A tuple of arrays
+            kernel (:obj:`tuple`): A tuple of arrays
                 ``(chi, w_chi)`` describing the radial kernel of this
                 tracer. ``chi`` should contain values of the comoving
                 radial distance in increasing order, and ``w_chi`` should
@@ -557,7 +557,7 @@ class Tracer(CCLObject):
                 outside the range of distances covered by ``chi``. If
                 ``kernel`` is ``None`` a constant kernel
                 :math:`W(\\chi)=1` will be assumed everywhere.
-            transfer_ka (tuple of arrays, optional): a tuple of arrays
+            transfer_ka (:obj:`tuple`): a tuple of arrays
                 ``(a, lk,t_ka)`` describing the most general transfer
                 function for a tracer. ``a`` should be an array of scale
                 factor values in increasing order. ``lk`` should be an
@@ -578,7 +578,7 @@ class Tracer(CCLObject):
                 and above the range of wavenumbers covered by ``lk``
                 respectively. If this argument is not ``None``, the values of
                 ``transfer_k`` and ``transfer_a`` will be ignored.
-            transfer_k (tuple of arrays, optional): a tuple of arrays
+            transfer_k (:obj:`tuple`): a tuple of arrays
                 ``(lk,t_k)`` describing the scale-dependent part of a
                 factorizable transfer function. ``lk`` should be an
                 array of values of the natural logarithm of the wave
@@ -590,7 +590,7 @@ class Tracer(CCLObject):
                 ``extrap_order_hik`` below and above the range of wavenumbers
                 covered by ``lk`` respectively. If ``None``, the k-dependent
                 part of the transfer function will be set to 1 everywhere.
-            transfer_a (tuple of arrays, optional): a tuple of arrays
+            transfer_a (:obj:`tuple`): a tuple of arrays
                 `(a, t_a)`` describing the time-dependent part of a
                 factorizable transfer function. ``a`` should be an array of
                 scale factor values in increasing order. ``t_a`` should
@@ -599,7 +599,7 @@ class Tracer(CCLObject):
                 will be assumed continuous and constant outside the range
                 covered by ``a``. If ``None``, the time-dependent part of the
                 transfer function will be set to 1 everywhere.
-            der_bessel (int): order of the derivative of the Bessel
+            der_bessel (:obj:`int`): order of the derivative of the Bessel
                 functions with which this tracer enters the calculation
                 of the power spectrum. Allowed values are -1, 0, 1 and 2.
                 0, 1 and 2 correspond to the raw functions, their first
@@ -609,7 +609,7 @@ class Tracer(CCLObject):
                 is ubiquitous for many common tracers (lensing, IAs), and
                 makes the corresponding transfer functions more stable
                 for small :math:`k` or :math:`\\chi`.
-            der_angles (int): integer describing the ell-dependent prefactor
+            der_angles (:obj:`int`): integer describing the ell-dependent prefactor
                 associated with this tracer. Allowed values are 0, 1 and 2.
                 0 means no prefactor. 1 means a prefactor
                 :math:`\\ell(\\ell+1)`, associated with the angular
@@ -617,16 +617,16 @@ class Tracer(CCLObject):
                 magnification. 2 means a prefactor
                 :math:`\\sqrt{(\\ell+2)!/(\\ell-2)!}`, associated with the
                 angular derivatives of spin-2 fields (e.g. cosmic shear, IAs).
-            is_logt (bool): if ``True``, ``transfer_ka``, ``transfer_k`` and
+            is_logt (:obj:`bool`): if ``True``, ``transfer_ka``, ``transfer_k`` and
                 ``transfer_a`` will contain the natural logarithm of the
                 transfer function (or their factorizable parts).
-            extrap_order_lok (int): polynomial order used to extrapolate the
+            extrap_order_lok (:obj:`int`): polynomial order used to extrapolate the
                 transfer functions for low wavenumbers not covered by the
                 input arrays.
-            extrap_order_hik (int): polynomial order used to extrapolate the
+            extrap_order_hik (:obj:`int`): polynomial order used to extrapolate the
                 transfer functions for high wavenumbers not covered by the
                 input arrays.
-        """
+        """ # noqa
         is_factorizable = transfer_ka is None
         is_k_constant = (transfer_ka is None) and (transfer_k is None)
         is_a_constant = (transfer_ka is None) and (transfer_a is None)
@@ -687,13 +687,13 @@ class Tracer(CCLObject):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmology object.
-            A (float): amplitude parameter.
-            alpha (float): power law index.
-            z_min (float): minimum redshift from to which we define the kernel.
-            z_max (float): maximum redshift up to which we define the kernel.
-            n_chi (float): number of intervals in the radial comoving
+            A (:obj:`float`): amplitude parameter.
+            alpha (:obj:`float`): power law index.
+            z_min (:obj:`float`): minimum redshift from to which we define the kernel.
+            z_max (:obj:`float`): maximum redshift up to which we define the kernel.
+            n_chi (:obj:`float`): number of intervals in the radial comoving
                 distance on which we sample the kernel.
-        """
+        """ # noqa
         if z_min >= z_max:
             raise ValueError("z_min should be smaller than z_max.")
 
@@ -727,10 +727,10 @@ class NzTracer(Tracer):
         """Get the redshift distribution for this tracer.
 
         Args:
-            z (float or array_like): redshift values.
+            z (:obj:`float` or `array`): redshift values.
 
         Returns:
-            array_like: redshift distribution evaluated at the
+            `array`: redshift distribution evaluated at the
             input values of ``z``.
         """
         return self._dndz(z)
@@ -753,19 +753,19 @@ def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmology object.
-        dndz (tuple of arrays): A tuple of arrays ``(z, N(z))``
+        dndz (:obj:`tuple`): A tuple of arrays ``(z, N(z))``
             giving the redshift distribution of the objects. The units are
             arbitrary; ``N(z)`` will be normalized to unity.
-        bias (tuple of arrays): A tuple of arrays ``(z, b(z))``
+        bias (:obj:`tuple`): A tuple of arrays ``(z, b(z))``
             giving the galaxy bias. If ``None``, this tracer won't include
             a term proportional to the matter density contrast.
-        mag_bias (tuple of arrays, optional): A tuple of arrays ``(z, s(z))``
+        mag_bias (:obj:`tuple`): A tuple of arrays ``(z, s(z))``
             giving the magnification bias as a function of redshift. If
             ``None``, the tracer is assumed to not have magnification bias
             terms.
-        has_rsd (bool): If ``True``, this tracer will include a
+        has_rsd (:obj:`bool`): If ``True``, this tracer will include a
             redshift-space distortion term.
-        n_samples (int, optional): number of samples over which the
+        n_samples (:obj:`int`): number of samples over which the
             magnification lensing kernel is desired. These will be equi-spaced
             in radial distance. The kernel is quite smooth, so usually O(100)
             samples is enough.
@@ -829,20 +829,20 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmology object.
-        dndz (tuple of arrays): A tuple of arrays ``(z, N(z))``
+        dndz (:obj:`tuple`): A tuple of arrays ``(z, N(z))``
             giving the redshift distribution of the objects. The units are
             arbitrary; ``N(z)`` will be normalized to unity.
-        has_shear (bool): set to ``False`` if you want to omit the lensing
-            shear contribution from this tracer.
-        ia_bias (tuple of arrays, optional): A tuple of arrays
+        has_shear (:obj:`bool`): set to ``False`` if you want to omit the
+            lensing shear contribution from this tracer.
+        ia_bias (:obj:`tuple`): A tuple of arrays
             ``(z, A_IA(z))`` giving the intrinsic alignment amplitude
             ``A_IA(z)``. If ``None``, the tracer is assumped to not have
             intrinsic alignments.
-        use_A_ia (bool): set to ``True`` to use the conventional IA
+        use_A_ia (:obj:`bool`): set to ``True`` to use the conventional IA
             normalization. Set to ``False`` to use the raw input amplitude,
             which will usually be 1 for use with perturbaion theory IA
             modeling.
-        n_samples (int, optional): number of samples over which the lensing
+        n_samples (:obj:`int`): number of samples over which the lensing
             kernel is desired. These will be equi-spaced in radial distance.
             The kernel is quite smooth, so usually O(100) samples
             is enough.
@@ -899,8 +899,8 @@ def CMBLensingTracer(cosmo, *, z_source, n_samples=100):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmology object.
-        z_source (float): Redshift of source plane for CMB lensing.
-        n_samples (int, optional): number of samples over which the kernel
+        z_source (:obj:`float`): Redshift of source plane for CMB lensing.
+        n_samples (:obj:`int`): number of samples over which the kernel
             is desired. These will be equi-spaced in radial distance.
             The kernel is quite smooth, so usually O(100) samples
             is enough.
@@ -935,9 +935,9 @@ def tSZTracer(cosmo, *, z_max=6., n_chi=1024):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmology object.
-        z_max (float): maximum redshift up to which we define the
+        z_max (:obj:`float`): maximum redshift up to which we define the
             kernel.
-        n_chi (float): number of intervals in the radial comoving
+        n_chi (:obj:`float`): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
     # This is \sigma_T / (m_e * c^2)
@@ -963,11 +963,11 @@ def CIBTracer(cosmo, *, z_min=0., z_max=6., n_chi=1024):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmology object.
-        z_min (float): minimum redshift down to which we define the
+        z_min (:obj:`float`): minimum redshift down to which we define the
             kernel.
-        z_max (float): maximum redshift up to which we define the
+        z_max (:obj:`float`): maximum redshift up to which we define the
             kernel.
-        n_chi (float): number of intervals in the radial comoving
+        n_chi (:obj:`float`): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
     return Tracer.from_z_power(cosmo, A=1.0, alpha=1, z_min=z_min,
@@ -996,9 +996,9 @@ def ISWTracer(cosmo, *, z_max=6., n_chi=1024):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmology object.
-        z_max (float): maximum redshift up to which we define the
+        z_max (:obj:`float`): maximum redshift up to which we define the
             kernel.
-        n_chi (float): number of intervals in the radial comoving
+        n_chi (:obj:`float`): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
     tracer = Tracer()

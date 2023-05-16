@@ -78,17 +78,17 @@ class Tk3D(CCLObject):
             ``None``.
         pk2_arr (array): a 2D array with shape ``[na,nk]`` describing the
             second factor :math:`f_2(k,a)` for a factorizable trispectrum.
-        is_logt (boolean): if True, ``tkk_arr``/``pk1_arr``/``pk2_arr``
+        is_logt (:obj:`bool`): if True, ``tkk_arr``/``pk1_arr``/``pk2_arr``
             hold the natural logarithm of the trispectrum (or its factors).
             Otherwise, the true values of the corresponding quantities are
             expected. Note that arrays will be interpolated in log space
             if ``is_logt`` is set to ``True``.
-        extrap_order_lok (int): extrapolation order to be used on k-values
-            below the minimum of the splines (use 0 or 1). Note that
-            the extrapolation will be done in either
+        extrap_order_lok (:obj:`int`): extrapolation order to be used on
+            k-values below the minimum of the splines (use 0 or 1). Note
+            that the extrapolation will be done in either
             :math:`\\log(T(k_1,k_2,a)` or :math:`T(k_1,k_2,a)`,
             depending on the value of ``is_logt``.
-        extrap_order_hik (int): same as ``extrap_order_lok`` for
+        extrap_order_hik (:obj:`int`): same as ``extrap_order_lok`` for
             k-values above the maximum of the splines.
 
     .. automethod:: __call__
@@ -197,12 +197,12 @@ class Tk3D(CCLObject):
         an array, the shape will be ``[len(a),nk,nk]``.
 
         Args:
-            k (float or array_like): wavenumber value(s) in units of
+            k (:obj:`float` or `array`): wavenumber value(s) in units of
                 :math:`{\\rm Mpc}^{-1}`.
-            a (float or array_like): value(s) of the scale factor
+            a (:obj:`float` or `array`): value(s) of the scale factor
 
         Returns:
-            float or array_like: value(s) of the trispectrum.
+            (:obj:`float` or `array`): value(s) of the trispectrum.
         """
         a_use = np.atleast_1d(a).astype(float)
         k_use = np.atleast_1d(k).astype(float)

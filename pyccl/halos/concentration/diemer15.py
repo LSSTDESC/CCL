@@ -13,7 +13,7 @@ class ConcentrationDiemer15(Concentration):
     times the critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
     """
     name = 'Diemer15'

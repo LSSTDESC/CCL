@@ -76,44 +76,44 @@ class HaloProfileHOD(HaloProfile):
     Args:
         concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
-        log10Mmin_0 (float): offset parameter for
+        log10Mmin_0 (:obj:`float`): offset parameter for
             :math:`\\log_{10}M_{\\rm min}`.
-        log10Mmin_p (float): tilt parameter for
+        log10Mmin_p (:obj:`float`): tilt parameter for
             :math:`\\log_{10}M_{\\rm min}`.
-        siglnM_0 (float): offset parameter for
+        siglnM_0 (:obj:`float`): offset parameter for
             :math:`\\sigma_{{\\rm ln}M}`.
-        siglnM_p (float): tilt parameter for
+        siglnM_p (:obj:`float`): tilt parameter for
             :math:`\\sigma_{{\\rm ln}M}`.
-        log10M0_0 (float): offset parameter for
+        log10M0_0 (:obj:`float`): offset parameter for
             :math:`\\log_{10}M_0`.
-        log10M0_p (float): tilt parameter for
+        log10M0_p (:obj:`float`): tilt parameter for
             :math:`\\log_{10}M_0`.
-        log10M1_0 (float): offset parameter for
+        log10M1_0 (:obj:`float`): offset parameter for
             :math:`\\log_{10}M_1`.
-        log10M1_p (float): tilt parameter for
+        log10M1_p (:obj:`float`): tilt parameter for
             :math:`\\log_{10}M_1`.
-        alpha_0 (float): offset parameter for
+        alpha_0 (:obj:`float`): offset parameter for
             :math:`\\alpha`.
-        alpha_p (float): tilt parameter for
+        alpha_p (:obj:`float`): tilt parameter for
             :math:`\\alpha`.
-        fc_0 (float): offset parameter for
+        fc_0 (:obj:`float`): offset parameter for
             :math:`f_c`.
-        fc_p (float): tilt parameter for
+        fc_p (:obj:`float`): tilt parameter for
             :math:`f_c`.
-        bg_0 (float): offset parameter for
+        bg_0 (:obj:`float`): offset parameter for
             :math:`\\beta_g`.
-        bg_p (float): tilt parameter for
+        bg_p (:obj:`float`): tilt parameter for
             :math:`\\beta_g`.
-        bmax_0 (float): offset parameter for
+        bmax_0 (:obj:`float`): offset parameter for
             :math:`\\beta_{\\rm max}`.
-        bmax_p (float): tilt parameter for
+        bmax_p (:obj:`float`): tilt parameter for
             :math:`\\beta_{\\rm max}`.
-        a_pivot (float): pivot scale factor :math:`a_*`.
-        ns_independent (bool): drop requirement to only form
+        a_pivot (:obj:`float`): pivot scale factor :math:`a_*`.
+        ns_independent (:obj:`bool`): drop requirement to only form
             satellites when centrals are present.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-        is_number_counts (bool): set to ``True`` if this profile
+        is_number_counts (:obj:`bool`): set to ``True`` if this profile
             is meant to represent galaxy overdensity.
     """
     __repr_attrs__ = __eq_attrs__ = (
@@ -181,40 +181,40 @@ class HaloProfileHOD(HaloProfile):
         this profile. Any parameter set to ``None`` won't be updated.
 
         Args:
-            log10Mmin_0 (float): offset parameter for
+            log10Mmin_0 (:obj:`float`): offset parameter for
                 :math:`\\log_{10}M_{\\rm min}`.
-            log10Mmin_p (float): tilt parameter for
+            log10Mmin_p (:obj:`float`): tilt parameter for
                 :math:`\\log_{10}M_{\\rm min}`.
-            siglnM_0 (float): offset parameter for
+            siglnM_0 (:obj:`float`): offset parameter for
                 :math:`\\sigma_{{\\rm ln}M}`.
-            siglnM_p (float): tilt parameter for
+            siglnM_p (:obj:`float`): tilt parameter for
                 :math:`\\sigma_{{\\rm ln}M}`.
-            log10M0_0 (float): offset parameter for
+            log10M0_0 (:obj:`float`): offset parameter for
                 :math:`\\log_{10}M_0`.
-            log10M0_p (float): tilt parameter for
+            log10M0_p (:obj:`float`): tilt parameter for
                 :math:`\\log_{10}M_0`.
-            log10M1_0 (float): offset parameter for
+            log10M1_0 (:obj:`float`): offset parameter for
                 :math:`\\log_{10}M_1`.
-            log10M1_p (float): tilt parameter for
+            log10M1_p (:obj:`float`): tilt parameter for
                 :math:`\\log_{10}M_1`.
-            alpha_0 (float): offset parameter for
+            alpha_0 (:obj:`float`): offset parameter for
                 :math:`\\alpha`.
-            alpha_p (float): tilt parameter for
+            alpha_p (:obj:`float`): tilt parameter for
                 :math:`\\alpha`.
-            fc_0 (float): offset parameter for
+            fc_0 (:obj:`float`): offset parameter for
                 :math:`f_c`.
-            fc_p (float): tilt parameter for
+            fc_p (:obj:`float`): tilt parameter for
                 :math:`f_c`.
-            bg_0 (float): offset parameter for
+            bg_0 (:obj:`float`): offset parameter for
                 :math:`\\beta_g`.
-            bg_p (float): tilt parameter for
+            bg_p (:obj:`float`): tilt parameter for
                 :math:`\\beta_g`.
-            bmax_0 (float): offset parameter for
+            bmax_0 (:obj:`float`): offset parameter for
                 :math:`\\beta_{\\rm max}`.
-            bmax_p (float): tilt parameter for
+            bmax_p (:obj:`float`): tilt parameter for
                 :math:`\\beta_{\\rm max}`.
-            a_pivot (float): pivot scale factor :math:`a_*`.
-            ns_independent (bool): drop requirement to only form
+            a_pivot (:obj:`float`): pivot scale factor :math:`a_*`.
+            ns_independent (:obj:`bool`): drop requirement to only form
                 satellites when centrals are present
         """
         if log10Mmin_0 is not None:

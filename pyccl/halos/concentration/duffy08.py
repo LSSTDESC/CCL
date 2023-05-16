@@ -12,7 +12,7 @@ class ConcentrationDuffy08(Concentration):
     By default it will be initialized for :math:`M_{200c}`.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition object, or a name string.
     """
     name = 'Duffy08'

@@ -40,31 +40,31 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
         tracer1 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
         tracer2 (:class:`~pyccl.tracers.Tracer`): a second Tracer object.
-        ell (float or array_like): Angular wavenumber(s) at which to evaluate
+        ell (:obj:`float` or `array`): Angular wavenumber(s) at which to evaluate
             the first dimension of the angular power spectrum covariance.
-        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D` or None): 3D connected
+        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D` or :obj:`None`): 3D connected
             trispectrum.
         tracer3 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
             If ``None``, ``tracer1`` will be used instead.
         tracer4 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
             If ``None``, ``tracer2`` will be used instead.
-        ell2 (float or array_like): Angular wavenumber(s) at which to evaluate
+        ell2 (:obj:`float` or `array`): Angular wavenumber(s) at which to evaluate
             the second dimension of the angular power spectrum covariance. If
             ``None``, ``ell`` will be used instead.
-        fsky (float): sky fraction.
-        integration_method (string) : integration method to be used
+        fsky (:obj:`float`): sky fraction.
+        integration_method (:obj:`str`) : integration method to be used
             for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
             `qag` method backed up by `quad` when it fails) and ``'spline'``
             (the integrand is splined and then integrated analytically).
 
     Returns:
-        float or array_like: 2D array containing the connected non-Gaussian \
+        (:obj:`float` or `array`): 2D array containing the connected non-Gaussian \
             Angular power spectrum covariance \
             :math:`{\\rm Cov}_{\\rm cNG}(\\ell_1,\\ell_2)`, for the \
             four input tracers, as a function of :math:`\\ell_1` and \
             :math:`\\ell_2`. The ordering is such that \
             ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
-    """
+    """ # noqa
     if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
@@ -143,21 +143,21 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-        a_arr (float, array_like or None): an array of scale factor
+        a_arr (:obj:`float`, `array` or :obj:`None`): an array of scale factor
             values at which to evaluate the projected variance. If
             ``None``, a default sampling will be used.
-        fsky (float): sky fraction.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or str): Linear
+        fsky (:obj:`float`): sky fraction.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or :obj:`str`): Linear
             power spectrum to use. Defaults to the
             internal linear power spectrum from ``cosmo``.
 
     Returns:
         Tuple containing
 
-        - a_arr (array_like): an array of scale factor values at which the
+        - a_arr (`array`): an array of scale factor values at which the
           projected variance has been evaluated. Only returned if ``a_arr``
           is ``None`` on input.
-        - sigma2_B (float or array_like): projected variance.
+        - sigma2_B (:obj:`float` or `array`): projected variance.
     """
     full_output = a_arr is None
 
@@ -201,25 +201,25 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-        a_arr (float, array_like or None): an array of scale factor
+        a_arr (:obj:`float`, `array` or :obj:`None`): an array of scale factor
             values at which to evaluate the projected variance.
-        mask_wl (array_like): Array with the angular power spectrum of the
+        mask_wl (`array`): Array with the angular power spectrum of the
             masks. The power spectrum should be given at integer multipoles,
             starting at :math:`\\ell=0`. The power spectrum is normalized as
             :math:`{\\tt mask\\_wl}=\\sum_m W^A_{\\ell m} {W^B}^*_{\\ell m}`.
             It is the responsibility of the user to the provide the mask power
             out to sufficiently high ell for their required precision.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or str): Linear
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or :obj:`str`): Linear
             power spectrum to use. Defaults to the
             internal linear power spectrum from `cosmo`.
 
     Returns:
         Tuple containing
 
-        - a_arr (array_like): an array of scale factor values at which the
+        - a_arr (`array`): an array of scale factor values at which the
           projected variance has been evaluated. Only returned if ``a_arr`` is
           ``None`` on input.
-        - sigma2_B (float or array_like): projected variance.
+        - sigma2_B (:obj:`float` or `array`): projected variance.
     """
     full_output = a_arr is None
 
@@ -292,36 +292,36 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
         tracer1 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
         tracer2 (:class:`~pyccl.tracers.Tracer`): a second Tracer object.
-        ell (float or array_like): Angular wavenumber(s) at which to evaluate
+        ell (:obj:`float` or `array`): Angular wavenumber(s) at which to evaluate
             the first dimension of the angular power spectrum covariance.
-        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D` or None): 3D connected
+        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D` or :obj:`None`): 3D connected
             trispectrum.
         tracer3 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
             If ``None``, ``tracer1`` will be used instead.
         tracer4 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
             If ``None``, ``tracer2`` will be used instead.
-        ell2 (float or array_like): Angular wavenumber(s) at which to evaluate
+        ell2 (:obj:`float` or `array`): Angular wavenumber(s) at which to evaluate
             the second dimension of the angular power spectrum covariance. If
             ``None``, ``ell`` will be used instead.
-        sigma2_B (tuple of arrays or None): A tuple of arrays
+        sigma2_B (:obj:`tuple` or :obj:`None`): A tuple of arrays
             (a, sigma2_B(a)) containing the variance of the projected matter
             overdensity over the footprint as a function of the scale factor.
             If ``None``, a compact circular footprint will be assumed covering
             a sky fraction ``fsky``.
-        fsky (float): sky fraction.
-        integration_method (string) : integration method to be used
+        fsky (:obj:`float`): sky fraction.
+        integration_method (:obj:`str`) : integration method to be used
             for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
             `qag` method backed up by `quad` when it fails) and ``'spline'``
             (the integrand is splined and then integrated analytically).
 
     Returns:
-        float or array_like: 2D array containing the super-sample \
+        (:obj:`float` or `array`): 2D array containing the super-sample \
             Angular power spectrum covariance \
             :math:`{\\rm Cov}_{\\rm SSC}(\\ell_1,\\ell_2)`, for the \
             four input tracers, as a function of :math:`\\ell_1` and \
             :math:`\\ell_2`. The ordering is such that \
             ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
-    """
+    """ # noqa
     if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 

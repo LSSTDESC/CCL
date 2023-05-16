@@ -28,56 +28,56 @@ class SatelliteShearHOD(HaloProfileHOD):
     Args:
         concentration (:obj:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
-        a1h (float): Amplitude of the satellite intrinsic shear profile.
-        b (float): Power-law index of the satellite intrinsic shear profile.
+        a1h (:obj:`float`): Amplitude of the satellite intrinsic shear profile.
+        b (:obj:`float`): Power-law index of the satellite intrinsic shear profile.
             If zero, the profile is assumed to be constant inside the halo.
-        lmax (int): Maximum multipole to be summed in the plane-wave expansion
+        lmax (:obj:`int`): Maximum multipole to be summed in the plane-wave expansion
             (Eq. (C1) in `Fortuna et al. 2021
             <https://arxiv.org/abs/2003.02700>`_, default=6).
-        log10Mmin_0 (float): offset parameter for
+        log10Mmin_0 (:obj:`float`): offset parameter for
             :math:`\\log_{10}M_{\\rm min}`.
-        log10Mmin_p (float): tilt parameter for
+        log10Mmin_p (:obj:`float`): tilt parameter for
             :math:`\\log_{10}M_{\\rm min}`.
-        siglnM_0 (float): offset parameter for
+        siglnM_0 (:obj:`float`): offset parameter for
             :math:`\\sigma_{{\\rm ln}M}`.
-        siglnM_p (float): tilt parameter for
+        siglnM_p (:obj:`float`): tilt parameter for
             :math:`\\sigma_{{\\rm ln}M}`.
-        log10M0_0 (float): offset parameter for
+        log10M0_0 (:obj:`float`): offset parameter for
             :math:`\\log_{10}M_0`.
-        log10M0_p (float): tilt parameter for
+        log10M0_p (:obj:`float`): tilt parameter for
             :math:`\\log_{10}M_0`.
-        log10M1_0 (float): offset parameter for
+        log10M1_0 (:obj:`float`): offset parameter for
             :math:`\\log_{10}M_1`.
-        log10M1_p (float): tilt parameter for
+        log10M1_p (:obj:`float`): tilt parameter for
             :math:`\\log_{10}M_1`.
-        alpha_0 (float): offset parameter for
+        alpha_0 (:obj:`float`): offset parameter for
             :math:`\\alpha`.
-        alpha_p (float): tilt parameter for
+        alpha_p (:obj:`float`): tilt parameter for
             :math:`\\alpha`.
-        bg_0 (float): offset parameter for
+        bg_0 (:obj:`float`): offset parameter for
             :math:`\\beta_g`.
-        bg_p (float): tilt parameter for
+        bg_p (:obj:`float`): tilt parameter for
             :math:`\\beta_g`.
-        bmax_0 (float): offset parameter for
+        bmax_0 (:obj:`float`): offset parameter for
             :math:`\\beta_{\\rm max}`.
-        bmax_p (float): tilt parameter for
+        bmax_p (:obj:`float`): tilt parameter for
             :math:`\\beta_{\\rm max}`.
-        a_pivot (float): pivot scale factor :math:`a_*`.
-        ns_independent (bool): drop requirement to only form
+        a_pivot (:obj:`float`): pivot scale factor :math:`a_*`.
+        ns_independent (:obj:`bool`): drop requirement to only form
             satellites when centrals are present.
-        integration_method: Method used to obtain the fourier transform
+        integration_method (:obj:`str`): Method used to obtain the fourier transform
             of the profile. Can be ``'FFTLog'``, ``'simpson'`` or
             ``'spline'``.
-        rmin: For ``'simpson'`` or ``'spline'`` integration, minimum value of
+        rmin (:obj:`float`): For ``'simpson'`` or ``'spline'`` integration, minimum value of
             physical radius used to carry out the radial integral (in Mpc).
-        N_r: For ``'simpson'`` or ``'spline'`` integration, number of points
+        N_r (:obj:`int`): For ``'simpson'`` or ``'spline'`` integration, number of points
             to be used when sampling the radial integral (in log space).
-        N_jn: For ``'simpson'`` or ``'spline'`` integration, number of points
+        N_jn (:obj:`int`): For ``'simpson'`` or ``'spline'`` integration, number of points
             to be used when sampling the spherical Bessel functions, that are
             later used to interpolate. Interpolating the Bessel functions
             increases the speed of the computations compared to explicitly
             evaluating them, without significant loss of accuracy.
-    """
+    """ # noqa
     __repr_attrs__ = __eq_attrs__ = (
         "a1h", "b", "lmax", "integration_method",
         "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
@@ -174,53 +174,53 @@ class SatelliteShearHOD(HaloProfileHOD):
         this profile. Any parameter set to `None` won't be updated.
 
         Args:
-            a1h (float): Amplitude of the satellite intrinsic shear profile.
-            b (float): Power-law index of the satellite intrinsic shear
+            a1h (:obj:`float`): Amplitude of the satellite intrinsic shear profile.
+            b (:obj:`float`): Power-law index of the satellite intrinsic shear
                 profile. If zero, the profile is assumed to be constant inside
                 the halo.
-            lmax (int): Maximum multipole to be summed in the plane-wave
+            lmax (:obj:`int`): Maximum multipole to be summed in the plane-wave
                 expansion.
-            log10Mmin_0 (float): offset parameter for
+            log10Mmin_0 (:obj:`float`): offset parameter for
                 :math:`\\log_{10}M_{\\rm min}`.
-            log10Mmin_p (float): tilt parameter for
+            log10Mmin_p (:obj:`float`): tilt parameter for
                 :math:`\\log_{10}M_{\\rm min}`.
-            siglnM_0 (float): offset parameter for
+            siglnM_0 (:obj:`float`): offset parameter for
                 :math:`\\sigma_{{\\rm ln}M}`.
-            siglnM_p (float): tilt parameter for
+            siglnM_p (:obj:`float`): tilt parameter for
                 :math:`\\sigma_{{\\rm ln}M}`.
-            log10M0_0 (float): offset parameter for
+            log10M0_0 (:obj:`float`): offset parameter for
                 :math:`\\log_{10}M_0`.
-            log10M0_p (float): tilt parameter for
+            log10M0_p (:obj:`float`): tilt parameter for
                 :math:`\\log_{10}M_0`.
-            log10M1_0 (float): offset parameter for
+            log10M1_0 (:obj:`float`): offset parameter for
                 :math:`\\log_{10}M_1`.
-            log10M1_p (float): tilt parameter for
+            log10M1_p (:obj:`float`): tilt parameter for
                 :math:`\\log_{10}M_1`.
-            alpha_0 (float): offset parameter for
+            alpha_0 (:obj:`float`): offset parameter for
                 :math:`\\alpha`.
-            alpha_p (float): tilt parameter for
+            alpha_p (:obj:`float`): tilt parameter for
                 :math:`\\alpha`.
-            bg_0 (float): offset parameter for
+            bg_0 (:obj:`float`): offset parameter for
                 :math:`\\beta_g`.
-            bg_p (float): tilt parameter for
+            bg_p (:obj:`float`): tilt parameter for
                 :math:`\\beta_g`.
-            bmax_0 (float): offset parameter for
+            bmax_0 (:obj:`float`): offset parameter for
                 :math:`\\beta_{\\rm max}`.
-            bmax_p (float): tilt parameter for
+            bmax_p (:obj:`float`): tilt parameter for
                 :math:`\\beta_{\\rm max}`.
-            a_pivot (float): pivot scale factor :math:`a_*`.
-            ns_independent (bool): drop requirement to only form
+            a_pivot (:obj:`float`): pivot scale factor :math:`a_*`.
+            ns_independent (:obj:`bool`): drop requirement to only form
                 satellites when centrals are present
-            rmin: For `simpson` or `spline` integration, minimum value of
+            rmin (:obj:`float`): For `simpson` or `spline` integration, minimum value of
                 physical radius used to carry out the radial integral (in Mpc).
-            N_r: For `simpson` or `spline` integration, number of points to be
+            N_r (:obj:`int`): For `simpson` or `spline` integration, number of points to be
                 used when sampling the radial integral (in logarithmic space).
-            N_jn: For `simpson` or `spline` integration, number of points to
+            N_jn (:obj:`int`): For `simpson` or `spline` integration, number of points to
                 be used when sampling the spherical Bessel functions, that are
                 later used to interpolate. Interpolating the Bessel functions
                 increases the speed of the computations compared to explicitly
                 evaluating them, without significant loss of accuracy.
-        """
+        """ # noqa
         if a1h is not None:
             self.a1h = a1h
         if b is not None:
@@ -307,6 +307,15 @@ class SatelliteShearHOD(HaloProfileHOD):
     def get_normalization(self, cosmo, a, hmc):
         """Returns the normalization of this profile, which is the
         mean galaxy number density.
+
+        Args:
+            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
+                model calculator object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            a (:obj:`float`): scale factor.
+
+        Returns:
+            float: normalization factor of this profile.
         """
         def integ(M):
             Nc = self._Nc(M, a)

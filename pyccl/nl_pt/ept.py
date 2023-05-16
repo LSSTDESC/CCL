@@ -71,33 +71,33 @@ class EulerianPTCalculator(CCLAutoRepr):
               If necessary, consider adding it in post-processing.
 
     Args:
-        with_NC (bool): set to ``True`` if you'll want to use
+        with_NC (:obj:`bool`): set to ``True`` if you'll want to use
             this calculator to compute correlations involving
             number counts.
-        with_IA(bool): set to ``True`` if you'll want to use
+        with_IA(:obj:`bool`): set to ``True`` if you'll want to use
             this calculator to compute correlations involving
             intrinsic alignments.
-        with_matter_1loop(bool): set to ``True`` if you'll want to use
+        with_matter_1loop(:obj:`bool`): set to ``True`` if you'll want to use
             this calculator to compute the one-loop matter power
             spectrum (automatically on if ``with_NC==True``).
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
             If present, internal PT power spectrum templates will
             be initialized. If ``None``, you will need to initialize
             them using the :meth:`update_ingredients` method.
-        log10k_min (float): decimal logarithm of the minimum
+        log10k_min (:obj:`float`): decimal logarithm of the minimum
             Fourier scale (in :math:`{\\rm Mpc}^{-1}`) for which you want to
             calculate perturbation theory quantities.
-        log10k_max (float): decimal logarithm of the maximum
+        log10k_max (:obj:`float`): decimal logarithm of the maximum
             Fourier scale (in :math:`{\\rm Mpc}^{-1}`) for which you want to
             calculate perturbation theory quantities.
-        nk_per_decade (int or float): number of k values per
+        nk_per_decade (:obj:`int` or :obj:`float`): number of k values per
             decade.
-        a_arr (array_like): array of values of the scale factor at
+        a_arr (array): array of values of the scale factor at
             which all power spectra will be evaluated. If ``None``,
             the default sampling used internally by CCL will be
             used. Note that this may be slower than a bespoke sampling
             optimised for your particular application.
-        k_cutoff (float): exponential cutoff scale. All power
+        k_cutoff (:obj:`float`): exponential cutoff scale. All power
             spectra will be multiplied by a cutoff factor of the
             form :math:`\\exp(-(k/k_*)^n)`, where :math:`k_*` is
             the cutoff scale. This may be useful when using the
@@ -105,31 +105,31 @@ class EulerianPTCalculator(CCLAutoRepr):
             functions if some of the PT contributions do not
             fall sufficiently fast on small scales. If ``None``
             (default), no cutoff factor will be applied.
-        n_exp_cutoff (float): exponent of the cutoff factor (see
+        n_exp_cutoff (:obj:`float`): exponent of the cutoff factor (see
             ``k_cutoff``).
-        b1_pk_kind (str): power spectrum to use for the first-order
+        b1_pk_kind (:obj:`str`): power spectrum to use for the first-order
             bias terms in the expansion. ``'linear'``: use the linear
             matter power spectrum. ``'nonlinear'``: use the non-linear
             matter power spectrum. ``'pt'``: use the 1-loop SPT matter
             power spectrum.
-        bk2_pk_kind (str): power spectrum to use for the non-local
+        bk2_pk_kind (:obj:`str`): power spectrum to use for the non-local
             bias terms in the expansion. Same options and default as
             ``b1_pk_kind``.
-        pad_factor (float): fraction of the :math:`\\log_{10}(k)`
+        pad_factor (:obj:`float`): fraction of the :math:`\\log_{10}(k)`
              interval you to add as padding for FFTLog calculations.
-        low_extrap (float): decimal logaritm of the minimum Fourier
+        low_extrap (:obj:`float`): decimal logaritm of the minimum Fourier
              scale (in :math:`{\\rm Mpc}^{-1}`) for which FAST-PT will
              extrapolate.
-        high_extrap (float): decimal logaritm of the maximum Fourier
+        high_extrap (:obj:`float`): decimal logaritm of the maximum Fourier
              scale (in :math:`{\\rm Mpc}^{-1}`) for which FAST-PT will
              extrapolate.
-        P_window (array_like): 2-element array describing the
+        P_window (array): 2-element array describing the
              tapering window used by FAST-PT. See FAST-PT
              documentation for more details.
-        C_window (float):  `C_window` parameter used by FAST-PT to
+        C_window (:obj:`float`):  `C_window` parameter used by FAST-PT to
              smooth the edges and avoid ringing. See FAST-PT
              documentation for more details.
-        sub_lowk (bool): if ``True``, the small-scale white noise
+        sub_lowk (:obj:`bool`): if ``True``, the small-scale white noise
              contribution to some of the terms will be subtracted.
     """
     __repr_attrs__ = __eq_attrs__ = ('with_NC', 'with_IA', 'with_matter_1loop',
@@ -296,7 +296,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                 tracer to correlate.
 
         Returns:
-            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+            array: 2D array of shape `(N_a, N_k)`, where `N_k` \
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
@@ -355,7 +355,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                 alignment tracer.
 
         Returns:
-            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+            array: 2D array of shape `(N_a, N_k)`, where `N_k` \
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
@@ -394,7 +394,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                 counts tracer.
 
         Returns:
-            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+            array: 2D array of shape `(N_a, N_k)`, where `N_k` \
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
@@ -432,7 +432,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                 to correlate.
 
         Returns:
-            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+            array: 2D array of shape `(N_a, N_k)`, where `N_k` \
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
@@ -474,7 +474,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                 alignment tracer.
 
         Returns:
-            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+            array: 2D array of shape `(N_a, N_k)`, where `N_k` \
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
@@ -498,7 +498,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         """ Get the one-loop matter power spectrum.
 
         Returns:
-            array_like: 2D array of shape `(N_a, N_k)`, where `N_k` \
+            array: 2D array of shape `(N_a, N_k)`, where `N_k` \
                 is the size of this object's `k_s` attribute, and \
                 `N_a` is the size of the object's `a_s` attribute.
         """
@@ -528,15 +528,15 @@ class EulerianPTCalculator(CCLAutoRepr):
             tracer2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the second
                 tracer being correlated. If ``None``, the auto-correlation
                 of the first tracer will be returned.
-            return_ia_bb (bool): if ``True``, the B-mode power spectrum
+            return_ia_bb (:obj:`bool`): if ``True``, the B-mode power spectrum
                 for intrinsic alignments will be returned (if both
                 input tracers are of type
                 :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
                 If ``False`` (default) E-mode power spectrum is returned.
-            extrap_order_lok (int): extrapolation order to be used on
+            extrap_order_lok (:obj:`int`): extrapolation order to be used on
                 k-values below the minimum of the splines. See
                 :class:`~pyccl.pk2d.Pk2D`.
-            extrap_order_hik (int): extrapolation order to be used on
+            extrap_order_hik (:obj:`int`): extrapolation order to be used on
                 k-values above the maximum of the splines. See
                 :class:`~pyccl.pk2d.Pk2D`.
 
@@ -607,15 +607,15 @@ class EulerianPTCalculator(CCLAutoRepr):
         expansion), ``'cdelta'`` (:math:`s\\delta` term in IA expansion).
 
         Args:
-            kind (str): string defining the pair of PT operators for
+            kind (:obj:`str`): string defining the pair of PT operators for
                 which we want the power spectrum.
-            extrap_order_lok (int): extrapolation order to be used on
+            extrap_order_lok (:obj:`int`): extrapolation order to be used on
                 k-values below the minimum of the splines. See
                 :class:`~pyccl.pk2d.Pk2D`.
-            extrap_order_hik (int): extrapolation order to be used on
+            extrap_order_hik (:obj:`int`): extrapolation order to be used on
                 k-values above the maximum of the splines. See
                 :class:`~pyccl.pk2d.Pk2D`.
-            return_ia_bb (bool): if ``True``, the B-mode power spectrum
+            return_ia_bb (:obj:`bool`): if ``True``, the B-mode power spectrum
                 for intrinsic alignments will be returned (if both
                 input tracers are of type
                 :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)

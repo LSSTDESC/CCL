@@ -43,15 +43,15 @@ def Omeganuh2(a, m_nu,
                  :func:`~pyccl.background.omega_x` instead.
 
     Args:
-        a (float or array-like): Scale factor, normalized to 1 today.
-        m_nu (float or array-like): Neutrino mass(es) (in eV)
-        T_CMB (float, optional): Temperature of the CMB (K).
+        a (:obj:`float` or `array`): Scale factor, normalized to 1 today.
+        m_nu (:obj:`float` or `array`): Neutrino mass(es) (in eV)
+        T_CMB (:obj:`float`): Temperature of the CMB (K).
             The default is the same as the Cosmology default.
-        T_ncdm (float, optional): Non-CDM temperature in units of photon
+        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is the same as the Cosmology default.
 
     Returns:
-        float or array_like: :math:`\\Omega_\\nu\\,h^2` at a given
+        (:obj:`float` or `array`): :math:`\\Omega_\\nu\\,h^2` at a given
         scale factor given the neutrino masses
     """
     status = 0
@@ -84,18 +84,19 @@ def nu_masses(*, Omega_nu_h2=None, mass_split, T_CMB=None, m_nu=None):
     specified by the user.
 
     Args:
-        Omega_nu_h2 (float): Neutrino energy density at z=0 times :math:`h^2`.
-        mass_split (str): indicates how the masses should be split up
+        Omega_nu_h2 (:obj:`float`): Neutrino energy density at z=0 times
+            :math:`h^2`.
+        mass_split (:obj:`str`): indicates how the masses should be split up
             Should be one of 'normal', 'inverted', 'equal' or 'sum'.
-        T_CMB (float, optional): Deprecated - do not use.
+        T_CMB (:obj:`float`): Deprecated - do not use.
             Temperature of the CMB (K). Default: 2.725.
-        m_nu (:obj:`float` or array_like, optional):
+        m_nu (:obj:`float` or array_like):
             Mass in eV of the massive neutrinos present.
             If a sequence is passed, it is assumed that the elements of the
             sequence represent the individual neutrino masses.
 
     Returns:
-        float or array-like: Neutrino mass(es) corresponding to this
+        :obj:`float` or `array`: Neutrino mass(es) corresponding to this
         :math:`\\Omega_\\nu h^2`.
     """
     if T_CMB is not None:

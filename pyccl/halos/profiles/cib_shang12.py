@@ -68,20 +68,20 @@ class HaloProfileCIBShang12(HaloProfileCIB):
     Args:
         concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation for NFW profile.
-        nu_GHz (float): frequency in GHz.
-        alpha (float): dust temperature evolution parameter.
-        T0 (float): dust temperature at :math:`z=0` in Kelvin.
-        beta (float): dust spectral index.
-        gamma (float): high frequency slope.
-        s_z (float): luminosity evolution slope.
-        log10Meff (float): :math:`\\log_{10}` of the most efficient mass.
-        siglog10M (float): logarithmic scatter in mass.
-        Mmin (float): minimum subhalo mass.
-        L0 (float): luminosity scale (in
+        nu_GHz (:obj:`float`): frequency in GHz.
+        alpha (:obj:`float`): dust temperature evolution parameter.
+        T0 (:obj:`float`): dust temperature at :math:`z=0` in Kelvin.
+        beta (:obj:`float`): dust spectral index.
+        gamma (:obj:`float`): high frequency slope.
+        s_z (:obj:`float`): luminosity evolution slope.
+        log10Meff (:obj:`float`): :math:`\\log_{10}` of the most efficient mass.
+        siglog10M (:obj:`float`): logarithmic scatter in mass.
+        Mmin (:obj:`float`): minimum subhalo mass.
+        L0 (:obj:`float`): luminosity scale (in
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-    """
+    """ # noqa
     __repr_attrs__ = __eq_attrs__ = (
         "nu", "alpha", "T0", "beta", "gamma", "s_z", "log10Meff", "siglog10M",
         "Mmin", "L0", "mass_def", "concentration", "precision_fftlog",)
@@ -116,11 +116,11 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         per (natural) logarithmic interval of mass.
 
         Args:
-            Msub (float or array_like): sub-halo mass (in solar masses).
-            Mparent (float): parent halo mass (in solar masses).
+            Msub (:obj:`float` or `array`): sub-halo mass (in solar masses).
+            Mparent (:obj:`float`): parent halo mass (in solar masses).
 
         Returns:
-            float or array_like: average number of subhalos.
+            (:obj:`float` or `array`): average number of subhalos.
         """
         return 0.30*(Msub/Mparent)**(-0.7)*np.exp(-9.9*(Msub/Mparent)**2.5)
 
@@ -134,16 +134,17 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         this profile. Any parameter set to ``None`` won't be updated.
 
         Args:
-            nu_GHz (float): frequency in GHz.
-            alpha (float): dust temperature evolution parameter.
-            T0 (float): dust temperature at :math:`z=0` in Kelvin.
-            beta (float): dust spectral index.
-            gamma (float): high frequency slope.
-            s_z (float): luminosity evolution slope.
-            log10Meff (float): :math:`\\log_{10}` of the most efficient mass.
-            siglog10M (float): logarithmic scatter in mass.
-            Mmin (float): minimum subhalo mass.
-            L0 (float): luminosity scale (in
+            nu_GHz (:obj:`float`): frequency in GHz.
+            alpha (:obj:`float`): dust temperature evolution parameter.
+            T0 (:obj:`float`): dust temperature at :math:`z=0` in Kelvin.
+            beta (:obj:`float`): dust spectral index.
+            gamma (:obj:`float`): high frequency slope.
+            s_z (:obj:`float`): luminosity evolution slope.
+            log10Meff (:obj:`float`): :math:`\\log_{10}` of the most
+                efficient mass.
+            siglog10M (:obj:`float`): logarithmic scatter in mass.
+            Mmin (:obj:`float`): minimum subhalo mass.
+            L0 (:obj:`float`): luminosity scale (in
                 :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
         """
         if nu_GHz is not None:

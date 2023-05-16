@@ -14,9 +14,9 @@ class HaloBiasTinker10(HaloBias):
     defined with respect to the critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-        mass_def_strict (bool): if ``False``, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = "Tinker10"

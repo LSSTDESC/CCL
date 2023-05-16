@@ -19,7 +19,8 @@ class Baryons(CCLAutoRepr, CCLNamedClass):
         """Apply baryonic effects to a given power spectrum.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`):
+                Cosmological parameters.
             pk (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
 
         Returns:
@@ -30,10 +31,11 @@ class Baryons(CCLAutoRepr, CCLNamedClass):
         """Apply baryonic effects to a given power spectrum.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`):
+                Cosmological parameters.
             pk (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
 
         Returns:
-            :obj:`~pyccl.pk2d.Pk2D` object or ``None``.
+            :obj:`~pyccl.pk2d.Pk2D` or :obj:`None`.
         """
         return self._include_baryonic_effects(cosmo, pk)

@@ -14,11 +14,11 @@ class MassFuncBocquet16(MassFunc):
     critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-        mass_def_strict (bool): if ``False``, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
-        hydro (bool): if ``False``, use the parametrization found
+        hydro (:obj:`bool`): if ``False``, use the parametrization found
             using dark-matter-only simulations. Otherwise, include
             baryonic effects (default).
     """

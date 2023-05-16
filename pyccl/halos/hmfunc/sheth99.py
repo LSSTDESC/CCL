@@ -12,11 +12,11 @@ class MassFuncSheth99(MassFunc):
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-        mass_def_strict (bool): if ``False``, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
-        use_delta_c_fit (bool): if ``True``, use the fit to the
+        use_delta_c_fit (:obj:`bool`): if ``True``, use the fit to the
             critical overdensity :math:`\\delta_c` by
             `Nakamura & Suto 1997
             <https://arxiv.org/abs/astro-ph/9612074>`_. Otherwise use

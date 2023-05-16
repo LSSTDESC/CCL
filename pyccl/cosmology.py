@@ -156,84 +156,84 @@ class Cosmology(CCLObject):
         sigma8 (:obj:`float`): Variance of matter density perturbations at
             an 8 Mpc/h scale. Exactly one of A_s and sigma_8 is required.
         n_s (:obj:`float`): Primordial scalar perturbation spectral index.
-        Omega_k (:obj:`float`, optional): Curvature density fraction.
+        Omega_k (:obj:`float`): Curvature density fraction.
             Defaults to 0.
-        Omega_g (:obj:`float`, optional): Density in relativistic species
+        Omega_g (:obj:`float`): Density in relativistic species
             except massless neutrinos. The default of `None` corresponds
             to setting this from the CMB temperature. Note that if a non-`None`
             value is given, this may result in a physically inconsistent model
             because the CMB temperature will still be non-zero in the
             parameters.
-        Neff (:obj:`float`, optional): Effective number of massless
+        Neff (:obj:`float`): Effective number of massless
             neutrinos present. Defaults to 3.046.
-        m_nu (:obj:`float` or array_like, optional):
+        m_nu (:obj:`float` or `array`):
             Mass in eV of the massive neutrinos present. Defaults to 0.
             If a sequence is passed, it is assumed that the elements of the
             sequence represent the individual neutrino masses.
-        mass_split (:obj:`str`, optional): Type of massive neutrinos. Should
+        mass_split (:obj:`str`): Type of massive neutrinos. Should
             be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
             the mass as being held by one massive neutrino. The other options
             split the mass into 3 massive neutrinos. Ignored if a sequence is
             passed in m_nu. Default is 'normal'.
-        w0 (:obj:`float`, optional): First order term of dark energy equation
+        w0 (:obj:`float`): First order term of dark energy equation
             of state. Defaults to -1.
-        wa (:obj:`float`, optional): Second order term of dark energy equation
+        wa (:obj:`float`): Second order term of dark energy equation
             of state. Defaults to 0.
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             is 2.725.
-        bcm_log10Mc (:obj:`float`, optional): One of the parameters of the
+        bcm_log10Mc (:obj:`float`): One of the parameters of the
             BCM model. Deprecated.
-        bcm_etab (:obj:`float`, optional): One of the parameters of the BCM
+        bcm_etab (:obj:`float`): One of the parameters of the BCM
             model. Deprecated.
-        bcm_ks (:obj:`float`, optional): One of the parameters of the BCM
+        bcm_ks (:obj:`float`): One of the parameters of the BCM
             model. Deprecated.
-        mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+        mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+        sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
-        c1_mg (:obj:`float`, optional): MG parameter that enters in the scale
+        c1_mg (:obj:`float`): MG parameter that enters in the scale
             dependence of mu affecting its large scale behavior. Default to 1.
             See, e.g., Eqs. (46) in Ade et al. 2015, arXiv:1502.01590
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        c2_mg (:obj:`float`, optional): MG parameter that enters in the scale
+        c2_mg (:obj:`float`): MG parameter that enters in the scale
             dependence of Sigma affecting its large scale behavior. Default 1.
             See, e.g., Eqs. (47) in Ade et al. 2015, arXiv:1502.01590
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        lambda_mg (:obj:`float`, optional): MG parameter that sets the start
+        lambda_mg (:obj:`float`): MG parameter that sets the start
             of dependance on c1 and c2 MG parameters. Defaults to 0.0
             See, e.g., Eqs. (46) & (47) in Ade et al. 2015, arXiv:1502.01590
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        df_mg (array_like, optional): Perturbations to the GR growth rate as
+        df_mg (array): Perturbations to the GR growth rate as
             a function of redshift :math:`\\Delta f`. Used to implement simple
             modified growth scenarios. Deprecated.
-        z_mg (array_like, optional): Array of redshifts corresponding to df_mg.
+        z_mg (array): Array of redshifts corresponding to df_mg.
             Deprecated.
-        transfer_function (:obj:`str`, optional): The transfer function to
+        transfer_function (:obj:`str`): The transfer function to
             use. Defaults to 'boltzmann_camb'.
-        matter_power_spectrum (:obj:`str`, optional): The matter power
+        matter_power_spectrum (:obj:`str`): The matter power
             spectrum to use. Defaults to 'halofit'.
-        baryons_power_spectrum (:obj:`str`, optional): The correction from
+        baryons_power_spectrum (:obj:`str`): The correction from
             baryonic effects to be implemented. Defaults to 'nobaryons'.
             Deprecated.
-        mass_function (:obj:`str`, optional): The mass function to use.
+        mass_function (:obj:`str`): The mass function to use.
             Defaults to 'tinker10' (2010). Deprecated.
-        halo_concentration (:obj:`str`, optional): The halo concentration
+        halo_concentration (:obj:`str`): The halo concentration
             relation to use. Defaults to Duffy et al. (2008) 'duffy2008'.
             Deprecated.
-        emulator_neutrinos (:obj:`str`, optional): If using the emulator for
+        emulator_neutrinos (:obj:`str`): If using the emulator for
             the power spectrum, specified treatment of unequal neutrinos.
             Options are 'strict', which will raise an error and quit if the
             user fails to pass either a set of three equal masses or a sum with
             mass_split = 'equal', and 'equalize', which will redistribute
             masses to be equal right before calling the emulator but results in
             internal inconsistencies. Defaults to 'strict'.
-        extra_parameters (:obj:`dict`, optional): Dictionary holding extra
+        extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB, with
             details described below. Defaults to None.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
@@ -399,7 +399,8 @@ class Cosmology(CCLObject):
         Args:
             filename (:obj:`str`) Filename, file pointer, or stream to read
                 parameters from.
-            **kwargs (dict) Additional keywords that supersede file contents
+            **kwargs (:obj:`dict`) Additional keywords that supersede
+                file contents
         """
         loader = yaml.Loader
         if isinstance(filename, str):
@@ -848,7 +849,7 @@ def CosmologyVanillaLCDM(**kwargs):
     no massive neutrinos) for quick instantiation.
 
     Arguments:
-        **kwargs (dict): a dictionary of parameters passed as arguments
+        **kwargs (:obj:`dict`): a dictionary of parameters passed as arguments
             to the :class:`Cosmology` constructor. It should not contain any of
             the :math:`\\Lambda`-CDM parameters (`"Omega_c"`, `"Omega_b"`,
             `"n_s"`, `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
@@ -895,34 +896,34 @@ class CosmologyCalculator(Cosmology):
             and sigma_8 is required.
         n_s (:obj:`float`): Primordial scalar perturbation spectral
             index.
-        Omega_k (:obj:`float`, optional): Curvature density fraction.
+        Omega_k (:obj:`float`): Curvature density fraction.
             Defaults to 0.
-        Omega_g (:obj:`float`, optional): Density in relativistic species
+        Omega_g (:obj:`float`): Density in relativistic species
             except massless neutrinos. The default of `None` corresponds
             to setting this from the CMB temperature. Note that if a
             non-`None` value is given, this may result in a physically
             inconsistent model because the CMB temperature will still
             be non-zero in the parameters.
-        Neff (:obj:`float`, optional): Effective number of massless
+        Neff (:obj:`float`): Effective number of massless
             neutrinos present. Defaults to 3.046.
-        m_nu (:obj:`float` or array_like, optional):
+        m_nu (:obj:`float` or `array`):
             Mass in eV of the massive neutrinos present. Defaults to 0.
             If a sequence is passed, it is assumed that the elements of the
             sequence represent the individual neutrino masses.
-        mass_split (:obj:`str`, optional): Type of massive neutrinos. Should
+        mass_split (:obj:`str`): Type of massive neutrinos. Should
             be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
             the mass as being held by one massive neutrino. The other options
             split the mass into 3 massive neutrinos. Ignored if a sequence is
             passed in m_nu. Default is 'normal'.
-        w0 (:obj:`float`, optional): First order term of dark energy
+        w0 (:obj:`float`): First order term of dark energy
             equation of state. Defaults to -1.
-        wa (:obj:`float`, optional): Second order term of dark energy
+        wa (:obj:`float`): Second order term of dark energy
             equation of state. Defaults to 0.
         T_CMB (:obj:`float`): The CMB temperature today. The default is the
             same as in the Cosmology base class.
-        mu_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+        mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`, optional): One of the parameters of the mu-Sigma
+        sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         background (:obj:`dict`): a dictionary describing the background
             expansion. It must contain three mandatory entries: ``'a'``: an

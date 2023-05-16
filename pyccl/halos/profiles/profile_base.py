@@ -98,7 +98,7 @@ class HaloProfile(CCLAutoRepr):
             hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
                 model calculator object.
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            a (float): scale factor.
+            a (:obj:`float`): scale factor.
 
         Returns:
             float: normalization factor of this profile.
@@ -122,7 +122,7 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            a (float): scale factor.
+            a (:obj:`float`): scale factor.
 
         Returns:
             float: power law index to be used with FFTLog.
@@ -135,7 +135,7 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            a (float): scale factor.
+            a (:obj:`float`): scale factor.
 
         Returns:
             float: power law index to be used with FFTLog.
@@ -159,12 +159,12 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+            r (:obj:`float` or `array`): comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo profile. The shape of the
+            (:obj:`float` or `array`): halo profile. The shape of the
             output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively. If `r` or `M`
             are scalars, the corresponding dimension will be
@@ -188,17 +188,17 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber (in :math:`Mpc^{-1}`).
-            M (float or array_like): halo mass.
-            a (float): scale factor.
+            k (:obj:`float` or `array`): comoving wavenumber (in :math:`Mpc^{-1}`).
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: Fourier-space profile. The shape of the
+            (:obj:`float` or `array`): Fourier-space profile. The shape of the
             output will be ``(N_M, N_k)`` where ``N_k`` and ``N_m`` are
             the sizes of ``k`` and ``M`` respectively. If ``k`` or ``M``
             are scalars, the corresponding dimension will be
             squeezed out on output.
-        """
+        """ # noqa
         if getattr(self, "_fourier", None):
             return self._fourier(cosmo, k, M, a)
         return self._fftlog_wrap(cosmo, k, M, a, fourier_out=True)
@@ -216,12 +216,12 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            r_t (float or array_like): transverse comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+            r_t (:obj:`float` or `array`): transverse comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: projected profile. The shape of the
+            (:obj:`float` or `array`): projected profile. The shape of the
             output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively. If `r` or `M`
             are scalars, the corresponding dimension will be
@@ -245,17 +245,17 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            r_t (float or array_like): transverse comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+            r_t (:obj:`float` or `array`): transverse comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: cumulative surface density. The shape of the
+            (:obj:`float` or `array`): cumulative surface density. The shape of the
             output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m`` are
             the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
             are scalars, the corresponding dimension will be
             squeezed out on output.
-        """
+        """ # noqa
         if getattr(self, "_cumul2d", None):
             return self._cumul2d(cosmo, r_t, M, a)
         return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=True)
@@ -279,18 +279,18 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            r (float or array_like): comoving radius.
-            M (float or array_like): halo mass.
-            a_lens (float): scale factor of lens.
-            a_source (float or array_like): scale factor of source.
+            r (:obj:`float` or `array`): comoving radius.
+            M (:obj:`float` or `array`): halo mass.
+            a_lens (:obj:`float`): scale factor of lens.
+            a_source (:obj:`float` or `array`): scale factor of source.
                 If an array, it must have the same shape as ``r``.
 
         Returns:
-            float or array_like: convergence :math:`\\kappa`. The shape of the
-            output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m`` are
-            the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
-            are scalars, the corresponding dimension will be
-            squeezed out on output.
+            (:obj:`float` or `array`): convergence :math:`\\kappa`. The
+            shape of the output will be ``(N_M, N_r)`` where ``N_r`` and
+            ``N_m`` are the sizes of ``r`` and ``M`` respectively. If
+            ``r`` or ``M`` are scalars, the corresponding dimension will
+            be squeezed out on output.
         """
         Sigma = self.projected(cosmo, r, M, a_lens)
         Sigma /= a_lens**2
@@ -319,14 +319,14 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a_lens (float): scale factor of lens.
-            a_source (float or array_like): source's scale factor.
+            r (:obj:`float` or `array`): comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a_lens (:obj:`float`): scale factor of lens.
+            a_source (:obj:`float` or `array`): source's scale factor.
                 If array, it must have the same shape as `r`.
 
         Returns:
-            float or array_like: shear :math:`\\gamma`. The shape of the
+            (:obj:`float` or `array`): shear :math:`\\gamma`. The shape of the
             output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m`` are
             the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
             are scalars, the corresponding dimension will be
@@ -354,17 +354,17 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a_lens (float): scale factor of lens.
-            a_source (float or array_like): source's scale factor.
+            r (:obj:`float` or `array`): comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a_lens (:obj:`float`): scale factor of lens.
+            a_source (:obj:`float` or `array`): source's scale factor.
                 If array, it must have the same shape as `r`.
 
         Returns:
-            float or array_like: reduced shear :math:`g_t`. The shape of the
-            output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m`` are
-            the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
-            are scalars, the corresponding dimension will be
+            (:obj:`float` or `array`): reduced shear :math:`g_t`. The shape
+            of the output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m``
+            are the sizes of ``r`` and ``M`` respectively. If ``r`` or
+            ``M`` are scalars, the corresponding dimension will be
             squeezed out on output.
         """
         convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
@@ -388,16 +388,16 @@ class HaloProfile(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a_lens (float): scale factor of lens.
-            a_source (float or array_like): source's scale factor.
+            r (:obj:`float` or `array`): comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a_lens (:obj:`float`): scale factor of lens.
+            a_source (:obj:`float` or `array`): source's scale factor.
                 If array, it must have the same shape as `r`.
 
         Returns:
-            float or array_like: magnification :math:`\\mu`. The shape of the
-            output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m`` are
-            the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
+            (:obj:`float` or `array`): magnification :math:`\\mu`. The shape
+            of the output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m``
+            are the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
@@ -532,6 +532,15 @@ class HaloProfileMatter(HaloProfile):
     def get_normalization(self, cosmo, a, *, hmc=None):
         """Returns the normalization of all matter overdensity
         profiles, which is simply the comoving matter density.
+
+        Args:
+            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
+                model calculator object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            a (:obj:`float`): scale factor.
+
+        Returns:
+            :obj:`float`: normalization factor of this profile.
         """
         return const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"]**2
 

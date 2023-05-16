@@ -13,11 +13,11 @@ class MassFuncDespali16(MassFunc):
 
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-        mass_def_strict (bool): if ``False``, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
-        ellipsoidal (bool): use the ellipsoidal parametrization.
+        ellipsoidal (:obj:`bool`): use the ellipsoidal parametrization.
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
                                      "ellipsoidal",)

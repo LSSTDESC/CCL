@@ -61,36 +61,36 @@ class FFTLogParams:
 
         Arguments
         ---------
-        padding_lo_fftlog: float
+        padding_lo_fftlog: :obj:`float`
             Factor by which the minimum scale is multiplied to avoid
             aliasing. Default: 0.1.
-        padding_hi_fftlog: float
+        padding_hi_fftlog: :obj:`float`
             Factor by which the maximum scale is multiplied to avoid
             aliasing. Default: 10.
-        n_per_decade : float
+        n_per_decade : :obj:`float`
             Samples per decade for the Hankel transforms. Default: 100.
         extrapol : {'linx_liny', 'linx_logy'}
             Extrapolation type when FFTLog has narrower output support.
             Default ``'linx_liny'``.
-        padding_lo_extra: float
+        padding_lo_extra: :obj:`float`
             Additional minimum scale padding for double Hankel transforms,
             used when computing 2D projected and cumulative profiles. In
             these, the first transform goes from 3D real space to
             Fourier, and the second transform goes from Fourier to 2D
             real space.
             Default: 0.1.
-        padding_hi_extra: float
+        padding_hi_extra: :obj:`float`
             As ``padding_lo_extra`` for the maximum scale.
             Default: 10.
-        large_padding_2D : bool
+        large_padding_2D : :obj:`bool`
             Override ``padding_xx_extra`` in the intermediate transform,
             and use ``padding_xx_fftlog``. The default is False.
-        plaw_fourier: float
+        plaw_fourier: :obj:`float`
             FFTLog pre-whitens its arguments (makes them flatter) to avoid
             aliasing. The ``plaw_fourier`` parameter describes the tilt of
             the profile, :math:`P(r) \\propto r^{\\mathrm{tilt}}`, for
             standard 3D transforms. Default: -1.5
-        plaw_fourier_projected: float
+        plaw_fourier_projected: :obj:`float`
             As ``plaw_fourier`` for 2D transforms (when computing 2D
             projected or cumulative profiles. Default: -1.0.
         """

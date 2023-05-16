@@ -38,14 +38,14 @@ void angular_cl_vec(ccl_cosmology * cosmo,
   // Compute non-Limber power spectra
   if(index_nonlimber_last >= 0) {
     // Cast ells as integers
-    int *ell_int = malloc((index_nonlimber_last+1) * sizeof(int));
+    int *ell_int = malloc((index_nonlimber_last+1) * sizeof(:obj:`int`));
 
     if (ell_int == NULL) {
       *status = CCL_ERROR_MEMORY;
     }
     else {
       for(int i=0; i <= index_nonlimber_last; i++)
-        ell_int[i] = (int)(ell[i]);
+        ell_int[i] = (:obj:`int`)(ell[i]);
 
       // Non-Limber computation
       ccl_angular_cls_nonlimber(cosmo, clt1, clt2, pspec,

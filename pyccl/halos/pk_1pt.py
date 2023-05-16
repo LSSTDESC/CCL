@@ -12,18 +12,18 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
         hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo model
             calculator.
-        k (float or array_like): comoving wavenumber in
+        k (:obj:`float` or `array`): comoving wavenumber in
             :math:`{\\rm Mpc}^{-1}`.
-        a (float or array_like): scale factor.
+        a (:obj:`float` or `array`): scale factor.
         prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): halo
             profile.
-        normprof (bool): (Deprecated - do not use)
+        normprof (:obj:`bool`): (Deprecated - do not use)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`,
             where :math:`u` is the profile represented by ``prof``.
 
     Returns:
-        float or array_like: integral values evaluated at each
+        (:obj:`float` or `array`): integral values evaluated at each
         combination of ``k`` and ``a``. The shape of the output will
         be ``(N_a, N_k)`` where ``N_k`` and ``N_a`` are the sizes of
         ``k`` and ``a`` respectively. If ``k`` or ``a`` are scalars, the

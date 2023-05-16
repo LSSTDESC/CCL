@@ -12,7 +12,7 @@ class ConcentrationPrada12(Concentration):
     S.O. masses with :math:`\\Delta = 200` times the critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition object ora name string.
     """
     name = 'Prada12'

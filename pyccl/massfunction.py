@@ -16,13 +16,13 @@ def massfunc(cosmo, halo_mass, a, overdensity=200):
     """Halo mass function, dn/dlog10M.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        halo_mass (float or array_like): Halo masses; Msun.
-        a (float): scale factor.
-        overdensity (float): overdensity parameter (default: 200)
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
+        halo_mass (:obj:`float` or `array`): Halo masses; Msun.
+        a (:obj:`float`): scale factor.
+        overdensity (:obj:`float`): overdensity parameter (default: 200)
 
     Returns:
-        float or array_like: Halo mass function; dn/dlog10M.
+        (:obj:`float` or `array`): Halo mass function; dn/dlog10M.
     """
     mdef = hal.MassDef(overdensity, 'matter')
     mf_par = cosmo._config_init_kwargs['mass_function']
@@ -45,13 +45,13 @@ def halo_bias(cosmo, halo_mass, a, overdensity=200):
     """Halo bias
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        halo_mass (float or array_like): Halo masses; Msun.
-        a (float): Scale factor.
-        overdensity (float): Overdensity parameter (default: 200).
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
+        halo_mass (:obj:`float` or `array`): Halo masses; Msun.
+        a (:obj:`float`): Scale factor.
+        overdensity (:obj:`float`): Overdensity parameter (default: 200).
 
     Returns:
-        float or array_like: Halo bias.
+        (:obj:`float` or `array`): Halo bias.
     """
     mdef = hal.MassDef(overdensity, 'matter')
     mf_par = cosmo._config_init_kwargs['mass_function']
@@ -73,10 +73,10 @@ def massfunc_m2r(cosmo, halo_mass):
               :math:`\\rho_M` is the mean comoving matter density.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        halo_mass (float or array_like): Halo masses; Msun.
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
+        halo_mass (:obj:`float` or `array`): Halo masses; Msun.
 
     Returns:
-        float or array_like: Smoothing halo radius; Mpc.
+        (:obj:`float` or `array`): Smoothing halo radius; Mpc.
     """
     return hal.mass2radius_lagrangian(cosmo, halo_mass)

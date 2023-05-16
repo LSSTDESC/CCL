@@ -15,13 +15,13 @@ class MassFuncTinker10(MassFunc):
     defined with respect to the critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-        mass_def_strict (bool): if ``False``, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
-        norm_all_z (bool): if ``True``, the mass function will be normalised
-            to yield the total matter density when integrated over mass at
-            all redshifts (as opposed to :math:`z=0` only).
+        norm_all_z (:obj:`bool`): if ``True``, the mass function will be
+            normalised to yield the total matter density when integrated
+            over mass at all redshifts (as opposed to :math:`z=0` only).
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
                                      "norm_all_z",)

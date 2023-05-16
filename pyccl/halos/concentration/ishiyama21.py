@@ -16,12 +16,12 @@ class ConcentrationIshiyama21(Concentration):
     By default it will be initialized for :math:`M_{500c}`.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object or a name string.
-        relaxed (bool):
+        relaxed (:obj:`bool`):
             If ``True``, use concentration for relaxed halos. Otherwise,
             use concentration for all halos. Default: ``False``.
-        Vmax (bool):
+        Vmax (:obj:`bool`):
             If ``True``, use the concentration found with the "Vmax"
             numerical method. Otherwise, use the concentration found with
             profile fitting. Default:  ``False``.

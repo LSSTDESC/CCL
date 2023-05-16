@@ -28,20 +28,20 @@ class HMCalculator(CCLAutoRepr):
             the halo bias function to use
         mass_def (str or :class:`~pyccl.halos.massdef.MassDef`):
             the halo mass definition to use
-        log10M_min (float): lower bound of the mass integration range
+        log10M_min (:obj:`float`): lower bound of the mass integration range
             (base-10 logarithmic).
-        log10M_max (float): lower bound of the mass integration range
+        log10M_max (:obj:`float`): lower bound of the mass integration range
             (base-10 logarithmic).
-        nM (int): number of uniformly-spaced samples in :math:`\\log_{10}(M)`
+        nM (:obj:`int`): number of uniformly-spaced samples in :math:`\\log_{10}(M)`
             to be used in the mass integrals.
-        integration_method_M (string): integration method to use
+        integration_method_M (:obj:`str`): integration method to use
             in the mass integrals. Options: "simpson" and "spline".
-        k_min (float): **Deprecated - do not use.**
+        k_min (:obj:`float`): **Deprecated - do not use.**
             Some of the integrals solved by this class
             will often be normalized by their value on very large
             scales. This parameter (in units of inverse Mpc)
             determines what is considered a "very large" scale.
-    """
+    """ # noqa
     __repr_attrs__ = __eq_attrs__ = (
         "mass_function", "halo_bias", "mass_def", "precision",)
     __getattr__ = deprecate_attr(pairs=[('_mdef', 'mass_def'),
@@ -142,15 +142,15 @@ class HMCalculator(CCLAutoRepr):
             \\int dM\\,n(M,a)\\,f(M)
 
         Args:
-            func (callable): a function accepting an array of halo masses
+            func (:obj:`callable`): a function accepting an array of halo masses
                 as a single argument, and returning an array of the
                 same size.
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            a (float): scale factor.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float: integral value.
-        """
+            :obj:`float`: integral value.
+        """ # noqa
         fM = func(self._mass)
         self._get_ingredients(cosmo, a, get_bf=False)
         return self._integrate_over_mf(fM)
@@ -167,12 +167,12 @@ class HMCalculator(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            a (float): scale factor.
+            a (:obj:`float`): scale factor.
             prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
                 halo profile.
 
         Returns:
-            float or array_like: integral value.
+            (:obj:`float` or `array`): integral value.
         """
         self._fix_profile_mass_def(prof)
         self._check_mass_def(prof)
@@ -202,22 +202,22 @@ class HMCalculator(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            selection (callable): function of mass and scale factor
+            selection (:obj:`callable`): function of mass and scale factor
                 that returns the selection function. This function
                 should take in floats or arrays with a signature ``sel(m, a)``
                 and return an array with shape ``(len(m), len(a))`` according
                 to the numpy broadcasting rules.
-            a_min (float): the minimum scale factor at which to start integrals
+            a_min (:obj:`float`): the minimum scale factor at which to start integrals
                 over the selection function.
                 Default: value of ``cosmo.cosmo.spline_params.A_SPLINE_MIN``
-            a_max (float): the maximum scale factor at which to end integrals
+            a_max (:obj:`float`): the maximum scale factor at which to end integrals
                 over the selection function.
-            na (int): number of samples in scale factor to be used in
+            na (:obj:`int`): number of samples in scale factor to be used in
                 the integrals.
 
         Returns:
-            float: the total number of clusters/halos.
-        """
+            :obj:`float`: the total number of clusters/halos.
+        """ # noqa
         # get a values for integral
         if a_min is None:
             a_min = cosmo.cosmo.spline_params.A_SPLINE_MIN
@@ -256,13 +256,13 @@ class HMCalculator(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber.
-            a (float): scale factor.
+            k (:obj:`float` or `array`): comoving wavenumber.
+            a (:obj:`float`): scale factor.
             prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
                 halo profile.
 
         Returns:
-            float or array_like: integral values evaluated at each
+            (:obj:`float` or `array`): integral values evaluated at each
             value of ``k``.
         """
         self._fix_profile_mass_def(prof)
@@ -285,13 +285,13 @@ class HMCalculator(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber.
-            a (float): scale factor.
+            k (:obj:`float` or `array`): comoving wavenumber.
+            a (:obj:`float`): scale factor.
             prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
                 halo profile.
 
         Returns:
-            float or array_like: integral values evaluated at each
+            (:obj:`float` or `array`): integral values evaluated at each
             value of ``k``.
         """
         self._fix_profile_mass_def(prof)
@@ -314,8 +314,8 @@ class HMCalculator(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber.
-            a (float): scale factor.
+            k (:obj:`float` or `array`): comoving wavenumber.
+            a (:obj:`float`): scale factor.
             prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
                 halo profile.
             prof2 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): a
@@ -327,7 +327,7 @@ class HMCalculator(CCLAutoRepr):
                 being correlated.
 
         Returns:
-             float or array_like: integral values evaluated at each
+             (:obj:`float` or `array`): integral values evaluated at each
              value of ``k``.
         """
         if prof2 is None:
@@ -355,8 +355,8 @@ class HMCalculator(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber.
-            a (float): scale factor.
+            k (:obj:`float` or `array`): comoving wavenumber.
+            a (:obj:`float`): scale factor.
             prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
                 halo profile.
             prof2 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): a
@@ -368,7 +368,7 @@ class HMCalculator(CCLAutoRepr):
                 being correlated.
 
         Returns:
-             float or array_like: integral values evaluated at each
+             (:obj:`float` or `array`): integral values evaluated at each
              value of ``k``.
         """
         if prof2 is None:
@@ -400,8 +400,8 @@ class HMCalculator(CCLAutoRepr):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber.
-            a (float): scale factor.
+            k (:obj:`float` or `array`): comoving wavenumber.
+            a (:obj:`float`): scale factor.
             prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
                 halo profile.
             prof2 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): a
@@ -422,7 +422,7 @@ class HMCalculator(CCLAutoRepr):
                 ``prof12_2pt`` will be used.
 
         Returns:
-             float or array_like: integral values evaluated at each
+             (:obj:`float` or `array`): integral values evaluated at each
              value of ``k``.
         """
         if prof3 is None:

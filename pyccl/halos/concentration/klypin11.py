@@ -10,7 +10,7 @@ class ConcentrationKlypin11(Concentration):
     valid for S.O. masses with :math:`\\Delta = \\Delta_{\\rm vir}`.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition object or a name string.
     """
     name = 'Klypin11'

@@ -32,17 +32,17 @@ class HaloProfileNFW(HaloProfileMatter):
     Args:
         concentration (:obj:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
-        fourier_analytic (bool): set to ``True`` if you want to compute
+        fourier_analytic (:obj:`bool`): set to ``True`` if you want to compute
             the Fourier profile analytically (and not through FFTLog).
-        projected_analytic (bool): set to ``True`` if you want to
+        projected_analytic (:obj:`bool`): set to ``True`` if you want to
             compute the 2D projected profile analytically (and not
             through FFTLog).
-        cumul2d_analytic (bool): set to ``True`` if you want to
+        cumul2d_analytic (:obj:`bool`): set to ``True`` if you want to
             compute the 2D cumulative surface density analytically
             (and not through FFTLog).
-        truncated (bool): set to ``True`` if the profile should be
+        truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (

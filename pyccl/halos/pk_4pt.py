@@ -35,9 +35,9 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
         hmc (:class:`HMCalculator`): a halo model calculator.
-        k (float or array_like): comoving wavenumber in
+        k (:obj:`float` or `array`): comoving wavenumber in
             :math:`{\\rm Mpc}^{-1}`.
-        a (float or array_like): scale factor.
+        a (:obj:`float` or `array`): scale factor.
         prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): halo
             profile (corresponding to :math:`u_1` above).
         prof2 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): halo
@@ -56,17 +56,17 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
             ``prof2`` will be used as ``prof4``.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as ``prof12_2pt`` for ``prof3`` and ``prof4``.
-        normprof1 (bool): (Deprecated - do not use)
+        normprof1 (:obj:`bool`): (Deprecated - do not use)
             if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by ``prof``.
-        normprof2 (bool): same as ``normprof1`` for ``prof2``.
-        normprof3 (bool): same as ``normprof1`` for ``prof3``.
-        normprof4 (bool): same as ``normprof1`` for ``prof4``.
+        normprof2 (:obj:`bool`): same as ``normprof1`` for ``prof2``.
+        normprof3 (:obj:`bool`): same as ``normprof1`` for ``prof3``.
+        normprof4 (:obj:`bool`): same as ``normprof1`` for ``prof4``.
 
     Returns:
-        float or array_like: 1-halo trispectrum evaluated at each
+        (:obj:`float` or `array`): 1-halo trispectrum evaluated at each
         combination of ``k`` and ``a``. The shape of the output will
         be ``(N_a, N_k, N_k)`` where ``N_k`` and ``N_a`` are the sizes of
         ``k`` and ``a`` respectively. The ordering is such that
@@ -165,14 +165,14 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
             products of the means of both profiles.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as ``prof12_2pt`` for ``prof3`` and ``prof4``.
-        normprof1 (bool): (Deprecated - do not use)
+        normprof1 (:obj:`bool`): (Deprecated - do not use)
             if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by ``prof``.
-        normprof2 (bool): same as ``normprof1`` for ``prof2``.
-        normprof3 (bool): same as ``normprof1`` for ``prof3``.
-        normprof4 (bool): same as ``normprof1`` for ``prof4``.
+        normprof2 (:obj:`bool`): same as ``normprof1`` for ``prof2``.
+        normprof3 (:obj:`bool`): same as ``normprof1`` for ``prof3``.
+        normprof4 (:obj:`bool`): same as ``normprof1`` for ``prof4``.
         a_arr (array): an array holding values of the scale factor
             at which the trispectrum should be calculated for
             interpolation. If ``None``, the internal values used
@@ -182,13 +182,13 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
             :math:`{\\rm Mpc}^{-1}`) at which the trispectrum should
             be calculated for interpolation. If ``None``, the internal
             values used by `cosmo` will be used.
-        extrap_order_lok (int): extrapolation order to be used on
+        extrap_order_lok (:obj:`int`): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.tk3d.Tk3D`.
-        extrap_order_hik (int): extrapolation order to be used on
+        extrap_order_hik (:obj:`int`): extrapolation order to be used on
             k-values above the maximum of the splines. See
             :class:`~pyccl.tk3d.Tk3D`.
-        use_log (bool): if ``True``, the trispectrum will be
+        use_log (:obj:`bool`): if ``True``, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
 
@@ -248,16 +248,16 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
         hmc (:class:`HMCalculator`): a halo model calculator.
         prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): a halo
             profile representing the matter overdensity.
-        bias1 (float or array): linear galaxy bias for quantity 1.
+        bias1 (:obj:`float` or `array`): linear galaxy bias for quantity 1.
             If an array, it has to have the shape of ``a_arr``.
-        bias2 (float or array): linear galaxy bias for quantity 2.
-        bias3 (float or array): linear galaxy bias for quantity 3.
-        bias4 (float or array): linear galaxy bias for quantity 4.
-        is_number_counts1 (bool): If ``True``, quantity 1 will be considered
+        bias2 (:obj:`float` or `array`): linear galaxy bias for quantity 2.
+        bias3 (:obj:`float` or `array`): linear galaxy bias for quantity 3.
+        bias4 (:obj:`float` or `array`): linear galaxy bias for quantity 4.
+        is_number_counts1 (:obj:`bool`): If ``True``, quantity 1 will be considered
             number counts and the clustering counter terms computed.
-        is_number_counts2 (bool): as ``is_number_counts1`` but for quantity 2.
-        is_number_counts3 (bool): as ``is_number_counts1`` but for quantity 3.
-        is_number_counts4 (bool): as ``is_number_counts1`` but for quantity 4.
+        is_number_counts2 (:obj:`bool`): as ``is_number_counts1`` but for quantity 2.
+        is_number_counts3 (:obj:`bool`): as ``is_number_counts1`` but for quantity 3.
+        is_number_counts4 (:obj:`bool`): as ``is_number_counts1`` but for quantity 4.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If ``None``,
             the power spectrum stored within `cosmo` will be used.
@@ -270,23 +270,23 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
             :math:`{\\rm Mpc}^{-1}`) at which the trispectrum should be
             calculated for interpolation. If ``None``, the internal values
             used by `cosmo` will be used.
-        extrap_order_lok (int): extrapolation order to be used on
+        extrap_order_lok (:obj:`int`): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.tk3d.Tk3D`.
-        extrap_order_hik (int): extrapolation order to be used on
+        extrap_order_hik (:obj:`int`): extrapolation order to be used on
             k-values above the maximum of the splines. See
             :class:`~pyccl.tk3d.Tk3D`.
-        use_log (bool): if ``True``, the trispectrum will be
+        use_log (:obj:`bool`): if ``True``, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
-        extrap_pk (bool):
+        extrap_pk (:obj:`bool`):
             Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
             support. If ``False``, and the queried values are out of bounds,
             an error is raised. The default is ``False``.
 
     Returns:
         :class:`~pyccl.tk3d.Tk3D`: SSC effective trispectrum.
-    """
+    """ # noqa
     if lk_arr is None:
         lk_arr = cosmo.get_pk_spline_lk()
     if a_arr is None:
@@ -407,14 +407,14 @@ def halomod_Tk3D_SSC(
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as ``prof12_2pt`` for ``prof3`` and ``prof4``. If ``None``,
             ``prof12_2pt`` will be used.
-        normprof1 (bool): (Deprecated - do not use)
+        normprof1 (:obj:`bool`): (Deprecated - do not use)
             if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
             :math:`u` is the profile represented by ``prof``.
-        normprof2 (bool): same as ``normprof1`` for ``prof2``.
-        normprof3 (bool): same as ``normprof1`` for ``prof3``.
-        normprof4 (bool): same as ``normprof1`` for ``prof4``.
+        normprof2 (:obj:`bool`): same as ``normprof1`` for ``prof2``.
+        normprof3 (:obj:`bool`): same as ``normprof1`` for ``prof3``.
+        normprof4 (:obj:`bool`): same as ``normprof1`` for ``prof4``.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If ``None``,
             the power spectrum stored within `cosmo` will be used.
@@ -427,16 +427,16 @@ def halomod_Tk3D_SSC(
             :math:`{\\rm Mpc}^{-1}`) at which the trispectrum should
             be calculated for interpolation. If ``None``, the internal
             values used by `cosmo` will be used.
-        extrap_order_lok (int): extrapolation order to be used on
+        extrap_order_lok (:obj:`int`): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.tk3d.Tk3D`.
-        extrap_order_hik (int): extrapolation order to be used on
+        extrap_order_hik (:obj:`int`): extrapolation order to be used on
             k-values above the maximum of the splines. See
             :class:`~pyccl.tk3d.Tk3D`.
-        use_log (bool): if ``True``, the trispectrum will be
+        use_log (:obj:`bool`): if ``True``, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
-        extrap_pk (bool):
+        extrap_pk (:obj:`bool`):
             Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
             support. If ``False``, and the queried values are out of bounds,
             an error is raised. The default is ``False``.

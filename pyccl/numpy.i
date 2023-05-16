@@ -71,7 +71,7 @@
  */
 %#if NPY_API_VERSION < 0x00000007
 %#define is_array(a)            ((a) && PyArray_Check((PyArrayObject*)a))
-%#define array_type(a)          (int)(PyArray_TYPE((PyArrayObject*)a))
+%#define array_type(a)          (:obj:`int`)(PyArray_TYPE((PyArrayObject*)a))
 %#define array_numdims(a)       (((PyArrayObject*)a)->nd)
 %#define array_dimensions(a)    (((PyArrayObject*)a)->dimensions)
 %#define array_size(a,i)        (((PyArrayObject*)a)->dimensions[i])
@@ -1030,7 +1030,7 @@
   /* the arrays */
   array = (DATA_TYPE **)malloc($2*sizeof(DATA_TYPE *));
   object_array = (PyArrayObject **)calloc($2,sizeof(PyArrayObject *));
-  is_new_object_array = (int *)calloc($2,sizeof(int));
+  is_new_object_array = (int *)calloc($2,sizeof(:obj:`int`));
 
   if (array == NULL || object_array == NULL || is_new_object_array == NULL)
   {
@@ -1265,7 +1265,7 @@
   /* the arrays */
   array = (DATA_TYPE **)malloc($2*sizeof(DATA_TYPE *));
   object_array = (PyArrayObject **)calloc($2,sizeof(PyArrayObject *));
-  is_new_object_array = (int *)calloc($2,sizeof(int));
+  is_new_object_array = (int *)calloc($2,sizeof(:obj:`int`));
 
   if (array == NULL || object_array == NULL || is_new_object_array == NULL)
   {

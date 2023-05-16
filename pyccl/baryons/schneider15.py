@@ -41,14 +41,14 @@ class BaryonsSchneider15(Baryons):
         """The BCM model boost factor for baryons.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-            k (float or array_like): Wavenumber (in :math:`{\\rm Mpc}^{-1}`).
-            a (float or array_like): Scale factor.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
+            k (:obj:`float` or `array`): Wavenumber (in :math:`{\\rm Mpc}^{-1}`).
+            a (:obj:`float` or `array`): Scale factor.
 
         Returns:
-            float or array_like: Correction factor to apply to
+            :obj:`float` or `array`: Correction factor to apply to
                 the power spectrum.
-        """
+        """ # noqa
         a_use, k_use = map(np.atleast_1d, [a, k])
         a_use, k_use = a_use[:, None], k_use[None, :]
 

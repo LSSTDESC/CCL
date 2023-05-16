@@ -23,10 +23,10 @@ def mass2radius_lagrangian(cosmo, M):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-        M (float or array_like): halo mass in units of :math:`M_\\odot`.
+        M (:obj:`float` or `array`): halo mass in units of :math:`M_\\odot`.
 
     Returns:
-        float or array_like: lagrangian radius in comoving Mpc.
+        (:obj:`float` or `array`): lagrangian radius in comoving Mpc.
     """
     M_use = np.atleast_1d(M)
     R = (M_use / (4.18879020479 * cosmo.rho_x(1, 'matter')))**(1./3.)
@@ -51,14 +51,14 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-        c_old (float or array_like): concentration to translate from.
-        Delta_old (float): Delta parameter associated to the input
+        c_old (:obj:`float` or `array`): concentration to translate from.
+        Delta_old (:obj:`float`): Delta parameter associated to the input
             concentration. See description of the :class:`MassDef` class.
-        Delta_new (float): Delta parameter associated to the output
+        Delta_new (:obj:`float`): Delta parameter associated to the output
             concentration.
 
     Returns:
-        float or array_like: concentration parameter for the new
+        (:obj:`float` or `array`): concentration parameter for the new
         mass definition.
     """
     status = 0
@@ -95,10 +95,10 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
     in which case simply pass ``Delta='fof'`` below.
 
     Args:
-        Delta (float): overdensity parameter. Pass ``'vir'`` if using virial
+        Delta (:obj:`float`): overdensity parameter. Pass ``'vir'`` if using virial
             overdensity. Pass ``'fof'`` for Friends-of-Friends halos.
-        rho_type (string): either 'critical' or 'matter'.
-        concentration (:class:`~pyccl.halos.halo_model_base.Concentration` or str):
+        rho_type (:obj:`str`): either 'critical' or 'matter'.
+        concentration (:class:`~pyccl.halos.halo_model_base.Concentration` or :obj:`str`):
             concentration-mass relation. If ``None``, no :math:`c(M)` relation will
             be attached to this mass definition (and hence one can't translate into
             other definitions).
@@ -146,10 +146,10 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            a (float): scale factor
+            a (:obj:`float`): scale factor
 
         Returns:
-            float : value of the overdensity parameter.
+            :obj:`float`: value of the overdensity parameter.
         """
         if self.Delta == 'fof':
             raise ValueError("FoF masses don't have an associated overdensity."
@@ -179,12 +179,12 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            R (float or array_like): halo radius (:math:`{\\rm Mpc}`,
+            R (:obj:`float` or `array`): halo radius (:math:`{\\rm Mpc}`,
                 physical, not comoving).
-            a (float): scale factor.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo mass in units of :math:`M_\\odot`.
+            (:obj:`float` or `array`): halo mass in units of :math:`M_\\odot`.
         """
         R_use = np.atleast_1d(R)
         Delta = self.get_Delta(cosmo, a)
@@ -201,13 +201,15 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             \\rho_X\\,\\Delta}\\right)^{1/3}
 
         Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of :math:`M_\\odot`.
-            a (float): scale factor.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`):
+                A Cosmology object.
+            M (:obj:`float` or `array`): halo mass in units of
+                :math:`M_\\odot`.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo radius in units of :math:`{\\rm Mpc}`
-            (physical, not comoving).
+            (:obj:`float` or `array`): halo radius in units of
+            :math:`{\\rm Mpc}` (physical, not comoving).
         """
         M_use = np.atleast_1d(M)
         Delta = self.get_Delta(cosmo, a)
@@ -222,12 +224,12 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
             m_def_other (:obj:`MassDef`): another mass definition.
 
         Returns:
-            float or array_like: halo masses in new definition.
+            (:obj:`float` or `array`): halo masses in new definition.
         """
         # TODO: Remove for CCLv3.
         warnings.warn("translate_mass is a deprecated method of MassDef and "
@@ -252,7 +254,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         """ Return mass definition subclass from name string.
 
         Args:
-            name (string):
+            name (:obj:`str`):
                 a mass definition name (e.g. ``'200m'`` for
                 :math:`\\Delta=200` times the matter density).
 
@@ -283,27 +285,27 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         instantiated.
 
         Args:
-            mass_def (MassDef, str or None, optional):
+            mass_def (:obj:`MassDef`, :obj:`str` or :obj:`None`):
                 Mass definition. If a string, instantiate from its name.
                 If `None`, obtain the one from the first specified halo model
                 ingredient.
-            mass_function (:class:`pyccl.halos.halo_model_base.MassFunction` or str):
+            mass_function (:class:`~pyccl.halos.halo_model_base.MassFunc` or :obj:`str`):
                 Mass function subclass. Strings are auto-instantiated using
                 ``mass_def``. ``None`` values are ignored.
-            halo_bias (:class:`pyccl.halos.halo_model_base.HaloBias` or str):
+            halo_bias (:class:`~pyccl.halos.halo_model_base.HaloBias` or :obj:`str`):
                 Halo bias subclass. Strings are auto-instantiated using
                 ``mass_def``. ``None`` values are ignored.
-            concentration (:class:`pyccl.halos.halo_model_base.Concentration` or str):
+            concentration (:class:`~pyccl.halos.halo_model_base.Concentration` or :obj:`str`):
                 Concentration subclass. Strings are auto-instantiated using
                 ``mass_def``. ``None`` values are ignored.
 
         Returns:
             Tuple of up to 4 elements.
 
-            - mass_def : MassDef
-            - mass_function : MassFunction, if specified
-            - halo_bias : HaloBias, if specified
-            - concentration : Concentration, if specified
+            - mass_def : :class:`MassDef`
+            - mass_function : :class:`~pyccl.halos.halo_model_base.MassFunc`, if specified
+            - halo_bias : :class:`~pyccl.halos.halo_model_base.HaloBias`, if specified
+            - concentration : :class:`~pyccl.halos.halo_model_base.Concentration`, if specified
         """ # noqa
         values = mass_function, halo_bias, concentration
         idx = [value is not None for value in values]
@@ -349,7 +351,7 @@ def MassDef200m(c_m='Duffy08'):
     r""":math:`\Delta = 200m` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation (deprecated).
+        c_m (:obj:`str`): concentration-mass relation (deprecated).
     """
     factory_warn()
     return MassDef(200, 'matter', c_m_relation=c_m)
@@ -359,7 +361,7 @@ def MassDef200c(c_m='Duffy08'):
     r""":math:`\Delta = 200c` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation (deprecated).
+        c_m (:obj:`str`): concentration-mass relation (deprecated).
     """
     factory_warn()
     return MassDef(200, 'critical', c_m_relation=c_m)
@@ -369,7 +371,7 @@ def MassDef500c(c_m='Ishiyama21'):
     r""":math:`\Delta = 500m` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation (deprecated).
+        c_m (:obj:`str`): concentration-mass relation (deprecated).
     """
     factory_warn()
     return MassDef(500, 'critical', c_m_relation=c_m)
@@ -379,7 +381,7 @@ def MassDefVir(c_m='Klypin11'):
     r""":math:`\Delta = \rm vir` mass definition.
 
     Args:
-        c_m (string): concentration-mass relation (deprecated).
+        c_m (:obj:`str`): concentration-mass relation (deprecated).
     """
     factory_warn()
     return MassDef('vir', 'critical', c_m_relation=c_m)
@@ -405,11 +407,11 @@ def mass_translator(*, mass_in, mass_out, concentration):
     masses according to two different definitions.
 
     Args:
-        mass_in (:class:`MassDef` or str): mass definition of the
+        mass_in (:class:`MassDef` or :obj:`str`): mass definition of the
             input mass.
-        mass_out (:class:`MassDef` or str): mass definition of the
+        mass_out (:class:`MassDef` or :obj:`str`): mass definition of the
             output mass.
-        concentration (:class:`~pyccl.halos.halo_model_base.Concentration` or str):
+        concentration (:class:`~pyccl.halos.halo_model_base.Concentration` or :obj:`str`):
             concentration-mass relation to use for the mass conversion. It must
             be calibrated for masses using the ``mass_in`` definition.
 

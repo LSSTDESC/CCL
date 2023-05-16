@@ -67,9 +67,9 @@ def check(status, cosmo=None):
     """Check the status returned by a ccllib function.
 
     Args:
-        status (int or :obj:`~pyccl.core.error_types`):
+        status (:obj:`int` or :obj:`~pyccl.core.error_types`):
             Flag or error describing the success of a function.
-        cosmo (:class:`~pyccl.core.Cosmology`, optional):
+        cosmo (:class:`~pyccl.cosmology.Cosmology`):
             A Cosmology object.
     """
     # Check for normal status (no action required)
@@ -102,7 +102,7 @@ def debug_mode(debug):
     user will not necessarily be informed of the root cause of the error.
 
     Args:
-        debug (bool): Switch debug mode on (True) or off (False).
+        debug (:obj:`bool`): Switch debug mode on (True) or off (False).
 
     """
     if debug:
@@ -122,7 +122,7 @@ def debug_mode(debug):
 #         fn (callable): Function with a single argument.
 #         fn_vec (callable): Function that has a vectorized implementation in
 #                            a .i file.
-#         x (float or array_like): Argument to fn.
+#         x (:obj:`float` or `array`): Argument to fn.
 #         returns_stats (bool): Indicates whether fn returns a status.
 #
 #     """
@@ -163,7 +163,7 @@ def _vectorize_fn(fn, fn_vec, cosmo, x, returns_status=True):
                            a .i file.
         cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
                                             converted to a ccl_cosmology.
-        x (float or array_like): Argument to fn.
+        x (:obj:`float` or `array`): Argument to fn.
         returns_stats (bool): Indicates whether fn returns a status.
 
     """
@@ -211,8 +211,8 @@ def _vectorize_fn3(fn, fn_vec, cosmo, x, n, returns_status=True):
                            a .i file.
         cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
                                             converted to a ccl_cosmology.
-        x (float or array_like): Argument to fn.
-        n (int): Integer argument to fn.
+        x (:obj:`float` or `array`): Argument to fn.
+        n (:obj:`int`): Integer argument to fn.
         returns_stats (bool): Indicates whether fn returns a status.
 
     """
@@ -258,7 +258,7 @@ def _vectorize_fn4(fn, fn_vec, cosmo, x, a, d, returns_status=True):
                            a .i file.
         cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
                                             converted to a ccl_cosmology.
-        x (float or array_like): Argument to fn.
+        x (:obj:`float` or `array`): Argument to fn.
         a (float): Float argument to fn.
         d (float): Float argument to fn.
         returns_stats (bool): Indicates whether fn returns a status.
@@ -305,8 +305,8 @@ def _vectorize_fn5(fn, fn_vec, cosmo, x1, x2, returns_status=True):
                            a .i file.
         cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
                                             converted to a ccl_cosmology.
-        x1 (float or array_like): Argument to fn.
-        x2 (float or array_like): Argument to fn.
+        x1 (:obj:`float` or `array`): Argument to fn.
+        x2 (:obj:`float` or `array`): Argument to fn.
         returns_stats (bool): Indicates whether fn returns a status.
 
     """
@@ -354,8 +354,8 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
                            a .i file.
         cosmo (ccl_cosmology or Cosmology): The input cosmology which gets
                                             converted to a ccl_cosmology.
-        x1 (float or array_like): Argument to fn.
-        x2 (float or array_like): Argument to fn.
+        x1 (:obj:`float` or `array`): Argument to fn.
+        x2 (:obj:`float` or `array`): Argument to fn.
         returns_stats (bool): Indicates whether fn returns a status.
 
     """
@@ -396,7 +396,7 @@ def get_pk_spline_nk(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the wavenumber dimension.
 
     Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
+        cosmo (``~pyccl.ccllib.cosmology`` via SWIG):
             Input cosmology.
     """
     if cosmo is not None:
@@ -409,7 +409,7 @@ def get_pk_spline_na(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the scale factor dimension.
 
     Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
+        cosmo (``~pyccl.ccllib.cosmology`` via SWIG):
             Input cosmology.
     """
     if cosmo is not None:
@@ -422,7 +422,7 @@ def get_pk_spline_lk(cosmo=None, spline_params=spline_params):
     or by the spline parameters of the input ``cosmo``.
 
     Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
+        cosmo (``~pyccl.ccllib.cosmology`` via SWIG):
             Input cosmology.
     """
     nk = get_pk_spline_nk(cosmo=cosmo, spline_params=spline_params)
@@ -440,7 +440,7 @@ def get_pk_spline_a(cosmo=None, spline_params=spline_params):
     or by the spline parameters of the input ``cosmo``.
 
     Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG, optional):
+        cosmo (``~pyccl.ccllib.cosmology`` via SWIG):
             Input cosmology.
     """
     na = get_pk_spline_na(cosmo=cosmo, spline_params=spline_params)
@@ -459,21 +459,21 @@ def resample_array(x_in, y_in, x_out,
     """ Interpolates an input y array onto a set of x values.
 
     Args:
-        x_in (array_like): input x-values.
-        y_in (array_like): input y-values.
-        x_out (array_like): x-values for output array.
-        extrap_lo (string): type of extrapolation for x-values below the
+        x_in (`array`): input x-values.
+        y_in (`array`): input y-values.
+        x_out (`array`): x-values for output array.
+        extrap_lo (:obj:`str`): type of extrapolation for x-values below the
             range of `x_in`. 'none' (for no interpolation), 'constant',
             'linx_liny' (linear in x and y), 'linx_logy', 'logx_liny' and
             'logx_logy'.
-        extrap_hi (string): type of extrapolation for x-values above the
+        extrap_hi (:obj:`str`): type of extrapolation for x-values above the
             range of `x_in`.
-        fill_value_lo (float): constant value if `extrap_lo` is
+        fill_value_lo (:obj:`float`): constant value if `extrap_lo` is
             'constant'.
-        fill_value_hi (float): constant value if `extrap_hi` is
+        fill_value_hi (:obj:`float`): constant value if `extrap_hi` is
             'constant'.
     Returns:
-        array_like: output array.
+        `array`: output array.
     """
     # TODO: point to the enum in CCLv3 docs.
     if extrap_lo not in extrap_types.keys():
@@ -589,9 +589,9 @@ def _get_spline1d_arrays(gsl_spline):
             The SWIG object of the GSL spline.
 
     Returns:
-        xarr: array_like
+        xarr: `array`
             The x array of the spline.
-        yarr: array_like
+        yarr: `array`
             The y array of the spline.
     """
     status = 0
@@ -613,11 +613,11 @@ def _get_spline2d_arrays(gsl_spline):
             The SWIG object of the 2D GSL spline.
 
     Returns:
-        yarr: array_like
+        yarr: `array`
             The y array of the spline.
-        xarr: array_like
+        xarr: `array`
             The x array of the spline.
-        zarr: array_like
+        zarr: `array`
             The z array of the spline. The shape is (yarr.size, xarr.size).
     """
     status = 0
@@ -639,15 +639,15 @@ def _get_spline3d_arrays(gsl_spline, length):
     Args:
         gsl_spline (`SWIGObject` of gsl_spline2d **):
             The SWIG object of the 2D GSL spline.
-        length (int):
+        length (:obj:`int`):
             The length of the 3rd dimension.
 
     Returns:
-        xarr: array_like
+        xarr: `array`
             The x array of the spline.
-        yarr: array_like
+        yarr: `array`
             The y array of the spline.
-        zarr: array_like
+        zarr: `array`
             The z array of the spline. The shape is (yarr.size, xarr.size).
     """
     status = 0

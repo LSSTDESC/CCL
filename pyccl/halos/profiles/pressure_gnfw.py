@@ -42,30 +42,30 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
     calculated in physical (non-comoving) units of :math:`\\mathrm{eV/cm^3}`.
 
     Args:
-        mass_bias (float):
+        mass_bias (:obj:`float`):
             The mass bias parameter :math:`1-b`.
-        P0 (float):
+        P0 (:obj:`float`):
             Profile normalization.
-        c500 (float):
+        c500 (:obj:`float`):
             Concentration parameter.
-        alpha, beta, gamma (float):
+        alpha, beta, gamma (:obj:`float`):
             Profile shape parameters.
-        alpha_P (float):
+        alpha_P (:obj:`float`):
             Additional mass dependence exponent
-        P0_hexp (float):
+        P0_hexp (:obj:`float`):
             Power of :math:`h` with which the normalization parameter scales.
             Equal to :math:`-1` for SZ-based normalizations,
             and :math:`-3/2` for X-ray-based normalizations.
-        qrange (tuple):
+        qrange (:obj:`tuple`):
             Tuple of two numbers denoting the limits of integration used when
             computing the Fourier-space profile template, in units of
             :math:`r_{\\mathrm{vir}}`.
-        nq (int):
+        nq (:obj:`int`):
             Number of sampling points of the Fourier-space profile template.
-        x_out (float):
+        x_out (:obj:`float`):
             Profile threshold, in units of :math:`r_{\\mathrm{500c}}`.
             Defaults to :math:`+\\infty`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
@@ -106,21 +106,21 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
             recomputes the Fourier-space template, which may be slow.
 
         Args:
-            mass_bias (float):
+            mass_bias (:obj:`float`):
                 The mass bias parameter :math:`1-b`.
-            P0 (float):
+            P0 (:obj:`float`):
                 Profile normalization.
-            c500 (float):
+            c500 (:obj:`float`):
                 Concentration parameter.
-            alpha, beta, gamma (float):
+            alpha, beta, gamma (:obj:`float`):
                 Profile shape parameters.
-            alpha_P (float):
+            alpha_P (:obj:`float`):
                 Additional mass dependence exponent
-            P0_hexp (float):
+            P0_hexp (:obj:`float`):
                 Power of :math:`h` with which the normalization parameter
                 scales. Equal to :math:`-1` for SZ-based normalizations,
                 and :math:`-3/2` for X-ray-based normalizations.
-            x_out (float):
+            x_out (:obj:`float`):
                 Profile threshold, in units of :math:`r_{\\mathrm{500c}}`.
                 Defaults to :math:`+\\infty`.
         """
