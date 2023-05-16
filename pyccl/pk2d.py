@@ -152,7 +152,7 @@ class Pk2D(CCLObject):
 
     @classmethod
     def from_function(cls, pkfunc, *, is_logp=True,
-                      spline_par=None,
+                      spline_params=None,
                       extrap_order_lok=1, extrap_order_hik=2):
         """ Generates a `Pk2D` object from a function that calculates a power
         spectrum.
@@ -178,11 +178,11 @@ class Pk2D(CCLObject):
             :class:`~pyccl.pk2d.Pk2D`
                 Power spectrum object.
         """ # noqa E501
-        if spline_par is None:
-            spline_par = spline_params
+        if spline_params is None:
+            from . import spline_params
         # Set k and a sampling from CCL parameters
-        a_arr = get_pk_spline_a(spline_params=spline_par)
-        lk_arr = get_pk_spline_lk(spline_params=spline_par)
+        a_arr = get_pk_spline_a(spline_params=spline_params)
+        lk_arr = get_pk_spline_lk(spline_params=spline_params)
 
         # Compute power spectrum on 2D grid
         pk_arr = np.array([pkfunc(k=np.exp(lk_arr), a=a) for a in a_arr])
