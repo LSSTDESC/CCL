@@ -2,4 +2,4 @@ sphinx==6
 sphinx_mdinclude
 numpy
 scipy
-docutils==0.2
+docutils==0.20
