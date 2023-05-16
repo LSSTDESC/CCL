@@ -23,7 +23,8 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
         cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmology object.
         z (:obj:`float` or `array`): z value(s) where amplitude is evaluated.
         a1 (:obj:`float` or `array`): IA :math:`A_1` at input z values.
-        a1delta (:obj:`float` or `array`): IA :math:`A_{1\\delta}` at input z values.
+        a1delta (:obj:`float` or `array`): IA :math:`A_{1\\delta}` at input
+            z values.
         a2 (:obj:`float` or `array`): IA :math:`A_2` at input z values.
         Om_m2_for_c2 (:obj:`bool`): True to use the Blazek et al. 2019
             convention of :math:`\\Omega_m^2` scaling.
@@ -33,7 +34,8 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
         Tuple of IA bias parameters
 
         - c1 (:obj:`float` or `array`): IA :math:`C_1` at input z values
-        - c1delta (:obj:`float` or `array`): IA :math:`C_{1\\delta}` at input z values
+        - c1delta (:obj:`float` or `array`): IA :math:`C_{1\\delta}` at input
+            z values
         - c2 (:obj:`float` or `array`): IA :math:`C_2` at input z values
     """
 

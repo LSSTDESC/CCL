@@ -21,7 +21,7 @@ Here, :math:`f^\alpha_\ell` is an :math:`\ell`-dependent **prefactor**,
 :math:`W_\alpha(\chi)` is the **radial kernel**, :math:`T_\alpha(k,\chi)`
 is the **transfer function**, and :math:`j^{(n)}_\ell(x)` is a
 generalized version of the **spherical Bessel functions**. Descriptions
-of each of these ingredients, and how to implement generalised ``Tracer`` s
+of each of these ingredients, and how to implement generalised Tracers
 as sub-classes of the :class:`Tracer` base class can be found below. The
 documentation of the base :class:`Tracer` class is a good place to start.
 """
