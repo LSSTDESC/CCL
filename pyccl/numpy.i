@@ -1030,7 +1030,7 @@
   /* the arrays */
   array = (DATA_TYPE **)malloc($2*sizeof(DATA_TYPE *));
   object_array = (PyArrayObject **)calloc($2,sizeof(PyArrayObject *));
-  is_new_object_array = (int *)calloc($2,sizeof(:obj:`int`));
+  is_new_object_array = (int *)calloc($2,sizeof(int));
 
   if (array == NULL || object_array == NULL || is_new_object_array == NULL)
   {
@@ -1265,7 +1265,7 @@
   /* the arrays */
   array = (DATA_TYPE **)malloc($2*sizeof(DATA_TYPE *));
   object_array = (PyArrayObject **)calloc($2,sizeof(PyArrayObject *));
-  is_new_object_array = (int *)calloc($2,sizeof(:obj:`int`));
+  is_new_object_array = (int *)calloc($2,sizeof(int));
 
   if (array == NULL || object_array == NULL || is_new_object_array == NULL)
   {
