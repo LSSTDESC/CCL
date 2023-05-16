@@ -56,7 +56,7 @@ class HaloProfileHOD(HaloProfile):
     :math:`\\beta_g` and :math:`\\beta_{\\rm max}` are
     time-dependent via a linear expansion around a pivot scale
     factor :math:`a_*` with an offset and a tilt parameter
-    (:math:`X_0` and :math:`X_p` respectively):
+    (:math:`X_0` and :math:`X_p`, respectively):
 
     .. math::
        X(a) = X_0 + X_p\\,(a-a_*).
