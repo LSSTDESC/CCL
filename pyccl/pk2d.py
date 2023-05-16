@@ -7,7 +7,7 @@ import numpy as np
 
 from . import (
     CCLObject, DEFAULT_POWER_SPECTRUM, UnlockInstance, check, get_pk_spline_a,
-    get_pk_spline_lk, lib, spline_params, unlock_instance)
+    get_pk_spline_lk, lib, unlock_instance)
 from . import CCLWarning, CCLError, CCLDeprecationWarning, warn_api, deprecated
 from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 
