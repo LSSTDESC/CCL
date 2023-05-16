@@ -86,7 +86,7 @@ class Tk3D(CCLObject):
         extrap_order_lok (:obj:`int`): extrapolation order to be used on
             k-values below the minimum of the splines (use 0 or 1). Note
             that the extrapolation will be done in either
-            :math:`\\log(T(k_1,k_2,a)` or :math:`T(k_1,k_2,a)`,
+            :math:`\\log(T(k_1,k_2,a))` or :math:`T(k_1,k_2,a)`,
             depending on the value of ``is_logt``.
         extrap_order_hik (:obj:`int`): same as ``extrap_order_lok`` for
             k-values above the maximum of the splines.
@@ -240,7 +240,7 @@ class Tk3D(CCLObject):
 
             - a_arr (1D ``numpy.ndarray``): Array of scale factors.
             - lk_arr1, lk_arr2 (1D ``numpy.ndarray``): Arrays of
-              :math:`ln(k)`.
+              :math:`log(k)`.
             - out (list of ``numpy.ndarray``): The trispectrum
               :math:`T(k_1, k_2, z)` or its factors
               :math:`f(k_1, z),\\,\\,f(k_2, z)`.
