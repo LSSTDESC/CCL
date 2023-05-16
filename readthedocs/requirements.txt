@@ -1,5 +1,5 @@
 sphinx==6
 sphinx_mdinclude
+sphinx-book-theme
 numpy
 scipy
-docutils>=0.18

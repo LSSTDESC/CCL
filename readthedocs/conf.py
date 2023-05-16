@@ -131,8 +131,13 @@ todo_include_todos = True
 # a list of builtin themes.
 #
 
-html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+options = ["sphinx_rtd_theme", "sphinx_book_theme",]
+html_theme = options[1]
+html_theme_module = importlib.import_module(html_theme)
+try:
+    html_theme_path = [html_theme_module.get_html_theme_path()]
+except AttributeError:
+    pass
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
