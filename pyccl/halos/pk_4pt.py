@@ -56,7 +56,7 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
             ``prof2`` will be used as ``prof4``.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as ``prof12_2pt`` for ``prof3`` and ``prof4``.
-        normprof1 (:obj:`bool`): (Deprecated - do not use)
+        normprof1 (:obj:`bool`): (**Deprecated - do not use**)
             if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
@@ -165,7 +165,7 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
             products of the means of both profiles.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as ``prof12_2pt`` for ``prof3`` and ``prof4``.
-        normprof1 (:obj:`bool`): (Deprecated - do not use)
+        normprof1 (:obj:`bool`): (**Deprecated - do not use**)
             if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
@@ -407,7 +407,7 @@ def halomod_Tk3D_SSC(
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as ``prof12_2pt`` for ``prof3`` and ``prof4``. If ``None``,
             ``prof12_2pt`` will be used.
-        normprof1 (:obj:`bool`): (Deprecated - do not use)
+        normprof1 (:obj:`bool`): (**Deprecated - do not use**)
             if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where

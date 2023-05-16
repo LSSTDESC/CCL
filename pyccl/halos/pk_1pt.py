@@ -17,7 +17,7 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
         a (:obj:`float` or `array`): scale factor.
         prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): halo
             profile.
-        normprof (:obj:`bool`): (Deprecated - do not use)
+        normprof (:obj:`bool`): (**Deprecated - do not use**)
             if `True`, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`,
             where :math:`u` is the profile represented by ``prof``.
