@@ -20,6 +20,7 @@ import os
 from os.path import abspath, dirname, join as pjoin
 import sys
 import sphinx_rtd_theme
+import importlib
 
 this_dir = dirname(abspath(__file__))
 root_path = abspath(pjoin(this_dir, '../'))
