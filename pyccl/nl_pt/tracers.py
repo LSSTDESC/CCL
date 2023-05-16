@@ -32,9 +32,9 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
     Returns:
         Tuple of IA bias parameters
 
-        - c1 (:obj:`float` or `array`): IA ``c1`` at input z values
-        - c1delta (:obj:`float` or `array`): IA ``c1delta`` at input z values
-        - c2 (:obj:`float` or `array`): IA ``c2`` at input z values
+        - c1 (:obj:`float` or `array`): IA :math:`C_1` at input z values
+        - c1delta (:obj:`float` or `array`): IA :math:`C_{1\\delta}` at input z values
+        - c2 (:obj:`float` or `array`): IA :math:`C_2` at input z values
     """
 
     Om_m = cosmo['Omega_m']
@@ -203,11 +203,11 @@ class PTIntrinsicAlignmentTracer(PTTracer):
     Args:
         c1 (:obj:`float` or :obj:`tuple`): a single number or a
             tuple of arrays ``(z, c1(z))`` giving the first-order
-            alignment bias.
+            alignment bias :math:`C_1`.
         c2 (:obj:`float` or :obj:`tuple`): as above for the
-            second-order alignment bias.
+            second-order alignment bias :math:`C_2`.
         cdelta (:obj:`float` or :obj:`tuple`): as above for the
-            overdensity bias.
+            overdensity bias :math:`C_{1\\delta}`.
     """
     type = 'IA'
 
