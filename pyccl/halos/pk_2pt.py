@@ -41,16 +41,16 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
         prof2 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): a
             second halo profile. If ``None``, ``prof`` will be used as
             ``prof2``.
-        normprof1 (:obj:`bool`): (**Deprecated - do not use**)
-            if ``True``, this integral will be
+        normprof1 (:obj:`bool`): if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by ``prof``. **Deprecated.**
-        normprof2 (:obj:`bool`): (**Deprecated - do not use**)
-            if ``True``, this integral will be
+            :math:`u` is the profile represented by ``prof``.
+            **Will be deprecated in v3.**
+        normprof2 (:obj:`bool`): if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`v` is the profile represented by ``prof2``. **Deprecated.**
+            :math:`v` is the profile represented by ``prof2``.
+            **Will be deprecated in v3.**
         prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object
             returning the the two-point moment of the two profiles
@@ -197,11 +197,13 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
         normprof1 (:obj:`bool`): if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by ``prof``. **Deprecated.**
+            :math:`u` is the profile represented by ``prof``.
+            **Will be deprecated in v3.**
         normprof2 (:obj:`bool`): if ``True``, this integral will be
             normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
             (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`v` is the profile represented by ``prof2``. **Deprecated.**
+            :math:`v` is the profile represented by ``prof2``.
+            **Will be deprecated in v3.**
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If ``None``,
             the power spectrum stored within `cosmo` will be used.
