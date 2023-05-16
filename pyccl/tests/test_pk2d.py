@@ -175,7 +175,7 @@ def test_pk2d_function():
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
 
     psp = ccl.Pk2D.from_function(pkfunc=lpk2d,
-                                 spline_par=cosmo.cosmo.spline_params)
+                                 spline_params=cosmo.cosmo.spline_params)
     with pytest.warns(ccl.CCLDeprecationWarning):
         psp2 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
     assert psp(1.0, 1.0) == psp2(1.0, 1.0)
