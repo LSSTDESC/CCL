@@ -33,10 +33,10 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
     Returns:
         Tuple of IA bias parameters
 
-        - c1 (:obj:`float` or `array`): IA :math:`C_1` at input z values
-        - c1delta (:obj:`float` or `array`): IA :math:`C_{1\\delta}` at input
-            z values
-        - c2 (:obj:`float` or `array`): IA :math:`C_2` at input z values
+        - c1 (:obj:`float` or `array`): IA :math:`C_1` at input z values.
+        - c1delta (:obj:`float` or `array`): IA :math:`C_{1\\delta}` at
+          input z values.
+        - c2 (:obj:`float` or `array`): IA :math:`C_2` at input z values.
     """
 
     Om_m = cosmo['Omega_m']
