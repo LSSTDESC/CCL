@@ -18,12 +18,6 @@ R_ARR = np.linspace(R_INI, R_END, 512)
 def test_resample_raises():
     with pytest.raises(ccl.CCLError):
         ccl.resample_array(R_ARR, R_ARR[:-1], R_ARR)
-    with pytest.raises(ValueError):
-        ccl.resample_array(R_ARR, R_ARR, R_ARR,
-                           'linx_lagy', 'linx_logy')
-    with pytest.raises(ValueError):
-        ccl.resample_array(R_ARR, R_ARR, R_ARR,
-                           'linx_logy', 'linx_lagy')
 
 
 @pytest.mark.parametrize('extrap', EXTRAP_TYPES)

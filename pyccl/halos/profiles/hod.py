@@ -131,7 +131,7 @@ class HaloProfileHOD(HaloProfileNumberCounts):
                  log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False, mass_def=None):
+                 a_pivot=1., ns_independent=False, mass_def=None, **fftlog):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p
         self.log10M0_0 = log10M0_0
@@ -150,7 +150,8 @@ class HaloProfileHOD(HaloProfileNumberCounts):
         self.bmax_p = bmax_p
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
-        super().__init__(mass_def=mass_def, concentration=concentration)
+        super().__init__(mass_def=mass_def, concentration=concentration,
+                         **fftlog)
 
     @warn_api(pairs=[("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
                      ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),

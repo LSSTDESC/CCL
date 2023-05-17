@@ -2,8 +2,8 @@
 well as wrappers to automatically vectorize functions.
 """
 __all__ = (
-    "CLevelErrors", "ExtrapolationMethods", "IntegrationMethods", "check",
-    "debug_mode", "get_pk_spline_lk", "get_pk_spline_a", "resample_array")
+    "CLevelErrors", "IntegrationMethods", "check", "debug_mode",
+    "get_pk_spline_lk", "get_pk_spline_a", "resample_array")
 
 from enum import Enum
 from typing import Iterable
@@ -11,6 +11,7 @@ from typing import Iterable
 import numpy as np
 
 from . import CCLError, lib, spline_params
+from .base.parameters.fftlog_params import extrap_types
 
 
 NoneArr = np.array([])
@@ -21,26 +22,10 @@ class IntegrationMethods(Enum):
     SPLINE = "spline"
 
 
-class ExtrapolationMethods(Enum):
-    NONE = "none"
-    CONSTANT = "constant"
-    LINX_LINY = "linx_liny"
-    LINX_LOGY = "linx_logy"
-    LOGX_LINY = "logx_liny"
-    LOGX_LOGY = "logx_logy"
-
-
 integ_types = {
     'qag_quad': lib.integration_qag_quad,
     'spline': lib.integration_spline}
 
-extrap_types = {
-    'none': lib.f1d_extrap_0,
-    'constant': lib.f1d_extrap_const,
-    'linx_liny': lib.f1d_extrap_linx_liny,
-    'linx_logy': lib.f1d_extrap_linx_logy,
-    'logx_liny': lib.f1d_extrap_logx_liny,
-    'logx_logy': lib.f1d_extrap_logx_logy}
 
 # This is defined here instead of in `errors.py` because SWIG needs `CCLError`
 # from `.errors`, resulting in a cyclic import.
@@ -454,11 +439,6 @@ def resample_array(x_in, y_in, x_out,
         array_like: output array.
     """
     # TODO: point to the enum in CCLv3 docs.
-    if extrap_lo not in extrap_types.keys():
-        raise ValueError("Invalid extrapolation type.")
-    if extrap_hi not in extrap_types.keys():
-        raise ValueError("Invalid extrapolation type.")
-
     status = 0
     y_out, status = lib.array_1d_resample(x_in, y_in, x_out,
                                           fill_value_lo, fill_value_hi,

@@ -91,7 +91,10 @@ class HaloProfileCIBShang12(HaloProfileCIB):
                      ("sigLM", "siglog10M")])
     def __init__(self, *, concentration, nu_GHz, alpha=0.36, T0=24.4,
                  beta=1.75, gamma=1.7, s_z=3.6, log10Meff=12.6,
-                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8, mass_def=None):
+                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8, mass_def=None,
+                 **fftlog):
+
+        self._one_over_4pi = 1/(4*np.pi)
         self.nu = nu_GHz
         self.alpha = alpha
         self.T0 = T0
@@ -102,10 +105,9 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         self.siglog10M = siglog10M
         self.Mmin = Mmin
         self.L0 = L0
-        self._one_over_4pi = 1/(4*np.pi)
         kwargs = {"concentration": concentration, "mass_def": mass_def}
         self.pNFW = HaloProfileNFW(**kwargs)
-        super().__init__(**kwargs)
+        super().__init__(**kwargs, **fftlog)
 
     def dNsub_dlnM_TinkerWetzel10(self, Msub, Mparent):
         """Subhalo mass function of Tinker & Wetzel (2010ApJ...719...88T)

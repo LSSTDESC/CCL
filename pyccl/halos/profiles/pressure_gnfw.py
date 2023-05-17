@@ -73,7 +73,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
     def __init__(self, *, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
-                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, mass_def):
+                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, mass_def, **fftlog):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
@@ -88,7 +88,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
 
         # Interpolator for dimensionless Fourier-space profile
         self._fourier_interp = None
-        super().__init__(mass_def=mass_def)
+        super().__init__(mass_def=mass_def, **fftlog)
 
     @warn_api
     def update_parameters(self, *, mass_bias=None, P0=None,
@@ -147,7 +147,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
             re_fourier = True
             self.x_out = x_out
 
-        if re_fourier and (self._fourier_interp is not None):
+        if re_fourier and self._fourier_interp is not None:
             self._fourier_interp = self._integ_interp()
 
     def _form_factor(self, x):

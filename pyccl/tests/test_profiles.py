@@ -10,6 +10,8 @@ COSMO = ccl.Cosmology(
     transfer_function='bbks', matter_power_spectrum='linear')
 M200 = ccl.halos.MassDef200c()
 M500c = ccl.halos.MassDef(500, 'critical')
+FFTL = {"large_padding_2D": True, "padding_hi_extra": 1234,
+        "extrapol": "linx_liny", }
 
 
 def test_HaloProfile_eq_repr_hash():
@@ -127,10 +129,14 @@ def test_empirical_smoke(prof_class):
         smoke_assert_prof_real(p, method='_projected_analytic')
         smoke_assert_prof_real(p, method='_cumul2d_analytic')
 
-    p = prof_class(concentration=c)
+    p = prof_class(concentration=c, **FFTL)
     smoke_assert_prof_real(p, method='real')
     smoke_assert_prof_real(p, method='projected')
     smoke_assert_prof_real(p, method='fourier')
+
+    # verify that the FFTLog parameters have been set
+    for param in FFTL:
+        assert getattr(p.precision_fftlog, param) == FFTL[param]
 
 
 def test_cib_smoke():
@@ -194,13 +200,13 @@ def test_gnfw_smoke():
 
 
 def test_gnfw_refourier():
-    p = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
+    p = ccl.halos.HaloProfilePressureGNFW(mass_def=M500c)
     # Create Fourier template
-    p._integ_interp()
-    p_f1 = p.fourier(COSMO, 1., 1E13, 1)
+    kwargs = {"cosmo": COSMO, "k": 1., "M": 1e13, "a": 1}
+    p_f1 = p.fourier(**kwargs)
     # Check the Fourier profile gets recalculated
     p.update_parameters(alpha=1.32, c500=p.c500+0.1)
-    p_f2 = p.fourier(COSMO, 1., 1E13, 1)
+    p_f2 = p.fourier(**kwargs)
     assert p_f1 != p_f2
 
 

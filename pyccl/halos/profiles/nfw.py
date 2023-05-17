@@ -54,7 +54,8 @@ class HaloProfileNFW(HaloProfileMatter):
                  projected_analytic=False,
                  cumul2d_analytic=False,
                  truncated=True,
-                 mass_def=None):
+                 mass_def=None,
+                 **fftlog):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic
@@ -74,11 +75,10 @@ class HaloProfileNFW(HaloProfileMatter):
                                  "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
         self._omln2 = 1 - np.log(2)
-        super().__init__(mass_def=mass_def, concentration=concentration)
-        self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
-                                     n_per_decade=1000,
-                                     plaw_fourier=-2.)
+        default_fftlog = {"padding_lo_fftlog": 1e-2, "padding_hi_fftlog": 100,
+                          "n_per_decade": 1000, "plaw_fourier": -2}
+        super().__init__(mass_def=mass_def, concentration=concentration,
+                         **{**default_fftlog, **fftlog})
 
     def _norm(self, M, Rs, c):
         # NFW normalization from mass, radius and concentration

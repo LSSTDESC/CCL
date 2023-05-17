@@ -43,18 +43,18 @@ class HaloProfileEinasto(HaloProfileMatter):
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration, truncated=True, alpha='cosmo',
-                 mass_def=None):
+                 mass_def=None, **fftlog):
         self.truncated = truncated
         self.alpha = alpha
-        super().__init__(mass_def=mass_def, concentration=concentration)
-        mvir = MassDef("vir", "matter")
+        self.truncated = truncated
+        self.alpha = alpha
+        default_fftlog = {"padding_lo_fftlog": 0.01, "padding_hi_fftlog": 100,
+                          "n_per_decade": 1000, "plaw_fourier": -2}
+        super().__init__(mass_def=mass_def, concentration=concentration,
+                         **{**default_fftlog, **fftlog})
         self._to_virial_mass = mass_translator(
-            mass_in=self.mass_def, mass_out=mvir,
+            mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
             concentration=self.concentration)
-        self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-2,
-                                     n_per_decade=1000,
-                                     plaw_fourier=-2.)
 
     def update_parameters(self, alpha=None):
         """Update any of the parameters associated with this profile.

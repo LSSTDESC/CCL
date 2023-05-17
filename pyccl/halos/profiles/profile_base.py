@@ -42,7 +42,7 @@ class HaloProfile(CCLAutoRepr):
     __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
                                  )(super.__getattribute__)
 
-    def __init__(self, *, mass_def=None, concentration=None):
+    def __init__(self, *, mass_def=None, concentration=None, **fftlog):
         # Verify that profile can be initialized.
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
             name = type(self).__name__
@@ -50,7 +50,7 @@ class HaloProfile(CCLAutoRepr):
                             "_real or _fourier implementation.")
 
         # Initialize FFTLog.
-        self.precision_fftlog = FFTLogParams()
+        self.precision_fftlog = FFTLogParams(**fftlog)
 
         # Initialize mass_def and concentration.
         self.mass_def, *out = MassDef.from_specs(
