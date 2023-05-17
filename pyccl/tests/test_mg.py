@@ -4,7 +4,7 @@ import pytest
 
 @pytest.mark.parametrize('tf', ['eisenstein_hu', 'bbks'])
 def test_mu_sigma_transfer_err(tf):
-    with pytest.raises(ccl.CCLError):
+    with pytest.raises(ValueError):
         cosmo = ccl.Cosmology(
             Omega_c=0.25,
             Omega_b=0.05,

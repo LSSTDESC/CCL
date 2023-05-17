@@ -146,19 +146,10 @@ def test_pk2d_from_model_emu():
         assert maxdiff < 1E-10
 
 
-@pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu'])
-def test_pk2d_from_model_fails(model):
-    cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1E-10, n_s=0.96,
-        transfer_function='boltzmann_class')
-    with pytest.raises(ccl.CCLError):
-        ccl.Pk2D.from_model(cosmo, model=model)
-
-
 def test_pk2d_from_model_raises():
     cosmo = ccl.CosmologyVanillaLCDM()
-    with pytest.raises(ValueError):
-        ccl.Pk2D.from_model(cosmo, model='bbkss')
+    with pytest.raises(KeyError):
+        ccl.Pk2D.from_model(cosmo, "Ratajkowski")
 
 
 def test_pk2d_function():

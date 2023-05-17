@@ -5,6 +5,7 @@ can compute a set of theoretical predictions.
 __all__ = ("TransferFunctions", "MatterPowerSpectra",
            "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
 
+import copy
 import warnings
 import yaml
 from enum import Enum
@@ -331,7 +332,7 @@ class Cosmology(CCLObject):
             bcm_etab=bcm_etab, bcm_ks=bcm_ks, mu_0=mu_0, sigma_0=sigma_0,
             c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
             z_mg=z_mg, df_mg=df_mg,
-            extra_parameters=extra_parameters)
+            extra_parameters=copy.deepcopy(extra_parameters))
 
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
@@ -575,16 +576,13 @@ class Cosmology(CCLObject):
         state.pop('cosmo', None)
         state.pop('_params', None)
         state.pop('_config', None)
-        return state
+        return copy.deepcopy(state)
 
     def __setstate__(self, state):
-        # This will create a new `Cosmology` object so we create another lock.
-        state["_object_lock"] = type(state.pop("_object_lock"))()
         self.__dict__ = state
         # we removed the C data when it was pickled, so now we unpickle
         # and rebuild the C data
         self._build_cosmo()
-        self._object_lock.lock()  # Lock on exit.
 
     def compute_distances(self):
         """Compute the distance splines."""
@@ -607,48 +605,25 @@ class Cosmology(CCLObject):
         """Return the linear power spectrum."""
         self.compute_growth()
 
-        # Populate power spectrum splines
-        trf = self._config_init_kwargs['transfer_function']
-        pk = None
-        rescale_s8 = True
-        rescale_mg = True
-        if trf == 'boltzmann_class':
-            pk = self.get_class_pk_lin()
-        elif trf == 'boltzmann_isitgr':
-            rescale_mg = False
-            pk = self.get_isitgr_pk_lin()
-        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
-            rescale_s8 = False
-            rescale_mg = False
-            pk = Pk2D.from_model(self, model=trf)
-
         # Compute the CAMB nonlin power spectrum if needed,
         # to avoid repeating the code in `compute_nonlin_power`.
         # Because CAMB power spectra come in pairs with pkl always computed,
         # we set the nonlin power spectrum first, but keep the linear via a
         # status variable to use it later if the transfer function is CAMB too.
-        pkl = None
         if self._config_init_kwargs["matter_power_spectrum"] == "camb":
-            if not np.isfinite(self["A_s"]):
-                raise CCLError("CAMB doesn't rescale non-linear power spectra "
-                               "consistently without A_s.")
-            # no rescaling because A_s is necessarily provided
-            rescale_mg = rescale_s8 = False
+            # If MPS is 'camb', then TRF must be 'boltzmann_camb'.
+            if not self["extra_parameters"].get("camb"):
+                self["extra_parameters"]["camb"] = {}
+            self["extra_parameters"]["camb"]["nonlin"] = True
+
+        trf = self._config_init_kwargs['transfer_function']
+        pk = Pk2D.from_model(self, trf)
+
+        if isinstance(pk, tuple):
+            # (trf, mps) == CAMB so both pkl & pknl were returned
             name = "delta_matter:delta_matter"
-            pkl, self._pk_nl[name] = self.get_camb_pk_lin(nonlin=True)
-
-        if trf == "boltzmann_camb":
-            pk = pkl if pkl is not None else self.get_camb_pk_lin()
-
-        # Rescale by sigma8/mu-sigma if needed
-        if pk:
-            status = 0
-            status = lib.rescale_linpower(self.cosmo, pk.psp,
-                                          int(rescale_mg),
-                                          int(rescale_s8),
-                                          status)
-            check(status, self)
-
+            pkl, self._pk_nl[name] = pk
+            return pkl
         return pk
 
     @unlock_instance(mutate=False)
@@ -830,6 +805,16 @@ class Cosmology(CCLObject):
 
         # Return status information
         return "status(%s): %s" % (status, msg)
+
+    def copy(self, **params):
+        """Generate a copy of the object. Optionally, change some paramters."""
+        out = type(self).__new__(type(self))
+        new_state = self.__getstate__()
+        new_state["_params_init_kwargs"].update(**params)
+        if params:
+            new_state["_pk_lin"], new_state["_pk_nl"] = {}, {}
+        out.__setstate__(new_state)
+        return out
 
 
 def CosmologyVanillaLCDM(**kwargs):

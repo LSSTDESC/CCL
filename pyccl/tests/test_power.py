@@ -152,7 +152,6 @@ def test_kNL(A):
 
 
 @pytest.mark.parametrize('tf,pk,m_nu', [
-    # ('boltzmann_class', 'emu', 0.06), - this case is slow and not needed
     ('bbks', 'emu', 0.06),
     ('eisenstein_hu', 'emu', 0.06),
 ])

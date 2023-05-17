@@ -224,44 +224,30 @@ class Pk2D(CCLObject):
         """`Pk2D` constructor returning the power spectrum associated with
         a given numerical model.
 
-        Arguments:
-            cosmo (:class:`~pyccl.core.Cosmology`)
-                A Cosmology object.
-            model (:obj:`str`)
-                model to use. These models allowed:
-                  - `'bbks'` (Bardeen et al. ApJ 304 (1986) 15)
-                  - `'eisenstein_hu'` (Eisenstein & Hu astro-ph/9709112)
-                  - `'eisenstein_hu_nowiggles'` (Eisenstein & Hu astro-ph/9709112)
-                  - `'emu'` (arXiv:1508.02654).
-        Returns:
-            :class:`~pyccl.pk2d.Pk2D`
-                The power spectrum of the input model.
-        """  # noqa E501
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            model (:obj:`str`): model to use. Three models allowed:
+                `'bbks'` (Bardeen et al. ApJ 304 (1986) 15).
+                `'eisenstein_hu'` (Eisenstein & Hu astro-ph/9709112).
+                `'eisenstein_hu_nowiggles'` (Eisenstein & Hu astro-ph/9709112).
+                `'emu'` (arXiv:1508.02654).
+        """
+        # TODO: docs CCLv3 - points users to PowerSpectrum._subclasses()
+        if model == "emu":
+            ret = lib.compute_power_emu(cosmo.cosmo, 0)
+            psp, status = ret if np.ndim(ret) else (None, ret)
+            check(status, cosmo)
+            return cls.from_psp(psp)
 
-        pk2d = Pk2D.__new__(cls)
-        status = 0
-        if model == 'bbks':
-            cosmo.compute_growth()
-            ret = lib.compute_linpower_bbks(cosmo.cosmo, status)
-        elif model == 'eisenstein_hu':
-            cosmo.compute_growth()
-            ret = lib.compute_linpower_eh(cosmo.cosmo, 1, status)
-        elif model == 'eisenstein_hu_nowiggles':
-            cosmo.compute_growth()
-            ret = lib.compute_linpower_eh(cosmo.cosmo, 0, status)
-        elif model == 'emu':
-            ret = lib.compute_power_emu(cosmo.cosmo, status)
-        else:
-            raise ValueError(f"Invalid model {model}.")
+        from .pspec import PowerSpectrum
+        # Parse extra parameters in `cosmo`.
+        extras_map = {"boltzmann_camb": "camb", "boltzmann_isitgr": "camb",
+                      "boltzmann_class": "class", }
+        extras_name = extras_map.get(model)
+        extras = cosmo["extra_parameters"].get(extras_name) or {}
 
-        if np.ndim(ret) == 0:
-            status = ret
-        else:
-            with UnlockInstance(pk2d):
-                pk2d.psp, status = ret
-
-        check(status, cosmo)
-        return pk2d
+        pspec = PowerSpectrum.create_instance(model, **extras)
+        return pspec.get_power_spectrum(cosmo)
 
     @classmethod
     @functools.wraps(from_model)
@@ -579,6 +565,12 @@ class Pk2D(CCLObject):
     def __ipow__(self, other):
         self = self**other
         return self
+
+    @classmethod
+    def from_psp(cls, psp):
+        out = cls.__new__(cls)
+        out.psp = psp
+        return out
 
 
 @warn_api

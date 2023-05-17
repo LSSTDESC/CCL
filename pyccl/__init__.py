@@ -35,7 +35,7 @@ from .covariances import *
 from .pk2d import *
 from .tk3d import *
 
-from .boltzmann import *
+from .pspec import *
 from .baryons import *
 from .neutrinos import *
 

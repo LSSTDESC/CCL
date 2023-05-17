@@ -25,7 +25,7 @@ def test_bcm():
     k = data[:, 0] * cosmo['h']
     a = 1
 
-    bar = ccl.BaryonsSchneider15(log10Mc=14.)
+    bar = ccl.baryons.BaryonsSchneider15(log10Mc=14.)
     fbcm = bar.boost_factor(cosmo, k, a)
     err = np.abs(data[:, 1]/data_nobar[:, 1]/fbcm - 1)
     assert np.allclose(err, 0, atol=BCM_TOLERANCE, rtol=0)
