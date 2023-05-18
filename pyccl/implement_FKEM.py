@@ -174,8 +174,9 @@ def implement_FKEM(cosmo,clt1, clt2, p_of_k_a, ls, l_limber, limber_max_error):
 
 		#print(fll_t1[i][el]*fll_t2[j][el], len(cl_limber_nonlin),len(ls), cls_nonlimber_lin, cl_limber_nonlin[el], cl_limber_nonlin[el]- cl_limber_lin[el])
 		cells.append(cl_limber_nonlin[el]- cl_limber_lin[el] + fll_t1[i][el]*fll_t2[j][el]*cls_nonlimber_lin)
-		if (cells[-1]/cl_limber_nonlin[el] - 1<limber_max_error and l_limber=='auto') or (type(l_limber) !='str' and  ell >=l_limber):
+		if (cells[-1]/cl_limber_nonlin[el] - 1<limber_max_error and l_limber=='auto') or (type(l_limber) !=str and  ell >=l_limber):
 			l_limber = ls[el]
+			print("Limber calculation starting at l=",l_limber)
 			break
 
 
