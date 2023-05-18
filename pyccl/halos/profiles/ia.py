@@ -9,11 +9,13 @@ __all__ = ("SatelliteShearHOD",)
 
 class SatelliteShearHOD(HaloProfileHOD):
     """ Halo HOD class that calculates the satellite galaxy intrinsic shear
-    field in real and fourier space, according to Fortuna et al. 2021.
+    field in real and fourier space, according to `Fortuna et al. 2021.
+    <https://arxiv.org/abs/2003.02700>`_.
     Can be used to compute halo model-based intrinsic alignment
     (angular) power spectra.
 
     The satellite intrinsic shear profile in real space is assumed to be
+
     .. math::
         \\gamma^I(r)=a_{1\\mathrm{h}}\\left(\\frac{r}{r_\\mathrm{vir}}
         \\right)^b \\sin^b\\theta,
@@ -24,61 +26,58 @@ class SatelliteShearHOD(HaloProfileHOD):
     semi-major axis of the galaxy along the line of sight.
 
     Args:
-        concentration (:obj:`Concentration`): concentration-mass
-            relation to use with this profile.
-        a1h (float): Amplitude of the satellite intrinsic shear profile.
-        b (float): Power-law index of the satellite intrinsic shear profile.
+        concentration (:obj:`~pyccl.halos.halo_model_base.Concentration`):
+            concentration-mass relation to use with this profile.
+        a1h (:obj:`float`): Amplitude of the satellite intrinsic shear profile.
+        b (:obj:`float`): Power-law index of the satellite intrinsic shear profile.
             If zero, the profile is assumed to be constant inside the halo.
-        lmax (int): Maximum multipole to be summed in the plane-wave expansion
-            (Eq. (C1) in Fortuna et al. 2021, default=6).
-        log10Mmin_0 (float): offset parameter for
+        lmax (:obj:`int`): Maximum multipole to be summed in the plane-wave expansion
+            (Eq. (C1) in `Fortuna et al. 2021
+            <https://arxiv.org/abs/2003.02700>`_, default=6).
+        log10Mmin_0 (:obj:`float`): offset parameter for
             :math:`\\log_{10}M_{\\rm min}`.
-        log10Mmin_p (float): tilt parameter for
+        log10Mmin_p (:obj:`float`): tilt parameter for
             :math:`\\log_{10}M_{\\rm min}`.
-        siglnM_0 (float): offset parameter for
+        siglnM_0 (:obj:`float`): offset parameter for
             :math:`\\sigma_{{\\rm ln}M}`.
-        siglnM_p (float): tilt parameter for
+        siglnM_p (:obj:`float`): tilt parameter for
             :math:`\\sigma_{{\\rm ln}M}`.
-        log10M0_0 (float): offset parameter for
+        log10M0_0 (:obj:`float`): offset parameter for
             :math:`\\log_{10}M_0`.
-        log10M0_p (float): tilt parameter for
+        log10M0_p (:obj:`float`): tilt parameter for
             :math:`\\log_{10}M_0`.
-        log10M1_0 (float): offset parameter for
+        log10M1_0 (:obj:`float`): offset parameter for
             :math:`\\log_{10}M_1`.
-        log10M1_p (float): tilt parameter for
+        log10M1_p (:obj:`float`): tilt parameter for
             :math:`\\log_{10}M_1`.
-        alpha_0 (float): offset parameter for
+        alpha_0 (:obj:`float`): offset parameter for
             :math:`\\alpha`.
-        alpha_p (float): tilt parameter for
+        alpha_p (:obj:`float`): tilt parameter for
             :math:`\\alpha`.
-        bg_0 (float): offset parameter for
+        bg_0 (:obj:`float`): offset parameter for
             :math:`\\beta_g`.
-        bg_p (float): tilt parameter for
+        bg_p (:obj:`float`): tilt parameter for
             :math:`\\beta_g`.
-        bmax_0 (float): offset parameter for
+        bmax_0 (:obj:`float`): offset parameter for
             :math:`\\beta_{\\rm max}`.
-        bmax_p (float): tilt parameter for
+        bmax_p (:obj:`float`): tilt parameter for
             :math:`\\beta_{\\rm max}`.
-        a_pivot (float): pivot scale factor :math:`a_*`.
-        ns_independent (bool): drop requirement to only form
+        a_pivot (:obj:`float`): pivot scale factor :math:`a_*`.
+        ns_independent (:obj:`bool`): drop requirement to only form
             satellites when centrals are present.
-        integration_method: Method used to obtain the fourier transform
-            of the profile. Can be 'FFTLog', 'simpson' or 'spline'. The FFTLog
-            parameters can be updated using the self.update_precision_fftlog
-            function, to attempt reducing ringing and aliasing.
-        rmin: For `simpson` or `spline` integration, minimum value of
+        integration_method (:obj:`str`): Method used to obtain the fourier transform
+            of the profile. Can be ``'FFTLog'``, ``'simpson'`` or
+            ``'spline'``.
+        rmin (:obj:`float`): For ``'simpson'`` or ``'spline'`` integration, minimum value of
             physical radius used to carry out the radial integral (in Mpc).
-            Default=0.001.
-        N_r: For `simpson` or `spline` integration, number of points to be
-            used when sampling the radial integral (in logarithmic space).
-            Default=512.
-        N_jn: For `simpson` or `spline` integration, number of points to
-            be used when sampling the spherical Bessel functions, that are
+        N_r (:obj:`int`): For ``'simpson'`` or ``'spline'`` integration, number of points
+            to be used when sampling the radial integral (in log space).
+        N_jn (:obj:`int`): For ``'simpson'`` or ``'spline'`` integration, number of points
+            to be used when sampling the spherical Bessel functions, that are
             later used to interpolate. Interpolating the Bessel functions
             increases the speed of the computations compared to explicitly
             evaluating them, without significant loss of accuracy.
-            Default=10000.
-    """
+    """ # noqa
     __repr_attrs__ = __eq_attrs__ = (
         "a1h", "b", "lmax", "integration_method",
         "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
@@ -175,56 +174,53 @@ class SatelliteShearHOD(HaloProfileHOD):
         this profile. Any parameter set to `None` won't be updated.
 
         Args:
-            a1h (float): Amplitude of the satellite intrinsic shear profile.
-            b (float): Power-law index of the satellite intrinsic shear
+            a1h (:obj:`float`): Amplitude of the satellite intrinsic shear profile.
+            b (:obj:`float`): Power-law index of the satellite intrinsic shear
                 profile. If zero, the profile is assumed to be constant inside
                 the halo.
-            lmax (int): Maximum multipole to be summed in the plane-wave
-                expansion (Eq. (C1) in Fortuna et al. 2021, default=6).
-            log10Mmin_0 (float): offset parameter for
+            lmax (:obj:`int`): Maximum multipole to be summed in the plane-wave
+                expansion.
+            log10Mmin_0 (:obj:`float`): offset parameter for
                 :math:`\\log_{10}M_{\\rm min}`.
-            log10Mmin_p (float): tilt parameter for
+            log10Mmin_p (:obj:`float`): tilt parameter for
                 :math:`\\log_{10}M_{\\rm min}`.
-            siglnM_0 (float): offset parameter for
+            siglnM_0 (:obj:`float`): offset parameter for
                 :math:`\\sigma_{{\\rm ln}M}`.
-            siglnM_p (float): tilt parameter for
+            siglnM_p (:obj:`float`): tilt parameter for
                 :math:`\\sigma_{{\\rm ln}M}`.
-            log10M0_0 (float): offset parameter for
+            log10M0_0 (:obj:`float`): offset parameter for
                 :math:`\\log_{10}M_0`.
-            log10M0_p (float): tilt parameter for
+            log10M0_p (:obj:`float`): tilt parameter for
                 :math:`\\log_{10}M_0`.
-            log10M1_0 (float): offset parameter for
+            log10M1_0 (:obj:`float`): offset parameter for
                 :math:`\\log_{10}M_1`.
-            log10M1_p (float): tilt parameter for
+            log10M1_p (:obj:`float`): tilt parameter for
                 :math:`\\log_{10}M_1`.
-            alpha_0 (float): offset parameter for
+            alpha_0 (:obj:`float`): offset parameter for
                 :math:`\\alpha`.
-            alpha_p (float): tilt parameter for
+            alpha_p (:obj:`float`): tilt parameter for
                 :math:`\\alpha`.
-            bg_0 (float): offset parameter for
+            bg_0 (:obj:`float`): offset parameter for
                 :math:`\\beta_g`.
-            bg_p (float): tilt parameter for
+            bg_p (:obj:`float`): tilt parameter for
                 :math:`\\beta_g`.
-            bmax_0 (float): offset parameter for
+            bmax_0 (:obj:`float`): offset parameter for
                 :math:`\\beta_{\\rm max}`.
-            bmax_p (float): tilt parameter for
+            bmax_p (:obj:`float`): tilt parameter for
                 :math:`\\beta_{\\rm max}`.
-            a_pivot (float): pivot scale factor :math:`a_*`.
-            ns_independent (bool): drop requirement to only form
+            a_pivot (:obj:`float`): pivot scale factor :math:`a_*`.
+            ns_independent (:obj:`bool`): drop requirement to only form
                 satellites when centrals are present
-            rmin: For `simpson` or `spline` integration, minimum value of
+            rmin (:obj:`float`): For `simpson` or `spline` integration, minimum value of
                 physical radius used to carry out the radial integral (in Mpc).
-                Default=0.001.
-            N_r: For `simpson` or `spline` integration, number of points to be
+            N_r (:obj:`int`): For `simpson` or `spline` integration, number of points to be
                 used when sampling the radial integral (in logarithmic space).
-                Default=512.
-            N_jn: For `simpson` or `spline` integration, number of points to
+            N_jn (:obj:`int`): For `simpson` or `spline` integration, number of points to
                 be used when sampling the spherical Bessel functions, that are
                 later used to interpolate. Interpolating the Bessel functions
                 increases the speed of the computations compared to explicitly
                 evaluating them, without significant loss of accuracy.
-                Default=10000.
-        """
+        """ # noqa
         if a1h is not None:
             self.a1h = a1h
         if b is not None:
@@ -273,6 +269,7 @@ class SatelliteShearHOD(HaloProfileHOD):
     def _I_integral(self, a, b):
         '''
         Computes the integral
+
         .. math::
             I(a,b) = \\int_{-1}^1 \\mathrm{d}x (1-x^2)^{a/2}x^b =
             \\frac{((-1)^b+1)\\Gamma(a+1)\\Gamma\\left
@@ -285,7 +282,7 @@ class SatelliteShearHOD(HaloProfileHOD):
     def _fl(self, l, thk=np.pi / 2, phik=None, b=-2):
         '''
         Computes the angular part of the satellite intrinsic shear field,
-        Eq. (C8) in Fortuna et al. 2021.
+        Eq. (C8) in `Fortuna et al. 2021 <https://arxiv.org/abs/2003.02700>`_.
         '''
         from scipy.special import binom
         gj = np.array([0, 0, np.pi / 2, 0, np.pi / 2, 0, 15 * np.pi / 32,
@@ -310,6 +307,15 @@ class SatelliteShearHOD(HaloProfileHOD):
     def get_normalization(self, cosmo, a, hmc):
         """Returns the normalization of this profile, which is the
         mean galaxy number density.
+
+        Args:
+            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
+                model calculator object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            a (:obj:`float`): scale factor.
+
+        Returns:
+            float: normalization factor of this profile.
         """
         def integ(M):
             Nc = self._Nc(M, a)
@@ -322,12 +328,15 @@ class SatelliteShearHOD(HaloProfileHOD):
     def gamma_I(self, r, r_vir):
         '''
         Returns the intrinsic satellite shear,
+
         .. math::
             \\gamma^I(r)=a_{1\\mathrm{h}}
             \\left(\\frac{r}{r_\\mathrm{vir}}\\right)^b.
+
         If :math:`b` is 0, then only the value of the amplitude
         :math:`a_\\mathrm{1h}` is returned. In addition, according to
-        Fortuna et al. 2021, we use a constant value of 0.06 Mpc for
+        `Fortuna et al. 2021 <https://arxiv.org/abs/2003.02700>`_, we
+        use a constant value of 0.06 Mpc for
         :math:`r<0.06` Mpc and set a maximum of 0.3 for :math:`\\gamma^I(r)`.
         '''
         if self.b == 0:
@@ -345,8 +354,10 @@ class SatelliteShearHOD(HaloProfileHOD):
     def _real(self, cosmo, r, M, a):
         '''
         Returns the real part of the satellite intrinsic shear field,
+
         .. math::
             \\gamma^I(r) u(r|M),
+
         with :math:`u` being the halo density profile divided by its mass.
         For now, it assumes a NFW profile.
         '''

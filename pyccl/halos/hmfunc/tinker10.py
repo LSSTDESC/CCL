@@ -8,18 +8,20 @@ from . import MassFunc
 
 
 class MassFuncTinker10(MassFunc):
-    """ Implements mass function described in arXiv:1001.3162.
+    """Implements the mass function of `Tinker et al. 2010
+    <https://arxiv.org/abs/1001.3162>`_. This parametrization accepts S.O.
+    masses with :math:`200 < \\Delta < 3200`, defined with respect to the
+    matter density. This can be automatically translated to S.O. masses
+    defined with respect to the critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            This parametrization accepts SO masses with
-            200 < Delta < 3200 with respect to the matter density.
-            If `None`, Delta = 200 (matter) will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
-        norm_all_z (bool): should we normalize the mass function
-            at z=0 or at all z?
+        norm_all_z (:obj:`bool`): if ``True``, the mass function will be
+            normalised to yield the total matter density when integrated
+            over mass at all redshifts (as opposed to :math:`z=0` only).
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
                                      "norm_all_z",)

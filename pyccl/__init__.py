@@ -21,7 +21,7 @@ del parse, numpy
 
 from . import ccllib as lib
 from .errors import *
-from .base import *
+from ._core import *
 from .pyutils import *
 
 from .background import *

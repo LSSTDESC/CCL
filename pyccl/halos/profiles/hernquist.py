@@ -8,39 +8,41 @@ from . import HaloProfileMatter
 
 
 class HaloProfileHernquist(HaloProfileMatter):
-    """ Hernquist (1990ApJ...356..359H).
+    """ `Hernquist 1990
+    <https://ui.adsabs.harvard.edu/abs/1990ApJ...356..359H/abstract>`_
+    profile.
 
     .. math::
        \\rho(r) = \\frac{\\rho_0}
        {\\frac{r}{r_s}\\left(1+\\frac{r}{r_s}\\right)^3}
 
-    where :math:`r_s` is related to the spherical overdensity
-    halo radius :math:`R_\\Delta(M)` through the concentration
+    where :math:`r_s` is related to the comoving spherical overdensity
+    halo radius :math:`r_\\Delta(M)` through the concentration
     parameter :math:`c(M)` as
 
     .. math::
-       R_\\Delta(M) = c(M)\\,r_s
+       r_\\Delta(M) = c(M)\\,r_s
 
     and the normalization :math:`\\rho_0` is the mean density
-    within the :math:`R_\\Delta(M)` of the halo.
+    within the :math:`r_\\Delta(M)` of the halo.
 
-    By default, this profile is truncated at :math:`r = R_\\Delta(M)`.
+    By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
 
     Args:
-        concentration (:obj:`Concentration`): concentration-mass
-            relation to use with this profile.
-        fourier_analytic (bool): set to `True` if you want to compute
+        concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
+            concentration-mass relation to use with this profile.
+        fourier_analytic (:obj:`bool`): set to ``True`` if you want to compute
             the Fourier profile analytically (and not through FFTLog).
-            Default: `False`.
-        projected_analytic (bool): set to `True` if you want to
+        projected_analytic (:obj:`bool`): set to ``True`` if you want to
             compute the 2D projected profile analytically (and not
-            through FFTLog). Default: `False`.
-        cumul2d_analytic (bool): set to `True` if you want to
+            through FFTLog).
+        cumul2d_analytic (:obj:`bool`): set to ``True`` if you want to
             compute the 2D cumulative surface density analytically
-            (and not through FFTLog). Default: `False`.
-        truncated (bool): set to `True` if the profile should be
-            truncated at :math:`r = R_\\Delta` (i.e. zero at larger
-            radii.
+            (and not through FFTLog).
+        truncated (:obj:`bool`): set to ``True`` if the profile should be
+            truncated at :math:`r = r_\\Delta`.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
         "fourier_analytic", "projected_analytic", "cumul2d_analytic",

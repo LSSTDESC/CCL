@@ -9,23 +9,25 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     # I_X_1 dispatcher for internal use
     """
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HMCalculator`): a halo model calculator.
-        k (float or array_like): comoving wavenumber in Mpc^-1.
-        a (float or array_like): scale factor.
-        prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+        hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo model
+            calculator.
+        k (:obj:`float` or `array`): comoving wavenumber in
+            :math:`{\\rm Mpc}^{-1}`.
+        a (:obj:`float` or `array`): scale factor.
+        prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): halo
             profile.
-        normprof (bool): (Deprecated - do not use)
+        normprof (:obj:`bool`):
             if `True`, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by `prof`.
+            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`,
+            where :math:`u` is the profile represented by ``prof``.
+            **Will be deprecated in v3.**
 
     Returns:
-        float or array_like: integral values evaluated at each
-        combination of `k` and `a`. The shape of the output will
-        be `(N_a, N_k)` where `N_k` and `N_a` are the sizes of
-        `k` and `a` respectively. If `k` or `a` are scalars, the
+        (:obj:`float` or `array`): integral values evaluated at each
+        combination of ``k`` and ``a``. The shape of the output will
+        be ``(N_a, N_k)`` where ``N_k`` and ``N_a`` are the sizes of
+        ``k`` and ``a`` respectively. If ``k`` or ``a`` are scalars, the
         corresponding dimension will be squeezed out on output.
     """
     func = getattr(hmc, func)

@@ -7,15 +7,14 @@ from . import Concentration
 
 
 class ConcentrationDiemer15(Concentration):
-    """ Concentration-mass relation by Diemer & Kravtsov 2015
-    (arXiv:1407.4730). This parametrization is only valid for
-    S.O. masses with Delta = 200-critical.
+    """Concentration-mass relation by `Diemer & Kravtsov 2015
+    <https://arxiv.org/abs/1407.4730>`_. This parametrization
+    is only valid for S.O. masses with :math:`\\Delta = 200`
+    times the critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
-            a mass definition object that fixes
-            the mass definition used by this c(M)
-            parametrization, or a name string.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
     """
     name = 'Diemer15'
 
