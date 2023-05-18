@@ -179,8 +179,8 @@ class Cosmology(CCLObject):
         matter_power_spectrum (:obj:`str`): The matter power
             spectrum to use. Defaults to 'halofit'.
         extra_parameters (:obj:`dict`): Dictionary holding extra
-            parameters. Currently supports extra parameters for CAMB, with
-            details described below. Defaults to None.
+            parameters. Currently supports extra parameters for CAMB, as well
+            as CosmicEmu. Details described below. Defaults to None.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is 0.71611.
 
@@ -194,28 +194,24 @@ class Cosmology(CCLObject):
         * `lmax`
         * `dark_energy_model`
 
-    # TODO:
-       check structure of extra_parameters and include the below
-        emulator_neutrinos (:obj:`str`): If using the emulator for
-            the power spectrum, specified treatment of unequal neutrinos.
-            Options are 'strict', which will raise an error and quit if the
-            user fails to pass either a set of three equal masses or a sum with
-            mass_split = 'equal', and 'equalize', which will redistribute
-            masses to be equal right before calling the emulator but results in
-            internal inconsistencies. Defaults to 'strict'.
-        if emulator_neutrinos is not None:
-            warn("emulator_neutrinos has been moved to extra_parameters  "
-                 "and can be specified using e.g. "
-                 "{'emu': {'neutrinos': 'strict'}}.", CCLDeprecationWarning)
-            extra_parameters["emu"] = {"neutrinos": emulator_neutrinos}
-
-
     Consult the CAMB documentation for their usage. These parameters are passed
     in a :obj:`dict` to `extra_parameters` as::
 
         extra_parameters = {"camb": {"halofit_version": "mead2020_feedback",
                                      "HMCode_logT_AGN": 7.8}}
 
+    Currently supported extra parameters for CosmicEmu are:
+
+        * `neutrinos`: governing the treatment of unequal neutrinos
+          Options are: 'strict', which will raise an error and quit if the
+          user fails to pass either a set of three equal masses or a sum with
+          mass_split = 'equal', and 'equalize', which will redistribute
+          masses to be equal right before calling the emulator but results in
+          internal inconsistencies. Defaults to 'strict'.
+
+    These parameters are passed in a :obj:`dict` to `extra_parameters` as::
+
+        extra_parameters = {"emu": {"neutrinos", "equal"}}
     """ # noqa
     from ._core.repr_ import build_string_Cosmology as __repr__
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
