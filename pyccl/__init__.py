@@ -31,6 +31,7 @@ from .tracers import *
 from .cells import *
 from .correlations import *
 from .covariances import *
+from .implement_FKEM import *
 
 from .pk2d import *
 from .tk3d import *

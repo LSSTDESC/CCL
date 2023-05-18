@@ -6,7 +6,7 @@ import numpy as np
 
 from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warn_api
 from .pyutils import integ_types
-
+from .implement_FKEM import *
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
 def angular_cl(cosmo, tracer1, tracer2, ell, *,
@@ -61,8 +61,8 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
     if non_limber_integration_method not in ['FKEM','MATTER']:
         raise ValueError("Non-Limber integration method %s not supported" %
                          limber_integration_method)
-    if type(l_limber)=='str':
-        if (l_limer!='auto'):
+    if type(l_limber)==str:
+        if (l_limber!='auto'):
             raise ValueError("l_limber cannot be a string other than 'auto'")
         auto_limber=True
     else:
@@ -73,7 +73,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
 
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    cosmo = cosmo.cosmo
+    
 
     psp = cosmo_in.parse_pk2d(p_of_k_a, is_linear=False)
 
@@ -92,16 +92,16 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
     if not (np.diff(ell_use) > 0).all():
         raise ValueError("ell values must be monotonically increasing")
 
-    if auto_limber or ell_use[0]<l_limber:
+    if auto_limber or (type(l_limber)!='str' and ell_use[0]<l_limber):
         if non_limber_integration_method=='FKEM':
-            l_limber, cl_non_limber, status = implement_FKEM (cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error)
+            l_limber, cl_non_limber, status = implement_FKEM (cosmo, tracer1, tracer2, p_of_k_a, ell_use, l_limber, limber_max_error)
         else: #it has to be matter, since we checked the input
             l_limber, cl_non_limber, status = implement_MATTER (cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error)
         if status != 0:
             raise ValueError("Error in non-Limber integrator.")    
     else:
         cl_non_limber = np.array([])
-
+    cosmo = cosmo.cosmo
     ell_use_limber = ell_use[ell_use>l_limber]
     # Return Cl values, according to whether ell is an array or not
     if len(ell_use_limber) > 0:

@@ -19,7 +19,7 @@ CCL_BEGIN_DECLS
  */
 void ccl_fftlog_ComputeXi_general(double mu, double q, 
     int npk, int N, double *k, double **pk,
-    int spherical_bessel, double bessel_deriv, double window_frac, 
+    int spherical_bessel, double bessel_deriv, double plaw, 
     double *r, double **xi, int *status);
 
 

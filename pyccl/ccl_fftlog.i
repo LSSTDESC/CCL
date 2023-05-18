@@ -74,7 +74,7 @@ void fftlog_transform_general(int npk,
           double *k_in, int n_in_k,
           double *fk_in, int n_in_f,
           double mu, double q,
-          int spherical_bessel, double bessel_deriv, double window_frac,
+          int spherical_bessel, double bessel_deriv, double plaw,
           int nout, double *output,
           int *status)
 {
@@ -92,7 +92,7 @@ void fftlog_transform_general(int npk,
       _fk_in[ii]=&(fk_in[ii*n_in_k]);
       _fr_out[ii]=&(output[(ii+1)*n_in_k]);
     }
-    ccl_fftlog_ComputeXi_general(mu, q, npk, n_in_k, k_in, _fk_in, spherical_bessel, bessel_deriv, window_frac, r_out, _fr_out, status);
+    ccl_fftlog_ComputeXi_general(mu, q, npk, n_in_k, k_in, _fk_in, spherical_bessel, bessel_deriv, plaw, r_out, _fr_out, status);
   }
 
   free(_fk_in);
