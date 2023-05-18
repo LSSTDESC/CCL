@@ -4,10 +4,9 @@ __all__ = ("linear_power", "nonlin_power", "linear_matter_power",
 
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, check, lib, warn_api
+from . import DEFAULT_POWER_SPECTRUM, check, lib
 
 
-@warn_api
 def linear_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """The linear power spectrum.
 
@@ -25,7 +24,6 @@ def linear_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     return cosmo.get_linear_power(p_of_k_a)(k, a, cosmo)
 
 
-@warn_api
 def nonlin_power(cosmo, k, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """The non-linear power spectrum.
 
@@ -99,7 +97,6 @@ def sigmaM(cosmo, M, a):
     return sigM
 
 
-@warn_api
 def sigmaR(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """RMS of the matter overdensity a top-hat sphere of radius :math:`R`.
 
@@ -131,7 +128,6 @@ def sigmaR(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     return sR
 
 
-@warn_api
 def sigmaV(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """RMS of the linear displacement field in a top-hat sphere of radius R.
 
@@ -162,7 +158,6 @@ def sigmaV(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     return sV
 
 
-@warn_api
 def sigma8(cosmo, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """RMS variance in a top-hat sphere of radius :math:`8\\,{\\rm Mpc}/h`,
     (with the value of :math:`h` extracted from ``cosmo``) at :math:`z=0`.
@@ -184,7 +179,6 @@ def sigma8(cosmo, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     return sig8
 
 
-@warn_api
 def kNL(cosmo, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     r"""Non-linear scale :math:`k_{\rm NL}`. Calculated based on Lagrangian
     perturbation theory as the inverse of the rms of the displacement

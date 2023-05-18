@@ -4,11 +4,10 @@ import warnings
 
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warn_api
+from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
 from .pyutils import integ_types
 
 
-@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
 def angular_cl(cosmo, tracer1, tracer2, ell, *,
                p_of_k_a=DEFAULT_POWER_SPECTRUM,
                l_limber=-1., limber_integration_method='qag_quad'):

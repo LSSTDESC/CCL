@@ -7,10 +7,9 @@ try:
 except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
-from . import CCLError, Pk2D, check, lib, warn_api
+from . import CCLError, Pk2D, check, lib
 
 
-@warn_api
 def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 

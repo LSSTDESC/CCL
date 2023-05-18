@@ -1,6 +1,5 @@
 __all__ = ("Pk2D", "parse_pk2d", "parse_pk",)
 
-import functools
 import warnings
 
 import numpy as np
@@ -8,30 +7,8 @@ import numpy as np
 from . import (
     CCLObject, DEFAULT_POWER_SPECTRUM, UnlockInstance, check, get_pk_spline_a,
     get_pk_spline_lk, lib, unlock_instance)
-from . import CCLWarning, CCLError, CCLDeprecationWarning, warn_api, deprecated
+from . import CCLWarning, CCLError
 from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
-
-
-class _Pk2D_descriptor:
-    """Descriptor to deprecate usage of `Pk2D` methods as class methods."""
-    def __init__(self, func):
-        self.func = func
-
-    def __get__(self, instance, base):
-        if instance is None:
-            warnings.warn("Use of the power spectrum as an argument "
-                          f"is deprecated in {self.func.__name__}. "
-                          "Use the instance method instead.",
-                          CCLDeprecationWarning)
-            this = base
-        else:
-            this = instance
-
-        @functools.wraps(self.func)
-        def new_func(*args, **kwargs):
-            return self.func(this, *args, **kwargs)
-
-        return new_func
 
 
 class Pk2D(CCLObject):
@@ -70,19 +47,6 @@ class Pk2D(CCLObject):
             i.e. the resolution of `a_arr` and `lk_arr` is high enough to sample
             the main features in the power spectrum. CCL uses bicubic interpolation
             to evaluate the power spectrum at any intermediate point in k and a.
-        pkfunc (:obj:`callable`):
-            Function with signature ``f(k, a)`` which takes vectorized input
-            in ``k`` (wavenumber in :math:`\\mathrm{Mpc}^{-1}`) and a scale factor
-            ``a``, and returns the value of the power spectrum, or its natural log
-            depending on ``is_logp``. Power spectrum units must be compatible
-            with  CCL (e.g. :math:`\\mathrm{Mpc}^3` for matter power spectrum).
-            If a ``pkfunc`` is provided the power spectrum is sampled at the
-            values of ``k`` and ``a`` used internally by CCL to store the linear
-            and non-linear power spectra. This is deprecated in favour of using
-            the :meth:`Pk2D.from_function` class method.
-        cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmological parameters.
-            Used to determine sampling rates in scale factor and wavenumber if
-            using ``pkfunc`` (deprecated).
         extrap_order_lok (:obj:`int`):  ``{0, 1, 2}``.
             Extrapolation order to be used on k-values below the minimum
             the splines. Note that extrapolation is either in :math:`\\log(P(k))`
@@ -96,52 +60,27 @@ class Pk2D(CCLObject):
             power spectrum. Otherwise, the true value of the power spectrum is
             expected. If ``is_logp`` is ``True``, arrays are interpolate in
             log-space.
-        empty (:obj:`bool`):
-            If ``True``, just create an empty object, to be filled out later
-            (deprecated).
 
     .. automethod:: __call__
     """ # noqa E501
     from ._core.repr_ import build_string_Pk2D as __repr__
 
-    @warn_api(reorder=["pkfunc", "a_arr", "lk_arr", "pk_arr", "is_logp",
-                       "extrap_order_lok", "extrap_order_hik", "cosmo"])
     def __init__(self, *, a_arr=None, lk_arr=None, pk_arr=None,
-                 pkfunc=None, cosmo=None, is_logp=True,
-                 extrap_order_lok=1, extrap_order_hik=2, empty=False):
-        if empty:
-            warnings.warn("The creation of empty Pk2D objects is now "
-                          "deprecated. If you want an empty object, use "
-                          "`Pk2D.__new__(Pk2D)`.",
-                          category=CCLDeprecationWarning)
-            return
+                 is_logp=True, extrap_order_lok=1, extrap_order_hik=2):
+        # Make sure input makes sense
+        if (a_arr is None) or (lk_arr is None) or (pk_arr is None):
+            raise ValueError("If you do not provide a function, "
+                             "you must provide arrays")
 
-        if pkfunc is None:  # Initialize power spectrum from 2D array
-            # Make sure input makes sense
-            if (a_arr is None) or (lk_arr is None) or (pk_arr is None):
-                raise ValueError("If you do not provide a function, "
-                                 "you must provide arrays")
+        # Check that `a` is a monotonically increasing array.
+        if not (np.diff(a_arr) > 0).all():
+            raise ValueError("Input scale factor array in `a_arr` is not "
+                             "monotonically increasing.")
 
-            # Check that `a` is a monotonically increasing array.
-            if not (np.diff(a_arr) > 0).all():
-                raise ValueError("Input scale factor array in `a_arr` is not "
-                                 "monotonically increasing.")
-
-            pkflat = pk_arr.flatten()
-            # Check dimensions make sense
-            if len(pkflat) != len(a_arr)*len(lk_arr):
-                raise ValueError("Size of input arrays is inconsistent")
-        else:  # Initialize power spectrum from function
-            warnings.warn("The use of a function when initialising a ``Pk2D`` "
-                          "object is deprecated. Use `Pk2D.from_function`.",
-                          CCLDeprecationWarning)
-            # Set k and a sampling from CCL parameters
-            a_arr = get_pk_spline_a(cosmo=cosmo)
-            lk_arr = get_pk_spline_lk(cosmo=cosmo)
-
-            # Compute power spectrum on 2D grid
-            pkflat = np.array([pkfunc(k=np.exp(lk_arr), a=a)
-                               for a in a_arr]).flatten()
+        pkflat = pk_arr.flatten()
+        # Check dimensions make sense
+        if len(pkflat) != len(a_arr)*len(lk_arr):
+            raise ValueError("Size of input arrays is inconsistent")
 
         status = 0
         self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
@@ -271,14 +210,6 @@ class Pk2D(CCLObject):
         check(status, cosmo)
         return pk2d
 
-    @classmethod
-    @functools.wraps(from_model)
-    @deprecated(new_function=from_model.__func__)
-    def pk_from_model(cls, cosmo, model):
-        return cls.from_model(cosmo, model)
-
-    @_Pk2D_descriptor
-    @warn_api
     def apply_halofit(self, cosmo, *, pk_linear=None):
         """:class:`Pk2D` constructor that applies the "HALOFIT" transformation of
         `Takahashi et al. 2012 <https://arxiv.org/abs/1208.2701>`_ on an input
@@ -324,26 +255,6 @@ class Pk2D(CCLObject):
                 pk2d.psp, status = ret
         check(status, cosmo)
         return pk2d
-
-    def eval(self, k, a, cosmo=None, *, derivative=False):
-        """
-        .. warning:: This function is deprecated in favour of the
-                     :meth:`__call__` method.
-        """
-        warnings.warn("Pk2D.eval is deprecated. Simply call the object "
-                      "itself.", category=CCLDeprecationWarning)
-        return self(k, a, cosmo=cosmo, derivative=derivative)
-
-    def eval_dlogpk_dlogk(self, k, a, cosmo):
-        """Evaluate logarithmic derivative. See :meth:`Pk2D.eval` for details.
-
-        .. warning:: This function is deprecated in favour of the
-                     :meth:`__call__` method.
-        """
-        warnings.warn("Pk2D.eval_dlogpk_dlogk is deprecated. Simply call "
-                      "the object itself with `derivative=True`.",
-                      category=CCLDeprecationWarning)
-        return self(k, a, cosmo=cosmo, derivative=True)
 
     def __call__(self, k, a, cosmo=None, *, derivative=False):
         """Evaluate the power spectrum or its logarithmic derivative at
@@ -608,7 +519,6 @@ class Pk2D(CCLObject):
         return self
 
 
-@warn_api
 def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
     """ Return the C-level `f2d` spline associated with a
     :class:`Pk2D` object.
@@ -628,17 +538,11 @@ def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
     if isinstance(p_of_k_a, Pk2D):
         psp = p_of_k_a.psp
     else:
-        if p_of_k_a is None:
-            warnings.warn("The default power spectrum can is now designated "
-                          "via ``ccl.DEFAULT_POWER_SPECTRUM``. The use of "
-                          "``None`` will be deprecated in future versions.",
-                          CCLDeprecationWarning)
-            name = DEFAULT_POWER_SPECTRUM
-        elif isinstance(p_of_k_a, str):
+        if isinstance(p_of_k_a, str):
             name = p_of_k_a
         else:
-            raise ValueError("p_of_k_a must be a pyccl.Pk2D object, "
-                             "a string, or None")
+            raise ValueError("p_of_k_a must be a pyccl.Pk2D object or "
+                             "a string")
 
         if is_linear:
             cosmo.compute_linear_power()

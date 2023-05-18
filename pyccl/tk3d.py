@@ -1,11 +1,8 @@
 __all__ = ("Tk3D",)
 
-import warnings
-
 import numpy as np
 
 from . import CCLObject, check, lib
-from . import CCLDeprecationWarning, warn_api
 from .pyutils import _get_spline2d_arrays, _get_spline3d_arrays
 
 
@@ -95,7 +92,6 @@ class Tk3D(CCLObject):
     """
     from ._core.repr_ import build_string_Tk3D as __repr__
 
-    @warn_api(reorder=['extrap_order_lok', 'extrap_order_hik', 'is_logt'])
     def __init__(self, *, a_arr, lk_arr, tkk_arr=None,
                  pk1_arr=None, pk2_arr=None, is_logt=True,
                  extrap_order_lok=1, extrap_order_hik=1):
@@ -180,14 +176,6 @@ class Tk3D(CCLObject):
     @property
     def extrap_order_hik(self):
         return self.tsp.extrap_order_hik if self else None
-
-    def eval(self, k, a):
-        """
-        .. warning:: Deprecate, use this class's :meth:`Tk3D.__call__` method.
-        """
-        warnings.warn("Tk3D.eval is deprecated. Simply call the object "
-                      "itself.", category=CCLDeprecationWarning)
-        return self(k, a)
 
     def __call__(self, k, a):
         """Evaluate trispectrum. If ``k`` is a 1D array with size ``nk``, and

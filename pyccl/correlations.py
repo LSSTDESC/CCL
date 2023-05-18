@@ -3,12 +3,8 @@ __all__ = ("CorrelationMethods", "CorrelationTypes", "correlation",
            "correlation_3dRsd_avgmu", "correlation_pi_sigma",)
 
 from enum import Enum
-import warnings
-
 import numpy as np
-
 from . import DEFAULT_POWER_SPECTRUM, check, lib
-from . import CCLDeprecationWarning, warn_api
 
 
 class CorrelationMethods(Enum):
@@ -46,7 +42,6 @@ correlation_types = {
 }
 
 
-@warn_api
 def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
                 method='fftlog'):
     r"""Compute the angular correlation function.
@@ -105,11 +100,6 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
             Choices: ``'Bessel'`` (direct integration over Bessel function),
             ``'FFTLog'`` (fast integration with FFTLog), ``'Legendre'``
             (brute-force sum over Legendre polynomials).
-        corr_type (:obj:`str`): (deprecated, please use `type`)
-            Type of correlation function. Choices: ``'gg'`` (0x0),
-            ``'gl'`` (0x2), ``'l+'`` (2x2, :math:`\xi_+`), ``'l-'`` (2x2,
-            :math:`\xi_-`), where the numbers refer to the spins of the two
-            quantities being cross-correlated.
 
     Returns:
         (:obj:`float` or `array`): Value(s) of the correlation function at the
@@ -118,22 +108,6 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
     status = 0
-
-    if corr_type is not None:
-        # Convert to lower case
-        corr_type = corr_type.lower()
-        if corr_type == 'gg':
-            type = 'NN'
-        elif corr_type == 'gl':
-            type = 'NG'
-        elif corr_type == 'l+':
-            type = 'GG+'
-        elif corr_type == 'l-':
-            type = 'GG-'
-        else:
-            raise ValueError("Unknown corr_type " + corr_type)
-        warnings.warn("corr_type is deprecated. Use type = {}".format(type),
-                      CCLDeprecationWarning)
     method = method.lower()
 
     if type not in correlation_types:
@@ -161,7 +135,6 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
     return wth
 
 
-@warn_api(reorder=['a', 'r'])
 def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     r"""Compute the 3D correlation function:
 
@@ -203,8 +176,6 @@ def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     return xi
 
 
-@warn_api(pairs=[('s', 'r'), ('l', 'ell')],
-          reorder=['a', 'beta', 'ell', 'r'])
 def correlation_multipole(cosmo, *, r, a, beta, ell,
                           p_of_k_a=DEFAULT_POWER_SPECTRUM):
     r"""Compute the correlation function multipoles:
@@ -249,8 +220,6 @@ def correlation_multipole(cosmo, *, r, a, beta, ell,
     return xis
 
 
-@warn_api(pairs=[('s', 'r')],
-          reorder=['a', 'r', 'mu', 'beta', 'use_spline', 'p_of_k_a'])
 def correlation_3dRsd(cosmo, *, r, a, mu, beta,
                       p_of_k_a=DEFAULT_POWER_SPECTRUM, use_spline=True):
     """
@@ -297,7 +266,6 @@ def correlation_3dRsd(cosmo, *, r, a, mu, beta,
     return xis
 
 
-@warn_api(pairs=[('s', 'r')], reorder=['a', 'r'])
 def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
                             p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """
@@ -340,8 +308,6 @@ def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
     return xis
 
 
-@warn_api(pairs=[("sig", "sigma")],
-          reorder=['a', 'beta', 'pi', 'sigma'])
 def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
                          use_spline=True, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """
