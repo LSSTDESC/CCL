@@ -2,7 +2,7 @@ __all__ = ("MassFuncSheth99",)
 
 import numpy as np
 
-from ... import check, lib, warn_api
+from ... import check, lib
 from . import MassFunc
 
 
@@ -26,7 +26,6 @@ class MassFuncSheth99(MassFunc):
                                      "use_delta_c_fit",)
     name = 'Sheth99'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="fof",
                  mass_def_strict=True,

@@ -1,14 +1,12 @@
 __all__ = ("HaloProfile", "HaloProfileMatter",
            "HaloProfilePressure", "HaloProfileCIB",)
 
-import warnings
 import functools
 from typing import Callable
 
 import numpy as np
 
 from ... import CCLAutoRepr, FFTLogParams, unlock_instance
-from ... import CCLDeprecationWarning, deprecate_attr, warn_api, mass_def_api
 from ... import physical_constants as const
 from ...pyutils import resample_array, _fftlog_transform
 from .. import MassDef
@@ -39,8 +37,6 @@ class HaloProfile(CCLAutoRepr):
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
-    __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
-                                 )(super.__getattribute__)
 
     def __init__(self, *, mass_def=None, concentration=None,
                  is_number_counts=False):
@@ -54,16 +50,6 @@ class HaloProfile(CCLAutoRepr):
         self.precision_fftlog = FFTLogParams()
 
         self._is_number_counts = is_number_counts
-
-        if (mass_def, concentration) == (None, None):
-            warnings.warn(
-                "mass_def (or concentration where applicable) will become a "
-                "required argument for HaloProfile instantiation in CCLv3 "
-                "and will be moved from (real, fourier, projected, cumul2d "
-                "convergence, shear, reduced_shear, magnification).",
-                CCLDeprecationWarning)
-            self.mass_def = self.concentration = None
-            return
 
         # Initialize mass_def and concentration.
         self.mass_def, *out = MassDef.from_specs(
@@ -85,7 +71,7 @@ class HaloProfile(CCLAutoRepr):
     def is_number_counts(self, value):
         self._is_number_counts = value
 
-    def get_normalization(self, cosmo, a, *, hmc=None):
+    def get_normalization(self, cosmo=None, a=None, *, hmc=None):
         """Profiles may be normalized by an overall function of redshift
         (or scale factor). This function may be cosmology-dependent and
         often comes from integrating certain halo properties over mass.
@@ -103,13 +89,7 @@ class HaloProfile(CCLAutoRepr):
         Returns:
             float: normalization factor of this profile.
         """
-        def integ(M):
-            return self.fourier(cosmo, hmc.precision["k_min"], M, a)
-        return hmc.integrate_over_massfunc(integ, cosmo, a)
-        # TODO: CCLv3 replace by the below in v3 (profiles will all have a
-        # default normalization of 1. Normalization will always be applied).
-        # NK: (cosmo, a) have to take None defaults in v3.
-        # return 1.0
+        return 1.0
 
     @unlock_instance(mutate=True)
     @functools.wraps(FFTLogParams.update_parameters)
@@ -150,7 +130,6 @@ class HaloProfile(CCLAutoRepr):
 
     _cumul2d: Callable    # implementation of the cumulative surface density
 
-    @mass_def_api
     def real(self, cosmo, r, M, a):
         """
         real(cosmo, r, M, a)
@@ -174,7 +153,6 @@ class HaloProfile(CCLAutoRepr):
             return self._real(cosmo, r, M, a)
         return self._fftlog_wrap(cosmo, r, M, a, fourier_out=False)
 
-    @mass_def_api
     def fourier(self, cosmo, k, M, a):
         """
         fourier(cosmo, k, M, a)
@@ -203,7 +181,6 @@ class HaloProfile(CCLAutoRepr):
             return self._fourier(cosmo, k, M, a)
         return self._fftlog_wrap(cosmo, k, M, a, fourier_out=True)
 
-    @mass_def_api
     def projected(self, cosmo, r_t, M, a):
         """
         projected(cosmo, r_t, M, a)
@@ -231,7 +208,6 @@ class HaloProfile(CCLAutoRepr):
             return self._projected(cosmo, r_t, M, a)
         return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=False)
 
-    @mass_def_api
     def cumul2d(self, cosmo, r_t, M, a):
         """
         cumul2d(cosmo, r_t, M, a)
@@ -260,8 +236,6 @@ class HaloProfile(CCLAutoRepr):
             return self._cumul2d(cosmo, r_t, M, a)
         return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=True)
 
-    @mass_def_api
-    @warn_api
     def convergence(self, cosmo, r, M, *, a_lens, a_source):
         """
         convergence(cosmo, r, M, *, a_lens, a_source)
@@ -297,8 +271,6 @@ class HaloProfile(CCLAutoRepr):
         Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return Sigma / Sigma_crit
 
-    @mass_def_api
-    @warn_api
     def shear(self, cosmo, r, M, *, a_lens, a_source):
         """
         shear(cosmo, r, M, *, a_lens, a_source)
@@ -337,8 +309,6 @@ class HaloProfile(CCLAutoRepr):
         Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
-    @mass_def_api
-    @warn_api
     def reduced_shear(self, cosmo, r, M, *, a_lens, a_source):
         """
         reduced_shear(cosmo, r, M, *, a_lens, a_source)
@@ -372,8 +342,6 @@ class HaloProfile(CCLAutoRepr):
         shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source)
         return shear / (1.0 - convergence)
 
-    @mass_def_api
-    @warn_api
     def magnification(self, cosmo, r, M, *, a_lens, a_source):
         """
         magnification(cosmo, r, M, a_lens, a_source)

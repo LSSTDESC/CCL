@@ -2,7 +2,6 @@ __all__ = ("ConcentrationDiemer15",)
 
 import numpy as np
 
-from ... import warn_api
 from . import Concentration
 
 
@@ -18,7 +17,6 @@ class ConcentrationDiemer15(Concentration):
     """
     name = 'Diemer15'
 
-    @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, *, mass_def="200c"):
         super().__init__(mass_def=mass_def)
 

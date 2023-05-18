@@ -2,7 +2,7 @@ __all__ = ("HaloProfilePressureGNFW",)
 
 import numpy as np
 
-from ... import UnlockInstance, warn_api
+from ... import UnlockInstance
 from . import HaloProfilePressure
 
 
@@ -72,7 +72,6 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
         "P0_hexp", "qrange", "nq", "x_out", "mass_def", "precision_fftlog",)
 
-    @warn_api
     def __init__(self, *, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
@@ -93,7 +92,6 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         self._fourier_interp = None
         super().__init__(mass_def=mass_def)
 
-    @warn_api
     def update_parameters(self, *, mass_bias=None, P0=None,
                           c500=None, alpha=None, beta=None, gamma=None,
                           alpha_P=None, P0_hexp=None, x_out=None):

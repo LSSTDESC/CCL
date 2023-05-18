@@ -5,16 +5,13 @@ import warnings
 
 import numpy as np
 
-from .. import CCLWarning, Tk3D, warn_api
+from .. import CCLWarning, Tk3D
 from . import HaloProfileNFW, Profile2pt
 
 
-@warn_api(pairs=[("prof1", "prof")], reorder=["prof12_2pt", "prof3", "prof4"])
 def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof3=None, prof4=None,
-                           prof12_2pt=None, prof34_2pt=None,
-                           normprof1=None, normprof2=None,
-                           normprof3=None, normprof4=None):
+                           prof12_2pt=None, prof34_2pt=None):
     """ Computes the halo model 1-halo trispectrum for four different
     quantities defined by their respective halo profiles. The 1-halo
     trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
@@ -56,14 +53,6 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
             ``prof2`` will be used as ``prof4``.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as ``prof12_2pt`` for ``prof3`` and ``prof4``.
-        normprof1 (:obj:`bool`): if ``True``, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by ``prof``.
-            **Will be deprecated in v3.**
-        normprof2 (:obj:`bool`): same as ``normprof1`` for ``prof2``.
-        normprof3 (:obj:`bool`): same as ``normprof1`` for ``prof3``.
-        normprof4 (:obj:`bool`): same as ``normprof1`` for ``prof4``.
 
     Returns:
         (:obj:`float` or `array`): 1-halo trispectrum evaluated at each
@@ -80,40 +69,28 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
     # define all the profiles
     prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt = \
         _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt)
-    hmc._fix_profile_mass_def(prof)
-    hmc._fix_profile_mass_def(prof2)
-    hmc._fix_profile_mass_def(prof3)
-    hmc._fix_profile_mass_def(prof4)
 
     na = len(a_use)
     nk = len(k_use)
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
         # normalizations
-        norm1 = prof.get_normalization(cosmo, aa,
-                                       hmc=hmc) if normprof1 else 1
-        # TODO: CCLv3 remove if
+        norm1 = prof.get_normalization(cosmo, aa, hmc=hmc)
 
         if prof2 == prof:
             norm2 = norm1
         else:
-            norm2 = prof2.get_normalization(cosmo, aa,
-                                            hmc=hmc) if normprof2 else 1
-            # TODO: CCLv3 remove if
+            norm2 = prof2.get_normalization(cosmo, aa, hmc=hmc)
 
         if prof3 == prof:
             norm3 = norm1
         else:
-            norm3 = prof3.get_normalization(cosmo, aa,
-                                            hmc=hmc) if normprof3 else 1
-            # TODO: CCLv3 remove if
+            norm3 = prof3.get_normalization(cosmo, aa, hmc=hmc)
 
         if prof4 == prof2:
             norm4 = norm2
         else:
-            norm4 = prof4.get_normalization(cosmo, aa,
-                                            hmc=hmc) if normprof4 else 1
-            # TODO: CCLv3 remove if
+            norm4 = prof4.get_normalization(cosmo, aa, hmc=hmc)
 
         # trispectrum
         tk_1h = hmc.I_0_22(cosmo, k_use, aa,
@@ -132,13 +109,9 @@ def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
     return out
 
 
-@warn_api(pairs=[("prof1", "prof")],
-          reorder=["prof12_2pt", "prof3", "prof4"])
 def halomod_Tk3D_1h(cosmo, hmc, prof, *,
                     prof2=None, prof3=None, prof4=None,
                     prof12_2pt=None, prof34_2pt=None,
-                    normprof1=None, normprof2=None,
-                    normprof3=None, normprof4=None,
                     lk_arr=None, a_arr=None,
                     extrap_order_lok=1, extrap_order_hik=1,
                     use_log=False):
@@ -165,14 +138,6 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
             products of the means of both profiles.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as ``prof12_2pt`` for ``prof3`` and ``prof4``.
-        normprof1 (:obj:`bool`): if ``True``, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by ``prof``.
-            **Will be deprecated in v3.**
-        normprof2 (:obj:`bool`): same as ``normprof1`` for ``prof2``.
-        normprof3 (:obj:`bool`): same as ``normprof1`` for ``prof3``.
-        normprof4 (:obj:`bool`): same as ``normprof1`` for ``prof4``.
         a_arr (array): an array holding values of the scale factor
             at which the trispectrum should be calculated for
             interpolation. If ``None``, the internal values used
@@ -204,9 +169,7 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
                                  prof, prof2=prof2,
                                  prof12_2pt=prof12_2pt,
                                  prof3=prof3, prof4=prof4,
-                                 prof34_2pt=prof34_2pt,
-                                 normprof1=normprof1, normprof2=normprof2,
-                                 normprof3=normprof3, normprof4=normprof4)
+                                 prof34_2pt=prof34_2pt)
 
     tkk, use_log = _logged_output(tkk, log=use_log)
 
@@ -215,7 +178,6 @@ def halomod_Tk3D_1h(cosmo, hmc, prof, *,
                 extrap_order_hik=extrap_order_hik, is_logt=use_log)
 
 
-@warn_api
 def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
                                  bias1=1, bias2=1, bias3=1, bias4=1,
                                  is_number_counts1=False,
@@ -294,7 +256,6 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
 
     if not isinstance(prof, HaloProfileNFW):
         raise TypeError("prof should be HaloProfileNFW.")
-    hmc._fix_profile_mass_def(prof)
 
     # Make sure biases are of the form number of a x number of k
     ones = np.ones_like(a_arr)
@@ -314,7 +275,6 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
     dpk12, dpk34 = [np.zeros([na, nk]) for _ in range(2)]
     for ia, aa in enumerate(a_arr):
         norm = prof.get_normalization(cosmo, aa, hmc=hmc)**2
-        # TODO: CCLv3 remove if
         i12 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof, prof_2pt=prof_2pt)
 
         pk = pk2d(k_use, aa, cosmo=extrap)
@@ -356,12 +316,9 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
                 extrap_order_hik=extrap_order_hik, is_logt=use_log)
 
 
-@warn_api(pairs=[("prof1", "prof")],
-          reorder=["prof12_2pt", "prof3", "prof4"])
 def halomod_Tk3D_SSC(
         cosmo, hmc, prof, *, prof2=None, prof3=None, prof4=None,
         prof12_2pt=None, prof34_2pt=None,
-        normprof1=None, normprof2=None, normprof3=None, normprof4=None,
         p_of_k_a=None, lk_arr=None, a_arr=None,
         extrap_order_lok=1, extrap_order_hik=1, use_log=False,
         extrap_pk=False):
@@ -407,14 +364,6 @@ def halomod_Tk3D_SSC(
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as ``prof12_2pt`` for ``prof3`` and ``prof4``. If ``None``,
             ``prof12_2pt`` will be used.
-        normprof1 (:obj:`bool`): if ``True``, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by ``prof``.
-            **Will be deprecated in v3.**
-        normprof2 (:obj:`bool`): same as ``normprof1`` for ``prof2``.
-        normprof3 (:obj:`bool`): same as ``normprof1`` for ``prof3``.
-        normprof4 (:obj:`bool`): same as ``normprof1`` for ``prof4``.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If ``None``,
             the power spectrum stored within ``cosmo`` will be used.
@@ -452,10 +401,6 @@ def halomod_Tk3D_SSC(
     # define all the profiles
     prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt = \
         _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt)
-    hmc._fix_profile_mass_def(prof)
-    hmc._fix_profile_mass_def(prof2)
-    hmc._fix_profile_mass_def(prof3)
-    hmc._fix_profile_mass_def(prof4)
 
     k_use = np.exp(lk_arr)
     pk2d = cosmo.parse_pk(p_of_k_a)
@@ -464,36 +409,28 @@ def halomod_Tk3D_SSC(
     dpk12, dpk34 = [np.zeros((len(a_arr), len(k_use))) for _ in range(2)]
     for ia, aa in enumerate(a_arr):
         # normalizations & I11 integral
-        norm1 = prof.get_normalization(cosmo, aa,
-                                       hmc=hmc) if normprof1 else 1
-        # TODO: CCLv3 remove if
+        norm1 = prof.get_normalization(cosmo, aa, hmc=hmc)
         i11_1 = hmc.I_1_1(cosmo, k_use, aa, prof)
 
         if prof2 == prof:
             norm2 = norm1
             i11_2 = i11_1
         else:
-            norm2 = prof2.get_normalization(cosmo, aa,
-                                            hmc=hmc) if normprof2 else 1
-            # TODO: CCLv3 remove if
+            norm2 = prof2.get_normalization(cosmo, aa, hmc=hmc)
             i11_2 = hmc.I_1_1(cosmo, k_use, aa, prof2)
 
         if prof3 == prof:
             norm3 = norm1
             i11_3 = i11_1
         else:
-            norm3 = prof3.get_normalization(cosmo, aa,
-                                            hmc=hmc) if normprof3 else 1
-            # TODO: CCLv3 remove if
+            norm3 = prof3.get_normalization(cosmo, aa, hmc=hmc)
             i11_3 = hmc.I_1_1(cosmo, k_use, aa, prof3)
 
         if prof4 == prof2:
             norm4 = norm2
             i11_4 = i11_2
         else:
-            norm4 = prof4.get_normalization(cosmo, aa,
-                                            hmc=hmc) if normprof4 else 1
-            # TODO: CCLv3 remove if
+            norm4 = prof4.get_normalization(cosmo, aa, hmc=hmc)
             i11_4 = hmc.I_1_1(cosmo, k_use, aa, prof4)
 
         # I12 integral

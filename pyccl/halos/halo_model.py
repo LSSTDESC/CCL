@@ -1,10 +1,8 @@
 __all__ = ("HMCalculator",)
 
-import warnings
 import numpy as np
 
-from .. import CCLAutoRepr, CCLDeprecationWarning, unlock_instance
-from .. import warn_api, deprecate_attr, deprecated
+from .. import CCLAutoRepr, unlock_instance
 from .. import physical_constants as const
 from . import MassDef
 from ..pyutils import _spline_integrate
@@ -36,25 +34,13 @@ class HMCalculator(CCLAutoRepr):
             to be used in the mass integrals.
         integration_method_M (:obj:`str`): integration method to use
             in the mass integrals. Options: "simpson" and "spline".
-        k_min (:obj:`float`): **Deprecated - do not use.**
-            Some of the integrals solved by this class
-            will often be normalized by their value on very large
-            scales. This parameter (in units of inverse Mpc)
-            determines what is considered a "very large" scale.
     """ # noqa
     __repr_attrs__ = __eq_attrs__ = (
         "mass_function", "halo_bias", "mass_def", "precision",)
-    __getattr__ = deprecate_attr(pairs=[('_mdef', 'mass_def'),
-                                        ('_massfunc', 'mass_function'),
-                                        ('_hbias', 'halo_bias'),
-                                        ('_prec', 'precision')]
-                                 )(super.__getattribute__)
 
-    @warn_api(pairs=[("massfunc", "mass_function"), ("hbias", "halo_bias"),
-                     ("nlog10M", "nM")])
     def __init__(self, *, mass_function, halo_bias, mass_def=None,
                  log10M_min=8., log10M_max=16., nM=128,
-                 integration_method_M='simpson', k_min=1E-5):
+                 integration_method_M='simpson'):
         # Initialize halo model ingredients.
         out = MassDef.from_specs(mass_def, mass_function=mass_function,
                                  halo_bias=halo_bias)
@@ -65,7 +51,7 @@ class HMCalculator(CCLAutoRepr):
 
         self.precision = {
             'log10M_min': log10M_min, 'log10M_max': log10M_max, 'nM': nM,
-            'integration_method_M': integration_method_M, 'k_min': k_min}
+            'integration_method_M': integration_method_M}
         self._lmass = np.linspace(log10M_min, log10M_max, nM)
         self._mass = 10.**self._lmass
         self._m0 = self._mass[0]
@@ -81,14 +67,6 @@ class HMCalculator(CCLAutoRepr):
         # Cache last results for mass function and halo bias.
         self._cosmo_mf = self._cosmo_bf = None
         self._a_mf = self._a_bf = -1
-
-    def _fix_profile_mass_def(self, prof):
-        # TODO v3: remove this (in v3 all profiles have a mass_def).
-        # If profile has no mass definition assigned, assign one.
-        if prof.mass_def is None:
-            warnings.warn("In v3 all profiles will need an associated "
-                          "mass definition.", CCLDeprecationWarning)
-            prof.mass_def = self.mass_def
 
     def _integ_spline(self, fM, log10M):
         # Spline integrator
@@ -155,35 +133,6 @@ class HMCalculator(CCLAutoRepr):
         self._get_ingredients(cosmo, a, get_bf=False)
         return self._integrate_over_mf(fM)
 
-    @deprecated()
-    def profile_norm(self, cosmo, a, prof):
-        """ Returns :math:`I^0_1(k\\rightarrow0,a|u)`
-        (see :meth:`~HMCalculator.I_0_1`).
-
-        .. note::
-            This function will be deprecated in v3. Use
-            :meth:`~pyccl.halos.profiles.profile_base.HaloProfile.get_normalization`
-            to access profile normalizations.
-
-        Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            a (:obj:`float`): scale factor.
-            prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
-                halo profile.
-
-        Returns:
-            (:obj:`float` or `array`): integral value.
-        """
-        self._fix_profile_mass_def(prof)
-        self._check_mass_def(prof)
-        self._get_ingredients(cosmo, a, get_bf=False)
-        uk0 = prof.fourier(cosmo, self.precision['k_min'], self._mass, a).T
-        return 1. / self._integrate_over_mf(uk0)
-
-    @warn_api(pairs=[("sel", "selection"),
-                     ("amin", "a_min"),
-                     ("amax", "a_max")],
-              reorder=["na", "a_min", "a_max"])
     def number_counts(self, cosmo, *, selection,
                       a_min=None, a_max=1.0, na=128):
         """ Solves the integral:
@@ -300,7 +249,6 @@ class HMCalculator(CCLAutoRepr):
         uk = prof.fourier(cosmo, k, self._mass, a).T
         return self._integrate_over_mbf(uk)
 
-    @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
     def I_0_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
         """ Solves the integral:
 
@@ -340,7 +288,6 @@ class HMCalculator(CCLAutoRepr):
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
         return self._integrate_over_mf(uk)
 
-    @warn_api(pairs=[("prof1", "prof")], reorder=["prof_2pt", "prof2"])
     def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
         """ Solves the integral:
 
@@ -381,8 +328,6 @@ class HMCalculator(CCLAutoRepr):
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
         return self._integrate_over_mbf(uk)
 
-    @warn_api(pairs=[("prof1", "prof")],
-              reorder=["prof12_2pt", "prof2", "prof3", "prof34_2pt", "prof4"])
     def I_0_22(self, cosmo, k, a, prof, *,
                prof2=None, prof3=None, prof4=None,
                prof12_2pt, prof34_2pt=None):
@@ -450,23 +395,3 @@ class HMCalculator(CCLAutoRepr):
                 cosmo, k, self._mass, a, prof3, prof2=prof4).T
 
         return self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
-
-
-# TODO: Remove for CCLv3.
-def __getattr__(name):
-    warn = lambda n, m: warnings.warn(  # noqa
-        f"{n} is moved to pyccl.halos.{m}", CCLDeprecationWarning)
-    if name in ["halomod_mean_profile_1pt", "halomod_bias_1pt"]:
-        from .pk_1pt import __dict__ as mod_dict
-        warn(name, "pk_1pt")
-        return mod_dict[name]
-    elif name in ["halomod_power_spectrum", "halomod_Pk2D"]:
-        from .pk_2pt import __dict__ as mod_dict
-        warn(name, "pk_2pt")
-        return mod_dict[name]
-    elif name in ["halomod_trispectrum_1h", "halomod_Tk3D_1h",
-                  "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC"]:
-        from .pk_4pt import __dict__ as mod_dict
-        warn(name, "pk_4pt")
-        return mod_dict[name]
-    return eval(name) if name in locals() else None

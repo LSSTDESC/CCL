@@ -304,7 +304,7 @@ class SatelliteShearHOD(HaloProfileHOD):
             l_sum *= np.exp(1j * 2 * phik)
         return 2 ** l * l_sum
 
-    def get_normalization(self, cosmo, a, hmc):
+    def get_normalization(self, cosmo, a, *, hmc):
         """Returns the normalization of this profile, which is the
         mean galaxy number density.
 

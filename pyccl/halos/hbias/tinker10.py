@@ -2,7 +2,6 @@ __all__ = ("HaloBiasTinker10",)
 
 import numpy as np
 
-from ... import warn_api
 from . import HaloBias
 
 
@@ -21,7 +20,6 @@ class HaloBiasTinker10(HaloBias):
     """
     name = "Tinker10"
 
-    @warn_api
     def __init__(self, *,
                  mass_def="200m",
                  mass_def_strict=True):

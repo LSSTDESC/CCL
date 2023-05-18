@@ -3,7 +3,6 @@ __all__ = ("HaloProfileNFW",)
 import numpy as np
 from scipy.special import sici
 
-from ... import warn_api
 from . import HaloProfileMatter
 
 
@@ -49,7 +48,6 @@ class HaloProfileNFW(HaloProfileMatter):
         "fourier_analytic", "projected_analytic", "cumul2d_analytic",
         "truncated", "mass_def", "concentration", "precision_fftlog",)
 
-    @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration,
                  fourier_analytic=True,
                  projected_analytic=False,

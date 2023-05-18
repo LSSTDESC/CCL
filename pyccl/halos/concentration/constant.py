@@ -2,7 +2,6 @@ __all__ = ("ConcentrationConstant",)
 
 import numpy as np
 
-from ... import warn_api
 from . import Concentration
 
 
@@ -17,7 +16,6 @@ class ConcentrationConstant(Concentration):
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "c",)
     name = 'Constant'
 
-    @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, c=1, *, mass_def="200c"):
         self.c = c
         super().__init__(mass_def=mass_def)

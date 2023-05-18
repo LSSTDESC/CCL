@@ -2,7 +2,6 @@ __all__ = ("MassFuncPress74",)
 
 import numpy as np
 
-from ... import warn_api
 from . import MassFunc
 
 
@@ -19,7 +18,6 @@ class MassFuncPress74(MassFunc):
     """
     name = 'Press74'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="fof",
                  mass_def_strict=True):

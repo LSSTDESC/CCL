@@ -3,7 +3,6 @@ __all__ = ("HaloProfileEinasto",)
 import numpy as np
 from scipy.special import gamma, gammainc
 
-from ... import unlock_instance, warn_api
 from .. import MassDef, mass_translator
 from . import HaloProfileMatter
 
@@ -44,25 +43,18 @@ class HaloProfileEinasto(HaloProfileMatter):
     __repr_attrs__ = __eq_attrs__ = (
         "truncated", "alpha", "mass_def", "concentration", "precision_fftlog",)
 
-    @warn_api(pairs=[("c_M_relation", "concentration")])
     def __init__(self, *, concentration, truncated=True, alpha='cosmo',
                  mass_def=None):
         self.truncated = truncated
         self.alpha = alpha
         super().__init__(mass_def=mass_def, concentration=concentration)
-        self._init_mass_translator()
+        self._to_virial_mass = mass_translator(
+            mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
+            concentration=self.concentration)
         self.update_precision_fftlog(padding_hi_fftlog=1E2,
                                      padding_lo_fftlog=1E-2,
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
-
-    @unlock_instance
-    def _init_mass_translator(self):
-        # Set the mass translator to Mvir as an attribute.
-        # TODO: Move to `__init__` in CCLv3.
-        self._to_virial_mass = mass_translator(
-            mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
-            concentration=self.concentration)
 
     def update_parameters(self, alpha=None):
         """Update any of the parameters associated with this profile.
@@ -77,7 +69,6 @@ class HaloProfileEinasto(HaloProfileMatter):
 
     def _get_alpha(self, cosmo, M, a):
         if self.alpha == 'cosmo':
-            self._init_mass_translator()  # TODO: Remove for CCLv3.
             Mvir = self._to_virial_mass(cosmo, M, a)
             sM = cosmo.sigmaM(Mvir, a)
             nu = 1.686 / sM
