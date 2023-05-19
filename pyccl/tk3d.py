@@ -10,9 +10,9 @@ from .pyutils import _get_spline2d_arrays, _get_spline3d_arrays
 
 
 class Tk3D(CCLObject):
-    """A container for \"isotropized\" connected trispectra relevant for
-    covariance matrix calculations. I.e. functions of 3 variables of the
-    form :math:`T(k_1,k_2,a)`, where :math:`k_i` are wave vector moduli
+    """A container for \"isotropized\" connected trispectra, relevant for
+    covariance matrix calculations. These are functions of 3 variables of the
+    form :math:`T(k_1,k_2,a)`, where :math:`k_i` are wavenumbers,
     and :math:`a` is the scale factor. This function can be provided as
     a 3D array (one dimension per variable), or as two 2D arrays
     corresponding to functions :math:`f_i(k,a)` such that
@@ -45,52 +45,55 @@ class Tk3D(CCLObject):
 
     These objects can then be used, analogously to
     :class:`~pyccl.pk2d.Pk2D` objects, to construct the non-Gaussian
-    covariance of angular power spectra via Limber integration.
+    covariance of angular power spectra via Limber integration. See
+    :py:mod:`~pyccl.covariances`.
 
     Args:
         a_arr (array): an array holding values of the scale factor. Note
             that the trispectrum will be extrapolated as constant on
             values of the scale factor outside those held by this array.
         lk_arr (array): an array holding values of the natural logarithm
-            of the wavenumber (in units of Mpc^-1).
-        tkk_arr (array): a 3D array with shape `[na,nk,nk]`, where `na`
-            and `nk` are the sizes of `a_arr` and `lk_arr` respectively.
+            of the wavenumber (in units of :math:`{\\rm Mpc}^{-1}`).
+        tkk_arr (array): a 3D array with shape ``[na,nk,nk]``, where ``na``
+            and ``nk`` are the sizes of ``a_arr`` and ``lk_arr`` respectively.
             This array should contain the values of the trispectrum
-            at the values of scale factor and wavenumber held by `a_arr`
-            and `lk_arr`. The array can hold the values of the natural
+            at the values of scale factor and wavenumber held by ``a_arr``
+            and ``lk_arr``. The array can hold the values of the natural
             logarithm of the trispectrum, depending on the value of
-            `is_logt`. If `tkk_arr` is `None`, then it is assumed that
+            ``is_logt``. If ``tkk_arr`` is ``None``, then it is assumed that
             the trispectrum can be factorized as described above, and
             the two functions :math:`f_i(k_i,a)` are described by
-            `pk1_arr` and `pk2_arr`. You are responsible for making sure
+            ``pk1_arr`` and ``pk2_arr``. You are responsible for making sure
             all these arrays are sufficiently well sampled (i.e. the
-            resolution of `a_arr` and `lk_arr` is high enough to sample
+            resolution of ``a_arr`` and ``lk_arr`` is high enough to sample
             the main features in the trispectrum). For reference, CCL
             will use bicubic interpolation to evaluate the trispectrum
             in the 2D space of wavenumbers :math:`(k_1,k_2)` at a fixed
             scale factor, and will use linear interpolation in the
             scale factor dimension.
-        pk1_arr (array): a 2D array with shape `[na,nk]` describing the
+        pk1_arr (array): a 2D array with shape ``[na,nk]`` describing the
             first function :math:`f_1(k,a)` that makes up a factorizable
             trispectrum :math:`T(k_1,k_2,a)=f_1(k_1,a)f_2(k_2,a)`.
-            `pk1_arr` and `pk2_arr` are ignored if `tkk_arr` is not
-            `None`.
-        pk2_arr (array): a 2D array with shape `[na,nk]` describing the
+            ``pk1_arr`` and ``pk2_arr`` are ignored if ``tkk_arr`` is not
+            ``None``.
+        pk2_arr (array): a 2D array with shape ``[na,nk]`` describing the
             second factor :math:`f_2(k,a)` for a factorizable trispectrum.
-        is_logt (boolean): if True, `tkk_arr`/`pk1_arr`/`pk2_arr` hold the
-            natural logarithm of the trispectrum (or its factors).
+        is_logt (:obj:`bool`): if True, ``tkk_arr``/``pk1_arr``/``pk2_arr``
+            hold the natural logarithm of the trispectrum (or its factors).
             Otherwise, the true values of the corresponding quantities are
             expected. Note that arrays will be interpolated in log space
-            if `is_logt` is set to `True`.
-        extrap_order_lok (int): extrapolation order to be used on k-values
-            below the minimum of the splines (use 0 or 1). Note that
-            the extrapolation will be done in either
-            :math:`\\log(T(k_1,k_2,a)` or :math:`T(k_1,k_2,a)`,
-            depending on the value of `is_logt`.
-        extrap_order_hik (int): same as `extrap_order_lok` for
+            if ``is_logt`` is set to ``True``.
+        extrap_order_lok (:obj:`int`): extrapolation order to be used on
+            k-values below the minimum of the splines (use 0 or 1). Note
+            that the extrapolation will be done in either
+            :math:`\\log(T(k_1,k_2,a))` or :math:`T(k_1,k_2,a)`,
+            depending on the value of ``is_logt``.
+        extrap_order_hik (:obj:`int`): same as ``extrap_order_lok`` for
             k-values above the maximum of the splines.
+
+    .. automethod:: __call__
     """
-    from .base.repr_ import build_string_Tk3D as __repr__
+    from ._core.repr_ import build_string_Tk3D as __repr__
 
     @warn_api(reorder=['extrap_order_lok', 'extrap_order_hik', 'is_logt'])
     def __init__(self, *, a_arr, lk_arr, tkk_arr=None,
@@ -179,23 +182,27 @@ class Tk3D(CCLObject):
         return self.tsp.extrap_order_hik if self else None
 
     def eval(self, k, a):
+        """
+        .. warning:: Deprecate, use this class's :meth:`Tk3D.__call__` method.
+        """
         warnings.warn("Tk3D.eval is deprecated. Simply call the object "
                       "itself.", category=CCLDeprecationWarning)
         return self(k, a)
 
     def __call__(self, k, a):
-        """Evaluate trispectrum. If `k` is a 1D array with size `nk`, and
-        `a` is a scalar, the output `out` will be a 2D array with shape
-        `[nk,nk]` holding `out[i,j] = T(k[j],k[i],a)`, where `T` is the
-        trispectrum function held by this `Tk3D` object. If `a` is an array,
-        the shape will be `[len(a),nk,nk]`.
+        """Evaluate trispectrum. If ``k`` is a 1D array with size ``nk``, and
+        ``a`` is a scalar, the output ``out`` will be a 2D array with shape
+        ``[nk,nk]`` holding ``out[i,j] = T(k[j],k[i],a)``, where ``T`` is the
+        trispectrum function held by this :class:`Tk3D` object. If ``a`` is
+        an array, the shape will be ``[len(a),nk,nk]``.
 
         Args:
-            k (float or array_like): wavenumber value(s) in units of Mpc^-1.
-            a (float or array_like): value(s) of the scale factor
+            k (:obj:`float` or `array`): wavenumber value(s) in units of
+                :math:`{\\rm Mpc}^{-1}`.
+            a (:obj:`float` or `array`): value(s) of the scale factor
 
         Returns:
-            float or array_like: value(s) of the trispectrum.
+            (:obj:`float` or `array`): value(s) of the trispectrum.
         """
         a_use = np.atleast_1d(a).astype(float)
         k_use = np.atleast_1d(k).astype(float)
@@ -233,7 +240,7 @@ class Tk3D(CCLObject):
 
             - a_arr (1D ``numpy.ndarray``): Array of scale factors.
             - lk_arr1, lk_arr2 (1D ``numpy.ndarray``): Arrays of
-              :math:`ln(k)`.
+              :math:`log(k)`.
             - out (list of ``numpy.ndarray``): The trispectrum
               :math:`T(k_1, k_2, z)` or its factors
               :math:`f(k_1, z),\\,\\,f(k_2, z)`.

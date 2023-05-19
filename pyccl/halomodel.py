@@ -1,3 +1,9 @@
+"""
+.. warning:: The functionality contained in this module has been deprecated
+             in favour of the newer halo model implementation
+             :py:mod:`~pyccl.halos`.
+"""
+
 __all__ = ("halo_concentration", "onehalo_matter_power",
            "twohalo_matter_power", "halomodel_matter_power",)
 
@@ -39,13 +45,14 @@ def halo_concentration(cosmo, halo_mass, a, odelta=200):
     """Halo mass concentration relation
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        halo_mass (float or array_like): Halo masses; Msun.
-        a (float): scale factor.
-        odelta (float): overdensity parameter (default: 200)
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
+        halo_mass (:obj:`float` or `array`): Halo masses; Msun.
+        a (:obj:`float`): scale factor.
+        odelta (:obj:`float`): overdensity parameter (default: 200)
 
     Returns:
-        float or array_like: Dimensionless halo concentration, ratio rv/rs
+        (:obj:`float` or `array`): Dimensionless halo concentration,
+        ratio rv/rs.
     """
     mdef = hal.MassDef(odelta, 'matter')
     c = _get_concentration(cosmo, mdef)
@@ -57,12 +64,12 @@ def onehalo_matter_power(cosmo, k, a):
     """One-halo term for matter power spectrum assuming NFW density profiles
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): wavenumber
-        a (float): scale factor.
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
+        k (:obj:`float` or `array`): wavenumber
+        a (:obj:`float`): scale factor.
 
     Returns:
-        float or array_like: one-halo term for matter \
+        (:obj:`float` or `array`): one-halo term for matter \
             power spectrum
     """
     mdef = hal.MassDef('vir', 'matter')
@@ -81,12 +88,12 @@ def twohalo_matter_power(cosmo, k, a):
     """Two-halo term for matter power spectrum assuming NFW density profiles
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): wavenumber
-        a (float): scale factor.
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
+        k (:obj:`float` or `array`): wavenumber
+        a (:obj:`float`): scale factor.
 
     Returns:
-        float or array_like: two-halo term for matter power spectrum.
+        (:obj:`float` or `array`): two-halo term for matter power spectrum.
     """
     mdef = hal.MassDef('vir', 'matter')
     c = _get_concentration(cosmo, mdef)
@@ -104,12 +111,12 @@ def halomodel_matter_power(cosmo, k, a):
     """Matter power spectrum from halo model assuming NFW density profiles
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological parameters.
-        k (float or array_like): wavenumber
-        a (float): scale factor.
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
+        k (:obj:`float` or `array`): wavenumber
+        a (:obj:`float`): scale factor.
 
     Returns:
-        float or array_like: matter power spectrum from halo model
+        (:obj:`float` or `array`): matter power spectrum from halo model
     """
     mdef = hal.MassDef('vir', 'matter')
     c = _get_concentration(cosmo, mdef)

@@ -9,22 +9,22 @@ from . import Concentration
 
 
 class ConcentrationIshiyama21(Concentration):
-    """ Concentration-mass relation by Ishiyama et al. 2021
-    (arXiv:2007.14720). This parametrization is only valid for
-    S.O. masses with Delta = Delta_vir, 200-critical and 500-critical.
-    By default it will be initialized for Delta = 500-critical.
+    """Concentration-mass relation by `Ishiyama et al. 2021
+    <http://arxiv.org/abs/2007.14720>`_. This parametrization is only
+    valid for S.O. masses with :math:`\\Delta = \\Delta_{\\rm vir}`, or
+    :math:`\\Delta=200` or :math:`500` times the critical density.
+    By default it will be initialized for :math:`M_{500c}`.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
-            a mass definition object that fixes the mass definition
-            used by this c(M) parametrization, or a name string.
-        relaxed (bool):
-            If True, use concentration for relaxed halos. Otherwise,
-            use concentration for all halos. The default is False.
-        Vmax (bool):
-            If True, use the concentration found with the Vmax numerical
-            method. Otherwise, use the concentration found with profile
-            fitting. The default is False.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object or a name string.
+        relaxed (:obj:`bool`):
+            If ``True``, use concentration for relaxed halos. Otherwise,
+            use concentration for all halos. Default: ``False``.
+        Vmax (:obj:`bool`):
+            If ``True``, use the concentration found with the "Vmax"
+            numerical method. Otherwise, use the concentration found with
+            profile fitting. Default:  ``False``.
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'

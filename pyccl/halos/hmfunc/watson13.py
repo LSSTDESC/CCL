@@ -7,15 +7,14 @@ from . import MassFunc
 
 
 class MassFuncWatson13(MassFunc):
-    """ Implements mass function described in arXiv:1212.0095.
+    """Implements the mass function of `Watson et al. 2013
+    <https://arxiv.org/abs/1212.0095>`_. This parametrization accepts
+    `fof` and any S.O. masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            This parametrization accepts fof and any SO masses.
-            The default is '200m'.
-            If `None`, Delta = 200 (matter) will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = 'Watson13'

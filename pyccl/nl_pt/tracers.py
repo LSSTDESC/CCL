@@ -14,26 +14,29 @@ from ..pyutils import _check_array_params
 def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
                       Om_m2_for_c2=False, Om_m_fid=0.3):
     """
-    Function to convert from a_ia values to c_ia values,
-    using the standard convention of Blazek 2019 or the variant used
-    by the Dark Energy Survey analysis.
+    Function to convert from :math:`A_{ia}` values to :math:`c_{ia}` values,
+    for the intrinsic alignment bias parameters using the standard
+    convention of `Blazek et al. 2019 <https://arxiv.org/abs/1708.09247>`_
+    or the variant used by the Dark Energy Survey analysis.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): cosmology object.
-        z (float or array_like): z value(s) where amplitude is evaluated
-        a1 (float or array_like): IA a1 at input z values. Defaults to 1.0
-        a1delta (float or array_like): IA a1delta at input z values.
-            Defaults to None.
-        a2 (float or array_like): IA a2 at input z values.
-            Defaults to None.
-        Om_m2_for_c2 (bool): True to use the Blazek 2019 convention of
-            Om_m^2 scaling. Defaults to False
-        Om_m_fid (float): Value for Blazek 2019 scaling. Defaults to 0.3.
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmology object.
+        z (:obj:`float` or `array`): z value(s) where amplitude is evaluated.
+        a1 (:obj:`float` or `array`): IA :math:`A_1` at input z values.
+        a1delta (:obj:`float` or `array`): IA :math:`A_{1\\delta}` at input
+            z values.
+        a2 (:obj:`float` or `array`): IA :math:`A_2` at input z values.
+        Om_m2_for_c2 (:obj:`bool`): True to use the Blazek et al. 2019
+            convention of :math:`\\Omega_m^2` scaling.
+        Om_m_fid (:obj:`float`): Value for Blazek et al. 2019 scaling.
 
     Returns:
-        c1 (float or array_like): IA c1 at input z values
-        c1delta (float or array_like): IA c1delta at input z values
-        c2 (float or array_like): IA c2 at input z values
+        Tuple of IA bias parameters
+
+        - c1 (:obj:`float` or `array`): IA :math:`C_1` at input z values.
+        - c1delta (:obj:`float` or `array`): IA :math:`C_{1\\delta}` at
+          input z values.
+        - c2 (:obj:`float` or `array`): IA :math:`C_2` at input z values.
     """
 
     Om_m = cosmo['Omega_m']
@@ -61,9 +64,9 @@ class PTTracer(CCLAutoRepr):
     perturbative, non-linear inhomogeneities associated with
     different physical quantities.
 
-    In essence their main function is to store a set of redshift-
-    dependent functions (e.g. perturbation theory biases) needed
-    in a perturbation theory framework to provide N-point
+    In essence their main function is to store a set of
+    redshift-dependent functions (e.g. perturbation theory biases)
+    needed in a perturbation theory framework to provide N-point
     correlations.
     """
     __repr_attrs__ = __eq_attrs__ = ('type', 'biases')
@@ -75,8 +78,8 @@ class PTTracer(CCLAutoRepr):
     @property
     @abstractmethod
     def type(self):
-        """String defining tracer type (`M`, `NC` and
-        `IA` supported).
+        """String defining tracer type (``'M'``, ``'NC'`` and
+        ``'IA'`` supported).
         """
 
     def get_bias(self, bias_name, z):
@@ -84,11 +87,11 @@ class PTTracer(CCLAutoRepr):
         redshift.
 
         Args:
-            bias_name (str): name of the bias function to return.
-            z (float or array_like): redshift.
+            bias_name (:obj:`str`): name of the bias function to return.
+            z (:obj:`float` or `array`): redshift.
 
         Returns:
-            float or array_like: bias value at the input redshifts.
+            (:obj:`float` or `array`): bias value at the input redshifts.
         """
         if bias_name not in self.biases:
             raise KeyError(f"Bias {bias_name} not included in this tracer")
@@ -129,19 +132,19 @@ class PTNumberCountsTracer(PTTracer):
     a tidal field bias. These are provided as floating
     point numbers or tuples of (reshift,bias) arrays.
     If a number is provided, a constant bias is assumed.
-    If `None`, a bias of zero is assumed.
+    If ``None``, a bias of zero is assumed.
 
     Args:
-        b1 (float or tuple of arrays): a single number or a
-            tuple of arrays (z, b(z)) giving the first-order
+        b1 (:obj:`float` or :obj:`tuple`): a single number or a
+            tuple of arrays ``(z, b(z))`` giving the first-order
             bias.
-        b2 (float or tuple of arrays): as above for the
+        b2 (:obj:`float` or :obj:`tuple`): as above for the
             second-order bias.
-        bs (float or tuple of arrays): as above for the
+        bs (:obj:`float` or :obj:`tuple`): as above for the
             tidal bias.
-        b3nl (float or tuple of arrays): as above for the
+        b3nl (:obj:`float` or :obj:`tuple`): as above for the
             third-order bias.
-        bk2 (float or tuple of arrays): as above for the
+        bk2 (:obj:`float` or :obj:`tuple`): as above for the
             non-local bias.
     """
     type = 'NC'
@@ -197,16 +200,16 @@ class PTIntrinsicAlignmentTracer(PTTracer):
     and an overdensity bias. These are provided as floating
     point numbers or tuples of (reshift,bias) arrays.
     If a number is provided, a constant bias is assumed.
-    If `None`, a bias of zero is assumed.
+    If ``None``, a bias of zero is assumed.
 
     Args:
-        c1 (float or tuple of arrays): a single number or a
-            tuple of arrays (z, c1(z)) giving the first-order
-            alignment bias.
-        c2 (float or tuple of arrays): as above for the
-            second-order alignment bias.
-        cdelta (float or tuple of arrays): as above for the
-            overdensity bias.
+        c1 (:obj:`float` or :obj:`tuple`): a single number or a
+            tuple of arrays ``(z, c1(z))`` giving the first-order
+            alignment bias :math:`C_1`.
+        c2 (:obj:`float` or :obj:`tuple`): as above for the
+            second-order alignment bias :math:`C_2`.
+        cdelta (:obj:`float` or :obj:`tuple`): as above for the
+            overdensity bias :math:`C_{1\\delta}`.
     """
     type = 'IA'
 
