@@ -43,9 +43,7 @@ def test_halomod(model):
     z = 0.
     k = data_z0[:, 0] * cosmo['h']
     pk = data_z0[:, -1] / (cosmo['h']**3)
-    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
-        pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z), prf,
-                                                  normprof1=True)
+    pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z), prf)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)
@@ -53,9 +51,7 @@ def test_halomod(model):
     z = 1.
     k = data_z1[:, 0] * cosmo['h']
     pk = data_z1[:, -1] / (cosmo['h']**3)
-    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
-        pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z), prf,
-                                                  normprof1=True)
+    pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z), prf)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)

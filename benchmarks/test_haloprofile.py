@@ -14,10 +14,9 @@ COSMO = ccl.Cosmology(
     wa=0,
     m_nu=0,
     mass_split='normal',
-    Neff=3.046,
+    Neff=3.046, T_CMB=2.725,
     Omega_k=0,
-    transfer_function='eisenstein_hu',
-    mass_function='shethtormen')
+    transfer_function='eisenstein_hu')
 
 
 def test_profile_Hernquist():
