@@ -136,7 +136,7 @@ class Cosmology(CCLObject):
             because the CMB temperature will still be non-zero in the
             parameters.
         Neff (:obj:`float`): Effective number of massless
-            neutrinos present. Defaults to 3.046.
+            neutrinos present. Defaults to 3.044.
         m_nu (:obj:`float` or `array`):
             Mass in eV of the massive neutrinos present. Defaults to 0.
             If a sequence is passed, it is assumed that the elements of the
@@ -229,7 +229,7 @@ class Cosmology(CCLObject):
             T_ncdm=DefaultParams.T_ncdm):
 
         if Neff is None:
-            Neff = 3.046
+            Neff = 3.044
 
         extra_parameters = extra_parameters or {}
         if "emu" not in extra_parameters:
@@ -732,7 +732,7 @@ class CosmologyCalculator(Cosmology):
             inconsistent model because the CMB temperature will still
             be non-zero in the parameters.
         Neff (:obj:`float`): Effective number of massless
-            neutrinos present. Defaults to 3.046.
+            neutrinos present. Defaults to 3.044.
         m_nu (:obj:`float` or `array`):
             Mass in eV of the massive neutrinos present. Defaults to 0.
             If a sequence is passed, it is assumed that the elements of the

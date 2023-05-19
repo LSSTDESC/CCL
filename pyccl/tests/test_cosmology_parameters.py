@@ -26,9 +26,9 @@ def test_parameters_lcdmDefaultParams():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.allclose(cosmo['Neff'], 3.046)
+    assert np.allclose(cosmo['Neff'], 3.044)
     assert cosmo['N_nu_mass'] == 0
-    assert np.allclose(cosmo['N_nu_rel'], 3.046)
+    assert np.allclose(cosmo['N_nu_rel'], 3.044)
     assert np.allclose(cosmo['sum_nu_masses'], 0)
     assert np.allclose(cosmo['m_nu'], 0)
     assert np.allclose(cosmo['Omega_nu_mass'], 0)
@@ -55,7 +55,7 @@ def test_parameters_nu(mass_split):
         n_s=0.96,
         wa=0.01,
         w0=-1,
-        Neff=3.046,
+        Neff=3.044,
         Omega_k=0.0,
         m_nu=0.15,
         mass_split=mass_split
@@ -123,7 +123,7 @@ def test_parameters_nu_list():
         cosmo['Omega_nu_rel'] + cosmo['Omega_k'],
         1)
 
-    assert np.allclose(cosmo['Neff'], 3.046)
+    assert np.allclose(cosmo['Neff'], 3.044)
     assert cosmo['N_nu_mass'] == 3
     assert np.allclose(cosmo['sum_nu_masses'], 0.1 + 0.01 + 0.003)
     assert np.allclose(cosmo['m_nu'], [0.1, 0.01, 0.003])
@@ -164,7 +164,7 @@ def test_parameters_nu_normal():
         cosmo['Omega_nu_rel'] + cosmo['Omega_k'],
         1)
 
-    assert np.allclose(cosmo['Neff'], 3.046)
+    assert np.allclose(cosmo['Neff'], 3.044)
     assert cosmo['N_nu_mass'] == 3
     assert np.allclose(cosmo['sum_nu_masses'], 0.3)
 
@@ -204,7 +204,7 @@ def test_parameters_nu_inverted():
         cosmo['Omega_nu_rel'] + cosmo['Omega_k'],
         1)
 
-    assert np.allclose(cosmo['Neff'], 3.046)
+    assert np.allclose(cosmo['Neff'], 3.044)
     assert cosmo['N_nu_mass'] == 3
     assert np.allclose(cosmo['sum_nu_masses'], 0.3)
 
@@ -244,7 +244,7 @@ def test_parameters_nu_equal():
         cosmo['Omega_nu_rel'] + cosmo['Omega_k'],
         1)
 
-    assert np.allclose(cosmo['Neff'], 3.046)
+    assert np.allclose(cosmo['Neff'], 3.044)
     assert cosmo['N_nu_mass'] == 3
     assert np.allclose(cosmo['sum_nu_masses'], 0.3)
     assert np.allclose(cosmo['m_nu'], 0.1)
