@@ -42,8 +42,7 @@ correlation_types = {
 }
 
 
-def correlation(cosmo, *, ell, C_ell, theta, type='NN', corr_type=None,
-                method='fftlog'):
+def correlation(cosmo, *, ell, C_ell, theta, type='NN', method='fftlog'):
     r"""Compute the angular correlation function.
 
     .. math::

@@ -108,9 +108,6 @@ def test_correlation_raises():
         ccl.correlation(COSMO, ell=[1], C_ell=[1e-3], theta=[1], method='blah')
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, ell=[1], C_ell=[1e-3], theta=[1], type='blah')
-    with pytest.raises(ValueError):
-        ccl.correlation(COSMO, ell=[1], C_ell=[1e-3],
-                        theta=[1], corr_type='blah')
 
 
 def test_correlation_zero():
