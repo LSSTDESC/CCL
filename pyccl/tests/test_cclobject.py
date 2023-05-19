@@ -68,8 +68,7 @@ def test_CCLObject_immutability():
         cosmo.update_parameters(A_SPLINE_NA=120)
 
     # `update_parameters` implemented.
-    mdef = ccl.halos.MassDef200c()
-    prof = ccl.halos.HaloProfilePressureGNFW(mass_def=mdef, mass_bias=0.5)
+    prof = ccl.halos.HaloProfilePressureGNFW(mass_def="200c", mass_bias=0.5)
     # with pytest.raises(AttributeError):  # TODO: Uncomment for CCLv3.
     #     prof.mass_bias = 0.7
     assert prof.mass_bias == 0.5
@@ -95,7 +94,7 @@ def test_CCLObject_default_behavior():
 
 def test_named_class_raises():
     # Test that an error is raised if `create_instance` gets the wrong type.
-    with pytest.raises(TypeError):
+    with pytest.raises(AttributeError):
         ccl.halos.MassDef.create_instance(1)
 
 

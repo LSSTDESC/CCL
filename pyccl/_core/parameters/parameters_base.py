@@ -3,27 +3,18 @@ __all__ = (
     "PhysicalConstants", "spline_params", "gsl_params", "physical_constants",
     "DEFAULT_POWER_SPECTRUM",)
 
-import warnings
-
-from ... import CCLDeprecationWarning, lib
+from ... import lib
 
 DEFAULT_POWER_SPECTRUM = "delta_matter:delta_matter"
 
 
 class DefaultParams:
     """Default cosmological parameters used throughout the library.
-
-    .. warning:: The default values of ``T_CMB`` and ``T_ncdm`` will change
-                 in v3 of CCL.
     """
     #: Mean CMB temperature in Kelvin.
-    T_CMB = 2.725
+    T_CMB = 2.7255
     #: Non-CDM temperature in units of ``T_CMB``.
     T_ncdm = 0.71611
-
-    warnings.warn(
-        "The default CMB temperaHaloProfileCIBture (T_CMB) will change in "
-        "CCLv3.0.0, from 2.725 to 2.7255 (Kelvin).", CCLDeprecationWarning)
 
 
 class CCLParameters:

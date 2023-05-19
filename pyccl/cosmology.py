@@ -748,6 +748,8 @@ class CosmologyCalculator(Cosmology):
             equation of state. Defaults to 0.
         T_CMB (:obj:`float`): The CMB temperature today. The default is the
             same as in the Cosmology base class.
+        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
+            temperature. The default is the same as in the base class
         mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
@@ -804,10 +806,7 @@ class CosmologyCalculator(Cosmology):
             computed. The only non-linear model supported is ``'halofit'``,
             corresponding to the "HALOFIT" transformation of
             `Takahashi et al. 2012 <https://arxiv.org/abs/1208.2701>`_.
-        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is the same as in the base class
     """
-    # TODO: Docstring - Move T_ncdm after T_CMB for CCLv3.
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_accuracy_params", "_input_arrays",)
 
@@ -815,10 +814,9 @@ class CosmologyCalculator(Cosmology):
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=None, m_nu=0., mass_split="normal", w0=-1., wa=0.,
-            T_CMB=DefaultParams.T_CMB, mu_0=0., sigma_0=0.,
-            background=None, growth=None,
-            pk_linear=None, pk_nonlin=None, nonlinear_model=None,
-            T_ncdm=DefaultParams.T_ncdm):
+            T_CMB=DefaultParams.T_CMB, T_ncdm=DefaultParams.T_ncdm,
+            mu_0=0., sigma_0=0., background=None, growth=None,
+            pk_linear=None, pk_nonlin=None, nonlinear_model=None):
 
         super().__init__(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,

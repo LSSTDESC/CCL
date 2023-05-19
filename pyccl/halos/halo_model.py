@@ -214,7 +214,6 @@ class HMCalculator(CCLAutoRepr):
             (:obj:`float` or `array`): integral values evaluated at each
             value of ``k``.
         """
-        self._fix_profile_mass_def(prof)
         self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk = prof.fourier(cosmo, k, self._mass, a).T
@@ -243,7 +242,6 @@ class HMCalculator(CCLAutoRepr):
             (:obj:`float` or `array`): integral values evaluated at each
             value of ``k``.
         """
-        self._fix_profile_mass_def(prof)
         self._check_mass_def(prof)
         self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof.fourier(cosmo, k, self._mass, a).T
@@ -280,8 +278,6 @@ class HMCalculator(CCLAutoRepr):
         """
         if prof2 is None:
             prof2 = prof
-        self._fix_profile_mass_def(prof)
-        self._fix_profile_mass_def(prof2)
 
         self._check_mass_def(prof, prof2)
         self._get_ingredients(cosmo, a, get_bf=False)
@@ -320,8 +316,6 @@ class HMCalculator(CCLAutoRepr):
         """
         if prof2 is None:
             prof2 = prof
-        self._fix_profile_mass_def(prof)
-        self._fix_profile_mass_def(prof2)
 
         self._check_mass_def(prof, prof2)
         self._get_ingredients(cosmo, a, get_bf=True)
@@ -378,10 +372,6 @@ class HMCalculator(CCLAutoRepr):
         if prof34_2pt is None:
             prof34_2pt = prof12_2pt
 
-        self._fix_profile_mass_def(prof)
-        self._fix_profile_mass_def(prof2)
-        self._fix_profile_mass_def(prof3)
-        self._fix_profile_mass_def(prof4)
         self._check_mass_def(prof, prof2, prof3, prof4)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk12 = prof12_2pt.fourier_2pt(

@@ -34,17 +34,6 @@ def test_parameters_lcdmDefaultParams():
     assert np.allclose(cosmo['Omega_nu_mass'], 0)
     assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
 
-    # TODO: Remove these for CCLv3.
-    assert np.allclose(cosmo['bcm_ks'], 55.0)
-    assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
-    assert np.allclose(cosmo['bcm_etab'], 0.5)
-
-    # TODO: Remove these for CCLv3.
-    assert not cosmo['has_mgrowth']
-    assert cosmo['nz_mgrowth'] == 0
-    assert cosmo['z_mgrowth'] is None
-    assert cosmo['df_mgrowth'] is None
-
     # these are defined in the code via some constants so
     # going to test the total
     #     Omega_nu_rel
@@ -124,15 +113,6 @@ def test_parameters_nu_list():
     assert np.isnan(cosmo['sigma8'])
     assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
 
-    assert np.allclose(cosmo['bcm_ks'], 55.0)
-    assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
-    assert np.allclose(cosmo['bcm_etab'], 0.5)
-
-    assert not cosmo['has_mgrowth']
-    assert cosmo['nz_mgrowth'] == 0
-    assert cosmo['z_mgrowth'] is None
-    assert cosmo['df_mgrowth'] is None
-
     # these are defined in the code via some constants so
     # going to test the total
     #     Omega_nu_rel
@@ -174,15 +154,6 @@ def test_parameters_nu_normal():
     assert np.isnan(cosmo['sigma8'])
     assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
 
-    assert np.allclose(cosmo['bcm_ks'], 55.0)
-    assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
-    assert np.allclose(cosmo['bcm_etab'], 0.5)
-
-    assert not cosmo['has_mgrowth']
-    assert cosmo['nz_mgrowth'] == 0
-    assert cosmo['z_mgrowth'] is None
-    assert cosmo['df_mgrowth'] is None
-
     # these are defined in the code via some constants so
     # going to test the total
     #     Omega_nu_rel
@@ -223,15 +194,6 @@ def test_parameters_nu_inverted():
     assert np.isnan(cosmo['sigma8'])
     assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
 
-    assert np.allclose(cosmo['bcm_ks'], 55.0)
-    assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
-    assert np.allclose(cosmo['bcm_etab'], 0.5)
-
-    assert not cosmo['has_mgrowth']
-    assert cosmo['nz_mgrowth'] == 0
-    assert cosmo['z_mgrowth'] is None
-    assert cosmo['df_mgrowth'] is None
-
     # these are defined in the code via some constants so
     # going to test the total
     #     Omega_nu_rel
@@ -271,15 +233,6 @@ def test_parameters_nu_equal():
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
     assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
-
-    assert np.allclose(cosmo['bcm_ks'], 55.0)
-    assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
-    assert np.allclose(cosmo['bcm_etab'], 0.5)
-
-    assert not cosmo['has_mgrowth']
-    assert cosmo['nz_mgrowth'] == 0
-    assert cosmo['z_mgrowth'] is None
-    assert cosmo['df_mgrowth'] is None
 
     # these are defined in the code via some constants so
     # going to test the total
@@ -337,56 +290,6 @@ def test_parameters_missing():
                       A_s=2.1e-9, sigma8=0.7)
     with pytest.raises(ValueError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.8)
-
-
-def test_parameters_mgrowth():
-    """
-    Check that valid modified growth inputs are allowed, and invalid ones are
-    rejected.
-    """
-    # TODO: Remove this test for CCLv3.
-    zarr = np.linspace(0., 1., 15)
-    dfarr = 0.1 * np.ones(15)
-
-    def f_func(z):
-        return 0.1 * z
-
-    # Valid constructions
-    for omega_g in [None, 0.0, 0.1]:
-        with pytest.warns(ccl.CCLDeprecationWarning):
-            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=zarr, df_mg=dfarr, Omega_g=omega_g)
-            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=[0., 0.1, 0.2],
-                          df_mg=[0.1, 0.1, 0.1], Omega_g=omega_g)
-
-        # Invalid constructions
-        with pytest.raises(ValueError):
-            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=zarr, Omega_g=omega_g)
-        with pytest.raises(ValueError):
-            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, df_mg=dfarr, Omega_g=omega_g)
-        with pytest.raises(ValueError):
-            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=None, df_mg=dfarr)
-        with pytest.raises(ValueError):
-            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=zarr, df_mg=0.1)
-        with pytest.raises(ValueError):
-            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=zarr, df_mg=f_func)
-
-        # Mis-matched array sizes and dimensionality
-        with pytest.raises(ValueError):
-            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=zarr, df_mg=dfarr[1:],
-                          Omega_g=omega_g)
-        with pytest.raises(ValueError):
-            ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
-                          n_s=0.96, z_mg=zarr,
-                          df_mg=np.column_stack((dfarr, dfarr)),
-                          Omega_g=omega_g)
 
 
 def test_parameters_read_write():
