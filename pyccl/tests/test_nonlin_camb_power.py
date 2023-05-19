@@ -13,7 +13,7 @@ def test_nonlin_camb_power():
     n_s = 0.97
     h = 0.7
     # Needs to be set for good agreements between CCL and CAMB
-    T_CMB = 2.725
+    T_CMB = 2.7255
 
     p = camb.CAMBparams(WantTransfer=True,
                         NonLinearModel=camb.nonlinear.Halofit(

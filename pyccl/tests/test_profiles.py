@@ -270,7 +270,7 @@ def test_hod_normalization(ns_indep):
         "Duffy08", mass_def=hmc.mass_def)
     prof = ccl.halos.HaloProfileHOD(concentration=cm, ns_independent=ns_indep)
 
-    norm = np.array([prof.get_normalization(cosmo, a, hmc) for a in a_arr])
+    norm = np.array([prof.get_normalization(cosmo, a, hmc=hmc) for a in a_arr])
 
     def profile_norm(a):
         hmc._get_ingredients(cosmo, a, get_bf=False)
@@ -321,87 +321,6 @@ def test_2pt_rcorr_smoke():
     assert p2pt.r_corr == -1.
     F3 = p2pt.fourier_2pt(COSMO, 1., 1e13, 1., p)
     assert F3 == 0
-
-
-@pytest.mark.parametrize('prof_class',
-                         [ccl.halos.HaloProfileGaussian,
-                          ccl.halos.HaloProfilePowerLaw])
-def test_simple_smoke(prof_class):
-    def r_s(cosmo, M, a):
-        return np.ones_like(M)
-
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        if prof_class == ccl.halos.HaloProfileGaussian:
-            p = prof_class(r_scale=r_s, rho0=one_f, mass_def='200c')
-        else:
-            p = prof_class(r_scale=r_s, tilt=one_f, mass_def='200c')
-    smoke_assert_prof_real(p)
-
-
-def test_gaussian_accuracy():
-    def fk(k):
-        return np.pi**1.5 * np.exp(-k**2 / 4)
-
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        p = ccl.halos.HaloProfileGaussian(r_scale=one_f, rho0=one_f,
-                                          mass_def='200c')
-
-    k_arr = np.logspace(-3, 2, 1024)
-    fk_arr = p.fourier(COSMO, k_arr, 1., 1.)
-    fk_arr_pred = fk(k_arr)
-    res = np.fabs(fk_arr - fk_arr_pred)
-    assert np.all(res < 5E-3)
-
-
-@pytest.mark.parametrize('alpha', [-1.2, -2., -2.8])
-def test_projected_plaw_accuracy(alpha):
-    from scipy.special import gamma
-
-    prefac = (np.pi**0.5 * gamma(-(alpha + 1) / 2) /
-              gamma(-alpha / 2))
-
-    def s_r_t(rt):
-        return prefac * rt**(1 + alpha)
-
-    def alpha_f(cosmo, a):
-        return alpha
-
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        p = ccl.halos.HaloProfilePowerLaw(r_scale=one_f, tilt=alpha_f,
-                                          mass_def='200c')
-    p.update_precision_fftlog(plaw_fourier=alpha)
-
-    rt_arr = np.logspace(-3, 2, 1024)
-    srt_arr = p.projected(COSMO, rt_arr, 1., 1.)
-    srt_arr_pred = s_r_t(rt_arr)
-    res = np.fabs(srt_arr / srt_arr_pred - 1)
-    assert np.all(res < 5E-3)
-
-
-@pytest.mark.parametrize('alpha', [-1.2, -2., -2.8])
-def test_plaw_accuracy(alpha):
-    from scipy.special import gamma
-
-    prefac = (2.**(3+alpha) * np.pi**1.5 *
-              gamma((3 + alpha) / 2) /
-              gamma(-alpha / 2))
-
-    def fk(k):
-        return prefac / k**(3 + alpha)
-
-    def alpha_f(cosmo, a):
-        return alpha
-
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        p = ccl.halos.HaloProfilePowerLaw(r_scale=one_f, tilt=alpha_f,
-                                          mass_def='200c')
-    p.update_precision_fftlog(plaw_fourier=alpha)
-
-    k_arr = np.logspace(-3, 2, 1024)
-    fk_arr = p.fourier(COSMO, k_arr, 1., 1.)
-    fk_arr_pred = fk(k_arr)
-    res = np.fabs(fk_arr / fk_arr_pred - 1)
-    assert np.all(res < 5E-3)
 
 
 def get_nfw(real=False, fourier=False):
