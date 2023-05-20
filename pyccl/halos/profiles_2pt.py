@@ -16,7 +16,7 @@ class Profile2pt(CCLAutoRepr):
     are implemented via the parameters of this class.
 
     Args:
-        r_corr (float):
+        r_corr (:obj:`float`):
             Tuning knob for the 1-halo 2-point correlation.
             Scale the correlation by :math:`(1+\\rho_{u_1, u_2})`.
             This is useful when the individual 1-halo terms
@@ -34,7 +34,7 @@ class Profile2pt(CCLAutoRepr):
     @warn_api
     def update_parameters(self, *, r_corr=None):
         """ Update any of the parameters associated with this 1-halo
-        2-point correlator. Any parameter set to `None` won't be updated.
+        2-point correlator. Any parameter set to ``None`` won't be updated.
         """
         if r_corr is not None:
             self.r_corr = r_corr
@@ -49,24 +49,24 @@ class Profile2pt(CCLAutoRepr):
            (1+\\rho_{u_1,u_2})\\langle u_1(k)\\rangle\\langle u_2(k) \\rangle
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`):
+            cosmo (:class:`~pyccl.cosmology.Cosmology`):
                 a Cosmology object.
-            k (float or array_like):
+            k (:obj:`float` or `array`):
                 comoving wavenumber in Mpc^-1.
-            M (float or array_like):
+            M (:obj:`float` or `array`):
                 halo mass in units of M_sun.
-            a (float):
+            a (:obj:`float`):
                 scale factor.
             prof (:class:`~pyccl.halos.profiles.HaloProfile`):
                 halo profile for which the second-order moment
                 is desired.
             prof2 (:class:`~pyccl.halos.profiles.HaloProfile`):
                 second halo profile for which the second-order moment
-                is desired. If `None`, the assumption is that you want
+                is desired. If ``None``, the assumption is that you want
                 an auto-correlation, and `prof` will be used as `prof2`.
 
         Returns:
-            float or array_like: second-order Fourier-space
+            (:obj:`float` or `array`): second-order Fourier-space
             moment. The shape of the output will be `(N_M, N_k)`
             where `N_k` and `N_m` are the sizes of `k` and `M`
             respectively. If `k` or `M` are scalars, the
@@ -105,26 +105,26 @@ class Profile2ptHOD(Profile2pt):
         profile.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfileHOD`):
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            k (:obj:`float` or `array`): comoving wavenumber in Mpc^-1.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
+            prof (:class:`~pyccl.halos.profiles.hod.HaloProfileHOD`):
                 halo profile for which the second-order moment
                 is desired.
-            prof2 (:class:`~pyccl.halos.profiles.HaloProfileHOD` or None):
+            prof2 (:class:`~pyccl.halos.profiles.hod.HaloProfileHOD` or :obj:`None`):
                 second halo profile for which the second-order moment
-                is desired. If `None`, the assumption is that you want
+                is desired. If ``None``, the assumption is that you want
                 an auto-correlation. Note that only auto-correlations
                 are allowed in this case.
 
         Returns:
-            float or array_like: second-order Fourier-space
+            (:obj:`float` or `array`): second-order Fourier-space
             moment. The shape of the output will be `(N_M, N_k)`
             where `N_k` and `N_m` are the sizes of `k` and `M`
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
-        """
+        """ # noqa
         if prof2 is None:
             prof2 = prof
 
@@ -152,26 +152,26 @@ class Profile2ptCIB(Profile2pt):
         profile.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
-            prof (:class:`HaloProfileCIBShang12`):
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            k (:obj:`float` or `array`): comoving wavenumber in Mpc^-1.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
+            prof (:class:`~pyccl.halos.profiles.cib_shang12.HaloProfileCIBShang12`):
                 halo profile for which the second-order moment
                 is desired.
-            prof2 (:class:`HaloProfileCIBShang12`):
+            prof2 (:class:`~pyccl.halos.profiles.cib_shang12.HaloProfileCIBShang12`):
                 second halo profile for which the second-order moment
-                is desired. If `None`, the assumption is that you want
+                is desired. If ``None``, the assumption is that you want
                 an auto-correlation. Note that only auto-correlations
                 are allowed in this case.
 
         Returns:
-            float or array_like: second-order Fourier-space
+            (:obj:`float` or `array`): second-order Fourier-space
             moment. The shape of the output will be `(N_M, N_k)`
             where `N_k` and `N_m` are the sizes of `k` and `M`
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
-        """
+        """ # noqa
         if prof2 is None:
             prof2 = prof
 

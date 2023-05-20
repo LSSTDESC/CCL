@@ -1,7 +1,7 @@
-pyccl.base.deprecations module
+pyccl.halos.profiles.ia module
 ==============================
 
-.. automodule:: pyccl.base.deprecations
+.. automodule:: pyccl.halos.profiles.ia
    :members:
    :undoc-members:
    :show-inheritance:

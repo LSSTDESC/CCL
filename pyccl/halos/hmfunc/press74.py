@@ -7,15 +7,14 @@ from . import MassFunc
 
 
 class MassFuncPress74(MassFunc):
-    """ Implements mass function described in 1974ApJ...187..425P.
+    """Implements the mass function of `Press & Schechter 1974
+    <https://ui.adsabs.harvard.edu/abs/1974ApJ...187..425P/abstract>`_.
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            This parametrization accepts FoF masses only.
-            The default is 'fof'.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = 'Press74'

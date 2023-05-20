@@ -15,10 +15,10 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run CAMB.
-        nonlin (:obj:`bool`, optional): Whether to compute and return the
+        nonlin (:obj:`bool`): Whether to compute and return the
             non-linear power spectrum as well.
 
     Returns:
@@ -231,7 +231,7 @@ def get_isitgr_pk_lin(cosmo):
     """Run ISiTGR-CAMB and return the linear power spectrum.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run ISiTGR-CAMB.
 
@@ -407,7 +407,7 @@ def get_class_pk_lin(cosmo):
     """Run CLASS and return the linear power spectrum.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run CLASS.
 

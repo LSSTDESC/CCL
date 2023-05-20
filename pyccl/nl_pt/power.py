@@ -9,7 +9,12 @@ from . import PTTracer
 
 
 class PTCalculator:
-    """ This class implements a set of methods that can be
+    """
+    .. warning:: This class is deprecated in favour of the
+                 :class:`~pyccl.nl_pt.ept.EulerianPTCalculator`
+                 class.
+
+    This class implements a set of methods that can be
     used to compute the various components needed to estimate
     perturbation theory correlations. These calculations are
     currently based on FAST-PT
@@ -462,7 +467,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
               linearly biased number counts.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
         tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
             tracer being correlated.
         ptc (:class:`PTCalculator`): a perturbation theory
@@ -485,10 +490,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             at which the power spectrum should be calculated for
             interpolation. If `None`, the internal values used by
             `cosmo` will be used.
-        extrap_order_lok (int): extrapolation order to be used on
+        extrap_order_lok (:obj:`int`): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.pk2d.Pk2D`.
-        extrap_order_hik (int): extrapolation order to be used on
+        extrap_order_hik (:obj:`int`): extrapolation order to be used on
             k-values above the maximum of the splines. See
             :class:`~pyccl.pk2d.Pk2D`.
         return_ia_bb (bool): if `True`, the B-mode power spectrum

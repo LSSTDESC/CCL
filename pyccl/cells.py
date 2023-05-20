@@ -18,21 +18,20 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        tracer1 (:class:`~pyccl.tracers.Tracer`): a `Tracer` object,
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        tracer1 (:class:`~pyccl.tracers.Tracer`): a Tracer object,
             of any kind.
-        tracer2 (:class:`~pyccl.tracers.Tracer`): a second `Tracer` object,
-            of any kind.
-        ell (float or array_like): Angular wavenumber(s) at which to evaluate
+        tracer2 (:class:`~pyccl.tracers.Tracer`): a second Tracer object.
+        ell (:obj:`float` or `array`): Angular multipole(s) at which to evaluate
             the angular power spectrum.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
-            to project. If a string, it must correspond to one of the
-            non-linear power spectra stored in `cosmo` (e.g.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 3D Power
+            spectrum to project. If a string, it must correspond to one of
+            the non-linear power spectra stored in `cosmo` (e.g.
             `'delta_matter:delta_matter'`).
-        l_limber (int, float or 'auto') : Angular wavenumber beyond which Limber's
-            approximation will be used. Defaults to -1. If 'auto', then the non-limber
-            integrator will be used to compute the right transition point given the value
-            of limber_max_error.
+        l_limber (int, float or 'auto') : Angular wavenumber beyond which 
+            Limber's approximation will be used. Defaults to -1. If 'auto', 
+            then the non-limber integrator will be used to compute the right 
+            transition point given the value of limber_max_error.
         limber_max_error (float) : Maximum fractional error for Limber integration.
         limber_integration_method (string) : integration method to be used
             for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
@@ -41,14 +40,14 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
         non_limber_integration_method (string) : integration method to be used
             for the non-Limber integrals. Possibilities: 'FKEM','MATTER'.
             See N5K (arXiv:2212.04291) paper for more information.
-        return_meta (bool): if `True`, also return a dictionary with varius
+        return_meta (bool): if `True`, also return a dictionary with various
             metadata about the calculation, such as l_limber as calculated by the
             non-limber integrator.
     Returns:
-        float or array_like: Angular (cross-)power spectrum values, \
+        :obj:`float` or `array`: Angular (cross-)power spectrum values, \
             :math:`C_\\ell`, for the pair of tracers, as a function of \
             :math:`\\ell`.
-    """
+    """ # noqa
     if cosmo['Omega_k'] != 0:
         warnings.warn(
             "CCL does not properly use the hyperspherical Bessel functions "
