@@ -6,7 +6,7 @@ import numpy as np
 
 from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warn_api
 from .pyutils import integ_types
-from .implement_FKEM import *
+from .nonlimber_FKEM import *
 
 @warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
 def angular_cl(cosmo, tracer1, tracer2, ell, *,
@@ -94,7 +94,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
 
     if auto_limber or (type(l_limber)!=str and ell_use[0]<l_limber):
         if non_limber_integration_method=='FKEM':
-            l_limber, cl_non_limber, status = implement_FKEM (cosmo, tracer1, tracer2, p_of_k_a, ell_use, l_limber, limber_max_error)
+            l_limber, cl_non_limber, status = nonlimber_FKEM(cosmo, tracer1, tracer2, p_of_k_a, ell_use, l_limber, limber_max_error)
         else: #it has to be matter, since we checked the input
             l_limber, cl_non_limber, status = implement_MATTER (cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error)
         if status != 0:
@@ -111,6 +111,8 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
             ell_use_limber.size, status)
         if status != 0:
             raise ValueError("Error in Limber integrator.")    
+    else:
+        cl_limber = np.array([])
 
     # put pieces together
     cl = np.concatenate((cl_non_limber,cl_limber))

@@ -67,6 +67,11 @@ void fftlog_transform(int npk,
 
     if nout != k_in.size * (npk + 1):
         raise CCLError("Input shape for `output` must match `(k_in.size * (npk + 1),)`!")
+
+    if round(bessel_deriv)!= bessel_deriv or bessel_deriv<0:
+        raise CCLError("bessel_deriv must be a non-negative integer in a floating-point format.`")
+    if spherical_bessel!=0 and spherical_bessel!=1:
+        raise CCLError("0 and 1 are the only valid values of spherical_bessel.")
 %}
 
 %inline %{

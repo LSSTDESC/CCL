@@ -6,16 +6,18 @@ CCL_BEGIN_DECLS
 
 /**
  * Compute the function
- *   \xi_\mu(\theta) = \int \frac{d\ell}{2\pi} j_\mu(\ell\theta)\,C_\ell
- * C_\ell will be multiplied by ell^{1-\epsilon}, so \epsilon can be used to minimize ringing.
+ *   \xi_\ell(r) = \int dk (kr)^plaw P_k J/j^n_\ell(kr)
  * @param mu Bessel function order.
  * @param epsilon FFTLog bias exponent.
- * @param ncl number of power spectra that should be converted into correlation functions.
- * @param N size of l (and the output th).
- * @param l logarithmically spaced values of l.
- * @param cl array of power spectra to be converted. Each of them should be sampled at the values of l.
- * @param th output values of theta (N of them, logarithmically spaced). This array is modified on output.
- * @param xi array of output correlation functions sampled at th.
+ * @param npk number of power spectra that should be converted into correlation functions.
+ * @param N size of k (and the output r).
+ * @param k logarithmically spaced values of k.
+ * @param pk array of power spectra to be converted. Each of them should be sampled at the values of k.
+ * @param spherical_bessel 1 to indicate spherical bessel function, 0 to indicate bessel funcion
+ * @param bessel_deriv nth derivative of the (spherical) bessel function
+ * @param plaw power-law index of (rk) weighting in integral
+ * @param r output values of r (N of them, logarithmically spaced). This array is modified on output.
+ * @param xi array of output correlation functions sampled at r.
  */
 void ccl_fftlog_ComputeXi_general(double mu, double q, 
     int npk, int N, double *k, double **pk,

@@ -28,6 +28,19 @@ and provided bindings for C++ and python.
 
 These are the C++ bindings
 
+Modified by Paul Rogozenski (paulrogozenski@arizona.edu)
+to implement a modified generalized version of FFTLog (https://jila.colorado.edu/~ajsh/FFTLog/fftlog.pdf)
+allowing computations of integrals over spherical bessel functions 
+with any derivative of a (spherical) bessel function
+and general power-law dependence of (kr)
+
+relevant functions for generalized FFTLog:
+  goodkr_new_deriv
+  compute_u_coefficients_new_deriv
+  general_fht
+  ccl_fftlog_ComputeXi_general  
+
+
 *****************************************************************/
 
 #ifndef M_PI
@@ -133,7 +146,11 @@ static void compute_u_coefficients(int N, double mu, double q, double L, double 
     u[N/2] = (creal(u[N/2]) + I*0.0);
 }
 
-
+/* Pre-compute a low-ringing value of k0r0 that appears in the FFTLog implementation of
+ * the discrete Hankel transform.  The parameters N, mu, q, spherical_bessel, deriv, and plaw here are the
+ * same as for the function general_fht().  The parameter L is defined (for whatever
+ * reason) to be N times the logarithmic spacing of the input array, i.e.
+ *   L = N * log(r[N-1]/r[0])/(N-1) */
 static double goodkr_new_deriv(int N, double mu, double q, double L, int spherical_bessel, double deriv, double plaw, double kr)
 {
   double complex prefac;
@@ -144,11 +161,11 @@ static double goodkr_new_deriv(int N, double mu, double q, double L, int spheric
   double lnrp, lnrm, argm, argp;
   lngamma_4(xp, y, &lnrp, &argp);
   lngamma_4(xm, -y, &lnrm, &argm);
-  double arg = log(2/kr) * N/L + (argp - argm)/M_PI;
+  double arg;
 
   prefac = cpow(2.0, q + 1.0*spherical_bessel+2*I*y-deriv) * cpow(1.0, -2*I*y);//polar(exp(prefac), m*y);
 
-  prefac = complex_mult(polar(exp( lnrp - lnrm), argp - argm), prefac);
+  prefac = (polar(exp( lnrp - lnrm), argp - argm)) * prefac;
 
   if(deriv>0.0) {
     for (int j = 1; j<=(int)deriv; j++){
@@ -166,6 +183,12 @@ static double goodkr_new_deriv(int N, double mu, double q, double L, int spheric
   return kr;
 
 }
+
+/* Pre-compute the coefficients that appear in the FFTLog implementation of
+ * the discrete Hankel transform.  The parameters N, mu, q, spherical_bessel, deriv, and plaw here are the
+ * same as for the function general_fht().  The parameter L is defined (for whatever
+ * reason) to be N times the logarithmic spacing of the input array, i.e.
+ *   L = N * log(r[N-1]/r[0])/(N-1) */
 static void compute_u_coefficients_new_deriv(int N, double mu, double q, double L, double kcrc, int spherical_bessel, double deriv, double plaw, double complex *u)
 {
   double y = M_PI/L;
@@ -181,18 +204,12 @@ static void compute_u_coefficients_new_deriv(int N, double mu, double q, double 
     lngamma_4(xm,-m*y, &lnrm, &phim);
     u[m] = cpow(2.0, q + 1.0*spherical_bessel+2*I*m*y - deriv) * cpow(k0r0, -2*I*m*y);
     u[m] *= polar(exp(lnrp - lnrm), phip - phim);
-    //for (int j = 1; j<=(int)deriv; j++){
-    //  u[m]*=(q-plaw +2*I*m*y - j-1.5);
-    //}
-
+    
     for (int j = 1; j<=(int)deriv; j++){
       u[m]*=(q +2*I*m*y - (j-spherical_bessel));//(q +2*I*m*y - j-1.5);
     }
-    u[m]*=pow(-1.0,deriv);
-    //if (plaw==-2.0){
-    //  u[m]/=((mu-2.+q +2*I*m*y)*(3.+mu-q -2*I*m*y));
-    //}
 
+    u[m]*=pow(-1.0,deriv);
   }
   
   for(int m = N/2+1; m < N; m++)
@@ -353,18 +370,24 @@ static void fht(int npk, int N,
   fftw_free(b_tmp);
 }
 
-/* Compute the discrete Hankel transform of the function pk 
+/* Compute the discrete Hankel transform of the function a(r) 
 * weighted by a power law and the nth derivative of the 
 * (spherical) bessel function. Explicitly, this function computes 
-* \tilde{P}(x)= \int \frac{dk}{k^q} P(k) [choice of bessel and its derivative]_\mu(xk)*/
+* \tilde{a}(k)= \int \frac{dr}{(xk)^plaw} a(r) (J/j)^(n)_\mu(xk)
+* The computed transform will be centered about the peak of the given \mu.
+* double bessel_deriv: the nth derivative of the (spherical) bessel function
+* int spherical_bessel: 1 indicates spherical bessel functions, 0 bessel functions
+* double q: the biasing index
+* double plaw: power-law index of (xk) weighting in integral
+* NOTE: we ignore factors of (2*pi) found in typical fht algorithm,
+*   these factors should be calculated and applied a-posteriori if necessary
+*/
 static void general_fht(int npk, int N,
     double *k, double **pk,
     double *r, double **xi,
     double mu, double q, double kcrc,
     int spherical_bessel, double bessel_deriv, double plaw, double complex* u, int *status)
 {
-  //if (bessel_deriv==0.0) fht(npk, N, k,pk,r,xi,0.0,mu+0.5, q-1.5, mu+1.0, 1, NULL, status);
-  //else fht_first_deriv(npk, N, k,pk,r,xi,bessel_deriv,mu+0.5, q-1.0, mu+1.0, 1, NULL, status);
   q = q-1.0*spherical_bessel;
   kcrc = mu+1.0;
   mu = mu+0.5*spherical_bessel;
@@ -468,12 +491,9 @@ static void general_fht(int npk, int N,
             a[i] = prefac_pk[i] * pk[j][i];
 
           fftw_execute_dft(forward_plan,a,b);
-          //window_cfft(b, 0.25, N/2, k);
           for(int m = 0; m < N; m++){
-          //printf("i: %d, eta: %f, real: %f, imag: %f, real: %f, imag: %f\n", m, m*2*M_PI/L, creal(b[m]), cimag(b[m]),creal(u[m]), cimag(u[m]));
 
             b[m] *= u[m] / (double)(N);       // divide by N since FFTW doesn't normalize the inverse FFT
-          //printf("i: %d, eta: %f, real: %f, imag: %f, real: %f, imag: %f\n", m, m*M_PI/L, creal(b[m]), cimag(b[m]),creal(u[m]), cimag(u[m]));
 
           }
           fftw_execute_dft(reverse_plan,b,b);
@@ -534,7 +554,5 @@ void ccl_fftlog_ComputeXi_general(double mu, double q,
   int spherical_bessel, double bessel_deriv, double plaw, 
     double *r, double **xi, int *status)
 {
-
   general_fht(npk, N, k, pk, r, xi, mu, q, 1, spherical_bessel, bessel_deriv, plaw, NULL, status);
-  //printf("npk: %d, N: %d, mu: %f, q: %f, bessel: %d, deriv: %f, frac: %f\n", npk, N, mu, q, spherical_bessel, bessel_deriv, window_frac);
 }
