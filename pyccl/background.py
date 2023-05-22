@@ -22,7 +22,7 @@ from enum import Enum
 
 import numpy as np
 
-from . import lib, physical_constants, warn_api
+from . import lib, physical_constants
 from .pyutils import (_vectorize_fn, _vectorize_fn3,
                       _vectorize_fn4, _vectorize_fn5)
 
@@ -191,17 +191,16 @@ def distance_modulus(cosmo, a):
                          lib.distance_modulus_vec, cosmo, a)
 
 
-@warn_api
 def sigma_critical(cosmo, *, a_lens, a_source):
     """Returns the critical surface mass density.
 
     .. math::
          \\Sigma_{\\mathrm{crit}} = \\frac{c^2}{4\\pi G}
-          \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}},
+         \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}},
 
     where :math:`c` is the speed of light, :math:`G` is the
     gravitational constant, and :math:`D_i` is the angular diameter
-    distance. The labels :math:`i =` s, l and ls denotes the distances
+    distance. The labels :math:`i = \\{s,\\,l,\\,ls\\}` denote the distances
     to the source, lens, and between source and lens, respectively.
 
     Args:
@@ -211,7 +210,7 @@ def sigma_critical(cosmo, *, a_lens, a_source):
 
     Returns:
         (:obj:`float` or `array`): :math:`\\Sigma_{\\mathrm{crit}}` in units
-        of :math:`\\M_{\\odot}/Mpc^2`
+        of :math:`M_{\\odot}/{\\rm Mpc}^2`
     """
     Ds = angular_diameter_distance(cosmo, a_source, a2=None)
     Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
@@ -255,7 +254,6 @@ def omega_x(cosmo, a, species):
                           lib.omega_x_vec, cosmo, a, species_types[species])
 
 
-@warn_api
 def rho_x(cosmo, a, species, *, is_comoving=False):
     """Physical or comoving density as a function of scale factor.
 
@@ -276,8 +274,8 @@ def rho_x(cosmo, a, species, *, is_comoving=False):
             comoving (True)
 
     Returns:
-        rho_x (:obj:`float` or `array`): Physical density of a given species
-        at a scale factor, in units of Msun / Mpc^3.
+        (:obj:`float` or `array`): Physical density of a given species
+        at a scale factor, in units of :math:`M_\\odot / {\\rm Mpc}^3`.
     """
     # TODO: Replace docstring enum with ref to Species.
     if species not in species_types:

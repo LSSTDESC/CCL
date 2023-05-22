@@ -61,7 +61,6 @@ matter_power_spectrum_types = {
     'camb': lib.pknl_from_boltzman
 }
 
-# TODO: think
 emulator_neutrinos_types = {
     'strict': lib.emu_strict,
     'equalize': lib.emu_equalize
@@ -646,28 +645,6 @@ class Cosmology(CCLObject):
     def has_sigma(self):
         """Checks if sigma(M) is precomputed."""
         return bool(self.cosmo.computed_sigma)
-
-    # TODO: do we need to deprecate this?
-    def status(self):
-        """Get error status of the ccl_cosmology object.
-
-        .. note:: The error statuses are currently under development and
-                  may not be fully descriptive.
-
-        Returns:
-            :obj:`str` containing the status message.
-        """
-        # Get status ID string if one exists
-        if self.cosmo.status in CLevelErrors.keys():
-            status = CLevelErrors[self.cosmo.status]
-        else:
-            status = self.cosmo.status
-
-        # Get status message
-        msg = self.cosmo.status_message
-
-        # Return status information
-        return "status(%s): %s" % (status, msg)
 
 
 def CosmologyVanillaLCDM(**kwargs):
