@@ -210,24 +210,19 @@ class Pk2D(CCLObject):
         check(status, cosmo)
         return pk2d
 
-    def apply_halofit(self, cosmo, *, pk_linear=None):
-        """:class:`Pk2D` constructor that applies the "HALOFIT" transformation of
-        `Takahashi et al. 2012 <https://arxiv.org/abs/1208.2701>`_ on an input
-        linear power spectrum.
+    def apply_halofit(self, cosmo):
+        """Apply the "HALOFIT" transformation of
+        `Takahashi et al. 2012 <https://arxiv.org/abs/1208.2701>`_ on the linear
+        power spectrum represented by this :class:`Pk2D` object, and return the
+        result as a :class:`Pk2D` object.
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
-            pk_linear (:class:`Pk2D`): a Pk2D object containing the linear power
-                spectrum on which the HALOFIT method is to be applied. If ``None``,
-                HALOFIT is applied on the power spectrum represented by the
-                caller object.
 
         Return:
             :class:`Pk2D` object containing the non-linear power spectrum after
             applying HALOFIT.
         """ # noqa 501
-        if pk_linear is None:
-            pk_linear = self
 
         if cosmo["wa"] != 0:
             # HALOFIT translates (w0, wa) to a w0_eff. This requires computing
@@ -247,7 +242,7 @@ class Pk2D(CCLObject):
 
         pk2d = Pk2D.__new__(Pk2D)
         status = 0
-        ret = lib.apply_halofit(cosmo.cosmo, pk_linear.psp, status)
+        ret = lib.apply_halofit(cosmo.cosmo, self.psp, status)
         if np.ndim(ret) == 0:
             status = ret
         else:

@@ -15,7 +15,7 @@ from typing import Iterable
 import numpy as np
 
 from . import (
-    CCLError, CCLObject, CCLParameters, CLevelErrors, CosmologyParams,
+    CCLError, CCLObject, CCLParameters, CosmologyParams,
     DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, cache, check, lib,
     unlock_instance)
 from . import physical_constants as const
