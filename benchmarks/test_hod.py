@@ -54,7 +54,7 @@ def test_hodcl():
     hbf = ccl.halos.HaloBiasTinker10(mass_def=mass_def)
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mass_def)
-    prf = ccl.halos.HaloProfileHOD(
+    prf = ccl.halos.HaloProfileHOD(mass_def=mass_def,
         concentration=cm,
         log10Mmin_0=np.log10(10.**log10Mcut/cosmo['h']),
         siglnM_0=sigma_Ncen,

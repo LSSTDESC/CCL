@@ -36,7 +36,7 @@ def test_halomod(model):
     hbf = ccl.halos.HaloBiasSheth99(mass_def=mass_def,
                                     mass_def_strict=False)
     cM = ccl.halos.ConcentrationDuffy08(mass_def=mass_def)
-    prf = ccl.halos.HaloProfileNFW(concentration=cM)
+    prf = ccl.halos.HaloProfileNFW(mass_def=mass_def, concentration=cM)
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mass_def)
 
