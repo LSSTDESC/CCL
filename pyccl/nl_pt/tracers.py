@@ -129,7 +129,7 @@ class PTNumberCountsTracer(PTTracer):
     """:class:`PTTracer` representing number count fluctuations.
     This is described by 1st and 2nd-order biases and
     a tidal field bias. These are provided as floating
-    point numbers or tuples of (reshift,bias) arrays.
+    point numbers or tuples of `(reshift,bias)` arrays.
     If a number is provided, a constant bias is assumed.
     If ``None``, a bias of zero is assumed.
 
