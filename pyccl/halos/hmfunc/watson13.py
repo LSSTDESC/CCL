@@ -37,7 +37,6 @@ class MassFuncWatson13(MassFunc):
         om = cosmo.omega_x(a, "matter")
         Delta_178 = self.mass_def.Delta / 178
 
-        # TODO: this has to be vectorized with numpy
         if a == 1:
             pA = 0.194
             pa = 1.805
