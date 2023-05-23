@@ -28,6 +28,8 @@ class HaloProfileHernquist(HaloProfileMatter):
     By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
 
     Args:
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
         concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
         fourier_analytic (:obj:`bool`): set to ``True`` if you want to compute
@@ -40,19 +42,16 @@ class HaloProfileHernquist(HaloProfileMatter):
             (and not through FFTLog).
         truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
         "fourier_analytic", "projected_analytic", "cumul2d_analytic",
         "truncated", "mass_def", "concentration", "precision_fftlog",)
 
-    def __init__(self, *, concentration,
+    def __init__(self, *, mass_def, concentration,
                  truncated=True,
                  fourier_analytic=False,
                  projected_analytic=False,
-                 cumul2d_analytic=False,
-                 mass_def=None):
+                 cumul2d_analytic=False):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic

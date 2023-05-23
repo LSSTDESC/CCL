@@ -26,6 +26,8 @@ class SatelliteShearHOD(HaloProfileHOD):
     semi-major axis of the galaxy along the line of sight.
 
     Args:
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
         concentration (:obj:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
         a1h (:obj:`float`): Amplitude of the satellite intrinsic shear profile.
@@ -86,12 +88,12 @@ class SatelliteShearHOD(HaloProfileHOD):
         "rmin", "N_r", "N_jn", "concentration", "integration_method",
         "precision_fftlog",)
 
-    def __init__(self, *, concentration, a1h=0.001, b=-2,
+    def __init__(self, *, mass_def, concentration, a1h=0.001, b=-2,
                  lmax=6, log10Mmin_0=12., log10Mmin_p=0., siglnM_0=0.4,
                  siglnM_p=0., log10M0_0=7., log10M0_p=0.,
                  log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
                  alpha_p=0., bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False, mass_def=None,
+                 a_pivot=1., ns_independent=False,
                  integration_method='FFTLog', rmin=0.001, N_r=512,
                  N_jn=10000):
         if lmax >= 13:
@@ -136,7 +138,8 @@ class SatelliteShearHOD(HaloProfileHOD):
         self.rmin = rmin
         self.N_r = N_r
         self.N_jn = N_jn
-        super().__init__(concentration=concentration,
+        super().__init__(mass_def=mass_def,
+                         concentration=concentration,
                          log10Mmin_0=log10Mmin_0,
                          log10Mmin_p=log10Mmin_p,
                          siglnM_0=siglnM_0,
@@ -153,8 +156,7 @@ class SatelliteShearHOD(HaloProfileHOD):
                          bmax_0=bmax_0,
                          bmax_p=bmax_p,
                          a_pivot=a_pivot,
-                         ns_independent=ns_independent,
-                         mass_def=mass_def)
+                         ns_independent=ns_independent)
         self.update_precision_fftlog(padding_lo_fftlog=1E-2,
                                      padding_hi_fftlog=1E3,
                                      n_per_decade=350,

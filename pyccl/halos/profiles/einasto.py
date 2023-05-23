@@ -31,20 +31,20 @@ class HaloProfileEinasto(HaloProfileMatter):
     By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
 
     Args:
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
         concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
         truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
         alpha (:obj:`float` or :obj:`str`): :math:`\\alpha` parameter, or
             set to ``'cosmo'`` to calculate the value from cosmology.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
         "truncated", "alpha", "mass_def", "concentration", "precision_fftlog",)
 
-    def __init__(self, *, concentration, truncated=True, alpha='cosmo',
-                 mass_def=None):
+    def __init__(self, *, mass_def, concentration, truncated=True,
+                 alpha='cosmo'):
         self.truncated = truncated
         self.alpha = alpha
         super().__init__(mass_def=mass_def, concentration=concentration)

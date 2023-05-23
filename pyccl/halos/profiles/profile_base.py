@@ -38,7 +38,7 @@ class HaloProfile(CCLAutoRepr):
     calculation.
     """
 
-    def __init__(self, *, mass_def=None, concentration=None,
+    def __init__(self, *, mass_def, concentration=None,
                  is_number_counts=False):
         # Verify that profile can be initialized.
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):

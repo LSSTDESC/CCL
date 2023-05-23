@@ -73,6 +73,8 @@ class HaloProfileHOD(HaloProfile):
     HOD profile.
 
     Args:
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
         concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
         log10Mmin_0 (:obj:`float`): offset parameter for
@@ -110,8 +112,6 @@ class HaloProfileHOD(HaloProfile):
         a_pivot (:obj:`float`): pivot scale factor :math:`a_*`.
         ns_independent (:obj:`bool`): drop requirement to only form
             satellites when centrals are present.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
         is_number_counts (:obj:`bool`): set to ``True`` if this profile
             is meant to represent galaxy overdensity.
     """
@@ -122,13 +122,13 @@ class HaloProfileHOD(HaloProfile):
         "_is_number_counts", "ns_independent", "mass_def", "concentration",
         "precision_fftlog",)
 
-    def __init__(self, *, concentration,
+    def __init__(self, *, mass_def, concentration,
                  log10Mmin_0=12., log10Mmin_p=0., siglnM_0=0.4,
                  siglnM_p=0., log10M0_0=7., log10M0_p=0.,
                  log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False, mass_def=None,
+                 a_pivot=1., ns_independent=False,
                  is_number_counts=True):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p

@@ -14,9 +14,10 @@ HMC = ccl.halos.HMCalculator(
     mass_function=HMF, halo_bias=HBF, mass_def=M200, nM=2)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 
-NFW = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
-HOD = ccl.halos.HaloProfileHOD(concentration=CON)
-HOD_nogc = ccl.halos.HaloProfileHOD(concentration=CON)
+NFW = ccl.halos.HaloProfileNFW(mass_def=M200, concentration=CON,
+                               fourier_analytic=True)
+HOD = ccl.halos.HaloProfileHOD(mass_def=M200, concentration=CON)
+HOD_nogc = ccl.halos.HaloProfileHOD(mass_def=M200, concentration=CON)
 HOD_nogc.is_number_counts = False
 GNFW = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
 

@@ -23,7 +23,7 @@ def get_pk_new(mf, c, cosmo, a, k, get_1h, get_2h):
         cc = ccl.halos.ConcentrationDuffy08(mass_def=mdef)
     elif c == 'bhattacharya2011':
         cc = ccl.halos.ConcentrationBhattacharya13(mass_def=mdef)
-    prf = ccl.halos.HaloProfileNFW(concentration=cc)
+    prf = ccl.halos.HaloProfileNFW(mass_def=mdef, concentration=cc)
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mdef)
     return ccl.halos.halomod_power_spectrum(cosmo, hmc, k, a, prf,
