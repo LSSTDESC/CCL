@@ -362,18 +362,6 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
   }
 }
 
-void ccl_angular_cls_nonlimber(ccl_cosmology *cosmo,
-                               ccl_cl_tracer_collection_t *trc1,
-                               ccl_cl_tracer_collection_t *trc2,
-                               ccl_f2d_t *psp,
-                               int nl_out, int *l_out, double *cl_out,
-                               int *status) {
-  *status = CCL_ERROR_INCONSISTENT;
-  ccl_cosmology_set_status_message(
-    cosmo,
-    "ccl_cls.c: ccl_angular_cls_nonlimber(); non-Limber integrator not implemented yet\n");
-}
-
 static double cov_integrand(double chi, void *params)
 {
   double d1, d2, d3, d4, tkk, ker=1;
