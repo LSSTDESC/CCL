@@ -10,7 +10,7 @@
 - IA halo profile (1074).
 - Lightweight docs revamp for v2.last (1082).
 
-# v2.6.0 Changes
+# v2.7.0 Changes
 
 ## Python library
 - Numpy 1.24 compatibility (#1012).
