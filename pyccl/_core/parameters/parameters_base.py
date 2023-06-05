@@ -22,7 +22,7 @@ class DefaultParams:
     T_ncdm = 0.71611
 
     warnings.warn(
-        "The default CMB temperaHaloProfileCIBture (T_CMB) will change in "
+        "The default CMB temperature (T_CMB) will change in "
         "CCLv3.0.0, from 2.725 to 2.7255 (Kelvin).", CCLDeprecationWarning)
 
 
