@@ -3,12 +3,12 @@
 # v2.8.0 Changes
 
 ## Python library
-- Refactor pyccl under an abstract CCLObject (934).
-- Bump Python version to 3.8 (1031).
-- Optimize HM autocorrelation power spectra (891).
-- `__eq__` methods for all objects (1033).
-- IA halo profile (1074).
-- Lightweight docs revamp for v2.last (1082).
+- Refactor pyccl under an abstract CCLObject (#934).
+- Bump Python version to 3.8 (#1031).
+- Optimize HM autocorrelation power spectra (#891).
+- `__eq__` methods for all objects (#1033).
+- IA halo profile (#1074).
+- Lightweight docs revamp for v2.last (#1082).
 
 # v2.7.0 Changes
 
