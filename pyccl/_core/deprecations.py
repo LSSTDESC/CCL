@@ -2,10 +2,8 @@ __all__ = ("deprecated", "deprecate_attr",)
 
 import functools
 import warnings
-from inspect import Parameter, signature
 
 from .. import CCLDeprecationWarning
-from . import unlock_instance
 
 
 def deprecated(new_function=None):
