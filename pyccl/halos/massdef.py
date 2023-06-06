@@ -207,7 +207,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
                 :math:`\\Delta=200` times the matter density).
 
         Returns:
-            :class:`MassDef` object corresponding to the input name.
+            :class:`MassDef` instance corresponding to the input name.
         """
         MassDefName = f"MassDef{name.capitalize()}"
         if MassDefName in globals():
