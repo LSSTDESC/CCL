@@ -9,12 +9,10 @@ Submodules
 
    pyccl.halos.profiles.cib_shang12
    pyccl.halos.profiles.einasto
-   pyccl.halos.profiles.gaussian
    pyccl.halos.profiles.hernquist
    pyccl.halos.profiles.hod
    pyccl.halos.profiles.ia
    pyccl.halos.profiles.nfw
-   pyccl.halos.profiles.powerlaw
    pyccl.halos.profiles.pressure_gnfw
    pyccl.halos.profiles.profile_base
 

@@ -60,20 +60,13 @@ def test_pk2d_init():
     Test initialization of Pk2D objects
     """
 
-    cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=1e-10, n_s=0.96)
-
     # If no input
     with pytest.raises(ValueError):
         ccl.Pk2D()
 
     # Input function has incorrect signature
     with pytest.raises(TypeError):
-        with pytest.warns(ccl.CCLDeprecationWarning):
-            ccl.Pk2D(pkfunc=pk1d)
-
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+        ccl.Pk2D.from_function(pk1d)
 
     # Input arrays have incorrect sizes
     lkarr = -4.+6*np.arange(100)/99.
@@ -176,8 +169,7 @@ def test_pk2d_function():
 
     psp = ccl.Pk2D.from_function(pkfunc=lpk2d,
                                  spline_params=cosmo.cosmo.spline_params)
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        psp2 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    psp2 = ccl.Pk2D.from_function(lpk2d)
     assert psp(1.0, 1.0) == psp2(1.0, 1.0)
 
     # Test at single point
@@ -280,8 +272,7 @@ def test_pk2d_cells():
         ccl.angular_cl(cosmo, lens1, lens1, ells, p_of_k_a=1)
 
     # Check that passing a correct power spectrum runs as expected
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        psp = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo)
+    psp = ccl.Pk2D.from_function(lpk2d)
     cells = ccl.angular_cl(cosmo, lens1, lens1, ells, p_of_k_a=psp)
     assert all_finite(cells)
 
@@ -434,15 +425,6 @@ def test_pk2d_mul_pow():
     assert np.allclose((zarr_a + 0.5*zarr_i)**1.5, zarr_j)
 
 
-def test_pk2d_pkfunc_init_without_cosmo():
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        arr1 = ccl.Pk2D(pkfunc=lpk2d, cosmo=cosmo).get_spline_arrays()[-1]
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        arr2 = ccl.Pk2D(pkfunc=lpk2d).get_spline_arrays()[-1]
-    assert np.allclose(arr1, arr2, rtol=0)
-
-
 def test_pk2d_extrap_orders():
     # Check that setting extrap orders propagates down to the `psp`.
     x = np.linspace(0.1, 1, 10)
@@ -452,18 +434,6 @@ def test_pk2d_extrap_orders():
 
     assert pk.extrap_order_hik == pk.psp.extrap_order_hik
     assert pk.extrap_order_lok == pk.psp.extrap_order_lok
-
-
-def test_pk2d_descriptor():
-    # Check that `apply_halofit` can be called as a class method or
-    # as an instance method.
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    cosmo.compute_linear_power()
-    pkl = cosmo.get_linear_power()
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        pk1 = ccl.Pk2D.apply_halofit(cosmo, pk_linear=pkl)
-    pk2 = pkl.apply_halofit(cosmo)
-    assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])
 
 
 def test_pk2d_eval_cosmo():
@@ -538,6 +508,5 @@ def test_pk2d_from_model_smoke():
     # Verify that both `from_model` methods are equivalent.
     cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
     pk1 = ccl.Pk2D.from_model(cosmo, "bbks")
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        pk2 = ccl.Pk2D.pk_from_model(cosmo, "bbks")
+    pk2 = cosmo.get_linear_power()
     assert np.all(pk1.get_spline_arrays()[-1] == pk2.get_spline_arrays()[-1])

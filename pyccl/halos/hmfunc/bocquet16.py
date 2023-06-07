@@ -2,7 +2,6 @@ __all__ = ("MassFuncBocquet16",)
 
 import numpy as np
 
-from ... import warn_api
 from . import MassFunc
 
 
@@ -26,7 +25,6 @@ class MassFuncBocquet16(MassFunc):
     _mass_def_strict_always = True
     name = 'Bocquet16'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="200m",
                  mass_def_strict=True,

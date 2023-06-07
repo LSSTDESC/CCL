@@ -17,7 +17,7 @@ CONCS = [ccl.halos.ConcentrationDiemer15,
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 # None of our concentration-mass relations
 # are defined for FoF halos, or 400 critical.
-MDEF = ccl.halos.MassDef('fof', 'matter')
+MDEF = ccl.halos.MassDefFof
 M400 = ccl.halos.MassDef(400, 'critical')
 
 
@@ -28,7 +28,7 @@ def test_Concentration_eq_repr_hash():
     assert check_eq_repr_hash(CM1.mass_def, CM2.mass_def)
     assert check_eq_repr_hash(CM1, CM2)
 
-    M200m = ccl.halos.MassDef200m()
+    M200m = ccl.halos.MassDef200m
     CM3 = ccl.halos.ConcentrationDuffy08(mass_def=M200m)
     assert check_eq_repr_hash(CM1.mass_def, CM3.mass_def, equal=False)
     assert check_eq_repr_hash(CM1, CM3, equal=False)
@@ -63,12 +63,10 @@ def test_cM_mdef_raises(cM_class):
 
     if cM_class.name == "Ishiyama21":
         with pytest.raises(ValueError):
-            M500 = ccl.halos.MassDef500c()
-            cM_class(mass_def=M500, Vmax=True)
+            cM_class(mass_def="500c", Vmax=True)
 
         with pytest.raises(ValueError):
-            M200 = ccl.halos.MassDef200m()
-            cM_class(mass_def=M200)
+            cM_class(mass_def="200m")
 
 
 @pytest.mark.parametrize('name', ['Duffy08', 'Diemer15'])

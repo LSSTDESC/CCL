@@ -24,7 +24,7 @@ def test_power_nu(model):
         h=0.7,
         A_s=2.1e-9,
         n_s=0.96,
-        Neff=3.046,
+        Neff=3.046, T_CMB=2.725,
         Omega_k=0,
         w0=w_0[model],
         wa=w_a[model],

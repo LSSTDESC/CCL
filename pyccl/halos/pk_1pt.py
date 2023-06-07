@@ -2,10 +2,8 @@ __all__ = ("halomod_mean_profile_1pt", "halomod_bias_1pt",)
 
 import numpy as np
 
-from .. import warn_api
 
-
-def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
+def _Ix1(func, cosmo, hmc, k, a, prof):
     # I_X_1 dispatcher for internal use
     """
     Args:
@@ -17,11 +15,6 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
         a (:obj:`float` or `array`): scale factor.
         prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): halo
             profile.
-        normprof (:obj:`bool`):
-            if `True`, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`,
-            where :math:`u` is the profile represented by ``prof``.
-            **Will be deprecated in v3.**
 
     Returns:
         (:obj:`float` or `array`): integral values evaluated at each
@@ -40,8 +33,7 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         i11 = func(cosmo, k_use, aa, prof)
-        norm = prof.get_normalization(cosmo, aa, hmc=hmc) if normprof else 1
-        # TODO: CCLv3 remove if
+        norm = prof.get_normalization(cosmo, aa, hmc=hmc)
         out[ia] = i11 / norm
 
     if np.ndim(a) == 0:
@@ -51,8 +43,7 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     return out
 
 
-@warn_api
-def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
+def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof):
     """ Returns the mass-weighted mean halo profile.
 
     .. math::
@@ -62,12 +53,10 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
     :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
     function of scale, scale factor and halo mass.
     """
-    hmc._fix_profile_mass_def(prof)
-    return _Ix1("I_0_1", cosmo, hmc, k, a, prof, normprof)
+    return _Ix1("I_0_1", cosmo, hmc, k, a, prof)
 
 
-@warn_api
-def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
+def halomod_bias_1pt(cosmo, hmc, k, a, prof):
     """ Returns the mass-and-bias-weighted mean halo profile.
 
     .. math::
@@ -79,8 +68,7 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
     :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
     function of scale, scale factor and halo mass.
     """
-    hmc._fix_profile_mass_def(prof)
-    return _Ix1("I_1_1", cosmo, hmc, k, a, prof, normprof)
+    return _Ix1("I_1_1", cosmo, hmc, k, a, prof)
 
 
 halomod_mean_profile_1pt.__doc__ += _Ix1.__doc__

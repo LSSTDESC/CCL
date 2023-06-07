@@ -25,7 +25,7 @@ def test_correlation_3d(model):
         h=0.7,
         sigma8=0.8,
         n_s=0.96,
-        Neff=3.046,
+        Neff=3.046, T_CMB=2.725,
         mass_split='normal',
         Omega_g=0,
         Omega_k=1.0 - 0.25 - 0.05 - Omega_v[model],

@@ -10,7 +10,7 @@ def test_szcl():
         h=0.7,
         n_s=0.9645,
         A_s=2.02E-9,
-        Neff=3.046,
+        Neff=3.046, T_CMB=2.725,
         transfer_function='boltzmann_class')
     bm = np.loadtxt("benchmarks/data/sz_cl_P13_szpowerspectrum.txt",
                     unpack=True)

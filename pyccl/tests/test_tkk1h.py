@@ -5,12 +5,13 @@ import pyccl as ccl
 
 COSMO = ccl.CosmologyVanillaLCDM(transfer_function='bbks',
                                  matter_power_spectrum='linear')
-M200 = ccl.halos.MassDef200m()
+M200 = ccl.halos.MassDef200m
 HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
-P2 = ccl.halos.HaloProfileHOD(concentration=CON)
+P1 = ccl.halos.HaloProfileNFW(mass_def=M200, concentration=CON,
+                              fourier_analytic=True)
+P2 = ccl.halos.HaloProfileHOD(mass_def=M200, concentration=CON)
 P3 = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
 P4 = P1
 PKC = ccl.halos.Profile2pt()
@@ -88,12 +89,11 @@ def test_tkk1h_tk3d():
     assert np.allclose(tkk_arr, tkk_arr_2, atol=0, rtol=1e-4)
 
     # Standard sampling
-    with pytest.warns(ccl.CCLWarning):
-        tk3d = ccl.halos.halomod_Tk3D_1h(
-            COSMO, hmc,
-            prof=P1, prof2=P2, prof12_2pt=PKC,
-            prof3=P3, prof4=P4, prof34_2pt=PKC,
-            lk_arr=np.log(k_arr), use_log=True)
+    tk3d = ccl.halos.halomod_Tk3D_1h(
+        COSMO, hmc,
+        prof=P1, prof2=P2, prof12_2pt=PKC,
+        prof3=P3, prof4=P4, prof34_2pt=PKC,
+        lk_arr=np.log(k_arr), use_log=True)
 
     tkk_arr_2 = tk3d(k_arr, a_arr)
     assert np.allclose(tkk_arr, tkk_arr_2, atol=0, rtol=1e-4)

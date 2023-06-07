@@ -13,7 +13,7 @@ def test_nonlin_camb_power():
     n_s = 0.97
     h = 0.7
     # Needs to be set for good agreements between CCL and CAMB
-    T_CMB = 2.725
+    T_CMB = 2.7255
 
     p = camb.CAMBparams(WantTransfer=True,
                         NonLinearModel=camb.nonlinear.Halofit(
@@ -41,7 +41,7 @@ def test_nonlin_camb_power():
 
     ccl_cosmo = ccl.Cosmology(
         Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
-        A_s=A_s, n_s=n_s,
+        A_s=A_s, n_s=n_s, Neff=3.046,
         transfer_function="boltzmann_camb",
         matter_power_spectrum="camb",
         extra_parameters={"camb": {"halofit_version": "mead2020_feedback",

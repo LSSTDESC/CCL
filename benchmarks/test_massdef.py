@@ -21,10 +21,10 @@ cs_vir_b = dc[6]
 cs_200c_p = dc[7]
 cs_200c_di = dc[8]
 
-hmd_vir = ccl.halos.MassDefVir()
-hmd_200m = ccl.halos.MassDef200m()
-hmd_200c = ccl.halos.MassDef200c()
-hmd_500c = ccl.halos.MassDef500c()
+hmd_vir = ccl.halos.MassDefVir
+hmd_200m = ccl.halos.MassDef200m
+hmd_200c = ccl.halos.MassDef200c
+hmd_500c = ccl.halos.MassDef500c
 
 
 def test_mdef_get_radius():

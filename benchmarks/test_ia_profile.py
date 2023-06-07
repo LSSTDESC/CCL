@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 import pyccl as ccl
 
 
@@ -48,21 +47,15 @@ def test_satellite_shear_profile():
     NFW = ccl.halos.HaloProfileNFW(concentration=cM, truncated=True,
                                    fourier_analytic=True, mass_def='200m')
 
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        pk_GI_1h = ccl.halos.halomod_Pk2D(cosmo, hmc, NFW,
-                                          normprof1=True,
-                                          normprof2=True,
-                                          prof2=sat_gamma_HOD,
-                                          get_2h=False,
-                                          lk_arr=np.log(k_arr),
-                                          a_arr=a_arr)
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        pk_II_1h = ccl.halos.halomod_Pk2D(cosmo, hmc, sat_gamma_HOD,
-                                          normprof1=True,
-                                          normprof2=True,
-                                          get_2h=False,
-                                          lk_arr=np.log(k_arr),
-                                          a_arr=a_arr)
+    pk_GI_1h = ccl.halos.halomod_Pk2D(cosmo, hmc, NFW,
+                                      prof2=sat_gamma_HOD,
+                                      get_2h=False,
+                                      lk_arr=np.log(k_arr),
+                                      a_arr=a_arr)
+    pk_II_1h = ccl.halos.halomod_Pk2D(cosmo, hmc, sat_gamma_HOD,
+                                      get_2h=False,
+                                      lk_arr=np.log(k_arr),
+                                      a_arr=a_arr)
 
     z_arr = np.linspace(0., 3., 256)
     z0 = 0.1
@@ -90,5 +83,5 @@ def test_satellite_shear_profile():
                           sigma8=0.81, n_s=0.96, h=1.)
     cosmo.compute_sigma()
     Ns_M_mean = sat_gamma_HOD._Ns(mass_benchmark, 1.)
-    norm = Ns_M_mean / sat_gamma_HOD.get_normalization(cosmo, 1, hmc)
+    norm = Ns_M_mean / sat_gamma_HOD.get_normalization(cosmo, 1, hmc=hmc)
     assert np.all(np.fabs(norm / norm_benchmark - 1) < 0.005)

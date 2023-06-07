@@ -8,6 +8,7 @@ from contextlib import nullcontext
 # Set cosmology
 COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05,
                       h=0.7, sigma8=0.8, n_s=0.96,
+                      T_CMB=2.725,
                       transfer_function='bbks')
 
 # Redshifts

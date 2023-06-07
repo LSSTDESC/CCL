@@ -3,14 +3,10 @@ __all__ = ("angular_cl_cov_cNG", "sigma2_B_disc", "sigma2_B_from_mask",
 
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, check, lib, warn_api
+from . import DEFAULT_POWER_SPECTRUM, check, lib
 from .pyutils import _check_array_params, integ_types
 
 
-@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
-                 ("cltracer3", "tracer3"), ("cltracer4", "tracer4"),
-                 ("tkka", "t_of_kk_a")],
-          reorder=['fsky', 'tracer3', 'tracer4', 'ell2'])
 def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
                        tracer3=None, tracer4=None, ell2=None,
                        fsky=1., integration_method='qag_quad'):
@@ -126,7 +122,6 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     return cov
 
 
-@warn_api(pairs=[('a', 'a_arr')])
 def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
                   p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """Returns the variance of the projected linear density field
@@ -183,7 +178,6 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
     return s2B_arr
 
 
-@warn_api(pairs=[('a', 'a_arr')])
 def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
                        p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """ Returns the variance of the projected linear density field, given the
@@ -257,10 +251,6 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
     return sigma2_B
 
 
-@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2"),
-                 ("cltracer3", "tracer3"), ("cltracer4", "tracer4"),
-                 ('tkka', 't_of_kk_a')],
-          reorder=['sigma2_B', 'fsky', 'tracer3', 'tracer4', 'ell2'])
 def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
                        tracer3=None, tracer4=None, ell2=None,
                        sigma2_B=None, fsky=1.,

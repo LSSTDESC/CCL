@@ -7,11 +7,12 @@ from .test_cclobject import check_eq_repr_hash
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
-M200 = ccl.halos.MassDef200m()
+M200 = ccl.halos.MassDef200m
 HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
-P1 = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
+P1 = ccl.halos.HaloProfileNFW(mass_def=M200, concentration=CON,
+                              fourier_analytic=True)
 P2 = P1
 P3 = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
 PKC = ccl.halos.Profile2pt()
@@ -67,7 +68,7 @@ def test_HMIngredients_eq_repr_hash():
         mass_function="Tinker08", halo_bias="Tinker10", mass_def="200m")
 
     # 2. Define separate default halo model ingredients.
-    MDEF = ccl.halos.MassDef200m()
+    MDEF = ccl.halos.MassDef200m
     HMF = ccl.halos.MassFuncTinker08(mass_def=MDEF)
     HBF = ccl.halos.HaloBiasTinker10(mass_def=MDEF)
     HMC2 = ccl.halos.HMCalculator(
@@ -153,8 +154,10 @@ def test_pkhm_pk2d():
                   < 1E-4)
 
     # Testing profiles which are not equivalent (but very close)
-    G1 = ccl.halos.HaloProfileHOD(concentration=CON, log10Mmin_0=12.00000)
-    G2 = ccl.halos.HaloProfileHOD(concentration=CON, log10Mmin_0=11.99999)
+    G1 = ccl.halos.HaloProfileHOD(mass_def=M200, concentration=CON,
+                                  log10Mmin_0=12.00000)
+    G2 = ccl.halos.HaloProfileHOD(mass_def=M200, concentration=CON,
+                                  log10Mmin_0=11.99999)
     assert G1 != G2
 
     # I_1_1

@@ -3,7 +3,6 @@ __all__ = ("MassFuncTinker10",)
 import numpy as np
 from scipy.interpolate import interp1d
 
-from ... import warn_api
 from . import MassFunc
 
 
@@ -27,7 +26,6 @@ class MassFuncTinker10(MassFunc):
                                      "norm_all_z",)
     name = 'Tinker10'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="200m",
                  mass_def_strict=True,

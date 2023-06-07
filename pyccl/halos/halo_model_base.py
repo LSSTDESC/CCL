@@ -1,22 +1,17 @@
 __all__ = ("HMIngredients", "Concentration", "MassFunc", "HaloBias", )
 
-import functools
 from abc import abstractmethod
 
 import numpy as np
 
 from .. import CCLAutoRepr, CCLNamedClass, lib, check
-from .. import deprecate_attr, deprecated, warn_api, mass_def_api
 from .. import physical_constants as const
 
 
 class HMIngredients(CCLAutoRepr, CCLNamedClass):
     """Base class for halo model ingredients."""
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",)
-    __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
-                                 )(super.__getattribute__)
 
-    @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):
         # Check mass definition consistency.
         from .massdef import MassDef
@@ -167,24 +162,6 @@ class MassFunc(HMIngredients):
             return mf[0]
         return mf
 
-    @deprecated(new_function=__call__)
-    @mass_def_api
-    def get_mass_function(self, cosmo, M, a):
-        """
-        get_mass_function(cosmo, M, a)
-        Returns the mass function for input parameters.
-
-        Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (:obj:`float` or `array`): halo mass.
-            a (:obj:`float`): scale factor.
-
-        Returns:
-            (:obj:`float` or `array`): mass function \
-                :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
-        """
-        return self(cosmo, M, a)
-
 
 class HaloBias(HMIngredients):
     """This class enables the calculation of halo bias functions.
@@ -239,23 +216,6 @@ class HaloBias(HMIngredients):
             return b[0]
         return b
 
-    @deprecated(new_function=__call__)
-    @mass_def_api
-    def get_halo_bias(self, cosmo, M, a):
-        """
-        get_halo_bias(cosmo, M, a)
-        Returns the halo bias for input parameters.
-
-        Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (:obj:`float` or `array`): halo mass.
-            a (:obj:`float`): scale factor.
-
-        Returns:
-            (:obj:`float` or `array`): halo bias.
-        """
-        return self(cosmo, M, a)
-
 
 class Concentration(HMIngredients):
     """
@@ -269,7 +229,6 @@ class Concentration(HMIngredients):
     """
     _mass_def_strict_always = True
 
-    @warn_api
     def __init__(self, *, mass_def):
         super().__init__(mass_def=mass_def, mass_def_strict=True)
 
@@ -292,38 +251,3 @@ class Concentration(HMIngredients):
         if np.ndim(M) == 0:
             return c[0]
         return c
-
-    @deprecated(new_function=__call__)
-    @mass_def_api
-    def get_concentration(self, cosmo, M, a):
-        """
-        get_concentration(cosmo, M, a)
-        Returns the concentration for input parameters.
-
-        Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-            M (:obj:`float` or `array`): halo mass.
-            a (:obj:`float`): scale factor.
-
-        Returns:
-            (:obj:`float` or `array`): concentration.
-        """
-        return self(cosmo, M, a)
-
-
-@functools.wraps(MassFunc.from_name)
-@deprecated(new_function=MassFunc.from_name)
-def mass_function_from_name(name):
-    return MassFunc.from_name(name)
-
-
-@functools.wraps(HaloBias.from_name)
-@deprecated(new_function=HaloBias.from_name)
-def halo_bias_from_name(name):
-    return HaloBias.from_name(name)
-
-
-@functools.wraps(Concentration.from_name)
-@deprecated(new_function=Concentration.from_name)
-def concentration_from_name(name):
-    return Concentration.from_name(name)

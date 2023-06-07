@@ -7,10 +7,9 @@ try:
 except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
-from . import CCLError, Pk2D, check, lib, warn_api
+from . import CCLError, Pk2D, check, lib
 
 
-@warn_api
 def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 
@@ -184,14 +183,12 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         ln_p_k_and_z[i, :] = np.log(pk[sind, :])
 
     pk_lin = Pk2D(
-        pkfunc=None,
         a_arr=a_arr,
         lk_arr=lk_arr,
         pk_arr=ln_p_k_and_z,
         is_logp=True,
         extrap_order_lok=1,
-        extrap_order_hik=2,
-        cosmo=cosmo)
+        extrap_order_hik=2)
 
     if not nonlin:
         return pk_lin
@@ -215,14 +212,12 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
             ln_p_k_and_z[i, :] = np.log(pk[sind, :])
 
         pk_nonlin = Pk2D(
-            pkfunc=None,
             a_arr=a_arr,
             lk_arr=lk_arr,
             pk_arr=ln_p_k_and_z,
             is_logp=True,
             extrap_order_lok=1,
-            extrap_order_hik=2,
-            cosmo=cosmo)
+            extrap_order_hik=2)
 
         return pk_lin, pk_nonlin
 
@@ -392,14 +387,12 @@ def get_isitgr_pk_lin(cosmo):
         ln_p_k_and_z[i, :] = np.log(pk[sind, :])
 
     pk_lin = Pk2D(
-        pkfunc=None,
         a_arr=a_arr,
         lk_arr=lk_arr,
         pk_arr=ln_p_k_and_z,
         is_logp=True,
         extrap_order_lok=1,
-        extrap_order_hik=2,
-        cosmo=cosmo)
+        extrap_order_hik=2)
     return pk_lin
 
 
@@ -508,13 +501,11 @@ def get_class_pk_lin(cosmo):
 
     # make the Pk2D object
     pk_lin = Pk2D(
-        pkfunc=None,
         a_arr=a_arr,
         lk_arr=lk_arr,
         pk_arr=ln_p_k_and_z,
         is_logp=True,
         extrap_order_lok=1,
-        extrap_order_hik=2,
-        cosmo=cosmo)
+        extrap_order_hik=2)
 
     return pk_lin

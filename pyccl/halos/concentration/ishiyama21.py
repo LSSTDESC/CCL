@@ -3,7 +3,7 @@ __all__ = ("ConcentrationIshiyama21",)
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 
-from ... import lib, warn_api
+from ... import lib
 from ... import check
 from . import Concentration
 
@@ -29,7 +29,6 @@ class ConcentrationIshiyama21(Concentration):
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'
 
-    @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, *, mass_def="500c",
                  relaxed=False, Vmax=False):
         self.relaxed = relaxed

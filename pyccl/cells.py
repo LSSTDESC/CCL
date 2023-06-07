@@ -4,11 +4,10 @@ import warnings
 
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warn_api
+from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
 from .pyutils import integ_types
 from .nonlimber_FKEM import *
 
-@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
 def angular_cl(cosmo, tracer1, tracer2, ell, *,
                p_of_k_a=DEFAULT_POWER_SPECTRUM,
                l_limber=-1, limber_max_error=0.01,  
@@ -43,6 +42,7 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
         return_meta (bool): if `True`, also return a dictionary with various
             metadata about the calculation, such as l_limber as calculated by the
             non-limber integrator.
+
     Returns:
         :obj:`float` or `array`: Angular (cross-)power spectrum values, \
             :math:`C_\\ell`, for the pair of tracers, as a function of \

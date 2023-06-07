@@ -7,16 +7,17 @@ import pyccl as ccl
 COSMO = ccl.CosmologyVanillaLCDM(transfer_function='bbks',
                                  matter_power_spectrum='linear')
 COSMO.compute_nonlin_power()
-M200 = ccl.halos.MassDef200m()
+M200 = ccl.halos.MassDef200m
 HMF = ccl.halos.MassFuncTinker10(mass_def=M200)
 HBF = ccl.halos.HaloBiasTinker10(mass_def=M200)
 HMC = ccl.halos.HMCalculator(
     mass_function=HMF, halo_bias=HBF, mass_def=M200, nM=2)
 CON = ccl.halos.ConcentrationDuffy08(mass_def=M200)
 
-NFW = ccl.halos.HaloProfileNFW(concentration=CON, fourier_analytic=True)
-HOD = ccl.halos.HaloProfileHOD(concentration=CON)
-HOD_nogc = ccl.halos.HaloProfileHOD(concentration=CON)
+NFW = ccl.halos.HaloProfileNFW(mass_def=M200, concentration=CON,
+                               fourier_analytic=True)
+HOD = ccl.halos.HaloProfileHOD(mass_def=M200, concentration=CON)
+HOD_nogc = ccl.halos.HaloProfileHOD(mass_def=M200, concentration=CON)
 HOD_nogc.is_number_counts = False
 GNFW = ccl.halos.HaloProfilePressureGNFW(mass_def=M200)
 
@@ -86,10 +87,8 @@ def test_tkkssc_linear_bias(isNC1, isNC2, isNC3, isNC4):
     assert np.allclose(tkkl_12, tkkl_34, atol=0, rtol=1e-12)
 
     # Test with the full T(k1,k2,a) for an NFW profile with bias ~1.
-    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
-        tkk = ccl.halos.halomod_Tk3D_SSC(
-            COSMO, HMC, prof=NFW, lk_arr=np.log(KK), a_arr=AA,
-            normprof1=True)
+    tkk = ccl.halos.halomod_Tk3D_SSC(
+        COSMO, HMC, prof=NFW, lk_arr=np.log(KK), a_arr=AA)
     *_, (tkk_12, tkk_34) = tkk.get_spline_arrays()
     assert np.allclose(tkkl_12, tkk_12, atol=0, rtol=5e-3)
     assert np.allclose(tkkl_34, tkk_34, atol=0, rtol=5e-3)
@@ -132,30 +131,25 @@ def test_tkkssc_linear_bias_raises():
         ccl.halos.halomod_Tk3D_SSC_linear_bias(COSMO, HMC, prof=GNFW)
 
 
-def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
-                           normalize=False):
+def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt):
     P_12 = b1 = b2 = np.zeros_like(k)
     if prof1.is_number_counts or prof2.is_number_counts:
-        norm1 = 1./prof1.get_normalization(COSMO, a, hmc=hmc)
-        norm2 = 1./prof2.get_normalization(COSMO, a, hmc=hmc)
-        norm12 = 1
-        if prof1.is_number_counts or normalize:
-            norm12 *= norm1
-        if prof2.is_number_counts or normalize:
-            norm12 *= norm2
+        norm1 = prof1.get_normalization(COSMO, a, hmc=hmc)
+        norm2 = prof2.get_normalization(COSMO, a, hmc=hmc)
 
-        i11_1 = hmc.I_1_1(COSMO, k, a, prof1)
-        i11_2 = hmc.I_1_1(COSMO, k, a, prof2)
+        i11_1 = hmc.I_1_1(COSMO, k, a, prof1)/norm1
+        i11_2 = hmc.I_1_1(COSMO, k, a, prof2)/norm2
         i02_12 = hmc.I_0_2(COSMO, k, a, prof1,
-                           prof_2pt=prof12_2pt, prof2=prof2)
+                           prof_2pt=prof12_2pt,
+                           prof2=prof2)/(norm1*norm2)
 
         pk = ccl.linear_matter_power(COSMO, k, a)
-        P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
+        P_12 = pk * i11_1 * i11_2 + i02_12
 
         if prof1.is_number_counts:
-            b1 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof1) * norm1
+            b1 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof1)
         if prof2.is_number_counts:
-            b2 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof2) * norm2
+            b2 = ccl.halos.halomod_bias_1pt(COSMO, hmc, k, a, prof2)
 
     return (b1 + b2) * P_12
 
@@ -200,18 +194,12 @@ def test_tkkssc_counterterms_gc(kwargs):
 
     # Tk's without clustering terms. Set is_number_counts=False for HOD
     # profiles
-    # Ensure HOD profiles are normalized
     kwargs_nogc = kwargs.copy()
     keys = list(kwargs.keys())
     for k in keys:
         v = kwargs[k]
         if isinstance(v, ccl.halos.HaloProfileHOD):
             kwargs_nogc[k] = HOD_nogc
-            normname = 'norm'+k
-            if k == 'prof':
-                normname = 'normprof1'
-            kwargs_nogc[normname] = True
-            kwargs[normname] = True
     tkk_nogc = ccl.halos.halomod_Tk3D_SSC(COSMO, HMC,
                                           lk_arr=np.log(k_arr), a_arr=a_arr,
                                           **kwargs_nogc)

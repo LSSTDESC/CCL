@@ -1,6 +1,6 @@
 __all__ = ("HaloBiasSheth99",)
 
-from ... import check, lib, warn_api
+from ... import check, lib
 from . import HaloBias
 
 
@@ -24,7 +24,6 @@ class HaloBiasSheth99(HaloBias):
                                      "use_delta_c_fit",)
     name = "Sheth99"
 
-    @warn_api
     def __init__(self, *,
                  mass_def="fof",
                  mass_def_strict=True,

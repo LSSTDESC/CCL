@@ -13,8 +13,8 @@ def test_cibcl():
                           h=0.7,
                           n_s=0.9645,
                           A_s=2.02E-9,
-                          Neff=3.046)
-    mdef = ccl.halos.MassDef200m()
+                          Neff=3.046, T_CMB=2.725)
+    mdef = ccl.halos.MassDef200m
     cM = ccl.halos.ConcentrationDuffy08(mass_def=mdef)
     nM = ccl.halos.MassFuncTinker10(mass_def=mdef, norm_all_z=True)
     bM = ccl.halos.HaloBiasTinker10(mass_def=mdef)
