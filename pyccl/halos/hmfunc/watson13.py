@@ -2,7 +2,6 @@ __all__ = ("MassFuncWatson13",)
 
 import numpy as np
 
-from ... import warn_api
 from . import MassFunc
 
 
@@ -19,7 +18,6 @@ class MassFuncWatson13(MassFunc):
     """
     name = 'Watson13'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="200m",
                  mass_def_strict=True):
@@ -39,7 +37,6 @@ class MassFuncWatson13(MassFunc):
         om = cosmo.omega_x(a, "matter")
         Delta_178 = self.mass_def.Delta / 178
 
-        # TODO: this has to be vectorized with numpy
         if a == 1:
             pA = 0.194
             pa = 1.805

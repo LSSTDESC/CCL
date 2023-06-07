@@ -18,16 +18,12 @@ Submodules
    :maxdepth: 4
 
    pyccl.background
-   pyccl.bcm
    pyccl.boltzmann
    pyccl.cells
    pyccl.correlations
    pyccl.cosmology
    pyccl.covariances
    pyccl.errors
-   pyccl.halomodel
-   pyccl.haloprofile
-   pyccl.massfunction
    pyccl.neutrinos
    pyccl.pk2d
    pyccl.power

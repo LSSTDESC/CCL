@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 import pyccl as ccl
 
 
@@ -56,6 +55,7 @@ def test_hodcl():
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mass_def)
     prf = ccl.halos.HaloProfileHOD(
+        mass_def=mass_def,
         concentration=cm,
         log10Mmin_0=np.log10(10.**log10Mcut/cosmo['h']),
         siglnM_0=sigma_Ncen,
@@ -67,10 +67,8 @@ def test_hodcl():
     prf2pt = ccl.halos.Profile2ptHOD()
     # P(k)
     a_arr, lk_arr, _ = cosmo.get_linear_power().get_spline_arrays()
-    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
-        pk_hod = ccl.halos.halomod_Pk2D(cosmo, hmc, prf, prof_2pt=prf2pt,
-                                        lk_arr=lk_arr, a_arr=a_arr,
-                                        normprof1=True)
+    pk_hod = ccl.halos.halomod_Pk2D(cosmo, hmc, prf, prof_2pt=prf2pt,
+                                    lk_arr=lk_arr, a_arr=a_arr)
     # C_ell
     tr = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z_arr, dndz),
                                 bias=(z_arr, np.ones(len(dndz))))

@@ -4,11 +4,10 @@ import warnings
 
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warn_api
+from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
 from .pyutils import integ_types
 
 
-@warn_api(pairs=[("cltracer1", "tracer1"), ("cltracer2", "tracer2")])
 def angular_cl(cosmo, tracer1, tracer2, ell, *,
                p_of_k_a=DEFAULT_POWER_SPECTRUM,
                l_limber=-1., limber_integration_method='qag_quad'):
@@ -23,10 +22,10 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
             the angular power spectrum.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 3D Power
             spectrum to project. If a string, it must correspond to one of
-            the non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`).
+            the non-linear power spectra stored in ``cosmo`` (e.g.
+            ``'delta_matter:delta_matter'``).
         l_limber (:obj:`float`): Angular wavenumber beyond which Limber's
-            approximation will be used. Defaults to -1.
+            approximation will be used.
         limber_integration_method (:obj:`str`): integration method to be used
             for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
             `qag` method backed up by `quad` when it fails) and ``'spline'``

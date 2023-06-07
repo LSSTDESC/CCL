@@ -8,7 +8,7 @@ COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
 
 
 def test_mdef_eq():
-    hmd_200m = ccl.halos.MassDef200m()
+    hmd_200m = ccl.halos.MassDef200m
     hmd_200m_b = ccl.halos.MassDef(200, 'matter')
     assert hmd_200m == hmd_200m_b
 
@@ -73,8 +73,8 @@ def test_get_radius():
 
 
 def test_translate_mass():
-    hmd = ccl.halos.MassDef200m()
-    hmdb = ccl.halos.MassDef200c()
+    hmd = ccl.halos.MassDef200m
+    hmdb = ccl.halos.MassDef200c
     cm = ccl.halos.Concentration.create_instance("Duffy08", mass_def=hmd)
     translator = ccl.halos.mass_translator(mass_in=hmd, mass_out=hmdb,
                                            concentration=cm)
@@ -90,14 +90,13 @@ def test_translate_mass():
                                   ccl.halos.MassDef500c,
                                   ccl.halos.MassDefVir])
 def test_subclasses_smoke(scls):
-    hmd = scls()
+    hmd = scls
     assert np.isfinite(hmd.get_Delta(COSMO, 1.))
 
 
 @pytest.mark.parametrize('name', ['200m', '200c', '500c', 'vir', '350m'])
 def test_massdef_from_string_smoke(name):
-    hmd_class = ccl.halos.MassDef.from_name(name)
-    hmd = hmd_class()
+    hmd = ccl.halos.MassDef.from_name(name)
     assert np.isfinite(hmd.get_radius(COSMO, 1e14, 1))
 
 

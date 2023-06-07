@@ -6,14 +6,10 @@ ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
-with pytest.warns(ccl.CCLDeprecationWarning):
-    PKA = ccl.Pk2D(pkfunc=lambda k, a: np.log(a/k), cosmo=COSMO)
+PKA = ccl.Pk2D.from_function(pkfunc=lambda k, a: np.log(a/k))
 ZZ = np.linspace(0., 1., 200)
 NN = np.exp(-((ZZ-0.5)/0.1)**2)
 LENS = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, NN))
-
-with pytest.warns(ccl.CCLDeprecationWarning):
-    ccl.cls
 
 
 @pytest.mark.parametrize('p_of_k_a', [ccl.DEFAULT_POWER_SPECTRUM, PKA])

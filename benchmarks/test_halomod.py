@@ -36,16 +36,14 @@ def test_halomod(model):
     hbf = ccl.halos.HaloBiasSheth99(mass_def=mass_def,
                                     mass_def_strict=False)
     cM = ccl.halos.ConcentrationDuffy08(mass_def=mass_def)
-    prf = ccl.halos.HaloProfileNFW(concentration=cM)
+    prf = ccl.halos.HaloProfileNFW(mass_def=mass_def, concentration=cM)
     hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
                                  mass_def=mass_def)
 
     z = 0.
     k = data_z0[:, 0] * cosmo['h']
     pk = data_z0[:, -1] / (cosmo['h']**3)
-    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
-        pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z), prf,
-                                                  normprof1=True)
+    pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z), prf)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)
@@ -53,9 +51,7 @@ def test_halomod(model):
     z = 1.
     k = data_z1[:, 0] * cosmo['h']
     pk = data_z1[:, -1] / (cosmo['h']**3)
-    with pytest.warns(ccl.CCLDeprecationWarning):  # TODO: remove normprof v3
-        pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z), prf,
-                                                  normprof1=True)
+    pk_ccl = ccl.halos.halomod_power_spectrum(cosmo, hmc, k, 1./(1+z), prf)
     tol = pk * HALOMOD_TOLERANCE
     err = np.abs(pk_ccl - pk)
     assert np.all(err <= tol)

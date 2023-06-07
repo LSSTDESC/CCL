@@ -3,7 +3,6 @@ __all__ = ("HaloProfileHOD",)
 import numpy as np
 from scipy.special import sici, erf
 
-from ... import warn_api, deprecate_attr
 from . import HaloProfile
 
 
@@ -74,6 +73,8 @@ class HaloProfileHOD(HaloProfile):
     HOD profile.
 
     Args:
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
         concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
         log10Mmin_0 (:obj:`float`): offset parameter for
@@ -111,8 +112,6 @@ class HaloProfileHOD(HaloProfile):
         a_pivot (:obj:`float`): pivot scale factor :math:`a_*`.
         ns_independent (:obj:`bool`): drop requirement to only form
             satellites when centrals are present.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
         is_number_counts (:obj:`bool`): set to ``True`` if this profile
             is meant to represent galaxy overdensity.
     """
@@ -122,25 +121,14 @@ class HaloProfileHOD(HaloProfile):
         "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
         "_is_number_counts", "ns_independent", "mass_def", "concentration",
         "precision_fftlog",)
-    __getattr__ = deprecate_attr(pairs=[
-        ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
-        ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
-        ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
-        ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")]
-    )(super.__getattribute__)
 
-    @warn_api(pairs=[("c_M_relation", "concentration"),
-                     ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
-                     ("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
-                     ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
-                     ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")])
-    def __init__(self, *, concentration,
+    def __init__(self, *, mass_def, concentration,
                  log10Mmin_0=12., log10Mmin_p=0., siglnM_0=0.4,
                  siglnM_p=0., log10M0_0=7., log10M0_p=0.,
                  log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
                  alpha_p=0., fc_0=1., fc_p=0.,
                  bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False, mass_def=None,
+                 a_pivot=1., ns_independent=False,
                  is_number_counts=True):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p
@@ -163,10 +151,6 @@ class HaloProfileHOD(HaloProfile):
         super().__init__(mass_def=mass_def, concentration=concentration,
                          is_number_counts=is_number_counts)
 
-    @warn_api(pairs=[("lMmin_0", "log10Mmin_0"), ("lMmin_p", "log10Mmin_p"),
-                     ("siglM_0", "siglnM_0"), ("siglM_p", "siglnM_p"),
-                     ("lM0_0", "log10M0_0"), ("lM0_p", "log10M0_p"),
-                     ("lM1_0", "log10M1_0"), ("lM1_p", "log10M1_p")])
     def update_parameters(self, *, log10Mmin_0=None, log10Mmin_p=None,
                           siglnM_0=None, siglnM_p=None,
                           log10M0_0=None, log10M0_p=None,
@@ -328,7 +312,7 @@ class HaloProfileHOD(HaloProfile):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def get_normalization(self, cosmo, a, hmc):
+    def get_normalization(self, cosmo, a, *, hmc):
         """Returns the normalization of this profile, which is the
         mean galaxy number density.
         """

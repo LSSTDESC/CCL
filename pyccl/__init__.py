@@ -42,21 +42,4 @@ from .neutrinos import *
 from . import halos
 from . import nl_pt
 
-from .bcm import *           # deprecated
-from .halomodel import *     # deprecated
-from .massfunction import *  # deprecated
-from .haloprofile import *   # deprecated
-
 from .cosmology import *
-
-
-def __getattr__(name):
-    rename = {"core": "cosmology", "cls": "cells"}
-    if name in rename:
-        from .errors import CCLDeprecationWarning
-        import warnings
-        warnings.warn(f"Module {name} has been renamed to {rename[name]}.",
-                      CCLDeprecationWarning)
-        name = rename[name]
-        return eval(name)
-    raise AttributeError(f"No module named {name}.")

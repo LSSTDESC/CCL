@@ -1,6 +1,5 @@
 __all__ = ("HaloBiasSheth01",)
 
-from ... import warn_api
 from . import HaloBias
 
 
@@ -17,7 +16,6 @@ class HaloBiasSheth01(HaloBias):
     """
     name = "Sheth01"
 
-    @warn_api
     def __init__(self, *,
                  mass_def="fof",
                  mass_def_strict=True):

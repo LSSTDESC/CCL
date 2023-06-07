@@ -3,7 +3,6 @@ __all__ = ("HaloProfileNFW",)
 import numpy as np
 from scipy.special import sici
 
-from ... import warn_api
 from . import HaloProfileMatter
 
 
@@ -30,6 +29,8 @@ class HaloProfileNFW(HaloProfileMatter):
     By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
 
     Args:
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
         concentration (:obj:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation to use with this profile.
         fourier_analytic (:obj:`bool`): set to ``True`` if you want to compute
@@ -42,20 +43,16 @@ class HaloProfileNFW(HaloProfileMatter):
             (and not through FFTLog).
         truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
         "fourier_analytic", "projected_analytic", "cumul2d_analytic",
         "truncated", "mass_def", "concentration", "precision_fftlog",)
 
-    @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, concentration,
+    def __init__(self, *, mass_def, concentration,
                  fourier_analytic=True,
                  projected_analytic=False,
                  cumul2d_analytic=False,
-                 truncated=True,
-                 mass_def=None):
+                 truncated=True):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic

@@ -34,7 +34,7 @@ from . import ccllib as lib
 from .pyutils import check
 from .errors import CCLWarning
 from ._core.parameters import physical_constants
-from ._core import CCLObject, UnlockInstance, unlock_instance, warn_api
+from ._core import CCLObject, UnlockInstance, unlock_instance
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays, _get_spline2d_arrays)
 
@@ -78,7 +78,6 @@ def _check_background_spline_compatibility(cosmo, z):
             f"Background splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
 
 
-@warn_api
 def get_density_kernel(cosmo, *, dndz):
     """This convenience function returns the radial kernel for
     galaxy-clustering-like tracers. Given an unnormalized
@@ -109,7 +108,6 @@ def get_density_kernel(cosmo, *, dndz):
     return chi, wchi
 
 
-@warn_api
 def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
     r"""This convenience function returns the radial kernel for
     weak-lensing-like. Given an unnormalized redshift distribution
@@ -170,7 +168,6 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
     return chi, wchi
 
 
-@warn_api(pairs=[("nsamples", "n_samples")])
 def get_kappa_kernel(cosmo, *, z_source, n_samples=100):
     """This convenience function returns the radial kernel for
     CMB-lensing-like tracers.
@@ -538,7 +535,6 @@ class Tracer(CCLObject):
 
         return mg_transfer
 
-    @warn_api
     @unlock_instance
     def add_tracer(self, cosmo, *, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,
@@ -736,7 +732,6 @@ class NzTracer(Tracer):
         return self._dndz(z)
 
 
-@warn_api(reorder=["has_rsd", "dndz", "bias", "mag_bias"])
 def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
                        has_rsd, n_samples=256):
     """Specific `Tracer` associated to galaxy clustering with linear
@@ -819,7 +814,6 @@ def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
     return tracer
 
 
-@warn_api
 def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
                       use_A_ia=True, n_samples=256):
     """Specific `Tracer` associated to galaxy shape distortions including
@@ -891,7 +885,6 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
     return tracer
 
 
-@warn_api
 def CMBLensingTracer(cosmo, *, z_source, n_samples=100):
     r"""A Tracer for CMB lensing convergence :math:`\kappa`.
     The associated kernel and transfer function are described
@@ -918,7 +911,6 @@ def CMBLensingTracer(cosmo, *, z_source, n_samples=100):
     return tracer
 
 
-@warn_api
 def tSZTracer(cosmo, *, z_max=6., n_chi=1024):
     """Specific :class:`Tracer` associated with the thermal Sunyaev Zel'dovich
     Compton-y parameter. The radial kernel for this tracer is simply given by
@@ -946,7 +938,6 @@ def tSZTracer(cosmo, *, z_max=6., n_chi=1024):
                                z_max=z_max, n_chi=n_chi)
 
 
-@warn_api
 def CIBTracer(cosmo, *, z_min=0., z_max=6., n_chi=1024):
     """Specific :class:`Tracer` associated with the cosmic infrared
     background (CIB). The radial kernel for this tracer is simply

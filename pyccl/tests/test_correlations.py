@@ -30,27 +30,6 @@ def test_correlation_smoke(method):
         assert np.shape(corr) == np.shape(tval)
 
 
-@pytest.mark.parametrize('typs', [['gg', 'NN'],
-                                  ['gl', 'NG'],
-                                  ['l+', 'GG+'],
-                                  ['l-', 'GG-']])
-def test_correlation_newtypes(typs):
-    z = np.linspace(0., 1., 200)
-    n = np.ones(z.shape)
-    lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
-
-    ell = np.logspace(1, 3, 5)
-    cl = ccl.angular_cl(COSMO, lens, lens, ell)
-
-    theta = np.logspace(-2., np.log10(5.), 5)
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        corr_old = ccl.correlation(COSMO, ell=ell, C_ell=cl, theta=theta,
-                                   corr_type=typs[0])
-    corr_new = ccl.correlation(COSMO, ell=ell, C_ell=cl, theta=theta,
-                               type=typs[1])
-    assert np.all(corr_new == corr_old)
-
-
 @pytest.mark.parametrize(
     'rval',
     [50,
@@ -129,9 +108,6 @@ def test_correlation_raises():
         ccl.correlation(COSMO, ell=[1], C_ell=[1e-3], theta=[1], method='blah')
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, ell=[1], C_ell=[1e-3], theta=[1], type='blah')
-    with pytest.raises(ValueError):
-        ccl.correlation(COSMO, ell=[1], C_ell=[1e-3],
-                        theta=[1], corr_type='blah')
 
 
 def test_correlation_zero():

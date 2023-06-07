@@ -1,6 +1,5 @@
 __all__ = ("ConcentrationKlypin11",)
 
-from ... import warn_api
 from . import Concentration
 
 
@@ -15,7 +14,6 @@ class ConcentrationKlypin11(Concentration):
     """
     name = 'Klypin11'
 
-    @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, *, mass_def="vir"):
         super().__init__(mass_def=mass_def)
 

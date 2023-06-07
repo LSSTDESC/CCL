@@ -3,15 +3,11 @@ __all__ = ("halomod_power_spectrum", "halomod_Pk2D",)
 import numpy as np
 
 from .. import Pk2D
-from .. import warn_api
 from . import Profile2pt
 
 
-@warn_api(pairs=[("supress_1h", "suppress_1h")],
-          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof1", "normprof2"])
 def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof_2pt=None,
-                           normprof1=None, normprof2=None,
                            p_of_k_a=None,
                            get_1h=True, get_2h=True,
                            smooth_transition=None, suppress_1h=None,
@@ -41,16 +37,6 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
         prof2 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): a
             second halo profile. If ``None``, ``prof`` will be used as
             ``prof2``.
-        normprof1 (:obj:`bool`): if ``True``, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by ``prof``.
-            **Will be deprecated in v3.**
-        normprof2 (:obj:`bool`): if ``True``, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
-            (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`v` is the profile represented by ``prof2``.
-            **Will be deprecated in v3.**
         prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object
             returning the the two-point moment of the two profiles
@@ -106,8 +92,6 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
         prof2 = prof
     if prof_2pt is None:
         prof_2pt = Profile2pt()
-    hmc._fix_profile_mass_def(prof)
-    hmc._fix_profile_mass_def(prof2)
 
     pk2d = cosmo.parse_pk(p_of_k_a)
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
@@ -117,15 +101,12 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         # normalizations
-        norm1 = prof.get_normalization(cosmo, aa, hmc=hmc) if normprof1 else 1
-        # TODO: CCLv3, remove if
+        norm1 = prof.get_normalization(cosmo, aa, hmc=hmc)
 
         if prof2 == prof:
             norm2 = norm1
         else:
-            norm2 = prof2.get_normalization(cosmo, aa,
-                                            hmc=hmc) if normprof2 else 1
-            # TODO: CCLv3, remove if
+            norm2 = prof2.get_normalization(cosmo, aa, hmc=hmc)
 
         if get_2h:
             # bias factors
@@ -165,11 +146,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     return out
 
 
-@warn_api(pairs=[("supress_1h", "suppress_1h")],
-          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof1", "normprof2"])
 def halomod_Pk2D(cosmo, hmc, prof, *,
                  prof2=None, prof_2pt=None,
-                 normprof1=None, normprof2=None,
                  p_of_k_a=None,
                  get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
@@ -194,16 +172,6 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
             being correlated. If ``None``, the default second moment
             will be used, corresponding to the products of the means
             of both profiles.
-        normprof1 (:obj:`bool`): if ``True``, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by ``prof``.
-            **Will be deprecated in v3.**
-        normprof2 (:obj:`bool`): if ``True``, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
-            (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`), where
-            :math:`v` is the profile represented by ``prof2``.
-            **Will be deprecated in v3.**
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If ``None``,
             the power spectrum stored within `cosmo` will be used.
@@ -254,7 +222,6 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
     pk_arr = halomod_power_spectrum(
         cosmo, hmc, np.exp(lk_arr), a_arr,
         prof, prof2=prof2, prof_2pt=prof_2pt, p_of_k_a=p_of_k_a,
-        normprof1=normprof1, normprof2=normprof2,  # TODO: remove for CCLv3
         get_1h=get_1h, get_2h=get_2h,
         smooth_transition=smooth_transition, suppress_1h=suppress_1h,
         extrap_pk=extrap_pk)

@@ -2,7 +2,6 @@ __all__ = ("MassFuncJenkins01",)
 
 import numpy as np
 
-from ... import warn_api
 from . import MassFunc
 
 
@@ -19,7 +18,6 @@ class MassFuncJenkins01(MassFunc):
     """
     name = 'Jenkins01'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="fof",
                  mass_def_strict=True):

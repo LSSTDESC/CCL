@@ -2,7 +2,7 @@ __all__ = ("MassFuncDespali16",)
 
 import numpy as np
 
-from ... import check, lib, warn_api
+from ... import check, lib
 from . import MassFunc
 
 
@@ -23,7 +23,6 @@ class MassFuncDespali16(MassFunc):
                                      "ellipsoidal",)
     name = 'Despali16'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="200m",
                  mass_def_strict=True,

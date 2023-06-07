@@ -1,6 +1,6 @@
 __all__ = ("Profile2pt", "Profile2ptHOD", "Profile2ptCIB",)
 
-from .. import CCLAutoRepr, mass_def_api, warn_api
+from .. import CCLAutoRepr
 from . import HaloProfileHOD, HaloProfileCIBShang12
 
 
@@ -27,11 +27,9 @@ class Profile2pt(CCLAutoRepr):
     """
     __repr_attrs__ = __eq_attrs__ = ("r_corr",)
 
-    @warn_api
     def __init__(self, *, r_corr=0.):
         self.r_corr = r_corr
 
-    @warn_api
     def update_parameters(self, *, r_corr=None):
         """ Update any of the parameters associated with this 1-halo
         2-point correlator. Any parameter set to ``None`` won't be updated.
@@ -39,8 +37,6 @@ class Profile2pt(CCLAutoRepr):
         if r_corr is not None:
             self.r_corr = r_corr
 
-    @mass_def_api
-    @warn_api
     def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
         """ Return the Fourier-space two-point moment between
         two profiles.
@@ -98,8 +94,6 @@ class Profile2ptHOD(Profile2pt):
     :class:`~pyccl.halos.profiles.HaloProfileHOD`.
     """
 
-    @mass_def_api
-    @warn_api
     def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
         """ Returns the Fourier-space two-point moment for the HOD
         profile.
@@ -145,8 +139,6 @@ class Profile2ptCIB(Profile2pt):
     and Eq. 15 of McCarthy & Madhavacheril (2021PhRvD.103j3515M)).
     """
 
-    @mass_def_api
-    @warn_api
     def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
         """ Returns the Fourier-space two-point moment for the CIB
         profile.

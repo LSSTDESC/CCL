@@ -2,7 +2,7 @@ __all__ = ("HaloProfilePressureGNFW",)
 
 import numpy as np
 
-from ... import UnlockInstance, warn_api
+from ... import UnlockInstance
 from . import HaloProfilePressure
 
 
@@ -42,6 +42,8 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
     calculated in physical (non-comoving) units of :math:`\\mathrm{eV/cm^3}`.
 
     Args:
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
         mass_bias (:obj:`float`):
             The mass bias parameter :math:`1-b`.
         P0 (:obj:`float`):
@@ -65,18 +67,15 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         x_out (:obj:`float`):
             Profile threshold, in units of :math:`r_{\\mathrm{500c}}`.
             Defaults to :math:`+\\infty`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
         "P0_hexp", "qrange", "nq", "x_out", "mass_def", "precision_fftlog",)
 
-    @warn_api
-    def __init__(self, *, mass_bias=0.8, P0=6.41,
+    def __init__(self, *, mass_def, mass_bias=0.8, P0=6.41,
                  c500=1.81, alpha=1.33, alpha_P=0.12,
                  beta=4.13, gamma=0.31, P0_hexp=-1.,
-                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, mass_def=None):
+                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
@@ -93,7 +92,6 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         self._fourier_interp = None
         super().__init__(mass_def=mass_def)
 
-    @warn_api
     def update_parameters(self, *, mass_bias=None, P0=None,
                           c500=None, alpha=None, beta=None, gamma=None,
                           alpha_P=None, P0_hexp=None, x_out=None):

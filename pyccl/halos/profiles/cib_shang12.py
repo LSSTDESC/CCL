@@ -4,7 +4,6 @@ import numpy as np
 from scipy.integrate import simpson
 from scipy.special import lambertw
 
-from ... import warn_api, deprecate_attr
 from . import HaloProfileNFW, HaloProfileCIB
 
 
@@ -66,6 +65,8 @@ class HaloProfileCIBShang12(HaloProfileCIB):
     dependence of the form :math:`T_d=T_0(1+z)^\\alpha`.
 
     Args:
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
+            a mass definition object, or a name string.
         concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
             concentration-mass relation for NFW profile.
         nu_GHz (:obj:`float`): frequency in GHz.
@@ -79,23 +80,15 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         Mmin (:obj:`float`): minimum subhalo mass.
         L0 (:obj:`float`): luminosity scale (in
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
     """ # noqa
     __repr_attrs__ = __eq_attrs__ = (
         "nu", "alpha", "T0", "beta", "gamma", "s_z", "log10Meff", "siglog10M",
         "Mmin", "L0", "mass_def", "concentration", "precision_fftlog",)
-    __getattr__ = deprecate_attr(pairs=[('l10meff', 'log10Meff'),
-                                        ('sigLM', 'siglog10M')]
-                                 )(super.__getattribute__)
     _one_over_4pi = 0.07957747154
 
-    @warn_api(pairs=[("c_M_relation", "concentration"),
-                     ("log10meff", "log10Meff"),
-                     ("sigLM", "siglog10M")])
-    def __init__(self, *, concentration, nu_GHz, alpha=0.36, T0=24.4,
-                 beta=1.75, gamma=1.7, s_z=3.6, log10Meff=12.6,
-                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8, mass_def=None):
+    def __init__(self, *, mass_def, concentration, nu_GHz, alpha=0.36,
+                 T0=24.4, beta=1.75, gamma=1.7, s_z=3.6, log10Meff=12.6,
+                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8):
         self.nu = nu_GHz
         self.alpha = alpha
         self.T0 = T0
@@ -124,8 +117,6 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         """
         return 0.30*(Msub/Mparent)**(-0.7)*np.exp(-9.9*(Msub/Mparent)**2.5)
 
-    @warn_api(pairs=[("log10meff", "log10Meff"),
-                     ("sigLM", "siglog10M")])
     def update_parameters(self, nu_GHz=None,
                           alpha=None, T0=None, beta=None, gamma=None,
                           s_z=None, log10Meff=None, siglog10M=None,
