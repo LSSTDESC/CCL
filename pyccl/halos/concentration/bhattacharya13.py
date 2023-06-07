@@ -1,24 +1,44 @@
+from __future__ import annotations
+
 __all__ = ("ConcentrationBhattacharya13",)
+
+from typing import TYPE_CHECKING, Union
 
 from ... import lib, warn_api
 from . import Concentration
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class ConcentrationBhattacharya13(Concentration):
-    """Concentration-mass relation by `Bhattacharya et al. 2013
-    <https://arxiv.org/abs/1112.5479>`_. This parametrization is only valid for
-    S.O. masses with :math:`\\Delta = \\Delta_{\\rm vir}`, or
-    :math:`\\Delta=200` times the critical or matter densities. By default it
-    will be initialized for :math:`M_{200c}`.
+    r"""Concentration-mass relation by :footcite:t:`Bhattacharya13`. Valid only
+    for S.O. masses with :math:`\Delta_{\rm vir}`, :math:`\Delta_{200{\rm m}}`,
+    and :math:`\Delta_{200{\rm c}}`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
-            definition object or name string.
+    The concentration takes the form
+
+    .. math::
+
+        c(M, z) = A \times D(z)^B \nu^C,
+
+    where :math:`D(z)` is the growth factor at redshift :math:`z`,
+    :math:`\nu=\frac{\delta_c}{\sigma_\rm{M}}` is the peak height, and
+    :math:`(A,B,C)` are given by the fitting formula.
+
+    Parameters
+    ----------
+    mass_def
+        Mass definition for this :math:`c(M)` parametrization.
+
+    References
+    ----------
+    .. footbibliography::
     """
     name = 'Bhattacharya13'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def="200c"):
+    def __init__(self, *, mass_def: Union[str, MassDef] = "200c"):
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):

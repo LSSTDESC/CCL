@@ -1,4 +1,12 @@
-from ..halo_model_base import Concentration, concentration_from_name
+"""
+=================================================
+Concentrations (:mod:`pyccl.halos.concentration`)
+=================================================
+
+Models of the halo mass-concentration relation.
+"""
+
+from .. import Concentration
 from .bhattacharya13 import *
 from .constant import *
 from .diemer15 import *

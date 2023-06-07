@@ -1,41 +1,52 @@
+"""
+===========================================
+Baryons (:mod:`pyccl.baryons.baryons_base`)
+===========================================
+
+Abstract base class for models that add baryonic effects to power spectra.
+"""
+
+from __future__ import annotations
+
 __all__ = ("Baryons",)
 
 from abc import abstractmethod
+from typing import TYPE_CHECKING
 
-from .. import CCLAutoRepr, CCLNamedClass
+from .. import CCLNamedClass
+
+if TYPE_CHECKING:
+    from .. import Cosmology, Pk2D
 
 
-class Baryons(CCLAutoRepr, CCLNamedClass):
-    """:class:`Baryons` objects are used to include the effects of
-    baryons on the non-linear matter power spectrum. Their main ingredient
-    is a method :meth:`include_baryonic_effects` that takes in a
-    :class:`~pyccl.pk2d.Pk2D` and returns another :class:`~pyccl.pk2d.Pk2D`
-    object that now accounts for baryonic effects (according to the model
-    implemented in the corresponding :class:`Baryons` object).
+class Baryons(CCLNamedClass):
+    r"""Base class for models that add the imprint of baryons to a power
+    spectrum (usually the non-linear matter power).
     """
 
     @abstractmethod
-    def _include_baryonic_effects(self, cosmo, pk):
-        """Apply baryonic effects to a given power spectrum.
+    def _include_baryonic_effects(self, cosmo: Cosmology, pk: Pk2D) -> Pk2D:
+        """Model-specific implementation.
+        See :meth:`Baryons.include_baryonic_effects`.
 
-        Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`):
-                Cosmological parameters.
-            pk (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
-
-        Returns:
-            :obj:`~pyccl.pk2d.Pk2D` object.
+        :meta public:
         """
 
-    def include_baryonic_effects(self, cosmo, pk):
+    def include_baryonic_effects(self, cosmo: Cosmology, pk: Pk2D) -> Pk2D:
         """Apply baryonic effects to a given power spectrum.
 
-        Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`):
-                Cosmological parameters.
-            pk (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
+        Arguments
+        ---------
+        cosmo
+            Cosmological parameters.
+        pk
+            Power spectrum.
 
-        Returns:
-            :obj:`~pyccl.pk2d.Pk2D` or :obj:`None`.
+        Returns
+        -------
+
+            Power spectrum that includes baryonic effects.
         """
         return self._include_baryonic_effects(cosmo, pk)
+
+    include_baryonic_effects.__doc__ += _include_baryonic_effects.__doc__

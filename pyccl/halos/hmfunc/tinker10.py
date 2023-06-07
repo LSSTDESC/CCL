@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncTinker10",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -6,32 +10,62 @@ from scipy.interpolate import interp1d
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncTinker10(MassFunc):
-    """Implements the mass function of `Tinker et al. 2010
-    <https://arxiv.org/abs/1001.3162>`_. This parametrization accepts S.O.
-    masses with :math:`200 < \\Delta < 3200`, defined with respect to the
-    matter density. This can be automatically translated to S.O. masses
-    defined with respect to the critical density.
+    r"""Halo mass function by :footcite:t:`Tinker10`. Valid for any S.O. masses
+    with :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
-        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
-            definition will be ignored.
-        norm_all_z (:obj:`bool`): if ``True``, the mass function will be
-            normalised to yield the total matter density when integrated
-            over mass at all redshifts (as opposed to :math:`z=0` only).
+    The mass function takes the form
+
+    .. math::
+
+        n(M, z) = \alpha \, \left[ 1 + (\beta\nu)^{-2\phi} \right] \,
+        \nu^{2\eta} \, \exp{ \left( -\frac{\gamma\nu^2}{2} \right) },
+
+    where :math:`\nu \equiv \delta_c/\sigma` is the peak height, and
+    :math:`\alpha`, :math:`\beta`, :math:`\gamma`, :math:`\eta`, :math:`\phi`
+    follow time-dependent power laws of the form :math:`x = x_0 (1+z)^{x_z}`,
+    with :math:`(x_0, x_z)` fitted parameters.
+
+    Parameters
+    ----------
+    mass_def
+        Mass definition for this :math:`n(M)` parametrization.
+    mass_def_strict
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+    norm_all_z
+        Whether the mass function is normalized at all :math:`z`. If False,
+        it is only normalized at :math:`z=0`.
+
+    Raises
+    ------
+    ValueError
+        Interpolation out of bounds. :math:`\Delta_m` for the particular
+        combination of mass definition and scale factor is out of bounds with
+        the range of the mass function.
+
+    References
+    ----------
+    .. footbibliography::
     """
-    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
-                                     "norm_all_z",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_def", "mass_def_strict", "norm_all_z",)
     name = 'Tinker10'
+    norm_all_z: bool
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True,
-                 norm_all_z=False):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True,
+            norm_all_z: bool = False
+    ):
         self.norm_all_z = norm_all_z
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
@@ -70,7 +104,7 @@ class MassFuncTinker10(MassFunc):
             self.pq0 = interp1d(ldelta, q)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
+        ld = np.log10(self.mass_def.get_Delta_matter(cosmo, a))
         nu = 1.686 / sigM
         # redshift evolution only up to z=3
         a = np.clip(a, 0.25, 1)

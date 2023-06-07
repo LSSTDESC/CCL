@@ -1,25 +1,48 @@
+from __future__ import annotations
+
 __all__ = ("ConcentrationDiemer15",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import Concentration
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class ConcentrationDiemer15(Concentration):
-    """Concentration-mass relation by `Diemer & Kravtsov 2015
-    <https://arxiv.org/abs/1407.4730>`_. This parametrization
-    is only valid for S.O. masses with :math:`\\Delta = 200`
-    times the critical density.
+    r"""Concentration-mass relation by :footcite:t:`Diemer15`. Valid only for
+    S.O. :math:`\Delta = 200c` mass definitions.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
+    The concentration takes the form
+
+    .. math::
+
+        c_{\rm 200c}(M, z) = \frac{c_{\rm min}}{2} \left[
+            \left( \frac{\nu}{\nu_{\rm min}} \right)^{-\alpha}
+            + \left( \frac{\nu}{\nu_{\rm min}} \right)^\beta \right],
+
+    where :math:`c_{\rm min}` and :math:`\nu_{\rm min}` take the functional
+    form :math:`X_{\rm min} = \chi_0 + \chi_1 n`. :math:`n` is the slope
+    of the power spectrum, and :math:`(\chi_0,\chi_1)` are fitting parameters.
+
+    Parameters
+    ----------
+    mass_def
+        Mass definition for this :math:`c(M)` parametrization. It is fixed to
+        :math:`\Delta=200c`.
+
+    References
+    ----------
+    .. footbibliography::
     """
     name = 'Diemer15'
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def="200c"):
+    def __init__(self, *, mass_def: Union[str, MassDef] = "200c"):
         super().__init__(mass_def=mass_def)
 
     def _setup(self):

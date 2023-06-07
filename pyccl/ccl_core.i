@@ -32,14 +32,3 @@ void parameters_mgrowth_set_custom(ccl_parameters *params,
 }
 
 %}
-
-
-%apply (int DIM1, double* ARGOUT_ARRAY1) {(int nout, double* output)};
-
-%inline %{
-
-void parameters_get_nu_masses(ccl_parameters *params, int nout, double* output) {
-  memcpy(output, params->m_nu, nout*sizeof(double));
-}
-
-%}

@@ -29,23 +29,24 @@ from .power import *
 
 from .tracers import *
 from .cells import *
-from .correlations import *
-from .covariances import *
 
 from .pk2d import *
 from .tk3d import *
+
+from .correlations import *
+from .covariances import *
 
 from .boltzmann import *
 from .baryons import *
 from .neutrinos import *
 
-from . import halos
-from . import nl_pt
-
 from .bcm import *           # deprecated
 from .halomodel import *     # deprecated
 from .massfunction import *  # deprecated
 from .haloprofile import *   # deprecated
+
+from . import halos
+from . import nl_pt
 
 from .cosmology import *
 

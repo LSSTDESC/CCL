@@ -1,54 +1,86 @@
+from __future__ import annotations
+
 __all__ = ("BaryonsSchneider15",)
 
-import numpy as np
+from numbers import Real
+from typing import TYPE_CHECKING, Union
 
-from .. import Pk2D
+import numpy as np
+from numpy.typing import NDArray
+
+from .. import Pk2D, update
 from . import Baryons
+
+if TYPE_CHECKING:
+    from .. import Cosmology
 
 
 class BaryonsSchneider15(Baryons):
-    """The "BCM" model boost factor for baryons.
+    r"""Baryonic correction model of :footcite:t:`Schneider15`.
 
-    .. note:: BCM stands for the "baryonic correction model" of `Schneider &
-              Teyssier 2015 <https://arxiv.org/abs/1510.06034>`_. See the
-              `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
-/0000-ccl_note/main.pdf>`_
-              for details.
+    The boost factor :math:`f` is applied multiplicatively so that
 
-              The boost factor is applied multiplicatively so that
-              :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\,
-              f_{\\rm BCM}(k, a)`.
+    .. math::
 
-    Args:
-        log10Mc (:obj:`float`): logarithmic mass scale of hot
-            gas suppression. Defaults to
-            :math:`\\log_{10}(1.2\\,10^{14}\\,M_\\odot)`.
-        eta_b (:obj:`float`): ratio of escape to ejection radii (see
-            Teyssier et al. 2015). Defaults to 0.5.
-        k_s (:obj:`float`): Characteristic scale (wavenumber) of
-            the stellar component in units of :math:`{\\rm Mpc}\\,h^{-1}`.
-            Defaults to 55.
+        P_{\rm bar}(k, a) = P_{\rm nobar}(k, a) \, f(k, a).
+
+    Refer to the `DESC Note
+    <https://github.com/LSSTDESC/CCL/blob/master/doc/0000-ccl_note/>`_
+    for details (needs compilation).
+
+    References
+    ----------
+    .. footbibliography::
+
+    Parameters
+    ----------
+    log10Mc
+        Logarithmic mass scale of hot gas suppression.
+    eta_b
+        Ratio of escape to ejection radii (see linked publication).
+    k_s
+        Characteristic scale (wavenumber) of the stellar component, in units of
+        :math:`\rm Mpc^{-1}`.
     """
-    name = 'Schneider15'
     __repr_attrs__ = __eq_attrs__ = ("log10Mc", "eta_b", "k_s")
+    name = 'Schneider15'
+    log10Mc: Real
+    eta_b: Real
+    k_s: Real
 
-    def __init__(self, log10Mc=np.log10(1.2E14), eta_b=0.5, k_s=55.0):
+    def __init__(
+            self,
+            *,
+            log10Mc: Real = np.log10(1.2E14),
+            eta_b: Real = 0.5,
+            k_s: Real = 55.0
+    ):
         self.log10Mc = log10Mc
         self.eta_b = eta_b
         self.k_s = k_s
 
-    def boost_factor(self, cosmo, k, a):
-        """The BCM model boost factor for baryons.
+    def boost_factor(
+            self,
+            cosmo: Cosmology,
+            k: Union[Real, NDArray[Real]],
+            a: Union[Real, NDArray[Real]],
+    ) -> Union[float, NDArray[float]]:
+        r"""Compute the baryonic boost factor.
 
-        Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
-            k (:obj:`float` or `array`): Wavenumber (in :math:`{\\rm Mpc}^{-1}`).
-            a (:obj:`float` or `array`): Scale factor.
+        Arguments
+        ---------
+        cosmo
+            Cosmological parameters.
+        k  : array_like (nk,)
+            Comoving wavenumber in :math:`\rm Mpc^{-1}`.
+        a : array_like (na,)
+            Scale factor.
 
-        Returns:
-            :obj:`float` or `array`: Correction factor to apply to
-                the power spectrum.
-        """ # noqa
+        Returns
+        -------
+        boost_factor : array_like (na, nk)
+            Baryonic boost multiplicative factor.
+        """
         a_use, k_use = map(np.atleast_1d, [a, k])
         a_use, k_use = a_use[:, None], k_use[None, :]
 
@@ -67,29 +99,16 @@ class BaryonsSchneider15(Baryons):
             fka = np.squeeze(fka, axis=0)
         return fka
 
-    def update_parameters(self, log10Mc=None, eta_b=None, k_s=None):
-        """Update BCM parameters. All parameters set to ``None`` will
-        be left untouched.
-
-        Args:
-            log10Mc (:obj:`float`): logarithmic mass scale of hot
-                gas suppression.
-            eta_b (:obj:`float`): ratio of escape to ejection radii.
-            k_s (:obj:`float`): Characteristic scale (wavenumber) of
-                the stellar component.
+    @update(names=["log10Mc", "eta_b", "k_s"])
+    def update_parameters(self) -> None:
+        r"""Update the model parameters. All parameters this class accepts are
+        updatable.
         """
-        if log10Mc is not None:
-            self.log10Mc = log10Mc
-        if eta_b is not None:
-            self.eta_b = eta_b
-        if k_s is not None:
-            self.k_s = k_s
 
     def _include_baryonic_effects(self, cosmo, pk):
-        # Applies boost factor
+        # Apply boost factor.
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
-        k_arr = np.exp(lk_arr)
-        fka = self.boost_factor(cosmo, k_arr, a_arr)
+        fka = self.boost_factor(cosmo, np.exp(lk_arr), a_arr)
         pk_arr *= fka
 
         if pk.psp.is_log:

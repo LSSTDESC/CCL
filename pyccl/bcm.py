@@ -2,30 +2,43 @@ __all__ = ("bcm_model_fka", "bcm_correct_pk2d",)
 
 import numpy as np
 
-from . import BaryonsSchneider15, check, deprecated, lib, unlock_instance
+from . import BaryonsSchneider15, deprecated, lib, unlock_instance
+from .pyutils import check
 
 
-@deprecated(BaryonsSchneider15)
+@deprecated(new_api=BaryonsSchneider15)
 def bcm_model_fka(cosmo, k, a):
-    """The BCM model correction factor for baryons.
+    r"""The BCM model correction factor for baryons.
 
-    .. note:: BCM stands for the "baryonic correction model" of Schneider &
-              Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
-              `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
-/0000-ccl_note/main.pdf>`_
-              for details.
+    .. note::
 
-    .. note:: The correction factor is applied multiplicatively so that
-              :math:`P_{\\rm corrected}(k, a) = P(k, a)\\, f_{\\rm bcm}(k, a)`.
+        BCM stands for the "baryonic correction model" of Schneider &
+        Teyssier (2015; https://arxiv.org/abs/1510.06034). See the
+        `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
+        /0000-ccl_note/main.pdf>`_ for details.
 
-    Args:
-        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
-        k (:obj:`float` or `array`): Wavenumber; Mpc^-1.
-        a (:obj:`float`): Scale factor.
+    .. note::
 
-    Returns:
-        (:obj:`float` or `array`): Correction factor to apply to the power
-        spectrum.
+        The correction factor is applied multiplicatively so that
+        :math:`P_{\rm corrected}(k, a) = P(k, a) \, f_{\rm bcm}(k, a)`.
+
+    .. deprecated:: 2.8.0
+
+        Use the functionality in :mod:`~pyccl.baryons`.
+
+    Arguments
+    ---------
+    cosmo : :class:`~pyccl.cosmology.Cosmology`
+        Cosmological parameters.
+    k : array_like (nk,)
+        Wavenumber (in :math:`\rm Mpc^{-1}`).
+    a : array_like (na,)
+        Scale factor.
+
+    Returns
+    -------
+    array_like (na, nk)
+        Correction factor to apply to the power spectrum.
     """
     bcm = BaryonsSchneider15(log10Mc=cosmo['bcm_log10Mc'],
                              eta_b=cosmo['bcm_etab'],
@@ -33,14 +46,25 @@ def bcm_model_fka(cosmo, k, a):
     return bcm.boost_factor(cosmo, k, a)
 
 
-@deprecated(BaryonsSchneider15)
-@unlock_instance(mutate=True, name="pk2d")
-def bcm_correct_pk2d(cosmo, pk2d):
+@deprecated(new_api=BaryonsSchneider15)
+@unlock_instance(name="pk2d")
+def bcm_correct_pk2d(cosmo, pk2d) -> None:
     """Apply the BCM model correction factor to a given power spectrum.
 
-    Args:
-        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
-        pk2d (:class:`~pyccl.pk2d.Pk2D`): power spectrum.
+    .. note::
+
+        This function operates and modifies the input power spectrum.
+
+    .. deprecated:: 2.8.0
+
+        Use the functionality in :mod:`~pyccl.baryons`.
+
+    Arguments
+    --------
+    cosmo : :class:`~pyccl.cosmology.Cosmology`
+        Cosmological parameters.
+    pk2d : :class:`~pyccl.pk2d.Pk2D`
+        Power spectrum.
     """
 
     bcm = BaryonsSchneider15(log10Mc=cosmo['bcm_log10Mc'],

@@ -51,7 +51,7 @@ def test_resample_extrapolation(extrap):
     r_end_x = 200
     r_arr_x = np.geomspace(r_ini_x, r_end_x, 2048)
     if extrap == 'none':
-        with pytest.raises(ccl.CCLError):
+        with pytest.raises(ValueError):
             ccl.resample_array(R_ARR, f_arr, r_arr_x,
                                extrap, extrap,
                                offset, offset)

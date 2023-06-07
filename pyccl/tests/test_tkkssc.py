@@ -28,15 +28,14 @@ AA = np.linspace(0.3, 1.0, 4)
 
 @pytest.mark.parametrize(
     "p1,p2,cv12,p3,p4,cv34,pk",
-    [(NFW, None, None, None, None, None, None),
-     (HOD, None, None, None, None, None, None),
-     (NFW, HOD, None, None, None, None, None),
-     (NFW, None, None, GNFW, None, None, None),
-     (NFW, None, None, None, NFW, None, None),
-     (NFW, HOD, None, GNFW, NFW, None, None),
-     (HOD, HOD, PKCH, HOD, HOD, None, None),
-     (NFW, HOD, PKC, GNFW, NFW, PKC, None),
-     (NFW, None, None, None, None, None, "linear"),
+    [(NFW, None, None, None, None, None, "linear"),
+     (HOD, None, None, None, None, None, "linear"),
+     (NFW, HOD, None, None, None, None, "linear"),
+     (NFW, None, None, GNFW, None, None, "linear"),
+     (NFW, None, None, None, NFW, None, "linear"),
+     (NFW, HOD, None, GNFW, NFW, None, "linear"),
+     (HOD, HOD, PKCH, HOD, HOD, None, "linear"),
+     (NFW, HOD, PKC, GNFW, NFW, PKC, "linear"),
      (NFW, None, None, None, None, None, "nonlinear"),
      (NFW, None, None, None, None, None, COSMO.get_nonlin_power())])
 def test_tkkssc_smoke(p1, p2, cv12, p3, p4, cv34, pk):
@@ -136,8 +135,8 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
                            normalize=False):
     P_12 = b1 = b2 = np.zeros_like(k)
     if prof1.is_number_counts or prof2.is_number_counts:
-        norm1 = 1./prof1.get_normalization(COSMO, a, hmc=hmc)
-        norm2 = 1./prof2.get_normalization(COSMO, a, hmc=hmc)
+        norm1 = 1 / prof1.get_normalization(COSMO, a, hmc=hmc)
+        norm2 = 1 / prof2.get_normalization(COSMO, a, hmc=hmc)
         norm12 = 1
         if prof1.is_number_counts or normalize:
             norm12 *= norm1
@@ -149,7 +148,7 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
         i02_12 = hmc.I_0_2(COSMO, k, a, prof1,
                            prof_2pt=prof12_2pt, prof2=prof2)
 
-        pk = ccl.linear_matter_power(COSMO, k, a)
+        pk = COSMO.linear_matter_power(k, a)
         P_12 = norm12 * (pk * i11_1 * i11_2 + i02_12)
 
         if prof1.is_number_counts:
@@ -160,47 +159,30 @@ def get_ssc_counterterm_gc(k, a, hmc, prof1, prof2, prof12_2pt,
     return (b1 + b2) * P_12
 
 
-@pytest.mark.parametrize('kwargs', [
-                         # All is_number_counts = False
-                         {'prof': NFW, 'prof2': NFW,
-                          'prof3': NFW, 'prof4': NFW},
-                         {'prof': HOD, 'prof2': NFW,
-                          'prof3': NFW, 'prof4': NFW},
-                         {'prof': HOD, 'prof2': HOD,
-                          'prof3': NFW, 'prof4': NFW},
-                         {'prof': HOD, 'prof2': HOD,
-                          'prof3': HOD, 'prof4': NFW},
-                         {'prof': NFW, 'prof2': NFW,
-                          'prof3': HOD, 'prof4': HOD},
-                         {'prof': HOD, 'prof2': NFW,
-                          'prof3': HOD, 'prof4': HOD},
-                         {'prof': HOD, 'prof2': HOD,
-                          'prof3': NFW, 'prof4': HOD},
-                         {'prof': HOD, 'prof2': None,
-                          'prof3': NFW, 'prof4': None},
-                         {'prof': HOD, 'prof2': None,
-                          'prof3': None, 'prof4': None},
-                         {'prof': HOD, 'prof2': HOD,
-                          'prof3': None, 'prof4': None},
-                         # As in benchmarks/test_covariances.py
-                         {'prof': NFW, 'prof2': NFW,
-                          'prof3': None, 'prof4': None},
-                         # Setting prof34_2pt
-                         {'prof': NFW, 'prof2': NFW,
-                          'prof3': None, 'prof4': None,
-                          'prof34_2pt': PKC},
-                         # All is_number_counts = True
-                         {'prof': HOD, 'prof2': HOD,
-                          'prof3': HOD, 'prof4': HOD},
-                         ]
-                         )
-def test_tkkssc_counterterms_gc(kwargs):
+@pytest.mark.parametrize(
+    'prof,prof2,prof3,prof4,prof34_2pt',
+    [(NFW, NFW, NFW, NFW, None),
+     (HOD, NFW, NFW, NFW, None),
+     (HOD, HOD, NFW, NFW, None),
+     (HOD, HOD, HOD, NFW, None),
+     (NFW, NFW, HOD, HOD, None),
+     (HOD, NFW, HOD, HOD, None),
+     (HOD, HOD, NFW, HOD, None),
+     (HOD, None, NFW, None, None),
+     (HOD, None, None, None, None),
+     (HOD, HOD, None, None, None),
+     (NFW, NFW, None, None, None),  # as in benchmarks/test_covariances.py
+     (NFW, NFW, None, None, None),
+     (NFW, NFW, None, None, PKC),  # set a profile covariance
+     (HOD, HOD, HOD, HOD, None)])  # all NC
+def test_tkkssc_counterterms_gc(prof, prof2, prof3, prof4, prof34_2pt):
     k_arr = KK
     a_arr = np.array([0.3, 0.5, 0.7, 1.0])
 
-    # Tk's without clustering terms. Set is_number_counts=False for HOD
-    # profiles
-    # Ensure HOD profiles are normalized
+    # Tk's without clustering terms. Set is_number_counts=False for HOD profs.
+    # Ensure HOD profiles are normalized.
+    kwargs = dict(zip(["prof", "prof2", "prof3", "prof4", "prof34_2pt"],
+                      [prof, prof2, prof3, prof4, prof34_2pt]))
     kwargs_nogc = kwargs.copy()
     keys = list(kwargs.keys())
     for k in keys:
@@ -241,8 +223,8 @@ def test_tkkssc_counterterms_gc(kwargs):
                                             kwargs['prof2'], PKC))
         tkc34.append(get_ssc_counterterm_gc(k_arr, aa, HMC, kwargs['prof3'],
                                             kwargs['prof4'], PKC))
-    tkc12 = np.array(tkc12)
-    tkc34 = np.array(tkc34)
+    tkc12 = np.asarray(tkc12)
+    tkc34 = np.asarray(tkc34)
 
     assert np.abs((tk_nogc_12 - tkc12) / tk_gc_12 - 1).max() < 1e-5
     assert np.abs((tk_nogc_34 - tkc34) / tk_gc_34 - 1).max() < 1e-5

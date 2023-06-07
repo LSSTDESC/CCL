@@ -1,52 +1,75 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfileEinasto",)
+
+from numbers import Real
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
 import numpy as np
 from scipy.special import gamma, gammainc
 
-from ... import unlock_instance, warn_api
+from ... import update, warn_api
 from .. import MassDef, mass_translator
 from . import HaloProfileMatter
 
+if TYPE_CHECKING:
+    from .. import Concentration
+
 
 class HaloProfileEinasto(HaloProfileMatter):
-    """ `Einasto 1965
-    <https://ui.adsabs.harvard.edu/abs/1965TrAlm...5...87E/abstract>`_
-    profile.
+    r"""Halo profile by :footcite:t:`Einasto65`.
 
     .. math::
-       \\rho(r) = \\rho_0\\,\\exp(-2 ((r/r_s)^\\alpha-1) / \\alpha)
 
-    where :math:`r_s` is related to the comoving spherical overdensity
-    halo radius :math:`r_\\Delta(M)` through the concentration
-    parameter :math:`c(M)` as
+        \rho(r) = \rho_0 \, \exp \left[ -\frac{2}{\alpha}
+        \left( \left( \frac{r}{r_s} \right)^\alpha -1 \right) \right]
+
+
+    where :math:`r_s` is related to the spherical overdensityhalo radius
+    :math:`R_\Delta(M)` through the concentration parameter :math:`c(M)` as
 
     .. math::
-       r_\\Delta(M) = c(M)\\,r_s
 
-    and the normalization :math:`\\rho_0` is the mean density
-    within the :math:`r_\\Delta(M)` of the halo. The index
-    :math:`\\alpha` depends on halo mass and redshift, and we
-    use the parameterization of `Diemer & Kravtsov
-    <https://arxiv.org/abs/1401.1216>`_.
+        R_\Delta(M) = c(M) \, r_s
 
-    By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
+    and the normalization :math:`\rho_0` is the mean density within the
+    :math:`R_\Delta(M)` of the halo. The index :math:`\alpha` depends on halo
+    mass and redshift, and we use the parameterization of
+    :footcite:t:`Diemer14`.
 
-    Args:
-        concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
-            concentration-mass relation to use with this profile.
-        truncated (:obj:`bool`): set to ``True`` if the profile should be
-            truncated at :math:`r = r_\\Delta`.
-        alpha (:obj:`float` or :obj:`str`): :math:`\\alpha` parameter, or
-            set to ``'cosmo'`` to calculate the value from cosmology.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
+    By default, this profile is truncated at :math:`r = R_\Delta(M)`.
+
+    Parameters
+    ----------
+    concentration
+        Concentration-mass relation. If a string, `mass_def` must be specified.
+    truncated
+        If True, the profile is truncated at :math:`r = R_\Delta` .
+    alpha
+        Slope of the profile. If `'cosmo'`, it is calculated using the
+        cosmological parameters.
+    mass_def
+        Halo mass definition. If `concentration` is instantiated, this
+        parameter is optional.
+
+        .. versionadded:: 2.8.0
+
+    References
+    ----------
+    .. footbibliography::
     """
     __repr_attrs__ = __eq_attrs__ = (
         "truncated", "alpha", "mass_def", "concentration", "precision_fftlog",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, concentration, truncated=True, alpha='cosmo',
-                 mass_def=None):
+    def __init__(
+            self,
+            *,
+            concentration: Union[str, Concentration],
+            truncated: bool = True,
+            alpha: Union[Literal["cosmo"], Real] = "cosmo",
+            mass_def: Optional[Union[str, MassDef]] = None
+    ):
         self.truncated = truncated
         self.alpha = alpha
         super().__init__(mass_def=mass_def, concentration=concentration)
@@ -56,24 +79,20 @@ class HaloProfileEinasto(HaloProfileMatter):
                                      n_per_decade=1000,
                                      plaw_fourier=-2.)
 
-    @unlock_instance
     def _init_mass_translator(self):
         # Set the mass translator to Mvir as an attribute.
-        # TODO: Move to `__init__` in CCLv3.
-        self._to_virial_mass = mass_translator(
-            mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
-            concentration=self.concentration)
+        # TODO: Move to `__init__` in CCLv3 (without the context).
+        with self.unlock():
+            self._to_virial_mass = mass_translator(
+                mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
+                concentration=self.concentration)
 
-    def update_parameters(self, alpha=None):
-        """Update any of the parameters associated with this profile.
-        Any parameter set to ``None`` won't be updated.
-
-        Args:
-            alpha (:obj:`float` or :obj:`str`): :math:`\\alpha` parameter, or
-                set to ``'cosmo'`` to calculate the value from cosmology.
+    @warn_api
+    @update(names=["alpha"])
+    def update_parameters(self) -> None:
+        """Update the profile parameters. All numerical parameters in
+        :meth:`__init__` are updatable.
         """
-        if alpha is not None and alpha != self.alpha:
-            self.alpha = alpha
 
     def _get_alpha(self, cosmo, M, a):
         if self.alpha == 'cosmo':

@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncTinker08",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -6,26 +10,69 @@ from scipy.interpolate import interp1d
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncTinker08(MassFunc):
-    """Implements the mass function of `Tinker et al. 2008
-    <https://arxiv.org/abs/0803.2706>`_. This parametrization accepts S.O.
-    masses with :math:`200 < \\Delta < 3200`, defined with respect to the
-    matter density. This can be automatically translated to S.O. masses
-    defined with respect to the critical density.
+    r"""Halo mass function by :footcite:t:`Tinker08`. Valid for any S.O. masses
+    with :math:`\Delta \in (200{\rm m}, 3200{\rm m})`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
-        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
-            definition will be ignored.
+    The mass function takes the form
+
+    .. math::
+
+        \frac{{\rm d}N}{{\rm d}M} = f(\sigma) \, \frac{\bar{\rho}_{\rm m}}{M}\,
+        \frac{{\rm d}\ln \sigma^{-1}}{{\rm d}M},
+
+    where
+
+    .. math::
+
+        f(\sigma) = A \left[\left( \frac{\sigma}{b} \right)^{-a} + 1 \right] \,
+        \exp{\left( -\frac{c}{\sigma^2} \right)},
+
+    with :math:`A`, :math:`a`, :math:`b`, and :math:`c` given by
+
+    .. math::
+
+        A &= \begin{cases}
+            0.1 \, \log_{10} \Delta - 0.05  &  \Delta < 1600 \\
+            0.26                       &  \Delta \ge 1600,
+            \end{cases} \\
+        a &= 1.43 + (\log_{10} \Delta - 2.3)^{1.5}, \\
+        b &= 1.0 + (\log_{10} \Delta - 1.6)^{1.5}, \\
+        c &= 1.2 + (\log_{10} \Delta -2.35)^{1.6}.
+
+    Parameters
+    ----------
+    mass_def
+        Mass definition for this :math:`n(M)` parametrization.
+    mass_def_strict
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+
+    Raises
+    ------
+    ValueError
+        Interpolation out of bounds. :math:`\Delta_m` for the particular
+        combination of mass definition and scale factor is out of bounds with
+        the range of the mass function.
+
+    References
+    ----------
+    .. footbibliography::
     """
     name = 'Tinker08'
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True
+    ):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
@@ -49,7 +96,7 @@ class MassFuncTinker08(MassFunc):
         self.pc = interp1d(ldelta, phi)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
+        ld = np.log10(self.mass_def.get_Delta_matter(cosmo, a))
         pA = self.pA0(ld) * a**0.14
         pa = self.pa0(ld) * a**0.06
         pd = 10.**(-(0.75/(ld - 1.8750612633))**1.2)

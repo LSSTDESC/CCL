@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfileHernquist",)
+
+from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
 from scipy.special import sici
@@ -6,55 +10,65 @@ from scipy.special import sici
 from ... import warn_api
 from . import HaloProfileMatter
 
+if TYPE_CHECKING:
+    from .. import Concentration, MassDef
+
 
 class HaloProfileHernquist(HaloProfileMatter):
-    """ `Hernquist 1990
-    <https://ui.adsabs.harvard.edu/abs/1990ApJ...356..359H/abstract>`_
-    profile.
+    r"""Halo profile by :footcite:t:`Hernquist90`.
 
     .. math::
-       \\rho(r) = \\frac{\\rho_0}
-       {\\frac{r}{r_s}\\left(1+\\frac{r}{r_s}\\right)^3}
 
-    where :math:`r_s` is related to the comoving spherical overdensity
-    halo radius :math:`r_\\Delta(M)` through the concentration
-    parameter :math:`c(M)` as
+       \rho(r) = \frac{\rho_0}
+       {\frac{r}{r_s} \left(1 + \frac{r}{r_s} \right)^3}
+
+    where :math:`r_s` is related to the spherical overdensity halo radius
+    :math:`R_\Delta(M)` through the concentration parameter :math:`c(M)` as
 
     .. math::
-       r_\\Delta(M) = c(M)\\,r_s
 
-    and the normalization :math:`\\rho_0` is the mean density
-    within the :math:`r_\\Delta(M)` of the halo.
+        R_\Delta(M) = c(M) \, r_s
 
-    By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
+    and the normalization :math:`\rho_0` is the mean density within the
+    :math:`R_\Delta(M)` of the halo.
 
-    Args:
-        concentration (:class:`~pyccl.halos.halo_model_base.Concentration`):
-            concentration-mass relation to use with this profile.
-        fourier_analytic (:obj:`bool`): set to ``True`` if you want to compute
-            the Fourier profile analytically (and not through FFTLog).
-        projected_analytic (:obj:`bool`): set to ``True`` if you want to
-            compute the 2D projected profile analytically (and not
-            through FFTLog).
-        cumul2d_analytic (:obj:`bool`): set to ``True`` if you want to
-            compute the 2D cumulative surface density analytically
-            (and not through FFTLog).
-        truncated (:obj:`bool`): set to ``True`` if the profile should be
-            truncated at :math:`r = r_\\Delta`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
+    Parameters
+    ----------
+    concentration
+        Concentration-mass relation. If a string, `mass_def` must be specified.
+    fourier_analytic
+        If True, compute the Fourier-space profile analytically.
+    projected_analytic
+        If True, compute the 2-D projected profile analytically.
+    cumul2d_analytic
+        If True, compute the 2-D cumulative surface density analytically.
+    truncated
+        If True, truncate the profile at :math:`r = R_\Delta`.
+    mass_def
+        Halo mass definition. If `concentration` is instantiated, this
+        parameter is optional.
+
+        .. versionadded:: 2.8.0
+
+    References
+    ----------
+    .. footbibliography::
     """
     __repr_attrs__ = __eq_attrs__ = (
         "fourier_analytic", "projected_analytic", "cumul2d_analytic",
         "truncated", "mass_def", "concentration", "precision_fftlog",)
 
     @warn_api(pairs=[("c_M_relation", "concentration")])
-    def __init__(self, *, concentration,
-                 truncated=True,
-                 fourier_analytic=False,
-                 projected_analytic=False,
-                 cumul2d_analytic=False,
-                 mass_def=None):
+    def __init__(
+            self,
+            *,
+            concentration: Union[str, Concentration],
+            truncated: bool = True,
+            fourier_analytic: bool = False,
+            projected_analytic: bool = False,
+            cumul2d_analytic: bool = False,
+            mass_def: Optional[Union[str, MassDef]] = None
+    ):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic

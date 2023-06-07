@@ -4,17 +4,12 @@ import warnings
 
 import numpy as np
 
-from .. import CCLDeprecationWarning, Pk2D, check, lib
+from .. import CCLDeprecationWarning, Pk2D
 from . import PTTracer
 
 
 class PTCalculator:
-    """
-    .. warning:: This class is deprecated in favour of the
-                 :class:`~pyccl.nl_pt.ept.EulerianPTCalculator`
-                 class.
-
-    This class implements a set of methods that can be
+    """ This class implements a set of methods that can be
     used to compute the various components needed to estimate
     perturbation theory correlations. These calculations are
     currently based on FAST-PT
@@ -467,7 +462,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
               linearly biased number counts.
 
     Args:
-        cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
         tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
             tracer being correlated.
         ptc (:class:`PTCalculator`): a perturbation theory
@@ -490,10 +485,10 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
             at which the power spectrum should be calculated for
             interpolation. If `None`, the internal values used by
             `cosmo` will be used.
-        extrap_order_lok (:obj:`int`): extrapolation order to be used on
+        extrap_order_lok (int): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.pk2d.Pk2D`.
-        extrap_order_hik (:obj:`int`): extrapolation order to be used on
+        extrap_order_hik (int): extrapolation order to be used on
             k-values above the maximum of the splines. See
             :class:`~pyccl.pk2d.Pk2D`.
         return_ia_bb (bool): if `True`, the B-mode power spectrum
@@ -526,10 +521,7 @@ def get_pt_pk2d(cosmo, tracer1, tracer2=None, ptc=None,
                   "EulerianPTCalculator.get_biased_pk2d).",
                   CCLDeprecationWarning)
     if a_arr is None:
-        status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+        a_arr = cosmo.get_pk_spline_a()
 
     if tracer2 is None:
         tracer2 = tracer1

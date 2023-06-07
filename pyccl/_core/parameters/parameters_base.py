@@ -1,150 +1,123 @@
-__all__ = (
-    "CCLParameters", "DefaultParams", "SplineParams", "GSLParams",
-    "PhysicalConstants", "spline_params", "gsl_params", "physical_constants",
-    "DEFAULT_POWER_SPECTRUM",)
+"""
+====================================================
+Parameters Base (:mod:`pyccl._core.parameters_base`)
+====================================================
 
-import warnings
+Base class for all kinds of parameters handled by CCL.
+"""
 
-from ... import CCLDeprecationWarning, lib
+from __future__ import annotations
 
-DEFAULT_POWER_SPECTRUM = "delta_matter:delta_matter"
+__all__ = ("Parameters",)
+
+from dataclasses import dataclass, fields
+from functools import cached_property
+from typing import Any, Optional
 
 
-class DefaultParams:
-    """Default cosmological parameters used throughout the library.
+class Parameters:
+    """Base for classes holding parameters and their values.
 
-    .. warning:: The default values of ``T_CMB`` and ``T_ncdm`` will change
-                 in v3 of CCL.
+    Subclasses are data classes. If the stored parameters are coupled with the
+    C library, `instance` or `factory` have to be provided,
+
+    Subclasses are data classes and are coupled to the C-struct with the
+    parameter collection they represent (and their values), via SWIG.
+
+    Parameters
+    ----------
+    instance : :mod:`pyccl.ccllib`, optional
+        Reference to the instance where the parameters are implemented.
+    factory : :mod:`pyccl.ccllib`, optional
+        The SWIG factory class where the parameters are stored.
+    frozen : bool, optional
+        Disable parameter mutation. The default is False.
     """
-    #: Mean CMB temperature in Kelvin.
-    T_CMB = 2.725
-    #: Non-CDM temperature in units of ``T_CMB``.
-    T_ncdm = 0.71611
+    _allowed_keys = ("_instance", "_frozen", "_index",)
+    _instance: Any = None
+    _factory: Any = None
+    _frozen: bool = False
+    _coupled_with_C: bool
 
-    warnings.warn(
-        "The default CMB temperaHaloProfileCIBture (T_CMB) will change in "
-        "CCLv3.0.0, from 2.725 to 2.7255 (Kelvin).", CCLDeprecationWarning)
-
-
-class CCLParameters:
-    """Base for classes holding global CCL parameters and their values.
-
-    Subclasses contain a reference to the C-struct with the collection
-    of parameters (and their values) (via SWIG). All subclasses act as proxies
-    to the CCL parameters at the C-level.
-
-    Subclasses automatically store a backup of the initial parameter state
-    to enable ad hoc reloading.
-    """
-
-    def __init_subclass__(cls, *, instance=None, factory=None, freeze=False):
-        """Routine for subclass initialization.
-
-        Parameters
-        ----------
-        instance : :obj:`pyccl.ccllib`
-            Reference to the instance where the parameters are implemented.
-        factory : :class:`pyccl.ccllib`
-            The SWIG factory class where the parameters are stored.
-        freeze : bool
-            Disable parameter mutation.
-        """
+    def __init_subclass__(cls, *, instance=None, factory=None, frozen=False):
         super().__init_subclass__()
-        if (instance, factory) == (None, None):
-            raise ValueError(
-                "Provide either the instance, or an instance factory.")
         cls._instance = instance
         cls._factory = factory
-        cls._frozen = freeze
+        cls._coupled_with_C = not (instance, factory) == (None, None)
+        if frozen:
+            cls.__post_init__ = lambda self: self.freeze()  # noqa
 
-    def __init__(self):
-        # Emulate abstraction so that base class cannot be instantiated.
-        if not (hasattr(self, "_instance") or hasattr(self, "_factory")):
-            name = type(self).__name__
-            raise TypeError(f"Can't instantiate {name} with no set "
-                            "`instance` or `factory`.")
-        # Create a new instance if a factory is provided.
-        if self._factory:
-            object.__setattr__(self, "_instance", self._factory())
-        # Keep a copy of the default parameters.
-        object.__setattr__(self, "_bak", CCLParameters.get_params_dict(self))
+        # Make subclasses data classes.
+        cls = dataclass(init=True, eq=True, repr=True, unsafe_hash=True)(cls)
 
-    def __getattribute__(self, name):
-        get = object.__getattribute__
-        try:
-            return get(get(self, "_instance"), name)
-        except AttributeError:
-            return get(self, name)
+    def __new__(cls, **kwargs):
+        obj = super().__new__(cls)  # create a new object
+        if cls._factory is not None:
+            obj._instance = cls._factory()  # instantiate C struct
+        return obj
 
-    def __setattr__(self, key, value):
-        if self._frozen:
-            name = self.__class__.__name__
-            raise AttributeError(f"Instances of {name} are frozen.")
-        if not hasattr(self._instance, key):
-            raise KeyError(f"Parameter {key} does not exist.")
-        object.__setattr__(self._instance, key, value)
+    @cached_property
+    def _parameters(self) -> list:
+        return [field.name for field in fields(self)]
 
-    __getitem__ = __getattribute__
+    def __setattr__(self, name, value):
+        if name not in self._allowed_keys:
+            if name not in self:
+                raise AttributeError(f"Parameter {name} does not exist.")
+            if self._frozen:
+                raise AttributeError(f"{type(self).__name__} is frozen.")
+
+        object.__setattr__(self, name, value)  # update Python
+        if self._coupled_with_C and name in self:
+            object.__setattr__(self._instance, name, value)  # update C
+
+    def __getitem__(self, name):
+        return getattr(self, name)
 
     __setitem__ = __setattr__
 
-    def __repr__(self):
-        out = self._bak.copy()
-        for par in out:
-            out[par] = getattr(self, par)
-        return repr(out)
+    def __contains__(self, name):
+        return name in self._parameters
 
-    def reload(self):
-        """Reload the C-level default CCL parameters."""
-        frozen = self._frozen
-        if frozen:
-            object.__setattr__(self, "_frozen", False)
-        for param, value in self._bak.items():
-            setattr(self, param, value)
-        object.__setattr__(self, "_frozen", frozen)
+    def __len__(self):
+        return len(self._parameters)
 
-    def freeze(self):
-        """Freeze an instance of ``CCLParameters``."""
-        object.__setattr__(self, "_frozen", True)
+    def __iter__(self):
+        self._index = 0
+        return self
 
-    def unfreeze(self):
-        """Unfreeze an instance of ``CCLParameters``."""
-        object.__setattr__(self, "_frozen", False)
+    def __next__(self):
+        if self._index >= len(self):
+            raise StopIteration
+        self._index += 1
+        return self._parameters[self._index - 1]
 
-    @classmethod
-    def get_params_dict(cls, name):
-        """Get a dictionary of the current parameters.
+    def freeze(self) -> None:
+        """Freeze the instance."""
+        self._frozen = True
 
-        Arguments:
-            name (str or :obj:`CCLParameters`):
-                Name or instance of the parameters to look up.
+    def unfreeze(self) -> None:
+        """Unfreeze the instance."""
+        self._frozen = False
+
+    def reload(self, *, source: Optional[Parameters] = None) -> None:
+        """Reload the original values.
+
+        Arguments
+        ---------
+        source
+            Where to reload the parameters from. This is an implementation
+            detail which enables copying. :meth:`reload` is normally called
+            with no arguments.
         """
-        pars = eval(name) if isinstance(name, str) else name
-        out = {}
-        for par in dir(pars):
-            if not par.startswith("_") and par not in ["this", "thisown"]:
-                out[par] = getattr(pars, par)
+        source = type(self) if source is None else source
+        frozen, self._frozen = self._frozen, False  # unfreeze to reload
+        for param in self:
+            setattr(self, param, getattr(source, param))
+        self._frozen = frozen  # reset original frozen state
+
+    def copy(self) -> Parameters:
+        """Create a copy of the instance."""
+        out = type(self)()
+        out.reload(source=self)
         return out
-
-
-class SplineParams(CCLParameters, instance=lib.cvar.user_spline_params):
-    """Instances of this class hold the spline parameters."""
-
-    def __setattr__(self, key, value):
-        if key == "A_SPLINE_MAX" and value != 1.0:
-            raise ValueError("A_SPLINE_MAX is fixed to 1.")
-        super().__setattr__(key, value)
-
-
-class GSLParams(CCLParameters, instance=lib.cvar.user_gsl_params):
-    """Instances of this class hold the gsl parameters."""
-
-
-class PhysicalConstants(CCLParameters, instance=lib.cvar.constants,
-                        freeze=True):
-    """Instances of this class hold the physical constants."""
-
-
-spline_params = SplineParams()
-gsl_params = GSLParams()
-physical_constants = PhysicalConstants()

@@ -1,28 +1,69 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncWatson13",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncWatson13(MassFunc):
-    """Implements the mass function of `Watson et al. 2013
-    <https://arxiv.org/abs/1212.0095>`_. This parametrization accepts
-    `fof` and any S.O. masses.
+    r"""Halo mass function by :footcite:t:`Watson13`. Valid for any S.O. and
+    FoF masses.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
-        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
-            definition will be ignored.
+    The mass function takes the form
+
+    .. math::
+
+        \frac{{\rm d}n}{{\rm d}M} = \frac{\bar{\rho}_{\rm m}}{M^2} \, f(\sigma)
+        \, \frac{{\rm d} \ln \sigma^{-1}}{{\rm d} \ln M}.
+
+    where
+
+    .. math::
+
+        f(\sigma) = A \, \left[\left( \frac{\beta}{\sigma} \right)^\alpha + 1
+        \right] \, \exp \left( -\frac{\gamma}{\sigma^2} \right),
+
+    For FoF masses, :math:`A`, :math:`\alpha`, :math:`\beta`, :math:`\gamma`
+    are fitted parameters. For S.O. masses these parameters experience a time-
+    dependent modified power law evolution up to :math:`z=6`, after which they
+    are fixed. The modified power law has the form
+
+    .. math::
+
+        X(z) = \Omega_{\rm m}(z) \left( x_1 \times (1+z)^{-x_2} + x_3 \right),
+
+    where :math:`x_1`, :math:`x_2`, and :math:`x_3` are fitted parameters.
+
+    Parameters
+    ----------
+    mass_def
+        Mass definition for this :math:`n(M)` parametrization.
+    mass_def_strict
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+
+    References
+    ----------
+    .. footbibliography::
     """
     name = 'Watson13'
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True
+    ):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):

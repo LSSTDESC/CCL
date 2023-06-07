@@ -1,4 +1,16 @@
+"""
+==========================================
+Boltzmann solvers (:mod:`pyccl.boltzmann`)
+==========================================
+
+Functions to get the power spectrum from Boltzmann equation solvers.
+"""
+
+from __future__ import annotations
+
 __all__ = ("get_camb_pk_lin", "get_isitgr_pk_lin", "get_class_pk_lin",)
+
+from typing import TYPE_CHECKING, Tuple, Union
 
 import numpy as np
 
@@ -7,24 +19,45 @@ try:
 except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
-from . import CCLError, Pk2D, check, lib, warn_api
+from . import CCLError, Pk2D, warn_api
+
+if TYPE_CHECKING:
+    from . import Cosmology
 
 
 @warn_api
-def get_camb_pk_lin(cosmo, *, nonlin=False):
-    """Run CAMB and return the linear power spectrum.
+def get_camb_pk_lin(
+        cosmo: Cosmology,
+        *,
+        nonlin: bool = False
+) -> Union[Pk2D, Tuple[Pk2D, Pk2D]]:
+    """Compute the linear (and optionally non-linear) power spectrum from CAMB.
 
-    Args:
-        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
-            parameters. The cosmological parameters with
-            which to run CAMB.
-        nonlin (:obj:`bool`): Whether to compute and return the
-            non-linear power spectrum as well.
+    Arguments
+    ---------
+    cosmo
+        Cosmological parameters.
+    nonlin
+        If True, also compute and return the non-linear power spectrum.
+        For the non-linear power spectrum, these additional parameters may be
+        specified in `cosmo`:
 
-    Returns:
-        :class:`~pyccl.pk2d.Pk2D`: Power spectrum object. The linear power \
-            spectrum. If ``nonlin=True``, returns a tuple \
-            ``(pk_lin, pk_nonlin)``.
+        * `'halofit_version'`
+        * `'HMCode_A_baryon'`
+        * `'HMCode_eta_baryon'`
+        * `'HMCode_logT_AGN'`
+        * `'kmax'`
+        * `'lmax'`
+        * `'dark_energy_model'`
+
+        Specified as e.g. ``extra_parameters={"camb": {"kmax": 50}}``.
+        More information in `CAMB Non-linear models <https://camb.readthedocs.
+        io/en/latest/nonlinear.html#camb.nonlinear.Halofit>`_.
+
+    Returns
+    -------
+
+        Linear (and optionally non-linear) power spectra.
     """
     import camb
     import camb.model
@@ -37,11 +70,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         pass
 
     # z sampling from CCL parameters
-    na = lib.get_pk_spline_na(cosmo.cosmo)
-    status = 0
-    a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-    check(status, cosmo=cosmo)
-    a_arr = np.sort(a_arr)
+    a_arr = cosmo.get_pk_spline_a()
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
 
@@ -227,17 +256,19 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         return pk_lin, pk_nonlin
 
 
-def get_isitgr_pk_lin(cosmo):
-    """Run ISiTGR-CAMB and return the linear power spectrum.
+def get_isitgr_pk_lin(cosmo: Cosmology) -> Pk2D:
+    """Compute the modified-gravity linear power spectrum using ISiTGR
+    (based on CAMB).
 
-    Args:
-        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
-            parameters. The cosmological parameters with
-            which to run ISiTGR-CAMB.
+    Arguments
+    ---------
+    cosmo
+        Cosmological parameters.
 
-    Returns:
-        :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
-            object. The linear power spectrum.
+    Returns
+    -------
+
+        Linear power spectrum.
     """
     import isitgr  # noqa: F811
     import isitgr.model
@@ -250,11 +281,7 @@ def get_isitgr_pk_lin(cosmo):
         pass
 
     # z sampling from CCL parameters
-    na = lib.get_pk_spline_na(cosmo.cosmo)
-    status = 0
-    a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-    check(status, cosmo=cosmo)
-    a_arr = np.sort(a_arr)
+    a_arr = cosmo.get_pk_spline_a()
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
 
@@ -403,25 +430,26 @@ def get_isitgr_pk_lin(cosmo):
     return pk_lin
 
 
-def get_class_pk_lin(cosmo):
-    """Run CLASS and return the linear power spectrum.
+def get_class_pk_lin(cosmo: Cosmology) -> Pk2D:
+    """Compute the linear power spectrum from CLASS.
 
-    Args:
-        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
-            parameters. The cosmological parameters with
-            which to run CLASS.
+    Arguments
+    ---------
+    cosmo
+        Cosmological parameters.
 
-    Returns:
-        :class:`~pyccl.pk2d.Pk2D`: Power spectrum object.\
-            The linear power spectrum.
+    Returns
+    -------
+
+        Linear power spectrum.
     """
     import classy
 
     params = {
         "output": "mPk",
         "non linear": "none",
-        "P_k_max_1/Mpc": cosmo.cosmo.spline_params.K_MAX_SPLINE,
-        "z_max_pk": 1.0/cosmo.cosmo.spline_params.A_SPLINE_MINLOG_PK-1.0,
+        "P_k_max_1/Mpc": cosmo._spline_params.K_MAX_SPLINE,
+        "z_max_pk": 1.0/cosmo._spline_params.A_SPLINE_MINLOG_PK-1.0,
         "modes": "s",
         "lensing": "no",
         "h": cosmo["h"],
@@ -447,7 +475,7 @@ def get_class_pk_lin(cosmo):
     # massive neutrinos
     if cosmo["N_nu_mass"] > 0:
         params["N_ncdm"] = cosmo["N_nu_mass"]
-        masses = lib.parameters_get_nu_masses(cosmo._params, 3)
+        masses = cosmo["m_nu"]
         params["m_ncdm"] = ", ".join(
             ["%g" % m for m in masses[:cosmo["N_nu_mass"]]])
 
@@ -474,21 +502,19 @@ def get_class_pk_lin(cosmo):
         model.compute()
 
         # Set k and a sampling from CCL parameters
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        status = 0
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+        nk = len(cosmo.get_pk_spline_lk())
+        a_arr = cosmo.get_pk_spline_a()
+        na = len(a_arr)
 
         # FIXME - getting the lowest CLASS k value from the python interface
         # appears to be broken - setting to 1e-5 which is close to the
         # old value
         lk_arr = np.log(np.logspace(
             -5,
-            np.log10(cosmo.cosmo.spline_params.K_MAX_SPLINE), nk))
+            np.log10(cosmo._spline_params.K_MAX_SPLINE), nk))
 
         # we need to cut this to the max value used for calling CLASS
-        msk = lk_arr < np.log(cosmo.cosmo.spline_params.K_MAX_SPLINE)
+        msk = lk_arr < np.log(cosmo._spline_params.K_MAX_SPLINE)
         nk = int(np.sum(msk))
         lk_arr = lk_arr[msk]
 
@@ -504,7 +530,7 @@ def get_class_pk_lin(cosmo):
             model.struct_cleanup()
             model.empty()
 
-    params["P_k_max_1/Mpc"] = cosmo.cosmo.spline_params.K_MAX_SPLINE
+    params["P_k_max_1/Mpc"] = cosmo._spline_params.K_MAX_SPLINE
 
     # make the Pk2D object
     pk_lin = Pk2D(

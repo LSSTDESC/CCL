@@ -16,7 +16,8 @@ def test_satellite_shear_profile():
 
     cM = ccl.halos.ConcentrationDuffy08(mass_def='200m')
 
-    sat_gamma_HOD_simps = ccl.halos.SatelliteShearHOD(concentration=cM, lmax=6,
+    sat_gamma_HOD_simps = ccl.halos.SatelliteShearHOD(concentration=cM,
+                                                      l_max=6,
                                                       a1h=0.000989,
                                                       mass_def='200m')
     gamma_k_CCL = sat_gamma_HOD_simps._usat_fourier(cosmo, k_arr, mass_eval,

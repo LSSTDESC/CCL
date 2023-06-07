@@ -1,35 +1,60 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfilePowerLaw",)
 
+from numbers import Real
+from typing import TYPE_CHECKING, Callable, Union
+
 import numpy as np
+from numpy.typing import NDArray
 
 from ... import warn_api, deprecated
 from . import HaloProfile
 
+if TYPE_CHECKING:
+    from ... import Cosmology
+    from .. import MassDef
+
+    FuncSignature = Callable[[Cosmology,
+                              Union[Real, NDArray[Real]],
+                              Real],
+                             NDArray[float]]
+
 
 class HaloProfilePowerLaw(HaloProfile):
-    """ Power-law profile
+    r"""Power-law halo profile.
 
     .. math::
-        \\rho(r) = (r/r_s)^\\alpha
 
-    Args:
-        r_scale (:obj:`callable`): the correlation length of
-            the profile. The signature of this function
-            should be ``f(cosmo, M, a)``, where ``cosmo``
-            is a :class:`~pyccl.cosmology.Cosmology` object, ``M`` is
-            a halo mass, and ``a`` is the scale factor.
-        tilt (:obj:`callable`): the power law index of the
-            profile. The signature of this function should
-            be ``f(cosmo, a)``.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
+        \rho(r) = (r/r_s)^\alpha
+
+    .. deprecated:: 2.8.0
+
+        This profile will be removed in the next major release.
+
+    Parameters
+    ----------
+    r_scale
+        Correlation length of the profile.
+    tilt
+        Power law index of the profile.
+    mass_def
+        Halo mass definition.
+
+        .. versionadded:: 2.8.0
     """
     __repr_attrs__ = __eq_attrs__ = ("r_scale", "tilt", "mass_def",
                                      "precision_fftlog",)
 
-    @deprecated()
+    @deprecated
     @warn_api
-    def __init__(self, *, r_scale, tilt, mass_def=None):
+    def __init__(
+            self,
+            *,
+            r_scale: FuncSignature,
+            tilt: FuncSignature,
+            mass_def: Union[str, MassDef] = None
+    ):
         self.r_scale = r_scale
         self.tilt = tilt
         super().__init__(mass_def=mass_def)

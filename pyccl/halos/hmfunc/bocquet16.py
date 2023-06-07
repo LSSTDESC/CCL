@@ -1,36 +1,124 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncBocquet16",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncBocquet16(MassFunc):
-    """Implements the mass function of `Bocquet et al. 2016
-    <https://arxiv.org/abs/1502.07357>`_. This parametrization accepts
-    S.O. masses with :math:`\\Delta = 200` with respect to the matter
-    or critical densities, and :math:`\\Delta=500` with respect to the
-    critical density.
+    r"""Halo mass function by :footcite:t:`Bocquet16`. Defined for S.O. masses
+    with :math:`\Delta_{200{\rm m}}`, :math:`\Delta_{200{\rm c}}`, and
+    :math:`\Delta_{500{\rm c}}`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
-        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
-            definition will be ignored.
-        hydro (:obj:`bool`): if ``False``, use the parametrization found
-            using dark-matter-only simulations. Otherwise, include
-            baryonic effects (default).
+    The mass function takes the form
+
+    .. math::
+
+        f(M, z) = A \left[ \left( \frac{\sigma}{b} \right)^{-a} \right]
+        \exp{\left( -\frac{c}{\sigma^2} \right)},
+
+    where :math:`(A, a, b, c)` follow redshift-dependent power laws of the form
+    :math:`x(z) = x_0 (1+z)^{x_z}` with free parameters :math:`x_0` and
+    :math:`x_z`.
+
+    To translate to other mass definitions the authors assume an NFW halo
+    profile and the mass-concentration relation by Duffy et al. (2008).
+    These are expressed as a function of the :math:`\Delta_{200{\rm m}}` mass
+    function as
+
+    .. math::
+
+        \frac{{\rm d}n}{{\rm d}M_{\Delta{\rm c}}} = \left( f(\sigma)
+        \frac{\bar{\rho}_{\rm m}}{M_{\Delta{\rm m}}}
+        \frac{{\rm d} \ln \sigma^{-1}}{{\rm d}M_{\Delta{\rm c}}} \right)
+        \frac{M_{\Delta{\rm c}}}{M_{200{\rm m}}},
+
+    where the mass conversions are given by
+
+    .. math::
+
+        \frac{M_{\Delta{\rm c}}}{M_{200{\rm m}}} \equiv \alpha + \beta
+        \ln \frac{M_{\Delta{\rm c}}}{\rm M_{\odot}},
+
+    For the :math:`\Delta_{500{\rm c}}` mass definition, parameters
+    :math:`\alpha` and :math:`\beta` are
+
+    .. math::
+
+        \alpha(\Omega_{\rm m}, z) &= \alpha_0
+        \frac{\alpha_1 z + \alpha_2}{z + \alpha_2}, \\
+        \beta(\Omega_{\rm m}) &= -1.70 \times 10^{-2}
+        + \Omega_{\rm m} 3.74 \times 10^{-3},
+
+    with
+
+    .. math::
+
+        a_0(\Omega_{\rm m}) &= 0.880 + 0.329 \Omega_{\rm m}, \\
+        a_1(\Omega_{\rm m}) &= 1.00 + 4.31 \times 10^{-2} / \Omega_{\rm m}, \\
+        a_2(\Omega_{\rm m}) &= -0.365 + 0.254 / \Omega_{\rm m}.
+
+    For the :math:`\Delta_{200{\rm c}}` mass definition, parameters
+    :math:`\alpha` and :math:`\beta` are
+
+    .. math::
+
+        \alpha(\Omega_{\rm m}, z) &= \alpha_0 + \alpha_1
+        \exp{\left[ -\left( \frac{\alpha_2 - z}{\alpha_3} \right)^2\right]}, \\
+        \beta(\Omega_{\rm m}, z) &= \beta_0 + \beta_1 z,
+
+    with
+
+    .. math::
+
+        \alpha_0(\Omega_{\rm m}) &= 3.54 \times 10^{-2}
+        + \Omega_{\rm m}^{0.09}, \\
+        \alpha_1(\Omega_{\rm m}) &= 4.56 \times 10^{-2}
+        + 2.68 \times 10^{-2} / \Omega_{\rm m}, \\
+        \alpha_2(\Omega_{\rm m}) &= 0.721
+        + 3.50 \times 10^{-2} / \Omega_{\rm m}, \\
+        \alpha_3(\Omega_{\rm m}) &= 0.628 + 0.164 / \Omega_{\rm m}, \\
+        \beta_0(\Omega_{\rm m}) &= -1.67 \times 10^{-2}
+        + 2.18 \times 10^{-2} \Omega_{\rm m}, \\
+        \beta_1(\Omega_{\rm m}) &= 6.52 \times 10^{-3}
+        - 6.86 \times 10^{-3} \Omega_{\rm m}.
+
+    Parameters
+    ----------
+    mass_def
+        Mass definition for this :math:`n(M)` parametrization.
+    mass_def_strict
+        This mass function necessarily needs one of the valid mass definitions.
+        It is fixed to True and cannot be changed.
+    hydro
+        Whether to use the fitting formulas from simulations with baryons.
+        If False, use the parametrization found using DM-only simulations.
+
+    References
+    ----------
+    .. footbibliography::
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict", "hydro",)
     _mass_def_strict_always = True
     name = 'Bocquet16'
+    hydro: bool
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="200m",
-                 mass_def_strict=True,
-                 hydro=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "200m",
+            mass_def_strict: bool = True,
+            hydro: bool = True
+    ):
         self.hydro = hydro
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 

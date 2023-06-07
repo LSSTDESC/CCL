@@ -11,6 +11,7 @@ on:
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
   CONDA_ENV: .github/environment.yml
+  DOCS_ENV: readthedocs/environment.yml
 
 jobs:
   build:
@@ -113,6 +114,24 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           args: "--config .flake8"
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CCL repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+
+      - name: Install dependencies
+        run: pip install -r readthedocs/requirements.txt
+
+      - name: Build docs
+        run: |
+          cd readthedocs
+          # convert warnings to erros, but keep going to the end
+          make clean && make SPHINXOPTS="-W --keep-going" html
 
 
 # Legacy step: uninstall homebrew (CI works without it).

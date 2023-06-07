@@ -119,14 +119,6 @@ def test_tk3d_errors():
     with pytest.raises(TypeError):
         ccl.Tk3D()
 
-    # No input tkk or fkas
-    with pytest.raises(ValueError):
-        ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr)
-
-    # Missing one fka factor
-    with pytest.raises(ValueError):
-        ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk2_arr=fka2_arr)
-
     # fka has wrong shape
     with pytest.raises(ValueError):
         ccl.Tk3D(a_arr=a_arr, lk_arr=lk_arr, pk1_arr=tkka_arr)

@@ -1,37 +1,93 @@
+from __future__ import annotations
+
 __all__ = ("ConcentrationIshiyama21",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 from scipy.optimize import brentq, root_scalar
 
 from ... import lib, warn_api
-from ... import check
 from . import Concentration
+
+if TYPE_CHECKING:
+    from .. import MassDef
 
 
 class ConcentrationIshiyama21(Concentration):
-    """Concentration-mass relation by `Ishiyama et al. 2021
-    <http://arxiv.org/abs/2007.14720>`_. This parametrization is only
-    valid for S.O. masses with :math:`\\Delta = \\Delta_{\\rm vir}`, or
-    :math:`\\Delta=200` or :math:`500` times the critical density.
-    By default it will be initialized for :math:`M_{500c}`.
+    r"""Concentration-mass relation by :footcite:t:`Ishiyama21`. Only valid for
+    S.O. masses with :math:`\Delta_{\rm vir}`, :math:`\Delta_{200{\rm c}}`, or
+    :math:`\Delta_{500{\rm c}}`.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object or a name string.
-        relaxed (:obj:`bool`):
-            If ``True``, use concentration for relaxed halos. Otherwise,
-            use concentration for all halos. Default: ``False``.
-        Vmax (:obj:`bool`):
-            If ``True``, use the concentration found with the "Vmax"
-            numerical method. Otherwise, use the concentration found with
-            profile fitting. Default:  ``False``.
+    The concentration takes the form
+
+    .. math::
+
+        c(\nu, n_{\rm eff}, \alpha_{\rm eff})
+        = C(\alpha_{\rm eff}) \times \tilde{G} \left[
+            \frac{A(n{\rm eff})}{\nu}
+            \left( 1 + \frac{\nu^2}{B(n_{\rm eff})} \right) \right],
+
+    where :math:`\tilde{G}` is the inverse function of
+
+    .. math::
+
+        G(x) = \frac{x}{\left[ f(x) \right]^{(5 + n_{\rm eff})/6}}.
+
+    In the above, :math:`f(x) = \ln(1+x) - x/(1+x)` is the mass function of
+    the NFW profile, :math:`\nu=\frac{\delta_c}{\sigma_\rm{M}}` is the height
+    of the density peak. Variables :math:`n_{\rm eff}` and
+    :math:`\alpha_{\rm eff}` are defined as
+
+    .. math::
+
+        n_{\rm eff}(M) = -2 \frac{\rm{d} \ln \sigma(R)}{\rm{d} \ln R} - 3,
+
+    where :math:`R = \kappa R_{\rm L}` and
+
+    .. math::
+
+        \alpha_{\rm eff}(z)
+        = -\frac{\mathrm{d} \ln D(z)}{\mathrm{d} \ln (1 + z)}.
+
+    Terms :math:`(A,B,C)` have the following form:
+
+    .. math::
+
+        A(n_{\rm eff}) &= \alpha_0 \, (1 + \alpha_1 (n_{\rm eff} + 3)), \\
+        B(n_{\rm eff}) &= \beta_0 \, (1 + \beta_1 (n_{\rm eff} + 3)), \\
+        C(\alpha_{\rm eff}) &= 1 - c_\alpha \, (1 - \alpha_{\rm eff}).
+
+
+    Parameters
+    ----------
+    mass_def
+        Mass definition for this :math:`c(M)` parametrization.
+    relaxed
+        If True, use concentration for relaxed halos. Otherwise,
+        use concentration for all halos.
+    Vmax
+        If True, use the concentration found with the Vmax numerical
+        method. Otherwise, use the concentration found with profile
+        fitting.
+
+    References
+    ----------
+    .. footbibliography::
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "relaxed", "Vmax",)
     name = 'Ishiyama21'
+    relaxed: bool
+    Vmax: bool
 
     @warn_api(pairs=[("mdef", "mass_def")])
-    def __init__(self, *, mass_def="500c",
-                 relaxed=False, Vmax=False):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "500c",
+            relaxed: bool = False,
+            Vmax: bool = False
+    ):
         self.relaxed = relaxed
         self.Vmax = Vmax
         super().__init__(mass_def=mass_def)
@@ -64,7 +120,7 @@ class ConcentrationIshiyama21(Concentration):
         status = 0
         dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
                                                    len(logM), status)
-        check(status, cosmo=cosmo)
+        cosmo.check(status)
         return -3/np.log(10) * dlns_dlogM
 
     def _G(self, x, n_eff):

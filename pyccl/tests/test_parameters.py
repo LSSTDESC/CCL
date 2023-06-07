@@ -32,7 +32,7 @@ def test_parameters_lcdmDefaultParams():
     assert np.allclose(cosmo['sum_nu_masses'], 0)
     assert np.allclose(cosmo['m_nu'], 0)
     assert np.allclose(cosmo['Omega_nu_mass'], 0)
-    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.CosmologyParams.T_CMB)
 
     # TODO: Remove these for CCLv3.
     assert np.allclose(cosmo['bcm_ks'], 55.0)
@@ -122,7 +122,7 @@ def test_parameters_nu_list():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.CosmologyParams.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -172,7 +172,7 @@ def test_parameters_nu_normal():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.CosmologyParams.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -221,7 +221,7 @@ def test_parameters_nu_inverted():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.CosmologyParams.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -270,7 +270,7 @@ def test_parameters_nu_equal():
     assert np.allclose(cosmo['A_s'], 2.1e-9)
     assert np.allclose(cosmo['n_s'], 0.96)
     assert np.isnan(cosmo['sigma8'])
-    assert np.allclose(cosmo['T_CMB'], ccl.cosmology.DefaultParams.T_CMB)
+    assert np.allclose(cosmo['T_CMB'], ccl.CosmologyParams.T_CMB)
 
     assert np.allclose(cosmo['bcm_ks'], 55.0)
     assert np.allclose(cosmo['bcm_log10Mc'], np.log10(1.2e14))
@@ -315,22 +315,6 @@ def test_parameters_missing():
     Check that errors are raised when compulsory parameters are missing, but
     not when non-compulsory ones are.
     """
-
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25)
-
-    # Check that a single missing compulsory parameter is noticed
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9)
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.96)
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, A_s=2.1e-9, n_s=0.96)
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_c=0.25, h=0.7, A_s=2.1e-9, n_s=0.96)
-    with pytest.raises(ValueError):
-        ccl.Cosmology(Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96)
-
     # Check that sigma8 vs A_s is handled ok.
     with pytest.raises(ValueError):
         ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.8,

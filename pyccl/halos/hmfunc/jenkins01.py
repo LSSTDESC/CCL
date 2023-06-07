@@ -1,28 +1,51 @@
+from __future__ import annotations
+
 __all__ = ("MassFuncJenkins01",)
+
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 
 from ... import warn_api
 from . import MassFunc
 
+if TYPE_CHECKING:
+    from .. import MassDef
+
 
 class MassFuncJenkins01(MassFunc):
-    """Implements the mass function of `Jenkins et al. 2001
-    <https://arxiv.org/abs/astro-ph/0005260>`_. This parametrization
-    is only valid for 'fof' masses.
+    r"""Halo mass function by :footcite:t:`Jenkins01`. Valid for FoF masses
+    only.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
-        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
-            definition will be ignored.
+    The mass function takes the form
+
+    .. math::
+
+        n(M) = 0.315 \, \exp{
+            \left( -\left| \sigma^{-1} + 0.61 \right|^{3.8} \right)}.
+
+    Parameters
+    ----------
+    mass_def
+        Mass definition for this :math:`n(M)` parametrization.
+    mass_def_strict
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+
+    References
+    ----------
+    .. footbibliography::
     """
     name = 'Jenkins01'
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="fof",
-                 mass_def_strict=True):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "fof",
+            mass_def_strict: bool = True
+    ):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):

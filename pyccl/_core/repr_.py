@@ -1,11 +1,64 @@
-import numpy as np
+"""
+==========================================
+Representations (:mod:`pyccl._core.repr_`)
+==========================================
 
-from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
-from .caching import _to_hashable, hash_
+Specialized representation strings for complicated CCL objects.
+"""
+
+__all__ = ()
+
+import numpy as np
+import yaml
+
+from .caching import hash_
+
+
+def build_string_simple(self):
+    """Simple representation.
+
+    Example output::
+
+        <pyccl.emulator.Emulator>
+    """
+    return f"<{self.__module__}.{self.__class__.__qualname__}>"
+
+
+def build_string_from_attrs(self):
+    """Build a representation for an object from a list of attribute names
+    given in the hook ``__repr_attrs__``.
+
+    Example output::
+
+        <pyccl.halos.halo_model.HMCalculator>
+            mass_function = MassFuncTinker08,  HASH = 0xd3b29dd3
+            halo_bias = HaloBiasTinker10,  HASH = 0x9da644b5
+            mass_def = pyccl.halos.MassDef(Delta=500, rho_type=critical)
+    """
+    params = {param: getattr(self, param) for param in self.__repr_attrs__}
+    defaults = {param: value.default
+                for param, value in self.__signature__.parameters.items()
+                if param != "self"}
+
+    s = build_string_simple(self)
+    newline = "\n\t"
+    for param, value in params.items():
+        if param in defaults and value == defaults[param]:
+            # skip printing when value is the default
+            continue
+        s += f"{newline}{param} = "
+        if "\n" in repr(value):
+            # if too long, print the type and its hash
+            name = value.__class__.__qualname__
+            H = hex(hash_(value))
+            s += f"{name},  HASH = {H}"
+        else:
+            s += f"{value}"
+    return s
 
 
 class Table:
-    """Build nice tables.
+    """Build nice tables. Used in the representations of ``Pk2D`` and ``Tk3D``.
 
     Comments describing the capabilities of each method are included below.
     """
@@ -103,95 +156,48 @@ class Table:
 def build_string_Cosmology(self):
     """Build the ``Cosmology`` representation.
 
-    Cosmology equivalence is tested via its representation. Therefore,
-    there is limiting behavior where ``'=='`` will return ``False``
-    even though the compared cosmologies return the same theoretical
-    predictions. This happens whenever:
-
-        * Exactly one Cosmology is an instance of ``CosmologyCalculator``.
-        * Cosmologies defined with different parameter sets, where one can
-          be computed from the other (e.g. ``sigma8`` and ``A_s``).
-        * Instances of ``CosmologyCalculator`` which do not contain exactly
-          the same linear & non-linear power spectrum entries.
-
     Example output::
 
         <pyccl.cosmology.Cosmology>
-            Omega_b = 0.05
-            Omega_c = 0.25
-            h       = 0.67
-            n_s     = 0.96
-            sigma8  = 0.81
-            extra_parameters =
-                test = {'param': 18.4}
-            HASH_ACCURACY_PARAMS = 0x1959cbc9
-            HASH_PK = 0xbca03ab0
+            Omega_b: 0.05
+            Omega_c: 0.25
+            h: 0.67
+            n_s: 0.96
+            sigma8: 0.81
+            extra_parameters:
+              test:
+                param: 18.4
+            transfer_funcion: boltzmann_camb
+            HASH_INPUT_ARRS = 0xbca03ab0
     """
     newline = "\n\t"
-    cls = self.__class__
 
-    def test_eq(key, val, default):
-        # Neutrino masses can be a list, so use `np.all` for comparison.
-        # `np.all` is expensive, so only use that with `m_nu`.
-        if key not in ["m_nu", "z_mg", "df_mg"]:
-            return val == default
-        return np.all(val == default)
-
-    def printdict(dic):
-        # Print the non-default parameters listed in a parameter dictionary.
-        base = cls.__base__ if cls.__qualname__ != "Cosmology" else cls
-        params = base.__signature__.parameters
+    def remove_defaults(dic):
+        # Remove the parameters that are equal to the default ones.
+        from .. import Cosmology, is_equal
+        params = Cosmology.__signature__.parameters
         defaults = {param: value.default for param, value in params.items()}
-        dic = {key: val for key, val in dic.items()
-               if not test_eq(key, val, defaults.get(key))}
-        dic.pop("extra_parameters", None)
-        if not dic:
-            return ""
-        length = max(len(key) for key, val in dic.items())
-        tup = _to_hashable(dic)
-        s = ""
-        for param, value in tup:
-            s += f"{newline}{param:{length}} = {value}"
-        return s
-
-    def printextras(dic):
-        # Print any extra parameters.
-        if dic["extra_parameters"] is None:
-            return ""
-        tup = _to_hashable(dic["extra_parameters"])
-
-        s = f"{newline}extra_parameters ="
-        for key, value in tup:
-            s += f"{newline}\t{key} = {dict(value)}"
-        return s
+        return {key: val for key, val in dic.items()
+                if not is_equal(val, defaults.get(key))}
 
     def metadata():
         # Print hashes for the accuracy parameters and the stored Pk2D's.
-        H = hex(hash_(self._accuracy_params))
-        s = f"{newline}HASH_ACCURACY_PARAMS = {H}"
-        if self.__class__.__qualname__ == "CosmologyCalculator":
+        if type(self).__name__ == "CosmologyCalculator":
             # only need the pk's if we compare CosmologyCalculator objects
-            H = 0
-            if self.has_linear_power:
-                H += sum([hash_(pk) for pk in self._pk_lin.values()])
-            if self.has_nonlin_power:
-                H += sum([hash_(pk) for pk in self._pk_nl.values()])
-            H = hex(H)
-            s += f"{newline}HASH_PK = {H}"
-        return s
+            H = hex(hash_(self._input_arrays))
+            return f"{newline}HASH_INPUT_ARRS = {H}"
+        return ""
 
-    s = "<pyccl.cosmology.Cosmology>"
-    s += printdict(self._params_init_kwargs)
-    s += printdict(self._config_init_kwargs)
-    s += printextras(self._params_init_kwargs)
-    s += metadata()
-    return s
+    dump = yaml.dump(remove_defaults(self._pretty_print()), sort_keys=False)
+    dump = "\n" + dump.strip("\n")
+    dump = dump.replace("\n", newline)
+    return "<pyccl.cosmology.Cosmology>" + dump + metadata()
 
 
 def build_string_Pk2D(self, na=6, nk=6, decimals=2):
     """Build the ``Pk2D`` representation.
 
-    Example output ::
+    Example output::
 
         <pyccl.Pk2D>
             +===============+=============================================+
@@ -230,46 +236,60 @@ def build_string_Pk2D(self, na=6, nk=6, decimals=2):
     return s
 
 
-def build_string_simple(self):
-    """Simple representation.
-
-    Example output ::
-
-        <pyccl.emulator.Emulator>
-    """
-    return f"<{self.__module__}.{self.__class__.__qualname__}>"
-
-
-def build_string_from_attrs(self):
-    """Build a representation for an object from a list of attribute names
-    given in the hook ``__repr_attrs__``.
+def build_string_Tk3D(self, na=2, nk=4, decimals=2):
+    """Build a representation for a Tk3D object.
 
     Example output::
 
-        <pyccl.halos.halo_model.HMCalculator>
-            mass_function = MassFuncTinker08,  HASH = 0xd3b29dd3
-            halo_bias = HaloBiasTinker10,  HASH = 0x9da644b5
-            mass_def = pyccl.halos.MassDef(Delta=500, rho_type=critical)
+        <pyccl.Tk3D>
+            +================+=============================================+
+            | a \\ log10(k1) | -4.00e+00 -3.33e+00 ...  1.33e+00  2.00e+00 |
+            +================+=============================================+
+            |   5.00e-02     |  4.46e+07  9.62e+06 ...  2.07e+02  4.46e+01 |
+            |       ...      |                     ...                     |
+            |   1.00e+00     |  2.00e+09  4.30e+08 ...  9.26e+03  2.00e+03 |
+            +================+=============================================+
+            +================+=============================================+
+            | a \\ log10(k2) | -4.00e+00 -3.33e+00 ...  1.33e+00  2.00e+00 |
+            +================+=============================================+
+            |   5.00e-02     |  4.46e+01  1.78e+00 ...  2.82e-10  1.12e-11 |
+            |       ...      |                     ...                     |
+            |   1.00e+00     |  2.00e+03  7.94e+01 ...  1.26e-08  5.01e-10 |
+            +================+=============================================+
+            | is_log = True , extrap_orders = (1, 1)                       |
+            | HASH_ARRS = 0x780972f4                                       |
+            +================+=============================================+
     """
-    params = {param: getattr(self, param) for param in self.__repr_attrs__}
-    defaults = {param: value.default
-                for param, value in self.__signature__.parameters.items()
-                if param != "self"}
+    if not self.has_tsp:
+        return "pyccl.Tk3D(empty=True)"
 
-    s = build_string_simple(self)
+    # get what's needed from the Tk3D object
+    a, lk1, lk2, tks = self.get_spline_arrays()
+    lk1 /= np.log(10)  # easier to read in log10
+    lk2 /= np.log(10)  # easier to read in log10
+    islog = str(bool(self.tsp.is_log))
+    extrap = (self.tsp.extrap_order_lok, self.tsp.extrap_order_hik)
+    H = hex(sum([hash_(obj) for obj in [a, lk1, lk2, *tks]]))
+
     newline = "\n\t"
-    for param, value in params.items():
-        if param in defaults and value == defaults[param]:
-            # skip printing when value is the default
-            continue
-        s += f"{newline}{param} = "
-        if "\n" in repr(value):
-            # if too long, print the type and its hash
-            name = value.__class__.__qualname__
-            H = hex(hash_(value))
-            s += f"{name},  HASH = {H}"
-        else:
-            s += f"{value}"
+    meta = [f"is_log = {islog:5.5s}, extrap_orders = {extrap}"]
+    meta += [f"HASH_ARRS = {H:34}"]
+
+    # we will print 2 tables
+    if not self.tsp.is_product:
+        # get the start and the end of the trispectrum, diagonally in `k`
+        tks = [tks[0][:, 0, :], tks[0][:, :, -1]]
+
+    T = Table(n_y=na, n_x=nk, decimals=decimals, newline=newline,
+              data_y=a, legend="a \\ log10(k1)", meta=[])
+
+    s = build_string_simple(self) + f"{newline}"
+    T.data_x, T.data_z = lk1, tks[0]
+    s += T.build() + f"{newline}"
+    T.legend = "a \\ log10(k2)"
+    T.data_x, T.data_z = lk2, tks[1]
+    T.meta = meta
+    s += T.build()
     return s
 
 
@@ -278,13 +298,15 @@ def build_string_Tracer(self):
 
     .. note:: Tracer insertion order is important.
 
-    Example output ::
+    Example output::
 
         <pyccl.tracers.Tracer>
             num       kernel             transfer       prefac  bessel
              0  0x82ad882c232406bb  0xa0657c0f1c98fd77    0       2
              1  0x7ab385bb323530da         None           0       0
     """
+    from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
+
     def get_tracer_info(tr):
         # Return a string with info for the C-level tracer.
 
@@ -325,61 +347,4 @@ def build_string_Tracer(self):
     s += print_row(newline, "num", "kernel", "transfer", "prefac", "bessel")
     for num, tracer in enumerate(tracers):
         s += print_row(newline, num, *get_tracer_info(tracer))
-    return s
-
-
-def build_string_Tk3D(self, na=2, nk=4, decimals=2):
-    """Build a representation for a Tk3D object.
-
-    Example output ::
-
-        <pyccl.Tk3D>
-            +================+=============================================+
-            | a \\ log10(k1) | -4.00e+00 -3.33e+00 ...  1.33e+00  2.00e+00 |
-            +================+=============================================+
-            |   5.00e-02     |  4.46e+07  9.62e+06 ...  2.07e+02  4.46e+01 |
-            |       ...      |                     ...                     |
-            |   1.00e+00     |  2.00e+09  4.30e+08 ...  9.26e+03  2.00e+03 |
-            +================+=============================================+
-            +================+=============================================+
-            | a \\ log10(k2) | -4.00e+00 -3.33e+00 ...  1.33e+00  2.00e+00 |
-            +================+=============================================+
-            |   5.00e-02     |  4.46e+01  1.78e+00 ...  2.82e-10  1.12e-11 |
-            |       ...      |                     ...                     |
-            |   1.00e+00     |  2.00e+03  7.94e+01 ...  1.26e-08  5.01e-10 |
-            +================+=============================================+
-            | is_log = True , extrap_orders = (1, 1)                       |
-            | HASH_ARRS = 0x780972f4                                       |
-            +================+=============================================+
-    """
-    if not self.has_tsp:
-        return "pyccl.Tk3D(empty)"
-
-    # get what's needed from the Tk3D object
-    a, lk1, lk2, tks = self.get_spline_arrays()
-    lk1 /= np.log(10)  # easier to read in log10
-    lk2 /= np.log(10)  # easier to read in log10
-    islog = str(bool(self.tsp.is_log))
-    extrap = (self.tsp.extrap_order_lok, self.tsp.extrap_order_hik)
-    H = hex(sum([hash_(obj) for obj in [a, lk1, lk2, *tks]]))
-
-    newline = "\n\t"
-    meta = [f"is_log = {islog:5.5s}, extrap_orders = {extrap}"]
-    meta += [f"HASH_ARRS = {H:34}"]
-
-    # we will print 2 tables
-    if not self.tsp.is_product:
-        # get the start and the end of the trispectrum, diagonally in `k`
-        tks = [tks[0][:, 0, :], tks[0][:, :, -1]]
-
-    T = Table(n_y=na, n_x=nk, decimals=decimals, newline=newline,
-              data_y=a, legend="a \\ log10(k1)", meta=[])
-
-    s = build_string_simple(self) + f"{newline}"
-    T.data_x, T.data_z = lk1, tks[0]
-    s += T.build() + f"{newline}"
-    T.legend = "a \\ log10(k2)"
-    T.data_x, T.data_z = lk2, tks[1]
-    T.meta = meta
-    s += T.build()
     return s

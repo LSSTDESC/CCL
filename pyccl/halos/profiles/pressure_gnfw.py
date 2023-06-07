@@ -1,82 +1,105 @@
+from __future__ import annotations
+
 __all__ = ("HaloProfilePressureGNFW",)
+
+from numbers import Real
+from typing import TYPE_CHECKING, Sequence, Union
 
 import numpy as np
 
-from ... import UnlockInstance, warn_api
+from ... import warn_api
 from . import HaloProfilePressure
+
+if TYPE_CHECKING:
+    from .. import MassDef
 
 
 class HaloProfilePressureGNFW(HaloProfilePressure):
-    """ Generalized NFW electron pressure profile by
-    `Arnaud et al. 2010 <https://arxiv.org/abs/0910.1234>`_.
+    r"""Generalized NFW pressure profile by :footcite:t:`Arnaud10`.
 
     The parametrization is:
 
     .. math::
 
-       P_e(r) = C\\times P_0 h_{70}^E (c_{500} x)^{-\\gamma}
-       [1+(c_{500}x)^\\alpha]^{(\\gamma-\\beta)/\\alpha},
+       P_e(r) = C \times P_0 \, h_{70}^E \, (c_{500} x)^{-\gamma} \,
+       [1+(c_{500}x)^\alpha]^{(\gamma-\beta)/\alpha},
 
     where
 
     .. math::
 
-       C = 1.65\\,h_{70}^2\\left(\\frac{H(z)}{H_0}\\right)^{8/3}
-       \\left[\\frac{h_{70}\\tilde{M}_{500c}}
-       {3\\times10^{14}\\,M_\\odot}\\right]^{2/3+\\alpha_{\\mathrm{P}}},
+       C = 1.65 \, h_{70}^2 \left(\frac{H(z)}{H_0}\right)^{8/3}
+       \left[\frac{h_{70}\tilde{M}_{500}}{3\times10^{14} \, {\rm M_\odot}}
+       \right]^{2/3 + \alpha_{\rm P}},
 
-    :math:`x = r/\\tilde{r}_{500c}`, :math:`h_{70}=h/0.7`, and the
-    exponent :math:`E` is -1 for SZ-based profile normalizations
-    and -1.5 for X-ray-based normalizations. The biased mass
-    :math:`\\tilde{M}_{500c}` is related to the true overdensity
-    mass :math:`M_{500c}` via the mass bias parameter :math:`(1-b)`
-    as :math:`\\tilde{M}_{500c}=(1-b)M_{500c}`. :math:`\\tilde{r}_{500c}`
-    is the overdensity halo radius associated with :math:`\\tilde{M}_{500c}`
-    (note the intentional tilde!), and the profile is defined for
-    a halo overdensity :math:`\\Delta=500` with respect to the
-    critical density.
+    :math:`x = r/\tilde{r}_{500}`, :math:`h_{70}=h/0.7`, and the exponent
+    :math:`E` is :math:`-1` for SZ-based profile normalizations and
+    :math:`-1.5` for X-ray-based normalizations. The biased mass
+    :math:`\tilde{M}_{500}` is related to the true overdensity mass
+    :math:`M_{500}` via the mass bias parameter :math:`(1-b)` as
+    :math:`\tilde{M}_{500} = (1-b) \, M_{500}`. :math:`\tilde{r}_{500}` is the
+    overdensity halo radius associated with :math:`\tilde{M}_{500}` (note the
+    intentional tilde!), and the profile is defined for a halo overdensity
+    :math:`\Delta_{\rm 500c}`.
 
-    The default arguments (other than ``mass_bias``), correspond to the
-    profile parameters used in the `Planck 2013 (XX)
-    <https://arxiv.org/abs/1303.5080>`_ paper. The profile is
-    calculated in physical (non-comoving) units of :math:`\\mathrm{eV/cm^3}`.
+    The default parameters (other than `mass_bias`), correspond to those
+    used in in Planck Intermediate Results (V) :footcite:p:`Planck13V_inter`.
+    The profile is computed in physical (non-comoving) units of
+    :math:`\rm eV / cm^3`.
 
-    Args:
-        mass_bias (:obj:`float`):
-            The mass bias parameter :math:`1-b`.
-        P0 (:obj:`float`):
-            Profile normalization.
-        c500 (:obj:`float`):
-            Concentration parameter.
-        alpha, beta, gamma (:obj:`float`):
-            Profile shape parameters.
-        alpha_P (:obj:`float`):
-            Additional mass dependence exponent
-        P0_hexp (:obj:`float`):
-            Power of :math:`h` with which the normalization parameter scales.
-            Equal to :math:`-1` for SZ-based normalizations,
-            and :math:`-3/2` for X-ray-based normalizations.
-        qrange (:obj:`tuple`):
-            Tuple of two numbers denoting the limits of integration used when
-            computing the Fourier-space profile template, in units of
-            :math:`r_{\\mathrm{vir}}`.
-        nq (:obj:`int`):
-            Number of sampling points of the Fourier-space profile template.
-        x_out (:obj:`float`):
-            Profile threshold, in units of :math:`r_{\\mathrm{500c}}`.
-            Defaults to :math:`+\\infty`.
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
+    Parameters
+    ----------
+    mass_bias
+        The mass bias parameter :math:`1-b`.
+    P0
+        Profile normalization.
+    c500
+        Concentration parameter.
+    alpha, beta, gamma
+        Profile shape parameter.
+    alpha_P
+        Additional mass dependence exponent
+    P0_hexp
+        Power of :math:`h` with which the normalization parameter scales.
+        Equal to :math:`-1` for SZ-based normalizations,
+        and :math:`-3/2` for X-ray-based normalizations.
+    qrange
+        Limits of integration used when computing the Fourier-space
+        profile template, in units of :math:`R_{\\mathrm{vir}}`.
+    nq
+        Number of sampling points of the Fourier-space profile template.
+    x_out
+        Profile threshold, in units of :math:`R_{\rm 500c}`.
+    mass_def
+        Halo mass definition.
+
+        .. versionadded:: 2.8.0
+
+    References
+    ----------
+    .. footbibliography::
     """
     __repr_attrs__ = __eq_attrs__ = (
         "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
         "P0_hexp", "qrange", "nq", "x_out", "mass_def", "precision_fftlog",)
 
     @warn_api
-    def __init__(self, *, mass_bias=0.8, P0=6.41,
-                 c500=1.81, alpha=1.33, alpha_P=0.12,
-                 beta=4.13, gamma=0.31, P0_hexp=-1.,
-                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf, mass_def=None):
+    def __init__(
+            self,
+            *,
+            mass_bias: Real = 0.8,
+            P0: Real = 6.41,
+            c500: Real = 1.81,
+            alpha: Real = 1.33,
+            alpha_P: Real = 0.12,
+            beta: Real = 4.13,
+            gamma: Real = 0.31,
+            P0_hexp: Real = -1,
+            qrange: Sequence[Real, Real] = (1e-3, 1e3),
+            nq: int = 128,
+            x_out: Real = np.inf,
+            mass_def: Union[str, MassDef] = None
+    ):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
@@ -93,36 +116,17 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         self._fourier_interp = None
         super().__init__(mass_def=mass_def)
 
+    # TODO: Uncomment for CCLv3.
+    # @update(names=["mass_bias", "alpha_P", "P0", "P0_hexp"])
+    # def update_parameters(self, *, alpha=None, beta=None, gamma=None,
+    #                       c500=None, x_out=None) -> None:
     @warn_api
-    def update_parameters(self, *, mass_bias=None, P0=None,
-                          c500=None, alpha=None, beta=None, gamma=None,
-                          alpha_P=None, P0_hexp=None, x_out=None):
-        """Update any of the parameters associated with this profile.
-        Any parameter set to ``None`` won't be updated.
-
-        .. note::
-
-            A change in ``alpha``, ``beta``, ``gamma``, ``c500``, or ``x_out``
-            recomputes the Fourier-space template, which may be slow.
-
-        Args:
-            mass_bias (:obj:`float`):
-                The mass bias parameter :math:`1-b`.
-            P0 (:obj:`float`):
-                Profile normalization.
-            c500 (:obj:`float`):
-                Concentration parameter.
-            alpha, beta, gamma (:obj:`float`):
-                Profile shape parameters.
-            alpha_P (:obj:`float`):
-                Additional mass dependence exponent
-            P0_hexp (:obj:`float`):
-                Power of :math:`h` with which the normalization parameter
-                scales. Equal to :math:`-1` for SZ-based normalizations,
-                and :math:`-3/2` for X-ray-based normalizations.
-            x_out (:obj:`float`):
-                Profile threshold, in units of :math:`r_{\\mathrm{500c}}`.
-                Defaults to :math:`+\\infty`.
+    def update_parameters(
+            self, *, mass_bias=None, P0=None, c500=None, alpha=None, beta=None,
+            gamma=None, alpha_P=None, P0_hexp=None, x_out=None):
+        """Update the profile parameters. All numerical parameters except those
+        related to the Fourier interpolation settings (``qrange, nq``) are
+        updatable.
         """
         if mass_bias is not None:
             self.mass_bias = mass_bias
@@ -224,7 +228,7 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
 
         # Tabulate if not done yet
         if self._fourier_interp is None:
-            with UnlockInstance(self):
+            with self.unlock():
                 self._fourier_interp = self._integ_interp()
 
         # Input handling

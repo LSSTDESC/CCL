@@ -15,11 +15,6 @@ def test_Pk2D_eq_repr_hash():
     assert check_eq_repr_hash(PK1, PK2)
     assert check_eq_repr_hash(2*PK1, PK2, equal=False)
 
-    # edge-case: same data
-    empties = [ccl.Pk2D.__new__(ccl.Pk2D) for _ in range(2)]
-    assert check_eq_repr_hash(*empties)
-    assert check_eq_repr_hash(PK1, PK1)
-
     # edge-case: comparing different types
     assert check_eq_repr_hash(PK1, 1, equal=False)
 

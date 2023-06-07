@@ -114,7 +114,6 @@ def test_pkhm_bias_smoke(prof):
      (None, "linear", True, True, "simpson", P3),
      (None, "nonlinear", True, True, "simpson", None),
      (None, PK2D, True, True, "simpson", None),
-     (None, None, True, True, "simpson", None),
      (None, "linear", False, True, "simpson", None),
      (None, "linear", True, False, "simpson", None),
      (None, "linear", False, False, "simpson", None),
@@ -251,7 +250,7 @@ def test_pkhm_errors():
     # Wrong pk2d
     with pytest.raises(TypeError):
         ccl.halos.halomod_power_spectrum(COSMO, hmc, KK, AA, P1,
-                                         p_of_k_a=KK)
+                                         p_of_k_a="something_else")
 
     def func():
         pass

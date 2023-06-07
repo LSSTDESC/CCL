@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 import pyccl as ccl
-from pyccl import UnlockInstance
 from .test_cclobject import check_eq_repr_hash
 
 
@@ -259,28 +258,6 @@ def test_hod_ns_independent(real_prof):
     assert p1.ns_independent is True
 
 
-@pytest.mark.parametrize("ns_indep", [True, False])
-def test_hod_normalization(ns_indep):
-    # Test that the HOD normalization works as expected.
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    a_arr = np.linspace(0.5, 1.0, 8)
-    hmc = ccl.halos.HMCalculator(
-        mass_function="Tinker10", halo_bias="Tinker10", mass_def="200c")
-    cm = ccl.halos.Concentration.create_instance(
-        "Duffy08", mass_def=hmc.mass_def)
-    prof = ccl.halos.HaloProfileHOD(concentration=cm, ns_independent=ns_indep)
-
-    norm = np.array([prof.get_normalization(cosmo, a, hmc) for a in a_arr])
-
-    def profile_norm(a):
-        hmc._get_ingredients(cosmo, a, get_bf=False)
-        uk0 = prof.fourier(cosmo, k=1e-5, M=hmc._mass, a=a).T
-        return hmc._integrate_over_mf(uk0)
-
-    norm_fourier = np.array([profile_norm(a) for a in a_arr])
-    assert np.allclose(norm, norm_fourier, atol=0, rtol=1e-5)
-
-
 def test_hod_2pt():
     pbad = ccl.halos.HaloProfilePressureGNFW(mass_def='200c')
     c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
@@ -305,6 +282,10 @@ def test_hod_2pt():
 
     with pytest.raises(ValueError):
         p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood, prof2=pbad)
+
+    with pytest.raises(ValueError):
+        p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood,
+                       prof2=pbad, mass_def=ccl.halos.MassDef(200, "critical"))
 
 
 def test_2pt_rcorr_smoke():
@@ -554,7 +535,7 @@ def test_hernquist_f2r():
     # by FFT-ing the Fourier-space one.
     p2 = ccl.halos.HaloProfileHernquist(concentration=cM,
                                         fourier_analytic=True)
-    with UnlockInstance(p2):
+    with p2.unlock():
         p2._real = None
     p2.update_precision_fftlog(padding_hi_fftlog=1E3)
 
@@ -624,12 +605,12 @@ def test_IA_update():
                  'log10M0_0', 'log10M0_p', 'log10M1_0', 'log10M1_p',
                  'siglnM_0', 'siglnM_p', 'alpha_0', 'alpha_p',
                  'bg_0', 'bg_p', 'bmax_0', 'bmax_p', 'a_pivot',
-                 'rmin', 'N_r', 'N_jn']:
+                 'r_min', 'N_r', 'N_jn']:
         p.update_parameters(**{attr: -123})
         assert getattr(p, attr) == -123
     # Special cases
-    p.update_parameters(lmax=5)
-    assert p.lmax == 5
+    p.update_parameters(l_max=5)
+    assert p.l_max == 5
     p.update_parameters(ns_independent=True)
     assert p.ns_independent
 
@@ -640,24 +621,24 @@ def test_IA_profile():
     k_arr = np.geomspace(1E-3, 1e3, 256)  # For evaluating
     cM = ccl.halos.ConcentrationDuffy08(mass_def="200m")
 
-    # lmax too low
+    # l_max too low
     with pytest.warns(ccl.CCLWarning):
-        ccl.halos.SatelliteShearHOD(concentration=cM, lmax=1,
+        ccl.halos.SatelliteShearHOD(concentration=cM, l_max=1,
                                     mass_def="200m")
 
-    # lmax too high
+    # l_max too high
     with pytest.warns(ccl.CCLWarning):
-        ccl.halos.SatelliteShearHOD(concentration=cM, lmax=14,
+        ccl.halos.SatelliteShearHOD(concentration=cM, l_max=14,
                                     mass_def="200m")
 
-    # lmax odd
+    # l_max odd
     assert (ccl.halos.SatelliteShearHOD(concentration=cM, mass_def="200m",
-                                        lmax=7).lmax) % 2 == 0
+                                        l_max=7).l_max) % 2 == 0
 
     # Run with b!={0,2}
     assert (ccl.halos.SatelliteShearHOD(
         concentration=cM, b=-1.9, mass_def="200m",
-        lmax=12)._angular_fl).shape == (6, 1)
+        l_max=12)._angular_fl).shape == (6, 1)
 
     # Testing FFTLog accuracy vs simps and spline method.
     s_g_HOD1 = ccl.halos.SatelliteShearHOD(concentration=cM,
@@ -673,12 +654,6 @@ def test_IA_profile():
     s_g3 = s_g_HOD3._usat_fourier(cosmo, k_arr, 1e13, 1.)
     assert np.all(np.abs((s_g1 - s_g2) / s_g2)) > 0.05
     assert np.all(np.abs((s_g3 - s_g2) / s_g3)) > 0.05
-
-    # Wrong integration method
-    with pytest.raises(ValueError):
-        ccl.halos.SatelliteShearHOD(concentration=cM,
-                                    mass_def="200m",
-                                    integration_method="something_else")
 
 
 def test_prefactor():

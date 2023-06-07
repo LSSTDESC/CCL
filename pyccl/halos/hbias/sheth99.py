@@ -1,34 +1,60 @@
+from __future__ import annotations
+
 __all__ = ("HaloBiasSheth99",)
 
-from ... import check, lib, warn_api
+from typing import TYPE_CHECKING, Union
+
+from ... import lib, warn_api
 from . import HaloBias
+
+if TYPE_CHECKING:
+    from .. import MassDef
 
 
 class HaloBiasSheth99(HaloBias):
-    """Implements halo bias as described in `Sheth & Tormen 1999
-    <https://arxiv.org/abs/astro-ph/9901122>`_.
-    This parametrization is only valid for 'fof' masses.
+    r"""Halo bias relation by :footcite:t:`Sheth99`. Valid for FoF masses only.
 
-    Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
-            a mass definition object, or a name string.
-        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
-            definition will be ignored.
-        use_delta_c_fit (:obj:`bool`): if ``True``, use the fit to the
-            critical overdensity :math:`\\delta_c` by
-            `Nakamura & Suto 1997
-            <https://arxiv.org/abs/astro-ph/9612074>`_. Otherwise use
-            :math:`\\delta_c = 1.68647`.
+    The halo bias takes the form
+
+    .. math::
+
+        b(M, z) = 1 + \frac{a\nu - 1}{\delta_{\rm c}}
+        + \frac{2p / \delta_{\rm c}}{1 + (a\nu)^p},
+
+    where :math:`\nu(M, z) = \delta_{\rm c}(z)^2 / \sigma(M, z)^2`, and
+    :math:`(a, p) = (0.707, 0.3)` are fitted parameters.
+
+    Parameters
+    ----------
+    mass_def
+        Mass definition for this :math:`b(M)` parametrization.
+    mass_def_strict
+        If True, only allow the mass definitions for which this halo bias
+        relation was fitted, and raise if another mass definition is passed.
+        If False, do not check for model consistency for the mass definition.
+    use_delta_c_fit
+        If True, use the formula for :math:`\delta_{\rm c}` given by the
+        fit of Nakamura & Suto (1997). If False, use
+        :math:`\delta_{\rm c} \simeq 1.68647` given by spherical collapse
+        theory.
+
+    References
+    ----------
+    .. footbibliography::
     """
-    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
-                                     "use_delta_c_fit",)
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_def", "mass_def_strict", "use_delta_c_fit",)
     name = "Sheth99"
+    use_delta_c_fit: bool
 
     @warn_api
-    def __init__(self, *,
-                 mass_def="fof",
-                 mass_def_strict=True,
-                 use_delta_c_fit=False):
+    def __init__(
+            self,
+            *,
+            mass_def: Union[str, MassDef] = "fof",
+            mass_def_strict: bool = True,
+            use_delta_c_fit: bool = False
+    ):
         self.use_delta_c_fit = use_delta_c_fit
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
@@ -43,7 +69,7 @@ class HaloBiasSheth99(HaloBias):
         if self.use_delta_c_fit:
             status = 0
             delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-            check(status, cosmo=cosmo)
+            cosmo.check(status)
         else:
             delta_c = 1.68647
 

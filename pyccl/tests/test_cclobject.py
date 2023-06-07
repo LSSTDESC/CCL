@@ -52,13 +52,7 @@ def check_eq_repr_hash(self, other, *, equal=True):
 
 def test_CCLObject_immutability():
     # These tests check the behavior of immutable objects, i.e. instances
-    # of classes where `Funlock` or `unlock_instance` is not used.
-    # test `CCLObject` lock
-    obj = ccl.CCLObject()
-    obj._object_lock.unlock()
-    assert "locked=False" in repr(obj._object_lock)
-    obj._object_lock.lock()
-    assert "locked=True" in repr(obj._object_lock)
+    # of classes where `Funlock` or `unlock` is not used.
 
     # `update_parameters` not implemented.
     cosmo = ccl.CosmologyVanillaLCDM()
@@ -78,17 +72,12 @@ def test_CCLObject_immutability():
 
 
 def test_CCLObject_default_behavior():
-    # Test that if `__repr__` is not defined the fall back is safe.
+    # Test that all subclasses of ``CCLObject`` use Python's default
+    # ``repr`` if no ``__repr_attrs__`` exists.
+    instances = [ccl.CCLObject() for _ in range(2)]
+    assert check_eq_repr_hash(*instances, equal=False)
+
     MyType = type("MyType", (ccl.CCLObject,), {"test": 0})
-    instances = [MyType() for _ in range(2)]
-    assert check_eq_repr_hash(*instances, equal=False)
-
-    # Test that all subclasses of ``CCLAutoRepr`` use Python's default
-    # ``repr`` if no ``__repr_attrs__`` has been defined.
-    instances = [ccl.CCLAutoRepr() for _ in range(2)]
-    assert check_eq_repr_hash(*instances, equal=False)
-
-    MyType = type("MyType", (ccl.CCLAutoRepr,), {"test": 0})
     instances = [MyType() for _ in range(2)]
     assert instances[0] != instances[1]
 
@@ -99,16 +88,6 @@ def test_named_class_raises():
         ccl.halos.MassDef.create_instance(1)
 
 
-def test_ccl_parameters_abstract():
-    # Test that the Parameters base class is abstract and cannot instantiate
-    # if `instance` or `factory` are not specified.
-    with pytest.raises(TypeError):
-        ccl.CCLParameters()
-    with pytest.raises(ValueError):
-        class MyPars(ccl.CCLParameters):
-            pass
-
-
 # +==========================================================================+
 # | The following functions are used by `conftest.py` to check correct setup.|
 # +==========================================================================+
@@ -116,7 +95,7 @@ def test_ccl_parameters_abstract():
 
 def init_decorator(func):
     """Check that all attributes listed in ``__repr_attrs__`` are defined in
-    the constructor of all subclasses of ``CCLAutoRepr``.
+    the constructor of all subclasses of ``CCLObject``.
     NOTE: Used in ``conftest.py``.
     """
 
@@ -147,8 +126,8 @@ def init_decorator(func):
     return wrapper
 
 
-def test_unlock_instance_errors():
-    # Test that unlock_instance gives the correct errors.
+def test_unlock_errors():
+    # Test that `unlock` gives the correct errors.
 
     # 1. Developer error
     with pytest.raises(NameError):
@@ -163,7 +142,3 @@ def test_unlock_instance_errors():
 
     with pytest.raises(TypeError):
         func2()
-
-    # 3. Doesn't do anything if instance is not CCLObject.
-    with ccl.UnlockInstance(True, mutate=False):
-        pass
