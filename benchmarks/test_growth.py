@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.testing import assert_allclose
 import pytest
 
 import pyccl as ccl
@@ -64,7 +63,6 @@ def read_growth_allz_benchmark_file():
 
     # Split into redshift column and growth(z) columns
     z = dat[0]
-    # gfac = np.column_stack((dat[1:], dat_MG[1:]))
     gfac = dat[1:]
 
     return z, gfac
@@ -97,10 +95,11 @@ def compare_growth(
 
     # Compare to benchmark data
     if high_tol:
-        assert_allclose(
-            gfac, gfac_bench, atol=1e-12, rtol=GROWTH_HIZ_TOLERANCE)
+        assert np.allclose(gfac, gfac_bench,
+                           atol=1e-12, rtol=GROWTH_HIZ_TOLERANCE)
     else:
-        assert_allclose(gfac, gfac_bench, atol=1e-12, rtol=GROWTH_TOLERANCE)
+        assert np.allclose(gfac, gfac_bench,
+                           atol=1e-12, rtol=GROWTH_TOLERANCE)
 
 
 @pytest.mark.parametrize('i', list(range(5)))
@@ -120,45 +119,3 @@ def test_growth_highz_model(i):
 def test_growth_allz_model(i):
     compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
                    wa_vals[i], mu0_vals[i], Sig0_vals[i])
-
-
-def test_growth_mg():
-    """
-    Compare the modified growth function computed by CCL against the exact
-    result for a particular modification of the growth rate.
-    """
-    # Define differential growth rate arrays
-    nz_mg = 128
-    z_mg = np.zeros(nz_mg)
-    df_mg = np.zeros(nz_mg)
-    for i in range(0, nz_mg):
-        z_mg[i] = 4. * (i + 0.0) / (nz_mg - 1.)
-        df_mg[i] = 0.1 / (1. + z_mg[i])
-
-    # Define two test cosmologies, without and with modified growth
-    # respectively
-    cosmo1 = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,
-        w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96)
-    cosmo2 = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, Omega_k=0., Neff=0., m_nu=0.,
-        w0=-1., wa=0., h=0.7, A_s=2.1e-9, n_s=0.96,
-        z_mg=z_mg, df_mg=df_mg)
-
-    # We have included a growth modification \delta f = K*a, with K==0.1
-    # (arbitrarily). This case has an analytic solution, given by
-    # D(a) = D_0(a)*exp(K*(a-1)). Here we compare the growth computed by CCL
-    # with the analytic solution.
-    a = 1. / (1. + z_mg)
-
-    d1 = ccl.growth_factor(cosmo1, a)
-    d2 = ccl.growth_factor(cosmo2, a)
-    f1 = ccl.growth_rate(cosmo1, a)
-    f2 = ccl.growth_rate(cosmo2, a)
-
-    f2r = f1 + 0.1*a
-    d2r = d1 * np.exp(0.1*(a-1.))
-
-    # Check that ratio of calculated and analytic results is within tolerance
-    assert_allclose(d2r, d2, rtol=GROWTH_TOLERANCE)
-    assert_allclose(f2r, f2, rtol=GROWTH_TOLERANCE)

@@ -1,3 +1,5 @@
+__all__ = ("get_camb_pk_lin", "get_isitgr_pk_lin", "get_class_pk_lin",)
+
 import numpy as np
 
 try:
@@ -5,21 +7,17 @@ try:
 except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
-from . import ccllib as lib
-from .pyutils import check
-from .pk2d import Pk2D
-from .errors import CCLError
-from .parameters import physical_constants
+from . import CCLError, Pk2D, check, lib
 
 
-def get_camb_pk_lin(cosmo, nonlin=False):
+def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run CAMB.
-        nonlin (:obj:`bool`, optional): Whether to compute and return the
+        nonlin (:obj:`bool`): Whether to compute and return the
             non-linear power spectrum as well.
 
     Returns:
@@ -55,7 +53,7 @@ def get_camb_pk_lin(cosmo, nonlin=False):
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -95,14 +93,14 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     # where T_nu is the standard neutrino temperature from first order
     # computations
     # CLASS defines the temperature of each neutrino species to be
-    # T_i_eff = TNCDM * T_cmb where TNCDM is a fudge factor to get the
+    # T_i_eff = T_ncdm * T_cmb where T_ncdm is a fudge factor to get the
     # total mass in terms of eV to match second-order computations of the
     # relationship between m_nu and Omega_nu.
     # We are trying to get both codes to use the same neutrino temperature.
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
-    # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
+    # value of g for CAMB. We get g = (T_ncdm / (11/4)^(-1/3))^4
     g = np.power(
-        physical_constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        cosmo["T_ncdm"] / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
@@ -126,8 +124,8 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
-        raise ValueError("The only dark energy models CCL supports with"
-                         " camb are fluid and ppf.")
+        raise ValueError("The only dark energy models CCL supports with "
+                         "CAMB are fluid and ppf.")
     cp.set_classes(
         dark_energy_model=camb_de_model
     )
@@ -185,14 +183,12 @@ def get_camb_pk_lin(cosmo, nonlin=False):
         ln_p_k_and_z[i, :] = np.log(pk[sind, :])
 
     pk_lin = Pk2D(
-        pkfunc=None,
         a_arr=a_arr,
         lk_arr=lk_arr,
         pk_arr=ln_p_k_and_z,
         is_logp=True,
         extrap_order_lok=1,
-        extrap_order_hik=2,
-        cosmo=cosmo)
+        extrap_order_hik=2)
 
     if not nonlin:
         return pk_lin
@@ -216,14 +212,12 @@ def get_camb_pk_lin(cosmo, nonlin=False):
             ln_p_k_and_z[i, :] = np.log(pk[sind, :])
 
         pk_nonlin = Pk2D(
-            pkfunc=None,
             a_arr=a_arr,
             lk_arr=lk_arr,
             pk_arr=ln_p_k_and_z,
             is_logp=True,
             extrap_order_lok=1,
-            extrap_order_hik=2,
-            cosmo=cosmo)
+            extrap_order_hik=2)
 
         return pk_lin, pk_nonlin
 
@@ -232,7 +226,7 @@ def get_isitgr_pk_lin(cosmo):
     """Run ISiTGR-CAMB and return the linear power spectrum.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run ISiTGR-CAMB.
 
@@ -268,7 +262,7 @@ def get_isitgr_pk_lin(cosmo):
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -289,8 +283,7 @@ def get_isitgr_pk_lin(cosmo):
     cp.ombh2 = cosmo['Omega_b'] * h2
     cp.omch2 = cosmo['Omega_c'] * h2
     cp.omk = cosmo['Omega_k']
-#   cp.GR = 1 means GR modified!
-    cp.GR = 1
+    cp.GR = 1  # means GR modified!
     cp.ISiTGR_muSigma = True
     cp.mu0 = cosmo['mu_0']
     cp.Sigma0 = cosmo['sigma_0']
@@ -317,14 +310,14 @@ def get_isitgr_pk_lin(cosmo):
     # where T_nu is the standard neutrino temperature from first order
     # computations
     # CLASS defines the temperature of each neutrino species to be
-    # T_i_eff = TNCDM * T_cmb where TNCDM is a fudge factor to get the
+    # T_i_eff = T_ncdm * T_cmb where T_ncdm is a fudge factor to get the
     # total mass in terms of eV to match second-order computations of the
     # relationship between m_nu and Omega_nu.
     # We are trying to get both codes to use the same neutrino temperature.
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
-    # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
+    # value of g for CAMB. We get g = (T_ncdm / (11/4)^(-1/3))^4
     g = np.power(
-        physical_constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        cosmo["T_ncdm"] / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
@@ -348,16 +341,15 @@ def get_isitgr_pk_lin(cosmo):
     camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
-        raise ValueError("The only dark energy models CCL supports with"
-                         " camb are fluid and ppf.")
+        raise ValueError("The only dark energy models CCL supports with "
+                         "CAMB are fluid and ppf.")
     cp.set_classes(
         dark_energy_model=camb_de_model
     )
     if camb_de_model not in camb_de_models[:2] and cosmo['wa'] and \
             (cosmo['w0'] < -1 - 1e-6 or
                 1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
-        raise ValueError("If you want to use w crossing -1,"
-                         " then please set the dark_energy_model to ppf.")
+        raise ValueError("For w to cross -1, set `dark_energy_model=ppf`.")
     cp.DarkEnergy.set_params(
         w=cosmo['w0'],
         wa=cosmo['wa']
@@ -395,14 +387,12 @@ def get_isitgr_pk_lin(cosmo):
         ln_p_k_and_z[i, :] = np.log(pk[sind, :])
 
     pk_lin = Pk2D(
-        pkfunc=None,
         a_arr=a_arr,
         lk_arr=lk_arr,
         pk_arr=ln_p_k_and_z,
         is_logp=True,
         extrap_order_lok=1,
-        extrap_order_hik=2,
-        cosmo=cosmo)
+        extrap_order_hik=2)
     return pk_lin
 
 
@@ -410,7 +400,7 @@ def get_class_pk_lin(cosmo):
     """Run CLASS and return the linear power spectrum.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run CLASS.
 
@@ -466,7 +456,7 @@ def get_class_pk_lin(cosmo):
         params["A_s"] = A_s_fid
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -511,13 +501,11 @@ def get_class_pk_lin(cosmo):
 
     # make the Pk2D object
     pk_lin = Pk2D(
-        pkfunc=None,
         a_arr=a_arr,
         lk_arr=lk_arr,
         pk_arr=ln_p_k_and_z,
         is_logp=True,
         extrap_order_lok=1,
-        extrap_order_hik=2,
-        cosmo=cosmo)
+        extrap_order_hik=2)
 
     return pk_lin

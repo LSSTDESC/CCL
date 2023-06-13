@@ -8,7 +8,7 @@ COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_g=0, Omega_k=0,
 
 
 def test_mdef_eq():
-    hmd_200m = ccl.halos.MassDef200m()
+    hmd_200m = ccl.halos.MassDef200m
     hmd_200m_b = ccl.halos.MassDef(200, 'matter')
     assert hmd_200m == hmd_200m_b
 
@@ -19,16 +19,14 @@ def test_concentration_translation():
 
     # No change expected
     Delta_new = 200.
-    c_new = ccl.halos.massdef.convert_concentration(COSMO,
-                                                    c_old, Delta_old,
-                                                    Delta_new)
+    c_new = ccl.halos.massdef.convert_concentration(
+        COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new)
     assert np.all(c_old == c_new)
 
     # Test against numerical solutions from Mathematica.
     Delta_new = 500.
-    c_new = ccl.halos.massdef.convert_concentration(COSMO,
-                                                    c_old, Delta_old,
-                                                    Delta_new)
+    c_new = ccl.halos.massdef.convert_concentration(
+        COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new)
     c_new_expected = np.array([6.12194, 6.82951, 7.53797])
     assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-4)
 
@@ -74,38 +72,17 @@ def test_get_radius():
         assert np.shape(r) == np.shape(M)
 
 
-def test_get_concentration():
-    hmd = ccl.halos.MassDef200m()
-    for M in [1E12, [1E12, 2E12],
-              np.array([1E12, 2E12])]:
-        c = hmd._get_concentration(COSMO, M, 1.)
-        assert np.all(np.isfinite(c))
-        assert np.shape(c) == np.shape(M)
-
-
-def test_get_concentration_raises():
-    hmd = ccl.halos.MassDef(200, 'matter')
-    with pytest.raises(RuntimeError):
-        hmd._get_concentration(COSMO, 1E12, 1.)
-
-
 def test_translate_mass():
-    hmd = ccl.halos.MassDef200m()
-    hmdb = ccl.halos.MassDef200c()
+    hmd = ccl.halos.MassDef200m
+    hmdb = ccl.halos.MassDef200c
+    cm = ccl.halos.Concentration.create_instance("Duffy08", mass_def=hmd)
+    translator = ccl.halos.mass_translator(mass_in=hmd, mass_out=hmdb,
+                                           concentration=cm)
     for M in [1E12, [1E12, 2E12],
               np.array([1E12, 2E12])]:
-        m = hmd.translate_mass(COSMO, M,
-                               1., hmdb)
+        m = translator(COSMO, M, 1)
         assert np.all(np.isfinite(m))
         assert np.shape(m) == np.shape(M)
-
-
-def test_translate_mass_raises():
-    hmd = ccl.halos.MassDef(200, 'matter')
-    hmdb = ccl.halos.MassDef(200, 'critical')
-    with pytest.raises(RuntimeError):
-        hmd.translate_mass(COSMO, 1E12,
-                           1., hmdb)
 
 
 @pytest.mark.parametrize('scls', [ccl.halos.MassDef200m,
@@ -113,17 +90,33 @@ def test_translate_mass_raises():
                                   ccl.halos.MassDef500c,
                                   ccl.halos.MassDefVir])
 def test_subclasses_smoke(scls):
-    hmd = scls()
+    hmd = scls
     assert np.isfinite(hmd.get_Delta(COSMO, 1.))
 
 
-@pytest.mark.parametrize('name', ['200m', '200c', '500c', 'vir'])
+@pytest.mark.parametrize('name', ['200m', '200c', '500c', 'vir', '350m'])
 def test_massdef_from_string_smoke(name):
-    hmd_class = ccl.halos.MassDef.from_name(name)
-    hmd = hmd_class()
+    hmd = ccl.halos.MassDef.from_name(name)
     assert np.isfinite(hmd.get_radius(COSMO, 1e14, 1))
 
 
 def test_massdef_from_string_raises():
     with pytest.raises(ValueError):
         ccl.halos.MassDef.from_name("my_mass_def")
+
+
+def test_mass_translator():
+    # Check that the mass translator complains for inconsistent masses.
+    cm = ccl.halos.Concentration.create_instance("Duffy08")
+    mdef1 = ccl.halos.MassDef.create_instance("250c")
+    mdef2 = ccl.halos.MassDef.create_instance("500c")
+    with pytest.raises(ValueError):
+        ccl.halos.mass_translator(mass_in=mdef1, mass_out=mdef2,
+                                  concentration=cm)
+
+    # Check that if we pass the same mass definition, it returns the same M.
+    mdef1 = mdef2 = cm.mass_def
+    translator = ccl.halos.mass_translator(mass_in=mdef1, mass_out=mdef2,
+                                           concentration=cm)
+    cosmo = ccl.CosmologyVanillaLCDM()
+    assert translator(cosmo, 1e14, 1) == 1e14

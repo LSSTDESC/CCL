@@ -16,6 +16,7 @@ def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
     h0 = 0.70001831054687500
     logA = 3.05  # log(10^10 A_s)
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
     ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
     ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
@@ -48,10 +49,12 @@ def set_up(request):
 
     # Initialize tracers
     trc = {}
-    trc['g1'] = ccl.NumberCountsTracer(cosmo, False, (z1, pz1), (z1, bz1))
-    trc['g2'] = ccl.NumberCountsTracer(cosmo, False, (z2, pz2), (z2, bz2))
-    trc['l1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1))
-    trc['l2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2))
+    trc['g1'] = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                       dndz=(z1, pz1), bias=(z1, bz1))
+    trc['g2'] = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                       dndz=(z2, pz2), bias=(z2, bz2))
+    trc['l1'] = ccl.WeakLensingTracer(cosmo, dndz=(z1, pz1))
+    trc['l2'] = ccl.WeakLensingTracer(cosmo, dndz=(z2, pz2))
 
     # Read benchmarks
     bms = {}
@@ -152,10 +155,10 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     # We cut the largest theta value for xi+ because of issues with the
     # benchmarks.
     if kind == 'GG+':
-        xi = ccl.correlation(cosmo, ell, cli, theta_deg[0:14],
+        xi = ccl.correlation(cosmo, ell=ell, C_ell=cli, theta=theta_deg[0:14],
                              type=kind, method=method)
     else:
-        xi = ccl.correlation(cosmo, ell, cli, theta_deg,
+        xi = ccl.correlation(cosmo, ell=ell, C_ell=cli, theta=theta_deg,
                              type=kind, method=method)
     xi *= pref
 

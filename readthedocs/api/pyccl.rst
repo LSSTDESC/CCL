@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   pyccl.baryons
    pyccl.halos
    pyccl.nl_pt
 
@@ -17,18 +18,13 @@ Submodules
    :maxdepth: 4
 
    pyccl.background
-   pyccl.bcm
    pyccl.boltzmann
-   pyccl.cls
-   pyccl.core
+   pyccl.cells
    pyccl.correlations
+   pyccl.cosmology
    pyccl.covariances
    pyccl.errors
-   pyccl.halomodel
-   pyccl.haloprofile
-   pyccl.massfunction
    pyccl.neutrinos
-   pyccl.parameters
    pyccl.pk2d
    pyccl.power
    pyccl.pyutils
