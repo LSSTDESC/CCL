@@ -35,6 +35,7 @@ def get_nmodes(fsky=0.4):
     nmodes.append(lp**2-ls[-1]**2)
     return np.array(nmodes)*0.5*fsky
 
+#likely obsolete
 def get_tracer_kernels():
     filename = root+'/kernels_fullwidth.npz'
     d = np.load(filename)
@@ -46,6 +47,14 @@ def get_tracer_kernels():
             'z_sh': d['z_sh'],
             'chi_sh': d['chi_sh'],
             'kernels_sh': kernels_sh}
+
+def get_tracer_dNdzs():
+    filename = root + '/dNdzs_fullwidth.npz'
+    d = np.load(filename)
+    return {'z_sh':d['z_sh'],
+            'dNdz_sh':d['dNdz_sh'],
+            'z_cl':d['z_cl'],
+            'dNdz_cl':d['dNdz_cl']}
 
 def read_cls():
     d = np.load(root + '/benchmarks_nl_full_clgg.npz')
@@ -65,23 +74,17 @@ def set_up():
                                    h=par['h'], n_s=par['n_s'],
                                    A_s=par['A_s'], w0=par['w0'])
     tpar = get_tracer_parameters()
-    ker = get_tracer_kernels()
+    #ker = get_tracer_kernels()
+    Nzs = get_tracer_dNdzs()
 
-    a_g = 1./(1+ker['z_cl'][::-1])    
     t_g = []
-    for k in ker['kernels_cl']:
-        t = ccl.Tracer()
-        barr = np.ones_like(a_g)
-        t.add_tracer(cosmo,
-                        kernel = (ker['chi_cl'], k),
-                        transfer_a=(a_g, barr))
+    for Nz,bias in zip(Nzs['dNdz_cl'].T,tpar['b_g']):
+        
+        t = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(Nzs['z_cl'], Nz), bias=(Nzs['z_cl'],bias*np.ones(len(Nzs['z_cl']))))
         t_g.append(t)
     t_s = []
-    for k in ker['kernels_sh']:
-        t = ccl.Tracer()
-        t.add_tracer(cosmo,
-                        kernel = (ker['chi_sh'], k),
-                        der_bessel=-1, der_angles=2)
+    for Nz in Nzs['dNdz_sh'].T:
+        t = ccl.WeakLensingTracer(cosmo, dndz=(Nzs['z_sh'], Nz))
         t_s.append(t)
     ells = get_ells()
     raw_truth = read_cls()
@@ -143,7 +146,7 @@ def test_cells(set_up, method, cross_type):
     t0 = time.time()
     chi2max = 0
     for pair_index, (i1, i2) in enumerate(indices[cross_type]):
-        cls = ccl.angular_cl(cosmo, tracers1[cross_type][i1], tracers2[cross_type][i2], ells, l_limber=-1, non_limber_integration_method=method)
+        cls = ccl.angular_cl(cosmo, tracers1[cross_type][i1], tracers2[cross_type][i2], ells, l_limber='auto', non_limber_integration_method=method)
         chi2 = (cls - truth[cross_type][pair_index,:])**2/errors[cross_type][pair_index]**2
         chi2max = max(chi2.max(), chi2max)
         assert(np.all(chi2<0.3))
@@ -153,7 +156,7 @@ def test_cells(set_up, method, cross_type):
 
 
 
-
+### likely obsolete
 class NonLimberTest:
 
     def __init__(self):
