@@ -8,11 +8,20 @@ from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
 from .pyutils import integ_types
 from .nonlimber_FKEM import *
 
-def angular_cl(cosmo, tracer1, tracer2, ell, *,
-               p_of_k_a=DEFAULT_POWER_SPECTRUM,
-               l_limber=-1, limber_max_error=0.01,  
-               limber_integration_method='qag_quad', non_limber_integration_method='FKEM', 
-               return_meta=False):
+
+def angular_cl(
+    cosmo,
+    tracer1,
+    tracer2,
+    ell,
+    *,
+    p_of_k_a=DEFAULT_POWER_SPECTRUM,
+    l_limber=-1,
+    limber_max_error=0.01,
+    limber_integration_method="qag_quad",
+    non_limber_integration_method="FKEM",
+    return_meta=False
+):
 
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
@@ -47,32 +56,34 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
         :obj:`float` or `array`: Angular (cross-)power spectrum values, \
             :math:`C_\\ell`, for the pair of tracers, as a function of \
             :math:`\\ell`.
-    """ # noqa
-    if cosmo['Omega_k'] != 0:
+    """  # noqa
+    if cosmo["Omega_k"] != 0:
         warnings.warn(
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
-            category=CCLWarning)
+            category=CCLWarning,
+        )
 
     if limber_integration_method not in integ_types:
-        raise ValueError("Limber integration method %s not supported" %
-                         limber_integration_method)
-    if non_limber_integration_method not in ['FKEM','MATTER']:
-        raise ValueError("Non-Limber integration method %s not supported" %
-                         limber_integration_method)
-    if type(l_limber)==str:
-        if (l_limber!='auto'):
+        raise ValueError(
+            "Limber integration method %s not supported" % limber_integration_method
+        )
+    if non_limber_integration_method not in ["FKEM", "MATTER"]:
+        raise ValueError(
+            "Non-Limber integration method %s not supported" % limber_integration_method
+        )
+    if type(l_limber) == str:
+        if l_limber != "auto":
             raise ValueError("l_limber cannot be a string other than 'auto'")
-        auto_limber=True
+        auto_limber = True
     else:
-        auto_limber=False
+        auto_limber = False
 
     # we need the distances for the integrals
     cosmo.compute_distances()
 
     # Access ccl_cosmology object
     cosmo_in = cosmo
-    
 
     psp = cosmo_in.parse_pk2d(p_of_k_a, is_linear=False)
 
@@ -91,39 +102,49 @@ def angular_cl(cosmo, tracer1, tracer2, ell, *,
     if not (np.diff(ell_use) > 0).all():
         raise ValueError("ell values must be monotonically increasing")
 
-    if auto_limber or (type(l_limber)!=str and ell_use[0]<l_limber):
-        if non_limber_integration_method=='FKEM':
-            l_limber, cl_non_limber, status = nonlimber_FKEM(cosmo, tracer1, tracer2, p_of_k_a, ell_use, l_limber, limber_max_error)
-        else: #it has to be matter, since we checked the input
-            l_limber, cl_non_limber, status = implement_MATTER (cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error)
+    if auto_limber or (type(l_limber) != str and ell_use[0] < l_limber):
+        if non_limber_integration_method == "FKEM":
+            l_limber, cl_non_limber, status = nonlimber_FKEM(
+                cosmo, tracer1, tracer2, p_of_k_a, ell_use, l_limber, limber_max_error
+            )
+        else:  # it has to be matter, since we checked the input
+            l_limber, cl_non_limber, status = implement_MATTER(
+                cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error
+            )
         if status != 0:
-            raise ValueError("Error in non-Limber integrator.")    
+            raise ValueError("Error in non-Limber integrator.")
     else:
         cl_non_limber = np.array([])
     cosmo = cosmo.cosmo
-    ell_use_limber = ell_use[ell_use>l_limber]
+    ell_use_limber = ell_use[ell_use > l_limber]
     # Return Cl values, according to whether ell is an array or not
     if len(ell_use_limber) > 0:
         cl_limber, status = lib.angular_cl_vec_limber(
-            cosmo, clt1, clt2, psp, 
-            ell_use_limber, integ_types[limber_integration_method],
-            ell_use_limber.size, status)
+            cosmo,
+            clt1,
+            clt2,
+            psp,
+            ell_use_limber,
+            integ_types[limber_integration_method],
+            ell_use_limber.size,
+            status,
+        )
         if status != 0:
-            raise ValueError("Error in Limber integrator.")    
+            raise ValueError("Error in Limber integrator.")
     else:
         cl_limber = np.array([])
 
     # put pieces together
-    cl = np.concatenate((cl_non_limber,cl_limber))
+    cl = np.concatenate((cl_non_limber, cl_limber))
     if np.ndim(ell) == 0:
         cl = cl[0]
-    
+
     # Free up tracer collections
     lib.cl_tracer_collection_t_free(clt1)
     lib.cl_tracer_collection_t_free(clt2)
-    
+
     if return_meta:
-        meta = {'l_limber': l_limber} # add other things as needed
+        meta = {"l_limber": l_limber}  # add other things as needed
 
     check(status, cosmo=cosmo_in)
-    return (cl,meta) if return_meta else cl
+    return (cl, meta) if return_meta else cl
