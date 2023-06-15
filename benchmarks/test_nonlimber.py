@@ -139,17 +139,21 @@ def set_up():
     indices = {'gg':indices_gg, 'gs':indices_gs, 'ss':indices_ss}
     return cosmo, ells, tracers1, tracers2, truth, errors, indices
     
-@pytest.mark.parametrize("method",['FKEM'])
+@pytest.mark.parametrize("method",[None,'FKEM'])
 @pytest.mark.parametrize("cross_type", ['gg','gs','ss'])
 def test_cells(set_up, method, cross_type):
     cosmo, ells, tracers1, tracers2, truth, errors, indices = set_up
     t0 = time.time()
     chi2max = 0
     for pair_index, (i1, i2) in enumerate(indices[cross_type]):
-        cls = ccl.angular_cl(cosmo, tracers1[cross_type][i1], tracers2[cross_type][i2], ells, l_limber='auto', non_limber_integration_method=method)
+        if method is None:
+            cls = ccl.angular_cl(cosmo, tracers1[cross_type][i1], tracers2[cross_type][i2], ells, l_limber=-1)
+        else:
+            cls = ccl.angular_cl(cosmo, tracers1[cross_type][i1], tracers2[cross_type][i2], ells, l_limber='auto', non_limber_integration_method=method)
         chi2 = (cls - truth[cross_type][pair_index,:])**2/errors[cross_type][pair_index]**2
         chi2max = max(chi2.max(), chi2max)
-        assert(np.all(chi2<0.3))
+        if method is not None: # Limber is going to fail by default
+            assert(np.all(chi2<0.3))
     t1 = time.time()
     print(f"Time taken for {method} on {cross_type} = {(t1-t0):3.2f}; worst chi2 = {chi2max:5.3f}")
     return cls
