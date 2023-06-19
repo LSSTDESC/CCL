@@ -18,8 +18,8 @@ def build_data_dict(stats_arr, prefix):
     for n in range(N_thres):
         for j in range(N_z):
             for m in range(N_kbins):
-                key = "tot_%s_h%d_k%d_z%d" % (prefix, n+1, m+1, j+1)
-                data_dict[key] = stats_arr[:,n, j, m]
+                key = "tot_%s_h%d_k%d_z%d" % (prefix, n + 1, m + 1, j + 1)
+                data_dict[key] = stats_arr[:, n, j, m]
     return data_dict
 
 
@@ -64,7 +64,7 @@ def load_hypercube(fname):
         values for all sample points (values).
     """
     # Get header
-    f = open(fname, 'r')
+    f = open(fname, "r")
     hdr = f.readline()[2:-1].split(" ")
     f.close()
 
@@ -118,7 +118,6 @@ def generate_latin_hypercube(samples, param_dict, class_root, seed=10):
 
     # Generate samples until there are no indices left to choose
     for i in range(samples):
-
         # Randomly choose index and then remove the number that was chosen
         # (Latin hypercubes require at most one item per row and column)
         for j, p in enumerate(pnames):
@@ -126,15 +125,25 @@ def generate_latin_hypercube(samples, param_dict, class_root, seed=10):
             idx = random.choice(l[j])
 
             # Get value at this sample point (add 0.5 to idx get bin centroid)
-            sample_points[p][i] = pmin + (pmax - pmin) \
-                                * (idx + 0.5) / float(samples)
-            l[j].remove(idx) # Remove choice from list (sampling w/o replacement)
+            sample_points[p][i] = pmin + (pmax - pmin) * (idx + 0.5) / float(
+                samples
+            )
+            l[j].remove(
+                idx
+            )  # Remove choice from list (sampling w/o replacement)
 
     return sample_points
 
 
-def generate_ccl_pspec(sample_points, root, class_data_root, zvals,
-                       default_params=None, nonlin=False, mode='std'):
+def generate_ccl_pspec(
+    sample_points,
+    root,
+    class_data_root,
+    zvals,
+    default_params=None,
+    nonlin=False,
+    mode="std",
+):
     """
     Generate linear and non-linear power spectra using CCL, for a set of
     points in cosmological parameter space and redshift.
@@ -176,31 +185,31 @@ def generate_ccl_pspec(sample_points, root, class_data_root, zvals,
         # Load the CLASS power spectra to get k bins (lin and NL can differ!)
         class_file = "%s_%05dz1_pk.dat" % (class_data_root, i)
         k_class, pk_class = np.genfromtxt(class_file).T
-        k_class *= sample_points['h'][i] # Convert to non-h^-1 units
+        k_class *= sample_points["h"][i]  # Convert to non-h^-1 units
 
         if nonlin:
             class_file_nl = "%s_%05dz1_pk_nl.dat" % (class_data_root, i)
             k_class_nl, pk_class_nl = np.genfromtxt(class_file_nl).T
-            k_class_nl *= sample_points['h'][i] # Convert to non-h^-1 units
+            k_class_nl *= sample_points["h"][i]  # Convert to non-h^-1 units
 
         # Build parameter dictionary
         params = {}
         for p in sample_points.keys():
             # Treat parameters with different naming conventions as special case
-            if p == 'Omega_cdm':
-                params['Omega_c'] = sample_points[p][i]
+            if p == "Omega_cdm":
+                params["Omega_c"] = sample_points[p][i]
             else:
                 params[p] = sample_points[p][i]
 
         # Instantiate CCL Cosmology object with this set of parameters
-        params['transfer_function'] = 'boltzmann'
+        params["transfer_function"] = "boltzmann"
         cosmo = ccl.Cosmology(**params)
 
         # Loop over redshifts to get linear and nonlinear matter power spectra
         errored = []
         for j, z in enumerate(zvals):
             try:
-                a = 1. / (1. + z)
+                a = 1.0 / (1.0 + z)
                 pk_lin = ccl.linear_matter_power(cosmo, k_class, a)
                 if nonlin:
                     pk_nl = ccl.nonlin_matter_power(cosmo, k_class_nl, a)
@@ -214,20 +223,26 @@ def generate_ccl_pspec(sample_points, root, class_data_root, zvals,
 
             # Save datafiles
             if nonlin:
-                fname_nl = "%s_nl_%s_%05d_z%d.dat" % (root, mode, i, j+1)
+                fname_nl = "%s_nl_%s_%05d_z%d.dat" % (root, mode, i, j + 1)
                 np.savetxt(fname_nl, np.column_stack((k_class_nl, pk_nl)))
             else:
-                fname_lin = "%s_lin_%s_%05d_z%d.dat" % (root, mode, i, j+1)
+                fname_lin = "%s_lin_%s_%05d_z%d.dat" % (root, mode, i, j + 1)
                 np.savetxt(fname_lin, np.column_stack((k_class, pk_lin)))
 
     # Print runs that errored
-    if len(errored) > 0: print("ERRORED:")
+    if len(errored) > 0:
+        print("ERRORED:")
     for err in errored:
         print(err)
 
 
-def generate_class_ini(sample_points, root, nonlinear=False, mnu=False,
-                       redshifts=np.arange(0., 3., 0.5)):
+def generate_class_ini(
+    sample_points,
+    root,
+    nonlinear=False,
+    mnu=False,
+    redshifts=np.arange(0.0, 3.0, 0.5),
+):
     """
     Generate CLASS .ini files for a set of parameters.
 
@@ -257,20 +272,21 @@ def generate_class_ini(sample_points, root, nonlinear=False, mnu=False,
 
     # Loop over sample points
     for i in range(Nsamp):
-        if i % 10 == 0: print("  Writing CLASS .ini file %d / %d" % (i, Nsamp))
+        if i % 10 == 0:
+            print("  Writing CLASS .ini file %d / %d" % (i, Nsamp))
 
         # Open file for writing
-        f = open("%s_%05d.ini" % (root, i), 'w')
+        f = open("%s_%05d.ini" % (root, i), "w")
 
         # Write output location into file (will be same as .ini file location)
-        f.write('root = %s_%05d\n' % (root, i))
+        f.write("root = %s_%05d\n" % (root, i))
 
         # Write user-defined cosmo parameters into file
         for p in pnames:
             # Handle commonly-used params that CLASS uses different names for
-            if p == 'w0' or p == 'w_0':
+            if p == "w0" or p == "w_0":
                 f.write("w0_fld = %e\n" % sample_points[p][i])
-            elif p == 'wa' or p == 'w_a':
+            elif p == "wa" or p == "w_a":
                 f.write("wa_fld = %e\n" % sample_points[p][i])
             else:
                 # Generic user-defined parameters
@@ -280,17 +296,20 @@ def generate_class_ini(sample_points, root, nonlinear=False, mnu=False,
         f.write("z_pk = %s\n" % (",".join(["%3.3f" % z for z in redshifts])))
 
         # Write nonlinear switch to file, if specified
-        if nonlinear: f.write("non linear = halofit\n")
+        if nonlinear:
+            f.write("non linear = halofit\n")
 
         # Write curvature parameter
-        if 'Omega_k' not in pnames: f.write('Omega_k = 0.0\n')
+        if "Omega_k" not in pnames:
+            f.write("Omega_k = 0.0\n")
 
         # Write neutrino parameters
         N_ur = 2.0328 if mnu else 3.046
         N_ncdm = 1 if mnu else 0
         f.write("N_ur = %f\n" % N_ur)
         f.write("N_ncdm = %f\n" % N_ncdm)
-        if mnu: f.write("m_ncdm = 0.06\n")
+        if mnu:
+            f.write("m_ncdm = 0.06\n")
 
         # Add various default CLASS settings to file
         # NB: Need to set P_k_max_h/Mpc to a large value if doing halofit
@@ -371,15 +390,18 @@ def run_class(fname_pattern, class_root, precision=False):
     # Loop over all .ini files
     failed = []
     for i, filename in enumerate(fnames):
-        print("CLASS run %d / %d (%s)" % (i+1, len(fnames), filename))
+        print("CLASS run %d / %d (%s)" % (i + 1, len(fnames), filename))
 
         # Run CLASS and save the output
-        cmd = ['%s/class' % class_root, filename]
-        if precision: cmd += ['%s/pk_ref.pre' % class_root,]
+        cmd = ["%s/class" % class_root, filename]
+        if precision:
+            cmd += [
+                "%s/pk_ref.pre" % class_root,
+            ]
         try:
             stdout = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-            basefile = os.path.splitext('%s' % filename)[0]
-            f = open('%s.txt' % basefile, 'w')
+            basefile = os.path.splitext("%s" % filename)[0]
+            f = open("%s.txt" % basefile, "w")
             f.write(stdout)
             f.close()
         except KeyboardInterrupt:
@@ -391,11 +413,15 @@ def run_class(fname_pattern, class_root, precision=False):
             failed.append(i)
 
 
-def load_summary_stats(sample_points, ccl_data_root, class_data_root,
-                       thresholds=[5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2],
-                       scale_ranges = [(1e-4, 1e-2), (1e-2, 1e-1), (1e-1, 1e0)],
-                       z_vals = ['1', '2', '3', '4', '5', '6'],
-                       cache_name=None):
+def load_summary_stats(
+    sample_points,
+    ccl_data_root,
+    class_data_root,
+    thresholds=[5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2],
+    scale_ranges=[(1e-4, 1e-2), (1e-2, 1e-1), (1e-1, 1e0)],
+    z_vals=["1", "2", "3", "4", "5", "6"],
+    cache_name=None,
+):
     """
     Calculate summary stats for the deviation between CCL and reference power
     spectra as a function of scale and redshift, for a large number of sample
@@ -451,58 +477,66 @@ def load_summary_stats(sample_points, ccl_data_root, class_data_root,
         print("  Loading power spectra for parameter set %05d" % i)
 
         # Get Hubble parameter, h, for rescaling CLASS P(k) to Mpc units
-        h = sample_points['h'][i]
+        h = sample_points["h"][i]
 
         # Try to get deviation
         try:
-          # Loop over redshift values
-          for j in range(N_z):
+            # Loop over redshift values
+            for j in range(N_z):
+                # Construct filenames for CCL and CLASS P(k) data files
+                fname_ccl = "%s_%05d_z%d.dat" % (ccl_data_root, i, j + 1)
+                if "_nl_" in class_data_root:
+                    fname_class = "%s_%05dz%d_pk_nl.dat" % (
+                        class_data_root,
+                        i,
+                        j + 1,
+                    )
+                else:
+                    fname_class = "%s_%05dz%d_pk.dat" % (
+                        class_data_root,
+                        i,
+                        j + 1,
+                    )
 
-            # Construct filenames for CCL and CLASS P(k) data files
-            fname_ccl = "%s_%05d_z%d.dat" % (ccl_data_root, i, j+1)
-            if '_nl_' in class_data_root:
-                fname_class = "%s_%05dz%d_pk_nl.dat" % (class_data_root, i, j+1)
-            else:
-                fname_class = "%s_%05dz%d_pk.dat" % (class_data_root, i, j+1)
+                # Load CCL power spectrum data
+                pk_ccl_dat = np.loadtxt(fname_ccl)
+                ccl_k = pk_ccl_dat[:, 0]
+                ccl_pk = pk_ccl_dat[:, 1]
 
-            # Load CCL power spectrum data
-            pk_ccl_dat = np.loadtxt(fname_ccl)
-            ccl_k = pk_ccl_dat[:,0]
-            ccl_pk = pk_ccl_dat[:,1]
+                # Load CLASS power spectrum data
+                pk_class_dat = np.loadtxt(fname_class)  # , skiprows=1)
+                class_k = pk_class_dat[:, 0]
+                class_pk = pk_class_dat[:, 1] / h**3.0
 
-            # Load CLASS power spectrum data
-            pk_class_dat = np.loadtxt(fname_class) #, skiprows=1)
-            class_k = pk_class_dat[:,0]
-            class_pk = pk_class_dat[:,1] / h**3.
+                # Sanity checks
+                print(ccl_pk.size, class_pk.size)
+                assert ccl_pk.size == class_pk.size
 
-            # Sanity checks
-            print(ccl_pk.size, class_pk.size)
-            assert ccl_pk.size == class_pk.size
+                # Calculate fractional deviation
+                frac_dev[i][j] = ccl_pk / class_pk - 1.0
+                k_arr[i][j] = ccl_k
 
-            # Calculate fractional deviation
-            frac_dev[i][j] = ccl_pk/class_pk - 1.
-            k_arr[i][j] = ccl_k
+                # Calculate summary stats in each k bin
+                for m in range(N_kbins):
+                    kmin, kmax = scale_ranges[m]
+                    idxs = np.logical_and(ccl_k >= kmin, ccl_k < kmax)
 
-            # Calculate summary stats in each k bin
-            for m in range(N_kbins):
-                kmin, kmax = scale_ranges[m]
-                idxs = np.logical_and(ccl_k >= kmin, ccl_k < kmax)
+                    # Calculate deviation statistic, Delta, for a range of
+                    # threshold values (only values above the threshold are counted)
+                    for n, thres in enumerate(thresholds):
+                        # Calculate deviation statistic
+                        dev = np.log10(
+                            np.abs(ccl_pk[idxs] / class_pk[idxs] - 1.0) / thres
+                        )
+                        dev[np.where(dev < 0.0)] = 0.0
 
-                # Calculate deviation statistic, Delta, for a range of
-                # threshold values (only values above the threshold are counted)
-                for n, thres in enumerate(thresholds):
-                    # Calculate deviation statistic
-                    dev = np.log10(
-                               np.abs(ccl_pk[idxs]/class_pk[idxs] - 1.) / thres)
-                    dev[np.where(dev < 0.)] = 0.
-
-                    # Store result in stats array (N_samp, N_thres, N_z, N_kbins)
-                    stats[i, n, j, m] = np.sum(dev)
+                        # Store result in stats array (N_samp, N_thres, N_z, N_kbins)
+                        stats[i, n, j, m] = np.sum(dev)
         except:
-          raise
-          # If there were any failures, set stats to 'nan' for this sample point
-          print("  Failed to compute stats for sample %05d." % i)
-          stats[i, :, :, :] = np.nan
+            raise
+            # If there were any failures, set stats to 'nan' for this sample point
+            print("  Failed to compute stats for sample %05d." % i)
+            stats[i, :, :, :] = np.nan
 
     # Save to cache file
     if cache_name is not None:
@@ -512,19 +546,21 @@ def load_summary_stats(sample_points, ccl_data_root, class_data_root,
     return stats, np.array(frac_dev), k_arr
 
 
-def ccl_summary_stats(params,
-                      fname_template='../stats/lhs_mpk_err_lin_%05d_z%d.dat',
-                      thresholds=[5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2],
-                      scale_ranges = [(1e-4, 1e-2), (1e-2, 1e-1), (1e-1, 1e0)],
-                      z_vals = ['1', '2', '3', '4', '5', '6'],
-                      cache_name=None):
+def ccl_summary_stats(
+    params,
+    fname_template="../stats/lhs_mpk_err_lin_%05d_z%d.dat",
+    thresholds=[5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2],
+    scale_ranges=[(1e-4, 1e-2), (1e-2, 1e-1), (1e-1, 1e0)],
+    z_vals=["1", "2", "3", "4", "5", "6"],
+    cache_name=None,
+):
     """
     Calculate summary stats for the deviation between CCL and reference power
     spectra as a function of scale and redshift, for a large number of sample
     points over the cosmological parameter space.
     """
     # Get dimensions of stats array that will be constructed
-    N_samp = params['id'].size
+    N_samp = params["id"].size
     N_thres = len(thresholds)
     N_z = len(z_vals)
     N_kbins = len(scale_ranges)
@@ -545,17 +581,16 @@ def ccl_summary_stats(params,
 
     # Loop over sample points in parameter space and calculate summary stats
     for i in range(N_samp):
-        trial = params['id'][i]
+        trial = params["id"][i]
         print("  Loading CCL power spectra for parameter set %05d" % i)
 
         # Loop over redshift values
         for j in range(N_z):
-
             # Load cached CCL power spectrum data
             fname = fname_template % (i, z_vals[j])
             pk_ccl_dat = np.loadtxt(fname, skiprows=1)
-            ccl_k = pk_ccl_dat[:,0]
-            ccl_pk = pk_ccl_dat[:,1]
+            ccl_k = pk_ccl_dat[:, 0]
+            ccl_pk = pk_ccl_dat[:, 1]
 
             # Calculate summary stats in each k bin
             for m in range(N_kbins):
@@ -569,7 +604,7 @@ def ccl_summary_stats(params,
                 for n, thres in enumerate(thresholds):
                     # Calculate deviation statistic
                     dev = np.log10(np.abs(ccl_pk[idxs]) / thres)
-                    dev[np.where(dev < 0.)] = 0.
+                    dev[np.where(dev < 0.0)] = 0.0
 
                     # Store result in stats array (N_samp, N_thres, N_z, N_kbins)
                     stats[i, n, j, m] = np.sum(dev)

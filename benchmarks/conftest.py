@@ -10,4 +10,5 @@ def pytest_addoption(parser):
 def pytest_generate_tests(metafunc):
     if metafunc.config.getoption("use_cache"):
         import pyccl
+
         pyccl.Caching.enable()

@@ -1,7 +1,6 @@
 import numpy as np
 import pyccl as ccl
 import time
-import os
 import pytest
 
 root = "benchmarks/data/nonlimber/"
@@ -107,7 +106,6 @@ def set_up():
 
     t_g = []
     for Nz, bias in zip(Nzs["dNdz_cl"].T, tpar["b_g"]):
-
         t = ccl.NumberCountsTracer(
             cosmo,
             has_rsd=False,
@@ -153,7 +151,7 @@ def set_up():
     assert tgs.shape == (len(indices_gs), Nell)
     assert tss.shape == (len(indices_ss), Nell)
 
-    ## now generate errors
+    # now generate errors
     err_gg = []
     err_gs = []
     err_ss = []
@@ -221,14 +219,15 @@ def test_cells(set_up, method, cross_type):
                 l_limber="auto",
                 non_limber_integration_method=method,
             )
-        chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / errors[cross_type][
-            pair_index
-        ] ** 2
+        chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / errors[
+            cross_type
+        ][pair_index] ** 2
         chi2max = max(chi2.max(), chi2max)
         if method is not None:  # Limber is going to fail by default
             assert np.all(chi2 < 0.3)
     t1 = time.time()
     print(
-        f"Time taken for {method} on {cross_type} = {(t1-t0):3.2f}; worst chi2 = {chi2max:5.3f}"
+        f'Time taken for {method} on {cross_type} = {(t1-t0):3.2f};\
+        worst chi2 = {chi2max:5.3f}'
     )
     return cls

@@ -13,8 +13,9 @@ import numpy as np
 dirdat = os.path.join(os.path.dirname(__file__), "data")
 
 # Planck18 used in Uchuu simulations
-COSMO = ccl.Cosmology(Omega_c=0.2589, Omega_b=0.0486, h=0.6774,
-                      sigma8=0.8159, n_s=0.9667)
+COSMO = ccl.Cosmology(
+    Omega_c=0.2589, Omega_b=0.0486, h=0.6774, sigma8=0.8159, n_s=0.9667
+)
 COSMO.compute_sigma()
 H100 = COSMO["h"]
 
@@ -26,17 +27,21 @@ UCHUU_DATA_SCATTER = 0.035
 M_min, M_max = 1e8, 1e16
 
 
-@pytest.mark.parametrize("pars",
-                         [{"Delta": 200, "relaxed": False, "Vmax": False},
-                          {"Delta": 200, "relaxed": False, "Vmax": True},
-                          {"Delta": 200, "relaxed": True, "Vmax": False},
-                          {"Delta": 200, "relaxed": True, "Vmax": True},
-                          {"Delta": "vir", "relaxed": False, "Vmax": False},
-                          {"Delta": "vir", "relaxed": False, "Vmax": True},
-                          {"Delta": "vir", "relaxed": True, "Vmax": False},
-                          {"Delta": "vir", "relaxed": True, "Vmax": True},
-                          {"Delta": 500, "relaxed": False, "Vmax": False},
-                          {"Delta": 500, "relaxed": True, "Vmax": False}])
+@pytest.mark.parametrize(
+    "pars",
+    [
+        {"Delta": 200, "relaxed": False, "Vmax": False},
+        {"Delta": 200, "relaxed": False, "Vmax": True},
+        {"Delta": 200, "relaxed": True, "Vmax": False},
+        {"Delta": 200, "relaxed": True, "Vmax": True},
+        {"Delta": "vir", "relaxed": False, "Vmax": False},
+        {"Delta": "vir", "relaxed": False, "Vmax": True},
+        {"Delta": "vir", "relaxed": True, "Vmax": False},
+        {"Delta": "vir", "relaxed": True, "Vmax": True},
+        {"Delta": 500, "relaxed": False, "Vmax": False},
+        {"Delta": 500, "relaxed": True, "Vmax": False},
+    ],
+)
 def test_concentration_Ishiyama21(pars):
     Delta = pars["Delta"]
     key1 = "cvmax" if pars["Vmax"] else "crs"
@@ -47,16 +52,16 @@ def test_concentration_Ishiyama21(pars):
     M = data[:, 0]
 
     # mass cutoff at CCL integration boundaries
-    data = data[(M > M_min/H100) & (M < M_max/H100)]
-    M_use = M[(M > M_min/H100) & (M < M_max/H100)]
+    data = data[(M > M_min / H100) & (M < M_max / H100)]
+    M_use = M[(M > M_min / H100) & (M < M_max / H100)]
 
     hmd = ccl.halos.MassDef(Delta, "critical")
 
-    cm = ccl.halos.ConcentrationIshiyama21(mass_def=hmd,
-                                           relaxed=pars["relaxed"],
-                                           Vmax=pars["Vmax"])
+    cm = ccl.halos.ConcentrationIshiyama21(
+        mass_def=hmd, relaxed=pars["relaxed"], Vmax=pars["Vmax"]
+    )
 
     for i, zz in enumerate(Z):
-        dat = data[:, i+1]
-        mod = cm(COSMO, M_use/H100, 1/(1+zz))
+        dat = data[:, i + 1]
+        mod = cm(COSMO, M_use / H100, 1 / (1 + zz))
         assert np.allclose(mod, dat, rtol=UCHUU_DATA_SCATTER)

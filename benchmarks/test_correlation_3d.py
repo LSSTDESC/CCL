@@ -13,7 +13,7 @@ CORR_TOLERANCE1 = [3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2]
 CORR_TOLERANCE2 = [3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2, 3.0e-2]
 
 
-@pytest.mark.parametrize('model', list(range(3)))
+@pytest.mark.parametrize("model", list(range(3)))
 def test_correlation_3d(model):
     Omega_v = [0.7, 0.7, 0.7, 0.65, 0.75]
     w_0 = [-1.0, -0.9, -0.9, -0.9, -0.9]
@@ -25,16 +25,18 @@ def test_correlation_3d(model):
         h=0.7,
         sigma8=0.8,
         n_s=0.96,
-        Neff=3.046, T_CMB=2.725,
-        mass_split='normal',
+        Neff=3.046,
+        T_CMB=2.725,
+        mass_split="normal",
         Omega_g=0,
         Omega_k=1.0 - 0.25 - 0.05 - Omega_v[model],
         w0=w_0[model],
         wa=w_a[model],
-        transfer_function='bbks',
-        matter_power_spectrum='halofit')
+        transfer_function="bbks",
+        matter_power_spectrum="halofit",
+    )
 
-    data = np.loadtxt("./benchmarks/data/model%d_xi.txt" % (model+1))
+    data = np.loadtxt("./benchmarks/data/model%d_xi.txt" % (model + 1))
     N1 = 40
     data1 = data[:N1, :]
     r1 = data1[:, 0]
@@ -46,9 +48,9 @@ def test_correlation_3d(model):
         a = 1.0 / (1 + z)
 
         xi1 = ccl.correlation_3d(cosmo, a=a, r=r1)
-        err = np.abs(r1*r1*(xi1-data1[:, zind+1]))
+        err = np.abs(r1 * r1 * (xi1 - data1[:, zind + 1]))
         assert np.allclose(err, 0, rtol=0, atol=CORR_TOLERANCE1[zind])
 
         xi2 = ccl.correlation_3d(cosmo, a=a, r=data2[:, 0])
-        err = np.abs(r2*r2*(xi2-data2[:, zind+1]))
+        err = np.abs(r2 * r2 * (xi2 - data2[:, zind + 1]))
         assert np.allclose(err, 0, rtol=0, atol=CORR_TOLERANCE1[zind])

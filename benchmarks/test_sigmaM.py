@@ -2,14 +2,12 @@ import numpy as np
 import pyccl as ccl
 import pytest
 
-SIGMAM_TOLERANCE = 3.0E-5
+SIGMAM_TOLERANCE = 3.0e-5
 
 
 @pytest.mark.parametrize(
-    'model,w0,wa',
-    [(1, -1.0, 0.0),
-     (2, -0.9, 0.0),
-     (3, -0.9, 0.1)])
+    "model,w0,wa", [(1, -1.0, 0.0), (2, -0.9, 0.0), (3, -0.9, 0.1)]
+)
 def test_sigmaM(model, w0, wa):
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
@@ -22,16 +20,17 @@ def test_sigmaM(model, w0, wa):
         w0=w0,
         wa=wa,
         T_CMB=2.7,
-        mass_split='normal',
+        mass_split="normal",
         Omega_g=0,
         Omega_k=0,
-        transfer_function='bbks',
-        matter_power_spectrum='linear')
+        transfer_function="bbks",
+        matter_power_spectrum="linear",
+    )
 
-    data = np.loadtxt('./benchmarks/data/model%d_sm.txt' % model)
+    data = np.loadtxt("./benchmarks/data/model%d_sm.txt" % model)
 
     for i in range(data.shape[0]):
-        m = data[i, 0] / cosmo['h']
+        m = data[i, 0] / cosmo["h"]
         sm = ccl.sigmaM(cosmo, m, 1)
         err = sm / data[i, 1] - 1
         np.allclose(err, 0, rtol=0, atol=SIGMAM_TOLERANCE)
