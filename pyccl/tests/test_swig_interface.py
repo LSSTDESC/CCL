@@ -68,7 +68,7 @@ def test_swig_cls():
         ccllib.cl_tracer_t_new_wrapper(COSMO, 0, 0, *args)
 
     with pytest.raises(CCLError):
-        ccllib.angular_cl_vec_limber(COSMO, None, None, None, 1, 0,
+        ccllib.angular_cl_vec_limber(COSMO, None, None, 1, 0,
                               pyccl.pyutils.integ_types['spline'],
                               "none", status)
 
