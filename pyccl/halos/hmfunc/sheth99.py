@@ -22,14 +22,17 @@ class MassFuncSheth99(MassFunc):
             <https://arxiv.org/abs/astro-ph/9612074>`_. Otherwise use
             :math:`\\delta_c = 1.68647`.
     """
-    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
-                                     "use_delta_c_fit",)
-    name = 'Sheth99'
 
-    def __init__(self, *,
-                 mass_def="fof",
-                 mass_def_strict=True,
-                 use_delta_c_fit=False):
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_def",
+        "mass_def_strict",
+        "use_delta_c_fit",
+    )
+    name = "Sheth99"
+
+    def __init__(
+        self, *, mass_def="fof", mass_def_strict=True, use_delta_c_fit=False
+    ):
         self.use_delta_c_fit = use_delta_c_fit
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
@@ -50,5 +53,9 @@ class MassFuncSheth99(MassFunc):
             delta_c = 1.68647
 
         nu = delta_c / sigM
-        return nu * self.A * (1. + (self.a * nu**2)**(-self.p)) * (
-            np.exp(-self.a * nu**2/2.))
+        return (
+            nu
+            * self.A
+            * (1.0 + (self.a * nu**2) ** (-self.p))
+            * (np.exp(-self.a * nu**2 / 2.0))
+        )

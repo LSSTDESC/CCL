@@ -16,8 +16,9 @@ SPEEDUP = 50
 
 
 def get_cosmo(sigma8):
-    return ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96,
-                         sigma8=sigma8)
+    return ccl.Cosmology(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=sigma8
+    )
 
 
 def cosmo_create_and_compute_linpow(sigma8):
@@ -52,12 +53,12 @@ def test_times():
     ccl.Caching.disable()
     t1 = np.array([timeit_(s8) for s8 in s8_arr[:1]])
     t2 = np.array([timeit_(s8) for s8 in s8_arr[:1]])
-    assert np.abs(np.log10(t2/t1)) < 1.0
+    assert np.abs(np.log10(t2 / t1)) < 1.0
     # But if caching is enabled, the second call will be much faster.
     ccl.Caching.enable()
     t1 = np.array([timeit_(s8) for s8 in s8_arr])
     t2 = np.array([timeit_(s8) for s8 in s8_arr])
-    assert np.all(t1/t2 > SPEEDUP)
+    assert np.all(t1 / t2 > SPEEDUP)
 
 
 def test_caching_fifo():
@@ -75,7 +76,7 @@ def test_caching_fifo():
     # create new and discard oldest
     cosmo_create_and_compute_linpow(0.42)
     t2 = timeit_(sigma8=s8_arr[0])  # cached again
-    assert t2/t1 > SPEEDUP
+    assert t2 / t1 > SPEEDUP
 
 
 def test_caching_lru():
@@ -89,7 +90,7 @@ def test_caching_lru():
     # create new and discard the least recently used
     cosmo_create_and_compute_linpow(0.43)
     t2 = timeit_(sigma8=s8_arr[2])  # retrieved
-    assert np.abs(np.log10(t2/t1)) < 1.0
+    assert np.abs(np.log10(t2 / t1)) < 1.0
 
 
 def test_caching_lfu():
@@ -105,7 +106,7 @@ def test_caching_lfu():
     # create new and discard the least frequently used
     cosmo_create_and_compute_linpow(0.44)
     t2 = timeit_(sigma8=0.43)  # cached again
-    assert t2/t1 > SPEEDUP
+    assert t2 / t1 > SPEEDUP
 
 
 def test_cache_info():
@@ -131,11 +132,13 @@ def test_caching_reset():
 def test_caching_policy_raises():
     """Test that if the set policy is not correct, it raises an exception."""
     with pytest.raises(ValueError):
+
         @ccl.Caching.cache(maxsize=-1)
         def func1():
             return
 
     with pytest.raises(ValueError):
+
         @ccl.Caching.cache(policy="my_policy")
         def func2():
             return

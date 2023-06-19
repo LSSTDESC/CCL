@@ -1,12 +1,23 @@
-__all__ = ("Pk2D", "parse_pk2d", "parse_pk",)
+__all__ = (
+    "Pk2D",
+    "parse_pk2d",
+    "parse_pk",
+)
 
 import warnings
 
 import numpy as np
 
 from . import (
-    CCLObject, DEFAULT_POWER_SPECTRUM, UnlockInstance, check, get_pk_spline_a,
-    get_pk_spline_lk, lib, unlock_instance)
+    CCLObject,
+    DEFAULT_POWER_SPECTRUM,
+    UnlockInstance,
+    check,
+    get_pk_spline_a,
+    get_pk_spline_lk,
+    lib,
+    unlock_instance,
+)
 from . import CCLWarning, CCLError
 from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 
@@ -30,7 +41,7 @@ class Pk2D(CCLObject):
         ``pk(k, a)``. This is vectorized in both ``k`` and ``a``.
 
     Args:
-        a_arr (`array`): 
+        a_arr (`array`):
             An array holding values of the scale factor
         lk_arr (`array`):
             An array holding values of the natural logarithm of the wavenumber
@@ -62,38 +73,61 @@ class Pk2D(CCLObject):
             log-space.
 
     .. automethod:: __call__
-    """ # noqa E501
+    """  # noqa E501
+
     from ._core.repr_ import build_string_Pk2D as __repr__
 
-    def __init__(self, *, a_arr=None, lk_arr=None, pk_arr=None,
-                 is_logp=True, extrap_order_lok=1, extrap_order_hik=2):
+    def __init__(
+        self,
+        *,
+        a_arr=None,
+        lk_arr=None,
+        pk_arr=None,
+        is_logp=True,
+        extrap_order_lok=1,
+        extrap_order_hik=2,
+    ):
         # Make sure input makes sense
         if (a_arr is None) or (lk_arr is None) or (pk_arr is None):
-            raise ValueError("If you do not provide a function, "
-                             "you must provide arrays")
+            raise ValueError(
+                "If you do not provide a function, " "you must provide arrays"
+            )
 
         # Check that `a` is a monotonically increasing array.
         if not (np.diff(a_arr) > 0).all():
-            raise ValueError("Input scale factor array in `a_arr` is not "
-                             "monotonically increasing.")
+            raise ValueError(
+                "Input scale factor array in `a_arr` is not "
+                "monotonically increasing."
+            )
 
         pkflat = pk_arr.flatten()
         # Check dimensions make sense
-        if len(pkflat) != len(a_arr)*len(lk_arr):
+        if len(pkflat) != len(a_arr) * len(lk_arr):
             raise ValueError("Size of input arrays is inconsistent")
 
         status = 0
-        self.psp, status = lib.set_pk2d_new_from_arrays(lk_arr, a_arr, pkflat,
-                                                        int(extrap_order_lok),
-                                                        int(extrap_order_hik),
-                                                        int(is_logp), status)
+        self.psp, status = lib.set_pk2d_new_from_arrays(
+            lk_arr,
+            a_arr,
+            pkflat,
+            int(extrap_order_lok),
+            int(extrap_order_hik),
+            int(is_logp),
+            status,
+        )
         check(status)
 
     @classmethod
-    def from_function(cls, pkfunc, *, is_logp=True,
-                      spline_params=None,
-                      extrap_order_lok=1, extrap_order_hik=2):
-        """ Generates a `Pk2D` object from a function that calculates a power
+    def from_function(
+        cls,
+        pkfunc,
+        *,
+        is_logp=True,
+        spline_params=None,
+        extrap_order_lok=1,
+        extrap_order_hik=2,
+    ):
+        """Generates a `Pk2D` object from a function that calculates a power
         spectrum.
 
         Args:
@@ -116,7 +150,7 @@ class Pk2D(CCLObject):
         Returns:
             :class:`~pyccl.pk2d.Pk2D`
                 Power spectrum object.
-        """ # noqa E501
+        """  # noqa E501
         if spline_params is None:
             from . import spline_params
         # Set k and a sampling from CCL parameters
@@ -126,9 +160,14 @@ class Pk2D(CCLObject):
         # Compute power spectrum on 2D grid
         pk_arr = np.array([pkfunc(k=np.exp(lk_arr), a=a) for a in a_arr])
 
-        return cls(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
-                   is_logp=is_logp, extrap_order_lok=extrap_order_lok,
-                   extrap_order_hik=extrap_order_hik)
+        return cls(
+            a_arr=a_arr,
+            lk_arr=lk_arr,
+            pk_arr=pk_arr,
+            is_logp=is_logp,
+            extrap_order_lok=extrap_order_lok,
+            extrap_order_hik=extrap_order_hik,
+        )
 
     def __eq__(self, other):
         # Check object id.
@@ -141,21 +180,26 @@ class Pk2D(CCLObject):
         if not (self or other):
             return True
         # Check extrapolation orders.
-        if not (self.extrap_order_lok == other.extrap_order_lok
-                and self.extrap_order_hik == other.extrap_order_hik):
+        if not (
+            self.extrap_order_lok == other.extrap_order_lok
+            and self.extrap_order_hik == other.extrap_order_hik
+        ):
             return False
         # Check the individual splines.
         a1, lk1, pk1 = self.get_spline_arrays()
         a2, lk2, pk2 = other.get_spline_arrays()
-        return ((a1 == a2).all() and (lk1 == lk2).all()
-                and np.array_equal(pk1, pk2))
+        return (
+            (a1 == a2).all()
+            and (lk1 == lk2).all()
+            and np.array_equal(pk1, pk2)
+        )
 
     def __hash__(self):
         return hash(repr(self))
 
     @property
     def has_psp(self):
-        return 'psp' in vars(self)
+        return "psp" in vars(self)
 
     @property
     def extrap_order_lok(self):
@@ -173,7 +217,7 @@ class Pk2D(CCLObject):
         Arguments:
             cosmo (:class:`~pyccl.cosmology.Cosmology`)
                 A Cosmology object.
-            model (:obj:`str`) 
+            model (:obj:`str`)
                 Model to use. These models allowed:
                   - ``'bbks'`` (`Bardeen et al. <https://ui.adsabs.harvard.edu/abs/1986ApJ...304...15B/abstract>`_).
                   - ``'eisenstein_hu'`` (`Eisenstein & Hu <https://arxiv.org/abs/astro-ph/9709112>`_).
@@ -187,16 +231,16 @@ class Pk2D(CCLObject):
 
         pk2d = Pk2D.__new__(cls)
         status = 0
-        if model == 'bbks':
+        if model == "bbks":
             cosmo.compute_growth()
             ret = lib.compute_linpower_bbks(cosmo.cosmo, status)
-        elif model == 'eisenstein_hu':
+        elif model == "eisenstein_hu":
             cosmo.compute_growth()
             ret = lib.compute_linpower_eh(cosmo.cosmo, 1, status)
-        elif model == 'eisenstein_hu_nowiggles':
+        elif model == "eisenstein_hu_nowiggles":
             cosmo.compute_growth()
             ret = lib.compute_linpower_eh(cosmo.cosmo, 0, status)
-        elif model == 'emu':
+        elif model == "emu":
             ret = lib.compute_power_emu(cosmo.cosmo, status)
         else:
             raise ValueError(f"Invalid model {model}.")
@@ -222,7 +266,7 @@ class Pk2D(CCLObject):
         Return:
             :class:`Pk2D` object containing the non-linear power spectrum after
             applying HALOFIT.
-        """ # noqa 501
+        """  # noqa 501
 
         if cosmo["wa"] != 0:
             # HALOFIT translates (w0, wa) to a w0_eff. This requires computing
@@ -230,15 +274,17 @@ class Pk2D(CCLObject):
             # splines being sampled to sufficiently high redshifts.
             cosmo.compute_distances()
             _, a = _get_spline1d_arrays(cosmo.cosmo.data.achi)
-            if min(a) > 1/(1 + 3000):
-                raise CCLError("Comoving distance spline does not cover "
-                               "sufficiently high redshifts for HALOFIT. "
-                               "HALOFIT translates (w0, wa) to a w0_eff. This "
-                               "requires computing the comoving distance to "
-                               "the CMB, which requires the background "
-                               "splines being sampled to sufficiently high "
-                               "redshifts. If using the calculator mode, "
-                               "check the support of the background data.")
+            if min(a) > 1 / (1 + 3000):
+                raise CCLError(
+                    "Comoving distance spline does not cover "
+                    "sufficiently high redshifts for HALOFIT. "
+                    "HALOFIT translates (w0, wa) to a w0_eff. This "
+                    "requires computing the comoving distance to "
+                    "the CMB, which requires the background "
+                    "splines being sampled to sufficiently high "
+                    "redshifts. If using the calculator mode, "
+                    "check the support of the background data."
+                )
 
         pk2d = Pk2D.__new__(Pk2D)
         status = 0
@@ -297,14 +343,16 @@ class Pk2D(CCLObject):
         status = 0
         out = np.zeros([len(a_use), len(k_use)])
         for ia, aa in enumerate(a_use):
-            f, status = eval_func(self.psp, lk_use, aa,
-                                  cosmo.cosmo, k_use.size, status)
+            f, status = eval_func(
+                self.psp, lk_use, aa, cosmo.cosmo, k_use.size, status
+            )
 
             # Catch scale factor extrapolation bounds error.
             if status == lib.CCL_ERROR_SPLINE_EV:
                 raise ValueError(
                     "Pk2D evaluation scale factor is outside of the "
-                    "interpolation range. To extrapolate, pass a Cosmology.")
+                    "interpolation range. To extrapolate, pass a Cosmology."
+                )
             check(status, cosmo)
             out[ia] = f
 
@@ -356,10 +404,12 @@ class Pk2D(CCLObject):
         return self.has_psp
 
     def __contains__(self, other):
-        if not (self.psp.lkmin <= other.psp.lkmin
-                and self.psp.lkmax >= other.psp.lkmax
-                and self.psp.amin <= other.psp.amin
-                and self.psp.amax >= other.psp.amax):
+        if not (
+            self.psp.lkmin <= other.psp.lkmin
+            and self.psp.lkmax >= other.psp.lkmax
+            and self.psp.amin <= other.psp.amin
+            and self.psp.amax >= other.psp.amax
+        ):
             return False
         return True
 
@@ -371,19 +421,24 @@ class Pk2D(CCLObject):
                 "The 2nd operand has its data defined over a smaller range "
                 "than the 1st operand. To avoid extrapolation, this operation "
                 "is forbidden. If you want to operate on the smaller support, "
-                "try swapping the operands.")
+                "try swapping the operands."
+            )
 
         a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
         a_arr_b, lk_arr_b, pk_arr_b = other.get_spline_arrays()
-        if not (a_arr_a.size == a_arr_b.size
-                and lk_arr_a.size == lk_arr_b.size
-                and np.allclose(a_arr_a, a_arr_b)
-                and np.allclose(lk_arr_a, lk_arr_b)):
+        if not (
+            a_arr_a.size == a_arr_b.size
+            and lk_arr_a.size == lk_arr_b.size
+            and np.allclose(a_arr_a, a_arr_b)
+            and np.allclose(lk_arr_a, lk_arr_b)
+        ):
             warnings.warn(
                 "Operands defined over different ranges. "
                 "The result will be interpolated and clipped to "
                 f"{self.psp.lkmin} <= log k <= {self.psp.lkmax} and "
-                f"{self.psp.amin} <= a <= {self.psp.amax}.", CCLWarning)
+                f"{self.psp.amin} <= a <= {self.psp.amax}.",
+                CCLWarning,
+            )
             pk_arr_b = other(np.exp(lk_arr_a), a_arr_a)
 
         return a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b
@@ -400,21 +455,31 @@ class Pk2D(CCLObject):
             a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
             pk_arr_new = pk_arr_a + other
         elif isinstance(other, Pk2D):
-            a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b = \
-                self._get_binary_operator_arrays(other)
+            (
+                a_arr_a,
+                lk_arr_a,
+                pk_arr_a,
+                pk_arr_b,
+            ) = self._get_binary_operator_arrays(other)
             pk_arr_new = pk_arr_a + pk_arr_b
         else:
-            raise TypeError("Addition of Pk2D is only defined for "
-                            "floats, ints, and Pk2D objects.")
+            raise TypeError(
+                "Addition of Pk2D is only defined for "
+                "floats, ints, and Pk2D objects."
+            )
 
         logp = np.all(pk_arr_new > 0)
         if logp:
             pk_arr_new = np.log(pk_arr_new)
 
-        new = Pk2D(a_arr=a_arr_a, lk_arr=lk_arr_a, pk_arr=pk_arr_new,
-                   is_logp=logp,
-                   extrap_order_lok=self.extrap_order_lok,
-                   extrap_order_hik=self.extrap_order_hik)
+        new = Pk2D(
+            a_arr=a_arr_a,
+            lk_arr=lk_arr_a,
+            pk_arr=pk_arr_new,
+            is_logp=logp,
+            extrap_order_lok=self.extrap_order_lok,
+            extrap_order_hik=self.extrap_order_hik,
+        )
 
         return new
 
@@ -430,34 +495,46 @@ class Pk2D(CCLObject):
             a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
             pk_arr_new = other * pk_arr_a
         elif isinstance(other, Pk2D):
-            a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b = \
-                self._get_binary_operator_arrays(other)
+            (
+                a_arr_a,
+                lk_arr_a,
+                pk_arr_a,
+                pk_arr_b,
+            ) = self._get_binary_operator_arrays(other)
             pk_arr_new = pk_arr_a * pk_arr_b
         else:
-            raise TypeError("Multiplication of Pk2D is only defined for "
-                            "floats, ints, and Pk2D objects.")
+            raise TypeError(
+                "Multiplication of Pk2D is only defined for "
+                "floats, ints, and Pk2D objects."
+            )
 
         logp = np.all(pk_arr_new > 0)
         if logp:
             pk_arr_new = np.log(pk_arr_new)
 
-        new = Pk2D(a_arr=a_arr_a, lk_arr=lk_arr_a, pk_arr=pk_arr_new,
-                   is_logp=logp,
-                   extrap_order_lok=self.extrap_order_lok,
-                   extrap_order_hik=self.extrap_order_hik)
+        new = Pk2D(
+            a_arr=a_arr_a,
+            lk_arr=lk_arr_a,
+            pk_arr=pk_arr_new,
+            is_logp=logp,
+            extrap_order_lok=self.extrap_order_lok,
+            extrap_order_hik=self.extrap_order_hik,
+        )
         return new
 
     def __pow__(self, exponent):
-        """Take a Pk2D instance to a power.
-        """
+        """Take a Pk2D instance to a power."""
         if not isinstance(exponent, (float, int)):
             raise TypeError(
-                "Exponentiation of Pk2D is only defined for floats and ints.")
+                "Exponentiation of Pk2D is only defined for floats and ints."
+            )
         a_arr_a, lk_arr_a, pk_arr_a = self.get_spline_arrays()
         if np.any(pk_arr_a < 0) and exponent % 1 != 0:
             warnings.warn(
                 "Taking a non-positive Pk2D object to a non-integer "
-                "power may lead to unexpected results", CCLWarning)
+                "power may lead to unexpected results",
+                CCLWarning,
+            )
 
         pk_arr_new = pk_arr_a**exponent
 
@@ -465,28 +542,32 @@ class Pk2D(CCLObject):
         if logp:
             pk_arr_new = np.log(pk_arr_new)
 
-        new = Pk2D(a_arr=a_arr_a, lk_arr=lk_arr_a, pk_arr=pk_arr_new,
-                   is_logp=logp,
-                   extrap_order_lok=self.extrap_order_lok,
-                   extrap_order_hik=self.extrap_order_hik)
+        new = Pk2D(
+            a_arr=a_arr_a,
+            lk_arr=lk_arr_a,
+            pk_arr=pk_arr_new,
+            is_logp=logp,
+            extrap_order_lok=self.extrap_order_lok,
+            extrap_order_hik=self.extrap_order_hik,
+        )
 
         return new
 
     def __sub__(self, other):
-        return self + (-1)*other
+        return self + (-1) * other
 
     def __truediv__(self, other):
-        return self * other**(-1)
+        return self * other ** (-1)
 
     __radd__ = __add__
 
     __rmul__ = __mul__
 
     def __rsub__(self, other):
-        return other + (-1)*self
+        return other + (-1) * self
 
     def __rtruediv__(self, other):
-        return other * self**(-1)
+        return other * self ** (-1)
 
     @unlock_instance
     def __iadd__(self, other):
@@ -515,7 +596,7 @@ class Pk2D(CCLObject):
 
 
 def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
-    """ Return the C-level `f2d` spline associated with a
+    """Return the C-level `f2d` spline associated with a
     :class:`Pk2D` object.
 
     Args:
@@ -536,8 +617,9 @@ def parse_pk2d(cosmo, p_of_k_a=DEFAULT_POWER_SPECTRUM, *, is_linear=False):
         if isinstance(p_of_k_a, str):
             name = p_of_k_a
         else:
-            raise ValueError("p_of_k_a must be a pyccl.Pk2D object or "
-                             "a string")
+            raise ValueError(
+                "p_of_k_a must be a pyccl.Pk2D object or " "a string"
+            )
 
         if is_linear:
             cosmo.compute_linear_power()

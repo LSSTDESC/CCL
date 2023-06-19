@@ -34,30 +34,49 @@ class HMCalculator(CCLAutoRepr):
             to be used in the mass integrals.
         integration_method_M (:obj:`str`): integration method to use
             in the mass integrals. Options: "simpson" and "spline".
-    """ # noqa
-    __repr_attrs__ = __eq_attrs__ = (
-        "mass_function", "halo_bias", "mass_def", "precision",)
+    """  # noqa
 
-    def __init__(self, *, mass_function, halo_bias, mass_def=None,
-                 log10M_min=8., log10M_max=16., nM=128,
-                 integration_method_M='simpson'):
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_function",
+        "halo_bias",
+        "mass_def",
+        "precision",
+    )
+
+    def __init__(
+        self,
+        *,
+        mass_function,
+        halo_bias,
+        mass_def=None,
+        log10M_min=8.0,
+        log10M_max=16.0,
+        nM=128,
+        integration_method_M="simpson"
+    ):
         # Initialize halo model ingredients.
-        out = MassDef.from_specs(mass_def, mass_function=mass_function,
-                                 halo_bias=halo_bias)
+        out = MassDef.from_specs(
+            mass_def, mass_function=mass_function, halo_bias=halo_bias
+        )
         if len(out) != 3:
-            raise ValueError("A valid mass function and halo bias is "
-                             "needed")
+            raise ValueError(
+                "A valid mass function and halo bias is " "needed"
+            )
         self.mass_def, self.mass_function, self.halo_bias = out
 
         self.precision = {
-            'log10M_min': log10M_min, 'log10M_max': log10M_max, 'nM': nM,
-            'integration_method_M': integration_method_M}
+            "log10M_min": log10M_min,
+            "log10M_max": log10M_max,
+            "nM": nM,
+            "integration_method_M": integration_method_M,
+        }
         self._lmass = np.linspace(log10M_min, log10M_max, nM)
-        self._mass = 10.**self._lmass
+        self._mass = 10.0**self._lmass
         self._m0 = self._mass[0]
 
         if integration_method_M == "simpson":
             from scipy.integrate import simpson
+
             self._integrator = simpson
         elif integration_method_M == "spline":
             self._integrator = self._integ_spline
@@ -82,7 +101,7 @@ class HMCalculator(CCLAutoRepr):
         # Compute the mass function at this cosmo and a.
         if a != self._a_mf or cosmo != self._cosmo_mf:
             self._mf = self.mass_function(cosmo, self._mass, a)
-            integ = self._integrator(self._mf*self._mass, self._lmass)
+            integ = self._integrator(self._mf * self._mass, self._lmass)
             self._mf0 = (rho0 - integ) / self._m0
             self._cosmo_mf, self._a_mf = cosmo, a  # cache
 
@@ -91,13 +110,15 @@ class HMCalculator(CCLAutoRepr):
         # Compute the halo bias at this cosmo and a.
         if a != self._a_bf or cosmo != self._cosmo_bf:
             self._bf = self.halo_bias(cosmo, self._mass, a)
-            integ = self._integrator(self._mf*self._bf*self._mass, self._lmass)
+            integ = self._integrator(
+                self._mf * self._bf * self._mass, self._lmass
+            )
             self._mbf0 = (rho0 - integ) / self._m0
             self._cosmo_bf, self._a_bf = cosmo, a  # cache
 
     def _get_ingredients(self, cosmo, a, *, get_bf):
         """Compute mass function and halo bias at some scale factor."""
-        rho0 = const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"]**2
+        rho0 = const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"] ** 2
         self._get_mass_function(cosmo, a, rho0)
         if get_bf:
             self._get_halo_bias(cosmo, a, rho0)
@@ -113,7 +134,7 @@ class HMCalculator(CCLAutoRepr):
         return i1 + self._mbf0 * array_2[..., 0]
 
     def integrate_over_massfunc(self, func, cosmo, a):
-        """ Returns the integral over mass of a given funcion times
+        """Returns the integral over mass of a given funcion times
         the mass function:
 
         .. math::
@@ -128,14 +149,15 @@ class HMCalculator(CCLAutoRepr):
 
         Returns:
             :obj:`float`: integral value.
-        """ # noqa
+        """  # noqa
         fM = func(self._mass)
         self._get_ingredients(cosmo, a, get_bf=False)
         return self._integrate_over_mf(fM)
 
-    def number_counts(self, cosmo, *, selection,
-                      a_min=None, a_max=1.0, na=128):
-        """ Solves the integral:
+    def number_counts(
+        self, cosmo, *, selection, a_min=None, a_max=1.0, na=128
+    ):
+        """Solves the integral:
 
         .. math::
             nc(sel) = \\int dM\\int da\\,\\frac{dV}{dad\\Omega}\\,
@@ -166,7 +188,7 @@ class HMCalculator(CCLAutoRepr):
 
         Returns:
             :obj:`float`: the total number of clusters/halos.
-        """ # noqa
+        """  # noqa
         # get a values for integral
         if a_min is None:
             a_min = cosmo.cosmo.spline_params.A_SPLINE_MIN
@@ -176,7 +198,7 @@ class HMCalculator(CCLAutoRepr):
         abs_dzda = 1 / a / a
         dc = cosmo.comoving_angular_distance(a)
         ez = cosmo.h_over_h0(a)
-        dh = const.CLIGHT_HMPC / cosmo['h']
+        dh = const.CLIGHT_HMPC / cosmo["h"]
         dvdz = dh * dc**2 / ez
         dvda = dvdz * abs_dzda
 
@@ -186,15 +208,14 @@ class HMCalculator(CCLAutoRepr):
             self._get_ingredients(cosmo, _a, get_bf=False)
             _selm = np.atleast_2d(selection(self._mass, _a)).T
             mint[i] = self._integrator(
-                dvda[i] * self._mf[..., :] * _selm[..., :],
-                self._lmass
+                dvda[i] * self._mf[..., :] * _selm[..., :], self._lmass
             )
 
         # now do scale factor integral
         return self._integrator(mint, a)
 
     def I_0_1(self, cosmo, k, a, prof):
-        """ Solves the integral:
+        """Solves the integral:
 
         .. math::
             I^0_1(k,a|u) = \\int dM\\,n(M,a)\\,\\langle u(k,a|M)\\rangle,
@@ -220,7 +241,7 @@ class HMCalculator(CCLAutoRepr):
         return self._integrate_over_mf(uk)
 
     def I_1_1(self, cosmo, k, a, prof):
-        """ Solves the integral:
+        """Solves the integral:
 
         .. math::
             I^1_1(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,
@@ -248,7 +269,7 @@ class HMCalculator(CCLAutoRepr):
         return self._integrate_over_mbf(uk)
 
     def I_0_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
-        """ Solves the integral:
+        """Solves the integral:
 
         .. math::
             I^0_2(k,a|u,v) = \\int dM\\,n(M,a)\\,
@@ -285,7 +306,7 @@ class HMCalculator(CCLAutoRepr):
         return self._integrate_over_mf(uk)
 
     def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
-        """ Solves the integral:
+        """Solves the integral:
 
         .. math::
             I^1_2(k,a|u,v) = \\int dM\\,n(M,a)\\,b(M,a)\\,
@@ -322,10 +343,20 @@ class HMCalculator(CCLAutoRepr):
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
         return self._integrate_over_mbf(uk)
 
-    def I_0_22(self, cosmo, k, a, prof, *,
-               prof2=None, prof3=None, prof4=None,
-               prof12_2pt, prof34_2pt=None):
-        """ Solves the integral:
+    def I_0_22(
+        self,
+        cosmo,
+        k,
+        a,
+        prof,
+        *,
+        prof2=None,
+        prof3=None,
+        prof4=None,
+        prof12_2pt,
+        prof34_2pt=None
+    ):
+        """Solves the integral:
 
         .. math::
             I^0_{2,2}(k_u,k_v,a|u_{1,2},v_{1,2}) =
@@ -375,13 +406,15 @@ class HMCalculator(CCLAutoRepr):
         self._check_mass_def(prof, prof2, prof3, prof4)
         self._get_ingredients(cosmo, a, get_bf=False)
         uk12 = prof12_2pt.fourier_2pt(
-            cosmo, k, self._mass, a, prof, prof2=prof2).T
+            cosmo, k, self._mass, a, prof, prof2=prof2
+        ).T
 
         if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
             # 4pt approximation of the same profile
             uk34 = uk12
         else:
             uk34 = prof34_2pt.fourier_2pt(
-                cosmo, k, self._mass, a, prof3, prof2=prof4).T
+                cosmo, k, self._mass, a, prof3, prof2=prof4
+            ).T
 
         return self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])

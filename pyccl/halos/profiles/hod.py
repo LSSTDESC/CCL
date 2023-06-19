@@ -7,7 +7,7 @@ from . import HaloProfile
 
 
 class HaloProfileHOD(HaloProfile):
-    """ A generic halo occupation distribution (HOD)
+    """A generic halo occupation distribution (HOD)
     profile describing the number density of galaxies
     as a function of halo mass.
 
@@ -115,21 +115,57 @@ class HaloProfileHOD(HaloProfile):
         is_number_counts (:obj:`bool`): set to ``True`` if this profile
             is meant to represent galaxy overdensity.
     """
-    __repr_attrs__ = __eq_attrs__ = (
-        "log10Mmin_0", "log10Mmin_p", "siglnM_0", "siglnM_p", "log10M0_0",
-        "log10M0_p", "log10M1_0", "log10M1_p", "alpha_0", "alpha_p", "fc_0",
-        "fc_p", "bg_0", "bg_p", "bmax_0", "bmax_p", "a_pivot",
-        "_is_number_counts", "ns_independent", "mass_def", "concentration",
-        "precision_fftlog",)
 
-    def __init__(self, *, mass_def, concentration,
-                 log10Mmin_0=12., log10Mmin_p=0., siglnM_0=0.4,
-                 siglnM_p=0., log10M0_0=7., log10M0_p=0.,
-                 log10M1_0=13.3, log10M1_p=0., alpha_0=1.,
-                 alpha_p=0., fc_0=1., fc_p=0.,
-                 bg_0=1., bg_p=0., bmax_0=1., bmax_p=0.,
-                 a_pivot=1., ns_independent=False,
-                 is_number_counts=True):
+    __repr_attrs__ = __eq_attrs__ = (
+        "log10Mmin_0",
+        "log10Mmin_p",
+        "siglnM_0",
+        "siglnM_p",
+        "log10M0_0",
+        "log10M0_p",
+        "log10M1_0",
+        "log10M1_p",
+        "alpha_0",
+        "alpha_p",
+        "fc_0",
+        "fc_p",
+        "bg_0",
+        "bg_p",
+        "bmax_0",
+        "bmax_p",
+        "a_pivot",
+        "_is_number_counts",
+        "ns_independent",
+        "mass_def",
+        "concentration",
+        "precision_fftlog",
+    )
+
+    def __init__(
+        self,
+        *,
+        mass_def,
+        concentration,
+        log10Mmin_0=12.0,
+        log10Mmin_p=0.0,
+        siglnM_0=0.4,
+        siglnM_p=0.0,
+        log10M0_0=7.0,
+        log10M0_p=0.0,
+        log10M1_0=13.3,
+        log10M1_p=0.0,
+        alpha_0=1.0,
+        alpha_p=0.0,
+        fc_0=1.0,
+        fc_p=0.0,
+        bg_0=1.0,
+        bg_p=0.0,
+        bmax_0=1.0,
+        bmax_p=0.0,
+        a_pivot=1.0,
+        ns_independent=False,
+        is_number_counts=True
+    ):
         self.log10Mmin_0 = log10Mmin_0
         self.log10Mmin_p = log10Mmin_p
         self.log10M0_0 = log10M0_0
@@ -148,20 +184,35 @@ class HaloProfileHOD(HaloProfile):
         self.bmax_p = bmax_p
         self.a_pivot = a_pivot
         self.ns_independent = ns_independent
-        super().__init__(mass_def=mass_def, concentration=concentration,
-                         is_number_counts=is_number_counts)
+        super().__init__(
+            mass_def=mass_def,
+            concentration=concentration,
+            is_number_counts=is_number_counts,
+        )
 
-    def update_parameters(self, *, log10Mmin_0=None, log10Mmin_p=None,
-                          siglnM_0=None, siglnM_p=None,
-                          log10M0_0=None, log10M0_p=None,
-                          log10M1_0=None, log10M1_p=None,
-                          alpha_0=None, alpha_p=None,
-                          fc_0=None, fc_p=None,
-                          bg_0=None, bg_p=None,
-                          bmax_0=None, bmax_p=None,
-                          a_pivot=None,
-                          ns_independent=None):
-        """ Update any of the parameters associated with
+    def update_parameters(
+        self,
+        *,
+        log10Mmin_0=None,
+        log10Mmin_p=None,
+        siglnM_0=None,
+        siglnM_p=None,
+        log10M0_0=None,
+        log10M0_p=None,
+        log10M1_0=None,
+        log10M1_p=None,
+        alpha_0=None,
+        alpha_p=None,
+        fc_0=None,
+        fc_p=None,
+        bg_0=None,
+        bg_p=None,
+        bmax_0=None,
+        bmax_p=None,
+        a_pivot=None,
+        ns_independent=None
+    ):
+        """Update any of the parameters associated with
         this profile. Any parameter set to ``None`` won't be updated.
 
         Args:
@@ -251,11 +302,13 @@ class HaloProfileHOD(HaloProfile):
         c_M *= bmax / bg
 
         x = r_use[None, :] / (R_s[:, None] * bg)
-        prof = 1./(x * (1 + x)**2)
+        prof = 1.0 / (x * (1 + x) ** 2)
         # Truncate
-        prof[r_use[None, :] > R_M[:, None]*bmax] = 0
+        prof[r_use[None, :] > R_M[:, None] * bmax] = 0
 
-        norm = 1. / (4 * np.pi * (bg*R_s)**3 * (np.log(1+c_M) - c_M/(1+c_M)))
+        norm = 1.0 / (
+            4 * np.pi * (bg * R_s) ** 3 * (np.log(1 + c_M) - c_M / (1 + c_M))
+        )
         prof = prof[:, :] * norm[:, None]
 
         if np.ndim(r) == 0:
@@ -280,7 +333,7 @@ class HaloProfileHOD(HaloProfile):
         Si1, Ci1 = sici((1 + c_M[:, None]) * x)
         Si2, Ci2 = sici(x)
 
-        P1 = 1. / (np.log(1+c_M) - c_M/(1+c_M))
+        P1 = 1.0 / (np.log(1 + c_M) - c_M / (1 + c_M))
         P2 = np.sin(x) * (Si1 - Si2) + np.cos(x) * (Ci1 - Ci2)
         P3 = np.sin(c_M[:, None] * x) / ((1 + c_M[:, None]) * x)
         prof = P1[:, None] * (P2 - P3)
@@ -316,13 +369,15 @@ class HaloProfileHOD(HaloProfile):
         """Returns the normalization of this profile, which is the
         mean galaxy number density.
         """
+
         def integ(M):
             Nc = self._Nc(M, a)
             Ns = self._Ns(M, a)
             fc = self._fc(a)
             if self.ns_independent:
-                return Nc*fc + Ns
-            return Nc*(fc + Ns)
+                return Nc * fc + Ns
+            return Nc * (fc + Ns)
+
         return hmc.integrate_over_massfunc(integ, cosmo, a)
 
     def _fourier(self, cosmo, k, M, a):
@@ -375,13 +430,15 @@ class HaloProfileHOD(HaloProfile):
 
     def _Nc(self, M, a):
         # Number of centrals
-        Mmin = 10.**(self.log10Mmin_0 + self.log10Mmin_p * (a - self.a_pivot))
+        Mmin = 10.0 ** (
+            self.log10Mmin_0 + self.log10Mmin_p * (a - self.a_pivot)
+        )
         siglnM = self.siglnM_0 + self.siglnM_p * (a - self.a_pivot)
-        return 0.5 * (1 + erf(np.log(M/Mmin)/siglnM))
+        return 0.5 * (1 + erf(np.log(M / Mmin) / siglnM))
 
     def _Ns(self, M, a):
         # Number of satellites
-        M0 = 10.**(self.log10M0_0 + self.log10M0_p * (a - self.a_pivot))
-        M1 = 10.**(self.log10M1_0 + self.log10M1_p * (a - self.a_pivot))
+        M0 = 10.0 ** (self.log10M0_0 + self.log10M0_p * (a - self.a_pivot))
+        M1 = 10.0 ** (self.log10M1_0 + self.log10M1_p * (a - self.a_pivot))
         alpha = self.alpha_0 + self.alpha_p * (a - self.a_pivot)
-        return np.heaviside(M-M0, 1) * (np.fabs(M-M0) / M1)**alpha
+        return np.heaviside(M - M0, 1) * (np.fabs(M - M0) / M1) ** alpha

@@ -6,7 +6,7 @@ import numpy as np
 
 from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
 from .pyutils import integ_types
-from .nonlimber_FKEM import *
+from .nonlimber_FKEM import nonlimber_FKEM
 
 
 def angular_cl(
@@ -22,7 +22,6 @@ def angular_cl(
     non_limber_integration_method="FKEM",
     return_meta=False
 ):
-
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
     Args:
@@ -66,11 +65,13 @@ def angular_cl(
 
     if limber_integration_method not in integ_types:
         raise ValueError(
-            "Limber integration method %s not supported" % limber_integration_method
+            "Limber integration method %s not supported"
+            % limber_integration_method
         )
     if non_limber_integration_method not in ["FKEM", "MATTER"]:
         raise ValueError(
-            "Non-Limber integration method %s not supported" % limber_integration_method
+            "Non-Limber integration method %s not supported"
+            % limber_integration_method
         )
     if type(l_limber) == str:
         if l_limber != "auto":
@@ -105,12 +106,18 @@ def angular_cl(
     if auto_limber or (type(l_limber) != str and ell_use[0] < l_limber):
         if non_limber_integration_method == "FKEM":
             l_limber, cl_non_limber, status = nonlimber_FKEM(
-                cosmo, tracer1, tracer2, p_of_k_a, ell_use, l_limber, limber_max_error
+                cosmo,
+                tracer1,
+                tracer2,
+                p_of_k_a,
+                ell_use,
+                l_limber,
+                limber_max_error,
             )
-        else:  # it has to be matter, since we checked the input
-            l_limber, cl_non_limber, status = implement_MATTER(
-                cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error
-            )
+        # else:  # it has to be matter, since we checked the input
+        #     l_limber, cl_non_limber, status = implement_MATTER(
+        #         cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error
+        #     )
         if status != 0:
             raise ValueError("Error in non-Limber integrator.")
     else:

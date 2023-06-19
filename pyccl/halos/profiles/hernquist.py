@@ -7,7 +7,7 @@ from . import HaloProfileMatter
 
 
 class HaloProfileHernquist(HaloProfileMatter):
-    """ `Hernquist 1990
+    """`Hernquist 1990
     <https://ui.adsabs.harvard.edu/abs/1990ApJ...356..359H/abstract>`_
     profile.
 
@@ -43,15 +43,27 @@ class HaloProfileHernquist(HaloProfileMatter):
         truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
     """
-    __repr_attrs__ = __eq_attrs__ = (
-        "fourier_analytic", "projected_analytic", "cumul2d_analytic",
-        "truncated", "mass_def", "concentration", "precision_fftlog",)
 
-    def __init__(self, *, mass_def, concentration,
-                 truncated=True,
-                 fourier_analytic=False,
-                 projected_analytic=False,
-                 cumul2d_analytic=False):
+    __repr_attrs__ = __eq_attrs__ = (
+        "fourier_analytic",
+        "projected_analytic",
+        "cumul2d_analytic",
+        "truncated",
+        "mass_def",
+        "concentration",
+        "precision_fftlog",
+    )
+
+    def __init__(
+        self,
+        *,
+        mass_def,
+        concentration,
+        truncated=True,
+        fourier_analytic=False,
+        projected_analytic=False,
+        cumul2d_analytic=False
+    ):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic
@@ -60,25 +72,31 @@ class HaloProfileHernquist(HaloProfileMatter):
             self._fourier = self._fourier_analytic
         if projected_analytic:
             if truncated:
-                raise ValueError("Analytic projected profile not supported "
-                                 "for truncated Hernquist. Set `truncated` or "
-                                 "`projected_analytic` to `False`.")
+                raise ValueError(
+                    "Analytic projected profile not supported "
+                    "for truncated Hernquist. Set `truncated` or "
+                    "`projected_analytic` to `False`."
+                )
             self._projected = self._projected_analytic
         if cumul2d_analytic:
             if truncated:
-                raise ValueError("Analytic cumuative 2d profile not supported "
-                                 "for truncated Hernquist. Set `truncated` or "
-                                 "`cumul2d_analytic` to `False`.")
+                raise ValueError(
+                    "Analytic cumuative 2d profile not supported "
+                    "for truncated Hernquist. Set `truncated` or "
+                    "`cumul2d_analytic` to `False`."
+                )
             self._cumul2d = self._cumul2d_analytic
         super().__init__(mass_def=mass_def, concentration=concentration)
-        self.update_precision_fftlog(padding_hi_fftlog=1E2,
-                                     padding_lo_fftlog=1E-4,
-                                     n_per_decade=1000,
-                                     plaw_fourier=-2.)
+        self.update_precision_fftlog(
+            padding_hi_fftlog=1e2,
+            padding_lo_fftlog=1e-4,
+            n_per_decade=1000,
+            plaw_fourier=-2.0,
+        )
 
     def _norm(self, M, Rs, c):
         # Hernquist normalization from mass, radius and concentration
-        return M / (2 * np.pi * Rs**3 * (c / (1 + c))**2)
+        return M / (2 * np.pi * Rs**3 * (c / (1 + c)) ** 2)
 
     def _real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
@@ -92,7 +110,7 @@ class HaloProfileHernquist(HaloProfileMatter):
         norm = self._norm(M_use, R_s, c_M)
 
         x = r_use[None, :] / R_s[:, None]
-        prof = norm[:, None] / (x * (1 + x)**3)
+        prof = norm[:, None] / (x * (1 + x) ** 3)
         if self.truncated:
             prof[r_use[None, :] > R_M[:, None]] = 0
 
@@ -103,21 +121,24 @@ class HaloProfileHernquist(HaloProfileMatter):
         return prof
 
     def _fx_projected(self, x):
-
         def f1(xx):
             x2m1 = xx * xx - 1
-            return (-3 / 2 / x2m1**2
-                    + (x2m1+3) * np.arccosh(1 / xx) / 2 / np.fabs(x2m1)**2.5)
+            return (
+                -3 / 2 / x2m1**2
+                + (x2m1 + 3) * np.arccosh(1 / xx) / 2 / np.fabs(x2m1) ** 2.5
+            )
 
         def f2(xx):
             x2m1 = xx * xx - 1
-            return (-3 / 2 / x2m1**2
-                    + (x2m1+3) * np.arccos(1 / xx) / 2 / np.fabs(x2m1)**2.5)
+            return (
+                -3 / 2 / x2m1**2
+                + (x2m1 + 3) * np.arccos(1 / xx) / 2 / np.fabs(x2m1) ** 2.5
+            )
 
         xf = x.flatten()
-        return np.piecewise(xf,
-                            [xf < 1, xf > 1],
-                            [f1, f2, 2./15.]).reshape(x.shape)
+        return np.piecewise(
+            xf, [xf < 1, xf > 1], [f1, f2, 2.0 / 15.0]
+        ).reshape(x.shape)
 
     def _projected_analytic(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
@@ -140,21 +161,26 @@ class HaloProfileHernquist(HaloProfileMatter):
         return prof
 
     def _fx_cumul2d(self, x):
-
         def f1(xx):
             x2m1 = xx * xx - 1
-            return (1 + 1 / x2m1
-                    + (x2m1 + 1) * np.arccosh(1 / xx) / np.fabs(x2m1)**1.5)
+            return (
+                1
+                + 1 / x2m1
+                + (x2m1 + 1) * np.arccosh(1 / xx) / np.fabs(x2m1) ** 1.5
+            )
 
         def f2(xx):
             x2m1 = xx * xx - 1
-            return (1 + 1 / x2m1
-                    - (x2m1 + 1) * np.arccos(1 / xx) / np.fabs(x2m1)**1.5)
+            return (
+                1
+                + 1 / x2m1
+                - (x2m1 + 1) * np.arccos(1 / xx) / np.fabs(x2m1) ** 1.5
+            )
 
         xf = x.flatten()
-        f = np.piecewise(xf,
-                         [xf < 1, xf > 1],
-                         [f1, f2, 1./3.]).reshape(x.shape)
+        f = np.piecewise(xf, [xf < 1, xf > 1], [f1, f2, 1.0 / 3.0]).reshape(
+            x.shape
+        )
 
         return f / x**2
 
@@ -189,17 +215,23 @@ class HaloProfileHernquist(HaloProfileMatter):
 
         x = k_use[None, :] * R_s[:, None]
         Si2, Ci2 = sici(x)
-        P1 = M / ((c_M / (c_M + 1))**2 / 2)
+        P1 = M / ((c_M / (c_M + 1)) ** 2 / 2)
         c_Mp1 = c_M[:, None] + 1
         if self.truncated:
             Si1, Ci1 = sici(c_Mp1 * x)
             P2 = x * np.sin(x) * (Ci1 - Ci2) - x * np.cos(x) * (Si1 - Si2)
-            P3 = (-1 + np.sin(c_M[:, None] * x) / (c_Mp1**2 * x)
-                  + c_Mp1 * np.cos(c_M[:, None] * x) / (c_Mp1**2))
+            P3 = (
+                -1
+                + np.sin(c_M[:, None] * x) / (c_Mp1**2 * x)
+                + c_Mp1 * np.cos(c_M[:, None] * x) / (c_Mp1**2)
+            )
             prof = P1[:, None] * (P2 - P3) / 2
         else:
-            P2 = (-x * (2 * np.sin(x) * Ci2 + np.pi * np.cos(x))
-                  + 2 * x * np.cos(x) * Si2 + 2) / 4
+            P2 = (
+                -x * (2 * np.sin(x) * Ci2 + np.pi * np.cos(x))
+                + 2 * x * np.cos(x) * Si2
+                + 2
+            ) / 4
             prof = P1[:, None] * P2
 
         if np.ndim(k) == 0:

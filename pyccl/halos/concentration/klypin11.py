@@ -12,7 +12,8 @@ class ConcentrationKlypin11(Concentration):
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition object or a name string.
     """
-    name = 'Klypin11'
+
+    name = "Klypin11"
 
     def __init__(self, *, mass_def="vir"):
         super().__init__(mass_def=mass_def)
@@ -21,5 +22,5 @@ class ConcentrationKlypin11(Concentration):
         return mass_def.name != "vir"
 
     def _concentration(self, cosmo, M, a):
-        M_pivot_inv = cosmo["h"] * 1E-12
-        return 9.6 * (M * M_pivot_inv)**(-0.075)
+        M_pivot_inv = cosmo["h"] * 1e-12
+        return 9.6 * (M * M_pivot_inv) ** (-0.075)

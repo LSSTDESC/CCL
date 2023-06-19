@@ -16,11 +16,10 @@ class MassFuncAngulo12(MassFunc):
         mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
-    name = 'Angulo12'
 
-    def __init__(self, *,
-                 mass_def="fof",
-                 mass_def_strict=True):
+    name = "Angulo12"
+
+    def __init__(self, *, mass_def="fof", mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
@@ -33,5 +32,8 @@ class MassFuncAngulo12(MassFunc):
         self.c = 1.172
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        return self.A * ((self.a / sigM)**self.b + 1.) * (
-            np.exp(-self.c / sigM**2))
+        return (
+            self.A
+            * ((self.a / sigM) ** self.b + 1.0)
+            * (np.exp(-self.c / sigM**2))
+        )

@@ -15,18 +15,25 @@ def test_nonlin_camb_power():
     # Needs to be set for good agreements between CCL and CAMB
     T_CMB = 2.7255
 
-    p = camb.CAMBparams(WantTransfer=True,
-                        NonLinearModel=camb.nonlinear.Halofit(
-                            halofit_version="mead2020_feedback",
-                            HMCode_logT_AGN=logT_AGN))
+    p = camb.CAMBparams(
+        WantTransfer=True,
+        NonLinearModel=camb.nonlinear.Halofit(
+            halofit_version="mead2020_feedback", HMCode_logT_AGN=logT_AGN
+        ),
+    )
     # This affects k_min
     p.WantCls = False
     p.DoLensing = False
     p.Want_CMB = False
     p.Want_CMB_lensing = False
     p.Want_cl_2D_array = False
-    p.set_cosmology(H0=h*100, omch2=Omega_c*h**2, ombh2=Omega_b*h**2,
-                    mnu=0.0, TCMB=T_CMB)
+    p.set_cosmology(
+        H0=h * 100,
+        omch2=Omega_c * h**2,
+        ombh2=Omega_b * h**2,
+        mnu=0.0,
+        TCMB=T_CMB,
+    )
     p.share_delta_neff = False
     p.InitPower.set_params(As=A_s, ns=n_s)
 
@@ -37,18 +44,29 @@ def test_nonlin_camb_power():
     r = camb.get_results(p)
 
     k, z, pk_nonlin_camb = r.get_nonlinear_matter_power_spectrum(
-        hubble_units=False, k_hunit=False)
+        hubble_units=False, k_hunit=False
+    )
 
     ccl_cosmo = ccl.Cosmology(
-        Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
-        A_s=A_s, n_s=n_s, Neff=3.046,
+        Omega_c=Omega_c,
+        Omega_b=Omega_b,
+        h=h,
+        m_nu=0.0,
+        A_s=A_s,
+        n_s=n_s,
+        Neff=3.046,
         transfer_function="boltzmann_camb",
         matter_power_spectrum="camb",
-        extra_parameters={"camb": {"halofit_version": "mead2020_feedback",
-                                   "HMCode_logT_AGN": logT_AGN}})
+        extra_parameters={
+            "camb": {
+                "halofit_version": "mead2020_feedback",
+                "HMCode_logT_AGN": logT_AGN,
+            }
+        },
+    )
 
     for z_, pk_camb in zip(z, pk_nonlin_camb):
-        pk_nonlin_ccl = ccl.nonlin_matter_power(ccl_cosmo, k, 1/(1+z_))
+        pk_nonlin_ccl = ccl.nonlin_matter_power(ccl_cosmo, k, 1 / (1 + z_))
 
         assert np.allclose(pk_camb, pk_nonlin_ccl, rtol=3e-5)
 
@@ -59,10 +77,16 @@ def test_nonlin_camb_power_with_sigma8():
     n_s = 0.97
     h = 0.7
 
-    ccl_cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
-                              sigma8=0.8, n_s=n_s,
-                              transfer_function="boltzmann_camb",
-                              matter_power_spectrum="camb")
+    ccl_cosmo = ccl.Cosmology(
+        Omega_c=Omega_c,
+        Omega_b=Omega_b,
+        h=h,
+        m_nu=0.0,
+        sigma8=0.8,
+        n_s=n_s,
+        transfer_function="boltzmann_camb",
+        matter_power_spectrum="camb",
+    )
 
     k = np.logspace(-3, 1, 10)
 
@@ -74,5 +98,6 @@ def test_nonlin_camb_power_with_sigma8():
 def test_nonlin_camb_power_raises():
     # Test that it raises when (trf, mps) == (no camb, camb).
     with pytest.raises(ccl.CCLError):
-        ccl.CosmologyVanillaLCDM(transfer_function="boltzmann_class",
-                                 matter_power_spectrum="camb")
+        ccl.CosmologyVanillaLCDM(
+            transfer_function="boltzmann_class", matter_power_spectrum="camb"
+        )

@@ -90,52 +90,76 @@ class Tk3D(CCLObject):
 
     .. automethod:: __call__
     """
+
     from ._core.repr_ import build_string_Tk3D as __repr__
 
-    def __init__(self, *, a_arr, lk_arr, tkk_arr=None,
-                 pk1_arr=None, pk2_arr=None, is_logt=True,
-                 extrap_order_lok=1, extrap_order_hik=1):
+    def __init__(
+        self,
+        *,
+        a_arr,
+        lk_arr,
+        tkk_arr=None,
+        pk1_arr=None,
+        pk2_arr=None,
+        is_logt=True,
+        extrap_order_lok=1,
+        extrap_order_hik=1
+    ):
         na = len(a_arr)
         nk = len(lk_arr)
 
         if not (np.diff(a_arr) > 0).all():
             raise ValueError("`a_arr` must be strictly increasing")
 
-        if not np.all(lk_arr[1:]-lk_arr[:-1] > 0):
+        if not np.all(lk_arr[1:] - lk_arr[:-1] > 0):
             raise ValueError("`lk_arr` must be strictly increasing")
 
-        if ((extrap_order_hik not in (0, 1)) or
-                (extrap_order_lok not in (0, 1))):
-            raise ValueError("Only constant or linear extrapolation in "
-                             "log(k) is possible (`extrap_order_hik` or "
-                             "`extrap_order_lok` must be 0 or 1).")
+        if (extrap_order_hik not in (0, 1)) or (
+            extrap_order_lok not in (0, 1)
+        ):
+            raise ValueError(
+                "Only constant or linear extrapolation in "
+                "log(k) is possible (`extrap_order_hik` or "
+                "`extrap_order_lok` must be 0 or 1)."
+            )
         status = 0
 
         if tkk_arr is None:
             if pk2_arr is None:
                 pk2_arr = pk1_arr
             if (pk1_arr is None) or (pk2_arr is None):
-                raise ValueError("If trispectrum is factorizable "
-                                 "you must provide the two factors")
+                raise ValueError(
+                    "If trispectrum is factorizable "
+                    "you must provide the two factors"
+                )
             if (pk1_arr.shape != (na, nk)) or (pk2_arr.shape != (na, nk)):
-                raise ValueError("Input trispectrum factor "
-                                 "shapes are wrong")
+                raise ValueError(
+                    "Input trispectrum factor " "shapes are wrong"
+                )
 
-            self.tsp, status = lib.tk3d_new_factorizable(lk_arr, a_arr,
-                                                         pk1_arr.flatten(),
-                                                         pk2_arr.flatten(),
-                                                         int(extrap_order_lok),
-                                                         int(extrap_order_lok),
-                                                         int(is_logt), status)
+            self.tsp, status = lib.tk3d_new_factorizable(
+                lk_arr,
+                a_arr,
+                pk1_arr.flatten(),
+                pk2_arr.flatten(),
+                int(extrap_order_lok),
+                int(extrap_order_lok),
+                int(is_logt),
+                status,
+            )
         else:
             if tkk_arr.shape != (na, nk, nk):
                 raise ValueError("Input trispectrum shape is wrong")
 
-            self.tsp, status = lib.tk3d_new_from_arrays(lk_arr, a_arr,
-                                                        tkk_arr.flatten(),
-                                                        int(extrap_order_lok),
-                                                        int(extrap_order_lok),
-                                                        int(is_logt), status)
+            self.tsp, status = lib.tk3d_new_from_arrays(
+                lk_arr,
+                a_arr,
+                tkk_arr.flatten(),
+                int(extrap_order_lok),
+                int(extrap_order_lok),
+                int(is_logt),
+                status,
+            )
         check(status)
 
     def __eq__(self, other):
@@ -152,22 +176,27 @@ class Tk3D(CCLObject):
         if self.tsp.is_product ^ other.tsp.is_product:
             return False
         # Check extrapolation orders.
-        if not (self.extrap_order_lok == other.extrap_order_lok
-                and self.extrap_order_hik == other.extrap_order_hik):
+        if not (
+            self.extrap_order_lok == other.extrap_order_lok
+            and self.extrap_order_hik == other.extrap_order_hik
+        ):
             return False
         # Check the individual splines.
         a1, lk11, lk12, tk1 = self.get_spline_arrays()
         a2, lk21, lk22, tk2 = other.get_spline_arrays()
-        return ((a1 == a2).all()
-                and (lk11 == lk21).all() and (lk21 == lk22).all()
-                and np.array_equal(tk1, tk2))
+        return (
+            (a1 == a2).all()
+            and (lk11 == lk21).all()
+            and (lk21 == lk22).all()
+            and np.array_equal(tk1, tk2)
+        )
 
     def __hash__(self):
         return hash(repr(self))
 
     @property
     def has_tsp(self):
-        return 'tsp' in vars(self)
+        return "tsp" in vars(self)
 
     @property
     def extrap_order_lok(self):
@@ -201,8 +230,9 @@ class Tk3D(CCLObject):
 
         status = 0
         for ia, aa in enumerate(a_use):
-            f, status = lib.tk3d_eval_multi(self.tsp, lk_use,
-                                            aa, nk*nk, status)
+            f, status = lib.tk3d_eval_multi(
+                self.tsp, lk_use, aa, nk * nk, status
+            )
             check(status)
             out[ia] = f.reshape([nk, nk])
 
@@ -213,8 +243,8 @@ class Tk3D(CCLObject):
         return out
 
     def __del__(self):
-        if hasattr(self, 'has_tsp'):
-            if self.has_tsp and hasattr(self, 'tsp'):
+        if hasattr(self, "has_tsp"):
+            if self.has_tsp and hasattr(self, "tsp"):
                 lib.f3d_t_free(self.tsp)
 
     def __bool__(self):
@@ -246,8 +276,9 @@ class Tk3D(CCLObject):
             status = 0
             a_arr, status = lib.get_array(self.tsp.a_arr, self.tsp.na, status)
             check(status)
-            lk_arr1, lk_arr2, tkka_arr = _get_spline3d_arrays(self.tsp.tkka,
-                                                              self.tsp.na)
+            lk_arr1, lk_arr2, tkka_arr = _get_spline3d_arrays(
+                self.tsp.tkka, self.tsp.na
+            )
             out.append(tkka_arr)
 
         if self.tsp.is_log:

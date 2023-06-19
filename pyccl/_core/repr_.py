@@ -10,9 +10,20 @@ class Table:
     Comments describing the capabilities of each method are included below.
     """
 
-    def __init__(self, *, n_y=6, n_x=6, decimals=2,
-                 legend="", newline="\n\t", missing="...",
-                 data_x=None, data_y=None, data_z=None, meta=[]):
+    def __init__(
+        self,
+        *,
+        n_y=6,
+        n_x=6,
+        decimals=2,
+        legend="",
+        newline="\n\t",
+        missing="...",
+        data_x=None,
+        data_y=None,
+        data_z=None,
+        meta=[],
+    ):
         self.data_x = data_x
         self.data_y = data_y
         self.data_z = data_z
@@ -25,8 +36,10 @@ class Table:
         self.entryl = 7 + decimals
         self.div = max(self.entryl, len(self.legend))
         self.form = f"{self.entryl}.{decimals}e"
-        self.idx = np.arange(self.n_y//2).tolist() + \
-            np.arange(-self.n_y//2, 0).tolist()
+        self.idx = (
+            np.arange(self.n_y // 2).tolist()
+            + np.arange(-self.n_y // 2, 0).tolist()
+        )
 
     def divider(self, new_line: bool):
         # Horizontal line in Table.
@@ -50,11 +63,13 @@ class Table:
 
     def print_right(self, arr, num):
         # Print the right part of a row of the Table (see `fullrow`).
-        s = self.wrap(self.print_elements(arr[:num//2]), " ")
+        s = self.wrap(self.print_elements(arr[: num // 2]), " ")
         s += f"{self.missing}"
-        s += self.wrap(self.wrap(
-            self.print_elements(arr[-num//2:]),
-            " "), "", f"|{self.newline}")
+        s += self.wrap(
+            self.wrap(self.print_elements(arr[(-num // 2):]), " "),
+            "",
+            f"|{self.newline}",
+        )
         return s
 
     def fullrow(self, s1, s2, num):
@@ -69,9 +84,9 @@ class Table:
         # |  ...   |            ...             |
         s = self.wrap(self.wrap(f"{self.missing:^{self.div}}", " "), "|")
         length = len(self.divider(new_line=False)) - len(s) - 3
-        s += self.wrap(self.wrap(
-            f"{self.missing:^{length}}",
-            " "), "", f"|{self.newline}")
+        s += self.wrap(
+            self.wrap(f"{self.missing:^{length}}", " "), "", f"|{self.newline}"
+        )
         return s
 
     def metadata(self):
@@ -79,9 +94,15 @@ class Table:
         # pass them here in a list. Each element will start a new row.
         s = ""
         for m in self.meta:
-            s += self.wrap(self.wrap(
-                f"{m:<{len(self.divider(new_line=False)) - 4}}",
-                " "), "|") + self.newline
+            s += (
+                self.wrap(
+                    self.wrap(
+                        f"{m:<{len(self.divider(new_line=False)) - 4}}", " "
+                    ),
+                    "|",
+                )
+                + self.newline
+            )
         return s
 
     def build(self):
@@ -89,11 +110,19 @@ class Table:
         s = self.divider(new_line=True)
         s += self.fullrow(f"{self.legend}", self.data_x, self.n_x)
         s += self.divider(new_line=True)
-        s += "".join([self.fullrow(self.data_y[i], self.data_z[i], self.n_x)
-                      for i in self.idx[:self.n_y//2]])
+        s += "".join(
+            [
+                self.fullrow(self.data_y[i], self.data_z[i], self.n_x)
+                for i in self.idx[: self.n_y // 2]
+            ]
+        )
         s += self.missing_row()
-        s += "".join([self.fullrow(self.data_y[i], self.data_z[i], self.n_x)
-                      for i in self.idx[-self.n_y//2:]])
+        s += "".join(
+            [
+                self.fullrow(self.data_y[i], self.data_z[i], self.n_x)
+                for i in self.idx[(-self.n_y // 2):]
+            ]
+        )
         s += self.divider(new_line=bool(self.meta))
         s += self.metadata()
         s += self.divider(new_line=False) if self.meta else ""
@@ -142,8 +171,11 @@ def build_string_Cosmology(self):
         base = cls.__base__ if cls.__qualname__ != "Cosmology" else cls
         params = base.__signature__.parameters
         defaults = {param: value.default for param, value in params.items()}
-        dic = {key: val for key, val in dic.items()
-               if not test_eq(key, val, defaults.get(key))}
+        dic = {
+            key: val
+            for key, val in dic.items()
+            if not test_eq(key, val, defaults.get(key))
+        }
         dic.pop("extra_parameters", None)
         if not dic:
             return ""
@@ -222,8 +254,17 @@ def build_string_Pk2D(self, na=6, nk=6, decimals=2):
     meta = [f"is_log = {islog:5.5s}, extrap_orders = {extrap}"]
     meta += [f"HASH_ARRS = {H:34}"]
 
-    T = Table(n_y=na, n_x=nk, decimals=decimals, legend=legend,
-              newline=newline, data_x=lk, data_y=a, data_z=pk, meta=meta)
+    T = Table(
+        n_y=na,
+        n_x=nk,
+        decimals=decimals,
+        legend=legend,
+        newline=newline,
+        data_x=lk,
+        data_y=a,
+        data_z=pk,
+        meta=meta,
+    )
 
     s = build_string_simple(self) + f"{newline}"
     s += T.build()
@@ -252,9 +293,11 @@ def build_string_from_attrs(self):
             mass_def = pyccl.halos.MassDef(Delta=500, rho_type=critical)
     """
     params = {param: getattr(self, param) for param in self.__repr_attrs__}
-    defaults = {param: value.default
-                for param, value in self.__signature__.parameters.items()
-                if param != "self"}
+    defaults = {
+        param: value.default
+        for param, value in self.__signature__.parameters.items()
+        if param != "self"
+    }
 
     s = build_string_simple(self)
     newline = "\n\t"
@@ -285,13 +328,14 @@ def build_string_Tracer(self):
              0  0x82ad882c232406bb  0xa0657c0f1c98fd77    0       2
              1  0x7ab385bb323530da         None           0       0
     """
+
     def get_tracer_info(tr):
         # Return a string with info for the C-level tracer.
 
         kernel = []
         if tr.kernel is not None:
             kernel.append(_get_spline1d_arrays(tr.kernel.spline))
-        kernel = hex(hash_(kernel)) if kernel else 'None'
+        kernel = hex(hash_(kernel)) if kernel else "None"
 
         transfer = []
         if tr.transfer is not None:
@@ -304,9 +348,10 @@ def build_string_Tracer(self):
             if spline is not None:
                 transfer.append(_get_spline2d_arrays(spline))
             transfer.append(tr.transfer.is_log)
-            transfer.append((tr.transfer.extrap_order_lok,
-                             tr.transfer.extrap_order_hik))
-        transfer = hex(hash_(transfer)) if transfer else 'None'
+            transfer.append(
+                (tr.transfer.extrap_order_lok, tr.transfer.extrap_order_hik)
+            )
+        transfer = hex(hash_(transfer)) if transfer else "None"
 
         prefac = tr.der_angles
         bessel = tr.der_bessel
@@ -372,8 +417,15 @@ def build_string_Tk3D(self, na=2, nk=4, decimals=2):
         # get the start and the end of the trispectrum, diagonally in `k`
         tks = [tks[0][:, 0, :], tks[0][:, :, -1]]
 
-    T = Table(n_y=na, n_x=nk, decimals=decimals, newline=newline,
-              data_y=a, legend="a \\ log10(k1)", meta=[])
+    T = Table(
+        n_y=na,
+        n_x=nk,
+        decimals=decimals,
+        newline=newline,
+        data_y=a,
+        legend="a \\ log10(k1)",
+        meta=[],
+    )
 
     s = build_string_simple(self) + f"{newline}"
     T.data_x, T.data_z = lk1, tks[0]

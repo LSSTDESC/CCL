@@ -1,7 +1,14 @@
 __all__ = (
-    "CCLParameters", "DefaultParams", "SplineParams", "GSLParams",
-    "PhysicalConstants", "spline_params", "gsl_params", "physical_constants",
-    "DEFAULT_POWER_SPECTRUM",)
+    "CCLParameters",
+    "DefaultParams",
+    "SplineParams",
+    "GSLParams",
+    "PhysicalConstants",
+    "spline_params",
+    "gsl_params",
+    "physical_constants",
+    "DEFAULT_POWER_SPECTRUM",
+)
 
 from ... import lib
 
@@ -9,12 +16,13 @@ DEFAULT_POWER_SPECTRUM = "delta_matter:delta_matter"
 
 
 class DefaultParams:
-    """Default cosmological parameters used throughout the library.
-    """
+    """Default cosmological parameters used throughout the library."""
+
     #: Mean CMB temperature in Kelvin.
     T_CMB = 2.7255
     #: Non-CDM temperature in units of ``T_CMB``.
     T_ncdm = 0.71611
+
 
 class CCLParameters:
     """Base for classes holding global CCL parameters and their values.
@@ -42,7 +50,8 @@ class CCLParameters:
         super().__init_subclass__()
         if (instance, factory) == (None, None):
             raise ValueError(
-                "Provide either the instance, or an instance factory.")
+                "Provide either the instance, or an instance factory."
+            )
         cls._instance = instance
         cls._factory = factory
         cls._frozen = freeze
@@ -51,8 +60,10 @@ class CCLParameters:
         # Emulate abstraction so that base class cannot be instantiated.
         if not (hasattr(self, "_instance") or hasattr(self, "_factory")):
             name = type(self).__name__
-            raise TypeError(f"Can't instantiate {name} with no set "
-                            "`instance` or `factory`.")
+            raise TypeError(
+                f"Can't instantiate {name} with no set "
+                "`instance` or `factory`."
+            )
         # Create a new instance if a factory is provided.
         if self._factory:
             object.__setattr__(self, "_instance", self._factory())
@@ -130,8 +141,9 @@ class GSLParams(CCLParameters, instance=lib.cvar.user_gsl_params):
     """Instances of this class hold the gsl parameters."""
 
 
-class PhysicalConstants(CCLParameters, instance=lib.cvar.constants,
-                        freeze=True):
+class PhysicalConstants(
+    CCLParameters, instance=lib.cvar.constants, freeze=True
+):
     """Instances of this class hold the physical constants."""
 
 

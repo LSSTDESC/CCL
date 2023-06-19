@@ -1,7 +1,13 @@
-__all__ = ("ObjectLock",
-           "UnlockInstance", "unlock_instance",
-           "CustomRepr", "CustomEq",
-           "CCLObject", "CCLAutoRepr", "CCLNamedClass",)
+__all__ = (
+    "ObjectLock",
+    "UnlockInstance",
+    "unlock_instance",
+    "CustomRepr",
+    "CustomEq",
+    "CCLObject",
+    "CCLAutoRepr",
+    "CCLNamedClass",
+)
 
 import functools
 from abc import ABC, abstractmethod
@@ -13,6 +19,7 @@ import numpy as np
 
 class ObjectLock:
     """Control the lock state (immutability) of a ``CCLObject``."""
+
     _locked: bool = False
     _lock_id: int = None
 
@@ -109,8 +116,9 @@ class UnlockInstance:
         """
         if func is None:
             # called with parentheses
-            return functools.partial(cls.unlock_instance, name=name,
-                                     mutate=mutate)
+            return functools.partial(
+                cls.unlock_instance, name=name, mutate=mutate
+            )
 
         if not hasattr(func, "__signature__"):
             # store the function signature
@@ -126,6 +134,7 @@ class UnlockInstance:
             bound = func.__signature__.bind(*args, **kwargs)
             with UnlockInstance(bound.arguments[name], mutate=mutate):
                 return func(*args, **kwargs)
+
         return wrapper
 
     @classmethod
@@ -158,7 +167,8 @@ class _CustomMethod:
         super().__init_subclass__()
         if method not in vars(cls):
             raise ValueError(
-                f"Subclass must contain a default {method} implementation.")
+                f"Subclass must contain a default {method} implementation."
+            )
         cls._method = method
         cls._enabled: bool = True
         cls._classes: dict = {}
@@ -265,8 +275,10 @@ class CCLObject(ABC):
 
     def __setattr__(self, name, value):
         if self._object_lock.locked:
-            raise AttributeError("CCL objects can only be updated via "
-                                 "`update_parameters`, if implemented.")
+            raise AttributeError(
+                "CCL objects can only be updated via "
+                "`update_parameters`, if implemented."
+            )
         object.__setattr__(self, name, value)
 
     def update_parameters(self, **kwargs):
@@ -327,6 +339,7 @@ class CCLAutoRepr(CCLObject):
         # Subclasses overriding `__repr__`, stop using `__repr_attrs__`.
         if hasattr(self.__class__, "__repr_attrs__"):
             from .repr_ import build_string_from_attrs
+
             return build_string_from_attrs(self)
         return object.__repr__(self)
 

@@ -2,7 +2,7 @@ import pyccl as ccl
 import pytest
 
 
-@pytest.mark.parametrize('tf', ['eisenstein_hu', 'bbks'])
+@pytest.mark.parametrize("tf", ["eisenstein_hu", "bbks"])
 def test_mu_sigma_transfer_err(tf):
     with pytest.raises(ccl.CCLError):
         cosmo = ccl.Cosmology(
@@ -14,6 +14,6 @@ def test_mu_sigma_transfer_err(tf):
             mu_0=0.1,
             sigma_0=0.2,
             transfer_function=tf,
-            matter_power_spectrum='linear'
+            matter_power_spectrum="linear",
         )
         ccl.linear_matter_power(cosmo, 1, 1)

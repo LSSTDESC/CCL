@@ -1,5 +1,10 @@
-__all__ = ("translate_IA_norm", "PTTracer", "PTMatterTracer",
-           "PTNumberCountsTracer", "PTIntrinsicAlignmentTracer",)
+__all__ = (
+    "translate_IA_norm",
+    "PTTracer",
+    "PTMatterTracer",
+    "PTNumberCountsTracer",
+    "PTIntrinsicAlignmentTracer",
+)
 
 from abc import abstractmethod
 
@@ -10,8 +15,16 @@ from .. import CCLAutoRepr, physical_constants
 from ..pyutils import _check_array_params
 
 
-def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
-                      Om_m2_for_c2=False, Om_m_fid=0.3):
+def translate_IA_norm(
+    cosmo,
+    *,
+    z,
+    a1=1.0,
+    a1delta=None,
+    a2=None,
+    Om_m2_for_c2=False,
+    Om_m_fid=0.3,
+):
     """
     Function to convert from :math:`A_{ia}` values to :math:`c_{ia}` values,
     for the intrinsic alignment bias parameters using the standard
@@ -38,22 +51,22 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
         - c2 (:obj:`float` or `array`): IA :math:`C_2` at input z values.
     """
 
-    Om_m = cosmo['Omega_m']
+    Om_m = cosmo["Omega_m"]
     rho_crit = physical_constants.RHO_CRITICAL
     c1 = c1delta = c2 = None
-    gz = cosmo.growth_factor(1./(1+z))
+    gz = cosmo.growth_factor(1.0 / (1 + z))
 
     if a1 is not None:
-        c1 = -1*a1*5e-14*rho_crit*Om_m/gz
+        c1 = -1 * a1 * 5e-14 * rho_crit * Om_m / gz
 
     if a1delta is not None:
-        c1delta = -1*a1delta*5e-14*rho_crit*Om_m/gz
+        c1delta = -1 * a1delta * 5e-14 * rho_crit * Om_m / gz
 
     if a2 is not None:
         if Om_m2_for_c2:  # Blazek2019 convention
-            c2 = a2*5*5e-14*rho_crit*Om_m**2/(Om_m_fid*gz**2)
+            c2 = a2 * 5 * 5e-14 * rho_crit * Om_m**2 / (Om_m_fid * gz**2)
         else:  # DES convention
-            c2 = a2*5*5e-14*rho_crit*Om_m/(gz**2)
+            c2 = a2 * 5 * 5e-14 * rho_crit * Om_m / (gz**2)
 
     return c1, c1delta, c2
 
@@ -68,7 +81,8 @@ class PTTracer(CCLAutoRepr):
     needed in a perturbation theory framework to provide N-point
     correlations.
     """
-    __repr_attrs__ = __eq_attrs__ = ('type', 'biases')
+
+    __repr_attrs__ = __eq_attrs__ = ("type", "biases")
 
     def __init__(self):
         self.biases = {}
@@ -103,6 +117,7 @@ class PTTracer(CCLAutoRepr):
 
         # If it's a scalar, then assume it's a constant function
         if np.ndim(b) == 0:
+
             def _const(z):
                 if np.ndim(z) == 0:
                     return b
@@ -112,14 +127,13 @@ class PTTracer(CCLAutoRepr):
             return _const
         else:  # Otherwise interpolate
             z, b = _check_array_params(b)
-            return interp1d(z, b, bounds_error=False,
-                            fill_value=b[-1])
+            return interp1d(z, b, bounds_error=False, fill_value=b[-1])
 
 
 class PTMatterTracer(PTTracer):
-    """:class:`PTTracer` representing matter fluctuations.
-    """
-    type = 'M'
+    """:class:`PTTracer` representing matter fluctuations."""
+
+    type = "M"
 
     def __init__(self):
         self.biases = {}
@@ -146,51 +160,47 @@ class PTNumberCountsTracer(PTTracer):
         bk2 (:obj:`float` or :obj:`tuple`): as above for the
             non-local bias.
     """
-    type = 'NC'
+
+    type = "NC"
 
     def __init__(self, b1, b2=None, bs=None, b3nl=None, bk2=None):
         self.biases = {}
 
         # Initialize b1
-        self.biases['b1'] = self._get_bias_function(b1)
+        self.biases["b1"] = self._get_bias_function(b1)
         # Initialize b2
-        self.biases['b2'] = self._get_bias_function(b2)
+        self.biases["b2"] = self._get_bias_function(b2)
         # Initialize bs
-        self.biases['bs'] = self._get_bias_function(bs)
+        self.biases["bs"] = self._get_bias_function(bs)
         # Initialize b3nl
-        self.biases['b3nl'] = self._get_bias_function(b3nl)
+        self.biases["b3nl"] = self._get_bias_function(b3nl)
         # Initialize bk2
-        self.biases['bk2'] = self._get_bias_function(bk2)
+        self.biases["bk2"] = self._get_bias_function(bk2)
 
     @property
     def b1(self):
-        """Internal first-order bias function.
-        """
-        return self.biases['b1']
+        """Internal first-order bias function."""
+        return self.biases["b1"]
 
     @property
     def b2(self):
-        """Internal second-order bias function.
-        """
-        return self.biases['b2']
+        """Internal second-order bias function."""
+        return self.biases["b2"]
 
     @property
     def bs(self):
-        """Internal tidal bias function.
-        """
-        return self.biases['bs']
+        """Internal tidal bias function."""
+        return self.biases["bs"]
 
     @property
     def b3nl(self):
-        """Internal third-order bias function.
-        """
-        return self.biases['b3nl']
+        """Internal third-order bias function."""
+        return self.biases["b3nl"]
 
     @property
     def bk2(self):
-        """Internal non-local bias function.
-        """
-        return self.biases['bk2']
+        """Internal non-local bias function."""
+        return self.biases["bk2"]
 
 
 class PTIntrinsicAlignmentTracer(PTTracer):
@@ -210,33 +220,30 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         cdelta (:obj:`float` or :obj:`tuple`): as above for the
             overdensity bias :math:`C_{1\\delta}`.
     """
-    type = 'IA'
+
+    type = "IA"
 
     def __init__(self, c1, c2=None, cdelta=None):
-
         self.biases = {}
 
         # Initialize c1
-        self.biases['c1'] = self._get_bias_function(c1)
+        self.biases["c1"] = self._get_bias_function(c1)
         # Initialize c2
-        self.biases['c2'] = self._get_bias_function(c2)
+        self.biases["c2"] = self._get_bias_function(c2)
         # Initialize cdelta
-        self.biases['cdelta'] = self._get_bias_function(cdelta)
+        self.biases["cdelta"] = self._get_bias_function(cdelta)
 
     @property
     def c1(self):
-        """Internal first-order bias function.
-        """
-        return self.biases['c1']
+        """Internal first-order bias function."""
+        return self.biases["c1"]
 
     @property
     def c2(self):
-        """Internal second-order bias function.
-        """
-        return self.biases['c2']
+        """Internal second-order bias function."""
+        return self.biases["c2"]
 
     @property
     def cdelta(self):
-        """Internal overdensity bias function.
-        """
-        return self.biases['cdelta']
+        """Internal overdensity bias function."""
+        return self.biases["cdelta"]

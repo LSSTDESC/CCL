@@ -6,10 +6,11 @@ class FFTLogParams:
     See documentation in :meth:`update_parameters` for a full
     description of all allowed parameters.
     """
+
     #: Anti-aliasing. Factor mulitplying the lower boundary.
     padding_lo_fftlog = 0.1
     #: Anti-aliasing. Factor mulitplying the upper boundary.
-    padding_hi_fftlog = 10.
+    padding_hi_fftlog = 10.0
 
     #: Samples per decade for the Hankel transforms.
     n_per_decade = 100
@@ -19,7 +20,7 @@ class FFTLogParams:
     #: Padding for intermediate transforms (lower bound).
     padding_lo_extra = 0.1
     #: Padding for intermediate transforms (upper bound).
-    padding_hi_extra = 10.
+    padding_hi_extra = 10.0
     #: If True, high precision intermediate transforms.
     large_padding_2D = False
 
@@ -30,21 +31,29 @@ class FFTLogParams:
 
     @property
     def params(self):
-        return ["padding_lo_fftlog", "padding_hi_fftlog", "n_per_decade",
-                "extrapol", "padding_lo_extra", "padding_hi_extra",
-                "large_padding_2D", "plaw_fourier", "plaw_projected"]
+        return [
+            "padding_lo_fftlog",
+            "padding_hi_fftlog",
+            "n_per_decade",
+            "extrapol",
+            "padding_lo_extra",
+            "padding_hi_extra",
+            "large_padding_2D",
+            "plaw_fourier",
+            "plaw_projected",
+        ]
 
     def to_dict(self):
-        """ Returns a dictionary containing this object's parameters.
-        """
+        """Returns a dictionary containing this object's parameters."""
         return {param: getattr(self, param) for param in self.params}
 
     def __getitem__(self, name):
         return getattr(self, name)
 
     def __setattr__(self, name, value):
-        raise AttributeError("FFTLogParams can only be updated via "
-                             "`updated_parameters`.")
+        raise AttributeError(
+            "FFTLogParams can only be updated via " "`updated_parameters`."
+        )
 
     def __repr__(self):
         return repr(self.to_dict())

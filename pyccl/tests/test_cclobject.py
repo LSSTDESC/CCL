@@ -6,12 +6,14 @@ import functools
 def all_subclasses(cls):
     """Get all subclasses of ``cls``. NOTE: Used in ``conftest.py``."""
     return set(cls.__subclasses__()).union(
-        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)]
+    )
 
 
 def test_method_control_raises():
     # All method control subclasses must contain a default implementation.
     with pytest.raises(ValueError):
+
         class MyMethodControl(ccl._core.schema._CustomMethod, method="name"):
             pass
 
@@ -42,12 +44,16 @@ def test_eq_control():
 def check_eq_repr_hash(self, other, *, equal=True):
     # Helper to ensure `__eq__`, `__repr__`, `__hash__` are consistent.
     if equal:
-        return (self == other
-                and repr(self) == repr(other)
-                and hash(self) == hash(other))
-    return (self != other
-            and repr(self) != repr(other)
-            and hash(self) != hash(other))
+        return (
+            self == other
+            and repr(self) == repr(other)
+            and hash(self) == hash(other)
+        )
+    return (
+        self != other
+        and repr(self) != repr(other)
+        and hash(self) != hash(other)
+    )
 
 
 def test_CCLObject_immutability():
@@ -104,6 +110,7 @@ def test_ccl_parameters_abstract():
     with pytest.raises(TypeError):
         ccl.CCLParameters()
     with pytest.raises(ValueError):
+
         class MyPars(ccl.CCLParameters):
             pass
 
@@ -136,12 +143,17 @@ def init_decorator(func):
             # If `__repr_attrs__` is not specified, use local repr or inherit.
             return
 
-        flag = [attr for attr in self.__repr_attrs__
-                if not (hasattr(self, attr) or in_mro(self))]
+        flag = [
+            attr
+            for attr in self.__repr_attrs__
+            if not (hasattr(self, attr) or in_mro(self))
+        ]
         if flag:
             # NOTE: Set the attributes before calling `super`.
-            raise AttributeError(f"{self.__class__.__name__}: attribute(s) "
-                                 f"{flag} not set in __init__.")
+            raise AttributeError(
+                f"{self.__class__.__name__}: attribute(s) "
+                f"{flag} not set in __init__."
+            )
 
     return wrapper
 
@@ -151,6 +163,7 @@ def test_unlock_instance_errors():
 
     # 1. Developer error
     with pytest.raises(NameError):
+
         @ccl.unlock_instance(name="hello")
         def func1(item, pk, a0=0, *, a1=None, a2):
             return

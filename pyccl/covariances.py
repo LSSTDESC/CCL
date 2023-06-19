@@ -1,5 +1,9 @@
-__all__ = ("angular_cl_cov_cNG", "sigma2_B_disc", "sigma2_B_from_mask",
-           "angular_cl_cov_SSC",)
+__all__ = (
+    "angular_cl_cov_cNG",
+    "sigma2_B_disc",
+    "sigma2_B_from_mask",
+    "angular_cl_cov_SSC",
+)
 
 import numpy as np
 
@@ -7,9 +11,19 @@ from . import DEFAULT_POWER_SPECTRUM, check, lib
 from .pyutils import _check_array_params, integ_types
 
 
-def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
-                       tracer3=None, tracer4=None, ell2=None,
-                       fsky=1., integration_method='qag_quad'):
+def angular_cl_cov_cNG(
+    cosmo,
+    tracer1,
+    tracer2,
+    *,
+    ell,
+    t_of_kk_a,
+    tracer3=None,
+    tracer4=None,
+    ell2=None,
+    fsky=1.0,
+    integration_method="qag_quad",
+):
     """Calculate the connected non-Gaussian covariance for a pair of
     power spectra :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
     between two pairs of tracers (:math:`(a,b)` and :math:`(c,d)`).
@@ -60,7 +74,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             four input tracers, as a function of :math:`\\ell_1` and \
             :math:`\\ell_2`. The ordering is such that \
             ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
-    """ # noqa
+    """  # noqa
     if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
@@ -100,9 +114,20 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     ell2_use = np.atleast_1d(ell2)
 
     cov, status = lib.angular_cov_vec(
-        cosmo, clt1, clt2, clt3, clt4, tsp,
-        ell1_use, ell2_use, integ_types[integration_method],
-        6, 1./(4*np.pi*fsky), ell1_use.size*ell2_use.size, status)
+        cosmo,
+        clt1,
+        clt2,
+        clt3,
+        clt4,
+        tsp,
+        ell1_use,
+        ell2_use,
+        integ_types[integration_method],
+        6,
+        1.0 / (4 * np.pi * fsky),
+        ell1_use.size * ell2_use.size,
+        status,
+    )
 
     cov = cov.reshape([ell2_use.size, ell1_use.size])
     if np.ndim(ell2) == 0:
@@ -122,8 +147,9 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     return cov
 
 
-def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
-                  p_of_k_a=DEFAULT_POWER_SPECTRUM):
+def sigma2_B_disc(
+    cosmo, a_arr=None, *, fsky=1.0, p_of_k_a=DEFAULT_POWER_SPECTRUM
+):
     """Returns the variance of the projected linear density field
     over a circular disc covering a sky fraction `fsky` as a function
     of scale factor. This is given by
@@ -163,12 +189,13 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
         a_arr = np.atleast_1d(a_arr)
 
     chi_arr = cosmo.comoving_radial_distance(a_arr)
-    R_arr = chi_arr * np.arccos(1-2*fsky)
+    R_arr = chi_arr * np.arccos(1 - 2 * fsky)
     psp = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
 
     status = 0
-    s2B_arr, status = lib.sigma2b_vec(cosmo.cosmo, a_arr, R_arr, psp,
-                                      len(a_arr), status)
+    s2B_arr, status = lib.sigma2b_vec(
+        cosmo.cosmo, a_arr, R_arr, psp, len(a_arr), status
+    )
     check(status, cosmo=cosmo)
 
     if full_output:
@@ -178,9 +205,10 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
     return s2B_arr
 
 
-def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
-                       p_of_k_a=DEFAULT_POWER_SPECTRUM):
-    """ Returns the variance of the projected linear density field, given the
+def sigma2_B_from_mask(
+    cosmo, a_arr=None, *, mask_wl=None, p_of_k_a=DEFAULT_POWER_SPECTRUM
+):
+    """Returns the variance of the projected linear density field, given the
     angular power spectrum of the footprint mask and scale factor. This is
     given by
 
@@ -231,18 +259,19 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
 
     sigma2_B = np.zeros(a_arr.size)
     for i in range(sigma2_B.size):
-        if 1-a_arr[i] < 1e-6:
+        if 1 - a_arr[i] < 1e-6:
             # For a=1, the integral becomes independent of the footprint in
             # the flat-sky approximation. So we are just using the method
             # for the disc geometry here
-            sigma2_B[i] = sigma2_B_disc(cosmo=cosmo, a_arr=a_arr[i],
-                                        p_of_k_a=p_of_k_a)
+            sigma2_B[i] = sigma2_B_disc(
+                cosmo=cosmo, a_arr=a_arr[i], p_of_k_a=p_of_k_a
+            )
         else:
             chi = cosmo.comoving_angular_distance(a=a_arr)
-            k = (ell+0.5)/chi[i]
+            k = (ell + 0.5) / chi[i]
             pk = p_of_k_a(k, a_arr[i], cosmo)
             # See eq. E.10 of 2007.01844
-            sigma2_B[i] = np.sum(pk * mask_wl)/chi[i]**2
+            sigma2_B[i] = np.sum(pk * mask_wl) / chi[i] ** 2
 
     if full_output:
         return a_arr, sigma2_B
@@ -251,10 +280,20 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
     return sigma2_B
 
 
-def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
-                       tracer3=None, tracer4=None, ell2=None,
-                       sigma2_B=None, fsky=1.,
-                       integration_method='qag_quad'):
+def angular_cl_cov_SSC(
+    cosmo,
+    tracer1,
+    tracer2,
+    *,
+    ell,
+    t_of_kk_a,
+    tracer3=None,
+    tracer4=None,
+    ell2=None,
+    sigma2_B=None,
+    fsky=1.0,
+    integration_method="qag_quad",
+):
     """Calculate the super-sample contribution to the connected
     non-Gaussian covariance for a pair of power spectra
     :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
@@ -311,7 +350,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             four input tracers, as a function of :math:`\\ell_1` and \
             :math:`\\ell_2`. The ordering is such that \
             ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
-    """ # noqa
+    """  # noqa
     if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
@@ -353,11 +392,24 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     if sigma2_B is None:
         a_arr, s2b_arr = sigma2_B_disc(cosmo_in, fsky=fsky)
     else:
-        a_arr, s2b_arr = _check_array_params(sigma2_B, 'sigma2_B')
+        a_arr, s2b_arr = _check_array_params(sigma2_B, "sigma2_B")
     cov, status = lib.angular_cov_ssc_vec(
-        cosmo, clt1, clt2, clt3, clt4, tsp, a_arr, s2b_arr,
-        ell1_use, ell2_use, integ_types[integration_method],
-        4, 1., ell1_use.size*ell2_use.size, status)
+        cosmo,
+        clt1,
+        clt2,
+        clt3,
+        clt4,
+        tsp,
+        a_arr,
+        s2b_arr,
+        ell1_use,
+        ell2_use,
+        integ_types[integration_method],
+        4,
+        1.0,
+        ell1_use.size * ell2_use.size,
+        status,
+    )
 
     cov = cov.reshape([ell2_use.size, ell1_use.size])
     if np.ndim(ell2) == 0:

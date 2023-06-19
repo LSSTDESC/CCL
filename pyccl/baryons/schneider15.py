@@ -29,10 +29,11 @@ class BaryonsSchneider15(Baryons):
             the stellar component in units of :math:`{\\rm Mpc}\\,h^{-1}`.
             Defaults to 55.
     """
-    name = 'Schneider15'
+
+    name = "Schneider15"
     __repr_attrs__ = __eq_attrs__ = ("log10Mc", "eta_b", "k_s")
 
-    def __init__(self, log10Mc=np.log10(1.2E14), eta_b=0.5, k_s=55.0):
+    def __init__(self, log10Mc=np.log10(1.2e14), eta_b=0.5, k_s=55.0):
         self.log10Mc = log10Mc
         self.eta_b = eta_b
         self.k_s = k_s
@@ -48,17 +49,17 @@ class BaryonsSchneider15(Baryons):
         Returns:
             :obj:`float` or `array`: Correction factor to apply to
                 the power spectrum.
-        """ # noqa
+        """  # noqa
         a_use, k_use = map(np.atleast_1d, [a, k])
         a_use, k_use = a_use[:, None], k_use[None, :]
 
-        z = 1/a_use - 1
-        kh = k_use / cosmo['h']
-        b0 = 0.105*self.log10Mc - 1.27
-        bfunc = b0 / (1. + (z/2.3)**2.5)
-        kg = 0.7 * (1-bfunc)**4 * self.eta_b**(-1.6)
-        gf = bfunc / (1 + (kh/kg)**3) + 1. - bfunc
-        scomp = 1 + (kh / self.k_s)**2
+        z = 1 / a_use - 1
+        kh = k_use / cosmo["h"]
+        b0 = 0.105 * self.log10Mc - 1.27
+        bfunc = b0 / (1.0 + (z / 2.3) ** 2.5)
+        kg = 0.7 * (1 - bfunc) ** 4 * self.eta_b ** (-1.6)
+        gf = bfunc / (1 + (kh / kg) ** 3) + 1.0 - bfunc
+        scomp = 1 + (kh / self.k_s) ** 2
         fka = gf * scomp
 
         if np.ndim(k) == 0:
@@ -95,7 +96,11 @@ class BaryonsSchneider15(Baryons):
         if pk.psp.is_log:
             np.log(pk_arr, out=pk_arr)  # in-place log
 
-        return Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
-                    is_logp=pk.psp.is_log,
-                    extrap_order_lok=pk.extrap_order_lok,
-                    extrap_order_hik=pk.extrap_order_hik)
+        return Pk2D(
+            a_arr=a_arr,
+            lk_arr=lk_arr,
+            pk_arr=pk_arr,
+            is_logp=pk.psp.is_log,
+            extrap_order_lok=pk.extrap_order_lok,
+            extrap_order_hik=pk.extrap_order_hik,
+        )

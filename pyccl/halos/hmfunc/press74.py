@@ -16,18 +16,17 @@ class MassFuncPress74(MassFunc):
         mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
-    name = 'Press74'
 
-    def __init__(self, *,
-                 mass_def="fof",
-                 mass_def_strict=True):
+    name = "Press74"
+
+    def __init__(self, *, mass_def="fof", mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
-        self._norm = np.sqrt(2/np.pi)
+        self._norm = np.sqrt(2 / np.pi)
 
     def _check_mass_def_strict(self, mass_def):
         return mass_def.Delta != "fof"
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         delta_c = 1.68647
-        nu = delta_c/sigM
+        nu = delta_c / sigM
         return self._norm * nu * np.exp(-0.5 * nu**2)

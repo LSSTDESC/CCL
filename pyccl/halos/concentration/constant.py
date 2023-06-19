@@ -13,8 +13,12 @@ class ConcentrationConstant(Concentration):
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition (arbitrary in this case).
     """
-    __repr_attrs__ = __eq_attrs__ = ("mass_def", "c",)
-    name = 'Constant'
+
+    __repr_attrs__ = __eq_attrs__ = (
+        "mass_def",
+        "c",
+    )
+    name = "Constant"
 
     def __init__(self, c=1, *, mass_def="200c"):
         self.c = c

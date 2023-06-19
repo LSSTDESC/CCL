@@ -1,4 +1,7 @@
-__all__ = ("deprecated", "deprecate_attr",)
+__all__ = (
+    "deprecated",
+    "deprecate_attr",
+)
 
 import functools
 import warnings
@@ -12,6 +15,7 @@ def deprecated(new_function=None):
     when the function is used. If there is a replacement function,
     pass it as `new_function`.
     """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -20,7 +24,9 @@ def deprecated(new_function=None):
                 s += f" Use {new_function.__qualname__} instead."
             warnings.warn(s, CCLDeprecationWarning)
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -66,8 +72,11 @@ def deprecate_attr(getter=None, *, pairs=[]):
             class_name = cls.__class__.__name__
             warnings.warn(
                 f"Attribute {name} is deprecated in {class_name}. "
-                f"Pass the new name {new_name}.", CCLDeprecationWarning)
+                f"Pass the new name {new_name}.",
+                CCLDeprecationWarning,
+            )
             name = new_name
 
         return cls.__getattribute__(name)
+
     return wrapper

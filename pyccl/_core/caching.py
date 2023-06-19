@@ -1,4 +1,10 @@
-__all__ = ("hash_", "Caching", "cache", "CacheInfo", "CachedObject",)
+__all__ = (
+    "hash_",
+    "Caching",
+    "cache",
+    "CacheInfo",
+    "CachedObject",
+)
 
 import sys
 import functools
@@ -54,6 +60,7 @@ def hash_(obj):
 
 class _CachingMeta(type):
     """Implement ``property`` to a ``classmethod`` for ``Caching``."""
+
     # NOTE: Only in 3.8 < py < 3.11 can `classmethod` wrap `property`.
     # https://docs.python.org/3.11/library/functions.html#classmethod
     @property
@@ -65,7 +72,8 @@ class _CachingMeta(type):
         if value < 0:
             raise ValueError(
                 "`maxsize` should be larger than zero. "
-                "To disable caching, use `Caching.disable()`.")
+                "To disable caching, use `Caching.disable()`."
+            )
         cls._maxsize = value
         for func in cls._cached_functions:
             func.cache_info.maxsize = value
@@ -103,12 +111,13 @@ class Caching(metaclass=_CachingMeta):
         policy (``'fifo'``, ``'lru'``, ``'lfu'``):
             Cache retention policy.
     """
+
     _enabled: bool = False
-    _policies: list = ['fifo', 'lru', 'lfu']
-    _default_maxsize: int = 128   # class default maxsize
-    _default_policy: str = 'lru'  # class default policy
-    _maxsize = _default_maxsize   # user-defined maxsize
-    _policy = _default_policy     # user-defined policy
+    _policies: list = ["fifo", "lru", "lfu"]
+    _default_maxsize: int = 128  # class default maxsize
+    _default_policy: str = "lru"  # class default policy
+    _maxsize = _default_maxsize  # user-defined maxsize
+    _policy = _default_policy  # user-defined policy
     _cached_functions: list = []
 
     @classmethod
@@ -202,14 +211,16 @@ class Caching(metaclass=_CachingMeta):
         if maxsize < 0:
             raise ValueError(
                 "`maxsize` should be larger than zero. "
-                "To disable caching, use `Caching.disable()`.")
+                "To disable caching, use `Caching.disable()`."
+            )
         if policy not in cls._policies:
             raise ValueError("Cache retention policy not recognized.")
 
         if func is None:
             # `@cache` with parentheses
             return functools.partial(
-                cls._decorator, maxsize=maxsize, policy=policy)
+                cls._decorator, maxsize=maxsize, policy=policy
+            )
         # `@cache()` without parentheses
         return cls._decorator(func, maxsize=maxsize, policy=policy)
 
@@ -287,6 +298,7 @@ class CachedObject:
         counter (``int``):
             Number of times the cached item has been retrieved.
     """
+
     counter: int = 0
 
     def __init__(self, obj):

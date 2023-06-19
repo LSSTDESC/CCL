@@ -9,18 +9,16 @@ def yf(x, pw):
 
 
 def yf_int(x, pw):
-    return x**(pw + 1) / (pw + 1)
+    return x ** (pw + 1) / (pw + 1)
 
 
 def test_intspline_accuracy():
     nx = 1024
     x_arr = np.linspace(-2, 2, nx)
-    y_arr = np.array([yf(x_arr, p)
-                      for p in [2, 4]])
+    y_arr = np.array([yf(x_arr, p) for p in [2, 4]])
     int_spline = _spline_integrate(x_arr, y_arr, -1, 1)
-    int_exact = np.array([yf_int(1, p) - yf_int(-1, p)
-                          for p in [2, 4]])
-    assert np.all(np.fabs(int_spline / int_exact - 1) < 1E5-5)
+    int_exact = np.array([yf_int(1, p) - yf_int(-1, p) for p in [2, 4]])
+    assert np.all(np.fabs(int_spline / int_exact - 1) < 1e5 - 5)
 
 
 def test_intspline_raises_shapes():

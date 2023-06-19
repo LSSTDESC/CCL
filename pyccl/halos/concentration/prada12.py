@@ -14,7 +14,8 @@ class ConcentrationPrada12(Concentration):
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition object ora name string.
     """
-    name = 'Prada12'
+
+    name = "Prada12"
 
     def __init__(self, *, mass_def="200c"):
         super().__init__(mass_def=mass_def)
@@ -31,8 +32,8 @@ class ConcentrationPrada12(Concentration):
         self.i1 = 1.646
         self.be = 7.386
         self.x1 = 0.526
-        self.cnorm = 1. / self._cmin(1.393)
-        self.inorm = 1. / self._imin(1.393)
+        self.cnorm = 1.0 / self._cmin(1.393)
+        self.inorm = 1.0 / self._imin(1.393)
 
     def _form(self, x, x0, v0, v1, v2):
         # form factor for `cmin` and `imin`
@@ -46,9 +47,11 @@ class ConcentrationPrada12(Concentration):
 
     def _concentration(self, cosmo, M, a):
         sig = cosmo.sigmaM(M, a)
-        x = a * (cosmo["Omega_l"] / cosmo["Omega_m"])**(1. / 3.)
+        x = a * (cosmo["Omega_l"] / cosmo["Omega_m"]) ** (1.0 / 3.0)
         B0 = self._cmin(x) * self.cnorm
         B1 = self._imin(x) * self.inorm
         sig_p = B1 * sig
-        Cc = 2.881 * ((sig_p / 1.257)**1.022 + 1) * np.exp(0.060 / sig_p**2)
+        Cc = (
+            2.881 * ((sig_p / 1.257) ** 1.022 + 1) * np.exp(0.060 / sig_p**2)
+        )
         return B0 * Cc
