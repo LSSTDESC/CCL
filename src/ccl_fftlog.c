@@ -76,14 +76,6 @@ static double complex polar (double r, double phi)
 }
 
 
-static void lngamma_4_approx(double x, double y, double* lnr, double* arg)
-{
-  double complex w;
-  w = ln_g_m_vals_cfft(x+0.5, (y-1.5));
-  
-  if(lnr) *lnr = creal(w);
-  if(arg) *arg = cimag(w);
-}
 
 
 static void lngamma_4(double x, double y, double* lnr, double* arg)
