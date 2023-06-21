@@ -118,8 +118,7 @@ def angular_cl(
         #     l_limber, cl_non_limber, status = implement_MATTER(
         #         cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error
         #     )
-        if status != 0:
-            raise ValueError("Error in non-Limber integrator.")
+        check(status, cosmo=cosmo_in)
     else:
         cl_non_limber = np.array([])
     cosmo = cosmo.cosmo
@@ -136,8 +135,6 @@ def angular_cl(
             ell_use_limber.size,
             status,
         )
-        if status != 0:
-            raise ValueError("Error in Limber integrator.")
     else:
         cl_limber = np.array([])
 

@@ -91,6 +91,31 @@ def test_cells_raise_integ_method():
             COSMO, LENS, LENS, ells, limber_integration_method="guad"
         )
 
+    with pytest.raises(ValueError):
+        LENS_2 = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, np.zeros(len(ZZ))))
+        ccl.angular_cl(
+            COSMO, LENS, LENS_2, ells, limber_integration_method="quad"
+        )
+
+
+def test_cells_raise_nonlimber_methods():
+    ells = [10, 11]
+    with pytest.raises(ValueError):
+        ccl.angular_cl(
+            COSMO, LENS, LENS, ells, non_limber_integration_method="FEKM"
+        )
+    with pytest.raises(ValueError):
+        ccl.angular_cl(
+            COSMO, LENS, LENS, ells, l_limber='auoto',
+            non_limber_integration_method="FKEM"
+        )
+    cl, meta = ccl.angular_cl(COSMO, LENS, LENS,
+                              ells, l_limber=100,
+                              non_limber_integration_method="FKEM",
+                              return_meta=True
+                              )
+    assert (meta['l_limber'] == 100)
+
 
 def test_cells_raise_weird_pk():
     ells = [10, 11]

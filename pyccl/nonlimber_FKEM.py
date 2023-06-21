@@ -7,7 +7,7 @@ We utilize a modified generalized version of FFTLog
  to compute integrals over spherical bessel functions
 """
 import numpy as np
-from . import lib
+from . import lib, check
 from .pyutils import integ_types
 from scipy.interpolate import interp1d
 from pyccl.pyutils import _fftlog_transform_general
@@ -66,11 +66,15 @@ def nonlimber_FKEM(
     psp_nonlin = cosmo.parse_pk2d(p_of_k_a, is_linear=False)
     status = 0
     t1, status = lib.cl_tracer_collection_t_new(status)
+    check(status)
     t2, status = lib.cl_tracer_collection_t_new(status)
+    check(status)
     for t in clt1._trc:
         status = lib.add_cl_tracer_to_collection(t1, t, status)
+        check(status)
     for t in clt2._trc:
         status = lib.add_cl_tracer_to_collection(t2, t, status)
+        check(status)
     pk = cosmo.get_linear_power(name=p_of_k_a)
 
     chi_min = np.max([np.min(chis_t1), np.min(chis_t2)])
@@ -141,8 +145,7 @@ def nonlimber_FKEM(
             1,
             status,
         )
-        if status != 0:
-            raise ValueError("Error in Limber integrator.")
+        check(status, cosmo=cosmo)
         cl_limber_nonlin, status = lib.angular_cl_vec_limber(
             cosmo.cosmo,
             t1,
@@ -153,8 +156,7 @@ def nonlimber_FKEM(
             1,
             status,
         )
-        if status != 0:
-            raise ValueError("Error in Limber integrator.")
+        check(status, cosmo=cosmo)
 
         for i in range(len(kernels_t1)):
             # calls to fftlog to perform integration over chi integrals
@@ -221,4 +223,6 @@ def nonlimber_FKEM(
 
     if type(l_limber) == str:
         l_limber = ls[-1]
+    if False in np.isfinite(cells):
+        status = 1
     return l_limber, cells, status
