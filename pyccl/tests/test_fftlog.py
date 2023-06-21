@@ -37,7 +37,7 @@ def test_fftlog_plaw(dim, mu, alpha):
                                                   mu + 1,
                                                   -alpha + dim,
                                                   0, 0.0, 0.0)
-        ccl_Fr /= 2 * np.pi * (dim + mu - alpha) 
+        ccl_Fr /= 2 * np.pi * (dim + mu - alpha)
     elif dim == 3:
         ccl_r, ccl_Fr = _fftlog_transform_general(k_arr,
                                                   fk_arr * (k_arr**(dim)),
