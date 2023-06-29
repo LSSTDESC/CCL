@@ -553,7 +553,7 @@ def test_hernquist_cumul2d_accuracy(fourier_analytic):
 
 def test_einasto_projected_accuracy():
     cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
-    # Analytic projected profile
+    # projected profile from numerical integration
     p1 = ccl.halos.HaloProfileEinasto(mass_def='200c',
                                       concentration=cM, truncated=True,
                                       projected_integrate=True)
