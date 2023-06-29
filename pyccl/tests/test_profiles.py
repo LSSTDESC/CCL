@@ -552,12 +552,12 @@ def test_einasto_projected_accuracy():
     cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     # Analytic projected profile
     p1 = ccl.halos.HaloProfileEinasto(mass_def='200c',
-                                        concentration=cM, truncated=False,
-                                        projected_integrate=True)
+                                      concentration=cM, truncated=False,
+                                      projected_integrate=True)
     # FFTLog
     p2 = ccl.halos.HaloProfileEinasto(mass_def='200c',
-                                        concentration=cM, truncated=False,
-                                        projected_integrate=False)
+                                      concentration=cM, truncated=False,
+                                      projected_integrate=False)
 
     M = 1E14
     a = 0.5
