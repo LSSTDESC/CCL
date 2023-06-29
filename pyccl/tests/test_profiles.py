@@ -548,6 +548,27 @@ def test_hernquist_cumul2d_accuracy(fourier_analytic):
     assert np.all(res2 < 5E-3)
 
 
+def test_einasto_projected_accuracy():
+    cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
+    # Analytic projected profile
+    p1 = ccl.halos.HaloProfileEinasto(mass_def='200c',
+                                        concentration=cM, truncated=False,
+                                        projected_integrate=True)
+    # FFTLog
+    p2 = ccl.halos.HaloProfileEinasto(mass_def='200c',
+                                        concentration=cM, truncated=False,
+                                        projected_integrate=False)
+
+    M = 1E14
+    a = 0.5
+    rt = np.logspace(-3, 2, 1024)
+    srt1 = p1.projected(COSMO, rt, M, a)
+    srt2 = p2.projected(COSMO, rt, M, a)
+
+    res2 = np.fabs(srt2/srt1-1)
+    assert np.all(res2 < 5E-1)
+
+
 def test_HaloProfile_abstractmethods():
     # Test that `HaloProfile` and its subclasses can't be instantiated if
     # either `_real` or `_fourier` have not been defined.

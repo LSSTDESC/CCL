@@ -1,6 +1,7 @@
 __all__ = ("HaloProfileEinasto",)
 
 import numpy as np
+from scipy.integrate import quad_vec
 from scipy.special import gamma, gammainc
 
 from .. import MassDef, mass_translator
@@ -43,10 +44,15 @@ class HaloProfileEinasto(HaloProfileMatter):
     __repr_attrs__ = __eq_attrs__ = (
         "truncated", "alpha", "mass_def", "concentration", "precision_fftlog",)
 
-    def __init__(self, *, mass_def, concentration, truncated=True,
+    def __init__(self, *, mass_def, concentration,
+                 truncated=False,
+                 projected_integrate=False,
                  alpha='cosmo'):
         self.truncated = truncated
+        self.projected_integrate = projected_integrate
         self.alpha = alpha
+        if projected_integrate:
+            self._projected = self._projected_integrate
         super().__init__(mass_def=mass_def, concentration=concentration)
         self._to_virial_mass = mass_translator(
             mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
@@ -97,6 +103,33 @@ class HaloProfileEinasto(HaloProfileMatter):
         x = r_use[None, :] / R_s[:, None]
         prof = norm[:, None] * np.exp(-2. * (x**alpha[:, None] - 1) /
                                       alpha[:, None])
+        if self.truncated:
+            prof[r_use[None, :] > R_M[:, None]] = 0
+
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _projected_integrate(self, cosmo, r, M, a):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
+        R_s = R_M / c_M
+
+        alpha = self._get_alpha(cosmo, M_use, a)
+
+        def integrand(z):
+            x = np.sqrt(z**2. + r_use[None, :]**2.) / R_s[:, None]
+            return np.exp(-2. * (x**alpha[:, None] - 1.) / alpha[:, None])
+        prof = quad_vec(integrand, 0., np.inf)[0]
+
+        prof *= 2 * self._norm(M_use, R_s, c_M, alpha)[:, None]
+
         if self.truncated:
             prof[r_use[None, :] > R_M[:, None]] = 0
 
