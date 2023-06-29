@@ -133,6 +133,9 @@ def test_empirical_smoke(prof_class):
         smoke_assert_prof_real(p, method='_fourier_analytic')
         smoke_assert_prof_real(p, method='_projected_analytic')
         smoke_assert_prof_real(p, method='_cumul2d_analytic')
+    else:
+        p = prof_class(mass_def=c.mass_def, concentration=c)
+        smoke_assert_prof_real(p, method='_projected_integrate')
 
     p = prof_class(mass_def=c.mass_def, concentration=c)
     smoke_assert_prof_real(p, method='real')
@@ -552,21 +555,21 @@ def test_einasto_projected_accuracy():
     cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     # Analytic projected profile
     p1 = ccl.halos.HaloProfileEinasto(mass_def='200c',
-                                      concentration=cM, truncated=False,
+                                      concentration=cM, truncated=True,
                                       projected_integrate=True)
     # FFTLog
     p2 = ccl.halos.HaloProfileEinasto(mass_def='200c',
-                                      concentration=cM, truncated=False,
+                                      concentration=cM, truncated=True,
                                       projected_integrate=False)
 
     M = 1E14
     a = 0.5
     rt = np.logspace(-3, 2, 1024)
-    srt1 = p1.projected(COSMO, rt, M, a)
-    srt2 = p2.projected(COSMO, rt, M, a)
+    srt1 = p1.projected(COSMO, rt, M, a)[:500]
+    srt2 = p2.projected(COSMO, rt, M, a)[:500]
 
     res2 = np.fabs(srt2/srt1-1)
-    assert np.all(res2 < 5E-1)
+    assert np.all(res2 < 6e-2)
 
 
 def test_HaloProfile_abstractmethods():
