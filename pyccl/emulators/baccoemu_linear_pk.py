@@ -60,7 +60,7 @@ class BaccoemuLinear(Emulator):
             emupars['A_s'] = cosmo['A_s']
 
         h = cosmo['h']
-        k_hubble, pk_hubble = self.mpk.get_linear_pk(**emupars)
+        k_hubble, pk_hubble = self.mpk.get_linear_pk(cold=False, **emupars)
         return k_hubble * h, pk_hubble / h**3
 
     def _get_pk2d(self, cosmo):
