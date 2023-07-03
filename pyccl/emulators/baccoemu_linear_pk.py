@@ -16,6 +16,12 @@ class BaccoemuLinear(Emulator):
             self.a_max = self.mpk.emulator['linear']['bounds'][-1][1]
             self.k_min = self.mpk.emulator['linear']['k'][0]
             self.k_max = self.mpk.emulator['linear']['k'][-1]
+    
+    def __str__(self) -> str:
+        return """baccoemu linear Pk module, 
+k_min,k_max = ({}, {}), 
+a_min,a_max = ({}, {})""".format(
+            self.k_min, self.k_max, self.a_min, self.a_max)
 
     def _sigma8tot_2_sigma8cold(self, emupars, sigma8tot):
         if hasattr(emupars['omega_cold'], '__len__'):
@@ -27,6 +33,7 @@ class BaccoemuLinear(Emulator):
         A_s_fid = 2.1e-9
         sigma8tot_fid = self.mpk.get_sigma8(cold=False, A_s=A_s_fid, **_emupars)
         A_s = (sigma8tot / sigma8tot_fid)**2 * A_s_fid
+        print(self.mpk.get_sigma8(cold=True, A_s=A_s, **_emupars))
         return self.mpk.get_sigma8(cold=True, A_s=A_s, **_emupars)
     
     def _get_pk_at_a(self, a, cosmo):
@@ -55,9 +62,16 @@ class BaccoemuLinear(Emulator):
 
         if np.isnan(cosmo['A_s']):
             sigma8tot = cosmo['sigma8']
-            emupars['sigma8_cold'] = self._sigma8tot_2_sigma8cold(emupars, sigma8tot)
+            sigma8cold = self._sigma8tot_2_sigma8cold(emupars, sigma8tot)
+            if hasattr(a, '__len__'):
+                emupars['sigma8_cold'] = np.full((len(a)), sigma8cold)
+            else:
+                emupars['sigma8_cold'] = sigma8cold
         else:
-            emupars['A_s'] = cosmo['A_s']
+            if hasattr(a, '__len__'):
+                emupars['A_s'] = np.full((len(a)), cosmo['A_s'])
+            else:
+                emupars['A_s'] = cosmo['A_s']
 
         h = cosmo['h']
         k_hubble, pk_hubble = self.mpk.get_linear_pk(cold=False, **emupars)
