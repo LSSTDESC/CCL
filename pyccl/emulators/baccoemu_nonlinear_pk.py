@@ -6,12 +6,13 @@ from .. import Pk2D
 from . import Emulator
 
 class BaccoemuNonlinear(Emulator):
-    def __init__(self):
+    def __init__(self, nonlinear_emu_path=None, nonlinear_emu_details=None):
         import warnings
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=UserWarning)
             import baccoemu 
-            self.mpk = baccoemu.Matter_powerspectrum()
+            self.mpk = baccoemu.Matter_powerspectrum(nonlinear_emu_path=nonlinear_emu_path, 
+                                                     nonlinear_emu_details=nonlinear_emu_details)
             self.a_min = self.mpk.emulator['nonlinear']['bounds'][-1][0]
             self.a_max = self.mpk.emulator['nonlinear']['bounds'][-1][1]
             self.k_min = self.mpk.emulator['nonlinear']['k'][0]
