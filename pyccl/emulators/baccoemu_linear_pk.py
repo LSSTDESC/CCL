@@ -33,7 +33,6 @@ a_min,a_max = ({}, {})""".format(
         A_s_fid = 2.1e-9
         sigma8tot_fid = self.mpk.get_sigma8(cold=False, A_s=A_s_fid, **_emupars)
         A_s = (sigma8tot / sigma8tot_fid)**2 * A_s_fid
-        print(self.mpk.get_sigma8(cold=True, A_s=A_s, **_emupars))
         return self.mpk.get_sigma8(cold=True, A_s=A_s, **_emupars)
     
     def _get_pk_at_a(self, a, cosmo):
