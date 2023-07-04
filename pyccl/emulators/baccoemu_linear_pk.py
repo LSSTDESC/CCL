@@ -6,6 +6,8 @@ from .. import Pk2D
 from . import Emulator
 
 class BaccoemuLinear(Emulator):
+    """ See https://arxiv.org/abs/2104.14568 and https://bacco.dipc.org/emulator.html
+    """
     def __init__(self):
         import warnings
         with warnings.catch_warnings():

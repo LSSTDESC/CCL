@@ -179,9 +179,9 @@ class Cosmology(CCLObject):
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        transfer_function (:obj:`str`): The transfer function to
+        transfer_function (:obj:`str` or `emulator instance`): The transfer function to
             use. Defaults to 'boltzmann_camb'.
-        matter_power_spectrum (:obj:`str`): The matter power
+        matter_power_spectrum (:obj:`str` or `emulator instance`): The matter power
             spectrum to use. Defaults to 'halofit'.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB, as well
