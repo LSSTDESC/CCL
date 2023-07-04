@@ -105,19 +105,19 @@ class BaccoemuBaryons(Baryons):
         be left untouched.
         """
         if log10_M_c is not None:
-            self.bcm_params.update({'log10_M_c', log10_M_c})
+            self.bcm_params.update({'M_c' : log10_M_c})
         if log10_eta is not None:
-            self.bcm_params.update({'log10_eta', log10_eta})
+            self.bcm_params.update({'eta' : log10_eta})
         if log10_beta is not None:
-            self.bcm_params.update({'log10_beta', log10_beta})
+            self.bcm_params.update({'beta' : log10_beta})
         if log10_M1_z0_cen is not None:
-            self.bcm_params.update({'log10_M1_z0_cen', log10_M1_z0_cen})
+            self.bcm_params.update({'M1_z0_cen' : log10_M1_z0_cen})
         if log10_theta_out is not None:
-            self.bcm_params.update({'log10_theta_out', log10_theta_out})
+            self.bcm_params.update({'theta_out' : log10_theta_out})
         if log10_theta_inn is not None:
-            self.bcm_params.update({'log10_theta_inn', log10_theta_inn})
+            self.bcm_params.update({'theta_inn' : log10_theta_inn})
         if log10_M_inn is not None:
-            self.bcm_params.update({'log10_M_inn', log10_M_inn})
+            self.bcm_params.update({'M_inn' : log10_M_inn})
         
 
     def _include_baryonic_effects(self, cosmo, pk):
