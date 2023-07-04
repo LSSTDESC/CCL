@@ -35,7 +35,8 @@ a_min,a_max = ({}, {})""".format(
                    'wa' : cosmo['wa']}
 
         h = cosmo['h']
-        k_hubble, pk_hubble, _, _ = self.ee2.get_pnonlin(emupars, redshifts)
+        k_hubble, _pk_hubble, _, _ = self.ee2.get_pnonlin(emupars, redshifts)
+        pk_hubble = np.array([_pk_hubble[index] for index in _pk_hubble])
         pk_hubble = np.squeeze(pk_hubble)
         return k_hubble * h, pk_hubble / h**3
 
