@@ -26,7 +26,7 @@ def test_baccoemu_linear():
     k = data[:, 0] * cosmo['h']
     pk = data[:, 1] / cosmo['h']**3
     a = 1
-    
+
     linpk = cosmo.get_linear_power()
     err = np.abs(pk / linpk(k, a) - 1)
     assert np.allclose(err, 0, atol=BEMULIN_TOLERANCE, rtol=0)

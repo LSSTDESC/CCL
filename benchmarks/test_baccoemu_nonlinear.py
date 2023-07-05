@@ -26,7 +26,7 @@ def test_baccoemu_nonlinear():
     k = data[:, 0] * cosmo['h']
     pk = data[:, 1] / cosmo['h']**3
     a = 1
-    
+
     nlpk = cosmo.get_nonlin_power()
     err = np.abs(pk / nlpk(k, a) - 1)
     assert np.allclose(err, 0, atol=BEMUNL_TOLERANCE, rtol=0)

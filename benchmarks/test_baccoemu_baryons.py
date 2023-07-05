@@ -25,7 +25,7 @@ def test_baccoemu_baryons():
     k = data[:, 0] * cosmo['h']
     fk = data[:, 1]
     a = 1
-    
+
     cclfk = baryons.boost_factor(cosmo, k, a)
     err = np.abs(fk / cclfk - 1)
     assert np.allclose(err, 0, atol=BEMBAR_TOLERANCE, rtol=0)

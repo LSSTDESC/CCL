@@ -51,7 +51,7 @@ transfer_function_types = {
     'boltzmann_camb': lib.boltzmann_camb,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
     'calculator': lib.pklin_from_input,
-    'emulator' : lib.emulator_linpk
+    'emulator': lib.emulator_linpk
 }
 
 
@@ -62,7 +62,7 @@ matter_power_spectrum_types = {
     'emu': lib.emu,
     'calculator': lib.pknl_from_input,
     'camb': lib.pknl_from_boltzman,
-    'emulator' : lib.emulator_nlpk
+    'emulator': lib.emulator_nlpk
 }
 
 emulator_neutrinos_types = {
@@ -240,11 +240,11 @@ class Cosmology(CCLObject):
 
         # initialise linear Pk emulators if needed
         self.lin_pk_emu = None
-        
+
         if type(transfer_function) == emulators.BaccoemuLinear:
             self.lin_pk_emu = transfer_function
             transfer_function = 'emulator'
-        
+
         # initialise nonlinear Pk emulators if needed
         self.nl_pk_emu = None
         if type(matter_power_spectrum) == emulators.BaccoemuNonlinear:

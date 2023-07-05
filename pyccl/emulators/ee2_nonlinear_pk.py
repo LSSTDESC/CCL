@@ -3,10 +3,13 @@ __all__ = ("EuclidEmulator2Nonlinear",)
 import numpy as np
 
 from .. import Pk2D
+from .. import CCLError
 from . import EmulatorPk
 
+
 class EuclidEmulator2Nonlinear(EmulatorPk):
-    """See https://arxiv.org/pdf/2010.11288.pdf and https://github.com/miknab/EuclidEmulator2
+    """See https://arxiv.org/pdf/2010.11288.pdf
+    and https://github.com/miknab/EuclidEmulator2
     """
     def __init__(self):
         import euclidemu2 as ee2
@@ -15,24 +18,26 @@ class EuclidEmulator2Nonlinear(EmulatorPk):
         self.a_max = 1
         self.k_min = 0.01
         self.k_max = 10.0
-    
+
     def __str__(self) -> str:
-        return """EuclidEmulator2 nonlinear Pk module, 
-k_min,k_max = ({}, {}), 
+        return """EuclidEmulator2 nonlinear Pk module,
+k_min,k_max = ({}, {}),
 a_min,a_max = ({}, {})""".format(
             self.k_min, self.k_max, self.a_min, self.a_max)
-    
+
     def _get_pk_at_a(self, a, cosmo):
-        assert not np.isnan(cosmo['A_s']), 'euclid emulator 2 needs A_s as input'
+        if np.isnan(cosmo['A_s']):
+            raise CCLError('euclid emulator 2 needs A_s as input')
         redshifts = 1 / np.atleast_1d(a) - 1
-        emupars = {'As' : cosmo['A_s'], 
-                   'ns' : cosmo['n_s'], 
-                   'Omb' : cosmo['Omega_b'], 
-                   'Omm' : cosmo['Omega_c'] + cosmo['Omega_b'] + np.sum(cosmo['m_nu']) / 93.14 / cosmo['h']**2, 
-                   'h' : cosmo['h'], 
-                   'mnu' : np.sum(cosmo['m_nu']), 
-                   'w' : cosmo['w0'], 
-                   'wa' : cosmo['wa']}
+        emupars = {'As': cosmo['A_s'],
+                   'ns': cosmo['n_s'],
+                   'Omb': cosmo['Omega_b'],
+                   'Omm': (cosmo['Omega_c'] + cosmo['Omega_b'] +
+                           np.sum(cosmo['m_nu']) / 93.14 / cosmo['h']**2),
+                   'h': cosmo['h'],
+                   'mnu': np.sum(cosmo['m_nu']),
+                   'w': cosmo['w0'],
+                   'wa': cosmo['wa']}
 
         h = cosmo['h']
         k_hubble, _pk_hubble, _, _ = self.ee2.get_pnonlin(emupars, redshifts)
@@ -43,4 +48,5 @@ a_min,a_max = ({}, {})""".format(
     def _get_pk2d(self, cosmo):
         a = np.linspace(self.a_min, 1, 100)
         k, pk = self._get_pk_at_a(a, cosmo)
-        return Pk2D(a_arr=a, lk_arr=np.log(k), pk_arr=np.log(pk), is_logp=True, extrap_order_lok=1, extrap_order_hik=2)
+        return Pk2D(a_arr=a, lk_arr=np.log(k), pk_arr=np.log(pk), is_logp=True,
+                    extrap_order_lok=1, extrap_order_hik=2)

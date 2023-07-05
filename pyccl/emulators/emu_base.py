@@ -2,6 +2,7 @@ __all__ = ('EmulatorPk', )
 
 from abc import abstractmethod
 
+
 class EmulatorPk(object):
 
     @abstractmethod
@@ -13,7 +14,7 @@ class EmulatorPk(object):
                 Scale factor.
             cosmo (:class:`~pyccl.cosmology.Cosmology`):
                 Cosmological parameters.
-        
+
         Returns:
             :tuple: k and pk arrays.
         """
@@ -26,12 +27,12 @@ class EmulatorPk(object):
                 Scale factor.
             cosmo (:class:`~pyccl.cosmology.Cosmology`):
                 Cosmological parameters.
-        
+
         Returns:
             :tuple: k and pk arrays.
         """
         return self._get_pk_at_a(a, cosmo)
-    
+
     @abstractmethod
     def _get_pk2d(self, cosmo):
         """Get a 2D interpolator for the power of k and a.
@@ -55,6 +56,3 @@ class EmulatorPk(object):
             :obj:`~pyccl.pk2d.Pk2D` object.
         """
         return self._get_pk2d(cosmo)
-    
-
-
