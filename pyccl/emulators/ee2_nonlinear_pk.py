@@ -1,11 +1,11 @@
-__all__ = ("EE2Nonlinear",)
+__all__ = ("EuclidEmulator2Nonlinear",)
 
 import numpy as np
 
 from .. import Pk2D
-from . import Emulator
+from . import EmulatorPk
 
-class EE2Nonlinear(Emulator):
+class EuclidEmulator2Nonlinear(EmulatorPk):
     """See https://arxiv.org/pdf/2010.11288.pdf and https://github.com/miknab/EuclidEmulator2
     """
     def __init__(self):

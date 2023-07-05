@@ -7,22 +7,34 @@ from . import Baryons
 
 
 class BaccoemuBaryons(Baryons):
-    """See https://arxiv.org/abs/2011.15018 and https://bacco.dipc.org/emulator.html
+    """The baryonic boost factor computed with the baccoemu baryons emulators.
+    
+    See https://arxiv.org/abs/2011.15018 and https://bacco.dipc.org/emulator.html
+
+    Args:
+        log10_M_c (:obj: `float`): characteristic halo mass to model baryon mass fraction
+        log10_eta (:obj: `float`): extent of ejected gas
+        log10_beta (:obj: `float`): slope of power law describing baryon mass fraction
+        log10_M1_z0_cen (:obj: `float`): characteristic halo mass scale for central galaxies
+        log10_theta_out (:obj: `float`):  outer slope of density profiles of hot gas in haloes
+        log10_theta_inn (:obj: `float`): inner slope of density profiles of hot gas in haloes
+        log10_M_inn (:obj: `float`): transition mass of density profiles of hot gas in haloes
     """
     name = 'BaccoemuBaryons'
     __repr_attrs__ = __eq_attrs__ = ("log10_M_c", "log10_eta", "log10_beta", "log10_M1_z0_cen", 
                                      "log10_theta_out", "log10_theta_inn", "log10_M_inn")
     def __init__(self, log10_M_c=14, log10_eta=-0.3, log10_beta=-0.22, log10_M1_z0_cen=10.5, 
                  log10_theta_out=0.25, log10_theta_inn=-0.86, log10_M_inn=13.4):
+        # avoid tensorflow warnings
         import warnings
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=UserWarning)
             import baccoemu 
             self.mpk = baccoemu.Matter_powerspectrum()
-            self.a_min = self.mpk.emulator['baryon']['bounds'][-1][0]
-            self.a_max = self.mpk.emulator['baryon']['bounds'][-1][1]
-            self.k_min = self.mpk.emulator['baryon']['k'][0]
-            self.k_max = self.mpk.emulator['baryon']['k'][-1]
+        self.a_min = self.mpk.emulator['baryon']['bounds'][-1][0]
+        self.a_max = self.mpk.emulator['baryon']['bounds'][-1][1]
+        self.k_min = self.mpk.emulator['baryon']['k'][0]
+        self.k_max = self.mpk.emulator['baryon']['k'][-1]
         
         self.bcm_params = {
             'M_c'           : log10_M_c,
@@ -35,6 +47,8 @@ class BaccoemuBaryons(Baryons):
         }
     
     def _sigma8tot_2_sigma8cold(self, emupars, sigma8tot):
+        """Use baccoemu to convert sigma8 total matter to sigma8 cdm+baryons
+        """
         if hasattr(emupars['omega_cold'], '__len__'):
             _emupars = {}
             for pname in emupars:
@@ -59,6 +73,9 @@ class BaccoemuBaryons(Baryons):
                 the power spectrum.
         """ # noqa
 
+        # First create the dictionary passed to baccoemu
+        # if a is an array, make sure all the other parameters passed to the emulator
+        # have the same len
         if hasattr(a, '__len__'):
             emupars = dict(
                 omega_cold = np.full((len(a)), cosmo['Omega_c'] + cosmo['Omega_b']),
@@ -82,7 +99,12 @@ class BaccoemuBaryons(Baryons):
                 expfactor = a
             )
 
+        # if cosmo contains sigma8, we use it for baccoemu, otherwise we pass 
+        # A_s to the emulator
         if np.isnan(cosmo['A_s']):
+            # note that ccl parametrises sigma8 of the total matter power spectrum while 
+            # baccoemu defines it in terms of the cdm+baryons power spectrum; so we have 
+            # to convert from total to cold sigma8
             sigma8tot = cosmo['sigma8']
             sigma8cold = self._sigma8tot_2_sigma8cold(emupars, sigma8tot)
             if hasattr(a, '__len__'):
@@ -95,6 +117,9 @@ class BaccoemuBaryons(Baryons):
             else:
                 emupars['A_s'] = cosmo['A_s']
 
+        # baccoemu internally interpolates k with a cubic spline
+        # it returns k, boost, so, since we are already requesting a specific k-vector 
+        # we can ignore the first returned object
         _, fka = self.mpk.get_baryonic_boost(k=k / cosmo['h'], **{**emupars, **self.bcm_params})
         
         return fka
@@ -104,21 +129,13 @@ class BaccoemuBaryons(Baryons):
         """Update BCM parameters. All parameters set to ``None`` will
         be left untouched.
         """
-        if log10_M_c is not None:
-            self.bcm_params.update({'M_c' : log10_M_c})
-        if log10_eta is not None:
-            self.bcm_params.update({'eta' : log10_eta})
-        if log10_beta is not None:
-            self.bcm_params.update({'beta' : log10_beta})
-        if log10_M1_z0_cen is not None:
-            self.bcm_params.update({'M1_z0_cen' : log10_M1_z0_cen})
-        if log10_theta_out is not None:
-            self.bcm_params.update({'theta_out' : log10_theta_out})
-        if log10_theta_inn is not None:
-            self.bcm_params.update({'theta_inn' : log10_theta_inn})
-        if log10_M_inn is not None:
-            self.bcm_params.update({'M_inn' : log10_M_inn})
-        
+        _kwargs = locals()
+        _new_bcm_params = {key: _kwargs[key] for key in set(list(_kwargs.keys())) - set(['self'])}
+        new_bcm_params = {}
+        for key in _new_bcm_params:
+            if _new_bcm_params[key] is not None:
+                new_bcm_params[key[6:]] = _new_bcm_params[key]
+        self.bcm_params.update(new_bcm_params)       
 
     def _include_baryonic_effects(self, cosmo, pk):
         # Applies boost factor

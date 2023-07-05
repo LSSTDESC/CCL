@@ -1,8 +1,8 @@
-__all__ = ('Emulator', )
+__all__ = ('EmulatorPk', )
 
 from abc import abstractmethod
 
-class Emulator(object):
+class EmulatorPk(object):
 
     @abstractmethod
     def _get_pk_at_a(self, a, cosmo):

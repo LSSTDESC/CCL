@@ -23,7 +23,7 @@ typedef enum transfer_function_t
   ccl_boltzmann_isitgr  = 5,
   ccl_pklin_from_input  = 6,
   ccl_eisenstein_hu_nowiggles = 7,
-  ccl_baccoemu_linear   = 8,
+  ccl_emulator_linpk    = 8,
 } transfer_function_t;
 
 /**
@@ -42,8 +42,7 @@ typedef enum matter_power_spectrum_t
     ccl_emu                = 4,
     ccl_pknl_from_input    = 5,
     ccl_pknl_from_boltzman = 6,
-    ccl_baccoemu_nonlinear = 7,
-    ccl_ee2_nonlinear      = 8,
+    ccl_emulator_nlpk      = 7,
 } matter_power_spectrum_t;
 
 /**

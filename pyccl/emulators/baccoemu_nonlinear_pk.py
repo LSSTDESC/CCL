@@ -3,22 +3,38 @@ __all__ = ("BaccoemuNonlinear",)
 import numpy as np
 
 from .. import Pk2D
-from . import Emulator
+from . import EmulatorPk
 
-class BaccoemuNonlinear(Emulator):
-    """ See https://arxiv.org/pdf/2004.06245.pdf and https://bacco.dipc.org/emulator.html
+class BaccoemuNonlinear(EmulatorPk):
+    """ nonlinear power spectrum emulator from baccoemu
+
+    This is an emultor of N-body matter Pk as a function of 8 cosmological 
+    parameters (omega_cold, omega_baryons, A_s or sigma8_cold, ns, h, Mnu, 
+    w0, wa) and the expansion factor.
+
+    If `nonlinear_emu_path` and `nonlinear_emu_details` are not specified the
+    installed public version of the emulator is used. If the user has access to 
+    a locally saved baccoemu version, the path can be specified with these two
+    keyword arguments.
+    
+    See https://arxiv.org/pdf/2004.06245.pdf and https://bacco.dipc.org/emulator.html
+
+    Args:
+        nonlinear_emu_path (:obj: `str`): path to a folder containing a specific baccoemu version 
+        nonlinear_emu_details (:obj: `str`): name of the details file in the given baccoemu version
     """
     def __init__(self, nonlinear_emu_path=None, nonlinear_emu_details=None):
+        # avoid tensorflow warnings
         import warnings
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=UserWarning)
             import baccoemu 
             self.mpk = baccoemu.Matter_powerspectrum(nonlinear_emu_path=nonlinear_emu_path, 
                                                      nonlinear_emu_details=nonlinear_emu_details)
-            self.a_min = self.mpk.emulator['nonlinear']['bounds'][-1][0]
-            self.a_max = self.mpk.emulator['nonlinear']['bounds'][-1][1]
-            self.k_min = self.mpk.emulator['nonlinear']['k'][0]
-            self.k_max = self.mpk.emulator['nonlinear']['k'][-1]
+        self.a_min = self.mpk.emulator['nonlinear']['bounds'][-1][0]
+        self.a_max = self.mpk.emulator['nonlinear']['bounds'][-1][1]
+        self.k_min = self.mpk.emulator['nonlinear']['k'][0]
+        self.k_max = self.mpk.emulator['nonlinear']['k'][-1]
     
     def __str__(self) -> str:
         return """baccoemu nonlinear Pk module, 
@@ -27,6 +43,8 @@ a_min,a_max = ({}, {})""".format(
             self.k_min, self.k_max, self.a_min, self.a_max)
 
     def _sigma8tot_2_sigma8cold(self, emupars, sigma8tot):
+        """Use baccoemu to convert sigma8 total matter to sigma8 cdm+baryons
+        """
         if hasattr(emupars['omega_cold'], '__len__'):
             _emupars = {}
             for pname in emupars:
@@ -39,6 +57,9 @@ a_min,a_max = ({}, {})""".format(
         return self.mpk.get_sigma8(cold=True, A_s=A_s, **_emupars)
     
     def _get_pk_at_a(self, a, cosmo):
+        # First create the dictionary passed to baccoemu
+        # if a is an array, make sure all the other parameters passed to the emulator
+        # have the same len
         if hasattr(a, '__len__'):
             emupars = dict(
                 omega_cold = np.full((len(a)), cosmo['Omega_c'] + cosmo['Omega_b']),
@@ -62,6 +83,8 @@ a_min,a_max = ({}, {})""".format(
                 expfactor = a
             )
 
+        # if cosmo contains sigma8, we use it for baccoemu, otherwise we pass 
+        # A_s to the emulator
         if np.isnan(cosmo['A_s']):
             sigma8tot = cosmo['sigma8']
             sigma8cold = self._sigma8tot_2_sigma8cold(emupars, sigma8tot)

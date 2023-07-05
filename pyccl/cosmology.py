@@ -29,7 +29,7 @@ class TransferFunctions(Enum):
     BOLTZMANN_CAMB = "boltzmann_camb"
     BOLTZMANN_ISITGR = "boltzmann_isitgr"
     CALCULATOR = "calculator"
-    BACCOEMU_LINEAR = "baccoemu_linear"
+    EMULATOR_LINPK = "emulator"
 
 
 class MatterPowerSpectra(Enum):
@@ -39,8 +39,7 @@ class MatterPowerSpectra(Enum):
     EMU = "emu"
     CAMB = "camb"
     CALCULATOR = "calculator"
-    BACCOEMU_NONLINEAR = "baccoemu_nonlinear"
-    EE2_NONLINEAR = "ee2_nonlinear"
+    EMULATOR_NLPK = "emulator"
 
 
 # Configuration types
@@ -52,7 +51,7 @@ transfer_function_types = {
     'boltzmann_camb': lib.boltzmann_camb,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
     'calculator': lib.pklin_from_input,
-    'baccoemu_linear' : lib.baccoemu_linear
+    'emulator' : lib.emulator_linpk
 }
 
 
@@ -63,8 +62,7 @@ matter_power_spectrum_types = {
     'emu': lib.emu,
     'calculator': lib.pknl_from_input,
     'camb': lib.pknl_from_boltzman,
-    'baccoemu_nonlinear' : lib.baccoemu_nonlinear,
-    'ee2_nonlinear' : lib.ee2_nonlinear
+    'emulator' : lib.emulator_nlpk
 }
 
 emulator_neutrinos_types = {
@@ -245,16 +243,16 @@ class Cosmology(CCLObject):
         
         if type(transfer_function) == emulators.BaccoemuLinear:
             self.lin_pk_emu = transfer_function
-            transfer_function = 'baccoemu_linear'
+            transfer_function = 'emulator'
         
         # initialise nonlinear Pk emulators if needed
         self.nl_pk_emu = None
         if type(matter_power_spectrum) == emulators.BaccoemuNonlinear:
             self.nl_pk_emu = matter_power_spectrum
-            matter_power_spectrum = 'baccoemu_nonlinear'
-        elif type(matter_power_spectrum) == emulators.EE2Nonlinear:
+            matter_power_spectrum = 'emulator'
+        elif type(matter_power_spectrum) == emulators.EuclidEmulator2Nonlinear:
             self.nl_pk_emu = matter_power_spectrum
-            matter_power_spectrum = 'ee2_nonlinear'
+            matter_power_spectrum = 'emulator'
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -526,9 +524,8 @@ class Cosmology(CCLObject):
             rescale_s8 = False
             rescale_mg = False
             pk = Pk2D.from_model(self, model=trf)
-        elif trf in ['baccoemu_linear']:
+        elif trf == 'emulator':
             rescale_s8 = False
-            rescale_mg = False
             pk = self.lin_pk_emu.get_pk2d(self)
 
         # Compute the CAMB nonlin power spectrum if needed,
@@ -575,7 +572,7 @@ class Cosmology(CCLObject):
         # Populate power spectrum splines
         mps = self._config_init_kwargs['matter_power_spectrum']
         # needed for halofit, halomodel and linear options
-        if (mps not in ['emu', 'baccoemu_nonlinear', 'ee2_nonlinear']) and (mps is not None):
+        if (mps not in ['emu', 'emulator']) and (mps is not None):
             self.compute_linear_power()
 
         if mps == "camb" and self.has_nonlin_power:
@@ -589,7 +586,7 @@ class Cosmology(CCLObject):
             pk = Pk2D.from_model(self, model='emu')
         elif mps == 'linear':
             pk = self._pk_lin[DEFAULT_POWER_SPECTRUM]
-        elif mps in ['baccoemu_nonlinear', 'ee2_nonlinear']:
+        elif mps == 'emulator':
             pk = self.nl_pk_emu.get_pk2d(self)
 
         return pk
