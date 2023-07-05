@@ -10,22 +10,14 @@ from .. import (CCLAutoRepr, CCLError, CCLWarning, Pk2D,
 
 # All valid Pk pair labels and their aliases
 _PK_ALIAS = {
-    'm:m': 'm:m', 'm:b1': 'm:m', 'm:b2': 'm:b2',
+    'm:m': 'm:m', 'm:b1': 'm:b1', 'm:b2': 'm:b2',
     'm:b3nl': 'm:b3nl', 'm:bs': 'm:bs', 'm:bk2': 'm:bk2',
-    'm:c1': 'm:m', 'm:c2': 'm:c2', 'm:cdelta': 'm:cdelta',
-    'b1:b1': 'm:m', 'b1:b2': 'm:b2', 'b1:b3nl': 'm:b3nl',
-    'b1:bs': 'm:bs', 'b1:bk2': 'm:bk2', 'b1:c1': 'm:m',
-    'b1:c2': 'm:c2', 'b1:cdelta': 'm:cdelta', 'b2:b2': 'b2:b2',
-    'b2:b3nl': 'zero', 'b2:bs': 'b2:bs', 'b2:bk2': 'zero',
-    'b2:c1': 'zero', 'b2:c2': 'zero', 'b2:cdelta': 'zero',
+    'b1:b1': 'b1:b1', 'b1:b2': 'b1:b2', 'b1:b3nl': 'b1:b3nl',
+    'b1:bs': 'b1:bs', 'b1:bk2': 'b1:bk2', 'b2:b2': 'b2:b2',
+    'b2:b3nl': 'zero', 'b2:bs': 'b2:bs', 'b2:bk2': 'b2:bk2',
     'b3nl:b3nl': 'zero', 'b3nl:bs': 'zero',
-    'b3nl:bk2': 'zero', 'b3nl:c1': 'zero', 'b3nl:c2':
-    'zero', 'b3nl:cdelta': 'zero', 'bs:bs': 'bs:bs',
-    'bs:bk2': 'zero', 'bs:c1': 'zero', 'bs:c2': 'zero',
-    'bs:cdelta': 'zero', 'bk2:bk2': 'zero', 'bk2:c1': 'zero',
-    'bk2:c2': 'zero', 'bk2:cdelta': 'zero', 'c1:c1': 'm:m',
-    'c1:c2': 'm:c2', 'c1:cdelta': 'm:cdelta', 'c2:c2': 'c2:c2',
-    'c2:cdelta': 'c2:cdelta', 'cdelta:cdelta': 'cdelta:cdelta'}
+    'b3nl:bk2': 'zero', 'bs:bs': 'bs:bs',
+    'bs:bk2': 'bs:bk2', 'bk2:bk2': 'bk2:bk2'}
 
 
 class LagrangianPTCalculator(CCLAutoRepr):
