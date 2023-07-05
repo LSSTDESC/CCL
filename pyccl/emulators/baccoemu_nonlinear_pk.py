@@ -11,7 +11,7 @@ class BaccoemuNonlinear(EmulatorPk):
 
     This is an emulator of N-body matter Pk as a function of 8 cosmological
     parameters (omega_cold, omega_baryons, A_s or sigma8_cold, ns, h, Mnu,
-    w0, wa) and the expansion factor.
+    w0, wa) and the scale factor.
 
     If `nonlinear_emu_path` and `nonlinear_emu_details` are not specified the
     installed public version of the emulator is used. If the user has access to
@@ -26,7 +26,7 @@ class BaccoemuNonlinear(EmulatorPk):
                                           specific baccoemu version
         nonlinear_emu_details (:obj:`str`): name of the details file in the
                                              given baccoemu version
-        n_sampling_a (:obj:`int`): number of expansion factor values used for
+        n_sampling_a (:obj:`int`): number of scale factor values used for
                                     building the 2d pk interpolator
     """
     def __init__(self, nonlinear_emu_path=None, nonlinear_emu_details=None,

@@ -11,7 +11,7 @@ class BaccoemuLinear(EmulatorPk):
 
     This is an emulator of class linear Pk as a function of 8 cosmological
     parameters (omega_cold, omega_baryons, A_s or sigma8_cold, ns, h, Mnu,
-    w0, wa) and the expansion factor.
+    w0, wa) and the scale factor.
 
     See https://arxiv.org/abs/2104.14568
     and https://bacco.dipc.org/emulator.html

@@ -14,7 +14,7 @@ class EuclidEmulator2Nonlinear(EmulatorPk):
     and https://github.com/miknab/EuclidEmulator2
 
     Args:
-        n_sampling_a (:obj:`int`): number of expansion factor values used for
+        n_sampling_a (:obj:`int`): number of scale factor values used for
                                     building the 2d pk interpolator
     """
     def __init__(self, n_sampling_a=100):
