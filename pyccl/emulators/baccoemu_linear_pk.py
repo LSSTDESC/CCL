@@ -100,7 +100,7 @@ a_min,a_max = ({}, {})""".format(
         a = cosmo.get_pk_spline_a()
         a_for_baccoemu = a[a >= self.a_min]
         a_extrapolated = a[a < self.a_min]
-        # we directlt use the emulator for the expansion factors within its
+        # we directly use the emulator for the expansion factors within its
         # range
         k, pk = self._get_pk_at_a(a_for_baccoemu, cosmo)
         # for the expansion factors requested by ccl but outside the emulator
