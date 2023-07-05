@@ -38,6 +38,8 @@ class HaloProfileEinasto(HaloProfileMatter):
             concentration-mass relation to use with this profile.
         truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
+        projected_integrate (:obj:`bool`): set to ``True`` to calculate the 
+        projected profile with numerical integration.
         alpha (:obj:`float` or :obj:`str`): :math:`\\alpha` parameter, or
             set to ``'cosmo'`` to calculate the value from cosmology.
     """
