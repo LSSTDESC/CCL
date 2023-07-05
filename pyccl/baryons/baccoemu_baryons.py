@@ -7,7 +7,7 @@ from . import Baryons
 
 
 class BaccoemuBaryons(Baryons):
-    """The baryonic boost factor computed with the baccoemu baryons emulators.
+    """ The baryonic boost factor computed with the baccoemu baryons emulators.
 
     See https://arxiv.org/abs/2011.15018 and
     https://bacco.dipc.org/emulator.html

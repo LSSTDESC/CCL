@@ -7,7 +7,7 @@ from . import EmulatorPk
 
 
 class BaccoemuNonlinear(EmulatorPk):
-    """ nonlinear power spectrum emulator from baccoemu
+    """ Nonlinear power spectrum emulator from baccoemu
 
     This is an emulator of N-body matter Pk as a function of 8 cosmological
     parameters (omega_cold, omega_baryons, A_s or sigma8_cold, ns, h, Mnu,

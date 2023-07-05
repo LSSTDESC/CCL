@@ -8,7 +8,9 @@ from . import EmulatorPk
 
 
 class EuclidEmulator2Nonlinear(EmulatorPk):
-    """See https://arxiv.org/pdf/2010.11288.pdf
+    """ Nonlinear matter power spectrum from EuclidEmulator2
+
+    See https://arxiv.org/pdf/2010.11288.pdf
     and https://github.com/miknab/EuclidEmulator2
 
     Args:
