@@ -97,7 +97,22 @@ a_min,a_max = ({}, {})""".format(
         return k_hubble * h, pk_hubble / h**3
 
     def _get_pk2d(self, cosmo):
-        a = np.linspace(self.a_min, 1, 100)
-        k, pk = self._get_pk_at_a(a, cosmo)
-        return Pk2D(a_arr=a, lk_arr=np.log(k), pk_arr=np.log(pk),
+        a = cosmo.get_pk_spline_a()
+        a_for_baccoemu = a[a >= self.a_min]
+        a_extrapolated = a[a < self.a_min]
+        # we directlt use the emulator for the expansion factors within its
+        # range
+        k, pk = self._get_pk_at_a(a_for_baccoemu, cosmo)
+        # for the expansion factors requested by ccl but outside the emulator
+        # range, we extrapolate from the earliest pk available with linear
+        # growth factors.
+        # NOTE: ccl computes scale independent growth factors, this is not
+        # correct with massive neutrinos
+        growth_factors = cosmo.growth_factor(a_extrapolated)
+        ref_growth_factor = cosmo.growth_factor(a_for_baccoemu[0])
+        pk_extrapolated = (np.repeat([pk[0]], [len(a_extrapolated)], axis=0).T
+                           * (growth_factors / ref_growth_factor)**2).T
+        # now we combine the extrapolated and direct spectra
+        pk_final = np.concatenate([pk_extrapolated, pk])
+        return Pk2D(a_arr=a, lk_arr=np.log(k), pk_arr=np.log(pk_final),
                     is_logp=True, extrap_order_lok=1, extrap_order_hik=2)

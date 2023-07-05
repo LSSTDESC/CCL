@@ -10,14 +10,19 @@ from . import EmulatorPk
 class EuclidEmulator2Nonlinear(EmulatorPk):
     """See https://arxiv.org/pdf/2010.11288.pdf
     and https://github.com/miknab/EuclidEmulator2
+
+    Args:
+        n_sampling_a (:obj: `int`): number of expansion factor values used for
+                                    building the 2d pk interpolator
     """
-    def __init__(self):
+    def __init__(self, n_sampling_a=100):
         import euclidemu2 as ee2
         self.ee2 = ee2
         self.a_min = 1/(1+3)
         self.a_max = 1
         self.k_min = 0.01
         self.k_max = 10.0
+        self.n_sampling_a = n_sampling_a
 
     def __str__(self) -> str:
         return """EuclidEmulator2 nonlinear Pk module,
@@ -46,7 +51,7 @@ a_min,a_max = ({}, {})""".format(
         return k_hubble * h, pk_hubble / h**3
 
     def _get_pk2d(self, cosmo):
-        a = np.linspace(self.a_min, 1, 100)
+        a = np.linspace(self.a_min, 1, self.n_sampling_a)
         k, pk = self._get_pk_at_a(a, cosmo)
         return Pk2D(a_arr=a, lk_arr=np.log(k), pk_arr=np.log(pk), is_logp=True,
                     extrap_order_lok=1, extrap_order_hik=2)

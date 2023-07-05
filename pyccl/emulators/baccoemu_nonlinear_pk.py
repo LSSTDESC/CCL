@@ -26,8 +26,11 @@ class BaccoemuNonlinear(EmulatorPk):
                                           specific baccoemu version
         nonlinear_emu_details (:obj: `str`): name of the details file in the
                                              given baccoemu version
+        n_sampling_a (:obj: `int`): number of expansion factor values used for
+                                    building the 2d pk interpolator
     """
-    def __init__(self, nonlinear_emu_path=None, nonlinear_emu_details=None):
+    def __init__(self, nonlinear_emu_path=None, nonlinear_emu_details=None,
+                 n_sampling_a=100):
         # avoid tensorflow warnings
         import warnings
         with warnings.catch_warnings():
@@ -40,6 +43,7 @@ class BaccoemuNonlinear(EmulatorPk):
         self.a_max = self.mpk.emulator['nonlinear']['bounds'][-1][1]
         self.k_min = self.mpk.emulator['nonlinear']['k'][0]
         self.k_max = self.mpk.emulator['nonlinear']['k'][-1]
+        self.n_sampling_a = n_sampling_a
 
     def __str__(self) -> str:
         return """baccoemu nonlinear Pk module,
@@ -110,7 +114,7 @@ a_min,a_max = ({}, {})""".format(
         return k_hubble * h, pk_hubble / h**3
 
     def _get_pk2d(self, cosmo):
-        a = np.linspace(self.a_min, 1, 100)
+        a = np.linspace(self.a_min, 1, self.n_sampling_a)
         k, pk = self._get_pk_at_a(a, cosmo)
         return Pk2D(a_arr=a, lk_arr=np.log(k), pk_arr=np.log(pk), is_logp=True,
                     extrap_order_lok=1, extrap_order_hik=2)
