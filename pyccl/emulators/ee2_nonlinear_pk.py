@@ -54,6 +54,6 @@ a_min,a_max = ({}, {})""".format(
 
     def _get_pk2d(self, cosmo):
         a = np.linspace(self.a_min, 1, self.n_sampling_a)
-        k, pk = self._get_pk_at_a(a, cosmo)
+        k, pk = self.get_pk_at_a(a, cosmo)
         return Pk2D(a_arr=a, lk_arr=np.log(k), pk_arr=np.log(pk), is_logp=True,
                     extrap_order_lok=1, extrap_order_hik=2)
