@@ -16,3 +16,4 @@ dependencies:
   - pip:
       - classy<3
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
+      - euclidemu2
