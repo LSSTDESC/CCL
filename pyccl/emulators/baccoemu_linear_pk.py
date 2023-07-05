@@ -9,7 +9,7 @@ from . import EmulatorPk
 class BaccoemuLinear(EmulatorPk):
     """ Linear power spectrum emulator from baccoemu
 
-    This is an emultor of class linear Pk as a function of 8 cosmological
+    This is an emulator of class linear Pk as a function of 8 cosmological
     parameters (omega_cold, omega_baryons, A_s or sigma8_cold, ns, h, Mnu,
     w0, wa) and the expansion factor.
 

@@ -13,18 +13,18 @@ class BaccoemuBaryons(Baryons):
     https://bacco.dipc.org/emulator.html
 
     Args:
-        log10_M_c (:obj: `float`): characteristic halo mass to model baryon
+        log10_M_c (:obj:`float`): characteristic halo mass to model baryon
                                    mass fraction
-        log10_eta (:obj: `float`): extent of ejected gas
-        log10_beta (:obj: `float`): slope of power law describing baryon mass
+        log10_eta (:obj:`float`): extent of ejected gas
+        log10_beta (:obj:`float`): slope of power law describing baryon mass
                                     fraction
-        log10_M1_z0_cen (:obj: `float`): characteristic halo mass scale for
+        log10_M1_z0_cen (:obj:`float`): characteristic halo mass scale for
                                          central galaxies
-        log10_theta_out (:obj: `float`):  outer slope of density profiles of
+        log10_theta_out (:obj:`float`):  outer slope of density profiles of
                                           hot gas in haloes
-        log10_theta_inn (:obj: `float`): inner slope of density profiles of
+        log10_theta_inn (:obj:`float`): inner slope of density profiles of
                                          hot gas in haloes
-        log10_M_inn (:obj: `float`): transition mass of density profiles of
+        log10_M_inn (:obj:`float`): transition mass of density profiles of
                                      hot gas in haloes
     """
     name = 'BaccoemuBaryons'

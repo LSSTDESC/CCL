@@ -9,7 +9,7 @@ from . import EmulatorPk
 class BaccoemuNonlinear(EmulatorPk):
     """ nonlinear power spectrum emulator from baccoemu
 
-    This is an emultor of N-body matter Pk as a function of 8 cosmological
+    This is an emulator of N-body matter Pk as a function of 8 cosmological
     parameters (omega_cold, omega_baryons, A_s or sigma8_cold, ns, h, Mnu,
     w0, wa) and the expansion factor.
 
@@ -22,11 +22,11 @@ class BaccoemuNonlinear(EmulatorPk):
     and https://bacco.dipc.org/emulator.html
 
     Args:
-        nonlinear_emu_path (:obj: `str`): path to a folder containing a
+        nonlinear_emu_path (:obj:`str`): path to a folder containing a
                                           specific baccoemu version
-        nonlinear_emu_details (:obj: `str`): name of the details file in the
+        nonlinear_emu_details (:obj:`str`): name of the details file in the
                                              given baccoemu version
-        n_sampling_a (:obj: `int`): number of expansion factor values used for
+        n_sampling_a (:obj:`int`): number of expansion factor values used for
                                     building the 2d pk interpolator
     """
     def __init__(self, nonlinear_emu_path=None, nonlinear_emu_details=None,
