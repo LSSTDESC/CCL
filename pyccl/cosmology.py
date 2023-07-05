@@ -526,6 +526,7 @@ class Cosmology(CCLObject):
             pk = Pk2D.from_model(self, model=trf)
         elif trf == 'emulator':
             rescale_s8 = False
+            rescale_mg = False
             pk = self.lin_pk_emu.get_pk2d(self)
 
         # Compute the CAMB nonlin power spectrum if needed,
