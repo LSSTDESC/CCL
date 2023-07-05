@@ -177,10 +177,10 @@ class Cosmology(CCLObject):
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        transfer_function (:obj:`str` or :class:`~pyccl.emulators.EmulatorPk`): The transfer function to
-            use. Defaults to 'boltzmann_camb'.
-        matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.EmulatorPk`): The matter power
-            spectrum to use. Defaults to 'halofit'.
+        transfer_function (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
+            The transfer function to use. Defaults to 'boltzmann_camb'.
+        matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
+            The matter power spectrum to use. Defaults to 'halofit'.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB, as well
             as CosmicEmu. Details described below. Defaults to None.
