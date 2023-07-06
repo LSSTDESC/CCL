@@ -4,7 +4,7 @@ import pyccl as ccl
 AEMNL_TOLERANCE = 5e-3
 
 
-def test_baccoemu_nonlinear():
+def test_aemulus_heft_nonlinear():
     aem = ccl.AemulusHEFTNonlinear(n_sampling_a=20)
     cosmo = ccl.Cosmology(
         Omega_c=0.27,
