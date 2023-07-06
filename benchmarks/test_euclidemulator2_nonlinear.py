@@ -35,3 +35,4 @@ def test_ee2_nonlinear():
     pktest = np.exp(np.interp(np.log(k), np.log(ktest), np.log(pktest)))
     err = np.abs(pktest / pk - 1)
     assert np.allclose(err, 0, atol=EE2_TOLERANCE, rtol=0)
+test_ee2_nonlinear()
