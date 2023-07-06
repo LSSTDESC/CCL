@@ -16,4 +16,5 @@ dependencies:
   - pip:
       - classy<3
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
+      - aemulus_heft @ git+https://github.com/AemulusProject/aemulus_heft
       - euclidemu2
