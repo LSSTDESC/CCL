@@ -1,7 +1,83 @@
 import numpy as np
 import pyccl as ccl
 
+BEMULIN_TOLERANCE = 1e-3
+BEMUNL_TOLERANCE = 5e-3
 BEMBAR_TOLERANCE = 1e-3
+
+
+def test_baccoemu_linear_As_sigma8():
+    bemu = ccl.BaccoemuLinear()
+    cosmo1 = ccl.Cosmology(
+        Omega_c=0.27,
+        Omega_b=0.05,
+        h=0.67,
+        sigma8=0.83,
+        n_s=0.96,
+        Neff=3.046,
+        mass_split='normal',
+        m_nu=0.1,
+        Omega_g=0,
+        Omega_k=0,
+        w0=-1,
+        wa=0)
+
+    cosmo2 = ccl.Cosmology(
+        Omega_c=0.27,
+        Omega_b=0.05,
+        h=0.67,
+        A_s=2.2194e-09,
+        n_s=0.96,
+        Neff=3.046,
+        mass_split='normal',
+        m_nu=0.1,
+        Omega_g=0,
+        Omega_k=0,
+        w0=-1,
+        wa=0)
+
+    k1, pk1 = bemu.get_pk_at_a(1, cosmo1)
+    k2, pk2 = bemu.get_pk_at_a(1, cosmo2)
+
+    err = np.abs(pk1 / pk2 - 1)
+    assert np.allclose(err, 0, atol=BEMULIN_TOLERANCE, rtol=0)
+
+
+def test_baccoemu_nonlinear_As_sigma8():
+    bemu = ccl.BaccoemuNonlinear()
+    cosmo1 = ccl.Cosmology(
+        Omega_c=0.27,
+        Omega_b=0.05,
+        h=0.67,
+        sigma8=0.83,
+        n_s=0.96,
+        Neff=3.046,
+        mass_split='normal',
+        m_nu=0.1,
+        Omega_g=0,
+        Omega_k=0,
+        w0=-1,
+        wa=0)
+
+    cosmo2 = ccl.Cosmology(
+        Omega_c=0.27,
+        Omega_b=0.05,
+        h=0.67,
+        A_s=2.2194e-09,
+        n_s=0.96,
+        Neff=3.046,
+        mass_split='normal',
+        m_nu=0.1,
+        Omega_g=0,
+        Omega_k=0,
+        w0=-1,
+        wa=0)
+
+    k1, pk1 = bemu.get_pk_at_a(1, cosmo1)
+    k2, pk2 = bemu.get_pk_at_a(1, cosmo2)
+
+    err = np.abs(pk1 / pk2 - 1)
+    assert np.allclose(err, 0, atol=BEMUNL_TOLERANCE, rtol=0)
 
 
 def test_baccoemu_baryons_boost():
@@ -29,3 +105,10 @@ def test_baccoemu_baryons_boost():
     fk = pk_bcm(k, 1) / pk_gro(k, 1)
     err = np.abs(fk / cclfk - 1)
     assert np.allclose(err, 0, atol=BEMBAR_TOLERANCE, rtol=0)
+
+
+def test_baccoemu_baryons_changepars():
+    baryons = ccl.BaccoemuBaryons()
+    baryons.update_parameters(log10_M_c=12.7, log10_eta=-0.4)
+    assert ((baryons.bcm_params['M_c'] == 12.7)
+            & (baryons.bcm_params['eta'] == -0.4))
