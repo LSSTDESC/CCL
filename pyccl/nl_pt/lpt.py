@@ -323,7 +323,7 @@ class LagrangianPTCalculator(CCLAutoRepr):
             Pdmd1 = 0.5*self.lpt_table[:, :, 2]
             pgm = Pdmdm + bL1[:, None] * Pdmd1
         else:
-            pgm = b1[:, None]*self.self.pk_b1
+            pgm = b1[:, None]*self.pk_b1
         Pdmd2 = 0.5*self.lpt_table[:, :, 4]
         Pdms2 = 0.25*self.lpt_table[:, :, 7]
         Pdmo3 = 0.25 * self.lpt_table[:, :, 11]
