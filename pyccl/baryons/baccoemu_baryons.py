@@ -28,9 +28,7 @@ class BaccoemuBaryons(Baryons):
                                      hot gas in haloes
     """
     name = 'BaccoemuBaryons'
-    __repr_attrs__ = __eq_attrs__ = ("log10_M_c", "log10_eta", "log10_beta",
-                                     "log10_M1_z0_cen", "log10_theta_out",
-                                     "log10_theta_inn", "log10_M_inn")
+    __repr_attrs__ = __eq_attrs__ = ("bcm_params",)
 
     def __init__(self, log10_M_c=14, log10_eta=-0.3, log10_beta=-0.22,
                  log10_M1_z0_cen=10.5, log10_theta_out=0.25,
