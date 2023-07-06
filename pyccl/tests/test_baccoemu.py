@@ -112,3 +112,41 @@ def test_baccoemu_baryons_changepars():
     baryons.update_parameters(log10_M_c=12.7, log10_eta=-0.4)
     assert ((baryons.bcm_params['M_c'] == 12.7)
             & (baryons.bcm_params['eta'] == -0.4))
+
+
+def test_baccoemu_baryons_As_sigma8():
+    baryons = ccl.BaccoemuBaryons()
+    cosmo1 = ccl.Cosmology(
+        Omega_c=0.27,
+        Omega_b=0.05,
+        h=0.67,
+        sigma8=0.83,
+        n_s=0.96,
+        Neff=3.046,
+        mass_split='normal',
+        m_nu=0.1,
+        Omega_g=0,
+        Omega_k=0,
+        w0=-1,
+        wa=0)
+
+    cosmo2 = ccl.Cosmology(
+        Omega_c=0.27,
+        Omega_b=0.05,
+        h=0.67,
+        A_s=2.2194e-09,
+        n_s=0.96,
+        Neff=3.046,
+        mass_split='normal',
+        m_nu=0.1,
+        Omega_g=0,
+        Omega_k=0,
+        w0=-1,
+        wa=0)
+
+    k = np.logspace(-2, 0.5, 100)
+    fk1 = baryons.boost_factor(cosmo1, k, 1)
+    fk2 = baryons.boost_factor(cosmo2, k, 1)
+
+    err = np.abs(fk1 / fk2 - 1)
+    assert np.allclose(err, 0, atol=BEMUNL_TOLERANCE, rtol=0)
