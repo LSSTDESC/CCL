@@ -14,7 +14,7 @@ dependencies:
   - pytest
   - pytest-cov
   - pip:
-      - classy=3.2.0
+      - classy=3.2.0.1
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - aemulus_heft @ git+https://github.com/AemulusProject/aemulus_heft
