@@ -109,11 +109,13 @@ class HaloProfileNFW(HaloProfileMatter):
 
         def f1(xx):
             x2m1 = xx * xx - 1
-            return 1 / x2m1 + np.arccosh(1 / xx) / np.fabs(x2m1)**1.5
+            sqx2m1 = np.sqrt(np.fabs(x2m1))
+            return 1 / x2m1 + np.arcsinh(sqx2m1 / xx) / sqx2m1**3
 
         def f2(xx):
             x2m1 = xx * xx - 1
-            return 1 / x2m1 - np.arccos(1 / xx) / np.fabs(x2m1)**1.5
+            sqx2m1 = np.sqrt(np.fabs(x2m1))
+            return 1 / x2m1 - np.arcsin(sqx2m1 / xx) / sqx2m1**3
 
         xf = x.flatten()
         return np.piecewise(xf,
@@ -144,11 +146,11 @@ class HaloProfileNFW(HaloProfileMatter):
 
         def f1(xx):
             sqx2m1 = np.sqrt(np.fabs(xx * xx - 1))
-            return np.log(0.5 * xx) + np.arccosh(1 / xx) / sqx2m1
+            return np.log(0.5 * xx) + np.arcsinh(sqx2m1 / xx) / sqx2m1
 
         def f2(xx):
             sqx2m1 = np.sqrt(np.fabs(xx * xx - 1))
-            return np.log(0.5 * xx) + np.arccos(1 / xx) / sqx2m1
+            return np.log(0.5 * xx) + np.arcsin(sqx2m1 / xx) / sqx2m1
 
         xf = x.flatten()
         f = np.piecewise(xf,
