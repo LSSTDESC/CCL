@@ -106,15 +106,15 @@ class HaloProfileHernquist(HaloProfileMatter):
 
         def f1(xx):
             x2m1 = xx * xx - 1
-            sqx2m1 = np.sqrt(np.fabs(x2m1))
+            sqx2m1 = np.sqrt(-x2m1)
             return (-3 / 2 / x2m1**2
-                    + (x2m1+3) * np.arcsinh(sqx2m1 / xx) / 2 / sqx2m1**5)
+                    + (x2m1+3) * np.arcsinh(sqx2m1 / xx) / 2 / (-x2m1)**2.5)
 
         def f2(xx):
             x2m1 = xx * xx - 1
-            sqx2m1 = np.sqrt(np.fabs(x2m1))
+            sqx2m1 = np.sqrt(x2m1)
             return (-3 / 2 / x2m1**2
-                    + (x2m1+3) * np.arcsin(sqx2m1 / xx) / 2 / sqx2m1**5)
+                    + (x2m1+3) * np.arcsin(sqx2m1 / xx) / 2 / x2m1**2.5)
 
         xf = x.flatten()
         return np.piecewise(xf,
@@ -145,15 +145,15 @@ class HaloProfileHernquist(HaloProfileMatter):
 
         def f1(xx):
             x2m1 = xx * xx - 1
-            sqx2m1 = np.sqrt(np.fabs(x2m1))
+            sqx2m1 = np.sqrt(-x2m1)
             return (1 + 1 / x2m1
-                    + (x2m1 + 1) * np.arcsinh(sqx2m1 / xx) / sqx2m1**3)
+                    + (x2m1 + 1) * np.arcsinh(sqx2m1 / xx) / (-x2m1)**1.5)
 
         def f2(xx):
             x2m1 = xx * xx - 1
-            sqx2m1 = np.sqrt(np.fabs(x2m1))
+            sqx2m1 = np.sqrt(x2m1)
             return (1 + 1 / x2m1
-                    - (x2m1 + 1) * np.arcsin(sqx2m1 / xx) / sqx2m1**3)
+                    - (x2m1 + 1) * np.arcsin(sqx2m1 / xx) / x2m1**1.5)
 
         xf = x.flatten()
         f = np.piecewise(xf,
