@@ -1,10 +1,8 @@
 __all__ = ("LagrangianPTCalculator",)
 
-import warnings
-
 import numpy as np
 
-from .. import (CCLAutoRepr, CCLError, CCLWarning, Pk2D,
+from .. import (CCLAutoRepr, CCLError, Pk2D,
                 get_pk_spline_a, unlock_instance)
 
 
@@ -38,7 +36,8 @@ class LagrangianPTCalculator(CCLAutoRepr):
     where
 
     .. math::
-        O_{3}(k) = s_{ij}(k)t_{ij}(k) + \\frac{16}{63}\\langle \\delta_{lin}\\rangle
+        O_{3}(k) = s_{ij}(k)t_{ij}(k) +
+        \\frac{16}{63}\\langle \\delta_{lin}\\rangle
 
     .. note:: Only the leading-order non-local term (i.e.
               :math:`\\langle \\delta\\,\\nabla^2\\delta`) is
@@ -57,9 +56,6 @@ class LagrangianPTCalculator(CCLAutoRepr):
         with_NC (:obj:`bool`): set to ``True`` if you'll want to use
             this calculator to compute correlations involving
             number counts.
-        with_matter_1loop(:obj:`bool`): set to ``True`` if you'll want to use
-            this calculator to compute the one-loop matter power
-            spectrum (automatically on if ``with_NC==True``).
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
             If present, internal PT power spectrum templates will
             be initialized. If ``None``, you will need to initialize
@@ -96,21 +92,14 @@ class LagrangianPTCalculator(CCLAutoRepr):
             bias terms in the expansion. Same options and default as
             ``b1_pk_kind``.
     """
-    __repr_attrs__ = __eq_attrs__ = ('with_NC', 'with_matter_1loop',
-                                     'k_s', 'a_s', 'exp_cutoff', 'b1_pk_kind',
-                                     'bk2_pk_kind', )
+    __repr_attrs__ = __eq_attrs__ = ('with_NC', 'k_s', 'a_s', 'exp_cutoff',
+                                     'b1_pk_kind', 'bk2_pk_kind')
 
-    def __init__(self, *, with_NC=False,
-                 with_matter_1loop=True, cosmo=None,
+    def __init__(self, *, with_NC=False, cosmo=None,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  a_arr=None, k_cutoff=None, n_exp_cutoff=4,
                  b1_pk_kind='nonlinear', bk2_pk_kind='nonlinear'):
-        self.with_matter_1loop = with_matter_1loop
         self.with_NC = with_NC
-
-        to_do = ['one_loop_dd']
-        if self.with_NC:
-            to_do.append('dd_bias')
 
         # k sampling
         nk_total = int((log10k_max - log10k_min) * nk_per_decade)
@@ -136,8 +125,6 @@ class LagrangianPTCalculator(CCLAutoRepr):
             raise ValueError(f"Unknown P(k) prescription {bk2_pk_kind}")
         self.b1_pk_kind = b1_pk_kind
         self.bk2_pk_kind = bk2_pk_kind
-        if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt'):
-            self.with_matter_1loop = True
 
         # Initialize all expensive arrays to ``None``.
         self._cosmo = None
@@ -186,14 +173,8 @@ class LagrangianPTCalculator(CCLAutoRepr):
         lpt_table = np.array(lpt_table)
         lpt_table[:, :, 1:] /= h ** 3
 
-        # Galaxy clustering templates
-        # TODO: What to do here?
-        if self.with_NC:
-            self.lpt_table = lpt_table
-            self.one_loop_dd = self.lpt_table[:, :, 1]
-            self.with_matter_1loop = True
-        elif self.with_matter_1loop:  # Only 1-loop matter needed
-            self.one_loop_dd = lpt_table[:, :, 1]
+        self.lpt_table = lpt_table
+        self.one_loop_dd = self.lpt_table[:, :, 1]
 
         # b1/bk power spectrum
         pks = {}
@@ -413,7 +394,6 @@ class LagrangianPTCalculator(CCLAutoRepr):
                     extrap_order_hik=extrap_order_hik)
         return pk2d
 
-    # TODO: adapt to LPT
     def get_pk2d_template(self, kind, *, extrap_order_lok=1,
                           extrap_order_hik=2):
         """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
@@ -453,30 +433,47 @@ class LagrangianPTCalculator(CCLAutoRepr):
         if pk_name in self._pk2d_temp:
             return self._pk2d_temp[pk_name]
 
-        # Construct power spectrum array
-        s4 = 0.
+        self._check_init()
+
         if pk_name == 'm:m':
             pk = self._get_pmm()
+        elif pk_name == 'm:b1':
+            pk = 0.5*self.lpt_table[:, :, 2]
         elif pk_name == 'm:b2':
-            pk = 0.5*self._g4T*self.dd_bias[2]
+            pk = 0.5*self.lpt_table[:, :, 4]
         elif pk_name == 'm:b3nl':
-            pk = 0.5*self._g4T*self.dd_bias[8]
+            pk = 0.25 * self.lpt_table[:, :, 11]
         elif pk_name == 'm:bs':
-            pk = 0.5*self._g4T*self.dd_bias[4]
+            pk = 0.25*self.lpt_table[:, :, 7]
         elif pk_name == 'm:bk2':
-            pk = 0.5*self.pk_bk*(self.k_s**2)
+            Pdmdm = self.lpt_table[:, :, 1]
+            pk = 0.5*Pdmdm * (self.k_s**2)[None, :]
+        elif pk_name == 'b1:b1':
+            pk = self.lpt_table[:, :, 3]
+        elif pk_name == 'b1:b2':
+            pk = 0.5*self.lpt_table[:, :, 5]
+        elif pk_name == 'b1:b3nl':
+            pk = 0.25 * self.lpt_table[:, :, 12]
+        elif pk_name == 'b1:bs':
+            pk = 0.25*self.lpt_table[:, :, 8]
+        elif pk_name == 'b1:bk2':
+            Pdmd1 = 0.5*self.lpt_table[:, :, 2]
+            pk = 0.5*Pdmd1 * (self.k_s**2)[None, :]
         elif pk_name == 'b2:b2':
-            if self.fastpt_par['sub_lowk']:
-                s4 = self.dd_bias[7]
-            pk = 0.25*self._g4T*(self.dd_bias[3] - 2*s4)
+            pk = self.lpt_table[:, :, 6]
         elif pk_name == 'b2:bs':
-            if self.fastpt_par['sub_lowk']:
-                s4 = self.dd_bias[7]
-            pk = 0.25*self._g4T*(self.dd_bias[5] - 4*s4/3)
+            pk = 0.25*self.lpt_table[:, :, 9]
+        elif pk_name == 'b2:bk2':
+            Pdmd2 = 0.25*self.lpt_table[:, :, 4]
+            pk = Pdmd2 * (self.k_s**2)[None, :]
         elif pk_name == 'bs:bs':
-            if self.fastpt_par['sub_lowk']:
-                s4 = self.dd_bias[7]
-            pk = 0.25*self._g4T*(self.dd_bias[6] - 8*s4/9)
+            pk = 0.25*self.lpt_table[:, :, 10]
+        elif pk_name == 'bs:bk2':
+            Pdms2 = 0.25*self.lpt_table[:, :, 7]
+            pk = Pdms2 * (self.k_s**2)[None, :]
+        elif pk_name == 'bk2:bk2':
+            Pdmdm = self.lpt_table[:, :, 1]
+            pk = 0.25*Pdmdm * (self.k_s**4)[None, :]
         elif pk_name == 'zero':
             # If zero, store None and return
             self._pk2d_temp[pk_name] = None
