@@ -532,13 +532,6 @@ class Cosmology(CCLObject):
                                           status)
             check(status, self)
 
-        # Compute A_s for Boltzmann transfer functions and add to params to use with HEFT
-        if trf == 'boltzmann_class' or trf == 'boltzmann_camb':
-            if not np.isfinite(self["A_s"]):
-                sigma8_temp = self.sigma8(p_of_k_a=pk)
-                A_s_rescaled = 2.43e-9 * self["sigma8"]**4 / 0.87659**2 / sigma8_temp**2
-                self._fill_params(A_s=A_s_rescaled)
-
         return pk
 
     @unlock_instance(mutate=False)
