@@ -1,6 +1,7 @@
 __all__ = ("BaccoemuBaryons",)
 
 import numpy as np
+from copy import deepcopy
 
 from .. import Pk2D
 from . import Baryons
@@ -12,27 +13,31 @@ class BaccoemuBaryons(Baryons):
     See https://arxiv.org/abs/2011.15018 and
     https://bacco.dipc.org/emulator.html
 
+    Note that masses are in units of :math:`M_\\odot`, differently from the
+    original paper and baccoemu public code (where they are
+    in :math:`M_\\odot/h`)
+
     Args:
         log10_M_c (:obj:`float`): characteristic halo mass to model baryon
-                                   mass fraction
+                                   mass fraction (in :math:`M_\\odot`)
         log10_eta (:obj:`float`): extent of ejected gas
         log10_beta (:obj:`float`): slope of power law describing baryon mass
                                     fraction
         log10_M1_z0_cen (:obj:`float`): characteristic halo mass scale for
-                                         central galaxies
+                                         central galaxies (in :math:`M_\\odot`)
         log10_theta_out (:obj:`float`):  outer slope of density profiles of
                                           hot gas in haloes
         log10_theta_inn (:obj:`float`): inner slope of density profiles of
                                          hot gas in haloes
         log10_M_inn (:obj:`float`): transition mass of density profiles of
-                                     hot gas in haloes
+                                     hot gas in haloes (in :math:`M_\\odot`)
     """
     name = 'BaccoemuBaryons'
     __repr_attrs__ = __eq_attrs__ = ("bcm_params",)
 
-    def __init__(self, log10_M_c=14, log10_eta=-0.3, log10_beta=-0.22,
-                 log10_M1_z0_cen=10.5, log10_theta_out=0.25,
-                 log10_theta_inn=-0.86, log10_M_inn=13.4):
+    def __init__(self, log10_M_c=14.174, log10_eta=-0.3, log10_beta=-0.22,
+                 log10_M1_z0_cen=10.674, log10_theta_out=0.25,
+                 log10_theta_inn=-0.86, log10_M_inn=13.574):
         # avoid tensorflow warnings
         import warnings
         with warnings.catch_warnings():
@@ -127,11 +132,17 @@ class BaccoemuBaryons(Baryons):
             else:
                 emupars['A_s'] = cosmo['A_s']
 
+        # change masses from Msun to Msun/h
+        _bcm_params = deepcopy(self.bcm_params)
+        for key in ['M_c', 'M1_z0_cen', 'M_inn']:
+            _bcm_params[key] = np.log10((10**_bcm_params[key])
+                                        * emupars['hubble'])
+
         # baccoemu internally interpolates k with a cubic spline
         # it returns k, boost, so, since we are already requesting a specific
         # k-vector we can ignore the first returned object
         _, fka = self.mpk.get_baryonic_boost(k=k / cosmo['h'],
-                                             **{**emupars, **self.bcm_params})
+                                             **{**emupars, **_bcm_params})
 
         return fka
 
