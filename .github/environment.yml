@@ -8,7 +8,6 @@ dependencies:
   - pyyaml
   - numpy
   - scipy
-  - cython
   - camb=1.3.6
   - isitgr
   - fast-pt
