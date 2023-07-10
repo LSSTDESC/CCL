@@ -63,10 +63,11 @@ double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)
  * @param status, integer indicating the status
  */
 void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
-                            int mg_rescale, int* status) {
+                            int mg_rescale, int s8_rescale,
+			    int* status) {
 
   int do_mg = mg_rescale && (fabs(cosmo->params.mu_0) > 1e-14);
-  int do_s8 = isfinite(cosmo->params.sigma8) && (!isfinite(cosmo->params.A_s));
+  int do_s8 = s8_rescale && (isfinite(cosmo->params.sigma8) && (!isfinite(cosmo->params.A_s)));
 
   if (!do_mg && !do_s8)
     return;
