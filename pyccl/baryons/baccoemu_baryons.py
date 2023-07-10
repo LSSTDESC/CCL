@@ -134,9 +134,9 @@ class BaccoemuBaryons(Baryons):
 
         # change masses from Msun to Msun/h
         _bcm_params = deepcopy(self.bcm_params)
+        l10h = np.log10(emupars['hubble'])
         for key in ['M_c', 'M1_z0_cen', 'M_inn']:
-            _bcm_params[key] = np.log10((10**_bcm_params[key])
-                                        * emupars['hubble'])
+            _bcm_params[key] += l10h
 
         # baccoemu internally interpolates k with a cubic spline
         # it returns k, boost, so, since we are already requesting a specific

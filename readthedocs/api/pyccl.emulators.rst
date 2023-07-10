@@ -9,7 +9,6 @@ Submodules
 
    pyccl.emulators.baccoemu_linear_pk
    pyccl.emulators.baccoemu_nonlinear_pk
-   pyccl.emulators.ee2_nonlinear_pk
    pyccl.emulators.emu_base
 
 Module contents
