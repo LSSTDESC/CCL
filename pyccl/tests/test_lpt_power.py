@@ -8,7 +8,7 @@ COSMO = ccl.Cosmology(
     transfer_function='bbks', matter_power_spectrum='linear')
 TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer(b1=2.0, b2=2.0, bs=2.0, bk2=2.0),
        'TM': ccl.nl_pt.PTMatterTracer()}
-PTC = ccl.nl_pt.LagrangianPTCalculator(with_NC=True, cosmo=COSMO)
+PTC = ccl.nl_pt.LagrangianPTCalculator(cosmo=COSMO)
 
 
 def test_lpt_calculator_smoke():
@@ -25,7 +25,7 @@ def test_lpt_calculator_smoke():
                           ['TM', 'TM']])
 def test_lpt_get_pk2d_smoke(tr1, tr2):
     t2 = None if tr2 == tr1 else TRS[tr2]
-    ptc = ccl.nl_pt.LagrangianPTCalculator(with_NC=True, cosmo=COSMO)
+    ptc = ccl.nl_pt.LagrangianPTCalculator(cosmo=COSMO)
 
     pk = ptc.get_biased_pk2d(TRS[tr1], tracer2=t2)
     assert isinstance(pk, ccl.Pk2D)
@@ -34,7 +34,7 @@ def test_lpt_get_pk2d_smoke(tr1, tr2):
 @pytest.mark.parametrize('nl', ['nonlinear', 'linear', 'pt'])
 def test_lpt_get_pk2d_nl(nl):
     ptc = ccl.nl_pt.LagrangianPTCalculator(
-        with_NC=True, b1_pk_kind=nl, bk2_pk_kind=nl, cosmo=COSMO)
+        b1_pk_kind=nl, bk2_pk_kind=nl, cosmo=COSMO)
     pk = ptc.get_biased_pk2d(TRS['TG'])
     assert isinstance(pk, ccl.Pk2D)
 
@@ -45,9 +45,9 @@ def test_lpt_k2pk_types(typ_nlin, typ_nloc):
     tg = ccl.nl_pt.PTNumberCountsTracer(1., 0., 0., bk2=1.)
     tm = ccl.nl_pt.PTNumberCountsTracer(1., 0., 0.)
     ptc1 = ccl.nl_pt.LagrangianPTCalculator(
-        with_NC=True, b1_pk_kind=typ_nlin, bk2_pk_kind=typ_nloc, cosmo=COSMO)
+        b1_pk_kind=typ_nlin, bk2_pk_kind=typ_nloc, cosmo=COSMO)
     ptc2 = ccl.nl_pt.LagrangianPTCalculator(
-        with_NC=True, b1_pk_kind=typ_nloc, cosmo=COSMO)
+        b1_pk_kind=typ_nloc, cosmo=COSMO)
     pkmm = ptc1.get_biased_pk2d(tm, tracer2=tm)
     pkmm2 = ptc2.get_biased_pk2d(tm, tracer2=tm)
     pkgg = ptc1.get_biased_pk2d(tg, tracer2=tg)
@@ -60,7 +60,7 @@ def test_lpt_k2pk_types(typ_nlin, typ_nloc):
 @pytest.mark.parametrize('kind', ['m:m', 'm:b2', 'm:b3nl', 'm:bs',
                                   'b1:b3nl', 'b3nl:b3nl', 'b3nl:bk2'])
 def test_lpt_deconstruction(kind):
-    ptc = ccl.nl_pt.LagrangianPTCalculator(with_NC=True, cosmo=COSMO,
+    ptc = ccl.nl_pt.LagrangianPTCalculator(cosmo=COSMO,
                                            b1_pk_kind='nonlinear',
                                            bk2_pk_kind='nonlinear')
     b_nc = ['b1', 'b2', 'b3nl', 'bs', 'bk2']
@@ -99,12 +99,10 @@ def test_lpt_pk_cutoff():
     ks = np.geomspace(1E-2, 15., 128)
 
     t = ccl.nl_pt.PTNumberCountsTracer(b1=1.0)
-    ptc1 = ccl.nl_pt.LagrangianPTCalculator(with_NC=True,
-                                            cosmo=COSMO)
+    ptc1 = ccl.nl_pt.LagrangianPTCalculator(cosmo=COSMO)
     pk2d1 = ptc1.get_biased_pk2d(t, tracer2=t)
     pk1 = pk2d1(ks, 1.0, cosmo=COSMO)
-    ptc2 = ccl.nl_pt.LagrangianPTCalculator(with_NC=True,
-                                            k_cutoff=10.,
+    ptc2 = ccl.nl_pt.LagrangianPTCalculator(k_cutoff=10.,
                                             n_exp_cutoff=2.,
                                             cosmo=COSMO)
     pk2d2 = ptc2.get_biased_pk2d(t, tracer2=t)
@@ -117,7 +115,7 @@ def test_lpt_pk_cutoff():
 def test_lpt_matter_1loop():
     # Check P(k) for linear tracer with b1=1 is the same
     # as matter P(k)
-    ptc = ccl.nl_pt.LagrangianPTCalculator(with_NC=True, cosmo=COSMO,
+    ptc = ccl.nl_pt.LagrangianPTCalculator(cosmo=COSMO,
                                            b1_pk_kind='pt')
     tg = ccl.nl_pt.PTNumberCountsTracer(b1=1.0)
     tm = ccl.nl_pt.PTMatterTracer()
@@ -138,20 +136,13 @@ def test_lpt_calculator_raises():
 
     # Uninitialized templates
     with pytest.raises(ccl.CCLError):
-        ptc = ccl.nl_pt.LagrangianPTCalculator(with_NC=True)
-        ptc.get_biased_pk2d(TRS['TG'])
-
-    # Didn't ask for the right calculation
-    with pytest.raises(ValueError):
-        ptc = ccl.nl_pt.LagrangianPTCalculator(with_NC=False,
-                                               cosmo=COSMO)
+        ptc = ccl.nl_pt.LagrangianPTCalculator()
         ptc.get_biased_pk2d(TRS['TG'])
 
     # TODO: Discuss this test
     # Wrong pair combination
     with pytest.raises(ValueError):
-        ptc = ccl.nl_pt.LagrangianPTCalculator(with_NC=True,
-                                               cosmo=COSMO)
+        ptc = ccl.nl_pt.LagrangianPTCalculator(cosmo=COSMO)
         ptc.get_pk2d_template('b1:b3')
 
 
@@ -159,25 +150,22 @@ def test_lpt_template_swap():
     # Test that swapping operator order gets you the same
     # Pk
     ks = np.array([0.01, 0.1, 1.0])
-    ptc = ccl.nl_pt.LagrangianPTCalculator(with_NC=True,
-                                           cosmo=COSMO)
+    ptc = ccl.nl_pt.LagrangianPTCalculator(cosmo=COSMO)
     pk1 = ptc.get_pk2d_template('b2:bs')(ks, 1.0, cosmo=COSMO)
     pk2 = ptc.get_pk2d_template('bs:b2')(ks, 1.0, cosmo=COSMO)
     assert np.all(pk1 == pk2)
 
 
 def test_lpt_eq():
-    ptc1 = ccl.nl_pt.LagrangianPTCalculator(with_NC=True)
+    ptc1 = ccl.nl_pt.LagrangianPTCalculator()
     # Should be the same
-    ptc2 = ccl.nl_pt.LagrangianPTCalculator(with_NC=True)
+    ptc2 = ccl.nl_pt.LagrangianPTCalculator()
     assert ptc1 == ptc2
     # Should still be the same
     ptc2 = ccl.nl_pt.LagrangianPTCalculator(
-        with_NC=True,
         a_arr=ccl.pyutils.get_pk_spline_a())
     assert ptc1 == ptc2
     # Different a sampling
     ptc2 = ccl.nl_pt.LagrangianPTCalculator(
-        with_NC=True,
         a_arr=np.linspace(0.5, 1., 30))
     assert ptc1 != ptc2

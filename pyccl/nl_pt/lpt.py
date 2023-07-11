@@ -39,23 +39,20 @@ class LagrangianPTCalculator(CCLAutoRepr):
         O_{3}(k) = s_{ij}(k)t_{ij}(k) +
         \\frac{16}{63}\\langle \\delta_{lin}\\rangle
 
-    .. note:: Only the leading-order non-local term (i.e.
-              :math:`\\langle \\delta\\,\\nabla^2\\delta`) is
-              taken into account in the expansion. All others are
-              set to zero.
+    .. note:: As opposed to EPT, all terms including
+              :math:`\\nabla^2\\delta`) are taken into account
+              in the expansion.
 
     .. note:: Terms of the form
               :math:`\\langle \\delta^2 \\psi_{nl}\\rangle` (and
-              likewise for :math:`s^2`) are set to zero.
+              likewise for :math:`s^2` and :math:`\\nabla^2\\delta`)
+              are set to zero.
 
     .. note:: This calculator does not account for any form of
               stochastic bias contribution to the power spectra.
               If necessary, consider adding it in post-processing.
 
     Args:
-        with_NC (:obj:`bool`): set to ``True`` if you'll want to use
-            this calculator to compute correlations involving
-            number counts.
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
             If present, internal PT power spectrum templates will
             be initialized. If ``None``, you will need to initialize
@@ -92,14 +89,13 @@ class LagrangianPTCalculator(CCLAutoRepr):
             bias terms in the expansion. Same options and default as
             ``b1_pk_kind``.
     """
-    __repr_attrs__ = __eq_attrs__ = ('with_NC', 'k_s', 'a_s', 'exp_cutoff',
+    __repr_attrs__ = __eq_attrs__ = ('k_s', 'a_s', 'exp_cutoff',
                                      'b1_pk_kind', 'bk2_pk_kind')
 
-    def __init__(self, *, with_NC=False, cosmo=None,
+    def __init__(self, *, cosmo=None,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  a_arr=None, k_cutoff=None, n_exp_cutoff=4,
                  b1_pk_kind='nonlinear', bk2_pk_kind='nonlinear'):
-        self.with_NC = with_NC
 
         # k sampling
         nk_total = int((log10k_max - log10k_min) * nk_per_decade)
@@ -184,6 +180,9 @@ class LagrangianPTCalculator(CCLAutoRepr):
         if 'linear' in [self.b1_pk_kind, self.bk2_pk_kind]:
             pks['linear'] = np.array([cosmo.linear_matter_power(self.k_s, a)
                                       for a in self.a_s])
+        # If PT power spectrum is required it will be calculated on
+        # the fly in the respective _get_pgg and _get_pgm functions
+        # later as it needs the biases
         if 'pt' in [self.b1_pk_kind, self.bk2_pk_kind]:
             pks['pt'] = None
         self.pk_b1 = pks[self.b1_pk_kind]
@@ -343,12 +342,6 @@ class LagrangianPTCalculator(CCLAutoRepr):
         the PT power spectrum for two quantities defined by
         two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
 
-        .. note:: The full non-linear model for the cross-correlation
-                  between number counts and intrinsic alignments is
-                  still work in progress in FastPT. As a workaround
-                  CCL assumes a non-linear treatment of IAs, but only
-                  linearly biased number counts.
-
         Args:
             tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
                 tracer being correlated.
@@ -371,9 +364,9 @@ class LagrangianPTCalculator(CCLAutoRepr):
         t1 = tracer1.type
         t2 = tracer2.type
 
-        if ((t1 == 'NC') or (t2 == 'NC')) and (not self.with_NC):
-            raise ValueError("Can't use number counts tracer in "
-                             "LagrangianPTCalculator with 'with_NC=False'")
+        if t1 == 'IA' or t2 == 'IA':
+            raise ValueError("Intrinsic alignments not implemented in "
+                             "LagrangianPTCalculator.")
 
         if t1 == 'NC':
             if t2 == 'NC':
