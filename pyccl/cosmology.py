@@ -17,7 +17,7 @@ import numpy as np
 from . import (
     CCLError, CCLObject, CCLParameters, CosmologyParams,
     DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, cache, check, lib,
-    unlock_instance)
+    unlock_instance, emulators)
 from . import physical_constants as const
 
 
@@ -29,6 +29,7 @@ class TransferFunctions(Enum):
     BOLTZMANN_CAMB = "boltzmann_camb"
     BOLTZMANN_ISITGR = "boltzmann_isitgr"
     CALCULATOR = "calculator"
+    EMULATOR_LINPK = "emulator"
 
 
 class MatterPowerSpectra(Enum):
@@ -38,6 +39,7 @@ class MatterPowerSpectra(Enum):
     EMU = "emu"
     CAMB = "camb"
     CALCULATOR = "calculator"
+    EMULATOR_NLPK = "emulator"
 
 
 # Configuration types
@@ -48,7 +50,8 @@ transfer_function_types = {
     'boltzmann_class': lib.boltzmann_class,
     'boltzmann_camb': lib.boltzmann_camb,
     'boltzmann_isitgr': lib.boltzmann_isitgr,
-    'calculator': lib.pklin_from_input
+    'calculator': lib.pklin_from_input,
+    'emulator': lib.emulator_linpk
 }
 
 
@@ -58,7 +61,8 @@ matter_power_spectrum_types = {
     'linear': lib.linear,
     'emu': lib.emu,
     'calculator': lib.pknl_from_input,
-    'camb': lib.pknl_from_boltzman
+    'camb': lib.pknl_from_boltzman,
+    'emulator': lib.emulator_nlpk
 }
 
 emulator_neutrinos_types = {
@@ -173,10 +177,10 @@ class Cosmology(CCLObject):
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        transfer_function (:obj:`str`): The transfer function to
-            use. Defaults to 'boltzmann_camb'.
-        matter_power_spectrum (:obj:`str`): The matter power
-            spectrum to use. Defaults to 'halofit'.
+        transfer_function (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
+            The transfer function to use. Defaults to 'boltzmann_camb'.
+        matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
+            The matter power spectrum to use. Defaults to 'halofit'.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB, as well
             as CosmicEmu. Details described below. Defaults to None.
@@ -233,6 +237,18 @@ class Cosmology(CCLObject):
         extra_parameters = extra_parameters or {}
         if "emu" not in extra_parameters:
             extra_parameters["emu"] = {"neutrinos": "strict"}
+
+        # initialise linear Pk emulators if needed
+        self.lin_pk_emu = None
+        if emulators.EmulatorPk in type(transfer_function).__bases__:
+            self.lin_pk_emu = transfer_function
+            transfer_function = 'emulator'
+
+        # initialise nonlinear Pk emulators if needed
+        self.nl_pk_emu = None
+        if emulators.EmulatorPk in type(matter_power_spectrum).__bases__:
+            self.nl_pk_emu = matter_power_spectrum
+            matter_power_spectrum = 'emulator'
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -504,6 +520,9 @@ class Cosmology(CCLObject):
             rescale_s8 = False
             rescale_mg = False
             pk = Pk2D.from_model(self, model=trf)
+        elif trf == 'emulator':
+            rescale_s8 = False
+            pk = self.lin_pk_emu.get_pk2d(self)
 
         # Compute the CAMB nonlin power spectrum if needed,
         # to avoid repeating the code in `compute_nonlin_power`.
@@ -549,7 +568,7 @@ class Cosmology(CCLObject):
         # Populate power spectrum splines
         mps = self._config_init_kwargs['matter_power_spectrum']
         # needed for halofit, halomodel and linear options
-        if (mps != 'emu') and (mps is not None):
+        if (mps not in ['emu', 'emulator']) and (mps is not None):
             self.compute_linear_power()
 
         if mps == "camb" and self.has_nonlin_power:
@@ -563,6 +582,8 @@ class Cosmology(CCLObject):
             pk = Pk2D.from_model(self, model='emu')
         elif mps == 'linear':
             pk = self._pk_lin[DEFAULT_POWER_SPECTRUM]
+        elif mps == 'emulator':
+            pk = self.nl_pk_emu.get_pk2d(self)
 
         return pk
 
