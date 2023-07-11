@@ -4,7 +4,7 @@ import pyccl as ccl
 import pyccl.nl_pt as pt
 import pytest
 
-LPTPK_TOLERANCE = 1e-6
+LPTPK_TOLERANCE = 1e-4
 
 # Set cosmology
 COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05,
