@@ -3,6 +3,7 @@ __all__ = ("CosmicemuMTIVPk",)
 import numpy as np
 import os
 import inspect
+from scipy.interpolate import interp1d
 
 from .. import Pk2D
 from . import EmulatorPk
@@ -67,8 +68,8 @@ class CosmicemuMTIVPk(EmulatorPk):
                 pmin = self.xmin[ip]
                 pmax = self.xmax[ip]
                 raise ValueError(f'{pname} must be between {pmin} and {pmax}')
-        xstarstd = (xstar - self.xmin)/self.xrange
-        Sigmastar = np.exp(-np.sum(self.beta[:, None, :]*
+        xstarstd = (xstar-self.xmin)/self.xrange
+        Sigmastar = np.exp(-np.sum(self.beta[:, None, :] *
                                    ((self.x-xstarstd[None, :])**2)[None, :, :],
                                    axis=-1))/self.lamz[:, None]
         wstar = np.sum(Sigmastar*self.KrigBasis, axis=-1)
