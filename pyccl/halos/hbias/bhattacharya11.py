@@ -1,6 +1,6 @@
 __all__ = ("HaloBiasBhattacharya11",)
 
-from . import HaloBias
+from . import HaloBias, get_delta_c
 
 
 class HaloBiasBhattacharya11(HaloBias):
@@ -29,7 +29,7 @@ class HaloBiasBhattacharya11(HaloBias):
         self.az = 0.01
         self.p = 0.807
         self.q = 1.795
-        self.dc = 1.68647
+        self.dc = get_delta_c(None, None, kind='EdS')
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM
