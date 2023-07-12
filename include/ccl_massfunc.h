@@ -38,15 +38,6 @@ double ccl_sigmaM(ccl_cosmology *cosmo, double log_halomass, double a, int *stat
  */
 double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, double a, int *status);
 
-/**
- * Fitting function for the spherical-model critical linear density for collapse
- * Fitting formula from Nakamura & Suto (1997; arXiv:astro-ph/9710107)
- * @param cosmo Cosmological parameters
- * @param a, scale factor, normalized to a=1 today
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- */
-double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status);
-
 CCL_END_DECLS
 
 #endif

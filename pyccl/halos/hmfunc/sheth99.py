@@ -2,8 +2,7 @@ __all__ = ("MassFuncSheth99",)
 
 import numpy as np
 
-from ... import check, lib
-from . import MassFunc
+from . import MassFunc, get_delta_c
 
 
 class MassFuncSheth99(MassFunc):
@@ -43,11 +42,9 @@ class MassFuncSheth99(MassFunc):
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         if self.use_delta_c_fit:
-            status = 0
-            delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-            check(status, cosmo=cosmo)
+            delta_c = get_delta_c(cosmo, a, 'NakamuraSuto97')
         else:
-            delta_c = 1.68647
+            delta_c = get_delta_c(cosmo, a, 'EdS')
 
         nu = delta_c / sigM
         return nu * self.A * (1. + (self.a * nu**2)**(-self.p)) * (
