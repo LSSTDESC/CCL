@@ -50,11 +50,8 @@ class MassFuncDespali16(MassFunc):
         delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
         check(status, cosmo=cosmo)
 
-        Dv, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
-        check(status, cosmo=cosmo)
-
-        x = np.log10(self.mass_def.get_Delta(cosmo, a) *
-                     cosmo.omega_x(a, self.mass_def.rho_type) / Dv)
+        Dv = self.mass_def.get_Delta_vir(cosmo, a)
+        x = np.log10(self.mass_def.get_Delta(cosmo, a) / Dv)
 
         A, a, p = self.poly_A(x), self.poly_a(x), self.poly_p(x)
 

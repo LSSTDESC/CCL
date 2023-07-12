@@ -47,16 +47,6 @@ double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, double a, in
  */
 double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status);
 
-/**
- * Fitting function for virial collapse density contrast assuming LCDM.
- * Density contrast is relative to background *matter* density, *not* critical density
- * Fitting formula from Bryan & Norman (1998; arXiv:astro-ph/9710107)
- * @param cosmo Cosmological parameters
- * @param a, scale factor, normalized to a=1 today
- * @param status Status flag. 0 if there are no errors, nonzero otherwise.
- */
-double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status);
-
 CCL_END_DECLS
 
 #endif
