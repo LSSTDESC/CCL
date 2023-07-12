@@ -36,8 +36,8 @@ def test_baccoemu_linear_As_sigma8():
         w0=-1,
         wa=0)
 
-    k1, pk1 = bemu.get_pk_at_a(1, cosmo1)
-    k2, pk2 = bemu.get_pk_at_a(1, cosmo2)
+    k1, pk1 = bemu.get_pk_at_a(cosmo1, 1.0)
+    k2, pk2 = bemu.get_pk_at_a(cosmo2, 1.0)
 
     err = np.abs(pk1 / pk2 - 1)
     assert np.allclose(err, 0, atol=BEMULIN_TOLERANCE, rtol=0)
@@ -73,8 +73,8 @@ def test_baccoemu_nonlinear_As_sigma8():
         w0=-1,
         wa=0)
 
-    k1, pk1 = bemu.get_pk_at_a(1, cosmo1)
-    k2, pk2 = bemu.get_pk_at_a(1, cosmo2)
+    k1, pk1 = bemu.get_pk_at_a(cosmo1, 1.0)
+    k2, pk2 = bemu.get_pk_at_a(cosmo2, 1.0)
 
     err = np.abs(pk1 / pk2 - 1)
     assert np.allclose(err, 0, atol=BEMUNL_TOLERANCE, rtol=0)

@@ -31,7 +31,7 @@ def test_baccoemu_linear():
     err = np.abs(pk / linpk(k, a) - 1)
     assert np.allclose(err, 0, atol=BEMULIN_TOLERANCE, rtol=0)
 
-    ktest, pktest = bemu.get_pk_at_a(1, cosmo)
+    ktest, pktest = bemu.get_pk_at_a(cosmo, 1.0)
     pktest = np.exp(np.interp(np.log(k), np.log(ktest), np.log(pktest)))
     err = np.abs(pktest / pk - 1)
     assert np.allclose(err, 0, atol=BEMULIN_TOLERANCE, rtol=0)
@@ -64,7 +64,7 @@ def test_baccoemu_linear_A_s():
     err = np.abs(pk / linpk(k, a) - 1)
     assert np.allclose(err, 0, atol=BEMULIN_TOLERANCE, rtol=0)
 
-    ktest, pktest = bemu.get_pk_at_a(1, cosmo)
+    ktest, pktest = bemu.get_pk_at_a(cosmo, 1.0)
     pktest = np.exp(np.interp(np.log(k), np.log(ktest), np.log(pktest)))
     err = np.abs(pktest / pk - 1)
     assert np.allclose(err, 0, atol=BEMULIN_TOLERANCE, rtol=0)

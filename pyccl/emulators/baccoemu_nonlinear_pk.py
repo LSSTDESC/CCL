@@ -66,7 +66,7 @@ a_min,a_max = ({}, {})""".format(
         A_s = (sigma8tot / sigma8tot_fid)**2 * A_s_fid
         return self.mpk.get_sigma8(cold=True, A_s=A_s, **_emupars)
 
-    def _get_pk_at_a(self, a, cosmo):
+    def _get_pk_at_a(self, cosmo, a):
         # First create the dictionary passed to baccoemu
         # if a is an array, make sure all the other parameters passed to the
         # emulator have the same len
@@ -115,6 +115,6 @@ a_min,a_max = ({}, {})""".format(
 
     def _get_pk2d(self, cosmo):
         a = np.linspace(self.a_min, 1, self.n_sampling_a)
-        k, pk = self.get_pk_at_a(a, cosmo)
+        k, pk = self.get_pk_at_a(cosmo, a)
         return Pk2D(a_arr=a, lk_arr=np.log(k), pk_arr=np.log(pk), is_logp=True,
                     extrap_order_lok=1, extrap_order_hik=2)
