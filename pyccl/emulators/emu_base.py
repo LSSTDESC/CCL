@@ -6,32 +6,32 @@ from abc import abstractmethod
 class EmulatorPk(object):
 
     @abstractmethod
-    def _get_pk_at_a(self, a, cosmo):
+    def _get_pk_at_a(self, cosmo, a):
         """Get k vector and uninterpolated power spectrum at given a.
 
         Args:
-            a (:obj:`float` or `array`):
-                Scale factor.
             cosmo (:class:`~pyccl.cosmology.Cosmology`):
                 Cosmological parameters.
+            a (:obj:`float` or `array`):
+                Scale factor.
 
         Returns:
             :tuple: k and pk arrays.
         """
 
-    def get_pk_at_a(self, a, cosmo):
+    def get_pk_at_a(self, cosmo, a):
         """Get k vector and uninterpolated power spectrum at given a.
 
         Args:
-            a (:obj:`float` or `array`):
-                Scale factor.
             cosmo (:class:`~pyccl.cosmology.Cosmology`):
                 Cosmological parameters.
+            a (:obj:`float` or `array`):
+                Scale factor.
 
         Returns:
             :tuple: k and pk arrays.
         """
-        return self._get_pk_at_a(a, cosmo)
+        return self._get_pk_at_a(cosmo, a)
 
     @abstractmethod
     def _get_pk2d(self, cosmo):
