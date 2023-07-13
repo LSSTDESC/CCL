@@ -16,7 +16,7 @@ import numpy as np
 
 from . import (
     CCLError, CCLObject, CCLParameters, CosmologyParams,
-    DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, cache, check, lib,
+    DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, check, lib,
     unlock_instance, emulators)
 from . import physical_constants as const
 
