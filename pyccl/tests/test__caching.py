@@ -41,6 +41,7 @@ def test_caching_switches():
     assert not ccl.Caching._enabled
     ccl.Caching.enable()
     assert ccl.Caching._enabled
+    ccl.Caching.disable()
 
 
 def test_times():
@@ -58,6 +59,7 @@ def test_times():
     t1 = np.array([timeit_(s8) for s8 in s8_arr])
     t2 = np.array([timeit_(s8) for s8 in s8_arr])
     assert np.all(t1/t2 > SPEEDUP)
+    ccl.Caching.disable()
 
 
 def test_caching_fifo():
