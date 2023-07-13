@@ -36,7 +36,6 @@ class MatterPowerSpectra(Enum):
     LINEAR = "linear"
     HALOFIT = "halofit"
     HALOMODEL = "halomodel"
-    EMU = "emu"
     CAMB = "camb"
     CALCULATOR = "calculator"
     EMULATOR_NLPK = "emulator"
@@ -59,15 +58,9 @@ matter_power_spectrum_types = {
     'halo_model': lib.halo_model,
     'halofit': lib.halofit,
     'linear': lib.linear,
-    'emu': lib.emu,
     'calculator': lib.pknl_from_input,
     'camb': lib.pknl_from_boltzman,
     'emulator': lib.emulator_nlpk
-}
-
-emulator_neutrinos_types = {
-    'strict': lib.emu_strict,
-    'equalize': lib.emu_equalize
 }
 
 _TOP_LEVEL_MODULES = ("",)
@@ -182,8 +175,8 @@ class Cosmology(CCLObject):
         matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
             The matter power spectrum to use. Defaults to 'halofit'.
         extra_parameters (:obj:`dict`): Dictionary holding extra
-            parameters. Currently supports extra parameters for CAMB, as well
-            as CosmicEmu. Details described below. Defaults to None.
+            parameters. Currently supports extra parameters for CAMB.
+            Details described below. Defaults to None.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is 0.71611.
 
@@ -202,19 +195,6 @@ class Cosmology(CCLObject):
 
         extra_parameters = {"camb": {"halofit_version": "mead2020_feedback",
                                      "HMCode_logT_AGN": 7.8}}
-
-    Currently supported extra parameters for CosmicEmu are:
-
-        * `neutrinos`: governing the treatment of unequal neutrinos
-          Options are: 'strict', which will raise an error and quit if the
-          user fails to pass either a set of three equal masses or a sum with
-          mass_split = 'equal', and 'equalize', which will redistribute
-          masses to be equal right before calling the emulator but results in
-          internal inconsistencies. Defaults to 'strict'.
-
-    These parameters are passed in a :obj:`dict` to `extra_parameters` as::
-
-        extra_parameters = {"emu": {"neutrinos", "equal"}}
     """ # noqa
     from ._core.repr_ import build_string_Cosmology as __repr__
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
@@ -235,8 +215,6 @@ class Cosmology(CCLObject):
             Neff = 3.044
 
         extra_parameters = extra_parameters or {}
-        if "emu" not in extra_parameters:
-            extra_parameters["emu"] = {"neutrinos": "strict"}
 
         # initialise linear Pk emulators if needed
         self.lin_pk_emu = None
@@ -331,9 +309,8 @@ class Cosmology(CCLObject):
 
         This function builds C ccl_configuration struct. This structure
         controls which various approximations are used for the transfer
-        function, matter power spectrum, baryonic effect in the matter
-        power spectrum, mass function, halo concentration relation, and
-        neutrino effects in the emulator.
+        function, matter power spectrum, and baryonic effect in the matter
+        power spectrum.
 
         It also does some error checking on the inputs to make sure they
         are valid and physically consistent.
@@ -349,8 +326,6 @@ class Cosmology(CCLObject):
         config.transfer_function_method = tf
         mps = matter_power_spectrum_types[matter_power_spectrum]
         config.matter_power_spectrum_method = mps
-        ent = extra_parameters["emu"]["neutrinos"]
-        config.emulator_neutrinos_method = emulator_neutrinos_types[ent]
 
         # Store ccl_configuration for later access
         self._config = config
@@ -568,7 +543,7 @@ class Cosmology(CCLObject):
         # Populate power spectrum splines
         mps = self._config_init_kwargs['matter_power_spectrum']
         # needed for halofit, halomodel and linear options
-        if (mps not in ['emu', 'emulator']) and (mps is not None):
+        if (mps not in ['emulator']) and (mps is not None):
             self.compute_linear_power()
 
         if mps == "camb" and self.has_nonlin_power:
@@ -578,8 +553,6 @@ class Cosmology(CCLObject):
         if mps == 'halofit':
             pkl = self._pk_lin[DEFAULT_POWER_SPECTRUM]
             pk = pkl.apply_halofit(self)
-        elif mps == 'emu':
-            pk = Pk2D.from_model(self, model='emu')
         elif mps == 'linear':
             pk = self._pk_lin[DEFAULT_POWER_SPECTRUM]
         elif mps == 'emulator':

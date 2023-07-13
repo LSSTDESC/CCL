@@ -23,7 +23,7 @@ set(CCL_SRC
     src/ccl_eh.c src/ccl_musigma.c
     src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c
     src/ccl_neutrinos.c
-    src/ccl_emu17.c src/ccl_correlation.c
+    src/ccl_correlation.c
     src/ccl_halofit.c
     src/ccl_tracers.c
     src/ccl_mass_conversion.c
