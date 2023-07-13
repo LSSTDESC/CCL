@@ -3,6 +3,7 @@ import pytest
 import pyccl as ccl
 
 EMU_TOLERANCE = 3.0E-2
+cemu = ccl.CosmicemuMTIIPk('tot')
 
 
 @pytest.mark.parametrize('model', list(range(4)))
@@ -30,7 +31,7 @@ def test_emu_nu(model):
         Omega_g=0,
         Omega_k=0,
         transfer_function='boltzmann_camb',
-        matter_power_spectrum='emu',
+        matter_power_spectrum=cemu,
     )
 
     a = 1
@@ -62,7 +63,7 @@ def test_emu(model):
         Omega_g=0,
         Omega_k=0,
         transfer_function='bbks',
-        matter_power_spectrum='emu',
+        matter_power_spectrum=cemu,
     )
 
     a = 1
@@ -93,7 +94,7 @@ def test_emu_lin(model):
         Omega_g=0,
         Omega_k=0,
         transfer_function='boltzmann_camb',
-        matter_power_spectrum='emu',
+        matter_power_spectrum=cemu,
     )
 
     a = 1
