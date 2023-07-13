@@ -64,6 +64,7 @@ def test_times():
 
 def test_caching_fifo():
     """Test First-In-First-Out retention policy."""
+    ccl.Caching.enable()
     # To save time, we test caching by limiting the maximum cache size
     # from 64 (default) to 3. We cache Comologies with different sigma8.
     # By now, the caching repo will be full.
@@ -78,6 +79,7 @@ def test_caching_fifo():
     cosmo_create_and_compute_linpow(0.42)
     t2 = timeit_(sigma8=s8_arr[0])  # cached again
     assert t2/t1 > SPEEDUP
+    ccl.Caching.disable()
 
 
 def test_caching_lru():
@@ -85,6 +87,7 @@ def test_caching_lru():
     # By now the stored Cosmologies are { s8_arr[2], 0.42, s8_arr[0]] }
     # from oldest to newest. Here, we show that we can retain s8_arr[2]
     # simply by using it and moving it to the end of the stack.
+    ccl.Caching.enable()
     ccl.Caching.policy = "lru"
 
     t1 = timeit_(sigma8=s8_arr[2])  # moves to the end of the stack
@@ -92,6 +95,7 @@ def test_caching_lru():
     cosmo_create_and_compute_linpow(0.43)
     t2 = timeit_(sigma8=s8_arr[2])  # retrieved
     assert np.abs(np.log10(t2/t1)) < 1.0
+    ccl.Caching.disable()
 
 
 def test_caching_lfu():
@@ -99,6 +103,7 @@ def test_caching_lfu():
     # Now, the stored Cosmologies are { s8_arr[0], 0.43, s8_arr[2] }
     # from oldest to newest. Here, we call each a different number of times
     # and we check that the one used the least (0.43) is discarded.
+    ccl.Caching.enable()
     ccl.Caching.policy = "lfu"
 
     t1 = timeit_(sigma8=0.43)  # increments counter by 1
@@ -108,6 +113,7 @@ def test_caching_lfu():
     cosmo_create_and_compute_linpow(0.44)
     t2 = timeit_(sigma8=0.43)  # cached again
     assert t2/t1 > SPEEDUP
+    ccl.Caching.disable()
 
 
 def test_cache_info():
