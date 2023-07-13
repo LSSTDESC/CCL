@@ -53,7 +53,9 @@ class CosmicemuMTIVPk(EmulatorPk):
         h = cosmo['h']
         omega_m = cosmo['Omega_m']*h**2
         omega_b = cosmo['Omega_b']*h**2
-        sigma8 = cosmo.sigma8()
+        sigma8 = cosmo['sigma8']
+        if np.isnan(sigma8):
+            raise ValueError("sigma8 must be provided to use CosmicEmu")
         wtild = (-cosmo['w0']-cosmo['wa'])**0.25
         omega_nu = cosmo.omega_x(1.0, 'neutrinos_massive')*h**2
         return np.array([omega_m, omega_b, sigma8, h,
