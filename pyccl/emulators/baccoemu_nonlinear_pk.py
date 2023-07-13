@@ -18,8 +18,8 @@ class BaccoemuNonlinear(EmulatorPk):
     a locally saved baccoemu version, the path can be specified with these two
     keyword arguments.
 
-    See https://arxiv.org/pdf/2004.06245.pdf
-    and https://bacco.dipc.org/emulator.html
+    See `Angulo et al. 2020 <https://arxiv.org/pdf/2004.06245.pdf>`_
+    and https://bacco.dipc.org/emulator.html.
 
     Args:
         nonlinear_emu_path (:obj:`str`): path to a folder containing a

@@ -10,6 +10,24 @@ from . import EmulatorPk
 
 
 class CosmicemuMTIVPk(EmulatorPk):
+    """ Nonlinear power spectrum emulator for CosmicEmu (Mira-Titan IV,
+    2022 version).
+
+    This is an emulator of the non-linear matter power spectrum from
+    N-body simulations, as a function of 8 cosmological parameters:
+    (:math:`\\omega_m`, :math:`\\omega_b`, :math:`\\sigma_8`,
+    :math:`n_s`, :math:`h`, :math:`w_0`, :math:`w_a`, and
+    :math:`\\omega_\\nu`). The power spectrum is interpolated in this
+    parameter space at a fixed grid of redshifts and wavenumbers.
+
+    See `Moran et al. 2022 <https://arxiv.org/abs/2207.12345>`_.
+    and https://github.com/lanl/CosmicEmu.
+
+    Args:
+        kind (:obj:`str`): type of matter power spectrum to use.
+            Options are `'tot'` (for the total matter power spectrum)
+            or `'cb'` (for the CDM+baryons power spectrum).
+    """
     def __init__(self, kind='tot'):
         data_path = os.path.join(os.path.dirname(
             os.path.abspath(inspect.stack()[0][1])), 'data')
@@ -50,6 +68,8 @@ class CosmicemuMTIVPk(EmulatorPk):
                        'w_0', 'wtild', 'omega_nu']
 
     def _cosmo_to_x(self, cosmo):
+        # Translates cosmology to an array of parameters used
+        # by CosmicEmu.
         h = cosmo['h']
         omega_m = cosmo['Omega_m']*h**2
         omega_b = cosmo['Omega_b']*h**2
@@ -62,7 +82,10 @@ class CosmicemuMTIVPk(EmulatorPk):
                          cosmo['n_s'], cosmo['w0'], wtild, omega_nu])
 
     def _get_pk_full(self, cosmo):
+        # Computes power spectrum at full grid of redshifts and k
+        # for this cosmology.
         xstar = self._cosmo_to_x(cosmo)
+        # Check for out of bounds
         out_of_bounds = (xstar < self.xmin) | (xstar > self.xmax)
         if np.any(out_of_bounds):
             for ip in np.where(out_of_bounds)[0]:
@@ -70,10 +93,13 @@ class CosmicemuMTIVPk(EmulatorPk):
                 pmin = self.xmin[ip]
                 pmax = self.xmax[ip]
                 raise ValueError(f'{pname} must be between {pmin} and {pmax}')
+        # Standardize
         xstarstd = (xstar-self.xmin)/self.xrange
+        # Compute covariance with new point
         Sigmastar = np.exp(-np.sum(self.beta[:, None, :] *
                                    ((self.x-xstarstd[None, :])**2)[None, :, :],
                                    axis=-1))/self.lamz[:, None]
+        # Project and reshape
         wstar = np.sum(Sigmastar*self.KrigBasis, axis=-1)
         ystaremu = (np.dot(self.K, wstar)*self.sd+self.mean).reshape([self.nz,
                                                                       self.nk])

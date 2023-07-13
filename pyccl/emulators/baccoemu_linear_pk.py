@@ -13,7 +13,7 @@ class BaccoemuLinear(EmulatorPk):
     parameters (omega_cold, omega_baryons, A_s or sigma8_cold, ns, h, Mnu,
     w0, wa) and the scale factor.
 
-    See https://arxiv.org/abs/2104.14568
+    See `Arico et al. 2021 <https://arxiv.org/abs/2104.14568>`_
     and https://bacco.dipc.org/emulator.html
     """
     def __init__(self):
