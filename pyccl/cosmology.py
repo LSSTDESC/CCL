@@ -476,7 +476,6 @@ class Cosmology(CCLObject):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
-    @cache(maxsize=3)
     def _compute_linear_power(self):
         """Return the linear power spectrum."""
         self.compute_growth()
@@ -535,7 +534,6 @@ class Cosmology(CCLObject):
             return
         self._pk_lin[DEFAULT_POWER_SPECTRUM] = self._compute_linear_power()
 
-    @cache(maxsize=3)
     def _compute_nonlin_power(self):
         """Return the non-linear power spectrum."""
         self.compute_distances()

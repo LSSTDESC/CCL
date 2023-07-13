@@ -20,6 +20,7 @@ def get_cosmo(sigma8):
                          sigma8=sigma8)
 
 
+@ccl.cache(maxsize=3)
 def cosmo_create_and_compute_linpow(sigma8):
     cosmo = get_cosmo(sigma8)
     cosmo.compute_linear_power()
@@ -69,7 +70,7 @@ def test_caching_fifo():
     # from 64 (default) to 3. We cache Comologies with different sigma8.
     # By now, the caching repo will be full.
     ccl.Caching.maxsize = NUM
-    func = ccl.Cosmology._compute_linear_power
+    func = cosmo_create_and_compute_linpow
     assert len(func.cache_info._caches) >= ccl.Caching.maxsize
 
     ccl.Caching.policy = "fifo"
@@ -118,7 +119,7 @@ def test_caching_lfu():
 
 def test_cache_info():
     """Test that the CacheInfo repr gives us the expected information."""
-    info = ccl.Cosmology._compute_linear_power.cache_info
+    info = cosmo_create_and_compute_linpow.cache_info
     for text in ["maxsize", "policy", "hits", "misses", "current_size"]:
         assert text in repr(info)
 
@@ -132,7 +133,7 @@ def test_caching_reset():
     assert ccl.Caching.maxsize == ccl.Caching._default_maxsize
     assert ccl.Caching.policy == ccl.Caching._default_policy
     ccl.Caching.clear_cache()
-    func = ccl.Cosmology._compute_linear_power
+    func = cosmo_create_and_compute_linpow
     assert len(func.cache_info._caches) == 0
 
 
