@@ -9,7 +9,7 @@ Submodules
 
    pyccl.emulators.baccoemu_linear_pk
    pyccl.emulators.baccoemu_nonlinear_pk
-   pyccl.emulators.cosmicemu_MTIV_pk
+   pyccl.emulators.cosmicemu_pk
    pyccl.emulators.emu_base
 
 Module contents

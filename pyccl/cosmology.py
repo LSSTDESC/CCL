@@ -240,13 +240,13 @@ class Cosmology(CCLObject):
 
         # initialise linear Pk emulators if needed
         self.lin_pk_emu = None
-        if emulators.EmulatorPk in type(transfer_function).__bases__:
+        if isinstance(transfer_function, emulators.EmulatorPk):
             self.lin_pk_emu = transfer_function
             transfer_function = 'emulator'
 
         # initialise nonlinear Pk emulators if needed
         self.nl_pk_emu = None
-        if emulators.EmulatorPk in type(matter_power_spectrum).__bases__:
+        if isinstance(matter_power_spectrum, emulators.EmulatorPk):
             self.nl_pk_emu = matter_power_spectrum
             matter_power_spectrum = 'emulator'
 
