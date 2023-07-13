@@ -1,5 +1,5 @@
 """Config file for pytest. Allow caching for faster test completion.
-`$ pytest tests/ --use-cache`
+`$ pytest tests/`
 """
 from .test_cclobject import all_subclasses, init_decorator
 import pyccl

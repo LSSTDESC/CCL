@@ -11,6 +11,9 @@ def test_cosmicemu_smoke(cemu):
     cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum=cemu)
     k, pk = cemu.get_pk_at_a(cosmo, 1.0)
     pk2 = cosmo.nonlin_matter_power(k, 1.0)
+    print(pk[:10])
+    print(pk2[:10])
+    assert False
     assert np.allclose(pk, pk2, atol=0, rtol=1E-6)
 
 
