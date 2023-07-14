@@ -20,7 +20,7 @@ def get_bm(cosmo, kind):
     f.close()
     os.system(f'./P_{kind}/emu.exe')
     for i in range(2):
-        os.system(f'mv EMU{i}.txt ../../{cosmoname}_{kind}_{i}.txt')
+        os.system(f'mv EMU{i}.txt ../../{cosmoname}_MTII_{kind}_{i}.txt')
 
 get_bm(cosmo1, 'tot')
 get_bm(cosmo1, 'cb')

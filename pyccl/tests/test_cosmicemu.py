@@ -2,17 +2,20 @@ import numpy as np
 import pyccl as ccl
 import pytest
 
-cemu = ccl.CosmicemuMTIVPk('tot')
+cemu_iv = ccl.CosmicemuMTIVPk('tot')
+cemu_ii = ccl.CosmicemuMTIIPk('tot')
 
 
-def test_cosmicemu_smoke():
+@pytest.mark.parametrize('cemu', [cemu_ii, cemu_iv])
+def test_cosmicemu_smoke(cemu):
     cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum=cemu)
     k, pk = cemu.get_pk_at_a(cosmo, 1.0)
     pk2 = cosmo.nonlin_matter_power(k, 1.0)
     assert np.allclose(pk, pk2, atol=0, rtol=1E-6)
 
 
-def test_cosmicemu_As_raises():
+@pytest.mark.parametrize('cemu', [cemu_ii, cemu_iv])
+def test_cosmicemu_As_raises(cemu):
     cosmo = ccl.Cosmology(Omega_c=0.25,
                           Omega_b=0.05,
                           h=0.67, n_s=0.96,
@@ -22,7 +25,8 @@ def test_cosmicemu_As_raises():
         cemu.get_pk_at_a(cosmo, 1.0)
 
 
-def test_cosmicemu_outbound():
+@pytest.mark.parametrize('cemu', [cemu_ii, cemu_iv])
+def test_cosmicemu_outbound(cemu):
     cosmo = ccl.Cosmology(Omega_c=0.25,
                           Omega_b=0.05,
                           h=0.67, n_s=0.96,
