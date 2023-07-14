@@ -135,7 +135,7 @@ def test_empirical_smoke(prof_class):
         smoke_assert_prof_real(p, method='_cumul2d_analytic')
     else:
         p = prof_class(mass_def=c.mass_def, concentration=c)
-        smoke_assert_prof_real(p, method='_projected_integrate')
+        smoke_assert_prof_real(p, method='_projected_quad')
 
     p = prof_class(mass_def=c.mass_def, concentration=c)
     smoke_assert_prof_real(p, method='real')
@@ -556,11 +556,11 @@ def test_einasto_projected_accuracy():
     # projected profile from numerical integration
     p1 = ccl.halos.HaloProfileEinasto(mass_def='200c',
                                       concentration=cM, truncated=True,
-                                      projected_integrate=True)
+                                      projected_quad=True)
     # FFTLog
     p2 = ccl.halos.HaloProfileEinasto(mass_def='200c',
                                       concentration=cM, truncated=True,
-                                      projected_integrate=False)
+                                      projected_quad=False)
 
     M = 1E14
     a = 0.5

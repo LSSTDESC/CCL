@@ -38,7 +38,7 @@ class HaloProfileEinasto(HaloProfileMatter):
             concentration-mass relation to use with this profile.
         truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
-        projected_integrate (:obj:`bool`): set to ``True`` to calculate the
+        projected_quad (:obj:`bool`): set to ``True`` to calculate the
             projected profile with numerical integration.
         alpha (:obj:`float` or :obj:`str`): :math:`\\alpha` parameter, or
             set to ``'cosmo'`` to calculate the value from cosmology.
@@ -48,13 +48,13 @@ class HaloProfileEinasto(HaloProfileMatter):
 
     def __init__(self, *, mass_def, concentration,
                  truncated=False,
-                 projected_integrate=False,
+                 projected_quad=False,
                  alpha='cosmo'):
         self.truncated = truncated
-        self.projected_integrate = projected_integrate
+        self.projected_quad = projected_quad
         self.alpha = alpha
-        if projected_integrate:
-            self._projected = self._projected_integrate
+        if projected_quad:
+            self._projected = self._projected_quad
         super().__init__(mass_def=mass_def, concentration=concentration)
         self._to_virial_mass = mass_translator(
             mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
@@ -114,7 +114,7 @@ class HaloProfileEinasto(HaloProfileMatter):
             prof = np.squeeze(prof, axis=0)
         return prof
 
-    def _projected_integrate(self, cosmo, r, M, a):
+    def _projected_quad(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
         M_use = np.atleast_1d(M)
 
