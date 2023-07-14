@@ -1,7 +1,6 @@
 __all__ = ("ConcentrationBhattacharya13",)
 
-from ... import lib
-from . import Concentration
+from . import Concentration, get_delta_c
 
 
 class ConcentrationBhattacharya13(Concentration):
@@ -32,8 +31,7 @@ class ConcentrationBhattacharya13(Concentration):
 
     def _concentration(self, cosmo, M, a):
         gz = cosmo.growth_factor(a)
-        status = 0
-        delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
+        delta_c = get_delta_c(cosmo, a, kind='NakamuraSuto97')
         sig = cosmo.sigmaM(M, a)
         nu = delta_c / sig
         return self.A * gz**self.B * nu**self.C

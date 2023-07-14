@@ -38,6 +38,7 @@ from .tk3d import *
 from .boltzmann import *
 from .baryons import *
 from .neutrinos import *
+from .emulators import *
 
 from . import halos
 from . import nl_pt

@@ -1,7 +1,6 @@
 __all__ = ("HaloBiasSheth99",)
 
-from ... import check, lib
-from . import HaloBias
+from . import HaloBias, get_delta_c
 
 
 class HaloBiasSheth99(HaloBias):
@@ -40,11 +39,9 @@ class HaloBiasSheth99(HaloBias):
 
     def _get_bsigma(self, cosmo, sigM, a):
         if self.use_delta_c_fit:
-            status = 0
-            delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-            check(status, cosmo=cosmo)
+            delta_c = get_delta_c(cosmo, a, kind='NakamuraSuto97')
         else:
-            delta_c = 1.68647
+            delta_c = get_delta_c(cosmo, a, kind='EdS')
 
         nu = delta_c / sigM
         anu2 = self.a * nu**2

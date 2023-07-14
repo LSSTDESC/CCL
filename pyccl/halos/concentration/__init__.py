@@ -1,4 +1,4 @@
-from ..halo_model_base import Concentration
+from ..halo_model_base import Concentration, get_delta_c
 from .bhattacharya13 import *
 from .constant import *
 from .diemer15 import *

@@ -8,7 +8,7 @@ MESSAGE( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 # Adding customized cmake module
 list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-project(ccl VERSION 2.0.0)
+project(ccl VERSION 3.0.0)
 
 # Uncomment to get detailed build outputs
 # set( CMAKE_VERBOSE_MAKEFILE on )
@@ -23,7 +23,7 @@ set(CCL_SRC
     src/ccl_eh.c src/ccl_musigma.c
     src/ccl_utils.c src/ccl_cls.c src/ccl_massfunc.c
     src/ccl_neutrinos.c
-    src/ccl_emu17.c src/ccl_correlation.c
+    src/ccl_correlation.c
     src/ccl_halofit.c
     src/ccl_tracers.c
     src/ccl_mass_conversion.c
