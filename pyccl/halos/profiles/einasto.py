@@ -125,15 +125,25 @@ class HaloProfileEinasto(HaloProfileMatter):
 
         alpha = self._get_alpha(cosmo, M_use, a)
 
-        def integrand(z):
-            x = np.sqrt(z**2. + r_use[None, :]**2.) / R_s[:, None]
-            return np.exp(-2. * (x**alpha[:, None] - 1.) / alpha[:, None])
-        prof = quad_vec(integrand, 0., np.inf)[0]
-
-        prof *= 2 * self._norm(M_use, R_s, c_M, alpha)[:, None]
+        def integrand(z, R, R_s, alpha):
+            x = np.sqrt(z**2. + R**2.) / R_s
+            return np.exp(-2. * (x**alpha - 1.) / alpha)
 
         if self.truncated:
-            prof[r_use[None, :] > R_M[:, None]] = 0
+            untruncated = r_use[None, :] < R_M[:, None]
+            prof = np.zeros(np.broadcast(r_use[None, :], R_M[:, None]).shape)
+            prof[untruncated] = quad_vec(
+                integrand, 0., np.inf,
+                args=(r_use[None, :][untruncated],
+                      R_s[:, None],
+                      alpha[:, None])
+            )[0].flatten()
+        else:
+            prof, _ = quad_vec(
+                integrand, 0., np.inf,
+                args=(r_use[None, :], R_s[:, None], alpha[:, None]))
+
+        prof *= 2 * self._norm(M_use, R_s, c_M, alpha)[:, None]
 
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)

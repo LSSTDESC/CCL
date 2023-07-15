@@ -553,13 +553,21 @@ def test_hernquist_cumul2d_accuracy(fourier_analytic):
 
 def test_einasto_projected_accuracy():
     cM = ccl.halos.ConcentrationDuffy08(mass_def='200c')
-    # projected profile from numerical integration
+    # projected profile from quad
     p1 = ccl.halos.HaloProfileEinasto(mass_def='200c',
+                                      concentration=cM, truncated=False,
+                                      projected_quad=True)
+    # truncated projected profile from quad
+    p2 = ccl.halos.HaloProfileEinasto(mass_def='200c',
                                       concentration=cM, truncated=True,
                                       projected_quad=True)
-    # FFTLog
-    p2 = ccl.halos.HaloProfileEinasto(mass_def='200c',
-                                      concentration=cM,
+    # projected profile from FFTLog
+    p3 = ccl.halos.HaloProfileEinasto(mass_def='200c',
+                                      concentration=cM, truncated=False,
+                                      projected_quad=False)
+    # truncated projected profile from FFTLog
+    p4 = ccl.halos.HaloProfileEinasto(mass_def='200c',
+                                      concentration=cM, truncated=True,
                                       projected_quad=False)
 
     M = 1E14
@@ -567,9 +575,15 @@ def test_einasto_projected_accuracy():
     rt = np.logspace(-3, 2, 1024)
     srt1 = p1.projected(COSMO, rt, M, a)[:500]
     srt2 = p2.projected(COSMO, rt, M, a)[:500]
+    srt3 = p3.projected(COSMO, rt, M, a)[:500]
+    srt4 = p4.projected(COSMO, rt, M, a)[:500]
 
-    res2 = np.fabs(srt2/srt1-1)
+    res1 = np.fabs(srt2/srt1-1)
+    res2 = np.fabs(srt3/srt1-1)
+    res3 = np.fabs(srt4/srt1-1)
+    assert np.all(res1 < 2e-12)
     assert np.all(res2 < 6e-5)
+    assert np.all(res3 < 6e-2)
 
 
 def test_HaloProfile_abstractmethods():
