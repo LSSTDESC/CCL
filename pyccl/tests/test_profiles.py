@@ -559,7 +559,7 @@ def test_einasto_projected_accuracy():
                                       projected_quad=True)
     # FFTLog
     p2 = ccl.halos.HaloProfileEinasto(mass_def='200c',
-                                      concentration=cM, truncated=True,
+                                      concentration=cM,
                                       projected_quad=False)
 
     M = 1E14
@@ -569,7 +569,7 @@ def test_einasto_projected_accuracy():
     srt2 = p2.projected(COSMO, rt, M, a)[:500]
 
     res2 = np.fabs(srt2/srt1-1)
-    assert np.all(res2 < 6e-2)
+    assert np.all(res2 < 6e-5)
 
 
 def test_HaloProfile_abstractmethods():
