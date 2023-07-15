@@ -134,6 +134,10 @@ def test_empirical_smoke(prof_class):
         smoke_assert_prof_real(p, method='_projected_analytic')
         smoke_assert_prof_real(p, method='_cumul2d_analytic')
     else:
+        with pytest.raises(ValueError):
+            p = prof_class(mass_def=c.mass_def, concentration=c,
+                           projected_quad=True,
+                           truncated=True)
         p = prof_class(mass_def=c.mass_def, concentration=c)
         smoke_assert_prof_real(p, method='_projected_quad')
 
@@ -557,16 +561,12 @@ def test_einasto_projected_accuracy():
     p1 = ccl.halos.HaloProfileEinasto(mass_def='200c',
                                       concentration=cM, truncated=False,
                                       projected_quad=True)
-    # truncated projected profile from quad
-    p2 = ccl.halos.HaloProfileEinasto(mass_def='200c',
-                                      concentration=cM, truncated=True,
-                                      projected_quad=True)
     # projected profile from FFTLog
-    p3 = ccl.halos.HaloProfileEinasto(mass_def='200c',
+    p2 = ccl.halos.HaloProfileEinasto(mass_def='200c',
                                       concentration=cM, truncated=False,
                                       projected_quad=False)
     # truncated projected profile from FFTLog
-    p4 = ccl.halos.HaloProfileEinasto(mass_def='200c',
+    p3 = ccl.halos.HaloProfileEinasto(mass_def='200c',
                                       concentration=cM, truncated=True,
                                       projected_quad=False)
 
@@ -576,14 +576,11 @@ def test_einasto_projected_accuracy():
     srt1 = p1.projected(COSMO, rt, M, a)[:500]
     srt2 = p2.projected(COSMO, rt, M, a)[:500]
     srt3 = p3.projected(COSMO, rt, M, a)[:500]
-    srt4 = p4.projected(COSMO, rt, M, a)[:500]
 
     res1 = np.fabs(srt2/srt1-1)
     res2 = np.fabs(srt3/srt1-1)
-    res3 = np.fabs(srt4/srt1-1)
-    assert np.all(res1 < 2e-12)
-    assert np.all(res2 < 6e-5)
-    assert np.all(res3 < 6e-2)
+    assert np.all(res1 < 6e-5)
+    assert np.all(res2 < 6e-2)
 
 
 def test_HaloProfile_abstractmethods():
