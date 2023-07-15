@@ -54,7 +54,7 @@ def nonlimber_FKEM(
     """
 
     kpow = 3
-    k_low = 1.0e-3
+    k_low = 1.0e-5
     cells = np.zeros(len(ls))
     kernels_t1, chis_t1 = clt1.get_kernel()
     bessels_t1 = clt1.get_bessel_derivative()
@@ -76,9 +76,12 @@ def nonlimber_FKEM(
         status = lib.add_cl_tracer_to_collection(t2, t, status)
         check(status)
     pk = cosmo.get_linear_power(name=p_of_k_a)
-
-    chi_min = np.max([np.min(chis_t1), np.min(chis_t2)])
-    chi_max = np.min([np.max(chis_t1), np.max(chis_t2)])
+    min_chis_t1 = np.min([np.min(i) for i in chis_t1])
+    min_chis_t2 = np.min([np.min(i) for i in chis_t2])
+    max_chis_t1 = np.max([np.max(i) for i in chis_t1])
+    max_chis_t2 = np.max([np.max(i) for i in chis_t2])
+    chi_min = np.min([min_chis_t1, min_chis_t2])
+    chi_max = np.max([max_chis_t1, max_chis_t2])
     Nchi = min(min(len(i) for i in chis_t1), min(len(i) for i in chis_t2))
     """zero chi_min will result in a divide-by-zero error.
     If it is zero, we set it to something very small
@@ -158,6 +161,7 @@ def nonlimber_FKEM(
         )
         check(status, cosmo=cosmo)
 
+        fks_1, transfers_t1 = [], []
         for i in range(len(kernels_t1)):
             # calls to fftlog to perform integration over chi integrals
             nu, deriv, plaw = get_general_params(bessels_t1[i])
@@ -170,35 +174,37 @@ def nonlimber_FKEM(
                 float(deriv),
                 float(plaw),
             )
-            transfer_t1 = np.array(clt1.get_transfer(np.log(k), avg_a1))[i]
+            fks_1.append(fk1)
+        transfers_t1 = np.array(clt1.get_transfer(np.log(k), avg_a1))
+        fks_2, transfers_t2 = [], []
+
+        if clt1 != clt2:
             for j in range(len(kernels_t2)):
                 # calls to fftlog to perform integration over chi integrals
-                if clt1 != clt2:
-                    nu2, deriv2, plaw2 = get_general_params(bessels_t2[j])
-                    k, fk2 = _fftlog_transform_general(
-                        chi_logspace_arr,
-                        fchi2_arr[j],
-                        float(ell),
-                        nu2,
-                        1,
-                        float(deriv2),
-                        float(plaw2),
-                    )
-                    transfer_t2 = np.array(
-                        clt2.get_transfer(np.log(k), avg_a2)
-                    )[j]
-                else:
-                    fk2 = fk1
-                    transfer_t2 = transfer_t1
+                nu2, deriv2, plaw2 = get_general_params(bessels_t2[j])
+                k, fk2 = _fftlog_transform_general(
+                    chi_logspace_arr,
+                    fchi2_arr[j],
+                    float(ell),
+                    nu2,
+                    1,
+                    float(deriv2),
+                    float(plaw2),
+                )
+                fks_2.append(fk2)
+            transfers_t2 = np.array(clt2.get_transfer(np.log(k), avg_a2))
+        else:
+            fks_2 = fks_1
+            transfers_t2 = transfers_t1
 
-                # sum contributions of all components of the tracers
-                # to calculate non-limber portion of the cl's
+        for i in range(len(kernels_t1)):
+            for j in range(len(kernels_t2)):
                 cls_nonlimber_lin += (
                     np.sum(
-                        fk1
-                        * transfer_t1
-                        * fk2
-                        * transfer_t2
+                        fks_1[i]
+                        * transfers_t1[i]
+                        * fks_2[j]
+                        * transfers_t2[j]
                         * k**kpow
                         * pk(k, 1.0, cosmo)
                     )
