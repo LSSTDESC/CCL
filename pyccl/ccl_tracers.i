@@ -203,7 +203,7 @@ ccl_cl_tracer_t *cl_tracer_t_new_wrapper(ccl_cosmology *cosmo,
   }
   if(is_factorizable) {
     fka_arr=NULL;
-    if(is_k_constant) { 
+    if(is_k_constant) {
       lk_ka=NULL;
       fk_arr=NULL;
     }
