@@ -5,6 +5,8 @@ __all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
 from functools import cached_property
 
 import numpy as np
+from scipy.optimize import fsolve
+from scipy.special import gamma, gammainc
 
 from .. import CCLAutoRepr, CCLNamedClass, lib, check
 from . import Concentration, HaloBias, MassFunc
@@ -68,6 +70,65 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     if np.isscalar(c_old):
         return c_new[0]
     return c_new
+
+def convert_concentration_2(cosmo, *, c_old, Delta_old, Delta_new,
+                          model="NFW", alpha=None):
+    """ Computes the concentration parameter for a different mass definition.
+    This is done assuming an NFW profile. The output concentration ``c_new`` is
+    found by solving the equation:
+
+    .. math::
+        f(c_{\\rm old}) \\Delta_{\\rm old} = f(c_{\\rm new}) \\Delta_{\\rm new}
+
+    where
+
+    .. math::
+        f(x) = \\frac{x^3}{\\log(1+x) - x/(1+x)}.
+
+    Args:
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        c_old (:obj:`float` or `array`): concentration to translate from.
+        Delta_old (:obj:`float`): Delta parameter associated to the input
+            concentration. See description of the :class:`MassDef` class.
+        Delta_new (:obj:`float`): Delta parameter associated to the output
+            concentration.
+        model(:obj:`str`): Can be one of "NFW", "Einasto" or "Hernquist".
+            If `model="Einasto"`, `alpha` must be provided.
+        alpha: (:obj:`float`): Einasto alpha parameter.
+
+    Returns:
+        (:obj:`float` or `array`): concentration parameter for the new
+        mass definition.
+    """
+    if model == "NFW":
+        def f(c):
+            return c**3/(np.log(1.0+c) - c/(1.0+c))
+    elif model == "Einasto":
+        if alpha is None:
+            raise ValueError("`alpha` must be provided.")
+
+        def f(c):
+            return c**3 / (
+                gamma(3.0/alpha)*gammainc(3.0/alpha, 2.0/alpha*c**alpha))
+    elif model == "Hernquist":
+        def f(c):
+            return c**3/((c/(1.0+c))**2.0)
+    else:
+        raise ValueError(f"model {model} is not supported")
+
+    # Eq. to solve
+    def c_new(c_old):
+        def solve_c(c_new):
+            return f(c_new)*Delta_new - f(c_old)*Delta_old
+
+        # Iterate 2 times:
+        c = fsolve(func=solve_c, x0=c_old)
+        c = fsolve(func=solve_c, x0=c)
+        return c
+
+    if np.isscalar(c_old):
+        return c_new(c_old)[0]
+    return c_new(c_old)
 
 
 class MassDef(CCLAutoRepr, CCLNamedClass):
@@ -319,7 +380,8 @@ MassDefVir = MassDef("vir", "critical")
 MassDefFof = MassDef("fof", "matter")
 
 
-def mass_translator(*, mass_in, mass_out, concentration):
+def mass_translator(*, mass_in, mass_out, concentration,
+                    model="NFW", alpha=None):
     """Translate between mass definitions, assuming an NFW profile.
 
     Returns a function that can be used to translate between halo
@@ -361,7 +423,8 @@ def mass_translator(*, mass_in, mass_out, concentration):
         Om_out = cosmo.omega_x(a, mass_out.rho_type)
         D_out = mass_out.get_Delta(cosmo, a) * Om_out
         c_out = convert_concentration(
-            cosmo, c_old=c_in, Delta_old=D_in, Delta_new=D_out)
+            cosmo, c_old=c_in, Delta_old=D_in, Delta_new=D_out,
+            model=model, alpha=alpha)
         R_out = R_in * c_out/c_in
         return mass_out.get_mass(cosmo, R_out, a)
 
