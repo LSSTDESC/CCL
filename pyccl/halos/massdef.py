@@ -37,8 +37,7 @@ def mass2radius_lagrangian(cosmo, M):
 def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
                           model="NFW", alpha=None):
     """ Computes the concentration parameter for a different mass definition.
-    This is done assuming an NFW profile. The output concentration ``c_new`` is
-    found by solving the equation:
+    The output concentration ``c_new`` is found by solving the equation:
 
     .. math::
         f(c_{\\rm old}) \\Delta_{\\rm old} = f(c_{\\rm new}) \\Delta_{\\rm new}
