@@ -40,7 +40,6 @@
 #include "ccl_eh.h"
 #include "ccl_halofit.h"
 #include "ccl_musigma.h"
-#include "ccl_mass_conversion.h"
 
 CCL_BEGIN_DECLS
 /* add function and variable declarations here */
