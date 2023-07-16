@@ -26,7 +26,6 @@ set(CCL_SRC
     src/ccl_correlation.c
     src/ccl_halofit.c
     src/ccl_tracers.c
-    src/ccl_mass_conversion.c
     src/ccl_fftlog.c)
 
 # Defines list of CCL C test src files

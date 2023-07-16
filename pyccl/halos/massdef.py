@@ -8,7 +8,7 @@ import numpy as np
 from scipy.optimize import fsolve
 from scipy.special import gamma, gammainc
 
-from .. import CCLAutoRepr, CCLNamedClass, lib, check
+from .. import CCLAutoRepr, CCLNamedClass
 from . import Concentration, HaloBias, MassFunc
 
 
@@ -34,44 +34,7 @@ def mass2radius_lagrangian(cosmo, M):
     return R
 
 
-def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
-    """ Computes the concentration parameter for a different mass definition.
-    This is done assuming an NFW profile. The output concentration ``c_new`` is
-    found by solving the equation:
-
-    .. math::
-        f(c_{\\rm old}) \\Delta_{\\rm old} = f(c_{\\rm new}) \\Delta_{\\rm new}
-
-    where
-
-    .. math::
-        f(x) = \\frac{x^3}{\\log(1+x) - x/(1+x)}.
-
-    Args:
-        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-        c_old (:obj:`float` or `array`): concentration to translate from.
-        Delta_old (:obj:`float`): Delta parameter associated to the input
-            concentration. See description of the :class:`MassDef` class.
-        Delta_new (:obj:`float`): Delta parameter associated to the output
-            concentration.
-
-    Returns:
-        (:obj:`float` or `array`): concentration parameter for the new
-        mass definition.
-    """
-    status = 0
-    c_old_use = np.atleast_1d(c_old)
-    c_new, status = lib.convert_concentration_vec(cosmo.cosmo,
-                                                  Delta_old, c_old_use,
-                                                  Delta_new, c_old_use.size,
-                                                  status)
-    check(status, cosmo=cosmo)
-
-    if np.isscalar(c_old):
-        return c_new[0]
-    return c_new
-
-def convert_concentration_2(cosmo, *, c_old, Delta_old, Delta_new,
+def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
                           model="NFW", alpha=None):
     """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration ``c_new`` is
