@@ -382,7 +382,7 @@ def mass_translator(*, mass_in, mass_out, concentration,
             ``model="Einasto"``, ignored otherwise.
 
     Returns:
-        Function that ranslates between two masses. The returned function
+        Function that translates between two masses. The returned function
         ``f`` can be called as: ``f(cosmo, M, a)``, where
         ``cosmo`` is a :class:`~pyccl.cosmology.Cosmology` object, ``M``
         is a mass (or array of masses), and ``a`` is a scale factor.
