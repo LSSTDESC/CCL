@@ -72,7 +72,8 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
         model(:obj:`str`): Can be one of "NFW", "Einasto" or "Hernquist".
             If ``model="Einasto"``, ``alpha`` must be provided.
             Default: "NFW"
-        alpha: (:obj:`float`): Einasto slope parameter.
+        alpha: (:obj:`float`): Einasto slope parameter. Used only when
+            ``model="Einasto"``, ignored otherwise.
 
     Returns:
         (:obj:`float` or `array`): concentration parameter for the new
@@ -374,6 +375,11 @@ def mass_translator(*, mass_in, mass_out, concentration,
         concentration (:class:`~pyccl.halos.halo_model_base.Concentration` or :obj:`str`):
             concentration-mass relation to use for the mass conversion. It must
             be calibrated for masses using the ``mass_in`` definition.
+        model(:obj:`str`): Can be one of "NFW", "Einasto" or "Hernquist".
+            If ``model="Einasto"``, ``alpha`` must be provided.
+            Default: "NFW"
+        alpha: (:obj:`float`): Einasto slope parameter. Used only when
+            ``model="Einasto"``, ignored otherwise.
 
     Returns:
         Function that ranslates between two masses. The returned function
