@@ -129,12 +129,8 @@ class HaloProfileEinasto(HaloProfileMatter):
 
         alpha = self._get_alpha(cosmo, M_use, a)
 
-        def integrand(z, R, R_s, alpha):
-            x = np.sqrt(z**2. + R**2.) / R_s
-            return np.exp(-2. * (x**alpha - 1.) / alpha)
-
         prof, _ = quad_vec(
-            integrand, 0., np.inf,
+            self._projected_quad_integrand, 0., np.inf,
             args=(r_use[None, :], R_s[:, None], alpha[:, None]))
 
         prof *= 2 * self._norm(M_use, R_s, c_M, alpha)[:, None]
@@ -144,3 +140,7 @@ class HaloProfileEinasto(HaloProfileMatter):
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
+
+    def _projected_quad_integrand(self, z, R, R_s, alpha):
+        x = np.sqrt(z**2. + R**2.) / R_s
+        return np.exp(-2. * (x**alpha - 1.) / alpha)
