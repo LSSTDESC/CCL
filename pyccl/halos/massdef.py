@@ -43,10 +43,24 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
     .. math::
         f(c_{\\rm old}) \\Delta_{\\rm old} = f(c_{\\rm new}) \\Delta_{\\rm new}
 
-    where
+    where :math:`f(x)` for the different models are
+
+    NFW:
 
     .. math::
         f(x) = \\frac{x^3}{\\log(1+x) - x/(1+x)}.
+
+    Einasto: (:math:`\\gamma` is the lower incomplete gamma function,
+    :math:`\\alpha` is the Einasto slope parameter)
+
+    .. math::
+        f(x) =
+        \\frac{x^3}{\\gamma(\\frac{3}{\\alpha}, \\frac{2}{\\alpha}x^{\\alpha})}
+
+    Hernquist:
+
+    .. math::
+        f(x) = \\frac{x^3}{\\left(\\frac{x}{1+x}\\right)^2}
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
@@ -56,42 +70,43 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
         Delta_new (:obj:`float`): Delta parameter associated to the output
             concentration.
         model(:obj:`str`): Can be one of "NFW", "Einasto" or "Hernquist".
-            If `model="Einasto"`, `alpha` must be provided.
-        alpha: (:obj:`float`): Einasto alpha parameter.
+            If ``model="Einasto"``, ``alpha`` must be provided.
+            Default: "NFW"
+        alpha: (:obj:`float`): Einasto slope parameter.
 
     Returns:
         (:obj:`float` or `array`): concentration parameter for the new
         mass definition.
     """
     if model == "NFW":
-        def f(c):
-            return c**3/(np.log(1.0+c) - c/(1.0+c))
+        def f(x):
+            return x**3./(np.log(1.+x) - x/(1.+x))
     elif model == "Einasto":
         if alpha is None:
             raise ValueError("`alpha` must be provided.")
 
-        def f(c):
-            return c**3 / (
-                gamma(3.0/alpha)*gammainc(3.0/alpha, 2.0/alpha*c**alpha))
+        def f(x):
+            return x**3 / (
+                gamma(3./alpha)*gammainc(3./alpha, 2./alpha*x**alpha))
     elif model == "Hernquist":
-        def f(c):
-            return c**3/((c/(1.0+c))**2.0)
+        def f(x):
+            return x*(1.+x)**2.
     else:
         raise ValueError(f"model {model} is not supported")
 
-    # Eq. to solve
-    def c_new(c_old):
-        def solve_c(c_new):
+    def c_new(c_old, Delta_old, Delta_new):
+        # Equation to solve
+        def solve_c(c_new, c_old, Delta_old, Delta_new):
             return f(c_new)*Delta_new - f(c_old)*Delta_old
 
         # Iterate 2 times:
-        c = fsolve(func=solve_c, x0=c_old)
-        c = fsolve(func=solve_c, x0=c)
+        c = fsolve(func=solve_c, x0=c_old, args=(c_old, Delta_old, Delta_new))
+        c = fsolve(func=solve_c, x0=c, args=(c_old, Delta_old, Delta_new))
         return c
 
     if np.isscalar(c_old):
-        return c_new(c_old)[0]
-    return c_new(c_old)
+        return c_new(c_old, Delta_old, Delta_new)[0]
+    return c_new(c_old, Delta_old, Delta_new)
 
 
 class MassDef(CCLAutoRepr, CCLNamedClass):
