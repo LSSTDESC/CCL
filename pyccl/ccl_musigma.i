@@ -52,4 +52,6 @@ void Sig_MG_vec(ccl_cosmology * cosmo, double* a, int na, double* k, int nk,
      }
 }
 %}
+/* The directive gets carried between files, so we reset it at the end. */
+%feature("pythonprepend") %{ %}
 /* End of MG functions and unit tests */
