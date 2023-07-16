@@ -78,6 +78,7 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
         (:obj:`float` or `array`): concentration parameter for the new
         mass definition.
     """
+    c_in = np.atleast_1d(c_old)
     if model == "NFW":
         def f(x):
             return x**3./(np.log(1.+x) - x/(1.+x))
@@ -94,19 +95,19 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
     else:
         raise ValueError(f"model {model} is not supported")
 
-    def c_new(c_old, Delta_old, Delta_new):
+    def c_new(c_1, Delta_1, Delta_2):
         # Equation to solve
-        def solve_c(c_new, c_old, Delta_old, Delta_new):
-            return f(c_new)*Delta_new - f(c_old)*Delta_old
+        def solve_c(c_2, c_1, Delta_1, Delta_2):
+            return f(c_2)*Delta_2 - f(c_1)*Delta_1
 
         # Iterate 2 times:
-        c = fsolve(func=solve_c, x0=c_old, args=(c_old, Delta_old, Delta_new))
-        c = fsolve(func=solve_c, x0=c, args=(c_old, Delta_old, Delta_new))
+        c = fsolve(func=solve_c, x0=c_in, args=(c_in, Delta_old, Delta_new))
+        c = fsolve(func=solve_c, x0=c, args=(c_in, Delta_old, Delta_new))
         return c
 
     if np.isscalar(c_old):
-        return c_new(c_old, Delta_old, Delta_new)[0]
-    return c_new(c_old, Delta_old, Delta_new)
+        return c_new(c_in, Delta_old, Delta_new)[0]
+    return c_new(c_in, Delta_old, Delta_new)
 
 
 class MassDef(CCLAutoRepr, CCLNamedClass):

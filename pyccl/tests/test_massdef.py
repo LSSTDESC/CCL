@@ -23,13 +23,40 @@ def test_concentration_translation():
         COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new)
     assert np.all(c_old == c_new)
 
+    c_new = ccl.halos.massdef.convert_concentration(
+        COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
+        model="Einasto", alpha=0.25)
+    assert np.all(c_old == c_new)
+
+    c_new = ccl.halos.massdef.convert_concentration(
+        COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
+        model="Hernquist")
+    assert np.all(c_old == c_new)
+
+    with pytest.raises(ValueError):
+        c_new = ccl.halos.massdef.convert_concentration(
+            COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
+            model="Einasto")
+
     # Test against numerical solutions from Mathematica.
     Delta_new = 500.
     c_new = ccl.halos.massdef.convert_concentration(
-        COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new)
-    c_new_expected = np.array([6.12194, 6.82951, 7.53797])
-    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-4)
+        COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
+        model="NFW")
+    c_new_expected = np.array([6.12193624, 6.82950943, 7.53797157])
+    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-8)
 
+    c_new = ccl.halos.massdef.convert_concentration(
+        COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
+        model="Einasto", alpha=0.25)
+    c_new_expected = np.array([6.25446994, 6.98975397, 7.72676127])
+    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-8)
+
+    c_new = ccl.halos.massdef.convert_concentration(
+        COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
+        model="Hernquist")
+    c_new_expected = np.array([6.46322585, 7.19930924, 7.93552076])
+    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-8)
 
 def test_init_raises():
     with pytest.raises(ValueError):
