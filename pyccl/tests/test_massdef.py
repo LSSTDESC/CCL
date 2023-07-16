@@ -38,6 +38,11 @@ def test_concentration_translation():
             COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
             model="Einasto")
 
+    with pytest.raises(ValueError):
+        c_new = ccl.halos.massdef.convert_concentration(
+            COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
+            model="NotValid")
+
     # Test against numerical solutions from Mathematica.
     Delta_new = 500.
     c_new = ccl.halos.massdef.convert_concentration(
