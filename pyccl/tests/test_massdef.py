@@ -43,20 +43,21 @@ def test_concentration_translation():
     c_new = ccl.halos.massdef.convert_concentration(
         COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
         model="NFW")
-    c_new_expected = np.array([6.12193624, 6.82950943, 7.53797157])
-    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-8)
+    c_new_expected = np.array([6.121936239564, 6.829509425616, 7.537971574322])
+    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-12)
 
     c_new = ccl.halos.massdef.convert_concentration(
         COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
         model="Einasto", alpha=0.25)
-    c_new_expected = np.array([6.25446994, 6.98975397, 7.72676127])
-    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-8)
+    c_new_expected = np.array([6.254469943236, 6.98975396734, 7.72676126963])
+    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-12)
 
     c_new = ccl.halos.massdef.convert_concentration(
         COSMO, c_old=c_old, Delta_old=Delta_old, Delta_new=Delta_new,
         model="Hernquist")
-    c_new_expected = np.array([6.46322585, 7.19930924, 7.93552076])
-    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-8)
+    c_new_expected = np.array([6.463225850159, 7.199309242066, 7.935520760879])
+    assert np.all(np.fabs(c_new/c_new_expected-1) < 1E-12)
+
 
 def test_init_raises():
     with pytest.raises(ValueError):
