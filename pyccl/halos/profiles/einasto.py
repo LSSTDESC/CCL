@@ -44,7 +44,8 @@ class HaloProfileEinasto(HaloProfileMatter):
             set to ``'cosmo'`` to calculate the value from cosmology.
     """
     __repr_attrs__ = __eq_attrs__ = (
-        "truncated", "alpha", "mass_def", "concentration", "precision_fftlog",)
+        "truncated", "alpha", "projected_quad",
+        "mass_def", "concentration", "precision_fftlog",)
 
     def __init__(self, *, mass_def, concentration,
                  truncated=False,
