@@ -86,7 +86,7 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
         if alpha is None:
             raise ValueError("`alpha` must be provided.")
 
-        f = lambda x: x**3 / (
+        f = lambda x: x**3 / ( # noqa
             gamma(3./alpha)*gammainc(3./alpha, 2./alpha*x**alpha)) # noqa
     elif model == "Hernquist":
         f = lambda x: x*(1.+x)**2. # noqa
