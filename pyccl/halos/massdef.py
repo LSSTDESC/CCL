@@ -95,11 +95,11 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
     else:
         raise ValueError(f"model {model} is not supported")
 
-    def c_new(c_1, Delta_1, Delta_2):
-        # Equation to solve
-        def solve_c(c_2, c_1, Delta_1, Delta_2):
-            return f(c_2)*Delta_2 - f(c_1)*Delta_1
+    # Equation to solve
+    def solve_c(c_2, c_1, Delta_1, Delta_2):
+        return f(c_2)*Delta_2 - f(c_1)*Delta_1
 
+    def c_new(c_1, Delta_1, Delta_2):
         # Iterate 2 times:
         c = fsolve(func=solve_c, x0=c_in, args=(c_in, Delta_old, Delta_new))
         c = fsolve(func=solve_c, x0=c, args=(c_in, Delta_old, Delta_new))
