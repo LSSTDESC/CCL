@@ -126,11 +126,13 @@ class HaloProfileNFW(HaloProfileMatter):
     def _fx_projected(self, x):
         def f1(xx):
             x2m1 = xx * xx - 1
-            return 1 / x2m1 + np.arccosh(1 / xx) / np.fabs(x2m1) ** 1.5
+            sqx2m1 = np.sqrt(-x2m1)
+            return 1 / x2m1 + np.arcsinh(sqx2m1 / xx) / (-x2m1)**1.5
 
         def f2(xx):
             x2m1 = xx * xx - 1
-            return 1 / x2m1 - np.arccos(1 / xx) / np.fabs(x2m1) ** 1.5
+            sqx2m1 = np.sqrt(x2m1)
+            return 1 / x2m1 - np.arcsin(sqx2m1 / xx) / x2m1**1.5
 
         xf = x.flatten()
         return np.piecewise(xf, [xf < 1, xf > 1], [f1, f2, 1.0 / 3.0]).reshape(
@@ -159,12 +161,12 @@ class HaloProfileNFW(HaloProfileMatter):
 
     def _fx_cumul2d(self, x):
         def f1(xx):
-            sqx2m1 = np.sqrt(np.fabs(xx * xx - 1))
-            return np.log(0.5 * xx) + np.arccosh(1 / xx) / sqx2m1
+            sqx2m1 = np.sqrt(-(xx * xx - 1))
+            return np.log(0.5 * xx) + np.arcsinh(sqx2m1 / xx) / sqx2m1
 
         def f2(xx):
-            sqx2m1 = np.sqrt(np.fabs(xx * xx - 1))
-            return np.log(0.5 * xx) + np.arccos(1 / xx) / sqx2m1
+            sqx2m1 = np.sqrt(xx * xx - 1)
+            return np.log(0.5 * xx) + np.arcsin(sqx2m1 / xx) / sqx2m1
 
         xf = x.flatten()
         f = np.piecewise(xf, [xf < 1, xf > 1], [f1, f2, self._omln2]).reshape(

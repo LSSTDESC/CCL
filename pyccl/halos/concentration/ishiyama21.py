@@ -5,7 +5,7 @@ from scipy.optimize import brentq, root_scalar
 
 from ... import lib
 from ... import check
-from . import Concentration
+from . import Concentration, get_delta_c
 
 
 class ConcentrationIshiyama21(Concentration):
@@ -93,7 +93,7 @@ class ConcentrationIshiyama21(Concentration):
         return np.asarray(roots)
 
     def _concentration(self, cosmo, M, a):
-        nu = 1.686 / cosmo.sigmaM(M, a)
+        nu = get_delta_c(cosmo, a, 'EdS_approx') / cosmo.sigmaM(M, a)
         n_eff = -2 * self._dlsigmaR(cosmo, M, a) - 3
         alpha_eff = cosmo.growth_rate(a)
 

@@ -3,7 +3,7 @@ __all__ = ("HaloProfileEinasto",)
 import numpy as np
 from scipy.special import gamma, gammainc
 
-from .. import MassDef, mass_translator
+from .. import MassDef, mass_translator, get_delta_c
 from . import HaloProfileMatter
 
 
@@ -82,7 +82,7 @@ class HaloProfileEinasto(HaloProfileMatter):
         if self.alpha == "cosmo":
             Mvir = self._to_virial_mass(cosmo, M, a)
             sM = cosmo.sigmaM(Mvir, a)
-            nu = 1.686 / sM
+            nu = get_delta_c(cosmo, a, kind='EdS_approx') / sM
             return 0.155 + 0.0095 * nu * nu
         return np.full_like(M, self.alpha)
 

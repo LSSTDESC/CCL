@@ -1,9 +1,5 @@
-__all__ = (
-    "HMIngredients",
-    "Concentration",
-    "MassFunc",
-    "HaloBias",
-)
+__all__ = ("HMIngredients", "Concentration", "MassFunc", "HaloBias",
+           "get_delta_c", )
 
 from abc import abstractmethod
 
@@ -11,6 +7,43 @@ import numpy as np
 
 from .. import CCLAutoRepr, CCLNamedClass, lib, check
 from .. import physical_constants as const
+
+
+def get_delta_c(cosmo, a, kind='EdS'):
+    """Returns the linear collapse threshold.
+
+    Args:
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        a (:obj:`float` or `array`): scale factor.
+        kind (:obj:`str`): prescription to use. Should be one of
+
+            * 'EdS': the SC prediction in Einstein de-Sitter, :math:`\\delta_c=(3/20)(12\\pi)^{2/3}`.
+            * 'EdS_approx': a common approximation to the EdS result :math:`\\delta_c=1.686`.
+            * 'NakamuraSuto97': the prescription from `Nakamura & Suto 1997 <https://arxiv.org/abs/astro-ph/9612074>`_.
+            * 'Mead16': the prescription from `Mead et al. 2016 <https://arxiv.org/abs/1602.02154>`_.
+
+    Returns:
+        (:obj:`float` or `array`): linear collapse threshold.
+    """  # noqa
+    # This is the linear collapse threshold in Einstein de-Sitter:
+    # delta_c = 3/20*(12*pi)^(2/3)
+    dc0 = 1.68647019984
+
+    if kind == 'EdS':
+        return dc0
+    elif kind == 'EdS_approx':
+        return 1.686
+    elif kind == 'NakamuraSuto97':
+        Om = cosmo.omega_x(a, 'matter')
+        return dc0*(1+0.012299*np.log10(Om))
+    elif kind == 'Mead16':
+        Om = cosmo.omega_x(a, 'matter')
+        s8 = cosmo.sigma8()*cosmo.growth_factor(a)
+        facs8 = (1.59+0.0314*np.log(s8))
+        facOm = (1+0.0123*np.log10(Om))
+        return facs8*facOm
+    else:
+        raise ValueError(f"Unknown threshold kind {kind}")
 
 
 class HMIngredients(CCLAutoRepr, CCLNamedClass):

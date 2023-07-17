@@ -222,7 +222,6 @@ class Pk2D(CCLObject):
                   - ``'bbks'`` (`Bardeen et al. <https://ui.adsabs.harvard.edu/abs/1986ApJ...304...15B/abstract>`_).
                   - ``'eisenstein_hu'`` (`Eisenstein & Hu <https://arxiv.org/abs/astro-ph/9709112>`_).
                   - ``'eisenstein_hu_nowiggles'`` (`Eisenstein & Hu <https://arxiv.org/abs/astro-ph/9709112>`_).
-                  - ``'emu'`` (`Mira Titan emulator <https://arxiv.org/abs/1508.02654>`_).
 
         Returns:
             :class:`~pyccl.pk2d.Pk2D`
@@ -240,8 +239,6 @@ class Pk2D(CCLObject):
         elif model == "eisenstein_hu_nowiggles":
             cosmo.compute_growth()
             ret = lib.compute_linpower_eh(cosmo.cosmo, 0, status)
-        elif model == "emu":
-            ret = lib.compute_power_emu(cosmo.cosmo, status)
         else:
             raise ValueError(f"Invalid model {model}.")
 

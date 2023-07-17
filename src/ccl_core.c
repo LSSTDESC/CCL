@@ -19,9 +19,7 @@
 #define STRING(s) #s
 
 
-const ccl_configuration default_config = {
-  ccl_boltzmann_class, ccl_halofit, ccl_nobaryons,
-  ccl_tinker10, ccl_duffy2008, ccl_emu_strict};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit};
 
 
 //Precision parameters

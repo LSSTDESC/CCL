@@ -2,7 +2,7 @@ __all__ = ("MassFuncPress74",)
 
 import numpy as np
 
-from . import MassFunc
+from . import MassFunc, get_delta_c
 
 
 class MassFuncPress74(MassFunc):
@@ -27,6 +27,6 @@ class MassFuncPress74(MassFunc):
         return mass_def.Delta != "fof"
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        delta_c = 1.68647
-        nu = delta_c / sigM
+        delta_c = get_delta_c(cosmo, a, kind='EdS')
+        nu = delta_c/sigM
         return self._norm * nu * np.exp(-0.5 * nu**2)

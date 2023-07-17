@@ -127,46 +127,7 @@ def test_pk2d_from_model(model):
         assert maxdiff < 1e-10
 
 
-def test_pk2d_from_model_emu():
-    pars = [0.3643, 0.071075, 0.55, 0.8333, 0.9167, -0.7667, 0.1944]
-    cosmo_fixed = ccl.Cosmology(
-        Omega_c=pars[0],
-        Omega_b=pars[1],
-        h=pars[2],
-        sigma8=pars[3],
-        n_s=pars[4],
-        w0=pars[5],
-        wa=pars[6],
-        Neff=3.04,
-        Omega_g=0,
-        Omega_k=0,
-        transfer_function="bbks",
-    )
-    cosmo = ccl.Cosmology(
-        Omega_c=pars[0],
-        Omega_b=pars[1],
-        h=pars[2],
-        sigma8=pars[3],
-        n_s=pars[4],
-        w0=pars[5],
-        wa=pars[6],
-        Neff=3.04,
-        Omega_g=0,
-        Omega_k=0,
-        transfer_function="bbks",
-        matter_power_spectrum="emu",
-    )
-    pk = ccl.Pk2D.from_model(cosmo_fixed, model="emu")
-    ks = np.geomspace(1e-3, 1e1, 128)
-    for z in [0.0, 0.5, 2.0]:
-        a = 1.0 / (1 + z)
-        pk1 = pk(ks, a, cosmo)
-        pk2 = ccl.nonlin_matter_power(cosmo, ks, a)
-        maxdiff = np.amax(np.fabs(pk1 / pk2 - 1))
-        assert maxdiff < 1e-10
-
-
-@pytest.mark.parametrize("model", ["bbks", "eisenstein_hu"])
+@pytest.mark.parametrize('model', ['bbks', 'eisenstein_hu'])
 def test_pk2d_from_model_fails(model):
     cosmo = ccl.Cosmology(
         Omega_c=0.27,

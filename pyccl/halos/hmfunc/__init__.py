@@ -1,4 +1,4 @@
-from ..halo_model_base import MassFunc
+from ..halo_model_base import MassFunc, get_delta_c
 from .angulo12 import *
 from .bocquet16 import *
 from .despali16 import *

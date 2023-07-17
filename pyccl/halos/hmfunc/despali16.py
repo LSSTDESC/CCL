@@ -2,8 +2,7 @@ __all__ = ("MassFuncDespali16",)
 
 import numpy as np
 
-from ... import check, lib
-from . import MassFunc
+from . import MassFunc, get_delta_c
 
 
 class MassFuncDespali16(MassFunc):
@@ -67,18 +66,10 @@ class MassFuncDespali16(MassFunc):
         self.poly_A, self.poly_a, self.poly_p = map(np.poly1d, coeffs)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        status = 0
-        delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status, cosmo=cosmo)
+        delta_c = get_delta_c(cosmo, a, 'NakamuraSuto97')
 
-        Dv, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
-        check(status, cosmo=cosmo)
-
-        x = np.log10(
-            self.mass_def.get_Delta(cosmo, a)
-            * cosmo.omega_x(a, self.mass_def.rho_type)
-            / Dv
-        )
+        Dv = self.mass_def.get_Delta_vir(cosmo, a)
+        x = np.log10(self.mass_def.get_Delta(cosmo, a) / Dv)
 
         A, a, p = self.poly_A(x), self.poly_a(x), self.poly_p(x)
 

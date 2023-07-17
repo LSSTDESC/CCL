@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    pyccl.baryons
+   pyccl.emulators
    pyccl.halos
    pyccl.nl_pt
 

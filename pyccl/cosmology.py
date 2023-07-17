@@ -20,18 +20,9 @@ from typing import Iterable
 import numpy as np
 
 from . import (
-    CCLError,
-    CCLObject,
-    CCLParameters,
-    CosmologyParams,
-    DEFAULT_POWER_SPECTRUM,
-    DefaultParams,
-    Pk2D,
-    cache,
-    check,
-    lib,
-    unlock_instance,
-)
+    CCLError, CCLObject, CCLParameters, CosmologyParams,
+    DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, check, lib,
+    unlock_instance, emulators)
 from . import physical_constants as const
 
 
@@ -43,41 +34,38 @@ class TransferFunctions(Enum):
     BOLTZMANN_CAMB = "boltzmann_camb"
     BOLTZMANN_ISITGR = "boltzmann_isitgr"
     CALCULATOR = "calculator"
+    EMULATOR_LINPK = "emulator"
 
 
 class MatterPowerSpectra(Enum):
     LINEAR = "linear"
     HALOFIT = "halofit"
     HALOMODEL = "halomodel"
-    EMU = "emu"
     CAMB = "camb"
     CALCULATOR = "calculator"
+    EMULATOR_NLPK = "emulator"
 
 
 # Configuration types
 transfer_function_types = {
-    "eisenstein_hu": lib.eisenstein_hu,
-    "eisenstein_hu_nowiggles": lib.eisenstein_hu_nowiggles,
-    "bbks": lib.bbks,
-    "boltzmann_class": lib.boltzmann_class,
-    "boltzmann_camb": lib.boltzmann_camb,
-    "boltzmann_isitgr": lib.boltzmann_isitgr,
-    "calculator": lib.pklin_from_input,
+    'eisenstein_hu': lib.eisenstein_hu,
+    'eisenstein_hu_nowiggles': lib.eisenstein_hu_nowiggles,
+    'bbks': lib.bbks,
+    'boltzmann_class': lib.boltzmann_class,
+    'boltzmann_camb': lib.boltzmann_camb,
+    'boltzmann_isitgr': lib.boltzmann_isitgr,
+    'calculator': lib.pklin_from_input,
+    'emulator': lib.emulator_linpk
 }
 
 
 matter_power_spectrum_types = {
-    "halo_model": lib.halo_model,
-    "halofit": lib.halofit,
-    "linear": lib.linear,
-    "emu": lib.emu,
-    "calculator": lib.pknl_from_input,
-    "camb": lib.pknl_from_boltzman,
-}
-
-emulator_neutrinos_types = {
-    "strict": lib.emu_strict,
-    "equalize": lib.emu_equalize,
+    'halo_model': lib.halo_model,
+    'halofit': lib.halofit,
+    'linear': lib.linear,
+    'calculator': lib.pknl_from_input,
+    'camb': lib.pknl_from_boltzman,
+    'emulator': lib.emulator_nlpk
 }
 
 _TOP_LEVEL_MODULES = ("",)
@@ -194,13 +182,13 @@ class Cosmology(CCLObject):
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
-        transfer_function (:obj:`str`): The transfer function to
-            use. Defaults to 'boltzmann_camb'.
-        matter_power_spectrum (:obj:`str`): The matter power
-            spectrum to use. Defaults to 'halofit'.
+        transfer_function (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
+            The transfer function to use. Defaults to 'boltzmann_camb'.
+        matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
+            The matter power spectrum to use. Defaults to 'halofit'.
         extra_parameters (:obj:`dict`): Dictionary holding extra
-            parameters. Currently supports extra parameters for CAMB, as well
-            as CosmicEmu. Details described below. Defaults to None.
+            parameters. Currently supports extra parameters for CAMB.
+            Details described below. Defaults to None.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is 0.71611.
 
@@ -219,21 +207,7 @@ class Cosmology(CCLObject):
 
         extra_parameters = {"camb": {"halofit_version": "mead2020_feedback",
                                      "HMCode_logT_AGN": 7.8}}
-
-    Currently supported extra parameters for CosmicEmu are:
-
-        * `neutrinos`: governing the treatment of unequal neutrinos
-          Options are: 'strict', which will raise an error and quit if the
-          user fails to pass either a set of three equal masses or a sum with
-          mass_split = 'equal', and 'equalize', which will redistribute
-          masses to be equal right before calling the emulator but results in
-          internal inconsistencies. Defaults to 'strict'.
-
-    These parameters are passed in a :obj:`dict` to `extra_parameters` as::
-
-        extra_parameters = {"emu": {"neutrinos", "equal"}}
-    """  # noqa
-
+    """ # noqa
     from ._core.repr_ import build_string_Cosmology as __repr__
 
     __eq_attrs__ = (
@@ -273,8 +247,18 @@ class Cosmology(CCLObject):
             Neff = 3.044
 
         extra_parameters = extra_parameters or {}
-        if "emu" not in extra_parameters:
-            extra_parameters["emu"] = {"neutrinos": "strict"}
+
+        # initialise linear Pk emulators if needed
+        self.lin_pk_emu = None
+        if isinstance(transfer_function, emulators.EmulatorPk):
+            self.lin_pk_emu = transfer_function
+            transfer_function = 'emulator'
+
+        # initialise nonlinear Pk emulators if needed
+        self.nl_pk_emu = None
+        if isinstance(matter_power_spectrum, emulators.EmulatorPk):
+            self.nl_pk_emu = matter_power_spectrum
+            matter_power_spectrum = 'emulator'
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -378,9 +362,8 @@ class Cosmology(CCLObject):
 
         This function builds C ccl_configuration struct. This structure
         controls which various approximations are used for the transfer
-        function, matter power spectrum, baryonic effect in the matter
-        power spectrum, mass function, halo concentration relation, and
-        neutrino effects in the emulator.
+        function, matter power spectrum, and baryonic effect in the matter
+        power spectrum.
 
         It also does some error checking on the inputs to make sure they
         are valid and physically consistent.
@@ -399,8 +382,6 @@ class Cosmology(CCLObject):
         config.transfer_function_method = tf
         mps = matter_power_spectrum_types[matter_power_spectrum]
         config.matter_power_spectrum_method = mps
-        ent = extra_parameters["emu"]["neutrinos"]
-        config.emulator_neutrinos_method = emulator_neutrinos_types[ent]
 
         # Store ccl_configuration for later access
         self._config = config
@@ -598,7 +579,6 @@ class Cosmology(CCLObject):
         status = lib.cosmology_compute_growth(self.cosmo, status)
         check(status, self)
 
-    @cache(maxsize=3)
     def _compute_linear_power(self):
         """Return the linear power spectrum."""
         self.compute_growth()
@@ -617,6 +597,9 @@ class Cosmology(CCLObject):
             rescale_s8 = False
             rescale_mg = False
             pk = Pk2D.from_model(self, model=trf)
+        elif trf == 'emulator':
+            rescale_s8 = False
+            pk = self.lin_pk_emu.get_pk2d(self)
 
         # Compute the CAMB nonlin power spectrum if needed,
         # to avoid repeating the code in `compute_nonlin_power`.
@@ -655,7 +638,6 @@ class Cosmology(CCLObject):
             return
         self._pk_lin[DEFAULT_POWER_SPECTRUM] = self._compute_linear_power()
 
-    @cache(maxsize=3)
     def _compute_nonlin_power(self):
         """Return the non-linear power spectrum."""
         self.compute_distances()
@@ -663,7 +645,7 @@ class Cosmology(CCLObject):
         # Populate power spectrum splines
         mps = self._config_init_kwargs["matter_power_spectrum"]
         # needed for halofit, halomodel and linear options
-        if (mps != "emu") and (mps is not None):
+        if (mps not in ['emulator']) and (mps is not None):
             self.compute_linear_power()
 
         if mps == "camb" and self.has_nonlin_power:
@@ -673,10 +655,10 @@ class Cosmology(CCLObject):
         if mps == "halofit":
             pkl = self._pk_lin[DEFAULT_POWER_SPECTRUM]
             pk = pkl.apply_halofit(self)
-        elif mps == "emu":
-            pk = Pk2D.from_model(self, model="emu")
-        elif mps == "linear":
+        elif mps == 'linear':
             pk = self._pk_lin[DEFAULT_POWER_SPECTRUM]
+        elif mps == 'emulator':
+            pk = self.nl_pk_emu.get_pk2d(self)
 
         return pk
 

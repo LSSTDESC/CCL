@@ -2,7 +2,7 @@ __all__ = ("ConcentrationDiemer15",)
 
 import numpy as np
 
-from . import Concentration
+from . import Concentration, get_delta_c
 
 
 class ConcentrationDiemer15(Concentration):
@@ -43,7 +43,7 @@ class ConcentrationDiemer15(Concentration):
         n = pk(k_R, a, derivative=True)
 
         sig = cosmo.sigmaM(M, a)
-        delta_c = 1.68647
+        delta_c = get_delta_c(cosmo, a, kind='EdS')
         nu = delta_c / sig
 
         floor = self.phi_0 + n * self.phi_1

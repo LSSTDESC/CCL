@@ -363,16 +363,16 @@ def test_parameters_read_write():
     assert params["sum_nu_masses"] == params2["sum_nu_masses"]
 
     # check overriding parameters with kwargs
-    params3 = ccl.Cosmology.read_yaml(
-        temp_file_name, matter_power_spectrum="emu", n_s=1.1
-    )
+    params3 = ccl.Cosmology.read_yaml(temp_file_name,
+                                      matter_power_spectrum='linear',
+                                      n_s=1.1)
     # check unmodified parameters are the same
     assert params["Omega_c"] == params3["Omega_c"]
     assert params["Neff"] == params3["Neff"]
     # check new parameters and config correctly updated
     assert params3["n_s"] == 1.1
     assert params["sum_nu_masses"] == params3["sum_nu_masses"]
-    assert params3._config_init_kwargs["matter_power_spectrum"] == "emu"
+    assert params3._config_init_kwargs['matter_power_spectrum'] == 'linear'
 
     # Now make a file that will be deleted so it does not exist
     # and check the right error is raise
