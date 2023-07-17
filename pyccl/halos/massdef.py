@@ -81,20 +81,20 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
     c_in = np.asarray(c_old)
 
     if model == "NFW":
-        f = lambda x: x**3./(np.log(1.+x) - x/(1.+x))
+        f = lambda x: x**3./(np.log(1.+x) - x/(1.+x)) # noqa
     elif model == "Einasto":
         if alpha is None:
             raise ValueError("`alpha` must be provided.")
 
         f = lambda x: x**3 / (
-            gamma(3./alpha)*gammainc(3./alpha, 2./alpha*x**alpha))
+            gamma(3./alpha)*gammainc(3./alpha, 2./alpha*x**alpha)) # noqa
     elif model == "Hernquist":
-        f = lambda x: x*(1.+x)**2.
+        f = lambda x: x*(1.+x)**2. # noqa
     else:
         raise ValueError(f"model {model} is not supported")
 
     # Equation to solve
-    solve_c = lambda c_2, c_1, D_1, D_2, f: f(c_2)*D_2 - f(c_1)*D_1
+    solve_c = lambda c_2, c_1, D_1, D_2, f: f(c_2)*D_2 - f(c_1)*D_1 # noqa
 
     # Iterate 2 times:
     c = fsolve(func=solve_c, x0=c_in, args=(c_in, Delta_old, Delta_new, f))
