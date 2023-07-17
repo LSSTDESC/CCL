@@ -78,31 +78,29 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new,
         (:obj:`float` or `array`): concentration parameter for the new
         mass definition.
     """
-    c_in = np.atleast_1d(c_old)
+    c_in = np.asarray(c_old)
+
     if model == "NFW":
-        def f(x):
-            return x**3./(np.log(1.+x) - x/(1.+x))
+        f = lambda x: x**3./(np.log(1.+x) - x/(1.+x))
     elif model == "Einasto":
         if alpha is None:
             raise ValueError("`alpha` must be provided.")
 
-        def f(x):
-            return x**3 / (
-                gamma(3./alpha)*gammainc(3./alpha, 2./alpha*x**alpha))
+        f = lambda x: x**3 / (
+            gamma(3./alpha)*gammainc(3./alpha, 2./alpha*x**alpha))
     elif model == "Hernquist":
-        def f(x):
-            return x*(1.+x)**2.
+        f = lambda x: x*(1.+x)**2.
     else:
         raise ValueError(f"model {model} is not supported")
 
     # Equation to solve
-    def solve_c(c_2, c_1, Delta_1, Delta_2):
+    def solve_c(c_2, c_1, Delta_1, Delta_2, f):
         return f(c_2)*Delta_2 - f(c_1)*Delta_1
 
     def c_new(c_1, Delta_1, Delta_2):
         # Iterate 2 times:
-        c = fsolve(func=solve_c, x0=c_in, args=(c_in, Delta_old, Delta_new))
-        c = fsolve(func=solve_c, x0=c, args=(c_in, Delta_old, Delta_new))
+        c = fsolve(func=solve_c, x0=c_in, args=(c_in, Delta_old, Delta_new, f))
+        c = fsolve(func=solve_c, x0=c, args=(c_in, Delta_old, Delta_new, f))
         return c
 
     if np.isscalar(c_old):
