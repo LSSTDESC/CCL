@@ -2,7 +2,6 @@ __all__ = ("BaccoemuBaryons",)
 
 import numpy as np
 from copy import deepcopy
-from collections.abc import Iterable
 
 from .. import Pk2D
 from . import Baryons
@@ -32,6 +31,8 @@ class BaccoemuBaryons(Baryons):
                                          hot gas in haloes
         log10_M_inn (:obj:`float`): transition mass of density profiles of
                                      hot gas in haloes (in :math:`M_\\odot`)
+        verbose (:obj:`bool`): Verbose output from baccoemu.
+                                (default: :obj:`False`)
     """
     name = 'BaccoemuBaryons'
     __repr_attrs__ = __eq_attrs__ = ("bcm_params",)
@@ -64,7 +65,7 @@ class BaccoemuBaryons(Baryons):
     def _sigma8tot_2_sigma8cold(self, emupars, sigma8tot):
         """Use baccoemu to convert sigma8 total matter to sigma8 cdm+baryons
         """
-        if hasattr(emupars['omega_cold'], '__len__'):
+        if np.ndim(emupars['omega_cold']) == 1:
             _emupars = {}
             for pname in emupars:
                 _emupars[pname] = emupars[pname][0]
@@ -95,7 +96,7 @@ class BaccoemuBaryons(Baryons):
         # First create the dictionary passed to baccoemu
         # if a is an array, make sure all the other parameters passed to the
         # emulator have the same len
-        if hasattr(a, '__len__'):
+        if np.ndim(a) == 1:
             emupars = dict(
                 omega_cold=np.full((len(a)),
                                    cosmo['Omega_c'] + cosmo['Omega_b']),
@@ -127,12 +128,12 @@ class BaccoemuBaryons(Baryons):
             # power spectrum; so we have to convert from total to cold sigma8
             sigma8tot = cosmo['sigma8']
             sigma8cold = self._sigma8tot_2_sigma8cold(emupars, sigma8tot)
-            if hasattr(a, '__len__'):
+            if np.ndim(a) == 1:
                 emupars['sigma8_cold'] = np.full((len(a)), sigma8cold)
             else:
                 emupars['sigma8_cold'] = sigma8cold
         else:
-            if hasattr(a, '__len__'):
+            if np.ndim(a) == 1:
                 emupars['A_s'] = np.full((len(a)), cosmo['A_s'])
             else:
                 emupars['A_s'] = cosmo['A_s']
@@ -183,7 +184,7 @@ class BaccoemuBaryons(Baryons):
                     extrap_order_hik=pk.extrap_order_hik)
 
     def _check_a_range(self, a):
-        if not isinstance(a, Iterable):
+        if np.ndim(a) == 0:
             a_min, a_max = a, a
         else:
             a_min = min(a)
