@@ -48,9 +48,8 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
     if np.isfinite(cosmo["A_s"]):
         A_s_fid = cosmo["A_s"]
     elif np.isfinite(cosmo["sigma8"]):
-        # in this case, CCL will internally normalize for us when we init
-        # the linear power spectrum - so we just get close
-        A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
+        A_s_fid = 2.1e-9
+        sigma8_target = cosmo["sigma8"]
     else:
         raise CCLError(
             "Could not normalize the linear power spectrum. "
@@ -140,30 +139,38 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         wa=cosmo['wa']
     )
 
+    cp.set_for_lmax(extra_camb_params.get("lmax", 5000))
+    cp.InitPower.set_params(
+        As=A_s_fid,
+        ns=cosmo['n_s'])
+    
+    cp.set_matter_power(
+        redshifts=[_z for _z in zs],
+        kmax=extra_camb_params.get("kmax", 10.0))
+
+    camb_res = camb.get_transfer_functions(cp)
+    camb_res.calc_power_spectra()
+    
+    if np.isfinite(cosmo["sigma8"]):
+        sigma8 = camb_res.get_sigma8_0()
+        camb_res.Params.InitPower.As *= sigma8_target**2 / sigma8**2
+
     if nonlin:
-        cp.NonLinearModel = camb.nonlinear.Halofit()
+        camb_res.Params.NonLinear = camb.model.NonLinear_pk
+        camb_res.Params.NonLinearModel = camb.nonlinear.Halofit()
         halofit_version = extra_camb_params.get("halofit_version", "mead")
         options = {k: extra_camb_params[k] for k in
                    ["HMCode_A_baryon",
                     "HMCode_eta_baryon",
                     "HMCode_logT_AGN"] if k in extra_camb_params}
-        cp.NonLinearModel.set_params(halofit_version=halofit_version,
+        camb_res.Params.NonLinearModel.set_params(halofit_version=halofit_version,
                                      **options)
+    else:
+        assert camb_res.Params.NonLinear == camb.model.NonLinear_none
 
-    cp.set_matter_power(
-        redshifts=[_z for _z in zs],
-        kmax=extra_camb_params.get("kmax", 10.0),
-        nonlinear=nonlin)
-    if not nonlin:
-        assert cp.NonLinear == camb.model.NonLinear_none
-
-    cp.set_for_lmax(extra_camb_params.get("lmax", 5000))
-    cp.InitPower.set_params(
-        As=A_s_fid,
-        ns=cosmo['n_s'])
-
-    # run CAMB and get results
-    camb_res = camb.get_results(cp)
+    if np.isfinite(cosmo["sigma8"]) or nonlin:
+        camb_res.calc_power_spectra()
+    
     k, z, pk = camb_res.get_linear_matter_power_spectrum(
         hubble_units=True, nonlinear=False)
 
