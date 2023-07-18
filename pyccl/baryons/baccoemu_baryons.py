@@ -2,6 +2,7 @@ __all__ = ("BaccoemuBaryons",)
 
 import numpy as np
 from copy import deepcopy
+from collections.abc import Iterable
 
 from .. import Pk2D
 from . import Baryons
@@ -37,13 +38,14 @@ class BaccoemuBaryons(Baryons):
 
     def __init__(self, log10_M_c=14.174, log10_eta=-0.3, log10_beta=-0.22,
                  log10_M1_z0_cen=10.674, log10_theta_out=0.25,
-                 log10_theta_inn=-0.86, log10_M_inn=13.574):
+                 log10_theta_inn=-0.86, log10_M_inn=13.574,
+                 verbose=False):
         # avoid tensorflow warnings
         import warnings
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=UserWarning)
             import baccoemu
-            self.mpk = baccoemu.Matter_powerspectrum()
+            self.mpk = baccoemu.Matter_powerspectrum(verbose=verbose)
         self.a_min = self.mpk.emulator['baryon']['bounds'][-1][0]
         self.a_max = self.mpk.emulator['baryon']['bounds'][-1][1]
         self.k_min = self.mpk.emulator['baryon']['k'][0]
@@ -86,6 +88,9 @@ class BaccoemuBaryons(Baryons):
             :obj:`float` or `array`: Correction factor to apply to
                 the power spectrum.
         """ # noqa
+
+        # Check a ranges
+        self._check_a_range(a)
 
         # First create the dictionary passed to baccoemu
         # if a is an array, make sure all the other parameters passed to the
@@ -176,3 +181,14 @@ class BaccoemuBaryons(Baryons):
                     is_logp=pk.psp.is_log,
                     extrap_order_lok=pk.extrap_order_lok,
                     extrap_order_hik=pk.extrap_order_hik)
+
+    def _check_a_range(self, a):
+        if not isinstance(a, Iterable):
+            a_min, a_max = a, a
+        else:
+            a_min = min(a)
+            a_max = max(a)
+        if a_min < self.a_min or a_max > self.a_max:
+            raise ValueError(f"Requested scale factor outside the bounds of "
+                             f"the emulator: {(a_min, a_max)} outside of "
+                             f"{((self.a_min, self.a_max))}")
