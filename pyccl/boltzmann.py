@@ -143,14 +143,14 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
     cp.InitPower.set_params(
         As=A_s_fid,
         ns=cosmo['n_s'])
-    
+
     cp.set_matter_power(
         redshifts=[_z for _z in zs],
         kmax=extra_camb_params.get("kmax", 10.0))
 
     camb_res = camb.get_transfer_functions(cp)
     camb_res.calc_power_spectra()
-    
+
     if np.isfinite(cosmo["sigma8"]):
         sigma8 = camb_res.get_sigma8_0()
         camb_res.Params.InitPower.As *= sigma8_target**2 / sigma8**2
@@ -163,14 +163,15 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
                    ["HMCode_A_baryon",
                     "HMCode_eta_baryon",
                     "HMCode_logT_AGN"] if k in extra_camb_params}
-        camb_res.Params.NonLinearModel.set_params(halofit_version=halofit_version,
-                                     **options)
+        camb_res.Params.NonLinearModel.set_params(
+            halofit_version=halofit_version,
+            **options)
     else:
         assert camb_res.Params.NonLinear == camb.model.NonLinear_none
 
     if np.isfinite(cosmo["sigma8"]) or nonlin:
         camb_res.calc_power_spectra()
-    
+
     k, z, pk = camb_res.get_linear_matter_power_spectrum(
         hubble_units=True, nonlinear=False)
 
