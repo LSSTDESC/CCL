@@ -88,7 +88,7 @@ jobs:
       - name: Install classy
         run: |
           pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython>=0.29.21,<3'  # for classy
-          pip install --no-build-isolation classy<3
+          pip install -v --no-build-isolation classy<3
 
       - name: Install CCL
         run: pip install -e .
