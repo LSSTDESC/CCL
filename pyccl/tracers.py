@@ -35,28 +35,13 @@ from .pyutils import check
 from .errors import CCLWarning
 from ._core.parameters import physical_constants
 from ._core import CCLObject, UnlockInstance, unlock_instance
-from .pyutils import (
-    _check_array_params,
-    NoneArr,
-    _vectorize_fn6,
-    _get_spline1d_arrays,
-    _get_spline2d_arrays,
-)
+from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
+                      _get_spline1d_arrays, _get_spline2d_arrays)
 
 
-__all__ = (
-    "get_density_kernel",
-    "get_lensing_kernel",
-    "get_kappa_kernel",
-    "Tracer",
-    "NzTracer",
-    "NumberCountsTracer",
-    "WeakLensingTracer",
-    "CMBLensingTracer",
-    "tSZTracer",
-    "CIBTracer",
-    "ISWTracer",
-)
+__all__ = ("get_density_kernel", "get_lensing_kernel", "get_kappa_kernel",
+           "Tracer", "NzTracer", "NumberCountsTracer", "WeakLensingTracer",
+           "CMBLensingTracer", "tSZTracer", "CIBTracer", "ISWTracer",)
 
 
 def _Sig_MG(cosmo, a, k):
@@ -84,14 +69,13 @@ def _check_background_spline_compatibility(cosmo, z):
     """
     cosmo.compute_distances()
     a_bg, _ = _get_spline1d_arrays(cosmo.cosmo.data.chi)
-    a = 1 / (1 + z)
+    a = 1/(1+z)
 
     if a.min() < a_bg.min() or a.max() > a_bg.max():
         raise ValueError(
             "Tracer has wider redshift support than internal CCL splines. "
             f"Tracer: z=[{1/a.max()-1}, {1/a.min()-1}]. "
-            f"Background splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}]."
-        )
+            f"Background splines: z=[{1/a_bg.max()-1}, {1/a_bg.min()-1}].")
 
 
 def get_density_kernel(cosmo, *, dndz):
@@ -111,14 +95,15 @@ def get_density_kernel(cosmo, *, dndz):
             The units are arbitrary; ``N(z)`` will be normalized
             to unity.
     """
-    z_n, n = _check_array_params(dndz, "dndz")
+    z_n, n = _check_array_params(dndz, 'dndz')
     _check_background_spline_compatibility(cosmo, dndz[0])
     # this call inits the distance splines neded by the kernel functions
-    chi = cosmo.comoving_radial_distance(1.0 / (1.0 + z_n))
+    chi = cosmo.comoving_radial_distance(1./(1.+z_n))
     status = 0
-    wchi, status = lib.get_number_counts_kernel_wrapper(
-        cosmo.cosmo, z_n, n, len(z_n), status
-    )
+    wchi, status = lib.get_number_counts_kernel_wrapper(cosmo.cosmo,
+                                                        z_n, n,
+                                                        len(z_n),
+                                                        status)
     check(status, cosmo=cosmo)
     return chi, wchi
 
@@ -152,46 +137,33 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
     # we need the distance functions at the C layer
     cosmo.compute_distances()
 
-    z_n, n = _check_array_params(dndz, "dndz")
+    z_n, n = _check_array_params(dndz, 'dndz')
     has_magbias = mag_bias is not None
-    z_s, s = _check_array_params(mag_bias, "mag_bias")
+    z_s, s = _check_array_params(mag_bias, 'mag_bias')
     _check_background_spline_compatibility(cosmo, dndz[0])
 
     if n_chi is None:
         # Calculate number of samples in chi
         n_chi = lib.get_nchi_lensing_kernel_wrapper(z_n)
 
-    if (
-        n_chi > len(z_n)
-        and cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION
-    ):
+    if (n_chi > len(z_n)
+            and cosmo.cosmo.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION):
         warnings.warn(
             f"The number of samples in the n(z) ({len(z_n)}) is smaller than "
             f"the number of samples in the lensing kernel ({n_chi}). Consider "
             "disabling spline integration for the lensing kernel by setting "
             "pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False "
-            "before instantiating the Cosmology passed.",
-            category=CCLWarning,
-        )
+            "before instantiating the Cosmology passed.", category=CCLWarning)
 
     # Compute array of chis
     status = 0
-    chi, status = lib.get_chis_lensing_kernel_wrapper(
-        cosmo.cosmo, z_n[-1], n_chi, status
-    )
+    chi, status = lib.get_chis_lensing_kernel_wrapper(cosmo.cosmo, z_n[-1],
+                                                      n_chi, status)
     # Compute kernel
-    wchi, status = lib.get_lensing_kernel_wrapper(
-        cosmo.cosmo,
-        z_n,
-        n,
-        z_n[-1],
-        int(has_magbias),
-        z_s,
-        s,
-        chi,
-        n_chi,
-        status,
-    )
+    wchi, status = lib.get_lensing_kernel_wrapper(cosmo.cosmo,
+                                                  z_n, n, z_n[-1],
+                                                  int(has_magbias), z_s, s,
+                                                  chi, n_chi, status)
     check(status, cosmo=cosmo)
     return chi, wchi
 
@@ -210,13 +182,12 @@ def get_kappa_kernel(cosmo, *, z_source, n_samples=100):
     """
     _check_background_spline_compatibility(cosmo, np.array([z_source]))
     # this call inits the distance splines neded by the kernel functions
-    chi_source = cosmo.comoving_radial_distance(1.0 / (1.0 + z_source))
+    chi_source = cosmo.comoving_radial_distance(1./(1.+z_source))
     chi = np.linspace(0, chi_source, n_samples)
 
     status = 0
-    wchi, status = lib.get_kappa_kernel_wrapper(
-        cosmo.cosmo, chi_source, chi, n_samples, status
-    )
+    wchi, status = lib.get_kappa_kernel_wrapper(cosmo.cosmo, chi_source,
+                                                chi, n_samples, status)
     check(status, cosmo=cosmo)
     return chi, wchi
 
@@ -243,7 +214,6 @@ class Tracer(CCLObject):
     A ``Tracer`` object will in reality be a list of different such
     tracers that get combined linearly when computing power spectra.
     """
-
     from ._core.repr_ import build_string_Tracer as __repr__
 
     def __init__(self):
@@ -284,10 +254,8 @@ class Tracer(CCLObject):
             if t1.kernel is None:
                 # none of them has a kernel
                 continue
-            if not np.array_equal(
-                _get_spline1d_arrays(t1.kernel.spline),
-                _get_spline1d_arrays(t2.kernel.spline),
-            ):
+            if not np.array_equal(_get_spline1d_arrays(t1.kernel.spline),
+                                  _get_spline1d_arrays(t2.kernel.spline)):
                 # both have kernels, but they are unequal
                 return False
 
@@ -300,20 +268,14 @@ class Tracer(CCLObject):
                 # none of them has a transfer
                 continue
             # Check the characteristics of the transfer function.
-            for arg in (
-                "extrap_order_lok",
-                "extrap_order_hik",
-                "is_factorizable",
-                "is_log",
-            ):
+            for arg in ("extrap_order_lok", "extrap_order_hik",
+                        "is_factorizable", "is_log"):
                 if getattr(t1.transfer, arg) != getattr(t2.transfer, arg):
                     return False
 
-            c2py = {
-                "fa": _get_spline1d_arrays,
-                "fk": _get_spline1d_arrays,
-                "fka": _get_spline2d_arrays,
-            }
+            c2py = {"fa": _get_spline1d_arrays,
+                    "fk": _get_spline1d_arrays,
+                    "fka": _get_spline2d_arrays}
             for attr in c2py.keys():
                 spl1 = getattr(t1.transfer, attr, None)
                 spl2 = getattr(t2.transfer, attr, None)
@@ -390,8 +352,7 @@ class Tracer(CCLObject):
                 else:
                     status = 0
                     w, status = lib.cl_tracer_get_kernel(
-                        t, chi_use, chi_use.size, status
-                    )
+                        t, chi_use, chi_use.size, status)
                     check(status)
                 kernels.append(w)
 
@@ -420,9 +381,9 @@ class Tracer(CCLObject):
         f_ells = []
         for t in self._trc:
             status = 0
-            f, status = lib.cl_tracer_get_f_ell(
-                t, ell_use, ell_use.size, status
-            )
+            f, status = lib.cl_tracer_get_f_ell(t, ell_use,
+                                                ell_use.size,
+                                                status)
             check(status)
             f_ells.append(f)
         f_ells = np.array(f_ells)
@@ -452,9 +413,9 @@ class Tracer(CCLObject):
         transfers = []
         for t in self._trc:
             status = 0
-            t, status = lib.cl_tracer_get_transfer(
-                t, lk_use, a_use, lk_use.size * a_use.size, status
-            )
+            t, status = lib.cl_tracer_get_transfer(t, lk_use, a_use,
+                                                   lk_use.size * a_use.size,
+                                                   status)
             check(status)
             transfers.append(t.reshape([lk_use.size, a_use.size]))
         transfers = np.array(transfers)
@@ -483,83 +444,44 @@ class Tracer(CCLObject):
         """
         return np.array([t.der_angles for t in self._trc])
 
-    def _MG_add_tracer(
-        self,
-        cosmo,
-        kernel,
-        z_b,
-        der_bessel=0,
-        der_angles=0,
-        bias_transfer_a=None,
-        bias_transfer_k=None,
-    ):
-        """function to set mg_transfer in the right format and add MG tracers
-        for different cases including different cases and biases like
-        intrinsic alignements (IA) when present
+    def _MG_add_tracer(self, cosmo, kernel, z_b, der_bessel=0, der_angles=0,
+                       bias_transfer_a=None, bias_transfer_k=None):
+        """ function to set mg_transfer in the right format and add MG tracers
+            for different cases including different cases and biases like
+            intrinsic alignements (IA) when present
         """
         # Getting MG transfer function and building a k-array
         mg_transfer = self._get_MG_transfer_function(cosmo, z_b)
 
         # case with no astro biases
-        if (bias_transfer_a is None) and (bias_transfer_k is None):
-            self.add_tracer(
-                cosmo,
-                kernel=kernel,
-                transfer_ka=mg_transfer,
-                der_bessel=der_bessel,
-                der_angles=der_angles,
-            )
+        if ((bias_transfer_a is None) and (bias_transfer_k is None)):
+            self.add_tracer(cosmo, kernel=kernel, transfer_ka=mg_transfer,
+                            der_bessel=der_bessel, der_angles=der_angles)
 
         #  case of an astro bias depending on a and  k
-        elif (bias_transfer_a is not None) and (bias_transfer_k is not None):
-            mg_transfer_new = (
-                mg_transfer[0],
-                mg_transfer[1],
-                (
-                    bias_transfer_a[1]
-                    * (bias_transfer_k[1] * mg_transfer[2]).T
-                ).T,
-            )
-            self.add_tracer(
-                cosmo,
-                kernel=kernel,
-                transfer_ka=mg_transfer_new,
-                der_bessel=der_bessel,
-                der_angles=der_angles,
-            )
+        elif ((bias_transfer_a is not None) and (bias_transfer_k is not None)):
+            mg_transfer_new = (mg_transfer[0], mg_transfer[1],
+                               (bias_transfer_a[1] * (bias_transfer_k[1] *
+                                mg_transfer[2]).T).T)
+            self.add_tracer(cosmo, kernel=kernel, transfer_ka=mg_transfer_new,
+                            der_bessel=der_bessel, der_angles=der_angles)
 
         #  case of an astro bias depending on a but not k
-        elif (bias_transfer_a is not None) and (bias_transfer_k is None):
-            mg_transfer_new = (
-                mg_transfer[0],
-                mg_transfer[1],
-                (bias_transfer_a[1] * mg_transfer[2].T).T,
-            )
-            self.add_tracer(
-                cosmo,
-                kernel=kernel,
-                transfer_ka=mg_transfer_new,
-                der_bessel=der_bessel,
-                der_angles=der_angles,
-            )
+        elif ((bias_transfer_a is not None) and (bias_transfer_k is None)):
+            mg_transfer_new = (mg_transfer[0], mg_transfer[1],
+                               (bias_transfer_a[1] * mg_transfer[2].T).T)
+            self.add_tracer(cosmo, kernel=kernel, transfer_ka=mg_transfer_new,
+                            der_bessel=der_bessel, der_angles=der_angles)
 
         #  case of an astro bias depending on k but not a
-        elif (bias_transfer_a is None) and (bias_transfer_k is not None):
-            mg_transfer_new = (
-                mg_transfer[0],
-                mg_transfer[1],
-                (bias_transfer_k[1] * mg_transfer[2]),
-            )
-            self.add_tracer(
-                cosmo,
-                kernel=kernel,
-                transfer_ka=mg_transfer_new,
-                der_bessel=der_bessel,
-                der_angles=der_angles,
-            )
+        elif ((bias_transfer_a is None) and (bias_transfer_k is not None)):
+            mg_transfer_new = (mg_transfer[0], mg_transfer[1],
+                               (bias_transfer_k[1] * mg_transfer[2]))
+            self.add_tracer(cosmo, kernel=kernel, transfer_ka=mg_transfer_new,
+                            der_bessel=der_bessel, der_angles=der_angles)
 
     def _get_MG_transfer_function(self, cosmo, z):
-        """This function allows to obtain the function Sigma(z,k) (1 or 2D
+        """ This function allows to obtain the function Sigma(z,k) (1 or 2D
             arrays) for an array of redshifts coming from a redshift
             distribution (defined by the user) and a single value or
             an array of k specified by the user. We obtain then Sigma(z,k) as a
@@ -584,16 +506,16 @@ class Tracer(CCLObject):
         # all the way to 1 here and today for the transfer function.
         # For a < a_single it is GR (no early MG)
         if isinstance(z, (int, float)):
-            a_single = 1 / (1 + z)
+            a_single = 1/(1+z)
             a = np.linspace(a_single, 1, 100)
             # a_single is for example like for the CMB surface
         else:
             if z[0] != 0.0:
-                stepsize = z[1] - z[0]
-                samplesize = int(z[0] / stepsize)
+                stepsize = z[1]-z[0]
+                samplesize = int(z[0]/stepsize)
                 z_0_to_zmin = np.linspace(0.0, z[0] - stepsize, samplesize)
                 z = np.concatenate((z_0_to_zmin, z))
-            a = 1.0 / (1.0 + z)
+            a = 1./(1.+z)
         a.sort()
         # Scale-dependant MG case with an array of k
         nk = lib.get_pk_spline_nk(cosmo.cosmo)
@@ -607,27 +529,17 @@ class Tracer(CCLObject):
         # converting 1D MG factor to a 2D array, so it is compatible
         # with the transfer_ka input structure in MG_add.tracer and
         # add.tracer
-        mgfac_2d = mgfac_1d.reshape(len(a), -1, order="F")
+        mgfac_2d = mgfac_1d.reshape(len(a), -1, order='F')
         # setting transfer_ka for this case
         mg_transfer = (a, lk, mgfac_2d)
 
         return mg_transfer
 
     @unlock_instance
-    def add_tracer(
-        self,
-        cosmo,
-        *,
-        kernel=None,
-        transfer_ka=None,
-        transfer_k=None,
-        transfer_a=None,
-        der_bessel=0,
-        der_angles=0,
-        is_logt=False,
-        extrap_order_lok=0,
-        extrap_order_hik=2,
-    ):
+    def add_tracer(self, cosmo, *, kernel=None,
+                   transfer_ka=None, transfer_k=None, transfer_a=None,
+                   der_bessel=0, der_angles=0,
+                   is_logt=False, extrap_order_lok=0, extrap_order_hik=2):
         """Adds one more tracer to the list contained in this ``Tracer``.
 
         Args:
@@ -710,72 +622,56 @@ class Tracer(CCLObject):
             extrap_order_hik (:obj:`int`): polynomial order used to extrapolate the
                 transfer functions for high wavenumbers not covered by the
                 input arrays.
-        """  # noqa
+        """ # noqa
         is_factorizable = transfer_ka is None
         is_k_constant = (transfer_ka is None) and (transfer_k is None)
         is_a_constant = (transfer_ka is None) and (transfer_a is None)
         is_kernel_constant = kernel is None
 
-        chi_s, wchi_s = _check_array_params(kernel, "kernel")
+        chi_s, wchi_s = _check_array_params(kernel, 'kernel')
         if is_factorizable:
-            a_s, ta_s = _check_array_params(transfer_a, "transfer_a")
-            lk_s, tk_s = _check_array_params(transfer_k, "transfer_k")
+            a_s, ta_s = _check_array_params(transfer_a, 'transfer_a')
+            lk_s, tk_s = _check_array_params(transfer_k, 'transfer_k')
             tka_s = NoneArr
             if (not is_a_constant) and (a_s.shape != ta_s.shape):
-                raise ValueError(
-                    "Time-dependent transfer arrays "
-                    "should have the same shape"
-                )
+                raise ValueError("Time-dependent transfer arrays "
+                                 "should have the same shape")
             if (not is_k_constant) and (lk_s.shape != tk_s.shape):
-                raise ValueError(
-                    "Scale-dependent transfer arrays "
-                    "should have the same shape"
-                )
+                raise ValueError("Scale-dependent transfer arrays "
+                                 "should have the same shape")
         else:
-            a_s, lk_s, tka_s = _check_array_params(
-                transfer_ka, "transer_ka", arr3=True
-            )
+            a_s, lk_s, tka_s = _check_array_params(transfer_ka, 'transer_ka',
+                                                   arr3=True)
             if tka_s.shape != (len(a_s), len(lk_s)):
-                raise ValueError(
-                    "2D transfer array has inconsistent "
-                    "shape. Should be (na,nk)"
-                )
+                raise ValueError("2D transfer array has inconsistent "
+                                 "shape. Should be (na,nk)")
             tka_s = tka_s.flatten()
             ta_s = NoneArr
             tk_s = NoneArr
 
         if not (np.diff(a_s) > 0).all():
-            raise ValueError(
-                "Scale factor must be monotonically " "increasing"
-            )
+            raise ValueError("Scale factor must be monotonically "
+                             "increasing")
 
         status = 0
-        ret = lib.cl_tracer_t_new_wrapper(
-            cosmo.cosmo,
-            int(der_bessel),
-            int(der_angles),
-            chi_s,
-            wchi_s,
-            a_s,
-            lk_s,
-            tka_s,
-            tk_s,
-            ta_s,
-            int(is_logt),
-            int(is_factorizable),
-            int(is_k_constant),
-            int(is_a_constant),
-            int(is_kernel_constant),
-            int(extrap_order_lok),
-            int(extrap_order_hik),
-            status,
-        )
+        ret = lib.cl_tracer_t_new_wrapper(cosmo.cosmo,
+                                          int(der_bessel),
+                                          int(der_angles),
+                                          chi_s, wchi_s,
+                                          a_s, lk_s,
+                                          tka_s, tk_s, ta_s,
+                                          int(is_logt),
+                                          int(is_factorizable),
+                                          int(is_k_constant),
+                                          int(is_a_constant),
+                                          int(is_kernel_constant),
+                                          int(extrap_order_lok),
+                                          int(extrap_order_hik),
+                                          status)
         self._trc.append(_check_returned_tracer(ret))
 
     @classmethod
-    def from_z_power(
-        cls, cosmo, *, A, alpha, z_min=0.0, z_max=6.0, n_chi=1024
-    ):
+    def from_z_power(cls, cosmo, *, A, alpha, z_min=0., z_max=6., n_chi=1024):
         """Constructor for tracers associated with a radial kernel of the form
 
         .. math::
@@ -793,14 +689,14 @@ class Tracer(CCLObject):
             z_max (:obj:`float`): maximum redshift up to which we define the kernel.
             n_chi (:obj:`float`): number of intervals in the radial comoving
                 distance on which we sample the kernel.
-        """  # noqa
+        """ # noqa
         if z_min >= z_max:
             raise ValueError("z_min should be smaller than z_max.")
 
         tracer = cls()
 
-        chi_min = cosmo.comoving_radial_distance(1.0 / (1 + z_min))
-        chi_max = cosmo.comoving_radial_distance(1.0 / (1 + z_max))
+        chi_min = cosmo.comoving_radial_distance(1./(1+z_min))
+        chi_max = cosmo.comoving_radial_distance(1./(1+z_max))
         chi_arr = np.linspace(chi_min, chi_max, n_chi)
         a_arr = cosmo.scale_factor_of_chi(chi_arr)
         w_arr = A * a_arr**alpha
@@ -812,7 +708,7 @@ class Tracer(CCLObject):
         # Sometimes lib is freed before some Tracers, in which case, this
         # doesn't work.
         # So just check that lib.cl_tracer_t_free is still a real function.
-        if hasattr(self, "_trc") and lib.cl_tracer_t_free is not None:
+        if hasattr(self, '_trc') and lib.cl_tracer_t_free is not None:
             for t in self._trc:
                 lib.cl_tracer_t_free(t)
 
@@ -836,9 +732,8 @@ class NzTracer(Tracer):
         return self._dndz(z)
 
 
-def NumberCountsTracer(
-    cosmo, *, dndz, bias=None, mag_bias=None, has_rsd, n_samples=256
-):
+def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
+                       has_rsd, n_samples=256):
     """Specific `Tracer` associated to galaxy clustering with linear
     scale-independent bias, including redshift-space distortions and
     magnification. The associated contributions are described in
@@ -876,8 +771,7 @@ def NumberCountsTracer(
     cosmo.compute_distances()
 
     from scipy.interpolate import interp1d
-
-    z_n, n = _check_array_params(dndz, "dndz")
+    z_n, n = _check_array_params(dndz, 'dndz')
     with UnlockInstance(tracer, mutate=False):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
 
@@ -887,9 +781,9 @@ def NumberCountsTracer(
         if kernel_d is None:
             kernel_d = get_density_kernel(cosmo, dndz=dndz)
         # Transfer
-        z_b, b = _check_array_params(bias, "bias")
+        z_b, b = _check_array_params(bias, 'bias')
         # Reverse order for increasing a
-        t_a = (1.0 / (1 + z_b[::-1]), b[::-1])
+        t_a = (1./(1+z_b[::-1]), b[::-1])
         tracer.add_tracer(cosmo, kernel=kernel_d, transfer_a=t_a)
 
     if has_rsd:  # Has RSDs
@@ -897,34 +791,31 @@ def NumberCountsTracer(
         if kernel_d is None:
             kernel_d = get_density_kernel(cosmo, dndz=dndz)
         # Transfer (growth rate)
-        z_b, _ = _check_array_params(dndz, "dndz")
-        a_s = 1.0 / (1 + z_b[::-1])
+        z_b, _ = _check_array_params(dndz, 'dndz')
+        a_s = 1./(1+z_b[::-1])
         t_a = (a_s, -cosmo.growth_rate(a_s))
-        tracer.add_tracer(cosmo, kernel=kernel_d, transfer_a=t_a, der_bessel=2)
+        tracer.add_tracer(cosmo, kernel=kernel_d,
+                          transfer_a=t_a, der_bessel=2)
     if mag_bias is not None:  # Has magnification bias
         # Kernel
-        chi, w = get_lensing_kernel(
-            cosmo, dndz=dndz, mag_bias=mag_bias, n_chi=n_samples
-        )
+        chi, w = get_lensing_kernel(cosmo, dndz=dndz, mag_bias=mag_bias,
+                                    n_chi=n_samples)
         # Multiply by -2 for magnification
         kernel_m = (chi, -2 * w)
-        if cosmo["sigma_0"] == 0:
+        if (cosmo['sigma_0'] == 0):
             # GR case
-            tracer.add_tracer(
-                cosmo, kernel=kernel_m, der_bessel=-1, der_angles=1
-            )
+            tracer.add_tracer(cosmo, kernel=kernel_m,
+                              der_bessel=-1, der_angles=1)
         else:
             # MG case
-            z_b, _ = _check_array_params(dndz, "dndz")
-            tracer._MG_add_tracer(
-                cosmo, kernel_m, z_b, der_bessel=-1, der_angles=1
-            )
+            z_b, _ = _check_array_params(dndz, 'dndz')
+            tracer._MG_add_tracer(cosmo, kernel_m, z_b,
+                                  der_bessel=-1, der_angles=1)
     return tracer
 
 
-def WeakLensingTracer(
-    cosmo, *, dndz, has_shear=True, ia_bias=None, use_A_ia=True, n_samples=256
-):
+def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
+                      use_A_ia=True, n_samples=256):
     """Specific `Tracer` associated to galaxy shape distortions including
     lensing shear and intrinsic alignments within the L-NLA model.
     The associated contributions are described in detail in Section 2.4.1
@@ -956,45 +847,41 @@ def WeakLensingTracer(
     cosmo.compute_distances()
 
     from scipy.interpolate import interp1d
-
-    z_n, n = _check_array_params(dndz, "dndz")
+    z_n, n = _check_array_params(dndz, 'dndz')
     with UnlockInstance(tracer, mutate=False):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
 
     if has_shear:
         kernel_l = get_lensing_kernel(cosmo, dndz=dndz, n_chi=n_samples)
-        if cosmo["sigma_0"] == 0:
+        if (cosmo['sigma_0'] == 0):
             # GR case
-            tracer.add_tracer(
-                cosmo, kernel=kernel_l, der_bessel=-1, der_angles=2
-            )
+            tracer.add_tracer(cosmo, kernel=kernel_l,
+                              der_bessel=-1, der_angles=2)
         else:
             # MG case
-            tracer._MG_add_tracer(
-                cosmo, kernel_l, z_n, der_bessel=-1, der_angles=2
-            )
+            tracer._MG_add_tracer(cosmo, kernel_l, z_n,
+                                  der_bessel=-1, der_angles=2)
     if ia_bias is not None:  # Has intrinsic alignments
-        z_a, tmp_a = _check_array_params(ia_bias, "ia_bias")
+        z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
         # Kernel
         kernel_i = get_density_kernel(cosmo, dndz=dndz)
         if use_A_ia:
             # Normalize so that A_IA=1
-            D = cosmo.growth_factor(1.0 / (1 + z_a))
+            D = cosmo.growth_factor(1./(1+z_a))
             # Transfer
             # See Joachimi et al. (2011), arXiv: 1008.3491, Eq. 6.
             # and note that we use C_1= 5e-14 from arXiv:0705.0166
-            rho_m = physical_constants.RHO_CRITICAL * cosmo["Omega_m"]
-            a = -tmp_a * 5e-14 * rho_m / D
+            rho_m = physical_constants.RHO_CRITICAL * cosmo['Omega_m']
+            a = - tmp_a * 5e-14 * rho_m / D
         else:
             # use the raw input normalization. Normally, this will be 1
             # to allow nonlinear PT IA models, where normalization is
             # already applied to the power spectrum.
             a = tmp_a
         # Reverse order for increasing a
-        t_a = (1.0 / (1 + z_a[::-1]), a[::-1])
-        tracer.add_tracer(
-            cosmo, kernel=kernel_i, transfer_a=t_a, der_bessel=-1, der_angles=2
-        )
+        t_a = (1./(1+z_a[::-1]), a[::-1])
+        tracer.add_tracer(cosmo, kernel=kernel_i, transfer_a=t_a,
+                          der_bessel=-1, der_angles=2)
     return tracer
 
 
@@ -1016,16 +903,15 @@ def CMBLensingTracer(cosmo, *, z_source, n_samples=100):
     # we need the distance functions at the C layer
     cosmo.compute_distances()
     kernel = get_kappa_kernel(cosmo, z_source=z_source, n_samples=n_samples)
-    if cosmo["sigma_0"] == 0:
+    if (cosmo['sigma_0'] == 0):
         tracer.add_tracer(cosmo, kernel=kernel, der_bessel=-1, der_angles=1)
     else:
-        tracer._MG_add_tracer(
-            cosmo, kernel, z_source, der_bessel=-1, der_angles=1
-        )
+        tracer._MG_add_tracer(cosmo, kernel, z_source,
+                              der_bessel=-1, der_angles=1)
     return tracer
 
 
-def tSZTracer(cosmo, *, z_max=6.0, n_chi=1024):
+def tSZTracer(cosmo, *, z_max=6., n_chi=1024):
     """Specific :class:`Tracer` associated with the thermal Sunyaev Zel'dovich
     Compton-y parameter. The radial kernel for this tracer is simply given by
 
@@ -1048,12 +934,11 @@ def tSZTracer(cosmo, *, z_max=6.0, n_chi=1024):
     """
     # This is \sigma_T / (m_e * c^2)
     prefac = 4.01710079e-06
-    return Tracer.from_z_power(
-        cosmo, A=prefac, alpha=1, z_min=0.0, z_max=z_max, n_chi=n_chi
-    )
+    return Tracer.from_z_power(cosmo, A=prefac, alpha=1, z_min=0.,
+                               z_max=z_max, n_chi=n_chi)
 
 
-def CIBTracer(cosmo, *, z_min=0.0, z_max=6.0, n_chi=1024):
+def CIBTracer(cosmo, *, z_min=0., z_max=6., n_chi=1024):
     """Specific :class:`Tracer` associated with the cosmic infrared
     background (CIB). The radial kernel for this tracer is simply
 
@@ -1076,12 +961,11 @@ def CIBTracer(cosmo, *, z_min=0.0, z_max=6.0, n_chi=1024):
         n_chi (:obj:`float`): number of intervals in the radial comoving
             distance on which we sample the kernel.
     """
-    return Tracer.from_z_power(
-        cosmo, A=1.0, alpha=1, z_min=z_min, z_max=z_max, n_chi=n_chi
-    )
+    return Tracer.from_z_power(cosmo, A=1.0, alpha=1, z_min=z_min,
+                               z_max=z_max, n_chi=n_chi)
 
 
-def ISWTracer(cosmo, *, z_max=6.0, n_chi=1024):
+def ISWTracer(cosmo, *, z_max=6., n_chi=1024):
     """Specific :class:`Tracer` associated with the integrated Sachs-Wolfe
     effect (ISW). Useful when cross-correlating any low-redshift probe with
     the primary CMB anisotropies. The ISW contribution to the temperature
@@ -1110,14 +994,14 @@ def ISWTracer(cosmo, *, z_max=6.0, n_chi=1024):
     """
     tracer = Tracer()
 
-    chi_max = cosmo.comoving_radial_distance(1.0 / (1 + z_max))
+    chi_max = cosmo.comoving_radial_distance(1./(1+z_max))
     chi = np.linspace(0, chi_max, n_chi)
     a_arr = cosmo.scale_factor_of_chi(chi)
-    H0 = cosmo["h"] / physical_constants.CLIGHT_HMPC
-    OM = cosmo["Omega_c"] + cosmo["Omega_b"]
+    H0 = cosmo['h'] / physical_constants.CLIGHT_HMPC
+    OM = cosmo['Omega_c']+cosmo['Omega_b']
     Ez = cosmo.h_over_h0(a_arr)
     fz = cosmo.growth_rate(a_arr)
-    w_arr = 3 * cosmo["T_CMB"] * H0**3 * OM * Ez * chi**2 * (1 - fz)
+    w_arr = 3*cosmo['T_CMB']*H0**3*OM*Ez*chi**2*(1-fz)
 
     tracer.add_tracer(cosmo, kernel=(chi, w_arr), der_bessel=-1)
     return tracer
@@ -1125,7 +1009,7 @@ def ISWTracer(cosmo, *, z_max=6.0, n_chi=1024):
 
 def _check_returned_tracer(return_val):
     """Wrapper to catch exceptions when tracers are spawned from C."""
-    if isinstance(return_val, int):
+    if (isinstance(return_val, int)):
         check(return_val)
         tr = None
     else:

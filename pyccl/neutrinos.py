@@ -1,7 +1,4 @@
-__all__ = (
-    "NeutrinoMassSplits",
-    "nu_masses",
-)
+__all__ = ("NeutrinoMassSplits", "nu_masses",)
 
 from enum import Enum
 from numbers import Real
@@ -24,13 +21,12 @@ class NeutrinoMassSplits(Enum):
     - 'inverted': inverted hierarchy.
     - 'list': a list of 3 different masses is passed.
     """
-
-    SUM = "sum"
-    SINGLE = "single"
-    EQUAL = "equal"
-    NORMAL = "normal"
-    INVERTED = "inverted"
-    LIST = "list"  # placeholder for backwards-compatibility
+    SUM = 'sum'
+    SINGLE = 'single'
+    EQUAL = 'equal'
+    NORMAL = 'normal'
+    INVERTED = 'inverted'
+    LIST = 'list'  # placeholder for backwards-compatibility
 
 
 def nu_masses(*, Omega_nu_h2=None, mass_split, m_nu=None):
@@ -58,7 +54,8 @@ def nu_masses(*, Omega_nu_h2=None, mass_split, m_nu=None):
 
 
 def _get_neutrino_masses(*, m_nu, mass_split):
-    """ """
+    """
+    """
     if isinstance(m_nu, Real) and m_nu == 0:  # no massive neutrinos
         return np.array([])
     if isinstance(m_nu, Iterable):  # input was list
@@ -71,16 +68,14 @@ def _get_neutrino_masses(*, m_nu, mass_split):
     if split(mass_split) == split.SINGLE:
         return np.atleast_1d(m_nu)
     if split(mass_split) == split.EQUAL:
-        return np.full(3, m_nu / 3)
+        return np.full(3, m_nu/3)
 
     c = const
     D12, D13p, D13n = c.DELTAM12_sq, c.DELTAM13_sq_pos, c.DELTAM13_sq_neg
 
     def M_nu(m, D13):
         m2 = m * m
-        return np.array(
-            [m.sum() - m_nu, m2[1] - m2[0] - D12, m2[2] - m2[0] - D13]
-        )
+        return np.array([m.sum()-m_nu, m2[1]-m2[0]-D12, m2[2]-m2[0]-D13])
 
     def check_mnu(val):
         if m_nu < val:

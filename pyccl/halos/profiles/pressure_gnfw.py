@@ -7,7 +7,7 @@ from . import HaloProfilePressure
 
 
 class HaloProfilePressureGNFW(HaloProfilePressure):
-    """Generalized NFW electron pressure profile by
+    """ Generalized NFW electron pressure profile by
     `Arnaud et al. 2010 <https://arxiv.org/abs/0910.1234>`_.
 
     The parametrization is:
@@ -68,39 +68,14 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
             Profile threshold, in units of :math:`r_{\\mathrm{500c}}`.
             Defaults to :math:`+\\infty`.
     """
-
     __repr_attrs__ = __eq_attrs__ = (
-        "mass_bias",
-        "P0",
-        "c500",
-        "alpha",
-        "alpha_P",
-        "beta",
-        "gamma",
-        "P0_hexp",
-        "qrange",
-        "nq",
-        "x_out",
-        "mass_def",
-        "precision_fftlog",
-    )
+        "mass_bias", "P0", "c500", "alpha", "alpha_P", "beta", "gamma",
+        "P0_hexp", "qrange", "nq", "x_out", "mass_def", "precision_fftlog",)
 
-    def __init__(
-        self,
-        *,
-        mass_def,
-        mass_bias=0.8,
-        P0=6.41,
-        c500=1.81,
-        alpha=1.33,
-        alpha_P=0.12,
-        beta=4.13,
-        gamma=0.31,
-        P0_hexp=-1.0,
-        qrange=(1e-3, 1e3),
-        nq=128,
-        x_out=np.inf
-    ):
+    def __init__(self, *, mass_def, mass_bias=0.8, P0=6.41,
+                 c500=1.81, alpha=1.33, alpha_P=0.12,
+                 beta=4.13, gamma=0.31, P0_hexp=-1.,
+                 qrange=(1e-3, 1e3), nq=128, x_out=np.inf):
         self.qrange = qrange
         self.nq = nq
         self.mass_bias = mass_bias
@@ -117,19 +92,9 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         self._fourier_interp = None
         super().__init__(mass_def=mass_def)
 
-    def update_parameters(
-        self,
-        *,
-        mass_bias=None,
-        P0=None,
-        c500=None,
-        alpha=None,
-        beta=None,
-        gamma=None,
-        alpha_P=None,
-        P0_hexp=None,
-        x_out=None
-    ):
+    def update_parameters(self, *, mass_bias=None, P0=None,
+                          c500=None, alpha=None, beta=None, gamma=None,
+                          alpha_P=None, P0_hexp=None, x_out=None):
         """Update any of the parameters associated with this profile.
         Any parameter set to ``None`` won't be updated.
 
@@ -189,10 +154,10 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
 
     def _form_factor(self, x):
         # Scale-dependent factor of the GNFW profile.
-        f1 = (self.c500 * x) ** (-self.gamma)
-        exponent = -(self.beta - self.gamma) / self.alpha
-        f2 = (1 + (self.c500 * x) ** self.alpha) ** exponent
-        return f1 * f2
+        f1 = (self.c500*x)**(-self.gamma)
+        exponent = -(self.beta-self.gamma)/self.alpha
+        f2 = (1+(self.c500*x)**self.alpha)**exponent
+        return f1*f2
 
     def _integ_interp(self):
         # Precomputes the Fourier transform of the profile in terms
@@ -202,38 +167,30 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
         from scipy.integrate import quad
 
         def integrand(x):
-            return self._form_factor(x) * x
+            return self._form_factor(x)*x
 
         q_arr = np.geomspace(self.qrange[0], self.qrange[1], self.nq)
         # We use the `weight` feature of quad to quickly estimate
         # the Fourier transform. We could use the existing FFTLog
         # framework, but this is a lot less of a kerfuffle.
-        f_arr = np.array(
-            [
-                quad(
-                    integrand,
-                    a=1e-4,
-                    b=self.x_out,  # limits of integration
-                    weight="sin",  # fourier sine weight
-                    wvar=q,
-                )[0]
-                / q
-                for q in q_arr
-            ]
-        )
-        Fq = interp1d(
-            np.log(q_arr), f_arr, fill_value="extrapolate", bounds_error=False
-        )
+        f_arr = np.array([quad(integrand,
+                               a=1e-4, b=self.x_out,  # limits of integration
+                               weight="sin",  # fourier sine weight
+                               wvar=q)[0] / q
+                          for q in q_arr])
+        Fq = interp1d(np.log(q_arr), f_arr,
+                      fill_value="extrapolate",
+                      bounds_error=False)
         return Fq
 
     def _norm(self, cosmo, M, a, mb):
         # Computes the normalization factor of the GNFW profile.
         # Normalization factor is given in units of eV/cm^3.
         # (Bolliet et al. 2017).
-        h70 = cosmo["h"] / 0.7
-        C0 = 1.65 * h70**2
-        CM = (h70 * M * mb / 3e14) ** (2 / 3 + self.alpha_P)  # M dependence
-        Cz = cosmo.h_over_h0(a) ** (8 / 3)  # z dependence
+        h70 = cosmo["h"]/0.7
+        C0 = 1.65*h70**2
+        CM = (h70*M*mb/3E14)**(2/3+self.alpha_P)   # M dependence
+        Cz = cosmo.h_over_h0(a)**(8/3)  # z dependence
         P0_corr = self.P0 * h70**self.P0_hexp  # h-corrected P_0
         return P0_corr * C0 * CM * Cz
 
@@ -274,12 +231,12 @@ class HaloProfilePressureGNFW(HaloProfilePressure):
 
         mb = self.mass_bias
         # R_Delta*(1+z)
-        R = self.mass_def.get_radius(cosmo, M_use * mb, a) / a
+        R = self.mass_def.get_radius(cosmo, M_use*mb, a) / a
 
         ff = self._fourier_interp(np.log(k_use[None, :] * R[:, None]))
         nn = self._norm(cosmo, M_use, a, mb)
 
-        prof = (4 * np.pi * R**3 * nn)[:, None] * ff
+        prof = (4*np.pi*R**3 * nn)[:, None] * ff
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)

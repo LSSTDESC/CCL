@@ -1,15 +1,11 @@
-__all__ = (
-    "Profile2pt",
-    "Profile2ptHOD",
-    "Profile2ptCIB",
-)
+__all__ = ("Profile2pt", "Profile2ptHOD", "Profile2ptCIB",)
 
 from .. import CCLAutoRepr
 from . import HaloProfileHOD, HaloProfileCIBShang12
 
 
 class Profile2pt(CCLAutoRepr):
-    """This class implements the 1-halo 2-point correlator between
+    """ This class implements the 1-halo 2-point correlator between
     two halo profiles.
 
     .. math::
@@ -29,21 +25,20 @@ class Profile2pt(CCLAutoRepr):
             Defaults to ``r_corr=0``, returning simply the product
             of the fourier profiles.
     """
-
     __repr_attrs__ = __eq_attrs__ = ("r_corr",)
 
-    def __init__(self, *, r_corr=0.0):
+    def __init__(self, *, r_corr=0.):
         self.r_corr = r_corr
 
     def update_parameters(self, *, r_corr=None):
-        """Update any of the parameters associated with this 1-halo
+        """ Update any of the parameters associated with this 1-halo
         2-point correlator. Any parameter set to ``None`` won't be updated.
         """
         if r_corr is not None:
             self.r_corr = r_corr
 
     def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
-        """Return the Fourier-space two-point moment between
+        """ Return the Fourier-space two-point moment between
         two profiles.
 
         .. math::
@@ -87,7 +82,7 @@ class Profile2pt(CCLAutoRepr):
 
 
 class Profile2ptHOD(Profile2pt):
-    """This class implements the Fourier-space 1-halo 2-point
+    """ This class implements the Fourier-space 1-halo 2-point
     correlator for the HOD profile.
 
     .. math::
@@ -100,7 +95,7 @@ class Profile2ptHOD(Profile2pt):
     """
 
     def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
-        """Returns the Fourier-space two-point moment for the HOD
+        """ Returns the Fourier-space two-point moment for the HOD
         profile.
 
         Args:
@@ -123,7 +118,7 @@ class Profile2ptHOD(Profile2pt):
             where `N_k` and `N_m` are the sizes of `k` and `M`
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
-        """  # noqa
+        """ # noqa
         if prof2 is None:
             prof2 = prof
 
@@ -137,7 +132,7 @@ class Profile2ptHOD(Profile2pt):
 
 
 class Profile2ptCIB(Profile2pt):
-    """This class implements the Fourier-space 1-halo 2-point
+    """ This class implements the Fourier-space 1-halo 2-point
     correlator for the CIB profile. It follows closely the
     implementation of the equivalent HOD quantity
     (see :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`
@@ -145,7 +140,7 @@ class Profile2ptCIB(Profile2pt):
     """
 
     def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
-        """Returns the Fourier-space two-point moment for the CIB
+        """ Returns the Fourier-space two-point moment for the CIB
         profile.
 
         Args:
@@ -168,7 +163,7 @@ class Profile2ptCIB(Profile2pt):
             where `N_k` and `N_m` are the sizes of `k` and `M`
             respectively. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
-        """  # noqa
+        """ # noqa
         if prof2 is None:
             prof2 = prof
 

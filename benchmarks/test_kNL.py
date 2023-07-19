@@ -13,20 +13,19 @@ def test_kNL():
         n_s=0.96,
         Neff=0,
         m_nu=0.0,
-        w0=-1.0,
-        wa=0.0,
+        w0=-1.,
+        wa=0.,
         T_CMB=2.7,
-        mass_split="normal",
+        mass_split='normal',
         Omega_g=0,
         Omega_k=0,
-        transfer_function="bbks",
-        matter_power_spectrum="linear",
-    )
+        transfer_function='bbks',
+        matter_power_spectrum='linear')
 
-    data = np.loadtxt("./benchmarks/data/kNL.txt")
+    data = np.loadtxt('./benchmarks/data/kNL.txt')
     a = data[:, 0]
     kNL = data[:, 1]
     kNL_ccl = ccl.kNL(cosmo, a)
     for i in range(len(a)):
-        err = np.abs(kNL_ccl[i] / kNL[i] - 1)
+        err = np.abs(kNL_ccl[i]/kNL[i] - 1)
         assert np.allclose(err, 0, rtol=0, atol=KNL_TOLERANCE)

@@ -3,9 +3,8 @@ import pytest
 import pyccl as ccl
 
 
-@pytest.mark.parametrize(
-    "split", ["normal", "inverted", "equal", "sum", "single"]
-)
+@pytest.mark.parametrize('split', ['normal', 'inverted', 'equal', 'sum',
+                                   'single'])
 def test_nu_masses_smoke(split):
     m = ccl.nu_masses(Omega_nu_h2=0.1, mass_split=split)
     if split == "sum":
@@ -18,4 +17,4 @@ def test_nu_masses_smoke(split):
 
 def test_neutrinos_raises():
     with pytest.raises(ValueError):
-        ccl.nu_masses(Omega_nu_h2=0.1, mass_split="blah")
+        ccl.nu_masses(Omega_nu_h2=0.1, mass_split='blah')

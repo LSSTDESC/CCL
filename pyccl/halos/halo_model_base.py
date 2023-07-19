@@ -1,9 +1,5 @@
-__all__ = (
-    "HMIngredients",
-    "Concentration",
-    "MassFunc",
-    "HaloBias",
-)
+__all__ = ("HMIngredients", "Concentration", "MassFunc", "HaloBias",
+           "get_delta_c", )
 
 from abc import abstractmethod
 
@@ -13,18 +9,50 @@ from .. import CCLAutoRepr, CCLNamedClass, lib, check
 from .. import physical_constants as const
 
 
+def get_delta_c(cosmo, a, kind='EdS'):
+    """Returns the linear collapse threshold.
+
+    Args:
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        a (:obj:`float` or `array`): scale factor.
+        kind (:obj:`str`): prescription to use. Should be one of
+
+            * 'EdS': the SC prediction in Einstein de-Sitter, :math:`\\delta_c=(3/20)(12\\pi)^{2/3}`.
+            * 'EdS_approx': a common approximation to the EdS result :math:`\\delta_c=1.686`.
+            * 'NakamuraSuto97': the prescription from `Nakamura & Suto 1997 <https://arxiv.org/abs/astro-ph/9612074>`_.
+            * 'Mead16': the prescription from `Mead et al. 2016 <https://arxiv.org/abs/1602.02154>`_.
+
+    Returns:
+        (:obj:`float` or `array`): linear collapse threshold.
+    """  # noqa
+    # This is the linear collapse threshold in Einstein de-Sitter:
+    # delta_c = 3/20*(12*pi)^(2/3)
+    dc0 = 1.68647019984
+
+    if kind == 'EdS':
+        return dc0
+    elif kind == 'EdS_approx':
+        return 1.686
+    elif kind == 'NakamuraSuto97':
+        Om = cosmo.omega_x(a, 'matter')
+        return dc0*(1+0.012299*np.log10(Om))
+    elif kind == 'Mead16':
+        Om = cosmo.omega_x(a, 'matter')
+        s8 = cosmo.sigma8()*cosmo.growth_factor(a)
+        facs8 = (1.59+0.0314*np.log(s8))
+        facOm = (1+0.0123*np.log10(Om))
+        return facs8*facOm
+    else:
+        raise ValueError(f"Unknown threshold kind {kind}")
+
+
 class HMIngredients(CCLAutoRepr, CCLNamedClass):
     """Base class for halo model ingredients."""
-
-    __repr_attrs__ = __eq_attrs__ = (
-        "mass_def",
-        "mass_def_strict",
-    )
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",)
 
     def __init__(self, *, mass_def, mass_def_strict=True):
         # Check mass definition consistency.
         from .massdef import MassDef
-
         mass_def = MassDef.create_instance(mass_def)
         self.mass_def_strict = mass_def_strict
         self._check_mass_def(mass_def)
@@ -50,13 +78,13 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
         """Check if this class is defined for mass definition ``mass_def``."""
 
     def _setup(self) -> None:
-        """Use this function to initialize any internal attributes
+        """ Use this function to initialize any internal attributes
         of this object. This function is called at the very end of the
         constructor call.
         """
 
     def _check_mass_def(self, mass_def) -> None:
-        """Return False if the input mass definition agrees with
+        """ Return False if the input mass definition agrees with
         the definitions for which this mass function parametrization
         works. True otherwise. This function gets called at the
         start of the constructor call.
@@ -74,14 +102,12 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
             if self._mass_def_strict_always:
                 # Class has no universal model and mass is incompatible.
                 raise ValueError(
-                    f"{msg} and this requirement cannot be relaxed."
-                )
+                    f"{msg} and this requirement cannot be relaxed.")
 
             if self.mass_def_strict:
                 # Strict mass_def check enabled and mass is incompatible.
                 raise ValueError(
-                    f"{msg}. To relax this check set `mass_def_strict=False`."
-                )
+                    f"{msg}. To relax this check set `mass_def_strict=False`.")
 
     def _get_logM_sigM(self, cosmo, M, a, *, return_dlns=False):
         """Compute ``logM``, ``sigM``, and (optionally) ``dlns_dlogM``."""
@@ -96,9 +122,8 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
             return logM, sigM
 
         # dlogsigma(M)/dlog10(M)
-        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(
-            cosmo.cosmo, a, logM, len(logM), status
-        )
+        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
+                                                   len(logM), status)
         check(status, cosmo=cosmo)
         return logM, sigM, dlns_dlogM
 
@@ -132,11 +157,10 @@ class MassFunc(HMIngredients):
 
     .. automethod:: __call__
     """
-
     _mass_def_strict_always = False
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        """Get the :math:`f(\\sigma_M)` function for this mass function
+        """ Get the :math:`f(\\sigma_M)` function for this mass function
         object (see description of this class for details).
 
         Args:
@@ -167,10 +191,9 @@ class MassFunc(HMIngredients):
         """
         M_use = np.atleast_1d(M)
         logM, sigM, dlns_dlogM = self._get_logM_sigM(
-            cosmo, M_use, a, return_dlns=True
-        )
+            cosmo, M_use, a, return_dlns=True)
 
-        rho = const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"] ** 2
+        rho = (const.RHO_CRITICAL * cosmo['Omega_m'] * cosmo['h']**2)
         f = self._get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
         mf = f * rho * dlns_dlogM / M_use
         if np.ndim(M) == 0:
@@ -198,11 +221,10 @@ class HaloBias(HMIngredients):
 
     .. automethod:: __call__
     """
-
     _mass_def_strict_always = False
 
     def _get_bsigma(self, cosmo, sigM, a):
-        """Get the halo bias as a function of sigmaM.
+        """ Get the halo bias as a function of sigmaM.
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
@@ -243,7 +265,6 @@ class Concentration(HMIngredients):
 
     .. automethod:: __call__
     """
-
     _mass_def_strict_always = True
 
     def __init__(self, *, mass_def):

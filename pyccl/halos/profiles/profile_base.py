@@ -1,9 +1,5 @@
-__all__ = (
-    "HaloProfile",
-    "HaloProfileMatter",
-    "HaloProfilePressure",
-    "HaloProfileCIB",
-)
+__all__ = ("HaloProfile", "HaloProfileMatter",
+           "HaloProfilePressure", "HaloProfileCIB",)
 
 import functools
 from typing import Callable
@@ -17,7 +13,7 @@ from .. import MassDef
 
 
 class HaloProfile(CCLAutoRepr):
-    """This class implements functionality associated to
+    """ This class implements functionality associated to
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL
     for specific halo profiles, or write your own subclass.
@@ -42,16 +38,13 @@ class HaloProfile(CCLAutoRepr):
     calculation.
     """
 
-    def __init__(
-        self, *, mass_def, concentration=None, is_number_counts=False
-    ):
+    def __init__(self, *, mass_def, concentration=None,
+                 is_number_counts=False):
         # Verify that profile can be initialized.
         if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
             name = type(self).__name__
-            raise TypeError(
-                f"Can't instantiate {name} with no "
-                "_real or _fourier implementation."
-            )
+            raise TypeError(f"Can't instantiate {name} with no "
+                            "_real or _fourier implementation.")
 
         # Initialize FFTLog.
         self.precision_fftlog = FFTLogParams()
@@ -60,8 +53,7 @@ class HaloProfile(CCLAutoRepr):
 
         # Initialize mass_def and concentration.
         self.mass_def, *out = MassDef.from_specs(
-            mass_def, concentration=concentration
-        )
+            mass_def, concentration=concentration)
         if out:
             self.concentration = out[0]
 
@@ -105,7 +97,7 @@ class HaloProfile(CCLAutoRepr):
         self.precision_fftlog.update_parameters(**kwargs)
 
     def _get_plaw_fourier(self, cosmo, a):
-        """This controls the value of `plaw_fourier` to be used
+        """ This controls the value of `plaw_fourier` to be used
         as a function of cosmology and scale factor.
 
         Args:
@@ -115,10 +107,10 @@ class HaloProfile(CCLAutoRepr):
         Returns:
             float: power law index to be used with FFTLog.
         """
-        return self.precision_fftlog["plaw_fourier"]
+        return self.precision_fftlog['plaw_fourier']
 
     def _get_plaw_projected(self, cosmo, a):
-        """This controls the value of `plaw_projected` to be
+        """ This controls the value of `plaw_projected` to be
         used as a function of cosmology and scale factor.
 
         Args:
@@ -128,15 +120,15 @@ class HaloProfile(CCLAutoRepr):
         Returns:
             float: power law index to be used with FFTLog.
         """
-        return self.precision_fftlog["plaw_projected"]
+        return self.precision_fftlog['plaw_projected']
 
-    _real: Callable  # implementation of the real profile
+    _real: Callable       # implementation of the real profile
 
-    _fourier: Callable  # implementation of the Fourier profile
+    _fourier: Callable    # implementation of the Fourier profile
 
     _projected: Callable  # implementation of the projected profile
 
-    _cumul2d: Callable  # implementation of the cumulative surface density
+    _cumul2d: Callable    # implementation of the cumulative surface density
 
     def real(self, cosmo, r, M, a):
         """
@@ -184,7 +176,7 @@ class HaloProfile(CCLAutoRepr):
             the sizes of ``k`` and ``M`` respectively. If ``k`` or ``M``
             are scalars, the corresponding dimension will be
             squeezed out on output.
-        """  # noqa
+        """ # noqa
         if getattr(self, "_fourier", None):
             return self._fourier(cosmo, k, M, a)
         return self._fftlog_wrap(cosmo, k, M, a, fourier_out=True)
@@ -239,7 +231,7 @@ class HaloProfile(CCLAutoRepr):
             the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
             are scalars, the corresponding dimension will be
             squeezed out on output.
-        """  # noqa
+        """ # noqa
         if getattr(self, "_cumul2d", None):
             return self._cumul2d(cosmo, r_t, M, a)
         return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=True)
@@ -345,9 +337,8 @@ class HaloProfile(CCLAutoRepr):
             ``M`` are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        convergence = self.convergence(
-            cosmo, r, M, a_lens=a_lens, a_source=a_source
-        )
+        convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
+                                       a_source=a_source)
         shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source)
         return shear / (1.0 - convergence)
 
@@ -378,16 +369,15 @@ class HaloProfile(CCLAutoRepr):
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        convergence = self.convergence(
-            cosmo, r, M, a_lens=a_lens, a_source=a_source
-        )
+        convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
+                                       a_source=a_source)
         shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source)
 
-        return 1.0 / ((1.0 - convergence) ** 2 - np.abs(shear) ** 2)
+        return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 
-    def _fftlog_wrap(
-        self, cosmo, k, M, a, fourier_out=False, large_padding=True, ell=0
-    ):
+    def _fftlog_wrap(self, cosmo, k, M, a,
+                     fourier_out=False,
+                     large_padding=True, ell=0):
         # This computes the 3D Hankel transform
         #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_ell(k r)
         # if fourier_out == True, and
@@ -406,15 +396,13 @@ class HaloProfile(CCLAutoRepr):
 
         # k/r ranges to be used with FFTLog and its sampling.
         if large_padding:
-            k_min = self.precision_fftlog["padding_lo_fftlog"] * np.amin(k_use)
-            k_max = self.precision_fftlog["padding_hi_fftlog"] * np.amax(k_use)
+            k_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(k_use)
+            k_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(k_use)
         else:
-            k_min = self.precision_fftlog["padding_lo_extra"] * np.amin(k_use)
-            k_max = self.precision_fftlog["padding_hi_extra"] * np.amax(k_use)
-        n_k = (
-            int(np.log10(k_max / k_min))
-            * self.precision_fftlog["n_per_decade"]
-        )
+            k_min = self.precision_fftlog['padding_lo_extra'] * np.amin(k_use)
+            k_max = self.precision_fftlog['padding_hi_extra'] * np.amax(k_use)
+        n_k = (int(np.log10(k_max / k_min)) *
+               self.precision_fftlog['n_per_decade'])
         r_arr = np.geomspace(k_min, k_max, n_k)
 
         p_k_out = np.zeros([nM, k_use.size])
@@ -424,25 +412,19 @@ class HaloProfile(CCLAutoRepr):
         plaw_index = self._get_plaw_fourier(cosmo, a)
 
         # Compute Fourier profile through fftlog
-        k_arr, p_fourier_M = _fftlog_transform(
-            r_arr, p_real_M, 3, ell, plaw_index
-        )
+        k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
+                                               3, ell, plaw_index)
         lk_arr = np.log(k_arr)
 
         for im, p_k_arr in enumerate(p_fourier_M):
             # Resample into input k values
-            p_fourier = resample_array(
-                lk_arr,
-                p_k_arr,
-                lk_use,
-                self.precision_fftlog["extrapol"],
-                self.precision_fftlog["extrapol"],
-                0,
-                0,
-            )
+            p_fourier = resample_array(lk_arr, p_k_arr, lk_use,
+                                       self.precision_fftlog['extrapol'],
+                                       self.precision_fftlog['extrapol'],
+                                       0, 0)
             p_k_out[im, :] = p_fourier
         if fourier_out:
-            p_k_out *= (2 * np.pi) ** 3
+            p_k_out *= (2 * np.pi)**3
 
         if np.ndim(k) == 0:
             p_k_out = np.squeeze(p_k_out, axis=-1)
@@ -459,12 +441,10 @@ class HaloProfile(CCLAutoRepr):
         nM = len(M_use)
 
         # k/r range to be used with FFTLog and its sampling.
-        r_t_min = self.precision_fftlog["padding_lo_fftlog"] * np.amin(r_t_use)
-        r_t_max = self.precision_fftlog["padding_hi_fftlog"] * np.amax(r_t_use)
-        n_r_t = (
-            int(np.log10(r_t_max / r_t_min))
-            * self.precision_fftlog["n_per_decade"]
-        )
+        r_t_min = self.precision_fftlog['padding_lo_fftlog'] * np.amin(r_t_use)
+        r_t_max = self.precision_fftlog['padding_hi_fftlog'] * np.amax(r_t_use)
+        n_r_t = (int(np.log10(r_t_max / r_t_min)) *
+                 self.precision_fftlog['n_per_decade'])
         k_arr = np.geomspace(r_t_min, r_t_max, n_r_t)
 
         sig_r_t_out = np.zeros([nM, r_t_use.size])
@@ -474,10 +454,9 @@ class HaloProfile(CCLAutoRepr):
             p_fourier = self._fourier(cosmo, k_arr, M_use, a)
         else:
             # Compute with FFTLog otherwise.
-            lpad = self.precision_fftlog["large_padding_2D"]
-            p_fourier = self._fftlog_wrap(
-                cosmo, k_arr, M_use, a, fourier_out=True, large_padding=lpad
-            )
+            lpad = self.precision_fftlog['large_padding_2D']
+            p_fourier = self._fftlog_wrap(cosmo, k_arr, M_use, a,
+                                          fourier_out=True, large_padding=lpad)
         if is_cumul2d:
             # The cumulative profile involves a factor 1/(k R) in
             # the integrand.
@@ -492,24 +471,20 @@ class HaloProfile(CCLAutoRepr):
             plaw_index = self._get_plaw_projected(cosmo, a)
 
         # Compute projected profile through fftlog
-        r_t_arr, sig_r_t_M = _fftlog_transform(
-            k_arr, p_fourier, 2, i_bessel, plaw_index
-        )
+        r_t_arr, sig_r_t_M = _fftlog_transform(k_arr, p_fourier,
+                                               2, i_bessel,
+                                               plaw_index)
         lr_t_arr = np.log(r_t_arr)
 
         if is_cumul2d:
             sig_r_t_M /= r_t_arr[None, :]
         for im, sig_r_t_arr in enumerate(sig_r_t_M):
             # Resample into input r_t values
-            sig_r_t = resample_array(
-                lr_t_arr,
-                sig_r_t_arr,
-                lr_t_use,
-                self.precision_fftlog["extrapol"],
-                self.precision_fftlog["extrapol"],
-                0,
-                0,
-            )
+            sig_r_t = resample_array(lr_t_arr, sig_r_t_arr,
+                                     lr_t_use,
+                                     self.precision_fftlog['extrapol'],
+                                     self.precision_fftlog['extrapol'],
+                                     0, 0)
             sig_r_t_out[im, :] = sig_r_t
 
         if np.ndim(r_t) == 0:
@@ -535,7 +510,7 @@ class HaloProfileMatter(HaloProfile):
         Returns:
             :obj:`float`: normalization factor of this profile.
         """
-        return const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"] ** 2
+        return const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"]**2
 
 
 class HaloProfilePressure(HaloProfile):

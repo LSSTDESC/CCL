@@ -88,7 +88,7 @@ setup(
     url="https://github.com/LSSTDESC/CCL",
     packages=find_packages(),
     provides=['pyccl'],
-    package_data={'pyccl': ['_ccllib.so']},
+    package_data={'pyccl': ['_ccllib.so', 'emulators/data/*.npz']},
     include_package_data=True,
     use_scm_version=True,
     distclass=Distribution,

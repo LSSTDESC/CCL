@@ -12,11 +12,9 @@ def test_Cosmology_eq_repr_hash():
     # Test eq, repr, hash for Cosmology and CosmologyCalculator.
     # 1. Using a complicated Cosmology object.
     extras = {"camb": {"halofit_version": "mead2020", "HMCode_logT_AGN": 7.8}}
-    kwargs = {
-        "transfer_function": "bbks",
-        "matter_power_spectrum": "linear",
-        "extra_parameters": extras,
-    }
+    kwargs = {"transfer_function": "bbks",
+              "matter_power_spectrum": "linear",
+              "extra_parameters": extras}
     COSMO1 = ccl.CosmologyVanillaLCDM(**kwargs)
     COSMO2 = ccl.CosmologyVanillaLCDM(**kwargs)
     assert check_eq_repr_hash(COSMO1, COSMO2)
@@ -30,83 +28,37 @@ def test_Cosmology_eq_repr_hash():
     # 3. Using a CosmologyCalculator.
     COSMO1.compute_linear_power()
     a_arr, lk_arr, pk_arr = COSMO1.get_linear_power().get_spline_arrays()
-    pk_linear = {
-        "a": a_arr,
-        "k": np.exp(lk_arr),
-        "delta_matter:delta_matter": pk_arr,
-    }
+    pk_linear = {"a": a_arr,
+                 "k": np.exp(lk_arr),
+                 "delta_matter:delta_matter": pk_arr}
     COSMO4 = ccl.CosmologyCalculator(
-        Omega_c=0.25,
-        Omega_b=0.05,
-        h=0.67,
-        n_s=0.96,
-        sigma8=0.81,
-        pk_linear=pk_linear,
-        pk_nonlin=pk_linear,
-    )
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
     COSMO5 = ccl.CosmologyCalculator(
-        Omega_c=0.25,
-        Omega_b=0.05,
-        h=0.67,
-        n_s=0.96,
-        sigma8=0.81,
-        pk_linear=pk_linear,
-        pk_nonlin=pk_linear,
-    )
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
     assert check_eq_repr_hash(COSMO4, COSMO5)
 
-    pk_linear = {
-        "a": a_arr,
-        "k": np.exp(lk_arr),
-        "delta_matter:delta_matter": 2 * pk_arr,
-    }
+    pk_linear = {"a": a_arr,
+                 "k": np.exp(lk_arr),
+                 "delta_matter:delta_matter": 2*pk_arr}
     COSMO6 = ccl.CosmologyCalculator(
-        Omega_c=0.25,
-        Omega_b=0.05,
-        h=0.67,
-        n_s=0.96,
-        sigma8=0.81,
-        pk_linear=pk_linear,
-        pk_nonlin=pk_linear,
-    )
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
+        pk_linear=pk_linear, pk_nonlin=pk_linear)
     assert check_eq_repr_hash(COSMO4, COSMO6, equal=False)
 
 
 def test_cosmo_methods():
-    """Check that all pyccl functions that take cosmo
+    """ Check that all pyccl functions that take cosmo
     as their first argument are methods of the Cosmology object.
     """
     from inspect import getmembers, isfunction, signature
-    from pyccl import (
-        background,
-        boltzmann,
-        cells,
-        correlations,
-        covariances,
-        neutrinos,
-        pk2d,
-        power,
-        tk3d,
-        tracers,
-        halos,
-        nl_pt,
-    )
-
+    from pyccl import background, boltzmann, \
+        cells, correlations, covariances, neutrinos, \
+        pk2d, power, tk3d, tracers, halos, nl_pt
     cosmo = ccl.CosmologyVanillaLCDM()
-    subs = [
-        background,
-        boltzmann,
-        cells,
-        correlations,
-        covariances,
-        neutrinos,
-        pk2d,
-        power,
-        tk3d,
-        tracers,
-        halos,
-        nl_pt,
-    ]
+    subs = [background, boltzmann, cells, correlations, covariances,
+            neutrinos, pk2d, power, tk3d, tracers, halos, nl_pt]
     funcs = [getmembers(sub, isfunction) for sub in subs]
     funcs = [func for sub in funcs for func in sub]
     for name, func in funcs:
@@ -118,21 +70,17 @@ def test_cosmo_methods():
 
     # quantitative
     assert ccl.sigma8(cosmo) == cosmo.sigma8()
-    assert ccl.rho_x(cosmo, 1.0, "matter", is_comoving=False) == cosmo.rho_x(
-        1.0, "matter", is_comoving=False
-    )
-    assert ccl.get_camb_pk_lin(cosmo)(
-        1.0, 1.0, cosmo
-    ) == cosmo.get_camb_pk_lin()(1.0, 1.0, cosmo)
+    assert ccl.rho_x(cosmo, 1., "matter", is_comoving=False) == \
+        cosmo.rho_x(1., "matter", is_comoving=False)
+    assert ccl.get_camb_pk_lin(cosmo)(1., 1., cosmo) == \
+        cosmo.get_camb_pk_lin()(1., 1., cosmo)
     prof = ccl.halos.HaloProfilePressureGNFW(mass_def="200m")
     hmf = ccl.halos.MassFuncTinker08(mass_def="200m")
     hbf = ccl.halos.HaloBiasTinker10(mass_def="200m")
-    hmc = ccl.halos.HMCalculator(
-        mass_function=hmf, halo_bias=hbf, mass_def="200m"
-    )
-    assert ccl.halos.halomod_power_spectrum(
-        cosmo, hmc, 1.0, 1.0, prof
-    ) == cosmo.halomod_power_spectrum(hmc, 1.0, 1.0, prof)
+    hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf,
+                                 mass_def="200m")
+    assert ccl.halos.halomod_power_spectrum(cosmo, hmc, 1., 1., prof) == \
+        cosmo.halomod_power_spectrum(hmc, 1., 1., prof)
 
 
 def test_cosmology_critical_init():
@@ -146,18 +94,16 @@ def test_cosmology_critical_init():
         m_nu=0.0,
         w0=-1.0,
         wa=0.0,
-        mass_split="normal",
+        mass_split='normal',
         Omega_g=0,
-        Omega_k=0,
-    )
+        Omega_k=0)
     assert np.allclose(cosmo.cosmo.data.growth0, 1)
 
 
 def test_cosmology_As_sigma8_populates():
     # Check that cosmo.sigma8() pupulates sigma8 if it is missing.
-    cosmo = ccl.Cosmology(
-        Omega_c=0.265, Omega_b=0.045, h=0.675, n_s=0.965, A_s=2e-9
-    )
+    cosmo = ccl.Cosmology(Omega_c=0.265, Omega_b=0.045, h=0.675,
+                          n_s=0.965, A_s=2e-9)
     assert np.isnan(cosmo["sigma8"])
     cosmo.sigma8()
     assert cosmo["sigma8"] == cosmo.sigma8()
@@ -169,45 +115,17 @@ def test_cosmology_init():
     """
     # Make sure error raised if invalid transfer/power spectrum etc. passed
     with pytest.raises(KeyError):
-        ccl.Cosmology(
-            Omega_c=0.25,
-            Omega_b=0.05,
-            h=0.7,
-            A_s=2.1e-9,
-            n_s=0.96,
-            matter_power_spectrum="x",
-        )
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      matter_power_spectrum='x')
     with pytest.raises(KeyError):
-        ccl.Cosmology(
-            Omega_c=0.25,
-            Omega_b=0.05,
-            h=0.7,
-            A_s=2.1e-9,
-            n_s=0.96,
-            transfer_function="x",
-        )
-    with pytest.raises(KeyError):
-        ccl.Cosmology(
-            Omega_c=0.25,
-            Omega_b=0.05,
-            h=0.7,
-            A_s=2.1e-9,
-            n_s=0.96,
-            extra_parameters={"emu": {"neutrinos": "x"}},
-        )
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      transfer_function='x')
     with pytest.raises(ValueError):
-        ccl.Cosmology(
-            Omega_c=0.25,
-            Omega_b=0.05,
-            h=0.7,
-            A_s=2.1e-9,
-            n_s=0.96,
-            m_nu=np.array([0.1, 0.1, 0.1, 0.1]),
-        )
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      m_nu=np.array([0.1, 0.1, 0.1, 0.1]))
     with pytest.raises(ValueError):
-        ccl.Cosmology(
-            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96, m_nu=ccl
-        )
+        ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+                      m_nu=ccl)
 
 
 def test_cosmology_output():
@@ -216,9 +134,8 @@ def test_cosmology_output():
     correctly.
     """
     # Create test cosmology object
-    cosmo = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96
-    )
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
+                          n_s=0.96)
 
     # Return and print status messages
     assert cosmo.cosmo.status == 0
@@ -246,14 +163,8 @@ def test_cosmology_output():
 def test_cosmology_pickles():
     """Check that a Cosmology object pickles."""
     cosmo = ccl.Cosmology(
-        Omega_c=0.25,
-        Omega_b=0.05,
-        h=0.7,
-        A_s=2.1e-9,
-        n_s=0.96,
-        m_nu=[0.02, 0.1, 0.05],
-        mass_split="list",
-    )
+        Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+        m_nu=[0.02, 0.1, 0.05], mass_split='list')
 
     with tempfile.TemporaryFile() as fp:
         pickle.dump(cosmo, fp)
@@ -261,32 +172,27 @@ def test_cosmology_pickles():
         fp.seek(0)
         cosmo2 = pickle.load(fp)
 
-    assert np.allclose(
-        ccl.comoving_radial_distance(cosmo, 0.5),
-        ccl.comoving_radial_distance(cosmo2, 0.5),
-        atol=0,
-        rtol=0,
-    )
+    assert np.allclose(ccl.comoving_radial_distance(cosmo, 0.5),
+                       ccl.comoving_radial_distance(cosmo2, 0.5),
+                       atol=0, rtol=0)
 
 
 def test_cosmology_lcdm():
     """Check that the default vanilla cosmology behaves
     as expected"""
-    c1 = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81
-    )
+    c1 = ccl.Cosmology(Omega_c=0.25,
+                       Omega_b=0.05,
+                       h=0.67, n_s=0.96,
+                       sigma8=0.81)
     c2 = ccl.CosmologyVanillaLCDM()
-    assert np.allclose(
-        ccl.comoving_radial_distance(c1, 0.5),
-        ccl.comoving_radial_distance(c2, 0.5),
-        atol=0,
-        rtol=0,
-    )
+    assert np.allclose(ccl.comoving_radial_distance(c1, 0.5),
+                       ccl.comoving_radial_distance(c2, 0.5),
+                       atol=0, rtol=0)
 
 
 def test_cosmology_p18lcdm_raises():
     with pytest.raises(ValueError):
-        kw = {"Omega_c": 0.1}
+        kw = {'Omega_c': 0.1}
         ccl.CosmologyVanillaLCDM(**kw)
 
 
@@ -294,14 +200,8 @@ def test_cosmology_context():
     """Check that using a Cosmology object in a context manager
     frees C resources properly."""
     with ccl.Cosmology(
-        Omega_c=0.25,
-        Omega_b=0.05,
-        h=0.7,
-        A_s=2.1e-9,
-        n_s=0.96,
-        m_nu=np.array([0.02, 0.1, 0.05]),
-        mass_split="list",
-    ) as cosmo:
+            Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9, n_s=0.96,
+            m_nu=np.array([0.02, 0.1, 0.05]), mass_split='list') as cosmo:
         # make sure it works
         assert not cosmo.has_distances
         ccl.comoving_radial_distance(cosmo, 0.5)
@@ -376,10 +276,10 @@ def test_cosmology_default_params():
     cosmo1 = ccl.CosmologyVanillaLCDM()
     v1 = cosmo1.cosmo.gsl_params.HM_MMIN
 
-    ccl.gsl_params.HM_MMIN = v1 * 10
+    ccl.gsl_params.HM_MMIN = v1*10
     cosmo2 = ccl.CosmologyVanillaLCDM()
     v2 = cosmo2.cosmo.gsl_params.HM_MMIN
-    assert v2 == v1 * 10
+    assert v2 == v1*10
     assert v2 != v1
 
     ccl.gsl_params.reload()

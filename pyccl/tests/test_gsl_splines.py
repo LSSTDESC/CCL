@@ -18,12 +18,12 @@ def test_spline2d():
     log_y = np.linspace(-3, 1, 20)
     zarr_in = np.outer(x, np.exp(log_y))
 
-    pk2d = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=zarr_in, is_logp=False)
+    pk2d = ccl.Pk2D(a_arr=x, lk_arr=log_y, pk_arr=zarr_in,
+                    is_logp=False)
 
     pk2d_gsl_spline2d = pk2d.psp.fka
-    xarr, yarr, zarr_out_spline = ccl.pyutils._get_spline2d_arrays(
-        pk2d_gsl_spline2d
-    )
+    xarr, yarr, zarr_out_spline = \
+        ccl.pyutils._get_spline2d_arrays(pk2d_gsl_spline2d)
 
     cosmo = ccl.CosmologyVanillaLCDM()
     zarr_out_eval = pk2d(k=np.exp(log_y), a=x[-1], cosmo=cosmo)

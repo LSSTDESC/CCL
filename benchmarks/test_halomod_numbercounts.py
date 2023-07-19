@@ -16,10 +16,10 @@ def test_hmcalculator_number_counts_numcosmo():
         wa=0.0,
         T_CMB=2.7245,
         mu_0=0.0,
-        transfer_function="eisenstein_hu",
-        matter_power_spectrum="linear",
+        transfer_function='eisenstein_hu',
+        matter_power_spectrum='linear'
     )
-    mdef = ccl.halos.MassDef(200, "matter")
+    mdef = ccl.halos.MassDef(200, 'matter')
     hmf = ccl.halos.MassFuncTinker08(mass_def=mdef, mass_def_strict=False)
     hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
@@ -28,13 +28,10 @@ def test_hmcalculator_number_counts_numcosmo():
     for i in range(benches.shape[0]):
         bench = benches[i, :]
         hmc = ccl.halos.HMCalculator(
-            mass_function=hmf,
-            halo_bias=hbf,
-            mass_def=mdef,
+            mass_function=hmf, halo_bias=hbf, mass_def=mdef,
             log10M_min=np.log10(bench[1]),
             log10M_max=np.log10(bench[2]),
-            integration_method_M="spline",
-        )
+            integration_method_M='spline')
 
         a_2 = 1.0 / (1.0 + bench[4])
         a_1 = 1.0 / (1.0 + bench[3])
@@ -52,17 +49,15 @@ def test_hmcalculator_number_counts_numcosmo():
             val[msk] = 1.0
             return val
 
-        area = 200 * (np.pi / 180) ** 2
+        area = 200 * (np.pi / 180)**2
 
-        nc = (
-            hmc.number_counts(cosmo, selection=sel, a_min=a_2, a_max=a_1)
-            * area
-        )
+        nc = hmc.number_counts(cosmo, selection=sel,
+                               a_min=a_2, a_max=a_1) * area
         assert np.isfinite(nc)
         assert not np.allclose(nc, 0)
 
         tol = max(0.013, np.sqrt(bench[0]) / bench[0] / 10)
-        print(nc, bench[0], nc / bench[0] - 1, tol)
+        print(nc, bench[0], nc/bench[0]-1, tol)
         assert np.allclose(nc, bench[0], atol=0, rtol=tol)
 
 
@@ -80,10 +75,10 @@ def test_hmcalculator_number_counts_numcosmo_highacc():
         wa=0.0,
         T_CMB=2.7245,
         mu_0=0.0,
-        transfer_function="eisenstein_hu",
-        matter_power_spectrum="linear",
+        transfer_function='eisenstein_hu',
+        matter_power_spectrum='linear'
     )
-    mdef = ccl.halos.MassDef(200, "matter")
+    mdef = ccl.halos.MassDef(200, 'matter')
     hmf = ccl.halos.MassFuncTinker08(mass_def=mdef, mass_def_strict=False)
     hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
@@ -92,12 +87,10 @@ def test_hmcalculator_number_counts_numcosmo_highacc():
     for i in range(benches.shape[0]):
         bench = benches[i, :]
         hmc = ccl.halos.HMCalculator(
-            mass_function=hmf,
-            halo_bias=hbf,
-            mass_def=mdef,
+            mass_function=hmf, halo_bias=hbf, mass_def=mdef,
             log10M_min=np.log10(bench[1]),
             log10M_max=np.log10(bench[2]),
-            integration_method_M="spline",
+            integration_method_M='spline',
             nM=4096,
         )
 
@@ -117,21 +110,17 @@ def test_hmcalculator_number_counts_numcosmo_highacc():
             val[msk] = 1.0
             return val
 
-        area = 200 * (np.pi / 180) ** 2
+        area = 200 * (np.pi / 180)**2
 
-        nc = (
-            hmc.number_counts(
-                cosmo,
-                selection=sel,
-                a_min=a_2,
-                a_max=a_1,
-                na=4096,
-            )
-            * area
-        )
+        nc = hmc.number_counts(
+            cosmo, selection=sel,
+            a_min=a_2,
+            a_max=a_1,
+            na=4096,
+        ) * area
         assert np.isfinite(nc)
         assert not np.allclose(nc, 0)
 
         tol = 1e-3
-        print(nc, bench[0], nc / bench[0] - 1, tol)
+        print(nc, bench[0], nc/bench[0]-1, tol)
         assert np.allclose(nc, bench[0], atol=0, rtol=tol)

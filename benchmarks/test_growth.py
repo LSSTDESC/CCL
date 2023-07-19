@@ -10,8 +10,8 @@ GROWTH_TOLERANCE = 1e-4
 # Values that are the same for all 5 models
 Omega_c = 0.25
 Omega_b = 0.05
-Neff = 0.0
-m_nu = 0.0
+Neff = 0.
+m_nu = 0.
 h = 0.7
 A_s = 2.1e-9
 n_s = 0.96
@@ -30,7 +30,7 @@ def read_growth_lowz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt("benchmarks/data/growth_model1-5.txt").T
-    assert dat.shape == (6, 6)
+    assert (dat.shape == (6, 6))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]
@@ -44,7 +44,7 @@ def read_growth_highz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt("benchmarks/data/growth_hiz_model1-3.txt").T
-    assert dat.shape == (4, 7)
+    assert (dat.shape == (4, 7))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]
@@ -59,7 +59,7 @@ def read_growth_allz_benchmark_file():
     """
     # Load data from file
     dat = np.genfromtxt("benchmarks/data/growth_cosmomad_allz.txt").T
-    assert dat.shape == (6, 10)
+    assert (dat.shape == (6, 10))
 
     # Split into redshift column and growth(z) columns
     z = dat[0]
@@ -75,8 +75,7 @@ z_allz, gfac_allz = read_growth_allz_benchmark_file()
 
 
 def compare_growth(
-    z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0, high_tol=False
-):
+        z, gfac_bench, Omega_v, w0, wa, mu_0, sigma_0, high_tol=False):
     """
     Compare growth factor calculated by pyccl with the values in the benchmark
     file. This test only works if radiation is explicitly set to 0.
@@ -86,70 +85,37 @@ def compare_growth(
     Omega_k = 1.0 - Omega_c - Omega_b - Omega_v
 
     cosmo = ccl.Cosmology(
-        Omega_c=Omega_c,
-        Omega_b=Omega_b,
-        Neff=Neff,
-        m_nu=m_nu,
-        h=h,
-        A_s=A_s,
-        n_s=n_s,
-        Omega_k=Omega_k,
-        Omega_g=0,
-        w0=w0,
-        wa=wa,
-        mu_0=mu_0,
-        sigma_0=sigma_0,
-    )
+        Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, m_nu=m_nu,
+        h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k, Omega_g=0,
+        w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0)
 
     # Calculate distance using pyccl
-    a = 1.0 / (1.0 + z)
+    a = 1. / (1. + z)
     gfac = ccl.growth_factor_unnorm(cosmo, a)
 
     # Compare to benchmark data
     if high_tol:
-        assert np.allclose(
-            gfac, gfac_bench, atol=1e-12, rtol=GROWTH_HIZ_TOLERANCE
-        )
+        assert np.allclose(gfac, gfac_bench,
+                           atol=1e-12, rtol=GROWTH_HIZ_TOLERANCE)
     else:
-        assert np.allclose(gfac, gfac_bench, atol=1e-12, rtol=GROWTH_TOLERANCE)
+        assert np.allclose(gfac, gfac_bench,
+                           atol=1e-12, rtol=GROWTH_TOLERANCE)
 
 
-@pytest.mark.parametrize("i", list(range(5)))
+@pytest.mark.parametrize('i', list(range(5)))
 def test_growth_lowz_model(i):
-    compare_growth(
-        z_lowz,
-        gfac_lowz[i],
-        Omega_v_vals[i],
-        w0_vals[i],
-        wa_vals[i],
-        mu0_vals[i],
-        Sig0_vals[i],
-    )
+    compare_growth(z_lowz, gfac_lowz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])
 
 
-@pytest.mark.parametrize("i", list(range(3)))
+@pytest.mark.parametrize('i', list(range(3)))
 def test_growth_highz_model(i):
-    compare_growth(
-        z_highz,
-        gfac_highz[i],
-        Omega_v_vals[i],
-        w0_vals[i],
-        wa_vals[i],
-        mu0_vals[i],
-        Sig0_vals[i],
-        high_tol=True,
-    )
+    compare_growth(z_highz, gfac_highz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i], high_tol=True)
 
 
 # 0.01 < z < 1000 tests
-@pytest.mark.parametrize("i", list(range(5)))
+@pytest.mark.parametrize('i', list(range(5)))
 def test_growth_allz_model(i):
-    compare_growth(
-        z_allz,
-        gfac_allz[i],
-        Omega_v_vals[i],
-        w0_vals[i],
-        wa_vals[i],
-        mu0_vals[i],
-        Sig0_vals[i],
-    )
+    compare_growth(z_allz, gfac_allz[i], Omega_v_vals[i], w0_vals[i],
+                   wa_vals[i], mu0_vals[i], Sig0_vals[i])

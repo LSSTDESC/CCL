@@ -16,10 +16,11 @@ class MassFuncJenkins01(MassFunc):
         mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
+    name = 'Jenkins01'
 
-    name = "Jenkins01"
-
-    def __init__(self, *, mass_def="fof", mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def="fof",
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
@@ -31,4 +32,4 @@ class MassFuncJenkins01(MassFunc):
         self.q = 3.8
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        return self.A * np.exp(-np.abs(-np.log(sigM) + self.b) ** self.q)
+        return self.A * np.exp(-np.abs(-np.log(sigM) + self.b)**self.q)

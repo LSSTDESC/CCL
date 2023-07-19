@@ -27,11 +27,11 @@
 
 
 void fftlog_transform(int npk,
-		      double *k_in, int n_in_k,
-		      double *fk_in, int n_in_f,
-		      int dim, double mu, double plaw_index,
-		      int nout, double *output,
-		      int *status)
+          double *k_in, int n_in_k,
+          double *fk_in, int n_in_f,
+          int dim, double mu, double plaw_index,
+          int nout, double *output,
+          int *status)
 {
   int ii;
   double *r_out = &(output[0]);
