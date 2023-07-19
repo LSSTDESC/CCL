@@ -23,6 +23,7 @@
         raise CCLError("`dim` must be 2 or 3")
 %}
 
+
 %inline %{
 
 
@@ -60,6 +61,7 @@ void fftlog_transform(int npk,
 }
 
 %}
+
 
 %feature("pythonprepend") fftlog_transform_general %{
     if npk * k_in.size != fk_in.size:
