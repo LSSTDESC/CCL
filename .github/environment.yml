@@ -1,7 +1,7 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
   - python=3.8
-  - cython<3
+  - cython<2.7
   - pip
   - cmake
   - gsl
