@@ -62,7 +62,6 @@ void fftlog_transform(int npk,
 
 %}
 
-
 %feature("pythonprepend") fftlog_transform_general %{
     if npk * k_in.size != fk_in.size:
         raise CCLError("Input size for `fk_in` must match `npk * k_in.size`")
@@ -75,6 +74,7 @@ void fftlog_transform(int npk,
     if spherical_bessel!=0 and spherical_bessel!=1:
         raise CCLError("0 and 1 are the only valid values of spherical_bessel.")
 %}
+
 
 %inline %{
 void fftlog_transform_general(int npk,
