@@ -1,18 +1,19 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
-  - python=3.9
+  - python=3.8
   - pip
   - cmake
   - gsl
   - swig
   - pyyaml
   - numpy
-  - scipy=1.11.0
+  - scipy
   - camb=1.3.6
   - isitgr
   - fast-pt
   - pytest
   - pytest-cov
+  - cython=0.29.35
   - pip:
       - classy<3
       - velocileptors @ git+https://github.com/sfschen/velocileptors
