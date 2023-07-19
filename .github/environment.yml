@@ -1,4 +1,4 @@
-name: test  # default testing environment name from conda-incubator
+name: test  # default testingz environment name from conda-incubator
 dependencies:
   - python=3.8
   - pip
