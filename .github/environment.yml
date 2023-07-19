@@ -1,7 +1,6 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
   - python=3.8
-  - cython=0.29.36
   - pip
   - cmake
   - gsl
@@ -15,6 +14,5 @@ dependencies:
   - pytest
   - pytest-cov
   - pip:
-      - classy==2.8.0
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master

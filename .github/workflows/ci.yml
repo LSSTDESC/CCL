@@ -85,6 +85,11 @@ jobs:
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
           mamba env update --file ${{ env.CONDA_ENV }} --prune
 
+      - name: Install classy
+        run: |
+          pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython>=0.29.21,<3'  # for classy
+          pip install --no-build-isolation classy
+
       - name: Install CCL
         run: pip install -e .
 
