@@ -15,6 +15,6 @@ dependencies:
   - pytest-cov
   - cython=0.29.35
   - pip:
-      - classy<3
+      #- classy<3
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
