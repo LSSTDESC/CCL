@@ -13,7 +13,6 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
-  - cython=0.29.35
   - pip:
       #- classy<3
       - velocileptors @ git+https://github.com/sfschen/velocileptors
