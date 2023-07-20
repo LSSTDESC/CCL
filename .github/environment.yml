@@ -8,12 +8,13 @@ dependencies:
   - pyyaml
   - numpy
   - scipy
-  - camb=1.5.0
-  - isitgr
+  - camb
+  #- isitgr
   - fast-pt
   - pytest
   - pytest-cov
   - pip:
       #- classy<3
+      - isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
