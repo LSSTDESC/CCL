@@ -1,6 +1,7 @@
 __all__ = ("HaloProfileEinasto",)
 
 import numpy as np
+from scipy.integrate import quad_vec
 from scipy.special import gamma, gammainc
 
 from .. import MassDef, mass_translator, get_delta_c
@@ -37,16 +38,28 @@ class HaloProfileEinasto(HaloProfileMatter):
             concentration-mass relation to use with this profile.
         truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
+        projected_quad (:obj:`bool`): set to ``True`` to calculate the
+            projected profile with numerical integration.
         alpha (:obj:`float` or :obj:`str`): :math:`\\alpha` parameter, or
             set to ``'cosmo'`` to calculate the value from cosmology.
     """
     __repr_attrs__ = __eq_attrs__ = (
-        "truncated", "alpha", "mass_def", "concentration", "precision_fftlog",)
+        "truncated", "alpha", "projected_quad",
+        "mass_def", "concentration", "precision_fftlog",)
 
-    def __init__(self, *, mass_def, concentration, truncated=True,
+    def __init__(self, *, mass_def, concentration,
+                 truncated=False,
+                 projected_quad=False,
                  alpha='cosmo'):
         self.truncated = truncated
+        self.projected_quad = projected_quad
         self.alpha = alpha
+        if projected_quad:
+            if truncated:
+                raise ValueError("projected_quad profile not supported "
+                                 "for truncated Einasto. Set `truncated` or "
+                                 "`projected_quad` to `False`.")
+            self._projected = self._projected_quad
         super().__init__(mass_def=mass_def, concentration=concentration)
         self._to_virial_mass = mass_translator(
             mass_in=self.mass_def, mass_out=MassDef("vir", "matter"),
@@ -105,3 +118,30 @@ class HaloProfileEinasto(HaloProfileMatter):
         if np.ndim(M) == 0:
             prof = np.squeeze(prof, axis=0)
         return prof
+
+    def _projected_quad(self, cosmo, r, M, a):
+        r_use = np.atleast_1d(r)
+        M_use = np.atleast_1d(M)
+
+        # Comoving virial radius
+        R_M = self.mass_def.get_radius(cosmo, M_use, a) / a
+        c_M = self.concentration(cosmo, M_use, a)
+        R_s = R_M / c_M
+
+        alpha = self._get_alpha(cosmo, M_use, a)
+
+        prof, _ = quad_vec(
+            self._projected_quad_integrand, 0., np.inf,
+            args=(r_use[None, :], R_s[:, None], alpha[:, None]))
+
+        prof *= 2 * self._norm(M_use, R_s, c_M, alpha)[:, None]
+
+        if np.ndim(r) == 0:
+            prof = np.squeeze(prof, axis=-1)
+        if np.ndim(M) == 0:
+            prof = np.squeeze(prof, axis=0)
+        return prof
+
+    def _projected_quad_integrand(self, z, R, R_s, alpha):
+        x = np.sqrt(z**2. + R**2.) / R_s
+        return np.exp(-2. * (x**alpha - 1.) / alpha)
