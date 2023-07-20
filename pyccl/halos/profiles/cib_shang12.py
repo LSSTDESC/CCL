@@ -80,41 +80,15 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         Mmin (:obj:`float`): minimum subhalo mass.
         L0 (:obj:`float`): luminosity scale (in
             :math:`{\\rm Jy}\\,{\\rm Mpc}^2\\,M_\\odot^{-1}`).
-    """  # noqa
-
+    """ # noqa
     __repr_attrs__ = __eq_attrs__ = (
-        "nu",
-        "alpha",
-        "T0",
-        "beta",
-        "gamma",
-        "s_z",
-        "log10Meff",
-        "siglog10M",
-        "Mmin",
-        "L0",
-        "mass_def",
-        "concentration",
-        "precision_fftlog",
-    )
+        "nu", "alpha", "T0", "beta", "gamma", "s_z", "log10Meff", "siglog10M",
+        "Mmin", "L0", "mass_def", "concentration", "precision_fftlog",)
     _one_over_4pi = 0.07957747154
 
-    def __init__(
-        self,
-        *,
-        mass_def,
-        concentration,
-        nu_GHz,
-        alpha=0.36,
-        T0=24.4,
-        beta=1.75,
-        gamma=1.7,
-        s_z=3.6,
-        log10Meff=12.6,
-        siglog10M=0.707,
-        Mmin=1e10,
-        L0=6.4e-8
-    ):
+    def __init__(self, *, mass_def, concentration, nu_GHz, alpha=0.36,
+                 T0=24.4, beta=1.75, gamma=1.7, s_z=3.6, log10Meff=12.6,
+                 siglog10M=0.707, Mmin=1E10, L0=6.4E-8):
         self.nu = nu_GHz
         self.alpha = alpha
         self.T0 = T0
@@ -141,26 +115,13 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         Returns:
             (:obj:`float` or `array`): average number of subhalos.
         """
-        return (
-            0.30
-            * (Msub / Mparent) ** (-0.7)
-            * np.exp(-9.9 * (Msub / Mparent) ** 2.5)
-        )
+        return 0.30*(Msub/Mparent)**(-0.7)*np.exp(-9.9*(Msub/Mparent)**2.5)
 
-    def update_parameters(
-        self,
-        nu_GHz=None,
-        alpha=None,
-        T0=None,
-        beta=None,
-        gamma=None,
-        s_z=None,
-        log10Meff=None,
-        siglog10M=None,
-        Mmin=None,
-        L0=None,
-    ):
-        """Update any of the parameters associated with
+    def update_parameters(self, nu_GHz=None,
+                          alpha=None, T0=None, beta=None, gamma=None,
+                          s_z=None, log10Meff=None, siglog10M=None,
+                          Mmin=None, L0=None):
+        """ Update any of the parameters associated with
         this profile. Any parameter set to ``None`` won't be updated.
 
         Args:
@@ -201,38 +162,38 @@ class HaloProfileCIBShang12(HaloProfileCIB):
     def _spectrum(self, nu, a):
         # h*nu_GHZ / k_B / Td_K
         h_GHz_o_kB_K = 0.0479924466
-        Td = self.T0 / a**self.alpha
+        Td = self.T0/a**self.alpha
         x = h_GHz_o_kB_K * nu / Td
 
         # Find nu_0
-        q = self.beta + 3 + self.gamma
-        x0 = q + np.real(lambertw(-q * np.exp(-q), k=0))
+        q = self.beta+3+self.gamma
+        x0 = q+np.real(lambertw(-q*np.exp(-q), k=0))
 
         def mBB(x):
             ex = np.exp(x)
-            return x ** (3 + self.beta) / (ex - 1)
+            return x**(3+self.beta)/(ex-1)
 
         mBB0 = mBB(x0)
 
         def plaw(x):
-            return mBB0 * (x0 / x) ** self.gamma
+            return mBB0*(x0/x)**self.gamma
 
-        return np.piecewise(x, [x <= x0], [mBB, plaw]) / mBB0
+        return np.piecewise(x, [x <= x0],
+                            [mBB, plaw])/mBB0
 
     def _Lum(self, l10M, a):
         # Redshift evolution
-        phi_z = a ** (-self.s_z)
+        phi_z = a**(-self.s_z)
         # Mass dependence
         # M/sqrt(2*pi*siglog10M^2)
-        sig_pref = 10**l10M / (2.50662827463 * self.siglog10M)
-        sigma_m = sig_pref * np.exp(
-            -0.5 * ((l10M - self.log10Meff) / self.siglog10M) ** 2
-        )
-        return self.L0 * phi_z * sigma_m
+        sig_pref = 10**l10M/(2.50662827463*self.siglog10M)
+        sigma_m = sig_pref * np.exp(-0.5*((l10M - self.log10Meff)
+                                          / self.siglog10M)**2)
+        return self.L0*phi_z*sigma_m
 
     def _Lumcen(self, M, a):
         Lum = self._Lum(np.log10(M), a)
-        Lumcen = np.heaviside(M - self.Mmin, 1) * Lum
+        Lumcen = np.heaviside(M-self.Mmin, 1)*Lum
         return Lumcen
 
     def _Lumsat(self, M, a):
@@ -243,13 +204,13 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         M_use = M[M >= self.Mmin, None]
         logM = np.log10(M_use)
         LOGM_MIN = np.log10(self.Mmin)
-        nm = max(2, 10 * int(np.max(logM) - LOGM_MIN))
-        msub = np.linspace(LOGM_MIN, np.max(logM), nm + 1)[None, :]
+        nm = max(2, 10*int(np.max(logM) - LOGM_MIN))
+        msub = np.linspace(LOGM_MIN, np.max(logM), nm+1)[None, :]
 
         Lum = self._Lum(msub, a)
         dnsubdlnm = self.dNsub_dlnM_TinkerWetzel10(10**msub, M_use)
         integ = dnsubdlnm * Lum
-        Lumsat = simpson(integ, x=np.log(10) * msub)
+        Lumsat = simpson(integ, x=np.log(10)*msub)
         res[-len(Lumsat):] = Lumsat
         return res
 
@@ -258,12 +219,12 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         r_use = np.atleast_1d(r)
 
         # (redshifted) Frequency dependence
-        spec_nu = self._spectrum(self.nu / a, a)
+        spec_nu = self._spectrum(self.nu/a, a)
 
         Ls = self._Lumsat(M_use, a)
-        ur = self.pNFW._real(cosmo, r_use, M_use, a) / M_use[:, None]
+        ur = self.pNFW._real(cosmo, r_use, M_use, a)/M_use[:, None]
 
-        prof = Ls[:, None] * ur * spec_nu * self._one_over_4pi
+        prof = Ls[:, None]*ur*spec_nu*self._one_over_4pi
 
         if np.ndim(r) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -276,13 +237,13 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         k_use = np.atleast_1d(k)
 
         # (redshifted) Frequency dependence
-        spec_nu = self._spectrum(self.nu / a, a)
+        spec_nu = self._spectrum(self.nu/a, a)
 
         Lc = self._Lumcen(M_use, a)
         Ls = self._Lumsat(M_use, a)
-        uk = self.pNFW._fourier(cosmo, k_use, M_use, a) / M_use[:, None]
+        uk = self.pNFW._fourier(cosmo, k_use, M_use, a)/M_use[:, None]
 
-        prof = (Lc[:, None] + Ls[:, None] * uk) * spec_nu * self._one_over_4pi
+        prof = (Lc[:, None]+Ls[:, None]*uk)*spec_nu*self._one_over_4pi
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)
@@ -294,19 +255,19 @@ class HaloProfileCIBShang12(HaloProfileCIB):
         M_use = np.atleast_1d(M)
         k_use = np.atleast_1d(k)
 
-        spec_nu1 = self._spectrum(self.nu / a, a)
+        spec_nu1 = self._spectrum(self.nu/a, a)
         if nu_other is None:
             spec_nu2 = spec_nu1
         else:
-            spec_nu2 = self._spectrum(nu_other / a, a)
+            spec_nu2 = self._spectrum(nu_other/a, a)
 
         Lc = self._Lumcen(M_use, a)
         Ls = self._Lumsat(M_use, a)
-        uk = self.pNFW._fourier(cosmo, k_use, M_use, a) / M_use[:, None]
+        uk = self.pNFW._fourier(cosmo, k_use, M_use, a)/M_use[:, None]
 
-        prof = Ls[:, None] * uk
-        prof = 2 * Lc[:, None] * prof + prof**2
-        prof *= spec_nu1 * spec_nu2 * self._one_over_4pi**2
+        prof = Ls[:, None]*uk
+        prof = 2*Lc[:, None]*prof + prof**2
+        prof *= spec_nu1*spec_nu2*self._one_over_4pi**2
 
         if np.ndim(k) == 0:
             prof = np.squeeze(prof, axis=-1)

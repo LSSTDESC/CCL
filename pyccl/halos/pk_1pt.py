@@ -1,7 +1,4 @@
-__all__ = (
-    "halomod_mean_profile_1pt",
-    "halomod_bias_1pt",
-)
+__all__ = ("halomod_mean_profile_1pt", "halomod_bias_1pt",)
 
 import numpy as np
 
@@ -47,7 +44,7 @@ def _Ix1(func, cosmo, hmc, k, a, prof):
 
 
 def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof):
-    """Returns the mass-weighted mean halo profile.
+    """ Returns the mass-weighted mean halo profile.
 
     .. math::
         I^0_1(k,a|u) = \\int dM\\,n(M,a)\\,\\langle u(k,a|M)\\rangle,
@@ -60,7 +57,7 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof):
 
 
 def halomod_bias_1pt(cosmo, hmc, k, a, prof):
-    """Returns the mass-and-bias-weighted mean halo profile.
+    """ Returns the mass-and-bias-weighted mean halo profile.
 
     .. math::
         I^1_1(k,a|u) = \\int dM\\,n(M,a)\\,b(M,a)\\,

@@ -4,7 +4,7 @@ from . import HaloBias, get_delta_c
 
 
 class HaloBiasBhattacharya11(HaloBias):
-    """Implements halo bias as described in `Bhattacharya et al. 2011
+    """ Implements halo bias as described in `Bhattacharya et al. 2011
     <https://arxiv.org/abs/1005.2239>`_. This parametrization is only
     valid for 'fof' masses.
 
@@ -14,10 +14,11 @@ class HaloBiasBhattacharya11(HaloBias):
         mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
-
     name = "Bhattacharya11"
 
-    def __init__(self, *, mass_def="fof", mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def="fof",
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
@@ -34,6 +35,4 @@ class HaloBiasBhattacharya11(HaloBias):
         nu = self.dc / sigM
         a = self.a * a**self.az
         anu2 = a * nu**2
-        return (
-            1 + (anu2 - self.q + 2 * self.p / (1 + anu2**self.p)) / self.dc
-        )
+        return 1 + (anu2 - self.q + 2*self.p / (1 + anu2**self.p)) / self.dc

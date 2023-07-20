@@ -14,8 +14,7 @@ class ConcentrationBhattacharya13(Concentration):
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition object or name string.
     """
-
-    name = "Bhattacharya13"
+    name = 'Bhattacharya13'
 
     def __init__(self, *, mass_def="200c"):
         super().__init__(mass_def=mass_def)
@@ -24,11 +23,9 @@ class ConcentrationBhattacharya13(Concentration):
         return mass_def.name not in ["vir", "200m", "200c"]
 
     def _setup(self):
-        vals = {
-            "vir": (7.7, 0.9, -0.29),
-            "200m": (9.0, 1.15, -0.29),
-            "200c": (5.9, 0.54, -0.35),
-        }
+        vals = {"vir": (7.7, 0.9, -0.29),
+                "200m": (9.0, 1.15, -0.29),
+                "200c": (5.9, 0.54, -0.35)}
 
         self.A, self.B, self.C = vals[self.mass_def.name]
 

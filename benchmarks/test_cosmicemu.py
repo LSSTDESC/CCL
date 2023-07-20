@@ -74,15 +74,12 @@ def test_cemu_mtii(kind):
 def test_emu_nu_old(model):
     model_numbers = [38, 39, 40, 42]
     data = np.loadtxt(
-        "./benchmarks/data/emu_nu_smooth_pk_M%d.txt" % model_numbers[model]
-    )
+        "./benchmarks/data/emu_nu_smooth_pk_M%d.txt" % model_numbers[model])
 
     cosmos = np.loadtxt("./benchmarks/data/emu_nu_cosmologies.txt")
 
-    mnu = ccl.nu_masses(
-        Omega_nu_h2=cosmos[model, 7] * cosmos[model, 2] ** 2,
-        mass_split="equal",
-    )
+    mnu = ccl.nu_masses(Omega_nu_h2=cosmos[model, 7]*cosmos[model, 2]**2,
+                        mass_split='equal')
 
     cosmo = ccl.Cosmology(
         Omega_c=cosmos[model, 0],
@@ -93,7 +90,7 @@ def test_emu_nu_old(model):
         w0=cosmos[model, 5],
         wa=cosmos[model, 6],
         m_nu=mnu,
-        mass_split="list",
+        mass_split='list',
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,
@@ -106,7 +103,7 @@ def test_emu_nu_old(model):
 
     pk = ccl.nonlin_matter_power(cosmo, k, a)
 
-    err = np.abs(pk / data[:, 1] - 1)
+    err = np.abs(pk/data[:, 1]-1)
     assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)
 
 
@@ -114,8 +111,7 @@ def test_emu_nu_old(model):
 def test_emu_old(model):
     model_numbers = [1, 3, 5, 6, 8, 10]
     data = np.loadtxt(
-        "./benchmarks/data/emu_smooth_pk_M%d.txt" % model_numbers[model]
-    )
+        "./benchmarks/data/emu_smooth_pk_M%d.txt" % model_numbers[model])
 
     cosmos = np.loadtxt("./benchmarks/data/emu_cosmologies.txt")
 
@@ -137,7 +133,7 @@ def test_emu_old(model):
     a = 1
     k = data[:, 0]
     pk = ccl.nonlin_matter_power(cosmo, k, a)
-    err = np.abs(pk / data[:, 1] - 1)
+    err = np.abs(pk/data[:, 1]-1)
     assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)
 
 
@@ -145,10 +141,8 @@ def test_emu_old(model):
 def test_emu_lin_old(model):
     cosmos = np.loadtxt("./benchmarks/data/emu_input_cosmologies.txt")
 
-    mnu = ccl.nu_masses(
-        Omega_nu_h2=cosmos[model, 7] * cosmos[model, 2] ** 2,
-        mass_split="equal",
-    )
+    mnu = ccl.nu_masses(Omega_nu_h2=cosmos[model, 7]*cosmos[model, 2]**2,
+                        mass_split='equal')
 
     cosmo = ccl.Cosmology(
         Omega_c=cosmos[model, 0],
@@ -159,7 +153,7 @@ def test_emu_lin_old(model):
         w0=cosmos[model, 5],
         wa=cosmos[model, 6],
         m_nu=mnu,
-        mass_split="list",
+        mass_split='list',
         Neff=3.04,
         Omega_g=0,
         Omega_k=0,
@@ -173,5 +167,5 @@ def test_emu_lin_old(model):
     pk = ccl.nonlin_matter_power(cosmo, k, a)
     pk_lin = ccl.linear_matter_power(cosmo, k, a)
 
-    err = np.abs(pk / pk_lin - 1)
+    err = np.abs(pk/pk_lin-1)
     assert np.allclose(err, 0, rtol=0, atol=EMU_TOLERANCE)

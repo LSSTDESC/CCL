@@ -1,13 +1,6 @@
-__all__ = (
-    "CorrelationMethods",
-    "CorrelationTypes",
-    "correlation",
-    "correlation_3d",
-    "correlation_multipole",
-    "correlation_3dRsd",
-    "correlation_3dRsd_avgmu",
-    "correlation_pi_sigma",
-)
+__all__ = ("CorrelationMethods", "CorrelationTypes", "correlation",
+           "correlation_3d", "correlation_multipole", "correlation_3dRsd",
+           "correlation_3dRsd_avgmu", "correlation_pi_sigma",)
 
 from enum import Enum
 import numpy as np
@@ -21,15 +14,14 @@ class CorrelationMethods(Enum):
     - 'FFTLog' is fast using a fast Fourier transform.
     - 'Legendre' uses a sum over Legendre polynomials.
     """
-
     FFTLOG = "fftlog"
     BESSEL = "bessel"
     LEGENDRE = "legendre"
 
 
 class CorrelationTypes(Enum):
-    """Correlation function types."""
-
+    """Correlation function types.
+    """
     NN = "NN"
     NG = "NG"
     GG_PLUS = "GG+"
@@ -37,20 +29,20 @@ class CorrelationTypes(Enum):
 
 
 correlation_methods = {
-    "fftlog": lib.CCL_CORR_FFTLOG,
-    "bessel": lib.CCL_CORR_BESSEL,
-    "legendre": lib.CCL_CORR_LGNDRE,
+    'fftlog': lib.CCL_CORR_FFTLOG,
+    'bessel': lib.CCL_CORR_BESSEL,
+    'legendre': lib.CCL_CORR_LGNDRE,
 }
 
 correlation_types = {
-    "NN": lib.CCL_CORR_GG,
-    "NG": lib.CCL_CORR_GL,
-    "GG+": lib.CCL_CORR_LP,
-    "GG-": lib.CCL_CORR_LM,
+    'NN': lib.CCL_CORR_GG,
+    'NG': lib.CCL_CORR_GL,
+    'GG+': lib.CCL_CORR_LP,
+    'GG-': lib.CCL_CORR_LM,
 }
 
 
-def correlation(cosmo, *, ell, C_ell, theta, type="NN", method="fftlog"):
+def correlation(cosmo, *, ell, C_ell, theta, type='NN', method='fftlog'):
     r"""Compute the angular correlation function.
 
     .. math::
@@ -111,7 +103,7 @@ def correlation(cosmo, *, ell, C_ell, theta, type="NN", method="fftlog"):
     Returns:
         (:obj:`float` or `array`): Value(s) of the correlation function at the
         input angular separations.
-    """  # noqa
+    """ # noqa
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
     status = 0
@@ -125,27 +117,17 @@ def correlation(cosmo, *, ell, C_ell, theta, type="NN", method="fftlog"):
 
     # Convert scalar input into an array
     if scalar := isinstance(theta, (int, float)):
-        theta = np.array(
-            [
-                theta,
-            ]
-        )
+        theta = np.array([theta, ])
 
     if np.all(np.array(C_ell) == 0):
         # short-cut and also avoid integration errors
         wth = np.zeros_like(theta)
     else:
         # Call correlation function
-        wth, status = lib.correlation_vec(
-            cosmo,
-            ell,
-            C_ell,
-            theta,
-            correlation_types[type],
-            correlation_methods[method],
-            len(theta),
-            status,
-        )
+        wth, status = lib.correlation_vec(cosmo, ell, C_ell, theta,
+                                          correlation_types[type],
+                                          correlation_methods[method],
+                                          len(theta), status)
     check(status, cosmo_in)
     if scalar:
         return wth[0]
@@ -170,7 +152,7 @@ def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
     Returns:
         Value(s) of the correlation function at the input distance(s).
-    """  # noqa
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
@@ -182,23 +164,19 @@ def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
     # Convert scalar input into an array
     if scalar := isinstance(r, (int, float)):
-        r = np.array(
-            [
-                r,
-            ]
-        )
+        r = np.array([r, ])
 
     # Call 3D correlation function
-    xi, status = lib.correlation_3d_vec(cosmo, psp, a, r, len(r), status)
+    xi, status = lib.correlation_3d_vec(cosmo, psp, a, r,
+                                        len(r), status)
     check(status, cosmo_in)
     if scalar:
         return xi[0]
     return xi
 
 
-def correlation_multipole(
-    cosmo, *, r, a, beta, ell, p_of_k_a=DEFAULT_POWER_SPECTRUM
-):
+def correlation_multipole(cosmo, *, r, a, beta, ell,
+                          p_of_k_a=DEFAULT_POWER_SPECTRUM):
     r"""Compute the correlation function multipoles:
 
     .. math::
@@ -218,7 +196,7 @@ def correlation_multipole(
 
     Returns:
         Value(s) of the correlation function at the input distance(s).
-    """  # noqa
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
@@ -230,25 +208,19 @@ def correlation_multipole(
 
     # Convert scalar input into an array
     if scalar := isinstance(r, (int, float)):
-        r = np.array(
-            [
-                r,
-            ]
-        )
+        r = np.array([r, ])
 
     # Call 3D correlation function
-    xis, status = lib.correlation_multipole_vec(
-        cosmo, psp, a, beta, ell, r, len(r), status
-    )
+    xis, status = lib.correlation_multipole_vec(cosmo, psp, a, beta, ell, r,
+                                                len(r), status)
     check(status, cosmo_in)
     if scalar:
         return xis[0]
     return xis
 
 
-def correlation_3dRsd(
-    cosmo, *, r, a, mu, beta, p_of_k_a=DEFAULT_POWER_SPECTRUM, use_spline=True
-):
+def correlation_3dRsd(cosmo, *, r, a, mu, beta,
+                      p_of_k_a=DEFAULT_POWER_SPECTRUM, use_spline=True):
     """
     Compute the 3D correlation function with linear RSDs using
     multipoles.
@@ -270,7 +242,7 @@ def correlation_3dRsd(
 
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
-    """  # noqa
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
@@ -282,25 +254,19 @@ def correlation_3dRsd(
 
     # Convert scalar input into an array
     if scalar := isinstance(r, (int, float)):
-        r = np.array(
-            [
-                r,
-            ]
-        )
+        r = np.array([r, ])
 
     # Call 3D correlation function
-    xis, status = lib.correlation_3dRsd_vec(
-        cosmo, psp, a, mu, beta, r, len(r), int(use_spline), status
-    )
+    xis, status = lib.correlation_3dRsd_vec(cosmo, psp, a, mu, beta, r,
+                                            len(r), int(use_spline), status)
     check(status, cosmo_in)
     if scalar:
         return xis[0]
     return xis
 
 
-def correlation_3dRsd_avgmu(
-    cosmo, *, r, a, beta, p_of_k_a=DEFAULT_POWER_SPECTRUM
-):
+def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
+                            p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """
     Compute the 3D correlation function averaged over angles with
     RSDs.
@@ -318,7 +284,7 @@ def correlation_3dRsd_avgmu(
 
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
-    """  # noqa
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
@@ -330,32 +296,19 @@ def correlation_3dRsd_avgmu(
 
     # Convert scalar input into an array
     if scalar := isinstance(r, (int, float)):
-        r = np.array(
-            [
-                r,
-            ]
-        )
+        r = np.array([r, ])
 
     # Call 3D correlation function
-    xis, status = lib.correlation_3dRsd_avgmu_vec(
-        cosmo, psp, a, beta, r, len(r), status
-    )
+    xis, status = lib.correlation_3dRsd_avgmu_vec(cosmo, psp, a, beta, r,
+                                                  len(r), status)
     check(status, cosmo_in)
     if scalar:
         return xis[0]
     return xis
 
 
-def correlation_pi_sigma(
-    cosmo,
-    *,
-    pi,
-    sigma,
-    a,
-    beta,
-    use_spline=True,
-    p_of_k_a=DEFAULT_POWER_SPECTRUM,
-):
+def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
+                         use_spline=True, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """
     Compute the 3D correlation in :math:`(\\pi,\\sigma)` space.
 
@@ -375,7 +328,7 @@ def correlation_pi_sigma(
 
     Returns:
         Value(s) of the correlation function at the input pi and sigma.
-    """  # noqa
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
@@ -387,16 +340,12 @@ def correlation_pi_sigma(
 
     # Convert scalar input into an array
     if scalar := isinstance(sigma, (int, float)):
-        sigma = np.array(
-            [
-                sigma,
-            ]
-        )
+        sigma = np.array([sigma, ])
 
     # Call 3D correlation function
-    xis, status = lib.correlation_pi_sigma_vec(
-        cosmo, psp, a, beta, pi, sigma, len(sigma), int(use_spline), status
-    )
+    xis, status = lib.correlation_pi_sigma_vec(cosmo, psp, a, beta, pi, sigma,
+                                               len(sigma), int(use_spline),
+                                               status)
     check(status, cosmo_in)
     if scalar:
         return xis[0]

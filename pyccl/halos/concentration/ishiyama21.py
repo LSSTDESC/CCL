@@ -26,15 +26,11 @@ class ConcentrationIshiyama21(Concentration):
             numerical method. Otherwise, use the concentration found with
             profile fitting. Default:  ``False``.
     """
+    __repr_attrs__ = __eq_attrs__ = ("mass_def", "relaxed", "Vmax",)
+    name = 'Ishiyama21'
 
-    __repr_attrs__ = __eq_attrs__ = (
-        "mass_def",
-        "relaxed",
-        "Vmax",
-    )
-    name = "Ishiyama21"
-
-    def __init__(self, *, mass_def="500c", relaxed=False, Vmax=False):
+    def __init__(self, *, mass_def="500c",
+                 relaxed=False, Vmax=False):
         self.relaxed = relaxed
         self.Vmax = Vmax
         super().__init__(mass_def=mass_def)
@@ -45,38 +41,34 @@ class ConcentrationIshiyama21(Concentration):
 
     def _setup(self):
         # key: (Vmax, relaxed, Delta)
-        vals = {
-            (True, True, 200): (1.79, 2.15, 2.06, 0.88, 9.24, 0.51),
-            (True, False, 200): (1.10, 2.30, 1.64, 1.72, 3.60, 0.32),
-            (False, True, 200): (0.60, 2.14, 2.63, 1.69, 6.36, 0.37),
-            (False, False, 200): (1.19, 2.54, 1.33, 4.04, 1.21, 0.22),
-            (True, True, "vir"): (2.40, 2.27, 1.80, 0.56, 13.24, 0.079),
-            (True, False, "vir"): (0.76, 2.34, 1.82, 1.83, 3.52, -0.18),
-            (False, True, "vir"): (1.22, 2.52, 1.87, 2.13, 4.19, -0.017),
-            (False, False, "vir"): (1.64, 2.67, 1.23, 3.92, 1.30, -0.19),
-            (False, True, 500): (0.38, 1.44, 3.41, 2.86, 2.99, 0.42),
-            (False, False, 500): (1.83, 1.95, 1.17, 3.57, 0.91, 0.26),
-        }
+        vals = {(True, True, 200): (1.79, 2.15, 2.06, 0.88, 9.24, 0.51),
+                (True, False, 200): (1.10, 2.30, 1.64, 1.72, 3.60, 0.32),
+                (False, True, 200): (0.60, 2.14, 2.63, 1.69, 6.36, 0.37),
+                (False, False, 200): (1.19, 2.54, 1.33, 4.04, 1.21, 0.22),
+                (True, True, "vir"): (2.40, 2.27, 1.80, 0.56, 13.24, 0.079),
+                (True, False, "vir"): (0.76, 2.34, 1.82, 1.83, 3.52, -0.18),
+                (False, True, "vir"): (1.22, 2.52, 1.87, 2.13, 4.19, -0.017),
+                (False, False, "vir"): (1.64, 2.67, 1.23, 3.92, 1.30, -0.19),
+                (False, True, 500): (0.38, 1.44, 3.41, 2.86, 2.99, 0.42),
+                (False, False, 500): (1.83, 1.95, 1.17, 3.57, 0.91, 0.26)}
 
         key = (self.Vmax, self.relaxed, self.mass_def.Delta)
-        self.kappa, self.a0, self.a1, self.b0, self.b1, self.c_alpha = vals[
-            key
-        ]
+        self.kappa, self.a0, self.a1, \
+            self.b0, self.b1, self.c_alpha = vals[key]
 
     def _dlsigmaR(self, cosmo, M, a):
         # kappa multiplies radius, so in log, 3*kappa multiplies mass
-        logM = 3 * np.log10(self.kappa) + np.log10(M)
+        logM = 3*np.log10(self.kappa) + np.log10(M)
 
         status = 0
-        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(
-            cosmo.cosmo, a, logM, len(logM), status
-        )
+        dlns_dlogM, status = lib.dlnsigM_dlogM_vec(cosmo.cosmo, a, logM,
+                                                   len(logM), status)
         check(status, cosmo=cosmo)
-        return -3 / np.log(10) * dlns_dlogM
+        return -3/np.log(10) * dlns_dlogM
 
     def _G(self, x, n_eff):
         fx = np.log(1 + x) - x / (1 + x)
-        G = x / fx ** ((5 + n_eff) / 6)
+        G = x / fx**((5 + n_eff) / 6)
         return G
 
     def _G_inv(self, arg, n_eff):

@@ -1,14 +1,6 @@
-__all__ = (
-    "mass2radius_lagrangian",
-    "convert_concentration",
-    "MassDef",
-    "MassDef200m",
-    "MassDef200c",
-    "MassDef500c",
-    "MassDefVir",
-    "MassDefFof",
-    "mass_translator",
-)
+__all__ = ("mass2radius_lagrangian", "convert_concentration", "MassDef",
+           "MassDef200m", "MassDef200c", "MassDef500c", "MassDefVir",
+           "MassDefFof", "mass_translator",)
 
 from functools import cached_property
 
@@ -19,7 +11,7 @@ from . import Concentration, HaloBias, MassFunc
 
 
 def mass2radius_lagrangian(cosmo, M):
-    """Returns Lagrangian radius for a halo of mass :math:`M`.
+    """ Returns Lagrangian radius for a halo of mass :math:`M`.
     The lagrangian radius is defined as that enclosing
     the mass of the halo assuming a homogeneous Universe.
 
@@ -34,14 +26,14 @@ def mass2radius_lagrangian(cosmo, M):
         (:obj:`float` or `array`): lagrangian radius in comoving Mpc.
     """
     M_use = np.atleast_1d(M)
-    R = (M_use / (4.18879020479 * cosmo.rho_x(1, "matter"))) ** (1.0 / 3.0)
+    R = (M_use / (4.18879020479 * cosmo.rho_x(1, 'matter')))**(1./3.)
     if np.ndim(M) == 0:
         return R[0]
     return R
 
 
 def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
-    """Computes the concentration parameter for a different mass definition.
+    """ Computes the concentration parameter for a different mass definition.
     This is done assuming an NFW profile. The output concentration ``c_new`` is
     found by solving the equation:
 
@@ -67,9 +59,10 @@ def convert_concentration(cosmo, *, c_old, Delta_old, Delta_new):
     """
     status = 0
     c_old_use = np.atleast_1d(c_old)
-    c_new, status = lib.convert_concentration_vec(
-        cosmo.cosmo, Delta_old, c_old_use, Delta_new, c_old_use.size, status
-    )
+    c_new, status = lib.convert_concentration_vec(cosmo.cosmo,
+                                                  Delta_old, c_old_use,
+                                                  Delta_new, c_old_use.size,
+                                                  status)
     check(status, cosmo=cosmo)
 
     if np.isscalar(c_old):
@@ -97,8 +90,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         Delta (:obj:`float`): overdensity parameter. Pass ``'vir'`` if using virial
             overdensity. Pass ``'fof'`` for Friends-of-Friends halos.
         rho_type (:obj:`str`): either 'critical' or 'matter'.
-    """  # noqa
-
+    """ # noqa
     __eq_attrs__ = ("name",)
 
     def __init__(self, Delta, rho_type):
@@ -110,7 +102,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
                 raise ValueError(f"Unknown Delta type {Delta}.")
         if isinstance(Delta, (int, float)) and Delta < 0:
             raise ValueError("Delta must be a positive number.")
-        if rho_type not in ["matter", "critical"]:
+        if rho_type not in ['matter', 'critical']:
             raise ValueError("rho_type must be {'matter', 'critical'}.")
 
         self.Delta = Delta
@@ -150,7 +142,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         return Dv
 
     def get_Delta(self, cosmo, a):
-        """Gets overdensity parameter associated to this mass
+        """ Gets overdensity parameter associated to this mass
         definition.
 
         Args:
@@ -168,18 +160,18 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         return self.Delta
 
     def _get_Delta_m(self, cosmo, a):
-        """For SO-based mass definitions, this returns the corresponding
+        """ For SO-based mass definitions, this returns the corresponding
         value of Delta for a rho_matter-based definition.
         """
         delta = self.get_Delta(cosmo, a)
-        if self.rho_type == "matter":
+        if self.rho_type == 'matter':
             return delta
         om_this = cosmo.omega_x(a, self.rho_type)
-        om_matt = cosmo.omega_x(a, "matter")
+        om_matt = cosmo.omega_x(a, 'matter')
         return delta * om_this / om_matt
 
     def get_mass(self, cosmo, R, a):
-        """Translates a halo radius into a mass
+        """ Translates a halo radius into a mass
 
         .. math::
             M_\\Delta = \\frac{4 \\pi}{3} \\Delta\\,\\rho_X\\, R_\\Delta^3
@@ -201,7 +193,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         return M
 
     def get_radius(self, cosmo, M, a):
-        """Translates a halo mass into a radius
+        """ Translates a halo mass into a radius
 
         .. math::
             R_\\Delta = \\left(\\frac{3M_\\Delta}{4 \\pi
@@ -220,16 +212,15 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
         """
         M_use = np.atleast_1d(M)
         Delta = self.get_Delta(cosmo, a)
-        R = (
-            M_use / (4.18879020479 * Delta * cosmo.rho_x(a, self.rho_type))
-        ) ** (1.0 / 3.0)
+        R = (M_use / (4.18879020479 * Delta *
+                      cosmo.rho_x(a, self.rho_type)))**(1./3.)
         if np.ndim(M) == 0:
             return R[0]
         return R
 
     @classmethod
     def from_name(cls, name):
-        """Return mass definition subclass from name string.
+        """ Return mass definition subclass from name string.
 
         Args:
             name (:obj:`str`):
@@ -258,14 +249,8 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             return cls.from_name(input_)
 
     @classmethod
-    def from_specs(
-        cls,
-        mass_def=None,
-        *,
-        mass_function=None,
-        halo_bias=None,
-        concentration=None,
-    ):
+    def from_specs(cls, mass_def=None, *,
+                   mass_function=None, halo_bias=None, concentration=None):
         """Instantiate mass definition and halo model ingredients.
 
         Unspecified halo model ingredients are ignored. ``mass_def`` is always
@@ -293,7 +278,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             - mass_function : :class:`~pyccl.halos.halo_model_base.MassFunc`, if specified
             - halo_bias : :class:`~pyccl.halos.halo_model_base.HaloBias`, if specified
             - concentration : :class:`~pyccl.halos.halo_model_base.Concentration`, if specified
-        """  # noqa
+        """ # noqa
         values = mass_function, halo_bias, concentration
         idx = [value is not None for value in values]
 
@@ -355,13 +340,12 @@ def mass_translator(*, mass_in, mass_out, concentration):
         ``cosmo`` is a :class:`~pyccl.cosmology.Cosmology` object, ``M``
         is a mass (or array of masses), and ``a`` is a scale factor.
 
-    """  # noqa
+    """ # noqa
 
     mass_in = MassDef.create_instance(mass_in)
     mass_out = MassDef.create_instance(mass_out)
-    concentration = Concentration.create_instance(
-        concentration, mass_def=mass_in
-    )
+    concentration = Concentration.create_instance(concentration,
+                                                  mass_def=mass_in)
     if concentration.mass_def != mass_in:
         raise ValueError("mass_def of concentration doesn't match mass_in")
 
@@ -377,9 +361,8 @@ def mass_translator(*, mass_in, mass_out, concentration):
         Om_out = cosmo.omega_x(a, mass_out.rho_type)
         D_out = mass_out.get_Delta(cosmo, a) * Om_out
         c_out = convert_concentration(
-            cosmo, c_old=c_in, Delta_old=D_in, Delta_new=D_out
-        )
-        R_out = R_in * c_out / c_in
+            cosmo, c_old=c_in, Delta_old=D_in, Delta_new=D_out)
+        R_out = R_in * c_out/c_in
         return mass_out.get_mass(cosmo, R_out, a)
 
     return translate

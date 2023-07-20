@@ -14,10 +14,11 @@ class HaloBiasSheth01(HaloBias):
         mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
-
     name = "Sheth01"
 
-    def __init__(self, *, mass_def="fof", mass_def_strict=True):
+    def __init__(self, *,
+                 mass_def="fof",
+                 mass_def_strict=True):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
@@ -31,10 +32,9 @@ class HaloBiasSheth01(HaloBias):
         self.dc = get_delta_c(None, None, kind='EdS')
 
     def _get_bsigma(self, cosmo, sigM, a):
-        nu = self.dc / sigM
+        nu = self.dc/sigM
         anu2 = self.a * nu**2
         anu2c = anu2**self.c
         t1 = self.b * (1.0 - self.c) * (1.0 - 0.5 * self.c)
-        return 1 + (
-            self.sqrta * anu2 * (1 + self.b / anu2c) - anu2c / (anu2c + t1)
-        ) / (self.sqrta * self.dc)
+        return 1 + (self.sqrta * anu2 * (1 + self.b / anu2c) -
+                    anu2c / (anu2c + t1)) / (self.sqrta * self.dc)

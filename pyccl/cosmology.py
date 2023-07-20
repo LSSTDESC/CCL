@@ -3,13 +3,8 @@ module. Its focus is :class:`Cosmology` class, which plays a central role,
 carrying the information on cosmological parameters and derived quantities
 needed in most of the calculations carried out by CCL.
 """
-__all__ = (
-    "TransferFunctions",
-    "MatterPowerSpectra",
-    "Cosmology",
-    "CosmologyVanillaLCDM",
-    "CosmologyCalculator",
-)
+__all__ = ("TransferFunctions", "MatterPowerSpectra",
+           "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
 
 import yaml
 from enum import Enum
@@ -95,14 +90,7 @@ def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
     return cls
 
 
-@_make_methods(
-    modules=(
-        "",
-        "halos",
-        "nl_pt",
-    ),
-    name="cosmo",
-)
+@_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
 class Cosmology(CCLObject):
     """A cosmology including parameters and associated data (e.g. distances,
     power spectra).
@@ -209,40 +197,20 @@ class Cosmology(CCLObject):
                                      "HMCode_logT_AGN": 7.8}}
     """ # noqa
     from ._core.repr_ import build_string_Cosmology as __repr__
-
-    __eq_attrs__ = (
-        "_params_init_kwargs",
-        "_config_init_kwargs",
-        "_accuracy_params",
-    )
+    __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
+                    "_accuracy_params",)
 
     def __init__(
-        self,
-        *,
-        Omega_c=None,
-        Omega_b=None,
-        h=None,
-        n_s=None,
-        sigma8=None,
-        A_s=None,
-        Omega_k=0.0,
-        Omega_g=None,
-        Neff=None,
-        m_nu=0.0,
-        mass_split="normal",
-        w0=-1.0,
-        wa=0.0,
-        T_CMB=DefaultParams.T_CMB,
-        mu_0=0,
-        sigma_0=0,
-        c1_mg=1,
-        c2_mg=1,
-        lambda_mg=0,
-        transfer_function="boltzmann_camb",
-        matter_power_spectrum="halofit",
-        extra_parameters=None,
-        T_ncdm=DefaultParams.T_ncdm,
-    ):
+            self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
+            sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
+            Neff=None, m_nu=0., mass_split='normal', w0=-1., wa=0.,
+            T_CMB=DefaultParams.T_CMB,
+            mu_0=0, sigma_0=0, c1_mg=1, c2_mg=1, lambda_mg=0,
+            transfer_function='boltzmann_camb',
+            matter_power_spectrum='halofit',
+            extra_parameters=None,
+            T_ncdm=DefaultParams.T_ncdm):
+
         if Neff is None:
             Neff = 3.044
 
@@ -262,34 +230,17 @@ class Cosmology(CCLObject):
 
         # going to save these for later
         self._params_init_kwargs = dict(
-            Omega_c=Omega_c,
-            Omega_b=Omega_b,
-            h=h,
-            n_s=n_s,
-            sigma8=sigma8,
-            A_s=A_s,
-            Omega_k=Omega_k,
-            Omega_g=Omega_g,
-            Neff=Neff,
-            m_nu=m_nu,
-            mass_split=mass_split,
-            w0=w0,
-            wa=wa,
-            T_CMB=T_CMB,
-            T_ncdm=T_ncdm,
-            mu_0=mu_0,
-            sigma_0=sigma_0,
-            c1_mg=c1_mg,
-            c2_mg=c2_mg,
-            lambda_mg=lambda_mg,
-            extra_parameters=extra_parameters,
-        )
+            Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
+            A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
+            mass_split=mass_split, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
+            mu_0=mu_0, sigma_0=sigma_0,
+            c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
+            extra_parameters=extra_parameters)
 
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
             matter_power_spectrum=matter_power_spectrum,
-            extra_parameters=extra_parameters,
-        )
+            extra_parameters=extra_parameters)
 
         self._build_cosmo()
 
@@ -317,7 +268,6 @@ class Cosmology(CCLObject):
             filename (:obj:`str`) Filename, file pointer, or stream to write "
                 "parameters to."
         """
-
         def make_yaml_friendly(d):
             # serialize numpy types and dicts
             for k, v in d.items():
@@ -348,16 +298,13 @@ class Cosmology(CCLObject):
         """
         loader = yaml.Loader
         if isinstance(filename, str):
-            with open(filename, "r") as fp:
+            with open(filename, 'r') as fp:
                 return cls(**{**yaml.load(fp, Loader=loader), **kwargs})
         return cls(**{**yaml.load(filename, Loader=loader), **kwargs})
 
     def _build_config(
-        self,
-        transfer_function=None,
-        matter_power_spectrum=None,
-        extra_parameters=None,
-    ):
+            self, transfer_function=None, matter_power_spectrum=None,
+            extra_parameters=None):
         """Build a ccl_configuration struct.
 
         This function builds C ccl_configuration struct. This structure
@@ -368,14 +315,11 @@ class Cosmology(CCLObject):
         It also does some error checking on the inputs to make sure they
         are valid and physically consistent.
         """
-        if (
-            matter_power_spectrum == "camb"
-            and transfer_function != "boltzmann_camb"
-        ):
+        if (matter_power_spectrum == "camb"
+                and transfer_function != "boltzmann_camb"):
             raise CCLError(
                 "To compute the non-linear matter power spectrum with CAMB "
-                "the transfer function should be 'boltzmann_camb'."
-            )
+                "the transfer function should be 'boltzmann_camb'.")
 
         config = lib.configuration()
         tf = transfer_function_types[transfer_function]
@@ -387,29 +331,11 @@ class Cosmology(CCLObject):
         self._config = config
 
     def _build_parameters(
-        self,
-        Omega_c=None,
-        Omega_b=None,
-        h=None,
-        n_s=None,
-        sigma8=None,
-        A_s=None,
-        Omega_k=None,
-        Neff=None,
-        m_nu=None,
-        mass_split=None,
-        w0=None,
-        wa=None,
-        T_CMB=None,
-        T_ncdm=None,
-        mu_0=None,
-        sigma_0=None,
-        c1_mg=None,
-        c2_mg=None,
-        lambda_mg=None,
-        Omega_g=None,
-        extra_parameters=None,
-    ):
+            self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
+            A_s=None, Omega_k=None, Neff=None, m_nu=None, mass_split=None,
+            w0=None, wa=None, T_CMB=None, T_ncdm=None,
+            mu_0=None, sigma_0=None, c1_mg=None, c2_mg=None, lambda_mg=None,
+            Omega_g=None, extra_parameters=None):
         """Build a ccl_parameters struct"""
         # Fill-in defaults (SWIG converts `numpy.nan` to `NAN`)
         A_s = np.nan if A_s is None else A_s
@@ -444,72 +370,43 @@ class Cosmology(CCLObject):
         rho_crit = c.RHO_CRITICAL * c.SOLAR_MASS / c.MPC_TO_METER**3 * h**2
 
         # Initialize neutrinos.
-        g = (4 / 11) ** (1 / 3)
+        g = (4/11)**(1/3)
         T_nu = g * T_CMB
         massless_limit = T_nu * c.KBOLTZ / c.EV_IN_J
 
         from .neutrinos import nu_masses
-
         mnu_list = nu_masses(m_nu=m_nu, mass_split=mass_split)
         nu_mass = mnu_list[mnu_list > massless_limit]
         N_nu_mass = len(nu_mass)
-        N_nu_rel = Neff - N_nu_mass * (T_ncdm / g) ** 4
+        N_nu_rel = Neff - N_nu_mass * (T_ncdm/g)**4
 
-        rho_nu_rel = (
-            N_nu_rel * (7 / 8) * 4 * c.STBOLTZ / c.CLIGHT**3 * T_nu**4
-        )
+        rho_nu_rel = N_nu_rel * (7/8) * 4 * c.STBOLTZ / c.CLIGHT**3 * T_nu**4
         Omega_nu_rel = rho_nu_rel / rho_crit
-        Omega_nu_mass = (
-            self._OmNuh2(nu_mass, N_nu_mass, T_CMB, T_ncdm) / h**2
-        )
+        Omega_nu_mass = self._OmNuh2(nu_mass, N_nu_mass, T_CMB, T_ncdm) / h**2
 
         if N_nu_rel < 0:
-            raise ValueError(
-                "Unphysical Neff and m_nu combination results to "
-                "negative number of relativistic neutrinos."
-            )
+            raise ValueError("Unphysical Neff and m_nu combination results to "
+                             "negative number of relativistic neutrinos.")
 
         # Initialize matter & dark energy.
         Omega_m = Omega_b + Omega_c + Omega_nu_mass
-        Omega_l = 1 - Omega_m - rho_g / rho_crit - Omega_nu_rel - Omega_k
+        Omega_l = 1 - Omega_m - rho_g/rho_crit - Omega_nu_rel - Omega_k
         if np.isnan(Omega_g):
             # No value passed for Omega_g
-            Omega_g = rho_g / rho_crit
+            Omega_g = rho_g/rho_crit
         else:
             # Omega_g was passed - modify Omega_l
-            Omega_l += rho_g / rho_crit - Omega_g
+            Omega_l += rho_g/rho_crit - Omega_g
 
         self._fill_params(
-            m_nu=nu_mass,
-            sum_nu_masses=sum(nu_mass),
-            N_nu_mass=N_nu_mass,
-            N_nu_rel=N_nu_rel,
-            Neff=Neff,
-            Omega_nu_mass=Omega_nu_mass,
-            Omega_nu_rel=Omega_nu_rel,
-            Omega_m=Omega_m,
-            Omega_c=Omega_c,
-            Omega_b=Omega_b,
-            Omega_k=Omega_k,
-            sqrtk=sqrtk,
-            k_sign=int(k_sign),
-            T_CMB=T_CMB,
-            T_ncdm=T_ncdm,
-            Omega_g=Omega_g,
-            w0=w0,
-            wa=wa,
-            Omega_l=Omega_l,
-            h=h,
-            H0=h * 100,
-            A_s=A_s,
-            sigma8=sigma8,
-            n_s=n_s,
-            mu_0=mu_0,
-            sigma_0=sigma_0,
-            c1_mg=c1_mg,
-            c2_mg=c2_mg,
-            lambda_mg=lambda_mg,
-        )
+            m_nu=nu_mass, sum_nu_masses=sum(nu_mass), N_nu_mass=N_nu_mass,
+            N_nu_rel=N_nu_rel, Neff=Neff, Omega_nu_mass=Omega_nu_mass,
+            Omega_nu_rel=Omega_nu_rel, Omega_m=Omega_m, Omega_c=Omega_c,
+            Omega_b=Omega_b, Omega_k=Omega_k, sqrtk=sqrtk, k_sign=int(k_sign),
+            T_CMB=T_CMB, T_ncdm=T_ncdm, Omega_g=Omega_g, w0=w0, wa=wa,
+            Omega_l=Omega_l, h=h, H0=h*100, A_s=A_s, sigma8=sigma8, n_s=n_s,
+            mu_0=mu_0, sigma_0=sigma_0, c1_mg=c1_mg, c2_mg=c2_mg,
+            lambda_mg=lambda_mg)
 
     def _OmNuh2(self, m_nu, N_nu_mass, T_CMB, T_ncdm):
         # Compute OmNuh2 today.
@@ -523,7 +420,7 @@ class Cosmology(CCLObject):
         [setattr(self._params, par, val) for par, val in kwargs.items()]
 
     def __getitem__(self, key):
-        if key == "extra_parameters":
+        if key == 'extra_parameters':
             return self._params_init_kwargs["extra_parameters"]
         return getattr(self._params, key)
 
@@ -549,9 +446,9 @@ class Cosmology(CCLObject):
         # we are removing any C data before pickling so that the
         # is pure python when pickled.
         state = self.__dict__.copy()
-        state.pop("cosmo", None)
-        state.pop("_params", None)
-        state.pop("_config", None)
+        state.pop('cosmo', None)
+        state.pop('_params', None)
+        state.pop('_config', None)
         return state
 
     def __setstate__(self, state):
@@ -584,16 +481,16 @@ class Cosmology(CCLObject):
         self.compute_growth()
 
         # Populate power spectrum splines
-        trf = self._config_init_kwargs["transfer_function"]
+        trf = self._config_init_kwargs['transfer_function']
         pk = None
         rescale_s8 = True
         rescale_mg = True
-        if trf == "boltzmann_class":
+        if trf == 'boltzmann_class':
             pk = self.get_class_pk_lin()
-        elif trf == "boltzmann_isitgr":
+        elif trf == 'boltzmann_isitgr':
             rescale_mg = False
             pk = self.get_isitgr_pk_lin()
-        elif trf in ["bbks", "eisenstein_hu", "eisenstein_hu_nowiggles"]:
+        elif trf in ['bbks', 'eisenstein_hu', 'eisenstein_hu_nowiggles']:
             rescale_s8 = False
             rescale_mg = False
             pk = Pk2D.from_model(self, model=trf)
@@ -609,10 +506,8 @@ class Cosmology(CCLObject):
         pkl = None
         if self._config_init_kwargs["matter_power_spectrum"] == "camb":
             if not np.isfinite(self["A_s"]):
-                raise CCLError(
-                    "CAMB doesn't rescale non-linear power spectra "
-                    "consistently without A_s."
-                )
+                raise CCLError("CAMB doesn't rescale non-linear power spectra "
+                               "consistently without A_s.")
             # no rescaling because A_s is necessarily provided
             rescale_mg = rescale_s8 = False
             name = "delta_matter:delta_matter"
@@ -624,9 +519,10 @@ class Cosmology(CCLObject):
         # Rescale by sigma8/mu-sigma if needed
         if pk:
             status = 0
-            status = lib.rescale_linpower(
-                self.cosmo, pk.psp, int(rescale_mg), int(rescale_s8), status
-            )
+            status = lib.rescale_linpower(self.cosmo, pk.psp,
+                                          int(rescale_mg),
+                                          int(rescale_s8),
+                                          status)
             check(status, self)
 
         return pk
@@ -643,7 +539,7 @@ class Cosmology(CCLObject):
         self.compute_distances()
 
         # Populate power spectrum splines
-        mps = self._config_init_kwargs["matter_power_spectrum"]
+        mps = self._config_init_kwargs['matter_power_spectrum']
         # needed for halofit, halomodel and linear options
         if (mps not in ['emulator']) and (mps is not None):
             self.compute_linear_power()
@@ -652,7 +548,7 @@ class Cosmology(CCLObject):
             # Already computed
             return self._pk_nl[DEFAULT_POWER_SPECTRUM]
 
-        if mps == "halofit":
+        if mps == 'halofit':
             pkl = self._pk_lin[DEFAULT_POWER_SPECTRUM]
             pk = pkl.apply_halofit(self)
         elif mps == 'linear':
@@ -754,18 +650,15 @@ def CosmologyVanillaLCDM(**kwargs):
             the :math:`\\Lambda`-CDM parameters (`"Omega_c"`, `"Omega_b"`,
             `"n_s"`, `"sigma8"`, `"A_s"`, `"h"`), since these are fixed.
     """
-    p = {
-        "Omega_c": 0.25,
-        "Omega_b": 0.05,
-        "h": 0.67,
-        "n_s": 0.96,
-        "sigma8": 0.81,
-        "A_s": None,
-    }
+    p = {'Omega_c': 0.25,
+         'Omega_b': 0.05,
+         'h': 0.67,
+         'n_s': 0.96,
+         'sigma8': 0.81,
+         'A_s': None}
     if set(p).intersection(set(kwargs)):
         raise ValueError(
-            f"You cannot change the ΛCDM parameters: {list(p.keys())}."
-        )
+            f"You cannot change the ΛCDM parameters: {list(p.keys())}.")
     # TODO py39+: dictionary union operator `(p | kwargs)`.
     return Cosmology(**{**p, **kwargs})
 
@@ -883,69 +776,27 @@ class CosmologyCalculator(Cosmology):
             corresponding to the "HALOFIT" transformation of
             `Takahashi et al. 2012 <https://arxiv.org/abs/1208.2701>`_.
     """
-
-    __eq_attrs__ = (
-        "_params_init_kwargs",
-        "_config_init_kwargs",
-        "_accuracy_params",
-        "_input_arrays",
-    )
+    __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
+                    "_accuracy_params", "_input_arrays",)
 
     def __init__(
-        self,
-        *,
-        Omega_c=None,
-        Omega_b=None,
-        h=None,
-        n_s=None,
-        sigma8=None,
-        A_s=None,
-        Omega_k=0.0,
-        Omega_g=None,
-        Neff=None,
-        m_nu=0.0,
-        mass_split="normal",
-        w0=-1.0,
-        wa=0.0,
-        T_CMB=DefaultParams.T_CMB,
-        T_ncdm=DefaultParams.T_ncdm,
-        mu_0=0.0,
-        sigma_0=0.0,
-        background=None,
-        growth=None,
-        pk_linear=None,
-        pk_nonlin=None,
-        nonlinear_model=None,
-    ):
-        super().__init__(
-            Omega_c=Omega_c,
-            Omega_b=Omega_b,
-            h=h,
-            n_s=n_s,
-            sigma8=sigma8,
-            A_s=A_s,
-            Omega_k=Omega_k,
-            Omega_g=Omega_g,
-            Neff=Neff,
-            m_nu=m_nu,
-            mass_split=mass_split,
-            w0=w0,
-            wa=wa,
-            T_CMB=T_CMB,
-            T_ncdm=T_ncdm,
-            mu_0=mu_0,
-            sigma_0=sigma_0,
-            transfer_function="calculator",
-            matter_power_spectrum="calculator",
-        )
+            self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
+            sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
+            Neff=None, m_nu=0., mass_split="normal", w0=-1., wa=0.,
+            T_CMB=DefaultParams.T_CMB, T_ncdm=DefaultParams.T_ncdm,
+            mu_0=0., sigma_0=0., background=None, growth=None,
+            pk_linear=None, pk_nonlin=None, nonlinear_model=None):
 
-        self._input_arrays = {
-            "background": background,
-            "growth": growth,
-            "pk_linear": pk_linear,
-            "pk_nonlin": pk_nonlin,
-            "nonlinear_model": nonlinear_model,
-        }
+        super().__init__(
+            Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
+            A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
+            mass_split=mass_split, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
+            mu_0=mu_0, sigma_0=sigma_0,
+            transfer_function="calculator", matter_power_spectrum="calculator")
+
+        self._input_arrays = {"background": background, "growth": growth,
+                              "pk_linear": pk_linear, "pk_nonlin": pk_nonlin,
+                              "nonlinear_model": nonlinear_model}
 
         if background is not None:
             self._init_background(background)
@@ -970,18 +821,15 @@ class CosmologyCalculator(Cosmology):
 
     def _check_label(self, name):
         if len(name.split(":")) != 2:
-            raise ValueError(
-                f"Could not parse power spectrum {name}. "
-                "Label must be of the form 'q1:q2'."
-            )
+            raise ValueError(f"Could not parse power spectrum {name}. "
+                             "Label must be of the form 'q1:q2'.")
 
     def _init_background(self, background):
         a, chi, E = background["a"], background["chi"], background["h_over_h0"]
         self._check_input(a, chi, E)
         status = 0
-        status = lib.cosmology_distances_from_input(
-            self.cosmo, a, chi, E, status
-        )
+        status = lib.cosmology_distances_from_input(self.cosmo, a, chi, E,
+                                                    status)
         check(status, self)
 
     def _init_growth(self, growth):
@@ -998,26 +846,22 @@ class CosmologyCalculator(Cosmology):
         na, nk = a.size, lk.size
 
         if DEFAULT_POWER_SPECTRUM not in pk_linear:
-            raise ValueError(
-                "pk_linear does not contain " f"{DEFAULT_POWER_SPECTRUM}"
-            )
+            raise ValueError("pk_linear does not contain "
+                             f"{DEFAULT_POWER_SPECTRUM}")
 
         pk_names = set(pk_linear.keys()) - set(["a", "k"])
         for name in pk_names:
             self._check_label(name)
             pk = pk_linear[name]
             if pk.shape != (na, nk):
-                raise ValueError(
-                    "Power spectrum shape mismatch. "
-                    f"Expected {(na, nk)}. Received {pk.shape}."
-                )
+                raise ValueError("Power spectrum shape mismatch. "
+                                 f"Expected {(na, nk)}. Received {pk.shape}.")
             # Spline in log-space if the P(k) is positive-definite
             use_log = (pk > 0).all()
             if use_log:
                 pk = np.log(pk)
-            self._pk_lin[name] = Pk2D(
-                a_arr=a, lk_arr=lk, pk_arr=pk, is_logp=use_log
-            )
+            self._pk_lin[name] = Pk2D(a_arr=a, lk_arr=lk, pk_arr=pk,
+                                      is_logp=use_log)
 
     def _init_pk_nonlinear(self, pk_nonlin, nonlinear_model):
         a, lk = pk_nonlin["a"], np.log(pk_nonlin["k"])
@@ -1025,27 +869,22 @@ class CosmologyCalculator(Cosmology):
         na, nk = a.size, lk.size
 
         if DEFAULT_POWER_SPECTRUM not in pk_nonlin and nonlinear_model is None:
-            raise ValueError(
-                f"{DEFAULT_POWER_SPECTRUM} not specified in "
-                "`pk_nonlin` and `nonlinear_model` is None"
-            )
+            raise ValueError(f"{DEFAULT_POWER_SPECTRUM} not specified in "
+                             "`pk_nonlin` and `nonlinear_model` is None")
 
         pk_names = set(pk_nonlin.keys()) - set(["a", "k"])
         for name in pk_names:
             self._check_label(name)
             pk = pk_nonlin[name]
             if pk.shape != (na, nk):
-                raise ValueError(
-                    "Power spectrum shape mismatch. "
-                    f"Expected {(na, nk)}. Received {pk.shape}."
-                )
+                raise ValueError("Power spectrum shape mismatch. "
+                                 f"Expected {(na, nk)}. Received {pk.shape}.")
             # Spline in log-space if the P(k) is positive-definite
             use_log = (pk > 0).all()
             if use_log:
                 pk = np.log(pk)
-            self._pk_nl[name] = Pk2D(
-                a_arr=a, lk_arr=lk, pk_arr=pk, is_logp=use_log
-            )
+            self._pk_nl[name] = Pk2D(a_arr=a, lk_arr=lk, pk_arr=pk,
+                                     is_logp=use_log)
 
     def _apply_nonlinear_model(self, nonlin_model):
         if nonlin_model is None:
@@ -1068,10 +907,9 @@ class CosmologyCalculator(Cosmology):
             if model not in [None, "halofit"]:
                 raise KeyError(f"{model} is not a valid non-linear model.")
             if name == DEFAULT_POWER_SPECTRUM and model is None:
-                raise ValueError(
-                    "The non-linear matter power spectrum must " "not be None."
-                )
+                raise ValueError("The non-linear matter power spectrum must "
+                                 "not be None.")
 
-            if model == "halofit":
+            if model == 'halofit':
                 pkl = self._pk_lin[name]
                 self._pk_nl[name] = pkl.apply_halofit(self)

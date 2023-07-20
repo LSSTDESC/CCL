@@ -1,14 +1,6 @@
-__all__ = (
-    "linear_power",
-    "nonlin_power",
-    "linear_matter_power",
-    "nonlin_matter_power",
-    "sigmaM",
-    "sigmaR",
-    "sigmaV",
-    "sigma8",
-    "kNL",
-)
+__all__ = ("linear_power", "nonlin_power", "linear_matter_power",
+           "nonlin_matter_power", "sigmaM", "sigmaR", "sigmaV", "sigma8",
+           "kNL",)
 
 import numpy as np
 
@@ -97,7 +89,8 @@ def sigmaM(cosmo, M, a):
 
     logM = np.log10(np.atleast_1d(M))
     status = 0
-    sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM, len(logM), status)
+    sigM, status = lib.sigM_vec(cosmo.cosmo, a, logM,
+                                len(logM), status)
     check(status, cosmo=cosmo)
     if np.ndim(M) == 0:
         sigM = sigM[0]
@@ -180,7 +173,7 @@ def sigma8(cosmo, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     Returns:
         :obj:`float`: :math:`\\sigma_8`.
     """
-    sig8 = cosmo.sigmaR(8 / cosmo["h"], p_of_k_a=p_of_k_a)
+    sig8 = cosmo.sigmaR(8/cosmo["h"], p_of_k_a=p_of_k_a)
     if np.isnan(cosmo["sigma8"]):
         cosmo._fill_params(sigma8=sig8)
     return sig8

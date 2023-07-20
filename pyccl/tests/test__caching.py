@@ -16,9 +16,8 @@ SPEEDUP = 50
 
 
 def get_cosmo(sigma8):
-    return ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=sigma8
-    )
+    return ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96,
+                         sigma8=sigma8)
 
 
 @ccl.cache(maxsize=3)
@@ -55,7 +54,7 @@ def test_times():
     ccl.Caching.disable()
     t1 = np.array([timeit_(s8) for s8 in s8_arr[:1]])
     t2 = np.array([timeit_(s8) for s8 in s8_arr[:1]])
-    assert np.abs(np.log10(t2 / t1)) < 1.0
+    assert np.abs(np.log10(t2/t1)) < 1.0
     # But if caching is enabled, the second call will be much faster.
     ccl.Caching.enable()
     t1 = np.array([timeit_(s8) for s8 in s8_arr])
@@ -141,13 +140,11 @@ def test_caching_reset():
 def test_caching_policy_raises():
     """Test that if the set policy is not correct, it raises an exception."""
     with pytest.raises(ValueError):
-
         @ccl.Caching.cache(maxsize=-1)
         def func1():
             return
 
     with pytest.raises(ValueError):
-
         @ccl.Caching.cache(policy="my_policy")
         def func2():
             return

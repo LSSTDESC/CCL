@@ -23,15 +23,16 @@
         raise CCLError("`dim` must be 2 or 3")
 %}
 
+
 %inline %{
 
 
 void fftlog_transform(int npk,
-		      double *k_in, int n_in_k,
-		      double *fk_in, int n_in_f,
-		      int dim, double mu, double plaw_index,
-		      int nout, double *output,
-		      int *status)
+          double *k_in, int n_in_k,
+          double *fk_in, int n_in_f,
+          int dim, double mu, double plaw_index,
+          int nout, double *output,
+          int *status)
 {
   int ii;
   double *r_out = &(output[0]);
@@ -73,6 +74,7 @@ void fftlog_transform(int npk,
     if spherical_bessel!=0 and spherical_bessel!=1:
         raise CCLError("0 and 1 are the only valid values of spherical_bessel.")
 %}
+
 
 %inline %{
 void fftlog_transform_general(int npk,

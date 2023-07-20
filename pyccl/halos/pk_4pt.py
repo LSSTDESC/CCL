@@ -1,9 +1,5 @@
-__all__ = (
-    "halomod_trispectrum_1h",
-    "halomod_Tk3D_1h",
-    "halomod_Tk3D_SSC_linear_bias",
-    "halomod_Tk3D_SSC",
-)
+__all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
+           "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC",)
 
 import warnings
 
@@ -13,20 +9,10 @@ from .. import CCLWarning, Tk3D
 from . import HaloProfileNFW, Profile2pt
 
 
-def halomod_trispectrum_1h(
-    cosmo,
-    hmc,
-    k,
-    a,
-    prof,
-    *,
-    prof2=None,
-    prof3=None,
-    prof4=None,
-    prof12_2pt=None,
-    prof34_2pt=None,
-):
-    """Computes the halo model 1-halo trispectrum for four different
+def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
+                           prof2=None, prof3=None, prof4=None,
+                           prof12_2pt=None, prof34_2pt=None):
+    """ Computes the halo model 1-halo trispectrum for four different
     quantities defined by their respective halo profiles. The 1-halo
     trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
     calculated as:
@@ -81,9 +67,8 @@ def halomod_trispectrum_1h(
     k_use = np.atleast_1d(k).astype(float)
 
     # define all the profiles
-    prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt = _allocate_profiles(
-        prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt
-    )
+    prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt = \
+        _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt)
 
     na = len(a_use)
     nk = len(k_use)
@@ -108,17 +93,11 @@ def halomod_trispectrum_1h(
             norm4 = prof4.get_normalization(cosmo, aa, hmc=hmc)
 
         # trispectrum
-        tk_1h = hmc.I_0_22(
-            cosmo,
-            k_use,
-            aa,
-            prof=prof,
-            prof2=prof2,
-            prof4=prof4,
-            prof3=prof3,
-            prof12_2pt=prof12_2pt,
-            prof34_2pt=prof34_2pt,
-        )
+        tk_1h = hmc.I_0_22(cosmo, k_use, aa,
+                           prof=prof, prof2=prof2,
+                           prof4=prof4, prof3=prof3,
+                           prof12_2pt=prof12_2pt,
+                           prof34_2pt=prof34_2pt)
 
         out[ia] = tk_1h / (norm1 * norm2 * norm3 * norm4)  # assign
 
@@ -130,23 +109,13 @@ def halomod_trispectrum_1h(
     return out
 
 
-def halomod_Tk3D_1h(
-    cosmo,
-    hmc,
-    prof,
-    *,
-    prof2=None,
-    prof3=None,
-    prof4=None,
-    prof12_2pt=None,
-    prof34_2pt=None,
-    lk_arr=None,
-    a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=1,
-    use_log=False,
-):
-    """Returns a :class:`~pyccl.tk3d.Tk3D` object containing
+def halomod_Tk3D_1h(cosmo, hmc, prof, *,
+                    prof2=None, prof3=None, prof4=None,
+                    prof12_2pt=None, prof34_2pt=None,
+                    lk_arr=None, a_arr=None,
+                    extrap_order_lok=1, extrap_order_hik=1,
+                    use_log=False):
+    """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the 1-halo trispectrum for four quantities defined by
     their respective halo profiles. See :meth:`halomod_trispectrum_1h`
     for more details about the actual calculation.
@@ -196,53 +165,30 @@ def halomod_Tk3D_1h(
     if a_arr is None:
         a_arr = cosmo.get_pk_spline_a()
 
-    tkk = halomod_trispectrum_1h(
-        cosmo,
-        hmc,
-        np.exp(lk_arr),
-        a_arr,
-        prof,
-        prof2=prof2,
-        prof12_2pt=prof12_2pt,
-        prof3=prof3,
-        prof4=prof4,
-        prof34_2pt=prof34_2pt,
-    )
+    tkk = halomod_trispectrum_1h(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                 prof, prof2=prof2,
+                                 prof12_2pt=prof12_2pt,
+                                 prof3=prof3, prof4=prof4,
+                                 prof34_2pt=prof34_2pt)
 
     tkk, use_log = _logged_output(tkk, log=use_log)
 
-    return Tk3D(
-        a_arr=a_arr,
-        lk_arr=lk_arr,
-        tkk_arr=tkk,
-        extrap_order_lok=extrap_order_lok,
-        extrap_order_hik=extrap_order_hik,
-        is_logt=use_log,
-    )
+    return Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkk,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik, is_logt=use_log)
 
 
-def halomod_Tk3D_SSC_linear_bias(
-    cosmo,
-    hmc,
-    *,
-    prof,
-    bias1=1,
-    bias2=1,
-    bias3=1,
-    bias4=1,
-    is_number_counts1=False,
-    is_number_counts2=False,
-    is_number_counts3=False,
-    is_number_counts4=False,
-    p_of_k_a=None,
-    lk_arr=None,
-    a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=1,
-    use_log=False,
-    extrap_pk=False,
-):
-    """Returns a :class:`~pyccl.tk3d.Tk3D` object containing
+def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
+                                 bias1=1, bias2=1, bias3=1, bias4=1,
+                                 is_number_counts1=False,
+                                 is_number_counts2=False,
+                                 is_number_counts3=False,
+                                 is_number_counts4=False,
+                                 p_of_k_a=None, lk_arr=None,
+                                 a_arr=None, extrap_order_lok=1,
+                                 extrap_order_hik=1, use_log=False,
+                                 extrap_pk=False):
+    """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
     two pairs of quantities being correlated. Each response is
@@ -302,7 +248,7 @@ def halomod_Tk3D_SSC_linear_bias(
 
     Returns:
         :class:`~pyccl.tk3d.Tk3D`: SSC effective trispectrum.
-    """  # noqa
+    """ # noqa
     if lk_arr is None:
         lk_arr = cosmo.get_pk_spline_lk()
     if a_arr is None:
@@ -328,29 +274,22 @@ def halomod_Tk3D_SSC_linear_bias(
     nk = len(k_use)
     dpk12, dpk34 = [np.zeros([na, nk]) for _ in range(2)]
     for ia, aa in enumerate(a_arr):
-        norm = prof.get_normalization(cosmo, aa, hmc=hmc) ** 2
+        norm = prof.get_normalization(cosmo, aa, hmc=hmc)**2
         i12 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof, prof_2pt=prof_2pt)
 
         pk = pk2d(k_use, aa, cosmo=extrap)
         dpk = pk2d(k_use, aa, derivative=True, cosmo=extrap)
 
         # ~ (47/21 - 1/3 dlogPk/dlogk) * Pk + I12
-        dpk12[ia] = (47 / 21 - dpk / 3) * pk + i12 / norm
+        dpk12[ia] = (47/21 - dpk/3)*pk + i12 / norm
         dpk34[ia] = dpk12[ia].copy()
 
         # Counter terms for clustering (i.e. - (bA + bB) * PAB)
-        if any(
-            [
-                is_number_counts1,
-                is_number_counts2,
-                is_number_counts3,
-                is_number_counts4,
-            ]
-        ):
+        if any([is_number_counts1, is_number_counts2,
+                is_number_counts3, is_number_counts4]):
             b1 = b2 = b3 = b4 = 0
-            i02 = hmc.I_0_2(
-                cosmo, k_use, aa, prof, prof2=prof, prof_2pt=prof_2pt
-            )
+            i02 = hmc.I_0_2(cosmo, k_use, aa, prof,
+                            prof2=prof, prof_2pt=prof_2pt)
 
             P_12 = P_34 = pk + i02 / norm
 
@@ -371,36 +310,19 @@ def halomod_Tk3D_SSC_linear_bias(
 
     dpk12, dpk34, use_log = _logged_output(dpk12, dpk34, log=use_log)
 
-    return Tk3D(
-        a_arr=a_arr,
-        lk_arr=lk_arr,
-        pk1_arr=dpk12,
-        pk2_arr=dpk34,
-        extrap_order_lok=extrap_order_lok,
-        extrap_order_hik=extrap_order_hik,
-        is_logt=use_log,
-    )
+    return Tk3D(a_arr=a_arr, lk_arr=lk_arr,
+                pk1_arr=dpk12, pk2_arr=dpk34,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik, is_logt=use_log)
 
 
 def halomod_Tk3D_SSC(
-    cosmo,
-    hmc,
-    prof,
-    *,
-    prof2=None,
-    prof3=None,
-    prof4=None,
-    prof12_2pt=None,
-    prof34_2pt=None,
-    p_of_k_a=None,
-    lk_arr=None,
-    a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=1,
-    use_log=False,
-    extrap_pk=False,
-):
-    """Returns a :class:`~pyccl.tk3d.Tk3D` object containing
+        cosmo, hmc, prof, *, prof2=None, prof3=None, prof4=None,
+        prof12_2pt=None, prof34_2pt=None,
+        p_of_k_a=None, lk_arr=None, a_arr=None,
+        extrap_order_lok=1, extrap_order_hik=1, use_log=False,
+        extrap_pk=False):
+    """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
     two pairs of quantities being correlated. Each response is
@@ -477,9 +399,8 @@ def halomod_Tk3D_SSC(
         a_arr = cosmo.get_pk_spline_a()
 
     # define all the profiles
-    prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt = _allocate_profiles(
-        prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt
-    )
+    prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt = \
+        _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt)
 
     k_use = np.exp(lk_arr)
     pk2d = cosmo.parse_pk(p_of_k_a)
@@ -513,27 +434,21 @@ def halomod_Tk3D_SSC(
             i11_4 = hmc.I_1_1(cosmo, k_use, aa, prof4)
 
         # I12 integral
-        i12_12 = hmc.I_1_2(
-            cosmo, k_use, aa, prof, prof2=prof2, prof_2pt=prof12_2pt
-        )
+        i12_12 = hmc.I_1_2(cosmo, k_use, aa, prof,
+                           prof2=prof2, prof_2pt=prof12_2pt)
         if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
             i12_34 = i12_12
         else:
-            i12_34 = hmc.I_1_2(
-                cosmo, k_use, aa, prof3, prof2=prof4, prof_2pt=prof34_2pt
-            )
+            i12_34 = hmc.I_1_2(cosmo, k_use, aa, prof3,
+                               prof2=prof4, prof_2pt=prof34_2pt)
 
         # power spectrum
         pk = pk2d(k_use, aa, cosmo=extrap)
         dpk = pk2d(k_use, aa, derivative=True, cosmo=extrap)
 
         # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk + I12
-        dpk12[ia] = ((47 / 21 - dpk / 3) * i11_1 * i11_2 * pk + i12_12) / (
-            norm1 * norm2
-        )
-        dpk34[ia] = ((47 / 21 - dpk / 3) * i11_3 * i11_4 * pk + i12_34) / (
-            norm3 * norm4
-        )
+        dpk12[ia] = ((47/21 - dpk/3)*i11_1*i11_2*pk + i12_12) / (norm1 * norm2)
+        dpk34[ia] = ((47/21 - dpk/3)*i11_3*i11_4*pk + i12_34) / (norm3 * norm4)
 
         # Counter terms for clustering (i.e. - (bA + bB) * PAB)
         def _get_counterterm(pA, pB, p2pt, nA, nB, i11_A, i11_B):
@@ -546,29 +461,22 @@ def halomod_Tk3D_SSC(
             return (bA + bB) * P
 
         if prof.is_number_counts or prof2.is_number_counts:
-            dpk12[ia] -= _get_counterterm(
-                prof, prof2, prof12_2pt, norm1, norm2, i11_1, i11_2
-            )
+            dpk12[ia] -= _get_counterterm(prof, prof2, prof12_2pt,
+                                          norm1, norm2, i11_1, i11_2)
 
         if prof3.is_number_counts or prof4.is_number_counts:
             if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
                 dpk34[ia] = dpk12[ia]
             else:
-                dpk34[ia] -= _get_counterterm(
-                    prof3, prof4, prof34_2pt, norm3, norm4, i11_3, i11_4
-                )
+                dpk34[ia] -= _get_counterterm(prof3, prof4, prof34_2pt,
+                                              norm3, norm4, i11_3, i11_4)
 
     dpk12, dpk34, use_log = _logged_output(dpk12, dpk34, log=use_log)
 
-    return Tk3D(
-        a_arr=a_arr,
-        lk_arr=lk_arr,
-        pk1_arr=dpk12,
-        pk2_arr=dpk34,
-        extrap_order_lok=extrap_order_lok,
-        extrap_order_hik=extrap_order_hik,
-        is_logt=use_log,
-    )
+    return Tk3D(a_arr=a_arr, lk_arr=lk_arr,
+                pk1_arr=dpk12, pk2_arr=dpk34,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik, is_logt=use_log)
 
 
 def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt):
@@ -593,9 +501,7 @@ def _logged_output(*arrs, log):
         return *arrs, log
     is_negative = [(arr <= 0).any() for arr in arrs]
     if any(is_negative):
-        warnings.warn(
-            "Some values were non-positive. " "Interpolating linearly.",
-            CCLWarning,
-        )
+        warnings.warn("Some values were non-positive. "
+                      "Interpolating linearly.", CCLWarning)
         return *arrs, False
     return *[np.log(arr) for arr in arrs], log

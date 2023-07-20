@@ -15,8 +15,7 @@ class ConcentrationDiemer15(Concentration):
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
     """
-
-    name = "Diemer15"
+    name = 'Diemer15'
 
     def __init__(self, *, mass_def="200c"):
         super().__init__(mass_def=mass_def)
@@ -48,5 +47,6 @@ class ConcentrationDiemer15(Concentration):
 
         floor = self.phi_0 + n * self.phi_1
         nu0 = self.eta_0 + n * self.eta_1
-        c = 0.5 * floor * ((nu0 / nu) ** self.alpha + (nu / nu0) ** self.beta)
+        c = 0.5 * floor * ((nu0 / nu)**self.alpha +
+                           (nu / nu0)**self.beta)
         return c

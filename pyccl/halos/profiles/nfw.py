@@ -44,27 +44,15 @@ class HaloProfileNFW(HaloProfileMatter):
         truncated (:obj:`bool`): set to ``True`` if the profile should be
             truncated at :math:`r = r_\\Delta`.
     """
-
     __repr_attrs__ = __eq_attrs__ = (
-        "fourier_analytic",
-        "projected_analytic",
-        "cumul2d_analytic",
-        "truncated",
-        "mass_def",
-        "concentration",
-        "precision_fftlog",
-    )
+        "fourier_analytic", "projected_analytic", "cumul2d_analytic",
+        "truncated", "mass_def", "concentration", "precision_fftlog",)
 
-    def __init__(
-        self,
-        *,
-        mass_def,
-        concentration,
-        fourier_analytic=True,
-        projected_analytic=False,
-        cumul2d_analytic=False,
-        truncated=True
-    ):
+    def __init__(self, *, mass_def, concentration,
+                 fourier_analytic=True,
+                 projected_analytic=False,
+                 cumul2d_analytic=False,
+                 truncated=True):
         self.truncated = truncated
         self.fourier_analytic = fourier_analytic
         self.projected_analytic = projected_analytic
@@ -73,32 +61,26 @@ class HaloProfileNFW(HaloProfileMatter):
             self._fourier = self._fourier_analytic
         if projected_analytic:
             if truncated:
-                raise ValueError(
-                    "Analytic projected profile not supported "
-                    "for truncated NFW. Set `truncated` or "
-                    "`projected_analytic` to `False`."
-                )
+                raise ValueError("Analytic projected profile not supported "
+                                 "for truncated NFW. Set `truncated` or "
+                                 "`projected_analytic` to `False`.")
             self._projected = self._projected_analytic
         if cumul2d_analytic:
             if truncated:
-                raise ValueError(
-                    "Analytic cumuative 2d profile not supported "
-                    "for truncated NFW. Set `truncated` or "
-                    "`cumul2d_analytic` to `False`."
-                )
+                raise ValueError("Analytic cumuative 2d profile not supported "
+                                 "for truncated NFW. Set `truncated` or "
+                                 "`cumul2d_analytic` to `False`.")
             self._cumul2d = self._cumul2d_analytic
         self._omln2 = 1 - np.log(2)
         super().__init__(mass_def=mass_def, concentration=concentration)
-        self.update_precision_fftlog(
-            padding_hi_fftlog=1e2,
-            padding_lo_fftlog=1e-2,
-            n_per_decade=1000,
-            plaw_fourier=-2.0,
-        )
+        self.update_precision_fftlog(padding_hi_fftlog=1E2,
+                                     padding_lo_fftlog=1E-2,
+                                     n_per_decade=1000,
+                                     plaw_fourier=-2.)
 
     def _norm(self, M, Rs, c):
         # NFW normalization from mass, radius and concentration
-        return M / (4 * np.pi * Rs**3 * (np.log(1 + c) - c / (1 + c)))
+        return M / (4 * np.pi * Rs**3 * (np.log(1+c) - c/(1+c)))
 
     def _real(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
@@ -110,7 +92,7 @@ class HaloProfileNFW(HaloProfileMatter):
         R_s = R_M / c_M
 
         x = r_use[None, :] / R_s[:, None]
-        prof = 1.0 / (x * (1 + x) ** 2)
+        prof = 1./(x * (1 + x)**2)
         if self.truncated:
             prof[r_use[None, :] > R_M[:, None]] = 0
 
@@ -124,6 +106,7 @@ class HaloProfileNFW(HaloProfileMatter):
         return prof
 
     def _fx_projected(self, x):
+
         def f1(xx):
             x2m1 = xx * xx - 1
             sqx2m1 = np.sqrt(-x2m1)
@@ -135,9 +118,9 @@ class HaloProfileNFW(HaloProfileMatter):
             return 1 / x2m1 - np.arcsin(sqx2m1 / xx) / x2m1**1.5
 
         xf = x.flatten()
-        return np.piecewise(xf, [xf < 1, xf > 1], [f1, f2, 1.0 / 3.0]).reshape(
-            x.shape
-        )
+        return np.piecewise(xf,
+                            [xf < 1, xf > 1],
+                            [f1, f2, 1./3.]).reshape(x.shape)
 
     def _projected_analytic(self, cosmo, r, M, a):
         r_use = np.atleast_1d(r)
@@ -160,6 +143,7 @@ class HaloProfileNFW(HaloProfileMatter):
         return prof
 
     def _fx_cumul2d(self, x):
+
         def f1(xx):
             sqx2m1 = np.sqrt(-(xx * xx - 1))
             return np.log(0.5 * xx) + np.arcsinh(sqx2m1 / xx) / sqx2m1
@@ -169,9 +153,9 @@ class HaloProfileNFW(HaloProfileMatter):
             return np.log(0.5 * xx) + np.arcsin(sqx2m1 / xx) / sqx2m1
 
         xf = x.flatten()
-        f = np.piecewise(xf, [xf < 1, xf > 1], [f1, f2, self._omln2]).reshape(
-            x.shape
-        )
+        f = np.piecewise(xf,
+                         [xf < 1, xf > 1],
+                         [f1, f2, self._omln2]).reshape(x.shape)
         return 2 * f / x**2
 
     def _cumul2d_analytic(self, cosmo, r, M, a):

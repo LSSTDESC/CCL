@@ -2,15 +2,8 @@
 well as wrappers to automatically vectorize functions.
 """
 __all__ = (
-    "CLevelErrors",
-    "ExtrapolationMethods",
-    "IntegrationMethods",
-    "check",
-    "debug_mode",
-    "get_pk_spline_lk",
-    "get_pk_spline_a",
-    "resample_array",
-)
+    "CLevelErrors", "ExtrapolationMethods", "IntegrationMethods", "check",
+    "debug_mode", "get_pk_spline_lk", "get_pk_spline_a", "resample_array")
 
 from enum import Enum
 from typing import Iterable
@@ -38,37 +31,35 @@ class ExtrapolationMethods(Enum):
 
 
 integ_types = {
-    "qag_quad": lib.integration_qag_quad,
-    "spline": lib.integration_spline,
-}
+    'qag_quad': lib.integration_qag_quad,
+    'spline': lib.integration_spline}
 
 extrap_types = {
-    "none": lib.f1d_extrap_0,
-    "constant": lib.f1d_extrap_const,
-    "linx_liny": lib.f1d_extrap_linx_liny,
-    "linx_logy": lib.f1d_extrap_linx_logy,
-    "logx_liny": lib.f1d_extrap_logx_liny,
-    "logx_logy": lib.f1d_extrap_logx_logy,
-}
+    'none': lib.f1d_extrap_0,
+    'constant': lib.f1d_extrap_const,
+    'linx_liny': lib.f1d_extrap_linx_liny,
+    'linx_logy': lib.f1d_extrap_linx_logy,
+    'logx_liny': lib.f1d_extrap_logx_liny,
+    'logx_logy': lib.f1d_extrap_logx_logy}
 
 # This is defined here instead of in `errors.py` because SWIG needs `CCLError`
 # from `.errors`, resulting in a cyclic import.
 CLevelErrors = {
-    lib.CCL_ERROR_CLASS: "CCL_ERROR_CLASS",
-    lib.CCL_ERROR_INCONSISTENT: "CCL_ERROR_INCONSISTENT",
-    lib.CCL_ERROR_INTEG: "CCL_ERROR_INTEG",
-    lib.CCL_ERROR_LINSPACE: "CCL_ERROR_LINSPACE",
-    lib.CCL_ERROR_MEMORY: "CCL_ERROR_MEMORY",
-    lib.CCL_ERROR_ROOT: "CCL_ERROR_ROOT",
-    lib.CCL_ERROR_SPLINE: "CCL_ERROR_SPLINE",
-    lib.CCL_ERROR_SPLINE_EV: "CCL_ERROR_SPLINE_EV",
-    lib.CCL_ERROR_COMPUTECHI: "CCL_ERROR_COMPUTECHI",
-    lib.CCL_ERROR_MF: "CCL_ERROR_MF",
-    lib.CCL_ERROR_HMF_INTERP: "CCL_ERROR_HMF_INTERP",
-    lib.CCL_ERROR_PARAMETERS: "CCL_ERROR_PARAMETERS",
-    lib.CCL_ERROR_NU_INT: "CCL_ERROR_NU_INT",
-    lib.CCL_ERROR_EMULATOR_BOUND: "CCL_ERROR_EMULATOR_BOUND",
-    lib.CCL_ERROR_MISSING_CONFIG_FILE: "CCL_ERROR_MISSING_CONFIG_FILE",
+    lib.CCL_ERROR_CLASS: 'CCL_ERROR_CLASS',
+    lib.CCL_ERROR_INCONSISTENT: 'CCL_ERROR_INCONSISTENT',
+    lib.CCL_ERROR_INTEG: 'CCL_ERROR_INTEG',
+    lib.CCL_ERROR_LINSPACE: 'CCL_ERROR_LINSPACE',
+    lib.CCL_ERROR_MEMORY: 'CCL_ERROR_MEMORY',
+    lib.CCL_ERROR_ROOT: 'CCL_ERROR_ROOT',
+    lib.CCL_ERROR_SPLINE: 'CCL_ERROR_SPLINE',
+    lib.CCL_ERROR_SPLINE_EV: 'CCL_ERROR_SPLINE_EV',
+    lib.CCL_ERROR_COMPUTECHI: 'CCL_ERROR_COMPUTECHI',
+    lib.CCL_ERROR_MF: 'CCL_ERROR_MF',
+    lib.CCL_ERROR_HMF_INTERP: 'CCL_ERROR_HMF_INTERP',
+    lib.CCL_ERROR_PARAMETERS: 'CCL_ERROR_PARAMETERS',
+    lib.CCL_ERROR_NU_INT: 'CCL_ERROR_NU_INT',
+    lib.CCL_ERROR_EMULATOR_BOUND: 'CCL_ERROR_EMULATOR_BOUND',
+    lib.CCL_ERROR_MISSING_CONFIG_FILE: 'CCL_ERROR_MISSING_CONFIG_FILE',
 }
 
 
@@ -386,15 +377,15 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     elif isinstance(x1, np.ndarray):
         # Use vectorised function
         if returns_status:
-            f, status = fn_vec(cosmo, x1, x2, int(x1.size * x2.size), status)
+            f, status = fn_vec(cosmo, x1, x2, int(x1.size*x2.size), status)
         else:
-            f = fn_vec(cosmo, x1, x2, int(x1.size * x2.size))
+            f = fn_vec(cosmo, x1, x2, int(x1.size*x2.size))
     else:
         # Use vectorised function
         if returns_status:
-            f, status = fn_vec(cosmo, x1, x2, int(len(x1) * len(x2)), status)
+            f, status = fn_vec(cosmo, x1, x2, int(len(x1)*len(x2)), status)
         else:
-            f = fn_vec(cosmo, x1, x2, int(len(x1) * len(x2)))
+            f = fn_vec(cosmo, x1, x2, int(len(x1)*len(x2)))
 
     # Check result and return
     check(status, cosmo_in)
@@ -411,7 +402,7 @@ def get_pk_spline_nk(cosmo=None, spline_params=spline_params):
     if cosmo is not None:
         return lib.get_pk_spline_nk(cosmo.cosmo)
     ndecades = np.log10(spline_params.K_MAX / spline_params.K_MIN)
-    return int(np.ceil(ndecades * spline_params.N_K))
+    return int(np.ceil(ndecades*spline_params.N_K))
 
 
 def get_pk_spline_na(cosmo=None, spline_params=spline_params):
@@ -462,16 +453,10 @@ def get_pk_spline_a(cosmo=None, spline_params=spline_params):
     return a_arr
 
 
-def resample_array(
-    x_in,
-    y_in,
-    x_out,
-    extrap_lo="none",
-    extrap_hi="none",
-    fill_value_lo=0,
-    fill_value_hi=0,
-):
-    """Interpolates an input y array onto a set of x values.
+def resample_array(x_in, y_in, x_out,
+                   extrap_lo='none', extrap_hi='none',
+                   fill_value_lo=0, fill_value_hi=0):
+    """ Interpolates an input y array onto a set of x values.
 
     Args:
         x_in (`array`): input x-values.
@@ -497,22 +482,17 @@ def resample_array(
         raise ValueError("Invalid extrapolation type.")
 
     status = 0
-    y_out, status = lib.array_1d_resample(
-        x_in,
-        y_in,
-        x_out,
-        fill_value_lo,
-        fill_value_hi,
-        extrap_types[extrap_lo],
-        extrap_types[extrap_hi],
-        x_out.size,
-        status,
-    )
+    y_out, status = lib.array_1d_resample(x_in, y_in, x_out,
+                                          fill_value_lo, fill_value_hi,
+                                          extrap_types[extrap_lo],
+                                          extrap_types[extrap_hi],
+                                          x_out.size, status)
     check(status)
     return y_out
 
 
-def _fftlog_transform(rs, frs, dim, mu, power_law_index):
+def _fftlog_transform(rs, frs,
+                      dim, mu, power_law_index):
     if np.ndim(rs) != 1:
         raise ValueError("rs should be a 1D array")
     if np.ndim(frs) < 1 or np.ndim(frs) > 2:
@@ -527,16 +507,11 @@ def _fftlog_transform(rs, frs, dim, mu, power_law_index):
         raise ValueError(f"rs should have {n_r} elements")
 
     status = 0
-    result, status = lib.fftlog_transform(
-        n_transforms,
-        rs,
-        frs.flatten(),
-        dim,
-        mu,
-        power_law_index,
-        (n_transforms + 1) * n_r,
-        status,
-    )
+    result, status = lib.fftlog_transform(n_transforms,
+                                          rs, frs.flatten(),
+                                          dim, mu, power_law_index,
+                                          (n_transforms + 1) * n_r,
+                                          status)
     check(status)
     result = result.reshape([n_transforms + 1, n_r])
     ks = result[0]
@@ -604,9 +579,10 @@ def _spline_integrate(x, ys, a, b):
         raise TypeError("Integration limits should be scalar")
 
     status = 0
-    result, status = lib.spline_integrate(
-        n_integ, x, ys.flatten(), a, b, n_integ, status
-    )
+    result, status = lib.spline_integrate(n_integ,
+                                          x, ys.flatten(),
+                                          a, b, n_integ,
+                                          status)
     check(status)
 
     if np.ndim(ys) == 1:
@@ -628,16 +604,10 @@ def _check_array_params(f_arg, name=None, arr3=False):
         f2 = NoneArr
         f3 = NoneArr
     else:
-        if (
-            (not isinstance(f_arg, Iterable))
+        if ((not isinstance(f_arg, Iterable))
             or (len(f_arg) != (3 if arr3 else 2))
-            or (
-                not (
-                    isinstance(f_arg[0], Iterable)
-                    and isinstance(f_arg[1], Iterable)
-                )
-            )
-        ):
+            or (not (isinstance(f_arg[0], Iterable)
+                     and isinstance(f_arg[1], Iterable)))):
             raise ValueError(f"{name} must be a tuple of two arrays.")
 
         f1 = np.atleast_1d(np.array(f_arg[0], dtype=float))
@@ -667,9 +637,8 @@ def _get_spline1d_arrays(gsl_spline):
     size, status = lib.get_spline1d_array_size(gsl_spline, status)
     check(status)
 
-    xarr, yarr, status = lib.get_spline1d_arrays(
-        gsl_spline, size, size, status
-    )
+    xarr, yarr, status = lib.get_spline1d_arrays(gsl_spline, size, size,
+                                                 status)
     check(status)
 
     return xarr, yarr
@@ -694,10 +663,10 @@ def _get_spline2d_arrays(gsl_spline):
     x_size, y_size, status = lib.get_spline2d_array_sizes(gsl_spline, status)
     check(status)
 
-    z_size = x_size * y_size
-    xarr, yarr, zarr, status = lib.get_spline2d_arrays(
-        gsl_spline, x_size, y_size, z_size, status
-    )
+    z_size = x_size*y_size
+    xarr, yarr, zarr, status = lib.get_spline2d_arrays(gsl_spline,
+                                                       x_size, y_size, z_size,
+                                                       status)
     check(status)
 
     return yarr, xarr, zarr.reshape(y_size, x_size)
@@ -724,10 +693,10 @@ def _get_spline3d_arrays(gsl_spline, length):
     x_size, y_size, status = lib.get_spline3d_array_sizes(gsl_spline, status)
     check(status)
 
-    z_size = x_size * y_size * length
-    xarr, yarr, zarr, status = lib.get_spline3d_arrays(
-        gsl_spline, x_size, y_size, z_size, length, status
-    )
+    z_size = x_size*y_size*length
+    xarr, yarr, zarr, status = lib.get_spline3d_arrays(gsl_spline,
+                                                       x_size, y_size, z_size,
+                                                       length, status)
     check(status)
 
     return xarr, yarr, zarr.reshape((length, x_size, y_size))

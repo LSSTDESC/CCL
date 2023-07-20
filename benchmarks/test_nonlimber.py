@@ -216,7 +216,7 @@ def test_cells(set_up, method, cross_type):
                 tracers1[cross_type][i1],
                 tracers2[cross_type][i2],
                 ells,
-                l_limber="auto",
+                l_limber=200,
                 non_limber_integration_method=method,
             )
         chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / errors[
@@ -230,4 +230,3 @@ def test_cells(set_up, method, cross_type):
         f'Time taken for {method} on {cross_type} = {(t1-t0):3.2f};\
         worst chi2 = {chi2max:5.3f}'
     )
-    return cls

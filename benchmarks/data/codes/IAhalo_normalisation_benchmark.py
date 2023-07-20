@@ -10,7 +10,7 @@ import pyccl as ccl
 
 
 def normalisation(Mhalo, cosmo, conc, z):
-    """Returns the 'normalisation factor' that goes into the IA halo model
+    """ Returns the 'normalisation factor' that goes into the IA halo model
     power spectrum: satelite fraction * Nsat / tot_ns as a function of Mhalo.
     Mhalo is the vector of halo masses over which to integrate in units of Msol
     cosmo is a pyccl cosmology object
@@ -20,17 +20,15 @@ def normalisation(Mhalo, cosmo, conc, z):
 
     # Get the halo mass function
     HMF_setup = ccl.halos.MassFuncTinker10(cosmo)
-    HMF = HMF_setup.get_mass_function(cosmo, Mhalo, 1.0 / (1.0 + z))
+    HMF = HMF_setup.get_mass_function(cosmo, Mhalo, 1. / (1. + z))
 
     # Get HOD quantities we need
     HODHProf = ccl.halos.HaloProfileHOD(conc)
-    Ncen_lens = HODHProf._Nc(Mhalo, 1.0 / (1.0 + z))
-    Nsat_lens = HODHProf._Ns(Mhalo, 1.0 / (1.0 + z))
+    Ncen_lens = HODHProf._Nc(Mhalo, 1. / (1. + z))
+    Nsat_lens = HODHProf._Ns(Mhalo, 1. / (1. + z))
 
     # Get total number of satellite galaxies
-    tot_ns = scipy.integrate.simps(
-        Ncen_lens * Nsat_lens * HMF, np.log10(Mhalo)
-    )
+    tot_ns = scipy.integrate.simps(Ncen_lens * Nsat_lens * HMF, np.log10(Mhalo))
     tot_nc = scipy.integrate.simps((Ncen_lens) * HMF, np.log10(Mhalo))
 
     tot_all = tot_ns + tot_nc
@@ -41,18 +39,18 @@ def normalisation(Mhalo, cosmo, conc, z):
     return f_s / tot_ns * Nsat_lens
 
 
-if __name__ == "__main__":
-    Mhalo = np.logspace(10.0, 16, 30)  # Units Msol
+if (__name__ == "__main__"):
+    Mhalo = np.logspace(10., 16, 30)  # Units Msol
 
     z = 0.0
 
-    cosmo = ccl.Cosmology(
-        Omega_c=0.25, Omega_b=0.05, Omega_k=0, sigma8=0.81, n_s=0.96, h=1.0
-    )
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_k=0, sigma8=0.81, n_s=0.96, h=1.)
 
     concentration = ccl.halos.ConcentrationDuffy08()
 
     norm_term = normalisation(Mhalo, cosmo, concentration, z)
 
     save = np.column_stack((Mhalo, norm_term))
-    np.savetxt("../IA_halomodel_norm_term.dat", save)
+    np.savetxt('../IA_halomodel_norm_term.dat', save)
+
+

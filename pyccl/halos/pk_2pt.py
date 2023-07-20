@@ -1,7 +1,4 @@
-__all__ = (
-    "halomod_power_spectrum",
-    "halomod_Pk2D",
-)
+__all__ = ("halomod_power_spectrum", "halomod_Pk2D",)
 
 import numpy as np
 
@@ -9,23 +6,13 @@ from .. import Pk2D
 from . import Profile2pt
 
 
-def halomod_power_spectrum(
-    cosmo,
-    hmc,
-    k,
-    a,
-    prof,
-    *,
-    prof2=None,
-    prof_2pt=None,
-    p_of_k_a=None,
-    get_1h=True,
-    get_2h=True,
-    smooth_transition=None,
-    suppress_1h=None,
-    extrap_pk=False
-):
-    """Computes the halo model power spectrum for two
+def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
+                           prof2=None, prof_2pt=None,
+                           p_of_k_a=None,
+                           get_1h=True, get_2h=True,
+                           smooth_transition=None, suppress_1h=None,
+                           extrap_pk=False):
+    """ Computes the halo model power spectrum for two
     quantities defined by their respective halo profiles.
     The halo model power spectrum for two profiles
     :math:`u` and :math:`v` is:
@@ -87,22 +74,19 @@ def halomod_power_spectrum(
         be ``(N_a, N_k)`` where ``N_k`` and ``N_a`` are the sizes of
         ``k`` and ``a`` respectively. If ``k`` or ``a`` are scalars, the
         corresponding dimension will be squeezed out on output.
-    """  # noqa
+    """ # noqa
     a_use = np.atleast_1d(a).astype(float)
     k_use = np.atleast_1d(k).astype(float)
 
     # Check inputs
     if smooth_transition is not None:
         if not (get_1h and get_2h):
-            raise ValueError(
-                "Transition region can only be modified "
-                "when both 1-halo and 2-halo terms are queried."
-            )
+            raise ValueError("Transition region can only be modified "
+                             "when both 1-halo and 2-halo terms are queried.")
     if suppress_1h is not None:
         if not get_1h:
-            raise ValueError(
-                "Can't suppress the 1-halo term " "when get_1h is False."
-            )
+            raise ValueError("Can't suppress the 1-halo term "
+                             "when get_1h is False.")
 
     if prof2 is None:
         prof2 = prof
@@ -138,14 +122,13 @@ def halomod_power_spectrum(
             pk_2h = 0
 
         if get_1h:
-            pk_1h = hmc.I_0_2(
-                cosmo, k_use, aa, prof, prof2=prof2, prof_2pt=prof_2pt
-            )  # 1h term
+            pk_1h = hmc.I_0_2(cosmo, k_use, aa, prof,
+                              prof2=prof2, prof_2pt=prof_2pt)  # 1h term
 
             if suppress_1h is not None:
                 # large-scale damping of 1-halo term
                 ks = suppress_1h(aa)
-                pk_1h *= (k_use / ks) ** 4 / (1 + (k_use / ks) ** 4)
+                pk_1h *= (k_use / ks)**4 / (1 + (k_use / ks)**4)
         else:
             pk_1h = 0
 
@@ -154,9 +137,7 @@ def halomod_power_spectrum(
             out[ia] = (pk_1h + pk_2h) / (norm1 * norm2)
         else:
             alpha = smooth_transition(aa)
-            out[ia] = (pk_1h**alpha + pk_2h**alpha) ** (1 / alpha) / (
-                norm1 * norm2
-            )
+            out[ia] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) / (norm1*norm2)
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -165,25 +146,14 @@ def halomod_power_spectrum(
     return out
 
 
-def halomod_Pk2D(
-    cosmo,
-    hmc,
-    prof,
-    *,
-    prof2=None,
-    prof_2pt=None,
-    p_of_k_a=None,
-    get_1h=True,
-    get_2h=True,
-    lk_arr=None,
-    a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=2,
-    smooth_transition=None,
-    suppress_1h=None,
-    extrap_pk=False
-):
-    """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
+def halomod_Pk2D(cosmo, hmc, prof, *,
+                 prof2=None, prof_2pt=None,
+                 p_of_k_a=None,
+                 get_1h=True, get_2h=True,
+                 lk_arr=None, a_arr=None,
+                 extrap_order_lok=1, extrap_order_hik=2,
+                 smooth_transition=None, suppress_1h=None, extrap_pk=False):
+    """ Returns a :class:`~pyccl.pk2d.Pk2D` object containing
     the halo-model power spectrum for two quantities defined by
     their respective halo profiles. See :meth:`halomod_power_spectrum`
     for more details about the actual calculation.
@@ -243,33 +213,20 @@ def halomod_Pk2D(
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: halo model power spectrum.
-    """  # noqa
+    """ # noqa
     if lk_arr is None:
         lk_arr = cosmo.get_pk_spline_lk()
     if a_arr is None:
         a_arr = cosmo.get_pk_spline_a()
 
     pk_arr = halomod_power_spectrum(
-        cosmo,
-        hmc,
-        np.exp(lk_arr),
-        a_arr,
-        prof,
-        prof2=prof2,
-        prof_2pt=prof_2pt,
-        p_of_k_a=p_of_k_a,
-        get_1h=get_1h,
-        get_2h=get_2h,
-        smooth_transition=smooth_transition,
-        suppress_1h=suppress_1h,
-        extrap_pk=extrap_pk,
-    )
+        cosmo, hmc, np.exp(lk_arr), a_arr,
+        prof, prof2=prof2, prof_2pt=prof_2pt, p_of_k_a=p_of_k_a,
+        get_1h=get_1h, get_2h=get_2h,
+        smooth_transition=smooth_transition, suppress_1h=suppress_1h,
+        extrap_pk=extrap_pk)
 
-    return Pk2D(
-        a_arr=a_arr,
-        lk_arr=lk_arr,
-        pk_arr=pk_arr,
-        extrap_order_lok=extrap_order_lok,
-        extrap_order_hik=extrap_order_hik,
-        is_logp=False,
-    )
+    return Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik,
+                is_logp=False)
