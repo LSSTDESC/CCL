@@ -8,7 +8,7 @@ dependencies:
   - pyyaml
   - numpy
   - scipy
-  - camb
+  - camb=1.5.0
   - isitgr
   - fast-pt
   - pytest
