@@ -1,4 +1,4 @@
-name: test  # default testing environment name from conda-incubator
+name: test  # default testingz environment name from conda-incubator
 dependencies:
   - python=3.8
   - pip
@@ -14,6 +14,6 @@ dependencies:
   - pytest
   - pytest-cov
   - pip:
-      - classy<3
+      #- classy<3
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
