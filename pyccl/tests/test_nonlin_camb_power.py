@@ -41,7 +41,7 @@ def test_nonlin_camb_power():
 
     ccl_cosmo = ccl.Cosmology(
         Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
-        A_s=A_s, n_s=n_s, Neff=3.046,
+        A_s=A_s, n_s=n_s,
         transfer_function="boltzmann_camb",
         matter_power_spectrum="camb",
         extra_parameters={"camb": {"halofit_version": "mead2020_feedback",
