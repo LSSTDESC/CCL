@@ -9,7 +9,6 @@ dependencies:
   - numpy
   - scipy
   - camb
-  #- isitgr
   - fast-pt
   - pytest
   - pytest-cov
