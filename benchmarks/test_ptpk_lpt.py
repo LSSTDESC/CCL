@@ -12,6 +12,12 @@ COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05,
                       T_CMB=2.725,
                       transfer_function='boltzmann_camb')
 
+# The accuracy of the CCL-internal sigmaR computation isn't that high
+SIGMA8_TOLERANCE = np.sqrt(
+    COSMO._accuracy_params["INTEGRATION_SIGMAR_EPSREL"]
+    * np.log(10)/(2*np.pi**2)
+)
+
 # Redshifts
 zs = np.array([0., 1.])
 
@@ -52,4 +58,6 @@ def test_pt_pk(comb):
         k = kin[ind]
         dpk = data[iz][i_d+1][ind]
         tpk = pk(k, a, COSMO)
-        assert np.all(np.fabs(tpk / dpk - 1) < LPTPK_TOLERANCE)
+        assert np.all(
+            np.fabs(tpk / dpk - 1) < LPTPK_TOLERANCE + SIGMA8_TOLERANCE
+        )
