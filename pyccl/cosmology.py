@@ -487,6 +487,11 @@ class Cosmology(CCLObject):
         rescale_mg = True
         if trf == "boltzmann_camb":
             rescale_s8 = False
+            # For MG, the input sigma8 includes the effects of MG, while the
+            # sigma8 that CAMB uses is the GR definition. So we need to rescale
+            # sigma8 afterwards.
+            if self["mu_0"] != 0:
+                rescale_s8 = True
         elif trf == 'boltzmann_class':
             pk = self.get_class_pk_lin()
         elif trf == 'boltzmann_isitgr':
@@ -508,6 +513,9 @@ class Cosmology(CCLObject):
         pkl = None
         if self._config_init_kwargs["matter_power_spectrum"] == "camb":
             rescale_mg = False
+            if self["mu_0"] != 0:
+                raise ValueError("Can't rescale non-linear power spectrum "
+                                 "from CAMB for mu-Sigma MG.")
             name = "delta_matter:delta_matter"
             pkl, self._pk_nl[name] = self.get_camb_pk_lin(nonlin=True)
 

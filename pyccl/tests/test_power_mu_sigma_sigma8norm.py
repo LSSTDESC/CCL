@@ -23,7 +23,12 @@ def test_power_mu_sigma_sigma8norm(tf):
         transfer_function=tf, mu_0=0.1, sigma_0=0.2)
 
     # make sure sigma8 is correct
-    assert np.allclose(ccl.sigma8(cosmo_musig), 0.8)
+    # The accuracy of the CCL-internal sigmaR computation isn't that high
+    sigma8_eps = np.sqrt(
+        cosmo._accuracy_params["INTEGRATION_SIGMAR_EPSREL"]
+        * np.log(10)/(2*np.pi**2)
+    )
+    assert np.allclose(ccl.sigma8(cosmo_musig), 0.8, rtol=sigma8_eps)
 
     if tf != 'boltzmann_isitgr':
         # make sure P(k) ratio is right
@@ -33,7 +38,7 @@ def test_power_mu_sigma_sigma8norm(tf):
         pk_rat = (
             ccl.linear_matter_power(cosmo, 1e-4, a) /
             ccl.linear_matter_power(cosmo_musig, 1e-4, a))
-        assert np.allclose(pk_rat, gfac)
+        assert np.allclose(pk_rat, gfac, rtol=sigma8_eps)
 
     with mock.patch.dict(sys.modules, {'isitgr': None}):
         with pytest.raises(ModuleNotFoundError):
@@ -58,7 +63,14 @@ def test_power_mu_sigma_sigma8norm_norms_consistent(tf):
         transfer_function=tf, mu_0=0.1, sigma_0=0.2)
 
     # make sure they come out the same-ish
-    assert np.allclose(ccl.sigma8(cosmo), ccl.sigma8(cosmo_s8))
+    # The accuracy of the CCL-internal sigmaR computation isn't that high
+    sigma8_eps = np.sqrt(
+        cosmo._accuracy_params["INTEGRATION_SIGMAR_EPSREL"]
+        * np.log(10)/(2*np.pi**2)
+    )
+    assert np.allclose(ccl.sigma8(cosmo), ccl.sigma8(cosmo_s8),
+                       rtol=sigma8_eps)
+
     if tf != 'boltzmann_isitgr':
         # and that the power spectra look right
         a = 0.8
@@ -67,4 +79,23 @@ def test_power_mu_sigma_sigma8norm_norms_consistent(tf):
         pk_rat = (
             ccl.linear_matter_power(cosmo, 1e-4, a) /
             ccl.linear_matter_power(cosmo_s8, 1e-4, a))
-        assert np.allclose(pk_rat, gfac)
+        assert np.allclose(pk_rat, gfac, rtol=sigma8_eps)
+
+
+def test_nonlin_camb_MG_error():
+    Omega_c = 0.25
+    Omega_b = 0.05
+    n_s = 0.97
+    h = 0.7
+
+    ccl_cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
+                              A_s=2.1e-9, n_s=n_s,
+                              transfer_function="boltzmann_camb",
+                              matter_power_spectrum="camb",
+                              mu_0=0.1, sigma_0=0.2)
+
+    k = np.logspace(-3, 1, 10)
+
+    # Check that non-linear power spectrum isn't being used with sigma8
+    with pytest.raises(ValueError):
+        ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)
