@@ -1,4 +1,4 @@
-__all__ = ("vanDaalen19",)
+__all__ = ("BaryonsvanDaalen19",)
 
 import numpy as np
 
@@ -6,7 +6,7 @@ from .. import Pk2D
 from . import Baryons
 
 
-class vanDaalen19(Baryons):
+class BaryonsvanDaalen19(Baryons):
     """The "van Daalen+ 2019" model boost factor for baryons.
 
     .. note:: First presented in van Daalen et al., arXiv:1906.00968.
