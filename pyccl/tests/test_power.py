@@ -99,7 +99,12 @@ def test_power_sigma8norm_norms_consistent(tf):
         transfer_function=tf)
 
     # make sure they come out the same-ish
-    assert np.allclose(ccl.sigma8(cosmo), ccl.sigma8(cosmo_s8))
+    # The accuracy of the CCL-internal sigmaR computation isn't that high
+    sigma8_eps = np.sqrt(
+        cosmo._accuracy_params["INTEGRATION_SIGMAR_EPSREL"]
+        * np.log(10)/(2*np.pi**2)
+    )
+    assert np.allclose(sigma8, ccl.sigma8(cosmo_s8), rtol=sigma8_eps)
 
     # and that the power spectra look right
     a = 0.8
@@ -108,7 +113,7 @@ def test_power_sigma8norm_norms_consistent(tf):
     pk_rat = (
         ccl.linear_matter_power(cosmo, 1e-4, a) /
         ccl.linear_matter_power(cosmo_s8, 1e-4, a))
-    assert np.allclose(pk_rat, gfac)
+    assert np.allclose(pk_rat, gfac, rtol=sigma8_eps)
 
 
 def test_input_lin_power_spectrum():
