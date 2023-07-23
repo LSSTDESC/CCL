@@ -303,9 +303,4 @@ def test_camb_sigma8_input():
         Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=sigma8,
         transfer_function="boltzmann_camb"
     )
-    # The accuracy of the CCL-internal sigmaR computation isn't that high
-    eps = np.sqrt(
-        cosmo._accuracy_params["INTEGRATION_SIGMAR_EPSREL"]
-        * np.log(10)/(2*np.pi**2)
-    )
-    assert np.isclose(cosmo.sigma8(), sigma8, rtol=eps)
+    assert np.isclose(cosmo.sigma8(), sigma8)
