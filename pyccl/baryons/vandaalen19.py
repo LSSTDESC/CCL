@@ -19,19 +19,17 @@ class BaryonsvanDaalen19(Baryons):
               :math:`k\\leq 1 \\,h/{\\rm Mpc}.
 
     Args:
-        fbar500c (:obj:`float`): the fraction of baryons in a halo within 
+        fbar500c (:obj:`float`): the fraction of baryons in a halo within
         an overdensity of 500 times the critical density, given in units
-        of the ratio of :math:`\\Omega_b` to :math:`\\Omega_m`. 
+        of the ratio of :math:`\\Omega_b` to :math:`\\Omega_m`.
         Default to 0.7 which is approximately compatible with observations.
         See Figure 16 of the paper.
-
     """
     name = 'vanDaalen19'
     __repr_attrs__ = __eq_attrs__ = ("fbar500c")
 
     def __init__(self, fbar500c=0.7):
         self.fbar500c = fbar500c
-    
 
     def boost_factor(self, cosmo, k, a):
         """The vd19 model boost factor for baryons.
@@ -46,22 +44,23 @@ class BaryonsvanDaalen19(Baryons):
                 the power spectrum.
         """ # noqa
         a_use, k_use = map(np.atleast_1d, [a, k])
-        a_use, k_use = a_use[:, None], k_use[None, :]/cosmo['h'] #[k]=1/Mpc [k_use]=h/Mpc
+        # [k]=1/Mpc [k_use]=h/Mpc
+        a_use, k_use = a_use[:, None], k_use[None, :]/cosmo['h']
 
-        z = 1/a_use - 1
+        avD19 = 2.215
+        bvD19 = 0.1276
+        cvD19 = 1.309
+        dvD19 = -5.99
+        evD19 = -0.5107
+        tildefbar500c = self.fbar500c
+        numf = (2**avD19 +
+                2**bvD19*(cvD19*tildefbar500c)**(bvD19 -
+                                                 avD19))
+        expf = np.exp(dvD19*tildefbar500c+evD19)
+        denf1 = (cvD19*tildefbar500c)**(bvD19-avD19)
+        denf = k_use**(-avD19)+k_use**(-bvD19)*denf1
+        fka = 1-numf/denf*expf
 
-        a_vD19_Table3=2.215
-        b_vD19_Table3=0.1276
-        c_vD19_Table3=1.309
-        d_vD19_Table3=-5.99
-        e_vD19_Table3=-0.5107
-        tildefbar500c=self.fbar500c
-        numf=2**a_vD19_Table3+2**b_vD19_Table3*(c_vD19_Table3*tildefbar500c)**(b_vD19_Table3-a_vD19_Table3)
-        expf=np.exp(d_vD19_Table3*tildefbar500c+e_vD19_Table3)
-        denf1=(c_vD19_Table3*tildefbar500c)**(b_vD19_Table3-a_vD19_Table3)
-        denf=k_use**(-a_vD19_Table3)+k_use**(-b_vD19_Table3)*denf1
-        fka=1-numf/denf*expf                                                   
-        
         if np.ndim(k) == 0:
             fka = np.squeeze(fka, axis=-1)
         if np.ndim(a) == 0:
@@ -69,11 +68,12 @@ class BaryonsvanDaalen19(Baryons):
         return fka
 
     def update_parameters(self, fbar500c=None):
-        """Update van Daalen 2019 parameters. All parameters set to ``None`` will
-        be left untouched.
+        """Update van Daalen 2019 parameters. All parameters set to
+        ``None`` will be left untouched.
 
         Args:
-            fbar500c (:obj:`float`): baryonic fraction in halos within 500 times the critical density.
+            fbar500c (:obj:`float`): baryonic fraction in halos
+                within 500 times the critical density.
         """
         if fbar500c is not None:
             self.fbar500c = fbar500c
