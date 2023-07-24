@@ -17,7 +17,7 @@ import numpy as np
 from . import (
     CCLError, CCLObject, CCLParameters, CosmologyParams,
     DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, check, lib,
-    unlock_instance, emulators)
+    unlock_instance, emulators, baryons)
 from . import physical_constants as const
 
 
@@ -174,6 +174,10 @@ class Cosmology(CCLObject):
             The transfer function to use. Defaults to 'boltzmann_camb'.
         matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
             The matter power spectrum to use. Defaults to 'halofit'.
+        baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons`, `'bcm'` or `None`):
+            The baryonic effects model to use. Options are `None` (no baryonic effects),
+            `'bcm'` (the Schneider 2015 model with default parameters -- see :class:`~pyccl.baryons.schneider15.BaryonsSchneider15`),
+            or a baryonic effects object. Defaults to `None`.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB.
             Details described below. Defaults to None.
@@ -195,10 +199,15 @@ class Cosmology(CCLObject):
 
         extra_parameters = {"camb": {"halofit_version": "mead2020_feedback",
                                      "HMCode_logT_AGN": 7.8}}
+
+    .. note :: If using camb to compute the non-linear power spectrum with HMCode
+               to include baryonic effects, you should not include any extra
+               baryonic effects (i.e. set `baryonic_effects=None`).
     """ # noqa
     from ._core.repr_ import build_string_Cosmology as __repr__
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
-                    "_accuracy_params",)
+                    "_accuracy_params", "lin_pk_emu", 'nl_pk_emu',
+                    "baryons",)
 
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
@@ -208,6 +217,7 @@ class Cosmology(CCLObject):
             mu_0=0, sigma_0=0, c1_mg=1, c2_mg=1, lambda_mg=0,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
+            baryonic_effects=None,
             extra_parameters=None,
             T_ncdm=DefaultParams.T_ncdm):
 
@@ -227,6 +237,12 @@ class Cosmology(CCLObject):
         if isinstance(matter_power_spectrum, emulators.EmulatorPk):
             self.nl_pk_emu = matter_power_spectrum
             matter_power_spectrum = 'emulator'
+
+        self.baryons = baryonic_effects
+        if not isinstance(self.baryons, baryons.Baryons):
+            if self.baryons not in (None, 'bcm'):
+                raise ValueError("`baryonic_effects` must be `None`, `'bcm'`, "
+                                 "or a `Baryons` instance.")
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -556,6 +572,12 @@ class Cosmology(CCLObject):
         elif mps == 'emulator':
             pk = self.nl_pk_emu.get_pk2d(self)
 
+        # Include baryonic effects
+        if self.baryons is not None:
+            if self.baryons == 'bcm':  # Initialise convenience baryons model
+                self.baryons = baryons.BaryonsSchneider15(
+                    log10Mc=np.log10(1.2E14), eta_b=0.5, k_s=55.0)
+            pk = self.baryons.include_baryonic_effects(self, pk)
         return pk
 
     @unlock_instance(mutate=False)
