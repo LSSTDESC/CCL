@@ -348,7 +348,7 @@ class Cosmology(CCLObject):
 
         # Check to make sure specified amplitude parameter is consistent.
         if [A_s, sigma8].count(np.nan) != 1:
-            raise ValueError("Set either A_s or sigma8 and not both.")
+            raise ValueError("Set either A_s or sigma8 but not both.")
 
         # Check if any compulsory parameters are not set.
         compul = {"Omega_c": Omega_c, "Omega_b": Omega_b, "h": h, "n_s": n_s}
@@ -485,7 +485,14 @@ class Cosmology(CCLObject):
         pk = None
         rescale_s8 = True
         rescale_mg = True
-        if trf == 'boltzmann_class':
+        if trf == "boltzmann_camb":
+            rescale_s8 = False
+            # For MG, the input sigma8 includes the effects of MG, while the
+            # sigma8 that CAMB uses is the GR definition. So we need to rescale
+            # sigma8 afterwards.
+            if self["mu_0"] != 0:
+                rescale_s8 = True
+        elif trf == 'boltzmann_class':
             pk = self.get_class_pk_lin()
         elif trf == 'boltzmann_isitgr':
             rescale_mg = False
@@ -505,11 +512,10 @@ class Cosmology(CCLObject):
         # status variable to use it later if the transfer function is CAMB too.
         pkl = None
         if self._config_init_kwargs["matter_power_spectrum"] == "camb":
-            if not np.isfinite(self["A_s"]):
-                raise CCLError("CAMB doesn't rescale non-linear power spectra "
-                               "consistently without A_s.")
-            # no rescaling because A_s is necessarily provided
-            rescale_mg = rescale_s8 = False
+            rescale_mg = False
+            if self["mu_0"] != 0:
+                raise ValueError("Can't rescale non-linear power spectrum "
+                                 "from CAMB for mu-Sigma MG.")
             name = "delta_matter:delta_matter"
             pkl, self._pk_nl[name] = self.get_camb_pk_lin(nonlin=True)
 

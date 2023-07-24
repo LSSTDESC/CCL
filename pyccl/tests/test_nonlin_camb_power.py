@@ -53,24 +53,6 @@ def test_nonlin_camb_power():
         assert np.allclose(pk_camb, pk_nonlin_ccl, rtol=3e-5)
 
 
-def test_nonlin_camb_power_with_sigma8():
-    Omega_c = 0.25
-    Omega_b = 0.05
-    n_s = 0.97
-    h = 0.7
-
-    ccl_cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
-                              sigma8=0.8, n_s=n_s,
-                              transfer_function="boltzmann_camb",
-                              matter_power_spectrum="camb")
-
-    k = np.logspace(-3, 1, 10)
-
-    # Check that non-linear power spectrum isn't being used with sigma8
-    with pytest.raises(ccl.errors.CCLError):
-        ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)
-
-
 def test_nonlin_camb_power_raises():
     # Test that it raises when (trf, mps) == (no camb, camb).
     with pytest.raises(ccl.CCLError):

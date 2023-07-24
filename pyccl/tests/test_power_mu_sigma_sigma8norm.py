@@ -59,6 +59,7 @@ def test_power_mu_sigma_sigma8norm_norms_consistent(tf):
 
     # make sure they come out the same-ish
     assert np.allclose(ccl.sigma8(cosmo), ccl.sigma8(cosmo_s8))
+
     if tf != 'boltzmann_isitgr':
         # and that the power spectra look right
         a = 0.8
@@ -68,3 +69,22 @@ def test_power_mu_sigma_sigma8norm_norms_consistent(tf):
             ccl.linear_matter_power(cosmo, 1e-4, a) /
             ccl.linear_matter_power(cosmo_s8, 1e-4, a))
         assert np.allclose(pk_rat, gfac)
+
+
+def test_nonlin_camb_MG_error():
+    Omega_c = 0.25
+    Omega_b = 0.05
+    n_s = 0.97
+    h = 0.7
+
+    ccl_cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
+                              A_s=2.1e-9, n_s=n_s,
+                              transfer_function="boltzmann_camb",
+                              matter_power_spectrum="camb",
+                              mu_0=0.1, sigma_0=0.2)
+
+    k = np.logspace(-3, 1, 10)
+
+    # Check that non-linear power spectrum isn't being used with sigma8
+    with pytest.raises(ValueError):
+        ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)

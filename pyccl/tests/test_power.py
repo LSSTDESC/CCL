@@ -99,7 +99,7 @@ def test_power_sigma8norm_norms_consistent(tf):
         transfer_function=tf)
 
     # make sure they come out the same-ish
-    assert np.allclose(ccl.sigma8(cosmo), ccl.sigma8(cosmo_s8))
+    assert np.allclose(sigma8, ccl.sigma8(cosmo_s8))
 
     # and that the power spectra look right
     a = 0.8

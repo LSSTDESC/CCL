@@ -295,3 +295,12 @@ def test_ccl_physical_constants_smoke():
 def test_ccl_global_parameters_repr():
     ccl.spline_params.reload()
     assert eval(repr(ccl.spline_params)) == ccl.spline_params._bak
+
+
+def test_camb_sigma8_input():
+    sigma8 = 0.85
+    cosmo = ccl.Cosmology(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=sigma8,
+        transfer_function="boltzmann_camb"
+    )
+    assert np.isclose(cosmo.sigma8(), sigma8)
