@@ -26,7 +26,7 @@ class BaryonsvanDaalen19(Baryons):
         See Figure 16 of the paper.
     """
     name = 'vanDaalen19'
-    __repr_attrs__ = __eq_attrs__ = ("fbar500c")
+    __repr_attrs__ = __eq_attrs__ = ("fbar500c",)
 
     def __init__(self, fbar500c=0.7):
         self.fbar500c = fbar500c
