@@ -1,9 +1,10 @@
 import pytest
 import numpy as np
 import pyccl as ccl
+import pytest
 
 
-COSMO = ccl.CosmologyVanillaLCDM()
+COSMO = ccl.CosmologyVanillaLCDM(transfer_function='bbks')
 bar = ccl.BaryonsSchneider15()
 
 
@@ -46,14 +47,17 @@ def test_baryons_from_name():
 def test_baryons_in_cosmology():
     # Test that applying baryons during cosmology creation works.
     # 1. Outside of cosmo
-    cosmo_nb = ccl.CosmologyVanillaLCDM(baryonic_effects=None)
+    cosmo_nb = ccl.CosmologyVanillaLCDM(
+        transfer_function='bbks', baryonic_effects=None)
     pk_nb = cosmo_nb.get_nonlin_power()
     pk_wb = bar.include_baryonic_effects(cosmo_nb, pk_nb)
     # 2. In cosmo - default BCM model
-    cosmo_wb1 = ccl.CosmologyVanillaLCDM(baryonic_effects='bcm')
+    cosmo_wb1 = ccl.CosmologyVanillaLCDM(
+        transfer_function='bbks', baryonic_effects='bcm')
     pk_wb1 = cosmo_wb1.get_nonlin_power()
     # 3. In cosmo - from object.
-    cosmo_wb2 = ccl.CosmologyVanillaLCDM(baryonic_effects=bar)
+    cosmo_wb2 = ccl.CosmologyVanillaLCDM(
+        transfer_function='bbks', baryonic_effects=bar)
     pk_wb2 = cosmo_wb2.get_nonlin_power()
 
     ks = np.geomspace(1E-2, 10, 128)
@@ -63,3 +67,8 @@ def test_baryons_in_cosmology():
 
     assert np.allclose(pk_wb, pk_wb1, atol=0, rtol=1E-6)
     assert np.allclose(pk_wb, pk_wb2, atol=0, rtol=1E-6)
+
+
+def test_baryons_in_cosmology_error():
+    with pytest.raises(ValueError):
+        ccl.CosmologyVanillaLCDM(baryonic_effects=3.1416)
