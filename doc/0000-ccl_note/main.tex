@@ -518,8 +518,9 @@ be mindful of this for their particular application.
 \subsubsection{Impact of baryons}
 \label{ss:baryons}
 
-\ccl incorporates the impact of baryons on the total matter power spectrum via
-the ``baryonic correction model'' (BCM) of \citet{Schneider15}. When this
+\ccl incorporates several models of the impact of baryons on the total matter power spectrum.
+
+One of the modelling options is the ``baryonic correction model'' (BCM) of \citet{Schneider15}. When this
 correction is in use, the nonlinear matter power spectrum (whichever the
 method that provides it) is multiplied by a correction factor $F(k,z)$ which
 models the impact of baryons.
@@ -540,6 +541,12 @@ processes to modifying the total matter power spectrum:
 If the BCM parameters are not specified and the user sets \ccl to compute the power
 spectrum with baryonic feedback included, \ccl will assume the default parameters
 of \citet{Schneider15}.
+
+A second option is the fitting function presented in \citet{vanDaalen19}. This model
+uses only one free parameter, which relates to the fraction of baryons in halos of mass
+$10^{14}\,h^{-1}\rm M_\odot$, normalised to $\Omega_{\rm b}/\Omega_{\rm m}$, the universal
+baryon fraction. The model has only been validated against cosmological simulations at $z=0$
+and can be applied up to $k\leq 1\,h/\rm Mpc$ for the time being.
 
 \subsubsection{Modified gravity ($\mu, \Sigma$)}
 
