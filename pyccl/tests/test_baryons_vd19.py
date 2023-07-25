@@ -1,6 +1,6 @@
 import numpy as np
 import pyccl as ccl
-
+import pytest
 
 # Set tolerances
 BOOST_TOLERANCE = 1e-5
@@ -48,3 +48,8 @@ def test_baryons_from_name():
     bar2 = ccl.Baryons.from_name('vanDaalen19')
     assert baryons.name == bar2.name
     assert baryons.name == 'vanDaalen19'
+
+    
+def test_baryons_vd19_raises():
+    with pytest.raises(ValueError):
+        ccl.BaryonsvanDaalen19(fbar=0.7,mass_def='blah')

@@ -37,7 +37,9 @@ class BaryonsvanDaalen19(Baryons):
 
     def __init__(self, fbar=0.7,mass_def='500c'):
         self.fbar = fbar
-        self.mass_def = mass_def 
+        self.mass_def = mass_def
+        if mass_def not in ["500c", "200c"]:
+            raise ValueError(f"Unknown mass definition for van Daalen baryons model.")
 
     def boost_factor(self, cosmo, k, a):
         """The vd19 model boost factor for baryons.
@@ -98,6 +100,8 @@ class BaryonsvanDaalen19(Baryons):
             self.fbar = fbar
         if mass_def is not None:
             self.mass_def = mass_def
+            if mass_def not in ["500c", "200c"]:
+                raise ValueError(f"Unknown mass definition for van Daalen baryons model.")
 
     def _include_baryonic_effects(self, cosmo, pk):
         # Applies boost factor
