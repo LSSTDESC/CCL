@@ -17,19 +17,20 @@ class BaryonsvanDaalen19(Baryons):
 
               The boost factor is applied multiplicatively so that
               :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\,
-              f_{\\rm vD19}(k, a)`.
+              f_{\\rm BCM}(k, a)`.
 
               Notice the model has only been tested at z=0 and is valid for
-              :math:`k\\leq 1 \\,h/{\\rm Mpc}.
+              :math:`k\\leq 1 \\,h/{\\rm Mpc}`.
 
     Args:
         fbar (:obj:`float`): the fraction of baryons in a halo within
-        an overdensity of X times the critical density, given in units
-        of the ratio of :math:`\\Omega_b` to :math:`\\Omega_m`.
-        Default to 0.7 which is approximately compatible with observations.
-        See Figure 16 of the paper.
+            an overdensity of X times the critical density, given in units
+            of the ratio of :math:`\\Omega_b` to :math:`\\Omega_m`.
+            Default to 0.7 which is approximately compatible with observations.
+            See Figure 16 of the paper.
         mass_def (:obj:`string`): whether the mass definition corresponds to
-        X=500 or 200. Options are 500c or 200c.
+            X=500 or 200 critical. Options are "500c" or "200c".
+
     """
     name = 'vanDaalen19'
     __repr_attrs__ = __eq_attrs__ = ("fbar","mass_def",)
@@ -49,6 +50,7 @@ class BaryonsvanDaalen19(Baryons):
         Returns:
             :obj:`float` or `array`: Correction factor to apply to
                 the power spectrum.
+
         """ # noqa
         a_use, k_use = map(np.atleast_1d, [a, k])
         # [k]=1/Mpc [k_use]=h/Mpc
@@ -87,7 +89,10 @@ class BaryonsvanDaalen19(Baryons):
         Args:
             fbar (:obj:`float`): baryonic fraction in halos
                 within X times the critical density.
-            mass_def (:obj:`string`): mass definition: whether 500 (500c) or 200 critical (200c).
+
+            mass_def (:obj:`string`): mass definition: whether 500 ("500c") 
+                or 200 critical ("200c").
+
         """
         if fbar is not None:
             self.fbar = fbar
