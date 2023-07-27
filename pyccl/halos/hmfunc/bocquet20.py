@@ -70,8 +70,9 @@ class MassFuncBocquet20(MassFunc):
                                    get_errors=False)[0].flatten()
             mfh[m_good] = mfp
         # For masses above emulator range, n(M) will be set to zero
-        # Remove h-inverse
-        mf = mfh*h**3
+        # Remove h-inverse and correct for dn/dln(M) -> dn/dlog10(M)
+        # log10 = 2.30258509299
+        mf = mfh*h**3*2.30258509299
 
         if np.ndim(M) == 0:
             return mf[0]
