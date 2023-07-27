@@ -154,3 +154,24 @@ def test_mass_function_mass_def_strict_always_raises():
     mdef = ccl.halos.MassDef(400, "critical")
     with pytest.raises(ValueError):
         ccl.halos.MassFuncBocquet16(mass_def=mdef, mass_def_strict=False)
+
+
+def test_nM_bocquet20_raises():
+    mf = ccl.halos.MassFuncBocquet20(mass_def='200c')
+    Ms = np.geomspace(1E12, 1E17, 128)
+
+    # Need A_s
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                          A_s=2E-9, n_s=0.96)
+    with pytest.raises(ValueError):
+        mf(cosmo, Ms, 1.0)
+
+    # Cosmo parameters out of bounds
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                          sigma8=0.8, n_s=2.0)
+    with pytest.raises(ValueError):
+        mf(cosmo, Ms, 1.0)
+
+    # Redshift out of bounds
+    with pytest.raises(ValueError):
+        mf(cosmo, Ms, 0.3)

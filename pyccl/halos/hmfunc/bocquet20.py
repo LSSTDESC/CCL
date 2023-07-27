@@ -21,9 +21,9 @@ class MassFuncBocquet20(MassFunc):
     def __init__(self, *,
                  mass_def="200c",
                  mass_def_strict=True):
+        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
         import MiraTitanHMFemulator
         self.emu = MiraTitanHMFemulator.Emulator()
-        super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
 
     def _check_mass_def_strict(self, mass_def):
         return mass_def.name != '200c'
