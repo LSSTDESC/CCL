@@ -4,7 +4,7 @@ import pyccl as ccl
 
 
 COSMO = ccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+    Omega_c=0.27, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
 HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncSheth99,
@@ -14,7 +14,8 @@ HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncTinker10,
         ccl.halos.MassFuncWatson13,
         ccl.halos.MassFuncDespali16,
-        ccl.halos.MassFuncBocquet16]
+        ccl.halos.MassFuncBocquet16,
+        ccl.halos.MassFuncBocquet20]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 MFOF = ccl.halos.MassDef('fof', 'matter')
 MVIR = ccl.halos.MassDef('vir', 'critical')
@@ -24,7 +25,7 @@ M200m = ccl.halos.MassDef(200, 'matter')
 M500c = ccl.halos.MassDef(500, 'critical')
 M500m = ccl.halos.MassDef(500, 'matter')
 MDFS = [MVIR, MVIR, MVIR, MVIR,
-        MFOF, MFOF, MVIR, MFOF, MFOF]
+        MFOF, MFOF, MVIR, MFOF, MFOF, MFOF]
 
 
 @pytest.mark.parametrize('nM_class', HMFS)
