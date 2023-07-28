@@ -18,3 +18,19 @@ def test_mu_sigma_transfer_err(tf):
             matter_power_spectrum='linear'
         )
         ccl.linear_matter_power(cosmo, 1, 1)
+
+
+def test_mg_error():
+    class NotMG:
+        pass
+
+    with pytest.raises(ValueError):
+        ccl.Cosmology(
+            Omega_c=0.25,
+            Omega_b=0.05,
+            h=0.7,
+            sigma8=0.8,
+            n_s=0.96,
+            mg_parametrisation=NotMG(),
+            transfer_function="bbks",
+        )
