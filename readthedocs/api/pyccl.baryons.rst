@@ -10,6 +10,7 @@ Submodules
    pyccl.baryons.baccoemu_baryons
    pyccl.baryons.baryons_base
    pyccl.baryons.schneider15
+   pyccl.baryons.vandaalen19
 
 Module contents
 ---------------
