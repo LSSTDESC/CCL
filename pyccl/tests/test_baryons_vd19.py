@@ -54,3 +54,13 @@ def test_baryons_from_name():
 def test_baryons_vd19_raises():
     with pytest.raises(ValueError):
         ccl.BaryonsvanDaalen19(fbar=0.7, mass_def='blah')
+    b = ccl.BaryonsvanDaalen19(fbar=0.7, mass_def='500c')
+    with pytest.raises(ValueError):
+        b.update_parameters(mass_def='blah')
+
+
+def test_update_params():
+    b = ccl.BaryonsvanDaalen19(fbar=0.7, mass_def='500c')
+    b.update_parameters(fbar=0.6, mass_def='200c')
+    assert b.mass_def == '200c'
+    assert b.fbar == 0.6
