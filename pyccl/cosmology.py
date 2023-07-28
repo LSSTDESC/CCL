@@ -35,7 +35,6 @@ class TransferFunctions(Enum):
 class MatterPowerSpectra(Enum):
     LINEAR = "linear"
     HALOFIT = "halofit"
-    HALOMODEL = "halomodel"
     CAMB = "camb"
     CALCULATOR = "calculator"
     EMULATOR_NLPK = "emulator"
@@ -546,7 +545,7 @@ class Cosmology(CCLObject):
 
         # Populate power spectrum splines
         mps = self._config_init_kwargs['matter_power_spectrum']
-        # needed for halofit, halomodel and linear options
+        # needed for halofit, and linear options
         if (mps not in ['emulator']) and (mps is not None):
             self.compute_linear_power()
 
