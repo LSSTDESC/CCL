@@ -17,4 +17,4 @@ dependencies:
       - isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
-      - amemu @ https://test.pypi.org/simple/ amemu==0.0.18
+      - https://test.pypi.org/simple/ amemu==0.0.18
