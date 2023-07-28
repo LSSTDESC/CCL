@@ -148,28 +148,6 @@ class Cosmology(CCLObject):
             of state. Defaults to 0.
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             is 2.725.
-        mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        c1_mg (:obj:`float`): MG parameter that enters in the scale
-            dependence of mu affecting its large scale behavior. Default to 1.
-            See, e.g., Eqs. (46) in Ade et al. 2015, arXiv:1502.01590
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
-        c2_mg (:obj:`float`): MG parameter that enters in the scale
-            dependence of Sigma affecting its large scale behavior. Default 1.
-            See, e.g., Eqs. (47) in Ade et al. 2015, arXiv:1502.01590
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
-        lambda_mg (:obj:`float`): MG parameter that sets the start
-            of dependance on c1 and c2 MG parameters. Defaults to 0.0
-            See, e.g., Eqs. (46) & (47) in Ade et al. 2015, arXiv:1502.01590
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
         transfer_function (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
             The transfer function to use. Defaults to 'boltzmann_camb'.
         matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
@@ -177,6 +155,10 @@ class Cosmology(CCLObject):
         baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons` or `None`):
             The baryonic effects model to use. Options are `None` (no baryonic effects), or
             a :class:`~pyccl.baryons.baryons_base.Baryons` object.
+        mg_parametrisation (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
+            or `None`):
+            The modified gravity parametrisation to use. Options are `None` (no MG), or
+            a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` object. 
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB.
             Details described below. Defaults to None.
