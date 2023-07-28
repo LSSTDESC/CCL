@@ -56,7 +56,6 @@ These dependencies are
 
 * GNU Scientific Library `GSL <https://www.gnu.org/software/gsl/>`_, version 2.1 or above
 * `FFTW3 <http://www.fftw.org/>`_ version 3.1 or above
-* `CLASS <http://class-code.net/>`_ version 2.6.3 or above
 * `SWIG <http://www.swig.org/>`_
 
 
