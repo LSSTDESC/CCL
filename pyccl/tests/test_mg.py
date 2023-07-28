@@ -1,5 +1,5 @@
 import pyccl as ccl
-from pyccl.modified_gravity import MuSigmaMG
+from pyccl.modified_gravity import MuSigmaMG, ModifiedGravity
 
 import pytest
 
@@ -24,6 +24,9 @@ def test_mg_error():
     class NotMG:
         pass
 
+    class NotMuSigma(ModifiedGravity):
+        pass
+
     with pytest.raises(ValueError):
         ccl.Cosmology(
             Omega_c=0.25,
@@ -32,5 +35,16 @@ def test_mg_error():
             sigma8=0.8,
             n_s=0.96,
             mg_parametrisation=NotMG(),
+            transfer_function="bbks",
+        )
+
+    with pytest.raises(NotImplementedError):
+        ccl.Cosmology(
+            Omega_c=0.25,
+            Omega_b=0.05,
+            h=0.7,
+            sigma8=0.8,
+            n_s=0.96,
+            mg_parametrisation=NotMuSigma(),
             transfer_function="bbks",
         )
