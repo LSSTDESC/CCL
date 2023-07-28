@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
 import pyccl as ccl
+from pyccl.modified_gravity import MuSigmaMG
+
 
 POWER_MG_TOL = 1e-4
 
@@ -17,11 +19,12 @@ def test_power_mg(model):
         A_s=2.1e-9,
         n_s=0.96,
         Neff=3.046,
-        mu_0=mu_0[model],
-        sigma_0=sigma_0[model],
         Omega_k=0,
         m_nu=0,
         T_CMB=2.7255,
+        mg_parametrisation=MuSigmaMG(
+            mu_0=mu_0[model],
+            sigma_0=sigma_0[model]),
         matter_power_spectrum='linear',
         transfer_function='boltzmann_isitgr')
 

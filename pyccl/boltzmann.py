@@ -273,11 +273,11 @@ def get_isitgr_pk_lin(cosmo):
     cp.omk = cosmo['Omega_k']
     cp.GR = 1  # means GR modified!
     cp.ISiTGR_muSigma = True
-    cp.mu0 = cosmo['mu_0']
-    cp.Sigma0 = cosmo['sigma_0']
-    cp.c1 = cosmo['c1_mg']
-    cp.c2 = cosmo['c2_mg']
-    cp.Lambda = cosmo['lambda_mg']
+    cp.mu0 = cosmo.mg_parametrisation.mu_0
+    cp.Sigma0 = cosmo.mg_parametrisation.sigma_0
+    cp.c1 = cosmo.mg_parametrisation.c1_mg
+    cp.c2 = cosmo.mg_parametrisation.c2_mg
+    cp.Lambda = cosmo.mg_parametrisation.lambda_mg
 
     # "constants"
     cp.TCMB = cosmo['T_CMB']

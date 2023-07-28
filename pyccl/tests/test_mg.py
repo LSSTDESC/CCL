@@ -1,4 +1,6 @@
 import pyccl as ccl
+from pyccl.modified_gravity import MuSigmaMG
+
 import pytest
 
 
@@ -11,8 +13,7 @@ def test_mu_sigma_transfer_err(tf):
             h=0.7,
             A_s=2.1e-9,
             n_s=0.96,
-            mu_0=0.1,
-            sigma_0=0.2,
+            mg_parametrisation=MuSigmaMG(mu_0=0.1, sigma_0=0.2),
             transfer_function=tf,
             matter_power_spectrum='linear'
         )

@@ -1,5 +1,7 @@
 import numpy as np
 import pyccl as ccl
+from pyccl.modified_gravity import MuSigmaMG
+
 import pytest
 
 # Set tolerances
@@ -463,7 +465,8 @@ def compare_distances_muSig(z, chi_bench, dm_bench, Omega_v, w0, wa):
     cosmo = ccl.Cosmology(
         Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
         h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-        w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0, Omega_g=0.)
+        w0=w0, wa=wa, Omega_g=0.,
+        mg_parametrisation=MuSigmaMG(mu_0=mu_0, sigma_0=sigma_0))
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
@@ -493,7 +496,8 @@ def compare_distances_hiz_muSig(z, chi_bench, Omega_v, w0, wa):
     cosmo = ccl.Cosmology(
         Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
         h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-        w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0, Omega_g=0.)
+        w0=w0, wa=wa, Omega_g=0.,
+        mg_parametrisation=MuSigmaMG(mu_0=mu_0, sigma_0=sigma_0))
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
