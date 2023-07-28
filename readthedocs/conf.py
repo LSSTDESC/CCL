@@ -94,7 +94,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pyccl'
-copyright = u'2018-2019, LSST DESC'
+copyright = u'2023 LSST DESC'
 author = u'LSST DESC'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -226,5 +226,5 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python3': ('https://docs.python.org/3', None),
-    'numpy': ('http://docs.scipy.org/doc/numpy', None),
+    'numpy': ('https://www.numpy.org/', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference', None)}
