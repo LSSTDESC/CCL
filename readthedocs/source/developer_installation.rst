@@ -22,7 +22,7 @@ from the top-level directory in the repository. You will need ``CMake`` in
 order to install CCL in this way. See :ref:`getting-cmake` for help installing
 ``CMake`` if you do not already have it. In order to run the tests,
 you will need ``CAMB``, ``CLASS``, and ``FAST-PT`` installed. See the instructions for
-:ref:`boltzmann-codes` and :ref:`getting-fast-pt` for details.
+:ref:`boltzmann-codes` and :ref:`getting-pt` for details.
 
 To compile the ``C`` code with debugging symbols, add the ``--debug`` option
 when calling ``setup.py``:
