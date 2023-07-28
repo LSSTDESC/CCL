@@ -50,21 +50,15 @@ def test_baryons_in_cosmology():
         transfer_function='bbks', baryonic_effects=None)
     pk_nb = cosmo_nb.get_nonlin_power()
     pk_wb = bar.include_baryonic_effects(cosmo_nb, pk_nb)
-    # 2. In cosmo - default BCM model
-    cosmo_wb1 = ccl.CosmologyVanillaLCDM(
-        transfer_function='bbks', baryonic_effects='bcm')
-    pk_wb1 = cosmo_wb1.get_nonlin_power()
-    # 3. In cosmo - from object.
+    # 2. In cosmo - from object.
     cosmo_wb2 = ccl.CosmologyVanillaLCDM(
         transfer_function='bbks', baryonic_effects=bar)
     pk_wb2 = cosmo_wb2.get_nonlin_power()
 
     ks = np.geomspace(1E-2, 10, 128)
     pk_wb = pk_wb(ks, 1.0)
-    pk_wb1 = pk_wb1(ks, 1.0)
     pk_wb2 = pk_wb2(ks, 1.0)
 
-    assert np.allclose(pk_wb, pk_wb1, atol=0, rtol=1E-6)
     assert np.allclose(pk_wb, pk_wb2, atol=0, rtol=1E-6)
 
 

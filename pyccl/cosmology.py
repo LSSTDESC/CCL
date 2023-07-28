@@ -174,10 +174,9 @@ class Cosmology(CCLObject):
             The transfer function to use. Defaults to 'boltzmann_camb'.
         matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
             The matter power spectrum to use. Defaults to 'halofit'.
-        baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons`, `'bcm'` or `None`):
-            The baryonic effects model to use. Options are `None` (no baryonic effects),
-            `'bcm'` (the Schneider 2015 model with default parameters -- see :class:`~pyccl.baryons.schneider15.BaryonsSchneider15`),
-            or a baryonic effects object. Defaults to `None`.
+        baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons` or `None`):
+            The baryonic effects model to use. Options are `None` (no baryonic effects), or
+            a :class:`~pyccl.baryons.baryons_base.Baryons` object.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB.
             Details described below. Defaults to None.
@@ -240,8 +239,8 @@ class Cosmology(CCLObject):
 
         self.baryons = baryonic_effects
         if not isinstance(self.baryons, baryons.Baryons):
-            if self.baryons not in (None, 'bcm'):
-                raise ValueError("`baryonic_effects` must be `None`, `'bcm'`, "
+            if self.baryons is not None:
+                raise ValueError("`baryonic_effects` must be `None` "
                                  "or a `Baryons` instance.")
 
         # going to save these for later
@@ -574,9 +573,6 @@ class Cosmology(CCLObject):
 
         # Include baryonic effects
         if self.baryons is not None:
-            if self.baryons == 'bcm':  # Initialise convenience baryons model
-                self.baryons = baryons.BaryonsSchneider15(
-                    log10Mc=np.log10(1.2E14), eta_b=0.5, k_s=55.0)
             pk = self.baryons.include_baryonic_effects(self, pk)
         return pk
 
