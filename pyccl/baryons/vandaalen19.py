@@ -9,7 +9,7 @@ from . import Baryons
 class BaryonsvanDaalen19(Baryons):
     """The "van Daalen+ 2019" model boost factor for baryons.
 
-    .. note:: First presented in 
+    .. note:: First presented in
               `van Daalen et al., <https://arxiv.org/abs/1906.00968>`_. See the
               `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
 /0000-ccl_note/main.pdf>`_
@@ -33,13 +33,14 @@ class BaryonsvanDaalen19(Baryons):
 
     """
     name = 'vanDaalen19'
-    __repr_attrs__ = __eq_attrs__ = ("fbar","mass_def",)
+    __repr_attrs__ = __eq_attrs__ = ("fbar", "mass_def",)
 
-    def __init__(self, fbar=0.7,mass_def='500c'):
+    def __init__(self, fbar=0.7, mass_def='500c'):
         self.fbar = fbar
         self.mass_def = mass_def
         if mass_def not in ["500c", "200c"]:
-            raise ValueError(f"Unknown mass definition for van Daalen baryons model.")
+            raise ValueError(f"Mass definition {mass_def} not supported "
+                             "for van Daalen 2019 model.")
 
     def boost_factor(self, cosmo, k, a):
         """The vd19 model boost factor for baryons.
@@ -58,7 +59,7 @@ class BaryonsvanDaalen19(Baryons):
         # [k]=1/Mpc [k_use]=h/Mpc
         a_use, k_use = a_use[:, None], k_use[None, :]/cosmo['h']
 
-        if(self.mass_def=='500c'):
+        if self.mass_def == '500c':
             avD19 = 2.215
             bvD19 = 0.1276
             cvD19 = 1.309
@@ -70,14 +71,14 @@ class BaryonsvanDaalen19(Baryons):
             cvD19 = 1.371
             dvD19 = -5.816
             evD19 = -0.4005
-            
+
         numf = (2**avD19 +
-                    2**bvD19*(cvD19*self.fbar)**(bvD19 -avD19))
+                2**bvD19*(cvD19*self.fbar)**(bvD19-avD19))
         expf = np.exp(dvD19*self.fbar+evD19)
         denf1 = (cvD19*self.fbar)**(bvD19-avD19)
         denf = k_use**(-avD19)+k_use**(-bvD19)*denf1
         fka = 1-numf/denf*expf
-            
+
         if np.ndim(k) == 0:
             fka = np.squeeze(fka, axis=-1)
         if np.ndim(a) == 0:
@@ -92,16 +93,16 @@ class BaryonsvanDaalen19(Baryons):
             fbar (:obj:`float`): baryonic fraction in halos
                 within X times the critical density.
 
-            mass_def (:obj:`string`): mass definition: whether 500 ("500c") 
+            mass_def (:obj:`string`): mass definition: whether 500 ("500c")
                 or 200 critical ("200c").
-
         """
         if fbar is not None:
             self.fbar = fbar
         if mass_def is not None:
             self.mass_def = mass_def
             if mass_def not in ["500c", "200c"]:
-                raise ValueError(f"Unknown mass definition for van Daalen baryons model.")
+                raise ValueError(f"Mass definition {mass_def} not supported "
+                                 "for van Daalen 2019 model.")
 
     def _include_baryonic_effects(self, cosmo, pk):
         # Applies boost factor
