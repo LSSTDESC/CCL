@@ -1,6 +1,5 @@
 __all__ = ("amemuLinear",)
 
-from typing import Tuple
 import numpy as np
 
 from .. import Pk2D
@@ -9,14 +8,8 @@ from amemu.prediction import EmuPredict
 
 
 class amemuLinear(EmulatorPk):
-    def __init__(self, download: bool = True):
+    def __init__(self, download=True):
         """
-        Install the emulator using the following:
-
-        git clone https://github.com/Harry45/amemu.git
-        pip install -r requirements.txt
-        pip install -i https://test.pypi.org/simple/ amemu==0.0.18
-
         Calculates the linear matter power spectrum based on the following
         setup:
         - redshift: [0.0, 5.0]
@@ -28,12 +21,12 @@ class amemuLinear(EmulatorPk):
         for any n_s and sigma_8.
 
         Args:
-            download (bool): download the latest suite of pre-trained models.
+            download: download the latest suite of pre-trained models.
         """
         # the emulator is trained on 500 training points only.
         self.emulator = EmuPredict(nlhs=500, download=download)
 
-    def __str__(self) -> str:
+    def __str__(self):
         """
         Main description of the bounds for the wavenumber and redshift.
 
@@ -48,8 +41,7 @@ class amemuLinear(EmulatorPk):
             + f"z_max={self.emulator.config.Z_MAX}"
         )
 
-    def _get_pk_at_a(self, cosmo: dict,
-                     a: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_pk_at_a(self, cosmo, a):
         """
         Calculates the linear matter power spectrum given a dictionary for
         cosmology and the scale factor. An example of
@@ -59,12 +51,12 @@ class amemuLinear(EmulatorPk):
         'sigma8': 0.75}
 
         Args:
-            cosmo (dict): the set of cosmological parameters.
-            a (np.ndarray): the scale factor, a.
+            cosmo : the set of cosmological parameters.
+            a: the scale factor, a.
 
         Returns:
-            Tuple[np.ndarray, np.ndarray]: the wavenumbers and the linear
-            matter spectrum at the pre-defined values of k.
+            the wavenumbers and the linear matter spectrum at the pre-defined
+            values of k.
         """
         redshift = (1.0 - a) / a
         record_mean = []
@@ -75,17 +67,17 @@ class amemuLinear(EmulatorPk):
         record_mean = np.asarray(record_mean)
         return self.emulator.wavenumber.numpy(), record_mean
 
-    def _get_pk2d(self, cosmo: dict) -> Pk2D:
+    def _get_pk2d(self, cosmo) -> Pk2D:
         """
         Calculates the 2D linear matter spectrum, as a function of wavenumber
         (1/Mpc) and scale factor. The scale factors are for redshift between
         0 and 5, inclusive.
 
         Args:
-            cosmo (dict): a dictionary for the cosmological parameter.
+            cosmo : a dictionary for the cosmological parameter.
 
         Returns:
-            Pk2D: Pk2D object implemented in CCL.
+            Pk2D object implemented in CCL.
         """
         # we are using 21 redshifts between the minimum and maximum redshifts.
         redshifts = np.linspace(self.emulator.config.Z_MIN + 1e-10,
