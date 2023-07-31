@@ -1,7 +1,19 @@
 """The core functionality of CCL, including the core data types lives in this
-module. Its focus is :class:`Cosmology` class, which plays a central role,
+module. Its focus is the :class:`Cosmology` class, which plays a central role,
 carrying the information on cosmological parameters and derived quantities
 needed in most of the calculations carried out by CCL.
+
+.. note::
+    All of the standalone functions in other modules, which take `cosmo` as
+    their first argument, are methods of :class:`~Cosmology`.
+
+Some important CCL parameters, governing for example the precision and speed
+of some calculations, are independent of the :class:`~Cosmology` objects,
+and instead can be accessed at a global level. You can do so as e.g.
+``pyccl.gsl_params['ODE_GROWTH_EPSREL']``, ``pyccl.spline_params['K_MIN']``,
+``pyccl.physical_constants['CLIGHT']``, or
+``pyccl.gsl_params.ODE_GROWTH_EPSREL``, ``pyccl.spline_params.K_MIN``,
+``pyccl.physical_constants.CLIGHT``.
 """
 __all__ = ("TransferFunctions", "MatterPowerSpectra",
            "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
@@ -91,8 +103,13 @@ def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
 
 @_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
 class Cosmology(CCLObject):
-    """A cosmology including parameters and associated data (e.g. distances,
-    power spectra).
+    """Stores information about cosmological parameters and associated data
+    (e.g. distances, power spectra).
+
+    The values of cosmological parameters may be looked up by name
+    (e.g. ``cosmo["sigma8"]``). Note that some of the parameters accessible
+    this way are not contained in the signature of :class:`~Cosmology`, but
+    are derived during initialization.
 
     .. note:: Although some arguments default to `None`, they will raise a
               ValueError inside this function if not specified, so they are not
@@ -102,16 +119,6 @@ class Cosmology(CCLObject):
               (not including relativistic neutrinos) to zero. Doing this will
               give you a model that is physically inconsistent since the
               temperature of the CMB will still be non-zero.
-
-    .. note:: After instantiation, you can set parameters related to the
-              internal splines and numerical integration accuracy by setting
-              the values of the attributes of
-              :obj:`Cosmology.cosmo.spline_params` and
-              :obj:`Cosmology.cosmo.gsl_params`. For example, you can set
-              the generic relative accuracy for integration by executing
-              ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
-= 1e-5``.
-              See the module level documentation of `pyccl.core` for details.
 
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
@@ -140,32 +147,35 @@ class Cosmology(CCLObject):
             be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
             the mass as being held by one massive neutrino. The other options
             split the mass into 3 massive neutrinos. Ignored if a sequence is
-            passed in m_nu. Default is 'normal'.
+            passed in ``m_nu``. Default is 'normal'.
         w0 (:obj:`float`): First order term of dark energy equation
             of state. Defaults to -1.
         wa (:obj:`float`): Second order term of dark energy equation
             of state. Defaults to 0.
-        T_CMB (:obj:`float`): The CMB temperature today. The default of
-            is 2.725.
+        T_CMB (:obj:`float`): The CMB temperature today. The default value
+            is 2.7255.
         mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
             modified gravity model. Defaults to 0.0
         c1_mg (:obj:`float`): MG parameter that enters in the scale
             dependence of mu affecting its large scale behavior. Default to 1.
-            See, e.g., Eqs. (46) in Ade et al. 2015, arXiv:1502.01590
+            See, e.g., Eqs. (46) in
+            `Ade et al. 2015 <https://arxiv.org/abs/1502.01590>`_,
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
         c2_mg (:obj:`float`): MG parameter that enters in the scale
             dependence of Sigma affecting its large scale behavior. Default 1.
-            See, e.g., Eqs. (47) in Ade et al. 2015, arXiv:1502.01590
+            See, e.g., Eqs. (47) in
+            `Ade et al. 2015 <https://arxiv.org/abs/1502.01590>`_,
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
         lambda_mg (:obj:`float`): MG parameter that sets the start
             of dependance on c1 and c2 MG parameters. Defaults to 0.0
-            See, e.g., Eqs. (46) & (47) in Ade et al. 2015, arXiv:1502.01590
+            See, e.g., Eqs. (46) & (47) in
+            `Ade et al. 2015 <https://arxiv.org/abs/1502.01590>`_,
             where their f1 and f2 functions are set equal to the commonly used
             ratio of dark energy density parameter at scale factor a over
             the dark energy density parameter today
@@ -173,7 +183,7 @@ class Cosmology(CCLObject):
             The transfer function to use. Defaults to 'boltzmann_camb'.
         matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
             The matter power spectrum to use. Defaults to 'halofit'.
-        baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons` or `None`):
+        baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons` or :obj:`None`):
             The baryonic effects model to use. Options are `None` (no baryonic effects), or
             a :class:`~pyccl.baryons.baryons_base.Baryons` object.
         extra_parameters (:obj:`dict`): Dictionary holding extra
@@ -279,8 +289,8 @@ class Cosmology(CCLObject):
         """Write a YAML representation of the parameters to file.
 
         Args:
-            filename (:obj:`str`) Filename, file pointer, or stream to write "
-                "parameters to."
+            filename (:obj:`str`): file name, file pointer, or stream to write
+                parameters to.
         """
         def make_yaml_friendly(d):
             # serialize numpy types and dicts
@@ -305,9 +315,9 @@ class Cosmology(CCLObject):
         """Read the parameters from a YAML file.
 
         Args:
-            filename (:obj:`str`) Filename, file pointer, or stream to read
+            filename (:obj:`str`): file name, file pointer, or stream to read
                 parameters from.
-            **kwargs (:obj:`dict`) Additional keywords that supersede
+            **kwargs (:obj:`dict`): additional keywords that supersede
                 file contents
         """
         loader = yaml.Loader
@@ -603,7 +613,7 @@ class Cosmology(CCLObject):
         the linear power spectrum with name ``name``.
 
         Args:
-            name (:obj:`str` or `None`): name of the power spectrum to
+            name (:obj:`str` or :obj:`None`): name of the power spectrum to
                 return.
 
         Returns:
@@ -622,7 +632,7 @@ class Cosmology(CCLObject):
         the non-linear power spectrum with name ``name``.
 
         Args:
-            name (:obj:`str` or `None`): name of the power spectrum to
+            name (:obj:`str` or :obj:`None`): name of the power spectrum to
                 return.
 
         Returns:
