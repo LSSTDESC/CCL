@@ -10,12 +10,12 @@ from . import Baryons
 class BaccoemuBaryons(Baryons):
     """ The baryonic boost factor computed with the baccoemu baryons emulators.
 
-    See https://arxiv.org/abs/2011.15018 and
-    https://bacco.dipc.org/emulator.html
+    See `Arico et al. 2021 <https://arxiv.org/abs/2011.15018>`_ and
+    https://bacco.dipc.org/emulator.html.
 
-    Note that masses are in units of :math:`M_\\odot`, differently from the
-    original paper and baccoemu public code (where they are
-    in :math:`M_\\odot/h`)
+    .. note:: Note that masses are in units of :math:`M_\\odot`, differently
+              from the original paper and baccoemu public code (where they are
+              in :math:`M_\\odot/h`)
 
     Args:
         log10_M_c (:obj:`float`): characteristic halo mass to model baryon
@@ -86,8 +86,8 @@ class BaccoemuBaryons(Baryons):
             a (:obj:`float` or `array`): Scale factor.
 
         Returns:
-            :obj:`float` or `array`: Correction factor to apply to
-                the power spectrum.
+            :obj:`float` or `array`: Correction factor to apply to \
+            the power spectrum.
         """ # noqa
 
         # Check a ranges
@@ -156,8 +156,23 @@ class BaccoemuBaryons(Baryons):
                           log10_beta=None, log10_M1_z0_cen=None,
                           log10_theta_out=None, log10_theta_inn=None,
                           log10_M_inn=None):
-        """Update BCM parameters. All parameters set to ``None`` will
+        """Update parameters. All parameters set to ``None`` will
         be left untouched.
+
+        Args:
+            log10_M_c (:obj:`float`): characteristic halo mass to model baryon
+                mass fraction (in :math:`M_\\odot`)
+            log10_eta (:obj:`float`): extent of ejected gas
+            log10_beta (:obj:`float`): slope of power law describing baryon
+                mass fraction
+            log10_M1_z0_cen (:obj:`float`): characteristic halo mass scale for
+                central galaxies (in :math:`M_\\odot`)
+            log10_theta_out (:obj:`float`):  outer slope of density profiles of
+                hot gas in haloes
+            log10_theta_inn (:obj:`float`): inner slope of density profiles of
+                hot gas in haloes
+            log10_M_inn (:obj:`float`): transition mass of density profiles of
+                hot gas in haloes (in :math:`M_\\odot`)
         """
         _kwargs = locals()
         _new_bcm_params = {key: _kwargs[key] for key in

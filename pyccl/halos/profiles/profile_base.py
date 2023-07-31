@@ -81,10 +81,10 @@ class HaloProfile(CCLAutoRepr):
         returned by this method.
 
         Args:
-            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
-                model calculator object.
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
             a (:obj:`float`): scale factor.
+            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
+                model calculator object.
 
         Returns:
             float: normalization factor of this profile.
@@ -502,10 +502,10 @@ class HaloProfileMatter(HaloProfile):
         profiles, which is simply the comoving matter density.
 
         Args:
-            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
-                model calculator object.
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
             a (:obj:`float`): scale factor.
+            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
+                model calculator object.
 
         Returns:
             :obj:`float`: normalization factor of this profile.

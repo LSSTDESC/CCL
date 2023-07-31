@@ -311,10 +311,10 @@ class SatelliteShearHOD(HaloProfileHOD):
         mean galaxy number density.
 
         Args:
-            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
-                model calculator object.
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
             a (:obj:`float`): scale factor.
+            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
+                model calculator object.
 
         Returns:
             float: normalization factor of this profile.
