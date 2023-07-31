@@ -173,7 +173,7 @@ def test_nM_bocquet20_compare():
 def test_nM_bocquet20_raises():
     Ms = np.geomspace(1E12, 1E17, 128)
 
-    # Need A_s
+    # Need sigma8
     cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
                           A_s=2E-9, n_s=0.96)
     with pytest.raises(ValueError):
