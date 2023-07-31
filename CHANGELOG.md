@@ -3,6 +3,7 @@
 # v2.8.0 Changes
 
 ## Python library
+- van Daalen+ baryons model (#1110)
 - Refactor pyccl under an abstract CCLObject (#934).
 - Bump Python version to 3.8 (#1031).
 - Optimize HM autocorrelation power spectra (#891).
