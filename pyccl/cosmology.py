@@ -697,7 +697,7 @@ def CosmologyVanillaLCDM(**kwargs):
 
 
 class CosmologyCalculator(Cosmology):
-    """A "calculator-mode" CCL `Cosmology` object.
+    """A "calculator-mode" CCL :class:`~Cosmology` object.
     This allows users to build a cosmology from a set of arrays
     describing the background expansion, linear growth factor and
     linear and non-linear power spectra, which can then be used
@@ -716,23 +716,20 @@ class CosmologyCalculator(Cosmology):
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
         Omega_b (:obj:`float`): Baryonic matter density fraction.
-        h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc;
-            unitless.
-        A_s (:obj:`float`): Power spectrum normalization. Exactly
-            one of A_s and sigma_8 is required.
-        sigma8 (:obj:`float`): Variance of matter density
-            perturbations at an 8 Mpc/h scale. Exactly one of A_s
+        h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc; unitless.
+        A_s (:obj:`float`): Power spectrum normalization. Exactly one of A_s
             and sigma_8 is required.
-        n_s (:obj:`float`): Primordial scalar perturbation spectral
-            index.
+        sigma8 (:obj:`float`): Variance of matter density perturbations at
+            an 8 Mpc/h scale. Exactly one of A_s and sigma_8 is required.
+        n_s (:obj:`float`): Primordial scalar perturbation spectral index.
         Omega_k (:obj:`float`): Curvature density fraction.
             Defaults to 0.
         Omega_g (:obj:`float`): Density in relativistic species
             except massless neutrinos. The default of `None` corresponds
-            to setting this from the CMB temperature. Note that if a
-            non-`None` value is given, this may result in a physically
-            inconsistent model because the CMB temperature will still
-            be non-zero in the parameters.
+            to setting this from the CMB temperature. Note that if a non-`None`
+            value is given, this may result in a physically inconsistent model
+            because the CMB temperature will still be non-zero in the
+            parameters.
         Neff (:obj:`float`): Effective number of massless
             neutrinos present. Defaults to 3.044.
         m_nu (:obj:`float` or `array`):
@@ -743,19 +740,13 @@ class CosmologyCalculator(Cosmology):
             be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
             the mass as being held by one massive neutrino. The other options
             split the mass into 3 massive neutrinos. Ignored if a sequence is
-            passed in m_nu. Default is 'normal'.
-        w0 (:obj:`float`): First order term of dark energy
-            equation of state. Defaults to -1.
-        wa (:obj:`float`): Second order term of dark energy
-            equation of state. Defaults to 0.
-        T_CMB (:obj:`float`): The CMB temperature today. The default is the
-            same as in the Cosmology base class.
-        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is the same as in the base class
-        mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
+            passed in ``m_nu``. Default is 'normal'.
+        w0 (:obj:`float`): First order term of dark energy equation
+            of state. Defaults to -1.
+        wa (:obj:`float`): Second order term of dark energy equation
+            of state. Defaults to 0.
+        T_CMB (:obj:`float`): The CMB temperature today. The default value
+            is 2.7255.
         background (:obj:`dict`): a dictionary describing the background
             expansion. It must contain three mandatory entries: ``'a'``: an
             array of monotonically ascending scale-factor values. ``'chi'``:
@@ -795,7 +786,7 @@ class CosmologyCalculator(Cosmology):
             also contain other entries with keys of the form ``'q1:q2'``,
             containing other cross-power spectra between quantities
             ``'q1'`` and ``'q2'``.
-        nonlinear_model (:obj:`str`, :obj:`dict` or `None`): model to
+        nonlinear_model (:obj:`str`, :obj:`dict` or :obj:`None`): model to
             compute non-linear power spectra. If a string, the associated
             non-linear model will be applied to all entries in ``pk_linear``
             which do not appear in ``pk_nonlin``. If a dictionary, it should
