@@ -128,6 +128,11 @@ class Cosmology(CCLObject):
             and sigma_8 is required.
         sigma8 (:obj:`float`): Variance of matter density perturbations at
             an 8 Mpc/h scale. Exactly one of A_s and sigma_8 is required.
+            Note that, if a value of `sigma8` is passed, CCL will enforce
+            the linear matter power spectrum to be correctly normalised to
+            this value of :math:`\\sigma_8`, even in the presence of other
+            parameters (e.g. modified gravity parameters) that might affect
+            the overall power spectrum normalization.
         n_s (:obj:`float`): Primordial scalar perturbation spectral index.
         Omega_k (:obj:`float`): Curvature density fraction.
             Defaults to 0.
