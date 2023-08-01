@@ -153,7 +153,7 @@ ccl_physical_constants ccl_constants = {
    */
   //6.6738e-11,  /(from PDG 2013) in m^3/Kg/s^2
   //6.67428e-11, // CLASS VALUE
-  6.67430e-11, // from CODATA 2022
+  6.67408e-11, // from CODATA 2014
 
   /**
    * Solar mass in units of kg (from GSL)
@@ -170,42 +170,43 @@ ccl_physical_constants ccl_constants = {
   /**
    * Rho critical in units of M_sun/h / (Mpc/h)^3
    */
-  ((3*100*100)/(8*M_PI*6.67430e-11)) * (1000*1000*3.085677581491367399198952281E+22/1.9884754153381438E+30),
+  ((3*100*100)/(8*M_PI*6.67408e-11)) * (1000*1000*3.085677581491367399198952281E+22/1.9884754153381438E+30),
 
   /**
    * Boltzmann constant in units of J/K
   */
   //GSL_CONST_MKSA_BOLTZMANN,
-  1.380649E-23, //from CODATA 2022
+  1.38064852E-23, //from CODATA 2014
 
   /**
    * Stefan-Boltzmann constant in units of kg/s^3 / K^4
    */
   //GSL_CONST_MKSA_STEFAN_BOLTZMANN_CONSTANT,
-  5.670374419E-8, //from CODATA 2022
+  5.670367E-8, //from CODATA 2014
 
   /**
    * Planck's constant in units kg m^2 / s
    */
   //GSL_CONST_MKSA_PLANCKS_CONSTANT_H,
-  6.62607015E-34, //from CODATA 2022
+  6.626070040E-34, //from CODATA 2014
 
   /**
    * The speed of light in m/s
    */
   //GSL_CONST_MKSA_SPEED_OF_LIGHT,
-  299792458.0, //from CODATA 2022
+  299792458.0, //from CODATA 2014
 
   /**
    * Electron volt to Joules convestion
    */
   //GSL_CONST_MKSA_ELECTRON_VOLT,
-  1.602176634e-19,  //from CODATA 2022
+  1.6021766208e-19,  //from CODATA 2014
 
   /**
    * Temperature of the CMB in K
    */
-  2.7255,
+  2.725,
+  //2.7255, // CLASS value
 
   /**
    * T_ncdm, as taken from CLASS, explanatory.ini
