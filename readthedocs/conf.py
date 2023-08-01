@@ -134,10 +134,6 @@ todo_include_todos = True
 #
 
 html_theme = "sphinx_rtd_theme"
-html_theme_options = {
-    "collapse_navigation": False,
-    "titles_only": True,
-}
 # html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -145,6 +141,10 @@ html_theme_options = {
 # documentation.
 #
 # html_theme_options = {}
+html_theme_options = {
+    "collapse_navigation": False,
+    "titles_only": True,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
