@@ -56,5 +56,5 @@ The source code is available on github at https://github.com/LSSTDESC/CCL.
    :name: apiref
 
    source/notation_and_other_cosmological_conventions.rst
-   API Documentation<api/modules>
+   API Documentation<api/pyccl>
    source/changelog
