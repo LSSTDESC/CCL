@@ -17,7 +17,7 @@ import numpy as np
 from . import (
     CCLError, CCLObject, CCLParameters, CosmologyParams,
     DEFAULT_POWER_SPECTRUM, DefaultParams, Pk2D, check, lib,
-    unlock_instance, emulators, baryons)
+    unlock_instance, emulators, baryons, modified_gravity)
 from . import physical_constants as const
 
 
@@ -148,28 +148,6 @@ class Cosmology(CCLObject):
             of state. Defaults to 0.
         T_CMB (:obj:`float`): The CMB temperature today. The default of
             is 2.725.
-        mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        c1_mg (:obj:`float`): MG parameter that enters in the scale
-            dependence of mu affecting its large scale behavior. Default to 1.
-            See, e.g., Eqs. (46) in Ade et al. 2015, arXiv:1502.01590
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
-        c2_mg (:obj:`float`): MG parameter that enters in the scale
-            dependence of Sigma affecting its large scale behavior. Default 1.
-            See, e.g., Eqs. (47) in Ade et al. 2015, arXiv:1502.01590
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
-        lambda_mg (:obj:`float`): MG parameter that sets the start
-            of dependance on c1 and c2 MG parameters. Defaults to 0.0
-            See, e.g., Eqs. (46) & (47) in Ade et al. 2015, arXiv:1502.01590
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
         transfer_function (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
             The transfer function to use. Defaults to 'boltzmann_camb'.
         matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
@@ -177,6 +155,11 @@ class Cosmology(CCLObject):
         baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons` or `None`):
             The baryonic effects model to use. Options are `None` (no baryonic effects), or
             a :class:`~pyccl.baryons.baryons_base.Baryons` object.
+        mg_parametrization (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
+            or `None`):
+            The modified gravity parametrization to use. Options are `None` (no MG), or
+            a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` object. 
+            Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG` is supported.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB.
             Details described below. Defaults to None.
@@ -206,17 +189,17 @@ class Cosmology(CCLObject):
     from ._core.repr_ import build_string_Cosmology as __repr__
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_accuracy_params", "lin_pk_emu", 'nl_pk_emu',
-                    "baryons",)
+                    "baryons", "mg_parametrization")
 
     def __init__(
             self, *, Omega_c=None, Omega_b=None, h=None, n_s=None,
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=None, m_nu=0., mass_split='normal', w0=-1., wa=0.,
             T_CMB=DefaultParams.T_CMB,
-            mu_0=0, sigma_0=0, c1_mg=1, c2_mg=1, lambda_mg=0,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryonic_effects=None,
+            mg_parametrization=None,
             extra_parameters=None,
             T_ncdm=DefaultParams.T_ncdm):
 
@@ -243,13 +226,29 @@ class Cosmology(CCLObject):
                 raise ValueError("`baryonic_effects` must be `None` "
                                  "or a `Baryons` instance.")
 
+        self.mg_parametrization = mg_parametrization
+        if self.mg_parametrization is not None and not isinstance(
+                self.mg_parametrization,
+                modified_gravity.ModifiedGravity):
+            raise ValueError("`mg_parametrization` must be `None` "
+                             "or a `ModifiedGravity` instance.")
+
+        if self.mg_parametrization is None:
+            # Internally, CCL still relies exclusively on the mu-Sigma
+            # parametrization, so we fill that in for now unless something
+            # else is provided.
+            self.mg_parametrization = modified_gravity.MuSigmaMG()
+        if not isinstance(
+                self.mg_parametrization,
+                modified_gravity.MuSigmaMG):
+            raise NotImplementedError("`mg_parametrization` only supports the "
+                                      "mu-Sigma parametrization at this point")
+
         # going to save these for later
         self._params_init_kwargs = dict(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
             mass_split=mass_split, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
-            mu_0=mu_0, sigma_0=sigma_0,
-            c1_mg=c1_mg, c2_mg=c2_mg, lambda_mg=lambda_mg,
             extra_parameters=extra_parameters)
 
         self._config_init_kwargs = dict(
@@ -349,7 +348,6 @@ class Cosmology(CCLObject):
             self, Omega_c=None, Omega_b=None, h=None, n_s=None, sigma8=None,
             A_s=None, Omega_k=None, Neff=None, m_nu=None, mass_split=None,
             w0=None, wa=None, T_CMB=None, T_ncdm=None,
-            mu_0=None, sigma_0=None, c1_mg=None, c2_mg=None, lambda_mg=None,
             Omega_g=None, extra_parameters=None):
         """Build a ccl_parameters struct"""
         # Fill-in defaults (SWIG converts `numpy.nan` to `NAN`)
@@ -412,6 +410,15 @@ class Cosmology(CCLObject):
         else:
             # Omega_g was passed - modify Omega_l
             Omega_l += rho_g/rho_crit - Omega_g
+
+        # Take the mu-Sigma parameters from the modified_gravity container
+        # object. This is the only supported MG parametrization at this time.
+        assert isinstance(self.mg_parametrization, modified_gravity.MuSigmaMG)
+        mu_0 = self.mg_parametrization.mu_0
+        sigma_0 = self.mg_parametrization.sigma_0
+        c1_mg = self.mg_parametrization.c1_mg
+        c2_mg = self.mg_parametrization.c2_mg
+        lambda_mg = self.mg_parametrization.lambda_mg
 
         self._fill_params(
             m_nu=nu_mass, sum_nu_masses=sum(nu_mass), N_nu_mass=N_nu_mass,
@@ -505,7 +512,7 @@ class Cosmology(CCLObject):
             # For MG, the input sigma8 includes the effects of MG, while the
             # sigma8 that CAMB uses is the GR definition. So we need to rescale
             # sigma8 afterwards.
-            if self["mu_0"] != 0:
+            if self.mg_parametrization.mu_0 != 0:
                 rescale_s8 = True
         elif trf == 'boltzmann_class':
             pk = self.get_class_pk_lin()
@@ -528,7 +535,7 @@ class Cosmology(CCLObject):
         pkl = None
         if self._config_init_kwargs["matter_power_spectrum"] == "camb":
             rescale_mg = False
-            if self["mu_0"] != 0:
+            if self.mg_parametrization.mu_0 != 0:
                 raise ValueError("Can't rescale non-linear power spectrum "
                                  "from CAMB for mu-Sigma MG.")
             name = "delta_matter:delta_matter"
@@ -743,10 +750,12 @@ class CosmologyCalculator(Cosmology):
             same as in the Cosmology base class.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is the same as in the base class
-        mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
+        mg_parametrization (:class:`~pyccl.modified_gravity.ModifiedGravity`
+            or `None`):
+            The modified gravity parametrization to use. Options are `None`
+            (no MG), or a :class:`~pyccl.modified_gravity.ModifiedGravity`
+            object. Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG`
+            is supported.
         background (:obj:`dict`): a dictionary describing the background
             expansion. It must contain three mandatory entries: ``'a'``: an
             array of monotonically ascending scale-factor values. ``'chi'``:
@@ -808,14 +817,14 @@ class CosmologyCalculator(Cosmology):
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=None, m_nu=0., mass_split="normal", w0=-1., wa=0.,
             T_CMB=DefaultParams.T_CMB, T_ncdm=DefaultParams.T_ncdm,
-            mu_0=0., sigma_0=0., background=None, growth=None,
+            mg_parametrization=None, background=None, growth=None,
             pk_linear=None, pk_nonlin=None, nonlinear_model=None):
 
         super().__init__(
             Omega_c=Omega_c, Omega_b=Omega_b, h=h, n_s=n_s, sigma8=sigma8,
             A_s=A_s, Omega_k=Omega_k, Omega_g=Omega_g, Neff=Neff, m_nu=m_nu,
             mass_split=mass_split, w0=w0, wa=wa, T_CMB=T_CMB, T_ncdm=T_ncdm,
-            mu_0=mu_0, sigma_0=sigma_0,
+            mg_parametrization=mg_parametrization,
             transfer_function="calculator", matter_power_spectrum="calculator")
 
         self._input_arrays = {"background": background, "growth": growth,

@@ -7,8 +7,8 @@ BOOST_TOLERANCE = 1e-5
 
 # Set up the cosmological parameters to be used
 cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67,
-                      A_s=2.1e-9, n_s=0.96,
-                      transfer_function='boltzmann_class')
+                      sigma8=0.8, n_s=0.96,
+                      transfer_function='eisenstein_hu')
 k = 0.5*cosmo['h']
 a = 1.
 
