@@ -94,7 +94,7 @@ def test_cells_mg():
     # same results.
 
     # set up a MG cosmology
-    cosmo_MG = ccl.CosmologyVanillaLCDM(mg_parametrisation=MuSigmaMG(
+    cosmo_MG = ccl.CosmologyVanillaLCDM(mg_parametrization=MuSigmaMG(
                                         mu_0=0.5, sigma_0=0.5),
                                         transfer_function="bbks",
                                         matter_power_spectrum="linear")
@@ -106,7 +106,7 @@ def test_cells_mg():
     pk_nonlin = {"a": a, "k": np.exp(lk), "delta_matter:delta_matter": pk}
     cosmo_calc = ccl.CosmologyCalculator(
         Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.81,
-        mg_parametrisation=MuSigmaMG(mu_0=0.5, sigma_0=0.5),
+        mg_parametrization=MuSigmaMG(mu_0=0.5, sigma_0=0.5),
         pk_nonlin=pk_nonlin)
 
     # get the Cells

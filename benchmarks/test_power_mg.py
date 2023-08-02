@@ -20,7 +20,7 @@ def test_power_mg(model):
         n_s=0.96,
         Neff=3.046,
         Omega_k=0,
-        mg_parametrisation=MuSigmaMG(
+        mg_parametrization=MuSigmaMG(
             mu_0=mu_0[model],
             sigma_0=sigma_0[model]),
         matter_power_spectrum='linear',

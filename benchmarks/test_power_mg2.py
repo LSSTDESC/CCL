@@ -22,7 +22,7 @@ def test_power_mg(model):
         Omega_k=0,
         m_nu=0,
         T_CMB=2.7255,
-        mg_parametrisation=MuSigmaMG(
+        mg_parametrization=MuSigmaMG(
             mu_0=mu_0[model],
             sigma_0=sigma_0[model]),
         matter_power_spectrum='linear',

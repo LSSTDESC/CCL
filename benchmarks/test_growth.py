@@ -90,7 +90,7 @@ def compare_growth(
         Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, m_nu=m_nu,
         h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k, Omega_g=0,
         w0=w0, wa=wa,
-        mg_parametrisation=MuSigmaMG(mu_0=mu_0, sigma_0=sigma_0))
+        mg_parametrization=MuSigmaMG(mu_0=mu_0, sigma_0=sigma_0))
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)

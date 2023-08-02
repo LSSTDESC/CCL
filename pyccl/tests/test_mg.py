@@ -13,7 +13,7 @@ def test_mu_sigma_transfer_err(tf):
             h=0.7,
             A_s=2.1e-9,
             n_s=0.96,
-            mg_parametrisation=MuSigmaMG(mu_0=0.1, sigma_0=0.2),
+            mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.2),
             transfer_function=tf,
             matter_power_spectrum='linear'
         )
@@ -34,7 +34,7 @@ def test_mg_error():
             h=0.7,
             sigma8=0.8,
             n_s=0.96,
-            mg_parametrisation=NotMG(),
+            mg_parametrization=NotMG(),
             transfer_function="bbks",
         )
 
@@ -45,6 +45,6 @@ def test_mg_error():
             h=0.7,
             sigma8=0.8,
             n_s=0.96,
-            mg_parametrisation=NotMuSigma(),
+            mg_parametrization=NotMuSigma(),
             transfer_function="bbks",
         )
