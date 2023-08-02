@@ -7,7 +7,7 @@ from . import ModifiedGravity
 
 @dataclass
 class MuSigmaMG(ModifiedGravity):
-    """The mu-Sigma parametrisation of modified gravity.
+    """The mu-Sigma parametrization of modified gravity.
 
     Args:
         mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
@@ -34,7 +34,7 @@ class MuSigmaMG(ModifiedGravity):
             the dark energy density parameter today
     """
 
-    parametrisation: str = "mu_Sigma"
+    parametrization: str = "mu_Sigma"
     mu_0: float = 0
     sigma_0: float = 0
     c1_mg: float = 1

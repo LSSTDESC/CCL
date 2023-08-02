@@ -157,7 +157,7 @@ class Cosmology(CCLObject):
             a :class:`~pyccl.baryons.baryons_base.Baryons` object.
         mg_parametrization (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
             or `None`):
-            The modified gravity parametrisation to use. Options are `None` (no MG), or
+            The modified gravity parametrization to use. Options are `None` (no MG), or
             a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` object. 
             Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG` is supported.
         extra_parameters (:obj:`dict`): Dictionary holding extra
@@ -235,14 +235,14 @@ class Cosmology(CCLObject):
 
         if self.mg_parametrization is None:
             # Internally, CCL still relies exclusively on the mu-Sigma
-            # parametrisation, so we fill that in for now unless something
+            # parametrization, so we fill that in for now unless something
             # else is provided.
             self.mg_parametrization = modified_gravity.MuSigmaMG()
         if not isinstance(
                 self.mg_parametrization,
                 modified_gravity.MuSigmaMG):
             raise NotImplementedError("`mg_parametrization` only supports the "
-                                      "mu-Sigma parametrisation at this point")
+                                      "mu-Sigma parametrization at this point")
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -412,7 +412,7 @@ class Cosmology(CCLObject):
             Omega_l += rho_g/rho_crit - Omega_g
 
         # Take the mu-Sigma parameters from the modified_gravity container
-        # object. This is the only supported MG parametrisation at this time.
+        # object. This is the only supported MG parametrization at this time.
         assert isinstance(self.mg_parametrization, modified_gravity.MuSigmaMG)
         mu_0 = self.mg_parametrization.mu_0
         sigma_0 = self.mg_parametrization.sigma_0
@@ -752,7 +752,7 @@ class CosmologyCalculator(Cosmology):
             temperature. The default is the same as in the base class
         mg_parametrization (:class:`~pyccl.modified_gravity.ModifiedGravity`
             or `None`):
-            The modified gravity parametrisation to use. Options are `None`
+            The modified gravity parametrization to use. Options are `None`
             (no MG), or a :class:`~pyccl.modified_gravity.ModifiedGravity`
             object. Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG`
             is supported.
