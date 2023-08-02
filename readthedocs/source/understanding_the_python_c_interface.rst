@@ -245,7 +245,7 @@ file.
 This file defines the actual API for the BCM model in CCL. It is the function signature
 and location of this function, along with what values it is supposed to return,
 that defines the API. Changes to any of the underlying ``C`` code or even the helper
-``Python`` functions does not constitute an API breakage.
+``Python`` functions do not constitute an API breakage.
 
 There are a few other features to note.
 

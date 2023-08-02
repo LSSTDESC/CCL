@@ -69,8 +69,8 @@ To uninstall ``CCL`` in developer mode, simply type
    $ pip uninstall pyccl
 
 
-Boostrapping a CCL Development Environment with ``conda``
-=========================================================
+Bootstrapping a CCL Development Environment with ``conda``
+==========================================================
 
 One of the easier ways to get started with CCL development is to use
 ``conda-forge`` to provide the third-party requirements above and the necessary

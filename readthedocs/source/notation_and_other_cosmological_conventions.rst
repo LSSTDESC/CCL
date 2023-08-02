@@ -26,13 +26,13 @@ CCL uses the following parameters to define the cosmological model.
 Background Parameters
 ~~~~~~~~~~~~~~~~~~~~~
 
-- ``Omega_c``: the density fraction at z=0 of CDM
-- ``Omega_b``: the density fraction at z=0 of baryons
-- ``h``: the Hubble constant in units of 100 Mpc/km/s
-- ``Omega_k``: the curvature density fraction at z=0
-- ``Omega_g``: the density of radiation (not including massless neutrinos)
-- ``w0``: first order term of the dark energy equation of state
-- ``wa``: second order term of the dark energy equation of state
+- ``Omega_c``: the density fraction at z=0 of CDM.
+- ``Omega_b``: the density fraction at z=0 of baryons.
+- ``h``: the Hubble constant in units of 100 :math:`{\rm km}/{\rm s}/{\rm Mpc}`.
+- ``Omega_k``: the curvature density fraction at :math:`z=0`.
+- ``Omega_g``: the density of radiation (not including massless neutrinos).
+- ``w0``: first order term of the dark energy equation of state.
+- ``wa``: second order term of the dark energy equation of state.
 
 Power Spectrum Normalization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,23 +42,23 @@ amplitude) or as ``sigma8`` (i.e., a measure of the amplitude today). Note that
 not all transfer functions support specifying a primordial amplitude.
 
 - ``sigma8``: the normalization of the power spectrum today, given by the RMS
-  variance in spheres of 8 Mpc/h
-- ``A_s``: the primordial normalization of the power spectrum at k=0.05 Mpc :math:`^{-1}`
+  variance in spheres of 8 :math:`{\rm Mpc}/h`.
+- ``A_s``: the primordial normalization of the power spectrum at :math:`k_p=0.05\,{\rm Mpc}^{-1}`.
 
 Relativistic Species
 ~~~~~~~~~~~~~~~~~~~~
 
-- ``Neff``: effective number of massless+massive neutrinos present at recombination
-- ``m_nu``: the total mass of massive neutrinos or the masses of the massive neutrinos in eV
-- ``mass_split``: how to interpret the ``m_nu`` argument, see the :ref:`options <masstype>` below
-- ``T_CMB``: the temperature of the CMB today
-- ``T_ncdm``: non-CDM temperature in units of the photon temperature
+- ``Neff``: effective number of massless+massive neutrinos present at recombination.
+- ``m_nu``: the total mass of massive neutrinos or the masses of the massive neutrinos in eV.
+- ``mass_split``: how to interpret the ``m_nu`` argument, see the :ref:`options <masstype>` below.
+- ``T_CMB``: the temperature of the CMB today.
+- ``T_ncdm``: non-CDM temperature in units of the photon temperature.
 
 Modified Gravity Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - ``mu_0`` and ``sigma_0``: the parameters of the scale-independent :math:`\mu-\Sigma`
-  modified gravity model
+  modified gravity model.
 - ``c1_mg``, ``c2_mg``, and ``lambda_mg``: parameters governing the scale dependence of
   the above.
 
@@ -71,18 +71,18 @@ quantities (e.g., the transfer function). The various options are as follows.
 
 ``transfer_function`` options
 
-  - ``None`` : do not compute a linear power spectrum
-  - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function
-  - 'bbks': the BBKS approximation
-  - 'boltzmann_class': use CLASS to compute the transfer function
-  - 'boltzmann_camb': use CAMB to compute the transfer function (default)
-  - 'boltzmann_isitgr': use ISiTGR to compute the transfer function
+  - ``None`` : do not compute a linear power spectrum.
+  - 'eisenstein_hu': the Eisenstein and Hu (1998) fitting function.
+  - 'bbks': the BBKS approximation.
+  - 'boltzmann_class': use CLASS to compute the transfer function.
+  - 'boltzmann_camb': use CAMB to compute the transfer function (default).
+  - 'boltzmann_isitgr': use ISiTGR to compute the transfer function.
   - An :class:`~pyccl.emulators.emu_base.EmulatorPk` object.
 
 ``matter_power_spectrum`` options
 
-  - 'halofit': use HALOFIT (default)
-  - 'linear': neglect non-linear power spectrum contributions
+  - 'halofit': use HALOFIT (default).
+  - 'linear': neglect non-linear power spectrum contributions.
   - An :class:`~pyccl.emulators.emu_base.EmulatorPk` object.
 
 ``baryonic_effects``: a :class:`~pyccl.baryons.baryons_base.Baryons` object.
@@ -230,16 +230,16 @@ CCL note for a discussion of the values of these constants from different source
 
 basic physical constants
 
-  - ``CLIGHT_HMPC``: speed of light / H0 in units of Mpc/h
-  - ``GNEWT``: Newton's gravitational constant in units of m^3/Kg/s^2
-  - ``SOLAR_MASS``: solar mass in units of kg
+  - ``CLIGHT_HMPC``: speed of light divided by :math:`H_0` in units of :math:`{\rm Mpc}/h`.
+  - ``GNEWT``: Newton's gravitational constant in units of :math:`{\rm m}^3{\rm kg}^{-1}{\rm s}^{-2}`.
+  - ``SOLAR_MASS``: solar mass in units of :math:`{\rm kg}`.
   - ``MPC_TO_METER``: conversion factor for Mpc to meters.
-  - ``RHO_CRITICAL``: critical density in units of M_sun/h / (Mpc/h)^3
-  - ``KBOLTZ``: Boltzmann constant in units of J/K
-  - ``STBOLTZ``: Stefan-Boltzmann constant in units of kg/s^3 / K^4
-  - ``HPLANCK``: Planck's constant in units kg m^2 / s
-  - ``CLIGHT``: speed of light in m/s
-  - ``EV_IN_J``: conversion factor between electron volts and Joules
+  - ``RHO_CRITICAL``: critical density in units of :math:`M_\odot/h/({\rm Mpc}/h)^3`.
+  - ``KBOLTZ``: Boltzmann constant in units of J/K.
+  - ``STBOLTZ``: Stefan-Boltzmann constant in units of :math:`{\rm kg}/{\rm s}^3 / {\rm K}^4`.
+  - ``HPLANCK``: Planck's constant in units :math:`{\rm kg}\,{\rm m}^2 {\rm s}^{-1}`.
+  - ``CLIGHT``: speed of light in m/s.
+  - ``EV_IN_J``: conversion factor between electron volts and Joules.
 
 neutrino mass splittings
 
