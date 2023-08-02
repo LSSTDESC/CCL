@@ -750,11 +750,12 @@ class CosmologyCalculator(Cosmology):
             same as in the Cosmology base class.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is the same as in the base class
-        mg_parametrisation (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
+        mg_parametrisation (:class:`~pyccl.modified_gravity.ModifiedGravity`
             or `None`):
-            The modified gravity parametrisation to use. Options are `None` (no MG), or
-            a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` object. 
-            Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG` is supported.
+            The modified gravity parametrisation to use. Options are `None`
+            (no MG), or a :class:`~pyccl.modified_gravity.ModifiedGravity`
+            object. Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG`
+            is supported.
         background (:obj:`dict`): a dictionary describing the background
             expansion. It must contain three mandatory entries: ``'a'``: an
             array of monotonically ascending scale-factor values. ``'chi'``:
