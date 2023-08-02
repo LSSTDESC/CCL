@@ -159,6 +159,7 @@ class Cosmology(CCLObject):
             or `None`):
             The modified gravity parametrisation to use. Options are `None` (no MG), or
             a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` object. 
+            Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG` is supported.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB.
             Details described below. Defaults to None.
@@ -749,10 +750,11 @@ class CosmologyCalculator(Cosmology):
             same as in the Cosmology base class.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is the same as in the base class
-        mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
+        mg_parametrisation (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
+            or `None`):
+            The modified gravity parametrisation to use. Options are `None` (no MG), or
+            a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` object. 
+            Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG` is supported.
         background (:obj:`dict`): a dictionary describing the background
             expansion. It must contain three mandatory entries: ``'a'``: an
             array of monotonically ascending scale-factor values. ``'chi'``:
