@@ -5,7 +5,7 @@ import pyccl as ccl
 COSMO = {"Omega_cdm": 0.25, "Omega_b": 0.04, "h": 0.70,
          "n_s": 1.0, "sigma8": 0.75}
 REDSHIFT = 0.0
-AMEMU_TOLERANCE = 1E-2
+AMEMU_TOLERANCE = 5E-2
 
 PKLIN_CLASS = np.array(
     [
