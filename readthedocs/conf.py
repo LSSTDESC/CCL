@@ -19,7 +19,6 @@
 import os
 from os.path import abspath, dirname, join as pjoin
 import sys
-# import sphinx_rtd_theme
 
 this_dir = dirname(abspath(__file__))
 root_path = abspath(pjoin(this_dir, '../'))
@@ -134,7 +133,6 @@ todo_include_todos = True
 #
 
 html_theme = "sphinx_rtd_theme"
-# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
