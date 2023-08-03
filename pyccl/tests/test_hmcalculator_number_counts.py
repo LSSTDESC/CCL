@@ -111,7 +111,6 @@ def test_hmcalculator_number_counts_scipy_dblquad():
         w0=-1.0,
         wa=0.0,
         T_CMB=2.7245,
-        mu_0=0.0,
         transfer_function='eisenstein_hu',
         matter_power_spectrum='linear'
     )
