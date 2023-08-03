@@ -10,6 +10,7 @@ Subpackages
    pyccl.baryons
    pyccl.emulators
    pyccl.halos
+   pyccl.modified_gravity
    pyccl.nl_pt
 
 Submodules

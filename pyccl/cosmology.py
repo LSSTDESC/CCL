@@ -157,33 +157,10 @@ class Cosmology(CCLObject):
             of state. Defaults to -1.
         wa (:obj:`float`): Second order term of dark energy equation
             of state. Defaults to 0.
-        T_CMB (:obj:`float`): The CMB temperature today. The default of
-            is 2.725.
-        mu_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        sigma_0 (:obj:`float`): One of the parameters of the mu-Sigma
-            modified gravity model. Defaults to 0.0
-        c1_mg (:obj:`float`): MG parameter that enters in the scale
-            dependence of mu affecting its large scale behavior. Default to 1.
-            See, e.g., Eqs. (46) in
-            `Ade et al. 2015 <https://arxiv.org/abs/1502.01590>`_,
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
-        c2_mg (:obj:`float`): MG parameter that enters in the scale
-            dependence of Sigma affecting its large scale behavior. Default 1.
-            See, e.g., Eqs. (47) in
-            `Ade et al. 2015 <https://arxiv.org/abs/1502.01590>`_,
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
-        lambda_mg (:obj:`float`): MG parameter that sets the start
-            of dependance on c1 and c2 MG parameters. Defaults to 0.0
-            See, e.g., Eqs. (46) & (47) in
-            `Ade et al. 2015 <https://arxiv.org/abs/1502.01590>`_,
-            where their f1 and f2 functions are set equal to the commonly used
-            ratio of dark energy density parameter at scale factor a over
-            the dark energy density parameter today
+        T_CMB (:obj:`float`): The CMB temperature today. The default value
+            is 2.7255.
+        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
+            temperature. The default is 0.71611.
         transfer_function (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
             The transfer function to use. Defaults to 'boltzmann_camb'.
         matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
@@ -191,16 +168,14 @@ class Cosmology(CCLObject):
         baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons` or :obj:`None`):
             The baryonic effects model to use. Options are `None` (no baryonic effects), or
             a :class:`~pyccl.baryons.baryons_base.Baryons` object.
-        mg_parametrization (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
-            or `None`):
-            The modified gravity parametrization to use. Options are `None` (no MG), or
-            a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` object. 
-            Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG` is supported.
+        mg_parametrization (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` or `None`):
+            The modified gravity parametrization to use. Options are `None`
+            (no MG), or a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
+            object. Currently, only :class:`~pyccl.modified_gravity.mu_Sigma.MuSigmaMG`
+            is supported.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB.
             Details described below. Defaults to None.
-        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is 0.71611.
 
     Currently supported extra parameters for CAMB are:
 
@@ -232,12 +207,12 @@ class Cosmology(CCLObject):
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=None, m_nu=0., mass_split='normal', w0=-1., wa=0.,
             T_CMB=DefaultParams.T_CMB,
+            T_ncdm=DefaultParams.T_ncdm,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryonic_effects=None,
             mg_parametrization=None,
-            extra_parameters=None,
-            T_ncdm=DefaultParams.T_ncdm):
+            extra_parameters=None):
 
         if Neff is None:
             Neff = 3.044
@@ -774,7 +749,6 @@ class CosmologyCalculator(Cosmology):
             be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
             the mass as being held by one massive neutrino. The other options
             split the mass into 3 massive neutrinos. Ignored if a sequence is
-<<<<<<< HEAD
             passed in ``m_nu``. Default is 'normal'.
         w0 (:obj:`float`): First order term of dark energy equation
             of state. Defaults to -1.
@@ -782,23 +756,13 @@ class CosmologyCalculator(Cosmology):
             of state. Defaults to 0.
         T_CMB (:obj:`float`): The CMB temperature today. The default value
             is 2.7255.
-=======
-            passed in m_nu. Default is 'normal'.
-        w0 (:obj:`float`): First order term of dark energy
-            equation of state. Defaults to -1.
-        wa (:obj:`float`): Second order term of dark energy
-            equation of state. Defaults to 0.
-        T_CMB (:obj:`float`): The CMB temperature today. The default is the
-            same as in the Cosmology base class.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is the same as in the base class
-        mg_parametrization (:class:`~pyccl.modified_gravity.ModifiedGravity`
-            or `None`):
+        mg_parametrization (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` or `None`):
             The modified gravity parametrization to use. Options are `None`
-            (no MG), or a :class:`~pyccl.modified_gravity.ModifiedGravity`
-            object. Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG`
+            (no MG), or a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
+            object. Currently, only :class:`~pyccl.modified_gravity.mu_Sigma.MuSigmaMG`
             is supported.
->>>>>>> master
         background (:obj:`dict`): a dictionary describing the background
             expansion. It must contain three mandatory entries: ``'a'``: an
             array of monotonically ascending scale-factor values. ``'chi'``:
@@ -851,7 +815,7 @@ class CosmologyCalculator(Cosmology):
             computed. The only non-linear model supported is ``'halofit'``,
             corresponding to the "HALOFIT" transformation of
             `Takahashi et al. 2012 <https://arxiv.org/abs/1208.2701>`_.
-    """
+    """ # noqa
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_accuracy_params", "_input_arrays",)
 
