@@ -4,7 +4,7 @@
 Notation, Models and Other Cosmological Conventions
 ***************************************************
 
-The documentation here is provides a brief description of CCL and its contents.
+The documentation here provides a brief description of CCL and its contents.
 For a more thorough description of the underlying equations CCL implements, see
 the CCL note and the `CCL paper <https://arxiv.org/abs/1812.05995>`_.
 
