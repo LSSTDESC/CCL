@@ -54,14 +54,6 @@ Relativistic Species
 - ``T_CMB``: the temperature of the CMB today.
 - ``T_ncdm``: non-CDM temperature in units of the photon temperature.
 
-Modified Gravity Parameters
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- ``mu_0`` and ``sigma_0``: the parameters of the scale-independent :math:`\mu-\Sigma`
-  modified gravity model.
-- ``c1_mg``, ``c2_mg``, and ``lambda_mg``: parameters governing the scale dependence of
-  the above.
-
 
 Supported Models for Power Spectra and other options
 ----------------------------------------------------
@@ -86,6 +78,8 @@ quantities (e.g., the transfer function). The various options are as follows.
   - An :class:`~pyccl.emulators.emu_base.EmulatorPk` object.
 
 ``baryonic_effects``: a :class:`~pyccl.baryons.baryons_base.Baryons` object.
+
+``mg_parametrization``: a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` object.
 
 .. _masstype:
 
