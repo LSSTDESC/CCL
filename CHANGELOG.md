@@ -3,7 +3,7 @@
 # v3.0.0 Changes
 
 ## Python library
-- Improvements to Einasto and Hernquist profiles (#1093, #1096).
+- Improvements to Einasto, NFW and Hernquist profiles (#1093, #1096).
 - LPT non-linear bias (#1097).
 - Power spectrum emulators (#1094, #1102, #1103, #1108).
 - Bug fix in virial overdensity (#1100) and streamlined collapse threshold (#1101).
