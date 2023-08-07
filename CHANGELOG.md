@@ -12,6 +12,7 @@
 - New baryonic effects models (#1102, #1110).
 - Restored convenience baryonic effects in Cosmology initialisation (#1113).
 - Bocquet et al. 2020 mass function emulatr (#1115)
+- Modified gravity parameter structures (#1119).
 
 # v2.8.0 Changes
 
