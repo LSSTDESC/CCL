@@ -1,7 +1,19 @@
 """The core functionality of CCL, including the core data types lives in this
-module. Its focus is :class:`Cosmology` class, which plays a central role,
+module. Its focus is the :class:`Cosmology` class, which plays a central role,
 carrying the information on cosmological parameters and derived quantities
 needed in most of the calculations carried out by CCL.
+
+.. note::
+    All of the standalone functions in other modules, which take `cosmo` as
+    their first argument, are methods of :class:`~Cosmology`.
+
+Some important CCL parameters, governing for example the precision and speed
+of some calculations, are independent of the :class:`~Cosmology` objects,
+and instead can be accessed at a global level. You can do so as e.g.
+``pyccl.gsl_params['ODE_GROWTH_EPSREL']``, ``pyccl.spline_params['K_MIN']``,
+``pyccl.physical_constants['CLIGHT']``, or
+``pyccl.gsl_params.ODE_GROWTH_EPSREL``, ``pyccl.spline_params.K_MIN``,
+``pyccl.physical_constants.CLIGHT``.
 """
 __all__ = ("TransferFunctions", "MatterPowerSpectra",
            "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
@@ -35,7 +47,6 @@ class TransferFunctions(Enum):
 class MatterPowerSpectra(Enum):
     LINEAR = "linear"
     HALOFIT = "halofit"
-    HALOMODEL = "halomodel"
     CAMB = "camb"
     CALCULATOR = "calculator"
     EMULATOR_NLPK = "emulator"
@@ -92,8 +103,13 @@ def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
 
 @_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
 class Cosmology(CCLObject):
-    """A cosmology including parameters and associated data (e.g. distances,
-    power spectra).
+    """Stores information about cosmological parameters and associated data
+    (e.g. distances, power spectra).
+
+    The values of cosmological parameters may be looked up by name
+    (e.g. ``cosmo["sigma8"]``). Note that some of the parameters accessible
+    this way are not contained in the signature of :class:`~Cosmology`, but
+    are derived during initialization.
 
     .. note:: Although some arguments default to `None`, they will raise a
               ValueError inside this function if not specified, so they are not
@@ -104,16 +120,6 @@ class Cosmology(CCLObject):
               give you a model that is physically inconsistent since the
               temperature of the CMB will still be non-zero.
 
-    .. note:: After instantiation, you can set parameters related to the
-              internal splines and numerical integration accuracy by setting
-              the values of the attributes of
-              :obj:`Cosmology.cosmo.spline_params` and
-              :obj:`Cosmology.cosmo.gsl_params`. For example, you can set
-              the generic relative accuracy for integration by executing
-              ``c = Cosmology(...); c.cosmo.gsl_params.INTEGRATION_EPSREL \
-= 1e-5``.
-              See the module level documentation of `pyccl.core` for details.
-
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
         Omega_b (:obj:`float`): Baryonic matter density fraction.
@@ -122,6 +128,11 @@ class Cosmology(CCLObject):
             and sigma_8 is required.
         sigma8 (:obj:`float`): Variance of matter density perturbations at
             an 8 Mpc/h scale. Exactly one of A_s and sigma_8 is required.
+            Note that, if a value of `sigma8` is passed, CCL will enforce
+            the linear matter power spectrum to be correctly normalised to
+            this value of :math:`\\sigma_8`, even in the presence of other
+            parameters (e.g. modified gravity parameters) that might affect
+            the overall power spectrum normalization.
         n_s (:obj:`float`): Primordial scalar perturbation spectral index.
         Omega_k (:obj:`float`): Curvature density fraction.
             Defaults to 0.
@@ -141,30 +152,30 @@ class Cosmology(CCLObject):
             be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
             the mass as being held by one massive neutrino. The other options
             split the mass into 3 massive neutrinos. Ignored if a sequence is
-            passed in m_nu. Default is 'normal'.
+            passed in ``m_nu``. Default is 'normal'.
         w0 (:obj:`float`): First order term of dark energy equation
             of state. Defaults to -1.
         wa (:obj:`float`): Second order term of dark energy equation
             of state. Defaults to 0.
-        T_CMB (:obj:`float`): The CMB temperature today. The default of
-            is 2.725.
+        T_CMB (:obj:`float`): The CMB temperature today. The default value
+            is 2.7255.
+        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
+            temperature. The default is 0.71611.
         transfer_function (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
             The transfer function to use. Defaults to 'boltzmann_camb'.
         matter_power_spectrum (:obj:`str` or :class:`~pyccl.emulators.emu_base.EmulatorPk`):
             The matter power spectrum to use. Defaults to 'halofit'.
-        baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons` or `None`):
+        baryonic_effects (:class:`~pyccl.baryons.baryons_base.Baryons` or :obj:`None`):
             The baryonic effects model to use. Options are `None` (no baryonic effects), or
             a :class:`~pyccl.baryons.baryons_base.Baryons` object.
-        mg_parametrization (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
-            or `None`):
-            The modified gravity parametrization to use. Options are `None` (no MG), or
-            a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` object. 
-            Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG` is supported.
+        mg_parametrization (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` or `None`):
+            The modified gravity parametrization to use. Options are `None`
+            (no MG), or a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
+            object. Currently, only :class:`~pyccl.modified_gravity.mu_Sigma.MuSigmaMG`
+            is supported.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB.
             Details described below. Defaults to None.
-        T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
-            temperature. The default is 0.71611.
 
     Currently supported extra parameters for CAMB are:
 
@@ -196,12 +207,12 @@ class Cosmology(CCLObject):
             sigma8=None, A_s=None, Omega_k=0., Omega_g=None,
             Neff=None, m_nu=0., mass_split='normal', w0=-1., wa=0.,
             T_CMB=DefaultParams.T_CMB,
+            T_ncdm=DefaultParams.T_ncdm,
             transfer_function='boltzmann_camb',
             matter_power_spectrum='halofit',
             baryonic_effects=None,
             mg_parametrization=None,
-            extra_parameters=None,
-            T_ncdm=DefaultParams.T_ncdm):
+            extra_parameters=None):
 
         if Neff is None:
             Neff = 3.044
@@ -279,8 +290,8 @@ class Cosmology(CCLObject):
         """Write a YAML representation of the parameters to file.
 
         Args:
-            filename (:obj:`str`) Filename, file pointer, or stream to write "
-                "parameters to."
+            filename (:obj:`str`): file name, file pointer, or stream to write
+                parameters to.
         """
         def make_yaml_friendly(d):
             # serialize numpy types and dicts
@@ -305,9 +316,9 @@ class Cosmology(CCLObject):
         """Read the parameters from a YAML file.
 
         Args:
-            filename (:obj:`str`) Filename, file pointer, or stream to read
+            filename (:obj:`str`): file name, file pointer, or stream to read
                 parameters from.
-            **kwargs (:obj:`dict`) Additional keywords that supersede
+            **kwargs (:obj:`dict`): additional keywords that supersede
                 file contents
         """
         loader = yaml.Loader
@@ -568,7 +579,7 @@ class Cosmology(CCLObject):
 
         # Populate power spectrum splines
         mps = self._config_init_kwargs['matter_power_spectrum']
-        # needed for halofit, halomodel and linear options
+        # needed for halofit, and linear options
         if (mps not in ['emulator']) and (mps is not None):
             self.compute_linear_power()
 
@@ -611,7 +622,7 @@ class Cosmology(CCLObject):
         the linear power spectrum with name ``name``.
 
         Args:
-            name (:obj:`str` or `None`): name of the power spectrum to
+            name (:obj:`str` or :obj:`None`): name of the power spectrum to
                 return.
 
         Returns:
@@ -630,7 +641,7 @@ class Cosmology(CCLObject):
         the non-linear power spectrum with name ``name``.
 
         Args:
-            name (:obj:`str` or `None`): name of the power spectrum to
+            name (:obj:`str` or :obj:`None`): name of the power spectrum to
                 return.
 
         Returns:
@@ -695,7 +706,7 @@ def CosmologyVanillaLCDM(**kwargs):
 
 
 class CosmologyCalculator(Cosmology):
-    """A "calculator-mode" CCL `Cosmology` object.
+    """A "calculator-mode" CCL :class:`~Cosmology` object.
     This allows users to build a cosmology from a set of arrays
     describing the background expansion, linear growth factor and
     linear and non-linear power spectra, which can then be used
@@ -714,23 +725,20 @@ class CosmologyCalculator(Cosmology):
     Args:
         Omega_c (:obj:`float`): Cold dark matter density fraction.
         Omega_b (:obj:`float`): Baryonic matter density fraction.
-        h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc;
-            unitless.
-        A_s (:obj:`float`): Power spectrum normalization. Exactly
-            one of A_s and sigma_8 is required.
-        sigma8 (:obj:`float`): Variance of matter density
-            perturbations at an 8 Mpc/h scale. Exactly one of A_s
+        h (:obj:`float`): Hubble constant divided by 100 km/s/Mpc; unitless.
+        A_s (:obj:`float`): Power spectrum normalization. Exactly one of A_s
             and sigma_8 is required.
-        n_s (:obj:`float`): Primordial scalar perturbation spectral
-            index.
+        sigma8 (:obj:`float`): Variance of matter density perturbations at
+            an 8 Mpc/h scale. Exactly one of A_s and sigma_8 is required.
+        n_s (:obj:`float`): Primordial scalar perturbation spectral index.
         Omega_k (:obj:`float`): Curvature density fraction.
             Defaults to 0.
         Omega_g (:obj:`float`): Density in relativistic species
             except massless neutrinos. The default of `None` corresponds
-            to setting this from the CMB temperature. Note that if a
-            non-`None` value is given, this may result in a physically
-            inconsistent model because the CMB temperature will still
-            be non-zero in the parameters.
+            to setting this from the CMB temperature. Note that if a non-`None`
+            value is given, this may result in a physically inconsistent model
+            because the CMB temperature will still be non-zero in the
+            parameters.
         Neff (:obj:`float`): Effective number of massless
             neutrinos present. Defaults to 3.044.
         m_nu (:obj:`float` or `array`):
@@ -741,20 +749,19 @@ class CosmologyCalculator(Cosmology):
             be one of 'single', 'equal', 'normal', 'inverted'. 'single' treats
             the mass as being held by one massive neutrino. The other options
             split the mass into 3 massive neutrinos. Ignored if a sequence is
-            passed in m_nu. Default is 'normal'.
-        w0 (:obj:`float`): First order term of dark energy
-            equation of state. Defaults to -1.
-        wa (:obj:`float`): Second order term of dark energy
-            equation of state. Defaults to 0.
-        T_CMB (:obj:`float`): The CMB temperature today. The default is the
-            same as in the Cosmology base class.
+            passed in ``m_nu``. Default is 'normal'.
+        w0 (:obj:`float`): First order term of dark energy equation
+            of state. Defaults to -1.
+        wa (:obj:`float`): Second order term of dark energy equation
+            of state. Defaults to 0.
+        T_CMB (:obj:`float`): The CMB temperature today. The default value
+            is 2.7255.
         T_ncdm (:obj:`float`): Non-CDM temperature in units of photon
             temperature. The default is the same as in the base class
-        mg_parametrization (:class:`~pyccl.modified_gravity.ModifiedGravity`
-            or `None`):
+        mg_parametrization (:class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity` or `None`):
             The modified gravity parametrization to use. Options are `None`
-            (no MG), or a :class:`~pyccl.modified_gravity.ModifiedGravity`
-            object. Currently, only :class:`~pyccl.modified_gravity.MuSigmaMG`
+            (no MG), or a :class:`~pyccl.modified_gravity.modified_gravity_base.ModifiedGravity`
+            object. Currently, only :class:`~pyccl.modified_gravity.mu_Sigma.MuSigmaMG`
             is supported.
         background (:obj:`dict`): a dictionary describing the background
             expansion. It must contain three mandatory entries: ``'a'``: an
@@ -795,7 +802,7 @@ class CosmologyCalculator(Cosmology):
             also contain other entries with keys of the form ``'q1:q2'``,
             containing other cross-power spectra between quantities
             ``'q1'`` and ``'q2'``.
-        nonlinear_model (:obj:`str`, :obj:`dict` or `None`): model to
+        nonlinear_model (:obj:`str`, :obj:`dict` or :obj:`None`): model to
             compute non-linear power spectra. If a string, the associated
             non-linear model will be applied to all entries in ``pk_linear``
             which do not appear in ``pk_nonlin``. If a dictionary, it should
@@ -808,7 +815,7 @@ class CosmologyCalculator(Cosmology):
             computed. The only non-linear model supported is ``'halofit'``,
             corresponding to the "HALOFIT" transformation of
             `Takahashi et al. 2012 <https://arxiv.org/abs/1208.2701>`_.
-    """
+    """ # noqa
     __eq_attrs__ = ("_params_init_kwargs", "_config_init_kwargs",
                     "_accuracy_params", "_input_arrays",)
 

@@ -22,8 +22,10 @@ class HaloProfileHernquist(HaloProfileMatter):
     .. math::
        r_\\Delta(M) = c(M)\\,r_s
 
-    and the normalization :math:`\\rho_0` is the mean density
-    within the :math:`r_\\Delta(M)` of the halo.
+    and the normalization :math:`\\rho_0` is
+
+    .. math::
+       \\rho_0 = \\frac{M}{2\\pi\\,r_s^3}\\left(\\frac{1+c}{c}\\right)^2
 
     By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
 

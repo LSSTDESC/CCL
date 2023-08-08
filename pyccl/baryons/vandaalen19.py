@@ -7,29 +7,22 @@ from . import Baryons
 
 
 class BaryonsvanDaalen19(Baryons):
-    """The "van Daalen+ 2019" model boost factor for baryons.
+    """The baryonic boost factor model of
+    `van Daalen et al. 2019, <https://arxiv.org/abs/1906.00968>`_.
 
-    .. note:: First presented in
-              `van Daalen et al., <https://arxiv.org/abs/1906.00968>`_. See the
-              `DESC Note <https://github.com/LSSTDESC/CCL/blob/master/doc\
-/0000-ccl_note/main.pdf>`_
-              for details.
+    The boost factor is applied multiplicatively so that
+    :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\, f_{\\rm vD19}(k, a)`.
 
-              The boost factor is applied multiplicatively so that
-              :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\,
-              f_{\\rm BCM}(k, a)`.
-
-              Notice the model has only been tested at z=0 and is valid for
+    .. note:: The model has only been tested at z=0 and is valid for
               :math:`k\\leq 1 \\,h/{\\rm Mpc}`.
 
     Args:
-        fbar (:obj:`float`): the fraction of baryons in a halo within
-            an overdensity of X times the critical density, given in units
+        fbar (:obj:`float`): the fraction of baryons in a halo in units
             of the ratio of :math:`\\Omega_b` to :math:`\\Omega_m`.
-            Default to 0.7 which is approximately compatible with observations.
-            See Figure 16 of the paper.
-        mass_def (:obj:`string`): whether the mass definition corresponds to
-            X=500 or 200 critical. Options are "500c" or "200c".
+            Default to 0.7 which is approximately compatible with observations
+            (see Fig. 16 of the paper).
+        mass_def (:obj:`string`): spherical overdensity mass definition.
+            Options are "500c" or "200c".
 
     """
     name = 'vanDaalen19'
@@ -43,7 +36,7 @@ class BaryonsvanDaalen19(Baryons):
                              "for van Daalen 2019 model.")
 
     def boost_factor(self, cosmo, k, a):
-        """The vd19 model boost factor for baryons.
+        """The vD19 model boost factor for baryons.
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
@@ -51,8 +44,8 @@ class BaryonsvanDaalen19(Baryons):
             a (:obj:`float` or `array`): Scale factor.
 
         Returns:
-            :obj:`float` or `array`: Correction factor to apply to
-                the power spectrum.
+            :obj:`float` or `array`: Correction factor to apply \
+            to the power spectrum.
 
         """ # noqa
         a_use, k_use = map(np.atleast_1d, [a, k])
@@ -90,11 +83,9 @@ class BaryonsvanDaalen19(Baryons):
         ``None`` will be left untouched.
 
         Args:
-            fbar (:obj:`float`): baryonic fraction in halos
-                within X times the critical density.
-
-            mass_def (:obj:`string`): mass definition: whether 500 ("500c")
-                or 200 critical ("200c").
+            fbar (:obj:`float`): baryonic fraction in halos.
+            mass_def (:obj:`string`): mass definition ("500c" or
+                "200c")
         """
         if fbar is not None:
             self.fbar = fbar
