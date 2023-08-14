@@ -1,2 +1,0 @@
-output_prefix: tests/test
-tracers_from_kernels: False

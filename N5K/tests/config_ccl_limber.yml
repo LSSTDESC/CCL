@@ -1,5 +1,0 @@
-output_prefix: tests/ccl_limber
-tracers_from_kernels: True
-
-
-benchmark_prefix: tests/ccl_limber

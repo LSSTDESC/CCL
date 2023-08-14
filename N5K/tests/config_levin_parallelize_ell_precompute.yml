@@ -1,4 +1,0 @@
-output_prefix: tests/levin
-tracers_from_kernels: True
-precompute_splines: True
-parallelize_ell: True
