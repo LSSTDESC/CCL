@@ -262,11 +262,11 @@ def nonlimber_FKEM(
         if (
             np.abs(cells[-1] / cl_limber_nonlin[-1] - 1) < limber_max_error
             and l_limber == "auto"
-        ) or (type(l_limber) != str and ell >= l_limber):
+        ) or (type(l_limber) is not str and ell >= l_limber):
             l_limber = ell
             break
 
-    if type(l_limber) == str:
+    if type(l_limber) is str:
         l_limber = ls[-1]
     if False in np.isfinite(cells):
         status = 1
