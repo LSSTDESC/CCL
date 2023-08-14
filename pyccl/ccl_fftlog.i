@@ -23,6 +23,7 @@
         raise CCLError("`dim` must be 2 or 3")
 %}
 
+
 %inline %{
 
 
@@ -73,6 +74,7 @@ void fftlog_transform(int npk,
     if spherical_bessel!=0 and spherical_bessel!=1:
         raise CCLError("0 and 1 are the only valid values of spherical_bessel.")
 %}
+
 
 %inline %{
 void fftlog_transform_general(int npk,

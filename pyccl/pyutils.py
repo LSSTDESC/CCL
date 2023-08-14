@@ -521,6 +521,7 @@ def _fftlog_transform(rs, frs,
 
     return ks, fks
 
+
 def _fftlog_transform_general(
     rs, frs, mu, q, spherical_bessel, bessel_deriv, window_frac
 ):
@@ -558,6 +559,7 @@ def _fftlog_transform_general(
         fks = fks.squeeze()
 
     return ks, fks
+
 
 def _spline_integrate(x, ys, a, b):
     if np.ndim(x) != 1:

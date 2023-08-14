@@ -13,6 +13,8 @@ from scipy.interpolate import interp1d
 from pyccl.pyutils import _fftlog_transform_general
 import pyccl as ccl
 
+global avg_a_dict
+avg_a_dict={}
 
 def get_general_params(b):
     nu = 1.51
@@ -32,19 +34,23 @@ def get_general_params(b):
     return best_nu, deriv, plaw
 
 
-def get_average_a(a_arr, dndz):
-    z_arr = 1.0 / (a_arr) - 1
-    dz = (z_arr[-1] - z_arr[0]) / (len(z_arr) - 1)
-    new_arr = []
-    for i in range(len(dndz)):
-        if dndz[i] != 0:
-            new_arr.append(dz * z_arr[i] * dndz[i])
-    z_mean = np.sum(np.array(new_arr))
-    return 1.0 / (1.0 + z_mean)
+def get_average_a(clt, Nchi, chi_min, chi_max, a_arr, dndz):
+    res = avg_a_dict.get((clt, Nchi, chi_min, chi_max))
+    if res==None:
+        z_arr = 1.0 / (a_arr) - 1
+        dz = (z_arr[-1] - z_arr[0]) / (len(z_arr) - 1)
+        new_arr = []
+        for i in range(len(dndz)):
+            if dndz[i] != 0:
+                new_arr.append(dz * z_arr[i] * dndz[i])
+        z_mean = np.sum(new_arr)
+        avg_a_dict[(clt, Nchi, chi_min, chi_max)]=1.0 / (1.0 + z_mean)
+        return 1.0 / (1.0 + z_mean)
+    return res
 
 
 def nonlimber_FKEM(
-    cosmo, clt1, clt2, p_of_k_a, ls, l_limber, limber_max_error
+    cosmo, clt1, clt2, p_of_k_a, p_of_k_a_lin, ls, l_limber, limber_max_error
 ):
     """clt1, clt2 are lists of tracer in a tracer object
     cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
@@ -63,7 +69,7 @@ def nonlimber_FKEM(
     fll_t1 = clt1.get_f_ell(ls)
     fll_t2 = clt2.get_f_ell(ls)
     psp_lin = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
-    psp_nonlin = cosmo.parse_pk2d(p_of_k_a, is_linear=False)
+    psp_nonlin = cosmo.parse_pk2d(p_of_k_a_lin, is_linear=False)
     status = 0
     t1, status = lib.cl_tracer_collection_t_new(status)
     check(status)
@@ -92,48 +98,13 @@ def nonlimber_FKEM(
         np.log10(chi_min), np.log10(chi_max), num=Nchi, endpoint=True
     )
     dlnr = np.log(chi_max / chi_min) / (Nchi - 1.0)
+    cells = []
+
     a_arr = ccl.scale_factor_of_chi(cosmo, chi_logspace_arr)
     growfac_arr = ccl.growth_factor(cosmo, a_arr)
+    avg_a1 = get_average_a(clt1, Nchi, chi_min, chi_max, a_arr, clt1.get_dndz(1.0 / a_arr - 1))
+    avg_a2 = get_average_a(clt2, Nchi, chi_min, chi_max, a_arr, clt2.get_dndz(1.0 / a_arr - 1))
 
-    """transfer function approximation for the case
-    when it's inseperable in k and a
-    exact for seperable transfer functions
-    """
-    transfer_t1_low = np.array(clt1.get_transfer(np.log(k_low), a_arr))
-    transfer_t2_low = np.array(clt2.get_transfer(np.log(k_low), a_arr))
-    avg_a1 = get_average_a(a_arr, clt1.get_dndz(1.0 / a_arr - 1))
-    avg_a2 = get_average_a(a_arr, clt2.get_dndz(1.0 / a_arr - 1))
-    transfer_t1_avg = clt1.get_transfer(np.log(k_low), avg_a1)
-    transfer_t2_avg = clt2.get_transfer(np.log(k_low), avg_a2)
-
-    # chi-integral integrand splines
-    fchi1_arr = np.zeros((len(kernels_t1), len(chi_logspace_arr)))
-    for i in range(len(kernels_t1)):
-        fchi1_interp = interp1d(
-            chis_t1[i], kernels_t1[i], fill_value="extrapolate"
-        )
-        fchi1_arr[i] = (
-            fchi1_interp(chi_logspace_arr)
-            * chi_logspace_arr
-            * growfac_arr
-            * transfer_t1_low[i]
-            / transfer_t1_avg[i]
-        )
-
-    fchi2_arr = np.zeros((len(kernels_t2), len(chi_logspace_arr)))
-    for j in range(len(kernels_t2)):
-        fchi2_interp = interp1d(
-            chis_t2[j], kernels_t2[j], fill_value="extrapolate"
-        )
-        fchi2_arr[j] = (
-            fchi2_interp(chi_logspace_arr)
-            * chi_logspace_arr
-            * growfac_arr
-            * transfer_t2_low[j]
-            / transfer_t2_avg[j]
-        )
-
-    cells = []
     for el in range(len(ls)):
         ell = ls[el]
         cls_nonlimber_lin = 0.0
@@ -160,38 +131,84 @@ def nonlimber_FKEM(
             status,
         )
         check(status, cosmo=cosmo)
+        
+        """transfer function approximation for the case
+        when it's inseperable in k and a
+        exact for seperable transfer functions
+        """
 
-        fks_1, transfers_t1 = [], []
+        # chi-integral integrand splines
+
+        fks_1, transfers_t1 = np.zeros((len(kernels_t1), Nchi)), np.zeros((len(kernels_t1), Nchi))
         for i in range(len(kernels_t1)):
-            # calls to fftlog to perform integration over chi integrals
-            nu, deriv, plaw = get_general_params(bessels_t1[i])
-            k, fk1 = _fftlog_transform_general(
-                chi_logspace_arr,
-                fchi1_arr[i],
-                float(ell),
-                nu,
-                1,
-                float(deriv),
-                float(plaw),
-            )
-            fks_1.append(fk1)
-        transfers_t1 = np.array(clt1.get_transfer(np.log(k), avg_a1))
-        fks_2, transfers_t2 = [], []
+            k, fk1 = clt1.get_chi_fft(clt1._trc[i], Nchi, chi_min, chi_max, ell)
 
+            if (not hasattr(k, "__len__")) or (not hasattr(fk1, "__len__")):
+                transfer_t1_low = np.array(clt1.get_transfer(np.log(k_low), a_arr))
+                transfer_t1_avg = clt1.get_transfer(np.log(k_low), avg_a1)
+
+                fchi1_interp = interp1d(
+                    chis_t1[i], kernels_t1[i], fill_value="extrapolate"
+                )
+                fchi1_arr = (
+                    fchi1_interp(chi_logspace_arr)
+                    * chi_logspace_arr
+                    * growfac_arr
+                    * transfer_t1_low[i]
+                    / transfer_t1_avg[i]
+                )
+                # calls to fftlog to perform integration over chi integrals
+                nu, deriv, plaw = get_general_params(bessels_t1[i])
+                k, fk1 = _fftlog_transform_general(
+                    chi_logspace_arr,
+                    fchi1_arr,
+                    float(ell),
+                    nu,
+                    1,
+                    float(deriv),
+                    float(plaw),
+                )
+                clt1.set_chi_fft(clt1._trc[i], Nchi, chi_min, chi_max, ell, k, fk1)
+            fks_1[i]=fk1
+        transfers_t1 = np.array(clt1.get_transfer(np.log(k), avg_a1))
+        
+        """transfer function approximation for the case
+        when it's inseperable in k and a
+        exact for seperable transfer functions
+        """        
+        
+        # chi-integral integrand splines
+
+        fks_2, transfers_t2 = np.zeros((len(kernels_t2), Nchi)), np.zeros((len(kernels_t2), Nchi))
         if clt1 != clt2:
             for j in range(len(kernels_t2)):
-                # calls to fftlog to perform integration over chi integrals
-                nu2, deriv2, plaw2 = get_general_params(bessels_t2[j])
-                k, fk2 = _fftlog_transform_general(
-                    chi_logspace_arr,
-                    fchi2_arr[j],
-                    float(ell),
-                    nu2,
-                    1,
-                    float(deriv2),
-                    float(plaw2),
-                )
-                fks_2.append(fk2)
+                k, fk2 = clt2.get_chi_fft(clt2._trc[j], Nchi, chi_min, chi_max, ell)
+                if (not hasattr(k, "__len__")) or (not hasattr(fk2, "__len__")):
+                    transfer_t2_low = np.array(clt2.get_transfer(np.log(k_low), a_arr))
+                    transfer_t2_avg = clt2.get_transfer(np.log(k_low), avg_a2)
+                    fchi2_interp = interp1d(
+                        chis_t2[j], kernels_t2[j], fill_value="extrapolate"
+                    )
+                    fchi2_arr = (
+                        fchi2_interp(chi_logspace_arr)
+                        * chi_logspace_arr
+                        * growfac_arr
+                        * transfer_t2_low[j]
+                        / transfer_t2_avg[j]
+                    )
+                    # calls to fftlog to perform integration over chi integrals
+                    nu2, deriv2, plaw2 = get_general_params(bessels_t2[j])
+                    k, fk2 = _fftlog_transform_general(
+                        chi_logspace_arr,
+                        fchi2_arr,
+                        float(ell),
+                        nu2,
+                        1,
+                        float(deriv2),
+                        float(plaw2),
+                    )
+                    clt2.set_chi_fft(clt2._trc[j], Nchi, chi_min, chi_max, ell, k, fk2)
+                fks_2[j]=fk2
             transfers_t2 = np.array(clt2.get_transfer(np.log(k), avg_a2))
         else:
             fks_2 = fks_1
