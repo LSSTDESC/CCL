@@ -727,17 +727,15 @@ class NzTracer(Tracer):
         super().__init__()
         self.chi_fft_dict = {}
 
-
     def get_chi_fft(self, tracer, Nchi, chimin, chimax, ell):
         temp = self.chi_fft_dict.get((tracer, Nchi, chimin, chimax, ell))
-        if temp==None: return None, None
+        if temp is None:
+            return None, None
         return temp[0], temp[1]
-
 
     def set_chi_fft(self, tracer, Nchi, chimin, chimax, ell, ks, fft):
         self.chi_fft_dict[(tracer, Nchi, chimin, chimax, ell)] = (ks, fft)
         return ks, fft
-
 
     def get_dndz(self, z):
         """Get the redshift distribution for this tracer.

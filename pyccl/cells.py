@@ -20,7 +20,7 @@ def angular_cl(
     limber_max_error=0.01,
     limber_integration_method="qag_quad",
     non_limber_integration_method="FKEM",
-    p_of_k_a_lin = DEFAULT_POWER_SPECTRUM,
+    p_of_k_a_lin=DEFAULT_POWER_SPECTRUM,
     return_meta=False
 ):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
