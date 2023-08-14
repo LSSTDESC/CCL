@@ -1,8 +1,23 @@
 # Unreleased
 
+# v3.0.0 Changes
+
+## Python library
+- Improvements to Einasto, NFW and Hernquist profiles (#1093, #1096).
+- LPT non-linear bias (#1097).
+- Power spectrum emulators (#1094, #1102, #1103, #1108).
+- Bug fix in virial overdensity (#1100) and streamlined collapse threshold (#1101).
+- sigma_8 usable as a parameter for camb when computing non-linear power spectra (#1106).
+- Reverted to better value of Neff (#1111).
+- New baryonic effects models (#1102, #1110).
+- Restored convenience baryonic effects in Cosmology initialisation (#1113).
+- Bocquet et al. 2020 mass function emulatr (#1115)
+- Modified gravity parameter structures (#1119).
+
 # v2.8.0 Changes
 
 ## Python library
+- van Daalen+ baryons model (#1110)
 - Refactor pyccl under an abstract CCLObject (#934).
 - Bump Python version to 3.8 (#1031).
 - Optimize HM autocorrelation power spectra (#891).

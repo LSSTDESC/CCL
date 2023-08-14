@@ -2,6 +2,8 @@ import numpy as np
 import pytest
 
 import pyccl as ccl
+from pyccl.modified_gravity import MuSigmaMG
+
 
 GROWTH_HIZ_TOLERANCE = 6.0e-6
 GROWTH_TOLERANCE = 1e-4
@@ -87,7 +89,8 @@ def compare_growth(
     cosmo = ccl.Cosmology(
         Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff, m_nu=m_nu,
         h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k, Omega_g=0,
-        w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0)
+        w0=w0, wa=wa,
+        mg_parametrization=MuSigmaMG(mu_0=mu_0, sigma_0=sigma_0))
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)

@@ -23,13 +23,19 @@ class HaloProfileEinasto(HaloProfileMatter):
     .. math::
        r_\\Delta(M) = c(M)\\,r_s
 
-    and the normalization :math:`\\rho_0` is the mean density
-    within the :math:`r_\\Delta(M)` of the halo. The index
-    :math:`\\alpha` depends on halo mass and redshift, and we
-    use the parameterization of `Diemer & Kravtsov
-    <https://arxiv.org/abs/1401.1216>`_.
+    and the normalization :math:`\\rho_0` is
 
-    By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
+    .. math::
+       \\rho_0 = \\frac{M}{4\\pi\\,r_s^3}
+       \\frac{2^{(3/\\alpha)}\\,\\alpha^{(1-3/\\alpha)}
+       \\,{\\rm exp}(-2/\\alpha)}
+       {\\gamma(\\frac{3}{\\alpha}, \\frac{2}{\\alpha}c^{\\alpha})},
+
+    where :math:`\\gamma` is the lower incomplete gamma function.
+
+    The index :math:`\\alpha` can be a free parameter or dependent on halo mass
+    and redshift. In the latter case, we use the parameterization of
+    `Diemer & Kravtsov <https://arxiv.org/abs/1401.1216>`_.
 
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):

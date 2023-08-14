@@ -12,7 +12,7 @@ from . import Concentration, HaloBias, MassFunc
 
 def mass2radius_lagrangian(cosmo, M):
     """ Returns Lagrangian radius for a halo of mass :math:`M`.
-    The lagrangian radius is defined as that enclosing
+    The Lagrangian radius is defined as that enclosing
     the mass of the halo assuming a homogeneous Universe.
 
     .. math::
@@ -23,7 +23,7 @@ def mass2radius_lagrangian(cosmo, M):
         M (:obj:`float` or `array`): halo mass in units of :math:`M_\\odot`.
 
     Returns:
-        (:obj:`float` or `array`): lagrangian radius in comoving Mpc.
+        (:obj:`float` or `array`): Lagrangian radius in comoving Mpc.
     """
     M_use = np.atleast_1d(M)
     R = (M_use / (4.18879020479 * cosmo.rho_x(1, 'matter')))**(1./3.)
