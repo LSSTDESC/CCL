@@ -219,20 +219,21 @@ def test_pyccl_default_params():
     """Check that the Python-layer for setting the gsl and spline parameters
     works on par with the C-layer.
     """
-    HM_MMIN = ccl.gsl_params["HM_MMIN"]
+    EPS_SCALEFAC_GROWTH = ccl.gsl_params["EPS_SCALEFAC_GROWTH"]
 
     # we will test with this parameter
-    assert HM_MMIN == 1e7
+    assert EPS_SCALEFAC_GROWTH == 1e-6
 
     # can be accessed as an attribute and as a dictionary item
-    assert ccl.gsl_params.HM_MMIN == ccl.gsl_params["HM_MMIN"]
+    assert ccl.gsl_params.EPS_SCALEFAC_GROWTH == \
+        ccl.gsl_params["EPS_SCALEFAC_GROWTH"]
 
     # can be assigned as an attribute
-    ccl.gsl_params.HM_MMIN = 1e5
-    assert ccl.gsl_params["HM_MMIN"] == 1e5  # cross-check
+    ccl.gsl_params.EPS_SCALEFAC_GROWTH = 1e-5
+    assert ccl.gsl_params["EPS_SCALEFAC_GROWTH"] == 1e-5  # cross-check
 
-    ccl.gsl_params["HM_MMIN"] = 1e6
-    assert ccl.gsl_params.HM_MMIN == 1e6
+    ccl.gsl_params["EPS_SCALEFAC_GROWTH"] = 2e-6
+    assert ccl.gsl_params.EPS_SCALEFAC_GROWTH == 2e-6
 
     # does not accept extra assignment
     with pytest.raises(KeyError):
@@ -264,27 +265,27 @@ def test_pyccl_default_params():
     ccl.physical_constants.reload()
 
     # verify that this has changed
-    assert ccl.gsl_params.HM_MMIN != HM_MMIN
+    assert ccl.gsl_params.EPS_SCALEFAC_GROWTH != EPS_SCALEFAC_GROWTH
 
     # but now we reload it, so it should be the default again
     ccl.gsl_params.reload()
-    assert ccl.gsl_params.HM_MMIN == HM_MMIN
+    assert ccl.gsl_params.EPS_SCALEFAC_GROWTH == EPS_SCALEFAC_GROWTH
 
 
 def test_cosmology_default_params():
     """Check that the default params within Cosmology work as intended."""
     cosmo1 = ccl.CosmologyVanillaLCDM()
-    v1 = cosmo1.cosmo.gsl_params.HM_MMIN
+    v1 = cosmo1.cosmo.gsl_params.EPS_SCALEFAC_GROWTH
 
-    ccl.gsl_params.HM_MMIN = v1*10
+    ccl.gsl_params.EPS_SCALEFAC_GROWTH = v1*10
     cosmo2 = ccl.CosmologyVanillaLCDM()
-    v2 = cosmo2.cosmo.gsl_params.HM_MMIN
+    v2 = cosmo2.cosmo.gsl_params.EPS_SCALEFAC_GROWTH
     assert v2 == v1*10
     assert v2 != v1
 
     ccl.gsl_params.reload()
     cosmo3 = ccl.CosmologyVanillaLCDM()
-    v3 = cosmo3.cosmo.gsl_params.HM_MMIN
+    v3 = cosmo3.cosmo.gsl_params.EPS_SCALEFAC_GROWTH
     assert v3 == v1
 
 
@@ -295,3 +296,12 @@ def test_ccl_physical_constants_smoke():
 def test_ccl_global_parameters_repr():
     ccl.spline_params.reload()
     assert eval(repr(ccl.spline_params)) == ccl.spline_params._bak
+
+
+def test_camb_sigma8_input():
+    sigma8 = 0.85
+    cosmo = ccl.Cosmology(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=sigma8,
+        transfer_function="boltzmann_camb"
+    )
+    assert np.isclose(cosmo.sigma8(), sigma8)

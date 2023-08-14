@@ -52,7 +52,7 @@ class FFTLogParams:
     def __eq__(self, other):
         if self is other:
             True
-        if type(self) != type(other):
+        if type(self) is not type(other):
             return False
         return self.to_dict() == other.to_dict()
 

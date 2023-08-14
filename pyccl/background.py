@@ -173,11 +173,17 @@ def luminosity_distance(cosmo, a):
 
 
 def distance_modulus(cosmo, a):
-    """Distance Modulus, defined as 5 * log10(luminosity distance / 10 pc).
+    """Distance Modulus, defined as
+
+    .. math::
+        \\mu = 5\\,\\log_{10}(d_L/10\\,{\\rm pc})
+
+    where :math:`d_L` is the luminosity distance.
 
     .. note :: The distance modulus can be used to convert between apparent
-               and absolute magnitudes via m = M + distance modulus, where m
-               is the apparent magnitude and M is the absolute magnitude.
+               and absolute magnitudes via :math:`m = M + \\mu`, where
+               :math:`m` is the apparent magnitude and :math:`M` is the
+               absolute magnitude.
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
@@ -325,7 +331,7 @@ def growth_factor_unnorm(cosmo, a):
 
 def growth_rate(cosmo, a):
     """Growth rate defined as the logarithmic derivative of the
-    growth factor, dlnD/dlna.
+    growth factor, :math:`f\\equiv d\\log D/d\\log a`.
 
     .. warning:: CCL is not able to compute the scale-dependent growth
                  rate for cosmologies with massive neutrinos.

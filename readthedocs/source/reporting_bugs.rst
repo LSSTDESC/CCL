@@ -9,6 +9,3 @@ If possible, provide an example script that reproduces the error.
 If you find a discrepancy between a computed quantity from CCL and another source
 (or from also from CCL) please describe the quantity you are computing. If possible,
 provide an example script and a plot demonstrating the inconsistency.
-
-Finally, if all else fails, you can contact the
-`administrators <https://github.com/LSSTDESC/CCL/CCL-administrators>`_ directly.

@@ -80,7 +80,7 @@ def sigmaM(cosmo, M, a):
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
         M (:obj:`float` or `array`): Halo masses.
-        a (float): scale factor.
+        a (:obj:`float`): scale factor.
 
     Returns:
         (:obj:`float` or `array`): RMS variance of halo mass.
@@ -109,10 +109,10 @@ def sigmaR(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
         R (:obj:`float` or `array`): Radius; Mpc.
-        a (float): optional scale factor.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): power spectrum
-            to integrate. If a string, it must correspond to one of the
-            linear power spectra stored in ``cosmo`` (e.g.
+        a (:obj:`float`): optional scale factor.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`):
+            power spectrum to integrate. If a string, it must correspond to
+            one of the linear power spectra stored in ``cosmo`` (e.g.
             ``'delta_matter:delta_matter'``).
 
     Returns:
@@ -139,10 +139,10 @@ def sigmaV(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
         R (:obj:`float` or `array`): Radius; Mpc.
-        a (float): optional scale factor.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
-            to integrate. If a string, it must correspond to one of the
-            linear power spectra stored in ``cosmo`` (e.g.
+        a (:obj:`float`): optional scale factor.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`):
+            power spectrum to integrate. If a string, it must correspond to
+            one of the linear power spectra stored in ``cosmo`` (e.g.
             ``'delta_matter:delta_matter'``).
 
     Returns:
@@ -165,9 +165,9 @@ def sigma8(cosmo, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
-            to integrate. If a string, it must correspond to one of the
-            linear power spectra stored in ``cosmo`` (e.g.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`):
+            power spectrum  to integrate. If a string, it must correspond to
+            one of the linear power spectra stored in ``cosmo`` (e.g.
             ``'delta_matter:delta_matter'``).
 
     Returns:
@@ -190,13 +190,13 @@ def kNL(cosmo, a, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
         a (:obj:`float` or `array`): Scale factor(s), normalized to 1 today.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
-            to integrate. If a string, it must correspond to one of the
-            non-linear power spectra stored in `cosmo` (e.g.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`):
+            power spectrum  to integrate. If a string, it must correspond to
+            one of the linear power spectra stored in ``cosmo`` (e.g.
             ``'delta_matter:delta_matter'``).
 
     Returns:
-        :obj:`float` or `array`: :math:`k_{\\rm NL}`.
+        :obj:`float` or `array`: :math:`k_{\rm NL}`.
     """
     psp = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
     status = 0

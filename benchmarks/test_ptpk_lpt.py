@@ -52,4 +52,6 @@ def test_pt_pk(comb):
         k = kin[ind]
         dpk = data[iz][i_d+1][ind]
         tpk = pk(k, a, COSMO)
-        assert np.all(np.fabs(tpk / dpk - 1) < LPTPK_TOLERANCE)
+        assert np.all(
+            np.fabs(tpk / dpk - 1) < LPTPK_TOLERANCE
+        )

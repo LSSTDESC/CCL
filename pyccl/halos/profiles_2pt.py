@@ -91,7 +91,7 @@ class Profile2ptHOD(Profile2pt):
        (\\bar{N}_s(M,a) u_{\\rm sat}(r|M,a))^2\\right],
 
     where all quantities are described in the documentation of
-    :class:`~pyccl.halos.profiles.HaloProfileHOD`.
+    :class:`~pyccl.halos.profiles.hod.HaloProfileHOD`.
     """
 
     def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
@@ -136,7 +136,8 @@ class Profile2ptCIB(Profile2pt):
     correlator for the CIB profile. It follows closely the
     implementation of the equivalent HOD quantity
     (see :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`
-    and Eq. 15 of McCarthy & Madhavacheril (2021PhRvD.103j3515M)).
+    and Eq. 15 of `McCarthy & Madhavacheril
+    <https://arxiv.org/abs/2010.16405>`_).
     """
 
     def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):

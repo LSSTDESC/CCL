@@ -326,7 +326,7 @@ class Tracer(CCLObject):
         in this ``Tracer``.
 
         Args:
-            chi ((:obj:`float` or `array`)): values of the comoving
+            chi (:obj:`float` or `array`): values of the comoving
                 radial distance in increasing order and in Mpc. If ``None``,
                 returns the kernel at the internal spline nodes.
 
@@ -441,6 +441,9 @@ class Tracer(CCLObject):
     def get_angles_derivative(self):
         r"""Get list of the :math:`\ell`-dependent prefactor order for all
         tracers contained in this ``Tracer``.
+
+        Returns:
+            `array`: list of angular derivative orders for each tracer.
         """
         return np.array([t.der_angles for t in self._trc])
 
