@@ -1,0 +1,7 @@
+output_prefix: tests/levin
+tracers_from_kernels: True
+precompute_splines: False
+parallelize_ell: False
+ell_max_non_Limber: 95
+ell_max_ext_Limber: 1000
+tol_rel: 1.0e-3

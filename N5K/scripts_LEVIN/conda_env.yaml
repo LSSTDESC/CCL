@@ -1,0 +1,14 @@
+name: levin_n5k_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3
+  - future
+  - pyyaml
+  - numpy
+  - pyccl
+  - pip>=20.0
+  - gsl
+  - pip:
+    - "git+ssh://git@github.com/rreischke/nonLimber.git@main#egg=levinpower"

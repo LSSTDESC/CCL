@@ -1,0 +1,4 @@
+output_prefix: tests/benchmarks
+tracers_from_kernels: True
+d_chi: 1.
+l_nonlimber: 100

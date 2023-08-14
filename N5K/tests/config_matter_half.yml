@@ -1,0 +1,43 @@
+# A few notes about this submission:
+
+# You can compile the program by typing
+
+# ->   cd utils
+# ->   make clean
+# ->   make -j
+# ->   cd ..
+
+# Then, you can run the calculator_matter.py as you would run any other calculator
+# (e.g. from the example.py file)
+output_prefix: newtest/matter
+verbosity: 1
+
+# For a given required accuracy, the below parameters can be adjusted to give faster speeds!
+
+# Sizes for actual calculation (smaller is faster, but less accurate)
+size_FFTlog : 75                           # <-- Number of FFT coefficients
+size_chi_window_array : 600                # <-- Number of time points for time integrals for clustering
+size_chi_window_array_integrated : 80      # <-- Number of time points for time integrals for shear
+size_t_array : 200                         # <-- Number of t samples for final t integration
+
+# Array of L sampling values
+l_logstep : 1.1                           # <-- Logarithmic sampling stepsize for small L (bigger is faster)
+l_linstep : 75                            # <-- Linear stepsize for large L (bigger is faster)
+lmax : 220                                # <-- Maximum value of l (smaller is faster)
+
+# Is everything seperable in k<->tau? This is NOT true if massive neutrinos or nonlinear corrections are present
+# This IS true if only a linear matter power spectrum (with scale-invariant growth) is considered
+# True == much much faster, but cannot always be used
+seperable : False
+
+# Sizes for preparation of calculation (these usually need not be changed, smaller is faster)
+size_prep_t_array : 200                   # <-- Number of t samples for intermediate steps
+size_prep_chi_window_array : 800          # <-- Number of time points for intermediate steps (clustering)
+size_prep_chi_window_array_integrated : 1600 # <-- Number of time points for intermediate steps (shear)
+size_prep_FFTlog : 256                    # <-- Number of FFT coefficients befor any cutoff !! HAS to be a power of 2 for speed reasons !!
+
+# Minimal k value, shouldn't matter too much (please leave fixed)
+k_min : 1e-7
+# Lensing integration precision parameter (2e-31) --> Please leave fixed
+internal_logchi_i_offset : 1e-20
+
