@@ -80,7 +80,7 @@ def angular_cl(
             "Non-Limber integration method %s not supported"
             % limber_integration_method
         )
-    if type(l_limber) == str:
+    if type(l_limber) is str:
         if l_limber != "auto":
             raise ValueError("l_limber cannot be a string other than 'auto'")
         auto_limber = True
@@ -110,7 +110,7 @@ def angular_cl(
     if not (np.diff(ell_use) > 0).all():
         raise ValueError("ell values must be monotonically increasing")
 
-    if auto_limber or (type(l_limber) != str and ell_use[0] < l_limber):
+    if auto_limber or (type(l_limber) is not str and ell_use[0] < l_limber):
         if non_limber_integration_method == "FKEM":
             l_limber, cl_non_limber, status = nonlimber_FKEM(
                 cosmo,
