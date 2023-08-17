@@ -14,8 +14,7 @@ dependencies:
   - pytest-cov
   - pip:
       #- classy<3
-      - isitgr
-      - pyproject-toml  # for isitgr
+      #- isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator
