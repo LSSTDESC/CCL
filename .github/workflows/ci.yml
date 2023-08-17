@@ -83,7 +83,6 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
-          pip install pyproject-toml
           mamba env update --file ${{ env.CONDA_ENV }} --prune
 
       - name: Install classy
