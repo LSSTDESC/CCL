@@ -6,12 +6,14 @@ We utilize a modified generalized version of FFTLog
  (https://jila.colorado.edu/~ajsh/FFTLog/fftlog.pdf)
  to compute integrals over spherical bessel functions
 """
+import warnings
 import numpy as np
 from . import lib, check
 from .pyutils import integ_types
 from scipy.interpolate import interp1d
 from pyccl.pyutils import _fftlog_transform_general
 import pyccl as ccl
+from . import CCLWarning
 
 global avg_a_dict
 avg_a_dict = {}
@@ -36,16 +38,20 @@ def get_general_params(b):
 
 
 def get_average_a(clt, Nchi, chi_min, chi_max, a_arr, dndz):
-    res = avg_a_dict.get((clt, Nchi, chi_min, chi_max))
+    res = avg_a_dict.get(clt)
     if res is None:
         z_arr = 1.0 / (a_arr) - 1
         dz = (z_arr[-1] - z_arr[0]) / (len(z_arr) - 1)
-        new_arr = []
-        for i in range(len(dndz)):
+        z_mean = 0.0
+        norm = 0.0
+        for i in range(1, len(dndz)-2):
             if dndz[i] != 0:
-                new_arr.append(dz * z_arr[i] * dndz[i])
-        z_mean = np.sum(new_arr)
-        avg_a_dict[(clt, Nchi, chi_min, chi_max)] = 1.0 / (1.0 + z_mean)
+                z_mean += dz * (
+                    z_arr[i+1] * dndz[i+1]
+                    + z_arr[i-1] * dndz[i-1]) / 2
+                norm += dz * (dndz[i+1] + dndz[i-1]) / 2
+        z_mean /= norm
+        avg_a_dict[clt] = 1.0 / (1.0 + z_mean)
         return 1.0 / (1.0 + z_mean)
     return res
 
@@ -69,9 +75,21 @@ def nonlimber_FKEM(
     bessels_t2 = clt2.get_bessel_derivative()
     fll_t1 = clt1.get_f_ell(ls)
     fll_t2 = clt2.get_f_ell(ls)
+    status = 0
+
+    if (not (isinstance(p_of_k_a, str) and isinstance(p_of_k_a_lin, str)) and
+       not (isinstance(p_of_k_a, ccl.Pk2D)
+            and isinstance(p_of_k_a_lin, ccl.Pk2D)
+            )):
+        warnings.warn(
+            "p_of_k_a and p_of_k_a_lin must be of the same "
+            "type: a str in cosmo or a Pk2D object. "
+            "Defaulting to Limber calculation. ", CCLWarning)
+        return -1, np.array([]), status
+
     psp_lin = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
     psp_nonlin = cosmo.parse_pk2d(p_of_k_a_lin, is_linear=False)
-    status = 0
+
     t1, status = lib.cl_tracer_collection_t_new(status)
     check(status)
     t2, status = lib.cl_tracer_collection_t_new(status)
