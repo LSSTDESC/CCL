@@ -16,19 +16,20 @@ STYLE CONVENTION USED
 [![Documentation](https://readthedocs.org/projects/ccl/badge/?version=latest)](https://ccl.readthedocs.io/en/latest/)&nbsp;
 [![DOI](https://img.shields.io/badge/DOI-10.3847%2F1538--4365%2Fab1658-B31B1B.svg)](https://iopscience.iop.org/article/10.3847/1538-4365/ab1658)
 
-The Core Cosmology Library (CCL) is a standardized library of routines to calculate
-basic observables used in cosmology. It will be the standard analysis package used by the
-LSST Dark Energy Science Collaboration (DESC).
+The Core Cosmology Library (CCL) is a public standardized library of routines to calculate
+basic observables used in cosmology. It will be the standard theoretical prediction package
+used by the LSST Dark Energy Science Collaboration (DESC), although we hope it will have
+broader applicability.
 
 The core functions of this package include:
 
-  - Matter power spectra `P(k)` from numerous models including CLASS, the Mira-Titan Emulator and halofit
-  - Hubble constant `H(z)` as well as comoving distances `\chi(z)` and distance moduli `\mu(z)`
-  - Growth of structure `D(z)` and `f`
-  - Correlation functions `C_\ell` for arbitrary combinations of tracers including galaxies, shear and number counts
-  - Halo mass function `{\rm d}n/{\rm d}M` and halo bias `b(M)`
-  - Approximate baryonic modifications to the matter power spectra `\Delta^2_{\rm baryons}`
-  - Simple modified gravity extensions `\Delta f(z)` and `\mu-\Sigma`
+  - Background quantities (Hubble parameter $H(z)$, distances etc.).
+  - Linear growth factor $D(z)$ and growth rate $f(z)$.
+  - Linear matter power spectra $P(k)$ from Boltzmann codes (CLASS, CAMB), emulators, and approximate fitting functions.
+  - Non-linear matter power power spectra using a variety of prescriptions, including emulators, and including the impact of baryonic effects.
+  - Angular power spectra $C_\ell$ and correlation functions $\xi(\theta)$ for arbitrary combinations of tracers including number counts, shear, CMB lensing, ISW, thermal SZ, CIB, as well as custom-made tracers.
+  - A comprehensive halo model framework able to combine different prescriptions for the halo mass function $dn/dM$, halo bias $b(M)$, concentration-mass relation $c(M)$, mass definitions, and halo profiles, as well as to provide predictions for summary statistics (power spectra, non-Gaussian covariances) of arbitrary quantities.
+  - Support for $\Lambda$ CDM, and $w_0-w_a$CDM cosmologies with curvature and massive neutrinos, as well as simple modified gravity extensions (e.g. $\mu-\Sigma$ ).
 
 This software is a publicly released LSST DESC product which was developed within the LSST
 DESC using LSST DESC resources. DESC users should use it in accordance with the

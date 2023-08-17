@@ -9,11 +9,12 @@ from . import EmulatorPk
 class BaccoemuNonlinear(EmulatorPk):
     """ Nonlinear power spectrum emulator from baccoemu
 
-    This is an emulator of N-body matter Pk as a function of 8 cosmological
-    parameters (omega_cold, omega_baryons, A_s or sigma8_cold, ns, h, Mnu,
-    w0, wa) and the scale factor.
+    This is an emulator of the non-linear matter power spectrum as a function
+    of 8 cosmological parameters (:math:`\\omega_c`, :math:`\\omega_b`,
+    :math:`A_s` or :math:`\\sigma_{8,c}`, :math:`n_s`, :math:`h`,
+    :math:`M_\\nu`, :math:`w_0`, :math:`w_a`) and the scale factor.
 
-    If `nonlinear_emu_path` and `nonlinear_emu_details` are not specified the
+    If `nonlinear_emu_path` and `nonlinear_emu_details` are not specified, the
     installed public version of the emulator is used. If the user has access to
     a locally saved baccoemu version, the path can be specified with these two
     keyword arguments.

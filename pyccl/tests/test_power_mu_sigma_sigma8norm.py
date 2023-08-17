@@ -4,6 +4,8 @@ from unittest import mock
 import pyccl as ccl
 import sys
 from pyccl.boltzmann import get_isitgr_pk_lin
+from pyccl.modified_gravity import MuSigmaMG
+
 try:
     from importlib import reload
 except ImportError:
@@ -20,7 +22,8 @@ def test_power_mu_sigma_sigma8norm(tf):
 
     cosmo_musig = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function=tf, mu_0=0.1, sigma_0=0.2)
+        transfer_function=tf,
+        mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.2))
 
     # make sure sigma8 is correct
     assert np.allclose(ccl.sigma8(cosmo_musig), 0.8)
@@ -49,13 +52,15 @@ def test_power_mu_sigma_sigma8norm_norms_consistent(tf):
     # make a cosmo with A_s
     cosmo = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2e-9, n_s=0.96,
-        transfer_function=tf, mu_0=0.1, sigma_0=0.2)
+        transfer_function=tf,
+        mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.2))
     sigma8 = ccl.sigma8(cosmo)
 
     # remake same but now give sigma8
     cosmo_s8 = ccl.Cosmology(
         Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=sigma8, n_s=0.96,
-        transfer_function=tf, mu_0=0.1, sigma_0=0.2)
+        transfer_function=tf,
+        mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.2))
 
     # make sure they come out the same-ish
     assert np.allclose(ccl.sigma8(cosmo), ccl.sigma8(cosmo_s8))
@@ -81,7 +86,8 @@ def test_nonlin_camb_MG_error():
                               A_s=2.1e-9, n_s=n_s,
                               transfer_function="boltzmann_camb",
                               matter_power_spectrum="camb",
-                              mu_0=0.1, sigma_0=0.2)
+                              mg_parametrization=MuSigmaMG(
+                                  mu_0=0.1, sigma_0=0.2))
 
     k = np.logspace(-3, 1, 10)
 

@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import pyccl as ccl
+from pyccl.modified_gravity import MuSigmaMG
+
 from scipy.interpolate import interp1d
 import pytest
 
@@ -23,8 +25,9 @@ def set_up(request):
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
                           m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255,
-                          mu_0=0.1, sigma_0=0.1,
-                          c1_mg=1.1, c2_mg=1.1, lambda_mg=1,
+                          mg_parametrization=MuSigmaMG(
+                              mu_0=0.1, sigma_0=0.1,
+                              c1_mg=1.1, c2_mg=1.1, lambda_mg=1),
                           transfer_function='boltzmann_isitgr',
                           matter_power_spectrum='linear')
 
