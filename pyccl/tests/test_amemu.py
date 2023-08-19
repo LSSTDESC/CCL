@@ -10,7 +10,7 @@ import pyccl as ccl
 
 COSMO = {"Omega_cdm": 0.25, "Omega_b": 0.04, "h": 0.70,
          "n_s": 1.0, "sigma8": 0.75}
-SCALE_FACTOR = 1.0
+SCALE_FACTOR = np.array([1.0])
 AMEMU_TOLERANCE = 5e-2
 
 PKLIN_CLASS = np.array(
