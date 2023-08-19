@@ -1,6 +1,6 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
-  - python=3.8
+  - python=3.9
   - pip
   - cmake
   - gsl
@@ -13,8 +13,8 @@ dependencies:
   - pytest
   - pytest-cov
   - pip:
-      #- classy<3
       - isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
+      - amemu @ git+https://github.com/Harry45/amemu
       - MiraTitanHMFemulator
