@@ -4,7 +4,7 @@ import pyccl as ccl
 
 COSMO = {"Omega_cdm": 0.25, "Omega_b": 0.04, "h": 0.70,
          "n_s": 1.0, "sigma8": 0.75}
-REDSHIFT = 0.0
+SCALE_FACTOR = 1.0
 AMEMU_TOLERANCE = 5E-2
 
 PKLIN_CLASS = np.array(
@@ -60,6 +60,7 @@ def test_amemu_linear():
     emulator, compared to CLASS.
     """
     emulator = ccl.amemuLinear(download=True)
-    pklin_emu = emulator.calculate_pklin(REDSHIFT, COSMO, return_var=False)
+    pklin_emu = emulator.get_pk_at_a(COSMO, SCALE_FACTOR, return_var = False)
+    # pklin_emu = emulator.calculate_pklin(REDSHIFT, COSMO, return_var=False)
     err = np.abs((PKLIN_CLASS - pklin_emu) / PKLIN_CLASS)
     assert np.all(err < AMEMU_TOLERANCE)
