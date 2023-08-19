@@ -41,7 +41,7 @@ class amemuLinear(EmulatorPk):
             + f"z_max={self.emulator.config.Z_MAX}"
         )
 
-    def _get_pk_at_a(self, cosmo, a):
+    def _get_pk_at_a(self, cosmo: dict, a: np.ndarray):
         """
         Calculates the linear matter power spectrum given a dictionary for
         cosmology and the scale factor. An example of
@@ -59,9 +59,10 @@ class amemuLinear(EmulatorPk):
             values of k.
         """
         redshift = (1.0 - a) / a
+        redshift = np.array(redshift).flatten()
         record_mean = []
-        for z in redshift:
-            pk_quant = self.emulator.calculate_pklin(z, cosmo,
+        for z_i in redshift:
+            pk_quant = self.emulator.calculate_pklin(z_i, cosmo,
                                                      return_var=False)
             record_mean.append(pk_quant)
         record_mean = np.asarray(record_mean)
