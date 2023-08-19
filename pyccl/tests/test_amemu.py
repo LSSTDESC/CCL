@@ -65,6 +65,6 @@ def test_amemu_linear():
     emulator, compared to CLASS.
     """
     emulator = ccl.amemuLinear(download=True)
-    pklin_emu = emulator.get_pk_at_a(cosmo=COSMO, a=[1.0])
+    pklin_emu = emulator.get_pk_at_a(cosmo=COSMO, a=np.array([1.0]))
     err = np.abs((PKLIN_CLASS - pklin_emu) / PKLIN_CLASS)
     assert np.all(err < AMEMU_TOLERANCE)
