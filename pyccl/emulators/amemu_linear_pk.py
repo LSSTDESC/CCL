@@ -58,8 +58,8 @@ class amemuLinear(EmulatorPk):
             the wavenumbers and the linear matter spectrum at the pre-defined
             values of k.
         """
-        redshift = (1.0 - a) / a
-        redshift = np.array(redshift).flatten()
+        a = np.array(a)
+        redshift = (np.ones(1) - a) / a
         record_mean = []
         for z_i in redshift:
             pk_quant = self.emulator.calculate_pklin(z_i, cosmo,
