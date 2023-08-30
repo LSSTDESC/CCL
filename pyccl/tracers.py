@@ -837,7 +837,7 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
             intrinsic alignments.
         use_A_ia (:obj:`bool`): set to ``True`` to use the conventional IA
             normalization. Set to ``False`` to use the raw input amplitude,
-            which will usually be 1 for use with perturbaion theory IA
+            which will usually be 1 for use with perturbation theory IA
             modeling.
         n_samples (:obj:`int`): number of samples over which the lensing
             kernel is desired. These will be equi-spaced in radial distance.
