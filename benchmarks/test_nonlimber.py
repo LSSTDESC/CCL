@@ -51,22 +51,6 @@ def get_nmodes(fsky=0.4):
     return np.array(nmodes) * 0.5 * fsky
 
 
-# likely obsolete
-def get_tracer_kernels():
-    filename = root + "/kernels_fullwidth.npz"
-    d = np.load(filename)
-    kernels_cl = d["kernels_cl"]
-    kernels_sh = d["kernels_sh"]
-    return {
-        "z_cl": d["z_cl"],
-        "chi_cl": d["chi_cl"],
-        "kernels_cl": kernels_cl,
-        "z_sh": d["z_sh"],
-        "chi_sh": d["chi_sh"],
-        "kernels_sh": kernels_sh,
-    }
-
-
 def get_tracer_dNdzs():
     filename = root + "/dNdzs_fullwidth.npz"
     d = np.load(filename)
@@ -101,7 +85,6 @@ def set_up():
         w0=par["w0"],
     )
     tpar = get_tracer_parameters()
-    # ker = get_tracer_kernels()
     Nzs = get_tracer_dNdzs()
 
     t_g = []
@@ -210,15 +193,18 @@ def test_cells(set_up, method, cross_type):
                 ells,
                 l_limber=-1,
             )
+            l_limber = 0
         else:
-            cls = ccl.angular_cl(
+            cls, meta = ccl.angular_cl(
                 cosmo,
                 tracers1[cross_type][i1],
                 tracers2[cross_type][i2],
                 ells,
-                l_limber=200,
+                l_limber='auto',
                 non_limber_integration_method=method,
+                return_meta=True
             )
+            l_limber = meta ['l_limber']
         chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / errors[
             cross_type
         ][pair_index] ** 2
@@ -227,6 +213,6 @@ def test_cells(set_up, method, cross_type):
             assert np.all(chi2 < 0.3)
     t1 = time.time()
     print(
-        f'Time taken for {method} on {cross_type} = {(t1-t0):3.2f};\
-        worst chi2 = {chi2max:5.3f}'
+        f'Time taken for {method if method is not None else "Limber"} on {cross_type} = {(t1-t0):3.2f};\
+        worst chi2 = {chi2max:5.3f}      l_limber = {l_limber}'
     )
