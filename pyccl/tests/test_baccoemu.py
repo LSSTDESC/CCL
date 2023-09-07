@@ -1,6 +1,8 @@
 import numpy as np
 import pyccl as ccl
 
+import pytest
+
 BEMULIN_TOLERANCE = 1e-3
 BEMUNL_TOLERANCE = 5e-3
 BEMBAR_TOLERANCE = 1e-3
@@ -112,6 +114,14 @@ def test_baccoemu_baryons_changepars():
     baryons.update_parameters(log10_M_c=12.7, log10_eta=-0.4)
     assert ((baryons.bcm_params['M_c'] == 12.7)
             & (baryons.bcm_params['eta'] == -0.4))
+
+
+def test_baccoemu_baryons_a_range():
+    baryons = ccl.BaccoemuBaryons()
+    cosmo = ccl.CosmologyVanillaLCDM()
+    k = 1e-1
+    with pytest.raises(ValueError):
+        baryons.boost_factor(cosmo, k, baryons.a_min * 0.9)
 
 
 def test_baccoemu_baryons_As_sigma8():

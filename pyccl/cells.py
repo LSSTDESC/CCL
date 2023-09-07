@@ -20,6 +20,7 @@ def angular_cl(
     limber_max_error=0.01,
     limber_integration_method="qag_quad",
     non_limber_integration_method="FKEM",
+    p_of_k_a_lin=DEFAULT_POWER_SPECTRUM,
     return_meta=False
 ):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
@@ -47,6 +48,12 @@ def angular_cl(
         non_limber_integration_method (string) : integration method to be used
             for the non-Limber integrals. Possibilities: 'FKEM','MATTER'.
             See N5K (arXiv:2212.04291) paper for more information.
+        p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 
+            3D linear Power spectrum to project, for special use in
+            PT calculations using the FKEM non-limber integration technique.
+            If a string, it must correspond to one of
+            the non-linear power spectra stored in `cosmo` (e.g.
+            `'delta_matter:delta_matter'`). 
         return_meta (bool): if `True`, also return a dictionary with various
             metadata about the calculation, such as l_limber as calculated by the
             non-limber integrator.
@@ -73,7 +80,7 @@ def angular_cl(
             "Non-Limber integration method %s not supported"
             % limber_integration_method
         )
-    if type(l_limber) == str:
+    if type(l_limber) is str:
         if l_limber != "auto":
             raise ValueError("l_limber cannot be a string other than 'auto'")
         auto_limber = True
@@ -103,13 +110,14 @@ def angular_cl(
     if not (np.diff(ell_use) > 0).all():
         raise ValueError("ell values must be monotonically increasing")
 
-    if auto_limber or (type(l_limber) != str and ell_use[0] < l_limber):
+    if auto_limber or (type(l_limber) is not str and ell_use[0] < l_limber):
         if non_limber_integration_method == "FKEM":
             l_limber, cl_non_limber, status = nonlimber_FKEM(
                 cosmo,
                 tracer1,
                 tracer2,
                 p_of_k_a,
+                p_of_k_a_lin,
                 ell_use,
                 l_limber,
                 limber_max_error,

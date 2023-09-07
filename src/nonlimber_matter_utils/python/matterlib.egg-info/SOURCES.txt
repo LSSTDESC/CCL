@@ -1,0 +1,7 @@
+autosetup.py
+setup.py
+/home/paul/N5K/utils/python/../python/mattery.c
+matterlib.egg-info/PKG-INFO
+matterlib.egg-info/SOURCES.txt
+matterlib.egg-info/dependency_links.txt
+matterlib.egg-info/top_level.txt

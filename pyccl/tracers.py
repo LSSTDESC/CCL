@@ -37,7 +37,7 @@ from ._core.parameters import physical_constants
 from ._core import CCLObject, UnlockInstance, unlock_instance
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays, _get_spline2d_arrays)
-
+# from scipy.integrate import quad
 
 __all__ = ("get_density_kernel", "get_lensing_kernel", "get_kappa_kernel",
            "Tracer", "NzTracer", "NumberCountsTracer", "WeakLensingTracer",
@@ -326,7 +326,7 @@ class Tracer(CCLObject):
         in this ``Tracer``.
 
         Args:
-            chi ((:obj:`float` or `array`)): values of the comoving
+            chi (:obj:`float` or `array`): values of the comoving
                 radial distance in increasing order and in Mpc. If ``None``,
                 returns the kernel at the internal spline nodes.
 
@@ -441,6 +441,9 @@ class Tracer(CCLObject):
     def get_angles_derivative(self):
         r"""Get list of the :math:`\ell`-dependent prefactor order for all
         tracers contained in this ``Tracer``.
+
+        Returns:
+            `array`: list of angular derivative orders for each tracer.
         """
         return np.array([t.der_angles for t in self._trc])
 
@@ -718,6 +721,24 @@ class NzTracer(Tracer):
     redshift distribution interpolator. These include
     :func:`NumberCountsTracer` and :func:`WeakLensingTracer`.
     """
+
+    def __init__(self):
+        """By default this `Tracer` object will contain no actual
+        tracers
+        """
+        # Do nothing, just initialize list of tracers
+        super().__init__()
+        self.chi_fft_dict = {}
+
+    def get_chi_fft(self, tracer, Nchi, chimin, chimax, ell):
+        temp = self.chi_fft_dict.get((tracer, Nchi, chimin, chimax, ell))
+        if temp is None:
+            return None, None
+        return temp[0], temp[1]
+
+    def set_chi_fft(self, tracer, Nchi, chimin, chimax, ell, ks, fft):
+        self.chi_fft_dict[(tracer, Nchi, chimin, chimax, ell)] = (ks, fft)
+        return ks, fft
 
     def get_dndz(self, z):
         """Get the redshift distribution for this tracer.

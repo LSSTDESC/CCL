@@ -10,12 +10,12 @@ from . import Baryons
 class BaccoemuBaryons(Baryons):
     """ The baryonic boost factor computed with the baccoemu baryons emulators.
 
-    See https://arxiv.org/abs/2011.15018 and
-    https://bacco.dipc.org/emulator.html
+    See `Arico et al. 2021 <https://arxiv.org/abs/2011.15018>`_ and
+    https://bacco.dipc.org/emulator.html.
 
-    Note that masses are in units of :math:`M_\\odot`, differently from the
-    original paper and baccoemu public code (where they are
-    in :math:`M_\\odot/h`)
+    .. note:: Note that masses are in units of :math:`M_\\odot`, differently
+              from the original paper and baccoemu public code (where they are
+              in :math:`M_\\odot/h`)
 
     Args:
         log10_M_c (:obj:`float`): characteristic halo mass to model baryon
@@ -31,19 +31,22 @@ class BaccoemuBaryons(Baryons):
                                          hot gas in haloes
         log10_M_inn (:obj:`float`): transition mass of density profiles of
                                      hot gas in haloes (in :math:`M_\\odot`)
+        verbose (:obj:`bool`): Verbose output from baccoemu.
+                                (default: :obj:`False`)
     """
     name = 'BaccoemuBaryons'
     __repr_attrs__ = __eq_attrs__ = ("bcm_params",)
 
     def __init__(self, log10_M_c=14.174, log10_eta=-0.3, log10_beta=-0.22,
                  log10_M1_z0_cen=10.674, log10_theta_out=0.25,
-                 log10_theta_inn=-0.86, log10_M_inn=13.574):
+                 log10_theta_inn=-0.86, log10_M_inn=13.574,
+                 verbose=False):
         # avoid tensorflow warnings
         import warnings
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=UserWarning)
             import baccoemu
-            self.mpk = baccoemu.Matter_powerspectrum()
+            self.mpk = baccoemu.Matter_powerspectrum(verbose=verbose)
         self.a_min = self.mpk.emulator['baryon']['bounds'][-1][0]
         self.a_max = self.mpk.emulator['baryon']['bounds'][-1][1]
         self.k_min = self.mpk.emulator['baryon']['k'][0]
@@ -62,7 +65,7 @@ class BaccoemuBaryons(Baryons):
     def _sigma8tot_2_sigma8cold(self, emupars, sigma8tot):
         """Use baccoemu to convert sigma8 total matter to sigma8 cdm+baryons
         """
-        if hasattr(emupars['omega_cold'], '__len__'):
+        if np.ndim(emupars['omega_cold']) == 1:
             _emupars = {}
             for pname in emupars:
                 _emupars[pname] = emupars[pname][0]
@@ -83,14 +86,17 @@ class BaccoemuBaryons(Baryons):
             a (:obj:`float` or `array`): Scale factor.
 
         Returns:
-            :obj:`float` or `array`: Correction factor to apply to
-                the power spectrum.
+            :obj:`float` or `array`: Correction factor to apply to \
+            the power spectrum.
         """ # noqa
+
+        # Check a ranges
+        self._check_a_range(a)
 
         # First create the dictionary passed to baccoemu
         # if a is an array, make sure all the other parameters passed to the
         # emulator have the same len
-        if hasattr(a, '__len__'):
+        if np.ndim(a) == 1:
             emupars = dict(
                 omega_cold=np.full((len(a)),
                                    cosmo['Omega_c'] + cosmo['Omega_b']),
@@ -122,12 +128,12 @@ class BaccoemuBaryons(Baryons):
             # power spectrum; so we have to convert from total to cold sigma8
             sigma8tot = cosmo['sigma8']
             sigma8cold = self._sigma8tot_2_sigma8cold(emupars, sigma8tot)
-            if hasattr(a, '__len__'):
+            if np.ndim(a) == 1:
                 emupars['sigma8_cold'] = np.full((len(a)), sigma8cold)
             else:
                 emupars['sigma8_cold'] = sigma8cold
         else:
-            if hasattr(a, '__len__'):
+            if np.ndim(a) == 1:
                 emupars['A_s'] = np.full((len(a)), cosmo['A_s'])
             else:
                 emupars['A_s'] = cosmo['A_s']
@@ -150,8 +156,23 @@ class BaccoemuBaryons(Baryons):
                           log10_beta=None, log10_M1_z0_cen=None,
                           log10_theta_out=None, log10_theta_inn=None,
                           log10_M_inn=None):
-        """Update BCM parameters. All parameters set to ``None`` will
+        """Update parameters. All parameters set to ``None`` will
         be left untouched.
+
+        Args:
+            log10_M_c (:obj:`float`): characteristic halo mass to model baryon
+                mass fraction (in :math:`M_\\odot`)
+            log10_eta (:obj:`float`): extent of ejected gas
+            log10_beta (:obj:`float`): slope of power law describing baryon
+                mass fraction
+            log10_M1_z0_cen (:obj:`float`): characteristic halo mass scale for
+                central galaxies (in :math:`M_\\odot`)
+            log10_theta_out (:obj:`float`):  outer slope of density profiles of
+                hot gas in haloes
+            log10_theta_inn (:obj:`float`): inner slope of density profiles of
+                hot gas in haloes
+            log10_M_inn (:obj:`float`): transition mass of density profiles of
+                hot gas in haloes (in :math:`M_\\odot`)
         """
         _kwargs = locals()
         _new_bcm_params = {key: _kwargs[key] for key in
@@ -176,3 +197,14 @@ class BaccoemuBaryons(Baryons):
                     is_logp=pk.psp.is_log,
                     extrap_order_lok=pk.extrap_order_lok,
                     extrap_order_hik=pk.extrap_order_hik)
+
+    def _check_a_range(self, a):
+        if np.ndim(a) == 0:
+            a_min, a_max = a, a
+        else:
+            a_min = min(a)
+            a_max = max(a)
+        if a_min < self.a_min or a_max > self.a_max:
+            raise ValueError(f"Requested scale factor outside the bounds of "
+                             f"the emulator: {(a_min, a_max)} outside of "
+                             f"{((self.a_min, self.a_max))}")

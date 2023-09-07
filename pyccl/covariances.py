@@ -11,7 +11,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
                        tracer3=None, tracer4=None, ell2=None,
                        fsky=1., integration_method='qag_quad'):
     """Calculate the connected non-Gaussian covariance for a pair of
-    power spectra :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
+    angular power spectra :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
     between two pairs of tracers (:math:`(a,b)` and :math:`(c,d)`).
 
     Specifically, it computes:
@@ -38,7 +38,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         tracer2 (:class:`~pyccl.tracers.Tracer`): a second Tracer object.
         ell (:obj:`float` or `array`): Angular wavenumber(s) at which to evaluate
             the first dimension of the angular power spectrum covariance.
-        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D` or :obj:`None`): 3D connected
+        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D`): 3D connected
             trispectrum.
         tracer3 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
             If ``None``, ``tracer1`` will be used instead.
@@ -134,7 +134,7 @@ def sigma2_B_disc(cosmo, a_arr=None, *, fsky=1.,
 
     where :math:`R(z)` is the corresponding radial aperture as a
     function of redshift. This quantity can be used to compute the
-    super-sample covariance.
+    super-sample covariance (see :func:`angular_cl_cov_SSC`).
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
@@ -191,7 +191,8 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
 
     where :math:`W^A_{\\ell m}` and :math:`W^B_{\\ell m}` are the spherical
     harmonics decomposition of the footprint masks of fields `A` and `B`,
-    normalized by their area.
+    normalized by their area. This quantity can be used to compute the
+    super-sample covariance (see :func:`angular_cl_cov_SSC`).
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
@@ -263,7 +264,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     Specifically, it computes:
 
     .. math::
-        {\\rm Cov}_{\\rm cNG}(\\ell_1,\\ell_2)=
+        {\\rm Cov}_{\\rm SSC}(\\ell_1,\\ell_2)=
         \\int \\frac{d\\chi}{\\chi^4}
         \\tilde{\\Delta}^a_{\\ell_1}(\\chi)
         \\tilde{\\Delta}^b_{\\ell_1}(\\chi)
@@ -284,7 +285,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         tracer2 (:class:`~pyccl.tracers.Tracer`): a second Tracer object.
         ell (:obj:`float` or `array`): Angular wavenumber(s) at which to evaluate
             the first dimension of the angular power spectrum covariance.
-        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D` or :obj:`None`): 3D connected
+        t_of_kk_a (:class:`~pyccl.tk3d.Tk3D`): 3D connected
             trispectrum.
         tracer3 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
             If ``None``, ``tracer1`` will be used instead.
