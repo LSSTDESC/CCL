@@ -92,7 +92,7 @@ def test_ept_deconstruction(kind):
                                          with_matter_1loop=True,
                                          cosmo=COSMO, sub_lowk=True)
     b_nc = ['b1', 'b2', 'b3nl', 'bs', 'bk2']
-    b_ia = ['c1', 'c2', 'cdelta']
+    b_ia = ['c1', 'c2', 'cdelta', 'ct']
     pk1 = ptc.get_pk2d_template(kind)
 
     def get_tr(tn):
@@ -110,14 +110,15 @@ def test_ept_deconstruction(kind):
             bdict[tn] = 1.0
             return ccl.nl_pt.PTIntrinsicAlignmentTracer(
                 c1=bdict['c1'], c2=bdict['c2'],
-                cdelta=bdict['cdelta'])
+                cdelta=bdict['cdelta'], ct=bdict['ct'])
+
 
     tn1, tn2 = kind.split(':')
     t1 = get_tr(tn1)
     t2 = get_tr(tn2)
 
     is_nl = tn1 in ["b2", "bs", "bk2", "b3nl"]
-    is_g = tn2 in ["c1", "c2", "cdelta"]
+    is_g = tn2 in ["c1", "c2", "cdelta", "ct"]
     with pytest.warns(ccl.CCLWarning) if is_nl and is_g else nullcontext():
         pk2 = ptc.get_biased_pk2d(t1, tracer2=t2)
     if pk1 is None:
@@ -133,9 +134,9 @@ def test_ept_deconstruction(kind):
 
 
 @pytest.mark.parametrize('kind',
-                         ['c2:c2', 'c2:cdelta', 'cdelta:cdelta'])
+                         ['c2:c2', 'c2:cdelta', 'cdelta:cdelta', 'ct:ct'])
 def test_ept_deconstruction_bb(kind):
-    b_ia = ['c1', 'c2', 'cdelta']
+    b_ia = ['c1', 'c2', 'cdelta', 'ct']
     pk1 = PTC.get_pk2d_template(kind, return_ia_bb=True)
 
     def get_tr(tn):
@@ -143,7 +144,7 @@ def test_ept_deconstruction_bb(kind):
         bdict[tn] = 1.0
         return ccl.nl_pt.PTIntrinsicAlignmentTracer(
             c1=bdict['c1'], c2=bdict['c2'],
-            cdelta=bdict['cdelta'])
+            cdelta=bdict['cdelta'], ct=bdict['ct'])
 
     tn1, tn2 = kind.split(':')
     t1 = get_tr(tn1)
