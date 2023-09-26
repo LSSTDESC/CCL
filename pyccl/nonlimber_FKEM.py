@@ -257,7 +257,6 @@ def nonlimber_FKEM(
             fks_2 = fks_1
             transfers_t2 = transfers_t1
 
-        #print(len(kernels_t1), len(kernels_t2))
         for i in range(len(kernels_t1)):
             for j in range(len(kernels_t2)):
                 cls_nonlimber_lin += (
@@ -267,7 +266,7 @@ def nonlimber_FKEM(
                         * fks_2[j]
                         * transfers_t2[j]
                         * k**kpow
-                        * pk(k, 1.0)#, cosmo)
+                        * pk(k, 1.0, cosmo)
                     )
                     * dlnr
                     * 2.0
