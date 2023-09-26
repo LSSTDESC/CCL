@@ -175,9 +175,13 @@ def set_up():
         )
     # Finally get the PT thing going
     ptc = pt.EulerianPTCalculator(with_NC=True, with_IA=False,
-                      log10k_min=-4, log10k_max=2, nk_per_decade=20)
+                      log10k_min=-4, log10k_max=4, nk_per_decade=200)
     ptc.update_ingredients(cosmo)
-    ptt_g = [pt.PTNumberCountsTracer(b1=bias, b2=0.0, bs=0.0) for bias in tpar["b_g"]]
+    ptc_lin = pt.EulerianPTCalculator(with_NC=True, with_IA=False,
+                      log10k_min=-4, log10k_max=4, nk_per_decade=200,
+                      b1_pk_kind = 'linear', bk2_pk_kind='linear')
+    ptc_lin.update_ingredients(cosmo)
+    ptt_g = [pt.PTNumberCountsTracer(b1=bias) for bias in tpar["b_g"]]
     ptt_m = pt.PTMatterTracer()
 
     tracers1 = {"gg": t_g, "gs": t_g, "ss": t_s}
@@ -185,7 +189,7 @@ def set_up():
     truth = {"gg": tgg, "gs": tgs, "ss": tss}
     errors = {"gg": err_gg, "gs": err_gs, "ss": err_ss}
     indices = {"gg": indices_gg, "gs": indices_gs, "ss": indices_ss}
-    ptobj = {"ptc": ptc, "ptt_g": ptt_g, "ptt_m": ptt_m}
+    ptobj = {"ptc": ptc, "ptc_lin": ptc_lin, "ptt_g": ptt_g, "ptt_m": ptt_m}
     return cosmo, ells, tracers1, tracers2, truth, errors, indices, ptobj
 
 
@@ -203,13 +207,13 @@ def test_cells(set_up, method, cross_type, pt_path):
         if cross_type == "gg":
             if pt_path:
                 p_of_k_a = ptobj['ptc'].get_biased_pk2d(ptobj['ptt_g'][i1], tracer2 = ptobj['ptt_g'][i2])
-                p_of_k_a_lin = ptobj['ptc'].get_biased_pk2d(ptobj['ptt_m'])
+                p_of_k_a_lin = ptobj['ptc_lin'].get_biased_pk2d(ptobj['ptt_g'][i1], tracer2 = ptobj['ptt_g'][i2])
             else:
                 bias_fact = biases[i1] * biases[i2]
         elif cross_type == "gs":
             if pt_path:
                 p_of_k_a = ptobj['ptc'].get_biased_pk2d(ptobj['ptt_g'][i1], tracer2 = ptobj['ptt_m'])
-                p_of_k_a_lin = ptobj['ptc'].get_biased_pk2d(ptobj['ptt_m'])
+                p_of_k_a_lin = ptobj['ptc_lin'].get_biased_pk2d(ptobj['ptt_g'][i1], tracer2 = ptobj['ptt_m'])
             else:
                 bias_fact = biases[i1]
         
@@ -241,6 +245,7 @@ def test_cells(set_up, method, cross_type, pt_path):
         chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / errors[
             cross_type
         ][pair_index] ** 2
+        #print(chi2.max(), l_limber, cross_type, i1, i2, pt_path)
         chi2max = max(chi2.max(), chi2max)
         if method is not None:  # Limber is going to fail by default
             assert np.all(chi2 < 0.3)

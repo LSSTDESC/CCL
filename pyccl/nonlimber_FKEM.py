@@ -87,8 +87,8 @@ def nonlimber_FKEM(
             "Defaulting to Limber calculation. ", CCLWarning)
         return -1, np.array([]), status
 
-    psp_lin = cosmo.parse_pk2d(p_of_k_a, is_linear=True)
-    psp_nonlin = cosmo.parse_pk2d(p_of_k_a_lin, is_linear=False)
+    psp_lin = cosmo.parse_pk2d(p_of_k_a_lin, is_linear=True)
+    psp_nonlin = cosmo.parse_pk2d(p_of_k_a, is_linear=False)
 
     t1, status = lib.cl_tracer_collection_t_new(status)
     check(status)
@@ -100,7 +100,10 @@ def nonlimber_FKEM(
     for t in clt2._trc:
         status = lib.add_cl_tracer_to_collection(t2, t, status)
         check(status)
-    pk = cosmo.get_linear_power(name=p_of_k_a)
+    if isinstance(p_of_k_a_lin, ccl.Pk2D):
+        pk = p_of_k_a_lin
+    else:
+        pk = cosmo.get_linear_power(name=p_of_k_a_lin)
     min_chis_t1 = np.min([np.min(i) for i in chis_t1])
     min_chis_t2 = np.min([np.min(i) for i in chis_t2])
     max_chis_t1 = np.max([np.max(i) for i in chis_t1])
@@ -254,6 +257,7 @@ def nonlimber_FKEM(
             fks_2 = fks_1
             transfers_t2 = transfers_t1
 
+        #print(len(kernels_t1), len(kernels_t2))
         for i in range(len(kernels_t1)):
             for j in range(len(kernels_t2)):
                 cls_nonlimber_lin += (
@@ -263,7 +267,7 @@ def nonlimber_FKEM(
                         * fks_2[j]
                         * transfers_t2[j]
                         * k**kpow
-                        * pk(k, 1.0, cosmo)
+                        * pk(k, 1.0)#, cosmo)
                     )
                     * dlnr
                     * 2.0
