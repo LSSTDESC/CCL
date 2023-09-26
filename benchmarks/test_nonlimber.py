@@ -91,14 +91,14 @@ def set_up():
 
     t_g = []
     # we pass unity bias here and will multiply by the actual bias later
-    # this allows us to use the same setup for both direct and PTtracer approach
+    # this allows us to use the same setup
+    # for both direct and PTtracer approach
     for Nz in Nzs["dNdz_cl"].T:
         t = ccl.NumberCountsTracer(
-                cosmo,
-                has_rsd=False,
-                dndz=(Nzs["z_cl"], Nz),
-                bias=(Nzs["z_cl"], np.ones(len(Nzs["z_cl"])))
-            )
+            cosmo,
+            has_rsd=False,
+            dndz=(Nzs["z_cl"], Nz),
+            bias=(Nzs["z_cl"], np.ones(len(Nzs["z_cl"]))))
         t_g.append(t)
     t_s = []
     for Nz in Nzs["dNdz_sh"].T:
@@ -175,11 +175,14 @@ def set_up():
         )
     # Finally get the PT thing going
     ptc = pt.EulerianPTCalculator(with_NC=True, with_IA=False,
-                      log10k_min=-4, log10k_max=4, nk_per_decade=200)
+                                  log10k_min=-4, log10k_max=4,
+                                  nk_per_decade=200)
     ptc.update_ingredients(cosmo)
     ptc_lin = pt.EulerianPTCalculator(with_NC=True, with_IA=False,
-                      log10k_min=-4, log10k_max=4, nk_per_decade=200,
-                      b1_pk_kind = 'linear', bk2_pk_kind='linear')
+                                      log10k_min=-4, log10k_max=4,
+                                      nk_per_decade=200,
+                                      b1_pk_kind='linear',
+                                      bk2_pk_kind='linear')
     ptc_lin.update_ingredients(cosmo)
     ptt_g = [pt.PTNumberCountsTracer(b1=bias) for bias in tpar["b_g"]]
     ptt_m = pt.PTMatterTracer()
@@ -206,17 +209,25 @@ def test_cells(set_up, method, cross_type, pt_path):
         p_of_k_a = p_of_k_a_lin = ccl.DEFAULT_POWER_SPECTRUM
         if cross_type == "gg":
             if pt_path:
-                p_of_k_a = ptobj['ptc'].get_biased_pk2d(ptobj['ptt_g'][i1], tracer2 = ptobj['ptt_g'][i2])
-                p_of_k_a_lin = ptobj['ptc_lin'].get_biased_pk2d(ptobj['ptt_g'][i1], tracer2 = ptobj['ptt_g'][i2])
+                p_of_k_a = ptobj['ptc'].get_biased_pk2d(
+                    ptobj['ptt_g'][i1],
+                    tracer2=ptobj['ptt_g'][i2])
+                p_of_k_a_lin = ptobj['ptc_lin'].get_biased_pk2d(
+                    ptobj['ptt_g'][i1],
+                    tracer2=ptobj['ptt_g'][i2])
             else:
                 bias_fact = biases[i1] * biases[i2]
         elif cross_type == "gs":
             if pt_path:
-                p_of_k_a = ptobj['ptc'].get_biased_pk2d(ptobj['ptt_g'][i1], tracer2 = ptobj['ptt_m'])
-                p_of_k_a_lin = ptobj['ptc_lin'].get_biased_pk2d(ptobj['ptt_g'][i1], tracer2 = ptobj['ptt_m'])
+                p_of_k_a = ptobj['ptc'].get_biased_pk2d(
+                    ptobj['ptt_g'][i1],
+                    tracer2=ptobj['ptt_m'])
+                p_of_k_a_lin = ptobj['ptc_lin'].get_biased_pk2d(
+                    ptobj['ptt_g'][i1],
+                    tracer2=ptobj['ptt_m'])
             else:
                 bias_fact = biases[i1]
-        
+
         if method is None:
             cls = ccl.angular_cl(
                 cosmo,
@@ -224,8 +235,8 @@ def test_cells(set_up, method, cross_type, pt_path):
                 tracers2[cross_type][i2],
                 ells,
                 l_limber=-1,
-                p_of_k_a = p_of_k_a,
-                p_of_k_a_lin = p_of_k_a_lin
+                p_of_k_a=p_of_k_a,
+                p_of_k_a_lin=p_of_k_a_lin
             )
             l_limber = 0
         else:
@@ -234,23 +245,25 @@ def test_cells(set_up, method, cross_type, pt_path):
                 tracers1[cross_type][i1],
                 tracers2[cross_type][i2],
                 ells,
-                p_of_k_a = p_of_k_a,
-                p_of_k_a_lin = p_of_k_a_lin,
+                p_of_k_a=p_of_k_a,
+                p_of_k_a_lin=p_of_k_a_lin,
                 l_limber='auto',
                 non_limber_integration_method=method,
-                return_meta=True 
+                return_meta=True
             )
-            l_limber = meta ['l_limber']
+            l_limber = meta['l_limber']
         cls *= bias_fact
         chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / errors[
             cross_type
         ][pair_index] ** 2
-        #print(chi2.max(), l_limber, cross_type, i1, i2, pt_path)
         chi2max = max(chi2.max(), chi2max)
         if method is not None:  # Limber is going to fail by default
             assert np.all(chi2 < 0.3)
     t1 = time.time()
+    method_name = "Limber"
+    if method is not None:
+        method_name = method
     print(
-        f'Time taken for {method if method is not None else "Limber"} on {cross_type} = {(t1-t0):3.2f};\
+        f'Time taken for {method_name} on {cross_type} = {(t1-t0):3.2f};\
         worst chi2 = {chi2max:5.3f}      l_limber = {l_limber}'
     )
