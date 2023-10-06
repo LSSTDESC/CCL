@@ -1,6 +1,5 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
-  - tables=3.8.0
   - gfortran=12.2.0  # for isitgr
   - python=3.8
   - pip
@@ -15,6 +14,7 @@ dependencies:
   - pytest
   - pytest-cov
   - pip:
+      - tables=3.8.0  # for baccoemu
       #- classy<3
       - isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
