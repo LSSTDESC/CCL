@@ -10,7 +10,7 @@ from .. import CCLAutoRepr, physical_constants
 from ..pyutils import _check_array_params
 
 
-def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, at=None,
+def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ader=None,
                       Om_m2_for_c2=False, Om_m_fid=0.3):
     """
     Function to convert from :math:`A_{ia}` values to :math:`c_{ia}` values,
@@ -40,8 +40,9 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, at=None,
 
     Om_m = cosmo['Omega_m']
     rho_crit = physical_constants.RHO_CRITICAL
-    c1 = c1delta = c2 = ct = None
+    c1 = c1delta = c2 = cder = None
     gz = cosmo.growth_factor(1./(1+z))
+    knorm = 1 #units of Mpc/h
 
     if a1 is not None:
         c1 = -1*a1*5e-14*rho_crit*Om_m/gz
@@ -55,10 +56,10 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, at=None,
         else:  # DES convention
             c2 = a2*5*5e-14*rho_crit*Om_m/(gz**2)
     
-    if at is not None:
-        ct = a2*5e-14*rho_crit*Om_m/gz
+    if ader is not None:
+        cder = ader*knorm**2*5e-14*rho_crit*Om_m/gz
     
-    return c1, c1delta, c2
+    return c1, c1delta, c2, cder
         
 
 
@@ -216,7 +217,7 @@ class PTIntrinsicAlignmentTracer(PTTracer):
     """
     type = 'IA'
 
-    def __init__(self, c1, c2=None, cdelta=None, ct=None):
+    def __init__(self, c1, c2=None, cdelta=None, cder=None):
 
         self.biases = {}
 
@@ -226,8 +227,8 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         self.biases['c2'] = self._get_bias_function(c2)
         # Initialize cdelta
         self.biases['cdelta'] = self._get_bias_function(cdelta)
-        #Initialize ct
-        self.biases['ct'] = self._get_bias_function(ct)
+        #Initialize cder
+        self.biases['cder'] = self._get_bias_function(cder)
 
     @property
     def c1(self):
@@ -251,5 +252,5 @@ class PTIntrinsicAlignmentTracer(PTTracer):
     def ct(self):
         "Internal tij function"
         
-        return self.biases['ct']
+        return self.biases['cder']
     

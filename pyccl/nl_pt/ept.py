@@ -260,6 +260,8 @@ class EulerianPTCalculator(CCLAutoRepr):
             reshape_fastpt(self.ia_tt)
             self.ia_mix = self.pt.IA_mix(**kw)
             reshape_fastpt(self.ia_mix)
+            self.ia_der =self.pt.IA_der(**kw)
+            reshape_fastpt(self.ia_der)
 
         # b1/bk power spectrum
         pks = {}
@@ -364,6 +366,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
+        Pder = self.ia_der
 
         # Get biases
         b1 = trg.b1(self.z_s)
@@ -379,12 +382,12 @@ class EulerianPTCalculator(CCLAutoRepr):
         c1 = tri.c1(self.z_s)
         c2 = tri.c2(self.z_s)
         cd = tri.cdelta(self.z_s)
-        ct = tri.ct(self.z_s)
+        cder = tri.cder(self.z_s)
 
         pgi = b1[:, None] * (c1[:, None] * Pd1d1 +
                              (self._g4*cd)[:, None] * (a00e + c00e) +
                              (self._g4*c2)[:, None] * (a0e2 + b0e2) +
-                             (self._g4*ct)[:, None] *(a00e + c00e))
+                             (self._g4*cder)[:, None] * (Pder))
         return pgi*self.exp_cutoff
 
     def _get_pgm(self, trg):
@@ -444,22 +447,22 @@ class EulerianPTCalculator(CCLAutoRepr):
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         ae2e2, ab2b2 = self.ia_tt
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
+        Pder = self.ia_der
 
         # Get biases
         c11 = tr1.c1(self.z_s)
         c21 = tr1.c2(self.z_s)
         cd1 = tr1.cdelta(self.z_s)
-        ct1 = tr1.ct(self.z_s)
+        cder1 = tr1.cder(self.z_s)
         c12 = tr2.c1(self.z_s)
         c22 = tr2.c2(self.z_s)
         cd2 = tr2.cdelta(self.z_s)
-        ct2 = tr2.ct(self.z_s)
+        cder2 = tr2.cder(self.z_s)
 
         if return_bb:
             pii = ((cd1*cd2*self._g4)[:, None]*a0b0b +
                    (c21*c22*self._g4)[:, None]*ab2b2 +
-                   ((cd1*c22+c21*cd2)*self._g4)[:, None] * d0bb2+
-                   (ct1*ct2*self._g4)[:,None]*ab2b2)
+                   ((cd1*c22+c21*cd2)*self._g4)[:, None] * d0bb2)
         else:
             pii = ((c11*c12)[:, None] * Pd1d1 +
                    ((c11*cd2+c12*cd1)*self._g4)[:, None]*(a00e+c00e) +
@@ -467,7 +470,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                    (c21*c22*self._g4)[:, None]*ae2e2 +
                    ((c11*c22+c21*c12)*self._g4)[:, None]*(a0e2+b0e2) +
                    ((cd1*c22+cd2*c21)*self._g4)[:, None]*d0ee2 +
-                   ((ct1*c22 + ct2*c21)*self._g4)[:, None]*d0ee2)
+                   ((cder1*cder2)*self._g4)[:, None]*Pder)
 
         return pii*self.exp_cutoff
 
@@ -489,17 +492,18 @@ class EulerianPTCalculator(CCLAutoRepr):
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
+        Pder = self.ia_der
 
         # Get biases
         c1 = tri.c1(self.z_s)
         c2 = tri.c2(self.z_s)
         cd = tri.cdelta(self.z_s)
-        ct = tri.cdelta(self.z_s)
+        cder = tri.cder(self.z_s)
 
         pim = (c1[:, None] * Pd1d1 +
                (self._g4*cd)[:, None] * (a00e + c00e) +
                (self._g4*c2)[:, None] * (a0e2 + b0e2) +
-               (self._g4*ct)[:, None]*(a0e2+c00e))
+               (self._g4*cder)[:, None]*(Pder))
         return pim*self.exp_cutoff
 
     def _get_pmm(self):
