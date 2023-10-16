@@ -1,4 +1,4 @@
-__all__ = ("nonlimber_FKEM",)
+__all__ = ("_nonlimber_FKEM",)
 """Written by Paul Rogozenski (paulrogozenski@arizona.edu),
  implementing the FKEM non-limber integration method of the N5K challenge
  detailed in this paper: https://arxiv.org/pdf/1911.11947.pdf .
@@ -19,7 +19,7 @@ global avg_a_dict
 avg_a_dict = {}
 
 
-def get_general_params(b):
+def _get_general_params(b):
     nu = 1.51
     nu2 = 0.51
     deriv = 0.0
@@ -37,7 +37,7 @@ def get_general_params(b):
     return best_nu, deriv, plaw
 
 
-def get_average_a(clt, Nchi, chi_min, chi_max, a_arr, dndz):
+def _get_average_a(clt, Nchi, chi_min, chi_max, a_arr, dndz):
     res = avg_a_dict.get(clt)
     if res is None:
         z_arr = 1.0 / (a_arr) - 1
@@ -56,7 +56,7 @@ def get_average_a(clt, Nchi, chi_min, chi_max, a_arr, dndz):
     return res
 
 
-def nonlimber_FKEM(
+def _nonlimber_FKEM(
     cosmo, clt1, clt2, p_of_k_a, p_of_k_a_lin, ls, l_limber, limber_max_error
 ):
     """clt1, clt2 are lists of tracer in a tracer object
@@ -124,10 +124,10 @@ def nonlimber_FKEM(
 
     a_arr = ccl.scale_factor_of_chi(cosmo, chi_logspace_arr)
     growfac_arr = ccl.growth_factor(cosmo, a_arr)
-    avg_a1 = get_average_a(
+    avg_a1 = _get_average_a(
         clt1, Nchi, chi_min, chi_max, a_arr, clt1.get_dndz(1.0 / a_arr - 1)
     )
-    avg_a2 = get_average_a(
+    avg_a2 = _get_average_a(
         clt2, Nchi, chi_min, chi_max, a_arr, clt2.get_dndz(1.0 / a_arr - 1)
     )
 
@@ -189,16 +189,18 @@ def nonlimber_FKEM(
                     / transfer_t1_avg[i]
                 )
                 # calls to fftlog to perform integration over chi integrals
-                nu, deriv, plaw = get_general_params(bessels_t1[i])
+                nu, deriv, plaw = _get_general_params(bessels_t1[i])
                 k, fk1 = _fftlog_transform_general(
                     chi_logspace_arr,
-                    fchi1_arr,
+                    fchi1_arr.flatten(),
                     float(ell),
                     nu,
                     1,
                     float(deriv),
                     float(plaw),
                 )
+                check(status, cosmo=cosmo)
+
                 clt1.set_chi_fft(
                     clt1._trc[i], Nchi, chi_min, chi_max, ell, k, fk1
                 )
@@ -238,16 +240,18 @@ def nonlimber_FKEM(
                         / transfer_t2_avg[j]
                     )
                     # calls to fftlog to perform integration over chi integrals
-                    nu2, deriv2, plaw2 = get_general_params(bessels_t2[j])
+                    nu2, deriv2, plaw2 = _get_general_params(bessels_t2[j])
                     k, fk2 = _fftlog_transform_general(
                         chi_logspace_arr,
-                        fchi2_arr,
+                        fchi2_arr.flatten(),
                         float(ell),
                         nu2,
                         1,
                         float(deriv2),
                         float(plaw2),
                     )
+                    check(status, cosmo=cosmo)
+
                     clt2.set_chi_fft(
                         clt2._trc[j], Nchi, chi_min, chi_max, ell, k, fk2
                     )

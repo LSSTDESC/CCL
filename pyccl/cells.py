@@ -6,7 +6,7 @@ import numpy as np
 
 from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
 from .pyutils import integ_types
-from .nonlimber_FKEM import nonlimber_FKEM
+from ._nonlimber_FKEM import _nonlimber_FKEM
 
 
 def angular_cl(
@@ -52,7 +52,7 @@ def angular_cl(
             3D linear Power spectrum to project, for special use in
             PT calculations using the FKEM non-limber integration technique.
             If a string, it must correspond to one of
-            the non-linear power spectra stored in `cosmo` (e.g.
+            the linear power spectra stored in `cosmo` (e.g.
             `'delta_matter:delta_matter'`). 
         return_meta (bool): if `True`, also return a dictionary with various
             metadata about the calculation, such as l_limber as calculated by the
@@ -75,14 +75,14 @@ def angular_cl(
             "Limber integration method %s not supported"
             % limber_integration_method
         )
-    if non_limber_integration_method not in ["FKEM", "MATTER"]:
+    if non_limber_integration_method not in ["FKEM"]:
         raise ValueError(
             "Non-Limber integration method %s not supported"
             % limber_integration_method
         )
     if type(l_limber) is str:
         if l_limber != "auto":
-            raise ValueError("l_limber cannot be a string other than 'auto'")
+            raise ValueError("l_limber must be an integer or'auto'")
         auto_limber = True
     else:
         auto_limber = False
@@ -91,9 +91,8 @@ def angular_cl(
     cosmo.compute_distances()
 
     # Access ccl_cosmology object
-    cosmo_in = cosmo
 
-    psp = cosmo_in.parse_pk2d(p_of_k_a, is_linear=False)
+    psp = cosmo.parse_pk2d(p_of_k_a, is_linear=False)
 
     # Create tracer colections
     status = 0
@@ -112,7 +111,7 @@ def angular_cl(
 
     if auto_limber or (type(l_limber) is not str and ell_use[0] < l_limber):
         if non_limber_integration_method == "FKEM":
-            l_limber, cl_non_limber, status = nonlimber_FKEM(
+            l_limber, cl_non_limber, status = _nonlimber_FKEM(
                 cosmo,
                 tracer1,
                 tracer2,
@@ -122,19 +121,14 @@ def angular_cl(
                 l_limber,
                 limber_max_error,
             )
-        # else:  # it has to be matter, since we checked the input
-        #     l_limber, cl_non_limber, status = implement_MATTER(
-        #         cosmo, clt1, clt2, psp, ell_use, l_limber, limber_max_error
-        #     )
-        check(status, cosmo=cosmo_in)
+        check(status, cosmo=cosmo)
     else:
         cl_non_limber = np.array([])
-    cosmo = cosmo.cosmo
     ell_use_limber = ell_use[ell_use > l_limber]
     # Return Cl values, according to whether ell is an array or not
     if len(ell_use_limber) > 0:
         cl_limber, status = lib.angular_cl_vec_limber(
-            cosmo,
+            cosmo.cosmo,
             clt1,
             clt2,
             psp,
@@ -158,5 +152,5 @@ def angular_cl(
     if return_meta:
         meta = {"l_limber": l_limber}  # add other things as needed
 
-    check(status, cosmo=cosmo_in)
+    check(status, cosmo=cosmo)
     return (cl, meta) if return_meta else cl

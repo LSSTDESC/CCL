@@ -37,7 +37,6 @@ from ._core.parameters import physical_constants
 from ._core import CCLObject, UnlockInstance, unlock_instance
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays, _get_spline2d_arrays)
-# from scipy.integrate import quad
 
 __all__ = ("get_density_kernel", "get_lensing_kernel", "get_kappa_kernel",
            "Tracer", "NzTracer", "NumberCountsTracer", "WeakLensingTracer",
