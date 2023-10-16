@@ -531,17 +531,17 @@ def _fftlog_transform(rs, frs,
 
     return ks, fks
 
+
 # Compute the discrete Hankel transform of the function frs
-# evaluated at values rs. 
-# Weighted by a power law and the bessel_deriv-th derivative of the 
-# (spherical) bessel function of order \mu. 
+# evaluated at values rs.
+# Weighted by a power law and the bessel_deriv-th derivative of the
+# (spherical) bessel function of order \mu.
 # The computed transform will be centered about the peak of the given \mu.
 # double bessel_deriv: the nth derivative of the (spherical) bessel function
-# int spherical_bessel: 1 indicates spherical bessel functions, 0 bessel functions
+# int spherical_bessel: 1 spherical bessel functions, 0 bessel functions
 # double q: the biasing index
-# double plaw: power-law index of (xk) weighting in integral
 # NOTE: we ignore factors of (2*pi) found in typical fht algorithm,
-#   these factors should be calculated and applied a-posteriori if necessary
+# these factors should be calculated and applied a-posteriori if necessary
 def _fftlog_transform_general(
     rs, frs, mu, q, spherical_bessel, bessel_deriv, window_frac
 ):
