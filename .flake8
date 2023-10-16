@@ -6,5 +6,4 @@ exclude =
     build/,
     .eggs/,
     benchmarks/data,
-    pyccl/ccllib.py,
-    N5k/
+    pyccl/ccllib.py
