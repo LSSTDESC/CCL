@@ -260,6 +260,8 @@ class EulerianPTCalculator(CCLAutoRepr):
             reshape_fastpt(self.ia_tt)
             self.ia_mix = self.pt.IA_mix(**kw)
             reshape_fastpt(self.ia_mix)
+            self.ia_der = self.pt.IA_der(**kw)
+            reshape_fastpt(self.ia_der)
 
         # b1/bk power spectrum
         pks = {}
