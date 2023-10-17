@@ -13,24 +13,32 @@ from .. import (CCLAutoRepr, CCLError, CCLWarning, Pk2D,
 
 
 # All valid Pk pair labels and their aliases
-_PK_ALIAS = {
-    'm:m': 'm:m', 'm:b1': 'm:m', 'm:b2': 'm:b2',
-    'm:b3nl': 'm:b3nl', 'm:bs': 'm:bs', 'm:bk2': 'm:bk2',
-    'm:c1': 'm:m', 'm:c2': 'm:c2', 'm:cdelta': 'm:cdelta',
-    'b1:b1': 'm:m', 'b1:b2': 'm:b2', 'b1:b3nl': 'm:b3nl',
-    'b1:bs': 'm:bs', 'b1:bk2': 'm:bk2', 'b1:c1': 'm:m',
-    'b1:c2': 'm:c2', 'b1:cdelta': 'm:cdelta', 'b2:b2': 'b2:b2',
-    'b2:b3nl': 'zero', 'b2:bs': 'b2:bs', 'b2:bk2': 'zero',
-    'b2:c1': 'zero', 'b2:c2': 'zero', 'b2:cdelta': 'zero',
-    'b3nl:b3nl': 'zero', 'b3nl:bs': 'zero',
-    'b3nl:bk2': 'zero', 'b3nl:c1': 'zero', 'b3nl:c2':
-    'zero', 'b3nl:cdelta': 'zero', 'bs:bs': 'bs:bs',
-    'bs:bk2': 'zero', 'bs:c1': 'zero', 'bs:c2': 'zero',
-    'bs:cdelta': 'zero', 'bk2:bk2': 'zero', 'bk2:c1': 'zero',
-    'bk2:c2': 'zero', 'bk2:cdelta': 'zero', 'c1:c1': 'm:m',
-    'c1:c2': 'm:c2', 'c1:cdelta': 'm:cdelta', 'c2:c2': 'c2:c2',
-    'c2:cdelta': 'c2:cdelta', 'cdelta:cdelta': 'cdelta:cdelta'}
-
+_PK_ALIAS = {'m:m': 'm:m', 'm:b1': 'm:m', 'm:b2,1': 'm:b2,1',
+'m:b2,2': 'm:b2,2', 'm:b3,1': 'm:b3,1', 'm:bk2': 'm:bk2',
+'b1:b2,1': 'mb2,1', 'b1:b2,2': 'mb2,2', 'b1:b3,1': 'mb3,1',
+'b1:bk2': 'mbk2', 'b2,1:b2,2': 'b2,1:b2,2', 'b2,1:b3,1': 'b2,1:b3,1',
+'b2,1:bk2': 'b2,1:bk2', 'b2,2:b3,1': 'b2,2:b3,1', 'b2,2:bk2': 'b2,2:bk2',
+'b3,1:bk2': 'b3,1:bk2', 'm:a1': 'm:m', 'm:a2,1': 'm:a2,1',
+'m:a2,2': 'm:a2,2', 'm:a3,1': 'm:a3,1', 'm:a3,2': 'm:a3,2',
+'m:ak2': 'm:ak2', 'a1:a2,1': 'ma2,1', 'a1:a2,2': 'ma2,2',
+'a1:a3,1': 'ma3,1', 'a1:a3,2': 'ma3,2', 'a1:ak2': 'mak2',
+'a2,1:a2,2': 'a2,1:a2,2', 'a2,1:a3,1': 'a2,1:a3,1',
+'a2,1:a3,2': 'a2,1:a3,2', 'a2,1:ak2': 'a2,1:ak2',
+'a2,2:a3,1': 'a2,2:a3,1', 'a2,2:a3,2': 'a2,2:a3,2',
+'a2,2:ak2': 'a2,2:ak2', 'a3,1:a3,2': 'a3,1:a3,2',
+'a3,1:ak2': 'a3,1:ak2', 'a3,2:ak2': 'a3,2:ak2',
+'a1:b1': 'mm', 'a1:b2,1': 'mb2,1', 'a1:b2,2': 'mb2,2',
+'a1:b3,1': 'mb3,1', 'a1:bk2': 'mbk2', 'a2,1:b1': 'a2,1:m',
+'a2,1:b2,1': 'a2,1:b2,1', 'a2,1:b2,2': 'a2,1:b2,2',
+'a2,1:b3,1': 'a2,1:b3,1', 'a2,1:bk2': 'a2,1:bk2', 'a2,2:b1': 'a2,2:m',
+'a2,2:b2,1': 'a2,2:b2,1', 'a2,2:b2,2': 'a2,2:b2,2',
+'a2,2:b3,1': 'a2,2:b3,1', 'a2,2:bk2': 'a2,2:bk2',
+'a3,1:b1': 'a3,1:m', 'a3,1:b2,1': 'a3,1:b2,1', 'a3,1:b2,2': 'a3,1:b2,2',
+'a3,1:b3,1': 'a3,1:b3,1', 'a3,1:bk2': 'a3,1:bk2', 'a3,2:b1': 'a3,2:m',
+'a3,2:b2,1': 'a3,2:b2,1', 'a3,2:b2,2': 'a3,2:b2,2',
+'a3,2:b3,1': 'a3,2:b3,1', 'a3,2:bk2': 'a3,2:bk2', 'ak2:b1': 'ak2:m',
+'ak2:b2,1': 'ak2:b2,1', 'ak2:b2,2': 'ak2:b2,2',
+'ak2:b3,1': 'ak2:b3,1', 'ak2:bk2': 'ak2:bk2'}
 
 class EFTCalculator(CCLAutoRepr):
     """ This class implements a set of methods that can be
@@ -112,13 +120,21 @@ class EFTCalculator(CCLAutoRepr):
         n_exp_cutoff (:obj:`float`): exponent of the cutoff factor (see
             ``k_cutoff``).
         b1_pk_kind (:obj:`str`): power spectrum to use for the first-order
-            bias terms in the expansion. ``'linear'``: use the linear
+            galaxy bias terms in the expansion. ``'linear'``: use the linear
             matter power spectrum. ``'nonlinear'``: use the non-linear
             matter power spectrum. ``'pt'``: use the 1-loop SPT matter
             power spectrum.
         bk2_pk_kind (:obj:`str`): power spectrum to use for the non-local
-            bias terms in the expansion. Same options and default as
+            galaxy bias terms in the expansion. Same options and default as
             ``b1_pk_kind``.
+        a1_pk_kind (:obj:`str`): power spectrum to use for the first-order
+            IA terms in the expansion. ``'linear'``: use the linear
+            matter power spectrum. ``'nonlinear'``: use the non-linear
+            matter power spectrum. ``'pt'``: use the 1-loop SPT matter
+            power spectrum.
+        ak2_pk_kind (:obj:`str`): power spectrum to use for the non-local
+            IA terms in the expansion. Same options and default as
+            ``a1_pk_kind``.
         pad_factor (:obj:`float`): fraction of the :math:`\\log_{10}(k)`
              interval you to add as padding for FFTLog calculations.
         low_extrap (:obj:`float`): decimal logaritm of the minimum Fourier
@@ -136,18 +152,24 @@ class EFTCalculator(CCLAutoRepr):
         sub_lowk (:obj:`bool`): if ``True``, the small-scale white noise
              contribution to some of the terms will be subtracted.
     """
-    __repr_attrs__ = __eq_attrs__ = ('with_NC', 'with_IA', 'with_matter_1loop',
+    # TODO: enfore co-evolution/lagraingian priors as a flag?
+    __repr_attrs__ = __eq_attrs__ = ('with_NC', 'with_IA',
+                                     'with_matter_1loop_NC', 'with_matter_1loop_IA',
                                      'k_s', 'a_s', 'exp_cutoff', 'b1_pk_kind',
-                                     'bk2_pk_kind', 'fastpt_par', )
+                                     'bk2_pk_kind', 'a1_pk_kind',
+                                     'ak2_pk_kind', 'fastpt_par', )
 
     def __init__(self, *, with_NC=False, with_IA=False,
-                 with_matter_1loop=True, cosmo=None,
+                 with_matter_1loop_NC=True, with_matter_1loop_IA=True, 
+                 cosmo=None,
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  a_arr=None, k_cutoff=None, n_exp_cutoff=4,
                  b1_pk_kind='nonlinear', bk2_pk_kind='nonlinear',
+                 a1_pk_kind='nonlinear', ak2_pk_kind='nonlinear',
                  pad_factor=1.0, low_extrap=-5.0, high_extrap=3.0,
                  P_window=None, C_window=0.75, sub_lowk=False):
-        self.with_matter_1loop = with_matter_1loop
+        self.with_matter_1loop_NC = with_matter_1loop_NC
+        self.with_matter_1loop_IA = with_matter_1loop_IA
         self.with_NC = with_NC
         self.with_IA = with_IA
 
@@ -198,7 +220,18 @@ class EFTCalculator(CCLAutoRepr):
         self.b1_pk_kind = b1_pk_kind
         self.bk2_pk_kind = bk2_pk_kind
         if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt'):
-            self.with_matter_1loop = True
+            self.with_matter_1loop_NC = True
+
+
+        # a1/ak P(k) prescription
+        if a1_pk_kind not in ['linear', 'nonlinear', 'pt']:
+            raise ValueError(f"Unknown P(k) prescription {a1_pk_kind}")
+        if ak2_pk_kind not in ['linear', 'nonlinear', 'pt']:
+            raise ValueError(f"Unknown P(k) prescription {ak2_pk_kind}")
+        self.a1_pk_kind = a1_pk_kind
+        self.ak2_pk_kind = ak2_pk_kind
+        if (self.a1_pk_kind == 'pt') or (self.ak2_pk_kind == 'pt'):
+            self.with_matter_1loop_IA = True
 
         # Initialize all expensive arrays to ``None``.
         self._cosmo = None
@@ -222,6 +255,9 @@ class EFTCalculator(CCLAutoRepr):
     @property
     def initialised(self):
         return hasattr(self, "pk_bk")
+
+
+    #need to look at update_ingredients
 
     @unlock_instance
     def update_ingredients(self, cosmo):
@@ -288,6 +324,124 @@ class EFTCalculator(CCLAutoRepr):
         # Reset template power spectra
         self._pk2d_temp = {}
         self._cosmo = cosmo
+
+    #involves calls to fast-pt
+
+    def _get_I11(self):
+        return 0
+
+    def _get_I12(self):
+        return 0
+
+    def _get_I13(self):
+        return 0
+
+    def _get_I14(self):
+        part_1 = (28.0 * self._I_12() - self._I_22() + self._I_23())/(2*np.sqrt(6))
+        return (part_1 - 5.0 * self._I_24() + 5.0 * self._I_34())/7.0
+
+    def _get_I22(self):
+        return 0
+
+    def _get_I23(self):
+        return 0
+
+    def _get_I24(self):
+        return 0
+        
+    def _get_I33(self):
+        return 0
+
+    def _get_I34(self):
+        return 0
+
+    def _get_I44(self):
+        return 0
+
+    def _get_I55(self):
+        return 0
+        
+    def _get_I66(self):
+        return (2. * self._I_22() - 2. * np.sqrt(6.0)*self._I_24() + 3.0  self._I_44())/18.0
+
+    def _get_I67(self):
+        return (2.0 * self._I_22() + 6.0 * self._I_23() - 5.0 * np.sqrt(6) * self._I_24() - 3.0 * np.sqrt(6.0) * self._I_34() + 12.0 * self._I_44())/72.0
+
+    def _get_I77(self):
+        return (self._I_22() + 6.0 * self._I_23() + 9.0 * self._I_33() - 4.0 * np.sqrt(6.0) * self._I_24() - 12.0 * np.sqrt(6) * self._I_34() + 24.0 * self._I_44())/144.0
+        
+
+    def _get_J1(self):
+        return 0
+
+    def _get_J2(self):
+        return 0
+
+    def _get_J3(self):
+        return 0
+
+
+
+    # this is where bias coefficients come into play
+
+    def _get_p00_0_lin(self, tr1, tr2):
+        return 0.0
+
+    def _get_p02_0_lin(self, tr1, tr2):
+        return 0.0
+    
+    def _get_p22_0_lin(self, tr1, tr2):
+        return 0.0
+
+    def _get_p00_0_22(self, tr1, tr2):
+        return 0.0
+
+    def _get_p02_0_22(self, tr1, tr2):
+        return 0.0
+
+    def _get_p22_0_22(self, tr1, tr2):
+        return 0.0
+
+    def _get_p22_1_22(self, tr1, tr2):
+        return 0.0
+
+    def _get_p22_2_22(self, tr1, tr2):
+        return 0.0
+
+    def _get_p00_0_13(self, tr1, tr2):
+        return 0.0
+
+    def _get_p02_0_13(self, tr1, tr2):
+        return 0.0
+
+    def _get_p22_0_13(self, tr1, tr2):
+        return 0.0
+
+    def _get_p00_0_22(self, tr1, tr2):
+        return 0.0
+
+
+    def _get_p00_0(self, tr1, tr2)
+        return self._get_p00_0_lin(tr1, tr2) + self._get_p00_0_22(tr1, tr2) + self._get_p00_0_13(tr1, tr2)
+
+    def _get_p02_0(self, tr1, tr2)
+        return self._get_p02_0_lin(tr1, tr2) + self._get_p02_0_22(tr1, tr2) + self._get_p00_0_13(tr1, tr2)
+
+    def _get_p22_0(self, tr1, tr2)
+        return self._get_p22_0_lin(tr1, tr2) + self._get_p22_0_22(tr1, tr2) + self._get_p22_0_13(tr1, tr2)
+
+    def _get_p22_1(self, tr1, tr2)
+        return self._get_p22_1_22(tr1, tr2) + self._get_p22_1_13(tr1, tr2)
+
+    def _get_p22_2(self, tr1, tr2)
+        return self._get_p22_2_lin(tr1, tr2) + self._get_p22_2_13(tr1, tr2) + self._get_p13_0_lin(tr1, tr2)
+
+
+
+
+    # UP TO HERE
+
+
 
     def _get_pgg(self, tr1, tr2):
         """ Get the number counts auto-spectrum at the internal

@@ -10,11 +10,11 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 from .. import CCLAutoRepr, physical_constants
-from ..pyutils import _check_array_params
+from ..pyutils import _cheak_array_params
 
 
 def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
-                      Om_m2_for_c2=False, Om_m_fid=0.3):
+                      Om_m2_for_a2=False, Om_m_fid=0.3):
     """
     Function to convert from :math:`A_{ia}` values to :math:`c_{ia}` values,
     for the intrinsic alignment bias parameters using the standard
@@ -28,37 +28,37 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
         a1delta (:obj:`float` or `array`): IA :math:`A_{1\\delta}` at input
             z values.
         a2 (:obj:`float` or `array`): IA :math:`A_2` at input z values.
-        Om_m2_for_c2 (:obj:`bool`): True to use the Blazek et al. 2019
+        Om_m2_for_a2 (:obj:`bool`): True to use the Blazek et al. 2019
             convention of :math:`\\Omega_m^2` scaling.
         Om_m_fid (:obj:`float`): Value for Blazek et al. 2019 scaling.
 
     Returns:
         Tuple of IA bias parameters
 
-        - c1 (:obj:`float` or `array`): IA :math:`C_1` at input z values.
-        - c1delta (:obj:`float` or `array`): IA :math:`C_{1\\delta}` at
+        - a1 (:obj:`float` or `array`): IA :math:`C_1` at input z values.
+        - a1delta (:obj:`float` or `array`): IA :math:`C_{1\\delta}` at
           input z values.
-        - c2 (:obj:`float` or `array`): IA :math:`C_2` at input z values.
+        - a2 (:obj:`float` or `array`): IA :math:`C_2` at input z values.
     """
 
     Om_m = cosmo['Omega_m']
     rho_crit = physical_constants.RHO_CRITICAL
-    c1 = c1delta = c2 = None
+    a1 = a1delta = a2 = None
     gz = cosmo.growth_factor(1./(1+z))
 
     if a1 is not None:
-        c1 = -1*a1*5e-14*rho_crit*Om_m/gz
+        a1 = -1*a1*5e-14*rho_crit*Om_m/gz
 
     if a1delta is not None:
-        c1delta = -1*a1delta*5e-14*rho_crit*Om_m/gz
+        a1delta = -1*a1delta*5e-14*rho_crit*Om_m/gz
 
     if a2 is not None:
-        if Om_m2_for_c2:  # Blazek2019 convention
-            c2 = a2*5*5e-14*rho_crit*Om_m**2/(Om_m_fid*gz**2)
+        if Om_m2_for_a2:  # Blazek2019 convention
+            a2 = a2*5*5e-14*rho_crit*Om_m**2/(Om_m_fid*gz**2)
         else:  # DES convention
-            c2 = a2*5*5e-14*rho_crit*Om_m/(gz**2)
+            a2 = a2*5*5e-14*rho_crit*Om_m/(gz**2)
 
-    return c1, c1delta, c2
+    return a1, a1delta, a2
 
 
 class EFTTracer(CCLAutoRepr):
@@ -114,7 +114,7 @@ class EFTTracer(CCLAutoRepr):
 
             return _const
         else:  # Otherwise interpolate
-            z, b = _check_array_params(b)
+            z, b = _cheak_array_params(b)
             return interp1d(z, b, bounds_error=False,
                             fill_value=b[-1])
 
@@ -140,28 +140,28 @@ class EFTNumberCountsTracer(PTTracer):
         b1 (:obj:`float` or :obj:`tuple`): a single number or a
             tuple of arrays ``(z, b(z))`` giving the first-order
             bias.
-        b2 (:obj:`float` or :obj:`tuple`): as above for the
+        b21 (:obj:`float` or :obj:`tuple`): as above for
             second-order bias.
-        bs (:obj:`float` or :obj:`tuple`): as above for the
-            tidal bias.
-        b3nl (:obj:`float` or :obj:`tuple`): as above for the
+        b22 (:obj:`float` or :obj:`tuple`): as above for
+            second-order bias.
+        b31 (:obj:`float` or :obj:`tuple`): as above for the
             third-order bias.
         bk2 (:obj:`float` or :obj:`tuple`): as above for the
             non-local bias.
     """
     type = 'NC'
 
-    def __init__(self, b1, b2=None, bs=None, b3nl=None, bk2=None):
+    def __init__(self, b1, b2=None, bs=None, b31=None, bk2=None):
         self.biases = {}
 
         # Initialize b1
         self.biases['b1'] = self._get_bias_function(b1)
-        # Initialize b2
-        self.biases['b2'] = self._get_bias_function(b2)
-        # Initialize bs
-        self.biases['bs'] = self._get_bias_function(bs)
-        # Initialize b3nl
-        self.biases['b3nl'] = self._get_bias_function(b3nl)
+        # Initialize b2,1
+        self.biases['b2,1'] = self._get_bias_function(b21)
+        # Initialize b2,2
+        self.biases['b2,2'] = self._get_bias_function(b22)
+        # Initialize b3,1
+        self.biases['b3,1'] = self._get_bias_function(b31)
         # Initialize bk2
         self.biases['bk2'] = self._get_bias_function(bk2)
 
@@ -172,22 +172,22 @@ class EFTNumberCountsTracer(PTTracer):
         return self.biases['b1']
 
     @property
-    def b2(self):
+    def b21(self):
         """Internal second-order bias function.
         """
-        return self.biases['b2']
+        return self.biases['b2,1']
 
     @property
-    def bs(self):
+    def b22(self):
         """Internal tidal bias function.
         """
-        return self.biases['bs']
+        return self.biases['b2,2']
 
     @property
-    def b3nl(self):
+    def b31(self):
         """Internal third-order bias function.
         """
-        return self.biases['b3nl']
+        return self.biases['b3,1']
 
     @property
     def bk2(self):
@@ -209,87 +209,87 @@ class EFTIntrinsicAlignmentTracer(PTTracer):
             of the parameters set by the user. 
             Valid flags are 'EFT', 'TATT', and 'NLA'
 
-        c1 (:obj:`float` or :obj:`tuple`): a single number or a
-            tuple of arrays ``(z, c1(z))`` giving the first-order
+        a1 (:obj:`float` or :obj:`tuple`): a single number or a
+            tuple of arrays ``(z, a1(z))`` giving the first-order
             alignment bias A_1
-        c21 (:obj:`float` or :obj:`tuple`): as above for
+        a21 (:obj:`float` or :obj:`tuple`): as above for
             second-order alignment bias. In TATT, this is b_TA
-        c22 (:obj:`float` or :obj:`tuple`): as above for
+        a22 (:obj:`float` or :obj:`tuple`): as above for
             second-order alignment bias. In TATT, this is A_2
-        c23 (:obj:`float` or :obj:`tuple`): as above for
+        a23 (:obj:`float` or :obj:`tuple`): as above for
             second-order alignment bias.
-        c31 (:obj:`float` or :obj:`tuple`): as above for
+        a31 (:obj:`float` or :obj:`tuple`): as above for
             third-order alignment bias.
-        c32 (:obj:`float` or :obj:`tuple`): as above for
+        a32 (:obj:`float` or :obj:`tuple`): as above for
             third-order alignment bias.
-        ck2 (:obj:`float` or :obj:`tuple`): as above for the
+        ak2 (:obj:`float` or :obj:`tuple`): as above for the
             k^2 bias
     """
     type = 'IA'
     bases = ['EFT', 'TATT', 'NLA']
 
-    def __init__(self, basis = 'EFT', c1, c21=None, c22=None, c23=None, c31=None, c32=None, ck2=None):
+    def __init__(self, basis = 'EFT', a1, a21=None, a22=None, a23=None, a31=None, a32=None, ak2=None):
 
         if basis not in bases:
             raise(some error)
 
         self.biases = {}
-        # Initialize c1
-        self.biases['c1'] = self._get_bias_function(c1)
+        # Initialize a1
+        self.biases['a1'] = self._get_bias_function(a1)
         if(basis is not "NLA"):
-            # Initialize c2,1
-            self.biases['c2,1'] = self._get_bias_function(c21)
-            # Initialize c2,2
-            self.biases['c2,2'] = self._get_bias_function(c22)
+            # Initialize a2,1
+            self.biases['a2,1'] = self._get_bias_function(a21)
+            # Initialize a2,2
+            self.biases['a2,2'] = self._get_bias_function(a22)
             if basis is not 'TATT':
-                # Initialize c2,3
-                self.biases['c2,3'] = self._get_bias_function(c23)
-                # Initialize c3,1
-                self.biases['c3,1'] = self._get_bias_function(c31)
-                # Initialize c3,2
-                self.biases['c3,2'] = self._get_bias_function(c32)
-                # Initialize ck2
-                self.biases['ck2'] = self._get_bias_function(ck2)
+                # Initialize a2,3
+                self.biases['a2,3'] = self._get_bias_function(a23)
+                # Initialize a3,1
+                self.biases['a3,1'] = self._get_bias_function(a31)
+                # Initialize a3,2
+                self.biases['a3,2'] = self._get_bias_function(a32)
+                # Initialize ak2
+                self.biases['ak2'] = self._get_bias_function(ak2)
 
     @property
-    def c1(self):
+    def a1(self):
         """Internal first-order bias function.
         """
-        return self.biases['c1']
+        return self.biases['a1']
 
     @property
-    def c21(self):
+    def a21(self):
         """Internal second-order bias function.
         """
-        return self.biases['c21']
+        return self.biases['a21']
 
     @property
-    def c22(self):
+    def a22(self):
         """Internal second-order bias function.
         """
-        return self.biases['c22']
+        return self.biases['a22']
 
     @property
-    def c23(self):
+    def a23(self):
         """Internal second-order bias function.
         """
-        return self.biases['c23']
+        return self.biases['a23']
 
     @property
-    def c31(self):
+    def a31(self):
         """Internal third-order bias function.
         """
-        return self.biases['c31']
+        return self.biases['a31']
 
     @property
-    def c32(self):
+    def a32(self):
         """Internal third-order bias function.
         """
-        return self.biases['c32']
+        return self.biases['a32']
 
     @property
-    def ck2(self):
+    def ak2(self):
         """Internal k^2 bias function.
         """
-        return self.biases['ck2']
+        return self.biases['ak2']
 
