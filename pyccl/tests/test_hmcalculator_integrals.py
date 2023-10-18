@@ -4,18 +4,17 @@ import pyccl as ccl
 cosmo = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
-mdef = ccl.halos.MassDef(200, 'matter')
-hmf = ccl.halos.MassFuncTinker10(cosmo, mdef,
-                                 mass_def_strict=False)
-hbf = ccl.halos.HaloBiasTinker10(cosmo, mass_def=mdef,
-                                 mass_def_strict=False)
+mdef = ccl.halos.MassDef200m
+hmf = ccl.halos.MassFuncTinker10(mass_def=mdef, mass_def_strict=False)
+hbf = ccl.halos.HaloBiasTinker10(mass_def=mdef, mass_def_strict=False)
 
-hmc = ccl.halos.HMCalculator(cosmo, hmf, hbf, mdef)
+hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf, mass_def=mdef)
 
 # Profiles
-P1 = ccl.halos.HaloProfileNFW(ccl.halos.ConcentrationDuffy08(mdef),
+con = ccl.halos.ConcentrationDuffy08(mass_def=mdef)
+P1 = ccl.halos.HaloProfileNFW(mass_def=mdef, concentration=con,
                               fourier_analytic=True)
-P3 = ccl.halos.HaloProfilePressureGNFW()
+P3 = ccl.halos.HaloProfilePressureGNFW(mass_def=mdef)
 
 # Profiles2pt
 PKC = ccl.halos.Profile2pt()
@@ -55,7 +54,7 @@ def test_hmcalculator_I_1_3():
     prof12_2pt = PKC
 
     # 1, 23
-    I = hmc.I_1_3(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2,
+    I = hmc.I_1_3(cosmo, k_use, aa, prof1, prof_2pt=prof12_2pt, prof2=prof2,
                   prof3=prof3)
 
     # Test correct shape
@@ -67,7 +66,7 @@ def test_hmcalculator_I_0_2():
     prof2 = P3
     prof12_2pt = PKC
 
-    I = hmc.I_0_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2)
+    I = hmc.I_0_2(cosmo, k_use, aa, prof1, prof_2pt=prof12_2pt, prof2=prof2)
 
     # Test correct shape
     assert I.shape == (nk,)
@@ -78,8 +77,8 @@ def test_hmcalculator_I_1_2():
     prof2 = P3
     prof12_2pt = PKC
 
-    I = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2)
-    I2 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2,
+    I = hmc.I_1_2(cosmo, k_use, aa, prof1, prof_2pt=prof12_2pt, prof2=prof2)
+    I2 = hmc.I_1_2(cosmo, k_use, aa, prof1, prof_2pt=prof12_2pt, prof2=prof2,
                    diag=False)
 
     # Test correct shape
@@ -93,7 +92,7 @@ def test_hmcalculator_I_0_22():
     prof3 = prof4 = P3
     prof12_2pt = prof34_2pt = PKC
 
-    I = hmc.I_0_22(cosmo, k_use, aa, prof1, prof12_2pt, prof2=prof2,
+    I = hmc.I_0_22(cosmo, k_use, aa, prof1, prof12_2pt=prof12_2pt, prof2=prof2,
                    prof3=prof3, prof34_2pt=prof34_2pt, prof4=prof4)
 
     # Test correct shape
