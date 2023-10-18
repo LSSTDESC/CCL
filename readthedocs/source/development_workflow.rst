@@ -4,10 +4,10 @@ Development Workflow
 
 CCL development proceeds via pull requests on GitHub. In short, the code base
 is forked on GitHub, a new change is pushed to a new branch, and then a pull request
-is issued by the developer. Once a pull request is issued, CCL uses Travis-CI to
-automatically run the benchmark/unit tests and the linter. Please read the sections
-below for guidance on how to modify the source code, test, and then document your
-modifications.
+is issued by the developer. Once a pull request is issued, CCL uses Github Actions to
+automatically run the benchmark/unit tests. Note that we also require any new ``Python``
+code to be PEP-8-compliant (see below). Please read the sections below for guidance on
+how to modify the source code, test, and then document your modifications.
 
 
 Working on the Python library
@@ -25,11 +25,12 @@ code, make sure to follow :ref:`updocs` in order to the properly document your
 new additions.
 
 
-Adding New C-level Features to CCL
-==================================
+Adding New Features to CCL
+==========================
 
 Before adding new features to the CCL ``C`` code, please read :ref:`pycint` in
-order to understand how the ``Python`` and ``C`` codes interact.
+order to understand how the ``Python`` and ``C`` codes interact. Most often you will
+**not** need to use ``C`` at all, in which case you can skip to step 7 below.
 
 The following steps are needed to add a new source file ``ccl_newfile.c`` and
 header ``ccl_newfile.h`` to the library.
@@ -45,8 +46,8 @@ header ``ccl_newfile.h`` to the library.
 #. Add your new ``SWIG`` interface file ``ccl_newfile.i`` to the list of includes
    in the ``pyccl/ccl.i`` file.
 #. Write the public ``Python`` APIs for your new function in a file called
-   ``pyccl/newfile.py``. This ``Python`` package should access the ``C`` code
-   you wrote from the new functions in ``pyccl.ccllib``.
+   ``pyccl/newfile.py``. This ``Python`` package should be able to access any
+   ``C`` code you wrote (if you did) from the new functions in ``pyccl.ccllib``.
 #. Import your new functions into the ``pyccl/__init__.py`` file as needed.
 #. Add unit tests and benchmarks as appropriate for the new code. See :ref:`benchmarks`
    and :ref:`unittests` for details.
@@ -127,56 +128,27 @@ error messages to ``STDERR`` whenever they occur. ``Python`` exceptions will onl
 recent error, as before. (Note that Jupyter notebooks do not print ``C`` ``STDERR`` messages by default.)
 
 
-Continuous Integration with Travis-CI
-=====================================
+Continuous Integration with Github Actions
+==========================================
 
-Travis-CI is a continuous integration service that reads the file ``.travis.yml``
-file in the repository and then runs the benchmarks/unit tests. More details on
-Travis-CI can be found here: https://docs.travis-ci.com/user/getting-started/.
+Github Actions (GHA) is a software workflow service used by CCL for continuous integration. Every time
+you push a commit, GHA will automatically try to build the libraries with your new changes and run the
+benchmark and unit tests. You can check the status of your builds by following the links from the pull
+request page. If your build errors or fails, you can scroll through the log to find out what went wrong.
+Warnings from ``flake8`` will result in the tests not passing.
 
-Every time you push a commit, Travis-CI will automatically try to build the
-libraries with your new changes and run the benchmark/unit tests. You can check the
-status of your builds by following the links from the pull request page. If your
-build errors or fails, you can scroll through the log to find out what went wrong.
-Warnings from ``flake8`` will result in the tests not passing. If your additions
-require new dependencies, make sure that you include them in the ``conda`` environments
-defined in ``.travis/install.sh``.
+What GHA does is dictated by the contents of the ``.github/`` folder in the CCL repo.
+Inside that folder you will find an ``environment.yml`` file, which contains a list of all packages
+needed by GHA to run the tests. You will need to edit it if any new code you've implemented introduces a
+new dependency. The file ``.github/workflows/ci.yml`` then contains the series of steps that GHA will
+take to run all tests.
 
 
 Deploying a New Release
 =======================
 
-When cutting a new release, the procedure is as follows:
-
-#. Make sure any API changes are documented in ``CHANGELOG.md``
-#. Commit to master
-#. Create a new release from the GitHub interface here: https://github.com/LSSTDESC/CCL/releases/new
-#. Manually create a source distribution from the root CCL folder:
-
-   .. code-block:: bash
-
-      $ python setup.py sdist
-
-   This command will create a ``.tar.gz`` file in the ``dist`` folder. CAREFUL!!! Only build and upload the source distribution,
-   not a binary wheel!
-#. Upload source distribution to PyPi using ``twine`` (can be installed using ``pip`` or ``conda``):
-
-   .. code-block:: bash
-
-      $ twine upload  dist/pyccl-x.x.x.tar.gz
-
-   Make sure your ``twine`` and ``setuptools`` packages are up to date, otherwise the
-   markdown formatting of the ``README.md`` will not be correctly processed on the CCL
-   PyPi page.
-#. The ``conda-forge`` automated release bots will detect the new PyPi release and
-   automatically make a pull request on the CCL feedstock. Once this pull request is
-   merged, the new CCL release will be available on ``conda`` after a few hours.
-#. Rebuild and redeploy the ``Read the Docs`` pages per the instructions in :ref:`rtd`.
-   Note that you may need to adjust the major version number in ``readthedocs/conf.py``
-   if the new version has a major version number bump.
-
-A CCL `administrators <https://github.com/LSSTDESC/CCL/CCL-administrators>`_ will
-need to complete the steps above.
+New releases are now automatically deployed after tagging them on github. Administrators can do so
+here https://github.com/LSSTDESC/CCL/releases/new once the new code is in the ``master`` branch.
 
 
 .. _rtd:
@@ -193,8 +165,7 @@ To build the ``Read the Docs`` documentation, follow the following steps:
    $ make html
 
 You can then inspect the outputs in ``readthedocs/_build/index.html`` to make
-sure the formatting is correct. Finally, contact the CCL
-`administrators <https://github.com/LSSTDESC/CCL/CCL-administrators>`_ to redeploy
+sure the formatting is correct. Finally, contact the CCL administrators to redeploy
 the live documentation.
 
 

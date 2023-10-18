@@ -63,10 +63,11 @@ double ccl_Sig_MG(ccl_cosmology * cosmo, double a, double k, int *status)
  * @param status, integer indicating the status
  */
 void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
-                            int mg_rescale, int* status) {
+                            int mg_rescale, int s8_rescale,
+			    int* status) {
 
   int do_mg = mg_rescale && (fabs(cosmo->params.mu_0) > 1e-14);
-  int do_s8 = isfinite(cosmo->params.sigma8) && (!isfinite(cosmo->params.A_s));
+  int do_s8 = s8_rescale && (isfinite(cosmo->params.sigma8) && (!isfinite(cosmo->params.A_s)));
 
   if (!do_mg && !do_s8)
     return;
@@ -118,7 +119,6 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
     // current one but with mu_0 and Sigma_0=0, for scaling P(k)
 
     // Get a list of the three neutrino masses already calculated
-    double norm_pk;
     double mnu_list[3] = {0, 0, 0};
     ccl_parameters params_GR;
     params_GR.m_nu = NULL;
@@ -129,13 +129,7 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
     for (int i=0; i< cosmo->params.N_nu_mass; i=i+1)
       mnu_list[i] = cosmo->params.m_nu[i];
 
-    if (isfinite(cosmo->params.A_s)) {
-      norm_pk = cosmo->params.A_s;
-    }
-    else if (isfinite(cosmo->params.sigma8)) {
-      norm_pk = cosmo->params.sigma8;
-    }
-    else {
+    if (isnan(cosmo->params.A_s) && isnan(cosmo->params.sigma8)) {
       *status = CCL_ERROR_PARAMETERS;
       ccl_cosmology_set_status_message(cosmo,
              "ccl_musigma.c: ccl_rescale_musigma_s8(): "
@@ -147,7 +141,8 @@ void ccl_rescale_musigma_s8(ccl_cosmology* cosmo, ccl_f2d_t *psp,
         cosmo->params.Omega_c, cosmo->params.Omega_b, cosmo->params.Omega_k,
         cosmo->params.Neff, mnu_list, cosmo->params.N_nu_mass,
         cosmo->params.w0, cosmo->params.wa, cosmo->params.h,
-        norm_pk, cosmo->params.n_s,
+        cosmo->params.A_s, cosmo->params.sigma8, cosmo->params.n_s,
+        cosmo->params.T_CMB, cosmo->params.Omega_g, cosmo->params.T_ncdm,
         cosmo->params.bcm_log10Mc, cosmo->params.bcm_etab,
         cosmo->params.bcm_ks, 0., 0., 1., 1., 0.,cosmo->params.nz_mgrowth,
         cosmo->params.z_mgrowth, cosmo->params.df_mgrowth, status);

@@ -5,7 +5,7 @@ set(FFTWMD5 0d5915d7d39b3253c1cc05030d79ac47)
 
 find_package(FFTW)
 
-# If GSL is not installed, lets go ahead and compile it
+# If FFTW is not installed, lets go ahead and compile it
 if(NOT FFTW_FOUND )
     message(STATUS "FFTW not found, downloading and compiling from source")
     ExternalProject_Add(FFTW

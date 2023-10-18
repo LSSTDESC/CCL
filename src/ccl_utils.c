@@ -3,6 +3,9 @@
 #include <math.h>
 
 #include <gsl/gsl_errno.h>
+#ifdef _OPENMP
+#include "omp.h"
+#endif
 
 #include "ccl.h"
 
@@ -339,4 +342,22 @@ void ccl_integ_spline(int ny, int nx,double *x,double **y,
       }
     } //end omp parallel
   }
+}
+
+int ccl_openmp_version()
+{
+  #ifdef _OPENMP
+    return _OPENMP;
+  #else
+    return 0;
+  #endif
+}
+
+int ccl_openmp_threads()
+{
+  #ifdef _OPENMP
+    return omp_get_num_procs();
+  #else
+    return 0;
+  #endif
 }

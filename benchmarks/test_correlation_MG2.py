@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import pyccl as ccl
+from pyccl.modified_gravity import MuSigmaMG
+
 from scipy.interpolate import interp1d
 import pytest
 
@@ -16,14 +18,15 @@ def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
     h0 = 0.67702026367187500
     logA = 3.05  # log(10^10 A_s)
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
+    ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
+    ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
                           m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255,
-                          mu_0=0.1, sigma_0=0.1,
+                          mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.1),
                           transfer_function='boltzmann_isitgr',
                           matter_power_spectrum='linear')
-    cosmo.cosmo.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
-    cosmo.cosmo.gsl_params.INTEGRATION_EPSREL = 2.5E-5
 
     # Ell-dependent correction factors
     # Set up array of ells
@@ -48,10 +51,12 @@ def set_up(request):
 
     # Initialize tracers
     trc = {}
-    trc['g1'] = ccl.NumberCountsTracer(cosmo, False, (z1, pz1), (z1, bz1))
-    trc['g2'] = ccl.NumberCountsTracer(cosmo, False, (z2, pz2), (z2, bz2))
-    trc['l1'] = ccl.WeakLensingTracer(cosmo, (z1, pz1))
-    trc['l2'] = ccl.WeakLensingTracer(cosmo, (z2, pz2))
+    trc['g1'] = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                       dndz=(z1, pz1), bias=(z1, bz1))
+    trc['g2'] = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                       dndz=(z2, pz2), bias=(z2, bz2))
+    trc['l1'] = ccl.WeakLensingTracer(cosmo, dndz=(z1, pz1))
+    trc['l2'] = ccl.WeakLensingTracer(cosmo, dndz=(z2, pz2))
 
     # Read benchmarks
     bms = {}
@@ -118,6 +123,8 @@ def set_up(request):
     ers['ll_12_m'] = interp1d(d[0], d[3],
                               fill_value=d[3][0],
                               bounds_error=False)(theta)
+
+    ccl.gsl_params.reload()
     return cosmo, trc, bms, ers, fl
 
 
@@ -147,7 +154,7 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
     # Our benchmarks have theta in arcmin
     # but CCL requires it in degrees:
     theta_deg = bms['theta'] / 60.
-    xi = ccl.correlation(cosmo, ell, cli, theta_deg, type=kind,
+    xi = ccl.correlation(cosmo, ell=ell, C_ell=cli, theta=theta_deg, type=kind,
                          method=method)
     xi *= pref
 

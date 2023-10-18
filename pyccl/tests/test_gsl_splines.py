@@ -1,18 +1,5 @@
-import pytest
 import pyccl as ccl
-
 import numpy as np
-
-
-def test_spline_params():
-    cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function='bbks', matter_power_spectrum='linear')
-
-    assert cosmo.cosmo.spline_params.A_SPLINE_MAX == 1.0
-
-    with pytest.raises(RuntimeError):
-        cosmo.cosmo.spline_params.A_SPLINE_MAX = 0.9
 
 
 def test_spline1d():
@@ -39,7 +26,7 @@ def test_spline2d():
         ccl.pyutils._get_spline2d_arrays(pk2d_gsl_spline2d)
 
     cosmo = ccl.CosmologyVanillaLCDM()
-    zarr_out_eval = pk2d.eval(k=np.exp(log_y), a=x[-1], cosmo=cosmo)
+    zarr_out_eval = pk2d(k=np.exp(log_y), a=x[-1], cosmo=cosmo)
 
     assert np.allclose(x, xarr)
     assert np.allclose(log_y, yarr)

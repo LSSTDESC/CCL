@@ -63,6 +63,10 @@ void ccl_integ_spline(int ny, int nx,double *x,double **y,
                       double a, double b, double *result,
                       const gsl_interp_type *T, int *status);
 
+int ccl_openmp_version();
+
+int ccl_openmp_threads();
+
 CCL_END_DECLS
 
 #endif
