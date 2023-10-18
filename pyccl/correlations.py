@@ -411,8 +411,6 @@ def correlation_ab(cosmo, *, r_p: np.ndarray, z: np.ndarray,
     cosmo.compute_nonlin_power()
     cosmo_in = cosmo
     psp = cosmo_in.parse_pk(p_of_k_a)
-    # TODO: add some unit tests for Value Errors.
-    # TODO: add the benchmark test.
 
     if dndz2 is None:
         dndz2 = dndz

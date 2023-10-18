@@ -133,4 +133,13 @@ def test_correlation_zero_ends():
         ccl.correlation(COSMO, ell=ell, C_ell=C_ell, theta=theta)
 
 
+def test_correlation_ab():
+    r_p = np.geomspace(0.1, 100, 128)
+    z = np.linspace(0, 0.5, 128)
+    dndz = z ** 2 * np.exp(-(z / 0.11) ** 0.68)
+    with pytest.raises(ccl.CCLError):
+        COSMO.correlation_ab(r_p=r_p, z=z, dndz=None)
+        COSMO.correlation_ab(r_p=r_p, z=z, dndz=dndz, type='somethingelse')
+
+
 ccl.gsl_params.reload()  # reset to the default parameters
