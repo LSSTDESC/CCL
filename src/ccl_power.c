@@ -10,8 +10,6 @@
 
 #include "ccl.h"
 #include "ccl_f2d.h"
-#include "ccl_emu17.h"
-#include "ccl_emu17_params.h"
 
 // helper functions for BBKS and EH98
 static double bbks_power(ccl_parameters *params, void *p, double k) {
@@ -169,205 +167,6 @@ ccl_f2d_t *ccl_compute_linpower_eh(ccl_cosmology *cosmo, int wiggled, int *statu
   return psp;
 }
 
-/*------ ROUTINE: ccl_compute_power_emu -----
-INPUT: cosmology
-TASK: provide spline for the emulated power spectrum from Cosmic EMU
-*/
-
-ccl_f2d_t *ccl_compute_power_emu(ccl_cosmology * cosmo, int * status)
-{
-  double Omeganuh2_eq;
-  ccl_f2d_t *psp_out=NULL;
-
-  // Check ranges to see if the cosmology is valid
-  if(*status==0) {
-    if((cosmo->params.h<0.55) || (cosmo->params.h>0.85)){
-      *status=CCL_ERROR_INCONSISTENT;
-      ccl_cosmology_set_status_message(cosmo,
-               "ccl_power.c: ccl_compute_power_emu(): "
-               "h is outside allowed range\n");
-    }
-  }
-
-  if(*status==0) {
-   // Check if the cosmology has been set up with equal neutrino masses for the emulator
-    // If not, check if the user has forced redistribution of masses and if so do this.
-    if(cosmo->params.N_nu_mass>0) {
-      if (cosmo->config.emulator_neutrinos_method == ccl_emu_strict){
-        if (cosmo->params.N_nu_mass==3){
-          if (cosmo->params.m_nu[0] != cosmo->params.m_nu[1] ||
-              cosmo->params.m_nu[0] != cosmo->params.m_nu[2] ||
-              cosmo->params.m_nu[1] != cosmo->params.m_nu[2]){
-            *status = CCL_ERROR_INCONSISTENT;
-            ccl_cosmology_set_status_message(cosmo,
-                                             "ccl_power.c: ccl_compute_power_emu(): "
-                                             "In the default configuration, you must pass a list of 3 "
-                                             "equal neutrino masses or pass a sum and set "
-                                             "m_nu_type = 'equal'. If you wish to over-ride this, "
-                                             "set config->emulator_neutrinos_method = "
-                                             "'ccl_emu_equalize'. This will force the neutrinos to "
-                                             "be of equal mass but will result in "
-                                             "internal inconsistencies.\n");
-          }
-        }else if (cosmo->params.N_nu_mass!=3){
-          *status = CCL_ERROR_INCONSISTENT;
-          ccl_cosmology_set_status_message(cosmo,
-                                           "ccl_power.c: ccl_compute_power_emu(): "
-                                           "In the default configuration, you must pass a list of 3 "
-                                           "equal neutrino masses or pass a sum and set "
-                                           "m_nu_type = 'equal'. If you wish to over-ride this, "
-                                           "set config->emulator_neutrinos_method = "
-                                           "'ccl_emu_equalize'. This will force the neutrinos to "
-                                           "be of equal mass but will result in "
-                                           "internal inconsistencies.\n");
-        }
-      }else if (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize){
-        // Reset the masses to equal
-        double mnu_eq[3] = {cosmo->params.sum_nu_masses / 3.,
-                            cosmo->params.sum_nu_masses / 3.,
-                            cosmo->params.sum_nu_masses / 3.};
-        Omeganuh2_eq = ccl_Omeganuh2(1.0, 3, mnu_eq, cosmo->params.T_CMB, status);
-      }
-    } else {
-      if(fabs(cosmo->params.N_nu_rel - 3.04)>1.e-6){
-        *status=CCL_ERROR_INCONSISTENT;
-        ccl_cosmology_set_status_message(cosmo,
-                                         "ccl_power.c: ccl_compute_power_emu(): "
-                                         "Set Neff = 3.04 for cosmic emulator predictions in "
-                                         "absence of massive neutrinos.\n");
-      }
-    }
-  }
-
-  if(*status==0) {
-    double w0wacomb = -cosmo->params.w0 - cosmo->params.wa;
-    if(w0wacomb<8.1e-3){ //0.3^4
-      *status=CCL_ERROR_INCONSISTENT;
-      ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_power.c: ccl_compute_power_emu(): "
-                                       "w0 and wa do not satisfy the emulator bound\n");
-    }
-  }
-
-  if(*status==0) {
-    if(cosmo->params.Omega_nu_mass*cosmo->params.h*cosmo->params.h>0.01){
-      *status=CCL_ERROR_INCONSISTENT;
-      ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_power.c: ccl_compute_power_emu(): "
-                                       "Omega_nu does not satisfy the emulator bound\n");
-    }
-  }
-
-  if(*status==0) {
-    // Check to see if sigma8 was defined
-    if(isnan(cosmo->params.sigma8)){
-      *status=CCL_ERROR_INCONSISTENT;
-      ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_power.c: ccl_compute_power_emu(): "
-                                       "sigma8 is not defined; specify sigma8 instead of A_s\n");
-    }
-  }
-
-  int na=cosmo->spline_params.A_SPLINE_NA_PK;
-  double *lpk_1a=NULL,*lk=NULL,*aemu=NULL,*lpk_nl=NULL;
-  if (*status == 0) {
-    //Now start the NL computation with the emulator
-    //These are the limits of the splining range
-    aemu = ccl_linear_spacing(A_MIN_EMU,cosmo->spline_params.A_SPLINE_MAX, na);
-    if(aemu==NULL) {
-      *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_power.c: ccl_compute_power_emu(): "
-                                       "memory allocation error\n");
-    }
-  }
-  if (*status == 0) {
-    lk=malloc(NK_EMU*sizeof(double));
-    if(lk==NULL) {
-      *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_power.c: ccl_compute_power_emu(): "
-                                       "memory allocation error\n");
-    }
-  }
-  if (*status == 0) {
-    //The emulator only computes power spectra at fixed nodes in k,
-    //given by the global variable "mode"
-    for (int i=0; i<NK_EMU; i++)
-      lk[i] = log(mode[i]);
-  }
-  if (*status == 0) {
-    lpk_nl = malloc(NK_EMU * na * sizeof(double));
-    if(lpk_nl==NULL) {
-      *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_power.c: ccl_compute_power_emu(): "
-                                       "memory allocation error\n");
-    }
-  }
-  if (*status == 0) {
-    lpk_1a=malloc(NK_EMU*sizeof(double));
-    if(lpk_1a==NULL) {
-      *status=CCL_ERROR_MEMORY;
-      ccl_cosmology_set_status_message(cosmo,
-                                       "ccl_power.c: ccl_compute_power_emu(): "
-                                       "memory allocation error\n");
-    }
-  }
-
-  if (*status == 0) {
-    double emu_par[9];
-    //For each redshift:
-    for (int j = 0; j < na; j++){
-      //Turn cosmology into emu_par:
-      if ((cosmo->params.N_nu_mass>0) &&
-          (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize)){
-          emu_par[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b)*cosmo->params.h*cosmo->params.h + Omeganuh2_eq;
-      }else{
-          emu_par[0] = (cosmo->params.Omega_c+cosmo->params.Omega_b+cosmo->params.Omega_nu_mass)*cosmo->params.h*cosmo->params.h;
-      }
-      emu_par[1] = cosmo->params.Omega_b*cosmo->params.h*cosmo->params.h;
-      emu_par[2] = cosmo->params.sigma8;
-      emu_par[3] = cosmo->params.h;
-      emu_par[4] = cosmo->params.n_s;
-      emu_par[5] = cosmo->params.w0;
-      emu_par[6] = cosmo->params.wa;
-      if ((cosmo->params.N_nu_mass>0) &&
-          (cosmo->config.emulator_neutrinos_method == ccl_emu_equalize)){
-        emu_par[7] = Omeganuh2_eq;
-      }else{
-        emu_par[7] = cosmo->params.Omega_nu_mass*cosmo->params.h*cosmo->params.h;
-      }
-      emu_par[8] = 1./aemu[j]-1;
-      //Need to have this here because otherwise overwritten by emu in each loop
-
-      //Call emulator at this redshift
-      ccl_pkemu(emu_par,NK_EMU,lpk_1a, status, cosmo);
-      if (*status) {
-        *status=CCL_ERROR_MEMORY;
-        ccl_cosmology_set_status_message(cosmo,
-                                         "ccl_power.c: ccl_compute_power_emu(): "
-                                         "memory allocation error\n");
-        break;
-      }
-      for (int i=0; i<NK_EMU; i++)
-        lpk_nl[j*NK_EMU+i] = log(lpk_1a[i]);
-    }
-  }
-
-  if(*status==0) {
-    psp_out=ccl_f2d_t_new(na,aemu,NK_EMU,lk,lpk_nl,NULL,NULL,0,
-                          1,2,ccl_f2d_no_extrapol,
-                          1,0,2,ccl_f2d_3,status);
-  }
-
-  free(lpk_1a);
-  free(lk);
-  free(aemu);
-  free(lpk_nl);
-  return psp_out;
-}
-
 
 ccl_f2d_t *ccl_apply_halofit(ccl_cosmology* cosmo, ccl_f2d_t *plin, int *status)
 {
@@ -437,7 +236,7 @@ void ccl_rescale_linpower(ccl_cosmology* cosmo, ccl_f2d_t *psp,
                           int *status)
 {
   if(rescale_mg || rescale_norm)
-    ccl_rescale_musigma_s8(cosmo, psp, rescale_mg, status);
+    ccl_rescale_musigma_s8(cosmo, psp, rescale_mg, rescale_norm, status);
 }
 
 // Params for sigma(R) integrand
@@ -707,7 +506,11 @@ smoothed with a tophat filter of comoving size 8 Mpc/h
 */
 
 double ccl_sigma8(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *status) {
-  return ccl_sigmaR(cosmo, 8/cosmo->params.h, 1., psp, status);
+  double res = ccl_sigmaR(cosmo, 8/cosmo->params.h, 1., psp, status);
+  if (isnan(cosmo->params.sigma8)) {
+    cosmo->params.sigma8 = res;
+  }
+  return res;
 }
 
 // Integrand for kNL integral

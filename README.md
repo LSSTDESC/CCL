@@ -1,5 +1,5 @@
 <!---
-STYLE CONVENTION USED   
+STYLE CONVENTION USED
     bolt italic:
         ***file***"
     code:
@@ -10,22 +10,26 @@ STYLE CONVENTION USED
         **`function`**
         **`type`** or **`structure`**
 -->
-# CCL     
-[![Build Status](https://travis-ci.org/LSSTDESC/CCL.svg?branch=master)](https://travis-ci.org/LSSTDESC/CCL) [![Coverage Status](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master) [![Documentation Status](https://readthedocs.org/projects/ccl/badge/?version=latest)](https://ccl.readthedocs.io/en/latest/?badge=latest)
+# CCL
+![Build](https://github.com/LSSTDESC/CCL/workflows/continuous-integration/badge.svg?branch=master)&nbsp;
+[![Coverage](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master)&nbsp;
+[![Documentation](https://readthedocs.org/projects/ccl/badge/?version=latest)](https://ccl.readthedocs.io/en/latest/)&nbsp;
+[![DOI](https://img.shields.io/badge/DOI-10.3847%2F1538--4365%2Fab1658-B31B1B.svg)](https://iopscience.iop.org/article/10.3847/1538-4365/ab1658)
 
-The Core Cosmology Library (CCL) is a standardized library of routines to calculate
-basic observables used in cosmology. It will be the standard analysis package used by the
-LSST Dark Energy Science Collaboration (DESC).
+The Core Cosmology Library (CCL) is a public standardized library of routines to calculate
+basic observables used in cosmology. It will be the standard theoretical prediction package
+used by the LSST Dark Energy Science Collaboration (DESC), although we hope it will have
+broader applicability.
 
 The core functions of this package include:
 
-  - Matter power spectra `P(k)` from numerous models including CLASS, the Mira-Titan Emulator and halofit
-  - Hubble constant `H(z)` as well as comoving distances `\chi(z)` and distance moduli `\mu(z)`
-  - Growth of structure `D(z)` and `f`
-  - Correlation functions `C_\ell` for arbitrary combinations of tracers including galaxies, shear and number counts
-  - Halo mass function `{\rm d}n/{\rm d}M` and halo bias `b(M)`
-  - Approximate baryonic modifications to the matter power spectra `\Delta^2_{\rm baryons}`
-  - Simple modified gravity extensions `\Delta f(z)` and `\mu-\Sigma`
+  - Background quantities (Hubble parameter $H(z)$, distances etc.).
+  - Linear growth factor $D(z)$ and growth rate $f(z)$.
+  - Linear matter power spectra $P(k)$ from Boltzmann codes (CLASS, CAMB), emulators, and approximate fitting functions.
+  - Non-linear matter power power spectra using a variety of prescriptions, including emulators, and including the impact of baryonic effects.
+  - Angular power spectra $C_\ell$ and correlation functions $\xi(\theta)$ for arbitrary combinations of tracers including number counts, shear, CMB lensing, ISW, thermal SZ, CIB, as well as custom-made tracers.
+  - A comprehensive halo model framework able to combine different prescriptions for the halo mass function $dn/dM$, halo bias $b(M)$, concentration-mass relation $c(M)$, mass definitions, and halo profiles, as well as to provide predictions for summary statistics (power spectra, non-Gaussian covariances) of arbitrary quantities.
+  - Support for $\Lambda$ CDM, and $w_0-w_a$CDM cosmologies with curvature and massive neutrinos, as well as simple modified gravity extensions (e.g. $\mu-\Sigma$ ).
 
 This software is a publicly released LSST DESC product which was developed within the LSST
 DESC using LSST DESC resources. DESC users should use it in accordance with the
@@ -54,9 +58,10 @@ or
 $ pip install pyccl
 ```
 
-For the PyPi installation, you will need ``CMake`` installed locally. See
-[Getting CMake](https://ccl.readthedocs.io/en/latest/source/installation.html#getting-cmake)
-for instructions. Note that the code only supports Linux or Mac OS, but no Windows.
+For the PyPi installation, you will need ``CMake`` and ``SWIG`` installed locally.
+See [Getting CMake](https://ccl.readthedocs.io/en/latest/source/installation.html#getting-cmake)
+and [Installing SWIG](https://pypi.org/project/swig/) for instructions.
+Note that the code only supports Linux or Mac OS, but no Windows.
 
 Once you have the code installed, you can take it for a spin!
 
@@ -71,7 +76,7 @@ cosmo = ccl.Cosmology(
     transfer_function='bbks')
 
 # Define a simple binned galaxy number density curve as a function of redshift
-z_n = np.linspace(0., 1., 200)
+z_n = np.linspace(0., 1., 500)
 n = np.ones(z_n.shape)
 
 # Create objects to represent tracers of the weak lensing signal with this
@@ -81,7 +86,7 @@ lens2 = ccl.WeakLensingTracer(cosmo, dndz=(z_n, n))
 
 # Calculate the angular cross-spectrum of the two tracers as a function of ell
 ell = np.arange(2, 10)
-cls = ccl.angular_cl(cosmo, lens1, lens2, ell)
+cls = cosmo.angular_cl(lens1, lens2, ell)
 print(cls)
 ```
 
@@ -111,13 +116,13 @@ for more information.
 # Contact
 
 If you have comments, questions, or feedback, please
-[write us an issue](https://github.com/LSSTDESC/CCL/issues). 
+[write us an issue](https://github.com/LSSTDESC/CCL/issues).
 
-The current lead of the LSST DESC CCL Topical Team is Danielle Leonard (c-d-leonard, danielle.leonard at ncl.ac.uk)
+The current lead of the LSST DESC CCL Topical Team is David Alonso (damonge, david.alonso at physics.ox.ac.uk).
 
 
 # Acknowledgements
 
 The DESC acknowledges ongoing support from the Institut National de Physique Nucleaire et de Physique des Particules in France; the Science \& Technology Facilities Council in the United Kingdom; and the Department of Energy, the National Science Foundation, and the LSST Corporation in the United States.  DESC uses resources of the IN2P3 Computing Center (CC-IN2P3--Lyon/Villeurbanne - France) funded by the Centre National de la Recherche Scientifique; the National Energy Research Scientific Computing Center, a DOE Office of Science User Facility supported by the Office of Science of the U.S. Department of Energy under Contract No. DE-AC02-05CH11231; STFC DiRAC HPC Facilities, funded by UK BIS National E-infrastructure capital grants; and the UK particle physics grid, supported by the GridPP Collaboration.  This work was performed in part under DOE Contract DE-AC02-76SF00515.
 
-NEC acknowledges support from a Royal Astronomical Society research fellowship and the Delta ITP consortium, a program of the Netherlands Organisation for Scientific Research (NWO) that is funded by the Dutch Ministry of Education, Culture and Science (OCW). DA acknowledges support from the Science and Technology Facilities Council through an Ernest Rutherford Fellowship, grant reference ST/P004474. AL and CG acknowledge support from the European Research Council under the European Union's Seventh Framework Programme (FP/2007-2013) / ERC Grant Agreement No. [616170] for work on the generic interface for theory inputs. 
+NEC acknowledges support from a Royal Astronomical Society research fellowship and the Delta ITP consortium, a program of the Netherlands Organisation for Scientific Research (NWO) that is funded by the Dutch Ministry of Education, Culture and Science (OCW). DA acknowledges support from the Science and Technology Facilities Council through an Ernest Rutherford Fellowship, grant reference ST/P004474. AL and CG acknowledge support from the European Research Council under the European Union's Seventh Framework Programme (FP/2007-2013) / ERC Grant Agreement No. [616170] for work on the generic interface for theory inputs.

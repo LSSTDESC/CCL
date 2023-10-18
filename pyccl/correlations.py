@@ -1,99 +1,122 @@
-"""Correlation functon computations.
+__all__ = ("CorrelationMethods", "CorrelationTypes", "correlation",
+           "correlation_3d", "correlation_multipole", "correlation_3dRsd",
+           "correlation_3dRsd_avgmu", "correlation_pi_sigma",)
 
-Choices of algorithms used to compute correlation functions:
-    'Bessel' is a direct integration using Bessel functions.
-    'FFTLog' is fast using a fast Fourier transform.
-    'Legendre' uses a sum over Legendre polynomials.
-"""
-
-from . import ccllib as lib
-from . import constants as const
-from .core import check
-from .pk2d import parse_pk2d
+from enum import Enum
 import numpy as np
-import warnings
+from . import DEFAULT_POWER_SPECTRUM, check, lib
+
+
+class CorrelationMethods(Enum):
+    """Choices of algorithms used to compute correlation functions:
+
+    - 'Bessel' is a direct integration using Bessel functions.
+    - 'FFTLog' is fast using a fast Fourier transform.
+    - 'Legendre' uses a sum over Legendre polynomials.
+    """
+    FFTLOG = "fftlog"
+    BESSEL = "bessel"
+    LEGENDRE = "legendre"
+
+
+class CorrelationTypes(Enum):
+    """Correlation function types.
+    """
+    NN = "NN"
+    NG = "NG"
+    GG_PLUS = "GG+"
+    GG_MINUS = "GG-"
+
 
 correlation_methods = {
-    'fftlog': const.CCL_CORR_FFTLOG,
-    'bessel': const.CCL_CORR_BESSEL,
-    'legendre': const.CCL_CORR_LGNDRE,
+    'fftlog': lib.CCL_CORR_FFTLOG,
+    'bessel': lib.CCL_CORR_BESSEL,
+    'legendre': lib.CCL_CORR_LGNDRE,
 }
 
 correlation_types = {
-    'NN': const.CCL_CORR_GG,
-    'NG': const.CCL_CORR_GL,
-    'GG+': const.CCL_CORR_LP,
-    'GG-': const.CCL_CORR_LM,
+    'NN': lib.CCL_CORR_GG,
+    'NG': lib.CCL_CORR_GL,
+    'GG+': lib.CCL_CORR_LP,
+    'GG-': lib.CCL_CORR_LM,
 }
 
 
-def correlation(cosmo, ell, C_ell, theta, type='NN', corr_type=None,
-                method='fftlog'):
-    """Compute the angular correlation function.
+def correlation(cosmo, *, ell, C_ell, theta, type='NN', method='fftlog'):
+    r"""Compute the angular correlation function.
+
+    .. math::
+
+        \xi^{ab}_\pm(\theta) =
+        \sum_\ell\frac{2\ell+1}{4\pi}\,(\pm1)^{s_b}\,
+        C^{ab\pm}_\ell\,d^\ell_{s_a,\pm s_b}(\theta)
+
+    where :math:`\theta` is the angle between the two fields :math:`a` and
+    :math:`b` with spins :math:`s_a` and :math:`s_b` after alignement of their
+    tangential coordinate. :math:`d^\ell_{mm'}` are the Wigner-d matrices and
+    we have defined the power spectra
+
+    .. math::
+        C^{ab\pm}_\ell \equiv
+        (C^{a_Eb_E}_\ell \pm C^{a_Bb_B}_\ell)+i
+        (C^{a_Bb_E}_\ell \mp C^{a_Eb_B}_\ell),
+
+    which reduces to the :math:`EE` power spectrum when all :math:`B`-modes
+    are 0.
+
+    The different spin combinations are:
+
+        * :math:`s_a=s_b=0` e.g. galaxy-galaxy, galaxy-:math:`\kappa`
+          and :math:`\kappa`-:math:`\kappa`
+        * :math:`s_a=2`, :math:`s_b=0` e.g. galaxy-shear, and :math:`\kappa`-shear
+        * :math:`s_a=s_b=2` e.g. shear-shear.
+
+    .. note::
+        For scales smaller than :math:`\sim 0.1^{\circ}`, the input power
+        spectrum should be sampled to sufficienly high :math:`\ell` to ensure
+        the Hankel transform is well-behaved. The following spline parameters,
+        related to ``FFTLog``-sampling may also be modified for accuracy:
+
+            * ``ccl.spline_params.ELL_MIN_CORR``
+            * ``ccl.spline_params.ELL_MAX_CORR``
+            * ``ccl.spline_params.N_ELL_CORR``.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        ell (array_like): Multipoles corresponding to the input angular power
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        ell (array): Multipoles corresponding to the input angular power
                           spectrum.
-        C_ell (array_like): Input angular power spectrum.
-        theta (float or array_like): Angular separation(s) at which to
-                                     calculate the angular correlation
-                                     function (in degrees).
-        type (string): Type of correlation function. Choices:
-                       'NN' (0x0), 'NG' (0x2),
-                       'GG+' (2x2, xi+),
-                       'GG-' (2x2, xi-), where numbers refer to the
-                       spins of the two quantities being cross-correlated
-                       (see Section 2.4.2 of the CCL paper).
-        method (string, optional): Method to compute the correlation function.
-                                   Choices: 'Bessel' (direct integration over
-                                   Bessel function), 'FFTLog' (fast
-                                   integration with FFTLog), 'Legendre'
-                                   (brute-force sum over Legendre polynomials).
-        corr_type (string): (deprecated, please use `type`)
-                            Type of correlation function. Choices:
-                            'gg' (0x0), 'gl' (0x2),
-                            'l+' (2x2, xi+),
-                            'l-' (2x2, xi-), where the numbers refer to the
-                            spins of the two quantities being cross-correlated
-                            (see Section 2.4.2 of the CCL paper).
+        C_ell (array): Input angular power spectrum.
+        theta (:obj:`float` or `array`): Angular separation(s) at which to
+            calculate the angular correlation function (in degrees).
+        type (:obj:`str`): Type of correlation function. Choices: ``'NN'`` (0x0),
+            ``'NG'`` (0x2), ``'GG+'`` (2x2, :math:`\xi_+`),
+            ``'GG-'`` (2x2, :math:`\xi_-`), where numbers refer to the spins
+            of the two quantities being cross-correlated (see Section 2.4.2 of
+            the CCL paper). The naming system roughly follows the nomenclature
+            used in `TreeCorr
+            <https://rmjarvis.github.io/TreeCorr/_build/html/correlation2.html>`_.
+        method (:obj:`str`): Method to compute the correlation function.
+            Choices: ``'Bessel'`` (direct integration over Bessel function),
+            ``'FFTLog'`` (fast integration with FFTLog), ``'Legendre'``
+            (brute-force sum over Legendre polynomials).
 
     Returns:
-        float or array_like: Value(s) of the correlation function at the \
-            input angular separations.
-    """
-    from .errors import CCLWarning
+        (:obj:`float` or `array`): Value(s) of the correlation function at the
+        input angular separations.
+    """ # noqa
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
     status = 0
-
-    if corr_type is not None:
-        # Convert to lower case
-        corr_type = corr_type.lower()
-        if corr_type == 'gg':
-            type = 'NN'
-        elif corr_type == 'gl':
-            type = 'NG'
-        elif corr_type == 'l+':
-            type = 'GG+'
-        elif corr_type == 'l-':
-            type = 'GG-'
-        else:
-            raise ValueError("Unknown corr_type " + corr_type)
-        warnings.warn("corr_type is deprecated. Use type = {}".format(type),
-                      CCLWarning)
     method = method.lower()
 
-    if type not in correlation_types.keys():
-        raise ValueError("'%s' is not a valid correlation type." % type)
+    if type not in correlation_types:
+        raise ValueError(f"Invalud correlation type {type}.")
 
     if method not in correlation_methods.keys():
-        raise ValueError("'%s' is not a valid correlation method." % method)
+        raise ValueError(f"Invalid correlation method {method}.")
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(theta, float) or isinstance(theta, int):
-        scalar = True
+    if scalar := isinstance(theta, (int, float)):
         theta = np.array([theta, ])
 
     if np.all(np.array(C_ell) == 0):
@@ -111,36 +134,36 @@ def correlation(cosmo, ell, C_ell, theta, type='NN', corr_type=None,
     return wth
 
 
-def correlation_3d(cosmo, a, r, p_of_k_a=None):
-    """Compute the 3D correlation function.
+def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
+    r"""Compute the 3D correlation function:
+
+    .. math::
+        \xi(r)\equiv\frac{1}{2\pi^2}\int dk\,k^2\,P(k)\,j_0(kr).
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        a (float): scale factor.
-        r (float or array_like): distance(s) at which to calculate the 3D
-                                 correlation function (in Mpc).
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        r (:obj:`float` or `array`): distance(s) at which to calculate the 3D
+            correlation function (in Mpc).
+        a (:obj:`float`): scale factor.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
 
     Returns:
         Value(s) of the correlation function at the input distance(s).
-    """
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(r, float) or isinstance(r, int):
-        scalar = True
+    if scalar := isinstance(r, (int, float)):
         r = np.array([r, ])
 
     # Call 3D correlation function
@@ -152,179 +175,187 @@ def correlation_3d(cosmo, a, r, p_of_k_a=None):
     return xi
 
 
-def correlation_multipole(cosmo, a, beta, l, s, p_of_k_a=None):
-    """Compute the correlation multipoles.
+def correlation_multipole(cosmo, *, r, a, beta, ell,
+                          p_of_k_a=DEFAULT_POWER_SPECTRUM):
+    r"""Compute the correlation function multipoles:
+
+    .. math::
+        \xi_\ell(r)\equiv\frac{i^\ell}{2\pi^2}\int dk\,k^2\,P(k)\,j_\ell(kr).
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        a (float): scale factor.
-        beta (float): growth rate divided by galaxy bias.
-        l (int) : the desired multipole
-        s (float or array_like): distance(s) at which to calculate the 3DRsd
-                                 correlation function (in Mpc).
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        r (:obj:`float` or `array`): distance(s) at which to calculate the 3D
+            correlation function (in Mpc).
+        a (:obj:`float`): scale factor.
+        beta (:obj:`float`): growth rate divided by galaxy bias.
+        ell (:obj:`int`) : the desired multipole
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
 
     Returns:
         Value(s) of the correlation function at the input distance(s).
-    """
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(s, float) or isinstance(s, int):
-        scalar = True
-        s = np.array([s, ])
+    if scalar := isinstance(r, (int, float)):
+        r = np.array([r, ])
 
     # Call 3D correlation function
-    xis, status = lib.correlation_multipole_vec(cosmo, psp, a, beta, l, s,
-                                                len(s), status)
+    xis, status = lib.correlation_multipole_vec(cosmo, psp, a, beta, ell, r,
+                                                len(r), status)
     check(status, cosmo_in)
     if scalar:
         return xis[0]
     return xis
 
 
-def correlation_3dRsd(cosmo, a, s, mu, beta, use_spline=True, p_of_k_a=None):
-    """
-    Compute the 3DRsd correlation function using linear approximation
-    with multipoles.
+def correlation_3dRsd(cosmo, *, r, a, mu, beta,
+                      p_of_k_a=DEFAULT_POWER_SPECTRUM, use_spline=True):
+    r"""
+    Compute the 3D correlation function with linear RSDs using
+    multipoles:
+
+    .. math::
+        \xi(r,\mu) = \sum_{\ell\in\{0,2,4\}}\xi_\ell(r)\,P_\ell(\mu)
+
+    where :math:`P_\ell(\mu)` are the Legendre polynomials, and
+    :math:`\xi_\ell(r)` are the correlation function multipoles.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        a (float): scale factor.
-        s (float or array_like): distance(s) at which to calculate the
-                                 3DRsd correlation function (in Mpc).
-        mu (float): cosine of the angle at which to calculate the 3DRsd
-                    correlation function (in Radian).
-        beta (float): growth rate divided by galaxy bias.
-        use_spline: switch that determines whether the RSD correlation
-                    function is calculated using global splines of multipoles.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        r (:obj:`float` or `array`): distance(s) at which to calculate the
+            3D correlation function (in Mpc).
+        a (:obj:`float`): scale factor.
+        mu (:obj:`float`): cosine of the angle at which to calculate the 3D
+            correlation function.
+        beta (:obj:`float`): growth rate divided by galaxy bias.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
+        use_spline (:obj:`bool`): switch that determines whether the RSD correlation
+            function is calculated using global splines of multipoles.
 
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
-    """
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(s, float) or isinstance(s, int):
-        scalar = True
-        s = np.array([s, ])
+    if scalar := isinstance(r, (int, float)):
+        r = np.array([r, ])
 
     # Call 3D correlation function
-    xis, status = lib.correlation_3dRsd_vec(cosmo, psp, a, mu, beta, s,
-                                            len(s), int(use_spline), status)
+    xis, status = lib.correlation_3dRsd_vec(cosmo, psp, a, mu, beta, r,
+                                            len(r), int(use_spline), status)
     check(status, cosmo_in)
     if scalar:
         return xis[0]
     return xis
 
 
-def correlation_3dRsd_avgmu(cosmo, a, s, beta, p_of_k_a=None):
+def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
+                            p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """
-    Compute the 3DRsd correlation function averaged over mu at constant s.
+    Compute the 3D correlation function averaged over angles with
+    RSDs. Equivalent to calling :func:`correlation_multipole`
+    with ``ell=0``.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        a (float): scale factor.
-        s (float or array_like): distance(s) at which to calculate the 3DRsd
-                                 correlation function (in Mpc).
-        beta (float): growth rate divided by galaxy bias.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        r (:obj:`float` or `array`): distance(s) at which to calculate the 3D
+            correlation function (in Mpc).
+        a (:obj:`float`): scale factor.
+        beta (:obj:`float`): growth rate divided by galaxy bias.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
 
     Returns:
         Value(s) of the correlation function at the input distance(s) & angle.
-    """
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(s, float) or isinstance(s, int):
-        scalar = True
-        s = np.array([s, ])
+    if scalar := isinstance(r, (int, float)):
+        r = np.array([r, ])
 
     # Call 3D correlation function
-    xis, status = lib.correlation_3dRsd_avgmu_vec(cosmo, psp, a, beta, s,
-                                                  len(s), status)
+    xis, status = lib.correlation_3dRsd_avgmu_vec(cosmo, psp, a, beta, r,
+                                                  len(r), status)
     check(status, cosmo_in)
     if scalar:
         return xis[0]
     return xis
 
 
-def correlation_pi_sigma(cosmo, a, beta, pi, sig,
-                         use_spline=True, p_of_k_a=None):
-    """
-    Compute the 3DRsd correlation in pi-sigma space.
+def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
+                         use_spline=True, p_of_k_a=DEFAULT_POWER_SPECTRUM):
+    r"""
+    Compute the 3D correlation in :math:`(\pi,\sigma)` space. This is
+    just
+
+    .. math::
+        \xi(\pi,\sigma) = \xi(r=\sqrt{\pi^2+\sigma^2},\mu=\pi/r).
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-        a (float): scale factor.
-        pi (float): distance times cosine of the angle (in Mpc).
-        sig (float or array-like): distance(s) times sine of the angle
-                                   (in Mpc).
-        beta (float): growth rate divided by galaxy bias.
-        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, `str` or None): 3D Power spectrum
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        pi (:obj:`float`): distance times cosine of the angle (in Mpc).
+        sigma (:obj:`float` or `array`): distance(s) times sine of the angle
+            (in Mpc).
+        a (:obj:`float`): scale factor.
+        beta (:obj:`float`): growth rate divided by galaxy bias.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 3D Power spectrum
             to integrate. If a string, it must correspond to one of the
             non-linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). If `None`, the non-linear matter
-            power spectrum stored in `cosmo` will be used.
+            `'delta_matter:delta_matter'`).
+        use_spline (:obj:`bool`): switch that determines whether the RSD correlation
+            function is calculated using global splines of multipoles.
 
     Returns:
         Value(s) of the correlation function at the input pi and sigma.
-    """
+    """ # noqa
     cosmo.compute_nonlin_power()
 
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
-    psp = parse_pk2d(cosmo_in, p_of_k_a)
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
 
     status = 0
 
     # Convert scalar input into an array
-    scalar = False
-    if isinstance(sig, float) or isinstance(sig, int):
-        scalar = True
-        sig = np.array([sig, ])
+    if scalar := isinstance(sigma, (int, float)):
+        sigma = np.array([sigma, ])
 
     # Call 3D correlation function
-    xis, status = lib.correlation_pi_sigma_vec(cosmo, psp, a, beta, pi, sig,
-                                               len(sig), int(use_spline),
+    xis, status = lib.correlation_pi_sigma_vec(cosmo, psp, a, beta, pi, sigma,
+                                               len(sigma), int(use_spline),
                                                status)
     check(status, cosmo_in)
     if scalar:

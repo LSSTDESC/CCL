@@ -1,37 +1,23 @@
+__all__ = ("get_camb_pk_lin", "get_isitgr_pk_lin", "get_class_pk_lin",)
+
 import numpy as np
 
 try:
-    import classy
-    HAVE_CLASS = True
-except ImportError:
-    HAVE_CLASS = False
-
-try:
-    import camb
-    import camb.model
-    HAVE_CAMB = True
-except ImportError:
-    HAVE_CAMB = False
-
-try:
     import isitgr  # noqa: F401
-except ImportError:
+except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
-from . import ccllib as lib
-from .pyutils import check
-from .pk2d import Pk2D
-from .errors import CCLError
+from . import CCLError, Pk2D, check, lib, sigma8
 
 
-def get_camb_pk_lin(cosmo, nonlin=False):
+def get_camb_pk_lin(cosmo, *, nonlin=False):
     """Run CAMB and return the linear power spectrum.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run CAMB.
-        nonlin (:obj:`bool`, optional): Whether to compute and return the
+        nonlin (:obj:`bool`): Whether to compute and return the
             non-linear power spectrum as well.
 
     Returns:
@@ -39,12 +25,8 @@ def get_camb_pk_lin(cosmo, nonlin=False):
             spectrum. If ``nonlin=True``, returns a tuple \
             ``(pk_lin, pk_nonlin)``.
     """
-
-    # Comment from Jarvis: TODO clean up this and other assert
-    # anti-patterns in this file
-    assert HAVE_CAMB, (
-        "You must have the `camb` python package "
-        "installed to run CCL with CAMB!")
+    import camb
+    import camb.model
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
@@ -66,12 +48,11 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     if np.isfinite(cosmo["A_s"]):
         A_s_fid = cosmo["A_s"]
     elif np.isfinite(cosmo["sigma8"]):
-        # in this case, CCL will internally normalize for us when we init
-        # the linear power spectrum - so we just get close
-        A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
+        A_s_fid = 2.1e-9
+        sigma8_target = cosmo["sigma8"]
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -111,14 +92,14 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     # where T_nu is the standard neutrino temperature from first order
     # computations
     # CLASS defines the temperature of each neutrino species to be
-    # T_i_eff = TNCDM * T_cmb where TNCDM is a fudge factor to get the
+    # T_i_eff = T_ncdm * T_cmb where T_ncdm is a fudge factor to get the
     # total mass in terms of eV to match second-order computations of the
     # relationship between m_nu and Omega_nu.
     # We are trying to get both codes to use the same neutrino temperature.
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
-    # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
+    # value of g for CAMB. We get g = (T_ncdm / (11/4)^(-1/3))^4
     g = np.power(
-        lib.cvar.constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        cosmo["T_ncdm"] / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
@@ -142,8 +123,8 @@ def get_camb_pk_lin(cosmo, nonlin=False):
     camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
-        raise ValueError("The only dark energy models CCL supports with"
-                         " camb are fluid and ppf.")
+        raise ValueError("The only dark energy models CCL supports with "
+                         "CAMB are fluid and ppf.")
     cp.set_classes(
         dark_energy_model=camb_de_model
     )
@@ -158,63 +139,20 @@ def get_camb_pk_lin(cosmo, nonlin=False):
         wa=cosmo['wa']
     )
 
-    if nonlin:
-        cp.NonLinearModel = camb.nonlinear.Halofit()
-        halofit_version = extra_camb_params.get("halofit_version", "mead")
-        options = {k: extra_camb_params[k] for k in
-                   ["HMCode_A_baryon",
-                    "HMCode_eta_baryon",
-                    "HMCode_logT_AGN"] if k in extra_camb_params}
-        cp.NonLinearModel.set_params(halofit_version=halofit_version,
-                                     **options)
-
-    cp.set_matter_power(
-        redshifts=[_z for _z in zs],
-        kmax=extra_camb_params.get("kmax", 10.0),
-        nonlinear=nonlin)
-    if not nonlin:
-        assert cp.NonLinear == camb.model.NonLinear_none
-
     cp.set_for_lmax(extra_camb_params.get("lmax", 5000))
     cp.InitPower.set_params(
         As=A_s_fid,
         ns=cosmo['n_s'])
 
-    # run CAMB and get results
-    camb_res = camb.get_results(cp)
-    k, z, pk = camb_res.get_linear_matter_power_spectrum(
-        hubble_units=True, nonlinear=False)
+    cp.set_matter_power(
+        redshifts=[_z for _z in zs],
+        kmax=extra_camb_params.get("kmax", 10.0))
 
-    # convert to non-h inverse units
-    k *= cosmo['h']
-    pk /= (h2 * cosmo['h'])
+    camb_res = camb.get_transfer_functions(cp)
 
-    # now build interpolant
-    nk = k.shape[0]
-    lk_arr = np.log(k)
-    a_arr = 1.0 / (1.0 + z)
-    na = a_arr.shape[0]
-    sinds = np.argsort(a_arr)
-    a_arr = a_arr[sinds]
-    ln_p_k_and_z = np.zeros((na, nk), dtype=np.float64)
-    for i, sind in enumerate(sinds):
-        ln_p_k_and_z[i, :] = np.log(pk[sind, :])
-
-    pk_lin = Pk2D(
-        pkfunc=None,
-        a_arr=a_arr,
-        lk_arr=lk_arr,
-        pk_arr=ln_p_k_and_z,
-        is_logp=True,
-        extrap_order_lok=1,
-        extrap_order_hik=2,
-        cosmo=cosmo)
-
-    if not nonlin:
-        return pk_lin
-    else:
+    def construct_Pk2D(camb_res, nonlin=False):
         k, z, pk = camb_res.get_linear_matter_power_spectrum(
-            hubble_units=True, nonlinear=True)
+            hubble_units=True, nonlinear=nonlin)
 
         # convert to non-h inverse units
         k *= cosmo['h']
@@ -231,15 +169,43 @@ def get_camb_pk_lin(cosmo, nonlin=False):
         for i, sind in enumerate(sinds):
             ln_p_k_and_z[i, :] = np.log(pk[sind, :])
 
-        pk_nonlin = Pk2D(
-            pkfunc=None,
+        pk = Pk2D(
             a_arr=a_arr,
             lk_arr=lk_arr,
             pk_arr=ln_p_k_and_z,
             is_logp=True,
             extrap_order_lok=1,
-            extrap_order_hik=2,
-            cosmo=cosmo)
+            extrap_order_hik=2)
+
+        return pk
+
+    if np.isfinite(cosmo["sigma8"]):
+        camb_res.calc_power_spectra()
+        pk = construct_Pk2D(camb_res, nonlin=False)
+        sigma8_tmp = sigma8(cosmo, p_of_k_a=pk)
+        camb_res.Params.InitPower.As *= sigma8_target**2 / sigma8_tmp**2
+
+    if nonlin:
+        camb_res.Params.NonLinear = camb.model.NonLinear_pk
+        camb_res.Params.NonLinearModel = camb.nonlinear.Halofit()
+        halofit_version = extra_camb_params.get("halofit_version", "mead")
+        options = {k: extra_camb_params[k] for k in
+                   ["HMCode_A_baryon",
+                    "HMCode_eta_baryon",
+                    "HMCode_logT_AGN"] if k in extra_camb_params}
+        camb_res.Params.NonLinearModel.set_params(
+            halofit_version=halofit_version,
+            **options)
+    else:
+        assert camb_res.Params.NonLinear == camb.model.NonLinear_none
+
+    camb_res.calc_power_spectra()
+    pk_lin = construct_Pk2D(camb_res, nonlin=False)
+
+    if not nonlin:
+        return pk_lin
+    else:
+        pk_nonlin = construct_Pk2D(camb_res, nonlin=True)
 
         return pk_lin, pk_nonlin
 
@@ -248,7 +214,7 @@ def get_isitgr_pk_lin(cosmo):
     """Run ISiTGR-CAMB and return the linear power spectrum.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run ISiTGR-CAMB.
 
@@ -256,16 +222,8 @@ def get_isitgr_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
             object. The linear power spectrum.
     """
-
-    try:
-        import isitgr  # noqa: F811
-        import isitgr.model
-    except ImportError as e:
-        e.args = (
-            "You must have the `isitgr` python package "
-            "installed to run CCL with ISiTGR-CAMB!",
-            *e.args)
-        raise
+    import isitgr  # noqa: F811
+    import isitgr.model
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
@@ -292,7 +250,7 @@ def get_isitgr_pk_lin(cosmo):
         A_s_fid = 2.43e-9 * (cosmo["sigma8"] / 0.87659)**2
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -313,14 +271,13 @@ def get_isitgr_pk_lin(cosmo):
     cp.ombh2 = cosmo['Omega_b'] * h2
     cp.omch2 = cosmo['Omega_c'] * h2
     cp.omk = cosmo['Omega_k']
-#   cp.GR = 1 means GR modified!
-    cp.GR = 1
+    cp.GR = 1  # means GR modified!
     cp.ISiTGR_muSigma = True
-    cp.mu0 = cosmo['mu_0']
-    cp.Sigma0 = cosmo['sigma_0']
-    cp.c1 = cosmo['c1_mg']
-    cp.c2 = cosmo['c2_mg']
-    cp.Lambda = cosmo['lambda_mg']
+    cp.mu0 = cosmo.mg_parametrization.mu_0
+    cp.Sigma0 = cosmo.mg_parametrization.sigma_0
+    cp.c1 = cosmo.mg_parametrization.c1_mg
+    cp.c2 = cosmo.mg_parametrization.c2_mg
+    cp.Lambda = cosmo.mg_parametrization.lambda_mg
 
     # "constants"
     cp.TCMB = cosmo['T_CMB']
@@ -341,14 +298,14 @@ def get_isitgr_pk_lin(cosmo):
     # where T_nu is the standard neutrino temperature from first order
     # computations
     # CLASS defines the temperature of each neutrino species to be
-    # T_i_eff = TNCDM * T_cmb where TNCDM is a fudge factor to get the
+    # T_i_eff = T_ncdm * T_cmb where T_ncdm is a fudge factor to get the
     # total mass in terms of eV to match second-order computations of the
     # relationship between m_nu and Omega_nu.
     # We are trying to get both codes to use the same neutrino temperature.
     # thus we set T_i_eff = T_i = g^(1/4) * T_nu and solve for the right
-    # value of g for CAMB. We get g = (TNCDM / (11/4)^(-1/3))^4
+    # value of g for CAMB. We get g = (T_ncdm / (11/4)^(-1/3))^4
     g = np.power(
-        lib.cvar.constants.TNCDM / np.power(11.0/4.0, -1.0/3.0),
+        cosmo["T_ncdm"] / np.power(11.0/4.0, -1.0/3.0),
         4.0)
 
     if cosmo['N_nu_mass'] > 0:
@@ -372,16 +329,15 @@ def get_isitgr_pk_lin(cosmo):
     camb_de_models = ['DarkEnergyPPF', 'ppf', 'DarkEnergyFluid', 'fluid']
     camb_de_model = extra_camb_params.get('dark_energy_model', 'fluid')
     if camb_de_model not in camb_de_models:
-        raise ValueError("The only dark energy models CCL supports with"
-                         " camb are fluid and ppf.")
+        raise ValueError("The only dark energy models CCL supports with "
+                         "CAMB are fluid and ppf.")
     cp.set_classes(
         dark_energy_model=camb_de_model
     )
     if camb_de_model not in camb_de_models[:2] and cosmo['wa'] and \
             (cosmo['w0'] < -1 - 1e-6 or
                 1 + cosmo['w0'] + cosmo['wa'] < - 1e-6):
-        raise ValueError("If you want to use w crossing -1,"
-                         " then please set the dark_energy_model to ppf.")
+        raise ValueError("For w to cross -1, set `dark_energy_model=ppf`.")
     cp.DarkEnergy.set_params(
         w=cosmo['w0'],
         wa=cosmo['wa']
@@ -419,14 +375,12 @@ def get_isitgr_pk_lin(cosmo):
         ln_p_k_and_z[i, :] = np.log(pk[sind, :])
 
     pk_lin = Pk2D(
-        pkfunc=None,
         a_arr=a_arr,
         lk_arr=lk_arr,
         pk_arr=ln_p_k_and_z,
         is_logp=True,
         extrap_order_lok=1,
-        extrap_order_hik=2,
-        cosmo=cosmo)
+        extrap_order_hik=2)
     return pk_lin
 
 
@@ -434,7 +388,7 @@ def get_class_pk_lin(cosmo):
     """Run CLASS and return the linear power spectrum.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): Cosmological
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
             parameters. The cosmological parameters with
             which to run CLASS.
 
@@ -442,10 +396,7 @@ def get_class_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum object.\
             The linear power spectrum.
     """
-
-    assert HAVE_CLASS, (
-        "You must have the python wrapper for CLASS "
-        "installed to run CCL with CLASS!")
+    import classy
 
     params = {
         "output": "mPk",
@@ -493,7 +444,7 @@ def get_class_pk_lin(cosmo):
         params["A_s"] = A_s_fid
     else:
         raise CCLError(
-            "Could not normalize the linear power spectrum! "
+            "Could not normalize the linear power spectrum. "
             "A_s = %f, sigma8 = %f" % (
                 cosmo['A_s'], cosmo['sigma8']))
 
@@ -538,13 +489,11 @@ def get_class_pk_lin(cosmo):
 
     # make the Pk2D object
     pk_lin = Pk2D(
-        pkfunc=None,
         a_arr=a_arr,
         lk_arr=lk_arr,
         pk_arr=ln_p_k_and_z,
         is_logp=True,
         extrap_order_lok=1,
-        extrap_order_hik=2,
-        cosmo=cosmo)
+        extrap_order_hik=2)
 
     return pk_lin

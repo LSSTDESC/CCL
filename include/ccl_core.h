@@ -40,11 +40,6 @@ typedef struct ccl_physical_constants {
   double MPC_TO_METER;
 
   /**
-   * pc to meters (from PDG 2013)
-   */
-  double PC_TO_METER;
-
-  /**
    * Rho critical in units of M_sun/h / (Mpc/h)^3
    */
   double RHO_CRITICAL;
@@ -149,7 +144,7 @@ typedef struct ccl_spline_params {
   const gsl_interp_type* CORR_SPLINE_TYPE;
 } ccl_spline_params;
 
-extern const ccl_spline_params default_spline_params;
+extern ccl_spline_params ccl_user_spline_params;
 
 /**
  * Struct that contains parameters that control the accuracy of various GSL
@@ -182,17 +177,12 @@ typedef struct ccl_gsl_params {
   // growth
   double EPS_SCALEFAC_GROWTH;
 
-  // halo model
-  double HM_MMIN;
-  double HM_MMAX;
-  double HM_EPSABS;
-  double HM_EPSREL;
-  size_t HM_LIMIT;
-  int HM_INT_METHOD;
-
+  // Flags for using spline integration
+  bool NZ_NORM_SPLINE_INTEGRATION;
+  bool LENSING_KERNEL_SPLINE_INTEGRATION;
 } ccl_gsl_params;
 
-extern const ccl_gsl_params default_gsl_params;
+extern ccl_gsl_params ccl_user_gsl_params;
 
 /**
  * Struct containing the parameters defining a cosmology
@@ -225,6 +215,7 @@ typedef struct ccl_parameters {
   double sum_nu_masses; // sum of the neutrino masses.
   double Omega_nu_mass; // Omega_nu for MASSIVE neutrinos
   double Omega_nu_rel; // Omega_nu for MASSLESS neutrinos
+  double T_ncdm; // Non-CDM temperature in units of photon temperature.
 
   // Primordial power spectra
   double A_s;
@@ -320,8 +311,12 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  * @param w0 Dark energy EoS parameter
  * @param wa Dark energy EoS parameter
  * @param h Hubble constant in units of 100 km/s/Mpc
- * @param norm_pk the normalization of the power spectrum, either A_s or sigma8
+ * @param A_s amplitude of primordial scalar perturbations
+ * @param sigma8 variance of matter density fluctuations at 8 Mpc/h
  * @param n_s the power-law index of the power spectrum
+ * @param T_CMB CMB temperature
+ * @param Omega_g radiation density parameter
+ * @param T_ncdm the non-CDM temperature in units of photon temperature
  * @param bcm_log10Mc log10 cluster mass, one of the parameters of the BCM model
  * @param bcm_etab ejection radius parameter, one of the parameters of the BCM model
  * @param bcm_ks wavenumber for the stellar profile, one of the parameters of the BCM model
@@ -334,8 +329,9 @@ void ccl_cosmology_set_status_message(ccl_cosmology * cosmo, const char * status
  */
 ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omega_k,
                                      double Neff, double* mnu, int n_mnu,
-                                     double w0, double wa, double h, double norm_pk,
-                                     double n_s, double bcm_log10Mc, double bcm_etab, double bcm_ks,
+                                     double w0, double wa, double h, double A_s, double sigma8,
+                                     double n_s, double T_CMB, double Omega_g, double T_ncdm,
+                                     double bcm_log10Mc, double bcm_etab, double bcm_ks,
                                      double mu_0, double sigma_0, double c1_mg, double c2_mg, double lambda_mg,
                                      int nz_mgrowth, double *zarr_mgrowth,
                                      double *dfarr_mgrowth, int *status);
@@ -359,6 +355,8 @@ int ccl_get_pk_spline_na(ccl_cosmology *cosmo);
 int ccl_get_pk_spline_nk(ccl_cosmology *cosmo);
 void ccl_get_pk_spline_a_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status);
 void ccl_get_pk_spline_lk_array(ccl_cosmology *cosmo,int ndout,double* doutput,int *status);
+void ccl_get_pk_spline_a_array_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status);
+void ccl_get_pk_spline_lk_array_from_params(ccl_spline_params *spline_params, int ndout, double *doutput, int *status);
 
 CCL_END_DECLS
 

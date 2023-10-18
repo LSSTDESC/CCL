@@ -36,12 +36,10 @@
 #include "ccl_correlation.h"
 #include "ccl_massfunc.h"
 #include "ccl_neutrinos.h"
-#include "ccl_bcm.h"
 #include "ccl_bbks.h"
 #include "ccl_eh.h"
 #include "ccl_halofit.h"
 #include "ccl_musigma.h"
-#include "ccl_haloprofile.h"
 #include "ccl_mass_conversion.h"
 
 CCL_BEGIN_DECLS

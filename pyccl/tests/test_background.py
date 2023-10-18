@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 import pyccl as ccl
 
 COSMO = ccl.Cosmology(
@@ -28,6 +27,31 @@ input_growth = ccl.background.growth_factor_unnorm(COSMO, input_a_array)
 input_fgrowth = ccl.background.growth_rate(COSMO, input_a_array)
 
 
+def test_angular_distance_arrs():
+    a_lens = 1.0
+    a_source = 0.5
+
+    # Pass no lens, one source
+    d0 = ccl.angular_diameter_distance(COSMO, a_source)
+
+    # Pass no lens, many sources
+    d = ccl.angular_diameter_distance(COSMO, np.full(10, a_source))
+    assert np.all(np.fabs(d-d0) < 1E-10)
+
+    # One source, one lens
+    d = ccl.angular_diameter_distance(COSMO, a_lens, a_source)
+    assert np.fabs(d0-d) < 1E-10
+
+    # Many sources, one lens
+    d = ccl.angular_diameter_distance(COSMO, a_lens, np.full(10, a_source))
+    assert np.all(np.fabs(d-d0) < 1E-10)
+
+    # Many sources, many lenses
+    d = ccl.angular_diameter_distance(COSMO, np.full(10, a_lens),
+                                      np.full(10, a_source))
+    assert np.all(np.fabs(d-d0) < 1E-10)
+
+
 @pytest.mark.parametrize('a', AVALS)
 @pytest.mark.parametrize('func', [
     ccl.growth_factor,
@@ -48,11 +72,11 @@ def test_background_a_interface(a, func):
         val = func(COSMO, a)
         assert np.all(np.isfinite(val))
         assert np.shape(val) == np.shape(a)
-        if(func is ccl.angular_diameter_distance):
+        if (func is ccl.angular_diameter_distance):
             val = func(COSMO, a, a)
             assert np.all(np.isfinite(val))
             assert np.shape(val) == np.shape(a)
-            if(isinstance(a, float) or isinstance(a, int)):
+            if isinstance(a, (int, float)):
                 val1 = ccl.angular_diameter_distance(COSMO, 1., a)
                 val2 = ccl.comoving_angular_distance(COSMO, a)*a
             else:
@@ -109,14 +133,14 @@ def test_background_omega_x_raises():
     'neutrinos_massive'])
 @pytest.mark.parametrize('is_comoving', [True, False])
 def test_background_rho_x(a, kind, is_comoving):
-    val = ccl.rho_x(COSMO_NU, a, kind, is_comoving)
+    val = ccl.rho_x(COSMO_NU, a, kind, is_comoving=is_comoving)
     assert np.all(np.isfinite(val))
     assert np.shape(val) == np.shape(a)
 
 
 def test_background_rho_x_raises():
     with pytest.raises(ValueError):
-        ccl.rho_x(COSMO, 1, 'blah', False)
+        ccl.rho_x(COSMO, 1, 'blah', is_comoving=False)
 
 
 def test_input_arrays():
@@ -196,12 +220,12 @@ def test_input_arrays_raises():
                                 n_s=0.965, A_s=2e-9,
                                 background=3)
     # Incomplete dictionary
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
                                 n_s=0.965, A_s=2e-9,
                                 background={'a': input_a_array,
                                             'h_over_h0': input_hoh0})
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.CosmologyCalculator(Omega_c=0.27, Omega_b=0.05, h=0.7,
                                 n_s=0.965, A_s=2e-9,
                                 growth={'a': input_a_array,

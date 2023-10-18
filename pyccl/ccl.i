@@ -21,7 +21,7 @@ from .errors import CCLError
 %init %{
     import_array();
     // Tell CCL to not print to stdout/stderr for debugging.
-    ccl_set_debug_policy(CCL_DEBUG_MODE_OFF);
+    ccl_set_debug_policy(CCL_DEBUG_MODE_ON);
 %}
 
 // Automatically document arguments and output types of all functions
@@ -44,14 +44,12 @@ from .errors import CCLError
 %include "ccl_tk3d.i"
 %include "ccl_background.i"
 %include "ccl_power.i"
-%include "ccl_bcm.i"
 %include "ccl_correlation.i"
 %include "ccl_tracers.i"
 %include "ccl_cls.i"
 %include "ccl_covs.i"
 %include "ccl_neutrinos.i"
 %include "ccl_musigma.i"
-%include "ccl_haloprofile.i"
 %include "ccl_mass_conversion.i"
 %include "ccl_sigM.i"
 %include "ccl_f1d.i"
