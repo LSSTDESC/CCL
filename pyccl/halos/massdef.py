@@ -12,7 +12,7 @@ from . import Concentration, HaloBias, MassFunc
 
 def mass2radius_lagrangian(cosmo, M):
     """ Returns Lagrangian radius for a halo of mass :math:`M`.
-    The lagrangian radius is defined as that enclosing
+    The Lagrangian radius is defined as that enclosing
     the mass of the halo assuming a homogeneous Universe.
 
     .. math::
@@ -23,7 +23,7 @@ def mass2radius_lagrangian(cosmo, M):
         M (:obj:`float` or `array`): halo mass in units of :math:`M_\\odot`.
 
     Returns:
-        (:obj:`float` or `array`): lagrangian radius in comoving Mpc.
+        (:obj:`float` or `array`): Lagrangian radius in comoving Mpc.
     """
     M_use = np.atleast_1d(M)
     R = (M_use / (4.18879020479 * cosmo.rho_x(1, 'matter')))**(1./3.)
@@ -118,6 +118,29 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
     def __repr__(self):
         return f"MassDef(Delta={self.Delta}, rho_type={self.rho_type})"
 
+    def get_Delta_vir(self, cosmo, a):
+        """ Computes the virial collapse density contrast with respect
+        to the critical density assuming a :math:`\\Lambda` CDM model. We
+        use the fitting function from
+        `Bryan and Norman 1998 <https://arxiv.org/abs/astro-ph/9710107>`_.
+        The virial overdensity is returned for the density type of this
+        object's mass definition (e.g. 'critical' or 'matter').
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            a (:obj:`float`): scale factor
+
+        Returns:
+            :obj:`float`: value of the virial overdensity.
+        """
+        Omz = cosmo.omega_x(a, 'matter')
+        x = Omz-1
+        # Eq. 6
+        Dv = 18*np.pi**2+82*x-39*x**2
+        if self.rho_type == 'matter':
+            Dv /= Omz
+        return Dv
+
     def get_Delta(self, cosmo, a):
         """ Gets overdensity parameter associated to this mass
         definition.
@@ -133,9 +156,7 @@ class MassDef(CCLAutoRepr, CCLNamedClass):
             raise ValueError("FoF masses don't have an associated overdensity."
                              "Nor can they be translated into other masses")
         if self.Delta == 'vir':
-            status = 0
-            D, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
-            return D
+            return self.get_Delta_vir(cosmo, a)
         return self.Delta
 
     def _get_Delta_m(self, cosmo, a):

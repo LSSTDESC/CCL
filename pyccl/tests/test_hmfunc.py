@@ -4,7 +4,7 @@ import pyccl as ccl
 
 
 COSMO = ccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+    Omega_c=0.27, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
 HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncSheth99,
@@ -14,7 +14,8 @@ HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncTinker10,
         ccl.halos.MassFuncWatson13,
         ccl.halos.MassFuncDespali16,
-        ccl.halos.MassFuncBocquet16]
+        ccl.halos.MassFuncBocquet16,
+        ccl.halos.MassFuncBocquet20]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 MFOF = ccl.halos.MassDef('fof', 'matter')
 MVIR = ccl.halos.MassDef('vir', 'critical')
@@ -24,7 +25,9 @@ M200m = ccl.halos.MassDef(200, 'matter')
 M500c = ccl.halos.MassDef(500, 'critical')
 M500m = ccl.halos.MassDef(500, 'matter')
 MDFS = [MVIR, MVIR, MVIR, MVIR,
-        MFOF, MFOF, MVIR, MFOF, MFOF]
+        MFOF, MFOF, MVIR, MFOF, MFOF, MFOF]
+# This is kind of slow to initialize, so let's do it only once
+MF_emu = ccl.halos.MassFuncBocquet20(mass_def='200c')
 
 
 @pytest.mark.parametrize('nM_class', HMFS)
@@ -153,3 +156,35 @@ def test_mass_function_mass_def_strict_always_raises():
     mdef = ccl.halos.MassDef(400, "critical")
     with pytest.raises(ValueError):
         ccl.halos.MassFuncBocquet16(mass_def=mdef, mass_def_strict=False)
+
+
+def test_nM_bocquet20_compare():
+    # Check that the values are sensible (they don't depart from other
+    # parametrisations by more than ~10%
+    Ms = np.geomspace(1E14, 1E15, 128)
+    mf1 = MF_emu
+    mf2 = ccl.halos.MassFuncTinker08(mass_def='200c')
+
+    nM1 = mf1(COSMO, Ms, 1.0)
+    nM2 = mf2(COSMO, Ms, 1.0)
+    assert np.allclose(nM1, nM2, atol=0, rtol=0.1)
+
+
+def test_nM_bocquet20_raises():
+    Ms = np.geomspace(1E12, 1E17, 128)
+
+    # Need sigma8
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                          A_s=2E-9, n_s=0.96)
+    with pytest.raises(ValueError):
+        MF_emu(cosmo, Ms, 1.0)
+
+    # Cosmo parameters out of bounds
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                          sigma8=0.8, n_s=2.0)
+    with pytest.raises(ValueError):
+        MF_emu(cosmo, Ms, 1.0)
+
+    # Redshift out of bounds
+    with pytest.raises(ValueError):
+        MF_emu(cosmo, Ms, 0.3)

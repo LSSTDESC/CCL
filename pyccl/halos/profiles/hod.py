@@ -68,7 +68,7 @@ class HaloProfileHOD(HaloProfile):
     here are roughly compatible with those found in the latter
     paper.
 
-    See :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD`) for a
+    See :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD` for a
     description of the Fourier-space two-point correlator of the
     HOD profile.
 
@@ -315,6 +315,16 @@ class HaloProfileHOD(HaloProfile):
     def get_normalization(self, cosmo, a, *, hmc):
         """Returns the normalization of this profile, which is the
         mean galaxy number density.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology
+                object.
+            a (:obj:`float`): scale factor.
+            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
+                model calculator object.
+
+        Returns:
+            :obj:`float`: normalization factor of this profile.
         """
         def integ(M):
             Nc = self._Nc(M, a)

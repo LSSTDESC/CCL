@@ -1,8 +1,6 @@
 import numpy as np
 import pytest
-
 import pyccl as ccl
-from pyccl import CCLError
 
 
 COSMO = ccl.Cosmology(
@@ -86,20 +84,6 @@ def test_kNL(A):
     assert np.shape(knl) == np.shape(A)
 
 
-@pytest.mark.parametrize('tf,pk,m_nu', [
-    # ('boltzmann_class', 'emu', 0.06), - this case is slow and not needed
-    ('bbks', 'emu', 0.06),
-    ('eisenstein_hu', 'emu', 0.06),
-])
-def test_transfer_matter_power_nu_raises(tf, pk, m_nu):
-    cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function=tf, matter_power_spectrum=pk, m_nu=m_nu)
-
-    with pytest.raises(CCLError):
-        ccl.nonlin_matter_power(cosmo, 1, 1)
-
-
 @pytest.mark.parametrize('tf', [
     'boltzmann_class', 'boltzmann_camb', 'boltzmann_isitgr'])
 def test_power_sigma8norm_norms_consistent(tf):
@@ -115,7 +99,7 @@ def test_power_sigma8norm_norms_consistent(tf):
         transfer_function=tf)
 
     # make sure they come out the same-ish
-    assert np.allclose(ccl.sigma8(cosmo), ccl.sigma8(cosmo_s8))
+    assert np.allclose(sigma8, ccl.sigma8(cosmo_s8))
 
     # and that the power spectra look right
     a = 0.8

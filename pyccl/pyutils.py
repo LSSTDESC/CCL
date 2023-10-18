@@ -71,6 +71,8 @@ def check(status, cosmo=None):
             Flag or error describing the success of a function.
         cosmo (:class:`~pyccl.cosmology.Cosmology`):
             A Cosmology object.
+
+    :meta private:
     """
     # Check for normal status (no action required)
     if status == 0:
@@ -396,8 +398,10 @@ def get_pk_spline_nk(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the wavenumber dimension.
 
     Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG):
+        cosmo (:obj:`~pyccl.ccllib.cosmology` via SWIG):
             Input cosmology.
+
+    :meta private:
     """
     if cosmo is not None:
         return lib.get_pk_spline_nk(cosmo.cosmo)
@@ -409,8 +413,10 @@ def get_pk_spline_na(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the scale factor dimension.
 
     Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG):
+        cosmo (:obj:`~pyccl.ccllib.cosmology` via SWIG):
             Input cosmology.
+
+    :meta private:
     """
     if cosmo is not None:
         return lib.get_pk_spline_na(cosmo.cosmo)
@@ -422,8 +428,10 @@ def get_pk_spline_lk(cosmo=None, spline_params=spline_params):
     or by the spline parameters of the input ``cosmo``.
 
     Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG):
+        cosmo (:obj:`~pyccl.ccllib.cosmology` via SWIG):
             Input cosmology.
+
+    :meta private:
     """
     nk = get_pk_spline_nk(cosmo=cosmo, spline_params=spline_params)
     if cosmo is not None:
@@ -440,8 +448,10 @@ def get_pk_spline_a(cosmo=None, spline_params=spline_params):
     or by the spline parameters of the input ``cosmo``.
 
     Arguments:
-        cosmo (``~pyccl.ccllib.cosmology`` via SWIG):
+        cosmo (:obj:`~pyccl.ccllib.cosmology` via SWIG):
             Input cosmology.
+
+    :meta private:
     """
     na = get_pk_spline_na(cosmo=cosmo, spline_params=spline_params)
     if cosmo is not None:

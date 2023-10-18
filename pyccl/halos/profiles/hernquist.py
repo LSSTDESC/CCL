@@ -22,8 +22,10 @@ class HaloProfileHernquist(HaloProfileMatter):
     .. math::
        r_\\Delta(M) = c(M)\\,r_s
 
-    and the normalization :math:`\\rho_0` is the mean density
-    within the :math:`r_\\Delta(M)` of the halo.
+    and the normalization :math:`\\rho_0` is
+
+    .. math::
+       \\rho_0 = \\frac{M}{2\\pi\\,r_s^3}\\left(\\frac{1+c}{c}\\right)^2
 
     By default, this profile is truncated at :math:`r = r_\\Delta(M)`.
 
@@ -106,13 +108,15 @@ class HaloProfileHernquist(HaloProfileMatter):
 
         def f1(xx):
             x2m1 = xx * xx - 1
+            sqx2m1 = np.sqrt(-x2m1)
             return (-3 / 2 / x2m1**2
-                    + (x2m1+3) * np.arccosh(1 / xx) / 2 / np.fabs(x2m1)**2.5)
+                    + (x2m1+3) * np.arcsinh(sqx2m1 / xx) / 2 / (-x2m1)**2.5)
 
         def f2(xx):
             x2m1 = xx * xx - 1
+            sqx2m1 = np.sqrt(x2m1)
             return (-3 / 2 / x2m1**2
-                    + (x2m1+3) * np.arccos(1 / xx) / 2 / np.fabs(x2m1)**2.5)
+                    + (x2m1+3) * np.arcsin(sqx2m1 / xx) / 2 / x2m1**2.5)
 
         xf = x.flatten()
         return np.piecewise(xf,
@@ -143,13 +147,15 @@ class HaloProfileHernquist(HaloProfileMatter):
 
         def f1(xx):
             x2m1 = xx * xx - 1
+            sqx2m1 = np.sqrt(-x2m1)
             return (1 + 1 / x2m1
-                    + (x2m1 + 1) * np.arccosh(1 / xx) / np.fabs(x2m1)**1.5)
+                    + (x2m1 + 1) * np.arcsinh(sqx2m1 / xx) / (-x2m1)**1.5)
 
         def f2(xx):
             x2m1 = xx * xx - 1
+            sqx2m1 = np.sqrt(x2m1)
             return (1 + 1 / x2m1
-                    - (x2m1 + 1) * np.arccos(1 / xx) / np.fabs(x2m1)**1.5)
+                    - (x2m1 + 1) * np.arcsin(sqx2m1 / xx) / x2m1**1.5)
 
         xf = x.flatten()
         f = np.piecewise(xf,

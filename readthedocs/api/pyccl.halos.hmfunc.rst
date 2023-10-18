@@ -9,6 +9,7 @@ Submodules
 
    pyccl.halos.hmfunc.angulo12
    pyccl.halos.hmfunc.bocquet16
+   pyccl.halos.hmfunc.bocquet20
    pyccl.halos.hmfunc.despali16
    pyccl.halos.hmfunc.jenkins01
    pyccl.halos.hmfunc.press74

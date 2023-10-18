@@ -2,7 +2,7 @@ __all__ = ("HaloBiasTinker10",)
 
 import numpy as np
 
-from . import HaloBias
+from . import HaloBias, get_delta_c
 
 
 class HaloBiasTinker10(HaloBias):
@@ -33,7 +33,7 @@ class HaloBiasTinker10(HaloBias):
         self.B = 0.183
         self.b = 1.5
         self.c = 2.4
-        self.dc = 1.68647
+        self.dc = get_delta_c(None, None, kind='EdS')
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM

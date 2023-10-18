@@ -19,9 +19,7 @@
 #define STRING(s) #s
 
 
-const ccl_configuration default_config = {
-  ccl_boltzmann_class, ccl_halofit, ccl_nobaryons,
-  ccl_tinker10, ccl_duffy2008, ccl_emu_strict};
+const ccl_configuration default_config = {ccl_boltzmann_class, ccl_halofit};
 
 
 //Precision parameters
@@ -80,12 +78,6 @@ ccl_gsl_params ccl_user_gsl_params = {
   GSL_N_ITERATION,                     // ROOT_N_ITERATION
   GSL_EPSREL_GROWTH,                   // ODE_GROWTH_EPSREL
   1E-6,                                // EPS_SCALEFAC_GROWTH
-  1E7,                                 // HM_MMIN
-  1E17,                                // HM_MMAX
-  0.0,                                 // HM_EPSABS
-  1E-4,                                // HM_EPSREL
-  1000,                                // HM_LIMIT
-  GSL_INTEG_GAUSS41,                   // HM_INT_METHOD
   true,                                // NZ_NORM_SPLINE_INTEGRATION
   true                                 // LENSING_KERNEL_SPLINE_INTEGRATION
   };
@@ -174,11 +166,6 @@ ccl_physical_constants ccl_constants = {
    * Mpc to meters (from PDG 2016 and using M_PI)
    */
   3.085677581491367399198952281E+22,
-
-  /**
-   * pc to meters (from PDG 2016 and using M_PI)
-   */
-  3.085677581491367399198952281E+16,
 
   /**
    * Rho critical in units of M_sun/h / (Mpc/h)^3

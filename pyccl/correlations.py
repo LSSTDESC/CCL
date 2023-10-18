@@ -223,9 +223,15 @@ def correlation_multipole(cosmo, *, r, a, beta, ell,
 
 def correlation_3dRsd(cosmo, *, r, a, mu, beta,
                       p_of_k_a=DEFAULT_POWER_SPECTRUM, use_spline=True):
-    """
+    r"""
     Compute the 3D correlation function with linear RSDs using
-    multipoles.
+    multipoles:
+
+    .. math::
+        \xi(r,\mu) = \sum_{\ell\in\{0,2,4\}}\xi_\ell(r)\,P_\ell(\mu)
+
+    where :math:`P_\ell(\mu)` are the Legendre polynomials, and
+    :math:`\xi_\ell(r)` are the correlation function multipoles.
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
@@ -271,7 +277,8 @@ def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
                             p_of_k_a=DEFAULT_POWER_SPECTRUM):
     """
     Compute the 3D correlation function averaged over angles with
-    RSDs.
+    RSDs. Equivalent to calling :func:`correlation_multipole`
+    with ``ell=0``.
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
@@ -311,13 +318,17 @@ def correlation_3dRsd_avgmu(cosmo, *, r, a, beta,
 
 def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
                          use_spline=True, p_of_k_a=DEFAULT_POWER_SPECTRUM):
-    """
-    Compute the 3D correlation in :math:`(\\pi,\\sigma)` space.
+    r"""
+    Compute the 3D correlation in :math:`(\pi,\sigma)` space. This is
+    just
+
+    .. math::
+        \xi(\pi,\sigma) = \xi(r=\sqrt{\pi^2+\sigma^2},\mu=\pi/r).
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
         pi (:obj:`float`): distance times cosine of the angle (in Mpc).
-        sigma (float or array-like): distance(s) times sine of the angle
+        sigma (:obj:`float` or `array`): distance(s) times sine of the angle
             (in Mpc).
         a (:obj:`float`): scale factor.
         beta (:obj:`float`): growth rate divided by galaxy bias.
