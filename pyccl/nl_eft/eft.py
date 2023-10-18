@@ -207,6 +207,7 @@ class EFTCalculator(CCLAutoRepr):
         # Call FAST-PT
         import fastpt as fpt
         n_pad = int(self.fastpt_par['pad_factor'] * len(self.k_s))
+        # !!!!!!! this needs to change based on new fastpt implementations
         self.pt = fpt.FASTPT(self.k_s, to_do=to_do,
                              low_extrap=self.fastpt_par['low_extrap'],
                              high_extrap=self.fastpt_par['high_extrap'],
@@ -293,6 +294,7 @@ class EFTCalculator(CCLAutoRepr):
             reshape_fastpt(self.one_loop_dd)
 
         # Intrinsic alignment templates
+        # !!!!!!! this needs to change based on new fastpt implementations
         if self.with_IA:
             self.ia_ta = self.pt.IA_ta(**kw)
             reshape_fastpt(self.ia_ta)
@@ -303,13 +305,13 @@ class EFTCalculator(CCLAutoRepr):
 
         # b1/bk power spectrum
         pks = {}
-        if 'nonlinear' in [self.b1_pk_kind, self.bk2_pk_kind]:
+        if 'nonlinear' in [self.b1_pk_kind, self.bk2_pk_kind, self.a1_pk_kind, self.ak2_pk_kind]:
             pks['nonlinear'] = np.array([cosmo.nonlin_matter_power(self.k_s, a)
                                          for a in self.a_s])
-        if 'linear' in [self.b1_pk_kind, self.bk2_pk_kind]:
+        if 'linear' in [self.b1_pk_kind, self.bk2_pk_kind, self.a1_pk_kind, self.ak2_pk_kind]:
             pks['linear'] = np.array([cosmo.linear_matter_power(self.k_s, a)
                                       for a in self.a_s])
-        if 'pt' in [self.b1_pk_kind, self.bk2_pk_kind]:
+        if 'pt' in [self.b1_pk_kind, self.bk2_pk_kind, self.a1_pk_kind, self.ak2_pk_kind]:
             if 'linear' in pks:
                 pk = pks['linear']
             else:
@@ -320,12 +322,35 @@ class EFTCalculator(CCLAutoRepr):
             pks['pt'] = pk
         self.pk_b1 = pks[self.b1_pk_kind]
         self.pk_bk = pks[self.bk2_pk_kind]
+        self.pk_a1 = pks[self.a1_pk_kind]
+        self.pk_ak = pks[self.ak2_pk_kind]
 
         # Reset template power spectra
         self._pk2d_temp = {}
         self._cosmo = cosmo
 
     #involves calls to fast-pt
+
+    def _get_pmm(self):
+        """ Get the one-loop matter power spectrum.
+
+        Returns:
+            array: 2D array of shape `(N_a, N_k)`, where `N_k` \
+                is the size of this object's `k_s` attribute, and \
+                `N_a` is the size of the object's `a_s` attribute.
+        """
+        self._check_init()
+        if self.b1_pk_kind == 'linear':
+            P1loop = self._g4T * self.one_loop_dd[0]
+        else:
+            P1loop = 0.
+        pk = self.pk_b1 + P1loop
+        return pk*self.exp_cutoff
+
+
+
+
+
 
     def _get_I11(self):
         return 0
@@ -337,8 +362,8 @@ class EFTCalculator(CCLAutoRepr):
         return 0
 
     def _get_I14(self):
-        part_1 = (28.0 * self._I_12() - self._I_22() + self._I_23())/(2*np.sqrt(6))
-        return (part_1 - 5.0 * self._I_24() + 5.0 * self._I_34())/7.0
+        part_1 = (28.0 * self._get_I12() - self._get_I22() + self._get_I23())/(2*np.sqrt(6))
+        return (part_1 - 5.0 * self._get_I24() + 5.0 * self._get_I34())/7.0
 
     def _get_I22(self):
         return 0
@@ -362,15 +387,14 @@ class EFTCalculator(CCLAutoRepr):
         return 0
         
     def _get_I66(self):
-        return (2. * self._I_22() - 2. * np.sqrt(6.0)*self._I_24() + 3.0  self._I_44())/18.0
+        return (2. * self._get_I22() - 2. * np.sqrt(6.0)*self._get_I24() + 3.0  self._get_I44())/18.0
 
     def _get_I67(self):
-        return (2.0 * self._I_22() + 6.0 * self._I_23() - 5.0 * np.sqrt(6) * self._I_24() - 3.0 * np.sqrt(6.0) * self._I_34() + 12.0 * self._I_44())/72.0
+        return (2.0 * self._get_I22() + 6.0 * self._get_I23() - 5.0 * np.sqrt(6) * self._get_I24() - 3.0 * np.sqrt(6.0) * self._get_I34() + 12.0 * self._get_I44())/72.0
 
     def _get_I77(self):
-        return (self._I_22() + 6.0 * self._I_23() + 9.0 * self._I_33() - 4.0 * np.sqrt(6.0) * self._I_24() - 12.0 * np.sqrt(6) * self._I_34() + 24.0 * self._I_44())/144.0
+        return (self._get_I22() + 6.0 * self._get_I23() + 9.0 * self._get_I33() - 4.0 * np.sqrt(6.0) * self._get_I24() - 12.0 * np.sqrt(6) * self._get_I34() + 24.0 * self._get_I44())/144.0
         
-
     def _get_J1(self):
         return 0
 
@@ -385,58 +409,199 @@ class EFTCalculator(CCLAutoRepr):
     # this is where bias coefficients come into play
 
     def _get_p00_0_lin(self, tr1, tr2):
-        return 0.0
+        b1_1 = tr1.b1(self.z_s)
+        bk2_1 = tr1.bk2(self.z_s)
+        b1_2 = tr2.b1(self.z_s)
+        bk2_2 = tr2.bk2(self.z_s)
+        p_11 = b1_1 * b1_2 * self._get_pmm()
+        p_1k = b1_1 * bk2_2 * self._get_pmm() + b1_2 * bk2_1 * self._get_pmm() # !!!!! placeholder
 
-    def _get_p02_0_lin(self, tr1, tr2):
-        return 0.0
+        return p_11 + p_1k
+
+    def _get_p02_0_lin(self, trg, tri):
+        b1 = trg.b1(self.z_s)
+        bk2 = trg.bk2(self.z_s)
+        a1 = tri.a1(self.z_s)
+        ak2 = tri.ak2(self.z_s)
+        p_11 = b1 * a1 * self._get_pmm()
+        p_1k = b1 * ak2 * self._get_pmm() + a1 * bk2 * self._get_pmm() # !!!!! placeholder
+
+        return p_11 + p_1k
     
     def _get_p22_0_lin(self, tr1, tr2):
-        return 0.0
+        a1_1 = tr1.a1(self.z_s)
+        ak2_1 = tr1.ak2(self.z_s)
+        a1_2 = tr2.a1(self.z_s)
+        ak2_2 = tr2.ak2(self.z_s)
+        p_11 = a1_1 * a1_2 * self._get_pmm()
+        p_1k = a1_1 * ak2_2 * self._get_pmm() + a1_2 * ak2_1 * self._get_pmm() # !!!!! placeholder
+
+        return p_11 + p_1k
 
     def _get_p00_0_22(self, tr1, tr2):
-        return 0.0
+        b1_1 = tr1.b1(self.z_s)
+        b21_1 = tr1.b21(self.z_s)
+        b22_1 = tr1.b22(self.z_s)
+        b1_2 = tr2.b1(self.z_s)
+        b21_2 = tr2.b21(self.z_s)
+        b22_2 = tr2.b22(self.z_s)
 
-    def _get_p02_0_22(self, tr1, tr2):
+        final = 0.0
+        final += 2 * b1_1 * b1_2 * self._get_I11()
+        if (b1_1*b21_2 + b1_2*b21_1):
+            final += 2*(b1_1*b21_2 + b1_2*b21_1)*self._get_I12()
+
+        if (b1_1*b22_2 + b1_2*b22_1):
+            final += 2*(b1_1*b22_2 + b1_2*b22_1)*self._get_I13()
+
+        if (b21_1*b21_2):
+            final += 2*(b21_1*b21_2)*self._get_I22()
+
+        if (b21_1*b22_2 + b21_2*b22_1):
+            final += 2*(b21_1*b22_2 + b21_2*b22_1)*self._get_I23()
+
+        if (b22_1*b22_2):
+            final += 2*(b22_1*b22_2)*self._get_I33()
+
+        return final
+
+    def _get_p02_0_22(self, trg, tri):
         return 0.0
 
     def _get_p22_0_22(self, tr1, tr2):
-        return 0.0
+        a1_1 = tr1.a1(self.z_s)
+        a21_1 = tr1.a21(self.z_s)
+        a22_1 = tr1.a22(self.z_s)
+        a1_2 = tr2.a1(self.z_s)
+        a21_2 = tr2.a21(self.z_s)
+        a22_2 = tr2.a22(self.z_s)
+
+        final = 0.0
+        final += 4./3 * a1_1 * a1_2 * self._get_I11()
+        if (a1_1*a21_2 + a1_2*a21_1):
+            final += np.sqrt(2./3)*(a1_1*a21_2 + a1_2*a21_1)*self._get_I14()
+
+        if (a1_1*a22_2 + a1_2*a22_1):
+            final += 1./3*(a1_1*a22_2 + a1_2*a22_1)*(self._get_I13() - self._get_I12())
+
+        if (a22_1*a22_2):
+            final += 1./12*(a22_1*a22_2)*(self._get_I22() - 2*self.get_I23() + self._get_I33())
+
+        if (a21_1*a22_2 + a21_2*a22_1):
+            final += np.sqrt(1./6)*(a21_1*a22_2 + a21_2*a22_1)*(self._get_I34() - self._get_I24())
+
+        if (a21_1*a21_2):
+            final += 2*(a21_1*a21_2)*self._get_I44()
+
+        return final
 
     def _get_p22_1_22(self, tr1, tr2):
-        return 0.0
+        a21_1 = tr1.a21(self.z_s)
+        a21_2 = tr2.a21(self.z_s)
+        return 2*a21_1*a21_2*self._get_I55()
 
     def _get_p22_2_22(self, tr1, tr2):
-        return 0.0
+        a21_1 = tr1.a21(self.z_s)
+        a22_1 = tr1.a22(self.z_s)
+        a23_1 = tr1.a23(self.z_s)
+        a21_2 = tr2.a21(self.z_s)
+        a22_2 = tr2.a22(self.z_s)
+        a23_2 = tr2.a23(self.z_s)
+
+        final = 0.0
+        if (a23_1*a23_2):
+            final += 2*(a22_1*a22_2)*(self._get_I66() - 2*self.get_I67() + self._get_I77())
+
+        if (a23_1*a22_2 + a23_2*a22_1):
+            final += 2*(a23_1*a22_2 + a23_2*a22_1)*(self._get_I67()-  self._get_I66())
+
+        if (a21_1*a21_2):
+            final += 2*(a21_1*a21_2)*self._get_I66()
+            
+        return final
 
     def _get_p00_0_13(self, tr1, tr2):
-        return 0.0
+        b1_1 = tr1.b1(self.z_s)
+        b31_1 = tr1.b31(self.z_s)
+        b1_2 = tr2.b1(self.z_s)
+        b31_2 = tr2.b31(self.z_s)
 
-    def _get_p02_0_13(self, tr1, tr2):
-        return 0.0
+        final = 0.0
+        final += 2 * b1_1 * b1_2 * self._get_J1()
+        if (b1_1*b31_2 + b1_2*b31_1):
+            final += 2*(b1_1*b31_2 + b1_2*b31_1)*self._get_J2()
+
+        return final
+
+    def _get_p02_0_13(self, trg, tri):
+        b1 = trg.b1(self.z_s)
+        b31 = trg.b31(self.z_s)
+        a1 = tri.a1(self.z_s)
+        a31 = tri.a31(self.z_s)
+        a32 = tri.a32(self.z_s)
+
+        final = 0.0
+        final += b1*a1*(1 + np.sqrt(2./3))*self._get_J1()
+        if (a1*b31 + b1*a31*np.sqrt(2./3)):
+            final += (a1*b31 + b1*a31*np.sqrt(2./3))*self._get_J2()
+
+        if (b1*a32):
+            final += b1*a32*self._get_J3()
+
+        return final
 
     def _get_p22_0_13(self, tr1, tr2):
-        return 0.0
+        a1_1 = tr1.a1(self.z_s)
+        a31_1 = tr1.a31(self.z_s)
+        a32_1 = tr1.a32(self.z_s)
+        a1_2 = tr2.a1(self.z_s)
+        a31_2 = tr2.a31(self.z_s)
+        a32_2 = tr2.a32(self.z_s)
 
-    def _get_p00_0_22(self, tr1, tr2):
-        return 0.0
+        final = 0.0
+        final += 2 * a1_1 * a1_2 * self._get_J1()
+        if (a1_1*a31_2 + a1_2*a31_1):
+            final += 2*(a1_1*a31_2 + a1_2*a31_1)*self._get_J2()
+        if (a1_1*a32_2 + a1_2*a32_1):
+            final += 2*(a1_1*a32_2 + a1_2*a32_1)*self._get_J3()
+
+        return final* np.sqrt(2./3)
 
 
-    def _get_p00_0(self, tr1, tr2)
+    def _get_p00_0(self, tr1, tr2):
         return self._get_p00_0_lin(tr1, tr2) + self._get_p00_0_22(tr1, tr2) + self._get_p00_0_13(tr1, tr2)
 
-    def _get_p02_0(self, tr1, tr2)
-        return self._get_p02_0_lin(tr1, tr2) + self._get_p02_0_22(tr1, tr2) + self._get_p00_0_13(tr1, tr2)
+    def _get_p02_0(self, trg, tri):
+        return self._get_p02_0_lin(trg, tri) + self._get_p02_0_22(trg, tri) + self._get_p00_0_13(trg, tri)
 
-    def _get_p22_0(self, tr1, tr2)
+    def _get_p22_0(self, tr1, tr2):
         return self._get_p22_0_lin(tr1, tr2) + self._get_p22_0_22(tr1, tr2) + self._get_p22_0_13(tr1, tr2)
 
-    def _get_p22_1(self, tr1, tr2)
+    def _get_p22_1(self, tr1, tr2):
         return self._get_p22_1_22(tr1, tr2) + self._get_p22_1_13(tr1, tr2)
 
-    def _get_p22_2(self, tr1, tr2)
+    def _get_p22_2(self, tr1, tr2):
         return self._get_p22_2_lin(tr1, tr2) + self._get_p22_2_13(tr1, tr2) + self._get_p13_0_lin(tr1, tr2)
 
 
+
+    def _get_pgg(self, tr1, tr2):
+        return self._get_p00_0(tr1, tr2)
+
+    def _get_pgi(self, trg, tri):
+        return self._get_p02_0(trg, tri)
+
+    def _get_pgm(self, trg):
+        #basically same as ept
+        return 0
+
+    def _get_pim(self, tri):
+        #basically same as ept but with extra terms
+        return 0
+
+    def _get_pii(self, tr1, tr2):
+        #hard! need spherical decomp for these terms!
+        return self._get_p22_0(tr1, tr2) + self._get_p22_1(tr1, tr2) + self._get_p22_2(tr1, tr2)
 
 
     # UP TO HERE
@@ -651,22 +816,6 @@ class EFTCalculator(CCLAutoRepr):
                (self._g4*cd)[:, None] * (a00e + c00e) +
                (self._g4*c2)[:, None] * (a0e2 + b0e2))
         return pim*self.exp_cutoff
-
-    def _get_pmm(self):
-        """ Get the one-loop matter power spectrum.
-
-        Returns:
-            array: 2D array of shape `(N_a, N_k)`, where `N_k` \
-                is the size of this object's `k_s` attribute, and \
-                `N_a` is the size of the object's `a_s` attribute.
-        """
-        self._check_init()
-        if self.b1_pk_kind == 'linear':
-            P1loop = self._g4T * self.one_loop_dd[0]
-        else:
-            P1loop = 0.
-        pk = self.pk_b1 + P1loop
-        return pk*self.exp_cutoff
 
     def get_biased_pk2d(self, tracer1, *, tracer2=None, return_ia_bb=False,
                         extrap_order_lok=1, extrap_order_hik=2):
