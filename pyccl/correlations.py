@@ -402,7 +402,7 @@ def correlation_ab(cosmo, *, r_p: np.ndarray, z: np.ndarray,
                 `n_per_decade`, `extrapol`, `plaw_fourier`.
                 Default values are 0.01, 0.1, 10., 10.,
                 100, 'linx_liny' and -1.5. For more information look at
-                `pyccl.halos.profiles.HaloProfile.update_precision_fftlog`.
+                `pyccl.halos.profiles.profile_base.update_precision_fftlog`.
 
         Returns:
             array-like: Value(s) of the correlation function at the input
@@ -458,7 +458,7 @@ def _fftlog_wrap(r_p: np.ndarray, a: float, p_of_k_a,
     '''Computes the integral
        .. math::
           \\xi(r_p,a)=\\int\\frac{dk k}{2\\pi^2}\\,P(k,a)\\,J_n(k r_p)
-       Adapted from pyccl.halos.profiles.HaloProfile._fftlog_wrap.
+       Adapted from pyccl.halos.profiles.profile_base._fftlog_wrap.
     '''
     # Note: The _fftlog_transform solves for
     # f(r) = \int 4 pi k^2 f(k) j_l(kr) dk
