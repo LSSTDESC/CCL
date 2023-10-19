@@ -141,6 +141,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                  log10k_min=-4, log10k_max=2, nk_per_decade=20,
                  a_arr=None, k_cutoff=None, n_exp_cutoff=4,
                  b1_pk_kind='nonlinear', bk2_pk_kind='nonlinear',
+                 ak2_pk_kind='nonlinear',
                  pad_factor=1.0, low_extrap=-5.0, high_extrap=3.0,
                  P_window=None, C_window=0.75, sub_lowk=False):
         self.with_matter_1loop = with_matter_1loop
@@ -191,9 +192,12 @@ class EulerianPTCalculator(CCLAutoRepr):
             raise ValueError(f"Unknown P(k) prescription {b1_pk_kind}")
         if bk2_pk_kind not in ['linear', 'nonlinear', 'pt']:
             raise ValueError(f"Unknown P(k) prescription {bk2_pk_kind}")
+        if ak2_pk_kind not in ['linear', 'nonlinear', 'pt']:
+            raise ValueError(f"Unknown P(k) prescription in {ak2_pk_kind}")
         self.b1_pk_kind = b1_pk_kind
         self.bk2_pk_kind = bk2_pk_kind
-        if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt'):
+        self.ak2_pk_kind = bk2_pk_kind
+        if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt') or (self.ak2_pk_kind == 'pt'):
             self.with_matter_1loop = True
 
         # Initialize all expensive arrays to ``None``.
@@ -283,6 +287,24 @@ class EulerianPTCalculator(CCLAutoRepr):
         self.pk_b1 = pks[self.b1_pk_kind]
         self.pk_bk = pks[self.bk2_pk_kind]
 
+        # a1/ak power spectrum
+        pksa = {}
+        if 'nonlinear' in [self.ak2_pk_kind]:
+            pksa['nonlinear'] = np.array([cosmo.nonlin_matter_power(self.k_s, a)
+                                         for a in self.a_s])
+        if 'linear' in [self.ak2_pk_kind]:
+            pksa['linear'] = np.array([cosmo.linear_matter_power(self.k_s, a)
+                                      for a in self.a_s])
+        if 'pt' in [self.ak2_pk_kind]:
+            if 'linear' in pksa:
+                pka = pks['linear']
+            else:
+                pka = np.array([cosmo.linear_matter_power(self.k_s, a) for a in self.a_s])
+            pk += self._g4T*self.one_loop_dd[0]
+            pks['pt'] = pk
+        self.pk_ak=pks[self.ak2_pk_kind]
+        
+    
         # Reset template power spectra
         self._pk2d_temp = {}
         self._cosmo = cosmo
@@ -366,6 +388,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
+        Pak2 = self.pk_ak*(self.k_s**2)[None, :]
 
         # Get biases
         b1 = trg.b1(self.z_s)
@@ -381,10 +404,12 @@ class EulerianPTCalculator(CCLAutoRepr):
         c1 = tri.c1(self.z_s)
         c2 = tri.c2(self.z_s)
         cd = tri.cdelta(self.z_s)
+        ck = tri.cder(self.z_s)
 
         pgi = b1[:, None] * (c1[:, None] * Pd1d1 +
                              (self._g4*cd)[:, None] * (a00e + c00e) +
-                             (self._g4*c2)[:, None] * (a0e2 + b0e2))
+                             (self._g4*c2)[:, None] * (a0e2 + b0e2) + 
+                             ck[:, None]*(Pak2))
         return pgi*self.exp_cutoff
 
     def _get_pgm(self, trg):
@@ -444,14 +469,17 @@ class EulerianPTCalculator(CCLAutoRepr):
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         ae2e2, ab2b2 = self.ia_tt
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
+        Pak2 = self.pk_ak*(self.k_s**2)[None, :]
 
         # Get biases
         c11 = tr1.c1(self.z_s)
         c21 = tr1.c2(self.z_s)
         cd1 = tr1.cdelta(self.z_s)
+        ck1 = tr1.cder(self.z_s)
         c12 = tr2.c1(self.z_s)
         c22 = tr2.c2(self.z_s)
         cd2 = tr2.cdelta(self.z_s)
+        ck2 = tr2.cder(self.z_s)
 
         if return_bb:
             pii = ((cd1*cd2*self._g4)[:, None]*a0b0b +
@@ -463,7 +491,8 @@ class EulerianPTCalculator(CCLAutoRepr):
                    (cd1*cd2*self._g4)[:, None]*a0e0e +
                    (c21*c22*self._g4)[:, None]*ae2e2 +
                    ((c11*c22+c21*c12)*self._g4)[:, None]*(a0e2+b0e2) +
-                   ((cd1*c22+cd2*c21)*self._g4)[:, None]*d0ee2)
+                   ((cd1*c22+cd2*c21)*self._g4)[:, None]*d0ee2 +
+                   (ck1*c12 + ck2*c11)[:,None]* (Pak2))
 
         return pii*self.exp_cutoff
 
@@ -485,15 +514,18 @@ class EulerianPTCalculator(CCLAutoRepr):
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
+        Pak2 = self.pk_ak*(self.k_s**2)[None, :]
 
         # Get biases
         c1 = tri.c1(self.z_s)
         c2 = tri.c2(self.z_s)
         cd = tri.cdelta(self.z_s)
+        ck = tri.cder(self.z_s)
 
         pim = (c1[:, None] * Pd1d1 +
                (self._g4*cd)[:, None] * (a00e + c00e) +
-               (self._g4*c2)[:, None] * (a0e2 + b0e2))
+               (self._g4*c2)[:, None] * (a0e2 + b0e2) +
+               (ck)[:,None]*Pak2)
         return pim*self.exp_cutoff
 
     def _get_pmm(self):
