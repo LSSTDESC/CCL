@@ -196,8 +196,8 @@ class EulerianPTCalculator(CCLAutoRepr):
             raise ValueError(f"Unknown P(k) prescription in {ak2_pk_kind}")
         self.b1_pk_kind = b1_pk_kind
         self.bk2_pk_kind = bk2_pk_kind
-        self.ak2_pk_kind = bk2_pk_kind
-        if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt') or (self.ak2_pk_kind == 'pt'):
+        self.ak2_pk_kind = ak2_pk_kind
+        if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt'):
             self.with_matter_1loop = True
 
         # Initialize all expensive arrays to ``None``.
@@ -297,12 +297,12 @@ class EulerianPTCalculator(CCLAutoRepr):
                                       for a in self.a_s])
         if 'pt' in [self.ak2_pk_kind]:
             if 'linear' in pksa:
-                pka = pks['linear']
+                pka = pksa['linear']
             else:
                 pka = np.array([cosmo.linear_matter_power(self.k_s, a) for a in self.a_s])
-            pk += self._g4T*self.one_loop_dd[0]
-            pks['pt'] = pk
-        self.pk_ak=pks[self.ak2_pk_kind]
+            pka += self._g4T*self.one_loop_dd[0]
+            pksa['pt'] = pka
+        self.pk_ak=pksa[self.ak2_pk_kind]
         
     
         # Reset template power spectra
@@ -404,7 +404,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         c1 = tri.c1(self.z_s)
         c2 = tri.c2(self.z_s)
         cd = tri.cdelta(self.z_s)
-        ck = tri.cder(self.z_s)
+        ck = tri.ck(self.z_s)
 
         pgi = b1[:, None] * (c1[:, None] * Pd1d1 +
                              (self._g4*cd)[:, None] * (a00e + c00e) +
@@ -475,11 +475,11 @@ class EulerianPTCalculator(CCLAutoRepr):
         c11 = tr1.c1(self.z_s)
         c21 = tr1.c2(self.z_s)
         cd1 = tr1.cdelta(self.z_s)
-        ck1 = tr1.cder(self.z_s)
+        ck1 = tr1.ck(self.z_s)
         c12 = tr2.c1(self.z_s)
         c22 = tr2.c2(self.z_s)
         cd2 = tr2.cdelta(self.z_s)
-        ck2 = tr2.cder(self.z_s)
+        ck2 = tr2.ck(self.z_s)
 
         if return_bb:
             pii = ((cd1*cd2*self._g4)[:, None]*a0b0b +
@@ -520,7 +520,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         c1 = tri.c1(self.z_s)
         c2 = tri.c2(self.z_s)
         cd = tri.cdelta(self.z_s)
-        ck = tri.cder(self.z_s)
+        ck = tri.ck(self.z_s)
 
         pim = (c1[:, None] * Pd1d1 +
                (self._g4*cd)[:, None] * (a00e + c00e) +
