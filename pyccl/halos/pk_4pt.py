@@ -649,19 +649,6 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
     a_use = np.atleast_1d(a)
     k_use = np.atleast_1d(k)
 
-    # Romberg needs 1 + 2^n points
-    # Since the functions we average depend only on cos(theta) we can rewrite
-    # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
-    # \int_0^pi dtheta f(cos theta) / pi
-    # Exclude theta = pi to avoid k + k' = 0
-    theta = np.linspace(0, np.pi - 1e-5, 129)
-    dtheta = theta[1] - theta[0]
-    cth = np.cos(theta)
-
-    kr = np.sqrt(k_use[:, None, None] ** 2 + k_use[None, :, None] ** 2 +
-                 2 * k_use[:, None, None] * k_use[None, :, None]
-                   * cth[None, None, :])
-
     # Check inputs
     prof, prof2, prof3, prof4, prof13_2pt, prof14_2pt, \
         prof24_2pt, prof32_2pt = _allocate_profiles2(prof, prof2, prof3, prof4,
@@ -673,21 +660,24 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
 
     # Power spectrum
     def get_isotropized_pkr(p_of_k_a, aa):
-        kk = kr.flatten()
-        # This returns int dphi / 2pi int dphi' / 2pi P(kk)
-        if isinstance(p_of_k_a, Pk2D):
-            pk = p_of_k_a(kk, aa, cosmo)
-        elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
-            pk = cosmo.get_linear_power()(kk, aa)
-        elif str(p_of_k_a) == 'nonlinear':
-            pk = cosmo.get_nonlin_power()(kk, aa)
-        else:
-            raise TypeError("p_of_k_a must be `None`, \'linear\', "
-                            "\'nonlinear\' or a `Pk2D` object")
-
-        pk = pk.reshape((nk, nk, theta.size))
-        int_pk = scipy.integrate.romb(pk, dtheta, axis=-1)
-        return int_pk / np.pi
+        def integ(theta):
+            mu = np.cos(theta)
+            k = np.sqrt(k_use[:, None]**2+k_use[None, :]**2
+                        +2*k_use[None, :]*k_use[:,  None]*mu)
+            kk = k.flatten()
+            if isinstance(p_of_k_a, Pk2D):
+                pk = p_of_k_a(kk, aa, cosmo)
+            elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+                pk = cosmo.get_linear_power()(kk, aa)
+            elif str(p_of_k_a) == 'nonlinear':
+                pk = cosmo.get_nonlin_power()(kk, aa)
+            else:
+                raise TypeError("p_of_k_a must be `None`, \'linear\', "
+                                "\'nonlinear\' or a `Pk2D` object")
+            pk = pk.reshape([nk, nk])
+            return pk
+        int_pk = scipy.integrate.quad_vec(integ, 0, np.pi)[0]
+        return int_pk/np.pi
 
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
@@ -717,7 +707,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
 
         tk_2h_22 = p * (i13 * i24 + i14 * i32)
         # Normalize
-        out[ia, :, :] = tk_2h_22 * norm
+        out[ia, :, :] = tk_2h_22 / norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -791,14 +781,9 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
     k_use = np.atleast_1d(k)
 
     # Check inputs
-    print(prof12_2pt)
-    print(prof34_2pt)
     prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt, _, _ = \
         _allocate_profiles2(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt,
                             None, None)
-
-    print(prof12_2pt)
-    print(prof34_2pt)
 
     # Power spectrum
     def get_pk(p_of_k_a):
@@ -825,42 +810,37 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
                                                 cosmo, aa, hmc)
         norm = norm1 * norm2 * norm3 * norm4
 
-        print(1)
+        # TODO: Possible improvement: when all profiles are the same, we just
+        # need to compute 2 blocks.
+
         # Compute trispectrum at this redshift
         p1 = get_pk(p_of_k_a)(aa)[:, None]
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[:, None]
         i234 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof2=prof3,
                          prof_2pt=prof34_2pt, prof3=prof4)
-        print(2)
         # Permutation 1
         # p2 = p1  # (because k_a = k_b)
         i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
         i134 = hmc.I_1_3(cosmo, k_use, aa, prof, prof2=prof3,
                          prof_2pt=prof34_2pt, prof3=prof4)
         # Attention to axis order change!
-        print(3)
         # Permutation 2
         p3 = p1.T
         i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i124 = hmc.I_1_3(cosmo, k_use, aa, prof4, prof2=prof,
                          prof_2pt=prof12_2pt, prof3=prof2).T
-        print(4)
         # Permutation 4
         # p4 = p3  # (because k_c = k_d)
         i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
         i123 = hmc.I_1_3(cosmo, k_use, aa, prof3, prof2=prof,
                          prof_2pt=prof12_2pt, prof3=prof2).T
         ####
-        print(5)
 
-        # print(i1.shape)
-        # print(i234.shape)
-        # print(i4.shape)
-        # print(i123.shape)
         tk_2h_13 = p1 * (i1 * i234 + i2 * i134) + p3 * (i3 * i124 + i4 * i123)
 
+
         # Normalize
-        out[ia, :, :] = tk_2h_13 * norm
+        out[ia, :, :] = tk_2h_13 / norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -943,7 +923,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
     # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
     # \int_0^pi dtheta f(cos theta) / pi
     # Exclude theta = pi to avoid k + k' = 0
-    theta = np.linspace(0, np.pi - 1e-5, 129)
+    theta = np.linspace(0, np.pi - 1e-5, 8193)
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
@@ -997,6 +977,8 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
         Bpt = 6. / 7. * pk * pk.T + 2 * pk * P3
         Bpt += Bpt.T
 
+        # TODO: We need the factor 2 to match Robert's code. Why?
+        # return 2 * Bpt
         return Bpt
 
     na = len(a_use)
@@ -1044,17 +1026,16 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
                        i3 * i2 * i14 + i4 * i2 * i31)
 
         # Normalize
-        out[ia, :, :] = tk_3h * norm
+        out[ia, :, :] = tk_3h / norm
+
+    # np.savez_compressed('/home/ardok/Bpt_isotropized.npz', Bpt=get_Bpt(1),
+    #                     k=k_use)
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
     if np.ndim(k) == 0:
         out = np.squeeze(out, axis=-1)
         out = np.squeeze(out, axis=-1)
-
-    # TODO: Check which return is correct. The commented out is the one from
-    # Lucas Faga commit 569a896d.
-    # return t1113 + t1122
 
     return out
 
@@ -1140,13 +1121,12 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
     # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
     # \int_0^pi dtheta f(cos theta) / pi
     # Exclude theta = pi to avoid k + k' = 0
-    theta = np.linspace(0, np.pi - 1e-5, 129)
+    theta = np.linspace(0, np.pi - 1e-5, 8193)
     dtheta = theta[1] - theta[0]
     cth = np.cos(theta)
 
     def isotropize(arr):
         int_arr = scipy.integrate.romb(arr, dtheta, axis=-1)
-        # return int_arr / (2 * np.pi)
         return int_arr / np.pi
 
     def get_kr_f2_f2T_X():
@@ -1201,13 +1181,17 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
         tk_4h = i1 * i2 * i3 * i4 * (t1113 + t1122)
 
         # Normalize
-        out[ia, :, :] = tk_4h * norm
+        out[ia, :, :] = tk_4h / norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
     if np.ndim(k) == 0:
         out = np.squeeze(out, axis=-1)
         out = np.squeeze(out, axis=-1)
+
+    # np.savez_compressed('/home/ardok/Tpt_isotropized.npz', Tpt=t1113+t1122,
+    #                     k=k_use)
+
     return out
 
 

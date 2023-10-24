@@ -285,20 +285,14 @@ class HMCalculator(CCLAutoRepr):
         if prof3 is None:
             prof3 = prof2
 
-        print(prof)
-        print(prof2)
-        print(prof3)
-        print(prof_2pt)
-
-        self._check_mass_def(prof, prof2)
-        self._check_mass_def(prof2, prof3)
+        self._check_mass_def(prof, prof2, prof3)
         self._get_ingredients(cosmo, a, get_bf=True)
-        uk1 = prof.fourier(cosmo, k, self._mass, a)
+        uk1 = prof.fourier(cosmo, k, self._mass, a).T
         uk23 = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof2,
-                                    prof2=prof3)
+                                    prof2=prof3).T
 
-        uk = uk1[:, :, None] * uk23[:, None, :]
-        i13 = self._integrate_over_mbf(uk.T)
+        uk = uk1[None, :, :] * uk23[:, None, :]
+        i13 = self._integrate_over_mbf(uk)
         return i13
 
     def I_0_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
