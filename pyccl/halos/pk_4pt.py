@@ -918,15 +918,6 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
     a_use = np.atleast_1d(a)
     k_use = np.atleast_1d(k)
 
-    # Romberg needs 1 + 2^n points
-    # Since the functions we average depend only on cos(theta) we can rewrite
-    # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
-    # \int_0^pi dtheta f(cos theta) / pi
-    # Exclude theta = pi to avoid k + k' = 0
-    theta = np.linspace(0, np.pi - 1e-5, 8193)
-    dtheta = theta[1] - theta[0]
-    cth = np.cos(theta)
-
     # Check inputs
     prof, prof2, prof3, prof4, prof13_2pt, prof14_2pt, \
         prof24_2pt, prof32_2pt = _allocate_profiles2(prof, prof2, prof3, prof4,
@@ -950,9 +941,10 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
 
     # Compute bispectrum
     # Encapsulate code in a function
-    def get_kr_and_f2():
-        kk = k_use[:, None, None]
-        kp = k_use[None, :, None]
+    def get_kr_and_f2(theta):
+        cth = np.cos(theta)
+        kk = k_use[:, None ]
+        kp = k_use[None, :]
         kr2 = kk ** 2 + kp ** 2 + 2 * kk * kp * cth
         kr = np.sqrt(kr2)
 
@@ -965,20 +957,20 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
 
         return kr, f2
 
-    kr, f2 = get_kr_and_f2()
 
     def get_Bpt(a):
         # We only need to compute the independent k * k * cos(theta) since Pk
         # only depends on the module of ki + kj
         pk = get_pk(k_use, a)[:, None]
-        pkr = get_pk(kr.flatten(), a).reshape(kr.shape)
-        P3 = scipy.integrate.romb(pkr * f2, dtheta, axis=-1) / np.pi
+        def integ(theta):
+            kr, f2 = get_kr_and_f2(theta)
+            pkr = get_pk(kr.flatten(), a).reshape(kr.shape)
+            return pkr * f2
+        P3 = scipy.integrate.quad_vec(integ, 0, np.pi)[0] / np.pi
 
         Bpt = 6. / 7. * pk * pk.T + 2 * pk * P3
         Bpt += Bpt.T
 
-        # TODO: We need the factor 2 to match Robert's code. Why?
-        # return 2 * Bpt
         return Bpt
 
     na = len(a_use)
@@ -1027,9 +1019,6 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
 
         # Normalize
         out[ia, :, :] = tk_3h / norm
-
-    # np.savez_compressed('/home/ardok/Bpt_isotropized.npz', Bpt=get_Bpt(1),
-    #                     k=k_use)
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -1116,43 +1105,47 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
 
         return pk
 
-    # Romberg needs 1 + 2^n points
-    # Since the functions we average depend only on cos(theta) we can rewrite
-    # the integrals as \int_0^2pi dtheta f(cos theta) / 2pi as
-    # \int_0^pi dtheta f(cos theta) / pi
-    # Exclude theta = pi to avoid k + k' = 0
-    theta = np.linspace(0, np.pi - 1e-5, 8193)
-    dtheta = theta[1] - theta[0]
-    cth = np.cos(theta)
+    def get_P4A_P4X(a):
+        k = k_use[:, None]
+        kp = k_use[None, :]
 
-    def isotropize(arr):
-        int_arr = scipy.integrate.romb(arr, dtheta, axis=-1)
-        return int_arr / np.pi
+        def integ(theta):
+            cth = np.cos(theta)
+            kr2 = k ** 2 + kp ** 2 + 2 * k * kp * cth
+            kr = np.sqrt(kr2)
 
-    def get_kr_f2_f2T_X():
-        k = k_use[:, None, None]
-        kp = k_use[None, :, None]
-        kr2 = k ** 2 + kp ** 2 + 2 * k * kp * cth
-        kr = np.sqrt(kr2)
+            f2 = 5./7. - 0.5 * (1 + k ** 2 / kr2) * (1 + kp / k * cth) + \
+                2/7. * k ** 2 / kr2 * (1 + kp / k * cth)**2
+            f2[np.where(kr == 0)] = 13. / 28
 
-        f2 = 5./7. - 0.5 * (1 + k ** 2 / kr2) * (1 + kp / k * cth) + \
-            2/7. * k ** 2 / kr2 * (1 + kp / k * cth)**2
-        f2[np.where(kr == 0)] = 13. / 28
+            pkr = get_pk(kr.flatten(), a).reshape((nk, nk))
+            return np.array([pkr * f2**2, pkr * f2 * f2.T])
+        P4A, P4X = scipy.integrate.quad_vec(integ, 0, np.pi)[0] / np.pi
 
-        # k <-> k'
-        f2T = np.transpose(f2, (1, 0, 2))
+        return P4A, P4X
 
+    def get_X():
+        k = k_use[:, None]
+        kp = k_use[None, :]
         r = kp / k
-        intd = (5 * r + (7 - 2*r**2)*cth) / (1 + r**2 + 2*r*cth) * \
-               (3/7. * r + 0.5 * (1 + r**2) * cth + 4/7. * r * cth**2)
-        # When kr = 0, r = 1 and intd = 0
-        intd[np.where(kr == 0)] = 0
-        X = -7./4. * (1 + r.reshape(nk, nk)**2) + isotropize(intd)
+        def integ(theta):
+            cth = np.cos(theta)
+            kr2 = k ** 2 + kp ** 2 + 2 * k * kp * cth
+            kr = np.sqrt(kr2)
+            intd = (5 * r + (7 - 2*r**2)*cth) / (1 + r**2 + 2*r*cth) * \
+                   (3/7. * r + 0.5 * (1 + r**2) * cth + 4/7. * r * cth**2)
+            # When kr = 0, r = 1 and intd = 0
+            intd[np.where(kr == 0)] = 0
+            return intd
 
-        return kr, f2, f2T, X
+        isotropized_integ = \
+            scipy.integrate.quad_vec(integ, 0, np.pi)[0] / np.pi
 
-    kr, f2, f2T, X = get_kr_f2_f2T_X()
+        X = -7./4. * (1 + r**2) + isotropized_integ
 
+        return X
+
+    X = get_X()
     out = np.zeros([na, nk, nk])
     for ia, aa in enumerate(a_use):
         # Compute profile normalizations
@@ -1161,10 +1154,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
         norm = norm1 * norm2 * norm3 * norm4
 
         pk = get_pk(k_use, aa)[:, None]
-        pkr = get_pk(kr.flatten(), aa).reshape((nk, nk, theta.size))
-
-        P4A = isotropize(f2 ** 2 * pkr)
-        P4X = isotropize(f2 * f2T * pkr)
+        P4A, P4X = get_P4A_P4X(aa)
 
         t1113 = 4/9. * pk**2 * pk.T * X
         t1113 += t1113.T
@@ -1188,9 +1178,6 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
     if np.ndim(k) == 0:
         out = np.squeeze(out, axis=-1)
         out = np.squeeze(out, axis=-1)
-
-    # np.savez_compressed('/home/ardok/Tpt_isotropized.npz', Tpt=t1113+t1122,
-    #                     k=k_use)
 
     return out
 
