@@ -291,7 +291,7 @@ class HMCalculator(CCLAutoRepr):
         uk23 = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof2,
                                     prof2=prof3).T
 
-        uk = uk1[None, :, :] * uk23[:, None, :]
+        uk = uk1[:, None,  :] * uk23[None, :, :]
         i13 = self._integrate_over_mbf(uk)
         return i13
 
@@ -441,4 +441,5 @@ class HMCalculator(CCLAutoRepr):
             uk34 = prof34_2pt.fourier_2pt(
                 cosmo, k, self._mass, a, prof3, prof2=prof4).T
 
+        # TODO: Is this k ordering correct?
         return self._integrate_over_mf(uk12[None, :, :] * uk34[:, None, :])
