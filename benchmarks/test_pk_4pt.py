@@ -1,5 +1,5 @@
 """
-Compare halo model trispectra with Robert Reiscke's code. We compare up to
+Compare halo model trispectra with Robert Reischke's code. We compare up to
 k=10h/Mpc, which is safe enough. At smaller scales, there are 10-20%
 differences coming mainly from the I_1_1 integral.
 
