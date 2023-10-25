@@ -499,6 +499,7 @@ def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt):
 
     return prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt
 
+
 def _allocate_profiles1pt(prof, prof2, prof3, prof4):
     if not isinstance(prof, HaloProfile):
         raise TypeError("prof must be of type `HaloProfile`")
@@ -517,6 +518,7 @@ def _allocate_profiles1pt(prof, prof2, prof3, prof4):
 
     return prof, prof2, prof3, prof4
 
+
 def _allocate_profiles2(prof, prof2, prof3, prof4, prof13_2pt, prof14_2pt,
                         prof24_2pt, prof32_2pt):
     """Helper that controls how the undefined profiles are allocated."""
@@ -530,25 +532,28 @@ def _allocate_profiles2(prof, prof2, prof3, prof4, prof13_2pt, prof14_2pt,
 
     if prof24_2pt is not None:
         if not isinstance(prof24_2pt, Profile2pt):
-            raise TypeError("prof13_2pt must be of type `Profile2pt` or `None`")
+            raise TypeError("prof24_2pt must be of type `Profile2pt` or "
+                            "`None`")
     else:
         prof24_2pt = prof13_2pt
 
     if prof14_2pt is not None:
         if not isinstance(prof14_2pt, Profile2pt):
-            raise TypeError("prof13_2pt must be of type `Profile2pt` or `None`")
+            raise TypeError("prof14_2pt must be of type `Profile2pt` or "
+                            "`None`")
     else:
         prof14_2pt = prof13_2pt
 
     if prof32_2pt is not None:
         if not isinstance(prof32_2pt, Profile2pt):
-            raise TypeError("prof13_2pt must be of type `Profile2pt` or `None`")
+            raise TypeError("prof32_2pt must be of type `Profile2pt` or "
+                            "`None`")
     else:
         prof32_2pt = prof13_2pt
 
+    return prof, prof2, prof3, prof4, prof13_2pt, prof14_2pt, prof24_2pt, \
+        prof32_2pt
 
-    return prof, prof2, prof3, prof4, prof13_2pt, prof14_2pt, \
-           prof24_2pt, prof32_2pt
 
 def _get_norms(prof, prof2, prof3, prof4, cosmo, aa, hmc):
     # Compute profile normalizations
@@ -586,8 +591,8 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
                               prof3=None, prof4=None, prof13_2pt=None,
                               prof14_2pt=None, prof24_2pt=None,
                               prof32_2pt=None, p_of_k_a=None):
-    """ Computes the isotropized halo model 2-halo trispectrum for four profiles
-    :math:`u_{1,2}`, :math:`v_{1,2}` as
+    """ Computes the isotropized halo model 2-halo trispectrum for four
+    profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
     .. math::
         \\bar{T}^{2h}_{22}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
@@ -663,7 +668,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
         def integ(theta):
             mu = np.cos(theta)
             k = np.sqrt(k_use[:, None]**2+k_use[None, :]**2
-                        +2*k_use[None, :]*k_use[:,  None]*mu)
+                        + 2*k_use[None, :]*k_use[:, None]*mu)
             kk = k.flatten()
             if isinstance(p_of_k_a, Pk2D):
                 pk = p_of_k_a(kk, aa, cosmo)
@@ -721,8 +726,8 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
                               prof2=None, prof3=None, prof4=None,
                               prof12_2pt=None, prof34_2pt=None,
                               p_of_k_a=None):
-    """ Computes the isotropized halo model 2-halo trispectrum for four different
-    quantities defined by their respective halo profiles. The 2-halo
+    """ Computes the isotropized halo model 2-halo trispectrum for four
+    different quantities defined by their respective halo profiles. The 2-halo
     trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
     calculated as:
 
@@ -838,7 +843,6 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
 
         tk_2h_13 = p1 * (i1 * i234 + i2 * i134) + p3 * (i3 * i124 + i4 * i123)
 
-
         # Normalize
         out[ia, :, :] = tk_2h_13 / norm
 
@@ -855,8 +859,8 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
                            prof13_2pt=None, prof14_2pt=None,
                            prof24_2pt=None, prof32_2pt=None,
                            p_of_k_a=None):
-    """ Computes the isotropized halo model 3-halo trispectrum for four profiles
-    :math:`u_{1,2}`, :math:`v_{1,2}` as
+    """ Computes the isotropized halo model 3-halo trispectrum for four
+    profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
     .. math::
         \\bar{T}^{3h}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
@@ -924,7 +928,6 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
                                                      prof13_2pt, prof14_2pt,
                                                      prof24_2pt, prof32_2pt)
 
-
     # Power spectrum
     def get_pk(k, a):
         if isinstance(p_of_k_a, Pk2D):
@@ -943,7 +946,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
     # Encapsulate code in a function
     def get_kr_and_f2(theta):
         cth = np.cos(theta)
-        kk = k_use[:, None ]
+        kk = k_use[:, None]
         kp = k_use[None, :]
         kr2 = kk ** 2 + kp ** 2 + 2 * kk * kp * cth
         kr = np.sqrt(kr2)
@@ -957,11 +960,11 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
 
         return kr, f2
 
-
     def get_Bpt(a):
         # We only need to compute the independent k * k * cos(theta) since Pk
         # only depends on the module of ki + kj
         pk = get_pk(k_use, a)[:, None]
+
         def integ(theta):
             kr, f2 = get_kr_and_f2(theta)
             pkr = get_pk(kr.flatten(), a).reshape(kr.shape)
@@ -1001,7 +1004,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
         i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof2,
                         prof_2pt=prof32_2pt, diag=False)
         # Permutation 3: 1 <-> 3
-        i14 = hmc.I_1_2(cosmo, k_use, aa, prof,prof2=prof4,
+        i14 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof4,
                         prof_2pt=prof14_2pt, diag=False)
         # Permutation 4: 1 <-> 4
         i31 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof,
@@ -1128,6 +1131,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
         k = k_use[:, None]
         kp = k_use[None, :]
         r = kp / k
+
         def integ(theta):
             cth = np.cos(theta)
             kr2 = k ** 2 + kp ** 2 + 2 * k * kp * cth

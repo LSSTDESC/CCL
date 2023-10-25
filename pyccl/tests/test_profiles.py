@@ -371,6 +371,7 @@ def test_2pt_rcorr_smoke():
     with pytest.raises(TypeError):
         p2pt.fourier_2pt(COSMO, 1., 1e13, 1., p, prof2=0)
 
+
 def get_nfw(real=False, fourier=False):
     # Return a subclass of the NFW profile with or without fourier analytic.
     NFW = type("NFW", (ccl.halos.HaloProfileNFW,), {})

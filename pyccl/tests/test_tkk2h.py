@@ -110,7 +110,7 @@ def test_tkk2h_22_smoke(pars):
 @pytest.mark.parametrize('pars',
                          [{'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv12': None, 'cv34': None,
-                            'p_of_k_a': None},
+                           'p_of_k_a': None},
                           {'p1': P1, 'p2': None, 'p3': None, 'p4': None,
                            'cv12': None, 'cv34': None,
                            'p_of_k_a': None},

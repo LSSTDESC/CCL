@@ -1,7 +1,6 @@
 __all__ = ("HMCalculator",)
 
 import numpy as np
-import scipy
 
 from .. import CCLAutoRepr, unlock_instance
 from .. import physical_constants as const
@@ -291,7 +290,7 @@ class HMCalculator(CCLAutoRepr):
         uk23 = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof2,
                                     prof2=prof3).T
 
-        uk = uk1[:, None,  :] * uk23[None, :, :]
+        uk = uk1[:, None, :] * uk23[None, :, :]
         i13 = self._integrate_over_mbf(uk)
         return i13
 
@@ -332,7 +331,7 @@ class HMCalculator(CCLAutoRepr):
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
         return self._integrate_over_mf(uk)
 
-    def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt,  diag=True):
+    def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt, diag=True):
         """ Solves the integral:
 
         .. math::

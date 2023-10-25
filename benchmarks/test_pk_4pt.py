@@ -34,7 +34,7 @@ onecov/cov_halo_model.py:
 ---
 >                 bias = self.bias(bias_dict, hm_prec) * self.norm_bias
 >                 norm = np.trapz(self.mass_func.dndm * bias *
->                                   self.mass_func.m, self.mass_func.m) / self.rho_bg
+>                             self.mass_func.m, self.mass_func.m) / self.rho_bg
 >                 Abmin = (1-norm)*self.rho_bg/self.mass_func.m[0]
 >
 >                 integral_x_offset = Abmin*hurlyX[:, :, 0]
@@ -88,22 +88,14 @@ import pytest
 
 # CCL halo stuff
 h = 0.7
-parsdic = dict(sigma8 = 0.8,
-h = h,
-Omega_c = 0.25,
-Omega_b = 0.05,
-w0 = -1.0,
-wa = 0.0,
-n_s = 0.96,
-Neff = 3.046,
-m_nu = 0.0,
-T_CMB = 2.725,
-transfer_function='eisenstein_hu')
 
-cosmo = ccl.Cosmology(**parsdic)
+cosmo = ccl.Cosmology(sigma8=0.8, h=h, Omega_c=0.25, Omega_b=0.05, w0=-1.0,
+                      wa=0.0, n_s=0.96, Neff=3.046, m_nu=0.0, T_CMB=2.725,
+                      transfer_function='eisenstein_hu')
 hmf = ccl.halos.MassFuncTinker10(mass_def="200m")
 hbf = ccl.halos.HaloBiasTinker10(mass_def="200m")
-hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf, log10M_max=17, log10M_min=9)
+hmc = ccl.halos.HMCalculator(mass_function=hmf, halo_bias=hbf, log10M_max=17,
+                             log10M_min=9)
 
 c = ccl.halos.ConcentrationDuffy08(mass_def='200m')
 nfw = ccl.halos.HaloProfileNFW(mass_def="200m", concentration=c)
@@ -113,8 +105,8 @@ p2pt = ccl.halos.Profile2pt()
 aa = 1/(1+np.linspace(0, 0.3, 1)[::-1])
 
 # Ref data cut to k<=10 h/Mpc
-REF_DATA =  np.load(os.path.join(os.path.dirname(__file__),
-                                 "data/trispectrum_terms.npz"))
+REF_DATA = np.load(os.path.join(os.path.dirname(__file__),
+                                "data/trispectrum_terms.npz"))
 KVALS = REF_DATA['k']
 
 
@@ -123,8 +115,7 @@ ccl_trispec = {"trispec_1h": ccl.halos.halomod_trispectrum_1h,
                "trispec_2h_31": ccl.halos.halomod_trispectrum_2h_13,
                "trispec_2h_22": ccl.halos.halomod_trispectrum_2h_22,
                "trispec_3h": ccl.halos.halomod_trispectrum_3h,
-               "trispec_4h": ccl.halos.halomod_trispectrum_4h,
-                   }
+               "trispec_4h": ccl.halos.halomod_trispectrum_4h}
 
 ccl_tk3d = {"trispec_1h": ccl.halos.halomod_Tk3D_1h,
             "trispec_2h": ccl.halos.halomod_Tk3D_2h,
@@ -177,13 +168,15 @@ def test_trispectrum_terms(term):
         # We relax the relative difference and remove the largest scales due to
         # errors in the reference Tpt integrals at the largest scales
         assert ccl_tk.diagonal() == pytest.approx(ref_tk.diagonal(), rel=3e-2)
-        assert ccl_tk.diagonal(1) == pytest.approx(ref_tk.diagonal(1), rel=3e-2)
-        sel = KVALS>5e-3
+        assert ccl_tk.diagonal(1) == pytest.approx(ref_tk.diagonal(1),
+                                                   rel=3e-2)
+        sel = KVALS > 5e-3
         assert ccl_tk[sel][:, sel] == pytest.approx(ref_tk[sel][:, sel],
                                                     rel=3e-2)
     else:
         assert ccl_tk.diagonal() == pytest.approx(ref_tk.diagonal(), rel=1e-2)
-        assert ccl_tk.diagonal(1) == pytest.approx(ref_tk.diagonal(1), rel=1e-2)
+        assert ccl_tk.diagonal(1) == pytest.approx(ref_tk.diagonal(1),
+                                                   rel=1e-2)
         assert ccl_tk == pytest.approx(ref_tk, rel=1e-2)
 
 
@@ -199,11 +192,13 @@ def test_Tk3D(term):
         # We relax the relative difference and remove the largest scales due to
         # errors in the reference Tpt integrals at the largest scales
         assert ccl_tk.diagonal() == pytest.approx(ref_tk.diagonal(), rel=3e-2)
-        assert ccl_tk.diagonal(1) == pytest.approx(ref_tk.diagonal(1), rel=3e-2)
-        sel = KVALS>5e-3
+        assert ccl_tk.diagonal(1) == pytest.approx(ref_tk.diagonal(1),
+                                                   rel=3e-2)
+        sel = KVALS > 5e-3
         assert ccl_tk[sel][:, sel] == pytest.approx(ref_tk[sel][:, sel],
                                                     rel=3e-2)
     else:
         assert ccl_tk.diagonal() == pytest.approx(ref_tk.diagonal(), rel=1e-2)
-        assert ccl_tk.diagonal(1) == pytest.approx(ref_tk.diagonal(1), rel=1e-2)
+        assert ccl_tk.diagonal(1) == pytest.approx(ref_tk.diagonal(1),
+                                                   rel=1e-2)
         assert ccl_tk == pytest.approx(ref_tk, rel=1e-2)
