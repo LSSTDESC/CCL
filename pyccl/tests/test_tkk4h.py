@@ -147,7 +147,8 @@ def test_tkk4h_errors(pars):
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
 
-    with pytest.raises(TypeError):
+    error = AttributeError if pars['p_of_k_a'] is None else TypeError
+    with pytest.raises(error):
         ccl.halos.halomod_trispectrum_4h(COSMO, hmc, k_arr, a_arr,
                                          prof=pars['p1'], prof2=pars['p2'],
                                          prof3=pars['p3'], prof4=pars['p4'],

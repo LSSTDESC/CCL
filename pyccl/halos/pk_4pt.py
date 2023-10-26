@@ -1,5 +1,5 @@
 __all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
-           "halomod_trispectrum_2h_22", "halomod_trispectrum_2h_13",
+           "_halomod_trispectrum_2h_22", "_halomod_trispectrum_2h_13",
            "halomod_trispectrum_3h", "halomod_trispectrum_4h",
            "halomod_Tk3D_2h", "halomod_Tk3D_3h", "halomod_Tk3D_4h",
            "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC",
@@ -11,7 +11,7 @@ import numpy as np
 import scipy
 
 from .. import CCLWarning, Tk3D, Pk2D
-from . import HaloProfile, HaloProfileNFW, Profile2pt
+from . import HaloProfileNFW, Profile2pt
 
 
 def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
@@ -501,20 +501,13 @@ def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt):
 
 
 def _allocate_profiles1pt(prof, prof2, prof3, prof4):
-    if not isinstance(prof, HaloProfile):
-        raise TypeError("prof must be of type `HaloProfile`")
+    """Helper that controls how the undefined profiles are allocated."""
     if prof2 is None:
         prof2 = prof
-    elif not isinstance(prof2, HaloProfile):
-        raise TypeError("prof2 must be of type `HaloProfile` or `None`")
     if prof3 is None:
         prof3 = prof
-    elif not isinstance(prof3, HaloProfile):
-        raise TypeError("prof3 must be of type `HaloProfile` or `None`")
     if prof4 is None:
         prof4 = prof3
-    elif not isinstance(prof4, HaloProfile):
-        raise TypeError("prof4 must be of type `HaloProfile` or `None`")
 
     return prof, prof2, prof3, prof4
 
@@ -523,32 +516,18 @@ def _allocate_profiles2(prof, prof2, prof3, prof4, prof13_2pt, prof14_2pt,
                         prof24_2pt, prof32_2pt):
     """Helper that controls how the undefined profiles are allocated."""
     prof, prof2, prof3, prof4 = \
-        _allocate_profiles1pt(prof, prof2, prof3, prof4,)
+        _allocate_profiles1pt(prof, prof2, prof3, prof4)
 
     if prof13_2pt is None:
         prof13_2pt = Profile2pt()
-    elif not isinstance(prof13_2pt, Profile2pt):
-        raise TypeError("prof13_2pt must be of type `Profile2pt` or `None`")
 
-    if prof24_2pt is not None:
-        if not isinstance(prof24_2pt, Profile2pt):
-            raise TypeError("prof24_2pt must be of type `Profile2pt` or "
-                            "`None`")
-    else:
-        prof24_2pt = prof13_2pt
-
-    if prof14_2pt is not None:
-        if not isinstance(prof14_2pt, Profile2pt):
-            raise TypeError("prof14_2pt must be of type `Profile2pt` or "
-                            "`None`")
-    else:
+    if prof14_2pt is None:
         prof14_2pt = prof13_2pt
 
-    if prof32_2pt is not None:
-        if not isinstance(prof32_2pt, Profile2pt):
-            raise TypeError("prof32_2pt must be of type `Profile2pt` or "
-                            "`None`")
-    else:
+    if prof24_2pt is None:
+        prof24_2pt = prof13_2pt
+
+    if prof32_2pt is None:
         prof32_2pt = prof13_2pt
 
     return prof, prof2, prof3, prof4, prof13_2pt, prof14_2pt, prof24_2pt, \
@@ -575,6 +554,19 @@ def _get_norms(prof, prof2, prof3, prof4, cosmo, aa, hmc):
     return norm1, norm2, norm3, norm4
 
 
+def _get_pk2d(p_of_k_a, cosmo):
+    if isinstance(p_of_k_a, Pk2D):
+        pk2d = p_of_k_a
+    elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
+        pk2d = cosmo.get_linear_power()
+    elif str(p_of_k_a) == 'nonlinear':
+        pk2d = cosmo.get_nonlin_power()
+    else:
+        raise TypeError("p_of_k_a must be `None`, \'linear\', "
+                        "\'nonlinear\' or a `Pk2D` object")
+    return pk2d
+
+
 def _logged_output(*arrs, log):
     """Helper that logs the output if needed."""
     if not log:
@@ -587,10 +579,10 @@ def _logged_output(*arrs, log):
     return *[np.log(arr) for arr in arrs], log
 
 
-def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
-                              prof3=None, prof4=None, prof13_2pt=None,
-                              prof14_2pt=None, prof24_2pt=None,
-                              prof32_2pt=None, p_of_k_a=None):
+def _halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
+                               prof3=None, prof4=None, prof13_2pt=None,
+                               prof14_2pt=None, prof24_2pt=None,
+                               prof32_2pt=None, p_of_k_a=None):
     """ Computes the isotropized halo model 2-halo trispectrum for four
     profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
@@ -664,22 +656,15 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
     nk = len(k_use)
 
     # Power spectrum
-    def get_isotropized_pkr(p_of_k_a, aa):
+    pk2d = _get_pk2d(p_of_k_a, cosmo)
+
+    def get_isotropized_pkr(aa):
         def integ(theta):
             mu = np.cos(theta)
             k = np.sqrt(k_use[:, None]**2+k_use[None, :]**2
                         + 2*k_use[None, :]*k_use[:, None]*mu)
             kk = k.flatten()
-            if isinstance(p_of_k_a, Pk2D):
-                pk = p_of_k_a(kk, aa, cosmo)
-            elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
-                pk = cosmo.get_linear_power()(kk, aa)
-            elif str(p_of_k_a) == 'nonlinear':
-                pk = cosmo.get_nonlin_power()(kk, aa)
-            else:
-                raise TypeError("p_of_k_a must be `None`, \'linear\', "
-                                "\'nonlinear\' or a `Pk2D` object")
-            pk = pk.reshape([nk, nk])
+            pk = pk2d(kk, aa, cosmo).reshape([nk, nk])
             return pk
         int_pk = scipy.integrate.quad_vec(integ, 0, np.pi)[0]
         return int_pk/np.pi
@@ -690,15 +675,11 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
                                                 cosmo, aa, hmc)
 
         norm = norm1 * norm2 * norm3 * norm4
-        p = get_isotropized_pkr(p_of_k_a, aa)
+        p = get_isotropized_pkr(aa)
 
         # Compute trispectrum at this redshift
-        # P(k1 - k1 = 0) = 0
-        # p12 = get_isotropized_pk(p_of_k_a, 0 * kkth, aa)
-        # i12 = hmc.I_1_2(cosmo, k_use, aa, prof, prof12_2pt,
-        #                 prof2=prof2)[:, None]
-        # i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt,
-        #                 prof2=prof4)[None, :]
+        # Permutation 0 is 0 due to P(k1 - k1 = 0) = 0
+
         # Permutation 1
         i13 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof3,
                         prof_2pt=prof13_2pt, diag=False)
@@ -722,10 +703,10 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
     return out
 
 
-def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
-                              prof2=None, prof3=None, prof4=None,
-                              prof12_2pt=None, prof34_2pt=None,
-                              p_of_k_a=None):
+def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
+                               prof2=None, prof3=None, prof4=None,
+                               prof12_2pt=None, prof34_2pt=None,
+                               p_of_k_a=None):
     """ Computes the isotropized halo model 2-halo trispectrum for four
     different quantities defined by their respective halo profiles. The 2-halo
     trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
@@ -791,20 +772,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
                             None, None)
 
     # Power spectrum
-    def get_pk(p_of_k_a):
-        if isinstance(p_of_k_a, Pk2D):
-            def pkf(sf):
-                return p_of_k_a(k_use, sf, cosmo)
-        elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
-            def pkf(sf):
-                return cosmo.get_linear_power()(k_use, sf)
-        elif str(p_of_k_a) == 'nonlinear':
-            def pkf(sf):
-                return cosmo.get_nonlin_power()(k_use, sf)
-        else:
-            raise TypeError("p_of_k_a must be `None`, \'linear\', "
-                            "\'nonlinear\' or a `Pk2D` object")
-        return pkf
+    pk2d = _get_pk2d(p_of_k_a, cosmo)
 
     na = len(a_use)
     nk = len(k_use)
@@ -819,7 +787,7 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
         # need to compute 2 blocks.
 
         # Compute trispectrum at this redshift
-        p1 = get_pk(p_of_k_a)(aa)[:, None]
+        p1 = pk2d(k_use, aa, cosmo)[:, None]
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[:, None]
         i234 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof2=prof3,
                          prof_2pt=prof34_2pt, prof3=prof4)
@@ -929,18 +897,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
                                                      prof24_2pt, prof32_2pt)
 
     # Power spectrum
-    def get_pk(k, a):
-        if isinstance(p_of_k_a, Pk2D):
-            pk = p_of_k_a(k, a, cosmo)
-        elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
-            pk = cosmo.get_linear_power()(k, a)
-        elif str(p_of_k_a) == 'nonlinear':
-            pk = cosmo.get_nonlin_power()(k, a)
-        else:
-            raise TypeError("p_of_k_a must be `None`, \'linear\', "
-                            "\'nonlinear\' or a `Pk2D` object")
-
-        return pk
+    pk2d = _get_pk2d(p_of_k_a, cosmo)
 
     # Compute bispectrum
     # Encapsulate code in a function
@@ -963,11 +920,11 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
     def get_Bpt(a):
         # We only need to compute the independent k * k * cos(theta) since Pk
         # only depends on the module of ki + kj
-        pk = get_pk(k_use, a)[:, None]
+        pk = pk2d(k_use, a, cosmo)[:, None]
 
         def integ(theta):
             kr, f2 = get_kr_and_f2(theta)
-            pkr = get_pk(kr.flatten(), a).reshape(kr.shape)
+            pkr = pk2d(kr.flatten(), a, cosmo).reshape(kr.shape)
             return pkr * f2
         P3 = scipy.integrate.quad_vec(integ, 0, np.pi)[0] / np.pi
 
@@ -986,7 +943,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
                                                 cosmo, aa, hmc)
         norm = norm1 * norm2 * norm3 * norm4
 
-        # Permutation 0
+        # Permutation 0 is 0 due to Bpt_1_2_34=0
         # Bpt_1_2_34 = 0
         # i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[:, None]
         # i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
@@ -1010,11 +967,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
         i31 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof,
                         prof_2pt=prof13_2pt, diag=False)
 
-        # Permutation 5: 12 <-> 34
-        # Bpt_3_4_12 = 0
-        # i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        # i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
-        # i12 = hmc.I_1_2(cosmo, k_use, aa, prof, prof12_2pt, prof2=prof2)
+        # Permutation 5: 12 <-> 34 is 0 due to Bpt_3_4_12=0
 
         Bpt = get_Bpt(aa)
         tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i32 +
@@ -1088,25 +1041,13 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
 
     # Check inputs
     prof, prof2, prof3, prof4 = \
-        _allocate_profiles1pt(prof, prof2, prof3, prof4,)
+        _allocate_profiles1pt(prof, prof2, prof3, prof4)
 
     na = len(a_use)
     nk = len(k_use)
 
     # Power spectrum
-    def get_pk(k, a):
-        # This returns int dphi / 2pi int dphi' / 2pi P(kkth)
-        if isinstance(p_of_k_a, Pk2D):
-            pk = p_of_k_a(k, a, cosmo)
-        elif (p_of_k_a is None) or (str(p_of_k_a) == 'linear'):
-            pk = cosmo.get_linear_power()(k, a)
-        elif str(p_of_k_a) == 'nonlinear':
-            pk = cosmo.get_nonlin_power()(k, a)
-        else:
-            raise TypeError("p_of_k_a must be `None`, \'linear\', "
-                            "\'nonlinear\' or a `Pk2D` object")
-
-        return pk
+    pk2d = _get_pk2d(p_of_k_a, cosmo)
 
     def get_P4A_P4X(a):
         k = k_use[:, None]
@@ -1121,7 +1062,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
                 2/7. * k ** 2 / kr2 * (1 + kp / k * cth)**2
             f2[np.where(kr == 0)] = 13. / 28
 
-            pkr = get_pk(kr.flatten(), a).reshape((nk, nk))
+            pkr = pk2d(kr.flatten(), a, cosmo).reshape((nk, nk))
             return np.array([pkr * f2**2, pkr * f2 * f2.T])
         P4A, P4X = scipy.integrate.quad_vec(integ, 0, np.pi)[0] / np.pi
 
@@ -1157,7 +1098,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
                                                 cosmo, aa, hmc)
         norm = norm1 * norm2 * norm3 * norm4
 
-        pk = get_pk(k_use, aa)[:, None]
+        pk = pk2d(k_use, aa, cosmo)[:, None]
         P4A, P4X = get_P4A_P4X(aa)
 
         t1113 = 4/9. * pk**2 * pk.T * X
@@ -1260,21 +1201,21 @@ def halomod_Tk3D_2h(cosmo, hmc,
     if a_arr is None:
         a_arr = cosmo.get_pk_spline_a()
 
-    tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                          prof, prof2=prof2,
-                                          prof3=prof3, prof4=prof4,
-                                          prof13_2pt=prof13_2pt,
-                                          prof14_2pt=prof14_2pt,
-                                          prof24_2pt=prof24_2pt,
-                                          prof32_2pt=prof32_2pt,
-                                          p_of_k_a=p_of_k_a)
+    tkk_2h_22 = _halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                           prof, prof2=prof2,
+                                           prof3=prof3, prof4=prof4,
+                                           prof13_2pt=prof13_2pt,
+                                           prof14_2pt=prof14_2pt,
+                                           prof24_2pt=prof24_2pt,
+                                           prof32_2pt=prof32_2pt,
+                                           p_of_k_a=p_of_k_a)
 
-    tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                          prof, prof2=prof2,
-                                          prof3=prof3, prof4=prof4,
-                                          prof12_2pt=prof12_2pt,
-                                          prof34_2pt=prof34_2pt,
-                                          p_of_k_a=p_of_k_a)
+    tkk_2h_13 = _halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                           prof, prof2=prof2,
+                                           prof3=prof3, prof4=prof4,
+                                           prof12_2pt=prof12_2pt,
+                                           prof34_2pt=prof34_2pt,
+                                           p_of_k_a=p_of_k_a)
 
     tkk = tkk_2h_22 + tkk_2h_13
 
@@ -1518,21 +1459,21 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
                                  prof3=prof3, prof4=prof4,
                                  prof34_2pt=prof34_2pt)
 
-    tkk += halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                     prof, prof2=prof2,
-                                     prof3=prof3, prof4=prof4,
-                                     prof13_2pt=prof13_2pt,
-                                     prof14_2pt=prof14_2pt,
-                                     prof24_2pt=prof24_2pt,
-                                     prof32_2pt=prof32_2pt,
-                                     p_of_k_a=p_of_k_a)
+    tkk += _halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                      prof, prof2=prof2,
+                                      prof3=prof3, prof4=prof4,
+                                      prof13_2pt=prof13_2pt,
+                                      prof14_2pt=prof14_2pt,
+                                      prof24_2pt=prof24_2pt,
+                                      prof32_2pt=prof32_2pt,
+                                      p_of_k_a=p_of_k_a)
 
-    tkk += halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                     prof, prof2=prof2,
-                                     prof3=prof3, prof4=prof4,
-                                     prof12_2pt=prof12_2pt,
-                                     prof34_2pt=prof34_2pt,
-                                     p_of_k_a=p_of_k_a)
+    tkk += _halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                      prof, prof2=prof2,
+                                      prof3=prof3, prof4=prof4,
+                                      prof12_2pt=prof12_2pt,
+                                      prof34_2pt=prof34_2pt,
+                                      p_of_k_a=p_of_k_a)
 
     tkk += halomod_trispectrum_3h(cosmo, hmc, np.exp(lk_arr), a_arr,
                                   prof=prof,

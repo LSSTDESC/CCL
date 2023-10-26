@@ -251,12 +251,13 @@ class HMCalculator(CCLAutoRepr):
         """ Solves the integral:
 
         .. math::
-            I^1_3(k,a|u_2, v_1, _v2) = \\int dM\\,n(M,a)\\,b(M,a)\\,
+            I^1_3(k,a|u_2, v_1, v_2) = \\int dM\\,n(M,a)\\,b(M,a)\\,
             \\langle u_2(k,a|M) v_1(k',a|M) v_2(k',a|M)\\rangle,
 
         approximated to
+
         .. math::
-            I^1_3(k,a|u_2, v_1, _v2) = I^1_1(k,a|u_2) I^1_2(k',a|v_1, v_2)
+            I^1_3(k,a|u_2, v_1, v_2) \\sim I^1_1(k,a|u_2) I^1_2(k',a|v_1, v_2),
 
         where :math:`n(M,a)` is the halo mass function,
         :math:`b(M,a)` is the halo bias, and
@@ -265,16 +266,16 @@ class HMCalculator(CCLAutoRepr):
         and halo mass.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            a (float): scale factor.
-            prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
-                profile.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            k (:obj:`float` or `array`): comoving wavenumber.
+            a (:obj:`float`): scale factor.
+            prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
+                halo profile.
 
         Returns:
-            float or array_like: integral values evaluated at each
-            value of `k`. Its shape will be `(N_k, N_k)`, with `N_k` the
-            size of the `k` array.
+            (:obj:`float` or `array`): integral values evaluated at each
+            value of ``k``. Its shape will be ``(N_k, N_k)``, with ``N_k`` the
+            size of the ``k`` array.
         """
         # Compute mass function and halo bias
         # and transpose to move the M-axis last
@@ -357,11 +358,13 @@ class HMCalculator(CCLAutoRepr):
                 returning the the two-point moment of the two profiles
                 being correlated.
             diag (bool): If True, both halo profiles depend on the same k. If
-            False, they will depend on k and k', respectively. Default True.
+                False, they will depend on k and k', respectively. Default
+                True.
 
         Returns:
              (:obj:`float` or `array`): integral values evaluated at each
-             value of ``k``.
+             value of ``k``. If `diag` is True, the output will be a 1D-array;
+             2D-array, otherwise.
         """
         if prof2 is None:
             prof2 = prof
@@ -369,8 +372,6 @@ class HMCalculator(CCLAutoRepr):
         self._get_ingredients(cosmo, a, get_bf=True)
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
                                   prof2=prof2, diag=diag)
-        # uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2,
-        #                           diag=diag).T
         if diag is True:
             uk = uk.T
         else:

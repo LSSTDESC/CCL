@@ -112,8 +112,8 @@ KVALS = REF_DATA['k']
 
 # CCL Trispectrum
 ccl_trispec = {"trispec_1h": ccl.halos.halomod_trispectrum_1h,
-               "trispec_2h_31": ccl.halos.halomod_trispectrum_2h_13,
-               "trispec_2h_22": ccl.halos.halomod_trispectrum_2h_22,
+               "trispec_2h_31": ccl.halos._halomod_trispectrum_2h_13,
+               "trispec_2h_22": ccl.halos._halomod_trispectrum_2h_22,
                "trispec_3h": ccl.halos.halomod_trispectrum_3h,
                "trispec_4h": ccl.halos.halomod_trispectrum_4h}
 

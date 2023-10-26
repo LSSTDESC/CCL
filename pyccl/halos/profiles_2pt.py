@@ -61,13 +61,15 @@ class Profile2pt(CCLAutoRepr):
                 is desired. If ``None``, the assumption is that you want
                 an auto-correlation, and `prof` will be used as `prof2`.
             diag (bool): If True, both halo profiles depend on the same k. If
-            False, they will depend on k and k', respectively. Default True.
+            False, they will depend on k and k', respectively. The output
+            dimension will change to `(N_M, N_k, N_k)`.Default True.
 
         Returns:
             (:obj:`float` or `array`): second-order Fourier-space
             moment. The shape of the output will be `(N_M, N_k)`
             where `N_k` and `N_m` are the sizes of `k` and `M`
-            respectively. If `k` or `M` are scalars, the
+            respectively, if diag is True. If False, the array will have
+            dimension `(N_M, N_k, N_k)`. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
         if prof2 is None:
@@ -125,14 +127,16 @@ class Profile2ptHOD(Profile2pt):
                 an auto-correlation. Note that only auto-correlations
                 are allowed in this case.
             diag (bool): If True, both halo profiles depend on the same k. If
-            False, they will depend on k and k', respectively and we will
-            approximate <uk uk'> to <uk><uk'>. Default True.
+                False, they will depend on k and k', respectively and we will
+                approximate <uk uk'> to <uk><uk'>. The output dimension will
+                change to `(N_M, N_k, N_k)`. Default True.
 
         Returns:
             (:obj:`float` or `array`): second-order Fourier-space
             moment. The shape of the output will be `(N_M, N_k)`
             where `N_k` and `N_m` are the sizes of `k` and `M`
-            respectively. If `k` or `M` are scalars, the
+            respectively, if diag is True. If False, the array will have
+            dimension `(N_M, N_k, N_k)`. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """ # noqa
         if prof2 is None:
