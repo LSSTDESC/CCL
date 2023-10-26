@@ -11,7 +11,7 @@ dependencies:
   - scipy
   - camb
   - fast-pt
-  - pytest=7.4.2
+  - pytest==7.4.2
   - pytest-cov
   - pip:
       - tables==3.8.0  # for baccoemu
