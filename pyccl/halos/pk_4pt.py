@@ -535,18 +535,27 @@ def _allocate_profiles2(prof, prof2, prof3, prof4, prof13_2pt, prof14_2pt,
 
 
 def _get_norms(prof, prof2, prof3, prof4, cosmo, aa, hmc):
+    """Helper that returns the profiles normalization."""
     # Compute profile normalizations
     norm1 = prof.get_normalization(cosmo, aa, hmc=hmc)
-    # Compute second profile normalization
-    if prof2 is None:
+
+    if prof2 == prof:
         norm2 = norm1
     else:
         norm2 = prof2.get_normalization(cosmo, aa, hmc=hmc)
-    if prof3 is None:
+
+    if prof3 == prof:
         norm3 = norm1
+    elif prof3 == prof2:
+        norm3 = norm2
     else:
         norm3 = prof3.get_normalization(cosmo, aa, hmc=hmc)
-    if prof4 is None:
+
+    if prof4 == prof:
+        norm4 = norm3
+    elif prof4 == prof2:
+        norm4 = norm2
+    elif prof4 == prof3:
         norm4 = norm3
     else:
         norm4 = prof4.get_normalization(cosmo, aa, hmc=hmc)
@@ -565,6 +574,34 @@ def _get_pk2d(p_of_k_a, cosmo):
         raise TypeError("p_of_k_a must be `None`, \'linear\', "
                         "\'nonlinear\' or a `Pk2D` object")
     return pk2d
+
+
+def _get_ints_I_1_1(hmc, cosmo, k_use, aa, prof, prof2, prof3, prof4):
+    """Helper that returns the I_1_1 integrals for 4 profiles."""
+    i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[:, None]
+
+    if prof2 == prof:
+        i2 = i1
+    else:
+        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
+
+    if prof3 == prof:
+        i3 = i1.T
+    elif prof3 == prof2:
+        i3 = i2.T
+    else:
+        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+
+    if prof4 == prof:
+        i4 = i1.T
+    elif prof4 == prof2:
+        i4 = i2.T
+    elif prof4 == prof3:
+        i4 = i3
+    else:
+        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
+
+    return i1, i2, i3, i4
 
 
 def _logged_output(*arrs, log):
@@ -683,13 +720,34 @@ def _halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
         # Permutation 1
         i13 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof3,
                         prof_2pt=prof13_2pt, diag=False)
-        i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof2=prof4,
-                        prof_2pt=prof24_2pt, diag=False)
+
+        if (([prof2, prof4] == [prof, prof3]) or
+            [prof2, prof4] == [prof3, prof]) and \
+            (prof24_2pt == prof13_2pt):
+            i24 = i13
+        else:
+            i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof2=prof4,
+                            prof_2pt=prof24_2pt, diag=False)
         # Permutation 2
-        i14 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof4,
-                        prof_2pt=prof14_2pt, diag=False)
-        i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof2,
-                        prof_2pt=prof32_2pt, diag=False)
+        if (prof4 == prof3) and (prof14_2pt == prof13_2pt):
+            i14 = i13
+        elif (prof == prof2) and (prof14_2pt == prof24_2pt):
+            i14 = i24
+        else:
+            i14 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof4,
+                            prof_2pt=prof14_2pt, diag=False)
+
+        if (prof2 == prof) and (prof32_2pt == prof13_2pt):
+            i32 = i13.T
+        elif (prof3 == prof4) and (prof32_2pt == prof24_2pt):
+            i32 = i24.T
+        elif (([prof3, prof2] == [prof, prof4]) or
+              ([prof3, prof2] == [prof4, prof])) and \
+             (prof32_2pt == prof14_2pt):
+            i32 = i14.T
+        else:
+            i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof2,
+                            prof_2pt=prof32_2pt, diag=False)
 
         tk_2h_22 = p * (i13 * i24 + i14 * i32)
         # Normalize
@@ -783,9 +841,6 @@ def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
                                                 cosmo, aa, hmc)
         norm = norm1 * norm2 * norm3 * norm4
 
-        # TODO: Possible improvement: when all profiles are the same, we just
-        # need to compute 2 blocks.
-
         # Compute trispectrum at this redshift
         p1 = pk2d(k_use, aa, cosmo)[:, None]
         i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[:, None]
@@ -793,20 +848,58 @@ def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
                          prof_2pt=prof34_2pt, prof3=prof4)
         # Permutation 1
         # p2 = p1  # (because k_a = k_b)
-        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
-        i134 = hmc.I_1_3(cosmo, k_use, aa, prof, prof2=prof3,
-                         prof_2pt=prof34_2pt, prof3=prof4)
+        if prof2 == prof:
+            i2 = i1
+            i134 = i234
+        else:
+            i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
+            i134 = hmc.I_1_3(cosmo, k_use, aa, prof, prof2=prof3,
+                             prof_2pt=prof34_2pt, prof3=prof4)
         # Attention to axis order change!
         # Permutation 2
         p3 = p1.T
-        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        i124 = hmc.I_1_3(cosmo, k_use, aa, prof4, prof2=prof,
-                         prof_2pt=prof12_2pt, prof3=prof2).T
+        if prof3 == prof:
+            i3 = i1.T
+        elif prof3 == prof2:
+            i3 = i2.T
+        else:
+            i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+
+        if (([prof, prof2] == [prof3, prof4] or
+             [prof, prof2] == [prof4, prof3])) and prof2 == prof4 and \
+                prof12_2pt == prof34_2pt:
+            i124 = i234.T
+        elif (([prof, prof2] == [prof3, prof4] or
+             [prof, prof2] == [prof4, prof3]) and prof4 == prof) and \
+                prof12_2pt == prof34_2pt:
+            i124 = i134.T
+        else:
+            i124 = hmc.I_1_3(cosmo, k_use, aa, prof4, prof2=prof,
+                             prof_2pt=prof12_2pt, prof3=prof2).T
         # Permutation 4
         # p4 = p3  # (because k_c = k_d)
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        i123 = hmc.I_1_3(cosmo, k_use, aa, prof3, prof2=prof,
-                         prof_2pt=prof12_2pt, prof3=prof2).T
+        if prof4 == prof:
+            i4 = i1.T
+        elif prof4 == prof2:
+            i4 = i2.T
+        elif prof4 == prof3:
+            i4 = i3.T
+        else:
+            i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+
+        if prof3 == prof4:
+            i123 = i124
+        elif (([prof, prof2] == [prof3, prof4]) or
+              [prof, prof2] == [prof4, prof3]) and \
+              (prof12_2pt == prof34_2pt) and (prof3 == prof):
+            i123 = i134.T
+        elif (([prof, prof2] == [prof3, prof4]) or
+              [prof, prof2] == [prof4, prof3]) and \
+              (prof12_2pt == prof34_2pt) and (prof3 == prof2):
+            i123 = i234.T
+        else:
+            i123 = hmc.I_1_3(cosmo, k_use, aa, prof3, prof2=prof,
+                             prof_2pt=prof12_2pt, prof3=prof2).T
         ####
 
         tk_2h_13 = p1 * (i1 * i234 + i2 * i134) + p3 * (i3 * i124 + i4 * i123)
@@ -944,28 +1037,40 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
         norm = norm1 * norm2 * norm3 * norm4
 
         # Permutation 0 is 0 due to Bpt_1_2_34=0
-        # Bpt_1_2_34 = 0
-        # i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[:, None]
-        # i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
-        # i34 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof34_2pt, prof2=prof4)
-
-        i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[:, None]
-        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
-        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
+        i1, i2, i3, i4 = _get_ints_I_1_1(hmc, cosmo, k_use, aa, prof, prof2,
+                                      prof3, prof4)
 
         # Permutation 1: 2 <-> 3
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof2=prof4,
                         prof_2pt=prof24_2pt, diag=False)
         # Permutation 2: 2 <-> 4
-        i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof2,
-                        prof_2pt=prof32_2pt, diag=False)
+        if (prof3 == prof4) and (prof32_2pt == prof24_2pt):
+            i32 = i24.T
+        else:
+            i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof2,
+                            prof_2pt=prof32_2pt, diag=False)
         # Permutation 3: 1 <-> 3
-        i14 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof4,
-                        prof_2pt=prof14_2pt, diag=False)
+        if (prof == prof2) and (prof14_2pt == prof24_2pt):
+            i14 = i24
+        elif ([prof, prof4] == [prof3, prof2]) and (prof14_2pt == prof32_2pt):
+            i14 = i32
+        elif ([prof, prof4] == [prof2, prof3]) and (prof14_2pt == prof32_2pt):
+            i14 = i32.T
+        else:
+            i14 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof4,
+                            prof_2pt=prof14_2pt, diag=False)
         # Permutation 4: 1 <-> 4
-        i31 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof,
-                        prof_2pt=prof13_2pt, diag=False)
+        if (prof == prof2) and (prof13_2pt == prof32_2pt):
+            i31 = i32
+        elif prof3 == prof4 and (prof13_2pt == prof32_2pt):
+            i31 = i14.T
+        elif ([prof3, prof] == [prof2, prof4]) and (prof13_2pt == prof24_2pt):
+            i31 = i24
+        elif ([prof3, prof] == [prof4, prof2]) and (prof13_2pt == prof24_2pt):
+            i31 = i24.T
+        else:
+            i31 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof,
+                            prof_2pt=prof13_2pt, diag=False)
 
         # Permutation 5: 12 <-> 34 is 0 due to Bpt_3_4_12=0
 
@@ -1108,10 +1213,8 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
         t1122 += t1122.T
 
         # Now the halo model integrals
-        i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[:, None]
-        i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
-        i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
-        i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[None, :]
+        i1, i2, i3, i4 = _get_ints_I_1_1(hmc, cosmo, k_use, aa, prof, prof2,
+                                      prof3, prof4)
 
         tk_4h = i1 * i2 * i3 * i4 * (t1113 + t1122)
 
