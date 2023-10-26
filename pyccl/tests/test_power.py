@@ -271,7 +271,8 @@ def test_input_nonlinear_model():
 
     pk_CCL_input = ccl.power.nonlin_matter_power(cosmo_input, k_arr, 0.5)
 
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-8)
+    #assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-8)
+    np.testing.assert_allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-8)
 
     # Test extra power spectrum
     kl_arr = np.logspace(-4, 1, 1000)
