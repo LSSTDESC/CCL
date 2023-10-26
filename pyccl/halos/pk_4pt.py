@@ -722,8 +722,8 @@ def _halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
                         prof_2pt=prof13_2pt, diag=False)
 
         if (([prof2, prof4] == [prof, prof3]) or
-            [prof2, prof4] == [prof3, prof]) and \
-            (prof24_2pt == prof13_2pt):
+           [prof2, prof4] == [prof3, prof]) and \
+           (prof24_2pt == prof13_2pt):
             i24 = i13
         else:
             i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof2=prof4,
@@ -870,7 +870,7 @@ def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
                 prof12_2pt == prof34_2pt:
             i124 = i234.T
         elif (([prof, prof2] == [prof3, prof4] or
-             [prof, prof2] == [prof4, prof3]) and prof4 == prof) and \
+               [prof, prof2] == [prof4, prof3]) and prof4 == prof) and \
                 prof12_2pt == prof34_2pt:
             i124 = i134.T
         else:
@@ -891,11 +891,11 @@ def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
             i123 = i124
         elif (([prof, prof2] == [prof3, prof4]) or
               [prof, prof2] == [prof4, prof3]) and \
-              (prof12_2pt == prof34_2pt) and (prof3 == prof):
+             (prof12_2pt == prof34_2pt) and (prof3 == prof):
             i123 = i134.T
         elif (([prof, prof2] == [prof3, prof4]) or
               [prof, prof2] == [prof4, prof3]) and \
-              (prof12_2pt == prof34_2pt) and (prof3 == prof2):
+             (prof12_2pt == prof34_2pt) and (prof3 == prof2):
             i123 = i234.T
         else:
             i123 = hmc.I_1_3(cosmo, k_use, aa, prof3, prof2=prof,
@@ -1038,7 +1038,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
 
         # Permutation 0 is 0 due to Bpt_1_2_34=0
         i1, i2, i3, i4 = _get_ints_I_1_1(hmc, cosmo, k_use, aa, prof, prof2,
-                                      prof3, prof4)
+                                         prof3, prof4)
 
         # Permutation 1: 2 <-> 3
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof2=prof4,
@@ -1214,7 +1214,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
 
         # Now the halo model integrals
         i1, i2, i3, i4 = _get_ints_I_1_1(hmc, cosmo, k_use, aa, prof, prof2,
-                                      prof3, prof4)
+                                         prof3, prof4)
 
         tk_4h = i1 * i2 * i3 * i4 * (t1113 + t1122)
 
