@@ -271,7 +271,7 @@ def test_input_nonlinear_model():
 
     pk_CCL_input = ccl.power.nonlin_matter_power(cosmo_input, k_arr, 0.5)
 
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
+    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-8)
 
     # Test extra power spectrum
     kl_arr = np.logspace(-4, 1, 1000)
@@ -289,12 +289,12 @@ def test_input_nonlinear_model():
 
     pk_CCL_input = cosmo_input.get_nonlin_power('a:b')(k_arr, 0.5,
                                                        cosmo_input)
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
+    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-8)
 
     # Via `nonlin_power`
     pk_CCL_input = ccl.power.nonlin_power(cosmo_input, k_arr, 0.5,
                                           p_of_k_a='a:b')
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
+    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-8)
 
     # Use dictionary
     cosmo_input = ccl.CosmologyCalculator(
@@ -309,7 +309,7 @@ def test_input_nonlinear_model():
                          'c:d': None})
     pk_CCL_input = ccl.power.nonlin_power(cosmo_input, k_arr, 0.5,
                                           p_of_k_a='a:b')
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
+    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-8)
     assert 'c:d' not in cosmo_input._pk_nl
 
 
