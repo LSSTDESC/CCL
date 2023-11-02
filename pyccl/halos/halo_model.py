@@ -254,10 +254,10 @@ class HMCalculator(CCLAutoRepr):
             I^1_3(k,a|u_2, v_1, v_2) = \\int dM\\,n(M,a)\\,b(M,a)\\,
             \\langle u_2(k,a|M) v_1(k',a|M) v_2(k',a|M)\\rangle,
 
-        approximated to
+        where we approximate
 
         .. math::
-            I^1_3(k,a|u_2, v_1, v_2) \\sim I^1_1(k,a|u_2) I^1_2(k',a|v_1, v_2),
+            \\langle u_2(k,a|M) v_1(k',a|M) v_2(k', a|M)\\rangle \\sim \\langle u_2(k,a|M)\\rangle \\langle v_1(k',a|M) v_2(k', a|M)\\rangle,
 
         where :math:`n(M,a)` is the halo mass function,
         :math:`b(M,a)` is the halo bias, and
