@@ -103,6 +103,6 @@ def test_Tk3D_cNG():
     # We cannot use assert_warns because other warnings are raised before the
     # one we are testing
     with pytest.warns(ccl.CCLWarning):
-        ccl.halos.halomod_Tk3D_cNG(COSMO, hmc, P3, prof2=Pneg,
-                                   lk_arr=np.log(k_arr), a_arr=a_arr,
+        ccl.halos.halomod_Tk3D_cNG(COSMO, hmc, P3, prof2=Pneg, prof3=P3,
+                                   prof4=P3, lk_arr=np.log(k_arr), a_arr=a_arr,
                                    use_log=True)

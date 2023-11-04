@@ -486,12 +486,8 @@ def halomod_Tk3D_SSC(
 
 def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt):
     """Helper that controls how the undefined profiles are allocated."""
-    if prof2 is None:
-        prof2 = prof
-    if prof3 is None:
-        prof3 = prof
-    if prof4 is None:
-        prof4 = prof2
+    prof, prof2, prof3, prof4 = _allocate_profiles1pt(prof, prof2, prof3,
+                                                      prof4)
     if prof12_2pt is None:
         prof12_2pt = Profile2pt()
     if prof34_2pt is None:
@@ -507,7 +503,7 @@ def _allocate_profiles1pt(prof, prof2, prof3, prof4):
     if prof3 is None:
         prof3 = prof
     if prof4 is None:
-        prof4 = prof3
+        prof4 = prof2
 
     return prof, prof2, prof3, prof4
 
@@ -658,7 +654,7 @@ def _halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
             `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         prof13_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof12_2pt` for `prof` and `prof3`.
         prof14_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
@@ -800,7 +796,7 @@ def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
             `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object returning the 2-point
             moment of `prof`, `prof2`. If `None`, the default second moment
@@ -955,7 +951,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
             `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         prof13_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object returning the the two-point
             moment of `prof` and `prof3`. If `None`, the default
@@ -1127,7 +1123,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
             `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`, the power
             spectrum stored within `cosmo` will be used.
@@ -1256,7 +1252,7 @@ def halomod_Tk3D_2h(cosmo, hmc,
             `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object returning the the two-point
             moment of `prof` and `prof2`. If `None`, the default
@@ -1272,8 +1268,6 @@ def halomod_Tk3D_2h(cosmo, hmc,
             same as `prof14_2pt` for `prof3` and `prof2`.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof34_2pt` for `prof3` and `prof4`.
-        p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
-        p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`, the power
             spectrum stored within `cosmo` will be used.
@@ -1355,7 +1349,7 @@ def halomod_Tk3D_3h(cosmo, hmc,
             `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         prof13_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object returning the the two-point
             moment of `prof` and `prof3`. If `None`, the default
@@ -1439,7 +1433,7 @@ def halomod_Tk3D_4h(cosmo, hmc,
             `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         lk_arr (array): an array holding values of the natural
             logarithm of the wavenumber (in units of Mpc^-1) at
             which the trispectrum should be calculated for
@@ -1508,7 +1502,7 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
             `prof` will be used as `prof3`.
         prof4 (:class:`~pyccl.halos.profiles.HaloProfile`): halo
             profile (corresponding to :math:`v_2` above. If `None`,
-            `prof3` will be used as `prof4`.
+            `prof2` will be used as `prof4`.
         prof12_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object returning the the two-point
             moment of `prof` and `prof2`. If `None`, the default
@@ -1524,8 +1518,6 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
             same as `prof12_2pt` for `prof3` and `prof2`.
         prof34_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             same as `prof12_2pt` for `prof3` and `prof4`.
-        p13_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 13
-        p14_of_k_a (:class:`~pyccl.pk2d.Pk2D`): same as p12_of_k_a for 14
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`, the power
             spectrum stored within `cosmo` will be used.

@@ -223,8 +223,8 @@ def test_Tk3D_2h():
 
     # Negative profile in logspace
     with pytest.warns(ccl.CCLWarning):
-        ccl.halos.halomod_Tk3D_2h(COSMO, hmc, P3, prof2=Pneg,
-                                  lk_arr=np.log(k_arr), a_arr=a_arr,
+        ccl.halos.halomod_Tk3D_2h(COSMO, hmc, P3, prof2=Pneg, prof3=P3,
+                                  prof4=P3, lk_arr=np.log(k_arr), a_arr=a_arr,
                                   use_log=True)
 
 
