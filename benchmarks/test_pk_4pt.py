@@ -135,8 +135,9 @@ def test_integral_I_1_1():
 
 def test_integral_I_1_2():
     ref_I = REF_DATA['I12']
+    # Transpose because CCL outputs I(k', k) and the refernce data (k, k')
     ccl_I = hmc.I_1_2(cosmo, KVALS*h, 1., nfw, prof_2pt=p2pt,
-                      diag=False)
+                      diag=False).T
     norm = nfw.get_normalization(cosmo, np.array([1.]), hmc=hmc)
     ccl_I = ccl_I / norm ** 2 * h**3
 
@@ -147,7 +148,8 @@ def test_integral_I_1_2():
 
 def test_integral_I_1_3():
     ref_I = REF_DATA['I13']
-    ccl_I = hmc.I_1_3(cosmo, KVALS*h, 1., nfw, prof_2pt=p2pt)
+    # Transpose because CCL outputs I(k', k) and the refernce data (k, k')
+    ccl_I = hmc.I_1_3(cosmo, KVALS*h, 1., nfw, prof_2pt=p2pt).T
     norm = nfw.get_normalization(cosmo, np.array([1.]), hmc=hmc)
     ccl_I = ccl_I / norm ** 3 * h**6
 
@@ -163,6 +165,8 @@ def test_trispectrum_terms(term):
 
     ccl_tk = \
         ccl_trispec[term](cosmo, hmc=hmc, k=KVALS*h, a=aa, prof=nfw)[0] * h**9
+    # Transpose because CCL outputs T(k', k) and the refernce data (k, k')
+    ccl_tk = ccl_tk.T
 
     if term == "trispec_4h":
         # We relax the relative difference and remove the largest scales due to
@@ -187,6 +191,8 @@ def test_Tk3D(term):
 
     ccl_tk = ccl_tk3d[term](cosmo, hmc=hmc, lk_arr=np.log(KVALS*h), a_arr=aa,
                             prof=nfw)(KVALS*h, 1) * h**9
+    # Transpose because CCL outputs T(k', k) and the refernce data (k, k')
+    ccl_tk = ccl_tk.T
 
     if term in ["trispec_4h", "full"]:
         # We relax the relative difference and remove the largest scales due to

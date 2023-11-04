@@ -842,8 +842,8 @@ def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
         norm = norm1 * norm2 * norm3 * norm4
 
         # Compute trispectrum at this redshift
-        p1 = pk2d(k_use, aa, cosmo)[:, None]
-        i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[:, None]
+        p1 = pk2d(k_use, aa, cosmo)[None, :]
+        i1 = hmc.I_1_1(cosmo, k_use, aa, prof)[None, :]
         i234 = hmc.I_1_3(cosmo, k_use, aa, prof2, prof2=prof3,
                          prof_2pt=prof34_2pt, prof3=prof4)
         # Permutation 1
@@ -852,7 +852,7 @@ def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
             i2 = i1
             i134 = i234
         else:
-            i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[:, None]
+            i2 = hmc.I_1_1(cosmo, k_use, aa, prof2)[None, :]
             i134 = hmc.I_1_3(cosmo, k_use, aa, prof, prof2=prof3,
                              prof_2pt=prof34_2pt, prof3=prof4)
         # Attention to axis order change!
@@ -863,7 +863,7 @@ def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
         elif prof3 == prof2:
             i3 = i2.T
         else:
-            i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+            i3 = hmc.I_1_1(cosmo, k_use, aa, prof3)[:, None]
 
         if (([prof, prof2] == [prof3, prof4] or
              [prof, prof2] == [prof4, prof3])) and prof2 == prof4 and \
@@ -885,7 +885,7 @@ def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
         elif prof4 == prof3:
             i4 = i3.T
         else:
-            i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)[None, :]
+            i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)[:, None]
 
         if prof3 == prof4:
             i123 = i124
@@ -996,8 +996,8 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
     # Encapsulate code in a function
     def get_kr_and_f2(theta):
         cth = np.cos(theta)
-        kk = k_use[:, None]
-        kp = k_use[None, :]
+        kk = k_use[None, :]
+        kp = k_use[:, None]
         kr2 = kk ** 2 + kp ** 2 + 2 * kk * kp * cth
         kr = np.sqrt(kr2)
 
@@ -1013,7 +1013,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
     def get_Bpt(a):
         # We only need to compute the independent k * k * cos(theta) since Pk
         # only depends on the module of ki + kj
-        pk = pk2d(k_use, a, cosmo)[:, None]
+        pk = pk2d(k_use, a, cosmo)[None, :]
 
         def integ(theta):
             kr, f2 = get_kr_and_f2(theta)
@@ -1154,9 +1154,10 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
     # Power spectrum
     pk2d = _get_pk2d(p_of_k_a, cosmo)
 
+    kk = k_use[None, :]
+    kp = k_use[:, None]
     def get_P4A_P4X(a):
-        k = k_use[:, None]
-        kp = k_use[None, :]
+        k = kk
 
         def integ(theta):
             cth = np.cos(theta)
@@ -1174,8 +1175,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
         return P4A, P4X
 
     def get_X():
-        k = k_use[:, None]
-        kp = k_use[None, :]
+        k = kk
         r = kp / k
 
         def integ(theta):
@@ -1203,7 +1203,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
                                                 cosmo, aa, hmc)
         norm = norm1 * norm2 * norm3 * norm4
 
-        pk = pk2d(k_use, aa, cosmo)[:, None]
+        pk = pk2d(k_use, aa, cosmo)[None, :]
         P4A, P4X = get_P4A_P4X(aa)
 
         t1113 = 4/9. * pk**2 * pk.T * X

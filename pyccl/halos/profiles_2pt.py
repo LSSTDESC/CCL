@@ -69,7 +69,8 @@ class Profile2pt(CCLAutoRepr):
             moment. The shape of the output will be `(N_M, N_k)`
             where `N_k` and `N_m` are the sizes of `k` and `M`
             respectively, if diag is True. If False, the array will have
-            dimension `(N_M, N_k, N_k)`. If `k` or `M` are scalars, the
+            dimension `(N_M, N_k, N_k)`, with k' corresponding to the second
+            axis of the array.. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """
         if prof2 is None:
@@ -86,12 +87,13 @@ class Profile2pt(CCLAutoRepr):
         else:
             uk2 = prof2.fourier(cosmo, k, M, a)
 
+        # TODO: This should be implemented in _fourier_variance
         if (diag is True) or (isinstance(k, float)):
             output = uk1 * uk2 * (1 + self.r_corr)
         elif isinstance(M, float):
-            output = uk1[:, None] * uk2[None, :] * (1 + self.r_corr)
+            output = uk1[None, :] * uk2[:, None] * (1 + self.r_corr)
         else:
-            output = uk1[:, :, None] * uk2[:, None, :] * (1 + self.r_corr)
+            output = uk1[:, None, :] * uk2[:, :, None] * (1 + self.r_corr)
 
         return output
 
@@ -136,7 +138,8 @@ class Profile2ptHOD(Profile2pt):
             moment. The shape of the output will be `(N_M, N_k)`
             where `N_k` and `N_m` are the sizes of `k` and `M`
             respectively, if diag is True. If False, the array will have
-            dimension `(N_M, N_k, N_k)`. If `k` or `M` are scalars, the
+            dimension `(N_M, N_k, N_k)`, with k' corresponding to the second
+            axis of the array.. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """ # noqa
         if prof2 is None:
@@ -148,14 +151,15 @@ class Profile2ptHOD(Profile2pt):
         if not (isinstance(prof, HOD) and isinstance(prof2, HOD)):
             raise TypeError("prof and prof2 must be HaloProfileHOD")
 
+        # TODO: This should be implemented in _fourier_variance
         if (diag is True) or (isinstance(k, float)):
             output = prof._fourier_variance(cosmo, k, M, a)
         elif isinstance(M, float):
             uk1 = prof.fourier(cosmo, k, M, a)
-            output = uk1[:, None] * uk1[None, :] * (1 + self.r_corr)
+            output = uk1[None, :] * uk1[:, None] * (1 + self.r_corr)
         else:
             uk1 = prof.fourier(cosmo, k, M, a)
-            output = uk1[:, :, None] * uk1[:, None, :] * (1 + self.r_corr)
+            output = uk1[:, None, :] * uk1[:, :, None] * (1 + self.r_corr)
 
         return output
 
@@ -169,7 +173,7 @@ class Profile2ptCIB(Profile2pt):
     <https://arxiv.org/abs/2010.16405>`_).
     """
 
-    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None):
+    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None, diag=True):
         """ Returns the Fourier-space two-point moment for the CIB
         profile.
 
@@ -186,12 +190,18 @@ class Profile2ptCIB(Profile2pt):
                 is desired. If ``None``, the assumption is that you want
                 an auto-correlation. Note that only auto-correlations
                 are allowed in this case.
+            diag (bool): If True, both halo profiles depend on the same k. If
+                False, they will depend on k and k', respectively and we will
+                approximate <uk uk'> to <uk><uk'>. The output dimension will
+                change to `(N_M, N_k, N_k)`. Default True.
 
         Returns:
             (:obj:`float` or `array`): second-order Fourier-space
             moment. The shape of the output will be `(N_M, N_k)`
             where `N_k` and `N_m` are the sizes of `k` and `M`
-            respectively. If `k` or `M` are scalars, the
+            respectively, if diag is True. If False, the array will have
+            dimension `(N_M, N_k, N_k)`, with k' corresponding to the second
+            axis of the array. If `k` or `M` are scalars, the
             corresponding dimension will be squeezed out on output.
         """ # noqa
         if prof2 is None:
@@ -201,4 +211,16 @@ class Profile2ptCIB(Profile2pt):
         if not (isinstance(prof, Shang12) and isinstance(prof2, Shang12)):
             raise TypeError("prof and prof2 must be HaloProfileCIB")
 
-        return prof._fourier_variance(cosmo, k, M, a, nu_other=prof2.nu)
+        # TODO: This should be implemented in _fourier_variance
+        if (diag is True) or (isinstance(k, float)):
+            output = prof._fourier_variance(cosmo, k, M, a, nu_other=prof2.nu)
+        elif isinstance(M, float):
+            uk1 = prof.fourier(cosmo, k, M, a)
+            uk2 = prof2.fourier(cosmo, k, M, a)
+            output = uk1[None, :] * uk2[:, None] * (1 + self.r_corr)
+        else:
+            uk1 = prof.fourier(cosmo, k, M, a)
+            uk2 = prof2.fourier(cosmo, k, M, a)
+            output = uk1[:, None, :] * uk1[:, :, None] * (1 + self.r_corr)
+
+        return output
