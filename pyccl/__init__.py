@@ -44,3 +44,5 @@ from . import halos
 from . import nl_pt
 
 from .cosmology import *
+
+from .darkemulator import *
