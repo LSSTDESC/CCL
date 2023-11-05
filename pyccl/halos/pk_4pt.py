@@ -1152,6 +1152,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
 
     kk = k_use[None, :]
     kp = k_use[:, None]
+
     def get_P4A_P4X(a):
         k = kk
 

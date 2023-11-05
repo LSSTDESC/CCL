@@ -257,7 +257,9 @@ class HMCalculator(CCLAutoRepr):
         where we approximate
 
         .. math::
-            \\langle u_2(k,a|M) v_1(k',a|M) v_2(k', a|M)\\rangle \\sim \\langle u_2(k,a|M)\\rangle \\langle v_1(k',a|M) v_2(k', a|M)\\rangle,
+            \\langle u_2(k,a|M) v_1(k',a|M) v_2(k', a|M)\\rangle \\sim
+            \\langle u_2(k,a|M)\\rangle
+            \\langle v_1(k',a|M) v_2(k', a|M)\\rangle,
 
         where :math:`n(M,a)` is the halo mass function,
         :math:`b(M,a)` is the halo bias, and
