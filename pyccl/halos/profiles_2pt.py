@@ -221,6 +221,6 @@ class Profile2ptCIB(Profile2pt):
         else:
             uk1 = prof.fourier(cosmo, k, M, a)
             uk2 = prof2.fourier(cosmo, k, M, a)
-            output = uk1[:, None, :] * uk1[:, :, None] * (1 + self.r_corr)
+            output = uk1[:, None, :] * uk2[:, :, None] * (1 + self.r_corr)
 
         return output

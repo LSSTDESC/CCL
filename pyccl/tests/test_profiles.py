@@ -165,6 +165,34 @@ def test_cib_smoke():
         assert getattr(p, n) == 1234.
 
 
+def test_cib_2pt_diag():
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
+    p1 = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=217,
+                                         mass_def='200c')
+    p2 = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=190,
+                                         mass_def='200c')
+    p2pt = ccl.halos.Profile2ptCIB()
+
+    # Test diag=False
+    # TODO: I comment this out because the CIB_2pt returns np.array(number)
+    # which is not a float. Is this intended? This is not the case for
+    # Profile2pt.fourier_2pt
+    # F = p2pt.fourier_2pt(COSMO, 1., 1E13, 1., p1, prof2=p2,
+    #                    diag=False)
+    # assert isinstance(F, float)
+    F = p2pt.fourier_2pt(COSMO, [1., 2], 1E13, 1., p1, prof2=p2, diag=False)
+    assert F.shape == (2, 2)
+    F = p2pt.fourier_2pt(COSMO, [1., 2], [1e12, 5e12, 1e13], 1., p1, prof2=p2,
+                         diag=False)
+    assert F.shape == (3, 2, 2)
+    F2 = ccl.halos.Profile2pt().fourier_2pt(COSMO, [1., 2],
+                                            [1e12, 5e12, 1e13], 1., p1,
+                                            prof2=p2, diag=False)
+    print(F)
+    print(F2)
+    assert np.all(F == F2)
+
+
 def test_cib_2pt_raises():
     c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p_cib = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=217,
