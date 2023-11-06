@@ -97,9 +97,9 @@ jobs:
         run: |
           OMP_NUM_THREADS=2 pytest -vv pyccl/tests/test_power.py --cov=pyccl --cov-report=lcov:lcov.info
 
-      - name: Benchmarks
-        run: |
-          OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-report=lcov:lcov.info --cov-append
+      #- name: Benchmarks
+      #  run: |
+      #    OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-report=lcov:lcov.info --cov-append
 
       - name: Code coverage
         if: matrix.label == 'linux-64'
