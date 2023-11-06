@@ -174,12 +174,8 @@ def test_cib_2pt_diag():
     p2pt = ccl.halos.Profile2ptCIB()
 
     # Test diag=False
-    # TODO: I comment this out because the CIB_2pt returns np.array(number)
-    # which is not a float. Is this intended? This is not the case for
-    # Profile2pt.fourier_2pt
-    # F = p2pt.fourier_2pt(COSMO, 1., 1E13, 1., p1, prof2=p2,
-    #                    diag=False)
-    # assert isinstance(F, float)
+    F = p2pt.fourier_2pt(COSMO, 1., 1E13, 1., p1, prof2=p2, diag=False)
+    assert np.ndim(F) == 0
     F = p2pt.fourier_2pt(COSMO, [1., 2], 1E13, 1., p1, prof2=p2, diag=False)
     assert F.shape == (2, 2)
     F = p2pt.fourier_2pt(COSMO, [1., 2], [1e12, 5e12, 1e13], 1., p1, prof2=p2,
@@ -188,8 +184,6 @@ def test_cib_2pt_diag():
     F2 = ccl.halos.Profile2pt().fourier_2pt(COSMO, [1., 2],
                                             [1e12, 5e12, 1e13], 1., p1,
                                             prof2=p2, diag=False)
-    print(F)
-    print(F2)
     assert np.all(F == F2)
 
 
@@ -351,12 +345,8 @@ def test_hod_2pt():
         p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood, prof2=pbad)
 
     # Test diag = False
-    # TODO: I comment this out because the HOD_2pt returns np.array(number)
-    # which is not a float. Is this intended? This is not the case for
-    # Profile2pt.fourier_2pt
-    # F = p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood,
-    #                    diag=False)
-    # assert isinstance(F, float)
+    F = p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood, diag=False)
+    assert np.ndim(F) == 0
     F = p2.fourier_2pt(COSMO, [1., 2], 1E13, 1., pgood, prof2=pgood,
                        diag=False)
     assert F.shape == (2, 2)
