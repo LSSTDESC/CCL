@@ -91,15 +91,15 @@ jobs:
           pip install --no-build-isolation classy==2.9.4
 
       - name: Install CCL
-        run: pip install -e . -v
+        run: pip install -e .
 
       - name: Unit tests
         run: |
-          OMP_NUM_THREADS=2 pytest -vv pyccl/tests/test_power.py --cov=pyccl --cov-report=lcov:lcov.info
+          OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl --cov-report=lcov:lcov.info
 
-      #- name: Benchmarks
-      #  run: |
-      #    OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-report=lcov:lcov.info --cov-append
+      - name: Benchmarks
+        run: |
+          OMP_NUM_THREADS=2 pytest -vv benchmarks --cov=pyccl --cov-report=lcov:lcov.info --cov-append
 
       - name: Code coverage
         if: matrix.label == 'linux-64'
