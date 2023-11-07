@@ -37,25 +37,6 @@ def _get_general_params(b):
     return best_nu, deriv, plaw
 
 
-def _get_average_a(clt, Nchi, chi_min, chi_max, a_arr, dndz):
-    res = avg_a_dict.get(clt)
-    if res is None:
-        z_arr = 1.0 / (a_arr) - 1
-        dz = (z_arr[-1] - z_arr[0]) / (len(z_arr) - 1)
-        z_mean = 0.0
-        norm = 0.0
-        for i in range(1, len(dndz)-2):
-            if dndz[i] != 0:
-                z_mean += dz * (
-                    z_arr[i+1] * dndz[i+1]
-                    + z_arr[i-1] * dndz[i-1]) / 2
-                norm += dz * (dndz[i+1] + dndz[i-1]) / 2
-        z_mean /= norm
-        avg_a_dict[clt] = 1.0 / (1.0 + z_mean)
-        return 1.0 / (1.0 + z_mean)
-    return res
-
-
 def _nonlimber_FKEM(
     cosmo, clt1, clt2, p_of_k_a, p_of_k_a_lin, ls, l_limber, limber_max_error
 ):
@@ -124,13 +105,8 @@ def _nonlimber_FKEM(
 
     a_arr = ccl.scale_factor_of_chi(cosmo, chi_logspace_arr)
     growfac_arr = ccl.growth_factor(cosmo, a_arr)
-    avg_a1 = _get_average_a(
-        clt1, Nchi, chi_min, chi_max, a_arr, clt1.get_dndz(1.0 / a_arr - 1)
-    )
-    avg_a2 = _get_average_a(
-        clt2, Nchi, chi_min, chi_max, a_arr, clt2.get_dndz(1.0 / a_arr - 1)
-    )
-
+    avg_a1s = clt1.get_avg_weighted_a()
+    avg_a2s = clt2.get_avg_weighted_a()
     for el in range(len(ls)):
         ell = ls[el]
         cls_nonlimber_lin = 0.0
@@ -176,7 +152,7 @@ def _nonlimber_FKEM(
                 transfer_t1_low = np.array(
                     clt1.get_transfer(np.log(k_low), a_arr)
                 )
-                transfer_t1_avg = clt1.get_transfer(np.log(k_low), avg_a1)
+                transfer_t1_avg = clt1.get_transfer(np.log(k_low), avg_a1s[i])
 
                 fchi1_interp = interp1d(
                     chis_t1[i], kernels_t1[i], fill_value="extrapolate"
@@ -205,8 +181,7 @@ def _nonlimber_FKEM(
                     clt1._trc[i], Nchi, chi_min, chi_max, ell, k, fk1
                 )
             fks_1[i] = fk1
-        transfers_t1 = np.array(clt1.get_transfer(np.log(k), avg_a1))
-
+        transfers_t1 = np.array(clt1.get_transfer(np.log(k), avg_a1s[i]))
         """transfer function approximation for the case
         when it's inseperable in k and a
         exact for seperable transfer functions
@@ -226,7 +201,7 @@ def _nonlimber_FKEM(
                         clt2.get_transfer(np.log(k_low), a_arr)
                     )
                     transfer_t2_avg = clt2.get_transfer(
-                        np.log(k_low), avg_a2
+                        np.log(k_low), avg_a2s[j]
                     )
                     fchi2_interp = interp1d(
                         chis_t2[j], kernels_t2[j],
@@ -256,7 +231,7 @@ def _nonlimber_FKEM(
                         clt2._trc[j], Nchi, chi_min, chi_max, ell, k, fk2
                     )
                 fks_2[j] = fk2
-            transfers_t2 = np.array(clt2.get_transfer(np.log(k), avg_a2))
+            transfers_t2 = np.array(clt2.get_transfer(np.log(k), avg_a2s[j]))
         else:
             fks_2 = fks_1
             transfers_t2 = transfers_t1
