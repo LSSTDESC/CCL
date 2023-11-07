@@ -1,7 +1,6 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
   - gfortran=12.2.0  # for isitgr
-  - libgfortran5=13.2.0
   - python=3.8
   - pip
   - cmake
@@ -14,18 +13,6 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
-  - bzip2=1.0.8=h0d85af4_4
-  - c-ares=1.20.1=h10d778d_1
-  - charset-normalizer=3.3.1=pyhd8ed1ab_0
-  - fonttools=4.43.1=py38hae2e43d_0
-  - libnghttp2=1.52.0=he2ab024_0
-  - libsqlite=3.43.2=h92b6c6a_0
-  - llvm-openmp=17.0.3=hb6ac08f_0
-  - ncurses=6.4=hf0c8a7f_0
-  - pooch=1.7.0=pyhd8ed1ab_4 
-  - pytest=7.4.2=pyhd8ed1ab_0
-  - tk=8.6.13=hef22860_0
-  - wheel=0.41.2=pyhd8ed1ab_0
   - pip:
       - tables==3.8.0  # for baccoemu
       #- classy<3
@@ -33,8 +20,3 @@ dependencies:
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator
-      - cython==3.0.4
-      - google-auth==2.23.3
-      - grpcio==1.59.0
-      - markdown==3.5
-      - protobuf==4.24.4
