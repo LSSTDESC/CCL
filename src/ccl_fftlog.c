@@ -51,18 +51,6 @@ relevant functions for generalized FFTLog:
 #endif
 /* This code is FFTLog, which is described in arXiv:astro-ph/9905191 */
 
-static double complex complex_mult(double complex a, double complex b){
-  double a_real = creal(a);
-  double b_real = creal(b);
-  double a_imag = cimag(a);
-  double b_imag = cimag(b);
-
-  return (a_real*b_real - a_imag*b_imag) + (a_real*b_imag + b_real*a_imag)*I;
-
-
-}
-
-
 static double complex lngamma_fftlog(double complex z)
 {
   gsl_sf_result lnr, phi;
@@ -74,9 +62,6 @@ static double complex polar (double r, double phi)
 {
   return (r*cos(phi) +I*(r*sin(phi)));
 }
-
-
-
 
 static void lngamma_4(double x, double y, double* lnr, double* arg)
 {
