@@ -42,7 +42,7 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None,
     rho_crit = physical_constants.RHO_CRITICAL
     c1 = c1delta = c2 = cder = None
     gz = cosmo.growth_factor(1./(1+z))
-    knorm = 1 #Units of Mpc/h, normalizes units out of derivative term
+    knorm = 1 #Units of Mpc/h, normalizes units out of ck term
     
 
     if a1 is not None:
