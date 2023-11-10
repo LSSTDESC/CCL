@@ -762,13 +762,6 @@ class NzTracer(Tracer):
     :func:`NumberCountsTracer` and :func:`WeakLensingTracer`.
     """
 
-    def __init__(self):
-        """By default this `Tracer` object will contain no actual
-        tracers
-        """
-        # Do nothing, just initialize list of tracers
-        super().__init__()
-
     def get_dndz(self, z):
         """Get the redshift distribution for this tracer.
 
