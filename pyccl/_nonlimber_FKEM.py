@@ -15,9 +15,6 @@ from pyccl.pyutils import _fftlog_transform_general
 import pyccl as ccl
 from . import CCLWarning
 
-global avg_a_dict
-avg_a_dict = {}
-
 
 def _get_general_params(b):
     nu = 1.51

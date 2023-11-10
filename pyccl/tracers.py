@@ -706,7 +706,12 @@ class Tracer(CCLObject):
                                           status)
         self._trc.append(_check_returned_tracer(ret))
         a = cosmo.scale_factor_of_chi(chi_s)
-        self.avg_weighted_a.append(np.trapz(a*wchi_s, a)/np.trapz(wchi_s, a))
+        wint = np.trapz(wchi_s, a)
+        if wint != 0:  # Avoid division by zero
+            avg_a = np.trapz(a*wchi_s, a)/wint
+        else:  # If kernel integral is zero, just set to z=0
+            avg_a = 1.0
+        self.avg_weighted_a.append(avg_a)
 
     @classmethod
     def from_z_power(cls, cosmo, *, A, alpha, z_min=0., z_max=6., n_chi=1024):
