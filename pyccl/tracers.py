@@ -448,7 +448,7 @@ class Tracer(CCLObject):
         """
         return np.array([t.der_angles for t in self._trc])
 
-    def get_chi_fft(self, tracer, Nchi, chimin, chimax, ell):
+    def _get_fkem_fft(self, tracer, Nchi, chimin, chimax, ell):
         """Get list fft integral over chi for FKEM non-limber calculation
         contained in this ``Tracer``.
 
@@ -460,7 +460,7 @@ class Tracer(CCLObject):
             return None, None
         return temp[0], temp[1]
 
-    def set_chi_fft(self, tracer, Nchi, chimin, chimax, ell, ks, fft):
+    def _set_fkem_fft(self, tracer, Nchi, chimin, chimax, ell, ks, fft):
         """Set list fft integral over chi for FKEM non-limber calculation
         contained in this ``Tracer``.
 
