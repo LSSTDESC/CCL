@@ -141,7 +141,7 @@ def _nonlimber_FKEM(
         fks_1 = np.zeros((len(kernels_t1), Nchi))
         transfers_t1 = np.zeros((len(kernels_t1), Nchi))
         for i in range(len(kernels_t1)):
-            k, fk1 = clt1.get_chi_fft(
+            k, fk1 = clt1._get_fkem_fft(
                 clt1._trc[i], Nchi, chi_min, chi_max, ell
             )
 
@@ -174,7 +174,7 @@ def _nonlimber_FKEM(
                 )
                 check(status, cosmo=cosmo)
 
-                clt1.set_chi_fft(
+                clt1._set_fkem_fft(
                     clt1._trc[i], Nchi, chi_min, chi_max, ell, k, fk1
                 )
             fks_1[i] = fk1
@@ -190,7 +190,7 @@ def _nonlimber_FKEM(
         transfers_t2 = np.zeros((len(kernels_t2), Nchi))
         if clt1 != clt2:
             for j in range(len(kernels_t2)):
-                k, fk2 = clt2.get_chi_fft(
+                k, fk2 = clt2._get_fkem_fft(
                     clt2._trc[j], Nchi, chi_min, chi_max, ell
                 )
                 if ((k is None) or (fk2 is None)):
@@ -224,7 +224,7 @@ def _nonlimber_FKEM(
                     )
                     check(status, cosmo=cosmo)
 
-                    clt2.set_chi_fft(
+                    clt2._set_fkem_fft(
                         clt2._trc[j], Nchi, chi_min, chi_max, ell, k, fk2
                     )
                 fks_2[j] = fk2
