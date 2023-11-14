@@ -38,7 +38,6 @@ from ._core import CCLObject, UnlockInstance, unlock_instance
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
                       _get_spline1d_arrays, _get_spline2d_arrays)
 
-
 __all__ = ("get_density_kernel", "get_lensing_kernel", "get_kappa_kernel",
            "Tracer", "NzTracer", "NumberCountsTracer", "WeakLensingTracer",
            "CMBLensingTracer", "tSZTracer", "CIBTracer", "ISWTracer",)
@@ -222,6 +221,8 @@ class Tracer(CCLObject):
         """
         # Do nothing, just initialize list of tracers
         self._trc = []
+        self.chi_fft_dict = {}
+        self.avg_weighted_a = []
 
     def __eq__(self, other):
         # Check object id.
@@ -446,6 +447,38 @@ class Tracer(CCLObject):
             `array`: list of angular derivative orders for each tracer.
         """
         return np.array([t.der_angles for t in self._trc])
+
+    def _get_fkem_fft(self, tracer, Nchi, chimin, chimax, ell):
+        """Get list fft integral over chi for FKEM non-limber calculation
+        contained in this ``Tracer``.
+
+        Returns:
+            `tuple`: k values and fft integral values at each k
+        """
+        temp = self.chi_fft_dict.get((tracer, Nchi, chimin, chimax, ell))
+        if temp is None:
+            return None, None
+        return temp[0], temp[1]
+
+    def _set_fkem_fft(self, tracer, Nchi, chimin, chimax, ell, ks, fft):
+        """Set list fft integral over chi for FKEM non-limber calculation
+        contained in this ``Tracer``.
+
+        Returns:
+            `tuple`: k values and fft integral values at each k
+        """
+        self.chi_fft_dict[(tracer, Nchi, chimin, chimax, ell)] = (ks, fft)
+        return ks, fft
+
+    def get_avg_weighted_a(self):
+        """Get list of kernel-averaged scale factors for all tracers
+        contained in this ``Tracer``.
+
+        Returns:
+            `array`: list of kernel-averaged scale factors for each tracer.
+        """
+
+        return np.array(self.avg_weighted_a)
 
     def _MG_add_tracer(self, cosmo, kernel, z_b, der_bessel=0, der_angles=0,
                        bias_transfer_a=None, bias_transfer_k=None):
@@ -672,6 +705,13 @@ class Tracer(CCLObject):
                                           int(extrap_order_hik),
                                           status)
         self._trc.append(_check_returned_tracer(ret))
+        a = cosmo.scale_factor_of_chi(chi_s)
+        wint = np.trapz(wchi_s, a)
+        if wint != 0:  # Avoid division by zero
+            avg_a = np.trapz(a*wchi_s, a)/wint
+        else:  # If kernel integral is zero, just set to z=0
+            avg_a = 1.0
+        self.avg_weighted_a.append(avg_a)
 
     @classmethod
     def from_z_power(cls, cosmo, *, A, alpha, z_min=0., z_max=6., n_chi=1024):
