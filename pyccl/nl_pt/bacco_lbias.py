@@ -127,7 +127,7 @@ class BaccoLbiasCalculator(CCLAutoRepr):
 
     @property
     def initialised(self):
-        return hasattr(self, "emu")
+        return hasattr(self, "lpt_table")
 
     @unlock_instance
     def update_ingredients(self, cosmo):
