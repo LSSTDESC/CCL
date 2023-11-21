@@ -56,7 +56,7 @@ def test_bacco_lbias_k2pk_types(typ_nlin, typ_nloc):
 
 
 @pytest.mark.parametrize('kind', ['m:m', 'm:b1', 'm:b2', 'm:bs', 'm:bk2',
-                                  'b1:b2', 'b1:bs', 'b1:bk2', 'b2:b2',
+                                  'b1:b1', 'b1:b2', 'b1:bs', 'b1:bk2', 'b2:b2',
                                   'b2:bs', 'b2:bk2', 'bs:bs', 'bs:bk2',
                                   'bk2:bk2'])
 def test_bacco_lbias_deconstruction(kind):
@@ -205,3 +205,26 @@ def test_bacco_lbias_sigma8_A_s():
     pk2 = pk2d2(ks, 1.0, cosmo=COSMO_sigma8)
 
     assert np.allclose(pk1, pk2, atol=0, rtol=1E-3)
+
+
+def test_bacco_lbias_many_A_s():
+    COSMO_sigma8 = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, n_s=0.96,
+                                 sigma8=0.81, m_nu=0.2)
+    pt = ccl.nl_pt.BaccoLbiasCalculator(cosmo=COSMO_sigma8)
+    emupars = dict(
+        omega_cold=COSMO_sigma8['Omega_c'] + COSMO_sigma8['Omega_b'],
+        omega_baryon=COSMO_sigma8['Omega_b'],
+        ns=COSMO_sigma8['n_s'],
+        hubble=COSMO_sigma8['h'],
+        neutrino_mass=np.sum(COSMO_sigma8['m_nu']),
+        w0=COSMO_sigma8['w0'],
+        wa=COSMO_sigma8['wa'],
+        expfactor=pt.a_s
+    )
+    sigma8tot = COSMO_sigma8['sigma8']
+    sigma8cold = pt._sigma8tot_2_sigma8cold(emupars, sigma8tot)
+    newemupars ={}
+    for key in emupars:
+        newemupars[key] = np.full(len(pt.a_s), emupars[key])
+    sigma8cold_arr = pt._sigma8tot_2_sigma8cold(emupars, sigma8tot)
+    assert np.allclose(np.mean(sigma8cold_arr), sigma8cold, atol=0, rtol=1E-4)
