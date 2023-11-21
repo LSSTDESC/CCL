@@ -165,6 +165,28 @@ def test_cib_smoke():
         assert getattr(p, n) == 1234.
 
 
+def test_cib_2pt_diag():
+    c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
+    p1 = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=217,
+                                         mass_def='200c')
+    p2 = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=190,
+                                         mass_def='200c')
+    p2pt = ccl.halos.Profile2ptCIB()
+
+    # Test diag=False
+    F = p2pt.fourier_2pt(COSMO, 1., 1E13, 1., p1, prof2=p2, diag=False)
+    assert np.ndim(F) == 0
+    F = p2pt.fourier_2pt(COSMO, [1., 2], 1E13, 1., p1, prof2=p2, diag=False)
+    assert F.shape == (2, 2)
+    F = p2pt.fourier_2pt(COSMO, [1., 2], [1e12, 5e12, 1e13], 1., p1, prof2=p2,
+                         diag=False)
+    assert F.shape == (3, 2, 2)
+    F2 = ccl.halos.Profile2pt().fourier_2pt(COSMO, [1., 2],
+                                            [1e12, 5e12, 1e13], 1., p1,
+                                            prof2=p2, diag=False)
+    assert np.all(F == F2)
+
+
 def test_cib_2pt_raises():
     c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
     p_cib = ccl.halos.HaloProfileCIBShang12(concentration=c, nu_GHz=217,
@@ -322,6 +344,20 @@ def test_hod_2pt():
     with pytest.raises(ValueError):
         p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood, prof2=pbad)
 
+    # Test diag = False
+    F = p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood, diag=False)
+    assert np.ndim(F) == 0
+    F = p2.fourier_2pt(COSMO, [1., 2], 1E13, 1., pgood, prof2=pgood,
+                       diag=False)
+    assert F.shape == (2, 2)
+    F = p2.fourier_2pt(COSMO, [1., 2], [1e12, 5e12, 1e13], 1., pgood,
+                       prof2=pgood, diag=False)
+    assert F.shape == (3, 2, 2)
+    F2 = ccl.halos.Profile2pt().fourier_2pt(COSMO, [1., 2],
+                                            [1e12, 5e12, 1e13], 1., pgood,
+                                            diag=False)
+    assert np.all(F == F2)
+
 
 def test_2pt_rcorr_smoke():
     c = ccl.halos.ConcentrationDuffy08(mass_def='200c')
@@ -337,6 +373,21 @@ def test_2pt_rcorr_smoke():
     assert p2pt.r_corr == -1.
     F3 = p2pt.fourier_2pt(COSMO, 1., 1e13, 1., p)
     assert F3 == 0
+
+    # Test diag = False
+    F = p2pt.fourier_2pt(COSMO, 1., 1e13, 1., p, diag=False)
+    assert isinstance(F, float)
+    F = p2pt.fourier_2pt(COSMO, [1., 2.], 1e13, 1., p, diag=False)
+    assert F.shape == (2, 2)
+    F = p2pt.fourier_2pt(COSMO, [1., 2.], [1e12, 5e12, 1e13], 1., p,
+                         diag=False)
+    assert F.shape == (3, 2, 2)
+
+    # Errors
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(COSMO, 1., 1e13, 1., None)
+    with pytest.raises(TypeError):
+        p2pt.fourier_2pt(COSMO, 1., 1e13, 1., p, prof2=0)
 
 
 def get_nfw(real=False, fourier=False):

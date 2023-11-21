@@ -247,6 +247,56 @@ class HMCalculator(CCLAutoRepr):
         uk = prof.fourier(cosmo, k, self._mass, a).T
         return self._integrate_over_mbf(uk)
 
+    def I_1_3(self, cosmo, k, a, prof, *, prof2=None, prof_2pt, prof3=None):
+        """ Solves the integral:
+
+        .. math::
+            I^1_3(k,a|u_2, v_1, v_2) = \\int dM\\,n(M,a)\\,b(M,a)\\,
+            \\langle u_2(k,a|M) v_1(k',a|M) v_2(k',a|M)\\rangle,
+
+        where we approximate
+
+        .. math::
+            \\langle u_2(k,a|M) v_1(k',a|M) v_2(k', a|M)\\rangle \\sim
+            \\langle u_2(k,a|M)\\rangle
+            \\langle v_1(k',a|M) v_2(k', a|M)\\rangle,
+
+        where :math:`n(M,a)` is the halo mass function,
+        :math:`b(M,a)` is the halo bias, and
+        :math:`\\langle u_2(k,a|M) v_1(k',a|M) v_2(k',a|M)\\rangle` is the
+        3pt halo profile as a function of scales `k` and `k'`, scale factor
+        and halo mass.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            k (:obj:`float` or `array`): comoving wavenumber.
+            a (:obj:`float`): scale factor.
+            prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
+                halo profile.
+
+        Returns:
+            (:obj:`float` or `array`): integral values evaluated at each
+            value of ``k``. Its shape will be ``(N_k, N_k)``, with ``N_k`` the
+            size of the ``k`` array.
+        """
+        # Compute mass function and halo bias
+        # and transpose to move the M-axis last
+        if prof2 is None:
+            prof2 = prof
+
+        if prof3 is None:
+            prof3 = prof2
+
+        self._check_mass_def(prof, prof2, prof3)
+        self._get_ingredients(cosmo, a, get_bf=True)
+        uk1 = prof.fourier(cosmo, k, self._mass, a).T
+        uk23 = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof2,
+                                    prof2=prof3).T
+
+        uk = uk1[None, :, :] * uk23[:, None, :]
+        i13 = self._integrate_over_mbf(uk)
+        return i13
+
     def I_0_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
         """ Solves the integral:
 
@@ -284,7 +334,7 @@ class HMCalculator(CCLAutoRepr):
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
         return self._integrate_over_mf(uk)
 
-    def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt):
+    def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt, diag=True):
         """ Solves the integral:
 
         .. math::
@@ -309,18 +359,27 @@ class HMCalculator(CCLAutoRepr):
                 a profile covariance object
                 returning the the two-point moment of the two profiles
                 being correlated.
+            diag (bool): If True, both halo profiles depend on the same k. If
+                False, they will depend on k and k', respectively. Default
+                True.
 
         Returns:
              (:obj:`float` or `array`): integral values evaluated at each
-             value of ``k``.
+             value of ``k``. If `diag` is True, the output will be a 1D-array;
+             2D-array, otherwise.
         """
         if prof2 is None:
             prof2 = prof
-
         self._check_mass_def(prof, prof2)
         self._get_ingredients(cosmo, a, get_bf=True)
-        uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
-        return self._integrate_over_mbf(uk)
+        uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof,
+                                  prof2=prof2, diag=diag)
+        if diag is True:
+            uk = uk.T
+        else:
+            uk = np.transpose(uk, axes=[1, 2, 0])
+        i12 = self._integrate_over_mbf(uk)
+        return i12
 
     def I_0_22(self, cosmo, k, a, prof, *,
                prof2=None, prof3=None, prof4=None,
