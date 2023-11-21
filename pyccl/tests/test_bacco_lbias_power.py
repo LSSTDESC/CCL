@@ -223,7 +223,7 @@ def test_bacco_lbias_many_A_s():
     )
     sigma8tot = COSMO_sigma8['sigma8']
     sigma8cold = pt._sigma8tot_2_sigma8cold(emupars, sigma8tot)
-    newemupars ={}
+    newemupars = {}
     for key in emupars:
         newemupars[key] = np.full(len(pt.a_s), emupars[key])
     sigma8cold_arr = pt._sigma8tot_2_sigma8cold(emupars, sigma8tot)
