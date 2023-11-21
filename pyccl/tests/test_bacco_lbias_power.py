@@ -55,9 +55,10 @@ def test_bacco_lbias_k2pk_types(typ_nlin, typ_nloc):
     assert np.allclose(p1, p2, atol=0, rtol=1E-4)
 
 
-@pytest.mark.parametrize('kind', ['m:m', 'm:b2', 'm:bs', 'm:bk2',
+@pytest.mark.parametrize('kind', ['m:m', 'm:b1', 'm:b2', 'm:bs', 'm:bk2',
                                   'b1:b2', 'b1:bs', 'b1:bk2', 'b2:b2',
-                                  'b2:bs', 'b2:bk2'])
+                                  'b2:bs', 'b2:bk2', 'bs:bs', 'bs:bk2',
+                                  'bk2:bk2'])
 def test_bacco_lbias_deconstruction(kind):
     ptc = ccl.nl_pt.BaccoLbiasCalculator(cosmo=COSMO)
     b_nc = ['b1', 'b2', 'bs', 'bk2']
