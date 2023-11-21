@@ -184,6 +184,7 @@ def test_bacco_lbias_eq():
         a_arr=np.linspace(0.5, 1., 30))
     assert ptc1 != ptc2
 
+
 def test_bacco_lbias_sigma8_A_s():
     ks = np.logspace(-2, np.log10(0.3), 30)
 
