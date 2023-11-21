@@ -164,6 +164,11 @@ def test_bacco_lbias_calculator_raises():
         ptc = ccl.nl_pt.BaccoLbiasCalculator(cosmo=COSMO)
         ptc.get_pk2d_template('b1:b3')
 
+    with pytest.raises(ValueError):
+        t1 = ccl.nl_pt.PTIntrinsicAlignmentTracer(c1=1)
+        ptc = ccl.nl_pt.BaccoLbiasCalculator(cosmo=COSMO)
+        ptc.get_biased_pk2d(t1, tracer2=t1)
+
 
 def test_bacco_lbias_template_swap():
     # Test that swapping operator order gets you the same
@@ -188,6 +193,12 @@ def test_bacco_lbias_eq():
     ptc2 = ccl.nl_pt.BaccoLbiasCalculator(
         a_arr=np.linspace(0.5, 1., 30))
     assert ptc1 != ptc2
+    # Should do nothing if cosmo is the same
+    ptc2 = ccl.nl_pt.BaccoLbiasCalculator(
+        cosmo=COSMO)
+    lpt_table_1 = ptc2.lpt_table
+    ptc2.update_ingredients(COSMO)
+    assert lpt_table_1 is ptc2.lpt_table
 
 
 def test_bacco_lbias_sigma8_A_s():
@@ -230,5 +241,5 @@ def test_bacco_lbias_many_A_s():
     newemupars = {}
     for key in emupars:
         newemupars[key] = np.full(len(pt.a_s), emupars[key])
-    sigma8cold_arr = pt._sigma8tot_2_sigma8cold(emupars, sigma8tot)
+    sigma8cold_arr = pt._sigma8tot_2_sigma8cold(newemupars, sigma8tot)
     assert np.allclose(np.mean(sigma8cold_arr), sigma8cold, atol=0, rtol=1E-4)
