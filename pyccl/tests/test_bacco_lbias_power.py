@@ -58,10 +58,10 @@ def test_bacco_lbias_k2pk_types(typ_nlin, typ_nloc):
 @pytest.mark.parametrize('kind', ['m:m', 'm:b1', 'm:b2', 'm:bs', 'm:bk2',
                                   'b1:b1', 'b1:b2', 'b1:bs', 'b1:bk2', 'b2:b2',
                                   'b2:bs', 'b2:bk2', 'bs:bs', 'bs:bk2',
-                                  'bk2:bk2'])
+                                  'bk2:bk2', 'b1:b3nl'])
 def test_bacco_lbias_deconstruction(kind):
     ptc = ccl.nl_pt.BaccoLbiasCalculator(cosmo=COSMO)
-    b_nc = ['b1', 'b2', 'bs', 'bk2']
+    b_nc = ['b1', 'b2', 'bs', 'bk2', 'b3nl']
     pk1 = ptc.get_pk2d_template(kind)
 
     def get_tr(tn):
@@ -77,7 +77,8 @@ def test_bacco_lbias_deconstruction(kind):
                 bdict[tn] = 1.0
             return ccl.nl_pt.PTNumberCountsTracer(
                 b1=bdict['b1'], b2=bdict['b2'],
-                bs=bdict['bs'], bk2=bdict['bk2'])
+                bs=bdict['bs'], bk2=bdict['bk2'],
+                b3nl=bdict['b3nl'])
 
     tn1, tn2 = kind.split(':')
     t1 = get_tr(tn1)
@@ -89,7 +90,10 @@ def test_bacco_lbias_deconstruction(kind):
 
     pk2 = ptc.get_biased_pk2d(t1, tracer2=t2)
     if pk1 is None:
-        assert pk2(0.2, 1.0, cosmo=COSMO) == 0.0
+        assert np.allclose(pk2(0.2, 1.0, cosmo=COSMO),
+                           pkmm(0.2, 1.0, cosmo=COSMO)
+                           + pkx1(0.2, 1.0, cosmo=COSMO),
+                           atol=0, rtol=1e-6)
     else:
         if (t1.type == 'M') & (t2.type == 'M'):
             v1 = pk1(0.2, 1.0, cosmo=COSMO)
