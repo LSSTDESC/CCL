@@ -33,8 +33,8 @@ class BaccoLbiasCalculator(CCLAutoRepr):
     terms):
 
     .. math::
-        w_{\\rm g}(\\boldsymbol{q})=1 + b_1\\,\\delta+b_2\\,\\delta^2+
-        b_s\\,s^2+b_{k2}\\nabla^2\\delta.
+        w_{\\rm g}(\\boldsymbol{q})=1 + b_1\\,\\delta+(b_2/2)\\,\\delta^2+
+        (b_s/2)\\,s^2+(b_{k2}/2)\\nabla^2\\delta.
 
     This translates to Eulerian space
 
