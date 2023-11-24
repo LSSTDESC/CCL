@@ -7,6 +7,9 @@ from .. import (CCLAutoRepr, CCLError, Pk2D,
 
 
 # All valid Pk pair labels and their aliases
+# Note that bacco lbias has no b3nl, so terms
+# with b3nl are automatically set to zero.
+# TODO: make this common to all nl_pt models.
 _PK_ALIAS = {
     'm:m': 'm:m', 'm:b1': 'm:b1', 'm:b2': 'm:b2',
     'm:b3nl': 'zero', 'm:bs': 'm:bs', 'm:bk2': 'm:bk2',
