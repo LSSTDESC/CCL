@@ -371,8 +371,7 @@ class BaccoLbiasCalculator(CCLAutoRepr):
         operator names are: ``'m'`` (matter overdensity), ``'b1'``
         (first-order overdensity), ``'b2'`` (:math:`\\delta^2`
         term in galaxy bias expansion), ``'bs'`` (:math:`s^2` term
-        in galaxy bias expansion), ``'b3nl'`` (:math:`\\psi_{nl}`
-        term in galaxy bias expansion), ``'bk2'`` (non-local
+        in galaxy bias expansion), ``'bk2'`` (non-local
         :math:`\\nabla^2 \\delta` term in galaxy bias expansion)
 
         Args:
