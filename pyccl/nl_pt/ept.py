@@ -13,19 +13,20 @@ _PK_ALIAS = {
     'm:m': 'm:m', 'm:b1': 'm:m', 'm:b2': 'm:b2',
     'm:b3nl': 'm:b3nl', 'm:bs': 'm:bs', 'm:bk2': 'm:bk2',
     'm:c1': 'm:m', 'm:c2': 'm:c2', 'm:cdelta': 'm:cdelta',
-    'm:ck' : 'm:ck', 'b1:b1': 'm:m', 'b1:b2': 'm:b2',
+    'm:ck': 'm:ck', 'b1:b1': 'm:m', 'b1:b2': 'm:b2',
     'b1:b3nl': 'm:b3nl', 'b1:bs': 'm:bs', 'b1:bk2': 'm:bk2',
-    'b1:c1': 'm:m', 'b1:c2': 'm:c2', 'b1:cdelta': 'm:cdelta', 'b1:ck' : 'm:ck',
+    'b1:c1': 'm:m', 'b1:c2': 'm:c2', 'b1:cdelta': 'm:cdelta', 'b1:ck': 'm:ck',
     'b2:b2': 'b2:b2', 'b2:b3nl': 'zero', 'b2:bs': 'b2:bs',
-    'b2:bk2': 'zero','b2:c1': 'zero', 'b2:c2': 'zero',
+    'b2:bk2': 'zero', 'b2:c1': 'zero', 'b2:c2': 'zero',
     'b2:cdelta': 'zero', 'b3nl:b3nl': 'zero', 'b3nl:bs': 'zero',
     'b3nl:bk2': 'zero', 'b3nl:c1': 'zero', 'b3nl:c2':
     'zero', 'b3nl:cdelta': 'zero', 'bs:bs': 'bs:bs',
     'bs:bk2': 'zero', 'bs:c1': 'zero', 'bs:c2': 'zero',
     'bs:cdelta': 'zero', 'bk2:bk2': 'zero', 'bk2:c1': 'zero',
     'bk2:c2': 'zero', 'bk2:cdelta': 'zero', 'c1:c1': 'm:m',
-    'c1:c2': 'm:c2', 'c1:cdelta': 'm:cdelta', 'c1:ck' : 'm:ck', 'c2:c2': 'c2:c2',
-    'c2:cdelta': 'c2:cdelta', 'cdelta:cdelta': 'cdelta:cdelta', 'ck:ck' : 'zero'}
+    'c1:c2': 'm:c2', 'c1:cdelta': 'm:cdelta', 'c1:ck': 'm:ck',
+    'c2:c2': 'c2:c2','c2:cdelta': 'c2:cdelta',
+    'cdelta:cdelta': 'cdelta:cdelta', 'ck:ck': 'zero'}
 
 
 class EulerianPTCalculator(CCLAutoRepr):
@@ -116,7 +117,7 @@ class EulerianPTCalculator(CCLAutoRepr):
             bias terms in the expansion. Same options and default as
             ``b1_pk_kind``.
         ak2_pk_kind (:obj:`str`): power spectrum to use for the derivative
-            term of the IA expansion. Same options and default as 
+            term of the IA expansion. Same options and default as
             ``b1_pk_kind``.
         pad_factor (:obj:`float`): fraction of the :math:`\\log_{10}(k)`
              interval you to add as padding for FFTLog calculations.
@@ -152,7 +153,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         self.with_matter_1loop = with_matter_1loop
         self.with_NC = with_NC
         self.with_IA = with_IA
-        self.ufpt=usefptk
+        self.ufpt = usefptk
         # Set FAST-PT parameters
         self.fastpt_par = {'pad_factor': pad_factor,
                            'low_extrap': low_extrap,
@@ -187,14 +188,19 @@ class EulerianPTCalculator(CCLAutoRepr):
         # Call FAST-PT
         try:
             import fastpt as fpt
-        except:
-            raise ImportError("Your attempted import of FAST-PT has failed. You either dont have fast-pt installed, or have the wrong version. Try running pip install fast-pt or conda install fast-pt, then try again")
-        
-        if( not hasattr(fpt, "IA_ta")):
-            raise ValueError(f"Your FAST-PT version lacks a required attribute. You may have the wrong fast-pt install. Try running pip install fast-pt or conda install fast-pt, then try again")
-        
-        if( not hasattr(fpt, "IA_der") and self.ufpt):
-            raise ValueError(f"You need a newer version of FAST-PT to use fpt for k2 term")
+        except Exception:
+            raise ImportError("Your attempted import of FAST-PT has failed. 
+              You either dont have fast-pt installed, or have the wrong version. 
+              Try running pip install fast-pt  or conda install fast-pt, then try again")
+
+        if (not hasattr(fpt, "IA_ta")):
+            raise ValueError("Your FAST-PT version lacks a required attribute.
+            You may have the wrong fast-pt install.
+            Try running pip install fast-pt or conda install fast-pt, then try again")
+
+        if (not hasattr(fpt, "IA_der") and self.ufpt):
+            raise ValueError("You need a newer version of 
+            FAST-PT to use fpt for k2 term")
         n_pad = int(self.fastpt_par['pad_factor'] * len(self.k_s))
         self.pt = fpt.FASTPT(self.k_s, to_do=to_do,
                              low_extrap=self.fastpt_par['low_extrap'],
@@ -278,7 +284,7 @@ class EulerianPTCalculator(CCLAutoRepr):
             reshape_fastpt(self.ia_tt)
             self.ia_mix = self.pt.IA_mix(**kw)
             reshape_fastpt(self.ia_mix)
-            if(self.ufpt):
+            if (self.ufpt):
                 self.ia_der = self.pt.IA_der(**kw)
                 reshape_fastpt(self.ia_der)
 
@@ -305,8 +311,8 @@ class EulerianPTCalculator(CCLAutoRepr):
         # ak power spectrum
         pksa = {}
         if 'nonlinear' in [self.ak2_pk_kind]:
-            pksa['nonlinear'] = np.array([cosmo.nonlin_matter_power(self.k_s, a)
-                                         for a in self.a_s])
+            pksa['nonlinear'] = np.array(
+                  cosmo.nonlin_matter_power(self.k_s, a) for a in self.a_s])
         if 'linear' in [self.ak2_pk_kind]:
             pksa['linear'] = np.array([cosmo.linear_matter_power(self.k_s, a)
                                       for a in self.a_s])
@@ -314,12 +320,12 @@ class EulerianPTCalculator(CCLAutoRepr):
             if 'linear' in pksa:
                 pka = pksa['linear']
             else:
-                pka = np.array([cosmo.linear_matter_power(self.k_s, a) for a in self.a_s])
+                pka = np.array([cosmo.linear_matter_power(self.k_s, a) 
+                                for a in self.a_s]) #Shorten
             pka += self._g4T*self.one_loop_dd[0]
             pksa['pt'] = pka
-        self.pk_ak=pksa[self.ak2_pk_kind]
-        
-    
+        self.pk_ak = pksa[self.ak2_pk_kind]
+
         # Reset template power spectra
         self._pk2d_temp = {}
         self._cosmo = cosmo
@@ -403,7 +409,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
-        if(self.ufpt):
+        if (self.ufpt):
             Pak2 = self.ia_der
         else:
             Pak2 = self.pk_ak*(self.k_s**2)[None, :]
@@ -426,7 +432,7 @@ class EulerianPTCalculator(CCLAutoRepr):
 
         pgi = b1[:, None] * (c1[:, None] * Pd1d1 +
                              (self._g4*cd)[:, None] * (a00e + c00e) +
-                             (self._g4*c2)[:, None] * (a0e2 + b0e2) + 
+                             (self._g4*c2)[:, None] * (a0e2 + b0e2) +
                              ck[:, None] * Pak2)
         return pgi*self.exp_cutoff
 
@@ -487,7 +493,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         ae2e2, ab2b2 = self.ia_tt
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
-        if(self.ufpt):
+        if (self.ufpt):
             Pak2 = self.ia_der
         else:
             Pak2 = self.pk_ak*(self.k_s**2)[None, :]
@@ -513,7 +519,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                    (c21*c22*self._g4)[:, None]*ae2e2 +
                    ((c11*c22+c21*c12)*self._g4)[:, None]*(a0e2+b0e2) +
                    ((cd1*c22+cd2*c21)*self._g4)[:, None]*d0ee2 +
-                   (ck1*c12 + ck2*c11)[:,None] * (Pak2))
+                   (ck1*c12 + ck2*c11)[:, None] * (Pak2))
 
         return pii*self.exp_cutoff
 
@@ -535,7 +541,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
-        if(self.ufpt):
+        if (self.ufpt):
             Pak2 = self.ia_der
         else:
             Pak2 = self.pk_ak*(self.k_s**2)[None, :]
@@ -549,7 +555,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         pim = (c1[:, None] * Pd1d1 +
                (self._g4*cd)[:, None] * (a00e + c00e) +
                (self._g4*c2)[:, None] * (a0e2 + b0e2) +
-               ck[:,None] * Pak2)
+               ck[:, None] * Pak2)
         return pim*self.exp_cutoff
 
     def _get_pmm(self):
