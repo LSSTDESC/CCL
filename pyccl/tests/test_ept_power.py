@@ -3,8 +3,8 @@ import pyccl as ccl
 import pytest
 from contextlib import nullcontext
 
-    
-
+#Delete    
+#Delete
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
@@ -59,7 +59,7 @@ def test_ept_pk2d_bb_smoke():
 def test_ept_get_pk2d_nl(nl):
     ptc = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
-        b1_pk_kind=nl, bk2_pk_kind=nl, ak2_pk_kind=nl,cosmo=COSMO)
+        b1_pk_kind=nl, bk2_pk_kind=nl, ak2_pk_kind=nl, cosmo=COSMO)
     pk = ptc.get_biased_pk2d(TRS['TG'])
     assert isinstance(pk, ccl.Pk2D)
 
@@ -214,8 +214,8 @@ def test_ept_calculator_raises():
     # Wrong type of b1 and bk2 power spectra
     with pytest.raises(ValueError):
         ccl.nl_pt.EulerianPTCalculator(bk2_pk_kind='non-linear')
-    
-    #wrong type of ak2 power spectra
+
+    # Wrong type of ak2 power spectra
     with pytest.raises(ValueError):
         ccl.nl_pt.EulerianPTCalculator(ak2_pk_kind="non-linear")
 
