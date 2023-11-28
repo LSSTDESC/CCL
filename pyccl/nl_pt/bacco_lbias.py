@@ -28,6 +28,13 @@ class BaccoLbiasCalculator(CCLAutoRepr):
     emulator baccoemu
     (https://bitbucket.org/rangulo/baccoemu/src/master/baccoemu/).
 
+    This is a hybrid model, featuring a second order
+    Lagrangian bias expansion coupled with advecting the
+    Lagrangian fields to Eulerian observables through
+    N-body simulations. It has been tested to reproduce the
+    galaxy-galaxy and galaxy-matter power spectra down
+    to scales of 0.7 h/Mpc.
+
     In the parametrisation used here, the bias function
     in Lagrangian coordinates is expanded as (ignoring constant
     terms):
