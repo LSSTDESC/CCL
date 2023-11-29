@@ -25,7 +25,7 @@ _PK_ALIAS = {
     'bs:cdelta': 'zero', 'bk2:bk2': 'zero', 'bk2:c1': 'zero',
     'bk2:c2': 'zero', 'bk2:cdelta': 'zero', 'c1:c1': 'm:m',
     'c1:c2': 'm:c2', 'c1:cdelta': 'm:cdelta', 'c1:ck': 'm:ck',
-    'c2:c2': 'c2:c2','c2:cdelta': 'c2:cdelta',
+    'c2:c2': 'c2:c2', 'c2:cdelta': 'c2:cdelta',
     'cdelta:cdelta': 'cdelta:cdelta', 'ck:ck': 'zero'}
 
 
@@ -190,17 +190,21 @@ class EulerianPTCalculator(CCLAutoRepr):
             import fastpt as fpt
         except Exception:
             raise ImportError("Your attempted import of FAST-PT has failed. "
-              "You either dont have fast-pt installed, or have the wrong version. "
-              "Try running pip install fast-pt  or conda install fast-pt, then try again")
+                              "You either dont have fast-pt installed, "
+                              "or have the wrong version. Try running "
+                              "pip install fast-pt  or conda "
+                              "install fast-pt, then try again")
 
         if (not hasattr(fpt, "IA_ta")):
-            raise ValueError("Your FAST-PT version lacks a required attribute. "
-            "You may have the wrong fast-pt install. "
-            "Try running pip install fast-pt or conda install fast-pt, then try again")
+            raise ValueError("Your FAST-PT version lacks a required function. "
+                             "You may have the wrong fast-pt install. "
+                             "Try running pip install "
+                             "fast-pt or conda install fast-pt, "
+                             "then try again")
 
         if (not hasattr(fpt, "IA_der") and self.ufpt):
-            raise ValueError("You need a newer version of " 
-            "FAST-PT to use fpt for k2 term")
+            raise ValueError("You need a newer version of "
+                             "FAST-PT to use fpt for k2 term")
         n_pad = int(self.fastpt_par['pad_factor'] * len(self.k_s))
         self.pt = fpt.FASTPT(self.k_s, to_do=to_do,
                              low_extrap=self.fastpt_par['low_extrap'],
@@ -320,8 +324,8 @@ class EulerianPTCalculator(CCLAutoRepr):
             if 'linear' in pksa:
                 pka = pksa['linear']
             else:
-                pka = np.array([cosmo.linear_matter_power(self.k_s, a) 
-                                for a in self.a_s]) #Shorten
+                pka = np.array([cosmo.linear_matter_power(self.k_s, a)
+                                for a in self.a_s])
             pka += self._g4T*self.one_loop_dd[0]
             pksa['pt'] = pka
         self.pk_ak = pksa[self.ak2_pk_kind]
