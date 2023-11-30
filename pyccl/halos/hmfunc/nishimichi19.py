@@ -63,7 +63,7 @@ class MassFuncNishimichi19(MassFunc):
                 slope = np.log(mfp[1]/mfp[0])/np.log(m0[1]/m0[0])
                 mfh[m_lo] = mfp[0]*(Mh[m_lo]/m0[0])**slope
             else:
-                raise RuntimeError("Input mass range is not supported. The supported range is from 10^12 to 10^16 Msun/h. If you want to obtain mass function at M200m<10^12 Msun/h, put 'extrapolate==True' in the input. Then this function extrapolates mass function outside of the supported range.")        
+                raise RuntimeError("Input mass range is not supported. The supported range is from 10^12 to 10^16 Msun/h. If you want to obtain mass function at M200m<10^12 Msun/h, put 'extrapolate=True' in the input. Then this function extrapolates mass function outside of the supported range.")        
         # Predict in good range of masses
         if np.any(m_good):
             mfp = self.hod.dndM_spl(np.log(Mh[m_good]))
