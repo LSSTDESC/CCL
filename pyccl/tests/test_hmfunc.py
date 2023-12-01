@@ -15,7 +15,8 @@ HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncWatson13,
         ccl.halos.MassFuncDespali16,
         ccl.halos.MassFuncBocquet16,
-        ccl.halos.MassFuncBocquet20]
+        ccl.halos.MassFuncBocquet20,
+        ccl.halos.MassFuncNishimichi19]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 MFOF = ccl.halos.MassDef('fof', 'matter')
 MVIR = ccl.halos.MassDef('vir', 'critical')
@@ -26,9 +27,9 @@ M500c = ccl.halos.MassDef(500, 'critical')
 M500m = ccl.halos.MassDef(500, 'matter')
 MDFS = [MVIR, MVIR, MVIR, MVIR,
         MFOF, MFOF, MVIR, MFOF, MFOF, MFOF]
-# This is kind of slow to initialize, so let's do it only once
+# These are kinds of slow to initialize, so let's do it only once
 MF_emu = ccl.halos.MassFuncBocquet20(mass_def='200c')
-
+MF_demu = ccl.halos.MassFuncNishimichi19(mass_def='200m')
 
 @pytest.mark.parametrize('nM_class', HMFS)
 def test_nM_subclasses_smoke(nM_class):
@@ -188,3 +189,47 @@ def test_nM_bocquet20_raises():
     # Redshift out of bounds
     with pytest.raises(ValueError):
         MF_emu(cosmo, Ms, 0.3)
+
+
+def test_nM_nishimichi_smoke():
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67, A_s=2.2e-9, n_s=0.96, w0=-1)
+    for m in MS:
+        n = MF_demu(cosmo, m, 0.9, extrapolate=True)
+        assert np.all(np.isfinite(n))
+        assert np.shape(n) == np.shape(m)       
+
+
+def test_nM_nishimichi19_compare():
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67, A_s=2.2e-9, n_s=0.96, w0=-1)
+    # Check that the values are sensible (they don't depart from other
+    # parametrisations by more than ~4%
+    Ms = np.geomspace(1.5E12, 1E15, 128) # Msun, under supported range(10^12-16 Msun/h)
+    mf1 = MF_demu
+    mf2 = ccl.halos.MassFuncTinker10(mass_def='200m')
+
+    nM1 = mf1(cosmo, Ms, 1.0)
+    nM2 = mf2(cosmo, Ms, 1.0)
+    assert np.allclose(nM1, nM2, atol=0, rtol=0.04)
+
+
+def test_nM_nishimichi19_raises():
+    Ms = np.geomspace(1.5E12, 1E15, 128)
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67, A_s=2.2e-9, n_s=0.96, w0=-1)
+    # Need A_s not sigma8
+    cosmo_s = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                          sigma8=0.8, n_s=0.96)
+    with pytest.raises(ValueError):
+        MF_demu(cosmo_s, Ms, 1.0)
+
+    # Cosmo parameters out of bounds
+    cosmo_wr = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                          A_s=2.2e-9, n_s=2.0)
+    with pytest.raises(RuntimeError):
+        MF_demu(cosmo_wr, Ms, 1.0)
+
+    # contain unsupported range
+    # you can pass it when you set "extrapolate=True" in input even you use unsupported range. 
+    # ex.) MF_demu(cosmo, Ms, 1.0, extrapolate=True)
+    Ms = np.geomspace(1E10, 1E15, 128)
+    with pytest.raises(RuntimeError):
+        MF_demu(cosmo, Ms, 1.0)
