@@ -35,13 +35,18 @@ class MassFuncNishimichi19(MassFunc):
         ob = cosmo['Omega_b']*h**2
         oc = cosmo['Omega_c']*h**2
         As = cosmo['A_s']
+        if np.isnan(As):
+            raise ValueError("A_s must be provided to use the Dark Emulator "
+                             "halo mass function.")
         ns = cosmo['n_s']
         w0 = cosmo['w0']
         onu= 0.00064 # we fix this value (Nishimichi et al. 2019)
         Ode= 1.-(ob+oc+onu)/h**2.
-        cparam = np.array([ob, oc, Ode, np.log(As*10.**10.), ns, w0]) # (omega_b,omega_c,Omega_de,ln(10^10As),ns,w)
+        # (omega_b,omega_c,Omega_de,ln(10^10As),ns,w)
+        cparam = np.array([ob, oc, Ode, np.log(As*10.**10.), ns, w0]) 
         self.hod.set_cosmology(cparam)
-        self.hod._compute_dndM_spl(redshift=1./a-1.) # calculating interpolated dndM array is (ln(M), ln(dndM))
+        # calculating interpolated dndM array is (ln(M), ln(dndM))
+        self.hod._compute_dndM_spl(redshift=1./a-1.) 
 
         # Filter out masses beyond emulator range
         M_use = np.atleast_1d(M)
@@ -63,7 +68,11 @@ class MassFuncNishimichi19(MassFunc):
                 slope = np.log(mfp[1]/mfp[0])/np.log(m0[1]/m0[0])
                 mfh[m_lo] = mfp[0]*(Mh[m_lo]/m0[0])**slope
             else:
-                raise RuntimeError("Input mass range is not supported. The supported range is from 10^12 to 10^16 Msun/h. If you want to obtain mass function at M200m<10^12 Msun/h, put 'extrapolate=True' in the input. Then this function extrapolates mass function outside of the supported range.")        
+                raise RuntimeError("Input mass range is not supported. "
+                                   "The supported range is from 10^12 to 10^16 Msun/h. "
+                                   "If you want to obtain mass function at M200m<10^12 Msun/h, "
+                                   "put 'extrapolate=True' in the input. "
+                                   "Then this function extrapolates mass function outside of the supported range.")
         # Predict in good range of masses
         if np.any(m_good):
             mfp = self.hod.dndM_spl(np.log(Mh[m_good]))
