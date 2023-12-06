@@ -21,15 +21,17 @@ class MassFuncNishimichi19(MassFunc):
 
     def __init__(self, *,
                  mass_def="200m",
-                 mass_def_strict=True):
+                 mass_def_strict=True, 
+                 extrapolate=False):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
         from dark_emulator import model_hod
         self.hod = model_hod.darkemu_x_hod({"fft_num":1})
+        self.extrapolate = extrapolate
 
     def _check_mass_def_strict(self, mass_def):
         return mass_def.name != '200m'
 
-    def __call__(self, cosmo, M, a, extrapolate=False):
+    def __call__(self, cosmo, M, a):
         # Set up cosmology
         h  = cosmo['h']
         ob = cosmo['Omega_b']*h**2
@@ -60,7 +62,7 @@ class MassFuncNishimichi19(MassFunc):
         # mfh = np.array([np.nan] * len(Mh))
         # Populate low-halo masses through extrapolation if needed
         if np.any(m_lo):
-            if extrapolate:
+            if self.extrapolate:
                 # Evaluate slope at low masses
                 m0 = 10**np.array([12.0, 12.1])
                 mfp = self.hod.dndM_spl(np.log(m0))
@@ -71,7 +73,7 @@ class MassFuncNishimichi19(MassFunc):
                 raise RuntimeError("Input mass range is not supported. "
                                    "The supported range is from 10^12 to 10^16 Msun/h. "
                                    "If you want to obtain mass function at M200m<10^12 Msun/h, "
-                                   "put 'extrapolate=True' in the input. "
+                                   "put 'extrapolate=True' in the input of mass function definition. "
                                    "Then this function extrapolates mass function outside of the supported range.")
         # Predict in good range of masses
         if np.any(m_good):
