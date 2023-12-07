@@ -287,6 +287,11 @@ class EulerianPTCalculator(CCLAutoRepr):
                 self.ia_der = self.pt.IA_der(**kw)
                 reshape_fastpt(self.ia_der)
             self.ia_tij = self.pt.IA_tij(**kw)
+            reshape_fastpt(self.ia_tij)
+            self.ia_gb2 = self.pt.IA_gb2(**kw)
+            reshape_fastpt(self.ia_gb2)
+            self.ia_s2 = self.pt.IA_s2(**kw)
+            reshape_fastpt(self.ia_s2)
 
         # b1/bk power spectrum
         pks = {}
@@ -407,9 +412,12 @@ class EulerianPTCalculator(CCLAutoRepr):
         self._check_init()
         # Get Pk templates
         Pd1d1 = self.pk_b1
+        
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
         tijdsij, tij2sij, tijtij, tijsij = self.ia_ta
+        gb2sij, gb2dsij, gb2sij2, gb2tij = self.ia_gb2
+        s2sij, s2dsij, s2sij2, s2tij = self.ia_s2
         
         if(self.ufpt):
             Pak2 = self.ia_der
@@ -438,6 +446,22 @@ class EulerianPTCalculator(CCLAutoRepr):
                              (self._g4*c2)[:, None] * (a0e2 + b0e2) + 
                              ck[:, None] * Pak2 +
                              ct[:, None] * tijsij)
+        pgi = (b1[:,None]*(c1[:, None] * Pd1d1 +
+                             (self._g4*cd)[:, None] * (a00e + c00e) +
+                             (self._g4*c2)[:, None] * (a0e2 + b0e2) + 
+                             ck[:, None] * Pak2 + ct[:, None] * tijsij) +
+               b2[:,None]*(c1[:,None]*gb2sij + 
+                            (self._g4*cd)[:,None] * (gb2dsij) +
+                            (self._g4*c2)[:, None] * (gb2sij2) +
+                            ck[:, None] * gb2sij*self.k_s**2 + 
+                            ct[:,None] * gb2tij) +
+               bs[:,None]*(c1[:,None]*s2sij +
+                            (self._g4*cd)[:,None] * (s2dsij) +
+                            (self._g4*c2)[:,None] * (s2sij2) +
+                            ck[:, None] * s2sij*self.k_s**2 +
+                            ct[:, None] *s2tij))
+                             
+        
         return pgi*self.exp_cutoff
 
     def _get_pgm(self, trg):
