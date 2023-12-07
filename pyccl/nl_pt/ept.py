@@ -316,7 +316,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         pksa = {}
         if 'nonlinear' in [self.ak2_pk_kind]:
             pksa['nonlinear'] = np.array(
-                  [cosmo.nonlin_matter_power(self.k_s, a) for a in self.a_s])
+            [cosmo.nonlin_matter_power(self.k_s, a) for a in self.a_s])
         if 'linear' in [self.ak2_pk_kind]:
             pksa['linear'] = np.array([cosmo.linear_matter_power(self.k_s, a)
                                       for a in self.a_s])
