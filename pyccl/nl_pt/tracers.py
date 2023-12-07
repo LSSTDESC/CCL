@@ -10,7 +10,7 @@ from .. import CCLAutoRepr, physical_constants
 from ..pyutils import _check_array_params
 
 
-def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None,
+def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None, at=None,
                       Om_m2_for_c2=False, Om_m_fid=0.3):
     """
     Function to convert from :math:`A_{ia}` values to :math:`c_{ia}` values,
@@ -40,7 +40,7 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None,
 
     Om_m = cosmo['Omega_m']
     rho_crit = physical_constants.RHO_CRITICAL
-    c1 = c1delta = c2 = ck = None
+    c1 = c1delta = c2 = ck = ct = None
     gz = cosmo.growth_factor(1./(1+z))
     knorm = 1  # Units of Mpc/h, normalizes units out of ck term
 
@@ -57,8 +57,10 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None,
             c2 = a2*5*5e-14*rho_crit*Om_m/(gz**2)
     if ak is not None:
         ck = ak*knorm**2*5e-14*rho_crit*Om_m/gz
+    if at is not None:
+        ct=at*5e-14*rho_crit(Om_m)/gz
 
-    return c1, c1delta, c2, ck
+    return c1, c1delta, c2, ck, ct
 
 
 class PTTracer(CCLAutoRepr):
@@ -215,7 +217,7 @@ class PTIntrinsicAlignmentTracer(PTTracer):
     """
     type = 'IA'
 
-    def __init__(self, c1, c2=None, cdelta=None, ck=None):
+    def __init__(self, c1, c2=None, cdelta=None, ck=None, ct=None):
 
         self.biases = {}
 
@@ -225,8 +227,10 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         self.biases['c2'] = self._get_bias_function(c2)
         # Initialize cdelta
         self.biases['cdelta'] = self._get_bias_function(cdelta)
-        # Initialize cder
+        # Initialize ck
         self.biases['ck'] = self._get_bias_function(ck)
+        #Initialize ct
+        self.biases['ct'] = self._get_bias_function(ct)
 
     @property
     def c1(self):
@@ -251,3 +255,9 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         """Internal derivative bias function
         """
         return self.biases['ck']
+    
+    @property
+    def ct(self):
+        """Internal velocity bias function
+        """
+        return self.biases['ct']
