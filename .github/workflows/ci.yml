@@ -91,7 +91,7 @@ jobs:
           pip install --no-build-isolation classy==2.9.4
 
       - name: Install CCL
-        run: pip install -no-use-pep517 -e .
+        run: pip install --no-use-pep517 -e .
 
       - name: Unit tests
         run: |
