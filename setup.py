@@ -15,7 +15,7 @@ def _compile_ccl(debug=False):
            "-DPYTHON_VERSION=%d.%d.%d" % (v.major, v.minor, v.micro)]
     if debug:
         cmd += ["-DCMAKE_BUILD_TYPE=Debug"]
-    if call(cmd, shell=True) != 0:
+    if call(cmd) != 0:
         raise Exception(
             "Could not run CMake configuration. Make sure "
             "CMake is installed !")
