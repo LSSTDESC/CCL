@@ -36,9 +36,9 @@ def test_mdef_get_radius():
 
 def test_mdef_get_mass():
     Ms_h = hmd_200m.get_mass(cosmo, Rs_200m, 1.)
-    assert np.all(np.fabs(Ms_h/Ms-1) < 5E-6)
+    assert np.all(np.fabs(Ms_h/Ms-1) < 1E-6)
     Ms_h = hmd_500c.get_mass(cosmo, Rs_500c, 1.)
-    assert np.all(np.fabs(Ms_h/Ms-1) < 5E-6)
+    assert np.all(np.fabs(Ms_h/Ms-1) < 1E-6)
 
 
 def get_cm(name, mass_def):

@@ -47,4 +47,4 @@ def test_cibcl():
     dl = cl*ls*(ls+1)/(2*np.pi)
 
     # Compare
-    assert np.all(np.fabs(dl/(bm[31]+bm[32])-1) < 1.2E-2)
+    assert np.all(np.fabs(dl/(bm[31]+bm[32])-1) < 1E-2)

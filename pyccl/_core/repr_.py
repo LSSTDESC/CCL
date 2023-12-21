@@ -166,7 +166,7 @@ def build_string_Cosmology(self):
 
     def metadata():
         # Print hashes for the accuracy parameters and the stored Pk2D's.
-        H = hex(hash_(self._spline_params) + hash_(self._gsl_params))
+        H = hex(hash_(self._accuracy_params))
         s = f"{newline}HASH_ACCURACY_PARAMS = {H}"
         if self.__class__.__qualname__ == "CosmologyCalculator":
             # only need the pk's if we compare CosmologyCalculator objects

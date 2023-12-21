@@ -420,7 +420,9 @@ def get_class_pk_lin(cosmo):
     # massive neutrinos
     if cosmo["N_nu_mass"] > 0:
         params["N_ncdm"] = cosmo["N_nu_mass"]
-        params["m_ncdm"] = ", ".join(["%g" % m for m in cosmo["m_nu"]])
+        masses = lib.parameters_get_nu_masses(cosmo._params, 3)
+        params["m_ncdm"] = ", ".join(
+            ["%g" % m for m in masses[:cosmo["N_nu_mass"]]])
 
     params["T_cmb"] = cosmo["T_CMB"]
 
@@ -445,19 +447,21 @@ def get_class_pk_lin(cosmo):
         model.compute()
 
         # Set k and a sampling from CCL parameters
-        nk = len(cosmo.get_pk_spline_lk())
-        a_arr = cosmo.get_pk_spline_a()
-        na = len(a_arr)
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        na = lib.get_pk_spline_na(cosmo.cosmo)
+        status = 0
+        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        check(status, cosmo=cosmo)
 
         # FIXME - getting the lowest CLASS k value from the python interface
         # appears to be broken - setting to 1e-5 which is close to the
         # old value
         lk_arr = np.log(np.logspace(
             -5,
-            np.log10(cosmo._spline_params.K_MAX_SPLINE), nk))
+            np.log10(cosmo.cosmo.spline_params.K_MAX_SPLINE), nk))
 
         # we need to cut this to the max value used for calling CLASS
-        msk = lk_arr < np.log(cosmo._spline_params.K_MAX_SPLINE)
+        msk = lk_arr < np.log(cosmo.cosmo.spline_params.K_MAX_SPLINE)
         nk = int(np.sum(msk))
         lk_arr = lk_arr[msk]
 
