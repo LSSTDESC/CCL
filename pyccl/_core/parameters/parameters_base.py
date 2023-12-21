@@ -134,6 +134,10 @@ class GSLParams(CCLParameters, instance=lib.cvar.user_gsl_params):
 class PhysicalConstants(CCLParameters, instance=lib.cvar.constants,
                         freeze=True):
     """Instances of this class hold the physical constants."""
+    # Mean solar day (s/day). [exact]
+    DAY = 86400.
+    # Sidereal year (days/yr). [IERS2014 in J2000.0]
+    YEAR = 365.256_363_004 * DAY
 
 
 spline_params = SplineParams()
