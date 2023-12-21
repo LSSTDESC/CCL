@@ -36,7 +36,11 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         pass
 
     # z sampling from CCL parameters
-    a_arr = cosmo.get_pk_spline_a()
+    na = lib.get_pk_spline_na(cosmo.cosmo)
+    status = 0
+    a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+    check(status, cosmo=cosmo)
+    a_arr = np.sort(a_arr)
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
 
@@ -229,7 +233,11 @@ def get_isitgr_pk_lin(cosmo):
         pass
 
     # z sampling from CCL parameters
-    a_arr = cosmo.get_pk_spline_a()
+    na = lib.get_pk_spline_na(cosmo.cosmo)
+    status = 0
+    a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+    check(status, cosmo=cosmo)
+    a_arr = np.sort(a_arr)
     zs = 1.0 / a_arr - 1
     zs = np.clip(zs, 0, np.inf)
 
