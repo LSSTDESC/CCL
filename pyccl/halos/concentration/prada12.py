@@ -1,25 +1,21 @@
-from ...base import warn_api
-from ..halo_model_base import Concentration
+__all__ = ("ConcentrationPrada12",)
+
 import numpy as np
 
-
-__all__ = ("ConcentrationPrada12",)
+from . import Concentration
 
 
 class ConcentrationPrada12(Concentration):
-    """ Concentration-mass relation by Prada et al. 2012
-    (arXiv:1104.5130). This parametrization is only valid for
-    S.O. masses with Delta = 200-critical.
+    """Concentration-mass relation by `Prada et al. 2012
+    <https://arXiv.org/abs/1104.5130>`_. This parametrization is only valid for
+    S.O. masses with :math:`\\Delta = 200` times the critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
-            definition object that fixes
-            the mass definition used by this c(M)
-            parametrization, or a name string.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
+            definition object ora name string.
     """
     name = 'Prada12'
 
-    @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, *, mass_def="200c"):
         super().__init__(mass_def=mass_def)
 

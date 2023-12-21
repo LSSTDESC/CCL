@@ -1,26 +1,21 @@
-from ...base import warn_api
-from ...base.parameters import physical_constants as const
-from ..halo_model_base import HaloBias
-
-
 __all__ = ("HaloBiasBhattacharya11",)
+
+from . import HaloBias, get_delta_c
 
 
 class HaloBiasBhattacharya11(HaloBias):
-    """ Implements halo bias described in arXiv:1005.2239.
-    This parametrization is only valid for 'fof' masses.
+    """ Implements halo bias as described in `Bhattacharya et al. 2011
+    <https://arxiv.org/abs/1005.2239>`_. This parametrization is only
+    valid for 'fof' masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = "Bhattacharya11"
 
-    @warn_api
     def __init__(self, *,
                  mass_def="fof",
                  mass_def_strict=True):
@@ -34,7 +29,7 @@ class HaloBiasBhattacharya11(HaloBias):
         self.az = 0.01
         self.p = 0.807
         self.q = 1.795
-        self.dc = const.DELTA_C
+        self.dc = get_delta_c(None, None, kind='EdS')
 
     def _get_bsigma(self, cosmo, sigM, a):
         nu = self.dc / sigM

@@ -1,5 +1,59 @@
 # Unreleased
 
+# v3.0.0 Changes
+
+## Python library
+- Improvements to Einasto, NFW and Hernquist profiles (#1093, #1096).
+- LPT non-linear bias (#1097).
+- Power spectrum emulators (#1094, #1102, #1103, #1108).
+- Bug fix in virial overdensity (#1100) and streamlined collapse threshold (#1101).
+- sigma_8 usable as a parameter for camb when computing non-linear power spectra (#1106).
+- Reverted to better value of Neff (#1111).
+- New baryonic effects models (#1102, #1110).
+- Restored convenience baryonic effects in Cosmology initialisation (#1113).
+- Bocquet et al. 2020 mass function emulatr (#1115)
+- Modified gravity parameter structures (#1119).
+
+# v2.8.0 Changes
+
+## Python library
+- van Daalen+ baryons model (#1110)
+- Refactor pyccl under an abstract CCLObject (#934).
+- Bump Python version to 3.8 (#1031).
+- Optimize HM autocorrelation power spectra (#891).
+- `__eq__` methods for all objects (#1033).
+- IA halo profile (#1074).
+- Lightweight docs revamp for v2.last (#1082).
+
+# v2.7.0 Changes
+
+## Python library
+- Numpy 1.24 compatibility (#1012).
+- Fix OpenMP again (#1017).
+
+# v2.6.0 Changes
+
+## Python library
+- Enhancements for Pk2D, Tk3D, Tracer (#923).
+- Useful error for transfer functions with non-monotonic scale factors (#971).
+- Better docs for correlations (#974).
+- Stop supporting Python 3.6 (#975).
+- HaloProfileGNFW bugfix for c500 update (#969).
+- Added option to make einasto alpha a free parameter (#987, #989).
+- MG parameters in CosmologyCalculator (#977).
+- Added functions to check if OpenMP is working (#1000).
+- Enhancement to the perturbative modelling (#1002).
+
+# v2.5.0 Changes
+
+## Python library
+- Fixed missing terms in Super Sample Covariance (#941).
+- Fixed status message string initialisation (#935).
+- Fixed WL functions in pyccl.halos.profiles ( #943).
+- 10x speed increase in CIB profile by (#917).
+- Super Sample Covariance with linear galaxy bias approximation (#947).
+- Add action to publish to pypi by (#948).
+
 # v2.4.0 Changes
 
 ## Python library

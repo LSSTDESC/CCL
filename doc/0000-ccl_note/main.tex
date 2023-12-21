@@ -518,8 +518,9 @@ be mindful of this for their particular application.
 \subsubsection{Impact of baryons}
 \label{ss:baryons}
 
-\ccl incorporates the impact of baryons on the total matter power spectrum via
-the ``baryonic correction model'' (BCM) of \citet{Schneider15}. When this
+\ccl incorporates several models of the impact of baryons on the total matter power spectrum.
+
+One of the modelling options is the ``baryonic correction model'' (BCM) of \citet{Schneider15}. When this
 correction is in use, the nonlinear matter power spectrum (whichever the
 method that provides it) is multiplied by a correction factor $F(k,z)$ which
 models the impact of baryons.
@@ -540,6 +541,14 @@ processes to modifying the total matter power spectrum:
 If the BCM parameters are not specified and the user sets \ccl to compute the power
 spectrum with baryonic feedback included, \ccl will assume the default parameters
 of \citet{Schneider15}.
+
+A second option is the fitting function presented in \citet{vanDaalen19}. This model
+uses only one free parameter, which relates to the fraction of baryons in halos of mass
+$10^{14}\,h^{-1}\rm M_\odot$, normalised to $\Omega_{\rm b}/\Omega_{\rm m}$, the universal
+baryon fraction. There are two available parametrisations depending on whether the
+baryon fraction is measured within 500 or 200 times the critical density.
+Notice the model has only been validated against cosmological simulations at $z=0$
+and can be applied up to $k\leq 1\,h/\rm Mpc$ for the time being. 
 
 \subsubsection{Modified gravity ($\mu, \Sigma$)}
 
@@ -735,7 +744,7 @@ The relevant galaxy-galaxy (for two galaxy samples, denoted by the second supers
 where $P_{d1d1}$ corresponds to the chosen nonlinear matter power spectrum,
 and the other terms are one-loop PT expressions.
 
-\subsubsection{Intrinsic alignments}
+\subsubsection{Intrinsic alignments: TATT}
 
 Following the ``TATT'' model (tidal alignment and tidal torquing) described in \cite{blazek19}, the galaxy intrinsic alignment field can be expanded:
 \begin{equation}
@@ -771,6 +780,25 @@ In the present \ccl implementation, correlations with between nonlinear bias par
 \begin{align}
     P_{gI} = b_1 P_{\delta E}~.
 \end{align}
+
+\subsubsection{Intrinsic alignments: Halo model}
+
+Small scale modelling of the intrinsic alignments signal can also be done using a halo model, as described in \cite{SchneiderBridle2010} and \cite{Fortuna2021}. In the context of halo occupation distribution (HOD) models, the power spectra for satellite galaxies can be found using halo model integrals implemented in CCL. In this case, the 1-halo contributions to the E-mode GI and II power spectra are \cite[Eq. 17, 18]{Fortuna2021}:
+ \begin{align}
+	P_{\delta \mathrm{I}, 1 \mathrm{~h}}^{s}(\mathbf{k}, z)&=\int \mathrm{d} M n(M) \frac{M}{\bar{\rho}_{m}} f_{s}(z) \frac{\left\langle N_{s} | M\right\rangle}{\bar{n}_{s}(z)}\left|\hat{\gamma}_{s}^{I}(\mathbf{k} | M)\right| u(k, M)\\
+	P_{\mathrm{II}, \mathrm{h}}^{s s}(\mathbf{k}, z)&=\int \mathrm{d} M n(M) f_{s}^{2}(z) \frac{\left\langle N_{s}\left(N_{s}-1\right) | M\right\rangle}{\bar{n}_{s}^{2}(z)}\left|\hat{\gamma}_{s}^{I}(\mathbf{k} | M)\right|^{2},
+  \label{eq:IAHaloModelPowerSpectra}
+\end{align}
+where $n(M)$ is the halo mass function, $f_s(z)$ is the fraction of satellites as a function of redshift, $\langle N_s|M\rangle$ is the HOD of the satellites, $\hat{\gamma}_s^I(\mathbf{k}|M)$ is the Fourier transform of the intrinsic shear field, and $\bar{n}_s$ is the average number density of satellites. We implement a radially dependent profile for the real part of $\hat{\gamma}_s^I(\mathbf{k}|M)$, following \cite{Fortuna2021},
+ \begin{align}
+	\gamma^I(r,\theta)=a_{1\mathrm{h}}\left(\frac{r\sin\theta}{r_\mathrm{vir}}\right)^b=\bar{\gamma}(r)\sin\theta,
+\end{align}
+where $a_{1\mathrm{h}}$ is the amplitude of intrinsic alignments on the 1-halo scale, $b$ the index defining the radial dependence and $\theta$ the angle defining the projection of the semi-major axis of the galaxy along the line of sight. To avoid unphysical behaviour on small sacles, we set $\bar{\gamma}(r<0.06\text{ Mpc}/h)=\bar{\gamma}(0.06\text{ Mpc}/h)$ and also $\bar{\gamma}(r)<0.3$, which corresponds to perfect alignment. By setting $b=0$ one can also define a radially constant profile with amplitude $a_{1\mathrm{h}}$.
+
+The computation of the Fourier transform for $\hat{\gamma}_s^I(\mathbf{k}|M)$ is done using the FFTLog algorithm by default. Another method available is the Simpson's integration and we have checked that angular power spectra computed with both methods agree very well, even when the density of the sampling points for the Simpson's method is very high. This ensures that the FFTLog algorithm provides accurate angular power spectra with very high computational efficiency.
+
+Another parameter that can affect the accuracy of the Fourier transform computation is $\l_\mathrm{max}$, which describe the maximum multipole considered in the plane-wave expansion (see \cite{Fortuna2021}, Appendix C for more details). We have checked that up to $\ell\sim5000$, setting $l_\mathrm{max}=6$ provides accurate total angular power spectra (GG, GI and II) down to 1\% accuracy. 
+
 
 \subsection{Angular power spectra}
 \label{sec:cl}
@@ -1435,6 +1463,21 @@ The following profile models are currently implemented in \ccl:
   \begin{equation}
     \alpha(\nu)=0.155+0.0095\nu^2.
   \end{equation}
+
+  \item{\bf Density-weighted satellite intrinsic shear \citep{SchneiderBridle2010, Fortuna2021}}: this profile is used in calculations of intrinsic alignment power spectra and in real space is given by:
+  \begin{align}
+  	\tilde{\gamma}_{1-\text{halo}}^{I}(\mathbf{r}, M) &=  \gamma^I(\mathbf{r})N_gu(r|M),
+  \end{align}
+  where $\gamma^I(\mathbf{r})=\left|\gamma^{I}(r, \theta)\right| \mathrm{e}^{2 \mathrm{i} \phi}$ is the complex projected intrinsic shear, $u(r|M) = \rho_{\text{NFW}}(\mathbf{r}|M)/M$ is the normalized NFW profile, $N_g$ is the number of galaxies within the halo, and the profile's concentration parameter $c$ needs to be specified by a mass-concentration relation, typically assumed to be deterministic. This profile can be used for halo model calculations of II and GI power spectra, where the intrinsic shear $\left|\gamma^{I}(r, \theta)\right|=\bar{\gamma}(r)\sin\theta$, and $\bar{\gamma}(r)$ can be either constant or radially dependent. We support an exponential profile for $\bar{\gamma}(r)$, with amplitude and index as free parameters. Since intrinsic shear involves an angular part, the Fourier transform of the profile is not given by equation~\ref{eq:prof.fourier}, but needs to be computed using a multipole expansion:
+  \begin{equation}
+  	\gamma^{I}(\mathbf{k}| M)= \sum_{\ell=0}^{\infty}(2 \ell+1) i^{\ell} \gamma_{\ell}\left(k | M\right) f_{\ell}\left(\theta_{k}, \phi_{k}\right),
+  	\label{eq:gamma_fourier}
+  \end{equation}
+  where $f_{\ell}\left(\theta_{k}, \phi_{k}\right)$ is an angular part \cite[Eq. C8]{Fortuna2021} and the multipoles are:
+  $$
+  \gamma_{\ell}\left(k | m\right) \equiv \int_{0}^{\infty} r^{2} \mathrm{~d} r\, \bar{\gamma}(r)  u(r | m) j_{\ell}(k r)
+  $$
+  with $j_\ell$ a spherical Bessel function. The sum in equation \ref{eq:gamma_fourier} is calculated up to a maximum $l_\mathrm{max}$ and the resulting ellipticity field is plugged into equation \ref{eq:IAHaloModelPowerSpectra}. The projected 2D profile and cumulative surface density are not relevant in the context of intrinsic alignments, and for this reason, only the Fourier transform computation is provided in the context of this field density profile.\\
 \end{itemize}
 
 We also provide two additional profiles to be used as toy models:

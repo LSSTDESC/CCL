@@ -1,27 +1,23 @@
-from ...base import warn_api
-from ...base.parameters import physical_constants as const
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncPress74",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncPress74",)
+from . import MassFunc, get_delta_c
 
 
 class MassFuncPress74(MassFunc):
-    """ Implements mass function described in 1974ApJ...187..425P.
+    """Implements the mass function of `Press & Schechter 1974
+    <https://ui.adsabs.harvard.edu/abs/1974ApJ...187..425P/abstract>`_.
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            This parametrization accepts FoF masses only.
-            The default is 'fof'.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = 'Press74'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="fof",
                  mass_def_strict=True):
@@ -32,6 +28,6 @@ class MassFuncPress74(MassFunc):
         return mass_def.Delta != "fof"
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        delta_c = const.DELTA_C
+        delta_c = get_delta_c(cosmo, a, kind='EdS')
         nu = delta_c/sigM
         return self._norm * nu * np.exp(-0.5 * nu**2)

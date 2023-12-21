@@ -40,11 +40,6 @@ typedef struct ccl_physical_constants {
   double MPC_TO_METER;
 
   /**
-   * pc to meters (from PDG 2013)
-   */
-  double PC_TO_METER;
-
-  /**
    * Rho critical in units of M_sun/h / (Mpc/h)^3
    */
   double RHO_CRITICAL;
@@ -181,14 +176,6 @@ typedef struct ccl_gsl_params {
 
   // growth
   double EPS_SCALEFAC_GROWTH;
-
-  // halo model
-  double HM_MMIN;
-  double HM_MMAX;
-  double HM_EPSABS;
-  double HM_EPSREL;
-  size_t HM_LIMIT;
-  int HM_INT_METHOD;
 
   // Flags for using spline integration
   bool NZ_NORM_SPLINE_INTEGRATION;

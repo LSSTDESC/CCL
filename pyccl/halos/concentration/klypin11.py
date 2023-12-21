@@ -1,24 +1,19 @@
-from ...base import warn_api
-from ..halo_model_base import Concentration
-
-
 __all__ = ("ConcentrationKlypin11",)
+
+from . import Concentration
 
 
 class ConcentrationKlypin11(Concentration):
-    """ Concentration-mass relation by Klypin et al. 2011
-    (arXiv:1002.3660). This parametrization is only valid for
-    S.O. masses with Delta = Delta_vir.
+    """Concentration-mass relation by `Klypin et al. 2011
+    <https://arxiv.org/abs/1002.3660>`_. This parametrization is only
+    valid for S.O. masses with :math:`\\Delta = \\Delta_{\\rm vir}`.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str): a mass
-            definition object that fixes
-            the mass definition used by this c(M)
-            parametrization, or a name string.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
+            definition object or a name string.
     """
     name = 'Klypin11'
 
-    @warn_api(pairs=[("mdef", "mass_def")])
     def __init__(self, *, mass_def="vir"):
         super().__init__(mass_def=mass_def)
 

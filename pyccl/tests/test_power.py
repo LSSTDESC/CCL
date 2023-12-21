@@ -1,79 +1,11 @@
 import numpy as np
 import pytest
-
 import pyccl as ccl
-from pyccl import CCLError, CCLWarning
 
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='halofit')
-COSMO_HM = ccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-    transfer_function='bbks', matter_power_spectrum='halo_model',
-    mass_function='shethtormen')
-
-
-def test_halomod_f2d_copy():
-    from pyccl.pyutils import assert_warns
-    mdef = ccl.halos.MassDef('vir', 'matter')
-    hmf = ccl.halos.MassFuncSheth99(COSMO_HM, mdef,
-                                    mass_def_strict=False,
-                                    use_delta_c_fit=True)
-    hbf = ccl.halos.HaloBiasSheth99(COSMO_HM, mass_def=mdef,
-                                    mass_def_strict=False)
-    cc = ccl.halos.ConcentrationDuffy08(mdef)
-    prf = ccl.halos.HaloProfileNFW(cc)
-    hmc = ccl.halos.HMCalculator(COSMO_HM, hmf, hbf, mdef)
-    pk2d = ccl.halos.halomod_Pk2D(COSMO_HM, hmc, prf, normprof1=True)
-    psp_new = pk2d.psp
-    # This just triggers the internal calculation
-    pk_old = assert_warns(
-        ccl.CCLWarning,
-        ccl.nonlin_matter_power, COSMO_HM, 1., 0.8)
-    pk_new = pk2d.eval(1., 0.8, COSMO_HM)
-    psp_old = COSMO_HM.get_nonlin_power().psp
-    assert psp_new.lkmin == psp_old.lkmin
-    assert psp_new.lkmax == psp_old.lkmax
-    assert psp_new.amin == psp_old.amin
-    assert psp_new.amax == psp_old.amax
-    assert psp_new.is_factorizable == psp_old.is_factorizable
-    assert psp_new.is_k_constant == psp_old.is_k_constant
-    assert psp_new.is_a_constant == psp_old.is_a_constant
-    assert psp_new.is_log == psp_old.is_log
-    assert psp_new.growth_factor_0 == psp_old.growth_factor_0
-    assert psp_new.growth_exponent == psp_old.growth_exponent
-    assert psp_new.extrap_order_lok == psp_old.extrap_order_lok
-    assert psp_new.extrap_order_hik == psp_old.extrap_order_hik
-    assert pk_old == pk_new
-
-
-@pytest.mark.parametrize('k', [
-    1,
-    1.0,
-    [0.3, 0.5, 10],
-    np.array([0.3, 0.5, 10])
-])
-def test_nonlin_matter_power_halomod(k):
-    a = 0.8
-    pk = ccl.nonlin_matter_power(COSMO_HM, k, a)
-
-    # New implementation
-    mdef = ccl.halos.MassDef('vir', 'matter')
-    hmf = ccl.halos.MassFuncSheth99(COSMO_HM, mdef,
-                                    mass_def_strict=False,
-                                    use_delta_c_fit=True)
-    hbf = ccl.halos.HaloBiasSheth99(COSMO_HM, mass_def=mdef,
-                                    mass_def_strict=False)
-    cc = ccl.halos.ConcentrationDuffy08(mdef)
-    prf = ccl.halos.HaloProfileNFW(cc)
-    hmc = ccl.halos.HMCalculator(COSMO_HM, hmf, hbf, mdef)
-    pkb = ccl.halos.halomod_power_spectrum(COSMO_HM, hmc, k, a,
-                                           prf, normprof1=True)
-
-    assert np.allclose(pk, pkb)
-    assert np.all(np.isfinite(pk))
-    assert np.shape(pk) == np.shape(k)
 
 
 @pytest.mark.parametrize('k', [
@@ -86,18 +18,6 @@ def test_linear_matter_power_smoke(k):
     pk = ccl.linear_matter_power(COSMO, k, a)
     assert np.all(np.isfinite(pk))
     assert np.shape(pk) == np.shape(k)
-
-
-def test_linear_matter_power_raises():
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=None)
-    with pytest.raises(ccl.CCLError):
-        ccl.linear_matter_power(cosmo, 1., 1.)
-
-
-def test_nonlin_matter_power_raises():
-    cosmo = ccl.CosmologyVanillaLCDM(matter_power_spectrum=None)
-    with pytest.raises(ccl.CCLError):
-        ccl.nonlin_matter_power(cosmo, 1., 1.)
 
 
 def test_linear_power_raises():
@@ -164,25 +84,6 @@ def test_kNL(A):
     assert np.shape(knl) == np.shape(A)
 
 
-@pytest.mark.parametrize('tf,pk,m_nu', [
-    # ('boltzmann_class', 'emu', 0.06), - this case is slow and not needed
-    (None, 'emu', 0.06),
-    ('bbks', 'emu', 0.06),
-    ('eisenstein_hu', 'emu', 0.06),
-])
-def test_transfer_matter_power_nu_raises(tf, pk, m_nu):
-    cosmo = ccl.Cosmology(
-        Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
-        transfer_function=tf, matter_power_spectrum=pk, m_nu=m_nu)
-
-    if tf is not None:
-        with pytest.warns(CCLWarning):
-            ccl.linear_matter_power(cosmo, 1, 1)
-
-    with pytest.raises(CCLError):
-        ccl.nonlin_matter_power(cosmo, 1, 1)
-
-
 @pytest.mark.parametrize('tf', [
     'boltzmann_class', 'boltzmann_camb', 'boltzmann_isitgr'])
 def test_power_sigma8norm_norms_consistent(tf):
@@ -198,7 +99,7 @@ def test_power_sigma8norm_norms_consistent(tf):
         transfer_function=tf)
 
     # make sure they come out the same-ish
-    assert np.allclose(ccl.sigma8(cosmo), ccl.sigma8(cosmo_s8))
+    assert np.allclose(sigma8, ccl.sigma8(cosmo_s8))
 
     # and that the power spectra look right
     a = 0.8
@@ -275,6 +176,15 @@ def test_input_lin_power_spectrum():
                                           p_of_k_a='a:b')
     assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
 
+    # Shape mismatch of input arrays
+    with pytest.raises(ValueError):
+        ccl.CosmologyCalculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, A_s=2e-9,
+            background={'a': a_arr,
+                        'chi': chi_from_ccl,
+                        'h_over_h0': hoh0_from_ccl[:-1]})
+
 
 def test_input_linpower_raises():
     cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.05, h=0.7,
@@ -308,15 +218,6 @@ def test_input_linpower_raises():
             pk_linear={'a': a_arr, 'k': k_arr,
                        'delta_matter;delta_matter': pk_arr})
 
-    # Non-parsable power spectrum
-    with pytest.raises(ValueError):
-        ccl.CosmologyCalculator(
-            Omega_c=0.27, Omega_b=0.05, h=0.7,
-            n_s=0.965, sigma8=0.8,
-            pk_linear={'a': a_arr, 'k': k_arr,
-                       'delta_matter:delta_matter': pk_arr,
-                       'a;b': pk_arr})
-
     # Wrong shape
     with pytest.raises(ValueError):
         ccl.CosmologyCalculator(
@@ -324,6 +225,15 @@ def test_input_linpower_raises():
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
                        'delta_matter:delta_matter': pk_arr,
+                       'a:b': pk_arr[0]})
+
+    # Wrong pk label
+    with pytest.raises(ValueError):
+        ccl.CosmologyCalculator(
+            Omega_c=0.27, Omega_b=0.05, h=0.7,
+            n_s=0.965, sigma8=0.8,
+            pk_linear={'a': a_arr, 'k': k_arr,
+                       'hello_there': pk_arr,
                        'a:b': pk_arr[0]})
 
     # Check new power spectrum is stored
@@ -361,7 +271,7 @@ def test_input_nonlinear_model():
 
     pk_CCL_input = ccl.power.nonlin_matter_power(cosmo_input, k_arr, 0.5)
 
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
+    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-4)
 
     # Test extra power spectrum
     kl_arr = np.logspace(-4, 1, 1000)
@@ -377,15 +287,14 @@ def test_input_nonlinear_model():
                    'delta_matter:delta_matter': -pk_arr},
         nonlinear_model='halofit')
 
-    pk_CCL_input = cosmo_input.get_nonlin_power('a:b').eval(k_arr,
-                                                            0.5,
-                                                            cosmo_input)
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
+    pk_CCL_input = cosmo_input.get_nonlin_power('a:b')(k_arr, 0.5,
+                                                       cosmo_input)
+    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-4)
 
     # Via `nonlin_power`
     pk_CCL_input = ccl.power.nonlin_power(cosmo_input, k_arr, 0.5,
                                           p_of_k_a='a:b')
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
+    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-4)
 
     # Use dictionary
     cosmo_input = ccl.CosmologyCalculator(
@@ -400,7 +309,7 @@ def test_input_nonlinear_model():
                          'c:d': None})
     pk_CCL_input = ccl.power.nonlin_power(cosmo_input, k_arr, 0.5,
                                           p_of_k_a='a:b')
-    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-5)
+    assert np.allclose(pk_CCL_input, pk_CCL, atol=0., rtol=1e-4)
     assert 'c:d' not in cosmo_input._pk_nl
 
 
@@ -470,7 +379,7 @@ def test_input_nonlinear_model_raises():
             pk_nonlin={'a': a_arr, 'k': k_arr,
                        'a:b': pkl_arr})
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
@@ -506,7 +415,7 @@ def test_input_nonlinear_model_raises():
             n_s=0.965, sigma8=0.8,
             pk_linear={'a': a_arr, 'k': k_arr,
                        'delta_matter:delta_matter': pkl_arr},
-            nonlinear_model={'delta_matter:delta_matter': 'hmcode'})
+            nonlinear_model={'delta_matter:delta_matter': 'unknown_model'})
 
 
 def test_input_nonlin_raises():
@@ -528,7 +437,7 @@ def test_input_nonlin_raises():
             pk_nonlin=np.pi)
 
     # k not present
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         ccl.CosmologyCalculator(
             Omega_c=0.27, Omega_b=0.05, h=0.7,
             n_s=0.965, sigma8=0.8,
@@ -550,15 +459,6 @@ def test_input_nonlin_raises():
             n_s=0.965, sigma8=0.8,
             pk_nonlin={'a': a_arr, 'k': k_arr,
                        'delta_matter;delta_matter': pk_arr})
-
-    # Non-parsable power spectrum
-    with pytest.raises(ValueError):
-        ccl.CosmologyCalculator(
-            Omega_c=0.27, Omega_b=0.05, h=0.7,
-            n_s=0.965, sigma8=0.8,
-            pk_nonlin={'a': a_arr, 'k': k_arr,
-                       'delta_matter:delta_matter': pk_arr,
-                       'a;b': pk_arr})
 
     # Wrong shape
     with pytest.raises(ValueError):

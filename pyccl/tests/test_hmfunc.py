@@ -4,7 +4,7 @@ import pyccl as ccl
 from pyccl import physical_constants as const
 
 COSMO = ccl.Cosmology(
-    Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
+    Omega_c=0.27, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
 HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncSheth99,
@@ -14,7 +14,8 @@ HMFS = [ccl.halos.MassFuncPress74,
         ccl.halos.MassFuncTinker10,
         ccl.halos.MassFuncWatson13,
         ccl.halos.MassFuncDespali16,
-        ccl.halos.MassFuncBocquet16]
+        ccl.halos.MassFuncBocquet16,
+        ccl.halos.MassFuncBocquet20]
 MS = [1E13, [1E12, 1E15], np.array([1E12, 1E15])]
 MFOF = ccl.halos.MassDef('fof', 'matter')
 MVIR = ccl.halos.MassDef('vir', 'critical')
@@ -24,18 +25,14 @@ M200m = ccl.halos.MassDef(200, 'matter')
 M500c = ccl.halos.MassDef(500, 'critical')
 M500m = ccl.halos.MassDef(500, 'matter')
 MDFS = [MVIR, MVIR, MVIR, MVIR,
-        MFOF, MFOF, MVIR, MFOF, MFOF]
-
-
-def test_sM_raises():
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function=None)
-    with pytest.raises(ccl.CCLError):
-        cosmo.compute_sigma()
+        MFOF, MFOF, MVIR, MFOF, MFOF, MFOF]
+# This is kind of slow to initialize, so let's do it only once
+MF_emu = ccl.halos.MassFuncBocquet20(mass_def='200c')
 
 
 @pytest.mark.parametrize('nM_class', HMFS)
 def test_nM_subclasses_smoke(nM_class):
-    nM = nM_class(COSMO)
+    nM = nM_class()
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -46,20 +43,20 @@ def test_nM_subclasses_smoke(nM_class):
 def test_nM_mdef_raises(nM_pair):
     nM_class, mdef = nM_pair
     with pytest.raises(ValueError):
-        nM_class(COSMO, mdef)
+        nM_class(mass_def=mdef)
 
 
 @pytest.mark.parametrize('nM_class', [ccl.halos.MassFuncTinker08,
                                       ccl.halos.MassFuncTinker10])
 def test_nM_mdef_bad_delta(nM_class):
     with pytest.raises(ValueError):
-        nM_class(COSMO, MFOF)
+        nM_class(mass_def=MFOF)
 
 
 @pytest.mark.parametrize('nM_class', [ccl.halos.MassFuncTinker08,
                                       ccl.halos.MassFuncTinker10])
 def test_nM_SO_allgood(nM_class):
-    nM = nM_class(COSMO, MVIR)
+    nM = nM_class(mass_def=MVIR)
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -67,8 +64,7 @@ def test_nM_SO_allgood(nM_class):
 
 
 def test_nM_despali_smoke():
-    nM = ccl.halos.MassFuncDespali16(COSMO,
-                                     ellipsoidal=True)
+    nM = ccl.halos.MassFuncDespali16(ellipsoidal=True)
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -77,8 +73,7 @@ def test_nM_despali_smoke():
 
 @pytest.mark.parametrize('mdef', [MFOF, M200m])
 def test_nM_watson_smoke(mdef):
-    nM = ccl.halos.MassFuncWatson13(COSMO,
-                                    mdef)
+    nM = ccl.halos.MassFuncWatson13(mass_def=mdef)
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -92,12 +87,10 @@ def test_nM_watson_smoke(mdef):
 @pytest.mark.parametrize('with_hydro', [True, False])
 def test_nM_bocquet_smoke(with_hydro):
     with pytest.raises(ValueError):
-        ccl.halos.MassFuncBocquet16(COSMO, M500m,
-                                    hydro=with_hydro)
+        ccl.halos.MassFuncBocquet16(mass_def=M500m, hydro=with_hydro)
 
     for md in [M500c, M200c, M200m]:
-        nM = ccl.halos.MassFuncBocquet16(COSMO, md,
-                                         hydro=with_hydro)
+        nM = ccl.halos.MassFuncBocquet16(mass_def=md, hydro=with_hydro)
         for m in MS:
             n = nM(COSMO, m, 0.9)
             assert np.all(np.isfinite(n))
@@ -108,8 +101,7 @@ def test_nM_bocquet_smoke(with_hydro):
                                   'Despali16', 'Angulo12'])
 def test_nM_from_string(name):
     nM_class = ccl.halos.MassFunc.from_name(name)
-    assert nM_class == ccl.halos.mass_function_from_name(name)
-    nM = nM_class(COSMO)
+    nM = nM_class()
     for m in MS:
         n = nM(COSMO, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -131,8 +123,8 @@ def test_nM_tinker_crit(mf):
     delta_m = delta_c * oc / om
     mdef_c = ccl.halos.MassDef(delta_c, 'critical')
     mdef_m = ccl.halos.MassDef(delta_m, 'matter')
-    nM_c = mf(COSMO, mdef_c)
-    nM_m = mf(COSMO, mdef_m)
+    nM_c = mf(mass_def=mdef_c)
+    nM_m = mf(mass_def=mdef_m)
     assert np.allclose(nM_c(COSMO, 1E13, a), nM_m(COSMO, 1E13, a))
 
 
@@ -140,9 +132,8 @@ def test_nM_tinker10_norm():
     from scipy.integrate import quad
 
     md = ccl.halos.MassDef(300, rho_type='matter')
-    mf = ccl.halos.MassFuncTinker10(COSMO, mass_def=md,
-                                    norm_all_z=True)
-    bf = ccl.halos.HaloBiasTinker10(COSMO, mass_def=md)
+    mf = ccl.halos.MassFuncTinker10(mass_def=md, norm_all_z=True)
+    bf = ccl.halos.HaloBiasTinker10(mass_def=md)
 
     def integrand(lnu, z):
         nu = np.exp(lnu)
@@ -165,3 +156,35 @@ def test_mass_function_mass_def_strict_always_raises():
     mdef = ccl.halos.MassDef(400, "critical")
     with pytest.raises(ValueError):
         ccl.halos.MassFuncBocquet16(mass_def=mdef, mass_def_strict=False)
+
+
+def test_nM_bocquet20_compare():
+    # Check that the values are sensible (they don't depart from other
+    # parametrisations by more than ~10%
+    Ms = np.geomspace(1E14, 1E15, 128)
+    mf1 = MF_emu
+    mf2 = ccl.halos.MassFuncTinker08(mass_def='200c')
+
+    nM1 = mf1(COSMO, Ms, 1.0)
+    nM2 = mf2(COSMO, Ms, 1.0)
+    assert np.allclose(nM1, nM2, atol=0, rtol=0.1)
+
+
+def test_nM_bocquet20_raises():
+    Ms = np.geomspace(1E12, 1E17, 128)
+
+    # Need sigma8
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                          A_s=2E-9, n_s=0.96)
+    with pytest.raises(ValueError):
+        MF_emu(cosmo, Ms, 1.0)
+
+    # Cosmo parameters out of bounds
+    cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67,
+                          sigma8=0.8, n_s=2.0)
+    with pytest.raises(ValueError):
+        MF_emu(cosmo, Ms, 1.0)
+
+    # Redshift out of bounds
+    with pytest.raises(ValueError):
+        MF_emu(cosmo, Ms, 0.3)

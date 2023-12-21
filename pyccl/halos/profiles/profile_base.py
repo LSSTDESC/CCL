@@ -1,14 +1,15 @@
-from ...pyutils import resample_array, _fftlog_transform
-from ...base import (CCLAutoRepr, abstractlinkedmethod, templatemethod,
-                     unlock_instance, warn_api, deprecate_attr)
-from ...base.parameters import FFTLogParams
-import numpy as np
-from abc import abstractmethod
-import functools
-
-
-__all__ = ("HaloProfile", "HaloProfileNumberCounts", "HaloProfileMatter",
+__all__ = ("HaloProfile", "HaloProfileMatter",
            "HaloProfilePressure", "HaloProfileCIB",)
+
+import functools
+from typing import Callable
+
+import numpy as np
+
+from ... import CCLAutoRepr, FFTLogParams, unlock_instance
+from ... import physical_constants as const
+from ...pyutils import resample_array, _fftlog_transform
+from .. import MassDef
 
 
 class HaloProfile(CCLAutoRepr):
@@ -16,63 +17,79 @@ class HaloProfile(CCLAutoRepr):
     halo profiles. You should not use this class directly.
     Instead, use one of the subclasses implemented in CCL
     for specific halo profiles, or write your own subclass.
-    `HaloProfile` classes contain methods to compute halo
-    profiles in real (3D) and Fourier spaces, as well as the
-    projected (2D) profile and the cumulative mean surface
-    density.
+    ``HaloProfile`` classes contain methods to compute halo
+    profiles in real (3D) and Fourier spaces, as well as other
+    projected (2D) quantities.
 
-    A minimal implementation of a `HaloProfile` subclass
-    should contain a method `_real` that returns the
+    A minimal implementation of a ``HaloProfile`` subclass
+    should contain a method ``_real`` that returns the
     real-space profile as a function of cosmology,
     comoving radius, mass and scale factor. The default
-    functionality in the base `HaloProfile` class will then
+    functionality in the base ``HaloProfile`` class will then
     allow the automatic calculation of the Fourier-space
     and projected profiles, as well as the cumulative
     mass density, based on the real-space profile using
     FFTLog to carry out fast Hankel transforms. See the
     CCL note for details. Alternatively, you can implement
-    a `_fourier` method for the Fourier-space profile, and
+    a ``_fourier`` method for the Fourier-space profile, and
     all other quantities will be computed from it. It is
     also possible to implement specific versions of any
     of these quantities if one wants to avoid the FFTLog
     calculation.
     """
-    __repr_attrs__ = __eq_attrs__ = ("precision_fftlog",)
-    __getattr__ = deprecate_attr(pairs=[('cM', 'concentration')]
-                                 )(super.__getattribute__)
 
-    def __init__(self):
+    def __init__(self, *, mass_def, concentration=None,
+                 is_number_counts=False):
+        # Verify that profile can be initialized.
+        if not (hasattr(self, "_real") or hasattr(self, "_fourier")):
+            name = type(self).__name__
+            raise TypeError(f"Can't instantiate {name} with no "
+                            "_real or _fourier implementation.")
+
+        # Initialize FFTLog.
         self.precision_fftlog = FFTLogParams()
 
+        self._is_number_counts = is_number_counts
+
+        # Initialize mass_def and concentration.
+        self.mass_def, *out = MassDef.from_specs(
+            mass_def, concentration=concentration)
+        if out:
+            self.concentration = out[0]
+
     @property
-    @abstractmethod
-    def normprof(self) -> bool:
-        """Normalize the profile in auto- and cross-correlations by
-        :math:`I^0_1(k\\rightarrow 0, a|u)`
-        (see :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_1`).
+    def is_number_counts(self):
+        """If ``True``, this profile represents source-count overdensities,
+        normalised by the mean number density within their survey window
+        function. This must be propagated when estimated super-sample
+        effects in the covariance matrix.
         """
+        return self._is_number_counts
 
-    # TODO: CCLv3 - Rename & allocate _normprof_bool to the subclasses.
+    @is_number_counts.setter
+    @unlock_instance
+    def is_number_counts(self, value):
+        self._is_number_counts = value
 
-    def _normprof_false(self, hmc, **settings):
-        """Option for ``normprof = False``."""
-        return lambda *args, cosmo, a, **kwargs: 1.
+    def get_normalization(self, cosmo=None, a=None, *, hmc=None):
+        """Profiles may be normalized by an overall function of redshift
+        (or scale factor). This function may be cosmology-dependent and
+        often comes from integrating certain halo properties over mass.
+        This method returns this normalizing factor. For example,
+        to get the normalized profile in real space, one would call
+        the :meth:`real` method, and then **divide** the result by the value
+        returned by this method.
 
-    def _normprof_true(self, hmc, k_min=1e-5):
-        """Option for ``normprof = True``."""
-        # TODO: remove the first two lines in CCLv3.
-        k_hmc = hmc.precision["k_min"]
-        k_min = k_hmc if k_hmc != k_min else k_min
-        M, mass_def = hmc._mass, hmc.mass_def
-        return functools.partial(self.fourier, k=k_min, M=M, mass_def=mass_def)
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            a (:obj:`float`): scale factor.
+            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
+                model calculator object.
 
-    def _normalization(self, hmc, **settings):
-        """This is the API adapter and it decides which norm to use.
-        It returns a function of ``cosmo`` and ``a``. Optional args & kwargs.
+        Returns:
+            float: normalization factor of this profile.
         """
-        if self.normprof:
-            return self._normprof_true(hmc, **settings)
-        return self._normprof_false(hmc, **settings)
+        return 1.0
 
     @unlock_instance(mutate=True)
     @functools.wraps(FFTLogParams.update_parameters)
@@ -84,8 +101,8 @@ class HaloProfile(CCLAutoRepr):
         as a function of cosmology and scale factor.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            a (float): scale factor.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            a (:obj:`float`): scale factor.
 
         Returns:
             float: power law index to be used with FFTLog.
@@ -97,57 +114,49 @@ class HaloProfile(CCLAutoRepr):
         used as a function of cosmology and scale factor.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            a (float): scale factor.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            a (:obj:`float`): scale factor.
 
         Returns:
             float: power law index to be used with FFTLog.
         """
         return self.precision_fftlog['plaw_projected']
 
-    @abstractlinkedmethod
-    def _real(self, cosmo, r, M, a, mass_def=None):
-        """TODO: Write some useful docstring."""
+    _real: Callable       # implementation of the real profile
 
-    @abstractlinkedmethod
-    def _fourier(self, cosmo, k, M, a, mass_def=None):
-        "TODO: Write some useful docstring."""
+    _fourier: Callable    # implementation of the Fourier profile
 
-    @templatemethod
-    def _projected(self, cosmo, r, M, a, mass_def=None):
-        """TODO: Write some useful docstring."""
+    _projected: Callable  # implementation of the projected profile
 
-    @templatemethod
-    def _cumul2d(self, cosmo, r, M, a, mass_def=None):
-        """TODO: Write some useful docstring."""
+    _cumul2d: Callable    # implementation of the cumulative surface density
 
-    @warn_api
-    def real(self, cosmo, r, M, a, *, mass_def=None):
-        """ Returns the 3D real-space value of the profile as a
+    def real(self, cosmo, r, M, a):
+        """
+        real(cosmo, r, M, a)
+        Returns the 3D real-space value of the profile as a
         function of cosmology, radius, halo mass and scale factor.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            r (:obj:`float` or `array`): comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo profile. The shape of the
+            (:obj:`float` or `array`): halo profile. The shape of the
             output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively. If `r` or `M`
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if self._is_implemented("_real"):
-            return self._real(cosmo, r, M, a, mass_def)
-        return self._fftlog_wrap(cosmo, r, M, a, mass_def, fourier_out=False)
+        if getattr(self, "_real", None):
+            return self._real(cosmo, r, M, a)
+        return self._fftlog_wrap(cosmo, r, M, a, fourier_out=False)
 
-    @warn_api
-    def fourier(self, cosmo, k, M, a, *, mass_def=None):
-        """ Returns the Fourier-space value of the profile as a
+    def fourier(self, cosmo, k, M, a):
+        """
+        fourier(cosmo, k, M, a)
+        Returns the Fourier-space value of the profile as a
         function of cosmology, wavenumber, halo mass and
         scale factor.
 
@@ -156,27 +165,26 @@ class HaloProfile(CCLAutoRepr):
            \\rho(r)\\, j_0(k r)
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            k (float or array_like): comoving wavenumber in Mpc^-1.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            k (:obj:`float` or `array`): comoving wavenumber (in :math:`Mpc^{-1}`).
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo profile. The shape of the
-            output will be `(N_M, N_k)` where `N_k` and `N_m` are
-            the sizes of `k` and `M` respectively. If `k` or `M`
+            (:obj:`float` or `array`): Fourier-space profile. The shape of the
+            output will be ``(N_M, N_k)`` where ``N_k`` and ``N_m`` are
+            the sizes of ``k`` and ``M`` respectively. If ``k`` or ``M``
             are scalars, the corresponding dimension will be
             squeezed out on output.
-        """
-        if self._is_implemented("_fourier"):
-            return self._fourier(cosmo, k, M, a, mass_def)
-        return self._fftlog_wrap(cosmo, k, M, a, mass_def, fourier_out=True)
+        """ # noqa
+        if getattr(self, "_fourier", None):
+            return self._fourier(cosmo, k, M, a)
+        return self._fftlog_wrap(cosmo, k, M, a, fourier_out=True)
 
-    @warn_api(pairs=[("r_t", "r")])
-    def projected(self, cosmo, r, M, a, *, mass_def=None):
-        """ Returns the 2D projected profile as a function of
+    def projected(self, cosmo, r_t, M, a):
+        """
+        projected(cosmo, r_t, M, a)
+        Returns the 2D projected profile as a function of
         cosmology, radius, halo mass and scale factor.
 
         .. math::
@@ -184,28 +192,26 @@ class HaloProfile(CCLAutoRepr):
            \\rho(\\sqrt{r_\\parallel^2 + R^2})
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            r_t (:obj:`float` or `array`): transverse comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo profile. The shape of the
+            (:obj:`float` or `array`): projected profile. The shape of the
             output will be `(N_M, N_r)` where `N_r` and `N_m` are
             the sizes of `r` and `M` respectively. If `r` or `M`
             are scalars, the corresponding dimension will be
             squeezed out on output.
         """
-        if self._is_implemented("_projected"):
-            return self._projected(cosmo, r, M, a, mass_def)
-        return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
-                                           is_cumul2d=False)
+        if getattr(self, "_projected", None):
+            return self._projected(cosmo, r_t, M, a)
+        return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=False)
 
-    @warn_api(pairs=[("r_t", "r")])
-    def cumul2d(self, cosmo, r, M, a, *, mass_def=None):
-        """ Returns the 2D cumulative surface density as a
+    def cumul2d(self, cosmo, r_t, M, a):
+        """
+        cumul2d(cosmo, r_t, M, a)
+        Returns the 2D cumulative surface density as a
         function of cosmology, radius, halo mass and scale
         factor.
 
@@ -214,159 +220,168 @@ class HaloProfile(CCLAutoRepr):
            \\Sigma(R')
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            r_t (:obj:`float` or `array`): transverse comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo profile. The shape of the
-            output will be `(N_M, N_r)` where `N_r` and `N_m` are
-            the sizes of `r` and `M` respectively. If `r` or `M`
+            (:obj:`float` or `array`): cumulative surface density. The shape of the
+            output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m`` are
+            the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
             are scalars, the corresponding dimension will be
             squeezed out on output.
-        """
-        if self._is_implemented("_cumul2d"):
-            return self._cumul2d(cosmo, r, M, a, mass_def)
-        return self._projected_fftlog_wrap(cosmo, r, M, a, mass_def,
-                                           is_cumul2d=True)
+        """ # noqa
+        if getattr(self, "_cumul2d", None):
+            return self._cumul2d(cosmo, r_t, M, a)
+        return self._projected_fftlog_wrap(cosmo, r_t, M, a, is_cumul2d=True)
 
-    @warn_api
-    def convergence(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
-        """ Returns the convergence as a function of cosmology,
+    def convergence(self, cosmo, r, M, *, a_lens, a_source):
+        """
+        convergence(cosmo, r, M, *, a_lens, a_source)
+        Returns the convergence as a function of cosmology,
         radius, halo mass and the scale factors of the source
         and the lens.
 
         .. math::
-           \\kappa(R) = \\frac{\\Sigma(R)}{\\Sigma_{\\mathrm{crit}}},\\
+           \\kappa(R) = \\frac{\\Sigma(R)}{\\Sigma_{\\rm crit}},
 
-        where :math:`\\Sigma(R)` is the 2D projected surface mass density.
+        where :math:`\\Sigma(R)` is the 2D projected surface mass density
+        (see :meth:`projected`), and :math:`\\Sigma_{\\rm crit}` is
+        the critical surface density (see
+        :meth:`~pyccl.background.sigma_critical`).
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a_lens (float): scale factor of lens.
-            a_source (float or array_like): scale factor of source.
-                If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            r (:obj:`float` or `array`): comoving radius.
+            M (:obj:`float` or `array`): halo mass.
+            a_lens (:obj:`float`): scale factor of lens.
+            a_source (:obj:`float` or `array`): scale factor of source.
+                If an array, it must have the same shape as ``r``.
 
         Returns:
-            float or array_like: convergence \
-                :math:`\\kappa`
+            (:obj:`float` or `array`): convergence :math:`\\kappa`. The
+            shape of the output will be ``(N_M, N_r)`` where ``N_r`` and
+            ``N_m`` are the sizes of ``r`` and ``M`` respectively. If
+            ``r`` or ``M`` are scalars, the corresponding dimension will
+            be squeezed out on output.
         """
-        Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
+        Sigma = self.projected(cosmo, r, M, a_lens)
         Sigma /= a_lens**2
         Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return Sigma / Sigma_crit
 
-    @warn_api
-    def shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
-        """ Returns the shear (tangential) as a function of cosmology,
+    def shear(self, cosmo, r, M, *, a_lens, a_source):
+        """
+        shear(cosmo, r, M, *, a_lens, a_source)
+        Returns the shear (tangential) as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
 
         .. math::
            \\gamma(R) = \\frac{\\Delta\\Sigma(R)}{\\Sigma_{\\mathrm{crit}}} =
            \\frac{\\overline{\\Sigma}(< R) -
-           \\Sigma(R)}{\\Sigma_{\\mathrm{crit}}},\\
+           \\Sigma(R)}{\\Sigma_{\\mathrm{crit}}},
 
-        where :math:`\\overline{\\Sigma}(< R)` is the average surface density
-        within R.
+        where :math:`\\overline{\\Sigma}(< R)` is cumulative surface density
+        (see :meth:`cumul2d`), :math:`\\Sigma(R)` is the projected 2D density
+        (see :meth:`projected`), and :math:`\\Sigma_{\\rm crit}` is the
+        critical surface density (see
+        :meth:`~pyccl.background.sigma_critical`).
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a_lens (float): scale factor of lens.
-            a_source (float or array_like): source's scale factor.
-                If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            r (:obj:`float` or `array`): comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a_lens (:obj:`float`): scale factor of lens.
+            a_source (:obj:`float` or `array`): source's scale factor.
+                If array, it must have the same shape as `r`.
 
         Returns:
-            float or array_like: shear \
-                :math:`\\gamma`
+            (:obj:`float` or `array`): shear :math:`\\gamma`. The shape of the
+            output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m`` are
+            the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
+            are scalars, the corresponding dimension will be
+            squeezed out on output.
         """
-        Sigma = self.projected(cosmo, r, M, a_lens, mass_def=mass_def)
-        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens, mass_def=mass_def)
+        Sigma = self.projected(cosmo, r, M, a_lens)
+        Sigma_bar = self.cumul2d(cosmo, r, M, a_lens)
         Sigma_crit = cosmo.sigma_critical(a_lens=a_lens, a_source=a_source)
         return (Sigma_bar - Sigma) / (Sigma_crit * a_lens**2)
 
-    @warn_api
-    def reduced_shear(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
-        """ Returns the reduced shear as a function of cosmology,
+    def reduced_shear(self, cosmo, r, M, *, a_lens, a_source):
+        """
+        reduced_shear(cosmo, r, M, *, a_lens, a_source)
+        Returns the reduced shear as a function of cosmology,
         radius, halo mass and the scale factors of the
         source and the lens.
 
         .. math::
-           g_t (R) = \\frac{\\gamma(R)}{(1 - \\kappa(R))},\\
+           g_t (R) = \\frac{\\gamma(R)}{(1 - \\kappa(R))},
 
-        where :math: `\\gamma(R)` is the shear and `\\kappa(R)` is the
-                convergence.
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a_lens (float): scale factor of lens.
-            a_source (float or array_like): source's scale factor.
-                If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
-
-        Returns:
-            float or array_like: reduced shear \
-                :math:`g_t`
-        """
-        convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
-                                       a_source=a_source, mass_def=mass_def)
-        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source,
-                           mass_def=mass_def)
-        return shear / (1.0 - convergence)
-
-    @warn_api
-    def magnification(self, cosmo, r, M, *, a_lens, a_source, mass_def=None):
-        """ Returns the magnification for input parameters.
-
-        .. math::
-           \\mu (R) = \\frac{1}{\\left[(1 - \\kappa(R))^2 -
-           \\vert \\gamma(R) \\vert^2 \\right]]},\\
-
-        where :math: `\\gamma(R)` is the shear and `\\kappa(R)` is the
+        where :math:`\\gamma(R)` is the shear and :math:`\\kappa(R)` is the
         convergence.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            r (float or array_like): comoving radius in Mpc.
-            M (float or array_like): halo mass in units of M_sun.
-            a_lens (float): scale factor of lens.
-            a_source (float or array_like): source's scale factor.
-                If array_like, it must have the same shape as `r`.
-            mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-                a mass definition object.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            r (:obj:`float` or `array`): comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a_lens (:obj:`float`): scale factor of lens.
+            a_source (:obj:`float` or `array`): source's scale factor.
+                If array, it must have the same shape as `r`.
 
         Returns:
-            float or array_like: magnification\
-                :math:`\\mu`
+            (:obj:`float` or `array`): reduced shear :math:`g_t`. The shape
+            of the output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m``
+            are the sizes of ``r`` and ``M`` respectively. If ``r`` or
+            ``M`` are scalars, the corresponding dimension will be
+            squeezed out on output.
         """
         convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
-                                       a_source=a_source, mass_def=mass_def)
-        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source,
-                           mass_def=mass_def)
+                                       a_source=a_source)
+        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source)
+        return shear / (1.0 - convergence)
+
+    def magnification(self, cosmo, r, M, *, a_lens, a_source):
+        """
+        magnification(cosmo, r, M, a_lens, a_source)
+        Returns the magnification for input parameters.
+
+        .. math::
+           \\mu(R) = \\frac{1}{\\left[(1 - \\kappa(R))^2 -
+           \\vert \\gamma(R) \\vert^2 \\right]]},
+
+        where :math:`\\gamma(R)` is the shear and :math:`\\kappa(R)` is the
+        convergence (see :meth:`shear` and :meth:`convergence`).
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            r (:obj:`float` or `array`): comoving radius in Mpc.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a_lens (:obj:`float`): scale factor of lens.
+            a_source (:obj:`float` or `array`): source's scale factor.
+                If array, it must have the same shape as `r`.
+
+        Returns:
+            (:obj:`float` or `array`): magnification :math:`\\mu`. The shape
+            of the output will be ``(N_M, N_r)`` where ``N_r`` and ``N_m``
+            are the sizes of ``r`` and ``M`` respectively. If ``r`` or ``M``
+            are scalars, the corresponding dimension will be
+            squeezed out on output.
+        """
+        convergence = self.convergence(cosmo, r, M, a_lens=a_lens,
+                                       a_source=a_source)
+        shear = self.shear(cosmo, r, M, a_lens=a_lens, a_source=a_source)
 
         return 1.0 / ((1.0 - convergence)**2 - np.abs(shear)**2)
 
-    def _fftlog_wrap(self, cosmo, k, M, a, mass_def,
+    def _fftlog_wrap(self, cosmo, k, M, a,
                      fourier_out=False,
-                     large_padding=True):
+                     large_padding=True, ell=0):
         # This computes the 3D Hankel transform
-        #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_0(k r)
-        # if fourier_out == False, and
-        #  \rho(r) = \frac{1}{2\pi^2} \int dk k^2 \rho(k) j_0(k r)
+        #  \rho(k) = 4\pi \int dr r^2 \rho(r) j_ell(k r)
+        # if fourier_out == True, and
+        #  \rho(r) = \frac{1}{2\pi^2} \int dk k^2 \rho(k) j_ell(k r)
         # otherwise.
 
         # Select which profile should be the input
@@ -392,13 +407,13 @@ class HaloProfile(CCLAutoRepr):
 
         p_k_out = np.zeros([nM, k_use.size])
         # Compute real profile values
-        p_real_M = p_func(cosmo, r_arr, M_use, a, mass_def)
+        p_real_M = p_func(cosmo, r_arr, M_use, a)
         # Power-law index to pass to FFTLog.
         plaw_index = self._get_plaw_fourier(cosmo, a)
 
         # Compute Fourier profile through fftlog
         k_arr, p_fourier_M = _fftlog_transform(r_arr, p_real_M,
-                                               3, 0, plaw_index)
+                                               3, ell, plaw_index)
         lk_arr = np.log(k_arr)
 
         for im, p_k_arr in enumerate(p_fourier_M):
@@ -417,8 +432,7 @@ class HaloProfile(CCLAutoRepr):
             p_k_out = np.squeeze(p_k_out, axis=0)
         return p_k_out
 
-    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, mass_def,
-                               is_cumul2d=False):
+    def _projected_fftlog_wrap(self, cosmo, r_t, M, a, is_cumul2d=False):
         # This computes Sigma(R) from the Fourier-space profile as:
         # Sigma(R) = \frac{1}{2\pi} \int dk k J_0(k R) \rho(k)
         r_t_use = np.atleast_1d(r_t)
@@ -435,19 +449,14 @@ class HaloProfile(CCLAutoRepr):
 
         sig_r_t_out = np.zeros([nM, r_t_use.size])
         # Compute Fourier-space profile
-        if self._is_implemented("_fourier"):
+        if getattr(self, "_fourier", None):
             # Compute from `_fourier` if available.
-            p_fourier = self._fourier(cosmo, k_arr, M_use,
-                                      a, mass_def)
+            p_fourier = self._fourier(cosmo, k_arr, M_use, a)
         else:
             # Compute with FFTLog otherwise.
             lpad = self.precision_fftlog['large_padding_2D']
-            p_fourier = self._fftlog_wrap(cosmo,
-                                          k_arr,
-                                          M_use, a,
-                                          mass_def,
-                                          fourier_out=True,
-                                          large_padding=lpad)
+            p_fourier = self._fftlog_wrap(cosmo, k_arr, M_use, a,
+                                          fourier_out=True, large_padding=lpad)
         if is_cumul2d:
             # The cumulative profile involves a factor 1/(k R) in
             # the integrand.
@@ -485,21 +494,28 @@ class HaloProfile(CCLAutoRepr):
         return sig_r_t_out
 
 
-class HaloProfileNumberCounts(HaloProfile):
-    """Base for number counts halo profiles."""
-    normprof = True
-
-
 class HaloProfileMatter(HaloProfile):
     """Base for matter halo profiles."""
-    normprof = True
+
+    def get_normalization(self, cosmo, a, *, hmc=None):
+        """Returns the normalization of all matter overdensity
+        profiles, which is simply the comoving matter density.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            a (:obj:`float`): scale factor.
+            hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo
+                model calculator object.
+
+        Returns:
+            :obj:`float`: normalization factor of this profile.
+        """
+        return const.RHO_CRITICAL * cosmo["Omega_m"] * cosmo["h"]**2
 
 
 class HaloProfilePressure(HaloProfile):
     """Base for pressure halo profiles."""
-    normprof = False
 
 
 class HaloProfileCIB(HaloProfile):
     """Base for CIB halo profiles."""
-    normprof = False

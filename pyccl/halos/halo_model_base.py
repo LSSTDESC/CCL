@@ -1,26 +1,58 @@
-from .. import ccllib as lib
-from ..core import check
-from ..base.parameters import physical_constants as const
-from ..base import (CCLAutoRepr, CCLNamedClass, abstractlinkedmethod,
-                    warn_api, deprecated, deprecate_attr)
-from .massdef import MassDef
-import numpy as np
-import functools
+__all__ = ("HMIngredients", "Concentration", "MassFunc", "HaloBias",
+           "get_delta_c", )
+
 from abc import abstractmethod
 
+import numpy as np
 
-__all__ = ("HMIngredients",)
+from .. import CCLAutoRepr, CCLNamedClass, lib, check
+from .. import physical_constants as const
+
+
+def get_delta_c(cosmo, a, kind='EdS'):
+    """Returns the linear collapse threshold.
+
+    Args:
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        a (:obj:`float` or `array`): scale factor.
+        kind (:obj:`str`): prescription to use. Should be one of
+
+            * 'EdS': the SC prediction in Einstein de-Sitter, :math:`\\delta_c=(3/20)(12\\pi)^{2/3}`.
+            * 'EdS_approx': a common approximation to the EdS result :math:`\\delta_c=1.686`.
+            * 'NakamuraSuto97': the prescription from `Nakamura & Suto 1997 <https://arxiv.org/abs/astro-ph/9612074>`_.
+            * 'Mead16': the prescription from `Mead et al. 2016 <https://arxiv.org/abs/1602.02154>`_.
+
+    Returns:
+        (:obj:`float` or `array`): linear collapse threshold.
+    """  # noqa
+    # This is the linear collapse threshold in Einstein de-Sitter:
+    # delta_c = 3/20*(12*pi)^(2/3)
+    dc0 = 1.68647019984
+
+    if kind == 'EdS':
+        return dc0
+    elif kind == 'EdS_approx':
+        return 1.686
+    elif kind == 'NakamuraSuto97':
+        Om = cosmo.omega_x(a, 'matter')
+        return dc0*(1+0.012299*np.log10(Om))
+    elif kind == 'Mead16':
+        Om = cosmo.omega_x(a, 'matter')
+        s8 = cosmo.sigma8()*cosmo.growth_factor(a)
+        facs8 = (1.59+0.0314*np.log(s8))
+        facOm = (1+0.0123*np.log10(Om))
+        return facs8*facOm
+    else:
+        raise ValueError(f"Unknown threshold kind {kind}")
 
 
 class HMIngredients(CCLAutoRepr, CCLNamedClass):
     """Base class for halo model ingredients."""
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",)
-    __getattr__ = deprecate_attr(pairs=[('mdef', 'mass_def')]
-                                 )(super.__getattribute__)
 
-    @warn_api
     def __init__(self, *, mass_def, mass_def_strict=True):
         # Check mass definition consistency.
+        from .massdef import MassDef
         mass_def = MassDef.create_instance(mass_def)
         self.mass_def_strict = mass_def_strict
         self._check_mass_def(mass_def)
@@ -97,7 +129,7 @@ class HMIngredients(CCLAutoRepr, CCLNamedClass):
 
 
 class MassFunc(HMIngredients):
-    """ This class enables the calculation of halo mass functions.
+    """This class enables the calculation of halo mass functions.
     We currently assume that all mass functions can be written as
 
     .. math::
@@ -114,46 +146,47 @@ class MassFunc(HMIngredients):
       ``_check_mass_def_strict`` to ensure consistency of the halo mass
       definition.
 
+    * Subclasses for parametrizations that cannot be written in terms of
+      :math:`\\sigma_M` can simply overload the :meth:`__call__` method.
+
     Args:
         mass_def (:class:`~pyccl.halos.massdef.MassDef`):
-            a mass definition object that fixes
-            the mass definition used by this mass function
-            parametrization.
-        mass_def_strict (bool): if False, consistency of the mass
+            a mass definition object or a name string.
+        mass_def_strict (:obj:`bool`): if False, consistency of the mass
             definition will be ignored.
+
+    .. automethod:: __call__
     """
     _mass_def_strict_always = False
 
-    @abstractlinkedmethod
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         """ Get the :math:`f(\\sigma_M)` function for this mass function
         object (see description of this class for details).
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            sigM (float or array_like): standard deviation in the
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            sigM (:obj:`float` or `array`): standard deviation in the
                 overdensity field on the scale of this halo.
-            a (float): scale factor.
-            lnM (float or array_like): natural logarithm of the
+            a (:obj:`float`): scale factor.
+            lnM (:obj:`float` or `array`): natural logarithm of the
                 halo mass in units of M_sun (provided in addition
                 to sigM for convenience in some mass function
                 parametrizations).
 
         Returns:
-            float or array_like: :math:`f(\\sigma_M)` function.
+            (:obj:`float` or `array`): :math:`f(\\sigma_M)` function.
         """
 
-    @abstractlinkedmethod
     def __call__(self, cosmo, M, a):
         """ Returns the mass function for input parameters.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: mass function \
+            (:obj:`float` or `array`): mass function \
                 :math:`dn/d\\log_{10}M` in units of Mpc^-3 (comoving).
         """
         M_use = np.atleast_1d(M)
@@ -167,56 +200,52 @@ class MassFunc(HMIngredients):
             return mf[0]
         return mf
 
-    @deprecated(new_function=__call__)
-    def get_mass_function(self, cosmo, M, a):
-        return self(cosmo, M, a)
-
 
 class HaloBias(HMIngredients):
-    """ This class enables the calculation of halo bias functions.
+    """This class enables the calculation of halo bias functions.
     We currently assume that all halo bias functions can be written
-    as functions that depend on M only through sigma_M (where
-    sigma_M^2 is the overdensity variance on spheres with a
-    radius given by the Lagrangian radius for mass M).
-    All sub-classes implementing specific parametrizations
-    can therefore be simply created by replacing this class'
-    `_get_bsigma method`.
+    as functions that depend on :math:`M` only through :math:`\\sigma_M`
+    (where :math:`\\sigma_M^2` is the overdensity variance on
+    spheres with a radius given by the Lagrangian radius for
+    mass :math:`M`). All sub-classes implementing specific
+    parametrizations can therefore be simply created by replacing
+    this class' ``_get_bsigma`` method. New classes departing
+    from this paradigm can simply overload the
+    :meth:`__call__` method.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass
-            definition object that fixes
-            the mass definition used by this halo bias
-            parametrization.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object or a name string.
+        mass_def_strict (:obj:`bool`): if False, consistency of the mass
             definition will be ignored.
+
+    .. automethod:: __call__
     """
     _mass_def_strict_always = False
 
-    @abstractlinkedmethod
     def _get_bsigma(self, cosmo, sigM, a):
         """ Get the halo bias as a function of sigmaM.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            sigM (float or array_like): standard deviation in the
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            sigM (:obj:`float` or `array`): standard deviation in the
                 overdensity field on the scale of this halo.
-            a (float): scale factor.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: f(sigma_M) function.
+            (:obj:`float` or `array`): f(sigma_M) function.
         """
 
-    @abstractlinkedmethod
     def __call__(self, cosmo, M, a):
-        """ Returns the halo bias for input parameters.
+        """Returns the halo bias for input parameters.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: halo bias.
+            (:obj:`float` or `array`): halo bias.
         """
         M_use = np.atleast_1d(M)
         logM, sigM = self._get_logM_sigM(cosmo, M_use, a)
@@ -225,65 +254,38 @@ class HaloBias(HMIngredients):
             return b[0]
         return b
 
-    @deprecated(new_function=__call__)
-    def get_halo_bias(self, cosmo, M, a):
-        return self(cosmo, M, a)
-
 
 class Concentration(HMIngredients):
-    """ This class enables the calculation of halo concentrations.
+    """
+    This class enables the calculation of halo concentrations.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef`): a mass definition
-            object that fixes the mass definition used by this c(M)
-            parametrization.
+        mass_def (:class:`~pyccl.halos.massdef.MassDef`):
+            a mass definition object or a name string.
+
+    .. automethod:: __call__
     """
     _mass_def_strict_always = True
 
-    @warn_api
     def __init__(self, *, mass_def):
         super().__init__(mass_def=mass_def, mass_def_strict=True)
 
-    @abstractlinkedmethod
     def _concentration(self, cosmo, M, a):
         """Implementation of the c(M) relation."""
 
-    @abstractlinkedmethod
     def __call__(self, cosmo, M, a):
-        """ Returns the concentration for input parameters.
+        """Returns the concentration for input parameters.
 
         Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
-            M (float or array_like): halo mass in units of M_sun.
-            a (float): scale factor.
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+            M (:obj:`float` or `array`): halo mass.
+            a (:obj:`float`): scale factor.
 
         Returns:
-            float or array_like: concentration.
+            (:obj:`float` or `array`): concentration.
         """
         M_use = np.atleast_1d(M)
         c = self._concentration(cosmo, M_use, a)
         if np.ndim(M) == 0:
             return c[0]
         return c
-
-    @deprecated(new_function=__call__)
-    def get_concentration(self, cosmo, M, a):
-        return self(cosmo, M, a)
-
-
-@functools.wraps(MassFunc.from_name)
-@deprecated(new_function=MassFunc.from_name)
-def mass_function_from_name(name):
-    return MassFunc.from_name(name)
-
-
-@functools.wraps(HaloBias.from_name)
-@deprecated(new_function=HaloBias.from_name)
-def halo_bias_from_name(name):
-    return HaloBias.from_name(name)
-
-
-@functools.wraps(Concentration.from_name)
-@deprecated(new_function=Concentration.from_name)
-def concentration_from_name(name):
-    return Concentration.from_name(name)

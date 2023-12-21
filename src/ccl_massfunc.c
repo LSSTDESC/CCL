@@ -10,39 +10,6 @@
 
 #include "ccl.h"
 
-
-/*----- ROUTINE: dc_NakamuraSuto -----
-INPUT: cosmology, scale factor
-TASK: Computes the peak threshold: delta_c(z) assuming LCDM.
-Cosmology dependence of the critical linear density according to the spherical-collapse model.
-Fitting function from Nakamura & Suto (1997; arXiv:astro-ph/9710107).
-*/
-double dc_NakamuraSuto(ccl_cosmology *cosmo, double a, int *status){
-
-  double Om_mz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
-  double dc0 = (3./20.)*pow(12.*M_PI,2./3.);
-  double dc = dc0*(1.+0.012299*log10(Om_mz));
-
-  return dc;
-
-}
-
-/*----- ROUTINE: Dv_BryanNorman -----
-INPUT: cosmology, scale factor
-TASK: Computes the virial collapse density contrast with respect to the matter density assuming LCDM.
-Cosmology dependence of the virial collapse density according to the spherical-collapse model
-Fitting function from Bryan & Norman (1998; arXiv:astro-ph/9710107)
-*/
-double Dv_BryanNorman(ccl_cosmology *cosmo, double a, int *status){
-
-  double Om_mz = ccl_omega_x(cosmo, a, ccl_species_m_label, status);
-  double x = Om_mz-1.;
-  double Dv0 = 18.*pow(M_PI,2);
-  double Dv = (Dv0+82.*x-39.*pow(x,2))/Om_mz;
-
-  return Dv;
-}
-
 static double sigmaM_m2r(ccl_cosmology *cosmo, double halomass, int *status)
 {
   double rho_m, smooth_radius;

@@ -1,17 +1,13 @@
-from ..base import UnlockInstance, warn_api
-from ..pk2d import Pk2D, parse_pk
-from .profiles_2pt import Profile2pt
-import numpy as np
-
-
 __all__ = ("halomod_power_spectrum", "halomod_Pk2D",)
 
+import numpy as np
 
-@warn_api(pairs=[("supress_1h", "suppress_1h")],
-          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof1", "normprof2"])
+from .. import Pk2D
+from . import Profile2pt
+
+
 def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof_2pt=None,
-                           normprof1=None, normprof2=None,
                            p_of_k_a=None,
                            get_1h=True, get_2h=True,
                            smooth_transition=None, suppress_1h=None,
@@ -27,66 +23,58 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
 
     where :math:`P_{\\rm lin}(k,a)` is the linear matter
     power spectrum, :math:`I^1_1` is defined in the documentation
-    of :meth:`~HMCalculator.I_1_1`, and :math:`I^0_2` is defined
-    in the documentation of :meth:`~HMCalculator.I_0_2`.
+    of :meth:`~pyccl.halos.halo_model.HMCalculator.I_1_1`, and :math:`I^0_2`
+    is defined in the documentation of
+    :meth:`~pyccl.halos.halo_model.HMCalculator.I_0_2`.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HMCalculator`): a halo model calculator.
-        k (float or array_like): comoving wavenumber in Mpc^-1.
-        a (float or array_like): scale factor.
-        prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+        hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo model calculator.
+        k (:obj:`float` or `array`): comoving wavenumber in Mpc^-1.
+        a (:obj:`float` or `array`): scale factor.
+        prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): halo
             profile.
-        prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-            second halo profile. If `None`, `prof` will be used as
-            `prof2`.
-        normprof1 (bool): (Deprecated - do not use)
-            if `True`, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by `prof`.
-        normprof2 (bool): (Deprecated - do not use)
-            if `True`, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
-            (see :meth:`~HMCalculator.I_0_1`), where
-            :math:`v` is the profile represented by `prof2`.
+        prof2 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): a
+            second halo profile. If ``None``, ``prof`` will be used as
+            ``prof2``.
         prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object
             returning the the two-point moment of the two profiles
-            being correlated. If `None`, the default second moment
+            being correlated. If ``None``, the default second moment
             will be used, corresponding to the products of the means
             of both profiles.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum. If `None`,
+            be used as the linear matter power spectrum. If ``None``,
             the power spectrum stored within `cosmo` will be used.
-        get_1h (bool): if `False`, the 1-halo term (i.e. the first
+        get_1h (:obj:`bool`): if ``False``, the 1-halo term (i.e. the first
             term in the first equation above) won't be computed.
-        get_2h (bool): if `False`, the 2-halo term (i.e. the second
+        get_2h (:obj:`bool`): if ``False``, the 2-halo term (i.e. the second
             term in the first equation above) won't be computed.
-        smooth_transition (function or None):
+        smooth_transition (:obj:`callable` or :obj:`None`):
             Modify the halo model 1-halo/2-halo transition region
             via a time-dependent function :math:`\\alpha(a)`,
-            defined as in HMCODE-2020 (``arXiv:2009.01858``): :math:`P(k,a)=
+            defined as in `HMCODE-2020 <https://arxiv.org/abs/2009.01858>`_:
+            :math:`P(k,a)=
             (P_{1h}^{\\alpha(a)}(k)+P_{2h}^{\\alpha(a)}(k))^{1/\\alpha}`.
-            If `None` the extra factor is just 1.
-        suppress_1h (function or None):
+            If ``None`` the extra factor is just 1.
+        suppress_1h (:obj:`callable` or :obj:`None`):
             Suppress the 1-halo large scale contribution by a
             time- and scale-dependent function :math:`k_*(a)`,
-            defined as in HMCODE-2020 (``arXiv:2009.01858``):
-            :math:`\\frac{(k/k_*(a))^4}{1+(k/k_*(a))^4}`.
-            If `None` the standard 1-halo term is returned with no damping.
-        extrap_pk (bool):
+            defined as in `HMCODE-2020 <https://arxiv.org/abs/2009.01858>`_:
+            :math:`1/[1+(k_*(a)/k)^4]`.
+            If ``None`` the standard 1-halo term is returned with no damping.
+        extrap_pk (:obj:`bool`):
             Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
-            support. If False, and the queried values are out of bounds,
-            an error is raised. The default is False.
+            support. If ```False```, and the queried values are out of bounds,
+            an error is raised.
 
     Returns:
-        float or array_like: integral values evaluated at each
-        combination of `k` and `a`. The shape of the output will
-        be `(N_a, N_k)` where `N_k` and `N_a` are the sizes of
-        `k` and `a` respectively. If `k` or `a` are scalars, the
+        (:obj:`float` or `array`): integral values evaluated at each
+        combination of ``k`` and ``a``. The shape of the output will
+        be ``(N_a, N_k)`` where ``N_k`` and ``N_a`` are the sizes of
+        ``k`` and ``a`` respectively. If ``k`` or ``a`` are scalars, the
         corresponding dimension will be squeezed out on output.
-    """
+    """ # noqa
     a_use = np.atleast_1d(a).astype(float)
     k_use = np.atleast_1d(k).astype(float)
 
@@ -105,15 +93,7 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     if prof_2pt is None:
         prof_2pt = Profile2pt()
 
-    # TODO: Remove for CCLv3.
-    if normprof1 is not None:
-        with UnlockInstance(prof):
-            prof.normprof = normprof1
-    if normprof2 is not None:
-        with UnlockInstance(prof2):
-            prof2.normprof = normprof2
-
-    pk2d = parse_pk(cosmo, p_of_k_a)
+    pk2d = cosmo.parse_pk(p_of_k_a)
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     na = len(a_use)
@@ -121,12 +101,12 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         # normalizations
-        norm1 = hmc.get_profile_norm(cosmo, aa, prof)
+        norm1 = prof.get_normalization(cosmo, aa, hmc=hmc)
 
         if prof2 == prof:
             norm2 = norm1
         else:
-            norm2 = hmc.get_profile_norm(cosmo, aa, prof2)
+            norm2 = prof2.get_normalization(cosmo, aa, hmc=hmc)
 
         if get_2h:
             # bias factors
@@ -154,10 +134,10 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
 
         # smooth 1h/2h transition region
         if smooth_transition is None:
-            out[ia] = (pk_1h + pk_2h) * norm1 * norm2
+            out[ia] = (pk_1h + pk_2h) / (norm1 * norm2)
         else:
             alpha = smooth_transition(aa)
-            out[ia] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) * norm1 * norm2
+            out[ia] = (pk_1h**alpha + pk_2h**alpha)**(1/alpha) / (norm1*norm2)
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -166,11 +146,8 @@ def halomod_power_spectrum(cosmo, hmc, k, a, prof, *,
     return out
 
 
-@warn_api(pairs=[("supress_1h", "suppress_1h")],
-          reorder=["prof_2pt", "prof2", "p_of_k_a", "normprof1", "normprof2"])
 def halomod_Pk2D(cosmo, hmc, prof, *,
                  prof2=None, prof_2pt=None,
-                 normprof1=None, normprof2=None,
                  p_of_k_a=None,
                  get_1h=True, get_2h=True,
                  lk_arr=None, a_arr=None,
@@ -182,69 +159,61 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
     for more details about the actual calculation.
 
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HMCalculator`): a halo model calculator.
-        prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+        hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo model calculator.
+        prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): halo
             profile.
-        prof2 (:class:`~pyccl.halos.profiles.HaloProfile`): a
-            second halo profile. If `None`, `prof` will be used as
-            `prof2`.
+        prof2 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): a
+            second halo profile. If ``None``, ``prof`` will be used as
+            ``prof2``.
         prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
             a profile covariance object
             returning the the two-point moment of the two profiles
-            being correlated. If `None`, the default second moment
+            being correlated. If ``None``, the default second moment
             will be used, corresponding to the products of the means
             of both profiles.
-        normprof1 (bool): if `True`, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by `prof`.
-        normprof2 (bool): if `True`, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|v)`
-            (see :meth:`~HMCalculator.I_0_1`), where
-            :math:`v` is the profile represented by `prof2`.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
-            be used as the linear matter power spectrum. If `None`,
+            be used as the linear matter power spectrum. If ``None``,
             the power spectrum stored within `cosmo` will be used.
-        get_1h (bool): if `False`, the 1-halo term (i.e. the first
+        get_1h (:obj:`bool`): if ``False``, the 1-halo term (i.e. the first
             term in the first equation above) won't be computed.
-        get_2h (bool): if `False`, the 2-halo term (i.e. the second
+        get_2h (:obj:`bool`): if ``False``, the 2-halo term (i.e. the second
             term in the first equation above) won't be computed.
         a_arr (array): an array holding values of the scale factor
             at which the halo model power spectrum should be
-            calculated for interpolation. If `None`, the internal
+            calculated for interpolation. If ``None``, the internal
             values used by `cosmo` will be used.
         lk_arr (array): an array holding values of the natural
             logarithm of the wavenumber (in units of Mpc^-1) at
             which the halo model power spectrum should be calculated
-            for interpolation. If `None`, the internal values used
+            for interpolation. If ``None``, the internal values used
             by `cosmo` will be used.
-        extrap_order_lok (int): extrapolation order to be used on
+        extrap_order_lok (:obj:`int`): extrapolation order to be used on
             k-values below the minimum of the splines. See
             :class:`~pyccl.pk2d.Pk2D`.
-        extrap_order_hik (int): extrapolation order to be used on
+        extrap_order_hik (:obj:`int`): extrapolation order to be used on
             k-values above the maximum of the splines. See
             :class:`~pyccl.pk2d.Pk2D`.
-        smooth_transition (function or None):
+        smooth_transition (:obj:`callable` or :obj:`None`):
             Modify the halo model 1-halo/2-halo transition region
             via a time-dependent function :math:`\\alpha(a)`,
-            defined as in HMCODE-2020 (``arXiv:2009.01858``): :math:`P(k,a)=
-            (P_{1h}^{\\alpha(a)}(k)+P_{2h}^{\\alpha(a)}(k))^{1/\\alpha}`.
-            If `None` the extra factor is just 1.
-        suppress_1h (function or None):
+            defined as in `HMCODE-2020 <https://arxiv.org/abs/2009.01858>`_:
+            :math:`P(k,a)= (P_{1h}^{\\alpha(a)}(k)+P_{2h}^{\\alpha(a)}(k))^{1/\\alpha}`.
+            If ``None`` the extra factor is just 1.
+        suppress_1h (:obj:`callable` or :obj:`None`):
             Suppress the 1-halo large scale contribution by a
             time- and scale-dependent function :math:`k_*(a)`,
-            defined as in HMCODE-2020 (``arXiv:2009.01858``):
-            :math:`\\frac{(k/k_*(a))^4}{1+(k/k_*(a))^4}`.
-            If `None` the standard 1-halo term is returned with no damping.
-        extrap_pk (bool):
+            defined as in `HMCODE-2020 <https://arxiv.org/abs/2009.01858>`_:
+            :math:`1/[1+(k_*(a)/k)^4]`.
+            If ``None`` the standard 1-halo term is returned with no damping.
+        extrap_pk (:obj:`bool`):
             Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
-            support. If False, and the queried values are out of bounds,
-            an error is raised. The default is False.
+            support. If ```False```, and the queried values are out of bounds,
+            an error is raised.
 
     Returns:
         :class:`~pyccl.pk2d.Pk2D`: halo model power spectrum.
-    """
+    """ # noqa
     if lk_arr is None:
         lk_arr = cosmo.get_pk_spline_lk()
     if a_arr is None:
@@ -253,7 +222,6 @@ def halomod_Pk2D(cosmo, hmc, prof, *,
     pk_arr = halomod_power_spectrum(
         cosmo, hmc, np.exp(lk_arr), a_arr,
         prof, prof2=prof2, prof_2pt=prof_2pt, p_of_k_a=p_of_k_a,
-        normprof1=normprof1, normprof2=normprof2,  # TODO: remove for CCLv3
         get_1h=get_1h, get_2h=get_2h,
         smooth_transition=smooth_transition, suppress_1h=suppress_1h,
         extrap_pk=extrap_pk)

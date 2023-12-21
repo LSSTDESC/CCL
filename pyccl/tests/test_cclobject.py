@@ -9,21 +9,34 @@ def all_subclasses(cls):
         [s for c in cls.__subclasses__() for s in all_subclasses(c)])
 
 
-def test_fancy_repr():
-    # Test fancy-repr controls.
+def test_method_control_raises():
+    # All method control subclasses must contain a default implementation.
+    with pytest.raises(ValueError):
+        class MyMethodControl(ccl._core.schema._CustomMethod, method="name"):
+            pass
+
+
+def test_repr_control():
+    # Test custom repr controls.
     cosmo = ccl.CosmologyVanillaLCDM()
 
-    ccl.FancyRepr.disable()
+    ccl.CustomRepr.disable()
     assert repr(cosmo) == object.__repr__(cosmo)
 
-    ccl.FancyRepr.enable()
+    ccl.CustomRepr.enable()
     assert repr(cosmo) != object.__repr__(cosmo)
 
-    with pytest.raises(AttributeError):
-        cosmo._fancy_repr.disable()
 
-    with pytest.raises(AttributeError):
-        ccl.Cosmology._fancy_repr.disable()
+def test_eq_control():
+    # Test custom eq controls.
+    cosmo = [ccl.CosmologyVanillaLCDM() for _ in range(2)]
+    assert id(cosmo[0]) != id(cosmo[1])
+
+    ccl.CustomEq.disable()
+    assert cosmo[0] != cosmo[1]
+
+    ccl.CustomEq.enable()
+    assert cosmo[0] == cosmo[1]
 
 
 def check_eq_repr_hash(self, other, *, equal=True):
@@ -35,44 +48,6 @@ def check_eq_repr_hash(self, other, *, equal=True):
     return (self != other
             and repr(self) != repr(other)
             and hash(self) != hash(other))
-
-
-def test_CCLAutoRepr():
-    # Test eq --> repr <-- hash for all kinds of CCL halo objects.
-
-    # 1. Build a halo model calculator using the default parametrizations.
-    cosmo = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
-    HMC = ccl.halos.HMCalculator(
-        cosmo, massfunc="Tinker08", hbias="Tinker10", mass_def="200m")
-
-    # 2. Define separate default halo model ingredients.
-    MDEF = ccl.halos.MassDef200m()
-    HMF = ccl.halos.MassFuncTinker08(cosmo, mass_def=MDEF)
-    HBF = ccl.halos.HaloBiasTinker10(cosmo, mass_def=MDEF)
-
-    # 3. Test equivalence.
-    assert MDEF == HMC._mdef
-    assert HMF == HMC._massfunc
-    assert HBF == HMC._hbias
-    HMC2 = ccl.halos.HMCalculator(
-        cosmo, massfunc=HMF, hbias=HBF, mass_def=MDEF)
-    assert HMC == HMC2
-
-    # 4. Test halo profiles.
-    CM1 = ccl.halos.Concentration.from_name("Duffy08")()
-    CM2 = ccl.halos.ConcentrationDuffy08()
-    assert CM1 == CM2
-
-    # TODO: uncomment once __eq__ methods are implemented.
-    # P1 = ccl.halos.HaloProfileHOD(c_M_relation=CM1)
-    # P2 = ccl.halos.HaloProfileHOD(c_M_relation=CM2)
-    # assert P1 == P2
-
-    # PCOV1 = ccl.halos.Profile2pt(r_corr=1.5)
-    # PCOV2 = ccl.halos.Profile2pt(r_corr=1.0)
-    # assert PCOV1 != PCOV2
-    # PCOV2.update_parameters(r_corr=1.5)
-    # assert PCOV1 == PCOV2
 
 
 def test_CCLObject_immutability():
@@ -93,7 +68,7 @@ def test_CCLObject_immutability():
         cosmo.update_parameters(A_SPLINE_NA=120)
 
     # `update_parameters` implemented.
-    prof = ccl.halos.HaloProfilePressureGNFW(mass_bias=0.5)
+    prof = ccl.halos.HaloProfilePressureGNFW(mass_def="200c", mass_bias=0.5)
     # with pytest.raises(AttributeError):  # TODO: Uncomment for CCLv3.
     #     prof.mass_bias = 0.7
     assert prof.mass_bias == 0.5
@@ -115,6 +90,22 @@ def test_CCLObject_default_behavior():
     MyType = type("MyType", (ccl.CCLAutoRepr,), {"test": 0})
     instances = [MyType() for _ in range(2)]
     assert instances[0] != instances[1]
+
+
+def test_named_class_raises():
+    # Test that an error is raised if `create_instance` gets the wrong type.
+    with pytest.raises(AttributeError):
+        ccl.halos.MassDef.create_instance(1)
+
+
+def test_ccl_parameters_abstract():
+    # Test that the Parameters base class is abstract and cannot instantiate
+    # if `instance` or `factory` are not specified.
+    with pytest.raises(TypeError):
+        ccl.CCLParameters()
+    with pytest.raises(ValueError):
+        class MyPars(ccl.CCLParameters):
+            pass
 
 
 # +==========================================================================+

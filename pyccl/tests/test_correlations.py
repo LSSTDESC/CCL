@@ -3,6 +3,7 @@ import pyccl as ccl
 import pytest
 from timeit import default_timer
 
+ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
@@ -27,27 +28,6 @@ def test_correlation_smoke(method):
             COSMO, ell=ell, C_ell=cl, theta=tval, type='NN', method=method)
         assert np.all(np.isfinite(corr))
         assert np.shape(corr) == np.shape(tval)
-
-
-@pytest.mark.parametrize('typs', [['gg', 'NN'],
-                                  ['gl', 'NG'],
-                                  ['l+', 'GG+'],
-                                  ['l-', 'GG-']])
-def test_correlation_newtypes(typs):
-    z = np.linspace(0., 1., 200)
-    n = np.ones(z.shape)
-    lens = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
-
-    ell = np.logspace(1, 3, 5)
-    cl = ccl.angular_cl(COSMO, lens, lens, ell)
-
-    theta = np.logspace(-2., np.log10(5.), 5)
-    with pytest.warns(ccl.CCLDeprecationWarning):
-        corr_old = ccl.correlation(COSMO, ell=ell, C_ell=cl, theta=theta,
-                                   corr_type=typs[0])
-    corr_new = ccl.correlation(COSMO, ell=ell, C_ell=cl, theta=theta,
-                               type=typs[1])
-    assert np.all(corr_new == corr_old)
 
 
 @pytest.mark.parametrize(
@@ -128,9 +108,6 @@ def test_correlation_raises():
         ccl.correlation(COSMO, ell=[1], C_ell=[1e-3], theta=[1], method='blah')
     with pytest.raises(ValueError):
         ccl.correlation(COSMO, ell=[1], C_ell=[1e-3], theta=[1], type='blah')
-    with pytest.raises(ValueError):
-        ccl.correlation(COSMO, ell=[1], C_ell=[1e-3],
-                        theta=[1], corr_type='blah')
 
 
 def test_correlation_zero():
@@ -154,3 +131,6 @@ def test_correlation_zero_ends():
     theta = np.logspace(0, 2, 20)
     with pytest.raises(ccl.CCLError):
         ccl.correlation(COSMO, ell=ell, C_ell=C_ell, theta=theta)
+
+
+ccl.gsl_params.reload()  # reset to the default parameters

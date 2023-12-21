@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.testing import assert_raises
 import pytest
 import pyccl as ccl
 
@@ -14,7 +13,7 @@ def test_nonlin_camb_power():
     n_s = 0.97
     h = 0.7
     # Needs to be set for good agreements between CCL and CAMB
-    T_CMB = 2.725
+    T_CMB = 2.7255
 
     p = camb.CAMBparams(WantTransfer=True,
                         NonLinearModel=camb.nonlinear.Halofit(
@@ -52,24 +51,6 @@ def test_nonlin_camb_power():
         pk_nonlin_ccl = ccl.nonlin_matter_power(ccl_cosmo, k, 1/(1+z_))
 
         assert np.allclose(pk_camb, pk_nonlin_ccl, rtol=3e-5)
-
-
-def test_nonlin_camb_power_with_sigma8():
-    Omega_c = 0.25
-    Omega_b = 0.05
-    n_s = 0.97
-    h = 0.7
-
-    ccl_cosmo = ccl.Cosmology(Omega_c=Omega_c, Omega_b=Omega_b, h=h, m_nu=0.0,
-                              sigma8=0.8, n_s=n_s,
-                              transfer_function="boltzmann_camb",
-                              matter_power_spectrum="camb")
-
-    k = np.logspace(-3, 1, 10)
-
-    # Check that non-linear power spectrum isn't being used with sigma8
-    with assert_raises(ccl.errors.CCLError):
-        ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)
 
 
 def test_nonlin_camb_power_raises():

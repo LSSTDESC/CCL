@@ -1,30 +1,27 @@
-from ...base import warn_api
-from ... import ccllib as lib
-from ...pyutils import check
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncDespali16",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncDespali16",)
+from . import MassFunc, get_delta_c
 
 
 class MassFuncDespali16(MassFunc):
-    """ Implements mass function described in arXiv:1507.05627.
+    """Implements the mass function of `Despali et al. 2016
+    <https://arxiv.org/abs/1507.05627>`_. This parametrization accepts
+    any S.O. masses.
+
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            This parametrization accepts any SO masses.
-            The default is '200m'.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
-        ellipsoidal (bool): use the ellipsoidal parametrization.
+        ellipsoidal (:obj:`bool`): use the ellipsoidal parametrization.
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
                                      "ellipsoidal",)
     name = 'Despali16'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="200m",
                  mass_def_strict=True,
@@ -48,15 +45,10 @@ class MassFuncDespali16(MassFunc):
         self.poly_A, self.poly_a, self.poly_p = map(np.poly1d, coeffs)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
-        status = 0
-        delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-        check(status, cosmo=cosmo)
+        delta_c = get_delta_c(cosmo, a, 'NakamuraSuto97')
 
-        Dv, status = lib.Dv_BryanNorman(cosmo.cosmo, a, status)
-        check(status, cosmo=cosmo)
-
-        x = np.log10(self.mass_def.get_Delta(cosmo, a) *
-                     cosmo.omega_x(a, self.mass_def.rho_type) / Dv)
+        Dv = self.mass_def.get_Delta_vir(cosmo, a)
+        x = np.log10(self.mass_def.get_Delta(cosmo, a) / Dv)
 
         A, a, p = self.poly_A(x), self.poly_a(x), self.poly_p(x)
 

@@ -1,26 +1,23 @@
-from ...base import warn_api
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncAngulo12",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncAngulo12",)
+from . import MassFunc
 
 
 class MassFuncAngulo12(MassFunc):
-    """ Implements mass function described in arXiv:1203.3216.
-    This parametrization is only valid for 'fof' masses.
+    """Implements the mass function of `Angulo et al. 2012
+    <https://arxiv.org/abs/1203.3216>`_. This parametrization is
+    only valid for 'fof' masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            this parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = 'Angulo12'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="fof",
                  mass_def_strict=True):

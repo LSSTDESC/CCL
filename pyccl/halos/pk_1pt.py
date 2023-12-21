@@ -1,38 +1,28 @@
-from ..base import UnlockInstance, warn_api
+__all__ = ("halomod_mean_profile_1pt", "halomod_bias_1pt",)
+
 import numpy as np
 
 
-__all__ = ("halomod_mean_profile_1pt", "halomod_bias_1pt",)
-
-
-def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
+def _Ix1(func, cosmo, hmc, k, a, prof):
     # I_X_1 dispatcher for internal use
     """
     Args:
-        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        hmc (:class:`HMCalculator`): a halo model calculator.
-        k (float or array_like): comoving wavenumber in Mpc^-1.
-        a (float or array_like): scale factor.
-        prof (:class:`~pyccl.halos.profiles.HaloProfile`): halo
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+        hmc (:class:`~pyccl.halos.halo_model.HMCalculator`): a halo model
+            calculator.
+        k (:obj:`float` or `array`): comoving wavenumber in
+            :math:`{\\rm Mpc}^{-1}`.
+        a (:obj:`float` or `array`): scale factor.
+        prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): halo
             profile.
-        normprof (bool): (Deprecated - do not use)
-            if `True`, this integral will be
-            normalized by :math:`I^0_1(k\\rightarrow 0,a|u)`
-            (see :meth:`~HMCalculator.I_0_1`), where
-            :math:`u` is the profile represented by `prof`.
 
     Returns:
-        float or array_like: integral values evaluated at each
-        combination of `k` and `a`. The shape of the output will
-        be `(N_a, N_k)` where `N_k` and `N_a` are the sizes of
-        `k` and `a` respectively. If `k` or `a` are scalars, the
+        (:obj:`float` or `array`): integral values evaluated at each
+        combination of ``k`` and ``a``. The shape of the output will
+        be ``(N_a, N_k)`` where ``N_k`` and ``N_a`` are the sizes of
+        ``k`` and ``a`` respectively. If ``k`` or ``a`` are scalars, the
         corresponding dimension will be squeezed out on output.
     """
-    # TODO: Remove for CCLv3.
-    if normprof is not None:
-        with UnlockInstance(prof):
-            prof.normprof = normprof
-
     func = getattr(hmc, func)
 
     a_use = np.atleast_1d(a).astype(float)
@@ -43,8 +33,8 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     out = np.zeros([na, nk])
     for ia, aa in enumerate(a_use):
         i11 = func(cosmo, k_use, aa, prof)
-        norm = hmc.get_profile_norm(cosmo, aa, prof)
-        out[ia] = i11 * norm
+        norm = prof.get_normalization(cosmo, aa, hmc=hmc)
+        out[ia] = i11 / norm
 
     if np.ndim(a) == 0:
         out = np.squeeze(out, axis=0)
@@ -53,8 +43,7 @@ def _Ix1(func, cosmo, hmc, k, a, prof, normprof):
     return out
 
 
-@warn_api
-def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
+def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof):
     """ Returns the mass-weighted mean halo profile.
 
     .. math::
@@ -64,11 +53,10 @@ def halomod_mean_profile_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
     :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
     function of scale, scale factor and halo mass.
     """
-    return _Ix1("I_0_1", cosmo, hmc, k, a, prof, normprof)
+    return _Ix1("I_0_1", cosmo, hmc, k, a, prof)
 
 
-@warn_api
-def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
+def halomod_bias_1pt(cosmo, hmc, k, a, prof):
     """ Returns the mass-and-bias-weighted mean halo profile.
 
     .. math::
@@ -80,7 +68,7 @@ def halomod_bias_1pt(cosmo, hmc, k, a, prof, *, normprof=None):
     :math:`\\langle u(k,a|M)\\rangle` is the halo profile as a
     function of scale, scale factor and halo mass.
     """
-    return _Ix1("I_1_1", cosmo, hmc, k, a, prof, normprof)
+    return _Ix1("I_1_1", cosmo, hmc, k, a, prof)
 
 
 halomod_mean_profile_1pt.__doc__ += _Ix1.__doc__

@@ -1,33 +1,28 @@
-from ... import ccllib as lib
-from ...base import warn_api
-from ...base.parameters import physical_constants as const
-from ...core import check
-from ..halo_model_base import HaloBias
-
-
 __all__ = ("HaloBiasSheth99",)
+
+from . import HaloBias, get_delta_c
 
 
 class HaloBiasSheth99(HaloBias):
-    """ Implements halo bias described in 1999MNRAS.308..119S
+    """Implements halo bias as described in `Sheth & Tormen 1999
+    <https://arxiv.org/abs/astro-ph/9901122>`_.
     This parametrization is only valid for 'fof' masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            This parametrization accepts FoF masses only.
-            If `None`, FoF masses will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
-        use_delta_c_fit (bool): if True, use delta_c given by
-            the fit of Nakamura & Suto 1997. Otherwise use
-            delta_c = 1.68647.
+        use_delta_c_fit (:obj:`bool`): if ``True``, use the fit to the
+            critical overdensity :math:`\\delta_c` by
+            `Nakamura & Suto 1997
+            <https://arxiv.org/abs/astro-ph/9612074>`_. Otherwise use
+            :math:`\\delta_c = 1.68647`.
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
                                      "use_delta_c_fit",)
     name = "Sheth99"
 
-    @warn_api
     def __init__(self, *,
                  mass_def="fof",
                  mass_def_strict=True,
@@ -44,11 +39,9 @@ class HaloBiasSheth99(HaloBias):
 
     def _get_bsigma(self, cosmo, sigM, a):
         if self.use_delta_c_fit:
-            status = 0
-            delta_c, status = lib.dc_NakamuraSuto(cosmo.cosmo, a, status)
-            check(status, cosmo=cosmo)
+            delta_c = get_delta_c(cosmo, a, kind='NakamuraSuto97')
         else:
-            delta_c = const.DELTA_C
+            delta_c = get_delta_c(cosmo, a, kind='EdS')
 
         nu = delta_c / sigM
         anu2 = self.a * nu**2

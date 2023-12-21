@@ -1,32 +1,31 @@
-from ...base import warn_api
-from ...base.parameters import physical_constants as const
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncTinker10",)
+
 import numpy as np
 from scipy.interpolate import interp1d
 
-
-__all__ = ("MassFuncTinker10",)
+from . import MassFunc, get_delta_c
 
 
 class MassFuncTinker10(MassFunc):
-    """ Implements mass function described in arXiv:1001.3162.
+    """Implements the mass function of `Tinker et al. 2010
+    <https://arxiv.org/abs/1001.3162>`_. This parametrization accepts S.O.
+    masses with :math:`200 < \\Delta < 3200`, defined with respect to the
+    matter density. This can be automatically translated to S.O. masses
+    defined with respect to the critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            This parametrization accepts SO masses with
-            200 < Delta < 3200 with respect to the matter density.
-            If `None`, Delta = 200 (matter) will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
-        norm_all_z (bool): should we normalize the mass function
-            at z=0 or at all z?
+        norm_all_z (:obj:`bool`): if ``True``, the mass function will be
+            normalised to yield the total matter density when integrated
+            over mass at all redshifts (as opposed to :math:`z=0` only).
     """
     __repr_attrs__ = __eq_attrs__ = ("mass_def", "mass_def_strict",
                                      "norm_all_z",)
     name = 'Tinker10'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="200m",
                  mass_def_strict=True,
@@ -70,7 +69,7 @@ class MassFuncTinker10(MassFunc):
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
         ld = np.log10(self.mass_def._get_Delta_m(cosmo, a))
-        nu = const.DELTA_C / sigM
+        nu = get_delta_c(cosmo, a, 'EdS_approx') / sigM
         # redshift evolution only up to z=3
         a = np.clip(a, 0.25, 1)
         pa = self.pa0(ld) * a**(-0.27)

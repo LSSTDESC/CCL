@@ -1,7 +1,7 @@
 import numpy as np
-from numpy.testing import assert_allclose
-import numpy.testing
 import pyccl as ccl
+from pyccl.modified_gravity import MuSigmaMG
+
 import pytest
 
 # Set tolerances
@@ -46,7 +46,7 @@ Neff_mnu = 3.0
 def Neff_from_N_ur_N_ncdm(N_ur, N_ncdm):
     """Calculate N_eff from the number of relativistic
     and massive neutrinos."""
-    Neff = N_ur + N_ncdm * ccl.core._Defaults.T_ncdm**4 / (4./11.)**(4./3.)
+    Neff = N_ur + N_ncdm * ccl.DefaultParams.T_ncdm**4 / (4/11)**(4/3)
     return Neff
 
 
@@ -340,13 +340,13 @@ def compare_distances(z, chi_bench, dm_bench, Omega_v, w0, wa):
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+    assert np.allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
     # compare distance moudli where a!=1
     a_not_one = (a != 1).nonzero()
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
 
-    assert_allclose(
+    assert np.allclose(
         dm, dm_bench[a_not_one], atol=1e-3, rtol=DISTANCES_TOLERANCE*10)
 
 
@@ -368,7 +368,7 @@ def compare_distances_hiz(z, chi_bench, Omega_v, w0, wa):
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+    assert np.allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
 
 def compare_distances_mnu(z, chi_bench, dm_bench, Omega_v, w0, wa, Neff, mnu):
@@ -388,13 +388,14 @@ def compare_distances_mnu(z, chi_bench, dm_bench, Omega_v, w0, wa, Neff, mnu):
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a)
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
+    assert np.allclose(chi, chi_bench,
+                       atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
 
     # compare distance moudli where a!=1
     a_not_one = (a != 1).nonzero()
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
 
-    assert_allclose(
+    assert np.allclose(
         dm, dm_bench[a_not_one], atol=1e-3, rtol=DISTANCES_TOLERANCE_MNU)
 
 
@@ -416,13 +417,14 @@ def compare_distances_mnu_hiz(z, chi_bench, dm_bench, Omega_v,
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a)
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
+    assert np.allclose(chi, chi_bench,
+                       atol=1e-12, rtol=DISTANCES_TOLERANCE_MNU)
 
     # compare distance moudli where a!=1
     a_not_one = (a != 1).nonzero()
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
 
-    assert_allclose(
+    assert np.allclose(
         dm, dm_bench[a_not_one], atol=1e-3, rtol=DISTANCES_TOLERANCE_MNU)
 
 
@@ -441,12 +443,12 @@ def compare_class_distances(z, chi_bench, dm_bench, Neff=3.0, m_nu=0.0,
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a)
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, rtol=DISTANCES_TOLERANCE_CLASS)
+    assert np.allclose(chi, chi_bench, rtol=DISTANCES_TOLERANCE_CLASS)
 
     # Compare distance moudli where a!=1
     a_not_one = a != 1
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
-    assert_allclose(dm, dm_bench[a_not_one], rtol=DISTANCES_TOLERANCE_CLASS)
+    assert np.allclose(dm, dm_bench[a_not_one], rtol=DISTANCES_TOLERANCE_CLASS)
 
 
 def compare_distances_muSig(z, chi_bench, dm_bench, Omega_v, w0, wa):
@@ -463,19 +465,20 @@ def compare_distances_muSig(z, chi_bench, dm_bench, Omega_v, w0, wa):
     cosmo = ccl.Cosmology(
         Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
         h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-        w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0, Omega_g=0.)
+        w0=w0, wa=wa, Omega_g=0.,
+        mg_parametrization=MuSigmaMG(mu_0=mu_0, sigma_0=sigma_0))
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+    assert np.allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
     # compare distance moudli where a!=1
     a_not_one = (a != 1).nonzero()
     dm = ccl.distance_modulus(cosmo, a[a_not_one])
 
-    assert_allclose(
+    assert np.allclose(
         dm, dm_bench[a_not_one], atol=1e-3, rtol=DISTANCES_TOLERANCE*10)
 
 
@@ -493,13 +496,14 @@ def compare_distances_hiz_muSig(z, chi_bench, Omega_v, w0, wa):
     cosmo = ccl.Cosmology(
         Omega_c=Omega_c, Omega_b=Omega_b, Neff=Neff,
         h=h, A_s=A_s, n_s=n_s, Omega_k=Omega_k,
-        w0=w0, wa=wa, mu_0=mu_0, sigma_0=sigma_0, Omega_g=0.)
+        w0=w0, wa=wa, Omega_g=0.,
+        mg_parametrization=MuSigmaMG(mu_0=mu_0, sigma_0=sigma_0))
 
     # Calculate distance using pyccl
     a = 1. / (1. + z)
     chi = ccl.comoving_radial_distance(cosmo, a) * h
     # Compare to benchmark data
-    assert_allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
+    assert np.allclose(chi, chi_bench, atol=1e-12, rtol=DISTANCES_TOLERANCE)
 
 
 @pytest.mark.parametrize('i', list(range(5)))

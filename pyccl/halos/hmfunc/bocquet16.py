@@ -1,23 +1,23 @@
-from ...base import warn_api
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncBocquet16",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncBocquet16",)
+from . import MassFunc
 
 
 class MassFuncBocquet16(MassFunc):
-    """ Implements mass function described in arXiv:1502.07357.
+    """Implements the mass function of `Bocquet et al. 2016
+    <https://arxiv.org/abs/1502.07357>`_. This parametrization accepts
+    S.O. masses with :math:`\\Delta = 200` with respect to the matter
+    or critical densities, and :math:`\\Delta=500` with respect to the
+    critical density.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            This parametrization accepts SO masses with
-            Delta = 200 (matter, critical) and 500 (critical).
-            The default is '200m'.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
-        hydro (bool): if `False`, use the parametrization found
+        hydro (:obj:`bool`): if ``False``, use the parametrization found
             using dark-matter-only simulations. Otherwise, include
             baryonic effects (default).
     """
@@ -25,7 +25,6 @@ class MassFuncBocquet16(MassFunc):
     _mass_def_strict_always = True
     name = 'Bocquet16'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="200m",
                  mass_def_strict=True,

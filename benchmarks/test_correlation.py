@@ -20,12 +20,12 @@ def set_up(request):
     t0 = time.time()
     nztyp = request.param
     dirdat = os.path.dirname(__file__) + '/data/'
+    ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
     ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
     ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
     cosmo = ccl.Cosmology(Omega_c=0.30, Omega_b=0.00, Omega_g=0, Omega_k=0,
                           h=0.7, sigma8=0.8, n_s=0.96, Neff=0, m_nu=0.0,
                           w0=-1, wa=0, T_CMB=2.7, transfer_function='bbks',
-                          mass_function='tinker',
                           matter_power_spectrum='linear')
 
     # Ell-dependent correction factors
@@ -223,12 +223,9 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
 
     global T0
     t0 = time.time()
-    xi = ccl.correlation(cosmo, ell, cli, bms['theta'],
+    xi = ccl.correlation(cosmo, ell=ell, C_ell=cli, theta=bms['theta'],
                          type=kind, method=method)
     T0 += (time.time() - t0)
 
     xi *= pref
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
-
-    print("time:", T0)
-    print("time cls:", T0_CLS)

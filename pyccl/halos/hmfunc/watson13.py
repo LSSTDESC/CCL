@@ -1,26 +1,23 @@
-from ...base import warn_api
-from ..halo_model_base import MassFunc
+__all__ = ("MassFuncWatson13",)
+
 import numpy as np
 
-
-__all__ = ("MassFuncWatson13",)
+from . import MassFunc
 
 
 class MassFuncWatson13(MassFunc):
-    """ Implements mass function described in arXiv:1212.0095.
+    """Implements the mass function of `Watson et al. 2013
+    <https://arxiv.org/abs/1212.0095>`_. This parametrization accepts
+    `fof` and any S.O. masses.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or str):
+        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`):
             a mass definition object, or a name string.
-            This parametrization accepts fof and any SO masses.
-            The default is '200m'.
-            If `None`, Delta = 200 (matter) will be used.
-        mass_def_strict (bool): if False, consistency of the mass
+        mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
     """
     name = 'Watson13'
 
-    @warn_api
     def __init__(self, *,
                  mass_def="200m",
                  mass_def_strict=True):
@@ -40,7 +37,6 @@ class MassFuncWatson13(MassFunc):
         om = cosmo.omega_x(a, "matter")
         Delta_178 = self.mass_def.Delta / 178
 
-        # TODO: this has to be vectorized with numpy
         if a == 1:
             pA = 0.194
             pa = 1.805
