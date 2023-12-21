@@ -393,7 +393,7 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     check(status, cosmo_in)
     return f
 
-'''
+
 def loglin_spacing(logstart, xmin, xmax, num_log, num_lin):
     """Create an array spaced first logarithmically, then linearly.
 
@@ -409,7 +409,12 @@ def loglin_spacing(logstart, xmin, xmax, num_log, num_lin):
       --*-*--*---*-----*---*---*---*---*---*---*---*---*---*---*---*--> (axis)
         ^                  ^                                       ^
      logstart             xmin                                    xmax
-'''
+
+    """
+    log = np.geomspace(logstart, xmin, num_log-1, endpoint=False)
+    lin = np.linspace(xmin, xmax, num_lin)
+    return np.concatenate((log, lin))
+
 
 def get_pk_spline_nk(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the wavenumber dimension.
@@ -420,18 +425,10 @@ def get_pk_spline_nk(cosmo=None, spline_params=spline_params):
 
     :meta private:
     """
-    log = np.geomspace(logstart, xmin, num_log-1, endpoint=False)
-    lin = np.linspace(xmin, xmax, num_lin)
-    return np.concatenate((log, lin))
-
-
-def get_pk_spline_a(cosmo=None, spline_params=spline_params):
-    """Get a sampling a-array. Used for P(k) splines."""
     if cosmo is not None:
-        spline_params = cosmo._spline_params
-    s = spline_params
-    return loglin_spacing(s.A_SPLINE_MINLOG_PK, s.A_SPLINE_MIN_PK,
-                          s.A_SPLINE_MAX, s.A_SPLINE_NLOG_PK, s.A_SPLINE_NA_PK)
+        return lib.get_pk_spline_nk(cosmo.cosmo)
+    ndecades = np.log10(spline_params.K_MAX / spline_params.K_MIN)
+    return int(np.ceil(ndecades*spline_params.N_K))
 
 
 def get_pk_spline_na(cosmo=None, spline_params=spline_params):

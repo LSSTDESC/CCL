@@ -299,79 +299,6 @@ class Tracer(CCLObject):
     def __hash__(self):
         return hash(repr(self))
 
-    def __eq__(self, other):
-        # Check the object class.
-        if self.__class__ is not other.__class__:
-            return False
-
-        # If the tracer collections are empty, return early.
-        if not (self or other):
-            return True
-
-        # If the tracer collections are not the same length, return early.
-        if len(self._trc) != len(other._trc):
-            return False
-
-        # Check `der_angles` & `der_bessel` for each tracer in the collection.
-        bessel = self.get_bessel_derivative(), other.get_bessel_derivative()
-        angles = self.get_angles_derivative(), other.get_angles_derivative()
-        if not (np.array_equal(*bessel) and np.array_equal(*angles)):
-            return False
-
-        # Check the kernels.
-        kwargs = {"atol": 0, "rtol": 1e-12, "equal_nan": True}
-        for t1, t2 in zip(self._trc, other._trc):
-            if bool(t1.kernel) ^ bool(t2.kernel):
-                # only one of them has a kernel
-                return False
-            if t1.kernel is None:
-                # none of them has a kernel
-                continue
-            if not np.allclose(_get_spline1d_arrays(t1.kernel.spline),
-                               _get_spline1d_arrays(t2.kernel.spline),
-                               **kwargs):
-                # both have kernels, but they are unequal
-                return False
-
-        # Check the transfer functions.
-        for t1, t2 in zip(self._trc, other._trc):
-            if bool(t1.transfer) ^ bool(t2.transfer):
-                # only one of them has a transfer
-                return False
-            if t1.transfer is None:
-                # none of them has a transfer
-                continue
-            # Check the characteristics of the transfer function.
-            for arg in ("extrap_order_lok", "extrap_order_hik",
-                        "is_factorizable", "is_log"):
-                if getattr(t1.transfer, arg) != getattr(t2.transfer, arg):
-                    return False
-
-            c2py = {"fa": _get_spline1d_arrays,
-                    "fk": _get_spline1d_arrays,
-                    "fka": _get_spline2d_arrays}
-            for attr in c2py.keys():
-                spl1 = getattr(t1.transfer, attr, None)
-                spl2 = getattr(t2.transfer, attr, None)
-                if bool(spl1) ^ bool(spl2):
-                    # only one of them has this transfer type
-                    return False
-                if spl1 is None:
-                    # none of them has this transfer type
-                    continue
-                # `pts` contain the the grid points and the transfer functions
-                pts1, pts2 = c2py[attr](spl1), c2py[attr](spl2)
-                for pt1, pt2 in zip(pts1, pts2):
-                    # loop through output points of `_get_splinend_arrays`
-                    if not np.allclose(pt1, pt2, **kwargs):
-                        # both have this transfer type, but they are unequal
-                        # or are defined at different grid points
-                        return False
-        return True
-
-    def __hash__(self):
-        return hash(repr(self))
-
     def __bool__(self):
         return bool(self._trc)
 
@@ -641,7 +568,6 @@ class Tracer(CCLObject):
 
         return mg_transfer
 
-    @warn_api
     @unlock_instance
     def add_tracer(self, cosmo, *, kernel=None,
                    transfer_ka=None, transfer_k=None, transfer_a=None,

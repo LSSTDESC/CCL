@@ -1,8 +1,4 @@
 import numpy as np
-<<<<<<<< HEAD:pyccl/base/repr_.py
-========
-
->>>>>>>> master:pyccl/_core/repr_.py
 from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 from .caching import _to_hashable, hash_
 

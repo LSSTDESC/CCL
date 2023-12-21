@@ -2,10 +2,6 @@ __all__ = ("get_camb_pk_lin", "get_isitgr_pk_lin", "get_class_pk_lin",)
 
 import numpy as np
 
-from .base import warn_api
-from .pk2d import Pk2D
-from .errors import CCLError
-
 try:
     import isitgr  # noqa: F401
 except ModuleNotFoundError:
