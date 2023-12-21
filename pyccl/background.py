@@ -15,6 +15,8 @@ __all__ = (
     "Species", "h_over_h0", "comoving_radial_distance", "scale_factor_of_chi",
     "comoving_angular_distance", "angular_diameter_distance",
     "luminosity_distance", "distance_modulus",
+    "hubble_distance", "comoving_volume_element", "comoving_volume",
+    "lookback_time", "age_of_universe",
     "sigma_critical", "omega_x", "rho_x",
     "growth_factor", "growth_factor_unnorm", "growth_rate",)
 
@@ -48,7 +50,7 @@ species_types = {
     'neutrinos_massive': lib.species_nu_label,
 }
 
-
+'''
 def compute_distances(cosmo):
     """Compute the distance splines."""
     if cosmo.has_distances:
@@ -71,7 +73,7 @@ def compute_distances(cosmo):
 
     cosmo.data.lookback = interp(a, t_arr)
     cosmo.data.age0 = cosmo.data.lookback(0, extrapolate=True)[()]
-
+'''
 
 def h_over_h0(cosmo, a):
     """Ratio of Hubble constant at `a` over Hubble constant today.
@@ -221,39 +223,6 @@ def distance_modulus(cosmo, a):
     return _vectorize_fn(lib.distance_modulus,
                          lib.distance_modulus_vec, cosmo, a)
 
-
-def sigma_critical(cosmo, *, a_lens, a_source):
-    """Returns the critical surface mass density.
-
-    .. math::
-         \\Sigma_{\\mathrm{crit}} = \\frac{c^2}{4\\pi G}
-         \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}},
-
-    where :math:`c` is the speed of light, :math:`G` is the
-    gravitational constant, and :math:`D_i` is the angular diameter
-    distance. The labels :math:`i = \\{s,\\,l,\\,ls\\}` denote the distances
-    to the source, lens, and between source and lens, respectively.
-
-    Args:
-        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
-        a_lens (:obj:`float`): lens' scale factor.
-        a_source (:obj:`float` or `array`): source's scale factor.
-
-    Returns:
-        (:obj:`float` or `array`): :math:`\\Sigma_{\\mathrm{crit}}` in units
-        of :math:`M_{\\odot}/{\\rm Mpc}^2`
-    """
-    Ds = angular_diameter_distance(cosmo, a_source, a2=None)
-    Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
-    Dls = angular_diameter_distance(cosmo, a_lens, a_source)
-    A = (physical_constants.CLIGHT**2 * physical_constants.MPC_TO_METER
-         / (4.0 * np.pi * physical_constants.GNEWT
-            * physical_constants.SOLAR_MASS))
-
-    Sigma_crit = A * Ds / (Dl * Dls)
-    return Sigma_crit
-
-
 def hubble_distance(cosmo, a):
     r"""Hubble distance in :math:`\rm Mpc`.
 
@@ -387,6 +356,38 @@ def age_of_universe(cosmo, a):
     cosmo.compute_distances()
     out = cosmo.data.age0 - cosmo.lookback_time(a)
     return out[()]
+
+
+def sigma_critical(cosmo, *, a_lens, a_source):
+    """Returns the critical surface mass density.
+
+    .. math::
+         \\Sigma_{\\mathrm{crit}} = \\frac{c^2}{4\\pi G}
+         \\frac{D_{\\rm{s}}}{D_{\\rm{l}}D_{\\rm{ls}}},
+
+    where :math:`c` is the speed of light, :math:`G` is the
+    gravitational constant, and :math:`D_i` is the angular diameter
+    distance. The labels :math:`i = \\{s,\\,l,\\,ls\\}` denote the distances
+    to the source, lens, and between source and lens, respectively.
+
+    Args:
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        a_lens (:obj:`float`): lens' scale factor.
+        a_source (:obj:`float` or `array`): source's scale factor.
+
+    Returns:
+        (:obj:`float` or `array`): :math:`\\Sigma_{\\mathrm{crit}}` in units
+        of :math:`M_{\\odot}/{\\rm Mpc}^2`
+    """
+    Ds = angular_diameter_distance(cosmo, a_source, a2=None)
+    Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
+    Dls = angular_diameter_distance(cosmo, a_lens, a_source)
+    A = (physical_constants.CLIGHT**2 * physical_constants.MPC_TO_METER
+         / (4.0 * np.pi * physical_constants.GNEWT
+            * physical_constants.SOLAR_MASS))
+
+    Sigma_crit = A * Ds / (Dl * Dls)
+    return Sigma_crit
 
 
 def omega_x(cosmo, a, species):
