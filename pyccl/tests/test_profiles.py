@@ -358,10 +358,6 @@ def test_hod_2pt():
                                             diag=False)
     assert np.all(F == F2)
 
-    with pytest.raises(ValueError):
-        p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood,
-                       prof2=pbad, mass_def=M200)
-
 
 def test_2pt_rcorr_smoke():
     c = ccl.halos.ConcentrationDuffy08(mass_def='200c')

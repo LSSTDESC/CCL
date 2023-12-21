@@ -7,7 +7,7 @@ try:
 except ModuleNotFoundError:
     pass  # prevent nans from isitgr
 
-from . import CCLError, Pk2D, check, lib, sigma8
+from . import CCLError, Pk2D, sigma8
 
 
 def get_camb_pk_lin(cosmo, *, nonlin=False):

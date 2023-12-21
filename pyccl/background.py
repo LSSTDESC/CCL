@@ -61,7 +61,8 @@ def compute_distances(cosmo):
     spl = cosmo.cosmo.spline_params  # Replace for CCLv3.
     a = loglin_spacing(spl.A_SPLINE_MINLOG, spl.A_SPLINE_MIN, spl.A_SPLINE_MAX,
                        spl.A_SPLINE_NLOG, spl.A_SPLINE_NA)
-    t_H = physical_constants.MPC_TO_METER / 1e14 / physical_constants.YEAR / cosmo["h"]
+    t_H = (physical_constants.MPC_TO_METER / 1e14
+           / physical_constants.YEAR / cosmo["h"])
     hoh0 = cosmo.h_over_h0(a)
     integral = interp(a, 1/(a*hoh0)).antiderivative()
     a_eval = np.r_[1.0, a]  # make a single call to the spline
@@ -246,7 +247,8 @@ def sigma_critical(cosmo, *, a_lens, a_source):
     Dl = angular_diameter_distance(cosmo, a_lens, a2=None)
     Dls = angular_diameter_distance(cosmo, a_lens, a_source)
     A = (physical_constants.CLIGHT**2 * physical_constants.MPC_TO_METER
-         / (4.0 * np.pi * physical_constants.GNEWT * physical_constants.SOLAR_MASS))
+         / (4.0 * np.pi * physical_constants.GNEWT
+            * physical_constants.SOLAR_MASS))
 
     Sigma_crit = A * Ds / (Dl * Dls)
     return Sigma_crit
