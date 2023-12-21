@@ -75,7 +75,6 @@ def compute_distances(cosmo):
     cosmo.data.age0 = cosmo.data.lookback(0, extrapolate=True)[()]
 
 
-
 def h_over_h0(cosmo, a):
     """Ratio of Hubble constant at `a` over Hubble constant today.
 
