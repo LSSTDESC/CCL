@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 import pyccl as ccl
-from pyccl import physical_constants as const
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96,
@@ -138,7 +137,7 @@ def test_nM_tinker10_norm():
     def integrand(lnu, z):
         nu = np.exp(lnu)
         a = 1./(1+z)
-        gnu = mf._get_fsigma(COSMO, const.DELTA_C/nu, a, 1)
+        gnu = mf._get_fsigma(COSMO, 1.686/nu, a, 1)
         bnu = bf._get_bsigma(COSMO, bf.dc/nu, a)
         return gnu*bnu
 

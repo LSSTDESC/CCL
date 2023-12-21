@@ -236,7 +236,7 @@ def test_pyccl_default_params():
     assert ccl.gsl_params.EPS_SCALEFAC_GROWTH == 2e-6
 
     # does not accept extra assignment
-    with pytest.raises(AttributeError):
+    with pytest.raises(KeyError):
         ccl.gsl_params.test = "hello_world"
     with pytest.raises(KeyError):
         ccl.gsl_params["test"] = "hello_world"
@@ -248,7 +248,7 @@ def test_pyccl_default_params():
 
     # complains when we try to change the spline type
     ccl.spline_params.A_SPLINE_TYPE = None
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ccl.spline_params.A_SPLINE_TYPE = "something_else"
 
     # complains when we try to change the physical constants
@@ -281,6 +281,7 @@ def test_cosmology_default_params():
     cosmo2 = ccl.CosmologyVanillaLCDM()
     v2 = cosmo2.cosmo.gsl_params.EPS_SCALEFAC_GROWTH
     assert v2 == v1*10
+    assert v2 != v1
 
     ccl.gsl_params.reload()
     cosmo3 = ccl.CosmologyVanillaLCDM()

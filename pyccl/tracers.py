@@ -554,7 +554,10 @@ class Tracer(CCLObject):
             a = 1./(1.+z)
         a.sort()
         # Scale-dependant MG case with an array of k
-        lk = cosmo.get_pk_spline_lk()
+        nk = lib.get_pk_spline_nk(cosmo.cosmo)
+        status = 0
+        lk, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        check(status, cosmo=cosmo)
         k = np.exp(lk)
         # computing MG factor array
         mgfac_1d = 1
@@ -730,40 +733,6 @@ class Tracer(CCLObject):
             n_chi (:obj:`float`): number of intervals in the radial comoving
                 distance on which we sample the kernel.
         """ # noqa
-        if z_min >= z_max:
-            raise ValueError("z_min should be smaller than z_max.")
-
-        tracer = cls()
-
-        chi_min = cosmo.comoving_radial_distance(1./(1+z_min))
-        chi_max = cosmo.comoving_radial_distance(1./(1+z_max))
-        chi_arr = np.linspace(chi_min, chi_max, n_chi)
-        a_arr = cosmo.scale_factor_of_chi(chi_arr)
-        w_arr = A * a_arr**alpha
-
-        tracer.add_tracer(cosmo, kernel=(chi_arr, w_arr))
-        return tracer
-
-    @classmethod
-    def from_zPower(cls, cosmo, *, A, alpha, z_min=0., z_max=6., n_chi=1024):
-        """Constructor for tracers associated with a radial kernel of the form
-
-        .. math::
-           W(\\chi) = \\frac{A}{(1+z)^\alpha},
-
-        where :math:`A` is an amplitude and :math:`\alpha` is a power
-        law index. The kernel only has support in the redshift range
-        [`z_min`, `z_max`].
-
-        Args:
-            cosmo (:class:`~pyccl.core.Cosmology`): Cosmology object.
-            A (float): amplitude parameter.
-            alpha (float): power law index.
-            z_min (float): minimum redshift from to which we define the kernel.
-            z_max (float): maximum redshift up to which we define the kernel.
-            n_chi (float): number of intervals in the radial comoving
-                distance on which we sample the kernel.
-        """
         if z_min >= z_max:
             raise ValueError("z_min should be smaller than z_max.")
 
