@@ -502,7 +502,6 @@ class Cosmology(CCLObject):
         self._build_cosmo()
         self._object_lock.lock()  # Lock on exit.
 
-
     def compute_growth(self):
         """Compute the growth function."""
         if self.has_growth:
