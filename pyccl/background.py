@@ -12,7 +12,8 @@ CCL defines seven species types:
 These strings define the `species` inputs to the functions below.
 """ # noqa
 __all__ = (
-    "Species", "h_over_h0", "comoving_radial_distance", "scale_factor_of_chi",
+    "Species", "compute_distances",
+    "h_over_h0", "comoving_radial_distance", "scale_factor_of_chi",
     "comoving_angular_distance", "angular_diameter_distance",
     "luminosity_distance", "distance_modulus",
     "hubble_distance", "comoving_volume_element", "comoving_volume",
