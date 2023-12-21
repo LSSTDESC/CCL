@@ -50,7 +50,7 @@ species_types = {
     'neutrinos_massive': lib.species_nu_label,
 }
 
-'''
+
 def compute_distances(cosmo):
     """Compute the distance splines."""
     if cosmo.has_distances:
@@ -73,7 +73,8 @@ def compute_distances(cosmo):
 
     cosmo.data.lookback = interp(a, t_arr)
     cosmo.data.age0 = cosmo.data.lookback(0, extrapolate=True)[()]
-'''
+
+
 
 def h_over_h0(cosmo, a):
     """Ratio of Hubble constant at `a` over Hubble constant today.
@@ -222,6 +223,7 @@ def distance_modulus(cosmo, a):
     cosmo.compute_distances()
     return _vectorize_fn(lib.distance_modulus,
                          lib.distance_modulus_vec, cosmo, a)
+
 
 def hubble_distance(cosmo, a):
     r"""Hubble distance in :math:`\rm Mpc`.
