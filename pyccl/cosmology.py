@@ -502,13 +502,6 @@ class Cosmology(CCLObject):
         self._build_cosmo()
         self._object_lock.lock()  # Lock on exit.
 
-    def compute_distances(self):
-        """Compute the distance splines."""
-        if self.has_distances:
-            return
-        status = 0
-        status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self)
 
     def compute_growth(self):
         """Compute the growth function."""
