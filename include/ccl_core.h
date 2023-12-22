@@ -22,6 +22,11 @@ typedef struct ccl_physical_constants {
   /**
    * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
    */
+  double YEAR;
+
+  /**
+   * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
+   */
   double CLIGHT_HMPC;
 
   /**

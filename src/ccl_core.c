@@ -143,6 +143,10 @@ ccl_spline_params ccl_user_spline_params = {
 
 ccl_physical_constants ccl_constants = {
   /**
+   * Sidereal year (s/yr). [IERS2014 in J2000.0]
+   */
+  365.256363004 * 86400.,
+  /**
    * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
    */
   2997.92458,
