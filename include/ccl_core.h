@@ -75,11 +75,6 @@ typedef struct ccl_physical_constants {
   double EV_IN_J;
 
   /**
-   * Temperature of the CMB in K
-   */
-  double T_CMB;
-
-  /**
    * neutrino mass splitting differences
    * See Lesgourgues and Pastor, 2012 for these values.
    * Adv. High Energy Phys. 2012 (2012) 608515,

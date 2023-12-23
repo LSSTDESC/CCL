@@ -206,12 +206,6 @@ ccl_physical_constants ccl_constants = {
   1.6021766208e-19,  //from CODATA 2014
 
   /**
-   * Temperature of the CMB in K
-   */
-  2.725,
-  //2.7255, // CLASS value
-
-  /**
    * neutrino mass splitting differences
    * See Lesgourgues and Pastor, 2012 for these values.
    * Adv. High Energy Phys. 2012 (2012) 608515,
