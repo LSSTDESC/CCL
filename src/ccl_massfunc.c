@@ -36,7 +36,6 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *stat
   // create linearly-spaced values of log-mass.
   m = ccl_linear_spacing(cosmo->spline_params.LOGM_SPLINE_MIN,
                          cosmo->spline_params.LOGM_SPLINE_MAX, nm);
-
   if (m == NULL ||
       (fabs(m[0]-cosmo->spline_params.LOGM_SPLINE_MIN)>1e-5) ||
       (fabs(m[nm-1]-cosmo->spline_params.LOGM_SPLINE_MAX)>1e-5) ||
@@ -108,6 +107,7 @@ void ccl_cosmology_compute_sigma(ccl_cosmology *cosmo, ccl_f2d_t *psp, int *stat
                                        "error allocating 2D spline\n");
     }
   }
+
   if(*status == 0) {
     int s2dstatus=gsl_spline2d_init(lsM, m, aa, y, nm, na);
     if (s2dstatus) {
@@ -177,7 +177,7 @@ double ccl_dlnsigM_dlogM(ccl_cosmology *cosmo, double log_halomass, double a, in
   int gslstatus = gsl_spline2d_eval_deriv_x_e(cosmo->data.logsigma,
                                               log_halomass, a,
                                               NULL, NULL, &dlsdlgm);
-  if(gslstatus) {
+  if(gslstatus) { 
     ccl_raise_gsl_warning(gslstatus, "ccl_massfunc.c: ccl_dlnsigM_dlogM():");
     *status |= gslstatus;
   }

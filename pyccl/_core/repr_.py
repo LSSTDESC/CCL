@@ -1,4 +1,5 @@
 import numpy as np
+
 from ..pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 from .caching import _to_hashable, hash_
 
