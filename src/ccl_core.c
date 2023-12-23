@@ -212,11 +212,6 @@ ccl_physical_constants ccl_constants = {
   //2.7255, // CLASS value
 
   /**
-   * T_ncdm, as taken from CLASS, explanatory.ini
-   */
-  0.71611,
-
-  /**
    * neutrino mass splitting differences
    * See Lesgourgues and Pastor, 2012 for these values.
    * Adv. High Energy Phys. 2012 (2012) 608515,

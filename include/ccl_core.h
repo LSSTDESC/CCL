@@ -80,11 +80,6 @@ typedef struct ccl_physical_constants {
   double T_CMB;
 
   /**
-   * T_ncdm, as taken from CLASS, explanatory.ini
-   */
-  double TNCDM;
-
-  /**
    * neutrino mass splitting differences
    * See Lesgourgues and Pastor, 2012 for these values.
    * Adv. High Energy Phys. 2012 (2012) 608515,
