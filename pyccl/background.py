@@ -28,7 +28,8 @@ from scipy.interpolate import Akima1DInterpolator as interp
 
 from . import lib, physical_constants
 from .pyutils import (_vectorize_fn, _vectorize_fn3,
-                      _vectorize_fn4, _vectorize_fn5, check, loglin_spacing)
+                      _vectorize_fn4, _vectorize_fn5,
+                      check, loglin_spacing)
 
 
 class Species(Enum):
@@ -61,7 +62,7 @@ def compute_distances(cosmo):
     check(status, cosmo)
 
     # lookback time
-    spl = cosmo.cosmo.spline_params  # Replace for CCLv3.
+    spl = cosmo.cosmo.spline_params
     a = loglin_spacing(spl.A_SPLINE_MINLOG, spl.A_SPLINE_MIN, spl.A_SPLINE_MAX,
                        spl.A_SPLINE_NLOG, spl.A_SPLINE_NA)
     t_H = (physical_constants.MPC_TO_METER / 1e14

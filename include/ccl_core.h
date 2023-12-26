@@ -20,7 +20,7 @@ CCL_BEGIN_DECLS
  */
 typedef struct ccl_physical_constants {
   /**
-   * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
+   * Sidereal year (s/yr). [IERS2014 in J2000.0]
    */
   double YEAR;
 
