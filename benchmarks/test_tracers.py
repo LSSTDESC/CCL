@@ -27,7 +27,6 @@ def set_up():
                           w0=-1, wa=0, T_CMB=2.7, transfer_function='bbks',
                           matter_power_spectrum='linear')
 
-    ccl.physical_constants.reload()
     ccl.gsl_params.reload()
     return cosmo
 
@@ -61,7 +60,7 @@ def set_up():
 def test_tracers_analytic(set_up, alpha, beta, gamma,
                           is_factorizable, w_transfer,
                           mismatch, der_bessel, der_angles):
-    cosmo = set_up
+    cosmo = set_up()
     zmax = 0.8
     zi = 0.4
     zf = 0.6
