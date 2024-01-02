@@ -105,6 +105,10 @@ def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
 
 @dataclass
 class _CosmologyBackgroundData:
+    """
+    This private class stores values calculated in the python level
+    as we are porting background calculators from C to python.
+    """
     lookback: Akima1DInterpolator = None
     age0: float = None
 
