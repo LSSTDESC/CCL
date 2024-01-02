@@ -285,6 +285,9 @@ def comoving_volume(cosmo, a, *, solid_angle=4*np.pi):
         V_{\rm C} = \int_{\Omega} \mathrm{{d}}\Omega \int_z \mathrm{d}z
         D_{\rm H} \frac{(1+z)^2 D_{\mathrm{A}}^2}{E(z)}
 
+
+    See Eq. 29 in `Hogg 2000 <https://arxiv.org/abs/astro-ph/9905116>`_.
+
     Arguments
     ---------
     cosmo : :class:`~pyccl.core.Cosmology`
