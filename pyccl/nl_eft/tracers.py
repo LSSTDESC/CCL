@@ -13,24 +13,44 @@ from .. import CCLAutoRepr, physical_constants
 from ..pyutils import _cheak_array_params
 
 
-def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
-                      Om_m2_for_a2=False, Om_m_fid=0.3):
+def translate_IA_EFT_norm(cosmo, *, z, a1=1.0, a21=None, a22=None,
+                      a23=None, a31=None, a32=None, ak2=None,
+                      Om_m2_for_a2=False, Om_m_fid=0.3, basis='NLA'):
     """
     Function to convert from :math:`A_{ia}` values to :math:`c_{ia}` values,
     for the intrinsic alignment bias parameters using the standard
     convention of `Blazek et al. 2019 <https://arxiv.org/abs/1708.09247>`_
-    or the variant used by the Dark Energy Survey analysis.
+    the variant used by the Dark Energy Survey analysis
+    or the EFT parameterization 
+    of 'Vlah et al. 2019 <https://arxiv.org/abs/1910.08085>'.
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): cosmology object.
         z (:obj:`float` or `array`): z value(s) where amplitude is evaluated.
-        a1 (:obj:`float` or `array`): IA :math:`A_1` at input z values.
-        a1delta (:obj:`float` or `array`): IA :math:`A_{1\\delta}` at input
-            z values.
-        a2 (:obj:`float` or `array`): IA :math:`A_2` at input z values.
+        a1 (:obj:`float` or :obj:`tuple`): a single number or a
+            tuple of arrays ``(z, a1(z))`` giving the first-order
+            alignment bias A_1
+        a21 (:obj:`float` or :obj:`tuple`): as above for
+            second-order alignment bias.
+            If specifying TATT, this is :math:`A_{1\\delta}`
+        a22 (:obj:`float` or :obj:`tuple`): as above for
+            second-order alignment bias.
+            If specifying TATT, this is A_2
+        a23 (:obj:`float` or :obj:`tuple`): as above for
+            second-order alignment bias.
+            If specifying TATT, this is b_t
+        a31 (:obj:`float` or :obj:`tuple`): as above for
+            third-order alignment bias.
+        a32 (:obj:`float` or :obj:`tuple`): as above for
+            third-order alignment bias.
+        ak2 (:obj:`float` or :obj:`tuple`): as above for the
+            k^2 bias
         Om_m2_for_a2 (:obj:`bool`): True to use the Blazek et al. 2019
             convention of :math:`\\Omega_m^2` scaling.
         Om_m_fid (:obj:`float`): Value for Blazek et al. 2019 scaling.
+        basis (:obj:'string'): a flag denoting the internal interpretation
+            of the parameters set by the user in the IA tracer. 
+            Valid flags are 'EFT', 'TATT', and 'NLA'
 
     Returns:
         Tuple of IA bias parameters
@@ -41,24 +61,60 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
         - a2 (:obj:`float` or `array`): IA :math:`C_2` at input z values.
     """
 
-    Om_m = cosmo['Omega_m']
-    rho_crit = physical_constants.RHO_CRITICAL
-    a1 = a1delta = a2 = None
-    gz = cosmo.growth_factor(1./(1+z))
+    if basis is 'NLA' or basis is 'TATT':
+        Om_m = cosmo['Omega_m']
+        rho_crit = physical_constants.RHO_CRITICAL
+        gz = cosmo.growth_factor(1./(1+z))
+        zeros = np.zeros(len(z))
+        c1 = c1delta = c2 = ct=zeros
+        if a1 is not None:
+            c1 = -1*a1*5e-14*rho_crit*Om_m/gz
 
-    if a1 is not None:
-        a1 = -1*a1*5e-14*rho_crit*Om_m/gz
+        if a21 is not None:
+            c1delta = -1*a21*5e-14*rho_crit*Om_m/gz
 
-    if a1delta is not None:
-        a1delta = -1*a1delta*5e-14*rho_crit*Om_m/gz
+        if a22 is not None:
+            if Om_m2_for_a2:  # Blazek2019 convention
+                c2 = a22*5*5e-14*rho_crit*Om_m**2/(Om_m_fid*gz**2)
+            else:  # DES convention
+                c2 = a22*5*5e-14*rho_crit*Om_m/(gz**2)
+        
+        if a23 is not None:
+            # check this normalizatoin
+            ct = a23*5e-14*rho_crit*Om_m
 
-    if a2 is not None:
-        if Om_m2_for_a2:  # Blazek2019 convention
-            a2 = a2*5*5e-14*rho_crit*Om_m**2/(Om_m_fid*gz**2)
-        else:  # DES convention
-            a2 = a2*5*5e-14*rho_crit*Om_m/(gz**2)
+        if c1!=zeros:
+            a1 = c1
+        #use transformation matrix here to convert to EFT parameters
+        # as found in Bakx et al https://arxiv.org/pdf/2303.15565.pdf
+        if basis is 'TATT':
+            a21 = c2/3 + c1delta
+            a22 = -8./7*ct - 2./3 * c2 + c1delta
+            a23 = - 2./3 * c2 + c1delta
+            if a21==zeros:
+                a21 = None
+            if a22==zeros:
+                a22 = None
+            if a23==zeros:
+                a23 = None
 
-    return a1, a1delta, a2
+    else:
+        if a1 is not None:
+            a1 *= 5e-14*rho_crit*Om_m
+        if a21 is not None:
+            a21 *= 5e-14*rho_crit*Om_m
+        if a22 is not None:
+            a22 *= 5e-14*rho_crit*Om_m
+        if a23 is not None:
+            a23 *= 5e-14*rho_crit*Om_m
+        if a31 is not None:
+            a31 *= 5e-14*rho_crit*Om_m
+        if a32 is not None:
+            a32 *= 5e-14*rho_crit*Om_m
+        if ak2 is not None:
+            ak2 *= 5e-14*rho_crit*Om_m
+
+    return a1, a21, a22, a23, a31, a32, ak2
 
 
 class EFTTracer(CCLAutoRepr):
@@ -205,10 +261,6 @@ class EFTIntrinsicAlignmentTracer(PTTracer):
     If ``None``, a bias of zero is assumed.
 
     Args:
-        basis (:obj:'string'): a flag denoting the internal interpretation
-            of the parameters set by the user. 
-            Valid flags are 'EFT', 'TATT', and 'NLA'
-
         a1 (:obj:`float` or :obj:`tuple`): a single number or a
             tuple of arrays ``(z, a1(z))`` giving the first-order
             alignment bias A_1
@@ -217,21 +269,24 @@ class EFTIntrinsicAlignmentTracer(PTTracer):
         a22 (:obj:`float` or :obj:`tuple`): as above for
             second-order alignment bias. In TATT, this is A_2
         a23 (:obj:`float` or :obj:`tuple`): as above for
-            second-order alignment bias.
+            second-order alignment bias. In TATT, this is b_t
         a31 (:obj:`float` or :obj:`tuple`): as above for
             third-order alignment bias.
         a32 (:obj:`float` or :obj:`tuple`): as above for
             third-order alignment bias.
         ak2 (:obj:`float` or :obj:`tuple`): as above for the
             k^2 bias
+        basis (:obj:'string'): a flag denoting the internal interpretation
+            of the parameters set by the user. 
+            Valid flags are 'EFT', 'TATT', and 'NLA'
     """
     type = 'IA'
     bases = ['EFT', 'TATT', 'NLA']
 
-    def __init__(self, basis = 'EFT', a1, a21=None, a22=None, a23=None, a31=None, a32=None, ak2=None):
+    def __init__(self, a1, a21=None, a22=None, a23=None, a31=None, a32=None, ak2=None, basis = 'NLA'):
 
         if basis not in bases:
-            raise(some error)
+            raise ValueError(f"Unknown IA prescription {basis}")
 
         self.biases = {}
         # Initialize a1

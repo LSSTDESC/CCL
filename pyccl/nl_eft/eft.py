@@ -173,6 +173,13 @@ class EFTCalculator(CCLAutoRepr):
         self.with_NC = with_NC
         self.with_IA = with_IA
 
+
+        # EFT normalization parameters
+        self._N0 = np.sqrt(1.5)
+        self._N1 = np.sqrt(0.5)
+        self._N2 = 1.0
+
+
         # Set FAST-PT parameters
         self.fastpt_par = {'pad_factor': pad_factor,
                            'low_extrap': low_extrap,
@@ -222,7 +229,6 @@ class EFTCalculator(CCLAutoRepr):
         self.bk2_pk_kind = bk2_pk_kind
         if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt'):
             self.with_matter_1loop_NC = True
-
 
         # a1/ak P(k) prescription
         if a1_pk_kind not in ['linear', 'nonlinear', 'pt']:
@@ -347,11 +353,6 @@ class EFTCalculator(CCLAutoRepr):
         pk = self.pk_b1 + P1loop
         return pk*self.exp_cutoff
 
-
-
-
-
-
     def _get_I11(self):
         return 0
 
@@ -413,8 +414,8 @@ class EFTCalculator(CCLAutoRepr):
         bk2_1 = tr1.bk2(self.z_s)
         b1_2 = tr2.b1(self.z_s)
         bk2_2 = tr2.bk2(self.z_s)
-        p_11 = b1_1 * b1_2 * self._get_pmm()
-        p_1k = b1_1 * bk2_2 * self._get_pmm() + b1_2 * bk2_1 * self._get_pmm() # !!!!! placeholder
+        p_11 = b1_1 * b1_2 * self.pk_b1
+        p_1k = b1_1 * bk2_2 * self.pk_bk + b1_2 * bk2_1 * self.pk_bk # !!!!! placeholder
 
         return p_11 + p_1k
 
@@ -423,8 +424,8 @@ class EFTCalculator(CCLAutoRepr):
         bk2 = trg.bk2(self.z_s)
         a1 = tri.a1(self.z_s)
         ak2 = tri.ak2(self.z_s)
-        p_11 = b1 * a1 * self._get_pmm()
-        p_1k = b1 * ak2 * self._get_pmm() + a1 * bk2 * self._get_pmm() # !!!!! placeholder
+        p_11 = b1 * a1 * np.sqrt(self.pk_a1 * self.pk_b1)
+        p_1k = b1 * ak2 * np.sqrt(self.pk_ak * self.pk_bk) + a1 * bk2 * np.sqrt(self.pk_ak * self.pk_bk) # !!!!! placeholder
 
         return p_11 + p_1k
     
@@ -433,8 +434,8 @@ class EFTCalculator(CCLAutoRepr):
         ak2_1 = tr1.ak2(self.z_s)
         a1_2 = tr2.a1(self.z_s)
         ak2_2 = tr2.ak2(self.z_s)
-        p_11 = a1_1 * a1_2 * self._get_pmm()
-        p_1k = a1_1 * ak2_2 * self._get_pmm() + a1_2 * ak2_1 * self._get_pmm() # !!!!! placeholder
+        p_11 = a1_1 * a1_2 * self.pk_a1
+        p_1k = a1_1 * ak2_2 * self.pk_ak + a1_2 * ak2_1 * self.pk_ak # !!!!! placeholder
 
         return p_11 + p_1k
 
@@ -585,6 +586,26 @@ class EFTCalculator(CCLAutoRepr):
 
 
 
+
+    # these enter the C_l integrals for C_EE, C_BB, etc.
+
+    def _get_pii_ee(self, tr1, tr2):
+        return (2 * (self._N0)**2 * self._get_p22_0() + (self._N2)**2 * self._get_p22_2())/8.0
+    def _get_pii_bb(self, tr1, tr2):
+        return (self._N1)**2 * self._get_p22_1()
+
+    def _pet_pgi_e(self, trg, tri):
+        return 0.5*(self._N0)* self._get_p02_0()
+    def _pet_pim_e(self, tri):
+        return 0
+    def _pet_pim_b(self, tri):
+        return 0
+
+
+
+
+
+
     def _get_pgg(self, tr1, tr2):
         return self._get_p00_0(tr1, tr2)
 
@@ -602,6 +623,206 @@ class EFTCalculator(CCLAutoRepr):
     def _get_pii(self, tr1, tr2):
         #hard! need spherical decomp for these terms!
         return self._get_p22_0(tr1, tr2) + self._get_p22_1(tr1, tr2) + self._get_p22_2(tr1, tr2)
+
+
+
+    def get_biased_pk2d(self, tracer1, *, tracer2=None, return_ia_bb=False,
+                        extrap_order_lok=1, extrap_order_hik=2):
+        """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
+        the PT power spectrum for two quantities defined by
+        two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
+
+        .. note:: The full non-linear model for the cross-correlation
+                  between number counts and intrinsic alignments is
+                  still work in progress in FastPT. As a workaround
+                  CCL assumes a non-linear treatment of IAs, but only
+                  linearly biased number counts.
+
+        Args:
+            tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
+                tracer being correlated.
+            tracer2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the second
+                tracer being correlated. If ``None``, the auto-correlation
+                of the first tracer will be returned.
+            return_ia_bb (:obj:`bool`): if ``True``, the B-mode power spectrum
+                for intrinsic alignments will be returned (if both
+                input tracers are of type
+                :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
+                If ``False`` (default) E-mode power spectrum is returned.
+            extrap_order_lok (:obj:`int`): extrapolation order to be used on
+                k-values below the minimum of the splines. See
+                :class:`~pyccl.pk2d.Pk2D`.
+            extrap_order_hik (:obj:`int`): extrapolation order to be used on
+                k-values above the maximum of the splines. See
+                :class:`~pyccl.pk2d.Pk2D`.
+
+        Returns:
+            :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
+        """
+        if return_ia_bb:
+            return_ia_bb = True
+
+        if tracer2 is None:
+            tracer2 = tracer1
+
+        t1 = tracer1.type
+        t2 = tracer2.type
+
+        if ((t1 == 'NC') or (t2 == 'NC')) and (not self.with_NC):
+            raise ValueError("Can't use number counts tracer in "
+                             "EulerianPTCalculator with 'with_NC=False'")
+        if ((t1 == 'IA') or (t2 == 'IA')) and (not self.with_IA):
+            raise ValueError("Can't use intrinsic alignment tracer in "
+                             "EulerianPTCalculator with 'with_IA=False'")
+
+        if t1 == 'NC':
+            if t2 == 'NC':
+                pk = self._get_pgg(tracer1, tracer2)
+            elif t2 == 'IA':
+                pk = self._get_pgi(tracer1, tracer2)
+            else:  # Must be matter
+                pk = self._get_pgm(tracer1)
+        elif t1 == 'IA':
+            if t2 == 'NC':
+                pk = self._get_pgi(tracer2, tracer1)
+            elif t2 == 'IA':
+                pk = self._get_pii(tracer1, tracer2,
+                                   return_bb=return_ia_bb)
+            else:  # Must be matter
+                pk = self._get_pim(tracer1)
+        else:  # Must be matter
+            if t2 == 'NC':
+                pk = self._get_pgm(tracer2)
+            elif t2 == 'IA':
+                pk = self._get_pim(tracer2)
+            else:  # Must be matter
+                pk = self._get_pmm()
+
+        pk2d = Pk2D(a_arr=self.a_s,
+                    lk_arr=np.log(self.k_s),
+                    pk_arr=pk,
+                    is_logp=False,
+                    extrap_order_lok=extrap_order_lok,
+                    extrap_order_hik=extrap_order_hik)
+        return pk2d
+
+
+
+    def get_pk2d_template(self, kind, *, extrap_order_lok=1,
+                          extrap_order_hik=2, return_ia_bb=False):
+        """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
+        the power spectrum template for two of the PT operators. The
+        combination returned is determined by ``kind``, which must be
+        a string of the form ``'q1:q2'``, where ``q1`` and ``q2`` denote
+        the two operators whose power spectrum is sought. Valid
+        operator names are: ``'m'`` (matter overdensity), ``'b1'``
+        (first-order overdensity), ``'b2'`` (:math:`\\delta^2`
+        term in galaxy bias expansion), ``'bs'`` (:math:`s^2` term
+        in galaxy bias expansion), ``'b3nl'`` (:math:`\\psi_{nl}`
+        term in galaxy bias expansion), ``'bk2'`` (non-local
+        :math:`\\nabla^2 \\delta` term in galaxy bias expansion),
+        ``'c1'`` (linear IA term), ``'c2'`` (:math:`s^2` term in IA
+        expansion), ``'cdelta'`` (:math:`s\\delta` term in IA expansion).
+
+        Args:
+            kind (:obj:`str`): string defining the pair of PT operators for
+                which we want the power spectrum.
+            extrap_order_lok (:obj:`int`): extrapolation order to be used on
+                k-values below the minimum of the splines. See
+                :class:`~pyccl.pk2d.Pk2D`.
+            extrap_order_hik (:obj:`int`): extrapolation order to be used on
+                k-values above the maximum of the splines. See
+                :class:`~pyccl.pk2d.Pk2D`.
+            return_ia_bb (:obj:`bool`): if ``True``, the B-mode power spectrum
+                for intrinsic alignments will be returned (if both
+                input tracers are of type
+                :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
+                If ``False`` (default) E-mode power spectrum is returned.
+
+        Returns:
+            :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
+        """
+        if not (kind in _PK_ALIAS):
+            # Reverse order and check again
+            kind_reverse = ':'.join(kind.split(':')[::-1])
+            if not (kind_reverse in _PK_ALIAS):
+                raise ValueError(f"Pk template {kind} not valid")
+            kind = kind_reverse
+        pk_name = _PK_ALIAS[kind]
+
+        # should change the valid combinations, but there are too many right now
+        if return_ia_bb and (pk_name in ['c2:c2', 'c2:cdelta',
+                                         'cdelta:cdelta']):
+            pk_name += '_bb'
+
+        # If already built, return
+        if pk_name in self._pk2d_temp:
+            return self._pk2d_temp[pk_name]
+
+        # Construct power spectrum array
+        s4 = 0.
+        if pk_name == 'm:m':
+            pk = self.pk_b1
+        
+        # will need to update these based on new I integrals
+        '''
+        elif pk_name == 'm:b2':
+            pk = 0.5*self._g4T*self.dd_bias[2]
+        elif pk_name == 'm:b3nl':
+            pk = 0.5*self._g4T*self.dd_bias[8]
+        elif pk_name == 'm:bs':
+            pk = 0.5*self._g4T*self.dd_bias[4]
+        elif pk_name == 'm:bk2':
+            pk = 0.5*self.pk_bk*(self.k_s**2)
+        elif pk_name == 'm:c2':
+            pk = self._g4T * (self.ia_mix[0]+self.ia_mix[1])
+        elif pk_name == 'm:cdelta':
+            pk = self._g4T * (self.ia_ta[0]+self.ia_ta[1])
+        elif pk_name == 'b2:b2':
+            if self.fastpt_par['sub_lowk']:
+                s4 = self.dd_bias[7]
+            pk = 0.25*self._g4T*(self.dd_bias[3] - 2*s4)
+        elif pk_name == 'b2:bs':
+            if self.fastpt_par['sub_lowk']:
+                s4 = self.dd_bias[7]
+            pk = 0.25*self._g4T*(self.dd_bias[5] - 4*s4/3)
+        elif pk_name == 'bs:bs':
+            if self.fastpt_par['sub_lowk']:
+                s4 = self.dd_bias[7]
+            pk = 0.25*self._g4T*(self.dd_bias[6] - 8*s4/9)
+        elif pk_name == 'c2:c2':
+            pk = self._g4T * self.ia_tt[0]
+        elif pk_name == 'c2:c2_bb':
+            pk = self._g4T * self.ia_tt[1]
+        elif pk_name == 'c2:cdelta':
+            pk = self._g4T * self.ia_mix[2]
+        elif pk_name == 'c2:cdelta_bb':
+            pk = self._g4T * self.ia_mix[3]
+        elif pk_name == 'cdelta:cdelta':
+            pk = self._g4T * self.ia_ta[2]
+        elif pk_name == 'cdelta:cdelta_bb':
+            pk = self._g4T * self.ia_ta[3]
+        elif pk_name == 'zero':
+            # If zero, store None and return
+            self._pk2d_temp[pk_name] = None
+            return None
+        '''
+        # Build interpolator
+        pk2d = Pk2D(a_arr=self.a_s,
+                    lk_arr=np.log(self.k_s),
+                    pk_arr=pk,
+                    is_logp=False,
+                    extrap_order_lok=extrap_order_lok,
+                    extrap_order_hik=extrap_order_hik)
+
+        # Store and return
+        self._pk2d_temp[pk_name] = pk2d
+        return pk2d
+
+
+
+
+
 
 
     # UP TO HERE
@@ -817,189 +1038,6 @@ class EFTCalculator(CCLAutoRepr):
                (self._g4*c2)[:, None] * (a0e2 + b0e2))
         return pim*self.exp_cutoff
 
-    def get_biased_pk2d(self, tracer1, *, tracer2=None, return_ia_bb=False,
-                        extrap_order_lok=1, extrap_order_hik=2):
-        """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
-        the PT power spectrum for two quantities defined by
-        two :class:`~pyccl.nl_pt.tracers.PTTracer` objects.
 
-        .. note:: The full non-linear model for the cross-correlation
-                  between number counts and intrinsic alignments is
-                  still work in progress in FastPT. As a workaround
-                  CCL assumes a non-linear treatment of IAs, but only
-                  linearly biased number counts.
 
-        Args:
-            tracer1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the first
-                tracer being correlated.
-            tracer2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): the second
-                tracer being correlated. If ``None``, the auto-correlation
-                of the first tracer will be returned.
-            return_ia_bb (:obj:`bool`): if ``True``, the B-mode power spectrum
-                for intrinsic alignments will be returned (if both
-                input tracers are of type
-                :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
-                If ``False`` (default) E-mode power spectrum is returned.
-            extrap_order_lok (:obj:`int`): extrapolation order to be used on
-                k-values below the minimum of the splines. See
-                :class:`~pyccl.pk2d.Pk2D`.
-            extrap_order_hik (:obj:`int`): extrapolation order to be used on
-                k-values above the maximum of the splines. See
-                :class:`~pyccl.pk2d.Pk2D`.
 
-        Returns:
-            :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
-        """
-        if return_ia_bb:
-            return_ia_bb = True
-
-        if tracer2 is None:
-            tracer2 = tracer1
-
-        t1 = tracer1.type
-        t2 = tracer2.type
-
-        if ((t1 == 'NC') or (t2 == 'NC')) and (not self.with_NC):
-            raise ValueError("Can't use number counts tracer in "
-                             "EulerianPTCalculator with 'with_NC=False'")
-        if ((t1 == 'IA') or (t2 == 'IA')) and (not self.with_IA):
-            raise ValueError("Can't use intrinsic alignment tracer in "
-                             "EulerianPTCalculator with 'with_IA=False'")
-
-        if t1 == 'NC':
-            if t2 == 'NC':
-                pk = self._get_pgg(tracer1, tracer2)
-            elif t2 == 'IA':
-                pk = self._get_pgi(tracer1, tracer2)
-            else:  # Must be matter
-                pk = self._get_pgm(tracer1)
-        elif t1 == 'IA':
-            if t2 == 'NC':
-                pk = self._get_pgi(tracer2, tracer1)
-            elif t2 == 'IA':
-                pk = self._get_pii(tracer1, tracer2,
-                                   return_bb=return_ia_bb)
-            else:  # Must be matter
-                pk = self._get_pim(tracer1)
-        else:  # Must be matter
-            if t2 == 'NC':
-                pk = self._get_pgm(tracer2)
-            elif t2 == 'IA':
-                pk = self._get_pim(tracer2)
-            else:  # Must be matter
-                pk = self._get_pmm()
-
-        pk2d = Pk2D(a_arr=self.a_s,
-                    lk_arr=np.log(self.k_s),
-                    pk_arr=pk,
-                    is_logp=False,
-                    extrap_order_lok=extrap_order_lok,
-                    extrap_order_hik=extrap_order_hik)
-        return pk2d
-
-    def get_pk2d_template(self, kind, *, extrap_order_lok=1,
-                          extrap_order_hik=2, return_ia_bb=False):
-        """Returns a :class:`~pyccl.pk2d.Pk2D` object containing
-        the power spectrum template for two of the PT operators. The
-        combination returned is determined by ``kind``, which must be
-        a string of the form ``'q1:q2'``, where ``q1`` and ``q2`` denote
-        the two operators whose power spectrum is sought. Valid
-        operator names are: ``'m'`` (matter overdensity), ``'b1'``
-        (first-order overdensity), ``'b2'`` (:math:`\\delta^2`
-        term in galaxy bias expansion), ``'bs'`` (:math:`s^2` term
-        in galaxy bias expansion), ``'b3nl'`` (:math:`\\psi_{nl}`
-        term in galaxy bias expansion), ``'bk2'`` (non-local
-        :math:`\\nabla^2 \\delta` term in galaxy bias expansion),
-        ``'c1'`` (linear IA term), ``'c2'`` (:math:`s^2` term in IA
-        expansion), ``'cdelta'`` (:math:`s\\delta` term in IA expansion).
-
-        Args:
-            kind (:obj:`str`): string defining the pair of PT operators for
-                which we want the power spectrum.
-            extrap_order_lok (:obj:`int`): extrapolation order to be used on
-                k-values below the minimum of the splines. See
-                :class:`~pyccl.pk2d.Pk2D`.
-            extrap_order_hik (:obj:`int`): extrapolation order to be used on
-                k-values above the maximum of the splines. See
-                :class:`~pyccl.pk2d.Pk2D`.
-            return_ia_bb (:obj:`bool`): if ``True``, the B-mode power spectrum
-                for intrinsic alignments will be returned (if both
-                input tracers are of type
-                :class:`~pyccl.nl_pt.tracers.PTIntrinsicAlignmentTracer`)
-                If ``False`` (default) E-mode power spectrum is returned.
-
-        Returns:
-            :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
-        """
-        if not (kind in _PK_ALIAS):
-            # Reverse order and check again
-            kind_reverse = ':'.join(kind.split(':')[::-1])
-            if not (kind_reverse in _PK_ALIAS):
-                raise ValueError(f"Pk template {kind} not valid")
-            kind = kind_reverse
-        pk_name = _PK_ALIAS[kind]
-
-        if return_ia_bb and (pk_name in ['c2:c2', 'c2:cdelta',
-                                         'cdelta:cdelta']):
-            pk_name += '_bb'
-
-        # If already built, return
-        if pk_name in self._pk2d_temp:
-            return self._pk2d_temp[pk_name]
-
-        # Construct power spectrum array
-        s4 = 0.
-        if pk_name == 'm:m':
-            pk = self.pk_b1
-        elif pk_name == 'm:b2':
-            pk = 0.5*self._g4T*self.dd_bias[2]
-        elif pk_name == 'm:b3nl':
-            pk = 0.5*self._g4T*self.dd_bias[8]
-        elif pk_name == 'm:bs':
-            pk = 0.5*self._g4T*self.dd_bias[4]
-        elif pk_name == 'm:bk2':
-            pk = 0.5*self.pk_bk*(self.k_s**2)
-        elif pk_name == 'm:c2':
-            pk = self._g4T * (self.ia_mix[0]+self.ia_mix[1])
-        elif pk_name == 'm:cdelta':
-            pk = self._g4T * (self.ia_ta[0]+self.ia_ta[1])
-        elif pk_name == 'b2:b2':
-            if self.fastpt_par['sub_lowk']:
-                s4 = self.dd_bias[7]
-            pk = 0.25*self._g4T*(self.dd_bias[3] - 2*s4)
-        elif pk_name == 'b2:bs':
-            if self.fastpt_par['sub_lowk']:
-                s4 = self.dd_bias[7]
-            pk = 0.25*self._g4T*(self.dd_bias[5] - 4*s4/3)
-        elif pk_name == 'bs:bs':
-            if self.fastpt_par['sub_lowk']:
-                s4 = self.dd_bias[7]
-            pk = 0.25*self._g4T*(self.dd_bias[6] - 8*s4/9)
-        elif pk_name == 'c2:c2':
-            pk = self._g4T * self.ia_tt[0]
-        elif pk_name == 'c2:c2_bb':
-            pk = self._g4T * self.ia_tt[1]
-        elif pk_name == 'c2:cdelta':
-            pk = self._g4T * self.ia_mix[2]
-        elif pk_name == 'c2:cdelta_bb':
-            pk = self._g4T * self.ia_mix[3]
-        elif pk_name == 'cdelta:cdelta':
-            pk = self._g4T * self.ia_ta[2]
-        elif pk_name == 'cdelta:cdelta_bb':
-            pk = self._g4T * self.ia_ta[3]
-        elif pk_name == 'zero':
-            # If zero, store None and return
-            self._pk2d_temp[pk_name] = None
-            return None
-
-        # Build interpolator
-        pk2d = Pk2D(a_arr=self.a_s,
-                    lk_arr=np.log(self.k_s),
-                    pk_arr=pk,
-                    is_logp=False,
-                    extrap_order_lok=extrap_order_lok,
-                    extrap_order_hik=extrap_order_hik)
-
-        # Store and return
-        self._pk2d_temp[pk_name] = pk2d
-        return pk2d
