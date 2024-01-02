@@ -104,7 +104,7 @@ def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
 
 
 @dataclass
-class CosmologyData:
+class _CosmologyBackgroundData:
     lookback: Akima1DInterpolator = None
     age0: float = None
 
@@ -287,7 +287,7 @@ class Cosmology(CCLObject):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
-        self.data = CosmologyData()
+        self.data = _CosmologyBackgroundData()
         self._spline_params = CCLParameters.get_params_dict("spline_params")
         self._gsl_params = CCLParameters.get_params_dict("gsl_params")
         self._accuracy_params = {**self._spline_params, **self._gsl_params}
