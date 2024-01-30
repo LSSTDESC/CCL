@@ -93,7 +93,7 @@ def _nonlimber_FKEM(
     If it is zero, we set it to something very small
     """
     if chi_min == 0.0:
-        chi_min = 1.0e-6
+        chi_min = 1.e-6
     chi_logspace_arr = np.logspace(
         np.log10(chi_min), np.log10(chi_max), num=Nchi, endpoint=True
     )
@@ -104,6 +104,7 @@ def _nonlimber_FKEM(
     growfac_arr = ccl.growth_factor(cosmo, a_arr)
     avg_a1s = clt1.get_avg_weighted_a()
     avg_a2s = clt2.get_avg_weighted_a()
+    # print(avg_a1s[0], 1/avg_a1s[0]-1)
     for el in range(len(ls)):
         ell = ls[el]
         cls_nonlimber_lin = 0.0

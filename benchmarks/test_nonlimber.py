@@ -3,6 +3,7 @@ import pyccl as ccl
 
 import time
 import pytest
+import matplotlib.pyplot as plt
 
 root = "benchmarks/data/nonlimber/"
 
@@ -181,7 +182,7 @@ def set_up():
     return cosmo, ells, tracers1, tracers2, truth, errors, indices
 
 
-@pytest.mark.parametrize("method", ["FKEM"])
+@pytest.mark.parametrize("method", ["MATTER", "FKEM"])
 @pytest.mark.parametrize("cross_type", ["gg", "gs", "ss"])
 def test_cells(set_up, method, cross_type):
     cosmo, ells, tracers1, tracers2, truth, errors, indices = set_up
@@ -201,9 +202,16 @@ def test_cells(set_up, method, cross_type):
             return_meta=True
         )
         l_limber = meta['l_limber']
+        #plt.loglog(ells, cls)
+        #plt.yscale('symlog')
+        #plt.title(method)
+        #plt.show()
         chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / \
             errors[cross_type][pair_index]**2
         chi2max = max(chi2.max(), chi2max)
+        #print(chi2)
+        #if method =='MATTER':print(i1,i2)
+        #print(method, i1, i2, chi2max, cls[0])
         assert np.all(chi2 < 0.3)
     t1 = time.time()
     print(

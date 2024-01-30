@@ -27,7 +27,13 @@ set(CCL_SRC
     src/ccl_halofit.c
     src/ccl_tracers.c
     src/ccl_mass_conversion.c
-    src/ccl_fftlog.c)
+    src/ccl_fftlog.c
+    src/matter_nonlimber/arrays.c
+    src/matter_nonlimber/common.c
+    src/matter_nonlimber/fft.c
+    src/matter_nonlimber/hypergeom.c
+    src/matter_nonlimber/matter.c
+)
 
 # Defines list of CCL C test src files
 # ! Add new tests of the C code to this list
@@ -80,7 +86,7 @@ endif()
 include_directories(${GSL_INCLUDE_DIRS} ${FFTW_INCLUDES})
 link_directories(${GSL_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS})
 # Adds path to CCL include folder
-include_directories(include)
+include_directories(include include/matter_nonlimber)
 
 #
 # Builds the main CCL library

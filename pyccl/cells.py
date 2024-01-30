@@ -7,6 +7,7 @@ import numpy as np
 from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
 from .pyutils import integ_types
 from ._nonlimber_FKEM import _nonlimber_FKEM
+from ._nonlimber_MATTER import _nonlimber_MATTER
 
 
 def angular_cl(
@@ -75,7 +76,7 @@ def angular_cl(
             "Limber integration method %s not supported"
             % limber_integration_method
         )
-    if non_limber_integration_method not in ["FKEM"]:
+    if non_limber_integration_method not in ["FKEM", "MATTER"]:
         raise ValueError(
             "Non-Limber integration method %s not supported"
             % limber_integration_method
@@ -112,6 +113,17 @@ def angular_cl(
     if auto_limber or (type(l_limber) is not str and ell_use[0] < l_limber):
         if non_limber_integration_method == "FKEM":
             l_limber, cl_non_limber, status = _nonlimber_FKEM(
+                cosmo,
+                tracer1,
+                tracer2,
+                p_of_k_a,
+                p_of_k_a_lin,
+                ell_use,
+                l_limber,
+                limber_max_error,
+            )
+        elif non_limber_integration_method == "MATTER":
+            l_limber, cl_non_limber, status = _nonlimber_MATTER(
                 cosmo,
                 tracer1,
                 tracer2,
