@@ -53,7 +53,7 @@ jobs:
       - name: "macOS: set env variables"
         if: matrix.label == 'osx-64'
         run: |
-          mamba install llvm-openmp
+          #mamba install llvm-openmp
           echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
           SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           echo "SDKROOT: ${SDKROOT}"
