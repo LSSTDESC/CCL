@@ -14,7 +14,7 @@ dependencies:
   - pytest
   - pytest-cov
   - clang_impl_osx-64=h1af8efd_8
-  - clang_osx-64=b91bd55_8
+  - clang_osx-64=hb91bd55_8
   - pip:
       - tables==3.8.0  # for baccoemu
       #- classy<3
