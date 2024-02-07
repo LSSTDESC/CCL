@@ -38,10 +38,8 @@ dev = [
     "pytest-cov",
 ]
 
-[tool.setuptools]
-packages = ["pyccl"]
-license-files = ["LICENSE", "LICENSE_COSMICEMU"]
-include-package-data = true
+[tool.setuptools.packages.find]
+include = ["pyccl*"]
 
 [tool.setuptools.package-data]
 pyccl = ["_ccllib.so", "emulators/data/*.npz"]
