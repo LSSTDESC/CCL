@@ -13,8 +13,7 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
-  - clang_impl_osx-64=17.0.6=h1af8efd_8
-  - clang_osx-64=17.0.6=hb91bd55_8
+  - llvm-openmp
   - pip:
       - tables==3.8.0  # for baccoemu
       #- classy<3
