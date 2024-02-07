@@ -13,7 +13,6 @@
 
 #include "ccl.h"
 
-//
 // Macros for replacing relative paths
 #define EXPAND_STR(s) STRING(s)
 #define STRING(s) #s
@@ -144,6 +143,10 @@ ccl_spline_params ccl_user_spline_params = {
 
 ccl_physical_constants ccl_constants = {
   /**
+   * Sidereal year (s/yr). [IERS2014 in J2000.0]
+   */
+  365.256363004 * 86400.,
+  /**
    * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
    */
   2997.92458,
@@ -201,17 +204,6 @@ ccl_physical_constants ccl_constants = {
    */
   //GSL_CONST_MKSA_ELECTRON_VOLT,
   1.6021766208e-19,  //from CODATA 2014
-
-  /**
-   * Temperature of the CMB in K
-   */
-  2.725,
-  //2.7255, // CLASS value
-
-  /**
-   * T_ncdm, as taken from CLASS, explanatory.ini
-   */
-  0.71611,
 
   /**
    * neutrino mass splitting differences
@@ -555,6 +547,7 @@ void ccl_cosmology_free(ccl_cosmology * cosmo) {
     ccl_data_free(&cosmo->data);
   free(cosmo);
 }
+
 
 int ccl_get_pk_spline_na(ccl_cosmology *cosmo) {
   return cosmo->spline_params.A_SPLINE_NA_PK + cosmo->spline_params.A_SPLINE_NLOG_PK - 1;

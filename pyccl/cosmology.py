@@ -23,6 +23,8 @@ from enum import Enum
 from inspect import getmembers, isfunction, signature
 from numbers import Real
 from typing import Iterable
+from dataclasses import dataclass
+from scipy.interpolate import Akima1DInterpolator
 
 import numpy as np
 
@@ -99,6 +101,16 @@ def _make_methods(cls=None, *, modules=_TOP_LEVEL_MODULES, name=None):
             setattr(cls, name, func)
 
     return cls
+
+
+@dataclass
+class _CosmologyBackgroundData:
+    """
+    This private class stores values calculated in the python level
+    as we are porting background calculators from C to python.
+    """
+    lookback: Akima1DInterpolator = None
+    age0: float = None
 
 
 @_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
@@ -279,6 +291,7 @@ class Cosmology(CCLObject):
         self._build_parameters(**self._params_init_kwargs)
         self._build_config(**self._config_init_kwargs)
         self.cosmo = lib.cosmology_create(self._params, self._config)
+        self.data = _CosmologyBackgroundData()
         self._spline_params = CCLParameters.get_params_dict("spline_params")
         self._gsl_params = CCLParameters.get_params_dict("gsl_params")
         self._accuracy_params = {**self._spline_params, **self._gsl_params}
@@ -492,14 +505,6 @@ class Cosmology(CCLObject):
         # and rebuild the C data
         self._build_cosmo()
         self._object_lock.lock()  # Lock on exit.
-
-    def compute_distances(self):
-        """Compute the distance splines."""
-        if self.has_distances:
-            return
-        status = 0
-        status = lib.cosmology_compute_distances(self.cosmo, status)
-        check(status, self)
 
     def compute_growth(self):
         """Compute the growth function."""
