@@ -13,7 +13,6 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
-  - llvm-openmp=17.0.6
   - pip:
       - tables==3.8.0  # for baccoemu
       #- classy<3
