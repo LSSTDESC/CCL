@@ -235,11 +235,23 @@ class Cosmology(CCLObject):
         self.lin_pk_emu = None
         if isinstance(transfer_function, emulators.EmulatorPk):
             self.lin_pk_emu = transfer_function
+            self.transfer_function_type = "emulator"
+        elif isinstance(transfer_function, str):
+            self.transfer_function_type = transfer_function
+        else:
+            raise ValueError(f"transfer_function={transfer_function} not "
+                             f"supported.")
 
         # initialise nonlinear Pk emulators if needed
         self.nl_pk_emu = None
         if isinstance(matter_power_spectrum, emulators.EmulatorPk):
             self.nl_pk_emu = matter_power_spectrum
+            self.matter_power_spectrum_type = "emulator"
+        elif isinstance(matter_power_spectrum, str):
+            self.matter_power_spectrum_type = matter_power_spectrum
+        else:
+            raise ValueError(f"matter_power_spectrum={matter_power_spectrum} "
+                             f"not supported.")
 
         self.baryons = baryonic_effects
         if not isinstance(self.baryons, baryons.Baryons):
@@ -361,10 +373,6 @@ class Cosmology(CCLObject):
         It also does some error checking on the inputs to make sure they
         are valid and physically consistent.
         """
-        if isinstance(transfer_function, emulators.EmulatorPk):
-            transfer_function = 'emulator'
-        if isinstance(matter_power_spectrum, emulators.EmulatorPk):
-            matter_power_spectrum = 'emulator'
         if (matter_power_spectrum == "camb"
                 and transfer_function != "boltzmann_camb"):
             raise CCLError(
@@ -372,9 +380,9 @@ class Cosmology(CCLObject):
                 "the transfer function should be 'boltzmann_camb'.")
 
         config = lib.configuration()
-        tf = transfer_function_types[transfer_function]
+        tf = transfer_function_types[self.transfer_function_type]
         config.transfer_function_method = tf
-        mps = matter_power_spectrum_types[matter_power_spectrum]
+        mps = matter_power_spectrum_types[self.matter_power_spectrum_type]
         config.matter_power_spectrum_method = mps
 
         # Store ccl_configuration for later access
@@ -531,7 +539,7 @@ class Cosmology(CCLObject):
         self.compute_growth()
 
         # Populate power spectrum splines
-        trf = self._config_init_kwargs['transfer_function']
+        trf = self.transfer_function_type
         pk = None
         rescale_s8 = True
         rescale_mg = True
@@ -561,7 +569,7 @@ class Cosmology(CCLObject):
         # we set the nonlin power spectrum first, but keep the linear via a
         # status variable to use it later if the transfer function is CAMB too.
         pkl = None
-        if self._config_init_kwargs["matter_power_spectrum"] == "camb":
+        if self.matter_power_spectrum_type == "camb":
             rescale_mg = False
             if self.mg_parametrization.mu_0 != 0:
                 raise ValueError("Can't rescale non-linear power spectrum "
@@ -595,7 +603,7 @@ class Cosmology(CCLObject):
         self.compute_distances()
 
         # Populate power spectrum splines
-        mps = self._config_init_kwargs['matter_power_spectrum']
+        mps = self.matter_power_spectrum_type
         # needed for halofit, and linear options
         if (mps not in ['emulator']) and (mps is not None):
             self.compute_linear_power()
