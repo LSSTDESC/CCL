@@ -1,4 +1,5 @@
 import tempfile
+import pytest
 import filecmp
 import io
 import pyccl as ccl
@@ -8,7 +9,6 @@ def test_yaml():
     cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, A_s=2.1e-9,
                           n_s=0.97, m_nu=[0.01, 0.2, 0.3],
                           transfer_function="boltzmann_camb",
-                          baryonic_effects=ccl.baryons.BaryonsvanDaalen19()
                           )
 
     # Make temporary files
@@ -37,6 +37,15 @@ def test_yaml():
     cosmo2.write_yaml(stream2)
 
     assert stream.getvalue() == stream2.getvalue()
+
+
+def test_write_yaml_complex_types():
+    cosmo = ccl.CosmologyVanillaLCDM(
+        baryonic_effects=ccl.baryons.BaryonsvanDaalen19()
+    )
+    with pytest.raises(ValueError):
+        with tempfile.NamedTemporaryFile(delete=True) as tmpfile:
+            cosmo.write_yaml(tmpfile)
 
 
 def test_to_dict():

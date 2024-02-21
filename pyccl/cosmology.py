@@ -331,8 +331,14 @@ class Cosmology(CCLObject):
                     d[k] = int(v)
                 elif isinstance(v, float):
                     d[k] = float(v)
+                elif isinstance(v, tuple):
+                    d[k] = list(v)
+                elif isinstance(v, np.ndarray):
+                    d[k] = v.tolist()
                 elif isinstance(v, dict):
                     make_yaml_friendly(v)
+                elif not (isinstance(v, (str, list)) or v is None):
+                    raise ValueError(f"{k}={v} cannot be serialised to YAML.")
 
         params = self.to_dict()
         make_yaml_friendly(params)
