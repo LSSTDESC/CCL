@@ -235,13 +235,11 @@ class Cosmology(CCLObject):
         self.lin_pk_emu = None
         if isinstance(transfer_function, emulators.EmulatorPk):
             self.lin_pk_emu = transfer_function
-            transfer_function = 'emulator'
 
         # initialise nonlinear Pk emulators if needed
         self.nl_pk_emu = None
         if isinstance(matter_power_spectrum, emulators.EmulatorPk):
             self.nl_pk_emu = matter_power_spectrum
-            matter_power_spectrum = 'emulator'
 
         self.baryons = baryonic_effects
         if not isinstance(self.baryons, baryons.Baryons):
@@ -277,6 +275,8 @@ class Cosmology(CCLObject):
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
             matter_power_spectrum=matter_power_spectrum,
+            baryonic_effects=baryonic_effects,
+            mg_parametrization=mg_parametrization,
             extra_parameters=extra_parameters)
 
         self._build_cosmo()
@@ -299,6 +299,12 @@ class Cosmology(CCLObject):
         if self.cosmo.status != 0:
             raise CCLError(f"{self.cosmo.status}: {self.cosmo.status_message}")
 
+    def to_dict(self):
+        """Returns a dictionary of the arguments used to create the Cosmology
+        object such that ``cosmo == pyccl.Cosmology(**cosmo.to_dict())``
+        is ``True``."""
+        return {**self._params_init_kwargs, **self._config_init_kwargs}
+
     def write_yaml(self, filename, *, sort_keys=False):
         """Write a YAML representation of the parameters to file.
 
@@ -316,7 +322,7 @@ class Cosmology(CCLObject):
                 elif isinstance(v, dict):
                     make_yaml_friendly(v)
 
-        params = {**self._params_init_kwargs, **self._config_init_kwargs}
+        params = self.to_dict()
         make_yaml_friendly(params)
 
         if isinstance(filename, str):
@@ -337,12 +343,14 @@ class Cosmology(CCLObject):
         loader = yaml.Loader
         if isinstance(filename, str):
             with open(filename, 'r') as fp:
-                return cls(**{**yaml.load(fp, Loader=loader), **kwargs})
-        return cls(**{**yaml.load(filename, Loader=loader), **kwargs})
+                params = yaml.load(fp, Loader=loader)
+        else:
+            params = yaml.load(filename, Loader=loader)
+        return cls(**{**params, **kwargs})
 
     def _build_config(
-            self, transfer_function=None, matter_power_spectrum=None,
-            extra_parameters=None):
+            self, *, transfer_function=None, matter_power_spectrum=None,
+            **kwargs):
         """Build a ccl_configuration struct.
 
         This function builds C ccl_configuration struct. This structure
@@ -353,6 +361,10 @@ class Cosmology(CCLObject):
         It also does some error checking on the inputs to make sure they
         are valid and physically consistent.
         """
+        if isinstance(transfer_function, emulators.EmulatorPk):
+            transfer_function = 'emulator'
+        if isinstance(matter_power_spectrum, emulators.EmulatorPk):
+            matter_power_spectrum = 'emulator'
         if (matter_power_spectrum == "camb"
                 and transfer_function != "boltzmann_camb"):
             raise CCLError(
