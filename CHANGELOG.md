@@ -1,5 +1,19 @@
 # Unreleased
 
+# v3.0.1 Changes
+
+## Python library
+- Fix GHA on macOS (#1154)
+- Documentation fixes (#1122)
+- Background Calculations (#1149)
+- Bacco lbias (#1139)
+- Integration of N5K winners into CCL (#1092)
+- Non-Gaussian covariances (#869)
+- Fix CI (#1121)
+
+## C library
+- Fix GSL integration abort (#1155)
+
 # v3.0.0 Changes
 
 ## Python library
