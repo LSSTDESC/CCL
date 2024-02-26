@@ -19,6 +19,7 @@ __all__ = ("TransferFunctions", "MatterPowerSpectra",
            "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
 
 import yaml
+from copy import deepcopy
 from enum import Enum
 from inspect import getmembers, isfunction, signature
 from numbers import Real
@@ -111,6 +112,23 @@ class _CosmologyBackgroundData:
     """
     lookback: Akima1DInterpolator = None
     age0: float = None
+
+
+def _make_yaml_friendly(d):
+    """Turn python objects into yaml types where possible."""
+
+    d = deepcopy(d)
+    for k, v in d.items():
+        if isinstance(v, tuple):
+            d[k] = list(v)
+        elif isinstance(v, np.ndarray):
+            d[k] = v.tolist()
+        elif isinstance(v, dict):
+            d[k] = _make_yaml_friendly(v)
+        elif not (isinstance(v, (str, list)) or v is None):
+            raise ValueError(f"{k}={v} cannot be serialised to YAML.")
+
+    return d
 
 
 @_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
@@ -324,24 +342,7 @@ class Cosmology(CCLObject):
             filename (:obj:`str`): file name, file pointer, or stream to write
                 parameters to.
         """
-        def make_yaml_friendly(d):
-            # serialize numpy types and dicts
-            for k, v in d.items():
-                if isinstance(v, int):
-                    d[k] = int(v)
-                elif isinstance(v, float):
-                    d[k] = float(v)
-                elif isinstance(v, tuple):
-                    d[k] = list(v)
-                elif isinstance(v, np.ndarray):
-                    d[k] = v.tolist()
-                elif isinstance(v, dict):
-                    make_yaml_friendly(v)
-                elif not (isinstance(v, (str, list)) or v is None):
-                    raise ValueError(f"{k}={v} cannot be serialised to YAML.")
-
-        params = self.to_dict()
-        make_yaml_friendly(params)
+        params = _make_yaml_friendly(self.to_dict())
 
         if isinstance(filename, str):
             with open(filename, "w") as fp:

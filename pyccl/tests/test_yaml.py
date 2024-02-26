@@ -2,7 +2,11 @@ import tempfile
 import pytest
 import filecmp
 import io
+
+import numpy as np
+
 import pyccl as ccl
+from pyccl.cosmology import _make_yaml_friendly
 
 
 def test_yaml():
@@ -62,3 +66,14 @@ def test_to_dict():
     init_params = {k: v for k, v in cosmo.__signature__.parameters.items()
                    if k != "self"}
     assert set(cosmo.to_dict().keys()) == set(init_params.keys())
+
+
+def test_yaml_types():
+    d = {
+        "tuple": (1, 2, 3),
+        "array": np.array([1.0, 42.0])
+    }
+
+    d_out = _make_yaml_friendly(d)
+    assert d_out["tuple"] == [1, 2, 3]
+    assert d_out["array"] == [1.0, 42.0]
