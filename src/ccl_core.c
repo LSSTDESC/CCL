@@ -235,6 +235,10 @@ computed_power, computed_sigma: store status of the computations
 */
 ccl_cosmology * ccl_cosmology_create(ccl_parameters params, ccl_configuration config)
 {
+  #ifndef USE_GSL_ERROR
+    gsl_set_error_handler_off();
+  #endif
+
   ccl_cosmology * cosmo = malloc(sizeof(ccl_cosmology));
   cosmo->params = params;
   cosmo->config = config;
@@ -382,10 +386,6 @@ ccl_parameters ccl_parameters_create(double Omega_c, double Omega_b, double Omeg
 				     int nz_mgrowth, double *zarr_mgrowth,
 				     double *dfarr_mgrowth, int *status)
 {
-  #ifndef USE_GSL_ERROR
-    gsl_set_error_handler_off();
-  #endif
-
   ccl_parameters params;
   // Initialize params
   params.m_nu = NULL;
