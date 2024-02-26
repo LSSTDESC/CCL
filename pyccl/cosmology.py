@@ -125,7 +125,7 @@ def _make_yaml_friendly(d):
             d[k] = v.tolist()
         elif isinstance(v, dict):
             d[k] = _make_yaml_friendly(v)
-        elif not (isinstance(v, (str, list)) or v is None):
+        elif not (isinstance(v, (int, float, str, list)) or v is None):
             raise ValueError(f"{k}={v} cannot be serialised to YAML.")
 
     return d
