@@ -9,6 +9,9 @@ import warnings
 
 import numpy as np
 import scipy
+import os 
+import time
+ROOT = os.getenv('ROOT')
 
 from .. import CCLWarning, Tk3D, Pk2D
 from . import HaloProfileNFW, Profile2pt
@@ -326,7 +329,7 @@ def halomod_Tk3D_SSC(
         prof12_2pt=None, prof34_2pt=None,
         p_of_k_a=None, lk_arr=None, a_arr=None,
         extrap_order_lok=1, extrap_order_hik=1, use_log=False,
-        extrap_pk=False):
+        extrap_pk=False, probe_block=None):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
@@ -412,6 +415,8 @@ def halomod_Tk3D_SSC(
     extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
 
     dpk12, dpk34 = [np.zeros((len(a_arr), len(k_use))) for _ in range(2)]
+    pk2d_array_tosave, dpk2d_array_tosave = [np.zeros((len(a_arr), len(k_use))) for _ in range(2)]
+    bA12_tosave, bB12_tosave, bA34_tosave, bB34_tosave = [np.zeros((len(a_arr), len(k_use))) for _ in range(4)]
     for ia, aa in enumerate(a_arr):
         # normalizations & I11 integral
         norm1 = prof.get_normalization(cosmo, aa, hmc=hmc)
@@ -451,6 +456,10 @@ def halomod_Tk3D_SSC(
         pk = pk2d(k_use, aa, cosmo=extrap)
         dpk = pk2d(k_use, aa, derivative=True, cosmo=extrap)
 
+        # save pk to normalize the response, and dpk just for fun
+        pk2d_array_tosave[ia] = pk
+        dpk2d_array_tosave[ia] = dpk
+
         # (47/21 - 1/3 dlogPk/dlogk) * I11 * I11 * Pk + I12
         dpk12[ia] = ((47/21 - dpk/3)*i11_1*i11_2*pk + i12_12) / (norm1 * norm2)
         dpk34[ia] = ((47/21 - dpk/3)*i11_3*i11_4*pk + i12_34) / (norm3 * norm4)
@@ -463,20 +472,44 @@ def halomod_Tk3D_SSC(
             bB = i11_B / nB if pB.is_number_counts else np.zeros_like(k_use)
             i02 = hmc.I_0_2(cosmo, k_use, aa, pA, prof2=pB, prof_2pt=p2pt)
             P = (pk * i11_A * i11_B + i02) / (nA * nB)
-            return (bA + bB) * P
+            return (bA + bB) * P, bA, bB
 
         if prof.is_number_counts or prof2.is_number_counts:
             dpk12[ia] -= _get_counterterm(prof, prof2, prof12_2pt,
-                                          norm1, norm2, i11_1, i11_2)
+                                          norm1, norm2, i11_1, i11_2)[0]
+            bA12_tosave[ia] = _get_counterterm(prof, prof2, prof12_2pt,
+                                             norm1, norm2, i11_1, i11_2)[1]
+            bB12_tosave[ia] = _get_counterterm(prof, prof2, prof12_2pt,
+                                             norm1, norm2, i11_1, i11_2)[2]
 
         if prof3.is_number_counts or prof4.is_number_counts:
             if (prof, prof2, prof12_2pt) == (prof3, prof4, prof34_2pt):
                 dpk34[ia] = dpk12[ia]
             else:
                 dpk34[ia] -= _get_counterterm(prof3, prof4, prof34_2pt,
-                                              norm3, norm4, i11_3, i11_4)
+                                              norm3, norm4, i11_3, i11_4)[0]
+                bA34_tosave[ia] = _get_counterterm(prof3, prof4, prof34_2pt,
+                                                 norm3, norm4, i11_3, i11_4)[1]
+                bB34_tosave[ia] = _get_counterterm(prof3, prof4, prof34_2pt,
+                                                 norm3, norm4, i11_3, i11_4)[2]
 
     dpk12, dpk34, use_log = _logged_output(dpk12, dpk34, log=use_log)
+
+    # transpose pk files to have [k, z] instead of [z, k]
+    output_path = ROOT + '/common_data/Spaceborne/jobs/SPV3_magcut_zcut_thesis/output/Flagship_2/pyccl_responses'
+    np.savetxt(f"{output_path}/{probe_block}/a_arr.txt", a_arr)
+    np.savetxt(f"{output_path}/{probe_block}/k_1overMpc.txt", k_use)
+    np.save(f"{output_path}/{probe_block}/dpk12_is_number_counts{prof.is_number_counts}.npy", dpk12.T)
+    np.save(f"{output_path}/{probe_block}/dpk34_is_number_counts{prof3.is_number_counts}.npy", dpk34.T)
+    np.save(f"{output_path}/{probe_block}/pk2d_linear.npy", pk2d_array_tosave.T)
+    np.save(f"{output_path}/{probe_block}/dpk2d_linear.npy", dpk2d_array_tosave.T)
+    # np.save(f"{output_path}/{probe_block}/pk1d_linear.npy", pk.T)
+    # np.save(f"{output_path}/{probe_block}/dpk1d_linear.npy", dpk.T)
+    np.save(f"{output_path}/{probe_block}/bA12.npy", bA12_tosave.T)
+    np.save(f"{output_path}/{probe_block}/bB12.npy", bB12_tosave.T)
+    np.save(f"{output_path}/{probe_block}/bA34.npy", bA34_tosave.T)
+    np.save(f"{output_path}/{probe_block}/bB34.npy", bB34_tosave.T)
+    print(f'Halomodel Pk responses saved from pyccl/halos/pk_4pt.py\nto{output_path}')
 
     return Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                 pk1_arr=dpk12, pk2_arr=dpk34,
@@ -1549,12 +1582,17 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
     if a_arr is None:
         a_arr = cosmo.get_pk_spline_a()
 
+    print('halomod_Tk3D_cNG: computing halomod_trispectrum_1h...')
+    start_time = time.perf_counter()
     tkk = halomod_trispectrum_1h(cosmo, hmc, np.exp(lk_arr), a_arr,
                                  prof, prof2=prof2,
                                  prof12_2pt=prof12_2pt,
                                  prof3=prof3, prof4=prof4,
                                  prof34_2pt=prof34_2pt)
+    print(f'halomod_Tk3D_cNG: computing halomod_trispectrum_1h... done in {(time.perf_counter() - start_time)/60:.2f} m')
 
+    print('halomod_Tk3D_cNG: computing _halomod_trispectrum_2h_22...')
+    start_time = time.perf_counter()
     tkk += _halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
                                       prof, prof2=prof2,
                                       prof3=prof3, prof4=prof4,
@@ -1563,14 +1601,20 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
                                       prof24_2pt=prof24_2pt,
                                       prof32_2pt=prof32_2pt,
                                       p_of_k_a=p_of_k_a)
+    print(f'halomod_Tk3D_cNG: computing _halomod_trispectrum_2h_22... done in {(time.perf_counter() - start_time)/60:.2f} m')
 
+    print('halomod_Tk3D_cNG: computing _halomod_trispectrum_2h_13...')
+    start_time = time.perf_counter()
     tkk += _halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
                                       prof, prof2=prof2,
                                       prof3=prof3, prof4=prof4,
                                       prof12_2pt=prof12_2pt,
                                       prof34_2pt=prof34_2pt,
                                       p_of_k_a=p_of_k_a)
+    print(f'halomod_Tk3D_cNG: computing _halomod_trispectrum_2h_13... done in {(time.perf_counter() - start_time)/60:.2f} m')
 
+    print('halomod_Tk3D_cNG: computing halomod_trispectrum_3h...')
+    start_time = time.perf_counter()
     tkk += halomod_trispectrum_3h(cosmo, hmc, np.exp(lk_arr), a_arr,
                                   prof=prof,
                                   prof2=prof2,
@@ -1581,13 +1625,17 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
                                   prof24_2pt=prof24_2pt,
                                   prof32_2pt=prof32_2pt,
                                   p_of_k_a=None)
+    print(f'halomod_Tk3D_cNG: computing halomod_trispectrum_3h... done in {(time.perf_counter() - start_time)/60:.2f} m')
 
+    print('halomod_Tk3D_cNG: computing halomod_trispectrum_4h...')
+    start_time = time.perf_counter()
     tkk += halomod_trispectrum_4h(cosmo, hmc, np.exp(lk_arr), a_arr,
                                   prof=prof,
                                   prof2=prof2,
                                   prof3=prof3,
                                   prof4=prof4,
                                   p_of_k_a=None)
+    print(f'halomod_Tk3D_cNG: computing halomod_trispectrum_4h... done in {(time.perf_counter() - start_time)/60:.2f} m')
 
     tkk, use_log = _logged_output(tkk, log=use_log)
 
