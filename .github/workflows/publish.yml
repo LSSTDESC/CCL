@@ -15,6 +15,10 @@ jobs:
     - name: Setup python
       uses: actions/setup-python@v2
 
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+
     - name: Build wheel and source tarball
       run: |
         python setup.py sdist
