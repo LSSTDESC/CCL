@@ -1,6 +1,8 @@
 # Unreleased
 
 # v3.0.1 Changes
+- Fixed GSL integration segfault (#1155).
+- Added `to_dict` utility in cosmology class (#1160). 
 
 ## Python library
 - Documentation fixes (#1122).
