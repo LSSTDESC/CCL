@@ -19,6 +19,7 @@ __all__ = ("TransferFunctions", "MatterPowerSpectra",
            "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
 
 import yaml
+from copy import deepcopy
 from enum import Enum
 from inspect import getmembers, isfunction, signature
 from numbers import Real
@@ -111,6 +112,23 @@ class _CosmologyBackgroundData:
     """
     lookback: Akima1DInterpolator = None
     age0: float = None
+
+
+def _make_yaml_friendly(d):
+    """Turn python objects into yaml types where possible."""
+
+    d = deepcopy(d)
+    for k, v in d.items():
+        if isinstance(v, tuple):
+            d[k] = list(v)
+        elif isinstance(v, np.ndarray):
+            d[k] = v.tolist()
+        elif isinstance(v, dict):
+            d[k] = _make_yaml_friendly(v)
+        elif not (isinstance(v, (int, float, str, list)) or v is None):
+            raise ValueError(f"{k}={v} cannot be serialised to YAML.")
+
+    return d
 
 
 @_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
@@ -235,13 +253,23 @@ class Cosmology(CCLObject):
         self.lin_pk_emu = None
         if isinstance(transfer_function, emulators.EmulatorPk):
             self.lin_pk_emu = transfer_function
-            transfer_function = 'emulator'
+            self.transfer_function_type = "emulator"
+        elif isinstance(transfer_function, str):
+            self.transfer_function_type = transfer_function
+        else:
+            raise ValueError(f"transfer_function={transfer_function} not "
+                             f"supported.")
 
         # initialise nonlinear Pk emulators if needed
         self.nl_pk_emu = None
         if isinstance(matter_power_spectrum, emulators.EmulatorPk):
             self.nl_pk_emu = matter_power_spectrum
-            matter_power_spectrum = 'emulator'
+            self.matter_power_spectrum_type = "emulator"
+        elif isinstance(matter_power_spectrum, str):
+            self.matter_power_spectrum_type = matter_power_spectrum
+        else:
+            raise ValueError(f"matter_power_spectrum={matter_power_spectrum} "
+                             f"not supported.")
 
         self.baryons = baryonic_effects
         if not isinstance(self.baryons, baryons.Baryons):
@@ -277,6 +305,8 @@ class Cosmology(CCLObject):
         self._config_init_kwargs = dict(
             transfer_function=transfer_function,
             matter_power_spectrum=matter_power_spectrum,
+            baryonic_effects=baryonic_effects,
+            mg_parametrization=mg_parametrization,
             extra_parameters=extra_parameters)
 
         self._build_cosmo()
@@ -299,6 +329,12 @@ class Cosmology(CCLObject):
         if self.cosmo.status != 0:
             raise CCLError(f"{self.cosmo.status}: {self.cosmo.status_message}")
 
+    def to_dict(self):
+        """Returns a dictionary of the arguments used to create the Cosmology
+        object such that ``cosmo == pyccl.Cosmology(**cosmo.to_dict())``
+        is ``True``."""
+        return {**self._params_init_kwargs, **self._config_init_kwargs}
+
     def write_yaml(self, filename, *, sort_keys=False):
         """Write a YAML representation of the parameters to file.
 
@@ -306,18 +342,7 @@ class Cosmology(CCLObject):
             filename (:obj:`str`): file name, file pointer, or stream to write
                 parameters to.
         """
-        def make_yaml_friendly(d):
-            # serialize numpy types and dicts
-            for k, v in d.items():
-                if isinstance(v, int):
-                    d[k] = int(v)
-                elif isinstance(v, float):
-                    d[k] = float(v)
-                elif isinstance(v, dict):
-                    make_yaml_friendly(v)
-
-        params = {**self._params_init_kwargs, **self._config_init_kwargs}
-        make_yaml_friendly(params)
+        params = _make_yaml_friendly(self.to_dict())
 
         if isinstance(filename, str):
             with open(filename, "w") as fp:
@@ -337,12 +362,14 @@ class Cosmology(CCLObject):
         loader = yaml.Loader
         if isinstance(filename, str):
             with open(filename, 'r') as fp:
-                return cls(**{**yaml.load(fp, Loader=loader), **kwargs})
-        return cls(**{**yaml.load(filename, Loader=loader), **kwargs})
+                params = yaml.load(fp, Loader=loader)
+        else:
+            params = yaml.load(filename, Loader=loader)
+        return cls(**{**params, **kwargs})
 
     def _build_config(
-            self, transfer_function=None, matter_power_spectrum=None,
-            extra_parameters=None):
+            self, *, transfer_function=None, matter_power_spectrum=None,
+            **kwargs):
         """Build a ccl_configuration struct.
 
         This function builds C ccl_configuration struct. This structure
@@ -360,9 +387,9 @@ class Cosmology(CCLObject):
                 "the transfer function should be 'boltzmann_camb'.")
 
         config = lib.configuration()
-        tf = transfer_function_types[transfer_function]
+        tf = transfer_function_types[self.transfer_function_type]
         config.transfer_function_method = tf
-        mps = matter_power_spectrum_types[matter_power_spectrum]
+        mps = matter_power_spectrum_types[self.matter_power_spectrum_type]
         config.matter_power_spectrum_method = mps
 
         # Store ccl_configuration for later access
@@ -519,7 +546,7 @@ class Cosmology(CCLObject):
         self.compute_growth()
 
         # Populate power spectrum splines
-        trf = self._config_init_kwargs['transfer_function']
+        trf = self.transfer_function_type
         pk = None
         rescale_s8 = True
         rescale_mg = True
@@ -549,7 +576,7 @@ class Cosmology(CCLObject):
         # we set the nonlin power spectrum first, but keep the linear via a
         # status variable to use it later if the transfer function is CAMB too.
         pkl = None
-        if self._config_init_kwargs["matter_power_spectrum"] == "camb":
+        if self.matter_power_spectrum_type == "camb":
             rescale_mg = False
             if self.mg_parametrization.mu_0 != 0:
                 raise ValueError("Can't rescale non-linear power spectrum "
@@ -583,7 +610,7 @@ class Cosmology(CCLObject):
         self.compute_distances()
 
         # Populate power spectrum splines
-        mps = self._config_init_kwargs['matter_power_spectrum']
+        mps = self.matter_power_spectrum_type
         # needed for halofit, and linear options
         if (mps not in ['emulator']) and (mps is not None):
             self.compute_linear_power()
