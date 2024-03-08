@@ -1,10 +1,8 @@
 name: Upload to PyPI
 
 on:
-  push:
-    branches:
-      - main
-      - master
+  release:
+    types: [published]
 
 jobs:
   Upload:
