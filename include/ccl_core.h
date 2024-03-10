@@ -20,6 +20,11 @@ CCL_BEGIN_DECLS
  */
 typedef struct ccl_physical_constants {
   /**
+   * Sidereal year (s/yr). [IERS2014 in J2000.0]
+   */
+  double YEAR;
+
+  /**
    * Lightspeed / H0 in units of Mpc/h (from CODATA 2014)
    */
   double CLIGHT_HMPC;
@@ -68,16 +73,6 @@ typedef struct ccl_physical_constants {
    * Electron volt to Joules convestion
    */
   double EV_IN_J;
-
-  /**
-   * Temperature of the CMB in K
-   */
-  double T_CMB;
-
-  /**
-   * T_ncdm, as taken from CLASS, explanatory.ini
-   */
-  double TNCDM;
 
   /**
    * neutrino mass splitting differences

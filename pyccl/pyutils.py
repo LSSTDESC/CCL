@@ -394,6 +394,28 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     return f
 
 
+def loglin_spacing(logstart, xmin, xmax, num_log, num_lin):
+    """Create an array spaced first logarithmically, then linearly.
+
+    .. note::
+
+        The number of logarithmically spaced points used is ``num_log - 1``
+        because the first point of the linearly spaced points is the same as
+        the end point of the logarithmically spaced points.
+
+    .. code-block:: text
+
+        |=== num_log ==|   |============== num_lin ================|
+      --*-*--*---*-----*---*---*---*---*---*---*---*---*---*---*---*--> (axis)
+        ^                  ^                                       ^
+     logstart             xmin                                    xmax
+
+    """
+    log = np.geomspace(logstart, xmin, num_log-1, endpoint=False)
+    lin = np.linspace(xmin, xmax, num_lin)
+    return np.concatenate((log, lin))
+
+
 def get_pk_spline_nk(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the wavenumber dimension.
 

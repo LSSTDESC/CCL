@@ -873,11 +873,11 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
             lensing shear contribution from this tracer.
         ia_bias (:obj:`tuple`): A tuple of arrays
             ``(z, A_IA(z))`` giving the intrinsic alignment amplitude
-            ``A_IA(z)``. If ``None``, the tracer is assumped to not have
+            ``A_IA(z)``. If ``None``, the tracer is assumed to not have
             intrinsic alignments.
         use_A_ia (:obj:`bool`): set to ``True`` to use the conventional IA
             normalization. Set to ``False`` to use the raw input amplitude,
-            which will usually be 1 for use with perturbaion theory IA
+            which will usually be 1 for use with perturbation theory IA
             modeling.
         n_samples (:obj:`int`): number of samples over which the lensing
             kernel is desired. These will be equi-spaced in radial distance.

@@ -16,5 +16,6 @@ class CosmologyParams(CCLParameters, factory=lib.parameters):
 
     def __setattr__(self, key, value):
         if key == "m_nu":
+            self._instance.N_nu_mass = len(value)
             return lib.parameters_m_nu_set_custom(self._instance, value)
         super().__setattr__(key, value)

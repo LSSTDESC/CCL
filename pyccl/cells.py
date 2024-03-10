@@ -46,8 +46,9 @@ def angular_cl(
             method backed up by `quad` when it fails) and 'spline' (the
             integrand is splined and then integrated numerically).
         non_limber_integration_method (string) : integration method to be used
-            for the non-Limber integrals. Possibilities: 'FKEM','MATTER'.
-            See N5K (arXiv:2212.04291) paper for more information.
+            for the non-Limber integrals. Currently the only method implemented
+            is ``'FKEM'`` (see the `N5K paper <https://arxiv.org/abs/2212.04291>`_
+            for details).
         p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 
             3D linear Power spectrum to project, for special use in
             PT calculations using the FKEM non-limber integration technique.

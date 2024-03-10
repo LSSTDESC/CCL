@@ -54,9 +54,9 @@ class Pk2D(CCLObject):
             splines. Note that extrapolation is either in :math:`\\log(P(k))` or
             in :math:`P(k)`, depending on the value of ``is_logp``.
         is_logp (:obj:`bool`):
-            If True, ``pkfunc``/``pkarr`` return/hold the natural logarithm of the
+            If True, ``pkarr`` holds the natural logarithm of the
             power spectrum. Otherwise, the true value of the power spectrum is
-            expected. If ``is_logp`` is ``True``, arrays are interpolate in
+            expected. If ``is_logp`` is ``True``, arrays are interpolated in
             log-space.
 
     .. automethod:: __call__

@@ -68,6 +68,12 @@ class HaloProfileHOD(HaloProfile):
     here are roughly compatible with those found in the latter
     paper.
 
+    .. warning:: Note that :math:`\\sigma_{{\\rm ln}M}` is defined
+        so that all logarithms of mass entering the definition of
+        :math:`\\bar{N}_c(M,a)` are natural logarithms, and not
+        decimal. This is different from the convention used in some
+        of the papers above, which used :math:`\\log_{10}`.
+
     See :class:`~pyccl.halos.profiles_2pt.Profile2ptHOD` for a
     description of the Fourier-space two-point correlator of the
     HOD profile.
