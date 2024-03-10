@@ -5,6 +5,7 @@ dependencies:
   - pip
   - cmake
   - gsl
+  - fftw
   - swig
   - pyyaml
   - numpy

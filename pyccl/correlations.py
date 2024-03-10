@@ -110,7 +110,7 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', method='fftlog'):
     method = method.lower()
 
     if type not in correlation_types:
-        raise ValueError(f"Invalud correlation type {type}.")
+        raise ValueError(f"Invalid correlation type {type}.")
 
     if method not in correlation_methods.keys():
         raise ValueError(f"Invalid correlation method {method}.")
