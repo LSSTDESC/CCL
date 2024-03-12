@@ -394,6 +394,28 @@ def _vectorize_fn6(fn, fn_vec, cosmo, x1, x2, returns_status=True):
     return f
 
 
+def loglin_spacing(logstart, xmin, xmax, num_log, num_lin):
+    """Create an array spaced first logarithmically, then linearly.
+
+    .. note::
+
+        The number of logarithmically spaced points used is ``num_log - 1``
+        because the first point of the linearly spaced points is the same as
+        the end point of the logarithmically spaced points.
+
+    .. code-block:: text
+
+        |=== num_log ==|   |============== num_lin ================|
+      --*-*--*---*-----*---*---*---*---*---*---*---*---*---*---*---*--> (axis)
+        ^                  ^                                       ^
+     logstart             xmin                                    xmax
+
+    """
+    log = np.geomspace(logstart, xmin, num_log-1, endpoint=False)
+    lin = np.linspace(xmin, xmax, num_lin)
+    return np.concatenate((log, lin))
+
+
 def get_pk_spline_nk(cosmo=None, spline_params=spline_params):
     """Get the number of sampling points in the wavenumber dimension.
 
@@ -522,6 +544,55 @@ def _fftlog_transform(rs, frs,
                                           dim, mu, power_law_index,
                                           (n_transforms + 1) * n_r,
                                           status)
+    check(status)
+    result = result.reshape([n_transforms + 1, n_r])
+    ks = result[0]
+    fks = result[1:]
+    if np.ndim(frs) == 1:
+        fks = fks.squeeze()
+
+    return ks, fks
+
+
+# Compute the discrete Hankel transform of the function frs
+# evaluated at values rs.
+# Weighted by a power law and the bessel_deriv-th derivative of the
+# (spherical) bessel function of order \mu.
+# The computed transform will be centered about the peak of the given \mu.
+# double bessel_deriv: the nth derivative of the (spherical) bessel function
+# int spherical_bessel: 1 spherical bessel functions, 0 bessel functions
+# double q: the biasing index
+# NOTE: we ignore factors of (2*pi) found in typical fht algorithm,
+# these factors should be calculated and applied a-posteriori if necessary
+def _fftlog_transform_general(
+    rs, frs, mu, q, spherical_bessel, bessel_deriv, window_frac
+):
+    if np.ndim(rs) != 1:
+        raise ValueError("rs should be a 1D array")
+    if np.ndim(frs) < 1 or np.ndim(frs) > 2:
+        raise ValueError("frs should be a 1D or 2D array")
+    if np.ndim(frs) == 1:
+        n_transforms = 1
+        n_r = len(frs)
+    else:
+        n_transforms, n_r = frs.shape
+
+    if len(rs) != n_r:
+        raise ValueError("rs should have %d elements" % n_r)
+
+    status = 0
+    result, status = lib.fftlog_transform_general(
+        n_transforms,
+        rs,
+        frs.flatten(),
+        mu,
+        q,
+        spherical_bessel,
+        bessel_deriv,
+        window_frac,
+        (n_transforms + 1) * n_r,
+        status,
+    )
     check(status)
     result = result.reshape([n_transforms + 1, n_r])
     ks = result[0]
