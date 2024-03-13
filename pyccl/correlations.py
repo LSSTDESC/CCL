@@ -465,7 +465,7 @@ def _fftlog_wrap(r_p: np.ndarray, a: float, p_of_k_a,
     # To compute the integral shown above we use _fftlog_transform
     # and set fk = rp^1/2 P(k,a:float)/(2^5/2 pi^5/2 k^1/2).
     if precision_fftlog is None:
-        precision_fftlog = {'padding_lo_fftlog': 0.01,
+        precision_fftlog = {'padding_lo_fftlog': 0.001,
                             'padding_hi_fftlog': 10.,
                             'n_per_decade': 100,
                             'extrapol': 'linx_liny',
