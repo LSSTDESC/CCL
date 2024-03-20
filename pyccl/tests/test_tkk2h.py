@@ -94,16 +94,16 @@ def test_tkk2h_22_smoke(pars):
                                  mass_def=M200, nM=2)
 
     def f(k, a):
-        return ccl.halos._halomod_trispectrum_2h_22(COSMO, hmc, k, a,
-                                                    prof=pars['p1'],
-                                                    prof2=pars['p2'],
-                                                    prof3=pars['p3'],
-                                                    prof4=pars['p4'],
-                                                    prof13_2pt=pars['cv13'],
-                                                    prof14_2pt=pars['cv14'],
-                                                    prof24_2pt=pars['cv24'],
-                                                    prof32_2pt=pars['cv32'],
-                                                    p_of_k_a=pars['p_of_k_a'])
+        return ccl.halos.halomod_trispectrum_2h_22(COSMO, hmc, k, a,
+                                                   prof=pars['p1'],
+                                                   prof2=pars['p2'],
+                                                   prof3=pars['p3'],
+                                                   prof4=pars['p4'],
+                                                   prof13_2pt=pars['cv13'],
+                                                   prof14_2pt=pars['cv14'],
+                                                   prof24_2pt=pars['cv24'],
+                                                   prof32_2pt=pars['cv32'],
+                                                   p_of_k_a=pars['p_of_k_a'])
     smoke_assert_tkk2h_real(f)
 
 
@@ -155,14 +155,14 @@ def test_tkk2h_13_smoke(pars):
                                  mass_def=M200, nM=2)
 
     def f(k, a):
-        return ccl.halos._halomod_trispectrum_2h_13(COSMO, hmc, k, a,
-                                                    prof=pars['p1'],
-                                                    prof2=pars['p2'],
-                                                    prof3=pars['p3'],
-                                                    prof4=pars['p4'],
-                                                    prof12_2pt=pars['cv12'],
-                                                    prof34_2pt=pars['cv34'],
-                                                    p_of_k_a=pars['p_of_k_a'])
+        return ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k, a,
+                                                   prof=pars['p1'],
+                                                   prof2=pars['p2'],
+                                                   prof3=pars['p3'],
+                                                   prof4=pars['p4'],
+                                                   prof12_2pt=pars['cv12'],
+                                                   prof34_2pt=pars['cv34'],
+                                                   p_of_k_a=pars['p_of_k_a'])
     smoke_assert_tkk2h_real(f)
 
 
@@ -171,21 +171,21 @@ def test_Tk3D_2h():
                                  mass_def=M200)
     k_arr = KK
     a_arr = np.array([0.1, 0.4, 0.7, 1.0])
-    tkk_arr = ccl.halos._halomod_trispectrum_2h_22(COSMO, hmc, k_arr, a_arr,
-                                                   P1, prof2=P2,
-                                                   prof3=P3, prof4=P4,
-                                                   prof13_2pt=PKC,
-                                                   prof14_2pt=PKC,
-                                                   prof24_2pt=PKC,
-                                                   prof32_2pt=PKC,
-                                                   p_of_k_a=None)
+    tkk_arr = ccl.halos.halomod_trispectrum_2h_22(COSMO, hmc, k_arr, a_arr,
+                                                  P1, prof2=P2,
+                                                  prof3=P3, prof4=P4,
+                                                  prof13_2pt=PKC,
+                                                  prof14_2pt=PKC,
+                                                  prof24_2pt=PKC,
+                                                  prof32_2pt=PKC,
+                                                  p_of_k_a=None)
 
-    tkk_arr += ccl.halos._halomod_trispectrum_2h_13(COSMO, hmc, k_arr, a_arr,
-                                                    prof=P1, prof2=P2,
-                                                    prof3=P3, prof4=P4,
-                                                    prof12_2pt=None,
-                                                    prof34_2pt=None,
-                                                    p_of_k_a=None)
+    tkk_arr += ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k_arr, a_arr,
+                                                   prof=P1, prof2=P2,
+                                                   prof3=P3, prof4=P4,
+                                                   prof12_2pt=None,
+                                                   prof34_2pt=None,
+                                                   p_of_k_a=None)
 
     # Input sampling
     tk3d = ccl.halos.halomod_Tk3D_2h(COSMO, hmc,
@@ -272,15 +272,15 @@ def test_tkk2h_22_errors(pars):
 
     error = AttributeError if pars['p_of_k_a'] is None else TypeError
     with pytest.raises(error):
-        ccl.halos._halomod_trispectrum_2h_22(COSMO, hmc, k_arr, a_arr,
-                                             prof=pars['p1'], prof2=pars['p2'],
-                                             prof3=pars['p3'],
-                                             prof4=pars['p4'],
-                                             prof13_2pt=pars['cv13'],
-                                             prof14_2pt=pars['cv14'],
-                                             prof24_2pt=pars['cv24'],
-                                             prof32_2pt=pars['cv32'],
-                                             p_of_k_a=pars['p_of_k_a'])
+        ccl.halos.halomod_trispectrum_2h_22(COSMO, hmc, k_arr, a_arr,
+                                            prof=pars['p1'], prof2=pars['p2'],
+                                            prof3=pars['p3'],
+                                            prof4=pars['p4'],
+                                            prof13_2pt=pars['cv13'],
+                                            prof14_2pt=pars['cv14'],
+                                            prof24_2pt=pars['cv24'],
+                                            prof32_2pt=pars['cv32'],
+                                            p_of_k_a=pars['p_of_k_a'])
 
 
 @pytest.mark.parametrize('pars',
@@ -316,11 +316,11 @@ def test_tkk2h_13_errors(pars):
     else:
         error = AttributeError
     with pytest.raises(error):
-        ccl.halos._halomod_trispectrum_2h_13(COSMO, hmc, k_arr, a_arr,
-                                             prof=pars['p1'],
-                                             prof2=pars['p2'],
-                                             prof3=pars['p3'],
-                                             prof4=pars['p4'],
-                                             prof12_2pt=pars['cv12'],
-                                             prof34_2pt=pars['cv34'],
-                                             p_of_k_a=pars['p_of_k_a'])
+        ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k_arr, a_arr,
+                                            prof=pars['p1'],
+                                            prof2=pars['p2'],
+                                            prof3=pars['p3'],
+                                            prof4=pars['p4'],
+                                            prof12_2pt=pars['cv12'],
+                                            prof34_2pt=pars['cv34'],
+                                            p_of_k_a=pars['p_of_k_a'])

@@ -1,5 +1,5 @@
 __all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
-           "_halomod_trispectrum_2h_22", "_halomod_trispectrum_2h_13",
+           "halomod_trispectrum_2h_22", "halomod_trispectrum_2h_13",
            "halomod_trispectrum_3h", "halomod_trispectrum_4h",
            "halomod_Tk3D_2h", "halomod_Tk3D_3h", "halomod_Tk3D_4h",
            "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC",
@@ -612,27 +612,30 @@ def _logged_output(*arrs, log):
     return *[np.log(arr) for arr in arrs], log
 
 
-def _halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
-                               prof3=None, prof4=None, prof13_2pt=None,
-                               prof14_2pt=None, prof24_2pt=None,
-                               prof32_2pt=None, p_of_k_a=None):
-    """ Computes the isotropized halo model 2-halo trispectrum for four
-    profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
+def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
+                              prof3=None, prof4=None, prof13_2pt=None,
+                              prof14_2pt=None, prof24_2pt=None,
+                              prof32_2pt=None, p_of_k_a=None):
+    """ Computes the "22" term of the isotropized halo model 2-halo trispectrum
+    for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
     .. math::
         \\bar{T}^{2h}_{22}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
         \\int \\frac{d\\varphi_2}{2\\pi}
-        T^{2h}_{22}({\\bf k_1},-{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
+        T^{2h,(22)}_{u_1,u_2;v_1,v_2}({\\bf k}_1,-{\\bf k}_1,
+        {\\bf k}_2,-{\\bf k}_2),
 
     with
 
     .. math::
-        T^{2h}_{22}_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
-        P_lin(|k_{u_1} + k_{u_2}|)\\,  I^1_2(k_{u_1}, k_{u_2}|u})\\,
-        I^1_2(k_{v_1}, k_{v_2}|v}) + 2 perm
+        T^{2h,(22)}_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
+        \\langle P_{\\rm lin}(|{\\bf k}_u + {\\bf k}_v|)\\rangle_{\\varphi}\\,
+        I^1_2(k_u, k_v|u_1,v_1)\\,
+        I^1_2(k_u, k_v|u_2,v_2) + 1\\,{\\rm perm.}
 
-    where :math:`I^1_2` is defined in the documentation
-    of :math:`~HMCalculator.I_1_2`.
+    where :math:`\\langle\\cdots\\rangle_\\varphi` denotes averaging over the
+    relative angle between the two wavevectors, and :math:`I^1_2` is defined in
+    the documentation of :meth:`~pyccl.halos.halo_model.HMCalculator.I_1_2`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -757,29 +760,31 @@ def _halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
     return out
 
 
-def _halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
-                               prof2=None, prof3=None, prof4=None,
-                               prof12_2pt=None, prof34_2pt=None,
-                               p_of_k_a=None):
-    """ Computes the isotropized halo model 2-halo trispectrum for four
-    different quantities defined by their respective halo profiles. The 2-halo
-    trispectrum for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` is
-    calculated as:
-
-    .. math::
-        T^{2h}_{13}_{u_1,u_2,v_1,v_2}(k_u,k_v,a) =
-        P_lin(k_u)\\, I^1_1(k_{u_1}|u_1)\\,
-        I^1_3(k_{u_1}, k_{v_1}, k_{v_2}|u_1, v}) + 3 perm
-
-    where :math:`I^1_1` is defined in the documentation of
-    :meth:`~HMCalculator.I_1_1` and :math:`I^1_3` is defined in the
-    documentation of :meth:`~HMCalculator.I_1_3`. Then, this function returns
+def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
+                              prof2=None, prof3=None, prof4=None,
+                              prof12_2pt=None, prof34_2pt=None,
+                              p_of_k_a=None):
+    """ Computes the "12" term of the isotropized halo model 2-halo trispectrum
+    for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
     .. math::
         \\bar{T}^{2h}_{13}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
         \\int \\frac{d\\varphi_2}{2\\pi}
-        T^{1h}_{13}({\\bf k_1},-{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
+        T^{2h,(13)}_{u_1,u_2;v_1,v_2}({\\bf k}_1,
+        -{\\bf k}_1,{\\bf k}_2,-{\\bf k}_2),
 
+    with
+
+    .. math::
+        T^{2h,(13)}_{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
+        P_{\\rm lin}(k_u)\\, [I^1_1(k_u|u_1)\\,
+        I^1_3(k_u,k_v,k_v|u_2,v_1,v_2)+(u_1\\leftrightarrow u_2)]+
+        (u_i\\leftrightarrow v_i)
+
+    where :math:`I^1_1` is defined in the documentation of
+    :meth:`~pyccl.halos.halo_model.HMCalculator.I_1_1` and
+    :math:`I^1_3` is defined in the documentation of
+    :meth:`~pyccl.halos.halo_model.HMCalculator.I_1_3`.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -922,19 +927,24 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
     .. math::
         \\bar{T}^{3h}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
         \\int \\frac{d\\varphi_2}{2\\pi}
-        T^{2h}_{22}({\\bf k_1},-{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
+        T^{3h}_{u_1,u_2;v_1,v_2}({\\bf k_1},
+        -{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
 
     with
 
     .. math::
-        T^{3h}{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
-        B^{PT}({\bf k_{u_1}}, {\bf k_{u_2}}, {\bf k_{v_1}} + {\bf k_{v_2}}) \\,
-        I^1_1(k_{u_1} | u) I^1_1(k_{u_2} | u) I^1_2(k_{v_1}, k_{v_2}|v}) \\,
-        + 5 perm
+        T^{3h}_{u_1,u_2;v_1,v_2}({\\bf k}_u,{\\bf k}_v,a) =
+        B^{\\rm PT}({\\bf k}_u, -{\\bf k}_v,
+                    -{\\bf k}_u+{\\bf k}_v)
+        I^1_1(k_u | u_1) I^1_1(k_v | v_1) I^1_2(k_u, k_v|u_2,v_2) \\,
+        + 3\\,{\\rm perm.}
 
     where :math:`I^1_1` and :math:`I^1_2` are defined in the documentation
-    of :math:`~HMCalculator.I_1_1` and :math:`~HMCalculator.I_1_2`,
-    respectively; and :math:`B^{PT}` can be found in Eq. 30 of arXiv:1302.6994.
+    of :meth:`~pyccl.halos.halo_model.HMCalculator.I_1_1` and
+    :meth:`~pyccl.halos.halo_model.HMCalculator.I_1_2`,
+    respectively; and the tree-level bispectrum :math:`B^{PT}` is calculated
+    according to Eq. 30 of `Takada et al. 2013
+    <https://arxiv.org/abs/1302.6994>`_
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -1094,19 +1104,22 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
     .. math::
         \\bar{T}^{4h}(k_1, k_2, a) = \\int \\frac{d\\varphi_1}{2\\pi}
         \\int \\frac{d\\varphi_2}{2\\pi}
-        T^{4h}({\\bf k_1},-{\\bf k_1},{\\bf k_2},-{\\bf k_2}),
+        T^{4h}_{u_1,u_2;v_1,v_2}({\\bf k_1},-{\\bf k_1},
+        {\\bf k_2},-{\\bf k_2}),
 
     with
 
     .. math::
-        T^{4h}{u_1,u_2;v_1,v_2}(k_u,k_v,a) =
-        T^{PT}({\bf k_{u_1}}, {\bf k_{u_2}}, {\bf k_{v_1}}, {\bf k_{v_2}}) \\,
-        I^1_1(k_{u_1} | u) I^1_1(k_{u_2} | u) I^1_1(k_{v_1} | v) \\,
-        I^1_1(k_{v_2} | v) \\,
+        T^{4h}_{u_1,u_2;v_1,v_2}({\\bf k}_u,{\\bf k}_v,a) =
+        T^{PT}({\\bf k}_u, -{\\bf k}_u, {\\bf k}_v, -{\\bf k}_v) \\,
+        I^1_1(k_u | u_1) I^1_1(k_u | u_2) I^1_1(k_v | v_1)
+        I^1_1(k_v | v_2) \\,
 
     where :math:`I^1_1` is defined in the documentation
-    of :math:`~HMCalculator.I_1_1` and :math:`P^{PT}` can be found in Eq. 30
-    of arXiv:1302.6994.
+    of :meth:`~pyccl.halos.halo_model.HMCalculator.I_1_1`, and
+    the tree-level trispectrum :math:`T^{PT}` is calculated
+    according to Eq. 30 of `Takada et al. 2013
+    <https://arxiv.org/abs/1302.6994>`_
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
@@ -1299,21 +1312,21 @@ def halomod_Tk3D_2h(cosmo, hmc,
     if a_arr is None:
         a_arr = cosmo.get_pk_spline_a()
 
-    tkk_2h_22 = _halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                           prof, prof2=prof2,
-                                           prof3=prof3, prof4=prof4,
-                                           prof13_2pt=prof13_2pt,
-                                           prof14_2pt=prof14_2pt,
-                                           prof24_2pt=prof24_2pt,
-                                           prof32_2pt=prof32_2pt,
-                                           p_of_k_a=p_of_k_a)
+    tkk_2h_22 = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                          prof, prof2=prof2,
+                                          prof3=prof3, prof4=prof4,
+                                          prof13_2pt=prof13_2pt,
+                                          prof14_2pt=prof14_2pt,
+                                          prof24_2pt=prof24_2pt,
+                                          prof32_2pt=prof32_2pt,
+                                          p_of_k_a=p_of_k_a)
 
-    tkk_2h_13 = _halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                           prof, prof2=prof2,
-                                           prof3=prof3, prof4=prof4,
-                                           prof12_2pt=prof12_2pt,
-                                           prof34_2pt=prof34_2pt,
-                                           p_of_k_a=p_of_k_a)
+    tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                          prof, prof2=prof2,
+                                          prof3=prof3, prof4=prof4,
+                                          prof12_2pt=prof12_2pt,
+                                          prof34_2pt=prof34_2pt,
+                                          p_of_k_a=p_of_k_a)
 
     tkk = tkk_2h_22 + tkk_2h_13
 
@@ -1555,21 +1568,21 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
                                  prof3=prof3, prof4=prof4,
                                  prof34_2pt=prof34_2pt)
 
-    tkk += _halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                      prof, prof2=prof2,
-                                      prof3=prof3, prof4=prof4,
-                                      prof13_2pt=prof13_2pt,
-                                      prof14_2pt=prof14_2pt,
-                                      prof24_2pt=prof24_2pt,
-                                      prof32_2pt=prof32_2pt,
-                                      p_of_k_a=p_of_k_a)
+    tkk += halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                     prof, prof2=prof2,
+                                     prof3=prof3, prof4=prof4,
+                                     prof13_2pt=prof13_2pt,
+                                     prof14_2pt=prof14_2pt,
+                                     prof24_2pt=prof24_2pt,
+                                     prof32_2pt=prof32_2pt,
+                                     p_of_k_a=p_of_k_a)
 
-    tkk += _halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
-                                      prof, prof2=prof2,
-                                      prof3=prof3, prof4=prof4,
-                                      prof12_2pt=prof12_2pt,
-                                      prof34_2pt=prof34_2pt,
-                                      p_of_k_a=p_of_k_a)
+    tkk += halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                     prof, prof2=prof2,
+                                     prof3=prof3, prof4=prof4,
+                                     prof12_2pt=prof12_2pt,
+                                     prof34_2pt=prof34_2pt,
+                                     p_of_k_a=p_of_k_a)
 
     tkk += halomod_trispectrum_3h(cosmo, hmc, np.exp(lk_arr), a_arr,
                                   prof=prof,

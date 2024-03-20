@@ -35,20 +35,20 @@ def test_Tk3D_cNG():
                                                prof3=P3, prof4=P4,
                                                prof34_2pt=PKC)
 
-    tkk_arr += ccl.halos._halomod_trispectrum_2h_22(COSMO, hmc, k_arr, a_arr,
-                                                    P1, prof2=P2, prof3=P3,
-                                                    prof4=P4, prof13_2pt=PKC,
-                                                    prof14_2pt=PKC,
-                                                    prof24_2pt=PKC,
-                                                    prof32_2pt=PKC,
-                                                    p_of_k_a=None)
+    tkk_arr += ccl.halos.halomod_trispectrum_2h_22(COSMO, hmc, k_arr, a_arr,
+                                                   P1, prof2=P2, prof3=P3,
+                                                   prof4=P4, prof13_2pt=PKC,
+                                                   prof14_2pt=PKC,
+                                                   prof24_2pt=PKC,
+                                                   prof32_2pt=PKC,
+                                                   p_of_k_a=None)
 
-    tkk_arr += ccl.halos._halomod_trispectrum_2h_13(COSMO, hmc, k_arr, a_arr,
-                                                    prof=P1, prof2=P2,
-                                                    prof3=P3, prof4=P4,
-                                                    prof12_2pt=PKC,
-                                                    prof34_2pt=PKC,
-                                                    p_of_k_a=None)
+    tkk_arr += ccl.halos.halomod_trispectrum_2h_13(COSMO, hmc, k_arr, a_arr,
+                                                   prof=P1, prof2=P2,
+                                                   prof3=P3, prof4=P4,
+                                                   prof12_2pt=PKC,
+                                                   prof34_2pt=PKC,
+                                                   p_of_k_a=None)
     tkk_arr += ccl.halos.halomod_trispectrum_3h(COSMO, hmc, k_arr, a_arr,
                                                 prof=P1,
                                                 prof2=P2,
