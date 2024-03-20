@@ -818,6 +818,10 @@ def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
     with UnlockInstance(tracer, mutate=False):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
 
+    if (bias is None) and (not has_rsd) and (mag_bias is None):
+        raise ValueError("Number counts tracers must have a non-zero bias, "
+                         "RSDs, or a magnification bias contribution.")
+
     kernel_d = None
     if bias is not None:  # Has density term
         # Kernel
@@ -904,6 +908,11 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
             # MG case
             tracer._MG_add_tracer(cosmo, kernel_l, z_n,
                                   der_bessel=-1, der_angles=2)
+    else:
+        if ia_bias is None:
+            raise ValueError("Weak lensing tracers with no shear must "
+                             "have a non-zero intrinsic alignment amplitude.")
+
     if ia_bias is not None:  # Has intrinsic alignments
         z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
         # Kernel

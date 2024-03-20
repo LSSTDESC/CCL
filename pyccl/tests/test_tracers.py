@@ -426,6 +426,17 @@ def test_tracer_chi_min_max():
     assert tr.chi_max == tr._trc[1].chi_max
 
 
+def test_empty_wlnc_tracer():
+    z = np.linspace(0, 1.0, 32)
+    nz = np.exp(-0.5*((z-0.5)/0.05)**2)
+    with pytest.raises(ValueError):
+        ccl.WeakLensingTracer(COSMO, dndz=(z, nz),
+                              has_shear=False)
+    with pytest.raises(ValueError):
+        ccl.NumberCountsTracer(COSMO, has_rsd=False,
+                               dndz=(z, nz))
+
+
 def test_zpower_raises():
     with pytest.raises(ValueError):
         ccl.Tracer.from_z_power(COSMO, A=1., z_min=1.0,
@@ -460,34 +471,30 @@ def test_tracer_repr():
     wchi = np.ones_like(chi)
     tr2.add_tracer(COSMO, kernel=(chi, wchi))
     assert tr2 != tr1
-    # Check empty tracer.
-    z = np.linspace(0, 0.5, 128)
-    nz = np.ones_like(z)
-    tr4 = ccl.NzTracer()
-    tr5 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=False)  # all off
-    assert tr4 == tr5
     # Check tracers with transfer functions.
     # transfer_a
-    tr6 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=True)
-    tr7 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=True)
-    assert tr6 == tr7
+    z = np.linspace(0, 0.5, 128)
+    nz = np.ones_like(z)
+    tr4 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=True)
+    tr5 = ccl.NumberCountsTracer(COSMO, dndz=(z, nz), has_rsd=True)
+    assert tr4 == tr5
     # transfer_k
     lk = np.linspace(-5, 2, 8)
     t_k = np.ones_like(lk)
-    tr6.add_tracer(COSMO, transfer_k=(lk, t_k))
-    tr7.add_tracer(COSMO, transfer_k=(lk, t_k))
-    assert tr6 == tr7
+    tr4.add_tracer(COSMO, transfer_k=(lk, t_k))
+    tr5.add_tracer(COSMO, transfer_k=(lk, t_k))
+    assert tr4 == tr5
     # transfer_a
-    tr6.add_tracer(COSMO, transfer_a=(1/(1+z)[::-1], nz))
-    tr7.add_tracer(COSMO, transfer_a=(1/(1+z)[::-1], nz))
-    assert tr6 == tr7
+    tr4.add_tracer(COSMO, transfer_a=(1/(1+z)[::-1], nz))
+    tr5.add_tracer(COSMO, transfer_a=(1/(1+z)[::-1], nz))
+    assert tr4 == tr5
     # transfer_ka
     a = np.linspace(0.5, 1.0, 8)
     t_ka = np.ones((a.size, lk.size))
-    tr6.add_tracer(COSMO, transfer_ka=(a, lk, t_ka))
-    tr7.add_tracer(COSMO, transfer_ka=(a, lk, t_ka))
-    assert tr6 == tr7
+    tr4.add_tracer(COSMO, transfer_ka=(a, lk, t_ka))
+    tr5.add_tracer(COSMO, transfer_ka=(a, lk, t_ka))
+    assert tr4 == tr5
     # different extrap orders
-    tr6.add_tracer(COSMO, transfer_ka=(a, lk, t_ka), extrap_order_lok=0)
-    tr7.add_tracer(COSMO, transfer_ka=(a, lk, t_ka), extrap_order_lok=1)
-    assert tr6 != tr7
+    tr4.add_tracer(COSMO, transfer_ka=(a, lk, t_ka), extrap_order_lok=0)
+    tr5.add_tracer(COSMO, transfer_ka=(a, lk, t_ka), extrap_order_lok=1)
+    assert tr4 != tr5
