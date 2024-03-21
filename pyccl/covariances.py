@@ -226,7 +226,7 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
         ndim = np.ndim(a_arr)
         a_arr = np.atleast_1d(a_arr)
 
-    if p_of_k_a is DEFAULT_POWER_SPECTRUM:
+    if p_of_k_a == DEFAULT_POWER_SPECTRUM:
         cosmo.compute_linear_power()
         p_of_k_a = cosmo.get_linear_power()
 
