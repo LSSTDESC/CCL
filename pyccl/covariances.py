@@ -257,7 +257,7 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
 def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
                        tracer3=None, tracer4=None, ell2=None,
                        sigma2_B=None, fsky=1.,
-                       integration_method='qag_quad', sigma2_suffix=''):
+                       integration_method='qag_quad'):
     """Calculate the super-sample contribution to the connected
     non-Gaussian covariance for a pair of power spectra
     :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
@@ -357,11 +357,6 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         a_arr, s2b_arr = sigma2_B_disc(cosmo_in, fsky=fsky)
     else:
         a_arr, s2b_arr = _check_array_params(sigma2_B, 'sigma2_B')
-        
-    # np.save(f'{ROOT}/exact_SSC/output/sigma2/PyCCL/a_arr{sigma2_suffix}.npy', a_arr)
-    # np.save(f'{ROOT}/exact_SSC/output/sigma2/PyCCL/s2b_arr{sigma2_suffix}.npy', s2b_arr)
-    # print(f'sigma2_B saved in folder\n{ROOT}/exact_SSC/output/sigma2/PyCCL ' \
-    #       f'with suffix: {sigma2_suffix}')
 
     cov, status = lib.angular_cov_ssc_vec(
         cosmo, clt1, clt2, clt3, clt4, tsp, a_arr, s2b_arr,
