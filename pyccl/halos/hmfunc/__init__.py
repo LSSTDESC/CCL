@@ -9,3 +9,4 @@ from .tinker08 import *
 from .tinker10 import *
 from .watson13 import *
 from .bocquet20 import *
+from .nishimichi19 import *
