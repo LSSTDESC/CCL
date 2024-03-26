@@ -329,7 +329,7 @@ def halomod_Tk3D_SSC(
         prof12_2pt=None, prof34_2pt=None,
         p_of_k_a=None, lk_arr=None, a_arr=None,
         extrap_order_lok=1, extrap_order_hik=1, use_log=False,
-        extrap_pk=False, probe_block=None):
+        extrap_pk=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the super-sample covariance trispectrum, given by the tensor
     product of the power spectrum responses associated with the
@@ -494,27 +494,25 @@ def halomod_Tk3D_SSC(
                                                  norm3, norm4, i11_3, i11_4)[2]
 
     dpk12, dpk34, use_log = _logged_output(dpk12, dpk34, log=use_log)
-
-    # transpose pk files to have [k, z] instead of [z, k]
-    output_path = ROOT + '/common_data/Spaceborne/jobs/SPV3_magcut_zcut_thesis/output/Flagship_2/pyccl_responses'
-    np.savetxt(f"{output_path}/{probe_block}/a_arr.txt", a_arr)
-    np.savetxt(f"{output_path}/{probe_block}/k_1overMpc.txt", k_use)
-    np.save(f"{output_path}/{probe_block}/dpk12_is_number_counts{prof.is_number_counts}.npy", dpk12.T)
-    np.save(f"{output_path}/{probe_block}/dpk34_is_number_counts{prof3.is_number_counts}.npy", dpk34.T)
-    np.save(f"{output_path}/{probe_block}/pk2d_linear.npy", pk2d_array_tosave.T)
-    np.save(f"{output_path}/{probe_block}/dpk2d_linear.npy", dpk2d_array_tosave.T)
-    # np.save(f"{output_path}/{probe_block}/pk1d_linear.npy", pk.T)
-    # np.save(f"{output_path}/{probe_block}/dpk1d_linear.npy", dpk.T)
-    np.save(f"{output_path}/{probe_block}/bA12.npy", bA12_tosave.T)
-    np.save(f"{output_path}/{probe_block}/bB12.npy", bB12_tosave.T)
-    np.save(f"{output_path}/{probe_block}/bA34.npy", bA34_tosave.T)
-    np.save(f"{output_path}/{probe_block}/bB34.npy", bB34_tosave.T)
-    print(f'Halomodel Pk responses saved from pyccl/halos/pk_4pt.py\nto{output_path}')
+    
+    responses_dict = {
+        'a_arr': a_arr,
+        'k_1overMpc': k_use,
+        'dpk12': dpk12.T,
+        'dpk34': dpk34.T,
+        'pk2d_linear': pk2d_array_tosave.T,
+        'dpk2d_linear': dpk2d_array_tosave.T,
+        'bA12_tosave': bA12_tosave.T,
+        'bB12_tosave': bB12_tosave.T,
+        'bA34_tosave': bA34_tosave.T,
+        'bB34_tosave': bB34_tosave.T,
+        
+    }
 
     return Tk3D(a_arr=a_arr, lk_arr=lk_arr,
                 pk1_arr=dpk12, pk2_arr=dpk34,
                 extrap_order_lok=extrap_order_lok,
-                extrap_order_hik=extrap_order_hik, is_logt=use_log)
+                extrap_order_hik=extrap_order_hik, is_logt=use_log), responses_dict
 
 
 def _allocate_profiles(prof, prof2, prof3, prof4, prof12_2pt, prof34_2pt):
