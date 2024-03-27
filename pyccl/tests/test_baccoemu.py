@@ -83,7 +83,7 @@ def test_baccoemu_nonlinear_As_sigma8():
 
 
 def test_baccoemu_baryons_boost():
-    baryons = ccl.BaccoemuBaryons()
+    baryons = ccl.BaryonsBaccoemu()
     nlpkemu = ccl.BaccoemuNonlinear()
     cosmo = ccl.Cosmology(
         Omega_c=0.27,
@@ -110,14 +110,14 @@ def test_baccoemu_baryons_boost():
 
 
 def test_baccoemu_baryons_changepars():
-    baryons = ccl.BaccoemuBaryons()
+    baryons = ccl.BaryonsBaccoemu()
     baryons.update_parameters(log10_M_c=12.7, log10_eta=-0.4)
     assert ((baryons.bcm_params['M_c'] == 12.7)
             & (baryons.bcm_params['eta'] == -0.4))
 
 
 def test_baccoemu_baryons_a_range():
-    baryons = ccl.BaccoemuBaryons()
+    baryons = ccl.BaryonsBaccoemu()
     cosmo = ccl.CosmologyVanillaLCDM()
     k = 1e-1
     with pytest.raises(ValueError):
@@ -125,7 +125,7 @@ def test_baccoemu_baryons_a_range():
 
 
 def test_baccoemu_baryons_As_sigma8():
-    baryons = ccl.BaccoemuBaryons()
+    baryons = ccl.BaryonsBaccoemu()
     cosmo1 = ccl.Cosmology(
         Omega_c=0.27,
         Omega_b=0.05,
