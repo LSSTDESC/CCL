@@ -1,4 +1,4 @@
-__all__ = ("BaccoemuBaryons",)
+__all__ = ("BaryonsBaccoemu",)
 
 import numpy as np
 from copy import deepcopy
@@ -7,7 +7,7 @@ from .. import Pk2D
 from . import Baryons
 
 
-class BaccoemuBaryons(Baryons):
+class BaryonsBaccoemu(Baryons):
     """ The baryonic boost factor computed with the baccoemu baryons emulators.
 
     See `Arico et al. 2021 <https://arxiv.org/abs/2011.15018>`_ and
@@ -34,7 +34,7 @@ class BaccoemuBaryons(Baryons):
         verbose (:obj:`bool`): Verbose output from baccoemu.
                                 (default: :obj:`False`)
     """
-    name = 'BaccoemuBaryons'
+    name = 'BaryonsBaccoemu'
     __repr_attrs__ = __eq_attrs__ = ("bcm_params",)
 
     def __init__(self, log10_M_c=14.174, log10_eta=-0.3, log10_beta=-0.22,
