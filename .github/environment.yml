@@ -20,3 +20,6 @@ dependencies:
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator
+      - dark_emulator==1.1.2
+      - colossus
+      
