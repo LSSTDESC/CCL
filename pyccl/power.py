@@ -104,7 +104,7 @@ def sigmaR(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
         \\sigma_R^2(z)=\\frac{1}{2\\pi^2}\\int dk\\,k^2\\,P(k,z)\\,
         |W(kR)|^2,
 
-    with :math:`W(x)=(3\\sin(x)-x\\cos(x))/x^3`.
+    with :math:`W(x)=3(\\sin(x)-x\\cos(x))/x^3`.
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
@@ -134,7 +134,7 @@ def sigmaV(cosmo, R, a=1, *, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     .. math::
         \\sigma_V^2(z)=\\frac{1}{6\\pi^2}\\int dk\\,P(k,z)\\,|W(kR)|^2,
 
-    with :math:`W(x)=(3\\sin(x)-x\\cos(x))/x^3`.
+    with :math:`W(x)=3(\\sin(x)-x\\cos(x))/x^3`.
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
