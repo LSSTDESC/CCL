@@ -452,23 +452,23 @@ class EulerianPTCalculator(CCLAutoRepr):
         pgi = (b1[:,None]*(c1[:, None] * Pd1d1 +
                              (self._g4*cd)[:, None] * (a00e + c00e) +
                              (self._g4*c2)[:, None] * (a0e2 + b0e2) + 
-                             ck[:, None] * Pak2 + self._g4*ct[:, None] * tijsij) +
-               b2[:,None]*(self._g4*c1[:,None]*gb2sij + 
+                             ck[:, None] * Pak2 + (self._g4*ct)[:, None] * tijsij) +
+               b2[:,None]*((self._g4*c1)[:,None]*gb2sij + 
                             (self._g4*cd)[:,None] * (gb2dsij) +
                             (self._g4*c2)[:, None] * (gb2sij2) +
-                            ck[:, None] * gb2sij*self.k_s**2 + 
-                            self._g4*ct[:,None] * gb2tij) +
-               bs[:,None]*(self._g4*c1[:,None]*s2sij +
+                            ck[:, None] * (gb2sij*self.k_s**2) + 
+                            (self._g4*ct)[:,None] * gb2tij) +
+               bs[:,None]*((self._g4*c1)[:,None]*s2sij +
                             (self._g4*cd)[:,None] * (s2dsij) +
                             (self._g4*c2)[:,None] * (s2sij2) +
-                            ck[:, None] * s2sij*self.k_s**2 +
-                            self._g4*ct[:, None] *s2tij) +
+                            ck[:, None] * (s2sij*self.k_s**2) +
+                            (self._g4*ct)[:, None] *s2tij) +
                 bk2[:,None]*self.k_s**2*(c1[:, None] * Pd1d1 +
                              (self._g4*cd)[:, None] * (a00e + c00e) +
                              (self._g4*c2)[:, None] * (a0e2 + b0e2) + 
                              ck[:, None] * Pak2 +
-                             self._g4*ct[:, None] * tijsij) +
-                b3nl[:,None]*(self._g4*c1[:,None]*sig3nl))
+                             (self._g4*ct)[:, None] * tijsij) +
+                b3nl[:,None]*((self._g4*c1)[:,None]*sig3nl))
                              
         
         return pgi*self.exp_cutoff

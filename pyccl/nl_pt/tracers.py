@@ -56,9 +56,9 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None, at=No
         else:  # DES convention
             c2 = a2*5*5e-14*rho_crit*Om_m/(gz**2)
     if ak is not None:
-        ck = ak*knorm**2*5e-14*rho_crit*Om_m/gz
+        ck = ak*(knorm**2)*5e-14*rho_crit*Om_m/gz
     if at is not None:
-        ct=at*5e-14*rho_crit(Om_m)/gz
+        ct=at*5e-14*rho_crit*Om_m/gz
 
     return c1, c1delta, c2, ck, ct
 
