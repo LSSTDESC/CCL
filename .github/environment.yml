@@ -17,7 +17,7 @@ dependencies:
 #  - pytables  # for baccoemu
 #  - pyfftw
   - pip:
-      #- tables  # for baccoemu
+      - tables==3.8.0  # for baccoemu
       #- classy<3
       - isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
