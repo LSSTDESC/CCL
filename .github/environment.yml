@@ -16,7 +16,7 @@ dependencies:
   - pytest-cov
   - pip:
       - setuptools_scm
-      - tables==3.8.0  # for baccoemu
+      - tables  # for baccoemu
       #- classy<3
       - isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
