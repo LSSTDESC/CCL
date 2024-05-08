@@ -34,15 +34,15 @@ jobs:
 
     steps:
       - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.11.0
+        uses: styfle/cancel-workflow-action@0.12
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout CCL repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           channels: conda-forge, defaults
           channel-priority: strict
@@ -91,7 +91,7 @@ jobs:
           pip install --no-build-isolation classy==2.9.4
 
       - name: Install CCL
-        run: pip install -v -e .
+        run: pip install -v -e . --use-pep517
 
       - name: Unit tests
         run: |
