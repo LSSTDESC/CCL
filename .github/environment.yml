@@ -14,11 +14,10 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
-  - pytables  # for baccoemu
-  - pyfftw
+#  - pytables  # for baccoemu
+#  - pyfftw
   - pip:
-      - setuptools_scm
-      #- tables  # for baccoemu
+      - tables  # for baccoemu
       #- classy<3
       - isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
