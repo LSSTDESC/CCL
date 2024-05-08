@@ -14,7 +14,8 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
-  - pytables
+  - pytables  # for baccoemu
+  - pyfftw
   - pip:
       - setuptools_scm
       #- tables  # for baccoemu
