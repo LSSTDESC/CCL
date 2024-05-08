@@ -19,6 +19,6 @@ dependencies:
   - pip:
       #- classy<3
       - isitgr
-      - velocileptors @ git+https://github.com/sfschen/velocileptors
+      #- velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
-      #- MiraTitanHMFemulator
+      - MiraTitanHMFemulator
