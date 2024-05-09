@@ -3,6 +3,7 @@ dependencies:
   - gfortran=12.2.0  # for isitgr
   - python=3.8
   - pip
+  - setuptools_scm
   - cmake
   - gsl
   - fftw
