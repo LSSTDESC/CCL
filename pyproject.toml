@@ -3,6 +3,7 @@ requires = ["setuptools>=64", "setuptools_scm>=8", "cmake", "swig"]
 
 [project]
 name = "pyccl"
+dynamic = ["version"]
 authors = [
     {name = "LSST DESC"},
 ]
@@ -11,7 +12,6 @@ readme = "README.md"
 requires-python = ">=3.8"
 keywords = ["cosmology", "astrophysics", "physics", "science", "LSST"]
 license = { text = "BSD" }
-dynamic = ["version"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
