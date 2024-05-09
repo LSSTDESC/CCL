@@ -1,10 +1,8 @@
 [build-system]
 requires = ["setuptools>=64", "setuptools_scm>=8", "cmake", "swig"]
-build-backend = "setuptools.build_meta"
 
 [project]
 name = "pyccl"
-dynamic = ["version"]
 authors = [
     {name = "LSST DESC"},
 ]
