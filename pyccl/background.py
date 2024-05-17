@@ -271,7 +271,7 @@ def comoving_volume_element(cosmo, a):
     --------
     comoving_volume : integral of the comoving volume element
     """
-    Dm = comoving_angular_distance(cosmo, a)
+    Dm = angular_diameter_distance(cosmo, a)
     Ez = h_over_h0(cosmo, a)
     Dh = physical_constants.CLIGHT_HMPC / cosmo["h"]
     return Dh * Dm**2 / (Ez * a**2)
