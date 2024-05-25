@@ -8,13 +8,13 @@ from . import EmulatorPk
 
 class FREmu(EmulatorPk):
     """ Nonlinear power spectrum emulator from fremu
-    FREmu is designed to predict the non-linear power spectrum of 
-    large-scale structures in the universe using neural networks. 
+    FREmu is designed to predict the non-linear power spectrum of
+    large-scale structures in the universe using neural networks.
     Details: https://arxiv.org/abs/2405.05840
     Documentation: https://astrobai.github.io/codes/fremu.html
     Source code: https://github.com/AstroBai/FREmu
     """
-    def __init__(self,n_sampling_a=100):
+    def __init__(self, n_sampling_a=100):
         # avoid tensorflow warnings
         import warnings
         with warnings.catch_warnings():
@@ -41,14 +41,14 @@ a_min,a_max = ({}, {})""".format(
                            ns=cosmo['n_s'],
                            sigma8=cosmo['sigma8'],
                            mnu=np.sum(cosmo['m_nu']),
-                           fR0=cosmo['extra_parameters']['fR0'])  # set extra_parameters={"fR0":fR0}
+                           fR0=cosmo['extra_parameters']['fR0'])
         h = cosmo['h']
         pk_hubble = []
         for a_ in a:
             pk_hubble_ = self.mpk.get_power_spectrum(z=1/a_-1)
             pk_hubble.append(pk_hubble_)
         k_hubble = self.mpk.get_k_values()
-        pk_hubble = np.array(pk_hubble)           
+        pk_hubble = np.array(pk_hubble)
         return k_hubble * h, pk_hubble / h**3
 
     def _get_pk2d(self, cosmo):
