@@ -13,6 +13,11 @@ class FREmu(EmulatorPk):
     Details: https://arxiv.org/abs/2405.05840
     Documentation: https://astrobai.github.io/codes/fremu.html
     Source code: https://github.com/AstroBai/FREmu
+    Usage:
+    pip install fremu
+    fremu_nl = ccl.FREmu()
+    cosmo = pyccl.Cosmology(extra_parameters={"fR0":fR0},
+                            matter_power_spectrum=fremu_nl)
     """
     def __init__(self, n_sampling_a=100):
         # avoid tensorflow warnings
@@ -23,7 +28,7 @@ class FREmu(EmulatorPk):
             self.mpk = fremu.emulator()
         self.a_min = 0.25
         self.a_max = 1
-        self.k_min = self.mpk.get_k_values()[0]
+        self.k_min = self.mpk.get_k_values()[1]
         self.k_max = self.mpk.get_k_values()[-1]
         self.n_sampling_a = n_sampling_a
 
@@ -47,7 +52,7 @@ a_min,a_max = ({}, {})""".format(
         for a_ in a:
             pk_hubble_ = self.mpk.get_power_spectrum(z=1/a_-1)
             pk_hubble.append(pk_hubble_)
-        k_hubble = self.mpk.get_k_values()
+        k_hubble = self.mpk.get_k_values()[1:]
         pk_hubble = np.array(pk_hubble)
         return k_hubble * h, pk_hubble / h**3
 
