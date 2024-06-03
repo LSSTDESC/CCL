@@ -38,5 +38,5 @@ def test_Pgg_resp():
     
     assert np.all(np.isfinite(response)), "darkemu_Pgg_resp produced infinity values."
 
-if __name__ == "__main__":
-    pytest.main()
+# if __name__ == "__main__":
+#    pytest.main()
