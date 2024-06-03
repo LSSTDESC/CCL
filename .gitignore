@@ -68,3 +68,6 @@ tests/benchmark/codes/.ipynb_checkpoints/*
 
 # notebook checkpoints
 benchmarks/data/codes/.ipynb_checkpoints/*
+benchmarks/test_ssc_terasawa_accuracy.py
+pyccl/__init__.py
+benchmarks/test_ssc_terasawa_accuracy.py
