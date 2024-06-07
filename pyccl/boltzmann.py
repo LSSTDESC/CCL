@@ -35,6 +35,15 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
     except (KeyError, TypeError):
         pass
 
+    # Get extra parameters to evaluate
+    # the halo mass function in cosmology with massive neutrinos
+    # using prescription by Costanzi et al. 2013(JCAP12(2013)012)
+    use_costanzi13 = False
+    try:
+        use_costanzi13 = cosmo["extra_parameters"]["use_costanzi13"]
+    except (KeyError, TypeError):
+        pass
+
     # z sampling from CCL parameters
     na = lib.get_pk_spline_na(cosmo.cosmo)
     status = 0
@@ -151,8 +160,13 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
     camb_res = camb.get_transfer_functions(cp)
 
     def construct_Pk2D(camb_res, nonlin=False):
-        k, z, pk = camb_res.get_linear_matter_power_spectrum(
-            hubble_units=True, nonlinear=nonlin)
+        if not use_costanzi13:
+            k, z, pk = camb_res.get_linear_matter_power_spectrum(
+                hubble_units=True, nonlinear=nonlin)
+        else:
+            k, z, pk = camb_res.get_linear_matter_power_spectrum(
+                var1='delta_nonu', var2='delta_nonu',
+                hubble_units=True, nonlinear=nonlin)
 
         # convert to non-h inverse units
         k *= cosmo['h']

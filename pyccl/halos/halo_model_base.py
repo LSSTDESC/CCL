@@ -193,7 +193,23 @@ class MassFunc(HMIngredients):
         logM, sigM, dlns_dlogM = self._get_logM_sigM(
             cosmo, M_use, a, return_dlns=True)
 
-        rho = (const.RHO_CRITICAL * cosmo['Omega_m'] * cosmo['h']**2)
+        # prescription by Costanzi et al. 2013(JCAP12(2013)012)
+        # to evaluate the halo mass function in nuCDM cosmology
+
+        use_costanzi13 = False
+
+        try:
+            use_costanzi13 = cosmo["extra_parameters"]["use_costanzi13"]
+        except (KeyError, TypeError):
+            pass
+
+        if not use_costanzi13:
+            rho = (const.RHO_CRITICAL * cosmo['Omega_m'] * cosmo['h']**2)
+        else:
+            rho = (const.RHO_CRITICAL
+                   * (cosmo['Omega_c'] + cosmo['Omega_b'])
+                   * cosmo['h']**2)
+
         f = self._get_fsigma(cosmo, sigM, a, 2.302585092994046 * logM)
         mf = f * rho * dlns_dlogM / M_use
         if np.ndim(M) == 0:
