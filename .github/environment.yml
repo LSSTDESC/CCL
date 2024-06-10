@@ -3,6 +3,7 @@ dependencies:
   - gfortran=12.2.0  # for isitgr
   - python=3.8
   - pip
+  - setuptools_scm
   - cmake
   - gsl
   - fftw
@@ -14,8 +15,9 @@ dependencies:
   - fast-pt
   - pytest
   - pytest-cov
+  - pytables  # for baccoemu
+  - pyfftw  # for velocileptors
   - pip:
-      - tables==3.8.0  # for baccoemu
       #- classy<3
       - isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
