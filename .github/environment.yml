@@ -17,6 +17,7 @@ dependencies:
   - pytest-cov
   - pytables  # for baccoemu
   - pyfftw  # for velocileptors
+  - george  # for dark_emu
   - pip:
       #- classy<3
       - isitgr
