@@ -1,6 +1,7 @@
 __all__ = ("HMCalculator",)
 
 import numpy as np
+from scipy.integrate import simpson
 
 from .. import CCLAutoRepr, unlock_instance
 from .. import physical_constants as const
@@ -57,8 +58,7 @@ class HMCalculator(CCLAutoRepr):
         self._m0 = self._mass[0]
 
         if integration_method_M == "simpson":
-            from scipy.integrate import simpson
-            self._integrator = simpson
+            self._integrator = self._integ_simpson
         elif integration_method_M == "spline":
             self._integrator = self._integ_spline
         else:
@@ -67,6 +67,9 @@ class HMCalculator(CCLAutoRepr):
         # Cache last results for mass function and halo bias.
         self._cosmo_mf = self._cosmo_bf = None
         self._a_mf = self._a_bf = -1
+
+    def _integ_simpson(self, fM, log10M):
+        return simpson(fM, x=log10M)
 
     def _integ_spline(self, fM, log10M):
         # Spline integrator
