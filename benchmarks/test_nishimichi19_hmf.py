@@ -4,7 +4,8 @@ import pyccl as ccl
 
 # Set cosmology
 # based on fiducial cosmology (Planck 2015)
-cosmo = ccl.Cosmology(Omega_c=0.2650, Omega_b=0.0492, h=0.6724, A_s=2.2065e-9, n_s=0.9645, w0=-1)
+cosmo = ccl.Cosmology(Omega_c=0.2650, Omega_b=0.0492, h=0.6724,
+                      A_s=2.2065e-9, n_s=0.9645, w0=-1)
 # Read data
 dirdat = os.path.join(os.path.dirname(__file__), 'data')
 

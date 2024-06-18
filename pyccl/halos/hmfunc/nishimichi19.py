@@ -8,7 +8,8 @@ from . import MassFunc
 class MassFuncNishimichi19(MassFunc):
     """Implements the mass function emulator of `Nishimichi et al. 2019
     <https://arxiv.org/abs/1811.09504>`_.
-    documentation is here -> <https://dark-emulator.readthedocs.io/en/latest/index.html#>.
+    documentation is
+    `here <https://dark-emulator.readthedocs.io/en/latest/index.html#>`_.
     This parametrization is only valid for '200m' masses.
 
     Args:
@@ -21,11 +22,11 @@ class MassFuncNishimichi19(MassFunc):
 
     def __init__(self, *,
                  mass_def="200m",
-                 mass_def_strict=True, 
+                 mass_def_strict=True,
                  extrapolate=False):
         super().__init__(mass_def=mass_def, mass_def_strict=mass_def_strict)
         from dark_emulator import model_hod
-        self.hod = model_hod.darkemu_x_hod({"fft_num":1})
+        self.hod = model_hod.darkemu_x_hod({"fft_num": 1})
         self.extrapolate = extrapolate
 
     def _check_mass_def_strict(self, mass_def):
@@ -33,7 +34,7 @@ class MassFuncNishimichi19(MassFunc):
 
     def __call__(self, cosmo, M, a):
         # Set up cosmology
-        h  = cosmo['h']
+        h = cosmo['h']
         ob = cosmo['Omega_b']*h**2
         oc = cosmo['Omega_c']*h**2
         As = cosmo['A_s']
@@ -42,13 +43,13 @@ class MassFuncNishimichi19(MassFunc):
                              "halo mass function.")
         ns = cosmo['n_s']
         w0 = cosmo['w0']
-        onu= 0.00064 # we fix this value (Nishimichi et al. 2019)
-        Ode= 1.-(ob+oc+onu)/h**2.
+        onu = 0.00064  # we fix this value (Nishimichi et al. 2019)
+        Ode = 1.-(ob+oc+onu)/h**2.
         # (omega_b,omega_c,Omega_de,ln(10^10As),ns,w)
-        cparam = np.array([ob, oc, Ode, np.log(As*10.**10.), ns, w0]) 
+        cparam = np.array([ob, oc, Ode, np.log(As*1E10), ns, w0])
         self.hod.set_cosmology(cparam)
         # calculating interpolated dndM array is (ln(M), ln(dndM))
-        self.hod._compute_dndM_spl(redshift=1./a-1.) 
+        self.hod._compute_dndM_spl(redshift=1./a-1.)
 
         # Filter out masses beyond emulator range
         M_use = np.atleast_1d(M)
@@ -70,11 +71,13 @@ class MassFuncNishimichi19(MassFunc):
                 slope = np.log(mfp[1]/mfp[0])/np.log(m0[1]/m0[0])
                 mfh[m_lo] = mfp[0]*(Mh[m_lo]/m0[0])**slope
             else:
-                raise RuntimeError("Input mass range is not supported. "
-                                   "The supported range is from 10^12 to 10^16 Msun/h. "
-                                   "If you want to obtain mass function at M200m<10^12 Msun/h, "
-                                   "put 'extrapolate=True' in the input of mass function definition. "
-                                   "Then this function extrapolates mass function outside of the supported range.")
+                raise RuntimeError(
+                    "Input mass range is not supported. "
+                    "The supported range is from 10^12 to 10^16 Msun/h. "
+                    "If you want to obtain mass function at "
+                    "M200m<10^12 Msun/h, use 'extrapolate=True'. "
+                    "This function will then extrapolate outside the "
+                    "supported range.")
         # Predict in good range of masses
         if np.any(m_good):
             mfp = self.hod.dndM_spl(np.log(Mh[m_good]))
