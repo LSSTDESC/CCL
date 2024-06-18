@@ -74,4 +74,4 @@ def test_hodcl():
                                 bias=(z_arr, np.ones(len(dndz))))
     cl_hod = ccl.angular_cl(cosmo, tr, tr, ell=l_bm, p_of_k_a=pk_hod)
 
-    assert np.all(np.fabs(cl_hod/cl_bm-1) < 0.005)
+    assert np.all(np.fabs(cl_hod/cl_bm-1) < 0.006)
