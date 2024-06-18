@@ -22,4 +22,4 @@ def test_hmf_nishimichi19():
     for iz, z in enumerate(zs):
         nm_d = d_hmf[iz+1]
         nm_h = mf(cosmo, m, 1. / (1 + z))
-        assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
+        assert np.all(np.fabs(nm_h / nm_d - 1) < 1E-5)
