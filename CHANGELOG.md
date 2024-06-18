@@ -1,5 +1,20 @@
 # Unreleased
 
+# v3.0.1 Changes
+- Fixed GSL integration segfault (#1155).
+- Added `to_dict` utility in cosmology class (#1160). 
+
+## Python library
+- Documentation fixes (#1122).
+- Background calculations (#1149).
+- Bacco lbias (#1139).
+- Integration of N5K winners into CCL (#1092).
+- Non-Gaussian covariances (#869).
+- CI fixes (#1121, #1154).
+
+## C library
+- Fix GSL integration abort (#1155)
+
 # v3.0.0 Changes
 
 ## Python library

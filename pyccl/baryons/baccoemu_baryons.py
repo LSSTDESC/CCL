@@ -1,13 +1,14 @@
-__all__ = ("BaccoemuBaryons",)
+__all__ = ("BaryonsBaccoemu", "BaccoemuBaryons")
 
 import numpy as np
 from copy import deepcopy
+from warnings import warn
 
 from .. import Pk2D
 from . import Baryons
 
 
-class BaccoemuBaryons(Baryons):
+class BaryonsBaccoemu(Baryons):
     """ The baryonic boost factor computed with the baccoemu baryons emulators.
 
     See `Arico et al. 2021 <https://arxiv.org/abs/2011.15018>`_ and
@@ -34,7 +35,7 @@ class BaccoemuBaryons(Baryons):
         verbose (:obj:`bool`): Verbose output from baccoemu.
                                 (default: :obj:`False`)
     """
-    name = 'BaccoemuBaryons'
+    name = 'BaryonsBaccoemu'
     __repr_attrs__ = __eq_attrs__ = ("bcm_params",)
 
     def __init__(self, log10_M_c=14.174, log10_eta=-0.3, log10_beta=-0.22,
@@ -208,3 +209,15 @@ class BaccoemuBaryons(Baryons):
             raise ValueError(f"Requested scale factor outside the bounds of "
                              f"the emulator: {(a_min, a_max)} outside of "
                              f"{((self.a_min, self.a_max))}")
+
+
+class BaccoemuBaryons(BaryonsBaccoemu):
+    name = 'BaccoemuBaryons'
+
+    def __init__(self, *args, **kwargs):
+        """This throws a deprecation warning on initialization."""
+        warn(f"Class {self.__class__.__name__} will be deprecated. " +
+             f"Please use {BaryonsBaccoemu.__name__} instead.",
+             DeprecationWarning, stacklevel=2)
+        super().__init__(*args, **kwargs)
+    pass
