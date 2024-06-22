@@ -143,7 +143,6 @@ def Pmm_resp(
 
 def darkemu_Pgm_resp(
     cosmo,
-    hmc,
     prof_hod,
     deltah=0.02,
     log10Mh_min=12.0,
@@ -214,7 +213,7 @@ def darkemu_Pgm_resp(
     hbf = halos.HaloBiasTinker10(mass_def=mass_def)
 
     # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(a_arr) > 1.5:
+    if np.any(1.0 / a_arr - 1) > 1.5:
         print("dark emulator is valid for z={:.2f}<1.48")
 
     for ia, aa in enumerate(a_arr):
@@ -370,7 +369,6 @@ def darkemu_Pgm_resp(
 
 def darkemu_Pgg_resp(
     cosmo,
-    hmc,
     prof_hod,
     deltalnAs=0.03,
     log10Mh_min=12.0,
@@ -412,7 +410,6 @@ def darkemu_Pgg_resp(
     na = len(a_arr)
     nk = len(k_use)
     dpk12 = np.zeros([na, nk])
-
     logMfor_hmf = np.linspace(8, 17, 200)
     logMh = np.linspace(log10Mh_min, log10Mh_max, 2**5 + 1)  # M_sol/h
     logM = np.log10(10**logMh / h)
@@ -433,18 +430,17 @@ def darkemu_Pgg_resp(
     prof_2pt = halos.profiles_2pt.Profile2ptHOD()
 
     # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(a_arr) > 1.5:
+    if np.any(1.0 / a_arr - 1) > 1.5:
         print("dark emulator is valid for z={:.2f}<1.48")
 
     for ia, aa in enumerate(a_arr):
         z = 1.0 / aa - 1
+
         # mass function
         dndlog10m_emu = ius(
             logMfor_hmf, hmf(cosmo, 10**logMfor_hmf, aa)
         )  # Mpc^-3
 
-        # set cosmology for dark emulator
-        darkemu_set_cosmology(emu, cosmo)
         for m in range(nM):
             nths[m] = mass_to_dens(dndlog10m_emu, cosmo, M[m])
             logM1 = np.linspace(logM[m], logM[-1], 2**5 + 1)
@@ -454,6 +450,9 @@ def darkemu_Pgg_resp(
                 dndlog10m_emu(logM1) * hbf(cosmo, (10**logM1), aa), dx=dlogM1
             ) / integrate.romb(dndlog10m_emu(logM1), dx=dlogM1)
 
+        # set cosmology for dark emulator
+        darkemu_set_cosmology(emu, cosmo)
+        for m in range(nM):
             for n in range(nM):
                 Pth[m, n] = (
                     emu.get_phh(
@@ -629,6 +628,10 @@ def darkemu_Pgg_resp(
         k_switch = 0.08  # [h/Mpc]
 
         dPgg_db = dPgg_db_lin * np.exp(-k_emu / k_switch) + dPgg_db_emu * (
+            1 - np.exp(-k_emu / k_switch)
+        )
+
+        Pgg = Pgg_lin * np.exp(-k_emu / k_switch) + Pgg * (
             1 - np.exp(-k_emu / k_switch)
         )
 
