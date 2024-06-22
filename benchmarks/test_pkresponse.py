@@ -118,7 +118,7 @@ generated_Pgg_resp = darkemu_Pgg_resp(
 )
 
 
-# Compare the generated responses with simulation data 
+# Compare the generated responses with simulation data
 def test_pmm_resp():
     assert np.allclose(
         Pmm_resp_data[indx_mm],
