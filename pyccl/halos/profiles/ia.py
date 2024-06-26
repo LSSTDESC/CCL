@@ -418,7 +418,7 @@ class SatelliteShearHOD(HaloProfileHOD):
                     from scipy.integrate import simpson
                     for i, M_i in enumerate(M_use):
                         prof[i, :] += (simpson(integrand[:, i, :],
-                                               r_use[i, :]).T
+                                               x=r_use[i, :]).T
                                        * (1j**l).real * (2*l+1)
                                        * self._angular_fl[j])
                 elif self.integration_method == 'spline':
