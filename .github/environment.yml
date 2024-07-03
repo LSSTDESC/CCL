@@ -1,7 +1,7 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
   - gfortran=12.2.0  # for isitgr
-  - python=3.8
+  - python=3.11
   - pip
   - setuptools_scm
   - cmake
@@ -17,9 +17,11 @@ dependencies:
   - pytest-cov
   - pytables  # for baccoemu
   - pyfftw  # for velocileptors
+  - george  # for dark_emu
   - pip:
       #- classy<3
       - isitgr<=1.0.2
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator
+      - dark_emulator
