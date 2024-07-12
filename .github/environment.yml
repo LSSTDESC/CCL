@@ -20,7 +20,7 @@ dependencies:
   - george  # for dark_emu
   - pip:
       #- classy<3
-      - isitgr
+      - isitgr<=1.0.2
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator
