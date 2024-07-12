@@ -17,6 +17,10 @@ class MassFuncNishimichi19(MassFunc):
             a mass definition object, or a name string.
         mass_def_strict (:obj:`bool`): if ``False``, consistency of the mass
             definition will be ignored.
+        extrapolate (:obj:`bool`): if ``True``, extrapolation will be used
+            to calculate the the mass function for small halo masses, below
+            the range supported by the Dark Emulator. Otherwise, an error
+            is thrown when evaluating the mass function on these masses.
     """
     name = 'Nishimichi19'
 
@@ -60,7 +64,6 @@ class MassFuncNishimichi19(MassFunc):
         m_good = ~(m_hi | m_lo)
 
         mfh = np.zeros_like(Mh)
-        # mfh = np.array([np.nan] * len(Mh))
         # Populate low-halo masses through extrapolation if needed
         if np.any(m_lo):
             if self.extrapolate:
