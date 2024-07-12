@@ -163,6 +163,15 @@ MiraTitan mass function emulator
 
    $ python3 -m pip install MiraTitanHMFemulator
 
+Dark Emulator
+--------------------------------
+
+`Source code <https://github.com/DarkQuestCosmology/dark_emulator_public>`__. Installation:
+
+.. code-block:: bash
+
+   $ python3 -m pip install dark_emulator==1.1.2
+
 
 .. _getting-cmake:
 
