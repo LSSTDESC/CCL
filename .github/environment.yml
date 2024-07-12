@@ -10,7 +10,9 @@ dependencies:
   - swig
   - pyyaml
   - numpy
-  - scipy
+  # The below is only because the currnt version of fast-pt uses deprecated scipy functions.
+  # We should remove the <1.14 flag as soon as this is fixed.
+  - scipy<1.14
   - camb
   - fast-pt
   - pytest
