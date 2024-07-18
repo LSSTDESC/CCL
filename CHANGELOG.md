@@ -1,8 +1,13 @@
 # Unreleased
 
+# v3.1 Changes
+- Docstring improvements (#1168, #1177, #1184).
+- Minor bugfixes (#1167, #1169, #1170, #1172, #1187, #1188).
+- DarkEmulator mass function (#1138).
+
 # v3.0.1 Changes
 - Fixed GSL integration segfault (#1155).
-- Added `to_dict` utility in cosmology class (#1160). 
+- Added `to_dict` utility in cosmology class (#1160).
 
 ## Python library
 - Documentation fixes (#1122).
