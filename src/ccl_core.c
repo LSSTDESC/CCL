@@ -164,7 +164,7 @@ ccl_physical_constants ccl_constants = {
   //GSL_CONST_MKSA_SOLAR_MASS,
   //1.9885e30, //(from PDG 2015) in Kg
   //1.9884754153381438E+30, //from IAU 2015
-  1.988409871E+30 // From IAU 2015 compatible with CODATA 2022 - Newton's Gravitational constant
+  1.988409871E+30, // From IAU 2015 compatible with CODATA 2022 - Newton's Gravitational constant
 
   /**
    * Mpc to meters (from PDG 2016 and using M_PI)
