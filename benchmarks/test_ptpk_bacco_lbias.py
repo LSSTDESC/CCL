@@ -36,7 +36,7 @@ order = ['gg', 'gm']
 
 
 @pytest.mark.parametrize('comb', enumerate(order))
-def atest_pt_pk(comb):
+def test_pt_pk(comb):
     i_d, cc = comb
     t1, t2 = cc
 
