@@ -4,7 +4,6 @@ import pyccl as ccl
 import pyccl.nl_pt as pt
 import pytest
 
-'''
 LPTPK_TOLERANCE = 1e-4
 
 # Set cosmology
@@ -56,4 +55,3 @@ def atest_pt_pk(comb):
         assert np.all(
             np.fabs(tpk / dpk - 1) < LPTPK_TOLERANCE
         )
-'''

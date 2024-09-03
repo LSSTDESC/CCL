@@ -95,7 +95,7 @@ class BaccoLbiasCalculator(CCLAutoRepr):
         import warnings
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=UserWarning)
-            #import baccoemu
+            import baccoemu
             self.emu = baccoemu.Lbias_expansion()
 
         # k sampling
