@@ -41,7 +41,7 @@ class MassFuncDespali16(MassFunc):
                         0.2488, 0.2554, -0.1151)}
 
         A0, A1, a0, a1, a2, p0, p1, p2 = vals[self.ellipsoidal]
-        coeffs = [[A1, A0], [a2, a1, a0], [p2, p2, p0]]
+        coeffs = [[A1, A0], [a2, a1, a0], [p2, p1, p0]]
         self.poly_A, self.poly_a, self.poly_p = map(np.poly1d, coeffs)
 
     def _get_fsigma(self, cosmo, sigM, a, lnM):
