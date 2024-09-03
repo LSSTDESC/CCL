@@ -26,6 +26,18 @@ def test_hmf_despali16():
         assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
 
 
+def test_hmf_despali16_m200c():
+    # Different mass definition
+    mf = ccl.halos.MassFuncDespali16(mass_def='200c')
+    d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_despali16_m200c.txt'),
+                       unpack=True)
+    m = d_hmf[0]
+    for iz, z in enumerate(zs):
+        nm_d = d_hmf[iz+1]
+        nm_h = mf(cosmo, m, 1. / (1 + z))
+        assert np.all(np.fabs(nm_h / nm_d - 1) < 0.01)
+
+
 def test_hmf_bocquet16():
     mf = ccl.halos.MassFuncBocquet16(mass_def="200c")
     d_hmf = np.loadtxt(os.path.join(dirdat, 'hmf_bocquet16.txt'),
