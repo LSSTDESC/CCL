@@ -6,7 +6,7 @@ h = 0.7
 my_cosmo = {'flat': True, 'H0': 100 * h, 'Om0': 0.30, 'Ob0': 0.05, 'sigma8': 0.8, 'ns': 0.96}
 cosmo_C = cosmology.setCosmology('my_cosmo', my_cosmo)
 
-def get_mfs(model, mdef):
+def get_mfs(model, mdef, extra=''):
     m_arr=np.geomspace(1E11,1E15,9) 
     z_arr=np.array([0., 0.5, 1.])
     d_out = []
@@ -17,7 +17,7 @@ def get_mfs(model, mdef):
                                                 mdef = mdef,
                                                 model = model,
                                                 q_out = 'dndlnM') * normfac)
-    np.savetxt("../hmf_" + model + ".txt",
+    np.savetxt("../hmf_" + model + extra + ".txt",
                np.transpose(d_out),
                header = 'M nM(z=0) nM(z=0.5) nM(z=1)')
 
@@ -26,6 +26,7 @@ get_mfs('press74', 'fof')
 get_mfs('sheth99', 'fof')
 get_mfs('jenkins01', 'fof')
 get_mfs('despali16', 'vir')
+get_mfs('despali16', '200c', extra='_m200c')
 get_mfs('bocquet16', '200c')
 get_mfs('watson13', '200m')
 get_mfs('angulo12', 'fof')
