@@ -152,7 +152,7 @@ class EFTCalculator(CCLAutoRepr):
         # Call FAST-PT
         import fastpt as fpt
         n_pad = int(self.fastpt_par['pad_factor'] * len(self.k_s))
-        self.pt = fpt.FASTPT(self.k_s, to_do=to_do,
+        self.fp = fpt.FASTPT(self.k_s, to_do=to_do,
                              low_extrap=self.fastpt_par['low_extrap'],
                              high_extrap=self.fastpt_par['high_extrap'],
                              n_pad=n_pad)
@@ -170,7 +170,7 @@ class EFTCalculator(CCLAutoRepr):
     def _check_init(self):
         if self.initialised:
             return
-        raise CCLError("PT templates have not been initialised "
+        raise CCLError("EFT templates have not been initialised "
                        "for this calculator. Please do so using "
                        "`update_ingredients`.")
 
@@ -180,7 +180,7 @@ class EFTCalculator(CCLAutoRepr):
 
     @unlock_instance
     def update_ingredients(self, cosmo):
-        """ Update the internal PT arrays.
+        """ Update the internal EFT arrays.
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
@@ -198,7 +198,7 @@ class EFTCalculator(CCLAutoRepr):
 
         (self.I11, self.I12, self.I13, self.I22, self.I23, self.I24,
             self.I33, self.I34, self.I44, self.I55, self.J1, self.J2,
-            self.J3) = self.pt.eft_integrals(**kw)
+            self.J3) = self.fp.eft_integrals(**kw)
         self.I14 = ((28*self.I12-self.I22+self.I23)/(14*np.sqrt(6)) +
                     5*(self.I34-self.I24)/7)
         self.I66 = (2*self.I22-2*np.sqrt(6)*self.I24+3*self.I44)/18
@@ -265,7 +265,7 @@ class EFTCalculator(CCLAutoRepr):
                (b1s_1*b1s_2)[:, None]*Ps1s1 +
                (b1s_1*b21s_2+b1s_2*b21s_1)[:, None]*Ps1s21 +
                (b21s_1*b21s_2)[:, None]*Ps21s21 +
-               (b1s_1*b22s_2+b22s_1*b1s_2)[:, None]*Ps1s22 +
+               (b1s_1*b22s_2+b1s_2*b22s_1)[:, None]*Ps1s22 +
                (b21s_1*b22s_2+b21s_2*b22s_1)[:, None]*Ps21s22 +
                (b22s_1*b22s_2)[:, None]*Ps22s22 +
                (b1s_1*b31s_2+b1s_2*b31s_1)[:, None]*Ps1s31
@@ -343,7 +343,7 @@ class EFTCalculator(CCLAutoRepr):
         set of wavenumbers and scale factors.
 
         Args:
-            trg (:class:`~pyccl.nl_pt.tracers.PTTracer`): number
+            trg (:class:`~pyccl.nl_eft.tracers.EFTTracer`): number
                 counts tracer.
 
         Returns:
@@ -445,7 +445,7 @@ class EFTCalculator(CCLAutoRepr):
         set of wavenumbers and scale factors.
 
         Args:
-            tri (:class:`~pyccl.nl_pt.tracers.PTTracer`): intrinsic
+            tri (:class:`~pyccl.nl_eft.tracers.EFTTracer`): intrinsic
                 alignment tracer.
 
         Returns:
@@ -507,7 +507,7 @@ class EFTCalculator(CCLAutoRepr):
                 :class:`~pyccl.pk2d.Pk2D`.
 
         Returns:
-            :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
+            :class:`~pyccl.pk2d.Pk2D`: EFT power spectrum.
         """
         if return_ia_bb:
             return_ia_bb = True
