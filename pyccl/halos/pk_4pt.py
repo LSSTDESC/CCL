@@ -3,7 +3,7 @@ __all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
            "halomod_trispectrum_3h", "halomod_trispectrum_4h",
            "halomod_Tk3D_2h", "halomod_Tk3D_3h", "halomod_Tk3D_4h",
            "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC",
-           "halomod_Tk3D_cNG")
+           "halomod_Tk3D_cNG", "halomod_Tk3D_cNG_linear_bias")
 
 import warnings
 
@@ -11,7 +11,7 @@ import numpy as np
 import scipy
 
 from .. import CCLWarning, Tk3D, Pk2D
-from . import HaloProfileNFW, Profile2pt
+from . import HaloProfileNFW, HaloProfileHOD, Profile2pt
 
 
 def halomod_trispectrum_1h(cosmo, hmc, k, a, prof, *,
@@ -1555,7 +1555,8 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
             zero values are found).
 
     Returns:
-        :class:`~pyccl.tk3d.Tk3D`: 2-halo trispectrum.
+        :class:`~pyccl.tk3d.Tk3D`: sum of the trispectrum terms 1h + 2h + 3h +
+        4h.
     """
     if lk_arr is None:
         lk_arr = cosmo.get_pk_spline_lk()
@@ -1607,4 +1608,173 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
     tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkk,
                 extrap_order_lok=extrap_order_lok,
                 extrap_order_hik=extrap_order_hik, is_logt=use_log)
+    return tk3d
+
+
+def halomod_Tk3D_cNG_linear_bias(cosmo, hmc, *, prof,
+                                 bias1=1, bias2=1, bias3=1, bias4=1,
+                                 is_number_counts1=False,
+                                 is_number_counts2=False,
+                                 is_number_counts3=False,
+                                 is_number_counts4=False,
+                                 p_of_k_a=None, lk_arr=None,
+                                 a_arr=None, extrap_order_lok=1,
+                                 extrap_order_hik=1, use_log=False,
+                                 extrap_pk=False, use_hod_for_1h=False,
+                                 prof_hod=None):
+    """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing the non-Gaussian
+    covariance trispectrum for four quantities defined by their respective halo
+    profiles. This is the sum of the trispectrum terms 1h + 2h + 3h + 4h.
+
+    Args:
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+        hmc (:class:`HMCalculator`): a halo model calculator.
+        prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`): a halo
+            profile representing the matter overdensity.
+        bias1 (:obj:`float` or `array`): linear galaxy bias for quantity 1.
+            If an array, it has to have the shape of ``a_arr``.
+        bias2 (:obj:`float` or `array`): linear galaxy bias for quantity 2.
+        bias3 (:obj:`float` or `array`): linear galaxy bias for quantity 3.
+        bias4 (:obj:`float` or `array`): linear galaxy bias for quantity 4.
+        is_number_counts1 (:obj:`bool`): If ``True``, quantity 1 will be considered
+            number counts and the clustering counter terms computed.
+        is_number_counts2 (:obj:`bool`): as ``is_number_counts1`` but for quantity 2.
+        is_number_counts3 (:obj:`bool`): as ``is_number_counts1`` but for quantity 3.
+        is_number_counts4 (:obj:`bool`): as ``is_number_counts1`` but for quantity 4.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
+            be used as the linear matter power spectrum. If ``None``,
+            the power spectrum stored within ``cosmo`` will be used.
+        a_arr (array): an array holding values of the scale factor
+            at which the trispectrum should be calculated for
+            interpolation. If ``None``, the internal values used
+            by ``cosmo`` will be used.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of
+            :math:`{\\rm Mpc}^{-1}`) at which the trispectrum should be
+            calculated for interpolation. If ``None``, the internal values
+            used by ``cosmo`` will be used.
+        extrap_order_lok (:obj:`int`): extrapolation order to be used on
+            k-values below the minimum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        extrap_order_hik (:obj:`int`): extrapolation order to be used on
+            k-values above the maximum of the splines. See
+            :class:`~pyccl.tk3d.Tk3D`.
+        use_log (:obj:`bool`): if ``True``, the trispectrum will be
+            interpolated in log-space (unless negative or
+            zero values are found).
+        extrap_pk (:obj:`bool`):
+            Whether to extrapolate ``p_of_k_a`` in case ``a`` is out of its
+            support. If ``False``, and the queried values are out of bounds,
+            an error is raised. The default is ``False``.
+        use_hod_for_1h (:obj: `bool`): If True, compute the 1h term with HOD
+            profiles, when needed. If False, use NFW and the linear galaxy
+            biases input. The default is ``False``.
+        prof_hod (:class:`~pyccl.halos.profiles.profile_base.HaloProfileHOD`):
+            a halo profile representing the galaxy overdensity.
+
+    Returns:
+        :class:`~pyccl.tk3d.Tk3D`: sum of the trispectrum terms 1h + 2h + 3h +
+        4h.
+    """ # noqa
+    if lk_arr is None:
+        lk_arr = cosmo.get_pk_spline_lk()
+    if a_arr is None:
+        a_arr = cosmo.get_pk_spline_a()
+
+    if not isinstance(prof, HaloProfileNFW):
+        raise TypeError("prof should be HaloProfileNFW.")
+
+    # Make sure biases are of the form number of a x number of k
+    ones = np.ones_like(a_arr)
+    bias1 *= ones
+    bias2 *= ones
+    bias3 *= ones
+    bias4 *= ones
+
+    bias_factor = ones.copy()
+    if is_number_counts1:
+        bias_factor *= bias1
+    if is_number_counts2:
+        bias_factor *= bias2
+    if is_number_counts3:
+        bias_factor *= bias3
+    if is_number_counts4:
+        bias_factor *= bias4
+
+    k_use = np.exp(lk_arr)
+    prof_2pt = Profile2pt()
+
+    pk2d = cosmo.parse_pk(p_of_k_a)
+    extrap = cosmo if extrap_pk else None  # extrapolation rule for pk2d
+
+
+    tkk_234h = halomod_trispectrum_2h_22(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                         prof, prof2=prof,
+                                         prof3=prof, prof4=prof,
+                                         prof13_2pt=prof_2pt,
+                                         prof14_2pt=prof_2pt,
+                                         prof24_2pt=prof_2pt,
+                                         prof32_2pt=prof_2pt,
+                                         p_of_k_a=p_of_k_a)
+
+    tkk_234h += halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                          prof, prof2=prof,
+                                          prof3=prof, prof4=prof,
+                                          prof12_2pt=prof_2pt,
+                                          prof34_2pt=prof_2pt,
+                                          p_of_k_a=p_of_k_a)
+
+    tkk_234h += halomod_trispectrum_3h(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                       prof=prof,
+                                       prof2=prof,
+                                       prof3=prof,
+                                       prof4=prof,
+                                       prof13_2pt=prof_2pt,
+                                       prof14_2pt=prof_2pt,
+                                       prof24_2pt=prof_2pt,
+                                       prof32_2pt=prof_2pt,
+                                       p_of_k_a=None)
+
+    tkk_234h += halomod_trispectrum_4h(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                       prof=prof,
+                                       prof2=prof,
+                                       prof3=prof,
+                                       prof4=prof,
+                                       p_of_k_a=None)
+
+    if use_hod_for_1h:
+        if not isinstance(prof, HaloProfileHOD):
+            raise TypeError("prof should be HaloProfileHOD.")
+
+        prof1 = prof2 = prof3 = prof4 = prof
+        if is_number_counts1:
+            prof1 = prof_hod
+        if is_number_counts2:
+            prof2 = prof_hod
+        if is_number_counts3:
+            prof3 = prof_hod
+        if is_number_counts4:
+            prof4 = prof_hod
+
+        tkk_1h = halomod_trispectrum_1h(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                        prof, prof2=prof2,
+                                        prof12_2pt=prof_2pt,
+                                        prof3=prof3, prof4=prof4,
+                                        prof34_2pt=prof_2pt)
+        tkk = tkk_1h + bias_factor[:, None, None] * tkk_234h
+    else:
+        tkk_1h = halomod_trispectrum_1h(cosmo, hmc, np.exp(lk_arr), a_arr,
+                                        prof, prof2=prof,
+                                        prof12_2pt=prof_2pt,
+                                        prof3=prof, prof4=prof,
+                                        prof34_2pt=prof_2pt)
+        tkk = bias_factor[:, None, None] * (tkk_1h + tkk_234h)
+
+
+    tkk, use_log = _logged_output(tkk, log=use_log)
+
+    tk3d = Tk3D(a_arr=a_arr, lk_arr=lk_arr, tkk_arr=tkk,
+                extrap_order_lok=extrap_order_lok,
+                extrap_order_hik=extrap_order_hik, is_logt=use_log)
+
     return tk3d
