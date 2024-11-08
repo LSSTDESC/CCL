@@ -10,7 +10,7 @@ STYLE CONVENTION USED
         **`function`**
         **`type`** or **`structure`**
 -->
-# CCL
+# CCL 
 ![Build](https://github.com/LSSTDESC/CCL/workflows/continuous-integration/badge.svg?branch=master)&nbsp;
 [![Coverage](https://coveralls.io/repos/github/LSSTDESC/CCL/badge.svg?branch=master)](https://coveralls.io/github/LSSTDESC/CCL?branch=master)&nbsp;
 [![Documentation](https://readthedocs.org/projects/ccl/badge/?version=latest)](https://ccl.readthedocs.io/en/latest/)&nbsp;
