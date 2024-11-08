@@ -89,13 +89,13 @@ jobs:
         run: |
           #pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython>=0.29.21,<3'  # for classy
           #pip install --no-build-isolation classy==2.9.4
-	  echo("Deps")
+          echo("Deps")
           pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython' # for classy
-	  echo("Purge")
+          echo("Purge")
           pip cache purge
-	  echo("dwl")
+          echo("dwl")
           pip download --no-deps --no-build-isolation classy==2.9.4
-	  echo("untar")
+          echo("untar")
           tar -zxvf classy-2.9.4.0.tar.gz
           cd classy-2.9.4.0/
           sed -i 's/np\.int_t/np.int64_t/g' python/classy.pyx
