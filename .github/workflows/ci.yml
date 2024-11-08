@@ -89,7 +89,7 @@ jobs:
         run: |
           #pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython>=0.29.21,<3'  # for classy
           #pip install --no-build-isolation classy==2.9.4
-          pip install 'setuptools' 'wheel' 'numpy>=1.19.0'  # for classy
+          pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython' # for classy
           pip cache purge
           pip download --no-deps --no-build-isolation classy==2.9.4
           tar -zxvf classy-2.9.4.0.tar.gz
