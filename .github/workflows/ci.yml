@@ -102,6 +102,7 @@ jobs:
           #sed -i 's/np\.int_t/np.int64_t/g' python/classy.pyx
           #echo "install"
           #pip install .
+          swig -version
 
       - name: Install CCL
         run: pip install --no-use-pep517 -v -e .
