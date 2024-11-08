@@ -87,8 +87,8 @@ jobs:
 
       - name: Install classy
         run: |
-          pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython>=0.29.21,<3'  # for classy
-          pip install --no-build-isolation classy==2.9.4
+          #pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython>=0.29.21,<3'  # for classy
+          #pip install --no-build-isolation classy==2.9.4
           #echo "Deps"
           #pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython' # for classy
           #echo "Purge"

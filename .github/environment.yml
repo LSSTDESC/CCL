@@ -9,7 +9,7 @@ dependencies:
   - fftw
   - swig
   - pyyaml
-  - numpy<2
+  - numpy
   # The below is only because the currnt version of fast-pt uses deprecated scipy functions.
   # We should remove the <1.14 flag as soon as this is fixed.
   - scipy<1.14
