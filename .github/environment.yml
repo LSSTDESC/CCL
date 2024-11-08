@@ -7,7 +7,7 @@ dependencies:
   - cmake
   - gsl
   - fftw
-  - swig==4.2.1
+  - swig
   - pyyaml
   - numpy
   # The below is only because the currnt version of fast-pt uses deprecated scipy functions.
