@@ -87,21 +87,21 @@ jobs:
 
       - name: Install classy
         run: |
-          #pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython>=0.29.21,<3'  # for classy
-          #pip install --no-build-isolation classy==2.9.4
-          echo "Deps"
-          pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython' # for classy
-          echo "Purge"
-          pip cache purge
-          echo "dwl"
-          pip download --no-deps --no-build-isolation classy==2.9.4
-          echo "untar"
-          tar -zxvf classy-2.9.4.0.tar.gz
-          cd classy-2.9.4.0/
-          echo "sed"
-          sed -i 's/np\.int_t/np.int64_t/g' python/classy.pyx
-          echo "install"
-          pip install .
+          pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython>=0.29.21,<3'  # for classy
+          pip install --no-build-isolation classy==2.9.4
+          #echo "Deps"
+          #pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython' # for classy
+          #echo "Purge"
+          #pip cache purge
+          #echo "dwl"
+          #pip download --no-deps --no-build-isolation classy==2.9.4
+          #echo "untar"
+          #tar -zxvf classy-2.9.4.0.tar.gz
+          #cd classy-2.9.4.0/
+          #echo "sed"
+          #sed -i 's/np\.int_t/np.int64_t/g' python/classy.pyx
+          #echo "install"
+          #pip install .
 
       - name: Install CCL
         run: pip install --no-use-pep517 -v -e .
