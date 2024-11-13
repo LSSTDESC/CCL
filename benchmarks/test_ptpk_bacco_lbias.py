@@ -37,6 +37,8 @@ order = ['gg', 'gm']
 
 @pytest.mark.parametrize('comb', enumerate(order))
 def test_pt_pk(comb):
+    import baccoemu
+    print(baccoemu.__version__)
     i_d, cc = comb
     t1, t2 = cc
 
