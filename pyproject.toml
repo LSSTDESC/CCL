@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8", "cmake", "swig", "numpy<2"]
+requires = ["setuptools>=64", "setuptools_scm>=8", "cmake", "swig"]
 
 [project]
 name = "pyccl"
@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
-    "numpy",
+    "numpy<2",
 ]
 
 [project.urls]
