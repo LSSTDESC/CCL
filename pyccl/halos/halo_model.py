@@ -186,7 +186,7 @@ class HMCalculator(CCLAutoRepr):
             mint[i] = self._integrator(
                 dVda[i] * self._mf[..., :] * _selm[..., :],
                 self._lmass
-            )
+            ).squeeze()
 
         # now do scale factor integral
         return self._integrator(mint, a)

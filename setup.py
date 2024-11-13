@@ -63,5 +63,6 @@ class Develop(_develop):
 
 setup(
     distclass=Distribution,
+    setup_requires=['setuptools_scm'],
     cmdclass={'build_py': Build, 'develop': Develop},
 )
