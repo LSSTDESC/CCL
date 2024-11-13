@@ -1,5 +1,12 @@
 # Unreleased
 
+# v3.1.2 Changes
+- Fixed dynamic versioning
+
+# v3.1.1 Changes
+- Update physical constants (#1196)
+- Fixed bug in Despali 2016 mass function (#1197)
+
 # v3.1 Changes
 - Docstring improvements (#1168, #1177, #1184).
 - Minor bugfixes (#1167, #1169, #1170, #1172, #1187, #1188).
