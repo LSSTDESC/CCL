@@ -125,6 +125,36 @@ def test_cells_raise_weird_pk():
         ccl.angular_cl(COSMO, LENS, LENS, ells, p_of_k_a=lambda k, a: 10)
 
 
+def test_fkem_chi_params():
+    # Redshift distribution
+    z = np.linspace(0, 4.72, 60)
+    nz = z**2*np.exp(-0.5*((z-1.5)/0.7)**2)
+
+    # Bias
+    bz = np.ones_like(z)
+
+    # Power spectra
+    ls = np.unique(np.geomspace(2, 2000, 128).astype(int)).astype(float)
+    cosmo = ccl.CosmologyVanillaLCDM()
+    tracer_gal = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                        dndz=(z, nz), bias=(z, bz))
+    cl_gg = ccl.angular_cl(cosmo, tracer_gal, tracer_gal, ls,
+                           l_limber=-1)
+    cl_ggn = ccl.angular_cl(cosmo, tracer_gal, tracer_gal, ls,
+                            l_limber=1000)
+    cl_ggn_b = ccl.angular_cl(cosmo, tracer_gal, tracer_gal, ls,
+                              l_limber=1000, fkem_chi_min=1.0,
+                              fkem_Nchi=100)
+
+    ell_good = ls > 100
+
+    # Check that, above ell, the non-Limber calculation does not
+    # agree with Limber when using the default FKEM sampling params
+    assert not np.all(np.fabs(cl_ggn/cl_gg-1)[ell_good] < 0.01)
+    # Check that it works with custom ones.
+    assert np.all(np.fabs(cl_ggn_b/cl_gg-1)[ell_good] < 0.01)
+
+
 def test_cells_mg():
     # Check that if we feed the non-linear matter power spectrum from a MG
     # cosmology into a Calculator and get Cells using MG tracers, we get the
