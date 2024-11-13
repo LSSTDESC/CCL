@@ -35,8 +35,8 @@ def _get_general_params(b):
 
 
 def _nonlimber_FKEM(
-    cosmo, clt1, clt2, p_of_k_a, p_of_k_a_lin, ls, l_limber, limber_max_error
-):
+        cosmo, clt1, clt2, p_of_k_a,
+        ls, l_limber, **params):
     """clt1, clt2 are lists of tracer in a tracer object
     cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
     psp non-linear power spectrum
@@ -55,6 +55,10 @@ def _nonlimber_FKEM(
     fll_t2 = clt2.get_f_ell(ls)
     status = 0
 
+    p_of_k_a_lin = params['pk_linear']
+    limber_max_error = params['limber_max_error']
+    Nchi = params['Nchi']
+    chi_min = params['chi_min']
     if (not (isinstance(p_of_k_a, str) and isinstance(p_of_k_a_lin, str)) and
        not (isinstance(p_of_k_a, ccl.Pk2D)
             and isinstance(p_of_k_a_lin, ccl.Pk2D)
@@ -86,9 +90,12 @@ def _nonlimber_FKEM(
     min_chis_t2 = np.min([np.min(i) for i in chis_t2])
     max_chis_t1 = np.max([np.max(i) for i in chis_t1])
     max_chis_t2 = np.max([np.max(i) for i in chis_t2])
-    chi_min = np.min([min_chis_t1, min_chis_t2])
+    if chi_min is None:
+        chi_min = np.min([min_chis_t1, min_chis_t2])
     chi_max = np.max([max_chis_t1, max_chis_t2])
-    Nchi = min(min(len(i) for i in chis_t1), min(len(i) for i in chis_t2))
+    if Nchi is None:
+        Nchi = min(min(len(i) for i in chis_t1),
+                   min(len(i) for i in chis_t2))
     """zero chi_min will result in a divide-by-zero error.
     If it is zero, we set it to something very small
     """
