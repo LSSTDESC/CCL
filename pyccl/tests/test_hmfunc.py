@@ -31,8 +31,6 @@ MDFS = [MVIR, MVIR, MVIR, MVIR,
         MFOF, MFOF, MVIR, MFOF, MFOF, MFOF]
 # These are kinds of slow to initialize, so let's do it only once
 MF_emu = ccl.halos.MassFuncBocquet20(mass_def='200c')
-# Dark Emulator needs A_s not sigma8, so cosmological params are defined later.
-MF_demu = ccl.halos.MassFuncNishimichi19(mass_def='200m', extrapolate=True)
 
 
 @pytest.mark.parametrize('nM_class', HMFS)
@@ -196,6 +194,10 @@ def test_nM_bocquet20_raises():
 
 
 def test_nM_nishimichi_smoke():
+    # Dark Emulator needs A_s not sigma8, so cosmological params
+    # are defined later.
+    MF_demu = ccl.halos.MassFuncNishimichi19(mass_def='200m',
+                                             extrapolate=True)
     for m in MS:
         n = MF_demu(COSMO_DE, m, 0.9)
         assert np.all(np.isfinite(n))
@@ -203,6 +205,11 @@ def test_nM_nishimichi_smoke():
 
 
 def test_nM_nishimichi19_compare():
+    # Dark Emulator needs A_s not sigma8, so cosmological params
+    # are defined later.
+    MF_demu = ccl.halos.MassFuncNishimichi19(mass_def='200m',
+                                             extrapolate=True)
+
     # Check that the values are sensible (they don't depart from other
     # parametrisations by more than ~4%
     # Msun, under supported range(10^12-16 Msun/h)
@@ -216,6 +223,11 @@ def test_nM_nishimichi19_compare():
 
 
 def test_nM_nishimichi19_raises():
+    # Dark Emulator needs A_s not sigma8, so cosmological params
+    # are defined later.
+    MF_demu = ccl.halos.MassFuncNishimichi19(mass_def='200m',
+                                             extrapolate=True)
+
     Ms = np.geomspace(1.5E12, 1E15, 128)
     # mdef raise
     with pytest.raises(ValueError):
