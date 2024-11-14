@@ -1,23 +1,32 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
   - gfortran=12.2.0  # for isitgr
-  - python=3.8
+  - python=3.10
   - pip
+  - setuptools_scm
   - cmake
   - gsl
   - fftw
   - swig
   - pyyaml
-  - numpy
-  - scipy
+  - numpy<2
+  # The below is only because the current version of fast-pt uses deprecated scipy functions.
+  # DarkEmulator also uses an old scipy.
+  # We should remove the <1.14 flag as soon as this is fixed.
+  - scipy<1.14
   - camb
   - fast-pt
   - pytest
   - pytest-cov
+  - pytables  # for baccoemu
+  - pyfftw  # for velocileptors
+  - george  # for dark_emu
   - pip:
-      - tables==3.8.0  # for baccoemu
       #- classy<3
-      - isitgr
+      - isitgr<=1.0.2
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator
+      - dark_emulator==1.1.2
+      - colossus
+      
