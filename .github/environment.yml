@@ -13,7 +13,7 @@ dependencies:
   # The below is only because the current version of fast-pt uses deprecated scipy functions.
   # DarkEmulator also uses an old scipy.
   # We should remove the <1.14 flag as soon as this is fixed.
-  - scipy<1.14
+  - scipy
   - camb
   - fast-pt
   - pytest
