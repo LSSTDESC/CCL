@@ -10,8 +10,7 @@ dependencies:
   - swig
   - pyyaml
   - numpy<2
-  # The below is only because the current version of fast-pt uses deprecated scipy functions.
-  # DarkEmulator also uses an old scipy.
+  # The below is only because the current version of DarkEmulator uses deprecated scipy functions.
   # We should remove the <1.14 flag as soon as this is fixed.
   - scipy<1.14
   - camb
