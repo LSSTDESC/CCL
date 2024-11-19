@@ -54,7 +54,7 @@ def angular_cl(
             the kernels are defined will be used (capped to 1E-6 Mpc if this
             value is zero). Users are encouraged to experiment with this parameter
             and ``fkem_Nchi`` to ensure the robustness of the output
-            :math:`C_\\ell`s.
+            :math:`C_\\ell` s.
         fkem_Nchi: Number of values of the comoving distance over which `FKEM`
             will interpolate the radial kernels. If ``None`` the smallest number
             over which the kernels are currently sampled will be used. Note that
@@ -62,7 +62,7 @@ def angular_cl(
             ``fkem_chi_min`` and the maximum distance over which the tracers
             are defined.  Users are encouraged to experiment with this parameter
             and ``fkem_chi_min`` to ensure the robustness of the output
-            :math:`C_\\ell`s.
+            :math:`C_\\ell` s.
         p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 
             3D linear Power spectrum to project, for special use in
             PT calculations using the FKEM non-limber integration technique.

@@ -26,7 +26,9 @@ def update_warning_verbosity(verbosity):
     """ Update the level of verbosity of the CCL warnings. Available
     levels are "none", "low", and "high". More warning messages will
     be output for higher verbosity levels. If "none", no CCL-level
-    warnings will be shown.
+    warnings will be shown. The default verbosity is "low". Note that
+    unless the verbosity level is "high", all C-level warnings will
+    be omitted.
 
     Args:
         verbosity (str): one of ``'none'``, ``'low'`` or ``'high'``.
@@ -35,6 +37,14 @@ def update_warning_verbosity(verbosity):
     if not (verbosity in ['none', 'low', 'high']):
         raise KeyError("`verbosity` must be one of {'none', 'low', 'high'}")
     warnings._CCL_WARN_THRESHOLD = _verbosity_thresholds[verbosity]
+
+    # Remove C-level warnings
+    from . import debug_mode
+
+    if verbosity == 'high':
+        debug_mode(True)
+    else:
+        debug_mode(False)
 
 
 class CCLError(RuntimeError):
