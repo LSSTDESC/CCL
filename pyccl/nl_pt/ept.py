@@ -195,9 +195,6 @@ class EulerianPTCalculator(CCLAutoRepr):
         
         if( not hasattr(fpt, "IA_ta")):
             raise ValueError(f"Your FAST-PT version lacks a required attribute. You may have the wrong fast-pt install. Try running pip install fast-pt or conda install fast-pt, then try again")
-        
-        if( not hasattr(fpt, "IA_der") and self.ufpt):
-            raise ValueError(f"You need a newer version of FAST-PT to use fpt for k2 term")
         if (not hasattr(fpt, "IA_tij")):
             raise ValueError(f"You are using an older version of FAST-PT, please run pip install fast-pt or conda install fast-pt, then try again")
         n_pad = int(self.fastpt_par['pad_factor'] * len(self.k_s))
@@ -453,23 +450,17 @@ class EulerianPTCalculator(CCLAutoRepr):
                              (self._g4*cd)[:, None] * (a00e + c00e) +
                              (self._g4*c2)[:, None] * (a0e2 + b0e2) + 
                              ck[:, None] * Pak2 + (self._g4*ct)[:, None] * tijsij) +
-               b2[:,None]*((self._g4*c1)[:,None]*gb2sij + 
+               0.5*b2[:,None]*((self._g4*c1)[:,None]*gb2sij + 
                             (self._g4*cd)[:,None] * (gb2dsij) +
                             (self._g4*c2)[:, None] * (gb2sij2) +
                             ck[:, None] * (gb2sij*self.k_s**2) + 
                             (self._g4*ct)[:,None] * gb2tij) +
-               bs[:,None]*((self._g4*c1)[:,None]*s2sij +
+               0.5*bs[:,None]*((self._g4*c1)[:,None]*s2sij +
                             (self._g4*cd)[:,None] * (s2dsij) +
                             (self._g4*c2)[:,None] * (s2sij2) +
                             ck[:, None] * (s2sij*self.k_s**2) +
                             (self._g4*ct)[:, None] *s2tij) +
-                bk2[:,None]*self.k_s**2*(c1[:, None] * Pd1d1 +
-                             (self._g4*cd)[:, None] * (a00e + c00e) +
-                             (self._g4*c2)[:, None] * (a0e2 + b0e2) + 
-                             ck[:, None] * Pak2 +
-                             (self._g4*ct)[:, None] * tijsij) +
-                b3nl[:,None]*((self._g4*c1)[:,None]*sig3nl))
-                             
+                0.5*b3nl[:,None]*((self._g4*c1)[:,None]*sig3nl))                            
         
         return pgi*self.exp_cutoff
 
@@ -563,8 +554,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                    (ct1*c12 + ct2*c11)[:,None]*(tijsij) +
                    (ct1*c22 + ct2*c21)[:,None] * (tij2sij) +
                    (ct1*cd2 + ct2*cd1)[:,None] * (tijdsij) +
-                   (ct1*ct2)[:,None] * (tijtij) +
-                   (ct1*ck2 + ct2*ck1)[:,None] * (tijsij)*(self.k_s**2)[None, :])
+                   (ct1*ct2)[:,None] * (tijtij))
 
         return pii*self.exp_cutoff
 
