@@ -9,7 +9,7 @@ _verbosity_thresholds = {'none': 100, 'low': 10, 'high': 1}
 
 
 class warnings:
-    _CCL_WARN_THRESHOLD = 1  # Equivalent to "low" verbosity
+    _CCL_WARN_THRESHOLD = 10  # Equivalent to "low" verbosity
 
     def warn(*args, **kwargs):
         category = kwargs.get('category')
