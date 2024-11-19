@@ -67,6 +67,11 @@ def test_ccl_deprecationwarning_switch():
     pyccl.CCLDeprecationWarning.enable()
 
 
+def test_ccl_warning_verbosity_error():
+    with pytest.raises(KeyError):
+        pyccl.update_warning_verbosity("hihg")
+
+
 def test_ccl_warning_verbosity():
 
     # The code below will trigger an unimportant warning
