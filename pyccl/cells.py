@@ -1,10 +1,8 @@
 __all__ = ("angular_cl",)
 
-import warnings
-
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
+from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warnings
 from .pyutils import integ_types
 from ._nonlimber_FKEM import _nonlimber_FKEM
 
@@ -84,8 +82,7 @@ def angular_cl(
         warnings.warn(
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
-            category=CCLWarning,
-        )
+            category=CCLWarning, importance='low')
 
     if limber_integration_method not in integ_types:
         raise ValueError(
