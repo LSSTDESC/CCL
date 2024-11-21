@@ -1593,14 +1593,14 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
                                   prof14_2pt=prof14_2pt,
                                   prof24_2pt=prof24_2pt,
                                   prof32_2pt=prof32_2pt,
-                                  p_of_k_a=None)
+                                  p_of_k_a=p_of_k_a)
 
     tkk += halomod_trispectrum_4h(cosmo, hmc, np.exp(lk_arr), a_arr,
                                   prof=prof,
                                   prof2=prof2,
                                   prof3=prof3,
                                   prof4=prof4,
-                                  p_of_k_a=None)
+                                  p_of_k_a=p_of_k_a)
 
     tkk, use_log = _logged_output(tkk, log=use_log)
 
