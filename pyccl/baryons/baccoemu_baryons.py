@@ -2,7 +2,6 @@ __all__ = ("BaryonsBaccoemu", "BaccoemuBaryons")
 
 import numpy as np
 from copy import deepcopy
-from warnings import warn
 
 from .. import Pk2D, CCLDeprecationWarning
 from . import Baryons
@@ -216,8 +215,9 @@ class BaccoemuBaryons(BaryonsBaccoemu):
 
     def __init__(self, *args, **kwargs):
         """This throws a deprecation warning on initialization."""
-        warn(f"Class {self.__class__.__name__} will be deprecated. " +
-             f"Please use {BaryonsBaccoemu.__name__} instead.",
-             CCLDeprecationWarning, stacklevel=2)
+        from .. import warnings
+        warnings.warn(f"Class {self.__class__.__name__} will be deprecated. " +
+                      f"Please use {BaryonsBaccoemu.__name__} instead.",
+                      CCLDeprecationWarning, stacklevel=2,
+                      importance='low')
         super().__init__(*args, **kwargs)
-    pass

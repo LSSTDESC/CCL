@@ -94,3 +94,11 @@ def test_ccl_warning_verbosity():
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         pyccl.WeakLensingTracer(cosmo, dndz=(z, nz))
+
+
+def test_ccl_deprecation_warning():
+    # Switch to high verbosity to catch it
+    pyccl.update_warning_verbosity("high")
+    with pytest.warns(pyccl.CCLDeprecationWarning):
+        pyccl.baryons.BaccoemuBaryons()
+    pyccl.update_warning_verbosity("low")
