@@ -15,7 +15,7 @@ class warnings:
         category = kwargs.get('category')
         importance = _warning_importance[kwargs.pop('importance', 'low')]
 
-        if ((category is CCLWarning) and
+        if ((category in (CCLWarning, CCLDeprecationWarning)) and
                 (importance < warnings._CCL_WARN_THRESHOLD)):
             return
 
