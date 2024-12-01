@@ -211,7 +211,7 @@ def darkemu_Pgm_resp(
     nths = np.zeros(nM)
 
     mass_def = halos.MassDef200m
-    hmf = halos.MassFuncDarkEmulator(mass_def=mass_def)
+    hmf = halos.MassFuncNishimichi19(mass_def=mass_def, extrapolate=True)
     hbf = halos.HaloBiasTinker10(mass_def=mass_def)
 
     # dark emulator is valid for 0 =< z <= 1.48
@@ -441,7 +441,7 @@ def darkemu_Pgg_resp(
     nths = np.zeros(nM)
 
     mass_def = halos.MassDef200m
-    hmf = halos.MassFuncDarkEmulator(mass_def=mass_def)
+    hmf = halos.MassFuncNishimichi19(mass_def=mass_def, extrapolate=True)
     hbf = halos.HaloBiasTinker10(mass_def=mass_def)
     prof_2pt = halos.profiles_2pt.Profile2ptHOD()
 

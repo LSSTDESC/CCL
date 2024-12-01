@@ -4,7 +4,7 @@ from pyccl.pkresponse import Pmm_resp, darkemu_Pgm_resp, darkemu_Pgg_resp
 
 cosmo = ccl.Cosmology(
     Omega_c=0.27,
-    Omega_b=0.045,
+    Omega_b=0.048,
     h=0.67,
     A_s=2.0e-9,
     n_s=0.96,
