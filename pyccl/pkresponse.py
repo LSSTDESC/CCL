@@ -44,6 +44,8 @@ def Pmm_resp(
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
         deltah (float): the variation of h to compute T_{h}(k) by
             the two-sided numerical derivative method.
+        extra_parameters (:obj:`dict`): Dictionary holding extra
+            parameters. Currently supports extra parameters for CAMB.
         a_arr (array): an array holding values of the scale factor
             at which the trispectrum should be calculated for
             interpolation. If `None`, the internal values used
@@ -81,7 +83,7 @@ def Pmm_resp(
     k_use = np.exp(lk_arr)
 
     # set h-modified cosmology to take finite differencing
-    cosmo_hp, cosmo_hm = set_hmodified_cosmology(cosmo, deltah)
+    cosmo_hp, cosmo_hm = set_hmodified_cosmology(cosmo, deltah, extra_parameters)
 
     # Growth factor
     Dp = cosmo_hp.growth_factor_unnorm(a_arr)
@@ -806,7 +808,7 @@ def darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
     return emu
 
 
-def set_hmodified_cosmology(cosmo, deltah):
+def set_hmodified_cosmology(cosmo, deltah, extra_parameters=None):
     """Input cosmology and initiallize the base class of DarkEmulator
     for cosmology with modified Hubble parameter h.
     """
@@ -826,11 +828,13 @@ def set_hmodified_cosmology(cosmo, deltah):
     Omega_b_m = np.power((h / hm), 2) * Omega_b
 
     cosmo_hp = cosmology.Cosmology(
-        Omega_c=Omega_c_p, Omega_b=Omega_b_p, h=hp, n_s=n_s, A_s=A_s
+        Omega_c=Omega_c_p, Omega_b=Omega_b_p, h=hp, n_s=n_s, A_s=A_s,
+        extra_parameters=extra_parameters
     )
 
     cosmo_hm = cosmology.Cosmology(
-        Omega_c=Omega_c_m, Omega_b=Omega_b_m, h=hm, n_s=n_s, A_s=A_s
+        Omega_c=Omega_c_m, Omega_b=Omega_b_m, h=hm, n_s=n_s, A_s=A_s,
+        extra_parameters=extra_parameters
     )
 
     return cosmo_hp, cosmo_hm
