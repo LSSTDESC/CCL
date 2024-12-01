@@ -746,14 +746,6 @@ def b2H17(b1):
     return b2
 
 
-def b2L16(b1):
-    """Implements fitting formula for secondary halo bias, b_2, described in
-    arXiv:1511.01096.
-    """
-    b2 = 0.412 - (2.143 * b1) + (0.929 * b1 * b1) + (0.008 * b1 * b1 * b1)
-    return b2
-
-
 def darkemu_set_cosmology(emu, cosmo):
     """Input cosmology and initiallize the base class of DarkEmulator.
     """
@@ -809,32 +801,26 @@ def darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
 
 
 def set_hmodified_cosmology(cosmo, deltah, extra_parameters=None):
-    """Input cosmology and initiallize the base class of DarkEmulator
-    for cosmology with modified Hubble parameter h.
+    """Create the Cosmology objects with modified Hubble parameter h.
     """
     Omega_c = cosmo["Omega_c"]
     Omega_b = cosmo["Omega_b"]
     h = cosmo["h"]
-    n_s = cosmo["n_s"]
-    A_s = cosmo["A_s"]
+    
+    cosmo_hmodified = []
+    for i in [+1, -1]:
+        hp = h + i * deltah
+    
+        # \Omega_c h^2, \Omega_b h^2 is fixed
+        Omega_c_p = np.power((h / hp), 2) * Omega_c
+        Omega_b_p = np.power((h / hp), 2) * Omega_b
+  
+        cosmo_hp_dict = cosmo.to_dict()
+        cosmo_hp_dict["h"] = hp
+        cosmo_hp_dict["Omega_c"] = Omega_c_p
+        cosmo_hp_dict["Omega_b"] = Omega_b_p
+        cosmo_hp_dict["extra_parameters"] = extra_parameters
+        cosmo_hp = cosmology.Cosmology(**cosmo_hp_dict)
+        cosmo_hmodified.append(cosmo_hp)   
 
-    # \Omega_c h^2, \Omega_b h^2 is fixed
-    hp = h + deltah
-    Omega_c_p = np.power((h / hp), 2) * Omega_c
-    Omega_b_p = np.power((h / hp), 2) * Omega_b
-
-    hm = h - deltah
-    Omega_c_m = np.power((h / hm), 2) * Omega_c
-    Omega_b_m = np.power((h / hm), 2) * Omega_b
-
-    cosmo_hp = cosmology.Cosmology(
-        Omega_c=Omega_c_p, Omega_b=Omega_b_p, h=hp, n_s=n_s, A_s=A_s,
-        extra_parameters=extra_parameters
-    )
-
-    cosmo_hm = cosmology.Cosmology(
-        Omega_c=Omega_c_m, Omega_b=Omega_b_m, h=hm, n_s=n_s, A_s=A_s,
-        extra_parameters=extra_parameters
-    )
-
-    return cosmo_hp, cosmo_hm
+    return cosmo_hmodified[0], cosmo_hmodified[1]
