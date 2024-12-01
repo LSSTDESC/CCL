@@ -105,26 +105,28 @@ def Pmm_resp(
     T_h = np.zeros(nk)
 
     kmin = 1e-2
+    # use the perturbation theory below kmin
+    T_h[k_use <= kmin] = 1
+
     for ia, aa in enumerate(a_arr):
-        pk = pk2d.__call__(k_use, aa, cosmo)
-        pk_hp = pk2d_hp.__call__(k_use, aa, cosmo_hp)
-        pk_hm = pk2d_hm.__call__(k_use, aa, cosmo_hm)
+        pk = pk2d(k_use, aa, cosmo)
+        pk_hp = pk2d_hp(k_use, aa, cosmo_hp)
+        pk_hm = pk2d_hm(k_use, aa, cosmo_hm)
 
-        dpknl = pk2d.__call__(k_use, aa, cosmo, derivative=True)
-        dpklin = pk2dlin.__call__(k_use, aa, cosmo, derivative=True)
+        dpknl = pk2d(k_use, aa, cosmo, derivative=True)
+        dpklin = pk2dlin(k_use, aa, cosmo, derivative=True)
 
-        # use the perturbation theory below kmin
-        T_h[k_use <= kmin] = 1
-
+        # Eq. 11 ((hp-hm) term is cancelled out)
         T_h[k_use > kmin] = (
             np.log(pk_hp[k_use > kmin]) - np.log(pk_hm[k_use > kmin])
         ) / (
             2 * (np.log(Dp[ia]) - np.log(Dm[ia]))
-        )  # (hp-hm) term is cancelled out
+        ) 
 
         dpk[k_use <= kmin] = dpklin[k_use <= kmin]
         dpk[k_use > kmin] = dpknl[k_use > kmin]
 
+        # Eq. 23
         dpk12[ia, :] = pk * (1.0 + (26.0 / 21.0) * T_h - dpk / 3.0)
 
     if use_log:
@@ -213,8 +215,8 @@ def darkemu_Pgm_resp(
     hbf = halos.HaloBiasTinker10(mass_def=mass_def)
 
     # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(1.0 / a_arr - 1) > 1.5:
-        print("dark emulator is valid for z={:.2f}<1.48")
+    if np.any(1.0 / a_arr - 1) > 1.48:
+        print("dark emulator is valid for z<=1.48")
 
     for ia, aa in enumerate(a_arr):
         z = 1.0 / aa - 1
@@ -268,7 +270,11 @@ def darkemu_Pgm_resp(
         dprof_dlogM = (prof_Mp - prof_Mm) / (2 * dlogM)
 
         nth_mat = np.tile(nths, (len(k_use), 1)).transpose()
+        
+        # Eq. 18
         ng = integrate.romb(dndlog10m_emu(logM) * Ng, dx=dlogM, axis=0)
+        
+        # Eq. 17
         bgE = (
             integrate.romb(
                 dndlog10m_emu(logM) * Ng * (hbf(cosmo, M, aa)),
@@ -278,6 +284,7 @@ def darkemu_Pgm_resp(
             / ng
         )
 
+        # Eq. 19
         bgE2 = (
             integrate.romb(
                 dndlog10m_emu(logM) * Ng * b2H17(hbf(cosmo, M, aa)),
@@ -299,9 +306,13 @@ def darkemu_Pgm_resp(
 
         dnP_hm_db_emu = nth_mat * (dPhm_db_nfix + b1L_th_mat * np.array(Pbin))
 
+        # Eq. A2
         nP = nth_mat * np.array(Pth)
+
+        # Eq. A7
         Pgm = integrate.romb(dprof_dlogM * nP, dx=dlogM, axis=0) / ng
 
+        # The first term of Eq. A8
         dnP_gm_db = integrate.romb(
             dprof_dlogM * (dnP_hm_db_emu), dx=dlogM, axis=0
         )
@@ -314,12 +325,14 @@ def darkemu_Pgm_resp(
                 np.log(k_use)
             )
 
+        # The second term of Eq. A8
         G_prof = (
             +1.0
             / 3.0
             * integrate.romb(dprof_dlogM_dlogk * nP, dx=dlogM, axis=0)
         )
 
+        # Eq. 25
         Pgm_growth = (dnP_gm_db + G_prof) / ng - bgL * Pgm
 
         Pgm_d = (
@@ -330,19 +343,22 @@ def darkemu_Pgm_resp(
             * Pgm
         )
 
+        # Eq. 22
         dPgm_db_emu = Pgm_growth + Pgm_d
 
-        dpklin = pk2dlin.__call__(k_use, aa, cosmo, derivative=True)
+        dpklin = pk2dlin(k_use, aa, cosmo, derivative=True)
 
+        # Eq. 16
         dPgm_db_lin = (
             (47 / 21 + bgE2 / bgE - bgE - 1 / 3 * dpklin)
             * bgE
-            * pk2dlin.__call__(k_use, aa, cosmo)
+            * pk2dlin(k_use, aa, cosmo)
         )
 
         # stitching
         k_switch = 0.08  # [h/Mpc]
 
+        # Eq. 27
         dPgm_db = dPgm_db_lin * np.exp(-k_emu / k_switch) + dPgm_db_emu * (
             1 - np.exp(-k_emu / k_switch)
         )
@@ -430,8 +446,8 @@ def darkemu_Pgg_resp(
     prof_2pt = halos.profiles_2pt.Profile2ptHOD()
 
     # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(1.0 / a_arr - 1) > 1.5:
-        print("dark emulator is valid for z={:.2f}<1.48")
+    if np.any(1.0 / a_arr - 1) > 1.48:
+        print("dark emulator is valid for z<=1.48")
 
     for ia, aa in enumerate(a_arr):
         z = 1.0 / aa - 1
@@ -520,13 +536,18 @@ def darkemu_Pgg_resp(
             )
 
         nth_mat = np.tile(nths, (len(k_use), 1)).transpose()
+
+        # Eq. 18
         ng = integrate.romb(dndlog10m_emu(logM) * Ng, dx=dlogM, axis=0)
         b1 = hbf(cosmo, M, aa)
+
+        # Eq. 17
         bgE = (
             integrate.romb(dndlog10m_emu(logM) * Ng * b1, dx=dlogM, axis=0)
             / ng
         )
 
+        #Eq. 19
         bgE2 = (
             integrate.romb(
                 dndlog10m_emu(logM) * Ng * b2H17(b1), dx=dlogM, axis=0
@@ -555,6 +576,8 @@ def darkemu_Pgg_resp(
                 )
             )
         Pgg_2h_int = np.array(Pgg_2h_int)
+
+        # Eq. A12
         _Pgg_2h = integrate.romb(
             Pgg_2h_int * nth_mat * dprof_dlogM, axis=0, dx=dlogM
         ) / (ng**2)
@@ -587,6 +610,8 @@ def darkemu_Pgg_resp(
             )
             / (ng**2)
         )
+
+        # The first term of Eq. A14
         resp_2h = resp_2h + G_prof
 
         # 1-halo response
@@ -604,6 +629,8 @@ def darkemu_Pgg_resp(
             )
             / (ng**2)
         )
+
+        # The first term of Eq. A15
         resp_1h = resp_1h + G_prof
 
         Pgg_growth = (resp_1h + resp_2h) - 2 * bgL * Pgg
@@ -616,17 +643,21 @@ def darkemu_Pgg_resp(
             * Pgg
         )
 
+        # Eq. 22
         dPgg_db_emu = Pgg_growth + Pgg_d - Pgg
 
-        dpklin = pk2dlin.__call__(k_use, aa, cosmo, derivative=True)
+        dpklin = pk2dlin(k_use, aa, cosmo, derivative=True)
 
-        Pgg_lin = bgE**2 * pk2dlin.__call__(k_use, aa, cosmo)
+        Pgg_lin = bgE**2 * pk2dlin(k_use, aa, cosmo)
+
+        # Eq. 16
         dPgg_db_lin = (
             47 / 21 + 2 * bgE2 / bgE - 2 * bgE - 1 / 3 * dpklin
         ) * Pgg_lin
         # stitching
         k_switch = 0.08  # [h/Mpc]
 
+        # Eq. 27
         dPgg_db = dPgg_db_lin * np.exp(-k_emu / k_switch) + dPgg_db_emu * (
             1 - np.exp(-k_emu / k_switch)
         )
@@ -659,6 +690,8 @@ def darkemu_Pgg_resp(
 
 
 def mass_to_dens(dndlog10m, cosmo, mass_thre):
+    """Converts mass threshold to 
+    """
     logM1 = np.linspace(
         np.log10(mass_thre), np.log10(10**16.0 / cosmo["h"]), 2**6 + 1
     )
@@ -720,6 +753,8 @@ def b2L16(b1):
 
 
 def darkemu_set_cosmology(emu, cosmo):
+    """Input cosmology and initiallize the base class of DarkEmulator.
+    """
     Omega_c = cosmo["Omega_c"]
     Omega_b = cosmo["Omega_b"]
     h = cosmo["h"]
@@ -740,6 +775,9 @@ def darkemu_set_cosmology(emu, cosmo):
 
 
 def darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
+    """Input cosmology and initiallize the base class of DarkEmulator
+    for cosmology with modified A_s.
+    """
     Omega_c = cosmo["Omega_c"]
     Omega_b = cosmo["Omega_b"]
     h = cosmo["h"]
@@ -769,6 +807,9 @@ def darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
 
 
 def set_hmodified_cosmology(cosmo, deltah):
+    """Input cosmology and initiallize the base class of DarkEmulator
+    for cosmology with modified Hubble parameter h.
+    """
     Omega_c = cosmo["Omega_c"]
     Omega_b = cosmo["Omega_b"]
     h = cosmo["h"]

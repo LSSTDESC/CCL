@@ -23,7 +23,7 @@ prof_hod = ccl.halos.HaloProfileHOD(mass_def=mass_def, concentration=cm)
 def test_Pmm_resp():
     response = Pmm_resp(cosmo, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr)
 
-    assert np.all(np.isfinite(response)), "Pmm_resp produced infinity values."
+    assert np.all(np.isfinite(response))
 
 
 def test_Pgm_resp():
@@ -31,9 +31,7 @@ def test_Pgm_resp():
         cosmo, prof_hod, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr
     )
 
-    assert np.all(
-        np.isfinite(response)
-    ), "darkemu_Pgm_resp produced infinity values."
+    assert np.all(np.isfinite(response))
 
 
 def test_Pgg_resp():
@@ -41,6 +39,4 @@ def test_Pgg_resp():
         cosmo, prof_hod, deltalnAs=deltalnAs, lk_arr=lk_arr, a_arr=a_arr
     )
 
-    assert np.all(
-        np.isfinite(response)
-    ), "darkemu_Pgg_resp produced infinity values."
+    assert np.all(np.isfinite(response))
