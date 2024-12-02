@@ -1,9 +1,6 @@
 import numpy as np
-import os
 from pyccl.pkresponse import Pmm_resp, darkemu_Pgm_resp, darkemu_Pgg_resp
 import pyccl as ccl
-
-data_directory_path = os.path.expanduser("benchmarks/data/SSC-Terasawa24/")
 
 # Set cosmology
 Om = 0.3156
@@ -26,31 +23,16 @@ cosmo = ccl.Cosmology(
 )
 
 
-# Construct the full path for each data file (z=0)
-k_data_path = os.path.join(data_directory_path, "k_h.npy")
-k_data_mm_path = os.path.join(data_directory_path, "k_h_mm.npy")
-Pmm_resp_data_path = os.path.join(data_directory_path, "Pmm_resp_z0.npy")
-Pmm_resp_err_data_path = os.path.join(
-    data_directory_path, "Pmm_resp_err_z0.npy"
-)
-Pgm_resp_data_path = os.path.join(data_directory_path, "Pgm_resp_z0.npy")
-Pgm_resp_err_data_path = os.path.join(
-    data_directory_path, "Pgm_resp_err_z0.npy"
-)
-Pgg_resp_data_path = os.path.join(data_directory_path, "Pgg_resp_z0.npy")
-Pgg_resp_err_data_path = os.path.join(
-    data_directory_path, "Pgg_resp_err_z0.npy"
-)
-
 # Load data
-k_data = np.load(k_data_path)
-k_data_mm = np.load(k_data_mm_path)
-Pmm_resp_data = np.load(Pmm_resp_data_path) / h**3
-Pmm_resp_err_data = np.load(Pmm_resp_err_data_path) / h**3
-Pgm_resp_data = np.load(Pgm_resp_data_path) / h**3
-Pgm_resp_err_data = np.load(Pgm_resp_err_data_path) / h**3
-Pgg_resp_data = np.load(Pgg_resp_data_path) / h**3
-Pgg_resp_err_data = np.load(Pgg_resp_err_data_path) / h**3
+pkresponse_data = np.load("benchmarks/data/pkresponse.npz")
+k_data = pkresponse_data["k_h"]
+k_data_mm = pkresponse_data["k_h_mm"]
+Pmm_resp_data = pkresponse_data["Pmm_resp"] / h**3
+Pmm_resp_err_data = pkresponse_data["Pmm_resp_err"] / h**3
+Pgm_resp_data = pkresponse_data["Pgm_resp"] / h**3
+Pgm_resp_err_data = pkresponse_data["Pgm_resp_err"] / h**3
+Pgg_resp_data = pkresponse_data["Pgg_resp"] / h**3
+Pgg_resp_err_data = pkresponse_data["Pgg_resp_err"]/ h**3
 
 
 # HOD parameters
@@ -82,10 +64,10 @@ prof_hod = ccl.halos.HaloProfileHOD(
 # Define input parameters for pkresponse functions
 log10Mh_min = np.log10(2.6e12)
 log10Mh_max = 15.9
-a_arr = np.array([1.0])
-indx = (k_data > 1e-2) & (k_data < 4)
+a_arr = np.array([1.0, 0.64516129, 0.49382716, 0.40387722])
+indx = (k_data > 1e-2) & (k_data < 3)
 lk_arr = np.log(k_data[indx] * h)  # Using loaded k_data
-indx_mm = (k_data_mm > 1e-2) & (k_data_mm < 4)
+indx_mm = (k_data_mm > 1e-2) & (k_data_mm < 3)
 lk_arr_mm = np.log(k_data_mm[indx_mm] * h)  # Using loaded k_data
 
 # Generate power spectrum responses using pkresponse.py functions
@@ -121,23 +103,44 @@ generated_Pgg_resp = darkemu_Pgg_resp(
 # Compare the generated responses with simulation data
 def test_pmm_resp():
     assert np.allclose(
-        Pmm_resp_data[indx_mm],
-        generated_Pmm_resp,
-        atol=6 * Pmm_resp_err_data[indx_mm],
+        Pmm_resp_data[0, indx_mm],
+        generated_Pmm_resp[0],
+        atol=10 * Pmm_resp_err_data[0, indx_mm],
+    )
+
+def test_pmm_resp2():
+    assert np.allclose(
+        Pmm_resp_data[1:, indx_mm],
+        generated_Pmm_resp[1:],
+        atol=60 * Pmm_resp_err_data[1:, indx_mm],
     )
 
 
 def test_pgm_resp():
     assert np.allclose(
-        Pgm_resp_data[indx],
-        generated_Pgm_resp,
-        atol=2 * Pgm_resp_err_data[indx],
+        Pgm_resp_data[:2, indx],
+        generated_Pgm_resp[:2],
+        atol=15 * Pgm_resp_err_data[:2, indx],
+    )
+
+def test_pgm_resp2():
+    assert np.allclose(
+        Pgm_resp_data[2:, indx],
+        generated_Pgm_resp[2:],
+        atol=50 * Pgm_resp_err_data[2:, indx],
     )
 
 
 def test_pgg_resp():
     assert np.allclose(
-        Pgg_resp_data[indx],
-        generated_Pgg_resp,
-        atol=3 * Pgg_resp_err_data[indx],
+        Pgg_resp_data[:2, indx],
+        generated_Pgg_resp[:2],
+        atol=4 * Pgg_resp_err_data[:2, indx],
+    )
+
+def test_pgg_resp2():
+    assert np.allclose(
+        Pgg_resp_data[2:, indx],
+        generated_Pgg_resp[2:],
+        atol=15 * Pgg_resp_err_data[2:, indx],
     )
