@@ -75,7 +75,7 @@ def Pmm_resp(
     k_use = np.exp(lk_arr)
 
     # set h-modified cosmology to take finite differencing
-    cosmo_hp, cosmo_hm = set_hmodified_cosmology(cosmo, deltah, extra_parameters)
+    cosmo_hp, cosmo_hm = _set_hmodified_cosmology(cosmo, deltah, extra_parameters)
 
     # Growth factor
     Dp = cosmo_hp.growth_factor_unnorm(a_arr)
@@ -178,7 +178,7 @@ def darkemu_Pgm_resp(
     # set h-modified cosmology to take finite differencing
     hp = h + deltah
     hm = h - deltah
-    cosmo_hp, cosmo_hm = set_hmodified_cosmology(cosmo, deltah)
+    cosmo_hp, cosmo_hm = _set_hmodified_cosmology(cosmo, deltah)
 
     # Growth factor
     Dp = cosmo_hp.growth_factor_unnorm(a_arr)
@@ -218,7 +218,7 @@ def darkemu_Pgm_resp(
             logMfor_hmf, hmf(cosmo, 10**logMfor_hmf, aa)
         )  # Mpc^-3
 
-        darkemu_set_cosmology(emu, cosmo)
+        _darkemu_set_cosmology(emu, cosmo)
         for m in range(nM):
             Pth[m] = emu.get_phm_massthreshold(k_emu, Mh[m], z) * (1 / h) ** 3
             Pbin[m] = emu.get_phm_mass(k_emu, Mh[m], z) * (1 / h) ** 3
@@ -231,7 +231,7 @@ def darkemu_Pgm_resp(
                 dndlog10m_emu(logM1) * hbf(cosmo, (10**logM1), aa), dx=dlogM1
             ) / integrate.romb(dndlog10m_emu(logM1), dx=dlogM1)
 
-        darkemu_set_cosmology(emu, cosmo_hp)
+        _darkemu_set_cosmology(emu, cosmo_hp)
         for m in range(nM):
             Pnth_hp[m] = (
                 emu.get_phm(
@@ -240,7 +240,7 @@ def darkemu_Pgm_resp(
                 * (1 / hp) ** 3
             )
 
-        darkemu_set_cosmology(emu, cosmo_hm)
+        _darkemu_set_cosmology(emu, cosmo_hm)
         for m in range(nM):
             Pnth_hm[m] = (
                 emu.get_phm(
@@ -279,7 +279,7 @@ def darkemu_Pgm_resp(
         # Eq. 19
         bgE2 = (
             integrate.romb(
-                dndlog10m_emu(logM) * Ng * b2H17(hbf(cosmo, M, aa)),
+                dndlog10m_emu(logM) * Ng * _b2H17(hbf(cosmo, M, aa)),
                 dx=dlogM,
                 axis=0,
             )
@@ -448,7 +448,7 @@ def darkemu_Pgg_resp(
         )  # Mpc^-3
 
         for m in range(nM):
-            nths[m] = mass_to_dens(dndlog10m_emu, cosmo, M[m])
+            nths[m] = _mass_to_dens(dndlog10m_emu, cosmo, M[m])
             logM1 = np.linspace(logM[m], logM[-1], 2**5 + 1)
             dlogM1 = logM[1] - logM[0]
 
@@ -457,7 +457,7 @@ def darkemu_Pgg_resp(
             ) / integrate.romb(dndlog10m_emu(logM1), dx=dlogM1)
 
         # set cosmology for dark emulator
-        darkemu_set_cosmology(emu, cosmo)
+        _darkemu_set_cosmology(emu, cosmo)
         for m in range(nM):
             for n in range(nM):
                 Pth[m, n] = (
@@ -471,13 +471,13 @@ def darkemu_Pgg_resp(
                 )
 
                 Pth_bin[m, n] = (
-                    get_phh_massthreshold_mass(
+                    _get_phh_massthreshold_mass(
                         emu, k_emu, nths[m] / (h**3), Mh[n], z
                     )
                     * (1 / h) ** 3
                 )
 
-        darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs)
+        _darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs)
         for m in range(nM):
             for n in range(nM):
                 Pth_Ap[m, n] = (
@@ -490,7 +490,7 @@ def darkemu_Pgg_resp(
                     * (1 / h) ** 3
                 )
 
-        darkemu_set_cosmology_forAsresp(emu, cosmo, -deltalnAs)
+        _darkemu_set_cosmology_forAsresp(emu, cosmo, -deltalnAs)
         for m in range(nM):
             for n in range(nM):
                 Pth_Am[m, n] = (
@@ -540,7 +540,7 @@ def darkemu_Pgg_resp(
         #Eq. 19
         bgE2 = (
             integrate.romb(
-                dndlog10m_emu(logM) * Ng * b2H17(b1), dx=dlogM, axis=0
+                dndlog10m_emu(logM) * Ng * _b2H17(b1), dx=dlogM, axis=0
             )
             / ng
         )
@@ -690,25 +690,6 @@ def _mass_to_dens(dndlog10m, cosmo, mass_thre):
     dens = integrate.romb(dndlog10m(logM1), dx=dlogM1)
 
     return dens
-
-
-def _dens_to_mass(dndlog10m_emu, cosmo, dens, nint=60):
-    """Convert the cumulative number density to the halo mass threshold 
-    for the current cosmological model at redshift z.
-    """
-    mlist = np.linspace(8, np.log10(10**15.8 / cosmo["h"]), nint)
-    dlist = np.log(
-        np.array(
-            [
-                mass_to_dens(dndlog10m_emu, cosmo, 10 ** mlist[i])
-                for i in range(nint)
-            ]
-        )
-    )
-    d_to_m_interp = ius(-dlist, mlist)
-
-    return 10 ** d_to_m_interp(-np.log(dens))
-
 
 def _get_phh_massthreshold_mass(emu, k_emu, dens1, Mbin, redshift):
     """Compute the halo-halo power spectrum between mass bin halo sample 
