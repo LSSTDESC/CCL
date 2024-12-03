@@ -5,23 +5,59 @@ from pyccl.pkresponse import *
 from pyccl.pkresponse import _mass_to_dens, _get_phh_massthreshold_mass , _b2H17, _darkemu_set_cosmology, _darkemu_set_cosmology_forAsresp, _set_hmodified_cosmology
 from .test_cclobject import check_eq_repr_hash
 
+# Set cosmology
+Om = 0.3156
+ob = 0.02225
+oc = 0.1198
+OL = 0.6844
+As = 2.2065e-9
+ns = 0.9645
+h = 0.6727
+
 cosmo = ccl.Cosmology(
-    Omega_c=0.27,
-    Omega_b=0.048,
-    h=0.67,
-    A_s=2.0e-9,
-    n_s=0.96,
+    Omega_c=oc / (h**2),
+    Omega_b=ob / (h**2),
+    h=h,
+    n_s=ns,
+    A_s=As,
+    m_nu=0.06,
     transfer_function="boltzmann_camb",
+    extra_parameters={"camb": {"halofit_version": "takahashi"}},
 )
 
 deltah = 0.02
 deltalnAs = 0.03
 lk_arr = np.log(np.geomspace(1e-3, 1e1, 100))
 k_use = np.exp(lk_arr)
+k_emu = k_use / h  # [h/Mpc]  
 a_arr = np.array([1.0])
+
+
+# HOD parameters
+logMhmin = 13.94
+logMh1 = 14.46
+alpha = 1.192
+kappa = 0.60
+sigma_logM = 0.5
+sigma_lM = sigma_logM * np.log(10)
+logMh0 = logMhmin + np.log10(kappa)
+
+logMmin = np.log10(10**logMhmin / h)
+logM0 = np.log10(10**logMh0 / h)
+logM1 = np.log10(10**logMh1 / h)
+
+# Construct HOD
 mass_def = ccl.halos.MassDef(200, "matter")
 cm = ccl.halos.ConcentrationDuffy08(mass_def=mass_def)
-prof_hod = ccl.halos.HaloProfileHOD(mass_def=mass_def, concentration=cm)
+prof_hod = ccl.halos.HaloProfileHOD(
+    mass_def=mass_def,
+    concentration=cm,
+    log10Mmin_0=logMmin,
+    siglnM_0=sigma_lM,
+    log10M0_0=logM0,
+    log10M1_0=logM1,
+    alpha_0=alpha,
+)
 
 # initialize dark emulator class
 emu = darkemu.de_interface.base_class()
@@ -32,24 +68,27 @@ pk2dlin = cosmo.get_linear_power("delta_matter:delta_matter")
 
 def test_Pmm_resp():
     response = Pmm_resp(cosmo, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr)
+    valid = (k_emu > 1e-2) & (k_emu < 4)
 
-    assert np.all(np.isfinite(response))
+    assert np.all(response[0][valid]>0)
 
 
 def test_Pgm_resp():
     response = darkemu_Pgm_resp(
         cosmo, prof_hod, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr
     )
+    valid = (k_emu > 1e-2) & (k_emu < 4)
 
-    assert np.all(np.isfinite(response))
+    assert np.all(response[0][valid]>0)
 
 
 def test_Pgg_resp():
     response = darkemu_Pgg_resp(
         cosmo, prof_hod, deltalnAs=deltalnAs, lk_arr=lk_arr, a_arr=a_arr
     )
+    valid = (k_emu > 1e-2) & (k_emu < 4)
 
-    assert np.all(np.isfinite(response))
+    assert np.all(response[0][valid]<0)
 
 # Tests for the utility functions
 def test_mass_to_dens():
@@ -64,8 +103,6 @@ def test_mass_to_dens():
 def test_get_phh_massthreshold_mass():
     # set cosmology for dark emulator
     _darkemu_set_cosmology(emu, cosmo)
-    h = cosmo["h"]
-    k_emu = k_use / h  # [h/Mpc]
     dens1 = 1e-3
     Mbin = 1e13
     redshift = 0.0    
