@@ -23,8 +23,6 @@ def Pmm_resp(
     },
     lk_arr=None,
     a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=1,
     use_log=False,
 ):
     """Implements the response of matter power spectrum to the long wavelength
@@ -55,12 +53,6 @@ def Pmm_resp(
             which the trispectrum should be calculated for
             interpolation. If `None`, the internal values used
             by `cosmo` will be used.
-        extrap_order_lok (int): extrapolation order to be used on
-            k-values below the minimum of the splines. See
-            :class:`~pyccl.tk3d.Tk3D`.
-        extrap_order_hik (int): extrapolation order to be used on
-            k-values above the maximum of the splines. See
-            :class:`~pyccl.tk3d.Tk3D`.
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
@@ -153,8 +145,6 @@ def darkemu_Pgm_resp(
     log10Mh_max=15.9,
     lk_arr=None,
     a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=1,
     use_log=False,
 ):
     """Implements the response of galaxy-matter power spectrum to
@@ -393,8 +383,6 @@ def darkemu_Pgg_resp(
     log10Mh_max=15.9,
     lk_arr=None,
     a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=1,
     use_log=False,
 ):
     """Implements the response of galaxy-auto power spectrum to
@@ -691,8 +679,9 @@ def darkemu_Pgg_resp(
 # Utility functions ####################
 
 
-def mass_to_dens(dndlog10m, cosmo, mass_thre):
-    """Converts mass threshold to 
+def _mass_to_dens(dndlog10m, cosmo, mass_thre):
+    """Converts mass threshold to  the cumulative number density 
+    for the current cosmological model at redshift z.
     """
     logM1 = np.linspace(
         np.log10(mass_thre), np.log10(10**16.0 / cosmo["h"]), 2**6 + 1
@@ -703,7 +692,10 @@ def mass_to_dens(dndlog10m, cosmo, mass_thre):
     return dens
 
 
-def dens_to_mass(dndlog10m_emu, cosmo, dens, nint=60):
+def _dens_to_mass(dndlog10m_emu, cosmo, dens, nint=60):
+    """Convert the cumulative number density to the halo mass threshold 
+    for the current cosmological model at redshift z.
+    """
     mlist = np.linspace(8, np.log10(10**15.8 / cosmo["h"]), nint)
     dlist = np.log(
         np.array(
@@ -718,7 +710,10 @@ def dens_to_mass(dndlog10m_emu, cosmo, dens, nint=60):
     return 10 ** d_to_m_interp(-np.log(dens))
 
 
-def get_phh_massthreshold_mass(emu, k_emu, dens1, Mbin, redshift):
+def _get_phh_massthreshold_mass(emu, k_emu, dens1, Mbin, redshift):
+    """Compute the halo-halo power spectrum between mass bin halo sample 
+    and mass threshold halo sample specified by the corresponding cumulative number density.
+    """
     M2p = Mbin * 1.01
     M2m = Mbin * 0.99
     dens2p = emu.mass_to_dens(M2p, redshift)
@@ -738,7 +733,7 @@ def get_phh_massthreshold_mass(emu, k_emu, dens1, Mbin, redshift):
     return numer / denom
 
 
-def b2H17(b1):
+def _b2H17(b1):
     """Implements fitting formula for secondary halo bias, b_2, described in
     arXiv:1607.01024.
     """
@@ -746,45 +741,48 @@ def b2H17(b1):
     return b2
 
 
-def darkemu_set_cosmology(emu, cosmo):
+def _darkemu_set_cosmology(emu, cosmo):
     """Input cosmology and initiallize the base class of DarkEmulator.
     """
-    Omega_c = cosmo["Omega_c"]
-    Omega_b = cosmo["Omega_b"]
     h = cosmo["h"]
     n_s = cosmo["n_s"]
     A_s = cosmo["A_s"]
-
-    omega_c = Omega_c * h**2
-    omega_b = Omega_b * h**2
-    omega_nu = 0.00064
+    if np.isnan(A_s):
+        raise ValueError("A_s must be provided to use the Dark Emulator")
+        
+    omega_c = cosmo["Omega_c"] * h**2
+    omega_b = cosmo["Omega_b"] * h**2
+    omega_nu = 0.00064  # we fix this value (Nishimichi et al. 2019)
     Omega_L = 1 - ((omega_c + omega_b + omega_nu) / h**2)
 
     # Parameters cparam (numpy array) : Cosmological parameters
-    # (𝜔𝑏, 𝜔𝑐, Ω𝑑𝑒, ln(10^10 𝐴𝑠), 𝑛𝑠, 𝑤)
+    # (omega_b,omega_c,Omega_de,ln(10^10As),ns,w)
     cparam = np.array(
         [omega_b, omega_c, Omega_L, np.log(10**10 * A_s), n_s, -1.0]
     )
+    if darkemu.cosmo_util.test_cosm_range(cparam):
+        raise ValueError(('cosmological parameter out of supported range of DarkEmulator'))
+    
     emu.set_cosmology(cparam)
 
 
-def darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
+def _darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
     """Input cosmology and initiallize the base class of DarkEmulator
     for cosmology with modified A_s.
     """
-    Omega_c = cosmo["Omega_c"]
-    Omega_b = cosmo["Omega_b"]
     h = cosmo["h"]
     n_s = cosmo["n_s"]
     A_s = cosmo["A_s"]
-
-    omega_c = Omega_c * h**2
-    omega_b = Omega_b * h**2
-    omega_nu = 0.00064
+    if np.isnan(A_s):
+        raise ValueError("A_s must be provided to use the Dark Emulator")
+                             
+    omega_c = cosmo["Omega_c"] * h**2
+    omega_b = cosmo["Omega_b"] * h**2
+    omega_nu = 0.00064  # we fix this value (Nishimichi et al. 2019)
     Omega_L = 1 - ((omega_c + omega_b + omega_nu) / h**2)
 
     # Parameters cparam (numpy array) : Cosmological parameters
-    # (𝜔𝑏, 𝜔𝑐, Ω𝑑𝑒, ln(10^10 𝐴𝑠), 𝑛𝑠, 𝑤)
+    # (omega_b,omega_c,Omega_de,ln(10^10As),ns,w)
     cparam = np.array(
         [
             omega_b,
@@ -795,12 +793,15 @@ def darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
             -1.0,
         ]
     )
+    if darkemu.cosmo_util.test_cosm_range(cparam):
+        raise ValueError(('cosmological parameter out of supported range of DarkEmulator'))
+
     emu.set_cosmology(cparam)
 
     return emu
 
 
-def set_hmodified_cosmology(cosmo, deltah, extra_parameters=None):
+def _set_hmodified_cosmology(cosmo, deltah, extra_parameters=None):
     """Create the Cosmology objects with modified Hubble parameter h.
     """
     Omega_c = cosmo["Omega_c"]
