@@ -929,7 +929,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
                            prof3=None, prof4=None,
                            prof13_2pt=None, prof14_2pt=None,
                            prof24_2pt=None, prof32_2pt=None,
-                           p_of_k_a=None, separable_growth = False):
+                           p_of_k_a=None, separable_growth=False):
     """ Computes the isotropized halo model 3-halo trispectrum for four
     profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
