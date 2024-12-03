@@ -32,7 +32,7 @@ Pmm_resp_err_data = pkresponse_data["Pmm_resp_err"] / h**3
 Pgm_resp_data = pkresponse_data["Pgm_resp"] / h**3
 Pgm_resp_err_data = pkresponse_data["Pgm_resp_err"] / h**3
 Pgg_resp_data = pkresponse_data["Pgg_resp"] / h**3
-Pgg_resp_err_data = pkresponse_data["Pgg_resp_err"]/ h**3
+Pgg_resp_err_data = pkresponse_data["Pgg_resp_err"] / h**3
 
 
 # HOD parameters
@@ -108,6 +108,7 @@ def test_pmm_resp():
         atol=10 * Pmm_resp_err_data[0, indx_mm],
     )
 
+
 def test_pmm_resp2():
     assert np.allclose(
         Pmm_resp_data[1:, indx_mm],
@@ -123,6 +124,7 @@ def test_pgm_resp():
         atol=15 * Pgm_resp_err_data[:2, indx],
     )
 
+
 def test_pgm_resp2():
     assert np.allclose(
         Pgm_resp_data[2:, indx],
@@ -137,6 +139,7 @@ def test_pgg_resp():
         generated_Pgg_resp[:2],
         atol=4 * Pgg_resp_err_data[:2, indx],
     )
+
 
 def test_pgg_resp2():
     assert np.allclose(

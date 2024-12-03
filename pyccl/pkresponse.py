@@ -75,7 +75,9 @@ def Pmm_resp(
     k_use = np.exp(lk_arr)
 
     # set h-modified cosmology to take finite differencing
-    cosmo_hp, cosmo_hm = _set_hmodified_cosmology(cosmo, deltah, extra_parameters)
+    cosmo_hp, cosmo_hm = _set_hmodified_cosmology(
+        cosmo, deltah, extra_parameters
+    )
 
     # Growth factor
     Dp = cosmo_hp.growth_factor_unnorm(a_arr)
@@ -113,9 +115,7 @@ def Pmm_resp(
         # Eq. 11 ((hp-hm) term is cancelled out)
         T_h[k_use > kmin] = (
             np.log(pk_hp[k_use > kmin]) - np.log(pk_hm[k_use > kmin])
-        ) / (
-            2 * (np.log(Dp[ia]) - np.log(Dm[ia]))
-        ) 
+        ) / (2 * (np.log(Dp[ia]) - np.log(Dm[ia])))
 
         dpk[k_use <= kmin] = dpklin[k_use <= kmin]
         dpk[k_use > kmin] = dpknl[k_use > kmin]
@@ -262,10 +262,10 @@ def darkemu_Pgm_resp(
         dprof_dlogM = (prof_Mp - prof_Mm) / (2 * dlogM)
 
         nth_mat = np.tile(nths, (len(k_use), 1)).transpose()
-        
+
         # Eq. 18
         ng = integrate.romb(dndlog10m_emu(logM) * Ng, dx=dlogM, axis=0)
-        
+
         # Eq. 17
         bgE = (
             integrate.romb(
@@ -537,7 +537,7 @@ def darkemu_Pgg_resp(
             / ng
         )
 
-        #Eq. 19
+        # Eq. 19
         bgE2 = (
             integrate.romb(
                 dndlog10m_emu(logM) * Ng * _b2H17(b1), dx=dlogM, axis=0
@@ -680,7 +680,7 @@ def darkemu_Pgg_resp(
 
 
 def _mass_to_dens(dndlog10m, cosmo, mass_thre):
-    """Converts mass threshold to  the cumulative number density 
+    """Converts mass threshold to  the cumulative number density
     for the current cosmological model at redshift z.
     """
     logM1 = np.linspace(
@@ -691,9 +691,11 @@ def _mass_to_dens(dndlog10m, cosmo, mass_thre):
 
     return dens
 
+
 def _get_phh_massthreshold_mass(emu, k_emu, dens1, Mbin, redshift):
-    """Compute the halo-halo power spectrum between mass bin halo sample 
-    and mass threshold halo sample specified by the corresponding cumulative number density.
+    """Compute the halo-halo power spectrum between
+    mass bin halo sample and mass threshold halo sample
+    specified by the corresponding cumulative number density.
     """
     M2p = Mbin * 1.01
     M2m = Mbin * 0.99
@@ -723,14 +725,13 @@ def _b2H17(b1):
 
 
 def _darkemu_set_cosmology(emu, cosmo):
-    """Input cosmology and initiallize the base class of DarkEmulator.
-    """
+    """Input cosmology and initiallize the base class of DarkEmulator."""
     h = cosmo["h"]
     n_s = cosmo["n_s"]
     A_s = cosmo["A_s"]
     if np.isnan(A_s):
         raise ValueError("A_s must be provided to use the Dark Emulator")
-        
+
     omega_c = cosmo["Omega_c"] * h**2
     omega_b = cosmo["Omega_b"] * h**2
     omega_nu = 0.00064  # we fix this value (Nishimichi et al. 2019)
@@ -742,8 +743,10 @@ def _darkemu_set_cosmology(emu, cosmo):
         [omega_b, omega_c, Omega_L, np.log(10**10 * A_s), n_s, -1.0]
     )
     if darkemu.cosmo_util.test_cosm_range(cparam):
-        raise ValueError(('cosmological parameter out of supported range of DarkEmulator'))
-    
+        raise ValueError(
+            ("cosmological parameter out of supported range of DarkEmulator")
+        )
+
     emu.set_cosmology(cparam)
 
 
@@ -756,7 +759,7 @@ def _darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
     A_s = cosmo["A_s"]
     if np.isnan(A_s):
         raise ValueError("A_s must be provided to use the Dark Emulator")
-                             
+
     omega_c = cosmo["Omega_c"] * h**2
     omega_b = cosmo["Omega_b"] * h**2
     omega_nu = 0.00064  # we fix this value (Nishimichi et al. 2019)
@@ -775,7 +778,9 @@ def _darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
         ]
     )
     if darkemu.cosmo_util.test_cosm_range(cparam):
-        raise ValueError(('cosmological parameter out of supported range of DarkEmulator'))
+        raise ValueError(
+            ("cosmological parameter out of supported range of DarkEmulator")
+        )
 
     emu.set_cosmology(cparam)
 
@@ -783,26 +788,25 @@ def _darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
 
 
 def _set_hmodified_cosmology(cosmo, deltah, extra_parameters=None):
-    """Create the Cosmology objects with modified Hubble parameter h.
-    """
+    """Create the Cosmology objects with modified Hubble parameter h."""
     Omega_c = cosmo["Omega_c"]
     Omega_b = cosmo["Omega_b"]
     h = cosmo["h"]
-    
+
     cosmo_hmodified = []
     for i in [+1, -1]:
         hp = h + i * deltah
-    
+
         # \Omega_c h^2, \Omega_b h^2 is fixed
         Omega_c_p = np.power((h / hp), 2) * Omega_c
         Omega_b_p = np.power((h / hp), 2) * Omega_b
-  
+
         cosmo_hp_dict = cosmo.to_dict()
         cosmo_hp_dict["h"] = hp
         cosmo_hp_dict["Omega_c"] = Omega_c_p
         cosmo_hp_dict["Omega_b"] = Omega_b_p
         cosmo_hp_dict["extra_parameters"] = extra_parameters
         cosmo_hp = cosmology.Cosmology(**cosmo_hp_dict)
-        cosmo_hmodified.append(cosmo_hp)   
+        cosmo_hmodified.append(cosmo_hp)
 
     return cosmo_hmodified[0], cosmo_hmodified[1]
