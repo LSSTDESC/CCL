@@ -86,7 +86,7 @@ def test_Tk3D_separable_growth():
                                                prof4=P4,
                                                prof13_2pt=PKC,
                                                prof14_2pt=PKC,
-                                               rof24_2pt=PKC,
+                                               prof24_2pt=PKC,
                                                prof32_2pt=PKC,
                                                p_of_k_a=None)
 
