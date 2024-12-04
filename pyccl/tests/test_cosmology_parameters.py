@@ -2,7 +2,6 @@ import tempfile
 import numpy as np
 import pytest
 import pyccl as ccl
-# import warnings  # TODO: Uncomment for CCLv3.
 
 
 def test_parameters_lcdmDefaultParams():

@@ -5,12 +5,10 @@ __all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
            "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC",
            "halomod_Tk3D_cNG")
 
-import warnings
-
 import numpy as np
 import scipy
 
-from .. import CCLWarning, Tk3D, Pk2D
+from .. import CCLWarning, warnings, Tk3D, Pk2D
 from . import HaloProfileNFW, Profile2pt
 
 
@@ -607,7 +605,8 @@ def _logged_output(*arrs, log):
     is_negative = [(arr <= 0).any() for arr in arrs]
     if any(is_negative):
         warnings.warn("Some values were non-positive. "
-                      "Interpolating linearly.", CCLWarning)
+                      "Interpolating linearly.",
+                      category=CCLWarning, importance='high')
         return *arrs, False
     return *[np.log(arr) for arr in arrs], log
 
