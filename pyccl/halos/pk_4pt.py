@@ -670,7 +670,7 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`, the power
             spectrum stored within `cosmo` will be used.
-        separable_growth (Boolean): Indeicates whether a separable
+        separable_growth (bool): Indicates whether a separable
             growth function approximation can be used to calculate
             the isotropized power spectrum.
 
@@ -985,7 +985,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`, the power
             spectrum stored within `cosmo` will be used.
-        separable_growth (Boolean): Indeicates whether a separable
+        separable_growth (bool): Indicates whether a separable
             growth function approximation can be used to calculate
             the isotropized power spectrum.
 
@@ -1159,7 +1159,7 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`, the power
             spectrum stored within `cosmo` will be used.
-        separable_growth (Boolean): Indeicates whether a separable
+        separable_growth (bool): Indicates whether a separable
             growth function approximation can be used to calculate
             the isotropized power spectrum.
 
@@ -1335,7 +1335,7 @@ def halomod_Tk3D_2h(cosmo, hmc,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
-        separable_growth (Boolean): Indeicates whether a separable
+        separable_growth (bool): Indicates whether a separable
             growth function approximation can be used to calculate
             the isotropized power spectrum.
 
@@ -1432,7 +1432,7 @@ def halomod_Tk3D_3h(cosmo, hmc,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
-        separable_growth (Boolean): Indeicates whether a separable
+        separable_growth (bool): Indicates whether a separable
             growth function approximation can be used to calculate
             the isotropized power spectrum.
 
@@ -1509,7 +1509,7 @@ def halomod_Tk3D_4h(cosmo, hmc,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
-        separable_growth (Boolean): Indeicates whether a separable
+        separable_growth (bool): Indicates whether a separable
             growth function approximation can be used to calculate
             the isotropized power spectrum.
 
@@ -1598,7 +1598,7 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
-        separable_growth (Boolean): Indeicates whether a separable
+        separable_growth (bool): Indicates whether a separable
             growth function approximation can be used to calculate
             the isotropized power spectrum.
 
