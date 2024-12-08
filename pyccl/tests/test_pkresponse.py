@@ -6,7 +6,6 @@ from pyccl.pkresponse import (
     Pmm_resp,
     darkemu_Pgm_resp,
     darkemu_Pgg_resp,
-    _mass_to_dens,
     _get_phh_massthreshold_mass,
     _b2H17,
     _darkemu_set_cosmology,
@@ -102,16 +101,6 @@ def test_Pgg_resp():
 
 
 # Tests for the utility functions
-def test_mass_to_dens():
-    def dndlog10m(logM):
-        return np.ones_like(logM)
-
-    mass_thre = 1e13
-    dens = _mass_to_dens(dndlog10m, cosmo, mass_thre)
-
-    assert dens > 0
-
-
 def test_get_phh_massthreshold_mass():
     # set cosmology for dark emulator
     _darkemu_set_cosmology(emu, cosmo)

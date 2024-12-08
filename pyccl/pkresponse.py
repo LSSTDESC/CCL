@@ -9,7 +9,6 @@ from .errors import CCLWarning
 
 from dark_emulator import darkemu
 from scipy import integrate
-from scipy.interpolate import InterpolatedUnivariateSpline as ius
 from . import halos
 
 
@@ -167,6 +166,17 @@ def darkemu_Pgm_resp(
     if not isinstance(prof_hod, halos.profiles.HaloProfile):
         raise TypeError("prof_hod must be of type `HaloProfile`")
 
+    # dark emulator is valid for 0 =< z <= 1.48
+    if np.any(1.0 / a_arr - 1) > 1.48:
+        print("dark emulator is valid for z<=1.48")
+
+    # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
+    if log10Mh_min < 12.0 or log10Mh_max > 16.0:
+        print(
+            "Input mass range is not supported."
+            "The supported range is from 10^12 to 10^16 Msun/h."
+        )
+
     h = cosmo["h"]
     k_emu = k_use / h  # [h/Mpc]
     cosmo.compute_linear_power()
@@ -187,49 +197,58 @@ def darkemu_Pgm_resp(
     na = len(a_arr)
     nk = len(k_use)
     dpk12 = np.zeros([na, nk])
-    logMfor_hmf = np.linspace(8, 17, 200)
-    logMh = np.linspace(log10Mh_min, log10Mh_max, 2**5 + 1)  # M_sol/h
-    logM = np.log10(10**logMh / h)
-    Mh = 10**logMh
-    M = 10**logM
-    nM = len(M)
-    dlogM = logM[1] - logM[0]
+    nM = 2**5 + 1
+    log10M_min = np.log10(10**log10Mh_min / h)
+    log10M_max = np.log10(10**log10Mh_max / h)
+
     b1_th_tink = np.zeros(nM)
     Pth = np.zeros((nM, nk))
     Pnth_hp = np.zeros((nM, nk))
     Pnth_hm = np.zeros((nM, nk))
     Pbin = np.zeros((nM, nk))
-
     nths = np.zeros(nM)
 
     mass_def = halos.MassDef200m
     hmf = halos.MassFuncNishimichi19(mass_def=mass_def, extrapolate=True)
     hbf = halos.HaloBiasTinker10(mass_def=mass_def)
+    hmc = halos.HMCalculator(
+        mass_function=hmf,
+        halo_bias=hbf,
+        mass_def=mass_def,
+        log10M_min=log10M_min,
+        log10M_max=log10M_max,
+        nM=nM,
+    )
 
-    # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(1.0 / a_arr - 1) > 1.48:
-        print("dark emulator is valid for z<=1.48")
+    logM = hmc._lmass
+    M = hmc._mass
+    Mh = M * h
+    dlogM = logM[1] - logM[0]
 
     for ia, aa in enumerate(a_arr):
         z = 1.0 / aa - 1
-
-        # mass function
-        dndlog10m_emu = ius(
-            logMfor_hmf, hmf(cosmo, 10**logMfor_hmf, aa)
-        )  # Mpc^-3
+        hmc._get_ingredients(cosmo, aa, get_bf=True)
 
         _darkemu_set_cosmology(emu, cosmo)
         for m in range(nM):
+            hmc_m = halos.HMCalculator(
+                mass_function=hmf,
+                halo_bias=hbf,
+                mass_def=mass_def,
+                log10M_min=logM[m],
+                log10M_max=17.0,
+            )
+            hmc_m._get_ingredients(cosmo, aa, get_bf=True)
+
             Pth[m] = emu.get_phm_massthreshold(k_emu, Mh[m], z) * (1 / h) ** 3
             Pbin[m] = emu.get_phm_mass(k_emu, Mh[m], z) * (1 / h) ** 3
             nths[m] = emu.mass_to_dens(Mh[m], z) * h**3
 
-            logM1 = np.linspace(logM[m], logM[-1], 2**5 + 1)
-            dlogM1 = logM[1] - logM[0]
-
-            b1_th_tink[m] = integrate.romb(
-                dndlog10m_emu(logM1) * hbf(cosmo, (10**logM1), aa), dx=dlogM1
-            ) / integrate.romb(dndlog10m_emu(logM1), dx=dlogM1)
+            array_2 = np.ones(len(hmc_m._mass))
+            array_2[..., 0] = 0
+            b1_th_tink[m] = hmc_m._integrate_over_mbf(
+                array_2
+            ) / hmc_m._integrate_over_mf(array_2)
 
         _darkemu_set_cosmology(emu, cosmo_hp)
         for m in range(nM):
@@ -264,27 +283,14 @@ def darkemu_Pgm_resp(
         nth_mat = np.tile(nths, (len(k_use), 1)).transpose()
 
         # Eq. 18
-        ng = integrate.romb(dndlog10m_emu(logM) * Ng, dx=dlogM, axis=0)
+        ng = hmc._integrate_over_mf(Ng)
 
         # Eq. 17
-        bgE = (
-            integrate.romb(
-                dndlog10m_emu(logM) * Ng * (hbf(cosmo, M, aa)),
-                dx=dlogM,
-                axis=0,
-            )
-            / ng
-        )
+        bgE = hmc._integrate_over_mbf(Ng) / ng
 
         # Eq. 19
-        bgE2 = (
-            integrate.romb(
-                dndlog10m_emu(logM) * Ng * _b2H17(hbf(cosmo, M, aa)),
-                dx=dlogM,
-                axis=0,
-            )
-            / ng
-        )
+        bgE2 = hmc._integrate_over_mf(Ng * _b2H17(hmc._bf)) / ng
+
         bgL = bgE - 1
 
         b1L_th_mat = np.tile(b1_th_tink - 1, (len(k_emu), 1)).transpose()
@@ -405,6 +411,17 @@ def darkemu_Pgg_resp(
     if not isinstance(prof_hod, halos.profiles.HaloProfile):
         raise TypeError("prof_hod must be of type `HaloProfile`")
 
+    # dark emulator is valid for 0 =< z <= 1.48
+    if np.any(1.0 / a_arr - 1) > 1.48:
+        print("dark emulator is valid for z<=1.48")
+
+    # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
+    if log10Mh_min < 12.0 or log10Mh_max > 16.0:
+        print(
+            "Input mass range is not supported."
+            "The supported range is from 10^12 to 10^16 Msun/h."
+        )
+
     h = cosmo["h"]
     k_emu = k_use / h  # [h/Mpc]
     cosmo.compute_linear_power()
@@ -416,13 +433,10 @@ def darkemu_Pgg_resp(
     na = len(a_arr)
     nk = len(k_use)
     dpk12 = np.zeros([na, nk])
-    logMfor_hmf = np.linspace(8, 17, 200)
-    logMh = np.linspace(log10Mh_min, log10Mh_max, 2**5 + 1)  # M_sol/h
-    logM = np.log10(10**logMh / h)
-    Mh = 10**logMh
-    M = 10**logM
-    nM = len(M)
-    dlogM = logM[1] - logM[0]
+    nM = 2**5 + 1
+    log10M_min = np.log10(10**log10Mh_min / h)
+    log10M_max = np.log10(10**log10Mh_max / h)
+
     b1_th_tink = np.zeros(nM)
     Pth = np.zeros((nM, nM, nk))
     Pth_Ap = np.zeros((nM, nM, nk))
@@ -435,26 +449,41 @@ def darkemu_Pgg_resp(
     hbf = halos.HaloBiasTinker10(mass_def=mass_def)
     prof_2pt = halos.profiles_2pt.Profile2ptHOD()
 
-    # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(1.0 / a_arr - 1) > 1.48:
-        print("dark emulator is valid for z<=1.48")
+    hmc = halos.HMCalculator(
+        mass_function=hmf,
+        halo_bias=hbf,
+        mass_def=mass_def,
+        log10M_min=log10M_min,
+        log10M_max=log10M_max,
+        nM=nM,
+    )
+
+    logM = hmc._lmass
+    M = hmc._mass
+    Mh = M * h
+    dlogM = logM[1] - logM[0]
 
     for ia, aa in enumerate(a_arr):
         z = 1.0 / aa - 1
-
-        # mass function
-        dndlog10m_emu = ius(
-            logMfor_hmf, hmf(cosmo, 10**logMfor_hmf, aa)
-        )  # Mpc^-3
+        hmc._get_ingredients(cosmo, aa, get_bf=True)
 
         for m in range(nM):
-            nths[m] = _mass_to_dens(dndlog10m_emu, cosmo, M[m])
-            logM1 = np.linspace(logM[m], logM[-1], 2**5 + 1)
-            dlogM1 = logM[1] - logM[0]
+            hmc_m = halos.HMCalculator(
+                mass_function=hmf,
+                halo_bias=hbf,
+                mass_def=mass_def,
+                log10M_min=logM[m],
+                log10M_max=17.0,
+            )
+            hmc_m._get_ingredients(cosmo, aa, get_bf=True)
 
-            b1_th_tink[m] = integrate.romb(
-                dndlog10m_emu(logM1) * hbf(cosmo, (10**logM1), aa), dx=dlogM1
-            ) / integrate.romb(dndlog10m_emu(logM1), dx=dlogM1)
+            nths[m] = emu.mass_to_dens(Mh[m], z) * h**3
+
+            array_2 = np.ones(len(hmc_m._mass))
+            array_2[..., 0] = 0
+            b1_th_tink[m] = hmc_m._integrate_over_mbf(
+                array_2
+            ) / hmc_m._integrate_over_mf(array_2)
 
         # set cosmology for dark emulator
         _darkemu_set_cosmology(emu, cosmo)
@@ -528,35 +557,21 @@ def darkemu_Pgg_resp(
         nth_mat = np.tile(nths, (len(k_use), 1)).transpose()
 
         # Eq. 18
-        ng = integrate.romb(dndlog10m_emu(logM) * Ng, dx=dlogM, axis=0)
+        ng = hmc._integrate_over_mf(Ng)
         b1 = hbf(cosmo, M, aa)
 
         # Eq. 17
-        bgE = (
-            integrate.romb(dndlog10m_emu(logM) * Ng * b1, dx=dlogM, axis=0)
-            / ng
-        )
+        bgE = hmc._integrate_over_mbf(Ng) / ng
 
         # Eq. 19
-        bgE2 = (
-            integrate.romb(
-                dndlog10m_emu(logM) * Ng * _b2H17(b1), dx=dlogM, axis=0
-            )
-            / ng
-        )
+        bgE2 = hmc._integrate_over_mf(Ng * _b2H17(b1)) / ng
+
         bgL = bgE - 1
-
-        dndlog10m_func_mat = np.tile(
-            dndlog10m_emu(logM), (len(k_emu), 1)
-        ).transpose()  # M_sol,Mpc^-3
-
         b1L_mat = np.tile(b1 - 1, (len(k_emu), 1)).transpose()
         b1L_th_mat = np.tile(b1_th_tink - 1, (len(k_emu), 1)).transpose()
 
         # P_gg(k)
-        _Pgg_1h = integrate.romb(
-            dndlog10m_func_mat * prof_1h, dx=dlogM, axis=0
-        ) / (ng**2)
+        _Pgg_1h = hmc._integrate_over_mf(prof_1h.T) / (ng**2)
 
         Pgg_2h_int = list()
         for m in range(nM):
@@ -605,20 +620,11 @@ def darkemu_Pgg_resp(
         resp_2h = resp_2h + G_prof
 
         # 1-halo response
-        resp_1h = integrate.romb(
-            dndlog10m_func_mat * b1L_mat * prof_1h, dx=dlogM, axis=0
-        ) / (ng**2)
+        resp_1h = hmc._integrate_over_mf(b1L_mat.T * prof_1h.T) / (ng**2)
 
         #  Here we assume the galaxies' profile around host halo
         #  is fixed at physical corrdinate.
-        G_prof = (
-            +1.0
-            / 3.0
-            * integrate.romb(
-                dndlog10m_func_mat * dprof_1h_dlogk, dx=dlogM, axis=0
-            )
-            / (ng**2)
-        )
+        G_prof = hmc._integrate_over_mf(dprof_1h_dlogk.T) / (ng**2) / 3.0
 
         # The first term of Eq. A15
         resp_1h = resp_1h + G_prof
@@ -677,21 +683,6 @@ def darkemu_Pgg_resp(
 
 
 # Utility functions ####################
-
-
-def _mass_to_dens(dndlog10m, cosmo, mass_thre):
-    """Converts mass threshold to  the cumulative number density
-    for the current cosmological model at redshift z.
-    """
-    logM1 = np.linspace(
-        np.log10(mass_thre), np.log10(10**16.0 / cosmo["h"]), 2**6 + 1
-    )
-    dlogM1 = logM1[1] - logM1[0]
-    dens = integrate.romb(dndlog10m(logM1), dx=dlogM1)
-
-    return dens
-
-
 def _get_phh_massthreshold_mass(emu, k_emu, dens1, Mbin, redshift):
     """Compute the halo-halo power spectrum between
     mass bin halo sample and mass threshold halo sample
