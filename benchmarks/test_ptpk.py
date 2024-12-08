@@ -3,7 +3,6 @@ import numpy as np
 import pyccl as ccl
 import pyccl.nl_pt as pt
 import pytest
-from contextlib import nullcontext
 
 # Set cosmology
 COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05,
@@ -50,8 +49,7 @@ def test_pt_pk(comb):
     ptt1 = ptt[t1]
     ptt2 = ptt[t2]
 
-    with pytest.warns(ccl.CCLWarning) if comb[1] == "gi" else nullcontext():
-        pk = ptc.get_biased_pk2d(ptt1, tracer2=ptt2, return_ia_bb=return_bb)
+    pk = ptc.get_biased_pk2d(ptt1, tracer2=ptt2, return_ia_bb=return_bb)
 
     for iz, z in enumerate(zs):
         a = 1./(1+z)

@@ -6,14 +6,13 @@ We utilize a modified generalized version of FFTLog
  (https://jila.colorado.edu/~ajsh/FFTLog/fftlog.pdf)
  to compute integrals over spherical bessel functions
 """
-import warnings
 import numpy as np
 from . import lib, check
 from .pyutils import integ_types
 from scipy.interpolate import interp1d
 from pyccl.pyutils import _fftlog_transform_general
 import pyccl as ccl
-from . import CCLWarning
+from . import CCLWarning, warnings
 
 
 def _get_general_params(b):
@@ -66,7 +65,8 @@ def _nonlimber_FKEM(
         warnings.warn(
             "p_of_k_a and p_of_k_a_lin must be of the same "
             "type: a str in cosmo or a Pk2D object. "
-            "Defaulting to Limber calculation. ", CCLWarning)
+            "Defaulting to Limber calculation. ",
+            category=CCLWarning, importance='high')
         return -1, np.array([]), status
 
     psp_lin = cosmo.parse_pk2d(p_of_k_a_lin, is_linear=True)

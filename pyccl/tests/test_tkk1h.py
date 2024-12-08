@@ -106,7 +106,9 @@ def test_tkk1h_warns():
 
     # Negative profile in logspace
     Pneg = ccl.halos.HaloProfilePressureGNFW(mass_def=M200, P0=-1)
+    ccl.update_warning_verbosity('high')
     with pytest.warns(ccl.CCLWarning):
         ccl.halos.halomod_Tk3D_1h(
             COSMO, hmc, P3, prof2=Pneg, prof3=P3, prof4=P3,
             lk_arr=np.log(KK), a_arr=a_arr, use_log=True)
+    ccl.update_warning_verbosity('low')

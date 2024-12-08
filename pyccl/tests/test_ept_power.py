@@ -43,8 +43,10 @@ def test_ept_get_pk2d_smoke(tr1, tr2, bb, sub_lowk):
         sub_lowk=sub_lowk, cosmo=COSMO)
 
     will_warn = set([tr1, tr2]) == set(["TG", "TI"])
+    ccl.update_warning_verbosity('high')
     with pytest.warns(ccl.CCLWarning) if will_warn else nullcontext():
         pk = ptc.get_biased_pk2d(TRS[tr1], tracer2=t2, return_ia_bb=bb)
+    ccl.update_warning_verbosity('low')
     assert isinstance(pk, ccl.Pk2D)
 
 
@@ -118,8 +120,10 @@ def test_ept_deconstruction(kind):
 
     is_nl = tn1 in ["b2", "bs", "bk2", "b3nl"]
     is_g = tn2 in ["c1", "c2", "cdelta"]
+    ccl.update_warning_verbosity('high')
     with pytest.warns(ccl.CCLWarning) if is_nl and is_g else nullcontext():
         pk2 = ptc.get_biased_pk2d(t1, tracer2=t2)
+    ccl.update_warning_verbosity('low')
     if pk1 is None:
         assert pk2(0.5, 1.0, cosmo=COSMO) == 0.0
     else:
@@ -237,11 +241,13 @@ def test_ept_calculator_raises():
         ptc.get_pk2d_template('b1:b3')
 
     # Warning when computing IA-gal correlation
+    ccl.update_warning_verbosity('high')
     with pytest.warns(ccl.CCLWarning):
         ptc = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
                                              cosmo=COSMO)
         tg = ccl.nl_pt.PTNumberCountsTracer(b1=1.0, b2=1.0)
         ptc.get_biased_pk2d(tg, tracer2=TRS['TI'])
+    ccl.update_warning_verbosity('low')
 
 
 def test_ept_template_swap():

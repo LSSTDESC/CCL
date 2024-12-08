@@ -26,13 +26,11 @@ as sub-classes of the :class:`Tracer` base class can be found below. The
 documentation of the base :class:`Tracer` class is a good place to start.
 """
 
-import warnings
-
 import numpy as np
 
 from . import ccllib as lib
 from .pyutils import check
-from .errors import CCLWarning
+from .errors import CCLWarning, warnings
 from ._core.parameters import physical_constants
 from ._core import CCLObject, UnlockInstance, unlock_instance
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
@@ -152,7 +150,8 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
             f"the number of samples in the lensing kernel ({n_chi}). Consider "
             "disabling spline integration for the lensing kernel by setting "
             "pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False "
-            "before instantiating the Cosmology passed.", category=CCLWarning)
+            "before instantiating the Cosmology passed.",
+            category=CCLWarning, importance='low')
 
     # Compute array of chis
     status = 0

@@ -1,13 +1,11 @@
 __all__ = ("Pk2D", "parse_pk2d", "parse_pk",)
 
-import warnings
-
 import numpy as np
 
 from . import (
     CCLObject, DEFAULT_POWER_SPECTRUM, UnlockInstance, check, get_pk_spline_a,
     get_pk_spline_lk, lib, unlock_instance)
-from . import CCLWarning, CCLError
+from . import CCLWarning, CCLError, warnings
 from .pyutils import _get_spline1d_arrays, _get_spline2d_arrays
 
 
@@ -375,7 +373,8 @@ class Pk2D(CCLObject):
                 "Operands defined over different ranges. "
                 "The result will be interpolated and clipped to "
                 f"{self.psp.lkmin} <= log k <= {self.psp.lkmax} and "
-                f"{self.psp.amin} <= a <= {self.psp.amax}.", CCLWarning)
+                f"{self.psp.amin} <= a <= {self.psp.amax}.",
+                category=CCLWarning, importance='low')
             pk_arr_b = other(np.exp(lk_arr_a), a_arr_a)
 
         return a_arr_a, lk_arr_a, pk_arr_a, pk_arr_b
@@ -449,7 +448,8 @@ class Pk2D(CCLObject):
         if np.any(pk_arr_a < 0) and exponent % 1 != 0:
             warnings.warn(
                 "Taking a non-positive Pk2D object to a non-integer "
-                "power may lead to unexpected results", CCLWarning)
+                "power may lead to unexpected results",
+                category=CCLWarning, importance='high')
 
         pk_arr_new = pk_arr_a**exponent
 
