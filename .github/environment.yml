@@ -1,7 +1,7 @@
 name: test  # default testing environment name from conda-incubator
 dependencies:
   - gfortran=12.2.0  # for isitgr
-  - python=3.10
+  - python=3.13
   - pip
   - setuptools_scm
   - cmake
