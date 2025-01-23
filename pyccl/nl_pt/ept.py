@@ -193,8 +193,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         if( not hasattr(fpt, "IA_ta")):
             raise ValueError(f"Your FAST-PT version lacks a required attribute. You may have the wrong fast-pt install. Try running pip install fast-pt or conda install fast-pt, then try again")
         if (not hasattr(fpt, "IA_tij")):
-            pass
-            #raise ValueError(f"You are using an older version of FAST-PT, please run pip install fast-pt or conda install fast-pt, then try again")
+            raise ValueError(f"You are using an older version of FAST-PT, please run pip install fast-pt or conda install fast-pt, then try again")
         n_pad = int(self.fastpt_par['pad_factor'] * len(self.k_s))
         self.pt = fpt.FASTPT(self.k_s, to_do=to_do,
                              low_extrap=self.fastpt_par['low_extrap'],
