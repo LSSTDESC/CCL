@@ -3,13 +3,14 @@ import pyccl as ccl
 import pytest
 from contextlib import nullcontext
 
+    
 
 COSMO = ccl.Cosmology(
     Omega_c=0.27, Omega_b=0.045, h=0.67, sigma8=0.8, n_s=0.96,
     transfer_function='bbks', matter_power_spectrum='linear')
 TRS = {'TG': ccl.nl_pt.PTNumberCountsTracer(b1=2.0, b2=2.0, bs=2.0),
        'TI': ccl.nl_pt.PTIntrinsicAlignmentTracer(c1=2.0, c2=2.0,
-                                                  cdelta=2.0),
+                                                  cdelta=2.0, ck=2.0),
        'TM': ccl.nl_pt.PTMatterTracer()}
 PTC = ccl.nl_pt.EulerianPTCalculator(with_NC=True, with_IA=True,
                                      with_matter_1loop=True,
@@ -60,7 +61,7 @@ def test_ept_pk2d_bb_smoke():
 def test_ept_get_pk2d_nl(nl):
     ptc = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
-        b1_pk_kind=nl, bk2_pk_kind=nl, cosmo=COSMO)
+        b1_pk_kind=nl, bk2_pk_kind=nl, ak2_pk_kind=nl,cosmo=COSMO)
     pk = ptc.get_biased_pk2d(TRS['TG'])
     assert isinstance(pk, ccl.Pk2D)
 
@@ -74,7 +75,7 @@ def test_ept_k2pk_types(typ_nlin, typ_nloc):
     tm = ccl.nl_pt.PTNumberCountsTracer(1., 0., 0.)
     ptc1 = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
-        b1_pk_kind=typ_nlin, bk2_pk_kind=typ_nloc,
+        b1_pk_kind=typ_nlin, bk2_pk_kind=typ_nloc, ak2_pk_kind=typ_nloc,
         cosmo=COSMO)
     ptc2 = ccl.nl_pt.EulerianPTCalculator(
         with_NC=True, with_IA=True, with_matter_1loop=True,
@@ -94,7 +95,7 @@ def test_ept_deconstruction(kind):
                                          with_matter_1loop=True,
                                          cosmo=COSMO, sub_lowk=True)
     b_nc = ['b1', 'b2', 'b3nl', 'bs', 'bk2']
-    b_ia = ['c1', 'c2', 'cdelta']
+    b_ia = ['c1', 'c2', 'cdelta', 'ck', 'ct']
     pk1 = ptc.get_pk2d_template(kind)
 
     def get_tr(tn):
@@ -112,23 +113,31 @@ def test_ept_deconstruction(kind):
             bdict[tn] = 1.0
             return ccl.nl_pt.PTIntrinsicAlignmentTracer(
                 c1=bdict['c1'], c2=bdict['c2'],
-                cdelta=bdict['cdelta'])
+                cdelta=bdict['cdelta'], ck=bdict['ck'], ct=bdict['ct'])
 
     tn1, tn2 = kind.split(':')
     t1 = get_tr(tn1)
     t2 = get_tr(tn2)
-
+    
     is_nl = tn1 in ["b2", "bs", "bk2", "b3nl"]
-    is_g = tn2 in ["c1", "c2", "cdelta"]
+    is_g = tn2 in ["c1", "c2", "cdelta", 'ck', 'ct']
     ccl.update_warning_verbosity('high')
     with pytest.warns(ccl.CCLWarning) if is_nl and is_g else nullcontext():
         pk2 = ptc.get_biased_pk2d(t1, tracer2=t2)
     ccl.update_warning_verbosity('low')
+    
     if pk1 is None:
         assert pk2(0.5, 1.0, cosmo=COSMO) == 0.0
     else:
         v1 = pk1(0.5, 1.0, cosmo=COSMO)
         v2 = pk2(0.5, 1.0, cosmo=COSMO)
+        if not np.allclose(v1, v2, atol=0, rtol=1e-6):
+            pytest.fail(f"""
+                Failed comparison for {kind}
+                v1 (template): {v1}
+                v2 (biased): {v2}
+                relative diff: {abs(v1-v2)/abs(v1)}
+            """)
         assert np.allclose(v1, v2, atol=0, rtol=1e-6)
         # Check cached
         pk3 = ptc._pk2d_temp[ccl.nl_pt.ept._PK_ALIAS[kind]]
@@ -139,7 +148,7 @@ def test_ept_deconstruction(kind):
 @pytest.mark.parametrize('kind',
                          ['c2:c2', 'c2:cdelta', 'cdelta:cdelta'])
 def test_ept_deconstruction_bb(kind):
-    b_ia = ['c1', 'c2', 'cdelta']
+    b_ia = ['c1', 'c2', 'cdelta', 'ck']
     pk1 = PTC.get_pk2d_template(kind, return_ia_bb=True)
 
     def get_tr(tn):
@@ -147,7 +156,7 @@ def test_ept_deconstruction_bb(kind):
         bdict[tn] = 1.0
         return ccl.nl_pt.PTIntrinsicAlignmentTracer(
             c1=bdict['c1'], c2=bdict['c2'],
-            cdelta=bdict['cdelta'])
+            cdelta=bdict['cdelta'], ck=bdict['ck'])
 
     tn1, tn2 = kind.split(':')
     t1 = get_tr(tn1)
@@ -217,6 +226,10 @@ def test_ept_calculator_raises():
     # Wrong type of b1 and bk2 power spectra
     with pytest.raises(ValueError):
         ccl.nl_pt.EulerianPTCalculator(bk2_pk_kind='non-linear')
+    
+    #wrong type of ak2 power spectra
+    with pytest.raises(ValueError):
+        ccl.nl_pt.EulerianPTCalculator(ak2_pk_kind="non-linear")
 
     # Uninitialized templates
     with pytest.raises(ccl.CCLError):
