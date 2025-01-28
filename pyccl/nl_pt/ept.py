@@ -453,13 +453,11 @@ class EulerianPTCalculator(CCLAutoRepr):
                              ck[:, None] * Pak2 + (self._g4*ct)[:, None] * tijsij) +
                0.5*b2[:,None]*((self._g4*c1)[:,None]*gb2sij + 
                             (self._g4*cd)[:,None] * (gb2dsij) +
-                            (self._g4*c2)[:, None] * (gb2sij2) +
-                            ck[:, None] * (gb2sij*self.k_s**2) + 
+                            (self._g4*c2)[:, None] * (gb2sij2) + 
                             (self._g4*ct)[:,None] * gb2tij) +
                0.5*bs[:,None]*((self._g4*c1)[:,None]*Pd1s2 +
                             (self._g4*cd)[:,None] * (s2dsij) +
                             (self._g4*c2)[:,None] * (s2sij2) +
-                            ck[:, None] * (s2sij*self.k_s**2) +
                             (self._g4*ct)[:, None] *s2tij) +
                 0.5*b3nl[:,None]*((self._g4*c1)[:,None]*sig3nl) +
                 0.5*bk2[:,None]*((self._g4*c1)[:,None]*(Pd1d1*self.k_s**2)))                            

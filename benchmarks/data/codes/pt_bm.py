@@ -97,6 +97,7 @@ c1 = 1.9
 c2 = 2.1
 cd = 2.3
 ct = 2.5
+ck2 = 0.1
 
 pgg = (b1**2 * Pd1d1 +
        b1*b2 * Pd1d2 +
@@ -114,21 +115,23 @@ pgm = (b1 * Pd1d1 +
        0.5 * bk2 * Pd1k2)
 pii = (c1**2 * Pd1d1 +
        2 * c1 * cd * (a00e + c00e) +
-       cd**2 * a0e0e +
-       c2**2 * ae2e2 +
+       2 * cd**2 * a0e0e + #maybe multiple by 2?
+       2 * c2**2 * ae2e2 + #maybe multiple by 2?
        2 * c1 * c2 * (a0e2 + b0e2) +
-       2 * cd * c2 * d0ee2)
+       (2 * cd * c2 * d0ee2) +
+       2 * c1 * ck2 * Pd1k2)
 pii_bb = (cd**2 * a0b0b +
           c2**2 * ab2b2 +
           2 * cd * c2 * d0bb2)
 pim = (c1 * Pd1d1 +
        cd * (a00e + c00e) +
-       c2 * (a0e2 + b0e2))
+       c2 * (a0e2 + b0e2) +
+       ck2 * Pd1k2)
 #Updated pgi
 pgi = b1 * (c1 * Pd1d1 +
             g4 * cd * (a00e + c00e) +
             g4 * c2 * (a0e2 + b0e2) + 
-            bk2 * Pd1k2 +
+            ck2 * Pd1k2 +
             ct * tijsij +
             0.5*b2*((c1*gb2sij) + 
                     (cd*gb2dsij) +
@@ -137,8 +140,11 @@ pgi = b1 * (c1 * Pd1d1 +
             0.5*bs*((c1*s2sij) +
                     (cd*s2dsij) +
                     (c2*s2sij2) +
-                    (ct*s2tij)))
+                    (ct*s2tij)) +
+            (0.5 * b3nl * c1 * sig3nl) +
+            (0.5 * bk2 * c1 * Pd1k2))
 
+#Need to change these names and override old benchmark text file
 np.savetxt("../pt_bm_test.txt",
            np.transpose([ks, pgg[0], pgm[0], pgi[0],
                          pii[0], pii_bb[0], pim[0]]),
