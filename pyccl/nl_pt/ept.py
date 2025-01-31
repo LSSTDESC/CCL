@@ -736,6 +736,50 @@ class EulerianPTCalculator(CCLAutoRepr):
 
         # Construct power spectrum array
         s4 = 0.
+        if pk_name == 'm:m':
+            pk = self.pk_b1
+        elif pk_name == 'm:b2':
+            pk = 0.5*self._g4T*self.dd_bias[2]
+        elif pk_name == 'm:b3nl':
+            pk = 0.5*self._g4T*self.dd_bias[8]
+        elif pk_name == 'm:bs':
+            pk = 0.5*self._g4T*self.dd_bias[4]
+        elif pk_name == 'm:bk2':
+            pk = 0.5*self.pk_bk*(self.k_s**2)
+        elif pk_name == 'm:c2':
+            pk = self._g4T * (self.ia_mix[0]+self.ia_mix[1])
+        elif pk_name == 'm:cdelta':
+            pk = self._g4T * (self.ia_ta[0]+self.ia_ta[1])
+        elif pk_name == 'b2:b2':
+            if self.fastpt_par['sub_lowk']:
+                s4 = self.dd_bias[7]
+            pk = 0.25*self._g4T*(self.dd_bias[3] - 2*s4)
+        elif pk_name == 'b2:bs':
+            if self.fastpt_par['sub_lowk']:
+                s4 = self.dd_bias[7]
+            pk = 0.25*self._g4T*(self.dd_bias[5] - 4*s4/3)
+        elif pk_name == 'bs:bs':
+            if self.fastpt_par['sub_lowk']:
+                s4 = self.dd_bias[7]
+            pk = 0.25*self._g4T*(self.dd_bias[6] - 8*s4/9)
+        elif pk_name == 'c2:c2':
+            pk = self._g4T * self.ia_tt[0]
+        elif pk_name == 'c2:c2_bb':
+            pk = self._g4T * self.ia_tt[1]
+        elif pk_name == 'c2:cdelta':
+            pk = self._g4T * self.ia_mix[2]
+        elif pk_name == 'c2:cdelta_bb':
+            pk = self._g4T * self.ia_mix[3]
+        elif pk_name == 'cdelta:cdelta':
+            pk = self._g4T * self.ia_ta[2]
+        elif pk_name == 'cdelta:cdelta_bb':
+            pk = self._g4T * self.ia_ta[3]
+        elif pk_name == 'zero':
+            # If zero, store None and return
+            self._pk2d_temp[pk_name] = None
+            return None
+        '''
+        Match-case requires python 3.10, functionally the same as if-elif-else though slightly faster
         match pk_name:
             case 'm:m':
                 pk = self.pk_b1
@@ -797,7 +841,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                 # If zero, store None and return
                 self._pk2d_temp[pk_name] = None
                 return None
-
+            '''
 
         # Build interpolator
         pk2d = Pk2D(a_arr=self.a_s,
