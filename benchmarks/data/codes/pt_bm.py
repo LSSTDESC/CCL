@@ -53,6 +53,11 @@ ia_s2 = pt_ob.IA_s2(pk,
                     P_window=P_window,
                     C_window=C_window)
 
+
+one_loop_dd_bias_b3nl = pt_ob.one_loop_dd_bias_b3nl(pk,
+                                                       P_window=P_window,
+                                                       C_window=C_window)
+
 g4 = g4[:, None]
 Pd1d2 = g4 * dd_bias[2][None, :]
 Pd2d2 = g4 * dd_bias[3][None, :]
@@ -87,6 +92,8 @@ gb2sij2 = g4 * ia_d2[2][None, :]
 s2sij = g4 * ia_s2[0][None, :]
 s2dsij = g4 * ia_s2[1][None, :]
 s2sij2 = g4 * ia_s2[2][None, :]
+
+sig3nl = g4 * one_loop_dd_bias_b3nl[8][None, :]
 
 b1 = 1.3
 b2 = 1.5
@@ -141,15 +148,14 @@ pgi = b1 * (c1 * Pd1d1 +
                     (cd*s2dsij) +
                     (c2*s2sij2) +
                     (ct*s2tij)) +
-            (0.5 * b3nl * c1 * sig3nl) +
+            (0.5 * b3 * c1 * sig3nl) +
             (0.5 * bk2 * c1 * Pd1k2))
 
-#Need to change these names and override old benchmark text file
-np.savetxt("../pt_bm_test.txt",
+np.savetxt("../pt_bm_z0.txt",
            np.transpose([ks, pgg[0], pgm[0], pgi[0],
                          pii[0], pii_bb[0], pim[0]]),
            header='[0]-k  [1]-GG [2]-GM [3]-GI [4]-II [5]-II_BB [6]-IM')
-np.savetxt("../pt_bm_test2.txt",
+np.savetxt("../pt_bm_z1.txt",
            np.transpose([ks, pgg[1], pgm[1], pgi[1],
                          pii[1], pii_bb[1], pim[1]]),
            header='[0]-k  [1]-GG [2]-GM [3]-GI [4]-II [5]-II_BB [6]-IM')
