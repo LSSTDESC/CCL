@@ -184,17 +184,8 @@ class EulerianPTCalculator(CCLAutoRepr):
         else:
             self.exp_cutoff = 1
 
-        # Call FAST-PT
-        try:
-            import fastpt as fpt
-        except:
-            raise ImportError("Your attempted import of FAST-PT has failed. You either dont have fast-pt installed, or have the wrong version. Try running pip install fast-pt or conda install fast-pt, then try again")
-        
-        if( not hasattr(fpt, "IA_ta")):
-            raise ValueError(f"Your FAST-PT version lacks a required attribute. You may have the wrong fast-pt install. Try running pip install fast-pt or conda install fast-pt, then try again")
-        if (not hasattr(fpt, "IA_tij")):
-            pass
-            #raise ValueError(f"You are using an older version of FAST-PT, please run pip install fast-pt or conda install fast-pt, then try again")
+        import fastpt as fpt
+
         n_pad = int(self.fastpt_par['pad_factor'] * len(self.k_s))
         self.pt = fpt.FASTPT(self.k_s, to_do=to_do,
                              low_extrap=self.fastpt_par['low_extrap'],
@@ -456,7 +447,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                             (self._g4*cd)[:,None] * (gb2dsij) +
                             (self._g4*c2)[:, None] * (gb2sij2) + 
                             (self._g4*ct)[:,None] * gb2tij) +
-               0.5*bs[:,None]*((self._g4*c1)[:,None]*Pd1s2+ #other term we tried: s2sij +
+               0.5*bs[:,None]*((self._g4*c1)[:,None]*s2sij +
                             (self._g4*cd)[:,None] * (s2dsij) +
                             (self._g4*c2)[:,None] * (s2sij2) +
                             (self._g4*ct)[:, None] *s2tij) +

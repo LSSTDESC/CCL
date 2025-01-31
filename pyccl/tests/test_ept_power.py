@@ -148,7 +148,7 @@ def test_ept_deconstruction(kind):
 @pytest.mark.parametrize('kind',
                          ['c2:c2', 'c2:cdelta', 'cdelta:cdelta'])
 def test_ept_deconstruction_bb(kind):
-    b_ia = ['c1', 'c2', 'cdelta', 'ck']
+    b_ia = ['c1', 'c2', 'cdelta', 'ck', 'ct']
     pk1 = PTC.get_pk2d_template(kind, return_ia_bb=True)
 
     def get_tr(tn):
@@ -156,7 +156,7 @@ def test_ept_deconstruction_bb(kind):
         bdict[tn] = 1.0
         return ccl.nl_pt.PTIntrinsicAlignmentTracer(
             c1=bdict['c1'], c2=bdict['c2'],
-            cdelta=bdict['cdelta'], ck=bdict['ck'])
+            cdelta=bdict['cdelta'], ck=bdict['ck'], ct=bdict['ct'])
 
     tn1, tn2 = kind.split(':')
     t1 = get_tr(tn1)
