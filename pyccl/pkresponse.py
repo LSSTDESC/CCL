@@ -82,7 +82,7 @@ def Pmm_resp(
     Dp = cosmo_hp.growth_factor_unnorm(a_arr)
     Dm = cosmo_hm.growth_factor_unnorm(a_arr)
 
-    # Power spectrum
+    # Linear power spectrum
     cosmo.compute_linear_power()
     cosmo_hp.compute_linear_power()
     cosmo_hm.compute_linear_power()
