@@ -1,10 +1,8 @@
 __all__ = ("angular_cl",)
 
-import warnings
-
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
+from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warnings
 from .pyutils import integ_types
 from ._nonlimber_FKEM import _nonlimber_FKEM
 
@@ -56,7 +54,7 @@ def angular_cl(
             the kernels are defined will be used (capped to 1E-6 Mpc if this
             value is zero). Users are encouraged to experiment with this parameter
             and ``fkem_Nchi`` to ensure the robustness of the output
-            :math:`C_\\ell`s.
+            :math:`C_\\ell` s.
         fkem_Nchi: Number of values of the comoving distance over which `FKEM`
             will interpolate the radial kernels. If ``None`` the smallest number
             over which the kernels are currently sampled will be used. Note that
@@ -64,7 +62,7 @@ def angular_cl(
             ``fkem_chi_min`` and the maximum distance over which the tracers
             are defined.  Users are encouraged to experiment with this parameter
             and ``fkem_chi_min`` to ensure the robustness of the output
-            :math:`C_\\ell`s.
+            :math:`C_\\ell` s.
         p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 
             3D linear Power spectrum to project, for special use in
             PT calculations using the FKEM non-limber integration technique.
@@ -84,8 +82,7 @@ def angular_cl(
         warnings.warn(
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
-            category=CCLWarning,
-        )
+            category=CCLWarning, importance='low')
 
     if limber_integration_method not in integ_types:
         raise ValueError(

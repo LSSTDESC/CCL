@@ -5,12 +5,10 @@ __all__ = ("halomod_trispectrum_1h", "halomod_Tk3D_1h",
            "halomod_Tk3D_SSC_linear_bias", "halomod_Tk3D_SSC",
            "halomod_Tk3D_cNG")
 
-import warnings
-
 import numpy as np
 import scipy
 
-from .. import CCLWarning, Tk3D, Pk2D
+from .. import CCLWarning, warnings, Tk3D, Pk2D
 from . import HaloProfileNFW, Profile2pt
 
 
@@ -607,7 +605,8 @@ def _logged_output(*arrs, log):
     is_negative = [(arr <= 0).any() for arr in arrs]
     if any(is_negative):
         warnings.warn("Some values were non-positive. "
-                      "Interpolating linearly.", CCLWarning)
+                      "Interpolating linearly.",
+                      category=CCLWarning, importance='high')
         return *arrs, False
     return *[np.log(arr) for arr in arrs], log
 
@@ -615,7 +614,8 @@ def _logged_output(*arrs, log):
 def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
                               prof3=None, prof4=None, prof13_2pt=None,
                               prof14_2pt=None, prof24_2pt=None,
-                              prof32_2pt=None, p_of_k_a=None):
+                              prof32_2pt=None, p_of_k_a=None,
+                              separable_growth=False):
     """ Computes the "22" term of the isotropized halo model 2-halo trispectrum
     for four profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
@@ -669,6 +669,9 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`, the power
             spectrum stored within `cosmo` will be used.
+        separable_growth (bool): Indicates whether a separable
+            growth function approximation can be used to calculate
+            the isotropized power spectrum.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -706,12 +709,17 @@ def halomod_trispectrum_2h_22(cosmo, hmc, k, a, prof, *, prof2=None,
         return int_pk/np.pi
 
     out = np.zeros([na, nk, nk])
+    if separable_growth:
+        p_separable = get_isotropized_pkr(1.0)
     for ia, aa in enumerate(a_use):
         norm1, norm2, norm3, norm4 = _get_norms(prof, prof2, prof3, prof4,
                                                 cosmo, aa, hmc)
 
         norm = norm1 * norm2 * norm3 * norm4
-        p = get_isotropized_pkr(aa)
+        if separable_growth:
+            p = p_separable * (cosmo.growth_factor(aa)) ** 2
+        else:
+            p = get_isotropized_pkr(aa)
 
         # Compute trispectrum at this redshift
         # Permutation 0 is 0 due to P(k1 - k1 = 0) = 0
@@ -920,7 +928,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
                            prof3=None, prof4=None,
                            prof13_2pt=None, prof14_2pt=None,
                            prof24_2pt=None, prof32_2pt=None,
-                           p_of_k_a=None):
+                           p_of_k_a=None, separable_growth=False):
     """ Computes the isotropized halo model 3-halo trispectrum for four
     profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
@@ -976,6 +984,9 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`, the power
             spectrum stored within `cosmo` will be used.
+        separable_growth (bool): Indicates whether a separable
+            growth function approximation can be used to calculate
+            the isotropized power spectrum.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -1036,6 +1047,10 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
     nk = len(k_use)
 
     out = np.zeros([na, nk, nk])
+
+    if separable_growth:
+        Bpt_separable = get_Bpt(1.0)
+
     for ia, aa in enumerate(a_use):
         # Compute profile normalizations
         norm1, norm2, norm3, norm4 = _get_norms(prof, prof2, prof3, prof4,
@@ -1079,8 +1094,11 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
                             prof_2pt=prof13_2pt, diag=False)
 
         # Permutation 5: 12 <-> 34 is 0 due to Bpt_3_4_12=0
+        if separable_growth:
+            Bpt = Bpt_separable * (cosmo.growth_factor(aa)) ** 4
+        else:
+            Bpt = get_Bpt(aa)
 
-        Bpt = get_Bpt(aa)
         tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i32 +
                        i3 * i2 * i14 + i4 * i2 * i31)
 
@@ -1097,7 +1115,7 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
 
 
 def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
-                           prof4=None, p_of_k_a=None):
+                           prof4=None, p_of_k_a=None, separable_growth=False):
     """ Computes the isotropized halo model 4-halo trispectrum for four
     profiles :math:`u_{1,2}`, :math:`v_{1,2}` as
 
@@ -1140,6 +1158,9 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D`): a `Pk2D` object to
             be used as the linear matter power spectrum. If `None`, the power
             spectrum stored within `cosmo` will be used.
+        separable_growth (bool): Indicates whether a separable
+            growth function approximation can be used to calculate
+            the isotropized power spectrum.
 
     Returns:
         float or array_like: integral values evaluated at each
@@ -1207,14 +1228,23 @@ def halomod_trispectrum_4h(cosmo, hmc, k, a, prof, prof2=None, prof3=None,
 
     X = get_X()
     out = np.zeros([na, nk, nk])
+    if separable_growth:
+        pk_separable = pk2d(k_use, 1.0, cosmo)[None, :]
+        P4A_separable, P4X_separable = get_P4A_P4X(1.0)
+
     for ia, aa in enumerate(a_use):
         # Compute profile normalizations
         norm1, norm2, norm3, norm4 = _get_norms(prof, prof2, prof3, prof4,
                                                 cosmo, aa, hmc)
         norm = norm1 * norm2 * norm3 * norm4
 
-        pk = pk2d(k_use, aa, cosmo)[None, :]
-        P4A, P4X = get_P4A_P4X(aa)
+        if separable_growth:
+            pk = pk_separable * (cosmo.growth_factor(aa)) ** 2
+            P4A = P4A_separable * (cosmo.growth_factor(aa)) ** 2
+            P4X = P4X_separable * (cosmo.growth_factor(aa)) ** 2
+        else:
+            pk = pk2d(k_use, aa, cosmo)[None, :]
+            P4A, P4X = get_P4A_P4X(aa)
 
         t1113 = 4/9. * pk**2 * pk.T * X
         t1113 += t1113.T
@@ -1247,7 +1277,8 @@ def halomod_Tk3D_2h(cosmo, hmc,
                     prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
                     p_of_k_a=None,
                     lk_arr=None, a_arr=None,
-                    extrap_order_lok=1, extrap_order_hik=1, use_log=False):
+                    extrap_order_lok=1, extrap_order_hik=1, use_log=False,
+                    separable_growth=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing the 2-halo
     trispectrum for four quantities defined by their respective halo profiles.
     See :meth:`halomod_trispectrum_1h` for more details about the actual
@@ -1303,6 +1334,9 @@ def halomod_Tk3D_2h(cosmo, hmc,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
+        separable_growth (bool): Indicates whether a separable
+            growth function approximation can be used to calculate
+            the isotropized power spectrum.
 
     Returns:
         :class:`~pyccl.tk3d.Tk3D`: 2-halo trispectrum.
@@ -1319,7 +1353,8 @@ def halomod_Tk3D_2h(cosmo, hmc,
                                           prof14_2pt=prof14_2pt,
                                           prof24_2pt=prof24_2pt,
                                           prof32_2pt=prof32_2pt,
-                                          p_of_k_a=p_of_k_a)
+                                          p_of_k_a=p_of_k_a,
+                                          separable_growth=separable_growth)
 
     tkk_2h_13 = halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
                                           prof, prof2=prof2,
@@ -1344,7 +1379,7 @@ def halomod_Tk3D_3h(cosmo, hmc,
                     prof32_2pt=None,
                     lk_arr=None, a_arr=None, p_of_k_a=None,
                     extrap_order_lok=1, extrap_order_hik=1,
-                    use_log=False):
+                    use_log=False, separable_growth=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the 3-halo trispectrum for four quantities defined by
     their respective halo profiles. See :meth:`halomod_trispectrum_3h`
@@ -1396,6 +1431,9 @@ def halomod_Tk3D_3h(cosmo, hmc,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
+        separable_growth (bool): Indicates whether a separable
+            growth function approximation can be used to calculate
+            the isotropized power spectrum.
 
     Returns:
         :class:`~pyccl.tk3d.Tk3D`: 3-halo trispectrum.
@@ -1414,7 +1452,8 @@ def halomod_Tk3D_3h(cosmo, hmc,
                                  prof14_2pt=prof14_2pt,
                                  prof24_2pt=prof24_2pt,
                                  prof32_2pt=prof32_2pt,
-                                 p_of_k_a=p_of_k_a)
+                                 p_of_k_a=p_of_k_a,
+                                 separable_growth=separable_growth)
 
     tkk, use_log = _logged_output(tkk, log=use_log)
 
@@ -1428,7 +1467,7 @@ def halomod_Tk3D_4h(cosmo, hmc,
                     prof, prof2=None, prof3=None, prof4=None,
                     lk_arr=None, a_arr=None, p_of_k_a=None,
                     extrap_order_lok=1, extrap_order_hik=1,
-                    use_log=False):
+                    use_log=False, separable_growth=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing
     the 3-halo trispectrum for four quantities defined by
     their respective halo profiles. See :meth:`halomod_trispectrum_4h`
@@ -1469,6 +1508,9 @@ def halomod_Tk3D_4h(cosmo, hmc,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
+        separable_growth (bool): Indicates whether a separable
+            growth function approximation can be used to calculate
+            the isotropized power spectrum.
 
     Returns:
         :class:`~pyccl.tk3d.Tk3D`: 4-halo trispectrum.
@@ -1483,7 +1525,8 @@ def halomod_Tk3D_4h(cosmo, hmc,
                                  prof2=prof2,
                                  prof3=prof3,
                                  prof4=prof4,
-                                 p_of_k_a=None)
+                                 p_of_k_a=None,
+                                 separable_growth=separable_growth)
 
     tkk, use_log = _logged_output(tkk, log=use_log)
 
@@ -1498,7 +1541,8 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
                      prof24_2pt=None, prof32_2pt=None, prof34_2pt=None,
                      p_of_k_a=None,
                      lk_arr=None, a_arr=None, extrap_order_lok=1,
-                     extrap_order_hik=1, use_log=False):
+                     extrap_order_hik=1, use_log=False,
+                     separable_growth=False):
     """ Returns a :class:`~pyccl.tk3d.Tk3D` object containing the non-Gaussian
     covariance trispectrum for four quantities defined by their respective halo
     profiles. This is the sum of the trispectrum terms 1h + 2h + 3h + 4h.
@@ -1553,6 +1597,9 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
+        separable_growth (bool): Indicates whether a separable
+            growth function approximation can be used to calculate
+            the isotropized power spectrum.
 
     Returns:
         :class:`~pyccl.tk3d.Tk3D`: 2-halo trispectrum.
@@ -1575,7 +1622,8 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
                                      prof14_2pt=prof14_2pt,
                                      prof24_2pt=prof24_2pt,
                                      prof32_2pt=prof32_2pt,
-                                     p_of_k_a=p_of_k_a)
+                                     p_of_k_a=p_of_k_a,
+                                     separable_growth=separable_growth)
 
     tkk += halomod_trispectrum_2h_13(cosmo, hmc, np.exp(lk_arr), a_arr,
                                      prof, prof2=prof2,
@@ -1593,14 +1641,16 @@ def halomod_Tk3D_cNG(cosmo, hmc, prof, prof2=None, prof3=None, prof4=None,
                                   prof14_2pt=prof14_2pt,
                                   prof24_2pt=prof24_2pt,
                                   prof32_2pt=prof32_2pt,
-                                  p_of_k_a=p_of_k_a)
+                                  p_of_k_a=p_of_k_a,
+                                  separable_growth=separable_growth)
 
     tkk += halomod_trispectrum_4h(cosmo, hmc, np.exp(lk_arr), a_arr,
                                   prof=prof,
                                   prof2=prof2,
                                   prof3=prof3,
                                   prof4=prof4,
-                                  p_of_k_a=p_of_k_a)
+                                  p_of_k_a=p_of_k_a,
+                                  separable_growth=separable_growth)
 
     tkk, use_log = _logged_output(tkk, log=use_log)
 

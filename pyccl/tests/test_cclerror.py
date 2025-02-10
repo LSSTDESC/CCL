@@ -1,4 +1,7 @@
 import pyccl
+import pytest
+import numpy as np
+import warnings
 
 
 def test_cclerror_repr():
@@ -62,3 +65,40 @@ def test_ccl_deprecationwarning_switch():
 
     # switch back on
     pyccl.CCLDeprecationWarning.enable()
+
+
+def test_ccl_warning_verbosity_error():
+    with pytest.raises(KeyError):
+        pyccl.update_warning_verbosity("hihg")
+
+
+def test_ccl_warning_verbosity():
+
+    # The code below will trigger an unimportant warning
+    # about the N(z) sampling
+
+    # Switch to high verbosity
+    pyccl.update_warning_verbosity("high")
+    cosmo = pyccl.CosmologyVanillaLCDM()
+    numz = 32
+    zm = 0.7
+    sz = 0.01
+    z = np.linspace(0, 1.5, numz)
+    nz = np.exp(-0.5*((z-zm)/sz)**2)
+    with pytest.warns(pyccl.CCLWarning):
+        pyccl.WeakLensingTracer(cosmo, dndz=(z, nz))
+
+    # Now test that no warning is triggered if back to low verbosity
+    pyccl.update_warning_verbosity("low")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        pyccl.WeakLensingTracer(cosmo, dndz=(z, nz))
+
+
+def test_ccl_deprecation_warning():
+    # Switch to high verbosity to catch it
+    pyccl.update_warning_verbosity("high")
+    with pytest.warns(pyccl.CCLDeprecationWarning):
+        pyccl.baryons.BaccoemuBaryons()
+    pyccl.update_warning_verbosity("low")

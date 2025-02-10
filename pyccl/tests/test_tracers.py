@@ -403,8 +403,10 @@ def test_tracer_n_sample_warn():
     z = np.linspace(0., 1., 50)
     n = dndz(z)
 
+    ccl.update_warning_verbosity('high')
     with pytest.warns(CCLWarning):
         _ = ccl.WeakLensingTracer(COSMO, dndz=(z, n))
+    ccl.update_warning_verbosity('low')
 
 
 def test_tracer_bool():
