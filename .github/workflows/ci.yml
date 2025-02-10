@@ -48,7 +48,7 @@ jobs:
           channel-priority: strict
           show-channel-urls: true
           miniforge-version: latest
-          miniforge-variant: Mambaforge
+          miniforge-variant: Miniforge3
 
       - name: "macOS: set env variables"
         if: matrix.label == 'osx-64'
