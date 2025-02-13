@@ -126,8 +126,9 @@ class Profile2ptHOD(Profile2pt):
             prof2 (:class:`~pyccl.halos.profiles.hod.HaloProfileHOD` or :obj:`None`):
                 second halo profile for which the second-order moment
                 is desired. If ``None``, the assumption is that you want
-                an auto-correlation. Note that only auto-correlations
-                are allowed in this case.
+                an auto-correlation. If the profiles are different we assume disjoint 
+                tracers and revert back to the usual Fourier-space two-point moment 
+                (see Profile2pt).
             diag (bool): If True, both halo profiles depend on the same k. If
                 False, they will depend on k and k', respectively and we will
                 approximate <uk uk'> to <uk><uk'>. The output dimension will
@@ -145,21 +146,33 @@ class Profile2ptHOD(Profile2pt):
         if prof2 is None:
             prof2 = prof
 
+        # If the profiles are different assume disjoint tracers
         if prof != prof2:
-            raise ValueError("prof and prof2 must be equivalent")
+            uk1 = prof.fourier(cosmo, k, M, a)
+            uk2 = prof2.fourier(cosmo, k, M, a)
+
         HOD = HaloProfileHOD
         if not (isinstance(prof, HOD) and isinstance(prof2, HOD)):
             raise TypeError("prof and prof2 must be HaloProfileHOD")
 
         # TODO: This should be implemented in _fourier_variance
         if (diag is True) or (isinstance(k, float)):
-            output = prof._fourier_variance(cosmo, k, M, a)
+            if prof == prof2:
+                output = prof._fourier_variance(cosmo, k, M, a)
+            else:
+                output = uk1 * uk2 * (1 + self.r_corr)
         elif isinstance(M, float):
-            uk1 = prof.fourier(cosmo, k, M, a)
-            output = uk1[None, :] * uk1[:, None] * (1 + self.r_corr)
+            if prof == prof2:
+                uk1 = prof.fourier(cosmo, k, M, a)
+                output = uk1[None, :] * uk1[:, None] * (1 + self.r_corr)
+            else:
+                output = uk1[None, :] * uk2[:, None] * (1 + self.r_corr)
         else:
-            uk1 = prof.fourier(cosmo, k, M, a)
-            output = uk1[:, None, :] * uk1[:, :, None] * (1 + self.r_corr)
+            if prof == prof2:
+                uk1 = prof.fourier(cosmo, k, M, a)
+                output = uk1[:, None, :] * uk1[:, :, None] * (1 + self.r_corr)
+            else:
+                output = uk1[:, None, :] * uk2[:, :, None] * (1 + self.r_corr)
 
         return output
 
