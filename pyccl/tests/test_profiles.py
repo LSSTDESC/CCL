@@ -329,6 +329,7 @@ def test_hod_2pt():
     assert np.allclose(p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood, prof2=None),
                        F0, rtol=0)
 
+    # raises for non-HOD profile
     with pytest.raises(TypeError):
         p2.fourier_2pt(COSMO, 1., 1E13, 1., pbad)
 
@@ -337,11 +338,12 @@ def test_hod_2pt():
 
     p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood_b)
 
-    with pytest.raises(ValueError):
-        pgood_b.update_parameters(log10M0_0=10.)
-        p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood_b)
+    # doesn't raise for two different HOD profiles
+    pgood_b.update_parameters(log10M0_0=10.)
+    p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood_b)
 
-    with pytest.raises(ValueError):
+    # raises for non-HOD profile
+    with pytest.raises(TypeError):
         p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood, prof2=pbad)
 
     # Test diag = False
