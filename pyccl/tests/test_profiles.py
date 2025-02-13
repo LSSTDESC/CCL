@@ -325,6 +325,7 @@ def test_hod_2pt():
     pgood = ccl.halos.HaloProfileHOD(mass_def='200c', concentration=c)
     pgood_b = ccl.halos.HaloProfileHOD(mass_def='200c', concentration=c)
     p2 = ccl.halos.Profile2ptHOD()
+    p2pt = ccl.halos.Profile2pt()
     F0 = p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood, prof2=pgood)
     assert np.allclose(p2.fourier_2pt(COSMO, 1., 1e13, 1., pgood, prof2=None),
                        F0, rtol=0)
@@ -340,7 +341,11 @@ def test_hod_2pt():
 
     # doesn't raise for two different HOD profiles
     pgood_b.update_parameters(log10M0_0=10.)
-    p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood_b)
+    F = p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood_b)
+
+    # check consistency with Profile2pt
+    assert np.allclose(F, p2pt.fourier_2pt(COSMO, 1., 1E13, 1., pgood,
+                       prof2=pgood_b))
 
     # raises for non-HOD profile
     with pytest.raises(TypeError):
@@ -349,16 +354,29 @@ def test_hod_2pt():
     # Test diag = False
     F = p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood, diag=False)
     assert np.ndim(F) == 0
+    # check consistency with Profile2pt
+    F = p2.fourier_2pt(COSMO, 1., 1E13, 1., pgood, prof2=pgood_b, diag=False)
+    assert np.allclose(F, p2pt.fourier_2pt(COSMO, 1., 1E13, 1., pgood,
+                       prof2=pgood_b, diag=False))
     F = p2.fourier_2pt(COSMO, [1., 2], 1E13, 1., pgood, prof2=pgood,
                        diag=False)
     assert F.shape == (2, 2)
+    # check consistency with Profile2pt
+    F = p2.fourier_2pt(COSMO, [1., 2], 1E13, 1., pgood, prof2=pgood_b,
+                       diag=False)
+    assert np.allclose(F, p2pt.fourier_2pt(COSMO, [1., 2], 1E13, 1., pgood,
+                       prof2=pgood_b, diag=False))
     F = p2.fourier_2pt(COSMO, [1., 2], [1e12, 5e12, 1e13], 1., pgood,
                        prof2=pgood, diag=False)
     assert F.shape == (3, 2, 2)
-    F2 = ccl.halos.Profile2pt().fourier_2pt(COSMO, [1., 2],
-                                            [1e12, 5e12, 1e13], 1., pgood,
-                                            diag=False)
+    F2 = p2pt.fourier_2pt(COSMO, [1., 2], [1e12, 5e12, 1e13], 1., pgood,
+                          diag=False)
     assert np.all(F == F2)
+    # check consistency with Profile2pt
+    F = p2.fourier_2pt(COSMO, [1., 2], [1e12, 5e12, 1e13], 1., pgood,
+                       prof2=pgood_b, diag=False)
+    assert np.allclose(F, p2pt.fourier_2pt(COSMO, [1., 2], [1e12, 5e12, 1e13],
+                       1., pgood, prof2=pgood_b, diag=False))
 
 
 def test_2pt_rcorr_smoke():
