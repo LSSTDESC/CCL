@@ -11,6 +11,9 @@ from dark_emulator import darkemu
 from scipy import integrate
 from . import halos
 
+# use the perturbation theory below khmin
+khmin = 1e-2  # [h/Mpc]
+
 
 def Pmm_resp(
     cosmo,
@@ -23,6 +26,7 @@ def Pmm_resp(
     lk_arr=None,
     a_arr=None,
     use_log=False,
+    khmin=khmin,
 ):
     """Implements the response of matter power spectrum to the long wavelength
     modes developed in Terasawa et al. 2023 (arXiv:2310.13330) as:
@@ -99,8 +103,8 @@ def Pmm_resp(
     dpk = np.zeros(nk)
     T_h = np.zeros(nk)
 
-    kmin = 1e-2
     # use the perturbation theory below kmin
+    kmin = khmin * cosmo["h"]
     T_h[k_use <= kmin] = 1
 
     for ia, aa in enumerate(a_arr):
@@ -145,6 +149,7 @@ def darkemu_Pgm_resp(
     lk_arr=None,
     a_arr=None,
     use_log=False,
+    khmin=khmin,
 ):
     """Implements the response of galaxy-matter power spectrum to
     the long wavelength modes, described in arXiv:2310.13330.
@@ -361,10 +366,8 @@ def darkemu_Pgm_resp(
             1 - np.exp(-k_emu / k_switch)
         )
 
-        # use the perturbation theory below kmin
-        kmin = 1e-2  # [h/Mpc]
-
-        dPgm_db[k_emu < kmin] = dPgm_db_lin[k_emu < kmin]
+        # use the perturbation theory below khmin
+        dPgm_db[k_emu < khmin] = dPgm_db_lin[k_emu < khmin]
         dpk12[ia, :] = dPgm_db
 
     if use_log:
@@ -390,6 +393,7 @@ def darkemu_Pgg_resp(
     lk_arr=None,
     a_arr=None,
     use_log=False,
+    khmin=khmin,
 ):
     """Implements the response of galaxy-auto power spectrum to
     the long wavelength modes, described in arXiv:2310.13330.
@@ -662,10 +666,8 @@ def darkemu_Pgg_resp(
             1 - np.exp(-k_emu / k_switch)
         )
 
-        # use the perturbation theory below kmin
-        kmin = 1e-2  # [h/Mpc]
-
-        dPgg_db[k_emu < kmin] = dPgg_db_lin[k_emu < kmin]
+        # use the perturbation theory below khmin
+        dPgg_db[k_emu < khmin] = dPgg_db_lin[k_emu < khmin]
         dpk12[ia, :] = dPgg_db
 
     if use_log:

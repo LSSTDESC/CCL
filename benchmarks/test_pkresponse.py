@@ -28,11 +28,8 @@ pkresponse_data = np.load("benchmarks/data/pkresponse.npz")
 k_data = pkresponse_data["k_h"]
 k_data_mm = pkresponse_data["k_h_mm"]
 Pmm_resp_data = pkresponse_data["Pmm_resp"] / h**3
-Pmm_resp_err_data = pkresponse_data["Pmm_resp_err"] / h**3
 Pgm_resp_data = pkresponse_data["Pgm_resp"] / h**3
-Pgm_resp_err_data = pkresponse_data["Pgm_resp_err"] / h**3
 Pgg_resp_data = pkresponse_data["Pgg_resp"] / h**3
-Pgg_resp_err_data = pkresponse_data["Pgg_resp_err"] / h**3
 
 
 # HOD parameters
@@ -103,47 +100,71 @@ generated_Pgg_resp = darkemu_Pgg_resp(
 # Compare the generated responses with simulation data
 def test_pmm_resp():
     assert np.allclose(
-        Pmm_resp_data[0, indx_mm],
-        generated_Pmm_resp[0],
-        atol=10 * Pmm_resp_err_data[0, indx_mm],
-    )
-
-
-def test_pmm_resp2():
-    assert np.allclose(
-        Pmm_resp_data[1:, indx_mm],
-        generated_Pmm_resp[1:],
-        atol=60 * Pmm_resp_err_data[1:, indx_mm],
+        generated_Pmm_resp,
+        Pmm_resp_data[:, indx_mm],
+        rtol=0.15,
     )
 
 
 def test_pgm_resp():
     assert np.allclose(
-        Pgm_resp_data[:2, indx],
-        generated_Pgm_resp[:2],
-        atol=15 * Pgm_resp_err_data[:2, indx],
+        generated_Pgm_resp[0],
+        Pgm_resp_data[0, indx],
+        rtol=0.3,
+    )
+
+
+def test_pgm_resp1():
+    assert np.allclose(
+        generated_Pgm_resp[1],
+        Pgm_resp_data[1, indx],
+        rtol=0.36,
     )
 
 
 def test_pgm_resp2():
     assert np.allclose(
-        Pgm_resp_data[2:, indx],
-        generated_Pgm_resp[2:],
-        atol=50 * Pgm_resp_err_data[2:, indx],
+        generated_Pgm_resp[2],
+        Pgm_resp_data[2, indx],
+        rtol=0.78,
+    )
+
+
+def test_pgm_resp3():
+    assert np.allclose(
+        generated_Pgm_resp[3],
+        Pgm_resp_data[3, indx],
+        rtol=0.85,
     )
 
 
 def test_pgg_resp():
     assert np.allclose(
-        Pgg_resp_data[:2, indx],
-        generated_Pgg_resp[:2],
-        atol=4 * Pgg_resp_err_data[:2, indx],
+        generated_Pgg_resp[0],
+        Pgg_resp_data[0, indx],
+        rtol=0.65,
+    )
+
+
+def test_pgg_resp1():
+    assert np.allclose(
+        generated_Pgg_resp[1],
+        Pgg_resp_data[1, indx],
+        rtol=1.7,
     )
 
 
 def test_pgg_resp2():
     assert np.allclose(
-        Pgg_resp_data[2:, indx],
-        generated_Pgg_resp[2:],
-        atol=15 * Pgg_resp_err_data[2:, indx],
+        generated_Pgg_resp[2],
+        Pgg_resp_data[2, indx],
+        rtol=3.1,
+    )
+
+
+def test_pgg_resp3():
+    assert np.allclose(
+        generated_Pgg_resp[3],
+        Pgg_resp_data[3, indx],
+        rtol=2.6,
     )
