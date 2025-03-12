@@ -97,7 +97,18 @@ generated_Pgg_resp = darkemu_Pgg_resp(
 )
 
 
-# Compare the generated responses with simulation data
+# Compare the generated responses with simulation data.
+# The error bars from the simulations are too strict,
+# probably because we use the pair and fixed initial density method.
+# Hence instead of "atol" (absolute difference compared to the error bars),
+# we use "rtol" (relative difference compared to the simulated response).
+# The difference between the model and the simulations are
+# typically few ten percents.
+# Higher redshifts of Pgm, Pgg (especially Pgg) have worse accuracy due to the
+# accuracy of darkemulator itself,
+# but they are still a factor of difference at most.
+
+
 def test_pmm_resp():
     assert np.allclose(
         generated_Pmm_resp,
