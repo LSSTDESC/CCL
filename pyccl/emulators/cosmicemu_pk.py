@@ -124,7 +124,8 @@ class CosmicemuMTIIPk(CosmicemuBase):
             # Add to diagonal
             for i, lw in enumerate(self.lamws[j]):
                 sigma_sim[i, :, :] += np.diag(np.full(m, 1./lw))
-            kb = np.linalg.solve(sigma_sim, self.w[j])
+            kb = np.linalg.solve(sigma_sim,
+                                 self.w[j][:, :, None]).squeeze()
             self.KrigBasis.append(kb)
 
     def _get_pk_full(self, cosmo):
@@ -211,7 +212,8 @@ class CosmicemuMTIVPk(CosmicemuBase):
         # Add to diagonal
         for i, lw in enumerate(self.lamws):
             sigma_sim[i, :, :] += np.diag(np.full(self.nsim, 1./lw))
-        self.KrigBasis = np.linalg.solve(sigma_sim, self.w)
+        self.KrigBasis = np.linalg.solve(sigma_sim,
+                                         self.w[:, :, None]).squeeze()
 
         # Parameter order
         self.pnames = ['omega_m', 'omega_b', 'sigma8', 'h', 'n_s',

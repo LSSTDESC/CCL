@@ -705,9 +705,9 @@ class Tracer(CCLObject):
                                           status)
         self._trc.append(_check_returned_tracer(ret))
         a = cosmo.scale_factor_of_chi(chi_s)
-        wint = np.trapz(wchi_s, a)
+        wint = np.trapezoid(wchi_s, x=a)
         if wint != 0:  # Avoid division by zero
-            avg_a = np.trapz(a*wchi_s, a)/wint
+            avg_a = np.trapezoid(a*wchi_s, x=a)/wint
         else:  # If kernel integral is zero, just set to z=0
             avg_a = 1.0
         self.avg_weighted_a.append(avg_a)
