@@ -707,11 +707,14 @@ class Tracer(CCLObject):
                                           status)
         self._trc.append(_check_returned_tracer(ret))
         a = cosmo.scale_factor_of_chi(chi_s)
-        wint = simpson(wchi_s, x=a)
-        if wint != 0:  # Avoid division by zero
-            avg_a = simpson(a*wchi_s, x=a)/wint
-        else:  # If kernel integral is zero, just set to z=0
+        if len(wchi_s) == 0:
             avg_a = 1.0
+        else:
+            wint = simpson(wchi_s, x=a)
+            if wint != 0:  # Avoid division by zero
+                avg_a = simpson(a*wchi_s, x=a)/wint
+            else:  # If kernel integral is zero, just set to z=0
+                avg_a = 1.0
         self.avg_weighted_a.append(avg_a)
 
     @classmethod
