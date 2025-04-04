@@ -27,6 +27,8 @@ documentation of the base :class:`Tracer` class is a good place to start.
 """
 
 import numpy as np
+from scipy.integrate import simpson
+from scipy.interpolate import interp1d
 
 from . import ccllib as lib
 from .pyutils import check
@@ -705,11 +707,14 @@ class Tracer(CCLObject):
                                           status)
         self._trc.append(_check_returned_tracer(ret))
         a = cosmo.scale_factor_of_chi(chi_s)
-        wint = np.trapz(wchi_s, a)
-        if wint != 0:  # Avoid division by zero
-            avg_a = np.trapz(a*wchi_s, a)/wint
-        else:  # If kernel integral is zero, just set to z=0
+        if len(wchi_s) == 0:
             avg_a = 1.0
+        else:
+            wint = simpson(wchi_s, x=a)
+            if wint != 0:  # Avoid division by zero
+                avg_a = simpson(a*wchi_s, x=a)/wint
+            else:  # If kernel integral is zero, just set to z=0
+                avg_a = 1.0
         self.avg_weighted_a.append(avg_a)
 
     @classmethod
@@ -812,7 +817,6 @@ def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
     # we need the distance functions at the C layer
     cosmo.compute_distances()
 
-    from scipy.interpolate import interp1d
     z_n, n = _check_array_params(dndz, 'dndz')
     with UnlockInstance(tracer, mutate=False):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
@@ -892,7 +896,6 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
     # we need the distance functions at the C layer
     cosmo.compute_distances()
 
-    from scipy.interpolate import interp1d
     z_n, n = _check_array_params(dndz, 'dndz')
     with UnlockInstance(tracer, mutate=False):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
