@@ -9,6 +9,8 @@ dependencies:
   - fftw
   - swig
   - pyyaml
+  # CCL itself is numpy2-compatible, but many of its dependencies aren't.
+  # Remove the <2 when this stops being the case.
   - numpy<2
   # The below is only because the current version of DarkEmulator uses deprecated scipy functions.
   # We should remove the <1.14 flag as soon as this is fixed.
