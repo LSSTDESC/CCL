@@ -432,7 +432,7 @@ def correlation_ab(cosmo, *, r_p: np.ndarray, z: np.ndarray,
                                      precision_fftlog=precision_fftlog) +
                        _fftlog_wrap(r_p, a_, psp, n=4,
                                     precision_fftlog=precision_fftlog))
-                      for a_ in a])
+                      for a_ in a])/2
     else:
         raise ValueError('Correlation type not recognised. Accepted'
                          'values: "gg", "g+", "++".')
