@@ -4,7 +4,10 @@ import pyccl as ccl
 import pyccl.nl_pt as pt
 import pytest
 
-LPTPK_TOLERANCE = 1e-4
+# Updated to a higher tolerance because of recent
+# changes to velocileptors with respect to the
+# version used to generate benchmarks.
+LPTPK_TOLERANCE = 5e-4
 
 # Set cosmology
 COSMO = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05,
