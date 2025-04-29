@@ -4,8 +4,7 @@ from .pyutils import check
 import numpy as np
 
 from . import cosmology
-import warnings
-from .errors import CCLWarning
+from .errors import CCLWarning, warnings
 
 from dark_emulator import darkemu
 from scipy import integrate
