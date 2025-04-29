@@ -333,8 +333,8 @@ def halomod_Tk3D_SSC(
 
     .. math::
         \\frac{\\partial P_{u,v}(k)}{\\partial\\delta_L} =
-        \\left(\\frac{68}{21}-\\frac{1}{3}\\frac{d\\log k^3P_L(k)}{d\\log k}\\right)
-        P_L(k)I^1_1(k,|u)I^1_1(k,|v)+I^1_2(k|u,v) - (b_{u} + b_{v})
+        \\left(\\frac{68}{21}-\\frac{1}{3}\\frac{d\\log k^3P_L(k)}{d\\log k}
+        \\right)P_L(k)I^1_1(k,|u)I^1_1(k,|v)+I^1_2(k|u,v) - (b_{u} + b_{v})
         P_{u,v}(k)
 
     where the :math:`I^a_b` are defined in the documentation
