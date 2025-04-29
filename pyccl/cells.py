@@ -36,9 +36,9 @@ def angular_cl(
             spectrum to project. If a string, it must correspond to one of
             the non-linear power spectra stored in `cosmo` (e.g.
             `'delta_matter:delta_matter'`).
-        l_limber (int, float or 'auto') : Angular wavenumber beyond which 
-            Limber's approximation will be used. Defaults to -1. If 'auto', 
-            then the non-limber integrator will be used to compute the right 
+        l_limber (int, float or 'auto') : Angular wavenumber beyond which
+            Limber's approximation will be used. Defaults to -1. If 'auto',
+            then the non-limber integrator will be used to compute the right
             transition point given the value of limber_max_error.
         limber_max_error (float) : Maximum fractional error for Limber integration.
         limber_integration_method (string) : integration method to be used
@@ -63,12 +63,12 @@ def angular_cl(
             are defined.  Users are encouraged to experiment with this parameter
             and ``fkem_chi_min`` to ensure the robustness of the output
             :math:`C_\\ell` s.
-        p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 
+        p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`):
             3D linear Power spectrum to project, for special use in
             PT calculations using the FKEM non-limber integration technique.
             If a string, it must correspond to one of
             the linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). 
+            `'delta_matter:delta_matter'`).
         return_meta (bool): if `True`, also return a dictionary with various
             metadata about the calculation, such as l_limber as calculated by the
             non-limber integrator.
@@ -106,6 +106,8 @@ def angular_cl(
 
     # Access ccl_cosmology object
 
+    if p_of_k_a is None:
+        p_of_k_a = DEFAULT_POWER_SPECTRUM
     psp = cosmo.parse_pk2d(p_of_k_a, is_linear=False)
 
     # Create tracer colections

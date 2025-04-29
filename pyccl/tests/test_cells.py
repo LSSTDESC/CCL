@@ -20,7 +20,7 @@ NN = np.exp(-(((ZZ - 0.5) / 0.1) ** 2))
 LENS = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, NN))
 
 
-@pytest.mark.parametrize("p_of_k_a", [ccl.DEFAULT_POWER_SPECTRUM, PKA])
+@pytest.mark.parametrize("p_of_k_a", [ccl.DEFAULT_POWER_SPECTRUM, PKA, None])
 def test_cells_smoke(p_of_k_a):
     # make a set of tracers to test with
     z = np.linspace(0.0, 1.0, 200)
