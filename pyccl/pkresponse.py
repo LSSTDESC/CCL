@@ -1,6 +1,3 @@
-from . import ccllib as lib
-
-from .pyutils import check
 import numpy as np
 
 from . import cosmology
