@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import cosmology
-from .errors import CCLWarning, warnings
+from . import CCLWarning, CCLError, warnings
 
 from dark_emulator import darkemu
 from scipy import integrate

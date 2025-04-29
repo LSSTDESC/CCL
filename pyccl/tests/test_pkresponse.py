@@ -1,6 +1,6 @@
 import numpy as np
 import pyccl as ccl
-from pyccl.errors import CCLWarning
+from pyccl import CCLWarning
 import pytest
 from dark_emulator import darkemu
 from pyccl.pkresponse import (
