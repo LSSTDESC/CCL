@@ -294,6 +294,16 @@ class Cosmology(CCLObject):
                 modified_gravity.MuSigmaMG):
             raise NotImplementedError("`mg_parametrization` only supports the "
                                       "mu-Sigma parametrization at this point")
+        """
+        if isinstance(
+                self.mg_parametrization,
+                modified_gravity.MuSigmaMG) and self.transfer_function_type is not 'boltzmann_isitgr':
+            raise ValueError("mu-Sigma parametrization is inconsistent with your transfer function choice (required to use isitgr)"
+                             )
+        """    
+
+        
+
 
         # going to save these for later
         self._params_init_kwargs = dict(
@@ -470,6 +480,21 @@ class Cosmology(CCLObject):
         c1_mg = self.mg_parametrization.c1_mg
         c2_mg = self.mg_parametrization.c2_mg
         lambda_mg = self.mg_parametrization.lambda_mg
+        gr_flag_scale_dep = 0.
+
+
+        if(c1_mg == 1. and c1_mg == 1.):
+            
+            gr_flag_scale_dep = 1.
+            
+        elif(c1_mg == 0. and c2_mg == 0. and lambda_mg == 0.):
+
+            gr_flag_scale_dep = 1.
+            
+        if(gr_flag_scale_dep == 0):
+                
+            if isinstance(self.mg_parametrization, modified_gravity.MuSigmaMG) and self.transfer_function_type != 'boltzmann_isitgr':
+                raise ValueError("Your choice of c1_mg, c2_mg, and lambda_mg values is inconsistent with your transfer function choice (you must choose istigr).")
 
         self._fill_params(
             m_nu=nu_mass, sum_nu_masses=sum(nu_mass), N_nu_mass=N_nu_mass,
