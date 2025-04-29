@@ -48,13 +48,11 @@ def Pmm_resp(
             parameters. Currently supports extra parameters for CAMB.
         a_arr (array): an array holding values of the scale factor
             at which the trispectrum should be calculated for
-            interpolation. If `None`, the internal values used
-            by `cosmo` will be used.
+            interpolation.
         lk_arr (array): an array holding values of the natural
             logarithm of the wavenumber (in units of Mpc^-1) at
             which the trispectrum should be calculated for
-            interpolation. If `None`, the internal values used
-            by `cosmo` will be used.
+            interpolation.
         use_log (bool): if `True`, the trispectrum will be
             interpolated in log-space (unless negative or
             zero values are found).
@@ -63,16 +61,9 @@ def Pmm_resp(
         Response of the matter power spectrum.
     """
 
-    if lk_arr is None:
-        status = 0
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status, cosmo=cosmo)
-    if a_arr is None:
-        status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+    # Make sure input makes sense
+    if (a_arr is None) or (lk_arr is None):
+        raise ValueError("you must provide arrays")
 
     k_use = np.exp(lk_arr)
 
@@ -153,16 +144,9 @@ def darkemu_Pgm_resp(
     """Implements the response of galaxy-matter power spectrum to
     the long wavelength modes, described in arXiv:2310.13330.
     """
-    if lk_arr is None:
-        status = 0
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status, cosmo=cosmo)
-    if a_arr is None:
-        status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+    # Make sure input makes sense
+    if (a_arr is None) or (lk_arr is None):
+        raise ValueError("you must provide arrays")
 
     k_use = np.exp(lk_arr)
 
@@ -171,14 +155,17 @@ def darkemu_Pgm_resp(
         raise TypeError("prof_hod must be of type `HaloProfile`")
 
     # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(1.0 / a_arr - 1) > 1.48:
-        print("dark emulator is valid for z<=1.48")
+    if np.any((1.0 / a_arr - 1) > 1.48):
+        warnings.warn(
+            "dark emulator is valid for z<=1.48", category=CCLWarning
+        )
 
     # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
     if log10Mh_min < 12.0 or log10Mh_max > 16.0:
-        print(
+        warnings.warn(
             "Input mass range is not supported."
-            "The supported range is from 10^12 to 10^16 Msun/h."
+            "The supported range is from 10^12 to 10^16 Msun/h.",
+            category=CCLWarning,
         )
 
     h = cosmo["h"]
@@ -397,16 +384,9 @@ def darkemu_Pgg_resp(
     """Implements the response of galaxy-auto power spectrum to
     the long wavelength modes, described in arXiv:2310.13330.
     """
-    if lk_arr is None:
-        status = 0
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
-        check(status, cosmo=cosmo)
-    if a_arr is None:
-        status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
-        check(status, cosmo=cosmo)
+    # Make sure input makes sense
+    if (a_arr is None) or (lk_arr is None):
+        raise ValueError("you must provide arrays")
 
     k_use = np.exp(lk_arr)
 
@@ -415,14 +395,18 @@ def darkemu_Pgg_resp(
         raise TypeError("prof_hod must be of type `HaloProfile`")
 
     # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(1.0 / a_arr - 1) > 1.48:
-        print("dark emulator is valid for z<=1.48")
+    if np.any((1.0 / a_arr - 1) > 1.48):
+        warnings.warn(
+            "dark emulator is valid for z<=1.48",
+            category=CCLWarning,
+        )
 
     # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
     if log10Mh_min < 12.0 or log10Mh_max > 16.0:
-        print(
+        warnings.warn(
             "Input mass range is not supported."
-            "The supported range is from 10^12 to 10^16 Msun/h."
+            "The supported range is from 10^12 to 10^16 Msun/h.",
+            category=CCLWarning,
         )
 
     h = cosmo["h"]

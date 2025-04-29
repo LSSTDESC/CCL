@@ -1,5 +1,6 @@
 import numpy as np
 import pyccl as ccl
+from pyccl.errors import CCLWarning
 import pytest
 from dark_emulator import darkemu
 from pyccl.pkresponse import (
@@ -13,6 +14,8 @@ from pyccl.pkresponse import (
     _set_hmodified_cosmology,
 )
 from .test_cclobject import check_eq_repr_hash
+
+ccl.update_warning_verbosity("high")
 
 # Set cosmology
 Om = 0.3156
@@ -75,11 +78,95 @@ cosmo.compute_linear_power()
 pk2dlin = cosmo.get_linear_power("delta_matter:delta_matter")
 
 
+def test_Pmm_resp_init():
+    # lk_arr and a_arr should be specified
+    with pytest.raises(ValueError):
+        Pmm_resp(cosmo, deltah=deltah, lk_arr=None, a_arr=None)
+
+
+def test_Pgm_resp_init():
+    # lk_arr and a_arr should be specified
+    with pytest.raises(ValueError):
+        darkemu_Pgm_resp(
+            cosmo, prof_hod, deltah=deltah, lk_arr=None, a_arr=None
+        )
+    with pytest.raises(TypeError):
+        darkemu_Pgm_resp(
+            cosmo, None, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr
+        )
+
+    # dark emulator is valid for z<=1.48
+    with pytest.warns(CCLWarning):
+        darkemu_Pgm_resp(
+            cosmo,
+            prof_hod,
+            deltah=deltah,
+            lk_arr=lk_arr,
+            a_arr=np.array([0.3]),
+        )
+
+    # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
+    with pytest.warns(CCLWarning):
+        darkemu_Pgm_resp(
+            cosmo,
+            prof_hod,
+            deltah=deltah,
+            lk_arr=lk_arr,
+            a_arr=a_arr,
+            log10Mh_min=11.9,
+            log10Mh_max=16.1,
+        )
+
+
+def test_Pgg_resp_init():
+    # lk_arr and a_arr should be specified
+    with pytest.raises(ValueError):
+        darkemu_Pgg_resp(
+            cosmo, prof_hod, deltalnAs=deltalnAs, lk_arr=None, a_arr=None
+        )
+
+    with pytest.raises(TypeError):
+        darkemu_Pgg_resp(
+            cosmo, None, deltalnAs=deltalnAs, lk_arr=lk_arr, a_arr=a_arr
+        )
+
+    # dark emulator is valid for z<=1.48
+    with pytest.warns(CCLWarning):
+        darkemu_Pgg_resp(
+            cosmo,
+            prof_hod,
+            deltalnAs=deltalnAs,
+            lk_arr=lk_arr,
+            a_arr=np.array([0.3]),
+        )
+
+    # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
+    with pytest.warns(CCLWarning):
+        darkemu_Pgg_resp(
+            cosmo,
+            prof_hod,
+            deltalnAs=deltalnAs,
+            lk_arr=lk_arr,
+            a_arr=a_arr,
+            log10Mh_min=11.9,
+            log10Mh_max=16.1,
+        )
+
+
 def test_Pmm_resp():
     response = Pmm_resp(cosmo, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr)
     valid = (k_emu > 1e-2) & (k_emu < 4)
 
     assert np.all(response[0][valid] > 0)
+
+    response = Pmm_resp(
+        cosmo, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr, use_log=True
+    )
+    if np.any(response <= 0):
+        with pytest.warns(CCLWarning):
+            response = Pmm_resp(
+                cosmo, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr, use_log=True
+            )
 
 
 def test_Pgm_resp():
@@ -90,6 +177,25 @@ def test_Pgm_resp():
 
     assert np.all(response[0][valid] > 0)
 
+    response = darkemu_Pgm_resp(
+        cosmo,
+        prof_hod,
+        deltah=deltah,
+        lk_arr=lk_arr,
+        a_arr=a_arr,
+        use_log=True,
+    )
+    if np.any(response <= 0):
+        with pytest.warns(CCLWarning):
+            response = darkemu_Pgm_resp(
+                cosmo,
+                prof_hod,
+                deltah=deltah,
+                lk_arr=lk_arr,
+                a_arr=a_arr,
+                use_log=True,
+            )
+
 
 def test_Pgg_resp():
     response = darkemu_Pgg_resp(
@@ -98,6 +204,25 @@ def test_Pgg_resp():
     valid = (k_emu > 1e-2) & (k_emu < 4)
 
     assert np.all(response[0][valid] < 0)
+
+    response = darkemu_Pgg_resp(
+        cosmo,
+        prof_hod,
+        deltalnAs=deltalnAs,
+        lk_arr=lk_arr,
+        a_arr=a_arr,
+        use_log=True,
+    )
+    if np.any(response <= 0):
+        with pytest.warns(CCLWarning):
+            response = darkemu_Pgg_resp(
+                cosmo,
+                prof_hod,
+                deltalnAs=deltalnAs,
+                lk_arr=lk_arr,
+                a_arr=a_arr,
+                use_log=True,
+            )
 
 
 # Tests for the utility functions
@@ -130,6 +255,13 @@ def test_darkemu_set_cosmology():
     with pytest.raises(ValueError):
         _darkemu_set_cosmology(emu, cosmo_wr)
 
+    # A_s must be provided
+    cosmo_noAs = ccl.Cosmology(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96
+    )
+    with pytest.raises(ValueError):
+        _darkemu_set_cosmology(emu, cosmo_noAs)
+
 
 def test_darkemu_set_cosmology_forAsresp():
     # Cosmo parameters out of bounds
@@ -138,6 +270,13 @@ def test_darkemu_set_cosmology_forAsresp():
     )
     with pytest.raises(ValueError):
         _darkemu_set_cosmology_forAsresp(emu, cosmo_wr, deltalnAs=100.0)
+
+    # A_s must be provided
+    cosmo_noAs = ccl.Cosmology(
+        Omega_c=0.25, Omega_b=0.05, h=0.67, sigma8=0.8, n_s=0.96
+    )
+    with pytest.raises(ValueError):
+        _darkemu_set_cosmology(emu, cosmo_noAs)
 
 
 def test_set_hmodified_cosmology():
