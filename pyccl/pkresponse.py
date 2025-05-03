@@ -48,7 +48,7 @@ def Pmm_resp(
             logarithm of the wavenumber (in units of Mpc^-1) at
             which the trispectrum should be calculated for
             interpolation.
-        
+
     Returns:
         Response of the matter power spectrum.
     """
@@ -142,8 +142,8 @@ def darkemu_Pgm_resp(
     if log10Mh_min < 12.0 or log10Mh_max > 16.0:
         raise ValueError(
             "Input mass range is not supported."
-            "The supported range is from 10^12 to 10^16 Msun/h.")
-    
+            "The supported range is from 10^12 to 10^16 Msun/h."
+        )
 
     h = cosmo["h"]
     k_emu = k_use / h  # [h/Mpc]
@@ -367,8 +367,8 @@ def darkemu_Pgg_resp(
     if log10Mh_min < 12.0 or log10Mh_max > 16.0:
         raise ValueError(
             "Input mass range is not supported."
-            "The supported range is from 10^12 to 10^16 Msun/h.")
-            
+            "The supported range is from 10^12 to 10^16 Msun/h."
+        )
 
     h = cosmo["h"]
     k_emu = k_use / h  # [h/Mpc]
