@@ -1,6 +1,5 @@
 import numpy as np
 import pyccl as ccl
-from pyccl import CCLWarning
 import pytest
 from dark_emulator import darkemu
 from pyccl.pkresponse import (
@@ -14,8 +13,6 @@ from pyccl.pkresponse import (
     _set_hmodified_cosmology,
 )
 from .test_cclobject import check_eq_repr_hash
-
-ccl.update_warning_verbosity("high")
 
 # Set cosmology
 Om = 0.3156
@@ -96,7 +93,7 @@ def test_Pgm_resp_init():
         )
 
     # dark emulator is valid for z<=1.48
-    with pytest.warns(CCLWarning):
+    with pytest.raises(ValueError):
         darkemu_Pgm_resp(
             cosmo,
             prof_hod,
@@ -106,7 +103,7 @@ def test_Pgm_resp_init():
         )
 
     # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
-    with pytest.warns(CCLWarning):
+    with pytest.raises(ValueError):
         darkemu_Pgm_resp(
             cosmo,
             prof_hod,
@@ -131,7 +128,7 @@ def test_Pgg_resp_init():
         )
 
     # dark emulator is valid for z<=1.48
-    with pytest.warns(CCLWarning):
+    with pytest.raises(ValueError):
         darkemu_Pgg_resp(
             cosmo,
             prof_hod,
@@ -141,7 +138,7 @@ def test_Pgg_resp_init():
         )
 
     # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
-    with pytest.warns(CCLWarning):
+    with pytest.raises(ValueError):
         darkemu_Pgg_resp(
             cosmo,
             prof_hod,
@@ -159,15 +156,6 @@ def test_Pmm_resp():
 
     assert np.all(response[0][valid] > 0)
 
-    response = Pmm_resp(
-        cosmo, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr, use_log=True
-    )
-    if np.any(response <= 0):
-        with pytest.warns(CCLWarning):
-            response = Pmm_resp(
-                cosmo, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr, use_log=True
-            )
-
 
 def test_Pgm_resp():
     response = darkemu_Pgm_resp(
@@ -177,16 +165,6 @@ def test_Pgm_resp():
 
     assert np.all(response[0][valid] > 0)
 
-    with pytest.warns(CCLWarning):
-        response = darkemu_Pgm_resp(
-            cosmo,
-            prof_hod,
-            deltah=deltah,
-            lk_arr=lk_arr,
-            a_arr=a_arr,
-            use_log=True,
-        )
-
 
 def test_Pgg_resp():
     response = darkemu_Pgg_resp(
@@ -195,16 +173,6 @@ def test_Pgg_resp():
     valid = (k_emu > 1e-2) & (k_emu < 4)
 
     assert np.all(response[0][valid] < 0)
-
-    with pytest.warns(CCLWarning):
-        response = darkemu_Pgg_resp(
-            cosmo,
-            prof_hod,
-            deltalnAs=deltalnAs,
-            lk_arr=lk_arr,
-            a_arr=a_arr,
-            use_log=True,
-        )
 
 
 # Tests for the utility functions

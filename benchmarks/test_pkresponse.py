@@ -68,10 +68,8 @@ indx_mm = (k_data_mm > 1e-2) & (k_data_mm < 3)
 lk_arr_mm = np.log(k_data_mm[indx_mm] * h)  # Using loaded k_data
 
 # Generate power spectrum responses using pkresponse.py functions
-use_log = False
-
 generated_Pmm_resp = Pmm_resp(
-    cosmo, deltah=0.02, lk_arr=lk_arr_mm, a_arr=a_arr, use_log=use_log
+    cosmo, deltah=0.02, lk_arr=lk_arr_mm, a_arr=a_arr
 )
 
 generated_Pgm_resp = darkemu_Pgm_resp(
@@ -82,7 +80,6 @@ generated_Pgm_resp = darkemu_Pgm_resp(
     log10Mh_max=log10Mh_max,
     lk_arr=lk_arr,
     a_arr=a_arr,
-    use_log=use_log,
 )
 
 generated_Pgg_resp = darkemu_Pgg_resp(
@@ -93,7 +90,6 @@ generated_Pgg_resp = darkemu_Pgg_resp(
     log10Mh_max=log10Mh_max,
     lk_arr=lk_arr,
     a_arr=a_arr,
-    use_log=use_log,
 )
 
 

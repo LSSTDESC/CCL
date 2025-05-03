@@ -1,7 +1,6 @@
 import numpy as np
 
 from . import cosmology
-from . import CCLWarning, warnings
 
 from dark_emulator import darkemu
 from scipy import integrate
@@ -21,7 +20,6 @@ def Pmm_resp(
     },
     lk_arr=None,
     a_arr=None,
-    use_log=False,
     khmin=khmin,
 ):
     """Implements the response of matter power spectrum to the long wavelength
@@ -50,10 +48,7 @@ def Pmm_resp(
             logarithm of the wavenumber (in units of Mpc^-1) at
             which the trispectrum should be calculated for
             interpolation.
-        use_log (bool): if `True`, the trispectrum will be
-            interpolated in log-space (unless negative or
-            zero values are found).
-
+        
     Returns:
         Response of the matter power spectrum.
     """
@@ -113,17 +108,6 @@ def Pmm_resp(
         # Eq. 23
         dpk12[ia, :] = pk * (1.0 + (26.0 / 21.0) * T_h - dpk / 3.0)
 
-    if use_log:
-        if np.any(dpk12 <= 0):
-            warnings.warn(
-                "Some values were not positive. "
-                "Will not interpolate in log-space.",
-                category=CCLWarning,
-            )
-            use_log = False
-        else:
-            dpk12 = np.log(dpk12)
-
     return dpk12
 
 
@@ -135,7 +119,6 @@ def darkemu_Pgm_resp(
     log10Mh_max=15.9,
     lk_arr=None,
     a_arr=None,
-    use_log=False,
     khmin=khmin,
 ):
     """Implements the response of galaxy-matter power spectrum to
@@ -153,17 +136,14 @@ def darkemu_Pgm_resp(
 
     # dark emulator is valid for 0 =< z <= 1.48
     if np.any((1.0 / a_arr - 1) > 1.48):
-        warnings.warn(
-            "dark emulator is valid for z<=1.48", category=CCLWarning
-        )
+        raise ValueError("dark emulator is valid for z<=1.48")
 
     # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
     if log10Mh_min < 12.0 or log10Mh_max > 16.0:
-        warnings.warn(
+        raise ValueError(
             "Input mass range is not supported."
-            "The supported range is from 10^12 to 10^16 Msun/h.",
-            category=CCLWarning,
-        )
+            "The supported range is from 10^12 to 10^16 Msun/h.")
+    
 
     h = cosmo["h"]
     k_emu = k_use / h  # [h/Mpc]
@@ -353,17 +333,6 @@ def darkemu_Pgm_resp(
         dPgm_db[k_emu < khmin] = dPgm_db_lin[k_emu < khmin]
         dpk12[ia, :] = dPgm_db
 
-    if use_log:
-        if np.any(dpk12 <= 0):
-            warnings.warn(
-                "Some values were not positive. "
-                "Will not interpolate in log-space.",
-                category=CCLWarning,
-            )
-            use_log = False
-        else:
-            dpk12 = np.log(dpk12)
-
     return dpk12
 
 
@@ -375,7 +344,6 @@ def darkemu_Pgg_resp(
     log10Mh_max=15.9,
     lk_arr=None,
     a_arr=None,
-    use_log=False,
     khmin=khmin,
 ):
     """Implements the response of galaxy-auto power spectrum to
@@ -393,18 +361,14 @@ def darkemu_Pgg_resp(
 
     # dark emulator is valid for 0 =< z <= 1.48
     if np.any((1.0 / a_arr - 1) > 1.48):
-        warnings.warn(
-            "dark emulator is valid for z<=1.48",
-            category=CCLWarning,
-        )
+        raise ValueError("dark emulator is valid for z<=1.48")
 
     # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
     if log10Mh_min < 12.0 or log10Mh_max > 16.0:
-        warnings.warn(
+        raise ValueError(
             "Input mass range is not supported."
-            "The supported range is from 10^12 to 10^16 Msun/h.",
-            category=CCLWarning,
-        )
+            "The supported range is from 10^12 to 10^16 Msun/h.")
+            
 
     h = cosmo["h"]
     k_emu = k_use / h  # [h/Mpc]
@@ -649,17 +613,6 @@ def darkemu_Pgg_resp(
         # use the perturbation theory below khmin
         dPgg_db[k_emu < khmin] = dPgg_db_lin[k_emu < khmin]
         dpk12[ia, :] = dPgg_db
-
-    if use_log:
-        if np.any(dpk12 <= 0):
-            warnings.warn(
-                "Some values were not positive. "
-                "Will not interpolate in log-space.",
-                category=CCLWarning,
-            )
-            use_log = False
-        else:
-            dpk12 = np.log(dpk12)
 
     return dpk12
 
