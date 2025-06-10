@@ -546,7 +546,7 @@ def _get_norms(prof, prof2, prof3, prof4, cosmo, aa, hmc):
         norm3 = prof3.get_normalization(cosmo, aa, hmc=hmc)
 
     if prof4 == prof:
-        norm4 = norm3
+        norm4 = norm1
     elif prof4 == prof2:
         norm4 = norm2
     elif prof4 == prof3:
