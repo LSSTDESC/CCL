@@ -4,7 +4,7 @@ from . import cosmology
 
 from dark_emulator import darkemu
 from scipy import integrate
-from . import halos, get_pk_spline_a, get_pk_spline_lk
+from . import halos, lib, check
 
 # use the perturbation theory below khmin
 khmin = 1e-2  # [h/Mpc]
@@ -52,10 +52,18 @@ def Pmm_resp(
     """
 
     # Set k and a sampling from CCL parameters
-    if a_arr is None:
-        a_arr = get_pk_spline_a()
     if lk_arr is None:
-        lk_arr = get_pk_spline_lk()
+        status = 0
+        lk_arr, status = lib.get_pk_spline_lk(
+            cosmo.cosmo, lib.get_pk_spline_nk(cosmo.cosmo), status
+        )
+        check(status, cosmo=cosmo)
+    if a_arr is None:
+        status = 0
+        a_arr, status = lib.get_pk_spline_a(
+            cosmo.cosmo, lib.get_pk_spline_na(cosmo.cosmo), status
+        )
+        check(status, cosmo=cosmo)
 
     k_use = np.exp(lk_arr)
 
@@ -126,10 +134,18 @@ def darkemu_Pgm_resp(
     """
 
     # Set k and a sampling from CCL parameters
-    if a_arr is None:
-        a_arr = get_pk_spline_a()
     if lk_arr is None:
-        lk_arr = get_pk_spline_lk()
+        status = 0
+        lk_arr, status = lib.get_pk_spline_lk(
+            cosmo.cosmo, lib.get_pk_spline_nk(cosmo.cosmo), status
+        )
+        check(status, cosmo=cosmo)
+    if a_arr is None:
+        status = 0
+        a_arr, status = lib.get_pk_spline_a(
+            cosmo.cosmo, lib.get_pk_spline_na(cosmo.cosmo), status
+        )
+        check(status, cosmo=cosmo)
 
     k_use = np.exp(lk_arr)
 
@@ -354,10 +370,18 @@ def darkemu_Pgg_resp(
     """
 
     # Set k and a sampling from CCL parameters
-    if a_arr is None:
-        a_arr = get_pk_spline_a()
     if lk_arr is None:
-        lk_arr = get_pk_spline_lk()
+        status = 0
+        lk_arr, status = lib.get_pk_spline_lk(
+            cosmo.cosmo, lib.get_pk_spline_nk(cosmo.cosmo), status
+        )
+        check(status, cosmo=cosmo)
+    if a_arr is None:
+        status = 0
+        a_arr, status = lib.get_pk_spline_a(
+            cosmo.cosmo, lib.get_pk_spline_na(cosmo.cosmo), status
+        )
+        check(status, cosmo=cosmo)
 
     k_use = np.exp(lk_arr)
 
