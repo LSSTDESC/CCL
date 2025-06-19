@@ -60,7 +60,7 @@ def test_bacco_lbias_k2pk_types(typ_nlin, typ_nloc):
                                   'b2:bs', 'b2:bk2', 'bs:bs', 'bs:bk2',
                                   'bk2:bk2', 'b1:b3nl'])
 def test_bacco_lbias_deconstruction(kind):
-    ptc = ccl.nl_pt.BaccoLbiasCalculator(cosmo=COSMO)
+    ptc = ccl.nl_pt.BaccoLbiasCalculator(cosmo=COSMO, extrap_lin=False)
     b_nc = ['b1', 'b2', 'bs', 'bk2', 'b3nl']
     pk1 = ptc.get_pk2d_template(kind)
 

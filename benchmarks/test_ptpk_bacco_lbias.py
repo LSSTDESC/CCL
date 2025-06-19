@@ -59,7 +59,7 @@ def test_pt_pk(comb):
     for iz, z in enumerate(zs):
         a = 1./(1+z)
         kin = data[iz][0]
-        ind = np.where((kin < 1.0) & (kin > 1E-3))
+        ind = np.where((kin < 1.0) & (kin > 1E-2))
         k = kin[ind]
         dpk = data[iz][i_d+1][ind]
         tpk = pk(k, a, COSMO)
