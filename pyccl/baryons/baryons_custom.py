@@ -4,12 +4,10 @@ import numpy as np
 
 from .. import Pk2D
 from . import Baryons
-
+from scipy.interpolate import RegularGridInterpolator
 
 class BaryonsCustom(Baryons):
-    """The "BCM" model boost factor for baryons. BCM stands for the
-    "baryonic correction model" of `Schneider & Teyssier 2015
-    <https://arxiv.org/abs/1510.06034>`_. See the
+    """The custom baryonic model boost factor for baryons. 
 
     The boost factor is applied multiplicatively so that
     :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\, f_{\\rm BCM}(k, a)`.
@@ -22,11 +20,21 @@ class BaryonsCustom(Baryons):
     name = 'BaryonsCustom'
     __repr_attrs__ = __eq_attrs__ = ("boost_data", "k_data", "a_data")
 
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self, boost_data, k_data, a_data):
+        self.boost_data = boost_data
+        self.k_data = k_data
+        self.a_data = a_data
+
+        # Create interpolator in (a, k) space
+        self._interpolator = RegularGridInterpolator(
+            points=(a_data, k_data),
+            values=boost_data,
+            bounds_error=False,
+            fill_value=1.0  # default to 1 (no boost) outside bounds
+        )
 
     def boost_factor(self, cosmo, k, a):
-        """The BCM model boost factor for baryons.
+        """Interpolated baryonic boost factor.
 
         Args:
             cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
@@ -37,25 +45,23 @@ class BaryonsCustom(Baryons):
             :obj:`float` or `array`: Correction factor to apply to \
             the power spectrum.
         """ # noqa
-        a_use, k_use = map(np.atleast_1d, [a, k])
-        a_use, k_use = a_use[:, None], k_use[None, :]
+        a_arr = np.atleast_1d(a)
+        k_arr = np.atleast_1d(k)
+        a_mesh, k_mesh = np.meshgrid(a_arr, k_arr, indexing='ij')
+        query_points = np.column_stack([a_mesh.ravel(), k_mesh.ravel()])
 
-        z = 1/a_use - 1
-        kh = k_use / cosmo['h']
-        b0 = 0.105*self.log10Mc - 1.27
-        bfunc = b0 / (1. + (z/2.3)**2.5)
-        kg = 0.7 * (1-bfunc)**4 * self.eta_b**(-1.6)
-        gf = bfunc / (1 + (kh/kg)**3) + 1. - bfunc
-        scomp = 1 + (kh / self.k_s)**2
-        fka = gf * scomp
+        boost_vals = self._interpolator(query_points).reshape(a_mesh.shape)
+        
+        # Match output shape to inputs
+        if np.ndim(a) == 0 and np.ndim(k) == 0:
+            return boost_vals[0, 0]
+        elif np.ndim(a) == 0:
+            return boost_vals[0]
+        elif np.ndim(k) == 0:
+            return boost_vals[:, 0]
+        return boost_vals
 
-        if np.ndim(k) == 0:
-            fka = np.squeeze(fka, axis=-1)
-        if np.ndim(a) == 0:
-            fka = np.squeeze(fka, axis=0)
-        return fka
-
-    def update_parameters(self, log10Mc=None, eta_b=None, k_s=None):
+    def update_parameters(self, boost_data=None, k_data=None, a_data=None):
         """Update BCM parameters. All parameters set to ``None`` will
         be left untouched.
 
@@ -66,12 +72,21 @@ class BaryonsCustom(Baryons):
             k_s (:obj:`float`): Characteristic scale (wavenumber) of
                 the stellar component.
         """
-        if log10Mc is not None:
-            self.log10Mc = log10Mc
-        if eta_b is not None:
-            self.eta_b = eta_b
-        if k_s is not None:
-            self.k_s = k_s
+        if boost_data is not None:
+            self.boost_data = boost_data
+        if k_data is not None:
+            self.k_data = k_data
+        if a_data is not None:
+            self.a_data = a_data
+
+        # Update interpolator in (a, k) space
+        if boost_data is not None or k_data is not None or a_data is not None:
+            self._interpolator = RegularGridInterpolator(
+                points=(a_data, k_data),
+                values=boost_data,
+                bounds_error=False,
+                fill_value=1.0  # default to 1 (no boost) outside bounds
+            )
 
     def _include_baryonic_effects(self, cosmo, pk):
         # Applies boost factor
