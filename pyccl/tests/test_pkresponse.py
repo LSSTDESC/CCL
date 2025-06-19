@@ -75,18 +75,7 @@ cosmo.compute_linear_power()
 pk2dlin = cosmo.get_linear_power("delta_matter:delta_matter")
 
 
-def test_Pmm_resp_init():
-    # lk_arr and a_arr should be specified
-    with pytest.raises(ValueError):
-        Pmm_resp(cosmo, deltah=deltah, lk_arr=None, a_arr=None)
-
-
 def test_Pgm_resp_init():
-    # lk_arr and a_arr should be specified
-    with pytest.raises(ValueError):
-        darkemu_Pgm_resp(
-            cosmo, prof_hod, deltah=deltah, lk_arr=None, a_arr=None
-        )
     with pytest.raises(TypeError):
         darkemu_Pgm_resp(
             cosmo, None, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr
@@ -116,12 +105,6 @@ def test_Pgm_resp_init():
 
 
 def test_Pgg_resp_init():
-    # lk_arr and a_arr should be specified
-    with pytest.raises(ValueError):
-        darkemu_Pgg_resp(
-            cosmo, prof_hod, deltalnAs=deltalnAs, lk_arr=None, a_arr=None
-        )
-
     with pytest.raises(TypeError):
         darkemu_Pgg_resp(
             cosmo, None, deltalnAs=deltalnAs, lk_arr=lk_arr, a_arr=a_arr

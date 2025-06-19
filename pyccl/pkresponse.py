@@ -4,7 +4,7 @@ from . import cosmology
 
 from dark_emulator import darkemu
 from scipy import integrate
-from . import halos
+from . import halos, get_pk_spline_a, get_pk_spline_lk
 
 # use the perturbation theory below khmin
 khmin = 1e-2  # [h/Mpc]
@@ -42,20 +42,20 @@ def Pmm_resp(
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB.
         a_arr (array): an array holding values of the scale factor
-            at which the trispectrum should be calculated for
-            interpolation.
+            at which the response is calculated.
         lk_arr (array): an array holding values of the natural
             logarithm of the wavenumber (in units of Mpc^-1) at
-            which the trispectrum should be calculated for
-            interpolation.
+            which the response is calculated.
 
     Returns:
         Response of the matter power spectrum.
     """
 
-    # Make sure input makes sense
-    if (a_arr is None) or (lk_arr is None):
-        raise ValueError("you must provide arrays")
+    # Set k and a sampling from CCL parameters
+    if a_arr is None:
+        a_arr = get_pk_spline_a()
+    if lk_arr is None:
+        lk_arr = get_pk_spline_lk()
 
     k_use = np.exp(lk_arr)
 
@@ -124,9 +124,12 @@ def darkemu_Pgm_resp(
     """Implements the response of galaxy-matter power spectrum to
     the long wavelength modes, described in arXiv:2310.13330.
     """
-    # Make sure input makes sense
-    if (a_arr is None) or (lk_arr is None):
-        raise ValueError("you must provide arrays")
+
+    # Set k and a sampling from CCL parameters
+    if a_arr is None:
+        a_arr = get_pk_spline_a()
+    if lk_arr is None:
+        lk_arr = get_pk_spline_lk()
 
     k_use = np.exp(lk_arr)
 
@@ -349,9 +352,12 @@ def darkemu_Pgg_resp(
     """Implements the response of galaxy-auto power spectrum to
     the long wavelength modes, described in arXiv:2310.13330.
     """
-    # Make sure input makes sense
-    if (a_arr is None) or (lk_arr is None):
-        raise ValueError("you must provide arrays")
+
+    # Set k and a sampling from CCL parameters
+    if a_arr is None:
+        a_arr = get_pk_spline_a()
+    if lk_arr is None:
+        lk_arr = get_pk_spline_lk()
 
     k_use = np.exp(lk_arr)
 
