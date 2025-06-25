@@ -85,6 +85,13 @@ class BaccoLbiasCalculator(CCLAutoRepr):
             (default), no cutoff factor will be applied.
         n_exp_cutoff (:obj:`float`): exponent of the cutoff factor (see
             ``k_cutoff``).
+        extrap_lin (:obj:`bool`): keyword determining large-scale
+            extrapolation of returned HEFT power spectra.
+            If ``True``, the appropriately biased linear power spectrum will be
+            smoothly joined to the HEFT power spectrum at a transition scale
+            of 0.01 h/Mpc (the minimum k value of baccoemu).
+            If ``False``, the extrapolation will be done within baccoemu. Note
+            that this can lead to unphysical behavior at large scales.
     """
     __repr_attrs__ = __eq_attrs__ = ('k_s', 'a_s', 'exp_cutoff')
 
