@@ -399,7 +399,8 @@ def resp_Pgg_darkemu(
 
     .. math::
         \\frac{\\partial P_{gg}(k)}{\\partial\\delta_b} =
-        \\left(\\partial P_{gg}(k)}{\\partial\\delta_b}|_{G} - \\frac{1}{3}
+        \\left(-1 + \\partial P_{gg}(k)}{\\partial\\delta_b}|_{G}
+        - \\frac{1}{3}
         \\frac{d\\log P_{gg}(k)}{d\\log k}\\right)P_{gg}(k),
 
     where the :math:`\\partial P_{gg}(k)}{\\partial\\delta_b}|_{G}`
