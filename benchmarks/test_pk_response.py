@@ -1,5 +1,9 @@
 import numpy as np
-from pyccl.pkresponse import Pmm_resp, darkemu_Pgm_resp, darkemu_Pgg_resp
+from pyccl.pk_response import (
+    resp_Pmm_hresponse,
+    resp_Pgm_darkemu,
+    resp_Pgg_darkemu,
+)
 import pyccl as ccl
 
 # Set cosmology
@@ -68,11 +72,11 @@ indx_mm = (k_data_mm > 1e-2) & (k_data_mm < 3)
 lk_arr_mm = np.log(k_data_mm[indx_mm] * h)  # Using loaded k_data
 
 # Generate power spectrum responses using pkresponse.py functions
-generated_Pmm_resp = Pmm_resp(
+generated_Pmm_resp = resp_Pmm_hresponse(
     cosmo, deltah=0.02, lk_arr=lk_arr_mm, a_arr=a_arr
 )
 
-generated_Pgm_resp = darkemu_Pgm_resp(
+generated_Pgm_resp = resp_Pgm_darkemu(
     cosmo,
     prof_hod,
     deltah=0.02,
@@ -82,7 +86,7 @@ generated_Pgm_resp = darkemu_Pgm_resp(
     a_arr=a_arr,
 )
 
-generated_Pgg_resp = darkemu_Pgg_resp(
+generated_Pgg_resp = resp_Pgg_darkemu(
     cosmo,
     prof_hod,
     deltalnAs=0.03,

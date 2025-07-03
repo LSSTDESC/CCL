@@ -46,4 +46,4 @@ from . import nl_pt
 
 from .cosmology import *
 
-from .pkresponse import *
+from .pk_response import *

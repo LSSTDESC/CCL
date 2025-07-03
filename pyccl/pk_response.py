@@ -10,7 +10,7 @@ from . import halos, lib, check
 khmin = 1e-2  # [h/Mpc]
 
 
-def Pmm_resp(
+def resp_Pmm_hresponse(
     cosmo,
     deltah=0.02,
     extra_parameters={
@@ -37,15 +37,15 @@ def Pmm_resp(
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        deltah (float): the variation of h to compute T_{h}(k) by
-            the two-sided numerical derivative method.
+        deltah (float): the variation of :math:`h` to compute :math:`T_{h}(k)`
+            by the two-sided numerical derivative method.
         extra_parameters (:obj:`dict`): Dictionary holding extra
             parameters. Currently supports extra parameters for CAMB.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of :math:`Mpc^{-1}`) at
+            which the response is calculated.
         a_arr (array): an array holding values of the scale factor
             at which the response is calculated.
-        lk_arr (array): an array holding values of the natural
-            logarithm of the wavenumber (in units of Mpc^-1) at
-            which the response is calculated.
 
     Returns:
         Response of the matter power spectrum.
@@ -119,7 +119,7 @@ def Pmm_resp(
     return dpk12
 
 
-def darkemu_Pgm_resp(
+def resp_Pgm_darkemu(
     cosmo,
     prof_hod,
     deltah=0.02,
@@ -129,8 +129,37 @@ def darkemu_Pgm_resp(
     a_arr=None,
     khmin=khmin,
 ):
-    """Implements the response of galaxy-matter power spectrum to
-    the long wavelength modes, described in arXiv:2310.13330.
+    """Implements the response of galaxy-matter power spectrum
+    to the long wavelength modes
+    developed in Terasawa et al. 2023 (arXiv:2310.13330) as:
+
+    .. math::
+        \\frac{\\partial P_{gm}(k)}{\\partial\\delta_b} =
+        \\left(\\partial P_{gm}(k)}{\\partial\\delta_b}|_{G} - \\frac{1}{3}
+        \\frac{d\\log P_{gm}(k)}{d\\log k}\\right)P_{gm}(k),
+
+    where the :math:`\\partial P_{gm}(k)}{\\partial\\delta_b}|_{G}`
+    is the growth response to the long wavelength modes.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        prof_hod (:class:`~pyccl.halos.profiles.hod.HaloProfileHOD`):
+        HOD profile.
+        deltah (float): the variation of :math:`h` to compute
+            the growth reponse to :math:`h`
+            by the two-sided numerical derivative method.
+        log10Mh_min (float): the minimum halo mass
+            (in units of :math:`M_\\odot/h`) for integration.
+        log10Mh_max (float): the maximum halo mass
+            (in units of :math:`M_\\odot/h`) for integration.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of :math:`Mpc^{-1}`) at
+            which the response is calculated.
+        a_arr (array): an array holding values of the scale factor
+            at which the response is calculated.
+
+    Returns:
+        Response of the galaxy-matter power spectrum.
     """
 
     # Set k and a sampling from CCL parameters
@@ -355,7 +384,7 @@ def darkemu_Pgm_resp(
     return dpk12
 
 
-def darkemu_Pgg_resp(
+def resp_Pgg_darkemu(
     cosmo,
     prof_hod,
     deltalnAs=0.03,
@@ -365,8 +394,36 @@ def darkemu_Pgg_resp(
     a_arr=None,
     khmin=khmin,
 ):
-    """Implements the response of galaxy-auto power spectrum to
-    the long wavelength modes, described in arXiv:2310.13330.
+    """Implements the response of galaxy power spectrum to the long wavelength
+    modes developed in Terasawa et al. 2023 (arXiv:2310.13330) as:
+
+    .. math::
+        \\frac{\\partial P_{gg}(k)}{\\partial\\delta_b} =
+        \\left(\\partial P_{gg}(k)}{\\partial\\delta_b}|_{G} - \\frac{1}{3}
+        \\frac{d\\log P_{gg}(k)}{d\\log k}\\right)P_{gg}(k),
+
+    where the :math:`\\partial P_{gg}(k)}{\\partial\\delta_b}|_{G}`
+    is the growth response to the long wavelength modes.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        prof_hod (:class:`~pyccl.halos.profiles.hod.HaloProfileHOD`):
+            HOD profile.
+        deltalnAs (float): the variation of :math:`\\ln A_{s}`
+            to compute the growth reponse to :math:`\\ln A_{s}` by
+            the two-sided numerical derivative method.
+        log10Mh_min (float): the minimum halo mass
+            (in units of :math:`M_\\odot/h`) for integration.
+        log10Mh_max (float): the maximum halo mass
+            (in units of :math:`M_\\odot/h`) for integration.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of :math:`Mpc^{-1}`) at
+            which the response is calculated.
+        a_arr (array): an array holding values of the scale factor
+            at which the response is calculated.
+
+    Returns:
+        Response of the galaxy power spectrum.
     """
 
     # Set k and a sampling from CCL parameters

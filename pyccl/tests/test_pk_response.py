@@ -2,10 +2,10 @@ import numpy as np
 import pyccl as ccl
 import pytest
 from dark_emulator import darkemu
-from pyccl.pkresponse import (
-    Pmm_resp,
-    darkemu_Pgm_resp,
-    darkemu_Pgg_resp,
+from pyccl.pk_response import (
+    resp_Pmm_hresponse,
+    resp_Pgm_darkemu,
+    resp_Pgg_darkemu,
     _get_phh_massthreshold_mass,
     _b2H17,
     _darkemu_set_cosmology,
@@ -75,15 +75,15 @@ cosmo.compute_linear_power()
 pk2dlin = cosmo.get_linear_power("delta_matter:delta_matter")
 
 
-def test_Pgm_resp_init():
+def test_resp_Pgm_darkemu_init():
     with pytest.raises(TypeError):
-        darkemu_Pgm_resp(
+        resp_Pgm_darkemu(
             cosmo, None, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr
         )
 
     # dark emulator is valid for z<=1.48
     with pytest.raises(ValueError):
-        darkemu_Pgm_resp(
+        resp_Pgm_darkemu(
             cosmo,
             prof_hod,
             deltah=deltah,
@@ -93,7 +93,7 @@ def test_Pgm_resp_init():
 
     # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
     with pytest.raises(ValueError):
-        darkemu_Pgm_resp(
+        resp_Pgm_darkemu(
             cosmo,
             prof_hod,
             deltah=deltah,
@@ -104,15 +104,15 @@ def test_Pgm_resp_init():
         )
 
 
-def test_Pgg_resp_init():
+def test_resp_Pgg_darkemu_init():
     with pytest.raises(TypeError):
-        darkemu_Pgg_resp(
+        resp_Pgg_darkemu(
             cosmo, None, deltalnAs=deltalnAs, lk_arr=lk_arr, a_arr=a_arr
         )
 
     # dark emulator is valid for z<=1.48
     with pytest.raises(ValueError):
-        darkemu_Pgg_resp(
+        resp_Pgg_darkemu(
             cosmo,
             prof_hod,
             deltalnAs=deltalnAs,
@@ -122,7 +122,7 @@ def test_Pgg_resp_init():
 
     # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
     with pytest.raises(ValueError):
-        darkemu_Pgg_resp(
+        resp_Pgg_darkemu(
             cosmo,
             prof_hod,
             deltalnAs=deltalnAs,
@@ -133,15 +133,17 @@ def test_Pgg_resp_init():
         )
 
 
-def test_Pmm_resp():
-    response = Pmm_resp(cosmo, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr)
+def test_resp_Pmm_hresponse():
+    response = resp_Pmm_hresponse(
+        cosmo, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr
+    )
     valid = (k_emu > 1e-2) & (k_emu < 4)
 
     assert np.all(response[0][valid] > 0)
 
 
-def test_Pgm_resp():
-    response = darkemu_Pgm_resp(
+def test_resp_Pgm_darkemu():
+    response = resp_Pgm_darkemu(
         cosmo, prof_hod, deltah=deltah, lk_arr=lk_arr, a_arr=a_arr
     )
     valid = (k_emu > 1e-2) & (k_emu < 4)
@@ -149,8 +151,8 @@ def test_Pgm_resp():
     assert np.all(response[0][valid] > 0)
 
 
-def test_Pgg_resp():
-    response = darkemu_Pgg_resp(
+def test_resp_Pgg_darkemu():
+    response = resp_Pgg_darkemu(
         cosmo, prof_hod, deltalnAs=deltalnAs, lk_arr=lk_arr, a_arr=a_arr
     )
     valid = (k_emu > 1e-2) & (k_emu < 4)
