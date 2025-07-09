@@ -15,7 +15,7 @@ hod = model_hod.darkemu_x_hod()
 def _compute_logdens(Mh, redshift):
     Mh = np.atleast_1d(Mh)
     logdens = np.log10([hod._convert_mass_to_dens(
-        Mh[i], redshift, integration=hod.config["hmf_int_algorithm"]) 
+        Mh[i], redshift, integration=hod.config["hmf_int_algorithm"])
         for i in range(len(Mh))])
     return logdens
 
@@ -54,7 +54,8 @@ def _compute_p_hm(ks, Mh, redshift):
 
     p_hm = np.zeros((len(logdens), len(ks)))
     for i in range(len(logdens)):
-        p_hm[i] = hod.fftlog_1h.xi2pk(hod.xi_hm[i], 1.01, N_extrap_high=1024)[1]
+        p_hm[i] = hod.fftlog_1h.xi2pk(hod.xi_hm[i], 
+                                      1.01, N_extrap_high=1024)[1]
         if hod.do_linear_correction:
             p_hm[i] *= (hod.pm_lin_k_1h_out_of_range/pm_lin)
 
@@ -204,14 +205,14 @@ def darkemu_power_spectrum(demu, cosmo, hmc, k, a, prof, *,
             for i in range(nM):
                 pk_2h_M2_int.append(hmc._integrator(
                     pkhh[:, i] * u1k * hmf[None, :], lmass))
-            pk_2h = hmc._integrator(np.array(pk_2h_M2_int).T * 
+            pk_2h = hmc._integrator(np.array(pk_2h_M2_int).T *
                                     u2k * hmf[None, :], lmass)
             #########
 
         else:
             pkhm = np.zeros([nk, nM])
             for i in range(nM):
-                pkhm[:, i] = demu_phm_mass(ks=k_use/h_, M=M_array[i]*h_, 
+                pkhm[:, i] = demu_phm_mass(ks=k_use/h_, M=M_array[i]*h_,
                                            redshift=1./aa-1.) / h_**3.
             # pkhm = _compute_p_hm(k_use, M_array, redshift=1./aa-1)
             # (Nk,NM)
