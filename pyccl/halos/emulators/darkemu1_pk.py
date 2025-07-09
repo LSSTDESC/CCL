@@ -54,7 +54,7 @@ def _compute_p_hm(ks, Mh, redshift):
 
     p_hm = np.zeros((len(logdens), len(ks)))
     for i in range(len(logdens)):
-        p_hm[i] = hod.fftlog_1h.xi2pk(hod.xi_hm[i], 
+        p_hm[i] = hod.fftlog_1h.xi2pk(hod.xi_hm[i],
                                       1.01, N_extrap_high=1024)[1]
         if hod.do_linear_correction:
             p_hm[i] *= (hod.pm_lin_k_1h_out_of_range/pm_lin)
