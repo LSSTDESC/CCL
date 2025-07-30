@@ -46,7 +46,8 @@ def resp_Pmm_hresponse(
             which the response is calculated.
         a_arr (array): an array holding values of the scale factor
             at which the response is calculated.
-
+        khmin (float): the wavenumber (in units of :math:`h Mpc^{-1}`) below
+            which the response is calculated using the perturbation theory.
     Returns:
         Response of the matter power spectrum.
     """
@@ -157,7 +158,8 @@ def resp_Pgm_darkemu(
             which the response is calculated.
         a_arr (array): an array holding values of the scale factor
             at which the response is calculated.
-
+        khmin (float): the wavenumber (in units of :math:`h Mpc^{-1}`) below
+            which the response is calculated using the perturbation theory.
     Returns:
         Response of the galaxy-matter power spectrum.
     """
@@ -422,7 +424,8 @@ def resp_Pgg_darkemu(
             which the response is calculated.
         a_arr (array): an array holding values of the scale factor
             at which the response is calculated.
-
+        khmin (float): the wavenumber (in units of :math:`h Mpc^{-1}`) below
+            which the response is calculated using the perturbation theory.
     Returns:
         Response of the galaxy power spectrum.
     """
