@@ -15,14 +15,14 @@ demuhod = model_hod.darkemu_x_hod()
 
 def galaxy_bias(cosmo, hmc, a, prof):
     """ Computes the galaxy bias for a given halo profile."""
-    Mh = np.logspace(12.2,15.0,2**5+1) / cosmo['h'] # [Msun]
+    Mh = np.logspace(12.2, 15.0, 2**5+1) / cosmo['h']  # [Msun]
     lmass = np.log10(Mh)
     NgalM = _Ngal(Mh, 1., profile=prof)
     # hmc._mf: dn/dlogM [Mpc^-3] (comoving) not dn/dM
     hmc._get_ingredients(cosmo, a, get_bf=False)
     hmf = ius(hmc._lmass, hmc._mf)(lmass)
     norm1 = hmc._integrator(hmf * NgalM, lmass)  # integral of dn/dM
-    hbias = np.array([demuhod.get_bias_mass(Mi, redshift=1./a - 1)[0,0]
+    hbias = np.array([demuhod.get_bias_mass(Mi, redshift=1./a - 1)[0, 0]
                       for Mi in Mh*cosmo['h']])
     galbias = hmc._integrator(hmf * hbias * NgalM, lmass) / norm1
     # integral of dn/dM
@@ -43,11 +43,11 @@ def galaxy_bias_DEmuxHOD(cosmo, a, prof):
         raise ValueError("Dark Emulator needs A_s as an input parameter.")
     # [omegab0.,omega_c0.,Omega_Lambda0,np.log(As*10**10),ns,w0]
     demuhod.set_cosmology(np.array([cosmo['Omega_b']*h_**2.,
-                                 cosmo['Omega_c']*h_**2.,
-                                 1-(cosmo['Omega_c']+cosmo['Omega_b']),
-                                 np.log(cosmo['A_s']*10**10),
-                                 cosmo['n_s'],
-                                 cosmo['w0']]))
+                                    cosmo['Omega_c']*h_**2.,
+                                    1-(cosmo['Omega_c']+cosmo['Omega_b']),
+                                    np.log(cosmo['A_s']*10**10),
+                                    cosmo['n_s'],
+                                    cosmo['w0']]))
     # HOD parameters for the dark emulator
     gparam_input = {"logMmin": prof.log10Mmin_0 + np.log10(h_),
                     "sigma_sq": (prof.siglnM_0/np.log(10))**2,
@@ -59,7 +59,7 @@ def galaxy_bias_DEmuxHOD(cosmo, a, prof):
                     "alpha_inc": 0., "logM_inc": 0.}
     demuhod.set_galaxy(gparam_input)
 
-    galbias = np.array([demuhod._get_effective_bias(redshift=z_) 
+    galbias = np.array([demuhod._get_effective_bias(redshift=z_)
                         for z_ in (1./a_use - 1.)])
     if len(galbias) == 1:
         return galbias[0]
@@ -80,19 +80,20 @@ def _compute_p_hh(dehod, ks, Mh, redshift):
         dehod._compute_logdens(redshift)
     dehod._compute_p_hh_spl(redshift)
 
-    points_known = (-dehod.g1.logdens_list, -dehod.g1.logdens_list, dehod.fftlog_2h.k)
+    points_known = (-dehod.g1.logdens_list, -dehod.g1.logdens_list,
+                    dehod.fftlog_2h.k)
     logdens = _compute_logdens(dehod=dehod, Mh=Mh, redshift=redshift)
     grid_d1, grid_d2, grid_k = np.meshgrid(-logdens, -logdens,
                                            ks, indexing='ij')
     points_target = np.stack([grid_d1.ravel(), grid_d2.ravel(),
                               grid_k.ravel()], axis=-1)
 
-    interpolator = rgi(points_known, dehod.p_hh_base, method='cubic', 
+    interpolator = rgi(points_known, dehod.p_hh_base, method='cubic',
                        bounds_error=False, fill_value=None)
 
-    p_hh = interpolator(points_target).reshape(len(logdens), len(logdens), len(ks))
+    p_hh = interpolator(points_target).reshape(len(logdens),
+                                               len(logdens), len(ks))
     return p_hh.transpose(2, 0, 1)
-
 
 
 # referred from dark_emulator_public/dark_emulator/model_hod/hod_interface.py
@@ -204,11 +205,11 @@ def darkemu_power_spectrum(cosmo, hmc, k, a, prof, *,
         raise ValueError("Dark Emulator needs A_s as an input parameter.")
     # [omegab0.,omega_c0.,Omega_Lambda0,np.log(As*10**10),ns,w0]
     demuhod.set_cosmology(np.array([cosmo['Omega_b']*h_**2.,
-                                 cosmo['Omega_c']*h_**2.,
-                                 1-(cosmo['Omega_c']+cosmo['Omega_b']),
-                                 np.log(cosmo['A_s']*10**10),
-                                 cosmo['n_s'],
-                                 cosmo['w0']]))
+                                    cosmo['Omega_c']*h_**2.,
+                                    1-(cosmo['Omega_c']+cosmo['Omega_b']),
+                                    np.log(cosmo['A_s']*10**10),
+                                    cosmo['n_s'],
+                                    cosmo['w0']]))
     # HOD parameters for the dark emulator
     gparam_input = {"logMmin": prof.log10Mmin_0 + np.log10(h_),
                     "sigma_sq": (prof.siglnM_0/np.log(10))**2,
@@ -242,7 +243,6 @@ def darkemu_power_spectrum(cosmo, hmc, k, a, prof, *,
     lmass = np.log10(M_array)
     nM = len(M_array)
 
-
     for ia, aa in enumerate(a_use):
         # normalizations
         # norm1 = prof.get_normalization(cosmo, aa, hmc=hmc)
@@ -255,15 +255,14 @@ def darkemu_power_spectrum(cosmo, hmc, k, a, prof, *,
         if prof2 == prof:
             norm2 = norm1
 
-
         # calc profile in fourier space
         u1k = prof.fourier(cosmo, k_use, M_array, aa).T  # (Nk,NM)
         if prof2 == prof:  # pkgg
             u2k = u1k
-            
+
             # (Nk,NM,NM)
             pkhh = _compute_p_hh(dehod=demuhod, ks=k_use/h_,
-                                  Mh=M_array*h_, redshift=1./aa-1) / h_**3.
+                                 Mh=M_array*h_, redshift=1./aa-1) / h_**3.
 
             # integration
             pk_2h_M2_int = list()
@@ -285,9 +284,9 @@ def darkemu_power_spectrum(cosmo, hmc, k, a, prof, *,
 
         if get_1h and (prof2 == prof):
             pk_1h = _I_0_2(hmc, cosmo, k_use, aa, prof,
-                           prof2=prof2, prof_2pt=prof_2pt, 
+                           prof2=prof2, prof_2pt=prof_2pt,
                            lmass=lmass, hmf=hmf)  # 1h term
-            
+
             if suppress_1h is not None:
                 # large-scale damping of 1-halo term
                 ks = suppress_1h(aa)
@@ -306,4 +305,3 @@ def darkemu_power_spectrum(cosmo, hmc, k, a, prof, *,
     if np.ndim(k) == 0:
         out = np.squeeze(out, axis=-1)
     return out
-
