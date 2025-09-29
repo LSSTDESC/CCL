@@ -11,9 +11,10 @@ class ConcentrationDuffy08(Concentration):
     By default it will be initialized for :math:`M_{200c}`.
 
     Args:
-         fc_bar (:obj:`float'): an optional constant that multiplies the Duffy. et al. relation 
-	    to mimic the impact of baryons (default value is set to 1). See Amon+, 2202.07440
-	    and Viola+, 1507.00735 (Eq 32).
+         fc_bar (:obj:`float'): an optional constant that multiplies
+            the Duffy. et al. relation to mimic the impact of baryons
+            (default value is set to 1). See Amon+, 2202.07440
+            and Viola+, 1507.00735 (Eq 32).
          mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition object, or a name string.
     """
