@@ -27,7 +27,9 @@ class _DummyTracer:
 
     def __init__(self):
         """Initializes the dummy tracer."""
-        self._trc = []  # Just something so identity matters, not used internally
+        self._trc = (
+            []
+        )  # Just something so identity matters, not used internally
 
     def get_kernel(self):
         """Returns a dummy kernel and chi array."""
@@ -53,7 +55,10 @@ class _DummyCosmo:
 
     def __init__(self):
         """Initializes the dummy cosmology."""
-        self.cosmo = object() # just something so code that expects `cosmo.cosmo` doesn't blow up on us
+        # just something so code that expects `cosmo.cosmo` doesn't blow up
+        self.cosmo = (
+            object()
+        )
 
     def parse_pk2d(self, p, is_linear):
         """Parses a power spectrum spec into a constant Pk2D.
@@ -100,6 +105,7 @@ class DummyTracerCollection:
     we monkeypatch compute_single_ell, the internal structure doesn't
     matter for this test.
     """
+
     def __init__(self):
         """Initializes the dummy tracer collection."""
         self.tracers = []

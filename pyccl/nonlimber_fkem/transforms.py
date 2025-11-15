@@ -88,9 +88,11 @@ def compute_collection_fft(
     if n == 0:  # if no tracers provided raise error
         raise ValueError("FKEM: 'kernels' must contain at least one tracer.")
 
-    if not (len(chis) == len(bessels) == len(avg_as) == n):  # if lengths mismatch raise error
+    if not (
+        len(chis) == len(bessels) == len(avg_as) == n
+    ):  # if lengths mismatch raise error
         raise ValueError(
-            "FKEM: 'kernels', 'chis', 'bessels', and 'avg_as' must have the same length."
+            "FKEM: kernels/chis/bessels/avg_as length mismatch."
         )
 
     # Basic checks on chi grid
@@ -102,15 +104,25 @@ def compute_collection_fft(
             f"[FKEM]: 'chi_logspace_arr' size ({chi_logspace_arr.size}) "
             f"does not match n_chi ({n_chi})."
         )
-    if not np.all(np.diff(chi_logspace_arr) > 0):  # this must be strictly increasing
-        raise ValueError("[FKEM]: 'chi_logspace_arr' must be strictly increasing.")
+    if not np.all(
+        np.diff(chi_logspace_arr) > 0
+    ):  # this must be strictly increasing
+        raise ValueError(
+            "[FKEM]: 'chi_logspace_arr' must be strictly increasing."
+        )
 
-    if not np.isfinite(chi_min) or not np.isfinite(chi_max):  # chi_min and chi_max must be finite
+    if not np.isfinite(chi_min) or not np.isfinite(
+        chi_max
+    ):  # chi_min and chi_max must be finite
         raise ValueError("[FKEM]: 'chi_min' and 'chi_max' must be finite.")
-    if chi_min < 0 or chi_min >= chi_max:  # chi_min must be non-negative and less than chi_max
+    if (
+        chi_min < 0 or chi_min >= chi_max
+    ):  # chi_min must be non-negative and less than chi_max
         raise ValueError("[FKEM]: require 0 <= chi_min < chi_max.")
 
-    if k_low <= 0 or not np.isfinite(k_low):  # k_low must be positive and finite
+    if k_low <= 0 or not np.isfinite(
+        k_low
+    ):  # k_low must be positive and finite
         raise ValueError("[FKEM] 'k_low' must be positive and finite.")
 
     fks = np.zeros((n, n_chi), dtype=float)
@@ -124,13 +136,14 @@ def compute_collection_fft(
         ki = np.asarray(kernels[i], dtype=float)
         chi_i = np.asarray(chis[i], dtype=float)
         if chi_i.ndim != 1 or ki.ndim != 1:
-            raise ValueError("[FKEM]: each entry in 'kernels' and 'chis' must be 1D.")
+            raise ValueError(
+                "[FKEM]: each entry in 'kernels' and 'chis' must be 1D."
+            )
         if chi_i.size != ki.size:
             raise ValueError(
-                f"[FKEM]: 'chis[{i}]' and 'kernels[{i}]' must have the same length "
-                f"(got {chi_i.size} vs {ki.size})."
+                f"[FKEM] length mismatch: chis[{i}] vs "
+                f"kernels[{i}] ({chi_i.size} vs {ki.size})."
             )
-
         # Try to read cached FFTLog result for this tracer piece
         k_cached, fk_cached = clt._get_fkem_fft(
             clt._trc[i], n_chi, chi_min, chi_max, ell
@@ -170,29 +183,35 @@ def compute_collection_fft(
                 transfer_avg = float(arr[0])
 
             if not np.all(np.isfinite(transfer_low_i)):
-                raise RuntimeError("[FKEM]: non-finite values in 'transfer_low'.")
+                raise RuntimeError(
+                    "[FKEM]: non-finite values in 'transfer_low'."
+                )
             if not np.isfinite(transfer_avg):
-                raise RuntimeError("[FKEM]: non-finite value in 'transfer_avg'.")
+                raise RuntimeError(
+                    "[FKEM]: non-finite value in 'transfer_avg'."
+                )
             if transfer_avg == 0.0:
-                raise RuntimeError("[FKEM]: 'transfer_avg' is zero, cannot rescale.")
+                raise RuntimeError(
+                    "[FKEM]: 'transfer_avg' is zero, cannot rescale."
+                )
 
             fchi_interp = interp1d(
                 chi_i, ki, fill_value="extrapolate", assume_sorted=False
             )
             fchi_arr = (
-                    fchi_interp(chi_logspace_arr)
-                    * chi_logspace_arr
-                    * growfac_arr
-                    * transfer_low_i
-                    / transfer_avg
+                fchi_interp(chi_logspace_arr)
+                * chi_logspace_arr
+                * growfac_arr
+                * transfer_low_i
+                / transfer_avg
             )
 
             if fchi_arr.shape != chi_logspace_arr.shape:
                 raise RuntimeError(
                     "[FKEM]: 'fchi_arr' has inconsistent shape "
-                    f"(expected {chi_logspace_arr.shape}, got {fchi_arr.shape})."
+                    f"(expected {chi_logspace_arr.shape}, "
+                    f"got {fchi_arr.shape})."
                 )
-
             if not np.all(np.isfinite(fchi_arr)):
                 raise RuntimeError("[FKEM]: non-finite values in 'fchi_arr'.")
 
@@ -215,7 +234,9 @@ def compute_collection_fft(
                 )
 
             if not (np.all(np.isfinite(k_fft)) and np.all(np.isfinite(fk))):
-                raise RuntimeError("[FKEM]: non-finite values in FFTLog output.")
+                raise RuntimeError(
+                    "[FKEM]: non-finite values in FFTLog output."
+                )
 
             clt._set_fkem_fft(
                 clt._trc[i], n_chi, chi_min, chi_max, ell, k_fft, fk
@@ -243,9 +264,7 @@ def compute_collection_fft(
     # the final transfer factor does not vary with tracer-specific avg_a.
     # If in future we want fully per-tracer scale-factor dependence here,
     # this is the place to change it (e.g. by passing avg_as instead).
-    transfers = np.asarray(
-        clt.get_transfer(np.log(k_out), avg_as[-1])
-    )
+    transfers = np.asarray(clt.get_transfer(np.log(k_out), avg_as[-1]))
 
     if transfers.shape[0] != n:
         raise RuntimeError(

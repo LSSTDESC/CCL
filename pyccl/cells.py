@@ -21,7 +21,7 @@ def angular_cl(
     fkem_chi_min=None,
     fkem_nchi=None,
     p_of_k_a_lin=DEFAULT_POWER_SPECTRUM,
-    return_meta=False
+    return_meta=False,
 ):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
@@ -82,7 +82,9 @@ def angular_cl(
         warnings.warn(
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
-            category=CCLWarning, importance='low')
+            category=CCLWarning,
+            importance="low",
+        )
 
     if limber_integration_method not in integ_types:
         raise ValueError(
@@ -127,21 +129,22 @@ def angular_cl(
     #   - ell_limber <= 0  : treated as "no FKEM, pure Limber"
     #   - ell_limber == min(ell) : FKEM active starting at the first ell
     if (
-            non_limber_integration_method == "FKEM"
-            and not auto_limber
-            and isinstance(ell_limber, (int, float))
-            and ell_limber > 0
-            and ell_limber < ell_use[0]
+        non_limber_integration_method == "FKEM"
+        and not auto_limber
+        and isinstance(ell_limber, (int, float))
+        and ell_limber > 0
+        and ell_limber < ell_use[0]
     ):
         raise ValueError(
-            "For FKEM non-Limber integration, a positive `ell_limber` must be at "
-            "least as large as the smallest requested ell."
+            "For FKEM non-Limber integration, a positive `ell_limber` must be "
+            "at least as large as the smallest requested ell."
         )
 
     cl_non_limber = np.array([])
-    ell_limber_eff = ell_limber
 
-    if auto_limber or (not isinstance(ell_limber, str) and ell_use[0] < ell_limber):
+    if auto_limber or (
+        not isinstance(ell_limber, str) and ell_use[0] < ell_limber
+    ):
         if non_limber_integration_method == "FKEM":
             ell_limber_eff, cl_non_limber, status = nonlimber_fkem(
                 cosmo=cosmo,
@@ -160,7 +163,6 @@ def angular_cl(
 
     n_nl = cl_non_limber.size
     if n_nl > 0:
-        ell_use_nonlimber = ell_use[:n_nl]
         ell_use_limber = ell_use[n_nl:]
     else:
         ell_use_limber = ell_use

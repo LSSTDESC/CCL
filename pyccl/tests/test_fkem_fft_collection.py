@@ -33,7 +33,7 @@ class _FakeTracerCollection:
 
 
 def test_compute_collection_fft_basic_shape():
-    """Tests that compute_collection_fft returns arrays of the correct shape."""
+    """Test compute_collection_fft returns arrays with correct shapes."""
     ntrc = 2
     n_chi = 5
     clt = _FakeTracerCollection(ntrc)
@@ -73,6 +73,7 @@ def test_compute_collection_fft_basic_shape():
 
 class _FakeClt:
     """A fake tracer collection that counts FFTLog calls."""
+
     def __init__(self):
         """Initializes the fake tracer collection."""
         self._trc = ["t0"]
@@ -119,8 +120,14 @@ def test_compute_collection_fft_uses_cache(monkeypatch):
 
     # First call: should hit fake FFTLog
     k1, fks1, tr1 = compute_collection_fft(
-        clt, kernels, chis, bessels, avg_as,
-        n_chi=5, chi_min=1.0, chi_max=10.0,
+        clt,
+        kernels,
+        chis,
+        bessels,
+        avg_as,
+        n_chi=5,
+        chi_min=1.0,
+        chi_max=10.0,
         ell=10.0,
         chi_logspace_arr=chi_logspace,
         a_arr=a_arr,
@@ -128,10 +135,17 @@ def test_compute_collection_fft_uses_cache(monkeypatch):
         k_low=1e-3,
     )
 
-    # Second call: should use cache, NOT our fake FFTLog (could check via counter)
+    # Second call: should use cache, NOT our fake FFTLog (could check via
+    # counter)
     k2, fks2, tr2 = compute_collection_fft(
-        clt, kernels, chis, bessels, avg_as,
-        n_chi=5, chi_min=1.0, chi_max=10.0,
+        clt,
+        kernels,
+        chis,
+        bessels,
+        avg_as,
+        n_chi=5,
+        chi_min=1.0,
+        chi_max=10.0,
         ell=10.0,
         chi_logspace_arr=chi_logspace,
         a_arr=a_arr,

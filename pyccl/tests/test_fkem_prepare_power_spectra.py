@@ -11,6 +11,7 @@ from pyccl.nonlimber_fkem.power_spectra import prepare_power_spectra
 
 class _FakeCosmoNoMethods:
     """A fake cosmology object that lacks required methods."""
+
     pass
 
 
@@ -21,6 +22,7 @@ def simple_pk(k, a, is_linear: bool) -> float:
 
 class _FakeCosmo:
     """A fake cosmology object that provides required methods."""
+
     def __init__(self):
         self._parsed: list[tuple[object, bool]] = []
 
@@ -39,6 +41,7 @@ class _FakeCosmo:
 
 def _constant_pk2d(value: float) -> ccl.Pk2D:
     """Helper to build a constant Pk2D without nested functions."""
+
     def _pk(k, a):
         return k * 0 + a * 0 + value
 
@@ -46,7 +49,7 @@ def _constant_pk2d(value: float) -> ccl.Pk2D:
 
 
 def test_prepare_power_spectra_type_mismatch_returns_none_and_warns(recwarn):
-    """Tests that prepare_power_spectra returns None and warns on type mismatch."""
+    """Test prepare_power_spectra returns None and warns on type mismatch."""
     cosmo = _FakeCosmo()
     p_nonlin = "delta_matter:delta_matter"
     p_lin = _constant_pk2d(1.0)
@@ -62,7 +65,7 @@ def test_prepare_power_spectra_type_mismatch_returns_none_and_warns(recwarn):
 
 
 def test_prepare_power_spectra_requires_methods():
-    """Tests that prepare_power_spectra raises TypeError if methods are missing."""
+    """Tests that prepare_power_spectra raises if methods are missing."""
     cosmo = _FakeCosmoNoMethods()
     with pytest.raises(TypeError, match="parse_pk2d"):
         prepare_power_spectra(
@@ -73,7 +76,7 @@ def test_prepare_power_spectra_requires_methods():
 
 
 def test_prepare_power_spectra_success_for_string_names():
-    """Tests that prepare_power_spectra works for string power spectrum names."""
+    """Tests that prepare_power_spectra works for string names."""
     cosmo = _FakeCosmo()
     psp_lin, psp_nonlin, pk_1d = prepare_power_spectra(
         cosmo,

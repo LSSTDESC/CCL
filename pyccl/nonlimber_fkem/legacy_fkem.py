@@ -15,7 +15,6 @@ import pyccl as ccl
 from pyccl import CCLWarning, warnings
 
 
-
 def _get_general_params(b):
     nu = 1.51
     nu2 = 0.51
@@ -34,9 +33,7 @@ def _get_general_params(b):
     return best_nu, deriv, plaw
 
 
-def legacy_nonlimber_fkem(
-        cosmo, clt1, clt2, p_of_k_a,
-        ls, l_limber, **params):
+def legacy_nonlimber_fkem(cosmo, clt1, clt2, p_of_k_a, ls, l_limber, **params):
     """clt1, clt2 are lists of tracer in a tracer object
     cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
     psp non-linear power spectrum
@@ -55,19 +52,22 @@ def legacy_nonlimber_fkem(
     fll_t2 = clt2.get_f_ell(ls)
     status = 0
 
-    p_of_k_a_lin = params['pk_linear']
-    limber_max_error = params['limber_max_error']
-    Nchi = params['Nchi']
-    chi_min = params['chi_min']
-    if (not (isinstance(p_of_k_a, str) and isinstance(p_of_k_a_lin, str)) and
-       not (isinstance(p_of_k_a, ccl.Pk2D)
-            and isinstance(p_of_k_a_lin, ccl.Pk2D)
-            )):
+    p_of_k_a_lin = params["pk_linear"]
+    limber_max_error = params["limber_max_error"]
+    Nchi = params["Nchi"]
+    chi_min = params["chi_min"]
+    if not (
+        isinstance(p_of_k_a, str) and isinstance(p_of_k_a_lin, str)
+    ) and not (
+        isinstance(p_of_k_a, ccl.Pk2D) and isinstance(p_of_k_a_lin, ccl.Pk2D)
+    ):
         warnings.warn(
             "p_of_k_a and p_of_k_a_lin must be of the same "
             "type: a str in cosmo or a Pk2D object. "
             "Defaulting to Limber calculation. ",
-            category=CCLWarning, importance='high')
+            category=CCLWarning,
+            importance="high",
+        )
         return -1, np.array([]), status
 
     psp_lin = cosmo.parse_pk2d(p_of_k_a_lin, is_linear=True)
@@ -95,8 +95,7 @@ def legacy_nonlimber_fkem(
         chi_min = np.min([min_chis_t1, min_chis_t2])
     chi_max = np.max([max_chis_t1, max_chis_t2])
     if Nchi is None:
-        Nchi = min(min(len(i) for i in chis_t1),
-                   min(len(i) for i in chis_t2))
+        Nchi = min(min(len(i) for i in chis_t1), min(len(i) for i in chis_t2))
     """zero chi_min will result in a divide-by-zero error.
     If it is zero, we set it to something very small
     """
@@ -201,7 +200,7 @@ def legacy_nonlimber_fkem(
                 k, fk2 = clt2._get_fkem_fft(
                     clt2._trc[j], Nchi, chi_min, chi_max, ell
                 )
-                if ((k is None) or (fk2 is None)):
+                if (k is None) or (fk2 is None):
                     transfer_t2_low = np.array(
                         clt2.get_transfer(np.log(k_low), a_arr)
                     )
@@ -209,8 +208,7 @@ def legacy_nonlimber_fkem(
                         np.log(k_low), avg_a2s[j]
                     )
                     fchi2_interp = interp1d(
-                        chis_t2[j], kernels_t2[j],
-                        fill_value="extrapolate"
+                        chis_t2[j], kernels_t2[j], fill_value="extrapolate"
                     )
                     fchi2_arr = (
                         fchi2_interp(chi_logspace_arr)

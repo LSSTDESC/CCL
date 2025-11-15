@@ -12,15 +12,19 @@ from pyccl.nonlimber_fkem.params import get_fftlog_params
 
 def test_get_fftlog_params_j_zero_uses_defaults():
     """Tests that for j=0, the default nu and plaw are used."""
-    nu, deriv, plaw = get_fftlog_params(0, nu_default=1.5, nu_low=0.4, plaw_default=0.7)
+    nu, deriv, plaw = get_fftlog_params(
+        0, nu_default=1.5, nu_low=0.4, plaw_default=0.7
+    )
     assert nu == pytest.approx(1.5)
     assert deriv == 0.0
     assert plaw == pytest.approx(0.7)
 
 
 def test_get_fftlog_params_positive_integer():
-    """Tests that for positive integer j, the default nu is used, deriv=j, plaw=0."""
-    nu, deriv, plaw = get_fftlog_params(3, nu_default=1.5, nu_low=0.4, plaw_default=0.7)
+    """Test positive j gives default nu, deriv=j, and plaw=0."""
+    nu, deriv, plaw = get_fftlog_params(
+        3, nu_default=1.5, nu_low=0.4, plaw_default=0.7
+    )
     assert nu == pytest.approx(1.5)
     assert deriv == 3.0
     assert plaw == pytest.approx(0.0)
@@ -28,7 +32,9 @@ def test_get_fftlog_params_positive_integer():
 
 def test_get_fftlog_params_negative_integer():
     """Tests that for negative integer j, nu=nu_low, deriv=0, plaw=-2."""
-    nu, deriv, plaw = get_fftlog_params(-2, nu_default=1.5, nu_low=0.4, plaw_default=0.7)
+    nu, deriv, plaw = get_fftlog_params(
+        -2, nu_default=1.5, nu_low=0.4, plaw_default=0.7
+    )
     assert nu == pytest.approx(0.4)
     assert deriv == 0.0
     assert plaw == -2.0
@@ -55,11 +61,14 @@ def test_get_fftlog_params_type_error_for_non_numeric(bad):
         get_fftlog_params(bad)
 
 
-@pytest.mark.parametrize("name, kwargs", [
-    ("nu_default", {"nu_default": math.nan}),
-    ("nu_low", {"nu_low": math.inf}),
-    ("plaw_default", {"plaw_default": -math.inf}),
-])
+@pytest.mark.parametrize(
+    "name, kwargs",
+    [
+        ("nu_default", {"nu_default": math.nan}),
+        ("nu_low", {"nu_low": math.inf}),
+        ("plaw_default", {"plaw_default": -math.inf}),
+    ],
+)
 def test_get_fftlog_params_rejects_non_finite_defaults(name, kwargs):
     """Tests that non-finite default parameters raise ValueError."""
     with pytest.raises(ValueError, match=name):

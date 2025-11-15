@@ -46,10 +46,11 @@ def build_chi_grid(chis_t1, chis_t2, chi_min, n_chi, *, warn: bool = True):
     Raises:
         ValueError:
             If any input chi arrays are invalid (non-1D, too few, non-finite,
-            or containing negative values); if chi_min or chi_max are non-finite
-            or inconsistent (chi_max ≤ chi_min); if n_chi is missing, non-finite,
-            or < 2; or if the inferred FKEM grid cannot be constructed
-            (e.g. non-monotonic or containing non-finite values).
+            or containing negative values); if chi_min or chi_max are
+            non-finite or inconsistent (chi_max ≤ chi_min); if n_chi
+            is missing, non-finite, or < 2; or if the inferred
+            FKEM grid cannot be constructed (e.g. non-monotonic or
+            containing non-finite values).
     """
     # Validate & summarize each tracer collection in helpers
     min1, max1, support1, nmin1 = _validate_and_summarize_chis(
@@ -59,18 +60,20 @@ def build_chi_grid(chis_t1, chis_t2, chi_min, n_chi, *, warn: bool = True):
         chis_t2, label="tracer2", warn=warn
     )
 
-    chi_log, dlnr, chi_min_eff, chi_max_eff, n_chi_eff = _build_grid_from_stats(
-        min1=min1,
-        min2=min2,
-        max1=max1,
-        max2=max2,
-        support1=support1,
-        support2=support2,
-        chi_min=chi_min,
-        n_chi=n_chi,
-        nmin1=nmin1,
-        nmin2=nmin2,
-        warn=warn,
+    chi_log, dlnr, chi_min_eff, chi_max_eff, n_chi_eff = (
+        _build_grid_from_stats(
+            min1=min1,
+            min2=min2,
+            max1=max1,
+            max2=max2,
+            support1=support1,
+            support2=support2,
+            chi_min=chi_min,
+            n_chi=n_chi,
+            nmin1=nmin1,
+            nmin2=nmin2,
+            warn=warn,
+        )
     )
 
     return chi_log, dlnr, chi_min_eff, chi_max_eff, n_chi_eff
@@ -125,8 +128,9 @@ def _validate_and_summarize_chis(chis_list, label: str, warn: bool):
 
         if chi.size < 2:
             raise ValueError(
-                f"[FKEM] {label}: chi array #{i} has only {chi.size} point(s). "
-                "Need at least 2 samples to build a meaningful FKEM grid."
+                f"[FKEM] {label}: chi array #{i} has only {chi.size}"
+                f"point(s). Need at least 2 samples to build a meaningful"
+                f"FKEM grid."
             )
 
         n_chi_min = min(n_chi_min, chi.size)
@@ -183,7 +187,7 @@ def _build_grid_from_stats(
     nmin2,
     warn: bool,
 ):
-    """Build FKEM chi grid given summary statistics from both tracer collections.
+    """Builds FKEM chi grid from both tracer collections.
 
     This helper takes the per-collection minima, maxima, effective support
     and sampling, applies FKEM-specific sanity checks, and constructs the
@@ -206,9 +210,13 @@ def _build_grid_from_stats(
     max_chi = max(max1, max2)
 
     if not np.isfinite(min1) or not np.isfinite(min2):
-        raise ValueError("[FKEM] Non-finite chi minima encountered in tracer kernels.")
+        raise ValueError(
+            "[FKEM] Non-finite chi minima encountered in tracer kernels."
+        )
     if not np.isfinite(max1) or not np.isfinite(max2):
-        raise ValueError("[FKEM] Non-finite chi maxima encountered in tracer kernels.")
+        raise ValueError(
+            "[FKEM] Non-finite chi maxima encountered in tracer kernels."
+        )
 
     # Effective minimum "support" of the kernels (smallest sampled finite chi)
     support_min = min(support1, support2)
@@ -224,15 +232,20 @@ def _build_grid_from_stats(
     if chi_min <= 0:
         if warn:
             warnings.warn(
-                f"[FKEM] Requested fkem_chi_min={chi_min:.3e} is non-positive. "
-                "Resetting to 1e-6.",
+                f"[FKEM] Requested fkem_chi_min={chi_min:.3e} "
+                f"is non-positive. Resetting to 1e-6.",
                 category=CCLWarning,
                 importance="low",
             )
         chi_min = 1e-6
 
-    # Avoid chi_min far below the kernel support (can cause low-z instabilities)
-    if np.isfinite(support_min) and support_min > 0 and chi_min < 0.1 * support_min:
+    # Avoid chi_min far below the kernel support (can cause low-z
+    # instabilities)
+    if (
+        np.isfinite(support_min)
+        and support_min > 0
+        and chi_min < 0.1 * support_min
+    ):
         chi_new = 0.1 * support_min
         if warn:
             warnings.warn(
@@ -255,7 +268,8 @@ def _build_grid_from_stats(
             f"chi_max={chi_max:.3e}). Check tracer kernels and fkem_chi_min."
         )
 
-    # Infer n_chi if needed: use the minimum sampling across both tracer collections
+    # Infer n_chi if needed: use the minimum sampling across both tracer
+    # collections
     if n_chi is None:
         n_chi = min(nmin1, nmin2)
 

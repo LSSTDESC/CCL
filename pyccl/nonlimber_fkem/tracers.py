@@ -1,4 +1,4 @@
-"""Utilities for handling tracer collections in non-Limber FKEM calculations."""
+"""Utilities for handling tracer collections in FKEM non-Limber work."""
 
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ def build_tracer_collections(clt1, clt2):
     # Require the internal tracer lists
     if not hasattr(clt1, "_trc") or not hasattr(clt2, "_trc"):
         raise TypeError(
-            "FKEM: both inputs must be tracer collections with a '_trc' attribute."
+            "FKEM: both inputs must be tracer collections exposing '_trc'."
         )
 
     # Make sure there is at least one tracer in each collection

@@ -18,12 +18,15 @@ def prepare_power_spectra(cosmo, p_nonlin, p_lin):
 
     Returns:
         tuple: (psp_lin, psp_nonlin, pk_1d) where
-            psp_lin (:class:`~pyccl.pk2d.Pk2D`): Parsed linear power spectrum.
-            psp_nonlin (:class:`~pyccl.pk2d.Pk2D`): Parsed non-linear power spectrum.
-            pk_1d (:class:`~pyccl.pk2d.Pk2D`): Linear power spectrum for 1D calculations.
+            psp_lin (:class:`~pyccl.pk2d.Pk2D`):
+                Parsed linear power spectrum.
+            psp_nonlin (:class:`~pyccl.pk2d.Pk2D`):
+                Parsed non-linear power spectrum.
+            pk_1d (:class:`~pyccl.pk2d.Pk2D`):
+                Linear power spectrum for 1D calculations.
 
-        If the configuration is unsafe for FKEM (e.g. type mismatch), all three
-        entries are returned as ``None`` and the caller should fall back to Limber.
+        If FKEM is unsafe (e.g. type mismatch), all three outputs are None and
+        the caller must fall back to Limber.
 
     Raises:
         TypeError:
@@ -34,7 +37,8 @@ def prepare_power_spectra(cosmo, p_nonlin, p_lin):
     same_str = isinstance(p_nonlin, str) and isinstance(p_lin, str)
     same_pk2d = isinstance(p_nonlin, ccl.Pk2D) and isinstance(p_lin, ccl.Pk2D)
 
-    # If types are inconsistent, we can't safely run FKEM → fall back to Limber.
+    # If types are inconsistent, we can't safely run FKEM → fall back to
+    # Limber.
     if not (same_str or same_pk2d):
         warnings.warn(
             "p_nonlin and p_lin must be of the same type "
@@ -59,7 +63,8 @@ def prepare_power_spectra(cosmo, p_nonlin, p_lin):
     if same_str:
         psp_lin = cosmo.parse_pk2d(p_lin, is_linear=True)
         psp_nonlin = cosmo.parse_pk2d(p_nonlin, is_linear=False)
-        # For the FKEM correction we need a 'pk' callable – use the linear spectrum.
+        # For the FKEM correction we need a 'pk' callable – use the linear
+        # spectrum.
         pk = cosmo.get_linear_power(name=p_lin)
         return psp_lin, psp_nonlin, pk
 
