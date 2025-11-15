@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 from scipy.interpolate import interp1d
 
-from pyccl.pyutils import _fftlog_transform_general
-from pyccl.nonlimber_fkem.params import get_fftlog_params
+from ..pyutils import _fftlog_transform_general
+from ..nonlimber_fkem.params import get_fftlog_params
 
 __all__ = ["compute_collection_fft"]
 

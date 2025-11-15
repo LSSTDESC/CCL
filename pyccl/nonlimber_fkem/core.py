@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 import pyccl as ccl
-from pyccl.nonlimber_fkem.power_spectra import prepare_power_spectra
+from ..nonlimber_fkem.power_spectra import prepare_power_spectra
 from pyccl.nonlimber_fkem.tracers import build_tracer_collections
 from pyccl.nonlimber_fkem.chi_grid import build_chi_grid
 from pyccl.nonlimber_fkem.single_ell import compute_single_ell
@@ -47,48 +47,38 @@ def nonlimber_fkem(
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`):
             A Cosmology object.
-
-        tracer1, tracer2:
-            Tracer objects for the two fields.
-
+        tracer1 (:class:`~pyccl.nonlimber_fkem.tracers.Tracer`):
+            Tracer object for the first field.
+        tracer2 (:class:`~pyccl.nonlimber_fkem.tracers.Tracer`):
+            Tracer object for the second field.
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or str):
             3D power spectrum to project. If a string, it must match one of
             the non-linear power spectra stored in `cosmo` (e.g.
             'delta_matter:delta_matter').
-
         ell_values (array-like):
             Multipoles at which to compute C_ell.
-
         ell_limber (int, float, or 'auto'):
             Multipole above which Limber is used.
             In 'auto' mode, FKEM runs until the FKEM/Limber
             fractional difference is below `limber_max_error` for
             `n_consec_ell` consecutive ells,
             and uses that ell as the transition.
-
         pk_linear (:class:`~pyccl.pk2d.Pk2D` or str):
             Linear power spectrum used in the Limber calculation.
-
         limber_max_error (float):
             Maximum allowed fractional FKEM–Limber difference.
-
         n_chi (int or None):
             Number of chi samples for FKEM. If None, inferred from the tracer
             kernel sampling.
-
         chi_min (float or None):
             Minimum chi for FKEM. If None, inferred from tracer kernels.
-
         k_pow (int, optional):
             Power-law index for FFTLog. Default is 3.
-
         k_low (float, optional):
             Low-k cutoff for transfer function evaluation. Default 1e-5.
-
         n_consec_ell (int, optional):
             Number of consecutive multipoles satisfying the accuracy threshold
             in 'auto' mode. Default is 3.
-
 
     Returns: tuple of (ell_limber, cells, status)
         ell_limber (float):

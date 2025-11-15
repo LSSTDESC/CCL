@@ -7,12 +7,12 @@ We utilize a modified generalized version of FFTLog
  to compute integrals over spherical bessel functions
 """
 import numpy as np
-from pyccl import lib, check
-from pyccl.pyutils import integ_types
+from .. import lib, check
+from ..pyutils import integ_types
 from scipy.interpolate import interp1d
-from pyccl.pyutils import _fftlog_transform_general
+from ..pyutils import _fftlog_transform_general
 import pyccl as ccl
-from pyccl import CCLWarning, warnings
+from .. import CCLWarning, warnings
 
 
 def _get_general_params(b):

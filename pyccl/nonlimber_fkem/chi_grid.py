@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from pyccl import CCLWarning, warnings
+from .. import CCLWarning, warnings
 
 __all__ = ["build_chi_grid"]
 

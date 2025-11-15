@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pyccl import lib, check
+from .. import lib, check
 
 __all__ = ["build_tracer_collections"]
 
