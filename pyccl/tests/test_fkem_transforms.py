@@ -18,26 +18,27 @@ class FakeCollection:
         self.transfer_avg_val = 4.0
 
     def get_transfer(self, logk_or_chi, a):
-        """Tests that transfer functions are returned with correct shapes."""
-        if self.transfer_shape == "scalar":
-            return np.array(
-                self.transfer_low_val
-                if np.ndim(logk_or_chi) == 0
-                else self.transfer_avg_val
-            )
+        """Return transfer functions with shapes similar to the real code."""
+        n_tracers = len(self._trc)
 
-        if self.transfer_shape == "per_tracer":
-            # one value per tracer
-            if np.ndim(logk_or_chi) == 0:
-                return np.full(len(self._trc), self.transfer_low_val)
-            else:
-                return np.full(len(self._trc), self.transfer_avg_val)
-
-        if self.transfer_shape == "per_tracer_chi":
-            # shape (n_tracers, n_chi)
-            n_tracers = len(self._trc)
-            n_chi = logk_or_chi.size
-            return np.full((n_tracers, n_chi), self.transfer_low_val)
+        # For scalar k (e.g. k_low): return one value per tracer, shape (n_tracers,)
+        if np.ndim(logk_or_chi) == 0:
+            if self.transfer_shape == "scalar":
+                return np.full(n_tracers, self.transfer_low_val)
+            if self.transfer_shape == "per_tracer":
+                return np.full(n_tracers, self.transfer_low_val)
+            if self.transfer_shape == "per_tracer_chi":
+                # degenerate radial dimension of size 1
+                return np.full((n_tracers, 1), self.transfer_low_val)
+        else:
+            # For array k (e.g. k_out): return shape (n_tracers, n_k)
+            n_k = np.asarray(logk_or_chi).size
+            if self.transfer_shape == "scalar":
+                return np.full((n_tracers, n_k), self.transfer_avg_val)
+            if self.transfer_shape == "per_tracer":
+                return np.full((n_tracers, n_k), self.transfer_avg_val)
+            if self.transfer_shape == "per_tracer_chi":
+                return np.full((n_tracers, n_k), self.transfer_low_val)
 
         raise RuntimeError("Unknown transfer_shape")
 
