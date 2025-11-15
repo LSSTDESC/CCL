@@ -1,5 +1,18 @@
-"""Non-Limber FKEM module."""
+"""Public interface for FKEM non-Limber projection."""
 
-from pyccl.nonlimber_fkem.core import nonlimber_fkem
+from __future__ import annotations
 
-__all__ = ["nonlimber_fkem"]
+from . import core
+from . import single_ell
+from . import transforms
+
+from .core import nonlimber_fkem
+from .legacy_fkem import legacy_nonlimber_fkem
+
+__all__ = [
+    "core",
+    "single_ell",
+    "transforms",
+    "nonlimber_fkem",
+    "legacy_nonlimber_fkem",
+]
