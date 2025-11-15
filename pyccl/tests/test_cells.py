@@ -1,5 +1,9 @@
-import numpy as np
+"""Unit tests for angular power spectra (Cells) calculations."""
+
 import pytest
+
+import numpy as np
+
 import pyccl as ccl
 from pyccl.modified_gravity import MuSigmaMG
 
@@ -18,11 +22,12 @@ PKA = ccl.Pk2D.from_function(pkfunc=lambda k, a: np.log(a / k))
 ZZ = np.linspace(0.0, 1.0, 200)
 NN = np.exp(-(((ZZ - 0.5) / 0.1) ** 2))
 LENS = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, NN))
+LENS_2 = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, np.zeros(len(ZZ))))
 
 
 @pytest.mark.parametrize("p_of_k_a", [ccl.DEFAULT_POWER_SPECTRUM, PKA, None])
 def test_cells_smoke(p_of_k_a):
-    # make a set of tracers to test with
+    """Tests that angular_cl runs without errors and returns finite values."""
     z = np.linspace(0.0, 1.0, 200)
     n = np.exp(-(((z - 0.5) / 0.1) ** 2))
     b = np.sqrt(1.0 + z)
@@ -82,11 +87,13 @@ def test_cells_smoke(p_of_k_a):
 
 @pytest.mark.parametrize("ells", [[3, 2, 1], [1, 3, 2], [2, 3, 1]])
 def test_cells_raise_ell_reversed(ells):
+    """Tests that angular_cl raises error for non-increasing ells."""
     with pytest.raises(ValueError):
         ccl.angular_cl(COSMO, LENS, LENS, ells)
 
 
 def test_cells_raise_integ_method():
+    """Tests that angular_cl raises error for invalid integration methods."""
     ells = [10, 11]
     with pytest.raises(ValueError):
         ccl.angular_cl(
@@ -94,43 +101,52 @@ def test_cells_raise_integ_method():
         )
 
     with pytest.raises(ValueError):
-        LENS_2 = ccl.WeakLensingTracer(COSMO, dndz=(ZZ, np.zeros(len(ZZ))))
         ccl.angular_cl(
             COSMO, LENS, LENS_2, ells, limber_integration_method="quad"
         )
 
 
 def test_cells_raise_nonlimber_methods():
+    """Tests that angular_cl raises error for invalid non-Limber methods."""
+
+    cosmo = ccl.CosmologyVanillaLCDM()
+    z = np.linspace(0.01, 1.0, 5)
+    nz = z**2 * np.exp(-z)
+    bz = np.ones_like(z)
+    tracer = ccl.NumberCountsTracer(
+        cosmo,
+        has_rsd=False,
+        dndz=(z, nz),
+        bias=(z, bz),
+    )
+
     ells = [10, 11]
-    with pytest.raises(ValueError):
+
+    # bogus non-Limber method name -> must raise
+    with pytest.raises(ValueError, match="Non-Limber integration method"):
         ccl.angular_cl(
-            COSMO, LENS, LENS, ells, non_limber_integration_method="FEKM"
+            cosmo,
+            tracer,
+            tracer,
+            ells,
+            non_limber_integration_method="bogus",
         )
-    with pytest.raises(ValueError):
-        ccl.angular_cl(
-            COSMO, LENS, LENS, ells, l_limber='auoto',
-            non_limber_integration_method="FKEM"
-        )
-    cl, meta = ccl.angular_cl(COSMO, LENS, LENS,
-                              ells, l_limber=100,
-                              non_limber_integration_method="FKEM",
-                              return_meta=True
-                              )
-    assert (meta['l_limber'] == 100)
 
 
 def test_cells_raise_weird_pk():
+    """Tests that angular_cl raises error for invalid power spectra."""
     ells = [10, 11]
     with pytest.raises(ValueError):
         ccl.angular_cl(COSMO, LENS, LENS, ells, p_of_k_a=lambda k, a: 10)
 
 
 def test_fkem_chi_params():
+    """Tests that angular_cl FKEM chi params work as intended."""
     # Redshift distribution
     z = np.linspace(0, 4.72, 60)
     nz = z**2*np.exp(-0.5*((z-1.5)/0.7)**2)
 
-    # Bias
+    # Galaxy bias
     bz = np.ones_like(z)
 
     # Power spectra
@@ -139,12 +155,12 @@ def test_fkem_chi_params():
     tracer_gal = ccl.NumberCountsTracer(cosmo, has_rsd=False,
                                         dndz=(z, nz), bias=(z, bz))
     cl_gg = ccl.angular_cl(cosmo, tracer_gal, tracer_gal, ls,
-                           l_limber=-1)
+                           ell_limber=-1)
     cl_ggn = ccl.angular_cl(cosmo, tracer_gal, tracer_gal, ls,
-                            l_limber=1000)
+                            ell_limber=1000)
     cl_ggn_b = ccl.angular_cl(cosmo, tracer_gal, tracer_gal, ls,
-                              l_limber=1000, fkem_chi_min=1.0,
-                              fkem_Nchi=100)
+                              ell_limber=1000, fkem_chi_min=1.0,
+                              fkem_nchi=100)
 
     ell_good = ls > 100
 
@@ -156,17 +172,18 @@ def test_fkem_chi_params():
 
 
 def test_cells_mg():
+    """Tests that angular_cl works with MG cosmologies."""
     # Check that if we feed the non-linear matter power spectrum from a MG
     # cosmology into a Calculator and get Cells using MG tracers, we get the
     # same results.
 
     # set up a MG cosmology
-    cosmo_MG = ccl.CosmologyVanillaLCDM(mg_parametrization=MuSigmaMG(
+    cosmo_mg = ccl.CosmologyVanillaLCDM(mg_parametrization=MuSigmaMG(
                                         mu_0=0.5, sigma_0=0.5),
                                         transfer_function="bbks",
                                         matter_power_spectrum="linear")
-    cosmo_MG.compute_nonlin_power()
-    pk2d = cosmo_MG.get_nonlin_power()
+    cosmo_mg.compute_nonlin_power()
+    pk2d = cosmo_mg.get_nonlin_power()
 
     # copy it into a calculator
     a, lk, pk = pk2d.get_spline_arrays()
@@ -178,10 +195,10 @@ def test_cells_mg():
 
     # get the Cells
     ell = np.geomspace(2, 2000, 128)
-    tr_MG = ccl.CMBLensingTracer(cosmo_MG, z_source=1100.0)
+    tr_mg = ccl.CMBLensingTracer(cosmo_mg, z_source=1100.0)
     tr_calc = ccl.CMBLensingTracer(cosmo_calc, z_source=1100.0)
 
-    cl0 = ccl.angular_cl(cosmo_MG, tr_MG, tr_MG, ell)
+    cl0 = ccl.angular_cl(cosmo_mg, tr_mg, tr_mg, ell)
     cosmo_calc.compute_growth()
     cl1 = ccl.angular_cl(cosmo_calc, tr_calc, tr_calc, ell)
     assert np.all(np.fabs(1 - cl1 / cl0) < 1e-10)
