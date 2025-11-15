@@ -196,11 +196,11 @@ def test_cells(set_up, method, cross_type):
             ells,
             p_of_k_a=p_of_k_a,
             p_of_k_a_lin=p_of_k_a_lin,
-            l_limber='auto',
+            ell_limber='auto',
             non_limber_integration_method=method,
             return_meta=True
         )
-        l_limber = meta['l_limber']
+        ell_limber = meta['ell_limber']
         chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / \
             errors[cross_type][pair_index]**2
         chi2max = max(chi2.max(), chi2max)
@@ -208,5 +208,5 @@ def test_cells(set_up, method, cross_type):
     t1 = time.time()
     print(
         f'Time taken for {method} on {cross_type} = {(t1-t0):3.2f};\
-        worst chi2 = {chi2max:5.3f}      l_limber = {l_limber}'
+        worst chi2 = {chi2max:5.3f}      ell_limber = {ell_limber}'
     )

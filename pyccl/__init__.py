@@ -39,9 +39,13 @@ from .boltzmann import *
 from .baryons import *
 from .neutrinos import *
 from .emulators import *
-from ._nonlimber_FKEM import *
+from pyccl.nonlimber_fkem.legacy_fkem import *
 
 from . import halos
 from . import nl_pt
 
 from .cosmology import *
+
+from . import nonlimber_fkem as _nonlimber_fkem_pkg
+
+Cosmology.nonlimber_fkem = _nonlimber_fkem_pkg.core.nonlimber_fkem
