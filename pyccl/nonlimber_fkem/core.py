@@ -32,14 +32,14 @@ def nonlimber_fkem(
     chi_min,
     k_pow=3,
     k_low=1e-5,
-    n_consec_ell=3
+    n_consec_ell=3,
 ):
-    """Computes the angular power spectrum C_ell using the FKEM non-Limber method.
+    """Computes the angular power spectrum via the FKEM non-Limber method.
 
-    This method computes the angular power spectrum C_ell for given multipole moments
+    This method computes the angular power spectrum C_ell for given ells
     `ell_values` using the FKEM approach (arXiv:1911.11947).
-    It combines Limber approximations for both linear and non-linear power spectra with
-    FFTLog transforms of the radial kernels.
+    It combines Limber approximations for both linear and non-linear
+    power spectra with FFTLog transforms of the radial kernels.
     The computation proceeds until the specified `ell_limber` multipole moment
     is reached, or (in automatic mode) until the FKEM and Limber predictions
     agree within the requested accuracy over several consecutive multipoles.
@@ -47,39 +47,48 @@ def nonlimber_fkem(
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`):
             A Cosmology object.
-        tracer1 (tracer):
-            The first tracer object.
-        tracer2 (tracer):
-            The second tracer object.
+
+        tracer1, tracer2:
+            Tracer objects for the two fields.
+
         p_of_k_a (:class:`~pyccl.pk2d.Pk2D` or str):
-            3D Power spectrum to project. If a string, it must correspond to one of
-            the non-linear power spectra stored in `cosmo` (e.g. `'delta_matter:delta_matter'`).
+            3D power spectrum to project. If a string, it must match one of
+            the non-linear power spectra stored in `cosmo` (e.g.
+            'delta_matter:delta_matter').
+
         ell_values (array-like):
-            Array of multipole moments at which to compute C_ell.
-        ell_limber (int, float or 'auto'):
-            Multipole beyond which Limber's approximation will be used.
-            If 'auto', the code increases ℓ until the relative difference
-            between FKEM and Limber, ``|C_ℓ^FKEM / C_ℓ^Limber − 1|``, is smaller than
-            ``limber_max_error`` for several consecutive multipoles (n_consec_ell), and
-            uses the corresponding ℓ as the transition. This is slightly
-            more conservative and more stable than using the very first
-            ℓ that passes the tolerance.
+            Multipoles at which to compute C_ell.
+
+        ell_limber (int, float, or 'auto'):
+            Multipole above which Limber is used.
+            In 'auto' mode, FKEM runs until the FKEM/Limber
+            fractional difference is below `limber_max_error` for
+            `n_consec_ell` consecutive ells,
+            and uses that ell as the transition.
+
         pk_linear (:class:`~pyccl.pk2d.Pk2D` or str):
-            Linear power spectrum to use in the Limber approximation.
+            Linear power spectrum used in the Limber calculation.
+
         limber_max_error (float):
-            Maximum fractional error for Limber integration.
+            Maximum allowed fractional FKEM–Limber difference.
+
         n_chi (int or None):
-            Number of chi samples for the FKEM method. If None, the chi grid
-            resolution is inferred from the tracer kernels.
+            Number of chi samples for FKEM. If None, inferred from the tracer
+            kernel sampling.
+
         chi_min (float or None):
-            Minimum chi value for the FKEM method. If None, it is inferred from
-            the tracer kernels.
+            Minimum chi for FKEM. If None, inferred from tracer kernels.
+
         k_pow (int, optional):
-            Power-law index for the FFTLog transform. Default is 3.
+            Power-law index for FFTLog. Default is 3.
+
         k_low (float, optional):
-            Low-k cutoff for transfer function evaluation. Defaults to 1e-5.
+            Low-k cutoff for transfer function evaluation. Default 1e-5.
+
         n_consec_ell (int, optional):
-            Number of consecutive multipoles below the error tolerance. Default is 3.
+            Number of consecutive multipoles satisfying the accuracy threshold
+            in 'auto' mode. Default is 3.
+
 
     Returns: tuple of (ell_limber, cells, status)
         ell_limber (float):
@@ -130,11 +139,12 @@ def nonlimber_fkem(
             raise ValueError("ell_limber must be finite.")
         if ell_limber < ell_values[0]:  # must not be below smallest ell
             raise ValueError(
-                "For FKEM non-Limber integration, `ell_limber` must be at least "
-                "as large as the smallest requested ell."
+                "For FKEM non-Limber integration, `ell_limber` must be"
+                "at least as large as the smallest requested ell."
             )
 
-    # First we extract the necessary kernels, chis, bessels, and f_ell values from the tracers
+    # First we extract the necessary kernels, chis, bessels, and f_ell values
+    # from the tracers
     kernels_t1, chis_t1 = tracer1.get_kernel()
     kernels_t2, chis_t2 = tracer2.get_kernel()
     bessels_t1 = tracer1.get_bessel_derivative()
@@ -144,7 +154,9 @@ def nonlimber_fkem(
 
     # Type consistency for power spectra
     same_str = isinstance(p_of_k_a, str) and isinstance(pk_linear, str)
-    same_pk2d = isinstance(p_of_k_a, ccl.Pk2D) and isinstance(pk_linear, ccl.Pk2D)
+    same_pk2d = isinstance(p_of_k_a, ccl.Pk2D) and isinstance(
+        pk_linear, ccl.Pk2D
+    )
     if not (same_str or same_pk2d):
         raise ValueError(
             "p_of_k_a and pk_linear must be of the same type "
@@ -156,10 +168,11 @@ def nonlimber_fkem(
         cosmo, p_nonlin=p_of_k_a, p_lin=pk_linear
     )
 
-    # If prepare_power_spectra couldn't build valid objects, fall back to Limber.
+    # If prepare_power_spectra couldn't build valid objects, fall back to
+    # Limber.
     if psp_lin is None or psp_nonlin is None or pk is None:
         warnings.warn(
-            "[FKEM] Could not construct FKEM power spectra for this configuration. "
+            "[FKEM] Could not construct FKEM power spectra for this setup. "
             "Falling back to pure Limber Cls.",
             category=CCLWarning,
             importance="high",
@@ -178,12 +191,14 @@ def nonlimber_fkem(
     avg_a1s = tracer1.get_avg_weighted_a()
     avg_a2s = tracer2.get_avg_weighted_a()
 
-    # Preallocate output array; we'll truncate depending on ell_limber / auto-stop
+    # Preallocate output array; we'll truncate depending on ell_limber /
+    # auto-stop
     n_ell = len(ell_values)
     cells = np.empty(n_ell, dtype=float)
     n_computed = 0
 
-    # Robust automatic transition: require several consecutive ℓ below the tolerance
+    # Robust automatic transition: require several consecutive ℓ below the
+    # tolerance
     consecutive_below = 0
 
     for ell_idx, ell in enumerate(ell_values):
@@ -219,7 +234,7 @@ def nonlimber_fkem(
             )
         except CCLError:
             warnings.warn(
-                "[FKEM] Non-Limber FKEM integration failed for this configuration. "
+                "[FKEM] Non-Limber integration failed for this configuration. "
                 "Falling back to pure Limber Cls.",
                 category=CCLWarning,
                 importance="high",
@@ -237,7 +252,8 @@ def nonlimber_fkem(
             else:
                 consecutive_below = 0
 
-            # Once we have enough consecutive multipoles below the threshold, set ell_limber
+            # Once we have enough consecutive multipoles below the threshold,
+            # set ell_limber
             if consecutive_below >= n_consec_ell:
                 ell_limber = ell
                 break

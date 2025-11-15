@@ -9,7 +9,9 @@ from pyccl import lib, check
 from pyccl.pyutils import integ_types
 from pyccl.nonlimber_fkem.transforms import compute_collection_fft
 
-__all__ = ["compute_single_ell",]
+__all__ = [
+    "compute_single_ell",
+]
 
 
 def compute_single_ell(
@@ -45,9 +47,10 @@ def compute_single_ell(
 
     This method computes the angular power spectrum C_ell for a given multipole
     moment `ell` using the FKEM approach (see arXiv:1911.11947).
-    It combines Limber approximations for both linear and non-linear power spectra
-    with FFTLog transforms of the radial kernels. It returns the computed C_ell value,
-    a reference Limber C_ell, and the relative difference between the two.
+    It combines Limber approximations for both linear and nonlinear
+    power spectra with FFTLog transforms of the radial kernels.
+    It returns the computed C_ell value, a reference Limber C_ell, and
+    the relative difference between the two.
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`):
@@ -123,7 +126,9 @@ def compute_single_ell(
             transformations fail, as signalled by ``check`` or
             ``compute_collection_fft``.
     """
-    ell_arr = np.asarray([ell], dtype="float64")  # make sure it's an array for C
+    ell_arr = np.asarray(
+        [ell], dtype="float64"
+    )  # make sure it's an array for C
     n_ell = ell_arr.size  # make sure that we have size info for C
 
     status = 0  # here we initialize the status flag
@@ -176,8 +181,7 @@ def compute_single_ell(
         k_low,
     )
 
-    # And here we do the FFTLog for tracer 2 (in case  it is different. If not, we
-    # just reuse the results from tracer 1)
+    # FFTLog for tracer 2, or reuse tracer 1 results if identical.
     if clt1 is clt2:
         fks_2 = fks_1
         transfers_t2 = transfers_t1
@@ -205,19 +209,19 @@ def compute_single_ell(
     for i in range(len(kernels_t1)):
         for j in range(len(kernels_t2)):
             cls_lin_fkem += (
-                    np.sum(
-                        fks_1[i]
-                        * transfers_t1[i]
-                        * fks_2[j]
-                        * transfers_t2[j]
-                        * k ** kpow
-                        * pk_vals
-                    )
-                    * dlnr
-                    * 2.0
-                    / np.pi
-                    * fll_t1[i][ell_idx]
-                    * fll_t2[j][ell_idx]
+                np.sum(
+                    fks_1[i]
+                    * transfers_t1[i]
+                    * fks_2[j]
+                    * transfers_t2[j]
+                    * k**kpow
+                    * pk_vals
+                )
+                * dlnr
+                * 2.0
+                / np.pi
+                * fll_t1[i][ell_idx]
+                * fll_t2[j][ell_idx]
             )
 
     # Final combination for output is:

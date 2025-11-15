@@ -184,7 +184,7 @@ def test_legacy_fkem_crashes_new_fkem_falls_back(lmax: int, with_ia: bool):
             cosmo,
             tracer,
             tracer,
-            pk2d_lin,          # non-linear P(k)
+            pk2d_lin,  # non-linear P(k)
             ells,
             WL_L_LIMBER,
             pk_linear=pk2d_lin,
@@ -212,8 +212,8 @@ def test_legacy_fkem_crashes_new_fkem_falls_back(lmax: int, with_ia: bool):
 
     # Document fallback behaviour:
     assert status_new == 0
-    assert ell_limber_new == -1   # "fell back to Limber"
-    assert cl_new.size == 0       # no non-Limber Cls returned
+    assert ell_limber_new == -1  # "fell back to Limber"
+    assert cl_new.size == 0  # no non-Limber Cls returned
 
 
 # -------------------------------------------------------------------
@@ -233,7 +233,7 @@ def test_nonlimber_fkem_matches_legacy_wl(lmax: int, with_ia: bool):
             cosmo,
             tracer,
             tracer,
-            pk2d_lin,          # non-linear P(k); legacy parses this as Pk2D
+            pk2d_lin,  # non-linear P(k); legacy parses this as Pk2D
             ells,
             WL_L_LIMBER,
             pk_linear=pk2d_lin,
@@ -243,7 +243,9 @@ def test_nonlimber_fkem_matches_legacy_wl(lmax: int, with_ia: bool):
         )
     except CCLError:
         # If legacy fails, we cannot use it as a reference.
-        pytest.xfail("Legacy _nonlimber_FKEM failed with a CCL integration error")
+        pytest.xfail(
+            "Legacy _nonlimber_FKEM failed with a CCL integration error"
+        )
 
     assert status_old == 0
     cl_old = np.asarray(cl_old, dtype=float)
@@ -282,15 +284,19 @@ def test_cells_uses_fkem_for_low_ell_number_counts():
     cosmo, tracer1, tracer2, ells = _make_nc_setup(has_rsd=False)
     # 1) Pure Limber reference
     cl_limber = ccl.angular_cl(
-        cosmo, tracer1, tracer2,
+        cosmo,
+        tracer1,
+        tracer2,
         ells,
         p_of_k_a="delta_matter:delta_matter",
-        ell_limber=0, # force Limber for all ℓ
+        ell_limber=0,  # force Limber for all ℓ
     )
 
     # 2) FKEM
     cl_fkem = ccl.angular_cl(
-        cosmo, tracer1, tracer2,
+        cosmo,
+        tracer1,
+        tracer2,
         ells,
         p_of_k_a="delta_matter:delta_matter",
         # whatever FKEM knobs are exposed at the high level

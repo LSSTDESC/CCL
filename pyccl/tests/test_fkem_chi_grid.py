@@ -17,7 +17,7 @@ def simple_chis():
 
 
 def test_build_chi_grid_infers_min_max_and_nchi():
-    """Tests that build_chi_grid infers chi_min, chi_max, and n_chi correctly."""
+    """Test build_chi_grid infers chi_min, chi_max, and n_chi correctly."""
     chis_t1, chis_t2 = simple_chis()
 
     chi_log, dlnr, chi_min_eff, chi_max_eff, n_chi_eff = build_chi_grid(

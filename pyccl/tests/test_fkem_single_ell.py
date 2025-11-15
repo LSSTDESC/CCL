@@ -11,12 +11,14 @@ from pyccl.nonlimber_fkem.single_ell import compute_single_ell
 
 class _DummyCosmo:
     """Dummy cosmology object; only identity matters."""
+
     def __init__(self):
         self.cosmo = object()
 
 
 class _DummyTracerCollection:
     """Minimal tracer collection object; only identity matters."""
+
     pass
 
 
@@ -30,7 +32,9 @@ def _fake_growth_factor(_cosmo, a_arr):
     return np.ones_like(a_arr, dtype=float)
 
 
-def _fake_angular_cl_vec_limber(_cosmo_cosmo, _t1, _t2, pk_id, ells, _integ_type, _n_ell, status):
+def _fake_angular_cl_vec_limber(
+    _cosmo_cosmo, _t1, _t2, pk_id, ells, _integ_type, _n_ell, status
+):
     """Returns deterministic Limber C_ell values for testing."""
     if pk_id == "LIN":
         cl_val = 1.0
@@ -42,9 +46,21 @@ def _fake_angular_cl_vec_limber(_cosmo_cosmo, _t1, _t2, pk_id, ells, _integ_type
     return np.array([cl_val], dtype=float), status
 
 
-def _fake_compute_collection_fft(clt, kernels, chis, bessels, avg_as,
-                                 n_chi, chi_min, chi_max, ell,
-                                 chi_logspace_arr, a_arr, growfac_arr, k_low):
+def _fake_compute_collection_fft(
+    clt,
+    kernels,
+    chis,
+    bessels,
+    avg_as,
+    n_chi,
+    chi_min,
+    chi_max,
+    ell,
+    chi_logspace_arr,
+    a_arr,
+    growfac_arr,
+    k_low,
+):
     """Returns fake FFTLog outputs for testing."""
     n_tracers = len(kernels)
     k = np.full(n_chi, 0.5, dtype=float)
