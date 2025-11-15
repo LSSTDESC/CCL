@@ -1,4 +1,4 @@
-__all__ = ("_nonlimber_FKEM",)
+__all__ = ("legacy_nonlimber_fkem",)
 """Written by Paul Rogozenski (paulrogozenski@arizona.edu),
  implementing the FKEM non-limber integration method of the N5K challenge
  detailed in this paper: https://arxiv.org/pdf/1911.11947.pdf .
@@ -7,12 +7,13 @@ We utilize a modified generalized version of FFTLog
  to compute integrals over spherical bessel functions
 """
 import numpy as np
-from . import lib, check
-from .pyutils import integ_types
+from pyccl import lib, check
+from pyccl.pyutils import integ_types
 from scipy.interpolate import interp1d
 from pyccl.pyutils import _fftlog_transform_general
 import pyccl as ccl
-from . import CCLWarning, warnings
+from pyccl import CCLWarning, warnings
+
 
 
 def _get_general_params(b):
@@ -33,7 +34,7 @@ def _get_general_params(b):
     return best_nu, deriv, plaw
 
 
-def _nonlimber_FKEM(
+def legacy_nonlimber_fkem(
         cosmo, clt1, clt2, p_of_k_a,
         ls, l_limber, **params):
     """clt1, clt2 are lists of tracer in a tracer object

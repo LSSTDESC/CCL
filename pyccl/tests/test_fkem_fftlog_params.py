@@ -1,10 +1,11 @@
-"""Unit tests for get_fftlog_params function in nonlimber_fkem.params module."""
+"""Unit tests for get_fftlog_params function in Non-Limber FKEM module."""
 
 from __future__ import annotations
 
 import math
-import numpy as np
 import pytest
+
+import numpy as np
 
 from pyccl.nonlimber_fkem.params import get_fftlog_params
 
