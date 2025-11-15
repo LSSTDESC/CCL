@@ -5,9 +5,9 @@ from __future__ import annotations
 import numpy as np
 
 import pyccl as ccl
-from pyccl import lib, check
-from pyccl.pyutils import integ_types
-from pyccl.nonlimber_fkem.transforms import compute_collection_fft
+from .. import lib, check
+from ..pyutils import integ_types
+from ..nonlimber_fkem.transforms import compute_collection_fft
 
 __all__ = [
     "compute_single_ell",

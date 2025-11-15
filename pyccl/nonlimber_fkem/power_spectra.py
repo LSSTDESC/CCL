@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pyccl as ccl
-from pyccl import CCLWarning, warnings
+from .. import CCLWarning, warnings
 
 __all__ = ["prepare_power_spectra"]
 
