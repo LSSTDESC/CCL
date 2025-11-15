@@ -196,7 +196,7 @@ def test_cells(set_up, method, cross_type):
             ells,
             p_of_k_a=p_of_k_a,
             p_of_k_a_lin=p_of_k_a_lin,
-            l_limber='auto',
+            ell_limber='auto',
             non_limber_integration_method=method,
             return_meta=True
         )
