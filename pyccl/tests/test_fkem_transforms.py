@@ -21,7 +21,7 @@ class FakeCollection:
         """Return transfer functions with shapes similar to the real code."""
         n_tracers = len(self._trc)
 
-        # For scalar k (e.g. k_low): return one value per tracer, shape (n_tracers,)
+        # For scalar k: return one value per tracer, shape (n_tracers,)
         if np.ndim(logk_or_chi) == 0:
             if self.transfer_shape == "scalar":
                 return np.full(n_tracers, self.transfer_low_val)
