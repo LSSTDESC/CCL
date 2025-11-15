@@ -47,7 +47,8 @@ def get_fftlog_params(
 
     if int(round(j)) != j:
         raise ValueError(
-            f"FKEM: bessel_index must be an integer, got {bessel_index!r}."
+            f"FKEM: bessel_index must be an integer order,"
+            f"got {bessel_index!r}."
         )
 
     j = int(j)
