@@ -141,3 +141,32 @@ def test_build_chi_grid_ignores_nonfinite_entries():
     assert dlnr > 0.0
     assert np.isfinite(chi_min_eff)
     assert np.isfinite(chi_max_eff)
+
+
+def test_build_chi_grid_clamps_chimin_far_below_support():
+    """Tests that chi_min is clamped when set far below support."""
+    # Here all chis are ≥ 10, so support_min = 10 → clamp threshold = 1.0
+    chis_t1 = [np.array([10.0, 20.0, 30.0])]
+    chis_t2 = [np.array([15.0, 25.0, 35.0])]
+
+    # Ask for a chi_min way below the support
+    chi_log, dlnr, chi_min_eff, chi_max_eff, n_chi_eff = build_chi_grid(
+        chis_t1,
+        chis_t2,
+        chi_min=1e-3,
+        n_chi=None,
+        warn=False,
+    )
+
+    # Effective chi_min should have been clamped to 0.1 * support_min = 1.0
+    assert chi_min_eff == pytest.approx(1.0)
+
+    # Basic sanity checks on the grid
+    assert n_chi_eff == 3  # from min(len(chis_t1[0]), len(chis_t2[0]))
+    assert chi_log.ndim == 1
+    assert chi_log.size == n_chi_eff
+    assert np.all(np.isfinite(chi_log))
+    assert np.all(np.diff(chi_log) > 0)
+    assert dlnr > 0.0
+    assert chi_log[0] == pytest.approx(chi_min_eff)
+    assert chi_max_eff == pytest.approx(35.0)

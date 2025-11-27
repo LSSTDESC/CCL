@@ -10,11 +10,12 @@ __all__ = ["build_chi_grid"]
 
 
 def build_chi_grid(chis_t1, chis_t2, chi_min, n_chi, *, warn: bool = True):
-    """Construct the FKEM chi grid from tracer kernel chi arrays.
+    """Constructs the FKEM chi grid from tracer kernel chi arrays.
 
-    This infers chi_min, chi_max, and n_chi from the tracer kernels if needed,
-    and guards against chi_min being set much smaller than the actual support
-    of the kernels (which can make FKEM unstable for very low-z tracers).
+        This function infers chi_min/chi_max/n_chi from the tracer kernels
+        when not provided, and applies conservative guards to prevent FKEM
+        from using a chi grid that extends far below the actual kernel
+        support, which can cause instabilities at very low redshift.
 
     Args:
         chis_t1 (list of arrays):
@@ -23,7 +24,11 @@ def build_chi_grid(chis_t1, chis_t2, chi_min, n_chi, *, warn: bool = True):
             List of 1D chi arrays for tracer collection 2.
         chi_min (float or None):
             User-specified minimum chi for the FKEM grid (fkem_chi_min).
-            If None, it is inferred from the tracer kernels.
+            If None, it is inferred from the tracer kernels as the minimum
+            sampled chi. If set to a non-positive value it is reset to 1e-6.
+            If it is much smaller than the actual kernel support, it is
+            automatically clamped to ~0.1 times the smallest positive chi
+            in the kernels to avoid low-z numerical instabilities.
         n_chi (int or None):
             Number of chi samples for FKEM (fkem_nchi). If None, it is
             inferred from the tracer kernel sampling.
@@ -162,7 +167,18 @@ def _validate_and_summarize_chis(chis_list, label: str, warn: bool):
         chi_finite = chi[finite_mask]
         chi_min = min(chi_min, np.min(chi_finite))
         chi_max = max(chi_max, np.max(chi_finite))
-        support_min = min(support_min, np.min(chi_finite))
+
+        # Use the smallest *positive* chi as "support" where the kernel actually lives.
+        # In other words: do not start the chi grid far below the kernel support,
+        # which can cause numerical instabilities for low-z bins.
+        pos = chi_finite[chi_finite > 0]
+        if pos.size > 0:
+            support_candidate = np.min(pos)
+        else:
+            # All finite values are zero – degenerate but handle gracefully
+            support_candidate = np.min(chi_finite)
+
+        support_min = min(support_min, support_candidate)
 
     if not any_finite:
         raise ValueError(

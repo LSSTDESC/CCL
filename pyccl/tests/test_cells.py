@@ -204,4 +204,94 @@ def test_cells_mg():
     assert np.all(np.fabs(1 - cl1 / cl0) < 1e-10)
 
 
+def test_fkem_runs_for_wl_nc_pair():
+    """Tests that angular_cl with FKEM works for a WL x NC pair."""
+    z = np.linspace(0, 2.0, 50)
+    nz = z**2 * np.exp(-z)
+    bz = np.ones_like(z)
+
+    cosmo = ccl.CosmologyVanillaLCDM()
+    lens = ccl.WeakLensingTracer(cosmo, dndz=(z, nz))
+    nc = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z, nz), bias=(z, bz))
+
+    ells = np.array([10, 30, 100], dtype=float)
+
+    cl = ccl.angular_cl(
+        cosmo,
+        lens,
+        nc,
+        ells,
+        ell_limber=-1,
+        fkem_chi_min=1.0,
+        fkem_nchi=80,
+    )
+
+    assert np.all(np.isfinite(cl))
+    assert cl.shape == ells.shape
+
+
+def test_cells_mg_nonlimber_fkem():
+    """Tests that angular_cl works with MG cosmologies and FKEM."""
+    # MG cosmology
+    cosmo_mg = ccl.CosmologyVanillaLCDM(
+        mg_parametrization=MuSigmaMG(mu_0=0.5, sigma_0=0.5),
+        transfer_function="bbks",
+        matter_power_spectrum="linear",
+    )
+    cosmo_mg.compute_nonlin_power()
+    pk2d = cosmo_mg.get_nonlin_power()
+
+    # Copy non-linear P(k) into a CosmologyCalculator
+    a, lk, pk = pk2d.get_spline_arrays()
+    pk_nonlin = {"a": a, "k": np.exp(lk), "delta_matter:delta_matter": pk}
+    cosmo_calc = ccl.CosmologyCalculator(
+        Omega_c=0.25,
+        Omega_b=0.05,
+        h=0.67,
+        n_s=0.96,
+        sigma8=0.81,
+        mg_parametrization=MuSigmaMG(mu_0=0.5, sigma_0=0.5),
+        pk_nonlin=pk_nonlin,
+    )
+
+    # Simple NC tracer for both cosmologies
+    z = np.linspace(0.01, 1.0, 20)
+    nz = z**2 * np.exp(-z)
+    bz = np.ones_like(z)
+
+    tr_mg = ccl.NumberCountsTracer(
+        cosmo_mg, has_rsd=False, dndz=(z, nz), bias=(z, bz)
+    )
+    tr_calc = ccl.NumberCountsTracer(
+        cosmo_calc, has_rsd=False, dndz=(z, nz), bias=(z, bz)
+    )
+
+    ells = np.geomspace(2, 500, 64)
+
+    # Non-Limber FKEM in both cases
+    cl0 = ccl.angular_cl(
+        cosmo_mg,
+        tr_mg,
+        tr_mg,
+        ells,
+        ell_limber=-1,
+        non_limber_integration_method="fkem",
+    )
+    cosmo_calc.compute_growth()
+    cl1 = ccl.angular_cl(
+        cosmo_calc,
+        tr_calc,
+        tr_calc,
+        ells,
+        ell_limber=-1,
+        non_limber_integration_method="fkem",
+    )
+
+    # Basic sanity + consistency
+    assert np.all(np.isfinite(cl0))
+    assert np.all(np.isfinite(cl1))
+    assert np.all(np.fabs(1 - cl1 / cl0) < 1e-3)
+
+
+
 ccl.gsl_params.reload()  # reset to the default parameters
