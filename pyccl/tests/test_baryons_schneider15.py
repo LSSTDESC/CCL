@@ -40,7 +40,7 @@ def test_bcm_correct_smoke():
     pkb = bar.include_baryonic_effects(COSMO, COSMO.get_nonlin_power())
     pk_wbar = pkb(k_arr, a)
 
-    np.testing.assert_allclose(pk_wbar, pk_nobar * fka, rtol=1e-5, atol=0.0)
+    np.testing.assert_allclose(pk_wbar, pk_nobar * fka, rtol=1e-6, atol=0.0)
 
 
 def test_bcm_update_params():
