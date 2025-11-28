@@ -8,6 +8,9 @@ from scipy.interpolate import RectBivariateSpline as rbs
 from scipy.interpolate import RegularGridInterpolator as rgi
 
 from .. import Profile2pt
+from .. import halomod_power_spectrum
+
+import pyccl as ccl
 
 from dark_emulator import model_hod
 demuhod = model_hod.darkemu_x_hod()
@@ -140,7 +143,8 @@ def _I_0_2(hmc, cosmo, k, a, prof, *, prof2=None, prof_2pt, lmass, hmf):
 def darkemu_power_spectrum(cosmo, hmc, k, a, prof, *,
                            prof2=None, prof_2pt=None,
                            get_1h=True, get_2h=True,
-                           suppress_1h=None):
+                           suppress_1h=None,
+                           hybrid=False):
     """ Computes the halo model power spectrum for two
     quantities defined by their respective halo profiles.
     The halo model power spectrum for two profiles
@@ -272,6 +276,14 @@ def darkemu_power_spectrum(cosmo, hmc, k, a, prof, *,
                     hmf[None, :] * res, lmass))
             res = np.array(pk_2h_M2_int).T * u2k
             pk_2h = hmc._integrator(hmf[None, :] * res, lmass)
+            if hybrid:
+                # hybrid approach
+                pk_gg_halomodel = halomod_power_spectrum(cosmo, hmc, k_use, aa, prof, prof_2pt=prof_2pt, get_1h=False) * (norm1 * norm2)
+                # smooth transition between the two approaches
+                k_transition = 0.01  # [Mpc^-1]
+                weight = np.exp(-(k_use / k_transition)**4.)
+                pk_2h = (1 - weight) * pk_2h + weight * pk_gg_halomodel
+
 
         else:
             # (Nk,NM)
