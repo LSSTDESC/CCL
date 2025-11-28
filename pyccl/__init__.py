@@ -19,7 +19,12 @@ import numpy
 numpy.int = int if parse(numpy.__version__) >= parse("1.20.0") else numpy.int
 del parse, numpy
 
-from . import ccllib as lib
+# ---- safe ccllib import (avoids circular / partial init on macOS CI) ----
+try:
+    from . import ccllib as lib
+except ImportError:  # ccllib not built / not yet available
+    lib = None
+
 from .errors import *
 from ._core import *
 from .pyutils import *

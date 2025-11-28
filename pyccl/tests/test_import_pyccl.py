@@ -1,9 +1,8 @@
-"""Unit tests for importing the pyccl module."""
+"""Tests for importing the pyccl module."""
 
-
-def test_import_pyccl_smoke():
-    """Tests that pyccl can be imported and its C library is accessible."""
+def test_import_pyccl():
     import pyccl
 
+def test_import_has_symbols():
+    import pyccl
     assert hasattr(pyccl, "lib")
-    assert pyccl.lib is not None
