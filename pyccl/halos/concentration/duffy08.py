@@ -11,12 +11,17 @@ class ConcentrationDuffy08(Concentration):
     By default it will be initialized for :math:`M_{200c}`.
 
     Args:
-        mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
+         fc_bar (:obj:`float'): an optional constant that multiplies
+            the Duffy. et al. relation to mimic the impact of baryons
+            (default value is set to 1). See Amon+, 2202.07440
+            and Viola+, 1507.00735 (Eq 32).
+         mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition object, or a name string.
     """
     name = 'Duffy08'
 
-    def __init__(self, *, mass_def="200c"):
+    def __init__(self, fc_bar=1, *, mass_def="200c"):
+        self.fc_bar = fc_bar
         super().__init__(mass_def=mass_def)
 
     def _check_mass_def_strict(self, mass_def):
@@ -31,4 +36,4 @@ class ConcentrationDuffy08(Concentration):
 
     def _concentration(self, cosmo, M, a):
         M_pivot_inv = cosmo["h"] * 5E-13
-        return self.A * (M * M_pivot_inv)**self.B * a**(-self.C)
+        return self.fc_bar * self.A * (M * M_pivot_inv)**self.B * a**(-self.C)
