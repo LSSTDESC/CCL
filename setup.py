@@ -8,17 +8,24 @@ from setuptools.command.build_py import build_py as _build
 from setuptools.command.develop import develop as _develop
 
 
-def _compile_ccl(debug=False):
+def _compile_ccl(debug: bool = False) -> None:
     call(["mkdir", "-p", "build"])
     v = sys.version_info
-    cmd = ["cmake", "-H.", "-Bbuild",
-           "-DPYTHON_VERSION=%d.%d.%d" % (v.major, v.minor, v.micro)]
+    cmd = [
+        "cmake",
+        "-H.",
+        "-Bbuild",
+        "-DPYTHON_VERSION=%d.%d.%d" % (v.major, v.minor, v.micro),
+        f"-DPython_EXECUTABLE={sys.executable}",
+        f"-DPYTHON_EXECUTABLE={sys.executable}",
+    ]
     if debug:
         cmd += ["-DCMAKE_BUILD_TYPE=Debug"]
     if call(cmd) != 0:
         raise Exception(
             "Could not run CMake configuration. Make sure "
-            "CMake is installed !")
+            "CMake is installed !"
+        )
 
     if call(["make", "-Cbuild", "_ccllib"]) != 0:
         raise Exception("Could not build CCL")
@@ -27,11 +34,15 @@ def _compile_ccl(debug=False):
     if os.path.exists("build/pyccl/_ccllib.so"):
         call(["cp", "build/pyccl/_ccllib.so", "pyccl/"])
     else:
-        raise Exception("Could not find wrapper shared library, "
-                        "compilation must have failed.")
+        raise Exception(
+            "Could not find wrapper shared library, "
+            "compilation must have failed."
+        )
     if call(["cp", "build/pyccl/ccllib.py", "pyccl/"]) != 0:
-        raise Exception("Could not find python module, "
-                        "SWIG must have failed.")
+        raise Exception(
+            "Could not find python module, "
+            "SWIG must have failed."
+        )
 
 
 class Distribution(_distribution):
