@@ -9,16 +9,11 @@ import numpy as np
 import pyccl as ccl
 
 
-# Base cosmology for non-HMCode baryon tests
 BASE_COSMO = ccl.CosmologyVanillaLCDM()
-
-# Simple redshift distribution
 Z = np.linspace(0.0, 2.0, 200)
-NZ = Z**2 * np.exp(-0.5 * ((Z - 1.0) / 0.3) ** 2)
+NZ = Z**2 * np.exp(-0.5 * ((Z - 1.0) / 0.3) ** 2)  # simple dN/dz
 BZ = np.ones_like(Z)  # simple constant bias for clustering
-
-# Angular multipoles
-ELLS = np.geomspace(10.0, 2000.0, 64)
+ELLS = np.geomspace(10.0, 2000.0, 64)  # ell values for Cls
 
 
 def _make_tracers(cosmo: ccl.Cosmology):

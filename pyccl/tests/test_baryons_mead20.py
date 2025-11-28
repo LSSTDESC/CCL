@@ -6,8 +6,8 @@ import numpy as np
 
 import pyccl as ccl
 
-camb = pytest.importorskip("camb")
 
+camb = pytest.importorskip("camb")
 
 TOL_MEAD20 = 3e-5
 
@@ -21,7 +21,7 @@ def _compute_camb_mead2020_pk(
     h=0.7,
     T_CMB=2.7255,
 ):
-    """Returns k, z, P_nl(k,z) from CAMB with Mead2020+HMCode baryons."""
+    """Returns k, z, P_nl(k,z) from CAMB with Mead2020 baryons."""
     p = camb.CAMBparams(
         WantTransfer=True,
         NonLinearModel=camb.nonlinear.Halofit(
@@ -112,7 +112,6 @@ def test_baryons_mead20_pk_responds_to_logt_agn():
 
     ratio = pk_hi / pk_lo
 
-    # sanity: finite and not just identically 1
     assert np.all(np.isfinite(ratio))
     assert np.any(np.abs(ratio - 1.0) > 1e-3)
 
