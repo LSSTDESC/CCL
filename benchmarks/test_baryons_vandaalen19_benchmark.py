@@ -1,62 +1,127 @@
-"""Regression test for the van Daalen+2019 baryonic model.
+r"""Benchmark: CCL van Daalen 2019 model vs Marcel's fbar tables.
 
-The reference data in ``baryons_vd19_fk_500c.txt`` were generated once using
-``benchmarks/data/codes/make_baryons_vd19_benchmark.py`` with the same
-cosmology and BaryonsvanDaalen19 configuration. This is a frozen regression
-target (not an external benchmark) intended to catch unintended changes in
-the implementation or numerical settings.
+Each file in benchmarks/data/baryons_vd20_from_marcel has the form
+
+    VD20_rXXX_kY.txt
+
+where:
+    - rXXX encodes the mass definition:
+        r500 -> 500c
+        r200 -> 200c
+    - kY encodes a fixed wavenumber in h/Mpc, e.g. k0.1, k0.5, k1.0
+
+The file contents are two columns:
+
+    col0:  fbar = \bar{f}_{bar,R_{\rm crit}}(10^{14} M_\odot) / (\Omega_b / \Omega_m)
+    col1:  DeltaP_over_P = (P_{\rm vD} - P_{\rm DMO}) / P_{\rm DMO}  (negative for bary suppression)
+
+i.e. the *fractional change* in the power spectrum at the given k and mass
+definition, as a function of the baryon fraction parameter fbar. DMO is dark matter only (no baryons).
+
+CCL's BaryonsvanDaalen19 implements the analytic model of van Daalen+2019,
+which provides the ratio
+
+    ratio(k, fbar) = P_{\rm vD} / P_{\rm DMO}
+
+so the corresponding fractional change is
+
+    DeltaP_over_P = ratio - 1.
+
+This benchmark checks that CCL reproduces Marcel's tables for all six
+(k, mass_def) combinations.
+
+Note
+----
+The VD20_rXXX_kY.txt tables were obtained by (Niko Šarčević
+directly from Marcel van Daalen on December 1st 2025 via personal
+correspondence, and are used here as an external validation target for
+the BaryonsvanDaalen19 implementation.
 """
 
 from pathlib import Path
+
+import pytest
 
 import numpy as np
 
 import pyccl as ccl
 
+DATA_DIR = Path(__file__).parent / "data" / "baryons_vd20_from_marcel"
 
-VD19_REGRESSION_TOLERANCE = 1e-8
-
-DATA_PATH = Path(__file__).parent / "data" / "baryons_vd19_fk_500c.txt"
-DATA = np.loadtxt(DATA_PATH)
+# Relative tol for DeltaP/P
+VD19_FBAR_RTOL = 5e-3  # 0.5%
 
 
 def _make_cosmo() -> ccl.Cosmology:
-    """Cosmology used to generate the vd19 regression reference file."""
-    return ccl.Cosmology(
-        Omega_c=0.25,
-        Omega_b=0.05,
-        h=0.7,
-        A_s=2.2e-9,
-        n_s=0.96,
-        Neff=3.046,
-        mass_split="normal",
-        m_nu=0.0,
-        Omega_g=0.0,
-        Omega_k=0.0,
-        w0=-1.0,
-        wa=0.0,
-    )
+    """Creates a pyccl Cosmology object used for the test.
+
+    The van Daalen+19 model is cosmology-independent except for the
+    conversion between k [1/Mpc] and k [h/Mpc], so a Vanilla LCDM
+    cosmology is sufficient here.
+    """
+    return ccl.CosmologyVanillaLCDM()
 
 
-def _check_vd19_baryons(cosmo: ccl.Cosmology, baryons: ccl.BaryonsvanDaalen19) -> None:
-    """Checks that the vd19 boost factor matches the frozen regression data."""
-    # First column is k in h/Mpc, second is boost factor f(k)
-    k_hmpc = DATA[:, 0]
-    fk_ref = DATA[:, 1]
-    a = 1.0
+def _parse_meta(stem: str) -> tuple[str, float]:
+    """Parses mass_def and k[h/Mpc] from filename stem.
 
-    # Convert to 1/Mpc for the model: k = k_hmpc * h
-    k = k_hmpc * cosmo["h"]
+    Example stems:
+        "VD20_r500_k0.1"
+        "VD20_r200_k1.0"
+    """
+    parts = stem.split("_")
+    if len(parts) != 3:
+        raise ValueError(f"Unexpected filename stem format: {stem!r}")
 
-    fk_ccl = baryons.boost_factor(cosmo, k, a)
-    err = np.abs(fk_ref / fk_ccl - 1.0)
-    np.testing.assert_allclose(
-        err, 0.0, atol=VD19_REGRESSION_TOLERANCE, rtol=0.0
-    )
+    r_part = parts[1]  # e.g. "r500" or "r200"
+    k_part = parts[2]  # e.g. "k0.1"
+
+    if r_part == "r500":
+        mass_def = "500c"
+    elif r_part == "r200":
+        mass_def = "200c"
+    else:
+        raise ValueError(f"Cannot infer mass_def from stem {stem!r}")
+
+    if not k_part.startswith("k"):
+        raise ValueError(f"Cannot parse k from stem {stem!r}")
+    k_hmpc = float(k_part[1:])  # strip leading 'k'
+
+    return mass_def, k_hmpc
 
 
-def test_baryons_vd19_500c():
-    """Tests that the vd19 baryonic model is stable for the 500c config."""
+@pytest.mark.parametrize("path", sorted(DATA_DIR.glob("VD20_r*.txt")))
+def test_vd19_against_marcel_fbar_tables(path: Path) -> None:
+    """Compares CCL van Daalen19 ΔP/P to Marcel's tables at fixed k and mass_def."""
     cosmo = _make_cosmo()
-    baryons = ccl.BaryonsvanDaalen19(fbar=0.7, mass_def="500c")
-    _check_vd19_baryons(cosmo, baryons)
+    mass_def, k_hmpc = _parse_meta(path.stem)
+
+    # Load fbar and fractional change: DeltaP/P_DMO
+    fbar_tab, delta_tab = np.loadtxt(path, unpack=True)
+
+    # Make sure fbar is sorted (just in case smth weird in the files)
+    order = np.argsort(fbar_tab)
+    fbar_tab = fbar_tab[order]
+    delta_tab = delta_tab[order]
+
+    # CCL instance with correct mass definition; we'll vary fbar per point
+    vd = ccl.baryons.BaryonsvanDaalen19(mass_def=mass_def)
+
+    # Now we convert k from h/Mpc to 1/Mpc for CCL; internal formula uses k/h
+    k = k_hmpc * cosmo["h"]
+    a = 1.0  # z = 0
+
+    # Evaluate CCL model at each fbar in the table
+    delta_ccl = np.empty_like(delta_tab)
+    for i, fbar in enumerate(fbar_tab):
+        vd.update_parameters(fbar=fbar)
+        ratio = vd.boost_factor(cosmo, k, a)  # P_vD / P_DMO
+        delta_ccl[i] = ratio - 1.0  # (P_vD - P_DMO) / P_DMO
+
+    # Compare fractional changes
+    np.testing.assert_allclose(
+        delta_ccl,
+        delta_tab,
+        rtol=VD19_FBAR_RTOL,
+        atol=0.0,
+    )
