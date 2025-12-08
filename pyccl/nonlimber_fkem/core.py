@@ -58,11 +58,14 @@ def nonlimber_fkem(
         ell_values (array-like):
             Multipoles at which to compute C_ell.
         ell_limber (int, float, or 'auto'):
-            Multipole above which Limber is used.
-            In 'auto' mode, FKEM runs until the FKEM/Limber
-            fractional difference is below `limber_max_error` for
-            `n_consec_ell` consecutive ells,
-            and uses that ell as the transition.
+            Multipole above which pure non-linear Limber is used.
+            For ell ≤ ell_limber, this function returns FKEM-based hybrid
+            C_ell values combining linear FKEM with linear and non-linear
+            Limber (see `compute_single_ell`).
+            In 'auto' mode, FKEM runs until the FKEM / non-linear Limber
+            fractional difference (``rel_diff``) is below
+            ``limber_max_error`` for ``n_consec_ell`` consecutive multipoles;
+            that ell is then used as the Limber transition scale.
         pk_linear (:class:`~pyccl.pk2d.Pk2D` or str):
             Linear power spectrum used in the Limber calculation.
         limber_max_error (float):
@@ -158,8 +161,10 @@ def nonlimber_fkem(
         cosmo, p_nonlin=p_of_k_a, p_lin=pk_linear
     )
 
-    # If prepare_power_spectra couldn't build valid objects, fall back to
-    # Limber.
+    # If FKEM power spectra cannot be constructed safely (e.g. unsupported
+    # p(k, a) choice or numerical issues), we *do not* attempt a partial
+    # FKEM run. Instead we return (ell_limber = -1, empty cells) and let
+    # the caller compute all C_ell with pure nonlinear Limber.
     if psp_lin is None or psp_nonlin is None or pk is None:
         warnings.warn(
             "[FKEM] Could not construct FKEM power spectra for this setup. "
@@ -187,7 +192,7 @@ def nonlimber_fkem(
     cells = np.empty(n_ell, dtype=float)
     n_computed = 0
 
-    # Robust automatic transition: require several consecutive ℓ below the
+    # Robust automatic transition: require several consecutive ell below the
     # tolerance
     consecutive_below = 0
 
@@ -235,19 +240,26 @@ def nonlimber_fkem(
         n_computed += 1
 
         if auto_mode:
-            # Require n_consec_ell consecutive multipoles
-            # whose FKEM/Limber discrepancy is below limber_max_error.
+            # In auto mode we decide where to stop using FKEM.
+            # For each ell we compare the hybrid FKEM result to the
+            # non-linear Limber reference (rel_diff).
+            # If rel_diff stays below `limber_max_error` for
+            # `n_consec_ell` consecutive multipoles, we record that ell
+            # as the Limber transition scale and stop calling FKEM.
+            # The caller then uses pure non-linear Limber for all
+            # higher multipoles.
             if np.isfinite(rel_diff) and rel_diff < limber_max_error:
                 consecutive_below += 1
             else:
                 consecutive_below = 0
 
-            # Once we have enough consecutive multipoles below the threshold,
-            # set ell_limber
             if consecutive_below >= n_consec_ell:
                 ell_limber = ell
                 break
         else:
+            # In manual mode we run FKEM only up to the user-specified
+            # `ell_limber` and stop there; higher multipoles are
+            # computed with pure non-linear Limber by the caller.
             if ell >= ell_limber:
                 break
 

@@ -3,34 +3,11 @@
 from __future__ import annotations
 
 import numpy as np
-from scipy.interpolate import interp1d
 
 from ..pyutils import _fftlog_transform_general
 from ..nonlimber_fkem.params import get_fftlog_params
 
 __all__ = ["compute_collection_fft"]
-
-def _get_general_params(b):
-    """Match the legacy FKEM choice of FFTLog parameters.
-
-    b is the Bessel derivative / 'spin' index for this tracer piece.
-    """
-    nu = 1.51
-    nu2 = 0.51
-    deriv = 0.0
-    plaw = 0.0
-
-    if b < 0:
-        # shear-like: use different bias and an extra k^-2 power law
-        plaw = -2.0
-        nu = nu2
-
-    if b > 0:
-        # positive b means we take b derivatives
-        deriv = float(b)
-
-    return nu, deriv, plaw
-
 
 
 def compute_collection_fft(
@@ -268,8 +245,6 @@ def compute_collection_fft(
                 raise RuntimeError("[FKEM]: non-finite values in 'fchi_arr'.")
 
             nu, deriv, plaw = get_fftlog_params(bessels[i])
-            # this is just to call the old code to test
-            #nu, deriv, plaw = _get_general_params(bessels[i])
 
             k_fft, fk = _fftlog_transform_general(
                 chi_logspace_arr,

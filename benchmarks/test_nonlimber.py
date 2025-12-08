@@ -1,13 +1,17 @@
-import numpy as np
-import pyccl as ccl
+"""Benchmark tests for non-Limber angular power spectra calculations."""
 
 import time
 import pytest
+
+import numpy as np
+import pyccl as ccl
+
 
 root = "benchmarks/data/nonlimber/"
 
 
 def get_cosmological_parameters():
+    """Returns cosmological parameters for the benchmarks."""
     return {
         "Omega_m": 0.3156,
         "Omega_b": 0.0492,
@@ -21,6 +25,7 @@ def get_cosmological_parameters():
 
 
 def get_tracer_parameters():
+    """Returns galaxy bias parameters for the benchmarks."""
     # Per-bin galaxy bias
     b_g = np.array(
         [
@@ -40,6 +45,7 @@ def get_tracer_parameters():
 
 
 def get_ells():
+    """Returns the ell values for the benchmarks."""
     return np.unique(np.geomspace(2, 2000, 128).astype(int)).astype(float)
 
 
@@ -52,7 +58,8 @@ def get_nmodes(fsky=0.4):
     return np.array(nmodes) * 0.5 * fsky
 
 
-def get_tracer_dNdzs():
+def get_tracer_dndzs():
+    """Returns the redshift distribution for the benchmarks."""
     filename = root + "/dNdzs_fullwidth.npz"
     d = np.load(filename)
     return {
@@ -64,6 +71,7 @@ def get_tracer_dNdzs():
 
 
 def read_cls():
+    """Reads benchmark Cls from file."""
     d = np.load(root + "/benchmarks_nl_full_clgg.npz")
     ls = d["ls"]
     cls_gg = d["cls"]
@@ -76,6 +84,7 @@ def read_cls():
 
 @pytest.fixture(scope="module")
 def set_up():
+    """Sets up cosmology, tracers, and benchmark data for the tests."""
     par = get_cosmological_parameters()
     cosmo = ccl.Cosmology(
         Omega_c=par["Omega_m"] - par["Omega_b"],
@@ -86,22 +95,22 @@ def set_up():
         w0=par["w0"],
     )
     tpar = get_tracer_parameters()
-    Nzs = get_tracer_dNdzs()
+    nzs = get_tracer_dndzs()
 
     t_g = []
     # we pass unity bias here and will multiply by the actual bias later
     # this allows us to use the same setup
     # for both direct and PTtracer approach
-    for Nz, bg in zip(Nzs["dNdz_cl"].T, tpar['b_g']):
+    for Nz, bg in zip(nzs["dNdz_cl"].T, tpar['b_g']):
         t = ccl.NumberCountsTracer(
             cosmo,
             has_rsd=False,
-            dndz=(Nzs["z_cl"], Nz),
-            bias=(Nzs["z_cl"], bg*np.ones(len(Nzs["z_cl"]))))
+            dndz=(nzs["z_cl"], Nz),
+            bias=(nzs["z_cl"], bg*np.ones(len(nzs["z_cl"]))))
         t_g.append(t)
     t_s = []
-    for Nz in Nzs["dNdz_sh"].T:
-        t = ccl.WeakLensingTracer(cosmo, dndz=(Nzs["z_sh"], Nz))
+    for Nz in nzs["dNdz_sh"].T:
+        t = ccl.WeakLensingTracer(cosmo, dndz=(nzs["z_sh"], Nz))
         t_s.append(t)
     ells = get_ells()
     raw_truth = read_cls()
@@ -111,31 +120,31 @@ def set_up():
     rind_gg = {}
     rind_gs = {}
     rind_ss = {}
-    Ng, Ns = len(t_g), len(t_s)
-    for i1 in range(Ng):
-        for i2 in range(i1, Ng):
+    ng, ns = len(t_g), len(t_s)
+    for i1 in range(ng):
+        for i2 in range(i1, ng):
             rind_gg[(i1, i2)] = len(indices_gg)
             rind_gg[(i2, i1)] = len(indices_gg)
             indices_gg.append((i1, i2))
 
-        for i2 in range(Ns):
+        for i2 in range(ns):
             rind_gs[(i1, i2)] = len(indices_gs)
             rind_gs[(i2, i1)] = len(indices_gs)
             indices_gs.append((i1, i2))
 
-    for i1 in range(Ns):
-        for i2 in range(i1, Ns):
+    for i1 in range(ns):
+        for i2 in range(i1, ns):
             rind_ss[(i1, i2)] = len(indices_ss)
             rind_ss[(i2, i1)] = len(indices_ss)
             indices_ss.append((i1, i2))
 
     # Sanity checks
     assert np.allclose(raw_truth[0], ells)
-    Nell = len(ells)
+    num_ell = len(ells)
     tgg, tgs, tss = raw_truth[1:]
-    assert tgg.shape == (len(indices_gg), Nell)
-    assert tgs.shape == (len(indices_gs), Nell)
-    assert tss.shape == (len(indices_ss), Nell)
+    assert tgg.shape == (len(indices_gg), num_ell)
+    assert tgs.shape == (len(indices_gs), num_ell)
+    assert tss.shape == (len(indices_ss), num_ell)
 
     # now generate errors
     err_gg = []
@@ -184,6 +193,7 @@ def set_up():
 @pytest.mark.parametrize("method", ["FKEM"])
 @pytest.mark.parametrize("cross_type", ["gg", "gs", "ss"])
 def test_cells(set_up, method, cross_type):
+    """Tests that non-Limber angular power spectra match benchmarks."""
     cosmo, ells, tracers1, tracers2, truth, errors, indices = set_up
     t0 = time.time()
     chi2max = 0
@@ -206,32 +216,22 @@ def test_cells(set_up, method, cross_type):
                errors[cross_type][pair_index] ** 2
         chi2max = max(chi2.max(), chi2max)
 
-        # after computing cls, chi2, etc
-
+        # Niko added some debug output here
+        # to help track down any issues with the benchmarks
         if cross_type == "ss" and pair_index == 0:
             frac_diff = cls / truth[cross_type][pair_index, :]
             max_fd = np.max(np.abs(frac_diff - 1.0))
             print(f"[DEBUG ss] max fractional diff over ell = {max_fd}")
-            # maybe also print at a few ell indices:
             for ell_probe in [2, 10, 100, 500, 1000, 2000]:
-                idx = np.where(ells == ell_probe)[0][0]
+                idxs = np.where(np.isclose(ells, ell_probe))[0]
+                if idxs.size == 0:
+                    continue  # this ell_probe is not in the ell grid
+                idx = idxs[0]
                 print(
-                    f"  ell={ell_probe:4.0f}: new={cls[idx]:.4e}, "
+                    f"  ell={ells[idx]:4.0f}: new={cls[idx]:.4e}, "
                     f"truth={truth[cross_type][pair_index, idx]:.4e}, "
-                    f"ratio={cls[idx]/truth[cross_type][pair_index, idx]:.4f}"
+                    f"ratio={cls[idx] / truth[cross_type][pair_index, idx]:.4f}"
                 )
-            # and then break after first pair to not spam
-            break
-
-
-        # Debug: if shear–shear is off, print details for the worst multipole
-        #if cross_type == "ss" and chi2.max() > 0.3:
-        #    imax = np.argmax(chi2)
-        #    print(f"[DEBUG ss] pair {pair_index}, worst ell index {imax}, ell = {ells[imax]}")
-        #    print("  cls_new   =", cls[imax])
-        #    print("  cls_truth =", truth[cross_type][pair_index, imax])
-        #    print("  error     =", errors[cross_type][pair_index][imax])
-        #    print("  chi2      =", chi2[imax])
 
         assert np.all(chi2 < 0.3)
 
