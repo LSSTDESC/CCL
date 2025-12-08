@@ -209,20 +209,27 @@ def compute_single_ell(
     for i in range(len(kernels_t1)):
         for j in range(len(kernels_t2)):
             cls_lin_fkem += (
-                np.sum(
-                    fks_1[i]
-                    * transfers_t1[i]
-                    * fks_2[j]
-                    * transfers_t2[j]
-                    * k**kpow
-                    * pk_vals
-                )
-                * dlnr
-                * 2.0
-                / np.pi
-                * fll_t1[i][ell_idx]
-                * fll_t2[j][ell_idx]
+                    np.sum(
+                        fks_1[i]
+                        * transfers_t1[i]
+                        * fks_2[j]
+                        * transfers_t2[j]
+                        * k ** kpow
+                        * pk_vals
+                    )
+                    * dlnr
+                    * 2.0
+                    / np.pi
+                    * fll_t1[i][ell_idx]
+                    * fll_t2[j][ell_idx]
             )
+
+    # Convert k^3 * P(k) to the dimensionless power Δ²(k).
+    # FKEM is formulated in terms of Δ²(k) = k^3 P(k) / (2π²),
+    # and CCL's FFTLog intentionally omits all (2π) normalisation factors.
+    # Since the sum above already includes k^3 * P(k), we must supply
+    # the missing 1/(2π²) here.
+    cls_lin_fkem /= (2.0 * np.pi ** 2)
 
     # Final combination for output is:
     # the angular power spectrum computed with non-linear Limber
@@ -231,6 +238,20 @@ def compute_single_ell(
     # This way, we capture non-linearities while benefiting
     # from the improved accuracy of FKEM over Limber at low ell.
     cl_out = cl_limber_nonlin[-1] - cl_limber_lin[-1] + cls_lin_fkem
+
+    limber_ref = cl_limber_nonlin[-1]
+    rel_diff = np.abs(cl_out / limber_ref - 1.0)
+
+    # TEMP DEBUG: only dump when we’re way off
+    if rel_diff > 0.3:
+        print(f"[DEBUG FKEM] ell = {ell}")
+        print(f"  cl_limber_nonlin = {cl_limber_nonlin[-1]}")
+        print(f"  cl_limber_lin    = {cl_limber_lin[-1]}")
+        print(f"  cls_lin_fkem     = {cls_lin_fkem}")
+        print(f"  cl_out (hybrid)  = {cl_out}")
+        print(f"  rel_diff         = {rel_diff}")
+
+
     limber_ref = cl_limber_nonlin[-1]
     rel_diff = np.abs(cl_out / limber_ref - 1.0)
 

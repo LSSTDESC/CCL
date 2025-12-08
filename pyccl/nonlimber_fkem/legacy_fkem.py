@@ -111,6 +111,7 @@ def legacy_nonlimber_fkem(cosmo, clt1, clt2, p_of_k_a, ls, l_limber, **params):
     growfac_arr = ccl.growth_factor(cosmo, a_arr)
     avg_a1s = clt1.get_avg_weighted_a()
     avg_a2s = clt2.get_avg_weighted_a()
+
     for el in range(len(ls)):
         ell = ls[el]
         cls_nonlimber_lin = 0.0
@@ -262,6 +263,16 @@ def legacy_nonlimber_fkem(cosmo, clt1, clt2, p_of_k_a, ls, l_limber, **params):
         cells.append(
             cl_limber_nonlin[-1] - cl_limber_lin[-1] + cls_nonlimber_lin
         )
+
+        # --- DEBUG: when called just for ell=[2], print legacy FKEM piece ---
+        if len(ls) == 1 and ls[0] == 2.0:
+            print("[DEBUG LEGACY FKEM] ell = 2")
+            print("  cl_limber_nonlin_legacy =", cl_limber_nonlin[-1])
+            print("  cl_limber_lin_legacy    =", cl_limber_lin[-1])
+            print("  cls_lin_fkem_legacy     =", cls_nonlimber_lin)
+            print("  cl_out_legacy           =", cells[-1])
+        # ---------------------------------------------------------------------
+
         if (
             np.abs(cells[-1] / cl_limber_nonlin[-1] - 1) < limber_max_error
             and l_limber == "auto"

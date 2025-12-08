@@ -196,17 +196,47 @@ def test_cells(set_up, method, cross_type):
             ells,
             p_of_k_a=p_of_k_a,
             p_of_k_a_lin=p_of_k_a_lin,
-            ell_limber='auto',
+            ell_limber="auto",
             non_limber_integration_method=method,
-            return_meta=True
+            return_meta=True,
         )
-        ell_limber = meta['ell_limber']
+        ell_limber = meta["ell_limber"]
+
         chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / \
-            errors[cross_type][pair_index]**2
+               errors[cross_type][pair_index] ** 2
         chi2max = max(chi2.max(), chi2max)
+
+        # after computing cls, chi2, etc
+
+        if cross_type == "ss" and pair_index == 0:
+            frac_diff = cls / truth[cross_type][pair_index, :]
+            max_fd = np.max(np.abs(frac_diff - 1.0))
+            print(f"[DEBUG ss] max fractional diff over ell = {max_fd}")
+            # maybe also print at a few ell indices:
+            for ell_probe in [2, 10, 100, 500, 1000, 2000]:
+                idx = np.where(ells == ell_probe)[0][0]
+                print(
+                    f"  ell={ell_probe:4.0f}: new={cls[idx]:.4e}, "
+                    f"truth={truth[cross_type][pair_index, idx]:.4e}, "
+                    f"ratio={cls[idx]/truth[cross_type][pair_index, idx]:.4f}"
+                )
+            # and then break after first pair to not spam
+            break
+
+
+        # Debug: if shear–shear is off, print details for the worst multipole
+        #if cross_type == "ss" and chi2.max() > 0.3:
+        #    imax = np.argmax(chi2)
+        #    print(f"[DEBUG ss] pair {pair_index}, worst ell index {imax}, ell = {ells[imax]}")
+        #    print("  cls_new   =", cls[imax])
+        #    print("  cls_truth =", truth[cross_type][pair_index, imax])
+        #    print("  error     =", errors[cross_type][pair_index][imax])
+        #    print("  chi2      =", chi2[imax])
+
         assert np.all(chi2 < 0.3)
+
     t1 = time.time()
     print(
-        f'Time taken for {method} on {cross_type} = {(t1-t0):3.2f};\
-        worst chi2 = {chi2max:5.3f}      ell_limber = {ell_limber}'
+        f"Time taken for {method} on {cross_type} = {(t1-t0):3.2f}; "
+        f"worst chi2 = {chi2max:5.3f}      ell_limber = {ell_limber}"
     )

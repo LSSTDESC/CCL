@@ -10,6 +10,28 @@ from ..nonlimber_fkem.params import get_fftlog_params
 
 __all__ = ["compute_collection_fft"]
 
+def _get_general_params(b):
+    """Match the legacy FKEM choice of FFTLog parameters.
+
+    b is the Bessel derivative / 'spin' index for this tracer piece.
+    """
+    nu = 1.51
+    nu2 = 0.51
+    deriv = 0.0
+    plaw = 0.0
+
+    if b < 0:
+        # shear-like: use different bias and an extra k^-2 power law
+        plaw = -2.0
+        nu = nu2
+
+    if b > 0:
+        # positive b means we take b derivatives
+        deriv = float(b)
+
+    return nu, deriv, plaw
+
+
 
 def compute_collection_fft(
     clt,
@@ -195,15 +217,45 @@ def compute_collection_fft(
                     "[FKEM]: 'transfer_avg' is zero, cannot rescale."
                 )
 
-            fchi_interp = interp1d(
-                chi_i, ki, fill_value="extrapolate", assume_sorted=False
+            # Prepare chi/kernel arrays (1D, finite, sorted)
+            chi_i = np.asarray(chi_i, dtype=float)
+            ki = np.asarray(ki, dtype=float)
+
+            mask = np.isfinite(chi_i) & np.isfinite(ki)
+            if not np.any(mask):
+                raise ValueError(
+                    f"[FKEM]: tracer {i}: no finite chi/kernel samples "
+                    "for interpolation."
+                )
+
+            chi_i = chi_i[mask]
+            ki = ki[mask]
+
+            order = np.argsort(chi_i)
+            chi_sorted = chi_i[order]
+            ki_sorted = ki[order]
+
+            if chi_sorted.size < 2:
+                raise ValueError(
+                    f"[FKEM]: tracer {i}: need at least 2 finite chi samples "
+                    "for FKEM interpolation."
+                )
+
+            # Linear interpolation with zero outside the sampled chi-range
+            fchi_vals = np.interp(
+                chi_logspace_arr,
+                chi_sorted,
+                ki_sorted,
+                left=0.0,
+                right=0.0,
             )
+
             fchi_arr = (
-                fchi_interp(chi_logspace_arr)
-                * chi_logspace_arr
-                * growfac_arr
-                * transfer_low_i
-                / transfer_avg
+                    fchi_vals
+                    * chi_logspace_arr
+                    * growfac_arr
+                    * transfer_low_i
+                    / transfer_avg
             )
 
             if fchi_arr.shape != chi_logspace_arr.shape:
@@ -216,6 +268,8 @@ def compute_collection_fft(
                 raise RuntimeError("[FKEM]: non-finite values in 'fchi_arr'.")
 
             nu, deriv, plaw = get_fftlog_params(bessels[i])
+            # this is just to call the old code to test
+            #nu, deriv, plaw = _get_general_params(bessels[i])
 
             k_fft, fk = _fftlog_transform_general(
                 chi_logspace_arr,
