@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import warnings as _warnings
+
 import numpy as np
 
 import pyccl as ccl
@@ -23,13 +25,16 @@ def nonlimber_fkem(
     tracer1,
     tracer2,
     p_of_k_a,
-    ell_values,
-    ell_limber,
+    ls=None,  # OLD name (deprecated)
+    l_limber=None,  # OLD name (deprecated)
+    fkem_Nchi=None,  # OLD name (deprecated)
     *,
-    pk_linear,
-    limber_max_error,
-    n_chi,
-    chi_min,
+    ell=None,  # NEW name
+    ell_limber=None,  # NEW name
+    n_chi_fkem=None,  # NEW name
+    pk_linear=None,
+    limber_max_error=None,
+    chi_min_fkem=None,
     k_pow=3,
     k_low=1e-5,
     n_consec_ell=3,
@@ -37,7 +42,7 @@ def nonlimber_fkem(
     """Computes the angular power spectrum via the FKEM non-Limber method.
 
     This method computes the angular power spectrum C_ell for given ells
-    `ell_values` using the FKEM approach (arXiv:1911.11947).
+    `ell` using the FKEM approach (arXiv:1911.11947).
     It combines Limber approximations for both linear and non-linear
     power spectra with FFTLog transforms of the radial kernels.
     The computation proceeds until the specified `ell_limber` multipole moment
@@ -55,8 +60,10 @@ def nonlimber_fkem(
             3D power spectrum to project. If a string, it must match one of
             the non-linear power spectra stored in `cosmo` (e.g.
             'delta_matter:delta_matter').
-        ell_values (array-like):
+        ell (array-like):
             Multipoles at which to compute C_ell.
+        ls : array_like, optional, deprecated
+            Deprecated alias for `ell`. Will be removed in CCL v4.
         ell_limber (int, float, or 'auto'):
             Multipole above which pure non-linear Limber is used.
             For ell ≤ ell_limber, this function returns FKEM-based hybrid
@@ -66,14 +73,18 @@ def nonlimber_fkem(
             fractional difference (``rel_diff``) is below
             ``limber_max_error`` for ``n_consec_ell`` consecutive multipoles;
             that ell is then used as the Limber transition scale.
+        l_limber : int, float, or 'auto', deprecated
+            Deprecated alias for `ell_limber`. Will be removed in CCL v4.
         pk_linear (:class:`~pyccl.pk2d.Pk2D` or str):
             Linear power spectrum used in the Limber calculation.
         limber_max_error (float):
             Maximum allowed fractional FKEM–Limber difference.
-        n_chi (int or None):
+        n_chi_fkem (int or None):
             Number of chi samples for FKEM. If None, inferred from the tracer
             kernel sampling.
-        chi_min (float or None):
+        fkem_Nchi : int or None, deprecated
+            Deprecated alias for `n_chi_fkem`. Will be removed in CCL v4.
+        chi_min_fkem (float or None):
             Minimum chi for FKEM. If None, inferred from tracer kernels.
         k_pow (int, optional):
             Power-law index for FFTLog. Default is 3.
@@ -94,25 +105,65 @@ def nonlimber_fkem(
     Raises:
         ValueError:
             If the input configuration is inconsistent or unsafe, e.g.:
-            empty or non-increasing ``ell_values`` in auto mode;
+            empty or non-increasing ``ell`` in auto mode;
             non-positive ``limber_max_error``; ``n_consec_ell < 1``;
-            ``n_chi < 2``; negative ``chi_min``; non-finite or out-of-range
+            ``n_chi_fkem < 2``; negative ``chi_min_fkem``; non-finite or out-of-range
             ``ell_limber``; or if ``p_of_k_a`` and ``pk_linear`` are of
             different types (one string and one :class:`~pyccl.pk2d.Pk2D`).
             Additional ``ValueError`` exceptions may be raised downstream
             by chi-grid and tracer-collection construction if their inputs
             are malformed.
     """
-    # Ensure ell_values is a numpy array of floats
-    ell_values = np.atleast_1d(ell_values)
-    if ell_values.size == 0:
-        raise ValueError("ell_values must contain at least one multipole.")
+    if ls is not None and ell is not None:
+        raise ValueError("Pass only one of `ls` (deprecated) or `ell`.")
+
+    if ell is None and ls is not None:
+        _warnings.warn(
+            "`ls` is deprecated and will be removed in CCL v4. "
+            "Use `ell` instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        ell = np.asarray(ls)
+
+    if l_limber is not None and ell_limber is not None:
+        raise ValueError(
+            "Pass only one of `l_limber` (deprecated) or `ell_limber`."
+        )
+
+    if ell_limber is None and l_limber is not None:
+        _warnings.warn(
+            "`l_limber` is deprecated and will be removed in CCL v4. "
+            "Use `ell_limber` instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        ell_limber = l_limber
+
+    if fkem_Nchi is not None and n_chi_fkem is not None:
+        raise ValueError(
+            "Pass only one of `fkem_Nchi` (deprecated) or `n_chi_fkem`."
+        )
+
+    if n_chi_fkem is None and fkem_Nchi is not None:
+        _warnings.warn(
+            "`fkem_Nchi` is deprecated and will be removed in CCL v4. "
+            "Use `n_chi_fkem` instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        n_chi_fkem = fkem_Nchi
+
+    # Ensure ell is a numpy array of floats
+    ell = np.atleast_1d(ell)
+    if ell.size == 0:
+        raise ValueError("ell must contain at least one multipole.")
 
     # Auto-mode flag for Limber transition
     auto_mode = isinstance(ell_limber, str)
-    if auto_mode and not np.all(np.diff(ell_values) > 0):
+    if auto_mode and not np.all(np.diff(ell) > 0):
         raise ValueError(
-            "ell_values must be strictly increasing for auto Limber mode."
+            "ell must be strictly increasing for auto Limber mode."
         )
 
     if limber_max_error <= 0:  # make sure it's positive
@@ -121,16 +172,16 @@ def nonlimber_fkem(
     if n_consec_ell < 1:  # we need at least one consecutive ell
         raise ValueError("n_consec_ell must be at least 1.")
 
-    if n_chi is not None and n_chi < 2:  # need at least two chi points
-        raise ValueError("n_chi must be at least 2.")
+    if n_chi_fkem is not None and n_chi_fkem < 2:  # need at least two chi points
+        raise ValueError("n_chi_fkem must be at least 2.")
 
-    if chi_min is not None and chi_min <= 0:
-        raise ValueError("chi_min must be positive.")
+    if chi_min_fkem is not None and chi_min_fkem <= 0:
+        raise ValueError("chi_min_fkem must be positive.")
 
     if not auto_mode:
         if not np.isfinite(ell_limber):  # must be finite
             raise ValueError("ell_limber must be finite.")
-        if ell_limber < ell_values[0]:  # must not be below smallest ell
+        if ell_limber < ell[0]:  # must not be below smallest ell
             raise ValueError(
                 "For FKEM non-Limber integration, `ell_limber` must be"
                 "at least as large as the smallest requested ell."
@@ -142,8 +193,8 @@ def nonlimber_fkem(
     kernels_t2, chis_t2 = tracer2.get_kernel()
     bessels_t1 = tracer1.get_bessel_derivative()
     bessels_t2 = tracer2.get_bessel_derivative()
-    fll_t1 = tracer1.get_f_ell(ell_values)
-    fll_t2 = tracer2.get_f_ell(ell_values)
+    fll_t1 = tracer1.get_f_ell(ell)
+    fll_t2 = tracer2.get_f_ell(ell)
 
     # Type consistency for power spectra
     same_str = isinstance(p_of_k_a, str) and isinstance(pk_linear, str)
@@ -178,8 +229,8 @@ def nonlimber_fkem(
     t1, t2 = build_tracer_collections(tracer1, tracer2)
 
     # Build chi grid for FKEM
-    chi_grid, dlnr, chi_min_eff, chi_max_eff, n_chi_eff = build_chi_grid(
-        chis_t1, chis_t2, chi_min, n_chi
+    chi_grid, dlnr, chi_min_fkem_eff, chi_max_eff, n_chi_fkem_eff = build_chi_grid(
+        chis_t1, chis_t2, chi_min_fkem, n_chi_fkem
     )
 
     # Compute average scale factors for the tracers
@@ -188,7 +239,7 @@ def nonlimber_fkem(
 
     # Preallocate output array; we'll truncate depending on ell_limber /
     # auto-stop
-    n_ell = len(ell_values)
+    n_ell = len(ell)
     cells = np.empty(n_ell, dtype=float)
     n_computed = 0
 
@@ -196,7 +247,7 @@ def nonlimber_fkem(
     # tolerance
     consecutive_below = 0
 
-    for ell_idx, ell in enumerate(ell_values):
+    for ell_idx, ell in enumerate(ell):
         try:
             cl_val, limber_ref, rel_diff = compute_single_ell(
                 cosmo,
@@ -218,9 +269,9 @@ def nonlimber_fkem(
                 fll_t1,
                 fll_t2,
                 chi_grid,
-                chi_min_eff,
+                chi_min_fkem_eff,
                 chi_max_eff,
-                n_chi_eff,
+                n_chi_fkem_eff,
                 dlnr,
                 avg_a1s,
                 avg_a2s,
@@ -265,7 +316,7 @@ def nonlimber_fkem(
 
     # If we never hit the auto criterion, default to the last ell in the grid
     if auto_mode and isinstance(ell_limber, str):
-        ell_limber = ell_values[-1]
+        ell_limber = ell[-1]
 
     # Trim to the number of ell actually computed with FKEM
     cells = cells[:n_computed]

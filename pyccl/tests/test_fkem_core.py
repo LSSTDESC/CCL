@@ -22,6 +22,44 @@ def build_constant_pk2d():
     return ccl.Pk2D.from_function(pk_constant_one, is_logp=False)
 
 
+@pytest.fixture
+def cosmo():
+    """Simple LCDM cosmology for FKEM interface tests."""
+    return ccl.CosmologyVanillaLCDM()
+
+
+@pytest.fixture
+def tracer1(cosmo):
+    """Basic number-counts tracer for FKEM interface tests."""
+    z = np.linspace(0.01, 2.0, 5)
+    n = np.ones_like(z)
+    b = np.ones_like(z)  # constant bias = 1
+    return ccl.NumberCountsTracer(
+        cosmo,
+        dndz=(z, n),
+        bias=(z, b),
+        has_rsd=False,
+    )
+
+
+@pytest.fixture
+def tracer2(tracer1):
+    """Use the same tracer for both legs."""
+    return tracer1
+
+
+@pytest.fixture
+def pk_nonlin():
+    """Non-linear P(k) spec understood by Cosmology.parse_pk2d."""
+    return "delta_matter:delta_matter"
+
+
+@pytest.fixture
+def pk_lin():
+    """Linear P(k) spec for pk_linear argument."""
+    return "delta_matter:delta_matter"
+
+
 class _DummyTracer:
     """A dummy tracer for testing purposes."""
 
@@ -152,12 +190,12 @@ def test_nonlimber_auto_transition_uses_n_consec(monkeypatch):
         tracer1,
         tracer2,
         p_of_k_a="delta_matter:delta_matter",  # ignored by _DummyCosmo
-        ell_values=ells,
+        ell=ells,
         ell_limber="auto",
         pk_linear="delta_matter:delta_matter",  # ignored by _DummyCosmo
         limber_max_error=0.1,
-        n_chi=5,
-        chi_min=1.0,
+        n_chi_fkem=5,
+        chi_min_fkem=1.0,
         n_consec_ell=3,
     )
 
@@ -176,10 +214,63 @@ def test_nonlimber_requires_increasing_ells_in_auto(dummy_cosmo, dummy_tracer):
             dummy_tracer,
             dummy_tracer,
             p_of_k_a="delta_matter:delta_matter",
-            ell_values=[10, 5, 20],
+            ell=[10, 5, 20],
             ell_limber="auto",
             pk_linear="delta_matter:delta_matter",
             limber_max_error=0.1,
-            n_chi=5,
-            chi_min=1.0,
+            n_chi_fkem=5,
+            chi_min_fkem=1.0,
+        )
+
+
+def test_fkem_ls_deprecated_matches_ell(cosmo, tracer1, tracer2, pk_nonlin, pk_lin):
+    """Tests that ls and ell arguments give the same result."""
+    ells = np.array([10, 20, 30])
+
+    with pytest.warns(FutureWarning, match="`ls` is deprecated"):
+        ell_limber_old, cells_old, status_old = nonlimber_fkem(
+            cosmo,
+            tracer1,
+            tracer2,
+            p_of_k_a=pk_nonlin,
+            ls=ells,
+            l_limber=30,
+            pk_linear=pk_lin,
+            limber_max_error=0.01,
+            fkem_Nchi=64,
+            chi_min_fkem=None,
+        )
+
+    ell_limber_new, cells_new, status_new = nonlimber_fkem(
+        cosmo,
+        tracer1,
+        tracer2,
+        p_of_k_a=pk_nonlin,
+        ell=ells,
+        ell_limber=30,
+        pk_linear=pk_lin,
+        limber_max_error=0.01,
+        n_chi_fkem=64,
+        chi_min_fkem=None,
+    )
+
+    np.testing.assert_allclose(cells_old, cells_new)
+    assert status_old == status_new
+    assert ell_limber_old == ell_limber_new
+
+
+def test_fkem_ls_and_ell_together_raises(cosmo, tracer1, tracer2, pk_nonlin, pk_lin):
+    """Tests that using both ls and ell raises an error."""
+    ells = np.array([10, 20])
+
+    with pytest.raises(ValueError, match="only one of `ls`"):
+        nonlimber_fkem(
+            cosmo,
+            tracer1,
+            tracer2,
+            p_of_k_a=pk_nonlin,
+            ls=ells,
+            ell=ells,
+            pk_linear=pk_lin,
+            limber_max_error=0.01,
         )
