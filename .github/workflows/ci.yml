@@ -95,7 +95,7 @@ jobs:
 
       - name: Full compilation (to runt C-level benchmarks)
         run: |
-          cmake --build build -j2
+          make -Cbuild all
 
       - name: Unit tests
         run: |
