@@ -93,7 +93,7 @@ jobs:
       - name: Install CCL
         run: pip install -v -e .
 
-      - name: Full compilation (to runt C-level benchmarks)
+      - name: Full compilation (to run C-level benchmarks)
         run: |
           make -Cbuild all
 
