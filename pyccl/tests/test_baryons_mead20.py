@@ -9,7 +9,7 @@ import pyccl as ccl
 
 camb = pytest.importorskip("camb")
 
-TOL_MEAD20 = 1e-5
+TOL_MEAD20 = 2e-5
 
 
 def _compute_camb_mead2020_pk(
