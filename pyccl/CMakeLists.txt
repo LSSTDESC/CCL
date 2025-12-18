@@ -30,8 +30,11 @@ endif()
 swig_link_libraries(ccllib ccl_static)
 
 if(APPLE)
-    # Unpleasant subtelty for linking on osx
+    # SWIG>=4.4 triggers int-conversion warning/error while calling numpy's import_array()
+    # GCC seems to be raising warnings but clang raises an error, instead.
+    # We make clang to treat them as warnings with next line.
     target_compile_options(${SWIG_MODULE_ccllib_REAL_NAME} PRIVATE "-Wno-error=int-conversion")
+    # Unpleasant subtelty for linking on osx
     set_target_properties(${SWIG_MODULE_ccllib_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
 else(APPLE)
     swig_link_libraries(ccllib ${PYTHON_LIBRARIES})
