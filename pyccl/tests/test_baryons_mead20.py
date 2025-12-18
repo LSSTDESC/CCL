@@ -9,7 +9,7 @@ import pyccl as ccl
 
 camb = pytest.importorskip("camb")
 
-TOL_MEAD20 = 2e-5
+TOL_MEAD20 = 3e-5
 
 
 def _compute_camb_mead2020_pk(
@@ -93,10 +93,7 @@ def test_baryons_mead20_hmcode_matches_camb():
     for z_val, pk_camb in zip(zs, pk_camb_all):
         a = 1.0 / (1.0 + z_val)
         pk_ccl = ccl.nonlin_matter_power(cosmo_ccl, k, a)
-        # restrict to a safe range in case CAMB changes behavior at very low or
-        # high k
-        sel = (k >= 1e-3) & (k <= 5.0)
-        np.testing.assert_allclose(pk_camb[sel], pk_ccl[sel], rtol=TOL_MEAD20)
+        np.testing.assert_allclose(pk_camb, pk_ccl, rtol=TOL_MEAD20)
 
 
 def test_baryons_mead20_pk_responds_to_logt_agn():
