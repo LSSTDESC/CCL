@@ -1,4 +1,4 @@
-"""Script to make benchmark data for Van Daalen et al. (2019) baryon model in CCL."""
+"""Script to make benchmark data for Van Daalen (2019) baryon model in CCL."""
 
 from pathlib import Path
 

@@ -12,7 +12,10 @@ DATA = np.loadtxt(DATA_PATH)
 BEMULIN_TOLERANCE = 1e-3
 
 
-def _check_baccoemu_linear(cosmo: ccl.Cosmology, bemu: ccl.BaccoemuLinear) -> None:
+def _check_baccoemu_linear(
+        cosmo: ccl.Cosmology,
+        bemu: ccl.BaccoemuLinear
+) -> None:
     """Checks that BACCOemu baryons match the reference fk(k)."""
     k = DATA[:, 0] * cosmo["h"]
     pk = DATA[:, 1] / cosmo["h"] ** 3

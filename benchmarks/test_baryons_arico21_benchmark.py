@@ -12,7 +12,10 @@ DATA = np.loadtxt(DATA_PATH)
 BEMBAR_TOLERANCE = 1e-3
 
 
-def _check_baccoemu_baryons(cosmo: ccl.Cosmology, baryons: ccl.BaryonsBaccoemu) -> None:
+def _check_baccoemu_baryons(
+        cosmo: ccl.Cosmology,
+        baryons: ccl.BaryonsBaccoemu
+) -> None:
     """Checks that the BACCOemu boost factor matches the reference fk(k)."""
     k = DATA[:, 0] * cosmo["h"]
     fk_ref = DATA[:, 1]

@@ -12,11 +12,12 @@ where:
 
 The file contents are two columns:
 
-    col0:  fbar = \bar{f}_{bar,R_{\rm crit}}(10^{14} M_\odot) / (\Omega_b / \Omega_m)
-    col1:  DeltaP_over_P = (P_{\rm vD} - P_{\rm DMO}) / P_{\rm DMO}  (negative for bary suppression)
+    col0: fbar = \bar{f}_{bar,Rcrit}(10^{14} M_\odot) / (\Omega_b / \Omega_m)
+    col1: ΔP/P = (P_vD − P_DMO) / P_DMO
 
 i.e. the *fractional change* in the power spectrum at the given k and mass
-definition, as a function of the baryon fraction parameter fbar. DMO is dark matter only (no baryons).
+definition, as a function of the baryon fraction parameter fbar.
+DMO is dark matter only (no baryons).
 
 CCL's BaryonsvanDaalen19 implements the analytic model of van Daalen+2019,
 which provides the ratio
@@ -92,7 +93,7 @@ def _parse_meta(stem: str) -> tuple[str, float]:
 
 @pytest.mark.parametrize("path", sorted(DATA_DIR.glob("VD20_r*.txt")))
 def test_vd19_against_marcel_fbar_tables(path: Path) -> None:
-    """Compares CCL van Daalen19 ΔP/P to Marcel's tables at fixed k and mass_def."""
+    """Compares CCL van Daalen19 deltaP/P to Marcel's tables."""
     cosmo = _make_cosmo()
     mass_def, k_hmpc = _parse_meta(path.stem)
 

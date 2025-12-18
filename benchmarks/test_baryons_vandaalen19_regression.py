@@ -38,7 +38,10 @@ def _make_cosmo() -> ccl.Cosmology:
     )
 
 
-def _check_vd19_baryons(cosmo: ccl.Cosmology, baryons: ccl.BaryonsvanDaalen19) -> None:
+def _check_vd19_baryons(
+        cosmo: ccl.Cosmology,
+        baryons: ccl.BaryonsvanDaalen19
+) -> None:
     """Checks that the vd19 boost factor matches the frozen regression data."""
     # First column is k in h/Mpc, second is boost factor f(k)
     k_hmpc = DATA[:, 0]
