@@ -18,5 +18,5 @@ if(NOT SWIG_FOUND )
               INSTALL_COMMAND       make install
               BUILD_IN_SOURCE 1)
       set(SWIG_DIR ${CMAKE_BINARY_DIR}/extern)
-      set(SWIG_EXECUTABLE ${CMAKE_BINARY_DIR}/extern/bin/swig -wno-error=int-conversion)
+      set(SWIG_EXECUTABLE ${CMAKE_BINARY_DIR}/extern/bin/swig)
 endif()
