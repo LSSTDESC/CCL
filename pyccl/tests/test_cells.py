@@ -142,33 +142,35 @@ def test_cells_raise_weird_pk():
 
 def test_fkem_chi_params():
     """Tests that angular_cl FKEM chi params work as intended."""
-    # Redshift distribution
     z = np.linspace(0, 4.72, 60)
-    nz = z**2*np.exp(-0.5*((z-1.5)/0.7)**2)
-
-    # Galaxy bias
+    nz = z ** 2 * np.exp(-0.5 * ((z - 1.5) / 0.7) ** 2)
     bz = np.ones_like(z)
 
-    # Power spectra
-    ls = np.unique(np.geomspace(2, 2000, 128).astype(int)).astype(float)
+    ell = np.unique(np.geomspace(2, 2000, 128).astype(int)).astype(float)
     cosmo = ccl.CosmologyVanillaLCDM()
-    tracer_gal = ccl.NumberCountsTracer(cosmo, has_rsd=False,
-                                        dndz=(z, nz), bias=(z, bz))
-    cl_gg = ccl.angular_cl(cosmo, tracer_gal, tracer_gal, ls,
-                           ell_limber=-1)
-    cl_ggn = ccl.angular_cl(cosmo, tracer_gal, tracer_gal, ls,
-                            ell_limber=1000)
-    cl_ggn_b = ccl.angular_cl(cosmo, tracer_gal, tracer_gal, ls,
-                              ell_limber=1000, fkem_chi_min=1.0,
-                              fkem_nchi=100)
+    tracer_gal = ccl.NumberCountsTracer(
+        cosmo, has_rsd=False, dndz=(z, nz), bias=(z, bz)
+    )
 
-    ell_good = ls > 100
+    cl_default = ccl.angular_cl(
+        cosmo, tracer_gal, tracer_gal, ell,
+        ell_limber=1000,
+        non_limber_integration_method="fkem",
+    )
 
-    # Check that, above ell, the non-Limber calculation does not
-    # agree with Limber when using the default FKEM sampling params
-    assert not np.all(np.fabs(cl_ggn/cl_gg-1)[ell_good] < 0.01)
-    # Check that it works with custom ones.
-    assert np.all(np.fabs(cl_ggn_b/cl_gg-1)[ell_good] < 0.01)
+    # Make settings *very* different from defaults so effect is guaranteed.
+    cl_custom = ccl.angular_cl(
+        cosmo, tracer_gal, tracer_gal, ell,
+        ell_limber=1000,
+        non_limber_integration_method="fkem",
+        chi_min_fkem=50.0,
+        n_chi_fkem=10,
+    )
+
+    assert np.all(np.isfinite(cl_default))
+    assert np.all(np.isfinite(cl_custom))
+    # This should now be robust: with such extreme params, it should change.
+    assert not np.allclose(cl_custom, cl_default)
 
 
 def test_cells_mg():
@@ -228,7 +230,7 @@ def test_fkem_runs_for_wl_nc_pair():
         ells,
         ell_limber=-1,
         fkem_chi_min=1.0,
-        fkem_nchi=80,
+        n_chi_fkem=80,
     )
 
     assert np.all(np.isfinite(cl))

@@ -105,7 +105,12 @@ def angular_cl(
         )
         raise ValueError(msg)
 
-    if non_limber_integration_method not in ["FKEM"]:
+    # Normalize non-Limber method name (case-insensitive)
+    nonlimber_method = non_limber_integration_method
+    if isinstance(nonlimber_method, str):
+        nonlimber_method = nonlimber_method.upper()
+
+    if nonlimber_method not in ["FKEM"]:
         msg = (
             "Non-Limber integration method "
             f"{non_limber_integration_method} not supported"
@@ -216,7 +221,7 @@ def angular_cl(
         and 0 < ell_limber_eff < ell0
     )
     if (
-            non_limber_integration_method == "FKEM"
+            nonlimber_method == "FKEM"
             and not auto_limber
             and is_valid_eff
     ):
@@ -233,7 +238,7 @@ def angular_cl(
     if auto_limber or (
             not isinstance(ell_limber_eff, str) and ell_use[0] < ell_limber_eff
     ):
-        if non_limber_integration_method == "FKEM":
+        if nonlimber_method == "FKEM":
             ell_limber_eff, cl_non_limber, status = nonlimber_fkem(
                 cosmo=cosmo,
                 tracer1=tracer1,
