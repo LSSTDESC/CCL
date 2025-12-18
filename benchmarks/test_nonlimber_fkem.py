@@ -212,8 +212,9 @@ def test_cells(set_up, method, cross_type):
         )
         ell_limber = meta["ell_limber"]
 
-        chi2 = (cls - truth[cross_type][pair_index, :]) ** 2 / \
-               errors[cross_type][pair_index] ** 2
+        diff = cls - truth[cross_type][pair_index, :]
+        sigma = errors[cross_type][pair_index]
+        chi2 = (diff * diff) / (sigma * sigma)
         chi2max = max(chi2.max(), chi2max)
 
         # Niko added some debug output here
@@ -227,10 +228,12 @@ def test_cells(set_up, method, cross_type):
                 if idxs.size == 0:
                     continue  # this ell_probe is not in the ell grid
                 idx = idxs[0]
+                t = truth[cross_type][pair_index, idx]
+                ratio = cls[idx] / t
                 print(
                     f"  ell={ells[idx]:4.0f}: new={cls[idx]:.4e}, "
-                    f"truth={truth[cross_type][pair_index, idx]:.4e}, "
-                    f"ratio={cls[idx] / truth[cross_type][pair_index, idx]:.4f}"
+                    f"truth={t:.4e}, "
+                    f"ratio={ratio:.4f}"
                 )
 
         assert np.all(chi2 < 0.3)

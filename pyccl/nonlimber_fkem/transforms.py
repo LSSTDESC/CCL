@@ -228,11 +228,11 @@ def compute_collection_fft(
             )
 
             fchi_arr = (
-                    fchi_vals
-                    * chi_logspace_arr
-                    * growfac_arr
-                    * transfer_low_i
-                    / transfer_avg
+                fchi_vals
+                * chi_logspace_arr
+                * growfac_arr
+                * transfer_low_i
+                / transfer_avg
             )
 
             if fchi_arr.shape != chi_logspace_arr.shape:

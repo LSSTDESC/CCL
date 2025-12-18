@@ -102,17 +102,21 @@ def nonlimber_fkem(
         status (int):
             Status flag: 0 if all C_ell values are finite, 1 otherwise.
 
-    Raises:
+     Raises:
         ValueError:
-            If the input configuration is inconsistent or unsafe, e.g.:
+            If the input configuration is inconsistent or unsafe, for example:
             empty or non-increasing ``ell`` in auto mode;
-            non-positive ``limber_max_error``; ``n_consec_ell < 1``;
-            ``n_chi_fkem < 2``; negative ``chi_min_fkem``; non-finite or out-of-range
-            ``ell_limber``; or if ``p_of_k_a`` and ``pk_linear`` are of
-            different types (one string and one :class:`~pyccl.pk2d.Pk2D`).
+            non-positive ``limber_max_error``;
+            ``n_consec_ell < 1``;
+            ``n_chi_fkem < 2``;
+            negative ``chi_min_fkem``;
+            non-finite or out-of-range ``ell_limber``; or
+            mismatched types for ``p_of_k_a`` and ``pk_linear`` (one string and
+            one :class:`~pyccl.pk2d.Pk2D`).
+
             Additional ``ValueError`` exceptions may be raised downstream
-            by chi-grid and tracer-collection construction if their inputs
-            are malformed.
+            during chi-grid and tracer-collection construction if
+            inputs are malformed.
     """
     if ls is not None and ell is not None:
         raise ValueError("Pass only one of `ls` (deprecated) or `ell`.")
@@ -172,7 +176,7 @@ def nonlimber_fkem(
     if n_consec_ell < 1:  # we need at least one consecutive ell
         raise ValueError("n_consec_ell must be at least 1.")
 
-    if n_chi_fkem is not None and n_chi_fkem < 2:  # need at least two chi points
+    if n_chi_fkem is not None and n_chi_fkem < 2:  # need at least 2 chi points
         raise ValueError("n_chi_fkem must be at least 2.")
 
     if chi_min_fkem is not None and chi_min_fkem <= 0:
@@ -229,8 +233,17 @@ def nonlimber_fkem(
     t1, t2 = build_tracer_collections(tracer1, tracer2)
 
     # Build chi grid for FKEM
-    chi_grid, dlnr, chi_min_fkem_eff, chi_max_eff, n_chi_fkem_eff = build_chi_grid(
-        chis_t1, chis_t2, chi_min_fkem, n_chi_fkem
+    (
+        chi_grid,
+        dlnr,
+        chi_min_fkem_eff,
+        chi_max_eff,
+        n_chi_fkem_eff,
+    ) = build_chi_grid(
+        chis_t1,
+        chis_t2,
+        chi_min_fkem,
+        n_chi_fkem,
     )
 
     # Compute average scale factors for the tracers

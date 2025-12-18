@@ -168,9 +168,9 @@ def _validate_and_summarize_chis(chis_list, label: str, warn: bool):
         chi_min = min(chi_min, np.min(chi_finite))
         chi_max = max(chi_max, np.max(chi_finite))
 
-        # Use the smallest *positive* chi as "support" where the kernel actually lives.
-        # In other words: do not start the chi grid far below the kernel support,
-        # which can cause numerical instabilities for low-z bins.
+        # Use the smallest positive chi as kernel support.
+        # Starting the grid far below this can cause low-z
+        # numerical instabilities.
         pos = chi_finite[chi_finite > 0]
         if pos.size > 0:
             support_candidate = np.min(pos)

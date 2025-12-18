@@ -26,7 +26,7 @@ def angular_cl(
     return_meta=False,
     ell_limber=None,  # NEW name for v4
     chi_min_fkem=None,  # NEW name for v4
-    n_chi_fkem=None, # NEW for v4
+    n_chi_fkem=None,  # NEW for v4
 ):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
@@ -99,16 +99,22 @@ def angular_cl(
         )
 
     if limber_integration_method not in integ_types:
-        raise ValueError(
-            f"Limber integration method {limber_integration_method} not supported"
+        msg = (
+            "Limber integration method "
+            f"{limber_integration_method} not supported"
         )
+        raise ValueError(msg)
+
     if non_limber_integration_method not in ["FKEM"]:
-        raise ValueError(
-            f"Non-Limber integration method {non_limber_integration_method} not supported"
+        msg = (
+            "Non-Limber integration method "
+            f"{non_limber_integration_method} not supported"
         )
+        raise ValueError(msg)
 
     # Backwards-compat: support both `ell_limber` (new) and `l_limber` (old).
-    # - If only `l_limber` is set, we treat it as `ell_limber` and emit a deprecation warning.
+    # - If only `l_limber` is set, we treat it as `ell_limber` and emit a
+    #   deprecation warning.
     # - If both are set, we raise, so users can't mix old and new names.
     if ell_limber is not None and l_limber != -1:
         raise ValueError(
@@ -204,11 +210,15 @@ def angular_cl(
     # smaller than the smallest ell. We allow:
     #   - ell_limber <= 0  : treated as "no FKEM, pure Limber"
     #   - ell_limber == min(ell) : FKEM active starting at the first ell
+    ell0 = ell_use[0]
+    is_valid_eff = (
+        isinstance(ell_limber_eff, (int, float))
+        and 0 < ell_limber_eff < ell0
+    )
     if (
-        non_limber_integration_method == "FKEM"
-        and not auto_limber
-        and isinstance(ell_limber_eff, (int, float)) and 0 < ell_limber_eff < ell_use[0]
-
+            non_limber_integration_method == "FKEM"
+            and not auto_limber
+            and is_valid_eff
     ):
         raise ValueError(
             "For FKEM non-Limber integration, a positive `ell_limber` must be "
@@ -268,7 +278,8 @@ def angular_cl(
     lib.cl_tracer_collection_t_free(clt2)
 
     if return_meta:
-        # Here we report the *effective* Limber scale; keep both keys for backwards compat.
+        # Here we report the *effective* Limber scale;
+        # keep both keys for backwards compat.
         meta = {"ell_limber": ell_limber_eff, "l_limber": ell_limber_eff}
 
     check(status, cosmo=cosmo)

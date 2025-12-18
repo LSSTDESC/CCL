@@ -212,7 +212,12 @@ def test_fkem_runs_for_wl_nc_pair():
 
     cosmo = ccl.CosmologyVanillaLCDM()
     lens = ccl.WeakLensingTracer(cosmo, dndz=(z, nz))
-    nc = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z, nz), bias=(z, bz))
+    nc = ccl.NumberCountsTracer(
+        cosmo,
+        has_rsd=False,
+        dndz=(z, nz),
+        bias=(z, bz)
+    )
 
     ells = np.array([10, 30, 100], dtype=float)
 
@@ -291,7 +296,6 @@ def test_cells_mg_nonlimber_fkem():
     assert np.all(np.isfinite(cl0))
     assert np.all(np.isfinite(cl1))
     assert np.all(np.fabs(1 - cl1 / cl0) < 1e-3)
-
 
 
 ccl.gsl_params.reload()  # reset to the default parameters

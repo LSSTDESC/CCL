@@ -223,7 +223,12 @@ def test_nonlimber_requires_increasing_ells_in_auto(dummy_cosmo, dummy_tracer):
         )
 
 
-def test_fkem_ls_deprecated_matches_ell(cosmo, tracer1, tracer2, pk_nonlin, pk_lin):
+def test_fkem_ls_deprecated_matches_ell(
+        cosmo,
+        tracer1,
+        tracer2,
+        pk_nonlin,
+        pk_lin):
     """Tests that ls and ell arguments give the same result."""
     ells = np.array([10, 20, 30])
 
@@ -259,7 +264,12 @@ def test_fkem_ls_deprecated_matches_ell(cosmo, tracer1, tracer2, pk_nonlin, pk_l
     assert ell_limber_old == ell_limber_new
 
 
-def test_fkem_ls_and_ell_together_raises(cosmo, tracer1, tracer2, pk_nonlin, pk_lin):
+def test_fkem_ls_and_ell_together_raises(
+        cosmo,
+        tracer1,
+        tracer2,
+        pk_nonlin,
+        pk_lin):
     """Tests that using both ls and ell raises an error."""
     ells = np.array([10, 20])
 

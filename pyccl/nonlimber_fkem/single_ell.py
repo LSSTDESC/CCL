@@ -222,10 +222,10 @@ def compute_single_ell(
             raw_sum_total += term
 
             pref = (
-                    2.0
-                    / np.pi
-                    * fll_t1[i][ell_idx]
-                    * fll_t2[j][ell_idx]
+                2.0
+                / np.pi
+                * fll_t1[i][ell_idx]
+                * fll_t2[j][ell_idx]
             )
 
             cls_lin_fkem += term * pref
