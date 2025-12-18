@@ -93,6 +93,10 @@ jobs:
       - name: Install CCL
         run: pip install -v -e .
 
+      - name: Full compilation (to runt C-level benchmarks)
+        run: |
+          cmake --build build -j2
+
       - name: Unit tests
         run: |
           OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl --cov-report=lcov:lcov.info
