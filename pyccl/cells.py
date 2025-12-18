@@ -1,10 +1,12 @@
-__all__ = ("angular_cl",)
+import warnings as _warnings
 
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warnings
+from pyccl import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warnings
 from .pyutils import integ_types
-from ._nonlimber_FKEM import _nonlimber_FKEM
+from .nonlimber_fkem.core import nonlimber_fkem
+
+__all__ = ("angular_cl",)
 
 
 def angular_cl(
@@ -14,14 +16,17 @@ def angular_cl(
     ell,
     *,
     p_of_k_a=DEFAULT_POWER_SPECTRUM,
-    l_limber=-1,
+    l_limber=-1,              # OLD name (deprecated)
     limber_max_error=0.01,
     limber_integration_method="qag_quad",
     non_limber_integration_method="FKEM",
-    fkem_chi_min=None,
-    fkem_Nchi=None,
+    fkem_chi_min=None,  # OLD name (deprecated)
+    fkem_Nchi=None,  # OLD name (deprecated)
     p_of_k_a_lin=DEFAULT_POWER_SPECTRUM,
-    return_meta=False
+    return_meta=False,
+    ell_limber=None,  # NEW name for v4
+    chi_min_fkem=None,  # NEW name for v4
+    n_chi_fkem=None,  # NEW for v4
 ):
     """Calculate the angular (cross-)power spectrum for a pair of tracers.
 
@@ -36,10 +41,13 @@ def angular_cl(
             spectrum to project. If a string, it must correspond to one of
             the non-linear power spectra stored in `cosmo` (e.g.
             `'delta_matter:delta_matter'`).
-        l_limber (int, float or 'auto') : Angular wavenumber beyond which
+        ell_limber (int, float or 'auto') : Angular wavenumber beyond which
             Limber's approximation will be used. Defaults to -1. If 'auto',
             then the non-limber integrator will be used to compute the right
             transition point given the value of limber_max_error.
+        l_limber (int, float or 'auto'):
+            Angular wavenumber beyond which Limber's approximation will be used.
+            Deprecated alias for ``ell_limber``. Will be removed in CCL v4.
         limber_max_error (float) : Maximum fractional error for Limber integration.
         limber_integration_method (string) : integration method to be used
             for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
@@ -49,20 +57,24 @@ def angular_cl(
             for the non-Limber integrals. Currently the only method implemented
             is ``'FKEM'`` (see the `N5K paper <https://arxiv.org/abs/2212.04291>`_
             for details).
-        fkem_chi_min: Minimum comoving distance used by `FKEM` to sample the
+        chi_min_fkem: Minimum comoving distance used by `FKEM` to sample the
             tracer radial kernels. If ``None``, the minimum distance over which
             the kernels are defined will be used (capped to 1E-6 Mpc if this
             value is zero). Users are encouraged to experiment with this parameter
-            and ``fkem_Nchi`` to ensure the robustness of the output
+            and ``n_chi_fkem`` to ensure the robustness of the output
             :math:`C_\\ell` s.
-        fkem_Nchi: Number of values of the comoving distance over which `FKEM`
+        fkem_chi_min (float or None):
+            Deprecated alias for ``chi_min_fkem``. Will be removed in CCL v4.
+        n_chi_fkem: Number of values of the comoving distance over which `FKEM`
             will interpolate the radial kernels. If ``None`` the smallest number
             over which the kernels are currently sampled will be used. Note that
             `FKEM` will use a logarithmic sampling for distances between
-            ``fkem_chi_min`` and the maximum distance over which the tracers
+            ``chi_min_fkem`` and the maximum distance over which the tracers
             are defined.  Users are encouraged to experiment with this parameter
-            and ``fkem_chi_min`` to ensure the robustness of the output
+            and ``chi_min_fkem`` to ensure the robustness of the output
             :math:`C_\\ell` s.
+        fkem_Nchi (:obj:`int` or :obj:`None`):
+            Deprecated alias for ``n_chi_fkem``. Will be removed in CCL v4.
         p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`):
             3D linear Power spectrum to project, for special use in
             PT calculations using the FKEM non-limber integration technique.
@@ -70,7 +82,7 @@ def angular_cl(
             the linear power spectra stored in `cosmo` (e.g.
             `'delta_matter:delta_matter'`).
         return_meta (bool): if `True`, also return a dictionary with various
-            metadata about the calculation, such as l_limber as calculated by the
+            metadata about the calculation, such as ell_limber as calculated by the
             non-limber integrator.
 
     Returns:
@@ -82,29 +94,104 @@ def angular_cl(
         warnings.warn(
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
-            category=CCLWarning, importance='low')
+            category=CCLWarning,
+            importance="low",
+        )
 
     if limber_integration_method not in integ_types:
-        raise ValueError(
-            "Limber integration method %s not supported"
-            % limber_integration_method
+        msg = (
+            "Limber integration method "
+            f"{limber_integration_method} not supported"
         )
-    if non_limber_integration_method not in ["FKEM"]:
-        raise ValueError(
-            "Non-Limber integration method %s not supported"
-            % limber_integration_method
+        raise ValueError(msg)
+
+    # Normalize non-Limber method name (case-insensitive)
+    nonlimber_method = non_limber_integration_method
+    if isinstance(nonlimber_method, str):
+        nonlimber_method = nonlimber_method.upper()
+
+    if nonlimber_method not in ["FKEM"]:
+        msg = (
+            "Non-Limber integration method "
+            f"{non_limber_integration_method} not supported"
         )
-    if type(l_limber) is str:
-        if l_limber != "auto":
-            raise ValueError("l_limber must be an integer or'auto'")
+        raise ValueError(msg)
+
+    # Backwards-compat: support both `ell_limber` (new) and `l_limber` (old).
+    # - If only `l_limber` is set, we treat it as `ell_limber` and emit a
+    #   deprecation warning.
+    # - If both are set, we raise, so users can't mix old and new names.
+    if ell_limber is not None and l_limber != -1:
+        raise ValueError(
+            "Pass only one of `l_limber` (deprecated) or `ell_limber`."
+        )
+
+    if ell_limber is None:
+        ell_limber_eff = l_limber
+        if l_limber != -1:
+            _warnings.warn(
+                "`l_limber` is deprecated and will be removed in CCL v4. "
+                "Use `ell_limber` instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+    else:
+        ell_limber_eff = ell_limber
+        if l_limber != -1:
+            raise ValueError(
+                "Pass only one of `l_limber` (deprecated) or `ell_limber`."
+            )
+
+    # Same pattern for chi_min:
+    #   - prefer the new `chi_min_fkem`,
+    #   - allow `fkem_chi_min` with a deprecation warning,
+    #   - forbid passing both.
+    if chi_min_fkem is not None and fkem_chi_min is not None:
+        raise ValueError(
+            "Pass only one of `fkem_chi_min` (deprecated) or "
+            "`chi_min_fkem`."
+        )
+
+    if chi_min_fkem is None:
+        chi_min_fkem_eff = fkem_chi_min
+        if fkem_chi_min is not None:
+            _warnings.warn(
+                "`fkem_chi_min` is deprecated and will be removed in CCL v4. "
+                "Use `chi_min_fkem` instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+    else:
+        chi_min_fkem_eff = chi_min_fkem
+
+    # And for the FKEM chi sampling:
+    #   - `n_chi_fkem` is the new name,
+    #   - `fkem_Nchi` is the deprecated alias.
+    if n_chi_fkem is not None and fkem_Nchi is not None:
+        raise ValueError(
+            "Pass only one of `fkem_Nchi` (deprecated) or `n_chi_fkem`."
+        )
+
+    if n_chi_fkem is None:
+        n_chi_fkem_eff = fkem_Nchi
+        if fkem_Nchi is not None:
+            _warnings.warn(
+                "`fkem_Nchi` is deprecated and will be removed in CCL v4. "
+                "Use `n_chi_fkem` instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+    else:
+        n_chi_fkem_eff = n_chi_fkem
+
+    if isinstance(ell_limber_eff, str):
+        if ell_limber_eff != "auto":
+            raise ValueError("ell_limber must be an integer or 'auto'")
         auto_limber = True
     else:
         auto_limber = False
 
-    # we need the distances for the integrals
     cosmo.compute_distances()
-
-    # Access ccl_cosmology object
 
     if p_of_k_a is None:
         p_of_k_a = DEFAULT_POWER_SPECTRUM
@@ -120,31 +207,59 @@ def angular_cl(
         status = lib.add_cl_tracer_to_collection(clt2, t, status)
 
     ell_use = np.atleast_1d(ell)
-
-    # Check the values of ell are monotonically increasing
     if not (np.diff(ell_use) > 0).all():
         raise ValueError("ell values must be monotonically increasing")
 
-    fkem_params = {'pk_linear': p_of_k_a_lin,
-                   'limber_max_error': limber_max_error,
-                   'Nchi': fkem_Nchi,
-                   'chi_min': fkem_chi_min}
-    if auto_limber or (type(l_limber) is not str and ell_use[0] < l_limber):
-        if non_limber_integration_method == "FKEM":
-            l_limber, cl_non_limber, status = _nonlimber_FKEM(
-                cosmo,
-                tracer1,
-                tracer2,
-                p_of_k_a,
-                ell_use,
-                l_limber,
-                **fkem_params
+    # sanity check for non-Limber configuration:
+    # If the user requested FKEM with a positive ell_limber, it must not be
+    # smaller than the smallest ell. We allow:
+    #   - ell_limber <= 0  : treated as "no FKEM, pure Limber"
+    #   - ell_limber == min(ell) : FKEM active starting at the first ell
+    ell0 = ell_use[0]
+    is_valid_eff = (
+        isinstance(ell_limber_eff, (int, float))
+        and 0 < ell_limber_eff < ell0
+    )
+    if (
+            nonlimber_method == "FKEM"
+            and not auto_limber
+            and is_valid_eff
+    ):
+        raise ValueError(
+            "For FKEM non-Limber integration, a positive `ell_limber` must be "
+            "at least as large as the smallest requested ell."
+        )
+
+    cl_non_limber = np.array([])
+
+    # We always call FKEM with the *effective* parameters:
+    #   - ell_limber_eff: resolved from old/new names,
+    #   - chi_min_fkem_eff, n_chi_fkem_eff: same idea for chi grid.
+    if auto_limber or (
+            not isinstance(ell_limber_eff, str) and ell_use[0] < ell_limber_eff
+    ):
+        if nonlimber_method == "FKEM":
+            ell_limber_eff, cl_non_limber, status = nonlimber_fkem(
+                cosmo=cosmo,
+                tracer1=tracer1,
+                tracer2=tracer2,
+                p_of_k_a=p_of_k_a,
+                ell=ell_use,
+                ell_limber=ell_limber_eff,
+                pk_linear=p_of_k_a_lin,
+                limber_max_error=limber_max_error,
+                n_chi_fkem=n_chi_fkem_eff,
+                chi_min_fkem=chi_min_fkem_eff,
+                n_consec_ell=3,
             )
         check(status, cosmo=cosmo)
+
+    n_nl = cl_non_limber.size
+    if n_nl > 0:
+        ell_use_limber = ell_use[n_nl:]
     else:
-        cl_non_limber = np.array([])
-    ell_use_limber = ell_use[ell_use > l_limber]
-    # Return Cl values, according to whether ell is an array or not
+        ell_use_limber = ell_use
+
     if len(ell_use_limber) > 0:
         cl_limber, status = lib.angular_cl_vec_limber(
             cosmo.cosmo,
@@ -159,7 +274,6 @@ def angular_cl(
     else:
         cl_limber = np.array([])
 
-    # put pieces together
     cl = np.concatenate((cl_non_limber, cl_limber))
     if np.ndim(ell) == 0:
         cl = cl[0]
@@ -169,7 +283,9 @@ def angular_cl(
     lib.cl_tracer_collection_t_free(clt2)
 
     if return_meta:
-        meta = {"l_limber": l_limber}  # add other things as needed
+        # Here we report the *effective* Limber scale;
+        # keep both keys for backwards compat.
+        meta = {"ell_limber": ell_limber_eff, "l_limber": ell_limber_eff}
 
     check(status, cosmo=cosmo)
     return (cl, meta) if return_meta else cl

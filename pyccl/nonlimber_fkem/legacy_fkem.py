@@ -1,4 +1,4 @@
-__all__ = ("_nonlimber_FKEM",)
+__all__ = ("legacy_nonlimber_fkem",)
 """Written by Paul Rogozenski (paulrogozenski@arizona.edu),
  implementing the FKEM non-limber integration method of the N5K challenge
  detailed in this paper: https://arxiv.org/pdf/1911.11947.pdf .
@@ -7,12 +7,12 @@ We utilize a modified generalized version of FFTLog
  to compute integrals over spherical bessel functions
 """
 import numpy as np
-from . import lib, check
-from .pyutils import integ_types
+from .. import lib, check
+from ..pyutils import integ_types
 from scipy.interpolate import interp1d
-from pyccl.pyutils import _fftlog_transform_general
+from ..pyutils import _fftlog_transform_general
 import pyccl as ccl
-from . import CCLWarning, warnings
+from .. import CCLWarning, warnings
 
 
 def _get_general_params(b):
@@ -33,9 +33,7 @@ def _get_general_params(b):
     return best_nu, deriv, plaw
 
 
-def _nonlimber_FKEM(
-        cosmo, clt1, clt2, p_of_k_a,
-        ls, l_limber, **params):
+def legacy_nonlimber_fkem(cosmo, clt1, clt2, p_of_k_a, ls, l_limber, **params):
     """clt1, clt2 are lists of tracer in a tracer object
     cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
     psp non-linear power spectrum
@@ -54,19 +52,22 @@ def _nonlimber_FKEM(
     fll_t2 = clt2.get_f_ell(ls)
     status = 0
 
-    p_of_k_a_lin = params['pk_linear']
-    limber_max_error = params['limber_max_error']
-    Nchi = params['Nchi']
-    chi_min = params['chi_min']
-    if (not (isinstance(p_of_k_a, str) and isinstance(p_of_k_a_lin, str)) and
-       not (isinstance(p_of_k_a, ccl.Pk2D)
-            and isinstance(p_of_k_a_lin, ccl.Pk2D)
-            )):
+    p_of_k_a_lin = params["pk_linear"]
+    limber_max_error = params["limber_max_error"]
+    Nchi = params["Nchi"]
+    chi_min = params["chi_min"]
+    if not (
+        isinstance(p_of_k_a, str) and isinstance(p_of_k_a_lin, str)
+    ) and not (
+        isinstance(p_of_k_a, ccl.Pk2D) and isinstance(p_of_k_a_lin, ccl.Pk2D)
+    ):
         warnings.warn(
             "p_of_k_a and p_of_k_a_lin must be of the same "
             "type: a str in cosmo or a Pk2D object. "
             "Defaulting to Limber calculation. ",
-            category=CCLWarning, importance='high')
+            category=CCLWarning,
+            importance="high",
+        )
         return -1, np.array([]), status
 
     psp_lin = cosmo.parse_pk2d(p_of_k_a_lin, is_linear=True)
@@ -94,8 +95,7 @@ def _nonlimber_FKEM(
         chi_min = np.min([min_chis_t1, min_chis_t2])
     chi_max = np.max([max_chis_t1, max_chis_t2])
     if Nchi is None:
-        Nchi = min(min(len(i) for i in chis_t1),
-                   min(len(i) for i in chis_t2))
+        Nchi = min(min(len(i) for i in chis_t1), min(len(i) for i in chis_t2))
     """zero chi_min will result in a divide-by-zero error.
     If it is zero, we set it to something very small
     """
@@ -111,6 +111,7 @@ def _nonlimber_FKEM(
     growfac_arr = ccl.growth_factor(cosmo, a_arr)
     avg_a1s = clt1.get_avg_weighted_a()
     avg_a2s = clt2.get_avg_weighted_a()
+
     for el in range(len(ls)):
         ell = ls[el]
         cls_nonlimber_lin = 0.0
@@ -200,7 +201,7 @@ def _nonlimber_FKEM(
                 k, fk2 = clt2._get_fkem_fft(
                     clt2._trc[j], Nchi, chi_min, chi_max, ell
                 )
-                if ((k is None) or (fk2 is None)):
+                if (k is None) or (fk2 is None):
                     transfer_t2_low = np.array(
                         clt2.get_transfer(np.log(k_low), a_arr)
                     )
@@ -208,8 +209,7 @@ def _nonlimber_FKEM(
                         np.log(k_low), avg_a2s[j]
                     )
                     fchi2_interp = interp1d(
-                        chis_t2[j], kernels_t2[j],
-                        fill_value="extrapolate"
+                        chis_t2[j], kernels_t2[j], fill_value="extrapolate"
                     )
                     fchi2_arr = (
                         fchi2_interp(chi_logspace_arr)
@@ -263,6 +263,16 @@ def _nonlimber_FKEM(
         cells.append(
             cl_limber_nonlin[-1] - cl_limber_lin[-1] + cls_nonlimber_lin
         )
+
+        # --- DEBUG: when called just for ell=[2], print legacy FKEM piece ---
+        if len(ls) == 1 and ls[0] == 2.0:
+            print("[DEBUG LEGACY FKEM] ell = 2")
+            print("  cl_limber_nonlin_legacy =", cl_limber_nonlin[-1])
+            print("  cl_limber_lin_legacy    =", cl_limber_lin[-1])
+            print("  cls_lin_fkem_legacy     =", cls_nonlimber_lin)
+            print("  cl_out_legacy           =", cells[-1])
+        # ---------------------------------------------------------------------
+
         if (
             np.abs(cells[-1] / cl_limber_nonlin[-1] - 1) < limber_max_error
             and l_limber == "auto"
