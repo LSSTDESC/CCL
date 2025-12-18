@@ -20,7 +20,7 @@ def _compile_ccl(debug=False):
             "Could not run CMake configuration. Make sure "
             "CMake is installed !")
 
-    if call(["make", "-Cbuild", "-DCMAKE_C_FLAGS=-Wno-error=int-conversion", "-DCMAKE_CXX_FLAGS=-Wno-error=int-conversion", "_ccllib"]) != 0:
+    if call(["make", "-Cbuild", "_ccllib"]) != 0:
         raise Exception("Could not build CCL")
 
     # Finds the library under its different possible names

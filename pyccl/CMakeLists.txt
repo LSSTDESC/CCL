@@ -31,6 +31,7 @@ swig_link_libraries(ccllib ccl_static)
 
 if(APPLE)
     # Unpleasant subtelty for linking on osx
+    target_compile_options(${SWIG_MODULE_ccllib_REAL_NAME} PRIVATE "-Wno-error=int-conversion")
     set_target_properties(${SWIG_MODULE_ccllib_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
 else(APPLE)
     swig_link_libraries(ccllib ${PYTHON_LIBRARIES})
