@@ -95,6 +95,7 @@ jobs:
 
       - name: Full compilation (to run C-level benchmarks)
         run: |
+          cmake -H. -Bbuild -DPYTHON_VERSION=0.0.0
           make -Cbuild all
 
       - name: Unit tests
