@@ -97,6 +97,7 @@ jobs:
         run: |
           cmake -H. -Bbuild -DPYTHON_VERSION=0.0.0
           make -Cbuild all
+          ./build/check_ccl
 
       - name: Unit tests
         run: |

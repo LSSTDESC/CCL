@@ -104,6 +104,7 @@ target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} 
 
 # Builds the test suite
 add_executable(check_ccl ${TEST_SRC})
+target_link_options(check_ccl PRIVATE "-Wl,--no-gc-sections")
 target_link_libraries(check_ccl ccl)
 
 # Builds pkgconfig file for CCL
