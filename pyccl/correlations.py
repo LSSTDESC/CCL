@@ -1,10 +1,12 @@
 __all__ = ("CorrelationMethods", "CorrelationTypes", "correlation",
            "correlation_3d", "correlation_multipole", "correlation_3dRsd",
-           "correlation_3dRsd_avgmu", "correlation_pi_sigma",)
+           "correlation_3dRsd_avgmu", "correlation_pi_sigma",
+           "correlation_ab")
 
 from enum import Enum
 import numpy as np
-from . import DEFAULT_POWER_SPECTRUM, check, lib
+from .pyutils import resample_array, _fftlog_transform
+from . import DEFAULT_POWER_SPECTRUM, check, lib, physical_constants
 
 
 class CorrelationMethods(Enum):
@@ -361,3 +363,144 @@ def correlation_pi_sigma(cosmo, *, pi, sigma, a, beta,
     if scalar:
         return xis[0]
     return xis
+
+
+def correlation_ab(cosmo, *, r_p: np.ndarray, z: np.ndarray,
+                   dndz: np.ndarray = None, dndz2: np.ndarray = None,
+                   p_of_k_a=None,
+                   type: str = 'gg',
+                   precision_fftlog: dict = None):
+    """
+    Computes :math:`w_{ab}`.
+    .. math::
+        \\w_{ab}(r_p)=\\int dz\\,(W)(z)
+        \\int\\frac{dk k}{2\\pi^2}\\,P(k,a)\\,J_n(k r_p)
+
+        Args:
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+            r_p (float or array-like): Projected radial separation where the
+                correlation function will be evaluated.
+            z (float or array-like): Redshift values where the redshift 
+                distribution has been evaluated. If float, the window function
+                is set to a delta function.
+            dndz (array-like): Redshift distribution to be used when computing
+                the window function (see e.g. Eq. (3.11) in (1811.09598)).
+            dndz2 (array-like or None): Redshift distribution corresponding to
+                sample `b` of tracers to be correlated. If None, tracers `a`
+                and `b` are the same. Default value: None.
+            p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 3D Power spectrum
+                to integrate. If a string, it must correspond to one of the
+                non-linear power spectra stored in `cosmo` (e.g.
+                `'delta_matter:delta_matter'`).
+            type (string): Type of `ab` correlation. This changes the Bessel
+                function in the integral above. Choices: 'gg' (`J_0`),
+                'g+' (`J_2`), '++' (`J_0+J_4`).
+            precision_fftlog (dict): Dictionary containing the precision
+                parameters used by FFTLog to compute Hankel transforms. The
+                dictionary should contain the keys:
+                `padding_lo_fftlog`, `padding_hi_fftlog`,
+                `n_per_decade`, `extrapol`, `plaw_fourier`.
+                Default values are 0.01, 0.1, 10., 10.,
+                100, 'linx_liny' and -1.5. For more information look at
+                `pyccl.halos.profiles.profile_base.update_precision_fftlog`.
+
+        Returns:
+            array-like: Value(s) of the correlation function at the input
+            projected radial separation(s).
+    """ # noqa
+    cosmo.compute_nonlin_power()
+    cosmo_in = cosmo
+    psp = cosmo_in.parse_pk(p_of_k_a)
+
+    if dndz2 is None:
+        dndz2 = dndz
+    if dndz is None and np.iterable(z):
+        raise ValueError('Cannot have iterable redshift array while '
+                         'dndz is None.')
+    a = 1/(1+z)
+    a = np.atleast_1d(a)
+    if type == 'gg':
+        xi = np.array([_fftlog_wrap(r_p, a_, psp, n=0,
+                                    precision_fftlog=precision_fftlog)
+                      for a_ in a])
+    elif type == 'g+':
+        xi = np.array([_fftlog_wrap(r_p, a_, psp, n=2,
+                                    precision_fftlog=precision_fftlog)
+                      for a_ in a])
+    elif type == '++':
+        xi = np.array([(_fftlog_wrap(r_p, a_, psp, n=0,
+                                     precision_fftlog=precision_fftlog) +
+                       _fftlog_wrap(r_p, a_, psp, n=4,
+                                    precision_fftlog=precision_fftlog))
+                      for a_ in a])/2
+    else:
+        raise ValueError('Correlation type not recognised. Accepted'
+                         'values: "gg", "g+", "++".')
+    if np.iterable(z):
+        speed_of_light_kmps = physical_constants.CLIGHT * 1e-3
+        dchi_dz = speed_of_light_kmps/(cosmo_in.h_over_h0(a)*cosmo_in['H0'])
+        denominator = cosmo_in.comoving_radial_distance(a) ** 2. * dchi_dz
+        wz = np.divide(dndz * dndz2,
+                       denominator,
+                       where=denominator > 0)
+        wz /= np.trapz(wz, z)
+        if np.ndim(xi) == 2:
+            wz = wz.reshape((len(z), 1))
+        w = np.trapz(wz*xi, z, axis=0)
+    else:
+        w = xi[0]
+    return w
+
+
+def _fftlog_wrap(r_p: np.ndarray, a: float, p_of_k_a,
+                 precision_fftlog: dict = None,
+                 n=0):
+    '''Computes the integral
+       .. math::
+          \\xi(r_p,a)=\\int\\frac{dk k}{2\\pi^2}\\,P(k,a)\\,J_n(k r_p)
+       Adapted from pyccl.halos.profiles.profile_base._fftlog_wrap.
+    '''
+    # Note: The _fftlog_transform solves for
+    # f(r) = \int 4 pi k^2 f(k) j_l(kr) dk
+    # To compute the integral shown above we use _fftlog_transform
+    # and set fk = rp^1/2 P(k,a:float)/(2^5/2 pi^5/2 k^1/2).
+    if precision_fftlog is None:
+        precision_fftlog = {'padding_lo_fftlog': 0.001,
+                            'padding_hi_fftlog': 10.,
+                            'n_per_decade': 100,
+                            'extrapol': 'linx_liny',
+                            'plaw_fourier': -1.5}
+    else:
+        for key in ['padding_lo_fftlog', 'padding_hi_fftlog', 'n_per_decade',
+                    'extrapol', 'plaw_fourier']:
+            if key not in precision_fftlog.keys():
+                raise ValueError('Error.')
+    l = n - 1 / 2
+
+    r_use = np.atleast_1d(r_p)
+    lr_use = np.log(r_use)
+
+    # k-range to be used with FFTLog and its sampling.
+    k_min = precision_fftlog['padding_lo_fftlog'] * np.amin(r_use)
+    k_max = precision_fftlog['padding_hi_fftlog'] * np.amax(r_use)
+    n_k = (int(np.log10(k_max / k_min)) *
+           precision_fftlog['n_per_decade'])
+    k_arr = np.geomspace(k_min, k_max, n_k)  # Array to be used by FFTLog.
+
+    # What needs to go in _fftlog_transform to get out \xi_gg.
+    fk = p_of_k_a(k_arr, a)/((2*np.pi)**(5./2)*k_arr**(1/2))
+    r_arr, xi_fourier = _fftlog_transform(k_arr, fk, 3, l,
+                                          precision_fftlog['plaw_fourier'])
+    lr_arr = np.log(r_arr)
+
+    # Resample into input k values.
+    xi_out = resample_array(lr_arr, xi_fourier, lr_use,
+                            precision_fftlog['extrapol'],
+                            precision_fftlog['extrapol'],
+                            0, 0)
+    # Multiply to get the correct output.
+    xi_out *= (2*np.pi)**3*np.sqrt(r_use)
+
+    if np.ndim(r_p) == 0:
+        xi_out = np.squeeze(xi_out, axis=-1)
+    return xi_out
