@@ -104,6 +104,12 @@ target_link_libraries(ccl ${GSL_LIBRARIES} ${FFTW_LIBRARIES} ${CLASS_LIBRARIES} 
 
 # Builds the test suite
 add_executable(check_ccl ${TEST_SRC})
+if(APPLE)
+  # Prevent per-function/section splitting for the test target so the .ctest entries are kept
+  target_compile_options(check_ccl PRIVATE -fno-function-sections)
+else()
+  target_link_options(check_ccl PRIVATE "-Wl,--no-gc-sections")
+endif()
 target_link_libraries(check_ccl ccl)
 
 # Builds pkgconfig file for CCL

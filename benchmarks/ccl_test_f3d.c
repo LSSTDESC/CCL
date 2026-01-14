@@ -5,6 +5,8 @@
 #include <math.h>
 #include <string.h>
 
+// Defining 1e-4 tolerance as in the old version of ctest.h vs 1e-12 in the new one
+#define DBL_NEAR_TOL 1e-4
 
 double a_func(double a)
 {
@@ -115,7 +117,7 @@ CTEST2(f3d,baseline) {
 
   tkka=ccl_f3d_t_eval(tsp,lktest,lktest,atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(exp(lktest),exp(lktest),atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(exp(lktest),exp(lktest),atest), DBL_NEAR_TOL);
 
   //Extrapolation in a
   tkka=ccl_f3d_t_eval(tsp,lktest,lktest,0.01,finda,NULL,&status);
@@ -126,33 +128,33 @@ CTEST2(f3d,baseline) {
   double klow=1E-5;
   tkka=ccl_f3d_t_eval(tsp,log(klow),lktest,atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(klow,exp(lktest),atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(klow,exp(lktest),atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (low, #2)
   tkka=ccl_f3d_t_eval(tsp,lktest, log(klow),atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(exp(lktest),klow,atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(exp(lktest),klow,atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (low, #1 and #2)
   tkka=ccl_f3d_t_eval(tsp,log(klow), log(klow),atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(klow,klow,atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(klow,klow,atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (high, #1)
   double khigh=1E3;
   tkka=ccl_f3d_t_eval(tsp,log(khigh),lktest,atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(khigh,exp(lktest),atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(khigh,exp(lktest),atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (high, #2)
   tkka=ccl_f3d_t_eval(tsp,lktest, log(khigh),atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(exp(lktest),khigh,atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(exp(lktest),khigh,atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (high, #1 and #2)
   tkka=ccl_f3d_t_eval(tsp,log(khigh), log(khigh),atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(khigh,khigh,atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(khigh,khigh,atest), DBL_NEAR_TOL);
 
   ccl_a_finder_free(finda);
   ccl_f3d_t_free(tsp);
@@ -179,7 +181,7 @@ CTEST2(f3d,factorized) {
 
   tkka=ccl_f3d_t_eval(tsp,lktest,lktest,atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(exp(lktest),exp(lktest),atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(exp(lktest),exp(lktest),atest), DBL_NEAR_TOL);
 
   //Extrapolation in a
   tkka=ccl_f3d_t_eval(tsp,lktest,lktest,0.01,finda,NULL,&status);
@@ -190,33 +192,33 @@ CTEST2(f3d,factorized) {
   double klow=1E-5;
   tkka=ccl_f3d_t_eval(tsp,log(klow),lktest,atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(klow,exp(lktest),atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(klow,exp(lktest),atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (low, #2)
   tkka=ccl_f3d_t_eval(tsp,lktest, log(klow),atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(exp(lktest),klow,atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(exp(lktest),klow,atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (low, #1 and #2)
   tkka=ccl_f3d_t_eval(tsp,log(klow), log(klow),atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(klow,klow,atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(klow,klow,atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (high, #1)
   double khigh=1E3;
   tkka=ccl_f3d_t_eval(tsp,log(khigh),lktest,atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(khigh,exp(lktest),atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(khigh,exp(lktest),atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (high, #2)
   tkka=ccl_f3d_t_eval(tsp,lktest, log(khigh),atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(exp(lktest),khigh,atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(exp(lktest),khigh,atest), DBL_NEAR_TOL);
 
   //Extrapolation in k (high, #1 and #2)
   tkka=ccl_f3d_t_eval(tsp,log(khigh), log(khigh),atest,finda,NULL,&status);
   ASSERT_TRUE(status==0);
-  ASSERT_DBL_NEAR(1,tkka/tkka_model(khigh,khigh,atest));
+  ASSERT_DBL_NEAR_TOL(1,tkka/tkka_model(khigh,khigh,atest), DBL_NEAR_TOL);
 
   ccl_a_finder_free(finda);
   ccl_f3d_t_free(tsp);
