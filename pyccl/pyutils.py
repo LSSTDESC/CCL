@@ -1,9 +1,11 @@
 """Utility functions to analyze status and error messages passed from CCL, as
 well as wrappers to automatically vectorize functions.
 """
-__all__ = (
+__all__ = [
     "CLevelErrors", "ExtrapolationMethods", "IntegrationMethods", "check",
-    "debug_mode", "get_pk_spline_lk", "get_pk_spline_a", "resample_array")
+    "debug_mode", "get_pk_spline_lk", "get_pk_spline_a", "resample_array",
+    "integ_types"
+]
 
 from enum import Enum
 from typing import Iterable

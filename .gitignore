@@ -68,3 +68,4 @@ tests/benchmark/codes/.ipynb_checkpoints/*
 
 # notebook checkpoints
 benchmarks/data/codes/.ipynb_checkpoints/*
+dev-scripts/compare_fkem.py
