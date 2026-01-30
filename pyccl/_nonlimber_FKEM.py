@@ -23,27 +23,22 @@ def _get_general_params(b):
         b (int): Bessel function derivative order
             (corresponds to CCL bessel_deriv_type)
     Returns:
-        best_nu (float): Tuned bias parameter for FFTLog
+        nu (float): bias parameter for FFTLog
         deriv (float): Derivative order of Bessel Function
             for integrand
         plaw (float): Power-law index of k-factor in integrand
     """
-    # references:
-    nu = 1.51
-    nu2 = 0.51
+    # nu set to 1.01 to avoid singularity at nu=1, as in FFTLog paper
+    nu = 1.01
     deriv = 0.0
     plaw = 0.0
-    best_nu = nu
     if b < 0:
         plaw = -2.0
-        best_nu = nu2
-
     if b <= 0:
         deriv = 0
     else:
         deriv = b
-
-    return best_nu, deriv, plaw
+    return nu, deriv, plaw
 
 
 def _chi_integrands(cosmo, clt,
@@ -83,53 +78,54 @@ def _chi_integrands(cosmo, clt,
     fks = np.zeros((len(kernels), Nchi))
     transfers = np.zeros((len(kernels), Nchi))
     for i in range(len(kernels)):
-        k, fk = clt._get_fkem_fft(
-            clt._trc[i], Nchi, chi_min, chi_max, ell
+        # TODO: better caching dictionaries to avoid recomputation
+        # must depend on cosmology and tracer properties
+        # k, fk = clt._get_fkem_fft(
+        #     clt._trc[i], Nchi, chi_min, chi_max, ell
+        # )
+
+        # if (k is None) or (fk is None):
+        transfer_low = np.array(
+            clt.get_transfer(np.log(k_low), a_arr)
         )
+        transfer_avg = clt.get_transfer(np.log(k_low), avg_as[i])
+        # check no zeros in transfer functions
+        if np.any(transfer_avg == 0.0):
+            raise ZeroDivisionError(
+                "Zero transfer function encountered in FKEM chi "
+                "integrand calculation. "
+                "Setting integrand to zero."
+            )
 
-        if (k is None) or (fk is None):
-            transfer_low = np.array(
-                clt.get_transfer(np.log(k_low), a_arr)
-            )
-            transfer_avg = clt.get_transfer(np.log(k_low), avg_as[i])
-            # check no zeros in transfer functions
-            if np.any(transfer_avg == 0.0):
-                raise ZeroDivisionError(
-                    "Zero transfer function encountered in FKEM chi "
-                    "integrand calculation. "
-                    "Setting integrand to zero."
-                )
+        fchi_interp = make_interp_spline(
+            chis[i], kernels[i], k=1
+        )
+        # transfer function approximation for the case
+        # when it's inseperable in k and a
+        # exact for seperable transfer functions
+        fchi_arr = (
+            fchi_interp(chi_logspace_arr)
+            * chi_logspace_arr
+            * growfac_arr
+            * transfer_low[i]
+            / transfer_avg[i]
+        )
+        # calls to fftlog to perform integration over chi integrals
+        nu, deriv, plaw = _get_general_params(bessels[i])
+        k, fk = _fftlog_transform_general(
+            chi_logspace_arr,
+            fchi_arr.flatten(),
+            float(ell),
+            nu,
+            1,
+            float(deriv),
+            float(plaw),
+        )
+        check(status, cosmo=cosmo)
 
-            fchi_interp = make_interp_spline(
-                chis[i], kernels[i], k=1
-            )
-            # transfer function approximation for the case
-            # when it's inseperable in k and a
-            # exact for seperable transfer functions
-            fchi_arr = (
-                fchi_interp(chi_logspace_arr)
-                * chi_logspace_arr
-                * growfac_arr
-                * transfer_low[i]
-                / transfer_avg[i]
-            )
-            # calls to fftlog to perform integration over chi integrals
-            nu, deriv, plaw = _get_general_params(bessels[i])
-            k, fk = _fftlog_transform_general(
-                chi_logspace_arr,
-                fchi_arr.flatten(),
-                float(ell),
-                nu,
-                1,
-                float(deriv),
-                float(plaw),
-            )
-            check(status, cosmo=cosmo)
-
-            # TODO: not caching fk
-            # clt._set_fkem_fft(
-            #    clt._trc[i], Nchi, chi_min, chi_max, ell, k, fk
-            #)
+        # clt._set_fkem_fft(
+        #    clt._trc[i], Nchi, chi_min, chi_max, ell, k, fk
+        # )
         fks[i] = fk
         transfers[i] = np.array(clt.get_transfer(np.log(k), avg_as[i]))
 
@@ -297,24 +293,19 @@ def _nonlimber_FKEM(
             fks_2 = fks_1
             transfers_t2 = transfers_t1
 
-        for i in range(len(kernels_t1)):
-            for j in range(len(kernels_t2)):
-                cls_nonlimber_lin += (
-                    np.sum(
-                        fks_1[i]
-                        * transfers_t1[i]
-                        * fks_2[j]
-                        * transfers_t2[j]
-                        * k**kpow
-                        * pk(k, 1.0, cosmo)
-                    )
-                    * dlnr
-                    * 2.0
-                    / np.pi
-                    * fll_t1[i][el]
-                    * fll_t2[j][el]
-                )
-
+        cls_nonlimber_lin = np.sum(
+            fks_1[:, None, :]
+            * transfers_t1[:, None, :]
+            * fks_2[None, :, :]
+            * transfers_t2[None, :, :]
+            * (k**kpow
+                * pk(k, 1.0, cosmo))[None, None, :]
+            * dlnr
+            * 2.0
+            / np.pi
+            * fll_t1[:, None, None, el]
+            * fll_t2[None, :, None, el]
+        )
         # append the final cl calculation to the returned array
         # see whether the Limber transition ell/threshold has been reached
         # and check whether to continue to higher ells
