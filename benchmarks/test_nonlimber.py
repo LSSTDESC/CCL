@@ -3,6 +3,7 @@ import pyccl as ccl
 
 import time
 import pytest
+from scipy.integrate import simpson
 
 root = "benchmarks/data/nonlimber/"
 
@@ -104,6 +105,23 @@ def set_up():
         t = ccl.WeakLensingTracer(cosmo, dndz=(Nzs["z_sh"], Nz))
         t_s.append(t)
     ells = get_ells()
+
+    arcmin2_per_sr = (60*60*(180/np.pi)**2)
+    sigma_e = 0.28
+
+    # Per-bin number densities via dN/dz integrals (match N5K calculator logic)
+    nc_ints = simpson(Nzs["dNdz_cl"], x=Nzs["z_cl"], axis=0)
+    ns_ints = simpson(Nzs["dNdz_sh"], x=Nzs["z_sh"], axis=0)
+    # Distribute totals: 40/arcmin^2 for clustering, 27/arcmin^2 for shear
+    nc_ints *= 40.0 / np.sum(nc_ints)
+    ns_ints *= 27.0 / np.sum(ns_ints)
+
+    nbar_g_bins_sr = nc_ints * arcmin2_per_sr  # length Ng
+    nbar_s_bins_sr = ns_ints * arcmin2_per_sr  # length Ns
+
+    Ngg_auto = 1.0 / nbar_g_bins_sr
+    Nss_auto = (sigma_e**2) / (nbar_s_bins_sr)
+
     raw_truth = read_cls()
     indices_gg = []
     indices_gs = []
@@ -143,34 +161,26 @@ def set_up():
     err_ss = []
     nmodes = get_nmodes()
     for i1, i2 in indices_gg:
+        Cgg_11 = tgg[rind_gg[(i1, i1)]] + Ngg_auto[i1]
+        Cgg_22 = tgg[rind_gg[(i2, i2)]] + Ngg_auto[i2]
+        Cgg_12 = tgg[rind_gg[(i1, i2)]] + (0.0 if i1 != i2 else Ngg_auto[i1])
         err_gg.append(
-            np.sqrt(
-                (
-                    tgg[rind_gg[(i1, i1)]] * tgg[rind_gg[(i2, i2)]]
-                    + tgg[rind_gg[(i1, i2)]] ** 2
-                )
-                / nmodes
-            )
+            np.sqrt((Cgg_11 * Cgg_22 + Cgg_12 ** 2) / nmodes)
         )
     for i1, i2 in indices_gs:
+        Cgg = tgg[rind_gg[(i1, i1)]] + Ngg_auto[i1]
+        Css = tss[rind_ss[(i2, i2)]] + Nss_auto[i2]
+        Cgs = tgs[rind_gs[(i1, i2)]]
         err_gs.append(
-            np.sqrt(
-                (
-                    tgg[rind_gg[(i1, i1)]] * tss[rind_ss[(i2, i2)]]
-                    + tgs[rind_gs[(i1, i2)]] ** 2
-                )
-                / nmodes
-            )
+            np.sqrt((Cgg * Css + Cgs**2) / nmodes)
         )
     for i1, i2 in indices_ss:
+        Css_11 = tss[rind_ss[(i1, i1)]] + Nss_auto[i1]
+        Css_22 = tss[rind_ss[(i2, i2)]] + Nss_auto[i2]
+        Css_12 = tss[rind_ss[(i1, i2)]] + (0.0 if i1 != i2 else Nss_auto[i1])
+
         err_ss.append(
-            np.sqrt(
-                (
-                    tss[rind_ss[(i1, i1)]] * tss[rind_ss[(i2, i2)]]
-                    + tss[rind_ss[(i1, i2)]] ** 2
-                )
-                / nmodes
-            )
+            np.sqrt((Css_11 * Css_22 + Css_12 ** 2) / nmodes)
         )
 
     tracers1 = {"gg": t_g, "gs": t_g, "ss": t_s}
