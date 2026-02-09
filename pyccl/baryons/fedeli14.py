@@ -25,7 +25,7 @@ class BaryonsFedeli14(Baryons):
     The operation applied is:
 
     .. math::
-        P_{\rm out}(k,a) = P_{\rm in}(k,a)\,B_{\rm fedeli}(k,a).
+        P_{\rm out}(k,a) = P_{\rm in}(k,a)\,f_{\rm fedeli}(k,a).
 
     Notes:
         - CCL ``Pk2D`` uses ``k`` in units of 1/Mpc, and this implementation
@@ -218,13 +218,13 @@ class BaryonsFedeli14(Baryons):
             k: float | FloatArray,
             a: float | FloatArray
     ) -> float | FloatArray:
-        r"""Evaluate the Fedeli14 boost factor ``B(k,a)``.
+        r"""Evaluate the Fedeli14 boost factor ``f(k,a)``.
 
         The boost is defined as a ratio of the baryonic halo-model matter
         spectrum to a chosen reference spectrum:
 
         .. math::
-            B(k,a) = \frac{P_{\rm bar}^{\rm HM}(k,a)}{P_{\rm ref}(k,a)}.
+            f(k,a) = \frac{P_{\rm bar}^{\rm HM}(k,a)}{P_{\rm ref}(k,a)}.
 
         The reference is controlled by ``self.pk_ref`` (e.g. "pk_dmo",
         "pk_nlin", "pk_lin") and is interpreted by ``BaryonHaloModel.boost``.
@@ -266,7 +266,7 @@ class BaryonsFedeli14(Baryons):
         for i, aval in enumerate(a_use[:, 0]):
             out[i, :] = bhm.boost(k=k_1d, a=float(aval), pk_ref=self.pk_ref)
 
-        # We need to enforce B(k->0)=1 by renormalizing on large scales.
+        # We need to enforce f(k->0)=1 by renormalizing on large scales.
         # Otherwise our boost will not behave at large scales.
         if self.renormalize_large_scales:
             k0 = self.k_renorm_max
@@ -297,7 +297,7 @@ class BaryonsFedeli14(Baryons):
         The transformation is:
 
         .. math::
-            P_{\rm out}(k,a) = P_{\rm in}(k,a)\,B(k,a).
+            P_{\rm out}(k,a) = P_{\rm in}(k,a)\,f(k,a).
 
         Behavior details:
             - The boost is evaluated only where the underlying baryon halo
