@@ -196,7 +196,6 @@ def test_trapz_compat_uses_trapezoid_or_falls_back(monkeypatch) -> None:
     assert out2 == pytest.approx(trap(y, x=x))
 
 
-
 def test_require_array_1d_rejects_non_1d_and_empty() -> None:
     """Tests that _require_array_1d rejects non-1D arrays and empty arrays."""
 
@@ -208,7 +207,8 @@ def test_require_array_1d_rejects_non_1d_and_empty() -> None:
 
 
 def test_require_finite_1d_rejects_nonfinite() -> None:
-    """Tests that _require_finite_1d rejects arrays containing non-finite values."""
+    """Tests that _require_finite_1d rejects arrays containing non-finite
+     values."""
 
     with pytest.raises(ValueError, match=r"x must contain only finite values"):
         _require_finite_1d("x", np.array([1.0, np.nan]))

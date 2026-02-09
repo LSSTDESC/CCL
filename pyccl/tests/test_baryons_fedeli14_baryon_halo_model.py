@@ -455,7 +455,10 @@ def test_validate_ranges_vs_interp_raises_when_ranges_exceed_grid() -> None:
     }
 
     with pytest.raises(ValueError, match=r"exceed interpolation mass grid"):
-        _ = BaryonHaloModel(cosmo=cosmo, interpolation_grid=interp, mass_ranges=ranges)
+        _ = BaryonHaloModel(
+            cosmo=cosmo,
+            interpolation_grid=interp,
+            mass_ranges=ranges)
 
 
 def test_halo_profiles_space_real_fourier_and_invalid(
@@ -464,8 +467,14 @@ def test_halo_profiles_space_real_fourier_and_invalid(
     """Tests that halo_profiles validates space and returns real or fourier."""
     bhm = BaryonHaloModel(cosmo=_cosmo())
 
-    monkeypatch.setattr(BaryonHaloModel, "_get_profiles", lambda self, a: {"x": "real"})
-    monkeypatch.setattr(BaryonHaloModel, "_get_interpolators", lambda self, a: {"x": "fourier"})
+    monkeypatch.setattr(
+        BaryonHaloModel,
+        "_get_profiles",
+        lambda self, a: {"x": "real"})
+    monkeypatch.setattr(
+        BaryonHaloModel,
+        "_get_interpolators",
+        lambda self, a: {"x": "fourier"})
 
     out_real = bhm.halo_profiles(a=1.0, space="real")
     assert out_real == {"x": "real"}
@@ -484,7 +493,10 @@ def test_mass_fractions_wrapper_calls_get_mass_fractions_and_validates_a(
     bhm = BaryonHaloModel(cosmo=_cosmo())
 
     sentinel = (object(), object(), object())
-    monkeypatch.setattr(BaryonHaloModel, "_get_mass_fractions", lambda self, a: sentinel)
+    monkeypatch.setattr(
+        BaryonHaloModel,
+        "_get_mass_fractions",
+        lambda self, a: sentinel)
 
     out = bhm.mass_fractions(a=1.0)
     assert out is sentinel
@@ -496,7 +508,8 @@ def test_mass_fractions_wrapper_calls_get_mass_fractions_and_validates_a(
 def test_halo_radius_physical_comoving_and_invalid_frame(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Tests that halo_radius validates frame and returns physical or comoving."""
+    """Tests that halo_radius validates frame and returns physical or
+    comoving."""
     bhm = BaryonHaloModel(cosmo=_cosmo())
 
     class _FakeMassDef:
@@ -515,11 +528,11 @@ def test_halo_radius_physical_comoving_and_invalid_frame(
         _ = bhm.halo_radius(M=1e14, a=1.0, frame="nope")
 
 
-
 def test_get_dmo_dm_interpolator_is_cached_and_builds_dm_only(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Tests that _get_dmo_dm_interpolator caches interpolators per scale factor."""
+    """Tests that _get_dmo_dm_interpolator caches interpolators per
+    scale factor."""
     calls = {"n": 0, "components": None}
 
     def fake_build_profile_interpolators(**kwargs: Any):

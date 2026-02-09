@@ -356,8 +356,7 @@ def test_boost_factor_renorm_guard_replaces_bad_norm(
     monkeypatch.setattr(
         BaryonsFedeli14,
         "_build_bhm",
-        lambda self,
-               cosmo: DummyBHM())
+        lambda self, cosmo: DummyBHM())
 
     k = np.array([1e-4, 1e-2, 1e-1], dtype=float)
     a = np.array([0.5, 1.0], dtype=float)
