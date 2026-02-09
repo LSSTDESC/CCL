@@ -210,11 +210,16 @@ class GasHaloProfile(HaloProfile):
         if np.any(~np.isfinite(prof)) or np.any(prof < 0.0):
             raise ValueError("Gas profile evaluation produced invalid values.")
 
-        if np.ndim(r) == 0:
-            prof = np.squeeze(prof, axis=-1)
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=0)
-        return prof
+        r_is_scalar = np.ndim(r) == 0
+        M_is_scalar = np.ndim(M) == 0
+
+        if r_is_scalar and M_is_scalar:
+            return float(prof[0, 0])
+        if M_is_scalar:
+            return np.asarray(prof[0, :], dtype=float)  # (nr,)
+        if r_is_scalar:
+            return np.asarray(prof[:, 0], dtype=float)  # (nM,)
+        return np.asarray(prof, dtype=float)  # (nM, nr)
 
 
 class StellarHaloProfile(HaloProfile):
@@ -306,8 +311,13 @@ class StellarHaloProfile(HaloProfile):
             raise ValueError("Stellar profile evaluation produced"
                              " invalid values.")
 
-        if np.ndim(r) == 0:
-            prof = np.squeeze(prof, axis=-1)
-        if np.ndim(M) == 0:
-            prof = np.squeeze(prof, axis=0)
-        return prof
+        r_is_scalar = np.ndim(r) == 0
+        M_is_scalar = np.ndim(M) == 0
+
+        if r_is_scalar and M_is_scalar:
+            return float(prof[0, 0])
+        if M_is_scalar:
+            return np.asarray(prof[0, :], dtype=float)  # (nr,)
+        if r_is_scalar:
+            return np.asarray(prof[:, 0], dtype=float)  # (nM,)
+        return np.asarray(prof, dtype=float)  # (nM, nr)
