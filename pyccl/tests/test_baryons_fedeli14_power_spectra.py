@@ -622,10 +622,15 @@ def test_bias_raises_if_halo_bias_wrong_shape() -> None:
 
 
 def test_Ib_and_I2_internal_shape_guards(monkeypatch) -> None:
-    """Tests that _Ib_vec and _I2_vec raise if their inputs have wrong shape."""
+    """Tests that _Ib_vec and _I2_vec raise if their inputs have wrong
+    shape."""
     calc = _make_calc()
 
-    monkeypatch.setattr(ps, "_trapz_compat", lambda y, x, axis=0: np.zeros(2))
+    monkeypatch.setattr(ps,
+                        "_trapz_compat",
+                        lambda y,
+                        x,
+                        axis=0: np.zeros(2))
 
     with pytest.raises(ValueError, match=r"Ib has wrong shape"):
         _ = calc._Ib_vec("gas", 1e13, 1e14)  # noqa: SLF001
@@ -659,7 +664,9 @@ def test_pair_mixed_cross_packet_validates_comp() -> None:
 
 def test_pk_packet_requires_all_densities() -> None:
     """Tests that pk_packet requires all densities."""
-    calc = _make_calc(densities={"matter": 1.0, "dark_matter": 1.0, "gas": 1.0})
+    calc = _make_calc(densities={"matter": 1.0,
+                                 "dark_matter": 1.0,
+                                 "gas": 1.0})
     with pytest.raises(KeyError, match=r"Missing density"):
         _ = calc.pk_packet(use_cache=False)
 

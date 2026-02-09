@@ -139,7 +139,8 @@ def test_update_precision_fftlog_callable_is_invoked_and_returns_profile(
 
 
 def test_interpolate_profile_u_over_m_validates_a_and_grids() -> None:
-    """Tests that invalid inputs to interpolate_profile_u_over_m raise errors."""
+    """Tests that invalid inputs to interpolate_profile_u_over_m raise
+    errors."""
     mass, k = _grid_mass_k()
     prof = _ProfileNoUpd()
 
@@ -172,7 +173,8 @@ def test_interpolate_profile_u_over_m_validates_a_and_grids() -> None:
 
 
 def test_interpolate_profile_u_over_m_requires_fourier_and_callable() -> None:
-    """Tests that invalid inputs to interpolate_profile_u_over_m raise errors."""
+    """Tests that invalid inputs to interpolate_profile_u_over_m raise
+    errors."""
     mass, k = _grid_mass_k()
 
     with pytest.raises(TypeError):
@@ -192,7 +194,8 @@ def test_interpolate_profile_u_over_m_requires_fourier_and_callable() -> None:
 
 
 def test_interpolate_profile_u_over_m_rejects_wrong_fourier_shape() -> None:
-    """Tests that invalid inputs to interpolate_profile_u_over_m raise errors."""
+    """Tests that invalid inputs to interpolate_profile_u_over_m raise
+    errors."""
     mass, k = _grid_mass_k()
     prof = _ProfileFourierBadShape()
     with pytest.raises(ValueError, match=r"profile\.fourier must return"):
@@ -207,7 +210,8 @@ def test_interpolate_profile_u_over_m_rejects_wrong_fourier_shape() -> None:
 def test_interpolate_profile_u_over_m_log_values_requires_positive_floor(
 
 ) -> None:
-    """Tests that invalid inputs to interpolate_profile_u_over_m raise errors."""
+    """Tests that invalid inputs to interpolate_profile_u_over_m raise
+    errors."""
     mass, k = _grid_mass_k()
     prof = _ProfileNoUpd()
 
@@ -298,7 +302,8 @@ def test_interpolator_bounds_error_true_raises_out_of_bounds() -> None:
 
 
 def test_build_profile_interpolators_validates_mapping_types() -> None:
-    """Tests that invalid inputs to build_profile_interpolators raise errors."""
+    """Tests that invalid inputs to build_profile_interpolators raise
+    errors."""
     mass, k = _grid_mass_k()
     prof = _ProfileNoUpd()
 
@@ -339,7 +344,8 @@ def test_build_profile_interpolators_validates_mapping_types() -> None:
 def test_build_profile_interpolators_missing_components_raises_keyerror(
 
 ) -> None:
-    """Tests that invalid inputs to build_profile_interpolators raise errors."""
+    """Tests that invalid inputs to build_profile_interpolators raise
+    errors."""
     mass, k = _grid_mass_k()
     prof = _ProfileNoUpd()
 
@@ -357,7 +363,8 @@ def test_build_profile_interpolators_missing_components_raises_keyerror(
 
 
 def test_build_profile_interpolators_grid_schema_checks() -> None:
-    """Tests that invalid inputs to build_profile_interpolators raise errors."""
+    """Tests that invalid inputs to build_profile_interpolators raise
+    errors."""
     mass, k = _grid_mass_k()
     prof = _ProfileNoUpd()
     profiles = {"dark_matter": prof, "gas": prof, "stars": prof}
