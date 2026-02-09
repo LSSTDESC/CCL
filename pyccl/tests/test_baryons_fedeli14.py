@@ -310,3 +310,60 @@ def test_incl_bary_eff_preserves_extrap_orders_and_log_flag(
     assert out1.extrap_order_lok == pk1.extrap_order_lok
     assert out1.extrap_order_hik == pk1.extrap_order_hik
     assert bool(out1.psp.is_log) == bool(pk1.psp.is_log)
+
+
+def test_boost_factor_squeezes_for_scalar_k(
+    monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Tests that boost_factor returns a scalar when k is a scalar."""
+    b = BaryonsFedeli14(renormalize_large_scales=False)
+
+    class DummyBHM:
+        def __init__(self) -> None:
+            self.interpolation_grid = {
+                "dark_matter": {"k": np.array([1e-6, 1e2])}}
+
+        def boost(self, *, k: np.ndarray, a: float, pk_ref: str) -> np.ndarray:
+            _, _ = a, pk_ref
+            return np.ones_like(k) * 2.0
+
+    monkeypatch.setattr(
+        BaryonsFedeli14,
+        "_build_bhm",
+        lambda self, cosmo: DummyBHM())
+
+    out = b.boost_factor(_cosmo(), k=1e-2, a=np.array([0.5, 1.0]))
+    assert out.shape == (2,)   # squeezed over k
+    assert np.allclose(out, 2.0)
+
+
+def test_boost_factor_renorm_guard_replaces_bad_norm(
+    monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Tests that boost factor renormalization guard replaces bad norms."""
+    b = BaryonsFedeli14(renormalize_large_scales=True, k_renorm_max=1e-2)
+
+    class DummyBHM:
+        def __init__(self) -> None:
+            self.interpolation_grid = {
+                "dark_matter": {"k": np.array([1e-6, 1e2])}}
+
+        def boost(self, *, k: np.ndarray, a: float, pk_ref: str) -> np.ndarray:
+            _, _ = a, pk_ref
+            k = np.asarray(k, float)
+            return np.where(k <= 1e-2, 0.0, 4.0)
+
+    monkeypatch.setattr(
+        BaryonsFedeli14,
+        "_build_bhm",
+        lambda self,
+               cosmo: DummyBHM())
+
+    k = np.array([1e-4, 1e-2, 1e-1], dtype=float)
+    a = np.array([0.5, 1.0], dtype=float)
+
+    out = b.boost_factor(_cosmo(), k, a)
+
+    # guard sets norm->1, then out bad/<=0 -> 1, then clips
+    assert np.all(np.isfinite(out))
+    assert np.all(out > 0.0)
