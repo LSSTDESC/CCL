@@ -272,7 +272,11 @@ class BaryonsFedeli14(Baryons):
             k0 = self.k_renorm_max
             m = k_1d <= k0
             if np.any(m):
-                # one normalization per 'a'
+                # Rescale the boost per-a so that its mean over a low-k band is
+                # unity. This is a pragmatic large-scale renormalization of
+                # the *ratio* to pk_ref: it removes small low-k offsets from
+                # numerics/pk_ref choice. It does not enforce B(k->0)=1
+                # pointwise, only that the average over k<=k_renorm_max is 1.
                 norm = np.mean(out[:, m], axis=1)
                 norm = np.where(np.isfinite(norm) & (norm > 0.0), norm, 1.0)
 
