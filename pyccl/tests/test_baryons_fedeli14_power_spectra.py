@@ -9,9 +9,11 @@ import pytest
 
 import pyccl as ccl
 
+import pyccl.baryons.fedeli14_bhm.power_spectra as ps
 from pyccl.baryons.fedeli14_bhm.power_spectra import (
     FedeliPkCalculator,
     _dndm_from_dndlog10m,
+    _k_cache_key,
 )
 
 
@@ -49,6 +51,8 @@ def _hmf_const(
     v = float(val)
 
     def hmf(_cosmo: Any, M: np.ndarray, a: float) -> np.ndarray:
+        """Halo mass function, constant on the provided mass grid."""
+        _ = a
         M = np.asarray(M, dtype=float)
         return np.full_like(M, v, dtype=float)
 
@@ -62,6 +66,7 @@ def _hb_const(
     v = float(val)
 
     def hb(_cosmo: Any, M: np.ndarray, a: float) -> np.ndarray:
+        _ = a
         M = np.asarray(M, dtype=float)
         return np.full_like(M, v, dtype=float)
 
@@ -253,6 +258,8 @@ def test_y_grid_mm_requires_u_over_m_return_shape() -> None:
     assert np.all(np.isfinite(y))
 
     def y_bad(M: np.ndarray, k: np.ndarray) -> np.ndarray:
+        """Returns (nM,) instead of (nM,nk)."""
+        _ = k
         M = np.asarray(M, dtype=float)
         return np.ones((M.shape[0], 1), dtype=float)
 
@@ -442,3 +449,246 @@ def test_pk_halo_pair_raises_for_non_overlapping_mass_ranges() -> None:
             rho1=1.0,
             rho2=1.0,
         )
+
+
+def test_k_cache_key_rounding():
+    """Tests that k_cache_key rounds to the nearest 1e-3."""
+    assert _k_cache_key(1.23456789, ndp=3) == 1.235
+
+
+def test_fedeli_pk_calculator_requires_nm_ge_2() -> None:
+    """Tests that FedeliPkCalculator requires n_m >= 2."""
+    with pytest.raises(ValueError, match=r"n_m must be >= 2"):
+        _ = _make_calc(n_m=1)
+
+
+def test_fedeli_pk_calculator_requires_nm_ge_2_direct() -> None:
+    """Tests that FedeliPkCalculator requires n_m >= 2."""
+    with pytest.raises(ValueError, match=r"n_m must be >= 2"):
+        _ = FedeliPkCalculator(
+            cosmo=_cosmo(),
+            a=1.0,
+            k=_kgrid(),
+            profiles_u_over_m=_profiles(),
+            mass_function=_hmf_const(1.0),
+            halo_bias=_hb_const(1.0),
+            mass_ranges=_mass_ranges(),
+            densities=_densities_full(),
+            gas_params=_gas_params(),
+            n_m=1,
+        )
+
+
+def test_rho_from_fraction_validations_and_cache_hit() -> None:
+    """Tests that rho_from_fraction validates inputs and respects the cache."""
+    calc = _make_calc(n_m=8)
+
+    with pytest.raises(TypeError, match=r"callable"):
+        _ = calc.rho_from_fraction(  # type: ignore[arg-type]
+            f_of_m=123, mmin=1e13, mmax=1e14
+        )
+
+    with pytest.raises(ValueError, match=r"Invalid mass range"):
+        _ = calc.rho_from_fraction(
+            f_of_m=lambda m: np.ones_like(m), mmin=1e14, mmax=1e13
+        )
+
+    with pytest.raises(ValueError, match=r"same shape"):
+        _ = calc.rho_from_fraction(
+            f_of_m=lambda m: np.ones(m.size + 1), mmin=1e13, mmax=1e14, n_m=8
+        )
+
+    def f_nan(m: np.ndarray) -> np.ndarray:
+        out = np.ones_like(m, dtype=float)
+        out[0] = np.nan
+        return out
+
+    with pytest.raises(ValueError, match=r"must be finite"):
+        _ = calc.rho_from_fraction(f_of_m=f_nan, mmin=1e13, mmax=1e14, n_m=8)
+
+    key = ("gas", 1e13, 1e14, 8)
+    calc._rho_cache[key] = 123.0  # noqa: SLF001
+    out = calc.rho_from_fraction(
+        f_of_m=lambda m: np.ones_like(m),
+        mmin=1e13,
+        mmax=1e14,
+        n_m=8,
+        cache_key="gas",
+    )
+    assert out == 123.0
+
+
+def test_ensure_densities_requires_cosmo_keys_and_fills_matter_and_dm(
+    monkeypatch,
+) -> None:
+    """Tests that ensure_densities requires cosmo keys and fills matter and
+    dm."""
+    calc = _make_calc(cosmo={"Omega_m": 0.3}, densities={})
+    with pytest.raises(KeyError, match=r"cosmo must provide"):
+        calc.ensure_densities(
+            f_gas=lambda m: 0.1 * np.ones_like(m),
+            f_star=lambda m: 0.02 * np.ones_like(m),
+            mmin=1e13,
+            mmax=1e14,
+            n_m=8,
+        )
+
+    monkeypatch.setattr(ps.ccl, "rho_x", lambda cosmo, a, what: 10.0)
+
+    calc = _make_calc(cosmo={"Omega_c": 0.25, "Omega_m": 0.30}, densities={})
+    calc.ensure_densities(
+        f_gas=lambda m: 0.1 * np.ones_like(m),
+        f_star=lambda m: 0.02 * np.ones_like(m),
+        mmin=1e13,
+        mmax=1e14,
+        n_m=8,
+    )
+
+    assert calc.rho["matter"] == 10.0
+    assert np.isclose(calc.rho["dark_matter"], 10.0 * (0.25 / 0.30))
+    assert "gas" in calc.rho and "stars" in calc.rho
+
+
+def test_linpk_caches_single_k(monkeypatch) -> None:
+    """Tests that linpk caches the result for a single k."""
+    calc = _make_calc()
+
+    calls = {"n": 0}
+
+    def fake_linear(cosmo, k, a):
+        _, _, _ = cosmo, k, a
+        calls["n"] += 1
+        return 3.0
+
+    monkeypatch.setattr(ps.ccl, "linear_matter_power", fake_linear)
+
+    p1 = calc.linpk(0.123456)
+    p2 = calc.linpk(0.123456)  # this should hit cache
+
+    assert p1 == 3.0 and p2 == 3.0
+    assert calls["n"] == 1
+
+
+def test_P_lin_falls_back_to_scalar_loop(monkeypatch) -> None:
+    """Tests that P_lin falls back to scalar loop when linear_matter_power
+    fails on vector k input."""
+    calc = _make_calc()
+
+    def fake_linear(cosmo, k, a):
+        """Raise an error if k is a vector."""
+        _, _ = cosmo, a
+        if np.ndim(k) > 0:
+            raise RuntimeError("no vector")
+        return 5.0
+
+    monkeypatch.setattr(ps.ccl, "linear_matter_power", fake_linear)
+
+    out = calc.P_lin()
+    assert out.shape == (calc.k.size,)
+    assert np.allclose(out, 5.0)
+
+
+def test_mass_grid_raises_for_invalid_range() -> None:
+    """Tests that mass_grid raises for invalid mass ranges."""
+    calc = _make_calc()
+    with pytest.raises(ValueError, match=r"Invalid mass range"):
+        _ = calc._mass_grid(1e14, 1e13)  # noqa: SLF001
+
+
+def test_dndm_raises_if_mass_function_wrong_shape() -> None:
+    """Tests that _dndm raises if mass_function returns wrong shape."""
+    def hmf_bad(_cosmo: Any, M: np.ndarray, a: float) -> np.ndarray:
+        """Mass function that returns wrong shape."""
+        _ = a
+        return np.ones(M.size + 1, dtype=float)
+
+    calc = _make_calc(mass_function=hmf_bad)
+
+    with pytest.raises(ValueError, match=r"mass_function must return"):
+        _ = calc._dndm(1e13, 1e14)  # noqa: SLF001
+
+
+def test_bias_raises_if_halo_bias_wrong_shape() -> None:
+    """Tests that _bias raises if halo_bias returns wrong shape."""
+    def hb_bad(_cosmo: Any, M: np.ndarray, a: float) -> np.ndarray:
+        """Bias function that returns wrong shape."""
+        _ = a
+        return np.ones(M.size + 1, dtype=float)
+
+    calc = _make_calc(halo_bias=hb_bad)
+
+    with pytest.raises(ValueError, match=r"halo_bias must return"):
+        _ = calc._bias(1e13, 1e14)  # noqa: SLF001
+
+
+def test_Ib_and_I2_internal_shape_guards(monkeypatch) -> None:
+    """Tests that _Ib_vec and _I2_vec raise if their inputs have wrong shape."""
+    calc = _make_calc()
+
+    monkeypatch.setattr(ps, "_trapz_compat", lambda y, x, axis=0: np.zeros(2))
+
+    with pytest.raises(ValueError, match=r"Ib has wrong shape"):
+        _ = calc._Ib_vec("gas", 1e13, 1e14)  # noqa: SLF001
+
+    with pytest.raises(ValueError, match=r"I2 has wrong shape"):
+        _ = calc._I2_vec("dark_matter", "stars", 1e13, 1e14)  # noqa: SLF001
+
+
+def test_pk_halo_pair_validates_rhos_and_components() -> None:
+    """Tests that pk_halo_pair validates rhos and components."""
+    calc = _make_calc()
+
+    with pytest.raises(ValueError, match=r"rho1 and rho2 must be > 0"):
+        calc.pk_halo_pair(comp1="gas", comp2="gas", rho1=0.0, rho2=1.0)
+
+    with pytest.raises(KeyError, match=r"mass_ranges"):
+        calc.pk_halo_pair(comp1="not_a_comp", comp2="gas", rho1=1.0, rho2=1.0)
+
+    calc2 = _make_calc()
+    calc2.y.pop("gas")
+    with pytest.raises(KeyError, match=r"profiles"):
+        calc2.pk_halo_pair(comp1="gas", comp2="stars", rho1=1.0, rho2=1.0)
+
+
+def test_pair_mixed_cross_packet_validates_comp() -> None:
+    """Tests that pair_mixed_cross_packet validates comp."""
+    calc = _make_calc()
+    with pytest.raises(ValueError, match=r"comp must be"):
+        _ = calc.pair_mixed_cross_packet(comp="gas")
+
+
+def test_pk_packet_requires_all_densities() -> None:
+    """Tests that pk_packet requires all densities."""
+    calc = _make_calc(densities={"matter": 1.0, "dark_matter": 1.0, "gas": 1.0})
+    with pytest.raises(KeyError, match=r"Missing density"):
+        _ = calc.pk_packet(use_cache=False)
+
+
+def test_pk_total_dmo_fills_matter_density_if_missing(monkeypatch) -> None:
+    """Tests that pk_total_dmo fills matter density if missing."""
+    rho = {"dark_matter": 1.0, "gas": 1.0, "stars": 1.0}
+    calc = _make_calc(densities=rho)
+
+    monkeypatch.setattr(ps.ccl, "rho_x", lambda cosmo, a, what: 7.0)
+
+    _ = calc.pk_total_dmo(use_cache=False)
+    assert "matter" in calc.rho
+    assert calc.rho["matter"] == 7.0
+
+
+def test_boost_hm_over_hm_raises_if_dmo_nonpositive(monkeypatch) -> None:
+    """Tests that boost_hm_over_hm raises if dmo is nonpositive."""
+    calc = _make_calc()
+
+    def fake_pk_packet(*, use_cache=True):
+        """Fake pk_packet that returns non-positive dmo."""
+        _ = use_cache
+        return {
+            "pk": {"total": np.ones(calc.k.size)},
+            "pk_ref": {"pk_dmo": np.zeros(calc.k.size)},  # non-positive
+        }
+
+    monkeypatch.setattr(calc, "pk_packet", fake_pk_packet)
+
+    with pytest.raises(ValueError, match=r"non-positive|non-finite"):
+        _ = calc.boost_hm_over_hm()
