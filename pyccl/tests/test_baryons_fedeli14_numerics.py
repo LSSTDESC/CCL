@@ -18,6 +18,12 @@ from pyccl.baryons.fedeli14_bhm.numerics import (
     _require_mass_ranges,
     _require_profiles_u_over_m,
     _require_component,
+    _trapz_compat,
+    _require_array_1d,
+    _require_finite_1d,
+    _require_float,
+    _as_float,
+    _require_attr,
 )
 
 
@@ -167,3 +173,76 @@ def test_require_component_accepts_known_and_raises_for_unknown() -> None:
 
     with pytest.raises(KeyError, match=r"Unknown component"):
         _require_component("stars", allowed=allowed)
+
+
+def test_trapz_compat_uses_trapezoid_or_falls_back(monkeypatch) -> None:
+    """Tests that _trapz_compat uses np.trapezoid when available and falls
+    back to np.trapz otherwise (simulated for NumPy >= 2.0)."""
+    y = np.array([0.0, 1.0, 2.0], dtype=float)
+    x = np.array([0.0, 1.0, 2.0], dtype=float)
+
+    # Branch 1: trapezoid available
+    out1 = _trapz_compat(y, x=x)
+    assert np.isfinite(out1)
+
+    # Branch 2: simulate old-NumPy fallback by *adding* np.trapz,
+    # then removing np.trapezoid.
+    trap = np.trapezoid
+    monkeypatch.setattr(np, "trapz", trap, raising=False)
+    monkeypatch.delattr(np, "trapezoid", raising=False)
+
+    out2 = _trapz_compat(y, x=x)
+    assert np.isfinite(out2)
+    assert out2 == pytest.approx(trap(y, x=x))
+
+
+
+def test_require_array_1d_rejects_non_1d_and_empty() -> None:
+    """Tests that _require_array_1d rejects non-1D arrays and empty arrays."""
+
+    with pytest.raises(ValueError, match=r"x must be a 1D array"):
+        _require_array_1d("x", np.ones((2, 2)))
+
+    with pytest.raises(ValueError, match=r"x must be non-empty"):
+        _require_array_1d("x", np.array([]))
+
+
+def test_require_finite_1d_rejects_nonfinite() -> None:
+    """Tests that _require_finite_1d rejects arrays containing non-finite values."""
+
+    with pytest.raises(ValueError, match=r"x must contain only finite values"):
+        _require_finite_1d("x", np.array([1.0, np.nan]))
+
+
+def test_require_float_raises_typeerror_if_not_float_convertible() -> None:
+    """Tests that _require_float raises TypeError when float(x) fails."""
+
+    with pytest.raises(TypeError, match=r"x must be a real number"):
+        _require_float("x", object())
+
+
+def test_as_float_raises_typeerror_when_not_float_convertible() -> None:
+    """Tests that _as_float raises TypeError when float(x) fails."""
+    with pytest.raises(TypeError, match=r"x must be a real number"):
+        _as_float(object(), "x")
+
+
+def test_pos_float_raises_valueerror_for_nonpositive() -> None:
+    """Tests that _pos_float raises ValueError for y <= 0."""
+    with pytest.raises(ValueError, match=r"x must be > 0"):
+        _pos_float(0.0, "x")
+
+
+def test_pos_int_raises_valueerror_for_nonpositive() -> None:
+    """Tests that _pos_int raises ValueError for y <= 0."""
+    with pytest.raises(ValueError, match=r"n must be > 0"):
+        _pos_int(0, "n")
+
+
+def test_require_attr_raises_when_missing() -> None:
+    """Tests that _require_attr raises TypeError when attribute is missing."""
+    class Dummy:
+        pass
+
+    with pytest.raises(TypeError, match=r"obj must define attribute 'nope'"):
+        _require_attr(Dummy(), "nope", who="obj")
