@@ -309,9 +309,9 @@ class BaryonsFedeli14(Baryons):
               grid) and only for late times (``a >= a_min``, with ``a_min``
               currently set to 0.1). Outside this region, the boost is unity.
             - The output representation (log or linear P) follows the input
-              ``Pk2D`` flags. Internally, ``Pk2D.get_spline_arrays()`` returns
-              linear P(k), so this method converts to log-space only when
-              required for the output.
+              ``Pk2D`` flags. Internally, Pk2D.get_spline_arrays() returns
+              linear P(k,a); if the spline is stored in log-space,
+              it exponentiates internally before returning.
             - A small defensive branch attempts to recover from a mis-flagged
               input where values appear to have been exponentiated despite
               being treated as linear. This is intended to keep splines
