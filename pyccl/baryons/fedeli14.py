@@ -157,8 +157,14 @@ class BaryonsFedeli14(Baryons):
                 "star_x_delta", "star_alpha", "density_mmin", "density_mmax",
             }:
                 val = float(val)
-            if key in {"n_m"}:
+            elif key == "n_m":
                 val = int(val)
+            elif key in {"update_fftlog_precision",
+                         "renormalize_large_scales"}:
+                val = bool(val)
+            elif key == "pk_ref":
+                val = str(val)
+
             if not hasattr(self, key):
                 raise AttributeError(f"Unknown parameter {key!r}")
             setattr(self, key, val)
