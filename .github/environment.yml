@@ -27,8 +27,7 @@ dependencies:
   - cython<3 # for classy
   - pip:
       #- classy<3
-      - setuptools<82  # Repeat it here to make sure this version is used
-      - isitgr<=1.0.2
+      # - isitgr<=1.0.2  # Done in ci.yml to avoid issues with pkg_resources in setuptools 82
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator

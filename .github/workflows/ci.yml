@@ -84,6 +84,10 @@ jobs:
         run: |
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
           mamba env update --file ${{ env.CONDA_ENV }} --prune
+          # Following https://github.com/pypa/setuptools/issues/5174
+          # Repeat installation here to make sure this version is used
+          pip install setuptools<82 --no-build-isolation  
+          pip install isitgr<=1.0.2
 
       - name: Install classy
         run: |
