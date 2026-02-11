@@ -3,6 +3,7 @@ dependencies:
   - gfortran=12.2.0  # for isitgr
   - python=3.10
   - pip
+  - setuptools<82  # In setuptools 82, they removed "pkg_resources", needed by isitgr
   - setuptools_scm
   - cmake
   - gsl
