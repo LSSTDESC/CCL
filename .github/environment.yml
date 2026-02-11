@@ -1,4 +1,6 @@
 name: test  # default testing environment name from conda-incubator
+channels:
+  - conda-forge
 dependencies:
   - gfortran=12.2.0  # for isitgr
   - python=3.10
