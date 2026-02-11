@@ -90,7 +90,7 @@ jobs:
           # Following https://github.com/pypa/setuptools/issues/5174
           # Repeat installation here to make sure this version is used
           pip install 'wheel' 'setuptools<81'  --no-build-isolation
-          pip install'isitgr<=1.0.2'
+          pip install 'isitgr<=1.0.2'
 
       - name: Install classy
         run: |
