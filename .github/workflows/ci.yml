@@ -64,8 +64,7 @@ jobs:
       - name: Set up conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          channels: conda-forge, defaults
-          channel-priority: strict
+          channels: conda-forge
           show-channel-urls: true
           miniforge-version: latest
           miniforge-variant: Miniforge3
