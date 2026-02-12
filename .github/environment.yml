@@ -2,22 +2,17 @@ name: test  # default testing environment name from conda-incubator
 channels:
   - conda-forge
 dependencies:
-  - gfortran=12.2.0  # for isitgr
-  - python=3.10
+  - gfortran  # for isitgr
   - pip
-  - setuptools<82  # In setuptools 82, they removed "pkg_resources", needed by isitgr
+  - setuptools
   - setuptools_scm
   - cmake
   - gsl
   - fftw
   - swig
   - pyyaml
-  # CCL itself is numpy2-compatible, but many of its dependencies aren't.
-  # Remove the <2 when this stops being the case.
-  - numpy<2
-  # The below is only because the current version of DarkEmulator uses deprecated scipy functions.
-  # We should remove the <1.14 flag as soon as this is fixed.
-  - scipy<1.14
+  - numpy < 2.4  # fast-pt uses np.trapz, which is deleted in numpy 2.4
+  - scipy
   - camb
   - fast-pt
   - pytest
@@ -28,11 +23,11 @@ dependencies:
   - wheel # for classy
   - cython<3 # for classy
   - pip:
-      #- classy<3
-      # - isitgr<=1.0.2  # Done in ci.yml to avoid issues with pkg_resources in setuptools 82
+      - classy
+      - isitgr
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator
-      - dark_emulator==1.1.2
+      - dark_emulator
       - colossus
       
