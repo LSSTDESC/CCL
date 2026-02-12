@@ -88,6 +88,18 @@ jobs:
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
           mamba env update --file ${{ env.CONDA_ENV }} --prune
 
+      - name: Get pip cache dir
+        id: pip-cache
+        run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: pip-${{ runner.os }}-${{ hashFiles('**/environment.yml') }}-${{ hashFiles('setup.py') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
+
       - name: Install isitgr
         run: |
           # Following https://github.com/pypa/setuptools/issues/5174
