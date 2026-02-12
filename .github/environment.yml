@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
+  - python
   - gfortran  # for isitgr
   - pip
   - setuptools
