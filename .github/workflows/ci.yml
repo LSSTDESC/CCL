@@ -8,6 +8,11 @@ on:
       - releases/*
   pull_request: null
 
+# Cancel redundant builds
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
   CONDA_ENV: .github/environment.yml
@@ -18,6 +23,10 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+
+    permissions:
+      contents: read
+      checks: write
 
     strategy:
       fail-fast: false
@@ -33,10 +42,6 @@ jobs:
             prefix: /usr/share/miniconda3
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          access_token: ${{ github.token }}
 
       - name: Checkout CCL repository
         uses: actions/checkout@v4
@@ -53,26 +58,24 @@ jobs:
       - name: "macOS: set env variables"
         if: matrix.label == 'osx-64'
         run: |
-          #mamba install llvm-openmp
           echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
           SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           echo "SDKROOT: ${SDKROOT}"
           echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
           echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
-
-          export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
-          export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+          echo "CFLAGS=-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib" >> $GITHUB_ENV
 
       - name: Set current date as environment variable
         run: echo "TODAY=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
 
       - name: Get cached environment
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache
         with:
           path: ${{ matrix.prefix }}
           key:
-            conda-py${{ matrix.py }}--${{
+            conda-${{
             matrix.os }}--${{
             hashFiles(env.CONDA_ENV) }}-${{
             hashFiles('setup.py') }}--${{
@@ -123,21 +126,13 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout CCL repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Lint
         uses: py-actions/flake8@v2
         with:
           args: "--config .flake8"
-
-
-# Legacy step: uninstall homebrew (CI works without it).
-# - name: "macOS: remove homebrew"
-#   if: matrix.label == 'osx-64'
-#   run: |
-#     curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
-#     chmod u+x ./uninstall_homebrew.sh
-#     ./uninstall_homebrew.sh -f -q >& /dev/null
-#     rm -f uninstall_homebrew.sh
