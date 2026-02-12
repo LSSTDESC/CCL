@@ -202,6 +202,50 @@ flake8 pyccl/
 OMP_NUM_THREADS=2 pytest -vv pyccl benchmarks
 ```
 
+## Manually Triggering CI Workflows
+
+You can manually trigger the CI workflow to test specific configurations without pushing code:
+
+### Via GitHub Web Interface:
+
+1. Go to the [Actions tab](https://github.com/LSSTDESC/CCL/actions) in the repository
+2. Click on "continuous-integration" workflow in the left sidebar
+3. Click "Run workflow" button (top right)
+4. Configure options:
+   - **Python version**: Specify a single version (e.g., `3.12`) or leave empty to test all versions
+   - **OS**: Choose `all` (default), `ubuntu-latest`, or `macos-latest`
+5. Click "Run workflow"
+
+### Use Cases:
+
+**Test a specific Python version:**
+- Set Python version to `3.13`
+- OS: `all`
+- Tests Python 3.13 on both Ubuntu and macOS
+
+**Quick test on single platform:**
+- Leave Python version empty (tests all)
+- OS: `ubuntu-latest`
+- Runs full test suite on Ubuntu only
+
+**Debug a specific configuration:**
+- Python version: `3.11`
+- OS: `macos-latest`
+- Tests only Python 3.11 on macOS
+
+### Via GitHub CLI:
+
+```bash
+# Test specific Python version on all platforms
+gh workflow run continuous-integration --field python-version=3.12 --field os=all
+
+# Test all Python versions on Ubuntu only
+gh workflow run continuous-integration --field os=ubuntu-latest
+
+# Test Python 3.13 on macOS only
+gh workflow run continuous-integration --field python-version=3.13 --field os=macos-latest
+```
+
 ## Additional Resources
 
 - **Documentation**: https://ccl.readthedocs.io/en/latest/

@@ -7,6 +7,21 @@ on:
       - master
       - releases/*
   pull_request: null
+  workflow_dispatch:
+    inputs:
+      python-version:
+        description: 'Python version to test (leave empty for all)'
+        required: false
+        type: string
+      os:
+        description: 'OS to test on'
+        required: false
+        type: choice
+        options:
+          - all
+          - ubuntu-latest
+          - macos-latest
+        default: 'all'
 
 # Cancel redundant builds
 concurrency:
@@ -31,8 +46,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
-        python-version: ['3.11', '3.12', '3.13', '3.14']
+        os: ${{ (github.event.inputs.os == 'all' || github.event.inputs.os == '') && fromJSON('["macos-latest", "ubuntu-latest"]') || fromJSON(format('["{0}"]', github.event.inputs.os)) }}
+        python-version: ${{ github.event.inputs.python-version != '' && fromJSON(format('["{0}"]', github.event.inputs.python-version)) || fromJSON('["3.11", "3.12", "3.13", "3.14"]') }}
         include:
           - os: macos-latest
             label: osx-64
