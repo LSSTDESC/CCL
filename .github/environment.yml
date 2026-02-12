@@ -1,6 +1,8 @@
 name: test  # default testing environment name from conda-incubator
+channel_priority: strict
 channels:
   - conda-forge
+  - nodefaults
 dependencies:
   - gfortran  # for isitgr
   - pip
