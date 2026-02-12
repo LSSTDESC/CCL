@@ -1,5 +1,4 @@
 name: test  # default testing environment name from conda-incubator
-channel_priority: strict
 channels:
   - conda-forge
   - nodefaults
@@ -14,7 +13,7 @@ dependencies:
   - swig
   - pyyaml
   - numpy < 2.4  # fast-pt uses np.trapz, which is deleted in numpy 2.4
-  - scipy
+  - scipy < 1.14 # velocileptors uses functions removed in recent scipy versions
   - camb
   - fast-pt
   - pytest

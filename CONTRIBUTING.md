@@ -254,3 +254,39 @@ gh workflow run continuous-integration --field python-version=3.13 --field os=ma
 - **Environment Specification**: See `.github/environment.yml` for full dependency list
 
 This setup provides full access to modify files, run tests, and debug both the Python layer and C/C++ implementation.
+
+## Updating dependencies
+
+
+To upgrade the project dependencies defined in [`.github/environment.yml`](.github/environment.yml):
+
+```bash
+# Update the conda environment from the YAML (reinstalls pip entries too)
+conda env update -f .github/environment.yml --prune
+
+# Activate the environment (name is `test` by default in the YAML)
+conda activate test
+```
+
+- Notes:
+   - `--prune` removes packages that are no longer listed in the YAML.
+   - Re-running `env update` will also (re)install the `pip:`-listed packages from the YAML, but if you need to explicitly upgrade pip-installed packages afterwards, run:
+
+```bash
+# Reinstall/upgrade pip packages listed in the YAML (example)
+pip install --upgrade classy isitgr \
+   'velocileptors @ git+https://github.com/sfschen/velocileptors' \
+   'baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master' \
+   MiraTitanHMFemulator dark_emulator colossus
+```
+
+- If you prefer to recreate the environment from scratch:
+
+```bash
+conda env remove -n test
+conda env create -f .github/environment.yml
+conda activate test
+```
+
+- Reminder: pip-installed packages come from PyPI or the specified VCS URLs and are unaffected by conda channels; the YAML's `channels:` controls only conda package resolution.
+
