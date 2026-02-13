@@ -39,37 +39,39 @@ def test_power_nu(model):
     # Instantiate CLASS for comparison
     # Generate pk from CLASS
     N_ncdm = np.nonzero(mnu[model])[0].size
-    # N_ur = [3.044, 2.0308, 1.0176, 0.00441][N_ncdm]  # Values in explanatori.ini
-    # N_ur ~ N_eff - N_ncdm * T_ncdm^4 * (11/4)^(4/3), with T_ncdm = 0.71611 in CLASS
+    # Values in explanatori.ini
+    # N_ur = [3.044, 2.0308, 1.0176, 0.00441][N_ncdm]
+    # N_ur ~ N_eff - N_ncdm * T_ncdm^4 * (11/4)^(4/3),
+    # with T_ncdm = 0.71611 in CLASS
     N_ur = cosmo['Neff'] - 1.0132 * N_ncdm
     params = {'Omega_Lambda': 0,
-            # 'Omega_fld': 0,  # Left unespecified to use w0, wa
-            # Dark energy parameters
-            'w0_fld': w_0[model],
-            'wa_fld': w_a[model],
-            # Cosmological parameters
-            'h': cosmo['h'],
-            'Omega_cdm': cosmo['Omega_c'],
-            'Omega_b': cosmo['Omega_b'],
-            'A_s': cosmo['A_s'],
-            'n_s': cosmo['n_s'],
-            'T_cmb': cosmo['T_CMB'],
-            'Omega_k': cosmo['Omega_k'],
-            # Neutrinos
-            "N_ur": N_ur,  # Neff
-            "N_ncdm": N_ncdm,  # Number of massive neutrino species
-            "m_ncdm": ",".join([str(m) for m in mnu[model][:N_ncdm]]),  # m_nu
-            # Matter power spectrum
-            'non_linear': 'halofit',
-            'output': 'mPk',
-            'P_k_max_1/Mpc': KMAX,
-            'z_pk': z
-            }
+              # 'Omega_fld': 0,  # Left unespecified to use w0, wa
+              # Dark energy parameters
+              'w0_fld': w_0[model],
+              'wa_fld': w_a[model],
+              # Cosmological parameters
+              'h': cosmo['h'],
+              'Omega_cdm': cosmo['Omega_c'],
+              'Omega_b': cosmo['Omega_b'],
+              'A_s': cosmo['A_s'],
+              'n_s': cosmo['n_s'],
+              'T_cmb': cosmo['T_CMB'],
+              'Omega_k': cosmo['Omega_k'],
+              # Neutrinos
+              "N_ur": N_ur,  # Neff
+              "N_ncdm": N_ncdm,  # Number of massive neutrino species
+              "m_ncdm": ",".join([str(m) for m in mnu[model][:N_ncdm]]),
+              # Matter power spectrum
+              'non_linear': 'halofit',
+              'output': 'mPk',
+              'P_k_max_1/Mpc': KMAX,
+              'z_pk': z
+              }
 
     cosmo_classy = Class()
     cosmo_classy.set(params)
     cosmo_classy.compute()
-    
+
     # Generate pk from CLASS and compare to CCL
     pk_lin = np.array([cosmo_classy.pk_lin(k_i, z) for k_i in k_arr])
     pk_nl = np.array([cosmo_classy.pk(k_i, z) for k_i in k_arr])
