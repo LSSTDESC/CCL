@@ -23,13 +23,13 @@ dependencies:
   - pyfftw  # for velocileptors
   - george  # for dark_emu
   - wheel # for classy
-  - cython<3 # for classy
+  - cython < 3  # for classy
   - pip:
-      - classy
-      - isitgr
+      - classy  # Note the benchmarks were generated with 2.9.4
+      - isitgr  # Note the benchmarks were generated with 1.0.2
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator
-      - dark_emulator
+      - dark_emulator  # Note the benchmarks were generated with 1.1.2
       - colossus
       

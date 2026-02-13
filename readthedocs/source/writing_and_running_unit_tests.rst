@@ -14,7 +14,11 @@ To run the unit tests, execute
 
 .. code-block:: bash
 
-   pytest -vv pyccl
+   # Run all Python tests with 2 threads
+   $ OMP_NUM_THREADS=2 pytest -vv pyccl
+
+   # Run with coverage
+   $ OMP_NUM_THREADS=2 pytest -vv pyccl --cov=pyccl
 
 from the top-level repository directory. Any errors will be reported at the end.
 
@@ -74,13 +78,9 @@ commands from the top-level CCL directory
 
 .. code-block:: bash
 
-   $ mkdir -p build
-   $ cd build
-   $ cmake ..
-   $ make check_ccl
+   # Full CMake build with C tests
+   $ cmake -H. -Bbuild -DPYTHON_VERSION=0.0.0
+   $ make -Cbuild all
 
-Then you can run the tests via
-
-.. code-block:: bash
-
-   $ ./check_ccl
+   # Run C test suite
+   $ ./build/check_ccl

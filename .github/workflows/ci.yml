@@ -46,7 +46,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ${{ (github.event.inputs.os == 'all' || github.event.inputs.os == '') && fromJSON('["macos-latest", "ubuntu-latest"]') || fromJSON(format('["{0}"]', github.event.inputs.os)) }}
-        python-version: ${{ github.event.inputs.python-version != '' && fromJSON(format('["{0}"]', github.event.inputs.python-version)) || fromJSON('["3.11", "3.12", "3.13", "3.14"]') }}
+        python-version: ${{ github.event.inputs.python-version != '' && fromJSON(format('["{0}"]', github.event.inputs.python-version)) || fromJSON('["3.10", "3.11", "3.12", "3.13", "3.14"]') }}
         include:
           - os: macos-latest
             label: osx-64
