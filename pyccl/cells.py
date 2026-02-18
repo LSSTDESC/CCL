@@ -4,7 +4,7 @@ import numpy as np
 
 from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warnings
 from .pyutils import integ_types
-from ._nonlimber_FKEM import _nonlimber_FKEM
+from . import nonlimber
 
 
 def angular_cl(
@@ -131,7 +131,7 @@ def angular_cl(
                    'chi_min': fkem_chi_min}
     if auto_limber or (type(l_limber) is not str and ell_use[0] < l_limber):
         if non_limber_integration_method == "FKEM":
-            l_limber, cl_non_limber, status = _nonlimber_FKEM(
+            l_limber, cl_non_limber, status = nonlimber._nonlimber_FKEM(
                 cosmo,
                 tracer1,
                 tracer2,
