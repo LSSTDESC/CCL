@@ -163,7 +163,9 @@ def test_fkem_warn_bad_params():
     bz = np.ones_like(z)
     ells = np.array([10.0, 30.0, 100.0])
     cosmo = ccl.CosmologyVanillaLCDM()
-    nc = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z, nz), bias=(z, bz))
+    nc = ccl.NumberCountsTracer(
+        cosmo, has_rsd=False, dndz=(z, nz), bias=(z, bz)
+    )
 
     # Nchi invalid (<=0) -> warning and defaulting
     with pytest.warns(CCLWarning, match="Nchi must be a positive integer"):
@@ -192,7 +194,8 @@ def test_fkem_warn_bad_params():
         assert np.all(np.isfinite(cl))
 
     # limber_max_error invalid (<=0) -> warning and defaulting
-    with pytest.warns(CCLWarning, match="limber_max_error must be greater than zero"):
+    with pytest.warns(CCLWarning,
+                      match="limber_max_error must be greater than zero"):
         cl = ccl.angular_cl(
             cosmo,
             nc,
@@ -206,16 +209,20 @@ def test_fkem_warn_bad_params():
 
 
 def test_fkem_warn_mismatched_pk_types_fallback_to_limber():
-    # If p_of_k_a and p_of_k_a_lin are of different types, FKEM should warn and fall back
+    # If p_of_k_a and p_of_k_a_lin are of different types,
+    # FKEM should warn and fall back
     z = np.linspace(0, 2.0, 50)
     nz = z**2 * np.exp(-z)
     bz = np.ones_like(z)
     ells = np.array([10.0, 30.0, 100.0])
     cosmo = ccl.CosmologyVanillaLCDM()
-    nc = ccl.NumberCountsTracer(cosmo, has_rsd=False, dndz=(z, nz), bias=(z, bz))
+    nc = ccl.NumberCountsTracer(
+        cosmo, has_rsd=False, dndz=(z, nz), bias=(z, bz)
+    )
 
     pka_obj = ccl.Pk2D.from_function(pkfunc=lambda k, a: a / (1.0 + k))
-    with pytest.warns(CCLWarning, match="p_of_k_a and p_of_k_a_lin must be of the same type"):
+    with pytest.warns(CCLWarning, match="p_of_k_a and "
+                      "p_of_k_a_lin must be of the same type"):
         cl, meta = ccl.angular_cl(
             cosmo,
             nc,

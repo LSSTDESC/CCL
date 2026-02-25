@@ -455,7 +455,7 @@ class Tracer(CCLObject):
         return np.array([t.der_angles for t in self._trc])
 
     def _get_fkem_fft(self, tracer, Nchi, chimin, chimax, ell,
-                       cosmo):
+                      cosmo):
         """Get cached FFTLog integral over chi for FKEM non-limber
         calculation.
 
@@ -485,7 +485,7 @@ class Tracer(CCLObject):
         return temp[0], temp[1]
 
     def _set_fkem_fft(self, tracer, cosmo, Nchi, chimin, chimax, ell,
-                       ks, fft):
+                      ks, fft):
         """Store an FFTLog integral over chi for FKEM non-limber
         calculation, with LRU eviction.
 
@@ -508,7 +508,7 @@ class Tracer(CCLObject):
         """
         cosmo_hash = hash(_to_hashable(cosmo._params_init_kwargs))
         key = (hash(tracer), Nchi, chimin, chimax, ell, cosmo_hash)
-        
+
         self.chi_fft_dict[key] = (ks, fft)
         self.chi_fft_dict.move_to_end(key)
         # Evict oldest (least-recently-used) entries
