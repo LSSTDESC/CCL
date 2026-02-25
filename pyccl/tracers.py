@@ -26,9 +26,13 @@ as sub-classes of the :class:`Tracer` base class can be found below. The
 documentation of the base :class:`Tracer` class is a good place to start.
 """
 
+from collections import OrderedDict
+
 import numpy as np
 from scipy.integrate import simpson
 from scipy.interpolate import interp1d
+
+from pyccl._core.caching import _to_hashable
 
 from . import ccllib as lib
 from .pyutils import check
@@ -222,7 +226,8 @@ class Tracer(CCLObject):
         """
         # Do nothing, just initialize list of tracers
         self._trc = []
-        self.chi_fft_dict = {}
+        self.chi_fft_dict = OrderedDict()
+        self._fkem_cache_maxsize = 1024
         self.avg_weighted_a = []
 
     def __eq__(self, other):
@@ -449,26 +454,66 @@ class Tracer(CCLObject):
         """
         return np.array([t.der_angles for t in self._trc])
 
-    def _get_fkem_fft(self, tracer, Nchi, chimin, chimax, ell):
-        """Get list fft integral over chi for FKEM non-limber calculation
-        contained in this ``Tracer``.
+    def _get_fkem_fft(self, tracer, Nchi, chimin, chimax, ell,
+                       cosmo):
+        """Get cached FFTLog integral over chi for FKEM non-limber
+        calculation.
+
+        Args:
+            tracer: C-level tracer object (element of ``self._trc``).
+                Used as an identity-based key component so that each
+                sub-tracer within this collection is cached separately.
+            Nchi (int): Number of comoving distance samples.
+            chimin (float): Minimum comoving distance.
+            chimax (float): Maximum comoving distance.
+            ell (float): Angular multipole.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+                Used to generate a hash of the cosmological parameters,
+                ensuring the cache is invalidated when cosmology changes.
 
         Returns:
-            `tuple`: k values and fft integral values at each k
+            `tuple`: k values and fft integral values at each k,
+            or (None, None) on cache miss.
         """
-        temp = self.chi_fft_dict.get((tracer, Nchi, chimin, chimax, ell))
+        cosmo_hash = hash(_to_hashable(cosmo._params_init_kwargs))
+        key = (hash(tracer), Nchi, chimin, chimax, ell, cosmo_hash)
+        temp = self.chi_fft_dict.get(key)
         if temp is None:
             return None, None
+        # Move to end for LRU behaviour
+        self.chi_fft_dict.move_to_end(key)
         return temp[0], temp[1]
 
-    def _set_fkem_fft(self, tracer, Nchi, chimin, chimax, ell, ks, fft):
-        """Set list fft integral over chi for FKEM non-limber calculation
-        contained in this ``Tracer``.
+    def _set_fkem_fft(self, tracer, cosmo, Nchi, chimin, chimax, ell,
+                       ks, fft):
+        """Store an FFTLog integral over chi for FKEM non-limber
+        calculation, with LRU eviction.
+
+        Args:
+            tracer: C-level tracer object (element of ``self._trc``).
+                Used as an identity-based key component so that each
+                sub-tracer within this collection is cached separately.
+            cosmo (:class:`~pyccl.core.Cosmology`): A Cosmology object.
+                Used to generate a hash of the cosmological parameters,
+                ensuring the cache is invalidated when cosmology changes.
+            Nchi (int): Number of comoving distance samples.
+            chimin (float): Minimum comoving distance.
+            chimax (float): Maximum comoving distance.
+            ell (float): Angular multipole.
+            ks (array): Wavenumber array.
+            fft (array): FFTLog result array.
 
         Returns:
-            `tuple`: k values and fft integral values at each k
+            `tuple`: k values and fft integral values at each k.
         """
-        self.chi_fft_dict[(tracer, Nchi, chimin, chimax, ell)] = (ks, fft)
+        cosmo_hash = hash(_to_hashable(cosmo._params_init_kwargs))
+        key = (hash(tracer), Nchi, chimin, chimax, ell, cosmo_hash)
+        
+        self.chi_fft_dict[key] = (ks, fft)
+        self.chi_fft_dict.move_to_end(key)
+        # Evict oldest (least-recently-used) entries
+        while len(self.chi_fft_dict) > self._fkem_cache_maxsize:
+            self.chi_fft_dict.popitem(last=False)
         return ks, fft
 
     def get_avg_weighted_a(self):

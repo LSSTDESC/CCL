@@ -78,58 +78,174 @@ def _chi_integrands(cosmo, clt,
     fks = np.zeros((len(kernels), Nchi))
     transfers = np.zeros((len(kernels), Nchi))
     for i in range(len(kernels)):
-        # TODO: better caching dictionaries to avoid recomputation
-        # must depend on cosmology and tracer properties
-        # k, fk = clt._get_fkem_fft(
-        #     clt._trc[i], Nchi, chi_min, chi_max, ell
-        # )
-
-        # if (k is None) or (fk is None):
-        transfer_low = np.array(
-            clt.get_transfer(np.log(k_low), a_arr)
+        k, fk = clt._get_fkem_fft(
+            clt._trc[i], Nchi, chi_min, chi_max, ell, cosmo,
         )
-        transfer_avg = clt.get_transfer(np.log(k_low), avg_as[i])
-        # check no zeros in transfer functions
-        if np.any(transfer_avg == 0.0):
-            raise ZeroDivisionError(
-                "Zero transfer function encountered in FKEM chi "
-                "integrand calculation. "
-                "Setting integrand to zero."
+
+        if (k is None) or (fk is None):
+            transfer_low = np.array(
+                clt.get_transfer(np.log(k_low), a_arr)
             )
+            transfer_avg = clt.get_transfer(np.log(k_low), avg_as[i])
+            # check no zeros in transfer functions
+            if np.any(transfer_avg == 0.0):
+                raise ZeroDivisionError(
+                    "Zero transfer function encountered in FKEM chi "
+                    "integrand calculation. "
+                    "Setting integrand to zero."
+                )
 
-        fchi_interp = make_interp_spline(
-            chis[i], kernels[i], k=1
-        )
-        # transfer function approximation for the case
-        # when it's inseperable in k and a
-        # exact for seperable transfer functions
-        fchi_arr = (
-            fchi_interp(chi_logspace_arr)
-            * chi_logspace_arr
-            * growfac_arr
-            * transfer_low[i]
-            / transfer_avg[i]
-        )
-        # calls to fftlog to perform integration over chi integrals
-        nu, deriv, plaw = _get_general_params(bessels[i])
-        k, fk = _fftlog_transform_general(
-            chi_logspace_arr,
-            fchi_arr.flatten(),
-            float(ell),
-            nu,
-            1,
-            float(deriv),
-            float(plaw),
-        )
-        check(status, cosmo=cosmo)
+            fchi_interp = make_interp_spline(
+                chis[i], kernels[i], k=1
+            )
+            # transfer function approximation for the case
+            # when it's inseperable in k and a
+            # exact for seperable transfer functions
+            fchi_arr = (
+                fchi_interp(chi_logspace_arr)
+                * chi_logspace_arr
+                * growfac_arr
+                * transfer_low[i]
+                / transfer_avg[i]
+            )
+            # calls to fftlog to perform integration over chi integrals
+            nu, deriv, plaw = _get_general_params(bessels[i])
+            k, fk = _fftlog_transform_general(
+                chi_logspace_arr,
+                fchi_arr.flatten(),
+                float(ell),
+                nu,
+                1,
+                float(deriv),
+                float(plaw),
+            )
+            check(status, cosmo=cosmo)
 
-        # clt._set_fkem_fft(
-        #    clt._trc[i], Nchi, chi_min, chi_max, ell, k, fk
-        # )
+        clt._set_fkem_fft(
+            clt._trc[i], cosmo, Nchi, chi_min, chi_max, ell, k, fk,
+        )
         fks[i] = fk
         transfers[i] = np.array(clt.get_transfer(np.log(k), avg_as[i]))
 
     return k, fks, transfers
+
+
+def _auto_limber_transition_ell(clt1, clt2, cosmo, psp_lin, psp_nonlin,
+                                fks_1, fks_2, transfers_t1, transfers_t2,
+                                fll_t1, fll_t2, k, kpow, pk, dlnr,
+                                el, ell, limber_max_error, status):
+    """
+    Helper function for _nonlimber_FKEM to determine whether the
+    Limber transition ell/threshold has been reached for all
+    combinations of tracers, not just the total cl,
+    to ensure that the non-Limber calculation is accurate up to the
+    specified limber_max_error threshold.
+    Args:
+        clt1 (:class:`~pyccl.tracers.TracerCollection`):
+            TracerCollection object for tracer 1.
+        clt2 (:class:`~pyccl.tracers.TracerCollection`):
+            TracerCollection object for tracer 2.
+        cosmo (:class:`~pyccl.core.Cosmology`):
+            A Cosmology object.
+        psp_lin (:class:`~pyccl.pk2d.Pk2D`):
+            Linear power spectrum to use for growth factor scaling.
+        psp_nonlin (:class:`~pyccl.pk2d.Pk2D`):
+            Non-linear power spectrum to project.
+        fks_1 (array):
+            Chi integrands for tracer 1.
+        fks_2 (array):
+            Chi integrands for tracer 2.
+        transfers_t1 (array):
+            Transfer functions for tracer 1.
+        transfers_t2 (array):
+            Transfer functions for tracer 2.
+        fll_t1 (array):
+            f_ell values for tracer 1.
+        fll_t2 (array):
+            f_ell values for tracer 2.
+        k (array):
+            Wavenumbers at which to evaluate the full integral.
+        kpow (float):
+            Power of k in the integrand.
+        pk (function):
+            Function that takes k and a and returns the power spectrum.
+        dlnr (float):
+            Logarithmic spacing of chi values for FKEM.
+        el (int):
+            Index of the current ell in the loop over ls.
+        ell (float):
+            Current ell value.
+        limber_max_error (float):
+            Maximum fractional error for Limber integration.
+        status (int):
+            Status flag for error checking.
+    Returns:
+        status (int):
+            Updated status flag for error checking.
+        is_limber (bool):
+            Whether the Limber transition ell/threshold
+            has been reached for all combinations of tracers.
+    """
+    for i in range(len(clt1._trc)):
+        for j in range(len(clt2._trc)):
+            ti = clt1._trc[i]
+            tj = clt2._trc[j]
+            t1_temp, status = lib.cl_tracer_collection_t_new(status)
+            check(status)
+            t2_temp, status = lib.cl_tracer_collection_t_new(status)
+            check(status)
+            status = lib.add_cl_tracer_to_collection(t1_temp, ti, status)
+            check(status)
+            status = lib.add_cl_tracer_to_collection(t2_temp, tj, status)
+            check(status)
+
+            cl_limber_lin_temp, status = lib.angular_cl_vec_limber(
+                cosmo.cosmo,
+                t1_temp,
+                t2_temp,
+                psp_lin,
+                [ell],
+                integ_types["qag_quad"],
+                1,
+                status,
+            )
+            check(status, cosmo=cosmo)
+            cl_limber_nonlin_temp, status = lib.angular_cl_vec_limber(
+                cosmo.cosmo,
+                t1_temp,
+                t2_temp,
+                psp_nonlin,
+                [ell],
+                integ_types["qag_quad"],
+                1,
+                status,
+            )
+            check(status, cosmo=cosmo)
+
+            cls_nonlimber_lin_temp = (
+                np.sum(
+                    fks_1[i]
+                    * transfers_t1[i]
+                    * fks_2[j]
+                    * transfers_t2[j]
+                    * (k**kpow
+                        * pk(k, 1.0, cosmo))
+                )
+                * dlnr
+                * 2.0
+                / np.pi
+                * fll_t1[i][el]
+                * fll_t2[j][el]
+            )
+            cl_temp = (
+                cl_limber_nonlin_temp[-1]
+                - cl_limber_lin_temp[-1]
+                + cls_nonlimber_lin_temp
+            )
+            thresh = cl_temp / cl_limber_nonlin_temp[-1] - 1.0
+            if np.abs(thresh) >= limber_max_error:
+                return status, False
+    return status, True
 
 
 def _nonlimber_FKEM(
@@ -219,6 +335,18 @@ def _nonlimber_FKEM(
                       importance='high'
                       )
         limber_max_error = 0.01
+
+    if l_limber is None \
+            or (not isinstance(l_limber, str)
+                and not isinstance(l_limber, int)) \
+            or ((isinstance(l_limber, str) and l_limber != 'auto')
+                or (isinstance(l_limber, int) and l_limber <= 0)):
+        warnings.warn("l_limber must be a positive integer or 'auto'. "
+                      "Setting to 'auto'.",
+                      category=CCLWarning,
+                      importance='high'
+                      )
+        l_limber = 'auto'
 
     psp_lin = cosmo.parse_pk2d(p_of_k_a_lin, is_linear=True)
     psp_nonlin = cosmo.parse_pk2d(p_of_k_a, is_linear=False)
@@ -312,13 +440,31 @@ def _nonlimber_FKEM(
         cells.append(
             cl_limber_nonlin[-1] - cl_limber_lin[-1] + cls_nonlimber_lin
         )
-        if (
-            np.abs(cells[-1] / cl_limber_nonlin[-1] - 1) < limber_max_error
-            and l_limber == "auto"
-        ) or (type(l_limber) is not str and ell >= l_limber):
+
+        if (type(l_limber) is not str and ell >= l_limber):
             l_limber = ell
             break
-
+        if l_limber == "auto":
+            # need to check each individual combination of tracers
+            # to ensure all have reached the limber threshold,
+            # not just the total cl
+            # if any of the individual combinations of tracers
+            # have not reached the limber threshold,
+            # we need to continue to higher ells
+            # this is because the total cl can be dominated
+            # by one combination of tracers that has reached
+            # the limber threshold
+            status, is_limber = _auto_limber_transition_ell(
+                clt1, clt2, cosmo, psp_lin,
+                psp_nonlin, fks_1, fks_2,
+                transfers_t1, transfers_t2,
+                fll_t1, fll_t2, k, kpow,
+                pk, dlnr, el, ell,
+                limber_max_error, status
+            )
+            if is_limber:
+                l_limber = ell
+                break
     if type(l_limber) is str:
         l_limber = ls[-1]
     if False in np.isfinite(cells):
