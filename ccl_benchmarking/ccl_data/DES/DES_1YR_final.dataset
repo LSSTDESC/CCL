@@ -1,0 +1,20 @@
+#Converted from 1Yr data at https://des.ncsa.illinois.edu/releases/y1a1/key-products
+
+measurements_format = DES
+kmax = 10
+intrinsic_alignment_model = DES1YR
+data_types = xip xim gammat wtheta
+used_data_types = xip xim gammat wtheta
+num_z_bins = 4
+num_gal_bins = 5
+num_theta_bins = 20
+theta_bins_file = DES_1YR_final_theta_bins.dat
+cov_file = DES_1YR_final_cov.dat
+measurements[xip] = DES_1YR_final_xip.dat
+measurements[xim] = DES_1YR_final_xim.dat
+measurements[gammat] = DES_1YR_final_gammat.dat
+measurements[wtheta] = DES_1YR_final_wtheta.dat
+nz_file = DES_1YR_final_nz_source.dat
+nz_gal_file = DES_1YR_final_nz_lens.dat
+data_selection = DES_1YR_final_selection.dat
+nuisance_params = DES.paramnames

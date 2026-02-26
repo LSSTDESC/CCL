@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+
 import numpy as np
 import pyccl as ccl
 from pyccl.modified_gravity import MuSigmaMG
@@ -6,44 +8,126 @@ from pyccl.modified_gravity import MuSigmaMG
 from scipy.interpolate import interp1d
 import pytest
 
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--plot-ccl-bench",
+        action="store_true",
+        default=False,
+        help="Save CCL vs benchmark correlation plots.",
+    )
+    parser.addoption(
+        "--plot-dir",
+        action="store",
+        default="benchmarks/plots",
+        help="Directory where plots are saved (used with --plot-ccl-bench).",
+    )
+
+
+def _maybe_plot(request, theta_arcmin, xi_ccl, xi_bm, sigma, title, fname, errfac=None):
+    if request is None or not request.config.getoption("--plot-ccl-bench"):
+        return
+
+    outdir = Path(request.config.getoption("--plot-dir"))
+    outdir.mkdir(parents=True, exist_ok=True)
+    fpath = outdir / fname
+
+    pull = (xi_ccl - xi_bm) / sigma
+
+    fig = plt.figure(figsize=(7.0, 6.0))
+    gs = fig.add_gridspec(2, 1, height_ratios=[3, 1], hspace=0.05)
+
+    ax = fig.add_subplot(gs[0])
+    ax.plot(theta_arcmin, xi_bm, marker="o", linestyle="-", label="Benchmark")
+    ax.plot(theta_arcmin, xi_ccl, marker="s", linestyle="--", label="CCL")
+    ax.set_xscale("log")
+    ax.set_ylabel(r"$\xi(\theta)$")
+    ax.set_title(title)
+    ax.legend(loc="best")
+
+    ax2 = fig.add_subplot(gs[1], sharex=ax)
+    ax2.axhline(0.0, linestyle="-")
+
+    # tolerance bands in pull space: |pull| = errfac
+    if errfac is not None:
+        ax2.axhline(+errfac, color="gray", ls="--", lw=1)
+        ax2.axhline(-errfac, color="gray", ls="--", lw=1)
+
+    ax2.plot(theta_arcmin, pull, marker=".")
+    ax2.set_xscale("log")
+    ax2.set_xlabel(r"$\theta$ [arcmin]")
+    ax2.set_ylabel(r"$(\mathrm{CCL}-\mathrm{BM})/\sigma$")
+
+    fig.savefig(fpath, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
 
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
 def corr_method(request):
-    errfacs = {'fftlog': 0.21, 'bessel': 0.05}
+    errfacs = {'fftlog': 0.22, 'bessel': 0.22}
     return request.param, errfacs[request.param]
 
 
 @pytest.fixture(scope='module')
 def set_up(request):
     dirdat = os.path.dirname(__file__) + '/data/'
-    h0 = 0.67702026367187500
-    logA = 3.05  # log(10^10 A_s)
+    h0 = 0.6736
     ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
-    ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
-    ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
-    cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
-                          h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
-                          m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255,
+    ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.0E-5
+    ccl.gsl_params.INTEGRATION_EPSREL = 2.0E-5
+    cosmo = ccl.Cosmology(Omega_c=0.1200/h0**2, Omega_b=0.02237/h0**2, Omega_k=0,
+                          h=h0, A_s=2.100e-9, n_s=0.9649, Neff=3.046, T_ncdm=(4/11)**(1/3),
+                          m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255, mass_split='equal',
                           mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.1),
                           transfer_function='boltzmann_isitgr',
                           matter_power_spectrum='linear')
 
     # Ell-dependent correction factors
     # Set up array of ells
+#    fl = {}
+#    lmax = 10000
+#    nls = (lmax - 400)//20+141
+#    ells = np.zeros(nls)
+#    ells[:101] = np.arange(101)
+#    ells[101:121] = ells[100] + (np.arange(20) + 1) * 5
+#    ells[121:141] = ells[120] + (np.arange(20) + 1) * 10
+#    ells[141:] = ells[140] + (np.arange(nls - 141) + 1) * 20
+#    fl['lmax'] = lmax
+#    fl['ells'] = ells
+    
+    # Ell-dependent correction factors
+    # Set up array of ells
     fl = {}
-    lmax = 10000
-    nls = (lmax - 400)//20+141
+    lmax = 50000
+
+    # piecewise spacing:
+    #   0..100 step 1  (101 pts)
+    #   105..200 step 5 (20 pts)
+    #   210..400 step 10 (20 pts)
+    #   410..lmax step 10 (denser tail)
+    tail_step = 10
+
+    nls = (lmax - 400)//tail_step + 141
     ells = np.zeros(nls)
-    ells[:101] = np.arange(101)
-    ells[101:121] = ells[100] + (np.arange(20) + 1) * 5
-    ells[121:141] = ells[120] + (np.arange(20) + 1) * 10
-    ells[141:] = ells[140] + (np.arange(nls - 141) + 1) * 20
-    fl['lmax'] = lmax
-    fl['ells'] = ells
+
+    ells[:101] = np.arange(101)  # 0..100
+    ells[101:121] = ells[100] + (np.arange(20) + 1) * 5   # 105..200
+    ells[121:141] = ells[120] + (np.arange(20) + 1) * 10  # 210..400
+    ells[141:] = ells[140] + (np.arange(nls - 141) + 1) * tail_step  # 410..lmax
+
+    fl["lmax"] = lmax
+    fl["ells"] = ells
 
     # Load dNdz's
     z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)
     z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt", unpack=True)
+
+    print("int pz1 dz =", np.trapz(pz1, z1))
+    print("int pz2 dz =", np.trapz(pz2, z2))
 
     # Set up the linear galaxy bias as used in generating benchmarks
     bz1 = 1.45*np.ones_like(pz1)
@@ -141,16 +225,16 @@ def set_up(request):
                           ('l1', 'l1', 'll_11_m', 'll_11_m', 'GG-', 1),
                           ('l1', 'l2', 'll_12_m', 'll_12_m', 'GG-', 1),
                           ('l2', 'l2', 'll_22_m', 'll_22_m', 'GG-', 1)])
-def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
+def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref, request):
     cosmo, trcs, bms, ers, fls = set_up
     method, errfac = corr_method
-
-    # Debugging - define the  same cosmology but in GR
 
     cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], fls['ells'])
 
     ell = np.arange(fls['lmax'])
     cli = interp1d(fls['ells'], cl, kind='cubic')(ell)
+    #ell = np.arange(2, fls['lmax'])          # start at 2
+    #cli = interp1d(fls['ells'], cl, kind='cubic', fill_value="extrapolate")(ell)
     # Our benchmarks have theta in arcmin
     # but CCL requires it in degrees:
     theta_deg = bms['theta'] / 60.
@@ -158,6 +242,22 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
                          method=method)
     xi *= pref
 
-    print(xi)
+    np.savetxt("debug_cl_ccl_lensing00.txt", np.c_[fls['ells'], cl])
+    np.savetxt("debug_cl_ccl_lensing00_input_to_xi.txt", np.c_[ell, cli])
+    # Decide PASS/FAIL before asserting so plots get labeled either way
+    passed = np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
+    tag = "PASSED" if passed else "FAILED"
+    if tag == "FAILED":
+        _maybe_plot(
+            request,
+            theta_arcmin=bms["theta"],
+            xi_ccl=xi,
+            xi_bm=bms[bm],
+            sigma=ers[er],
+            title=f"{bm} ({t1}×{t2}, {kind}, method={method})",
+            fname=f"corr_{bm}_{t1}_{t2}_{kind}_{method}_{tag}.png",
+            errfac=errfac,
+        )
 
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
+

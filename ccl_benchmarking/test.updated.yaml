@@ -1,0 +1,202 @@
+theory:
+  cobaya_isitgr.isitgr.ISiTGR:
+    version: 1.6.5
+    path: /n/home12/cgarciaquintero/DESI/ISiTGR
+    speed: 0.3
+    stop_at_error: false
+    extra_args:
+      lens_potential_accuracy: 1
+      AccuracyBoost: 1
+      lAccuracyBoost: 1
+      lSampleBoost: 1
+    ignore_obsolete: false
+    external_primordial_pk: false
+    renames:
+      omegabh2: ombh2
+      omegach2: omch2
+      omegal: omega_de
+      omegak: omk
+      yhe: YHe
+      yheused: YHe
+      YpBBN: Y_p
+    input_params:
+    - As
+    - ns
+    - H0
+    - omch2
+    - ombh2
+    - mnu
+    - omk
+    - w
+    output_params: []
+likelihood:
+  ccl.joint:
+    path: /n/home12/cgarciaquintero/CCL/ccl_benchmarking/ccl_data
+    dataset_file: CCL.dataset
+    dataset_params:
+      used_data_types: wtheta gammat xip xim
+    acc: 1
+    l_max: 8000
+    use_hankel: false
+    use_Weyl: true
+    binned_bessels: false
+    aliases:
+    - DES
+    speed: 20
+    type: []
+    stop_at_error: false
+    version: null
+    python_path: /n/home12/cgarciaquintero/cosmological_inference/cobaya/cobaya/likelihoods
+    use_MG: true
+    input_params:
+    - H0
+    - DES_AIA
+    - DES_alphaIA
+    - DES_z0IA
+    - DES_m1
+    - DES_m2
+    - DES_m3
+    - DES_m4
+    - DES_DzS1
+    - DES_DzS2
+    - DES_DzS3
+    - DES_DzS4
+    - DES_DzL1
+    - DES_DzL2
+    - DES_DzL3
+    - DES_DzL4
+    - DES_DzL5
+    - DES_b1
+    - DES_b2
+    - DES_b3
+    - DES_b4
+    - DES_b5
+    output_params: []
+params:
+  H0:
+    value: 67.7
+  omch2:
+    value: 0.12
+    renames:
+    - omegach2
+  ombh2:
+    value: 0.022
+    renames:
+    - omegabh2
+  As:
+    value: 2.1e-09
+  ns:
+    value: 0.965
+  mnu:
+    value: 0.0
+  omk:
+    value: 0.0
+    renames:
+    - omegak
+  w:
+    value: -1.0
+  DES_AIA:
+    latex: A_\mathrm{IA,DES}
+    value: 0.0
+  DES_alphaIA:
+    latex: \alpha_\mathrm{IA,DES}
+    value: 0.0
+  DES_z0IA:
+    value: 0.62
+    latex: z_{0\mathrm{IA,DES}}
+  DES_m1:
+    latex: m_\mathrm{DES}^1
+    value: 0.0
+  DES_m2:
+    latex: m_\mathrm{DES}^2
+    value: 0.0
+  DES_m3:
+    latex: m_\mathrm{DES}^3
+    value: 0.0
+  DES_m4:
+    latex: m_\mathrm{DES}^4
+    value: 0.0
+  DES_DzS1:
+    latex: \Delta z_\mathrm{s,DES}^1
+    value: 0.0
+  DES_DzS2:
+    latex: \Delta z_\mathrm{s,DES}^2
+    value: 0.0
+  DES_DzS3:
+    latex: \Delta z_\mathrm{s,DES}^3
+    value: 0.0
+  DES_DzS4:
+    latex: \Delta z_\mathrm{s,DES}^4
+    value: 0.0
+  DES_DzL1:
+    latex: \Delta z_\mathrm{l,DES}^1
+    value: 0.0
+  DES_DzL2:
+    latex: \Delta z_\mathrm{l,DES}^2
+    value: 0.0
+  DES_DzL3:
+    latex: \Delta z_\mathrm{l,DES}^3
+    value: 0.0
+  DES_DzL4:
+    latex: \Delta z_\mathrm{l,DES}^4
+    value: 0.0
+  DES_DzL5:
+    latex: \Delta z_\mathrm{l,DES}^5
+    value: 0.0
+  DES_b1:
+    latex: b_\mathrm{DES}^1
+    value: 1.45
+  DES_b2:
+    latex: b_\mathrm{DES}^2
+    value: 1.55
+  DES_b3:
+    latex: b_\mathrm{DES}^3
+    value: 1.0
+  DES_b4:
+    latex: b_\mathrm{DES}^4
+    value: 1.0
+  DES_b5:
+    latex: b_\mathrm{DES}^5
+    value: 1.0
+sampler:
+  evaluate:
+    sampler_type: uncorrelated
+    N: 1
+    override:
+      H0: 67.7020263671875
+      omch2: 0.12
+      ombh2: 0.0221
+      As: 2.111534442e-09
+      ns: 0.96
+      mnu: 0.0
+      omk: 0.0
+      w: -1.0
+      wa: 0.0
+      nnu: 3.046
+      DES_AIA: 0.0
+      DES_alphaIA: 0.0
+      DES_z0IA: 0.62
+      DES_m1: 0.0
+      DES_m2: 0.0
+      DES_m3: 0.0
+      DES_m4: 0.0
+      DES_DzS1: 0.0
+      DES_DzS2: 0.0
+      DES_DzS3: 0.0
+      DES_DzS4: 0.0
+      DES_DzL1: 0.0
+      DES_DzL2: 0.0
+      DES_DzL3: 0.0
+      DES_DzL4: 0.0
+      DES_DzL5: 0.0
+      DES_b1: 1.45
+      DES_b2: 1.55
+      DES_b3: 1.0
+      DES_b4: 1.0
+      DES_b5: 1.0
+    seed: null
+    version: null
+    supports_periodic_params: false
+output: test
+test: true
+version: '3.6'
