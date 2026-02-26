@@ -277,7 +277,7 @@ def get_isitgr_pk_lin(cosmo):
     cp.Sigma0 = cosmo.mg_parametrization.sigma_0
     cp.c1 = cosmo.mg_parametrization.c1_mg
     cp.c2 = cosmo.mg_parametrization.c2_mg
-    cp.Lambda = cosmo.mg_parametrization.lambda_mg
+    cp.lambda_k = cosmo.mg_parametrization.lambda_mg
 
     # "constants"
     cp.TCMB = cosmo['T_CMB']
