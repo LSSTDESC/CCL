@@ -15,16 +15,19 @@ def corr_method(request):
 
 @pytest.fixture(scope='module')
 def set_up(request):
-    dirdat = os.path.dirname(__file__) + '/data/'
+    dirdat = os.path.dirname(__file__) + '/data'
     h0 = 0.67702026367187500
     logA = 3.05  # log(10^10 A_s)
+    # scale dependent MG cosmology
     ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
     ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 2.5E-5
     ccl.gsl_params.INTEGRATION_EPSREL = 2.5E-5
     cosmo = ccl.Cosmology(Omega_c=0.12/h0**2, Omega_b=0.0221/h0**2, Omega_k=0,
                           h=h0, A_s=np.exp(logA)/10**10, n_s=0.96, Neff=3.046,
                           m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255,
-                          mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.1),
+                          mg_parametrization=MuSigmaMG(
+                              mu_0=0.1, sigma_0=0.1,
+                              c1_mg=1.1, c2_mg=1.1, lambda_mg=1),
                           transfer_function='boltzmann_isitgr',
                           matter_power_spectrum='linear')
 
@@ -42,8 +45,8 @@ def set_up(request):
     fl['ells'] = ells
 
     # Load dNdz's
-    z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)
-    z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt", unpack=True)
+    z1, pz1 = np.loadtxt(dirdat + "/bin1_histo.txt", unpack=True)
+    z2, pz2 = np.loadtxt(dirdat + "/bin2_histo.txt", unpack=True)
 
     # Set up the linear galaxy bias as used in generating benchmarks
     bz1 = 1.45*np.ones_like(pz1)
@@ -60,18 +63,18 @@ def set_up(request):
 
     # Read benchmarks
     bms = {}
-    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_isitgr_linear_prediction.dat')[0:15]
-    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_isitgr_linear_prediction.dat')[15:30]
-    bms['dl_11'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_prediction.dat')[0:15]
-    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_prediction.dat')[15:30]
-    bms['dl_21'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_prediction.dat')[30:45]
-    bms['dl_22'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_prediction.dat')[45:60]
-    bms['ll_11_p'] = np.loadtxt(dirdat+'/Xip_isitgr_linear_prediction.dat')[0:15]
-    bms['ll_12_p'] = np.loadtxt(dirdat+'/Xip_isitgr_linear_prediction.dat')[15:30]
-    bms['ll_22_p'] = np.loadtxt(dirdat+'/Xip_isitgr_linear_prediction.dat')[30:45]
-    bms['ll_11_m'] = np.loadtxt(dirdat+'/Xim_isitgr_linear_prediction.dat')[0:15]
-    bms['ll_12_m'] = np.loadtxt(dirdat+'/Xim_isitgr_linear_prediction.dat')[15:30]
-    bms['ll_22_m'] = np.loadtxt(dirdat+'/Xim_isitgr_linear_prediction.dat')[30:45]
+    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_linear_predictionSD.dat')[0:15]
+    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_linear_predictionSD.dat')[15:30]
+    bms['dl_11'] = np.loadtxt(dirdat+'/gammat_linear_predictionSD.dat')[0:15]
+    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_linear_predictionSD.dat')[15:30]
+    bms['dl_21'] = np.loadtxt(dirdat+'/gammat_linear_predictionSD.dat')[30:45]
+    bms['dl_22'] = np.loadtxt(dirdat+'/gammat_linear_predictionSD.dat')[45:60]
+    bms['ll_11_p'] = np.loadtxt(dirdat+'/Xip_linear_predictionSD.dat')[0:15]
+    bms['ll_12_p'] = np.loadtxt(dirdat+'/Xip_linear_predictionSD.dat')[15:30]
+    bms['ll_22_p'] = np.loadtxt(dirdat+'/Xip_linear_predictionSD.dat')[30:45]
+    bms['ll_11_m'] = np.loadtxt(dirdat+'/Xim_linear_predictionSD.dat')[0:15]
+    bms['ll_12_m'] = np.loadtxt(dirdat+'/Xim_linear_predictionSD.dat')[15:30]
+    bms['ll_22_m'] = np.loadtxt(dirdat+'/Xim_linear_predictionSD.dat')[30:45]
     theta = np.loadtxt(dirdat+'/theta_corr_MG.dat')
     bms['theta'] = theta
 
