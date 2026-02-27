@@ -51,7 +51,7 @@ def test_mg_error():
 
 
 @pytest.mark.parametrize('tf', ['boltzmann_camb', 'boltzmann_class', 'bbks',
-                                  'eisenstein_hu'])
+                                'eisenstein_hu'])
 def test_mg_scale_dep_transfer_err(tf):
     """Test that scale-dependent MG params raise error with non-isitgr TF.
 
