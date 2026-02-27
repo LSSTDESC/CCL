@@ -475,7 +475,9 @@ class Tracer(CCLObject):
             `tuple`: k values and fft integral values at each k,
             or (None, None) on cache miss.
         """
-        cosmo_hash = hash(_to_hashable(cosmo._params_init_kwargs))
+        d = cosmo._params_init_kwargs
+        d.update(cosmo._config_init_kwargs)
+        cosmo_hash = hash(_to_hashable(d))
         key = (hash(tracer), Nchi, chimin, chimax, ell, cosmo_hash)
         temp = self.chi_fft_dict.get(key)
         if temp is None:
@@ -506,7 +508,9 @@ class Tracer(CCLObject):
         Returns:
             `tuple`: k values and fft integral values at each k.
         """
-        cosmo_hash = hash(_to_hashable(cosmo._params_init_kwargs))
+        d = cosmo._params_init_kwargs
+        d.update(cosmo._config_init_kwargs)
+        cosmo_hash = hash(_to_hashable(d))
         key = (hash(tracer), Nchi, chimin, chimax, ell, cosmo_hash)
 
         self.chi_fft_dict[key] = (ks, fft)
