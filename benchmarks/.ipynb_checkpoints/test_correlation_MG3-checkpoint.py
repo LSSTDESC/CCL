@@ -8,64 +8,6 @@ from pyccl.modified_gravity import MuSigmaMG
 from scipy.interpolate import interp1d
 import pytest
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-
-
-def pytest_addoption(parser):
-    parser.addoption(
-        "--plot-ccl-bench",
-        action="store_true",
-        default=False,
-        help="Save CCL vs benchmark correlation plots.",
-    )
-    parser.addoption(
-        "--plot-dir",
-        action="store",
-        default="benchmarks/plots",
-        help="Directory where plots are saved (used with --plot-ccl-bench).",
-    )
-
-
-def _maybe_plot(request, theta_arcmin, xi_ccl, xi_bm, sigma, title, fname, errfac=None):
-    if request is None or not request.config.getoption("--plot-ccl-bench"):
-        return
-
-    outdir = Path(request.config.getoption("--plot-dir"))
-    outdir.mkdir(parents=True, exist_ok=True)
-    fpath = outdir / fname
-
-    pull = (xi_ccl - xi_bm) / sigma
-
-    fig = plt.figure(figsize=(7.0, 6.0))
-    gs = fig.add_gridspec(2, 1, height_ratios=[3, 1], hspace=0.05)
-
-    ax = fig.add_subplot(gs[0])
-    ax.plot(theta_arcmin, xi_bm, marker="o", linestyle="-", label="Benchmark")
-    ax.plot(theta_arcmin, xi_ccl, marker="s", linestyle="--", label="CCL")
-    ax.set_xscale("log")
-    ax.set_ylabel(r"$\xi(\theta)$")
-    ax.set_title(title)
-    ax.legend(loc="best")
-
-    ax2 = fig.add_subplot(gs[1], sharex=ax)
-    ax2.axhline(0.0, linestyle="-")
-
-    # tolerance bands in pull space: |pull| = errfac
-    if errfac is not None:
-        ax2.axhline(+errfac, color="gray", ls="--", lw=1)
-        ax2.axhline(-errfac, color="gray", ls="--", lw=1)
-
-    ax2.plot(theta_arcmin, pull, marker=".")
-    ax2.set_xscale("log")
-    ax2.set_xlabel(r"$\theta$ [arcmin]")
-    ax2.set_ylabel(r"$(\mathrm{CCL}-\mathrm{BM})/\sigma$")
-
-    fig.savefig(fpath, dpi=200, bbox_inches="tight")
-    plt.close(fig)
-
-
 @pytest.fixture(scope='module', params=['fftlog', 'bessel'])
 def corr_method(request):
     errfacs = {'fftlog': 0.22, 'bessel': 0.22}
@@ -82,33 +24,15 @@ def set_up(request):
     cosmo = ccl.Cosmology(Omega_c=0.1200/h0**2, Omega_b=0.02237/h0**2, Omega_k=0,
                           h=h0, A_s=2.100e-9, n_s=0.9649, Neff=3.046, T_ncdm=(4/11)**(1/3),
                           m_nu=0.0, w0=-1, wa=0, T_CMB=2.7255, mass_split='equal',
-                          mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.1),
+                          mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.1, c1_mg=1.1, c2_mg=1.1, lambda_mg=1),
                           transfer_function='boltzmann_isitgr',
                           matter_power_spectrum='linear')
-
-    # Ell-dependent correction factors
-    # Set up array of ells
-#    fl = {}
-#    lmax = 10000
-#    nls = (lmax - 400)//20+141
-#    ells = np.zeros(nls)
-#    ells[:101] = np.arange(101)
-#    ells[101:121] = ells[100] + (np.arange(20) + 1) * 5
-#    ells[121:141] = ells[120] + (np.arange(20) + 1) * 10
-#    ells[141:] = ells[140] + (np.arange(nls - 141) + 1) * 20
-#    fl['lmax'] = lmax
-#    fl['ells'] = ells
     
     # Ell-dependent correction factors
     # Set up array of ells
     fl = {}
     lmax = 50000
 
-    # piecewise spacing:
-    #   0..100 step 1  (101 pts)
-    #   105..200 step 5 (20 pts)
-    #   210..400 step 10 (20 pts)
-    #   410..lmax step 10 (denser tail)
     tail_step = 10
 
     nls = (lmax - 400)//tail_step + 141
@@ -144,18 +68,18 @@ def set_up(request):
 
     # Read benchmarks
     bms = {}
-    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_isitgr_linear_prediction.dat')[0:15]
-    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_isitgr_linear_prediction.dat')[15:30]
-    bms['dl_11'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_prediction.dat')[0:15]
-    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_prediction.dat')[15:30]
-    bms['dl_21'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_prediction.dat')[30:45]
-    bms['dl_22'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_prediction.dat')[45:60]
-    bms['ll_11_p'] = np.loadtxt(dirdat+'/Xip_isitgr_linear_prediction.dat')[0:15]
-    bms['ll_12_p'] = np.loadtxt(dirdat+'/Xip_isitgr_linear_prediction.dat')[15:30]
-    bms['ll_22_p'] = np.loadtxt(dirdat+'/Xip_isitgr_linear_prediction.dat')[30:45]
-    bms['ll_11_m'] = np.loadtxt(dirdat+'/Xim_isitgr_linear_prediction.dat')[0:15]
-    bms['ll_12_m'] = np.loadtxt(dirdat+'/Xim_isitgr_linear_prediction.dat')[15:30]
-    bms['ll_22_m'] = np.loadtxt(dirdat+'/Xim_isitgr_linear_prediction.dat')[30:45]
+    bms['dd_11'] = np.loadtxt(dirdat+'/wtheta_isitgr_linear_scale_dependence_prediction.dat')[0:15]
+    bms['dd_22'] = np.loadtxt(dirdat+'/wtheta_isitgr_linear_scale_dependence_prediction.dat')[15:30]
+    bms['dl_11'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_scale_dependence_prediction.dat')[0:15]
+    bms['dl_12'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_scale_dependence_prediction.dat')[15:30]
+    bms['dl_21'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_scale_dependence_prediction.dat')[30:45]
+    bms['dl_22'] = np.loadtxt(dirdat+'/gammat_isitgr_linear_scale_dependence_prediction.dat')[45:60]
+    bms['ll_11_p'] = np.loadtxt(dirdat+'/Xip_isitgr_linear_scale_dependence_prediction.dat')[0:15]
+    bms['ll_12_p'] = np.loadtxt(dirdat+'/Xip_isitgr_linear_scale_dependence_prediction.dat')[15:30]
+    bms['ll_22_p'] = np.loadtxt(dirdat+'/Xip_isitgr_linear_scale_dependence_prediction.dat')[30:45]
+    bms['ll_11_m'] = np.loadtxt(dirdat+'/Xim_isitgr_linear_scale_dependence_prediction.dat')[0:15]
+    bms['ll_12_m'] = np.loadtxt(dirdat+'/Xim_isitgr_linear_scale_dependence_prediction.dat')[15:30]
+    bms['ll_22_m'] = np.loadtxt(dirdat+'/Xim_isitgr_linear_scale_dependence_prediction.dat')[30:45]
     theta = np.loadtxt(dirdat+'/theta_corr_MG.dat')
     bms['theta'] = theta
 
@@ -241,23 +165,6 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref, request):
     xi = ccl.correlation(cosmo, ell=ell, C_ell=cli, theta=theta_deg, type=kind,
                          method=method)
     xi *= pref
-
-    np.savetxt("debug_cl_ccl_lensing00.txt", np.c_[fls['ells'], cl])
-    np.savetxt("debug_cl_ccl_lensing00_input_to_xi.txt", np.c_[ell, cli])
-    # Decide PASS/FAIL before asserting so plots get labeled either way
-    passed = np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
-    tag = "PASSED" if passed else "FAILED"
-    if tag == "FAILED":
-        _maybe_plot(
-            request,
-            theta_arcmin=bms["theta"],
-            xi_ccl=xi,
-            xi_bm=bms[bm],
-            sigma=ers[er],
-            title=f"{bm} ({t1}×{t2}, {kind}, method={method})",
-            fname=f"corr_{bm}_{t1}_{t2}_{kind}_{method}_{tag}.png",
-            errfac=errfac,
-        )
-
+    
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
 
