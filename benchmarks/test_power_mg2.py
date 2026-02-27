@@ -1,10 +1,10 @@
-import os
 import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl.modified_gravity import MuSigmaMG
 
 POWER_MG_TOL = 1e-2
+
 
 @pytest.mark.parametrize('model', list(range(5)))
 def test_power_mg(model):
@@ -32,14 +32,10 @@ def test_power_mg(model):
     )
 
     # --- load benchmark for this model ---
-    data = np.loadtxt(f"./benchmarks/data/model{model:d}_pk_isitgr_matterpower.dat")
+    fname = f"./benchmarks/data/model{model:d}_pk_isitgr_matterpower.dat"
+    data = np.loadtxt(fname)
     k_hmpc = data[:, 0]
     pk_bm_h3 = data[:, 1]
-
-    # --- load baseline benchmark (model 0: mu0=sigma0=0) ---
-    data0 = np.loadtxt("./benchmarks/data/model0_pk_isitgr_matterpower.dat")
-    k0_hmpc = data0[:, 0]
-    pk0_bm_h3 = data0[:, 1]
 
     a = 1.0
 
