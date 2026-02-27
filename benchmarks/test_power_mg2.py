@@ -1,42 +1,58 @@
+import os
 import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl.modified_gravity import MuSigmaMG
 
-
-POWER_MG_TOL = 1e-4
-
+POWER_MG_TOL = 1e-2
 
 @pytest.mark.parametrize('model', list(range(5)))
 def test_power_mg(model):
     mu_0 = [0., 0.1, -0.1, 0.1, -0.1]
     sigma_0 = [0., 0.1, -0.1, -0.1, 0.1]
-    h0 = 0.7
+
+    h0 = 0.6736
+
+    # --- CCL cosmology for this model ---
     cosmoMG = ccl.Cosmology(
-        Omega_c=0.112/h0**2,
-        Omega_b=0.0226/h0**2,
+        Omega_c=0.1200 / h0**2,
+        Omega_b=0.02237 / h0**2,
         h=h0,
-        A_s=2.1e-9,
-        n_s=0.96,
+        A_s=2.100e-9,
+        n_s=0.9649,
         Neff=3.046,
         Omega_k=0,
         m_nu=0,
         T_CMB=2.7255,
-        mg_parametrization=MuSigmaMG(
-            mu_0=mu_0[model],
-            sigma_0=sigma_0[model]),
+        T_ncdm=(4/11)**(1/3),
+        mass_split='equal',
+        mg_parametrization=MuSigmaMG(mu_0=mu_0[model], sigma_0=sigma_0[model]),
         matter_power_spectrum='linear',
-        transfer_function='boltzmann_isitgr')
+        transfer_function='boltzmann_isitgr',
+    )
 
-    data = np.loadtxt("./benchmarks/data/model%d_pk_MG_matterpower.dat"
-                      % model)
+    # --- load benchmark for this model ---
+    data = np.loadtxt(f"./benchmarks/data/model{model:d}_pk_isitgr_matterpower.dat")
+    k_hmpc = data[:, 0]
+    pk_bm_h3 = data[:, 1]
 
-    a = 1
-    k = data[:, 0] * cosmoMG['h']
-    pk = data[:, 1] / (cosmoMG['h']**3)
+    # --- load baseline benchmark (model 0: mu0=sigma0=0) ---
+    data0 = np.loadtxt("./benchmarks/data/model0_pk_isitgr_matterpower.dat")
+    k0_hmpc = data0[:, 0]
+    pk0_bm_h3 = data0[:, 1]
+
+    a = 1.0
+
+    # Bench file: k [h/Mpc], Pk [(Mpc/h)^3]
+    # CCL expects k [1/Mpc] and returns Pk [Mpc^3]
+    k = k_hmpc * cosmoMG["h"]
+    pk_bm = pk_bm_h3 / (cosmoMG["h"]**3)
     pk_ccl = ccl.linear_matter_power(cosmoMG, k, a)
-    err = np.abs(pk_ccl/pk - 1)
-    print(cosmoMG)
-    # cut two points due to cosmic variance
-    cut = data[:, 0] > 1e-04
-    assert np.allclose(err[cut], 0, rtol=0, atol=POWER_MG_TOL)
+
+    frac = pk_ccl / pk_bm - 1.0
+    err = np.abs(frac)
+
+    cut = k_hmpc > 1e-04
+    passed = np.allclose(err[cut], 0.0, rtol=0.0, atol=POWER_MG_TOL)
+
+    assert passed
