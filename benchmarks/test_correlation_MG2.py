@@ -55,9 +55,6 @@ def set_up(request):
     z1, pz1 = np.loadtxt(dirdat + "bin1_histo.txt", unpack=True)
     z2, pz2 = np.loadtxt(dirdat + "bin2_histo.txt", unpack=True)
 
-    print("int pz1 dz =", np.trapz(pz1, z1))
-    print("int pz2 dz =", np.trapz(pz2, z2))
-
     # Set up the linear galaxy bias as used in generating benchmarks
     bz1 = 1.45*np.ones_like(pz1)
     bz2 = 1.55*np.ones_like(pz2)
