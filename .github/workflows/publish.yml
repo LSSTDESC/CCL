@@ -15,8 +15,6 @@ jobs:
         include:
           - os: ubuntu-latest
             cibw_archs: x86_64
-          - os: macos-13
-            cibw_archs: x86_64
           - os: macos-latest
             cibw_archs: arm64
 
@@ -27,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2
+        uses: pypa/cibuildwheel@v3.3.1
         env:
           CIBW_ARCHS: ${{ matrix.cibw_archs }}
 
