@@ -85,18 +85,27 @@ class BaccoLbiasCalculator(CCLAutoRepr):
             (default), no cutoff factor will be applied.
         n_exp_cutoff (:obj:`float`): exponent of the cutoff factor (see
             ``k_cutoff``).
+        extrap_lin (:obj:`bool`): keyword determining large-scale
+            extrapolation of returned HEFT power spectra.
+            If ``True``, the appropriately biased linear power spectrum will be
+            smoothly joined to the HEFT power spectrum at a transition scale
+            of 0.01 h/Mpc (the minimum k value of baccoemu).
+            If ``False``, the extrapolation will be done within baccoemu. Note
+            that this can lead to unphysical behavior at large scales.
     """
     __repr_attrs__ = __eq_attrs__ = ('k_s', 'a_s', 'exp_cutoff')
 
     def __init__(self, *, cosmo=None,
                  log10k_min=-4, log10k_max=-0.47, nk_per_decade=20,
-                 a_arr=None, k_cutoff=None, n_exp_cutoff=4):
+                 a_arr=None, k_cutoff=None, n_exp_cutoff=4, extrap_lin=True):
         # Load emulator
         import warnings
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', category=UserWarning)
             import baccoemu
             self.emu = baccoemu.Lbias_expansion()
+            # Load linear matter power spectrum emulator
+            self.emu_pklin = baccoemu.Matter_powerspectrum()
 
         # k sampling
         nk_total = int((log10k_max - log10k_min) * nk_per_decade)
@@ -115,6 +124,14 @@ class BaccoLbiasCalculator(CCLAutoRepr):
             self.exp_cutoff = self.exp_cutoff[None, :]
         else:
             self.exp_cutoff = 1
+
+        # Transition scale for power spectrum extrapolation
+        if extrap_lin:
+            ktrans = 0.01*cosmo['h'] if cosmo is not None else 0.0067
+            ntrans = 5.0
+            self.smooth_transition = np.exp(-(self.k_s/ktrans)**ntrans)
+        else:
+            self.smooth_transition = np.zeros_like(self.k_s)
 
         # Initialize all expensive arrays to ``None``.
         self._cosmo = None
@@ -180,6 +197,12 @@ class BaccoLbiasCalculator(CCLAutoRepr):
 
         # save templates in a table
         self.lpt_table = lpt_table
+
+        # Get linear power spectrum from baccoemu
+        pk_lin = self.emu_pklin.get_linear_pk(k=k, **emupars)[1]
+        pk_lin /= h ** 3
+        # Save linear power spectrum
+        self.pk_lin = pk_lin
 
         # Reset template power spectra
         self._pk2d_temp = {}
@@ -264,7 +287,11 @@ class BaccoLbiasCalculator(CCLAutoRepr):
                (bs2 * bk21 + bs1 * bk22)[:, None] * Ps2k2 +
                (bk21 * bk22)[:, None] * Pk2k2)
 
-        return pgg*self.exp_cutoff
+        # Smoothly patch together with the linear power spectrum
+        pgg_smooth = (b11*b12)[:, None]*self.pk_lin*self.smooth_transition + \
+            pgg*(1-self.smooth_transition)
+
+        return pgg_smooth*self.exp_cutoff
 
     def _get_pgm(self, trg):
         """ Get the number counts - matter cross-spectrum at the internal
@@ -301,7 +328,11 @@ class BaccoLbiasCalculator(CCLAutoRepr):
                bs[:, None] * Pdms2 +
                bk2[:, None] * Pdmk2)
 
-        return pgm*self.exp_cutoff
+        # Smoothly patch together with the linear power spectrum
+        pgm_smooth = b1[:, None]*self.pk_lin*self.smooth_transition + \
+            pgm*(1-self.smooth_transition)
+
+        return pgm_smooth*self.exp_cutoff
 
     def _get_pmm(self):
         """ Get the one-loop matter power spectrum.
@@ -315,7 +346,11 @@ class BaccoLbiasCalculator(CCLAutoRepr):
 
         pk = self.lpt_table[0, :, :]
 
-        return pk*self.exp_cutoff
+        # Smoothly patch together with the linear power spectrum
+        pmm_smooth = self.pk_lin*self.smooth_transition + \
+            pk*(1-self.smooth_transition)
+
+        return pmm_smooth*self.exp_cutoff
 
     def get_biased_pk2d(self, tracer1, *, tracer2=None,
                         extrap_order_lok=1, extrap_order_hik=2):
