@@ -35,7 +35,9 @@ def set_up(request):
         wa=0,
         T_CMB=2.7255,
         mass_split="equal",
-        mg_parametrization=MuSigmaMG(mu_0=0.1, sigma_0=0.1),
+        mg_parametrization=MuSigmaMG(
+            mu_0=0.1, sigma_0=0.1, c1_mg=1.1, c2_mg=1.1, lambda_mg=1
+        ),
         transfer_function="boltzmann_isitgr",
         matter_power_spectrum="linear",
     )
@@ -45,11 +47,6 @@ def set_up(request):
     fl = {}
     lmax = 50000
 
-    # piecewise spacing:
-    #   0..100 step 1  (101 pts)
-    #   105..200 step 5 (20 pts)
-    #   210..400 step 10 (20 pts)
-    #   410..lmax step 10 (denser tail)
     tail_step = 10
 
     nls = (lmax - 400) // tail_step + 141
@@ -86,42 +83,42 @@ def set_up(request):
 
     # Read benchmarks
     bms = {}
-    bms["dd_11"] = np.loadtxt(dirdat + "/wtheta_isitgr_linear_prediction.dat")[
-        0:15
-    ]
-    bms["dd_22"] = np.loadtxt(dirdat + "/wtheta_isitgr_linear_prediction.dat")[
-        15:30
-    ]
-    bms["dl_11"] = np.loadtxt(dirdat + "/gammat_isitgr_linear_prediction.dat")[
-        0:15
-    ]
-    bms["dl_12"] = np.loadtxt(dirdat + "/gammat_isitgr_linear_prediction.dat")[
-        15:30
-    ]
-    bms["dl_21"] = np.loadtxt(dirdat + "/gammat_isitgr_linear_prediction.dat")[
-        30:45
-    ]
-    bms["dl_22"] = np.loadtxt(dirdat + "/gammat_isitgr_linear_prediction.dat")[
-        45:60
-    ]
-    bms["ll_11_p"] = np.loadtxt(dirdat + "/Xip_isitgr_linear_prediction.dat")[
-        0:15
-    ]
-    bms["ll_12_p"] = np.loadtxt(dirdat + "/Xip_isitgr_linear_prediction.dat")[
-        15:30
-    ]
-    bms["ll_22_p"] = np.loadtxt(dirdat + "/Xip_isitgr_linear_prediction.dat")[
-        30:45
-    ]
-    bms["ll_11_m"] = np.loadtxt(dirdat + "/Xim_isitgr_linear_prediction.dat")[
-        0:15
-    ]
-    bms["ll_12_m"] = np.loadtxt(dirdat + "/Xim_isitgr_linear_prediction.dat")[
-        15:30
-    ]
-    bms["ll_22_m"] = np.loadtxt(dirdat + "/Xim_isitgr_linear_prediction.dat")[
-        30:45
-    ]
+    bms["dd_11"] = np.loadtxt(
+        dirdat + "/wtheta_isitgr_linear_scale_dependence_prediction.dat"
+    )[0:15]
+    bms["dd_22"] = np.loadtxt(
+        dirdat + "/wtheta_isitgr_linear_scale_dependence_prediction.dat"
+    )[15:30]
+    bms["dl_11"] = np.loadtxt(
+        dirdat + "/gammat_isitgr_linear_scale_dependence_prediction.dat"
+    )[0:15]
+    bms["dl_12"] = np.loadtxt(
+        dirdat + "/gammat_isitgr_linear_scale_dependence_prediction.dat"
+    )[15:30]
+    bms["dl_21"] = np.loadtxt(
+        dirdat + "/gammat_isitgr_linear_scale_dependence_prediction.dat"
+    )[30:45]
+    bms["dl_22"] = np.loadtxt(
+        dirdat + "/gammat_isitgr_linear_scale_dependence_prediction.dat"
+    )[45:60]
+    bms["ll_11_p"] = np.loadtxt(
+        dirdat + "/Xip_isitgr_linear_scale_dependence_prediction.dat"
+    )[0:15]
+    bms["ll_12_p"] = np.loadtxt(
+        dirdat + "/Xip_isitgr_linear_scale_dependence_prediction.dat"
+    )[15:30]
+    bms["ll_22_p"] = np.loadtxt(
+        dirdat + "/Xip_isitgr_linear_scale_dependence_prediction.dat"
+    )[30:45]
+    bms["ll_11_m"] = np.loadtxt(
+        dirdat + "/Xim_isitgr_linear_scale_dependence_prediction.dat"
+    )[0:15]
+    bms["ll_12_m"] = np.loadtxt(
+        dirdat + "/Xim_isitgr_linear_scale_dependence_prediction.dat"
+    )[15:30]
+    bms["ll_22_m"] = np.loadtxt(
+        dirdat + "/Xim_isitgr_linear_scale_dependence_prediction.dat"
+    )[30:45]
     theta = np.loadtxt(dirdat + "/theta_corr_MG.dat")
     bms["theta"] = theta
 

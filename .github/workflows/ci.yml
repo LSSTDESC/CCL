@@ -3,10 +3,29 @@ name: continuous-integration
 on:
   push:
     branches:
-      - main
       - master
       - releases/*
   pull_request: null
+  workflow_dispatch:
+    inputs:
+      python-version:
+        description: 'Python version to test (leave empty for all)'
+        required: false
+        type: string
+      os:
+        description: 'OS to test on'
+        required: false
+        type: choice
+        options:
+          - all
+          - ubuntu-latest
+          - macos-latest
+        default: 'all'
+
+# Cancel redundant builds
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
@@ -19,10 +38,15 @@ jobs:
       run:
         shell: bash -l {0}
 
+    permissions:
+      contents: read
+      checks: write
+
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: ${{ (github.event.inputs.os == 'all' || github.event.inputs.os == '') && fromJSON('["macos-latest", "ubuntu-latest"]') || fromJSON(format('["{0}"]', github.event.inputs.os)) }}
+        python-version: ${{ github.event.inputs.python-version != '' && fromJSON(format('["{0}"]', github.event.inputs.python-version)) || fromJSON('["3.10", "3.11", "3.12", "3.13", "3.14"]') }}
         include:
           - os: macos-latest
             label: osx-64
@@ -33,10 +57,6 @@ jobs:
             prefix: /usr/share/miniconda3
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          access_token: ${{ github.token }}
 
       - name: Checkout CCL repository
         uses: actions/checkout@v4
@@ -44,35 +64,33 @@ jobs:
       - name: Set up conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          channels: conda-forge, defaults
-          channel-priority: strict
+          channels: conda-forge
           show-channel-urls: true
           miniforge-version: latest
           miniforge-variant: Miniforge3
+          python-version: ${{ matrix.python-version }}
 
       - name: "macOS: set env variables"
         if: matrix.label == 'osx-64'
         run: |
-          #mamba install llvm-openmp
           echo "DYLD_FALLBACK_LIBRARY_PATH=${CONDA_PREFIX}/lib" >> $GITHUB_ENV
           SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           echo "SDKROOT: ${SDKROOT}"
           echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
           echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
-
-          export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include"
-          export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+          echo "CFLAGS=-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib" >> $GITHUB_ENV
 
       - name: Set current date as environment variable
         run: echo "TODAY=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
 
       - name: Get cached environment
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache
         with:
           path: ${{ matrix.prefix }}
           key:
-            conda-py${{ matrix.py }}--${{
+            conda-py${{ matrix.python-version }}-${{
             matrix.os }}--${{
             hashFiles(env.CONDA_ENV) }}-${{
             hashFiles('setup.py') }}--${{
@@ -85,10 +103,18 @@ jobs:
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
           mamba env update --file ${{ env.CONDA_ENV }} --prune
 
-      - name: Install classy
-        run: |
-          pip install 'setuptools' 'wheel' 'numpy>=1.19.0' 'Cython>=0.29.21,<3'  # for classy
-          pip install --no-build-isolation classy==2.9.4
+      - name: Get pip cache dir
+        id: pip-cache
+        run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: pip-py${{ matrix.python-version }}-${{ runner.os }}-${{ hashFiles('**/environment.yml') }}-${{ hashFiles('setup.py') }}
+          restore-keys: |
+            pip-py${{ matrix.python-version }}-${{ runner.os }}-
+            pip-${{ runner.os }}-
 
       - name: Install CCL
         run: pip install -v -e .
@@ -116,21 +142,13 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout CCL repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Lint
         uses: py-actions/flake8@v2
         with:
           args: "--config .flake8"
-
-
-# Legacy step: uninstall homebrew (CI works without it).
-# - name: "macOS: remove homebrew"
-#   if: matrix.label == 'osx-64'
-#   run: |
-#     curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh -o uninstall_homebrew.sh
-#     chmod u+x ./uninstall_homebrew.sh
-#     ./uninstall_homebrew.sh -f -q >& /dev/null
-#     rm -f uninstall_homebrew.sh

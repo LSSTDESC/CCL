@@ -12,17 +12,39 @@ for the changes to be visible system-wide. Note, if you change the CCL ``C``
 code, you will need to force CCL to recompile the code (and copy the resulting
 ``.so`` into the ``Python`` package) by rerunning the command below.
 
-To install CCL using a ``pip`` developer installation, you can execute
+To install CCL using a ``pip`` developer installation, it is recommended to use
+a Conda environment to manage dependencies (matching the CI environment).
 
 .. code-block:: bash
 
-   $ pip install --no-deps -e .
+   # Create conda environment from the project specification
+   $ conda env create -f .github/environment.yml
+   $ conda activate test
 
-from the top-level directory in the repository. You will need ``CMake`` in
-order to install CCL in this way. See :ref:`getting-cmake` for help installing
-``CMake`` if you do not already have it. In order to run the tests,
-you will need ``CAMB``, ``CLASS``, and ``FAST-PT`` installed. See the instructions for
-:ref:`boltzmann-codes` and :ref:`getting-pt` for details.
+   # Install CCL in development mode
+   $ pip install -v -e .
+
+If you prefer a manual setup or virtualenv:
+
+.. code-block:: bash
+
+   # Install system dependencies (e.g. via brew or apt)
+   $ brew install cmake swig gsl fftw
+   # or: sudo apt-get install cmake swig libgsl-dev libfftw3-dev
+
+   # Create virtual environment
+   $ python3 -m venv venv
+   $ source venv/bin/activate
+
+   # Install Python dependencies
+   $ pip install --upgrade pip setuptools wheel
+   $ pip install numpy pytest pytest-cov
+
+   # Install CCL in development mode
+   $ pip install -v -e .
+
+To run the tests, you will need the Boltzmann codes installed (CAMB, CLASS, etc.),
+which are handled automatically if you use the Conda environment method.
 
 To compile the ``C`` code with debugging symbols, add the ``--debug`` option
 when calling ``setup.py``:

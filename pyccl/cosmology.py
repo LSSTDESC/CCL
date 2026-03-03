@@ -471,6 +471,20 @@ class Cosmology(CCLObject):
         c2_mg = self.mg_parametrization.c2_mg
         lambda_mg = self.mg_parametrization.lambda_mg
 
+        # Check if scale-dependent MG parameters are being used with
+        # an incompatible transfer function. GR is recovered when
+        # c1_mg = c2_mg = 1 (regardless of lambda) OR when
+        # c1_mg = c2_mg = lambda_mg = 0.
+        is_gr_case = (c1_mg == 1 and c2_mg == 1) or \
+                     (c1_mg == 0 and c2_mg == 0 and lambda_mg == 0)
+        if not is_gr_case and \
+                self.transfer_function_type != 'boltzmann_isitgr':
+            raise ValueError(
+                "Your choice of c1_mg, c2_mg, and lambda_mg values is "
+                "inconsistent with your transfer function choice "
+                "(you must choose boltzmann_isitgr for scale-dependent MG)."
+            )
+
         self._fill_params(
             m_nu=nu_mass, sum_nu_masses=sum(nu_mass), N_nu_mass=N_nu_mass,
             N_nu_rel=N_nu_rel, Neff=Neff, Omega_nu_mass=Omega_nu_mass,
