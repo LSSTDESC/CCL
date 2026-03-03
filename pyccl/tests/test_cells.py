@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 import pyccl as ccl
 from pyccl.modified_gravity import MuSigmaMG
+from pyccl import CCLWarning
 
 
 ccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False
@@ -153,6 +154,89 @@ def test_fkem_chi_params():
     assert not np.all(np.fabs(cl_ggn/cl_gg-1)[ell_good] < 0.01)
     # Check that it works with custom ones.
     assert np.all(np.fabs(cl_ggn_b/cl_gg-1)[ell_good] < 0.01)
+
+
+def test_fkem_warn_bad_params():
+    # Simple NC tracer setup
+    z = np.linspace(0, 2.0, 50)
+    nz = z**2 * np.exp(-z)
+    bz = np.ones_like(z)
+    ells = np.array([10.0, 30.0, 100.0])
+    cosmo = ccl.CosmologyVanillaLCDM()
+    nc = ccl.NumberCountsTracer(
+        cosmo, has_rsd=False, dndz=(z, nz), bias=(z, bz)
+    )
+
+    # Nchi invalid (<=0) -> warning and defaulting
+    with pytest.warns(CCLWarning, match="Nchi must be a positive integer"):
+        cl = ccl.angular_cl(
+            cosmo,
+            nc,
+            nc,
+            ells,
+            non_limber_integration_method="FKEM",
+            l_limber=1000,
+            fkem_Nchi=0,
+        )
+        assert np.all(np.isfinite(cl))
+
+    # chi_min invalid (<=0) -> warning and defaulting
+    with pytest.warns(CCLWarning, match="chi_min must be greater than zero"):
+        cl = ccl.angular_cl(
+            cosmo,
+            nc,
+            nc,
+            ells,
+            non_limber_integration_method="FKEM",
+            l_limber=1000,
+            fkem_chi_min=0.0,
+        )
+        assert np.all(np.isfinite(cl))
+
+    # limber_max_error invalid (<=0) -> warning and defaulting
+    with pytest.warns(CCLWarning,
+                      match="limber_max_error must be greater than zero"):
+        cl = ccl.angular_cl(
+            cosmo,
+            nc,
+            nc,
+            ells,
+            non_limber_integration_method="FKEM",
+            l_limber=1000,
+            limber_max_error=0.0,
+        )
+        assert np.all(np.isfinite(cl))
+
+
+def test_fkem_warn_mismatched_pk_types_fallback_to_limber():
+    # If p_of_k_a and p_of_k_a_lin are of different types,
+    # FKEM should warn and fall back
+    z = np.linspace(0, 2.0, 50)
+    nz = z**2 * np.exp(-z)
+    bz = np.ones_like(z)
+    ells = np.array([10.0, 30.0, 100.0])
+    cosmo = ccl.CosmologyVanillaLCDM()
+    nc = ccl.NumberCountsTracer(
+        cosmo, has_rsd=False, dndz=(z, nz), bias=(z, bz)
+    )
+
+    pka_obj = ccl.Pk2D.from_function(pkfunc=lambda k, a: a / (1.0 + k))
+    with pytest.warns(CCLWarning, match="p_of_k_a and "
+                      "p_of_k_a_lin must be of the same type"):
+        cl, meta = ccl.angular_cl(
+            cosmo,
+            nc,
+            nc,
+            ells,
+            non_limber_integration_method="FKEM",
+            l_limber=1000,
+            p_of_k_a=pka_obj,
+            p_of_k_a_lin=ccl.DEFAULT_POWER_SPECTRUM,  # string default
+            return_meta=True,
+        )
+        # Should have fallen back to Limber for all ells
+        assert np.all(np.isfinite(cl))
+        assert meta["l_limber"] == -1
 
 
 def test_cells_mg():
