@@ -11,7 +11,7 @@ if(NOT FFTW_FOUND )
     ExternalProject_Add(FFTW
         PREFIX FFTW
         URL http://www.fftw.org/fftw-${FFTWVersion}.tar.gz
-        URL_MD5 ${GSLMD5}
+        URL_MD5 ${FFTWMD5}
         DOWNLOAD_NO_PROGRESS 1
         CONFIGURE_COMMAND ./configure --prefix=${CMAKE_BINARY_DIR}/extern --enable-shared=no --with-pic=yes
         BUILD_COMMAND           make -j8
