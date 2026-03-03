@@ -45,6 +45,9 @@ class Distribution(_distribution):
         self.debug = False
         super().__init__(attr)
 
+    def has_ext_modules(self):
+        return True
+
 
 class Build(_build):
     """Specialized Python source builder."""
