@@ -12,7 +12,8 @@ def _compile_ccl(debug=False):
     call(["mkdir", "-p", "build"])
     v = sys.version_info
     cmd = ["cmake", "-H.", "-Bbuild",
-           "-DPYTHON_VERSION=%d.%d.%d" % (v.major, v.minor, v.micro)]
+           "-DPYTHON_VERSION=%d.%d.%d" % (v.major, v.minor, v.micro),
+           "-DPYTHON_EXECUTABLE=%s" % sys.executable]
     if debug:
         cmd += ["-DCMAKE_BUILD_TYPE=Debug"]
     if call(cmd) != 0:
