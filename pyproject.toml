@@ -49,3 +49,16 @@ include = ["pyccl*"]
 pyccl = ["_ccllib.so", "emulators/data/*.npz"]
 
 [tool.setuptools_scm]
+
+[tool.cibuildwheel]
+build = "cp310-* cp311-* cp312-* cp313-* cp314-*"
+skip = "pp* *-musllinux_* *-win* *-manylinux_i686 *-manylinux_s390x *-manylinux_ppc64le"
+test-command = "python -c \"import pyccl; print(pyccl.__version__)\""
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+before-all = "dnf install -y pcre-devel automake autoconf libtool bison"
+
+[tool.cibuildwheel.macos]
+environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
