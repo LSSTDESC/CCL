@@ -27,7 +27,7 @@ jobs:
 
     - name: Build wheel and source tarball
       run: |
-        python -m build
+        python -m build  --sdist
 
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
