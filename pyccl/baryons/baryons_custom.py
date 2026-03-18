@@ -6,14 +6,17 @@ from .. import Pk2D
 from . import Baryons
 from scipy.interpolate import RegularGridInterpolator
 
+
 class BaryonsCustom(Baryons):
-    """The custom baryonic model boost factor for baryons. 
+    """The custom baryonic model boost factor for baryons.
 
     The boost factor is applied multiplicatively so that
     :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\, f_{\\rm BCM}(k, a)`.
 
     Args:
-        boost_data (:obj:`array`): Array containing the boost factor data.
+        boost_data (:obj:`array`): 2D array of shape ``(n_a, n_k)``
+            containing the boost factor, with rows corresponding to
+            entries in ``a_data`` and columns to entries in ``k_data``.
         k_data (:obj:`array`): Wavenumber (in :math:`{\\rm Mpc}^{-1}`).
         a_data (:obj:`array`): Scale factor.
     """
@@ -37,28 +40,27 @@ class BaryonsCustom(Baryons):
         """Interpolated baryonic boost factor.
 
         Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
-            k (:obj:`float` or `array`): Wavenumber (in :math:`{\\rm Mpc}^{-1}`).
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
+                parameters.
+            k (:obj:`float` or `array`): Wavenumber
+                (in :math:`{\\rm Mpc}^{-1}`).
             a (:obj:`float` or `array`): Scale factor.
 
         Returns:
             :obj:`float` or `array`: Correction factor to apply to \
             the power spectrum.
-        """ # noqa
+        """  # noqa
         a_arr = np.atleast_1d(a)
         k_arr = np.atleast_1d(k)
         a_mesh, k_mesh = np.meshgrid(a_arr, k_arr, indexing='ij')
         query_points = np.column_stack([a_mesh.ravel(), k_mesh.ravel()])
 
         boost_vals = self._interpolator(query_points).reshape(a_mesh.shape)
-        
-        # Match output shape to inputs
-        if np.ndim(a) == 0 and np.ndim(k) == 0:
-            return boost_vals[0, 0]
-        elif np.ndim(a) == 0:
-            return boost_vals[0]
-        elif np.ndim(k) == 0:
-            return boost_vals[:, 0]
+
+        if np.ndim(k) == 0:
+            boost_vals = np.squeeze(boost_vals, axis=-1)
+        if np.ndim(a) == 0:
+            boost_vals = np.squeeze(boost_vals, axis=0)
         return boost_vals
 
     def update_parameters(self, boost_data=None, k_data=None, a_data=None):
@@ -66,11 +68,10 @@ class BaryonsCustom(Baryons):
         be left untouched.
 
         Args:
-            log10Mc (:obj:`float`): logarithmic mass scale of hot
-                gas suppression.
-            eta_b (:obj:`float`): ratio of escape to ejection radii.
-            k_s (:obj:`float`): Characteristic scale (wavenumber) of
-                the stellar component.
+            boost_data (:obj:`array`): 2D array of shape ``(n_a, n_k)``
+                containing the boost factor.
+            k_data (:obj:`array`): Wavenumber (in :math:`{\\rm Mpc}^{-1}`).
+            a_data (:obj:`array`): Scale factor.
         """
         if boost_data is not None:
             self.boost_data = boost_data
@@ -82,8 +83,8 @@ class BaryonsCustom(Baryons):
         # Update interpolator in (a, k) space
         if boost_data is not None or k_data is not None or a_data is not None:
             self._interpolator = RegularGridInterpolator(
-                points=(a_data, k_data),
-                values=boost_data,
+                points=(self.a_data, self.k_data),
+                values=self.boost_data,
                 bounds_error=False,
                 fill_value=1.0  # default to 1 (no boost) outside bounds
             )
