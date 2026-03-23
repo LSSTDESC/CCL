@@ -239,6 +239,46 @@ def test_fkem_warn_mismatched_pk_types_fallback_to_limber():
         assert meta["l_limber"] == -1
 
 
+def test_fkem_multicomponent_tracer():
+    # Smoke test to make sure multi-component tracers do not fail when
+    # FKEM non-Limber is calculated.
+    z = np.linspace(0.0, 2.0, 60)
+    nz = np.exp(-0.5 * ((z - 0.5) / 0.3) ** 2)
+    bz = np.ones_like(z)
+    mbz = 0.5 * np.ones_like(z)
+    ells = np.array([2.0, 5.0, 10.0, 20.0])
+    cosmo = ccl.CosmologyVanillaLCDM()
+
+    nc = ccl.NumberCountsTracer(
+        cosmo,
+        has_rsd=True,
+        dndz=(z, nz),
+        bias=(z, bz),
+        mag_bias=(z, mbz),
+    )
+
+    # gg auto test
+    cl_gg = ccl.angular_cl(
+        cosmo, nc, nc, ells,
+        non_limber_integration_method="FKEM",
+        l_limber=1000,
+        fkem_Nchi=100,
+        fkem_chi_min=1.0,
+    )
+    assert np.all(np.isfinite(cl_gg))
+
+    # cross test with weak lensing
+    lens = ccl.WeakLensingTracer(cosmo, dndz=(z, nz))
+    cl_gk = ccl.angular_cl(
+        cosmo, nc, lens, ells,
+        non_limber_integration_method="FKEM",
+        l_limber=1000,
+        fkem_Nchi=100,
+        fkem_chi_min=1.0,
+    )
+    assert np.all(np.isfinite(cl_gk))
+
+
 def test_cells_mg():
     # Check that if we feed the non-linear matter power spectrum from a MG
     # cosmology into a Calculator and get Cells using MG tracers, we get the
