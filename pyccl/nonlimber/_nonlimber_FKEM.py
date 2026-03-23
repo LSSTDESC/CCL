@@ -125,7 +125,7 @@ def _chi_integrands(cosmo, clt,
             clt._trc[i], cosmo, Nchi, chi_min, chi_max, ell, k, fk,
         )
         fks[i] = fk
-        transfers[i] = np.array(clt.get_transfer(np.log(k), avg_as[i]))
+        transfers[i] = np.array(clt.get_transfer(np.log(k), avg_as[i]))[i]
 
     return k, fks, transfers
 
