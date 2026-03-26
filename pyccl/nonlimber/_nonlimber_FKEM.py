@@ -41,6 +41,30 @@ def _get_general_params(b):
     return nu, deriv, plaw
 
 
+def _get_k_common(ks_1, ks_2):
+    """Get the common k array for the two tracers to perform the final
+    chi-integral integration over.
+    Args:
+        ks_1 (array): List of wavenumbers at which to evaluate
+            the chi integrands for tracer 1.
+        ks_2 (array): List of wavenumbers at which to evaluate
+            the chi integrands for tracer 2.
+    Returns:
+        k_common (array): Common wavenumbers at which to evaluate the
+            chi-integral integration for all tracers.
+    """
+    all_ks = [np.asarray(k, dtype=float) for k in (*ks_1, *ks_2)]
+
+    k_mins = [k[np.isfinite(k) & (k > 0.0)].min() for k in all_ks]
+    k_maxs = [k[np.isfinite(k) & (k > 0.0)].max() for k in all_ks]
+
+    k_min = max(k_mins)   # overlap lower bound
+    k_max = min(k_maxs)   # overlap upper bound
+
+    n_k = max(len(k) for k in all_ks)
+    return np.logspace(np.log10(k_min), np.log10(k_max), n_k)
+
+
 def _chi_integrands(cosmo, clt,
                     Nchi, chi_min, chi_max,
                     ell, k_low,
@@ -77,6 +101,7 @@ def _chi_integrands(cosmo, clt,
 
     fks = np.zeros((len(kernels), Nchi))
     transfers = np.zeros((len(kernels), Nchi))
+    ks = []
     for i in range(len(kernels)):
         k, fk = clt._get_fkem_fft(
             clt._trc[i], Nchi, chi_min, chi_max, ell, cosmo,
@@ -124,10 +149,11 @@ def _chi_integrands(cosmo, clt,
         clt._set_fkem_fft(
             clt._trc[i], cosmo, Nchi, chi_min, chi_max, ell, k, fk,
         )
+        ks.append(k)
         fks[i] = fk
         transfers[i] = np.array(clt.get_transfer(np.log(k), avg_as[i]))[i]
 
-    return k, fks, transfers
+    return ks, fks, transfers
 
 
 def _auto_limber_transition_ell(clt1, clt2, cosmo, psp_lin, psp_nonlin,
@@ -404,14 +430,15 @@ def _nonlimber_FKEM(
         check(status, cosmo=cosmo)
 
         # chi-integral integrand splines
-        k, fks_1, transfers_t1 = _chi_integrands(
+        ks, fks_1, transfers_t1 = _chi_integrands(
             cosmo, clt1,
             Nchi, chi_min, chi_max,
             ell, k_low,
             chi_logspace_arr, status
         )
+
         if clt1 != clt2:
-            k, fks_2, transfers_t2 = _chi_integrands(
+            ks_2, fks_2, transfers_t2 = _chi_integrands(
                 cosmo, clt2,
                 Nchi, chi_min, chi_max,
                 ell, k_low,
@@ -420,12 +447,25 @@ def _nonlimber_FKEM(
         else:
             fks_2 = fks_1
             transfers_t2 = transfers_t1
+            ks_2 = ks
+        k = _get_k_common(ks, ks_2)
+        # need to interpolate the fks and transfers to the common k array
+        fks_1_interp = np.zeros((len(clt1._trc), len(k)))
+        fks_2_interp = np.zeros((len(clt2._trc), len(k)))
+        transfers_t1_interp = np.zeros((len(clt1._trc), len(k)))
+        transfers_t2_interp = np.zeros((len(clt2._trc), len(k)))
+        for i in range(len(clt1._trc)):
+            fks_1_interp[i] = np.interp(k, ks[i], fks_1[i])
+            transfers_t1_interp[i] = np.interp(k, ks[i], transfers_t1[i])
+        for i in range(len(clt2._trc)):
+            fks_2_interp[i] = np.interp(k, ks_2[i], fks_2[i])
+            transfers_t2_interp[i] = np.interp(k, ks_2[i], transfers_t2[i])
 
         cls_nonlimber_lin = np.sum(
-            fks_1[:, None, :]
-            * transfers_t1[:, None, :]
-            * fks_2[None, :, :]
-            * transfers_t2[None, :, :]
+            fks_1_interp[:, None, :]
+            * transfers_t1_interp[:, None, :]
+            * fks_2_interp[None, :, :]
+            * transfers_t2_interp[None, :, :]
             * (k**kpow
                 * pk(k, 1.0, cosmo))[None, None, :]
             * dlnr
