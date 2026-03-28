@@ -43,6 +43,23 @@ Once you have ``CMake``, simply run:
    $ pip install pyccl
 
 
+Installing with optional extras
+--------------------------------
+
+CCL supports four optional dependency groups installable as pip extras:
+
+.. code-block:: bash
+
+   $ pip install pyccl[boltzmann]   # CAMB, CLASS (classy), ISiTGR
+   $ pip install pyccl[pt]          # FAST-PT and velocileptors
+   $ pip install pyccl[emulators]   # BaccoEmu, MiraTitan HMF, Dark Emulator
+   $ pip install pyccl[full]        # All of the above
+
+Without ``pyccl[boltzmann]``, the default ``transfer_function`` is
+``'eisenstein_hu'``. With it (or a ``conda`` install), the default is
+``'boltzmann_camb'``.
+
+
 Google Colab
 ============
 
@@ -60,6 +77,8 @@ To install ``pyccl`` on https://colab.research.google.com then one way is the fo
 
 Getting a Boltzmann Code
 ========================
+
+These packages are included in ``pip install pyccl[boltzmann]``.
 
 In order to use CCL with a Boltzmann code, you will need the ``Python`` wrappers
 for either ``CLASS`` or ``CAMB``.
@@ -112,6 +131,8 @@ should already be in your environment.
 Getting PT packages
 ===================
 
+These packages are included in ``pip install pyccl[pt]``.
+
 Getting FAST-PT
 ---------------
 
@@ -141,6 +162,8 @@ See full instructions in the ``velocileptors``
 
 Getting emulators
 =================
+
+These packages are included in ``pip install pyccl[emulators]``.
 
 The following emulators with external dependencies are currently supported
 in CCL.

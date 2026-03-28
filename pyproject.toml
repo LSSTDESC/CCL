@@ -41,9 +41,11 @@ dev = [
     "pytest",
     "pytest-cov",
 ]
-camb = ["camb>=1.3.0"]
-class = ["classy"]
-boltzmann = ["camb>=1.3.0", "classy"]
+
+boltzmann = ["camb", "classy", "isitgr"]
+pt = ["velocileptors", "fast-pt"]
+emulators = ["baccoemu", "MiraTitanHMFemulator", "dark_emulator"]
+full = ["camb", "classy", "isitgr", "velocileptors", "fast-pt", "baccoemu", "MiraTitanHMFemulator", "dark_emulator"]
 
 [tool.setuptools.packages.find]
 include = ["pyccl*"]
