@@ -41,6 +41,9 @@ dev = [
     "pytest",
     "pytest-cov",
 ]
+camb = ["camb>=1.3.0"]
+class = ["classy"]
+boltzmann = ["camb>=1.3.0", "classy"]
 
 [tool.setuptools.packages.find]
 include = ["pyccl*"]
