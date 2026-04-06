@@ -350,7 +350,7 @@ def _nonlimber_FKEM(
         # for at least a simple Gaussian density kernel.
         # May need to go higher for different cases.
         Nchi = 2 * max(max(len(i) for i in chis_t1),
-                   max(len(i) for i in chis_t2))
+                       max(len(i) for i in chis_t2))
     if chi_min is None or not isinstance(chi_min, (float)) or chi_min <= 0.0:
         warnings.warn("chi_min must be greater than zero."
                       "Setting to default 1e-6 Mpc.",
