@@ -299,7 +299,8 @@ def _nonlimber_FKEM(
             - chi_min: Minimum comoving distance used by FKEM to sample
               the tracer radial kernels. Must be greater than zero.
             - Nchi: Number of values of the comoving distance over which
-              FKEM will interpolate the radial kernels.
+              FKEM will interpolate the radial kernels. Default is
+              two times the maximum number of chi samples across the tracers.
             - pk_linear: Linear power spectrum to use for growth factor
               scaling. If a string, it must correspond to one of the
               linear power spectra stored in `cosmo`
@@ -340,12 +341,16 @@ def _nonlimber_FKEM(
     if Nchi is None or not isinstance(Nchi, int) or Nchi <= 0:
         warnings.warn("Nchi must be a positive integer. "
                       "Setting to match tracer with"
-                      " fewest chi samples.",
+                      " large chi samples x 2.",
                       category=CCLWarning,
                       importance='high'
                       )
-        Nchi = min(min(len(i) for i in chis_t1),
-                   min(len(i) for i in chis_t2))
+        # We put factor of 2 to help reduce spikes when comparing
+        # the decomposed and direct integration approaches to order 1e-6
+        # for at least a simple Gaussian density kernel.
+        # May need to go higher for different cases.
+        Nchi = 2 * max(max(len(i) for i in chis_t1),
+                   max(len(i) for i in chis_t2))
     if chi_min is None or not isinstance(chi_min, (float)) or chi_min <= 0.0:
         warnings.warn("chi_min must be greater than zero."
                       "Setting to default 1e-6 Mpc.",
