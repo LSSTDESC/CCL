@@ -496,8 +496,8 @@ def _nonlimber_FKEM(
             # the limber threshold
             status, is_limber = _auto_limber_transition_ell(
                 clt1, clt2, cosmo, psp_lin,
-                psp_nonlin, fks_1, fks_2,
-                transfers_t1, transfers_t2,
+                psp_nonlin, fks_1_interp, fks_2_interp,
+                transfers_t1_interp, transfers_t2_interp,
                 fll_t1, fll_t2, k, kpow,
                 pk, dlnr, el, ell,
                 limber_max_error, status
