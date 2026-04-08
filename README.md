@@ -63,6 +63,20 @@ See [Getting CMake](https://ccl.readthedocs.io/en/latest/source/installation.htm
 and [Installing SWIG](https://pypi.org/project/swig/) for instructions.
 Note that the code only supports Linux or Mac OS, but no Windows.
 
+### Optional dependencies
+
+For extended functionality, install one of the optional extra groups:
+
+```bash
+pip install pyccl[boltzmann]   # Boltzmann codes: CAMB, CLASS (classy), ISiTGR
+pip install pyccl[pt]          # Perturbation theory: FAST-PT, velocileptors
+pip install pyccl[emulators]   # Emulators: BaccoEmu, MiraTitan, Dark Emulator
+pip install pyccl[full]        # All of the above
+```
+
+Without `pyccl[boltzmann]`, the default `transfer_function` is `'eisenstein_hu'`.
+With `pyccl[boltzmann]` (or a full `conda` install), it defaults to `'boltzmann_camb'`.
+
 Once you have the code installed, you can take it for a spin!
 
 ```python

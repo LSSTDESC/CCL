@@ -25,8 +25,16 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
             spectrum. If ``nonlin=True``, returns a tuple \
             ``(pk_lin, pk_nonlin)``.
     """
-    import camb
-    import camb.model
+    try:
+        import camb
+        import camb.model
+    except ImportError as e:
+        raise CCLError(
+            "CAMB is required to use the 'boltzmann_camb' transfer function "
+            "but could not be imported. Install it with:\n"
+            "    pip install pyccl[boltzmann]\n"
+            "or: pip install camb"
+        ) from e
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
@@ -222,8 +230,15 @@ def get_isitgr_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum \
             object. The linear power spectrum.
     """
-    import isitgr  # noqa: F811
-    import isitgr.model
+    try:
+        import isitgr  # noqa: F811
+        import isitgr.model
+    except ImportError as e:
+        raise CCLError(
+            "ISiTGR is required to use the 'boltzmann_isitgr' transfer "
+            "function but could not be imported. Install it with: "
+            "pip install pyccl[boltzmann] or pip install isitgr"
+        ) from e
 
     # Get extra CAMB parameters that were specified
     extra_camb_params = {}
@@ -396,7 +411,15 @@ def get_class_pk_lin(cosmo):
         :class:`~pyccl.pk2d.Pk2D`: Power spectrum object.\
             The linear power spectrum.
     """
-    import classy
+    try:
+        import classy
+    except ImportError as e:
+        raise CCLError(
+            "CLASS (classy) is required to use the 'boltzmann_class' transfer "
+            "function but could not be imported. Install it with:\n"
+            "    pip install pyccl[boltzmann]\n"
+            "or: pip install classy"
+        ) from e
 
     params = {
         "output": "mPk",
