@@ -43,6 +43,16 @@ def test_cM_subclasses_smoke(cM_class):
         assert np.shape(c) == np.shape(m)
 
 
+def test_cM_duffy_smoke_fcbar():
+    md = ccl.halos.MassDef('vir', 'critical')
+    cM = ccl.halos.ConcentrationDuffy08(mass_def=md,
+                                        fc_bar=0.8)
+    for m in MS:
+        c = cM(COSMO, m, 0.9)
+        assert np.all(np.isfinite(c))
+        assert np.shape(c) == np.shape(m)
+
+
 def test_cM_duffy_smoke():
     md = ccl.halos.MassDef('vir', 'critical')
     cM = ccl.halos.ConcentrationDuffy08(mass_def=md)

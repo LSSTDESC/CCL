@@ -60,7 +60,7 @@ def test_bacco_lbias_k2pk_types(typ_nlin, typ_nloc):
                                   'b2:bs', 'b2:bk2', 'bs:bs', 'bs:bk2',
                                   'bk2:bk2', 'b1:b3nl'])
 def test_bacco_lbias_deconstruction(kind):
-    ptc = ccl.nl_pt.BaccoLbiasCalculator(cosmo=COSMO)
+    ptc = ccl.nl_pt.BaccoLbiasCalculator(cosmo=COSMO, extrap_lin=False)
     b_nc = ['b1', 'b2', 'bs', 'bk2', 'b3nl']
     pk1 = ptc.get_pk2d_template(kind)
 
@@ -243,3 +243,56 @@ def test_bacco_lbias_many_A_s():
         newemupars[key] = np.full(len(pt.a_s), emupars[key])
     sigma8cold_arr = pt._sigma8tot_2_sigma8cold(newemupars, sigma8tot)
     assert np.allclose(np.mean(sigma8cold_arr), sigma8cold, atol=0, rtol=1E-4)
+
+
+@pytest.mark.parametrize('comb', ['MM', 'MG', 'GG'])
+def test_bacco_lbias_extrap_lin(comb):
+    import baccoemu
+    # Redshifts
+    zs = np.array([0., 1.])
+    a_s = 1./(1 + zs)
+    k = np.geomspace(1E-4, 7e-4, 30)
+
+    # Calculator
+    a_arr = 1./(1+np.array([0., 0.25, 0.5, 0.75, 1.]))[::-1]
+    ptc = ccl.nl_pt.BaccoLbiasCalculator(log10k_min=-4, log10k_max=-0.47,
+                                         nk_per_decade=20, a_arr=a_arr,
+                                         extrap_lin=True, cosmo=COSMO)
+
+    # Load linear matter power spectrum emulator
+    emu_pklin = baccoemu.Matter_powerspectrum()
+    # get bacco parameters
+    h = COSMO['h']
+
+    emupars = dict(
+        omega_cold=COSMO['Omega_c'] + COSMO['Omega_b'],
+        omega_baryon=COSMO['Omega_b'],
+        ns=COSMO['n_s'],
+        hubble=COSMO['h'],
+        neutrino_mass=np.sum(COSMO['m_nu']),
+        w0=COSMO['w0'],
+        wa=COSMO['wa'],
+        expfactor=a_s)
+
+    sigma8tot = COSMO['sigma8']
+    sigma8cold = ptc._sigma8tot_2_sigma8cold(emupars, sigma8tot)
+    emupars['sigma8_cold'] = sigma8cold
+
+    t1, t2 = comb
+
+    ptt1 = TRS['T' + t1]
+    ptt2 = TRS['T' + t2]
+
+    pk = ptc.get_biased_pk2d(ptt1, tracer2=ptt2)
+
+    for i, ai in enumerate(a_s):
+        pk_nl_extrap = pk(k, ai, COSMO)
+        # baccoemu is in little h units
+        pk_lin = emu_pklin.get_linear_pk(k=k/h, **emupars)[1][i, :]
+        pk_lin /= h ** 3
+        if t1 != 'M':
+            pk_lin *= ptt1.b1(zs[i])
+        if t2 != 'M':
+            pk_lin *= ptt2.b1(zs[i])
+
+        assert np.allclose(pk_nl_extrap, pk_lin, atol=0, rtol=1E-3)
