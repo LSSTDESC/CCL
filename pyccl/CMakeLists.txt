@@ -34,9 +34,7 @@ swig_link_libraries(ccllib ccl_static)
 target_compile_options(${SWIG_MODULE_ccllib_REAL_NAME} PRIVATE "-Wno-error=int-conversion")
 
 if(APPLE)
-    # Unpleasant subtelty for linking on osx
+    # On macOS, allow undefined symbols to be resolved at runtime by the Python interpreter.
     set_target_properties(${SWIG_MODULE_ccllib_REAL_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-else(APPLE)
-    swig_link_libraries(ccllib ${PYTHON_LIBRARIES})
 endif()
 set_target_properties(${SWIG_MODULE_ccllib_REAL_NAME} PROPERTIES SUFFIX .so)
