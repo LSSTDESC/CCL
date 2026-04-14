@@ -37,10 +37,6 @@ documentation = "https://ccl.readthedocs.io/en/latest/"
 repository = "https://github.com/LSSTDESC/CCL"
 
 [project.optional-dependencies]
-boltzmann = ["camb", "classy", "isitgr"]
-emu = ["baccoemu", "dark-emulator", "MiraTitanHMFemulator"]
-pt = ["velocileptors", "FAST-PT"]
-all = ["pyccl[boltzmann]", "pyccl[emu]", "pyccl[pt]"]
 dev = ["pytest", "pytest-cov"]
 
 [tool.setuptools.packages.find]
