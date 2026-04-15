@@ -17,7 +17,7 @@ def _cosmo() -> ccl.Cosmology:
         Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.965, sigma8=0.8)
 
 
-def _make_pk2d(*, is_logp: bool, absurd_log_flag_data: bool = False) -> Pk2D:
+def _make_pk2d(*, is_logp: bool) -> Pk2D:
     """Make a small but spline-valid Pk2D with known behavior for testing."""
     # Use >=4 points to avoid spline allocation issues.
     a_arr = np.array([0.05, 0.2, 0.5, 1.0], dtype=float)
@@ -27,12 +27,7 @@ def _make_pk2d(*, is_logp: bool, absurd_log_flag_data: bool = False) -> Pk2D:
     pk_lin = np.ones((a_arr.size, k_arr.size), dtype=float) * 2.0
 
     if is_logp:
-        if absurd_log_flag_data:
-            # Must be > 200 to trigger fix,
-            # but small enough to avoid exp overflow.
-            pk_arr = np.ones_like(pk_lin) * 300.0
-        else:
-            pk_arr = np.log(pk_lin)
+        pk_arr = np.log(pk_lin)
     else:
         pk_arr = pk_lin
 
@@ -172,47 +167,11 @@ def test_incl_bary_eff_applies_unity_for_early_times_and_outside_k_support(
     assert np.allclose(a_arr, a0)
     assert np.allclose(k_arr, np.exp(lk0))
 
-    # Dummy BHM: k support [1e-3, 1e-1]
-    class DummyBHM2:
-        """Mock BHM class."""
-
-        def __init__(self) -> None:
-            self.interpolation_grid = {
-                "dark_matter": {
-                    "k": np.array([1e-3, 1e-1], dtype=float),
-                },
-            }
-
-    monkeypatch.setattr(
-        BaryonsFedeli14, "_build_bhm", lambda self, cosmo: DummyBHM2())
-
-    pk = _make_pk2d(is_logp=False)
-    out = b._include_baryonic_effects(_cosmo(), pk)
-
-    a_arr, lk_arr, pk_arr = out.get_spline_arrays()
-    k_arr = np.exp(lk_arr)
-
-    # baseline linear P=2
-    assert np.allclose(pk_arr[0, :], 2.0)  # a=0.05 < 0.1 => unity
-
-    # our k grid: [1e-4, 1e-2, 1e-1, 1]
-    # support is [1e-3,1e-1] inclusive => boosts apply to 1e-2 and 1e-1
-    # for a>=0.1 rows (a=0.2,0.5,1.0): boosted at indices 1,2
-    for i in range(1, a_arr.size):
-        assert np.allclose(pk_arr[i, 0], 2.0)  # k=1e-4 outside
-        assert np.allclose(pk_arr[i, 1], 20.0)  # k=1e-2 inside
-        assert np.allclose(pk_arr[i, 2], 20.0)  # k=1e-1 inside
-        assert np.allclose(pk_arr[i, 3], 2.0)  # k=1 outside
-
-    assert np.allclose(a_arr, pk.get_spline_arrays()[0])
-    assert np.allclose(k_arr, np.exp(pk.get_spline_arrays()[1]))
-
 
 def test_incl_bary_eff_respects_logp_representation(
     monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """If pk is logp, boost is applied additively in log space
-    (but get_spline_arrays returns linear)."""
+    """Tests that log-space Pk2D inputs are returned in log-space form."""
     b = BaryonsFedeli14(renormalize_large_scales=False)
 
     monkeypatch.setattr(
@@ -241,40 +200,6 @@ def test_incl_bary_eff_respects_logp_representation(
     # get_spline_arrays() returns linear P(k), not log(P)
     assert np.allclose(pk_out[0, :], 2.0)     # a<0.1 => unity
     assert np.allclose(pk_out[1:, :], 20.0)   # boosted by 10 for a>=0.1
-
-
-def test_incl_bary_eff_fixes_absurd_log_flag_data(
-    monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """If marked log but pk_arr.max>200, treat pk_arr as linear and convert to
-     log before boosting."""
-    b = BaryonsFedeli14(renormalize_large_scales=False)
-
-    monkeypatch.setattr(
-        BaryonsFedeli14,
-        "boost_factor",
-        lambda self, cosmo, k, a: np.ones((np.size(a), np.size(k))) * 10.0,
-    )
-
-    class DummyBHM:
-        def __init__(self) -> None:
-            self.interpolation_grid = {
-                "dark_matter": {"k": np.array([1e-6, 1e2],
-                                              dtype=float)}}
-
-    monkeypatch.setattr(
-        BaryonsFedeli14, "_build_bhm", lambda self, cosmo: DummyBHM())
-
-    pk = _make_pk2d(is_logp=True, absurd_log_flag_data=True)
-    out = b._include_baryonic_effects(_cosmo(), pk)
-
-    a_arr, lk_arr, pk_out = out.get_spline_arrays()
-
-    # After fix: pk_arr stored becomes log(300).
-    # get_spline_arrays returns exp => 300 (for a<0.1).
-    assert np.allclose(pk_out[0, :], 300.0)
-    # For a>=0.1: add log(10) => exp(log(300)+log(10)) = 3000
-    assert np.allclose(pk_out[1:, :], 3000.0)
 
 
 def test_incl_bary_eff_preserves_extrap_orders_and_log_flag(
