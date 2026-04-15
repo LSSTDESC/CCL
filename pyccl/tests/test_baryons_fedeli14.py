@@ -211,8 +211,8 @@ def test_incl_bary_eff_applies_unity_for_early_times_and_outside_k_support(
         assert np.allclose(pk_out[i, 3], 2.0)
 
     a0, lk0, _ = pk.get_spline_arrays()
-    assert np.allclose(a_arr, a0)
-    assert np.allclose(k_arr, np.exp(lk0))
+    assert a_arr == pytest.approx(a0, rel=1e-5)
+    assert k_arr == pytest.approx(np.exp(lk0), rel=1e-5)
 
 
 def test_incl_bary_eff_respects_logp_representation(
