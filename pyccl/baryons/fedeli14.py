@@ -32,8 +32,8 @@ class BaryonsFedeli14(Baryons):
           keeps ``k`` in 1/Mpc throughout (no k -> k/h conversion).
         - If ``renormalize_large_scales=True``, the boost is rescaled (per
           scale factor) so that its mean over ``k <= k_renorm_max`` is unity.
-        - For ``a < a_min`` (currently hard-coded to 0.1 in the application
-          step), the boost is forced to unity.
+        - For ``a < a_min``, the boost is forced to unity. The default
+          ``a_min=0.1`` avoids extrapolating the model to very early times.
 
     See Also:
         BaryonHaloModel: Lower-level wrapper that computes spectra and boosts.
@@ -59,6 +59,7 @@ class BaryonsFedeli14(Baryons):
         "mass_ranges", "interpolation_grid",
         "update_fftlog_precision", "fftlog_kwargs", "rgi_kwargs",
         "n_m", "density_mmin", "density_mmax",
+        "a_min",
     )
 
     def __init__(
@@ -93,6 +94,7 @@ class BaryonsFedeli14(Baryons):
         density_mmax: float = 1e16,
         renormalize_large_scales: bool = True,
         k_renorm_max: float = 1e-2,
+        a_min: float = 0.1,
     ) -> None:
         """Initialize Fedeli14 baryon halo model."""
         self.Fg = float(Fg)
@@ -130,6 +132,7 @@ class BaryonsFedeli14(Baryons):
 
         self.renormalize_large_scales = bool(renormalize_large_scales)
         self.k_renorm_max = float(k_renorm_max)
+        self.a_min = float(a_min)
 
     def update_parameters(self, **kwargs: Any) -> None:
         """Update model parameters on this instance.
@@ -155,6 +158,7 @@ class BaryonsFedeli14(Baryons):
                 "Fg", "bd", "m0_star", "sigma_star", "mmin_star", "mmax_star",
                 "m0_gas", "sigma_gas", "gas_beta", "gas_r_co", "gas_r_ej",
                 "star_x_delta", "star_alpha", "density_mmin", "density_mmax",
+                "a_min",
             }:
                 val = float(val)
             elif key == "n_m":
@@ -219,10 +223,10 @@ class BaryonsFedeli14(Baryons):
         )
 
     def boost_factor(
-            self,
-            cosmo: Any,
-            k: float | FloatArray,
-            a: float | FloatArray
+        self,
+        cosmo: Any,
+        k: float | FloatArray,
+        a: float | FloatArray
     ) -> float | FloatArray:
         r"""Evaluate the Fedeli14 boost factor ``f(k,a)``.
 
@@ -273,7 +277,7 @@ class BaryonsFedeli14(Baryons):
             out[i, :] = bhm.boost(k=k_1d, a=float(aval), pk_ref=self.pk_ref)
 
         # We need to enforce f(k->0)=1 by renormalizing on large scales.
-        # Otherwise our boost will not behave at large scales.
+        # Otherwise, our boost will not behave at large scales.
         if self.renormalize_large_scales:
             k0 = self.k_renorm_max
             m = k_1d <= k0
@@ -296,96 +300,53 @@ class BaryonsFedeli14(Baryons):
             out = np.squeeze(out, axis=0)
         return out
 
-    def _include_baryonic_effects(self, cosmo: Any, pk: Pk2D) -> Pk2D:
+    def _include_baryonic_effects(
+        self,
+        cosmo: Any,
+        pk: Pk2D,
+    ) -> Pk2D:
         r"""Return a new ``Pk2D`` with Fedeli14 baryonic effects applied.
 
-        This method reads the input ``Pk2D`` spline arrays, evaluates the
-        Fedeli14 boost on the same (a, k) grid (restricted to the model
-        support), and applies the boost multiplicatively to produce an
-        output ``Pk2D``.
-
-        The transformation is:
+        The baryonic correction is multiplicative in the physical spectrum,
 
         .. math::
             P_{\rm out}(k,a) = P_{\rm in}(k,a)\,f(k,a).
 
-        Behavior details:
-            - The boost is evaluated only where the underlying baryon halo
-              model is supported in k (based on the configured interpolation
-              grid) and only for late times (``a >= a_min``, with ``a_min``
-              currently set to 0.1). Outside this region, the boost is unity.
-            - The output representation (log or linear P) follows the input
-              ``Pk2D`` flags. Internally, Pk2D.get_spline_arrays() returns
-              linear P(k,a); if the spline is stored in log-space,
-              it exponentiates internally before returning.
-            - A small defensive branch attempts to recover from a mis-flagged
-              input where values appear to have been exponentiated despite
-              being treated as linear. This is intended to keep splines
-              well-behaved rather than to silently change scientific intent.
-
-        Args:
-            cosmo: Cosmology object used to evaluate reference spectra and
-                densities.
-            pk: Input matter power spectrum as a ``Pk2D`` instance.
-
-        Returns:
-            A new ``Pk2D`` instance representing the baryon-modified spectrum.
-        """
+        If the output ``Pk2D`` is stored in log-space, this method converts the
+        physical input spectrum to ``log(P)`` before adding ``log(f)``."""
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
-        pk_lin = pk_arr.copy()  # get_spline_arrays gives linear P(k)
+        pk_arr = pk_arr.copy()
         k_arr = np.exp(lk_arr)
 
-        # decide representation of the output
-        psp_is_log = bool(pk.psp.is_log)
-        pk_is_logp = getattr(pk, "is_logp", None)
-        is_log = bool(pk_is_logp) if pk_is_logp is not None else psp_is_log
-
-        # Build once; use declared k support
         bhm = self._build_bhm(cosmo)
-        kmin_model = float(bhm.interpolation_grid["dark_matter"]["k"].min())
-        kmax_model = float(bhm.interpolation_grid["dark_matter"]["k"].max())
+        k_model = bhm.interpolation_grid["dark_matter"]["k"]
+        kmin_model = k_model.min()
+        kmax_model = k_model.max()
 
-        # compute boost only wehre model is supported + late times
-        a_min = 0.1
-        fka = np.ones((a_arr.size, k_arr.size), dtype=float)
-        amask = a_arr >= a_min
         rtol = 1e-12
-        kmask = ((
-            k_arr >= kmin_model * (1.0 - rtol))
+        fka = np.ones((a_arr.size, k_arr.size))
+
+        amask = a_arr >= self.a_min
+        kmask = (
+            (k_arr >= kmin_model * (1.0 - rtol))
             & (k_arr <= kmax_model * (1.0 + rtol))
         )
 
         if np.any(amask) and np.any(kmask):
-            fka_sub = self.boost_factor(cosmo, k_arr[kmask], a_arr[amask])
-            fka[np.ix_(amask, kmask)] = fka_sub
+            fka[np.ix_(amask, kmask)] = self.boost_factor(
+                cosmo, k_arr[kmask], a_arr[amask]
+            )
 
-        # apply boost consistently
-        eps = 1e-300
+        pk_arr *= fka
 
-        if is_log:
-            # get_spline_arrays returned linear P. Convert to log(P).
-            # If it is absurdly huge, it is almost certainly exp(linear)
-            # coming from a mis-flagged log-Pk2D. Recover via log(log(P)).
-            # This is a bit hacky but I did not know how else to solve it.
-            if float(np.nanmax(pk_lin)) > float(np.exp(200.0)):
-                pk_log = np.log(np.maximum(
-                    np.log(np.maximum(pk_lin, eps)), eps))
-            else:
-                pk_log = np.log(np.maximum(pk_lin, eps))
-
-            fka_safe = np.where(np.isfinite(fka) & (fka > 0.0), fka, 1.0)
-            fka_safe = np.clip(fka_safe, 1e-6, 1e6)
-            pk_out = pk_log + np.log(fka_safe)
-        else:
-            fka_safe = np.where(np.isfinite(fka), fka, 1.0)
-            fka_safe = np.clip(fka_safe, 1e-6, 1e6)
-            pk_out = pk_lin * fka_safe
+        if pk.psp.is_log:
+            np.log(pk_arr, out=pk_arr)
 
         return Pk2D(
             a_arr=a_arr,
             lk_arr=lk_arr,
-            pk_arr=pk_out,
-            is_logp=is_log,
+            pk_arr=pk_arr,
+            is_logp=pk.psp.is_log,
             extrap_order_lok=pk.extrap_order_lok,
             extrap_order_hik=pk.extrap_order_hik,
         )
