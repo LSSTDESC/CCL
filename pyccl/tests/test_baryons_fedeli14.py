@@ -317,3 +317,23 @@ def test_boost_factor_renorm_guard_replaces_bad_norm(
 
     assert np.all(np.isfinite(out))
     assert np.all(out > 0.0)
+
+
+def test_boost_factor_matches_actual_fedeli14_bhm() -> None:
+    """Tests that boost_factor matches the actual Fedeli14 BHM boost."""
+    b = BaryonsFedeli14(
+        renormalize_large_scales=False,
+        n_m=16,
+    )
+
+    cosmo = _cosmo()
+    k = np.array([1e-3, 1e-2, 1e-1], dtype=float)
+    a = 0.5
+
+    bhm = b._build_bhm(cosmo)
+    expected = bhm.boost(k=k, a=a, pk_ref=b.pk_ref)
+    actual = b.boost_factor(cosmo, k=k, a=a)
+
+    assert np.all(np.isfinite(actual))
+    assert np.all(actual > 0.0)
+    assert np.allclose(actual, expected)
