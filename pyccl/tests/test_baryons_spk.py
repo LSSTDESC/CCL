@@ -1,5 +1,5 @@
 import sys
-from typing import Callable, cast
+from typing import Any, Callable, cast
 from unittest import mock
 
 import numpy as np
@@ -12,7 +12,15 @@ from .test_cclobject import check_eq_repr_hash
 COSMO = ccl.CosmologyVanillaLCDM(transfer_function="bbks")
 
 
-def _power_law_model(**kwargs):
+def _power_law_model(**kwargs: Any) -> ccl.BaryonsSPK:
+    """Build a default SP(k) power-law model for tests.
+
+    Args:
+        **kwargs: Parameter overrides for ``BaryonsSPK``.
+
+    Returns:
+        Configured ``BaryonsSPK`` instance.
+    """
     return ccl.BaryonsSPK(
         SO=200,
         relation_kind="power_law",
@@ -29,7 +37,8 @@ def _power_law_model(**kwargs):
     [0.2, 0.5, 1.0],
     np.array([0.2, 0.5, 1.0]),
 ])
-def test_spk_smoke(k):
+def test_spk_smoke(k: Any) -> None:
+    """Smoke-test SP(k) boost evaluation for scalar/array ``k`` inputs."""
     pytest.importorskip("pyspk")
     bar = _power_law_model()
     a = 0.8
@@ -47,6 +56,7 @@ def test_spk_smoke(k):
                           "gamma": 0.5, "m_pivot": 10**13.5}),
 ])
 def test_spk_matches_pyspk(relation_kind, relation_params):
+    """Check numerical agreement with direct ``pyspk`` evaluator output."""
     pyspk = pytest.importorskip("pyspk")
     bar = ccl.BaryonsSPK(
         SO=(500
@@ -73,7 +83,8 @@ def test_spk_matches_pyspk(relation_kind, relation_params):
     assert np.allclose(ccl_fk, pyspk_fk, atol=1e-3, rtol=0)
 
 
-def test_spk_correct_smoke():
+def test_spk_correct_smoke() -> None:
+    """Validate consistency between boost_factor and include_baryonic_effects."""
     pytest.importorskip("pyspk")
     bar = _power_law_model()
     k_arr = np.geomspace(1E-2, 1, 16)
@@ -85,7 +96,8 @@ def test_spk_correct_smoke():
     assert np.all(np.fabs(pk_wbar / (pk_nobar * fka) - 1) < 1E-5)
 
 
-def test_spk_out_of_bounds_policies():
+def test_spk_out_of_bounds_policies() -> None:
+    """Verify high-k policy behavior for direct boost queries."""
     pytest.importorskip("pyspk")
     k = np.array([0.2, 0.8]) * COSMO["h"]
     a = 0.9
@@ -104,7 +116,8 @@ def test_spk_out_of_bounds_policies():
     assert np.isnan(fk_nan[-1])
 
 
-def test_spk_out_of_bounds_policies_include_baryons():
+def test_spk_out_of_bounds_policies_include_baryons() -> None:
+    """Verify high-k policy behavior in ``include_baryonic_effects`` path."""
     pytest.importorskip("pyspk")
     pk_nobar = COSMO.get_nonlin_power()
     k_hi = np.array([1.0])
@@ -132,7 +145,8 @@ def test_spk_out_of_bounds_policies_include_baryons():
     assert np.allclose(ratio_error, 1.0, atol=0, rtol=1e-12)
 
 
-def test_spk_update_params_and_eq():
+def test_spk_update_params_and_eq() -> None:
+    """Check parameter updates and object equality/hash semantics."""
     pytest.importorskip("pyspk")
     bar1 = _power_law_model()
     bar2 = _power_law_model()
@@ -145,7 +159,8 @@ def test_spk_update_params_and_eq():
     assert check_eq_repr_hash(bar1, bar2)
 
 
-def test_spk_baryons_in_cosmology():
+def test_spk_baryons_in_cosmology() -> None:
+    """Ensure explicit and Cosmology-integrated baryons paths agree."""
     pytest.importorskip("pyspk")
     bar = _power_law_model()
     cosmo_nb = ccl.CosmologyVanillaLCDM(
@@ -164,7 +179,8 @@ def test_spk_baryons_in_cosmology():
                        atol=0, rtol=1E-6)
 
 
-def test_spk_missing_dependency_error():
+def test_spk_missing_dependency_error() -> None:
+    """Raise a clear error when optional dependency ``pyspk`` is missing."""
     with mock.patch.dict(sys.modules, {"pyspk": None}):
         with pytest.raises(ModuleNotFoundError, match="pyspk>=2.0.0"):
             _power_law_model()

@@ -7,7 +7,8 @@ SPK_TOLERANCE = 1e-5
 SPK_A = 0.8
 
 
-def test_spk_power_law_boost_against_reference():
+def test_spk_power_law_boost_against_reference() -> None:
+    """Validate SP(k) boost against benchmark reference data."""
     pytest.importorskip("pyspk")
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
@@ -47,7 +48,8 @@ def test_spk_power_law_boost_against_reference():
     assert np.allclose(err, 0, atol=SPK_TOLERANCE, rtol=0)
 
 
-def test_spk_power_law_include_matches_boost():
+def test_spk_power_law_include_matches_boost() -> None:
+    """Validate include_baryonic_effects matches boost-based expectation."""
     pytest.importorskip("pyspk")
     cosmo = ccl.Cosmology(
         Omega_c=0.25,
