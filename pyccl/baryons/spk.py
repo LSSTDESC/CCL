@@ -200,7 +200,6 @@ class BaryonsSPK(Baryons):
         self.k_max_hmpc = float(k_max_hmpc)
         self.n_k = int(n_k)
         self.out_of_bounds_policy = out_of_bounds_policy
-        self._evaluator = None
         self._pyspk = None
         self._forwarded_warning_messages = set()
         self._warned_oob_on_spline_grid = False
@@ -254,23 +253,34 @@ class BaryonsSPK(Baryons):
                 ) from err
         return self._pyspk
 
-    def _build_evaluator(self) -> None:
-        """Build and cache the internal ``pyspk`` evaluator."""
+    def _build_evaluator(
+            self,
+            *,
+            k_hmpc: np.ndarray | None = None) -> Callable[..., Any]:
+        """Build a ``pyspk`` evaluator.
+
+        Args:
+            k_hmpc: Optional explicit ``h/Mpc`` grid. If not provided,
+                pyspk builds an internal logarithmic grid using
+                ``k_min_hmpc``, ``k_max_hmpc``, and ``n_k``.
+
+        Returns:
+            Configured ``pyspk`` evaluator callable.
+        """
         pyspk = self._import_pyspk()
-        self._evaluator = pyspk.build_sup_model_evaluator(
+        if k_hmpc is not None:
+            return pyspk.build_sup_model_evaluator(
+                SO=self.SO,
+                relation_kind=self.relation_kind,
+                k_array=np.asarray(k_hmpc, dtype=float),
+            )
+        return pyspk.build_sup_model_evaluator(
             SO=self.SO,
             relation_kind=self.relation_kind,
             k_min=self.k_min_hmpc,
             k_max=self.k_max_hmpc,
             n=self.n_k,
         )
-
-    def _get_evaluator(self) -> Callable[..., Any]:
-        """Return the cached evaluator, creating it if needed."""
-        if self._evaluator is None:
-            self._build_evaluator()
-        assert self._evaluator is not None
-        return self._evaluator
 
     @staticmethod
     def _make_efunc(cosmo: Any) -> Callable[[float], Any]:
@@ -291,18 +301,12 @@ class BaryonsSPK(Baryons):
                 stacklevel=3,
             )
 
-    def _evaluate_on_internal_grid(
-            self, cosmo: Any, z: float) -> tuple[np.ndarray, np.ndarray]:
-        """Evaluate suppression on SP(k)'s internal ``h/Mpc`` grid.
-
-        Args:
-            cosmo: CCL cosmology object.
-            z: Redshift.
-
-        Returns:
-            Tuple ``(k_hmpc, suppression)`` as numpy arrays.
-        """
-        evaluator = self._get_evaluator()
+    def _evaluate_suppression(
+            self,
+            cosmo: Any,
+            z: float,
+            evaluator: Callable[..., Any]) -> tuple[np.ndarray, np.ndarray]:
+        """Evaluate SP(k) suppression with a provided ``pyspk`` evaluator."""
         kwargs = dict(self.relation_params)
         if self.relation_kind in ("cosmo_power_law", "double_power_law"):
             kwargs["efunc"] = self._make_efunc(cosmo)
@@ -386,14 +390,14 @@ class BaryonsSPK(Baryons):
         if np.any(a_use <= 0):
             raise ValueError("`a` must contain strictly positive values.")
 
-        k_hmpc = k_use / cosmo["h"]
+        k_hmpc = np.asarray(k_use / cosmo["h"], dtype=float)
+        k_eval_hmpc = np.clip(k_hmpc, self.k_min_hmpc, self.k_max_hmpc)
+        evaluator = self._build_evaluator(k_hmpc=k_eval_hmpc)
         fka = np.empty((a_use.size, k_use.size))
 
         for ia, aval in enumerate(a_use):
             z = 1.0 / aval - 1.0
-            k_spk, sup_spk = self._evaluate_on_internal_grid(cosmo, z)
-            fka_row = np.interp(k_hmpc, k_spk, sup_spk,
-                                left=sup_spk[0], right=sup_spk[-1])
+            _, fka_row = self._evaluate_suppression(cosmo, z, evaluator)
             fka[ia, :] = self._apply_out_of_bounds_policy(k_hmpc, fka_row)
 
         if np.ndim(k) == 0:
@@ -441,7 +445,6 @@ class BaryonsSPK(Baryons):
         self._validate_settings()
         self.relation_params = _normalize_relation_parameters(
             self.relation_kind, merged_relation_params)
-        self._evaluator = None
 
     def _include_baryonic_effects(self, cosmo: Any, pk: Pk2D) -> Pk2D:
         """Apply SP(k) baryonic suppression to a ``Pk2D`` power spectrum.
@@ -470,14 +473,14 @@ class BaryonsSPK(Baryons):
 
         fka = np.ones((a_arr.size, k_arr.size))
         if np.any(in_k_range):
+            evaluator = self._build_evaluator(k_hmpc=k_hmpc[in_k_range])
             for ia, aval in enumerate(a_arr):
                 if aval < a_min_cal:
                     continue  # z > z_max_cal: baryons negligible, leave unity
                 z = 1.0 / aval - 1.0
-                k_spk, sup_spk = self._evaluate_on_internal_grid(cosmo, z)
-                fka[ia, in_k_range] = np.interp(
-                    k_hmpc[in_k_range], k_spk, sup_spk,
-                    left=sup_spk[0], right=sup_spk[-1])
+                _, sup_eval = self._evaluate_suppression(
+                    cosmo, z, evaluator)
+                fka[ia, in_k_range] = sup_eval
 
         for ia in range(a_arr.size):
             fka[ia, :] = self._apply_out_of_bounds_policy(
