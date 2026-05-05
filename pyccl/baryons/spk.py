@@ -1,7 +1,7 @@
 __all__ = ("BaryonsSPK",)
 
 import importlib
-from typing import Any, cast
+from typing import Any, Callable, cast
 import warnings as warnings_builtin
 
 import numpy as np
@@ -10,7 +10,13 @@ from .. import CCLWarning, Pk2D, warnings
 from . import Baryons
 
 
-def _warn_ccl(*args, **kwargs):
+def _warn_ccl(*args: Any, **kwargs: Any) -> None:
+    """Forward warnings through CCL's warning utility.
+
+    Args:
+        *args: Positional arguments for ``warnings.warn``.
+        **kwargs: Keyword arguments for ``warnings.warn``.
+    """
     cast(Any, warnings).warn(*args, **kwargs)
 
 
@@ -38,14 +44,40 @@ _RELATION_PARAMS = {
 }
 
 
-def _arraylike_to_float_list(values, *, name):
+def _arraylike_to_float_list(values: Any, *, name: str) -> list[float]:
+    """Normalize array-like input into a finite list of floats.
+
+    Args:
+        values: Scalar or array-like values to normalize.
+        name: Parameter name used in error messages.
+
+    Returns:
+        Normalized list of floats.
+
+    Raises:
+        ValueError: If any value is not finite.
+    """
     arr = np.atleast_1d(values).astype(float)
     if np.any(~np.isfinite(arr)):
         raise ValueError(f"`{name}` must contain finite values.")
     return arr.tolist()
 
 
-def _normalize_relation_parameters(relation_kind, relation_params):
+def _normalize_relation_parameters(
+        relation_kind: str,
+        relation_params: dict[str, Any]) -> dict[str, Any]:
+    """Validate and normalize relation-specific SP(k) parameters.
+
+    Args:
+        relation_kind: SP(k) relation mode.
+        relation_params: Raw relation parameters.
+
+    Returns:
+        A normalized parameter dictionary with defaults applied.
+
+    Raises:
+        ValueError: If relation kind is unsupported or parameters are invalid.
+    """
     if relation_kind not in _SUPPORTED_RELATION_KINDS:
         raise ValueError(
             f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}.")
@@ -118,6 +150,10 @@ class BaryonsSPK(Baryons):
             because CCL's internal spline grid extends beyond the model domain.
         **relation_params: Parameters required by ``relation_kind`` and passed
             to the cached ``pyspk`` evaluator.
+
+    Raises:
+        ModuleNotFoundError: If ``pyspk`` is not installed.
+        ValueError: If settings or relation parameters are invalid.
     """
     name = "SPK"  # pyright: ignore[reportAssignmentType]
     __repr_attrs__ = __eq_attrs__ = (
@@ -133,6 +169,17 @@ class BaryonsSPK(Baryons):
     def __init__(self, *, SO=200, relation_kind="power_law",
                  k_min_hmpc=0.005, k_max_hmpc=8.0, n_k=128,
                  out_of_bounds_policy="error", **relation_params):
+        """Initialize a BaryonsSPK model instance.
+
+        Args:
+            SO: Spherical overdensity, either 200 or 500.
+            relation_kind: Relation mode used by ``pyspk``.
+            k_min_hmpc: Minimum SP(k) internal grid scale in ``h/Mpc``.
+            k_max_hmpc: Maximum SP(k) internal grid scale in ``h/Mpc``.
+            n_k: Number of logarithmic samples in SP(k) internal grid.
+            out_of_bounds_policy: Policy for ``k > k_max_hmpc``.
+            **relation_params: Parameters for the selected relation mode.
+        """
         self.SO = SO
         self.relation_kind = relation_kind
         self.k_min_hmpc = float(k_min_hmpc)
@@ -149,7 +196,12 @@ class BaryonsSPK(Baryons):
             self.relation_kind, relation_params)
         self._import_pyspk()
 
-    def _validate_settings(self):
+    def _validate_settings(self) -> None:
+        """Validate global SP(k) model settings.
+
+        Raises:
+            ValueError: If any configuration option is invalid.
+        """
         if self.SO not in (200, 500):
             raise ValueError("`SO` must be either 200 or 500.")
         if self.relation_kind not in _SUPPORTED_RELATION_KINDS:
@@ -168,7 +220,15 @@ class BaryonsSPK(Baryons):
                 f"{_SUPPORTED_OUT_OF_BOUNDS_POLICIES}."
             )
 
-    def _import_pyspk(self):
+    def _import_pyspk(self) -> Any:
+        """Import and cache ``pyspk`` lazily.
+
+        Returns:
+            Imported ``pyspk`` module.
+
+        Raises:
+            ModuleNotFoundError: If ``pyspk`` is unavailable.
+        """
         if self._pyspk is None:
             try:
                 self._pyspk = importlib.import_module("pyspk")
@@ -180,7 +240,8 @@ class BaryonsSPK(Baryons):
                 ) from err
         return self._pyspk
 
-    def _build_evaluator(self):
+    def _build_evaluator(self) -> None:
+        """Build and cache the internal ``pyspk`` evaluator."""
         pyspk = self._import_pyspk()
         self._evaluator = pyspk.build_sup_model_evaluator(
             SO=self.SO,
@@ -190,17 +251,20 @@ class BaryonsSPK(Baryons):
             n=self.n_k,
         )
 
-    def _get_evaluator(self):
+    def _get_evaluator(self) -> Callable[..., Any]:
+        """Return the cached evaluator, creating it if needed."""
         if self._evaluator is None:
             self._build_evaluator()
         assert self._evaluator is not None
         return self._evaluator
 
     @staticmethod
-    def _make_efunc(cosmo):
+    def _make_efunc(cosmo: Any) -> Callable[[float], Any]:
+        """Create an ``E(z)`` callable compatible with ``pyspk``."""
         return lambda z: cosmo.h_over_h0(1.0 / (1.0 + z))
 
-    def _forward_pyspk_warnings(self, caught_warnings):
+    def _forward_pyspk_warnings(self, caught_warnings: list[Any]) -> None:
+        """Forward unique warnings emitted by ``pyspk`` via CCL warnings."""
         for caught in caught_warnings:
             msg = str(caught.message)
             if msg in self._forwarded_warning_messages:
@@ -213,7 +277,17 @@ class BaryonsSPK(Baryons):
                 stacklevel=3,
             )
 
-    def _evaluate_on_internal_grid(self, cosmo, z):
+    def _evaluate_on_internal_grid(
+            self, cosmo: Any, z: float) -> tuple[np.ndarray, np.ndarray]:
+        """Evaluate suppression on SP(k)'s internal ``h/Mpc`` grid.
+
+        Args:
+            cosmo: CCL cosmology object.
+            z: Redshift.
+
+        Returns:
+            Tuple ``(k_hmpc, suppression)`` as numpy arrays.
+        """
         evaluator = self._get_evaluator()
         kwargs = dict(self.relation_params)
         if self.relation_kind in ("cosmo_power_law", "double_power_law"):
@@ -226,7 +300,25 @@ class BaryonsSPK(Baryons):
         return np.asarray(k_hmpc), np.asarray(sup)
 
     def _apply_out_of_bounds_policy(
-            self, k_hmpc, fka, *, for_spline_grid=False):
+            self,
+            k_hmpc: np.ndarray,
+            fka: np.ndarray,
+            *,
+            for_spline_grid: bool = False) -> np.ndarray:
+        """Apply configured high-k policy to suppression factors.
+
+        Args:
+            k_hmpc: Wavenumbers in ``h/Mpc``.
+            fka: Suppression factors matching ``k_hmpc``.
+            for_spline_grid: Whether this is for CCL's internal spline grid.
+
+        Returns:
+            Policy-adjusted suppression factors.
+
+        Raises:
+            ValueError: For out-of-range ``k`` when policy is ``error`` and
+                ``for_spline_grid`` is ``False``.
+        """
         out_hi = k_hmpc > self.k_max_hmpc
         if not np.any(out_hi):
             return fka
@@ -259,18 +351,21 @@ class BaryonsSPK(Baryons):
             fka[out_hi] = np.nan
         return fka
 
-    def boost_factor(self, cosmo, k, a):
-        """The SP(k) boost factor for baryons.
+    def boost_factor(self, cosmo: Any, k: Any, a: Any) -> Any:
+        """Compute the SP(k) baryonic boost factor.
 
         Args:
-            cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological parameters.
-            k (:obj:`float` or `array`): Wavenumber in :math:`{\\rm Mpc}^{-1}`.
-            a (:obj:`float` or `array`): Scale factor.
+            cosmo: CCL cosmology object.
+            k: Wavenumber(s) in ``Mpc^-1``.
+            a: Scale factor(s).
 
         Returns:
-            :obj:`float` or `array`: Correction factor to apply to the power
-            spectrum.
-        """  # noqa
+            Scalar or array correction factor matching the shapes of ``k`` and
+            ``a``.
+
+        Raises:
+            ValueError: If ``k`` or ``a`` contains non-positive values.
+        """
         a_use, k_use = map(np.atleast_1d, [a, k])
         if np.any(k_use <= 0):
             raise ValueError("`k` must contain strictly positive values.")
@@ -296,7 +391,16 @@ class BaryonsSPK(Baryons):
     def update_parameters(self, *, SO=None, relation_kind=None,
                           k_min_hmpc=None, k_max_hmpc=None, n_k=None,
                           out_of_bounds_policy=None, **relation_params):
-        """Update SP(k) model configuration.
+        """Update SP(k) model configuration in place.
+
+        Args:
+            SO: Optional new spherical overdensity.
+            relation_kind: Optional new relation mode.
+            k_min_hmpc: Optional new minimum ``h/Mpc`` scale.
+            k_max_hmpc: Optional new maximum ``h/Mpc`` scale.
+            n_k: Optional new internal grid sample count.
+            out_of_bounds_policy: Optional new out-of-bounds policy.
+            **relation_params: Relation parameters to replace or update.
 
         All arguments set to ``None`` will be left untouched.
         """
@@ -325,10 +429,20 @@ class BaryonsSPK(Baryons):
             self.relation_kind, merged_relation_params)
         self._evaluator = None
 
-    def _include_baryonic_effects(self, cosmo, pk):
-        # Applies boost factor only within the SP(k) calibrated k and z ranges.
-        # The CCL internal Pk2D spline grid may extend far beyond the model's
-        # calibrated domain; we apply SP(k) only where it is well-defined.
+    def _include_baryonic_effects(self, cosmo: Any, pk: Pk2D) -> Pk2D:
+        """Apply SP(k) baryonic suppression to a ``Pk2D`` power spectrum.
+
+        SP(k) is evaluated only inside calibrated ``k`` and ``z`` ranges.
+        Internal CCL spline-grid values outside ``k_max_hmpc`` are handled by
+        ``out_of_bounds_policy`` through :meth:`_apply_out_of_bounds_policy`.
+
+        Args:
+            cosmo: CCL cosmology object.
+            pk: Input dark-matter-only power spectrum.
+
+        Returns:
+            New ``Pk2D`` including baryonic suppression.
+        """
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         k_arr = np.exp(lk_arr)
         k_hmpc = k_arr / cosmo["h"]
@@ -360,7 +474,10 @@ class BaryonsSPK(Baryons):
         if pk.psp.is_log:
             np.log(pk_arr, out=pk_arr)  # in-place log
 
+        extrap_order_lok = 1 if pk.extrap_order_lok is None else pk.extrap_order_lok
+        extrap_order_hik = 2 if pk.extrap_order_hik is None else pk.extrap_order_hik
+
         return Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                     is_logp=pk.psp.is_log,
-                    extrap_order_lok=pk.extrap_order_lok,
-                    extrap_order_hik=pk.extrap_order_hik)
+                    extrap_order_lok=extrap_order_lok,
+                    extrap_order_hik=extrap_order_hik)
