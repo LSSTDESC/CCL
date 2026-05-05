@@ -1,4 +1,11 @@
-"""SP(k)-based baryonic suppression model integration for pyccl."""
+"""SP(k)-based baryonic suppression model integration for pyccl.
+
+References:
+        - Salcido et al. 2023, MNRAS 523, 2247
+            (https://doi.org/10.1093/mnras/stad1474)
+        - arXiv preprint: https://arxiv.org/abs/2305.09710
+        - pyspk package: https://github.com/jemme07/pyspk
+"""
 
 __all__ = ("BaryonsSPK",)
 
@@ -131,6 +138,20 @@ class BaryonsSPK(Baryons):
 
     The boost factor is applied multiplicatively:
     :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\, f_{\\rm SPk}(k, a)`.
+
+        Reference:
+                Salcido et al. 2023 (`MNRAS 523, 2247
+                <https://doi.org/10.1093/mnras/stad1474>`_).
+
+        Relation modes:
+                - ``power_law``: power law baryon-fraction relation with parameters
+                    ``fb_a``, ``fb_pow`` and optional ``fb_pivot``.
+                - ``cosmo_power_law``: redshift-dependent power law with
+                    ``alpha``, ``beta``, ``gamma``.
+                - ``double_power_law``: redshift-dependent double power law with
+                    ``epsilon``, ``alpha``, ``beta``, ``gamma``, ``m_pivot``.
+                - ``binned``: tabulated ``(M_halo, fb)`` relation with optional
+                    ``extrapolate``.
 
     Args:
         SO (:obj:`int`): Spherical overdensity.
