@@ -172,6 +172,15 @@ Dark Emulator
 
    $ python3 -m pip install dark_emulator==1.1.2
 
+SP(k) baryons model
+-------------------
+
+The ``pyccl.BaryonsSPK`` wrapper requires the optional ``pyspk`` package.
+
+.. code-block:: bash
+
+   $ python3 -m pip install "pyspk>=2.0.0"
+
 
 .. _getting-cmake:
 

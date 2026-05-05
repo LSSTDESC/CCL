@@ -1,5 +1,9 @@
 # Unreleased
 
+## Python library
+- Added `BaryonsSPK`, a new optional `pyspk>=2.0.0`-backed baryonic suppression
+  wrapper with configurable SP(k) relation modes and out-of-bounds policies.
+
 # v3.1.2 Changes
 - Fixed dynamic versioning
 
