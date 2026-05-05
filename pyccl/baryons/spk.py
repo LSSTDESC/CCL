@@ -1,12 +1,17 @@
 __all__ = ("BaryonsSPK",)
 
 import importlib
+from typing import Any, cast
 import warnings as warnings_builtin
 
 import numpy as np
 
 from .. import CCLWarning, Pk2D, warnings
 from . import Baryons
+
+
+def _warn_ccl(*args, **kwargs):
+    cast(Any, warnings).warn(*args, **kwargs)
 
 
 _SUPPORTED_RELATION_KINDS = ("power_law", "cosmo_power_law",
@@ -42,7 +47,8 @@ def _arraylike_to_float_list(values, *, name):
 
 def _normalize_relation_parameters(relation_kind, relation_params):
     if relation_kind not in _SUPPORTED_RELATION_KINDS:
-        raise ValueError(f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}.")
+        raise ValueError(
+            f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}.")
 
     relation_cfg = _RELATION_PARAMS[relation_kind]
     required = set(relation_cfg["required"])
@@ -57,9 +63,10 @@ def _normalize_relation_parameters(relation_kind, relation_params):
 
     missing = required - set(relation_params)
     if missing:
+        missing_keys = tuple(sorted(missing))
         raise ValueError(
-            f"Missing required parameters for relation_kind='{relation_kind}': "
-            f"{tuple(sorted(missing))}."
+            "Missing required parameters for "
+            f"relation_kind='{relation_kind}': {missing_keys}."
         )
 
     normalized = {}
@@ -71,7 +78,8 @@ def _normalize_relation_parameters(relation_kind, relation_params):
     if relation_kind == "binned":
         normalized["M_halo"] = _arraylike_to_float_list(
             normalized["M_halo"], name="M_halo")
-        normalized["fb"] = _arraylike_to_float_list(normalized["fb"], name="fb")
+        normalized["fb"] = _arraylike_to_float_list(
+            normalized["fb"], name="fb")
         if len(normalized["M_halo"]) != len(normalized["fb"]):
             raise ValueError("`M_halo` and `fb` must have the same length.")
         normalized["extrapolate"] = bool(normalized["extrapolate"])
@@ -91,20 +99,27 @@ class BaryonsSPK(Baryons):
     :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\, f_{\\rm SPk}(k, a)`.
 
     Args:
-        SO (:obj:`int`): Spherical overdensity. Supported values are 200 and 500.
+        SO (:obj:`int`): Spherical overdensity.
+            Supported values are 200 and 500.
         relation_kind (:obj:`str`): One of ``power_law``, ``cosmo_power_law``,
             ``double_power_law`` or ``binned``.
         k_min_hmpc (:obj:`float`): Minimum internal SP(k) grid scale in
             :math:`h\\,{\\rm Mpc}^{-1}`.
         k_max_hmpc (:obj:`float`): Maximum internal SP(k) grid scale in
             :math:`h\\,{\\rm Mpc}^{-1}`.
-        n_k (:obj:`int`): Number of logarithmic points in the internal SP(k) grid.
+        n_k (:obj:`int`): Number of logarithmic points in the internal
+            SP(k) grid.
         out_of_bounds_policy (:obj:`str`): Behavior for requests above
-            ``k_max_hmpc``. Supported values are ``error``, ``unity`` and ``nan``.
+            ``k_max_hmpc``.
+            Supported values are ``error``, ``unity`` and ``nan``.
+            For :meth:`boost_factor`, ``error`` raises a :class:`ValueError`.
+            For :meth:`include_baryonic_effects`, ``error`` emits a
+            :class:`~pyccl.CCLWarning` and uses unity above ``k_max_hmpc``
+            because CCL's internal spline grid extends beyond the model domain.
         **relation_params: Parameters required by ``relation_kind`` and passed
             to the cached ``pyspk`` evaluator.
     """
-    name = "SPK"
+    name = "SPK"  # pyright: ignore[reportAssignmentType]
     __repr_attrs__ = __eq_attrs__ = (
         "SO",
         "relation_kind",
@@ -127,6 +142,7 @@ class BaryonsSPK(Baryons):
         self._evaluator = None
         self._pyspk = None
         self._forwarded_warning_messages = set()
+        self._warned_oob_on_spline_grid = False
 
         self._validate_settings()
         self.relation_params = _normalize_relation_parameters(
@@ -142,7 +158,8 @@ class BaryonsSPK(Baryons):
         if self.k_min_hmpc <= 0 or self.k_max_hmpc <= 0:
             raise ValueError("`k_min_hmpc` and `k_max_hmpc` must be > 0.")
         if self.k_min_hmpc >= self.k_max_hmpc:
-            raise ValueError("`k_min_hmpc` must be strictly smaller than `k_max_hmpc`.")
+            raise ValueError(
+                "`k_min_hmpc` must be strictly smaller than `k_max_hmpc`.")
         if self.n_k < 2:
             raise ValueError("`n_k` must be >= 2.")
         if self.out_of_bounds_policy not in _SUPPORTED_OUT_OF_BOUNDS_POLICIES:
@@ -157,7 +174,8 @@ class BaryonsSPK(Baryons):
                 self._pyspk = importlib.import_module("pyspk")
             except ModuleNotFoundError as err:
                 raise ModuleNotFoundError(
-                    "BaryonsSPK requires the optional dependency `pyspk>=2.0.0`. "
+                    "BaryonsSPK requires the optional dependency "
+                    "`pyspk>=2.0.0`. "
                     "Install it in your environment to use this model."
                 ) from err
         return self._pyspk
@@ -175,6 +193,7 @@ class BaryonsSPK(Baryons):
     def _get_evaluator(self):
         if self._evaluator is None:
             self._build_evaluator()
+        assert self._evaluator is not None
         return self._evaluator
 
     @staticmethod
@@ -187,7 +206,7 @@ class BaryonsSPK(Baryons):
             if msg in self._forwarded_warning_messages:
                 continue
             self._forwarded_warning_messages.add(msg)
-            warnings.warn(
+            _warn_ccl(
                 msg,
                 category=CCLWarning,
                 importance="low",
@@ -206,12 +225,27 @@ class BaryonsSPK(Baryons):
         self._forward_pyspk_warnings(caught)
         return np.asarray(k_hmpc), np.asarray(sup)
 
-    def _apply_out_of_bounds_policy(self, k_hmpc, fka):
+    def _apply_out_of_bounds_policy(
+            self, k_hmpc, fka, *, for_spline_grid=False):
         out_hi = k_hmpc > self.k_max_hmpc
         if not np.any(out_hi):
             return fka
 
         if self.out_of_bounds_policy == "error":
+            if for_spline_grid:
+                if not self._warned_oob_on_spline_grid:
+                    self._warned_oob_on_spline_grid = True
+                    _warn_ccl(
+                        "CCL internal Pk2D grids extend above the configured "
+                        f"SP(k) limit k_max_hmpc={self.k_max_hmpc}. "
+                        "Falling back to unity above k_max_hmpc for "
+                        "include_baryonic_effects(). Set out_of_bounds_policy "
+                        "to 'nan' to propagate NaNs instead.",
+                        category=CCLWarning,
+                        importance="low",
+                        stacklevel=3,
+                    )
+                return fka
             raise ValueError(
                 "Requested k values exceed the configured SP(k) limit "
                 f"k_max_hmpc={self.k_max_hmpc}. Set out_of_bounds_policy to "
@@ -277,7 +311,8 @@ class BaryonsSPK(Baryons):
         if out_of_bounds_policy is not None:
             self.out_of_bounds_policy = out_of_bounds_policy
 
-        new_kind = self.relation_kind if relation_kind is None else relation_kind
+        new_kind = (
+            self.relation_kind if relation_kind is None else relation_kind)
         if relation_kind is None or new_kind == self.relation_kind:
             merged_relation_params = dict(self.relation_params)
         else:
@@ -293,15 +328,16 @@ class BaryonsSPK(Baryons):
     def _include_baryonic_effects(self, cosmo, pk):
         # Applies boost factor only within the SP(k) calibrated k and z ranges.
         # The CCL internal Pk2D spline grid may extend far beyond the model's
-        # calibrated domain; we apply SP(k) only where it is well-defined and
-        # leave everything else at unity (no baryon correction).
+        # calibrated domain; we apply SP(k) only where it is well-defined.
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         k_arr = np.exp(lk_arr)
         k_hmpc = k_arr / cosmo["h"]
         in_k_range = (k_hmpc >= self.k_min_hmpc) & (k_hmpc <= self.k_max_hmpc)
 
-        # Restrict to the pyspk calibrated redshift range (z <= CALIBRATED_Z_MAX).
-        z_max_cal = self._pyspk.constants.CALIBRATED_Z_MAX
+        # Restrict to pyspk's calibrated redshift range
+        # (z <= CALIBRATED_Z_MAX).
+        pyspk = self._import_pyspk()
+        z_max_cal = pyspk.constants.CALIBRATED_Z_MAX
         a_min_cal = 1.0 / (1.0 + z_max_cal)
 
         fka = np.ones((a_arr.size, k_arr.size))
@@ -314,6 +350,10 @@ class BaryonsSPK(Baryons):
                 fka[ia, in_k_range] = np.interp(
                     k_hmpc[in_k_range], k_spk, sup_spk,
                     left=sup_spk[0], right=sup_spk[-1])
+
+        for ia in range(a_arr.size):
+            fka[ia, :] = self._apply_out_of_bounds_policy(
+                k_hmpc, fka[ia, :], for_spline_grid=True)
 
         pk_arr *= fka
 
