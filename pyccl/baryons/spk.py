@@ -268,19 +268,24 @@ class BaryonsSPK(Baryons):
             Configured ``pyspk`` evaluator callable.
         """
         pyspk = self._import_pyspk()
-        if k_hmpc is not None:
-            return pyspk.build_sup_model_evaluator(
-                SO=self.SO,
-                relation_kind=self.relation_kind,
-                k_array=np.asarray(k_hmpc, dtype=float),
-            )
-        return pyspk.build_sup_model_evaluator(
-            SO=self.SO,
-            relation_kind=self.relation_kind,
-            k_min=self.k_min_hmpc,
-            k_max=self.k_max_hmpc,
-            n=self.n_k,
-        )
+        with warnings_builtin.catch_warnings(record=True) as caught:
+            warnings_builtin.simplefilter("always")
+            if k_hmpc is not None:
+                evaluator = pyspk.build_sup_model_evaluator(
+                    SO=self.SO,
+                    relation_kind=self.relation_kind,
+                    k_array=np.asarray(k_hmpc, dtype=float),
+                )
+            else:
+                evaluator = pyspk.build_sup_model_evaluator(
+                    SO=self.SO,
+                    relation_kind=self.relation_kind,
+                    k_min=self.k_min_hmpc,
+                    k_max=self.k_max_hmpc,
+                    n=self.n_k,
+                )
+        self._forward_pyspk_warnings(caught)
+        return evaluator
 
     @staticmethod
     def _make_efunc(cosmo: Any) -> Callable[[float], Any]:
