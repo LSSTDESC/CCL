@@ -1,3 +1,5 @@
+"""SP(k)-based baryonic suppression model integration for pyccl."""
+
 __all__ = ("BaryonsSPK",)
 
 import importlib

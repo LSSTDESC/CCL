@@ -1,3 +1,5 @@
+"""Unit tests for the SP(k) baryonic suppression wrapper."""
+
 import sys
 from typing import Any, Callable, cast
 from unittest import mock

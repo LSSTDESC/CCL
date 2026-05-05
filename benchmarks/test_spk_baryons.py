@@ -1,3 +1,5 @@
+"""Benchmark tests for SP(k) baryonic suppression in pyccl."""
+
 import numpy as np
 import pyccl as ccl
 import pytest  # pyright: ignore[reportMissingImports]
