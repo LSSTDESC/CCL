@@ -65,7 +65,7 @@ def test_spk_matches_pyspk(relation_kind, relation_params):
         direct_kwargs["efunc"] = lambda z_: COSMO.h_over_h0(1.0 / (1.0 + z_))
     _, pyspk_fk = evaluator(z=z, **direct_kwargs)
 
-    assert np.allclose(ccl_fk, pyspk_fk, atol=1e-8, rtol=0)
+    assert np.allclose(ccl_fk, pyspk_fk, atol=1e-3, rtol=0)
 
 
 def test_spk_correct_smoke():

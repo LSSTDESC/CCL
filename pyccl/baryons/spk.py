@@ -116,7 +116,7 @@ class BaryonsSPK(Baryons):
     )
 
     def __init__(self, *, SO=200, relation_kind="power_law",
-                 k_min_hmpc=0.1, k_max_hmpc=8.0, n_k=128,
+                 k_min_hmpc=0.005, k_max_hmpc=8.0, n_k=128,
                  out_of_bounds_policy="error", **relation_params):
         self.SO = SO
         self.relation_kind = relation_kind
@@ -291,10 +291,30 @@ class BaryonsSPK(Baryons):
         self._evaluator = None
 
     def _include_baryonic_effects(self, cosmo, pk):
-        # Applies boost factor
+        # Applies boost factor only within the SP(k) calibrated k and z ranges.
+        # The CCL internal Pk2D spline grid may extend far beyond the model's
+        # calibrated domain; we apply SP(k) only where it is well-defined and
+        # leave everything else at unity (no baryon correction).
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         k_arr = np.exp(lk_arr)
-        fka = self.boost_factor(cosmo, k_arr, a_arr)
+        k_hmpc = k_arr / cosmo["h"]
+        in_k_range = (k_hmpc >= self.k_min_hmpc) & (k_hmpc <= self.k_max_hmpc)
+
+        # Restrict to the pyspk calibrated redshift range (z <= CALIBRATED_Z_MAX).
+        z_max_cal = self._pyspk.constants.CALIBRATED_Z_MAX
+        a_min_cal = 1.0 / (1.0 + z_max_cal)
+
+        fka = np.ones((a_arr.size, k_arr.size))
+        if np.any(in_k_range):
+            for ia, aval in enumerate(a_arr):
+                if aval < a_min_cal:
+                    continue  # z > z_max_cal: baryons negligible, leave unity
+                z = 1.0 / aval - 1.0
+                k_spk, sup_spk = self._evaluate_on_internal_grid(cosmo, z)
+                fka[ia, in_k_range] = np.interp(
+                    k_hmpc[in_k_range], k_spk, sup_spk,
+                    left=sup_spk[0], right=sup_spk[-1])
+
         pk_arr *= fka
 
         if pk.psp.is_log:
