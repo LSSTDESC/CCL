@@ -134,45 +134,36 @@ def _normalize_relation_parameters(
 
 
 class BaryonsSPK(Baryons):
-    """The SP(k) baryonic suppression model from `pyspk`.
+    """SP(k) baryonic suppression model backed by ``pyspk``.
 
-    The boost factor is applied multiplicatively:
-    :math:`P_{\\rm bar.}(k, a) = P_{\\rm DMO}(k, a)\\, f_{\\rm SPk}(k, a)`.
+    The correction is applied multiplicatively:
+    ``P_bar(k, a) = P_DMO(k, a) * f_SPk(k, a)``.
 
-        Reference:
-                Salcido et al. 2023 (`MNRAS 523, 2247
-                <https://doi.org/10.1093/mnras/stad1474>`_).
+    Reference:
+        Salcido et al. 2023, MNRAS 523, 2247.
+        https://doi.org/10.1093/mnras/stad1474
 
-        Relation modes:
-                - ``power_law``: power law baryon-fraction relation with parameters
-                    ``fb_a``, ``fb_pow`` and optional ``fb_pivot``.
-                - ``cosmo_power_law``: redshift-dependent power law with
-                    ``alpha``, ``beta``, ``gamma``.
-                - ``double_power_law``: redshift-dependent double power law with
-                    ``epsilon``, ``alpha``, ``beta``, ``gamma``, ``m_pivot``.
-                - ``binned``: tabulated ``(M_halo, fb)`` relation with optional
-                    ``extrapolate``.
+    Relation modes:
+        - ``power_law``: ``fb_a``, ``fb_pow``, optional ``fb_pivot``
+        - ``cosmo_power_law``: ``alpha``, ``beta``, ``gamma``
+        - ``double_power_law``: ``epsilon``, ``alpha``, ``beta``, ``gamma``,
+          ``m_pivot``
+        - ``binned``: ``M_halo``, ``fb``, optional ``extrapolate``
 
     Args:
-        SO (:obj:`int`): Spherical overdensity.
-            Supported values are 200 and 500.
-        relation_kind (:obj:`str`): One of ``power_law``, ``cosmo_power_law``,
-            ``double_power_law`` or ``binned``.
-        k_min_hmpc (:obj:`float`): Minimum internal SP(k) grid scale in
-            :math:`h\\,{\\rm Mpc}^{-1}`.
-        k_max_hmpc (:obj:`float`): Maximum internal SP(k) grid scale in
-            :math:`h\\,{\\rm Mpc}^{-1}`.
-        n_k (:obj:`int`): Number of logarithmic points in the internal
-            SP(k) grid.
-        out_of_bounds_policy (:obj:`str`): Behavior for requests above
-            ``k_max_hmpc``.
-            Supported values are ``error``, ``unity`` and ``nan``.
-            For :meth:`boost_factor`, ``error`` raises a :class:`ValueError`.
-            For :meth:`include_baryonic_effects`, ``error`` emits a
-            :class:`~pyccl.CCLWarning` and uses unity above ``k_max_hmpc``
-            because CCL's internal spline grid extends beyond the model domain.
-        **relation_params: Parameters required by ``relation_kind`` and passed
-            to the cached ``pyspk`` evaluator.
+        SO: Spherical overdensity. Supported values are ``200`` and ``500``.
+        relation_kind: One of ``power_law``, ``cosmo_power_law``,
+            ``double_power_law``, or ``binned``.
+        k_min_hmpc: Minimum SP(k) internal grid scale in ``h Mpc^-1``.
+        k_max_hmpc: Maximum SP(k) internal grid scale in ``h Mpc^-1``.
+        n_k: Number of logarithmic points in the internal SP(k) grid.
+        out_of_bounds_policy: Behavior for ``k > k_max_hmpc``.
+            Supported values are ``error``, ``unity``, and ``nan``.
+            For ``boost_factor``, ``error`` raises ``ValueError``.
+            For ``include_baryonic_effects``, ``error`` warns and uses unity
+            above ``k_max_hmpc`` because CCL's internal spline grid extends
+            beyond the model domain.
+        **relation_params: Parameters required by ``relation_kind``.
 
     Raises:
         ModuleNotFoundError: If ``pyspk`` is not installed.
