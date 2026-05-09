@@ -311,8 +311,9 @@ class BaryonsSPK(Baryons):
         k_min_mpc, k_max_mpc = self._effective_k_bounds_mpc(cosmo)
         key = self._evaluator_cache_key() + (h, k_min_mpc, k_max_mpc)
         if self._cached_evaluator is None or self._cached_evaluator_key != key:
-            k_grid_mpc = np.geomspace(k_min_mpc, k_max_mpc, self.n_k)
-            k_grid_hmpc = self._k_mpc_to_hmpc(cosmo, k_grid_mpc)
+            k_min_hmpc = k_min_mpc / h
+            k_max_hmpc = k_max_mpc / h
+            k_grid_hmpc = np.geomspace(k_min_hmpc, k_max_hmpc, self.n_k)
             self._cached_k_grid_hmpc = k_grid_hmpc
             self._cached_evaluator = self._build_evaluator(k_grid_hmpc)
             self._cached_evaluator_key = key
@@ -410,6 +411,10 @@ class BaryonsSPK(Baryons):
         """Interpolate suppression from cached SP(k) grid to target k."""
         k_mapped_hmpc = self._k_mpc_to_hmpc(
             cosmo, self._map_k_to_domain(cosmo, k_mpc))
+        if (k_mapped_hmpc.shape == k_grid_hmpc.shape
+            and np.allclose(k_mapped_hmpc, k_grid_hmpc,
+                    rtol=0.0, atol=1e-13)):
+            return np.array(sup_grid, copy=True)
         return np.interp(k_mapped_hmpc, k_grid_hmpc, sup_grid)
 
     @staticmethod
