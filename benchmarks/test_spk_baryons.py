@@ -64,8 +64,8 @@ def test_spk_power_law_boost_against_reference() -> None:
         fb_a=0.4,
         fb_pow=0.3,
         fb_pivot=10**13.5,
-        k_min_hmpc=1e-2,
-        k_max_hmpc=2.0,
+        k_min_mpc=1e-2 * h,
+        k_max_mpc=2.0 * h,
         n_k=k.size,
         out_of_bounds_policy="unity",
     )
@@ -89,8 +89,8 @@ def test_spk_power_law_include_matches_boost() -> None:
         fb_a=0.4,
         fb_pow=0.3,
         fb_pivot=10**13.5,
-        k_min_hmpc=1e-2,
-        k_max_hmpc=2.0,
+        k_min_mpc=1e-2 * h,
+        k_max_mpc=2.0 * h,
         n_k=k.size,
         out_of_bounds_policy="unity",
     )
@@ -126,8 +126,8 @@ def test_spk_relation_matrix_matches_pyspk(
     baryons = ccl.BaryonsSPK(
         SO=SO,
         relation_kind=relation_kind,
-        k_min_hmpc=1e-2,
-        k_max_hmpc=2.0,
+        k_min_mpc=1e-2 * h,
+        k_max_mpc=2.0 * h,
         n_k=160,
         out_of_bounds_policy="error",
         **relation_params,

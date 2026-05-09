@@ -32,6 +32,8 @@ def _warn_ccl(*args: Any, **kwargs: Any) -> None:
 _SUPPORTED_RELATION_KINDS = ("power_law", "cosmo_power_law",
                              "double_power_law", "binned")
 _SUPPORTED_OUT_OF_BOUNDS_POLICIES = ("error", "unity", "nan")
+_DEFAULT_K_MIN_HMPC = 0.005
+_DEFAULT_K_MAX_HMPC = 8.0
 
 _RELATION_PARAMS = {
     "power_law": {
@@ -139,6 +141,10 @@ class BaryonsSPK(Baryons):
     The correction is applied multiplicatively:
     ``P_bar(k, a) = P_DMO(k, a) * f_SPk(k, a)``.
 
+    CCL follows non-h-inverse conventions for user-facing wavenumbers
+    (``k`` in ``Mpc^-1``). ``pyspk`` expects ``h/Mpc``. This wrapper performs
+    that conversion internally and transparently.
+
     Reference:
         Salcido et al. 2023, MNRAS 523, 2247.
         https://doi.org/10.1093/mnras/stad1474
@@ -154,12 +160,12 @@ class BaryonsSPK(Baryons):
         SO: Spherical overdensity. Supported values are ``200`` and ``500``.
         relation_kind: One of ``power_law``, ``cosmo_power_law``,
             ``double_power_law``, or ``binned``.
-        k_min_hmpc: Minimum SP(k) internal grid scale in ``h Mpc^-1``.
-        k_max_hmpc: Maximum SP(k) internal grid scale in ``h Mpc^-1``.
+        k_min_mpc: Minimum requested CCL scale in ``Mpc^-1``.
+        k_max_mpc: Maximum requested CCL scale in ``Mpc^-1``.
         n_k: Number of logarithmic points in the internal SP(k) grid.
-        out_of_bounds_policy: Behavior for ``k > k_max_hmpc``.
+        out_of_bounds_policy: Behavior for ``k > k_max_mpc``.
             Supported values are ``error``, ``unity``, and ``nan``.
-            For policy ``error``, requests above ``k_max_hmpc`` raise
+            For policy ``error``, requests above ``k_max_mpc`` raise
             ``ValueError``.
         **relation_params: Parameters required by ``relation_kind``.
 
@@ -171,31 +177,33 @@ class BaryonsSPK(Baryons):
     __repr_attrs__ = __eq_attrs__ = (
         "SO",
         "relation_kind",
-        "k_min_hmpc",
-        "k_max_hmpc",
+        "k_min_mpc",
+        "k_max_mpc",
         "n_k",
         "out_of_bounds_policy",
         "relation_params",
     )
 
     def __init__(self, *, SO=200, relation_kind="power_law",
-                 k_min_hmpc=0.005, k_max_hmpc=8.0, n_k=128,
+                 k_min_mpc=None, k_max_mpc=None, n_k=128,
                  out_of_bounds_policy="error", **relation_params):
         """Initialize a BaryonsSPK model instance.
 
         Args:
             SO: Spherical overdensity, either 200 or 500.
             relation_kind: Relation mode used by ``pyspk``.
-            k_min_hmpc: Minimum SP(k) internal grid scale in ``h/Mpc``.
-            k_max_hmpc: Maximum SP(k) internal grid scale in ``h/Mpc``.
+            k_min_mpc: Minimum requested CCL scale in ``Mpc^-1``.
+                If ``None``, defaults to ``0.005 * h``.
+            k_max_mpc: Maximum requested CCL scale in ``Mpc^-1``.
+                If ``None``, defaults to ``8.0 * h``.
             n_k: Number of logarithmic samples in SP(k) internal grid.
-            out_of_bounds_policy: Policy for ``k > k_max_hmpc``.
+            out_of_bounds_policy: Policy for ``k > k_max_mpc``.
             **relation_params: Parameters for the selected relation mode.
         """
         self.SO = SO
         self.relation_kind = relation_kind
-        self.k_min_hmpc = float(k_min_hmpc)
-        self.k_max_hmpc = float(k_max_hmpc)
+        self.k_min_mpc = (None if k_min_mpc is None else float(k_min_mpc))
+        self.k_max_mpc = (None if k_max_mpc is None else float(k_max_mpc))
         self.n_k = int(n_k)
         self.out_of_bounds_policy = out_of_bounds_policy
         self._pyspk = None
@@ -220,11 +228,14 @@ class BaryonsSPK(Baryons):
         if self.relation_kind not in _SUPPORTED_RELATION_KINDS:
             raise ValueError(
                 f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}.")
-        if self.k_min_hmpc <= 0 or self.k_max_hmpc <= 0:
-            raise ValueError("`k_min_hmpc` and `k_max_hmpc` must be > 0.")
-        if self.k_min_hmpc >= self.k_max_hmpc:
+        if self.k_min_mpc is not None and self.k_min_mpc <= 0:
+            raise ValueError("`k_min_mpc` must be > 0.")
+        if self.k_max_mpc is not None and self.k_max_mpc <= 0:
+            raise ValueError("`k_max_mpc` must be > 0.")
+        if (self.k_min_mpc is not None and self.k_max_mpc is not None
+                and self.k_min_mpc >= self.k_max_mpc):
             raise ValueError(
-                "`k_min_hmpc` must be strictly smaller than `k_max_hmpc`.")
+                "`k_min_mpc` must be strictly smaller than `k_max_mpc`.")
         if self.n_k < 2:
             raise ValueError("`n_k` must be >= 2.")
         if self.out_of_bounds_policy not in _SUPPORTED_OUT_OF_BOUNDS_POLICIES:
@@ -271,20 +282,42 @@ class BaryonsSPK(Baryons):
         return (
             self.SO,
             self.relation_kind,
-            self.k_min_hmpc,
-            self.k_max_hmpc,
+            self.k_min_mpc,
+            self.k_max_mpc,
             self.n_k,
         )
 
-    def _get_cached_evaluator(self) -> tuple[np.ndarray, Callable[..., Any]]:
+    def _effective_k_bounds_mpc(self, cosmo: Any) -> tuple[float, float]:
+        """Return effective CCL-facing k-range bounds in ``Mpc^-1``."""
+        h = float(cosmo["h"])
+        k_min_mpc = self.k_min_mpc
+        k_max_mpc = self.k_max_mpc
+        if k_min_mpc is None:
+            k_min_mpc = _DEFAULT_K_MIN_HMPC * h
+        if k_max_mpc is None:
+            k_max_mpc = _DEFAULT_K_MAX_HMPC * h
+        if k_min_mpc >= k_max_mpc:
+            raise ValueError(
+                "Effective k bounds are invalid: "
+                f"k_min_mpc={k_min_mpc} must be smaller than "
+                f"k_max_mpc={k_max_mpc}.")
+        return k_min_mpc, k_max_mpc
+
+    def _get_cached_evaluator(
+            self,
+            cosmo: Any) -> tuple[np.ndarray, Callable[..., Any]]:
         """Return a cached evaluator and its fixed internal SP(k) grid."""
-        key = self._evaluator_cache_key()
+        h = float(cosmo["h"])
+        k_min_mpc, k_max_mpc = self._effective_k_bounds_mpc(cosmo)
+        key = self._evaluator_cache_key() + (h, k_min_mpc, k_max_mpc)
         if self._cached_evaluator is None or self._cached_evaluator_key != key:
-            k_grid = np.geomspace(self.k_min_hmpc, self.k_max_hmpc, self.n_k)
-            self._cached_k_grid_hmpc = k_grid
-            self._cached_evaluator = self._build_evaluator(k_grid)
+            k_grid_mpc = np.geomspace(k_min_mpc, k_max_mpc, self.n_k)
+            k_grid_hmpc = self._k_mpc_to_hmpc(cosmo, k_grid_mpc)
+            self._cached_k_grid_hmpc = k_grid_hmpc
+            self._cached_evaluator = self._build_evaluator(k_grid_hmpc)
             self._cached_evaluator_key = key
-        return self._cached_k_grid_hmpc, self._cached_evaluator
+        return cast(np.ndarray, self._cached_k_grid_hmpc), cast(
+            Callable[..., Any], self._cached_evaluator)
 
     def _invalidate_evaluator_cache(self) -> None:
         """Reset cached evaluator and grid."""
@@ -329,13 +362,14 @@ class BaryonsSPK(Baryons):
 
     def _apply_out_of_bounds_policy(
             self,
-            k_hmpc: np.ndarray,
+            cosmo: Any,
+            k_mpc: np.ndarray,
             fka: np.ndarray) -> np.ndarray:
         """Apply configured high-k policy to suppression factors.
 
         Args:
-            k_hmpc: Wavenumbers in ``h/Mpc``.
-            fka: Suppression factors matching ``k_hmpc``.
+            k_mpc: Wavenumbers in ``Mpc^-1``.
+            fka: Suppression factors matching ``k_mpc``.
 
         Returns:
             Policy-adjusted suppression factors.
@@ -343,14 +377,15 @@ class BaryonsSPK(Baryons):
         Raises:
             ValueError: For out-of-range ``k`` when policy is ``error``.
         """
-        out_hi = k_hmpc > self.k_max_hmpc
+        _, k_max_mpc = self._effective_k_bounds_mpc(cosmo)
+        out_hi = k_mpc > k_max_mpc
         if not np.any(out_hi):
             return fka
 
         if self.out_of_bounds_policy == "error":
             raise ValueError(
                 "Requested k values exceed the configured SP(k) limit "
-                f"k_max_hmpc={self.k_max_hmpc}. Set out_of_bounds_policy to "
+                f"k_max_mpc={k_max_mpc}. Set out_of_bounds_policy to "
                 "'unity' or 'nan' to override this behavior."
             )
 
@@ -361,18 +396,26 @@ class BaryonsSPK(Baryons):
             fka[out_hi] = np.nan
         return fka
 
-    def _map_k_to_domain(self, k_hmpc: np.ndarray) -> np.ndarray:
+    def _map_k_to_domain(self, cosmo: Any, k_mpc: np.ndarray) -> np.ndarray:
         """Map requested k values onto SP(k) calibrated grid domain."""
-        return np.clip(k_hmpc, self.k_min_hmpc, self.k_max_hmpc)
+        k_min_mpc, k_max_mpc = self._effective_k_bounds_mpc(cosmo)
+        return np.clip(k_mpc, k_min_mpc, k_max_mpc)
 
     def _interpolate_suppression(
             self,
-            k_hmpc: np.ndarray,
+            cosmo: Any,
+            k_mpc: np.ndarray,
             k_grid_hmpc: np.ndarray,
             sup_grid: np.ndarray) -> np.ndarray:
         """Interpolate suppression from cached SP(k) grid to target k."""
-        k_mapped = self._map_k_to_domain(k_hmpc)
-        return np.interp(k_mapped, k_grid_hmpc, sup_grid)
+        k_mapped_hmpc = self._k_mpc_to_hmpc(
+            cosmo, self._map_k_to_domain(cosmo, k_mpc))
+        return np.interp(k_mapped_hmpc, k_grid_hmpc, sup_grid)
+
+    @staticmethod
+    def _k_mpc_to_hmpc(cosmo: Any, k_mpc: Any) -> np.ndarray:
+        """Convert CCL wavenumbers from ``Mpc^-1`` to ``h/Mpc``."""
+        return np.asarray(np.atleast_1d(k_mpc), dtype=float) / float(cosmo["h"])
 
     def boost_factor(self, cosmo: Any, k: Any, a: Any) -> Any:
         """Compute the SP(k) baryonic boost factor.
@@ -389,22 +432,22 @@ class BaryonsSPK(Baryons):
         Raises:
             ValueError: If ``k`` or ``a`` contains non-positive values.
         """
-        a_use, k_use = map(np.atleast_1d, [a, k])
+        a_use = np.atleast_1d(a)
+        k_use = np.atleast_1d(k)
         if np.any(k_use <= 0):
             raise ValueError("`k` must contain strictly positive values.")
         if np.any(a_use <= 0):
             raise ValueError("`a` must contain strictly positive values.")
 
-        k_hmpc = np.asarray(k_use / cosmo["h"], dtype=float)
-        k_grid_hmpc, evaluator = self._get_cached_evaluator()
+        k_grid_hmpc, evaluator = self._get_cached_evaluator(cosmo)
         fka = np.empty((a_use.size, k_use.size))
 
         for ia, aval in enumerate(a_use):
             z = 1.0 / aval - 1.0
             _, sup_grid = self._evaluate_suppression(cosmo, z, evaluator)
             fka_row = self._interpolate_suppression(
-                k_hmpc, k_grid_hmpc, np.asarray(sup_grid, dtype=float))
-            fka[ia, :] = self._apply_out_of_bounds_policy(k_hmpc, fka_row)
+                cosmo, k_use, k_grid_hmpc, np.asarray(sup_grid, dtype=float))
+            fka[ia, :] = self._apply_out_of_bounds_policy(cosmo, k_use, fka_row)
 
         if np.ndim(k) == 0:
             fka = np.squeeze(fka, axis=-1)
@@ -413,15 +456,15 @@ class BaryonsSPK(Baryons):
         return fka
 
     def update_parameters(self, *, SO=None, relation_kind=None,
-                          k_min_hmpc=None, k_max_hmpc=None, n_k=None,
+                          k_min_mpc=None, k_max_mpc=None, n_k=None,
                           out_of_bounds_policy=None, **relation_params):
         """Update SP(k) model configuration in place.
 
         Args:
             SO: Optional new spherical overdensity.
             relation_kind: Optional new relation mode.
-            k_min_hmpc: Optional new minimum ``h/Mpc`` scale.
-            k_max_hmpc: Optional new maximum ``h/Mpc`` scale.
+            k_min_mpc: Optional new minimum ``Mpc^-1`` scale.
+            k_max_mpc: Optional new maximum ``Mpc^-1`` scale.
             n_k: Optional new internal grid sample count.
             out_of_bounds_policy: Optional new out-of-bounds policy.
             **relation_params: Relation parameters to replace or update.
@@ -430,10 +473,10 @@ class BaryonsSPK(Baryons):
         """
         if SO is not None:
             self.SO = SO
-        if k_min_hmpc is not None:
-            self.k_min_hmpc = float(k_min_hmpc)
-        if k_max_hmpc is not None:
-            self.k_max_hmpc = float(k_max_hmpc)
+        if k_min_mpc is not None:
+            self.k_min_mpc = float(k_min_mpc)
+        if k_max_mpc is not None:
+            self.k_max_mpc = float(k_max_mpc)
         if n_k is not None:
             self.n_k = int(n_k)
         if out_of_bounds_policy is not None:
@@ -457,7 +500,7 @@ class BaryonsSPK(Baryons):
         """Apply SP(k) baryonic suppression to a ``Pk2D`` power spectrum.
 
         SP(k) is evaluated on a fixed cached internal grid and interpolated
-        to the ``Pk2D`` k-grid. Values above ``k_max_hmpc`` are handled by
+        to the ``Pk2D`` k-grid. Values above ``k_max_mpc`` are handled by
         ``out_of_bounds_policy``.
 
         Args:
@@ -469,8 +512,7 @@ class BaryonsSPK(Baryons):
         """
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         k_arr = np.exp(lk_arr)
-        k_hmpc = np.asarray(k_arr / cosmo["h"], dtype=float)
-        k_grid_hmpc, evaluator = self._get_cached_evaluator()
+        k_grid_hmpc, evaluator = self._get_cached_evaluator(cosmo)
 
         # Restrict to pyspk's calibrated redshift range
         # (z <= CALIBRATED_Z_MAX).
@@ -485,10 +527,10 @@ class BaryonsSPK(Baryons):
             z = 1.0 / aval - 1.0
             _, sup_grid = self._evaluate_suppression(cosmo, z, evaluator)
             fka[ia, :] = self._interpolate_suppression(
-                k_hmpc, k_grid_hmpc, np.asarray(sup_grid, dtype=float))
+                cosmo, k_arr, k_grid_hmpc, np.asarray(sup_grid, dtype=float))
 
         for ia in range(a_arr.size):
-            fka[ia, :] = self._apply_out_of_bounds_policy(k_hmpc, fka[ia, :])
+            fka[ia, :] = self._apply_out_of_bounds_policy(cosmo, k_arr, fka[ia, :])
 
         pk_arr *= fka
 

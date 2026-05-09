@@ -9,6 +9,25 @@ SP(k) references
 - arXiv preprint: https://arxiv.org/abs/2305.09710
 - pyspk implementation: https://github.com/jemme07/pyspk
 
+Units and Conversion
+--------------------
+
+CCL follows non-h-inverse conventions. For :class:`pyccl.BaryonsSPK` this
+means users pass :math:`k` in :math:`\mathrm{Mpc}^{-1}`.
+
+Internally, the wrapper converts to ``pyspk`` units
+(:math:`h/\mathrm{Mpc}`) via
+
+.. math::
+
+   k_{h\,\mathrm{Mpc}^{-1}} = k_{\mathrm{Mpc}^{-1}} / h
+
+This conversion is automatic; users should not pre-convert ``k`` when calling
+``pyccl`` APIs.
+
+The constructor range parameters ``k_min_mpc`` and ``k_max_mpc`` are also in
+:math:`\mathrm{Mpc}^{-1}`.
+
 Supported relation modes
 ------------------------
 

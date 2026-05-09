@@ -1,6 +1,7 @@
 """Unit tests for the SP(k) baryonic suppression wrapper."""
 
 import sys
+import warnings as warnings_builtin
 from typing import Any, Callable, cast
 from unittest import mock
 
@@ -85,6 +86,27 @@ def test_spk_matches_pyspk(relation_kind, relation_params):
     assert np.allclose(ccl_fk, pyspk_fk, atol=1e-3, rtol=0)
 
 
+def test_spk_k_unit_conversion_is_transparent() -> None:
+    """CCL-facing k in Mpc^-1 should internally map to pyspk's h/Mpc."""
+    pyspk = pytest.importorskip("pyspk")
+    bar = _power_law_model()
+
+    a = 0.8
+    z = 1.0 / a - 1.0
+    k_hmpc = np.geomspace(1e-2, 2.0, 128)
+    k_mpc = k_hmpc * cast(float, COSMO["h"])
+
+    fk_ccl = bar.boost_factor(COSMO, k_mpc, a)
+    evaluator = pyspk.build_sup_model_evaluator(
+        SO=bar.SO,
+        relation_kind=bar.relation_kind,
+        k_array=k_hmpc,
+    )
+    _, fk_pyspk = evaluator(z=z, **dict(bar.relation_params))
+
+    assert np.allclose(fk_ccl, fk_pyspk, atol=1e-3, rtol=0)
+
+
 def test_spk_correct_smoke() -> None:
     """Validate consistency between boost_factor and
     include_baryonic_effects.
@@ -103,20 +125,20 @@ def test_spk_correct_smoke() -> None:
 def test_spk_out_of_bounds_policies() -> None:
     """Verify high-k policy behavior for direct boost queries."""
     pytest.importorskip("pyspk")
-    k = np.array([0.2, 0.8]) * COSMO["h"]
+    k = np.array([0.2, 0.8])
     a = 0.9
 
     with pytest.raises(ValueError):
         model = _power_law_model(
-            k_max_hmpc=0.5, out_of_bounds_policy="error")
+            k_max_mpc=0.5, out_of_bounds_policy="error")
         model.boost_factor(COSMO, k, a)
 
     fk_unity = _power_law_model(
-        k_max_hmpc=0.5, out_of_bounds_policy="unity").boost_factor(COSMO, k, a)
+        k_max_mpc=0.5, out_of_bounds_policy="unity").boost_factor(COSMO, k, a)
     assert fk_unity[-1] == 1.0
 
     fk_nan = _power_law_model(
-        k_max_hmpc=0.5, out_of_bounds_policy="nan").boost_factor(COSMO, k, a)
+        k_max_mpc=0.5, out_of_bounds_policy="nan").boost_factor(COSMO, k, a)
     assert np.isnan(fk_nan[-1])
 
 
@@ -127,7 +149,7 @@ def test_spk_out_of_bounds_policies_include_baryons() -> None:
     k_hi = np.array([1.0])
     a = 0.8
 
-    bar_unity = _power_law_model(k_max_hmpc=0.5, out_of_bounds_policy="unity")
+    bar_unity = _power_law_model(k_max_mpc=0.5, out_of_bounds_policy="unity")
     pk_unity = bar_unity.include_baryonic_effects(COSMO, pk_nobar)
     pk_unity_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_unity)
     pk_nobar_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_nobar)
@@ -135,14 +157,14 @@ def test_spk_out_of_bounds_policies_include_baryons() -> None:
     assert np.allclose(ratio_unity, 1.0, atol=0, rtol=1e-12)
 
     bar_nan = _power_law_model(
-        k_max_hmpc=0.5, out_of_bounds_policy="nan")
+        k_max_mpc=0.5, out_of_bounds_policy="nan")
     pk_nan = bar_nan.include_baryonic_effects(COSMO, pk_nobar)
     pk_nan_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_nan)
     ratio_nan = pk_nan_eval(k_hi, a) / pk_nobar_eval(k_hi, a)
     assert np.isnan(ratio_nan[0])
 
     bar_error = _power_law_model(
-        k_min_hmpc=1e-4, k_max_hmpc=1e-3, out_of_bounds_policy="error")
+        k_min_mpc=1e-4, k_max_mpc=1e-3, out_of_bounds_policy="error")
     with pytest.raises(ValueError):
         bar_error.include_baryonic_effects(COSMO, pk_nobar)
 
@@ -187,3 +209,30 @@ def test_spk_missing_dependency_error() -> None:
     with mock.patch.dict(sys.modules, {"pyspk": None}):
         with pytest.raises(ModuleNotFoundError, match="pyspk>=2.0.0"):
             _power_law_model()
+
+
+def test_spk_warnings_are_deduplicated_per_instance() -> None:
+    """Repeated calls should not re-emit identical forwarded warnings."""
+    pytest.importorskip("pyspk")
+    # High internal h/Mpc coverage (set via k_max_mpc) typically emits warning.
+    bar = _power_law_model(k_max_mpc=12.0 * COSMO["h"], n_k=64)
+    k = np.geomspace(1e-2, 1.0, 32)
+
+    with warnings_builtin.catch_warnings(record=True) as first:
+        warnings_builtin.simplefilter("always")
+        _ = bar.boost_factor(COSMO, k, 0.8)
+
+    first_msgs = {
+        str(w.message) for w in first if issubclass(w.category, ccl.CCLWarning)
+    }
+    if not first_msgs:
+        pytest.skip("pyspk did not emit calibrations warnings in this setup")
+
+    with warnings_builtin.catch_warnings(record=True) as second:
+        warnings_builtin.simplefilter("always")
+        _ = bar.boost_factor(COSMO, k, 0.8)
+
+    second_msgs = {
+        str(w.message) for w in second if issubclass(w.category, ccl.CCLWarning)
+    }
+    assert first_msgs.isdisjoint(second_msgs)
