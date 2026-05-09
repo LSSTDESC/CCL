@@ -398,7 +398,7 @@ class BaryonsSPK(Baryons):
         return fka
 
     def _map_k_to_domain(self, cosmo: Any, k_mpc: np.ndarray) -> np.ndarray:
-        """Map requested k values onto SP(k) calibrated grid domain."""
+        """Map requested k values onto the configured interpolation domain."""
         k_min_mpc, k_max_mpc = self._effective_k_bounds_mpc(cosmo)
         return np.clip(k_mpc, k_min_mpc, k_max_mpc)
 
@@ -408,7 +408,7 @@ class BaryonsSPK(Baryons):
             k_mpc: np.ndarray,
             k_grid_hmpc: np.ndarray,
             sup_grid: np.ndarray) -> np.ndarray:
-        """Interpolate suppression from cached SP(k) grid to target k."""
+        """Interpolate suppression from cached SP(k) grid to requested k."""
         k_mapped_hmpc = self._k_mpc_to_hmpc(
             cosmo, self._map_k_to_domain(cosmo, k_mpc))
         if (k_mapped_hmpc.shape == k_grid_hmpc.shape
@@ -519,7 +519,7 @@ class BaryonsSPK(Baryons):
         k_arr = np.exp(lk_arr)
         k_grid_hmpc, evaluator = self._get_cached_evaluator(cosmo)
 
-        # Restrict to pyspk's calibrated redshift range
+        # Restrict evaluation to pyspk's calibrated redshift range
         # (z <= CALIBRATED_Z_MAX).
         pyspk = self._import_pyspk()
         z_max_cal = pyspk.constants.CALIBRATED_Z_MAX
@@ -528,7 +528,7 @@ class BaryonsSPK(Baryons):
         fka = np.ones((a_arr.size, k_arr.size))
         for ia, aval in enumerate(a_arr):
             if aval < a_min_cal:
-                continue  # z > z_max_cal: baryons negligible, leave unity
+                continue  # outside calibration range: leave unity suppression
             z = 1.0 / aval - 1.0
             _, sup_grid = self._evaluate_suppression(cosmo, z, evaluator)
             fka[ia, :] = self._interpolate_suppression(
