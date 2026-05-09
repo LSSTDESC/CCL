@@ -9,6 +9,7 @@ References:
 __all__ = ("BaryonsSPK",)
 
 import importlib
+import threading
 from collections import OrderedDict
 from typing import Any, Callable, cast
 import warnings as warnings_builtin
@@ -151,6 +152,7 @@ class BaryonsSPK(Baryons):
         self._forwarded_warning_messages = set()
         self._evaluator_cache: OrderedDict[tuple[Any, ...], Callable[..., Any]] = (
             OrderedDict())
+        self._cache_lock = threading.Lock()
 
         self._validate_settings()
         self.relation_params = _normalize_relation_parameters(
@@ -211,17 +213,18 @@ class BaryonsSPK(Baryons):
             k_hmpc: np.ndarray) -> Callable[..., Any]:
         """Return a cached evaluator, building one if needed."""
         key = self._evaluator_cache_key(cosmo, k_hmpc)
-        cached = self._evaluator_cache.get(key)
-        if cached is not None:
-            self._evaluator_cache.move_to_end(key)
-            return cached
+        with self._cache_lock:
+            cached = self._evaluator_cache.get(key)
+            if cached is not None:
+                self._evaluator_cache.move_to_end(key)
+                return cached
 
-        evaluator = self._build_evaluator(k_hmpc)
-        self._evaluator_cache[key] = evaluator
-        self._evaluator_cache.move_to_end(key)
-        if len(self._evaluator_cache) > self.max_evaluator_cache_size:
-            self._evaluator_cache.popitem(last=False)
-        return evaluator
+            evaluator = self._build_evaluator(k_hmpc)
+            self._evaluator_cache[key] = evaluator
+            self._evaluator_cache.move_to_end(key)
+            if len(self._evaluator_cache) > self.max_evaluator_cache_size:
+                self._evaluator_cache.popitem(last=False)
+            return evaluator
 
     @staticmethod
     def _make_efunc(cosmo: Any) -> Callable[[float], Any]:
@@ -234,6 +237,8 @@ class BaryonsSPK(Baryons):
             msg = str(caught.message)
             if msg in self._forwarded_warning_messages:
                 continue
+            if len(self._forwarded_warning_messages) >= 10:
+                self._forwarded_warning_messages.clear()
             self._forwarded_warning_messages.add(msg)
             _warn_ccl(
                 msg,
@@ -350,7 +355,8 @@ class BaryonsSPK(Baryons):
         self._validate_settings()
         self.relation_params = _normalize_relation_parameters(
             self.relation_kind, merged_relation_params)
-        self._evaluator_cache.clear()
+        with self._cache_lock:
+            self._evaluator_cache.clear()
 
     def _include_baryonic_effects(self, cosmo: Any, pk: Pk2D) -> Pk2D:
         """Apply SP(k) suppression to a Pk2D power spectrum.
