@@ -42,7 +42,7 @@ def test_spk_power_law_boost_against_reference() -> None:
         k_min_hmpc=1e-2,
         k_max_hmpc=2.0,
         n_k=k.size,
-        out_of_bounds_policy="error",
+        out_of_bounds_policy="unity",
     )
 
     fk = baryons.boost_factor(cosmo, k, SPK_A)
@@ -81,7 +81,7 @@ def test_spk_power_law_include_matches_boost() -> None:
         k_min_hmpc=1e-2,
         k_max_hmpc=2.0,
         n_k=k.size,
-        out_of_bounds_policy="error",
+        out_of_bounds_policy="unity",
     )
 
     pk_nobar = ccl.nonlin_matter_power(cosmo, k, SPK_A)

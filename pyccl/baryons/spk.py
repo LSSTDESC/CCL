@@ -159,10 +159,8 @@ class BaryonsSPK(Baryons):
         n_k: Number of logarithmic points in the internal SP(k) grid.
         out_of_bounds_policy: Behavior for ``k > k_max_hmpc``.
             Supported values are ``error``, ``unity``, and ``nan``.
-            For ``boost_factor``, ``error`` raises ``ValueError``.
-            For ``include_baryonic_effects``, ``error`` warns and uses unity
-            above ``k_max_hmpc`` because CCL's internal spline grid extends
-            beyond the model domain.
+            For policy ``error``, requests above ``k_max_hmpc`` raise
+            ``ValueError``.
         **relation_params: Parameters required by ``relation_kind``.
 
     Raises:
@@ -202,7 +200,9 @@ class BaryonsSPK(Baryons):
         self.out_of_bounds_policy = out_of_bounds_policy
         self._pyspk = None
         self._forwarded_warning_messages = set()
-        self._warned_oob_on_spline_grid = False
+        self._cached_k_grid_hmpc: np.ndarray | None = None
+        self._cached_evaluator: Callable[..., Any] | None = None
+        self._cached_evaluator_key: tuple[Any, ...] | None = None
 
         self._validate_settings()
         self.relation_params = _normalize_relation_parameters(
@@ -253,39 +253,44 @@ class BaryonsSPK(Baryons):
                 ) from err
         return self._pyspk
 
-    def _build_evaluator(
-            self,
-            *,
-            k_hmpc: np.ndarray | None = None) -> Callable[..., Any]:
-        """Build a ``pyspk`` evaluator.
-
-        Args:
-            k_hmpc: Optional explicit ``h/Mpc`` grid. If not provided,
-                pyspk builds an internal logarithmic grid using
-                ``k_min_hmpc``, ``k_max_hmpc``, and ``n_k``.
-
-        Returns:
-            Configured ``pyspk`` evaluator callable.
-        """
+    def _build_evaluator(self, k_hmpc: np.ndarray) -> Callable[..., Any]:
+        """Build a ``pyspk`` evaluator on a fixed ``h/Mpc`` grid."""
         pyspk = self._import_pyspk()
         with warnings_builtin.catch_warnings(record=True) as caught:
             warnings_builtin.simplefilter("always")
-            if k_hmpc is not None:
-                evaluator = pyspk.build_sup_model_evaluator(
-                    SO=self.SO,
-                    relation_kind=self.relation_kind,
-                    k_array=np.asarray(k_hmpc, dtype=float),
-                )
-            else:
-                evaluator = pyspk.build_sup_model_evaluator(
-                    SO=self.SO,
-                    relation_kind=self.relation_kind,
-                    k_min=self.k_min_hmpc,
-                    k_max=self.k_max_hmpc,
-                    n=self.n_k,
-                )
+            evaluator = pyspk.build_sup_model_evaluator(
+                SO=self.SO,
+                relation_kind=self.relation_kind,
+                k_array=np.asarray(k_hmpc, dtype=float),
+            )
         self._forward_pyspk_warnings(caught)
         return evaluator
+
+    def _evaluator_cache_key(self) -> tuple[Any, ...]:
+        """Return a hashable key for evaluator-cache invalidation."""
+        return (
+            self.SO,
+            self.relation_kind,
+            self.k_min_hmpc,
+            self.k_max_hmpc,
+            self.n_k,
+        )
+
+    def _get_cached_evaluator(self) -> tuple[np.ndarray, Callable[..., Any]]:
+        """Return a cached evaluator and its fixed internal SP(k) grid."""
+        key = self._evaluator_cache_key()
+        if self._cached_evaluator is None or self._cached_evaluator_key != key:
+            k_grid = np.geomspace(self.k_min_hmpc, self.k_max_hmpc, self.n_k)
+            self._cached_k_grid_hmpc = k_grid
+            self._cached_evaluator = self._build_evaluator(k_grid)
+            self._cached_evaluator_key = key
+        return self._cached_k_grid_hmpc, self._cached_evaluator
+
+    def _invalidate_evaluator_cache(self) -> None:
+        """Reset cached evaluator and grid."""
+        self._cached_k_grid_hmpc = None
+        self._cached_evaluator = None
+        self._cached_evaluator_key = None
 
     @staticmethod
     def _make_efunc(cosmo: Any) -> Callable[[float], Any]:
@@ -325,42 +330,24 @@ class BaryonsSPK(Baryons):
     def _apply_out_of_bounds_policy(
             self,
             k_hmpc: np.ndarray,
-            fka: np.ndarray,
-            *,
-            for_spline_grid: bool = False) -> np.ndarray:
+            fka: np.ndarray) -> np.ndarray:
         """Apply configured high-k policy to suppression factors.
 
         Args:
             k_hmpc: Wavenumbers in ``h/Mpc``.
             fka: Suppression factors matching ``k_hmpc``.
-            for_spline_grid: Whether this is for CCL's internal spline grid.
 
         Returns:
             Policy-adjusted suppression factors.
 
         Raises:
-            ValueError: For out-of-range ``k`` when policy is ``error`` and
-                ``for_spline_grid`` is ``False``.
+            ValueError: For out-of-range ``k`` when policy is ``error``.
         """
         out_hi = k_hmpc > self.k_max_hmpc
         if not np.any(out_hi):
             return fka
 
         if self.out_of_bounds_policy == "error":
-            if for_spline_grid:
-                if not self._warned_oob_on_spline_grid:
-                    self._warned_oob_on_spline_grid = True
-                    _warn_ccl(
-                        "CCL internal Pk2D grids extend above the configured "
-                        f"SP(k) limit k_max_hmpc={self.k_max_hmpc}. "
-                        "Falling back to unity above k_max_hmpc for "
-                        "include_baryonic_effects(). Set out_of_bounds_policy "
-                        "to 'nan' to propagate NaNs instead.",
-                        category=CCLWarning,
-                        importance="low",
-                        stacklevel=3,
-                    )
-                return fka
             raise ValueError(
                 "Requested k values exceed the configured SP(k) limit "
                 f"k_max_hmpc={self.k_max_hmpc}. Set out_of_bounds_policy to "
@@ -373,6 +360,19 @@ class BaryonsSPK(Baryons):
         else:
             fka[out_hi] = np.nan
         return fka
+
+    def _map_k_to_domain(self, k_hmpc: np.ndarray) -> np.ndarray:
+        """Map requested k values onto SP(k) calibrated grid domain."""
+        return np.clip(k_hmpc, self.k_min_hmpc, self.k_max_hmpc)
+
+    def _interpolate_suppression(
+            self,
+            k_hmpc: np.ndarray,
+            k_grid_hmpc: np.ndarray,
+            sup_grid: np.ndarray) -> np.ndarray:
+        """Interpolate suppression from cached SP(k) grid to target k."""
+        k_mapped = self._map_k_to_domain(k_hmpc)
+        return np.interp(k_mapped, k_grid_hmpc, sup_grid)
 
     def boost_factor(self, cosmo: Any, k: Any, a: Any) -> Any:
         """Compute the SP(k) baryonic boost factor.
@@ -396,13 +396,14 @@ class BaryonsSPK(Baryons):
             raise ValueError("`a` must contain strictly positive values.")
 
         k_hmpc = np.asarray(k_use / cosmo["h"], dtype=float)
-        k_eval_hmpc = np.clip(k_hmpc, self.k_min_hmpc, self.k_max_hmpc)
-        evaluator = self._build_evaluator(k_hmpc=k_eval_hmpc)
+        k_grid_hmpc, evaluator = self._get_cached_evaluator()
         fka = np.empty((a_use.size, k_use.size))
 
         for ia, aval in enumerate(a_use):
             z = 1.0 / aval - 1.0
-            _, fka_row = self._evaluate_suppression(cosmo, z, evaluator)
+            _, sup_grid = self._evaluate_suppression(cosmo, z, evaluator)
+            fka_row = self._interpolate_suppression(
+                k_hmpc, k_grid_hmpc, np.asarray(sup_grid, dtype=float))
             fka[ia, :] = self._apply_out_of_bounds_policy(k_hmpc, fka_row)
 
         if np.ndim(k) == 0:
@@ -450,13 +451,14 @@ class BaryonsSPK(Baryons):
         self._validate_settings()
         self.relation_params = _normalize_relation_parameters(
             self.relation_kind, merged_relation_params)
+        self._invalidate_evaluator_cache()
 
     def _include_baryonic_effects(self, cosmo: Any, pk: Pk2D) -> Pk2D:
         """Apply SP(k) baryonic suppression to a ``Pk2D`` power spectrum.
 
-        SP(k) is evaluated only inside calibrated ``k`` and ``z`` ranges.
-        Internal CCL spline-grid values outside ``k_max_hmpc`` are handled by
-        ``out_of_bounds_policy`` through :meth:`_apply_out_of_bounds_policy`.
+        SP(k) is evaluated on a fixed cached internal grid and interpolated
+        to the ``Pk2D`` k-grid. Values above ``k_max_hmpc`` are handled by
+        ``out_of_bounds_policy``.
 
         Args:
             cosmo: CCL cosmology object.
@@ -467,8 +469,8 @@ class BaryonsSPK(Baryons):
         """
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         k_arr = np.exp(lk_arr)
-        k_hmpc = k_arr / cosmo["h"]
-        in_k_range = (k_hmpc >= self.k_min_hmpc) & (k_hmpc <= self.k_max_hmpc)
+        k_hmpc = np.asarray(k_arr / cosmo["h"], dtype=float)
+        k_grid_hmpc, evaluator = self._get_cached_evaluator()
 
         # Restrict to pyspk's calibrated redshift range
         # (z <= CALIBRATED_Z_MAX).
@@ -477,27 +479,26 @@ class BaryonsSPK(Baryons):
         a_min_cal = 1.0 / (1.0 + z_max_cal)
 
         fka = np.ones((a_arr.size, k_arr.size))
-        if np.any(in_k_range):
-            evaluator = self._build_evaluator(k_hmpc=k_hmpc[in_k_range])
-            for ia, aval in enumerate(a_arr):
-                if aval < a_min_cal:
-                    continue  # z > z_max_cal: baryons negligible, leave unity
-                z = 1.0 / aval - 1.0
-                _, sup_eval = self._evaluate_suppression(
-                    cosmo, z, evaluator)
-                fka[ia, in_k_range] = sup_eval
+        for ia, aval in enumerate(a_arr):
+            if aval < a_min_cal:
+                continue  # z > z_max_cal: baryons negligible, leave unity
+            z = 1.0 / aval - 1.0
+            _, sup_grid = self._evaluate_suppression(cosmo, z, evaluator)
+            fka[ia, :] = self._interpolate_suppression(
+                k_hmpc, k_grid_hmpc, np.asarray(sup_grid, dtype=float))
 
         for ia in range(a_arr.size):
-            fka[ia, :] = self._apply_out_of_bounds_policy(
-                k_hmpc, fka[ia, :], for_spline_grid=True)
+            fka[ia, :] = self._apply_out_of_bounds_policy(k_hmpc, fka[ia, :])
 
         pk_arr *= fka
 
         if pk.psp.is_log:
             np.log(pk_arr, out=pk_arr)  # in-place log
 
-        extrap_order_lok = 1 if pk.extrap_order_lok is None else pk.extrap_order_lok
-        extrap_order_hik = 2 if pk.extrap_order_hik is None else pk.extrap_order_hik
+        extrap_order_lok = (
+            1 if pk.extrap_order_lok is None else pk.extrap_order_lok)
+        extrap_order_hik = (
+            2 if pk.extrap_order_hik is None else pk.extrap_order_hik)
 
         return Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                     is_logp=pk.psp.is_log,

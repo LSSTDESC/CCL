@@ -86,9 +86,11 @@ def test_spk_matches_pyspk(relation_kind, relation_params):
 
 
 def test_spk_correct_smoke() -> None:
-    """Validate consistency between boost_factor and include_baryonic_effects."""
+    """Validate consistency between boost_factor and
+    include_baryonic_effects.
+    """
     pytest.importorskip("pyspk")
-    bar = _power_law_model()
+    bar = _power_law_model(out_of_bounds_policy="unity")
     k_arr = np.geomspace(1E-2, 1, 16)
     fka = bar.boost_factor(COSMO, k_arr, 0.5)
     pk_nobar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
@@ -141,10 +143,8 @@ def test_spk_out_of_bounds_policies_include_baryons() -> None:
 
     bar_error = _power_law_model(
         k_min_hmpc=1e-4, k_max_hmpc=1e-3, out_of_bounds_policy="error")
-    pk_error = bar_error.include_baryonic_effects(COSMO, pk_nobar)
-    pk_error_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_error)
-    ratio_error = pk_error_eval(k_hi, a) / pk_nobar_eval(k_hi, a)
-    assert np.allclose(ratio_error, 1.0, atol=0, rtol=1e-12)
+    with pytest.raises(ValueError):
+        bar_error.include_baryonic_effects(COSMO, pk_nobar)
 
 
 def test_spk_update_params_and_eq() -> None:
@@ -164,7 +164,7 @@ def test_spk_update_params_and_eq() -> None:
 def test_spk_baryons_in_cosmology() -> None:
     """Ensure explicit and Cosmology-integrated baryons paths agree."""
     pytest.importorskip("pyspk")
-    bar = _power_law_model()
+    bar = _power_law_model(out_of_bounds_policy="unity")
     cosmo_nb = ccl.CosmologyVanillaLCDM(
         transfer_function="bbks", baryonic_effects=None)
     pk_nb = cosmo_nb.get_nonlin_power()
@@ -176,7 +176,8 @@ def test_spk_baryons_in_cosmology() -> None:
 
     ks = np.geomspace(1E-2, 2, 128)
     pk_wb_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_wb)
-    pk_wb_cosmo_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_wb_cosmo)
+    pk_wb_cosmo_eval = cast(
+        Callable[[np.ndarray, float], np.ndarray], pk_wb_cosmo)
     assert np.allclose(pk_wb_eval(ks, 1.0), pk_wb_cosmo_eval(ks, 1.0),
                        atol=0, rtol=1E-6)
 
