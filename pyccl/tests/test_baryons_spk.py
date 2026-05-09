@@ -112,7 +112,7 @@ def test_spk_correct_smoke() -> None:
     include_baryonic_effects.
     """
     pytest.importorskip("pyspk")
-    bar = _power_law_model(out_of_bounds_policy="unity")
+    bar = _power_law_model()
     k_arr = np.geomspace(1E-2, 1, 16)
     fka = bar.boost_factor(COSMO, k_arr, 0.5)
     pk_nobar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
@@ -122,51 +122,32 @@ def test_spk_correct_smoke() -> None:
     assert np.all(np.fabs(pk_wbar / (pk_nobar * fka) - 1) < 1E-5)
 
 
-def test_spk_out_of_bounds_policies() -> None:
-    """Verify high-k policy behavior for direct boost queries."""
+def test_spk_high_k_raises() -> None:
+    """Requests beyond pyspk's calibrated k range should raise."""
     pytest.importorskip("pyspk")
-    k = np.array([0.2, 0.8])
+    k = np.array([0.2, 20.0])
     a = 0.9
 
-    with pytest.raises(ValueError):
-        model = _power_law_model(
-            k_max_mpc=0.5, out_of_bounds_policy="error")
-        model.boost_factor(COSMO, k, a)
-
-    fk_unity = _power_law_model(
-        k_max_mpc=0.5, out_of_bounds_policy="unity").boost_factor(COSMO, k, a)
-    assert fk_unity[-1] == 1.0
-
-    fk_nan = _power_law_model(
-        k_max_mpc=0.5, out_of_bounds_policy="nan").boost_factor(COSMO, k, a)
-    assert np.isnan(fk_nan[-1])
+    with pytest.raises(Exception):
+        _power_law_model().boost_factor(COSMO, k, a)
 
 
-def test_spk_out_of_bounds_policies_include_baryons() -> None:
-    """Verify high-k policy behavior in ``include_baryonic_effects`` path."""
+def test_spk_include_baryons_high_k_unity() -> None:
+    """Include path should apply unity suppression above calibrated k."""
     pytest.importorskip("pyspk")
-    pk_nobar = COSMO.get_nonlin_power()
-    k_hi = np.array([1.0])
+    cosmo_hi = ccl.CosmologyVanillaLCDM(
+        transfer_function="bbks",
+        matter_power_spectrum="halofit",
+    )
+    bar = _power_law_model()
+    pk_nb = cosmo_hi.get_nonlin_power()
+    pk_wb = bar.include_baryonic_effects(cosmo_hi, pk_nb)
+    pk_nb_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_nb)
+    pk_wb_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_wb)
+    k_hi = np.array([20.0])
     a = 0.8
-
-    bar_unity = _power_law_model(k_max_mpc=0.5, out_of_bounds_policy="unity")
-    pk_unity = bar_unity.include_baryonic_effects(COSMO, pk_nobar)
-    pk_unity_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_unity)
-    pk_nobar_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_nobar)
-    ratio_unity = pk_unity_eval(k_hi, a) / pk_nobar_eval(k_hi, a)
-    assert np.allclose(ratio_unity, 1.0, atol=0, rtol=1e-12)
-
-    bar_nan = _power_law_model(
-        k_max_mpc=0.5, out_of_bounds_policy="nan")
-    pk_nan = bar_nan.include_baryonic_effects(COSMO, pk_nobar)
-    pk_nan_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_nan)
-    ratio_nan = pk_nan_eval(k_hi, a) / pk_nobar_eval(k_hi, a)
-    assert np.isnan(ratio_nan[0])
-
-    bar_error = _power_law_model(
-        k_min_mpc=1e-4, k_max_mpc=1e-3, out_of_bounds_policy="error")
-    with pytest.raises(ValueError):
-        bar_error.include_baryonic_effects(COSMO, pk_nobar)
+    ratio = pk_wb_eval(k_hi, a) / pk_nb_eval(k_hi, a)
+    assert np.allclose(ratio, 1.0, atol=0, rtol=1e-12)
 
 
 def test_spk_update_params_and_eq() -> None:
@@ -186,7 +167,7 @@ def test_spk_update_params_and_eq() -> None:
 def test_spk_baryons_in_cosmology() -> None:
     """Ensure explicit and Cosmology-integrated baryons paths agree."""
     pytest.importorskip("pyspk")
-    bar = _power_law_model(out_of_bounds_policy="unity")
+    bar = _power_law_model()
     cosmo_nb = ccl.CosmologyVanillaLCDM(
         transfer_function="bbks", baryonic_effects=None)
     pk_nb = cosmo_nb.get_nonlin_power()
@@ -214,9 +195,9 @@ def test_spk_missing_dependency_error() -> None:
 def test_spk_warnings_are_deduplicated_per_instance() -> None:
     """Repeated calls should not re-emit identical forwarded warnings."""
     pytest.importorskip("pyspk")
-    # High internal h/Mpc coverage (set via k_max_mpc) typically emits warning.
-    bar = _power_law_model(k_max_mpc=12.0 * COSMO["h"], n_k=64)
-    k = np.geomspace(1e-2, 1.0, 32)
+    bar = _power_law_model()
+    # Query above Nyquist but below calibrated k-max to trigger a warning.
+    k = np.geomspace(1e-2, 9.0 * COSMO["h"], 64)
 
     with warnings_builtin.catch_warnings(record=True) as first:
         warnings_builtin.simplefilter("always")
