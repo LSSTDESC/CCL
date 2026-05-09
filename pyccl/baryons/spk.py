@@ -303,7 +303,6 @@ class BaryonsSPK(Baryons):
                 continue
             if evaluator is not None:
                 sup = self._evaluate_suppression(z, evaluator, kwargs)
-                sup[~np.isfinite(sup)] = 1.0
                 fka[ia, valid_k] = sup
 
         return fka
@@ -343,6 +342,22 @@ class BaryonsSPK(Baryons):
 
         fka = self._compute_suppression_grid(
             cosmo, k_arr, a_arr, high_k_unity=True)
+
+        # Preserve raw pyspk non-finite outputs in boost_factor, but avoid
+        # contaminating the internal 2D spline representation with NaNs.
+        finite_cols = np.all(np.isfinite(fka), axis=0)
+        if not np.all(finite_cols):
+            _warn_ccl(
+                "SP(k) returned non-finite values on part of the Pk2D k-grid; "
+                "dropping those k-columns when building the baryonic Pk2D.",
+                category=CCLWarning,
+                importance="low",
+                stacklevel=3,
+            )
+            lk_arr = lk_arr[finite_cols]
+            pk_arr = pk_arr[:, finite_cols]
+            fka = fka[:, finite_cols]
+
         pk_arr *= fka
 
         if pk.psp.is_log:
