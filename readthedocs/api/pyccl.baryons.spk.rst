@@ -6,7 +6,6 @@ SP(k) references
 
 - Salcido et al. 2023, MNRAS 523, 2247:
    https://doi.org/10.1093/mnras/stad1474
-- arXiv preprint: https://arxiv.org/abs/2305.09710
 - pyspk implementation: https://github.com/jemme07/pyspk
 
 Units and Conversion
@@ -24,9 +23,6 @@ Internally, the wrapper converts to ``pyspk`` units
 
 This conversion is automatic; users should not pre-convert ``k`` when calling
 ``pyccl`` APIs.
-
-The constructor range parameters ``k_min_mpc`` and ``k_max_mpc`` are also in
-:math:`\mathrm{Mpc}^{-1}`.
 
 Supported relation modes
 ------------------------

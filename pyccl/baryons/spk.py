@@ -1,15 +1,13 @@
-"""SP(k)-based baryonic suppression model integration for pyccl.
+"""SP(k) baryonic suppression model for pyccl.
 
 References:
         - Salcido et al. 2023, MNRAS 523, 2247
             (https://doi.org/10.1093/mnras/stad1474)
-        - arXiv preprint: https://arxiv.org/abs/2305.09710
         - pyspk package: https://github.com/jemme07/pyspk
 """
 
 __all__ = ("BaryonsSPK",)
 
-import hashlib
 import importlib
 from collections import OrderedDict
 from typing import Any, Callable, cast
@@ -54,7 +52,7 @@ _RELATION_PARAMS = {
 
 
 def _arraylike_to_float_list(values: Any, *, name: str) -> list[float]:
-    """Normalize array-like input into a finite list of floats."""
+    """Convert array-like to a list of finite floats."""
     arr = np.atleast_1d(values).astype(float)
     if np.any(~np.isfinite(arr)):
         raise ValueError(f"`{name}` must contain finite values.")
@@ -64,7 +62,7 @@ def _arraylike_to_float_list(values: Any, *, name: str) -> list[float]:
 def _normalize_relation_parameters(
         relation_kind: str,
         relation_params: dict[str, Any]) -> dict[str, Any]:
-    """Validate and normalize relation-specific SP(k) parameters."""
+    """Validate and fill defaults for relation-specific parameters."""
     if relation_kind not in _SUPPORTED_RELATION_KINDS:
         raise ValueError(
             f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}.")
@@ -112,31 +110,28 @@ def _normalize_relation_parameters(
 
 
 class BaryonsSPK(Baryons):
-    """SP(k) baryonic suppression model backed by ``pyspk``.
+    """SP(k) baryonic suppression model (Salcido et al. 2023).
 
-    The correction is applied multiplicatively:
+    Applies a multiplicative correction to the matter power spectrum:
     ``P_bar(k, a) = P_DMO(k, a) * f_SPk(k, a)``.
 
-    CCL follows non-h-inverse conventions for user-facing wavenumbers
-    (``k`` in ``Mpc^-1``). ``pyspk`` expects ``h/Mpc``. This wrapper performs
-    that conversion internally and transparently.
-
-    Notes:
-        This implementation computes suppression on the exact requested k-grid.
-        It avoids wrapper-side interpolation and shares one suppression engine
-        across ``boost_factor`` and ``include_baryonic_effects``.
+    Wavenumbers are passed in ``Mpc^-1`` (CCL convention); the
+    conversion to ``h/Mpc`` (pyspk convention) is handled internally.
 
     Args:
-        SO: Spherical overdensity. Supported values are ``200`` and ``500``.
-        relation_kind: One of ``power_law``, ``cosmo_power_law``,
-            ``double_power_law``, or ``binned``.
-        max_evaluator_cache_size: Max number of evaluator objects cached for
-            exact k-grids. Least-recently-used eviction is applied.
-        **relation_params: Parameters required by ``relation_kind``.
+        SO (int): Spherical overdensity, ``200`` or ``500``.
+        relation_kind (str): Baryon-fraction relation. One of
+            ``power_law``, ``cosmo_power_law``, ``double_power_law``,
+            or ``binned``.
+        max_evaluator_cache_size (int): LRU cache size for pyspk
+            evaluator objects.
+        **relation_params: Parameters required by the chosen
+            ``relation_kind`` (see pyspk docs).
 
     Raises:
-        ModuleNotFoundError: If ``pyspk`` is not installed.
-        ValueError: If settings or relation parameters are invalid.
+        ModuleNotFoundError: If ``pyspk >= 2.0.0`` is not installed.
+        ValueError: If ``SO``, ``relation_kind``, or parameters
+            are invalid.
     """
     name = "SPK"  # pyright: ignore[reportAssignmentType]
     __repr_attrs__ = __eq_attrs__ = (
@@ -163,6 +158,7 @@ class BaryonsSPK(Baryons):
         self._import_pyspk()
 
     def _validate_settings(self) -> None:
+        """Check SO, relation_kind, and cache size."""
         if self.SO not in (200, 500):
             raise ValueError("`SO` must be either 200 or 500.")
         if self.relation_kind not in _SUPPORTED_RELATION_KINDS:
@@ -172,6 +168,7 @@ class BaryonsSPK(Baryons):
             raise ValueError("`max_evaluator_cache_size` must be >= 1.")
 
     def _import_pyspk(self) -> Any:
+        """Lazily import and cache the pyspk module."""
         if self._pyspk is None:
             try:
                 self._pyspk = importlib.import_module("pyspk")
@@ -185,23 +182,18 @@ class BaryonsSPK(Baryons):
 
     @staticmethod
     def _k_mpc_to_hmpc(cosmo: Any, k_mpc: Any) -> np.ndarray:
+        """Convert k from Mpc^-1 to h/Mpc."""
         return np.asarray(np.atleast_1d(k_mpc), dtype=float) / float(cosmo["h"])
 
-    @staticmethod
-    def _k_digest(k_hmpc: np.ndarray) -> str:
-        k_view = np.ascontiguousarray(k_hmpc, dtype=np.float64)
-        return hashlib.blake2b(k_view.tobytes(), digest_size=16).hexdigest()
-
     def _evaluator_cache_key(self, cosmo: Any, k_hmpc: np.ndarray) -> tuple[Any, ...]:
+        """Build a hashable key for the evaluator LRU cache."""
         return (
-            self.SO,
-            self.relation_kind,
             float(cosmo["h"]),
-            int(k_hmpc.size),
-            self._k_digest(k_hmpc),
+            tuple(np.asarray(k_hmpc, dtype=np.float64).tolist()),
         )
 
     def _build_evaluator(self, k_hmpc: np.ndarray) -> Callable[..., Any]:
+        """Construct a pyspk fast evaluator for the given k-grid."""
         pyspk = self._import_pyspk()
         with warnings_builtin.catch_warnings(record=True) as caught:
             warnings_builtin.simplefilter("always")
@@ -217,6 +209,7 @@ class BaryonsSPK(Baryons):
             self,
             cosmo: Any,
             k_hmpc: np.ndarray) -> Callable[..., Any]:
+        """Return a cached evaluator, building one if needed."""
         key = self._evaluator_cache_key(cosmo, k_hmpc)
         cached = self._evaluator_cache.get(key)
         if cached is not None:
@@ -232,9 +225,11 @@ class BaryonsSPK(Baryons):
 
     @staticmethod
     def _make_efunc(cosmo: Any) -> Callable[[float], Any]:
+        """Bridge CCL's h_over_h0(a) to pyspk's efunc(z)."""
         return lambda z: cosmo.h_over_h0(1.0 / (1.0 + z))
 
     def _forward_pyspk_warnings(self, caught_warnings: list[Any]) -> None:
+        """Re-emit pyspk warnings via CCL, deduplicating per instance."""
         for caught in caught_warnings:
             msg = str(caught.message)
             if msg in self._forwarded_warning_messages:
@@ -252,6 +247,7 @@ class BaryonsSPK(Baryons):
             z: float,
             evaluator: Callable[..., Any],
             kwargs: dict[str, Any]) -> np.ndarray:
+        """Run the evaluator at a single redshift, forwarding warnings."""
         with warnings_builtin.catch_warnings(record=True) as caught:
             warnings_builtin.simplefilter("always")
             _, sup = evaluator(z=float(z), **kwargs)
@@ -265,6 +261,7 @@ class BaryonsSPK(Baryons):
             a: Any,
             *,
             high_k_unity: bool = False) -> np.ndarray:
+        """Evaluate f_SPk(k, a) over a 2-D grid of (a, k)."""
         a_use = np.atleast_1d(a).astype(float)
         k_use = np.atleast_1d(k).astype(float)
 
@@ -308,6 +305,17 @@ class BaryonsSPK(Baryons):
         return fka
 
     def boost_factor(self, cosmo: Any, k: Any, a: Any) -> Any:
+        """SP(k) multiplicative suppression factor.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
+                parameters.
+            k (float or array): Wavenumber in Mpc^-1.
+            a (float or array): Scale factor.
+
+        Returns:
+            float or array: Suppression factor f_SP(k, a).
+        """
         fka = self._compute_suppression_grid(cosmo, k, a)
         if np.ndim(k) == 0:
             fka = np.squeeze(fka, axis=-1)
@@ -317,6 +325,14 @@ class BaryonsSPK(Baryons):
 
     def update_parameters(self, *, SO=None, relation_kind=None,
                           max_evaluator_cache_size=None, **relation_params):
+        """Update SP(k) parameters. ``None`` values are left unchanged.
+
+        Args:
+            SO (int): Spherical overdensity.
+            relation_kind (str): Baryon-fraction relation kind.
+            max_evaluator_cache_size (int): LRU cache size.
+            **relation_params: Relation parameters to update.
+        """
         if SO is not None:
             self.SO = SO
         if max_evaluator_cache_size is not None:
@@ -337,6 +353,16 @@ class BaryonsSPK(Baryons):
         self._evaluator_cache.clear()
 
     def _include_baryonic_effects(self, cosmo: Any, pk: Pk2D) -> Pk2D:
+        """Apply SP(k) suppression to a Pk2D power spectrum.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): Cosmological
+                parameters.
+            pk (:class:`~pyccl.pk2d.Pk2D`): Input (DMO) power spectrum.
+
+        Returns:
+            :class:`~pyccl.pk2d.Pk2D`: Baryonic-corrected power spectrum.
+        """
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         k_arr = np.exp(lk_arr)
 
@@ -363,12 +389,7 @@ class BaryonsSPK(Baryons):
         if pk.psp.is_log:
             np.log(pk_arr, out=pk_arr)  # in-place log
 
-        extrap_order_lok = (
-            1 if pk.extrap_order_lok is None else pk.extrap_order_lok)
-        extrap_order_hik = (
-            2 if pk.extrap_order_hik is None else pk.extrap_order_hik)
-
         return Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
                     is_logp=pk.psp.is_log,
-                    extrap_order_lok=extrap_order_lok,
-                    extrap_order_hik=extrap_order_hik)
+                    extrap_order_lok=pk.extrap_order_lok or 1,
+                    extrap_order_hik=pk.extrap_order_hik or 2)
