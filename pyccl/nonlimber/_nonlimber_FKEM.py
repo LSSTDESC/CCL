@@ -269,6 +269,10 @@ def _auto_limber_transition_ell(clt1, clt2, cosmo, psp_lin, psp_nonlin,
                 + cls_nonlimber_lin_temp
             )
             thresh = cl_temp / cl_limber_nonlin_temp[-1] - 1.0
+
+            lib.cl_tracer_collection_t_free(t1_temp)
+            lib.cl_tracer_collection_t_free(t2_temp)
+
             if np.abs(thresh) >= limber_max_error:
                 return status, False
     return status, True
@@ -514,4 +518,6 @@ def _nonlimber_FKEM(
         l_limber = ls[-1]
     if False in np.isfinite(cells):
         status = 1
+    lib.cl_tracer_collection_t_free(t1)
+    lib.cl_tracer_collection_t_free(t2)
     return l_limber, np.array(cells), status
