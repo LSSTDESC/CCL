@@ -25,6 +25,7 @@ dependencies:
   - wheel # for classy
   - cython < 3  # for classy
   - pip:
+      - scipy<1.14
       - classy  # Note the benchmarks were generated with 2.9.4
       - isitgr  # Note the benchmarks were generated with 1.0.2
       - velocileptors @ git+https://github.com/sfschen/velocileptors
