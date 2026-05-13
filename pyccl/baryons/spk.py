@@ -134,8 +134,16 @@ class BaryonsSPK(Baryons):
             ``unity``, or ``nan``. Default ``raise``.
         z_out_of_range (str): Out-of-range-z policy: ``raise``,
             ``unity``, or ``nan``. Default ``unity``.
-        **relation_params: Parameters required by the chosen
-            ``relation_kind`` (see pyspk docs).
+        **relation_params: Keyword arguments for the chosen
+            ``relation_kind``:
+
+            - ``power_law``: ``fb_a``, ``fb_pow``,
+              optional ``fb_pivot`` (default 1.0).
+            - ``cosmo_power_law``: ``alpha``, ``beta``, ``gamma``.
+            - ``double_power_law``: ``epsilon``, ``alpha``, ``beta``,
+              ``gamma``, ``m_pivot``.
+            - ``binned``: ``M_halo`` (array), ``fb`` (array),
+              optional ``extrapolate`` (default False).
     """
 
     name = "SPK"  # pyright: ignore[reportAssignmentType]
@@ -392,7 +400,9 @@ class BaryonsSPK(Baryons):
             max_evaluator_cache_size (int): LRU cache size.
             k_out_of_range (str): Out-of-range-k policy.
             z_out_of_range (str): Out-of-range-z policy.
-            **relation_params: Relation parameters to update.
+            **relation_params: Relation-specific parameters to update
+                (e.g. ``fb_a``, ``fb_pow`` for ``power_law``).
+                Only supplied keys are changed; others are preserved.
         """
         if SO is not None:
             self.SO = SO
