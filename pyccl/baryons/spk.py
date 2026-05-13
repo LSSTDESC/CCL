@@ -282,7 +282,21 @@ class BaryonsSPK(Baryons):
         return np.asarray(sup, dtype=float)
 
     def _compute_suppression_grid(self, cosmo: Any, k: Any, a: Any) -> np.ndarray:
-        """Evaluate f_SPk(k, a) over a 2-D grid of (a, k)."""
+        """Evaluate f_SPk(k, a) over a 2-D grid of (a, k).
+
+        The output array has shape ``(len(a), len(k))`` and is filled
+        according to the ``k_out_of_range`` and ``z_out_of_range`` policies:
+
+        - The grid is initialised to 1.0 (no baryonic effect).
+        - If ``k_out_of_range="nan"``, columns beyond calibration are set
+          to NaN before any redshift evaluation.
+        - For each scale factor whose redshift is within calibration, the
+          valid-k columns are overwritten with pyspk suppression values.
+        - For redshifts beyond calibration:
+            - ``"unity"``: row keeps its initial fill (1.0 for valid-k,
+              NaN for invalid-k if that policy is "nan").
+            - ``"nan"``: entire row is overwritten with NaN.
+        """
         a_use = np.atleast_1d(a).astype(float)
         k_use = np.atleast_1d(k).astype(float)
 
@@ -331,6 +345,7 @@ class BaryonsSPK(Baryons):
             if not valid_z[ia]:
                 if self.z_out_of_range == "nan":
                     fka[ia, :] = np.nan
+                # "unity": leave row as initial fill (1.0 / NaN per k policy).
                 continue
 
             z = float(z_use[ia])
