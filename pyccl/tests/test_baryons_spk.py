@@ -131,7 +131,7 @@ def test_spk_correct_smoke() -> None:
     include_baryonic_effects.
     """
     pytest.importorskip("pyspk")
-    bar = _power_law_model()
+    bar = _power_law_model(k_out_of_range="unity")
     k_arr = np.geomspace(1e-2, 1, 16)
     fka = bar.boost_factor(COSMO, k_arr, 0.5)
     pk_nobar = ccl.nonlin_matter_power(COSMO, k_arr, 0.5)
@@ -260,7 +260,7 @@ def test_spk_update_params_and_eq() -> None:
 def test_spk_baryons_in_cosmology() -> None:
     """Ensure explicit and Cosmology-integrated baryons paths agree."""
     pytest.importorskip("pyspk")
-    bar = _power_law_model()
+    bar = _power_law_model(k_out_of_range="unity")
     cosmo_nb = ccl.CosmologyVanillaLCDM(transfer_function="bbks", baryonic_effects=None)
     pk_nb = cosmo_nb.get_nonlin_power()
     pk_wb = bar.include_baryonic_effects(cosmo_nb, pk_nb)

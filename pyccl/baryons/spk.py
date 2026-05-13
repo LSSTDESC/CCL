@@ -420,24 +420,51 @@ class BaryonsSPK(Baryons):
 
         # Preserve raw pyspk non-finite outputs in boost_factor, but avoid
         # contaminating the internal 2D spline representation with NaNs.
-        finite_rows = np.all(np.isfinite(fka), axis=1)
+        # Policy fills produce all-NaN rows (z) or all-NaN columns (k).
+        # Identify these independently to avoid cross-contamination, then
+        # clean up any residual partial NaN from pyspk itself.
+        nan_rows = np.all(~np.isfinite(fka), axis=1)
+        nan_cols = np.all(~np.isfinite(fka), axis=0)
+
+        if np.any(nan_rows):
+            keep = ~nan_rows
+            a_arr = a_arr[keep]
+            pk_arr = pk_arr[keep, :]
+            fka = fka[keep, :]
+
+        if np.any(nan_cols):
+            keep = ~nan_cols
+            lk_arr = lk_arr[keep]
+            pk_arr = pk_arr[:, keep]
+            fka = fka[:, keep]
+
+        # Handle any residual non-finite values (e.g. from pyspk internals).
         finite_cols = np.all(np.isfinite(fka), axis=0)
-        if not np.all(finite_rows) or not np.all(finite_cols):
+        if not np.all(finite_cols):
+            lk_arr = lk_arr[finite_cols]
+            pk_arr = pk_arr[:, finite_cols]
+            fka = fka[:, finite_cols]
+
+        finite_rows = np.all(np.isfinite(fka), axis=1)
+        if not np.all(finite_rows):
+            a_arr = a_arr[finite_rows]
+            pk_arr = pk_arr[finite_rows, :]
+            fka = fka[finite_rows, :]
+
+        if (
+            np.any(nan_rows)
+            or np.any(nan_cols)
+            or not np.all(finite_cols)
+            or not np.all(finite_rows)
+        ):
             _warn_ccl(
                 "SP(k) returned non-finite values on part of the Pk2D grid; "
                 "dropping non-finite a-rows/k-columns when building the "
                 "baryonic Pk2D.",
                 category=CCLWarning,
-                importance="low",
+                importance="high",
                 stacklevel=3,
             )
-            a_arr = a_arr[finite_rows]
-            pk_arr = pk_arr[finite_rows, :]
-            fka = fka[finite_rows, :]
-
-            lk_arr = lk_arr[finite_cols]
-            pk_arr = pk_arr[:, finite_cols]
-            fka = fka[:, finite_cols]
 
         pk_arr *= fka
 

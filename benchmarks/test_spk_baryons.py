@@ -93,6 +93,7 @@ def test_spk_power_law_include_matches_boost() -> None:
         fb_a=0.4,
         fb_pow=0.3,
         fb_pivot=10**13.5,
+        k_out_of_range="unity",
     )
 
     pk_nobar = ccl.nonlin_matter_power(cosmo, k, SPK_A)
