@@ -88,6 +88,59 @@ the baryon-fraction parameterization used by ``pyspk``:
    to allow extrapolation beyond the tabulated mass range; otherwise values
    outside the tabulated range are treated according to ``pyspk`` behavior.
 
+Out-of-range behaviour
+----------------------
+
+The SP(k) model is calibrated up to :math:`k_{\max} = 12\,h/\mathrm{Mpc}`
+and :math:`z_{\max} = 3`. When a requested :math:`k` or :math:`z` exceeds
+the calibrated range, :class:`pyccl.BaryonsSPK` applies a configurable
+policy controlled by two constructor parameters:
+
+- ``k_out_of_range`` (default ``"raise"``): governs :math:`k` values
+  beyond calibration.
+- ``z_out_of_range`` (default ``"unity"``): governs :math:`z` values
+  (i.e. low scale-factor :math:`a`) beyond calibration.
+
+Each accepts one of three string values:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 15 85
+
+   * - Value
+     - Behaviour
+   * - ``"raise"``
+     - Raise a ``ValueError`` if any requested value exceeds calibration.
+   * - ``"unity"``
+     - Return a suppression factor of 1.0 (i.e. no baryonic effect) for
+       out-of-range entries. Computation proceeds for the valid range.
+   * - ``"nan"``
+     - Fill out-of-range entries with ``NaN``. This is consistent with
+       ``pyspk``'s own treatment of out-of-fitting-limit baryon fractions
+       and allows downstream code to mask or interpolate as appropriate.
+
+When ``_include_baryonic_effects`` builds a corrected :class:`~pyccl.Pk2D`,
+any resulting ``NaN`` rows (from ``z_out_of_range="nan"``) or columns
+(from ``k_out_of_range="nan"``) are automatically dropped with a
+:class:`~pyccl.CCLWarning`, ensuring the output spline remains finite.
+
+Example
+^^^^^^^
+
+.. code-block:: python
+
+   import pyccl as ccl
+
+   bar = ccl.BaryonsSPK(
+       SO=200,
+       relation_kind="power_law",
+       fb_a=0.4,
+       fb_pow=0.3,
+       fb_pivot=1e13,
+       k_out_of_range="unity",   # unity beyond calibration
+       z_out_of_range="nan",     # NaN for z > 3
+   )
+
 For exact mode definitions, calibration domain, and edge-case handling,
 refer to the upstream ``pyspk`` documentation (authoritative source):
 https://github.com/jemme07/pyspk

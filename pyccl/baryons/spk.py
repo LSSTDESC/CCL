@@ -9,7 +9,6 @@ References:
 __all__ = ("BaryonsSPK",)
 
 import importlib
-import threading
 from collections import OrderedDict
 from typing import Any, Callable, cast
 import warnings as warnings_builtin
@@ -30,6 +29,12 @@ _SUPPORTED_RELATION_KINDS = (
     "cosmo_power_law",
     "double_power_law",
     "binned",
+)
+
+_SUPPORTED_OUT_OF_RANGE = (
+    "raise",
+    "unity",
+    "nan",
 )
 
 _RELATION_PARAMS = {
@@ -61,12 +66,11 @@ def _arraylike_to_float_list(values: Any, *, name: str) -> list[float]:
 
 
 def _normalize_relation_parameters(
-        relation_kind: str,
-        relation_params: dict[str, Any]) -> dict[str, Any]:
+    relation_kind: str, relation_params: dict[str, Any]
+) -> dict[str, Any]:
     """Validate and fill defaults for relation-specific parameters."""
     if relation_kind not in _SUPPORTED_RELATION_KINDS:
-        raise ValueError(
-            f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}.")
+        raise ValueError(f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}.")
 
     relation_cfg = _RELATION_PARAMS[relation_kind]
     required = set(relation_cfg["required"])
@@ -95,9 +99,9 @@ def _normalize_relation_parameters(
 
     if relation_kind == "binned":
         normalized["M_halo"] = _arraylike_to_float_list(
-            normalized["M_halo"], name="M_halo")
-        normalized["fb"] = _arraylike_to_float_list(
-            normalized["fb"], name="fb")
+            normalized["M_halo"], name="M_halo"
+        )
+        normalized["fb"] = _arraylike_to_float_list(normalized["fb"], name="fb")
         if len(normalized["M_halo"]) != len(normalized["fb"]):
             raise ValueError("`M_halo` and `fb` must have the same length.")
         normalized["extrapolate"] = bool(normalized["extrapolate"])
@@ -126,48 +130,70 @@ class BaryonsSPK(Baryons):
             or ``binned``.
         max_evaluator_cache_size (int): LRU cache size for pyspk
             evaluator objects.
+        k_out_of_range (str): Out-of-range-k policy: ``raise``,
+            ``unity``, or ``nan``. Default ``raise``.
+        z_out_of_range (str): Out-of-range-z policy: ``raise``,
+            ``unity``, or ``nan``. Default ``unity``.
         **relation_params: Parameters required by the chosen
             ``relation_kind`` (see pyspk docs).
-
-    Raises:
-        ModuleNotFoundError: If ``pyspk >= 2.0.0`` is not installed.
-        ValueError: If ``SO``, ``relation_kind``, or parameters
-            are invalid.
     """
+
     name = "SPK"  # pyright: ignore[reportAssignmentType]
     __repr_attrs__ = __eq_attrs__ = (
         "SO",
         "relation_kind",
         "relation_params",
         "max_evaluator_cache_size",
+        "k_out_of_range",
+        "z_out_of_range",
     )
 
-    def __init__(self, *, SO=200, relation_kind="power_law",
-                 max_evaluator_cache_size=8, **relation_params):
+    def __init__(
+        self,
+        *,
+        SO=200,
+        relation_kind="power_law",
+        max_evaluator_cache_size=8,
+        k_out_of_range="raise",
+        z_out_of_range="unity",
+        **relation_params,
+    ):
         self.SO = SO
         self.relation_kind = relation_kind
         self.max_evaluator_cache_size = int(max_evaluator_cache_size)
+        self.k_out_of_range = k_out_of_range
+        self.z_out_of_range = z_out_of_range
 
         self._pyspk = None
         self._forwarded_warning_messages = set()
         self._evaluator_cache: OrderedDict[tuple[Any, ...], Callable[..., Any]] = (
-            OrderedDict())
-        self._cache_lock = threading.Lock()
+            OrderedDict()
+        )
 
         self._validate_settings()
         self.relation_params = _normalize_relation_parameters(
-            self.relation_kind, relation_params)
+            self.relation_kind, relation_params
+        )
         self._import_pyspk()
 
     def _validate_settings(self) -> None:
-        """Check SO, relation_kind, and cache size."""
+        """Check SO, relation_kind, cache size, and OOR policies."""
         if self.SO not in (200, 500):
             raise ValueError("`SO` must be either 200 or 500.")
         if self.relation_kind not in _SUPPORTED_RELATION_KINDS:
             raise ValueError(
-                f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}.")
+                f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}."
+            )
         if self.max_evaluator_cache_size < 1:
             raise ValueError("`max_evaluator_cache_size` must be >= 1.")
+        if self.k_out_of_range not in _SUPPORTED_OUT_OF_RANGE:
+            raise ValueError(
+                f"`k_out_of_range` must be one of {_SUPPORTED_OUT_OF_RANGE}."
+            )
+        if self.z_out_of_range not in _SUPPORTED_OUT_OF_RANGE:
+            raise ValueError(
+                f"`z_out_of_range` must be one of {_SUPPORTED_OUT_OF_RANGE}."
+            )
 
     def _import_pyspk(self) -> Any:
         """Lazily import and cache the pyspk module."""
@@ -208,23 +234,21 @@ class BaryonsSPK(Baryons):
         return evaluator
 
     def _get_cached_evaluator(
-            self,
-            cosmo: Any,
-            k_hmpc: np.ndarray) -> Callable[..., Any]:
+        self, cosmo: Any, k_hmpc: np.ndarray
+    ) -> Callable[..., Any]:
         """Return a cached evaluator, building one if needed."""
         key = self._evaluator_cache_key(cosmo, k_hmpc)
-        with self._cache_lock:
-            cached = self._evaluator_cache.get(key)
-            if cached is not None:
-                self._evaluator_cache.move_to_end(key)
-                return cached
-
-            evaluator = self._build_evaluator(k_hmpc)
-            self._evaluator_cache[key] = evaluator
+        cached = self._evaluator_cache.get(key)
+        if cached is not None:
             self._evaluator_cache.move_to_end(key)
-            if len(self._evaluator_cache) > self.max_evaluator_cache_size:
-                self._evaluator_cache.popitem(last=False)
-            return evaluator
+            return cached
+
+        evaluator = self._build_evaluator(k_hmpc)
+        self._evaluator_cache[key] = evaluator
+        self._evaluator_cache.move_to_end(key)
+        if len(self._evaluator_cache) > self.max_evaluator_cache_size:
+            self._evaluator_cache.popitem(last=False)
+        return evaluator
 
     @staticmethod
     def _make_efunc(cosmo: Any) -> Callable[[float], Any]:
@@ -248,10 +272,8 @@ class BaryonsSPK(Baryons):
             )
 
     def _evaluate_suppression(
-            self,
-            z: float,
-            evaluator: Callable[..., Any],
-            kwargs: dict[str, Any]) -> np.ndarray:
+        self, z: float, evaluator: Callable[..., Any], kwargs: dict[str, Any]
+    ) -> np.ndarray:
         """Run the evaluator at a single redshift, forwarding warnings."""
         with warnings_builtin.catch_warnings(record=True) as caught:
             warnings_builtin.simplefilter("always")
@@ -259,13 +281,7 @@ class BaryonsSPK(Baryons):
         self._forward_pyspk_warnings(caught)
         return np.asarray(sup, dtype=float)
 
-    def _compute_suppression_grid(
-            self,
-            cosmo: Any,
-            k: Any,
-            a: Any,
-            *,
-            high_k_unity: bool = False) -> np.ndarray:
+    def _compute_suppression_grid(self, cosmo: Any, k: Any, a: Any) -> np.ndarray:
         """Evaluate f_SPk(k, a) over a 2-D grid of (a, k)."""
         a_use = np.atleast_1d(a).astype(float)
         k_use = np.atleast_1d(k).astype(float)
@@ -286,7 +302,7 @@ class BaryonsSPK(Baryons):
         k_max_cal = pyspk.constants.CALIBRATED_K_MAX
 
         valid_k = k_hmpc <= k_max_cal
-        if not high_k_unity and not np.all(valid_k):
+        if self.k_out_of_range == "raise" and not np.all(valid_k):
             raise ValueError(
                 "Requested k exceeds pyspk calibration range: "
                 f"k_hmpc_max={float(np.max(k_hmpc)):.6g} > "
@@ -299,10 +315,25 @@ class BaryonsSPK(Baryons):
             evaluator = None
 
         fka = np.ones((a_use.size, k_use.size), dtype=float)
+        if self.k_out_of_range == "nan":
+            fka[:, ~valid_k] = np.nan
+
+        z_use = 1.0 / a_use - 1.0
+        valid_z = z_use <= z_max_cal
+        if self.z_out_of_range == "raise" and not np.all(valid_z):
+            raise ValueError(
+                "Requested z exceeds pyspk calibration range: "
+                f"z_max={float(np.max(z_use)):.6g} > "
+                f"{float(z_max_cal):.6g}."
+            )
+
         for ia, aval in enumerate(a_use):
-            z = 1.0 / aval - 1.0
-            if z > z_max_cal:
+            if not valid_z[ia]:
+                if self.z_out_of_range == "nan":
+                    fka[ia, :] = np.nan
                 continue
+
+            z = float(z_use[ia])
             if evaluator is not None:
                 sup = self._evaluate_suppression(z, evaluator, kwargs)
                 fka[ia, valid_k] = sup
@@ -328,23 +359,36 @@ class BaryonsSPK(Baryons):
             fka = np.squeeze(fka, axis=0)
         return fka
 
-    def update_parameters(self, *, SO=None, relation_kind=None,
-                          max_evaluator_cache_size=None, **relation_params):
+    def update_parameters(
+        self,
+        *,
+        SO=None,
+        relation_kind=None,
+        max_evaluator_cache_size=None,
+        k_out_of_range=None,
+        z_out_of_range=None,
+        **relation_params,
+    ):
         """Update SP(k) parameters. ``None`` values are left unchanged.
 
         Args:
             SO (int): Spherical overdensity.
             relation_kind (str): Baryon-fraction relation kind.
             max_evaluator_cache_size (int): LRU cache size.
+            k_out_of_range (str): Out-of-range-k policy.
+            z_out_of_range (str): Out-of-range-z policy.
             **relation_params: Relation parameters to update.
         """
         if SO is not None:
             self.SO = SO
         if max_evaluator_cache_size is not None:
             self.max_evaluator_cache_size = int(max_evaluator_cache_size)
+        if k_out_of_range is not None:
+            self.k_out_of_range = k_out_of_range
+        if z_out_of_range is not None:
+            self.z_out_of_range = z_out_of_range
 
-        new_kind = (
-            self.relation_kind if relation_kind is None else relation_kind)
+        new_kind = self.relation_kind if relation_kind is None else relation_kind
         if relation_kind is None or new_kind == self.relation_kind:
             merged_relation_params = dict(self.relation_params)
         else:
@@ -354,9 +398,9 @@ class BaryonsSPK(Baryons):
         self.relation_kind = new_kind
         self._validate_settings()
         self.relation_params = _normalize_relation_parameters(
-            self.relation_kind, merged_relation_params)
-        with self._cache_lock:
-            self._evaluator_cache.clear()
+            self.relation_kind, merged_relation_params
+        )
+        self._evaluator_cache.clear()
 
     def _include_baryonic_effects(self, cosmo: Any, pk: Pk2D) -> Pk2D:
         """Apply SP(k) suppression to a Pk2D power spectrum.
@@ -372,20 +416,25 @@ class BaryonsSPK(Baryons):
         a_arr, lk_arr, pk_arr = pk.get_spline_arrays()
         k_arr = np.exp(lk_arr)
 
-        fka = self._compute_suppression_grid(
-            cosmo, k_arr, a_arr, high_k_unity=True)
+        fka = self._compute_suppression_grid(cosmo, k_arr, a_arr)
 
         # Preserve raw pyspk non-finite outputs in boost_factor, but avoid
         # contaminating the internal 2D spline representation with NaNs.
+        finite_rows = np.all(np.isfinite(fka), axis=1)
         finite_cols = np.all(np.isfinite(fka), axis=0)
-        if not np.all(finite_cols):
+        if not np.all(finite_rows) or not np.all(finite_cols):
             _warn_ccl(
-                "SP(k) returned non-finite values on part of the Pk2D k-grid; "
-                "dropping those k-columns when building the baryonic Pk2D.",
+                "SP(k) returned non-finite values on part of the Pk2D grid; "
+                "dropping non-finite a-rows/k-columns when building the "
+                "baryonic Pk2D.",
                 category=CCLWarning,
                 importance="low",
                 stacklevel=3,
             )
+            a_arr = a_arr[finite_rows]
+            pk_arr = pk_arr[finite_rows, :]
+            fka = fka[finite_rows, :]
+
             lk_arr = lk_arr[finite_cols]
             pk_arr = pk_arr[:, finite_cols]
             fka = fka[:, finite_cols]
@@ -395,7 +444,11 @@ class BaryonsSPK(Baryons):
         if pk.psp.is_log:
             np.log(pk_arr, out=pk_arr)  # in-place log
 
-        return Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=pk_arr,
-                    is_logp=pk.psp.is_log,
-                    extrap_order_lok=pk.extrap_order_lok or 1,
-                    extrap_order_hik=pk.extrap_order_hik or 2)
+        return Pk2D(
+            a_arr=a_arr,
+            lk_arr=lk_arr,
+            pk_arr=pk_arr,
+            is_logp=pk.psp.is_log,
+            extrap_order_lok=pk.extrap_order_lok or 1,
+            extrap_order_hik=pk.extrap_order_hik or 2,
+        )

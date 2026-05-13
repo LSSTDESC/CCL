@@ -32,19 +32,27 @@ def _benchmark_cosmology() -> ccl.Cosmology:
 
 _MATRIX_CASES = [
     (200, "power_law", {"fb_a": 0.4, "fb_pow": 0.3, "fb_pivot": 10**13.5}),
-    (200, "binned", {
-        "M_halo": [1.0e13, 3.0e13, 1.0e14],
-        "fb": [0.12, 0.15, 0.18],
-        "extrapolate": False,
-    }),
+    (
+        200,
+        "binned",
+        {
+            "M_halo": [1.0e13, 3.0e13, 1.0e14],
+            "fb": [0.12, 0.15, 0.18],
+            "extrapolate": False,
+        },
+    ),
     (500, "cosmo_power_law", {"alpha": 4.16, "beta": 1.2, "gamma": 0.39}),
-    (500, "double_power_law", {
-        "epsilon": 0.3,
-        "alpha": 1.1,
-        "beta": 0.2,
-        "gamma": 0.5,
-        "m_pivot": 10**13.5,
-    }),
+    (
+        500,
+        "double_power_law",
+        {
+            "epsilon": 0.3,
+            "alpha": 1.1,
+            "beta": 0.2,
+            "gamma": 0.5,
+            "m_pivot": 10**13.5,
+        },
+    ),
 ]
 
 
@@ -97,12 +105,10 @@ def test_spk_power_law_include_matches_boost() -> None:
     assert np.allclose(err, 0, atol=SPK_TOLERANCE, rtol=0)
 
 
-@pytest.mark.parametrize(
-    "SO, relation_kind, relation_params", _MATRIX_CASES)
+@pytest.mark.parametrize("SO, relation_kind, relation_params", _MATRIX_CASES)
 def test_spk_relation_matrix_matches_pyspk(
-        SO: int,
-        relation_kind: str,
-        relation_params: dict[str, Any]) -> None:
+    SO: int, relation_kind: str, relation_params: dict[str, Any]
+) -> None:
     """Validate all supported relation kinds and both SO values.
 
     This benchmark-level matrix guards against unit-conversion and
@@ -129,8 +135,7 @@ def test_spk_relation_matrix_matches_pyspk(
     )
     kwargs = dict(relation_params)
     if relation_kind in ("cosmo_power_law", "double_power_law"):
-        h_over_h0 = cast(
-            Callable[[float], float], getattr(cosmo, "h_over_h0"))
+        h_over_h0 = cast(Callable[[float], float], getattr(cosmo, "h_over_h0"))
         kwargs["efunc"] = lambda z: h_over_h0(1.0 / (1.0 + z))
 
     z = 1.0 / SPK_A - 1.0
@@ -138,3 +143,74 @@ def test_spk_relation_matrix_matches_pyspk(
 
     err = np.abs(np.asarray(fk_ccl) / np.asarray(fk_pyspk) - 1.0)
     assert np.allclose(err, 0.0, atol=SPK_MATRIX_TOLERANCE, rtol=0.0)
+
+
+def test_spk_out_of_range_k_policy() -> None:
+    """Validate k out-of-range policies: raise, unity, and nan."""
+    pyspk = pytest.importorskip("pyspk")
+    cosmo = _benchmark_cosmology()
+    h = cast(float, cosmo["h"])
+
+    k_hmpc = np.array([0.1, float(pyspk.constants.CALIBRATED_K_MAX) * 1.01])
+    k_mpc = k_hmpc * h
+
+    common_kwargs: dict[str, Any] = dict(
+        SO=200,
+        relation_kind="power_law",
+        fb_a=0.4,
+        fb_pow=0.3,
+        fb_pivot=10**13.5,
+    )
+
+    with pytest.raises(ValueError, match="Requested k exceeds pyspk calibration range"):
+        ccl.BaryonsSPK(k_out_of_range="raise", **common_kwargs).boost_factor(
+            cosmo, k_mpc, SPK_A
+        )
+
+    fk_unity = np.asarray(
+        ccl.BaryonsSPK(k_out_of_range="unity", **common_kwargs).boost_factor(
+            cosmo, k_mpc, SPK_A
+        )
+    )
+    assert np.isclose(fk_unity[-1], 1.0)
+    assert np.isfinite(fk_unity[0])
+
+    fk_nan = np.asarray(
+        ccl.BaryonsSPK(k_out_of_range="nan", **common_kwargs).boost_factor(
+            cosmo, k_mpc, SPK_A
+        )
+    )
+    assert np.isnan(fk_nan[-1])
+    assert np.isfinite(fk_nan[0])
+
+
+def test_spk_out_of_range_z_policy() -> None:
+    """Validate z out-of-range policies: raise, unity, and nan."""
+    pyspk = pytest.importorskip("pyspk")
+    cosmo = _benchmark_cosmology()
+    z_high = float(pyspk.constants.CALIBRATED_Z_MAX) + 0.1
+    a_high = 1.0 / (1.0 + z_high)
+    k = 0.1 * cast(float, cosmo["h"])
+
+    common_kwargs: dict[str, Any] = dict(
+        SO=200,
+        relation_kind="power_law",
+        fb_a=0.4,
+        fb_pow=0.3,
+        fb_pivot=10**13.5,
+    )
+
+    with pytest.raises(ValueError, match="Requested z exceeds pyspk calibration range"):
+        ccl.BaryonsSPK(z_out_of_range="raise", **common_kwargs).boost_factor(
+            cosmo, k, a_high
+        )
+
+    fk_unity = ccl.BaryonsSPK(z_out_of_range="unity", **common_kwargs).boost_factor(
+        cosmo, k, a_high
+    )
+    assert np.isclose(float(fk_unity), 1.0)
+
+    fk_nan = ccl.BaryonsSPK(z_out_of_range="nan", **common_kwargs).boost_factor(
+        cosmo, k, a_high
+    )
+    assert np.isnan(float(fk_nan))
