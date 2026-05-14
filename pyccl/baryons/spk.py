@@ -70,7 +70,9 @@ def _normalize_relation_parameters(
 ) -> dict[str, Any]:
     """Validate and fill defaults for relation-specific parameters."""
     if relation_kind not in _SUPPORTED_RELATION_KINDS:
-        raise ValueError(f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}.")
+        raise ValueError(
+            f"`relation_kind` must be one of {_SUPPORTED_RELATION_KINDS}."
+        )
 
     relation_cfg = _RELATION_PARAMS[relation_kind]
     required = set(relation_cfg["required"])
@@ -101,7 +103,9 @@ def _normalize_relation_parameters(
         normalized["M_halo"] = _arraylike_to_float_list(
             normalized["M_halo"], name="M_halo"
         )
-        normalized["fb"] = _arraylike_to_float_list(normalized["fb"], name="fb")
+        normalized["fb"] = _arraylike_to_float_list(
+            normalized["fb"], name="fb"
+        )
         if len(normalized["M_halo"]) != len(normalized["fb"]):
             raise ValueError("`M_halo` and `fb` must have the same length.")
         normalized["extrapolate"] = bool(normalized["extrapolate"])
@@ -174,9 +178,9 @@ class BaryonsSPK(Baryons):
 
         self._pyspk = None
         self._forwarded_warning_messages = set()
-        self._evaluator_cache: OrderedDict[tuple[Any, ...], Callable[..., Any]] = (
-            OrderedDict()
-        )
+        self._evaluator_cache: OrderedDict[
+            tuple[Any, ...], Callable[..., Any]
+        ] = OrderedDict()
 
         self._validate_settings()
         self.relation_params = _normalize_relation_parameters(
@@ -219,9 +223,14 @@ class BaryonsSPK(Baryons):
     @staticmethod
     def _k_mpc_to_hmpc(cosmo: Any, k_mpc: Any) -> np.ndarray:
         """Convert k from Mpc^-1 to h/Mpc."""
-        return np.asarray(np.atleast_1d(k_mpc), dtype=float) / float(cosmo["h"])
+        return (
+            np.asarray(np.atleast_1d(k_mpc), dtype=float)
+            / float(cosmo["h"])
+        )
 
-    def _evaluator_cache_key(self, cosmo: Any, k_hmpc: np.ndarray) -> tuple[Any, ...]:
+    def _evaluator_cache_key(
+        self, cosmo: Any, k_hmpc: np.ndarray
+    ) -> tuple[Any, ...]:
         """Build a hashable key for the evaluator LRU cache."""
         return (
             float(cosmo["h"]),
@@ -289,7 +298,9 @@ class BaryonsSPK(Baryons):
         self._forward_pyspk_warnings(caught)
         return np.asarray(sup, dtype=float)
 
-    def _compute_suppression_grid(self, cosmo: Any, k: Any, a: Any) -> np.ndarray:
+    def _compute_suppression_grid(
+        self, cosmo: Any, k: Any, a: Any
+    ) -> np.ndarray:
         """Evaluate f_SPk(k, a) over a 2-D grid of (a, k).
 
         The output array has shape ``(len(a), len(k))`` and is filled
@@ -309,9 +320,13 @@ class BaryonsSPK(Baryons):
         k_use = np.atleast_1d(k).astype(float)
 
         if np.any(~np.isfinite(k_use)) or np.any(k_use <= 0):
-            raise ValueError("`k` must contain finite strictly positive values.")
+            raise ValueError(
+                "`k` must contain finite strictly positive values."
+            )
         if np.any(~np.isfinite(a_use)) or np.any(a_use <= 0):
-            raise ValueError("`a` must contain finite strictly positive values.")
+            raise ValueError(
+                "`a` must contain finite strictly positive values."
+            )
 
         k_hmpc = self._k_mpc_to_hmpc(cosmo, k_use)
 
@@ -413,7 +428,9 @@ class BaryonsSPK(Baryons):
         if z_out_of_range is not None:
             self.z_out_of_range = z_out_of_range
 
-        new_kind = self.relation_kind if relation_kind is None else relation_kind
+        new_kind = (
+            self.relation_kind if relation_kind is None else relation_kind
+        )
         if relation_kind is None or new_kind == self.relation_kind:
             merged_relation_params = dict(self.relation_params)
         else:

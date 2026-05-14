@@ -163,7 +163,10 @@ def test_spk_out_of_range_k_policy() -> None:
         fb_pivot=10**13.5,
     )
 
-    with pytest.raises(ValueError, match="Requested k exceeds pyspk calibration range"):
+    with pytest.raises(
+        ValueError,
+        match="Requested k exceeds pyspk calibration range",
+    ):
         ccl.BaryonsSPK(k_out_of_range="raise", **common_kwargs).boost_factor(
             cosmo, k_mpc, SPK_A
         )
@@ -201,17 +204,20 @@ def test_spk_out_of_range_z_policy() -> None:
         fb_pivot=10**13.5,
     )
 
-    with pytest.raises(ValueError, match="Requested z exceeds pyspk calibration range"):
+    with pytest.raises(
+        ValueError,
+        match="Requested z exceeds pyspk calibration range",
+    ):
         ccl.BaryonsSPK(z_out_of_range="raise", **common_kwargs).boost_factor(
             cosmo, k, a_high
         )
 
-    fk_unity = ccl.BaryonsSPK(z_out_of_range="unity", **common_kwargs).boost_factor(
-        cosmo, k, a_high
-    )
+    fk_unity = ccl.BaryonsSPK(
+        z_out_of_range="unity", **common_kwargs
+    ).boost_factor(cosmo, k, a_high)
     assert np.isclose(float(fk_unity), 1.0)
 
-    fk_nan = ccl.BaryonsSPK(z_out_of_range="nan", **common_kwargs).boost_factor(
-        cosmo, k, a_high
-    )
+    fk_nan = ccl.BaryonsSPK(
+        z_out_of_range="nan", **common_kwargs
+    ).boost_factor(cosmo, k, a_high)
     assert np.isnan(float(fk_nan))

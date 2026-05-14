@@ -82,7 +82,11 @@ def test_spk_matches_pyspk(relation_kind, relation_params):
     """Check numerical agreement with direct ``pyspk`` evaluator output."""
     pyspk = pytest.importorskip("pyspk")
     bar = ccl.BaryonsSPK(
-        SO=(500 if relation_kind in ("cosmo_power_law", "double_power_law") else 200),
+        SO=(
+            500
+            if relation_kind in ("cosmo_power_law", "double_power_law")
+            else 200
+        ),
         relation_kind=relation_kind,
         **relation_params,
     )
@@ -175,7 +179,10 @@ def test_spk_z_out_of_range_raise() -> None:
     z_hi = pyspk.constants.CALIBRATED_Z_MAX + 0.1
     a_hi = 1.0 / (1.0 + z_hi)
 
-    with pytest.raises(ValueError, match="Requested z exceeds pyspk calibration range"):
+    with pytest.raises(
+        ValueError,
+        match="Requested z exceeds pyspk calibration range",
+    ):
         _power_law_model(z_out_of_range="raise").boost_factor(COSMO, 0.2, a_hi)
 
 
@@ -201,7 +208,11 @@ def test_spk_include_baryons_nan_k_drops_columns() -> None:
     with warnings_builtin.catch_warnings(record=True) as caught:
         warnings_builtin.simplefilter("always")
         pk_wb = bar.include_baryonic_effects(cosmo_hi, pk_nb)
-    msgs = [str(w.message) for w in caught if issubclass(w.category, ccl.CCLWarning)]
+    msgs = [
+        str(w.message)
+        for w in caught
+        if issubclass(w.category, ccl.CCLWarning)
+    ]
     assert any("non-finite" in m for m in msgs)
     # Result should still be finite (NaN columns were dropped).
     pk_wb_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_wb)
@@ -228,7 +239,11 @@ def test_spk_include_baryons_nan_z_drops_rows() -> None:
     with warnings_builtin.catch_warnings(record=True) as caught:
         warnings_builtin.simplefilter("always")
         pk_wb = bar.include_baryonic_effects(cosmo_hi, pk_nb)
-    msgs = [str(w.message) for w in caught if issubclass(w.category, ccl.CCLWarning)]
+    msgs = [
+        str(w.message)
+        for w in caught
+        if issubclass(w.category, ccl.CCLWarning)
+    ]
     assert any("non-finite" in m for m in msgs)
     pk_wb_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_wb)
     assert np.all(np.isfinite(pk_wb_eval(np.array([0.5]), 0.8)))
@@ -261,16 +276,23 @@ def test_spk_baryons_in_cosmology() -> None:
     """Ensure explicit and Cosmology-integrated baryons paths agree."""
     pytest.importorskip("pyspk")
     bar = _power_law_model(k_out_of_range="unity")
-    cosmo_nb = ccl.CosmologyVanillaLCDM(transfer_function="bbks", baryonic_effects=None)
+    cosmo_nb = ccl.CosmologyVanillaLCDM(
+        transfer_function="bbks", baryonic_effects=None
+    )
     pk_nb = cosmo_nb.get_nonlin_power()
     pk_wb = bar.include_baryonic_effects(cosmo_nb, pk_nb)
 
-    cosmo_wb = ccl.CosmologyVanillaLCDM(transfer_function="bbks", baryonic_effects=bar)
+    cosmo_wb = ccl.CosmologyVanillaLCDM(
+        transfer_function="bbks", baryonic_effects=bar
+    )
     pk_wb_cosmo = cosmo_wb.get_nonlin_power()
 
     ks = np.geomspace(1e-2, 2, 128)
     pk_wb_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_wb)
-    pk_wb_cosmo_eval = cast(Callable[[np.ndarray, float], np.ndarray], pk_wb_cosmo)
+    pk_wb_cosmo_eval = cast(
+        Callable[[np.ndarray, float], np.ndarray],
+        pk_wb_cosmo,
+    )
     assert np.allclose(
         pk_wb_eval(ks, 1.0), pk_wb_cosmo_eval(ks, 1.0), atol=0, rtol=1e-6
     )
@@ -305,6 +327,8 @@ def test_spk_warnings_are_deduplicated_per_instance() -> None:
         _ = bar.boost_factor(COSMO, k, 0.8)
 
     second_msgs = {
-        str(w.message) for w in second if issubclass(w.category, ccl.CCLWarning)
+        str(w.message)
+        for w in second
+        if issubclass(w.category, ccl.CCLWarning)
     }
     assert first_msgs.isdisjoint(second_msgs)
