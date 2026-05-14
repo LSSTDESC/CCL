@@ -27,6 +27,11 @@ Internally, the wrapper converts to ``pyspk`` units
 This conversion is automatic; users should not pre-convert ``k`` when calling
 ``pyccl`` APIs.
 
+Halo masses (``fb_pivot``, ``m_pivot``, ``M_halo``) are always in units of
+:math:`M_\odot` (solar masses), consistent with ``pyspk``. Baryon-fraction
+parameters (``fb_a``, ``fb``) are dimensionless ratios
+:math:`f_b/(\Omega_b/\Omega_m)`.
+
 Supported relation modes
 ------------------------
 
@@ -63,8 +68,10 @@ the baryon-fraction parameterization used by ``pyspk``:
 
      \frac{f_b}{\Omega_b/\Omega_m} = a\left(\frac{M_{\mathrm{SO}}}{M_{\mathrm{pivot}}}\right)^b
 
-  with :math:`a=\mathrm{fb\_a}`, :math:`b=\mathrm{fb\_pow}`,
-  :math:`M_{\mathrm{pivot}}=\mathrm{fb\_pivot}` (optional).
+  with :math:`a=\mathrm{fb\_a}` (dimensionless normalisation),
+  :math:`b=\mathrm{fb\_pow}` (dimensionless slope), and
+  :math:`M_{\mathrm{pivot}}=\mathrm{fb\_pivot}` in :math:`M_\odot`
+  (optional; default :math:`1\,M_\odot`).
 
 - ``cosmo_power_law``:
 
@@ -73,6 +80,10 @@ the baryon-fraction parameterization used by ``pyspk``:
      \frac{f_b}{\Omega_b/\Omega_m} = \frac{\exp(\alpha)}{100}
      \left(\frac{M_{500c}}{10^{14}\,M_\odot}\right)^{\beta-1}
      \left(\frac{E(z)}{E(0.3)}\right)^\gamma
+
+  with :math:`\alpha` (log-space normalisation), :math:`\beta` (power-law
+  slope), and :math:`\gamma` (redshift-evolution exponent); the implicit
+  pivot mass is :math:`10^{14}\,M_\odot`.
 
 - ``double_power_law``:
 
@@ -83,12 +94,18 @@ the baryon-fraction parameterization used by ``pyspk``:
      \left(\frac{M_{500c}}{M_{\mathrm{pivot}}}\right)^\beta\right]
      \left(\frac{E(z)}{E(0.3)}\right)^\gamma
 
-  with :math:`M_{\mathrm{pivot}}=\mathrm{m\_pivot}`.
+  with :math:`\epsilon` (dimensionless normalisation of
+  :math:`f_b/(\Omega_b/\Omega_m)` at the pivot mass),
+  :math:`\alpha`, :math:`\beta` (low- and high-mass slopes),
+  :math:`\gamma` (redshift-evolution exponent), and
+  :math:`M_{\mathrm{pivot}}=\mathrm{m\_pivot}` in :math:`M_\odot`.
 
 - ``binned``:
    Provide tabulated halo-mass and baryon-fraction samples through
-   ``M_halo`` and ``fb``. In :class:`pyccl.BaryonsSPK`, these are passed as
-   arrays in ``relation_params`` (same length, representing
+   ``M_halo`` (halo masses in :math:`M_\odot`) and ``fb`` (dimensionless
+   baryon fractions :math:`f_b/(\Omega_b/\Omega_m)`, same length as
+   ``M_halo``). In :class:`pyccl.BaryonsSPK`, these are passed as arrays
+   in ``relation_params`` (same length, representing
    :math:`f_b(M, z)` at the evaluation redshift). Set ``extrapolate=True``
    to allow extrapolation beyond the tabulated mass range; otherwise values
    outside the tabulated range are treated according to ``pyspk`` behavior.

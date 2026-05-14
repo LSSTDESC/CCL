@@ -142,13 +142,24 @@ class BaryonsSPK(Baryons):
         **relation_params: Keyword arguments for the chosen
             ``relation_kind``:
 
-            - ``power_law``: ``fb_a``, ``fb_pow``,
-              optional ``fb_pivot`` (default 1.0).
-            - ``cosmo_power_law``: ``alpha``, ``beta``, ``gamma``.
-            - ``double_power_law``: ``epsilon``, ``alpha``, ``beta``,
-              ``gamma``, ``m_pivot``.
-            - ``binned``: ``M_halo`` (array), ``fb`` (array),
-              optional ``extrapolate`` (default False).
+            - ``power_law``: ``fb_a`` (float, dimensionless normalisation of
+              :math:`f_b/(\Omega_b/\Omega_m)` at the pivot mass),
+              ``fb_pow`` (float, dimensionless power-law slope),
+              optional ``fb_pivot`` (float, pivot halo mass in
+              :math:`M_\odot`; default ``1.0`` :math:`M_\odot`).
+            - ``cosmo_power_law``: ``alpha`` (float, log-space normalisation),
+              ``beta`` (float, power-law slope),
+              ``gamma`` (float, redshift-evolution exponent).
+            - ``double_power_law``: ``epsilon`` (float, dimensionless
+              normalisation of :math:`f_b/(\Omega_b/\Omega_m)` at
+              ``m_pivot``), ``alpha`` (float, low-mass slope),
+              ``beta`` (float, high-mass slope),
+              ``gamma`` (float, redshift-evolution exponent),
+              ``m_pivot`` (float, pivot halo mass in :math:`M_\odot`).
+            - ``binned``: ``M_halo`` (array of halo masses in
+              :math:`M_\odot`), ``fb`` (array of dimensionless baryon
+              fractions :math:`f_b/(\Omega_b/\Omega_m)`, same length as
+              ``M_halo``), optional ``extrapolate`` (default False).
     """
 
     name = "SPK"  # pyright: ignore[reportAssignmentType]
