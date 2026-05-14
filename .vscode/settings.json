@@ -8,12 +8,6 @@
     "source.fixAll.ruff": "never",
     "source.organizeImports.ruff": "never"
   },
-  "esbonio.server.pythonCommand": [
-    "/cosma/local/Python/3.12.4/bin/python3"
-  ],
-  "esbonio.sphinx.pythonCommand": [
-    "/cosma/local/Python/3.12.4/bin/python3"
-  ],
   "esbonio.sphinx.buildCommand": [
     "sphinx-build",
     "-M",
