@@ -129,10 +129,12 @@ static ccl_f2d_t *ccl_compute_linpower_analytic(ccl_cosmology* cosmo, void* par,
       y2d[j] += log_sigma8;
   }
 
+  // Free the first spline unconditionally; re-allocate with normalisation only on success.
+  // Without this, ccl_sigma8 failure above would leak the first psp_out.
+  ccl_f2d_t_free(psp_out);
+  psp_out = NULL;
+
   if(*status==0) {
-    // Free the previous P(k,a) spline, and allocate a new one to store the
-    // properly-normalized P(k,a)
-    ccl_f2d_t_free(psp_out);
     psp_out = ccl_f2d_t_new(na,z,nk,x,y2d,NULL,NULL,0,
                             1,2,ccl_f2d_cclgrowth,1,0,2,
                             ccl_f2d_3,status);
