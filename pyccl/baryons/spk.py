@@ -124,8 +124,9 @@ class BaryonsSPK(Baryons):
     Applies a multiplicative correction to the matter power spectrum:
     ``P_bar(k, a) = P_DMO(k, a) * f_SPk(k, a)``.
 
-    Wavenumbers are passed in ``Mpc^-1`` (CCL convention); the
-    conversion to ``h/Mpc`` (pyspk convention) is handled internally.
+    .. note:: Wavenumbers are in units of Mpc⁻¹ (CCL convention),
+              differently from the ``pyspk`` package (where they are
+              in h/Mpc). The conversion is handled internally.
 
     Args:
         SO (int): Spherical overdensity, ``200`` or ``500``.

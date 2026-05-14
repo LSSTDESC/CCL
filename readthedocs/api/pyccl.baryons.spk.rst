@@ -1,12 +1,15 @@
 pyccl.baryons.spk module
 =========================
 
-SP(k) references
-----------------
+SP(k) is a simulation-based model for the impact of baryon physics on the
+non-linear matter power spectrum (`Salcido et al. 2023
+<https://doi.org/10.1093/mnras/stad1474>`_). It predicts the suppression of
+power as a function of the mean baryon fraction of haloes, calibrated on the
+ANTILLES suite of 400 hydrodynamical simulations spanning a wide feedback
+landscape, accurate to approximately percent level for
+:math:`k \lesssim 12\,h\,\mathrm{Mpc}^{-1}` and :math:`z \leq 3`.
 
-- Salcido et al. 2023, MNRAS 523, 2247:
-   https://doi.org/10.1093/mnras/stad1474
-- pyspk implementation: https://github.com/jemme07/pyspk
+Python implementation: `pyspk <https://github.com/jemme07/pyspk>`_
 
 Units and Conversion
 --------------------
@@ -42,8 +45,10 @@ Mode details and examples
 
 - Full mode definitions and usage examples are maintained in ``pyspk``:
    https://github.com/jemme07/pyspk
-- Runnable example scripts are available in:
-   https://github.com/jemme07/pyspk/tree/main/examples
+- Runnable ``pyspk`` example notebook:
+   https://github.com/jemme07/pyspk/blob/main/examples/pySPk_Examples.ipynb
+- CCL integration demo:
+   https://github.com/LSSTDESC/CCL/blob/master/examples/spk_demo.ipynb
 
 SP(k) mode equations (summary)
 ------------------------------
@@ -144,6 +149,11 @@ Example
 For exact mode definitions, calibration domain, and edge-case handling,
 refer to the upstream ``pyspk`` documentation (authoritative source):
 https://github.com/jemme07/pyspk
+
+----
+
+API Reference
+-------------
 
 .. automodule:: pyccl.baryons.spk
    :members:
