@@ -22,7 +22,7 @@ Internally, the wrapper converts to ``pyspk`` units
 
 .. math::
 
-   k_{h\,\mathrm{Mpc}^{-1}} = k_{\mathrm{Mpc}^{-1}} / h
+   k\,[h\,\mathrm{Mpc}^{-1}] = k\,[\mathrm{Mpc}^{-1}] / h
 
 This conversion is automatic; users should not pre-convert ``k`` when calling
 ``pyccl`` APIs.
