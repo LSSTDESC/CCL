@@ -12,22 +12,22 @@ from setuptools.command.develop import develop as _develop
 def _compile_ccl(debug=False):
     # Clean stale CMake cache to avoid cross-version contamination
     # (e.g. when cibuildwheel builds multiple Python versions sequentially).
-    if os.path.exists("build/CMakeCache.txt"):
-        shutil.rmtree("build")
-    os.makedirs("build", exist_ok=True)
-    v = sys.version_info
-    cmd = ["cmake", "-H.", "-Bbuild",
-           "-DPYTHON_VERSION=%d.%d.%d" % (v.major, v.minor, v.micro),
-           "-DPYTHON_EXECUTABLE=%s" % sys.executable]
-    if debug:
-        cmd += ["-DCMAKE_BUILD_TYPE=Debug"]
-    if call(cmd) != 0:
-        raise Exception(
-            "Could not run CMake configuration. Make sure "
-            "CMake is installed !")
+    # if os.path.exists("build/CMakeCache.txt"):
+    #     shutil.rmtree("build")
+    # os.makedirs("build", exist_ok=True)
+    # v = sys.version_info
+    # cmd = ["cmake", "-H.", "-Bbuild",
+    #        "-DPYTHON_VERSION=%d.%d.%d" % (v.major, v.minor, v.micro),
+    #        "-DPYTHON_EXECUTABLE=%s" % sys.executable]
+    # if debug:
+    #     cmd += ["-DCMAKE_BUILD_TYPE=Debug"]
+    # if call(cmd) != 0:
+    #     raise Exception(
+    #         "Could not run CMake configuration. Make sure "
+    #         "CMake is installed !")
 
-    if call(["make", "-Cbuild", "_ccllib"]) != 0:
-        raise Exception("Could not build CCL")
+    # if call(["make", "-Cbuild", "_ccllib"]) != 0:
+    #     raise Exception("Could not build CCL")
 
     # Finds the library under its different possible names
     if os.path.exists("build/pyccl/_ccllib.so"):
