@@ -26,13 +26,13 @@ as sub-classes of the :class:`Tracer` base class can be found below. The
 documentation of the base :class:`Tracer` class is a good place to start.
 """
 
-import warnings
-
 import numpy as np
+from scipy.integrate import simpson
+from scipy.interpolate import interp1d
 
 from . import ccllib as lib
 from .pyutils import check
-from .errors import CCLWarning
+from .errors import CCLWarning, warnings
 from ._core.parameters import physical_constants
 from ._core import CCLObject, UnlockInstance, unlock_instance
 from .pyutils import (_check_array_params, NoneArr, _vectorize_fn6,
@@ -152,7 +152,8 @@ def get_lensing_kernel(cosmo, *, dndz, mag_bias=None, n_chi=None):
             f"the number of samples in the lensing kernel ({n_chi}). Consider "
             "disabling spline integration for the lensing kernel by setting "
             "pyccl.gsl_params.LENSING_KERNEL_SPLINE_INTEGRATION = False "
-            "before instantiating the Cosmology passed.", category=CCLWarning)
+            "before instantiating the Cosmology passed.",
+            category=CCLWarning, importance='low')
 
     # Compute array of chis
     status = 0
@@ -706,11 +707,14 @@ class Tracer(CCLObject):
                                           status)
         self._trc.append(_check_returned_tracer(ret))
         a = cosmo.scale_factor_of_chi(chi_s)
-        wint = np.trapz(wchi_s, a)
-        if wint != 0:  # Avoid division by zero
-            avg_a = np.trapz(a*wchi_s, a)/wint
-        else:  # If kernel integral is zero, just set to z=0
+        if len(wchi_s) == 0:
             avg_a = 1.0
+        else:
+            wint = simpson(wchi_s, x=a)
+            if wint != 0:  # Avoid division by zero
+                avg_a = simpson(a*wchi_s, x=a)/wint
+            else:  # If kernel integral is zero, just set to z=0
+                avg_a = 1.0
         self.avg_weighted_a.append(avg_a)
 
     @classmethod
@@ -813,10 +817,13 @@ def NumberCountsTracer(cosmo, *, dndz, bias=None, mag_bias=None,
     # we need the distance functions at the C layer
     cosmo.compute_distances()
 
-    from scipy.interpolate import interp1d
     z_n, n = _check_array_params(dndz, 'dndz')
     with UnlockInstance(tracer, mutate=False):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
+
+    if (bias is None) and (not has_rsd) and (mag_bias is None):
+        raise ValueError("Number counts tracers must have a non-zero bias, "
+                         "RSDs, or a magnification bias contribution.")
 
     kernel_d = None
     if bias is not None:  # Has density term
@@ -889,7 +896,6 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
     # we need the distance functions at the C layer
     cosmo.compute_distances()
 
-    from scipy.interpolate import interp1d
     z_n, n = _check_array_params(dndz, 'dndz')
     with UnlockInstance(tracer, mutate=False):
         tracer._dndz = interp1d(z_n, n, bounds_error=False, fill_value=0)
@@ -904,6 +910,11 @@ def WeakLensingTracer(cosmo, *, dndz, has_shear=True, ia_bias=None,
             # MG case
             tracer._MG_add_tracer(cosmo, kernel_l, z_n,
                                   der_bessel=-1, der_angles=2)
+    else:
+        if ia_bias is None:
+            raise ValueError("Weak lensing tracers with no shear must "
+                             "have a non-zero intrinsic alignment amplitude.")
+
     if ia_bias is not None:  # Has intrinsic alignments
         z_a, tmp_a = _check_array_params(ia_bias, 'ia_bias')
         # Kernel

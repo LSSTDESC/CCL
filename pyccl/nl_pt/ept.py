@@ -1,11 +1,9 @@
 __all__ = ("EulerianPTCalculator",)
 
-import warnings
-
 import numpy as np
 
 from .. import (CCLAutoRepr, CCLError, CCLWarning, Pk2D,
-                get_pk_spline_a, unlock_instance)
+                get_pk_spline_a, unlock_instance, warnings)
 
 
 # All valid Pk pair labels and their aliases
@@ -375,7 +373,7 @@ class EulerianPTCalculator(CCLAutoRepr):
             warnings.warn(
                 "EulerianPTCalculators assume linear galaxy bias "
                 "when computing galaxy-IA cross-correlations.",
-                category=CCLWarning)
+                category=CCLWarning, importance='low')
         c1 = tri.c1(self.z_s)
         c2 = tri.c2(self.z_s)
         cd = tri.cdelta(self.z_s)

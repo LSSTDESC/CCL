@@ -9,7 +9,7 @@
 
 // Debug mode policy: whether to print error messages as they are raised.
 // Defualt is ON.
-static CCLDebugModePolicy _ccl_debug_mode_policy = CCL_DEBUG_MODE_ON;
+static CCLDebugModePolicy _ccl_debug_mode_policy = CCL_DEBUG_MODE_OFF;
 
 // Set debug mode policy
 void ccl_set_debug_policy(CCLDebugModePolicy debug_policy) {

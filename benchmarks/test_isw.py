@@ -1,6 +1,6 @@
 import numpy as np
 import pyccl as ccl
-from scipy.integrate import simps
+from scipy.integrate import simpson
 
 
 def test_iswcl():
@@ -27,7 +27,7 @@ def test_iswcl():
     cl = ccl.angular_cl(COSMO, tr_n, tr_i, ls)
 
     # Benchmark from Eq. 6 in 1710.03238
-    pz = nz / simps(nz, x=zs)
+    pz = nz / simpson(nz, x=zs)
     H0 = h / ccl.physical_constants.CLIGHT_HMPC
     # Prefactor
     prefac = 3*COSMO['T_CMB']*(Oc+Ob)*H0**3/(ls+0.5)**2
@@ -43,7 +43,7 @@ def test_iswcl():
                     for c, z in zip(chi, zs)]).T
     # Limber integral
     cl_int = pks[:, :]*(pz*ez*gz)[None, :]
-    clbb = simps(cl_int, x=zs)
+    clbb = simpson(cl_int, x=zs)
     clbb *= prefac
 
     assert np.all(np.fabs(cl/clbb-1) < 1E-3)

@@ -1,10 +1,8 @@
 __all__ = ("angular_cl",)
 
-import warnings
-
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib
+from . import DEFAULT_POWER_SPECTRUM, CCLWarning, check, lib, warnings
 from .pyutils import integ_types
 from ._nonlimber_FKEM import _nonlimber_FKEM
 
@@ -20,6 +18,8 @@ def angular_cl(
     limber_max_error=0.01,
     limber_integration_method="qag_quad",
     non_limber_integration_method="FKEM",
+    fkem_chi_min=None,
+    fkem_Nchi=None,
     p_of_k_a_lin=DEFAULT_POWER_SPECTRUM,
     return_meta=False
 ):
@@ -36,9 +36,9 @@ def angular_cl(
             spectrum to project. If a string, it must correspond to one of
             the non-linear power spectra stored in `cosmo` (e.g.
             `'delta_matter:delta_matter'`).
-        l_limber (int, float or 'auto') : Angular wavenumber beyond which 
-            Limber's approximation will be used. Defaults to -1. If 'auto', 
-            then the non-limber integrator will be used to compute the right 
+        l_limber (int, float or 'auto') : Angular wavenumber beyond which
+            Limber's approximation will be used. Defaults to -1. If 'auto',
+            then the non-limber integrator will be used to compute the right
             transition point given the value of limber_max_error.
         limber_max_error (float) : Maximum fractional error for Limber integration.
         limber_integration_method (string) : integration method to be used
@@ -49,12 +49,26 @@ def angular_cl(
             for the non-Limber integrals. Currently the only method implemented
             is ``'FKEM'`` (see the `N5K paper <https://arxiv.org/abs/2212.04291>`_
             for details).
-        p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 
+        fkem_chi_min: Minimum comoving distance used by `FKEM` to sample the
+            tracer radial kernels. If ``None``, the minimum distance over which
+            the kernels are defined will be used (capped to 1E-6 Mpc if this
+            value is zero). Users are encouraged to experiment with this parameter
+            and ``fkem_Nchi`` to ensure the robustness of the output
+            :math:`C_\\ell` s.
+        fkem_Nchi: Number of values of the comoving distance over which `FKEM`
+            will interpolate the radial kernels. If ``None`` the smallest number
+            over which the kernels are currently sampled will be used. Note that
+            `FKEM` will use a logarithmic sampling for distances between
+            ``fkem_chi_min`` and the maximum distance over which the tracers
+            are defined.  Users are encouraged to experiment with this parameter
+            and ``fkem_chi_min`` to ensure the robustness of the output
+            :math:`C_\\ell` s.
+        p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`):
             3D linear Power spectrum to project, for special use in
             PT calculations using the FKEM non-limber integration technique.
             If a string, it must correspond to one of
             the linear power spectra stored in `cosmo` (e.g.
-            `'delta_matter:delta_matter'`). 
+            `'delta_matter:delta_matter'`).
         return_meta (bool): if `True`, also return a dictionary with various
             metadata about the calculation, such as l_limber as calculated by the
             non-limber integrator.
@@ -68,8 +82,7 @@ def angular_cl(
         warnings.warn(
             "CCL does not properly use the hyperspherical Bessel functions "
             "when computing angular power spectra in non-flat cosmologies!",
-            category=CCLWarning,
-        )
+            category=CCLWarning, importance='low')
 
     if limber_integration_method not in integ_types:
         raise ValueError(
@@ -93,6 +106,8 @@ def angular_cl(
 
     # Access ccl_cosmology object
 
+    if p_of_k_a is None:
+        p_of_k_a = DEFAULT_POWER_SPECTRUM
     psp = cosmo.parse_pk2d(p_of_k_a, is_linear=False)
 
     # Create tracer colections
@@ -110,6 +125,10 @@ def angular_cl(
     if not (np.diff(ell_use) > 0).all():
         raise ValueError("ell values must be monotonically increasing")
 
+    fkem_params = {'pk_linear': p_of_k_a_lin,
+                   'limber_max_error': limber_max_error,
+                   'Nchi': fkem_Nchi,
+                   'chi_min': fkem_chi_min}
     if auto_limber or (type(l_limber) is not str and ell_use[0] < l_limber):
         if non_limber_integration_method == "FKEM":
             l_limber, cl_non_limber, status = _nonlimber_FKEM(
@@ -117,10 +136,9 @@ def angular_cl(
                 tracer1,
                 tracer2,
                 p_of_k_a,
-                p_of_k_a_lin,
                 ell_use,
                 l_limber,
-                limber_max_error,
+                **fkem_params
             )
         check(status, cosmo=cosmo)
     else:

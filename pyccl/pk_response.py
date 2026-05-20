@@ -1,19 +1,16 @@
-from . import ccllib as lib
-
-from .pyutils import check
 import numpy as np
 
 from . import cosmology
-import warnings
-from .errors import CCLWarning
 
 from dark_emulator import darkemu
 from scipy import integrate
-from scipy.interpolate import InterpolatedUnivariateSpline as ius
-from . import halos
+from . import halos, lib, check
+
+# use the perturbation theory below khmin
+khmin = 1e-2  # [h/Mpc]
 
 
-def Pmm_resp(
+def resp_Pmm_hresponse(
     cosmo,
     deltah=0.02,
     extra_parameters={
@@ -23,9 +20,7 @@ def Pmm_resp(
     },
     lk_arr=None,
     a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=1,
-    use_log=False,
+    khmin=khmin,
 ):
     """Implements the response of matter power spectrum to the long wavelength
     modes developed in Terasawa et al. 2023 (arXiv:2310.13330) as:
@@ -42,52 +37,47 @@ def Pmm_resp(
 
     Args:
         cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
-        deltah (float): the variation of h to compute T_{h}(k) by
-            the two-sided numerical derivative method.
-        a_arr (array): an array holding values of the scale factor
-            at which the trispectrum should be calculated for
-            interpolation. If `None`, the internal values used
-            by `cosmo` will be used.
+        deltah (float): the variation of :math:`h` to compute :math:`T_{h}(k)`
+            by the two-sided numerical derivative method.
+        extra_parameters (:obj:`dict`): Dictionary holding extra
+            parameters. Currently supports extra parameters for CAMB.
         lk_arr (array): an array holding values of the natural
-            logarithm of the wavenumber (in units of Mpc^-1) at
-            which the trispectrum should be calculated for
-            interpolation. If `None`, the internal values used
-            by `cosmo` will be used.
-        extrap_order_lok (int): extrapolation order to be used on
-            k-values below the minimum of the splines. See
-            :class:`~pyccl.tk3d.Tk3D`.
-        extrap_order_hik (int): extrapolation order to be used on
-            k-values above the maximum of the splines. See
-            :class:`~pyccl.tk3d.Tk3D`.
-        use_log (bool): if `True`, the trispectrum will be
-            interpolated in log-space (unless negative or
-            zero values are found).
-
+            logarithm of the wavenumber (in units of :math:`Mpc^{-1}`) at
+            which the response is calculated.
+        a_arr (array): an array holding values of the scale factor
+            at which the response is calculated.
+        khmin (float): the wavenumber (in units of :math:`h Mpc^{-1}`) below
+            which the response is calculated using the perturbation theory.
     Returns:
         Response of the matter power spectrum.
     """
 
+    # Set k and a sampling from CCL parameters
     if lk_arr is None:
         status = 0
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        lk_arr, status = lib.get_pk_spline_lk(
+            cosmo.cosmo, lib.get_pk_spline_nk(cosmo.cosmo), status
+        )
         check(status, cosmo=cosmo)
     if a_arr is None:
         status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        a_arr, status = lib.get_pk_spline_a(
+            cosmo.cosmo, lib.get_pk_spline_na(cosmo.cosmo), status
+        )
         check(status, cosmo=cosmo)
 
     k_use = np.exp(lk_arr)
 
     # set h-modified cosmology to take finite differencing
-    cosmo_hp, cosmo_hm = set_hmodified_cosmology(cosmo, deltah)
+    cosmo_hp, cosmo_hm = _set_hmodified_cosmology(
+        cosmo, deltah, extra_parameters
+    )
 
     # Growth factor
     Dp = cosmo_hp.growth_factor_unnorm(a_arr)
     Dm = cosmo_hm.growth_factor_unnorm(a_arr)
 
-    # Power spectrum
+    # Linear power spectrum
     cosmo.compute_linear_power()
     cosmo_hp.compute_linear_power()
     cosmo_hm.compute_linear_power()
@@ -104,68 +94,88 @@ def Pmm_resp(
     dpk = np.zeros(nk)
     T_h = np.zeros(nk)
 
-    kmin = 1e-2
+    # use the perturbation theory below kmin
+    kmin = khmin * cosmo["h"]
+    T_h[k_use <= kmin] = 1
+
     for ia, aa in enumerate(a_arr):
-        pk = pk2d.__call__(k_use, aa, cosmo)
-        pk_hp = pk2d_hp.__call__(k_use, aa, cosmo_hp)
-        pk_hm = pk2d_hm.__call__(k_use, aa, cosmo_hm)
+        pk = pk2d(k_use, aa, cosmo)
+        pk_hp = pk2d_hp(k_use, aa, cosmo_hp)
+        pk_hm = pk2d_hm(k_use, aa, cosmo_hm)
 
-        dpknl = pk2d.__call__(k_use, aa, cosmo, derivative=True)
-        dpklin = pk2dlin.__call__(k_use, aa, cosmo, derivative=True)
+        dpknl = pk2d(k_use, aa, cosmo, derivative=True)
+        dpklin = pk2dlin(k_use, aa, cosmo, derivative=True)
 
-        # use the perturbation theory below kmin
-        T_h[k_use <= kmin] = 1
-
+        # Eq. 11 ((hp-hm) term is cancelled out)
         T_h[k_use > kmin] = (
             np.log(pk_hp[k_use > kmin]) - np.log(pk_hm[k_use > kmin])
-        ) / (
-            2 * (np.log(Dp[ia]) - np.log(Dm[ia]))
-        )  # (hp-hm) term is cancelled out
+        ) / (2 * (np.log(Dp[ia]) - np.log(Dm[ia])))
 
         dpk[k_use <= kmin] = dpklin[k_use <= kmin]
         dpk[k_use > kmin] = dpknl[k_use > kmin]
 
+        # Eq. 23
         dpk12[ia, :] = pk * (1.0 + (26.0 / 21.0) * T_h - dpk / 3.0)
-
-    if use_log:
-        if np.any(dpk12 <= 0):
-            warnings.warn(
-                "Some values were not positive. "
-                "Will not interpolate in log-space.",
-                category=CCLWarning,
-            )
-            use_log = False
-        else:
-            dpk12 = np.log(dpk12)
 
     return dpk12
 
 
-def darkemu_Pgm_resp(
+def resp_Pgm_darkemu(
     cosmo,
-    hmc,
     prof_hod,
     deltah=0.02,
     log10Mh_min=12.0,
     log10Mh_max=15.9,
     lk_arr=None,
     a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=1,
-    use_log=False,
+    khmin=khmin,
 ):
-    """Implements the response of galaxy-matter power spectrum to
-    the long wavelength modes, described in arXiv:2310.13330.
+    """Implements the response of galaxy-matter power spectrum
+    to the long wavelength modes
+    developed in Terasawa et al. 2023 (arXiv:2310.13330) as:
+
+    .. math::
+        \\frac{\\partial P_{gm}(k)}{\\partial\\delta_b} =
+        \\left(\\partial P_{gm}(k)}{\\partial\\delta_b}|_{G} - \\frac{1}{3}
+        \\frac{d\\log P_{gm}(k)}{d\\log k}\\right)P_{gm}(k),
+
+    where the :math:`\\partial P_{gm}(k)}{\\partial\\delta_b}|_{G}`
+    is the growth response to the long wavelength modes.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        prof_hod (:class:`~pyccl.halos.profiles.hod.HaloProfileHOD`):
+        HOD profile.
+        deltah (float): the variation of :math:`h` to compute
+            the growth reponse to :math:`h`
+            by the two-sided numerical derivative method.
+        log10Mh_min (float): the minimum halo mass
+            (in units of :math:`M_\\odot/h`) for integration.
+        log10Mh_max (float): the maximum halo mass
+            (in units of :math:`M_\\odot/h`) for integration.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of :math:`Mpc^{-1}`) at
+            which the response is calculated.
+        a_arr (array): an array holding values of the scale factor
+            at which the response is calculated.
+        khmin (float): the wavenumber (in units of :math:`h Mpc^{-1}`) below
+            which the response is calculated using the perturbation theory.
+    Returns:
+        Response of the galaxy-matter power spectrum.
     """
+
+    # Set k and a sampling from CCL parameters
     if lk_arr is None:
         status = 0
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        lk_arr, status = lib.get_pk_spline_lk(
+            cosmo.cosmo, lib.get_pk_spline_nk(cosmo.cosmo), status
+        )
         check(status, cosmo=cosmo)
     if a_arr is None:
         status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        a_arr, status = lib.get_pk_spline_a(
+            cosmo.cosmo, lib.get_pk_spline_na(cosmo.cosmo), status
+        )
         check(status, cosmo=cosmo)
 
     k_use = np.exp(lk_arr)
@@ -173,6 +183,17 @@ def darkemu_Pgm_resp(
     # Check inputs
     if not isinstance(prof_hod, halos.profiles.HaloProfile):
         raise TypeError("prof_hod must be of type `HaloProfile`")
+
+    # dark emulator is valid for 0 =< z <= 1.48
+    if np.any((1.0 / a_arr - 1) > 1.48):
+        raise ValueError("dark emulator is valid for z<=1.48")
+
+    # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
+    if log10Mh_min < 12.0 or log10Mh_max > 16.0:
+        raise ValueError(
+            "Input mass range is not supported."
+            "The supported range is from 10^12 to 10^16 Msun/h."
+        )
 
     h = cosmo["h"]
     k_emu = k_use / h  # [h/Mpc]
@@ -185,7 +206,7 @@ def darkemu_Pgm_resp(
     # set h-modified cosmology to take finite differencing
     hp = h + deltah
     hm = h - deltah
-    cosmo_hp, cosmo_hm = set_hmodified_cosmology(cosmo, deltah)
+    cosmo_hp, cosmo_hm = _set_hmodified_cosmology(cosmo, deltah)
 
     # Growth factor
     Dp = cosmo_hp.growth_factor_unnorm(a_arr)
@@ -194,51 +215,60 @@ def darkemu_Pgm_resp(
     na = len(a_arr)
     nk = len(k_use)
     dpk12 = np.zeros([na, nk])
-    logMfor_hmf = np.linspace(8, 17, 200)
-    logMh = np.linspace(log10Mh_min, log10Mh_max, 2**5 + 1)  # M_sol/h
-    logM = np.log10(10**logMh / h)
-    Mh = 10**logMh
-    M = 10**logM
-    nM = len(M)
-    dlogM = logM[1] - logM[0]
+    nM = 2**5 + 1
+    log10M_min = np.log10(10**log10Mh_min / h)
+    log10M_max = np.log10(10**log10Mh_max / h)
+
     b1_th_tink = np.zeros(nM)
     Pth = np.zeros((nM, nk))
     Pnth_hp = np.zeros((nM, nk))
     Pnth_hm = np.zeros((nM, nk))
     Pbin = np.zeros((nM, nk))
-
     nths = np.zeros(nM)
 
     mass_def = halos.MassDef200m
-    hmf = halos.MassFuncDarkEmulator(mass_def=mass_def)
+    hmf = halos.MassFuncNishimichi19(mass_def=mass_def, extrapolate=True)
     hbf = halos.HaloBiasTinker10(mass_def=mass_def)
+    hmc = halos.HMCalculator(
+        mass_function=hmf,
+        halo_bias=hbf,
+        mass_def=mass_def,
+        log10M_min=log10M_min,
+        log10M_max=log10M_max,
+        nM=nM,
+    )
 
-    # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(a_arr) > 1.5:
-        print("dark emulator is valid for z={:.2f}<1.48")
+    logM = hmc._lmass
+    M = hmc._mass
+    Mh = M * h
+    dlogM = logM[1] - logM[0]
 
     for ia, aa in enumerate(a_arr):
         z = 1.0 / aa - 1
+        hmc._get_ingredients(cosmo, aa, get_bf=True)
 
-        # mass function
-        dndlog10m_emu = ius(
-            logMfor_hmf, hmf(cosmo, 10**logMfor_hmf, aa)
-        )  # Mpc^-3
-
-        darkemu_set_cosmology(emu, cosmo)
+        _darkemu_set_cosmology(emu, cosmo)
         for m in range(nM):
+            hmc_m = halos.HMCalculator(
+                mass_function=hmf,
+                halo_bias=hbf,
+                mass_def=mass_def,
+                log10M_min=logM[m],
+                log10M_max=17.0,
+            )
+            hmc_m._get_ingredients(cosmo, aa, get_bf=True)
+
             Pth[m] = emu.get_phm_massthreshold(k_emu, Mh[m], z) * (1 / h) ** 3
             Pbin[m] = emu.get_phm_mass(k_emu, Mh[m], z) * (1 / h) ** 3
             nths[m] = emu.mass_to_dens(Mh[m], z) * h**3
 
-            logM1 = np.linspace(logM[m], logM[-1], 2**5 + 1)
-            dlogM1 = logM[1] - logM[0]
+            array_2 = np.ones(len(hmc_m._mass))
+            array_2[..., 0] = 0
+            b1_th_tink[m] = hmc_m._integrate_over_mbf(
+                array_2
+            ) / hmc_m._integrate_over_mf(array_2)
 
-            b1_th_tink[m] = integrate.romb(
-                dndlog10m_emu(logM1) * hbf(cosmo, (10**logM1), aa), dx=dlogM1
-            ) / integrate.romb(dndlog10m_emu(logM1), dx=dlogM1)
-
-        darkemu_set_cosmology(emu, cosmo_hp)
+        _darkemu_set_cosmology(emu, cosmo_hp)
         for m in range(nM):
             Pnth_hp[m] = (
                 emu.get_phm(
@@ -247,7 +277,7 @@ def darkemu_Pgm_resp(
                 * (1 / hp) ** 3
             )
 
-        darkemu_set_cosmology(emu, cosmo_hm)
+        _darkemu_set_cosmology(emu, cosmo_hm)
         for m in range(nM):
             Pnth_hm[m] = (
                 emu.get_phm(
@@ -269,24 +299,16 @@ def darkemu_Pgm_resp(
         dprof_dlogM = (prof_Mp - prof_Mm) / (2 * dlogM)
 
         nth_mat = np.tile(nths, (len(k_use), 1)).transpose()
-        ng = integrate.romb(dndlog10m_emu(logM) * Ng, dx=dlogM, axis=0)
-        bgE = (
-            integrate.romb(
-                dndlog10m_emu(logM) * Ng * (hbf(cosmo, M, aa)),
-                dx=dlogM,
-                axis=0,
-            )
-            / ng
-        )
 
-        bgE2 = (
-            integrate.romb(
-                dndlog10m_emu(logM) * Ng * b2H17(hbf(cosmo, M, aa)),
-                dx=dlogM,
-                axis=0,
-            )
-            / ng
-        )
+        # Eq. 18
+        ng = hmc._integrate_over_mf(Ng)
+
+        # Eq. 17
+        bgE = hmc._integrate_over_mbf(Ng) / ng
+
+        # Eq. 19
+        bgE2 = hmc._integrate_over_mf(Ng * _b2H17(hmc._bf)) / ng
+
         bgL = bgE - 1
 
         b1L_th_mat = np.tile(b1_th_tink - 1, (len(k_emu), 1)).transpose()
@@ -300,9 +322,13 @@ def darkemu_Pgm_resp(
 
         dnP_hm_db_emu = nth_mat * (dPhm_db_nfix + b1L_th_mat * np.array(Pbin))
 
+        # Eq. A2
         nP = nth_mat * np.array(Pth)
+
+        # Eq. A7
         Pgm = integrate.romb(dprof_dlogM * nP, dx=dlogM, axis=0) / ng
 
+        # The first term of Eq. A8
         dnP_gm_db = integrate.romb(
             dprof_dlogM * (dnP_hm_db_emu), dx=dlogM, axis=0
         )
@@ -315,12 +341,14 @@ def darkemu_Pgm_resp(
                 np.log(k_use)
             )
 
+        # The second term of Eq. A8
         G_prof = (
             +1.0
             / 3.0
             * integrate.romb(dprof_dlogM_dlogk * nP, dx=dlogM, axis=0)
         )
 
+        # Eq. 25
         Pgm_growth = (dnP_gm_db + G_prof) / ng - bgL * Pgm
 
         Pgm_d = (
@@ -331,68 +359,89 @@ def darkemu_Pgm_resp(
             * Pgm
         )
 
+        # Eq. 22
         dPgm_db_emu = Pgm_growth + Pgm_d
 
-        dpklin = pk2dlin.__call__(k_use, aa, cosmo, derivative=True)
+        dpklin = pk2dlin(k_use, aa, cosmo, derivative=True)
 
+        # Eq. 16
         dPgm_db_lin = (
             (47 / 21 + bgE2 / bgE - bgE - 1 / 3 * dpklin)
             * bgE
-            * pk2dlin.__call__(k_use, aa, cosmo)
+            * pk2dlin(k_use, aa, cosmo)
         )
 
         # stitching
         k_switch = 0.08  # [h/Mpc]
 
+        # Eq. 27
         dPgm_db = dPgm_db_lin * np.exp(-k_emu / k_switch) + dPgm_db_emu * (
             1 - np.exp(-k_emu / k_switch)
         )
 
-        # use the perturbation theory below kmin
-        kmin = 1e-2  # [h/Mpc]
-
-        dPgm_db[k_emu < kmin] = dPgm_db_lin[k_emu < kmin]
+        # use the perturbation theory below khmin
+        dPgm_db[k_emu < khmin] = dPgm_db_lin[k_emu < khmin]
         dpk12[ia, :] = dPgm_db
-
-    if use_log:
-        if np.any(dpk12 <= 0):
-            warnings.warn(
-                "Some values were not positive. "
-                "Will not interpolate in log-space.",
-                category=CCLWarning,
-            )
-            use_log = False
-        else:
-            dpk12 = np.log(dpk12)
 
     return dpk12
 
 
-def darkemu_Pgg_resp(
+def resp_Pgg_darkemu(
     cosmo,
-    hmc,
     prof_hod,
     deltalnAs=0.03,
     log10Mh_min=12.0,
     log10Mh_max=15.9,
     lk_arr=None,
     a_arr=None,
-    extrap_order_lok=1,
-    extrap_order_hik=1,
-    use_log=False,
+    khmin=khmin,
 ):
-    """Implements the response of galaxy-auto power spectrum to
-    the long wavelength modes, described in arXiv:2310.13330.
+    """Implements the response of galaxy power spectrum to the long wavelength
+    modes developed in Terasawa et al. 2023 (arXiv:2310.13330) as:
+
+    .. math::
+        \\frac{\\partial P_{gg}(k)}{\\partial\\delta_b} =
+        \\left(-1 + \\partial P_{gg}(k)}{\\partial\\delta_b}|_{G}
+        - \\frac{1}{3}
+        \\frac{d\\log P_{gg}(k)}{d\\log k}\\right)P_{gg}(k),
+
+    where the :math:`\\partial P_{gg}(k)}{\\partial\\delta_b}|_{G}`
+    is the growth response to the long wavelength modes.
+
+    Args:
+        cosmo (:class:`~pyccl.core.Cosmology`): a Cosmology object.
+        prof_hod (:class:`~pyccl.halos.profiles.hod.HaloProfileHOD`):
+            HOD profile.
+        deltalnAs (float): the variation of :math:`\\ln A_{s}`
+            to compute the growth reponse to :math:`\\ln A_{s}` by
+            the two-sided numerical derivative method.
+        log10Mh_min (float): the minimum halo mass
+            (in units of :math:`M_\\odot/h`) for integration.
+        log10Mh_max (float): the maximum halo mass
+            (in units of :math:`M_\\odot/h`) for integration.
+        lk_arr (array): an array holding values of the natural
+            logarithm of the wavenumber (in units of :math:`Mpc^{-1}`) at
+            which the response is calculated.
+        a_arr (array): an array holding values of the scale factor
+            at which the response is calculated.
+        khmin (float): the wavenumber (in units of :math:`h Mpc^{-1}`) below
+            which the response is calculated using the perturbation theory.
+    Returns:
+        Response of the galaxy power spectrum.
     """
+
+    # Set k and a sampling from CCL parameters
     if lk_arr is None:
         status = 0
-        nk = lib.get_pk_spline_nk(cosmo.cosmo)
-        lk_arr, status = lib.get_pk_spline_lk(cosmo.cosmo, nk, status)
+        lk_arr, status = lib.get_pk_spline_lk(
+            cosmo.cosmo, lib.get_pk_spline_nk(cosmo.cosmo), status
+        )
         check(status, cosmo=cosmo)
     if a_arr is None:
         status = 0
-        na = lib.get_pk_spline_na(cosmo.cosmo)
-        a_arr, status = lib.get_pk_spline_a(cosmo.cosmo, na, status)
+        a_arr, status = lib.get_pk_spline_a(
+            cosmo.cosmo, lib.get_pk_spline_na(cosmo.cosmo), status
+        )
         check(status, cosmo=cosmo)
 
     k_use = np.exp(lk_arr)
@@ -400,6 +449,17 @@ def darkemu_Pgg_resp(
     # Check inputs
     if not isinstance(prof_hod, halos.profiles.HaloProfile):
         raise TypeError("prof_hod must be of type `HaloProfile`")
+
+    # dark emulator is valid for 0 =< z <= 1.48
+    if np.any((1.0 / a_arr - 1) > 1.48):
+        raise ValueError("dark emulator is valid for z<=1.48")
+
+    # dark emulator support range is 10^12 <= M200m <= 10^16 Msun/h
+    if log10Mh_min < 12.0 or log10Mh_max > 16.0:
+        raise ValueError(
+            "Input mass range is not supported."
+            "The supported range is from 10^12 to 10^16 Msun/h."
+        )
 
     h = cosmo["h"]
     k_emu = k_use / h  # [h/Mpc]
@@ -412,14 +472,10 @@ def darkemu_Pgg_resp(
     na = len(a_arr)
     nk = len(k_use)
     dpk12 = np.zeros([na, nk])
+    nM = 2**5 + 1
+    log10M_min = np.log10(10**log10Mh_min / h)
+    log10M_max = np.log10(10**log10Mh_max / h)
 
-    logMfor_hmf = np.linspace(8, 17, 200)
-    logMh = np.linspace(log10Mh_min, log10Mh_max, 2**5 + 1)  # M_sol/h
-    logM = np.log10(10**logMh / h)
-    Mh = 10**logMh
-    M = 10**logM
-    nM = len(M)
-    dlogM = logM[1] - logM[0]
     b1_th_tink = np.zeros(nM)
     Pth = np.zeros((nM, nM, nk))
     Pth_Ap = np.zeros((nM, nM, nk))
@@ -428,32 +484,49 @@ def darkemu_Pgg_resp(
     nths = np.zeros(nM)
 
     mass_def = halos.MassDef200m
-    hmf = halos.MassFuncDarkEmulator(mass_def=mass_def)
+    hmf = halos.MassFuncNishimichi19(mass_def=mass_def, extrapolate=True)
     hbf = halos.HaloBiasTinker10(mass_def=mass_def)
     prof_2pt = halos.profiles_2pt.Profile2ptHOD()
 
-    # dark emulator is valid for 0 =< z <= 1.48
-    if np.any(a_arr) > 1.5:
-        print("dark emulator is valid for z={:.2f}<1.48")
+    hmc = halos.HMCalculator(
+        mass_function=hmf,
+        halo_bias=hbf,
+        mass_def=mass_def,
+        log10M_min=log10M_min,
+        log10M_max=log10M_max,
+        nM=nM,
+    )
+
+    logM = hmc._lmass
+    M = hmc._mass
+    Mh = M * h
+    dlogM = logM[1] - logM[0]
 
     for ia, aa in enumerate(a_arr):
         z = 1.0 / aa - 1
-        # mass function
-        dndlog10m_emu = ius(
-            logMfor_hmf, hmf(cosmo, 10**logMfor_hmf, aa)
-        )  # Mpc^-3
+        hmc._get_ingredients(cosmo, aa, get_bf=True)
+
+        for m in range(nM):
+            hmc_m = halos.HMCalculator(
+                mass_function=hmf,
+                halo_bias=hbf,
+                mass_def=mass_def,
+                log10M_min=logM[m],
+                log10M_max=17.0,
+            )
+            hmc_m._get_ingredients(cosmo, aa, get_bf=True)
+
+            nths[m] = emu.mass_to_dens(Mh[m], z) * h**3
+
+            array_2 = np.ones(len(hmc_m._mass))
+            array_2[..., 0] = 0
+            b1_th_tink[m] = hmc_m._integrate_over_mbf(
+                array_2
+            ) / hmc_m._integrate_over_mf(array_2)
 
         # set cosmology for dark emulator
-        darkemu_set_cosmology(emu, cosmo)
+        _darkemu_set_cosmology(emu, cosmo)
         for m in range(nM):
-            nths[m] = mass_to_dens(dndlog10m_emu, cosmo, M[m])
-            logM1 = np.linspace(logM[m], logM[-1], 2**5 + 1)
-            dlogM1 = logM[1] - logM[0]
-
-            b1_th_tink[m] = integrate.romb(
-                dndlog10m_emu(logM1) * hbf(cosmo, (10**logM1), aa), dx=dlogM1
-            ) / integrate.romb(dndlog10m_emu(logM1), dx=dlogM1)
-
             for n in range(nM):
                 Pth[m, n] = (
                     emu.get_phh(
@@ -466,13 +539,13 @@ def darkemu_Pgg_resp(
                 )
 
                 Pth_bin[m, n] = (
-                    get_phh_massthreshold_mass(
+                    _get_phh_massthreshold_mass(
                         emu, k_emu, nths[m] / (h**3), Mh[n], z
                     )
                     * (1 / h) ** 3
                 )
 
-        darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs)
+        _darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs)
         for m in range(nM):
             for n in range(nM):
                 Pth_Ap[m, n] = (
@@ -485,7 +558,7 @@ def darkemu_Pgg_resp(
                     * (1 / h) ** 3
                 )
 
-        darkemu_set_cosmology_forAsresp(emu, cosmo, -deltalnAs)
+        _darkemu_set_cosmology_forAsresp(emu, cosmo, -deltalnAs)
         for m in range(nM):
             for n in range(nM):
                 Pth_Am[m, n] = (
@@ -521,32 +594,23 @@ def darkemu_Pgg_resp(
             )
 
         nth_mat = np.tile(nths, (len(k_use), 1)).transpose()
-        ng = integrate.romb(dndlog10m_emu(logM) * Ng, dx=dlogM, axis=0)
+
+        # Eq. 18
+        ng = hmc._integrate_over_mf(Ng)
         b1 = hbf(cosmo, M, aa)
-        bgE = (
-            integrate.romb(dndlog10m_emu(logM) * Ng * b1, dx=dlogM, axis=0)
-            / ng
-        )
 
-        bgE2 = (
-            integrate.romb(
-                dndlog10m_emu(logM) * Ng * b2H17(b1), dx=dlogM, axis=0
-            )
-            / ng
-        )
+        # Eq. 17
+        bgE = hmc._integrate_over_mbf(Ng) / ng
+
+        # Eq. 19
+        bgE2 = hmc._integrate_over_mf(Ng * _b2H17(b1)) / ng
+
         bgL = bgE - 1
-
-        dndlog10m_func_mat = np.tile(
-            dndlog10m_emu(logM), (len(k_emu), 1)
-        ).transpose()  # M_sol,Mpc^-3
-
         b1L_mat = np.tile(b1 - 1, (len(k_emu), 1)).transpose()
         b1L_th_mat = np.tile(b1_th_tink - 1, (len(k_emu), 1)).transpose()
 
         # P_gg(k)
-        _Pgg_1h = integrate.romb(
-            dndlog10m_func_mat * prof_1h, dx=dlogM, axis=0
-        ) / (ng**2)
+        _Pgg_1h = hmc._integrate_over_mf(prof_1h.T) / (ng**2)
 
         Pgg_2h_int = list()
         for m in range(nM):
@@ -556,6 +620,8 @@ def darkemu_Pgg_resp(
                 )
             )
         Pgg_2h_int = np.array(Pgg_2h_int)
+
+        # Eq. A12
         _Pgg_2h = integrate.romb(
             Pgg_2h_int * nth_mat * dprof_dlogM, axis=0, dx=dlogM
         ) / (ng**2)
@@ -588,23 +654,18 @@ def darkemu_Pgg_resp(
             )
             / (ng**2)
         )
+
+        # The first term of Eq. A14
         resp_2h = resp_2h + G_prof
 
         # 1-halo response
-        resp_1h = integrate.romb(
-            dndlog10m_func_mat * b1L_mat * prof_1h, dx=dlogM, axis=0
-        ) / (ng**2)
+        resp_1h = hmc._integrate_over_mf(b1L_mat.T * prof_1h.T) / (ng**2)
 
         #  Here we assume the galaxies' profile around host halo
         #  is fixed at physical corrdinate.
-        G_prof = (
-            +1.0
-            / 3.0
-            * integrate.romb(
-                dndlog10m_func_mat * dprof_1h_dlogk, dx=dlogM, axis=0
-            )
-            / (ng**2)
-        )
+        G_prof = hmc._integrate_over_mf(dprof_1h_dlogk.T) / (ng**2) / 3.0
+
+        # The first term of Eq. A15
         resp_1h = resp_1h + G_prof
 
         Pgg_growth = (resp_1h + resp_2h) - 2 * bgL * Pgg
@@ -617,70 +678,42 @@ def darkemu_Pgg_resp(
             * Pgg
         )
 
+        # Eq. 22
         dPgg_db_emu = Pgg_growth + Pgg_d - Pgg
 
-        dpklin = pk2dlin.__call__(k_use, aa, cosmo, derivative=True)
+        dpklin = pk2dlin(k_use, aa, cosmo, derivative=True)
 
-        Pgg_lin = bgE**2 * pk2dlin.__call__(k_use, aa, cosmo)
+        Pgg_lin = bgE**2 * pk2dlin(k_use, aa, cosmo)
+
+        # Eq. 16
         dPgg_db_lin = (
             47 / 21 + 2 * bgE2 / bgE - 2 * bgE - 1 / 3 * dpklin
         ) * Pgg_lin
         # stitching
         k_switch = 0.08  # [h/Mpc]
 
+        # Eq. 27
         dPgg_db = dPgg_db_lin * np.exp(-k_emu / k_switch) + dPgg_db_emu * (
             1 - np.exp(-k_emu / k_switch)
         )
 
-        # use the perturbation theory below kmin
-        kmin = 1e-2  # [h/Mpc]
+        Pgg = Pgg_lin * np.exp(-k_emu / k_switch) + Pgg * (
+            1 - np.exp(-k_emu / k_switch)
+        )
 
-        dPgg_db[k_emu < kmin] = dPgg_db_lin[k_emu < kmin]
+        # use the perturbation theory below khmin
+        dPgg_db[k_emu < khmin] = dPgg_db_lin[k_emu < khmin]
         dpk12[ia, :] = dPgg_db
-
-    if use_log:
-        if np.any(dpk12 <= 0):
-            warnings.warn(
-                "Some values were not positive. "
-                "Will not interpolate in log-space.",
-                category=CCLWarning,
-            )
-            use_log = False
-        else:
-            dpk12 = np.log(dpk12)
 
     return dpk12
 
 
 # Utility functions ####################
-
-
-def mass_to_dens(dndlog10m, cosmo, mass_thre):
-    logM1 = np.linspace(
-        np.log10(mass_thre), np.log10(10**16.0 / cosmo["h"]), 2**6 + 1
-    )
-    dlogM1 = logM1[1] - logM1[0]
-    dens = integrate.romb(dndlog10m(logM1), dx=dlogM1)
-
-    return dens
-
-
-def dens_to_mass(dndlog10m_emu, cosmo, dens, nint=60):
-    mlist = np.linspace(8, np.log10(10**15.8 / cosmo["h"]), nint)
-    dlist = np.log(
-        np.array(
-            [
-                mass_to_dens(dndlog10m_emu, cosmo, 10 ** mlist[i])
-                for i in range(nint)
-            ]
-        )
-    )
-    d_to_m_interp = ius(-dlist, mlist)
-
-    return 10 ** d_to_m_interp(-np.log(dens))
-
-
-def get_phh_massthreshold_mass(emu, k_emu, dens1, Mbin, redshift):
+def _get_phh_massthreshold_mass(emu, k_emu, dens1, Mbin, redshift):
+    """Compute the halo-halo power spectrum between
+    mass bin halo sample and mass threshold halo sample
+    specified by the corresponding cumulative number density.
+    """
     M2p = Mbin * 1.01
     M2m = Mbin * 0.99
     dens2p = emu.mass_to_dens(M2p, redshift)
@@ -700,7 +733,7 @@ def get_phh_massthreshold_mass(emu, k_emu, dens1, Mbin, redshift):
     return numer / denom
 
 
-def b2H17(b1):
+def _b2H17(b1):
     """Implements fitting formula for secondary halo bias, b_2, described in
     arXiv:1607.01024.
     """
@@ -708,48 +741,49 @@ def b2H17(b1):
     return b2
 
 
-def b2L16(b1):
-    """Implements fitting formula for secondary halo bias, b_2, described in
-    arXiv:1511.01096.
-    """
-    b2 = 0.412 - (2.143 * b1) + (0.929 * b1 * b1) + (0.008 * b1 * b1 * b1)
-    return b2
-
-
-def darkemu_set_cosmology(emu, cosmo):
-    Omega_c = cosmo["Omega_c"]
-    Omega_b = cosmo["Omega_b"]
+def _darkemu_set_cosmology(emu, cosmo):
+    """Input cosmology and initiallize the base class of DarkEmulator."""
     h = cosmo["h"]
     n_s = cosmo["n_s"]
     A_s = cosmo["A_s"]
+    if np.isnan(A_s):
+        raise ValueError("A_s must be provided to use the Dark Emulator")
 
-    omega_c = Omega_c * h**2
-    omega_b = Omega_b * h**2
-    omega_nu = 0.00064
+    omega_c = cosmo["Omega_c"] * h**2
+    omega_b = cosmo["Omega_b"] * h**2
+    omega_nu = 0.00064  # we fix this value (Nishimichi et al. 2019)
     Omega_L = 1 - ((omega_c + omega_b + omega_nu) / h**2)
 
     # Parameters cparam (numpy array) : Cosmological parameters
-    # (𝜔𝑏, 𝜔𝑐, Ω𝑑𝑒, ln(10^10 𝐴𝑠), 𝑛𝑠, 𝑤)
+    # (omega_b,omega_c,Omega_de,ln(10^10As),ns,w)
     cparam = np.array(
         [omega_b, omega_c, Omega_L, np.log(10**10 * A_s), n_s, -1.0]
     )
+    if darkemu.cosmo_util.test_cosm_range(cparam):
+        raise ValueError(
+            ("cosmological parameter out of supported range of DarkEmulator")
+        )
+
     emu.set_cosmology(cparam)
 
 
-def darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
-    Omega_c = cosmo["Omega_c"]
-    Omega_b = cosmo["Omega_b"]
+def _darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
+    """Input cosmology and initiallize the base class of DarkEmulator
+    for cosmology with modified A_s.
+    """
     h = cosmo["h"]
     n_s = cosmo["n_s"]
     A_s = cosmo["A_s"]
+    if np.isnan(A_s):
+        raise ValueError("A_s must be provided to use the Dark Emulator")
 
-    omega_c = Omega_c * h**2
-    omega_b = Omega_b * h**2
-    omega_nu = 0.00064
+    omega_c = cosmo["Omega_c"] * h**2
+    omega_b = cosmo["Omega_b"] * h**2
+    omega_nu = 0.00064  # we fix this value (Nishimichi et al. 2019)
     Omega_L = 1 - ((omega_c + omega_b + omega_nu) / h**2)
 
     # Parameters cparam (numpy array) : Cosmological parameters
-    # (𝜔𝑏, 𝜔𝑐, Ω𝑑𝑒, ln(10^10 𝐴𝑠), 𝑛𝑠, 𝑤)
+    # (omega_b,omega_c,Omega_de,ln(10^10As),ns,w)
     cparam = np.array(
         [
             omega_b,
@@ -760,33 +794,36 @@ def darkemu_set_cosmology_forAsresp(emu, cosmo, deltalnAs):
             -1.0,
         ]
     )
+    if darkemu.cosmo_util.test_cosm_range(cparam):
+        raise ValueError(
+            ("cosmological parameter out of supported range of DarkEmulator")
+        )
+
     emu.set_cosmology(cparam)
 
     return emu
 
 
-def set_hmodified_cosmology(cosmo, deltah):
+def _set_hmodified_cosmology(cosmo, deltah, extra_parameters=None):
+    """Create the Cosmology objects with modified Hubble parameter h."""
     Omega_c = cosmo["Omega_c"]
     Omega_b = cosmo["Omega_b"]
     h = cosmo["h"]
-    n_s = cosmo["n_s"]
-    A_s = cosmo["A_s"]
 
-    # \Omega_c h^2, \Omega_b h^2 is fixed
-    hp = h + deltah
-    Omega_c_p = np.power((h / hp), 2) * Omega_c
-    Omega_b_p = np.power((h / hp), 2) * Omega_b
+    cosmo_hmodified = []
+    for i in [+1, -1]:
+        hp = h + i * deltah
 
-    hm = h - deltah
-    Omega_c_m = np.power((h / hm), 2) * Omega_c
-    Omega_b_m = np.power((h / hm), 2) * Omega_b
+        # \Omega_c h^2, \Omega_b h^2 is fixed
+        Omega_c_p = np.power((h / hp), 2) * Omega_c
+        Omega_b_p = np.power((h / hp), 2) * Omega_b
 
-    cosmo_hp = cosmology.Cosmology(
-        Omega_c=Omega_c_p, Omega_b=Omega_b_p, h=hp, n_s=n_s, A_s=A_s
-    )
+        cosmo_hp_dict = cosmo.to_dict()
+        cosmo_hp_dict["h"] = hp
+        cosmo_hp_dict["Omega_c"] = Omega_c_p
+        cosmo_hp_dict["Omega_b"] = Omega_b_p
+        cosmo_hp_dict["extra_parameters"] = extra_parameters
+        cosmo_hp = cosmology.Cosmology(**cosmo_hp_dict)
+        cosmo_hmodified.append(cosmo_hp)
 
-    cosmo_hm = cosmology.Cosmology(
-        Omega_c=Omega_c_m, Omega_b=Omega_b_m, h=hm, n_s=n_s, A_s=A_s
-    )
-
-    return cosmo_hp, cosmo_hm
+    return cosmo_hmodified[0], cosmo_hmodified[1]

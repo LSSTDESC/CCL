@@ -559,7 +559,10 @@ void ccl_get_kappa_kernel(ccl_cosmology *cosmo, double chi_source,
   for (int ichi=0; ichi < nchi; ichi++) {
     double chi = chi_arr[ichi];
     double a = ccl_scale_factor_of_chi(cosmo, chi, status);
-    wchi[ichi] = lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi/a;
+    if (chi != 0.0)
+      wchi[ichi] = lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi*chi/a/ccl_sinn(cosmo, chi, status);
+    else
+      wchi[ichi] = lens_prefac*(ccl_sinn(cosmo,chi_source-chi,status))*chi/a;
   }
 }
 

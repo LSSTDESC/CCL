@@ -1,14 +1,11 @@
-#!/usr/bin/env python
+import os
+import sys
+from subprocess import call
+
+from setuptools import Distribution as _distribution
+from setuptools import setup
 from setuptools.command.build_py import build_py as _build
 from setuptools.command.develop import develop as _develop
-from distutils.command.clean import clean as _clean
-from setuptools import Distribution as _distribution
-from setuptools import setup, find_packages
-from subprocess import call
-from io import open
-import os
-import shutil
-import sys
 
 
 def _compile_ccl(debug=False):
@@ -64,47 +61,8 @@ class Develop(_develop):
         _develop.run(self)
 
 
-class Clean(_clean):
-    """Remove the copied _ccllib.so"""
-    def run(self):
-        if os.path.isfile("pyccl/_ccllib.so"):
-            os.remove("pyccl/_ccllib.so")
-            print("Removed pyccl/_ccllib.so")
-        _clean.run(self)
-        shutil.rmtree("build")
-        print("Removed build.")
-
-
-# read the contents of the README file
-with open('README.md', encoding="utf-8") as f:
-    long_description = f.read()
-
 setup(
-    name="pyccl",
-    description="Library of validated cosmological functions.",
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    author="LSST DESC",
-    url="https://github.com/LSSTDESC/CCL",
-    packages=find_packages(),
-    provides=['pyccl'],
-    package_data={'pyccl': ['_ccllib.so', 'emulators/data/*.npz']},
-    include_package_data=True,
-    use_scm_version=True,
     distclass=Distribution,
-    python_requires='>=3.8',
     setup_requires=['setuptools_scm'],
-    install_requires=['numpy'],
-    cmdclass={'build_py': Build, 'develop': Develop, 'clean': Clean},
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: C',
-        'Programming Language :: Python',
-        'Topic :: Scientific/Engineering :: Physics',
-        'Topic :: Scientific/Engineering :: Astronomy',
-    ]
+    cmdclass={'build_py': Build, 'develop': Develop},
 )

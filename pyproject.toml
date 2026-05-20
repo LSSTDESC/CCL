@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8", "cmake", "swig", "numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyccl"
+dynamic = ["version"]
+authors = [
+    {name = "LSST DESC"},
+]
+description="Library of validated cosmological functions."
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["cosmology", "astrophysics", "physics", "science", "LSST"]
+license = { text = "BSD" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: C",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy",
+]
+
+[project.urls]
+homepage = "https://lsstdesc.org/"
+documentation = "https://ccl.readthedocs.io/en/latest/"
+repository = "https://github.com/LSSTDESC/CCL"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.setuptools.packages.find]
+include = ["pyccl*"]
+
+[tool.setuptools.package-data]
+pyccl = ["_ccllib.so", "emulators/data/*.npz"]
+
+[tool.setuptools_scm]

@@ -339,8 +339,10 @@ def test_pk2d_add():
 
     # This raises a warning because the power spectra are not defined on the
     # same support
+    ccl.update_warning_verbosity('high')
     with pytest.warns(CCLWarning):
         pk2d_f = pk2d_e + pk2d_a
+    ccl.update_warning_verbosity('low')
 
     xarr_f, yarr_f, zarr_f = pk2d_f.get_spline_arrays()
 
@@ -370,8 +372,10 @@ def test_pk2d_mul_pow():
 
     # This raises a warning because the power spectrum is non-negative and the
     # power is non-integer
+    ccl.update_warning_verbosity('high')
     with pytest.warns(CCLWarning):
         pk2d_b**0.5
+    ccl.update_warning_verbosity('low')
 
     pk2d_g = pk2d_a * pk2d_b
     pk2d_h = 2*pk2d_a

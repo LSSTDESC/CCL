@@ -1,7 +1,7 @@
-import warnings
 import pyccl
 import numpy as np
 from .hod import HaloProfileHOD
+from ... import warnings
 
 
 __all__ = ("SatelliteShearHOD",)
@@ -100,12 +100,12 @@ class SatelliteShearHOD(HaloProfileHOD):
             lmax = 12
             warnings.warn(
                 'Maximum l provided too high. Using lmax=12.',
-                category=pyccl.CCLWarning)
+                category=pyccl.CCLWarning, importance='high')
         elif lmax < 2:
             lmax = 2
             warnings.warn(
                 'Maximum l provided too low. Using lmax=2.',
-                category=pyccl.CCLWarning)
+                category=pyccl.CCLWarning, importance='high')
         self.a1h = a1h
         self.b = b
         if integration_method not in ['FFTLog',
@@ -418,7 +418,7 @@ class SatelliteShearHOD(HaloProfileHOD):
                     from scipy.integrate import simpson
                     for i, M_i in enumerate(M_use):
                         prof[i, :] += (simpson(integrand[:, i, :],
-                                               r_use[i, :]).T
+                                               x=r_use[i, :]).T
                                        * (1j**l).real * (2*l+1)
                                        * self._angular_fl[j])
                 elif self.integration_method == 'spline':

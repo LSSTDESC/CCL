@@ -5,7 +5,7 @@ BEMBAR_TOLERANCE = 1e-3
 
 
 def test_baccoemu_baryons():
-    baryons = ccl.BaccoemuBaryons()
+    baryons = ccl.BaryonsBaccoemu()
     cosmo = ccl.Cosmology(
         Omega_c=0.27,
         Omega_b=0.05,
@@ -32,7 +32,7 @@ def test_baccoemu_baryons():
 
 
 def test_baccoemu_baryons_A_s():
-    baryons = ccl.BaccoemuBaryons()
+    baryons = ccl.BaryonsBaccoemu()
     cosmo = ccl.Cosmology(
         Omega_c=0.27,
         Omega_b=0.05,
