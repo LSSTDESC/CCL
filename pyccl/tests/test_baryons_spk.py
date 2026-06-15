@@ -301,7 +301,7 @@ def test_spk_baryons_in_cosmology() -> None:
 def test_spk_missing_dependency_error() -> None:
     """Raise a clear error when optional dependency ``pyspk`` is missing."""
     with mock.patch.dict(sys.modules, {"pyspk": None}):
-        with pytest.raises(ModuleNotFoundError, match="pyspk>=2.0.0"):
+        with pytest.raises(ModuleNotFoundError, match="pyspk>=2.0.1"):
             _power_law_model()
 
 

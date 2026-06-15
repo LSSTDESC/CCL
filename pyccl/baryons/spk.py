@@ -227,7 +227,7 @@ class BaryonsSPK(Baryons):
             except ModuleNotFoundError as err:
                 raise ModuleNotFoundError(
                     "BaryonsSPK requires the optional dependency "
-                    "`pyspk>=2.0.0`. "
+                    "`pyspk>=2.0.1`. "
                     "Install it in your environment to use this model."
                 ) from err
         return self._pyspk
@@ -258,6 +258,7 @@ class BaryonsSPK(Baryons):
                 SO=self.SO,
                 relation_kind=self.relation_kind,
                 k_array=np.asarray(k_hmpc, dtype=float),
+                z_out_of_range="raise",
             )
         self._forward_pyspk_warnings(caught)
         return evaluator

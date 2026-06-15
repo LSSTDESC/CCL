@@ -11,6 +11,8 @@ landscape, accurate to approximately percent level for
 
 Python implementation: `pyspk <https://github.com/jemme07/pyspk>`_
 
+Minimum supported upstream version for this wrapper: ``pyspk>=2.0.1``.
+
 Units and Conversion
 --------------------
 

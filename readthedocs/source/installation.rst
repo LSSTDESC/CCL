@@ -179,7 +179,7 @@ The ``pyccl.BaryonsSPK`` wrapper requires the optional ``pyspk`` package.
 
 .. code-block:: bash
 
-   $ python3 -m pip install "pyspk>=2.0.0"
+   $ python3 -m pip install "pyspk>=2.0.1"
 
 
 .. _getting-cmake:
