@@ -2,7 +2,6 @@ import tempfile
 import numpy as np
 import pytest
 import pyccl as ccl
-# import warnings  # TODO: Uncomment for CCLv3.
 
 
 def test_parameters_lcdmDefaultParams():
@@ -323,7 +322,7 @@ def test_parameters_read_write():
     # check new parameters and config correctly updated
     assert params3["n_s"] == 1.1
     assert params["sum_nu_masses"] == params3["sum_nu_masses"]
-    assert params3._config_init_kwargs['matter_power_spectrum'] == 'linear'
+    assert params3.matter_power_spectrum_type == 'linear'
 
     # Now make a file that will be deleted so it does not exist
     # and check the right error is raise

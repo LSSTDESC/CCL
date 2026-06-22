@@ -1,5 +1,32 @@
 # Unreleased
 
+# v3.1.2 Changes
+- Fixed dynamic versioning
+
+# v3.1.1 Changes
+- Update physical constants (#1196)
+- Fixed bug in Despali 2016 mass function (#1197)
+
+# v3.1 Changes
+- Docstring improvements (#1168, #1177, #1184).
+- Minor bugfixes (#1167, #1169, #1170, #1172, #1187, #1188).
+- DarkEmulator mass function (#1138).
+
+# v3.0.1 Changes
+- Fixed GSL integration segfault (#1155).
+- Added `to_dict` utility in cosmology class (#1160).
+
+## Python library
+- Documentation fixes (#1122).
+- Background calculations (#1149).
+- Bacco lbias (#1139).
+- Integration of N5K winners into CCL (#1092).
+- Non-Gaussian covariances (#869).
+- CI fixes (#1121, #1154).
+
+## C library
+- Fix GSL integration abort (#1155)
+
 # v3.0.0 Changes
 
 ## Python library

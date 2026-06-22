@@ -1,22 +1,36 @@
 name: test  # default testing environment name from conda-incubator
+channels:
+  - conda-forge
+  - nodefaults
 dependencies:
-  - gfortran=12.2.0  # for isitgr
-  - python=3.8
+  - python
+  - gfortran  # for isitgr
   - pip
+  - setuptools
+  - setuptools_scm
   - cmake
   - gsl
+  - fftw
   - swig
   - pyyaml
-  - numpy
-  - scipy
+  - numpy < 2.4  # fast-pt uses np.trapz, which is deleted in numpy 2.4
+  - scipy < 1.14 # velocileptors uses functions removed in recent scipy versions
   - camb
   - fast-pt
   - pytest
   - pytest-cov
+  - pytables  # for baccoemu
+  - pyfftw  # for velocileptors
+  - george  # for dark_emu
+  - wheel # for classy
+  - cython < 3  # for classy
   - pip:
-      - tables==3.8.0  # for baccoemu
-      #- classy<3
-      - isitgr
+      - scipy<1.14
+      - classy  # Note the benchmarks were generated with 2.9.4
+      - isitgr  # Note the benchmarks were generated with 1.0.2
       - velocileptors @ git+https://github.com/sfschen/velocileptors
       - baccoemu @ git+https://bitbucket.org/rangulo/baccoemu.git@master
       - MiraTitanHMFemulator
+      - dark_emulator @ git+https://github.com/DarkQuestCosmology/dark_emulator_public.git@main # Note the benchmarks were generated with 1.1.2
+      - colossus
+      

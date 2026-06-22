@@ -13,11 +13,17 @@ to run them should be provided such that the user can reproduce the benchmarks.
 Running the Benchmarks
 ----------------------
 
-After CCL is installed, the benchmarks can be run by executing
+To run the benchmarks, execute
 
 .. code-block:: bash
 
-   $ pytest -vv benchmarks
+   $ OMP_NUM_THREADS=2 pytest -vv benchmarks
+
+You can also run a specific benchmark file:
+
+.. code-block:: bash
+
+   $ pytest -vv benchmarks/test_power.py
 
 from the top-level directory of the repository. The :ref:`unittests` section
 contains useful hints on using ``pytest`` to debug individual tests/benchmarks.

@@ -15,6 +15,9 @@
 
 %inline %{
 void parameters_m_nu_set_custom(ccl_parameters *params, double *mass, int num) {
+  if(params->m_nu != NULL) {
+    free(params->m_nu);
+  }
   params->m_nu = (double*) malloc(num*sizeof(double));
   memcpy(params->m_nu, mass, num*sizeof(double));
 }

@@ -16,13 +16,33 @@ Working on the Python library
 After completing the :ref:`devinstall`, you can change the ``Python`` library
 in your local copy of CCL. Any changes you make will be visible in ``Python``
 after you restart your interpreter. A typical workflow is to make some change,
-rerun a failing benchmark or unit test, etc. until you've completed your new
 feature and/or fixed a bug. See :ref:`benchmarks` and :ref:`unittests` for instructions
 on how to run these test suites. Please add unit tests and benchmarks as appropriate for
 any new functionality. You should also make sure to run the linter by following
 the instructions in :ref:`flake8`. Finally, after you are satisfied with your new
 code, make sure to follow :ref:`updocs` in order to the properly document your
 new additions.
+
+For a quick development cycle:
+
+.. code-block:: bash
+
+   # 1. Active environment
+   $ conda activate test
+
+   # 2. Make changes to Python or C files
+
+   # 3. If C files changed, rebuild
+   $ pip install -v -e .
+
+   # 4. Run relevant tests
+   $ pytest -vv pyccl/tests/test_yourmodule.py
+
+   # 5. Run linting
+   $ flake8 pyccl/
+
+   # 6. Full test suite before commit
+   $ OMP_NUM_THREADS=2 pytest -vv pyccl benchmarks
 
 
 Adding New Features to CCL

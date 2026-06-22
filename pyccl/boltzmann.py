@@ -86,7 +86,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
     cp.num_nu_massive = int(cosmo['N_nu_mass'])
     cp.nu_mass_eigenstates = int(cosmo['N_nu_mass'])
 
-    delta_neff = cosmo['Neff'] - 3.046  # used for BBN YHe comps
+    delta_neff = cosmo['Neff'] - 3.044  # used for BBN YHe comps
 
     # CAMB defines a neutrino degeneracy factor as T_i = g^(1/4)*T_nu
     # where T_nu is the standard neutrino temperature from first order
@@ -271,13 +271,13 @@ def get_isitgr_pk_lin(cosmo):
     cp.ombh2 = cosmo['Omega_b'] * h2
     cp.omch2 = cosmo['Omega_c'] * h2
     cp.omk = cosmo['Omega_k']
-    cp.GR = 1  # means GR modified!
+    cp.GR = 0  # 0 means GR modified!
     cp.ISiTGR_muSigma = True
     cp.mu0 = cosmo.mg_parametrization.mu_0
     cp.Sigma0 = cosmo.mg_parametrization.sigma_0
     cp.c1 = cosmo.mg_parametrization.c1_mg
     cp.c2 = cosmo.mg_parametrization.c2_mg
-    cp.Lambda = cosmo.mg_parametrization.lambda_mg
+    cp.lambda_k = cosmo.mg_parametrization.lambda_mg
 
     # "constants"
     cp.TCMB = cosmo['T_CMB']
@@ -291,7 +291,7 @@ def get_isitgr_pk_lin(cosmo):
     cp.num_nu_massive = int(cosmo['N_nu_mass'])
     cp.nu_mass_eigenstates = int(cosmo['N_nu_mass'])
 
-    delta_neff = cosmo['Neff'] - 3.046  # used for BBN YHe comps
+    delta_neff = cosmo['Neff'] - 3.044  # used for BBN YHe comps
 
     # ISiTGR built on CAMB which defines a neutrino degeneracy
     # factor as T_i = g^(1/4)*T_nu
