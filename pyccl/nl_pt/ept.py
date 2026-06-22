@@ -457,12 +457,6 @@ class EulerianPTCalculator(CCLAutoRepr):
         ck = tri.ck(self.z_s)
         ct = tri.ct(self.z_s)
 
-        # Original pgi
-        # pgi = b1[:, None] * (c1[:, None] * Pd1d1 +
-        #                    (self._g4*cd)[:, None] * (a00e + c00e) +
-        #                    (self._g4*c2)[:, None] * (a0e2 + b0e2) +
-        #                    ck[:, None] * Pak2 +
-        #                    self._g4*ct[:, None] * tijsij)
         pgi = (b1[:, None]*(c1[:, None] * Pd1d1 +
                             (self._g4*cd)[:, None] * (a00e + c00e) +
                             (self._g4*c2)[:, None] * (a0e2 + b0e2) +
