@@ -10,8 +10,8 @@ from .. import CCLAutoRepr, physical_constants
 from ..pyutils import _check_array_params
 
 
-def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None, at=None,
-                      Om_m2_for_c2=False, Om_m_fid=0.3):
+def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None,
+                      at=None, Om_m2_for_c2=False, Om_m_fid=0.3):
     """
     Function to convert from :math:`A_{ia}` values to :math:`c_{ia}` values,
     for the intrinsic alignment bias parameters using the standard
@@ -58,7 +58,7 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None, at=No
     if ak is not None:
         ck = -1*ak*(knorm**2)*5e-14*rho_crit*Om_m/gz
     if at is not None:
-        ct=at*5e-14*rho_crit*Om_m/gz
+        ct = at*5e-14*rho_crit*Om_m/gz
 
     return c1, c1delta, c2, ck, ct
 
@@ -229,7 +229,7 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         self.biases['cdelta'] = self._get_bias_function(cdelta)
         # Initialize ck
         self.biases['ck'] = self._get_bias_function(ck)
-        #Initialize ct
+        # Initialize ct
         self.biases['ct'] = self._get_bias_function(ct)
 
     @property
@@ -255,7 +255,7 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         """Internal derivative bias function
         """
         return self.biases['ck']
-    
+
     @property
     def ct(self):
         """Internal velocity bias function

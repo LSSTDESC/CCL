@@ -2,7 +2,8 @@ import numpy as np
 import pyccl as ccl
 import fastpt as fpt
 
-cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.96, sigma8=0.8, T_CMB=2.725,
+cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.96, sigma8=0.8,
+                      T_CMB=2.725,
                       transfer_function='bbks')
 lkmin = -4
 lkmax = 2
@@ -16,11 +17,11 @@ g4 = gf**4
 pklin = np.array([ccl.linear_matter_power(cosmo, ks, a)
                   for a in a_s])
 
-C_window=.75
-P_window=None
-n_pad=int(0.5*len(ks))
+C_window = 0.75
+P_window = None
+n_pad = int(0.5*len(ks))
 to_do = ['one_loop_dd', 'dd_bias', 'IA']
-pt_ob=fpt.FASTPT(ks,to_do=to_do,low_extrap=-5,high_extrap=3,n_pad=n_pad)
+pt_ob = fpt.FASTPT(ks, to_do=to_do, low_extrap=-5, high_extrap=3, n_pad=n_pad)
 oloop_dd = pt_ob.one_loop_dd(pk,
                              P_window=P_window,
                              C_window=C_window)
@@ -83,7 +84,7 @@ d2e2 = g4 * gI_tt[1][None, :]
 d2te = g4 * gI_ct[0][None, :]
 s2te = g4 * gI_ct[1][None, :]
 Pak2 = Pd1d1 * (ks**2)[None, :]
-                                        
+
 b1 = 1.3
 b2 = 1.5
 bs = 1.7
@@ -105,24 +106,24 @@ pgg = (b1**2 * Pd1d1 +
        b1 * bk2 * Pd1k2)
 
 pgm = (b1 * Pd1d1 +
-       0.5* b2 * Pd1d2 +
+       0.5 * b2 * Pd1d2 +
        0.5 * bs * Pd1s2 +
        0.5 * b3 * Pd1d3 +
        0.5 * bk2 * Pd1k2)
 pgi = (b1*(c1 * Pd1d1 +
-               (cd) * (a00e + c00e) +
-              (c2) * (a0e2 + b0e2) + 
-              (ct) * d0te + ck * Pak2) +
-       0.5*b2*((c1)*d2e + 
-              (cd) * (d20e) +
-              (c2) * (d2e2) + 
-              (ct) * d2te) +
+       (cd) * (a00e + c00e) +
+       (c2) * (a0e2 + b0e2) +
+       (ct) * d0te + ck * Pak2) +
+       0.5*b2*((c1)*d2e +
+               (cd) * (d20e) +
+               (c2) * (d2e2) +
+               (ct) * d2te) +
        0.5*bs*((c1)*s2e +
-              (cd) * (s20e) +
-              (c2) * (s2e2) +
-              (ct) *s2te) +
-       0.5*b3*(c1*Pd1d3)+
-       0.5*bk2*(c1*Pd1k2))   
+               (cd) * (s20e) +
+               (c2) * (s2e2) +
+               (ct) * s2te) +
+       0.5*b3*(c1*Pd1d3) +
+       0.5*bk2*(c1*Pd1k2))
 pii = (c1**2 * Pd1d1 +
        2 * c1 * cd * (a00e + c00e) +
        cd**2 * a0e0e +
