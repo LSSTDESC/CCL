@@ -19,14 +19,14 @@ _PK_ALIAS = {
     'b2:cdelta': 'b2:cdelta', 'b3nl:b3nl': 'zero', 'b3nl:bs': 'zero',
     'b3nl:bk2': 'zero', 'b3nl:c1': 'm:b3nl', 'b3nl:c2':
     'zero', 'b3nl:cdelta': 'zero', 'bs:bs': 'bs:bs',
-    'bs:bk2': 'zero', 'bs:c1': 'm:bs', 'bs:c2': 'bs:c2',
+    'bs:bk2': 'zero', 'bs:c1': 'bs:c1', 'bs:c2': 'bs:c2',
     'bs:cdelta': 'bs:cdelta', 'bk2:bk2': 'zero', 'bk2:c1': 'm:bk2',
     'bk2:c2': 'zero', 'bk2:cdelta': 'zero', 'c1:c1': 'm:m',
     'c1:c2': 'm:c2', 'c1:cdelta': 'm:cdelta', 'c1:ck': 'm:ck', 
     'c2:c2': 'c2:c2', 'c2:cdelta': 'c2:cdelta',
     'cdelta:cdelta': 'cdelta:cdelta', 'ck:ck': 'zero', 'm:ct': 'm:ct',
     'b1:ct': 'm:ct', 'c1:ct': 'm:ct','c2:ct': 'c2:ct',
-    'cdelta:ct': 'cdelta:ct', 'ct:ct': 'ct:ct', 'ck:ct': 'm:ct', 
+    'cdelta:ct': 'cdelta:ct', 'ct:ct': 'ct:ct', 'ck:ct': 'zero', 
     'bs:ct': 'bs:ct', 'b3nl:ct': 'zero', 'bk2:ct': 'zero', 'b2:ct': 'b2:ct',
     'b2:ck': 'zero', 'b3nl:ck': 'zero', 'bs:ck': 'zero', 'bk2:ck': 'zero',
     'c2:ck': 'zero', 'cdelta:ck': 'zero'}
@@ -433,6 +433,8 @@ class EulerianPTCalculator(CCLAutoRepr):
         d2te, s2te = self.gI_ct
         d0te, d0ete, de2te, tete = self.ia_ct
         d1,d2,d3,d4,d5,d6,d7,d8,sig3nl = self.ia_one_loop_dd_bias_b3nl
+        Pd1k2 = self.pk_bk * (self.k_s**2)[None, :]
+        
         
         if(self.ufpt):
             Pak2 = self.ia_der
@@ -471,9 +473,10 @@ class EulerianPTCalculator(CCLAutoRepr):
                             (self._g4*ct)[:,None] * d2te) +
                0.5*bs[:,None]*((self._g4*c1)[:,None]*s2e +
                             (self._g4*cd)[:,None] * (s20e) +
-                            (self._g4*c2)[:,None] * (s2e2)*2 +
+                            (self._g4*c2)[:,None] * (s2e2) +
                             (self._g4*ct)[:, None] *s2te) +
-                0.5*b3nl[:,None]*((self._g4*c1)[:,None]*sig3nl))    
+                0.5*b3nl[:,None]*((self._g4*c1)[:,None]*sig3nl)+
+                0.5*bk2[:,None]*(c1[:,None]*Pd1k2))   
         #ck[:, None] * (d2e*self.k_s**2) shouldnt exist at this order
         #ck[:, None] * (s2e*self.k_s**2) shouldnt exist at this order>
                                 
@@ -802,25 +805,27 @@ class EulerianPTCalculator(CCLAutoRepr):
         elif pk_name == 'cdelta:cdelta_bb':
             pk = self._g4T * self.ia_ta[3]
         elif pk_name == 'm:ct':
-            pk = self.ia_ct[0]
+            pk = self._g4T * self.ia_ct[0]
         elif pk_name == 'c2:ct':
             pk = self._g4T * self.ia_ct[2]
         elif pk_name == 'cdelta:ct':
             pk = self._g4T * self.ia_ct[1]
         elif pk_name == 'ct:ct':
-            pk = self.ia_ct[3]
+            pk = self._g4T *self.ia_ct[3]
         elif pk_name == 'b2:c2':
-            pk = self.gI_tt[1]
+            pk = 0.5 * self._g4T * self.gI_tt[1]
         elif pk_name == 'b2:cdelta':
-            pk = self.gI_ta[1]
+            pk = 0.5 * self._g4T * self.gI_ta[1]
         elif pk_name == 'b2:ct':
-            pk = self.gI_ct[0]
+            pk = 0.5 * self._g4T * self.gI_ct[0]
         elif pk_name == 'bs:c2':
-            pk = self.gI_tt[0]
+            pk = 0.5 * self._g4T * self.gI_tt[0]
         elif pk_name == 'bs:cdelta':
-            pk = self.gI_ta[3]
+            pk = 0.5 * self._g4T * self.gI_ta[3]
         elif pk_name == 'bs:ct':
-            pk = self.gI_ct[1]
+            pk = 0.5 * self._g4T * self.gI_ct[1]
+        elif pk_name == 'bs:c1':
+            pk = 0.5 * self._g4T * self.gI_ta[2]
         elif pk_name == 'zero':
             # If zero, store None and return
             self._pk2d_temp[pk_name] = None
