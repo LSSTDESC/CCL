@@ -570,10 +570,10 @@ class EulerianPTCalculator(CCLAutoRepr):
                    ((c11*c22+c21*c12)*self._g4)[:, None]*(a0e2+b0e2) +
                    ((cd1*c22+cd2*c21)*self._g4)[:, None]*d0ee2 +
                    (ck1*c12 + ck2*c11)[:,None] * (Pak2) +
-                   (ct1*c12 + ct2*c11)[:,None]*(d0te) +
-                   (ct1*c22 + ct2*c21)[:,None] * (de2te) +
-                   (ct1*cd2 + ct2*cd1)[:,None] * (d0ete) +
-                   (ct1*ct2)[:,None] * (tete))
+                   ((ct1*c12 + ct2*c11)*self._g4)[:,None]*(d0te) +
+                   ((ct1*c22 + ct2*c21)*self._g4)[:,None] * (de2te) +
+                   ((ct1*cd2 + ct2*cd1)*self._g4)[:,None] * (d0ete) +
+                   (ct1*ct2*self._g4)[:,None] * (tete))
 
 
         return pii*self.exp_cutoff
@@ -612,8 +612,8 @@ class EulerianPTCalculator(CCLAutoRepr):
         pim = (c1[:, None] * Pd1d1 +
                (self._g4*cd)[:, None] * (a00e + c00e) +
                (self._g4*c2)[:, None] * (a0e2 + b0e2) +
-               (self._g4*ck)[:, None] * Pak2 +
-               ct[:,None] * d0te)
+               (ck)[:, None] * Pak2 +
+               (self._g4*ct)[:,None] * d0te)
         return pim*self.exp_cutoff
 
     def _get_pmm(self):
