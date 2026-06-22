@@ -17,18 +17,21 @@ _PK_ALIAS = {
     'b1:b3nl': 'm:b3nl', 'b1:bs': 'm:bs', 'b1:bk2': 'm:bk2',
     'b1:c1': 'm:m', 'b1:c2': 'm:c2', 'b1:cdelta': 'm:cdelta', 'b1:ck': 'm:ck',
     'b2:b2': 'b2:b2', 'b2:b3nl': 'zero', 'b2:bs': 'b2:bs',
-    'b2:bk2': 'zero', 'b2:c1': 'zero', 'b2:c2': 'zero',
-    'b2:cdelta': 'zero', 'b3nl:b3nl': 'zero', 'b3nl:bs': 'zero',
-    'b3nl:bk2': 'zero', 'b3nl:c1': 'zero', 'b3nl:c2':
+    'b2:bk2': 'zero', 'b2:c1': 'm:b2', 'b2:c2': 'b2:c2',
+    'b2:cdelta': 'b2:cdelta', 'b3nl:b3nl': 'zero', 'b3nl:bs': 'zero',
+    'b3nl:bk2': 'zero', 'b3nl:c1': 'm:b3nl', 'b3nl:c2':
     'zero', 'b3nl:cdelta': 'zero', 'bs:bs': 'bs:bs',
-    'bs:bk2': 'zero', 'bs:c1': 'zero', 'bs:c2': 'zero',
-    'bs:cdelta': 'zero', 'bk2:bk2': 'zero', 'bk2:c1': 'zero',
+    'bs:bk2': 'zero', 'bs:c1': 'm:bs', 'bs:c2': 'bs:c2',
+    'bs:cdelta': 'bs:cdelta', 'bk2:bk2': 'zero', 'bk2:c1': 'm:bk2',
     'bk2:c2': 'zero', 'bk2:cdelta': 'zero', 'c1:c1': 'm:m',
     'c1:c2': 'm:c2', 'c1:cdelta': 'm:cdelta', 'c1:ck': 'm:ck', 
     'c2:c2': 'c2:c2', 'c2:cdelta': 'c2:cdelta',
     'cdelta:cdelta': 'cdelta:cdelta', 'ck:ck': 'zero', 'm:ct': 'm:ct',
     'b1:ct': 'm:ct', 'c1:ct': 'm:ct','c2:ct': 'c2:ct',
-    'cdelta:ct': 'cdelta:ct', 'ct:ct': 'ct:ct', 'ck:ct': 'm:ct'}
+    'cdelta:ct': 'cdelta:ct', 'ct:ct': 'ct:ct', 'ck:ct': 'm:ct', 
+    'bs:ct': 'bs:ct', 'b3nl:ct': 'zero', 'bk2:ct': 'zero', 'b2:ct': 'b2:ct',
+    'b2:ck': 'zero', 'b3nl:ck': 'zero', 'bs:ck': 'zero', 'bk2:ck': 'zero',
+    'c2:ck': 'zero', 'cdelta:ck': 'zero'}
 
 
 class EulerianPTCalculator(CCLAutoRepr):
@@ -193,10 +196,11 @@ class EulerianPTCalculator(CCLAutoRepr):
         except:
             raise ImportError("Your attempted import of FAST-PT has failed. You either dont have fast-pt installed, or have the wrong version. Try running pip install fast-pt or conda install fast-pt, then try again")
         
-        if( not hasattr(fpt, "IA_ta")):
-            raise ValueError(f"Your FAST-PT version lacks a required attribute. You may have the wrong fast-pt install. Try running pip install fast-pt or conda install fast-pt, then try again")
-        if (not hasattr(fpt, "IA_tij")):
-            raise ValueError(f"You are using an older version of FAST-PT, please run pip install fast-pt or conda install fast-pt, then try again")
+        #UPDATE THESE, currently breaks because these arent top level accessible
+        # if( not hasattr(fpt, "IA_ta")):
+        #     raise ValueError(f"Your FAST-PT version lacks a required attribute. You may have the wrong fast-pt install. Try running pip install fast-pt or conda install fast-pt, then try again")
+        # if (not hasattr(fpt, "IA_tij")):
+        #     raise ValueError(f"You are using an older version of FAST-PT, please run pip install fast-pt or conda install fast-pt, then try again")
         n_pad = int(self.fastpt_par['pad_factor'] * len(self.k_s))
         self.pt = fpt.FASTPT(self.k_s, to_do=to_do,
                              low_extrap=self.fastpt_par['low_extrap'],
@@ -280,15 +284,19 @@ class EulerianPTCalculator(CCLAutoRepr):
             reshape_fastpt(self.ia_tt)
             self.ia_mix = self.pt.IA_mix(**kw)
             reshape_fastpt(self.ia_mix)
+            self.ia_ct = self.pt.IA_ct(**kw)
+            reshape_fastpt(self.ia_ct)
             if(self.ufpt):
                 self.ia_der = self.pt.IA_der(**kw)
                 reshape_fastpt(self.ia_der)
-            self.ia_tij = self.pt.IA_tij(**kw)
-            reshape_fastpt(self.ia_tij)
-            self.ia_gb2 = self.pt.IA_gb2(**kw)
-            reshape_fastpt(self.ia_gb2)
-            self.ia_s2 = self.pt.IA_s2(**kw)
-            reshape_fastpt(self.ia_s2)
+            self.ia_ct = self.pt.IA_ct(**kw)
+            reshape_fastpt(self.ia_ct)
+            self.gI_ct = self.pt.gI_ct(**kw)
+            reshape_fastpt(self.gI_ct)
+            self.gI_ta = self.pt.gI_ta(**kw)
+            reshape_fastpt(self.gI_ta)
+            self.gI_tt = self.pt.gI_tt(**kw)
+            reshape_fastpt(self.gI_tt)
             self.ia_one_loop_dd_bias_b3nl = self.pt.one_loop_dd_bias_b3nl(**kw)
             reshape_fastpt(self.ia_one_loop_dd_bias_b3nl)
 
@@ -413,10 +421,19 @@ class EulerianPTCalculator(CCLAutoRepr):
         Pd1d1 = self.pk_b1
         
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
-        a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
-        tijdsij, tij2sij, tijtij, tijsij = self.ia_tij
-        gb2sij, gb2dsij, gb2sij2, gb2tij = self.ia_gb2
-        s2sij, s2dsij, s2sij2, s2tij = self.ia_s2
+        a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix\
+        #Currently kept for checking reference, will be deleted in official PR
+        #d2e = gb2sij, d20e = gb2dsij, s2e = s2sij, s20e = s2dsij
+        #s2e2 = s2sij2, d2e2 = gb2sij2
+        #d2te = gb2tij, s2te = s2tij
+        #d0te = tijsij
+        # tijdsij, tij2sij, tijtij, tijsij = self.gI_ta
+        # gb2sij, gb2dsij, gb2sij2, gb2tij = self.gI_tt
+        # s2sij, s2dsij, s2sij2, s2tij = self.gI_ct
+        d2e, d20e, s2e, s20e = self.gI_ta
+        s2e2, d2e2 = self.gI_tt
+        d2te, s2te = self.gI_ct
+        d0te, d0ete, de2te, tete = self.ia_ct
         d1,d2,d3,d4,d5,d6,d7,d8,sig3nl = self.ia_one_loop_dd_bias_b3nl
         
         if(self.ufpt):
@@ -449,18 +466,19 @@ class EulerianPTCalculator(CCLAutoRepr):
         pgi = (b1[:,None]*(c1[:, None] * Pd1d1 +
                              (self._g4*cd)[:, None] * (a00e + c00e) +
                              (self._g4*c2)[:, None] * (a0e2 + b0e2) + 
-                             ck[:, None] * Pak2 + (self._g4*ct)[:, None] * tijsij) +
-               0.5*b2[:,None]*((self._g4*c1)[:,None]*gb2sij + 
-                            (self._g4*cd)[:,None] * (gb2dsij) +
-                            (self._g4*c2)[:, None] * (gb2sij2) +
-                            ck[:, None] * (gb2sij*self.k_s**2) + 
-                            (self._g4*ct)[:,None] * gb2tij) +
-               0.5*bs[:,None]*((self._g4*c1)[:,None]*s2sij +
-                            (self._g4*cd)[:,None] * (s2dsij) +
-                            (self._g4*c2)[:,None] * (s2sij2) +
-                            ck[:, None] * (s2sij*self.k_s**2) +
-                            (self._g4*ct)[:, None] *s2tij) +
-                0.5*b3nl[:,None]*((self._g4*c1)[:,None]*sig3nl))                            
+                             (self._g4*ct)[:, None] * d0te + ck[:, None] * Pak2) +
+               0.5*b2[:,None]*((self._g4*c1)[:,None]*d2e + 
+                            (self._g4*cd)[:,None] * (d20e) +
+                            (self._g4*c2)[:, None] * (d2e2) + 
+                            (self._g4*ct)[:,None] * d2te) +
+               0.5*bs[:,None]*((self._g4*c1)[:,None]*s2e +
+                            (self._g4*cd)[:,None] * (s20e) +
+                            (self._g4*c2)[:,None] * (s2e2)*2 +
+                            (self._g4*ct)[:, None] *s2te) +
+                0.5*b3nl[:,None]*((self._g4*c1)[:,None]*sig3nl))    
+        #ck[:, None] * (d2e*self.k_s**2) shouldnt exist at this order
+        #ck[:, None] * (s2e*self.k_s**2) shouldnt exist at this order>
+                                
         
         return pgi*self.exp_cutoff
 
@@ -521,7 +539,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         ae2e2, ab2b2 = self.ia_tt
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
-        tijdsij, tij2sij, tijtij, tijsij = self.ia_ta
+        d0te, d0ete, de2te, tete = self.ia_ct
         if(self.ufpt):
             Pak2 = self.ia_der
         else:
@@ -551,10 +569,11 @@ class EulerianPTCalculator(CCLAutoRepr):
                    ((c11*c22+c21*c12)*self._g4)[:, None]*(a0e2+b0e2) +
                    ((cd1*c22+cd2*c21)*self._g4)[:, None]*d0ee2 +
                    (ck1*c12 + ck2*c11)[:,None] * (Pak2) +
-                   (ct1*c12 + ct2*c11)[:,None]*(tijsij) +
-                   (ct1*c22 + ct2*c21)[:,None] * (tij2sij) +
-                   (ct1*cd2 + ct2*cd1)[:,None] * (tijdsij) +
-                   (ct1*ct2)[:,None] * (tijtij))
+                   (ct1*c12 + ct2*c11)[:,None]*(d0te) +
+                   (ct1*c22 + ct2*c21)[:,None] * (de2te) +
+                   (ct1*cd2 + ct2*cd1)[:,None] * (d0ete) +
+                   (ct1*ct2)[:,None] * (tete))
+
 
         return pii*self.exp_cutoff
 
@@ -576,7 +595,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         Pd1d1 = self.pk_b1
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
-        tijdsij, tij2sij, tijtij, tijsij = self.ia_ta
+        d0te, d0ete, de2te, tete = self.ia_ct
         if(self.ufpt):
             Pak2 = self.ia_der
         else:
@@ -592,8 +611,8 @@ class EulerianPTCalculator(CCLAutoRepr):
         pim = (c1[:, None] * Pd1d1 +
                (self._g4*cd)[:, None] * (a00e + c00e) +
                (self._g4*c2)[:, None] * (a0e2 + b0e2) +
-               ck[:,None] * Pak2 +
-               ct[:,None] * tijsij)
+               (self._g4*ck)[:, None] * Pak2 +
+               ct[:,None] * d0te)
         return pim*self.exp_cutoff
 
     def _get_pmm(self):
@@ -785,13 +804,25 @@ class EulerianPTCalculator(CCLAutoRepr):
         elif pk_name == 'cdelta:cdelta_bb':
             pk = self._g4T * self.ia_ta[3]
         elif pk_name == 'm:ct':
-            pk = self.ia_tij[3]
+            pk = self.ia_ct[0]
         elif pk_name == 'c2:ct':
-            pk = self._g4T * self.ia_tij[1]
+            pk = self._g4T * self.ia_ct[2]
         elif pk_name == 'cdelta:ct':
-            pk = self._g4T * self.ia_tij[0]
+            pk = self._g4T * self.ia_ct[1]
         elif pk_name == 'ct:ct':
-            pk = self.ia_tij[2]
+            pk = self.ia_ct[3]
+        elif pk_name == 'b2:c2':
+            pk = self.gI_tt[1]
+        elif pk_name == 'b2:cdelta':
+            pk = self.gI_ta[1]
+        elif pk_name == 'b2:ct':
+            pk = self.gI_ct[0]
+        elif pk_name == 'bs:c2':
+            pk = self.gI_tt[0]
+        elif pk_name == 'bs:cdelta':
+            pk = self.gI_ta[3]
+        elif pk_name == 'bs:ct':
+            pk = self.gI_ct[1]
         elif pk_name == 'zero':
             # If zero, store None and return
             self._pk2d_temp[pk_name] = None
