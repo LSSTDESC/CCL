@@ -140,6 +140,18 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: lcov.info
+          parallel: true
+          flag-name: py${{ matrix.python-version }}
+
+  coverage-finish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close parallel coverage build
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
 
   lint:
     runs-on: ubuntu-latest

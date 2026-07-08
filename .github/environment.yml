@@ -33,4 +33,5 @@ dependencies:
       - MiraTitanHMFemulator
       - dark_emulator @ git+https://github.com/DarkQuestCosmology/dark_emulator_public.git@main # Note the benchmarks were generated with 1.1.2
       - colossus
+      - pyspk>=2.0.1
       
