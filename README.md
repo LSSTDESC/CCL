@@ -42,7 +42,7 @@ recent (non-released) stable branch, but under development. We recommend using o
 of the public releases unless working on the development on the library.
 
 See the [documentation](https://ccl.readthedocs.io/en/latest/) for more details
-and installation instructions.
+and installation instructions. We also have a comprehensive list of example computations `CCL` can do in the [CCLX github repo](https://github.com/LSSTDESC/CCLX).
 
 ## TLDR
 
@@ -89,6 +89,7 @@ ell = np.arange(2, 10)
 cls = cosmo.angular_cl(lens1, lens2, ell)
 print(cls)
 ```
+
 
 # License, Credits, Feedback etc
 

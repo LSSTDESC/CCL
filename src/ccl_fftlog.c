@@ -208,7 +208,7 @@ static void fht(int npk, int N,
     double dim, double mu, double q, double kcrc,
     int noring, double complex* u, int *status)
 {
-  fftw_plan forward_plan, reverse_plan;
+  fftw_plan forward_plan = NULL, reverse_plan = NULL;
   double L = log(k[N-1]/k[0]) * N/(N-1.);
   double complex* ulocal = NULL;
   if(u == NULL) {
@@ -225,8 +225,8 @@ static void fht(int npk, int N,
     }
   }
 
-  fftw_complex* a_tmp;
-  fftw_complex* b_tmp;
+  fftw_complex* a_tmp = NULL;
+  fftw_complex* b_tmp = NULL;
   if(*status == 0) {
     a_tmp = fftw_alloc_complex(N);
     if(a_tmp==NULL)
@@ -336,10 +336,8 @@ static void fht(int npk, int N,
     } //end omp parallel
   }
 
-  if(*status == 0) {
-    fftw_destroy_plan(forward_plan);
-    fftw_destroy_plan(reverse_plan);
-  }
+  if(forward_plan != NULL) fftw_destroy_plan(forward_plan);
+  if(reverse_plan != NULL) fftw_destroy_plan(reverse_plan);
 
   free(ulocal);
   //TODO: free this up
@@ -347,7 +345,7 @@ static void fht(int npk, int N,
   fftw_free(b_tmp);
 }
 
-/* Compute the discrete Hankel transform of the function a(r) 
+/* Compute the discrete Hankel transform of the function a(r)
 * weighted by a power law and the nth derivative of the 
 * (spherical) bessel function. Explicitly, this function computes 
 * \tilde{a}(k)= \int \frac{dr}{(xk)^plaw} a(r) (J/j)^(n)_\mu(xk)
@@ -369,11 +367,11 @@ static void general_fht(int npk, int N,
   kcrc = mu+1.0;
   mu = mu+0.5*spherical_bessel;
 
-  fftw_plan forward_plan, reverse_plan;
+  fftw_plan forward_plan = NULL, reverse_plan = NULL;
   double L = log(k[N-1]/k[0]) * N/(N-1.);
   double complex* ulocal = NULL;
   if(u == NULL) {
-    
+
       kcrc = goodkr_new_deriv(N, mu, q, L, spherical_bessel, bessel_deriv,plaw, kcrc);
 
     ulocal = malloc (sizeof(complex double)*N);
@@ -386,8 +384,8 @@ static void general_fht(int npk, int N,
     }
   }
 
-  fftw_complex* a_tmp;
-  fftw_complex* b_tmp;
+  fftw_complex* a_tmp = NULL;
+  fftw_complex* b_tmp = NULL;
   if(*status == 0) {
     a_tmp = fftw_alloc_complex(N);
     if(a_tmp==NULL)
@@ -500,10 +498,8 @@ static void general_fht(int npk, int N,
     } //end omp parallel
   }
 
-  if(*status == 0) {
-    fftw_destroy_plan(forward_plan);
-    fftw_destroy_plan(reverse_plan);
-  }
+  if(forward_plan != NULL) fftw_destroy_plan(forward_plan);
+  if(reverse_plan != NULL) fftw_destroy_plan(reverse_plan);
 
   free(ulocal);
   //TODO: free this up
