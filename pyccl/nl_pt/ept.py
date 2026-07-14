@@ -51,7 +51,8 @@ class EulerianPTCalculator(CCLAutoRepr):
 
     .. math::
         s^I_{ij}=c_1\\,s_{ij}+c_2(s_{ik}s_{jk}-s^2\\delta_{ik}/3)
-        +c_\\delta\\,\\delta\\,s_{ij + c_k\\k^2\\,s_{ij}}
+        +c_\\delta\\,\\delta\\,s_{ij} + c_k\\,k^2\\,s_{ij}
+        + c_t\\,t_{ij}
 
     (note that the higher-order terms are not divided by 2!).
 
@@ -138,12 +139,11 @@ class EulerianPTCalculator(CCLAutoRepr):
              documentation for more details.
         sub_lowk (:obj:`bool`): if ``True``, the small-scale white noise
              contribution to some of the terms will be subtracted.
-        usefptk (::obj:`bool`):) if `True``, will use the FASTPT IA k2
-        term instead of the CCL IA k2 term
     """
     __repr_attrs__ = __eq_attrs__ = ('with_NC', 'with_IA', 'with_matter_1loop',
                                      'k_s', 'a_s', 'exp_cutoff', 'b1_pk_kind',
-                                     'bk2_pk_kind', 'fastpt_par', )
+                                     'bk2_pk_kind', 'ak2_pk_kind', 'fastpt_par',
+                                     )
 
     def __init__(self, *, with_NC=False, with_IA=False,
                  with_matter_1loop=True, cosmo=None,
@@ -152,11 +152,10 @@ class EulerianPTCalculator(CCLAutoRepr):
                  b1_pk_kind='nonlinear', bk2_pk_kind='nonlinear',
                  ak2_pk_kind='nonlinear',
                  pad_factor=1.0, low_extrap=-5.0, high_extrap=3.0,
-                 P_window=None, C_window=0.75, sub_lowk=False, usefptk=False):
+                 P_window=None, C_window=0.75, sub_lowk=False):
         self.with_matter_1loop = with_matter_1loop
         self.with_NC = with_NC
         self.with_IA = with_IA
-        self.ufpt = usefptk
         # Set FAST-PT parameters
         self.fastpt_par = {'pad_factor': pad_factor,
                            'low_extrap': low_extrap,
@@ -193,10 +192,10 @@ class EulerianPTCalculator(CCLAutoRepr):
             import fastpt as fpt
         except ImportError:
             raise ImportError("Your attempted import of FAST-PT has failed. "
-                              "You either dont have fast-pt installed"
-                              "or have the wrong version."
+                              "You either don't have fast-pt installed "
+                              "or have the wrong version. "
                               "Try running pip install fast-pt or conda "
-                              " install fast-pt, then try again")
+                              "install fast-pt, then try again")
 
         # Verify the installed FAST-PT exposes the routines CCL needs.
         required = ['one_loop_dd', 'one_loop_dd_bias_b3nl', 'IA_ta', 'IA_tt',
@@ -204,7 +203,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         missing = [m for m in required if not hasattr(fpt.FASTPT, m)]
         if missing:
             raise ImportError(
-                "Your FAST-PT installation is missing required functions."
+                "Your FAST-PT installation is missing required functions. "
                 "You likely have an outdated "
                 "version; try pip or conda installing the newest version")
         n_pad = int(self.fastpt_par['pad_factor'] * len(self.k_s))
@@ -219,11 +218,14 @@ class EulerianPTCalculator(CCLAutoRepr):
         if bk2_pk_kind not in ['linear', 'nonlinear', 'pt']:
             raise ValueError(f"Unknown P(k) prescription {bk2_pk_kind}")
         if ak2_pk_kind not in ['linear', 'nonlinear', 'pt']:
-            raise ValueError(f"Unknown P(k) prescription in {ak2_pk_kind}")
+            raise ValueError(f"Unknown P(k) prescription {ak2_pk_kind}")
         self.b1_pk_kind = b1_pk_kind
         self.bk2_pk_kind = bk2_pk_kind
         self.ak2_pk_kind = ak2_pk_kind
-        if (self.b1_pk_kind == 'pt') or (self.bk2_pk_kind == 'pt'):
+        if (self.b1_pk_kind == 'pt'
+            or self.bk2_pk_kind == 'pt'
+            or self.ak2_pk_kind == 'pt'
+            ):
             self.with_matter_1loop = True
 
         # Initialize all expensive arrays to ``None``.
@@ -292,11 +294,6 @@ class EulerianPTCalculator(CCLAutoRepr):
             reshape_fastpt(self.ia_mix)
             self.ia_ct = self.pt.IA_ct(**kw)
             reshape_fastpt(self.ia_ct)
-            if (self.ufpt):
-                self.ia_der = self.pt.IA_der(**kw)
-                reshape_fastpt(self.ia_der)
-            self.ia_ct = self.pt.IA_ct(**kw)
-            reshape_fastpt(self.ia_ct)
             self.gI_ct = self.pt.gI_ct(**kw)
             reshape_fastpt(self.gI_ct)
             self.gI_ta = self.pt.gI_ta(**kw)
@@ -355,7 +352,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         Args:
             tr1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): first
                 tracer to correlate.
-            tr2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): first
+            tr2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): second
                 tracer to correlate.
 
         Returns:
@@ -405,12 +402,9 @@ class EulerianPTCalculator(CCLAutoRepr):
         """ Get the number counts - IA cross-spectrum at the internal
         set of wavenumbers and scale factors.
 
-        .. note:: The full non-linear model for the cross-correlation
-                  between number counts and intrinsic alignments is
-                  still work in progress in FastPT. As a workaround
-                  CCL assumes a non-linear treatment of IAs, but only
-                  linearly biased number counts.
-
+        .. note:: The nonlinear intrinsic alignment model has now been
+                    included to one loop order in FAST-PT,
+                    and has been implemented into CCL.
         Args:
             trg (:class:`~pyccl.nl_pt.tracers.PTTracer`): number
                 counts tracer.
@@ -434,11 +428,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         d0te, d0ete, de2te, tete = self.ia_ct
         d1, d2, d3, d4, d5, d6, d7, d8, sig3nl = self.ia_one_loop_dd_bias_b3nl
         Pd1k2 = self.pk_bk * (self.k_s**2)[None, :]
-
-        if (self.ufpt):
-            Pak2 = self.ia_der
-        else:
-            Pak2 = self.pk_ak*(self.k_s**2)[None, :]
+        Pak2 = self.pk_ak*(self.k_s**2)[None, :]
 
         # Get biases
         b1 = trg.b1(self.z_s)
@@ -518,7 +508,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         Args:
             tr1 (:class:`~pyccl.nl_pt.tracers.PTTracer`): first tracer
                 to correlate.
-            tr2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): first tracer
+            tr2 (:class:`~pyccl.nl_pt.tracers.PTTracer`): second tracer
                 to correlate.
 
         Returns:
@@ -533,10 +523,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         ae2e2, ab2b2 = self.ia_tt
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
         d0te, d0ete, de2te, tete = self.ia_ct
-        if (self.ufpt):
-            Pak2 = self.ia_der
-        else:
-            Pak2 = self.pk_ak*(self.k_s**2)[None, :]
+        Pak2 = self.pk_ak*(self.k_s**2)[None, :]
 
         # Get biases
         c11 = tr1.c1(self.z_s)
@@ -588,10 +575,7 @@ class EulerianPTCalculator(CCLAutoRepr):
         a00e, c00e, a0e0e, a0b0b = self.ia_ta
         a0e2, b0e2, d0ee2, d0bb2 = self.ia_mix
         d0te, d0ete, de2te, tete = self.ia_ct
-        if (self.ufpt):
-            Pak2 = self.ia_der
-        else:
-            Pak2 = self.pk_ak*(self.k_s**2)[None, :]
+        Pak2 = self.pk_ak*(self.k_s**2)[None, :]
 
         # Get biases
         c1 = tri.c1(self.z_s)
@@ -656,8 +640,6 @@ class EulerianPTCalculator(CCLAutoRepr):
         Returns:
             :class:`~pyccl.pk2d.Pk2D`: PT power spectrum.
         """
-        if return_ia_bb:
-            return_ia_bb = True
 
         if tracer2 is None:
             tracer2 = tracer1
@@ -717,7 +699,9 @@ class EulerianPTCalculator(CCLAutoRepr):
         term in galaxy bias expansion), ``'bk2'`` (non-local
         :math:`\\nabla^2 \\delta` term in galaxy bias expansion),
         ``'c1'`` (linear IA term), ``'c2'`` (:math:`s^2` term in IA
-        expansion), ``'cdelta'`` (:math:`s\\delta` term in IA expansion).
+        expansion), ``'cdelta'`` (:math:`s\\delta` term in IA expansion)
+        , ``'ck'`` (derivative term in IA expansion), and
+        ``'ct'`` (velocity shear term in IA expansion).
 
         Args:
             kind (:obj:`str`): string defining the pair of PT operators for
