@@ -270,26 +270,223 @@ static void ccl_tracer_corr_bessel(ccl_cosmology *cosmo,
 TASK: Compute input factor for ccl_tracer_corr_legendre
 INPUT: tracer 1, tracer 2, i_bessel, theta array, n_theta, L_max, output Pl_theta
  */
-static void ccl_compute_legendre_polynomial(int corr_type,double theta,int ell_max,double *Pl_theta)
+static void ccl_compute_legendre_polynomial(int corr_type,
+                                            double theta,
+                                            int ell_max,
+                                            double *Pl_theta)
 {
-  int j;
-  double cth=cos(theta*M_PI/180);
+  int ell;
+  double x = cos(theta * M_PI / 180.0);
+  const double eps = 1e-14;
 
-  //Initialize Pl_theta
-  for (j=0;j<=ell_max;j++)
-      Pl_theta[j]=0.;
+  /* Avoid exact endpoints because G^{+/-}_{l,2} contains 1/(1-x^2) */
+  if (x >  1.0 - eps) x =  1.0 - eps;
+  if (x < -1.0 + eps) x = -1.0 + eps;
 
-  if(corr_type==CCL_CORR_GG) {
-    gsl_sf_legendre_Pl_array(ell_max,cth,Pl_theta);
-    for (j=0;j<=ell_max;j++)
-      Pl_theta[j]*=(2*j+1);
+  for (ell = 0; ell <= ell_max; ell++)
+    Pl_theta[ell] = 0.0;
+
+  if (corr_type == CCL_CORR_GG) {
+    gsl_sf_legendre_Pl_array(ell_max, x, Pl_theta);
+    for (ell = 0; ell <= ell_max; ell++)
+      Pl_theta[ell] *= (2.0 * ell + 1.0);
   }
-  else if(corr_type==CCL_CORR_GL) {
-    for (j=2;j<=ell_max;j++) {//https://arxiv.org/pdf/1007.4809.pdf
-      Pl_theta[j]=gsl_sf_legendre_Plm(j,2,cth);
-      Pl_theta[j]*=(2*j+1.)/((j+0.)*(j+1.));
+
+  else if (corr_type == CCL_CORR_GL) {
+    gsl_sf_legendre_Plm_array(ell_max, 2, x, &(Pl_theta[2]));
+    for (ell = 2; ell <= ell_max; ell++)
+      Pl_theta[ell] *= (2.0 * ell + 1.0) / (ell * (ell + 1.0));
+  }
+
+  else if ((corr_type == CCL_CORR_LP) || (corr_type == CCL_CORR_LM)) {
+    double *P2;
+    double omx2 = 1.0 - x * x; //1 - x^2, with x = cos(theta)
+    int m       = 2.0;
+
+    P2 = malloc((ell_max + 1) * sizeof(double));
+    if (P2 == NULL)
+      return ;
+
+    for (ell = 0; ell <= ell_max; ell++)
+      P2[ell] = 0.0;
+
+    /* GSL fills P_l^2(x) for l=2..ell_max into P2[2..ell_max] */
+    gsl_sf_legendre_Plm_array(ell_max, (int) m, x, &(P2[2]));
+
+    for (ell = 2; ell <= ell_max; ell++) {
+      double Pl2   = P2[ell];
+      double Plm12 = (ell > 2) ? P2[ell - 1] : 0.0;
+      double Gplus, Gminus;
+      double pref;
+
+      /* Eq. 4.19 from https://arxiv.org/pdf/astro-ph/9609149 */
+      Gplus  = -(((ell - m * m) / omx2) + 0.5 * ell * (ell - 1.0)) * Pl2 + ((ell + m) * x / omx2) * Plm12;
+      Gminus = m * (((ell - 1.0) * x / omx2) * Pl2 - ((ell + m) / omx2) * Plm12);
+
+      /* ccl_tracer_corr_legendre divides the sum by 4*pi afterward,
+       * so we store an extra factor of 2 here to reproduce Eq. 19 in https://arxiv.org/abs/2105.13548
+       */
+      pref = 2.0 * (2.0 * ell + 1.0) / ((double) ell * ell * (ell + 1.0) * (ell + 1.0));
+
+      if (corr_type == CCL_CORR_LP)
+        Pl_theta[ell] = pref * (Gplus + Gminus);
+      else
+        Pl_theta[ell] = pref * (Gplus - Gminus);
+    }
+
+    free(P2);
+  }
+}
+
+
+/* A convenience function for the binning kernels */
+static inline double dpl_from_array(int n, double x, const double *P)
+{
+  if (n == 0) {
+    return 0.0;
+  }
+  return ((double)n) * (P[n - 1] - x * P[n]) / (1.0 - x * x);
+}
+
+static void ccl_compute_legendre_polynomial_binned(int corr_type,
+                                                   double theta_min,
+                                                   double theta_max,
+                                                   int ell_max,
+                                                   double *Pl_theta)
+{
+  int ell;
+  const double eps = 1e-14;
+
+  /* x_hi corresponds to the lower angular edge theta_min,
+   * x_lo corresponds to the upper angular edge theta_max.
+   */
+  double x_hi = cos(theta_min * M_PI / 180.0);
+  double x_lo = cos(theta_max * M_PI / 180.0);
+  double dx = x_hi - x_lo;
+
+  double *P_hi = NULL;
+  double *P_lo = NULL;
+
+  //Initialize with zeros
+  for (ell = 0; ell <= ell_max; ell++)
+    Pl_theta[ell] = 0.0;
+
+  /* Clamp endpoints slightly away from |x|=1 for derivative evaluations. */
+  if (x_hi >  1.0 - eps) x_hi =  1.0 - eps;
+  if (x_hi < -1.0 + eps) x_hi = -1.0 + eps;
+  if (x_lo >  1.0 - eps) x_lo =  1.0 - eps;
+  if (x_lo < -1.0 + eps) x_lo = -1.0 + eps;
+
+  dx = x_hi - x_lo;
+
+  /* Need up to ell_max + 1 because some expressions involve P_{ell+1}. */
+  P_hi = malloc((ell_max + 2) * sizeof(double));
+  P_lo = malloc((ell_max + 2) * sizeof(double));
+  if ((P_hi == NULL) || (P_lo == NULL)) {
+    free(P_hi);
+    free(P_lo);
+    return;
+  }
+
+  gsl_sf_legendre_Pl_array(ell_max + 1, x_hi, P_hi);
+  gsl_sf_legendre_Pl_array(ell_max + 1, x_lo, P_lo);
+
+  if (corr_type == CCL_CORR_GG) {
+    /* Eq. 20 of https://arxiv.org/abs/2105.13548:
+     * (2 ell + 1) * \bar{P_ell} =
+     *   ([P_{ell+1} - P_{ell-1}]_{x_lo}^{x_hi}) / (x_hi - x_lo)
+     */
+    Pl_theta[0] = 1.0;
+    for (ell = 1; ell <= ell_max; ell++) {
+      Pl_theta[ell] =
+        ((P_hi[ell + 1] - P_hi[ell - 1]) -
+         (P_lo[ell + 1] - P_lo[ell - 1])) / dx;
     }
   }
+
+  else if (corr_type == CCL_CORR_GL) {
+    /* Eq. B2 of https://arxiv.org/abs/2012.08568:
+     * average of P_ell^2 over the angular bin.
+     * CCL stores:
+     *   (2 ell + 1) / [ell (ell + 1)] * <P_ell^2>_bin
+     */
+    for (ell = 2; ell <= ell_max; ell++) {
+      double Ibin_hi, Ibin_lo, avgP2;
+
+      Ibin_hi =
+        (((double)ell + 2.0 / (2.0 * ell + 1.0)) * P_hi[ell - 1]) +
+        ((2.0 - ell) * x_hi * P_hi[ell]) -
+        (2.0 / (2.0 * ell + 1.0)) * P_hi[ell + 1];
+
+      Ibin_lo =
+        (((double)ell + 2.0 / (2.0 * ell + 1.0)) * P_lo[ell - 1]) +
+        ((2.0 - ell) * x_lo * P_lo[ell]) -
+        (2.0 / (2.0 * ell + 1.0)) * P_lo[ell + 1];
+
+      avgP2 = (Ibin_hi - Ibin_lo) / dx;
+
+      Pl_theta[ell] =
+        ((2.0 * ell + 1.0) / ((double)ell * (ell + 1.0))) * avgP2;
+    }
+  }
+
+  else if ((corr_type == CCL_CORR_LP) || (corr_type == CCL_CORR_LM)) {
+    /* Eq. B5:
+     * average of G^+_{ell,2} +/- G^-_{ell,2} over the angular bin.
+     * CCL stores an extra factor of 2 so that the later 1/(4 pi)
+     * gives the Eq. 19 normalization for xi_+ / xi_-.
+     */
+    for (ell = 2; ell <= ell_max; ell++) {
+      double dPl_hi   = dpl_from_array(ell,     x_hi, P_hi);
+      double dPl_lo   = dpl_from_array(ell,     x_lo, P_lo);
+      double dPlm1_hi = dpl_from_array(ell - 1, x_hi, P_hi);
+      double dPlm1_lo = dpl_from_array(ell - 1, x_lo, P_lo);
+
+      double term_hi, term_lo;
+      double avgGpm;
+      double pref;
+
+      term_hi =
+        -(0.5 * ell * (ell - 1.0)) *
+          (ell + 2.0 / (2.0 * ell + 1.0)) * P_hi[ell - 1]
+        -0.5 * ell * (ell - 1.0) * (2.0 - ell) * (x_hi * P_hi[ell])
+        +(ell * (ell - 1.0) / (2.0 * ell + 1.0)) * P_hi[ell + 1]
+        +(4.0 - ell) * dPl_hi
+        +(ell + 2.0) * (x_hi * dPlm1_hi - P_hi[ell - 1]);
+
+      term_lo =
+        -(0.5 * ell * (ell - 1.0)) *
+          (ell + 2.0 / (2.0 * ell + 1.0)) * P_lo[ell - 1]
+        -0.5 * ell * (ell - 1.0) * (2.0 - ell) * (x_lo * P_lo[ell])
+        +(ell * (ell - 1.0) / (2.0 * ell + 1.0)) * P_lo[ell + 1]
+        +(4.0 - ell) * dPl_lo
+        +(ell + 2.0) * (x_lo * dPlm1_lo - P_lo[ell - 1]);
+
+      if (corr_type == CCL_CORR_LP) {
+        term_hi +=  2.0 * (ell - 1.0) * (x_hi * dPl_hi - P_hi[ell])
+                   -2.0 * (ell + 2.0) * dPlm1_hi;
+        term_lo +=  2.0 * (ell - 1.0) * (x_lo * dPl_lo - P_lo[ell])
+                 -  2.0 * (ell + 2.0) * dPlm1_lo;
+      }
+      else {
+        term_hi += -2.0 * (ell - 1.0) * (x_hi * dPl_hi - P_hi[ell])
+                   +2.0 * (ell + 2.0) * dPlm1_hi;
+        term_lo += -2.0 * (ell - 1.0) * (x_lo * dPl_lo - P_lo[ell])
+                   +2.0 * (ell + 2.0) * dPlm1_lo;
+      }
+
+      avgGpm = (term_hi - term_lo) / dx;
+
+      pref = 2.0 * (2.0 * ell + 1.0) /
+             ((double)ell * ell * (ell + 1.0) * (ell + 1.0));
+
+      Pl_theta[ell] = pref * avgGpm;
+    }
+  }
+
+  free(P_hi);
+  free(P_lo);
+
 }
 
 /*--------ROUTINE: ccl_tracer_corr_legendre ------
@@ -305,13 +502,6 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
   int i;
   double *l_arr = NULL, *cl_arr = NULL, *Pl_theta = NULL;
   ccl_f1d_t *cl_spl;
-
-  if(corr_type==CCL_CORR_LM || corr_type==CCL_CORR_LP){
-    *status=CCL_ERROR_NOT_IMPLEMENTED;
-    ccl_cosmology_set_status_message(cosmo,
-                                     "ccl_correlation.c: ccl_tracer_corr_legendre(): "
-                                     "CCL does not support full-sky xi+- calcuations.\nhttps://arxiv.org/abs/1702.05301 indicates flat-sky to be sufficient.\n");
-  }
 
   if(*status==0) {
     l_arr=malloc(((int)(cosmo->spline_params.ELL_MAX_CORR)+1)*sizeof(double));
@@ -395,6 +585,103 @@ static void ccl_tracer_corr_legendre(ccl_cosmology *cosmo,
   free(cl_arr);
 }
 
+
+/*--------ROUTINE: ccl_tracer_corr_legendre_binned ------
+TASK: Compute correlation function via Legendre polynomials, including angular binning
+INPUT: cosmology, number of theta bins, theta array, tracer 1, tracer 2, i_bessel, boolean
+       for tapering, vector of tapering limits, correlation vector, angular_cl function.
+ */
+static void ccl_tracer_corr_legendre_binned(ccl_cosmology *cosmo,
+                                     int n_ell,double *ell,double *cls,
+                                     int n_theta,double *theta_min,double *theta_max,double *wtheta,
+                                     int corr_type,int do_taper_cl,double *taper_cl_limits,
+                                     int *status) {
+  int i;
+  double *l_arr = NULL, *cl_arr = NULL, *Pl_theta = NULL;
+  ccl_f1d_t *cl_spl;
+
+  if(*status==0) {
+    l_arr=malloc(((int)(cosmo->spline_params.ELL_MAX_CORR)+1)*sizeof(double));
+    if(l_arr==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo,
+                                       "ccl_correlation.c: ccl_tracer_corr_legendre(): "
+                                       "ran out of memory\n");
+    }
+  }
+
+  if(*status==0) {
+    cl_arr=malloc(((int)(cosmo->spline_params.ELL_MAX_CORR)+1)*sizeof(double));
+    if(cl_arr==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo,
+                                       "ccl_correlation.c: ccl_tracer_corr_legendre(): "
+                                       "ran out of memory\n");
+    }
+  }
+
+  if(*status==0) {
+    //Interpolate input Cl into
+    cl_spl=ccl_f1d_t_new(n_ell,ell,cls,cls[0],0,
+			 ccl_f1d_extrap_const,
+			 ccl_f1d_extrap_logx_logy, status);
+    if(cl_spl==NULL) {
+      *status=CCL_ERROR_MEMORY;
+      ccl_cosmology_set_status_message(cosmo,
+                                       "ccl_correlation.c: ccl_tracer_corr_legendre(): "
+                                       "ran out of memory\n");
+    }
+  }
+
+  if(*status==0) {
+    for(i=0;i<=(int)(cosmo->spline_params.ELL_MAX_CORR);i++) {
+      double l=(double)i;
+      l_arr[i]=l;
+      cl_arr[i]=ccl_f1d_t_eval(cl_spl,l);
+    }
+    ccl_f1d_t_free(cl_spl);
+
+    if (do_taper_cl)
+      *status=taper_cl((int)(cosmo->spline_params.ELL_MAX_CORR)+1,l_arr,cl_arr,taper_cl_limits);
+  }
+
+  int local_status, i_L;
+#pragma omp parallel default(none) \
+                     shared(cosmo, theta_min, theta_max, cl_arr, wtheta, n_theta, status, corr_type) \
+                     private(Pl_theta, i, i_L, local_status)
+  {
+    Pl_theta = NULL;
+    local_status = *status;
+
+    if (local_status == 0) {
+      Pl_theta = malloc(sizeof(double)*((int)(cosmo->spline_params.ELL_MAX_CORR)+1));
+      if (Pl_theta == NULL) {
+        local_status = CCL_ERROR_MEMORY;
+      }
+    }
+
+    #pragma omp for schedule(dynamic)
+    for (int i=0; i < n_theta; i++) {
+      if (local_status == 0) {
+        wtheta[i] = 0;
+        ccl_compute_legendre_polynomial_binned(corr_type, theta_min[i], theta_max[i], (int)(cosmo->spline_params.ELL_MAX_CORR), Pl_theta);
+        for (i_L=1; i_L < (int)(cosmo->spline_params.ELL_MAX_CORR); i_L+=1)
+          wtheta[i] += cl_arr[i_L]*Pl_theta[i_L];
+        wtheta[i] /= (M_PI*4);
+      }
+    }
+
+    if (local_status) {
+      #pragma omp atomic write
+      *status = local_status;
+    }
+
+    free(Pl_theta);
+  }
+  free(l_arr);
+  free(cl_arr);
+}
+
 /*--------ROUTINE: ccl_tracer_corr ------
 TASK: For a given tracer, get the correlation function. Do so by running
       ccl_angular_cls. If you already have Cls calculated, go to the next
@@ -423,6 +710,43 @@ void ccl_correlation(ccl_cosmology *cosmo,
   default :
     *status=CCL_ERROR_INCONSISTENT;
     ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_correlation(): Unknown algorithm\n");
+  }
+
+}
+
+
+/*--------ROUTINE: ccl_correlation_binned ------
+TASK: For a given tracer, get the correlation function. Include angular
+      binning directly in the kernels
+INPUT: cosmology, number of theta values to evaluate = NL, theta vector,
+       tracer 1, tracer 2, i_bessel, key for tapering, limits of tapering
+       correlation function.
+ */
+void ccl_correlation_binned(ccl_cosmology *cosmo,
+                     int n_ell,double *ell,double *cls,
+                     int n_theta,double *theta_min,double *theta_max,double *wtheta,
+                     int corr_type,int do_taper_cl,double *taper_cl_limits,int flag_method,
+                     int *status) {
+  switch(flag_method) {
+  case CCL_CORR_FFTLOG :
+    *status=CCL_ERROR_INCONSISTENT;
+    ccl_cosmology_set_status_message(cosmo, 
+                                     "ccl_correlation.c: ccl_correlation_binned(): "
+                                     "Cannot use method=FFTLOG for binned correlations, use LEGENDRE\n");
+    break;
+  case CCL_CORR_LGNDRE :
+    ccl_tracer_corr_legendre_binned(cosmo,n_ell,ell,cls,n_theta,theta_min,theta_max,wtheta,
+                                    corr_type, do_taper_cl,taper_cl_limits,status);
+    break;
+  case CCL_CORR_BESSEL :
+    *status=CCL_ERROR_INCONSISTENT;
+    ccl_cosmology_set_status_message(cosmo, 
+                                     "ccl_correlation.c: ccl_correlation_binned(): "
+                                     "Cannot use method=BESSEL for binned correlations, use LEGENDRE\n");
+    break;
+  default :
+    *status=CCL_ERROR_INCONSISTENT;
+    ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_correlation_binned(): Unknown algorithm\n");
   }
 
 }

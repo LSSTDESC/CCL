@@ -42,7 +42,8 @@ correlation_types = {
 }
 
 
-def correlation(cosmo, *, ell, C_ell, theta, type='NN', method='fftlog'):
+def correlation(cosmo, *, ell, C_ell, theta,
+                type='NN', method='fftlog', theta_max=None):
     r"""Compute the angular correlation function.
 
     .. math::
@@ -71,6 +72,12 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', method='fftlog'):
         * :math:`s_a=2`, :math:`s_b=0` e.g. galaxy-shear, and :math:`\kappa`-shear
         * :math:`s_a=s_b=2` e.g. shear-shear.
 
+    Bin-averaging, where we predict the average correlation within a given theta-bin,
+    is also implemented. This is only available for the Legendre method, as the 
+    bin-averaging can be done analytically in that case. The method we use for the
+    NN, NG, and GG+/- correlations follow Eq 65, B1, and B5, respectively, from 
+    arxiv:2012.08568
+
     .. note::
         For scales smaller than :math:`\sim 0.1^{\circ}`, the input power
         spectrum should be sampled to sufficienly high :math:`\ell` to ensure
@@ -87,7 +94,9 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', method='fftlog'):
                           spectrum.
         C_ell (array): Input angular power spectrum.
         theta (:obj:`float` or `array`): Angular separation(s) at which to
-            calculate the angular correlation function (in degrees).
+            calculate the angular correlation function (in degrees). If theta_max
+            is passed then this is interpreted as the minimum/left edge in a given
+            separation bin.
         type (:obj:`str`): Type of correlation function. Choices: ``'NN'`` (0x0),
             ``'NG'`` (0x2), ``'GG+'`` (2x2, :math:`\xi_+`),
             ``'GG-'`` (2x2, :math:`\xi_-`), where numbers refer to the spins
@@ -99,6 +108,9 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', method='fftlog'):
             Choices: ``'Bessel'`` (direct integration over Bessel function),
             ``'FFTLog'`` (fast integration with FFTLog), ``'Legendre'``
             (brute-force sum over Legendre polynomials).
+        theta_max (:obj:`float` or `array1): Maximum angular separation(s) for the given
+            separation bin (in degrees). If passed, then the `theta` input is interpreted
+            as a minimum/left edge of the bin.
 
     Returns:
         (:obj:`float` or `array`): Value(s) of the correlation function at the
@@ -119,15 +131,40 @@ def correlation(cosmo, *, ell, C_ell, theta, type='NN', method='fftlog'):
     if scalar := isinstance(theta, (int, float)):
         theta = np.array([theta, ])
 
+        if theta_max is not None:
+            if isinstance(theta_max, (int, float)):
+                theta_max = np.array([theta_max, ])
+
+            assert theta.size == theta_max.size, \
+                (f"theta and theta_max have different sizes"
+                 f"({theta.size} != {theta_max.size})")
+
+            assert not np.allclose(theta, theta_max), \
+                "theta_min cannot be the same as theta_max"
+
     if np.all(np.array(C_ell) == 0):
         # short-cut and also avoid integration errors
         wth = np.zeros_like(theta)
     else:
-        # Call correlation function
-        wth, status = lib.correlation_vec(cosmo, ell, C_ell, theta,
-                                          correlation_types[type],
-                                          correlation_methods[method],
-                                          len(theta), status)
+        if theta_max is None:
+            wth, status = lib.correlation_vec(
+                cosmo, ell, C_ell, theta,
+                correlation_types[type],
+                correlation_methods[method],
+                len(theta), status)
+        else:
+            wth, status = lib.correlation_vec_binned(
+                cosmo,
+                ell,
+                C_ell,
+                theta,
+                theta_max,
+                correlation_types[type],
+                correlation_methods[method],
+                len(theta),
+                status,
+            )
+
     check(status, cosmo_in)
     if scalar:
         return wth[0]

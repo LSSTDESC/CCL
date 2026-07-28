@@ -11,6 +11,8 @@
     (double* larr, int nlarr),
     (double* clarr, int nclarr),
     (double* theta, int nt),
+    (double* theta_min, int nt),
+    (double* theta_max, int ntmax),
     (double* r, int nr),
     (double* s, int ns),
     (double* sig, int nsig)}
@@ -25,6 +27,17 @@
 
     if numpy.shape(theta) != (nout,):
         raise CCLError("Input shape for `theta` must match `(nout,)`!")
+%}
+
+%feature("pythonprepend") correlation_vec_binned %{
+    if numpy.shape(larr) != numpy.shape(clarr):
+        raise CCLError("Input shape for `larr` must match `clarr`!")
+
+    if numpy.shape(theta_min) != (nout,):
+        raise CCLError("Input shape for `theta_min` must match `(nout,)`!")
+    
+    if numpy.shape(theta_max) != (nout,):
+        raise CCLError("Input shape for `theta_max` must match `(nout,)`!")
 %}
 
 %feature("pythonprepend") correlation_3d_vec %{
@@ -60,6 +73,30 @@ void correlation_vec(ccl_cosmology *cosmo, double* larr, int nlarr,
                      int *status) {
     ccl_correlation(
         cosmo, nlarr, larr, clarr, nt, theta,
+        output, corr_type, 0, NULL, method, status);
+}
+
+void correlation_vec_binned(ccl_cosmology *cosmo,
+                            double* larr, int nlarr,
+                            double* clarr, int nclarr,
+                            double* theta_min, int nt,
+                            double* theta_max, int ntmax,
+                            int corr_type, int method,
+                            int nout,
+                            double* output,
+                            int *status) {
+    if (ntmax != nt) {
+        *status = CCL_ERROR_INCONSISTENT;
+        return;
+    }
+
+    if (nout != nt) {
+        *status = CCL_ERROR_INCONSISTENT;
+        return;
+    }
+
+    ccl_correlation_binned(
+        cosmo, nlarr, larr, clarr, nt, theta_min, theta_max,
         output, corr_type, 0, NULL, method, status);
 }
 
