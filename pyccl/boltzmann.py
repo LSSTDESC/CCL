@@ -237,7 +237,7 @@ def get_isitgr_pk_lin(cosmo):
         raise CCLError(
             "ISiTGR is required to use the 'boltzmann_isitgr' transfer "
             "function but could not be imported. Install it with:\n"
-            "    pip install pyccl[MG]\n"
+            "    pip install \"pyccl[MG]\"\n"
             "or: pip install isitgr"
         ) from e
 
