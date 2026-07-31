@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 from subprocess import call
 
@@ -9,10 +10,15 @@ from setuptools.command.develop import develop as _develop
 
 
 def _compile_ccl(debug=False):
-    call(["mkdir", "-p", "build"])
+    # Clean stale CMake cache to avoid cross-version contamination
+    # (e.g. when cibuildwheel builds multiple Python versions sequentially).
+    if os.path.exists("build/CMakeCache.txt"):
+        shutil.rmtree("build")
+    os.makedirs("build", exist_ok=True)
     v = sys.version_info
     cmd = ["cmake", "-H.", "-Bbuild",
-           "-DPYTHON_VERSION=%d.%d.%d" % (v.major, v.minor, v.micro)]
+           "-DPYTHON_VERSION=%d.%d.%d" % (v.major, v.minor, v.micro),
+           "-DPYTHON_EXECUTABLE=%s" % sys.executable]
     if debug:
         cmd += ["-DCMAKE_BUILD_TYPE=Debug"]
     if call(cmd) != 0:
@@ -44,6 +50,9 @@ class Distribution(_distribution):
     def __init__(self, attr=None):
         self.debug = False
         super().__init__(attr)
+
+    def has_ext_modules(self):
+        return True
 
 
 class Build(_build):

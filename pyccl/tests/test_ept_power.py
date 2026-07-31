@@ -65,6 +65,22 @@ def test_ept_get_pk2d_nl(nl):
     assert isinstance(pk, ccl.Pk2D)
 
 
+def test_ept_b1_bk2_eq():
+    # Tests that pk templates for b1 and b_k2 are
+    # assigned correctly.
+    ptc = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=False,
+        b1_pk_kind='linear', bk2_pk_kind='linear')
+    ptc.update_ingredients(COSMO)
+    assert ptc.pk_bk is ptc.pk_b1
+
+    ptc = ccl.nl_pt.EulerianPTCalculator(
+        with_NC=True, with_IA=False,
+        b1_pk_kind='linear', bk2_pk_kind='pt')
+    ptc.update_ingredients(cosmo=COSMO)
+    assert not (ptc.pk_bk is ptc.pk_b1)
+
+
 @pytest.mark.parametrize('typ_nlin,typ_nloc', [('linear', 'nonlinear'),
                                                ('nonlinear', 'linear'),
                                                ('nonlinear', 'pt'),

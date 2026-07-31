@@ -269,7 +269,7 @@ class EulerianPTCalculator(CCLAutoRepr):
                                       for a in self.a_s])
         if 'pt' in [self.b1_pk_kind, self.bk2_pk_kind]:
             if 'linear' in pks:
-                pk = pks['linear']
+                pk = pks['linear'].copy()
             else:
                 pk = np.array([cosmo.linear_matter_power(self.k_s, a)
                                for a in self.a_s])

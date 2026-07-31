@@ -225,6 +225,7 @@ class Cosmology(CCLObject):
         * `HMCode_logT_AGN`
         * `kmax`
         * `lmax`
+        * `AccuracyTarget` (currently set to 0 to match CAMB v1 behavior)
         * `dark_energy_model`
 
     Consult the CAMB documentation for their usage. These parameters are passed

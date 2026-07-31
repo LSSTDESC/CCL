@@ -1057,50 +1057,50 @@ def halomod_trispectrum_3h(cosmo, hmc, k, a, prof, *, prof2=None,
                                                 cosmo, aa, hmc)
         norm = norm1 * norm2 * norm3 * norm4
 
-        # Permutation 0 is 0 due to Bpt_1_2_34=0
+        # Permutation 0
         i1, i2, i3, i4 = _get_ints_I_1_1(hmc, cosmo, k_use, aa, prof, prof2,
                                          prof3, prof4)
 
-        # Permutation 1: 2 <-> 3
+        # Permutation 1
         i24 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof2=prof4,
                         prof_2pt=prof24_2pt, diag=False)
-        # Permutation 2: 2 <-> 4
+        # Permutation 2
         if (prof3 == prof4) and (prof32_2pt == prof24_2pt):
-            i32 = i24.T
+            i23 = i24
         else:
-            i32 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof2,
+            i23 = hmc.I_1_2(cosmo, k_use, aa, prof2, prof2=prof3,
                             prof_2pt=prof32_2pt, diag=False)
-        # Permutation 3: 1 <-> 3
+        # Permutation 3
         if (prof == prof2) and (prof14_2pt == prof24_2pt):
             i14 = i24
-        elif ([prof, prof4] == [prof3, prof2]) and (prof14_2pt == prof32_2pt):
-            i14 = i32
         elif ([prof, prof4] == [prof2, prof3]) and (prof14_2pt == prof32_2pt):
-            i14 = i32.T
+            i14 = i23
+        elif ([prof, prof4] == [prof3, prof2]) and (prof14_2pt == prof32_2pt):
+            i14 = i23.T
         else:
             i14 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof4,
                             prof_2pt=prof14_2pt, diag=False)
-        # Permutation 4: 1 <-> 4
+        # Permutation 4
         if (prof == prof2) and (prof13_2pt == prof32_2pt):
-            i31 = i32
+            i13 = i23
         elif prof3 == prof4 and (prof13_2pt == prof32_2pt):
-            i31 = i14.T
-        elif ([prof3, prof] == [prof2, prof4]) and (prof13_2pt == prof24_2pt):
-            i31 = i24
-        elif ([prof3, prof] == [prof4, prof2]) and (prof13_2pt == prof24_2pt):
-            i31 = i24.T
+            i13 = i14
+        elif ([prof, prof3] == [prof2, prof4]) and (prof13_2pt == prof24_2pt):
+            i13 = i24
+        elif ([prof, prof3] == [prof4, prof2]) and (prof13_2pt == prof24_2pt):
+            i13 = i24.T
         else:
-            i31 = hmc.I_1_2(cosmo, k_use, aa, prof3, prof2=prof,
+            i13 = hmc.I_1_2(cosmo, k_use, aa, prof, prof2=prof3,
                             prof_2pt=prof13_2pt, diag=False)
 
-        # Permutation 5: 12 <-> 34 is 0 due to Bpt_3_4_12=0
+        # Permutation 5
         if separable_growth:
             Bpt = Bpt_separable * (cosmo.growth_factor(aa)) ** 4
         else:
             Bpt = get_Bpt(aa)
 
-        tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i32 +
-                       i3 * i2 * i14 + i4 * i2 * i31)
+        tk_3h = Bpt * (i1 * i3 * i24 + i1 * i4 * i23 +
+                       i3 * i2 * i14 + i4 * i2 * i13)
 
         # Normalize
         out[ia, :, :] = tk_3h / norm

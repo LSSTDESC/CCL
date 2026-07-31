@@ -59,12 +59,13 @@ jobs:
     steps:
 
       - name: Checkout CCL repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up conda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           channels: conda-forge
+          conda-remove-defaults: true
           show-channel-urls: true
           miniforge-version: latest
           miniforge-variant: Miniforge3
@@ -85,7 +86,7 @@ jobs:
         run: echo "TODAY=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
 
       - name: Get cached environment
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache
         with:
           path: ${{ matrix.prefix }}
@@ -108,7 +109,7 @@ jobs:
         run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
 
       - name: Cache pip packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
           key: pip-py${{ matrix.python-version }}-${{ runner.os }}-${{ hashFiles('**/environment.yml') }}-${{ hashFiles('setup.py') }}
@@ -146,7 +147,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout CCL repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Lint
         uses: py-actions/flake8@v2
