@@ -44,9 +44,9 @@ dev = [
 
 boltzmann = ["camb", "classy"]
 MG = ["isitgr"]
-pt = ["velocileptors", "fast-pt"]
+pt = ["fast-pt", "velocileptors @ git+https://github.com/sfschen/velocileptors"]
 emulators = ["baccoemu", "MiraTitanHMFemulator", "dark_emulator"]
-full = ["camb", "classy", "isitgr", "velocileptors", "fast-pt", "baccoemu", "MiraTitanHMFemulator", "dark_emulator"]
+full = ["camb", "classy", "isitgr", "fast-pt", "velocileptors @ git+https://github.com/sfschen/velocileptors", "baccoemu", "MiraTitanHMFemulator", "dark_emulator"]
 
 [tool.setuptools.packages.find]
 include = ["pyccl*"]

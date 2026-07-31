@@ -68,11 +68,11 @@ Note that the code only supports Linux or Mac OS, but no Windows.
 For extended functionality, install one of the optional extra groups:
 
 ```bash
-pip install pyccl[boltzmann]   # Boltzmann codes: CAMB, CLASS (classy)
-pip install pyccl[MG]          # Modified gravity: ISiTGR
-pip install pyccl[pt]          # Perturbation theory: FAST-PT, velocileptors
-pip install pyccl[emulators]   # Emulators: BaccoEmu, MiraTitan, Dark Emulator
-pip install pyccl[full]        # All of the above
+pip install "pyccl[boltzmann]"   # Boltzmann codes: CAMB, CLASS (classy)
+pip install "pyccl[MG]"          # Modified gravity: ISiTGR
+pip install "pyccl[pt]"          # Perturbation theory: FAST-PT, velocileptors
+pip install "pyccl[emulators]"   # Emulators: BaccoEmu, MiraTitan, Dark Emulator
+pip install "pyccl[full]"        # All of the above
 ```
 
 Without `pyccl[boltzmann]`, the default `transfer_function` is `'eisenstein_hu'`.
