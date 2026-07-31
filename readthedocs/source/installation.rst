@@ -56,6 +56,9 @@ CCL supports optional dependency groups installable as pip extras:
    $ pip install pyccl[emulators]   # BaccoEmu, MiraTitan HMF, Dark Emulator
    $ pip install pyccl[full]        # All of the above
 
+Without ``pyccl[boltzmann]``, the default ``transfer_function`` is
+``'eisenstein_hu'``. With it (or a ``conda`` install), the default is
+``'boltzmann_camb'``.
 
 Google Colab
 ============
