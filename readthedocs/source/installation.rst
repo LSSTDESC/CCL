@@ -50,11 +50,11 @@ CCL supports optional dependency groups installable as pip extras:
 
 .. code-block:: bash
 
-   $ pip install pyccl[boltzmann]   # CAMB and CLASS (classy)
-   $ pip install pyccl[MG]          # Modified gravity: ISiTGR
-   $ pip install pyccl[pt]          # FAST-PT and velocileptors
-   $ pip install pyccl[emulators]   # BaccoEmu, MiraTitan HMF, Dark Emulator
-   $ pip install pyccl[full]        # All of the above
+   $ pip install "pyccl[boltzmann]"   # CAMB and CLASS (classy)
+   $ pip install "pyccl[MG]"          # Modified gravity: ISiTGR
+   $ pip install "pyccl[pt]"          # FAST-PT and velocileptors
+   $ pip install "pyccl[emulators]"   # BaccoEmu, MiraTitan HMF, Dark Emulator
+   $ pip install "pyccl[full]"        # All of the above
 
 
 Google Colab
