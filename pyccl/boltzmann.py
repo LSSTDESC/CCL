@@ -32,7 +32,7 @@ def get_camb_pk_lin(cosmo, *, nonlin=False):
         raise CCLError(
             "CAMB is required to use the 'boltzmann_camb' transfer function "
             "but could not be imported. Install it with:\n"
-            "    pip install pyccl[boltzmann]\n"
+            "    pip install \"pyccl[boltzmann]\"\n"
             "or: pip install camb"
         ) from e
 
@@ -236,8 +236,9 @@ def get_isitgr_pk_lin(cosmo):
     except ImportError as e:
         raise CCLError(
             "ISiTGR is required to use the 'boltzmann_isitgr' transfer "
-            "function but could not be imported. Install it with: "
-            "pip install pyccl[boltzmann] or pip install isitgr"
+            "function but could not be imported. Install it with:\n"
+            "    pip install \"pyccl[MG]\"\n"
+            "or: pip install isitgr"
         ) from e
 
     # Get extra CAMB parameters that were specified

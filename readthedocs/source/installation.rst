@@ -46,19 +46,19 @@ Once you have ``CMake``, simply run:
 Installing with optional extras
 --------------------------------
 
-CCL supports four optional dependency groups installable as pip extras:
+CCL supports optional dependency groups installable as pip extras:
 
 .. code-block:: bash
 
-   $ pip install pyccl[boltzmann]   # CAMB, CLASS (classy), ISiTGR
-   $ pip install pyccl[pt]          # FAST-PT and velocileptors
-   $ pip install pyccl[emulators]   # BaccoEmu, MiraTitan HMF, Dark Emulator
-   $ pip install pyccl[full]        # All of the above
+   $ pip install "pyccl[boltzmann]"   # CAMB and CLASS (classy)
+   $ pip install "pyccl[MG]"          # Modified gravity: ISiTGR
+   $ pip install "pyccl[pt]"          # FAST-PT and velocileptors
+   $ pip install "pyccl[emulators]"   # BaccoEmu, MiraTitan HMF, Dark Emulator
+   $ pip install "pyccl[full]"        # All of the above
 
 Without ``pyccl[boltzmann]``, the default ``transfer_function`` is
 ``'eisenstein_hu'``. With it (or a ``conda`` install), the default is
 ``'boltzmann_camb'``.
-
 
 Google Colab
 ============
@@ -108,6 +108,8 @@ should already be in your environment.
 
 ISiTGR
 ------
+
+``ISiTGR`` is included in ``pip install pyccl[MG]``.
 
 In order to use CCL with ``ISiTGR``, you need to install the ``ISiTGR`` ``Python``
 wrapper ``isitgr`` with:
