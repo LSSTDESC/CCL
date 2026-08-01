@@ -77,6 +77,14 @@ matter_power_spectrum_types = {
     'emulator': lib.emulator_nlpk
 }
 
+def _camb_available():
+    # Avoid importing CAMB at module import time; just check if it's installed.
+    from importlib.util import find_spec
+    return find_spec("camb") is not None
+
+
+_DEFAULT_TRANSFER_FUNCTION = 'boltzmann_camb' if _camb_available() else 'eisenstein_hu'
+
 _TOP_LEVEL_MODULES = ("",)
 
 
@@ -239,7 +247,7 @@ class Cosmology(CCLObject):
             Neff=None, m_nu=0., mass_split='normal', w0=-1., wa=0.,
             T_CMB=DefaultParams.T_CMB,
             T_ncdm=DefaultParams.T_ncdm,
-            transfer_function='boltzmann_camb',
+            transfer_function=_DEFAULT_TRANSFER_FUNCTION,
             matter_power_spectrum='halofit',
             baryonic_effects=None,
             mg_parametrization=None,
