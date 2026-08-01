@@ -78,11 +78,9 @@ matter_power_spectrum_types = {
 }
 
 def _camb_available():
-    try:
-        import camb  # noqa: F401
-        return True
-    except ImportError:
-        return False
+    # Avoid importing CAMB at module import time; just check if it's installed.
+    from importlib.util import find_spec
+    return find_spec("camb") is not None
 
 
 _DEFAULT_TRANSFER_FUNCTION = 'boltzmann_camb' if _camb_available() else 'eisenstein_hu'
