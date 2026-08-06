@@ -10,8 +10,8 @@ from .. import CCLAutoRepr, physical_constants
 from ..pyutils import _check_array_params
 
 
-def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
-                      Om_m2_for_c2=False, Om_m_fid=0.3):
+def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None, ak=None,
+                      at=None, Om_m2_for_c2=False, Om_m_fid=0.3, knorm=1):
     """
     Function to convert from :math:`A_{ia}` values to :math:`c_{ia}` values,
     for the intrinsic alignment bias parameters using the standard
@@ -25,9 +25,13 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
         a1delta (:obj:`float` or `array`): IA :math:`A_{1\\delta}` at input
             z values.
         a2 (:obj:`float` or `array`): IA :math:`A_2` at input z values.
+        ak (:obj:`float` or `array`): IA derivative amplitude at input z values.
+        at (:obj:`float` or `array`): IA velocity shear bias at input z values.
         Om_m2_for_c2 (:obj:`bool`): True to use the Blazek et al. 2019
             convention of :math:`\\Omega_m^2` scaling.
         Om_m_fid (:obj:`float`): Value for Blazek et al. 2019 scaling.
+        knorm (:obj:`float`): Normalization scale for derivative bias,
+            assuming k in :math:`{\\rm Mpc}^{-1}`.
 
     Returns:
         Tuple of IA bias parameters
@@ -36,11 +40,15 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
         - c1delta (:obj:`float` or `array`): IA :math:`C_{1\\delta}` at
           input z values.
         - c2 (:obj:`float` or `array`): IA :math:`C_2` at input z values.
+        - ck (:obj:`float` or `array`): IA derivative bias at
+          input z values.
+        - ct (:obj:`float` or `array`): IA velocity shear bias at
+          input z values.
     """
 
     Om_m = cosmo['Omega_m']
     rho_crit = physical_constants.RHO_CRITICAL
-    c1 = c1delta = c2 = None
+    c1 = c1delta = c2 = ck = ct = None
     gz = cosmo.growth_factor(1./(1+z))
 
     if a1 is not None:
@@ -54,8 +62,12 @@ def translate_IA_norm(cosmo, *, z, a1=1.0, a1delta=None, a2=None,
             c2 = a2*5*5e-14*rho_crit*Om_m**2/(Om_m_fid*gz**2)
         else:  # DES convention
             c2 = a2*5*5e-14*rho_crit*Om_m/(gz**2)
+    if ak is not None:
+        ck = -1*ak*(knorm**2)*5e-14*rho_crit*Om_m/gz
+    if at is not None:
+        ct = at*5e-14*rho_crit*Om_m/gz
 
-    return c1, c1delta, c2
+    return c1, c1delta, c2, ck, ct
 
 
 class PTTracer(CCLAutoRepr):
@@ -129,7 +141,7 @@ class PTNumberCountsTracer(PTTracer):
     """:class:`PTTracer` representing number count fluctuations.
     This is described by 1st and 2nd-order biases and
     a tidal field bias. These are provided as floating
-    point numbers or tuples of `(reshift,bias)` arrays.
+    point numbers or tuples of `(redshift,bias)` arrays.
     If a number is provided, a constant bias is assumed.
     If ``None``, a bias of zero is assumed.
 
@@ -195,9 +207,10 @@ class PTNumberCountsTracer(PTTracer):
 
 class PTIntrinsicAlignmentTracer(PTTracer):
     """:class:`PTTracer` representing intrinsic alignments.
-    This is described by 1st and 2nd-order alignment biases
-    and an overdensity bias. These are provided as floating
-    point numbers or tuples of (reshift,bias) arrays.
+    This is described by 1st and 2nd-order alignment biases,
+    an overdensity bias, a derivative bias, and a
+    velocity shear bias. These are provided as floating
+    point numbers or tuples of (redshift,bias) arrays.
     If a number is provided, a constant bias is assumed.
     If ``None``, a bias of zero is assumed.
 
@@ -209,10 +222,14 @@ class PTIntrinsicAlignmentTracer(PTTracer):
             second-order alignment bias :math:`C_2`.
         cdelta (:obj:`float` or :obj:`tuple`): as above for the
             overdensity bias :math:`C_{1\\delta}`.
+        ck (:obj:`float` or :obj:`tuple`): as above for the derivative
+            alignment bias.
+        ct (:obj:`float` or :obj:`tuple`): as above for the velocity
+            shear bias term.
     """
     type = 'IA'
 
-    def __init__(self, c1, c2=None, cdelta=None):
+    def __init__(self, c1, c2=None, cdelta=None, ck=None, ct=None):
 
         self.biases = {}
 
@@ -222,6 +239,10 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         self.biases['c2'] = self._get_bias_function(c2)
         # Initialize cdelta
         self.biases['cdelta'] = self._get_bias_function(cdelta)
+        # Initialize ck
+        self.biases['ck'] = self._get_bias_function(ck)
+        # Initialize ct
+        self.biases['ct'] = self._get_bias_function(ct)
 
     @property
     def c1(self):
@@ -240,3 +261,15 @@ class PTIntrinsicAlignmentTracer(PTTracer):
         """Internal overdensity bias function.
         """
         return self.biases['cdelta']
+
+    @property
+    def ck(self):
+        """Internal derivative bias function
+        """
+        return self.biases['ck']
+
+    @property
+    def ct(self):
+        """Internal velocity bias function
+        """
+        return self.biases['ct']
