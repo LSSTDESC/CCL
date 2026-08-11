@@ -89,11 +89,11 @@ _A_S_MIN = np.exp(2.9960) / 1e10
 _A_S_MAX = np.exp(3.0910) / 1e10
 
 _COSMO_BOUNDS = {
-    "Omega_m": (0.25,     0.35),
-    "Omega_b": (0.04,     0.055),
-    "h":       (0.65,     0.73),
-    "n_s":     (0.95,     1.0),
-    "A_s":     (_A_S_MIN, _A_S_MAX),
+    "Omega_m": (0.25, 0.35),
+    "Omega_b": (0.04, 0.055),
+    "h": (0.65, 0.73),
+    "n_s": (0.95, 1.0),
+    "A_s": (_A_S_MIN, _A_S_MAX),
 }
 _MU_BOUNDS = (0.9, 1.1)
 _ETA_BOUNDS = (0.9, 1.1)
@@ -211,7 +211,7 @@ class MGHybridBoostPk(EmulatorPk):
     def _validate_mg_params(self):
         for i in range(N_BINS):
             for name, val, bounds in [
-                (f"mus[{i}]",  self.mus[i],  _MU_BOUNDS),
+                (f"mus[{i}]", self.mus[i], _MU_BOUNDS),
                 (f"etas[{i}]", self.etas[i], _ETA_BOUNDS),
             ]:
                 lo, hi = bounds
@@ -287,13 +287,14 @@ class MGHybridBoostPk(EmulatorPk):
         # k_native here is NOT stored in the checkpoint (unlike
         # the single-bin package's cola_eg.txt) - it's supplied
         # externally, exactly as in the reference script. This
-        # grid is present as "k.npy" file( already present 
+        # grid is present as "k.npy" file( already present
         # in multi_bin emulator directory).
         # -----------------------------------------------------
         multi_linear = MultiBinLinearEmulator(
             self.model_dir_multi + "/linear_boost_nn_multibin.pt"
         )
-        k_path = Path(__file__).resolve().parent / "multi_bin_emulator" / "k.npy"
+        k_path = Path(__file__).resolve().parent / \
+            "multi_bin_emulator" / "k.npy"
         k_nl = np.load(k_path)
 
         multi_nonlinear = MultiBinNonLinearEmulator(
@@ -322,9 +323,9 @@ class MGHybridBoostPk(EmulatorPk):
         cosmo_dict = {
             'Omega_m': float(cosmo['Omega_m']),
             'Omega_b': float(cosmo['Omega_b']),
-            'h':       float(cosmo['h']),
-            'n_s':     float(cosmo['n_s']),
-            'A_s':     float(A_s),
+            'h': float(cosmo['h']),
+            'n_s': float(cosmo['n_s']),
+            'A_s': float(A_s),
         }
         self._validate_cosmo(cosmo_dict)
         return cosmo_dict
@@ -377,10 +378,12 @@ class MGHybridBoostPk(EmulatorPk):
                 A_s=np.log(1e10*cosmo_dict["A_s"]),
                 mus=self.mus,
                 etas=self.etas,
-                k=None,   # keep native grid here; we interpolate below
+                k=None,   # keep native grid here; interpolate below
                           # onto self.k_arr the same way for both branches
             )
-            self._last_route = f"multi-bin (modified bins={self._modified_bins()})"
+            self._last_route = (
+                f"multi-bin (modified bins={self._modified_bins()})"
+            )
 
         k_emu = np.asarray(k_emu)
         boost_raw = np.asarray(boost_raw)
@@ -542,25 +545,31 @@ class MGHybridBoostPk(EmulatorPk):
             extrap_order_hik=2,
         )
 
-    # --Returns boost grid for user ------------------------------------------------------
+    # --Returns boost grid for user ------------------------------------------
 
     def boost(self, cosmo):
-        """ Returns Boost calculated for a modified cosmology
-        B(k,z) = P_MG(k,z)/P_LCDM(k,z)
-        the full linear+nonlinear blend,
-        `boost(cosmo)` returns it directly:
+        """Return the full linear+nonlinear MG boost.
 
-         ```Returns:
-           k_arr, z_arr, boost_grid;( a boost grid for a range of k_arr and z_arr) """
+    B(k,z) = P_MG(k,z) / P_LCDM(k,z)
+
+    Returns
+    -------
+    k_arr : ndarray
+        Wavenumber grid in 1/Mpc.
+    z_arr : ndarray
+        Redshift grid.
+    boost_grid : ndarray
+        Boost grid with shape (n_z, n_k).
+        """
 
         self._validate_z_arr()
         cosmo_dict = self._ccl_cosmo_to_dict(cosmo)
 
         boost = self._compute_boost_grid(cosmo_dict)
 
-        k_arr =self.k_arr*cosmo["h"]
+        k_arr = self.k_arr * cosmo["h"]
 
-        return  k_arr, self.z_arr, boost
+        return k_arr, self.z_arr, boost
 
     # -- Convenience ------------------------------------------------------
 

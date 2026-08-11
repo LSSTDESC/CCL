@@ -4,7 +4,7 @@ from .model_nonlinear import EmulatorNN
 
 
 class NonlinearBoostNN:
-    
+
     BIN_MAP = {0: 0, 1: 3, 2: 2, 3: 1}  # bin 4 never uses this
 
     def __init__(

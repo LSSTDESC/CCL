@@ -3,7 +3,6 @@ from scipy.interpolate import interp1d
 from .utils import check_param_ranges
 
 
-
 class BoostEmulator:
 
     def __init__(
@@ -20,10 +19,10 @@ class BoostEmulator:
         self.k_low = k_low
         self.k_high = k_high
 
-
     # -------------------------------------------------
     # Compute blending weights
     # -------------------------------------------------
+
     def _compute_weights(self, k):
 
         logk = np.log(k)
@@ -36,14 +35,14 @@ class BoostEmulator:
 
         return w
 
-
     # -------------------------------------------------
     # Main prediction
     # -------------------------------------------------
+
     def predict_boost(self, cosmo, mu, eta, bin_index, zs):
 
         zs = np.atleast_1d(zs)
-        
+
         check_param_ranges(cosmo, mu, eta, bin_index, zs)
 
         # -----------------------------

@@ -14,6 +14,7 @@ PARAM_BOUNDS = {
     "bin_index": (0, 4),
 }
 
+
 def check_param_ranges(cosmo, mu, eta, bin_index, zs):
 
     def warn(name, val, lo, hi):
@@ -38,6 +39,3 @@ def check_param_ranges(cosmo, mu, eta, bin_index, zs):
     # redshift(s)
     for z in zs:
         warn("z", z, *PARAM_BOUNDS["z"])
-        
-        
-        

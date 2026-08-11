@@ -1,7 +1,4 @@
 import numpy as np
-from scipy.interpolate import interp1d
-import cloudpickle as cpk
-import matplotlib.pyplot as plt
 import torch
 from .model import Net
 
@@ -10,7 +7,10 @@ class LinearBoostNN:
 
     def __init__(self, model_path, device="cpu"):
 
-        checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+        checkpoint = torch.load(
+            model_path,
+            map_location=device,
+            weights_only=False)
 
         self.model = Net(
             hidden_layers=checkpoint["hidden_layers"],
@@ -34,7 +34,7 @@ class LinearBoostNN:
     def _map_params(self, cosmo, mu, eta, bin_index, z):
 
         lnAs = np.log(1e10 * cosmo["A_s"])
-        bin_scaled = bin_index / 4.0 
+        bin_scaled = bin_index / 4.0
 
         return np.array([
             cosmo["Omega_m"],

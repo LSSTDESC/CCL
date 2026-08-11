@@ -19,7 +19,7 @@ class NonLinearEmulator:
         checkpoint = torch.load(checkpoint_path,
                                 map_location="cpu",
                                 weights_only=False
-                               )
+                                )
 
         # ------------------------------------------
         # Build model
@@ -43,12 +43,11 @@ class NonLinearEmulator:
         # PCA + normalizations
         # ------------------------------------------
 
-
         self.X_mean = checkpoint["X_mean"]
-        self.X_std  = checkpoint["X_std"]
+        self.X_std = checkpoint["X_std"]
 
         self.y_mean = checkpoint["y_mean"]
-        self.y_std  = checkpoint["y_std"]
+        self.y_std = checkpoint["y_std"]
 
         print(self.X_mean)
 
@@ -146,7 +145,7 @@ class NonLinearEmulator:
         boost = self.pca.inverse_transform(
             pca_modes
         )
-        print(boost[0,:10])
+        print(boost[0, :10])
 
         return boost
 
@@ -177,26 +176,22 @@ class NonLinearEmulator:
         )
 
         k = np.asarray(k)
-        
-        
 
         boost_interp = np.empty(
             (boost_native.shape[0], len(k))
         )
 
-
-
         for i in range(boost_native.shape[0]):
 
             interp = interp1d(
-                     np.log(self.k_native),
-                     np.log(boost_native[i]),
-                     kind="cubic",
-                     bounds_error=False,
-                     fill_value=(
-                     np.log(boost_native[i,0]),
-                     np.log(boost_native[i,-1])
-                     )
+                np.log(self.k_native),
+                np.log(boost_native[i]),
+                kind="cubic",
+                bounds_error=False,
+                fill_value=(
+                     np.log(boost_native[i, 0]),
+                     np.log(boost_native[i, -1])
+                )
             )
 
             boost_interp[i] = np.exp(
@@ -204,4 +199,3 @@ class NonLinearEmulator:
             )
 
         return boost_interp
-        

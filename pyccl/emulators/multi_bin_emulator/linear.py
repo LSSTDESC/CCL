@@ -3,6 +3,7 @@ import torch
 from scipy.interpolate import interp1d
 from .model_linear import Net
 
+
 class LinearEmulator:
 
     def __init__(

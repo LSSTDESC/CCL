@@ -15,8 +15,6 @@ class EmulatorNN(nn.Module):
             nn.Linear(512, output_dim)
         )
 
-    
-
     def forward(self, x):
 
         return self.net(x)
