@@ -50,17 +50,18 @@ def angular_cl(
             is ``'FKEM'`` (see the `N5K paper <https://arxiv.org/abs/2212.04291>`_
             for details).
         fkem_chi_min: Minimum comoving distance used by `FKEM` to sample the
-            tracer radial kernels. If ``None``, the minimum distance over which
-            the kernels are defined will be used (capped to 1E-6 Mpc if this
-            value is zero). Users are encouraged to experiment with this parameter
+            tracer radial kernels. If ``None``, 1E-6 Mpc is used.
+            Users are encouraged to experiment with this parameter
             and ``fkem_Nchi`` to ensure the robustness of the output
             :math:`C_\\ell` s.
         fkem_Nchi: Number of values of the comoving distance over which `FKEM`
-            will interpolate the radial kernels. If ``None`` the smallest number
-            over which the kernels are currently sampled will be used. Note that
+            will interpolate the radial kernels. If ``None``, twice the largest
+            number of kernel samples across the tracers is used. Note that
             `FKEM` will use a logarithmic sampling for distances between
             ``fkem_chi_min`` and the maximum distance over which the tracers
-            are defined.  Users are encouraged to experiment with this parameter
+            are defined. The FFTLog calculation adds zero-valued samples beyond
+            this interval; ``fkem_Nchi`` counts samples before this padding.
+            Users are encouraged to experiment with this parameter
             and ``fkem_chi_min`` to ensure the robustness of the output
             :math:`C_\\ell` s.
         p_of_k_a_lin (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`):
