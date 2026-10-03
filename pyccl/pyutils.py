@@ -32,7 +32,8 @@ class ExtrapolationMethods(Enum):
 
 integ_types = {
     'qag_quad': lib.integration_qag_quad,
-    'spline': lib.integration_spline}
+    'spline': lib.integration_spline,
+    'cquad': lib.integration_cquad}
 
 extrap_types = {
     'none': lib.f1d_extrap_0,
