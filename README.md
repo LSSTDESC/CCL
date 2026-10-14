@@ -26,7 +26,7 @@ The core functions of this package include:
   - Background quantities (Hubble parameter $H(z)$, distances etc.).
   - Linear growth factor $D(z)$ and growth rate $f(z)$.
   - Linear matter power spectra $P(k)$ from Boltzmann codes (CLASS, CAMB), emulators, and approximate fitting functions.
-  - Non-linear matter power power spectra using a variety of prescriptions, including emulators, and including the impact of baryonic effects.
+  - Non-linear matter power spectra using a variety of prescriptions, including emulators, and including the impact of baryonic effects.
   - Angular power spectra $C_\ell$ and correlation functions $\xi(\theta)$ for arbitrary combinations of tracers including number counts, shear, CMB lensing, ISW, thermal SZ, CIB, as well as custom-made tracers.
   - A comprehensive halo model framework able to combine different prescriptions for the halo mass function $dn/dM$, halo bias $b(M)$, concentration-mass relation $c(M)$, mass definitions, and halo profiles, as well as to provide predictions for summary statistics (power spectra, non-Gaussian covariances) of arbitrary quantities.
   - Support for $\Lambda$ CDM, and $w_0-w_a$CDM cosmologies with curvature and massive neutrinos, as well as simple modified gravity extensions (e.g. $\mu-\Sigma$ ).
