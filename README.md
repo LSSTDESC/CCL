@@ -103,7 +103,7 @@ the code, which is open source and available under terms consistent with our
 ([BSD 3-Clause](https://opensource.org/licenses/BSD-3-Clause)).
 
 External contributors and DESC members wishing to use CCL for non-DESC projects
-should consult with the TJP working group conveners, ideally before the work has
+should consult with the [MCP working group conveners](https://lsstdesc.org/pages/organization.html#analysis-working-groups), ideally before the work has
 started, but definitely before any publication or posting of the work to the arXiv.
 
 For free use of the `CLASS` library, the `CLASS` developers require that the `CLASS`
