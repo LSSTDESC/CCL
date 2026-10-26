@@ -1,7 +1,11 @@
-__all__ = ("Profile2pt", "Profile2ptHOD", "Profile2ptCIB",)
+__all__ = ("Profile2pt", "Profile2ptHOD", "Profile2ptCIB",
+           "Profile2ptSelection",)
+
+import numpy as np
 
 from .. import CCLAutoRepr
-from . import HaloProfile, HaloProfileHOD, HaloProfileCIBShang12
+from . import (HaloProfile, HaloProfileHOD, HaloProfileCIBShang12,
+               HaloProfileSelection)
 
 
 class Profile2pt(CCLAutoRepr):
@@ -236,4 +240,97 @@ class Profile2ptCIB(Profile2pt):
             uk2 = prof2.fourier(cosmo, k, M, a)
             output = uk1[:, None, :] * uk2[:, :, None] * (1 + self.r_corr)
 
+        return output
+
+
+class Profile2ptSelection(Profile2pt):
+    """ This class implements the Fourier-space 1-halo 2-point
+    correlator between two selected-halo profiles
+    (see :class:`~pyccl.halos.profiles.selection.HaloProfileSelection`).
+    Since a halo is either selected or not, the second moment is given
+    by the joint selection probability
+
+    .. math::
+       \\langle N_1(k) N_2(k)|M,a\\rangle = S_{12}(M,a)\\,
+       u^{\\rm off}_1(k|M,a)\\,u^{\\rm off}_2(k|M,a),
+
+    where :math:`S_{12}` reduces to :math:`S(M,a)` for identical
+    selections, and :math:`u^{\\rm off}` are the miscentering factors of
+    each profile. For the auto-correlation of a profile with itself, the
+    miscentering factors cancel.
+
+    Args:
+        joint_selection (:obj:`callable`): joint selection function
+            :math:`S_{12}(M,a)` with signature ``joint_selection(M, a)``.
+            Only needed if the two profiles have different selection
+            functions (e.g. for disjoint observable bins it should return
+            zero).
+    """
+    __repr_attrs__ = __eq_attrs__ = ("joint_selection",)
+
+    def __init__(self, *, joint_selection=None):
+        self.joint_selection = joint_selection
+        super().__init__()
+
+    def fourier_2pt(self, cosmo, k, M, a, prof, *, prof2=None, diag=True):
+        """ Returns the Fourier-space two-point moment between two
+        selected-halo profiles.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            k (:obj:`float` or `array`): comoving wavenumber in Mpc^-1.
+            M (:obj:`float` or `array`): halo mass in units of M_sun.
+            a (:obj:`float`): scale factor.
+            prof (:class:`~pyccl.halos.profiles.selection.HaloProfileSelection`):
+                halo profile for which the second-order moment
+                is desired.
+            prof2 (:class:`~pyccl.halos.profiles.selection.HaloProfileSelection`):
+                second halo profile for which the second-order moment
+                is desired. If ``None``, the assumption is that you want
+                an auto-correlation.
+            diag (bool): If True, both halo profiles depend on the same k. If
+                False, they will depend on k and k', respectively. The output
+                dimension will change to `(N_M, N_k, N_k)`. Default True.
+
+        Returns:
+            (:obj:`float` or `array`): second-order Fourier-space
+            moment. The shape of the output will be `(N_M, N_k)`
+            where `N_k` and `N_m` are the sizes of `k` and `M`
+            respectively, if diag is True. If False, the array will have
+            dimension `(N_M, N_k, N_k)`. If `k` or `M` are scalars, the
+            corresponding dimension will be squeezed out on output.
+        """ # noqa
+        if prof2 is None:
+            prof2 = prof
+
+        Sel = HaloProfileSelection
+        if not (isinstance(prof, Sel) and isinstance(prof2, Sel)):
+            raise TypeError("prof and prof2 must be HaloProfileSelection")
+
+        M_use = np.atleast_1d(M)
+        k_use = np.atleast_1d(k)
+
+        if prof.selection is prof2.selection:
+            S12 = prof._S(M_use, a)
+        elif self.joint_selection is None:
+            raise ValueError("joint_selection must be provided for "
+                             "different selection functions.")
+        else:
+            S12 = np.reshape(self.joint_selection(M_use, a), M_use.shape)
+
+        if prof == prof2:
+            # same halo: the miscentering phases cancel
+            off1 = off2 = np.ones([len(M_use), len(k_use)])
+        else:
+            off1 = prof._fourier_offset(cosmo, k_use, M_use, a)
+            off2 = prof2._fourier_offset(cosmo, k_use, M_use, a)
+
+        if (diag is True) or (np.ndim(k) == 0):
+            output = S12[:, None] * off1 * off2
+            if np.ndim(k) == 0:
+                output = np.squeeze(output, axis=-1)
+        else:
+            output = S12[:, None, None] * off1[:, None, :] * off2[:, :, None]
+        if np.ndim(M) == 0:
+            output = np.squeeze(output, axis=0)
         return output
