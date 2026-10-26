@@ -79,8 +79,8 @@ jobs:
           echo "SDKROOT: ${SDKROOT}"
           echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
           echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
-          echo "CFLAGS=-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include" >> $GITHUB_ENV
-          echo "LDFLAGS=-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib" >> $GITHUB_ENV
+          echo "CFLAGS=-I${SDKROOT}/usr/include" >> $GITHUB_ENV
+          echo "LDFLAGS=-L${SDKROOT}/usr/lib" >> $GITHUB_ENV
 
       - name: Set current date as environment variable
         run: echo "TODAY=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
