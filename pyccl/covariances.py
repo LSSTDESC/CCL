@@ -314,17 +314,20 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             four input tracers, as a function of :math:`\\ell_1` and \
             :math:`\\ell_2`. The ordering is such that \
             ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
-    """
+    """ # noqa
     if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
+    # we need the distances for the integrals
     cosmo.compute_distances()
 
+    # Access ccl_cosmology object
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
 
     tsp = t_of_kk_a.tsp
 
+    # Create tracer colections
     status = 0
     clt1, status = lib.cl_tracer_collection_t_new(status)
     for t in tracer1._trc:
@@ -365,6 +368,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
     if np.ndim(ell) == 0:
         cov = np.squeeze(cov, axis=-1)
 
+    # Free up tracer collections
     lib.cl_tracer_collection_t_free(clt1)
     lib.cl_tracer_collection_t_free(clt2)
     if tracer3 is not None:
