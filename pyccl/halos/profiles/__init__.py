@@ -6,3 +6,4 @@ from .hernquist import *
 from .hod import *
 from .ia import *
 from .pressure_gnfw import *
+from .selection import *

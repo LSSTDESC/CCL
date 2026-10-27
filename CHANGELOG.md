@@ -1,4 +1,9 @@
 # Unreleased
+- Cross-covariance between angular power spectra and halo (cluster) number
+  counts: squeezed halo model bispectrum and its super-sample contribution
+  (`halos.pk_3pt`), selected-halo profile with miscentering
+  (`HaloProfileSelection`, `Profile2ptSelection`), `HMCalculator.I_0_3`, and
+  `angular_cl_cov_counts`/`angular_cl_cov_counts_SSC`.
 
 # v3.1.2 Changes
 - Fixed dynamic versioning
