@@ -11,7 +11,6 @@ __all__ = ("_nonlimber_FKEM",)
 import numpy as np
 from .. import lib, check
 from ..pyutils import integ_types
-from scipy.interpolate import make_interp_spline
 from pyccl.pyutils import _fftlog_transform_general
 import pyccl as ccl
 from .. import CCLWarning, warnings
@@ -65,6 +64,17 @@ def _get_k_common(ks_1, ks_2):
     return np.logspace(np.log10(k_min), np.log10(k_max), n_k)
 
 
+def _pad_chi_grid(chi):
+    """Extend an FFTLog grid without changing its interior sampling."""
+    dlnchi = np.log(chi[-1] / chi[0]) / (len(chi) - 1)
+    # A decade on each side extends the low-k coverage and separates the
+    # periodic copies of the kernel. Bound the cost for narrow input ranges.
+    npad = min(len(chi), int(np.ceil(np.log(10.) / dlnchi)))
+    lower = chi[0] * np.exp(dlnchi * np.arange(-npad, 0))
+    upper = chi[-1] * np.exp(dlnchi * np.arange(1, npad + 1))
+    return np.concatenate((lower, chi, upper)), npad
+
+
 def _chi_integrands(cosmo, clt,
                     Nchi, chi_min, chi_max,
                     ell, k_low,
@@ -99,8 +109,9 @@ def _chi_integrands(cosmo, clt,
     growfac_arr = ccl.growth_factor(cosmo, a_arr)
     avg_as = clt.get_avg_weighted_a()
 
-    fks = np.zeros((len(kernels), Nchi))
-    transfers = np.zeros((len(kernels), Nchi))
+    chi_fft, npad = _pad_chi_grid(chi_logspace_arr)
+    fks = np.zeros((len(kernels), len(chi_fft)))
+    transfers = np.zeros_like(fks)
     ks = []
     for i in range(len(kernels)):
         k, fk = clt._get_fkem_fft(
@@ -120,14 +131,14 @@ def _chi_integrands(cosmo, clt,
                     "Setting integrand to zero."
                 )
 
-            fchi_interp = make_interp_spline(
-                chis[i], kernels[i], k=1
+            kernel = np.interp(
+                chi_logspace_arr, chis[i], kernels[i], left=0., right=0.
             )
             # transfer function approximation for the case
             # when it's inseperable in k and a
             # exact for seperable transfer functions
             fchi_arr = (
-                fchi_interp(chi_logspace_arr)
+                kernel
                 * chi_logspace_arr
                 * growfac_arr
                 * transfer_low[i]
@@ -136,8 +147,8 @@ def _chi_integrands(cosmo, clt,
             # calls to fftlog to perform integration over chi integrals
             nu, deriv, plaw = _get_general_params(bessels[i])
             k, fk = _fftlog_transform_general(
-                chi_logspace_arr,
-                fchi_arr.flatten(),
+                chi_fft,
+                np.pad(fchi_arr.flatten(), npad),
                 float(ell),
                 nu,
                 1,
@@ -157,9 +168,8 @@ def _chi_integrands(cosmo, clt,
 
 
 def _auto_limber_transition_ell(clt1, clt2, cosmo, psp_lin, psp_nonlin,
-                                fks_1, fks_2, transfers_t1, transfers_t2,
-                                fll_t1, fll_t2, k, kpow, pk, dlnr,
-                                el, ell, limber_max_error, status):
+                                cls_nonlimber_lin, ell,
+                                limber_max_error, status):
     """
     Helper function for _nonlimber_FKEM to determine whether the
     Limber transition ell/threshold has been reached for all
@@ -177,28 +187,8 @@ def _auto_limber_transition_ell(clt1, clt2, cosmo, psp_lin, psp_nonlin,
             Linear power spectrum to use for growth factor scaling.
         psp_nonlin (:class:`~pyccl.pk2d.Pk2D`):
             Non-linear power spectrum to project.
-        fks_1 (array):
-            Chi integrands for tracer 1.
-        fks_2 (array):
-            Chi integrands for tracer 2.
-        transfers_t1 (array):
-            Transfer functions for tracer 1.
-        transfers_t2 (array):
-            Transfer functions for tracer 2.
-        fll_t1 (array):
-            f_ell values for tracer 1.
-        fll_t2 (array):
-            f_ell values for tracer 2.
-        k (array):
-            Wavenumbers at which to evaluate the full integral.
-        kpow (float):
-            Power of k in the integrand.
-        pk (function):
-            Function that takes k and a and returns the power spectrum.
-        dlnr (float):
-            Logarithmic spacing of chi values for FKEM.
-        el (int):
-            Index of the current ell in the loop over ls.
+        cls_nonlimber_lin (array):
+            Linear non-Limber spectra for each tracer-component pair.
         ell (float):
             Current ell value.
         limber_max_error (float):
@@ -248,25 +238,10 @@ def _auto_limber_transition_ell(clt1, clt2, cosmo, psp_lin, psp_nonlin,
             )
             check(status, cosmo=cosmo)
 
-            cls_nonlimber_lin_temp = (
-                np.sum(
-                    fks_1[i]
-                    * transfers_t1[i]
-                    * fks_2[j]
-                    * transfers_t2[j]
-                    * (k**kpow
-                        * pk(k, 1.0, cosmo))
-                )
-                * dlnr
-                * 2.0
-                / np.pi
-                * fll_t1[i][el]
-                * fll_t2[j][el]
-            )
             cl_temp = (
                 cl_limber_nonlin_temp[-1]
                 - cl_limber_lin_temp[-1]
-                + cls_nonlimber_lin_temp
+                + cls_nonlimber_lin[i, j]
             )
             thresh = cl_temp / cl_limber_nonlin_temp[-1] - 1.0
 
@@ -409,11 +384,8 @@ def _nonlimber_FKEM(
         np.log10(chi_min), np.log10(chi_max), num=Nchi, endpoint=True
     )
 
-    dlnr = np.log(chi_max / chi_min) / (Nchi - 1.0)
-
     for el in range(len(ls)):
         ell = ls[el]
-        cls_nonlimber_lin = 0.0
         status = 0
         cl_limber_lin, status = lib.angular_cl_vec_limber(
             cosmo.cosmo,
@@ -457,37 +429,30 @@ def _nonlimber_FKEM(
             fks_2 = fks_1
             transfers_t2 = transfers_t1
             ks_2 = ks
-        k = _get_k_common(ks, ks_2)
-        # need to interpolate the fks and transfers to the common k array
-        fks_1_interp = np.zeros((len(clt1._trc), len(k)))
-        fks_2_interp = np.zeros((len(clt2._trc), len(k)))
-        transfers_t1_interp = np.zeros((len(clt1._trc), len(k)))
-        transfers_t2_interp = np.zeros((len(clt2._trc), len(k)))
-        for i in range(len(clt1._trc)):
-            fks_1_interp[i] = np.interp(k, ks[i], fks_1[i])
-            transfers_t1_interp[i] = np.interp(k, ks[i], transfers_t1[i])
-        for i in range(len(clt2._trc)):
-            fks_2_interp[i] = np.interp(k, ks_2[i], fks_2[i])
-            transfers_t2_interp[i] = np.interp(k, ks_2[i], transfers_t2[i])
-
-        cls_nonlimber_lin = np.sum(
-            fks_1_interp[:, None, :]
-            * transfers_t1_interp[:, None, :]
-            * fks_2_interp[None, :, :]
-            * transfers_t2_interp[None, :, :]
-            * (k**kpow
-                * pk(k, 1.0, cosmo))[None, None, :]
-            * dlnr
-            * 2.0
-            / np.pi
-            * fll_t1[:, None, None, el]
-            * fll_t2[None, :, None, el]
-        )
+        # Each component pair has its own overlap and quadrature. This keeps
+        # adding tracer components from changing another pair's integration.
+        cls_nonlimber_lin = np.zeros((len(ks), len(ks_2)))
+        for i, k1 in enumerate(ks):
+            for j, k2 in enumerate(ks_2):
+                k = _get_k_common([k1], [k2])
+                dlnk = np.log(k[-1] / k[0]) / (len(k) - 1)
+                integrand = (
+                    np.interp(k, k1, fks_1[i])
+                    * np.interp(k, k1, transfers_t1[i])
+                    * np.interp(k, k2, fks_2[j])
+                    * np.interp(k, k2, transfers_t2[j])
+                    * k**kpow * pk(k, 1.0, cosmo)
+                )
+                cls_nonlimber_lin[i, j] = (
+                    np.sum(integrand) * dlnk * 2.0 / np.pi
+                    * fll_t1[i, el] * fll_t2[j, el]
+                )
         # append the final cl calculation to the returned array
         # see whether the Limber transition ell/threshold has been reached
         # and check whether to continue to higher ells
         cells.append(
-            cl_limber_nonlin[-1] - cl_limber_lin[-1] + cls_nonlimber_lin
+            cl_limber_nonlin[-1] - cl_limber_lin[-1]
+            + np.sum(cls_nonlimber_lin)
         )
 
         if (type(l_limber) is not str and ell >= l_limber):
@@ -505,10 +470,7 @@ def _nonlimber_FKEM(
             # the limber threshold
             status, is_limber = _auto_limber_transition_ell(
                 clt1, clt2, cosmo, psp_lin,
-                psp_nonlin, fks_1_interp, fks_2_interp,
-                transfers_t1_interp, transfers_t2_interp,
-                fll_t1, fll_t2, k, kpow,
-                pk, dlnr, el, ell,
+                psp_nonlin, cls_nonlimber_lin, ell,
                 limber_max_error, status
             )
             if is_limber:
