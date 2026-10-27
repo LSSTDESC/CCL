@@ -4,7 +4,7 @@ import numpy as np
 
 try:
     import isitgr  # noqa: F401
-except ModuleNotFoundError:
+except (ImportError, OSError):
     pass  # prevent nans from isitgr
 
 from . import CCLError, Pk2D, check, lib, sigma8
