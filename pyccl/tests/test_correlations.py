@@ -44,6 +44,19 @@ def test_correlation_3d_smoke(rval):
 
 
 @pytest.mark.parametrize(
+    'rval',
+    [50,
+     50.0,
+     np.logspace(1, 2, 5),
+     [r for r in np.logspace(1, 2, 5)]])
+def test_correlation_wp_smoke(rval):
+    a = 0.8
+    corr = ccl.correlation_wp(COSMO, a=a, r_p=rval)
+    assert np.all(np.isfinite(corr))
+    assert np.shape(corr) == np.shape(rval)
+
+
+@pytest.mark.parametrize(
     'sval',
     [50,
      50.0,

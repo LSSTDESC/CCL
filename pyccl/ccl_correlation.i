@@ -32,6 +32,11 @@
         raise CCLError("Input shape for `r` must match `(nxi,)`!")
 %}
 
+%feature("pythonprepend") correlation_wp_vec %{
+    if numpy.shape(r) != (nxi,):
+        raise CCLError("Input shape for `r` must match `(nxi,)`!")
+%}
+
 %feature("pythonprepend") correlation_multipole_vec %{
     if numpy.shape(s) != (nxis,):
         raise CCLError("Input shape for `s` must match `(nxis,)`!")
@@ -67,6 +72,12 @@ void correlation_3d_vec(ccl_cosmology *cosmo,ccl_f2d_t *psp,
                         double a, double* r, int nr,
                         int nxi, double* xi, int *status) {
   ccl_correlation_3d(cosmo, psp, a, nr, r, xi, 0, NULL, status);
+}
+
+void correlation_wp_vec(ccl_cosmology *cosmo,ccl_f2d_t *psp,
+                        double a, double* r, int nr,
+                        int nxi, double* xi, int *status) {
+  ccl_correlation_wp(cosmo, psp, a, nr, r, xi, 0, NULL, status);
 }
 
 void correlation_multipole_vec(ccl_cosmology *cosmo,ccl_f2d_t *psp,

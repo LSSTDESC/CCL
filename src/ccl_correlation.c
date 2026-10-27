@@ -517,6 +517,100 @@ void ccl_correlation_3d(ccl_cosmology *cosmo,
   return;
 }
 
+/*--------ROUTINE: ccl_correlation_wp ------
+TASK: Calculate the projected correlation function, integrated over
+      the full line of sight. Do so by using FFTLog.
+
+      w_p(r_p) = 1/(2 pi) \int dk k P(k) J_0(k r_p)
+
+INPUT: cosmology, scale factor a,
+       number of r_p values, r_p values,
+       key for tapering, limits of tapering
+
+Projected correlation function result will be in array wp
+ */
+
+void ccl_correlation_wp(ccl_cosmology *cosmo,
+                        ccl_f2d_t *psp, double a,
+                        int n_r,double *r,double *wp,
+                        int do_taper_pk,double *taper_pk_limits,
+                        int *status) {
+  int i,N_ARR;
+  double *k_arr,*pk_arr,*r_arr,*wp_arr;
+
+  //number of data points for k and pk array
+  N_ARR=(int)(cosmo->spline_params.N_K_3DCOR*log10(cosmo->spline_params.K_MAX/cosmo->spline_params.K_MIN));
+
+  k_arr=ccl_log_spacing(cosmo->spline_params.K_MIN,cosmo->spline_params.K_MAX,N_ARR);
+  if(k_arr==NULL) {
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_correlation_wp(): ran out of memory\n");
+    return;
+  }
+
+  pk_arr=malloc(N_ARR*sizeof(double));
+  if(pk_arr==NULL) {
+    free(k_arr);
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_correlation_wp(): ran out of memory\n");
+    return;
+  }
+
+  for (i=0; i<N_ARR; i++){
+    pk_arr[i] = ccl_f2d_t_eval(psp, log(k_arr[i]), a, cosmo, status);
+  }
+  if (do_taper_pk)
+    taper_cl(N_ARR,k_arr,pk_arr,taper_pk_limits);
+
+  r_arr=malloc(sizeof(double)*N_ARR);
+  if(r_arr==NULL) {
+    free(k_arr);
+    free(pk_arr);
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_correlation_wp(): ran out of memory\n");
+    return;
+  }
+  wp_arr=malloc(sizeof(double)*N_ARR);
+  if(wp_arr==NULL) {
+    free(k_arr);
+    free(pk_arr);
+    free(r_arr);
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_correlation_wp(): ran out of memory\n");
+    return;
+  }
+
+  for(i=0;i<N_ARR;i++)
+    r_arr[i]=0;
+
+  // 2D Hankel transform with J_0 (mu=0) and no power-law bias
+  ccl_fftlog_ComputeXi2D(0, 0, 1, N_ARR, k_arr, &pk_arr, r_arr, &wp_arr, status);
+
+  // Interpolate to output values of r_p
+  ccl_f1d_t *wp_spl=ccl_f1d_t_new(N_ARR,r_arr,wp_arr,wp_arr[0],0,
+				  ccl_f1d_extrap_const,
+				  ccl_f1d_extrap_const, status);
+  if (wp_spl == NULL) {
+    free(k_arr);
+    free(pk_arr);
+    free(r_arr);
+    free(wp_arr);
+    *status=CCL_ERROR_MEMORY;
+    ccl_cosmology_set_status_message(cosmo, "ccl_correlation.c: ccl_correlation_wp(): ran out of memory\n");
+    return;
+  }
+  for(i=0;i<n_r;i++)
+    wp[i]=ccl_f1d_t_eval(wp_spl,r[i]);
+  ccl_f1d_t_free(wp_spl);
+
+  free(k_arr);
+  free(pk_arr);
+  free(r_arr);
+  free(wp_arr);
+
+  return;
+}
+
 /*--------ROUTINE: ccl_correlation_multipole ------
 TASK: Calculate multipole of the redshift space correlation function. Do so using FFTLog.
 

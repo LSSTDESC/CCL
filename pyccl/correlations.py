@@ -1,5 +1,6 @@
 __all__ = ("CorrelationMethods", "CorrelationTypes", "correlation",
-           "correlation_3d", "correlation_multipole", "correlation_3dRsd",
+           "correlation_3d", "correlation_wp", "correlation_multipole",
+           "correlation_3dRsd",
            "correlation_3dRsd_avgmu", "correlation_pi_sigma",)
 
 from enum import Enum
@@ -173,6 +174,51 @@ def correlation_3d(cosmo, *, r, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
     if scalar:
         return xi[0]
     return xi
+
+
+def correlation_wp(cosmo, *, r_p, a, p_of_k_a=DEFAULT_POWER_SPECTRUM):
+    r"""Compute the projected correlation function, integrated over the
+    full line of sight:
+
+    .. math::
+        w_p(r_p)\equiv\int_{-\infty}^{\infty}d\pi\,
+        \xi\left(\sqrt{r_p^2+\pi^2}\right)=
+        \frac{1}{2\pi}\int dk\,k\,P(k)\,J_0(kr_p).
+
+    Args:
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        r_p (:obj:`float` or `array`): projected distance(s) at which to
+            calculate the projected correlation function (in Mpc).
+        a (:obj:`float`): scale factor.
+        p_of_k_a (:class:`~pyccl.pk2d.Pk2D`, :obj:`str` or :obj:`None`): 3D Power spectrum
+            to integrate. If a string, it must correspond to one of the
+            non-linear power spectra stored in `cosmo` (e.g.
+            `'delta_matter:delta_matter'`).
+
+    Returns:
+        Value(s) of the projected correlation function at the input projected
+        distance(s) (in Mpc).
+    """ # noqa
+    cosmo.compute_nonlin_power()
+
+    cosmo_in = cosmo
+    cosmo = cosmo.cosmo
+
+    psp = cosmo_in.parse_pk2d(p_of_k_a)
+
+    status = 0
+
+    # Convert scalar input into an array
+    if scalar := isinstance(r_p, (int, float)):
+        r_p = np.array([r_p, ])
+
+    # Call projected correlation function
+    wp, status = lib.correlation_wp_vec(cosmo, psp, a, r_p,
+                                        len(r_p), status)
+    check(status, cosmo_in)
+    if scalar:
+        return wp[0]
+    return wp
 
 
 def correlation_multipole(cosmo, *, r, a, beta, ell,
