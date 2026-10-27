@@ -1,0 +1,33 @@
+CCL Limber integration regression tomography
+
+Source
+------
+Generated with Binny using the LSST Y1 lens preset.
+Binny version: 0.5.1
+
+Binny configuration
+-------------------
+survey: lsst
+role: lens
+year: 1
+mean_offset: 0.0
+scatter_scale: 0.03
+outlier_frac: 0.3
+outlier_scatter_scale: 0.3
+
+Frozen data
+-----------
+z samples: 500
+tomographic bins: 5
+bin centers: 0.39000000, 0.54000000, 0.71000000, 0.88000000, 1.06000000
+
+Contents
+--------
+z: common true-redshift grid
+bin_centers: Binny-reported tomographic bin centers
+nz_0 ... nz_4: normalized tomographic redshift distributions
+
+Purpose
+-------
+Frozen input for reproducing the CCL Limber integration discontinuity without
+requiring Binny as a runtime dependency.
