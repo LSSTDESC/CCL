@@ -229,3 +229,47 @@ def test_xi(set_up, corr_method, t1, t2, bm, er, kind, pref):
 
     xi *= pref
     assert np.all(np.fabs(xi - bms[bm]) < ers[er] * errfac)
+
+
+def test_correlation_curvedsky():
+
+    data = np.load(os.path.dirname(__file__) +
+                   "/data/curved_sky_cocoa.npz", allow_pickle=True)
+    COSMO = ccl.Cosmology(**data['cosmo_setup'][()])
+
+    nsrcs = 5
+    nlens = 10
+
+    theta_b = data['theta_b']
+    theta_u = theta_b[1:]
+    theta_l = theta_b[:-1]
+    ell_hr = np.arange(60000)
+
+    inp = dict(ell=ell_hr, theta=theta_l, theta_max=theta_u,
+               method='Legendre')
+
+    xip, xim, gammat, wtheta = [], [], [], []
+
+    for i in range(nsrcs*(nsrcs+1)//2):
+        C_ss_i = np.interp(ell_hr, data['ell'], data['C_ss'][i])
+        xip.append(ccl.correlation(COSMO, C_ell=C_ss_i, type='GG+', **inp))
+        xim.append(ccl.correlation(COSMO, C_ell=C_ss_i, type='GG-', **inp))
+
+    for i in range(nsrcs*nlens):
+        C_gs_i = np.interp(ell_hr, data['ell'], data['C_gs'][i])
+        gammat.append(ccl.correlation(COSMO, C_ell=C_gs_i, type='NG', **inp))
+
+    for i in range(nlens):
+        C_gg_i = np.interp(ell_hr, data['ell'], data['C_gg'][i])
+        wtheta.append(ccl.correlation(COSMO, C_ell=C_gg_i, type='NN', **inp))
+
+    xip = np.concatenate(xip)
+    xim = np.concatenate(xim)
+    gammat = np.concatenate(gammat)
+    wtheta = np.concatenate(wtheta)
+    dv_ccl = np.concatenate((xip, xim, gammat, wtheta))
+    dv_cca = data['dv_cocoa']
+
+    diff = dv_ccl/dv_cca - 1
+
+    assert np.max(np.abs(diff)) < 0.01
