@@ -57,6 +57,22 @@ void ccl_correlation_3d(ccl_cosmology *cosmo,ccl_f2d_t *psp,
                         int do_taper_pk,double *taper_pk_limits,
                         int *status);
 
+/**
+ * Computes the projected correlation function, integrated over the full line of sight (wrapper)
+ * @param cosmo :Cosmological parameters
+ * @param psp: power spectrum
+ * @param a : scale factor
+ * @param n_r : number of output values of projected distance r_p
+ * @param r : values of the projected distance in Mpc
+ * @param wp : the values of the projected correlation function at the distances above will be returned in this array, which should be pre-allocated
+ * @param do_taper_pk : key for tapering (using cosine tapering by default)
+ * @param taper_pk_limits: limits of tapering
+ */
+void ccl_correlation_wp(ccl_cosmology *cosmo,ccl_f2d_t *psp,
+                        double a,int n_r,double *r,double *wp,
+                        int do_taper_pk,double *taper_pk_limits,
+                        int *status);
+
 void ccl_correlation_multipole(ccl_cosmology *cosmo,ccl_f2d_t *psp,
                                double a,double beta,
                                int l,int n_s,double *s,double *xi,
