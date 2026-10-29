@@ -61,6 +61,12 @@ def _get_k_common(ks_1, ks_2):
     k_min = max(k_mins)   # overlap lower bound
     k_max = min(k_maxs)   # overlap upper bound
 
+    if k_min >= k_max:
+        raise ValueError(
+            "Input k grids have no overlapping positive finite range "
+            f"(k_min={k_min}, k_max={k_max})."
+        )
+
     n_k = max(len(k) for k in all_ks)
     return np.logspace(np.log10(k_min), np.log10(k_max), n_k)
 
@@ -114,25 +120,21 @@ def _chi_integrands(cosmo, clt,
             transfer_avg = clt.get_transfer(np.log(k_low), avg_as[i])
             # check no zeros in transfer functions
             if np.any(transfer_avg == 0.0):
-                raise ZeroDivisionError(
-                    "Zero transfer function encountered in FKEM chi "
-                    "integrand calculation. "
-                    "Setting integrand to zero."
+                fchi_arr = np.zeros_like(chi_logspace_arr, dtype=float)
+            else:
+                fchi_interp = make_interp_spline(
+                    chis[i], kernels[i], k=1
                 )
-
-            fchi_interp = make_interp_spline(
-                chis[i], kernels[i], k=1
-            )
-            # transfer function approximation for the case
-            # when it's inseperable in k and a
-            # exact for seperable transfer functions
-            fchi_arr = (
-                fchi_interp(chi_logspace_arr)
-                * chi_logspace_arr
-                * growfac_arr
-                * transfer_low[i]
-                / transfer_avg[i]
-            )
+                # transfer function approximation for the case
+                # when it's inseperable in k and a
+                # exact for seperable transfer functions
+                fchi_arr = (
+                    fchi_interp(chi_logspace_arr)
+                    * chi_logspace_arr
+                    * growfac_arr
+                    * transfer_low[i]
+                    / transfer_avg[i]
+                )
             # calls to fftlog to perform integration over chi integrals
             nu, deriv, plaw = _get_general_params(bessels[i])
             k, fk = _fftlog_transform_general(
@@ -268,7 +270,11 @@ def _auto_limber_transition_ell(clt1, clt2, cosmo, psp_lin, psp_nonlin,
                 - cl_limber_lin_temp[-1]
                 + cls_nonlimber_lin_temp
             )
-            thresh = cl_temp / cl_limber_nonlin_temp[-1] - 1.0
+            denom = cl_limber_nonlin_temp[-1]
+            if (not np.isfinite(denom)) or np.abs(denom) == 0.0:
+                thresh = np.inf
+            else:
+                thresh = cl_temp / denom - 1.0
 
             lib.cl_tracer_collection_t_free(t1_temp)
             lib.cl_tracer_collection_t_free(t2_temp)
