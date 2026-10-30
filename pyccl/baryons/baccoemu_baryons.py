@@ -41,6 +41,7 @@ class BaryonsBaccoemu(Baryons):
                  log10_M1_z0_cen=10.674, log10_theta_out=0.25,
                  log10_theta_inn=-0.86, log10_M_inn=13.574,
                  verbose=False):
+        self.verbose = verbose
         # avoid tensorflow warnings
         import warnings
         with warnings.catch_warnings():

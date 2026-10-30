@@ -32,6 +32,8 @@ class BaccoemuNonlinear(EmulatorPk):
     """
     def __init__(self, nonlinear_emu_path=None, nonlinear_emu_details=None,
                  n_sampling_a=100):
+        self.nonlinear_emu_path = nonlinear_emu_path
+        self.nonlinear_emu_details = nonlinear_emu_details
         # avoid tensorflow warnings
         import warnings
         with warnings.catch_warnings():

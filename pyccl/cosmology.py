@@ -19,7 +19,6 @@ __all__ = ("TransferFunctions", "MatterPowerSpectra",
            "Cosmology", "CosmologyVanillaLCDM", "CosmologyCalculator",)
 
 import yaml
-from copy import deepcopy
 from enum import Enum
 from inspect import getmembers, isfunction, signature
 from numbers import Real
@@ -114,21 +113,60 @@ class _CosmologyBackgroundData:
     age0: float = None
 
 
-def _make_yaml_friendly(d):
-    """Turn python objects into yaml types where possible."""
+_YAML_EMULATORS = {cls.__name__: cls for cls in (
+    emulators.CosmicemuMTIIPk, emulators.CosmicemuMTIVPk,
+    emulators.BaccoemuLinear, emulators.BaccoemuNonlinear)}
+_YAML_MODELS = {
+    "transfer_function": _YAML_EMULATORS,
+    "matter_power_spectrum": _YAML_EMULATORS,
+    "baryonic_effects": {cls.__name__: cls for cls in (
+        baryons.BaryonsSchneider15, baryons.BaryonsvanDaalen19,
+        baryons.BaryonsBaccoemu)},
+    "mg_parametrization": {"MuSigmaMG": modified_gravity.MuSigmaMG},
+}
 
-    d = deepcopy(d)
-    for k, v in d.items():
-        if isinstance(v, tuple):
-            d[k] = list(v)
-        elif isinstance(v, np.ndarray):
-            d[k] = v.tolist()
-        elif isinstance(v, dict):
-            d[k] = _make_yaml_friendly(v)
-        elif not (isinstance(v, (int, float, str, list)) or v is None):
-            raise ValueError(f"{k}={v} cannot be serialised to YAML.")
 
-    return d
+def _make_yaml_friendly(value):
+    """Copy Python and NumPy containers into plain YAML types."""
+    if isinstance(value, dict):
+        return {k: _make_yaml_friendly(v) for k, v in value.items()}
+    if isinstance(value, (tuple, list)):
+        return [_make_yaml_friendly(v) for v in value]
+    if isinstance(value, np.ndarray):
+        return _make_yaml_friendly(value.tolist())
+    if isinstance(value, np.generic):
+        value = value.item()
+    if isinstance(value, (int, float, str)) or value is None:
+        return value
+    raise ValueError(f"{value} cannot be serialised to YAML.")
+
+
+def _model_to_yaml(model, classes):
+    """Store constructor parameters, excluding caches and emulator weights."""
+    cls = type(model)
+    if classes.get(cls.__name__) is not cls:
+        raise ValueError(f"{cls.__name__} cannot be serialised to YAML.")
+    if cls is baryons.BaryonsBaccoemu:
+        params = {f"log10_{k}": v for k, v in model.bcm_params.items()}
+        params["verbose"] = model.verbose
+    else:
+        params = {name: getattr(model, name)
+                  for name in signature(cls.__init__).parameters
+                  if name != "self"}
+    return {"class": cls.__name__, "parameters": params}
+
+
+def _model_from_yaml(value, classes):
+    """Reconstruct only explicitly supported CCL model classes."""
+    if (set(value) != {"class", "parameters"}
+            or not isinstance(value["class"], str)
+            or not isinstance(value["parameters"], dict)):
+        raise ValueError("A YAML model needs 'class' and 'parameters' "
+                         "entries.")
+    cls = classes.get(value["class"])
+    if cls is None:
+        raise ValueError(f"Unknown YAML model class: {value['class']}")
+    return cls(**value["parameters"])
 
 
 @_make_methods(modules=("", "halos", "nl_pt",), name="cosmo")
@@ -339,20 +377,36 @@ class Cosmology(CCLObject):
     def write_yaml(self, filename, *, sort_keys=False):
         """Write a YAML representation of the parameters to file.
 
+        Built-in baryonic models, ``MuSigmaMG``, and CosmicEmu/Baccoemu
+        power-spectrum emulators are stored as mappings with ``class`` and
+        ``parameters`` entries. Only constructor parameters are saved; cached
+        predictions and emulator weights are reloaded when reading the file.
+        Custom model classes are not supported.
+
         Args:
             filename (:obj:`str`): file name, file pointer, or stream to write
                 parameters to.
+            sort_keys (:obj:`bool`): whether to sort the YAML mapping keys.
         """
-        params = _make_yaml_friendly(self.to_dict())
+        params = self.to_dict()
+        for name, classes in _YAML_MODELS.items():
+            value = params[name]
+            if value is not None and not isinstance(value, str):
+                params[name] = _model_to_yaml(value, classes)
+        params = _make_yaml_friendly(params)
 
         if isinstance(filename, str):
             with open(filename, "w") as fp:
-                return yaml.dump(params, fp, sort_keys=sort_keys)
-        return yaml.dump(params, filename, sort_keys=sort_keys)
+                return yaml.safe_dump(params, fp, sort_keys=sort_keys)
+        return yaml.safe_dump(params, filename, sort_keys=sort_keys)
 
     @classmethod
     def read_yaml(cls, filename, **kwargs):
         """Read the parameters from a YAML file.
+
+        Model mappings written by :meth:`write_yaml` are reconstructed using
+        the corresponding built-in CCL classes. Optional dependencies and
+        custom emulator data files must also be available when reading.
 
         Args:
             filename (:obj:`str`): file name, file pointer, or stream to read
@@ -360,13 +414,16 @@ class Cosmology(CCLObject):
             **kwargs (:obj:`dict`): additional keywords that supersede
                 file contents
         """
-        loader = yaml.Loader
         if isinstance(filename, str):
             with open(filename, 'r') as fp:
-                params = yaml.load(fp, Loader=loader)
+                params = yaml.safe_load(fp)
         else:
-            params = yaml.load(filename, Loader=loader)
-        return cls(**{**params, **kwargs})
+            params = yaml.safe_load(filename)
+        params = {**params, **kwargs}
+        for name, classes in _YAML_MODELS.items():
+            if isinstance(params.get(name), dict):
+                params[name] = _model_from_yaml(params[name], classes)
+        return cls(**params)
 
     def _build_config(
             self, *, transfer_function=None, matter_power_spectrum=None,
