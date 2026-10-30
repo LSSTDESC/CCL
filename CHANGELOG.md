@@ -1,4 +1,6 @@
 # Unreleased
+- Preserve built-in baryonic, modified-gravity, and power-spectrum emulator
+  configuration when writing and reading cosmology YAML files (issue #1159).
 
 # v3.1.2 Changes
 - Fixed dynamic versioning
