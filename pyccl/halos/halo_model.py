@@ -332,6 +332,56 @@ class HMCalculator(CCLAutoRepr):
         uk = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof, prof2=prof2).T
         return self._integrate_over_mf(uk)
 
+    def I_0_3(self, cosmo, k, a, prof, *, prof2=None, prof_2pt, prof3=None):
+        """ Solves the integral:
+
+        .. math::
+            I^0_3(k,a|u,v_1,v_2) = \\int dM\\,n(M,a)\\,
+            \\langle u(k,a|M) v_1(k,a|M) v_2(k,a|M)\\rangle,
+
+        where we approximate
+
+        .. math::
+            \\langle u(k,a|M) v_1(k,a|M) v_2(k,a|M)\\rangle \\sim
+            \\langle u(k,a|M)\\rangle
+            \\langle v_1(k,a|M) v_2(k,a|M)\\rangle,
+
+        where :math:`n(M,a)` is the halo mass function, and
+        :math:`\\langle u(k,a|M) v_1(k,a|M) v_2(k,a|M)\\rangle` is the
+        3pt halo profile as a function of scale, scale factor and halo mass.
+
+        Args:
+            cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.
+            k (:obj:`float` or `array`): comoving wavenumber.
+            a (:obj:`float`): scale factor.
+            prof (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
+                halo profile (corresponding to :math:`u` above).
+            prof2 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
+                halo profile (corresponding to :math:`v_1` above). If
+                ``None``, ``prof`` will be used as ``prof2``.
+            prof_2pt (:class:`~pyccl.halos.profiles_2pt.Profile2pt`):
+                a profile covariance object returning the the two-point
+                moment of ``prof2`` and ``prof3``.
+            prof3 (:class:`~pyccl.halos.profiles.profile_base.HaloProfile`):
+                halo profile (corresponding to :math:`v_2` above). If
+                ``None``, ``prof2`` will be used as ``prof3``.
+
+        Returns:
+             (:obj:`float` or `array`): integral values evaluated at each
+             value of ``k``.
+        """
+        if prof2 is None:
+            prof2 = prof
+        if prof3 is None:
+            prof3 = prof2
+
+        self._check_mass_def(prof, prof2, prof3)
+        self._get_ingredients(cosmo, a, get_bf=False)
+        uk1 = prof.fourier(cosmo, k, self._mass, a).T
+        uk23 = prof_2pt.fourier_2pt(cosmo, k, self._mass, a, prof2,
+                                    prof2=prof3).T
+        return self._integrate_over_mf(uk1 * uk23)
+
     def I_1_2(self, cosmo, k, a, prof, *, prof2=None, prof_2pt, diag=True):
         """ Solves the integral:
 

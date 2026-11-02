@@ -7,5 +7,6 @@ from .profiles import *
 from .profiles_2pt import *
 from .pk_1pt import *
 from .pk_2pt import *
+from .pk_3pt import *
 from .pk_4pt import *
 from .halo_model import *

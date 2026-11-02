@@ -1,9 +1,11 @@
 __all__ = ("angular_cl_cov_cNG", "sigma2_B_disc", "sigma2_B_from_mask",
-           "angular_cl_cov_SSC",)
+           "angular_cl_cov_SSC", "angular_cl_cov_counts",
+           "angular_cl_cov_counts_SSC",)
 
 import numpy as np
 
-from . import DEFAULT_POWER_SPECTRUM, check, lib
+from . import DEFAULT_POWER_SPECTRUM, angular_cl, check, lib
+from .pk2d import Pk2D
 from .pyutils import _check_array_params, integ_types
 
 
@@ -376,3 +378,125 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
 
     check(status, cosmo=cosmo_in)
     return cov
+
+
+def angular_cl_cov_counts(cosmo, tracer1, tracer2, *, ell, b_of_k_a,
+                          fsky=1., integration_method='qag_quad'):
+    """Calculate the covariance between the angular power spectrum
+    :math:`C_\\ell^{ab}` of a pair of tracers :math:`(a,b)` and the angular
+    number density of selected halos :math:`N` (e.g. clusters) in the same
+    footprint.
+
+    Specifically, it computes:
+
+    .. math::
+        {\\rm Cov}(\\ell)=\\frac{1}{4\\pi f_{\\rm sky}}
+        \\int \\frac{d\\chi}{\\chi^2}
+        \\tilde{\\Delta}^a_{\\ell}(\\chi)
+        \\tilde{\\Delta}^b_{\\ell}(\\chi)\\,
+        B_{Nab}\\left[\\frac{\\ell+1/2}{\\chi}, a(\\chi)\\right]
+
+    where :math:`\\Delta^x_\\ell(\\chi)` is the transfer function for tracer
+    :math:`x` (see Eq. 39 in the CCL note), and :math:`B_{Nab}(k,a)` is the
+    squeezed bispectrum between the halo number counts and the two tracers
+    (see :func:`~pyccl.halos.pk_3pt.halomod_Pk2D_bispectrum_squeezed`).
+
+    Args:
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        tracer1 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
+        tracer2 (:class:`~pyccl.tracers.Tracer`): a second Tracer object.
+        ell (:obj:`float` or `array`): Angular wavenumber(s) at which to evaluate
+            the covariance.
+        b_of_k_a (:class:`~pyccl.pk2d.Pk2D`): squeezed bispectrum.
+        fsky (:obj:`float`): sky fraction.
+        integration_method (:obj:`str`) : integration method to be used
+            for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
+            `qag` method backed up by `quad` when it fails) and ``'spline'``
+            (the integrand is splined and then integrated analytically).
+
+    Returns:
+        (:obj:`float` or `array`): covariance between the angular power \
+            spectrum and the halo number counts as a function of \
+            :math:`\\ell`.
+    """ # noqa
+    if integration_method not in integ_types:
+        raise ValueError(f"Unknown integration method {integration_method}.")
+
+    cl = angular_cl(cosmo, tracer1, tracer2, ell, p_of_k_a=b_of_k_a,
+                    limber_integration_method=integration_method)
+    return cl / (4*np.pi*fsky)
+
+
+def angular_cl_cov_counts_SSC(cosmo, tracer1, tracer2, *, ell, b_of_k_a,
+                              sigma2_B=None, fsky=1.,
+                              integration_method='qag_quad'):
+    """Calculate the super-sample contribution to the covariance between
+    the angular power spectrum :math:`C_\\ell^{ab}` of a pair of tracers
+    :math:`(a,b)` and the angular number density of selected halos :math:`N`
+    (e.g. clusters) in the same footprint.
+
+    Specifically, it computes:
+
+    .. math::
+        {\\rm Cov}_{\\rm SSC}(\\ell)=
+        \\int d\\chi\\,\\sigma^2_B(\\chi)
+        \\tilde{\\Delta}^a_{\\ell}(\\chi)
+        \\tilde{\\Delta}^b_{\\ell}(\\chi)\\,
+        \\bar{B}_{Nab}\\left[\\frac{\\ell+1/2}{\\chi}, a(\\chi)\\right]
+
+    where :math:`\\Delta^x_\\ell(\\chi)` is the transfer function for tracer
+    :math:`x` (see Eq. 39 in the CCL note), :math:`\\sigma^2_B` is the
+    variance of the projected matter overdensity over the footprint, and
+    :math:`\\bar{B}_{Nab}(k,a)` is the super-sample bispectrum between the
+    halo number counts and the two tracers (see
+    :func:`~pyccl.halos.pk_3pt.halomod_Pk2D_bispectrum_squeezed_SSC`).
+
+    .. note:: As in :func:`angular_cl_cov_SSC`, the covariance of the long
+              mode is assumed to be diagonal in :math:`\\chi`, i.e. the
+              number counts and the angular power spectrum only respond to
+              the long mode at the same distance. This approximation is
+              least accurate for counts in narrow redshift bins combined
+              with broad tracer kernels.
+
+    Args:
+        cosmo (:class:`~pyccl.cosmology.Cosmology`): A Cosmology object.
+        tracer1 (:class:`~pyccl.tracers.Tracer`): a Tracer object.
+        tracer2 (:class:`~pyccl.tracers.Tracer`): a second Tracer object.
+        ell (:obj:`float` or `array`): Angular wavenumber(s) at which to evaluate
+            the covariance.
+        b_of_k_a (:class:`~pyccl.pk2d.Pk2D`): super-sample bispectrum.
+        sigma2_B (:obj:`tuple` or :obj:`None`): A tuple of arrays
+            (a, sigma2_B(a)) containing the variance of the projected matter
+            overdensity over the footprint as a function of the scale factor.
+            If ``None``, a compact circular footprint will be assumed covering
+            a sky fraction ``fsky``.
+        fsky (:obj:`float`): sky fraction.
+        integration_method (:obj:`str`) : integration method to be used
+            for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
+            `qag` method backed up by `quad` when it fails) and ``'spline'``
+            (the integrand is splined and then integrated analytically).
+
+    Returns:
+        (:obj:`float` or `array`): super-sample covariance between the \
+            angular power spectrum and the halo number counts as a \
+            function of :math:`\\ell`.
+    """ # noqa
+    if integration_method not in integ_types:
+        raise ValueError(f"Unknown integration method {integration_method}.")
+
+    a_arr, lk_arr, bk_arr = b_of_k_a.get_spline_arrays()
+    if sigma2_B is None:
+        s2b_arr = sigma2_B_disc(cosmo, a_arr=a_arr, fsky=fsky)
+    else:
+        a_s2b, s2b = _check_array_params(sigma2_B, 'sigma2_B')
+        s2b_arr = np.interp(a_arr, a_s2b, s2b)
+
+    # chi^2 compensates the 1/chi^2 of the Limber integral
+    chi = cosmo.comoving_angular_distance(a_arr)
+    bk_arr = bk_arr * (chi**2 * s2b_arr)[:, None]
+    bk = Pk2D(a_arr=a_arr, lk_arr=lk_arr, pk_arr=bk_arr, is_logp=False,
+              extrap_order_lok=b_of_k_a.extrap_order_lok,
+              extrap_order_hik=b_of_k_a.extrap_order_hik)
+
+    return angular_cl(cosmo, tracer1, tracer2, ell, p_of_k_a=bk,
+                      limber_integration_method=integration_method)
