@@ -5,11 +5,13 @@ import numpy as np
 
 from . import DEFAULT_POWER_SPECTRUM, check, lib
 from .pyutils import _check_array_params, integ_types
+import warnings
 
 
 def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
                        tracer3=None, tracer4=None, ell2=None,
-                       fsky=1., integration_method='qag_quad'):
+                       fsky=1., integration_method='qag_quad',
+                       index_order='i2i1'):
     """Calculate the connected non-Gaussian covariance for a pair of
     angular power spectra :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
     between two pairs of tracers (:math:`(a,b)` and :math:`(c,d)`).
@@ -52,6 +54,8 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
             `qag` method backed up by `quad` when it fails) and ``'spline'``
             (the integrand is splined and then integrated analytically).
+        index_order (:obj:`str`): ordering of the indices in the returned
+            covariance matrix. Options are ``'i2i1'`` (default) and ``'i1i2'``.
 
     Returns:
         (:obj:`float` or `array`): 2D array containing the connected non-Gaussian \
@@ -59,13 +63,23 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`{\\rm Cov}_{\\rm cNG}(\\ell_1,\\ell_2)`, for the \
             four input tracers, as a function of :math:`\\ell_1` and \
             :math:`\\ell_2`. The ordering is such that \
-            ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
+            ``out[i2, i1] = Cov(ell2[i2], ell[i1])`` or \
+            ``out[i1, i2] = Cov(ell[i1], ell2[i2])`` if ``index_order`` is ``'i1i2'``.
     """ # noqa
     if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals
     cosmo.compute_distances()
+
+    # ordering assumed in TJPCov and NaMaster is i1i2,
+    # but the default in CCL is i2i1.
+    if index_order not in ['i2i1', 'i1i2']:
+        raise ValueError(f"Unknown index_order {index_order}.")
+    warnings.warn("Connected non-Gaussian covariance index ordering will be \
+                  changed to 'i1i2' in a future release."
+                  "Please update your code accordingly.", FutureWarning
+                  )
 
     # Access ccl_cosmology object
     cosmo_in = cosmo
@@ -119,6 +133,9 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         lib.cl_tracer_collection_t_free(clt4)
 
     check(status, cosmo=cosmo_in)
+
+    if index_order == 'i1i2':
+        cov = cov.T
     return cov
 
 
@@ -255,7 +272,8 @@ def sigma2_B_from_mask(cosmo, a_arr=None, *, mask_wl=None,
 def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
                        tracer3=None, tracer4=None, ell2=None,
                        sigma2_B=None, fsky=1.,
-                       integration_method='qag_quad'):
+                       integration_method='qag_quad',
+                       index_order='i2i1'):
     """Calculate the super-sample contribution to the connected
     non-Gaussian covariance for a pair of power spectra
     :math:`C_{\\ell_1}^{ab}` and :math:`C_{\\ell_2}^{cd}`,
@@ -304,6 +322,8 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
             `qag` method backed up by `quad` when it fails) and ``'spline'``
             (the integrand is splined and then integrated analytically).
+        index_order (:obj:`str`): ordering of the indices in the returned
+            covariance matrix. Options are ``'i2i1'`` (default) and ``'i1i2'``.
 
     Returns:
         (:obj:`float` or `array`): 2D array containing the super-sample \
@@ -311,14 +331,22 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`{\\rm Cov}_{\\rm SSC}(\\ell_1,\\ell_2)`, for the \
             four input tracers, as a function of :math:`\\ell_1` and \
             :math:`\\ell_2`. The ordering is such that \
-            ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
+            ``out[i2, i1] = Cov(ell2[i2], ell[i1])`` \
+            or ``out[i1, i2] = Cov(ell[i1], ell2[i2])`` if ``index_order`` is ``'i1i2'``.
     """ # noqa
     if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals
     cosmo.compute_distances()
-
+    # ordering assumed in TJPCov and NaMaster is i1i2,
+    # but the default in CCL is i2i1.
+    if index_order not in ['i2i1', 'i1i2']:
+        raise ValueError(f"Unknown index_order {index_order}.")
+    warnings.warn("Super-Sample covariance index ordering will be \
+                  changed to 'i1i2' in a future release."
+                  "Please update your code accordingly.", FutureWarning
+                  )
     # Access ccl_cosmology object
     cosmo_in = cosmo
     cosmo = cosmo.cosmo
@@ -375,4 +403,6 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         lib.cl_tracer_collection_t_free(clt4)
 
     check(status, cosmo=cosmo_in)
+    if index_order == 'i1i2':
+        cov = cov.T
     return cov
