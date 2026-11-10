@@ -79,6 +79,7 @@ jobs:
           echo "SDKROOT: ${SDKROOT}"
           echo "SDKROOT=${SDKROOT}" >> $GITHUB_ENV
           echo "CONDA_BUILD_SYSROOT=${SDKROOT}" >> $GITHUB_ENV
+          echo "MACOSX_DEPLOYMENT_TARGET=11.0" >> $GITHUB_ENV
           echo "CFLAGS=-I${SDKROOT}/usr/include" >> $GITHUB_ENV
           echo "LDFLAGS=-L${SDKROOT}/usr/lib" >> $GITHUB_ENV
           # conda-forge's gfortran 14 (picked on py3.10) pulls in clang/clang++ 14,
