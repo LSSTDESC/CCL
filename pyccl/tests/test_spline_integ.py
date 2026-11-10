@@ -20,7 +20,7 @@ def test_intspline_accuracy():
     int_spline = _spline_integrate(x_arr, y_arr, -1, 1)
     int_exact = np.array([yf_int(1, p) - yf_int(-1, p)
                           for p in [2, 4]])
-    assert np.all(np.fabs(int_spline / int_exact - 1) < 1E5-5)
+    assert np.all(np.fabs(int_spline / int_exact - 1) < 1E-5)
 
 
 def test_intspline_raises_shapes():

@@ -421,6 +421,8 @@ class HMCalculator(CCLAutoRepr):
              (:obj:`float` or `array`): integral values evaluated at each
              value of ``k``.
         """
+        if prof2 is None:
+            prof2 = prof
         if prof3 is None:
             prof3 = prof
         if prof4 is None:

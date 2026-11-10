@@ -205,8 +205,8 @@ def halomod_Tk3D_SSC_linear_bias(cosmo, hmc, *, prof,
     where the :math:`I^1_2` is defined in the documentation
     :meth:`~pyccl.halos.halo_model.HMCalculator.I_1_2` and :math:`b_{u}`
     and :math:`b_{v}` are the linear halo biases for quantities :math:`u`
-    and :math:`v`, respectively. The second term is only included if the
-    corresponding profiles do not represent number counts.
+    and :math:`v`, respectively. The second term is included if the
+    corresponding profiles represent number counts.
 
     Args:
         cosmo (:class:`~pyccl.cosmology.Cosmology`): a Cosmology object.

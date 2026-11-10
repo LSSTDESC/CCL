@@ -94,3 +94,15 @@ def test_nonlin_camb_MG_error():
     # Check that non-linear power spectrum isn't being used with sigma8
     with pytest.raises(ValueError):
         ccl.nonlin_matter_power(ccl_cosmo, k, 1.0)
+
+
+def test_import_survives_broken_isitgr(tmp_path, monkeypatch):
+    """An installed but unloadable isitgr (e.g. an invalid shared library
+    raising OSError at import) must not prevent importing pyccl."""
+    pkg = tmp_path / "isitgr"
+    pkg.mkdir()
+    (pkg / "__init__.py").write_text("raise OSError('invalid shared lib')\n")
+    monkeypatch.syspath_prepend(str(tmp_path))
+    with mock.patch.dict(sys.modules):
+        sys.modules.pop("isitgr", None)
+        reload(ccl.boltzmann)

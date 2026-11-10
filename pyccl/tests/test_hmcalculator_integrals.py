@@ -97,3 +97,8 @@ def test_hmcalculator_I_0_22():
 
     # Test correct shape
     assert I.shape == (nk, nk)
+
+    # Test that prof2 defaults to prof1 if not provided
+    I2 = hmc.I_0_22(cosmo, k_use, aa, prof1, prof12_2pt=prof12_2pt,
+                    prof3=prof3, prof34_2pt=prof34_2pt, prof4=prof4)
+    assert np.allclose(I, I2)
