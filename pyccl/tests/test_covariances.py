@@ -171,3 +171,29 @@ def test_Sigma2B():
     a_cosmo = COSMO.get_pk_spline_a()
     assert np.all(a_s == a_cosmo)
     assert len(a_s) == len(s2b)
+
+
+@pytest.mark.parametrize("typ", ['cNG', 'SSC'])
+def test_cov_NG_index_order(typ):
+    if typ == 'cNG':
+        cov_f = ccl.angular_cl_cov_cNG
+    elif typ == 'SSC':
+        cov_f = ccl.angular_cl_cov_SSC
+
+    tsp = get_tk3d(1, 1)
+    tr = get_tracer()
+    ls = np.array([2., 20., 200.])
+
+    cov_i2i1 = cov_f(
+        COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
+        index_order='i2i1')
+    cov_i1i2 = cov_f(
+        COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
+        index_order='i1i2')
+
+    assert np.all(cov_i2i1 == cov_i1i2.T)
+
+    with pytest.raises(ValueError):
+        cov_f(
+            COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
+            index_order='i3i1')

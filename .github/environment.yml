@@ -5,6 +5,7 @@ channels:
 dependencies:
   - python
   - gfortran  # for isitgr
+  - libiconv  # conda-forge's gcc (pulled in with gfortran on macOS) fails to start without it
   - pip
   - setuptools
   - setuptools_scm
