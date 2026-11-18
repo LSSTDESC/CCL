@@ -56,6 +56,8 @@ def nu_masses(*, Omega_nu_h2=None, mass_split, m_nu=None):
 def _get_neutrino_masses(*, m_nu, mass_split):
     """
     """
+    if np.any(np.asarray(m_nu) < 0):
+        raise ValueError("Neutrino masses must be non-negative.")
     if isinstance(m_nu, Real) and m_nu == 0:  # no massive neutrinos
         return np.array([])
     if isinstance(m_nu, Iterable):  # input was list
