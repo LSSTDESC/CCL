@@ -892,9 +892,9 @@ def halomod_trispectrum_2h_13(cosmo, hmc, k, a, prof, *,
         elif prof4 == prof2:
             i4 = i2.T
         elif prof4 == prof3:
-            i4 = i3.T
+            i4 = i3
         else:
-            i4 = hmc.I_1_1(cosmo, k_use, aa, prof3)[:, None]
+            i4 = hmc.I_1_1(cosmo, k_use, aa, prof4)[:, None]
 
         if prof3 == prof4:
             i123 = i124
