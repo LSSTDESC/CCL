@@ -1,5 +1,5 @@
 # Unreleased
-- Reject negative neutrino masses before splitting or filtering them (#PRNUM).
+- Reject negative neutrino masses before splitting or filtering them (#1329).
 
 # v3.1.2 Changes
 - Fixed dynamic versioning
