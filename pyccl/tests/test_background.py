@@ -253,3 +253,20 @@ def test_input_arrays_raises():
                                 n_s=0.965, A_s=2e-9,
                                 growth={'a': input_a_array,
                                         'growth_rate': input_fgrowth})
+
+
+@pytest.mark.parametrize('Omega_k', [-0.05, 0., 0.05])
+@pytest.mark.parametrize('z', [0., 0.1, 0.5, 1., 2., 5.])
+@pytest.mark.parametrize('solid_angle', [1., 4*np.pi])
+def test_comoving_volume_redshift(Omega_k, z, solid_angle):
+    from scipy.integrate import quad
+
+    cosmo = ccl.CosmologyVanillaLCDM(Omega_k=Omega_k)
+    a = 1 / (1 + z)
+    volume = cosmo.comoving_volume(a, solid_angle=solid_angle)
+    if z == 0:
+        assert np.isfinite(volume)
+        assert volume == 0
+    else:
+        expected = solid_angle * quad(cosmo.comoving_volume_element, a, 1.)[0]
+        assert np.isclose(volume, expected, rtol=1e-6, atol=0)

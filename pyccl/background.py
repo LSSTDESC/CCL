@@ -312,7 +312,7 @@ def comoving_volume(cosmo, a, *, solid_angle=4*np.pi):
     if Omk == 0:
         return solid_angle/3 * Dm**3
 
-    Dh = hubble_distance(cosmo, a)
+    Dh = physical_constants.CLIGHT_HMPC / cosmo["h"]
     sqrt = np.sqrt(np.abs(Omk))
     DmDh = Dm / Dh
     arcsinn = np.arcsin if Omk < 0 else np.arcsinh
