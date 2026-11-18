@@ -1,4 +1,5 @@
 # Unreleased
+- Include the baryonic fc_bar parameter in Duffy08 equality and hashing (#1331).
 
 # v3.1.2 Changes
 - Fixed dynamic versioning
