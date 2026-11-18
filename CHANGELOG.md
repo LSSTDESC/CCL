@@ -1,4 +1,5 @@
 # Unreleased
+- Correct fourth-profile bias selection and its k axis in the two-halo trispectrum (#PRNUM).
 
 # v3.1.2 Changes
 - Fixed dynamic versioning

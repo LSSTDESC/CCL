@@ -324,3 +324,36 @@ def test_tkk2h_13_errors(pars):
                                             prof12_2pt=pars['cv12'],
                                             prof34_2pt=pars['cv34'],
                                             p_of_k_a=pars['p_of_k_a'])
+
+
+@pytest.mark.parametrize('indices', [(0, 0, 0, 0), (0, 0, 0, 1),
+                                     (0, 0, 1, 1), (0, 1, 2, 2),
+                                     (0, 1, 2, 3), (0, 1, 0, 1)])
+def test_tkk2h_13_four_profile_terms(indices):
+    profiles = [P1, P2] + [
+        ccl.halos.HaloProfileNFW(
+            mass_def=M200,
+            concentration=ccl.halos.ConcentrationConstant(c, mass_def=M200))
+        for c in [3., 6.]]
+    u, v, w, x = [profiles[i] for i in indices]
+    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
+                                 mass_def=M200)
+    k = np.array([0.1, 1., 10.])
+    a = 1.
+    p = COSMO.get_linear_power()(k, a)
+    i1, i2, i3, i4 = [hmc.I_1_1(COSMO, k, a, prof)
+                      for prof in [u, v, w, x]]
+    i234 = hmc.I_1_3(COSMO, k, a, v, prof2=w, prof3=x, prof_2pt=PKC)
+    i134 = hmc.I_1_3(COSMO, k, a, u, prof2=w, prof3=x, prof_2pt=PKC)
+    i124 = hmc.I_1_3(COSMO, k, a, x, prof2=u, prof3=v, prof_2pt=PKC).T
+    i123 = hmc.I_1_3(COSMO, k, a, w, prof2=u, prof3=v, prof_2pt=PKC).T
+    norm = np.prod([prof.get_normalization(COSMO, a, hmc=hmc)
+                    for prof in [u, v, w, x]])
+    expected = (p[None, :] * (i1[None, :]*i234 + i2[None, :]*i134)
+                + p[:, None] * (i3[:, None]*i124 + i4[:, None]*i123)) / norm
+    actual = ccl.halos.halomod_trispectrum_2h_13(
+        COSMO, hmc, k, a, u, prof2=v, prof3=w, prof4=x)
+    np.testing.assert_allclose(actual, expected, rtol=1e-12)
+    reverse = ccl.halos.halomod_trispectrum_2h_13(
+        COSMO, hmc, k, a, w, prof2=x, prof3=u, prof4=v)
+    np.testing.assert_allclose(actual, reverse.T, rtol=1e-12)
