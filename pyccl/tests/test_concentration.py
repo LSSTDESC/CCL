@@ -93,3 +93,15 @@ def test_cM_from_string(name):
 def test_cM_from_string_raises():
     with pytest.raises(KeyError):
         ccl.halos.Concentration.from_name('Duffy09')
+
+
+@pytest.mark.parametrize('fc_bar', [0.8, 1.2])
+def test_cM_duffy_fcbar_eq_repr_hash(fc_bar):
+    default = ccl.halos.ConcentrationDuffy08()
+    changed = ccl.halos.ConcentrationDuffy08(fc_bar=fc_bar)
+    same = ccl.halos.ConcentrationDuffy08(fc_bar=fc_bar)
+    assert check_eq_repr_hash(default, changed, equal=False)
+    assert check_eq_repr_hash(changed, same)
+    np.testing.assert_allclose(changed(COSMO, 1e14, 1.),
+                               fc_bar * default(COSMO, 1e14, 1.),
+                               rtol=1e-12)

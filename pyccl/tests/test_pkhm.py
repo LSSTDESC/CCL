@@ -296,3 +296,25 @@ def test_hmcalculator_inconsistent_mass_def_raises():
     prof = ccl.halos.HaloProfilePressureGNFW(mass_def="500c")
     with pytest.raises(ValueError):
         hmc._check_mass_def(prof)
+
+
+def test_duffy_baryonic_cross_power():
+    concentration = ccl.halos.ConcentrationDuffy08(mass_def=M200, fc_bar=0.8)
+    baryonic = ccl.halos.HaloProfileNFW(mass_def=M200,
+                                        concentration=concentration)
+    k = np.array([0.1, 1., 10.])
+    masses = np.geomspace(1e12, 1e15, 8)
+    expected = (P1.fourier(COSMO, k, masses, AA)
+                * baryonic.fourier(COSMO, k, masses, AA))
+    actual = PKC.fourier_2pt(COSMO, k, masses, AA, P1, prof2=baryonic)
+    np.testing.assert_allclose(actual, expected, rtol=1e-12)
+
+    hmc = ccl.halos.HMCalculator(mass_function=HMF, halo_bias=HBF,
+                                 mass_def=M200)
+    cross = ccl.halos.halomod_power_spectrum(COSMO, hmc, k, AA, P1,
+                                             prof2=baryonic)
+    reverse = ccl.halos.halomod_power_spectrum(COSMO, hmc, k, AA, baryonic,
+                                               prof2=P1)
+    auto = ccl.halos.halomod_power_spectrum(COSMO, hmc, k, AA, P1)
+    np.testing.assert_allclose(cross, reverse, rtol=1e-12)
+    assert not np.allclose(cross, auto, rtol=1e-3)

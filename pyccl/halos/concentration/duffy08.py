@@ -18,6 +18,8 @@ class ConcentrationDuffy08(Concentration):
          mass_def (:class:`~pyccl.halos.massdef.MassDef` or :obj:`str`): a mass
             definition object, or a name string.
     """
+    __repr_attrs__ = __eq_attrs__ = (
+        *Concentration.__repr_attrs__, "fc_bar",)
     name = 'Duffy08'
 
     def __init__(self, fc_bar=1, *, mass_def="200c"):
