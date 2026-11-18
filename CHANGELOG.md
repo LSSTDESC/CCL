@@ -1,5 +1,5 @@
 # Unreleased
-- Use c/H0 in comoving volumes for curved cosmologies (#PRNUM).
+- Use c/H0 in comoving volumes for curved cosmologies (#1330).
 
 # v3.1.2 Changes
 - Fixed dynamic versioning
