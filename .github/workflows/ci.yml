@@ -28,7 +28,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CACHE_NUMBER: 0  # increase to reset cache manually
+  CACHE_NUMBER: 1  # increase to reset cache manually
   CONDA_ENV: .github/environment.yml
 
 jobs:
@@ -102,7 +102,15 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           export MAMBA_NO_BANNER=1  # hide mamba banner from output
-          mamba env update --file ${{ env.CONDA_ENV }} --prune
+          environment_file="${{ env.CONDA_ENV }}"
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            environment_file="${RUNNER_TEMP}/environment.yml"
+            # Omit isitgr until its bundled Linux binary and macOS linking issues are fixed.
+            # See https://github.com/mishakb/ISiTGR/issues/7.
+            grep -viE '^[[:space:]]*-[[:space:]]+isitgr([^[:alnum:]_.-]|$)' \
+              "${{ env.CONDA_ENV }}" > "${environment_file}"
+          fi
+          mamba env update --file "${environment_file}" --prune
 
       - name: Get pip cache dir
         id: pip-cache
@@ -117,26 +125,13 @@ jobs:
             pip-py${{ matrix.python-version }}-${{ runner.os }}-
             pip-${{ runner.os }}-
 
-      - name: Rebuild isitgr from source (macOS)
-        # The isitgr sdist ships a prebuilt Linux ELF (isitgr/isitgrlib.so) and its setup.py ignores
-        # the exit status of make, so on macOS pip installs the ELF and `import isitgr` fails.
-        # In addition, fortran/Makefile adds -static-libgcc & co. when gfortran >= 14 and libgfortran.a
-        # exists, but conda-forge's gfortran 15 has no static libgomp.a, so the link fails.
-        # TODO: remove once https://github.com/mishakb/ISiTGR/issues/7 is fixed upstream.
-        if: runner.os == 'macOS'
-        run: |
-          ver=$(pip show isitgr 2>/dev/null | awk '/^Version:/{print $2}' || true)
-          ver=${ver:-1.6.5}
-          mkdir -p "$RUNNER_TEMP/isitgr_src" && cd "$RUNNER_TEMP/isitgr_src"
-          pip download "isitgr==${ver}" --no-deps --no-binary :all: -d .
-          tar xzf "isitgr-${ver}.tar.gz"
-          rm -f "isitgr-${ver}/isitgr/isitgrlib.so"
-          sed -i.bak 's/ -static-libgfortran -static-libquadmath -static-libgcc//' "isitgr-${ver}/fortran/Makefile"
-          pip install -v --force-reinstall --no-deps "./isitgr-${ver}"
-          python -c "import isitgr; print('isitgr', isitgr.__version__, 'imported from', isitgr.__file__)"
-
       - name: Install CCL
         run: pip install -v -e .
+
+      - name: Verify isitgr is usable on Linux
+        if: runner.os == 'Linux'
+        run: |
+          python -c "import pyccl; import isitgr; print('isitgr:', isitgr.__file__)"
 
       - name: Full compilation (to run C-level benchmarks)
         run: |
