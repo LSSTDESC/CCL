@@ -43,8 +43,12 @@ def angular_cl(
         limber_max_error (float) : Maximum fractional error for Limber integration.
         limber_integration_method (string) : integration method to be used
             for the Limber integrals. Possibilities: 'qag_quad' (GSL's `qag`
-            method backed up by `quad` when it fails) and 'spline' (the
-            integrand is splined and then integrated numerically).
+            method backed up by `quad` when it fails), 'qagp' (GSL's `qagp`
+            on 8 equal intervals in :math:`\\ln k`, with the same backup) and
+            'spline' (the integrand is splined and then integrated
+            numerically). 'qag_quad' can return a wrong result without
+            an error when its first pass over the whole range has a small
+            error estimate; 'qagp' starts from 8 intervals and avoids this.
         non_limber_integration_method (string) : integration method to be used
             for the non-Limber integrals. Currently the only method implemented
             is ``'FKEM'`` (see the `N5K paper <https://arxiv.org/abs/2212.04291>`_

@@ -116,6 +116,11 @@ def test_cov_NG_errors(typ):
         cov_f(COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
               integration_method='cag_cuad')
 
+    # qagp is implemented for angular_cl only
+    with pytest.raises(ValueError):
+        cov_f(COSMO, tr, tr, ell=ls, t_of_kk_a=tsp,
+              integration_method='qagp')
+
 
 def test_Sigma2B():
     # Check projected variance calculation against

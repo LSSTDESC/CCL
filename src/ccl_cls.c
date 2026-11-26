@@ -224,21 +224,38 @@ static void integ_cls_limber_spline(ccl_cosmology *cosmo,
   free(lk_arr);
 }
 
+// Number of equal ln k panels given to qagp in integ_cls_limber_qag_quad
+#define CCL_LIMBER_QAGP_NPANELS 8
+
 static void integ_cls_limber_qag_quad(ccl_cosmology *cosmo,
 				      gsl_function *F,
 				      double lkmin, double lkmax,
+				      ccl_integration_t integration_method,
 				      gsl_integration_workspace *w,
 				      double *result, double *eresult,
 				      int *status) {
   int gslstatus;
   size_t nevals;
   gsl_integration_cquad_workspace *w_cquad = NULL;
-  // Integrate
-  gslstatus = gsl_integration_qag(F, lkmin, lkmax, 0,
-				  cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
-				  cosmo->gsl_params.N_ITERATION,
-				  cosmo->gsl_params.INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
-				  w, result, eresult);
+  // Integrate with qag on the whole range, or with qagp on equal panels in ln k
+  // (qag can accept a wrong first pass over the whole range)
+  if (integration_method == ccl_integration_qagp) {
+    double pts[CCL_LIMBER_QAGP_NPANELS + 1];
+    int i;
+    for (i = 0; i <= CCL_LIMBER_QAGP_NPANELS; i++)
+      pts[i] = lkmin + (lkmax - lkmin) * i / CCL_LIMBER_QAGP_NPANELS;
+    gslstatus = gsl_integration_qagp(F, pts, CCL_LIMBER_QAGP_NPANELS + 1, 0,
+				     cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
+				     cosmo->gsl_params.N_ITERATION,
+				     w, result, eresult);
+  }
+  else {
+    gslstatus = gsl_integration_qag(F, lkmin, lkmax, 0,
+				    cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
+				    cosmo->gsl_params.N_ITERATION,
+				    cosmo->gsl_params.INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
+				    w, result, eresult);
+  }
 
   // Test if a round-off error occured in the evaluation of the integral
   // If so, try another integration function, more robust but potentially slower
@@ -299,7 +316,8 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
       ipar.status = &clastatus;
     }
 
-    if(integration_method == ccl_integration_qag_quad) {
+    if((integration_method == ccl_integration_qag_quad) ||
+       (integration_method == ccl_integration_qagp)) {
       if (local_status == 0) {
 	w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
 	if (w == NULL) {
@@ -325,8 +343,9 @@ void ccl_angular_cls_limber(ccl_cosmology *cosmo,
         get_k_interval(cosmo, trc1, trc2, l, &lkmin, &lkmax);
 
 	// Integrate
-	if(integration_method == ccl_integration_qag_quad) {
-	  integ_cls_limber_qag_quad(cosmo, &F, lkmin, lkmax, w,
+	if((integration_method == ccl_integration_qag_quad) ||
+	   (integration_method == ccl_integration_qagp)) {
+	  integ_cls_limber_qag_quad(cosmo, &F, lkmin, lkmax, integration_method, w,
 				    &result, &eresult, &local_status);
 	}
 	else if(integration_method == ccl_integration_spline) {

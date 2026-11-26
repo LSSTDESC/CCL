@@ -193,11 +193,12 @@ def set_up(request):
                           ('i2', 'i2', 'ii_22',   # IA2-IA2
                            'll_22', 'll_22', 'll_22', 'll_22',
                            'fl_ll')])
+@pytest.mark.parametrize("method", ['qag_quad', 'qagp'])
 def test_cells(set_up, t1, t2, bm,
-               a1b1, a1b2, a2b1, a2b2, fl):
+               a1b1, a1b2, a2b1, a2b2, fl, method):
     cosmo, trcs, lfc, bmk = set_up
     cl = ccl.angular_cl(cosmo, trcs[t1], trcs[t2], lfc['ells'],
-                        limber_integration_method='qag_quad') * lfc[fl]
+                        limber_integration_method=method) * lfc[fl]
     el = np.sqrt((bmk[a1b1] * bmk[a2b2] + bmk[a1b2] * bmk[a2b1]) /
                  (2 * lfc['ells'] + 1.))
     assert np.all(np.fabs(cl - bmk[bm]) < 0.1 * el)

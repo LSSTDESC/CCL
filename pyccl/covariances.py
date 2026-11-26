@@ -61,7 +61,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`\\ell_2`. The ordering is such that \
             ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
     """ # noqa
-    if integration_method not in integ_types:
+    if integration_method not in ['qag_quad', 'spline']:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals
@@ -313,7 +313,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`\\ell_2`. The ordering is such that \
             ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
     """ # noqa
-    if integration_method not in integ_types:
+    if integration_method not in ['qag_quad', 'spline']:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals

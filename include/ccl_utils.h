@@ -12,6 +12,7 @@ CCL_BEGIN_DECLS
 typedef enum ccl_integration_t {
   ccl_integration_qag_quad = 500,  // GSL's quad
   ccl_integration_spline = 501,  // Spline integral
+  ccl_integration_qagp = 502,  // GSL's qagp on equal panels
 } ccl_integration_t;
 
 /**
