@@ -19,6 +19,7 @@ NoneArr = np.array([])
 class IntegrationMethods(Enum):
     QAG_QUAD = "qag_quad"
     SPLINE = "spline"
+    QAGP = "qagp"
 
 
 class ExtrapolationMethods(Enum):
@@ -32,7 +33,8 @@ class ExtrapolationMethods(Enum):
 
 integ_types = {
     'qag_quad': lib.integration_qag_quad,
-    'spline': lib.integration_spline}
+    'spline': lib.integration_spline,
+    'qagp': lib.integration_qagp}
 
 extrap_types = {
     'none': lib.f1d_extrap_0,

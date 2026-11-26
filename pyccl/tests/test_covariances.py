@@ -76,6 +76,10 @@ def test_cov_NG_sanity(alpha, beta, typ):
     cov = cov_f(ls)
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
 
+    # qagp on equal intervals in chi
+    cov = cov_f(ls, integration_method='qagp')
+    assert np.all(np.fabs(cov/cov_p-1).flatten() < 1E-5)
+
     # Spline integration (fast but inaccurate)
     cov = cov_f(ls, integration_method='spline')
     assert np.all(np.fabs(cov/cov_p-1).flatten() < 4E-2)

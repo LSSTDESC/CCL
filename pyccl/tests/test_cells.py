@@ -101,6 +101,31 @@ def test_cells_raise_integ_method():
         )
 
 
+def test_cells_qagp_accuracy():
+    # Weak lensing case where qag_quad exceeds 1e-4 at isolated ell
+    pars = dict(Omega_c=0.25, Omega_b=0.05, h=0.7, n_s=0.96, sigma8=0.8,
+                transfer_function="eisenstein_hu",
+                matter_power_spectrum="halofit")
+    z = np.linspace(0.0, 3.0, 512)
+    nz = np.exp(-0.5 * ((z - 1.0) / 0.3) ** 2)
+    ells = np.arange(2, 2001).astype(float)
+
+    cosmo = ccl.Cosmology(**pars)
+    try:
+        ccl.gsl_params.INTEGRATION_LIMBER_EPSREL = 1e-8
+        cosmo_ref = ccl.Cosmology(**pars)
+    finally:
+        ccl.gsl_params.reload()
+
+    lens = ccl.WeakLensingTracer(cosmo, dndz=(z, nz))
+    cl = ccl.angular_cl(cosmo, lens, lens, ells,
+                        limber_integration_method="qagp")
+    lens_ref = ccl.WeakLensingTracer(cosmo_ref, dndz=(z, nz))
+    cl_ref = ccl.angular_cl(cosmo_ref, lens_ref, lens_ref, ells,
+                            limber_integration_method="qag_quad")
+    assert np.all(np.fabs(cl / cl_ref - 1) < 1e-4)
+
+
 def test_cells_raise_nonlimber_methods():
     ells = [10, 11]
     with pytest.raises(ValueError):
