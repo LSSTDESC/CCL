@@ -50,8 +50,10 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         fsky (:obj:`float`): sky fraction.
         integration_method (:obj:`str`) : integration method to be used
             for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
-            `qag` method backed up by `quad` when it fails) and ``'spline'``
-            (the integrand is splined and then integrated analytically).
+            `qag` method backed up by `quad` when it fails), ``'qagp'``
+            (GSL's `qagp` on 8 equal intervals in :math:`\\chi`, with the
+            same backup) and ``'spline'`` (the integrand is splined and then
+            integrated analytically).
 
     Returns:
         (:obj:`float` or `array`): 2D array containing the connected non-Gaussian \
@@ -61,7 +63,7 @@ def angular_cl_cov_cNG(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`\\ell_2`. The ordering is such that \
             ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
     """ # noqa
-    if integration_method not in ['qag_quad', 'spline']:
+    if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals
@@ -302,8 +304,10 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
         fsky (:obj:`float`): sky fraction.
         integration_method (:obj:`str`) : integration method to be used
             for the Limber integrals. Possibilities: ``'qag_quad'`` (GSL's
-            `qag` method backed up by `quad` when it fails) and ``'spline'``
-            (the integrand is splined and then integrated analytically).
+            `qag` method backed up by `quad` when it fails), ``'qagp'``
+            (GSL's `qagp` on 8 equal intervals in :math:`\\chi`, with the
+            same backup) and ``'spline'`` (the integrand is splined and then
+            integrated analytically).
 
     Returns:
         (:obj:`float` or `array`): 2D array containing the super-sample \
@@ -313,7 +317,7 @@ def angular_cl_cov_SSC(cosmo, tracer1, tracer2, *, ell, t_of_kk_a,
             :math:`\\ell_2`. The ordering is such that \
             ``out[i2, i1] = Cov(ell2[i2], ell[i1])``.
     """ # noqa
-    if integration_method not in ['qag_quad', 'spline']:
+    if integration_method not in integ_types:
         raise ValueError(f"Unknown integration method {integration_method}.")
 
     # we need the distances for the integrals

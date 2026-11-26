@@ -224,7 +224,7 @@ static void integ_cls_limber_spline(ccl_cosmology *cosmo,
   free(lk_arr);
 }
 
-// Number of equal ln k panels given to qagp in integ_cls_limber_qag_quad
+// Number of equal intervals given to qagp by the Limber C_ell and covariance integrals
 #define CCL_LIMBER_QAGP_NPANELS 8
 
 static void integ_cls_limber_qag_quad(ccl_cosmology *cosmo,
@@ -471,18 +471,32 @@ static void integ_cov_limber_spline(ccl_cosmology *cosmo,
 static void integ_cov_limber_qag_quad(ccl_cosmology *cosmo,
 				      gsl_function *F,
 				      double chimin, double chimax,
+				      ccl_integration_t integration_method,
 				      gsl_integration_workspace *w,
 				      double *result, double *eresult,
 				      int *status) {
   int gslstatus;
   size_t nevals;
   gsl_integration_cquad_workspace *w_cquad = NULL;
-  // Integrate
-  gslstatus = gsl_integration_qag(F, chimin, chimax, 0,
-				  cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
-				  cosmo->gsl_params.N_ITERATION,
-				  cosmo->gsl_params.INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
-				  w, result, eresult);
+  // Integrate with qag on the whole range, or with qagp on equal intervals in chi
+  // (qag can accept a wrong first pass over the whole range)
+  if (integration_method == ccl_integration_qagp) {
+    double pts[CCL_LIMBER_QAGP_NPANELS + 1];
+    int i;
+    for (i = 0; i <= CCL_LIMBER_QAGP_NPANELS; i++)
+      pts[i] = chimin + (chimax - chimin) * i / CCL_LIMBER_QAGP_NPANELS;
+    gslstatus = gsl_integration_qagp(F, pts, CCL_LIMBER_QAGP_NPANELS + 1, 0,
+				     cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
+				     cosmo->gsl_params.N_ITERATION,
+				     w, result, eresult);
+  }
+  else {
+    gslstatus = gsl_integration_qag(F, chimin, chimax, 0,
+				    cosmo->gsl_params.INTEGRATION_LIMBER_EPSREL,
+				    cosmo->gsl_params.N_ITERATION,
+				    cosmo->gsl_params.INTEGRATION_LIMBER_GAUSS_KRONROD_POINTS,
+				    w, result, eresult);
+  }
 
   // Test if a round-off error occured in the evaluation of the integral
   // If so, try another integration function, more robust but potentially slower
@@ -564,7 +578,8 @@ void ccl_angular_cl_covariance(ccl_cosmology *cosmo,
       ipar.chipow = chi_exponent;
     }
 
-    if(integration_method == ccl_integration_qag_quad) {
+    if((integration_method == ccl_integration_qag_quad) ||
+       (integration_method == ccl_integration_qagp)) {
       if (local_status == 0) {
 	w = gsl_integration_workspace_alloc(cosmo->gsl_params.N_ITERATION);
 	if (w == NULL) {
@@ -591,9 +606,10 @@ void ccl_angular_cl_covariance(ccl_cosmology *cosmo,
           ipar.l2 = l2;
 
           // Integrate
-          if(integration_method == ccl_integration_qag_quad) {
-            integ_cov_limber_qag_quad(cosmo, &F, chimin, chimax, w,
-                                      &result, &eresult, &local_status);
+          if((integration_method == ccl_integration_qag_quad) ||
+             (integration_method == ccl_integration_qagp)) {
+            integ_cov_limber_qag_quad(cosmo, &F, chimin, chimax, integration_method,
+                                      w, &result, &eresult, &local_status);
           }
           else if(integration_method == ccl_integration_spline) {
             integ_cov_limber_spline(cosmo, &ipar, chimin, chimax,
