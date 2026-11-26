@@ -125,7 +125,7 @@ class Tk3D(CCLObject):
                                                          pk1_arr.flatten(),
                                                          pk2_arr.flatten(),
                                                          int(extrap_order_lok),
-                                                         int(extrap_order_lok),
+                                                         int(extrap_order_hik),
                                                          int(is_logt), status)
         else:
             if tkk_arr.shape != (na, nk, nk):
@@ -134,7 +134,7 @@ class Tk3D(CCLObject):
             self.tsp, status = lib.tk3d_new_from_arrays(lk_arr, a_arr,
                                                         tkk_arr.flatten(),
                                                         int(extrap_order_lok),
-                                                        int(extrap_order_lok),
+                                                        int(extrap_order_hik),
                                                         int(is_logt), status)
         check(status)
 
